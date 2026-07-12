@@ -37,23 +37,17 @@ public class InterfaceTool : KMonoBehaviour
 
 	public virtual bool ShowHoverUI()
 	{
+		if (ManagementMenu.Instance == null || ManagementMenu.Instance.IsFullscreenUIActive())
+		{
+			return false;
+		}
 		Vector3 vector = Camera.main.ScreenToWorldPoint(KInputManager.GetMousePos());
 		if (OverlayScreen.Instance == null || !ClusterManager.Instance.IsPositionInActiveWorld(vector) || vector.x < 0f || vector.x > Grid.WidthInMeters || vector.y < 0f || vector.y > Grid.HeightInMeters)
 		{
 			return false;
 		}
-		bool flag = false;
 		global::UnityEngine.EventSystems.EventSystem current = global::UnityEngine.EventSystems.EventSystem.current;
-		if (current != null)
-		{
-			Vector3 vector2 = new Vector3(KInputManager.GetMousePos().x, KInputManager.GetMousePos().y, 0f);
-			current.RaycastAll(new PointerEventData(current)
-			{
-				position = vector2
-			}, this.castResults);
-			flag = this.castResults.Count == 0;
-		}
-		return flag;
+		return current != null && !current.IsPointerOverGameObject();
 	}
 
 	protected virtual void OnActivateTool()

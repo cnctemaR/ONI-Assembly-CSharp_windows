@@ -181,7 +181,7 @@ public class KSelectable : KMonoBehaviour
 
 	private void PlayHoverSound()
 	{
-		if (base.GetComponent<CellSelectionObject>() != null)
+		if (CellSelectionObject.IsSelectionObject(base.gameObject))
 		{
 			return;
 		}

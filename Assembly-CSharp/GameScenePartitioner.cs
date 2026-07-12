@@ -47,7 +47,7 @@ public class GameScenePartitioner : KMonoBehaviour
 		for (int i = 0; i < 42; i++)
 		{
 			ObjectLayer objectLayer = (ObjectLayer)i;
-			this.objectLayers[i] = this.partitioner.CreateMask(new HashedString(objectLayer.ToString()));
+			this.objectLayers[i] = this.partitioner.CreateMask(objectLayer.ToString());
 		}
 	}
 
@@ -231,6 +231,21 @@ public class GameScenePartitioner : KMonoBehaviour
 	{
 		base.OnCleanUp();
 		this.partitioner.Cleanup();
+	}
+
+	public bool DoDebugLayersContainItemsOnCell(int cell)
+	{
+		return this.partitioner.DoDebugLayersContainItemsOnCell(cell);
+	}
+
+	public List<ScenePartitionerLayer> GetLayers()
+	{
+		return this.partitioner.layers;
+	}
+
+	public void SetToggledLayers(HashSet<ScenePartitionerLayer> toggled_layers)
+	{
+		this.partitioner.toggledLayers = toggled_layers;
 	}
 
 	public ScenePartitionerLayer solidChangedLayer;

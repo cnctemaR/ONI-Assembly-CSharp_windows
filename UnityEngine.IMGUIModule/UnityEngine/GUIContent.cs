@@ -5,8 +5,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeHeader("Modules/IMGUI/GUIContent.h")]
 	[RequiredByNativeCode(Optional = true, GenerateProxy = true)]
+	[NativeHeader("Modules/IMGUI/GUIContent.h")]
 	[Serializable]
 	[StructLayout(LayoutKind.Sequential)]
 	public class GUIContent

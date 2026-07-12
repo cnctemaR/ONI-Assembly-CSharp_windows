@@ -9,7 +9,6 @@ namespace Rendering.World
 		{
 			base.OnPrefabInit();
 			ShaderReloader.Register(new global::System.Action(this.OnShadersReloaded));
-			LiquidTileOverlayRenderer.Instance = this;
 		}
 
 		protected override Mask[] GetMasks()
@@ -117,8 +116,6 @@ namespace Rendering.World
 			}
 			this.SetBrushIdx(0, ref tile, Grid.Element[tile.TileCells.Cell2].substance.idx, LiquidTileOverlayRenderer.LiquidConnections.Left, brush_array, brush_grid);
 		}
-
-		public static LiquidTileOverlayRenderer Instance;
 
 		private enum LiquidConnections
 		{

@@ -49,7 +49,7 @@ public class KModalButtonMenu : KButtonMenu
 		{
 			if (show && !this.shown)
 			{
-				SpeedControlScreen.Instance.Pause(false);
+				SpeedControlScreen.Instance.Pause(false, false);
 			}
 			else if (!show && this.shown)
 			{

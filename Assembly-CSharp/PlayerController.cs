@@ -189,6 +189,10 @@ public class PlayerController : KMonoBehaviour, IInputHandler
 		{
 			this.dragging = true;
 		}
+		if (DistributionPlatform.Initialized && KInputManager.currentControllerIsGamepad && this.dragging)
+		{
+			return;
+		}
 		if (this.dragging)
 		{
 			this.dragDelta = mousePos - this.startDragPos;
@@ -202,6 +206,10 @@ public class PlayerController : KMonoBehaviour, IInputHandler
 		if (this.dragAction == action)
 		{
 			this.queueStopDrag = true;
+			if (KInputManager.currentControllerIsGamepad)
+			{
+				this.dragging = false;
+			}
 		}
 	}
 

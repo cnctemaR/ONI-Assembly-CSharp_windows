@@ -49,7 +49,7 @@ public class CrabConfig : IEntityConfig
 
 	private const SimHashes EMIT_ELEMENT = SimHashes.Sand;
 
-	private static float KG_ORE_EATEN_PER_CYCLE = 140f;
+	private static float KG_ORE_EATEN_PER_CYCLE = 70f;
 
 	private static float CALORIES_PER_KG_OF_ORE = CrabTuning.STANDARD_CALORIES_PER_CYCLE / CrabConfig.KG_ORE_EATEN_PER_CYCLE;
 

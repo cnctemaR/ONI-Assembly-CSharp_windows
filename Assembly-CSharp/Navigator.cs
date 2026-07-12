@@ -214,7 +214,7 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>, ISaveL
 			}
 			if (this.path.IsValid())
 			{
-				this.BeginTransition(this.NavGrid.transitions[this.path.nodes[1].transitionId]);
+				this.BeginTransition(this.NavGrid.transitions[(int)this.path.nodes[1].transitionId]);
 				this.distanceTravelledByNavType[this.CurrentNavType] = Mathf.Max(this.distanceTravelledByNavType[this.CurrentNavType] + 1, this.distanceTravelledByNavType[this.CurrentNavType]);
 			}
 			else if (this.path.HasArrived())
@@ -235,7 +235,7 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>, ISaveL
 
 	public NavGrid.Transition GetNextTransition()
 	{
-		return this.NavGrid.transitions[this.path.nodes[1].transitionId];
+		return this.NavGrid.transitions[(int)this.path.nodes[1].transitionId];
 	}
 
 	public void Stop(bool arrived_at_destination = false, bool play_idle = true)

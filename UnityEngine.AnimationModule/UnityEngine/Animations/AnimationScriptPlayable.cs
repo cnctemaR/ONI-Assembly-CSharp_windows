@@ -10,10 +10,10 @@ namespace UnityEngine.Animations
 {
 	[StaticAccessor("AnimationScriptPlayableBindings", StaticAccessorType.DoubleColon)]
 	[NativeHeader("Modules/Animation/ScriptBindings/AnimationScriptPlayable.bindings.h")]
-	[RequiredByNativeCode]
-	[NativeHeader("Runtime/Director/Core/HPlayableGraph.h")]
 	[NativeHeader("Runtime/Director/Core/HPlayable.h")]
 	[MovedFrom("UnityEngine.Experimental.Animations")]
+	[RequiredByNativeCode]
+	[NativeHeader("Runtime/Director/Core/HPlayableGraph.h")]
 	public struct AnimationScriptPlayable : IAnimationJobPlayable, IPlayable, IEquatable<AnimationScriptPlayable>
 	{
 		public static AnimationScriptPlayable Null

@@ -4,8 +4,8 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Misc/Cache.h")]
 	[StaticAccessor("CacheWrapper", StaticAccessorType.DoubleColon)]
+	[NativeHeader("Runtime/Misc/Cache.h")]
 	public struct Cache : IEquatable<Cache>
 	{
 		internal int handle

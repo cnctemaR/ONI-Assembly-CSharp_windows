@@ -23,8 +23,8 @@ namespace UnityEngine
 			throw new Exception("The physics scene associated with the Unity scene is invalid.");
 		}
 
-		[StaticAccessor("GetPhysicsManager2D()", StaticAccessorType.Arrow)]
 		[NativeMethod("GetPhysicsSceneFromUnityScene")]
+		[StaticAccessor("GetPhysicsManager2D()", StaticAccessorType.Arrow)]
 		private static PhysicsScene2D GetPhysicsScene_Internal(Scene scene)
 		{
 			PhysicsScene2D physicsScene2D;

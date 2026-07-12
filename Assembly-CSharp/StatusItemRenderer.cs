@@ -55,6 +55,10 @@ public class StatusItemRenderer
 			StatusItemRenderer.Entry entry = this.entries[num];
 			entry.handle = instanceID;
 			entry.transform = transform;
+			entry.buildingPos = transform.GetPosition();
+			entry.building = transform.GetComponent<Building>();
+			entry.isBuilding = entry.building != null;
+			entry.selectable = transform.GetComponent<KSelectable>();
 			this.entries[num] = entry;
 		}
 		return num;
@@ -77,7 +81,6 @@ public class StatusItemRenderer
 		}
 		int idx = this.GetIdx(transform);
 		StatusItemRenderer.Entry entry = this.entries[idx];
-		entry.isBuilding = transform.GetComponent<Building>() != null;
 		entry.Add(status_item);
 		this.entries[idx] = entry;
 	}
@@ -138,14 +141,19 @@ public class StatusItemRenderer
 
 	public void RenderEveryTick()
 	{
+		if (DebugHandler.HideUI)
+		{
+			return;
+		}
 		this.scale = 1f + Mathf.Sin(Time.unscaledTime * 8f) * 0.1f;
 		Shader.SetGlobalVector("_StatusItemParameters", new Vector4(this.scale, 0f, 0f, 0f));
 		Vector3 vector = Camera.main.ViewportToWorldPoint(new Vector3(1f, 1f, Camera.main.transform.GetPosition().z));
 		Vector3 vector2 = Camera.main.ViewportToWorldPoint(new Vector3(0f, 0f, Camera.main.transform.GetPosition().z));
 		this.visibleEntries.Clear();
+		Camera worldCamera = GameScreenManager.Instance.worldSpaceCanvas.GetComponent<Canvas>().worldCamera;
 		for (int i = 0; i < this.entryCount; i++)
 		{
-			this.entries[i].Render(this, vector2, vector, this.GetMode());
+			this.entries[i].Render(this, vector2, vector, this.GetMode(), worldCamera);
 		}
 	}
 
@@ -256,14 +264,9 @@ public class StatusItemRenderer
 			this.material = new Material(shader);
 		}
 
-		public void Render(StatusItemRenderer renderer, Vector3 camera_bl, Vector3 camera_tr, HashedString overlay)
+		public void Render(StatusItemRenderer renderer, Vector3 camera_bl, Vector3 camera_tr, HashedString overlay, Camera camera)
 		{
-			if (DebugHandler.HideUI)
-			{
-				return;
-			}
-			Vector3 vector = Vector3.zero;
-			if (!(this.transform != null))
+			if (this.transform == null)
 			{
 				string text = "Error cleaning up status items:";
 				foreach (StatusItem statusItem in this.statusItems)
@@ -273,14 +276,10 @@ public class StatusItemRenderer
 				global::Debug.LogWarning(text);
 				return;
 			}
-			vector = this.transform.GetPosition();
+			Vector3 vector = (this.isBuilding ? this.buildingPos : this.transform.GetPosition());
 			if (this.isBuilding)
 			{
-				Building component = this.transform.GetComponent<Building>();
-				if (component != null)
-				{
-					vector.x += (float)((component.Def.WidthInCells - 1) % 2) / 2f;
-				}
+				vector.x += (float)((this.building.Def.WidthInCells - 1) % 2) / 2f;
 			}
 			if (vector.x < camera_bl.x || vector.x > camera_tr.x || vector.y < camera_bl.y || vector.y > camera_tr.y)
 			{
@@ -291,7 +290,7 @@ public class StatusItemRenderer
 			{
 				return;
 			}
-			if (!this.transform.GetComponent<KSelectable>().IsSelectable)
+			if (!this.selectable.IsSelectable)
 			{
 				return;
 			}
@@ -366,7 +365,7 @@ public class StatusItemRenderer
 			}
 			if (this.hasVisibleStatusItems && GameScreenManager.Instance != null)
 			{
-				Graphics.DrawMesh(this.mesh, vector + this.offset, Quaternion.identity, this.material, renderer.layer, GameScreenManager.Instance.worldSpaceCanvas.GetComponent<Canvas>().worldCamera, 0, null, false, false);
+				Graphics.DrawMesh(this.mesh, vector + this.offset, Quaternion.identity, this.material, renderer.layer, camera, 0, null, false, false);
 			}
 		}
 
@@ -386,6 +385,10 @@ public class StatusItemRenderer
 		{
 			this.handle = entry.handle;
 			this.transform = entry.transform;
+			this.building = this.transform.GetComponent<Building>();
+			this.buildingPos = this.transform.GetPosition();
+			this.isBuilding = this.building != null;
+			this.selectable = this.transform.GetComponent<KSelectable>();
 			this.offset = entry.offset;
 			this.dirty = true;
 			this.statusItems.Clear();
@@ -399,7 +402,7 @@ public class StatusItemRenderer
 				return false;
 			}
 			Bounds bounds = this.mesh.bounds;
-			Vector3 vector = this.transform.GetPosition() + this.offset + bounds.center;
+			Vector3 vector = this.buildingPos + this.offset + bounds.center;
 			Vector2 vector2 = new Vector2(vector.x, vector.y);
 			Vector3 size = bounds.size;
 			Vector2 vector3 = new Vector2(size.x * scale * 0.5f, size.y * scale * 0.5f);
@@ -410,11 +413,11 @@ public class StatusItemRenderer
 
 		public void GetIntersection(Vector2 pos, List<InterfaceTool.Intersection> intersections, float scale)
 		{
-			if (this.Intersects(pos, scale) && this.transform.GetComponent<KSelectable>().IsSelectable)
+			if (this.Intersects(pos, scale) && this.selectable.IsSelectable)
 			{
 				intersections.Add(new InterfaceTool.Intersection
 				{
-					component = this.transform.GetComponent<KSelectable>(),
+					component = this.selectable,
 					distance = -100f
 				});
 			}
@@ -422,13 +425,9 @@ public class StatusItemRenderer
 
 		public void GetIntersection(Vector2 pos, List<KSelectable> selectables, float scale)
 		{
-			if (this.Intersects(pos, scale))
+			if (this.Intersects(pos, scale) && this.selectable.IsSelectable && !selectables.Contains(this.selectable))
 			{
-				KSelectable component = this.transform.GetComponent<KSelectable>();
-				if (component.IsSelectable && !selectables.Contains(component))
-				{
-					selectables.Add(component);
-				}
+				selectables.Add(this.selectable);
 			}
 		}
 
@@ -460,6 +459,12 @@ public class StatusItemRenderer
 		public int handle;
 
 		public Transform transform;
+
+		public Building building;
+
+		public Vector3 buildingPos;
+
+		public KSelectable selectable;
 
 		public List<StatusItem> statusItems;
 

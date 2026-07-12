@@ -94,6 +94,15 @@ namespace UnityEngine.Experimental.Rendering
 
 		[FreeFunction(IsThreadSafe = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool CanDecompressFormat(GraphicsFormat format, bool wholeImage);
+
+		internal static bool CanDecompressFormat(GraphicsFormat format)
+		{
+			return GraphicsFormatUtility.CanDecompressFormat(format, true);
+		}
+
+		[FreeFunction(IsThreadSafe = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern bool IsPackedFormat(GraphicsFormat format);
 
 		[FreeFunction(IsThreadSafe = true)]

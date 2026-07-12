@@ -10,8 +10,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[ExcludeFromPreset]
 	[NativeHeader("Runtime/Graphics/CubemapArrayTexture.h")]
+	[ExcludeFromPreset]
 	public sealed class CubemapArray : Texture
 	{
 		public extern int cubemapCount

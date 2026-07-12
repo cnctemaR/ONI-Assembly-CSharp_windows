@@ -8,8 +8,8 @@ using UnityEngine.Scripting;
 namespace UnityEngine.VFX
 {
 	[UsedByNativeCode]
-	[NativeHeader("VFXScriptingClasses.h")]
 	[NativeHeader("Modules/VFX/Public/VisualEffectAsset.h")]
+	[NativeHeader("VFXScriptingClasses.h")]
 	public class VisualEffectAsset : VisualEffectObject
 	{
 		[FreeFunction(Name = "VisualEffectAssetBindings::GetTextureDimension", HasExplicitThis = true)]

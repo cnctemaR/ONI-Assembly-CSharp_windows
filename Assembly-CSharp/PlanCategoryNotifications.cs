@@ -13,9 +13,5 @@ public class PlanCategoryNotifications : MonoBehaviour
 		this.AttentionImage.gameObject.SetActive(active);
 	}
 
-	public void PingAttention()
-	{
-	}
-
 	public Image AttentionImage;
 }

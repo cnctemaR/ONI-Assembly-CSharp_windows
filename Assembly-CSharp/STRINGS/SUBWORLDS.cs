@@ -286,7 +286,7 @@ namespace STRINGS
 				" to create a renewable source of oil.\n\n",
 				UI.FormatAsLink("Diamond", "DIAMOND"),
 				" deposits can occasionally be found in the Oily biome, which will require a Duplicant with the ",
-				UI.FormatAsLink("Super-Duperhard Digging", "SENIOR_MINER"),
+				UI.FormatAsLink("Super-Duperhard Digging", "MINING3"),
 				" skill to explore properly.\n\n",
 				UI.FormatAsLink("Sporechids", "EVIL_FLOWER"),
 				" are beautiful, but should only be approached if a Duplicant is properly ",
@@ -498,7 +498,7 @@ namespace STRINGS
 				" which goes a long way in solving many extreme temperature issues in a colony.\n\nThe edges of this biome are filled with ",
 				UI.FormatAsLink("Obsidian", "OBSIDIAN"),
 				" so a Duplicant with the ",
-				UI.FormatAsLink("Super-Duperhard Digging", "SENIOR_MINER"),
+				UI.FormatAsLink("Super-Duperhard Digging", "MINING3"),
 				" skill will be required before my colony can explore here."
 			});
 		}

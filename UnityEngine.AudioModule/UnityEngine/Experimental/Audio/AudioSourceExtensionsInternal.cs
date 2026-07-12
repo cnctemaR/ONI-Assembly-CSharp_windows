@@ -4,9 +4,9 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine.Experimental.Audio
 {
+	[NativeHeader("AudioScriptingClasses.h")]
 	[NativeHeader("Modules/Audio/Public/AudioSource.h")]
 	[NativeHeader("Modules/Audio/Public/ScriptBindings/AudioSourceExtensions.bindings.h")]
-	[NativeHeader("AudioScriptingClasses.h")]
 	internal static class AudioSourceExtensionsInternal
 	{
 		public static void RegisterSampleProvider(this AudioSource source, AudioSampleProvider provider)

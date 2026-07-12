@@ -8,9 +8,9 @@ using UnityEngine.Scripting;
 namespace UnityEngine.Rendering
 {
 	[NativeHeader("Runtime/Shaders/ComputeShader.h")]
-	[NativeHeader("Runtime/Graphics/AsyncGPUReadbackManaged.h")]
 	[NativeHeader("Runtime/Graphics/Texture.h")]
 	[UsedByNativeCode]
+	[NativeHeader("Runtime/Graphics/AsyncGPUReadbackManaged.h")]
 	public struct AsyncGPUReadbackRequest
 	{
 		public void Update()

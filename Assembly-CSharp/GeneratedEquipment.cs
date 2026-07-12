@@ -1,16 +1,30 @@
 ﻿using System;
+using System.Collections.Generic;
 
 public class GeneratedEquipment
 {
-	public static void LoadGeneratedEquipment()
+	public static void LoadGeneratedEquipment(List<Type> types)
 	{
-		EquipmentConfigManager.Instance.RegisterEquipment(new EquippableBalloonConfig());
-		EquipmentConfigManager.Instance.RegisterEquipment(new AtmoSuitConfig());
-		EquipmentConfigManager.Instance.RegisterEquipment(new JetSuitConfig());
-		EquipmentConfigManager.Instance.RegisterEquipment(new LeadSuitConfig());
-		EquipmentConfigManager.Instance.RegisterEquipment(new OxygenMaskConfig());
-		EquipmentConfigManager.Instance.RegisterEquipment(new WarmVestConfig());
-		EquipmentConfigManager.Instance.RegisterEquipment(new CoolVestConfig());
-		EquipmentConfigManager.Instance.RegisterEquipment(new FunkyVestConfig());
+		Type typeFromHandle = typeof(IEquipmentConfig);
+		List<Type> list = new List<Type>();
+		foreach (Type type in types)
+		{
+			if (typeFromHandle.IsAssignableFrom(type) && !type.IsAbstract && !type.IsInterface)
+			{
+				list.Add(type);
+			}
+		}
+		foreach (Type type2 in list)
+		{
+			object obj = Activator.CreateInstance(type2);
+			try
+			{
+				EquipmentConfigManager.Instance.RegisterEquipment(obj as IEquipmentConfig);
+			}
+			catch (Exception ex)
+			{
+				DebugUtil.LogException(null, "Exception in RegisterEquipment for type " + type2.FullName + " from " + type2.Assembly.GetName().Name, ex);
+			}
+		}
 	}
 }

@@ -49,8 +49,8 @@ namespace UnityEngine.Rendering.VirtualTexturing
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			internal static extern void GetRequestParameters(IntPtr requestHandles, IntPtr requestParameters, int length);
 
-			[ThreadSafe]
 			[NativeThrows]
+			[ThreadSafe]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			internal static extern void UpdateRequestState(IntPtr requestHandles, IntPtr requestUpdates, int length);
 

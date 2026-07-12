@@ -121,8 +121,12 @@ public class VerticalModuleTiler : KMonoBehaviour
 
 	private void LateUpdate()
 	{
-		this.bottomCapWide.Dirty();
-		this.topCapWide.Dirty();
+		if (this.animController.Offset != this.m_previousAnimControllerOffset)
+		{
+			this.m_previousAnimControllerOffset = this.animController.Offset;
+			this.bottomCapWide.Dirty();
+			this.topCapWide.Dirty();
+		}
 		if (this.dirty)
 		{
 			if (this.partitionerEntry != HandleVector<int>.InvalidHandle)
@@ -166,7 +170,9 @@ public class VerticalModuleTiler : KMonoBehaviour
 	private bool dirty;
 
 	[MyCmpGet]
-	private KBatchedAnimController controller;
+	private KAnimControllerBase animController;
+
+	private Vector3 m_previousAnimControllerOffset;
 
 	private enum AnimCapType
 	{

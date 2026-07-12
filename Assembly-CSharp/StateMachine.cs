@@ -589,6 +589,8 @@ public abstract class StateMachine
 
 			public abstract void ShowEditor(StateMachine.Instance base_smi);
 
+			public abstract void ShowDevTool(StateMachine.Instance base_smi);
+
 			public StateMachine.Parameter parameter;
 		}
 	}

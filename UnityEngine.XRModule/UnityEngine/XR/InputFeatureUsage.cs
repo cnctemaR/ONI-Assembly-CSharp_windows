@@ -4,9 +4,9 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.XR
 {
-	[RequiredByNativeCode]
-	[NativeHeader("Modules/XR/Subsystems/Input/Public/XRInputDevices.h")]
 	[NativeConditional("ENABLE_VR")]
+	[NativeHeader("Modules/XR/Subsystems/Input/Public/XRInputDevices.h")]
+	[RequiredByNativeCode]
 	public struct InputFeatureUsage : IEquatable<InputFeatureUsage>
 	{
 		public string name

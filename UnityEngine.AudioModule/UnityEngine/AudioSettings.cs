@@ -118,6 +118,12 @@ namespace UnityEngine
 		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 		public static event AudioSettings.AudioConfigurationChangeHandler OnAudioConfigurationChanged;
 
+		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
+		internal static event Action OnAudioSystemShuttingDown;
+
+		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
+		internal static event Action OnAudioSystemStartedUp;
+
 		[RequiredByNativeCode]
 		internal static void InvokeOnAudioConfigurationChanged(bool deviceWasChanged)
 		{
@@ -125,6 +131,26 @@ namespace UnityEngine
 			if (flag)
 			{
 				AudioSettings.OnAudioConfigurationChanged(deviceWasChanged);
+			}
+		}
+
+		[RequiredByNativeCode]
+		internal static void InvokeOnAudioSystemShuttingDown()
+		{
+			Action onAudioSystemShuttingDown = AudioSettings.OnAudioSystemShuttingDown;
+			if (onAudioSystemShuttingDown != null)
+			{
+				onAudioSystemShuttingDown();
+			}
+		}
+
+		[RequiredByNativeCode]
+		internal static void InvokeOnAudioSystemStartedUp()
+		{
+			Action onAudioSystemStartedUp = AudioSettings.OnAudioSystemStartedUp;
+			if (onAudioSystemStartedUp != null)
+			{
+				onAudioSystemStartedUp();
 			}
 		}
 

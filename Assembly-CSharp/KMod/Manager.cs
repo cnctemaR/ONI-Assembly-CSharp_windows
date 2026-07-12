@@ -119,7 +119,7 @@ namespace KMod
 		{
 			foreach (Mod mod in this.mods)
 			{
-				mod.Unload(Content.LayerableFiles);
+				mod.Unload((Content)0);
 			}
 		}
 
@@ -356,7 +356,7 @@ namespace KMod
 			}
 			Mod mod2 = this.mods[num];
 			mod2.SetEnabledForActiveDlc(false);
-			mod2.Unload(Content.LayerableFiles);
+			mod2.Unload((Content)0);
 			this.events.Add(new Event
 			{
 				event_type = EventType.Uninstalled,
@@ -886,7 +886,7 @@ namespace KMod
 				{
 					if (event_type == EventType.Deactivated)
 					{
-						if ((this.FindMod(event2.mod).available_content & (Content.Strings | Content.DLL | Content.Translation | Content.Animation)) != (Content)0)
+						if ((this.FindMod(event2.mod).available_content & (Content.LayerableFiles | Content.Strings | Content.DLL | Content.Translation | Content.Animation)) != (Content)0)
 						{
 							flag3 = true;
 						}
@@ -983,11 +983,11 @@ namespace KMod
 			mod.SetEnabledForActiveDlc(enabled);
 			if (enabled)
 			{
-				mod.Load(Content.LayerableFiles);
+				mod.Load((Content)0);
 			}
 			else
 			{
-				mod.Unload(Content.LayerableFiles);
+				mod.Unload((Content)0);
 			}
 			this.dirty = true;
 			this.Update(caller);
@@ -1048,11 +1048,9 @@ namespace KMod
 
 		public const Content all_content = Content.LayerableFiles | Content.Strings | Content.DLL | Content.Translation | Content.Animation;
 
-		public const Content boot_content = Content.Strings | Content.DLL | Content.Translation | Content.Animation;
+		public const Content boot_content = Content.LayerableFiles | Content.Strings | Content.DLL | Content.Translation | Content.Animation;
 
-		public const Content install_content = Content.DLL;
-
-		public const Content on_demand_content = Content.LayerableFiles;
+		public const Content on_demand_content = (Content)0;
 
 		public List<IDistributionPlatform> distribution_platforms = new List<IDistributionPlatform>();
 

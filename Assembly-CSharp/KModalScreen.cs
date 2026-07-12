@@ -54,8 +54,11 @@ public class KModalScreen : KScreen
 		{
 			CameraController.Instance.DisableUserCameraControl = true;
 		}
-		ScreenResize instance = ScreenResize.Instance;
-		instance.OnResize = (global::System.Action)Delegate.Combine(instance.OnResize, new global::System.Action(this.OnResize));
+		if (ScreenResize.Instance != null)
+		{
+			ScreenResize instance = ScreenResize.Instance;
+			instance.OnResize = (global::System.Action)Delegate.Combine(instance.OnResize, new global::System.Action(this.OnResize));
+		}
 	}
 
 	protected override void OnCmpDisable()
@@ -66,8 +69,11 @@ public class KModalScreen : KScreen
 			CameraController.Instance.DisableUserCameraControl = false;
 		}
 		base.Trigger(476357528, null);
-		ScreenResize instance = ScreenResize.Instance;
-		instance.OnResize = (global::System.Action)Delegate.Remove(instance.OnResize, new global::System.Action(this.OnResize));
+		if (ScreenResize.Instance != null)
+		{
+			ScreenResize instance = ScreenResize.Instance;
+			instance.OnResize = (global::System.Action)Delegate.Remove(instance.OnResize, new global::System.Action(this.OnResize));
+		}
 	}
 
 	private void OnResize()
@@ -102,7 +108,7 @@ public class KModalScreen : KScreen
 		{
 			if (show && !this.shown)
 			{
-				SpeedControlScreen.Instance.Pause(false);
+				SpeedControlScreen.Instance.Pause(false, false);
 			}
 			else if (!show && this.shown)
 			{

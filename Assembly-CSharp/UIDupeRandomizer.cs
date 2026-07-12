@@ -7,7 +7,7 @@ public class UIDupeRandomizer : MonoBehaviour
 {
 	protected virtual void Start()
 	{
-		this.slots = new AccessorySlots(null, this.head_default_anim, this.head_swap_anim, this.body_swap_anim);
+		this.slots = new AccessorySlots(null);
 		for (int i = 0; i < this.anims.Length; i++)
 		{
 			this.anims[i].curBody = null;
@@ -88,12 +88,6 @@ public class UIDupeRandomizer : MonoBehaviour
 	protected virtual void Update()
 	{
 	}
-
-	public KAnimFile head_default_anim;
-
-	public KAnimFile head_swap_anim;
-
-	public KAnimFile body_swap_anim;
 
 	public bool applyHat = true;
 

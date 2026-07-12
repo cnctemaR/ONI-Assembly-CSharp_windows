@@ -6,10 +6,10 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
+	[NativeClass(null)]
+	[NativeHeader("Runtime/Mono/MonoBehaviour.h")]
 	[RequiredByNativeCode]
 	[ExtensionOfNativeClass]
-	[NativeHeader("Runtime/Mono/MonoBehaviour.h")]
-	[NativeClass(null)]
 	[StructLayout(LayoutKind.Sequential)]
 	public class ScriptableObject : Object
 	{
@@ -18,8 +18,8 @@ namespace UnityEngine
 			ScriptableObject.CreateScriptableObject(this);
 		}
 
-		[NativeConditional("ENABLE_MONO")]
 		[Obsolete("Use EditorUtility.SetDirty instead")]
+		[NativeConditional("ENABLE_MONO")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void SetDirty();
 

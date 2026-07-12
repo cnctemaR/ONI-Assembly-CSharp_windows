@@ -16,7 +16,7 @@ public class CodexLabelWithLargeIcon : CodexLabelWithIcon
 		: base(text, style, coloredSprite, 128, 128)
 	{
 		base.icon = new CodexImage(128, 128, coloredSprite);
-		base.label = new CodexText(text, style);
+		base.label = new CodexText(text, style, null);
 		this.linkID = targetEntrylinkID;
 	}
 

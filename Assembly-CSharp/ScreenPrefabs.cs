@@ -105,4 +105,6 @@ public class ScreenPrefabs : KMonoBehaviour
 	public VideoScreen VideoScreen;
 
 	public ComicViewer ComicViewer;
+
+	public GameObject OldVersionWarningScreen;
 }

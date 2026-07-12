@@ -35,7 +35,14 @@ namespace Database
 							break;
 						}
 					}
-					num = (flag ? (num + 1) : 0);
+					if (flag)
+					{
+						num++;
+					}
+					else if (i != GameClock.Instance.GetCycle())
+					{
+						num = 0;
+					}
 					this.currentCycleStreak = num;
 					if (num >= this.numCycles)
 					{

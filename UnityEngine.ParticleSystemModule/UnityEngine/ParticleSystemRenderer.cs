@@ -7,10 +7,10 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeHeader("Modules/ParticleSystem/ParticleSystemRenderer.h")]
 	[NativeHeader("Modules/ParticleSystem/ScriptBindings/ParticleSystemRendererScriptBindings.h")]
 	[RequireComponent(typeof(Transform))]
 	[NativeHeader("ParticleSystemScriptingClasses.h")]
+	[NativeHeader("Modules/ParticleSystem/ParticleSystemRenderer.h")]
 	public sealed class ParticleSystemRenderer : Renderer
 	{
 		[Obsolete("EnableVertexStreams is deprecated.Use SetActiveVertexStreams instead.", false)]

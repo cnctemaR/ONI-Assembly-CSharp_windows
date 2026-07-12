@@ -89,6 +89,10 @@ public class SteamManager : MonoBehaviour
 			this.m_SteamAPIWarningMessageHook = new SteamAPIWarningMessageHook_t(SteamManager.SteamAPIDebugTextHook);
 			SteamClient.SetWarningMessageHook(this.m_SteamAPIWarningMessageHook);
 		}
+		if (SteamUtils.IsSteamChinaLauncher())
+		{
+			SteamUtils.InitFilterText(0U);
+		}
 	}
 
 	private void OnDestroy()

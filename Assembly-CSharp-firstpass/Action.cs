@@ -275,5 +275,7 @@ public enum Action
 	BuildMenuDown,
 	BuildMenuLeft,
 	BuildMenuRight,
+	AnalogCamera,
+	AnalogCursor,
 	NumActions
 }

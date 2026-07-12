@@ -89,8 +89,8 @@ namespace UnityEngine.Events
 		[FormerlySerializedAs("objectArgument")]
 		private Object m_ObjectArgument;
 
-		[FormerlySerializedAs("objectArgumentAssemblyTypeName")]
 		[SerializeField]
+		[FormerlySerializedAs("objectArgumentAssemblyTypeName")]
 		private string m_ObjectArgumentAssemblyTypeName;
 
 		[SerializeField]
@@ -101,8 +101,8 @@ namespace UnityEngine.Events
 		[SerializeField]
 		private float m_FloatArgument;
 
-		[FormerlySerializedAs("stringArgument")]
 		[SerializeField]
+		[FormerlySerializedAs("stringArgument")]
 		private string m_StringArgument;
 
 		[SerializeField]

@@ -6,8 +6,8 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Misc/CachingManager.h")]
 	[StaticAccessor("GetCachingManager()", StaticAccessorType.Dot)]
+	[NativeHeader("Runtime/Misc/CachingManager.h")]
 	public sealed class Caching
 	{
 		public static extern bool compressionEnabled
@@ -177,8 +177,8 @@ namespace UnityEngine
 		[Obsolete("This property is only used for the current cache, use Cache.spaceOccupied to get used bytes per cache.")]
 		public static extern long spaceOccupied
 		{
-			[StaticAccessor("GetCachingManager().GetCurrentCache()", StaticAccessorType.Dot)]
 			[NativeName("GetCachingDiskSpaceUsed")]
+			[StaticAccessor("GetCachingManager().GetCurrentCache()", StaticAccessorType.Dot)]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
@@ -201,8 +201,8 @@ namespace UnityEngine
 			get;
 		}
 
-		[StaticAccessor("GetCachingManager().GetCurrentCache()", StaticAccessorType.Dot)]
 		[Obsolete("This property is only used for the current cache, use Cache.maximumAvailableStorageSpace to access the maximum available storage space per cache.")]
+		[StaticAccessor("GetCachingManager().GetCurrentCache()", StaticAccessorType.Dot)]
 		public static extern long maximumAvailableDiskSpace
 		{
 			[NativeName("GetMaximumDiskSpaceAvailable")]
@@ -265,8 +265,8 @@ namespace UnityEngine
 			return cache;
 		}
 
-		[StaticAccessor("CachingManagerWrapper", StaticAccessorType.DoubleColon)]
 		[NativeName("Caching_GetCacheHandleAt")]
+		[StaticAccessor("CachingManagerWrapper", StaticAccessorType.DoubleColon)]
 		[NativeThrows]
 		public static Cache GetCacheAt(int cacheIndex)
 		{
@@ -275,9 +275,9 @@ namespace UnityEngine
 			return cache;
 		}
 
-		[NativeThrows]
 		[StaticAccessor("CachingManagerWrapper", StaticAccessorType.DoubleColon)]
 		[NativeName("Caching_GetCacheHandleByPath")]
+		[NativeThrows]
 		public static Cache GetCacheByPath(string cachePath)
 		{
 			Cache cache;
@@ -294,25 +294,25 @@ namespace UnityEngine
 			}
 		}
 
+		[NativeName("Caching_RemoveCacheByHandle")]
 		[StaticAccessor("CachingManagerWrapper", StaticAccessorType.DoubleColon)]
 		[NativeThrows]
-		[NativeName("Caching_RemoveCacheByHandle")]
 		public static bool RemoveCache(Cache cache)
 		{
 			return Caching.RemoveCache_Injected(ref cache);
 		}
 
-		[NativeThrows]
 		[StaticAccessor("CachingManagerWrapper", StaticAccessorType.DoubleColon)]
 		[NativeName("Caching_MoveCacheBeforeByHandle")]
+		[NativeThrows]
 		public static void MoveCacheBefore(Cache src, Cache dst)
 		{
 			Caching.MoveCacheBefore_Injected(ref src, ref dst);
 		}
 
+		[NativeName("Caching_MoveCacheAfterByHandle")]
 		[NativeThrows]
 		[StaticAccessor("CachingManagerWrapper", StaticAccessorType.DoubleColon)]
-		[NativeName("Caching_MoveCacheAfterByHandle")]
 		public static void MoveCacheAfter(Cache src, Cache dst)
 		{
 			Caching.MoveCacheAfter_Injected(ref src, ref dst);
@@ -346,8 +346,8 @@ namespace UnityEngine
 				Caching.get_currentCacheForWriting_Injected(out cache);
 				return cache;
 			}
-			[NativeName("Caching_SetCurrentCacheByHandle")]
 			[NativeThrows]
+			[NativeName("Caching_SetCurrentCacheByHandle")]
 			set
 			{
 				Caching.set_currentCacheForWriting_Injected(ref value);

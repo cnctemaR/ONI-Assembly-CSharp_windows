@@ -565,10 +565,37 @@ namespace UnityEngine
 
 		private static GUIStyle s_SpaceStyle;
 
+		internal readonly struct LayoutCacheState
+		{
+			public LayoutCacheState(GUILayoutUtility.LayoutCache cache)
+			{
+				this.id = cache.id;
+				this.topLevel = cache.topLevel;
+				this.layoutGroups = cache.layoutGroups;
+				this.windows = cache.windows;
+			}
+
+			public readonly int id;
+
+			public readonly GUILayoutGroup topLevel;
+
+			public readonly GenericStack layoutGroups;
+
+			public readonly GUILayoutGroup windows;
+		}
+
 		[DebuggerDisplay("id={id}, groups={layoutGroups.Count}")]
 		internal sealed class LayoutCache
 		{
 			internal int id { get; private set; }
+
+			public GUILayoutUtility.LayoutCacheState State
+			{
+				get
+				{
+					return new GUILayoutUtility.LayoutCacheState(this);
+				}
+			}
 
 			internal LayoutCache(int instanceID = -1)
 			{
@@ -576,7 +603,7 @@ namespace UnityEngine
 				this.layoutGroups.Push(this.topLevel);
 			}
 
-			internal LayoutCache(GUILayoutUtility.LayoutCache other)
+			internal void CopyState(GUILayoutUtility.LayoutCacheState other)
 			{
 				this.id = other.id;
 				this.topLevel = other.topLevel;

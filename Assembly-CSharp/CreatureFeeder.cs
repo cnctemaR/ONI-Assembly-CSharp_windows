@@ -7,13 +7,13 @@ public class CreatureFeeder : KMonoBehaviour
 {
 	protected override void OnSpawn()
 	{
-		Components.CreatureFeeders.Add(this);
+		Components.CreatureFeeders.Add(this.GetMyWorldId(), this);
 		base.Subscribe<CreatureFeeder>(-1452790913, CreatureFeeder.OnAteFromStorageDelegate);
 	}
 
 	protected override void OnCleanUp()
 	{
-		Components.CreatureFeeders.Remove(this);
+		Components.CreatureFeeders.Remove(this.GetMyWorldId(), this);
 	}
 
 	private void OnAteFromStorage(object data)

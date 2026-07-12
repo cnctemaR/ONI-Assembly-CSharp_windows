@@ -22,6 +22,23 @@ public class CavityInfo
 		this.dirty = true;
 	}
 
+	public void RemoveFromCavity(KPrefabID id, List<KPrefabID> listToRemove)
+	{
+		int num = -1;
+		for (int i = 0; i < listToRemove.Count; i++)
+		{
+			if (id.InstanceID == listToRemove[i].InstanceID)
+			{
+				num = i;
+				break;
+			}
+		}
+		if (num >= 0)
+		{
+			listToRemove.RemoveAt(num);
+		}
+	}
+
 	public void OnEnter(object data)
 	{
 		foreach (KPrefabID kprefabID in this.buildings)

@@ -21,6 +21,12 @@ public class UserMenuScreen : KIconButtonMenu
 		KInputManager.InputChange.AddListener(new UnityAction(base.RefreshButtonTooltip));
 	}
 
+	protected override void OnForcedCleanUp()
+	{
+		KInputManager.InputChange.RemoveListener(new UnityAction(base.RefreshButtonTooltip));
+		base.OnForcedCleanUp();
+	}
+
 	public void SetSelected(GameObject go)
 	{
 		this.ClearPrioritizable();

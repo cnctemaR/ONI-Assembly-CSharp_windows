@@ -3,8 +3,8 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	[AttributeUsage(AttributeTargets.Method)]
 	[VisibleToOtherModules]
+	[AttributeUsage(AttributeTargets.Method)]
 	internal class ThreadAndSerializationSafeAttribute : Attribute
 	{
 	}

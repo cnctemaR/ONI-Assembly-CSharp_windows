@@ -74,8 +74,8 @@ namespace UnityEngine
 			}
 		}
 
-		[EditorBrowsable(EditorBrowsableState.Never)]
 		[Obsolete("Anisotropic friction is no longer supported since Unity 5.0.", true)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		public Vector3 frictionDirection2
 		{
 			get
@@ -87,8 +87,8 @@ namespace UnityEngine
 			}
 		}
 
-		[EditorBrowsable(EditorBrowsableState.Never)]
 		[Obsolete("Anisotropic friction is no longer supported since Unity 5.0.", true)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		public float dynamicFriction2
 		{
 			get

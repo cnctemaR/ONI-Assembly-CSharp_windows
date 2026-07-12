@@ -6,6 +6,11 @@ using UnityEngine;
 [SerializationConfig(MemberSerialization.OptIn)]
 public class DiscoveredResources : KMonoBehaviour, ISaveLoadable, ISim4000ms
 {
+	public static void DestroyInstance()
+	{
+		DiscoveredResources.Instance = null;
+	}
+
 	public event Action<Tag, Tag> OnDiscover;
 
 	public void Discover(Tag tag, Tag categoryTag)

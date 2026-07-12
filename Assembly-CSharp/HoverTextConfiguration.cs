@@ -29,10 +29,24 @@ public class HoverTextConfiguration : KMonoBehaviour
 	{
 		TextStyleSetting standard = this.Styles_Instruction.Standard;
 		drawer.NewLine(26);
-		drawer.DrawIcon(screen.GetSprite("icon_mouse_left"), 20);
+		if (KInputManager.currentControllerIsGamepad)
+		{
+			drawer.DrawIcon(KInputManager.steamInputInterpreter.GetActionSprite(global::Action.MouseLeft, false), 20);
+		}
+		else
+		{
+			drawer.DrawIcon(screen.GetSprite("icon_mouse_left"), 20);
+		}
 		drawer.DrawText(this.ActionName, standard);
 		drawer.AddIndent(8);
-		drawer.DrawIcon(screen.GetSprite("icon_mouse_right"), 20);
+		if (KInputManager.currentControllerIsGamepad)
+		{
+			drawer.DrawIcon(KInputManager.steamInputInterpreter.GetActionSprite(global::Action.MouseRight, false), 20);
+		}
+		else
+		{
+			drawer.DrawIcon(screen.GetSprite("icon_mouse_right"), 20);
+		}
 		drawer.DrawText(this.backStr, standard);
 	}
 

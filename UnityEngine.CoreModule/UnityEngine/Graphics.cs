@@ -7,12 +7,12 @@ using UnityEngine.Rendering;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Graphics/CopyTexture.h")]
+	[NativeHeader("Runtime/Graphics/GraphicsScriptBindings.h")]
 	[NativeHeader("Runtime/Shaders/ComputeShader.h")]
 	[NativeHeader("Runtime/Misc/PlayerSettings.h")]
-	[NativeHeader("Runtime/Camera/LightProbeProxyVolume.h")]
-	[NativeHeader("Runtime/Graphics/GraphicsScriptBindings.h")]
 	[NativeHeader("Runtime/Graphics/ColorGamut.h")]
+	[NativeHeader("Runtime/Camera/LightProbeProxyVolume.h")]
+	[NativeHeader("Runtime/Graphics/CopyTexture.h")]
 	public class Graphics
 	{
 		[FreeFunction("GraphicsScripting::GetMaxDrawMeshInstanceCount")]
@@ -40,8 +40,8 @@ namespace UnityEngine
 			set;
 		}
 
-		[NativeMethod(Name = "GetPreserveFramebufferAlpha")]
 		[StaticAccessor("GetPlayerSettings()", StaticAccessorType.Dot)]
+		[NativeMethod(Name = "GetPreserveFramebufferAlpha")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern bool GetPreserveFramebufferAlpha();
 
@@ -53,8 +53,8 @@ namespace UnityEngine
 			}
 		}
 
-		[NativeMethod(Name = "GetMinOpenGLESVersion")]
 		[StaticAccessor("GetPlayerSettings()", StaticAccessorType.Dot)]
+		[NativeMethod(Name = "GetMinOpenGLESVersion")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern OpenGLESVersion GetMinOpenGLESVersion();
 
@@ -156,8 +156,8 @@ namespace UnityEngine
 			Graphics.Internal_DrawMeshNow2_Injected(mesh, subsetIndex, ref matrix);
 		}
 
-		[VisibleToOtherModules(new string[] { "UnityEngine.IMGUIModule" })]
 		[FreeFunction("GraphicsScripting::DrawTexture")]
+		[VisibleToOtherModules(new string[] { "UnityEngine.IMGUIModule" })]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern void Internal_DrawTexture(ref Internal_DrawTextureArguments args);
 

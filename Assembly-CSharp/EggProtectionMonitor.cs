@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using STRINGS;
 using UnityEngine;
 
 public class EggProtectionMonitor : GameStateMachine<EggProtectionMonitor, EggProtectionMonitor.Instance, IStateMachineTarget, EggProtectionMonitor.Def>
@@ -14,11 +15,18 @@ public class EggProtectionMonitor : GameStateMachine<EggProtectionMonitor, EggPr
 		this.find_egg.BatchUpdate(new UpdateBucketWithUpdater<EggProtectionMonitor.Instance>.BatchUpdateDelegate(EggProtectionMonitor.Instance.FindEggToGuard), UpdateRate.SIM_200ms).ParamTransition<bool>(this.hasEggToGuard, this.guard.safe, GameStateMachine<EggProtectionMonitor, EggProtectionMonitor.Instance, IStateMachineTarget, EggProtectionMonitor.Def>.IsTrue);
 		this.guard.Enter(delegate(EggProtectionMonitor.Instance smi)
 		{
-			smi.gameObject.AddOrGet<SymbolOverrideController>().ApplySymbolOverridesByAffix(Assets.GetAnim("pincher_kanim"), null, "_heat", 0);
+			smi.gameObject.AddOrGet<SymbolOverrideController>().ApplySymbolOverridesByAffix(Assets.GetAnim("pincher_kanim"), smi.def.animPrefix, "_heat", 0);
 			smi.gameObject.AddOrGet<FactionAlignment>().SwitchAlignment(FactionManager.FactionID.Hostile);
 		}).Exit(delegate(EggProtectionMonitor.Instance smi)
 		{
-			smi.gameObject.AddOrGet<SymbolOverrideController>().RemoveBuildOverride(Assets.GetAnim("pincher_kanim").GetData(), 0);
+			if (!smi.def.animPrefix.IsNullOrWhiteSpace())
+			{
+				smi.gameObject.AddOrGet<SymbolOverrideController>().ApplySymbolOverridesByAffix(Assets.GetAnim("pincher_kanim"), smi.def.animPrefix, null, 0);
+			}
+			else
+			{
+				smi.gameObject.AddOrGet<SymbolOverrideController>().RemoveBuildOverride(Assets.GetAnim("pincher_kanim").GetData(), 0);
+			}
 			smi.gameObject.AddOrGet<FactionAlignment>().SwitchAlignment(FactionManager.FactionID.Pest);
 		}).Update("evaulate_egg", delegate(EggProtectionMonitor.Instance smi, float dt)
 		{
@@ -31,7 +39,7 @@ public class EggProtectionMonitor : GameStateMachine<EggProtectionMonitor, EggPr
 		}).Update("safe", delegate(EggProtectionMonitor.Instance smi, float dt)
 		{
 			smi.RefreshThreat(null);
-		}, UpdateRate.SIM_200ms, true);
+		}, UpdateRate.SIM_200ms, true).ToggleStatusItem(CREATURES.STATUSITEMS.PROTECTINGENTITY.NAME, CREATURES.STATUSITEMS.PROTECTINGENTITY.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 129022, null, null, null);
 		this.guard.threatened.ToggleBehaviour(GameTags.Creatures.Defend, (EggProtectionMonitor.Instance smi) => smi.MainThreat != null, delegate(EggProtectionMonitor.Instance smi)
 		{
 			smi.GoTo(this.guard.safe);
@@ -59,6 +67,8 @@ public class EggProtectionMonitor : GameStateMachine<EggProtectionMonitor, EggPr
 	public class Def : StateMachine.BaseDef
 	{
 		public Tag[] allyTags;
+
+		public string animPrefix;
 	}
 
 	public class GuardEggStates : GameStateMachine<EggProtectionMonitor, EggProtectionMonitor.Instance, IStateMachineTarget, EggProtectionMonitor.Def>.State
@@ -129,6 +139,7 @@ public class EggProtectionMonitor : GameStateMachine<EggProtectionMonitor, EggPr
 				EggProtectionMonitor.Instance.find_eggs_job.GetWorkItem(num).Finish(pooledList, pooledList2);
 			}
 			pooledList.Recycle();
+			EggProtectionMonitor.Instance.find_eggs_job.Reset(null);
 			foreach (UpdateBucketWithUpdater<EggProtectionMonitor.Instance>.Entry entry in new List<UpdateBucketWithUpdater<EggProtectionMonitor.Instance>.Entry>(instances))
 			{
 				GameObject gameObject = null;
@@ -308,7 +319,7 @@ public class EggProtectionMonitor : GameStateMachine<EggProtectionMonitor, EggPr
 			{
 				for (int num = this.start; num != this.end; num++)
 				{
-					if (prefab_ids[num].HasTag(EggProtectionMonitor.Instance.FindEggsTask.EGG_TAG))
+					if (prefab_ids[num].HasAnyTags(EggProtectionMonitor.Instance.FindEggsTask.EGG_TAG))
 					{
 						this.eggs.Add(num);
 					}
@@ -329,7 +340,12 @@ public class EggProtectionMonitor : GameStateMachine<EggProtectionMonitor, EggPr
 				this.eggs.Recycle();
 			}
 
-			private static readonly Tag EGG_TAG = "CrabEgg".ToTag();
+			private static readonly List<Tag> EGG_TAG = new List<Tag>
+			{
+				"CrabEgg".ToTag(),
+				"CrabWoodEgg".ToTag(),
+				"CrabFreshWaterEgg".ToTag()
+			};
 
 			private ListPool<int, EggProtectionMonitor>.PooledList eggs;
 

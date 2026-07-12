@@ -10,6 +10,7 @@ public class EggIncubator : SingleEntityReceptacle, ISaveLoadable, ISim1000ms
 	{
 		base.OnPrefabInit();
 		this.autoReplaceEntity = true;
+		this.choreType = Db.Get().ChoreTypes.RanchingFetch;
 		this.statusItemNeed = Db.Get().BuildingStatusItems.NeedEgg;
 		this.statusItemNoneAvailable = Db.Get().BuildingStatusItems.NoAvailableEgg;
 		this.statusItemAwaitingDelivery = Db.Get().BuildingStatusItems.AwaitingEggDelivery;
@@ -18,6 +19,7 @@ public class EggIncubator : SingleEntityReceptacle, ISaveLoadable, ISim1000ms
 		this.synchronizeAnims = false;
 		base.GetComponent<KBatchedAnimController>().SetSymbolVisiblity("egg_target", false);
 		this.meter = new MeterController(this, Meter.Offset.Infront, Grid.SceneLayer.NoLayer, Array.Empty<string>());
+		base.Subscribe<EggIncubator>(-905833192, EggIncubator.OnCopySettingsDelegate);
 	}
 
 	protected override void OnSpawn()
@@ -37,6 +39,39 @@ public class EggIncubator : SingleEntityReceptacle, ISaveLoadable, ISim1000ms
 		base.Subscribe<EggIncubator>(-1697596308, EggIncubator.OnStorageChangeDelegate);
 		this.smi = new EggIncubatorStates.Instance(this);
 		this.smi.StartSM();
+	}
+
+	private void OnCopySettings(object data)
+	{
+		EggIncubator component = ((GameObject)data).GetComponent<EggIncubator>();
+		if (component != null)
+		{
+			this.autoReplaceEntity = component.autoReplaceEntity;
+			if (base.occupyingObject == null)
+			{
+				if (!(this.requestedEntityTag == component.requestedEntityTag) || !(this.requestedEntityAdditionalFilterTag == component.requestedEntityAdditionalFilterTag))
+				{
+					base.CancelActiveRequest();
+				}
+				if (this.fetchChore == null)
+				{
+					Tag requestedEntityTag = component.requestedEntityTag;
+					this.CreateOrder(requestedEntityTag, component.requestedEntityAdditionalFilterTag);
+				}
+			}
+			if (base.occupyingObject != null)
+			{
+				Prioritizable component2 = base.GetComponent<Prioritizable>();
+				if (component2 != null)
+				{
+					Prioritizable component3 = base.occupyingObject.GetComponent<Prioritizable>();
+					if (component3 != null)
+					{
+						component3.SetMasterPriority(component2.GetMasterPriority());
+					}
+				}
+			}
+		}
 	}
 
 	protected override void OnCleanUp()
@@ -194,6 +229,9 @@ public class EggIncubator : SingleEntityReceptacle, ISaveLoadable, ISim1000ms
 	[MyCmpAdd]
 	private EggIncubatorWorkable workable;
 
+	[MyCmpAdd]
+	private CopyBuildingSettings copySettings;
+
 	private Chore chore;
 
 	private EggIncubatorStates.Instance smi;
@@ -215,5 +253,10 @@ public class EggIncubator : SingleEntityReceptacle, ISaveLoadable, ISim1000ms
 	private static readonly EventSystem.IntraObjectHandler<EggIncubator> OnStorageChangeDelegate = new EventSystem.IntraObjectHandler<EggIncubator>(delegate(EggIncubator component, object data)
 	{
 		component.OnStorageChange(data);
+	});
+
+	private static readonly EventSystem.IntraObjectHandler<EggIncubator> OnCopySettingsDelegate = new EventSystem.IntraObjectHandler<EggIncubator>(delegate(EggIncubator component, object data)
+	{
+		component.OnCopySettings(data);
 	});
 }

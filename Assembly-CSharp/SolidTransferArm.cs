@@ -73,8 +73,14 @@ public class SolidTransferArm : StateMachineComponent<SolidTransferArm.SMInstanc
 		base.OnCleanUp();
 	}
 
-	private static void CachePickupables()
+	public static void BatchUpdate(List<UpdateBucketWithUpdater<ISim1000ms>.Entry> solid_transfer_arms, float time_delta)
 	{
+		SolidTransferArm.BatchUpdateContext batchUpdateContext = new SolidTransferArm.BatchUpdateContext(solid_transfer_arms);
+		if (batchUpdateContext.solid_transfer_arms.Count == 0)
+		{
+			batchUpdateContext.Finish();
+			return;
+		}
 		SolidTransferArm.cached_pickupables.Clear();
 		foreach (KeyValuePair<Tag, FetchManager.FetchablesByPrefabId> keyValuePair in Game.Instance.fetchManager.prefabIdToFetchables)
 		{
@@ -89,17 +95,6 @@ public class SolidTransferArm : StateMachineComponent<SolidTransferArm.SMInstanc
 				});
 			}
 		}
-	}
-
-	public static void BatchUpdate(List<UpdateBucketWithUpdater<ISim1000ms>.Entry> solid_transfer_arms, float time_delta)
-	{
-		SolidTransferArm.BatchUpdateContext batchUpdateContext = new SolidTransferArm.BatchUpdateContext(solid_transfer_arms);
-		if (batchUpdateContext.solid_transfer_arms.Count == 0)
-		{
-			batchUpdateContext.Finish();
-			return;
-		}
-		SolidTransferArm.CachePickupables();
 		SolidTransferArm.batch_update_job.Reset(batchUpdateContext);
 		int num = Math.Max(1, batchUpdateContext.solid_transfer_arms.Count / CPUBudget.coreCount);
 		int num2 = Math.Min(batchUpdateContext.solid_transfer_arms.Count, CPUBudget.coreCount);
@@ -115,6 +110,8 @@ public class SolidTransferArm : StateMachineComponent<SolidTransferArm.SMInstanc
 			SolidTransferArm.batch_update_job.GetWorkItem(num6).Finish();
 		}
 		batchUpdateContext.Finish();
+		SolidTransferArm.batch_update_job.Reset(null);
+		SolidTransferArm.cached_pickupables.Clear();
 	}
 
 	private void Sim()
@@ -193,7 +190,7 @@ public class SolidTransferArm : StateMachineComponent<SolidTransferArm.SMInstanc
 
 	private void IncrementSerialNo()
 	{
-		this.serial_no++;
+		this.serial_no += 1;
 		MinionGroupProber.Get().SetValidSerialNos(this, this.serial_no, this.serial_no);
 		MinionGroupProber.Get().Occupy(this, this.serial_no, this.reachableCells);
 	}
@@ -421,11 +418,11 @@ public class SolidTransferArm : StateMachineComponent<SolidTransferArm.SMInstanc
 		component.OnEndChore(data);
 	});
 
-	private static List<SolidTransferArm.CachedPickupable> cached_pickupables = new List<SolidTransferArm.CachedPickupable>();
-
 	private static WorkItemCollection<SolidTransferArm.BatchUpdateTask, SolidTransferArm.BatchUpdateContext> batch_update_job = new WorkItemCollection<SolidTransferArm.BatchUpdateTask, SolidTransferArm.BatchUpdateContext>();
 
-	private int serial_no;
+	private static List<SolidTransferArm.CachedPickupable> cached_pickupables = new List<SolidTransferArm.CachedPickupable>();
+
+	private short serial_no;
 
 	private static HashedString HASH_ROTATION = "rotation";
 
@@ -473,7 +470,7 @@ public class SolidTransferArm : StateMachineComponent<SolidTransferArm.SMInstanc
 		}
 	}
 
-	private struct BatchUpdateContext
+	private class BatchUpdateContext
 	{
 		public BatchUpdateContext(List<UpdateBucketWithUpdater<ISim1000ms>.Entry> solid_transfer_arms)
 		{

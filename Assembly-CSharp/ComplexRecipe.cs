@@ -71,52 +71,53 @@ public class ComplexRecipe
 
 	public string GetUIName(bool includeAmounts)
 	{
+		string text = (this.results[0].facadeID.IsNullOrWhiteSpace() ? this.results[0].material.ProperName() : this.results[0].facadeID.ProperName());
 		switch (this.nameDisplay)
 		{
 		case ComplexRecipe.RecipeNameDisplay.Result:
 			if (includeAmounts)
 			{
-				return string.Format(UI.UISIDESCREENS.REFINERYSIDESCREEN.RECIPE_SIMPLE_INCLUDE_AMOUNTS, this.results[0].material.ProperName(), this.results[0].amount);
+				return string.Format(UI.UISIDESCREENS.REFINERYSIDESCREEN.RECIPE_SIMPLE_INCLUDE_AMOUNTS, text, this.results[0].amount);
 			}
-			return this.results[0].material.ProperName();
+			return text;
 		case ComplexRecipe.RecipeNameDisplay.IngredientToResult:
 			if (includeAmounts)
 			{
 				return string.Format(UI.UISIDESCREENS.REFINERYSIDESCREEN.RECIPE_FROM_TO_INCLUDE_AMOUNTS, new object[]
 				{
 					this.ingredients[0].material.ProperName(),
-					this.results[0].material.ProperName(),
+					text,
 					this.ingredients[0].amount,
 					this.results[0].amount
 				});
 			}
-			return string.Format(UI.UISIDESCREENS.REFINERYSIDESCREEN.RECIPE_FROM_TO, this.ingredients[0].material.ProperName(), this.results[0].material.ProperName());
+			return string.Format(UI.UISIDESCREENS.REFINERYSIDESCREEN.RECIPE_FROM_TO, this.ingredients[0].material.ProperName(), text);
 		case ComplexRecipe.RecipeNameDisplay.ResultWithIngredient:
 			if (includeAmounts)
 			{
 				return string.Format(UI.UISIDESCREENS.REFINERYSIDESCREEN.RECIPE_WITH_INCLUDE_AMOUNTS, new object[]
 				{
 					this.ingredients[0].material.ProperName(),
-					this.results[0].material.ProperName(),
+					text,
 					this.ingredients[0].amount,
 					this.results[0].amount
 				});
 			}
-			return string.Format(UI.UISIDESCREENS.REFINERYSIDESCREEN.RECIPE_WITH, this.ingredients[0].material.ProperName(), this.results[0].material.ProperName());
+			return string.Format(UI.UISIDESCREENS.REFINERYSIDESCREEN.RECIPE_WITH, this.ingredients[0].material.ProperName(), text);
 		case ComplexRecipe.RecipeNameDisplay.Composite:
 			if (includeAmounts)
 			{
 				return string.Format(UI.UISIDESCREENS.REFINERYSIDESCREEN.RECIPE_FROM_TO_COMPOSITE_INCLUDE_AMOUNTS, new object[]
 				{
 					this.ingredients[0].material.ProperName(),
-					this.results[0].material.ProperName(),
+					text,
 					this.results[1].material.ProperName(),
 					this.ingredients[0].amount,
 					this.results[0].amount,
 					this.results[1].amount
 				});
 			}
-			return string.Format(UI.UISIDESCREENS.REFINERYSIDESCREEN.RECIPE_FROM_TO_COMPOSITE, this.ingredients[0].material.ProperName(), this.results[0].material.ProperName(), this.results[1].material.ProperName());
+			return string.Format(UI.UISIDESCREENS.REFINERYSIDESCREEN.RECIPE_FROM_TO_COMPOSITE, this.ingredients[0].material.ProperName(), text, this.results[1].material.ProperName());
 		case ComplexRecipe.RecipeNameDisplay.HEP:
 			if (includeAmounts)
 			{
@@ -129,7 +130,7 @@ public class ComplexRecipe
 					this.results[1].amount
 				});
 			}
-			return string.Format(UI.UISIDESCREENS.REFINERYSIDESCREEN.RECIPE_FROM_TO_HEP, this.ingredients[0].material.ProperName(), this.results[0].material.ProperName());
+			return string.Format(UI.UISIDESCREENS.REFINERYSIDESCREEN.RECIPE_FROM_TO_HEP, this.ingredients[0].material.ProperName(), text);
 		}
 		if (includeAmounts)
 		{
@@ -197,6 +198,15 @@ public class ComplexRecipe
 			this.storeElement = storeElement;
 		}
 
+		public RecipeElement(Tag material, float amount, ComplexRecipe.RecipeElement.TemperatureOperation temperatureOperation, string facadeID, bool storeElement = false)
+		{
+			this.material = material;
+			this.amount = amount;
+			this.temperatureOperation = temperatureOperation;
+			this.storeElement = storeElement;
+			this.facadeID = facadeID;
+		}
+
 		public float amount { get; private set; }
 
 		public Tag material;
@@ -206,6 +216,8 @@ public class ComplexRecipe
 		public bool storeElement;
 
 		public bool inheritElement;
+
+		public string facadeID;
 
 		public enum TemperatureOperation
 		{

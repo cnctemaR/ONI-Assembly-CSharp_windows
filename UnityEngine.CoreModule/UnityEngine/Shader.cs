@@ -7,12 +7,12 @@ using UnityEngine.Rendering;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Graphics/ShaderScriptBindings.h")]
 	[NativeHeader("Runtime/Misc/ResourceManager.h")]
 	[NativeHeader("Runtime/Graphics/ShaderScriptBindings.h")]
-	[NativeHeader("Runtime/Shaders/ShaderNameRegistry.h")]
 	[NativeHeader("Runtime/Shaders/GpuPrograms/ShaderVariantCollection.h")]
+	[NativeHeader("Runtime/Graphics/ShaderScriptBindings.h")]
 	[NativeHeader("Runtime/Shaders/ComputeShader.h")]
+	[NativeHeader("Runtime/Shaders/ShaderNameRegistry.h")]
 	[NativeHeader("Runtime/Shaders/Shader.h")]
 	public sealed class Shader : Object
 	{

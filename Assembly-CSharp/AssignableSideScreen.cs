@@ -250,7 +250,7 @@ public class AssignableSideScreen : SideScreenContent
 	private void ChangeAssignment(IAssignableIdentity new_identity)
 	{
 		this.targetAssignable.Unassign();
-		if (new_identity != null)
+		if (!new_identity.IsNullOrDestroyed())
 		{
 			this.targetAssignable.Assign(new_identity);
 		}

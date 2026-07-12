@@ -7,7 +7,7 @@ using UnityEngine;
 
 public static class BaseSquirrelConfig
 {
-	public static GameObject BaseSquirrel(string id, string name, string desc, string anim_file, string traitId, bool is_baby, string symbolOverridePrefix = null)
+	public static GameObject BaseSquirrel(string id, string name, string desc, string anim_file, string traitId, bool is_baby, string symbolOverridePrefix = null, bool isHuggable = false)
 	{
 		float num = 100f;
 		EffectorValues tier = DECOR.BONUS.TIER0;
@@ -63,22 +63,28 @@ public static class BaseSquirrelConfig
 			.Add(new FixedCaptureStates.Def(), true, -1)
 			.Add(new RanchedStates.Def(), true, -1)
 			.Add(new LayEggStates.Def(), true, -1)
+			.Add(new HugEggStates.Def(GameTags.Creatures.WantsToTendEgg), isHuggable, -1)
+			.Add(new HugMinionStates.Def(), isHuggable, -1)
 			.Add(new TreeClimbStates.Def(), true, -1)
 			.Add(new EatStates.Def(), true, -1)
 			.Add(new PlayAnimsStates.Def(GameTags.Creatures.Poop, false, "poop", global::STRINGS.CREATURES.STATUSITEMS.EXPELLING_SOLID.NAME, global::STRINGS.CREATURES.STATUSITEMS.EXPELLING_SOLID.TOOLTIP), true, -1)
 			.Add(new CallAdultStates.Def(), true, -1)
-			.Add(new SeedPlantingStates.Def(), true, -1)
+			.Add(new SeedPlantingStates.Def(symbolOverridePrefix), true, -1)
 			.PopInterruptGroup()
 			.Add(new IdleStates.Def(), true, -1);
 		EntityTemplates.AddCreatureBrain(gameObject, builder, GameTags.Creatures.Species.SquirrelSpecies, symbolOverridePrefix);
 		return gameObject;
 	}
 
-	public static Diet.Info[] BasicWoodDiet(Tag poopTag, float caloriesPerKg, float producedConversionRate, string diseaseId, float diseasePerKgProduced)
+	public static Diet.Info[] BasicDiet(Tag poopTag, float caloriesPerKg, float producedConversionRate, string diseaseId, float diseasePerKgProduced)
 	{
 		return new Diet.Info[]
 		{
-			new Diet.Info(new HashSet<Tag> { "ForestTree" }, poopTag, caloriesPerKg, producedConversionRate, diseaseId, diseasePerKgProduced, false, true)
+			new Diet.Info(new HashSet<Tag>
+			{
+				"ForestTree",
+				BasicFabricMaterialPlantConfig.ID
+			}, poopTag, caloriesPerKg, producedConversionRate, diseaseId, diseasePerKgProduced, false, true)
 		};
 	}
 

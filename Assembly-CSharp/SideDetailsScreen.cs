@@ -12,6 +12,12 @@ public class SideDetailsScreen : KScreen
 		base.gameObject.SetActive(false);
 	}
 
+	protected override void OnForcedCleanUp()
+	{
+		SideDetailsScreen.Instance = null;
+		base.OnForcedCleanUp();
+	}
+
 	private void Initialize()
 	{
 		if (this.screens == null)

@@ -6,8 +6,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Graphics/DisplayManager.h")]
 	[UsedByNativeCode]
+	[NativeHeader("Runtime/Graphics/DisplayManager.h")]
 	public class Display
 	{
 		internal Display()
@@ -168,6 +168,18 @@ namespace UnityEngine
 			}
 		}
 
+		public static int activeEditorGameViewTarget
+		{
+			get
+			{
+				return Display.m_ActiveEditorGameViewTarget;
+			}
+			internal set
+			{
+				Display.m_ActiveEditorGameViewTarget = value;
+			}
+		}
+
 		[RequiredByNativeCode]
 		private static void RecreateDisplayList(IntPtr[] nativeDisplay)
 		{
@@ -250,6 +262,8 @@ namespace UnityEngine
 		};
 
 		private static Display _mainDisplay = Display.displays[0];
+
+		private static int m_ActiveEditorGameViewTarget = -1;
 
 		public delegate void DisplaysUpdatedDelegate();
 	}

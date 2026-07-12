@@ -66,6 +66,10 @@ public class BaseNaming : KMonoBehaviour
 		{
 			return;
 		}
+		if (newName.EndsWith(" "))
+		{
+			newName = newName.TrimEnd(new char[] { ' ' });
+		}
 		if (!this.CheckBaseName(newName))
 		{
 			return;

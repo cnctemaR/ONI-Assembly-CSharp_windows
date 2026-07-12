@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{B4CE6748-3CA7-47DA-BE05-9CC2D0FFEAEC}</ProjectGuid>
+    <ProjectGuid>{46649EAC-BC57-4D67-B2C6-355E569B50F4}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>UnityEngine.CoreModule</RootNamespace>
     <AssemblyName>UnityEngine.CoreModule</AssemblyName>
@@ -453,6 +453,7 @@
     <Compile Include="UnityEngine\Rendering\CameraEvent.cs" />
     <Compile Include="UnityEngine\Rendering\CameraEventUtils.cs" />
     <Compile Include="UnityEngine\Rendering\CameraHDRMode.cs" />
+    <Compile Include="UnityEngine\Rendering\CameraLateLatchMatrixType.cs" />
     <Compile Include="UnityEngine\Rendering\CameraProperties.cs" />
     <Compile Include="UnityEngine\Rendering\ColorWriteMask.cs" />
     <Compile Include="UnityEngine\Rendering\CommandBuffer.cs" />
@@ -524,10 +525,12 @@
     <Compile Include="UnityEngine\Rendering\ScopedSubPass.cs" />
     <Compile Include="UnityEngine\Rendering\ScriptableCullingParameters.cs" />
     <Compile Include="UnityEngine\Rendering\ScriptableRenderContext.cs" />
+    <Compile Include="UnityEngine\Rendering\ShaderConstantType.cs" />
     <Compile Include="UnityEngine\Rendering\ShaderHardwareTier.cs" />
     <Compile Include="UnityEngine\Rendering\ShaderKeyword.cs" />
     <Compile Include="UnityEngine\Rendering\ShaderKeywordSet.cs" />
     <Compile Include="UnityEngine\Rendering\ShaderKeywordType.cs" />
+    <Compile Include="UnityEngine\Rendering\ShaderParamType.cs" />
     <Compile Include="UnityEngine\Rendering\ShaderPropertyFlags.cs" />
     <Compile Include="UnityEngine\Rendering\ShaderPropertyType.cs" />
     <Compile Include="UnityEngine\Rendering\ShaderTagId.cs" />
@@ -775,7 +778,9 @@
     <Compile Include="Unity\IO\LowLevel\Unsafe\AsyncReadManagerMetricsFilters.cs" />
     <Compile Include="Unity\IO\LowLevel\Unsafe\AsyncReadManagerRequestMetric.cs" />
     <Compile Include="Unity\IO\LowLevel\Unsafe\AsyncReadManagerSummaryMetrics.cs" />
+    <Compile Include="Unity\IO\LowLevel\Unsafe\FileInfoResult.cs" />
     <Compile Include="Unity\IO\LowLevel\Unsafe\FileReadType.cs" />
+    <Compile Include="Unity\IO\LowLevel\Unsafe\FileState.cs" />
     <Compile Include="Unity\IO\LowLevel\Unsafe\Priority.cs" />
     <Compile Include="Unity\IO\LowLevel\Unsafe\ProcessingState.cs" />
     <Compile Include="Unity\IO\LowLevel\Unsafe\ReadCommand.cs" />
@@ -810,6 +815,7 @@
     <Compile Include="Unity\Profiling\ProfilerFlowEventType.cs" />
     <Compile Include="Unity\Profiling\ProfilerMarker.cs" />
     <Compile Include="Unity\Profiling\ProfilerMarkerDataUnit.cs" />
+    <Compile Include="Unity\Profiling\ProfilerMarkerWithStringData.cs" />
     <Compile Include="Unity\Profiling\ProfilerRecorder.cs" />
     <Compile Include="Unity\Profiling\ProfilerRecorderDebugView.cs" />
     <Compile Include="Unity\Profiling\ProfilerRecorderOptions.cs" />
@@ -821,7 +827,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
-      <Project>{B4CE6748-3CA7-47DA-BE05-9CC2D0FFEB02}</Project>
+      <Project>{46649EAC-BC57-4D67-B2C6-355E569B510A}</Project>
       <Name>UnityEngine.SharedInternalsModule</Name>
     </ProjectReference>
   </ItemGroup>

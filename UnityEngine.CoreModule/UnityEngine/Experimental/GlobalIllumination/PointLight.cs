@@ -12,6 +12,8 @@ namespace UnityEngine.Experimental.GlobalIllumination
 
 		public Vector3 position;
 
+		public Quaternion orientation;
+
 		public LinearColor color;
 
 		public LinearColor indirectColor;

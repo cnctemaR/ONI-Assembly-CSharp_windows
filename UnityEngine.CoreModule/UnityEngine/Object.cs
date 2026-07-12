@@ -9,10 +9,10 @@ using UnityEngineInternal;
 
 namespace UnityEngine
 {
+	[NativeHeader("Runtime/Export/Scripting/UnityEngineObject.bindings.h")]
 	[NativeHeader("Runtime/SceneManager/SceneManager.h")]
 	[NativeHeader("Runtime/GameCode/CloneObject.h")]
 	[RequiredByNativeCode(GenerateProxy = true)]
-	[NativeHeader("Runtime/Export/Scripting/UnityEngineObject.bindings.h")]
 	[StructLayout(LayoutKind.Sequential)]
 	public class Object
 	{
@@ -283,8 +283,8 @@ namespace UnityEngine
 			Object.Destroy(obj, t);
 		}
 
-		[Obsolete("use Object.Destroy instead.")]
 		[ExcludeFromDocs]
+		[Obsolete("use Object.Destroy instead.")]
 		public static void DestroyObject(Object obj)
 		{
 			float num = 0f;
@@ -434,8 +434,8 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern bool DoesObjectWithInstanceIDExist(int instanceID);
 
-		[FreeFunction("UnityEngineObjectBindings::FindObjectFromInstanceID")]
 		[VisibleToOtherModules]
+		[FreeFunction("UnityEngineObjectBindings::FindObjectFromInstanceID")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern Object FindObjectFromInstanceID(int instanceID);
 

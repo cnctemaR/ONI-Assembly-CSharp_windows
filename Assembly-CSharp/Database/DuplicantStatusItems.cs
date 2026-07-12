@@ -199,6 +199,7 @@ namespace Database
 			this.GeneratingPower = this.CreateStatusItem("GeneratingPower", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 2);
 			this.GeneratingPower.resolveStringCallback = func;
 			this.Harvesting = this.CreateStatusItem("Harvesting", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 2);
+			this.Ranching = this.CreateStatusItem("Ranching", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 2);
 			this.Harvesting.resolveStringCallback = func;
 			this.Uprooting = this.CreateStatusItem("Uprooting", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 2);
 			this.Uprooting.resolveStringCallback = func;
@@ -526,6 +527,8 @@ namespace Database
 		public StatusItem WarmingUp;
 
 		public StatusItem GeneratingPower;
+
+		public StatusItem Ranching;
 
 		public StatusItem Harvesting;
 

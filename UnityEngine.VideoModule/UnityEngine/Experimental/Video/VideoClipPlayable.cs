@@ -10,10 +10,10 @@ namespace UnityEngine.Experimental.Video
 {
 	[StaticAccessor("VideoClipPlayableBindings", StaticAccessorType.DoubleColon)]
 	[NativeHeader("Runtime/Director/Core/HPlayable.h")]
-	[NativeHeader("Modules/Video/Public/Director/VideoClipPlayable.h")]
-	[NativeHeader("Modules/Video/Public/ScriptBindings/VideoClipPlayable.bindings.h")]
-	[NativeHeader("Modules/Video/Public/VideoClip.h")]
 	[RequiredByNativeCode]
+	[NativeHeader("Modules/Video/Public/Director/VideoClipPlayable.h")]
+	[NativeHeader("Modules/Video/Public/VideoClip.h")]
+	[NativeHeader("Modules/Video/Public/ScriptBindings/VideoClipPlayable.bindings.h")]
 	public struct VideoClipPlayable : IPlayable, IEquatable<VideoClipPlayable>
 	{
 		public static VideoClipPlayable Create(PlayableGraph graph, VideoClip clip, bool looping)

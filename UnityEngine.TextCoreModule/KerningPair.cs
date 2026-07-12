@@ -82,8 +82,8 @@ namespace UnityEngine.TextCore
 		[SerializeField]
 		private GlyphValueRecord m_FirstGlyphAdjustments;
 
-		[FormerlySerializedAs("AscII_Right")]
 		[SerializeField]
+		[FormerlySerializedAs("AscII_Right")]
 		private uint m_SecondGlyph;
 
 		[SerializeField]

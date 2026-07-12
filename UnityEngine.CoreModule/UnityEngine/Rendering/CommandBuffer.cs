@@ -12,11 +12,11 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Rendering
 {
+	[NativeType("Runtime/Graphics/CommandBuffer/RenderingCommandBuffer.h")]
 	[UsedByNativeCode]
-	[NativeHeader("Runtime/Export/Graphics/RenderingCommandBuffer.bindings.h")]
 	[NativeHeader("Runtime/Shaders/ComputeShader.h")]
 	[NativeHeader("Runtime/Shaders/RayTracingShader.h")]
-	[NativeType("Runtime/Graphics/CommandBuffer/RenderingCommandBuffer.h")]
+	[NativeHeader("Runtime/Export/Graphics/RenderingCommandBuffer.bindings.h")]
 	public class CommandBuffer : IDisposable
 	{
 		public void ConvertTexture(RenderTargetIdentifier src, RenderTargetIdentifier dst)
@@ -874,6 +874,18 @@ namespace UnityEngine.Rendering
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void SetGlobalMatrixArray(int nameID, Matrix4x4[] values);
 
+		[FreeFunction("RenderingCommandBuffer_Bindings::SetLateLatchProjectionMatrices", HasExplicitThis = true, ThrowsException = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern void SetLateLatchProjectionMatrices(Matrix4x4[] projectionMat);
+
+		[FreeFunction("RenderingCommandBuffer_Bindings::MarkLateLatchMatrixShaderPropertyID", HasExplicitThis = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern void MarkLateLatchMatrixShaderPropertyID(CameraLateLatchMatrixType matrixPropertyType, int shaderPropertyID);
+
+		[FreeFunction("RenderingCommandBuffer_Bindings::UnmarkLateLatchMatrix", HasExplicitThis = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern void UnmarkLateLatchMatrix(CameraLateLatchMatrixType matrixPropertyType);
+
 		[FreeFunction("RenderingCommandBuffer_Bindings::SetGlobalTexture_Impl", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void SetGlobalTexture_Impl(int nameID, ref RenderTargetIdentifier rt, RenderTextureSubElement element);
@@ -1303,8 +1315,8 @@ namespace UnityEngine.Rendering
 			this.InternalSetComputeBufferNativeData(buffer, (IntPtr)data.GetUnsafeReadOnlyPtr<T>(), nativeBufferStartIndex, graphicsBufferStartIndex, count, UnsafeUtility.SizeOf<T>());
 		}
 
-		[SecurityCritical]
 		[FreeFunction(Name = "RenderingCommandBuffer_Bindings::InternalSetComputeBufferNativeData", HasExplicitThis = true, ThrowsException = true)]
+		[SecurityCritical]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void InternalSetComputeBufferNativeData([NotNull("ArgumentNullException")] ComputeBuffer buffer, IntPtr data, int nativeBufferStartIndex, int graphicsBufferStartIndex, int count, int elemSize);
 

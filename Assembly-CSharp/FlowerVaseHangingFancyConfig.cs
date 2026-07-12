@@ -27,6 +27,8 @@ public class FlowerVaseHangingFancyConfig : IBuildingConfig
 		buildingDef.ViewMode = OverlayModes.Decor.ID;
 		buildingDef.AudioCategory = "Glass";
 		buildingDef.AudioSize = "large";
+		buildingDef.SceneLayer = Grid.SceneLayer.BuildingBack;
+		buildingDef.ForegroundLayer = Grid.SceneLayer.BuildingUse;
 		buildingDef.GenerateOffsets(1, 1);
 		return buildingDef;
 	}
@@ -37,7 +39,7 @@ public class FlowerVaseHangingFancyConfig : IBuildingConfig
 		Prioritizable.AddRef(go);
 		PlantablePlot plantablePlot = go.AddOrGet<PlantablePlot>();
 		plantablePlot.AddDepositTag(GameTags.DecorSeed);
-		plantablePlot.plantLayer = Grid.SceneLayer.BuildingFront;
+		plantablePlot.plantLayer = Grid.SceneLayer.BuildingUse;
 		plantablePlot.occupyingObjectVisualOffset = new Vector3(0f, -0.45f, 0f);
 		go.AddOrGet<FlowerVase>();
 		go.GetComponent<KPrefabID>().AddTag(GameTags.Decoration, false);

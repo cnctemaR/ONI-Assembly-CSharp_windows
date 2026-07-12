@@ -81,10 +81,11 @@ public class GridVisibleArea
 	public static GridArea GetVisibleArea()
 	{
 		GridArea gridArea = default(GridArea);
-		if (Camera.main != null)
+		Camera mainCamera = Game.Instance.MainCamera;
+		if (mainCamera != null)
 		{
-			Vector3 vector = Camera.main.ViewportToWorldPoint(new Vector3(1f, 1f, Camera.main.transform.GetPosition().z));
-			Vector3 vector2 = Camera.main.ViewportToWorldPoint(new Vector3(0f, 0f, Camera.main.transform.GetPosition().z));
+			Vector3 vector = mainCamera.ViewportToWorldPoint(new Vector3(1f, 1f, mainCamera.transform.GetPosition().z));
+			Vector3 vector2 = mainCamera.ViewportToWorldPoint(new Vector3(0f, 0f, mainCamera.transform.GetPosition().z));
 			if (CameraController.Instance != null)
 			{
 				Vector2I vector2I;

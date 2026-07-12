@@ -4,8 +4,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[RequiredByNativeCode(Optional = true, GenerateProxy = true)]
 	[NativeClass("PhysicsJobOptions2D", "struct PhysicsJobOptions2D;")]
+	[RequiredByNativeCode(Optional = true, GenerateProxy = true)]
 	[NativeHeader("Modules/Physics2D/Public/Physics2DSettings.h")]
 	public struct PhysicsJobOptions2D
 	{

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using Database;
 using Delaunay.Geo;
 using Klei;
@@ -239,7 +240,7 @@ namespace ProcGenGame
 
 		public WorldGen(string worldName, List<string> chosenTraits, bool assertMissingTraits)
 		{
-			WorldGen.LoadSettings();
+			WorldGen.LoadSettings(false);
 			this.Settings = new WorldGenSettings(worldName, chosenTraits, assertMissingTraits);
 			this.data = new Data();
 			this.data.chunkEdgeSize = this.Settings.GetIntSetting("ChunkEdgeSize");
@@ -248,7 +249,7 @@ namespace ProcGenGame
 
 		public WorldGen(string worldName, Data data, Dictionary<string, object> stats, List<string> chosenTraits, bool assertMissingTraits)
 		{
-			WorldGen.LoadSettings();
+			WorldGen.LoadSettings(false);
 			this.Settings = new WorldGenSettings(worldName, chosenTraits, assertMissingTraits);
 			this.data = data;
 			this.stats = stats;
@@ -267,7 +268,26 @@ namespace ProcGenGame
 			this.wasLoaded = false;
 		}
 
-		public static void LoadSettings()
+		public static void LoadSettings(bool in_async_thread = false)
+		{
+			bool is_playing = Application.isPlaying;
+			if (in_async_thread)
+			{
+				WorldGen.loadSettingsTask = Task.Run(delegate
+				{
+					WorldGen.LoadSettings_Internal(is_playing);
+				});
+				return;
+			}
+			if (WorldGen.loadSettingsTask != null)
+			{
+				WorldGen.loadSettingsTask.Wait();
+				WorldGen.loadSettingsTask = null;
+			}
+			WorldGen.LoadSettings_Internal(is_playing);
+		}
+
+		private static void LoadSettings_Internal(bool is_playing)
 		{
 			ListPool<YamlIO.Error, WorldGen>.PooledList pooledList = ListPool<YamlIO.Error, WorldGen>.Allocate();
 			if (SettingsCache.LoadFiles(pooledList))
@@ -275,7 +295,7 @@ namespace ProcGenGame
 				TemplateCache.Init();
 			}
 			CustomGameSettings.Instance != null;
-			if (Application.isPlaying)
+			if (is_playing)
 			{
 				Global.Instance.modManager.HandleErrors(pooledList);
 			}
@@ -458,7 +478,7 @@ namespace ProcGenGame
 			this.successCallbackFn(UI.WORLDGEN.PLACINGCREATURES.key, 1f, WorldGenProgressStages.Stages.PlacingCreatures);
 		}
 
-		private void ReportWorldGenError(Exception e)
+		public void ReportWorldGenError(Exception e)
 		{
 			bool flag = FileSystem.IsModdedFile(SettingsCache.RewriteWorldgenPathYaml(this.Settings.world.filePath));
 			string settingsCoordinate = CustomGameSettings.Instance.GetSettingsCoordinate();
@@ -1218,7 +1238,7 @@ namespace ProcGenGame
 
 		private void DrawWorldBorder(Sim.Cell[] cells, Chunk world, SeededRandom rnd, ref HashSet<int> borderCells, ref List<RectInt> poiBounds, WorldGen.OfflineCallbackFunction updateProgressFn)
 		{
-			WorldGen.<>c__DisplayClass138_0 CS$<>8__locals1 = new WorldGen.<>c__DisplayClass138_0();
+			WorldGen.<>c__DisplayClass140_0 CS$<>8__locals1 = new WorldGen.<>c__DisplayClass140_0();
 			CS$<>8__locals1.world = world;
 			bool boolSetting = this.Settings.GetBoolSetting("DrawWorldBorderForce");
 			int intSetting = this.Settings.GetIntSetting("WorldBorderThickness");
@@ -1768,6 +1788,8 @@ namespace ProcGenGame
 		public bool isStartingWorld;
 
 		public bool isModuleInterior;
+
+		private static Task loadSettingsTask;
 
 		public delegate bool OfflineCallbackFunction(StringKey stringKeyRoot, float completePercent, WorldGenProgressStages.Stages stage);
 

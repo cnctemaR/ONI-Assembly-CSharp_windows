@@ -10,8 +10,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Shaders/ComputeShader.h")]
 	[NativeHeader("Runtime/Export/Shaders/ComputeShader.bindings.h")]
+	[NativeHeader("Runtime/Shaders/ComputeShader.h")]
 	[UsedByNativeCode]
 	public sealed class ComputeBuffer : IDisposable
 	{

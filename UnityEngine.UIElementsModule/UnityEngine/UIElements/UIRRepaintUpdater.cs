@@ -43,7 +43,7 @@ namespace UnityEngine.UIElements
 				bool flag9 = (versionChangeType & VersionChangeType.Opacity) > (VersionChangeType)0;
 				if (flag9)
 				{
-					this.renderChain.UIEOnOpacityChanged(ve);
+					this.renderChain.UIEOnOpacityChanged(ve, false);
 				}
 				bool flag10 = (versionChangeType & VersionChangeType.Repaint) > (VersionChangeType)0;
 				if (flag10)

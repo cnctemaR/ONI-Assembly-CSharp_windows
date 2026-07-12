@@ -8,12 +8,12 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[Il2CppEagerStaticClassConstruction]
-	[RequiredByNativeCode(Optional = true, GenerateProxy = true)]
+	[NativeType(Header = "Runtime/Math/Vector3.h")]
 	[NativeHeader("Runtime/Math/MathScripting.h")]
 	[NativeHeader("Runtime/Math/Vector3.h")]
-	[NativeType(Header = "Runtime/Math/Vector3.h")]
 	[NativeClass("Vector3f")]
+	[RequiredByNativeCode(Optional = true, GenerateProxy = true)]
+	[Il2CppEagerStaticClassConstruction]
 	public struct Vector3 : IEquatable<Vector3>, IFormattable
 	{
 		[FreeFunction("VectorScripting::Slerp", IsThreadSafe = true)]

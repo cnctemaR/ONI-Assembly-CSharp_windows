@@ -20,7 +20,6 @@ public class DetailsScreen : KTabMenu
 		base.ConsumeMouseScroll = true;
 		global::Debug.Assert(DetailsScreen.Instance == null);
 		DetailsScreen.Instance = this;
-		UIRegistry.detailsScreen = this;
 		this.DeactivateSideContent();
 		this.Show(false);
 		base.Subscribe(Game.Instance.gameObject, -1503271301, new Action<object>(this.OnSelectObject));
@@ -410,6 +409,10 @@ public class DetailsScreen : KTabMenu
 	public void DeselectAndClose()
 	{
 		KMonoBehaviour.PlaySound(GlobalAssets.GetSound("Back", false));
+		if (this.GetActiveTab() != null)
+		{
+			this.GetActiveTab().SetTarget(null);
+		}
 		SelectTool.Instance.Select(null, false);
 		ClusterMapSelectTool.Instance.Select(null, false);
 		if (this.target == null)

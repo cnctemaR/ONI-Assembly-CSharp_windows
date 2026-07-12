@@ -7,11 +7,11 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Audio
 {
+	[NativeHeader("Modules/Audio/Public/ScriptBindings/AudioClipPlayable.bindings.h")]
+	[NativeHeader("Modules/Audio/Public/Director/AudioClipPlayable.h")]
+	[NativeHeader("Runtime/Director/Core/HPlayable.h")]
 	[StaticAccessor("AudioClipPlayableBindings", StaticAccessorType.DoubleColon)]
 	[RequiredByNativeCode]
-	[NativeHeader("Runtime/Director/Core/HPlayable.h")]
-	[NativeHeader("Modules/Audio/Public/Director/AudioClipPlayable.h")]
-	[NativeHeader("Modules/Audio/Public/ScriptBindings/AudioClipPlayable.bindings.h")]
 	public struct AudioClipPlayable : IPlayable, IEquatable<AudioClipPlayable>
 	{
 		public static AudioClipPlayable Create(PlayableGraph graph, AudioClip clip, bool looping)
@@ -141,8 +141,8 @@ namespace UnityEngine.Audio
 			AudioClipPlayable.SetSpatialBlendInternal(ref this.m_Handle, value);
 		}
 
-		[Obsolete("IsPlaying() has been deprecated. Use IsChannelPlaying() instead (UnityUpgradable) -> IsChannelPlaying()", true)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
+		[Obsolete("IsPlaying() has been deprecated. Use IsChannelPlaying() instead (UnityUpgradable) -> IsChannelPlaying()", true)]
 		public bool IsPlaying()
 		{
 			return this.IsChannelPlaying();

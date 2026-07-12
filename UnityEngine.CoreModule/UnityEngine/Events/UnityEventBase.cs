@@ -18,6 +18,7 @@ namespace UnityEngine.Events
 
 		void ISerializationCallbackReceiver.OnBeforeSerialize()
 		{
+			this.DirtyPersistentCalls();
 		}
 
 		void ISerializationCallbackReceiver.OnAfterDeserialize()

@@ -101,8 +101,8 @@ public class MinionStartingStats : ITelepadDeliverable
 		Trait trait2 = Db.Get().traits.Get(this.personality.joyTrait);
 		this.joyTrait = trait2;
 		this.stickerType = this.personality.stickerType;
-		Trait trait3 = Db.Get().traits.Get(this.personality.congenitaltrait);
-		if (trait3.Name == "None")
+		Trait trait3 = Db.Get().traits.TryGet(this.personality.congenitaltrait);
+		if (trait3 == null || trait3.Name == "None")
 		{
 			this.congenitaltrait = null;
 		}

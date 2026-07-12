@@ -7,10 +7,10 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
+	[StaticAccessor("GetPhysicsManager2D()", StaticAccessorType.Arrow)]
 	[NativeHeader("Physics2DScriptingClasses.h")]
 	[NativeHeader("Modules/Physics2D/PhysicsManager2D.h")]
 	[NativeHeader("Physics2DScriptingClasses.h")]
-	[StaticAccessor("GetPhysicsManager2D()", StaticAccessorType.Arrow)]
 	public class Physics2D
 	{
 		public static PhysicsScene2D defaultPhysicsScene
@@ -352,10 +352,10 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void IgnoreCollision([NotNull("ArgumentNullException")] [Writable] Collider2D collider1, [Writable] [NotNull("ArgumentNullException")] Collider2D collider2, [DefaultValue("true")] bool ignore);
 
-		[NativeMethod("GetIgnoreCollision_Binding")]
 		[StaticAccessor("PhysicsScene2D", StaticAccessorType.DoubleColon)]
+		[NativeMethod("GetIgnoreCollision_Binding")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern bool GetIgnoreCollision([Writable] [NotNull("ArgumentNullException")] Collider2D collider1, [NotNull("ArgumentNullException")] [Writable] Collider2D collider2);
+		public static extern bool GetIgnoreCollision([NotNull("ArgumentNullException")] [Writable] Collider2D collider1, [NotNull("ArgumentNullException")] [Writable] Collider2D collider2);
 
 		[ExcludeFromDocs]
 		public static void IgnoreLayerCollision(int layer1, int layer2)
@@ -413,8 +413,8 @@ namespace UnityEngine
 			Physics2D.SetLayerCollisionMask_Internal(layer, layerMask);
 		}
 
-		[StaticAccessor("GetPhysics2DSettings()")]
 		[NativeMethod("SetLayerCollisionMask")]
+		[StaticAccessor("GetPhysics2DSettings()")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void SetLayerCollisionMask_Internal(int layer, int layerMask);
 
@@ -435,7 +435,7 @@ namespace UnityEngine
 
 		[StaticAccessor("PhysicsQuery2D", StaticAccessorType.DoubleColon)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern bool IsTouching([NotNull("ArgumentNullException")] [Writable] Collider2D collider1, [NotNull("ArgumentNullException")] [Writable] Collider2D collider2);
+		public static extern bool IsTouching([NotNull("ArgumentNullException")] [Writable] Collider2D collider1, [Writable] [NotNull("ArgumentNullException")] Collider2D collider2);
 
 		public static bool IsTouching([Writable] Collider2D collider1, [Writable] Collider2D collider2, ContactFilter2D contactFilter)
 		{
@@ -469,7 +469,7 @@ namespace UnityEngine
 
 		[StaticAccessor("PhysicsQuery2D", StaticAccessorType.DoubleColon)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern bool IsTouchingLayers([Writable] [NotNull("ArgumentNullException")] Collider2D collider, [DefaultValue("Physics2D.AllLayers")] int layerMask);
+		public static extern bool IsTouchingLayers([NotNull("ArgumentNullException")] [Writable] Collider2D collider, [DefaultValue("Physics2D.AllLayers")] int layerMask);
 
 		public static ColliderDistance2D Distance([Writable] Collider2D colliderA, [Writable] Collider2D colliderB)
 		{
@@ -749,8 +749,8 @@ namespace UnityEngine
 			return Physics2D.RaycastAll_Internal(Physics2D.defaultPhysicsScene, origin, direction, distance, contactFilter2D);
 		}
 
-		[StaticAccessor("PhysicsQuery2D", StaticAccessorType.DoubleColon)]
 		[NativeMethod("RaycastAll_Binding")]
+		[StaticAccessor("PhysicsQuery2D", StaticAccessorType.DoubleColon)]
 		private static RaycastHit2D[] RaycastAll_Internal(PhysicsScene2D physicsScene, Vector2 origin, Vector2 direction, float distance, ContactFilter2D contactFilter)
 		{
 			return Physics2D.RaycastAll_Internal_Injected(ref physicsScene, ref origin, ref direction, distance, ref contactFilter);
@@ -838,8 +838,8 @@ namespace UnityEngine
 			return Physics2D.CircleCastAll_Internal(Physics2D.defaultPhysicsScene, origin, radius, direction, distance, contactFilter2D);
 		}
 
-		[StaticAccessor("PhysicsQuery2D", StaticAccessorType.DoubleColon)]
 		[NativeMethod("CircleCastAll_Binding")]
+		[StaticAccessor("PhysicsQuery2D", StaticAccessorType.DoubleColon)]
 		private static RaycastHit2D[] CircleCastAll_Internal(PhysicsScene2D physicsScene, Vector2 origin, float radius, Vector2 direction, float distance, ContactFilter2D contactFilter)
 		{
 			return Physics2D.CircleCastAll_Internal_Injected(ref physicsScene, ref origin, radius, ref direction, distance, ref contactFilter);
@@ -1060,8 +1060,8 @@ namespace UnityEngine
 			return Physics2D.CapsuleCastAll_Internal(Physics2D.defaultPhysicsScene, origin, size, capsuleDirection, angle, direction, distance, contactFilter2D);
 		}
 
-		[StaticAccessor("PhysicsQuery2D", StaticAccessorType.DoubleColon)]
 		[NativeMethod("CapsuleCastAll_Binding")]
+		[StaticAccessor("PhysicsQuery2D", StaticAccessorType.DoubleColon)]
 		private static RaycastHit2D[] CapsuleCastAll_Internal(PhysicsScene2D physicsScene, Vector2 origin, Vector2 size, CapsuleDirection2D capsuleDirection, float angle, Vector2 direction, float distance, ContactFilter2D contactFilter)
 		{
 			return Physics2D.CapsuleCastAll_Internal_Injected(ref physicsScene, ref origin, ref size, capsuleDirection, angle, ref direction, distance, ref contactFilter);
@@ -1242,8 +1242,8 @@ namespace UnityEngine
 			return Physics2D.OverlapPointAll_Internal(Physics2D.defaultPhysicsScene, point, contactFilter2D);
 		}
 
-		[StaticAccessor("PhysicsQuery2D", StaticAccessorType.DoubleColon)]
 		[NativeMethod("OverlapPointAll_Binding")]
+		[StaticAccessor("PhysicsQuery2D", StaticAccessorType.DoubleColon)]
 		private static Collider2D[] OverlapPointAll_Internal(PhysicsScene2D physicsScene, Vector2 point, ContactFilter2D contactFilter)
 		{
 			return Physics2D.OverlapPointAll_Internal_Injected(ref physicsScene, ref point, ref contactFilter);
@@ -1338,8 +1338,8 @@ namespace UnityEngine
 			return Physics2D.OverlapCircleAll_Internal(Physics2D.defaultPhysicsScene, point, radius, contactFilter2D);
 		}
 
-		[StaticAccessor("PhysicsQuery2D", StaticAccessorType.DoubleColon)]
 		[NativeMethod("OverlapCircleAll_Binding")]
+		[StaticAccessor("PhysicsQuery2D", StaticAccessorType.DoubleColon)]
 		private static Collider2D[] OverlapCircleAll_Internal(PhysicsScene2D physicsScene, Vector2 point, float radius, ContactFilter2D contactFilter)
 		{
 			return Physics2D.OverlapCircleAll_Internal_Injected(ref physicsScene, ref point, radius, ref contactFilter);
@@ -1434,8 +1434,8 @@ namespace UnityEngine
 			return Physics2D.OverlapBoxAll_Internal(Physics2D.defaultPhysicsScene, point, size, angle, contactFilter2D);
 		}
 
-		[NativeMethod("OverlapBoxAll_Binding")]
 		[StaticAccessor("PhysicsQuery2D", StaticAccessorType.DoubleColon)]
+		[NativeMethod("OverlapBoxAll_Binding")]
 		private static Collider2D[] OverlapBoxAll_Internal(PhysicsScene2D physicsScene, Vector2 point, Vector2 size, float angle, ContactFilter2D contactFilter)
 		{
 			return Physics2D.OverlapBoxAll_Internal_Injected(ref physicsScene, ref point, ref size, angle, ref contactFilter);
@@ -1717,15 +1717,15 @@ namespace UnityEngine
 			return Physics2D.GetColliderContactsArray_Injected(collider, ref contactFilter, results);
 		}
 
-		[NativeMethod("GetColliderColliderContactsArray_Binding")]
 		[StaticAccessor("PhysicsQuery2D", StaticAccessorType.DoubleColon)]
+		[NativeMethod("GetColliderColliderContactsArray_Binding")]
 		private static int GetColliderColliderContactsArray([NotNull("ArgumentNullException")] Collider2D collider1, [NotNull("ArgumentNullException")] Collider2D collider2, ContactFilter2D contactFilter, [NotNull("ArgumentNullException")] ContactPoint2D[] results)
 		{
 			return Physics2D.GetColliderColliderContactsArray_Injected(collider1, collider2, ref contactFilter, results);
 		}
 
-		[StaticAccessor("PhysicsQuery2D", StaticAccessorType.DoubleColon)]
 		[NativeMethod("GetRigidbodyContactsArray_Binding")]
+		[StaticAccessor("PhysicsQuery2D", StaticAccessorType.DoubleColon)]
 		private static int GetRigidbodyContactsArray([NotNull("ArgumentNullException")] Rigidbody2D rigidbody, ContactFilter2D contactFilter, [NotNull("ArgumentNullException")] ContactPoint2D[] results)
 		{
 			return Physics2D.GetRigidbodyContactsArray_Injected(rigidbody, ref contactFilter, results);
@@ -1790,29 +1790,29 @@ namespace UnityEngine
 			return Physics2D.GetRigidbodyContactsCollidersOnlyList(rigidbody, contactFilter, colliders);
 		}
 
-		[NativeMethod("GetColliderContactsList_Binding")]
 		[StaticAccessor("PhysicsQuery2D", StaticAccessorType.DoubleColon)]
+		[NativeMethod("GetColliderContactsList_Binding")]
 		private static int GetColliderContactsList([NotNull("ArgumentNullException")] Collider2D collider, ContactFilter2D contactFilter, [NotNull("ArgumentNullException")] List<ContactPoint2D> results)
 		{
 			return Physics2D.GetColliderContactsList_Injected(collider, ref contactFilter, results);
 		}
 
-		[StaticAccessor("PhysicsQuery2D", StaticAccessorType.DoubleColon)]
 		[NativeMethod("GetColliderColliderContactsList_Binding")]
+		[StaticAccessor("PhysicsQuery2D", StaticAccessorType.DoubleColon)]
 		private static int GetColliderColliderContactsList([NotNull("ArgumentNullException")] Collider2D collider1, [NotNull("ArgumentNullException")] Collider2D collider2, ContactFilter2D contactFilter, [NotNull("ArgumentNullException")] List<ContactPoint2D> results)
 		{
 			return Physics2D.GetColliderColliderContactsList_Injected(collider1, collider2, ref contactFilter, results);
 		}
 
-		[NativeMethod("GetRigidbodyContactsList_Binding")]
 		[StaticAccessor("PhysicsQuery2D", StaticAccessorType.DoubleColon)]
+		[NativeMethod("GetRigidbodyContactsList_Binding")]
 		private static int GetRigidbodyContactsList([NotNull("ArgumentNullException")] Rigidbody2D rigidbody, ContactFilter2D contactFilter, [NotNull("ArgumentNullException")] List<ContactPoint2D> results)
 		{
 			return Physics2D.GetRigidbodyContactsList_Injected(rigidbody, ref contactFilter, results);
 		}
 
-		[NativeMethod("GetColliderContactsCollidersOnlyList_Binding")]
 		[StaticAccessor("PhysicsQuery2D", StaticAccessorType.DoubleColon)]
+		[NativeMethod("GetColliderContactsCollidersOnlyList_Binding")]
 		private static int GetColliderContactsCollidersOnlyList([NotNull("ArgumentNullException")] Collider2D collider, ContactFilter2D contactFilter, [NotNull("ArgumentNullException")] List<Collider2D> results)
 		{
 			return Physics2D.GetColliderContactsCollidersOnlyList_Injected(collider, ref contactFilter, results);

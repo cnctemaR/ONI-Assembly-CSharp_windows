@@ -905,11 +905,11 @@ namespace STRINGS
 
 				public static LocString EFFECT_BABBLE_TOOLTIP = "Duplicants will gain {amount} {attrib} if they chat only with themselves.";
 
-				public static LocString EFFECT_CHAT = "{attrib}: {amount} (At least one duplicant)";
+				public static LocString EFFECT_CHAT = "{attrib}: {amount} (At least one Duplicant)";
 
 				public static LocString EFFECT_CHAT_TOOLTIP = "Duplicants will gain {amount} {attrib} if they chat with at least one other Duplicant.";
 
-				public static LocString EFFECT_LONG_DISTANCE = "{attrib}: {amount} (At least one duplicant across space)";
+				public static LocString EFFECT_LONG_DISTANCE = "{attrib}: {amount} (At least one Duplicant across space)";
 
 				public static LocString EFFECT_LONG_DISTANCE_TOOLTIP = "Duplicants will gain {amount} {attrib} if they chat with at least one other Duplicant across space.";
 			}
@@ -3323,7 +3323,7 @@ namespace STRINGS
 
 			public class CLUSTERTELESCOPE
 			{
-				public static LocString NAME = UI.FormatAsLink("Telescope", "TELESCOPE");
+				public static LocString NAME = UI.FormatAsLink("Telescope", "CLUSTERTELESCOPE");
 
 				public static LocString DESC = "Telescopes are necessary for studying space, allowing rocket travel to other worlds.";
 
@@ -3334,7 +3334,7 @@ namespace STRINGS
 
 			public class CLUSTERTELESCOPEENCLOSED
 			{
-				public static LocString NAME = UI.FormatAsLink("Enclosed Telescope", "TELESCOPE");
+				public static LocString NAME = UI.FormatAsLink("Enclosed Telescope", "CLUSTERTELESCOPEENCLOSED");
 
 				public static LocString DESC = "Telescopes are necessary for studying space, allowing rocket travel to other worlds.";
 
@@ -3466,9 +3466,16 @@ namespace STRINGS
 			{
 				public static LocString NAME = UI.FormatAsLink("Shearing Station", "SHEARINGSTATION");
 
-				public static LocString DESC = "Shearing stations allow " + UI.FormatAsLink("Dreckos", "DRECKO") + " to be safely sheared for useful raw materials.";
+				public static LocString DESC = string.Concat(new string[]
+				{
+					"Shearing stations allow ",
+					UI.FormatAsLink("Dreckos", "DRECKO"),
+					" and ",
+					UI.FormatAsLink("Delecta Voles", "MOLEDELICACY"),
+					" to be safely sheared for useful raw materials."
+				});
 
-				public static LocString EFFECT = "Allows the assigned Rancher to shear Dreckos.";
+				public static LocString EFFECT = "Allows the assigned Rancher to shear Dreckos and Delecta Voles.";
 			}
 
 			public class OXYGENMASKSTATION
@@ -3675,6 +3682,22 @@ namespace STRINGS
 				public static LocString DESC = "Exosuits can be filled with oxygen to allow Duplicants to safely enter hazardous areas.";
 
 				public static LocString EFFECT = "Forges protective " + UI.FormatAsLink("Exosuits", "EXOSUIT") + " for Duplicants to wear.\n\nDuplicants will not fabricate items unless recipes are queued.";
+			}
+
+			public class CLOTHINGALTERATIONSTATION
+			{
+				public static LocString NAME = UI.FormatAsLink("Clothing Refashionator", "CLOTHINGALTERATIONSTATION");
+
+				public static LocString DESC = "Allows skilled Duplicants to add extra personal pizzazz to their wardrobe.";
+
+				public static LocString EFFECT = string.Concat(new string[]
+				{
+					"Upgrades ",
+					UI.FormatAsLink("Snazzy Suits", "FUNKY_VEST"),
+					" into ",
+					UI.FormatAsLink("Primo Garb", "CUSTOM_CLOTHING"),
+					".\n\nDuplicants will not fabricate items unless recipes are queued."
+				});
 			}
 
 			public class CLOTHINGFABRICATOR
@@ -5082,7 +5105,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = UI.FormatAsLink("Critter Sensor", "LOGICCRITTERCOUNTSENSOR");
 
-				public static LocString DESC = "Detecting critter populations can help adjust their automated feeding and care regiments.";
+				public static LocString DESC = "Detecting critter populations can help adjust their automated feeding and care regimens.";
 
 				public static LocString EFFECT = string.Concat(new string[]
 				{
@@ -5749,7 +5772,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = UI.FormatAsLink("Auto-Sweeper", "SOLIDTRANSFERARM");
 
-				public static LocString DESC = "An auto-sweeper's range can be viewed at any time by clicking on the building.";
+				public static LocString DESC = "An auto-sweeper's range can be viewed at any time by  " + UI.CLICK(UI.ClickType.clicking) + " on the building.";
 
 				public static LocString EFFECT = string.Concat(new string[]
 				{

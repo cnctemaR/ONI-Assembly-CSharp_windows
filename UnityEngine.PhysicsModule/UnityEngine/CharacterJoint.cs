@@ -4,8 +4,8 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	[NativeClass("Unity::CharacterJoint")]
 	[NativeHeader("Modules/Physics/CharacterJoint.h")]
+	[NativeClass("Unity::CharacterJoint")]
 	public class CharacterJoint : Joint
 	{
 		public Vector3 swingAxis

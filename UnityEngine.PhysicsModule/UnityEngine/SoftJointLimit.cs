@@ -67,8 +67,8 @@ namespace UnityEngine
 			}
 		}
 
-		[EditorBrowsable(EditorBrowsableState.Never)]
 		[Obsolete("Use SoftJointLimit.bounciness instead", true)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		public float bouncyness
 		{
 			get

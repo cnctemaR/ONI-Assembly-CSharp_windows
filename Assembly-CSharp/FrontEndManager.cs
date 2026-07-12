@@ -43,6 +43,12 @@ public class FrontEndManager : KMonoBehaviour
 		}
 	}
 
+	protected override void OnForcedCleanUp()
+	{
+		FrontEndManager.Instance = null;
+		base.OnForcedCleanUp();
+	}
+
 	private void LateUpdate()
 	{
 		if (global::Debug.developerConsoleVisible)

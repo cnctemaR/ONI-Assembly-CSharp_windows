@@ -100,8 +100,8 @@ namespace UnityEngine
 			return this.QueryIndices(visible, distanceIndex, CullingQueryOptions.Normal, result, firstIndex);
 		}
 
-		[NativeThrows]
 		[FreeFunction("CullingGroup_Bindings::QueryIndices", HasExplicitThis = true)]
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern int QueryIndices(bool visible, int distanceIndex, CullingQueryOptions options, int[] result, int firstIndex);
 
@@ -110,8 +110,8 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern bool IsVisible(int index);
 
-		[FreeFunction("CullingGroup_Bindings::GetDistance", HasExplicitThis = true)]
 		[NativeThrows]
+		[FreeFunction("CullingGroup_Bindings::GetDistance", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern int GetDistance(int index);
 

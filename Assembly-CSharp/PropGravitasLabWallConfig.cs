@@ -32,6 +32,7 @@ public class PropGravitasLabWallConfig : IBuildingConfig
 		buildingDef.DefaultAnimState = "on";
 		buildingDef.ObjectLayer = ObjectLayer.Backwall;
 		buildingDef.SceneLayer = Grid.SceneLayer.Backwall;
+		buildingDef.ShowInBuildMenu = false;
 		return buildingDef;
 	}
 

@@ -16,19 +16,21 @@ public class Staterpillar : KMonoBehaviour
 
 	public void SpawnGenerator(int targetCell)
 	{
-		KPrefabID kprefabID = this.generatorRef.Get();
+		StaterpillarGenerator staterpillarGenerator = this.generatorRef.Get();
 		GameObject gameObject = null;
-		if (kprefabID != null)
+		if (staterpillarGenerator != null)
 		{
-			gameObject = kprefabID.gameObject;
+			gameObject = staterpillarGenerator.gameObject;
 		}
 		if (!gameObject)
 		{
 			gameObject = this.generatorDef.Build(targetCell, Orientation.R180, null, this.generatorElement, base.gameObject.GetComponent<PrimaryElement>().Temperature, true, -1f);
+			StaterpillarGenerator component = gameObject.GetComponent<StaterpillarGenerator>();
+			component.parent = new Ref<Staterpillar>(this);
+			this.generatorRef = new Ref<StaterpillarGenerator>(component);
 			gameObject.SetActive(true);
-			this.generatorRef = new Ref<KPrefabID>(gameObject.GetComponent<KPrefabID>());
 			gameObject.GetComponent<BuildingCellVisualizer>().enabled = false;
-			gameObject.GetComponent<StaterpillarGenerator>().enabled = false;
+			component.enabled = false;
 		}
 		Attributes attributes = gameObject.gameObject.GetAttributes();
 		bool flag = base.gameObject.GetSMI<WildnessMonitor.Instance>().wildness.value > 0f;
@@ -81,7 +83,7 @@ public class Staterpillar : KMonoBehaviour
 
 	public bool IsConnected()
 	{
-		return this.GetGenerator().GetComponent<Generator>().CircuitID != ushort.MaxValue;
+		return this.GetGenerator().CircuitID != ushort.MaxValue;
 	}
 
 	public bool IsNotConnected()
@@ -91,35 +93,34 @@ public class Staterpillar : KMonoBehaviour
 
 	public void EnableGenerator()
 	{
-		KPrefabID generator = this.GetGenerator();
-		generator.GetComponent<StaterpillarGenerator>().enabled = true;
+		StaterpillarGenerator generator = this.GetGenerator();
+		generator.enabled = true;
 		generator.GetComponent<BuildingCellVisualizer>().enabled = true;
 	}
 
 	public void DestroyGenerator()
 	{
-		KPrefabID generator = this.GetGenerator();
+		StaterpillarGenerator generator = this.GetGenerator();
 		if (generator != null)
 		{
 			this.generatorRef.Set(null);
 			GameScheduler.Instance.ScheduleNextFrame("Destroy Staterpillar Generator", delegate(object o)
 			{
-				Util.KDestroyGameObject(generator.gameObject);
+				if (generator != null)
+				{
+					Util.KDestroyGameObject(generator.gameObject);
+				}
 			}, null, null);
 		}
 	}
 
-	public KPrefabID GetGenerator()
+	public StaterpillarGenerator GetGenerator()
 	{
-		if (!(this.generatorRef.Get() != null))
-		{
-			return null;
-		}
 		return this.generatorRef.Get();
 	}
 
 	[Serialize]
-	private Ref<KPrefabID> generatorRef = new Ref<KPrefabID>();
+	private Ref<StaterpillarGenerator> generatorRef = new Ref<StaterpillarGenerator>();
 
 	private AttributeModifier wildMod = new AttributeModifier(Db.Get().Attributes.GeneratorOutput.Id, -75f, BUILDINGS.PREFABS.STATERPILLARGENERATOR.MODIFIERS.WILD, false, false, true);
 

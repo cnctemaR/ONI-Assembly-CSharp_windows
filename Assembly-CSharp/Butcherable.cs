@@ -7,7 +7,7 @@ public class Butcherable : Workable, ISaveLoadable
 {
 	public void SetDrops(string[] drops)
 	{
-		this.Drops = drops;
+		this.drops = drops;
 	}
 
 	protected override void OnPrefabInit()
@@ -91,9 +91,9 @@ public class Butcherable : Workable, ISaveLoadable
 		{
 			SelectTool.Instance.Select(null, false);
 		}
-		for (int i = 0; i < this.Drops.Length; i++)
+		for (int i = 0; i < this.drops.Length; i++)
 		{
-			GameObject gameObject = Scenario.SpawnPrefab(this.GetDropSpawnLocation(), 0, 0, this.Drops[i], Grid.SceneLayer.Ore);
+			GameObject gameObject = Scenario.SpawnPrefab(this.GetDropSpawnLocation(), 0, 0, this.drops[i], Grid.SceneLayer.Ore);
 			gameObject.SetActive(true);
 			Edible component2 = gameObject.GetComponent<Edible>();
 			if (component2)
@@ -129,7 +129,7 @@ public class Butcherable : Workable, ISaveLoadable
 
 	private bool butchered;
 
-	public string[] Drops;
+	public string[] drops;
 
 	private Chore chore;
 

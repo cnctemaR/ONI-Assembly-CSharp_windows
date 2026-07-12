@@ -12,8 +12,8 @@ namespace UnityEngine
 	[StructLayout(LayoutKind.Sequential)]
 	public class AsyncOperation : YieldInstruction
 	{
-		[StaticAccessor("AsyncOperationBindings", StaticAccessorType.DoubleColon)]
 		[NativeMethod(IsThreadSafe = true)]
+		[StaticAccessor("AsyncOperationBindings", StaticAccessorType.DoubleColon)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void InternalDestroy(IntPtr ptr);
 

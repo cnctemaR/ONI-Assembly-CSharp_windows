@@ -215,7 +215,7 @@ namespace UnityEngine.UIElements.UIR
 			}
 			this.m_DirtyTracker.dirtyID = this.m_DirtyTracker.dirtyID + 1U;
 			num = 1;
-			renderDataDirtyTypes = RenderDataDirtyTypes.Opacity;
+			renderDataDirtyTypes = RenderDataDirtyTypes.Opacity | RenderDataDirtyTypes.OpacityHierarchy;
 			renderDataDirtyTypes2 = ~renderDataDirtyTypes;
 			for (int j = this.m_DirtyTracker.minDepths[num]; j <= this.m_DirtyTracker.maxDepths[num]; j++)
 			{
@@ -429,7 +429,7 @@ namespace UnityEngine.UIElements.UIR
 				Debug.Assert(ve.renderChainData.isInChain);
 				Debug.Assert(ve.panel == this.panel);
 				this.UIEOnClippingChanged(ve, true);
-				this.UIEOnOpacityChanged(ve);
+				this.UIEOnOpacityChanged(ve, false);
 				this.UIEOnVisualsChanged(ve, true);
 				this.m_StatsElementsAdded += num;
 			}
@@ -452,6 +452,7 @@ namespace UnityEngine.UIElements.UIR
 				RenderEvents.DepthFirstOnChildAdded(this, ve, ve.hierarchy[j], j, false);
 			}
 			this.UIEOnClippingChanged(ve, true);
+			this.UIEOnOpacityChanged(ve, true);
 			this.UIEOnVisualsChanged(ve, true);
 		}
 
@@ -485,7 +486,7 @@ namespace UnityEngine.UIElements.UIR
 			}
 		}
 
-		public void UIEOnOpacityChanged(VisualElement ve)
+		public void UIEOnOpacityChanged(VisualElement ve, bool hierarchical = false)
 		{
 			bool isInChain = ve.renderChainData.isInChain;
 			if (isInChain)
@@ -495,7 +496,7 @@ namespace UnityEngine.UIElements.UIR
 				{
 					throw new InvalidOperationException("VisualElements cannot change opacity under an active visual tree during generateVisualContent callback execution nor during visual tree rendering");
 				}
-				this.m_DirtyTracker.RegisterDirty(ve, RenderDataDirtyTypes.Opacity, 1);
+				this.m_DirtyTracker.RegisterDirty(ve, RenderDataDirtyTypes.Opacity | (hierarchical ? RenderDataDirtyTypes.OpacityHierarchy : RenderDataDirtyTypes.None), 1);
 			}
 		}
 
@@ -907,7 +908,7 @@ namespace UnityEngine.UIElements.UIR
 					this.UIEOnVisualsChanged(visualElement, false);
 				}
 			}
-			this.UIEOnOpacityChanged(this.panel.visualTree);
+			this.UIEOnOpacityChanged(this.panel.visualTree, false);
 		}
 
 		private void OnFontReset(Font font)

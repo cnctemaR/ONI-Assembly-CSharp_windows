@@ -344,7 +344,7 @@ public class LineLayer : GraphLayer
 			if (this.lines[j].PointCount != 0)
 			{
 				Vector2 closestDataToPointOnXAxis = this.lines[j].GetClosestDataToPointOnXAxis(vector);
-				if (!float.IsNaN(closestDataToPointOnXAxis.x) && !float.IsNaN(closestDataToPointOnXAxis.y))
+				if (!float.IsInfinity(closestDataToPointOnXAxis.x) && !float.IsNaN(closestDataToPointOnXAxis.x) && !float.IsInfinity(closestDataToPointOnXAxis.y) && !float.IsNaN(closestDataToPointOnXAxis.y))
 				{
 					this.lines[j].SetPointHighlight(closestDataToPointOnXAxis);
 				}

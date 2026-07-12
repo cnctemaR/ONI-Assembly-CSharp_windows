@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+using Unity.Collections;
 using UnityEngine;
 
 public class SymbolInstanceGpuData
@@ -79,9 +80,9 @@ public class SymbolInstanceGpuData
 		}
 	}
 
-	public void WriteToTexture(byte[] data, int data_idx, int instance_idx)
+	public void WriteToTexture(NativeArray<byte> data, int data_idx, int instance_idx)
 	{
-		Buffer.BlockCopy(this.symbolInstancesConverter.bytes, 0, data, data_idx, this.symbolCount * 8 * 4);
+		NativeArray<byte>.Copy(this.symbolInstancesConverter.bytes, 0, data, data_idx, this.symbolCount * 8 * 4);
 	}
 
 	public const int FLOATS_PER_SYMBOL_INSTANCE = 8;

@@ -10,8 +10,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Graphics/Texture3D.h")]
 	[ExcludeFromPreset]
+	[NativeHeader("Runtime/Graphics/Texture3D.h")]
 	public sealed class Texture3D : Texture
 	{
 		public extern int depth

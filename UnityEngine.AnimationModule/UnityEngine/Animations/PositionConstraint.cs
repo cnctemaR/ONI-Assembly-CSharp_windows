@@ -8,8 +8,8 @@ namespace UnityEngine.Animations
 {
 	[UsedByNativeCode]
 	[RequireComponent(typeof(Transform))]
-	[NativeHeader("Modules/Animation/Constraints/Constraint.bindings.h")]
 	[NativeHeader("Modules/Animation/Constraints/PositionConstraint.h")]
+	[NativeHeader("Modules/Animation/Constraints/Constraint.bindings.h")]
 	public sealed class PositionConstraint : Behaviour, IConstraint, IConstraintInternal
 	{
 		private PositionConstraint()

@@ -5,8 +5,8 @@ using UnityEngine.Scripting.APIUpdating;
 
 namespace UnityEngine.Animations
 {
-	[MovedFrom("UnityEngine.Experimental.Animations")]
 	[NativeHeader("Modules/Animation/Director/AnimationStreamHandles.h")]
+	[MovedFrom("UnityEngine.Experimental.Animations")]
 	public struct PropertyStreamHandle
 	{
 		public bool IsValid(AnimationStream stream)

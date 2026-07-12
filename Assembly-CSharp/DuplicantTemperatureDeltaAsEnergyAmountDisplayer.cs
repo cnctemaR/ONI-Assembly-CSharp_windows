@@ -5,7 +5,7 @@ using STRINGS;
 public class DuplicantTemperatureDeltaAsEnergyAmountDisplayer : StandardAmountDisplayer
 {
 	public DuplicantTemperatureDeltaAsEnergyAmountDisplayer(GameUtil.UnitClass unitClass, GameUtil.TimeSlice timeSlice)
-		: base(unitClass, timeSlice, null)
+		: base(unitClass, timeSlice, null, GameUtil.IdentityDescriptorTense.Normal)
 	{
 	}
 

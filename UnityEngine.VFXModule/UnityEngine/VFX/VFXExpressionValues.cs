@@ -24,8 +24,8 @@ namespace UnityEngine.VFX
 			};
 		}
 
-		[NativeThrows]
 		[NativeName("GetValueFromScript<bool>")]
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern bool GetBool(int nameID);
 
@@ -62,8 +62,8 @@ namespace UnityEngine.VFX
 			return vector;
 		}
 
-		[NativeThrows]
 		[NativeName("GetValueFromScript<Vector4f>")]
+		[NativeThrows]
 		public Vector4 GetVector4(int nameID)
 		{
 			Vector4 vector;

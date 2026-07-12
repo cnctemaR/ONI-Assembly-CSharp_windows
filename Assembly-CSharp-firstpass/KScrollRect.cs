@@ -188,23 +188,7 @@ public class KScrollRect : ScrollRect
 
 	public void AnalogUpdate(Vector2 analogValue)
 	{
-		this.panRight = (this.panLeft = (this.panUp = (this.panDown = false)));
-		if (analogValue.x > 0.25f)
-		{
-			this.panRight = true;
-		}
-		if (analogValue.x < -0.25f)
-		{
-			this.panLeft = true;
-		}
-		if (analogValue.y > 0.25f)
-		{
-			this.panUp = true;
-		}
-		if (analogValue.y < -0.25f)
-		{
-			this.panDown = true;
-		}
+		base.content.anchoredPosition -= analogValue;
 	}
 
 	protected override void OnRectTransformDimensionsChange()

@@ -9,7 +9,7 @@ public class MoleConfig : IEntityConfig
 {
 	public static GameObject CreateMole(string id, string name, string desc, string anim_file, bool is_baby = false)
 	{
-		GameObject gameObject = BaseMoleConfig.BaseMole(id, name, global::STRINGS.CREATURES.SPECIES.MOLE.DESC, "MoleBaseTrait", anim_file, is_baby);
+		GameObject gameObject = BaseMoleConfig.BaseMole(id, name, global::STRINGS.CREATURES.SPECIES.MOLE.DESC, "MoleBaseTrait", anim_file, is_baby, null, 10);
 		gameObject.AddTag(GameTags.Creatures.Digger);
 		EntityTemplates.ExtendEntityToWildCreature(gameObject, MoleTuning.PEN_SIZE_PER_CREATURE);
 		Trait trait = Db.Get().CreateTrait("MoleBaseTrait", name, name, null, false, null, true, true);
@@ -29,6 +29,10 @@ public class MoleConfig : IEntityConfig
 		gameObject.AddOrGetDef<SolidConsumerMonitor.Def>().diet = diet;
 		gameObject.AddOrGetDef<OvercrowdingMonitor.Def>().spaceRequiredPerCreature = 0;
 		gameObject.AddOrGet<LoopingSounds>();
+		foreach (HashedString hashedString in MoleTuning.GINGER_SYMBOL_NAMES)
+		{
+			gameObject.GetComponent<KAnimControllerBase>().SetSymbolVisiblity(hashedString, false);
+		}
 		return gameObject;
 	}
 

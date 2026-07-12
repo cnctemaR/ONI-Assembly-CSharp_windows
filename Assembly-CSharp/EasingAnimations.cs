@@ -5,6 +5,14 @@ using UnityEngine;
 
 public class EasingAnimations : MonoBehaviour
 {
+	public bool IsPlaying
+	{
+		get
+		{
+			return this.animationCoroutine != null;
+		}
+	}
+
 	private void Start()
 	{
 		if (this.animationMap == null || this.animationMap.Count == 0)
@@ -70,6 +78,7 @@ public class EasingAnimations : MonoBehaviour
 			base.transform.localScale = Vector3.one * this.currentAnimation.currentScale;
 			yield return new WaitForEndOfFrame();
 		}
+		this.animationCoroutine = null;
 		if (this.OnAnimationDone != null)
 		{
 			this.OnAnimationDone(this.currentAnimation.name);

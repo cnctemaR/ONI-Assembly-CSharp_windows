@@ -8,8 +8,8 @@ using UnityEngine.Scripting;
 namespace UnityEngine
 {
 	[NativeHeader("Runtime/Graphics/Texture.h")]
-	[UsedByNativeCode]
 	[NativeHeader("Runtime/Streaming/TextureStreamingManager.h")]
+	[UsedByNativeCode]
 	public class Texture : Object
 	{
 		protected Texture()
@@ -346,10 +346,10 @@ namespace UnityEngine
 			}
 			else
 			{
-				bool flag3 = GraphicsFormatUtility.IsCompressedTextureFormat(format);
+				bool flag3 = GraphicsFormatUtility.IsCompressedTextureFormat(format) && GraphicsFormatUtility.CanDecompressFormat(GraphicsFormatUtility.GetGraphicsFormat(format, false));
 				if (flag3)
 				{
-					Debug.LogWarning(string.Format("'{0}' is not supported on this platform. Decompressing texture. Use 'SystemInfo.SupportsTextureFormat' C# API to check format support.", format.ToString()), this);
+					Debug.LogWarning(string.Format("'{0}' is not supported on this platform. Decompressing texture. Use 'SystemInfo.SupportsTextureFormat' C# API to check format support.", format), this);
 					flag2 = true;
 				}
 				else

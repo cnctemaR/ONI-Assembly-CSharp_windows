@@ -185,6 +185,64 @@ namespace STRINGS
 
 					public static LocString DESC = "A snippy little Pokeshell Spawn.\n\nIn time it will mature into a fully grown " + UI.FormatAsLink("Pokeshell", "CRAB") + ".";
 				}
+
+				public class VARIANT_WOOD
+				{
+					public static LocString NAME = UI.FormatAsLink("Oakshelll", "CRABWOOD");
+
+					public static LocString DESC = string.Concat(new string[]
+					{
+						"Oakshells are nonhostile critters that eat ",
+						UI.FormatAsLink("Polluted Dirt", "TOXICSAND"),
+						", ",
+						UI.FormatAsLink("Slime", "SLIMEMOLD"),
+						" and ",
+						UI.FormatAsLink("Rot Piles", "COMPOST"),
+						".\n\nThe shells they leave behind after molting can be crushed into ",
+						UI.FormatAsLink("Lumber", "WOOD"),
+						".\n\nOakshells thrive in ",
+						UI.FormatAsLink("Ethanol", "ETHANOL"),
+						"."
+					});
+
+					public static LocString EGG_NAME = UI.FormatAsLink("Oak Pinch Roe", "CRABWOOD");
+
+					public class BABY
+					{
+						public static LocString NAME = UI.FormatAsLink("Oakshell Spawn", "CRABWOOD");
+
+						public static LocString DESC = "A knotty little Oakshell Spawn.\n\nIn time it will mature into a fully grown " + UI.FormatAsLink("Oakshell", "CRABWOOD") + ".";
+					}
+				}
+
+				public class VARIANT_FRESH_WATER
+				{
+					public static LocString NAME = UI.FormatAsLink("Sanishell", "CRABFRESHWATER");
+
+					public static LocString DESC = string.Concat(new string[]
+					{
+						"Sanishells are nonhostile critters that thrive in  ",
+						UI.FormatAsLink("Water", "WATER"),
+						" and eliminates ",
+						UI.FormatAsLink("Germs", "DISEASE"),
+						" from any liquid it inhabits.\n\nThey eat ",
+						UI.FormatAsLink("Polluted Dirt", "TOXICSAND"),
+						", ",
+						UI.FormatAsLink("Slime", "SLIMEMOLD"),
+						" and ",
+						UI.FormatAsLink("Rot Piles", "COMPOST"),
+						"."
+					});
+
+					public static LocString EGG_NAME = UI.FormatAsLink("Sani Pinch Roe", "CRABFRESHWATER");
+
+					public class BABY
+					{
+						public static LocString NAME = UI.FormatAsLink("Sanishell Spawn", "CRABFRESHWATER");
+
+						public static LocString DESC = "A picky little Sanishell Spawn.\n\nIn time it will mature into a fully grown " + UI.FormatAsLink("Sanishell", "CRABFRESHWATER") + ".";
+					}
+				}
 			}
 
 			public class BEE
@@ -225,7 +283,7 @@ namespace STRINGS
 
 				public static LocString DESC = string.Concat(new string[]
 				{
-					"Pacus are aquatic creatures that cannot live outside of ",
+					"Pacus are aquatic creatures that can live in any liquid, such as ",
 					UI.FormatAsLink("Water", "WATER"),
 					" or ",
 					UI.FormatAsLink("Contaminated Water", "DIRTYWATER"),
@@ -451,8 +509,10 @@ namespace STRINGS
 
 					public static LocString DESC = string.Concat(new string[]
 					{
-						"Glossy Dreckos are nonhostile critters that graze only on live ",
+						"Glossy Dreckos are nonhostile critters that graze on live ",
 						UI.FormatAsLink("Mealwood Plants", "BASICSINGLEHARVESTPLANT"),
+						" and ",
+						UI.FormatAsLink("Bristle Blossoms", "PRICKLEFLOWER"),
 						".\n\nTheir backsides are covered in bioplastic scales that only grow in ",
 						UI.FormatAsLink("Hydrogen", "HYDROGEN"),
 						" climates."
@@ -475,9 +535,11 @@ namespace STRINGS
 
 				public static LocString DESC = string.Concat(new string[]
 				{
-					"Pips are pesky, nonhostile critters that subsist on the branches of ",
-					UI.FormatAsLink("Arbor Trees", "FOREST_TREE"),
-					".\n\nThey are known to bury ",
+					"Pips are pesky, nonhostile critters that subsist on ",
+					UI.FormatAsLink("Thimble Reeds", "BASICFABRICPLANT"),
+					" and ",
+					UI.FormatAsLink("Arbor Tree", "FOREST_TREE"),
+					" branches.\n\nThey are known to bury ",
 					UI.FormatAsLink("Seeds", "PLANTS"),
 					" in the ground whenever they can find a suitable area with enough space."
 				});
@@ -489,6 +551,22 @@ namespace STRINGS
 					public static LocString NAME = UI.FormatAsLink("Pipsqueak", "SQUIRREL");
 
 					public static LocString DESC = "A little purring Pipsqueak.\n\nIn time it will mature into a fully grown " + UI.FormatAsLink("Pip", "SQUIRREL") + ".";
+				}
+
+				public class VARIANT_HUG
+				{
+					public static LocString NAME = UI.FormatAsLink("Cuddle Pip", "SQUIRREL");
+
+					public static LocString DESC = "Cuddle Pips are fluffy, affectionate critters who exhibit a strong snuggling instinct towards all types of eggs.\n\nThis is temporarily amplified when they are hugged by a passing Duplicant.";
+
+					public static LocString EGG_NAME = UI.FormatAsLink("Cuddle Pip Egg", "SQUIRREL");
+
+					public class BABY
+					{
+						public static LocString NAME = UI.FormatAsLink("Cuddle Pipsqueak", "SQUIRREL");
+
+						public static LocString DESC = "A fuzzy little Cuddle Pipsqueak.\n\nIn time it will mature into a fully grown " + UI.FormatAsLink("Cuddle Pip", "SQUIRREL") + ".";
+					}
 				}
 			}
 
@@ -652,6 +730,31 @@ namespace STRINGS
 					public static LocString NAME = UI.FormatAsLink("Vole Pup", "MOLE");
 
 					public static LocString DESC = "A snuggly little pup.\n\nOne day it will grow into an adult " + UI.FormatAsLink("Shove Vole", "MOLE") + ".";
+				}
+
+				public class VARIANT_DELICACY
+				{
+					public static LocString NAME = UI.FormatAsLink("Delecta Vole", "MOLEDELICACY");
+
+					public static LocString DESC = string.Concat(new string[]
+					{
+						"Delecta Voles are burrowing critters whose bodies sprout shearable ",
+						UI.FormatAsLink("Tonic Root", "GINGER"),
+						" when ",
+						UI.FormatAsLink("Regolith", "REGOLITH"),
+						" is ingested at preferred temperatures.\n\nThey cannot burrow through ",
+						UI.FormatAsLink("Refined Metals", "REFINEDMETAL"),
+						"."
+					});
+
+					public static LocString EGG_NAME = UI.FormatAsLink("Delecta Vole Egg", "MOLEDELICACY");
+
+					public class BABY
+					{
+						public static LocString NAME = UI.FormatAsLink("Delecta Vole Pup", "MOLEDELICACY");
+
+						public static LocString DESC = "A tender little Delecta Vole pup.\n\nOne day it will grow into an adult Shove Vole morph, the " + UI.FormatAsLink("Delecta Vole", "MOLEDELICACY") + ".";
+					}
 				}
 			}
 
@@ -2270,6 +2373,34 @@ namespace STRINGS
 				public static LocString TOOLTIP = "This critter is searching for tasty " + UI.PRE_KEYWORD + "Seeds" + UI.PST_KEYWORD;
 			}
 
+			public class HUGEGG
+			{
+				public static LocString NAME = "Hugging Eggs";
+
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"This critter is snuggling up to an ",
+					UI.PRE_KEYWORD,
+					"Egg",
+					UI.PST_KEYWORD,
+					" "
+				});
+			}
+
+			public class HUGMINIONWAITING
+			{
+				public static LocString NAME = "Hoping for hugs";
+
+				public static LocString TOOLTIP = "This critter is hoping for a Duplicant to pass by and give it a hug\n\nA hug from a Duplicant will prompt it to cuddle more eggs";
+			}
+
+			public class HUGMINION
+			{
+				public static LocString NAME = "Hugging";
+
+				public static LocString TOOLTIP = "This critter is happily hugging a Duplicant";
+			}
+
 			public class EXPELLING_SOLID
 			{
 				public static LocString NAME = "Expelling Waste";
@@ -2295,7 +2426,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Expelling Waste";
 
-				public static LocString TOOLTIP = "This critter doing their \"business\"";
+				public static LocString TOOLTIP = "This critter is doing their \"business\"";
 			}
 
 			public class DEBUGGOTO
@@ -2317,6 +2448,13 @@ namespace STRINGS
 				public static LocString NAME = "Combat!";
 
 				public static LocString TOOLTIP = "This critter is on the attack!";
+			}
+
+			public class ATTACKINGENTITY
+			{
+				public static LocString NAME = "Attacking";
+
+				public static LocString TOOLTIP = "This critter is violently defending their young";
 			}
 
 			public class PROTECTINGENTITY
@@ -2428,6 +2566,13 @@ namespace STRINGS
 				public static LocString NAME = "Molting";
 
 				public static LocString TOOLTIP = "This critter is shedding its skin. Yuck";
+			}
+
+			public class CLEANING
+			{
+				public static LocString NAME = "Cleaning";
+
+				public static LocString TOOLTIP = "This critter is de-germ-ifying its liquid surroundings";
 			}
 
 			public class NEEDSFERTILIZER
@@ -3002,6 +3147,68 @@ namespace STRINGS
 					" requirements are met"
 				});
 			}
+
+			public class ELEMENT_GROWTH_GROWING
+			{
+				public static LocString NAME = "Picky Eater: Just Right";
+
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"This critter's ",
+					UI.PRE_KEYWORD,
+					"Quill Growth",
+					UI.PST_KEYWORD,
+					" rate is optimal\n\nPreferred food temperature range: {templo}-{temphi}"
+				});
+
+				public static LocString PREFERRED_TEMP = "Last eaten: {element} at {temperature}";
+			}
+
+			public class ELEMENT_GROWTH_STUNTED
+			{
+				public static LocString NAME = "Picky Eater: {reason}";
+
+				public static LocString TOO_HOT = "Too Hot";
+
+				public static LocString TOO_COLD = "Too Cold";
+
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"This critter's ",
+					UI.PRE_KEYWORD,
+					"Quill Growth",
+					UI.PST_KEYWORD,
+					" rate has slowed because they ate food outside their preferred temperature range\n\nPreferred food temperature range: {templo}-{temphi}"
+				});
+			}
+
+			public class ELEMENT_GROWTH_HALTED
+			{
+				public static LocString NAME = "Picky Eater: Hungry";
+
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"This critter's ",
+					UI.PRE_KEYWORD,
+					"Quill Growth",
+					UI.PST_KEYWORD,
+					" is halted because they are hungry\n\nPreferred food temperature range: {templo}-{temphi}"
+				});
+			}
+
+			public class ELEMENT_GROWTH_COMPLETE
+			{
+				public static LocString NAME = "Picky Eater: All Done";
+
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"This critter's ",
+					UI.PRE_KEYWORD,
+					"Tonic Root",
+					UI.PST_KEYWORD,
+					" quills are fully grown\n\nPreferred food temperature range: {templo}-{temphi}"
+				});
+			}
 		}
 
 		public class STATS
@@ -3216,6 +3423,13 @@ namespace STRINGS
 				public static LocString TOOLTIP = "The amount of time required for this critter to regrow its scales";
 			}
 
+			public class ELEMENTGROWTH
+			{
+				public static LocString NAME = "Quill Growth";
+
+				public static LocString TOOLTIP = "The amount of time required for this critter to regrow its " + UI.PRE_KEYWORD + "Tonic Root" + UI.PST_KEYWORD;
+			}
+
 			public class AIRPRESSURE
 			{
 				public static LocString NAME = "Air Pressure";
@@ -3348,15 +3562,18 @@ namespace STRINGS
 				public static LocString NAME = "Scale Regrowth Rate";
 			}
 
+			public class ELEMENT_GROWTH_RATE
+			{
+				public static LocString NAME = "Quill Regrowth Rate";
+			}
+
 			public class INCUBATOR_SONG
 			{
 				public static LocString NAME = "Lullabied";
 
 				public static LocString TOOLTIP = string.Concat(new string[]
 				{
-					"This egg was recently sung to by a kind Duplicant",
-					UI.HORIZONTAL_BR_RULE,
-					"Increased ",
+					"This egg was recently sung to by a kind Duplicant\n\nIncreased ",
 					UI.PRE_KEYWORD,
 					"Incubation Rate",
 					UI.PST_KEYWORD,
@@ -3365,6 +3582,27 @@ namespace STRINGS
 					"Critter Ranching",
 					UI.PST_KEYWORD,
 					" Skill to sing to eggs"
+				});
+			}
+
+			public class EGGHUG
+			{
+				public static LocString NAME = "Cuddled";
+
+				public static LocString TOOLTIP = "This egg was recently hugged by an affectionate critter\n\nIncreased " + UI.PRE_KEYWORD + "Incubation Rate" + UI.PST_KEYWORD;
+			}
+
+			public class HUGGINGFRENZY
+			{
+				public static LocString NAME = "Hugging Spree";
+
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"This critter was recently hugged by a Duplicant and is feeling extra affectionate\n\nWhile in this state, it hugs ",
+					UI.PRE_KEYWORD,
+					"Eggs",
+					UI.PST_KEYWORD,
+					" more frequently"
 				});
 			}
 
@@ -3400,14 +3638,14 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Happy";
 
-				public static LocString TOOLTIP = "This critter's in high spirits because all of its needs are being met" + UI.HORIZONTAL_BR_RULE + "It will produce more materials as a result";
+				public static LocString TOOLTIP = "This critter's in high spirits because all of its needs are being met\n\nIt will produce more materials as a result";
 			}
 
 			public class UNHAPPY
 			{
 				public static LocString NAME = "Glum";
 
-				public static LocString TOOLTIP = "This critter's feeling down because its needs aren't being met" + UI.HORIZONTAL_BR_RULE + "It will produce less materials as a result";
+				public static LocString TOOLTIP = "This critter's feeling down because its needs aren't being met\n\nIt will produce less materials as a result";
 			}
 
 			public class ATE_FROM_FEEDER
@@ -3493,6 +3731,8 @@ namespace STRINGS
 					UI.PST_KEYWORD,
 					" of this size"
 				});
+
+				public static LocString FISHTOOLTIP = "This critter is uncomfortable with either the size of this pool, or the number of other critters sharing it";
 			}
 
 			public class CONFINED
@@ -3570,6 +3810,13 @@ namespace STRINGS
 				public static LocString NAME = "Crop Tending";
 
 				public static LocString DESC = "Tends to: {0}";
+			}
+
+			public class LIVING_IN_ELEMENT
+			{
+				public static LocString NAME = "Habitat";
+
+				public static LocString DESC = "Dwells in {0}";
 			}
 		}
 	}

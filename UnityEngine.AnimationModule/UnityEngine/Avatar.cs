@@ -5,8 +5,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeHeader("Modules/Animation/Avatar.h")]
 	[UsedByNativeCode]
+	[NativeHeader("Modules/Animation/Avatar.h")]
 	public class Avatar : Object
 	{
 		private Avatar()

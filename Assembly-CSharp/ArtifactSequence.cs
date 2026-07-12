@@ -15,7 +15,7 @@ public static class ArtifactSequence
 	{
 		if (!SpeedControlScreen.Instance.IsPaused)
 		{
-			SpeedControlScreen.Instance.Pause(false);
+			SpeedControlScreen.Instance.Pause(false, false);
 		}
 		CameraController.Instance.SetWorldInteractive(false);
 		AudioMixer.instance.Stop(AudioMixerSnapshots.Get().VictoryMessageSnapshot, STOP_MODE.ALLOWFADEOUT);
@@ -157,7 +157,7 @@ public static class ArtifactSequence
 		AudioMixer.instance.Start(AudioMixerSnapshots.Get().VictoryCinematicSnapshot);
 		if (!SpeedControlScreen.Instance.IsPaused)
 		{
-			SpeedControlScreen.Instance.Pause(false);
+			SpeedControlScreen.Instance.Pause(false, false);
 		}
 		VideoScreen component = GameScreenManager.Instance.StartScreen(ScreenPrefabs.Instance.VideoScreen.gameObject, null, GameScreenManager.UIRenderTarget.ScreenSpaceOverlay).GetComponent<VideoScreen>();
 		component.PlayVideo(Assets.GetVideo(Db.Get().ColonyAchievements.CollectedArtifacts.shortVideoName), true, AudioMixerSnapshots.Get().VictoryCinematicSnapshot, false);

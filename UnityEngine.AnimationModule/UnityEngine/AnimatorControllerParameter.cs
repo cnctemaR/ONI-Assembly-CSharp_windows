@@ -5,11 +5,11 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeType(CodegenOptions.Custom, "MonoAnimatorControllerParameter")]
 	[NativeAsStruct]
-	[NativeHeader("Modules/Animation/AnimatorControllerParameter.h")]
-	[NativeHeader("Modules/Animation/ScriptBindings/AnimatorControllerParameter.bindings.h")]
+	[NativeType(CodegenOptions.Custom, "MonoAnimatorControllerParameter")]
 	[UsedByNativeCode]
+	[NativeHeader("Modules/Animation/ScriptBindings/AnimatorControllerParameter.bindings.h")]
+	[NativeHeader("Modules/Animation/AnimatorControllerParameter.h")]
 	[StructLayout(LayoutKind.Sequential)]
 	public class AnimatorControllerParameter
 	{

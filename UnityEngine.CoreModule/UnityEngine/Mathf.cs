@@ -7,11 +7,11 @@ using UnityEngineInternal;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Math/FloatConversion.h")]
-	[Il2CppEagerStaticClassConstruction]
 	[NativeHeader("Runtime/Utilities/BitUtility.h")]
-	[NativeHeader("Runtime/Math/ColorSpaceConversion.h")]
+	[NativeHeader("Runtime/Math/FloatConversion.h")]
 	[NativeHeader("Runtime/Math/PerlinNoise.h")]
+	[Il2CppEagerStaticClassConstruction]
+	[NativeHeader("Runtime/Math/ColorSpaceConversion.h")]
 	public struct Mathf
 	{
 		[FreeFunction(IsThreadSafe = true)]

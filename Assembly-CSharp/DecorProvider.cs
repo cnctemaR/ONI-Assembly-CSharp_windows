@@ -9,10 +9,115 @@ using UnityEngine;
 [AddComponentMenu("KMonoBehaviour/scripts/DecorProvider")]
 public class DecorProvider : KMonoBehaviour, IGameObjectEffectDescriptor
 {
+	private void AddDecor()
+	{
+		this.currDecor = 0f;
+		if (this.decor != null)
+		{
+			this.currDecor = this.decor.GetTotalValue();
+		}
+		if (base.gameObject.HasTag(GameTags.Stored))
+		{
+			this.currDecor = 0f;
+		}
+		int num = Grid.PosToCell(base.gameObject);
+		if (!Grid.IsValidCell(num))
+		{
+			return;
+		}
+		if (!Grid.Transparent[num] && Grid.Solid[num] && this.simCellOccupier == null)
+		{
+			this.currDecor = 0f;
+		}
+		if (this.currDecor == 0f)
+		{
+			return;
+		}
+		this.cellCount = 0;
+		int num2 = 5;
+		if (this.decorRadius != null)
+		{
+			num2 = (int)this.decorRadius.GetTotalValue();
+		}
+		Orientation orientation = Orientation.Neutral;
+		if (this.rotatable)
+		{
+			orientation = this.rotatable.GetOrientation();
+		}
+		Extents extents = this.occupyArea.GetExtents(orientation);
+		extents.x = Mathf.Max(extents.x - num2, 0);
+		extents.y = Mathf.Max(extents.y - num2, 0);
+		extents.width = Mathf.Min(extents.width + num2 * 2, Grid.WidthInCells - 1);
+		extents.height = Mathf.Min(extents.height + num2 * 2, Grid.HeightInCells - 1);
+		this.partitionerEntry = GameScenePartitioner.Instance.Add("DecorProvider.SplatCollectDecorProviders", base.gameObject, extents, GameScenePartitioner.Instance.decorProviderLayer, this.onCollectDecorProvidersCallback);
+		this.solidChangedPartitionerEntry = GameScenePartitioner.Instance.Add("DecorProvider.SplatSolidCheck", base.gameObject, extents, GameScenePartitioner.Instance.solidChangedLayer, this.refreshPartionerCallback);
+		int num3 = extents.x + extents.width;
+		int num4 = extents.y + extents.height;
+		int num5 = extents.x;
+		int num6 = extents.y;
+		int num7;
+		int num8;
+		Grid.CellToXY(num, out num7, out num8);
+		num3 = Math.Min(num3, Grid.WidthInCells);
+		num4 = Math.Min(num4, Grid.HeightInCells);
+		num5 = Math.Max(0, num5);
+		num6 = Math.Max(0, num6);
+		int num9 = (num3 - num5) * (num4 - num6);
+		if (this.cells == null || this.cells.Length != num9)
+		{
+			this.cells = new int[num9];
+		}
+		for (int i = num5; i < num3; i++)
+		{
+			for (int j = num6; j < num4; j++)
+			{
+				if (Grid.VisibilityTest(num7, num8, i, j, false))
+				{
+					int num10 = Grid.XYToCell(i, j);
+					if (Grid.IsValidCell(num10))
+					{
+						Grid.Decor[num10] += this.currDecor;
+						int[] array = this.cells;
+						int num11 = this.cellCount;
+						this.cellCount = num11 + 1;
+						array[num11] = num10;
+					}
+				}
+			}
+		}
+	}
+
+	public void Clear()
+	{
+		if (this.currDecor == 0f)
+		{
+			return;
+		}
+		this.RemoveDecor();
+		GameScenePartitioner.Instance.Free(ref this.partitionerEntry);
+		GameScenePartitioner.Instance.Free(ref this.solidChangedPartitionerEntry);
+	}
+
+	private void RemoveDecor()
+	{
+		if (this.currDecor == 0f)
+		{
+			return;
+		}
+		for (int i = 0; i < this.cellCount; i++)
+		{
+			int num = this.cells[i];
+			if (Grid.IsValidCell(num))
+			{
+				Grid.Decor[num] -= this.currDecor;
+			}
+		}
+	}
+
 	public void Refresh()
 	{
-		this.splat.Clear();
-		this.splat = new DecorProvider.Splat(this);
+		this.Clear();
+		this.AddDecor();
 		KPrefabID component = base.GetComponent<KPrefabID>();
 		bool flag = component.HasTag(RoomConstraints.ConstraintTags.Decor20);
 		bool flag2 = this.decor.GetTotalValue() >= 20f;
@@ -40,7 +145,7 @@ public class DecorProvider : KMonoBehaviour, IGameObjectEffectDescriptor
 		{
 			if (this.cells[i] == cell)
 			{
-				return this.splat.decor;
+				return this.currDecor;
 			}
 		}
 		return 0f;
@@ -73,8 +178,6 @@ public class DecorProvider : KMonoBehaviour, IGameObjectEffectDescriptor
 			this.Refresh();
 		};
 		this.onCollectDecorProvidersCallback = new Action<object>(this.OnCollectDecorProviders);
-		KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
-		this.isMovable = component != null && component.isMovable;
 		Singleton<CellChangeMonitor>.Instance.RegisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChange), "DecorProvider.OnSpawn");
 		AttributeInstance attributeInstance = this.decor;
 		attributeInstance.OnDirty = (global::System.Action)Delegate.Combine(attributeInstance.OnDirty, this.refreshCallback);
@@ -132,7 +235,7 @@ public class DecorProvider : KMonoBehaviour, IGameObjectEffectDescriptor
 			attributeInstance2.OnDirty = (global::System.Action)Delegate.Remove(attributeInstance2.OnDirty, this.refreshCallback);
 			Singleton<CellChangeMonitor>.Instance.UnregisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChange));
 		}
-		this.splat.Clear();
+		this.Clear();
 	}
 
 	public List<Descriptor> GetEffectDescriptions()
@@ -176,19 +279,11 @@ public class DecorProvider : KMonoBehaviour, IGameObjectEffectDescriptor
 
 	public const string ID = "DecorProvider";
 
-	private int width;
-
-	private int height;
-
-	private int previousDecor;
-
 	public float baseRadius;
 
 	public float baseDecor;
 
 	public string overrideName;
-
-	private HandleVector<int>.Handle partitionerEntry;
 
 	public global::System.Action refreshCallback;
 
@@ -204,13 +299,8 @@ public class DecorProvider : KMonoBehaviour, IGameObjectEffectDescriptor
 
 	private AttributeModifier baseDecorRadiusModifier;
 
-	public bool isMovable;
-
 	[MyCmpReq]
 	public OccupyArea occupyArea;
-
-	[MyCmpGet]
-	public Pickupable pickupable;
 
 	[MyCmpGet]
 	public Rotatable rotatable;
@@ -218,144 +308,13 @@ public class DecorProvider : KMonoBehaviour, IGameObjectEffectDescriptor
 	[MyCmpGet]
 	public SimCellOccupier simCellOccupier;
 
-	private int[] cells = new int[512];
+	private int[] cells;
 
 	private int cellCount;
 
-	[MyCmpReq]
-	private Modifiers modifiers;
+	public float currDecor;
 
-	private DecorProvider.Splat splat;
+	private HandleVector<int>.Handle partitionerEntry;
 
-	private struct Splat
-	{
-		public float decor { readonly get; private set; }
-
-		public Splat(DecorProvider provider)
-		{
-			this = default(DecorProvider.Splat);
-			AttributeInstance decor = provider.decor;
-			this.decor = 0f;
-			if (decor != null)
-			{
-				this.decor = decor.GetTotalValue();
-			}
-			if (provider.HasTag(GameTags.Stored))
-			{
-				this.decor = 0f;
-			}
-			int num = Grid.PosToCell(provider.gameObject);
-			if (!Grid.IsValidCell(num))
-			{
-				return;
-			}
-			if (!Grid.Transparent[num] && Grid.Solid[num] && provider.simCellOccupier == null)
-			{
-				this.decor = 0f;
-			}
-			if (this.decor == 0f)
-			{
-				return;
-			}
-			provider.cellCount = 0;
-			this.provider = provider;
-			int num2 = 5;
-			AttributeInstance decorRadius = provider.decorRadius;
-			if (decorRadius != null)
-			{
-				num2 = (int)decorRadius.GetTotalValue();
-			}
-			Orientation orientation = Orientation.Neutral;
-			if (provider.rotatable)
-			{
-				orientation = provider.rotatable.GetOrientation();
-			}
-			OccupyArea occupyArea = provider.occupyArea;
-			this.extents = occupyArea.GetExtents(orientation);
-			this.extents.x = Mathf.Max(this.extents.x - num2, 0);
-			this.extents.y = Mathf.Max(this.extents.y - num2, 0);
-			this.extents.width = Mathf.Min(this.extents.width + num2 * 2, Grid.WidthInCells - 1);
-			this.extents.height = Mathf.Min(this.extents.height + num2 * 2, Grid.HeightInCells - 1);
-			this.partitionerEntry = GameScenePartitioner.Instance.Add("DecorProvider.SplatCollectDecorProviders", provider.gameObject, this.extents, GameScenePartitioner.Instance.decorProviderLayer, provider.onCollectDecorProvidersCallback);
-			this.solidChangedPartitionerEntry = GameScenePartitioner.Instance.Add("DecorProvider.SplatSolidCheck", provider.gameObject, this.extents, GameScenePartitioner.Instance.solidChangedLayer, provider.refreshPartionerCallback);
-			this.AddDecor();
-		}
-
-		public void Clear()
-		{
-			if (this.decor == 0f)
-			{
-				return;
-			}
-			this.RemoveDecor();
-			GameScenePartitioner.Instance.Free(ref this.partitionerEntry);
-			GameScenePartitioner.Instance.Free(ref this.solidChangedPartitionerEntry);
-		}
-
-		private void AddDecor()
-		{
-			int num = Grid.PosToCell(this.provider);
-			int num2 = this.extents.x + this.extents.width;
-			int num3 = this.extents.y + this.extents.height;
-			int num4 = this.extents.x;
-			int num5 = this.extents.y;
-			int num6 = 0;
-			int num7 = 0;
-			Grid.CellToXY(num, out num6, out num7);
-			num2 = Math.Min(num2, Grid.WidthInCells);
-			num3 = Math.Min(num3, Grid.HeightInCells);
-			num4 = Math.Max(0, num4);
-			num5 = Math.Max(0, num5);
-			for (int i = num4; i < num2; i++)
-			{
-				for (int j = num5; j < num3; j++)
-				{
-					if (Grid.VisibilityTest(num6, num7, i, j, false))
-					{
-						int num8 = Grid.XYToCell(i, j);
-						if (Grid.IsValidCell(num8))
-						{
-							Grid.Decor[num8] += this.decor;
-							if (this.provider.cellCount >= 0 && this.provider.cellCount < this.provider.cells.Length)
-							{
-								int[] cells = this.provider.cells;
-								DecorProvider decorProvider = this.provider;
-								int cellCount = decorProvider.cellCount;
-								decorProvider.cellCount = cellCount + 1;
-								cells[cellCount] = num8;
-							}
-						}
-					}
-				}
-			}
-		}
-
-		private void RemoveDecor()
-		{
-			if (this.decor == 0f)
-			{
-				return;
-			}
-			if (this.provider == null)
-			{
-				return;
-			}
-			for (int i = 0; i < this.provider.cellCount; i++)
-			{
-				int num = this.provider.cells[i];
-				if (Grid.IsValidCell(num))
-				{
-					Grid.Decor[num] -= this.decor;
-				}
-			}
-		}
-
-		private DecorProvider provider;
-
-		private Extents extents;
-
-		private HandleVector<int>.Handle partitionerEntry;
-
-		private HandleVector<int>.Handle solidChangedPartitionerEntry;
-	}
+	private HandleVector<int>.Handle solidChangedPartitionerEntry;
 }

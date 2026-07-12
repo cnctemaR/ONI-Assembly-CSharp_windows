@@ -61,7 +61,7 @@ public class CreatureFallMonitor : GameStateMachine<CreatureFallMonitor, Creatur
 			{
 				return false;
 			}
-			if (this.CanSwimAtCurrentLocation(false))
+			if (this.CanSwimAtCurrentLocation(true))
 			{
 				return false;
 			}

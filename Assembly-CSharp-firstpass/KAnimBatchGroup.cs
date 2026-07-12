@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
 using Unity.Collections;
 using UnityEngine;
 
@@ -136,13 +135,13 @@ public class KAnimBatchGroup
 		if (animFrames.Count == 0)
 		{
 			num += this.data.symbolFrameInstances.Count * 4;
-			num += this.data.symbolFrameInstances.Count * 16;
+			num += this.data.symbolFrameInstances.Count * 12;
 		}
 		else
 		{
 			num += animFrames.Count * 4;
 			List<KAnim.Anim.FrameElement> animFrameElements = this.data.GetAnimFrameElements();
-			num += animFrameElements.Count * 16;
+			num += animFrameElements.Count * 12;
 		}
 		return (float)num / 4f;
 	}
@@ -161,10 +160,10 @@ public class KAnimBatchGroup
 				this.buildAndAnimTex.width * this.buildAndAnimTex.height
 			});
 		}
-		int num2 = this.data.WriteBuildData(this.data.symbolFrameInstances, this.buildAndAnimTex.floats);
-		this.data.WriteAnimData(num2, this.buildAndAnimTex.floats);
-		this.buildAndAnimTex.LoadRawTextureData();
-		this.buildAndAnimTex.Apply();
+		NativeArray<float> floatDataPointer = this.buildAndAnimTex.GetFloatDataPointer();
+		int num2 = this.data.WriteBuildData(this.data.symbolFrameInstances, floatDataPointer);
+		this.data.WriteAnimData(num2, floatDataPointer);
+		this.buildAndAnimTex.texture.Apply(false, true);
 	}
 
 	private Mesh BuildMesh(int numQuads)
@@ -357,38 +356,19 @@ public class KAnimBatchGroup
 		{
 			public Texture2D texture { get; private set; }
 
-			public byte[] bytes
-			{
-				get
-				{
-					return this.floatConverter.bytes;
-				}
-			}
-
-			public float[] floats
-			{
-				get
-				{
-					return this.floatConverter.floats;
-				}
-			}
-
 			public Entry(int float4s_per_side)
 			{
 				this.texture = new Texture2D(float4s_per_side, float4s_per_side, TextureFormat.RGBAFloat, false);
 				this.texture.wrapMode = TextureWrapMode.Clamp;
 				this.texture.filterMode = FilterMode.Point;
 				this.texture.anisoLevel = 0;
-				this.floatConverter = new KAnimBatchGroup.KAnimBatchTextureCache.Entry.ByteToFloatConverter
-				{
-					bytes = new byte[float4s_per_side * float4s_per_side * 4 * 4]
-				};
 				int num = float4s_per_side * float4s_per_side;
 				NativeArray<Color> rawTextureData = this.texture.GetRawTextureData<Color>();
 				for (int i = 0; i < num; i++)
 				{
 					rawTextureData[i] = KAnimBatchGroup.ResetColor;
 				}
+				this.texture.Apply();
 			}
 
 			public void SetTextureAndSize(MaterialPropertyBlock property_block)
@@ -397,14 +377,19 @@ public class KAnimBatchGroup
 				property_block.SetVector(this.textureSizePropertyId, new Vector4(this.texelSize.x, this.texelSize.y, (float)this.width, (float)this.height));
 			}
 
+			public NativeArray<byte> GetDataPointer()
+			{
+				return this.texture.GetRawTextureData<byte>();
+			}
+
+			public NativeArray<float> GetFloatDataPointer()
+			{
+				return this.texture.GetRawTextureData<float>();
+			}
+
 			public void Apply()
 			{
 				this.texture.Apply();
-			}
-
-			public void LoadRawTextureData()
-			{
-				this.texture.LoadRawTextureData(this.bytes);
 			}
 
 			public int width
@@ -443,23 +428,11 @@ public class KAnimBatchGroup
 				}
 			}
 
-			private KAnimBatchGroup.KAnimBatchTextureCache.Entry.ByteToFloatConverter floatConverter;
-
 			public int texturePropertyId;
 
 			public int textureSizePropertyId;
 
 			public int cacheIndex = -1;
-
-			[StructLayout(LayoutKind.Explicit)]
-			public struct ByteToFloatConverter
-			{
-				[FieldOffset(0)]
-				public byte[] bytes;
-
-				[FieldOffset(0)]
-				public float[] floats;
-			}
 		}
 	}
 

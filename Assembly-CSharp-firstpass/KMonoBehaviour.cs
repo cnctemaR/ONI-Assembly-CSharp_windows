@@ -182,10 +182,6 @@ public class KMonoBehaviour : MonoBehaviour, IStateMachineTarget, ISaveLoadable,
 	{
 	}
 
-	public virtual void CreateDef()
-	{
-	}
-
 	public T FindOrAdd<T>() where T : KMonoBehaviour
 	{
 		return this.FindOrAddComponent<T>();

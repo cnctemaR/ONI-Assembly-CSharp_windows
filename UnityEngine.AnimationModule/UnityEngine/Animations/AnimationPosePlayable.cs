@@ -8,8 +8,8 @@ namespace UnityEngine.Animations
 {
 	[RequiredByNativeCode]
 	[StaticAccessor("AnimationPosePlayableBindings", StaticAccessorType.DoubleColon)]
-	[NativeHeader("Runtime/Director/Core/HPlayable.h")]
 	[NativeHeader("Modules/Animation/ScriptBindings/AnimationPosePlayable.bindings.h")]
+	[NativeHeader("Runtime/Director/Core/HPlayable.h")]
 	[NativeHeader("Modules/Animation/Director/AnimationPosePlayable.h")]
 	internal struct AnimationPosePlayable : IPlayable, IEquatable<AnimationPosePlayable>
 	{

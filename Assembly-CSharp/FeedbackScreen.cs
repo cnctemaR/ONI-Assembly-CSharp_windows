@@ -1,5 +1,8 @@
 ﻿using System;
+using Steamworks;
 using STRINGS;
+using UnityEngine;
+using UnityEngine.UI;
 
 public class FeedbackScreen : KModalScreen
 {
@@ -31,6 +34,12 @@ public class FeedbackScreen : KModalScreen
 		{
 			App.OpenWebURL(SaveLoader.GetSavePrefix());
 		};
+		if (SteamUtils.IsSteamRunningOnSteamDeck())
+		{
+			this.logsDirectoryButton.GetComponentInParent<VerticalLayoutGroup>().padding = new RectOffset(0, 0, 0, 0);
+			this.saveFilesDirectoryButton.gameObject.SetActive(false);
+			this.logsDirectoryButton.gameObject.SetActive(false);
+		}
 	}
 
 	public LocText title;

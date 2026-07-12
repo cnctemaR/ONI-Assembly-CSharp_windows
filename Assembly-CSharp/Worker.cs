@@ -136,6 +136,7 @@ public class Worker : KMonoBehaviour
 					{
 						this.successFullyCompleted = true;
 						this.StartPlayingPostAnim();
+						this.workable.OnPendingCompleteWork(this);
 					}
 				}
 				return Worker.WorkResult.InProgress;

@@ -8,8 +8,8 @@ namespace UnityEngine
 {
 	[RequireComponent(typeof(Transform))]
 	[NativeHeader("Runtime/Camera/Light.h")]
-	[NativeHeader("Runtime/Export/Graphics/Light.bindings.h")]
 	[RequireComponent(typeof(Transform))]
+	[NativeHeader("Runtime/Export/Graphics/Light.bindings.h")]
 	public sealed class Light : Behaviour
 	{
 		[NativeProperty("LightType")]

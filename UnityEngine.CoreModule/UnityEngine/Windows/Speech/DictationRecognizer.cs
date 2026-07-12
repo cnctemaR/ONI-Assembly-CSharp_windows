@@ -8,8 +8,8 @@ namespace UnityEngine.Windows.Speech
 {
 	public sealed class DictationRecognizer : IDisposable
 	{
-		[NativeHeader("PlatformDependent/Win/Bindings/SpeechBindings.h")]
 		[NativeThrows]
+		[NativeHeader("PlatformDependent/Win/Bindings/SpeechBindings.h")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern IntPtr Create(object self, ConfidenceLevel minimumConfidence, DictationTopicConstraint topicConstraint);
 
@@ -26,8 +26,8 @@ namespace UnityEngine.Windows.Speech
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void Destroy(IntPtr self);
 
-		[NativeHeader("PlatformDependent/Win/Bindings/SpeechBindings.h")]
 		[ThreadSafe]
+		[NativeHeader("PlatformDependent/Win/Bindings/SpeechBindings.h")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void DestroyThreaded(IntPtr self);
 

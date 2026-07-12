@@ -8,9 +8,9 @@ using UnityEngine.Scripting;
 namespace UnityEngine
 {
 	[RequiredByNativeCode(Optional = true, GenerateProxy = true)]
-	[Il2CppEagerStaticClassConstruction]
-	[NativeHeader("Runtime/Math/Vector4.h")]
 	[NativeClass("Vector4f")]
+	[NativeHeader("Runtime/Math/Vector4.h")]
+	[Il2CppEagerStaticClassConstruction]
 	public struct Vector4 : IEquatable<Vector4>, IFormattable
 	{
 		public float this[int index]

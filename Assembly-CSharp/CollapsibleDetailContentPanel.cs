@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Events;
-using UnityEngine.UI;
 
 [AddComponentMenu("KMonoBehaviour/scripts/CollapsibleDetailContentPanel")]
 public class CollapsibleDetailContentPanel : KMonoBehaviour
@@ -10,8 +8,8 @@ public class CollapsibleDetailContentPanel : KMonoBehaviour
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		this.CollapseButton.onClick.AddListener(new UnityAction(this.ToggleOpen));
-		this.SetColors(this.colors);
+		MultiToggle multiToggle = this.collapseButton;
+		multiToggle.onClick = (global::System.Action)Delegate.Combine(multiToggle.onClick, new global::System.Action(this.ToggleOpen));
 		this.ArrowIcon.SetActive();
 		this.log = new LoggerFSS("detailpanel", 35);
 		this.labels = new Dictionary<string, CollapsibleDetailContentPanel.Label<DetailLabel>>();
@@ -112,23 +110,6 @@ public class CollapsibleDetailContentPanel : KMonoBehaviour
 		label.used = true;
 	}
 
-	public void SetColors(CollapsibleDetailContentPanel.PanelColors newColors)
-	{
-		this.colors = newColors;
-		this.HeaderLabel.color = this.colors.TextColor;
-		this.ArrowIcon.ActiveColour = this.colors.ArrowColor;
-		this.ArrowIcon.InactiveColour = this.colors.ArrowColor;
-		this.CollapseButton.transition = Selectable.Transition.None;
-		ColorBlock colorBlock = default(ColorBlock);
-		colorBlock.normalColor = new Color(this.colors.FrameColor.r, this.colors.FrameColor.g, this.colors.FrameColor.b, this.colors.FrameColor.a);
-		colorBlock.highlightedColor = this.colors.FrameColor_Hover;
-		colorBlock.pressedColor = this.colors.FrameColor_Press;
-		colorBlock.disabledColor = colorBlock.normalColor;
-		colorBlock.colorMultiplier = 1f;
-		this.CollapseButton.colors = colorBlock;
-		this.CollapseButton.transition = Selectable.Transition.ColorTint;
-	}
-
 	private void ToggleOpen()
 	{
 		bool flag = this.scalerMask.gameObject.activeSelf;
@@ -141,12 +122,6 @@ public class CollapsibleDetailContentPanel : KMonoBehaviour
 			return;
 		}
 		this.ArrowIcon.SetInactive();
-	}
-
-	public void SetCollapsible(bool bCollapsible)
-	{
-		this.ArrowIcon.gameObject.SetActive(bCollapsible);
-		this.CollapseButton.interactable = bCollapsible;
 	}
 
 	public void ForceLocTextsMeshRebuild()
@@ -162,7 +137,7 @@ public class CollapsibleDetailContentPanel : KMonoBehaviour
 
 	public LocText HeaderLabel;
 
-	public Button CollapseButton;
+	public MultiToggle collapseButton;
 
 	public Transform Content;
 
@@ -179,26 +154,10 @@ public class CollapsibleDetailContentPanel : KMonoBehaviour
 
 	private LoggerFSS log;
 
-	public CollapsibleDetailContentPanel.PanelColors colors;
-
 	private class Label<T>
 	{
 		public T obj;
 
 		public bool used;
-	}
-
-	[Serializable]
-	public struct PanelColors
-	{
-		public Color FrameColor;
-
-		public Color FrameColor_Hover;
-
-		public Color FrameColor_Press;
-
-		public Color ArrowColor;
-
-		public Color TextColor;
 	}
 }

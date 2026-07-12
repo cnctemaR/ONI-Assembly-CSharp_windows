@@ -25,6 +25,12 @@ public class SelectModuleSideScreen : KScreen
 		this.buildSelectedModuleButton.onClick += this.OnClickBuildSelectedModule;
 	}
 
+	protected override void OnForcedCleanUp()
+	{
+		SelectModuleSideScreen.Instance = null;
+		base.OnForcedCleanUp();
+	}
+
 	protected override void OnCmpDisable()
 	{
 		this.ClearSubscriptionHandles();
@@ -247,7 +253,7 @@ public class SelectModuleSideScreen : KScreen
 		{
 			while (enumerator.MoveNext())
 			{
-				SelectModuleSideScreen.<>c__DisplayClass38_0 CS$<>8__locals1 = new SelectModuleSideScreen.<>c__DisplayClass38_0();
+				SelectModuleSideScreen.<>c__DisplayClass39_0 CS$<>8__locals1 = new SelectModuleSideScreen.<>c__DisplayClass39_0();
 				CS$<>8__locals1.<>4__this = this;
 				CS$<>8__locals1.id = enumerator.Current;
 				GameObject part = prefabsWithComponent.Find((GameObject p) => p.PrefabID().Name == CS$<>8__locals1.id);

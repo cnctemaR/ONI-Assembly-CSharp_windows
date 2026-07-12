@@ -14,15 +14,34 @@ public class Geyser : StateMachineComponent<Geyser.StatesInstance>, IGameObjectE
 		{
 			this.configuration = base.GetComponent<GeyserConfigurator>().MakeConfiguration();
 		}
+		else
+		{
+			PrimaryElement component = base.gameObject.GetComponent<PrimaryElement>();
+			if (this.configuration.geyserType.geyserTemperature - component.Temperature != 0f)
+			{
+				SimTemperatureTransfer component2 = base.gameObject.GetComponent<SimTemperatureTransfer>();
+				component2.onSimRegistered = (Action<SimTemperatureTransfer>)Delegate.Combine(component2.onSimRegistered, new Action<SimTemperatureTransfer>(this.OnSimRegistered));
+			}
+		}
 		this.emitter.emitRange = 2;
 		this.emitter.maxPressure = this.configuration.GetMaxPressure();
 		this.emitter.outputElement = new ElementConverter.OutputElement(this.configuration.GetEmitRate(), this.configuration.GetElement(), this.configuration.GetTemperature(), false, false, (float)this.outputOffset.x, (float)this.outputOffset.y, 1f, this.configuration.GetDiseaseIdx(), Mathf.RoundToInt((float)this.configuration.GetDiseaseCount() * this.configuration.GetEmitRate()));
 		base.smi.StartSM();
-		Workable component = base.GetComponent<Studyable>();
-		if (component != null)
+		Workable component3 = base.GetComponent<Studyable>();
+		if (component3 != null)
 		{
-			component.alwaysShowProgressBar = true;
+			component3.alwaysShowProgressBar = true;
 		}
+	}
+
+	private void OnSimRegistered(SimTemperatureTransfer stt)
+	{
+		PrimaryElement component = base.gameObject.GetComponent<PrimaryElement>();
+		if (this.configuration.geyserType.geyserTemperature - component.Temperature != 0f)
+		{
+			component.Temperature = this.configuration.geyserType.geyserTemperature;
+		}
+		stt.onSimRegistered = (Action<SimTemperatureTransfer>)Delegate.Remove(stt.onSimRegistered, new Action<SimTemperatureTransfer>(this.OnSimRegistered));
 	}
 
 	public float RemainingPhaseTimeFrom2(float onDuration, float offDuration, float time, Geyser.Phase expectedPhase)

@@ -6,6 +6,11 @@ using UnityEngine;
 
 public class ColonyDiagnosticUtility : KMonoBehaviour, ISim1000ms
 {
+	public static void DestroyInstance()
+	{
+		ColonyDiagnosticUtility.Instance = null;
+	}
+
 	public ColonyDiagnostic.DiagnosticResult.Opinion GetWorldDiagnosticResult(int worldID)
 	{
 		ColonyDiagnostic.DiagnosticResult.Opinion opinion = ColonyDiagnostic.DiagnosticResult.Opinion.Good;

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+using Unity.Collections;
 using UnityEngine;
 
 public class KBatchedAnimInstanceData
@@ -73,7 +74,7 @@ public class KBatchedAnimInstanceData
 		return false;
 	}
 
-	public void WriteToTexture(byte[] output_bytes, int output_index, int this_index)
+	public void WriteToTexture(NativeArray<byte> output_bytes, int output_index, int this_index)
 	{
 		KBatchedAnimInstanceData.AnimInstanceData animInstanceData = this.converter.animInstanceData[0];
 		animInstanceData.curAnimFrameIndex = (float)this.target.GetCurrentFrameIndex();
@@ -85,7 +86,7 @@ public class KBatchedAnimInstanceData
 			animInstanceData.transformMatrix = this.target.GetTransformMatrix();
 		}
 		this.converter.animInstanceData[0] = animInstanceData;
-		Buffer.BlockCopy(this.converter.bytes, 0, output_bytes, output_index, 112);
+		NativeArray<byte>.Copy(this.converter.bytes, 0, output_bytes, output_index, 112);
 	}
 
 	public void SetOverrideTransformMatrix(Matrix2x3 transform_matrix)

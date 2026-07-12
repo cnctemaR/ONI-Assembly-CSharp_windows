@@ -139,7 +139,7 @@ public class ColonyAchievementTracker : KMonoBehaviour, ISaveLoadableDetails, IR
 		CameraController.Instance.DisableUserCameraControl = true;
 		if (!SpeedControlScreen.Instance.IsPaused)
 		{
-			SpeedControlScreen.Instance.Pause(false);
+			SpeedControlScreen.Instance.Pause(false, false);
 		}
 		AudioMixer.instance.Start(AudioMixerSnapshots.Get().VictoryMessageSnapshot);
 		AudioMixer.instance.Start(AudioMixerSnapshots.Get().MuteDynamicMusicSnapshot);
@@ -155,7 +155,7 @@ public class ColonyAchievementTracker : KMonoBehaviour, ISaveLoadableDetails, IR
 			SpeedControlScreen.Instance.SetSpeed(1);
 			if (!SpeedControlScreen.Instance.IsPaused)
 			{
-				SpeedControlScreen.Instance.Pause(false);
+				SpeedControlScreen.Instance.Pause(false, false);
 			}
 			CameraController.Instance.SetWorldInteractive(true);
 			Db.Get().ColonyAchievements.Get(achievementID).victorySequence(this);

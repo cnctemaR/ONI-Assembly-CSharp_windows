@@ -5,8 +5,8 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	[RequireComponent(typeof(Rigidbody2D))]
 	[NativeHeader("Modules/Physics2D/Public/CompositeCollider2D.h")]
+	[RequireComponent(typeof(Rigidbody2D))]
 	public sealed class CompositeCollider2D : Collider2D
 	{
 		public extern CompositeCollider2D.GeometryType geometryType

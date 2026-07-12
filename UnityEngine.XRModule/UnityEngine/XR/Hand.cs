@@ -6,12 +6,12 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.XR
 {
-	[StaticAccessor("XRInputDevices::Get()", StaticAccessorType.Dot)]
-	[NativeHeader("Modules/XR/Subsystems/Input/Public/XRInputDevices.h")]
 	[NativeHeader("XRScriptingClasses.h")]
 	[NativeHeader("Modules/XR/XRPrefix.h")]
 	[NativeConditional("ENABLE_VR")]
 	[RequiredByNativeCode]
+	[StaticAccessor("XRInputDevices::Get()", StaticAccessorType.Dot)]
+	[NativeHeader("Modules/XR/Subsystems/Input/Public/XRInputDevices.h")]
 	public struct Hand : IEquatable<Hand>
 	{
 		internal ulong deviceId

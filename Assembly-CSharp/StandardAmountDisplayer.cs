@@ -24,8 +24,9 @@ public class StandardAmountDisplayer : IAmountDisplayer
 		}
 	}
 
-	public StandardAmountDisplayer(GameUtil.UnitClass unitClass, GameUtil.TimeSlice deltaTimeSlice, StandardAttributeFormatter formatter = null)
+	public StandardAmountDisplayer(GameUtil.UnitClass unitClass, GameUtil.TimeSlice deltaTimeSlice, StandardAttributeFormatter formatter = null, GameUtil.IdentityDescriptorTense tense = GameUtil.IdentityDescriptorTense.Normal)
 	{
+		this.tense = tense;
 		if (formatter != null)
 		{
 			this.formatter = formatter;
@@ -53,7 +54,7 @@ public class StandardAmountDisplayer : IAmountDisplayer
 		string text = "";
 		if (master.description.IndexOf("{1}") > -1)
 		{
-			text += string.Format(master.description, this.formatter.GetFormattedValue(instance.value, GameUtil.TimeSlice.None), GameUtil.GetIdentityDescriptor(instance.gameObject));
+			text += string.Format(master.description, this.formatter.GetFormattedValue(instance.value, GameUtil.TimeSlice.None), GameUtil.GetIdentityDescriptor(instance.gameObject, this.tense));
 		}
 		else
 		{
@@ -92,4 +93,6 @@ public class StandardAmountDisplayer : IAmountDisplayer
 	}
 
 	protected StandardAttributeFormatter formatter;
+
+	public GameUtil.IdentityDescriptorTense tense;
 }

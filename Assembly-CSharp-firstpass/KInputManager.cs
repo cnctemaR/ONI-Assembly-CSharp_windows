@@ -5,7 +5,13 @@ using UnityEngine.Events;
 
 public class KInputManager
 {
-	public static bool isFocused { get; private set; }
+	public static bool isFocused
+	{
+		get
+		{
+			return KInputManager.hasFocus && !KInputManager.devToolFocus;
+		}
+	}
 
 	public static long lastUserActionTicks { get; private set; }
 
@@ -20,7 +26,7 @@ public class KInputManager
 	public KInputManager()
 	{
 		KInputManager.lastUserActionTicks = DateTime.Now.Ticks;
-		KInputManager.isFocused = true;
+		KInputManager.hasFocus = true;
 	}
 
 	public void AddController(KInputController controller)
@@ -69,7 +75,7 @@ public class KInputManager
 
 	public virtual void OnApplicationFocus(bool focus)
 	{
-		KInputManager.isFocused = focus;
+		KInputManager.hasFocus = focus;
 		KInputManager.SetUserActive();
 		if (!KInputManager.isFocused)
 		{
@@ -94,6 +100,10 @@ public class KInputManager
 	}
 
 	protected List<KInputController> mControllers = new List<KInputController>();
+
+	private static bool hasFocus = false;
+
+	public static bool devToolFocus = false;
 
 	public static SteamInputInterpreter steamInputInterpreter = new SteamInputInterpreter();
 

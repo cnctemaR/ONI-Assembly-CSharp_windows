@@ -14,16 +14,16 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
+	[RequireComponent(typeof(Transform))]
+	[NativeHeader("ParticleSystemScriptingClasses.h")]
+	[NativeHeader("Modules/ParticleSystem/ScriptBindings/ParticleSystemScriptBindings.h")]
+	[NativeHeader("Modules/ParticleSystem/ParticleSystemGeometryJob.h")]
 	[NativeHeader("Modules/ParticleSystem/ParticleSystem.h")]
 	[NativeHeader("ParticleSystemScriptingClasses.h")]
-	[RequireComponent(typeof(Transform))]
-	[UsedByNativeCode]
 	[NativeHeader("Modules/ParticleSystem/ScriptBindings/ParticleSystemScriptBindings.h")]
-	[NativeHeader("ParticleSystemScriptingClasses.h")]
+	[UsedByNativeCode]
 	[NativeHeader("Modules/ParticleSystem/ParticleSystem.h")]
 	[NativeHeader("Modules/ParticleSystem/ScriptBindings/ParticleSystemModulesScriptBindings.h")]
-	[NativeHeader("Modules/ParticleSystem/ParticleSystemGeometryJob.h")]
-	[NativeHeader("Modules/ParticleSystem/ScriptBindings/ParticleSystemScriptBindings.h")]
 	public sealed class ParticleSystem : Component
 	{
 		[Obsolete("Emit with specific parameters is deprecated. Pass a ParticleSystem.EmitParams parameter instead, which allows you to override some/all of the emission properties", false)]
@@ -464,15 +464,17 @@ namespace UnityEngine
 
 		public ParticleSystem.Trails GetTrails()
 		{
-			ParticleSystem.Trails trails = new ParticleSystem.Trails
-			{
-				positions = new List<Vector4>(),
-				frontPositions = new List<int>(),
-				backPositions = new List<int>(),
-				positionCounts = new List<int>()
-			};
+			ParticleSystem.Trails trails = default(ParticleSystem.Trails);
+			trails.Allocate();
 			this.GetTrailDataInternal(ref trails);
 			return trails;
+		}
+
+		public int GetTrails(ref ParticleSystem.Trails trailData)
+		{
+			trailData.Allocate();
+			this.GetTrailDataInternal(ref trailData);
+			return trailData.positions.Count;
 		}
 
 		[FreeFunction(Name = "ParticleSystemScriptBindings::SetTrailData", HasExplicitThis = true)]
@@ -3161,11 +3163,13 @@ namespace UnityEngine
 				}
 			}
 
+			[NativeThrows]
 			public void AddPlane(Transform transform)
 			{
 				ParticleSystem.CollisionModule.AddPlane_Injected(ref this, transform);
 			}
 
+			[NativeThrows]
 			public void RemovePlane(int index)
 			{
 				ParticleSystem.CollisionModule.RemovePlane_Injected(ref this, index);
@@ -3176,21 +3180,25 @@ namespace UnityEngine
 				this.RemovePlaneObject(transform);
 			}
 
+			[NativeThrows]
 			private void RemovePlaneObject(Transform transform)
 			{
 				ParticleSystem.CollisionModule.RemovePlaneObject_Injected(ref this, transform);
 			}
 
+			[NativeThrows]
 			public void SetPlane(int index, Transform transform)
 			{
 				ParticleSystem.CollisionModule.SetPlane_Injected(ref this, index, transform);
 			}
 
+			[NativeThrows]
 			public Transform GetPlane(int index)
 			{
 				return ParticleSystem.CollisionModule.GetPlane_Injected(ref this, index);
 			}
 
+			[NativeThrows]
 			public int planeCount
 			{
 				get
@@ -3514,6 +3522,7 @@ namespace UnityEngine
 				return ParticleSystem.TriggerModule.GetCollider_Injected(ref this, index);
 			}
 
+			[NativeThrows]
 			public int colliderCount
 			{
 				get
@@ -5446,6 +5455,56 @@ namespace UnityEngine
 		[NativeType(CodegenOptions.Custom, "MonoParticleTrails")]
 		public struct Trails
 		{
+			internal void Allocate()
+			{
+				bool flag = this.positions == null;
+				if (flag)
+				{
+					this.positions = new List<Vector4>();
+				}
+				bool flag2 = this.frontPositions == null;
+				if (flag2)
+				{
+					this.frontPositions = new List<int>();
+				}
+				bool flag3 = this.backPositions == null;
+				if (flag3)
+				{
+					this.backPositions = new List<int>();
+				}
+				bool flag4 = this.positionCounts == null;
+				if (flag4)
+				{
+					this.positionCounts = new List<int>();
+				}
+			}
+
+			public int capacity
+			{
+				get
+				{
+					bool flag = this.positions == null;
+					int num;
+					if (flag)
+					{
+						num = 0;
+					}
+					else
+					{
+						num = this.positions.Capacity;
+					}
+					return num;
+				}
+				set
+				{
+					this.Allocate();
+					this.positions.Capacity = value;
+					this.frontPositions.Capacity = value;
+					this.backPositions.Capacity = value;
+					this.positionCounts.Capacity = value;
+				}
+			}
+
 			internal List<Vector4> positions;
 
 			internal List<int> frontPositions;
@@ -7668,6 +7727,7 @@ namespace UnityEngine
 				}
 			}
 
+			[NativeThrows]
 			public int influenceCount
 			{
 				get
@@ -7704,6 +7764,7 @@ namespace UnityEngine
 				ParticleSystem.ExternalForcesModule.RemoveInfluence_Injected(ref this, field);
 			}
 
+			[NativeThrows]
 			public void RemoveAllInfluences()
 			{
 				ParticleSystem.ExternalForcesModule.RemoveAllInfluences_Injected(ref this);

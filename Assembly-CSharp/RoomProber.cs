@@ -111,6 +111,7 @@ public class RoomProber : ISim1000ms
 		foreach (HandleVector<int>.Handle handle3 in this.releasedIDs)
 		{
 			CavityInfo data = this.cavityInfos.GetData(handle3);
+			this.releasedCritters.AddRange(data.creatures);
 			if (data.room != null)
 			{
 				this.ClearRoom(data.room);
@@ -227,6 +228,18 @@ public class RoomProber : ISim1000ms
 				cavityInfo.dirty = false;
 			}
 		}
+		foreach (KPrefabID kprefabID3 in this.releasedCritters)
+		{
+			if (kprefabID3 != null)
+			{
+				OvercrowdingMonitor.Instance smi = kprefabID3.GetSMI<OvercrowdingMonitor.Instance>();
+				if (smi != null)
+				{
+					smi.RoomRefreshUpdateCavity();
+				}
+			}
+		}
+		this.releasedCritters.Clear();
 		this.dirty = false;
 	}
 
@@ -369,6 +382,8 @@ public class RoomProber : ISim1000ms
 	private HashSet<HandleVector<int>.Handle> releasedIDs = new HashSet<HandleVector<int>.Handle>();
 
 	private RoomProber.CavityFloodFiller floodFiller;
+
+	private List<KPrefabID> releasedCritters = new List<KPrefabID>();
 
 	public class Tuning : TuningData<RoomProber.Tuning>
 	{

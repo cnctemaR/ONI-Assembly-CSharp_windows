@@ -1,0 +1,33 @@
+﻿using System;
+
+namespace ImGuiNET
+{
+	public enum ImGuiStyleVar
+	{
+		Alpha,
+		WindowPadding,
+		WindowRounding,
+		WindowBorderSize,
+		WindowMinSize,
+		WindowTitleAlign,
+		ChildRounding,
+		ChildBorderSize,
+		PopupRounding,
+		PopupBorderSize,
+		FramePadding,
+		FrameRounding,
+		FrameBorderSize,
+		ItemSpacing,
+		ItemInnerSpacing,
+		IndentSpacing,
+		CellPadding,
+		ScrollbarSize,
+		ScrollbarRounding,
+		GrabMinSize,
+		GrabRounding,
+		TabRounding,
+		ButtonTextAlign,
+		SelectableTextAlign,
+		COUNT
+	}
+}

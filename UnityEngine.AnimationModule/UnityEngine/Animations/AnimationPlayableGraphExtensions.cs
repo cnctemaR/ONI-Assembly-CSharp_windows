@@ -5,10 +5,10 @@ using UnityEngine.Playables;
 
 namespace UnityEngine.Animations
 {
-	[StaticAccessor("AnimationPlayableGraphExtensionsBindings", StaticAccessorType.DoubleColon)]
-	[NativeHeader("Modules/Animation/ScriptBindings/AnimationPlayableGraphExtensions.bindings.h")]
 	[NativeHeader("Runtime/Director/Core/HPlayable.h")]
 	[NativeHeader("Runtime/Director/Core/HPlayableOutput.h")]
+	[StaticAccessor("AnimationPlayableGraphExtensionsBindings", StaticAccessorType.DoubleColon)]
+	[NativeHeader("Modules/Animation/ScriptBindings/AnimationPlayableGraphExtensions.bindings.h")]
 	[NativeHeader("Modules/Animation/Animator.h")]
 	internal static class AnimationPlayableGraphExtensions
 	{

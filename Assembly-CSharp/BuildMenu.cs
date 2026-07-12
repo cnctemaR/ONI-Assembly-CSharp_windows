@@ -720,7 +720,8 @@ public class BuildMenu : KScreen
 				new BuildMenu.BuildingInfo("Juicer", global::Action.BuildMenuKeyJ),
 				new BuildMenu.BuildingInfo("SodaFountain", global::Action.BuildMenuKeyF),
 				new BuildMenu.BuildingInfo("VerticalWindTunnel", global::Action.BuildMenuKeyW),
-				new BuildMenu.BuildingInfo("ParkSign", global::Action.BuildMenuKeyR)
+				new BuildMenu.BuildingInfo("ParkSign", global::Action.BuildMenuKeyR),
+				new BuildMenu.BuildingInfo("Telephone", global::Action.BuildMenuKeyT)
 			})
 		}),
 		new BuildMenu.DisplayInfo(BuildMenu.CacheHashString("Infrastructure"), "icon_category_utilities", global::Action.Plan4, KKeyCode.None, new List<BuildMenu.DisplayInfo>

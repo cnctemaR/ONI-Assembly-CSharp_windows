@@ -3,8 +3,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[RequiredByNativeCode]
 	[AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
+	[RequiredByNativeCode]
 	public sealed class ContextMenu : Attribute
 	{
 		public ContextMenu(string itemName)

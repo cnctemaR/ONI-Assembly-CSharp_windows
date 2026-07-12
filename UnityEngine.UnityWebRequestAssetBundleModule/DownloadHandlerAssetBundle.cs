@@ -68,6 +68,21 @@ namespace UnityEngine.Networking
 			get;
 		}
 
+		public extern bool autoLoadAssetBundle
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+			[NativeThrows]
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			set;
+		}
+
+		public extern bool isDownloadComplete
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+		}
+
 		public static AssetBundle GetContent(UnityWebRequest www)
 		{
 			return DownloadHandler.GetCheckedDownloader<DownloadHandlerAssetBundle>(www).assetBundle;

@@ -27,6 +27,10 @@ public abstract class Logger
 	{
 	}
 
+	public virtual void DebugDevTool()
+	{
+	}
+
 	public static uint NextIdx;
 
 	protected string name;

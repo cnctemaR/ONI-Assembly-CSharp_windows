@@ -239,6 +239,8 @@ public class MotdServerClient
 
 		public MotdServerClient.MotdUpdateData expansion1_update_data { get; set; }
 
+		public string latest_update_build { get; set; }
+
 		[JsonIgnore]
 		public Texture2D image_texture { get; set; }
 	}

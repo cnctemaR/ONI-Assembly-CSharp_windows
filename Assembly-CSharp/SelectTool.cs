@@ -151,6 +151,14 @@ public class SelectTool : InterfaceTool
 		KSelectable objectUnderCursor = base.GetObjectUnderCursor<KSelectable>(true, (KSelectable s) => s.GetComponent<KSelectable>().IsSelectable, this.selected);
 		this.selectedCell = Grid.PosToCell(cursor_pos);
 		this.Select(objectUnderCursor, false);
+		if (DevToolSimDebug.Instance != null)
+		{
+			DevToolSimDebug.Instance.SetCell(this.selectedCell);
+		}
+		if (DevToolNavGrid.Instance != null)
+		{
+			DevToolNavGrid.Instance.SetCell(this.selectedCell);
+		}
 	}
 
 	public int GetSelectedCell()

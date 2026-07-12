@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using Steamworks;
 using STRINGS;
 using UnityEngine;
 
@@ -33,7 +34,14 @@ public class GameOptionsScreen : KModalButtonMenu
 			this.UpdateExpansion1ContentToggle();
 		}
 		this.resetTutorialButton.onClick += this.OnTutorialReset;
-		this.controlsButton.onClick += this.OnKeyBindings;
+		if (DistributionPlatform.Initialized && SteamUtils.IsSteamRunningOnSteamDeck())
+		{
+			this.controlsButton.gameObject.SetActive(false);
+		}
+		else
+		{
+			this.controlsButton.onClick += this.OnKeyBindings;
+		}
 		this.sandboxButton.onClick += this.OnUnlockSandboxMode;
 		this.doneButton.onClick += this.Deactivate;
 		this.closeButton.onClick += this.Deactivate;

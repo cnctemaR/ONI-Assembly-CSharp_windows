@@ -381,6 +381,10 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 	{
 	}
 
+	public virtual void OnPendingCompleteWork(Worker worker)
+	{
+	}
+
 	public void SetOffsets(CellOffset[] offsets)
 	{
 		if (this.offsetTracker != null)

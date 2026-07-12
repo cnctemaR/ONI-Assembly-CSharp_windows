@@ -449,6 +449,7 @@ namespace UnityEngine.UIElements.UIR.Implementation
 					{
 						this.GenerateStencilClipEntryForRoundedRectBackground();
 					}
+					this.m_StencilClip = true;
 				}
 			}
 			this.m_ClipRectID = this.currentElement.renderChainData.clipRectID;
@@ -618,7 +619,6 @@ namespace UnityEngine.UIElements.UIR.Implementation
 					this.m_Entries.Add(this.m_CurrentEntry);
 					this.totalVertices += this.m_CurrentEntry.vertices.Length;
 					this.totalIndices += this.m_CurrentEntry.indices.Length;
-					this.m_StencilClip = true;
 					this.m_ClosingInfo.needsClosing = true;
 				}
 				this.m_CurrentEntry = default(UIRStylePainter.Entry);
@@ -633,7 +633,6 @@ namespace UnityEngine.UIElements.UIR.Implementation
 				UIRStylePainter.Entry entry = this.m_Entries[this.m_SVGBackgroundEntryIndex];
 				Debug.Assert(entry.vertices.Length > 0);
 				Debug.Assert(entry.indices.Length > 0);
-				this.m_StencilClip = true;
 				this.m_CurrentEntry.vertices = entry.vertices;
 				this.m_CurrentEntry.indices = entry.indices;
 				this.m_CurrentEntry.uvIsDisplacement = entry.uvIsDisplacement;

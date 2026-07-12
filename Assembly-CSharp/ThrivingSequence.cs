@@ -14,7 +14,7 @@ public static class ThrivingSequence
 	{
 		if (!SpeedControlScreen.Instance.IsPaused)
 		{
-			SpeedControlScreen.Instance.Pause(false);
+			SpeedControlScreen.Instance.Pause(false, false);
 		}
 		CameraController.Instance.SetWorldInteractive(false);
 		AudioMixer.instance.Stop(AudioMixerSnapshots.Get().VictoryMessageSnapshot, STOP_MODE.ALLOWFADEOUT);
@@ -145,7 +145,7 @@ public static class ThrivingSequence
 		AudioMixer.instance.Start(AudioMixerSnapshots.Get().VictoryCinematicSnapshot);
 		if (!SpeedControlScreen.Instance.IsPaused)
 		{
-			SpeedControlScreen.Instance.Pause(false);
+			SpeedControlScreen.Instance.Pause(false, false);
 		}
 		VideoScreen component = GameScreenManager.Instance.StartScreen(ScreenPrefabs.Instance.VideoScreen.gameObject, null, GameScreenManager.UIRenderTarget.ScreenSpaceOverlay).GetComponent<VideoScreen>();
 		component.PlayVideo(Assets.GetVideo(Db.Get().ColonyAchievements.Thriving.shortVideoName), true, AudioMixerSnapshots.Get().VictoryCinematicSnapshot, false);

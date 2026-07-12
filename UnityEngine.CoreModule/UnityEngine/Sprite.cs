@@ -6,11 +6,11 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/2D/Common/ScriptBindings/SpritesMarshalling.h")]
+	[NativeHeader("Runtime/Graphics/SpriteUtility.h")]
 	[ExcludeFromPreset]
 	[NativeType("Runtime/Graphics/SpriteFrame.h")]
-	[NativeHeader("Runtime/Graphics/SpriteUtility.h")]
 	[NativeHeader("Runtime/2D/Common/SpriteDataAccess.h")]
+	[NativeHeader("Runtime/2D/Common/ScriptBindings/SpritesMarshalling.h")]
 	public sealed class Sprite : Object
 	{
 		[RequiredByNativeCode]

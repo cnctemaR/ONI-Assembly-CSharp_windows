@@ -51,6 +51,11 @@ namespace UnityEngine.U2D
 			SpriteRendererDataAccessExtensions.SetBatchDeformableBufferAndLocalAABBArray(spriteRenderers, buffers.GetUnsafeReadOnlyPtr<IntPtr>(), bufferSizes.GetUnsafeReadOnlyPtr<int>(), bounds.GetUnsafeReadOnlyPtr<Bounds>(), num);
 		}
 
+		internal unsafe static bool IsUsingDeformableBuffer(this SpriteRenderer spriteRenderer, IntPtr buffer)
+		{
+			return SpriteRendererDataAccessExtensions.IsUsingDeformableBuffer(spriteRenderer, (void*)buffer);
+		}
+
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void DeactivateDeformableBuffer([NotNull("ArgumentNullException")] this SpriteRenderer renderer);
 
@@ -64,6 +69,9 @@ namespace UnityEngine.U2D
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private unsafe static extern void SetBatchDeformableBufferAndLocalAABBArray(SpriteRenderer[] spriteRenderers, void* buffers, void* bufferSizes, void* bounds, int count);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private unsafe static extern bool IsUsingDeformableBuffer([NotNull("ArgumentNullException")] SpriteRenderer spriteRenderer, void* buffer);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void SetLocalAABB_Injected(SpriteRenderer renderer, ref Bounds aabb);

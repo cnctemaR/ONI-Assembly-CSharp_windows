@@ -91,7 +91,6 @@ public class NavTeleporter : KMonoBehaviour
 			return;
 		}
 		Grid.HasNavTeleporter[cell] = true;
-		Pathfinding.Instance.GetNavGrid(MinionConfig.MINION_NAV_GRID_NAME);
 		Pathfinding.Instance.AddDirtyNavGridCell(cell);
 		this.lastRegisteredCell = cell;
 		if (this.target != null)

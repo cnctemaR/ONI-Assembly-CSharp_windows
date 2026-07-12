@@ -25,6 +25,12 @@ public class TopLeftControlScreen : KScreen
 		});
 	}
 
+	protected override void OnForcedCleanUp()
+	{
+		KInputManager.InputChange.RemoveListener(new UnityAction(this.ResetToolTip));
+		base.OnForcedCleanUp();
+	}
+
 	public void RefreshName()
 	{
 		if (SaveGame.Instance != null)

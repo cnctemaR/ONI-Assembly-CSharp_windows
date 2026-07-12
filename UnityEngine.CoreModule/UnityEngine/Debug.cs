@@ -120,7 +120,11 @@ namespace UnityEngine
 			}
 			else
 			{
-				debugLogHandler.LogFormat(logType, logOptions, context, format, args);
+				bool flag2 = Debug.unityLogger.IsLogTypeAllowed(logType);
+				if (flag2)
+				{
+					debugLogHandler.LogFormat(logType, logOptions, context, format, args);
+				}
 			}
 		}
 
@@ -289,8 +293,8 @@ namespace UnityEngine
 			Debug.unityLogger.LogFormat(LogType.Assert, context, format, args);
 		}
 
-		[NativeProperty(TargetType = TargetType.Field)]
 		[StaticAccessor("GetBuildSettings()", StaticAccessorType.Dot)]
+		[NativeProperty(TargetType = TargetType.Field)]
 		public static extern bool isDebugBuild
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -353,9 +357,9 @@ namespace UnityEngine
 			return flag2;
 		}
 
-		[Conditional("UNITY_ASSERTIONS")]
-		[Obsolete("Assert(bool, string, params object[]) is obsolete. Use AssertFormat(bool, string, params object[]) (UnityUpgradable) -> AssertFormat(*)", true)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
+		[Obsolete("Assert(bool, string, params object[]) is obsolete. Use AssertFormat(bool, string, params object[]) (UnityUpgradable) -> AssertFormat(*)", true)]
+		[Conditional("UNITY_ASSERTIONS")]
 		public static void Assert(bool condition, string format, params object[] args)
 		{
 			bool flag = !condition;

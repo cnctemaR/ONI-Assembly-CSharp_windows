@@ -475,7 +475,7 @@ namespace UnityEngine.UIElements
 				num = hardHighLimit - highLimit;
 				num6 = -1f;
 			}
-			bool flag5 = Mathf.Abs(num3) < Mathf.Epsilon;
+			bool flag5 = Mathf.Abs(num3) < 1E-30f;
 			float num7;
 			if (flag5)
 			{
@@ -729,8 +729,8 @@ namespace UnityEngine.UIElements
 
 		private void UpdateScrollers(bool displayHorizontal, bool displayVertical)
 		{
-			float num = ((this.contentContainer.layout.width > Mathf.Epsilon) ? (this.contentViewport.layout.width / this.contentContainer.layout.width) : 1f);
-			float num2 = ((this.contentContainer.layout.height > Mathf.Epsilon) ? (this.contentViewport.layout.height / this.contentContainer.layout.height) : 1f);
+			float num = ((this.contentContainer.layout.width > 1E-30f) ? (this.contentViewport.layout.width / this.contentContainer.layout.width) : 1f);
+			float num2 = ((this.contentContainer.layout.height > 1E-30f) ? (this.contentViewport.layout.height / this.contentContainer.layout.height) : 1f);
 			this.horizontalScroller.Adjust(num);
 			this.verticalScroller.Adjust(num2);
 			this.horizontalScroller.SetEnabled(this.contentContainer.layout.width - this.contentViewport.layout.width > 0f);

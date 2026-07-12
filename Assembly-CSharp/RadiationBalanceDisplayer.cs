@@ -6,7 +6,7 @@ using UnityEngine;
 public class RadiationBalanceDisplayer : StandardAmountDisplayer
 {
 	public RadiationBalanceDisplayer()
-		: base(GameUtil.UnitClass.SimpleFloat, GameUtil.TimeSlice.PerCycle, null)
+		: base(GameUtil.UnitClass.SimpleFloat, GameUtil.TimeSlice.PerCycle, null, GameUtil.IdentityDescriptorTense.Normal)
 	{
 		this.formatter = new RadiationBalanceDisplayer.RadiationAttributeFormatter();
 	}

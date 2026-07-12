@@ -5,9 +5,9 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Rendering
 {
-	[NativeHeader("Runtime/Graphics/ShaderScriptBindings.h")]
-	[NativeHeader("Runtime/Shaders/ShaderKeywords.h")]
 	[UsedByNativeCode]
+	[NativeHeader("Runtime/Shaders/ShaderKeywords.h")]
+	[NativeHeader("Runtime/Graphics/ShaderScriptBindings.h")]
 	public struct ShaderKeyword
 	{
 		[FreeFunction("ShaderScripting::GetGlobalKeywordIndex")]

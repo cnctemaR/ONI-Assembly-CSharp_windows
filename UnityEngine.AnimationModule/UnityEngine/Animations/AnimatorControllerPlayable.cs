@@ -8,13 +8,13 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Animations
 {
-	[NativeHeader("Modules/Animation/ScriptBindings/Animator.bindings.h")]
-	[NativeHeader("Modules/Animation/ScriptBindings/AnimatorControllerPlayable.bindings.h")]
-	[RequiredByNativeCode]
 	[NativeHeader("Modules/Animation/AnimatorInfo.h")]
 	[StaticAccessor("AnimatorControllerPlayableBindings", StaticAccessorType.DoubleColon)]
-	[NativeHeader("Modules/Animation/Director/AnimatorControllerPlayable.h")]
+	[RequiredByNativeCode]
+	[NativeHeader("Modules/Animation/ScriptBindings/AnimatorControllerPlayable.bindings.h")]
 	[NativeHeader("Modules/Animation/RuntimeAnimatorController.h")]
+	[NativeHeader("Modules/Animation/ScriptBindings/Animator.bindings.h")]
+	[NativeHeader("Modules/Animation/Director/AnimatorControllerPlayable.h")]
 	public struct AnimatorControllerPlayable : IPlayable, IEquatable<AnimatorControllerPlayable>
 	{
 		public static AnimatorControllerPlayable Null

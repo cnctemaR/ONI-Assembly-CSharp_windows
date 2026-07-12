@@ -22,8 +22,8 @@ namespace UnityEngine
 			AnimationClip.SampleAnimation(go, this, time, this.wrapMode);
 		}
 
-		[FreeFunction]
 		[NativeHeader("Modules/Animation/AnimationUtility.h")]
+		[FreeFunction]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern void SampleAnimation([NotNull("ArgumentNullException")] GameObject go, [NotNull("ArgumentNullException")] AnimationClip clip, float inTime, WrapMode wrapMode);
 

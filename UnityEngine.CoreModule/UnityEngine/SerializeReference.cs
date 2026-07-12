@@ -4,8 +4,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[AttributeUsage(AttributeTargets.Field)]
 	[RequiredByNativeCode]
+	[AttributeUsage(AttributeTargets.Field)]
 	public sealed class SerializeReference : Attribute
 	{
 		[ExcludeFromDocs]

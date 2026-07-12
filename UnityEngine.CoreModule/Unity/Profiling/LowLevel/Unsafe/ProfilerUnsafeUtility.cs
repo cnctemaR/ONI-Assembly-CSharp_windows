@@ -8,8 +8,8 @@ using UnityEngine.Scripting;
 
 namespace Unity.Profiling.LowLevel.Unsafe
 {
-	[UsedByNativeCode]
 	[NativeHeader("Runtime/Profiler/ScriptBindings/ProfilerMarker.bindings.h")]
+	[UsedByNativeCode]
 	public static class ProfilerUnsafeUtility
 	{
 		[ThreadSafe]

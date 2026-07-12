@@ -357,7 +357,7 @@ namespace UnityEngine
 									throw new Exception(text + ((typeFromHandle != null) ? typeFromHandle.ToString() : null) + "'");
 								}
 								IntPtr intPtr3 = AndroidJNISafe.CallObjectMethod(this.m_jobject, methodID, array);
-								returnType = ((intPtr3 == IntPtr.Zero) ? default(ReturnType) : ((ReturnType)((object)AndroidJNIHelper.ConvertFromJNIArray<ReturnType>(intPtr3))));
+								returnType = AndroidJavaObject.FromJavaArrayDeleteLocalRef<ReturnType>(intPtr3);
 							}
 						}
 					}
@@ -485,7 +485,7 @@ namespace UnityEngine
 								throw new Exception(text + ((typeFromHandle != null) ? typeFromHandle.ToString() : null) + "'");
 							}
 							IntPtr objectField3 = AndroidJNISafe.GetObjectField(this.m_jobject, fieldID);
-							fieldType = ((objectField3 == IntPtr.Zero) ? default(FieldType) : ((FieldType)((object)AndroidJNIHelper.ConvertFromJNIArray<FieldType>(objectField3))));
+							fieldType = AndroidJavaObject.FromJavaArrayDeleteLocalRef<FieldType>(objectField3);
 						}
 					}
 				}
@@ -750,7 +750,7 @@ namespace UnityEngine
 									throw new Exception(text + ((typeFromHandle != null) ? typeFromHandle.ToString() : null) + "'");
 								}
 								IntPtr intPtr3 = AndroidJNISafe.CallStaticObjectMethod(this.m_jclass, methodID, array);
-								returnType = ((intPtr3 == IntPtr.Zero) ? default(ReturnType) : ((ReturnType)((object)AndroidJNIHelper.ConvertFromJNIArray<ReturnType>(intPtr3))));
+								returnType = AndroidJavaObject.FromJavaArrayDeleteLocalRef<ReturnType>(intPtr3);
 							}
 						}
 					}
@@ -878,7 +878,7 @@ namespace UnityEngine
 								throw new Exception(text + ((typeFromHandle != null) ? typeFromHandle.ToString() : null) + "'");
 							}
 							IntPtr staticObjectField3 = AndroidJNISafe.GetStaticObjectField(this.m_jclass, fieldID);
-							fieldType = ((staticObjectField3 == IntPtr.Zero) ? default(FieldType) : ((FieldType)((object)AndroidJNIHelper.ConvertFromJNIArray<FieldType>(staticObjectField3))));
+							fieldType = AndroidJavaObject.FromJavaArrayDeleteLocalRef<FieldType>(staticObjectField3);
 						}
 					}
 				}
@@ -1027,6 +1027,28 @@ namespace UnityEngine
 				AndroidJNISafe.DeleteLocalRef(jclass);
 			}
 			return androidJavaClass;
+		}
+
+		internal static ReturnType FromJavaArrayDeleteLocalRef<ReturnType>(IntPtr jobject)
+		{
+			bool flag = jobject == IntPtr.Zero;
+			ReturnType returnType;
+			if (flag)
+			{
+				returnType = default(ReturnType);
+			}
+			else
+			{
+				try
+				{
+					returnType = (ReturnType)((object)AndroidJNIHelper.ConvertFromJNIArray<ReturnType>(jobject));
+				}
+				finally
+				{
+					AndroidJNISafe.DeleteLocalRef(jobject);
+				}
+			}
+			return returnType;
 		}
 
 		protected IntPtr _GetRawObject()

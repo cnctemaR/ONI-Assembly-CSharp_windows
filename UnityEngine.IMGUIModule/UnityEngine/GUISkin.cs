@@ -5,8 +5,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[AssetFileNameExtension("guiskin", new string[] { })]
 	[RequiredByNativeCode]
+	[AssetFileNameExtension("guiskin", new string[] { })]
 	[ExecuteInEditMode]
 	[Serializable]
 	public sealed class GUISkin : ScriptableObject

@@ -54,6 +54,12 @@ namespace UnityEngine.UIElements
 					}
 				}
 			}
+			else
+			{
+				base.textInputField.editorEngine.keyboardOnScreen.active = false;
+				base.textInputField.editorEngine.keyboardOnScreen = null;
+				this.m_TouchKeyboardPoller.Pause();
+			}
 		}
 
 		public override void ExecuteDefaultActionAtTarget(EventBase evt)

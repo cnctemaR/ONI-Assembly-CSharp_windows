@@ -75,7 +75,7 @@ public class ScannerModule : GameStateMachine<ScannerModule, ScannerModule.Insta
 					ClusterTraveler component = craftInterface.GetComponent<ClusterTraveler>();
 					if (component != null)
 					{
-						component.RevalidatePath();
+						component.RevalidatePath(true);
 					}
 				}
 				craftInterface.GetComponent<Clustercraft>().Trigger(-688990705, null);

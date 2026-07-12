@@ -4,6 +4,10 @@ using UnityEngine;
 
 public class KAnimFile : ScriptableObject
 {
+	public bool IsBuildLoaded { get; private set; }
+
+	public bool IsAnimLoaded { get; private set; }
+
 	public byte[] animBytes
 	{
 		get
@@ -46,6 +50,14 @@ public class KAnimFile : ScriptableObject
 			}
 			return this.textures;
 		}
+	}
+
+	public void FinalizeLoading()
+	{
+		this.IsBuildLoaded = this.buildBytes != null;
+		this.IsAnimLoaded = this.animBytes != null;
+		this.animFile = null;
+		this.buildFile = null;
 	}
 
 	public void Initialize(TextAsset anim, TextAsset build, IList<Texture2D> textures)

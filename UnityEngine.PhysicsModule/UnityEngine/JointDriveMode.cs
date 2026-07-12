@@ -2,8 +2,8 @@
 
 namespace UnityEngine
 {
-	[Obsolete("JointDriveMode is no longer supported")]
 	[Flags]
+	[Obsolete("JointDriveMode is no longer supported")]
 	public enum JointDriveMode
 	{
 		[Obsolete("JointDriveMode.None is no longer supported")]

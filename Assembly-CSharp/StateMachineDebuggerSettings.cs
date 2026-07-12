@@ -65,14 +65,6 @@ public class StateMachineDebuggerSettings : ScriptableObject
 			this.type = type;
 		}
 
-		public static void ShowHeader()
-		{
-		}
-
-		public void ShowEditor()
-		{
-		}
-
 		public Type type;
 
 		public string typeName;

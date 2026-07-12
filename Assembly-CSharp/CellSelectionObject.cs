@@ -34,11 +34,29 @@ public class CellSelectionObject : KMonoBehaviour
 		this.overlayFilterMap.Add(OverlayModes.Oxygen.ID, () => Grid.Element[this.mouseCell].IsGas);
 		this.overlayFilterMap.Add(OverlayModes.GasConduits.ID, () => Grid.Element[this.mouseCell].IsGas);
 		this.overlayFilterMap.Add(OverlayModes.LiquidConduits.ID, () => Grid.Element[this.mouseCell].IsLiquid);
+		if (CellSelectionObject.selectionObjectA == null)
+		{
+			CellSelectionObject.selectionObjectA = this;
+			return;
+		}
+		if (CellSelectionObject.selectionObjectB == null)
+		{
+			CellSelectionObject.selectionObjectB = this;
+			return;
+		}
+		global::Debug.LogError("CellSelectionObjects not properly cleaned up.");
 	}
 
 	protected override void OnCleanUp()
 	{
+		CellSelectionObject.selectionObjectA = null;
+		CellSelectionObject.selectionObjectB = null;
 		base.OnCleanUp();
+	}
+
+	public static bool IsSelectionObject(GameObject testObject)
+	{
+		return testObject == CellSelectionObject.selectionObjectA.gameObject || testObject == CellSelectionObject.selectionObjectB.gameObject;
 	}
 
 	private void OnApplicationFocus(bool focusStatus)
@@ -230,6 +248,10 @@ public class CellSelectionObject : KMonoBehaviour
 	{
 		Game.Instance.userMenu.Refresh(base.gameObject);
 	}
+
+	private static CellSelectionObject selectionObjectA;
+
+	private static CellSelectionObject selectionObjectB;
 
 	[HideInInspector]
 	public CellSelectionObject alternateSelectionObject;

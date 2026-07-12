@@ -46,6 +46,10 @@ public class Diggable : Workable
 		base.OnSpawn();
 		int num = Grid.PosToCell(this);
 		this.originalDigElement = Grid.Element[num];
+		if (this.originalDigElement.hardness == 255)
+		{
+			this.OnCancel();
+		}
 		base.GetComponent<KSelectable>().SetStatusItem(Db.Get().StatusItemCategories.Main, Db.Get().MiscStatusItems.WaitingForDig, null);
 		this.UpdateColor(this.isReachable);
 		Grid.Objects[num, 7] = base.gameObject;
@@ -106,7 +110,13 @@ public class Diggable : Workable
 		int num = Grid.PosToCell(this);
 		int num2 = -1;
 		this.UpdateColor(this.isReachable);
-		if (Grid.Element[num].hardness >= 251)
+		if (Grid.Element[num].hardness == 255)
+		{
+			this.UpdateColor(false);
+			this.requiredSkillPerk = null;
+			this.chore.AddPrecondition(ChorePreconditions.instance.HasSkillPerk, Db.Get().SkillPerks.CanDigUnobtanium);
+		}
+		else if (Grid.Element[num].hardness >= 251)
 		{
 			bool flag = false;
 			using (List<Chore.PreconditionInstance>.Enumerator enumerator = this.chore.GetPreconditions().GetEnumerator())
@@ -261,7 +271,12 @@ public class Diggable : Workable
 
 	public override bool InstantlyFinish(Worker worker)
 	{
-		float approximateDigTime = Diggable.GetApproximateDigTime(Grid.PosToCell(this));
+		int num = Grid.PosToCell(this);
+		if (Grid.Element[num].hardness == 255)
+		{
+			return false;
+		}
+		float approximateDigTime = Diggable.GetApproximateDigTime(num);
 		worker.Work(approximateDigTime);
 		return true;
 	}
@@ -433,7 +448,10 @@ public class Diggable : Workable
 
 	private void OnCancel()
 	{
-		DetailsScreen.Instance.Show(false);
+		if (DetailsScreen.Instance != null)
+		{
+			DetailsScreen.Instance.Show(false);
+		}
 		base.gameObject.Trigger(2127324410, null);
 	}
 

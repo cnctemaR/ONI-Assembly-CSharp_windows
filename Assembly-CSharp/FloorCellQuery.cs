@@ -3,9 +3,10 @@ using System.Collections.Generic;
 
 public class FloorCellQuery : PathFinderQuery
 {
-	public FloorCellQuery Reset(int max_results)
+	public FloorCellQuery Reset(int max_results, int adjacent_cells_buffer = 0)
 	{
 		this.max_results = max_results;
+		this.adjacent_cells_buffer = adjacent_cells_buffer;
 		this.result_cells.Clear();
 		return this;
 	}
@@ -27,10 +28,31 @@ public class FloorCellQuery : PathFinderQuery
 		}
 		int cellInDirection = Grid.GetCellInDirection(testCell, Direction.Up);
 		int cellInDirection2 = Grid.GetCellInDirection(testCell, Direction.Down);
-		return !Grid.ObjectLayers[1].ContainsKey(testCell) && Grid.IsValidCell(cellInDirection2) && Grid.IsSolidCell(cellInDirection2) && Grid.IsValidCell(cellInDirection) && !Grid.IsSolidCell(cellInDirection);
+		if (!Grid.ObjectLayers[1].ContainsKey(testCell) && Grid.IsValidCell(cellInDirection2) && Grid.IsSolidCell(cellInDirection2) && Grid.IsValidCell(cellInDirection) && !Grid.IsSolidCell(cellInDirection))
+		{
+			int num = testCell;
+			int num2 = testCell;
+			for (int i = 0; i < this.adjacent_cells_buffer; i++)
+			{
+				num = Grid.CellLeft(num);
+				num2 = Grid.CellRight(num2);
+				if (!Grid.IsValidCell(num) || Grid.IsSolidCell(num))
+				{
+					return false;
+				}
+				if (!Grid.IsValidCell(num2) || Grid.IsSolidCell(num2))
+				{
+					return false;
+				}
+			}
+			return true;
+		}
+		return false;
 	}
 
 	public List<int> result_cells = new List<int>();
 
 	private int max_results;
+
+	private int adjacent_cells_buffer;
 }

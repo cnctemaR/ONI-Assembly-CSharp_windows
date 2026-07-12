@@ -68,10 +68,9 @@ namespace UnityEngine.UI
 			this.CleanInvalidItems();
 			this.m_PerformingLayoutUpdate = true;
 			this.m_LayoutRebuildQueue.Sort(CanvasUpdateRegistry.s_SortLayoutFunction);
-			int count = this.m_LayoutRebuildQueue.Count;
 			for (int i = 0; i <= 2; i++)
 			{
-				for (int j = 0; j < count; j++)
+				for (int j = 0; j < this.m_LayoutRebuildQueue.Count; j++)
 				{
 					ICanvasElement canvasElement = this.m_LayoutRebuildQueue[j];
 					try
@@ -87,7 +86,7 @@ namespace UnityEngine.UI
 					}
 				}
 			}
-			for (int k = 0; k < count; k++)
+			for (int k = 0; k < this.m_LayoutRebuildQueue.Count; k++)
 			{
 				this.m_LayoutRebuildQueue[k].LayoutComplete();
 			}
@@ -97,10 +96,9 @@ namespace UnityEngine.UI
 			UISystemProfilerApi.BeginSample(UISystemProfilerApi.SampleType.Render);
 			ClipperRegistry.instance.Cull();
 			this.m_PerformingGraphicUpdate = true;
-			int count2 = this.m_GraphicRebuildQueue.Count;
 			for (int l = 3; l < 5; l++)
 			{
-				for (int m = 0; m < count2; m++)
+				for (int m = 0; m < this.m_GraphicRebuildQueue.Count; m++)
 				{
 					try
 					{
@@ -116,7 +114,7 @@ namespace UnityEngine.UI
 					}
 				}
 			}
-			for (int n = 0; n < count2; n++)
+			for (int n = 0; n < this.m_GraphicRebuildQueue.Count; n++)
 			{
 				this.m_GraphicRebuildQueue[n].GraphicUpdateComplete();
 			}

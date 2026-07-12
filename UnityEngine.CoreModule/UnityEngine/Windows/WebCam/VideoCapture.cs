@@ -9,8 +9,8 @@ using UnityEngine.Scripting.APIUpdating;
 
 namespace UnityEngine.Windows.WebCam
 {
-	[NativeHeader("PlatformDependent/Win/Webcam/VideoCaptureBindings.h")]
 	[MovedFrom("UnityEngine.XR.WSA.WebCam")]
+	[NativeHeader("PlatformDependent/Win/Webcam/VideoCaptureBindings.h")]
 	[StaticAccessor("VideoCaptureBindings", StaticAccessorType.DoubleColon)]
 	[StructLayout(LayoutKind.Sequential)]
 	public class VideoCapture : IDisposable
@@ -55,8 +55,8 @@ namespace UnityEngine.Windows.WebCam
 			}
 		}
 
-		[NativeName("GetSupportedResolutions")]
 		[NativeConditional("(PLATFORM_WIN || PLATFORM_WINRT) && !PLATFORM_XBOXONE")]
+		[NativeName("GetSupportedResolutions")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern Resolution[] GetSupportedResolutions_Internal();
 
@@ -65,8 +65,8 @@ namespace UnityEngine.Windows.WebCam
 			return VideoCapture.GetSupportedFrameRatesForResolution_Internal(resolution.width, resolution.height);
 		}
 
-		[NativeName("GetSupportedFrameRatesForResolution")]
 		[NativeConditional("(PLATFORM_WIN || PLATFORM_WINRT) && !PLATFORM_XBOXONE")]
+		[NativeName("GetSupportedFrameRatesForResolution")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern float[] GetSupportedFrameRatesForResolution_Internal(int resolutionWidth, int resolutionHeight);
 
@@ -85,7 +85,6 @@ namespace UnityEngine.Windows.WebCam
 			{
 				throw new ArgumentNullException("onCreatedCallback");
 			}
-			showHolograms = false;
 			VideoCapture.Instantiate_Internal(showHolograms, onCreatedCallback);
 		}
 
@@ -99,8 +98,8 @@ namespace UnityEngine.Windows.WebCam
 			VideoCapture.Instantiate_Internal(false, onCreatedCallback);
 		}
 
-		[NativeConditional("(PLATFORM_WIN || PLATFORM_WINRT) && !PLATFORM_XBOXONE")]
 		[NativeName("Instantiate")]
+		[NativeConditional("(PLATFORM_WIN || PLATFORM_WINRT) && !PLATFORM_XBOXONE")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void Instantiate_Internal(bool showHolograms, VideoCapture.OnVideoCaptureResourceCreatedCallback onCreatedCallback);
 
@@ -143,8 +142,8 @@ namespace UnityEngine.Windows.WebCam
 			this.StartVideoMode_Internal(setupParams, audioState, onVideoModeStartedCallback);
 		}
 
-		[NativeMethod("VideoCaptureBindings::StartVideoMode", HasExplicitThis = true)]
 		[NativeConditional("(PLATFORM_WIN || PLATFORM_WINRT) && !PLATFORM_XBOXONE")]
+		[NativeMethod("VideoCaptureBindings::StartVideoMode", HasExplicitThis = true)]
 		private void StartVideoMode_Internal(CameraParameters cameraParameters, VideoCapture.AudioState audioState, VideoCapture.OnVideoModeStartedCallback onVideoModeStartedCallback)
 		{
 			this.StartVideoMode_Internal_Injected(ref cameraParameters, audioState, onVideoModeStartedCallback);
@@ -156,8 +155,8 @@ namespace UnityEngine.Windows.WebCam
 			callback(VideoCapture.MakeCaptureResult(hResult));
 		}
 
-		[NativeMethod("VideoCaptureBindings::StopVideoMode", HasExplicitThis = true)]
 		[NativeConditional("(PLATFORM_WIN || PLATFORM_WINRT) && !PLATFORM_XBOXONE")]
+		[NativeMethod("VideoCaptureBindings::StopVideoMode", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void StopVideoModeAsync([NotNull("ArgumentNullException")] VideoCapture.OnVideoModeStoppedCallback onVideoModeStoppedCallback);
 
@@ -194,8 +193,8 @@ namespace UnityEngine.Windows.WebCam
 			this.StartRecordingVideoToDisk_Internal(fileInfo.FullName, onStartedRecordingVideoCallback);
 		}
 
-		[NativeConditional("(PLATFORM_WIN || PLATFORM_WINRT) && !PLATFORM_XBOXONE")]
 		[NativeMethod("VideoCaptureBindings::StartRecordingVideoToDisk", HasExplicitThis = true)]
+		[NativeConditional("(PLATFORM_WIN || PLATFORM_WINRT) && !PLATFORM_XBOXONE")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void StartRecordingVideoToDisk_Internal(string filename, VideoCapture.OnStartedRecordingVideoCallback onStartedRecordingVideoCallback);
 
@@ -205,8 +204,8 @@ namespace UnityEngine.Windows.WebCam
 			callback(VideoCapture.MakeCaptureResult(hResult));
 		}
 
-		[NativeConditional("(PLATFORM_WIN || PLATFORM_WINRT) && !PLATFORM_XBOXONE")]
 		[NativeMethod("VideoCaptureBindings::StopRecordingVideoToDisk", HasExplicitThis = true)]
+		[NativeConditional("(PLATFORM_WIN || PLATFORM_WINRT) && !PLATFORM_XBOXONE")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void StopRecordingAsync([NotNull("ArgumentNullException")] VideoCapture.OnStoppedRecordingVideoCallback onStoppedRecordingVideoCallback);
 
@@ -216,8 +215,8 @@ namespace UnityEngine.Windows.WebCam
 			callback(VideoCapture.MakeCaptureResult(hResult));
 		}
 
-		[ThreadAndSerializationSafe]
 		[NativeMethod("VideoCaptureBindings::GetUnsafePointerToVideoDeviceController", HasExplicitThis = true)]
+		[ThreadAndSerializationSafe]
 		[NativeConditional("(PLATFORM_WIN || PLATFORM_WINRT) && !PLATFORM_XBOXONE")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern IntPtr GetUnsafePointerToVideoDeviceController();
@@ -233,8 +232,8 @@ namespace UnityEngine.Windows.WebCam
 			GC.SuppressFinalize(this);
 		}
 
-		[NativeConditional("(PLATFORM_WIN || PLATFORM_WINRT) && !PLATFORM_XBOXONE")]
 		[NativeMethod("VideoCaptureBindings::Dispose", HasExplicitThis = true)]
+		[NativeConditional("(PLATFORM_WIN || PLATFORM_WINRT) && !PLATFORM_XBOXONE")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void Dispose_Internal();
 
@@ -255,8 +254,8 @@ namespace UnityEngine.Windows.WebCam
 			}
 		}
 
-		[NativeConditional("(PLATFORM_WIN || PLATFORM_WINRT) && !PLATFORM_XBOXONE")]
 		[ThreadAndSerializationSafe]
+		[NativeConditional("(PLATFORM_WIN || PLATFORM_WINRT) && !PLATFORM_XBOXONE")]
 		[NativeMethod("VideoCaptureBindings::DisposeThreaded", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void DisposeThreaded_Internal();

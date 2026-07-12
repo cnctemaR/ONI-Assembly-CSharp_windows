@@ -158,6 +158,7 @@ public class ConduitFlowVisualizer
 		this.movingBallMesh.End(z, this.layer);
 		this.staticBallMesh.End(z, this.layer);
 		renderMeshContext.Finish();
+		ConduitFlowVisualizer.render_mesh_job.Reset(null);
 	}
 
 	public void ColourizePipeContents(bool show_contents, bool move_to_overlay_layer)
@@ -411,7 +412,7 @@ public class ConduitFlowVisualizer
 		public Vector3 position;
 	}
 
-	private struct RenderMeshContext
+	private class RenderMeshContext
 	{
 		public RenderMeshContext(ConduitFlowVisualizer outer, float lerp_percent, Vector2I min, Vector2I max)
 		{

@@ -28,6 +28,18 @@ public class Game : KMonoBehaviour
 
 	public static Game Instance { get; private set; }
 
+	public Camera MainCamera
+	{
+		get
+		{
+			if (this.m_CachedCamera == null)
+			{
+				this.m_CachedCamera = Camera.main;
+			}
+			return this.m_CachedCamera;
+		}
+	}
+
 	public bool SaveToCloudActive
 	{
 		get
@@ -152,7 +164,7 @@ public class Game : KMonoBehaviour
 		Singleton<CellChangeMonitor>.Instance.SetGridSize(Grid.WidthInCells, Grid.HeightInCells);
 		this.unlocks = base.GetComponent<Unlocks>();
 		this.changelistsPlayedOn = new List<uint>();
-		this.changelistsPlayedOn.Add(498381U);
+		this.changelistsPlayedOn.Add(509629U);
 		this.dateGenerated = global::System.DateTime.UtcNow.ToString("U", CultureInfo.InvariantCulture);
 	}
 
@@ -218,7 +230,7 @@ public class Game : KMonoBehaviour
 		}
 		this.LocalPlayer = this.SpawnPlayer();
 		WaterCubes.Instance.Init();
-		SpeedControlScreen.Instance.Pause(false);
+		SpeedControlScreen.Instance.Pause(false, false);
 		LightGridManager.Initialise();
 		RadiationGridManager.Initialise();
 		this.RefreshRadiationLoop();
@@ -901,7 +913,7 @@ public class Game : KMonoBehaviour
 		{
 			return;
 		}
-		uint num = 498381U;
+		uint num = 509629U;
 		string text = global::System.DateTime.Now.ToShortDateString();
 		string text2 = global::System.DateTime.Now.ToShortTimeString();
 		string fileName = Path.GetFileName(GenericGameSettings.instance.performanceCapture.saveGame);
@@ -1117,9 +1129,9 @@ public class Game : KMonoBehaviour
 		gameSaveData.savedInfo = this.savedInfo;
 		global::Debug.Assert(gameSaveData.worldDetail != null, "World detail null");
 		gameSaveData.dateGenerated = this.dateGenerated;
-		if (!this.changelistsPlayedOn.Contains(498381U))
+		if (!this.changelistsPlayedOn.Contains(509629U))
 		{
-			this.changelistsPlayedOn.Add(498381U);
+			this.changelistsPlayedOn.Add(509629U);
 		}
 		gameSaveData.changelistsPlayedOn = this.changelistsPlayedOn;
 		if (this.OnSave != null)
@@ -1443,14 +1455,14 @@ public class Game : KMonoBehaviour
 		Infrared.DestroyInstance();
 		KPrefabIDTracker.DestroyInstance();
 		ManagementMenu.DestroyInstance();
+		ClusterMapScreen.DestroyInstance();
 		Messenger.DestroyInstance();
 		LoopingSoundManager.DestroyInstance();
 		MeterScreen.DestroyInstance();
 		MinionGroupProber.DestroyInstance();
 		NavPathDrawer.DestroyInstance();
 		MinionIdentity.DestroyStatics();
-		PathFinder.PathGrid.OnCleanUp();
-		PathFinder.PathGrid = null;
+		PathFinder.DestroyStatics();
 		Pathfinding.DestroyInstance();
 		PrebuildTool.DestroyInstance();
 		PrioritizeTool.DestroyInstance();
@@ -1544,9 +1556,20 @@ public class Game : KMonoBehaviour
 		UpdateObjectCountParameter.Clear();
 		MaterialSelectionPanel.ClearStatics();
 		StarmapScreen.DestroyInstance();
-		SpacecraftManager.DestroyInstance();
+		ClusterNameDisplayScreen.DestroyInstance();
 		ClusterManager.DestroyInstance();
 		ClusterGrid.DestroyInstance();
+		PathFinderQueries.Reset();
+		KBatchedAnimUpdater instance = Singleton<KBatchedAnimUpdater>.Instance;
+		if (instance != null)
+		{
+			instance.InitializeGrid();
+		}
+		GlobalChoreProvider.DestroyInstance();
+		WorldSelector.DestroyInstance();
+		ColonyDiagnosticUtility.DestroyInstance();
+		DiscoveredResources.DestroyInstance();
+		ClusterMapSelectTool.DestroyInstance();
 		Game.Instance = null;
 		Grid.OnReveal = null;
 		this.VisualTunerElement = null;
@@ -1588,6 +1611,8 @@ public class Game : KMonoBehaviour
 	public GameObject screenManagerPrefab;
 
 	public GameObject cameraControllerPrefab;
+
+	private Camera m_CachedCamera;
 
 	public GameObject tempIntroScreenPrefab;
 

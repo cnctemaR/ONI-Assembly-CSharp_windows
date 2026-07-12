@@ -5,8 +5,8 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	[RequireComponent(typeof(Transform))]
 	[StaticAccessor("AudioListenerBindings", StaticAccessorType.DoubleColon)]
+	[RequireComponent(typeof(Transform))]
 	public sealed class AudioListener : AudioBehaviour
 	{
 		[NativeThrows]

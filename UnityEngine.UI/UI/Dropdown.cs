@@ -245,7 +245,7 @@ namespace UnityEngine.UI
 			this.RefreshShownValue();
 		}
 
-		private void SetupTemplate()
+		private void SetupTemplate(Canvas rootCanvas)
 		{
 			this.validTemplate = false;
 			if (!this.m_Template)
@@ -298,9 +298,14 @@ namespace UnityEngine.UI
 				}
 				transform = transform.parent;
 			}
-			Canvas orAddComponent = Dropdown.GetOrAddComponent<Canvas>(gameObject);
-			orAddComponent.overrideSorting = true;
-			orAddComponent.sortingOrder = 30000;
+			Canvas canvas2;
+			if (!gameObject.TryGetComponent<Canvas>(out canvas2))
+			{
+				Canvas canvas3 = gameObject.AddComponent<Canvas>();
+				canvas3.overrideSorting = true;
+				canvas3.sortingOrder = 30000;
+				canvas3.sortingLayerID = rootCanvas.sortingLayerID;
+			}
 			if (canvas != null)
 			{
 				Component[] components = canvas.GetComponents<BaseRaycaster>();
@@ -373,14 +378,13 @@ namespace UnityEngine.UI
 			ListPool<Canvas>.Release(list);
 			if (!this.validTemplate)
 			{
-				this.SetupTemplate();
+				this.SetupTemplate(canvas);
 				if (!this.validTemplate)
 				{
 					return;
 				}
 			}
 			this.m_Template.gameObject.SetActive(true);
-			this.m_Template.GetComponent<Canvas>().sortingLayerID = canvas.sortingLayerID;
 			this.m_Dropdown = this.CreateDropdownList(this.m_Template.gameObject);
 			this.m_Dropdown.name = "Dropdown List";
 			this.m_Dropdown.SetActive(true);
@@ -705,6 +709,8 @@ namespace UnityEngine.UI
 		private TweenRunner<FloatTween> m_AlphaTweenRunner;
 
 		private bool validTemplate;
+
+		private const int kHighSortingLayer = 30000;
 
 		private static Dropdown.OptionData s_NoOptionData = new Dropdown.OptionData();
 

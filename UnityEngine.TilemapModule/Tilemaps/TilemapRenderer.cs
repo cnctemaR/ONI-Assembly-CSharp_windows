@@ -8,9 +8,9 @@ namespace UnityEngine.Tilemaps
 {
 	[NativeHeader("Modules/Grid/Public/GridMarshalling.h")]
 	[NativeHeader("Modules/Tilemap/TilemapRendererJobs.h")]
-	[NativeType(Header = "Modules/Tilemap/Public/TilemapRenderer.h")]
-	[RequireComponent(typeof(Tilemap))]
 	[NativeHeader("Modules/Tilemap/Public/TilemapMarshalling.h")]
+	[RequireComponent(typeof(Tilemap))]
+	[NativeType(Header = "Modules/Tilemap/Public/TilemapRenderer.h")]
 	public sealed class TilemapRenderer : Renderer
 	{
 		public Vector3Int chunkSize

@@ -6,9 +6,9 @@ using UnityEngine.Scripting;
 namespace UnityEngine
 {
 	[NativeHeader("Runtime/BaseClasses/TagManager.h")]
-	[NativeClass("BitField", "struct BitField;")]
-	[RequiredByNativeCode(Optional = true, GenerateProxy = true)]
 	[NativeHeader("Runtime/BaseClasses/BitField.h")]
+	[RequiredByNativeCode(Optional = true, GenerateProxy = true)]
+	[NativeClass("BitField", "struct BitField;")]
 	public struct LayerMask
 	{
 		public static implicit operator int(LayerMask mask)
@@ -35,8 +35,8 @@ namespace UnityEngine
 			}
 		}
 
-		[NativeMethod("LayerToString")]
 		[StaticAccessor("GetTagManager()", StaticAccessorType.Dot)]
+		[NativeMethod("LayerToString")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern string LayerToName(int layer);
 

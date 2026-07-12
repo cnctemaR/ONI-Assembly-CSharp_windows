@@ -281,7 +281,7 @@ namespace UnityEngine.UIElements
 			pooled.deltaPosition = touch.deltaPosition;
 			pooled.deltaTime = touch.deltaTime;
 			pooled.clickCount = touch.tapCount;
-			pooled.pressure = ((Mathf.Abs(touch.maximumPossiblePressure) > Mathf.Epsilon) ? (touch.pressure / touch.maximumPossiblePressure) : 1f);
+			pooled.pressure = ((Mathf.Abs(touch.maximumPossiblePressure) > 1E-30f) ? (touch.pressure / touch.maximumPossiblePressure) : 1f);
 			pooled.tangentialPressure = 0f;
 			pooled.altitudeAngle = touch.altitudeAngle;
 			pooled.azimuthAngle = touch.azimuthAngle;

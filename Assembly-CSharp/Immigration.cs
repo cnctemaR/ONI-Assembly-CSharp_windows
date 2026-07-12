@@ -92,6 +92,7 @@ public class Immigration : KMonoBehaviour, ISaveLoadable, ISim200ms, IPersonalPr
 			new CarePackageInfo("DreckoEgg", 3f, () => this.CycleCondition(24)),
 			new CarePackageInfo("SquirrelEgg", 2f, null),
 			new CarePackageInfo("BasicCure", 3f, null),
+			new CarePackageInfo("CustomClothing", 1f, null, "SELECTRANDOM"),
 			new CarePackageInfo("Funky_Vest", 1f, null)
 		};
 	}
@@ -164,6 +165,7 @@ public class Immigration : KMonoBehaviour, ISaveLoadable, ISim200ms, IPersonalPr
 			new CarePackageInfo("DivergentBeetleEgg", 2f, () => this.CycleCondition(48) && this.DiscoveredCondition("DivergentBeetleEgg")),
 			new CarePackageInfo("StaterpillarEgg", 2f, () => this.CycleCondition(48) && this.DiscoveredCondition("StaterpillarEgg")),
 			new CarePackageInfo("BasicCure", 3f, null),
+			new CarePackageInfo("CustomClothing", 1f, null, "SELECTRANDOM"),
 			new CarePackageInfo("Funky_Vest", 1f, null)
 		};
 	}
@@ -318,4 +320,6 @@ public class Immigration : KMonoBehaviour, ISaveLoadable, ISim200ms, IPersonalPr
 	private const int CYCLE_THRESHOLD_C = 24;
 
 	private const int CYCLE_THRESHOLD_D = 48;
+
+	public const string FACADE_SELECT_RANDOM = "SELECTRANDOM";
 }

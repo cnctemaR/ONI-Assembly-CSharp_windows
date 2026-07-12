@@ -3,8 +3,8 @@ using Microsoft.CodeAnalysis;
 
 namespace System.Runtime.CompilerServices
 {
-	[CompilerGenerated]
 	[Microsoft.CodeAnalysis.Embedded]
+	[CompilerGenerated]
 	internal sealed class IsReadOnlyAttribute : Attribute
 	{
 	}

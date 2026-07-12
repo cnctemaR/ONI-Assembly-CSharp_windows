@@ -107,7 +107,8 @@ namespace Database
 			this.Arting2 = this.AddSkill(new Skill("Arting2", DUPLICANTS.ROLES.ARTIST.NAME, DUPLICANTS.ROLES.ARTIST.DESCRIPTION, "", 1, "hat_role_art2", "skillbadge_role_art2", Db.Get().SkillGroups.Art.Id, new List<SkillPerk>
 			{
 				Db.Get().SkillPerks.CanArtOkay,
-				Db.Get().SkillPerks.IncreaseArtMedium
+				Db.Get().SkillPerks.IncreaseArtMedium,
+				Db.Get().SkillPerks.CanClothingAlteration
 			}, new List<string> { this.Arting1.Id }));
 			if (DlcManager.FeatureClusterSpaceEnabled())
 			{

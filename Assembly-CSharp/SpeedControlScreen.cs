@@ -75,6 +75,12 @@ public class SpeedControlScreen : KScreen
 		this.OnChanged();
 	}
 
+	protected override void OnForcedCleanUp()
+	{
+		KInputManager.InputChange.RemoveListener(new UnityAction(this.ResetToolTip));
+		base.OnForcedCleanUp();
+	}
+
 	public int GetSpeed()
 	{
 		return this.speed;
@@ -128,7 +134,7 @@ public class SpeedControlScreen : KScreen
 			this.Unpause(playsound);
 			return;
 		}
-		this.Pause(playsound);
+		this.Pause(playsound, false);
 	}
 
 	public void ResetToolTip()
@@ -149,14 +155,21 @@ public class SpeedControlScreen : KScreen
 		this.pauseButtonWidget.GetComponent<ToolTip>().AddMultiStringTooltip(GameUtil.ReplaceHotkeyString(UI.TOOLTIPS.PAUSE, global::Action.TogglePause), this.TooltipTextStyle);
 	}
 
-	public void Pause(bool playSound = true)
+	public void Pause(bool playSound = true, bool isCrashed = false)
 	{
 		this.pauseCount++;
 		if (this.pauseCount == 1)
 		{
 			if (playSound)
 			{
-				KMonoBehaviour.PlaySound(GlobalAssets.GetSound("Speed_Pause", false));
+				if (isCrashed)
+				{
+					KMonoBehaviour.PlaySound(GlobalAssets.GetSound("Crash_Screen", false));
+				}
+				else
+				{
+					KMonoBehaviour.PlaySound(GlobalAssets.GetSound("Speed_Pause", false));
+				}
 				if (SoundListenerController.Instance != null)
 				{
 					SoundListenerController.Instance.SetLoopingVolume(0f);
@@ -293,7 +306,7 @@ public class SpeedControlScreen : KScreen
 			Time.time - this.stepTime,
 			"seconds"
 		});
-		this.Pause(false);
+		this.Pause(false, false);
 		yield break;
 	}
 

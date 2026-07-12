@@ -5,10 +5,10 @@ using UnityEngine.Internal;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Graphics/GraphicsScriptBindings.h")]
-	[NativeHeader("Runtime/Camera/Camera.h")]
 	[NativeHeader("Runtime/GfxDevice/GfxDevice.h")]
 	[StaticAccessor("GetGfxDevice()", StaticAccessorType.Dot)]
+	[NativeHeader("Runtime/Graphics/GraphicsScriptBindings.h")]
+	[NativeHeader("Runtime/Camera/Camera.h")]
 	[NativeHeader("Runtime/Camera/CameraUtil.h")]
 	public sealed class GL
 	{
@@ -124,8 +124,8 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void IssuePluginEvent(int eventID);
 
-		[NativeName("SetUserBackfaceMode")]
 		[Obsolete("SetRevertBackfacing(revertBackFaces) is deprecated. Use invertCulling property instead.", false)]
+		[NativeName("SetUserBackfaceMode")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void SetRevertBackfacing(bool revertBackFaces);
 

@@ -20,7 +20,6 @@ public class NameDisplayScreen : KScreen
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		UIRegistry.nameDisplayScreen = this;
 		Components.Health.Register(new Action<Health>(this.OnHealthAdded), null);
 		Components.Equipment.Register(new Action<Equipment>(this.OnEquipmentAdded), null);
 		this.updateSectionIndex = 0;
@@ -310,8 +309,8 @@ public class NameDisplayScreen : KScreen
 			return;
 		}
 		this.bindOnOverlayChange();
-		Camera main = Camera.main;
-		if (main == null)
+		Camera mainCamera = Game.Instance.MainCamera;
+		if (mainCamera == null)
 		{
 			return;
 		}
@@ -320,7 +319,7 @@ public class NameDisplayScreen : KScreen
 			return;
 		}
 		int count = this.entries.Count;
-		this.LateUpdatePos(main.orthographicSize < this.HideDistance);
+		this.LateUpdatePos(mainCamera.orthographicSize < this.HideDistance);
 		this.lateUpdateSections[this.updateSectionIndex]();
 		this.updateSectionIndex = (this.updateSectionIndex + 1) % this.lateUpdateSections.Count;
 	}

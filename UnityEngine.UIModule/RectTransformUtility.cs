@@ -4,11 +4,11 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	[StaticAccessor("UI", StaticAccessorType.DoubleColon)]
 	[NativeHeader("Runtime/Camera/Camera.h")]
 	[NativeHeader("Modules/UI/Canvas.h")]
 	[NativeHeader("Modules/UI/RectTransformUtil.h")]
 	[NativeHeader("Runtime/Transform/RectTransform.h")]
+	[StaticAccessor("UI", StaticAccessorType.DoubleColon)]
 	public sealed class RectTransformUtility
 	{
 		public static Vector2 PixelAdjustPoint(Vector2 point, Transform elementTransform, Canvas canvas)

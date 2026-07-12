@@ -511,8 +511,8 @@ namespace UnityEngine.UIElements.UIR
 			vector.y = 2f / (float)activeViewport.height;
 			Matrix4x4 unityProjectionMatrix = Utility.GetUnityProjectionMatrix();
 			Vector3 vector2 = (unityProjectionMatrix * drawParams.view.Peek().transform).inverse.MultiplyVector(new Vector3(vector.x, vector.y));
-			vector.z = 1f / (Mathf.Abs(vector2.x) + Mathf.Epsilon);
-			vector.w = 1f / (Mathf.Abs(vector2.y) + Mathf.Epsilon);
+			vector.z = 1f / (Mathf.Abs(vector2.x) + 1E-30f);
+			vector.w = 1f / (Mathf.Abs(vector2.y) + 1E-30f);
 			props.SetVector(UIRenderDevice.s_1PixelClipInvViewPropID, vector);
 		}
 
@@ -838,6 +838,23 @@ namespace UnityEngine.UIElements.UIR
 			}
 		}
 
+		internal void WaitOnAllCpuFences()
+		{
+			for (int i = 0; i < this.m_Fences.Length; i++)
+			{
+				this.WaitOnCpuFence(this.m_Fences[i]);
+			}
+		}
+
+		private void WaitOnCpuFence(uint fence)
+		{
+			bool flag = fence != 0U && !Utility.CPUFencePassed(fence);
+			if (flag)
+			{
+				Utility.WaitForCPUFencePassed(fence);
+			}
+		}
+
 		public void AdvanceFrame()
 		{
 			this.m_FrameIndex += 1U;
@@ -847,11 +864,7 @@ namespace UnityEngine.UIElements.UIR
 			{
 				int num = (int)((ulong)this.m_FrameIndex % (ulong)((long)this.m_Fences.Length));
 				uint num2 = this.m_Fences[num];
-				bool flag2 = num2 != 0U && !Utility.CPUFencePassed(num2);
-				if (flag2)
-				{
-					Utility.WaitForCPUFencePassed(num2);
-				}
+				this.WaitOnCpuFence(num2);
 				this.m_Fences[num] = 0U;
 			}
 			this.m_NextUpdateID = 1U;
@@ -872,8 +885,8 @@ namespace UnityEngine.UIElements.UIR
 			List<UIRenderDevice.AllocToUpdate> list2 = this.m_Updates[(int)(this.m_FrameIndex % (uint)this.m_DeferredFrees.Count)];
 			foreach (UIRenderDevice.AllocToUpdate allocToUpdate in list2)
 			{
-				bool flag3 = allocToUpdate.meshHandle.updateAllocID == allocToUpdate.id && allocToUpdate.meshHandle.allocTime == allocToUpdate.allocTime;
-				if (flag3)
+				bool flag2 = allocToUpdate.meshHandle.updateAllocID == allocToUpdate.id && allocToUpdate.meshHandle.allocTime == allocToUpdate.allocTime;
+				if (flag2)
 				{
 					NativeSlice<Vertex> nativeSlice = new NativeSlice<Vertex>(allocToUpdate.meshHandle.allocPage.vertices.cpuData, (int)allocToUpdate.meshHandle.allocVerts.start, (int)allocToUpdate.meshHandle.allocVerts.size);
 					NativeSlice<Vertex> nativeSlice2 = new NativeSlice<Vertex>(allocToUpdate.permPage.vertices.cpuData, (int)allocToUpdate.permAllocVerts.start, (int)allocToUpdate.meshHandle.allocVerts.size);

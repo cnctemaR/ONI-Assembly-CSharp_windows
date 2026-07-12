@@ -6,8 +6,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.VFX
 {
-	[NativeType(Header = "Modules/VFX/Public/VFXSpawnerState.h")]
 	[RequiredByNativeCode]
+	[NativeType(Header = "Modules/VFX/Public/VFXSpawnerState.h")]
 	[StructLayout(LayoutKind.Sequential)]
 	public sealed class VFXSpawnerState : IDisposable
 	{

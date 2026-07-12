@@ -10,6 +10,8 @@ public class ImmigrantScreen : CharacterSelectionController
 		ImmigrantScreen.instance = null;
 	}
 
+	public Telepad telepad { get; private set; }
+
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
@@ -56,6 +58,12 @@ public class ImmigrantScreen : CharacterSelectionController
 			}
 		}
 		base.OnShow(show);
+	}
+
+	public void DebugShuffleOptions()
+	{
+		this.OnRejectionConfirmed();
+		Immigration.Instance.timeBeforeSpawn = 0f;
 	}
 
 	public override void OnPressBack()
@@ -150,9 +158,7 @@ public class ImmigrantScreen : CharacterSelectionController
 	[SerializeField]
 	private KButton cancelRejectionBtn;
 
-	private static ImmigrantScreen instance;
-
-	private Telepad telepad;
+	public static ImmigrantScreen instance;
 
 	private bool hasShown;
 }

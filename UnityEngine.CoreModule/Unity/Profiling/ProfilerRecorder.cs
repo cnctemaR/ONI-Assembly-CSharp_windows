@@ -11,9 +11,9 @@ using UnityEngine.Scripting;
 namespace Unity.Profiling
 {
 	[DebuggerDisplay("Count = {Count}")]
-	[DebuggerTypeProxy(typeof(ProfilerRecorderDebugView))]
 	[NativeHeader("Runtime/Profiler/ScriptBindings/ProfilerRecorder.bindings.h")]
 	[UsedByNativeCode]
+	[DebuggerTypeProxy(typeof(ProfilerRecorderDebugView))]
 	public struct ProfilerRecorder : IDisposable
 	{
 		internal ProfilerRecorder(ProfilerRecorderOptions options)

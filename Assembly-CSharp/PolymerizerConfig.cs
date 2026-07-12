@@ -40,7 +40,7 @@ public class PolymerizerConfig : IBuildingConfig
 		Polymerizer polymerizer = go.AddOrGet<Polymerizer>();
 		polymerizer.emitMass = 30f;
 		polymerizer.emitTag = GameTagExtensions.Create(SimHashes.Polypropylene);
-		polymerizer.emitOffset = new Vector3(-1.5f, 1f, 0f);
+		polymerizer.emitOffset = new Vector3(-1.45f, 1f, 0f);
 		polymerizer.exhaustElement = SimHashes.Steam;
 		ConduitConsumer conduitConsumer = go.AddOrGet<ConduitConsumer>();
 		conduitConsumer.conduitType = ConduitType.Liquid;

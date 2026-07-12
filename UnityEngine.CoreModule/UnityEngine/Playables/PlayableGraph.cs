@@ -7,10 +7,10 @@ using UnityEngine.Scripting;
 namespace UnityEngine.Playables
 {
 	[UsedByNativeCode]
+	[NativeHeader("Runtime/Export/Director/PlayableGraph.bindings.h")]
+	[NativeHeader("Runtime/Director/Core/HPlayableOutput.h")]
 	[NativeHeader("Runtime/Director/Core/HPlayableGraph.h")]
 	[NativeHeader("Runtime/Director/Core/HPlayable.h")]
-	[NativeHeader("Runtime/Director/Core/HPlayableOutput.h")]
-	[NativeHeader("Runtime/Export/Director/PlayableGraph.bindings.h")]
 	public struct PlayableGraph
 	{
 		public Playable GetRootPlayable(int index)

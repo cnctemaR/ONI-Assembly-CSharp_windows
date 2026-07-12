@@ -12,6 +12,7 @@ namespace UnityEngine.UIElements.UIR
 		ClippingHierarchy = 8,
 		Visuals = 16,
 		VisualsHierarchy = 32,
-		Opacity = 64
+		Opacity = 64,
+		OpacityHierarchy = 128
 	}
 }

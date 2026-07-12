@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+using Unity.Collections;
 using UnityEngine;
 
 public class SymbolOverrideInfoGpuData
@@ -65,10 +66,10 @@ public class SymbolOverrideInfoGpuData
 		this.MarkDirty();
 	}
 
-	public void WriteToTexture(byte[] data, int data_idx, int instance_idx)
+	public void WriteToTexture(NativeArray<byte> data, int data_idx, int instance_idx)
 	{
 		DebugUtil.Assert(instance_idx * this.symbolCount * 12 * 4 == data_idx);
-		Buffer.BlockCopy(this.symbolOverrideInfoConverter.bytes, 0, data, data_idx, this.symbolCount * 12 * 4);
+		NativeArray<byte>.Copy(this.symbolOverrideInfoConverter.bytes, 0, data, data_idx, this.symbolCount * 12 * 4);
 	}
 
 	public const int FLOATS_PER_SYMBOL_OVERRIDE_INFO = 12;

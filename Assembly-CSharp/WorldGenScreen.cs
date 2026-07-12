@@ -11,6 +11,12 @@ public class WorldGenScreen : NewGameFlowScreen
 		WorldGenScreen.Instance = this;
 	}
 
+	protected override void OnForcedCleanUp()
+	{
+		WorldGenScreen.Instance = null;
+		base.OnForcedCleanUp();
+	}
+
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();

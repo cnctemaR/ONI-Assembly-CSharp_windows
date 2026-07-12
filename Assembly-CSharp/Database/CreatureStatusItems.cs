@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using Klei.AI;
 using STRINGS;
 using UnityEngine;
@@ -135,7 +136,7 @@ namespace Database
 			this.Entombed.resolveTooltipCallback = delegate(string str, object go)
 			{
 				GameObject gameObject = go as GameObject;
-				return string.Format(str, GameUtil.GetIdentityDescriptor(gameObject));
+				return string.Format(str, GameUtil.GetIdentityDescriptor(gameObject, GameUtil.IdentityDescriptorTense.Normal));
 			};
 			this.Wilting = new StatusItem("Wilting", "CREATURES", "status_item_need_plant", StatusItem.IconType.Custom, NotificationType.BadMinor, false, OverlayModes.None.ID, false, 1026, null);
 			this.Wilting.resolveStringCallback = delegate(string str, object data)
@@ -410,6 +411,35 @@ namespace Database
 			};
 			this.Crop_Too_NonRadiated = new StatusItem("Crop_Too_NonRadiated", "CREATURES", "status_item_plant_light", StatusItem.IconType.Custom, NotificationType.BadMinor, false, OverlayModes.None.ID, false, 129022, null);
 			this.Crop_Too_Radiated = new StatusItem("Crop_Too_Radiated", "CREATURES", "status_item_plant_light", StatusItem.IconType.Custom, NotificationType.BadMinor, false, OverlayModes.None.ID, false, 129022, null);
+			this.ElementGrowthGrowing = new StatusItem("Element_Growth_Growing", "CREATURES", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022, null);
+			this.ElementGrowthGrowing.resolveTooltipCallback = delegate(string str, object data)
+			{
+				ElementGrowthMonitor.Instance instance8 = (ElementGrowthMonitor.Instance)data;
+				StringBuilder stringBuilder = new StringBuilder(str, str.Length * 2);
+				stringBuilder.Replace("{templo}", GameUtil.GetFormattedTemperature(instance8.def.minTemperature, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false));
+				stringBuilder.Replace("{temphi}", GameUtil.GetFormattedTemperature(instance8.def.maxTemperature, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false));
+				if (instance8.lastConsumedTemperature > 0f)
+				{
+					stringBuilder.Append("\n\n");
+					stringBuilder.Append(CREATURES.STATUSITEMS.ELEMENT_GROWTH_GROWING.PREFERRED_TEMP);
+					stringBuilder.Replace("{element}", ElementLoader.FindElementByHash(instance8.lastConsumedElement).name);
+					stringBuilder.Replace("{temperature}", GameUtil.GetFormattedTemperature(instance8.lastConsumedTemperature, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false));
+				}
+				return stringBuilder.ToString();
+			};
+			this.ElementGrowthStunted = new StatusItem("Element_Growth_Stunted", "CREATURES", "", StatusItem.IconType.Info, NotificationType.Bad, false, OverlayModes.None.ID, true, 129022, null);
+			this.ElementGrowthStunted.resolveTooltipCallback = this.ElementGrowthGrowing.resolveTooltipCallback;
+			this.ElementGrowthStunted.resolveStringCallback = delegate(string str, object data)
+			{
+				ElementGrowthMonitor.Instance instance9 = (ElementGrowthMonitor.Instance)data;
+				string text7 = ((instance9.lastConsumedTemperature < instance9.def.minTemperature) ? CREATURES.STATUSITEMS.ELEMENT_GROWTH_STUNTED.TOO_COLD : CREATURES.STATUSITEMS.ELEMENT_GROWTH_STUNTED.TOO_HOT);
+				str = str.Replace("{reason}", text7);
+				return str;
+			};
+			this.ElementGrowthHalted = new StatusItem("Element_Growth_Halted", "CREATURES", "", StatusItem.IconType.Info, NotificationType.Bad, false, OverlayModes.None.ID, true, 129022, null);
+			this.ElementGrowthHalted.resolveTooltipCallback = this.ElementGrowthGrowing.resolveTooltipCallback;
+			this.ElementGrowthComplete = new StatusItem("Element_Growth_Complete", "CREATURES", "", StatusItem.IconType.Info, NotificationType.Bad, false, OverlayModes.None.ID, true, 129022, null);
+			this.ElementGrowthComplete.resolveTooltipCallback = this.ElementGrowthGrowing.resolveTooltipCallback;
 		}
 
 		public StatusItem Dead;
@@ -533,5 +563,13 @@ namespace Database
 		public StatusItem Crop_Too_NonRadiated;
 
 		public StatusItem Crop_Too_Radiated;
+
+		public StatusItem ElementGrowthGrowing;
+
+		public StatusItem ElementGrowthStunted;
+
+		public StatusItem ElementGrowthHalted;
+
+		public StatusItem ElementGrowthComplete;
 	}
 }

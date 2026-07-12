@@ -949,6 +949,7 @@ namespace UnityEngine.UIElements
 			{
 				this.yogaNode.Config = this.elementPanel.yogaConfig;
 				this.RegisterRunningAnimations();
+				this.pseudoStates &= ~(PseudoStates.Active | PseudoStates.Hover | PseudoStates.Focus);
 				bool flag2 = (this.m_Flags & VisualElementFlags.NeedsAttachToPanelEvent) == VisualElementFlags.NeedsAttachToPanelEvent;
 				if (flag2)
 				{
@@ -1762,6 +1763,16 @@ namespace UnityEngine.UIElements
 
 		ValueAnimation<StyleValues> ITransitionAnimations.Start(StyleValues from, StyleValues to, int durationMs)
 		{
+			bool flag = from.m_StyleValues == null;
+			if (flag)
+			{
+				from.Values();
+			}
+			bool flag2 = to.m_StyleValues == null;
+			if (flag2)
+			{
+				to.Values();
+			}
 			return this.Start((VisualElement e) => from, to, durationMs);
 		}
 
@@ -1808,141 +1819,145 @@ namespace UnityEngine.UIElements
 		private static void AssignStyleValues(VisualElement ve, StyleValues src)
 		{
 			IStyle style = ve.style;
-			foreach (StyleValue styleValue in src.m_StyleValues.m_Values)
+			bool flag = src.m_StyleValues != null;
+			if (flag)
 			{
-				StylePropertyId id = styleValue.id;
-				StylePropertyId stylePropertyId = id;
-				switch (stylePropertyId)
+				foreach (StyleValue styleValue in src.m_StyleValues.m_Values)
 				{
-				case StylePropertyId.Unknown:
-					break;
-				case StylePropertyId.Color:
-					style.color = styleValue.color;
-					break;
-				case StylePropertyId.FontSize:
-					style.fontSize = styleValue.number;
-					break;
-				default:
+					StylePropertyId id = styleValue.id;
+					StylePropertyId stylePropertyId = id;
 					switch (stylePropertyId)
 					{
-					case StylePropertyId.BackgroundColor:
-						style.backgroundColor = styleValue.color;
+					case StylePropertyId.Unknown:
 						break;
-					case StylePropertyId.BackgroundImage:
-					case StylePropertyId.BorderBottomColor:
-					case StylePropertyId.BorderLeftColor:
-					case StylePropertyId.BorderRightColor:
-					case StylePropertyId.BorderTopColor:
-					case StylePropertyId.Cursor:
-					case StylePropertyId.Display:
-					case StylePropertyId.FlexBasis:
-					case StylePropertyId.FlexDirection:
-					case StylePropertyId.FlexWrap:
-					case StylePropertyId.JustifyContent:
-					case StylePropertyId.MaxHeight:
-					case StylePropertyId.MaxWidth:
-					case StylePropertyId.MinHeight:
-					case StylePropertyId.MinWidth:
-					case StylePropertyId.Overflow:
-					case StylePropertyId.Position:
-					case StylePropertyId.TextOverflow:
-					case StylePropertyId.UnityBackgroundScaleMode:
-					case StylePropertyId.UnityOverflowClipBox:
-					case StylePropertyId.UnitySliceBottom:
-					case StylePropertyId.UnitySliceLeft:
-					case StylePropertyId.UnitySliceRight:
-					case StylePropertyId.UnitySliceTop:
-					case StylePropertyId.UnityTextOverflowPosition:
+					case StylePropertyId.Color:
+						style.color = styleValue.color;
 						break;
-					case StylePropertyId.BorderBottomLeftRadius:
-						style.borderBottomLeftRadius = styleValue.number;
-						break;
-					case StylePropertyId.BorderBottomRightRadius:
-						style.borderBottomRightRadius = styleValue.number;
-						break;
-					case StylePropertyId.BorderBottomWidth:
-						style.borderBottomWidth = styleValue.number;
-						break;
-					case StylePropertyId.BorderLeftWidth:
-						style.borderLeftWidth = styleValue.number;
-						break;
-					case StylePropertyId.BorderRightWidth:
-						style.borderRightWidth = styleValue.number;
-						break;
-					case StylePropertyId.BorderTopLeftRadius:
-						style.borderTopLeftRadius = styleValue.number;
-						break;
-					case StylePropertyId.BorderTopRightRadius:
-						style.borderTopRightRadius = styleValue.number;
-						break;
-					case StylePropertyId.BorderTopWidth:
-						style.borderTopWidth = styleValue.number;
-						break;
-					case StylePropertyId.Bottom:
-						style.bottom = styleValue.number;
-						break;
-					case StylePropertyId.FlexGrow:
-						style.flexGrow = styleValue.number;
-						break;
-					case StylePropertyId.FlexShrink:
-						style.flexShrink = styleValue.number;
-						break;
-					case StylePropertyId.Height:
-						style.height = styleValue.number;
-						break;
-					case StylePropertyId.Left:
-						style.left = styleValue.number;
-						break;
-					case StylePropertyId.MarginBottom:
-						style.marginBottom = styleValue.number;
-						break;
-					case StylePropertyId.MarginLeft:
-						style.marginLeft = styleValue.number;
-						break;
-					case StylePropertyId.MarginRight:
-						style.marginRight = styleValue.number;
-						break;
-					case StylePropertyId.MarginTop:
-						style.marginTop = styleValue.number;
-						break;
-					case StylePropertyId.Opacity:
-						style.opacity = styleValue.number;
-						break;
-					case StylePropertyId.PaddingBottom:
-						style.paddingBottom = styleValue.number;
-						break;
-					case StylePropertyId.PaddingLeft:
-						style.paddingLeft = styleValue.number;
-						break;
-					case StylePropertyId.PaddingRight:
-						style.paddingRight = styleValue.number;
-						break;
-					case StylePropertyId.PaddingTop:
-						style.paddingTop = styleValue.number;
-						break;
-					case StylePropertyId.Right:
-						style.right = styleValue.number;
-						break;
-					case StylePropertyId.Top:
-						style.top = styleValue.number;
-						break;
-					case StylePropertyId.UnityBackgroundImageTintColor:
-						style.unityBackgroundImageTintColor = styleValue.color;
-						break;
-					case StylePropertyId.Width:
-						style.width = styleValue.number;
+					case StylePropertyId.FontSize:
+						style.fontSize = styleValue.number;
 						break;
 					default:
-						if (stylePropertyId == StylePropertyId.BorderColor)
+						switch (stylePropertyId)
 						{
-							style.borderLeftColor = styleValue.color;
-							style.borderTopColor = styleValue.color;
-							style.borderRightColor = styleValue.color;
-							style.borderBottomColor = styleValue.color;
+						case StylePropertyId.BackgroundColor:
+							style.backgroundColor = styleValue.color;
+							break;
+						case StylePropertyId.BackgroundImage:
+						case StylePropertyId.BorderBottomColor:
+						case StylePropertyId.BorderLeftColor:
+						case StylePropertyId.BorderRightColor:
+						case StylePropertyId.BorderTopColor:
+						case StylePropertyId.Cursor:
+						case StylePropertyId.Display:
+						case StylePropertyId.FlexBasis:
+						case StylePropertyId.FlexDirection:
+						case StylePropertyId.FlexWrap:
+						case StylePropertyId.JustifyContent:
+						case StylePropertyId.MaxHeight:
+						case StylePropertyId.MaxWidth:
+						case StylePropertyId.MinHeight:
+						case StylePropertyId.MinWidth:
+						case StylePropertyId.Overflow:
+						case StylePropertyId.Position:
+						case StylePropertyId.TextOverflow:
+						case StylePropertyId.UnityBackgroundScaleMode:
+						case StylePropertyId.UnityOverflowClipBox:
+						case StylePropertyId.UnitySliceBottom:
+						case StylePropertyId.UnitySliceLeft:
+						case StylePropertyId.UnitySliceRight:
+						case StylePropertyId.UnitySliceTop:
+						case StylePropertyId.UnityTextOverflowPosition:
+							break;
+						case StylePropertyId.BorderBottomLeftRadius:
+							style.borderBottomLeftRadius = styleValue.number;
+							break;
+						case StylePropertyId.BorderBottomRightRadius:
+							style.borderBottomRightRadius = styleValue.number;
+							break;
+						case StylePropertyId.BorderBottomWidth:
+							style.borderBottomWidth = styleValue.number;
+							break;
+						case StylePropertyId.BorderLeftWidth:
+							style.borderLeftWidth = styleValue.number;
+							break;
+						case StylePropertyId.BorderRightWidth:
+							style.borderRightWidth = styleValue.number;
+							break;
+						case StylePropertyId.BorderTopLeftRadius:
+							style.borderTopLeftRadius = styleValue.number;
+							break;
+						case StylePropertyId.BorderTopRightRadius:
+							style.borderTopRightRadius = styleValue.number;
+							break;
+						case StylePropertyId.BorderTopWidth:
+							style.borderTopWidth = styleValue.number;
+							break;
+						case StylePropertyId.Bottom:
+							style.bottom = styleValue.number;
+							break;
+						case StylePropertyId.FlexGrow:
+							style.flexGrow = styleValue.number;
+							break;
+						case StylePropertyId.FlexShrink:
+							style.flexShrink = styleValue.number;
+							break;
+						case StylePropertyId.Height:
+							style.height = styleValue.number;
+							break;
+						case StylePropertyId.Left:
+							style.left = styleValue.number;
+							break;
+						case StylePropertyId.MarginBottom:
+							style.marginBottom = styleValue.number;
+							break;
+						case StylePropertyId.MarginLeft:
+							style.marginLeft = styleValue.number;
+							break;
+						case StylePropertyId.MarginRight:
+							style.marginRight = styleValue.number;
+							break;
+						case StylePropertyId.MarginTop:
+							style.marginTop = styleValue.number;
+							break;
+						case StylePropertyId.Opacity:
+							style.opacity = styleValue.number;
+							break;
+						case StylePropertyId.PaddingBottom:
+							style.paddingBottom = styleValue.number;
+							break;
+						case StylePropertyId.PaddingLeft:
+							style.paddingLeft = styleValue.number;
+							break;
+						case StylePropertyId.PaddingRight:
+							style.paddingRight = styleValue.number;
+							break;
+						case StylePropertyId.PaddingTop:
+							style.paddingTop = styleValue.number;
+							break;
+						case StylePropertyId.Right:
+							style.right = styleValue.number;
+							break;
+						case StylePropertyId.Top:
+							style.top = styleValue.number;
+							break;
+						case StylePropertyId.UnityBackgroundImageTintColor:
+							style.unityBackgroundImageTintColor = styleValue.color;
+							break;
+						case StylePropertyId.Width:
+							style.width = styleValue.number;
+							break;
+						default:
+							if (stylePropertyId == StylePropertyId.BorderColor)
+							{
+								style.borderLeftColor = styleValue.color;
+								style.borderTopColor = styleValue.color;
+								style.borderRightColor = styleValue.color;
+								style.borderBottomColor = styleValue.color;
+							}
+							break;
 						}
 						break;
 					}
-					break;
 				}
 			}
 		}
@@ -1951,137 +1966,141 @@ namespace UnityEngine.UIElements
 		{
 			StyleValues styleValues = default(StyleValues);
 			IResolvedStyle resolvedStyle = ve.resolvedStyle;
-			foreach (StyleValue styleValue in targetValuesToRead.m_StyleValues.m_Values)
+			bool flag = targetValuesToRead.m_StyleValues != null;
+			if (flag)
 			{
-				StylePropertyId id = styleValue.id;
-				StylePropertyId stylePropertyId = id;
-				if (stylePropertyId <= StylePropertyId.Color)
+				foreach (StyleValue styleValue in targetValuesToRead.m_StyleValues.m_Values)
 				{
-					if (stylePropertyId != StylePropertyId.Unknown)
+					StylePropertyId id = styleValue.id;
+					StylePropertyId stylePropertyId = id;
+					if (stylePropertyId <= StylePropertyId.Color)
 					{
-						if (stylePropertyId == StylePropertyId.Color)
+						if (stylePropertyId != StylePropertyId.Unknown)
 						{
-							styleValues.color = resolvedStyle.color;
+							if (stylePropertyId == StylePropertyId.Color)
+							{
+								styleValues.color = resolvedStyle.color;
+							}
 						}
 					}
-				}
-				else
-				{
-					switch (stylePropertyId)
+					else
 					{
-					case StylePropertyId.BackgroundColor:
-						styleValues.backgroundColor = resolvedStyle.backgroundColor;
-						break;
-					case StylePropertyId.BackgroundImage:
-					case StylePropertyId.BorderBottomColor:
-					case StylePropertyId.BorderLeftColor:
-					case StylePropertyId.BorderRightColor:
-					case StylePropertyId.BorderTopColor:
-					case StylePropertyId.Cursor:
-					case StylePropertyId.Display:
-					case StylePropertyId.FlexBasis:
-					case StylePropertyId.FlexDirection:
-					case StylePropertyId.FlexWrap:
-					case StylePropertyId.JustifyContent:
-					case StylePropertyId.MaxHeight:
-					case StylePropertyId.MaxWidth:
-					case StylePropertyId.MinHeight:
-					case StylePropertyId.MinWidth:
-					case StylePropertyId.Overflow:
-					case StylePropertyId.Position:
-					case StylePropertyId.TextOverflow:
-					case StylePropertyId.UnityBackgroundScaleMode:
-					case StylePropertyId.UnityOverflowClipBox:
-					case StylePropertyId.UnitySliceBottom:
-					case StylePropertyId.UnitySliceLeft:
-					case StylePropertyId.UnitySliceRight:
-					case StylePropertyId.UnitySliceTop:
-					case StylePropertyId.UnityTextOverflowPosition:
-						break;
-					case StylePropertyId.BorderBottomLeftRadius:
-						styleValues.borderBottomLeftRadius = resolvedStyle.borderBottomLeftRadius;
-						break;
-					case StylePropertyId.BorderBottomRightRadius:
-						styleValues.borderBottomRightRadius = resolvedStyle.borderBottomRightRadius;
-						break;
-					case StylePropertyId.BorderBottomWidth:
-						styleValues.borderBottomWidth = resolvedStyle.borderBottomWidth;
-						break;
-					case StylePropertyId.BorderLeftWidth:
-						styleValues.borderLeftWidth = resolvedStyle.borderLeftWidth;
-						break;
-					case StylePropertyId.BorderRightWidth:
-						styleValues.borderRightWidth = resolvedStyle.borderRightWidth;
-						break;
-					case StylePropertyId.BorderTopLeftRadius:
-						styleValues.borderTopLeftRadius = resolvedStyle.borderTopLeftRadius;
-						break;
-					case StylePropertyId.BorderTopRightRadius:
-						styleValues.borderTopRightRadius = resolvedStyle.borderTopRightRadius;
-						break;
-					case StylePropertyId.BorderTopWidth:
-						styleValues.borderTopWidth = resolvedStyle.borderTopWidth;
-						break;
-					case StylePropertyId.Bottom:
-						styleValues.bottom = resolvedStyle.bottom;
-						break;
-					case StylePropertyId.FlexGrow:
-						styleValues.flexGrow = resolvedStyle.flexGrow;
-						break;
-					case StylePropertyId.FlexShrink:
-						styleValues.flexShrink = resolvedStyle.flexShrink;
-						break;
-					case StylePropertyId.Height:
-						styleValues.height = resolvedStyle.height;
-						break;
-					case StylePropertyId.Left:
-						styleValues.left = resolvedStyle.left;
-						break;
-					case StylePropertyId.MarginBottom:
-						styleValues.marginBottom = resolvedStyle.marginBottom;
-						break;
-					case StylePropertyId.MarginLeft:
-						styleValues.marginLeft = resolvedStyle.marginLeft;
-						break;
-					case StylePropertyId.MarginRight:
-						styleValues.marginRight = resolvedStyle.marginRight;
-						break;
-					case StylePropertyId.MarginTop:
-						styleValues.marginTop = resolvedStyle.marginTop;
-						break;
-					case StylePropertyId.Opacity:
-						styleValues.opacity = resolvedStyle.opacity;
-						break;
-					case StylePropertyId.PaddingBottom:
-						styleValues.paddingBottom = resolvedStyle.paddingBottom;
-						break;
-					case StylePropertyId.PaddingLeft:
-						styleValues.paddingLeft = resolvedStyle.paddingLeft;
-						break;
-					case StylePropertyId.PaddingRight:
-						styleValues.paddingRight = resolvedStyle.paddingRight;
-						break;
-					case StylePropertyId.PaddingTop:
-						styleValues.paddingTop = resolvedStyle.paddingTop;
-						break;
-					case StylePropertyId.Right:
-						styleValues.right = resolvedStyle.right;
-						break;
-					case StylePropertyId.Top:
-						styleValues.top = resolvedStyle.top;
-						break;
-					case StylePropertyId.UnityBackgroundImageTintColor:
-						styleValues.unityBackgroundImageTintColor = resolvedStyle.unityBackgroundImageTintColor;
-						break;
-					case StylePropertyId.Width:
-						styleValues.width = resolvedStyle.width;
-						break;
-					default:
-						if (stylePropertyId == StylePropertyId.BorderColor)
+						switch (stylePropertyId)
 						{
-							styleValues.borderColor = resolvedStyle.borderLeftColor;
+						case StylePropertyId.BackgroundColor:
+							styleValues.backgroundColor = resolvedStyle.backgroundColor;
+							break;
+						case StylePropertyId.BackgroundImage:
+						case StylePropertyId.BorderBottomColor:
+						case StylePropertyId.BorderLeftColor:
+						case StylePropertyId.BorderRightColor:
+						case StylePropertyId.BorderTopColor:
+						case StylePropertyId.Cursor:
+						case StylePropertyId.Display:
+						case StylePropertyId.FlexBasis:
+						case StylePropertyId.FlexDirection:
+						case StylePropertyId.FlexWrap:
+						case StylePropertyId.JustifyContent:
+						case StylePropertyId.MaxHeight:
+						case StylePropertyId.MaxWidth:
+						case StylePropertyId.MinHeight:
+						case StylePropertyId.MinWidth:
+						case StylePropertyId.Overflow:
+						case StylePropertyId.Position:
+						case StylePropertyId.TextOverflow:
+						case StylePropertyId.UnityBackgroundScaleMode:
+						case StylePropertyId.UnityOverflowClipBox:
+						case StylePropertyId.UnitySliceBottom:
+						case StylePropertyId.UnitySliceLeft:
+						case StylePropertyId.UnitySliceRight:
+						case StylePropertyId.UnitySliceTop:
+						case StylePropertyId.UnityTextOverflowPosition:
+							break;
+						case StylePropertyId.BorderBottomLeftRadius:
+							styleValues.borderBottomLeftRadius = resolvedStyle.borderBottomLeftRadius;
+							break;
+						case StylePropertyId.BorderBottomRightRadius:
+							styleValues.borderBottomRightRadius = resolvedStyle.borderBottomRightRadius;
+							break;
+						case StylePropertyId.BorderBottomWidth:
+							styleValues.borderBottomWidth = resolvedStyle.borderBottomWidth;
+							break;
+						case StylePropertyId.BorderLeftWidth:
+							styleValues.borderLeftWidth = resolvedStyle.borderLeftWidth;
+							break;
+						case StylePropertyId.BorderRightWidth:
+							styleValues.borderRightWidth = resolvedStyle.borderRightWidth;
+							break;
+						case StylePropertyId.BorderTopLeftRadius:
+							styleValues.borderTopLeftRadius = resolvedStyle.borderTopLeftRadius;
+							break;
+						case StylePropertyId.BorderTopRightRadius:
+							styleValues.borderTopRightRadius = resolvedStyle.borderTopRightRadius;
+							break;
+						case StylePropertyId.BorderTopWidth:
+							styleValues.borderTopWidth = resolvedStyle.borderTopWidth;
+							break;
+						case StylePropertyId.Bottom:
+							styleValues.bottom = resolvedStyle.bottom;
+							break;
+						case StylePropertyId.FlexGrow:
+							styleValues.flexGrow = resolvedStyle.flexGrow;
+							break;
+						case StylePropertyId.FlexShrink:
+							styleValues.flexShrink = resolvedStyle.flexShrink;
+							break;
+						case StylePropertyId.Height:
+							styleValues.height = resolvedStyle.height;
+							break;
+						case StylePropertyId.Left:
+							styleValues.left = resolvedStyle.left;
+							break;
+						case StylePropertyId.MarginBottom:
+							styleValues.marginBottom = resolvedStyle.marginBottom;
+							break;
+						case StylePropertyId.MarginLeft:
+							styleValues.marginLeft = resolvedStyle.marginLeft;
+							break;
+						case StylePropertyId.MarginRight:
+							styleValues.marginRight = resolvedStyle.marginRight;
+							break;
+						case StylePropertyId.MarginTop:
+							styleValues.marginTop = resolvedStyle.marginTop;
+							break;
+						case StylePropertyId.Opacity:
+							styleValues.opacity = resolvedStyle.opacity;
+							break;
+						case StylePropertyId.PaddingBottom:
+							styleValues.paddingBottom = resolvedStyle.paddingBottom;
+							break;
+						case StylePropertyId.PaddingLeft:
+							styleValues.paddingLeft = resolvedStyle.paddingLeft;
+							break;
+						case StylePropertyId.PaddingRight:
+							styleValues.paddingRight = resolvedStyle.paddingRight;
+							break;
+						case StylePropertyId.PaddingTop:
+							styleValues.paddingTop = resolvedStyle.paddingTop;
+							break;
+						case StylePropertyId.Right:
+							styleValues.right = resolvedStyle.right;
+							break;
+						case StylePropertyId.Top:
+							styleValues.top = resolvedStyle.top;
+							break;
+						case StylePropertyId.UnityBackgroundImageTintColor:
+							styleValues.unityBackgroundImageTintColor = resolvedStyle.unityBackgroundImageTintColor;
+							break;
+						case StylePropertyId.Width:
+							styleValues.width = resolvedStyle.width;
+							break;
+						default:
+							if (stylePropertyId == StylePropertyId.BorderColor)
+							{
+								styleValues.borderColor = resolvedStyle.borderLeftColor;
+							}
+							break;
 						}
-						break;
 					}
 				}
 			}
@@ -2090,6 +2109,11 @@ namespace UnityEngine.UIElements
 
 		ValueAnimation<StyleValues> ITransitionAnimations.Start(StyleValues to, int durationMs)
 		{
+			bool flag = to.m_StyleValues == null;
+			if (flag)
+			{
+				to.Values();
+			}
 			return this.Start((VisualElement e) => this.ReadCurrentValues(e, to), to, durationMs);
 		}
 
@@ -2357,6 +2381,38 @@ namespace UnityEngine.UIElements
 				num = ((contentContainer != null) ? contentContainer.IndexOf(element) : (-1));
 			}
 			return num;
+		}
+
+		internal VisualElement ElementAtTreePath(List<int> childIndexes)
+		{
+			VisualElement visualElement = this;
+			foreach (int num in childIndexes)
+			{
+				bool flag = num >= 0 && num < visualElement.hierarchy.childCount;
+				if (!flag)
+				{
+					return null;
+				}
+				visualElement = visualElement.hierarchy[num];
+			}
+			return visualElement;
+		}
+
+		internal bool FindElementInTree(VisualElement element, List<int> outChildIndexes)
+		{
+			VisualElement visualElement = element;
+			for (VisualElement visualElement2 = visualElement.hierarchy.parent; visualElement2 != null; visualElement2 = visualElement2.hierarchy.parent)
+			{
+				outChildIndexes.Insert(0, visualElement2.hierarchy.IndexOf(visualElement));
+				bool flag = visualElement2 == this;
+				if (flag)
+				{
+					return true;
+				}
+				visualElement = visualElement2;
+			}
+			outChildIndexes.Clear();
+			return false;
 		}
 
 		public IEnumerable<VisualElement> Children()
@@ -3845,7 +3901,7 @@ namespace UnityEngine.UIElements
 
 			public void Sort(Comparison<VisualElement> comp)
 			{
-				bool flag = this.childCount > 0;
+				bool flag = this.childCount > 1;
 				if (flag)
 				{
 					this.m_Owner.m_Children.Sort(comp);

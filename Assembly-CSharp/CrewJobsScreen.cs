@@ -25,6 +25,12 @@ public class CrewJobsScreen : CrewListScreen<CrewJobsEntry>
 		this.SortByPreviousSelected();
 	}
 
+	protected override void OnForcedCleanUp()
+	{
+		CrewJobsScreen.Instance = null;
+		base.OnForcedCleanUp();
+	}
+
 	protected override void SpawnEntries()
 	{
 		base.SpawnEntries();

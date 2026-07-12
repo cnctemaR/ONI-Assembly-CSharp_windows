@@ -10,14 +10,14 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Graphics/CommandBuffer/RenderingCommandBuffer.h")]
-	[RequireComponent(typeof(Transform))]
-	[NativeHeader("Runtime/Camera/Camera.h")]
-	[NativeHeader("Runtime/GfxDevice/GfxDeviceTypes.h")]
-	[NativeHeader("Runtime/Shaders/Shader.h")]
-	[NativeHeader("Runtime/Misc/GameObjectUtility.h")]
 	[NativeHeader("Runtime/Graphics/RenderTexture.h")]
+	[RequireComponent(typeof(Transform))]
+	[NativeHeader("Runtime/Misc/GameObjectUtility.h")]
+	[NativeHeader("Runtime/Graphics/CommandBuffer/RenderingCommandBuffer.h")]
+	[NativeHeader("Runtime/Shaders/Shader.h")]
+	[NativeHeader("Runtime/GfxDevice/GfxDeviceTypes.h")]
 	[UsedByNativeCode]
+	[NativeHeader("Runtime/Camera/Camera.h")]
 	[NativeHeader("Runtime/Camera/RenderManager.h")]
 	public sealed class Camera : Behaviour
 	{
@@ -1095,8 +1095,8 @@ namespace UnityEngine
 			return Camera.GetCullingParameters_Internal(this, stereoAware, out cullingParameters, sizeof(ScriptableCullingParameters));
 		}
 
-		[NativeHeader("Runtime/Export/RenderPipeline/ScriptableRenderPipeline.bindings.h")]
 		[FreeFunction("ScriptableRenderPipeline_Bindings::GetCullingParameters_Internal")]
+		[NativeHeader("Runtime/Export/RenderPipeline/ScriptableRenderPipeline.bindings.h")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern bool GetCullingParameters_Internal(Camera camera, bool stereoAware, out ScriptableCullingParameters cullingParameters, int managedCullingParametersSize);
 

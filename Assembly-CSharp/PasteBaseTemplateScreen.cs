@@ -18,6 +18,12 @@ public class PasteBaseTemplateScreen : KScreen
 		this.RefreshStampButtons();
 	}
 
+	protected override void OnForcedCleanUp()
+	{
+		PasteBaseTemplateScreen.Instance = null;
+		base.OnForcedCleanUp();
+	}
+
 	[ContextMenu("Refresh")]
 	public void RefreshStampButtons()
 	{

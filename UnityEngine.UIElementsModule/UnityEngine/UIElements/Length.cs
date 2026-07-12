@@ -18,7 +18,7 @@ namespace UnityEngine.UIElements
 			}
 			set
 			{
-				this.m_Value = value;
+				this.m_Value = Mathf.Clamp(value, -8388608f, 8388608f);
 			}
 		}
 
@@ -41,7 +41,8 @@ namespace UnityEngine.UIElements
 
 		public Length(float value, LengthUnit unit)
 		{
-			this.m_Value = value;
+			this = default(Length);
+			this.value = value;
 			this.m_Unit = unit;
 		}
 
@@ -110,6 +111,8 @@ namespace UnityEngine.UIElements
 			}
 			return this.value.ToString(CultureInfo.InvariantCulture.NumberFormat) + text;
 		}
+
+		private const float k_MaxValue = 8388608f;
 
 		private float m_Value;
 

@@ -9,8 +9,8 @@ using UnityEngine.Scripting;
 namespace UnityEngine
 {
 	[UsedByNativeCode]
-	[NativeHeader("Runtime/Utilities/Hash128.h")]
 	[NativeHeader("Runtime/Export/Hashing/Hash128.bindings.h")]
+	[NativeHeader("Runtime/Utilities/Hash128.h")]
 	[Serializable]
 	public struct Hash128 : IComparable, IComparable<Hash128>, IEquatable<Hash128>
 	{

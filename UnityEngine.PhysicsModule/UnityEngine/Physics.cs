@@ -7,8 +7,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[StaticAccessor("GetPhysicsManager()", StaticAccessorType.Dot)]
 	[NativeHeader("Modules/Physics/PhysicsManager.h")]
+	[StaticAccessor("GetPhysicsManager()", StaticAccessorType.Dot)]
 	public class Physics
 	{
 		[Obsolete("Use Physics.defaultContactOffset or Collider.contactOffset instead.", true)]
@@ -140,8 +140,8 @@ namespace UnityEngine
 			}
 		}
 
-		[EditorBrowsable(EditorBrowsableState.Never)]
 		[Obsolete("Use Rigidbody.maxAngularVelocity instead.", true)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		public static float maxAngularVelocity
 		{
 			get
@@ -263,8 +263,8 @@ namespace UnityEngine
 			return Physics.defaultPhysicsScene.Raycast(origin, direction, out hitInfo, maxDistance, layerMask, queryTriggerInteraction);
 		}
 
-		[RequiredByNativeCode]
 		[ExcludeFromDocs]
+		[RequiredByNativeCode]
 		public static bool Raycast(Vector3 origin, Vector3 direction, out RaycastHit hitInfo, float maxDistance, int layerMask)
 		{
 			return Physics.defaultPhysicsScene.Raycast(origin, direction, out hitInfo, maxDistance, layerMask, QueryTriggerInteraction.UseGlobal);
@@ -612,8 +612,8 @@ namespace UnityEngine
 			return Physics.defaultPhysicsScene.Raycast(ray.origin, ray.direction, results, maxDistance, layerMask, queryTriggerInteraction);
 		}
 
-		[ExcludeFromDocs]
 		[RequiredByNativeCode]
+		[ExcludeFromDocs]
 		public static int RaycastNonAlloc(Ray ray, RaycastHit[] results, float maxDistance, int layerMask)
 		{
 			return Physics.defaultPhysicsScene.Raycast(ray.origin, ray.direction, results, maxDistance, layerMask, QueryTriggerInteraction.UseGlobal);
@@ -654,8 +654,8 @@ namespace UnityEngine
 			return Physics.defaultPhysicsScene.Raycast(origin, direction, results, float.PositiveInfinity, -5, QueryTriggerInteraction.UseGlobal);
 		}
 
-		[StaticAccessor("GetPhysicsManager().GetPhysicsQuery()", StaticAccessorType.Dot)]
 		[NativeName("CapsuleCastAll")]
+		[StaticAccessor("GetPhysicsManager().GetPhysicsQuery()", StaticAccessorType.Dot)]
 		private static RaycastHit[] Query_CapsuleCastAll(PhysicsScene physicsScene, Vector3 p0, Vector3 p1, float radius, Vector3 direction, float maxDistance, int mask, QueryTriggerInteraction queryTriggerInteraction)
 		{
 			return Physics.Query_CapsuleCastAll_Injected(ref physicsScene, ref p0, ref p1, radius, ref direction, maxDistance, mask, queryTriggerInteraction);
@@ -785,8 +785,8 @@ namespace UnityEngine
 			return Physics.OverlapCapsule(point0, point1, radius, -1, QueryTriggerInteraction.UseGlobal);
 		}
 
-		[StaticAccessor("GetPhysicsManager().GetPhysicsQuery()", StaticAccessorType.Dot)]
 		[NativeName("OverlapSphere")]
+		[StaticAccessor("GetPhysicsManager().GetPhysicsQuery()", StaticAccessorType.Dot)]
 		private static Collider[] OverlapSphere_Internal(PhysicsScene physicsScene, Vector3 position, float radius, int layerMask, QueryTriggerInteraction queryTriggerInteraction)
 		{
 			return Physics.OverlapSphere_Internal_Injected(ref physicsScene, ref position, radius, layerMask, queryTriggerInteraction);
@@ -855,8 +855,8 @@ namespace UnityEngine
 			set;
 		}
 
-		[StaticAccessor("GetPhysicsManager().GetPhysicsQuery()")]
 		[NativeName("ComputePenetration")]
+		[StaticAccessor("GetPhysicsManager().GetPhysicsQuery()")]
 		private static bool Query_ComputePenetration([NotNull("ArgumentNullException")] Collider colliderA, Vector3 positionA, Quaternion rotationA, [NotNull("ArgumentNullException")] Collider colliderB, Vector3 positionB, Quaternion rotationB, ref Vector3 direction, ref float distance)
 		{
 			return Physics.Query_ComputePenetration_Injected(colliderA, ref positionA, ref rotationA, colliderB, ref positionB, ref rotationB, ref direction, ref distance);
@@ -948,8 +948,8 @@ namespace UnityEngine
 			return Physics.OverlapSphereNonAlloc(position, radius, results, -1, QueryTriggerInteraction.UseGlobal);
 		}
 
-		[StaticAccessor("GetPhysicsManager().GetPhysicsQuery()")]
 		[NativeName("SphereTest")]
+		[StaticAccessor("GetPhysicsManager().GetPhysicsQuery()")]
 		private static bool CheckSphere_Internal(PhysicsScene physicsScene, Vector3 position, float radius, int layerMask, QueryTriggerInteraction queryTriggerInteraction)
 		{
 			return Physics.CheckSphere_Internal_Injected(ref physicsScene, ref position, radius, layerMask, queryTriggerInteraction);
@@ -1065,8 +1065,8 @@ namespace UnityEngine
 			return Physics.CheckCapsule(start, end, radius, -5, QueryTriggerInteraction.UseGlobal);
 		}
 
-		[StaticAccessor("GetPhysicsManager().GetPhysicsQuery()")]
 		[NativeName("BoxTest")]
+		[StaticAccessor("GetPhysicsManager().GetPhysicsQuery()")]
 		private static bool CheckBox_Internal(PhysicsScene physicsScene, Vector3 center, Vector3 halfExtents, Quaternion orientation, int layermask, QueryTriggerInteraction queryTriggerInteraction)
 		{
 			return Physics.CheckBox_Internal_Injected(ref physicsScene, ref center, ref halfExtents, ref orientation, layermask, queryTriggerInteraction);
@@ -1095,8 +1095,8 @@ namespace UnityEngine
 			return Physics.CheckBox(center, halfExtents, Quaternion.identity, -5, QueryTriggerInteraction.UseGlobal);
 		}
 
-		[StaticAccessor("GetPhysicsManager().GetPhysicsQuery()")]
 		[NativeName("OverlapBox")]
+		[StaticAccessor("GetPhysicsManager().GetPhysicsQuery()")]
 		private static Collider[] OverlapBox_Internal(PhysicsScene physicsScene, Vector3 center, Vector3 halfExtents, Quaternion orientation, int layerMask, QueryTriggerInteraction queryTriggerInteraction)
 		{
 			return Physics.OverlapBox_Internal_Injected(ref physicsScene, ref center, ref halfExtents, ref orientation, layerMask, queryTriggerInteraction);
@@ -1242,8 +1242,8 @@ namespace UnityEngine
 			return Physics.OverlapCapsuleNonAlloc(point0, point1, radius, results, -1, QueryTriggerInteraction.UseGlobal);
 		}
 
-		[StaticAccessor("GetPhysicsManager()")]
 		[NativeName("RebuildBroadphaseRegions")]
+		[StaticAccessor("GetPhysicsManager()")]
 		private static void Internal_RebuildBroadphaseRegions(Bounds bounds, int subdivisions)
 		{
 			Physics.Internal_RebuildBroadphaseRegions_Injected(ref bounds, subdivisions);
@@ -1334,12 +1334,12 @@ namespace UnityEngine
 
 		public const int AllLayers = -1;
 
-		[EditorBrowsable(EditorBrowsableState.Never)]
 		[Obsolete("Please use Physics.IgnoreRaycastLayer instead. (UnityUpgradable) -> IgnoreRaycastLayer", true)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		public const int kIgnoreRaycastLayer = 4;
 
-		[Obsolete("Please use Physics.DefaultRaycastLayers instead. (UnityUpgradable) -> DefaultRaycastLayers", true)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
+		[Obsolete("Please use Physics.DefaultRaycastLayers instead. (UnityUpgradable) -> DefaultRaycastLayers", true)]
 		public const int kDefaultRaycastLayers = -5;
 
 		[Obsolete("Please use Physics.AllLayers instead. (UnityUpgradable) -> AllLayers", true)]

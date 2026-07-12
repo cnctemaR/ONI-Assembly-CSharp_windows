@@ -6,8 +6,8 @@ using UnityEngine.Scripting;
 namespace UnityEngine.Experimental.Rendering
 {
 	[UsedByNativeCode]
-	[NativeHeader("Runtime/Export/Graphics/RayTracingAccelerationStructure.bindings.h")]
 	[NativeHeader("Runtime/Shaders/RayTracingAccelerationStructure.h")]
+	[NativeHeader("Runtime/Export/Graphics/RayTracingAccelerationStructure.bindings.h")]
 	public sealed class RayTracingAccelerationStructure : IDisposable
 	{
 		~RayTracingAccelerationStructure()

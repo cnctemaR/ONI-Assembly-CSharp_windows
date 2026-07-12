@@ -4,8 +4,8 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Utilities/PropertyName.h")]
 	[NativeHeader("Runtime/Director/Core/ExposedPropertyTable.bindings.h")]
+	[NativeHeader("Runtime/Utilities/PropertyName.h")]
 	public struct ExposedPropertyResolver
 	{
 		internal static Object ResolveReferenceInternal(IntPtr ptr, PropertyName name, out bool isValid)

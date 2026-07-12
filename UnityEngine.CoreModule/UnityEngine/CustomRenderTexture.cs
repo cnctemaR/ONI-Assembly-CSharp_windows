@@ -7,8 +7,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[UsedByNativeCode]
 	[NativeHeader("Runtime/Graphics/CustomRenderTexture.h")]
+	[UsedByNativeCode]
 	public sealed class CustomRenderTexture : RenderTexture
 	{
 		[FreeFunction(Name = "CustomRenderTextureScripting::Create")]

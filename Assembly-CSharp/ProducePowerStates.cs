@@ -30,7 +30,10 @@ public class ProducePowerStates : GameStateMachine<ProducePowerStates, ProducePo
 		}).Exit(delegate(ProducePowerStates.Instance smi)
 		{
 			ProducePowerMonitor.Instance smi3 = smi.GetSMI<ProducePowerMonitor.Instance>();
-			smi3.sm.targetSleepCell.Set(Grid.InvalidCell, smi3);
+			if (smi3 != null)
+			{
+				smi3.sm.targetSleepCell.Set(Grid.InvalidCell, smi3);
+			}
 			smi.GetComponent<Staterpillar>().DestroyGenerator();
 		});
 		this.generator.sleep.connected.Enter(delegate(ProducePowerStates.Instance smi)

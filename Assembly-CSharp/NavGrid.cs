@@ -7,8 +7,6 @@ public class NavGrid
 {
 	public NavTable NavTable { get; private set; }
 
-	public NavGraph NavGraph { get; private set; }
-
 	public NavGrid.Transition[] transitions { get; set; }
 
 	public NavGrid.Transition[][] transitionsByNavType { get; private set; }
@@ -86,7 +84,6 @@ public class NavGrid
 		}
 		this.potentialScratchPad = new PathFinder.PotentialScratchPad(this.maxLinksPerCell);
 		this.InitializeGraph();
-		this.NavGraph = new NavGraph(Grid.CellCount, this);
 	}
 
 	public NavGrid.NavTypeData GetNavTypeData(NavType nav_type)
@@ -121,7 +118,7 @@ public class NavGrid
 
 	public void InitializeGraph()
 	{
-		NavGridUpdater.InitializeNavGrid(this.NavTable, this.ValidNavTypes, this.Validators, this.boundingOffsets, this.maxLinksPerCell, this.Links, this.transitionsByNavType);
+		NavGridUpdater.InitializeNavGrid(this.NavTable, this.Validators, this.boundingOffsets, this.maxLinksPerCell, this.Links, this.transitionsByNavType);
 	}
 
 	public void UpdateGraph()
@@ -147,7 +144,7 @@ public class NavGrid
 
 	public void UpdateGraph(HashSet<int> dirty_nav_cells)
 	{
-		NavGridUpdater.UpdateNavGrid(this.NavTable, this.ValidNavTypes, this.Validators, this.boundingOffsets, this.maxLinksPerCell, this.Links, this.transitionsByNavType, this.teleportTransitions, dirty_nav_cells);
+		NavGridUpdater.UpdateNavGrid(this.NavTable, this.Validators, this.boundingOffsets, this.maxLinksPerCell, this.Links, this.transitionsByNavType, this.teleportTransitions, dirty_nav_cells);
 		if (this.OnNavGridUpdateComplete != null)
 		{
 			this.OnNavGridUpdateComplete(dirty_nav_cells);
@@ -334,34 +331,8 @@ public class NavGrid
 
 	public struct Link
 	{
-		public byte transitionId
-		{
-			get
-			{
-				return this._transitionId;
-			}
-			set
-			{
-				this._transitionId = value;
-			}
-		}
-
-		public byte cost
-		{
-			get
-			{
-				return this._cost;
-			}
-			set
-			{
-				this._cost = value;
-			}
-		}
-
 		public Link(int link, NavType start_nav_type, NavType end_nav_type, byte transition_id, byte cost)
 		{
-			this._transitionId = 0;
-			this._cost = 0;
 			this.link = link;
 			this.startNavType = start_nav_type;
 			this.endNavType = end_nav_type;
@@ -375,9 +346,9 @@ public class NavGrid
 
 		public NavType endNavType;
 
-		private byte _transitionId;
+		public byte transitionId;
 
-		private byte _cost;
+		public byte cost;
 	}
 
 	public struct NavTypeData

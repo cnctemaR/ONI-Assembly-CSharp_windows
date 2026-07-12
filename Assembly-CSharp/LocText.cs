@@ -1,5 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
+using STRINGS;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
@@ -72,6 +76,12 @@ public class LocText : TextMeshProUGUI
 		this.RefreshLinkHandler();
 	}
 
+	private new void OnDestroy()
+	{
+		KInputManager.InputChange.RemoveListener(new UnityAction(this.RefreshText));
+		base.OnDestroy();
+	}
+
 	public override void SetLayoutDirty()
 	{
 		if (this.staticLayout)
@@ -123,38 +133,153 @@ public class LocText : TextMeshProUGUI
 
 	public static string ParseText(string input)
 	{
-		if (input.Contains("{Hotkey/"))
+		string text = "\\{Hotkey/(\\w+)\\}";
+		string text2 = Regex.Replace(input, text, delegate(Match m)
 		{
-			string[] array = input.Split(new char[] { '{', '}' });
+			string value = m.Groups[1].Value;
+			global::Action action;
+			if (LocText.ActionLookup.TryGetValue(value, out action))
+			{
+				return GameUtil.GetHotkeyString(action);
+			}
+			return m.Value;
+		});
+		if (text2.Contains('\\'))
+		{
+			string[] array = text2.Split(new char[] { '\\' });
+			string text3 = string.Empty;
 			if (array.Length >= 3)
 			{
-				string text = string.Empty;
 				for (int i = 0; i < array.Length; i++)
 				{
 					if (i % 2 == 0)
 					{
-						text += array[i];
+						text3 += array[i];
 					}
-					else
+					else if (KInputManager.currentControllerIsGamepad)
 					{
-						string text2 = array[i].Split(new char[] { '/' })[1];
-						for (int j = 0; j < 273; j++)
+						if (Enum.TryParse<UI.ClickType>(array[i], out LocText.clickCache))
 						{
-							global::Action action = (global::Action)j;
-							string text3 = action.ToString();
-							if (text2 == text3)
+							switch (LocText.clickCache)
 							{
-								text += GameUtil.ReplaceHotkeyString("{Hotkey}", (global::Action)j);
+							case UI.ClickType.Click:
+								text3 += UI.CONTROLS.PRESS;
+								break;
+							case UI.ClickType.Clicked:
+								text3 += UI.CONTROLS.PRESSED;
+								break;
+							case UI.ClickType.Clicking:
+								text3 += UI.CONTROLS.PRESSING;
+								break;
+							case UI.ClickType.Clickable:
+								text3 += UI.CONTROLS.PRESSABLE;
+								break;
+							case UI.ClickType.Clicks:
+								text3 += UI.CONTROLS.PRESSES;
+								break;
+							case UI.ClickType.click:
+								text3 += UI.CONTROLS.PRESSLOWER;
+								break;
+							case UI.ClickType.clicked:
+								text3 += UI.CONTROLS.PRESSEDLOWER;
+								break;
+							case UI.ClickType.clicking:
+								text3 += UI.CONTROLS.PRESSINGLOWER;
+								break;
+							case UI.ClickType.clickable:
+								text3 += UI.CONTROLS.PRESSABLELOWER;
+								break;
+							case UI.ClickType.clicks:
+								text3 += UI.CONTROLS.PRESSESLOWER;
+								break;
+							case UI.ClickType.CLICK:
+								text3 += UI.CONTROLS.PRESSUPPER;
+								break;
+							case UI.ClickType.CLICKED:
+								text3 += UI.CONTROLS.PRESSEDUPPER;
+								break;
+							case UI.ClickType.CLICKING:
+								text3 += UI.CONTROLS.PRESSINGUPPER;
+								break;
+							case UI.ClickType.CLICKABLE:
+								text3 += UI.CONTROLS.PRESSABLEUPPER;
+								break;
+							case UI.ClickType.CLICKS:
+								text3 += UI.CONTROLS.PRESSESUPPER;
+								break;
+							default:
+								text3 += array[i];
 								break;
 							}
 						}
+						else
+						{
+							text3 += array[i];
+						}
+					}
+					else if (Enum.TryParse<UI.ClickType>(array[i], out LocText.clickCache))
+					{
+						switch (LocText.clickCache)
+						{
+						case UI.ClickType.Click:
+							text3 += UI.CONTROLS.CLICK;
+							break;
+						case UI.ClickType.Clicked:
+							text3 += UI.CONTROLS.CLICKED;
+							break;
+						case UI.ClickType.Clicking:
+							text3 += UI.CONTROLS.CLICKING;
+							break;
+						case UI.ClickType.Clickable:
+							text3 += UI.CONTROLS.CLICKABLE;
+							break;
+						case UI.ClickType.Clicks:
+							text3 += UI.CONTROLS.CLICKS;
+							break;
+						case UI.ClickType.click:
+							text3 += UI.CONTROLS.CLICKLOWER;
+							break;
+						case UI.ClickType.clicked:
+							text3 += UI.CONTROLS.CLICKEDLOWER;
+							break;
+						case UI.ClickType.clicking:
+							text3 += UI.CONTROLS.CLICKINGLOWER;
+							break;
+						case UI.ClickType.clickable:
+							text3 += UI.CONTROLS.CLICKABLELOWER;
+							break;
+						case UI.ClickType.clicks:
+							text3 += UI.CONTROLS.CLICKSLOWER;
+							break;
+						case UI.ClickType.CLICK:
+							text3 += UI.CONTROLS.CLICKUPPER;
+							break;
+						case UI.ClickType.CLICKED:
+							text3 += UI.CONTROLS.CLICKEDUPPER;
+							break;
+						case UI.ClickType.CLICKING:
+							text3 += UI.CONTROLS.CLICKINGUPPER;
+							break;
+						case UI.ClickType.CLICKABLE:
+							text3 += UI.CONTROLS.CLICKABLEUPPER;
+							break;
+						case UI.ClickType.CLICKS:
+							text3 += UI.CONTROLS.CLICKSUPPER;
+							break;
+						default:
+							text3 += array[i];
+							break;
+						}
+					}
+					else
+					{
+						text3 += array[i];
 					}
 				}
-				input = text;
-				return text;
+				text2 = text3;
 			}
 		}
-		return input;
+		return text2;
 	}
 
 	private void RefreshText()
@@ -227,8 +352,12 @@ public class LocText : TextMeshProUGUI
 
 	private string originalString = string.Empty;
 
+	private static UI.ClickType clickCache = UI.ClickType.click;
+
 	[SerializeField]
 	private bool allowLinksInternal;
+
+	private static readonly Dictionary<string, global::Action> ActionLookup = Enum.GetNames(typeof(global::Action)).ToDictionary<string, string, global::Action>((string x) => x, (string x) => (global::Action)Enum.Parse(typeof(global::Action), x), StringComparer.OrdinalIgnoreCase);
 
 	private const string linkPrefix_open = "<link=\"";
 

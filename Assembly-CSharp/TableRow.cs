@@ -129,13 +129,7 @@ public class TableRow : KMonoBehaviour
 				}
 			}
 		}
-		foreach (KeyValuePair<string, TableColumn> keyValuePair2 in columns)
-		{
-			if (keyValuePair2.Value.on_load_action != null)
-			{
-				keyValuePair2.Value.on_load_action(minion, keyValuePair2.Value.widgets_by_row[this]);
-			}
-		}
+		this.RefreshColumns(columns);
 		if (minion != null)
 		{
 			base.gameObject.name = minion.GetProperName();
@@ -148,18 +142,29 @@ public class TableRow : KMonoBehaviour
 		{
 			this.selectMinionButton.transform.SetAsLastSibling();
 		}
-		foreach (KeyValuePair<string, GameObject> keyValuePair3 in this.scrollerBorders)
+		foreach (KeyValuePair<string, GameObject> keyValuePair2 in this.scrollerBorders)
 		{
-			RectTransform rectTransform = keyValuePair3.Value.rectTransform();
+			RectTransform rectTransform = keyValuePair2.Value.rectTransform();
 			float width = rectTransform.rect.width;
-			keyValuePair3.Value.transform.SetParent(base.gameObject.transform);
+			keyValuePair2.Value.transform.SetParent(base.gameObject.transform);
 			rectTransform.anchorMin = (rectTransform.anchorMax = new Vector2(0f, 1f));
 			rectTransform.sizeDelta = new Vector2(width, rectTransform.sizeDelta.y);
-			RectTransform rectTransform2 = this.scrollers[keyValuePair3.Key].transform.parent.rectTransform();
-			Vector3 vector = this.scrollers[keyValuePair3.Key].transform.parent.rectTransform().GetLocalPosition() - new Vector3(rectTransform2.sizeDelta.x / 2f, -1f * (rectTransform2.sizeDelta.y / 2f), 0f);
+			RectTransform rectTransform2 = this.scrollers[keyValuePair2.Key].transform.parent.rectTransform();
+			Vector3 vector = this.scrollers[keyValuePair2.Key].transform.parent.rectTransform().GetLocalPosition() - new Vector3(rectTransform2.sizeDelta.x / 2f, -1f * (rectTransform2.sizeDelta.y / 2f), 0f);
 			vector.y = 0f;
 			rectTransform.sizeDelta = new Vector2(rectTransform.sizeDelta.x, 374f);
 			rectTransform.SetLocalPosition(vector + Vector3.up * rectTransform.GetLocalPosition().y + Vector3.up * -rectTransform.anchoredPosition.y);
+		}
+	}
+
+	public void RefreshColumns(Dictionary<string, TableColumn> columns)
+	{
+		foreach (KeyValuePair<string, TableColumn> keyValuePair in columns)
+		{
+			if (keyValuePair.Value.on_load_action != null)
+			{
+				keyValuePair.Value.on_load_action(this.minion, keyValuePair.Value.widgets_by_row[this]);
+			}
 		}
 	}
 

@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using STRINGS;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.UI;
 
 public class CodexScreen : KScreen
@@ -64,6 +65,44 @@ public class CodexScreen : KScreen
 		return 50f;
 	}
 
+	public void RefreshTutorialMessages()
+	{
+		if (!this.HasFocus)
+		{
+			return;
+		}
+		string text = CodexCache.FormatLinkID("MISCELLANEOUSTIPS");
+		CodexEntry codexEntry;
+		if (CodexCache.entries.TryGetValue(text, out codexEntry))
+		{
+			for (int i = 0; i < codexEntry.subEntries.Count; i++)
+			{
+				for (int j = 0; j < codexEntry.subEntries[i].contentContainers.Count; j++)
+				{
+					for (int k = 0; k < codexEntry.subEntries[i].contentContainers[j].content.Count; k++)
+					{
+						CodexText codexText = codexEntry.subEntries[i].contentContainers[j].content[k] as CodexText;
+						if (codexText != null && codexText.messageID == MISC.NOTIFICATIONS.BASICCONTROLS.NAME)
+						{
+							if (KInputManager.currentControllerIsGamepad)
+							{
+								codexText.text = MISC.NOTIFICATIONS.BASICCONTROLS.MESSAGEBODYALT;
+							}
+							else
+							{
+								codexText.text = MISC.NOTIFICATIONS.BASICCONTROLS.MESSAGEBODY;
+							}
+							if (!string.IsNullOrEmpty(this.activeEntryID))
+							{
+								this.ChangeArticle("MISCELLANEOUSTIPS0", false, default(Vector3), CodexScreen.HistoryDirection.NewArticle);
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
 	private void CodexScreenInit()
 	{
 		this.textStyles[CodexTextStyle.Title] = this.textStyleTitle;
@@ -90,6 +129,7 @@ public class CodexScreen : KScreen
 				this.ChangeArticle(this.activeEntryID, false, default(Vector3), CodexScreen.HistoryDirection.NewArticle);
 			}
 		});
+		KInputManager.InputChange.AddListener(new UnityAction(this.RefreshTutorialMessages));
 	}
 
 	private void SetupPrefabs()

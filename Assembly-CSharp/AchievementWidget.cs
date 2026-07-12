@@ -42,15 +42,19 @@ public class AchievementWidget : KMonoBehaviour
 	private IEnumerator Flourish(float startDelay)
 	{
 		this.SetNeverAchieved();
-		if (base.GetComponent<Canvas>() == null)
+		Canvas canvas = base.GetComponent<Canvas>();
+		if (canvas == null)
 		{
-			base.gameObject.AddComponent<Canvas>().sortingOrder = 1;
+			canvas = base.gameObject.AddComponent<Canvas>();
 		}
-		base.GetComponent<Canvas>().overrideSorting = true;
 		yield return new WaitForSecondsRealtime(startDelay);
 		KScrollRect component = base.transform.parent.parent.GetComponent<KScrollRect>();
-		float num = 1f + base.transform.localPosition.y / component.content.rect.height;
-		component.SetSmoothAutoScrollTarget(num);
+		float num = 1.1f;
+		float num2 = 1f + base.transform.localPosition.y * num / component.content.rect.height;
+		component.SetSmoothAutoScrollTarget(num2);
+		yield return new WaitForSecondsRealtime(0.5f);
+		canvas.overrideSorting = true;
+		canvas.sortingOrder = 30;
 		GameObject icon = base.GetComponent<HierarchyReferences>().GetReference<Image>("icon").transform.parent.gameObject;
 		foreach (KBatchedAnimController kbatchedAnimController in this.sparks)
 		{
@@ -68,8 +72,8 @@ public class AchievementWidget : KMonoBehaviour
 		component2.GetReference<Image>("icon").color = this.color_gold;
 		bool colorChanged = false;
 		EventInstance eventInstance = KFMOD.BeginOneShot(GlobalAssets.GetSound("AchievementUnlocked", false), Vector3.zero, 1f);
-		int num2 = Mathf.RoundToInt(MathUtil.Clamp(1f, 7f, startDelay - startDelay % 1f / 1f)) - 1;
-		eventInstance.setParameterByName("num_achievements", (float)num2, false);
+		int num3 = Mathf.RoundToInt(MathUtil.Clamp(1f, 7f, startDelay - startDelay % 1f / 1f)) - 1;
+		eventInstance.setParameterByName("num_achievements", (float)num3, false);
 		KFMOD.EndOneShot(eventInstance);
 		for (float i = 0f; i < 1.2f; i += Time.unscaledDeltaTime)
 		{
@@ -88,11 +92,11 @@ public class AchievementWidget : KMonoBehaviour
 			yield return 0;
 		}
 		icon.transform.localScale = Vector3.one;
-		for (float i = 0f; i < 0.3f; i += Time.unscaledDeltaTime)
+		canvas.overrideSorting = false;
+		for (float i = 0f; i < 0.6f; i += Time.unscaledDeltaTime)
 		{
 			yield return 0;
 		}
-		base.GetComponent<Canvas>().overrideSorting = false;
 		base.transform.localScale = Vector3.one;
 		yield break;
 	}

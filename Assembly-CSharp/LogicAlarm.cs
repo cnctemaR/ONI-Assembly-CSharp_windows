@@ -66,7 +66,7 @@ public class LogicAlarm : KMonoBehaviour, ISaveLoadable
 				this.wasOn = true;
 				if (this.pauseOnNotify && !SpeedControlScreen.Instance.IsPaused)
 				{
-					SpeedControlScreen.Instance.Pause(false);
+					SpeedControlScreen.Instance.Pause(false, false);
 				}
 				if (this.zoomOnNotify)
 				{

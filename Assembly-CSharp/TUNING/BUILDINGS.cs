@@ -309,6 +309,7 @@ namespace TUNING
 			{ "ResetSkillsStation", "work stations" },
 			{ "CraftingTable", "suits general" },
 			{ "ClothingFabricator", "suits general" },
+			{ "ClothingAlterationStation", "suits general" },
 			{ "SuitFabricator", "suits general" },
 			{ "OxygenMaskMarker", "oxygen masks" },
 			{ "OxygenMaskLocker", "oxygen masks" },
@@ -602,7 +603,11 @@ namespace TUNING
 				"Compost", "WaterPurifier", "Desalinator", "FertilizerMaker", "AlgaeDistillery", "EthanolDistillery", "RockCrusher", "Kiln", "SludgePress", "MetalRefinery",
 				"GlassForge", "OilRefinery", "Polymerizer", "OxyliteRefinery", "SupermaterialRefinery", "DiamondPress"
 			}, ""),
-			new PlanScreen.PlanInfo(new HashedString("Medical"), false, new List<string> { "WashBasin", "WashSink", "HandSanitizer", "DecontaminationShower", "Apothecary", "DoctorStation", "AdvancedDoctorStation", "MedicalCot", "MassageTable", "Grave" }, ""),
+			new PlanScreen.PlanInfo(new HashedString("Medical"), false, new List<string>
+			{
+				"DevLifeSupport", "WashBasin", "WashSink", "HandSanitizer", "DecontaminationShower", "Apothecary", "DoctorStation", "AdvancedDoctorStation", "MedicalCot", "MassageTable",
+				"Grave"
+			}, ""),
 			new PlanScreen.PlanInfo(new HashedString("Furniture"), false, new List<string>
 			{
 				BedConfig.ID,
@@ -648,8 +653,8 @@ namespace TUNING
 			new PlanScreen.PlanInfo(new HashedString("Equipment"), false, new List<string>
 			{
 				"ResearchCenter", "AdvancedResearchCenter", "NuclearResearchCenter", "OrbitalResearchCenter", "CosmicResearchCenter", "DLC1CosmicResearchCenter", "Telescope", "PowerControlStation", "FarmStation", "GeneticAnalysisStation",
-				"RanchStation", "ShearingStation", "RoleStation", "ResetSkillsStation", "ArtifactAnalysisStation", "CraftingTable", "ClothingFabricator", "SuitFabricator", "OxygenMaskMarker", "OxygenMaskLocker",
-				"SuitMarker", "SuitLocker", "JetSuitMarker", "JetSuitLocker", "LeadSuitMarker", "LeadSuitLocker", "AstronautTrainingCenter"
+				"RanchStation", "ShearingStation", "RoleStation", "ResetSkillsStation", "ArtifactAnalysisStation", "CraftingTable", "ClothingFabricator", "ClothingAlterationStation", "SuitFabricator", "OxygenMaskMarker",
+				"OxygenMaskLocker", "SuitMarker", "SuitLocker", "JetSuitMarker", "JetSuitLocker", "LeadSuitMarker", "LeadSuitLocker", "AstronautTrainingCenter"
 			}, ""),
 			new PlanScreen.PlanInfo(new HashedString("Utilities"), true, new List<string>
 			{

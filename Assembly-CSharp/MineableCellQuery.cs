@@ -29,7 +29,7 @@ public class MineableCellQuery : PathFinderQuery
 		foreach (Direction direction in MineableCellQuery.DIRECTION_CHECKS)
 		{
 			int cellInDirection = Grid.GetCellInDirection(testCell, direction);
-			if (Grid.IsValidCell(cellInDirection) && Grid.IsSolidCell(cellInDirection) && Grid.Element[cellInDirection].tag == element)
+			if (Grid.IsValidCell(cellInDirection) && Grid.IsSolidCell(cellInDirection) && !Grid.Foundation[cellInDirection] && Grid.Element[cellInDirection].tag == element)
 			{
 				return true;
 			}

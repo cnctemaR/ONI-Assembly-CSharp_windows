@@ -6,10 +6,10 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using UnityEngine.Bindings;
 using UnityEngine.Rendering;
+using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeAsStruct]
 	[NativeHeader("Runtime/Export/Graphics/Graphics.bindings.h")]
 	[StructLayout(LayoutKind.Sequential)]
 	public sealed class LightProbes : Object
@@ -21,6 +21,7 @@ namespace UnityEngine
 		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 		public static event Action tetrahedralizationCompleted;
 
+		[RequiredByNativeCode]
 		private static void Internal_CallTetrahedralizationCompletedFunction()
 		{
 			bool flag = LightProbes.tetrahedralizationCompleted != null;
@@ -33,6 +34,7 @@ namespace UnityEngine
 		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 		public static event Action needsRetetrahedralization;
 
+		[RequiredByNativeCode]
 		private static void Internal_CallNeedsRetetrahedralizationFunction()
 		{
 			bool flag = LightProbes.needsRetetrahedralization != null;
@@ -143,20 +145,20 @@ namespace UnityEngine
 
 		public extern SphericalHarmonicsL2[] bakedProbes
 		{
-			[NativeName("GetBakedCoefficients")]
 			[FreeFunction(HasExplicitThis = true)]
+			[NativeName("GetBakedCoefficients")]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
-			[FreeFunction(HasExplicitThis = true)]
 			[NativeName("SetBakedCoefficients")]
+			[FreeFunction(HasExplicitThis = true)]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
 		}
 
 		public extern int count
 		{
-			[FreeFunction(HasExplicitThis = true)]
 			[NativeName("GetLightProbeCount")]
+			[FreeFunction(HasExplicitThis = true)]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
@@ -169,19 +171,19 @@ namespace UnityEngine
 			get;
 		}
 
-		[FreeFunction]
 		[NativeName("GetLightProbeCount")]
+		[FreeFunction]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern int GetCount();
 
-		[EditorBrowsable(EditorBrowsableState.Never)]
 		[Obsolete("Use GetInterpolatedProbe instead.", true)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		public void GetInterpolatedLightProbe(Vector3 position, Renderer renderer, float[] coefficients)
 		{
 		}
 
-		[Obsolete("Use bakedProbes instead.", true)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
+		[Obsolete("Use bakedProbes instead.", true)]
 		public float[] coefficients
 		{
 			get

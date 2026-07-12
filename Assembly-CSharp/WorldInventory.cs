@@ -9,6 +9,18 @@ using UnityEngine;
 [AddComponentMenu("KMonoBehaviour/scripts/WorldInventory")]
 public class WorldInventory : KMonoBehaviour, ISaveLoadable
 {
+	public WorldContainer WorldContainer
+	{
+		get
+		{
+			if (this.m_worldContainer == null)
+			{
+				this.m_worldContainer = base.GetComponent<WorldContainer>();
+			}
+			return this.m_worldContainer;
+		}
+	}
+
 	public bool HasValidCount
 	{
 		get
@@ -21,12 +33,12 @@ public class WorldInventory : KMonoBehaviour, ISaveLoadable
 	{
 		get
 		{
-			WorldContainer component = base.GetComponent<WorldContainer>();
-			if (!(component != null))
+			WorldContainer worldContainer = this.WorldContainer;
+			if (!(worldContainer != null))
 			{
 				return -1;
 			}
-			return component.id;
+			return worldContainer.id;
 		}
 	}
 
@@ -35,6 +47,7 @@ public class WorldInventory : KMonoBehaviour, ISaveLoadable
 		base.Subscribe(Game.Instance.gameObject, -1588644844, new Action<object>(this.OnAddedFetchable));
 		base.Subscribe(Game.Instance.gameObject, -1491270284, new Action<object>(this.OnRemovedFetchable));
 		base.Subscribe<WorldInventory>(631075836, WorldInventory.OnNewDayDelegate);
+		this.m_worldContainer = base.GetComponent<WorldContainer>();
 	}
 
 	protected override void OnCleanUp()
@@ -341,6 +354,8 @@ public class WorldInventory : KMonoBehaviour, ISaveLoadable
 	{
 		return this.accessibleAmounts;
 	}
+
+	private WorldContainer m_worldContainer;
 
 	[Serialize]
 	public List<Tag> pinnedResources = new List<Tag>();

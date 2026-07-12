@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using UnityEngine.Bindings;
+using UnityEngine.Scripting;
 
 namespace Unity.Jobs.LowLevel.Unsafe
 {
@@ -154,6 +155,29 @@ namespace Unity.Jobs.LowLevel.Unsafe
 			}
 		}
 
+		[FreeFunction("JobDebuggerGetSystemIdCellPtr")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal static extern IntPtr GetSystemIdCellPtr();
+
+		[FreeFunction("JobDebuggerClearSystemIds")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal static extern void ClearSystemIds();
+
+		[FreeFunction("JobDebuggerGetSystemIdMappings")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal unsafe static extern int GetSystemIdMappings(JobHandle* handles, int* systemIds, int maxCount);
+
+		[RequiredByNativeCode]
+		private static void InvokePanicFunction()
+		{
+			JobsUtility.PanicFunction_ panicFunction = JobsUtility.PanicFunction;
+			bool flag = panicFunction == null;
+			if (!flag)
+			{
+				panicFunction();
+			}
+		}
+
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void Schedule_Injected(ref JobsUtility.JobScheduleParameters parameters, out JobHandle ret);
 
@@ -173,6 +197,8 @@ namespace Unity.Jobs.LowLevel.Unsafe
 
 		public const int CacheLineSize = 64;
 
+		internal static JobsUtility.PanicFunction_ PanicFunction;
+
 		public struct JobScheduleParameters
 		{
 			public unsafe JobScheduleParameters(void* i_jobData, IntPtr i_reflectionData, JobHandle i_dependency, ScheduleMode i_scheduleMode)
@@ -191,5 +217,7 @@ namespace Unity.Jobs.LowLevel.Unsafe
 
 			public IntPtr JobDataPtr;
 		}
+
+		internal delegate void PanicFunction_();
 	}
 }

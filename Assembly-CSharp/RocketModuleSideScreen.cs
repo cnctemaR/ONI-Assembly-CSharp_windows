@@ -13,6 +13,12 @@ public class RocketModuleSideScreen : SideScreenContent
 		RocketModuleSideScreen.instance = this;
 	}
 
+	protected override void OnForcedCleanUp()
+	{
+		RocketModuleSideScreen.instance = null;
+		base.OnForcedCleanUp();
+	}
+
 	public override int GetSideScreenSortOrder()
 	{
 		return 500;
@@ -75,16 +81,7 @@ public class RocketModuleSideScreen : SideScreenContent
 		this.reorderable = new_target.GetComponent<ReorderableBuilding>();
 		this.moduleIcon.sprite = Def.GetUISprite(this.reorderable.gameObject, "ui", false).first;
 		this.moduleNameLabel.SetText(this.reorderable.GetProperName());
-		BuildingDef buildingDef;
-		if (this.reorderable.GetComponent<Building>() != null)
-		{
-			buildingDef = this.reorderable.GetComponent<Building>().Def;
-		}
-		else
-		{
-			buildingDef = this.reorderable.GetComponent<BuildingUnderConstruction>().Def;
-		}
-		this.moduleDescriptionLabel.SetText(buildingDef.Desc);
+		this.moduleDescriptionLabel.SetText(this.reorderable.GetComponent<Building>().Desc);
 		this.UpdateButtonStates();
 	}
 
@@ -110,6 +107,11 @@ public class RocketModuleSideScreen : SideScreenContent
 		}
 		if (ClusterManager.Instance.activeWorld == component.GetTargetWorld())
 		{
+			this.changeModuleButton.isInteractable = false;
+			this.addNewModuleButton.isInteractable = false;
+			this.removeModuleButton.isInteractable = false;
+			this.moveModuleDownButton.isInteractable = false;
+			this.moveModuleUpButton.isInteractable = false;
 			this.viewInteriorButton.isInteractable = component.GetMyWorldId() != (int)ClusterManager.INVALID_WORLD_IDX;
 			this.viewInteriorButton.GetComponentInChildren<LocText>().SetText(UI.UISIDESCREENS.ROCKETMODULESIDESCREEN.BUTTONVIEWEXTERIOR.LABEL);
 			this.viewInteriorButton.GetComponent<ToolTip>().SetSimpleTooltip(this.viewInteriorButton.isInteractable ? UI.UISIDESCREENS.ROCKETMODULESIDESCREEN.BUTTONVIEWEXTERIOR.DESC.text : UI.UISIDESCREENS.ROCKETMODULESIDESCREEN.BUTTONVIEWEXTERIOR.INVALID.text);
@@ -199,6 +201,7 @@ public class RocketModuleSideScreen : SideScreenContent
 			AudioMixer.instance.Start(component2.interiorReverbSnapshot);
 			ClusterManager.Instance.SetActiveWorld(targetWorld.id);
 		}
+		DetailsScreen.Instance.ClearSecondarySideScreen();
 		this.UpdateButtonStates();
 	}
 

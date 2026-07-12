@@ -4,7 +4,7 @@ using Klei.AI;
 public class CaloriesDisplayer : StandardAmountDisplayer
 {
 	public CaloriesDisplayer()
-		: base(GameUtil.UnitClass.Calories, GameUtil.TimeSlice.PerCycle, null)
+		: base(GameUtil.UnitClass.Calories, GameUtil.TimeSlice.PerCycle, null, GameUtil.IdentityDescriptorTense.Normal)
 	{
 		this.formatter = new CaloriesDisplayer.CaloriesAttributeFormatter();
 	}

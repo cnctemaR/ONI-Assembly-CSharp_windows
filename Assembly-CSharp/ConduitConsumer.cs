@@ -26,8 +26,7 @@ public class ConduitConsumer : KMonoBehaviour, IConduitConsumer
 	{
 		get
 		{
-			GameObject gameObject = Grid.Objects[this.utilityCell, (this.conduitType == ConduitType.Gas) ? 12 : 16];
-			return gameObject != null && gameObject.GetComponent<BuildingComplete>() != null;
+			return Grid.Objects[this.utilityCell, (this.conduitType == ConduitType.Gas) ? 12 : 16] != null && this.m_buildingComplete != null;
 		}
 	}
 
@@ -338,6 +337,9 @@ public class ConduitConsumer : KMonoBehaviour, IConduitConsumer
 
 	[MyCmpGet]
 	public Storage storage;
+
+	[MyCmpGet]
+	private BuildingComplete m_buildingComplete;
 
 	private int utilityCell = -1;
 

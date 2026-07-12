@@ -6,12 +6,16 @@ using UnityEngine;
 
 public static class BaseMoleConfig
 {
-	public static GameObject BaseMole(string id, string name, string desc, string traitId, string anim_file, bool is_baby)
+	public static GameObject BaseMole(string id, string name, string desc, string traitId, string anim_file, bool is_baby, string symbolOverridePrefix = null, int on_death_drop_count = 10)
 	{
 		float num = 25f;
 		EffectorValues none = global::TUNING.BUILDINGS.DECOR.NONE;
 		GameObject gameObject = EntityTemplates.CreatePlacedEntity(id, name, desc, num, Assets.GetAnim(anim_file), "idle_loop", Grid.SceneLayer.Creatures, 1, 1, none, default(EffectorValues), SimHashes.Creature, null, 293f);
-		EntityTemplates.ExtendEntityToBasicCreature(gameObject, FactionManager.FactionID.Pest, traitId, "DiggerNavGrid", NavType.Floor, 32, 2f, "Meat", 10, true, false, 123.149994f, 673.15f, 73.149994f, 773.15f);
+		EntityTemplates.ExtendEntityToBasicCreature(gameObject, FactionManager.FactionID.Pest, traitId, "DiggerNavGrid", NavType.Floor, 32, 2f, "Meat", on_death_drop_count, true, false, 123.149994f, 673.15f, 73.149994f, 773.15f);
+		if (symbolOverridePrefix != null)
+		{
+			gameObject.AddOrGet<SymbolOverrideController>().ApplySymbolOverridesByAffix(Assets.GetAnim(anim_file), symbolOverridePrefix, null, 0);
+		}
 		gameObject.AddOrGetDef<CreatureFallMonitor.Def>();
 		gameObject.AddOrGet<Trappable>();
 		gameObject.AddOrGetDef<DiggerMonitor.Def>().depthToDig = MoleTuning.DEPTH_TO_HIDE;
@@ -41,7 +45,7 @@ public static class BaseMoleConfig
 			{
 				customIdleAnim = new IdleStates.Def.IdleAnimCallback(BaseMoleConfig.CustomIdleAnim)
 			}, true, -1);
-		EntityTemplates.AddCreatureBrain(gameObject, builder, GameTags.Creatures.Species.MoleSpecies, null);
+		EntityTemplates.AddCreatureBrain(gameObject, builder, GameTags.Creatures.Species.MoleSpecies, symbolOverridePrefix);
 		return gameObject;
 	}
 

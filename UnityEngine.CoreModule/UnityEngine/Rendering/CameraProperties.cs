@@ -245,8 +245,8 @@ namespace UnityEngine.Rendering
 			public byte FixedElementField;
 		}
 
-		[UnsafeValueType]
 		[CompilerGenerated]
+		[UnsafeValueType]
 		[StructLayout(LayoutKind.Sequential, Size = 96)]
 		public struct <m_CameraCullPlanes>e__FixedBuffer
 		{

@@ -72,6 +72,16 @@ public class ChoreConsumer : KMonoBehaviour, IPersonalPriorityManager
 		this.consumerState = new ChoreConsumerState(this);
 	}
 
+	protected override void OnForcedCleanUp()
+	{
+		if (this.consumerState != null)
+		{
+			this.consumerState.navigator = null;
+		}
+		this.navigator = null;
+		base.OnForcedCleanUp();
+	}
+
 	protected override void OnCleanUp()
 	{
 		base.OnCleanUp();

@@ -8,8 +8,8 @@ namespace UnityEngine.Windows
 	{
 		public static extern string crashReportFolder
 		{
-			[NativeHeader("PlatformDependent/WinPlayer/Bindings/CrashReportingBindings.h")]
 			[ThreadSafe]
+			[NativeHeader("PlatformDependent/WinPlayer/Bindings/CrashReportingBindings.h")]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}

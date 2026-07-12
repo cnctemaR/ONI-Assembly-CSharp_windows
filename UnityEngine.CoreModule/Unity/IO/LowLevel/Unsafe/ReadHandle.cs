@@ -55,11 +55,28 @@ namespace Unity.IO.LowLevel.Unsafe
 			}
 		}
 
+		public long GetBytesRead()
+		{
+			bool flag = !ReadHandle.IsReadHandleValid(this);
+			if (flag)
+			{
+				throw new InvalidOperationException("ReadHandle.GetBytesRead cannot be called after the ReadHandle has been disposed");
+			}
+			return ReadHandle.GetBytesRead(this);
+		}
+
 		[FreeFunction("AsyncReadManagerManaged::GetReadStatus", IsThreadSafe = true)]
 		[ThreadAndSerializationSafe]
 		private static ReadStatus GetReadStatus(ReadHandle handle)
 		{
 			return ReadHandle.GetReadStatus_Injected(ref handle);
+		}
+
+		[ThreadAndSerializationSafe]
+		[FreeFunction("AsyncReadManagerManaged::GetBytesRead", IsThreadSafe = true)]
+		private static long GetBytesRead(ReadHandle handle)
+		{
+			return ReadHandle.GetBytesRead_Injected(ref handle);
 		}
 
 		[FreeFunction("AsyncReadManagerManaged::ReleaseReadHandle", IsThreadSafe = true)]
@@ -76,8 +93,8 @@ namespace Unity.IO.LowLevel.Unsafe
 			return ReadHandle.IsReadHandleValid_Injected(ref handle);
 		}
 
-		[ThreadAndSerializationSafe]
 		[FreeFunction("AsyncReadManagerManaged::GetJobHandle", IsThreadSafe = true)]
+		[ThreadAndSerializationSafe]
 		private static JobHandle GetJobHandle(ReadHandle handle)
 		{
 			JobHandle jobHandle;
@@ -87,6 +104,9 @@ namespace Unity.IO.LowLevel.Unsafe
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern ReadStatus GetReadStatus_Injected(ref ReadHandle handle);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern long GetBytesRead_Injected(ref ReadHandle handle);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void ReleaseReadHandle_Injected(ref ReadHandle handle);

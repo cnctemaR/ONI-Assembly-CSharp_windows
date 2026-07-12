@@ -61,8 +61,8 @@ namespace UnityEngine
 			get;
 		}
 
-		[Obsolete("ValidateIfRetargetable is not supported anymore, please use isHumanMotion instead.", true)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
+		[Obsolete("ValidateIfRetargetable is not supported anymore, please use isHumanMotion instead.", true)]
 		public bool ValidateIfRetargetable(bool val)
 		{
 			return false;

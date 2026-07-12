@@ -8,8 +8,8 @@ namespace UnityEngine
 {
 	[NativeHeader("Modules/UI/UIStructs.h")]
 	[NativeHeader("Modules/UI/Canvas.h")]
-	[NativeClass("UI::Canvas")]
 	[RequireComponent(typeof(RectTransform))]
+	[NativeClass("UI::Canvas")]
 	public sealed class Canvas : Behaviour
 	{
 		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]

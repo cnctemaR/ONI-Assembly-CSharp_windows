@@ -25,7 +25,7 @@ public class LegacyModMain
 		LegacyModMain.LoadBuildings(list);
 		LegacyModMain.ConfigElements();
 		LegacyModMain.LoadEntities(list);
-		LegacyModMain.LoadEquipment();
+		LegacyModMain.LoadEquipment(list);
 		EntityTemplates.DestroyBaseOreTemplates();
 	}
 
@@ -137,10 +137,10 @@ public class LegacyModMain
 		BuildingConfigManager.Instance.ConfigurePost();
 	}
 
-	private static void LoadEquipment()
+	private static void LoadEquipment(List<Type> types)
 	{
 		LocString.CreateLocStringKeys(typeof(EQUIPMENT.PREFABS), "STRINGS.EQUIPMENT.");
-		GeneratedEquipment.LoadGeneratedEquipment();
+		GeneratedEquipment.LoadGeneratedEquipment(types);
 	}
 
 	private static void ConfigElements()

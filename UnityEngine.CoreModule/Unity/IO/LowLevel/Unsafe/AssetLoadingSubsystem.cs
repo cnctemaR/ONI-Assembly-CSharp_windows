@@ -11,6 +11,7 @@ namespace Unity.IO.LowLevel.Unsafe
 		Audio,
 		Scripts,
 		EntitiesScene,
-		EntitiesStreamBinaryReader
+		EntitiesStreamBinaryReader,
+		FileInfo
 	}
 }

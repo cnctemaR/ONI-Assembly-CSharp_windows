@@ -10,12 +10,12 @@ using UnityEngine.Internal;
 
 namespace Unity.Collections
 {
-	[DebuggerTypeProxy(typeof(NativeArrayDebugView<>))]
-	[DebuggerDisplay("Length = {Length}")]
+	[NativeContainerSupportsMinMaxWriteRestriction]
 	[NativeContainerSupportsDeferredConvertListToArray]
 	[NativeContainerSupportsDeallocateOnJobCompletion]
-	[NativeContainerSupportsMinMaxWriteRestriction]
 	[NativeContainer]
+	[DebuggerTypeProxy(typeof(NativeArrayDebugView<>))]
+	[DebuggerDisplay("Length = {Length}")]
 	public struct NativeArray<T> : IDisposable, IEnumerable<T>, IEnumerable, IEquatable<NativeArray<T>> where T : struct
 	{
 		public NativeArray(int length, Allocator allocator, NativeArrayOptions options = NativeArrayOptions.ClearMemory)
@@ -452,7 +452,7 @@ namespace Unity.Collections
 
 		public unsafe NativeArray<T> GetSubArray(int start, int length)
 		{
-			return NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<T>((void*)((byte*)this.m_Buffer + (long)UnsafeUtility.SizeOf<T>() * (long)start), length, Allocator.Invalid);
+			return NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<T>((void*)((byte*)this.m_Buffer + (long)UnsafeUtility.SizeOf<T>() * (long)start), length, Allocator.None);
 		}
 
 		public NativeArray<T>.ReadOnly AsReadOnly()
@@ -512,9 +512,9 @@ namespace Unity.Collections
 			private int m_Index;
 		}
 
-		[NativeContainer]
 		[DebuggerTypeProxy(typeof(NativeArrayReadOnlyDebugView<>))]
 		[DebuggerDisplay("Length = {Length}")]
+		[NativeContainer]
 		[NativeContainerIsReadOnly]
 		public struct ReadOnly
 		{

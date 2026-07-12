@@ -6,8 +6,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Profiling
 {
-	[NativeHeader("Runtime/Profiler/Marker.h")]
 	[NativeHeader("Runtime/Profiler/ScriptBindings/Sampler.bindings.h")]
+	[NativeHeader("Runtime/Profiler/Marker.h")]
 	[UsedByNativeCode]
 	public class Sampler
 	{
@@ -65,8 +65,8 @@ namespace UnityEngine.Profiling
 			return Sampler.GetSamplerNamesInternal(names);
 		}
 
-		[NativeConditional("ENABLE_PROFILER")]
 		[NativeMethod(Name = "GetName", IsThreadSafe = true)]
+		[NativeConditional("ENABLE_PROFILER")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern string GetSamplerName();
 

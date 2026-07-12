@@ -41,12 +41,35 @@ public class SpeechMonitor : GameStateMachine<SpeechMonitor, SpeechMonitor.Insta
 		{
 			return false;
 		}
-		if (go.GetComponent<Navigator>().IsMoving())
+		KBatchedAnimController component = go.GetComponent<KBatchedAnimController>();
+		KAnim.Anim currentAnim = component.GetCurrentAnim();
+		return currentAnim == null || (GameAudioSheets.Get().IsAnimAllowedToPlaySpeech(currentAnim) && SpeechMonitor.CanOverrideHead(component));
+	}
+
+	private static bool CanOverrideHead(KBatchedAnimController kbac)
+	{
+		bool flag = true;
+		KAnim.Anim currentAnim = kbac.GetCurrentAnim();
+		if (currentAnim == null)
 		{
-			return true;
+			return false;
 		}
-		KAnim.Anim currentAnim = go.GetComponent<KBatchedAnimController>().GetCurrentAnim();
-		return currentAnim == null || GameAudioSheets.Get().IsAnimAllowedToPlaySpeech(currentAnim);
+		int currentFrameIndex = kbac.GetCurrentFrameIndex();
+		if (currentFrameIndex <= 0)
+		{
+			return false;
+		}
+		KBatchGroupData batchGroupData = KAnimBatchManager.Instance().GetBatchGroupData(currentAnim.animFile.animBatchTag);
+		KAnim.Anim.Frame frame = batchGroupData.GetFrame(currentFrameIndex);
+		for (int i = 0; i < frame.numElements; i++)
+		{
+			if (batchGroupData.GetFrameElement(frame.firstElementIdx + i).folder == SpeechMonitor.ANIM_HASH_HEAD_ANIM)
+			{
+				flag = false;
+				break;
+			}
+		}
+		return flag;
 	}
 
 	public static void BeginTalking(SpeechMonitor.Instance smi)
@@ -113,7 +136,7 @@ public class SpeechMonitor : GameStateMachine<SpeechMonitor, SpeechMonitor.Insta
 		{
 			PLAYBACK_STATE playback_STATE;
 			smi.ev.getPlaybackState(out playback_STATE);
-			if (playback_STATE != PLAYBACK_STATE.PLAYING && playback_STATE != PLAYBACK_STATE.STARTING)
+			if (playback_STATE == PLAYBACK_STATE.STOPPING || playback_STATE == PLAYBACK_STATE.STOPPED)
 			{
 				smi.GoTo(smi.sm.satisfied);
 				smi.ev.clearHandle();
@@ -136,9 +159,13 @@ public class SpeechMonitor : GameStateMachine<SpeechMonitor, SpeechMonitor.Insta
 
 	public static string PREFIX_HAPPY = "happy";
 
+	public static string PREFIX_SINGER = "sing";
+
 	public StateMachine<SpeechMonitor, SpeechMonitor.Instance, IStateMachineTarget, SpeechMonitor.Def>.TargetParameter mouth;
 
 	private static HashedString HASH_SNAPTO_MOUTH = "snapto_mouth";
+
+	private static KAnimHashedString ANIM_HASH_HEAD_ANIM = "head_anim";
 
 	public class Def : StateMachine.BaseDef
 	{

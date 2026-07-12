@@ -7,11 +7,11 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine.Experimental.AI
 {
-	[StaticAccessor("NavMeshQueryBindings", StaticAccessorType.DoubleColon)]
 	[NativeHeader("Modules/AI/NavMeshExperimental.bindings.h")]
-	[NativeHeader("Runtime/Math/Matrix4x4.h")]
-	[NativeHeader("Modules/AI/Public/NavMeshBindingTypes.h")]
 	[NativeContainer]
+	[NativeHeader("Modules/AI/Public/NavMeshBindingTypes.h")]
+	[StaticAccessor("NavMeshQueryBindings", StaticAccessorType.DoubleColon)]
+	[NativeHeader("Runtime/Math/Matrix4x4.h")]
 	public struct NavMeshQuery : IDisposable
 	{
 		public NavMeshQuery(NavMeshWorld world, Allocator allocator, int pathNodePoolSize = 0)

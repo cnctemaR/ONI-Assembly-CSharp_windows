@@ -4,8 +4,8 @@ using UnityEngine.Scripting.APIUpdating;
 
 namespace UnityEngine.PlayerLoop
 {
-	[MovedFrom("UnityEngine.Experimental.PlayerLoop")]
 	[RequiredByNativeCode]
+	[MovedFrom("UnityEngine.Experimental.PlayerLoop")]
 	public struct Initialization
 	{
 		[Obsolete("PlayerUpdateTime player loop component has been moved to its own category called TimeUpdate. (UnityUpgradable) -> UnityEngine.PlayerLoop.TimeUpdate/WaitForLastPresentationAndUpdateTime", true)]

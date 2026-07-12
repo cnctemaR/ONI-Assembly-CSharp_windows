@@ -3,8 +3,8 @@ using UnityEngine.Scripting;
 
 namespace Unity.Collections
 {
-	[AttributeUsage(AttributeTargets.Field | AttributeTargets.Parameter | AttributeTargets.ReturnValue)]
 	[RequiredByNativeCode]
+	[AttributeUsage(AttributeTargets.Field | AttributeTargets.Parameter | AttributeTargets.ReturnValue)]
 	public sealed class ReadOnlyAttribute : Attribute
 	{
 	}

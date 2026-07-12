@@ -7,9 +7,9 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
+	[RequiredByNativeCode]
 	[NativeHeader("Runtime/Transform/Transform.h")]
 	[NativeHeader("Runtime/Transform/ScriptBindings/TransformScriptBindings.h")]
-	[RequiredByNativeCode]
 	[NativeHeader("Configuration/UnityConfigure.h")]
 	public class Transform : Component, IEnumerable
 	{
@@ -615,8 +615,8 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern int internal_getHierarchyCount();
 
-		[NativeConditional("UNITY_EDITOR")]
 		[FreeFunction("IsNonUniformScaleTransform", HasExplicitThis = true)]
+		[NativeConditional("UNITY_EDITOR")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal extern bool IsNonUniformScaleTransform();
 

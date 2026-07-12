@@ -34,6 +34,7 @@ namespace Database
 			this.Sticker = new Expression("Sticker", this, faces.Sticker);
 			this.Balloon = new Expression("Sticker", this, faces.Balloon);
 			this.Sparkle = new Expression("Sticker", this, faces.Sparkle);
+			this.Music = new Expression("Music", this, faces.Music);
 			this.Tickled = new Expression("Tickled", this, faces.Tickled);
 			this.Happy = new Expression("Happy", this, faces.Happy);
 			this.Relief = new Expression("Relief", this, faces.Happy);
@@ -93,6 +94,8 @@ namespace Database
 		public Expression Balloon;
 
 		public Expression Sparkle;
+
+		public Expression Music;
 
 		public Expression Tickled;
 

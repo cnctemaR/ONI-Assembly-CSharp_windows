@@ -6,10 +6,10 @@ using UnityEngine.Scripting.APIUpdating;
 
 namespace UnityEngine.AI
 {
-	[NativeHeader("Modules/AI/NavMeshManager.h")]
 	[NativeHeader("Modules/AI/NavMesh/NavMesh.bindings.h")]
-	[StaticAccessor("NavMeshBindings", StaticAccessorType.DoubleColon)]
+	[NativeHeader("Modules/AI/NavMeshManager.h")]
 	[MovedFrom("UnityEngine")]
+	[StaticAccessor("NavMeshBindings", StaticAccessorType.DoubleColon)]
 	public static class NavMesh
 	{
 		[RequiredByNativeCode]
@@ -71,13 +71,13 @@ namespace UnityEngine.AI
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void SetAreaCost(int areaIndex, float cost);
 
-		[NativeName("GetAreaCost")]
 		[StaticAccessor("GetNavMeshProjectSettings()")]
+		[NativeName("GetAreaCost")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern float GetAreaCost(int areaIndex);
 
-		[StaticAccessor("GetNavMeshProjectSettings()")]
 		[NativeName("GetAreaFromName")]
+		[StaticAccessor("GetNavMeshProjectSettings()")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern int GetAreaFromName(string areaName);
 
@@ -185,8 +185,8 @@ namespace UnityEngine.AI
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern int AddNavMeshDataInternal(NavMeshData navMeshData);
 
-		[NativeName("LoadData")]
 		[StaticAccessor("GetNavMeshManager()")]
+		[NativeName("LoadData")]
 		internal static int AddNavMeshDataTransformedInternal(NavMeshData navMeshData, Vector3 position, Quaternion rotation)
 		{
 			return NavMesh.AddNavMeshDataTransformedInternal_Injected(navMeshData, ref position, ref rotation);
@@ -218,8 +218,8 @@ namespace UnityEngine.AI
 			NavMesh.RemoveLinkInternal(handle.id);
 		}
 
-		[StaticAccessor("GetNavMeshManager()")]
 		[NativeName("AddLink")]
+		[StaticAccessor("GetNavMeshManager()")]
 		internal static int AddLinkInternal(NavMeshLinkData link, Vector3 position, Quaternion rotation)
 		{
 			return NavMesh.AddLinkInternal_Injected(ref link, ref position, ref rotation);

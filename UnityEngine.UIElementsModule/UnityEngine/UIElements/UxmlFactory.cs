@@ -46,14 +46,7 @@ namespace UnityEngine.UIElements
 		{
 			get
 			{
-				foreach (UxmlAttributeDescription attr in this.m_Traits.uxmlAttributesDescription)
-				{
-					yield return attr;
-					attr = null;
-				}
-				IEnumerator<UxmlAttributeDescription> enumerator = null;
-				yield break;
-				yield break;
+				return this.m_Traits.uxmlAttributesDescription;
 			}
 		}
 
@@ -61,14 +54,7 @@ namespace UnityEngine.UIElements
 		{
 			get
 			{
-				foreach (UxmlChildElementDescription child in this.m_Traits.uxmlChildElementsDescription)
-				{
-					yield return child;
-					child = null;
-				}
-				IEnumerator<UxmlChildElementDescription> enumerator = null;
-				yield break;
-				yield break;
+				return this.m_Traits.uxmlChildElementsDescription;
 			}
 		}
 

@@ -20,7 +20,7 @@ public class SaveScreen : KModalScreen
 		{
 			this.AddExistingSaveFile(saveFileEntry.path);
 		}
-		SpeedControlScreen.Instance.Pause(true);
+		SpeedControlScreen.Instance.Pause(true, false);
 	}
 
 	protected override void OnDeactivate()

@@ -4,8 +4,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeHeader("Modules/Animation/AnimatorInfo.h")]
 	[RequiredByNativeCode]
+	[NativeHeader("Modules/Animation/AnimatorInfo.h")]
 	public struct AnimatorTransitionInfo
 	{
 		public bool IsName(string name)

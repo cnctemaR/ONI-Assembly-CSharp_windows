@@ -5,8 +5,8 @@ using UnityEngine.Internal;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Export/TouchScreenKeyboard/TouchScreenKeyboard.bindings.h")]
 	[NativeHeader("Runtime/Input/KeyboardOnScreen.h")]
+	[NativeHeader("Runtime/Export/TouchScreenKeyboard/TouchScreenKeyboard.bindings.h")]
 	[NativeConditional("ENABLE_ONSCREEN_KEYBOARD")]
 	public class TouchScreenKeyboard
 	{
@@ -53,37 +53,59 @@ namespace UnityEngine
 				RuntimePlatform platform = Application.platform;
 				RuntimePlatform runtimePlatform = platform;
 				RuntimePlatform runtimePlatform2 = runtimePlatform;
-				if (runtimePlatform2 <= RuntimePlatform.MetroPlayerARM)
+				if (runtimePlatform2 <= RuntimePlatform.Android)
 				{
-					if (runtimePlatform2 != RuntimePlatform.IPhonePlayer && runtimePlatform2 != RuntimePlatform.Android && runtimePlatform2 - RuntimePlatform.MetroPlayerX86 > 2)
+					if (runtimePlatform2 != RuntimePlatform.IPhonePlayer && runtimePlatform2 != RuntimePlatform.Android)
 					{
-						goto IL_004D;
+						goto IL_005C;
 					}
 				}
-				else if (runtimePlatform2 <= RuntimePlatform.Switch)
+				else if (runtimePlatform2 - RuntimePlatform.MetroPlayerX86 > 2 && runtimePlatform2 != RuntimePlatform.PS4)
 				{
-					if (runtimePlatform2 != RuntimePlatform.PS4 && runtimePlatform2 - RuntimePlatform.tvOS > 1)
+					switch (runtimePlatform2)
 					{
-						goto IL_004D;
+					case RuntimePlatform.tvOS:
+					case RuntimePlatform.Switch:
+					case RuntimePlatform.Stadia:
+					case RuntimePlatform.GameCoreScarlett:
+					case RuntimePlatform.GameCoreXboxOne:
+					case RuntimePlatform.PS5:
+						break;
+					case RuntimePlatform.Lumin:
+					case RuntimePlatform.CloudRendering:
+						goto IL_005C;
+					default:
+						goto IL_005C;
 					}
-				}
-				else if (runtimePlatform2 != RuntimePlatform.Stadia && runtimePlatform2 != RuntimePlatform.PS5)
-				{
-					goto IL_004D;
 				}
 				return true;
-				IL_004D:
+				IL_005C:
 				return false;
 			}
 		}
+
+		internal static bool disableInPlaceEditing { get; set; }
 
 		public static bool isInPlaceEditingAllowed
 		{
 			get
 			{
-				return false;
+				bool disableInPlaceEditing = TouchScreenKeyboard.disableInPlaceEditing;
+				return disableInPlaceEditing && false;
 			}
 		}
+
+		internal static bool isRequiredToForceOpen
+		{
+			get
+			{
+				return TouchScreenKeyboard.IsRequiredToForceOpen();
+			}
+		}
+
+		[FreeFunction("TouchScreenKeyboard_IsRequiredToForceOpen")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool IsRequiredToForceOpen();
 
 		public static TouchScreenKeyboard Open(string text, [DefaultValue("TouchScreenKeyboardType.Default")] TouchScreenKeyboardType keyboardType, [DefaultValue("true")] bool autocorrection, [DefaultValue("false")] bool multiline, [DefaultValue("false")] bool secure, [DefaultValue("false")] bool alert, [DefaultValue("\"\"")] string textPlaceholder, [DefaultValue("0")] int characterLimit)
 		{
@@ -321,6 +343,31 @@ namespace UnityEngine
 			Done,
 			Canceled,
 			LostFocus
+		}
+
+		public class Android
+		{
+			public static bool closeKeyboardOnOutsideTap
+			{
+				get
+				{
+					return TouchScreenKeyboard.Android.TouchScreenKeyboard_GetAndroidCloseKeyboardOnOutsideTap();
+				}
+				set
+				{
+					TouchScreenKeyboard.Android.TouchScreenKeyboard_SetAndroidCloseKeyboardOnOutsideTap(value);
+				}
+			}
+
+			[NativeConditional("PLATFORM_ANDROID")]
+			[FreeFunction("TouchScreenKeyboard_SetAndroidCloseKeyboardOnOutsideTap")]
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void TouchScreenKeyboard_SetAndroidCloseKeyboardOnOutsideTap(bool enable);
+
+			[FreeFunction("TouchScreenKeyboard_GetAndroidCloseKeyboardOnOutsideTap")]
+			[NativeConditional("PLATFORM_ANDROID")]
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern bool TouchScreenKeyboard_GetAndroidCloseKeyboardOnOutsideTap();
 		}
 	}
 }

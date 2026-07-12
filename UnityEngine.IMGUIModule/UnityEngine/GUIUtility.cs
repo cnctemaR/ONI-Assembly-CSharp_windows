@@ -6,12 +6,12 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
+	[NativeHeader("Runtime/Utilities/CopyPaste.h")]
+	[NativeHeader("Runtime/Camera/RenderLayers/GUITexture.h")]
+	[NativeHeader("Runtime/Input/InputManager.h")]
+	[NativeHeader("Runtime/Input/InputBindings.h")]
 	[NativeHeader("Modules/IMGUI/GUIUtility.h")]
 	[NativeHeader("Modules/IMGUI/GUIManager.h")]
-	[NativeHeader("Runtime/Input/InputBindings.h")]
-	[NativeHeader("Runtime/Utilities/CopyPaste.h")]
-	[NativeHeader("Runtime/Input/InputManager.h")]
-	[NativeHeader("Runtime/Camera/RenderLayers/GUITexture.h")]
 	public class GUIUtility
 	{
 		public static extern bool hasModalWindow
@@ -501,7 +501,7 @@ namespace UnityEngine
 
 		internal static bool HitTest(Rect rect, Vector2 point, bool isDirectManipulationDevice)
 		{
-			int num = (isDirectManipulationDevice ? 3 : 0);
+			int num = 0;
 			return GUIUtility.HitTest(rect, point, num);
 		}
 

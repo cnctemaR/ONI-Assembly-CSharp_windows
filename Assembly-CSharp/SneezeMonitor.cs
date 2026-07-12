@@ -19,48 +19,69 @@ public class SneezeMonitor : GameStateMachine<SneezeMonitor, SneezeMonitor.Insta
 
 	public GameStateMachine<SneezeMonitor, SneezeMonitor.Instance, IStateMachineTarget, object>.State sneezy;
 
-	public const float SINGLE_SNEEZE_TIME = 70f;
+	public const float SINGLE_SNEEZE_TIME_MINOR = 140f;
+
+	public const float SINGLE_SNEEZE_TIME_MAJOR = 70f;
 
 	public const float SNEEZE_TIME_VARIANCE = 0.3f;
+
+	public const float SHORT_SNEEZE_THRESHOLD = 5f;
 
 	public new class Instance : GameStateMachine<SneezeMonitor, SneezeMonitor.Instance, IStateMachineTarget, object>.GameInstance
 	{
 		public Instance(IStateMachineTarget master)
 			: base(master)
 		{
-			AttributeInstance attributeInstance = Db.Get().Attributes.Sneezyness.Lookup(master.gameObject);
+			this.sneezyness = Db.Get().Attributes.Sneezyness.Lookup(master.gameObject);
 			this.OnSneezyChange();
+			AttributeInstance attributeInstance = this.sneezyness;
 			attributeInstance.OnDirty = (global::System.Action)Delegate.Combine(attributeInstance.OnDirty, new global::System.Action(this.OnSneezyChange));
 		}
 
 		public override void StopSM(string reason)
 		{
-			AttributeInstance attributeInstance = Db.Get().Attributes.Sneezyness.Lookup(base.master.gameObject);
+			AttributeInstance attributeInstance = this.sneezyness;
 			attributeInstance.OnDirty = (global::System.Action)Delegate.Remove(attributeInstance.OnDirty, new global::System.Action(this.OnSneezyChange));
 			base.StopSM(reason);
 		}
 
 		public float NextSneezeInterval()
 		{
-			AttributeInstance attributeInstance = Db.Get().Attributes.Sneezyness.Lookup(base.master.gameObject);
-			if (attributeInstance.GetTotalValue() <= 0f)
+			if (this.sneezyness.GetTotalValue() <= 0f)
 			{
 				return 70f;
 			}
-			float num = 70f / attributeInstance.GetTotalValue();
+			float num = (this.IsMinorSneeze() ? 140f : 70f) / this.sneezyness.GetTotalValue();
 			return global::UnityEngine.Random.Range(num * 0.7f, num * 1.3f);
+		}
+
+		public bool IsMinorSneeze()
+		{
+			return this.sneezyness.GetTotalValue() <= 5f;
 		}
 
 		private void OnSneezyChange()
 		{
-			AttributeInstance attributeInstance = Db.Get().Attributes.Sneezyness.Lookup(base.master.gameObject);
-			base.smi.sm.isSneezy.Set(attributeInstance.GetTotalValue() > 0f, base.smi);
+			base.smi.sm.isSneezy.Set(this.sneezyness.GetTotalValue() > 0f, base.smi);
 		}
 
 		public Reactable GetReactable()
 		{
-			float num = this.NextSneezeInterval();
-			return new SelfEmoteReactable(base.master.gameObject, "Sneeze", Db.Get().ChoreTypes.Cough, "anim_sneeze_kanim", 0f, num, float.PositiveInfinity).AddStep(new EmoteReactable.EmoteStep
+			if (this.IsMinorSneeze())
+			{
+				float num = this.NextSneezeInterval();
+				return new SelfEmoteReactable(base.master.gameObject, "Sneeze", Db.Get().ChoreTypes.Cough, "anim_sneeze_kanim", 0f, num, float.PositiveInfinity).AddStep(new EmoteReactable.EmoteStep
+				{
+					anim = "sneeze_short",
+					startcb = new Action<GameObject>(this.TriggerDisurbance)
+				}).AddStep(new EmoteReactable.EmoteStep
+				{
+					anim = "sneeze_short_pst",
+					finishcb = new Action<GameObject>(this.ResetSneeze)
+				});
+			}
+			float num2 = this.NextSneezeInterval();
+			return new SelfEmoteReactable(base.master.gameObject, "Sneeze", Db.Get().ChoreTypes.Cough, "anim_sneeze_kanim", 0f, num2, float.PositiveInfinity).AddStep(new EmoteReactable.EmoteStep
 			{
 				anim = "sneeze",
 				startcb = new Action<GameObject>(this.TriggerDisurbance)
@@ -73,6 +94,11 @@ public class SneezeMonitor : GameStateMachine<SneezeMonitor, SneezeMonitor.Insta
 
 		private void TriggerDisurbance(GameObject go)
 		{
+			if (this.IsMinorSneeze())
+			{
+				AcousticDisturbance.Emit(go, 2);
+				return;
+			}
 			AcousticDisturbance.Emit(go, 3);
 		}
 
@@ -80,6 +106,8 @@ public class SneezeMonitor : GameStateMachine<SneezeMonitor, SneezeMonitor.Insta
 		{
 			base.smi.GoTo(base.sm.idle);
 		}
+
+		private AttributeInstance sneezyness;
 
 		private StatusItem statusItem;
 	}

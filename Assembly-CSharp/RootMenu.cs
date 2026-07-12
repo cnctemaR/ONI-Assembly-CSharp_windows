@@ -20,7 +20,6 @@ public class RootMenu : KScreen
 	protected override void OnPrefabInit()
 	{
 		RootMenu.Instance = this;
-		UIRegistry.rootMenu = this;
 		base.Subscribe(Game.Instance.gameObject, -1503271301, new Action<object>(this.OnSelectObject));
 		base.Subscribe(Game.Instance.gameObject, 288942073, new Action<object>(this.OnUIClear));
 		base.Subscribe(Game.Instance.gameObject, -809948329, new Action<object>(this.OnBuildingStatechanged));
@@ -91,7 +90,7 @@ public class RootMenu : KScreen
 		{
 			this.selectedGO = gameObject;
 			this.CloseSubMenus();
-			if (this.selectedGO != null && (this.selectedGO.GetComponent<KPrefabID>() != null || this.selectedGO.GetComponent<CellSelectionObject>()))
+			if (this.selectedGO != null && (this.selectedGO.GetComponent<KPrefabID>() != null || CellSelectionObject.IsSelectionObject(this.selectedGO)))
 			{
 				this.AddSubMenu(this.detailsScreen);
 				this.detailsScreen.Refresh(this.selectedGO);

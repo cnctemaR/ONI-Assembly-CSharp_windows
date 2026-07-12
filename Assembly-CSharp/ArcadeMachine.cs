@@ -119,10 +119,6 @@ public class ArcadeMachine : StateMachineComponent<ArcadeMachine.StatesInstance>
 		return list;
 	}
 
-	public const string SPECIFIC_EFFECT = "PlayedArcade";
-
-	public const string TRACKING_EFFECT = "RecentlyPlayedArcade";
-
 	public CellOffset[] choreOffsets = new CellOffset[]
 	{
 		new CellOffset(-1, 0),

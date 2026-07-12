@@ -110,7 +110,7 @@ public class StampTool : InterfaceTool
 	{
 		if (pause)
 		{
-			SpeedControlScreen.Instance.Pause(true);
+			SpeedControlScreen.Instance.Pause(true, false);
 		}
 		this.ready = true;
 		this.OnDeactivateTool(null);

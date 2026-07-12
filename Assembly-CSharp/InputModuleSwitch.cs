@@ -17,6 +17,7 @@ public class InputModuleSwitch : MonoBehaviour
 			if (this.standaloneInput.enabled)
 			{
 				this.standaloneInput.enabled = false;
+				this.virtualInput.forceModuleActive = true;
 				this.ChangeInputHandler();
 				return;
 			}
@@ -28,6 +29,7 @@ public class InputModuleSwitch : MonoBehaviour
 			if (this.virtualInput.enabled)
 			{
 				this.virtualInput.enabled = false;
+				this.standaloneInput.forceModuleActive = true;
 				this.ChangeInputHandler();
 			}
 		}

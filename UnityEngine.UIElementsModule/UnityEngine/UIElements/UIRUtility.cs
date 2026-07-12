@@ -13,7 +13,7 @@ namespace UnityEngine.UIElements
 		public static bool IsRoundRect(VisualElement ve)
 		{
 			IResolvedStyle resolvedStyle = ve.resolvedStyle;
-			return resolvedStyle.borderTopLeftRadius >= Mathf.Epsilon || resolvedStyle.borderTopRightRadius >= Mathf.Epsilon || resolvedStyle.borderBottomLeftRadius >= Mathf.Epsilon || resolvedStyle.borderBottomRightRadius >= Mathf.Epsilon;
+			return resolvedStyle.borderTopLeftRadius >= 1E-30f || resolvedStyle.borderTopRightRadius >= 1E-30f || resolvedStyle.borderBottomLeftRadius >= 1E-30f || resolvedStyle.borderBottomRightRadius >= 1E-30f;
 		}
 
 		public static bool IsVectorImageBackground(VisualElement ve)
@@ -41,6 +41,8 @@ namespace UnityEngine.UIElements
 		public static readonly string k_DefaultShaderName = Shaders.k_Runtime;
 
 		public static readonly string k_DefaultWorldSpaceShaderName = Shaders.k_RuntimeWorld;
+
+		public const float k_Epsilon = 1E-30f;
 
 		public const float k_ClearZ = 0.99f;
 

@@ -69,8 +69,8 @@ namespace UnityEngine
 
 		public struct ShaderVariant
 		{
-			[NativeConditional("UNITY_EDITOR")]
 			[FreeFunction]
+			[NativeConditional("UNITY_EDITOR")]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			private static extern string CheckShaderVariant(Shader shader, PassType passType, string[] keywords);
 

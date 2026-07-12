@@ -5,7 +5,7 @@ using STRINGS;
 public class DecorDisplayer : StandardAmountDisplayer
 {
 	public DecorDisplayer()
-		: base(GameUtil.UnitClass.SimpleFloat, GameUtil.TimeSlice.PerCycle, null)
+		: base(GameUtil.UnitClass.SimpleFloat, GameUtil.TimeSlice.PerCycle, null, GameUtil.IdentityDescriptorTense.Normal)
 	{
 		this.formatter = new DecorDisplayer.DecorAttributeFormatter();
 	}

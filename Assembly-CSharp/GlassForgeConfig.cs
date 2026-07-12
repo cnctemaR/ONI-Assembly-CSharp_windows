@@ -46,7 +46,7 @@ public class GlassForgeConfig : IBuildingConfig
 		glassForge.storeProduced = true;
 		glassForge.inStorage.SetDefaultStoredItemModifiers(GlassForgeConfig.RefineryStoredItemModifiers);
 		glassForge.buildStorage.SetDefaultStoredItemModifiers(GlassForgeConfig.RefineryStoredItemModifiers);
-		glassForge.outStorage.SetDefaultStoredItemModifiers(GlassForgeConfig.RefineryStoredItemModifiers);
+		glassForge.outStorage.SetDefaultStoredItemModifiers(GlassForgeConfig.OutputItemModifiers);
 		glassForge.outputOffset = new Vector3(1f, 0.5f);
 		workable.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_metalrefinery_kanim") };
 		ConduitDispenser conduitDispenser = go.AddOrGet<ConduitDispenser>();
@@ -98,5 +98,12 @@ public class GlassForgeConfig : IBuildingConfig
 	{
 		Storage.StoredItemModifier.Hide,
 		Storage.StoredItemModifier.Preserve
+	};
+
+	public static readonly List<Storage.StoredItemModifier> OutputItemModifiers = new List<Storage.StoredItemModifier>
+	{
+		Storage.StoredItemModifier.Hide,
+		Storage.StoredItemModifier.Preserve,
+		Storage.StoredItemModifier.Insulate
 	};
 }

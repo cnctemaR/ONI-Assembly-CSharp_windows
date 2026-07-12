@@ -5,18 +5,16 @@ using UnityEngine;
 
 public class BaseModularLaunchpadPortConfig
 {
-	public static BuildingDef CreateBaseLaunchpadPort(string id, string anim, ConduitType conduitType, bool isLoader)
+	public static BuildingDef CreateBaseLaunchpadPort(string id, string anim, ConduitType conduitType, bool isLoader, int width = 2, int height = 3)
 	{
-		int num = 2;
-		int num2 = 3;
-		int num3 = 1000;
-		float num4 = 60f;
+		int num = 1000;
+		float num2 = 60f;
 		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER4;
 		string[] refined_METALS = MATERIALS.REFINED_METALS;
-		float num5 = 9999f;
+		float num3 = 9999f;
 		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloor;
 		EffectorValues tier2 = NOISE_POLLUTION.NOISY.TIER2;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(id, num, num2, anim, num3, num4, tier, refined_METALS, num5, buildLocationRule, BUILDINGS.DECOR.NONE, tier2, 0.2f);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(id, width, height, anim, num, num2, tier, refined_METALS, num3, buildLocationRule, BUILDINGS.DECOR.NONE, tier2, 0.2f);
 		buildingDef.SceneLayer = Grid.SceneLayer.BuildingBack;
 		buildingDef.OverheatTemperature = 2273.15f;
 		buildingDef.Floodable = false;

@@ -1,13 +1,30 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Database;
+using Klei;
 using Klei.AI;
 using STRINGS;
 using UnityEngine;
 
 public class Db : EntityModifierSet
 {
+	public static string GetPath(string dlcId, string folder)
+	{
+		string text;
+		if (dlcId == "")
+		{
+			text = FileSystem.Normalize(Path.Combine(Application.streamingAssetsPath, folder));
+		}
+		else
+		{
+			string contentDirectoryName = DlcManager.GetContentDirectoryName(dlcId);
+			text = FileSystem.Normalize(Path.Combine(Application.streamingAssetsPath, "dlc", contentDirectoryName, folder));
+		}
+		return text;
+	}
+
 	public static Db Get()
 	{
 		if (Db._Instance == null)
@@ -39,7 +56,7 @@ public class Db : EntityModifierSet
 		this.Techs.Load(DlcManager.IsExpansion1Active() ? this.researchTreeFileExpansion1 : this.researchTreeFileVanilla);
 		this.TechItems.Init();
 		this.Accessories = new Accessories(this.Root);
-		this.AccessorySlots = new AccessorySlots(this.Root, null, null, null);
+		this.AccessorySlots = new AccessorySlots(this.Root);
 		this.ScheduleBlockTypes = new ScheduleBlockTypes(this.Root);
 		this.ScheduleGroups = new ScheduleGroups(this.Root);
 		this.RoomTypeCategories = new RoomTypeCategories(this.Root);
@@ -64,10 +81,16 @@ public class Db : EntityModifierSet
 			this.PlantMutations = new PlantMutations(this.Root);
 		}
 		this.OrbitalTypeCategories = new OrbitalTypeCategories(this.Root);
+		this.EquippableFacades = new EquippableFacades(this.Root);
 		Effect effect = new Effect("CenterOfAttention", DUPLICANTS.MODIFIERS.CENTEROFATTENTION.NAME, DUPLICANTS.MODIFIERS.CENTEROFATTENTION.TOOLTIP, 0f, true, true, false, null, 0f, null, "");
 		effect.Add(new AttributeModifier("StressDelta", -0.008333334f, DUPLICANTS.MODIFIERS.CENTEROFATTENTION.NAME, false, false, true));
 		this.effects.Add(effect);
 		this.CollectResources(this.Root, this.ResourceTable);
+	}
+
+	public void PostProcess()
+	{
+		this.Techs.PostProcess();
 	}
 
 	private void CollectResources(Resource resource, List<Resource> resource_table)
@@ -190,6 +213,8 @@ public class Db : EntityModifierSet
 	public TechTreeTitles TechTreeTitles;
 
 	public OrbitalTypeCategories OrbitalTypeCategories;
+
+	public EquippableFacades EquippableFacades;
 
 	[Serializable]
 	public class SlotInfo : Resource

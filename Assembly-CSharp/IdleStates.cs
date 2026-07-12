@@ -23,6 +23,7 @@ public class IdleStates : GameStateMachine<IdleStates, IdleStates.Instance, ISta
 		Navigator component = smi.GetComponent<Navigator>();
 		IdleStates.MoveCellQuery moveCellQuery = new IdleStates.MoveCellQuery(component.CurrentNavType);
 		moveCellQuery.allowLiquid = smi.gameObject.HasTag(GameTags.Amphibious);
+		moveCellQuery.submerged = smi.gameObject.HasTag(GameTags.Creatures.Submerged);
 		component.RunQuery(moveCellQuery);
 		component.GoTo(moveCellQuery.GetResultCell(), null);
 	}
@@ -77,6 +78,8 @@ public class IdleStates : GameStateMachine<IdleStates, IdleStates.Instance, ISta
 	{
 		public bool allowLiquid { get; set; }
 
+		public bool submerged { get; set; }
+
 		public MoveCellQuery(NavType navType)
 		{
 			this.navType = navType;
@@ -99,14 +102,14 @@ public class IdleStates : GameStateMachine<IdleStates, IdleStates.Instance, ISta
 					return false;
 				}
 			}
+			this.submerged = this.submerged || Grid.IsSubstantialLiquid(cell, 0.35f);
 			bool flag = this.navType != NavType.Swim;
 			bool flag2 = this.navType == NavType.Swim || this.allowLiquid;
-			bool flag3 = Grid.IsSubstantialLiquid(cell, 0.35f);
-			if (flag3 && !flag2)
+			if (this.submerged && !flag2)
 			{
 				return false;
 			}
-			if (!flag3 && !flag)
+			if (!this.submerged && !flag)
 			{
 				return false;
 			}

@@ -1,7 +1,4 @@
 ﻿using System;
-using KMod;
-using ProcGen;
-using ProcGenGame;
 using STRINGS;
 using UnityEngine;
 using UnityEngine.UI;
@@ -67,9 +64,6 @@ public class ModeSelectScreen : NewGameFlowScreen
 		{
 			return;
 		}
-		Global.Instance.modManager.Load(Content.LayerableFiles);
-		SettingsCache.Clear();
-		WorldGen.LoadSettings();
 		CustomGameSettings.Instance.LoadClusters();
 		Global.Instance.modManager.Report(base.gameObject);
 		ModeSelectScreen.dataLoaded = true;

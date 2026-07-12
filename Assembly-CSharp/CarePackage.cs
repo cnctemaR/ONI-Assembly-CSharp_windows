@@ -42,6 +42,12 @@ public class CarePackage : StateMachineComponent<CarePackage.SMInstance>
 		this.SetAnimToInfo();
 	}
 
+	public void SetFacade(string facadeID)
+	{
+		this.facadeID = facadeID;
+		this.SetAnimToInfo();
+	}
+
 	private void SetAnimToInfo()
 	{
 		GameObject gameObject = Util.KInstantiate(Assets.GetPrefab("Meter".ToTag()), base.gameObject, null);
@@ -65,6 +71,11 @@ public class CarePackage : StateMachineComponent<CarePackage.SMInstance>
 		}
 		component4.initialAnim = component2.initialAnim;
 		component4.initialMode = KAnim.PlayMode.Loop;
+		if (!string.IsNullOrEmpty(this.facadeID))
+		{
+			component4.SwapAnims(new KAnimFile[] { Db.Get().EquippableFacades.Get(this.facadeID).AnimFile });
+			base.GetComponentsInChildren<KBatchedAnimController>()[1].SetSymbolVisiblity("object", false);
+		}
 		KBatchedAnimTracker component5 = gameObject.GetComponent<KBatchedAnimTracker>();
 		component5.controller = component;
 		component5.symbol = new HashedString("snapTO_object");
@@ -93,6 +104,10 @@ public class CarePackage : StateMachineComponent<CarePackage.SMInstance>
 				gameObject = Util.KInstantiate(prefab, vector);
 				if (gameObject != null)
 				{
+					if (!this.facadeID.IsNullOrWhiteSpace())
+					{
+						EquippableFacade.AddFacadeToEquippable(gameObject.GetComponent<Equippable>(), this.facadeID);
+					}
 					gameObject.SetActive(true);
 				}
 				num++;
@@ -116,6 +131,8 @@ public class CarePackage : StateMachineComponent<CarePackage.SMInstance>
 	[Serialize]
 	public CarePackageInfo info;
 
+	private string facadeID;
+
 	private Reactable reactable;
 
 	public class SMInstance : GameStateMachine<CarePackage.States, CarePackage.SMInstance, CarePackage, object>.GameInstance
@@ -133,10 +150,12 @@ public class CarePackage : StateMachineComponent<CarePackage.SMInstance>
 		public override void InitializeStates(out StateMachine.BaseState default_state)
 		{
 			default_state = this.spawn;
-			this.spawn.PlayAnim("portalbirth").OnAnimQueueComplete(this.open);
+			base.serializable = StateMachine.SerializeType.ParamsOnly;
+			this.spawn.PlayAnim("portalbirth").OnAnimQueueComplete(this.open).ParamTransition<bool>(this.spawnedContents, this.pst, GameStateMachine<CarePackage.States, CarePackage.SMInstance, CarePackage, object>.IsTrue);
 			this.open.PlayAnim("portalbirth_pst").QueueAnim("object_idle_loop", false, null).Exit(delegate(CarePackage.SMInstance smi)
 			{
 				smi.master.SpawnContents();
+				this.spawnedContents.Set(true, smi);
 			})
 				.ScheduleGoTo(1f, this.pst);
 			this.pst.PlayAnim("object_idle_pst").ScheduleGoTo(5f, this.destroy);
@@ -145,6 +164,8 @@ public class CarePackage : StateMachineComponent<CarePackage.SMInstance>
 				Util.KDestroyGameObject(smi.master.gameObject);
 			});
 		}
+
+		public StateMachine<CarePackage.States, CarePackage.SMInstance, CarePackage, object>.BoolParameter spawnedContents;
 
 		public GameStateMachine<CarePackage.States, CarePackage.SMInstance, CarePackage, object>.State spawn;
 

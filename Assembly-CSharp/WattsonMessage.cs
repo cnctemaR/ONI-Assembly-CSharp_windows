@@ -163,7 +163,7 @@ public class WattsonMessage : KScreen
 
 	protected void PauseAndShowMessage()
 	{
-		SpeedControlScreen.Instance.Pause(false);
+		SpeedControlScreen.Instance.Pause(false, false);
 		base.StartCoroutine(this.ExpandPanel());
 		KFMOD.PlayUISound(this.dialogSound);
 		this.dialog.GetComponent<KScreen>().Activate();

@@ -180,7 +180,7 @@ namespace System.Net.NetworkInformation
 				socket.SendBufferSize = array.Length;
 				socket.SendTo(array, array.Length, SocketFlags.None, ipendPoint);
 				Stopwatch stopwatch = Stopwatch.StartNew();
-				array = new byte[100];
+				array = new byte[array.Length + 40];
 				SocketError socketError;
 				long elapsedMilliseconds;
 				Ping.IcmpMessage icmpMessage;
@@ -188,7 +188,7 @@ namespace System.Net.NetworkInformation
 				{
 					EndPoint endPoint = ipendPoint;
 					socketError = SocketError.Success;
-					int num = socket.ReceiveFrom(array, 0, 100, SocketFlags.None, ref endPoint, out socketError);
+					int num = socket.ReceiveFrom(array, 0, array.Length, SocketFlags.None, ref endPoint, out socketError);
 					if (socketError != SocketError.Success)
 					{
 						break;
@@ -210,7 +210,7 @@ namespace System.Net.NetworkInformation
 						icmpMessage = new Ping.IcmpMessage(array, num2, num3);
 						if (icmpMessage.Identifier == this.identifier && icmpMessage.Type != 8)
 						{
-							goto IL_0190;
+							goto IL_0195;
 						}
 						long num5 = (long)timeout - elapsedMilliseconds;
 						if (num5 <= 0L)
@@ -229,7 +229,7 @@ namespace System.Net.NetworkInformation
 				return new PingReply(null, new byte[0], options, 0L, IPStatus.TimedOut);
 				Block_9:
 				return new PingReply(null, new byte[0], options, 0L, IPStatus.TimedOut);
-				IL_0190:
+				IL_0195:
 				pingReply = new PingReply(address, icmpMessage.Data, options, elapsedMilliseconds, icmpMessage.IPStatus);
 			}
 			return pingReply;

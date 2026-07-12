@@ -9,10 +9,10 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Graphics/GraphicsScriptBindings.h")]
 	[NativeHeader("Runtime/Camera/Camera.h")]
 	[NativeHeader("Runtime/Graphics/RenderBufferManager.h")]
 	[NativeHeader("Runtime/Graphics/RenderTexture.h")]
+	[NativeHeader("Runtime/Graphics/GraphicsScriptBindings.h")]
 	[UsedByNativeCode]
 	public class RenderTexture : Texture
 	{

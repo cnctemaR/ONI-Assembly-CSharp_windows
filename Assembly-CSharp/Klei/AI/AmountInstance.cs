@@ -130,6 +130,7 @@ namespace Klei.AI
 			}
 			GlobalJobManager.Run(AmountInstance.batch_update_job);
 			batchUpdateContext.Finish();
+			AmountInstance.batch_update_job.Reset(null);
 		}
 
 		public void Deactivate()
@@ -156,7 +157,7 @@ namespace Klei.AI
 
 		private static WorkItemCollection<AmountInstance.BatchUpdateTask, AmountInstance.BatchUpdateContext> batch_update_job = new WorkItemCollection<AmountInstance.BatchUpdateTask, AmountInstance.BatchUpdateContext>();
 
-		private struct BatchUpdateContext
+		private class BatchUpdateContext
 		{
 			public BatchUpdateContext(List<UpdateBucketWithUpdater<ISim200ms>.Entry> amount_instances, float time_delta)
 			{

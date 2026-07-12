@@ -6,9 +6,9 @@ using UnityEngine.Rendering;
 
 namespace UnityEngine
 {
+	[NativeHeader("Runtime/Misc/PlayerSettings.h")]
 	[NativeHeader("Runtime/Graphics/QualitySettings.h")]
 	[StaticAccessor("GetQualitySettings()", StaticAccessorType.Dot)]
-	[NativeHeader("Runtime/Misc/PlayerSettings.h")]
 	public sealed class QualitySettings : Object
 	{
 		public static void IncreaseLevel([DefaultValue("false")] bool applyExpensiveChanges)
@@ -400,8 +400,8 @@ namespace UnityEngine
 
 		public static extern ColorSpace activeColorSpace
 		{
-			[NativeName("GetColorSpace")]
 			[StaticAccessor("GetPlayerSettings()", StaticAccessorType.Dot)]
+			[NativeName("GetColorSpace")]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}

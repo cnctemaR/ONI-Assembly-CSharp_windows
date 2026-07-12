@@ -3,8 +3,8 @@ using UnityEngine.Scripting;
 
 namespace Unity.Collections.LowLevel.Unsafe
 {
-	[AttributeUsage(AttributeTargets.Struct)]
 	[RequiredByNativeCode]
+	[AttributeUsage(AttributeTargets.Struct)]
 	public sealed class NativeContainerSupportsMinMaxWriteRestrictionAttribute : Attribute
 	{
 	}

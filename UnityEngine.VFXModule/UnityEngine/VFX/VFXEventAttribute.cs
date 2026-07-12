@@ -6,8 +6,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.VFX
 {
-	[NativeType(Header = "Modules/VFX/Public/VFXEventAttribute.h")]
 	[RequiredByNativeCode]
+	[NativeType(Header = "Modules/VFX/Public/VFXEventAttribute.h")]
 	[StructLayout(LayoutKind.Sequential)]
 	public sealed class VFXEventAttribute : IDisposable
 	{

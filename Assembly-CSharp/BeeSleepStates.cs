@@ -45,7 +45,7 @@ public class BeeSleepStates : GameStateMachine<BeeSleepStates, BeeSleepStates.In
 	private static void FindSleepLocation(BeeSleepStates.Instance smi)
 	{
 		smi.targetSleepCell = Grid.InvalidCell;
-		FloorCellQuery floorCellQuery = PathFinderQueries.floorCellQuery.Reset(1);
+		FloorCellQuery floorCellQuery = PathFinderQueries.floorCellQuery.Reset(1, 0);
 		smi.GetComponent<Navigator>().RunQuery(floorCellQuery);
 		if (floorCellQuery.result_cells.Count > 0)
 		{

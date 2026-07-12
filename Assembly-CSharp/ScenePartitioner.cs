@@ -45,6 +45,7 @@ public class ScenePartitioner : ISim1000ms
 		this.nodes = null;
 	}
 
+	[Obsolete]
 	public ScenePartitionerLayer CreateMask(HashedString name)
 	{
 		foreach (ScenePartitionerLayer scenePartitionerLayer in this.layers)
@@ -54,6 +55,22 @@ public class ScenePartitioner : ISim1000ms
 				return scenePartitionerLayer;
 			}
 		}
+		ScenePartitionerLayer scenePartitionerLayer2 = new ScenePartitionerLayer(name, this.layers.Count);
+		this.layers.Add(scenePartitionerLayer2);
+		DebugUtil.Assert(this.layers.Count <= this.nodes.GetLength(0));
+		return scenePartitionerLayer2;
+	}
+
+	public ScenePartitionerLayer CreateMask(string name)
+	{
+		foreach (ScenePartitionerLayer scenePartitionerLayer in this.layers)
+		{
+			if (scenePartitionerLayer.name == name)
+			{
+				return scenePartitionerLayer;
+			}
+		}
+		HashCache.Get().Add(name);
 		ScenePartitionerLayer scenePartitionerLayer2 = new ScenePartitionerLayer(name, this.layers.Count);
 		this.layers.Add(scenePartitionerLayer2);
 		DebugUtil.Assert(this.layers.Count <= this.nodes.GetLength(0));
@@ -405,6 +422,24 @@ public class ScenePartitioner : ISim1000ms
 		SimAndRenderScheduler.instance.Remove(this);
 	}
 
+	public bool DoDebugLayersContainItemsOnCell(int cell)
+	{
+		int num = 0;
+		int num2 = 0;
+		Grid.CellToXY(cell, out num, out num2);
+		List<ScenePartitionerEntry> list = new List<ScenePartitionerEntry>();
+		foreach (ScenePartitionerLayer scenePartitionerLayer in this.toggledLayers)
+		{
+			list.Clear();
+			GameScenePartitioner.Instance.GatherEntries(num, num2, 1, 1, scenePartitionerLayer, list);
+			if (list.Count > 0)
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
 	public List<ScenePartitionerLayer> layers = new List<ScenePartitionerLayer>();
 
 	private int nodeSize;
@@ -416,6 +451,8 @@ public class ScenePartitioner : ISim1000ms
 	private int queryId;
 
 	private static readonly Predicate<ScenePartitionerEntry> removeCallback = (ScenePartitionerEntry entry) => entry == null || entry.obj == null;
+
+	public HashSet<ScenePartitionerLayer> toggledLayers = new HashSet<ScenePartitionerLayer>();
 
 	private struct ScenePartitionerNode
 	{

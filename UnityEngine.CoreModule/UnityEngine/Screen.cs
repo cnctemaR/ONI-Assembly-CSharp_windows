@@ -6,9 +6,9 @@ using UnityEngine.Internal;
 
 namespace UnityEngine
 {
+	[NativeHeader("Runtime/Graphics/GraphicsScriptBindings.h")]
 	[NativeHeader("Runtime/Graphics/ScreenManager.h")]
 	[StaticAccessor("GetScreenManager()", StaticAccessorType.Dot)]
-	[NativeHeader("Runtime/Graphics/GraphicsScriptBindings.h")]
 	public sealed class Screen
 	{
 		public static extern int width

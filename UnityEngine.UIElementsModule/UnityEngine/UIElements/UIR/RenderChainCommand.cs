@@ -33,10 +33,21 @@ namespace UnityEngine.UIElements.UIR
 				break;
 			case CommandType.PushView:
 			{
+				VisualElement parent = this.owner.hierarchy.parent;
+				bool flag2 = parent != null;
+				Vector4 vector;
+				if (flag2)
+				{
+					vector = RenderChainCommand.RectToClipSpace(parent.worldClip);
+				}
+				else
+				{
+					vector = UIRUtility.ToVector4(DrawParams.k_FullNormalizedRect);
+				}
 				ViewTransform viewTransform = new ViewTransform
 				{
 					transform = this.owner.worldTransform,
-					clipRect = RenderChainCommand.RectToClipSpace(this.owner.worldClip)
+					clipRect = vector
 				};
 				drawParams.view.Push(viewTransform);
 				GL.modelview = viewTransform.transform;
@@ -57,8 +68,8 @@ namespace UnityEngine.UIElements.UIR
 			{
 				drawParams.scissor.Pop();
 				Rect rect2 = drawParams.scissor.Peek();
-				bool flag2 = rect2.x == DrawParams.k_UnlimitedRect.x;
-				if (flag2)
+				bool flag3 = rect2.x == DrawParams.k_UnlimitedRect.x;
+				if (flag3)
 				{
 					Utility.DisableScissor();
 				}
@@ -71,13 +82,13 @@ namespace UnityEngine.UIElements.UIR
 			default:
 				return;
 			}
-			bool flag3 = immediateException != null;
-			if (!flag3)
+			bool flag4 = immediateException != null;
+			if (!flag4)
 			{
 				Matrix4x4 unityProjectionMatrix = Utility.GetUnityProjectionMatrix();
-				bool flag4 = drawParams.scissor.Count > 1;
-				bool flag5 = flag4;
-				if (flag5)
+				bool flag5 = drawParams.scissor.Count > 1;
+				bool flag6 = flag5;
+				if (flag6)
 				{
 					Utility.DisableScissor();
 				}
@@ -96,8 +107,8 @@ namespace UnityEngine.UIElements.UIR
 				GL.modelview = drawParams.view.Peek().transform;
 				GL.LoadProjectionMatrix(unityProjectionMatrix);
 				Utility.ProfileImmediateRendererEnd();
-				bool flag6 = flag4;
-				if (flag6)
+				bool flag7 = flag5;
+				if (flag7)
 				{
 					Utility.SetScissorRect(RenderChainCommand.RectPointsToPixelsAndFlipYAxis(drawParams.scissor.Peek(), pixelsPerPoint));
 				}

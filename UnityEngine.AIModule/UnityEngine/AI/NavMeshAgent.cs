@@ -5,9 +5,9 @@ using UnityEngine.Scripting.APIUpdating;
 
 namespace UnityEngine.AI
 {
+	[MovedFrom("UnityEngine")]
 	[NativeHeader("Modules/AI/Components/NavMeshAgent.bindings.h")]
 	[NativeHeader("Modules/AI/NavMesh/NavMesh.bindings.h")]
-	[MovedFrom("UnityEngine")]
 	public sealed class NavMeshAgent : Behaviour
 	{
 		public bool SetDestination(Vector3 target)

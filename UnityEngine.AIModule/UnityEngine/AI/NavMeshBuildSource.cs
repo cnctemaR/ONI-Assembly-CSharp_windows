@@ -5,8 +5,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.AI
 {
-	[UsedByNativeCode]
 	[NativeHeader("Modules/AI/Public/NavMeshBindingTypes.h")]
+	[UsedByNativeCode]
 	public struct NavMeshBuildSource
 	{
 		public Matrix4x4 transform

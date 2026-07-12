@@ -5,10 +5,10 @@ using UnityEngine.Rendering;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Graphics/QualitySettingsTypes.h")]
-	[StaticAccessor("GetRenderSettings()", StaticAccessorType.Dot)]
 	[NativeHeader("Runtime/Camera/RenderSettings.h")]
+	[StaticAccessor("GetRenderSettings()", StaticAccessorType.Dot)]
 	[NativeHeader("Runtime/Graphics/GraphicsScriptBindings.h")]
+	[NativeHeader("Runtime/Graphics/QualitySettingsTypes.h")]
 	public sealed class RenderSettings : Object
 	{
 		[Obsolete("Use RenderSettings.ambientIntensity instead (UnityUpgradable) -> ambientIntensity", false)]

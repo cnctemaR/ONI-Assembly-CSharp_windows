@@ -7,8 +7,8 @@ using UnityEngine.Internal;
 
 namespace UnityEngine
 {
-	[NativeHeader("Modules/Physics2D/Public/Rigidbody2D.h")]
 	[RequireComponent(typeof(Transform))]
+	[NativeHeader("Modules/Physics2D/Public/Rigidbody2D.h")]
 	public sealed class Rigidbody2D : Component
 	{
 		public Vector2 position
@@ -346,7 +346,7 @@ namespace UnityEngine
 		}
 
 		[NativeMethod("Distance")]
-		private ColliderDistance2D Distance_Internal([Writable] [NotNull("ArgumentNullException")] Collider2D collider)
+		private ColliderDistance2D Distance_Internal([NotNull("ArgumentNullException")] [Writable] Collider2D collider)
 		{
 			ColliderDistance2D colliderDistance2D;
 			this.Distance_Internal_Injected(collider, out colliderDistance2D);

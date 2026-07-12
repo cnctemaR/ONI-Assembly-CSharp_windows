@@ -38,8 +38,8 @@ namespace UnityEngine.TextCore.LowLevel
 			this.m_GlyphValueRecord = glyphValueRecord;
 		}
 
-		[SerializeField]
 		[NativeName("glyphIndex")]
+		[SerializeField]
 		private uint m_GlyphIndex;
 
 		[SerializeField]

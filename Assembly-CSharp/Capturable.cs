@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using KSerialization;
 using STRINGS;
+using TUNING;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
@@ -21,6 +22,10 @@ public class Capturable : Workable, IGameObjectEffectDescriptor
 		base.OnPrefabInit();
 		Components.Capturables.Add(this);
 		base.SetOffsetTable(OffsetGroups.InvertedStandardTable);
+		this.attributeConverter = Db.Get().AttributeConverters.CapturableSpeed;
+		this.attributeExperienceMultiplier = DUPLICANTSTATS.ATTRIBUTE_LEVELING.PART_DAY_EXPERIENCE;
+		this.skillExperienceSkillGroup = Db.Get().SkillGroups.Ranching.Id;
+		this.skillExperienceMultiplier = SKILLS.PART_DAY_EXPERIENCE;
 		this.requiredSkillPerk = Db.Get().SkillPerks.CanWrangleCreatures.Id;
 		this.resetProgressOnStop = true;
 		this.faceTargetWhenWorking = true;

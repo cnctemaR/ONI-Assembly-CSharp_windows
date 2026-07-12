@@ -7,6 +7,7 @@ using Klei.AI;
 using STRINGS;
 using TUNING;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 public class CharacterContainer : KScreen, ITelepadDeliverableContainer
@@ -69,6 +70,12 @@ public class CharacterContainer : KScreen, ITelepadDeliverableContainer
 			this.animController.gameObject.DeleteObject();
 			this.animController = null;
 		}
+	}
+
+	protected override void OnForcedCleanUp()
+	{
+		CharacterContainer.containers.Remove(this);
+		base.OnForcedCleanUp();
 	}
 
 	protected override void OnCleanUp()
@@ -150,8 +157,8 @@ public class CharacterContainer : KScreen, ITelepadDeliverableContainer
 		this.stats.ApplyRace(this.animController.gameObject);
 		this.stats.ApplyAccessories(this.animController.gameObject);
 		this.stats.ApplyExperience(this.animController.gameObject);
-		HashedString hashedString = CharacterContainer.idleAnims[global::UnityEngine.Random.Range(0, CharacterContainer.idleAnims.Length)];
-		this.idle_anim = Assets.GetAnim(hashedString);
+		HashedString idleAnim = this.GetIdleAnim(this.stats);
+		this.idle_anim = Assets.GetAnim(idleAnim);
 		if (this.idle_anim != null)
 		{
 			this.animController.AddAnimOverrides(this.idle_anim, 0f);
@@ -162,6 +169,30 @@ public class CharacterContainer : KScreen, ITelepadDeliverableContainer
 			this.animController.AddAnimOverrides(anim, 0f);
 		}
 		this.animController.Queue("idle_default", KAnim.PlayMode.Loop, 1f, 0f);
+	}
+
+	private HashedString GetIdleAnim(MinionStartingStats minionStartingStats)
+	{
+		List<HashedString> list = new List<HashedString>();
+		foreach (KeyValuePair<HashedString, string[]> keyValuePair in CharacterContainer.traitIdleAnims)
+		{
+			foreach (Trait trait in minionStartingStats.Traits)
+			{
+				if (keyValuePair.Value.Contains(trait.Id))
+				{
+					list.Add(keyValuePair.Key);
+				}
+			}
+			if (keyValuePair.Value.Contains(minionStartingStats.joyTrait.Id) || keyValuePair.Value.Contains(minionStartingStats.stressTrait.Id))
+			{
+				list.Add(keyValuePair.Key);
+			}
+		}
+		if (list.Count > 0)
+		{
+			return list.ToArray()[global::UnityEngine.Random.Range(0, list.Count)];
+		}
+		return CharacterContainer.idleAnims[global::UnityEngine.Random.Range(0, CharacterContainer.idleAnims.Length)];
 	}
 
 	private void SetInfoText()
@@ -548,19 +579,72 @@ public class CharacterContainer : KScreen, ITelepadDeliverableContainer
 		return "<color=green>";
 	}
 
+	public override void OnPointerEnter(PointerEventData eventData)
+	{
+		this.scroll_rect.mouseIsOver = true;
+		base.OnPointerEnter(eventData);
+	}
+
+	public override void OnPointerExit(PointerEventData eventData)
+	{
+		this.scroll_rect.mouseIsOver = false;
+		base.OnPointerExit(eventData);
+	}
+
 	public override void OnKeyDown(KButtonEvent e)
 	{
-		if (e.IsAction(global::Action.Escape))
+		if (e.IsAction(global::Action.Escape) || e.IsAction(global::Action.MouseRight))
 		{
 			this.characterNameTitle.ForceStopEditing();
 			this.controller.OnPressBack();
+			this.archetypeDropDown.scrollRect.gameObject.SetActive(false);
 		}
-		e.Consumed = true;
+		if (!KInputManager.currentControllerIsGamepad)
+		{
+			e.Consumed = true;
+			return;
+		}
+		if (this.archetypeDropDown.scrollRect.activeInHierarchy)
+		{
+			KScrollRect component = this.archetypeDropDown.scrollRect.GetComponent<KScrollRect>();
+			Vector2 vector = component.rectTransform().InverseTransformPoint(KInputManager.GetMousePos());
+			if (component.rectTransform().rect.Contains(vector))
+			{
+				component.mouseIsOver = true;
+			}
+			else
+			{
+				component.mouseIsOver = false;
+			}
+			component.OnKeyDown(e);
+			return;
+		}
+		this.scroll_rect.OnKeyDown(e);
 	}
 
 	public override void OnKeyUp(KButtonEvent e)
 	{
-		e.Consumed = true;
+		if (!KInputManager.currentControllerIsGamepad)
+		{
+			e.Consumed = true;
+			return;
+		}
+		if (this.archetypeDropDown.scrollRect.activeInHierarchy)
+		{
+			KScrollRect component = this.archetypeDropDown.scrollRect.GetComponent<KScrollRect>();
+			Vector2 vector = component.rectTransform().InverseTransformPoint(KInputManager.GetMousePos());
+			if (component.rectTransform().rect.Contains(vector))
+			{
+				component.mouseIsOver = true;
+			}
+			else
+			{
+				component.mouseIsOver = false;
+			}
+			component.OnKeyUp(e);
+			return;
+		}
+		this.scroll_rect.OnKeyUp(e);
 	}
 
 	protected override void OnCmpEnable()
@@ -709,7 +793,42 @@ public class CharacterContainer : KScreen, ITelepadDeliverableContainer
 	[SerializeField]
 	private Sprite enabledSpr;
 
-	private static readonly HashedString[] idleAnims = new HashedString[] { "anim_idle_healthy_kanim", "anim_idle_susceptible_kanim", "anim_idle_keener_kanim", "anim_idle_coaster_kanim", "anim_idle_fastfeet_kanim", "anim_idle_breatherdeep_kanim", "anim_idle_breathershallow_kanim" };
+	[SerializeField]
+	private KScrollRect scroll_rect;
+
+	private static readonly Dictionary<HashedString, string[]> traitIdleAnims = new Dictionary<HashedString, string[]>
+	{
+		{
+			"anim_idle_food_kanim",
+			new string[] { "Foodie" }
+		},
+		{
+			"anim_idle_animal_lover_kanim",
+			new string[] { "RanchingUp" }
+		},
+		{
+			"anim_idle_loner_kanim",
+			new string[] { "Loner" }
+		},
+		{
+			"anim_idle_mole_hands_kanim",
+			new string[] { "MoleHands" }
+		},
+		{
+			"anim_idle_buff_kanim",
+			new string[] { "StrongArm" }
+		},
+		{
+			"anim_idle_distracted_kanim",
+			new string[] { "CantResearch", "CantBuild", "CantCook", "CantDig" }
+		},
+		{
+			"anim_idle_coaster_kanim",
+			new string[] { "HappySinger" }
+		}
+	};
+
+	private static readonly HashedString[] idleAnims = new HashedString[] { "anim_idle_healthy_kanim", "anim_idle_susceptible_kanim", "anim_idle_keener_kanim", "anim_idle_fastfeet_kanim", "anim_idle_breatherdeep_kanim", "anim_idle_breathershallow_kanim" };
 
 	public float baseCharacterScale = 0.38f;
 

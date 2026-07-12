@@ -7,9 +7,9 @@ using UnityEngine.Scripting.APIUpdating;
 
 namespace UnityEngine
 {
-	[NativeHeader("Modules/Animation/AvatarMask.h")]
-	[UsedByNativeCode]
 	[NativeHeader("Modules/Animation/ScriptBindings/Animation.bindings.h")]
+	[UsedByNativeCode]
+	[NativeHeader("Modules/Animation/AvatarMask.h")]
 	[MovedFrom(true, "UnityEditor.Animations", "UnityEditor", null)]
 	public sealed class AvatarMask : Object
 	{

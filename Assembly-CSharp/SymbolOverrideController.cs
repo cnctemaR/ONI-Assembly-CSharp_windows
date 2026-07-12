@@ -118,7 +118,11 @@ public class SymbolOverrideController : KMonoBehaviour
 					data = KAnimBatchManager.Instance().GetBatchGroupData(symbolEntry.sourceSymbol.build.batchTag)
 				};
 				Texture2D texture = symbolEntry.sourceSymbol.build.GetTexture(0);
-				int num = this.atlases.Add(texture);
+				int num = batch.atlases.GetAtlasIdx(texture);
+				if (num < 0)
+				{
+					num = this.atlases.Add(texture);
+				}
 				batchGroupInfo.atlasIdx = num;
 				pooledDictionary[batchGroupInfo.build] = batchGroupInfo;
 			}

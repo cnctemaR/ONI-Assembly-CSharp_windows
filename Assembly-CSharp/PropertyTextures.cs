@@ -32,11 +32,6 @@ public class PropertyTextures : KMonoBehaviour, ISim200ms
 		}
 	}
 
-	public void SetFilterMode(PropertyTextures.Property property, FilterMode mode)
-	{
-		this.textureProperties[(int)property].filterMode = mode;
-	}
-
 	public Texture GetTexture(PropertyTextures.Property property)
 	{
 		return this.textureBuffers[(int)property].texture;

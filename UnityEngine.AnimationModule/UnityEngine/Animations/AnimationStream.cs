@@ -6,10 +6,10 @@ using UnityEngine.Scripting.APIUpdating;
 
 namespace UnityEngine.Animations
 {
-	[RequiredByNativeCode]
 	[MovedFrom("UnityEngine.Experimental.Animations")]
-	[NativeHeader("Modules/Animation/ScriptBindings/AnimationStream.bindings.h")]
 	[NativeHeader("Modules/Animation/Director/AnimationStream.h")]
+	[NativeHeader("Modules/Animation/ScriptBindings/AnimationStream.bindings.h")]
+	[RequiredByNativeCode]
 	public struct AnimationStream
 	{
 		internal uint animatorBindingsVersion

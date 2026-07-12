@@ -112,6 +112,15 @@ public static class CPUBudget
 		}
 	}
 
+	public static void Remove(ICPULoad cpuLoad)
+	{
+		foreach (CPUBudget.Node node in CPUBudget.nodes[cpuLoad].children)
+		{
+			CPUBudget.Remove(node.load);
+		}
+		CPUBudget.nodes.Remove(cpuLoad);
+	}
+
 	public static Stopwatch stopwatch = Stopwatch.StartNew();
 
 	private static Dictionary<ICPULoad, CPUBudget.Node> nodes = new Dictionary<ICPULoad, CPUBudget.Node>();

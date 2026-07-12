@@ -10,6 +10,14 @@ public class CarePackageInfo : ITelepadDeliverable
 		this.requirement = requirement;
 	}
 
+	public CarePackageInfo(string ID, float amount, Func<bool> requirement, string facadeID)
+	{
+		this.id = ID;
+		this.quantity = amount;
+		this.requirement = requirement;
+		this.facadeID = facadeID;
+	}
+
 	public GameObject Deliver(Vector3 location)
 	{
 		location += Vector3.right / 2f;
@@ -24,4 +32,6 @@ public class CarePackageInfo : ITelepadDeliverable
 	public readonly float quantity;
 
 	public readonly Func<bool> requirement;
+
+	public readonly string facadeID;
 }

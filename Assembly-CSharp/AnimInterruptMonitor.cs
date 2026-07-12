@@ -10,12 +10,12 @@ public class AnimInterruptMonitor : GameStateMachine<AnimInterruptMonitor, AnimI
 
 	private static bool ShoulPlayAnim(AnimInterruptMonitor.Instance smi)
 	{
-		return smi.anim.IsValid;
+		return smi.anims != null;
 	}
 
 	private static void ClearAnim(AnimInterruptMonitor.Instance smi)
 	{
-		smi.anim = HashedString.Invalid;
+		smi.anims = null;
 	}
 
 	public class Def : StateMachine.BaseDef
@@ -31,10 +31,15 @@ public class AnimInterruptMonitor : GameStateMachine<AnimInterruptMonitor, AnimI
 
 		public void PlayAnim(HashedString anim)
 		{
-			this.anim = anim;
+			this.PlayAnimSequence(new HashedString[] { anim });
+		}
+
+		public void PlayAnimSequence(HashedString[] anims)
+		{
+			this.anims = anims;
 			base.GetComponent<CreatureBrain>().UpdateBrain();
 		}
 
-		public HashedString anim;
+		public HashedString[] anims;
 	}
 }

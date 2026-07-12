@@ -6,10 +6,10 @@ using UnityEngine.Scripting.APIUpdating;
 namespace UnityEngine.U2D
 {
 	[NativeHeader("Runtime/2D/Common/SpriteDataMarshalling.h")]
-	[RequiredByNativeCode]
-	[MovedFrom("UnityEngine.Experimental.U2D")]
-	[NativeType(CodegenOptions.Custom, "ScriptingSpriteBone")]
 	[NativeHeader("Runtime/2D/Common/SpriteDataAccess.h")]
+	[NativeType(CodegenOptions.Custom, "ScriptingSpriteBone")]
+	[MovedFrom("UnityEngine.Experimental.U2D")]
+	[RequiredByNativeCode]
 	[Serializable]
 	public struct SpriteBone
 	{
@@ -73,24 +73,24 @@ namespace UnityEngine.U2D
 			}
 		}
 
-		[SerializeField]
 		[NativeName("name")]
+		[SerializeField]
 		private string m_Name;
 
-		[SerializeField]
 		[NativeName("position")]
+		[SerializeField]
 		private Vector3 m_Position;
 
-		[SerializeField]
 		[NativeName("rotation")]
+		[SerializeField]
 		private Quaternion m_Rotation;
 
 		[SerializeField]
 		[NativeName("length")]
 		private float m_Length;
 
-		[SerializeField]
 		[NativeName("parentId")]
+		[SerializeField]
 		private int m_ParentId;
 	}
 }

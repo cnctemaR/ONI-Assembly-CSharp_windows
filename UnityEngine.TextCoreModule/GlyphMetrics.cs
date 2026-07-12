@@ -106,12 +106,12 @@ namespace UnityEngine.TextCore
 		[NativeName("width")]
 		private float m_Width;
 
-		[SerializeField]
 		[NativeName("height")]
+		[SerializeField]
 		private float m_Height;
 
-		[NativeName("horizontalBearingX")]
 		[SerializeField]
+		[NativeName("horizontalBearingX")]
 		private float m_HorizontalBearingX;
 
 		[SerializeField]

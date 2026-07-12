@@ -130,8 +130,8 @@ namespace UnityEngine.Analytics
 			set;
 		}
 
-		[StaticAccessor("GetUnityAnalytics()", StaticAccessorType.Dot)]
 		[NativeMethod("FlushEvents")]
+		[StaticAccessor("GetUnityAnalytics()", StaticAccessorType.Dot)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern bool FlushArchivedEvents();
 

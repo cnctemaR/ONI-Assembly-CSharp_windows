@@ -38,8 +38,8 @@ namespace UnityEngine.Playables
 			}
 		}
 
-		[EditorBrowsable(EditorBrowsableState.Never)]
 		[Obsolete("sourceBindingType is no longer supported on PlayableBinding. Use outputBindingType instead to get the required output target type, and the appropriate binding create method (e.g. AnimationPlayableBinding.Create(name, key)) to create PlayableBindings", true)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		public Type sourceBindingType
 		{
 			get

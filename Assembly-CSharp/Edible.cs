@@ -282,7 +282,19 @@ public class Edible : Workable, IGameObjectEffectDescriptor
 		list.Add(new Descriptor(string.Format(UI.GAMEOBJECTEFFECTS.FOOD_QUALITY, GameUtil.GetFormattedFoodQuality(this.foodInfo.Quality)), string.Format(UI.GAMEOBJECTEFFECTS.TOOLTIPS.FOOD_QUALITY, GameUtil.GetFormattedFoodQuality(this.foodInfo.Quality)), Descriptor.DescriptorType.Effect, false));
 		foreach (string text in this.foodInfo.Effects)
 		{
-			list.Add(new Descriptor(Strings.Get("STRINGS.DUPLICANTS.MODIFIERS." + text.ToUpper() + ".NAME"), Strings.Get("STRINGS.DUPLICANTS.MODIFIERS." + text.ToUpper() + ".DESCRIPTION"), Descriptor.DescriptorType.Effect, false));
+			string text2 = "";
+			foreach (AttributeModifier attributeModifier in Db.Get().effects.Get(text).SelfModifiers)
+			{
+				text2 = string.Concat(new string[]
+				{
+					text2,
+					"\n    • ",
+					Strings.Get("STRINGS.DUPLICANTS.ATTRIBUTES." + attributeModifier.AttributeId.ToUpper() + ".NAME"),
+					": ",
+					attributeModifier.GetFormattedString()
+				});
+			}
+			list.Add(new Descriptor(Strings.Get("STRINGS.DUPLICANTS.MODIFIERS." + text.ToUpper() + ".NAME"), Strings.Get("STRINGS.DUPLICANTS.MODIFIERS." + text.ToUpper() + ".DESCRIPTION") + text2, Descriptor.DescriptorType.Effect, false));
 		}
 		return list;
 	}

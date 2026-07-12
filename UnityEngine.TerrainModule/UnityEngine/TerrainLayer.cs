@@ -6,9 +6,9 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeHeader("Modules/Terrain/Public/TerrainLayerScriptingInterface.h")]
 	[NativeHeader("TerrainScriptingClasses.h")]
 	[UsedByNativeCode]
+	[NativeHeader("Modules/Terrain/Public/TerrainLayerScriptingInterface.h")]
 	[StructLayout(LayoutKind.Sequential)]
 	public sealed class TerrainLayer : Object
 	{

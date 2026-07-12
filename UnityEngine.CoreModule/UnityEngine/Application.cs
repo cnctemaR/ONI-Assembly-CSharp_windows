@@ -14,24 +14,24 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Network/NetworkUtility.h")]
-	[NativeHeader("Runtime/Input/GetInput.h")]
-	[NativeHeader("Runtime/Application/ApplicationInfo.h")]
 	[NativeHeader("Runtime/File/ApplicationSpecificPersistentDataPath.h")]
-	[NativeHeader("Runtime/Input/InputManager.h")]
-	[NativeHeader("Runtime/Utilities/Argv.h")]
-	[NativeHeader("Runtime/Logging/LogSystem.h")]
-	[NativeHeader("Runtime/Utilities/URLUtility.h")]
-	[NativeHeader("Runtime/BaseClasses/IsPlaying.h")]
-	[NativeHeader("Runtime/Input/TargetFrameRate.h")]
-	[NativeHeader("Runtime/PreloadManager/LoadSceneOperation.h")]
 	[NativeHeader("Runtime/Export/Application/Application.bindings.h")]
-	[NativeHeader("Runtime/PreloadManager/PreloadManager.h")]
-	[NativeHeader("Runtime/Misc/SystemInfo.h")]
-	[NativeHeader("Runtime/Misc/PlayerSettings.h")]
-	[NativeHeader("Runtime/Misc/Player.h")]
-	[NativeHeader("Runtime/Misc/BuildSettings.h")]
 	[NativeHeader("Runtime/Application/AdsIdHandler.h")]
+	[NativeHeader("Runtime/Application/ApplicationInfo.h")]
+	[NativeHeader("Runtime/BaseClasses/IsPlaying.h")]
+	[NativeHeader("Runtime/Misc/Player.h")]
+	[NativeHeader("Runtime/Misc/PlayerSettings.h")]
+	[NativeHeader("Runtime/Input/InputManager.h")]
+	[NativeHeader("Runtime/Utilities/URLUtility.h")]
+	[NativeHeader("Runtime/Utilities/Argv.h")]
+	[NativeHeader("Runtime/PreloadManager/PreloadManager.h")]
+	[NativeHeader("Runtime/PreloadManager/LoadSceneOperation.h")]
+	[NativeHeader("Runtime/Input/TargetFrameRate.h")]
+	[NativeHeader("Runtime/Logging/LogSystem.h")]
+	[NativeHeader("Runtime/Misc/BuildSettings.h")]
+	[NativeHeader("Runtime/Input/GetInput.h")]
+	[NativeHeader("Runtime/Misc/SystemInfo.h")]
+	[NativeHeader("Runtime/Network/NetworkUtility.h")]
 	public class Application
 	{
 		[FreeFunction("GetInputManager().QuitApplication")]
@@ -43,8 +43,8 @@ namespace UnityEngine
 			Application.Quit(0);
 		}
 
-		[FreeFunction("GetInputManager().CancelQuitApplication")]
 		[Obsolete("CancelQuit is deprecated. Use the wantsToQuit event instead.")]
+		[FreeFunction("GetInputManager().CancelQuitApplication")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void CancelQuit();
 
@@ -444,7 +444,7 @@ namespace UnityEngine
 			get
 			{
 				RuntimePlatform platform = Application.platform;
-				return platform == RuntimePlatform.PS4 || platform == RuntimePlatform.XboxOne;
+				return platform == RuntimePlatform.GameCoreXboxOne || platform == RuntimePlatform.GameCoreScarlett || platform == RuntimePlatform.PS4 || platform == RuntimePlatform.PS5 || platform == RuntimePlatform.Switch || platform == RuntimePlatform.XboxOne;
 			}
 		}
 

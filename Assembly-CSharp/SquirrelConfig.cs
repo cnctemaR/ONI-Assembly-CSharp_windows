@@ -7,13 +7,13 @@ public class SquirrelConfig : IEntityConfig
 {
 	public static GameObject CreateSquirrel(string id, string name, string desc, string anim_file, bool is_baby)
 	{
-		GameObject gameObject = EntityTemplates.ExtendEntityToWildCreature(BaseSquirrelConfig.BaseSquirrel(id, name, desc, anim_file, "SquirrelBaseTrait", is_baby, null), SquirrelTuning.PEN_SIZE_PER_CREATURE);
+		GameObject gameObject = EntityTemplates.ExtendEntityToWildCreature(BaseSquirrelConfig.BaseSquirrel(id, name, desc, anim_file, "SquirrelBaseTrait", is_baby, null, false), SquirrelTuning.PEN_SIZE_PER_CREATURE);
 		Trait trait = Db.Get().CreateTrait("SquirrelBaseTrait", name, name, null, false, null, true, true);
 		trait.Add(new AttributeModifier(Db.Get().Amounts.Calories.maxAttribute.Id, SquirrelTuning.STANDARD_STOMACH_SIZE, name, false, false, true));
 		trait.Add(new AttributeModifier(Db.Get().Amounts.Calories.deltaAttribute.Id, -SquirrelTuning.STANDARD_CALORIES_PER_CYCLE / 600f, name, false, false, true));
 		trait.Add(new AttributeModifier(Db.Get().Amounts.HitPoints.maxAttribute.Id, 25f, name, false, false, true));
 		trait.Add(new AttributeModifier(Db.Get().Amounts.Age.maxAttribute.Id, 100f, name, false, false, true));
-		Diet.Info[] array = BaseSquirrelConfig.BasicWoodDiet(SimHashes.Dirt.CreateTag(), SquirrelConfig.CALORIES_PER_DAY_OF_PLANT_EATEN, SquirrelConfig.KG_POOP_PER_DAY_OF_PLANT, null, 0f);
+		Diet.Info[] array = BaseSquirrelConfig.BasicDiet(SimHashes.Dirt.CreateTag(), SquirrelConfig.CALORIES_PER_DAY_OF_PLANT_EATEN, SquirrelConfig.KG_POOP_PER_DAY_OF_PLANT, null, 0f);
 		return BaseSquirrelConfig.SetupDiet(gameObject, array, SquirrelConfig.MIN_POOP_SIZE_KG);
 	}
 
@@ -47,7 +47,7 @@ public class SquirrelConfig : IEntityConfig
 
 	private const SimHashes EMIT_ELEMENT = SimHashes.Dirt;
 
-	private static float DAYS_PLANT_GROWTH_EATEN_PER_CYCLE = 0.4f;
+	public static float DAYS_PLANT_GROWTH_EATEN_PER_CYCLE = 0.4f;
 
 	private static float CALORIES_PER_DAY_OF_PLANT_EATEN = SquirrelTuning.STANDARD_CALORIES_PER_CYCLE / SquirrelConfig.DAYS_PLANT_GROWTH_EATEN_PER_CYCLE;
 

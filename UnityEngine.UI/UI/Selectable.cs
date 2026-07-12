@@ -248,6 +248,10 @@ namespace UnityEngine.UI
 				Array.Copy(Selectable.s_Selectables, array, Selectable.s_Selectables.Length);
 				Selectable.s_Selectables = array;
 			}
+			if (EventSystem.current && EventSystem.current.currentSelectedGameObject == base.gameObject)
+			{
+				this.hasSelection = true;
+			}
 			this.m_CurrentIndex = Selectable.s_SelectableCount;
 			Selectable.s_Selectables[this.m_CurrentIndex] = this;
 			Selectable.s_SelectableCount++;

@@ -192,8 +192,8 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern bool Contains(string name);
 
-		[EditorBrowsable(EditorBrowsableState.Never)]
 		[Obsolete("Method Load has been deprecated. Script updater cannot update it as the loading behaviour has changed. Please use LoadAsset instead and check the documentation for details.", true)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		public Object Load(string name)
 		{
 			return null;
@@ -206,22 +206,22 @@ namespace UnityEngine
 			return null;
 		}
 
-		[Obsolete("Method Load has been deprecated. Script updater cannot update it as the loading behaviour has changed. Please use LoadAsset instead and check the documentation for details.", true)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
+		[Obsolete("Method Load has been deprecated. Script updater cannot update it as the loading behaviour has changed. Please use LoadAsset instead and check the documentation for details.", true)]
 		private Object Load(string name, Type type)
 		{
 			return null;
 		}
 
-		[Obsolete("Method LoadAsync has been deprecated. Script updater cannot update it as the loading behaviour has changed. Please use LoadAssetAsync instead and check the documentation for details.", true)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
+		[Obsolete("Method LoadAsync has been deprecated. Script updater cannot update it as the loading behaviour has changed. Please use LoadAssetAsync instead and check the documentation for details.", true)]
 		private AssetBundleRequest LoadAsync(string name, Type type)
 		{
 			return null;
 		}
 
-		[EditorBrowsable(EditorBrowsableState.Never)]
 		[Obsolete("Method LoadAll has been deprecated. Script updater cannot update it as the loading behaviour has changed. Please use LoadAllAssets instead and check the documentation for details.", true)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		private Object[] LoadAll(Type type)
 		{
 			return null;
@@ -234,8 +234,8 @@ namespace UnityEngine
 			return null;
 		}
 
-		[Obsolete("Method LoadAll has been deprecated. Script updater cannot update it as the loading behaviour has changed. Please use LoadAllAssets instead and check the documentation for details.", true)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
+		[Obsolete("Method LoadAll has been deprecated. Script updater cannot update it as the loading behaviour has changed. Please use LoadAllAssets instead and check the documentation for details.", true)]
 		public T[] LoadAll<T>() where T : Object
 		{
 			return null;
@@ -471,6 +471,18 @@ namespace UnityEngine
 		internal static AssetBundleRecompressOperation RecompressAssetBundleAsync_Internal(string inputPath, string outputPath, BuildCompression method, uint expectedCRC, ThreadPriority priority)
 		{
 			return AssetBundle.RecompressAssetBundleAsync_Internal_Injected(inputPath, outputPath, ref method, expectedCRC, priority);
+		}
+
+		public static uint memoryBudgetKB
+		{
+			get
+			{
+				return AssetBundleLoadingCache.memoryBudgetKB;
+			}
+			set
+			{
+				AssetBundleLoadingCache.memoryBudgetKB = value;
+			}
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]

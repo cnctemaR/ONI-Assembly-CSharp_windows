@@ -8,11 +8,11 @@ using UnityEngine.Networking.Types;
 
 namespace UnityEngine.Networking
 {
-	[Obsolete("The UNET transport will be removed in the future as soon a replacement is ready.")]
+	[NativeConditional("ENABLE_NETWORK && ENABLE_UNET", true)]
 	[NativeHeader("Modules/UNET/UNETConfiguration.h")]
 	[NativeHeader("Modules/UNET/UNetTypes.h")]
 	[NativeHeader("Modules/UNET/UNETManager.h")]
-	[NativeConditional("ENABLE_NETWORK && ENABLE_UNET", true)]
+	[Obsolete("The UNET transport will be removed in the future as soon a replacement is ready.")]
 	public sealed class NetworkTransport
 	{
 		public static bool DoesEndPointUsePlatformProtocols(EndPoint endPoint)

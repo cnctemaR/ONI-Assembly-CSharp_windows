@@ -163,22 +163,10 @@ public class KScreen : KMonoBehaviour, IInputHandler, IPointerEnterHandler, IEve
 		}
 		if (!e.Consumed)
 		{
-			foreach (KScrollRect kscrollRect2 in base.GetComponentsInChildren<KScrollRect>())
+			KScrollRect[] array = base.GetComponentsInChildren<KScrollRect>();
+			for (int i = 0; i < array.Length; i++)
 			{
-				Vector2 vector2 = kscrollRect2.rectTransform().InverseTransformPoint(KInputManager.GetMousePos());
-				if (kscrollRect2.rectTransform().rect.Contains(vector2))
-				{
-					kscrollRect2.mouseIsOver = true;
-				}
-				else
-				{
-					kscrollRect2.mouseIsOver = false;
-				}
-				kscrollRect2.OnKeyDown(e);
-				if (e.Consumed)
-				{
-					break;
-				}
+				array[i].OnKeyDown(e);
 			}
 		}
 	}
@@ -326,6 +314,8 @@ public class KScreen : KMonoBehaviour, IInputHandler, IPointerEnterHandler, IEve
 	public KScreen.PointerExitActions pointerExitActions;
 
 	private bool hasFocus;
+
+	public bool isHiddenButActive;
 
 	public delegate void PointerEnterActions(PointerEventData eventData);
 

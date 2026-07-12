@@ -5,8 +5,8 @@ using UnityEngine.Internal;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Video/ScriptBindings/WebCamTexture.bindings.h")]
 	[NativeHeader("Runtime/Video/BaseWebCamTexture.h")]
+	[NativeHeader("Runtime/Video/ScriptBindings/WebCamTexture.bindings.h")]
 	[NativeHeader("AudioScriptingClasses.h")]
 	public sealed class WebCamTexture : Texture
 	{

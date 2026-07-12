@@ -5,8 +5,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.XR
 {
-	[NativeConditional("ENABLE_VR")]
 	[UsedByNativeCode]
+	[NativeConditional("ENABLE_VR")]
 	public struct InputDevice : IEquatable<InputDevice>
 	{
 		internal InputDevice(ulong deviceId)

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using ProcGen;
 using ProcGenGame;
+using Steamworks;
 using STRINGS;
 using TMPro;
 using UnityEngine;
@@ -27,7 +28,7 @@ public class LoadScreen : KModalScreen
 		this.colonyListPool = new UIPool<HierarchyReferences>(this.saveButtonPrefab);
 		if (SpeedControlScreen.Instance != null)
 		{
-			SpeedControlScreen.Instance.Pause(false);
+			SpeedControlScreen.Instance.Pause(false, false);
 		}
 		if (this.closeButton != null)
 		{
@@ -72,7 +73,7 @@ public class LoadScreen : KModalScreen
 	protected override void OnActivate()
 	{
 		base.OnActivate();
-		WorldGen.LoadSettings();
+		WorldGen.LoadSettings(false);
 		this.SetCloudSaveInfoActive(this.CloudSavesVisible());
 		this.RefreshColonyList();
 		this.ShowColonyList();
@@ -86,9 +87,15 @@ public class LoadScreen : KModalScreen
 				this.cloudTutorialBouncer.Bounce();
 				KPlayerPrefs.SetInt("LoadScreenCloudTutorialTimes", @int + 1);
 				KPlayerPrefs.GetInt("LoadScreenCloudTutorialTimes", 0);
-				return;
 			}
-			this.cloudTutorialBouncer.gameObject.SetActive(false);
+			else
+			{
+				this.cloudTutorialBouncer.gameObject.SetActive(false);
+			}
+		}
+		if (DistributionPlatform.Initialized && SteamUtils.IsSteamRunningOnSteamDeck())
+		{
+			this.colonyInfoButton.gameObject.SetActive(false);
 		}
 	}
 
@@ -408,30 +415,30 @@ public class LoadScreen : KModalScreen
 		saveError = null;
 		global::Tuple<SaveGame.Header, SaveGame.GameInfo> fileInfo = SaveGame.GetFileInfo(file);
 		SaveGame.Header first = fileInfo.first;
-		string baseName = fileInfo.second.baseName;
+		string text = fileInfo.second.baseName.TrimEnd(new char[] { ' ' });
 		string fileName = global::System.IO.Path.GetFileName(file);
-		string text = global::System.IO.Path.Combine(dest_root, baseName);
-		if (!Directory.Exists(text))
+		string text2 = global::System.IO.Path.Combine(dest_root, text);
+		if (!Directory.Exists(text2))
 		{
-			Directory.CreateDirectory(text);
+			text2 = Directory.CreateDirectory(text2).FullName;
 		}
-		string text2 = text;
+		string text3 = text2;
 		if (is_auto_save)
 		{
-			string text3 = global::System.IO.Path.Combine(text, "auto_save");
-			if (!Directory.Exists(text3))
+			string text4 = global::System.IO.Path.Combine(text2, "auto_save");
+			if (!Directory.Exists(text4))
 			{
-				Directory.CreateDirectory(text3);
+				Directory.CreateDirectory(text4);
 			}
-			text2 = text3;
+			text3 = text4;
 		}
-		string text4 = global::System.IO.Path.Combine(text2, fileName);
-		string text5 = global::System.IO.Path.ChangeExtension(file, "png");
-		string text6 = global::System.IO.Path.ChangeExtension(text4, "png");
+		string text5 = global::System.IO.Path.Combine(text3, fileName);
+		string text6 = global::System.IO.Path.ChangeExtension(file, "png");
+		string text7 = global::System.IO.Path.ChangeExtension(text5, "png");
 		try
 		{
-			this.MigrateFile(file, text4, false);
-			this.MigrateFile(text5, text6, true);
+			this.MigrateFile(file, text5, false);
+			this.MigrateFile(text6, text7, true);
 		}
 		catch (Exception ex)
 		{
@@ -590,10 +597,32 @@ public class LoadScreen : KModalScreen
 			this.cloudTutorialBouncer.Bounce();
 		};
 		moreInfoButton.ClearOnClick();
-		Action<InfoDialogScreen> <>9__5;
+		Action<InfoDialogScreen> <>9__4;
+		Action<InfoDialogScreen> <>9__6;
 		moreInfoButton.onClick += delegate
 		{
-			InfoDialogScreen infoDialogScreen = global::Util.KInstantiateUI<InfoDialogScreen>(ScreenPrefabs.Instance.InfoDialogScreen.gameObject, this.gameObject, false).SetHeader(UI.FRONTEND.LOADSCREEN.MIGRATE_RESULT_FAILURES_MORE_INFO_TITLE).AddPlainText(UI.FRONTEND.LOADSCREEN.MIGRATE_RESULT_FAILURES_MORE_INFO_PRE)
+			if (DistributionPlatform.Initialized && SteamUtils.IsSteamRunningOnSteamDeck())
+			{
+				InfoDialogScreen infoDialogScreen = global::Util.KInstantiateUI<InfoDialogScreen>(ScreenPrefabs.Instance.InfoDialogScreen.gameObject, this.gameObject, false).SetHeader(UI.FRONTEND.LOADSCREEN.MIGRATE_RESULT_FAILURES_MORE_INFO_TITLE).AddPlainText(UI.FRONTEND.LOADSCREEN.MIGRATE_RESULT_FAILURES_MORE_INFO_PRE)
+					.AddLineItem(UI.FRONTEND.LOADSCREEN.MIGRATE_RESULT_FAILURES_MORE_INFO_ITEM1, "")
+					.AddLineItem(UI.FRONTEND.LOADSCREEN.MIGRATE_RESULT_FAILURES_MORE_INFO_ITEM2, "")
+					.AddLineItem(UI.FRONTEND.LOADSCREEN.MIGRATE_RESULT_FAILURES_MORE_INFO_ITEM3, "")
+					.AddPlainText(UI.FRONTEND.LOADSCREEN.MIGRATE_RESULT_FAILURES_MORE_INFO_POST);
+				string text4 = UI.CONFIRMDIALOG.OK;
+				Action<InfoDialogScreen> action;
+				if ((action = <>9__4) == null)
+				{
+					action = (<>9__4 = delegate(InfoDialogScreen d)
+					{
+						this.migrationPanelRefs.gameObject.SetActive(false);
+						this.cloudTutorialBouncer.Bounce();
+						d.Deactivate();
+					});
+				}
+				infoDialogScreen.AddOption(text4, action, true).Activate();
+				return;
+			}
+			InfoDialogScreen infoDialogScreen2 = global::Util.KInstantiateUI<InfoDialogScreen>(ScreenPrefabs.Instance.InfoDialogScreen.gameObject, this.gameObject, false).SetHeader(UI.FRONTEND.LOADSCREEN.MIGRATE_RESULT_FAILURES_MORE_INFO_TITLE).AddPlainText(UI.FRONTEND.LOADSCREEN.MIGRATE_RESULT_FAILURES_MORE_INFO_PRE)
 				.AddLineItem(UI.FRONTEND.LOADSCREEN.MIGRATE_RESULT_FAILURES_MORE_INFO_ITEM1, "")
 				.AddLineItem(UI.FRONTEND.LOADSCREEN.MIGRATE_RESULT_FAILURES_MORE_INFO_ITEM2, "")
 				.AddLineItem(UI.FRONTEND.LOADSCREEN.MIGRATE_RESULT_FAILURES_MORE_INFO_ITEM3, "")
@@ -602,18 +631,18 @@ public class LoadScreen : KModalScreen
 				{
 					App.OpenWebURL("https://forums.kleientertainment.com/klei-bug-tracker/oni/");
 				}, false);
-			string text4 = UI.CONFIRMDIALOG.OK;
-			Action<InfoDialogScreen> action;
-			if ((action = <>9__5) == null)
+			string text5 = UI.CONFIRMDIALOG.OK;
+			Action<InfoDialogScreen> action2;
+			if ((action2 = <>9__6) == null)
 			{
-				action = (<>9__5 = delegate(InfoDialogScreen d)
+				action2 = (<>9__6 = delegate(InfoDialogScreen d)
 				{
 					this.migrationPanelRefs.gameObject.SetActive(false);
 					this.cloudTutorialBouncer.Bounce();
 					d.Deactivate();
 				});
 			}
-			infoDialogScreen.AddOption(text4, action, true).Activate();
+			infoDialogScreen2.AddOption(text5, action2, true).Activate();
 		};
 	}
 
@@ -801,7 +830,7 @@ public class LoadScreen : KModalScreen
 					save.FileName,
 					save.FileHeader.buildVersion,
 					save.FileInfo.saveMinorVersion,
-					498381U,
+					509629U,
 					28
 				});
 			}
@@ -1117,7 +1146,7 @@ public class LoadScreen : KModalScreen
 
 	private static bool IsSaveFileFromUnsupportedFutureBuild(SaveGame.Header header, SaveGame.GameInfo gameInfo)
 	{
-		return gameInfo.saveMajorVersion > 7 || (gameInfo.saveMajorVersion == 7 && gameInfo.saveMinorVersion > 28) || header.buildVersion > 498381U;
+		return gameInfo.saveMajorVersion > 7 || (gameInfo.saveMajorVersion == 7 && gameInfo.saveMinorVersion > 28) || header.buildVersion > 509629U;
 	}
 
 	private static bool IsSaveFromCurrentDLC(SaveGame.GameInfo gameInfo, out string saveDlcName)
@@ -1196,10 +1225,10 @@ public class LoadScreen : KModalScreen
 		SaveGame.GameInfo gameInfo = SaveLoader.LoadHeader(filename, out header);
 		string text = null;
 		string text2 = null;
-		if (header.buildVersion > 498381U)
+		if (header.buildVersion > 509629U)
 		{
 			text = header.buildVersion.ToString();
-			text2 = 498381U.ToString();
+			text2 = 509629U.ToString();
 		}
 		else if (gameInfo.saveMajorVersion < 7)
 		{
@@ -1277,6 +1306,14 @@ public class LoadScreen : KModalScreen
 	{
 		if (this.errorInfoScreen == null)
 		{
+			if (DistributionPlatform.Initialized && SteamUtils.IsSteamRunningOnSteamDeck())
+			{
+				this.errorInfoScreen = global::Util.KInstantiateUI<InfoDialogScreen>(ScreenPrefabs.Instance.InfoDialogScreen.gameObject, base.gameObject, false).SetHeader(UI.FRONTEND.LOADSCREEN.CONVERT_ERROR_TITLE).AddSprite(this.errorSprite)
+					.AddPlainText(message)
+					.AddDefaultOK(false);
+				this.errorInfoScreen.Activate();
+				return;
+			}
 			this.errorInfoScreen = global::Util.KInstantiateUI<InfoDialogScreen>(ScreenPrefabs.Instance.InfoDialogScreen.gameObject, base.gameObject, false).SetHeader(UI.FRONTEND.LOADSCREEN.CONVERT_ERROR_TITLE).AddSprite(this.errorSprite)
 				.AddPlainText(message)
 				.AddOption(UI.FRONTEND.LOADSCREEN.MIGRATE_FAILURES_FORUM_BUTTON, delegate(InfoDialogScreen d)

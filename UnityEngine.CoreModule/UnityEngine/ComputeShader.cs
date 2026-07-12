@@ -12,8 +12,8 @@ namespace UnityEngine
 	[UsedByNativeCode]
 	public sealed class ComputeShader : Object
 	{
-		[NativeMethod(Name = "ComputeShaderScripting::FindKernel", HasExplicitThis = true, IsFreeFunction = true, ThrowsException = true)]
 		[RequiredByNativeCode]
+		[NativeMethod(Name = "ComputeShaderScripting::FindKernel", HasExplicitThis = true, IsFreeFunction = true, ThrowsException = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern int FindKernel(string name);
 

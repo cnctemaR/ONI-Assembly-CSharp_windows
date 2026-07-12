@@ -2,8 +2,8 @@
 
 namespace UnityEngine.Bindings
 {
-	[VisibleToOtherModules]
 	[AttributeUsage(AttributeTargets.Class)]
+	[VisibleToOtherModules]
 	internal class NativeAsStructAttribute : Attribute, IBindingsAttribute
 	{
 	}

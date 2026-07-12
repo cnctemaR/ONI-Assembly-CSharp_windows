@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 
 namespace UnityEngine.UIElements
 {
@@ -26,6 +27,9 @@ namespace UnityEngine.UIElements
 			}
 		}
 
+		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
+		protected event Action<bool> onIsReadOnlyChanged;
+
 		public bool isReadOnly
 		{
 			get
@@ -35,6 +39,11 @@ namespace UnityEngine.UIElements
 			set
 			{
 				this.m_TextInputBase.isReadOnly = value;
+				Action<bool> action = this.onIsReadOnlyChanged;
+				if (action != null)
+				{
+					action(value);
+				}
 			}
 		}
 
@@ -466,6 +475,14 @@ namespace UnityEngine.UIElements
 				}
 			}
 
+			private bool touchScreenTextFieldChanged
+			{
+				get
+				{
+					return this.m_TouchScreenTextFieldInitialized != this.touchScreenTextField;
+				}
+			}
+
 			public Color selectionColor
 			{
 				get
@@ -522,8 +539,18 @@ namespace UnityEngine.UIElements
 				base.requireMeasureFunction = true;
 				this.editorEngine = new TextEditorEngine(new TextEditorEngine.OnDetectFocusChangeFunction(this.OnDetectFocusChange), new TextEditorEngine.OnIndexChangeFunction(this.OnCursorIndexChange));
 				this.editorEngine.style.richText = false;
-				bool touchScreenTextField = this.touchScreenTextField;
-				if (touchScreenTextField)
+				this.InitTextEditorEventHandler();
+				this.editorEngine.style = new GUIStyle(this.editorEngine.style);
+				base.RegisterCallback<CustomStyleResolvedEvent>(new EventCallback<CustomStyleResolvedEvent>(this.OnCustomStyleResolved), TrickleDown.NoTrickleDown);
+				base.RegisterCallback<AttachToPanelEvent>(new EventCallback<AttachToPanelEvent>(this.OnAttachToPanel), TrickleDown.NoTrickleDown);
+				base.generateVisualContent = (Action<MeshGenerationContext>)Delegate.Combine(base.generateVisualContent, new Action<MeshGenerationContext>(this.OnGenerateVisualContent));
+			}
+
+			private void InitTextEditorEventHandler()
+			{
+				this.m_TouchScreenTextFieldInitialized = this.touchScreenTextField;
+				bool touchScreenTextFieldInitialized = this.m_TouchScreenTextFieldInitialized;
+				if (touchScreenTextFieldInitialized)
 				{
 					this.editorEventHandler = new TouchScreenTextEditorEventHandler(this.editorEngine, this);
 				}
@@ -533,10 +560,6 @@ namespace UnityEngine.UIElements
 					this.tripleClickSelectsLine = true;
 					this.editorEventHandler = new KeyboardTextEditorEventHandler(this.editorEngine, this);
 				}
-				this.editorEngine.style = new GUIStyle(this.editorEngine.style);
-				base.RegisterCallback<CustomStyleResolvedEvent>(new EventCallback<CustomStyleResolvedEvent>(this.OnCustomStyleResolved), TrickleDown.NoTrickleDown);
-				base.RegisterCallback<AttachToPanelEvent>(new EventCallback<AttachToPanelEvent>(this.OnAttachToPanel), TrickleDown.NoTrickleDown);
-				base.generateVisualContent = (Action<MeshGenerationContext>)Delegate.Combine(base.generateVisualContent, new Action<MeshGenerationContext>(this.OnGenerateVisualContent));
 			}
 
 			private DropdownMenuAction.Status CutCopyActionStatus(DropdownMenuAction a)
@@ -627,8 +650,8 @@ namespace UnityEngine.UIElements
 				{
 					text = "".PadRight(this.text.Length, this.maskChar);
 				}
-				bool touchScreenTextField = this.touchScreenTextField;
-				if (touchScreenTextField)
+				bool touchScreenTextFieldInitialized = this.m_TouchScreenTextFieldInitialized;
+				if (touchScreenTextFieldInitialized)
 				{
 					TouchScreenTextEditorEventHandler touchScreenTextEditorEventHandler = this.editorEventHandler as TouchScreenTextEditorEventHandler;
 					bool flag = touchScreenTextEditorEventHandler != null;
@@ -865,18 +888,52 @@ namespace UnityEngine.UIElements
 					if (flag4)
 					{
 						this.SaveValueAndText();
+						bool touchScreenTextFieldChanged = this.touchScreenTextFieldChanged;
+						if (touchScreenTextFieldChanged)
+						{
+							this.InitTextEditorEventHandler();
+						}
+						bool flag5 = this.m_HardwareKeyboardPoller == null;
+						if (flag5)
+						{
+							this.m_HardwareKeyboardPoller = base.schedule.Execute(delegate
+							{
+								bool touchScreenTextFieldChanged2 = this.touchScreenTextFieldChanged;
+								if (touchScreenTextFieldChanged2)
+								{
+									this.InitTextEditorEventHandler();
+									this.Blur();
+								}
+							}).Every(250L);
+						}
+						else
+						{
+							this.m_HardwareKeyboardPoller.Resume();
+						}
 					}
 					else
 					{
-						bool flag5 = evt.eventTypeId == EventBase<KeyDownEvent>.TypeId();
-						if (flag5)
+						bool flag6 = evt.eventTypeId == EventBase<FocusOutEvent>.TypeId();
+						if (flag6)
 						{
-							KeyDownEvent keyDownEvent = evt as KeyDownEvent;
-							bool flag6 = keyDownEvent != null && keyDownEvent.keyCode == KeyCode.Escape;
-							if (flag6)
+							bool flag7 = this.m_HardwareKeyboardPoller != null;
+							if (flag7)
 							{
-								this.RestoreValueAndText();
-								base.parent.Focus();
+								this.m_HardwareKeyboardPoller.Pause();
+							}
+						}
+						else
+						{
+							bool flag8 = evt.eventTypeId == EventBase<KeyDownEvent>.TypeId();
+							if (flag8)
+							{
+								KeyDownEvent keyDownEvent = evt as KeyDownEvent;
+								bool flag9 = keyDownEvent != null && keyDownEvent.keyCode == KeyCode.Escape;
+								if (flag9)
+								{
+									this.RestoreValueAndText();
+									base.parent.Focus();
+								}
 							}
 						}
 					}
@@ -1024,6 +1081,10 @@ namespace UnityEngine.UIElements
 			}
 
 			private string m_OriginalText;
+
+			private bool m_TouchScreenTextFieldInitialized;
+
+			private IVisualElementScheduledItem m_HardwareKeyboardPoller = null;
 
 			private Color m_SelectionColor = Color.clear;
 

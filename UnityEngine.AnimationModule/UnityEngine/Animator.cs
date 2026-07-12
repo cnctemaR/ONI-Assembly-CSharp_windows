@@ -9,10 +9,10 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[UsedByNativeCode]
-	[NativeHeader("Modules/Animation/ScriptBindings/AnimatorControllerParameter.bindings.h")]
-	[NativeHeader("Modules/Animation/ScriptBindings/Animator.bindings.h")]
 	[NativeHeader("Modules/Animation/Animator.h")]
+	[NativeHeader("Modules/Animation/ScriptBindings/Animator.bindings.h")]
+	[NativeHeader("Modules/Animation/ScriptBindings/AnimatorControllerParameter.bindings.h")]
+	[UsedByNativeCode]
 	public class Animator : Behaviour
 	{
 		public extern bool isOptimizable
@@ -973,8 +973,8 @@ namespace UnityEngine
 			}
 		}
 
-		[Obsolete("Use mask and layers to control subset of transfroms in a skeleton.", true)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
+		[Obsolete("Use mask and layers to control subset of transfroms in a skeleton.", true)]
 		public bool IsControlled(Transform transform)
 		{
 			return false;

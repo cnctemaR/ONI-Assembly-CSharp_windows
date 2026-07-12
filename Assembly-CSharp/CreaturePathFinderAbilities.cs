@@ -12,17 +12,17 @@ public class CreaturePathFinderAbilities : PathFinderAbilities
 	{
 		if (PathFinder.IsSubmerged(Grid.PosToCell(navigator)))
 		{
-			this.maxUnderwaterCost = int.MaxValue;
+			this.canTraverseSubmered = true;
 			return;
 		}
 		AttributeInstance attributeInstance = Db.Get().Attributes.MaxUnderwaterTravelCost.Lookup(navigator);
-		this.maxUnderwaterCost = ((attributeInstance != null) ? ((int)attributeInstance.GetTotalValue()) : int.MaxValue);
+		this.canTraverseSubmered = attributeInstance == null;
 	}
 
-	public override bool TraversePath(ref PathFinder.PotentialPath path, int from_cell, NavType from_nav_type, int cost, int transition_id, int underwater_cost)
+	public override bool TraversePath(ref PathFinder.PotentialPath path, int from_cell, NavType from_nav_type, int cost, int transition_id, bool submerged)
 	{
-		return underwater_cost <= this.maxUnderwaterCost;
+		return !submerged || this.canTraverseSubmered;
 	}
 
-	public int maxUnderwaterCost;
+	public bool canTraverseSubmered;
 }

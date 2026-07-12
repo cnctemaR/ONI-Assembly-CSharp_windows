@@ -258,7 +258,7 @@ namespace KMod
 					list2 = list2.Where<Mod.ArchivedVersion>((Mod.ArchivedVersion v) => this.DoesModSupportCurrentContent(v.info)).ToList<Mod.ArchivedVersion>();
 					list2 = list2.Where<Mod.ArchivedVersion>((Mod.ArchivedVersion v) => v.info.APIVersion == 2 || v.info.APIVersion == 0).ToList<Mod.ArchivedVersion>();
 					Mod.ArchivedVersion archivedVersion2 = (from v in list2
-						where (long)v.info.minimumSupportedBuild <= 498381L
+						where (long)v.info.minimumSupportedBuild <= 509629L
 						orderby v.info.minimumSupportedBuild descending
 						select v).FirstOrDefault<Mod.ArchivedVersion>();
 					if (archivedVersion2 == null)
@@ -389,44 +389,61 @@ namespace KMod
 			string text = directory.TrimEnd(new char[] { '/' });
 			if (text != null)
 			{
-				if (!(text == "strings"))
+				uint num = <PrivateImplementationDetails>.ComputeStringHash(text);
+				if (num <= 1519694028U)
 				{
-					if (!(text == "codex"))
+					if (num != 948591336U)
 					{
-						if (!(text == "elements"))
+						if (num != 1318520008U)
 						{
-							if (!(text == "templates"))
+							if (num == 1519694028U)
 							{
-								if (!(text == "worldgen"))
-								{
-									if (text == "anim")
-									{
-										content |= Content.Animation;
-									}
-								}
-								else
+								if (text == "elements")
 								{
 									content |= Content.LayerableFiles;
 								}
 							}
-							else
-							{
-								content |= Content.LayerableFiles;
-							}
 						}
-						else
+						else if (text == "buildingfacades")
 						{
-							content |= Content.LayerableFiles;
+							content |= Content.Animation;
 						}
 					}
-					else
+					else if (text == "templates")
 					{
 						content |= Content.LayerableFiles;
 					}
 				}
-				else
+				else if (num <= 3037049615U)
 				{
-					content |= Content.Strings;
+					if (num != 2960291089U)
+					{
+						if (num == 3037049615U)
+						{
+							if (text == "worldgen")
+							{
+								content |= Content.LayerableFiles;
+							}
+						}
+					}
+					else if (text == "strings")
+					{
+						content |= Content.Strings;
+					}
+				}
+				else if (num != 3319670096U)
+				{
+					if (num == 3570262116U)
+					{
+						if (text == "codex")
+						{
+							content |= Content.LayerableFiles;
+						}
+					}
+				}
+				else if (text == "anim")
+				{
+					content |= Content.Animation;
 				}
 			}
 			return content;

@@ -5,7 +5,6 @@ public class SubmergedMonitor : GameStateMachine<SubmergedMonitor, SubmergedMoni
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
 		default_state = this.satisfied;
-		this.root.ToggleBehaviour(GameTags.Creatures.Submerged, (SubmergedMonitor.Instance smi) => smi.IsSubmerged(), null);
 		this.satisfied.Enter("SetNavType", delegate(SubmergedMonitor.Instance smi)
 		{
 			smi.GetComponent<Navigator>().SetCurrentNavType(NavType.Hover);
@@ -19,7 +18,8 @@ public class SubmergedMonitor : GameStateMachine<SubmergedMonitor, SubmergedMoni
 		}).Update("SetNavType", delegate(SubmergedMonitor.Instance smi, float dt)
 		{
 			smi.GetComponent<Navigator>().SetCurrentNavType(NavType.Swim);
-		}, UpdateRate.SIM_1000ms, false).Transition(this.satisfied, (SubmergedMonitor.Instance smi) => !smi.IsSubmerged(), UpdateRate.SIM_1000ms);
+		}, UpdateRate.SIM_1000ms, false).Transition(this.satisfied, (SubmergedMonitor.Instance smi) => !smi.IsSubmerged(), UpdateRate.SIM_1000ms)
+			.ToggleTag(GameTags.Creatures.Submerged);
 	}
 
 	public GameStateMachine<SubmergedMonitor, SubmergedMonitor.Instance, IStateMachineTarget, SubmergedMonitor.Def>.State satisfied;

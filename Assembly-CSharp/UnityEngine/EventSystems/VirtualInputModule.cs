@@ -210,7 +210,11 @@ namespace UnityEngine.EventSystems
 			}
 			this.m_LastMousePosition = this.m_MousePosition;
 			this.m_VirtualCursor.localScale = Vector2.one;
-			this.m_VirtualCursor.anchoredPosition += KInputManager.steamInputInterpreter.GetSteamCursorMovement() * this.m_VirtualCursorSpeed;
+			Vector2 steamCursorMovement = KInputManager.steamInputInterpreter.GetSteamCursorMovement();
+			float num = 1f / (4500f / vector.x);
+			steamCursorMovement.x *= num;
+			steamCursorMovement.y *= num;
+			this.m_VirtualCursor.anchoredPosition += steamCursorMovement * this.m_VirtualCursorSpeed;
 			this.m_VirtualCursor.anchoredPosition = new Vector2(Mathf.Clamp(this.m_VirtualCursor.anchoredPosition.x, 0f, vector.x), Mathf.Clamp(this.m_VirtualCursor.anchoredPosition.y, 0f, vector.y));
 			KInputManager.virtualCursorPos = new Vector3F(this.m_VirtualCursor.anchoredPosition.x, this.m_VirtualCursor.anchoredPosition.y, 0f);
 			this.m_MousePosition = this.m_VirtualCursor.anchoredPosition;
@@ -226,6 +230,10 @@ namespace UnityEngine.EventSystems
 			if (!base.ShouldActivateModule())
 			{
 				return false;
+			}
+			if (KInputManager.currentControllerIsGamepad)
+			{
+				return true;
 			}
 			bool forceModuleActive = this.m_ForceModuleActive;
 			Input.GetButtonDown(this.m_SubmitButton);
@@ -302,7 +310,7 @@ namespace UnityEngine.EventSystems
 				return false;
 			}
 			BaseEventData baseEventData = this.GetBaseEventData();
-			if (Input.GetButtonDown(this.m_SubmitButton) || this.leftFirstClick)
+			if (Input.GetButtonDown(this.m_SubmitButton))
 			{
 				ExecuteEvents.Execute<ISubmitHandler>(base.eventSystem.currentSelectedGameObject, baseEventData, ExecuteEvents.submitHandler);
 			}
@@ -394,6 +402,7 @@ namespace UnityEngine.EventSystems
 			}
 			PointerInputModule.MouseState mousePointerEventData = this.GetMousePointerEventData(id);
 			PointerInputModule.MouseButtonEventData eventData = mousePointerEventData.GetButtonState(PointerEventData.InputButton.Left).eventData;
+			this.m_CurrentFocusedGameObject = eventData.buttonData.pointerCurrentRaycast.gameObject;
 			this.ProcessControllerPress(eventData, true);
 			this.ProcessControllerPress(mousePointerEventData.GetButtonState(PointerEventData.InputButton.Right).eventData, false);
 			this.ProcessMove(eventData.buttonData);
@@ -559,11 +568,11 @@ namespace UnityEngine.EventSystems
 			{
 				this.rightClickData = data.buttonData;
 			}
-			PointerEventData buttonData = data.buttonData;
-			GameObject gameObject = buttonData.pointerCurrentRaycast.gameObject;
-			buttonData.position = this.m_VirtualCursor.anchoredPosition;
 			if (leftClick)
 			{
+				PointerEventData buttonData = data.buttonData;
+				GameObject gameObject = buttonData.pointerCurrentRaycast.gameObject;
+				buttonData.position = this.m_VirtualCursor.anchoredPosition;
 				if (this.leftFirstClick)
 				{
 					buttonData.button = PointerEventData.InputButton.Left;
@@ -608,6 +617,7 @@ namespace UnityEngine.EventSystems
 						ExecuteEvents.Execute<IInitializePotentialDragHandler>(buttonData.pointerDrag, buttonData, ExecuteEvents.initializePotentialDrag);
 					}
 					this.leftFirstClick = false;
+					return;
 				}
 				if (this.leftReleased)
 				{
@@ -642,78 +652,83 @@ namespace UnityEngine.EventSystems
 			}
 			else
 			{
+				PointerEventData buttonData2 = data.buttonData;
+				GameObject gameObject3 = buttonData2.pointerCurrentRaycast.gameObject;
+				buttonData2.position = this.m_VirtualCursor.anchoredPosition;
 				if (this.rightFirstClick)
 				{
-					buttonData.button = PointerEventData.InputButton.Right;
-					buttonData.eligibleForClick = true;
-					buttonData.delta = Vector2.zero;
-					buttonData.dragging = false;
-					buttonData.useDragThreshold = true;
-					buttonData.pressPosition = buttonData.position;
-					buttonData.pointerPressRaycast = buttonData.pointerCurrentRaycast;
-					buttonData.position = this.m_VirtualCursor.anchoredPosition;
-					base.DeselectIfSelectionChanged(gameObject, buttonData);
-					GameObject gameObject3 = ExecuteEvents.ExecuteHierarchy<IPointerDownHandler>(gameObject, buttonData, ExecuteEvents.pointerDownHandler);
-					if (gameObject3 == null)
+					buttonData2.button = PointerEventData.InputButton.Right;
+					buttonData2.eligibleForClick = true;
+					buttonData2.delta = Vector2.zero;
+					buttonData2.dragging = false;
+					buttonData2.useDragThreshold = true;
+					buttonData2.pressPosition = buttonData2.position;
+					buttonData2.pointerPressRaycast = buttonData2.pointerCurrentRaycast;
+					buttonData2.position = this.m_VirtualCursor.anchoredPosition;
+					base.DeselectIfSelectionChanged(gameObject3, buttonData2);
+					GameObject gameObject4 = ExecuteEvents.ExecuteHierarchy<IPointerDownHandler>(gameObject3, buttonData2, ExecuteEvents.pointerDownHandler);
+					if (gameObject4 == null)
 					{
-						gameObject3 = ExecuteEvents.GetEventHandler<IPointerClickHandler>(gameObject);
+						gameObject4 = ExecuteEvents.GetEventHandler<IPointerClickHandler>(gameObject3);
 					}
 					float unscaledTime2 = Time.unscaledTime;
-					if (gameObject3 == buttonData.lastPress)
+					if (gameObject4 == buttonData2.lastPress)
 					{
-						if (unscaledTime2 - buttonData.clickTime < 0.3f)
+						if (unscaledTime2 - buttonData2.clickTime < 0.3f)
 						{
-							PointerEventData pointerEventData2 = buttonData;
+							PointerEventData pointerEventData2 = buttonData2;
 							int num = pointerEventData2.clickCount + 1;
 							pointerEventData2.clickCount = num;
 						}
 						else
 						{
-							buttonData.clickCount = 1;
+							buttonData2.clickCount = 1;
 						}
-						buttonData.clickTime = unscaledTime2;
+						buttonData2.clickTime = unscaledTime2;
 					}
 					else
 					{
-						buttonData.clickCount = 1;
+						buttonData2.clickCount = 1;
 					}
-					buttonData.pointerPress = gameObject3;
-					buttonData.rawPointerPress = gameObject;
-					buttonData.pointerDrag = ExecuteEvents.GetEventHandler<IDragHandler>(gameObject);
-					if (buttonData.pointerDrag != null)
+					buttonData2.pointerPress = gameObject4;
+					buttonData2.rawPointerPress = gameObject3;
+					buttonData2.pointerDrag = ExecuteEvents.GetEventHandler<IDragHandler>(gameObject3);
+					if (buttonData2.pointerDrag != null)
 					{
-						ExecuteEvents.Execute<IInitializePotentialDragHandler>(buttonData.pointerDrag, buttonData, ExecuteEvents.initializePotentialDrag);
+						ExecuteEvents.Execute<IInitializePotentialDragHandler>(buttonData2.pointerDrag, buttonData2, ExecuteEvents.initializePotentialDrag);
 					}
 					this.rightFirstClick = false;
+					return;
 				}
 				if (this.rightReleased)
 				{
-					buttonData.button = PointerEventData.InputButton.Right;
-					ExecuteEvents.Execute<IPointerUpHandler>(buttonData.pointerPress, buttonData, ExecuteEvents.pointerUpHandler);
-					GameObject eventHandler2 = ExecuteEvents.GetEventHandler<IPointerClickHandler>(gameObject);
-					if (buttonData.pointerPress == eventHandler2 && buttonData.eligibleForClick)
+					buttonData2.button = PointerEventData.InputButton.Right;
+					ExecuteEvents.Execute<IPointerUpHandler>(buttonData2.pointerPress, buttonData2, ExecuteEvents.pointerUpHandler);
+					GameObject eventHandler2 = ExecuteEvents.GetEventHandler<IPointerClickHandler>(gameObject3);
+					if (buttonData2.pointerPress == eventHandler2 && buttonData2.eligibleForClick)
 					{
-						ExecuteEvents.Execute<IPointerClickHandler>(buttonData.pointerPress, buttonData, ExecuteEvents.pointerClickHandler);
+						ExecuteEvents.Execute<IPointerClickHandler>(buttonData2.pointerPress, buttonData2, ExecuteEvents.pointerClickHandler);
 					}
-					else if (buttonData.pointerDrag != null && buttonData.dragging)
+					else if (buttonData2.pointerDrag != null && buttonData2.dragging)
 					{
-						ExecuteEvents.ExecuteHierarchy<IDropHandler>(gameObject, buttonData, ExecuteEvents.dropHandler);
+						ExecuteEvents.ExecuteHierarchy<IDropHandler>(gameObject3, buttonData2, ExecuteEvents.dropHandler);
 					}
-					buttonData.eligibleForClick = false;
-					buttonData.pointerPress = null;
-					buttonData.rawPointerPress = null;
-					if (buttonData.pointerDrag != null && buttonData.dragging)
+					buttonData2.eligibleForClick = false;
+					buttonData2.pointerPress = null;
+					buttonData2.rawPointerPress = null;
+					if (buttonData2.pointerDrag != null && buttonData2.dragging)
 					{
-						ExecuteEvents.Execute<IEndDragHandler>(buttonData.pointerDrag, buttonData, ExecuteEvents.endDragHandler);
+						ExecuteEvents.Execute<IEndDragHandler>(buttonData2.pointerDrag, buttonData2, ExecuteEvents.endDragHandler);
 					}
-					buttonData.dragging = false;
-					buttonData.pointerDrag = null;
-					if (gameObject != buttonData.pointerEnter)
+					buttonData2.dragging = false;
+					buttonData2.pointerDrag = null;
+					if (gameObject3 != buttonData2.pointerEnter)
 					{
-						base.HandlePointerExitAndEnter(buttonData, null);
-						base.HandlePointerExitAndEnter(buttonData, gameObject);
+						base.HandlePointerExitAndEnter(buttonData2, null);
+						base.HandlePointerExitAndEnter(buttonData2, gameObject3);
 					}
 					this.rightReleased = false;
+					return;
 				}
 			}
 		}
@@ -769,7 +784,7 @@ namespace UnityEngine.EventSystems
 		private RectTransform m_VirtualCursor;
 
 		[SerializeField]
-		private float m_VirtualCursorSpeed = 1.5f;
+		private float m_VirtualCursorSpeed = 1f;
 
 		[SerializeField]
 		private Vector2 m_VirtualCursorOffset = Vector2.zero;
@@ -790,6 +805,8 @@ namespace UnityEngine.EventSystems
 		private PointerEventData rightClickData;
 
 		private VirtualInputModule.ControllerButtonStates conButtonStates;
+
+		private GameObject m_CurrentFocusedGameObject;
 
 		private bool leftReleased;
 

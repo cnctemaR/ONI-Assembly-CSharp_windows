@@ -27,7 +27,23 @@ namespace UnityEngine
 		{
 			get
 			{
-				return this.m_Rigidbody;
+				return this.m_Body as Rigidbody;
+			}
+		}
+
+		public ArticulationBody articulationBody
+		{
+			get
+			{
+				return this.m_Body as ArticulationBody;
+			}
+		}
+
+		public Component body
+		{
+			get
+			{
+				return this.m_Body;
 			}
 		}
 
@@ -51,7 +67,7 @@ namespace UnityEngine
 		{
 			get
 			{
-				return (this.m_Rigidbody != null) ? this.m_Rigidbody.gameObject : this.m_Collider.gameObject;
+				return (this.m_Body != null) ? this.m_Body.gameObject : this.m_Collider.gameObject;
 			}
 		}
 
@@ -148,7 +164,7 @@ namespace UnityEngine
 		{
 			get
 			{
-				return (this.m_Rigidbody != null) ? this.m_Rigidbody : this.m_Collider;
+				return (this.m_Body != null) ? this.m_Body : this.m_Collider;
 			}
 		}
 
@@ -156,7 +172,7 @@ namespace UnityEngine
 
 		internal Vector3 m_RelativeVelocity;
 
-		internal Rigidbody m_Rigidbody;
+		internal Component m_Body;
 
 		internal Collider m_Collider;
 

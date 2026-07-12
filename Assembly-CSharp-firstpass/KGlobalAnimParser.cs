@@ -133,7 +133,7 @@ public class KGlobalAnimParser
 					frameElement.symbol = new KAnimHashedString(reader.ReadInt32());
 					frameElement.frame = reader.ReadInt32();
 					frameElement.folder = new KAnimHashedString(reader.ReadInt32());
-					frameElement.flags = reader.ReadInt32();
+					reader.ReadInt32();
 					float num10 = reader.ReadSingle();
 					float num11 = reader.ReadSingle();
 					float num12 = reader.ReadSingle();

@@ -19,8 +19,7 @@ public class OverlayMenu : KIconToggleMenu
 		base.Setup(this.overlayToggleInfos);
 		Game.Instance.Subscribe(1798162660, new Action<object>(this.OnOverlayChanged));
 		Game.Instance.Subscribe(-107300940, new Action<object>(this.OnResearchComplete));
-		this.inputChangeReceiver = (UnityAction)Delegate.Combine(this.inputChangeReceiver, new UnityAction(this.Refresh));
-		KInputManager.InputChange.AddListener(this.inputChangeReceiver);
+		KInputManager.InputChange.AddListener(new UnityAction(this.Refresh));
 		base.onSelect += this.OnToggleSelect;
 	}
 
@@ -53,6 +52,12 @@ public class OverlayMenu : KIconToggleMenu
 	private void OnResearchComplete(object data)
 	{
 		this.RefreshButtons();
+	}
+
+	protected override void OnForcedCleanUp()
+	{
+		KInputManager.InputChange.RemoveListener(new UnityAction(this.Refresh));
+		base.OnForcedCleanUp();
 	}
 
 	protected override void OnCleanUp()

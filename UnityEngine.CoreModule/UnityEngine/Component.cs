@@ -10,8 +10,8 @@ using UnityEngineInternal;
 namespace UnityEngine
 {
 	[RequiredByNativeCode]
-	[NativeClass("Unity::Component")]
 	[NativeHeader("Runtime/Export/Scripting/Component.bindings.h")]
+	[NativeClass("Unity::Component")]
 	public class Component : Object
 	{
 		public extern Transform transform

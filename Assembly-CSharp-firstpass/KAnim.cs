@@ -214,8 +214,6 @@ public class KAnim
 			public Matrix2x3 transform;
 
 			public Color multColour;
-
-			public int flags;
 		}
 	}
 

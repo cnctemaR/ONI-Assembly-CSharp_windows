@@ -16,7 +16,7 @@ public class StaterpillarGeneratorConfig : IBuildingConfig
 		int num = 1;
 		int num2 = 2;
 		string text = "egg_caterpillar_kanim";
-		int num3 = 100;
+		int num3 = 1000;
 		float num4 = 10f;
 		string[] all_METALS = MATERIALS.ALL_METALS;
 		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER3;
@@ -29,7 +29,7 @@ public class StaterpillarGeneratorConfig : IBuildingConfig
 		buildingDef.GeneratorBaseCapacity = 5000f;
 		buildingDef.ExhaustKilowattsWhenActive = 2f;
 		buildingDef.SelfHeatKilowattsWhenActive = 4f;
-		buildingDef.Overheatable = true;
+		buildingDef.Overheatable = false;
 		buildingDef.Floodable = false;
 		buildingDef.OverheatTemperature = 423.15f;
 		buildingDef.PermittedRotations = PermittedRotations.FlipV;

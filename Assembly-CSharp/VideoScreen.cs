@@ -37,6 +37,12 @@ public class VideoScreen : KModalScreen
 		this.Show(false);
 	}
 
+	protected override void OnForcedCleanUp()
+	{
+		VideoScreen.Instance = null;
+		base.OnForcedCleanUp();
+	}
+
 	protected override void OnShow(bool show)
 	{
 		base.transform.SetAsLastSibling();

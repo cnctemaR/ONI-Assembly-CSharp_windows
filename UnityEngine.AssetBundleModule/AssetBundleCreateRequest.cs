@@ -6,8 +6,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeHeader("Modules/AssetBundle/Public/AssetBundleLoadFromAsyncOperation.h")]
 	[RequiredByNativeCode]
+	[NativeHeader("Modules/AssetBundle/Public/AssetBundleLoadFromAsyncOperation.h")]
 	[StructLayout(LayoutKind.Sequential)]
 	public class AssetBundleCreateRequest : AsyncOperation
 	{

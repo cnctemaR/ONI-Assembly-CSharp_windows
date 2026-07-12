@@ -7,8 +7,8 @@ using UnityEngine.Rendering;
 
 namespace UnityEngine.U2D
 {
-	[NativeHeader("Runtime/Graphics/SpriteFrame.h")]
 	[NativeHeader("Runtime/2D/Common/SpriteDataAccess.h")]
+	[NativeHeader("Runtime/Graphics/SpriteFrame.h")]
 	public static class SpriteDataAccessExtensions
 	{
 		private static void CheckAttributeTypeMatchesAndThrow<T>(VertexAttribute channel)

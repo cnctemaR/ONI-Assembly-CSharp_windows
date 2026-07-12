@@ -105,8 +105,8 @@ namespace UnityEngine.TextCore
 			return !(lhs == rhs);
 		}
 
-		[SerializeField]
 		[NativeName("x")]
+		[SerializeField]
 		private int m_X;
 
 		[NativeName("y")]

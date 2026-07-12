@@ -3,6 +3,11 @@ using System.Collections.Generic;
 
 public class GlobalChoreProvider : ChoreProvider, IRender200ms
 {
+	public static void DestroyInstance()
+	{
+		GlobalChoreProvider.Instance = null;
+	}
+
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();

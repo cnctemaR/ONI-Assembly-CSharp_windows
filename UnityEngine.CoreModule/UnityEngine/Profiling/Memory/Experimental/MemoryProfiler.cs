@@ -22,8 +22,8 @@ namespace UnityEngine.Profiling.Memory.Experimental
 		public static event Action<MetaData> createMetaData;
 
 		[NativeMethod("StartOperation")]
-		[StaticAccessor("profiling::memory::GetMemorySnapshotManager()", StaticAccessorType.Dot)]
 		[NativeConditional("ENABLE_PROFILER")]
+		[StaticAccessor("profiling::memory::GetMemorySnapshotManager()", StaticAccessorType.Dot)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void StartOperation(uint captureFlag, bool requestScreenshot, string path, bool isRemote);
 

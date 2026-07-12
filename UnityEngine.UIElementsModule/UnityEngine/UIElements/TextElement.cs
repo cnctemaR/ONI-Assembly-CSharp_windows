@@ -129,7 +129,7 @@ namespace UnityEngine.UIElements
 							}
 						}
 						vector = this.MeasureTextSize(text3, 0f, VisualElement.MeasureMode.Undefined, 0f, VisualElement.MeasureMode.Undefined);
-						bool flag7 = Math.Abs(vector.x - width) < Mathf.Epsilon;
+						bool flag7 = Math.Abs(vector.x - width) < 1E-30f;
 						if (flag7)
 						{
 							return text3;

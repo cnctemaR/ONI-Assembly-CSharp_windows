@@ -23,11 +23,12 @@ public class ManagementMenu : KIconToggleMenu
 		ManagementMenu.Instance = this;
 		this.notificationDisplayer.onNotificationsChanged += this.OnNotificationsChanged;
 		CodexCache.CodexCacheInit();
-		ScheduledUIInstantiation component = GameScreenManager.Instance.ssOverlayCanvas.GetComponent<ScheduledUIInstantiation>();
+		ScheduledUIInstantiation component = GameScreenManager.Instance.GetComponent<ScheduledUIInstantiation>();
 		this.starmapScreen = component.GetInstantiatedObject<StarmapScreen>();
 		this.clusterMapScreen = component.GetInstantiatedObject<ClusterMapScreen>();
 		this.skillsScreen = component.GetInstantiatedObject<SkillsScreen>();
 		this.researchScreen = component.GetInstantiatedObject<ResearchScreen>();
+		this.fullscreenUIs = new ManagementMenu.ManagementMenuToggleInfo[] { this.researchInfo, this.skillsInfo, this.starmapInfo, this.clusterMapInfo };
 		base.Subscribe(Game.Instance.gameObject, 288942073, new Action<object>(this.OnUIClear));
 		this.consumablesInfo = new ManagementMenu.ManagementMenuToggleInfo(UI.CONSUMABLES, "OverviewUI_consumables_icon", null, global::Action.ManageConsumables, UI.TOOLTIPS.MANAGEMENTMENU_CONSUMABLES, "");
 		this.AddToggleTooltip(this.consumablesInfo, null);
@@ -149,8 +150,7 @@ public class ManagementMenu : KIconToggleMenu
 		this.PauseMenuButton.onClick += this.OnPauseMenuClicked;
 		this.PauseMenuButton.transform.SetAsLastSibling();
 		this.PauseMenuButton.GetComponent<ToolTip>().toolTip = GameUtil.ReplaceHotkeyString(UI.TOOLTIPS.MANAGEMENTMENU_PAUSEMENU, global::Action.Escape);
-		this.inputChangeReceiver = (UnityAction)Delegate.Combine(this.inputChangeReceiver, new UnityAction(this.OnInputChanged));
-		KInputManager.InputChange.AddListener(this.inputChangeReceiver);
+		KInputManager.InputChange.AddListener(new UnityAction(this.OnInputChanged));
 		Components.ResearchCenters.OnAdd += new Action<IResearchCenter>(this.CheckResearch);
 		Components.ResearchCenters.OnRemove += new Action<IResearchCenter>(this.CheckResearch);
 		Components.RoleStations.OnAdd += new Action<RoleStation>(this.CheckSkills);
@@ -184,6 +184,12 @@ public class ManagementMenu : KIconToggleMenu
 		this.mutuallyExclusiveScreens.Add(AllResourcesScreen.Instance);
 		this.mutuallyExclusiveScreens.Add(AllDiagnosticsScreen.Instance);
 		this.OnNotificationsChanged();
+	}
+
+	protected override void OnForcedCleanUp()
+	{
+		KInputManager.InputChange.RemoveListener(new UnityAction(this.OnInputChanged));
+		base.OnForcedCleanUp();
 	}
 
 	private void OnInputChanged()
@@ -243,6 +249,22 @@ public class ManagementMenu : KIconToggleMenu
 			list.Add(new global::Tuple<string, TextStyleSetting>(toggleInfo.tooltip, ToolTipScreen.Instance.defaultTooltipBodyStyle));
 			return list;
 		};
+	}
+
+	public bool IsFullscreenUIActive()
+	{
+		if (this.activeScreen == null)
+		{
+			return false;
+		}
+		foreach (ManagementMenu.ManagementMenuToggleInfo managementMenuToggleInfo in this.fullscreenUIs)
+		{
+			if (this.activeScreen.toggleInfo == managementMenuToggleInfo)
+			{
+				return true;
+			}
+		}
+		return false;
 	}
 
 	private void OnPauseMenuClicked()
@@ -551,6 +573,11 @@ public class ManagementMenu : KIconToggleMenu
 		}
 	}
 
+	public bool IsScreenOpen(KScreen screen)
+	{
+		return this.activeScreen != null && this.activeScreen.screen == screen;
+	}
+
 	private const float UI_WIDTH_COMPRESS_THRESHOLD = 1300f;
 
 	[MyCmpReq]
@@ -612,7 +639,7 @@ public class ManagementMenu : KIconToggleMenu
 
 	private ManagementMenu.ManagementMenuToggleInfo skillsInfo;
 
-	private UnityAction inputChangeReceiver;
+	private ManagementMenu.ManagementMenuToggleInfo[] fullscreenUIs;
 
 	private Dictionary<ManagementMenu.ManagementMenuToggleInfo, ManagementMenu.ScreenData> ScreenInfoMatch = new Dictionary<ManagementMenu.ManagementMenuToggleInfo, ManagementMenu.ScreenData>();
 

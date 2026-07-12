@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
+using ImGuiNET;
 using KSerialization;
 using UnityEngine;
 
@@ -844,6 +845,16 @@ public class StateMachine<StateMachineType, StateMachineInstanceType, MasterType
 			public override void ShowEditor(StateMachine.Instance base_smi)
 			{
 			}
+
+			public override void ShowDevTool(StateMachine.Instance base_smi)
+			{
+				bool value = this.value;
+				if (ImGui.Checkbox(this.parameter.name, ref value))
+				{
+					StateMachineInstanceType stateMachineInstanceType = (StateMachineInstanceType)((object)base_smi);
+					this.Set(value, stateMachineInstanceType);
+				}
+			}
 		}
 	}
 
@@ -887,6 +898,16 @@ public class StateMachine<StateMachineType, StateMachineInstanceType, MasterType
 			public override void ShowEditor(StateMachine.Instance base_smi)
 			{
 			}
+
+			public override void ShowDevTool(StateMachine.Instance base_smi)
+			{
+				Vector3 value = this.value;
+				if (ImGui.InputFloat3(this.parameter.name, ref value))
+				{
+					StateMachineInstanceType stateMachineInstanceType = (StateMachineInstanceType)((object)base_smi);
+					this.Set(value, stateMachineInstanceType);
+				}
+			}
 		}
 	}
 
@@ -921,6 +942,18 @@ public class StateMachine<StateMachineType, StateMachineInstanceType, MasterType
 
 			public override void ShowEditor(StateMachine.Instance base_smi)
 			{
+			}
+
+			public override void ShowDevTool(StateMachine.Instance base_smi)
+			{
+				string[] names = Enum.GetNames(typeof(EnumType));
+				Array values = Enum.GetValues(typeof(EnumType));
+				int num = Array.IndexOf(values, this.value);
+				if (ImGui.Combo(this.parameter.name, ref num, names, names.Length))
+				{
+					StateMachineInstanceType stateMachineInstanceType = (StateMachineInstanceType)((object)base_smi);
+					this.Set((EnumType)((object)values.GetValue(num)), stateMachineInstanceType);
+				}
 			}
 		}
 	}
@@ -978,6 +1011,16 @@ public class StateMachine<StateMachineType, StateMachineInstanceType, MasterType
 			public override void ShowEditor(StateMachine.Instance base_smi)
 			{
 			}
+
+			public override void ShowDevTool(StateMachine.Instance base_smi)
+			{
+				float value = this.value;
+				if (ImGui.InputFloat(this.parameter.name, ref value))
+				{
+					StateMachineInstanceType stateMachineInstanceType = (StateMachineInstanceType)((object)base_smi);
+					this.Set(value, stateMachineInstanceType);
+				}
+			}
 		}
 	}
 
@@ -1024,6 +1067,16 @@ public class StateMachine<StateMachineType, StateMachineInstanceType, MasterType
 
 			public override void ShowEditor(StateMachine.Instance base_smi)
 			{
+			}
+
+			public override void ShowDevTool(StateMachine.Instance base_smi)
+			{
+				int value = this.value;
+				if (ImGui.InputInt(this.parameter.name, ref value))
+				{
+					StateMachineInstanceType stateMachineInstanceType = (StateMachineInstanceType)((object)base_smi);
+					this.Set(value, stateMachineInstanceType);
+				}
 			}
 		}
 	}
@@ -1077,6 +1130,16 @@ public class StateMachine<StateMachineType, StateMachineInstanceType, MasterType
 			public override void ShowEditor(StateMachine.Instance base_smi)
 			{
 			}
+
+			public override void ShowDevTool(StateMachine.Instance base_smi)
+			{
+				string text = "None";
+				if (this.value != null)
+				{
+					text = this.value.ToString();
+				}
+				ImGui.LabelText(this.parameter.name, text);
+			}
 		}
 	}
 
@@ -1116,6 +1179,11 @@ public class StateMachine<StateMachineType, StateMachineInstanceType, MasterType
 			public override void ShowEditor(StateMachine.Instance base_smi)
 			{
 			}
+
+			public override void ShowDevTool(StateMachine.Instance base_smi)
+			{
+				ImGui.LabelText(this.parameter.name, this.value.ToString());
+			}
 		}
 	}
 
@@ -1150,6 +1218,16 @@ public class StateMachine<StateMachineType, StateMachineInstanceType, MasterType
 
 			public override void ShowEditor(StateMachine.Instance base_smi)
 			{
+			}
+
+			public override void ShowDevTool(StateMachine.Instance base_smi)
+			{
+				string text = "None";
+				if (this.value != null)
+				{
+					text = this.value.ToString();
+				}
+				ImGui.LabelText(this.parameter.name, text);
 			}
 		}
 	}
@@ -1303,6 +1381,16 @@ public class StateMachine<StateMachineType, StateMachineInstanceType, MasterType
 			{
 			}
 
+			public override void ShowDevTool(StateMachine.Instance base_smi)
+			{
+				if (this.value != null)
+				{
+					ImGui.LabelText(this.parameter.name, this.value.name);
+					return;
+				}
+				ImGui.LabelText(this.parameter.name, "null");
+			}
+
 			private StateMachineInstanceType m_smi;
 
 			private int objectDestroyedHandler;
@@ -1356,6 +1444,15 @@ public class StateMachine<StateMachineType, StateMachineInstanceType, MasterType
 
 			public override void ShowEditor(StateMachine.Instance base_smi)
 			{
+			}
+
+			public override void ShowDevTool(StateMachine.Instance base_smi)
+			{
+				if (ImGui.Button(this.parameter.name))
+				{
+					StateMachineInstanceType stateMachineInstanceType = (StateMachineInstanceType)((object)base_smi);
+					this.Set(null, stateMachineInstanceType);
+				}
 			}
 		}
 	}

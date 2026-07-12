@@ -84,7 +84,11 @@ public class BottleEmptier : StateMachineComponent<BottleEmptier.StatesInstance>
 			Tag[] array;
 			if (!base.master.allowManualPumpingStationFetching)
 			{
-				array = new Tag[] { GameTags.LiquidSource };
+				array = new Tag[]
+				{
+					GameTags.LiquidSource,
+					GameTags.GasSource
+				};
 			}
 			else
 			{

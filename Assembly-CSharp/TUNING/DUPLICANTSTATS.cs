@@ -78,6 +78,8 @@ namespace TUNING
 
 		public const float POWER_DURATION_MULTIPLIER_BONUS_PER_POINT = 0.025f;
 
+		public const float RANCHING_CAPTURABLE_MULTIPLIER_BONUS_PER_POINT = 0.05f;
+
 		public const float STRESS_BELOW_EXPECTATIONS_FOOD = 0.25f;
 
 		public const float STRESS_ABOVE_EXPECTATIONS_FOOD = -0.5f;
@@ -536,6 +538,11 @@ namespace TUNING
 			{
 				id = "BingeEater",
 				dlcId = ""
+			},
+			new DUPLICANTSTATS.TraitVal
+			{
+				id = "Banshee",
+				dlcId = ""
 			}
 		};
 
@@ -559,6 +566,11 @@ namespace TUNING
 			new DUPLICANTSTATS.TraitVal
 			{
 				id = "SuperProductive",
+				dlcId = ""
+			},
+			new DUPLICANTSTATS.TraitVal
+			{
+				id = "HappySinger",
 				dlcId = ""
 			}
 		};
@@ -1198,6 +1210,8 @@ namespace TUNING
 				public const int POSITIVE_MILD = 10;
 
 				public const int POSITIVE_SIGNIFICANT = 30;
+
+				public const int POSITIVE_MAJOR = 40;
 			}
 
 			public class CONDUCTIVITY_BARRIER_MODIFICATION

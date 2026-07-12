@@ -29,31 +29,31 @@ public class ClusterCoverPostFX : MonoBehaviour
 		}
 		Ray ray = this.myCamera.ViewportPointToRay(Vector3.zero);
 		float num = Mathf.Abs(ray.origin.z / ray.direction.z);
-		Vector3 vector = ray.GetPoint(num);
-		Vector4 vector2;
-		vector2.x = vector.x / Grid.WidthInMeters;
-		vector2.y = vector.y / Grid.HeightInMeters;
+		Vector3 point = ray.GetPoint(num);
 		ray = this.myCamera.ViewportPointToRay(Vector3.one);
 		num = Mathf.Abs(ray.origin.z / ray.direction.z);
-		vector = ray.GetPoint(num);
-		vector2.z = vector.x / Grid.WidthInMeters - vector2.x;
-		vector2.w = vector.y / Grid.HeightInMeters - vector2.y;
-		this.material.SetVector("_UVOffsetScale", vector2);
-		Vector4 vector3;
+		Vector3 point2 = ray.GetPoint(num);
+		Vector4 vector;
+		vector.x = point.x;
+		vector.y = point.y;
+		vector.z = point2.x - point.x;
+		vector.w = point2.y - point.y;
+		this.material.SetVector("_CameraCoords", vector);
+		Vector4 vector2;
 		if (ClusterManager.Instance != null && !CameraController.Instance.ignoreClusterFX)
 		{
 			WorldContainer activeWorld = ClusterManager.Instance.activeWorld;
 			Vector2I worldOffset = activeWorld.WorldOffset;
 			Vector2I worldSize = activeWorld.WorldSize;
-			vector3 = new Vector4((float)worldOffset.x / (float)Grid.WidthInCells, (float)worldOffset.y / (float)Grid.HeightInCells, (float)(worldSize.x + worldOffset.x) / (float)Grid.WidthInCells, (float)(worldSize.y + worldOffset.y) / (float)Grid.HeightInCells);
+			vector2 = new Vector4((float)worldOffset.x, (float)worldOffset.y, (float)worldSize.x, (float)worldSize.y);
 			this.material.SetFloat("_HideSurface", ClusterManager.Instance.activeWorld.FullyEnclosedBorder ? 1f : 0f);
 		}
 		else
 		{
-			vector3 = new Vector4(0f, 0f, (float)Grid.WidthInCells, (float)Grid.HeightInCells);
+			vector2 = new Vector4(0f, 0f, (float)Grid.WidthInCells, (float)Grid.HeightInCells);
 			this.material.SetFloat("_HideSurface", 0f);
 		}
-		this.material.SetVector("_CameraWorldInfo", vector3);
+		this.material.SetVector("_WorldCoords", vector2);
 	}
 
 	[SerializeField]

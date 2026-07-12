@@ -6,6 +6,8 @@ public class CodexText : CodexWidget<CodexText>
 {
 	public string text { get; set; }
 
+	public string messageID { get; set; }
+
 	public CodexTextStyle style { get; set; }
 
 	public string stringKey
@@ -25,10 +27,14 @@ public class CodexText : CodexWidget<CodexText>
 		this.style = CodexTextStyle.Body;
 	}
 
-	public CodexText(string text, CodexTextStyle style = CodexTextStyle.Body)
+	public CodexText(string text, CodexTextStyle style = CodexTextStyle.Body, string id = null)
 	{
 		this.text = text;
 		this.style = style;
+		if (id != null)
+		{
+			this.messageID = id;
+		}
 	}
 
 	public void ConfigureLabel(LocText label, Dictionary<CodexTextStyle, TextStyleSetting> textStyles)

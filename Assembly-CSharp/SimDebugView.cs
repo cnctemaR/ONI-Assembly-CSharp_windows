@@ -793,6 +793,15 @@ public class SimDebugView : KMonoBehaviour
 		return color;
 	}
 
+	public static Color GetScenePartitionerColour(SimDebugView instance, int cell)
+	{
+		if (!GameScenePartitioner.Instance.DoDebugLayersContainItemsOnCell(cell))
+		{
+			return Color.black;
+		}
+		return Color.white;
+	}
+
 	[SerializeField]
 	public Material material;
 
@@ -1021,6 +1030,10 @@ public class SimDebugView : KMonoBehaviour
 		{
 			SimDebugView.OverlayModes.Joules,
 			new Func<SimDebugView, int, Color>(SimDebugView.GetJoulesColour)
+		},
+		{
+			SimDebugView.OverlayModes.ScenePartitioner,
+			new Func<SimDebugView, int, Color>(SimDebugView.GetScenePartitionerColour)
 		}
 	};
 

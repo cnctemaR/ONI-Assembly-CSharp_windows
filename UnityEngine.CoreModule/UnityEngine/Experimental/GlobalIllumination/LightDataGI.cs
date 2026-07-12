@@ -33,7 +33,7 @@ namespace UnityEngine.Experimental.GlobalIllumination
 			this.cookieScale = cookie.scale;
 			this.color = light.color;
 			this.indirectColor = light.indirectColor;
-			this.orientation = Quaternion.identity;
+			this.orientation = light.orientation;
 			this.position = light.position;
 			this.range = light.range;
 			this.coneAngle = 0f;

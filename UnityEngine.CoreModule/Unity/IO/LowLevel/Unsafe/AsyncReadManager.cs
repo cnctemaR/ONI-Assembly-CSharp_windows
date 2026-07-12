@@ -8,8 +8,8 @@ namespace Unity.IO.LowLevel.Unsafe
 	[NativeHeader("Runtime/File/AsyncReadManagerManagedApi.h")]
 	public static class AsyncReadManager
 	{
-		[FreeFunction("AsyncReadManagerManaged::Read", IsThreadSafe = true)]
 		[ThreadAndSerializationSafe]
+		[FreeFunction("AsyncReadManagerManaged::Read", IsThreadSafe = true)]
 		private unsafe static ReadHandle ReadInternal(string filename, void* cmds, uint cmdCount, string assetName, ulong typeID, AssetLoadingSubsystem subsystem)
 		{
 			ReadHandle readHandle;
@@ -22,7 +22,24 @@ namespace Unity.IO.LowLevel.Unsafe
 			return AsyncReadManager.ReadInternal(filename, (void*)readCmds, readCmdCount, assetName, typeID, subsystem);
 		}
 
+		[FreeFunction("AsyncReadManagerManaged::GetFileInfo", IsThreadSafe = true)]
+		[ThreadAndSerializationSafe]
+		private unsafe static ReadHandle GetFileInfoInternal(string filename, void* cmd)
+		{
+			ReadHandle readHandle;
+			AsyncReadManager.GetFileInfoInternal_Injected(filename, cmd, out readHandle);
+			return readHandle;
+		}
+
+		public unsafe static ReadHandle GetFileInfo(string filename, FileInfoResult* result)
+		{
+			return AsyncReadManager.GetFileInfoInternal(filename, (void*)result);
+		}
+
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private unsafe static extern void ReadInternal_Injected(string filename, void* cmds, uint cmdCount, string assetName, ulong typeID, AssetLoadingSubsystem subsystem, out ReadHandle ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private unsafe static extern void GetFileInfoInternal_Injected(string filename, void* cmd, out ReadHandle ret);
 	}
 }

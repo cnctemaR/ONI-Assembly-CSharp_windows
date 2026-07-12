@@ -48,7 +48,7 @@ internal class GraphicsOptionsScreen : KModalScreen
 				this.resolutionDropdown.value = resolutionIndex;
 			}
 		}
-		this.CanvasScalers = global::UnityEngine.Object.FindObjectsOfType<KCanvasScaler>();
+		this.CanvasScalers = global::UnityEngine.Object.FindObjectsOfType<KCanvasScaler>(true);
 		this.UpdateSliderLabel();
 		this.uiScaleSlider.onValueChanged.AddListener(delegate(float data)
 		{
@@ -210,6 +210,7 @@ internal class GraphicsOptionsScreen : KModalScreen
 
 	private void UpdateUIScale(float value)
 	{
+		this.CanvasScalers = global::UnityEngine.Object.FindObjectsOfType<KCanvasScaler>(true);
 		foreach (KCanvasScaler kcanvasScaler in this.CanvasScalers)
 		{
 			float num = value / 100f;

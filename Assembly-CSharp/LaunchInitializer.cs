@@ -7,7 +7,7 @@ public class LaunchInitializer : MonoBehaviour
 {
 	public static string BuildPrefix()
 	{
-		return "U41";
+		return "U42";
 	}
 
 	private void Update()
@@ -71,7 +71,7 @@ public class LaunchInitializer : MonoBehaviour
 		}
 	}
 
-	private const string BASE_BUILD_PREFIX = "U41";
+	private const string BASE_BUILD_PREFIX = "U42";
 
 	public GameObject[] SpawnPrefabs;
 

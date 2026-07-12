@@ -4,8 +4,8 @@ using UnityEngine.Scripting.APIUpdating;
 
 namespace UnityEngine.Animations
 {
-	[MovedFrom("UnityEngine.Experimental.Animations")]
 	[JobProducerType(typeof(ProcessAnimationJobStruct<>))]
+	[MovedFrom("UnityEngine.Experimental.Animations")]
 	public interface IAnimationJob
 	{
 		void ProcessAnimation(AnimationStream stream);

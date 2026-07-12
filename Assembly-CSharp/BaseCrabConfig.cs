@@ -60,6 +60,7 @@ public static class BaseCrabConfig
 			.Add(new PlayAnimsStates.Def(GameTags.Creatures.Poop, false, "poop", global::STRINGS.CREATURES.STATUSITEMS.EXPELLING_SOLID.NAME, global::STRINGS.CREATURES.STATUSITEMS.EXPELLING_SOLID.TOOLTIP), true, -1)
 			.Add(new CallAdultStates.Def(), true, -1)
 			.PopInterruptGroup()
+			.Add(new CreatureDiseaseCleaner.Def(30f), true, -1)
 			.Add(new IdleStates.Def(), true, -1);
 		EntityTemplates.AddCreatureBrain(gameObject, builder, GameTags.Creatures.Species.CrabSpecies, symbolOverridePrefix);
 		gameObject.AddTag(GameTags.Amphibious);
@@ -71,6 +72,18 @@ public static class BaseCrabConfig
 		HashSet<Tag> hashSet = new HashSet<Tag>();
 		hashSet.Add(SimHashes.ToxicSand.CreateTag());
 		hashSet.Add(RotPileConfig.ID.ToTag());
+		return new List<Diet.Info>
+		{
+			new Diet.Info(hashSet, poopTag, caloriesPerKg, producedConversionRate, diseaseId, diseasePerKgProduced, false, false)
+		};
+	}
+
+	public static List<Diet.Info> DietWithSlime(Tag poopTag, float caloriesPerKg, float producedConversionRate, string diseaseId, float diseasePerKgProduced)
+	{
+		HashSet<Tag> hashSet = new HashSet<Tag>();
+		hashSet.Add(SimHashes.ToxicSand.CreateTag());
+		hashSet.Add(RotPileConfig.ID.ToTag());
+		hashSet.Add(SimHashes.SlimeMold.CreateTag());
 		return new List<Diet.Info>
 		{
 			new Diet.Info(hashSet, poopTag, caloriesPerKg, producedConversionRate, diseaseId, diseasePerKgProduced, false, false)

@@ -20,6 +20,8 @@ namespace TUNING
 
 		public const float WILD_CALORIE_BURN_RATIO = 0.25f;
 
+		public const float HUG_INCUBATION_MULTIPLIER = 1f;
+
 		public const float VIABILITY_LOSS_RATE = -0.016666668f;
 
 		public const float STATERPILLAR_POWER_CHARGE_LOSS_RATE = -0.055555556f;
@@ -231,6 +233,58 @@ namespace TUNING
 				};
 			}
 
+			private static global::System.Action CreateElementCreatureModifier(string id, Tag eggTag, Tag element, float modifierPerSecond, bool alsoInvert)
+			{
+				Func<string, string> <>9__1;
+				FertilityModifier.FertilityModFn <>9__2;
+				return delegate
+				{
+					string text = CREATURES.FERTILITY_MODIFIERS.LIVING_IN_ELEMENT.NAME;
+					string text2 = CREATURES.FERTILITY_MODIFIERS.LIVING_IN_ELEMENT.DESC;
+					ModifierSet modifierSet = Db.Get();
+					string id2 = id;
+					Tag eggTag2 = eggTag;
+					string text3 = text;
+					string text4 = text2;
+					Func<string, string> func;
+					if ((func = <>9__1) == null)
+					{
+						func = (<>9__1 = (string descStr) => string.Format(descStr, ElementLoader.GetElement(element).name));
+					}
+					FertilityModifier.FertilityModFn fertilityModFn;
+					if ((fertilityModFn = <>9__2) == null)
+					{
+						fertilityModFn = (<>9__2 = delegate(FertilityMonitor.Instance inst, Tag eggType)
+						{
+							CritterElementMonitor.Instance instance = inst.gameObject.GetSMI<CritterElementMonitor.Instance>();
+							if (instance == null)
+							{
+								instance = new CritterElementMonitor.Instance(inst.master);
+								instance.StartSM();
+							}
+							instance.OnUpdateEggChances += delegate(float dt)
+							{
+								int num = Grid.PosToCell(inst);
+								if (!Grid.IsValidCell(num))
+								{
+									return;
+								}
+								if (Grid.Element[num].tag == element && Grid.IsSubstantialLiquid(num, 0.35f))
+								{
+									inst.AddBreedingChance(eggType, dt * modifierPerSecond);
+									return;
+								}
+								if (alsoInvert)
+								{
+									inst.AddBreedingChance(eggType, dt * -modifierPerSecond);
+								}
+							};
+						});
+					}
+					modifierSet.CreateFertilityModifier(id2, eggTag2, text3, text4, func, fertilityModFn);
+				};
+			}
+
 			private static global::System.Action CreateCropTendedModifier(string id, Tag eggTag, TagBits cropTags, float modifierPerEvent)
 			{
 				FertilityModifier.FertilityModFn <>9__2;
@@ -342,11 +396,15 @@ namespace TUNING
 				CREATURES.EGG_CHANCE_MODIFIERS.CreateTemperatureModifier("PacuTropical", "PacuTropicalEgg".ToTag(), 308.15f, 353.15f, 8.333333E-05f, false),
 				CREATURES.EGG_CHANCE_MODIFIERS.CreateTemperatureModifier("PacuCleaner", "PacuCleanerEgg".ToTag(), 243.15f, 278.15f, 8.333333E-05f, false),
 				CREATURES.EGG_CHANCE_MODIFIERS.CreateDietaryModifier("DreckoPlastic", "DreckoPlasticEgg".ToTag(), "BasicSingleHarvestPlant".ToTag(), 0.025f / DreckoTuning.STANDARD_CALORIES_PER_CYCLE),
+				CREATURES.EGG_CHANCE_MODIFIERS.CreateDietaryModifier("SquirrelHug", "SquirrelHugEgg".ToTag(), BasicFabricMaterialPlantConfig.ID.ToTag(), 0.025f / SquirrelTuning.STANDARD_CALORIES_PER_CYCLE),
 				CREATURES.EGG_CHANCE_MODIFIERS.CreateCropTendedModifier("DivergentWorm", "DivergentWormEgg".ToTag(), new TagBits(new Tag[]
 				{
 					"WormPlant".ToTag(),
 					"SuperWormPlant".ToTag()
-				}), 0.05f / (float)DivergentTuning.TIMES_TENDED_PER_CYCLE_FOR_EVOLUTION)
+				}), 0.05f / (float)DivergentTuning.TIMES_TENDED_PER_CYCLE_FOR_EVOLUTION),
+				CREATURES.EGG_CHANCE_MODIFIERS.CreateElementCreatureModifier("PokeLumber", "CrabWoodEgg".ToTag(), SimHashes.Ethanol.CreateTag(), 0.00025f, true),
+				CREATURES.EGG_CHANCE_MODIFIERS.CreateElementCreatureModifier("PokeFreshWater", "CrabFreshWaterEgg".ToTag(), SimHashes.Water.CreateTag(), 0.00025f, true),
+				CREATURES.EGG_CHANCE_MODIFIERS.CreateTemperatureModifier("MoleDelicacy", "MoleDelicacyEgg".ToTag(), MoleDelicacyConfig.EGG_CHANCES_TEMPERATURE_MIN, MoleDelicacyConfig.EGG_CHANCES_TEMPERATURE_MAX, 8.333333E-05f, false)
 			};
 		}
 	}

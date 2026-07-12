@@ -9,9 +9,9 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Rendering
 {
+	[RequiredByNativeCode]
 	[NativeHeader("Runtime/Camera/BatchRendererGroup.h")]
 	[NativeHeader("Runtime/Math/Matrix4x4.h")]
-	[RequiredByNativeCode]
 	[StructLayout(LayoutKind.Sequential)]
 	public class BatchRendererGroup : IDisposable
 	{

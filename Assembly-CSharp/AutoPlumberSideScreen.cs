@@ -60,6 +60,8 @@ public class AutoPlumberSideScreen : SideScreenContent
 
 	private void Refresh()
 	{
+		bool flag = this.building != null && this.building.Def.AvailableFacades.Count > 0;
+		this.applyTestFacade.gameObject.SetActive(flag);
 	}
 
 	public KButton activateButton;
@@ -71,6 +73,8 @@ public class AutoPlumberSideScreen : SideScreenContent
 	public KButton solidsButton;
 
 	public KButton minionButton;
+
+	public KButton applyTestFacade;
 
 	private Building building;
 }

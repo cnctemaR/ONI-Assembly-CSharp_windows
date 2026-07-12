@@ -3,8 +3,8 @@ using UnityEngine.Scripting;
 
 namespace Unity.Collections.LowLevel.Unsafe
 {
-	[AttributeUsage(AttributeTargets.Field)]
 	[RequiredByNativeCode]
+	[AttributeUsage(AttributeTargets.Field)]
 	public sealed class NativeDisableContainerSafetyRestrictionAttribute : Attribute
 	{
 	}

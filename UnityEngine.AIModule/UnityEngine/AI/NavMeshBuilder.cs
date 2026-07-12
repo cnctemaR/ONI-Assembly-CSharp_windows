@@ -101,8 +101,8 @@ namespace UnityEngine.AI
 		}
 
 		[StaticAccessor("GetNavMeshManager().GetNavMeshBuildManager()", StaticAccessorType.Arrow)]
-		[NativeMethod("Purge")]
 		[NativeHeader("Modules/AI/NavMeshManager.h")]
+		[NativeMethod("Purge")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void Cancel(NavMeshData data);
 

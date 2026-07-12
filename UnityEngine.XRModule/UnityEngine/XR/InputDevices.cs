@@ -10,8 +10,8 @@ namespace UnityEngine.XR
 {
 	[UsedByNativeCode]
 	[NativeConditional("ENABLE_VR")]
-	[StaticAccessor("XRInputDevices::Get()", StaticAccessorType.Dot)]
 	[NativeHeader("Modules/XR/Subsystems/Input/Public/XRInputDevices.h")]
+	[StaticAccessor("XRInputDevices::Get()", StaticAccessorType.Dot)]
 	[StructLayout(LayoutKind.Sequential)]
 	public class InputDevices
 	{

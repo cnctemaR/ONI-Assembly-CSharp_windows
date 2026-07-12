@@ -5,8 +5,8 @@ using UnityEngine.Internal;
 
 namespace UnityEngine
 {
-	[StaticAccessor("GizmoBindings", StaticAccessorType.DoubleColon)]
 	[NativeHeader("Runtime/Export/Gizmos/Gizmos.bindings.h")]
+	[StaticAccessor("GizmoBindings", StaticAccessorType.DoubleColon)]
 	public sealed class Gizmos
 	{
 		[NativeThrows]

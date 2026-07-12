@@ -76,7 +76,7 @@ namespace UnityEngine
 
 		public SparseTexture(int width, int height, GraphicsFormat format, int mipCount)
 		{
-			bool flag = !base.ValidateFormat(format, FormatUsage.Sample);
+			bool flag = !base.ValidateFormat(format, FormatUsage.Sparse);
 			if (!flag)
 			{
 				bool flag2 = !this.ValidateSize(width, height, format);

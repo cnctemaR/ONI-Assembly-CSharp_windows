@@ -12,7 +12,6 @@ public class TexturePage
 		this.texture.name = name;
 		this.texture.filterMode = FilterMode.Point;
 		this.texture.wrapMode = TextureWrapMode.Clamp;
-		this.bytes = new byte[width * height * TextureUtil.GetBytesPerPixel(format)];
 		this.SetName(name);
 	}
 
@@ -30,6 +29,4 @@ public class TexturePage
 	public TexturePagePool pool;
 
 	public Texture2D texture;
-
-	public byte[] bytes;
 }

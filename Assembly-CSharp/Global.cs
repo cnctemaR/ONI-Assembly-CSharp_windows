@@ -8,6 +8,7 @@ using Klei;
 using KMod;
 using KSerialization;
 using Newtonsoft.Json;
+using ProcGenGame;
 using STRINGS;
 using UnityEngine;
 using UnityEngine.U2D;
@@ -178,6 +179,8 @@ public class Global : MonoBehaviour
 			new BindingEntry("Debug", GamepadButton.NumButtons, KKeyCode.Alpha5, Modifier.Alt, global::Action.DebugLockCursor, true, false),
 			new BindingEntry("Debug", GamepadButton.NumButtons, KKeyCode.Alpha0, Modifier.Alt, global::Action.DebugTogglePersonalPriorityComparison, true, false),
 			new BindingEntry("Root", GamepadButton.NumButtons, KKeyCode.Return, Modifier.None, global::Action.DialogSubmit, false, false),
+			new BindingEntry("Analog", GamepadButton.NumButtons, KKeyCode.None, Modifier.None, global::Action.AnalogCamera, false, false),
+			new BindingEntry("Analog", GamepadButton.NumButtons, KKeyCode.None, Modifier.None, global::Action.AnalogCursor, false, false),
 			new BindingEntry("BuildingsMenu", GamepadButton.NumButtons, KKeyCode.A, Modifier.None, global::Action.BuildMenuKeyA, false, true),
 			new BindingEntry("BuildingsMenu", GamepadButton.NumButtons, KKeyCode.B, Modifier.None, global::Action.BuildMenuKeyB, false, true),
 			new BindingEntry("BuildingsMenu", GamepadButton.NumButtons, KKeyCode.C, Modifier.None, global::Action.BuildMenuKeyC, false, true),
@@ -285,6 +288,7 @@ public class Global : MonoBehaviour
 		global::Debug.Log("Save path: " + Util.RootFolder());
 		MyCmp.Init();
 		MySmi.Init();
+		DevToolManager.Instance.Init();
 		if (this.forcedAtlasInitializationList != null)
 		{
 			foreach (SpriteAtlas spriteAtlas in this.forcedAtlasInitializationList)
@@ -353,6 +357,7 @@ public class Global : MonoBehaviour
 			this.OnGetUserIdKey();
 		}
 		this.modManager.Load(Content.LayerableFiles);
+		WorldGen.LoadSettings(true);
 		GlobalResources.Instance();
 	}
 
@@ -566,6 +571,17 @@ public class Global : MonoBehaviour
 
 	private void Update()
 	{
+		ImGuiRenderer instance = ImGuiRenderer.GetInstance();
+		if (instance)
+		{
+			this.DevTools.UpdateShouldShowTools();
+			instance.gameObject.transform.parent.gameObject.SetActive(this.DevTools.Show);
+			if (this.DevTools.Show)
+			{
+				instance.NewFrame();
+			}
+			this.DevTools.UpdateTools();
+		}
 		this.mInputManager.Update();
 		if (this.mAnimEventManager != null)
 		{
@@ -593,7 +609,7 @@ public class Global : MonoBehaviour
 	private void SetONIStaticSessionVariables()
 	{
 		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Branch", "release");
-		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Build", 498381U);
+		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Build", 509629U);
 		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("SaveFolderWriteTest", Global.saveFolderTestResult);
 		if (KPlayerPrefs.HasKey(UnitConfigurationScreen.MassUnitKey))
 		{
@@ -624,6 +640,15 @@ public class Global : MonoBehaviour
 	private void LateUpdate()
 	{
 		Singleton<KBatchedAnimUpdater>.Instance.LateUpdate();
+		if (this.DevTools.Show)
+		{
+			ImGuiRenderer instance = ImGuiRenderer.GetInstance();
+			if (instance == null)
+			{
+				return;
+			}
+			instance.EndFrame();
+		}
 	}
 
 	private void OnDestroy()
@@ -672,13 +697,13 @@ public class Global : MonoBehaviour
 				{
 					Console.WriteLine(string.Format("    {0}={1}", keyValuePair.Key.ToString(), keyValuePair.Value.ToString()));
 				}
-				catch
+				catch (Exception)
 				{
 				}
 			}
 			Console.WriteLine(string.Format("    {0}={1}", "System Language", Application.systemLanguage.ToString()));
 		}
-		catch
+		catch (Exception)
 		{
 		}
 	}
@@ -692,6 +717,8 @@ public class Global : MonoBehaviour
 	private GameInputManager mInputManager;
 
 	private AnimEventManager mAnimEventManager;
+
+	private DevToolManager DevTools = new DevToolManager();
 
 	public global::KMod.Manager modManager;
 

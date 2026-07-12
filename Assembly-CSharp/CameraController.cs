@@ -34,9 +34,14 @@ public class CameraController : KMonoBehaviour, IInputHandler
 		this.ignoreClusterFX = !this.ignoreClusterFX;
 	}
 
-	private void OnCleanup()
+	protected override void OnForcedCleanUp()
 	{
-		Global.Instance.GetInputManager().usedMenus.Remove(this);
+		Global instance = Global.Instance;
+		if (instance == null)
+		{
+			return;
+		}
+		instance.GetInputManager().usedMenus.Remove(this);
 	}
 
 	public int cameraActiveCluster
@@ -49,9 +54,9 @@ public class CameraController : KMonoBehaviour, IInputHandler
 
 	public void GetWorldCamera(out Vector2I worldOffset, out Vector2I worldSize)
 	{
-		if (!this.ignoreClusterFX && ClusterManager.Instance.activeWorld != null)
+		WorldContainer activeWorld = ClusterManager.Instance.activeWorld;
+		if (!this.ignoreClusterFX && activeWorld != null)
 		{
-			WorldContainer activeWorld = ClusterManager.Instance.activeWorld;
 			worldOffset = activeWorld.WorldOffset;
 			worldSize = activeWorld.WorldSize;
 			return;
@@ -250,6 +255,7 @@ public class CameraController : KMonoBehaviour, IInputHandler
 		}
 		if (ClusterManager.Instance.activeWorldId != id)
 		{
+			DetailsScreen.Instance.DeselectAndClose();
 			this.activeFadeRoutine = base.StartCoroutine(this.SwapToWorldFade(id, useForcePosition, forcePosition, forceOrthgraphicSize, callback));
 			return;
 		}

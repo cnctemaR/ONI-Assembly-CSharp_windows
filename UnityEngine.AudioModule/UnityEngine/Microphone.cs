@@ -70,6 +70,13 @@ namespace UnityEngine
 			get;
 		}
 
+		internal static extern bool isAnyDeviceRecording
+		{
+			[NativeName("IsAnyRecordDeviceActive")]
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+		}
+
 		public static bool IsRecording(string deviceName)
 		{
 			int microphoneDeviceIDFromName = Microphone.GetMicrophoneDeviceIDFromName(deviceName);

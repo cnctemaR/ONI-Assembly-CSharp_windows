@@ -3,10 +3,10 @@ using System.ComponentModel;
 
 namespace UnityEngine
 {
-	[EditorBrowsable(EditorBrowsableState.Never)]
 	[Obsolete("GUILayer has been removed.", true)]
-	[ExcludeFromObjectFactory]
 	[ExcludeFromPreset]
+	[ExcludeFromObjectFactory]
+	[EditorBrowsable(EditorBrowsableState.Never)]
 	public sealed class GUILayer
 	{
 		[Obsolete("GUILayer has been removed.", true)]

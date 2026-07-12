@@ -4,8 +4,8 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine.IO
 {
-	[NativeConditional("ENABLE_PROFILER")]
 	[StaticAccessor("FileAccessor", StaticAccessorType.DoubleColon)]
+	[NativeConditional("ENABLE_PROFILER")]
 	[NativeHeader("Runtime/VirtualFileSystem/VirtualFileSystem.h")]
 	internal static class File
 	{

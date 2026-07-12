@@ -9,6 +9,11 @@ using UnityEngine.EventSystems;
 
 public class ClusterMapScreen : KScreen
 {
+	public static void DestroyInstance()
+	{
+		ClusterMapScreen.Instance = null;
+	}
+
 	public ClusterMapVisualizer GetEntityVisAnim(ClusterGridEntity entity)
 	{
 		if (this.m_gridEntityAnims.ContainsKey(entity))
@@ -309,7 +314,7 @@ public class ClusterMapScreen : KScreen
 	{
 		if (KInputManager.currentControllerIsGamepad)
 		{
-			this.mapScrollRect.AnalogUpdate(KInputManager.steamInputInterpreter.GetSteamCameraMovement());
+			this.mapScrollRect.AnalogUpdate(KInputManager.steamInputInterpreter.GetSteamCameraMovement() * this.scrollSpeed);
 		}
 	}
 
@@ -791,6 +796,9 @@ public class ClusterMapScreen : KScreen
 
 	[SerializeField]
 	private KScrollRect mapScrollRect;
+
+	[SerializeField]
+	private float scrollSpeed = 15f;
 
 	public GameObject selectMarkerPrefab;
 

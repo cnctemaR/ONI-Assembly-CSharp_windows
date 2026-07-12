@@ -8,6 +8,11 @@ using UnityEngine.UI;
 
 public class WorldSelector : KScreen, ISim4000ms
 {
+	public static void DestroyInstance()
+	{
+		WorldSelector.Instance = null;
+	}
+
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();

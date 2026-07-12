@@ -6,7 +6,7 @@ public class RocketsInOrbitDiagnostic : ColonyDiagnostic
 	public RocketsInOrbitDiagnostic(int worldID)
 		: base(worldID, UI.COLONY_DIAGNOSTICS.ROCKETINORBITDIAGNOSTIC.ALL_NAME)
 	{
-		this.icon = "icon_action_dig";
+		this.icon = "icon_errand_rocketry";
 		base.AddCriterion("RocketsOrbiting", new DiagnosticCriterion(UI.COLONY_DIAGNOSTICS.ROCKETINORBITDIAGNOSTIC.CRITERIA.CHECKORBIT, new Func<ColonyDiagnostic.DiagnosticResult>(this.CheckOrbit)));
 	}
 

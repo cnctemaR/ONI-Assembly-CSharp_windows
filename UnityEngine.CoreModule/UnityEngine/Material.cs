@@ -9,8 +9,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Graphics/ShaderScriptBindings.h")]
 	[NativeHeader("Runtime/Shaders/Material.h")]
+	[NativeHeader("Runtime/Graphics/ShaderScriptBindings.h")]
 	public class Material : Object
 	{
 		[Obsolete("Creating materials from shader source string will be removed in the future. Use Shader assets instead.", false)]

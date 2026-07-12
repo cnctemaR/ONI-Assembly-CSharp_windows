@@ -11,14 +11,14 @@ using UnityEngineInternal;
 
 namespace UnityEngine
 {
-	[UsedByNativeCode]
-	[NativeHeader("Runtime/Graphics/GraphicsScriptBindings.h")]
 	[RequireComponent(typeof(Transform))]
+	[UsedByNativeCode]
 	[NativeHeader("Runtime/Graphics/Renderer.h")]
+	[NativeHeader("Runtime/Graphics/GraphicsScriptBindings.h")]
 	public class Renderer : Component
 	{
-		[Obsolete("Use shadowCastingMode instead.", false)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
+		[Obsolete("Use shadowCastingMode instead.", false)]
 		public bool castShadows
 		{
 			get

@@ -171,7 +171,7 @@ namespace STRINGS
 			{
 				public static LocString CONTAINER1 = "<smallcaps>Pictured: \"Glossy\" Drecko variant</smallcaps>";
 
-				public static LocString CONTAINER2 = "Caring for Dreckos is fulfilling endeavor thanks to their companionable personalities.\n\nSome domestic Dreckos have even been known to respond to their own names.";
+				public static LocString CONTAINER2 = "Caring for Dreckos is a fulfilling endeavor thanks to their companionable personalities.\n\nSome domestic Dreckos have even been known to respond to their own names.";
 			}
 		}
 
@@ -261,6 +261,18 @@ namespace STRINGS
 			}
 		}
 
+		public class VARIANT_DELICACY
+		{
+			public static LocString TITLE = "Delecta Vole";
+
+			public static LocString SUBTITLE = "Critter Morph";
+
+			public class BODY
+			{
+				public static LocString CONTAINER1 = "<smallcaps>Pictured: \"Delecta\" Vole variant</smallcaps>";
+			}
+		}
+
 		public class MORB
 		{
 			public static LocString TITLE = "Morb";
@@ -271,7 +283,7 @@ namespace STRINGS
 			{
 				public static LocString CONTAINER1 = "The Morb is a versatile scavenger, capable of breaking down and consuming dead matter from most plant and animal species.";
 
-				public static LocString CONTAINER2 = "It poses a severe disease risk to humans due to the thick slime it excretes to surround its inner cartilage structures.\nA single teaspoon of Morb slime can contain up to a quadrillion bacteria that work to deter would-be predators and liquefy its food.";
+				public static LocString CONTAINER2 = "It poses a severe disease risk to humans due to the thick slime it excretes to surround its inner cartilage structures.\n\nA single teaspoon of Morb slime can contain up to a quadrillion bacteria that work to deter would-be predators and liquefy its food.";
 
 				public static LocString CONTAINER3 = "Petting a Morb is not recommended.";
 			}
@@ -323,6 +335,10 @@ namespace STRINGS
 
 		public class PIP
 		{
+			public static LocString SPECIES_TITLE = "Pips";
+
+			public static LocString SPECIES_SUBTITLE = "Critter Species";
+
 			public static LocString TITLE = "Pip";
 
 			public static LocString SUBTITLE = "Domesticable Critter";
@@ -334,6 +350,20 @@ namespace STRINGS
 				public static LocString CONTAINER2 = "It is unknown whether their caching behavior is a compulsion or a form of entertainment, as the Pip relies primarily on bark and wood for its survival.";
 
 				public static LocString CONTAINER3 = "Although the Pip lacks truly opposable thumbs, it nonetheless has highly dexterous paws that allow it to rummage through most tight to reach spaces in search of seeds and other treasures.";
+			}
+		}
+
+		public class VARIANT_HUG
+		{
+			public static LocString TITLE = "Cuddle Pip";
+
+			public static LocString SUBTITLE = "Critter Morph";
+
+			public class BODY
+			{
+				public static LocString CONTAINER1 = "<smallcaps>Pictured: \"Cuddle\" Pip variant</smallcaps>";
+
+				public static LocString CONTAINER2 = "Cuddle Pips are genetically predisposed to feel deeply affectionate towards the unhatched young of all species, and can often be observed hugging eggs.";
 			}
 		}
 
@@ -351,6 +381,10 @@ namespace STRINGS
 
 		public class POKESHELL
 		{
+			public static LocString SPECIES_TITLE = "Pokeshells";
+
+			public static LocString SPECIES_SUBTITLE = "Critter Species";
+
 			public static LocString TITLE = "Pokeshell";
 
 			public static LocString SUBTITLE = "Domesticable Critter";
@@ -364,6 +398,30 @@ namespace STRINGS
 				public static LocString CONTAINER3 = "As Pokeshells mature they must periodically shed portions of their exoskeletons to make room for new growth.";
 
 				public static LocString CONTAINER4 = "Although the most dramatic sheds occur early in a Pokeshell's adolescence, they will continue growing and shedding throughout their adult lives, until the day they eventually die.";
+			}
+		}
+
+		public class VARIANT_WOOD
+		{
+			public static LocString TITLE = "Oakshell";
+
+			public static LocString SUBTITLE = "Critter Morph";
+
+			public class BODY
+			{
+				public static LocString CONTAINER1 = "<smallcaps>Pictured: \"Oakshell\" variant</smallcaps>";
+			}
+		}
+
+		public class VARIANT_FRESH_WATER
+		{
+			public static LocString TITLE = "Sanishell";
+
+			public static LocString SUBTITLE = "Critter Morph";
+
+			public class BODY
+			{
+				public static LocString CONTAINER1 = "<smallcaps>Pictured: \"Sanishell\" variant</smallcaps>";
 			}
 		}
 
@@ -545,7 +603,7 @@ namespace STRINGS
 
 			public class BODY
 			{
-				public static LocString CONTAINER1 = "Slicksters are a unique creature most renown for their ability to exude hydrocarbon waste that is nearly identical in makeup to crude oil.\n\nThe two tufts atop a Slickster's head are called rhinophores, and help guide the Slickster toward breathable carbon dioxide.";
+				public static LocString CONTAINER1 = "Slicksters are a unique creature most renowned for their ability to exude hydrocarbon waste that is nearly identical in makeup to crude oil.\n\nThe two tufts atop a Slickster's head are called rhinophores, and help guide the Slickster toward breathable carbon dioxide.";
 			}
 		}
 
@@ -695,7 +753,7 @@ namespace STRINGS
 
 			public class BODY
 			{
-				public static LocString EMAILHEADER1 = "<smallcaps>To: <b>[REDACTED]</b>\nFrom: <b>Director Stern</b><size=12><alpha=#AA> <jstern@gravitas.nova></size></color></smallcaps>\n------------------\n";
+				public static LocString EMAILHEADER1 = "<smallcaps>To: <b>Director Stern</b><size=12><alpha=#AA> <jstern@gravitas.nova></size></color></smallcaps>\nFrom: <b>[REDACTED]</b>\n------------------\n";
 
 				public static LocString CONTAINER3 = "<indent=5%>Director, I think I've found the perfect engineer candidate to design our small-scale colony machines.\n-----------------------------------------------------------------------------------------------------\n</indent>";
 
@@ -747,6 +805,34 @@ namespace STRINGS
 			}
 		}
 
+		public class JOURNALISTREQUEST
+		{
+			public static LocString TITLE = "Re: Call me";
+
+			public static LocString TITLE2 = "Call me";
+
+			public static LocString SUBTITLE = "UNENCRYPTED";
+
+			public class BODY
+			{
+				public static LocString EMAILHEADER1 = "<smallcaps>To: <b>Dr. Olowe</b><size=10><alpha=#AA> <aolowe@gravitas.nova></size></color>\nFrom: <b>Quinn Kelly</b><alpha=#AA><size=10> <editor@stemscoop.news></size></color></smallcaps>\n------------------\n";
+
+				public static LocString EMAILHEADER2 = "<smallcaps>To: <b>[BCC: all]</b><alpha=#AA><size=10> </size></color>\nFrom: <b>Quinn Kelly</b><alpha=#AA><size=10> <editor@stemscoop.news></size></color></smallcaps>\n------------------\n";
+
+				public static LocString CONTAINER1 = "<indent=5%>Dear colleagues, friends and community members,\n\nAfter nine deeply fulfilling years as editor of The STEM Scoop, I am stepping down to spend more time with my family.\n\nPlease give a warm welcome to Dorian Hearst, who will be taking over editorial management duties effective immediately.</indent>";
+
+				public static LocString CONTAINER2 = "<indent=5%>I don’t know how you pulled it off, but Stern’s office just called the paper and granted me an exclusive…and a tour of the Gravitas Facility. I owe you a beer. No - a case of beer. Six cases of beer!\n\nSeriously, thank you. I know you're in a difficult position but you’ve done the right thing. See you on Tuesday.</indent>";
+
+				public static LocString CONTAINER3 = "<indent=5%>I waited at the fountain for four hours. Where were you? This story is going to be huge. Call me.</indent>";
+
+				public static LocString CONTAINER4 = "<indent=5%>Dr. Olowe,\n\nI’m sorry - I know ambushing you at your home last night was a bad idea. But something is happening at Gravitas, and people need to know. Please call me.</indent>";
+
+				public static LocString SIGNATURE1 = "\n-Q\n------------------\n";
+
+				public static LocString SIGNATURE2 = "\nAll the best,\nQuinn Kelly\n------------------\n";
+			}
+		}
+
 		public class B50_MEMORYCHIP
 		{
 			public static LocString TITLE = "Duplicant Memory Solution";
@@ -760,6 +846,38 @@ namespace STRINGS
 				public static LocString CONTAINER2 = "<indent=5%>Director,\n\nI had a thought about how to solve your Duplicant memory problem.\n\nRather than attempt to access the subject's old memories, what if we were to embed all necessary information for colony survival into the printing process itself?\n\nThe amount of data engineering can store has grown exponentially over the last year. We should take advantage of the technological development.</indent>";
 
 				public static LocString SIGNATURE1 = "\n[REDACTED]\n<size=11>Engineering Department\nThe Gravitas Facility</size>\n------------------\n";
+			}
+		}
+
+		public class MISSINGNOTES
+		{
+			public static LocString TITLE = "Re: Missing notes";
+
+			public static LocString TITLE2 = "SUBJECT: Missing notes";
+
+			public static LocString SUBTITLE = "ENCRYPTION LEVEL: THREE";
+
+			public class BODY
+			{
+				public static LocString EMAILHEADER1 = "<smallcaps>To: <b>Dr. Jones</b><alpha=#AA><size=12> <ejones@gravitas.nova></size></color>\nFrom: <b>Dr. Olowe</b><alpha=#AA><size=12> <aolowe@gravitas.nova></size></color></smallcaps>\n------------------\n";
+
+				public static LocString EMAILHEADER2 = "<smallcaps>To: <b>Dr. Olowe</b><alpha=#AA><size=12> <aolowe@gravitas.nova></size></color>\nFrom: <b>Dr. Jones</b><alpha=#AA><size=12> <ejones@gravitas.nova></size></color></smallcaps>\n------------------\n";
+
+				public static LocString EMAILHEADER3 = "<smallcaps>To: <b>Dr. Olowe</b><alpha=#AA><size=12> <aolowe@gravitas.nova></size></color>\nFrom: <b>Director Stern</b><alpha=#AA><size=12> <jstern@gravitas.nova></size></color></smallcaps>\n------------------\n";
+
+				public static LocString CONTAINER1 = "<indent=5%>Hello Dr. Jones,\n\nHope you are well. Sorry to bother you- I believe that someone may have inappropriately accessed my computer.\n\nWhen I was logging in this morning, the \"last log-in\" pop-up indicated that my computer had been accessed at 2 a.m. My last actual log-in was 6 p.m. And some of my files have gone missing.\n\nThe privacy of my work is paramount. Would it be possible to have someone take a look, please?</indent>";
+
+				public static LocString CONTAINER2 = "<indent=5%>OMG Amari, you’re so dramatic!! It’s probably just a glitch from the system network upgrade. Nobody can even get into your office without going through the new hand scanners.\n\nPS: Everybody's work is super private, not just yours ;)</indent>";
+
+				public static LocString CONTAINER3 = "<indent=5%>Dear Dr. Jones,\nI'm so sorry to bother you again...it's just that I'm absolutely certain that someone has been interfering with my files.\n\nI've noticed several discrepancies since last week's \"glitch.\" For example, responses to my recent employee survey on workplace satisfaction and safety were decrypted, and significant portions of my data and research notes have been erased. I'm even missing a few e-mails.\n\nIt's all quite alarming. Could you or Dr. Summers please investigate this when you have a moment?\n\nThank you so much,\n\n</indent>";
+
+				public static LocString CONTAINER4 = "<indent=5%>The files in question were a security risk, and were disposed of accordingly.\n\nAs for your emails: the NDA you signed was very clear about how to handle requests from members of the media.\n\nSee me in my office.</indent>";
+
+				public static LocString SIGNATURE1 = "\n-Dr. Olowe\n<size=11>Industrial-Organizational Psychologist\nThe Gravitas Facility</size>\n------------------\n";
+
+				public static LocString SIGNATURE2 = "\nXOXO,\nDr. Jones\n<size=11>Information and Statistics Department\nThe Gravitas Facility</size>\n------------------\n";
+
+				public static LocString SIGNATURE3 = "\n-Director Stern\n<size=11>\nThe Gravitas Facility</size>\n------------------\n";
 			}
 		}
 
@@ -999,11 +1117,54 @@ namespace STRINGS
 
 			public class BODY
 			{
-				public static LocString EMAILHEADER = "<smallcaps>To: <b>Dr. Mason</b><size=12><alpha=#AA> <dross@gravitas.nova></size></color>\nFrom: <b>Admin</b><size=12><alpha=#AA> <admin@gravitas.nova></color></size></smallcaps>\n------------------\n";
+				public static LocString EMAILHEADER = "<smallcaps>To: <b>Dr. Ross</b><size=12><alpha=#AA> <dross@gravitas.nova></size></color>\nFrom: <b>Admin</b><size=12><alpha=#AA> <admin@gravitas.nova></color></size></smallcaps>\n------------------\n";
 
 				public static LocString CONTAINER = "<indent=5%><b>Vacation Request Granted</b>\nGood luck, Devon!\n\n<alpha=#AA><smallcaps><indent=10%> Vacation Request [May 18th-20th]\nReason: Time off request for attendance of the Blogjam Awards (\"Toast of the Town\" nominated in the Freshest Food Blog category).</indent></smallcaps></color></indent>";
 
 				public static LocString SIGNATURE = "\n-Admin\n<size=11>The Gravitas Facility</size>\n------------------\n";
+			}
+		}
+
+		public class BASIC_FABRIC
+		{
+			public static LocString TITLE = "Reed Fiber";
+
+			public static LocString SUBTITLE = "Textile Ingredient";
+
+			public class BODY
+			{
+				public static LocString CONTAINER1 = "A ball of raw cellulose harvested from a Thimble Reed.\n\nIt is used in the production of " + UI.FormatAsLink("Clothing", "EQUIPMENT") + " and textiles.";
+			}
+		}
+
+		public class LUMBER
+		{
+			public static LocString TITLE = "Lumber";
+
+			public static LocString SUBTITLE = "Renewable Resource";
+
+			public class BODY
+			{
+				public static LocString CONTAINER1 = string.Concat(new string[]
+				{
+					"Lumber is harvested from ",
+					UI.FormatAsLink("Arbor Trees", "FOREST_TREE"),
+					" and ",
+					UI.FormatAsLink("Oakshells", "CRABWOOD"),
+					"."
+				});
+			}
+		}
+
+		public class SWAMPLILYFLOWER
+		{
+			public static LocString TITLE = "Balm Lily Flower";
+
+			public static LocString SUBTITLE = "Medicinal Herb";
+
+			public class BODY
+			{
+				public static LocString CONTAINER1 = "Balm Lily Flowers bloom on " + UI.FormatAsLink("Balm Lily", "SWAMPLILY") + " plants.\n\nThey have a wide range of medicinal applications, and have been shown to be a particularly effective antidote for respiratory illnesses.\n\nThe intense perfume emitted by their vivid petals is best described as \"dizzying.\"";
 			}
 		}
 
@@ -1039,7 +1200,7 @@ namespace STRINGS
 
 			public class BODY
 			{
-				public static LocString CONTAINER1 = "The first experiments with establishing a colony off planet were an unmitigated disaster. Without outside help, our current Artificial Intelligence was completely incapable of making the kind of spontaneous decisions needed to deal with unforeseen circumstances. Additionally, the colony subjects lacked the forethought to even build themselves toilet facilities, even after soiling themselves repeatedly.\n\nWhile initial experiments in a lab setting were encouraging, our latest operation on non-Terra soil revealed some massive inadequacies to our system. If this idea is ever going to work, we will either need to drastically improve the AI directing the subjects, or improve the brains of our Duplicants to the point where they possess higher cognitive functions.\n\nGiven the disastrous complications that I could foresee arising if our Duplicants were made less supplicant, I'm leaning toward a push to improve our Artificial Intellegence.\n\nMeanwhile, we will have to send a clean-up crew to destroy all evidence of our little experiment beneath the Ceres' surface. We can't risk anyone discovering the remnants of our failed colony, even if that's unlikely to happen for another few decades at least.\n\n(Sometimes it boggles my mind how much further behind Gravitas the rest of the world is.)";
+				public static LocString CONTAINER1 = "The first experiments with establishing a colony off planet were an unmitigated disaster. Without outside help, our current Artificial Intelligence was completely incapable of making the kind of spontaneous decisions needed to deal with unforeseen circumstances. Additionally, the colony subjects lacked the forethought to even build themselves toilet facilities, even after soiling themselves repeatedly.\n\nWhile initial experiments in a lab setting were encouraging, our latest operation on non-Terra soil revealed some massive inadequacies to our system. If this idea is ever going to work, we will either need to drastically improve the AI directing the subjects, or improve the brains of our Duplicants to the point where they possess higher cognitive functions.\n\nGiven the disastrous complications that I could foresee arising if our Duplicants were made less supplicant, I'm leaning toward a push to improve our Artificial Intelligence.\n\nMeanwhile, we will have to send a clean-up crew to destroy all evidence of our little experiment beneath the Ceres' surface. We can't risk anyone discovering the remnants of our failed colony, even if that's unlikely to happen for another few decades at least.\n\n(Sometimes it boggles my mind how much further behind Gravitas the rest of the world is.)";
 			}
 		}
 
@@ -1066,6 +1227,20 @@ namespace STRINGS
 				public static LocString CONTAINER1 = "<b>Incredible Technology From Independent Lab Harnesses Time into Energy</b>";
 
 				public static LocString CONTAINER2 = "Scientists from the recently founded Gravitas Facility have unveiled their first technology prototype, dubbed the \"Temporal Bow\". It is a device which manipulates the 4th dimension to generate infinite, clean and renewable energy.\n\nWhile it may sound like something from science fiction, facility founder Dr. Jacquelyn Stern confirms that it is very much real.\n\n\"It has already been demonstrated that Newton's Second Law of Motion can be violated by negative mass superfluids under the correct lab conditions,\" she says.\n\n\"If the Laws of Motion can be bent and altered, why not the Laws of Thermodynamics? That was the main intent behind this project.\"\n\nThe Temporal Bow works by rapidly vibrating sections of the 4th dimension to send small quantities of mass forward and backward in time, generating massive amounts of energy with virtually no waste.\n\n\"The fantastic thing about using the 4th dimension as fuel,\" says Stern, \"is that it is really, categorically infinite\".\n\nFor those eagerly awaiting the prospect of human time travel, don't get your hopes up just yet. The Facility says that although they have successfully transported matter through time, the technology was expressly developed for the purpose of energy generation and is ill-equipped for human transportation.";
+			}
+		}
+
+		public class MYSTERYAWARD
+		{
+			public static LocString TITLE = "Nanotech Article";
+
+			public static LocString SUBTITLE = "ENCRYPTION LEVEL: THREE";
+
+			public class BODY
+			{
+				public static LocString CONTAINER1 = "<b>Mystery Project Wins Nanotech Award</b>";
+
+				public static LocString CONTAINER2 = "Last night’s Worldwide Nanotech Awards has sparked controversy in the scientific community after it was announced that the top prize had been awarded to a project whose details could not be publicly disclosed.\n\nThe highly classified paper was presented to the jury in a closed session by lead researcher Dr. Liling Pei, recipient of the inaugural Gravitas Accelerator Scholarship at the Elion University of Science and Technology.\n\nHead judge Dr. Elias Balko acknowledges that it was unorthodox, but defends the decision. \"We’re scientists—it’s our job to push boundaries.\"\n\nPei was awarded the coveted Halas Medal, the top prize for innovation in the field.\n\n\"I wish I could tell you more,\" says Pei. \"I’m SO grateful to the WNA for this great honor, and to Dr. Stern for the funding that made it all possible. This is going to change everything about…well, everything.\"\n\nThis is the second time that Pei has made headlines. Last year, the striking young nanoscientist won the Miss Planetary Belle pageant’s talent show with a live demonstration of nanorobots weaving a ballgown out of fibers harvested from common houseplants.\n\nPei joins the team at the Gravitas Facility early next month.";
 			}
 		}
 
@@ -1182,6 +1357,18 @@ namespace STRINGS
 			public class BODY
 			{
 				public static LocString CONTAINER1 = "I cleaned up a few messes in my time, but ain't nothing like the mess I seen today in that bio lab. Green goop all over the floor, all over the walls. Murky tubes with what look like human shapes floating in them.\n\nThey think old Mr. Gunderson ain't got smarts enough to put two and two together, but I got eyes, don't I?\n\nAin't nobody ever pay attention to the janitor.\n\nBut the janitor pays attention to everybody.\n\n-Mr. Stinky Gunderson";
+			}
+		}
+
+		public class CRITTERDELIVERY
+		{
+			public static LocString TITLE = "Critter Delivery";
+
+			public static LocString SUBTITLE = "ENCRYPTION LEVEL: TWO";
+
+			public class BODY
+			{
+				public static LocString CONTAINER1 = "<smallcaps>[Voice Recognition Initialized]\n[Subjects Identified: B482, B759, C094]</smallcaps>\n\n[LOG BEGINS]\n\nSecurity Guard 1: Hey hey! Welcome back.\n\nSecurity Guard 2: Hand on the scanner, please.\n\nCourier: Sure thing, lemme just…\n\nCourier: Whoops-- thanks, Steve. These little fellas are a two-hander for sure.\n\n(sound of furry noses snuffling on cardboard)\n\nSecurity Guard 2: Follow me, please.\n\n[LOG ENDS]";
 			}
 		}
 
@@ -1433,7 +1620,7 @@ namespace STRINGS
 		{
 			public static LocString TITLE = "Spaced Out Trailer";
 
-			public static LocString SUBTITLE = "Spaced Out Trailer";
+			public static LocString SUBTITLE = "";
 
 			public class BODY
 			{
@@ -1558,7 +1745,7 @@ namespace STRINGS
 				{
 					public static LocString TITLE = "Cycle 10";
 
-					public static LocString BODY = "As my Duplicants venture out into the neighbouring worlds, there is an ever increasing chance that they will encounter hostile environments unsafe for unprotected individuals. A prudent course of action would be to start research and training for equipment that could protect my Duplicants when they encounter such adverse environments.\n\nThese first few cycles have been occupied with building the basics for my colony, but now it is time I start planning for the future. We cannot merely live day-to-day without purpose. If we are to survive for any significant time, we must strive for a purpose.\n\n";
+					public static LocString BODY = "As my Duplicants venture out into the neighboring worlds, there is an ever increasing chance that they will encounter hostile environments unsafe for unprotected individuals. A prudent course of action would be to start research and training for equipment that could protect my Duplicants when they encounter such adverse environments.\n\nThese first few cycles have been occupied with building the basics for my colony, but now it is time I start planning for the future. We cannot merely live day-to-day without purpose. If we are to survive for any significant time, we must strive for a purpose.\n\n";
 				}
 
 				public class SURFACEBREACH
@@ -1607,7 +1794,7 @@ namespace STRINGS
 				{
 					public static LocString TITLE = "Temporal Potential";
 
-					public static LocString BODY = "In their interplanetary travels throughout this system, my Duplicants have discovered a Temporal Tear deep in space.\n\nCurrently it is too small to send a rocket and crew through, but further investigation reveals the presence of a strange artifact on a nearby world which could feasably increase the size of the tear if a number of Printing Pods are erected in nearby worlds.\n\nHowever, I've determined that using the Temporal Bow to operate a Printing Pod was what propelled Gravitas down the disasterous path which eventually led to the destruction of our home planet. My calculations seem to indicate that the size of that planet may have been a contributing factor in its destruction, and in all probability opening the Temporal Tear in our current situation will not cause such a cataclysmic event. However, as with everything in science, we can never know all the outcomes of a situation until we perform an experiment.\n\nDare we tempt fate again?";
+					public static LocString BODY = "In their interplanetary travels throughout this system, my Duplicants have discovered a Temporal Tear deep in space.\n\nCurrently it is too small to send a rocket and crew through, but further investigation reveals the presence of a strange artifact on a nearby world which could feasibly increase the size of the tear if a number of Printing Pods are erected in nearby worlds.\n\nHowever, I've determined that using the Temporal Bow to operate a Printing Pod was what propelled Gravitas down the disasterous path which eventually led to the destruction of our home planet. My calculations seem to indicate that the size of that planet may have been a contributing factor in its destruction, and in all probability opening the Temporal Tear in our current situation will not cause such a cataclysmic event. However, as with everything in science, we can never know all the outcomes of a situation until we perform an experiment.\n\nDare we tempt fate again?";
 				}
 
 				public class LOG4
@@ -1780,7 +1967,7 @@ namespace STRINGS
 
 			public class BODY
 			{
-				public static LocString CONTAINER1 = "";
+				public static LocString CONTAINER1 = "Tired of shutting down during seasonal heat waves? Looking to cut weather-related operating costs?\n\nLook no further: Gravitas's revolutionary Anti Entropy Thermo-Nullifier is the exciting, affordable new way to eliminate operational downtime.\n\nPowered by our proprietary renewable power sources, the AETN efficiently cools an entire office building without incurring any of the environmental surcharges associated with comparable systems.\n\nInitial setup includes hydrogen duct installation and discounted monthly maintenance visits from our elite team of specially trained contractors.\n\nNow available for pre-order!";
 
 				public static LocString CONTAINER2 = "Brought to you by the Gravitas Facility.\n<smallcaps>Patent Pending</smallcaps>";
 			}
@@ -1933,6 +2120,22 @@ namespace STRINGS
 				public static LocString CONTAINER1 = "Much remains a mystery about the biology of Gas Grass, a plant-like lifeform only recently recovered from missions into outer space.\n\nHowever, it appears to use ambient radiation from space as an energy source, growing rapidly when given a suitable " + UI.FormatAsLink("Chlorine", "CHLORINE") + "-laden environment.";
 
 				public static LocString CONTAINER2 = "Initially there was worry that transplanting a Gas Grass specimen on planet or gravity-laden terrestrial body would collapse its internal structures. Luckily, Gas Grass has evolved sturdy tubules to prevent structural damage in the event of pressure changes between its internally transported chlorine and its external environment.";
+			}
+		}
+
+		public class GINGER
+		{
+			public static LocString TITLE = "Tonic Root";
+
+			public static LocString SUBTITLE = "Edible Plant";
+
+			public class BODY
+			{
+				public static LocString CONTAINER1 = "Tonic Root is a close relative of the zingiberaceae family commonly known as ginger. Its heavily burled shoots are typically light brown in colour, and enveloped in a thin layer of protective, edible bark.";
+
+				public static LocString CONTAINER2 = "In addition to its use as an aromatic culinary ingredient, it has traditionally been employed as a tonic for a variety of minor digestive ailments.";
+
+				public static LocString CONTAINER3 = "Its stringy fibers can become irretrievably embedded between one's teeth during mastication.";
 			}
 		}
 
@@ -2326,7 +2529,7 @@ namespace STRINGS
 
 			public class BODY
 			{
-				public static LocString CONTAINER1 = "<smallcaps>[Voice Recognition Initialized]\n[Subject Identified: A001]</smallcaps>\n\n[LOG BEGINS]\n\nDr. Techna's newest notes on Duplicant memories have revealed some interesting discoveries. It seems memories </i>can</i> be transferred to the cloned subject but it requires the host to be subjected to a machine that performs extremely detailed microanalysis. This in depth dissection of the subject would produce the results we need but at the expense of destroying the host.\n\nOf course this is not ideal for our current situation. The time and energy it took to recruit Gravitas’ highly trained staff would be wasted if we were to extirpate these people for the sake of experimentation. But perhaps we can use our Duplicants as experimental subjects until we perfect the process and look into finding volunteers for the future in order to obtain an ideal specimen. I will have to discuss this with Dr. Techna but I'm sure he would be enthusiastic about such an opportunity to continue his work.\n\nI am also very interested in the commercial opportunities this presents. Off the top of my head I can think of applications in genetics, AI development, and teleportation technology. This could be a significant financial windfall for the company.\n\n[LOG ENDS]";
+				public static LocString CONTAINER1 = "<smallcaps>[Voice Recognition Initialized]\n[Subject Identified: A001]</smallcaps>\n\n[LOG BEGINS]\n\nDr. Techna's newest notes on Duplicant memories have revealed some interesting discoveries. It seems memories </i>can</i> be transferred to the cloned subject but it requires the host to be subjected to a machine that performs extremely detailed microanalysis. This in-depth dissection of the subject would produce the results we need but at the expense of destroying the host.\n\nOf course this is not ideal for our current situation. The time and energy it took to recruit Gravitas’ highly trained staff would be wasted if we were to extirpate these people for the sake of experimentation. But perhaps we can use our Duplicants as experimental subjects until we perfect the process and look into finding volunteers for the future in order to obtain an ideal specimen. I will have to discuss this with Dr. Techna but I'm sure he would be enthusiastic about such an opportunity to continue his work.\n\nI am also very interested in the commercial opportunities this presents. Off the top of my head I can think of applications in genetics, AI development, and teleportation technology. This could be a significant financial windfall for the company.\n\n[LOG ENDS]";
 			}
 		}
 
@@ -2428,7 +2631,7 @@ namespace STRINGS
 				"Building a rocket first requires constructing a ",
 				UI.FormatAsLink("Rocket Platform", "LAUNCHPAD"),
 				" and adding modules from the menu. All rockets will require an engine, a nosecone and a Command Module piloted by a Duplicant possessing the ",
-				UI.FormatAsLink("Rocket Piloting", "ASTRONAUTTRAINEE"),
+				UI.FormatAsLink("Rocket Piloting", "ROCKETPILOTING1"),
 				" skill or higher. Note that the ",
 				UI.FormatAsLink("Solo Spacefarer Nosecone", "HABITATMODULESMALL"),
 				" functions as both a Command Module and a nosecone.\n\n"
@@ -2439,7 +2642,7 @@ namespace STRINGS
 			public static LocString PARAGRAPH_2 = string.Concat(new string[]
 			{
 				"To scan space and see nearby intersteller destinations a ",
-				UI.FormatAsLink("Telescope", "TELESCOPE"),
+				UI.FormatAsLink("Telescope", "CLUSTERTELESCOPE"),
 				" must first be built on the surface of a Planetoid. ",
 				UI.FormatAsLink("Orbital Microlabs", "ORBITALRESEARCHCENTER"),
 				" in orbit around a Planetoid, and ",
@@ -2690,15 +2893,70 @@ namespace STRINGS
 
 			public static LocString HEADER_1 = "Radiation";
 
-			public static LocString PARAGRAPH_1 = "When transporting radioactive materials such as Uranium, care must be taken to avoid exposing outside objects to contaminants.\n\nUsing proper transportation vessels, such as those which are lead lined, is crucial to ensuring that Duplicants avoid Radiation Sickness.";
+			public static LocString PARAGRAPH_1 = string.Concat(new string[]
+			{
+				"When transporting radioactive materials such as ",
+				UI.FormatAsLink("Uranium", "URANIUMORE"),
+				", care must be taken to avoid exposing outside objects to ",
+				UI.FormatAsLink("Radioactive Contaminants", "RADIATIONSICKNESS"),
+				".\n\nUsing proper transportation vessels, such as those which are lined with ",
+				UI.FormatAsLink("Lead", "LEAD"),
+				", is crucial to ensuring that Duplicants avoid ",
+				UI.FormatAsLink("Radiation Sickness", "RADIATIONSICKNESS"),
+				"."
+			});
 
 			public static LocString HEADER_2 = "Radiation Sickness";
 
-			public static LocString PARAGRAPH_2 = "Duplicants who are exposed to Radioactive Contaminants will need to wear protection or they risk coming down with radiation sickness.\n\nSome Duplicants will have more of a natural resistance to radiation but prolonged exposure to radioactive contaminants will still increase their chances of becoming sick.\n\nConsuming Iodine Supplements and Seafood will pro-actively increase a Duplicant's radiation resistance, but will not cure a Duplicant's Radiation Sickness once they have become infected.\n\nOn the other hand, exposure to radiation will kill food poisoning, slimelung and zombie spores on surfaces (including Duplicants).\n\n";
+			public static LocString PARAGRAPH_2 = string.Concat(new string[]
+			{
+				"Duplicants who are exposed to ",
+				UI.FormatAsLink("Radioactive Contaminants", "RADIATIONSICKNESS"),
+				" will need to wear protection or they risk coming down with ",
+				UI.FormatAsLink("Radiation Sickness", "RADIATIONSICKNESS"),
+				".\n\nSome Duplicants will have more of a natural resistance to radiation, but prolonged exposure will still increase their chances of becoming sick.\n\nConsuming ",
+				UI.FormatAsLink("Rad Pills", "BASICRADPILL"),
+				" or seafood such as ",
+				UI.FormatAsLink("Cooked Seafood", "COOKEDFISH"),
+				" or ",
+				UI.FormatAsLink("Waterweed", "SEALETTUCE"),
+				" increases a Duplicant's radiation resistance, but will not cure a Duplicant's ",
+				UI.FormatAsLink("Radiation Sickness", "RADIATIONSICKNESS"),
+				" once they have become infected.\n\nOn the other hand, exposure to radiation will kill ",
+				UI.FormatAsLink("Food Poisoning", "FOODPOISONING"),
+				", ",
+				UI.FormatAsLink("Slimelung", "SLIMELUNG"),
+				" and ",
+				UI.FormatAsLink("Zombie Spores", "ZOMBIESPORES"),
+				" on surfaces (including on Duplicants).\n\n"
+			});
 
 			public static LocString HEADER_3 = "Nuclear Energy";
 
-			public static LocString PARAGRAPH_3 = "A Research Reactor will require Enriched Uranium to run. Uranium can be enriched using a Uranium Centrifuge.\n\nOnce supplied with Enriched Uranium a Nuclear Reactor will create an enormous amount of heat which can then be placed under a source of water to produce steam and connected to a Steam Turbine to produce a considerable source of power.";
+			public static LocString PARAGRAPH_3 = string.Concat(new string[]
+			{
+				"A ",
+				UI.FormatAsLink("Research Reactor", "NUCLEARREACTOR"),
+				" will require ",
+				UI.FormatAsLink("Enriched Uranium", "ENRICHEDURANIUM"),
+				" to run. Uranium can be enriched using a ",
+				UI.FormatAsLink("Uranium Centrifuge", "URANIUMCENTRIFUGE"),
+				".\n\nOnce supplied with ",
+				UI.FormatAsLink("Enriched Uranium", "ENRICHEDURANIUM"),
+				", a ",
+				UI.FormatAsLink("Research Reactors", "NUCLEARREACTOR"),
+				" will create an enormous amount of ",
+				UI.FormatAsLink("Heat", "HEAT"),
+				" which can then be placed under a source of ",
+				UI.FormatAsLink("Water", "WATER"),
+				" to produce ",
+				UI.FormatAsLink("Steam", "STEAM"),
+				"and connected to a  ",
+				UI.FormatAsLink("Steam Turbine", "STEAMTURBINE2"),
+				" to produce a considerable source of ",
+				UI.FormatAsLink("Power", "POWER"),
+				"."
+			});
 		}
 
 		public class RESEARCH

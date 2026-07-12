@@ -64,6 +64,11 @@ public class ModifierSet : ScriptableObject
 		Effect effect3 = new Effect("EggSong", global::STRINGS.CREATURES.MODIFIERS.INCUBATOR_SONG.NAME, global::STRINGS.CREATURES.MODIFIERS.INCUBATOR_SONG.TOOLTIP, 600f, true, false, false, null, 0f, null, "");
 		effect3.Add(new AttributeModifier(Db.Get().Amounts.Incubation.deltaAttribute.Id, 4f, global::STRINGS.CREATURES.MODIFIERS.INCUBATOR_SONG.NAME, true, false, true));
 		this.effects.Add(effect3);
+		Effect effect4 = new Effect("EggHug", global::STRINGS.CREATURES.MODIFIERS.EGGHUG.NAME, global::STRINGS.CREATURES.MODIFIERS.EGGHUG.TOOLTIP, 600f, true, true, false, null, 0f, null, "");
+		effect4.Add(new AttributeModifier(Db.Get().Amounts.Incubation.deltaAttribute.Id, 1f, global::STRINGS.CREATURES.MODIFIERS.EGGHUG.NAME, true, false, true));
+		this.effects.Add(effect4);
+		Effect effect5 = new Effect("HuggingFrenzy", global::STRINGS.CREATURES.MODIFIERS.HUGGINGFRENZY.NAME, global::STRINGS.CREATURES.MODIFIERS.HUGGINGFRENZY.TOOLTIP, 600f, true, false, false, null, 0f, null, "");
+		this.effects.Add(effect5);
 		Reactable.ReactablePrecondition reactablePrecondition = delegate(GameObject go, Navigator.ActiveTransition n)
 		{
 			int num = Grid.PosToCell(go);
@@ -71,12 +76,12 @@ public class ModifierSet : ScriptableObject
 		};
 		this.effects.Get("WetFeet").AddEmotePrecondition(reactablePrecondition);
 		this.effects.Get("SoakingWet").AddEmotePrecondition(reactablePrecondition);
-		Effect effect4 = new Effect("DivergentCropTended", global::STRINGS.CREATURES.MODIFIERS.DIVERGENTPLANTTENDED.NAME, global::STRINGS.CREATURES.MODIFIERS.DIVERGENTPLANTTENDED.TOOLTIP, 600f, true, true, false, null, 0f, null, "");
-		effect4.Add(new AttributeModifier(Db.Get().Amounts.Maturity.deltaAttribute.Id, 0.05f, global::STRINGS.CREATURES.MODIFIERS.DIVERGENTPLANTTENDED.NAME, true, false, true));
-		this.effects.Add(effect4);
-		Effect effect5 = new Effect("DivergentCropTendedWorm", global::STRINGS.CREATURES.MODIFIERS.DIVERGENTPLANTTENDEDWORM.NAME, global::STRINGS.CREATURES.MODIFIERS.DIVERGENTPLANTTENDEDWORM.TOOLTIP, 600f, true, true, false, null, 0f, null, "");
-		effect5.Add(new AttributeModifier(Db.Get().Amounts.Maturity.deltaAttribute.Id, 0.5f, global::STRINGS.CREATURES.MODIFIERS.DIVERGENTPLANTTENDEDWORM.NAME, true, false, true));
-		this.effects.Add(effect5);
+		Effect effect6 = new Effect("DivergentCropTended", global::STRINGS.CREATURES.MODIFIERS.DIVERGENTPLANTTENDED.NAME, global::STRINGS.CREATURES.MODIFIERS.DIVERGENTPLANTTENDED.TOOLTIP, 600f, true, true, false, null, 0f, null, "");
+		effect6.Add(new AttributeModifier(Db.Get().Amounts.Maturity.deltaAttribute.Id, 0.05f, global::STRINGS.CREATURES.MODIFIERS.DIVERGENTPLANTTENDED.NAME, true, false, true));
+		this.effects.Add(effect6);
+		Effect effect7 = new Effect("DivergentCropTendedWorm", global::STRINGS.CREATURES.MODIFIERS.DIVERGENTPLANTTENDEDWORM.NAME, global::STRINGS.CREATURES.MODIFIERS.DIVERGENTPLANTTENDEDWORM.TOOLTIP, 600f, true, true, false, null, 0f, null, "");
+		effect7.Add(new AttributeModifier(Db.Get().Amounts.Maturity.deltaAttribute.Id, 0.5f, global::STRINGS.CREATURES.MODIFIERS.DIVERGENTPLANTTENDEDWORM.NAME, true, false, true));
+		this.effects.Add(effect7);
 	}
 
 	public Trait CreateTrait(string id, string name, string description, string group_name, bool should_save, ChoreGroup[] disabled_chore_groups, bool positive_trait, bool is_valid_starter_trait)

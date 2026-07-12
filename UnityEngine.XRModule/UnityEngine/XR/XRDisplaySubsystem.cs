@@ -8,9 +8,9 @@ using UnityEngine.Scripting;
 namespace UnityEngine.XR
 {
 	[NativeType(Header = "Modules/XR/Subsystems/Display/XRDisplaySubsystem.h")]
-	[NativeConditional("ENABLE_XR")]
-	[NativeHeader("Modules/XR/XRPrefix.h")]
 	[UsedByNativeCode]
+	[NativeHeader("Modules/XR/XRPrefix.h")]
+	[NativeConditional("ENABLE_XR")]
 	public class XRDisplaySubsystem : IntegratedSubsystem<XRDisplaySubsystemDescriptor>
 	{
 		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
@@ -161,6 +161,40 @@ namespace UnityEngine.XR
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern bool Internal_TryGetRenderPass(int renderPassIndex, out XRDisplaySubsystem.XRRenderPass renderPass);
 
+		public void EndRecordingIfLateLatched(Camera camera)
+		{
+			bool flag = !this.Internal_TryEndRecordingIfLateLatched(camera);
+			if (flag)
+			{
+				bool flag2 = camera == null;
+				if (flag2)
+				{
+					throw new ArgumentNullException("camera");
+				}
+			}
+		}
+
+		[NativeMethod("TryEndRecordingIfLateLatched")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern bool Internal_TryEndRecordingIfLateLatched(Camera camera);
+
+		public void BeginRecordingIfLateLatched(Camera camera)
+		{
+			bool flag = !this.Internal_TryBeginRecordingIfLateLatched(camera);
+			if (flag)
+			{
+				bool flag2 = camera == null;
+				if (flag2)
+				{
+					throw new ArgumentNullException("camera");
+				}
+			}
+		}
+
+		[NativeMethod("TryBeginRecordingIfLateLatched")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern bool Internal_TryBeginRecordingIfLateLatched(Camera camera);
+
 		public void GetCullingParameters(Camera camera, int cullingPassIndex, out ScriptableCullingParameters scriptableCullingParameters)
 		{
 			bool flag = !this.Internal_TryGetCullingParams(camera, cullingPassIndex, out scriptableCullingParameters);
@@ -176,8 +210,8 @@ namespace UnityEngine.XR
 			throw new IndexOutOfRangeException("cullingPassIndex");
 		}
 
-		[NativeHeader("Runtime/Graphics/ScriptableRenderLoop/ScriptableCulling.h")]
 		[NativeMethod("TryGetCullingParams")]
+		[NativeHeader("Runtime/Graphics/ScriptableRenderLoop/ScriptableCulling.h")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern bool Internal_TryGetCullingParams(Camera camera, int cullingPassIndex, out ScriptableCullingParameters scriptableCullingParameters);
 
@@ -237,9 +271,9 @@ namespace UnityEngine.XR
 			return this.AddGraphicsThreadMirrorViewBlit(cmd, allowGraphicsStateInvalidate, -1);
 		}
 
+		[NativeConditional("ENABLE_XR")]
 		[NativeMethod(Name = "AddGraphicsThreadMirrorViewBlit", IsThreadSafe = false)]
 		[NativeHeader("Runtime/Graphics/CommandBuffer/RenderingCommandBuffer.h")]
-		[NativeConditional("ENABLE_XR")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern bool AddGraphicsThreadMirrorViewBlit(CommandBuffer cmd, bool allowGraphicsStateInvalidate, int mode);
 
@@ -281,6 +315,10 @@ namespace UnityEngine.XR
 			public Mesh occlusionMesh;
 
 			public int textureArraySlice;
+
+			public Matrix4x4 previousView;
+
+			public bool isPreviousViewValid;
 		}
 
 		[NativeHeader("Modules/XR/Subsystems/Display/XRDisplaySubsystem.bindings.h")]
@@ -288,8 +326,8 @@ namespace UnityEngine.XR
 		[NativeHeader("Runtime/Graphics/RenderTextureDesc.h")]
 		public struct XRRenderPass
 		{
-			[NativeMethod(Name = "XRRenderPassScriptApi::GetRenderParameter", IsFreeFunction = true, HasExplicitThis = true, ThrowsException = true)]
 			[NativeConditional("ENABLE_XR")]
+			[NativeMethod(Name = "XRRenderPassScriptApi::GetRenderParameter", IsFreeFunction = true, HasExplicitThis = true, ThrowsException = true)]
 			public void GetRenderParameter(Camera camera, int renderParameterIndex, out XRDisplaySubsystem.XRRenderParameter renderParameter)
 			{
 				XRDisplaySubsystem.XRRenderPass.GetRenderParameter_Injected(ref this, camera, renderParameterIndex, out renderParameter);
@@ -316,13 +354,19 @@ namespace UnityEngine.XR
 
 			public RenderTextureDescriptor renderTargetDesc;
 
+			public bool hasMotionVectorPass;
+
+			public RenderTargetIdentifier motionVectorRenderTarget;
+
+			public RenderTextureDescriptor motionVectorRenderTargetDesc;
+
 			public bool shouldFillOutDepth;
 
 			public int cullingPassIndex;
 		}
 
-		[NativeHeader("Runtime/Graphics/RenderTexture.h")]
 		[NativeHeader("Modules/XR/Subsystems/Display/XRDisplaySubsystem.bindings.h")]
+		[NativeHeader("Runtime/Graphics/RenderTexture.h")]
 		public struct XRBlitParams
 		{
 			public RenderTexture srcTex;
@@ -337,8 +381,8 @@ namespace UnityEngine.XR
 		[NativeHeader("Modules/XR/Subsystems/Display/XRDisplaySubsystem.bindings.h")]
 		public struct XRMirrorViewBlitDesc
 		{
-			[NativeMethod(Name = "XRMirrorViewBlitDescScriptApi::GetBlitParameter", IsFreeFunction = true, HasExplicitThis = true)]
 			[NativeConditional("ENABLE_XR")]
+			[NativeMethod(Name = "XRMirrorViewBlitDescScriptApi::GetBlitParameter", IsFreeFunction = true, HasExplicitThis = true)]
 			public void GetBlitParameter(int blitParameterIndex, out XRDisplaySubsystem.XRBlitParams blitParameter)
 			{
 				XRDisplaySubsystem.XRMirrorViewBlitDesc.GetBlitParameter_Injected(ref this, blitParameterIndex, out blitParameter);

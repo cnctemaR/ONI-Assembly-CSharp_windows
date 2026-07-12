@@ -195,7 +195,7 @@ public class SaveLoader : KMonoBehaviour
 			DebugUtil.LogWarningArgs(new object[] { "Mod footprint of save file doesn't match current mod configuration" });
 		}
 		Global.Instance.modManager.SendMetricsEvent();
-		WorldGen.LoadSettings();
+		WorldGen.LoadSettings(false);
 		CustomGameSettings.Instance.LoadClusters();
 		if (this.GameInfo.clusterId == null)
 		{
@@ -276,12 +276,12 @@ public class SaveLoader : KMonoBehaviour
 
 	public static string GetSavePrefix()
 	{
-		return global::System.IO.Path.Combine(global::Util.RootFolder(), "save_files/");
+		return global::System.IO.Path.Combine(global::Util.RootFolder(), string.Format("{0}{1}", "save_files", global::System.IO.Path.DirectorySeparatorChar));
 	}
 
 	public static string GetCloudSavePrefix()
 	{
-		string text = global::System.IO.Path.Combine(global::Util.RootFolder(), "cloud_save_files/");
+		string text = global::System.IO.Path.Combine(global::Util.RootFolder(), string.Format("{0}{1}", "cloud_save_files", global::System.IO.Path.DirectorySeparatorChar));
 		string userID = SaveLoader.GetUserID();
 		if (string.IsNullOrEmpty(userID))
 		{
@@ -357,7 +357,7 @@ public class SaveLoader : KMonoBehaviour
 
 	public static string GetAutoSavePrefix()
 	{
-		string text = global::System.IO.Path.Combine(SaveLoader.GetSavePrefixAndCreateFolder(), "auto_save/");
+		string text = global::System.IO.Path.Combine(SaveLoader.GetSavePrefixAndCreateFolder(), string.Format("{0}{1}", "auto_save", global::System.IO.Path.DirectorySeparatorChar));
 		if (!global::System.IO.Directory.Exists(text))
 		{
 			global::System.IO.Directory.CreateDirectory(text);
@@ -692,7 +692,14 @@ public class SaveLoader : KMonoBehaviour
 
 	public static SaveGame.GameInfo LoadHeader(string filename, out SaveGame.Header header)
 	{
-		return SaveGame.GetHeader(new FastReader(File.ReadAllBytes(filename)), out header, filename);
+		byte[] array = new byte[512];
+		SaveGame.GameInfo header2;
+		using (FileStream fileStream = File.OpenRead(filename))
+		{
+			fileStream.Read(array, 0, 512);
+			header2 = SaveGame.GetHeader(new FastReader(array), out header, filename);
+		}
+		return header2;
 	}
 
 	public bool Load(string filename)
@@ -818,7 +825,7 @@ public class SaveLoader : KMonoBehaviour
 	public bool LoadFromWorldGen()
 	{
 		DebugUtil.LogArgs(new object[] { "Attempting to start a new game with current world gen" });
-		WorldGen.LoadSettings();
+		WorldGen.LoadSettings(false);
 		this.m_clusterLayout = Cluster.Load();
 		ListPool<SimSaveFileStructure, SaveLoader>.PooledList pooledList = ListPool<SimSaveFileStructure, SaveLoader>.Allocate();
 		this.m_clusterLayout.LoadClusterLayoutSim(pooledList);

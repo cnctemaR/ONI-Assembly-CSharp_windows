@@ -82,6 +82,14 @@ namespace UnityEngine
 			get;
 		}
 
+		internal static extern bool isInsideList
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			set;
+		}
+
 		internal static extern Material blendMaterial
 		{
 			[FreeFunction("GetGUIBlendMaterial")]
@@ -779,14 +787,22 @@ namespace UnityEngine
 			textEditor.multiline = multiline;
 			textEditor.controlID = id;
 			textEditor.DetectFocusChange();
-			bool flag2 = TouchScreenKeyboard.isSupported && !TouchScreenKeyboard.isInPlaceEditingAllowed;
-			if (flag2)
+			bool isRequiredToForceOpen = TouchScreenKeyboard.isRequiredToForceOpen;
+			if (isRequiredToForceOpen)
 			{
-				GUI.HandleTextFieldEventForTouchscreen(position, id, content, multiline, maxLength, style, secureText, maskChar, textEditor);
+				GUI.HandleTextFieldEventForDesktopWithForcedKeyboard(position, id, content, multiline, maxLength, style, secureText, textEditor);
 			}
 			else
 			{
-				GUI.HandleTextFieldEventForDesktop(position, id, content, multiline, maxLength, style, textEditor);
+				bool flag2 = TouchScreenKeyboard.isSupported && !TouchScreenKeyboard.isInPlaceEditingAllowed;
+				if (flag2)
+				{
+					GUI.HandleTextFieldEventForTouchscreen(position, id, content, multiline, maxLength, style, secureText, maskChar, textEditor);
+				}
+				else
+				{
+					GUI.HandleTextFieldEventForDesktop(position, id, content, multiline, maxLength, style, textEditor);
+				}
 			}
 			textEditor.UpdateScrollOffsetIfNeeded(Event.current);
 		}
@@ -999,6 +1015,54 @@ namespace UnityEngine
 				}
 				current.Use();
 			}
+		}
+
+		private static void HandleTextFieldEventForDesktopWithForcedKeyboard(Rect position, int id, GUIContent content, bool multiline, int maxLength, GUIStyle style, string secureText, TextEditor editor)
+		{
+			bool flag = false;
+			bool flag2 = Event.current.type == EventType.Repaint;
+			if (flag2)
+			{
+				bool flag3 = GUI.s_HotTextField != -1 && GUI.s_HotTextField != id;
+				if (flag3)
+				{
+					TextEditor textEditor = (TextEditor)GUIUtility.GetStateObject(typeof(TextEditor), GUI.s_HotTextField);
+					textEditor.keyboardOnScreen.active = false;
+					textEditor.keyboardOnScreen = null;
+				}
+				bool flag4 = editor.keyboardOnScreen != null;
+				if (flag4)
+				{
+					bool flag5 = GUIUtility.keyboardControl != id || !Application.isFocused;
+					if (flag5)
+					{
+						editor.keyboardOnScreen.active = false;
+						editor.keyboardOnScreen = null;
+					}
+					else
+					{
+						bool flag6 = !editor.keyboardOnScreen.active;
+						if (flag6)
+						{
+							flag = true;
+						}
+					}
+				}
+				else
+				{
+					bool flag7 = GUIUtility.keyboardControl == id && Application.isFocused;
+					if (flag7)
+					{
+						flag = true;
+					}
+				}
+			}
+			bool flag8 = flag;
+			if (flag8)
+			{
+				editor.keyboardOnScreen = TouchScreenKeyboard.Open(secureText ?? content.text, TouchScreenKeyboardType.Default, true, multiline, secureText != null);
+			}
+			GUI.HandleTextFieldEventForDesktop(position, id, content, multiline, maxLength, style, editor);
 		}
 
 		public static bool Toggle(Rect position, bool value, string text)
@@ -1224,7 +1288,12 @@ namespace UnityEngine
 				bool flag2 = !string.IsNullOrEmpty(content.tooltip) && position.Contains(current.mousePosition) && GUIClip.visibleRect.Contains(current.mousePosition);
 				if (flag2)
 				{
-					GUIStyle.SetMouseTooltip(content.tooltip, position);
+					bool flag3 = !GUIStyle.IsTooltipActive(content.tooltip);
+					if (flag3)
+					{
+						GUI.s_ToolTipRect = new Rect(current.mousePosition, Vector2.zero);
+					}
+					GUIStyle.SetMouseTooltip(content.tooltip, GUI.s_ToolTipRect);
 				}
 			}
 		}

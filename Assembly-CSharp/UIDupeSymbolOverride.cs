@@ -9,7 +9,7 @@ public class UIDupeSymbolOverride : MonoBehaviour
 	{
 		if (this.slots == null)
 		{
-			this.slots = new AccessorySlots(null, this.head_default_anim, this.head_swap_anim, this.body_swap_anim);
+			this.slots = new AccessorySlots(null);
 		}
 		if (this.symbolOverrideController == null)
 		{
@@ -51,12 +51,6 @@ public class UIDupeSymbolOverride : MonoBehaviour
 		}
 		return HashedString.Invalid;
 	}
-
-	public KAnimFile head_default_anim;
-
-	public KAnimFile head_swap_anim;
-
-	public KAnimFile body_swap_anim;
 
 	private KBatchedAnimController animController;
 

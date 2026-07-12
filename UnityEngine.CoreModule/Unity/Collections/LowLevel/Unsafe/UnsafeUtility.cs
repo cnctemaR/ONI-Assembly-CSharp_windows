@@ -5,8 +5,8 @@ using UnityEngine.Bindings;
 
 namespace Unity.Collections.LowLevel.Unsafe
 {
-	[NativeHeader("Runtime/Export/Unsafe/UnsafeUtility.bindings.h")]
 	[StaticAccessor("UnsafeUtility", StaticAccessorType.DoubleColon)]
+	[NativeHeader("Runtime/Export/Unsafe/UnsafeUtility.bindings.h")]
 	public static class UnsafeUtility
 	{
 		[ThreadSafe]

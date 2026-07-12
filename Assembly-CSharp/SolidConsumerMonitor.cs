@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using Klei.AI;
 using UnityEngine;
@@ -13,7 +14,7 @@ public class SolidConsumerMonitor : GameStateMachine<SolidConsumerMonitor, Solid
 			smi.OnEatSolidComplete(data);
 		}).ToggleBehaviour(GameTags.Creatures.WantsToEat, (SolidConsumerMonitor.Instance smi) => smi.targetEdible != null && !smi.targetEdible.HasTag(GameTags.Creatures.ReservedByCreature), null);
 		this.satisfied.TagTransition(GameTags.Creatures.Hungry, this.lookingforfood, false);
-		this.lookingforfood.TagTransition(GameTags.Creatures.Hungry, this.satisfied, true).Update(new Action<SolidConsumerMonitor.Instance, float>(SolidConsumerMonitor.FindFood), UpdateRate.SIM_1000ms, true);
+		this.lookingforfood.TagTransition(GameTags.Creatures.Hungry, this.satisfied, true).Update(new Action<SolidConsumerMonitor.Instance, float>(SolidConsumerMonitor.FindFood), UpdateRate.SIM_4000ms, true);
 	}
 
 	[Conditional("DETAILED_SOLID_CONSUMER_MONITOR_PROFILE")]
@@ -28,90 +29,112 @@ public class SolidConsumerMonitor : GameStateMachine<SolidConsumerMonitor, Solid
 
 	private static void FindFood(SolidConsumerMonitor.Instance smi, float dt)
 	{
-		ListPool<KMonoBehaviour, SolidConsumerMonitor>.PooledList pooledList = ListPool<KMonoBehaviour, SolidConsumerMonitor>.Allocate();
-		ListPool<Storage, SolidConsumerMonitor>.PooledList pooledList2 = ListPool<Storage, SolidConsumerMonitor>.Allocate();
-		foreach (CreatureFeeder creatureFeeder in Components.CreatureFeeders.Items)
-		{
-			creatureFeeder.GetComponents<Storage>(pooledList2);
-			foreach (Storage storage in pooledList2)
-			{
-				if (!(storage == null))
-				{
-					foreach (GameObject gameObject in storage.items)
-					{
-						pooledList.Add((gameObject != null) ? gameObject.GetComponent<KMonoBehaviour>() : null);
-					}
-				}
-			}
-		}
-		pooledList2.Recycle();
+		ListPool<GameObject, SolidConsumerMonitor>.PooledList pooledList = ListPool<GameObject, SolidConsumerMonitor>.Allocate();
+		Diet diet = smi.def.diet;
 		int num = 0;
 		int num2 = 0;
 		Grid.PosToXY(smi.gameObject.transform.GetPosition(), out num, out num2);
 		num -= 8;
 		num2 -= 8;
-		ListPool<ScenePartitionerEntry, GameScenePartitioner>.PooledList pooledList3 = ListPool<ScenePartitionerEntry, GameScenePartitioner>.Allocate();
-		GameScenePartitioner.Instance.GatherEntries(num, num2, 16, 16, GameScenePartitioner.Instance.pickupablesLayer, pooledList3);
-		GameScenePartitioner.Instance.GatherEntries(num, num2, 16, 16, GameScenePartitioner.Instance.plants, pooledList3);
-		foreach (ScenePartitionerEntry scenePartitionerEntry in pooledList3)
+		ListPool<Storage, SolidConsumerMonitor>.PooledList pooledList2 = ListPool<Storage, SolidConsumerMonitor>.Allocate();
+		if (!diet.eatsPlantsDirectly)
 		{
-			pooledList.Add(scenePartitionerEntry.obj as KMonoBehaviour);
-		}
-		pooledList3.Recycle();
-		Diet diet = smi.def.diet;
-		for (int num3 = 0; num3 != pooledList.Count; num3++)
-		{
-			KMonoBehaviour kmonoBehaviour = pooledList[num3];
-			if (!(kmonoBehaviour == null))
+			foreach (CreatureFeeder creatureFeeder in Components.CreatureFeeders.GetItems(smi.GetMyWorldId()))
 			{
-				KPrefabID component = kmonoBehaviour.GetComponent<KPrefabID>();
-				component.UpdateTagBits();
-				if (component.HasAnyTags_AssumeLaundered(ref SolidConsumerMonitor.creatureMask) || diet.GetDietInfo(component.PrefabTag) == null)
+				int num3;
+				int num4;
+				Grid.PosToXY(creatureFeeder.transform.GetPosition(), out num3, out num4);
+				if (num3 >= num && num3 <= num + 16 && num4 >= num2 && num4 <= num2 + 16)
 				{
-					pooledList[num3] = null;
-				}
-				else if (component.HasAnyTags_AssumeLaundered(ref SolidConsumerMonitor.plantMask))
-				{
-					float num4 = 0.25f;
-					float num5 = 0f;
-					BuddingTrunk component2 = component.GetComponent<BuddingTrunk>();
-					if (component2)
+					creatureFeeder.GetComponents<Storage>(pooledList2);
+					foreach (Storage storage in pooledList2)
 					{
-						num5 = component2.GetMaxBranchMaturity();
-					}
-					else
-					{
-						AmountInstance amountInstance = Db.Get().Amounts.Maturity.Lookup(component);
-						if (amountInstance != null)
+						if (!(storage == null))
 						{
-							num5 = amountInstance.value / amountInstance.GetMax();
+							foreach (GameObject gameObject in storage.items)
+							{
+								KPrefabID component = gameObject.GetComponent<KPrefabID>();
+								component.UpdateTagBits();
+								if (!component.HasAnyTags_AssumeLaundered(ref SolidConsumerMonitor.creatureMask) && diet.GetDietInfo(component.PrefabTag) != null)
+								{
+									pooledList.Add(gameObject);
+								}
+							}
 						}
-					}
-					if (num5 < num4)
-					{
-						pooledList[num3] = null;
 					}
 				}
 			}
 		}
-		Navigator component3 = smi.GetComponent<Navigator>();
-		DrowningMonitor component4 = smi.GetComponent<DrowningMonitor>();
-		bool flag = component4 != null && component4.canDrownToDeath && !component4.livesUnderWater;
-		smi.targetEdible = null;
-		int num6 = -1;
-		foreach (KMonoBehaviour kmonoBehaviour2 in pooledList)
+		pooledList2.Recycle();
+		ListPool<ScenePartitionerEntry, GameScenePartitioner>.PooledList pooledList3 = ListPool<ScenePartitionerEntry, GameScenePartitioner>.Allocate();
+		if (diet.eatsPlantsDirectly)
 		{
-			if (!(kmonoBehaviour2 == null))
+			GameScenePartitioner.Instance.GatherEntries(num, num2, 16, 16, GameScenePartitioner.Instance.plants, pooledList3);
+			using (List<ScenePartitionerEntry>.Enumerator enumerator4 = pooledList3.GetEnumerator())
 			{
-				int num7 = Grid.PosToCell(kmonoBehaviour2.gameObject.transform.GetPosition());
-				if (!flag || component4.IsCellSafe(num7))
+				while (enumerator4.MoveNext())
 				{
-					int navigationCost = component3.GetNavigationCost(num7);
-					if (navigationCost != -1 && (navigationCost < num6 || num6 == -1))
+					ScenePartitionerEntry scenePartitionerEntry = enumerator4.Current;
+					KPrefabID kprefabID = (KPrefabID)scenePartitionerEntry.obj;
+					kprefabID.UpdateTagBits();
+					if (!kprefabID.HasAnyTags_AssumeLaundered(ref SolidConsumerMonitor.creatureMask) && diet.GetDietInfo(kprefabID.PrefabTag) != null)
 					{
-						num6 = navigationCost;
-						smi.targetEdible = kmonoBehaviour2.gameObject;
+						if (kprefabID.HasAnyTags_AssumeLaundered(ref SolidConsumerMonitor.plantMask))
+						{
+							float num5 = 0.25f;
+							float num6 = 0f;
+							BuddingTrunk component2 = kprefabID.GetComponent<BuddingTrunk>();
+							if (component2)
+							{
+								num6 = component2.GetMaxBranchMaturity();
+							}
+							else
+							{
+								AmountInstance amountInstance = Db.Get().Amounts.Maturity.Lookup(kprefabID);
+								if (amountInstance != null)
+								{
+									num6 = amountInstance.value / amountInstance.GetMax();
+								}
+							}
+							if (num6 < num5)
+							{
+								continue;
+							}
+						}
+						pooledList.Add(kprefabID.gameObject);
 					}
+				}
+				goto IL_0311;
+			}
+		}
+		GameScenePartitioner.Instance.GatherEntries(num, num2, 16, 16, GameScenePartitioner.Instance.pickupablesLayer, pooledList3);
+		foreach (ScenePartitionerEntry scenePartitionerEntry2 in pooledList3)
+		{
+			Pickupable pickupable = (Pickupable)scenePartitionerEntry2.obj;
+			KPrefabID component3 = pickupable.GetComponent<KPrefabID>();
+			component3.UpdateTagBits();
+			if (!component3.HasAnyTags_AssumeLaundered(ref SolidConsumerMonitor.creatureMask) && diet.GetDietInfo(component3.PrefabTag) != null)
+			{
+				pooledList.Add(pickupable.gameObject);
+			}
+		}
+		IL_0311:
+		pooledList3.Recycle();
+		Navigator component4 = smi.GetComponent<Navigator>();
+		DrowningMonitor component5 = smi.GetComponent<DrowningMonitor>();
+		bool flag = component5 != null && component5.canDrownToDeath && !component5.livesUnderWater;
+		smi.targetEdible = null;
+		int num7 = -1;
+		foreach (GameObject gameObject2 in pooledList)
+		{
+			int num8 = Grid.PosToCell(gameObject2.transform.GetPosition());
+			if (!flag || component5.IsCellSafe(num8))
+			{
+				int navigationCost = component4.GetNavigationCost(num8);
+				if (navigationCost != -1 && (navigationCost < num7 || num7 == -1))
+				{
+					num7 = navigationCost;
+					smi.targetEdible = gameObject2.gameObject;
 				}
 			}
 		}
@@ -170,10 +193,14 @@ public class SolidConsumerMonitor : GameStateMachine<SolidConsumerMonitor, Solid
 				BuddingTrunk component3 = kprefabID.GetComponent<BuddingTrunk>();
 				if (component3)
 				{
+					float maxBranchMaturity = component3.GetMaxBranchMaturity();
+					num2 = Mathf.Min(num2, maxBranchMaturity);
 					component3.ConsumeMass(num2);
 				}
 				else
 				{
+					float value = Db.Get().Amounts.Maturity.Lookup(component2.gameObject).value;
+					num2 = Mathf.Min(num2, value);
 					component2.ConsumeMass(num2);
 				}
 			}

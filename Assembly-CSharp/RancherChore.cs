@@ -1,5 +1,7 @@
 ﻿using System;
+using Klei.AI;
 using STRINGS;
+using TUNING;
 using UnityEngine;
 
 public class RancherChore : Chore<RancherChore.RancherChoreStates.Instance>
@@ -61,21 +63,14 @@ public class RancherChore : Chore<RancherChore.RancherChoreStates.Instance>
 				})
 				.Target(this.masterTarget)
 				.EventTransition(GameHashes.CreatureArrivedAtRanchStation, this.ranchcreature, null);
-			this.ranchcreature.Transition(this.checkformoreranchables, new StateMachine<RancherChore.RancherChoreStates, RancherChore.RancherChoreStates.Instance, IStateMachineTarget, object>.Transition.ConditionCallback(RancherChore.RancherChoreStates.HasCreatureLeft), UpdateRate.SIM_1000ms).ToggleAnims(new Func<RancherChore.RancherChoreStates.Instance, HashedString>(RancherChore.RancherChoreStates.GetRancherInteractAnim)).DefaultState(this.ranchcreature.pre)
-				.EventTransition(GameHashes.CreatureAbandonedRanchStation, this.checkformoreranchables, null)
+			this.ranchcreature.Transition(this.checkformoreranchables, new StateMachine<RancherChore.RancherChoreStates, RancherChore.RancherChoreStates.Instance, IStateMachineTarget, object>.Transition.ConditionCallback(RancherChore.RancherChoreStates.HasCreatureLeft), UpdateRate.SIM_1000ms).DefaultState(this.ranchcreature.working).EventTransition(GameHashes.CreatureAbandonedRanchStation, this.checkformoreranchables, null)
 				.Enter(new StateMachine<RancherChore.RancherChoreStates, RancherChore.RancherChoreStates.Instance, IStateMachineTarget, object>.State.Callback(RancherChore.RancherChoreStates.SetCreatureLayer))
 				.Exit(new StateMachine<RancherChore.RancherChoreStates, RancherChore.RancherChoreStates.Instance, IStateMachineTarget, object>.State.Callback(RancherChore.RancherChoreStates.ClearCreatureLayer));
-			this.ranchcreature.pre.Enter(new StateMachine<RancherChore.RancherChoreStates, RancherChore.RancherChoreStates.Instance, IStateMachineTarget, object>.State.Callback(RancherChore.RancherChoreStates.FaceCreature)).Enter(new StateMachine<RancherChore.RancherChoreStates, RancherChore.RancherChoreStates.Instance, IStateMachineTarget, object>.State.Callback(RancherChore.RancherChoreStates.PlayBuildingWorkingPre)).QueueAnim("working_pre", false, null)
-				.OnAnimQueueComplete(this.ranchcreature.loop);
-			this.ranchcreature.loop.Enter("TellCreatureRancherIsReady", delegate(RancherChore.RancherChoreStates.Instance smi)
+			this.ranchcreature.working.Enter("TellCreatureRancherIsReady", delegate(RancherChore.RancherChoreStates.Instance smi)
 			{
 				smi.TellCreatureRancherIsReady();
-			}).Enter(new StateMachine<RancherChore.RancherChoreStates, RancherChore.RancherChoreStates.Instance, IStateMachineTarget, object>.State.Callback(RancherChore.RancherChoreStates.PlayBuildingWorkingLoop)).Enter(new StateMachine<RancherChore.RancherChoreStates, RancherChore.RancherChoreStates.Instance, IStateMachineTarget, object>.State.Callback(RancherChore.RancherChoreStates.PlayRancherWorkingLoops))
-				.Target(this.rancher)
-				.OnAnimQueueComplete(this.ranchcreature.pst);
-			this.ranchcreature.pst.Enter(new StateMachine<RancherChore.RancherChoreStates, RancherChore.RancherChoreStates.Instance, IStateMachineTarget, object>.State.Callback(RancherChore.RancherChoreStates.RanchCreature)).Enter(new StateMachine<RancherChore.RancherChoreStates, RancherChore.RancherChoreStates.Instance, IStateMachineTarget, object>.State.Callback(RancherChore.RancherChoreStates.PlayBuildingWorkingPst)).QueueAnim("working_pst", false, null)
-				.QueueAnim("wipe_brow", false, null)
-				.OnAnimQueueComplete(this.checkformoreranchables);
+			}).ToggleWork<RancherChore.RancherWorkable>(this.masterTarget, this.ranchcreature.pst, this.checkformoreranchables, null);
+			this.ranchcreature.pst.ToggleAnims(new Func<RancherChore.RancherChoreStates.Instance, HashedString>(RancherChore.RancherChoreStates.GetRancherInteractAnim)).QueueAnim("wipe_brow", false, null).OnAnimQueueComplete(this.checkformoreranchables);
 			this.checkformoreranchables.Enter("FindRanchable", delegate(RancherChore.RancherChoreStates.Instance smi)
 			{
 				smi.CheckForMoreRanchables();
@@ -120,7 +115,7 @@ public class RancherChore : Chore<RancherChore.RancherChoreStates.Instance>
 			facing.Face(position);
 		}
 
-		private static void RanchCreature(RancherChore.RancherChoreStates.Instance smi)
+		public static void RanchCreature(RancherChore.RancherChoreStates.Instance smi)
 		{
 			global::Debug.Assert(smi.ranchStation != null, "smi.ranchStation was null");
 			RanchableMonitor.Instance targetRanchable = smi.ranchStation.targetRanchable;
@@ -131,44 +126,6 @@ public class RancherChore : Chore<RancherChore.RancherChoreStates.Instance>
 			KPrefabID component = targetRanchable.GetComponent<KPrefabID>();
 			smi.sm.rancher.Get(smi).Trigger(937885943, component.PrefabTag.Name);
 			smi.ranchStation.RanchCreature();
-		}
-
-		private static bool ShouldSynchronizeBuilding(RancherChore.RancherChoreStates.Instance smi)
-		{
-			return smi.ranchStation.def.synchronizeBuilding;
-		}
-
-		private static void PlayBuildingWorkingPre(RancherChore.RancherChoreStates.Instance smi)
-		{
-			if (RancherChore.RancherChoreStates.ShouldSynchronizeBuilding(smi))
-			{
-				smi.ranchStation.GetComponent<KBatchedAnimController>().Queue("working_pre", KAnim.PlayMode.Once, 1f, 0f);
-			}
-		}
-
-		private static void PlayRancherWorkingLoops(RancherChore.RancherChoreStates.Instance smi)
-		{
-			KBatchedAnimController kbatchedAnimController = smi.sm.rancher.Get<KBatchedAnimController>(smi);
-			for (int i = 0; i < smi.ranchStation.def.interactLoopCount; i++)
-			{
-				kbatchedAnimController.Queue("working_loop", KAnim.PlayMode.Once, 1f, 0f);
-			}
-		}
-
-		private static void PlayBuildingWorkingLoop(RancherChore.RancherChoreStates.Instance smi)
-		{
-			if (RancherChore.RancherChoreStates.ShouldSynchronizeBuilding(smi))
-			{
-				smi.ranchStation.GetComponent<KBatchedAnimController>().Queue("working_loop", KAnim.PlayMode.Loop, 1f, 0f);
-			}
-		}
-
-		private static void PlayBuildingWorkingPst(RancherChore.RancherChoreStates.Instance smi)
-		{
-			if (RancherChore.RancherChoreStates.ShouldSynchronizeBuilding(smi))
-			{
-				smi.ranchStation.GetComponent<KBatchedAnimController>().Queue("working_pst", KAnim.PlayMode.Once, 1f, 0f);
-			}
 		}
 
 		public StateMachine<RancherChore.RancherChoreStates, RancherChore.RancherChoreStates.Instance, IStateMachineTarget, object>.TargetParameter rancher;
@@ -187,9 +144,7 @@ public class RancherChore : Chore<RancherChore.RancherChoreStates.Instance>
 
 		private class RanchState : GameStateMachine<RancherChore.RancherChoreStates, RancherChore.RancherChoreStates.Instance, IStateMachineTarget, object>.State
 		{
-			public GameStateMachine<RancherChore.RancherChoreStates, RancherChore.RancherChoreStates.Instance, IStateMachineTarget, object>.State pre;
-
-			public GameStateMachine<RancherChore.RancherChoreStates, RancherChore.RancherChoreStates.Instance, IStateMachineTarget, object>.State loop;
+			public GameStateMachine<RancherChore.RancherChoreStates, RancherChore.RancherChoreStates.Instance, IStateMachineTarget, object>.State working;
 
 			public GameStateMachine<RancherChore.RancherChoreStates, RancherChore.RancherChoreStates.Instance, IStateMachineTarget, object>.State pst;
 		}
@@ -227,6 +182,50 @@ public class RancherChore : Chore<RancherChore.RancherChoreStates.Instance>
 			}
 
 			public RanchStation.Instance ranchStation;
+		}
+	}
+
+	public class RancherWorkable : Workable
+	{
+		protected override void OnPrefabInit()
+		{
+			RanchStation.Instance smi = base.gameObject.GetSMI<RanchStation.Instance>();
+			this.overrideAnims = new KAnimFile[] { Assets.GetAnim(smi.def.rancherInteractAnim) };
+			base.SetWorkTime(smi.def.worktime);
+			base.SetWorkerStatusItem(smi.def.ranchingStatusItem);
+			this.attributeExperienceMultiplier = DUPLICANTSTATS.ATTRIBUTE_LEVELING.MOST_DAY_EXPERIENCE;
+			this.skillExperienceSkillGroup = Db.Get().SkillGroups.Ranching.Id;
+			this.skillExperienceMultiplier = SKILLS.MOST_DAY_EXPERIENCE;
+			this.lightEfficiencyBonus = false;
+		}
+
+		public override Klei.AI.Attribute GetWorkAttribute()
+		{
+			return Db.Get().Attributes.Ranching;
+		}
+
+		protected override void OnStartWork(Worker worker)
+		{
+			RanchStation.Instance smi = base.gameObject.GetSMI<RanchStation.Instance>();
+			if (smi != null)
+			{
+				smi.targetRanchable.Get<KBatchedAnimController>().Play(smi.def.ranchedPreAnim, KAnim.PlayMode.Once, 1f, 0f);
+				smi.targetRanchable.Get<KBatchedAnimController>().Queue(smi.def.ranchedLoopAnim, KAnim.PlayMode.Loop, 1f, 0f);
+			}
+		}
+
+		public override void OnPendingCompleteWork(Worker work)
+		{
+			RanchStation.Instance smi = base.gameObject.GetSMI<RanchStation.Instance>();
+			if (smi != null)
+			{
+				smi.targetRanchable.Get<KBatchedAnimController>().Play(smi.def.ranchedPstAnim, KAnim.PlayMode.Once, 1f, 0f);
+				RancherChore.RancherChoreStates.Instance smi2 = base.gameObject.GetSMI<RancherChore.RancherChoreStates.Instance>();
+				if (smi2 != null)
+				{
+					RancherChore.RancherChoreStates.RanchCreature(smi2);
+				}
+			}
 		}
 	}
 }

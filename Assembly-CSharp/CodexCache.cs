@@ -92,18 +92,18 @@ public static class CodexCache
 				{
 					List<ICodexWidget> list2 = new List<ICodexWidget>();
 					list2.Add(new CodexSpacer());
-					list2.Add(new CodexText(string.Format(CODEX.HEADERS.SUBENTRIES, keyValuePair2.Value.subEntries.Count - num, keyValuePair2.Value.subEntries.Count), CodexTextStyle.Subtitle));
+					list2.Add(new CodexText(string.Format(CODEX.HEADERS.SUBENTRIES, keyValuePair2.Value.subEntries.Count - num, keyValuePair2.Value.subEntries.Count), CodexTextStyle.Subtitle, null));
 					foreach (SubEntry subEntry2 in keyValuePair2.Value.subEntries)
 					{
 						if (subEntry2.lockID != null && !Game.Instance.unlocks.IsUnlocked(subEntry2.lockID))
 						{
-							list2.Add(new CodexText(UI.FormatAsLink(CODEX.HEADERS.CONTENTLOCKED, UI.ExtractLinkID(subEntry2.name)), CodexTextStyle.Body));
+							list2.Add(new CodexText(UI.FormatAsLink(CODEX.HEADERS.CONTENTLOCKED, UI.ExtractLinkID(subEntry2.name)), CodexTextStyle.Body, null));
 						}
 						else
 						{
 							string text2 = UI.StripLinkFormatting(subEntry2.name);
 							text2 = UI.FormatAsLink(text2, subEntry2.id);
-							list2.Add(new CodexText(text2, CodexTextStyle.Body));
+							list2.Add(new CodexText(text2, CodexTextStyle.Body, null));
 						}
 					}
 					list2.Add(new CodexSpacer());

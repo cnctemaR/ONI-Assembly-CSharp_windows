@@ -6,8 +6,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[UsedByNativeCode]
 	[Il2CppEagerStaticClassConstruction]
+	[UsedByNativeCode]
 	public struct Vector2Int : IEquatable<Vector2Int>, IFormattable
 	{
 		public int x

@@ -490,7 +490,7 @@ namespace UnityEngine
 			{
 				guilayoutOption = GUILayout.ExpandWidth(true);
 			}
-			guilayoutOption.value = 10000;
+			guilayoutOption = new GUILayoutOption(guilayoutOption.type, 10000);
 			GUILayoutUtility.GetRect(0f, 0f, GUILayoutUtility.spaceStyle, new GUILayoutOption[] { guilayoutOption });
 			bool flag = Event.current.type == EventType.Layout;
 			if (flag)

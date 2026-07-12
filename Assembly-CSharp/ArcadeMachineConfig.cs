@@ -24,7 +24,7 @@ public class ArcadeMachineConfig : IBuildingConfig
 		buildingDef.Overheatable = true;
 		buildingDef.RequiresPowerInput = true;
 		buildingDef.EnergyConsumptionWhenActive = 1200f;
-		buildingDef.SelfHeatKilowattsWhenActive = 4f;
+		buildingDef.SelfHeatKilowattsWhenActive = 2f;
 		return buildingDef;
 	}
 
@@ -43,4 +43,8 @@ public class ArcadeMachineConfig : IBuildingConfig
 	}
 
 	public const string ID = "ArcadeMachine";
+
+	public const string SPECIFIC_EFFECT = "PlayedArcade";
+
+	public const string TRACKING_EFFECT = "RecentlyPlayedArcade";
 }

@@ -11,6 +11,7 @@ public class ToiletDiagnostic : ColonyDiagnostic
 		this.tracker = TrackerTool.Instance.GetWorldTracker<WorkingToiletTracker>(worldID);
 		base.AddCriterion("CheckHasAnyToilets", new DiagnosticCriterion(UI.COLONY_DIAGNOSTICS.TOILETDIAGNOSTIC.CRITERIA.CHECKHASANYTOILETS, new Func<ColonyDiagnostic.DiagnosticResult>(this.CheckHasAnyToilets)));
 		base.AddCriterion("CheckEnoughToilets", new DiagnosticCriterion(UI.COLONY_DIAGNOSTICS.TOILETDIAGNOSTIC.CRITERIA.CHECKENOUGHTOILETS, new Func<ColonyDiagnostic.DiagnosticResult>(this.CheckEnoughToilets)));
+		base.AddCriterion("CheckBladders", new DiagnosticCriterion(UI.COLONY_DIAGNOSTICS.TOILETDIAGNOSTIC.CRITERIA.CHECKBLADDERS, new Func<ColonyDiagnostic.DiagnosticResult>(this.CheckBladders)));
 	}
 
 	private ColonyDiagnostic.DiagnosticResult CheckHasAnyToilets()
@@ -49,6 +50,33 @@ public class ToiletDiagnostic : ColonyDiagnostic
 			{
 				diagnosticResult.opinion = ColonyDiagnostic.DiagnosticResult.Opinion.Concern;
 				diagnosticResult.Message = UI.COLONY_DIAGNOSTICS.TOILETDIAGNOSTIC.NO_WORKING_TOILETS;
+			}
+		}
+		return diagnosticResult;
+	}
+
+	private ColonyDiagnostic.DiagnosticResult CheckBladders()
+	{
+		List<MinionIdentity> worldItems = Components.LiveMinionIdentities.GetWorldItems(base.worldID, false);
+		ColonyDiagnostic.DiagnosticResult diagnosticResult = new ColonyDiagnostic.DiagnosticResult(ColonyDiagnostic.DiagnosticResult.Opinion.Normal, UI.COLONY_DIAGNOSTICS.GENERIC_CRITERIA_PASS, null);
+		if (worldItems.Count == 0)
+		{
+			diagnosticResult.opinion = ColonyDiagnostic.DiagnosticResult.Opinion.Normal;
+			diagnosticResult.Message = UI.COLONY_DIAGNOSTICS.NO_MINIONS;
+		}
+		else
+		{
+			diagnosticResult.opinion = ColonyDiagnostic.DiagnosticResult.Opinion.Normal;
+			diagnosticResult.Message = UI.COLONY_DIAGNOSTICS.TOILETDIAGNOSTIC.NORMAL;
+			foreach (MinionIdentity minionIdentity in worldItems)
+			{
+				PeeChoreMonitor.Instance smi = minionIdentity.GetSMI<PeeChoreMonitor.Instance>();
+				if (smi != null && smi.IsCritical())
+				{
+					diagnosticResult.opinion = ColonyDiagnostic.DiagnosticResult.Opinion.Warning;
+					diagnosticResult.Message = UI.COLONY_DIAGNOSTICS.TOILETDIAGNOSTIC.TOILET_URGENT;
+					break;
+				}
 			}
 		}
 		return diagnosticResult;

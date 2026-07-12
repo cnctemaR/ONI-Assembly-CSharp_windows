@@ -92,8 +92,8 @@ namespace UnityEngine.Rendering
 		[FixedBuffer(typeof(uint), 14)]
 		internal ShaderKeywordSet.<m_Bits>e__FixedBuffer m_Bits;
 
-		[CompilerGenerated]
 		[UnsafeValueType]
+		[CompilerGenerated]
 		[StructLayout(LayoutKind.Sequential, Size = 56)]
 		public struct <m_Bits>e__FixedBuffer
 		{

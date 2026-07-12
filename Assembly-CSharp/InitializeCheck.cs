@@ -28,6 +28,7 @@ public class InitializeCheck : MonoBehaviour
 		camera.nearClipPlane = 0f;
 		global::Debug.Log("Cannot initialize filesystem. [" + InitializeCheck.savePathState.ToString() + "]");
 		Localization.Initialize();
+		GameObject.Find("BootCanvas").SetActive(false);
 		this.ShowFileErrorDialogs();
 	}
 

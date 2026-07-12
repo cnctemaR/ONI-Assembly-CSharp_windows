@@ -86,6 +86,12 @@ public class BrainScheduler : KMonoBehaviour, IRenderEveryTick, ICPULoad
 		}
 	}
 
+	protected override void OnForcedCleanUp()
+	{
+		CPUBudget.Remove(this);
+		base.OnForcedCleanUp();
+	}
+
 	public const float millisecondsPerFrame = 33.33333f;
 
 	public const float secondsPerFrame = 0.033333328f;

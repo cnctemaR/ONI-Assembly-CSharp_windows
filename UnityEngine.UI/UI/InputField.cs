@@ -737,9 +737,23 @@ namespace UnityEngine.UI
 			}
 		}
 
+		private bool TouchScreenKeyboardShouldBeUsed()
+		{
+			if (Application.platform == RuntimePlatform.Android)
+			{
+				return !TouchScreenKeyboard.isInPlaceEditingAllowed;
+			}
+			return TouchScreenKeyboard.isSupported;
+		}
+
 		private bool InPlaceEditing()
 		{
 			return !TouchScreenKeyboard.isSupported || this.m_TouchKeyboardAllowsInPlaceEditing;
+		}
+
+		private bool InPlaceEditingChanged()
+		{
+			return this.m_TouchKeyboardAllowsInPlaceEditing != TouchScreenKeyboard.isInPlaceEditingAllowed;
 		}
 
 		private void UpdateCaretFromKeyboard()
@@ -778,6 +792,18 @@ namespace UnityEngine.UI
 				this.m_ShouldActivateNextUpdate = false;
 			}
 			this.AssignPositioningIfNeeded();
+			if (this.isFocused && this.InPlaceEditingChanged())
+			{
+				if (this.m_CachedInputRenderer != null)
+				{
+					using (VertexHelper vertexHelper = new VertexHelper())
+					{
+						vertexHelper.FillMesh(this.mesh);
+					}
+					this.m_CachedInputRenderer.SetMesh(this.mesh);
+				}
+				this.DeactivateInputField();
+			}
 			if (!this.isFocused || this.InPlaceEditing())
 			{
 				return;
@@ -1886,7 +1912,7 @@ namespace UnityEngine.UI
 
 		private void UpdateGeometry()
 		{
-			if (!this.shouldHideMobileInput)
+			if (!this.InPlaceEditing() && !this.shouldHideMobileInput)
 			{
 				return;
 			}
@@ -2221,14 +2247,14 @@ namespace UnityEngine.UI
 			{
 				EventSystem.current.SetSelectedGameObject(base.gameObject);
 			}
-			if (TouchScreenKeyboard.isSupported)
+			this.m_TouchKeyboardAllowsInPlaceEditing = TouchScreenKeyboard.isInPlaceEditingAllowed;
+			if (this.TouchScreenKeyboardShouldBeUsed())
 			{
 				if (this.input != null && this.input.touchSupported)
 				{
 					TouchScreenKeyboard.hideInput = this.shouldHideMobileInput;
 				}
 				this.m_Keyboard = ((this.inputType == InputField.InputType.Password) ? TouchScreenKeyboard.Open(this.m_Text, this.keyboardType, false, this.multiLine, true, false, "", this.characterLimit) : TouchScreenKeyboard.Open(this.m_Text, this.keyboardType, this.inputType == InputField.InputType.AutoCorrect, this.multiLine, false, false, "", this.characterLimit));
-				this.m_TouchKeyboardAllowsInPlaceEditing = TouchScreenKeyboard.isInPlaceEditingAllowed;
 				if (!this.m_TouchKeyboardAllowsInPlaceEditing)
 				{
 					this.MoveTextEnd(false);

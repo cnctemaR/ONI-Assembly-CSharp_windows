@@ -617,8 +617,8 @@ namespace STRINGS
 			{
 				"Nuclear Fallout is a highly toxic gas full of ",
 				UI.FormatAsLink("Radioactive Contaminants", "RADIATION"),
-				". Formed in a ",
-				UI.FormatAsLink("Reactor meltdown", "NUCLEARREACTOR"),
+				". Condenses into ",
+				UI.FormatAsLink("Nuclear Waste", "NUCLEARWASTE"),
 				"."
 			});
 		}
@@ -704,14 +704,7 @@ namespace STRINGS
 		{
 			public static LocString NAME = UI.FormatAsLink("Solid Nuclear Waste", "SOLIDNUCLEARWASTE");
 
-			public static LocString DESC = string.Concat(new string[]
-			{
-				"Highly toxic liquid full of ",
-				UI.FormatAsLink("Radioactive Contaminants", "RADIATION"),
-				". Formed in a ",
-				UI.FormatAsLink("Reactor meltdown", "NUCLEARREACTOR"),
-				"."
-			});
+			public static LocString DESC = "Highly toxic solid full of " + UI.FormatAsLink("Radioactive Contaminants", "RADIATION") + ".";
 		}
 
 		public class HELIUM
@@ -1228,8 +1221,10 @@ namespace STRINGS
 			{
 				"Highly toxic liquid full of ",
 				UI.FormatAsLink("Radioactive Contaminants", "RADIATION"),
-				". Formed in a ",
-				UI.FormatAsLink("Reactor meltdown", "NUCLEARREACTOR"),
+				" which emit ",
+				UI.FormatAsLink("Radiation", "RADIATION"),
+				" that can be absorbed by ",
+				UI.FormatAsLink("Radbolt Generators", "HIGHENERGYPARTICLESPAWNER"),
 				"."
 			});
 		}

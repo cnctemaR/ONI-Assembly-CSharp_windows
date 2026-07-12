@@ -11,8 +11,8 @@ using UnityEngineInternal;
 namespace UnityEngine
 {
 	[NativeHeader("Runtime/Export/Scripting/GameObject.bindings.h")]
-	[ExcludeFromPreset]
 	[UsedByNativeCode]
+	[ExcludeFromPreset]
 	public sealed class GameObject : Object
 	{
 		[FreeFunction("GameObjectBindings::CreatePrimitive")]
@@ -27,13 +27,13 @@ namespace UnityEngine
 			return castHelper.t;
 		}
 
-		[FreeFunction(Name = "GameObjectBindings::GetComponentFromType", HasExplicitThis = true, ThrowsException = true)]
 		[TypeInferenceRule(TypeInferenceRules.TypeReferencedByFirstArgument)]
+		[FreeFunction(Name = "GameObjectBindings::GetComponentFromType", HasExplicitThis = true, ThrowsException = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern Component GetComponent(Type type);
 
-		[FreeFunction(Name = "GameObjectBindings::GetComponentFastPath", HasExplicitThis = true, ThrowsException = true)]
 		[NativeWritableSelf]
+		[FreeFunction(Name = "GameObjectBindings::GetComponentFastPath", HasExplicitThis = true, ThrowsException = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal extern void GetComponentFastPath(Type type, IntPtr oneFurtherThanResultValue);
 
@@ -190,8 +190,8 @@ namespace UnityEngine
 			return component != null;
 		}
 
-		[TypeInferenceRule(TypeInferenceRules.TypeReferencedByFirstArgument)]
 		[FreeFunction(Name = "GameObjectBindings::TryGetComponentFromType", HasExplicitThis = true, ThrowsException = true)]
+		[TypeInferenceRule(TypeInferenceRules.TypeReferencedByFirstArgument)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal extern Component TryGetComponentInternal(Type type);
 

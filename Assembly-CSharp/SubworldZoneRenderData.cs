@@ -42,7 +42,7 @@ public class SubworldZoneRenderData : KMonoBehaviour
 						{
 							if (Grid.IsActiveWorld(num))
 							{
-								rawTextureData2[num] = ((overworldCell.zoneType == SubWorld.ZoneType.Space) ? byte.MaxValue : ((byte)overworldCell.zoneType));
+								rawTextureData2[num] = ((overworldCell.zoneType == SubWorld.ZoneType.Space) ? byte.MaxValue : ((byte)this.zoneTextureArrayIndices[(int)overworldCell.zoneType]));
 								Color32 color = this.zoneColours[(int)overworldCell.zoneType];
 								rawTextureData[num * 3] = color.r;
 								rawTextureData[num * 3 + 1] = color.g;
@@ -215,4 +215,10 @@ public class SubworldZoneRenderData : KMonoBehaviour
 	};
 
 	private const int NUM_COLOUR_BYTES = 3;
+
+	public int[] zoneTextureArrayIndices = new int[]
+	{
+		0, 1, 2, 3, 4, 5, 5, 3, 6, 7,
+		8, 9, 10, 11, 12, 7, 3, 13
+	};
 }

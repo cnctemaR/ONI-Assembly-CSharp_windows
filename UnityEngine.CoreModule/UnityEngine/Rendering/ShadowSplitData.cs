@@ -143,8 +143,8 @@ namespace UnityEngine.Rendering
 
 		private float m_CullingNearPlane;
 
-		[UnsafeValueType]
 		[CompilerGenerated]
+		[UnsafeValueType]
 		[StructLayout(LayoutKind.Sequential, Size = 160)]
 		public struct <m_CullingPlanes>e__FixedBuffer
 		{

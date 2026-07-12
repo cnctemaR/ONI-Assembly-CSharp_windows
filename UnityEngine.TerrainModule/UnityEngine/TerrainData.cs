@@ -7,13 +7,13 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[UsedByNativeCode]
-	[NativeHeader("Modules/Terrain/Public/TerrainDataScriptingInterface.h")]
 	[NativeHeader("TerrainScriptingClasses.h")]
+	[NativeHeader("Modules/Terrain/Public/TerrainDataScriptingInterface.h")]
+	[UsedByNativeCode]
 	public sealed class TerrainData : Object
 	{
-		[StaticAccessor("TerrainDataScriptingInterface", StaticAccessorType.DoubleColon)]
 		[ThreadSafe]
+		[StaticAccessor("TerrainDataScriptingInterface", StaticAccessorType.DoubleColon)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern int GetBoundaryValue(TerrainData.BoundaryValueType type);
 

@@ -11,8 +11,8 @@ using UnityEngine.Scripting;
 
 namespace Unity.Profiling
 {
-	[UsedByNativeCode]
 	[NativeHeader("Runtime/Profiler/ScriptBindings/ProfilerMarker.bindings.h")]
+	[UsedByNativeCode]
 	public struct ProfilerMarker
 	{
 		public IntPtr Handle
@@ -47,8 +47,8 @@ namespace Unity.Profiling
 			this.m_Ptr = ProfilerUnsafeUtility.CreateMarker(name, nameLen, category, MarkerFlags.Default, 0);
 		}
 
-		[Pure]
 		[Conditional("ENABLE_PROFILER")]
+		[Pure]
 		[MethodImpl((MethodImplOptions)256)]
 		public void Begin()
 		{
@@ -62,8 +62,8 @@ namespace Unity.Profiling
 			ProfilerUnsafeUtility.Internal_BeginWithObject(this.m_Ptr, contextUnityObject);
 		}
 
-		[Pure]
 		[Conditional("ENABLE_PROFILER")]
+		[Pure]
 		[MethodImpl((MethodImplOptions)256)]
 		public void End()
 		{

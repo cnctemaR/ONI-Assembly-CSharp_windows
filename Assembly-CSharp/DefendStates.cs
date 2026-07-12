@@ -9,7 +9,7 @@ public class DefendStates : GameStateMachine<DefendStates, DefendStates.Instance
 		this.root.Enter("SetTarget", delegate(DefendStates.Instance smi)
 		{
 			this.target.Set(smi.GetSMI<EggProtectionMonitor.Instance>().MainThreat, smi);
-		}).ToggleStatusItem(CREATURES.STATUSITEMS.PROTECTINGENTITY.NAME, CREATURES.STATUSITEMS.PROTECTINGENTITY.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 129022, null, null, Db.Get().StatusItemCategories.Main);
+		}).ToggleStatusItem(CREATURES.STATUSITEMS.ATTACKINGENTITY.NAME, CREATURES.STATUSITEMS.ATTACKINGENTITY.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 129022, null, null, Db.Get().StatusItemCategories.Main);
 		this.protectEntity.moveToThreat.InitializeStates(this.masterTarget, this.target, this.protectEntity.attackThreat, null, new CellOffset[]
 		{
 			new CellOffset(0, 0),

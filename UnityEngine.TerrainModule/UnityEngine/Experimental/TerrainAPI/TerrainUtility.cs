@@ -15,7 +15,11 @@ namespace UnityEngine.Experimental.TerrainAPI
 		{
 			foreach (Terrain terrain in Terrain.activeTerrains)
 			{
-				terrain.SetNeighbors(null, null, null, null);
+				bool allowAutoConnect = terrain.allowAutoConnect;
+				if (allowAutoConnect)
+				{
+					terrain.SetNeighbors(null, null, null, null);
+				}
 			}
 		}
 

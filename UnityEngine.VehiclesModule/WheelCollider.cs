@@ -4,8 +4,8 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	[NativeHeader("Modules/Vehicles/WheelCollider.h")]
 	[NativeHeader("PhysicsScriptingClasses.h")]
+	[NativeHeader("Modules/Vehicles/WheelCollider.h")]
 	public class WheelCollider : Collider
 	{
 		public Vector3 center

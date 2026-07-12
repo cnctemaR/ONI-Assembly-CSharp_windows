@@ -12,7 +12,7 @@ public class ClippyPanel : KScreen
 	protected override void OnActivate()
 	{
 		base.OnActivate();
-		SpeedControlScreen.Instance.Pause(true);
+		SpeedControlScreen.Instance.Pause(true, false);
 		Game.Instance.Trigger(1634669191, null);
 	}
 

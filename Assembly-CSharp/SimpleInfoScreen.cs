@@ -307,12 +307,12 @@ public class SimpleInfoScreen : TargetScreen, ISim4000ms, ISim1000ms
 		else if (component3 != null)
 		{
 			text = component3.Def.Effect;
-			text2 = component3.Def.Desc;
+			text2 = component3.Desc;
 		}
 		else if (component4 != null)
 		{
 			text = component4.Def.Effect;
-			text2 = component4.Def.Desc;
+			text2 = component4.Desc;
 		}
 		else if (component7 != null)
 		{
@@ -503,7 +503,7 @@ public class SimpleInfoScreen : TargetScreen, ISim4000ms, ISim1000ms
 	{
 		WorldContainer worldContainer = ((this.selectedTarget == null) ? null : this.selectedTarget.GetComponent<WorldContainer>());
 		AsteroidGridEntity asteroidGridEntity = ((this.selectedTarget == null) ? null : this.selectedTarget.GetComponent<AsteroidGridEntity>());
-		bool flag = worldContainer != null && asteroidGridEntity != null;
+		bool flag = ManagementMenu.Instance.IsScreenOpen(ClusterMapScreen.Instance) && worldContainer != null && asteroidGridEntity != null;
 		this.worldBiomesPanel.gameObject.SetActive(flag);
 		this.worldGeysersPanel.gameObject.SetActive(flag);
 		this.worldTraitsPanel.gameObject.SetActive(flag);
@@ -533,11 +533,11 @@ public class SimpleInfoScreen : TargetScreen, ISim4000ms, ISim1000ms
 					}
 					this.biomeRows[text].SetActive(true);
 				}
-				goto IL_021A;
+				goto IL_022B;
 			}
 		}
 		this.worldBiomesPanel.gameObject.SetActive(false);
-		IL_021A:
+		IL_022B:
 		List<Tag> list = new List<Tag>();
 		foreach (Geyser geyser in global::UnityEngine.Object.FindObjectsOfType<Geyser>())
 		{

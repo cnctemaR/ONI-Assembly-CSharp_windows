@@ -9,11 +9,11 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeHeader("TerrainScriptingClasses.h")]
 	[UsedByNativeCode]
-	[StaticAccessor("GetITerrainManager()", StaticAccessorType.Arrow)]
 	[NativeHeader("Modules/Terrain/Public/Terrain.h")]
 	[NativeHeader("Runtime/Interfaces/ITerrainManager.h")]
+	[NativeHeader("TerrainScriptingClasses.h")]
+	[StaticAccessor("GetITerrainManager()", StaticAccessorType.Arrow)]
 	public sealed class Terrain : Behaviour
 	{
 		public extern TerrainData terrainData

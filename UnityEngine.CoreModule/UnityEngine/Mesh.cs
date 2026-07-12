@@ -262,13 +262,13 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern int GetAllBoneWeightsArraySize();
 
-		[SecurityCritical]
 		[FreeFunction(Name = "MeshScripting::GetAllBoneWeightsArray", HasExplicitThis = true)]
+		[SecurityCritical]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern IntPtr GetAllBoneWeightsArray();
 
-		[SecurityCritical]
 		[FreeFunction(Name = "MeshScripting::GetBonesPerVertexArray", HasExplicitThis = true)]
+		[SecurityCritical]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern IntPtr GetBonesPerVertexArray();
 
@@ -1916,7 +1916,7 @@ namespace UnityEngine
 			{
 				throw new ArgumentOutOfRangeException(string.Format("Bad start/count arguments (start:{0} count:{1} desc.Length:{2})", start, count, desc.Length));
 			}
-			this.SetAllSubMeshesAtOnceFromNativeArray((IntPtr)desc.GetUnsafeReadOnlyPtr<T>(), start, count, MeshUpdateFlags.Default);
+			this.SetAllSubMeshesAtOnceFromNativeArray((IntPtr)desc.GetUnsafeReadOnlyPtr<T>(), start, count, flags);
 		}
 
 		public void SetSubMeshes<T>(NativeArray<T> desc, MeshUpdateFlags flags = MeshUpdateFlags.Default) where T : struct
@@ -2487,8 +2487,8 @@ namespace UnityEngine
 		}
 
 		[NativeContainer]
-		[StaticAccessor("MeshDataArrayBindings", StaticAccessorType.DoubleColon)]
 		[NativeContainerSupportsMinMaxWriteRestriction]
+		[StaticAccessor("MeshDataArrayBindings", StaticAccessorType.DoubleColon)]
 		public struct MeshDataArray : IDisposable
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]

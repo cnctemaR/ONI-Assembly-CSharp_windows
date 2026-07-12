@@ -109,14 +109,19 @@ public class MainMenu : KScreen
 				{
 					global::Debug.LogWarning("Cannot resize motd image, missing sprite");
 				}
-				this.motdImageButton.onClick.AddListener(delegate
+				this.motdImageButton.ClearOnClick();
+				this.motdImageButton.onClick += delegate
 				{
 					App.OpenWebURL(response.image_link_url);
-				});
+				};
 				return;
 			}
 			global::Debug.LogWarning("Motd Request error: " + error);
 		});
+		if (DistributionPlatform.Initialized && DistributionPlatform.Inst.IsPreviousVersionBranch)
+		{
+			global::UnityEngine.Object.Instantiate<GameObject>(ScreenPrefabs.Instance.OldVersionWarningScreen, this.uiCanvas.transform);
+		}
 		this.activateOnSpawn = true;
 	}
 
@@ -419,7 +424,7 @@ public class MainMenu : KScreen
 					header = saveFileEntry.header;
 					gameInfo = saveFileEntry.headerData;
 				}
-				if (header.buildVersion > 498381U || gameInfo.saveMajorVersion != 7 || gameInfo.saveMinorVersion > 28)
+				if (header.buildVersion > 509629U || gameInfo.saveMajorVersion != 7 || gameInfo.saveMinorVersion > 28)
 				{
 					flag = false;
 				}
@@ -638,7 +643,7 @@ public class MainMenu : KScreen
 	private LocText motdImageHeader;
 
 	[SerializeField]
-	private Button motdImageButton;
+	private KButton motdImageButton;
 
 	[SerializeField]
 	private Image motdImage;

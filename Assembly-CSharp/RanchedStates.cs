@@ -26,13 +26,13 @@ public class RanchedStates : GameStateMachine<RanchedStates, RanchedStates.Insta
 		{
 			smi.GetComponent<Navigator>().defaultSpeed = smi.originalSpeed;
 		});
-		this.ranch.move.getontable.Enter(new StateMachine<RanchedStates, RanchedStates.Instance, IStateMachineTarget, RanchedStates.Def>.State.Callback(RanchedStates.GetOnTable)).OnAnimQueueComplete(this.ranch.move.waitforranchertobeready);
+		this.ranch.move.getontable.Enter(new StateMachine<RanchedStates, RanchedStates.Instance, IStateMachineTarget, RanchedStates.Def>.State.Callback(RanchedStates.GetOnTable)).GoTo(this.ranch.move.waitforranchertobeready);
 		this.ranch.move.waitforranchertobeready.Enter("SetCreatureAtRanchingStation", delegate(RanchedStates.Instance smi)
 		{
 			smi.GetRanchStation().Trigger(-1357116271, null);
 		}).EventTransition(GameHashes.RancherReadyAtRanchStation, this.ranch.ranching, null);
-		this.ranch.ranching.Enter(new StateMachine<RanchedStates, RanchedStates.Instance, IStateMachineTarget, RanchedStates.Def>.State.Callback(RanchedStates.PlayGroomingLoopAnim)).EventTransition(GameHashes.RanchingComplete, this.wavegoodbye, null).ToggleStatusItem(CREATURES.STATUSITEMS.GETTING_RANCHED.NAME, CREATURES.STATUSITEMS.GETTING_RANCHED.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 129022, null, null, Db.Get().StatusItemCategories.Main);
-		this.wavegoodbye.Enter(new StateMachine<RanchedStates, RanchedStates.Instance, IStateMachineTarget, RanchedStates.Def>.State.Callback(RanchedStates.PlayGroomingPstAnim)).OnAnimQueueComplete(this.runaway).ToggleStatusItem(CREATURES.STATUSITEMS.EXCITED_TO_BE_RANCHED.NAME, CREATURES.STATUSITEMS.EXCITED_TO_BE_RANCHED.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 129022, null, null, Db.Get().StatusItemCategories.Main);
+		this.ranch.ranching.EventTransition(GameHashes.RanchingComplete, this.wavegoodbye, null).ToggleStatusItem(CREATURES.STATUSITEMS.GETTING_RANCHED.NAME, CREATURES.STATUSITEMS.GETTING_RANCHED.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 129022, null, null, Db.Get().StatusItemCategories.Main);
+		this.wavegoodbye.OnAnimQueueComplete(this.runaway).ToggleStatusItem(CREATURES.STATUSITEMS.EXCITED_TO_BE_RANCHED.NAME, CREATURES.STATUSITEMS.EXCITED_TO_BE_RANCHED.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 129022, null, null, Db.Get().StatusItemCategories.Main);
 		this.runaway.MoveTo(new Func<RanchedStates.Instance, int>(RanchedStates.GetRunawayCell), this.behaviourcomplete, this.behaviourcomplete, false).ToggleStatusItem(CREATURES.STATUSITEMS.IDLE.NAME, CREATURES.STATUSITEMS.IDLE.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 129022, null, null, Db.Get().StatusItemCategories.Main);
 		this.behaviourcomplete.BehaviourComplete(GameTags.Creatures.WantsToGetRanched, false);
 	}
@@ -55,17 +55,6 @@ public class RanchedStates : GameStateMachine<RanchedStates, RanchedStates.Insta
 			navigator.SetCurrentNavType(NavType.Floor);
 		}
 		smi.Get<Facing>().SetFacing(false);
-		smi.Get<KBatchedAnimController>().Queue(RanchedStates.GetRanchStation(smi).def.ranchedPreAnim, KAnim.PlayMode.Once, 1f, 0f);
-	}
-
-	private static void PlayGroomingLoopAnim(RanchedStates.Instance smi)
-	{
-		smi.Get<KBatchedAnimController>().Queue(RanchedStates.GetRanchStation(smi).def.ranchedLoopAnim, KAnim.PlayMode.Loop, 1f, 0f);
-	}
-
-	private static void PlayGroomingPstAnim(RanchedStates.Instance smi)
-	{
-		smi.Get<KBatchedAnimController>().Queue(RanchedStates.GetRanchStation(smi).def.ranchedPstAnim, KAnim.PlayMode.Once, 1f, 0f);
 	}
 
 	private static int GetTargetRanchCell(RanchedStates.Instance smi)

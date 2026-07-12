@@ -46,7 +46,7 @@ public class ClusterTraveler : KMonoBehaviour, ISim200ms
 		Game.Instance.Subscribe(-1991583975, new Action<object>(this.OnClusterFogOfWarRevealed));
 		this.UpdateAnimationTags();
 		this.MarkPathDirty();
-		this.RevalidatePath();
+		this.RevalidatePath(false);
 		this.ForceRevealLocation(this.m_clusterGridEntity.Location);
 	}
 
@@ -157,7 +157,7 @@ public class ClusterTraveler : KMonoBehaviour, ISim200ms
 				this.AdvancePathOneStep();
 			}
 		}
-		this.RevalidatePath();
+		this.RevalidatePath(true);
 	}
 
 	public bool AdvancePathOneStep()
@@ -202,13 +202,13 @@ public class ClusterTraveler : KMonoBehaviour, ISim200ms
 		this.m_clusterGridEntity.RemoveTag(GameTags.BallisticEntityMoving);
 	}
 
-	public void RevalidatePath()
+	public void RevalidatePath(bool react_to_change = true)
 	{
 		string reason;
 		List<AxialI> list;
 		if (this.HasCurrentPathChanged(out reason, out list))
 		{
-			if (this.stopAndNotifyWhenPathChanges)
+			if (this.stopAndNotifyWhenPathChanges && react_to_change)
 			{
 				this.m_destinationSelector.SetDestination(this.m_destinationSelector.GetMyWorldLocation());
 				string message = MISC.NOTIFICATIONS.BADROCKETPATH.TOOLTIP;

@@ -2,8 +2,8 @@
 
 namespace UnityEngine.Bindings
 {
-	[VisibleToOtherModules]
 	[AttributeUsage(AttributeTargets.Method | AttributeTargets.Property, AllowMultiple = true)]
+	[VisibleToOtherModules]
 	internal class PreventExecutionInStateAttribute : Attribute, IBindingsPreventExecution
 	{
 		public object singleFlagValue { get; set; }

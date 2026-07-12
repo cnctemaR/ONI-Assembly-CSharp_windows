@@ -66,8 +66,8 @@ namespace UnityEngine
 			return this.MoveKey_Injected(index, ref key);
 		}
 
-		[NativeThrows]
 		[FreeFunction("AnimationCurveBindings::RemoveKey", HasExplicitThis = true, IsThreadSafe = true)]
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void RemoveKey(int index);
 
@@ -90,8 +90,8 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void SetKeys(Keyframe[] keys);
 
-		[NativeThrows]
 		[FreeFunction("AnimationCurveBindings::GetKey", HasExplicitThis = true, IsThreadSafe = true)]
+		[NativeThrows]
 		private Keyframe GetKey(int index)
 		{
 			Keyframe keyframe;

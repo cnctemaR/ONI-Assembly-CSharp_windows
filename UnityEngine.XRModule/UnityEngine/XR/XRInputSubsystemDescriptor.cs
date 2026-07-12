@@ -5,10 +5,10 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.XR
 {
-	[NativeHeader("Modules/XR/XRPrefix.h")]
-	[NativeType(Header = "Modules/XR/Subsystems/Input/XRInputSubsystemDescriptor.h")]
 	[NativeConditional("ENABLE_XR")]
 	[UsedByNativeCode]
+	[NativeType(Header = "Modules/XR/Subsystems/Input/XRInputSubsystemDescriptor.h")]
+	[NativeHeader("Modules/XR/XRPrefix.h")]
 	public class XRInputSubsystemDescriptor : IntegratedSubsystemDescriptor<XRInputSubsystem>
 	{
 		[NativeConditional("ENABLE_XR")]

@@ -79,6 +79,10 @@ public class Def : ScriptableObject
 						}
 					}
 				}
+				if (gameObject.HasTag(GameTags.MoltShell))
+				{
+					animName = gameObject.GetComponent<SimpleMassStatusItem>().symbolPrefix + animName;
+				}
 				KBatchedAnimController component2 = gameObject.GetComponent<KBatchedAnimController>();
 				if (component2)
 				{
@@ -130,6 +134,15 @@ public class Def : ScriptableObject
 				return Def.GetUISprite((item as string).ToTag(), animName, centered);
 			}
 		}
+	}
+
+	public static global::Tuple<Sprite, Color> GetUISprite(Tag prefabID, string facadeID)
+	{
+		if (Assets.GetPrefab(prefabID).GetComponent<Equippable>() != null && !facadeID.IsNullOrWhiteSpace())
+		{
+			return Db.Get().EquippableFacades.Get(facadeID).GetUISprite();
+		}
+		return Def.GetUISprite(prefabID, "ui", false);
 	}
 
 	public static Sprite GetUISpriteFromMultiObjectAnim(KAnimFile animFile, string animName = "ui", bool centered = false, string symbolName = "")

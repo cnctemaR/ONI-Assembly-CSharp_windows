@@ -6,8 +6,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.XR
 {
-	[UsedByNativeCode]
 	[NativeConditional("ENABLE_XR")]
+	[UsedByNativeCode]
 	[NativeHeader("Modules/XR/Subsystems/Meshing/XRMeshingSubsystem.h")]
 	[NativeHeader("Modules/XR/XRPrefix.h")]
 	public class XRMeshSubsystem : IntegratedSubsystem<XRMeshSubsystemDescriptor>

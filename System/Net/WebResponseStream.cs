@@ -429,7 +429,6 @@ namespace System.Net
 						}
 						this.KeepAlive = false;
 					}
-					int new_size;
 					if (this.contentLength == 9223372036854775807L)
 					{
 						MemoryStream ms = new MemoryStream();
@@ -453,7 +452,7 @@ namespace System.Net
 						{
 							ms.Write(buffer.Buffer, buffer.Offset, read);
 						}
-						new_size = (int)ms.Length;
+						int new_size = (int)ms.Length;
 						this.contentLength = (long)new_size;
 						this.readBuffer = new BufferOffsetSize(ms.GetBuffer(), 0, new_size, false);
 						ms = null;
@@ -461,7 +460,7 @@ namespace System.Net
 					}
 					else
 					{
-						new_size = (int)(this.contentLength - this.totalRead);
+						int new_size = (int)(this.contentLength - this.totalRead);
 						b = new byte[new_size];
 						int readSize = 0;
 						if (this.readBuffer != null && this.readBuffer.Size > 0)
@@ -481,8 +480,8 @@ namespace System.Net
 							remaining -= num;
 							readSize += num;
 						}
+						this.readBuffer = new BufferOffsetSize(b, 0, new_size, false);
 					}
-					this.readBuffer = new BufferOffsetSize(b, 0, new_size, false);
 					this.totalRead = 0L;
 					this.nextReadCalled = true;
 					completion.TrySetCompleted();

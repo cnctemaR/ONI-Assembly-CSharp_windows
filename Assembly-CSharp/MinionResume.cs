@@ -83,6 +83,10 @@ public class MinionResume : KMonoBehaviour, ISaveLoadable, ISim200ms
 				this.AptitudeBySkillGroup[keyValuePair2.Key] = keyValuePair2.Value;
 			}
 		}
+		if (this.TotalSkillPointsGained > 1000 || this.TotalSkillPointsGained < 0)
+		{
+			this.ForceSetSkillPoints(100);
+		}
 	}
 
 	protected override void OnPrefabInit()
@@ -429,6 +433,11 @@ public class MinionResume : KMonoBehaviour, ISaveLoadable, ISim200ms
 	{
 		base.Trigger(540773776, null);
 		Game.Instance.Trigger(-1523247426, this);
+	}
+
+	public void ForceSetSkillPoints(int points)
+	{
+		this.totalExperienceGained = MinionResume.CalculatePreviousExperienceBar(points);
 	}
 
 	public void ForceAddSkillPoint()

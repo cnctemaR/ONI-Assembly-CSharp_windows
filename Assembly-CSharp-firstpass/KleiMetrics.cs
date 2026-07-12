@@ -561,6 +561,10 @@ public class KleiMetrics : ThreadedHttps<KleiMetrics>
 			{
 				"GPUsupportsSparseTextures",
 				SystemInfo.supportsSparseTextures
+			},
+			{
+				"GPUcopyTextureSupport",
+				SystemInfo.copyTextureSupport
 			}
 		};
 	}

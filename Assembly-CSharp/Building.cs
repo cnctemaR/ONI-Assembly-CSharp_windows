@@ -111,6 +111,23 @@ public class Building : KMonoBehaviour, IGameObjectEffectDescriptor, IUniformGri
 		}
 	}
 
+	public void SetDescription(string desc)
+	{
+		this.description = desc;
+	}
+
+	public string Desc
+	{
+		get
+		{
+			if (this.Def.AvailableFacades.Count > 0 && !this.description.IsNullOrWhiteSpace())
+			{
+				return this.description;
+			}
+			return this.Def.Desc;
+		}
+	}
+
 	protected override void OnSpawn()
 	{
 		if (this.Def == null)
@@ -413,6 +430,8 @@ public class Building : KMonoBehaviour, IGameObjectEffectDescriptor, IUniformGri
 	private Extents extents;
 
 	private static StatusItem deprecatedBuildingStatusItem;
+
+	private string description;
 
 	private HandleVector<int>.Handle scenePartitionerEntry;
 }

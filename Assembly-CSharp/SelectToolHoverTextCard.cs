@@ -448,7 +448,7 @@ public class SelectToolHoverTextCard : HoverTextConfiguration
 		}
 		for (int k = 0; k < this.overlayValidHoverObjects.Count; k++)
 		{
-			if (this.overlayValidHoverObjects[k] != null && this.overlayValidHoverObjects[k].GetComponent<CellSelectionObject>() == null)
+			if (this.overlayValidHoverObjects[k] != null && !CellSelectionObject.IsSelectionObject(this.overlayValidHoverObjects[k].gameObject))
 			{
 				KSelectable kselectable3 = this.overlayValidHoverObjects[k];
 				if ((!(OverlayScreen.Instance != null) || !(OverlayScreen.Instance.mode != OverlayModes.None.ID) || (kselectable3.gameObject.layer & this.maskOverlay) == 0) && flag3)
@@ -556,7 +556,7 @@ public class SelectToolHoverTextCard : HoverTextConfiguration
 					{
 						num7 = component4.Temperature;
 					}
-					else if (kselectable3.GetComponent<CellSelectionObject>() != null)
+					else if (CellSelectionObject.IsSelectionObject(kselectable3.gameObject))
 					{
 						num7 = kselectable3.GetComponent<CellSelectionObject>().temperature;
 					}

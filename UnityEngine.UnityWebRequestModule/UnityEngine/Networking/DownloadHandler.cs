@@ -143,7 +143,7 @@ namespace UnityEngine.Networking
 			return true;
 		}
 
-		[UsedByNativeCode]
+		[RequiredByNativeCode]
 		protected virtual void ReceiveContentLengthHeader(ulong contentLength)
 		{
 			this.ReceiveContentLength((int)contentLength);

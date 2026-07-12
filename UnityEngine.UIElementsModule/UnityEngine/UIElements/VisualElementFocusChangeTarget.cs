@@ -13,6 +13,7 @@ namespace UnityEngine.UIElements
 
 		protected override void Dispose()
 		{
+			this.target = null;
 			VisualElementFocusChangeTarget.Pool.Release(this);
 		}
 

@@ -16,13 +16,13 @@ public class CodexIndentedLabelWithIcon : CodexWidget<CodexIndentedLabelWithIcon
 	public CodexIndentedLabelWithIcon(string text, CodexTextStyle style, global::Tuple<Sprite, Color> coloredSprite)
 	{
 		this.icon = new CodexImage(coloredSprite);
-		this.label = new CodexText(text, style);
+		this.label = new CodexText(text, style, null);
 	}
 
 	public CodexIndentedLabelWithIcon(string text, CodexTextStyle style, global::Tuple<Sprite, Color> coloredSprite, int iconWidth, int iconHeight)
 	{
 		this.icon = new CodexImage(iconWidth, iconHeight, coloredSprite);
-		this.label = new CodexText(text, style);
+		this.label = new CodexText(text, style, null);
 	}
 
 	public override void Configure(GameObject contentGameObject, Transform displayPane, Dictionary<CodexTextStyle, TextStyleSetting> textStyles)

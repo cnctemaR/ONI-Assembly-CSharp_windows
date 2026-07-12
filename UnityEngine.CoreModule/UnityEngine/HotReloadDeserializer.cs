@@ -23,13 +23,13 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern Object CreateEmptyAsset(Type type);
 
-		[NativeThrows]
 		[FreeFunction("HotReload::DeserializeAsset")]
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern void DeserializeAsset(Object asset, byte[] data);
 
-		[FreeFunction("HotReload::RemapInstanceIds")]
 		[NativeThrows]
+		[FreeFunction("HotReload::RemapInstanceIds")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void RemapInstanceIds(Object editorAsset, int[] editorToPlayerInstanceIdMapKeys, int[] editorToPlayerInstanceIdMapValues);
 

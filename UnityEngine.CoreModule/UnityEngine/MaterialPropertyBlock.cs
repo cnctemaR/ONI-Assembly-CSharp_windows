@@ -9,8 +9,8 @@ namespace UnityEngine
 {
 	[NativeHeader("Runtime/Graphics/ShaderScriptBindings.h")]
 	[NativeHeader("Runtime/Shaders/ShaderPropertySheet.h")]
-	[NativeHeader("Runtime/Shaders/ComputeShader.h")]
 	[NativeHeader("Runtime/Math/SphericalHarmonicsL2.h")]
+	[NativeHeader("Runtime/Shaders/ComputeShader.h")]
 	public sealed class MaterialPropertyBlock
 	{
 		[Obsolete("Use SetFloat instead (UnityUpgradable) -> SetFloat(*)", false)]
@@ -115,22 +115,22 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void SetFloatImpl(int name, float value);
 
-		[ThreadSafe]
 		[NativeName("SetVectorFromScript")]
+		[ThreadSafe]
 		private void SetVectorImpl(int name, Vector4 value)
 		{
 			this.SetVectorImpl_Injected(name, ref value);
 		}
 
-		[ThreadSafe]
 		[NativeName("SetColorFromScript")]
+		[ThreadSafe]
 		private void SetColorImpl(int name, Color value)
 		{
 			this.SetColorImpl_Injected(name, ref value);
 		}
 
-		[ThreadSafe]
 		[NativeName("SetMatrixFromScript")]
+		[ThreadSafe]
 		private void SetMatrixImpl(int name, Matrix4x4 value)
 		{
 			this.SetMatrixImpl_Injected(name, ref value);
@@ -141,13 +141,13 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void SetTextureImpl(int name, [NotNull("ArgumentNullException")] Texture value);
 
-		[ThreadSafe]
 		[NativeName("SetRenderTextureFromScript")]
+		[ThreadSafe]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void SetRenderTextureImpl(int name, [NotNull("ArgumentNullException")] RenderTexture value, RenderTextureSubElement element);
 
-		[ThreadSafe]
 		[NativeName("SetBufferFromScript")]
+		[ThreadSafe]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void SetBufferImpl(int name, ComputeBuffer value);
 
@@ -156,18 +156,18 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void SetGraphicsBufferImpl(int name, GraphicsBuffer value);
 
-		[ThreadSafe]
 		[NativeName("SetConstantBufferFromScript")]
+		[ThreadSafe]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void SetConstantBufferImpl(int name, ComputeBuffer value, int offset, int size);
 
-		[ThreadSafe]
 		[NativeName("SetConstantGraphicsBufferFromScript")]
+		[ThreadSafe]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void SetConstantGraphicsBufferImpl(int name, GraphicsBuffer value, int offset, int size);
 
-		[ThreadSafe]
 		[NativeName("SetFloatArrayFromScript")]
+		[ThreadSafe]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void SetFloatArrayImpl(int name, float[] values, int count);
 
@@ -186,13 +186,13 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern float[] GetFloatArrayImpl(int name);
 
-		[NativeName("GetVectorArrayFromScript")]
 		[ThreadSafe]
+		[NativeName("GetVectorArrayFromScript")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern Vector4[] GetVectorArrayImpl(int name);
 
-		[ThreadSafe]
 		[NativeName("GetMatrixArrayFromScript")]
+		[ThreadSafe]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern Matrix4x4[] GetMatrixArrayImpl(int name);
 
@@ -211,13 +211,13 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern int GetMatrixArrayCountImpl(int name);
 
-		[NativeName("ExtractFloatArrayFromScript")]
 		[ThreadSafe]
+		[NativeName("ExtractFloatArrayFromScript")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void ExtractFloatArrayImpl(int name, [Out] float[] val);
 
-		[NativeName("ExtractVectorArrayFromScript")]
 		[ThreadSafe]
+		[NativeName("ExtractVectorArrayFromScript")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void ExtractVectorArrayImpl(int name, [Out] Vector4[] val);
 

@@ -1479,6 +1479,18 @@ public class BuildingDef : Def
 		return this.UseHighEnergyParticleOutputPort;
 	}
 
+	public void AddFacade(string db_facade_id)
+	{
+		if (this.AvailableFacades == null)
+		{
+			this.AvailableFacades = new List<string>();
+		}
+		if (!this.AvailableFacades.Contains(db_facade_id))
+		{
+			this.AvailableFacades.Add(db_facade_id);
+		}
+	}
+
 	public string[] RequiredDlcIds;
 
 	public float EnergyConsumptionWhenActive;
@@ -1710,6 +1722,8 @@ public class BuildingDef : Def
 	public int BaseNoisePollution;
 
 	public int BaseNoisePollutionRadius;
+
+	public List<string> AvailableFacades = new List<string>();
 
 	private static Dictionary<CellOffset, CellOffset[]> placementOffsetsCache = new Dictionary<CellOffset, CellOffset[]>();
 }

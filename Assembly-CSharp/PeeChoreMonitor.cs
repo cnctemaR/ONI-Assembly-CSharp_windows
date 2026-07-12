@@ -49,5 +49,10 @@ public class PeeChoreMonitor : GameStateMachine<PeeChoreMonitor, PeeChoreMonitor
 			: base(master)
 		{
 		}
+
+		public bool IsCritical()
+		{
+			return base.IsInsideState(base.sm.critical);
+		}
 	}
 }

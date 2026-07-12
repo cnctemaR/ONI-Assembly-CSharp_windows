@@ -11,7 +11,7 @@ public static class EntityTemplateExtensions
 		{
 			defType = Activator.CreateInstance<DefType>();
 			stateMachineController.AddDef(defType);
-			defType.Configure(stateMachineController.gameObject);
+			defType.Configure(go);
 		}
 		return defType;
 	}
@@ -22,11 +22,6 @@ public static class EntityTemplateExtensions
 		if (componentType == null)
 		{
 			componentType = go.AddComponent<ComponentType>();
-		}
-		KMonoBehaviour kmonoBehaviour = componentType as KMonoBehaviour;
-		if (kmonoBehaviour != null)
-		{
-			kmonoBehaviour.CreateDef();
 		}
 		return componentType;
 	}

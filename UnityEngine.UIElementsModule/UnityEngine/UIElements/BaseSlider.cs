@@ -278,7 +278,7 @@ namespace UnityEngine.UIElements
 		private void ComputeValueAndDirectionFromDrag(float sliderLength, float dragElementLength, float dragElementPos)
 		{
 			float num = sliderLength - dragElementLength;
-			bool flag = Mathf.Abs(num) < Mathf.Epsilon;
+			bool flag = Mathf.Abs(num) < 1E-30f;
 			if (!flag)
 			{
 				float num2 = Mathf.Max(0f, Mathf.Min(dragElementPos, num)) / num;
@@ -389,7 +389,7 @@ namespace UnityEngine.UIElements
 		internal virtual void ComputeValueAndDirectionFromClick(float sliderLength, float dragElementLength, float dragElementPos, float dragElementLastPos)
 		{
 			float num = sliderLength - dragElementLength;
-			bool flag = Mathf.Abs(num) < Mathf.Epsilon;
+			bool flag = Mathf.Abs(num) < 1E-30f;
 			if (!flag)
 			{
 				bool flag2 = dragElementLastPos < dragElementPos && this.clampedDragger.dragDirection != ClampedDragger<TValueType>.DragDirection.LowToHigh;

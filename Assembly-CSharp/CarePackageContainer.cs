@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using Database;
 using STRINGS;
 using UnityEngine;
 using UnityEngine.UI;
@@ -94,6 +95,16 @@ public class CarePackageContainer : KScreen, ITelepadDeliverableContainer
 			global::UnityEngine.Object.Destroy(this.animController.gameObject);
 			this.animController = null;
 		}
+		this.carePackageInstanceData = new CarePackageContainer.CarePackageInstanceData();
+		this.carePackageInstanceData.info = this.info;
+		if (this.info.facadeID == "SELECTRANDOM")
+		{
+			this.carePackageInstanceData.facadeID = Db.Get().EquippableFacades.resources.FindAll((EquippableFacadeResource match) => match.DefID == this.info.id).GetRandom<EquippableFacadeResource>().Id;
+		}
+		else
+		{
+			this.carePackageInstanceData.facadeID = this.info.facadeID;
+		}
 		this.SetAnimator();
 		this.SetInfoText();
 		this.selectButton.ClearOnClick();
@@ -130,9 +141,17 @@ public class CarePackageContainer : KScreen, ITelepadDeliverableContainer
 				GameObject gameObject = Util.KInstantiateUI(this.contentBody, this.contentBody.transform.parent.gameObject, false);
 				gameObject.SetActive(true);
 				Image component = gameObject.GetComponent<Image>();
-				global::Tuple<Sprite, Color> uisprite = Def.GetUISprite(prefab, "ui", false);
-				component.sprite = uisprite.first;
-				component.color = uisprite.second;
+				global::Tuple<Sprite, Color> tuple;
+				if (!this.carePackageInstanceData.facadeID.IsNullOrWhiteSpace())
+				{
+					tuple = Def.GetUISprite(prefab.PrefabID(), this.carePackageInstanceData.facadeID);
+				}
+				else
+				{
+					tuple = Def.GetUISprite(prefab, "ui", false);
+				}
+				component.sprite = tuple.first;
+				component.color = tuple.second;
 				this.entryIcons.Add(gameObject);
 				if (num > 1)
 				{
@@ -185,16 +204,23 @@ public class CarePackageContainer : KScreen, ITelepadDeliverableContainer
 	private string GetSpawnableName()
 	{
 		GameObject prefab = Assets.GetPrefab(this.info.id);
-		if (!(prefab == null))
+		if (prefab == null)
 		{
-			return prefab.GetProperName();
+			Element element = ElementLoader.FindElementByName(this.info.id);
+			if (element != null)
+			{
+				return element.substance.name;
+			}
+			return "";
 		}
-		Element element = ElementLoader.FindElementByName(this.info.id);
-		if (element != null)
+		else
 		{
-			return element.substance.name;
+			if (string.IsNullOrEmpty(this.carePackageInstanceData.facadeID))
+			{
+				return prefab.GetProperName();
+			}
+			return EquippableFacade.GetNameOverride(this.carePackageInstanceData.info.id, this.carePackageInstanceData.facadeID);
 		}
-		return "";
 	}
 
 	private string GetSpawnableQuantityOnly()
@@ -272,7 +298,7 @@ public class CarePackageContainer : KScreen, ITelepadDeliverableContainer
 	{
 		if (this.controller != null)
 		{
-			this.controller.AddDeliverable(this.info);
+			this.controller.AddDeliverable(this.carePackageInstanceData);
 		}
 		if (MusicManager.instance.SongIsPlaying("Music_SelectDuplicant"))
 		{
@@ -296,7 +322,7 @@ public class CarePackageContainer : KScreen, ITelepadDeliverableContainer
 	{
 		if (this.controller != null)
 		{
-			this.controller.RemoveDeliverable(this.info);
+			this.controller.RemoveDeliverable(this.carePackageInstanceData);
 		}
 		this.selectButton.GetComponent<ImageToggleState>().SetInactive();
 		this.selectButton.Deselect();
@@ -311,7 +337,7 @@ public class CarePackageContainer : KScreen, ITelepadDeliverableContainer
 
 	private void OnReplacedEvent(ITelepadDeliverable stats)
 	{
-		if (stats == this.info)
+		if (stats == this.carePackageInstanceData)
 		{
 			this.DeselectDeliverable();
 		}
@@ -430,12 +456,18 @@ public class CarePackageContainer : KScreen, ITelepadDeliverableContainer
 		{
 			this.controller.OnPressBack();
 		}
-		e.Consumed = true;
+		if (!KInputManager.currentControllerIsGamepad)
+		{
+			e.Consumed = true;
+		}
 	}
 
 	public override void OnKeyUp(KButtonEvent e)
 	{
-		e.Consumed = true;
+		if (!KInputManager.currentControllerIsGamepad)
+		{
+			e.Consumed = true;
+		}
 	}
 
 	protected override void OnCmpEnable()
@@ -498,6 +530,8 @@ public class CarePackageContainer : KScreen, ITelepadDeliverableContainer
 
 	private CarePackageInfo info;
 
+	public CarePackageContainer.CarePackageInstanceData carePackageInstanceData;
+
 	private CharacterSelectionController controller;
 
 	private static List<ITelepadDeliverableContainer> containers;
@@ -520,5 +554,19 @@ public class CarePackageContainer : KScreen, ITelepadDeliverableContainer
 		public string professionName;
 
 		public Sprite iconImg;
+	}
+
+	public class CarePackageInstanceData : ITelepadDeliverable
+	{
+		public GameObject Deliver(Vector3 position)
+		{
+			GameObject gameObject = this.info.Deliver(position);
+			gameObject.GetComponent<CarePackage>().SetFacade(this.facadeID);
+			return gameObject;
+		}
+
+		public CarePackageInfo info;
+
+		public string facadeID;
 	}
 }

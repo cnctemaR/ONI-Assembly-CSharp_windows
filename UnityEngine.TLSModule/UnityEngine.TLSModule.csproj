@@ -1,8 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{B4CE6748-3CA7-47DA-BE05-9CC2D0FFEB0D}</ProjectGuid>
+    <ProjectGuid>{46649EAC-BC57-4D67-B2C6-355E569B5115}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <RootNamespace>UnityEngine.TLSModule</RootNamespace>
+    <RootNamespace>Unity.TLS</RootNamespace>
     <AssemblyName>UnityEngine.TLSModule</AssemblyName>
     <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
     <FileAlignment>512</FileAlignment>
@@ -14,11 +14,13 @@
   </PropertyGroup>
   <PropertyGroup />
   <ItemGroup>
+    <Compile Include="LowLevel\Binding.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="UnityTLSNativeLibrary.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
-      <Project>{B4CE6748-3CA7-47DA-BE05-9CC2D0FFEB02}</Project>
+      <Project>{46649EAC-BC57-4D67-B2C6-355E569B510A}</Project>
       <Name>UnityEngine.SharedInternalsModule</Name>
     </ProjectReference>
   </ItemGroup>

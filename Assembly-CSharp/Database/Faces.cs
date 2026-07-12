@@ -29,6 +29,7 @@ namespace Database
 			this.Sparkle = base.Add(new Face("Sparkle", null));
 			this.Balloon = base.Add(new Face("Balloon", null));
 			this.Tickled = base.Add(new Face("Tickled", null));
+			this.Music = base.Add(new Face("Music", null));
 			this.Radiation1 = base.Add(new Face("Radiation1", "headfx_radiation1"));
 			this.Radiation2 = base.Add(new Face("Radiation2", "headfx_radiation2"));
 			this.Radiation3 = base.Add(new Face("Radiation3", "headfx_radiation3"));
@@ -80,6 +81,8 @@ namespace Database
 		public Face Sparkle;
 
 		public Face Tickled;
+
+		public Face Music;
 
 		public Face Radiation1;
 

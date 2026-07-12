@@ -7,9 +7,9 @@ using UnityEngine.Scripting;
 namespace UnityEngine.Animations
 {
 	[NativeHeader("Modules/Animation/Constraints/Constraint.bindings.h")]
-	[NativeHeader("Modules/Animation/Constraints/AimConstraint.h")]
-	[RequireComponent(typeof(Transform))]
 	[UsedByNativeCode]
+	[RequireComponent(typeof(Transform))]
+	[NativeHeader("Modules/Animation/Constraints/AimConstraint.h")]
 	public sealed class AimConstraint : Behaviour, IConstraint, IConstraintInternal
 	{
 		private AimConstraint()

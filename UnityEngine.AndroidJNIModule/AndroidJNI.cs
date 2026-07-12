@@ -4,8 +4,8 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	[NativeConditional("PLATFORM_ANDROID")]
 	[StaticAccessor("AndroidJNIBindingsHelpers", StaticAccessorType.DoubleColon)]
+	[NativeConditional("PLATFORM_ANDROID")]
 	[NativeHeader("Modules/AndroidJNI/Public/AndroidJNIBindingsHelpers.h")]
 	public static class AndroidJNI
 	{
@@ -512,8 +512,8 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern bool[] FromBooleanArray(IntPtr array);
 
-		[Obsolete("AndroidJNI.FromByteArray is obsolete. Use AndroidJNI.FromSByteArray method instead")]
 		[ThreadSafe]
+		[Obsolete("AndroidJNI.FromByteArray is obsolete. Use AndroidJNI.FromSByteArray method instead")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern byte[] FromByteArray(IntPtr array);
 

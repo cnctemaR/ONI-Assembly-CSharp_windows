@@ -43,118 +43,122 @@ namespace UnityEngine.UIElements.Experimental
 		internal static StyleValues Interpolate(StyleValues start, StyleValues end, float ratio)
 		{
 			StyleValues styleValues = default(StyleValues);
-			foreach (StyleValue styleValue in end.m_StyleValues.m_Values)
+			bool flag = end.m_StyleValues != null;
+			if (flag)
 			{
-				StyleValue styleValue2 = default(StyleValue);
-				bool flag = !start.m_StyleValues.TryGetStyleValue(styleValue.id, ref styleValue2);
-				if (flag)
+				foreach (StyleValue styleValue in end.m_StyleValues.m_Values)
 				{
-					throw new ArgumentException("Start StyleValues must contain the same values as end values. Missing property:" + styleValue.id.ToString());
-				}
-				StylePropertyId id = styleValue.id;
-				StylePropertyId stylePropertyId = id;
-				if (stylePropertyId <= StylePropertyId.Width)
-				{
-					switch (stylePropertyId)
+					StyleValue styleValue2 = default(StyleValue);
+					bool flag2 = !start.m_StyleValues.TryGetStyleValue(styleValue.id, ref styleValue2);
+					if (flag2)
 					{
-					case StylePropertyId.Custom:
-					case StylePropertyId.Unknown:
-					case StylePropertyId.UnityFont:
-					case StylePropertyId.UnityFontStyleAndWeight:
-					case StylePropertyId.UnityTextAlign:
-					case StylePropertyId.Visibility:
-					case StylePropertyId.WhiteSpace:
-						goto IL_0203;
-					case StylePropertyId.Color:
-						goto IL_01DF;
-					case StylePropertyId.FontSize:
-						break;
-					default:
+						throw new ArgumentException("Start StyleValues must contain the same values as end values. Missing property:" + styleValue.id.ToString());
+					}
+					StylePropertyId id = styleValue.id;
+					StylePropertyId stylePropertyId = id;
+					if (stylePropertyId <= StylePropertyId.Width)
+					{
 						switch (stylePropertyId)
 						{
-						case StylePropertyId.AlignContent:
-						case StylePropertyId.AlignItems:
-						case StylePropertyId.AlignSelf:
-						case StylePropertyId.BackgroundImage:
-						case StylePropertyId.BorderBottomColor:
-						case StylePropertyId.BorderLeftColor:
-						case StylePropertyId.BorderRightColor:
-						case StylePropertyId.BorderTopColor:
-						case StylePropertyId.Cursor:
-						case StylePropertyId.Display:
-						case StylePropertyId.FlexDirection:
-						case StylePropertyId.FlexWrap:
-						case StylePropertyId.JustifyContent:
-						case StylePropertyId.Overflow:
-						case StylePropertyId.Position:
-						case StylePropertyId.TextOverflow:
-						case StylePropertyId.UnityBackgroundScaleMode:
-						case StylePropertyId.UnityOverflowClipBox:
-						case StylePropertyId.UnitySliceBottom:
-						case StylePropertyId.UnitySliceLeft:
-						case StylePropertyId.UnitySliceRight:
-						case StylePropertyId.UnitySliceTop:
-						case StylePropertyId.UnityTextOverflowPosition:
-							goto IL_0203;
-						case StylePropertyId.BackgroundColor:
-						case StylePropertyId.UnityBackgroundImageTintColor:
-							goto IL_01DF;
-						case StylePropertyId.BorderBottomLeftRadius:
-						case StylePropertyId.BorderBottomRightRadius:
-						case StylePropertyId.BorderBottomWidth:
-						case StylePropertyId.BorderLeftWidth:
-						case StylePropertyId.BorderRightWidth:
-						case StylePropertyId.BorderTopLeftRadius:
-						case StylePropertyId.BorderTopRightRadius:
-						case StylePropertyId.BorderTopWidth:
-						case StylePropertyId.Bottom:
-						case StylePropertyId.FlexBasis:
-						case StylePropertyId.FlexGrow:
-						case StylePropertyId.FlexShrink:
-						case StylePropertyId.Height:
-						case StylePropertyId.Left:
-						case StylePropertyId.MarginBottom:
-						case StylePropertyId.MarginLeft:
-						case StylePropertyId.MarginRight:
-						case StylePropertyId.MarginTop:
-						case StylePropertyId.MaxHeight:
-						case StylePropertyId.MaxWidth:
-						case StylePropertyId.MinHeight:
-						case StylePropertyId.MinWidth:
-						case StylePropertyId.Opacity:
-						case StylePropertyId.PaddingBottom:
-						case StylePropertyId.PaddingLeft:
-						case StylePropertyId.PaddingRight:
-						case StylePropertyId.PaddingTop:
-						case StylePropertyId.Right:
-						case StylePropertyId.Top:
-						case StylePropertyId.Width:
+						case StylePropertyId.Custom:
+						case StylePropertyId.Unknown:
+						case StylePropertyId.UnityFont:
+						case StylePropertyId.UnityFontStyleAndWeight:
+						case StylePropertyId.UnityTextAlign:
+						case StylePropertyId.Visibility:
+						case StylePropertyId.WhiteSpace:
+							goto IL_0216;
+						case StylePropertyId.Color:
+							goto IL_01F1;
+						case StylePropertyId.FontSize:
 							break;
 						default:
-							goto IL_0203;
+							switch (stylePropertyId)
+							{
+							case StylePropertyId.AlignContent:
+							case StylePropertyId.AlignItems:
+							case StylePropertyId.AlignSelf:
+							case StylePropertyId.BackgroundImage:
+							case StylePropertyId.BorderBottomColor:
+							case StylePropertyId.BorderLeftColor:
+							case StylePropertyId.BorderRightColor:
+							case StylePropertyId.BorderTopColor:
+							case StylePropertyId.Cursor:
+							case StylePropertyId.Display:
+							case StylePropertyId.FlexDirection:
+							case StylePropertyId.FlexWrap:
+							case StylePropertyId.JustifyContent:
+							case StylePropertyId.Overflow:
+							case StylePropertyId.Position:
+							case StylePropertyId.TextOverflow:
+							case StylePropertyId.UnityBackgroundScaleMode:
+							case StylePropertyId.UnityOverflowClipBox:
+							case StylePropertyId.UnitySliceBottom:
+							case StylePropertyId.UnitySliceLeft:
+							case StylePropertyId.UnitySliceRight:
+							case StylePropertyId.UnitySliceTop:
+							case StylePropertyId.UnityTextOverflowPosition:
+								goto IL_0216;
+							case StylePropertyId.BackgroundColor:
+							case StylePropertyId.UnityBackgroundImageTintColor:
+								goto IL_01F1;
+							case StylePropertyId.BorderBottomLeftRadius:
+							case StylePropertyId.BorderBottomRightRadius:
+							case StylePropertyId.BorderBottomWidth:
+							case StylePropertyId.BorderLeftWidth:
+							case StylePropertyId.BorderRightWidth:
+							case StylePropertyId.BorderTopLeftRadius:
+							case StylePropertyId.BorderTopRightRadius:
+							case StylePropertyId.BorderTopWidth:
+							case StylePropertyId.Bottom:
+							case StylePropertyId.FlexBasis:
+							case StylePropertyId.FlexGrow:
+							case StylePropertyId.FlexShrink:
+							case StylePropertyId.Height:
+							case StylePropertyId.Left:
+							case StylePropertyId.MarginBottom:
+							case StylePropertyId.MarginLeft:
+							case StylePropertyId.MarginRight:
+							case StylePropertyId.MarginTop:
+							case StylePropertyId.MaxHeight:
+							case StylePropertyId.MaxWidth:
+							case StylePropertyId.MinHeight:
+							case StylePropertyId.MinWidth:
+							case StylePropertyId.Opacity:
+							case StylePropertyId.PaddingBottom:
+							case StylePropertyId.PaddingLeft:
+							case StylePropertyId.PaddingRight:
+							case StylePropertyId.PaddingTop:
+							case StylePropertyId.Right:
+							case StylePropertyId.Top:
+							case StylePropertyId.Width:
+								break;
+							default:
+								goto IL_0216;
+							}
+							break;
 						}
-						break;
+						styleValues.SetValue(styleValue.id, Lerp.Interpolate(styleValue2.number, styleValue.number, ratio));
 					}
-					styleValues.SetValue(styleValue.id, Lerp.Interpolate(styleValue2.number, styleValue.number, ratio));
-				}
-				else
-				{
-					if (stylePropertyId == StylePropertyId.BorderColor)
+					else
 					{
-						goto IL_01DF;
+						if (stylePropertyId == StylePropertyId.BorderColor)
+						{
+							goto IL_01F1;
+						}
+						if (stylePropertyId - StylePropertyId.BorderRadius > 4)
+						{
+							goto IL_0216;
+						}
+						goto IL_0216;
 					}
-					if (stylePropertyId - StylePropertyId.BorderRadius > 4)
-					{
-						goto IL_0203;
-					}
-					goto IL_0203;
+					continue;
+					IL_01F1:
+					styleValues.SetValue(styleValue.id, Lerp.Interpolate(styleValue2.color, styleValue.color, ratio));
+					continue;
+					IL_0216:
+					throw new ArgumentException("Style Value can't be animated");
 				}
-				continue;
-				IL_01DF:
-				styleValues.SetValue(styleValue.id, Lerp.Interpolate(styleValue2.color, styleValue.color, ratio));
-				continue;
-				IL_0203:
-				throw new ArgumentException("Style Value can't be animated");
 			}
 			return styleValues;
 		}

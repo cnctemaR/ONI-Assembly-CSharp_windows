@@ -5,8 +5,8 @@ using UnityEngineInternal;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Misc/ResourceManagerUtility.h")]
 	[NativeHeader("Runtime/Export/Resources/Resources.bindings.h")]
+	[NativeHeader("Runtime/Misc/ResourceManagerUtility.h")]
 	internal static class ResourcesAPIInternal
 	{
 		[FreeFunction("Resources_Bindings::FindObjectsOfTypeAll")]
@@ -18,9 +18,9 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern Shader FindShaderByName(string name);
 
+		[FreeFunction("Resources_Bindings::Load")]
 		[NativeThrows]
 		[TypeInferenceRule(TypeInferenceRules.TypeReferencedBySecondArgument)]
-		[FreeFunction("Resources_Bindings::Load")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern Object Load(string path, [NotNull("ArgumentNullException")] Type systemTypeInstance);
 

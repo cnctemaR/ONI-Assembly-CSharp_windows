@@ -23,7 +23,7 @@ namespace Rendering.World
 				this.TileGrid[j] = new Tile(j, num, num2, this.Masks.Length);
 			}
 			this.LoadBrushes();
-			this.VisibleAreaUpdater = new VisibleAreaUpdater(new Action<int>(this.UpdateOutsideView), new Action<int>(this.UpdateInsideView), null, null, "TileRenderer");
+			this.VisibleAreaUpdater = new VisibleAreaUpdater(new Action<int>(this.UpdateOutsideView), new Action<int>(this.UpdateInsideView), "TileRenderer");
 		}
 
 		protected virtual Mask[] GetMasks()

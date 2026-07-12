@@ -6,11 +6,11 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Animations
 {
-	[RequiredByNativeCode]
 	[StaticAccessor("AnimationLayerMixerPlayableBindings", StaticAccessorType.DoubleColon)]
-	[NativeHeader("Runtime/Director/Core/HPlayable.h")]
+	[RequiredByNativeCode]
 	[NativeHeader("Modules/Animation/Director/AnimationLayerMixerPlayable.h")]
 	[NativeHeader("Modules/Animation/ScriptBindings/AnimationLayerMixerPlayable.bindings.h")]
+	[NativeHeader("Runtime/Director/Core/HPlayable.h")]
 	public struct AnimationLayerMixerPlayable : IPlayable, IEquatable<AnimationLayerMixerPlayable>
 	{
 		public static AnimationLayerMixerPlayable Null

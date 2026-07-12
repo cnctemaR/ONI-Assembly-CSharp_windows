@@ -16,7 +16,7 @@ public class ToolTipScreen : KScreen
 		this.toolTipWidget.SetActive(false);
 	}
 
-	protected override void OnCleanUp()
+	protected override void OnForcedCleanUp()
 	{
 		ToolTipScreen.Instance = null;
 	}

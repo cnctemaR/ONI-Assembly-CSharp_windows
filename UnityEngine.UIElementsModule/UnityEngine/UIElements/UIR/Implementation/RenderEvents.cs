@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Unity.Collections;
+using Unity.Profiling;
 
 namespace UnityEngine.UIElements.UIR.Implementation
 {
@@ -23,8 +24,9 @@ namespace UnityEngine.UIElements.UIR.Implementation
 
 		internal static void ProcessOnOpacityChanged(RenderChain renderChain, VisualElement ve, uint dirtyID, ref ChainBuilderStats stats)
 		{
+			bool flag = (ve.renderChainData.dirtiedValues & RenderDataDirtyTypes.OpacityHierarchy) > RenderDataDirtyTypes.None;
 			stats.recursiveOpacityUpdates += 1U;
-			RenderEvents.DepthFirstOnOpacityChanged(renderChain, (ve.hierarchy.parent != null) ? ve.hierarchy.parent.renderChainData.compositeOpacity : 1f, ve, dirtyID, ref stats, false);
+			RenderEvents.DepthFirstOnOpacityChanged(renderChain, (ve.hierarchy.parent != null) ? ve.hierarchy.parent.renderChainData.compositeOpacity : 1f, ve, dirtyID, flag, ref stats, false);
 		}
 
 		internal static void ProcessOnTransformOrSizeChanged(RenderChain renderChain, VisualElement ve, uint dirtyID, ref ChainBuilderStats stats)
@@ -425,7 +427,7 @@ namespace UnityEngine.UIElements.UIR.Implementation
 			}
 		}
 
-		private static void DepthFirstOnOpacityChanged(RenderChain renderChain, float parentCompositeOpacity, VisualElement ve, uint dirtyID, ref ChainBuilderStats stats, bool isDoingFullVertexRegeneration = false)
+		private static void DepthFirstOnOpacityChanged(RenderChain renderChain, float parentCompositeOpacity, VisualElement ve, uint dirtyID, bool hierarchical, ref ChainBuilderStats stats, bool isDoingFullVertexRegeneration = false)
 		{
 			bool flag = dirtyID == ve.renderChainData.dirtyID;
 			if (!flag)
@@ -499,13 +501,13 @@ namespace UnityEngine.UIElements.UIR.Implementation
 						}
 					}
 				}
-				bool flag17 = flag4 || flag6;
+				bool flag17 = flag4 || flag6 || hierarchical;
 				if (flag17)
 				{
 					int childCount = ve.hierarchy.childCount;
 					for (int i = 0; i < childCount; i++)
 					{
-						RenderEvents.DepthFirstOnOpacityChanged(renderChain, num, ve.hierarchy[i], dirtyID, ref stats, isDoingFullVertexRegeneration);
+						RenderEvents.DepthFirstOnOpacityChanged(renderChain, num, ve.hierarchy[i], dirtyID, hierarchical, ref stats, isDoingFullVertexRegeneration);
 					}
 				}
 			}
@@ -693,30 +695,23 @@ namespace UnityEngine.UIElements.UIR.Implementation
 			}
 			else
 			{
+				ClipMethod clipMethod2 = (((ve.renderHints & (RenderHints.GroupTransform | RenderHints.ClipWithScissors)) > RenderHints.None) ? ClipMethod.Scissor : ClipMethod.ShaderDiscard);
 				bool flag2 = !UIRUtility.IsRoundRect(ve) && !UIRUtility.IsVectorImageBackground(ve);
 				if (flag2)
 				{
-					bool flag3 = (ve.renderHints & (RenderHints.GroupTransform | RenderHints.ClipWithScissors)) > RenderHints.None;
-					if (flag3)
-					{
-						clipMethod = ClipMethod.Scissor;
-					}
-					else
-					{
-						clipMethod = ClipMethod.ShaderDiscard;
-					}
+					clipMethod = clipMethod2;
 				}
 				else
 				{
 					VisualElement parent = ve.hierarchy.parent;
-					bool flag4 = parent != null && parent.renderChainData.isStencilClipped;
-					if (flag4)
+					bool flag3 = parent != null && parent.renderChainData.isStencilClipped;
+					if (flag3)
 					{
-						clipMethod = ClipMethod.ShaderDiscard;
+						clipMethod = clipMethod2;
 					}
 					else
 					{
-						clipMethod = (renderChain.drawInCameras ? ClipMethod.ShaderDiscard : ClipMethod.Stencil);
+						clipMethod = (renderChain.drawInCameras ? clipMethod2 : ClipMethod.Stencil);
 					}
 				}
 			}
@@ -747,18 +742,19 @@ namespace UnityEngine.UIElements.UIR.Implementation
 		internal static UIRStylePainter.ClosingInfo PaintElement(RenderChain renderChain, VisualElement ve, ref ChainBuilderStats stats)
 		{
 			bool flag = ve.renderChainData.clipMethod == ClipMethod.Stencil;
-			bool flag2 = (RenderEvents.IsElementSelfHidden(ve) && !flag) || ve.renderChainData.isHierarchyHidden;
+			bool flag2 = ve.renderChainData.clipMethod == ClipMethod.Scissor;
+			bool flag3 = (RenderEvents.IsElementSelfHidden(ve) && !flag && !flag2) || ve.renderChainData.isHierarchyHidden;
 			UIRStylePainter.ClosingInfo closingInfo2;
-			if (flag2)
+			if (flag3)
 			{
-				bool flag3 = ve.renderChainData.data != null;
-				if (flag3)
+				bool flag4 = ve.renderChainData.data != null;
+				if (flag4)
 				{
 					renderChain.painter.device.Free(ve.renderChainData.data);
 					ve.renderChainData.data = null;
 				}
-				bool flag4 = ve.renderChainData.firstCommand != null;
-				if (flag4)
+				bool flag5 = ve.renderChainData.firstCommand != null;
+				if (flag5)
 				{
 					RenderEvents.ResetCommands(renderChain, ve);
 				}
@@ -771,11 +767,11 @@ namespace UnityEngine.UIElements.UIR.Implementation
 				RenderChainCommand renderChainCommand = ((firstCommand != null) ? firstCommand.prev : null);
 				RenderChainCommand lastCommand = ve.renderChainData.lastCommand;
 				RenderChainCommand renderChainCommand2 = ((lastCommand != null) ? lastCommand.next : null);
-				bool flag5 = ve.renderChainData.firstClosingCommand != null && renderChainCommand2 == ve.renderChainData.firstClosingCommand;
-				bool flag6 = flag5;
+				bool flag6 = ve.renderChainData.firstClosingCommand != null && renderChainCommand2 == ve.renderChainData.firstClosingCommand;
+				bool flag7 = flag6;
 				RenderChainCommand renderChainCommand4;
 				RenderChainCommand renderChainCommand3;
-				if (flag6)
+				if (flag7)
 				{
 					renderChainCommand2 = ve.renderChainData.lastClosingCommand.next;
 					renderChainCommand3 = (renderChainCommand4 = null);
@@ -804,19 +800,19 @@ namespace UnityEngine.UIElements.UIR.Implementation
 				}
 				else
 				{
-					bool flag7 = ve.renderChainData.clipMethod == ClipMethod.Stencil;
-					if (flag7)
+					bool flag8 = flag2 || flag;
+					if (flag8)
 					{
 						painter.ApplyVisualElementClipping();
 					}
 				}
 				MeshHandle meshHandle = ve.renderChainData.data;
-				bool flag8 = (long)painter.totalVertices > (long)((ulong)renderChain.device.maxVerticesPerPage);
-				if (flag8)
+				bool flag9 = (long)painter.totalVertices > (long)((ulong)renderChain.device.maxVerticesPerPage);
+				if (flag9)
 				{
 					Debug.LogError(string.Format("A {0} must not allocate more than {1} vertices.", "VisualElement", renderChain.device.maxVerticesPerPage));
-					bool flag9 = meshHandle != null;
-					if (flag9)
+					bool flag10 = meshHandle != null;
+					if (flag10)
 					{
 						painter.device.Free(meshHandle);
 						meshHandle = null;
@@ -825,14 +821,14 @@ namespace UnityEngine.UIElements.UIR.Implementation
 					painter.Begin(ve);
 				}
 				List<UIRStylePainter.Entry> entries = painter.entries;
-				bool flag10 = entries.Count > 0;
-				if (flag10)
+				bool flag11 = entries.Count > 0;
+				if (flag11)
 				{
 					NativeSlice<Vertex> nativeSlice = default(NativeSlice<Vertex>);
 					NativeSlice<ushort> nativeSlice2 = default(NativeSlice<ushort>);
 					ushort num = 0;
-					bool flag11 = painter.totalVertices > 0;
-					if (flag11)
+					bool flag12 = painter.totalVertices > 0;
+					if (flag12)
 					{
 						RenderEvents.UpdateOrAllocate(ref meshHandle, painter.totalVertices, painter.totalIndices, painter.device, out nativeSlice, out nativeSlice2, out num, ref stats);
 					}
@@ -840,12 +836,12 @@ namespace UnityEngine.UIElements.UIR.Implementation
 					int num3 = 0;
 					RenderChainCommand renderChainCommand5 = renderChainCommand;
 					RenderChainCommand renderChainCommand6 = renderChainCommand2;
-					bool flag12 = renderChainCommand == null && renderChainCommand2 == null;
-					if (flag12)
+					bool flag13 = renderChainCommand == null && renderChainCommand2 == null;
+					if (flag13)
 					{
 						RenderEvents.FindCommandInsertionPoint(ve, out renderChainCommand5, out renderChainCommand6);
 					}
-					bool flag13 = false;
+					bool flag14 = false;
 					Matrix4x4 identity = Matrix4x4.identity;
 					Color32 color = new Color32(0, 0, 0, 0);
 					Color32 color2 = new Color32(0, 0, 0, 0);
@@ -855,23 +851,23 @@ namespace UnityEngine.UIElements.UIR.Implementation
 					foreach (UIRStylePainter.Entry entry in painter.entries)
 					{
 						NativeSlice<Vertex> nativeSlice3 = entry.vertices;
-						bool flag14;
+						bool flag15;
 						if (nativeSlice3.Length > 0)
 						{
 							NativeSlice<ushort> nativeSlice4 = entry.indices;
-							flag14 = nativeSlice4.Length > 0;
+							flag15 = nativeSlice4.Length > 0;
 						}
 						else
 						{
-							flag14 = false;
+							flag15 = false;
 						}
-						bool flag15 = flag14;
-						if (flag15)
+						bool flag16 = flag15;
+						if (flag16)
 						{
-							bool flag16 = !flag13;
-							if (flag16)
+							bool flag17 = !flag14;
+							if (flag17)
 							{
-								flag13 = true;
+								flag14 = true;
 								RenderEvents.GetVerticesTransformInfo(ve, out identity);
 								ve.renderChainData.verticesSpace = identity;
 								Color32 color4 = renderChain.shaderInfoAllocator.TransformAllocToVertexData(ve.renderChainData.transformID);
@@ -895,8 +891,8 @@ namespace UnityEngine.UIElements.UIR.Implementation
 							bool uvIsDisplacement = entry.uvIsDisplacement;
 							if (uvIsDisplacement)
 							{
-								bool flag17 = num4 < 0;
-								if (flag17)
+								bool flag18 = num4 < 0;
+								if (flag18)
 								{
 									num4 = num2;
 									int num7 = num2;
@@ -905,8 +901,8 @@ namespace UnityEngine.UIElements.UIR.Implementation
 								}
 								else
 								{
-									bool flag18 = num5 == num2;
-									if (flag18)
+									bool flag19 = num5 == num2;
+									if (flag19)
 									{
 										int num8 = num5;
 										nativeSlice3 = entry.vertices;
@@ -927,8 +923,8 @@ namespace UnityEngine.UIElements.UIR.Implementation
 							int length = nativeSlice4.Length;
 							int num9 = num2 + (int)num;
 							NativeSlice<ushort> nativeSlice7 = nativeSlice2.Slice<ushort>(num3, length);
-							bool flag19 = entry.isClipRegisterEntry || !entry.isStencilClipped;
-							if (flag19)
+							bool flag20 = entry.isClipRegisterEntry || !entry.isStencilClipped;
+							if (flag20)
 							{
 								RenderEvents.CopyTriangleIndices(entry.indices, nativeSlice7, num9);
 							}
@@ -942,11 +938,11 @@ namespace UnityEngine.UIElements.UIR.Implementation
 								painter.LandClipRegisterMesh(nativeSlice6, nativeSlice7, num9);
 							}
 							RenderChainCommand renderChainCommand7 = RenderEvents.InjectMeshDrawCommand(renderChain, ve, ref renderChainCommand5, ref renderChainCommand6, meshHandle, length, num3, entry.material, entry.custom, entry.font);
-							bool flag20 = entry.isTextEntry && ve.renderChainData.usesLegacyText;
-							if (flag20)
+							bool flag21 = entry.isTextEntry && ve.renderChainData.usesLegacyText;
+							if (flag21)
 							{
-								bool flag21 = ve.renderChainData.textEntries == null;
-								if (flag21)
+								bool flag22 = ve.renderChainData.textEntries == null;
+								if (flag22)
 								{
 									ve.renderChainData.textEntries = new List<RenderChainTextEntry>(1);
 								}
@@ -965,8 +961,8 @@ namespace UnityEngine.UIElements.UIR.Implementation
 						}
 						else
 						{
-							bool flag22 = entry.customCommand != null;
-							if (flag22)
+							bool flag23 = entry.customCommand != null;
+							if (flag23)
 							{
 								RenderEvents.InjectCommandInBetween(renderChain, entry.customCommand, ref renderChainCommand5, ref renderChainCommand6);
 							}
@@ -976,8 +972,8 @@ namespace UnityEngine.UIElements.UIR.Implementation
 							}
 						}
 					}
-					bool flag23 = !ve.renderChainData.disableNudging && num4 >= 0;
-					if (flag23)
+					bool flag24 = !ve.renderChainData.disableNudging && num4 >= 0;
+					if (flag24)
 					{
 						ve.renderChainData.displacementUVStart = num4;
 						ve.renderChainData.displacementUVEnd = num5;
@@ -985,8 +981,8 @@ namespace UnityEngine.UIElements.UIR.Implementation
 				}
 				else
 				{
-					bool flag24 = meshHandle != null;
-					if (flag24)
+					bool flag25 = meshHandle != null;
+					if (flag25)
 					{
 						painter.device.Free(meshHandle);
 						meshHandle = null;
@@ -999,8 +995,8 @@ namespace UnityEngine.UIElements.UIR.Implementation
 					renderChain.AddTextElement(ve);
 				}
 				UIRStylePainter.ClosingInfo closingInfo = painter.closingInfo;
-				bool flag25 = closingInfo.clipperRegisterIndices.Length == 0 && ve.renderChainData.closingData != null;
-				if (flag25)
+				bool flag26 = closingInfo.clipperRegisterIndices.Length == 0 && ve.renderChainData.closingData != null;
+				if (flag26)
 				{
 					painter.device.Free(ve.renderChainData.closingData);
 					ve.renderChainData.closingData = null;
@@ -1010,23 +1006,23 @@ namespace UnityEngine.UIElements.UIR.Implementation
 				{
 					RenderChainCommand renderChainCommand8 = renderChainCommand4;
 					RenderChainCommand renderChainCommand9 = renderChainCommand3;
-					bool flag26 = flag5;
-					if (flag26)
+					bool flag27 = flag6;
+					if (flag27)
 					{
 						renderChainCommand8 = ve.renderChainData.lastCommand;
 						renderChainCommand9 = renderChainCommand8.next;
 					}
 					else
 					{
-						bool flag27 = renderChainCommand8 == null && renderChainCommand9 == null;
-						if (flag27)
+						bool flag28 = renderChainCommand8 == null && renderChainCommand9 == null;
+						if (flag28)
 						{
 							RenderEvents.FindClosingCommandInsertionPoint(ve, out renderChainCommand8, out renderChainCommand9);
 						}
 					}
 					closingInfo = painter.closingInfo;
-					bool flag28 = closingInfo.clipperRegisterIndices.Length > 0;
-					if (flag28)
+					bool flag29 = closingInfo.clipperRegisterIndices.Length > 0;
+					if (flag29)
 					{
 						painter.LandClipUnregisterMeshDrawCommand(RenderEvents.InjectClosingMeshDrawCommand(renderChain, ve, ref renderChainCommand8, ref renderChainCommand9, null, 0, 0, null, null, null));
 					}
@@ -1049,6 +1045,7 @@ namespace UnityEngine.UIElements.UIR.Implementation
 						RenderEvents.InjectClosingCommandInBetween(renderChain, renderChainCommand11, ref renderChainCommand8, ref renderChainCommand9);
 					}
 				}
+				Debug.Assert(ve.renderChainData.closingData == null || ve.renderChainData.data != null);
 				UIRStylePainter.ClosingInfo closingInfo3 = painter.closingInfo;
 				painter.Reset();
 				closingInfo2 = closingInfo3;
@@ -1200,34 +1197,56 @@ namespace UnityEngine.UIElements.UIR.Implementation
 			else
 			{
 				ve.renderChainData.verticesSpace = matrix4x;
-				int size = (int)ve.renderChainData.data.allocVerts.size;
-				NativeSlice<Vertex> nativeSlice = ve.renderChainData.data.allocPage.vertices.cpuData.Slice<Vertex>((int)ve.renderChainData.data.allocVerts.start, size);
-				NativeSlice<Vertex> nativeSlice2;
-				device.Update(ve.renderChainData.data, (uint)size, out nativeSlice2);
-				int displacementUVStart = ve.renderChainData.displacementUVStart;
-				int displacementUVEnd = ve.renderChainData.displacementUVEnd;
-				for (int i = 0; i < displacementUVStart; i++)
+				RenderEvents.DoNudgeVertices(ve, device, ve.renderChainData.data, ref matrix4x2, false);
+				bool flag3 = ve.renderChainData.closingData != null;
+				if (flag3)
 				{
-					Vertex vertex = nativeSlice[i];
-					vertex.position = matrix4x2.MultiplyPoint3x4(vertex.position);
-					nativeSlice2[i] = vertex;
-				}
-				for (int j = displacementUVStart; j < displacementUVEnd; j++)
-				{
-					Vertex vertex2 = nativeSlice[j];
-					vertex2.position = matrix4x2.MultiplyPoint3x4(vertex2.position);
-					vertex2.uv = matrix4x2.MultiplyVector(vertex2.uv);
-					nativeSlice2[j] = vertex2;
-				}
-				for (int k = displacementUVEnd; k < size; k++)
-				{
-					Vertex vertex3 = nativeSlice[k];
-					vertex3.position = matrix4x2.MultiplyPoint3x4(vertex3.position);
-					nativeSlice2[k] = vertex3;
+					RenderEvents.DoNudgeVertices(ve, device, ve.renderChainData.closingData, ref matrix4x2, true);
 				}
 				flag2 = true;
 			}
 			return flag2;
+		}
+
+		private static void DoNudgeVertices(VisualElement ve, UIRenderDevice device, MeshHandle mesh, ref Matrix4x4 nudgeTransform, bool isClosingMesh)
+		{
+			int size = (int)mesh.allocVerts.size;
+			NativeSlice<Vertex> nativeSlice = mesh.allocPage.vertices.cpuData.Slice<Vertex>((int)mesh.allocVerts.start, size);
+			NativeSlice<Vertex> nativeSlice2;
+			device.Update(mesh, (uint)size, out nativeSlice2);
+			if (isClosingMesh)
+			{
+				for (int i = 0; i < size; i++)
+				{
+					Vertex vertex = nativeSlice[i];
+					vertex.position = nudgeTransform.MultiplyPoint3x4(vertex.position);
+					nativeSlice2[i] = vertex;
+				}
+			}
+			else
+			{
+				int displacementUVStart = ve.renderChainData.displacementUVStart;
+				int displacementUVEnd = ve.renderChainData.displacementUVEnd;
+				for (int j = 0; j < displacementUVStart; j++)
+				{
+					Vertex vertex2 = nativeSlice[j];
+					vertex2.position = nudgeTransform.MultiplyPoint3x4(vertex2.position);
+					nativeSlice2[j] = vertex2;
+				}
+				for (int k = displacementUVStart; k < displacementUVEnd; k++)
+				{
+					Vertex vertex3 = nativeSlice[k];
+					vertex3.position = nudgeTransform.MultiplyPoint3x4(vertex3.position);
+					vertex3.uv = nudgeTransform.MultiplyVector(vertex3.uv);
+					nativeSlice2[k] = vertex3;
+				}
+				for (int l = displacementUVEnd; l < size; l++)
+				{
+					Vertex vertex4 = nativeSlice[l];
+					vertex4.position = nudgeTransform.MultiplyPoint3x4(vertex4.position);
+					nativeSlice2[l] = vertex4;
+				}
+			}
 		}
 
 		private static RenderChainCommand InjectMeshDrawCommand(RenderChain renderChain, VisualElement ve, ref RenderChainCommand cmdPrev, ref RenderChainCommand cmdNext, MeshHandle mesh, int indexCount, int indexOffset, Material material, Texture custom, Texture font)
@@ -1494,5 +1513,7 @@ namespace UnityEngine.UIElements.UIR.Implementation
 		}
 
 		private static readonly float VisibilityTreshold = Mathf.Epsilon;
+
+		private static readonly ProfilerMarker k_NudgeVerticesMarker = new ProfilerMarker("UIR.NudgeVertices");
 	}
 }

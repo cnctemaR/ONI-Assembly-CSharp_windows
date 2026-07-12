@@ -145,8 +145,8 @@ namespace UnityEngine
 			set;
 		}
 
-		[NativeProperty("m_ClipOffset", false, TargetType.Field)]
 		[Obsolete("Don't use clipOffset - put things inside BeginGroup instead. This functionality will be removed in a later version.", false)]
+		[NativeProperty("m_ClipOffset", false, TargetType.Field)]
 		public Vector2 clipOffset
 		{
 			get
@@ -295,6 +295,10 @@ namespace UnityEngine
 		{
 			GUIStyle.SetMouseTooltip_Injected(tooltip, ref screenRect);
 		}
+
+		[FreeFunction(Name = "GUIStyle_Bindings::IsTooltipActive")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal static extern bool IsTooltipActive(string tooltip);
 
 		[FreeFunction(Name = "GUIStyle_Bindings::Internal_GetCursorFlashOffset")]
 		[MethodImpl(MethodImplOptions.InternalCall)]

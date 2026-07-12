@@ -27,7 +27,7 @@ namespace UnityEngine.UIElements.UIR
 
 		internal static void MakeTexturedRect(MeshGenerationContextUtils.RectangleParams rectParams, float posZ, MeshBuilder.AllocMeshData meshAlloc)
 		{
-			bool flag = (float)rectParams.leftSlice <= Mathf.Epsilon && (float)rectParams.topSlice <= Mathf.Epsilon && (float)rectParams.rightSlice <= Mathf.Epsilon && (float)rectParams.bottomSlice <= Mathf.Epsilon;
+			bool flag = (float)rectParams.leftSlice <= 1E-30f && (float)rectParams.topSlice <= 1E-30f && (float)rectParams.rightSlice <= 1E-30f && (float)rectParams.bottomSlice <= 1E-30f;
 			if (flag)
 			{
 				bool flag2 = !rectParams.HasRadius(Tessellation.kEpsilon);
@@ -296,7 +296,7 @@ namespace UnityEngine.UIElements.UIR
 					opacityPageSVGSettingIndex = new Color32(0, 0, (byte)(vectorImageVertex.settingIndex >> 8), (byte)vectorImageVertex.settingIndex)
 				};
 			}
-			bool flag = (float)rectParams.leftSlice <= Mathf.Epsilon && (float)rectParams.topSlice <= Mathf.Epsilon && (float)rectParams.rightSlice <= Mathf.Epsilon && (float)rectParams.bottomSlice <= Mathf.Epsilon;
+			bool flag = (float)rectParams.leftSlice <= 1E-30f && (float)rectParams.topSlice <= 1E-30f && (float)rectParams.rightSlice <= 1E-30f && (float)rectParams.bottomSlice <= 1E-30f;
 			if (flag)
 			{
 				MeshBuilder.MakeVectorGraphicsStretchBackground(array, vectorImage.indices, vectorImage.size.x, vectorImage.size.y, rectParams.rect, rectParams.uv, rectParams.scaleMode, rectParams.color, settingIndexOffset, meshAlloc, out finalVertexCount, out finalIndexCount);

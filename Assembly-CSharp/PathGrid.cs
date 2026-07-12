@@ -28,6 +28,7 @@ public class PathGrid
 				}
 			}
 		}
+		DebugUtil.DevAssert(true, "Cell packs nav type into 4 bits!", null);
 		this.Cells = new PathFinder.Cell[width_in_cells * height_in_cells * this.ValidNavTypes.Length];
 		this.ProberCells = new PathGrid.ProberCell[width_in_cells * height_in_cells];
 		this.serialNo = 0;
@@ -62,7 +63,7 @@ public class PathGrid
 			this.rootX -= this.widthInCells / 2;
 			this.rootY -= this.heightInCells / 2;
 		}
-		this.serialNo++;
+		this.serialNo += 1;
 		if (this.groupProber != null)
 		{
 			this.groupProber.SetValidSerialNos(this, this.previousSerialNo, this.serialNo);
@@ -87,7 +88,7 @@ public class PathGrid
 		this.previousSerialNo = this.serialNo;
 	}
 
-	private bool IsValidSerialNo(int serialNo)
+	private bool IsValidSerialNo(short serialNo)
 	{
 		return serialNo == this.serialNo || (!this.isUpdating && this.previousSerialNo != -1 && serialNo == this.previousSerialNo);
 	}
@@ -207,9 +208,9 @@ public class PathGrid
 
 	private int rootY;
 
-	private int serialNo;
+	private short serialNo;
 
-	private int previousSerialNo;
+	private short previousSerialNo;
 
 	private bool isUpdating;
 
@@ -224,6 +225,6 @@ public class PathGrid
 	{
 		public int cost;
 
-		public int queryId;
+		public short queryId;
 	}
 }

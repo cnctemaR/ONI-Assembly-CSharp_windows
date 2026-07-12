@@ -50,6 +50,13 @@ public class Sleepable : Workable
 	protected override void OnStartWork(Worker worker)
 	{
 		base.OnStartWork(worker);
+		KAnimControllerBase component = base.GetComponent<KAnimControllerBase>();
+		if (component != null)
+		{
+			component.Play("working_pre", KAnim.PlayMode.Once, 1f, 0f);
+			component.Queue("working_loop", KAnim.PlayMode.Loop, 1f, 0f);
+		}
+		base.Subscribe(worker.gameObject, -1142962013, new Action<object>(this.PlayPstAnim));
 		if (this.operational != null)
 		{
 			this.operational.SetActive(true, false);
@@ -83,6 +90,7 @@ public class Sleepable : Workable
 		{
 			this.operational.SetActive(false, false);
 		}
+		base.Unsubscribe(worker.gameObject, -1142962013, new Action<object>(this.PlayPstAnim));
 		if (worker != null)
 		{
 			Effects component = worker.GetComponent<Effects>();
@@ -114,6 +122,19 @@ public class Sleepable : Workable
 	{
 		base.OnCleanUp();
 		Components.Sleepables.Remove(this);
+	}
+
+	private void PlayPstAnim(object data)
+	{
+		Worker worker = (Worker)data;
+		if (worker != null && worker.workable != null)
+		{
+			KAnimControllerBase component = worker.workable.gameObject.GetComponent<KAnimControllerBase>();
+			if (component != null)
+			{
+				component.Play("working_pst", KAnim.PlayMode.Once, 1f, 0f);
+			}
+		}
 	}
 
 	private const float STRECH_CHANCE = 0.33f;

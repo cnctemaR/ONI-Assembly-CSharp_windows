@@ -47,75 +47,74 @@ public class MusicManager : KMonoBehaviour, ISerializationCallbackReceiver
 			{
 				songInfo.ev.setParameterByName("variation", (float)num, false);
 			}
-			songInfo.ev.start();
-			this.activeSongs[song_name] = songInfo;
 			if (songInfo.dynamic)
 			{
+				songInfo.ev.setProperty(EVENT_PROPERTY.SCHEDULE_DELAY, 16000f);
+				songInfo.ev.setProperty(EVENT_PROPERTY.SCHEDULE_LOOKAHEAD, 48000f);
 				this.activeDynamicSong = songInfo;
-				return;
+			}
+			songInfo.ev.start();
+			this.activeSongs[song_name] = songInfo;
+			return;
+		}
+		List<string> list = new List<string>(this.activeSongs.Keys);
+		if (songInfo.interruptsActiveMusic)
+		{
+			for (int i = 0; i < list.Count; i++)
+			{
+				if (!this.activeSongs[list[i]].interruptsActiveMusic)
+				{
+					MusicManager.SongInfo songInfo2 = this.activeSongs[list[i]];
+					songInfo2.ev.setParameterByName("interrupted_dimmed", 1f, false);
+					this.Log("Dimming: " + Assets.GetSimpleSoundEventName(songInfo2.fmodEvent));
+					songInfo.songsOnHold.Add(list[i]);
+				}
+			}
+			songInfo.ev = KFMOD.CreateInstance(songInfo.fmodEvent);
+			if (!songInfo.ev.isValid())
+			{
+				DebugUtil.LogWarningArgs(new object[] { "Failed to find FMOD event [" + songInfo.fmodEvent + "]" });
+			}
+			songInfo.ev.start();
+			songInfo.ev.release();
+			this.activeSongs[song_name] = songInfo;
+			return;
+		}
+		int num2 = 0;
+		foreach (string text in this.activeSongs.Keys)
+		{
+			MusicManager.SongInfo songInfo3 = this.activeSongs[text];
+			if (!songInfo3.interruptsActiveMusic && songInfo3.priority > num2)
+			{
+				num2 = songInfo3.priority;
 			}
 		}
-		else
+		if (songInfo.priority >= num2)
 		{
-			List<string> list = new List<string>(this.activeSongs.Keys);
-			if (songInfo.interruptsActiveMusic)
+			for (int j = 0; j < list.Count; j++)
 			{
-				for (int i = 0; i < list.Count; i++)
+				MusicManager.SongInfo songInfo4 = this.activeSongs[list[j]];
+				FMOD.Studio.EventInstance ev = songInfo4.ev;
+				if (!songInfo4.interruptsActiveMusic)
 				{
-					if (!this.activeSongs[list[i]].interruptsActiveMusic)
-					{
-						MusicManager.SongInfo songInfo2 = this.activeSongs[list[i]];
-						songInfo2.ev.setParameterByName("interrupted_dimmed", 1f, false);
-						this.Log("Dimming: " + Assets.GetSimpleSoundEventName(songInfo2.fmodEvent));
-						songInfo.songsOnHold.Add(list[i]);
-					}
-				}
-				songInfo.ev = KFMOD.CreateInstance(songInfo.fmodEvent);
-				if (!songInfo.ev.isValid())
-				{
-					DebugUtil.LogWarningArgs(new object[] { "Failed to find FMOD event [" + songInfo.fmodEvent + "]" });
-				}
-				songInfo.ev.start();
-				songInfo.ev.release();
-				this.activeSongs[song_name] = songInfo;
-				return;
-			}
-			int num2 = 0;
-			foreach (string text in this.activeSongs.Keys)
-			{
-				MusicManager.SongInfo songInfo3 = this.activeSongs[text];
-				if (!songInfo3.interruptsActiveMusic && songInfo3.priority > num2)
-				{
-					num2 = songInfo3.priority;
+					ev.setParameterByName("interrupted_dimmed", 1f, false);
+					ev.stop(FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
+					this.activeSongs.Remove(list[j]);
+					list.Remove(list[j]);
 				}
 			}
-			if (songInfo.priority >= num2)
+			songInfo.ev = KFMOD.CreateInstance(songInfo.fmodEvent);
+			if (!songInfo.ev.isValid())
 			{
-				for (int j = 0; j < list.Count; j++)
-				{
-					MusicManager.SongInfo songInfo4 = this.activeSongs[list[j]];
-					FMOD.Studio.EventInstance ev = songInfo4.ev;
-					if (!songInfo4.interruptsActiveMusic)
-					{
-						ev.setParameterByName("interrupted_dimmed", 1f, false);
-						ev.stop(FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
-						this.activeSongs.Remove(list[j]);
-						list.Remove(list[j]);
-					}
-				}
-				songInfo.ev = KFMOD.CreateInstance(songInfo.fmodEvent);
-				if (!songInfo.ev.isValid())
-				{
-					DebugUtil.LogWarningArgs(new object[] { "Failed to find FMOD event [" + songInfo.fmodEvent + "]" });
-				}
-				int num3 = ((songInfo.numberOfVariations > 0) ? global::UnityEngine.Random.Range(1, songInfo.numberOfVariations + 1) : (-1));
-				if (num3 != -1)
-				{
-					songInfo.ev.setParameterByName("variation", (float)num3, false);
-				}
-				songInfo.ev.start();
-				this.activeSongs[song_name] = songInfo;
+				DebugUtil.LogWarningArgs(new object[] { "Failed to find FMOD event [" + songInfo.fmodEvent + "]" });
 			}
+			int num3 = ((songInfo.numberOfVariations > 0) ? global::UnityEngine.Random.Range(1, songInfo.numberOfVariations + 1) : (-1));
+			if (num3 != -1)
+			{
+				songInfo.ev.setParameterByName("variation", (float)num3, false);
+			}
+			songInfo.ev.start();
+			this.activeSongs[song_name] = songInfo;
 		}
 	}
 
@@ -332,6 +331,7 @@ public class MusicManager : KMonoBehaviour, ISerializationCallbackReceiver
 				this.SetDynamicMusicOverlayActive();
 			}
 			this.SetDynamicMusicPlayHook();
+			this.SetDynamicMusicKeySigniture();
 			string text = "Volume_Music";
 			if (KPlayerPrefs.HasKey(text))
 			{
@@ -476,6 +476,42 @@ public class MusicManager : KMonoBehaviour, ISerializationCallbackReceiver
 		return GameClock.Instance.GetCurrentCycleAsPercentage() <= this.loadGameCutoffPercentage / 100f;
 	}
 
+	public void SetDynamicMusicKeySigniture()
+	{
+		if (this.DynamicMusicIsActive())
+		{
+			string simpleSoundEventName = Assets.GetSimpleSoundEventName(this.activeDynamicSong.fmodEvent);
+			string musicKeySigniture = this.activePlaylist.songMap[simpleSoundEventName].musicKeySigniture;
+			float num;
+			if (musicKeySigniture != null)
+			{
+				if (musicKeySigniture == "Ab")
+				{
+					num = 0f;
+					goto IL_0092;
+				}
+				if (musicKeySigniture == "Bb")
+				{
+					num = 1f;
+					goto IL_0092;
+				}
+				if (musicKeySigniture == "C")
+				{
+					num = 2f;
+					goto IL_0092;
+				}
+				if (musicKeySigniture == "D")
+				{
+					num = 3f;
+					goto IL_0092;
+				}
+			}
+			num = 2f;
+			IL_0092:
+			RuntimeManager.StudioSystem.setParameterByName("MusicInKey", num, false);
+		}
+	}
+
 	public static MusicManager instance
 	{
 		get
@@ -526,6 +562,7 @@ public class MusicManager : KMonoBehaviour, ISerializationCallbackReceiver
 			songInfo.dynamic = true;
 			songInfo.useTimeOfDay = dynamicSong.useTimeOfDay;
 			songInfo.numberOfVariations = dynamicSong.numberOfVariations;
+			songInfo.musicKeySigniture = dynamicSong.musicKeySigniture;
 			songInfo.sfxAttenuationPercentage = this.dynamicMusicSFXAttenuationPercentage;
 			this.songMap[simpleSoundEventName] = songInfo;
 			this.fullSongPlaylist.songMap[simpleSoundEventName] = songInfo;
@@ -541,6 +578,7 @@ public class MusicManager : KMonoBehaviour, ISerializationCallbackReceiver
 			songInfo2.dynamic = true;
 			songInfo2.useTimeOfDay = false;
 			songInfo2.numberOfVariations = 5;
+			songInfo2.musicKeySigniture = minisong.musicKeySigniture;
 			songInfo2.sfxAttenuationPercentage = this.miniSongSFXAttenuationPercentage;
 			this.songMap[simpleSoundEventName2] = songInfo2;
 			this.miniSongPlaylist.songMap[simpleSoundEventName2] = songInfo2;
@@ -587,6 +625,12 @@ public class MusicManager : KMonoBehaviour, ISerializationCallbackReceiver
 	private const string VARIATION_ID = "variation";
 
 	private const string INTERRUPTED_DIMMED_ID = "interrupted_dimmed";
+
+	private const string MUSIC_KEY = "MusicInKey";
+
+	private const float DYNAMIC_MUSIC_SCHEDULE_DELAY = 16000f;
+
+	private const float DYNAMIC_MUSIC_SCHEDULE_LOOKAHEAD = 48000f;
 
 	[Header("Song Lists")]
 	[Tooltip("Play during the daytime. The mix of the song is affected by the player's input, like pausing the sim, activating an overlay, or zooming in and out.")]
@@ -682,6 +726,9 @@ public class MusicManager : KMonoBehaviour, ISerializationCallbackReceiver
 		public int numberOfVariations;
 
 		[NonSerialized]
+		public string musicKeySigniture = "C";
+
+		[NonSerialized]
 		public FMOD.Studio.EventInstance ev;
 
 		[NonSerialized]
@@ -712,6 +759,10 @@ public class MusicManager : KMonoBehaviour, ISerializationCallbackReceiver
 		[SerializeField]
 		public int numberOfVariations;
 
+		[Tooltip("Some songs have different key signitures. Enter the key this music is in.")]
+		[SerializeField]
+		public string musicKeySigniture = "";
+
 		[Tooltip("Should playback of this song be limited to an active DLC?")]
 		[SerializeField]
 		public string requiredDlcId = "";
@@ -731,6 +782,10 @@ public class MusicManager : KMonoBehaviour, ISerializationCallbackReceiver
 	{
 		[EventRef]
 		public string fmodEvent;
+
+		[Tooltip("Some songs have different key signitures. Enter the key this music is in.")]
+		[SerializeField]
+		public string musicKeySigniture = "";
 
 		[Tooltip("Should playback of this song be limited to an active DLC?")]
 		[SerializeField]

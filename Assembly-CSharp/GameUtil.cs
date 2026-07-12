@@ -215,17 +215,45 @@ public static class GameUtil
 		throw new ArgumentException(action.ToString() + " is not bound in GameInputBindings");
 	}
 
-	public static string GetIdentityDescriptor(GameObject go)
+	public static string GetIdentityDescriptor(GameObject go, GameUtil.IdentityDescriptorTense tense = GameUtil.IdentityDescriptorTense.Normal)
 	{
 		if (go.GetComponent<MinionIdentity>())
 		{
-			return DUPLICANTS.STATS.SUBJECTS.DUPLICANT;
+			switch (tense)
+			{
+			case GameUtil.IdentityDescriptorTense.Normal:
+				return DUPLICANTS.STATS.SUBJECTS.DUPLICANT;
+			case GameUtil.IdentityDescriptorTense.Possessive:
+				return DUPLICANTS.STATS.SUBJECTS.DUPLICANT_POSSESSIVE;
+			case GameUtil.IdentityDescriptorTense.Plural:
+				return DUPLICANTS.STATS.SUBJECTS.DUPLICANT_PLURAL;
+			}
 		}
-		if (go.GetComponent<CreatureBrain>())
+		else if (go.GetComponent<CreatureBrain>())
 		{
-			return DUPLICANTS.STATS.SUBJECTS.CREATURE;
+			switch (tense)
+			{
+			case GameUtil.IdentityDescriptorTense.Normal:
+				return DUPLICANTS.STATS.SUBJECTS.CREATURE;
+			case GameUtil.IdentityDescriptorTense.Possessive:
+				return DUPLICANTS.STATS.SUBJECTS.CREATURE_POSSESSIVE;
+			case GameUtil.IdentityDescriptorTense.Plural:
+				return DUPLICANTS.STATS.SUBJECTS.CREATURE_PLURAL;
+			}
 		}
-		return DUPLICANTS.STATS.SUBJECTS.PLANT;
+		else
+		{
+			switch (tense)
+			{
+			case GameUtil.IdentityDescriptorTense.Normal:
+				return DUPLICANTS.STATS.SUBJECTS.PLANT;
+			case GameUtil.IdentityDescriptorTense.Possessive:
+				return DUPLICANTS.STATS.SUBJECTS.PLANT_POSESSIVE;
+			case GameUtil.IdentityDescriptorTense.Plural:
+				return DUPLICANTS.STATS.SUBJECTS.PLANT_PLURAL;
+			}
+		}
+		return "";
 	}
 
 	public static float GetEnergyInPrimaryElement(PrimaryElement element)
@@ -1002,7 +1030,11 @@ public static class GameUtil
 
 	public static float GetRadiationAbsorptionPercentage(int cell)
 	{
-		return GameUtil.GetRadiationAbsorptionPercentage(Grid.Element[cell], Grid.Mass[cell], Grid.IsSolidCell(cell) && (Grid.Properties[cell] & 128) == 128);
+		if (Grid.IsValidCell(cell))
+		{
+			return GameUtil.GetRadiationAbsorptionPercentage(Grid.Element[cell], Grid.Mass[cell], Grid.IsSolidCell(cell) && (Grid.Properties[cell] & 128) == 128);
+		}
+		return 0f;
 	}
 
 	public static float GetRadiationAbsorptionPercentage(Element elem, float mass, bool isConstructed)
@@ -1021,6 +1053,55 @@ public static class GameUtil
 			num5 = elem.radiationAbsorptionFactor * num2 + mass / num * elem.radiationAbsorptionFactor * num3;
 		}
 		return Mathf.Clamp(num5, 0f, 1f);
+	}
+
+	public static HashSet<int> CollectCellsBreadthFirst(int start_cell, Func<int, bool> test_func, int max_depth = 10)
+	{
+		HashSet<int> hashSet = new HashSet<int>();
+		HashSet<int> hashSet2 = new HashSet<int>();
+		HashSet<int> hashSet3 = new HashSet<int>();
+		hashSet3.Add(start_cell);
+		Vector2Int[] array = new Vector2Int[]
+		{
+			new Vector2Int(1, 0),
+			new Vector2Int(-1, 0),
+			new Vector2Int(0, 1),
+			new Vector2Int(0, -1)
+		};
+		for (int i = 0; i < max_depth; i++)
+		{
+			List<int> list = new List<int>();
+			foreach (int num in hashSet3)
+			{
+				foreach (Vector2Int vector2Int in array)
+				{
+					int num2 = Grid.OffsetCell(num, vector2Int.x, vector2Int.y);
+					if (!hashSet2.Contains(num2) && !hashSet.Contains(num2))
+					{
+						if (Grid.IsValidCell(num2) && test_func(num2))
+						{
+							hashSet.Add(num2);
+							list.Add(num2);
+						}
+						else
+						{
+							hashSet2.Add(num2);
+						}
+					}
+				}
+			}
+			hashSet3.Clear();
+			foreach (int num3 in list)
+			{
+				hashSet3.Add(num3);
+			}
+			list.Clear();
+			if (hashSet3.Count == 0)
+			{
+				break;
+			}
+		}
+		return hashSet;
 	}
 
 	public static HashSet<int> FloodCollectCells(int start_cell, Func<int, bool> is_valid, int maxSize = 300, HashSet<int> AddInvalidCellsToSet = null, bool clearOversizedResults = true)
@@ -1396,46 +1477,23 @@ public static class GameUtil
 		return color.ToHexString();
 	}
 
-	public static string AppendHotkeyString(string template, global::Action action)
+	public static string GetHotkeyString(global::Action action)
 	{
-		string text;
 		if (KInputManager.currentControllerIsGamepad)
 		{
-			text = template + UI.FormatAsHotkey(GameUtil.GetActionString(action));
+			return UI.FormatAsHotkey(GameUtil.GetActionString(action));
 		}
-		else
-		{
-			text = template + UI.FormatAsHotkey("[" + GameUtil.GetActionString(action) + "]");
-		}
-		return text;
+		return UI.FormatAsHotkey("[" + GameUtil.GetActionString(action) + "]");
 	}
 
 	public static string ReplaceHotkeyString(string template, global::Action action)
 	{
-		string text;
-		if (KInputManager.currentControllerIsGamepad)
-		{
-			text = template.Replace("{Hotkey}", UI.FormatAsHotkey(GameUtil.GetActionString(action)));
-		}
-		else
-		{
-			text = template.Replace("{Hotkey}", UI.FormatAsHotkey("[" + GameUtil.GetActionString(action) + "]"));
-		}
-		return text;
+		return template.Replace("{Hotkey}", GameUtil.GetHotkeyString(action));
 	}
 
 	public static string ReplaceHotkeyString(string template, global::Action action1, global::Action action2)
 	{
-		string text;
-		if (KInputManager.currentControllerIsGamepad)
-		{
-			text = template.Replace("{Hotkey}", UI.FormatAsHotkey(GameUtil.GetActionString(action1)) + UI.FormatAsHotkey(GameUtil.GetActionString(action2)));
-		}
-		else
-		{
-			text = template.Replace("{Hotkey}", UI.FormatAsHotkey("[" + GameUtil.GetActionString(action1) + "]") + UI.FormatAsHotkey("[" + GameUtil.GetActionString(action2) + "]"));
-		}
-		return text;
+		return template.Replace("{Hotkey}", GameUtil.GetHotkeyString(action1) + GameUtil.GetHotkeyString(action2));
 	}
 
 	public static string GetKeycodeLocalized(KKeyCode key_code)
@@ -2922,6 +2980,13 @@ public static class GameUtil
 		mass,
 		kcal,
 		quantity
+	}
+
+	public enum IdentityDescriptorTense
+	{
+		Normal,
+		Possessive,
+		Plural
 	}
 
 	public enum WattageFormatterUnit

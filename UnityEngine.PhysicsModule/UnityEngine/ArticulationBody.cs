@@ -5,8 +5,8 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	[NativeHeader("Modules/Physics/ArticulationBody.h")]
 	[NativeClass("Unity::ArticulationBody")]
+	[NativeHeader("Modules/Physics/ArticulationBody.h")]
 	public class ArticulationBody : Behaviour
 	{
 		public extern ArticulationJointType jointType

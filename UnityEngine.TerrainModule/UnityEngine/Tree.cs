@@ -4,8 +4,8 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	[NativeHeader("Modules/Terrain/Public/Tree.h")]
 	[ExcludeFromPreset]
+	[NativeHeader("Modules/Terrain/Public/Tree.h")]
 	public sealed class Tree : Component
 	{
 		[NativeProperty("TreeData")]

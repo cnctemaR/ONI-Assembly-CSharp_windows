@@ -8,7 +8,7 @@ using STRINGS;
 using TUNING;
 using UnityEngine;
 
-public class Clustercraft : ClusterGridEntity, IClusterRange
+public class Clustercraft : ClusterGridEntity, IClusterRange, ISim4000ms
 {
 	public override string Name
 	{
@@ -188,6 +188,15 @@ public class Clustercraft : ClusterGridEntity, IClusterRange
 		});
 		this.SetRocketName(this.m_name);
 		this.UpdateStatusItem();
+	}
+
+	public void Sim4000ms(float dt)
+	{
+		RocketClusterDestinationSelector clusterDestinationSelector = this.m_moduleInterface.GetClusterDestinationSelector();
+		if (this.Status == Clustercraft.CraftStatus.InFlight && this.m_location == clusterDestinationSelector.GetDestination())
+		{
+			this.OnClusterDestinationReached(null);
+		}
 	}
 
 	public void Init(AxialI location, LaunchPad pad)

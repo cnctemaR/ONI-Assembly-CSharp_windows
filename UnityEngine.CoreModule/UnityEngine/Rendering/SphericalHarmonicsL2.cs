@@ -6,8 +6,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Rendering
 {
-	[UsedByNativeCode]
 	[NativeHeader("Runtime/Export/Math/SphericalHarmonicsL2.bindings.h")]
+	[UsedByNativeCode]
 	public struct SphericalHarmonicsL2 : IEquatable<SphericalHarmonicsL2>
 	{
 		public void Clear()

@@ -940,6 +940,14 @@ namespace UnityEngine.UIElements
 					dragger.OnPointerUp();
 				}
 			}
+			else
+			{
+				bool flag2 = evt.eventTypeId == EventBase<FocusEvent>.TypeId();
+				if (flag2)
+				{
+					this.OnFocus(evt.leafTarget as VisualElement);
+				}
+			}
 		}
 
 		private void OnScroll(float offset)
@@ -1119,6 +1127,7 @@ namespace UnityEngine.UIElements
 
 		private void Setup(ListView.RecycledItem recycledItem, int newIndex)
 		{
+			int index = recycledItem.index;
 			int idFromIndex = this.GetIdFromIndex(newIndex);
 			recycledItem.element.style.display = DisplayStyle.Flex;
 			bool flag = recycledItem.index == newIndex;
@@ -1157,6 +1166,68 @@ namespace UnityEngine.UIElements
 				}
 				this.bindItem(recycledItem.element, recycledItem.index);
 				recycledItem.SetSelected(this.m_SelectedIds.Contains(idFromIndex));
+				this.HandleFocus(recycledItem, index);
+			}
+		}
+
+		private void OnFocus(VisualElement leafTarget)
+		{
+			bool flag = leafTarget == this.m_ScrollView.contentContainer;
+			if (!flag)
+			{
+				this.m_LastFocusedElementTreeChildIndexes.Clear();
+				bool flag2 = this.m_ScrollView.contentContainer.FindElementInTree(leafTarget, this.m_LastFocusedElementTreeChildIndexes);
+				if (flag2)
+				{
+					VisualElement visualElement = this.m_ScrollView.contentContainer[this.m_LastFocusedElementTreeChildIndexes[0]];
+					foreach (ListView.RecycledItem recycledItem in this.m_Pool)
+					{
+						bool flag3 = recycledItem.element == visualElement;
+						if (flag3)
+						{
+							this.m_LastFocusedElementIndex = recycledItem.index;
+							break;
+						}
+					}
+					this.m_LastFocusedElementTreeChildIndexes.RemoveAt(0);
+				}
+				else
+				{
+					this.m_LastFocusedElementIndex = -1;
+				}
+			}
+		}
+
+		private void HandleFocus(ListView.RecycledItem recycledItem, int previousIndex)
+		{
+			bool flag = this.m_LastFocusedElementIndex == -1;
+			if (!flag)
+			{
+				bool flag2 = this.m_LastFocusedElementIndex == recycledItem.index;
+				if (flag2)
+				{
+					VisualElement visualElement = recycledItem.element.ElementAtTreePath(this.m_LastFocusedElementTreeChildIndexes);
+					if (visualElement != null)
+					{
+						visualElement.Focus();
+					}
+				}
+				else
+				{
+					bool flag3 = this.m_LastFocusedElementIndex != previousIndex;
+					if (flag3)
+					{
+						VisualElement visualElement2 = recycledItem.element.ElementAtTreePath(this.m_LastFocusedElementTreeChildIndexes);
+						if (visualElement2 != null)
+						{
+							visualElement2.Blur();
+						}
+					}
+					else
+					{
+						this.m_ScrollView.contentContainer.Focus();
+					}
+				}
 			}
 		}
 
@@ -1258,6 +1329,10 @@ namespace UnityEngine.UIElements
 		private readonly List<int> m_SelectedIndices = new List<int>();
 
 		private readonly List<object> m_SelectedItems = new List<object>();
+
+		private int m_LastFocusedElementIndex = -1;
+
+		private List<int> m_LastFocusedElementTreeChildIndexes = new List<int>();
 
 		private int m_RangeSelectionOrigin = -1;
 

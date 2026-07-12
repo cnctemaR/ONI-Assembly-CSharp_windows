@@ -18,6 +18,12 @@ public class NewBaseScreen : KScreen
 		TimeOfDay.Instance.SetScale(0f);
 	}
 
+	protected override void OnForcedCleanUp()
+	{
+		NewBaseScreen.Instance = null;
+		base.OnForcedCleanUp();
+	}
+
 	public static Vector2I SetInitialCamera()
 	{
 		Vector2I vector2I = SaveLoader.Instance.cachedGSD.baseStartPos;

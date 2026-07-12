@@ -7,10 +7,10 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[UsedByNativeCode]
-	[NativeConditional("PLATFORM_ANDROID")]
 	[StaticAccessor("AndroidJNIBindingsHelpers", StaticAccessorType.DoubleColon)]
+	[UsedByNativeCode]
 	[NativeHeader("Modules/AndroidJNI/Public/AndroidJNIBindingsHelpers.h")]
+	[NativeConditional("PLATFORM_ANDROID")]
 	public static class AndroidJNIHelper
 	{
 		public static extern bool debug

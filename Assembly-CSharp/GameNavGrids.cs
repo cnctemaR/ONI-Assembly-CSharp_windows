@@ -66,7 +66,8 @@ public class GameNavGrids
 			new NavGrid.Transition(NavType.Floor, NavType.Floor, 2, 1, NavAxis.NA, false, false, true, 20, "", new CellOffset[]
 			{
 				new CellOffset(1, 0),
-				new CellOffset(1, 1)
+				new CellOffset(1, 1),
+				new CellOffset(1, 2)
 			}, new CellOffset[0], new NavOffset[0], new NavOffset[]
 			{
 				new NavOffset(NavType.Floor, 1, 0),
@@ -455,8 +456,43 @@ public class GameNavGrids
 			new NavGrid.Transition(NavType.Hover, NavType.Floor, 1, 0, NavAxis.NA, false, false, false, 15, "", new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0], false, 1f),
 			new NavGrid.Transition(NavType.Hover, NavType.Floor, 0, -1, NavAxis.NA, false, false, false, 15, "", new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0], false, 1f)
 		};
-		NavGrid.Transition[] array4 = this.MirrorTransitions(array3);
-		NavGrid.NavTypeData[] array5 = new NavGrid.NavTypeData[]
+		NavGrid.Transition[] array4 = new NavGrid.Transition[]
+		{
+			new NavGrid.Transition(NavType.Floor, NavType.Floor, 2, -1, NavAxis.NA, false, false, false, 30, "climb_down_2_-1", new CellOffset[]
+			{
+				new CellOffset(1, 0),
+				new CellOffset(1, -1)
+			}, new CellOffset[]
+			{
+				new CellOffset(1, 1)
+			}, new NavOffset[0], new NavOffset[]
+			{
+				new NavOffset(NavType.Floor, 1, 0),
+				new NavOffset(NavType.Ladder, 1, 0),
+				new NavOffset(NavType.Pole, 1, 0),
+				new NavOffset(NavType.Floor, 1, -1),
+				new NavOffset(NavType.Ladder, 1, -1),
+				new NavOffset(NavType.Pole, 1, -1)
+			}, false, 1f),
+			new NavGrid.Transition(NavType.Floor, NavType.Floor, 2, 1, NavAxis.NA, false, false, false, 30, "", new CellOffset[]
+			{
+				new CellOffset(1, 0),
+				new CellOffset(1, 1)
+			}, new CellOffset[]
+			{
+				new CellOffset(1, 2)
+			}, new NavOffset[0], new NavOffset[]
+			{
+				new NavOffset(NavType.Floor, 1, 0),
+				new NavOffset(NavType.Ladder, 1, 0),
+				new NavOffset(NavType.Pole, 1, 0),
+				new NavOffset(NavType.Floor, 1, 1),
+				new NavOffset(NavType.Ladder, 1, 1),
+				new NavOffset(NavType.Pole, 1, 1)
+			}, false, 1f)
+		};
+		NavGrid.Transition[] array5 = this.MirrorTransitions(this.CombineTransitions(array3, array4));
+		NavGrid.NavTypeData[] array6 = new NavGrid.NavTypeData[]
 		{
 			new NavGrid.NavTypeData
 			{
@@ -489,7 +525,7 @@ public class GameNavGrids
 				idleAnim = "idle_default"
 			}
 		};
-		this.DuplicantGrid = new NavGrid("MinionNavGrid", array4, array5, array2, new NavTableValidator[]
+		this.DuplicantGrid = new NavGrid("MinionNavGrid", array5, array6, array2, new NavTableValidator[]
 		{
 			new GameNavGrids.FloorValidator(true),
 			new GameNavGrids.LadderValidator(),
@@ -500,11 +536,47 @@ public class GameNavGrids
 		}, 2, 3, 32);
 		this.DuplicantGrid.updateEveryFrame = true;
 		pathfinding.AddNavGrid(this.DuplicantGrid);
-		this.RobotGrid = new NavGrid("RobotNavGrid", array4, array5, array2, new NavTableValidator[]
+		NavGrid.Transition[] array7 = new NavGrid.Transition[]
+		{
+			new NavGrid.Transition(NavType.Floor, NavType.Floor, 2, -1, NavAxis.NA, false, false, false, 30, "climb_down_2_-1", new CellOffset[]
+			{
+				new CellOffset(1, 0),
+				new CellOffset(1, -1)
+			}, new CellOffset[]
+			{
+				new CellOffset(1, 1)
+			}, new NavOffset[0], new NavOffset[]
+			{
+				new NavOffset(NavType.Floor, 1, 0),
+				new NavOffset(NavType.Ladder, 1, 0),
+				new NavOffset(NavType.Pole, 1, 0),
+				new NavOffset(NavType.Floor, 1, -1),
+				new NavOffset(NavType.Ladder, 1, -1),
+				new NavOffset(NavType.Pole, 1, -1)
+			}, false, 1f),
+			new NavGrid.Transition(NavType.Floor, NavType.Floor, 2, 1, NavAxis.NA, false, false, false, 30, "climb_up_2_1", new CellOffset[]
+			{
+				new CellOffset(1, 0),
+				new CellOffset(1, 1)
+			}, new CellOffset[]
+			{
+				new CellOffset(1, 2)
+			}, new NavOffset[0], new NavOffset[]
+			{
+				new NavOffset(NavType.Floor, 1, 0),
+				new NavOffset(NavType.Ladder, 1, 0),
+				new NavOffset(NavType.Pole, 1, 0),
+				new NavOffset(NavType.Floor, 1, 1),
+				new NavOffset(NavType.Ladder, 1, 1),
+				new NavOffset(NavType.Pole, 1, 1)
+			}, false, 1f)
+		};
+		NavGrid.Transition[] array8 = this.MirrorTransitions(this.CombineTransitions(array3, array7));
+		this.RobotGrid = new NavGrid("RobotNavGrid", array8, array6, array2, new NavTableValidator[]
 		{
 			new GameNavGrids.FloorValidator(true),
 			new GameNavGrids.LadderValidator()
-		}, 2, 3, 32);
+		}, 2, 3, 22);
 		this.RobotGrid.updateEveryFrame = true;
 		pathfinding.AddNavGrid(this.RobotGrid);
 	}
@@ -751,7 +823,7 @@ public class GameNavGrids
 			new GameNavGrids.FloorValidator(false),
 			new GameNavGrids.WallValidator(),
 			new GameNavGrids.CeilingValidator()
-		}, 2, 3, array3.Length);
+		}, 2, 3, 16);
 		pathfinding.AddNavGrid(this.DreckoGrid);
 	}
 
@@ -823,7 +895,7 @@ public class GameNavGrids
 			new GameNavGrids.FloorValidator(false),
 			new GameNavGrids.WallValidator(),
 			new GameNavGrids.CeilingValidator()
-		}, 2, 3, array3.Length);
+		}, 2, 3, 16);
 		pathfinding.AddNavGrid(this.DreckoBabyGrid);
 	}
 
@@ -952,9 +1024,16 @@ public class GameNavGrids
 			new NavGrid.Transition(NavType.Hover, NavType.Hover, 0, -1, NavAxis.NA, true, true, true, 3, "hover_hover_1_0", new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0], false, 1f),
 			new NavGrid.Transition(NavType.Swim, NavType.Swim, 1, 0, NavAxis.NA, true, true, true, 5, "", new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0], false, 1f),
 			new NavGrid.Transition(NavType.Swim, NavType.Swim, 0, 1, NavAxis.NA, true, true, true, 2, "swim_swim_1_0", new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0], false, 1f),
-			new NavGrid.Transition(NavType.Swim, NavType.Swim, 1, 1, NavAxis.NA, true, true, true, 2, "swim_swim_1_0", new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0], false, 1f),
+			new NavGrid.Transition(NavType.Swim, NavType.Swim, 1, 1, NavAxis.NA, true, true, true, 2, "swim_swim_1_0", new CellOffset[]
+			{
+				new CellOffset(1, 0)
+			}, new CellOffset[0], new NavOffset[0], new NavOffset[0], false, 1f),
 			new NavGrid.Transition(NavType.Swim, NavType.Swim, 0, -1, NavAxis.NA, true, true, true, 10, "swim_swim_1_0", new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0], false, 1f),
-			new NavGrid.Transition(NavType.Swim, NavType.Swim, 1, -1, NavAxis.NA, true, true, true, 10, "swim_swim_1_0", new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0], false, 1f),
+			new NavGrid.Transition(NavType.Swim, NavType.Swim, 1, -1, NavAxis.NA, true, true, true, 10, "swim_swim_1_0", new CellOffset[]
+			{
+				new CellOffset(1, 0),
+				new CellOffset(0, -1)
+			}, new CellOffset[0], new NavOffset[0], new NavOffset[0], false, 1f),
 			new NavGrid.Transition(NavType.Swim, NavType.Hover, 0, 1, NavAxis.NA, true, true, true, 1, "swim_swim_1_0", new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0], false, 1f),
 			new NavGrid.Transition(NavType.Swim, NavType.Hover, 1, 0, NavAxis.NA, true, true, true, 1, "swim_swim_1_0", new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0], false, 1f)
 		};
@@ -976,7 +1055,7 @@ public class GameNavGrids
 		{
 			new GameNavGrids.FlyingValidator(false, false, false),
 			new GameNavGrids.SwimValidator()
-		}, 2, 2, array2.Length);
+		}, 2, 2, 16);
 		pathfinding.AddNavGrid(navGrid);
 		return navGrid;
 	}
@@ -1108,7 +1187,7 @@ public class GameNavGrids
 			new GameNavGrids.FloorValidator(false),
 			new GameNavGrids.WallValidator(),
 			new GameNavGrids.CeilingValidator()
-		}, 2, 3, array3.Length);
+		}, 2, 3, 22);
 		pathfinding.AddNavGrid(this.DiggerGrid);
 	}
 
@@ -1203,7 +1282,7 @@ public class GameNavGrids
 			new GameNavGrids.FloorValidator(false),
 			new GameNavGrids.WallValidator(),
 			new GameNavGrids.CeilingValidator()
-		}, 2, 3, array3.Length);
+		}, 2, 3, 20);
 		pathfinding.AddNavGrid(this.SquirrelGrid);
 	}
 
@@ -1253,6 +1332,15 @@ public class GameNavGrids
 		return list.ToArray();
 	}
 
+	private NavGrid.Transition[] CombineTransitions(NavGrid.Transition[] setA, NavGrid.Transition[] setB)
+	{
+		NavGrid.Transition[] array = new NavGrid.Transition[setA.Length + setB.Length];
+		Array.Copy(setA, array, setA.Length);
+		Array.Copy(setB, 0, array, setA.Length, setB.Length);
+		Array.Sort<NavGrid.Transition>(array, (NavGrid.Transition x, NavGrid.Transition y) => x.cost.CompareTo(y.cost));
+		return array;
+	}
+
 	public NavGrid DuplicantGrid;
 
 	public NavGrid WalkerGrid1x1;
@@ -1300,8 +1388,13 @@ public class GameNavGrids
 
 		public override void UpdateCell(int cell, NavTable nav_table, CellOffset[] bounding_offsets)
 		{
-			bool flag = Grid.IsWorldValidCell(cell) && Grid.IsSubstantialLiquid(cell, 0.35f) && base.IsClear(cell, bounding_offsets, false);
-			nav_table.SetValid(cell, NavType.Swim, flag);
+			bool flag = Grid.IsSubstantialLiquid(cell, 0.35f);
+			if (!flag)
+			{
+				flag = Grid.IsSubstantialLiquid(Grid.CellAbove(cell), 0.35f);
+			}
+			bool flag2 = Grid.IsWorldValidCell(cell) && flag && base.IsClear(cell, bounding_offsets, false);
+			nav_table.SetValid(cell, NavType.Swim, flag2);
 		}
 
 		private void OnLiquidChanged(int cell)

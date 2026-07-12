@@ -12,9 +12,9 @@ namespace UnityEngine.XR.Provider
 		}
 
 		[NativeMethod("TryGetStatByName_Internal")]
-		[NativeHeader("Modules/XR/Stats/XRStats.h")]
 		[StaticAccessor("XRStats::Get()", StaticAccessorType.Dot)]
 		[NativeConditional("ENABLE_XR")]
+		[NativeHeader("Modules/XR/Stats/XRStats.h")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern bool TryGetStat_Internal(IntPtr ptr, string tag, out float value);
 	}

@@ -2,8 +2,8 @@
 
 namespace JetBrains.Annotations
 {
-	[MeansImplicitUse(ImplicitUseTargetFlags.WithMembers)]
 	[AttributeUsage(AttributeTargets.All, Inherited = false)]
+	[MeansImplicitUse(ImplicitUseTargetFlags.WithMembers)]
 	public sealed class PublicAPIAttribute : Attribute
 	{
 		public PublicAPIAttribute()

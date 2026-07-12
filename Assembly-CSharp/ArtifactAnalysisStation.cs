@@ -24,7 +24,7 @@ public class ArtifactAnalysisStation : GameStateMachine<ArtifactAnalysisStation,
 
 	private Chore CreateChore(ArtifactAnalysisStation.StatesInstance smi)
 	{
-		return new WorkChore<ArtifactAnalysisStationWorkable>(Db.Get().ChoreTypes.Research, smi.workable, null, true, null, null, null, true, null, false, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 5, false, true);
+		return new WorkChore<ArtifactAnalysisStationWorkable>(Db.Get().ChoreTypes.AnalyzeArtifact, smi.workable, null, true, null, null, null, true, null, false, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 5, false, true);
 	}
 
 	public GameStateMachine<ArtifactAnalysisStation, ArtifactAnalysisStation.StatesInstance, IStateMachineTarget, ArtifactAnalysisStation.Def>.State inoperational;

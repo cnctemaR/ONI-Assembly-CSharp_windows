@@ -39,7 +39,6 @@ public class JobsTableScreen : TableScreen
 
 	protected override void OnActivate()
 	{
-		JobsTableScreen.Instance = this;
 		this.title = UI.JOBSSCREEN.TITLE;
 		base.OnActivate();
 		this.resetSettingsButton.onClick += this.OnResetSettingsClicked;
@@ -738,7 +737,7 @@ public class JobsTableScreen : TableScreen
 			bool flag2;
 			bool flag3;
 			this.GetMouseHoverInfo(out flag2, out flag3);
-			if (flag2)
+			if (flag3)
 			{
 				flag = true;
 				if (!e.Consumed)
@@ -761,17 +760,10 @@ public class JobsTableScreen : TableScreen
 			bool flag2;
 			bool flag3;
 			this.GetMouseHoverInfo(out flag2, out flag3);
-			if (flag2)
+			if (flag3)
 			{
+				e.TryConsume(global::Action.MouseRight);
 				flag = true;
-				if (!flag3)
-				{
-					UISounds.PlaySound(UISounds.Sound.Negative);
-				}
-				if (!e.Consumed)
-				{
-					e.TryConsume(global::Action.MouseRight);
-				}
 			}
 		}
 		if (!flag)
@@ -966,8 +958,6 @@ public class JobsTableScreen : TableScreen
 
 	[SerializeField]
 	private KImage optionsPanel;
-
-	public static JobsTableScreen Instance;
 
 	[SerializeField]
 	private bool dynamicRowSpacing = true;

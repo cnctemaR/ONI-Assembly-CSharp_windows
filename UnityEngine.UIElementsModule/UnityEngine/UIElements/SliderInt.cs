@@ -75,7 +75,7 @@ namespace UnityEngine.UIElements
 			else
 			{
 				float num = sliderLength - dragElementLength;
-				bool flag2 = Mathf.Abs(num) < Mathf.Epsilon;
+				bool flag2 = Mathf.Abs(num) < 1E-30f;
 				if (!flag2)
 				{
 					int num2 = (int)this.pageSize;

@@ -131,7 +131,6 @@ public class CometDetector : GameStateMachine<CometDetector, CometDetector.Insta
 		public void ScanSky(bool expectedDetectionForState)
 		{
 			float detectTime = this.GetDetectTime();
-			base.GetComponent<KPrefabID>();
 			if (this.targetCraft.Get() == null)
 			{
 				SaveGame.Instance.GetComponent<GameplayEventManager>().GetActiveEventsOfType<MeteorShowerEvent>(this.GetMyWorldId(), ref this.meteorShowers);

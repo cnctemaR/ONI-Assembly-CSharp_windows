@@ -12,6 +12,12 @@ public class OffscreenIndicator : KMonoBehaviour
 		OffscreenIndicator.Instance = this;
 	}
 
+	protected override void OnForcedCleanUp()
+	{
+		OffscreenIndicator.Instance = null;
+		base.OnForcedCleanUp();
+	}
+
 	private void Update()
 	{
 		foreach (KeyValuePair<GameObject, GameObject> keyValuePair in this.targets)

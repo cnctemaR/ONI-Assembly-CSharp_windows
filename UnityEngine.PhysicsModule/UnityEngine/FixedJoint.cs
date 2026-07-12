@@ -3,8 +3,8 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	[NativeHeader("Modules/Physics/FixedJoint.h")]
 	[NativeClass("Unity::FixedJoint")]
+	[NativeHeader("Modules/Physics/FixedJoint.h")]
 	public class FixedJoint : Joint
 	{
 	}

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Database;
 using STRINGS;
 using UnityEngine;
 using UnityEngine.UI;
@@ -47,6 +48,10 @@ public class SelectedRecipeQueueScreen : KScreen
 			base.isEditing = true;
 			KScreenManager.Instance.RefreshStack();
 		};
+		MultiToggle multiToggle = this.previousRecipeButton;
+		multiToggle.onClick = (global::System.Action)Delegate.Combine(multiToggle.onClick, new global::System.Action(this.CyclePreviousRecipe));
+		MultiToggle multiToggle2 = this.nextRecipeButton;
+		multiToggle2.onClick = (global::System.Action)Delegate.Combine(multiToggle2.onClick, new global::System.Action(this.CycleNextRecipe));
 	}
 
 	public void SetRecipe(ComplexFabricatorSideScreen owner, ComplexFabricator target, ComplexRecipe recipe)
@@ -55,19 +60,66 @@ public class SelectedRecipeQueueScreen : KScreen
 		this.target = target;
 		this.selectedRecipe = recipe;
 		this.recipeName.text = recipe.GetUIName(false);
-		global::Tuple<Sprite, Color> uisprite = Def.GetUISprite((recipe.nameDisplay == ComplexRecipe.RecipeNameDisplay.Ingredient) ? recipe.ingredients[0].material : recipe.results[0].material, "ui", false);
+		global::Tuple<Sprite, Color> tuple = ((recipe.nameDisplay == ComplexRecipe.RecipeNameDisplay.Ingredient) ? Def.GetUISprite(recipe.ingredients[0].material, "ui", false) : Def.GetUISprite(recipe.results[0].material, recipe.results[0].facadeID));
 		if (recipe.nameDisplay == ComplexRecipe.RecipeNameDisplay.HEP)
 		{
 			this.recipeIcon.sprite = owner.radboltSprite;
 		}
 		else
 		{
-			this.recipeIcon.sprite = uisprite.first;
-			this.recipeIcon.color = uisprite.second;
+			this.recipeIcon.sprite = tuple.first;
+			this.recipeIcon.color = tuple.second;
 		}
+		this.recipeMainDescription.SetText(recipe.description);
 		this.RefreshIngredientDescriptors();
 		this.RefreshResultDescriptors();
 		this.RefreshQueueCountDisplay();
+		this.ToggleAndRefreshMinionDisplay();
+	}
+
+	private void CyclePreviousRecipe()
+	{
+		this.ownerScreen.CycleRecipe(-1);
+	}
+
+	private void CycleNextRecipe()
+	{
+		this.ownerScreen.CycleRecipe(1);
+	}
+
+	private void ToggleAndRefreshMinionDisplay()
+	{
+		this.minionWidget.gameObject.SetActive(this.RefreshMinionDisplayAnim());
+	}
+
+	private bool RefreshMinionDisplayAnim()
+	{
+		GameObject prefab = Assets.GetPrefab(this.selectedRecipe.results[0].material);
+		if (prefab == null)
+		{
+			return false;
+		}
+		Equippable component = prefab.GetComponent<Equippable>();
+		if (component == null)
+		{
+			return false;
+		}
+		KAnimFile buildOverride = component.GetBuildOverride();
+		if (buildOverride == null)
+		{
+			return false;
+		}
+		this.minionWidget.SetPortraitAnimator(null);
+		this.minionWidget.UpdateClothingOverride(buildOverride.GetData());
+		if (!this.selectedRecipe.results[0].facadeID.IsNullOrWhiteSpace())
+		{
+			EquippableFacadeResource equippableFacadeResource = Db.Get().EquippableFacades.TryGet(this.selectedRecipe.results[0].facadeID);
+			if (equippableFacadeResource != null)
+			{
+				this.minionWidget.UpdateClothingOverride(Assets.GetAnim(equippableFacadeResource.BuildOverride).GetData());
+			}
+		}
+		return true;
 	}
 
 	private void RefreshQueueCountDisplay()
@@ -125,7 +177,7 @@ public class SelectedRecipeQueueScreen : KScreen
 		{
 			GameObject prefab = Assets.GetPrefab(recipeElement.material);
 			string formattedByTag = GameUtil.GetFormattedByTag(recipeElement.material, recipeElement.amount, GameUtil.TimeSlice.None);
-			list.Add(new SelectedRecipeQueueScreen.DescriptorWithSprite(new Descriptor(string.Format(UI.UISIDESCREENS.FABRICATORSIDESCREEN.RECIPEPRODUCT, prefab.GetProperName(), formattedByTag), string.Format(UI.UISIDESCREENS.FABRICATORSIDESCREEN.TOOLTIPS.RECIPEPRODUCT, prefab.GetProperName(), formattedByTag), Descriptor.DescriptorType.Requirement, false), Def.GetUISprite(recipeElement.material, "ui", false), false));
+			list.Add(new SelectedRecipeQueueScreen.DescriptorWithSprite(new Descriptor(string.Format(UI.UISIDESCREENS.FABRICATORSIDESCREEN.RECIPEPRODUCT, recipeElement.facadeID.IsNullOrWhiteSpace() ? recipeElement.material.ProperName() : recipeElement.facadeID.ProperName(), formattedByTag), string.Format(UI.UISIDESCREENS.FABRICATORSIDESCREEN.TOOLTIPS.RECIPEPRODUCT, recipeElement.facadeID.IsNullOrWhiteSpace() ? recipeElement.material.ProperName() : recipeElement.facadeID.ProperName(), formattedByTag), Descriptor.DescriptorType.Requirement, false), Def.GetUISprite(recipeElement.material, recipeElement.facadeID), false));
 			Element element = ElementLoader.GetElement(recipeElement.material);
 			if (element != null)
 			{
@@ -204,9 +256,9 @@ public class SelectedRecipeQueueScreen : KScreen
 
 	public LocText recipeName;
 
-	public GameObject IngredientsDescriptorPanel;
+	public LocText recipeMainDescription;
 
-	public GameObject buildingGlobalRecipeFilters;
+	public GameObject IngredientsDescriptorPanel;
 
 	public GameObject EffectsDescriptorPanel;
 
@@ -232,6 +284,15 @@ public class SelectedRecipeQueueScreen : KScreen
 	private Dictionary<SelectedRecipeQueueScreen.DescriptorWithSprite, GameObject> recipeIngredientDescriptorRows = new Dictionary<SelectedRecipeQueueScreen.DescriptorWithSprite, GameObject>();
 
 	private Dictionary<SelectedRecipeQueueScreen.DescriptorWithSprite, GameObject> recipeEffectsDescriptorRows = new Dictionary<SelectedRecipeQueueScreen.DescriptorWithSprite, GameObject>();
+
+	[SerializeField]
+	private FullBodyUIMinionWidget minionWidget;
+
+	[SerializeField]
+	private MultiToggle previousRecipeButton;
+
+	[SerializeField]
+	private MultiToggle nextRecipeButton;
 
 	private class DescriptorWithSprite
 	{

@@ -2,6 +2,23 @@
 
 public static class PathFinderQueries
 {
+	public static void Reset()
+	{
+		PathFinderQueries.cellQuery = new CellQuery();
+		PathFinderQueries.cellCostQuery = new CellCostQuery();
+		PathFinderQueries.cellArrayQuery = new CellArrayQuery();
+		PathFinderQueries.cellOffsetQuery = new CellOffsetQuery();
+		PathFinderQueries.safeCellQuery = new SafeCellQuery();
+		PathFinderQueries.idleCellQuery = new IdleCellQuery();
+		PathFinderQueries.breathableCellQuery = new BreathableCellQuery();
+		PathFinderQueries.drawNavGridQuery = new DrawNavGridQuery();
+		PathFinderQueries.plantableCellQuery = new PlantableCellQuery();
+		PathFinderQueries.mineableCellQuery = new MineableCellQuery();
+		PathFinderQueries.staterpillarCellQuery = new StaterpillarCellQuery();
+		PathFinderQueries.floorCellQuery = new FloorCellQuery();
+		PathFinderQueries.buildingPlacementQuery = new BuildingPlacementQuery();
+	}
+
 	public static CellQuery cellQuery = new CellQuery();
 
 	public static CellCostQuery cellCostQuery = new CellCostQuery();

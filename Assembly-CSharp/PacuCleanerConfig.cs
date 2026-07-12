@@ -12,7 +12,9 @@ public class PacuCleanerConfig : IEntityConfig
 		gameObject = EntityTemplates.ExtendEntityToWildCreature(gameObject, PacuTuning.PEN_SIZE_PER_CREATURE);
 		if (!is_baby)
 		{
-			gameObject.AddComponent<Storage>().capacityKg = 10f;
+			Storage storage = gameObject.AddComponent<Storage>();
+			storage.capacityKg = 10f;
+			storage.SetDefaultStoredItemModifiers(Storage.StandardInsulatedStorage);
 			PassiveElementConsumer passiveElementConsumer = gameObject.AddOrGet<PassiveElementConsumer>();
 			passiveElementConsumer.elementToConsume = SimHashes.DirtyWater;
 			passiveElementConsumer.consumptionRate = 0.2f;

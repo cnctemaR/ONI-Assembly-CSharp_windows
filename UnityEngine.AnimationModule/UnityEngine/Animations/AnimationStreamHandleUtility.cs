@@ -7,8 +7,8 @@ using UnityEngine.Scripting.APIUpdating;
 
 namespace UnityEngine.Animations
 {
-	[MovedFrom("UnityEngine.Experimental.Animations")]
 	[NativeHeader("Modules/Animation/ScriptBindings/AnimationStreamHandles.bindings.h")]
+	[MovedFrom("UnityEngine.Experimental.Animations")]
 	public static class AnimationStreamHandleUtility
 	{
 		public static void WriteInts(AnimationStream stream, NativeArray<PropertyStreamHandle> handles, NativeArray<int> buffer, bool useMask)

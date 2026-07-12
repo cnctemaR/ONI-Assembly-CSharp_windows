@@ -4,9 +4,9 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine.SceneManagement
 {
-	[NativeHeader("Runtime/SceneManager/SceneManager.h")]
-	[NativeHeader("Runtime/Export/SceneManager/SceneManager.bindings.h")]
 	[StaticAccessor("SceneManagerBindings", StaticAccessorType.DoubleColon)]
+	[NativeHeader("Runtime/Export/SceneManager/SceneManager.bindings.h")]
+	[NativeHeader("Runtime/SceneManager/SceneManager.h")]
 	internal static class SceneManagerAPIInternal
 	{
 		[MethodImpl(MethodImplOptions.InternalCall)]

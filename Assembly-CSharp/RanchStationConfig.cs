@@ -49,6 +49,7 @@ public class RanchStationConfig : IBuildingConfig
 		def.ranchedPreAnim = "grooming_pre";
 		def.ranchedLoopAnim = "grooming_loop";
 		def.ranchedPstAnim = "grooming_pst";
+		def.worktime = 12f;
 		def.getTargetRanchCell = delegate(RanchStation.Instance smi)
 		{
 			int num2 = Grid.InvalidCell;

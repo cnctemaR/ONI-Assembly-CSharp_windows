@@ -49,6 +49,8 @@ public class CanvasConfig : IBuildingConfig
 		painting.stages.Add(new Artable.Stage("Good", global::STRINGS.BUILDINGS.PREFABS.CANVAS.EXCELLENTQUALITYNAME, "art_c", 15, true, Artable.Status.Great));
 		painting.stages.Add(new Artable.Stage("Good2", global::STRINGS.BUILDINGS.PREFABS.CANVAS.EXCELLENTQUALITYNAME, "art_d", 15, true, Artable.Status.Great));
 		painting.stages.Add(new Artable.Stage("Good3", global::STRINGS.BUILDINGS.PREFABS.CANVAS.EXCELLENTQUALITYNAME, "art_e", 15, true, Artable.Status.Great));
+		painting.stages.Add(new Artable.Stage("Good4", global::STRINGS.BUILDINGS.PREFABS.CANVAS.EXCELLENTQUALITYNAME, "art_f", 15, true, Artable.Status.Great));
+		painting.stages.Add(new Artable.Stage("Good5", global::STRINGS.BUILDINGS.PREFABS.CANVAS.EXCELLENTQUALITYNAME, "art_g", 15, true, Artable.Status.Great));
 	}
 
 	public const string ID = "Canvas";

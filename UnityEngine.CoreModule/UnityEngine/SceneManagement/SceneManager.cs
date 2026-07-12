@@ -8,8 +8,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.SceneManagement
 {
-	[RequiredByNativeCode]
 	[NativeHeader("Runtime/Export/SceneManager/SceneManager.bindings.h")]
+	[RequiredByNativeCode]
 	public class SceneManager
 	{
 		public static extern int sceneCount
@@ -37,8 +37,8 @@ namespace UnityEngine.SceneManagement
 			return scene;
 		}
 
-		[NativeThrows]
 		[StaticAccessor("SceneManagerBindings", StaticAccessorType.DoubleColon)]
+		[NativeThrows]
 		public static bool SetActiveScene(Scene scene)
 		{
 			return SceneManager.SetActiveScene_Injected(ref scene);
@@ -65,8 +65,8 @@ namespace UnityEngine.SceneManagement
 			return SceneManagerAPI.ActiveAPI.GetSceneByBuildIndex(buildIndex);
 		}
 
-		[NativeThrows]
 		[StaticAccessor("SceneManagerBindings", StaticAccessorType.DoubleColon)]
+		[NativeThrows]
 		public static Scene GetSceneAt(int index)
 		{
 			Scene scene;
@@ -74,8 +74,8 @@ namespace UnityEngine.SceneManagement
 			return scene;
 		}
 
-		[NativeThrows]
 		[StaticAccessor("SceneManagerBindings", StaticAccessorType.DoubleColon)]
+		[NativeThrows]
 		public static Scene CreateScene([NotNull("ArgumentNullException")] string sceneName, CreateSceneParameters parameters)
 		{
 			Scene scene;
@@ -90,8 +90,8 @@ namespace UnityEngine.SceneManagement
 			return SceneManager.UnloadSceneInternal_Injected(ref scene, options);
 		}
 
-		[NativeThrows]
 		[StaticAccessor("SceneManagerBindings", StaticAccessorType.DoubleColon)]
+		[NativeThrows]
 		private static AsyncOperation UnloadSceneAsyncInternal(Scene scene, UnloadSceneOptions options)
 		{
 			return SceneManager.UnloadSceneAsyncInternal_Injected(ref scene, options);
@@ -128,8 +128,8 @@ namespace UnityEngine.SceneManagement
 			return asyncOperation;
 		}
 
-		[NativeThrows]
 		[StaticAccessor("SceneManagerBindings", StaticAccessorType.DoubleColon)]
+		[NativeThrows]
 		public static void MergeScenes(Scene sourceScene, Scene destinationScene)
 		{
 			SceneManager.MergeScenes_Injected(ref sourceScene, ref destinationScene);

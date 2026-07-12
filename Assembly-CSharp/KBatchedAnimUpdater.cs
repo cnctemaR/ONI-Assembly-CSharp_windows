@@ -22,6 +22,8 @@ public class KBatchedAnimUpdater : Singleton<KBatchedAnimUpdater>
 		this.previouslyVisibleChunks.Clear();
 		this.previouslyVisibleChunkGrid = new bool[num, num2];
 		this.visibleChunkGrid = new bool[num, num2];
+		this.controllerChunkInfos.Clear();
+		this.movingControllerInfos.Clear();
 	}
 
 	public Vector2I GetVisibleSize()

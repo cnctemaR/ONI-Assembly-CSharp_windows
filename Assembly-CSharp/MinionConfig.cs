@@ -269,9 +269,7 @@ public class MinionConfig : IEntityConfig
 		gameObject.AddOrGet<SicknessTrigger>();
 		gameObject.AddOrGet<ClothingWearer>();
 		gameObject.AddOrGet<SuitEquipper>();
-		DecorProvider decorProvider = gameObject.AddOrGet<DecorProvider>();
-		decorProvider.baseRadius = 3f;
-		decorProvider.isMovable = true;
+		gameObject.AddOrGet<DecorProvider>().baseRadius = 3f;
 		gameObject.AddOrGet<ConsumableConsumer>();
 		gameObject.AddOrGet<NoiseListener>();
 		gameObject.AddOrGet<MinionResume>();

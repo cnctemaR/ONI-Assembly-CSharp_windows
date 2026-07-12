@@ -55,6 +55,7 @@ namespace UnityEngine.Experimental.GlobalIllumination
 			point.mode = LightmapperUtils.Extract(l.bakingOutput.lightmapBakeType);
 			point.shadow = l.shadows > LightShadows.None;
 			point.position = l.transform.position;
+			point.orientation = l.transform.rotation;
 			Color color = LightmapperUtils.ExtractColorTemperature(l);
 			LinearColor linearColor = LinearColor.Convert(l.color, l.intensity);
 			LinearColor linearColor2 = LightmapperUtils.ExtractIndirect(l);

@@ -61,6 +61,7 @@ public class PlantablePlot : SingleEntityReceptacle, ISaveLoadable, IGameObjectE
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
+		this.choreType = Db.Get().ChoreTypes.FarmFetch;
 		this.statusItemNeed = Db.Get().BuildingStatusItems.NeedSeed;
 		this.statusItemNoneAvailable = Db.Get().BuildingStatusItems.NoAvailableSeed;
 		this.statusItemAwaitingDelivery = Db.Get().BuildingStatusItems.AwaitingSeedDelivery;

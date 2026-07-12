@@ -4,8 +4,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.TextCore.LowLevel
 {
-	[UsedByNativeCode]
 	[DebuggerDisplay("{familyName} - {styleName}")]
+	[UsedByNativeCode]
 	internal struct FontReference
 	{
 		public string familyName;

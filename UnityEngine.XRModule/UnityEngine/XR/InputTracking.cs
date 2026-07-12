@@ -7,10 +7,10 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.XR
 {
-	[RequiredByNativeCode]
-	[NativeConditional("ENABLE_VR")]
 	[StaticAccessor("XRInputTrackingFacade::Get()", StaticAccessorType.Dot)]
+	[NativeConditional("ENABLE_VR")]
 	[NativeHeader("Modules/XR/Subsystems/Input/Public/XRInputTrackingFacade.h")]
+	[RequiredByNativeCode]
 	public static class InputTracking
 	{
 		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
@@ -75,8 +75,8 @@ namespace UnityEngine.XR
 			return quaternion;
 		}
 
-		[NativeConditional("ENABLE_VR")]
 		[Obsolete("This API is obsolete, and should no longer be used. Please use XRInputSubsystem.TryRecenter() instead.")]
+		[NativeConditional("ENABLE_VR")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void Recenter();
 
@@ -100,8 +100,8 @@ namespace UnityEngine.XR
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void GetNodeStates_Internal([NotNull("ArgumentNullException")] List<XRNodeState> nodeStates);
 
-		[Obsolete("This API is obsolete, and should no longer be used. Please use the TrackedPoseDriver in the Legacy Input Helpers package for controlling a camera in XR.")]
 		[NativeConditional("ENABLE_VR")]
+		[Obsolete("This API is obsolete, and should no longer be used. Please use the TrackedPoseDriver in the Legacy Input Helpers package for controlling a camera in XR.")]
 		public static extern bool disablePositionalTracking
 		{
 			[NativeName("GetPositionalTrackingDisabled")]
@@ -112,13 +112,13 @@ namespace UnityEngine.XR
 			set;
 		}
 
-		[NativeHeader("Modules/XR/Subsystems/Input/Public/XRInputTracking.h")]
 		[StaticAccessor("XRInputTracking::Get()", StaticAccessorType.Dot)]
+		[NativeHeader("Modules/XR/Subsystems/Input/Public/XRInputTracking.h")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern ulong GetDeviceIdAtXRNode(XRNode node);
 
-		[NativeHeader("Modules/XR/Subsystems/Input/Public/XRInputTracking.h")]
 		[StaticAccessor("XRInputTracking::Get()", StaticAccessorType.Dot)]
+		[NativeHeader("Modules/XR/Subsystems/Input/Public/XRInputTracking.h")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern void GetDeviceIdsAtXRNode_Internal(XRNode node, [NotNull("ArgumentNullException")] List<ulong> deviceIds);
 

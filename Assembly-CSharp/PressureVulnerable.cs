@@ -189,11 +189,26 @@ public class PressureVulnerable : StateMachineComponent<PressureVulnerable.State
 		if (this.safe_atmospheres != null && this.safe_atmospheres.Count > 0)
 		{
 			string text = "";
+			bool flag = false;
+			bool flag2 = false;
 			foreach (Element element in this.safe_atmospheres)
 			{
+				flag |= element.IsGas;
+				flag2 |= element.IsLiquid;
 				text = text + "\n        • " + element.name;
 			}
-			list.Add(new Descriptor(string.Format(UI.GAMEOBJECTEFFECTS.REQUIRES_ATMOSPHERE, text), string.Format(UI.GAMEOBJECTEFFECTS.TOOLTIPS.REQUIRES_ATMOSPHERE, text), Descriptor.DescriptorType.Requirement, false));
+			if (flag && flag2)
+			{
+				list.Add(new Descriptor(string.Format(UI.GAMEOBJECTEFFECTS.REQUIRES_ATMOSPHERE, text), string.Format(UI.GAMEOBJECTEFFECTS.TOOLTIPS.REQUIRES_ATMOSPHERE_MIXED, text), Descriptor.DescriptorType.Requirement, false));
+			}
+			if (flag)
+			{
+				list.Add(new Descriptor(string.Format(UI.GAMEOBJECTEFFECTS.REQUIRES_ATMOSPHERE, text), string.Format(UI.GAMEOBJECTEFFECTS.TOOLTIPS.REQUIRES_ATMOSPHERE, text), Descriptor.DescriptorType.Requirement, false));
+			}
+			else
+			{
+				list.Add(new Descriptor(string.Format(UI.GAMEOBJECTEFFECTS.REQUIRES_ATMOSPHERE, text), string.Format(UI.GAMEOBJECTEFFECTS.TOOLTIPS.REQUIRES_ATMOSPHERE_LIQUID, text), Descriptor.DescriptorType.Requirement, false));
+			}
 		}
 		return list;
 	}

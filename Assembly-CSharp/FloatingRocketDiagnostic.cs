@@ -6,7 +6,7 @@ public class FloatingRocketDiagnostic : ColonyDiagnostic
 	public FloatingRocketDiagnostic(int worldID)
 		: base(worldID, UI.COLONY_DIAGNOSTICS.FLOATINGROCKETDIAGNOSTIC.ALL_NAME)
 	{
-		this.icon = "icon_action_dig";
+		this.icon = "icon_errand_rocketry";
 	}
 
 	public override string[] GetDlcIds()

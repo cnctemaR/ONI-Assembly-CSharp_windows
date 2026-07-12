@@ -5,11 +5,11 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.XR
 {
-	[NativeHeader("XRScriptingClasses.h")]
-	[StaticAccessor("XRInputDevices::Get()", StaticAccessorType.Dot)]
 	[NativeHeader("Modules/XR/Subsystems/Input/Public/XRInputDevices.h")]
-	[NativeConditional("ENABLE_VR")]
+	[StaticAccessor("XRInputDevices::Get()", StaticAccessorType.Dot)]
+	[NativeHeader("XRScriptingClasses.h")]
 	[RequiredByNativeCode]
+	[NativeConditional("ENABLE_VR")]
 	[NativeHeader("Modules/XR/XRPrefix.h")]
 	public struct Eyes : IEquatable<Eyes>
 	{

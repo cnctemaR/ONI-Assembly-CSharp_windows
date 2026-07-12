@@ -11,9 +11,9 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
+	[NativeHeader("Runtime/Graphics/Texture2D.h")]
 	[NativeHeader("Runtime/Graphics/GeneratedTextures.h")]
 	[UsedByNativeCode]
-	[NativeHeader("Runtime/Graphics/Texture2D.h")]
 	public sealed class Texture2D : Texture
 	{
 		public extern TextureFormat format
@@ -87,8 +87,8 @@ namespace UnityEngine
 			get;
 		}
 
-		[NativeConditional("ENABLE_VIRTUALTEXTURING && UNITY_EDITOR")]
 		[NativeName("VTOnly")]
+		[NativeConditional("ENABLE_VIRTUALTEXTURING && UNITY_EDITOR")]
 		public extern bool vtOnly
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]

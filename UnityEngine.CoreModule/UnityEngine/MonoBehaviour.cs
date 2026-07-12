@@ -7,10 +7,10 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Scripting/DelayedCallUtility.h")]
+	[RequiredByNativeCode]
 	[ExtensionOfNativeClass]
 	[NativeHeader("Runtime/Mono/MonoBehaviour.h")]
-	[RequiredByNativeCode]
+	[NativeHeader("Runtime/Scripting/DelayedCallUtility.h")]
 	public class MonoBehaviour : Behaviour
 	{
 		public bool IsInvoking()

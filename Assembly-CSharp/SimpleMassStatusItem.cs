@@ -9,4 +9,6 @@ public class SimpleMassStatusItem : KMonoBehaviour
 		base.OnSpawn();
 		base.GetComponent<KSelectable>().AddStatusItem(Db.Get().MiscStatusItems.OreMass, base.gameObject);
 	}
+
+	public string symbolPrefix = "";
 }

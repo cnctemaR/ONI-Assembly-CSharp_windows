@@ -7,9 +7,9 @@ using UnityEngine.Video;
 namespace UnityEngine.Experimental.Video
 {
 	[StaticAccessor("VideoPlayerExtensionsBindings", StaticAccessorType.DoubleColon)]
-	[NativeHeader("VideoScriptingClasses.h")]
 	[NativeHeader("Modules/Video/Public/VideoPlayer.h")]
 	[NativeHeader("Modules/Video/Public/ScriptBindings/VideoPlayerExtensions.bindings.h")]
+	[NativeHeader("VideoScriptingClasses.h")]
 	public static class VideoPlayerExtensions
 	{
 		public static AudioSampleProvider GetAudioSampleProvider(this VideoPlayer vp, ushort trackIndex)

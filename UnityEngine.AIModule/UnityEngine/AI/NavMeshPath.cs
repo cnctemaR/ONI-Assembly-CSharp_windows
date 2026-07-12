@@ -6,8 +6,8 @@ using UnityEngine.Scripting.APIUpdating;
 
 namespace UnityEngine.AI
 {
-	[MovedFrom("UnityEngine")]
 	[NativeHeader("Modules/AI/NavMeshPath.bindings.h")]
+	[MovedFrom("UnityEngine")]
 	[StructLayout(LayoutKind.Sequential)]
 	public sealed class NavMeshPath
 	{

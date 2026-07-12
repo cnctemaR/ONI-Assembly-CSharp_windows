@@ -20,6 +20,12 @@ public class ColonyDiagnosticScreen : KScreen, ISim1000ms
 		}));
 	}
 
+	protected override void OnForcedCleanUp()
+	{
+		ColonyDiagnosticScreen.Instance = null;
+		base.OnForcedCleanUp();
+	}
+
 	private void RefreshSingleWorld(object data = null)
 	{
 		foreach (ColonyDiagnosticScreen.DiagnosticRow diagnosticRow in this.diagnosticRows)

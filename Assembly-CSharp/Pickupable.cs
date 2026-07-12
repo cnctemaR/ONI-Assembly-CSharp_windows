@@ -263,7 +263,7 @@ public class Pickupable : Workable, IHasSortOrder
 	[OnDeserialized]
 	public void OnDeserialize()
 	{
-		if (SaveLoader.Instance.GameInfo.IsVersionOlderThan(7, 28))
+		if (SaveLoader.Instance.GameInfo.IsVersionOlderThan(7, 28) && base.transform.position.z == 0f)
 		{
 			KBatchedAnimController component = base.transform.GetComponent<KBatchedAnimController>();
 			component.SetSceneLayer(component.sceneLayer);

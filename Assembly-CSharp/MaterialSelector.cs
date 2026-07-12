@@ -35,23 +35,19 @@ public class MaterialSelector : KScreen
 		this.ElementToggles.Clear();
 	}
 
-	public void ConfigureScreen(Recipe.Ingredient ingredient, Recipe recipe)
+	public static List<Tag> GetValidMaterials(Tag materialTypeTag)
 	{
-		this.ClearMaterialToggles();
-		this.activeIngredient = ingredient;
-		this.activeRecipe = recipe;
-		this.activeMass = ingredient.amount;
 		List<Tag> list = new List<Tag>();
 		foreach (Element element in ElementLoader.elements)
 		{
-			if (element.IsSolid && (element.tag == ingredient.tag || element.HasTag(ingredient.tag)))
+			if (element.IsSolid && (element.tag == materialTypeTag || element.HasTag(materialTypeTag)))
 			{
 				list.Add(element.tag);
 			}
 		}
 		foreach (Tag tag in GameTags.MaterialBuildingElements)
 		{
-			if (tag == ingredient.tag)
+			if (tag == materialTypeTag)
 			{
 				foreach (GameObject gameObject in Assets.GetPrefabsWithTag(tag))
 				{
@@ -63,17 +59,26 @@ public class MaterialSelector : KScreen
 				}
 			}
 		}
-		foreach (Tag tag2 in list)
+		return list;
+	}
+
+	public void ConfigureScreen(Recipe.Ingredient ingredient, Recipe recipe)
+	{
+		this.ClearMaterialToggles();
+		this.activeIngredient = ingredient;
+		this.activeRecipe = recipe;
+		this.activeMass = ingredient.amount;
+		foreach (Tag tag in MaterialSelector.GetValidMaterials(ingredient.tag))
 		{
-			if (!this.ElementToggles.ContainsKey(tag2))
+			if (!this.ElementToggles.ContainsKey(tag))
 			{
-				GameObject gameObject2 = Util.KInstantiate(this.TogglePrefab, this.LayoutContainer, "MaterialSelection_" + tag2.ProperName());
-				gameObject2.transform.localScale = Vector3.one;
-				gameObject2.SetActive(true);
-				KToggle component2 = gameObject2.GetComponent<KToggle>();
-				this.ElementToggles.Add(tag2, component2);
-				component2.group = this.toggleGroup;
-				gameObject2.gameObject.GetComponent<ToolTip>().toolTip = tag2.ProperName();
+				GameObject gameObject = Util.KInstantiate(this.TogglePrefab, this.LayoutContainer, "MaterialSelection_" + tag.ProperName());
+				gameObject.transform.localScale = Vector3.one;
+				gameObject.SetActive(true);
+				KToggle component = gameObject.GetComponent<KToggle>();
+				this.ElementToggles.Add(tag, component);
+				component.group = this.toggleGroup;
+				gameObject.gameObject.GetComponent<ToolTip>().toolTip = tag.ProperName();
 			}
 		}
 		this.ConfigureMaterialTooltips();

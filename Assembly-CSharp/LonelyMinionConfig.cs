@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using STRINGS;
 using UnityEngine;
 
@@ -15,26 +14,12 @@ public class LonelyMinionConfig : IEntityConfig
 		string text = DUPLICANTS.MODIFIERS.BASEDUPLICANT.NAME;
 		GameObject gameObject = EntityTemplates.CreateEntity(LonelyMinionConfig.ID, text, true);
 		gameObject.AddComponent<Accessorizer>();
+		gameObject.AddOrGet<WearableAccessorizer>();
 		gameObject.AddComponent<Storage>().doDiseaseTransfer = false;
 		gameObject.AddComponent<StateMachineController>();
 		LonelyMinion.Def def = gameObject.AddOrGetDef<LonelyMinion.Def>();
-		Tag tag = new Tag("Jorge");
-		string text2 = tag.Name.ToUpper();
-		def.Personality = new Personality(text2, Strings.Get(string.Format("STRINGS.DUPLICANTS.PERSONALITIES.{0}.NAME", text2)), "Male", "Grumpy", "UglyCrier", "BalloonArtist", "", "", 5, 5, -1, 3, 45, tag.GetHash(), Strings.Get(string.Format("STRINGS.DUPLICANTS.PERSONALITIES.{0}.DESC", text2)), false);
-		KAnimFile anim = Assets.GetAnim("body_lonelyminion_kanim");
-		List<AccessorySlot> resources = Db.Get().AccessorySlots.resources;
-		for (int i = 0; i < resources.Count; i++)
-		{
-			int count = resources[i].accessories.Count;
-			resources[i].AddAccessories(anim, null);
-			if (count != resources[i].accessories.Count)
-			{
-				Resource resource = resources[i].accessories[resources[i].accessories.Count - 1];
-				Db.Get().ResourceTable.Add(resource);
-			}
-		}
+		def.Personality = Db.Get().Personalities.Get(LonelyMinionConfig.MinionName);
 		def.Personality.Disabled = true;
-		Db.Get().Personalities.Add(def.Personality);
 		KBatchedAnimController kbatchedAnimController = gameObject.AddOrGet<KBatchedAnimController>();
 		kbatchedAnimController.defaultAnim = "idle_default";
 		kbatchedAnimController.initialAnim = "idle_default";
@@ -49,7 +34,7 @@ public class LonelyMinionConfig : IEntityConfig
 		SymbolOverrideController symbolOverrideController = SymbolOverrideControllerUtil.AddToPrefab(gameObject);
 		symbolOverrideController.applySymbolOverridesEveryFrame = true;
 		symbolOverrideController.AddSymbolOverride("snapto_cheek", Assets.GetAnim("head_swap_kanim").GetData().build.GetSymbol(string.Format("cheek_00{0}", def.Personality.headShape)), 1);
-		MinionConfig.ConfigureSymbols(gameObject, false);
+		MinionConfig.ConfigureSymbols(gameObject, true);
 		return gameObject;
 	}
 
@@ -74,25 +59,6 @@ public class LonelyMinionConfig : IEntityConfig
 		KBatchedAnimTracker kbatchedAnimTracker = gameObject.AddOrGet<KBatchedAnimTracker>();
 		kbatchedAnimTracker.controller = component;
 		kbatchedAnimTracker.symbol = LonelyMinionConfig.PARCEL_SNAPTO;
-	}
-
-	public static void ApplyAccessoryOverrides(Accessorizer accessorizer)
-	{
-		int num = Hash.SDBMLower("Jorge");
-		accessorizer.RemoveAccessory(accessorizer.GetAccessory(Db.Get().AccessorySlots.Neck));
-		accessorizer.RemoveAccessory(accessorizer.GetAccessory(Db.Get().AccessorySlots.Leg));
-		accessorizer.RemoveAccessory(accessorizer.GetAccessory(Db.Get().AccessorySlots.Belt));
-		accessorizer.RemoveAccessory(accessorizer.GetAccessory(Db.Get().AccessorySlots.Pelvis));
-		accessorizer.RemoveAccessory(accessorizer.GetAccessory(Db.Get().AccessorySlots.Foot));
-		accessorizer.RemoveAccessory(accessorizer.GetAccessory(Db.Get().AccessorySlots.Hand));
-		accessorizer.RemoveAccessory(accessorizer.GetAccessory(Db.Get().AccessorySlots.Cuff));
-		accessorizer.AddAccessory(Db.Get().AccessorySlots.Neck.Lookup(string.Format("neck_{0}", num)));
-		accessorizer.AddAccessory(Db.Get().AccessorySlots.Leg.Lookup(string.Format("leg_{0}", num)));
-		accessorizer.AddAccessory(Db.Get().AccessorySlots.Belt.Lookup(string.Format("belt_{0}", num)));
-		accessorizer.AddAccessory(Db.Get().AccessorySlots.Pelvis.Lookup(string.Format("pelvis_{0}", num)));
-		accessorizer.AddAccessory(Db.Get().AccessorySlots.Foot.Lookup(string.Format("foot_{0}", num)));
-		accessorizer.AddAccessory(Db.Get().AccessorySlots.Hand.Lookup(string.Format("hand_paint_{0}", num)));
-		accessorizer.AddAccessory(Db.Get().AccessorySlots.Cuff.Lookup(string.Format("cuff_{0}", num)));
 	}
 
 	public static string ID = "LonelyMinion";
@@ -144,4 +110,8 @@ public class LonelyMinionConfig : IEntityConfig
 	public static readonly HashedString BLINDS_IDLE_0 = "idle_blinds_0";
 
 	public static readonly HashedString PARCEL_SNAPTO = "parcel_snapTo";
+
+	public static readonly string MinionName = "JORGE";
+
+	public static readonly string BodyAnimFile = "body_lonelyminion_kanim";
 }

@@ -9,13 +9,13 @@ namespace Database
 			: base("MonumentParts", parent)
 		{
 			base.Initialize();
-			foreach (MonumentParts.Info info in MonumentParts.Infos_Vanilla)
+			foreach (MonumentParts.Info info in MonumentParts.Infos_Vanilla_All)
 			{
 				this.Add(info.id, info.animFilename, info.state, info.symbolName, info.part);
 			}
 			if (DlcManager.IsExpansion1Active())
 			{
-				foreach (MonumentParts.Info info2 in MonumentParts.Infos_Expansion1)
+				foreach (MonumentParts.Info info2 in MonumentParts.Infos_Expansion1_All)
 				{
 					this.Add(info2.id, info2.animFilename, info2.state, info2.symbolName, info2.part);
 				}
@@ -33,7 +33,7 @@ namespace Database
 			return this.resources.FindAll((MonumentPartResource mpr) => mpr.part == part);
 		}
 
-		public static MonumentParts.Info[] Infos_Vanilla = new MonumentParts.Info[]
+		public static MonumentParts.Info[] Infos_Vanilla_Base = new MonumentParts.Info[]
 		{
 			new MonumentParts.Info("bottom_option_a", "monument_base_a_kanim", "option_a", "straight_legs", MonumentPartResource.Part.Bottom),
 			new MonumentParts.Info("bottom_option_b", "monument_base_b_kanim", "option_b", "wide_stance", MonumentPartResource.Part.Bottom),
@@ -77,7 +77,11 @@ namespace Database
 			new MonumentParts.Info("top_option_q", "monument_upper_q_kanim", "option_q", "pacu", MonumentPartResource.Part.Top)
 		};
 
-		public static MonumentParts.Info[] Infos_Expansion1 = new MonumentParts.Info[]
+		public static MonumentParts.Info[] Infos_Vanilla_Skins = new MonumentParts.Info[0];
+
+		public static MonumentParts.Info[] Infos_Vanilla_All = MonumentParts.Infos_Vanilla_Base.Concat<MonumentParts.Info>(MonumentParts.Infos_Vanilla_Skins);
+
+		public static MonumentParts.Info[] Infos_Expansion1_Base = new MonumentParts.Info[]
 		{
 			new MonumentParts.Info("bottom_option_l", "monument_base_l_kanim", "option_l", "rocketnosecone", MonumentPartResource.Part.Bottom),
 			new MonumentParts.Info("bottom_option_m", "monument_base_m_kanim", "option_m", "rocketsugarengine", MonumentPartResource.Part.Bottom),
@@ -101,6 +105,10 @@ namespace Database
 			new MonumentParts.Info("top_option_y", "monument_upper_y_kanim", "option_y", "Harold", MonumentPartResource.Part.Top),
 			new MonumentParts.Info("top_option_z", "monument_upper_z_kanim", "option_z", "Nails", MonumentPartResource.Part.Top)
 		};
+
+		public static MonumentParts.Info[] Infos_Expansion1_Skins = new MonumentParts.Info[0];
+
+		public static MonumentParts.Info[] Infos_Expansion1_All = MonumentParts.Infos_Expansion1_Base.Concat<MonumentParts.Info>(MonumentParts.Infos_Expansion1_Skins);
 
 		public struct Info
 		{

@@ -96,7 +96,7 @@ public class TemplateSelectionInfoPanel : KMonoBehaviour, IRender1000ms
 			{
 				ignoreObjects.Add(gameObject);
 				PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
-				if (!(component == null))
+				if (!(component == null) && component.Element != null)
 				{
 					float num2 = component.Mass;
 					Building component2 = gameObject.GetComponent<Building>();

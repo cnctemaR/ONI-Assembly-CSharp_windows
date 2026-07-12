@@ -140,7 +140,11 @@ public class RetiredColonyInfoScreen : KModalScreen
 		{
 			return;
 		}
-		if (e.TryConsume(global::Action.MouseRight))
+		if (e.TryConsume(global::Action.Escape))
+		{
+			this.Show(false);
+		}
+		else if (e.TryConsume(global::Action.MouseRight))
 		{
 			this.Show(false);
 		}
@@ -181,7 +185,13 @@ public class RetiredColonyInfoScreen : KModalScreen
 		base.OnShow(show);
 		if (show)
 		{
+			this.explorerSearch.text = "";
+			this.achievementSearch.text = "";
 			this.RefreshUIScale(null);
+		}
+		else
+		{
+			this.InstantClearAchievementVeils();
 		}
 		if (Game.Instance != null)
 		{
@@ -336,24 +346,39 @@ public class RetiredColonyInfoScreen : KModalScreen
 		this.UpdateAchievementData(null, null);
 	}
 
+	private void InstantClearAchievementVeils()
+	{
+		GameObject[] array = this.achievementVeils;
+		for (int i = 0; i < array.Length; i++)
+		{
+			array[i].GetComponent<Image>().color = new Color(0f, 0f, 0f, 0f);
+		}
+		array = this.achievementVeils;
+		for (int i = 0; i < array.Length; i++)
+		{
+			array[i].SetActive(false);
+		}
+		foreach (KeyValuePair<string, GameObject> keyValuePair in this.achievementEntries)
+		{
+			AchievementWidget component = keyValuePair.Value.GetComponent<AchievementWidget>();
+			component.StopAllCoroutines();
+			component.CompleteFlourish();
+		}
+	}
+
 	private IEnumerator ClearAchievementVeil(float delay = 0f)
 	{
 		yield return new WaitForSecondsRealtime(delay);
-		GameObject[] array;
 		for (float i = 0.7f; i >= 0f; i -= Time.unscaledDeltaTime)
 		{
-			array = this.achievementVeils;
+			GameObject[] array = this.achievementVeils;
 			for (int j = 0; j < array.Length; j++)
 			{
 				array[j].GetComponent<Image>().color = new Color(0f, 0f, 0f, i);
 			}
 			yield return 0;
 		}
-		array = this.achievementVeils;
-		for (int j = 0; j < array.Length; j++)
-		{
-			array[j].SetActive(false);
-		}
+		this.InstantClearAchievementVeils();
 		yield break;
 	}
 
@@ -465,7 +490,9 @@ public class RetiredColonyInfoScreen : KModalScreen
 		{
 			base.StartCoroutine(this.ShowAchievementVeil());
 			base.StartCoroutine(this.ClearAchievementVeil(num3 + (float)num * num2));
+			return;
 		}
+		this.InstantClearAchievementVeils();
 	}
 
 	private void DisplayInfoBlock(RetiredColonyData data, GameObject container)

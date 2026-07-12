@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{EA9301EF-341A-4564-B69E-CA8966F0462E}</ProjectGuid>
+    <ProjectGuid>{95FD58EB-1DE6-446B-8517-7D6E7F2C64EE}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>UnityEngine</RootNamespace>
     <AssemblyName>UnityEngine.SharedInternalsModule</AssemblyName>

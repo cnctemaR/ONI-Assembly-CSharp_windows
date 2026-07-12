@@ -50,6 +50,17 @@ public static class KleiPermitVisUtil
 		buildingKAnim.rectTransform().sizeDelta = 176f * Vector2.one;
 	}
 
+	public static void ConfigureBuildingPosition(RectTransform transform, PrefabDefinedUIPosition anchorPosition, BuildingDef buildingDef, Alignment alignment)
+	{
+		anchorPosition.SetOn(transform);
+		transform.anchoredPosition += new Vector2(176f * (float)buildingDef.WidthInCells * -(alignment.x - 0.5f), 176f * (float)buildingDef.HeightInCells * -alignment.y);
+	}
+
+	public static void ConfigureBuildingPosition(RectTransform transform, Vector2 anchorPosition, BuildingDef buildingDef, Alignment alignment)
+	{
+		transform.anchoredPosition = anchorPosition + new Vector2(176f * (float)buildingDef.WidthInCells * -(alignment.x - 0.5f), 176f * (float)buildingDef.HeightInCells * -alignment.y);
+	}
+
 	public static HashedString GetFirstAnimHash(KAnimFile animFile)
 	{
 		return animFile.GetData().GetAnim(0).hash;

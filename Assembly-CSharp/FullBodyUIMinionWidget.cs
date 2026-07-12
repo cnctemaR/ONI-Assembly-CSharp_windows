@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Linq;
+using Database;
 using UnityEngine;
 
 public class FullBodyUIMinionWidget : KMonoBehaviour
@@ -34,19 +36,16 @@ public class FullBodyUIMinionWidget : KMonoBehaviour
 	public void SetDefaultPortraitAnimator()
 	{
 		MinionIdentity minionIdentity = ((Components.MinionIdentities.Count > 0) ? Components.MinionIdentities[0] : null);
-		if (minionIdentity == null)
-		{
-			return;
-		}
+		HashedString hashedString = ((minionIdentity != null) ? minionIdentity.personalityResourceId : Db.Get().Personalities.resources.GetRandom<Personality>().Id);
 		this.InitializeAnimator();
-		this.animController.GetComponent<Accessorizer>().ApplyMinionPersonality(Db.Get().Personalities.Get(minionIdentity.personalityResourceId));
-		Accessorizer component = minionIdentity.GetComponent<Accessorizer>();
+		this.animController.GetComponent<Accessorizer>().ApplyMinionPersonality(Db.Get().Personalities.Get(hashedString));
+		Accessorizer accessorizer = ((minionIdentity != null) ? minionIdentity.GetComponent<Accessorizer>() : null);
 		KAnim.Build.Symbol symbol = null;
 		KAnim.Build.Symbol symbol2 = null;
-		if (component)
+		if (accessorizer)
 		{
-			symbol = component.GetAccessory(Db.Get().AccessorySlots.Hair).symbol;
-			symbol2 = Db.Get().AccessorySlots.HatHair.Lookup("hat_" + HashCache.Get().Get(component.GetAccessory(Db.Get().AccessorySlots.Hair).symbol.hash)).symbol;
+			symbol = accessorizer.GetAccessory(Db.Get().AccessorySlots.Hair).symbol;
+			symbol2 = Db.Get().AccessorySlots.HatHair.Lookup("hat_" + HashCache.Get().Get(accessorizer.GetAccessory(Db.Get().AccessorySlots.Hair).symbol.hash)).symbol;
 		}
 		this.UpdateHatOverride(null, symbol, symbol2);
 		this.UpdateClothingOverride(this.animController.GetComponent<SymbolOverrideController>(), minionIdentity, null);
@@ -100,58 +99,36 @@ public class FullBodyUIMinionWidget : KMonoBehaviour
 		this.animController.SetSymbolVisiblity(Db.Get().AccessorySlots.Hair.targetSymbolId, string.IsNullOrEmpty(current_hat));
 		this.animController.SetSymbolVisiblity(Db.Get().AccessorySlots.HatHair.targetSymbolId, !string.IsNullOrEmpty(current_hat));
 		SymbolOverrideController component = this.animController.GetComponent<SymbolOverrideController>();
-		component.AddSymbolOverride("snapto_hair_always", hair_symbol, 1);
-		component.AddSymbolOverride(Db.Get().AccessorySlots.HatHair.targetSymbolId, hat_hair_symbol, 1);
+		if (hair_symbol != null)
+		{
+			component.AddSymbolOverride("snapto_hair_always", hair_symbol, 1);
+		}
+		if (hat_hair_symbol != null)
+		{
+			component.AddSymbolOverride(Db.Get().AccessorySlots.HatHair.targetSymbolId, hat_hair_symbol, 1);
+		}
 	}
 
 	private void UpdateClothingOverride(SymbolOverrideController symbolOverrideController, MinionIdentity identity, StoredMinionIdentity storedMinionIdentity)
 	{
-		Equipment equipment = null;
+		string[] array = null;
 		if (identity != null)
 		{
-			equipment = identity.assignableProxy.Get().GetComponent<Equipment>();
+			array = identity.GetComponent<WearableAccessorizer>().GetClothingItemIds();
 		}
 		else if (storedMinionIdentity != null)
 		{
-			equipment = storedMinionIdentity.assignableProxy.Get().GetComponent<Equipment>();
+			array = storedMinionIdentity.GetClothingItemIds();
 		}
-		if (this.buildOverrideData != null)
+		if (array != null)
 		{
-			symbolOverrideController.RemoveBuildOverride(this.buildOverrideData.first, this.buildOverrideData.second);
-			this.buildOverrideData = null;
-		}
-		AssignableSlotInstance assignableSlotInstance = equipment.GetSlot(Db.Get().AssignableSlots.Outfit);
-		if (assignableSlotInstance.assignable != null)
-		{
-			Equippable component = assignableSlotInstance.assignable.GetComponent<Equippable>();
-			if (component != null)
-			{
-				this.UpdateClothingOverride(component.GetBuildOverride().GetData(), component.def.BuildOverridePriority);
-				return;
-			}
-		}
-		else
-		{
-			assignableSlotInstance = equipment.GetSlot(Db.Get().AssignableSlots.Suit);
-			if (assignableSlotInstance.assignable != null)
-			{
-				this.animController.SetSymbolVisiblity("belt", true);
-			}
+			this.animController.GetComponent<WearableAccessorizer>().ApplyClothingItems(array.Select<string, ClothingItemResource>((string i) => Db.Get().Permits.ClothingItems.Get(i)));
 		}
 	}
 
-	public void UpdateClothingOverride(KAnimFileData clothingData, int priority = 4)
+	public void UpdateEquipment(Equippable equippable, KAnimFile animFile)
 	{
-		SymbolOverrideController component = this.animController.GetComponent<SymbolOverrideController>();
-		if (this.buildOverrideData != null)
-		{
-			component.RemoveBuildOverride(this.buildOverrideData.first, this.buildOverrideData.second);
-			this.buildOverrideData = null;
-		}
-		this.buildOverrideData = new global::Tuple<KAnimFileData, int>(clothingData, priority);
-		component.AddBuildOverride(this.buildOverrideData.first, this.buildOverrideData.second);
-		bool flag = this.buildOverrideData.first.build.GetSymbol("belt") != null;
-		this.animController.SetSymbolVisiblity("belt", flag);
+		this.animController.GetComponent<WearableAccessorizer>().ApplyEquipment(equippable, animFile);
 	}
 
 	private void GetMinionIdentity(IAssignableIdentity assignableIdentity, out MinionIdentity minionIdentity, out StoredMinionIdentity storedMinionIdentity)
@@ -170,6 +147,4 @@ public class FullBodyUIMinionWidget : KMonoBehaviour
 	private GameObject duplicantAnimAnchor;
 
 	public const float UI_MINION_PORTRAIT_ANIM_SCALE = 0.38f;
-
-	private global::Tuple<KAnimFileData, int> buildOverrideData;
 }

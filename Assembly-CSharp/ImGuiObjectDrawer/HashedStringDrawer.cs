@@ -11,7 +11,10 @@ namespace ImGuiObjectDrawer
 
 		protected override void DrawInline(in MemberDrawContext context, in MemberDetails member)
 		{
-			ImGuiEx.SimpleField(member.name, string.Format("{0}({1})", member.value, ((HashedString)member.value).ToString()));
+			HashedString hashedString = (HashedString)member.value;
+			string text = hashedString.ToString();
+			string text2 = "0x" + hashedString.HashValue.ToString("X");
+			ImGuiEx.SimpleField(member.name, text + " (" + text2 + ")");
 		}
 	}
 }

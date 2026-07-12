@@ -32,6 +32,7 @@ public class UIMinion : KMonoBehaviour, UIMinionOrMannequin.ITarget
 			this.animController.gameObject.SetActive(true);
 			this.animController.animScale = 0.38f;
 			this.animController.Play("idle_default", KAnim.PlayMode.Loop, 1f, 0f);
+			MinionConfig.ConfigureSymbols(this.animController.gameObject, true);
 			this.spawn = this.animController.gameObject;
 		}
 	}
@@ -40,17 +41,17 @@ public class UIMinion : KMonoBehaviour, UIMinionOrMannequin.ITarget
 	{
 		this.SpawnedAvatar.GetComponent<Accessorizer>().ApplyMinionPersonality(personality);
 		this.Personality = personality;
-		CustomOutfit customOutfit = this.SpawnedAvatar.AddOrGet<CustomOutfit>();
-		customOutfit.enabled = false;
-		if (personality.Name == "Jorge")
-		{
-			customOutfit.Update();
-		}
+		base.gameObject.AddOrGet<MinionVoiceProviderMB>().voice = MinionVoice.ByPersonality(personality);
 	}
 
 	public void SetOutfit(IEnumerable<ClothingItemResource> outfit)
 	{
-		this.SpawnedAvatar.GetComponent<Accessorizer>().ApplyClothingItems(outfit, true);
+		this.SpawnedAvatar.GetComponent<WearableAccessorizer>().ApplyClothingItems(outfit);
+	}
+
+	public MinionVoice GetMinionVoice()
+	{
+		return MinionVoice.ByObject(this.SpawnedAvatar).UnwrapOr(MinionVoice.Random(), null);
 	}
 
 	public void React(UIMinionOrMannequinReactSource source)

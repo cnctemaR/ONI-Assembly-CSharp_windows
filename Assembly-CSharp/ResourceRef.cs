@@ -14,6 +14,14 @@ public class ResourceRef<ResourceType> : ISaveLoadable where ResourceType : Reso
 	{
 	}
 
+	public ResourceGuid Guid
+	{
+		get
+		{
+			return this.guid;
+		}
+	}
+
 	public ResourceType Get()
 	{
 		return this.resource;
@@ -21,6 +29,7 @@ public class ResourceRef<ResourceType> : ISaveLoadable where ResourceType : Reso
 
 	public void Set(ResourceType resource)
 	{
+		this.guid = null;
 		this.resource = resource;
 	}
 
@@ -41,7 +50,10 @@ public class ResourceRef<ResourceType> : ISaveLoadable where ResourceType : Reso
 		if (this.guid != null)
 		{
 			this.resource = Db.Get().GetResource<ResourceType>(this.guid);
-			this.guid = null;
+			if (this.resource != null)
+			{
+				this.guid = null;
+			}
 		}
 	}
 

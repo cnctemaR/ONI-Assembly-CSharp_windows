@@ -227,6 +227,23 @@ public class PropertyTextures : KMonoBehaviour, ISim200ms
 		this.externallyUpdatedTextures[simProperty].Apply();
 	}
 
+	public static Vector4 CalculateClusterWorldSize()
+	{
+		WorldContainer activeWorld = ClusterManager.Instance.activeWorld;
+		Vector2I worldOffset = activeWorld.WorldOffset;
+		Vector2I worldSize = activeWorld.WorldSize;
+		Vector4 zero = Vector4.zero;
+		if (DlcManager.IsPureVanilla() || (CameraController.Instance != null && CameraController.Instance.ignoreClusterFX))
+		{
+			zero = new Vector4((float)Grid.WidthInCells, (float)Grid.HeightInCells, 0f, 0f);
+		}
+		else
+		{
+			zero = new Vector4((float)worldSize.x, (float)worldSize.y, 1f / (float)(worldSize.x + worldOffset.x), 1f / (float)(worldSize.y + worldOffset.y));
+		}
+		return zero;
+	}
+
 	private void LateUpdate()
 	{
 		if (!Grid.IsInitialized())
@@ -234,52 +251,34 @@ public class PropertyTextures : KMonoBehaviour, ISim200ms
 			return;
 		}
 		Shader.SetGlobalVector(this.WorldSizeID, new Vector4((float)Grid.WidthInCells, (float)Grid.HeightInCells, 1f / (float)Grid.WidthInCells, 1f / (float)Grid.HeightInCells));
-		int num = 0;
-		Vector4 vector = new Vector4((float)Grid.WidthInCells, (float)Grid.HeightInCells, 0f, 0f);
-		if (ClusterManager.Instance != null)
-		{
-			WorldContainer activeWorld = ClusterManager.Instance.activeWorld;
-			if (DlcManager.IsPureVanilla() || (CameraController.Instance != null && CameraController.Instance.ignoreClusterFX))
-			{
-				Vector2I worldOffset = activeWorld.WorldOffset;
-				Vector2I worldSize = activeWorld.WorldSize;
-				vector.x = (float)worldSize.x;
-				vector.y = (float)worldSize.y;
-				vector.z = 1f / (float)(worldSize.x + worldOffset.x);
-				vector.w = 1f / (float)(worldSize.y + worldOffset.y);
-			}
-			if (activeWorld.FullyEnclosedBorder)
-			{
-				num = Grid.TopBorderHeight;
-			}
-		}
+		Vector4 vector = PropertyTextures.CalculateClusterWorldSize();
 		Shader.SetGlobalVector(this.ClusterWorldSizeID, vector);
 		Shader.SetGlobalVector(this.PropTexWsToCsID, new Vector4(0f, 0f, 1f, 1f));
 		Shader.SetGlobalVector(this.PropTexCsToWsID, new Vector4(0f, 0f, 1f, 1f));
-		Shader.SetGlobalFloat(this.TopBorderHeightID, (float)num);
+		Shader.SetGlobalFloat(this.TopBorderHeightID, ClusterManager.Instance.activeWorld.FullyEnclosedBorder ? 0f : ((float)Grid.TopBorderHeight));
+		int num;
 		int num2;
 		int num3;
 		int num4;
-		int num5;
-		this.GetVisibleCellRange(out num2, out num3, out num4, out num5);
+		this.GetVisibleCellRange(out num, out num2, out num3, out num4);
 		Shader.SetGlobalFloat(this.FogOfWarScaleID, PropertyTextures.FogOfWarScale);
-		int num6 = this.NextPropertyIdx;
-		this.NextPropertyIdx = num6 + 1;
-		int num7 = num6 % this.allTextureProperties.Count;
-		PropertyTextures.TextureProperties textureProperties = this.allTextureProperties[num7];
+		int num5 = this.NextPropertyIdx;
+		this.NextPropertyIdx = num5 + 1;
+		int num6 = num5 % this.allTextureProperties.Count;
+		PropertyTextures.TextureProperties textureProperties = this.allTextureProperties[num6];
 		while (textureProperties.updateEveryFrame)
 		{
-			num6 = this.NextPropertyIdx;
-			this.NextPropertyIdx = num6 + 1;
-			num7 = num6 % this.allTextureProperties.Count;
-			textureProperties = this.allTextureProperties[num7];
+			num5 = this.NextPropertyIdx;
+			this.NextPropertyIdx = num5 + 1;
+			num6 = num5 % this.allTextureProperties.Count;
+			textureProperties = this.allTextureProperties[num6];
 		}
 		for (int i = 0; i < this.allTextureProperties.Count; i++)
 		{
 			PropertyTextures.TextureProperties textureProperties2 = this.allTextureProperties[i];
-			if (num7 == i || textureProperties2.updateEveryFrame || GameUtil.IsCapturingTimeLapse())
+			if (num6 == i || textureProperties2.updateEveryFrame || GameUtil.IsCapturingTimeLapse())
 			{
-				this.UpdateProperty(ref textureProperties2, num2, num3, num4, num5);
+				this.UpdateProperty(ref textureProperties2, num, num2, num3, num4);
 			}
 		}
 		for (int j = 0; j < 14; j++)

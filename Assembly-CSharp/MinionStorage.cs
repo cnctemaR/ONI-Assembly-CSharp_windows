@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using Database;
 using Klei.AI;
 using KSerialization;
 using UnityEngine;
@@ -49,34 +51,36 @@ public class MinionStorage : KMonoBehaviour
 		dest_id.assignableProxy.Get().SetTarget(dest_id, dest_id.gameObject);
 		Accessorizer component2 = src_id.GetComponent<Accessorizer>();
 		dest_id.accessories = component2.GetAccessories();
-		ConsumableConsumer component3 = src_id.GetComponent<ConsumableConsumer>();
-		if (component3.forbiddenTagSet != null)
+		WearableAccessorizer component3 = src_id.GetComponent<WearableAccessorizer>();
+		dest_id.clothingItems = component3.GetClothingItems();
+		ConsumableConsumer component4 = src_id.GetComponent<ConsumableConsumer>();
+		if (component4.forbiddenTagSet != null)
 		{
-			dest_id.forbiddenTagSet = new HashSet<Tag>(component3.forbiddenTagSet);
+			dest_id.forbiddenTagSet = new HashSet<Tag>(component4.forbiddenTagSet);
 		}
-		MinionResume component4 = src_id.GetComponent<MinionResume>();
-		dest_id.MasteryBySkillID = component4.MasteryBySkillID;
-		dest_id.grantedSkillIDs = component4.GrantedSkillIDs;
-		dest_id.AptitudeBySkillGroup = component4.AptitudeBySkillGroup;
-		dest_id.TotalExperienceGained = component4.TotalExperienceGained;
-		dest_id.currentHat = component4.CurrentHat;
-		dest_id.targetHat = component4.TargetHat;
-		ChoreConsumer component5 = src_id.GetComponent<ChoreConsumer>();
-		dest_id.choreGroupPriorities = component5.GetChoreGroupPriorities();
-		AttributeLevels component6 = src_id.GetComponent<AttributeLevels>();
-		component6.OnSerializing();
-		dest_id.attributeLevels = new List<AttributeLevels.LevelSaveLoad>(component6.SaveLoadLevels);
-		Effects component7 = src_id.GetComponent<Effects>();
-		dest_id.saveLoadEffects = component7.GetAllEffectsForSerialization();
-		dest_id.saveLoadImmunities = component7.GetAllImmunitiesForSerialization();
+		MinionResume component5 = src_id.GetComponent<MinionResume>();
+		dest_id.MasteryBySkillID = component5.MasteryBySkillID;
+		dest_id.grantedSkillIDs = component5.GrantedSkillIDs;
+		dest_id.AptitudeBySkillGroup = component5.AptitudeBySkillGroup;
+		dest_id.TotalExperienceGained = component5.TotalExperienceGained;
+		dest_id.currentHat = component5.CurrentHat;
+		dest_id.targetHat = component5.TargetHat;
+		ChoreConsumer component6 = src_id.GetComponent<ChoreConsumer>();
+		dest_id.choreGroupPriorities = component6.GetChoreGroupPriorities();
+		AttributeLevels component7 = src_id.GetComponent<AttributeLevels>();
+		component7.OnSerializing();
+		dest_id.attributeLevels = new List<AttributeLevels.LevelSaveLoad>(component7.SaveLoadLevels);
+		Effects component8 = src_id.GetComponent<Effects>();
+		dest_id.saveLoadEffects = component8.GetAllEffectsForSerialization();
+		dest_id.saveLoadImmunities = component8.GetAllImmunitiesForSerialization();
 		MinionStorage.StoreModifiers(src_id, dest_id);
-		Schedulable component8 = src_id.GetComponent<Schedulable>();
-		Schedule schedule = component8.GetSchedule();
+		Schedulable component9 = src_id.GetComponent<Schedulable>();
+		Schedule schedule = component9.GetSchedule();
 		if (schedule != null)
 		{
-			schedule.Unassign(component8);
-			Schedulable component9 = dest_id.GetComponent<Schedulable>();
-			schedule.Assign(component9);
+			schedule.Unassign(component9);
+			Schedulable component10 = dest_id.GetComponent<Schedulable>();
+			schedule.Assign(component10);
 		}
 	}
 
@@ -112,6 +116,10 @@ public class MinionStorage : KMonoBehaviour
 		if (src_id.accessories != null)
 		{
 			dest_id.GetComponent<Accessorizer>().SetAccessories(src_id.accessories);
+		}
+		if (src_id.clothingItems != null)
+		{
+			dest_id.GetComponent<WearableAccessorizer>().ApplyClothingItems(src_id.clothingItems.Select<ResourceRef<ClothingItemResource>, ClothingItemResource>((ResourceRef<ClothingItemResource> i) => i.Get()));
 		}
 		ConsumableConsumer component = dest_id.GetComponent<ConsumableConsumer>();
 		if (src_id.forbiddenTagSet != null)

@@ -24,6 +24,7 @@ public class FullMinionUIPortrait : IEntityConfig
 		gameObject.AddOrGet<BoxCollider2D>().size = new Vector2(1f, 1f);
 		gameObject.AddOrGet<FaceGraph>();
 		gameObject.AddOrGet<Accessorizer>();
+		gameObject.AddOrGet<WearableAccessorizer>();
 		KBatchedAnimController kbatchedAnimController = gameObject.AddOrGet<KBatchedAnimController>();
 		kbatchedAnimController.materialType = KAnimBatchGroup.MaterialType.UI;
 		kbatchedAnimController.animScale = 0.5f;
@@ -37,7 +38,7 @@ public class FullMinionUIPortrait : IEntityConfig
 			Assets.GetAnim("anim_cheer_kanim")
 		};
 		SymbolOverrideControllerUtil.AddToPrefab(gameObject);
-		MinionConfig.ConfigureSymbols(gameObject, false);
+		MinionConfig.ConfigureSymbols(gameObject, true);
 		return gameObject;
 	}
 

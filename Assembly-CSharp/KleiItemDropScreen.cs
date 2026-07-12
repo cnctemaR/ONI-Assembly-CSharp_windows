@@ -65,7 +65,7 @@ public class KleiItemDropScreen : KModalScreen
 		{
 			return;
 		}
-		if (KleiItems.InventoryData.AllItems != null)
+		if (KleiItems.HasUnopenedItem())
 		{
 			this.PresentNextUnopenedItem(true);
 			this.shouldDoCloseRoutine = true;
@@ -76,18 +76,14 @@ public class KleiItemDropScreen : KModalScreen
 
 	public void PresentNextUnopenedItem(bool firstItemPresentation = true)
 	{
-		foreach (KleiItems.Item item in KleiItems.InventoryData.AllItems)
+		foreach (KleiItems.ItemData itemData in PermitItems.IterateInventory())
 		{
-			if (!item.IsOpened)
-			{
-				this.PresentItem(item, firstItemPresentation);
-				return;
-			}
+			global::Debug.LogError("UNIMPLEMENTED");
 		}
 		this.Show(false);
 	}
 
-	public void PresentItem(KleiItems.Item item, bool firstItemPresentation)
+	public void PresentItem(KleiItems.ItemData item, bool firstItemPresentation)
 	{
 		this.giftRevealed = false;
 		this.giftAcknowledged = false;
@@ -135,7 +131,7 @@ public class KleiItemDropScreen : KModalScreen
 		yield break;
 	}
 
-	private IEnumerator PresentItemRoutine(KleiItems.Item item, bool firstItem)
+	private IEnumerator PresentItemRoutine(KleiItems.ItemData item, bool firstItem)
 	{
 		yield return null;
 		if (item.ItemId == 0UL)
@@ -178,12 +174,11 @@ public class KleiItemDropScreen : KModalScreen
 		this.animatedPod.Play("additional_pre", KAnim.PlayMode.Once, 1f, 0f);
 		this.animatedPod.Queue("working_loop", KAnim.PlayMode.Loop, 1f, 0f);
 		yield return Updater.WaitForSeconds(1f);
-		PermitResource permitResource = Db.Get().Permits.Get(PermitItems.GetPermitIDByKleiItemType(item.ItemType));
-		PermitPresentationInfo permitPresInfo = PermitItems.GetPermitPresentationInfo(permitResource.Id);
-		this.permitVisualizer.ConfigureWith(permitResource);
+		PermitResource permit = Db.Get().Permits.Get(item.PermitId);
+		this.permitVisualizer.ConfigureWith(permit);
 		yield return this.permitVisualizer.AnimateIn();
-		this.itemNameLabel.SetText(permitPresInfo.name);
-		this.itemDescriptionLabel.SetText(permitPresInfo.description);
+		this.itemNameLabel.SetText(permit.Name);
+		this.itemDescriptionLabel.SetText(permit.Description);
 		this.itemNameLabelPosition.SetOn(this.itemNameLabel);
 		this.itemDescriptionLabelPosition.SetOn(this.itemDescriptionLabel);
 		yield return Updater.Parallel(new Updater[]
@@ -202,7 +197,7 @@ public class KleiItemDropScreen : KModalScreen
 		this.itemNameLabel.SetText("");
 		this.itemDescriptionLabel.SetText("");
 		yield return this.permitVisualizer.AnimateOut();
-		permitPresInfo = default(PermitPresentationInfo);
+		permit = null;
 		this.PresentNextUnopenedItem(false);
 		yield break;
 	}

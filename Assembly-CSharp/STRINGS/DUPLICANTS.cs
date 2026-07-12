@@ -3297,7 +3297,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Spicing Food";
 
-				public static LocString TOOLTIP = "This Duplicant is adding spice to a meal";
+				public static LocString TOOLTIP = "This Duplicant is making a tasty meal even tastier";
 			}
 
 			public class CLEARING
@@ -4075,15 +4075,29 @@ namespace STRINGS
 
 			public class ROOMBEDROOM
 			{
-				public static LocString NAME = "Bedroom";
+				public static LocString NAME = "Luxury Barracks";
 
 				public static LocString TOOLTIP = string.Concat(new string[]
 				{
-					"This Duplicant slept in a private ",
+					"This Duplicant slept in a ",
 					UI.PRE_KEYWORD,
-					"Bedroom",
+					"Luxury Barracks",
 					UI.PST_KEYWORD,
 					" last night and feels extra refreshed"
+				});
+			}
+
+			public class ROOMPRIVATEBEDROOM
+			{
+				public static LocString NAME = "Private Bedroom";
+
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"This Duplicant slept in a ",
+					UI.PRE_KEYWORD,
+					"Private Bedroom",
+					UI.PST_KEYWORD,
+					" last night and feels super refreshed"
 				});
 			}
 
@@ -6085,7 +6099,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Lit";
 
-				public static LocString TOOLTIP = "This Duplicant was in a well lit environment and is feeling lit";
+				public static LocString TOOLTIP = "This Duplicant was in a well-lit environment and is feeling lit";
 			}
 
 			public class BONUSTALKER
@@ -6193,7 +6207,7 @@ namespace STRINGS
 
 			public static LocString CANNOT_DO_TASK_TOOLTIP = "{0}: {1}";
 
-			public static LocString REFUSES_TO_DO_TASK = "Cannot do<b>{0} Errands</b>";
+			public static LocString REFUSES_TO_DO_TASK = "Cannot do <b>{0} Errands</b>";
 
 			public static LocString IGNORED_EFFECTS = "Immune to <b>{0}</b>";
 
@@ -7551,7 +7565,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Jorge";
 
-				public static LocString DESC = "{0} is very excited to join the colony and settle into their new home!";
+				public static LocString DESC = "{0} loves his new colony, even if their collective body odor makes his eyes water.";
 			}
 		}
 

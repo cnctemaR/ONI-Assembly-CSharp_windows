@@ -43,27 +43,26 @@ public class Equipment : Assignables
 	public void Equip(Equippable equippable)
 	{
 		GameObject targetGameObject = this.GetTargetGameObject();
-		KBatchedAnimController component = targetGameObject.GetComponent<KBatchedAnimController>();
-		bool flag = component == null;
+		bool flag = targetGameObject.GetComponent<KBatchedAnimController>() == null;
 		if (!flag)
 		{
-			PrimaryElement component2 = equippable.GetComponent<PrimaryElement>();
+			PrimaryElement component = equippable.GetComponent<PrimaryElement>();
 			SimUtil.DiseaseInfo invalid = SimUtil.DiseaseInfo.Invalid;
-			invalid.idx = component2.DiseaseIdx;
-			invalid.count = (int)((float)component2.DiseaseCount * 0.33f);
-			PrimaryElement component3 = targetGameObject.GetComponent<PrimaryElement>();
+			invalid.idx = component.DiseaseIdx;
+			invalid.count = (int)((float)component.DiseaseCount * 0.33f);
+			PrimaryElement component2 = targetGameObject.GetComponent<PrimaryElement>();
 			SimUtil.DiseaseInfo invalid2 = SimUtil.DiseaseInfo.Invalid;
-			invalid2.idx = component3.DiseaseIdx;
-			invalid2.count = (int)((float)component3.DiseaseCount * 0.33f);
-			component3.ModifyDiseaseCount(-invalid2.count, "Equipment.Equip");
-			component2.ModifyDiseaseCount(-invalid.count, "Equipment.Equip");
+			invalid2.idx = component2.DiseaseIdx;
+			invalid2.count = (int)((float)component2.DiseaseCount * 0.33f);
+			component2.ModifyDiseaseCount(-invalid2.count, "Equipment.Equip");
+			component.ModifyDiseaseCount(-invalid.count, "Equipment.Equip");
 			if (invalid2.count > 0)
 			{
-				component2.AddDisease(invalid2.idx, invalid2.count, "Equipment.Equip");
+				component.AddDisease(invalid2.idx, invalid2.count, "Equipment.Equip");
 			}
 			if (invalid.count > 0)
 			{
-				component3.AddDisease(invalid.idx, invalid.count, "Equipment.Equip");
+				component2.AddDisease(invalid.idx, invalid.count, "Equipment.Equip");
 			}
 		}
 		AssignableSlotInstance slot = base.GetSlot(equippable.slot);
@@ -79,25 +78,21 @@ public class Equipment : Assignables
 				attributes.Add(attributeModifier);
 			}
 		}
-		SnapOn component4 = targetGameObject.GetComponent<SnapOn>();
-		if (component4 != null)
+		SnapOn component3 = targetGameObject.GetComponent<SnapOn>();
+		if (component3 != null)
 		{
-			component4.AttachSnapOnByName(equippable.def.SnapOn);
+			component3.AttachSnapOnByName(equippable.def.SnapOn);
 			if (equippable.def.SnapOn1 != null)
 			{
-				component4.AttachSnapOnByName(equippable.def.SnapOn1);
+				component3.AttachSnapOnByName(equippable.def.SnapOn1);
 			}
-		}
-		if (component != null && equippable.GetBuildOverride() != null)
-		{
-			component.GetComponent<SymbolOverrideController>().AddBuildOverride(equippable.GetBuildOverride().GetData(), equippable.def.BuildOverridePriority);
 		}
 		if (equippable.transform.parent)
 		{
-			Storage component5 = equippable.transform.parent.GetComponent<Storage>();
-			if (component5)
+			Storage component4 = equippable.transform.parent.GetComponent<Storage>();
+			if (component4)
 			{
-				component5.Drop(equippable.gameObject, true);
+				component4.Drop(equippable.gameObject, true);
 			}
 		}
 		equippable.transform.parent = slot.gameObject.transform;
@@ -144,10 +139,6 @@ public class Equipment : Assignables
 		KBatchedAnimController component2 = targetGameObject.GetComponent<KBatchedAnimController>();
 		if (!this.destroyed)
 		{
-			if (equippable.GetBuildOverride() != null && component2 != null)
-			{
-				component2.GetComponent<SymbolOverrideController>().TryRemoveBuildOverride(equippable.GetBuildOverride().GetData(), equippable.def.BuildOverridePriority);
-			}
 			Attributes attributes = targetGameObject.GetAttributes();
 			if (attributes != null)
 			{

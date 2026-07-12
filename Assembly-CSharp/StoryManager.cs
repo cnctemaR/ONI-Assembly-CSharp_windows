@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Database;
+using Klei.CustomSettings;
 using KSerialization;
 using UnityEngine;
 
@@ -218,6 +219,15 @@ public class StoryManager : KMonoBehaviour
 		foreach (KeyValuePair<int, StoryInstance> keyValuePair in this._stories)
 		{
 			StoryManager.InitTelemetry(keyValuePair.Value);
+		}
+		CustomGameSettings.Instance.DisableAllStories();
+		foreach (KeyValuePair<int, StoryInstance> keyValuePair2 in this._stories)
+		{
+			SettingConfig settingConfig;
+			if (keyValuePair2.Value.Telemetry.Retrofitted < 0f && CustomGameSettings.Instance.StorySettings.TryGetValue(keyValuePair2.Value.storyId, out settingConfig))
+			{
+				CustomGameSettings.Instance.SetStorySetting(settingConfig, true);
+			}
 		}
 	}
 

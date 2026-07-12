@@ -54,6 +54,4 @@ public class LonelyMinionMailboxConfig : IBuildingConfig
 	public const string ID = "LonelyMailBox";
 
 	public static readonly HashedString IdHash = "LonelyMailBox";
-
-	public static readonly HashedString CleanupAnimation = "";
 }

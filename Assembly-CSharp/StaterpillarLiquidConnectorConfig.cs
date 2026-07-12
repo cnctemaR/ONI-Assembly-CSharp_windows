@@ -33,6 +33,7 @@ public class StaterpillarLiquidConnectorConfig : IBuildingConfig
 		buildingDef.OutputConduitType = ConduitType.Liquid;
 		buildingDef.UtilityOutputOffset = new CellOffset(0, 1);
 		buildingDef.PlayConstructionSounds = false;
+		buildingDef.ShowInBuildMenu = false;
 		return buildingDef;
 	}
 

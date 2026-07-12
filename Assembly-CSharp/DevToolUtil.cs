@@ -112,10 +112,10 @@ public static class DevToolUtil
 		GridVisibility.Reveal(num + 2, num2 + 2, 10, 10f);
 		DevToolUtil.FocusCameraOnCell(cellIndex);
 		Option<int> cellIndexForUniqueBuilding = DevToolUtil.GetCellIndexForUniqueBuilding("Headquarters");
-		if (cellIndexForUniqueBuilding.HasValue)
+		if (cellIndexForUniqueBuilding.IsSome())
 		{
 			Vector3 vector = Grid.CellToPos2D(cellIndex);
-			Vector3 vector2 = Grid.CellToPos2D(cellIndexForUniqueBuilding);
+			Vector3 vector2 = Grid.CellToPos2D(cellIndexForUniqueBuilding.Unwrap());
 			float num3 = 2f / Vector3.Distance(vector, vector2);
 			for (float num4 = 0f; num4 < 1f; num4 += num3)
 			{

@@ -2,65 +2,34 @@
 using System.Collections.Generic;
 using System.Linq;
 using Database;
-using STRINGS;
 
 public class PermitItems
 {
-	public static bool IsPermitUnlocked(string permitId)
+	public static IEnumerable<KleiItems.ItemData> IterateInventory()
 	{
+		foreach (KleiItems.ItemData itemData in KleiItems.IterateInventory(PermitItems.ItemToPermit))
+		{
+			yield return itemData;
+		}
+		IEnumerator<KleiItems.ItemData> enumerator = null;
+		yield break;
+		yield break;
+	}
+
+	public static bool IsPermitUnlocked(PermitResource permit)
+	{
+		return PermitItems.GetOwnedCount(permit) > 0;
+	}
+
+	public static int GetOwnedCount(PermitResource permit)
+	{
+		int num = 0;
 		PermitItems.ItemInfo itemInfo;
-		return !PermitItems.Mappings.TryGetValue(permitId, out itemInfo) || KleiItems.HasItem(itemInfo.ItemType);
-	}
-
-	public static bool IsPermitOwnable(string permitId)
-	{
-		return PermitItems.Mappings.ContainsKey(permitId);
-	}
-
-	public static string GetPermitIDByKleiItemType(string itemType)
-	{
-		if (!PermitItems.ReverseMappings.ContainsKey(itemType))
+		if (PermitItems.Mappings.TryGetValue(permit.Id, out itemInfo))
 		{
-			Debug.LogError("Could not find PermitItem with requested Klei itemType: " + itemType + ". It may be that this is a non Klei Item permit, or you just have a bad ID.");
-			return null;
+			num = KleiItems.GetOwnedItemCount(itemInfo.ItemType);
 		}
-		return PermitItems.ReverseMappings[itemType].PermitId;
-	}
-
-	public static Option<int> GetOwnedCount(string permitId)
-	{
-		PermitResource permitResource = Db.Get().Permits.TryGet(permitId);
-		if (permitResource == null)
-		{
-			return Option.None;
-		}
-		return PermitItems.GetOwnedCount(permitResource);
-	}
-
-	public static Option<int> GetOwnedCount(PermitResource permit)
-	{
-		PermitItems.ItemInfo itemInfo;
-		if (!PermitItems.Mappings.TryGetValue(permit.Id, out itemInfo))
-		{
-			return Option.None;
-		}
-		return KleiItems.GetOwnedItemCount(itemInfo.ItemType);
-	}
-
-	public static PermitPresentationInfo GetPermitPresentationInfo(string id)
-	{
-		PermitResource permitResource = Db.Get().Permits.TryGet(id);
-		if (permitResource != null)
-		{
-			return permitResource.GetPermitPresentationInfo();
-		}
-		return new PermitPresentationInfo
-		{
-			name = UI.KLEI_INVENTORY_SCREEN.ITEM_UNKNOWN_NAME,
-			description = UI.KLEI_INVENTORY_SCREEN.ITEM_UNKNOWN_DESCRIPTION,
-			sprite = PermitPresentationInfo.GetUnknownSprite(),
-			isNone = true
-		};
+		return num;
 	}
 
 	private static PermitItems.ItemInfo[] ItemInfos = new PermitItems.ItemInfo[]
@@ -139,25 +108,89 @@ public class PermitItems
 		new PermitItems.ItemInfo("sculpture_metal_amazing_4", 76U, "MetalSculpture_Good4"),
 		new PermitItems.ItemInfo("sculpture_marble_amazing_4", 77U, "MarbleSculpture_Good4"),
 		new PermitItems.ItemInfo("sculpture_marble_amazing_5", 78U, "MarbleSculpture_Good5"),
-		new PermitItems.ItemInfo("icesculpture_idle_2", 79U, "IceSculpture_Average2")
+		new PermitItems.ItemInfo("icesculpture_idle_2", 79U, "IceSculpture_Average2"),
+		new PermitItems.ItemInfo("top_raglan_deep_red", 83U, "TopRaglanDeepRed"),
+		new PermitItems.ItemInfo("top_raglan_cobalt", 84U, "TopRaglanCobalt"),
+		new PermitItems.ItemInfo("top_raglan_flamingo", 85U, "TopRaglanFlamingo"),
+		new PermitItems.ItemInfo("top_raglan_kelly_green", 86U, "TopRaglanKellyGreen"),
+		new PermitItems.ItemInfo("top_raglan_charcoal", 87U, "TopRaglanCharcoal"),
+		new PermitItems.ItemInfo("top_raglan_lemon", 88U, "TopRaglanLemon"),
+		new PermitItems.ItemInfo("top_raglan_satsuma", 89U, "TopRaglanSatsuma"),
+		new PermitItems.ItemInfo("shorts_basic_deep_red", 91U, "ShortsBasicDeepRed"),
+		new PermitItems.ItemInfo("shorts_basic_satsuma", 92U, "ShortsBasicSatsuma"),
+		new PermitItems.ItemInfo("shorts_basic_yellowcake", 93U, "ShortsBasicYellowcake"),
+		new PermitItems.ItemInfo("shorts_basic_kelly_green", 94U, "ShortsBasicKellyGreen"),
+		new PermitItems.ItemInfo("shorts_basic_blue_cobalt", 95U, "ShortsBasicBlueCobalt"),
+		new PermitItems.ItemInfo("shorts_basic_pink_flamingo", 96U, "ShortsBasicPinkFlamingo"),
+		new PermitItems.ItemInfo("shorts_basic_charcoal", 97U, "ShortsBasicCharcoal"),
+		new PermitItems.ItemInfo("socks_athletic_deep_red", 98U, "SocksAthleticDeepRed"),
+		new PermitItems.ItemInfo("socks_athletic_orange_satsuma", 99U, "SocksAthleticOrangeSatsuma"),
+		new PermitItems.ItemInfo("socks_athletic_yellow_lemon", 100U, "SocksAthleticYellowLemon"),
+		new PermitItems.ItemInfo("socks_athletic_green_kelly", 101U, "SocksAthleticGreenKelly"),
+		new PermitItems.ItemInfo("socks_athletic_blue_cobalt", 102U, "SocksAthleticBlueCobalt"),
+		new PermitItems.ItemInfo("socks_athletic_pink_flamingo", 103U, "SocksAthleticPinkFlamingo"),
+		new PermitItems.ItemInfo("socks_athletic_grey_charcoal", 104U, "SocksAthleticGreyCharcoal"),
+		new PermitItems.ItemInfo("gloves_athletic_red_deep", 105U, "GlovesAthleticRedDeep"),
+		new PermitItems.ItemInfo("gloves_athletic_orange_satsuma", 106U, "GlovesAthleticOrangeSatsuma"),
+		new PermitItems.ItemInfo("gloves_athletic_yellow_lemon", 107U, "GlovesAthleticYellowLemon"),
+		new PermitItems.ItemInfo("gloves_athletic_green_kelly", 108U, "GlovesAthleticGreenKelly"),
+		new PermitItems.ItemInfo("gloves_athletic_blue_cobalt", 109U, "GlovesAthleticBlueCobalt"),
+		new PermitItems.ItemInfo("gloves_athletic_pink_flamingo", 110U, "GlovesAthleticPinkFlamingo"),
+		new PermitItems.ItemInfo("gloves_athletic_grey_charcoal", 111U, "GlovesAthleticGreyCharcoal"),
+		new PermitItems.ItemInfo("walls_diagonal_red_deep_white", 112U, "ExteriorWall_diagonal_red_deep_white"),
+		new PermitItems.ItemInfo("walls_diagonal_orange_satsuma_white", 113U, "ExteriorWall_diagonal_orange_satsuma_white"),
+		new PermitItems.ItemInfo("walls_diagonal_yellow_lemon_white", 114U, "ExteriorWall_diagonal_yellow_lemon_white"),
+		new PermitItems.ItemInfo("walls_diagonal_green_kelly_white", 115U, "ExteriorWall_diagonal_green_kelly_white"),
+		new PermitItems.ItemInfo("walls_diagonal_blue_cobalt_white", 116U, "ExteriorWall_diagonal_blue_cobalt_white"),
+		new PermitItems.ItemInfo("walls_diagonal_pink_flamingo_white", 117U, "ExteriorWall_diagonal_pink_flamingo_white"),
+		new PermitItems.ItemInfo("walls_diagonal_grey_charcoal_white", 118U, "ExteriorWall_diagonal_grey_charcoal_white"),
+		new PermitItems.ItemInfo("walls_circle_red_deep_white", 119U, "ExteriorWall_circle_red_deep_white"),
+		new PermitItems.ItemInfo("walls_circle_orange_satsuma_white", 120U, "ExteriorWall_circle_orange_satsuma_white"),
+		new PermitItems.ItemInfo("walls_circle_yellow_lemon_white", 121U, "ExteriorWall_circle_yellow_lemon_white"),
+		new PermitItems.ItemInfo("walls_circle_green_kelly_white", 122U, "ExteriorWall_circle_green_kelly_white"),
+		new PermitItems.ItemInfo("walls_circle_blue_cobalt_white", 123U, "ExteriorWall_circle_blue_cobalt_white"),
+		new PermitItems.ItemInfo("walls_circle_pink_flamingo_white", 124U, "ExteriorWall_circle_pink_flamingo_white"),
+		new PermitItems.ItemInfo("walls_circle_grey_charcoal_white", 125U, "ExteriorWall_circle_grey_charcoal_white"),
+		new PermitItems.ItemInfo("bed_star_curtain", 126U, "Bed_star_curtain"),
+		new PermitItems.ItemInfo("bed_canopy", 127U, "Bed_canopy"),
+		new PermitItems.ItemInfo("bed_rowan_tropical", 128U, "Bed_rowan_tropical"),
+		new PermitItems.ItemInfo("bed_ada_science_lab", 129U, "Bed_ada_science_lab"),
+		new PermitItems.ItemInfo("ceilinglight_mining", 130U, "CeilingLight_mining"),
+		new PermitItems.ItemInfo("ceilinglight_flower", 131U, "CeilingLight_flower"),
+		new PermitItems.ItemInfo("ceilinglight_polka_lamp_shade", 132U, "CeilingLight_polka_lamp_shade"),
+		new PermitItems.ItemInfo("ceilinglight_burt_shower", 133U, "CeilingLight_burt_shower"),
+		new PermitItems.ItemInfo("ceilinglight_ada_flask_round", 134U, "CeilingLight_ada_flask_round"),
+		new PermitItems.ItemInfo("balloon_red_fireengine_long_sparkles_kanim", 135U, "BalloonRedFireEngineLongSparkles"),
+		new PermitItems.ItemInfo("balloon_yellow_long_sparkles_kanim", 136U, "BalloonYellowLongSparkles"),
+		new PermitItems.ItemInfo("balloon_blue_long_sparkles_kanim", 137U, "BalloonBlueLongSparkles"),
+		new PermitItems.ItemInfo("balloon_green_long_sparkles_kanim", 138U, "BalloonGreenLongSparkles"),
+		new PermitItems.ItemInfo("balloon_pink_long_sparkles_kanim", 139U, "BalloonPinkLongSparkles"),
+		new PermitItems.ItemInfo("balloon_purple_long_sparkles_kanim", 140U, "BalloonPurpleLongSparkles"),
+		new PermitItems.ItemInfo("balloon_babypacu_egg_kanim", 141U, "BalloonBabyPacuEgg"),
+		new PermitItems.ItemInfo("balloon_babyglossydrecko_egg_kanim", 142U, "BalloonBabyGlossyDreckoEgg"),
+		new PermitItems.ItemInfo("balloon_babyhatch_egg_kanim", 143U, "BalloonBabyHatchEgg"),
+		new PermitItems.ItemInfo("balloon_babypokeshell_egg_kanim", 144U, "BalloonBabyPokeshellEgg"),
+		new PermitItems.ItemInfo("balloon_babypuft_egg_kanim", 145U, "BalloonBabyPuftEgg"),
+		new PermitItems.ItemInfo("balloon_babyshovole_egg_kanim", 146U, "BalloonBabyShovoleEgg"),
+		new PermitItems.ItemInfo("balloon_babypip_egg_kanim", 147U, "BalloonBabyPipEgg")
 	};
 
 	private static Dictionary<string, PermitItems.ItemInfo> Mappings = PermitItems.ItemInfos.ToDictionary<PermitItems.ItemInfo, string>((PermitItems.ItemInfo x) => x.PermitId);
 
-	private static Dictionary<string, PermitItems.ItemInfo> ReverseMappings = PermitItems.ItemInfos.ToDictionary<PermitItems.ItemInfo, string>((PermitItems.ItemInfo x) => x.ItemType);
+	private static Dictionary<string, string> ItemToPermit = PermitItems.ItemInfos.ToDictionary<PermitItems.ItemInfo, string, string>((PermitItems.ItemInfo x) => x.ItemType, (PermitItems.ItemInfo x) => x.PermitId);
 
 	private struct ItemInfo
 	{
-		public ItemInfo(string itemType, uint itemId, string permitId)
+		public ItemInfo(string itemType, uint typeId, string permitId)
 		{
 			this.ItemType = itemType;
 			this.PermitId = permitId;
-			this.ItemId = itemId;
+			this.TypeId = typeId;
 		}
 
 		public string ItemType;
 
-		public uint ItemId;
+		public uint TypeId;
 
 		public string PermitId;
 	}

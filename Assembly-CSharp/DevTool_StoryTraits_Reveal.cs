@@ -8,12 +8,12 @@ public class DevTool_StoryTraits_Reveal : DevTool
 	protected override void RenderTo(DevPanel panel)
 	{
 		Option<int> cellIndexForUniqueBuilding = DevToolUtil.GetCellIndexForUniqueBuilding("Headquarters");
-		bool hasValue = cellIndexForUniqueBuilding.HasValue;
-		if (ImGuiEx.Button("Focus on headquaters", hasValue))
+		bool flag = cellIndexForUniqueBuilding.IsSome();
+		if (ImGuiEx.Button("Focus on headquaters", flag))
 		{
-			DevToolUtil.FocusCameraOnCell(cellIndexForUniqueBuilding);
+			DevToolUtil.FocusCameraOnCell(cellIndexForUniqueBuilding.Unwrap());
 		}
-		if (!hasValue)
+		if (!flag)
 		{
 			ImGuiEx.TooltipForPrevious("Couldn't find headquaters");
 		}
@@ -29,12 +29,12 @@ public class DevTool_StoryTraits_Reveal : DevTool
 			{
 				Option<int> cellIndexForSpawnable = this.GetCellIndexForSpawnable(text, allSpawnables.Value);
 				string text2 = "\"" + text + "\"";
-				bool hasValue2 = cellIndexForSpawnable.HasValue;
-				if (ImGuiEx.Button("Reveal and focus on " + text2, hasValue2))
+				bool hasValue = cellIndexForSpawnable.HasValue;
+				if (ImGuiEx.Button("Reveal and focus on " + text2, hasValue))
 				{
 					DevToolUtil.RevealAndFocusAt(cellIndexForSpawnable.Value);
 				}
-				if (!hasValue2)
+				if (!hasValue)
 				{
 					ImGuiEx.TooltipForPrevious("Couldn't find a cell that contained a spawnable with component " + text2);
 				}

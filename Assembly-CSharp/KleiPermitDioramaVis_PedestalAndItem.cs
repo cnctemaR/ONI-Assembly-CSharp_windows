@@ -14,8 +14,9 @@ public class KleiPermitDioramaVis_PedestalAndItem : KMonoBehaviour, IKleiPermitD
 	{
 	}
 
-	public void ConfigureWith(PermitResource permit, PermitPresentationInfo permitPresInfo)
+	public void ConfigureWith(PermitResource permit)
 	{
+		PermitPresentationInfo permitPresentationInfo = permit.GetPermitPresentationInfo();
 		RectTransform rectTransform = this.pedestalKAnim.rectTransform();
 		RectTransform rectTransform2 = this.itemSprite.rectTransform();
 		rectTransform.pivot = new Vector2(0.5f, 0f);
@@ -23,7 +24,7 @@ public class KleiPermitDioramaVis_PedestalAndItem : KMonoBehaviour, IKleiPermitD
 		rectTransform2.pivot = new Vector2(0.5f, 0f);
 		rectTransform2.anchoredPosition = rectTransform.anchoredPosition + Vector2.up * 0.79f * 176f;
 		rectTransform2.sizeDelta = Vector2.one * 176f;
-		this.itemSprite.sprite = permitPresInfo.sprite;
+		this.itemSprite.sprite = permitPresentationInfo.sprite;
 	}
 
 	[SerializeField]

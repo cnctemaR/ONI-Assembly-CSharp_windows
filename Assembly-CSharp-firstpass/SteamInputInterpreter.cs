@@ -85,6 +85,7 @@ public class SteamInputInterpreter
 			this.kleiActionToSteamDigitalActionLookup.Add(global::Action.Capture, SteamInputInterpreter.EDigitalActions_MainGameActionSet.wrangle_tool);
 			this.kleiActionToSteamDigitalActionLookup.Add(global::Action.Harvest, SteamInputInterpreter.EDigitalActions_MainGameActionSet.harvest_tool);
 			this.kleiActionToSteamDigitalActionLookup.Add(global::Action.EmptyPipe, SteamInputInterpreter.EDigitalActions_MainGameActionSet.empty_tool);
+			this.kleiActionToSteamDigitalActionLookup.Add(global::Action.Disconnect, SteamInputInterpreter.EDigitalActions_MainGameActionSet.disconnect_tool);
 			this.kleiActionToSteamDigitalActionLookup.Add(global::Action.Escape, SteamInputInterpreter.EDigitalActions_MainGameActionSet.pause_menu);
 			this.kleiActionToSteamDigitalActionLookup.Add(global::Action.ManageVitals, SteamInputInterpreter.EDigitalActions_MainGameActionSet.vitals_menu);
 			this.kleiActionToSteamDigitalActionLookup.Add(global::Action.ManageConsumables, SteamInputInterpreter.EDigitalActions_MainGameActionSet.consumables_menu);
@@ -452,6 +453,7 @@ public class SteamInputInterpreter
 		wrangle_tool,
 		harvest_tool,
 		empty_tool,
+		disconnect_tool,
 		pause_menu,
 		vitals_menu,
 		consumables_menu,

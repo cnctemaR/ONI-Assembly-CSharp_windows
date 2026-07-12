@@ -135,7 +135,10 @@ public class KBatchedAnimTracker : MonoBehaviour
 
 	private void OnAnimStop(HashedString name)
 	{
-		this.alive = false;
+		if (!this.forceAlwaysAlive)
+		{
+			this.alive = false;
+		}
 	}
 
 	private void OnLayerChanged(int layer)
@@ -166,6 +169,8 @@ public class KBatchedAnimTracker : MonoBehaviour
 	public bool forceAlwaysVisible;
 
 	public bool matchParentOffset;
+
+	public bool forceAlwaysAlive;
 
 	private bool alive = true;
 

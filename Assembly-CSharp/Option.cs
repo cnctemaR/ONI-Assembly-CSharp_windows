@@ -7,6 +7,12 @@ using KSerialization;
 [Serializable]
 public readonly struct Option<T> : IEquatable<Option<T>>, IEquatable<T>
 {
+	public Option(T value)
+	{
+		this.value = value;
+		this.hasValue = true;
+	}
+
 	public bool HasValue
 	{
 		get
@@ -15,50 +21,113 @@ public readonly struct Option<T> : IEquatable<Option<T>>, IEquatable<T>
 		}
 	}
 
-	public bool IsNone
-	{
-		get
-		{
-			return !this.hasValue;
-		}
-	}
-
 	public T Value
 	{
 		get
 		{
-			if (this.IsNone)
-			{
-				throw new Exception("Tried to get a value for a Option<" + typeof(T).Name + ">, but IsNone is true");
-			}
-			return this.value;
+			return this.Unwrap();
 		}
 	}
 
-	public Option(T value)
+	public T Unwrap()
 	{
-		this.value = value;
-		this.hasValue = true;
+		if (!this.hasValue)
+		{
+			throw new Exception("Tried to get a value for a Option<" + typeof(T).FullName + ">, but hasValue is false");
+		}
+		return this.value;
+	}
+
+	public T UnwrapOr(T fallback_value, string warn_on_fallback = null)
+	{
+		if (!this.hasValue)
+		{
+			if (warn_on_fallback != null)
+			{
+				DebugUtil.DevAssert(false, "Failed to unwrap a Option<" + typeof(T).FullName + ">: " + warn_on_fallback, null);
+			}
+			return fallback_value;
+		}
+		return this.value;
+	}
+
+	public T UnwrapOrElse(Func<T> get_fallback_value_fn, string warn_on_fallback = null)
+	{
+		if (!this.hasValue)
+		{
+			if (warn_on_fallback != null)
+			{
+				DebugUtil.DevAssert(false, "Failed to unwrap a Option<" + typeof(T).FullName + ">: " + warn_on_fallback, null);
+			}
+			return get_fallback_value_fn();
+		}
+		return this.value;
+	}
+
+	public T UnwrapOrDefault()
+	{
+		if (!this.hasValue)
+		{
+			return default(T);
+		}
+		return this.value;
+	}
+
+	public T Expect(string msg_on_fail)
+	{
+		if (!this.hasValue)
+		{
+			throw new Exception(msg_on_fail);
+		}
+		return this.value;
+	}
+
+	public bool IsSome()
+	{
+		return this.hasValue;
+	}
+
+	public bool IsNone()
+	{
+		return !this.hasValue;
+	}
+
+	public Option<U> AndThen<U>(Func<T, U> fn)
+	{
+		if (this.IsNone())
+		{
+			return Option.None;
+		}
+		return Option.Maybe<U>(fn(this.value));
+	}
+
+	public Option<U> AndThen<U>(Func<T, Option<U>> fn)
+	{
+		if (this.IsNone())
+		{
+			return Option.None;
+		}
+		return fn(this.value);
 	}
 
 	public static implicit operator Option<T>(T value)
 	{
-		return new Option<T>(value);
+		return Option.Maybe<T>(value);
 	}
 
-	public static implicit operator T(Option<T> option)
+	public static explicit operator T(Option<T> option)
 	{
-		return option.Value;
+		return option.Unwrap();
 	}
 
-	public static implicit operator Option<T>(Option.Value_None value)
+	public static implicit operator Option<T>(Option.Internal.Value_None value)
 	{
 		return default(Option<T>);
 	}
 
-	public static implicit operator Option.Value_HasValue(Option<T> value)
+	public static implicit operator Option.Internal.Value_HasValue(Option<T> value)
 	{
-		return new Option.Value_HasValue(value.hasValue);
+		return new Option.Internal.Value_HasValue(value.hasValue);
 	}
 
 	public void Deconstruct(out bool hasValue, out T value)
@@ -104,15 +173,6 @@ public readonly struct Option<T> : IEquatable<Option<T>>, IEquatable<T>
 			return "None";
 		}
 		return string.Format("{0}", this.value);
-	}
-
-	public Option<U> IfHasValue<U>(Func<T, Option<U>> fn)
-	{
-		if (this.IsNone)
-		{
-			return Option.None;
-		}
-		return fn(this.Value);
 	}
 
 	public static bool operator ==(Option<T> lhs, T rhs)

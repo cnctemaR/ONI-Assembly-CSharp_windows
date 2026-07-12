@@ -6,8 +6,15 @@ public class ContactConductivePipeBridge : GameStateMachine<ContactConductivePip
 {
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
-		default_state = this.idle;
-		this.idle.PlayAnim("on", KAnim.PlayMode.Loop).Update("", new Action<ContactConductivePipeBridge.Instance, float>(ContactConductivePipeBridge.Flow200ms), UpdateRate.SIM_200ms, false);
+		default_state = this.noLiquid;
+		this.root.PlayAnim("on", KAnim.PlayMode.Loop).Update("", new Action<ContactConductivePipeBridge.Instance, float>(ContactConductivePipeBridge.Flow200ms), UpdateRate.SIM_200ms, false);
+	}
+
+	private static void ExpirationTimerUpdate(ContactConductivePipeBridge.Instance smi, float dt)
+	{
+		float num = smi.sm.noLiquidTimer.Get(smi);
+		num -= dt;
+		smi.sm.noLiquidTimer.Set(num, smi, false);
 	}
 
 	private static void Flow200ms(ContactConductivePipeBridge.Instance smi, float dt)
@@ -48,11 +55,6 @@ public class ContactConductivePipeBridge : GameStateMachine<ContactConductivePip
 				float temperature2 = primaryElement.Temperature;
 				float finalContentTemperature = ContactConductivePipeBridge.GetFinalContentTemperature(ContactConductivePipeBridge.GetKilloJoulesTransfered(ContactConductivePipeBridge.CalculateMaxWattsTransfered(temperature, component2.Element.thermalConductivity, temperature2, primaryElement.Element.thermalConductivity), dt, temperature, num2, temperature2, num), temperature, num2, temperature2, num);
 				float finalBuildingTemperature = ContactConductivePipeBridge.GetFinalBuildingTemperature(temperature2, finalContentTemperature, num, temperature, num2);
-				float num3 = (finalBuildingTemperature - temperature) * num2;
-				float num4 = (finalContentTemperature - temperature2) * num;
-				if (num3 + num4 != 0f)
-				{
-				}
 				if ((finalBuildingTemperature >= 0f && finalBuildingTemperature <= 10000f) & (finalContentTemperature >= 0f && finalContentTemperature <= 10000f))
 				{
 					primaryElement.Temperature = finalContentTemperature;
@@ -111,7 +113,13 @@ public class ContactConductivePipeBridge : GameStateMachine<ContactConductivePip
 
 	private const string loopAnimName = "on";
 
-	private GameStateMachine<ContactConductivePipeBridge, ContactConductivePipeBridge.Instance, IStateMachineTarget, ContactConductivePipeBridge.Def>.State idle;
+	private const string loopAnim_noWater = "off";
+
+	private GameStateMachine<ContactConductivePipeBridge, ContactConductivePipeBridge.Instance, IStateMachineTarget, ContactConductivePipeBridge.Def>.State withLiquid;
+
+	private GameStateMachine<ContactConductivePipeBridge, ContactConductivePipeBridge.Instance, IStateMachineTarget, ContactConductivePipeBridge.Def>.State noLiquid;
+
+	private StateMachine<ContactConductivePipeBridge, ContactConductivePipeBridge.Instance, IStateMachineTarget, ContactConductivePipeBridge.Def>.FloatParameter noLiquidTimer;
 
 	public class Def : StateMachine.BaseDef
 	{

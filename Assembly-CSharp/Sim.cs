@@ -907,10 +907,6 @@ public static class Sim
 
 		public float buildingToBuildingTemperatureScale;
 
-		public float contaminatedOxygenEmitProbability;
-
-		public float contaminatedOxygenConversionPercent;
-
 		public float biomeTemperatureLerpRate;
 
 		public byte isDebugEditing;

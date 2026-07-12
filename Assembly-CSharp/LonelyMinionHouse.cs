@@ -218,10 +218,6 @@ public class LonelyMinionHouse : StoryTraitStateMachine<LonelyMinionHouse, Lonel
 			{
 				base.sm.CompleteStory.Trigger(this);
 			}
-			if (this.meterUpdateHandle.IsValid())
-			{
-				return;
-			}
 			float num2 = num * 3f;
 			int num3 = (Mathf.Approximately(num2, Mathf.Ceil(num2)) ? Mathf.CeilToInt(num2) : Mathf.FloorToInt(num2));
 			this.blinds.meterController.Queue(string.Format("{0}_{1}", "meter_blinds", num3 - 1), KAnim.PlayMode.Once, 1f, 0f);
@@ -251,9 +247,10 @@ public class LonelyMinionHouse : StoryTraitStateMachine<LonelyMinionHouse, Lonel
 				this.storageFilter.SetMeter(this.meter);
 				this.meter = null;
 				RootMenu.Instance.Refresh();
+				component.RenotifyAll();
 				return;
 			}
-			List<MinionIdentity> list = new List<MinionIdentity>(Components.MinionIdentities.Items);
+			List<MinionIdentity> list = new List<MinionIdentity>(Components.LiveMinionIdentities.Items);
 			list.Shuffle<MinionIdentity>();
 			int num = 3;
 			base.def.EventCompleteInfo.Minions = new GameObject[1 + Mathf.Min(num, list.Count)];
@@ -318,7 +315,6 @@ public class LonelyMinionHouse : StoryTraitStateMachine<LonelyMinionHouse, Lonel
 			}
 			MinionStartingStats minionStartingStats = new MinionStartingStats(this.lonelyMinion.def.Personality, null, "AncientKnowledge", false);
 			minionStartingStats.Traits.Add(Db.Get().traits.TryGet("Chatty"));
-			minionStartingStats.Traits.Add(Db.Get().traits.TryGet("CustomOutfit"));
 			minionStartingStats.voiceIdx = -2;
 			string[] all_ATTRIBUTES = DUPLICANTSTATS.ALL_ATTRIBUTES;
 			for (int i = 0; i < all_ATTRIBUTES.Length; i++)
@@ -333,7 +329,6 @@ public class LonelyMinionHouse : StoryTraitStateMachine<LonelyMinionHouse, Lonel
 			Immigration.Instance.ApplyDefaultPersonalPriorities(minionIdentity.gameObject);
 			minionIdentity.gameObject.SetActive(true);
 			minionStartingStats.Apply(minionIdentity.gameObject);
-			LonelyMinionConfig.ApplyAccessoryOverrides(minionIdentity.GetComponent<Accessorizer>());
 			minionIdentity.arrivalTime += (float)global::UnityEngine.Random.Range(2190, 3102);
 			minionIdentity.arrivalTime *= -1f;
 			MinionResume component = minionIdentity.GetComponent<MinionResume>();
@@ -370,12 +365,6 @@ public class LonelyMinionHouse : StoryTraitStateMachine<LonelyMinionHouse, Lonel
 			return flag;
 		}
 
-		public void OnPoweredStateChanged(bool isPowered)
-		{
-			this.light.enabled = isPowered && base.GetComponent<Operational>().IsOperational;
-			this.LightsController.Play(this.light.enabled ? LonelyMinionHouseConfig.LIGHTS_ON : LonelyMinionHouseConfig.LIGHTS_OFF, KAnim.PlayMode.Loop, 1f, 0f);
-		}
-
 		private void OnBuildingLayerChanged(int cell, object data)
 		{
 			GameObject gameObject = data as GameObject;
@@ -389,6 +378,12 @@ public class LonelyMinionHouse : StoryTraitStateMachine<LonelyMinionHouse, Lonel
 				component.GetComponent<LonelyMinionMailbox>().Initialize(this);
 				GameScenePartitioner.Instance.RemoveGlobalLayerListener(GameScenePartitioner.Instance.objectLayers[1], new Action<int, object>(this.OnBuildingLayerChanged));
 			}
+		}
+
+		public void OnPoweredStateChanged(bool isPowered)
+		{
+			this.light.enabled = isPowered && base.GetComponent<Operational>().IsOperational;
+			this.LightsController.Play(this.light.enabled ? LonelyMinionHouseConfig.LIGHTS_ON : LonelyMinionHouseConfig.LIGHTS_OFF, KAnim.PlayMode.Loop, 1f, 0f);
 		}
 
 		private void StartStoryTrait()
@@ -694,8 +689,6 @@ public class LonelyMinionHouse : StoryTraitStateMachine<LonelyMinionHouse, Lonel
 		private MeterController blinds;
 
 		private Workable.WorkableEvent currentWorkState = Workable.WorkableEvent.WorkStopped;
-
-		private SimAndRenderScheduler.Handle meterUpdateHandle;
 
 		private Notification knockNotification;
 

@@ -35,6 +35,7 @@ public class RocketInteriorGasInputConfig : IBuildingConfig
 		buildingDef.AudioSize = "small";
 		buildingDef.BaseTimeUntilRepair = -1f;
 		buildingDef.PermittedRotations = PermittedRotations.R360;
+		buildingDef.ShowInBuildMenu = true;
 		GeneratedBuildings.RegisterWithOverlay(OverlayScreen.GasVentIDs, "RocketInteriorGasInput");
 		return buildingDef;
 	}

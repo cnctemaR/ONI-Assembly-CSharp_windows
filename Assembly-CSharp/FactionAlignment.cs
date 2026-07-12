@@ -91,14 +91,16 @@ public class FactionAlignment : KMonoBehaviour
 		{
 			return;
 		}
-		if (enable)
+		if (enable && !this.hasBeenRegisterInPriority)
 		{
 			Prioritizable.AddRef(base.gameObject);
+			this.hasBeenRegisterInPriority = true;
 			return;
 		}
-		if (component.IsPrioritizable())
+		if (component.IsPrioritizable() && this.hasBeenRegisterInPriority)
 		{
 			Prioritizable.RemoveRef(base.gameObject);
+			this.hasBeenRegisterInPriority = false;
 		}
 	}
 
@@ -156,6 +158,8 @@ public class FactionAlignment : KMonoBehaviour
 
 	[Serialize]
 	private bool targetable = true;
+
+	private bool hasBeenRegisterInPriority;
 
 	private static readonly EventSystem.IntraObjectHandler<FactionAlignment> OnDeadTagAddedDelegate = GameUtil.CreateHasTagHandler<FactionAlignment>(GameTags.Dead, delegate(FactionAlignment component, object data)
 	{

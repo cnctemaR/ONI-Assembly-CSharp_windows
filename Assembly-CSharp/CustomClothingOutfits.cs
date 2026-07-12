@@ -23,13 +23,13 @@ public class CustomClothingOutfits
 		}
 	}
 
-	public void EditOutfit(string outfit_name, string[] outfit_items)
+	public void Internal_EditOutfit(string outfit_name, string[] outfit_items)
 	{
 		this.outfitData.CustomOutfits[outfit_name] = outfit_items;
 		ClothingOutfitUtility.SaveClothingOutfitData();
 	}
 
-	public void RenameOutfit(string old_outfit_name, string new_outfit_name)
+	public void Internal_RenameOutfit(string old_outfit_name, string new_outfit_name)
 	{
 		if (!this.outfitData.CustomOutfits.ContainsKey(old_outfit_name))
 		{
@@ -71,7 +71,7 @@ public class CustomClothingOutfits
 						}
 						else
 						{
-							personalityFromNameStringKey.SetOutfit(outfitType3, new_outfit_name);
+							personalityFromNameStringKey.Internal_SetOutfit(outfitType3, new_outfit_name);
 						}
 					}
 				}
@@ -81,7 +81,7 @@ public class CustomClothingOutfits
 		ClothingOutfitUtility.SaveClothingOutfitData();
 	}
 
-	public void RemoveOutfit(string outfit_name)
+	public void Internal_RemoveOutfit(string outfit_name)
 	{
 		if (this.outfitData.CustomOutfits.Remove(outfit_name))
 		{
@@ -116,7 +116,7 @@ public class CustomClothingOutfits
 							}
 							else
 							{
-								personalityFromNameStringKey.SetOutfit(outfitType3, Option.None);
+								personalityFromNameStringKey.Internal_SetOutfit(outfitType3, Option.None);
 							}
 						}
 					}
@@ -126,7 +126,7 @@ public class CustomClothingOutfits
 		}
 	}
 
-	public void SetDuplicantPerosonalityOutfit(string personalityId, Option<string> outfit_id, ClothingOutfitUtility.OutfitType outfit_type)
+	public void Internal_SetDuplicantPersonalityOutfit(string personalityId, Option<string> outfit_id, ClothingOutfitUtility.OutfitType outfit_type)
 	{
 		Dictionary<ClothingOutfitUtility.OutfitType, string> dictionary;
 		if (outfit_id.HasValue)

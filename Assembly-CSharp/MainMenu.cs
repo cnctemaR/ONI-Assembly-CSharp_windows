@@ -41,7 +41,7 @@ public class MainMenu : KScreen
 		{
 			MainMenu.ActivateRetiredColoniesScreen(this.transform.gameObject, "");
 		}, 14, this.normalButtonStyle));
-		this.MakeButton(new MainMenu.ButtonInfo(UI.FRONTEND.MAINMENU.LOCKERMENU, delegate
+		this.lockerButton = this.MakeButton(new MainMenu.ButtonInfo(UI.FRONTEND.MAINMENU.LOCKERMENU, delegate
 		{
 			MainMenu.ActivateLockerMenu();
 		}, 14, this.normalButtonStyle));
@@ -293,6 +293,12 @@ public class MainMenu : KScreen
 			GenericGameSettings.instance.SaveSettings();
 			global::Util.KInstantiateUI(ScreenPrefabs.Instance.WorldGenScreen.gameObject, base.gameObject, true);
 		}
+		this.RefreshInventoryNotification();
+	}
+
+	private void RefreshInventoryNotification()
+	{
+		this.lockerButton.GetComponent<HierarchyReferences>().GetReference<RectTransform>("AttentionIcon").gameObject.SetActive(false);
 	}
 
 	private void UnregisterMotdRequest()
@@ -426,7 +432,7 @@ public class MainMenu : KScreen
 
 	public static void ActivateInventoyScreen()
 	{
-		LockerNavigator.Instance.PushScreen(LockerNavigator.Instance.kleiInventoryScreen);
+		LockerNavigator.Instance.PushScreen(LockerNavigator.Instance.kleiInventoryScreen, null);
 	}
 
 	public static void ActivateLockerMenu()
@@ -475,7 +481,7 @@ public class MainMenu : KScreen
 					header = saveFileEntry.header;
 					gameInfo = saveFileEntry.headerData;
 				}
-				if (header.buildVersion > 537329U || gameInfo.saveMajorVersion != 7 || gameInfo.saveMinorVersion > 31)
+				if (header.buildVersion > 544519U || gameInfo.saveMajorVersion != 7 || gameInfo.saveMinorVersion > 31)
 				{
 					flag = false;
 				}
@@ -722,6 +728,8 @@ public class MainMenu : KScreen
 
 	[SerializeField]
 	public string IntroShortName;
+
+	private KButton lockerButton;
 
 	private static bool HasAutoresumedOnce = false;
 

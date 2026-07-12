@@ -15,6 +15,28 @@ public class KleiItems : ThreadedHttps<KleiItems>
 		this.serviceName = "KleiItems";
 		KleiItems.InventoryData.AllItems = new List<KleiItems.Item>();
 		KleiItems.InventoryData.ItemsByType = new Dictionary<string, List<KleiItems.Item>>();
+		KleiItems.InventoryData.HasUnopenedItem = false;
+	}
+
+	public static IEnumerable<KleiItems.ItemData> IterateInventory(Dictionary<string, string> item_to_permit)
+	{
+		if (KleiItems.InventoryData.AllItems != null)
+		{
+			foreach (KleiItems.Item item in KleiItems.InventoryData.AllItems)
+			{
+				string text;
+				if (item_to_permit.TryGetValue(item.ItemType, out text))
+				{
+					KleiItems.ItemData itemData;
+					itemData.PermitId = text;
+					itemData.ItemId = item.ItemId;
+					yield return itemData;
+				}
+			}
+			List<KleiItems.Item>.Enumerator enumerator = default(List<KleiItems.Item>.Enumerator);
+		}
+		yield break;
+		yield break;
 	}
 
 	public static bool HasItem(string itemType)
@@ -55,21 +77,7 @@ public class KleiItems : ThreadedHttps<KleiItems>
 
 	public static bool HasUnopenedItem()
 	{
-		if (KleiItems.InventoryData.AllItems == null)
-		{
-			return false;
-		}
-		using (List<KleiItems.Item>.Enumerator enumerator = KleiItems.InventoryData.AllItems.GetEnumerator())
-		{
-			while (enumerator.MoveNext())
-			{
-				if (!enumerator.Current.IsOpened)
-				{
-					return true;
-				}
-			}
-		}
-		return false;
+		return KleiItems.InventoryData.HasUnopenedItem;
 	}
 
 	public static void AddRequestInventoryRefresh()
@@ -85,16 +93,6 @@ public class KleiItems : ThreadedHttps<KleiItems>
 	public static void RemoveInventoryRefreshCallback(KleiItems.InventoryRefreshCallback cb)
 	{
 		ThreadedHttps<KleiItems>.Instance.InventoryRefreshCbs.Remove(cb);
-	}
-
-	public static void AddItemReceivedCallback(KleiItems.ItemReceivedCallback cb)
-	{
-		ThreadedHttps<KleiItems>.Instance.ItemReceivedCbs.Add(cb);
-	}
-
-	public static void RemoveItemReceivedCallback(KleiItems.ItemReceivedCallback cb)
-	{
-		ThreadedHttps<KleiItems>.Instance.ItemReceivedCbs.Remove(cb);
 	}
 
 	public void Update()
@@ -206,6 +204,7 @@ public class KleiItems : ThreadedHttps<KleiItems>
 		{
 			KleiItems.InventoryData.AllItems.Clear();
 			KleiItems.InventoryData.ItemsByType.Clear();
+			KleiItems.InventoryData.HasUnopenedItem = false;
 			if (inventoryReply.Items != null)
 			{
 				for (int i = 0; i < inventoryReply.Items.Length; i++)
@@ -225,6 +224,7 @@ public class KleiItems : ThreadedHttps<KleiItems>
 					{
 						KleiItems.InventoryData.ItemsByType[item2.ItemType] = new List<KleiItems.Item> { item2 };
 					}
+					KleiItems.InventoryData.HasUnopenedItem = KleiItems.InventoryData.HasUnopenedItem | !item2.IsOpened;
 				}
 			}
 			this.SaveInventoryCache();
@@ -312,6 +312,7 @@ public class KleiItems : ThreadedHttps<KleiItems>
 			{
 				KleiItems.InventoryData.AllItems.Clear();
 				KleiItems.InventoryData.ItemsByType.Clear();
+				KleiItems.InventoryData.HasUnopenedItem = false;
 				string text = File.ReadAllText(file_path);
 				KleiItems.InventoryCache inventoryCache;
 				try
@@ -347,12 +348,13 @@ public class KleiItems : ThreadedHttps<KleiItems>
 					{
 						KleiItems.InventoryData.ItemsByType[value2.ItemType] = new List<KleiItems.Item> { value2 };
 					}
+					KleiItems.InventoryData.HasUnopenedItem = KleiItems.InventoryData.HasUnopenedItem | !value2.IsOpened;
 				}
 			}, file_path, 0);
 		}
 	}
 
-	public static KleiItems.Inventory InventoryData;
+	private static KleiItems.Inventory InventoryData;
 
 	private List<KleiItems.Request> Requests = new List<KleiItems.Request>();
 
@@ -368,9 +370,14 @@ public class KleiItems : ThreadedHttps<KleiItems>
 
 	private List<KleiItems.InventoryRefreshCallback> InventoryRefreshCbs = new List<KleiItems.InventoryRefreshCallback>();
 
-	private List<KleiItems.ItemReceivedCallback> ItemReceivedCbs = new List<KleiItems.ItemReceivedCallback>();
+	public struct ItemData
+	{
+		public string PermitId;
 
-	public struct Item
+		public ulong ItemId;
+	}
+
+	private struct Item
 	{
 		public string ItemType;
 
@@ -379,22 +386,16 @@ public class KleiItems : ThreadedHttps<KleiItems>
 		public bool IsOpened;
 	}
 
-	public struct Inventory
+	private struct Inventory
 	{
 		public List<KleiItems.Item> AllItems;
 
 		public Dictionary<string, List<KleiItems.Item>> ItemsByType;
+
+		public bool HasUnopenedItem;
 	}
 
 	public delegate void InventoryRefreshCallback();
-
-	public enum DropType
-	{
-		Daily,
-		Playtime
-	}
-
-	public delegate void ItemReceivedCallback(KleiItems.DropType type);
 
 	private struct Request
 	{

@@ -39,15 +39,28 @@ public class UIMannequin : KMonoBehaviour, UIMinionOrMannequin.ITarget
 			this.animController.animScale = 0.38f;
 			this.animController.Play("idle", KAnim.PlayMode.Paused, 1f, 0f);
 			this.spawn = this.animController.gameObject;
-			this.SpawnedAvatar.GetComponent<KBatchedAnimController>().SetSymbolVisiblity("hand_paint", false);
-			this.SpawnedAvatar.GetComponent<KBatchedAnimController>().SetSymbolVisiblity("foot", false);
-			this.SpawnedAvatar.GetComponent<KBatchedAnimController>().SetSymbolVisiblity("torso", false);
+			MinionConfig.ConfigureSymbols(this.spawn, false);
+			base.gameObject.AddOrGet<MinionVoiceProviderMB>().voice = Option.None;
 		}
 	}
 
 	public void SetOutfit(IEnumerable<ClothingItemResource> outfit)
 	{
-		this.SpawnedAvatar.GetComponent<Accessorizer>().ApplyClothingItems(outfit, false);
+		MinionConfig.ConfigureSymbols(this.SpawnedAvatar, false);
+		SymbolOverrideController component = this.SpawnedAvatar.GetComponent<SymbolOverrideController>();
+		foreach (ClothingItemResource clothingItemResource in outfit)
+		{
+			KAnim.Build build = clothingItemResource.AnimFile.GetData().build;
+			if (build != null)
+			{
+				for (int i = 0; i < build.symbols.Length; i++)
+				{
+					string text = HashCache.Get().Get(build.symbols[i].hash);
+					component.AddSymbolOverride(text, build.symbols[i], 0);
+					this.animController.SetSymbolVisiblity(text, true);
+				}
+			}
+		}
 	}
 
 	public void React(UIMinionOrMannequinReactSource source)

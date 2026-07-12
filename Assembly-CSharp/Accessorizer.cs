@@ -21,27 +21,22 @@ public class Accessorizer : KMonoBehaviour
 
 	public KCompBuilder.BodyData bodyData { get; set; }
 
-	public string[] GetClothingItemIds()
-	{
-		string[] array = new string[this.clothingItems.Count];
-		for (int i = 0; i < this.clothingItems.Count; i++)
-		{
-			array[i] = this.clothingItems[i].Get().Id;
-		}
-		return array;
-	}
-
 	[OnDeserialized]
 	private void OnDeserialized()
 	{
-		if (SaveLoader.Instance.GameInfo.IsVersionOlderThan(7, 30))
+		MinionIdentity component = base.GetComponent<MinionIdentity>();
+		if (this.clothingItems.Count > 0 || (component != null && component.nameStringKey == LonelyMinionConfig.MinionName) || SaveLoader.Instance.GameInfo.IsVersionOlderThan(7, 30))
 		{
-			MinionIdentity component = base.GetComponent<MinionIdentity>();
 			if (component != null)
 			{
 				this.bodyData = Accessorizer.UpdateAccessorySlots(component.nameStringKey, ref this.accessories);
 			}
 			this.accessories.RemoveAll((ResourceRef<Accessory> x) => x.Get() == null);
+		}
+		if (this.clothingItems.Count > 0)
+		{
+			base.GetComponent<WearableAccessorizer>().ApplyClothingItems(this.clothingItems.Select<ResourceRef<ClothingItemResource>, ClothingItemResource>((ResourceRef<ClothingItemResource> i) => i.Get()));
+			this.clothingItems.Clear();
 		}
 		this.ApplyAccessories();
 	}
@@ -54,37 +49,6 @@ public class Accessorizer : KMonoBehaviour
 		{
 			this.bodyData = MinionStartingStats.CreateBodyData(Db.Get().Personalities.Get(component.personalityResourceId));
 		}
-		base.Subscribe(-448952673, new Action<object>(this.EquippedItem));
-		base.Subscribe(-1285462312, new Action<object>(this.UnequippedItem));
-	}
-
-	public void EquippedItem(object data)
-	{
-		KPrefabID kprefabID = data as KPrefabID;
-		if (kprefabID != null && kprefabID.GetComponent<Equippable>().def.BuildOverride != null)
-		{
-			this.ClothingItemsDisabled = true;
-			this.ClearAllItemSlots();
-			this.ValidateSlots(false);
-		}
-	}
-
-	private void UnequippedItem(object data)
-	{
-		if (this.ClothingItemsDisabled)
-		{
-			KPrefabID kprefabID = data as KPrefabID;
-			if (kprefabID != null && kprefabID.GetComponent<Equippable>().def.BuildOverride != null)
-			{
-				this.ClearAllItemSlots();
-				foreach (ResourceRef<ClothingItemResource> resourceRef in this.clothingItems)
-				{
-					this.ApplyClothingItem(resourceRef.Get());
-				}
-				this.ClothingItemsDisabled = false;
-				this.ValidateSlots(true);
-			}
-		}
 	}
 
 	public void AddAccessory(Accessory accessory)
@@ -95,8 +59,7 @@ public class Accessorizer : KMonoBehaviour
 			{
 				this.animController = base.GetComponent<KAnimControllerBase>();
 			}
-			this.animController.SetSymbolVisiblity(accessory.slot.targetSymbolId, true);
-			this.animController.GetComponent<SymbolOverrideController>().AddSymbolOverride(accessory.slot.targetSymbolId, accessory.symbol, 0);
+			this.animController.GetComponent<SymbolOverrideController>().AddSymbolOverride(accessory.slot.targetSymbolId, accessory.symbol, accessory.slot.overrideLayer);
 			if (!this.HasAccessory(accessory))
 			{
 				ResourceRef<Accessory> resourceRef = new ResourceRef<Accessory>(accessory);
@@ -111,10 +74,7 @@ public class Accessorizer : KMonoBehaviour
 	public void RemoveAccessory(Accessory accessory)
 	{
 		this.accessories.RemoveAll((ResourceRef<Accessory> x) => x.Get() == accessory);
-		if (this.animController.GetComponent<SymbolOverrideController>().TryRemoveSymbolOverride(accessory.slot.targetSymbolId, 0))
-		{
-			this.animController.SetSymbolVisiblity(accessory.slot.targetSymbolId, false);
-		}
+		this.animController.GetComponent<SymbolOverrideController>().TryRemoveSymbolOverride(accessory.slot.targetSymbolId, accessory.slot.overrideLayer);
 	}
 
 	public void ApplyAccessories()
@@ -125,13 +85,6 @@ public class Accessorizer : KMonoBehaviour
 			if (accessory != null)
 			{
 				this.AddAccessory(accessory);
-			}
-		}
-		foreach (AccessorySlot accessorySlot in Db.Get().AccessorySlots.resources)
-		{
-			if (this.GetAccessory(accessorySlot) == null)
-			{
-				this.animController.SetSymbolVisiblity(accessorySlot.targetSymbolId, false);
 			}
 		}
 	}
@@ -203,6 +156,7 @@ public class Accessorizer : KMonoBehaviour
 					if (accessory != null)
 					{
 						ResourceRef<Accessory> resourceRef = new ResourceRef<Accessory>(accessory);
+						accessories.RemoveAll((ResourceRef<Accessory> old_acc) => old_acc.Get().slot == accessory.slot);
 						accessories.Add(resourceRef);
 					}
 				}
@@ -217,11 +171,6 @@ public class Accessorizer : KMonoBehaviour
 		return this.accessories.Exists((ResourceRef<Accessory> x) => x.Get() == accessory);
 	}
 
-	public bool HasAccessoryInSlot(AccessorySlot slot)
-	{
-		return this.accessories.Exists((ResourceRef<Accessory> x) => x.Get().slot == slot);
-	}
-
 	public Accessory GetAccessory(AccessorySlot slot)
 	{
 		for (int i = 0; i < this.accessories.Count; i++)
@@ -232,54 +181,6 @@ public class Accessorizer : KMonoBehaviour
 			}
 		}
 		return null;
-	}
-
-	public void ApplyClothingItem(ClothingItemResource clothingItem)
-	{
-		if (!this.clothingItems.Exists((ResourceRef<ClothingItemResource> x) => x.Get().IdHash == clothingItem.IdHash))
-		{
-			this.clothingItems.RemoveAll((ResourceRef<ClothingItemResource> x) => x.Get().Category == clothingItem.Category);
-			this.clothingItems.Add(new ResourceRef<ClothingItemResource>(clothingItem));
-		}
-		KAnim.Build build = clothingItem.AnimFile.GetData().build;
-		for (int i = 0; i < build.symbols.Length; i++)
-		{
-			string text = HashCache.Get().Get(build.symbols[i].hash);
-			AccessorySlot accessorySlot = Db.Get().AccessorySlots.Find(text);
-			if (accessorySlot != null)
-			{
-				Accessory accessory = this.GetAccessory(accessorySlot);
-				if (accessory != null)
-				{
-					this.RemoveAccessory(accessory);
-				}
-				Accessory accessory2 = accessorySlot.Lookup(clothingItem.Id + text);
-				if (accessory2 != null)
-				{
-					this.AddAccessory(accessory2);
-				}
-			}
-		}
-	}
-
-	public void RemoveClothingItem(ClothingItemResource clothing_item)
-	{
-		this.clothingItems.RemoveAll((ResourceRef<ClothingItemResource> x) => x.Get().IdHash == clothing_item.IdHash);
-		KAnim.Build build = clothing_item.AnimFile.GetData().build;
-		for (int i = 0; i < build.symbols.Length; i++)
-		{
-			string text = HashCache.Get().Get(build.symbols[i].hash);
-			AccessorySlot accessorySlot = Db.Get().AccessorySlots.Find(text);
-			if (accessorySlot != null)
-			{
-				Accessory accessory = accessorySlot.Lookup(clothing_item.Id + text);
-				if (accessory != null)
-				{
-					this.RemoveAccessory(accessory);
-				}
-			}
-		}
-		this.ValidateClothingAccessory(clothing_item.Category);
 	}
 
 	public void ApplyMinionPersonality(Personality personality)
@@ -316,27 +217,6 @@ public class Accessorizer : KMonoBehaviour
 		this.UpdateHairBasedOnHat();
 	}
 
-	public void ApplyClothingOutfit(ClothingOutfitResource outfit, bool respectRequiredAccessorySlots = true)
-	{
-		IEnumerable<ClothingItemResource> enumerable = outfit.itemsInOutfit.Select<string, ClothingItemResource>((string itemId) => Db.Get().Permits.ClothingItems.Get(itemId));
-		this.ApplyClothingItems(enumerable, respectRequiredAccessorySlots);
-	}
-
-	public void ApplyClothingItems(IEnumerable<ClothingItemResource> items, bool respectRequiredAccessorySlots = true)
-	{
-		this.clothingItems.Clear();
-		this.ClearAllItemSlots();
-		foreach (ClothingItemResource clothingItemResource in items)
-		{
-			this.ApplyClothingItem(clothingItemResource);
-		}
-		if (respectRequiredAccessorySlots)
-		{
-			this.ValidateSlots(true);
-		}
-		this.UpdateHairBasedOnHat();
-	}
-
 	public void UpdateHairBasedOnHat()
 	{
 		if (!this.GetAccessory(Db.Get().AccessorySlots.Hat).IsNullOrDestroyed())
@@ -348,115 +228,6 @@ public class Accessorizer : KMonoBehaviour
 		this.animController.SetSymbolVisiblity(Db.Get().AccessorySlots.Hair.targetSymbolId, true);
 		this.animController.SetSymbolVisiblity(Db.Get().AccessorySlots.HatHair.targetSymbolId, false);
 		this.animController.SetSymbolVisiblity(Db.Get().AccessorySlots.Hat.targetSymbolId, false);
-	}
-
-	private void ValidateSlots(bool check_accessory = true)
-	{
-		this.ValidateClothingAccessory(PermitCategory.DupeBottoms);
-		this.ValidateClothingAccessory(PermitCategory.DupeTops);
-		this.ValidateClothingAccessory(PermitCategory.DupeGloves);
-		this.ValidateClothingAccessory(PermitCategory.DupeShoes);
-		if (check_accessory)
-		{
-			this.ValidateClothingAccessory(PermitCategory.DupeAccessories);
-		}
-		MinionResume component = base.GetComponent<MinionResume>();
-		if (component != null && !component.CurrentHat.IsNullOrWhiteSpace())
-		{
-			MinionResume.AddHat(component.CurrentHat, base.GetComponent<KBatchedAnimController>());
-		}
-	}
-
-	private void ValidateClothingAccessory(PermitCategory category)
-	{
-		if (!this.HasClothingAccessory(category))
-		{
-			if (category == PermitCategory.DupeBottoms && !this.HasBottomItem())
-			{
-				this.AddAccessory(Db.Get().AccessorySlots.Leg.Lookup(this.bodyData.legs));
-				this.AddAccessory(Db.Get().AccessorySlots.Pelvis.Lookup(this.bodyData.pelvis));
-				return;
-			}
-			if (category == PermitCategory.DupeTops && !this.HasTopItem())
-			{
-				this.AddAccessory(Db.Get().AccessorySlots.Arm.Lookup(this.bodyData.arms));
-				this.AddAccessory(Db.Get().AccessorySlots.ArmLower.Lookup(this.bodyData.armslower));
-				this.AddAccessory(Db.Get().AccessorySlots.Body.Lookup(this.bodyData.body));
-				this.AddAccessory(Db.Get().AccessorySlots.Neck.Lookup(this.bodyData.neck));
-				return;
-			}
-			if (category == PermitCategory.DupeGloves && !this.HasGloveItem())
-			{
-				this.AddAccessory(Db.Get().AccessorySlots.Cuff.Lookup(this.bodyData.cuff));
-				this.AddAccessory(Db.Get().AccessorySlots.Hand.Lookup(this.bodyData.hand));
-				return;
-			}
-			if (category == PermitCategory.DupeShoes && !this.HasFootItem())
-			{
-				this.AddAccessory(Db.Get().AccessorySlots.Foot.Lookup(this.bodyData.foot));
-				return;
-			}
-			if (category == PermitCategory.DupeAccessories && !this.HasAccessoryItem())
-			{
-				this.AddAccessory(Db.Get().AccessorySlots.Belt.Lookup(this.bodyData.belt));
-			}
-		}
-	}
-
-	public bool HasClothingAccessory(PermitCategory category)
-	{
-		return !this.ClothingItemsDisabled && this.clothingItems.Exists((ResourceRef<ClothingItemResource> ci) => ci.Get().Category == category);
-	}
-
-	private bool HasBottomItem()
-	{
-		return this.HasAccessoryInSlot(Db.Get().AccessorySlots.Skirt) || this.HasAccessoryInSlot(Db.Get().AccessorySlots.Pelvis);
-	}
-
-	private bool HasTopItem()
-	{
-		return this.HasAccessoryInSlot(Db.Get().AccessorySlots.Body);
-	}
-
-	private bool HasAccessoryItem()
-	{
-		return this.HasAccessoryInSlot(Db.Get().AccessorySlots.Belt) || this.HasAccessoryInSlot(Db.Get().AccessorySlots.Necklace);
-	}
-
-	private bool HasFootItem()
-	{
-		return this.HasAccessoryInSlot(Db.Get().AccessorySlots.Foot);
-	}
-
-	private bool HasGloveItem()
-	{
-		return this.HasAccessoryInSlot(Db.Get().AccessorySlots.Hand);
-	}
-
-	private void ClearAllItemSlots()
-	{
-		this.RemoveAccessoryFromSlot(Db.Get().AccessorySlots.Hat);
-		this.RemoveAccessoryFromSlot(Db.Get().AccessorySlots.Neck);
-		this.RemoveAccessoryFromSlot(Db.Get().AccessorySlots.Body);
-		this.RemoveAccessoryFromSlot(Db.Get().AccessorySlots.Belt);
-		this.RemoveAccessoryFromSlot(Db.Get().AccessorySlots.Arm);
-		this.RemoveAccessoryFromSlot(Db.Get().AccessorySlots.ArmLower);
-		this.RemoveAccessoryFromSlot(Db.Get().AccessorySlots.Pelvis);
-		this.RemoveAccessoryFromSlot(Db.Get().AccessorySlots.Leg);
-		this.RemoveAccessoryFromSlot(Db.Get().AccessorySlots.Skirt);
-		this.RemoveAccessoryFromSlot(Db.Get().AccessorySlots.Necklace);
-		this.RemoveAccessoryFromSlot(Db.Get().AccessorySlots.Cuff);
-		this.RemoveAccessoryFromSlot(Db.Get().AccessorySlots.Hand);
-		this.RemoveAccessoryFromSlot(Db.Get().AccessorySlots.Foot);
-	}
-
-	private void RemoveAccessoryFromSlot(AccessorySlot slot)
-	{
-		Accessory accessory = this.GetAccessory(slot);
-		if (accessory != null)
-		{
-			this.RemoveAccessory(accessory);
-		}
 	}
 
 	public void GetBodySlots(ref KCompBuilder.BodyData fd)
@@ -575,9 +346,6 @@ public class Accessorizer : KMonoBehaviour
 
 	[MyCmpReq]
 	private KAnimControllerBase animController;
-
-	[Serialize]
-	private bool ClothingItemsDisabled;
 
 	[Serialize]
 	private List<ResourceRef<ClothingItemResource>> clothingItems = new List<ResourceRef<ClothingItemResource>>();

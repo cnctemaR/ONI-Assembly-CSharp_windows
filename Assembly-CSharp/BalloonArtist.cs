@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.Serialization;
+using Database;
 using KSerialization;
 using TUNING;
 
@@ -58,9 +59,44 @@ public class BalloonArtist : GameStateMachine<BalloonArtist, BalloonArtist.Insta
 			base.smi.sm.balloonsGivenOut.Set(this.numBalloonsGiven, base.smi, false);
 		}
 
+		public void Internal_InitBalloons()
+		{
+			JoyResponseOutfitTarget joyResponseOutfitTarget = JoyResponseOutfitTarget.FromMinion(base.master.gameObject);
+			if (!this.balloonSymbolIter.IsNullOrDestroyed())
+			{
+				if (this.balloonSymbolIter.facade.AndThen<string>((BalloonArtistFacadeResource f) => f.Id) == joyResponseOutfitTarget.ReadFacadeId())
+				{
+					return;
+				}
+			}
+			this.balloonSymbolIter = joyResponseOutfitTarget.ReadFacadeId().AndThen<BalloonArtistFacadeResource>((string id) => Db.Get().Permits.BalloonArtistFacades.Get(id)).AndThen<BalloonOverrideSymbolIter>((BalloonArtistFacadeResource permit) => permit.GetSymbolIter())
+				.UnwrapOr(new BalloonOverrideSymbolIter(Option.None), null);
+			this.SetBalloonSymbolOverride(this.balloonSymbolIter.Current());
+		}
+
 		public bool IsRecTime()
 		{
 			return base.master.GetComponent<Schedulable>().IsAllowed(Db.Get().ScheduleBlockTypes.Recreation);
+		}
+
+		public void SetBalloonSymbolOverride(BalloonOverrideSymbol balloonOverrideSymbol)
+		{
+			if (balloonOverrideSymbol.animFile.IsNone())
+			{
+				base.master.GetComponent<SymbolOverrideController>().AddSymbolOverride("body", Assets.GetAnim("balloon_anim_kanim").GetData().build.GetSymbol("body"), 0);
+				return;
+			}
+			base.master.GetComponent<SymbolOverrideController>().AddSymbolOverride("body", balloonOverrideSymbol.symbol.Unwrap(), 0);
+		}
+
+		public BalloonOverrideSymbol GetCurrentBalloonSymbolOverride()
+		{
+			return this.balloonSymbolIter.Current();
+		}
+
+		public void ApplyNextBalloonSymbolOverride()
+		{
+			this.SetBalloonSymbolOverride(this.balloonSymbolIter.Next());
 		}
 
 		public void GiveBalloon()
@@ -77,5 +113,12 @@ public class BalloonArtist : GameStateMachine<BalloonArtist, BalloonArtist.Insta
 
 		[Serialize]
 		public int numBalloonsGiven;
+
+		[NonSerialized]
+		private BalloonOverrideSymbolIter balloonSymbolIter;
+
+		private const string TARGET_SYMBOL_TO_OVERRIDE = "body";
+
+		private const int TARGET_OVERRIDE_PRIORITY = 0;
 	}
 }

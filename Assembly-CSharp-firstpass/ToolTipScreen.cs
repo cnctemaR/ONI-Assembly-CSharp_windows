@@ -65,6 +65,19 @@ public class ToolTipScreen : KScreen
 				}
 				RectTransform component = this.toolTipWidget.GetComponent<RectTransform>();
 				component.transform.SetParent(this.anchorRoot.transform);
+				float num = 1f;
+				if (this.scaler == null)
+				{
+					this.scaler = base.transform.parent.GetComponent<CanvasScaler>();
+					if (this.scaler == null)
+					{
+						this.scaler = base.transform.parent.parent.GetComponent<CanvasScaler>();
+					}
+				}
+				if (this.scaler != null)
+				{
+					num = this.scaler.scaleFactor;
+				}
 				if (!this.tooltipSetting.worldSpace)
 				{
 					this.anchorRoot.anchoredPosition = rectTransform.transform.GetPosition();
@@ -73,21 +86,11 @@ public class ToolTipScreen : KScreen
 				{
 					this.anchorRoot.anchoredPosition = base.WorldToScreen(rectTransform.transform.GetPosition()) + new Vector3((float)(Screen.width / 2), (float)(Screen.height / 2), 0f);
 				}
+				this.anchorRoot.anchoredPosition = new Vector2(this.anchorRoot.anchoredPosition.x / num, this.anchorRoot.anchoredPosition.y / num);
 				this.anchorRoot.anchoredPosition -= Vector2.up * (rectTransform.rectTransform().pivot.y * rectTransform.rectTransform().sizeDelta.y);
 				this.anchorRoot.anchoredPosition -= Vector2.right * (rectTransform.rectTransform().pivot.x * rectTransform.rectTransform().sizeDelta.x);
 				this.anchorRoot.anchoredPosition += Vector2.right * (rectTransform.sizeDelta.x * this.tooltipSetting.parentPositionAnchor.x);
 				this.anchorRoot.anchoredPosition += Vector2.up * (rectTransform.sizeDelta.y * this.tooltipSetting.parentPositionAnchor.y);
-				float num = 1f;
-				CanvasScaler canvasScaler = base.transform.parent.GetComponent<CanvasScaler>();
-				if (canvasScaler == null)
-				{
-					canvasScaler = base.transform.parent.parent.GetComponent<CanvasScaler>();
-				}
-				if (canvasScaler != null)
-				{
-					num = canvasScaler.scaleFactor;
-				}
-				this.anchorRoot.anchoredPosition = new Vector2(this.anchorRoot.anchoredPosition.x / num, this.anchorRoot.anchoredPosition.y / num);
 				component.pivot = this.tooltipSetting.tooltipPivot;
 				RectTransform rectTransform2 = component;
 				RectTransform rectTransform3 = component;
@@ -298,4 +301,6 @@ public class ToolTipScreen : KScreen
 	private ToolTip dirtyHoverTooltip;
 
 	private bool tooltipIncubating = true;
+
+	private CanvasScaler scaler;
 }

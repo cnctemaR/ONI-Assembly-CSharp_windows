@@ -223,7 +223,7 @@ namespace STRINGS
 
 					public static LocString DESC = string.Concat(new string[]
 					{
-						"Sanishells are nonhostile critters that thrive in  ",
+						"Sanishells are nonhostile critters that thrive in ",
 						UI.FormatAsLink("Water", "WATER"),
 						" and eliminate ",
 						UI.FormatAsLink("Germs", "DISEASE"),
@@ -1265,7 +1265,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = UI.FormatAsLink("Gas Grass", "GASGRASS");
 
-				public static LocString DESC = "Gas grass.";
+				public static LocString DESC = "Gas Grass.";
 
 				public static LocString DOMESTICATEDDESC = "An alien grass variety that is eaten by " + UI.FormatAsLink("Gassy Moos", "MOO") + ".";
 			}
@@ -1777,9 +1777,7 @@ namespace STRINGS
 						UI.FormatAsLink("Seed", "PLANTS"),
 						" of a ",
 						CREATURES.SPECIES.GASGRASS.NAME,
-						" plant.\n\nUsed as feed for ",
-						UI.FormatAsLink("Gassy Moos", "MOO"),
-						"."
+						" plant."
 					});
 				}
 

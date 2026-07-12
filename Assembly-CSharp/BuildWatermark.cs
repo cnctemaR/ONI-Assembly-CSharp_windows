@@ -26,7 +26,7 @@ public class BuildWatermark : KScreen
 		}
 		else
 		{
-			text += 537329U.ToString();
+			text += 544519U.ToString();
 			if (DistributionPlatform.Initialized)
 			{
 				text = text + "-" + DlcManager.GetActiveContentLetters();

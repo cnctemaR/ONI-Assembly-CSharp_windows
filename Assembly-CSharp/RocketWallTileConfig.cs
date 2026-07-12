@@ -42,6 +42,7 @@ public class RocketWallTileConfig : IBuildingConfig
 		buildingDef.DecorBlockTileInfo = Assets.GetBlockTileDecorInfo("tiles_rocket_wall_ext_decor_info");
 		buildingDef.DecorPlaceBlockTileInfo = Assets.GetBlockTileDecorInfo("tiles_rocket_wall_ext_place_decor_info");
 		buildingDef.ConstructionOffsetFilter = BuildingDef.ConstructionOffsetFilter_OneDown;
+		buildingDef.ShowInBuildMenu = false;
 		return buildingDef;
 	}
 

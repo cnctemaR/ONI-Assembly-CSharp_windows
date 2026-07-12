@@ -75,7 +75,7 @@ public class LonelyMinion : GameStateMachine<LonelyMinion, LonelyMinion.Instance
 			return;
 		}
 		float num = LonelyMinionHouse.CalculateAverageDecor(smi.def.DecorInspectionArea);
-		bool flag = num >= 0f || (num > smi.StartingAverageDecor && 1f - num / smi.StartingAverageDecor > 0.1f);
+		bool flag = num >= 0f || (num > smi.StartingAverageDecor && 1f - num / smi.StartingAverageDecor > 0.01f);
 		if (!instance.IsStarted && !flag)
 		{
 			return;
@@ -119,7 +119,7 @@ public class LonelyMinion : GameStateMachine<LonelyMinion, LonelyMinion.Instance
 		}
 		QuestInstance instance = QuestManager.GetInstance(smi.def.QuestOwnerId, Db.Get().Quests.LonelyMinionFoodQuest);
 		int num = instance.GetCurrentCount(LonelyMinionConfig.FoodCriteriaId) - 1;
-		if (idleAnim == LonelyMinionConfig.FOOD_IDLE && num > 0)
+		if (idleAnim == LonelyMinionConfig.FOOD_IDLE && num >= 0)
 		{
 			KBatchedAnimController component = Assets.GetPrefab(instance.GetSatisfyingItem(LonelyMinionConfig.FoodCriteriaId, global::UnityEngine.Random.Range(0, num))).GetComponent<KBatchedAnimController>();
 			smi.PackageSnapPoint.SwapAnims(component.AnimFiles);
@@ -250,9 +250,7 @@ public class LonelyMinion : GameStateMachine<LonelyMinion, LonelyMinion.Instance
 			this.animControllers = base.gameObject.GetComponentsInChildren<KBatchedAnimController>(true);
 			this.storage = base.GetComponent<Storage>();
 			global::Debug.Assert(def.Personality != null);
-			Accessorizer component = base.GetComponent<Accessorizer>();
-			component.ApplyMinionPersonality(def.Personality);
-			LonelyMinionConfig.ApplyAccessoryOverrides(component);
+			base.GetComponent<Accessorizer>().ApplyMinionPersonality(def.Personality);
 			StoryInstance storyInstance = StoryManager.Instance.GetStoryInstance(Db.Get().Stories.LonelyMinion.HashId);
 			storyInstance.StoryStateChanged = (Action<StoryInstance.State>)Delegate.Combine(storyInstance.StoryStateChanged, new Action<StoryInstance.State>(this.OnStoryStateChanged));
 		}
@@ -289,6 +287,7 @@ public class LonelyMinion : GameStateMachine<LonelyMinion, LonelyMinion.Instance
 
 		public void Pickup(Pickupable pickupable, bool store)
 		{
+			base.sm.Mail.Set(null, this, true);
 			pickupable.storage.GetComponent<SingleEntityReceptacle>().OrderRemoveOccupant();
 			this.PackageSnapPoint.Play("object", KAnim.PlayMode.Loop, 1f, 0f);
 			if (store)

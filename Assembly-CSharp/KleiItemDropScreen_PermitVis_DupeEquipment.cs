@@ -7,7 +7,7 @@ public class KleiItemDropScreen_PermitVis_DupeEquipment : KMonoBehaviour, IKleiI
 	public void ConfigureWith(PermitResource permit, PermitPresentationInfo permitPresInfo)
 	{
 		this.dupeKAnim.GetComponent<UIDupeRandomizer>().Randomize();
-		KAnimFile anim = Assets.GetAnim(permitPresInfo.buildOverride);
+		KAnimFile anim = Assets.GetAnim((permit as EquippableFacadeResource).BuildOverride);
 		this.dupeKAnim.AddAnimOverrides(anim, 0f);
 		KAnimHashedString kanimHashedString = new KAnimHashedString("snapto_neck");
 		KAnim.Build.Symbol symbol = anim.GetData().build.GetSymbol(kanimHashedString);

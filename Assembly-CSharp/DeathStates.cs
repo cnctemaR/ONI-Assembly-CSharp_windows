@@ -21,6 +21,7 @@ public class DeathStates : GameStateMachine<DeathStates, DeathStates.Instance, I
 		})
 			.Enter("Destroy", delegate(DeathStates.Instance smi)
 			{
+				smi.gameObject.AddTag(GameTags.Dead);
 				smi.gameObject.DeleteObject();
 			})
 			.BehaviourComplete(GameTags.Creatures.Die, false);

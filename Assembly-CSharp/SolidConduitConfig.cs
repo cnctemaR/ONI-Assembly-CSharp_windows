@@ -60,6 +60,7 @@ public class SolidConduitConfig : IBuildingConfig
 		kanimGraphTileVisualizer.connectionSource = KAnimGraphTileVisualizer.ConnectionSource.Solid;
 		kanimGraphTileVisualizer.isPhysicalBuilding = true;
 		LiquidConduitConfig.CommonConduitPostConfigureComplete(go);
+		go.AddComponent<EmptySolidConduitWorkable>();
 	}
 
 	public const string ID = "SolidConduit";

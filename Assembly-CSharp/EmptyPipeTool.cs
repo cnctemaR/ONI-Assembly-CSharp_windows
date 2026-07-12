@@ -24,12 +24,12 @@ public class EmptyPipeTool : FilteredDragTool
 				GameObject gameObject = Grid.Objects[cell, i];
 				if (!(gameObject == null))
 				{
-					EmptyConduitWorkable component = gameObject.GetComponent<EmptyConduitWorkable>();
-					if (!(component == null))
+					IEmptyConduitWorkable component = gameObject.GetComponent<IEmptyConduitWorkable>();
+					if (!component.IsNullOrDestroyed())
 					{
 						if (DebugHandler.InstantBuildMode)
 						{
-							component.EmptyPipeContents();
+							component.EmptyContents();
 						}
 						else
 						{
@@ -60,9 +60,10 @@ public class EmptyPipeTool : FilteredDragTool
 
 	protected override void GetDefaultFilters(Dictionary<string, ToolParameterMenu.ToggleState> filters)
 	{
-		filters.Add(ToolParameterMenu.FILTERLAYERS.LIQUIDCONDUIT, ToolParameterMenu.ToggleState.On);
-		filters.Add(ToolParameterMenu.FILTERLAYERS.GASCONDUIT, ToolParameterMenu.ToggleState.On);
-		filters.Add(ToolParameterMenu.FILTERLAYERS.SOLIDCONDUIT, ToolParameterMenu.ToggleState.On);
+		filters.Add(ToolParameterMenu.FILTERLAYERS.ALL, ToolParameterMenu.ToggleState.On);
+		filters.Add(ToolParameterMenu.FILTERLAYERS.LIQUIDCONDUIT, ToolParameterMenu.ToggleState.Off);
+		filters.Add(ToolParameterMenu.FILTERLAYERS.GASCONDUIT, ToolParameterMenu.ToggleState.Off);
+		filters.Add(ToolParameterMenu.FILTERLAYERS.SOLIDCONDUIT, ToolParameterMenu.ToggleState.Off);
 	}
 
 	public static EmptyPipeTool Instance;

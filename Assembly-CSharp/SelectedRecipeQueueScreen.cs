@@ -110,17 +110,16 @@ public class SelectedRecipeQueueScreen : KScreen
 			return false;
 		}
 		this.minionWidget.SetDefaultPortraitAnimator();
-		KAnimFileData data = buildOverride.GetData();
-		this.minionWidget.UpdateClothingOverride(data, 4);
-		this.minionWidget.animController.SetSymbolVisiblity("snapTo_neck", data.build.GetSymbol("snapto_neck") != null);
+		KAnimFile kanimFile = buildOverride;
 		if (!this.selectedRecipe.results[0].facadeID.IsNullOrWhiteSpace())
 		{
 			EquippableFacadeResource equippableFacadeResource = Db.GetEquippableFacades().TryGet(this.selectedRecipe.results[0].facadeID);
 			if (equippableFacadeResource != null)
 			{
-				this.minionWidget.UpdateClothingOverride(Assets.GetAnim(equippableFacadeResource.BuildOverride).GetData(), 4);
+				kanimFile = Assets.GetAnim(equippableFacadeResource.BuildOverride);
 			}
 		}
+		this.minionWidget.UpdateEquipment(component, kanimFile);
 		return true;
 	}
 

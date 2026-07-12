@@ -51,9 +51,9 @@ public class UIMinionOrMannequin : KMonoBehaviour
 
 	public UIMinionOrMannequin.ITarget SetFrom(Option<Personality> personality)
 	{
-		if (personality.HasValue)
+		if (personality.IsSome())
 		{
-			return this.SetAsMinion(personality);
+			return this.SetAsMinion(personality.Unwrap());
 		}
 		return this.SetAsMannequin();
 	}
@@ -73,6 +73,11 @@ public class UIMinionOrMannequin : KMonoBehaviour
 		this.mannequin.gameObject.SetActive(true);
 		this.current = this.mannequin;
 		return this.mannequin;
+	}
+
+	public MinionVoice GetMinionVoice()
+	{
+		return MinionVoice.ByObject(this.current.SpawnedAvatar).UnwrapOr(MinionVoice.Random(), null);
 	}
 
 	private UIMinion minion;

@@ -688,8 +688,8 @@ public class BuildMenu : KScreen
 			}),
 			new BuildMenu.DisplayInfo(BuildMenu.CacheHashString("Furniture"), "icon_category_furniture", global::Action.BuildCategoryFurniture, KKeyCode.F, new List<BuildMenu.BuildingInfo>
 			{
-				new BuildMenu.BuildingInfo(BedConfig.ID, global::Action.BuildMenuKeyC),
-				new BuildMenu.BuildingInfo(LuxuryBedConfig.ID, global::Action.BuildMenuKeyX),
+				new BuildMenu.BuildingInfo("Bed", global::Action.BuildMenuKeyC),
+				new BuildMenu.BuildingInfo("LuxuryBed", global::Action.BuildMenuKeyX),
 				new BuildMenu.BuildingInfo(LadderBedConfig.ID, global::Action.BuildMenuKeyL),
 				new BuildMenu.BuildingInfo("DiningTable", global::Action.BuildMenuKeyD),
 				new BuildMenu.BuildingInfo("FloorLamp", global::Action.BuildMenuKeyF),

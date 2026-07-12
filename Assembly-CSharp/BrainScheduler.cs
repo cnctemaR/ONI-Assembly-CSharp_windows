@@ -175,7 +175,7 @@ public class BrainScheduler : KMonoBehaviour, IRenderEveryTick, ICPULoad
 				num += num13 - this.probeSize;
 				this.probeSize = num13;
 			}
-			if (num >= 0 && num <= 0)
+			if (num >= 0 && num <= 0 && this.brains.Count > 0)
 			{
 				global::Debug.LogWarning("AdjustLoad() failed");
 			}

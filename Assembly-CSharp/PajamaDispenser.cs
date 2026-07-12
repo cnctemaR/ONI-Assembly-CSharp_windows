@@ -45,7 +45,7 @@ public class PajamaDispenser : Workable, IDispenser
 	protected override void OnStopWork(Worker worker)
 	{
 		base.OnStopWork(worker);
-		if (this.Chore.smi.IsRunning())
+		if (this.Chore != null && this.Chore.smi.IsRunning())
 		{
 			this.Chore.Cancel("work interrupted");
 		}

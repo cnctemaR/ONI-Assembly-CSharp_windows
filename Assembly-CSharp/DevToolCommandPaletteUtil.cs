@@ -14,7 +14,7 @@ public static class DevToolCommandPaletteUtil
 				Type devToolType = enumerator.Current;
 				if (!devToolType.IsAbstract && ReflectionUtil.HasDefaultConstructor(devToolType))
 				{
-					list.Add(new DevToolCommandPalette.Command("[DevTool] Open \"" + DevToolUtil.GenerateDevToolName(devToolType) + "\"", delegate
+					list.Add(new DevToolCommandPalette.Command("Open DevTool: \"" + DevToolUtil.GenerateDevToolName(devToolType) + "\"", delegate
 					{
 						DevToolUtil.Open((DevTool)Activator.CreateInstance(devToolType));
 					}));

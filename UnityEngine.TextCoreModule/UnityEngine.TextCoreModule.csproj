@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{EA9301EF-341A-4564-B69E-CA8966F04636}</ProjectGuid>
+    <ProjectGuid>{95FD58EB-1DE6-446B-8517-7D6E7F2C64F6}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>UnityEngine.TextCore</RootNamespace>
     <AssemblyName>UnityEngine.TextCoreModule</AssemblyName>
@@ -91,15 +91,15 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
-      <Project>{EA9301EF-341A-4564-B69E-CA8966F04618}</Project>
+      <Project>{95FD58EB-1DE6-446B-8517-7D6E7F2C64D8}</Project>
       <Name>UnityEngine.CoreModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
-      <Project>{EA9301EF-341A-4564-B69E-CA8966F0462E}</Project>
+      <Project>{95FD58EB-1DE6-446B-8517-7D6E7F2C64EE}</Project>
       <Name>UnityEngine.SharedInternalsModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.TextRenderingModule\UnityEngine.TextRenderingModule.csproj">
-      <Project>{EA9301EF-341A-4564-B69E-CA8966F04637}</Project>
+      <Project>{95FD58EB-1DE6-446B-8517-7D6E7F2C64F7}</Project>
       <Name>UnityEngine.TextRenderingModule</Name>
     </ProjectReference>
   </ItemGroup>

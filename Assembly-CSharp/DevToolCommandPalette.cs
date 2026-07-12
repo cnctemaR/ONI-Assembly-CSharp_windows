@@ -117,26 +117,28 @@ public class DevToolCommandPalette : DevTool
 					bool flag2;
 					if (flag)
 					{
-						flag2 = ImGui.Selectable("> " + command.display_name);
+						flag2 = ImGui.Selectable("> " + command.display_name, flag);
 					}
 					else
 					{
-						flag2 = ImGui.Selectable("  " + command.display_name);
+						flag2 = ImGui.Selectable("  " + command.display_name, flag);
 					}
 					ImGui.PopID();
 					if (this.shouldScrollToSelectedCommandFlag && flag)
 					{
+						this.shouldScrollToSelectedCommandFlag = false;
 						ImGui.SetScrollHereY(0.5f);
 					}
 					if (flag2)
 					{
 						this.SelectCommand(command, panel);
+						ImGui.EndChild();
 						return;
 					}
 				}
 			}
-			ImGui.EndChild();
 		}
+		ImGui.EndChild();
 	}
 
 	private void SelectCommand(DevToolCommandPalette.Command command, DevPanel panel)
@@ -223,14 +225,7 @@ public class DevToolCommandPalette : DevTool
 
 		public void Internal_Select()
 		{
-			try
-			{
-				this.m_on_select();
-			}
-			catch (Exception ex)
-			{
-				global::UnityEngine.Debug.LogException(ex);
-			}
+			this.m_on_select();
 		}
 
 		public string display_name;

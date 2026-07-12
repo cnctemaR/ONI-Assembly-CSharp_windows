@@ -91,22 +91,33 @@ public class KAnimLayering
 		}
 		KAnimFile[] animFiles = this.controller.AnimFiles;
 		bool flag = KAnimLayering.IsAnimLayered(animFiles);
-		if (flag && this.foregroundController == null && this.layer != Grid.SceneLayer.NoLayer)
+		if (flag && this.layer != Grid.SceneLayer.NoLayer)
 		{
-			GameObject gameObject = Util.KInstantiate(EntityPrefabs.Instance.ForegroundLayer, this.controller.gameObject, null);
-			gameObject.name = this.controller.name + "_fg";
-			this.foregroundController = gameObject.GetComponent<KAnimControllerBase>();
+			bool flag2 = this.foregroundController == null;
+			if (flag2)
+			{
+				GameObject gameObject = Util.KInstantiate(EntityPrefabs.Instance.ForegroundLayer, this.controller.gameObject, null);
+				gameObject.name = this.controller.name + "_fg";
+				this.foregroundController = gameObject.GetComponent<KAnimControllerBase>();
+				this.link = new KAnimLink(this.controller, this.foregroundController);
+			}
 			this.foregroundController.AnimFiles = animFiles;
 			this.foregroundController.GetLayering().SetIsForeground(true);
 			this.foregroundController.initialAnim = this.controller.initialAnim;
-			this.link = new KAnimLink(this.controller, this.foregroundController);
 			this.Dirty();
 			KAnimSynchronizer synchronizer = this.controller.GetSynchronizer();
-			synchronizer.Add(this.foregroundController);
+			if (flag2)
+			{
+				synchronizer.Add(this.foregroundController);
+			}
+			else
+			{
+				this.foregroundController.GetComponent<KBatchedAnimController>().SwapAnims(this.foregroundController.AnimFiles);
+			}
 			synchronizer.Sync(this.foregroundController);
 			Vector3 vector = new Vector3(0f, 0f, Grid.GetLayerZ(this.layer) - this.controller.gameObject.transform.GetPosition().z - 0.1f);
-			gameObject.transform.SetLocalPosition(vector);
-			gameObject.SetActive(true);
+			this.foregroundController.gameObject.transform.SetLocalPosition(vector);
+			this.foregroundController.gameObject.SetActive(true);
 		}
 		else if (!flag && this.foregroundController != null)
 		{
@@ -123,6 +134,15 @@ public class KAnimLayering
 				layering.HideSymbolsInternal();
 			}
 		}
+	}
+
+	public void RefreshForegroundBatchGroup()
+	{
+		if (this.foregroundController == null)
+		{
+			return;
+		}
+		this.foregroundController.GetComponent<KBatchedAnimController>().SwapAnims(this.foregroundController.AnimFiles);
 	}
 
 	public void Dirty()

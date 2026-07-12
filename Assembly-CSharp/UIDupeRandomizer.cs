@@ -7,7 +7,7 @@ public class UIDupeRandomizer : MonoBehaviour
 {
 	protected virtual void Start()
 	{
-		this.slots = new AccessorySlots(null);
+		this.slots = Db.Get().AccessorySlots;
 		for (int i = 0; i < this.anims.Length; i++)
 		{
 			this.anims[i].curBody = null;

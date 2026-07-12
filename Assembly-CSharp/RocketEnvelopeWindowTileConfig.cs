@@ -30,6 +30,7 @@ public class RocketEnvelopeWindowTileConfig : IBuildingConfig
 		buildingDef.AudioSize = "small";
 		buildingDef.BaseTimeUntilRepair = -1f;
 		buildingDef.SceneLayer = Grid.SceneLayer.GlassTile;
+		buildingDef.ShowInBuildMenu = false;
 		buildingDef.isKAnimTile = true;
 		buildingDef.BlockTileIsTransparent = true;
 		buildingDef.BlockTileAtlas = Assets.GetTextureAtlas("tiles_glass");

@@ -74,6 +74,7 @@ public class DevPanel
 	public void RenderPanel()
 	{
 		DevTool currentDevTool = this.GetCurrentDevTool();
+		currentDevTool.Internal_TryInit();
 		if (currentDevTool.isRequestingToClosePanel)
 		{
 			this.isRequestingToClose = true;
@@ -102,9 +103,9 @@ public class DevPanel
 			{
 				ImGui.SetScrollY(0f);
 			}
-			ImGui.End();
 		}
-		if (currentDevTool.isRequestingToClosePanel)
+		ImGui.End();
+		if (this.GetCurrentDevTool().isRequestingToClosePanel)
 		{
 			this.isRequestingToClose = true;
 		}
@@ -113,13 +114,13 @@ public class DevPanel
 	private void DrawNavigation()
 	{
 		Option<int> option = this.TryGetDevToolIndexByOffset(-1);
-		if (ImGuiEx.Button(" < ", option.HasValue))
+		if (ImGuiEx.Button(" < ", option.IsSome()))
 		{
-			this.currentDevToolIndex = option;
+			this.currentDevToolIndex = option.Unwrap();
 		}
-		if (option.HasValue)
+		if (option.IsSome())
 		{
-			ImGuiEx.TooltipForPrevious("Go back to " + this.devTools[option].Name);
+			ImGuiEx.TooltipForPrevious("Go back to " + this.devTools[option.Unwrap()].Name);
 		}
 		else
 		{
@@ -127,13 +128,13 @@ public class DevPanel
 		}
 		ImGui.SameLine(0f, 5f);
 		Option<int> option2 = this.TryGetDevToolIndexByOffset(1);
-		if (ImGuiEx.Button(" > ", option2.HasValue))
+		if (ImGuiEx.Button(" > ", option2.IsSome()))
 		{
-			this.currentDevToolIndex = option2;
+			this.currentDevToolIndex = option2.Unwrap();
 		}
-		if (option2.HasValue)
+		if (option2.IsSome())
 		{
-			ImGuiEx.TooltipForPrevious("Go forward to " + this.devTools[option2].Name);
+			ImGuiEx.TooltipForPrevious("Go forward to " + this.devTools[option2.Unwrap()].Name);
 			return;
 		}
 		ImGuiEx.TooltipForPrevious("Go forward");

@@ -153,10 +153,12 @@ public class CharacterContainer : KScreen, ITelepadDeliverableContainer
 			this.animController.gameObject.SetActive(true);
 			this.animController.animScale = this.baseCharacterScale;
 		}
+		MinionConfig.ConfigureSymbols(this.animController.gameObject, true);
 		this.stats.ApplyTraits(this.animController.gameObject);
 		this.stats.ApplyRace(this.animController.gameObject);
 		this.stats.ApplyAccessories(this.animController.gameObject);
 		this.stats.ApplyOutfit(this.stats.personality, this.animController.gameObject);
+		this.stats.ApplyJoyResponseOutfit(this.stats.personality, this.animController.gameObject);
 		this.stats.ApplyExperience(this.animController.gameObject);
 		HashedString idleAnim = this.GetIdleAnim(this.stats);
 		this.idle_anim = Assets.GetAnim(idleAnim);

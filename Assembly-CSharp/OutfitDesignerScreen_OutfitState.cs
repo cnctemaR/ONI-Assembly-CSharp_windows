@@ -64,57 +64,57 @@ public class OutfitDesignerScreen_OutfitState
 
 	public void AddItemValuesTo(ICollection<ClothingItemResource> clothingItems)
 	{
-		if (this.hatSlot.HasValue)
+		if (this.hatSlot.IsSome())
 		{
-			clothingItems.Add(this.hatSlot);
+			clothingItems.Add(this.hatSlot.Unwrap());
 		}
-		if (this.topSlot.HasValue)
+		if (this.topSlot.IsSome())
 		{
-			clothingItems.Add(this.topSlot);
+			clothingItems.Add(this.topSlot.Unwrap());
 		}
-		if (this.glovesSlot.HasValue)
+		if (this.glovesSlot.IsSome())
 		{
-			clothingItems.Add(this.glovesSlot);
+			clothingItems.Add(this.glovesSlot.Unwrap());
 		}
-		if (this.bottomSlot.HasValue)
+		if (this.bottomSlot.IsSome())
 		{
-			clothingItems.Add(this.bottomSlot);
+			clothingItems.Add(this.bottomSlot.Unwrap());
 		}
-		if (this.shoesSlot.HasValue)
+		if (this.shoesSlot.IsSome())
 		{
-			clothingItems.Add(this.shoesSlot);
+			clothingItems.Add(this.shoesSlot.Unwrap());
 		}
-		if (this.accessorySlot.HasValue)
+		if (this.accessorySlot.IsSome())
 		{
-			clothingItems.Add(this.accessorySlot);
+			clothingItems.Add(this.accessorySlot.Unwrap());
 		}
 	}
 
 	public void AddItemsTo(ICollection<string> itemIds)
 	{
-		if (this.hatSlot.HasValue)
+		if (this.hatSlot.IsSome())
 		{
-			itemIds.Add(this.hatSlot.Value.Id);
+			itemIds.Add(this.hatSlot.Unwrap().Id);
 		}
-		if (this.topSlot.HasValue)
+		if (this.topSlot.IsSome())
 		{
-			itemIds.Add(this.topSlot.Value.Id);
+			itemIds.Add(this.topSlot.Unwrap().Id);
 		}
-		if (this.glovesSlot.HasValue)
+		if (this.glovesSlot.IsSome())
 		{
-			itemIds.Add(this.glovesSlot.Value.Id);
+			itemIds.Add(this.glovesSlot.Unwrap().Id);
 		}
-		if (this.bottomSlot.HasValue)
+		if (this.bottomSlot.IsSome())
 		{
-			itemIds.Add(this.bottomSlot.Value.Id);
+			itemIds.Add(this.bottomSlot.Unwrap().Id);
 		}
-		if (this.shoesSlot.HasValue)
+		if (this.shoesSlot.IsSome())
 		{
-			itemIds.Add(this.shoesSlot.Value.Id);
+			itemIds.Add(this.shoesSlot.Unwrap().Id);
 		}
-		if (this.accessorySlot.HasValue)
+		if (this.accessorySlot.IsSome())
 		{
-			itemIds.Add(this.accessorySlot.Value.Id);
+			itemIds.Add(this.accessorySlot.Unwrap().Id);
 		}
 	}
 

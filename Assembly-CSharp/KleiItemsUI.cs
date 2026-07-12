@@ -32,6 +32,11 @@ public static class KleiItemsUI
 		return Assets.GetSprite("NoTraits");
 	}
 
+	public static Sprite GetNoneBalloonArtistIcon()
+	{
+		return Assets.GetSprite("NoTraits");
+	}
+
 	public static string GetNoneClothingItemString(PermitCategory category)
 	{
 		switch (category)
@@ -48,10 +53,11 @@ public static class KleiItemsUI
 			return UI.OUTFIT_DESCRIPTION.NO_DUPE_HATS;
 		case PermitCategory.DupeAccessories:
 			return UI.OUTFIT_DESCRIPTION.NO_DUPE_ACCESSORIES;
-		default:
-			DebugUtil.DevAssert(false, string.Format("Couldn't find \"no item\" string for category {0}", category), null);
-			return "-";
+		case PermitCategory.JoyResponse:
+			return UI.OUTFIT_DESCRIPTION.NO_JOY_RESPONSE;
 		}
+		DebugUtil.DevAssert(false, string.Format("Couldn't find \"no item\" string for category {0}", category), null);
+		return "-";
 	}
 
 	public static void ConfigureTooltipOn(GameObject gameObject, Option<LocString> tooltipText = default(Option<LocString>))
@@ -87,21 +93,17 @@ public static class KleiItemsUI
 
 	public static string GetTooltipStringFor(PermitResource permit)
 	{
-		return KleiItemsUI.GetTooltipStringFor(permit.GetPermitPresentationInfo());
-	}
-
-	public static string GetTooltipStringFor(PermitPresentationInfo permitPresInfo)
-	{
-		string text = KleiItemsUI.WrapAsToolTipTitle(permitPresInfo.name);
-		if (!string.IsNullOrWhiteSpace(permitPresInfo.description))
+		string text = KleiItemsUI.WrapAsToolTipTitle(permit.Name);
+		if (!string.IsNullOrWhiteSpace(permit.Description))
 		{
-			text = text + "\n" + permitPresInfo.description;
+			text = text + "\n" + permit.Description;
 		}
-		if (!string.IsNullOrWhiteSpace(permitPresInfo.rarityDetails))
+		string text2 = UI.KLEI_INVENTORY_SCREEN.ITEM_RARITY_DETAILS.Replace("{RarityName}", permit.Rarity.GetLocStringName());
+		if (!string.IsNullOrWhiteSpace(text2))
 		{
-			text = text + "\n\n" + permitPresInfo.rarityDetails;
+			text = text + "\n\n" + text2;
 		}
-		if (!permitPresInfo.IsUnlocked())
+		if (PermitItems.GetOwnedCount(permit) <= 0)
 		{
 			text = text + "\n\n" + KleiItemsUI.WrapWithColor(UI.KLEI_INVENTORY_SCREEN.ITEM_PLAYER_OWN_NONE, KleiItemsUI.TEXT_COLOR__PERMIT_NOT_OWNED);
 		}

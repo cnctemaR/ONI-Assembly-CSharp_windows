@@ -49,7 +49,7 @@ public class ExpandRevealUIContent : MonoBehaviour
 		}
 		this.CollapsedImmediate();
 		this.activeRoutineCompleteCallback = completeCallback;
-		this.activeRoutine = base.StartCoroutine(this.expand(null));
+		this.activeRoutine = base.StartCoroutine(this.ExpandRoutine(null));
 	}
 
 	public void Collapse(Action<object> completeCallback)
@@ -65,7 +65,7 @@ public class ExpandRevealUIContent : MonoBehaviour
 		this.activeRoutineCompleteCallback = completeCallback;
 		if (base.gameObject.activeInHierarchy)
 		{
-			this.activeRoutine = base.StartCoroutine(this.collapse(completeCallback));
+			this.activeRoutine = base.StartCoroutine(this.CollapseRoutine(completeCallback));
 			return;
 		}
 		this.activeRoutine = null;
@@ -75,7 +75,7 @@ public class ExpandRevealUIContent : MonoBehaviour
 		}
 	}
 
-	private IEnumerator expand(Action<object> completeCallback)
+	private IEnumerator ExpandRoutine(Action<object> completeCallback)
 	{
 		this.Collapsing = false;
 		this.Expanding = true;
@@ -151,7 +151,7 @@ public class ExpandRevealUIContent : MonoBehaviour
 		}
 	}
 
-	private IEnumerator collapse(Action<object> completeCallback)
+	private IEnumerator CollapseRoutine(Action<object> completeCallback)
 	{
 		this.Expanding = false;
 		this.Collapsing = true;

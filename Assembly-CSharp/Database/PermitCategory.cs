@@ -15,6 +15,7 @@ namespace Database
 		Critter,
 		Sweepy,
 		Duplicant,
-		Artwork
+		Artwork,
+		JoyResponse
 	}
 }

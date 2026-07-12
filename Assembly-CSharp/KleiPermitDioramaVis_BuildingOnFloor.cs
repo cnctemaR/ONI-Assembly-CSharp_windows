@@ -13,7 +13,7 @@ public class KleiPermitDioramaVis_BuildingOnFloor : KMonoBehaviour, IKleiPermitD
 	{
 	}
 
-	public void ConfigureWith(PermitResource permit, PermitPresentationInfo permitPresInfo)
+	public void ConfigureWith(PermitResource permit)
 	{
 		BuildingFacadeResource buildingFacadeResource = (BuildingFacadeResource)permit;
 		KleiPermitVisUtil.ConfigureToRenderBuilding(this.buildingKAnim, buildingFacadeResource);

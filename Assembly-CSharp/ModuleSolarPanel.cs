@@ -55,7 +55,6 @@ public class ModuleSolarPanel : Generator
 
 	public override void EnergySim200ms(float dt)
 	{
-		base.EnergySim200ms(dt);
 		ushort circuitID = base.CircuitID;
 		this.operational.SetFlag(Generator.wireConnectedFlag, true);
 		this.operational.SetFlag(Generator.generatorConnectedFlag, true);

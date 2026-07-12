@@ -27,7 +27,6 @@ public class LonelyMinionMailbox : KMonoBehaviour
 	{
 		StoryInstance storyInstance = StoryManager.Instance.GetStoryInstance(Db.Get().Stories.LonelyMinion.HashId);
 		storyInstance.StoryStateChanged = (Action<StoryInstance.State>)Delegate.Remove(storyInstance.StoryStateChanged, new Action<StoryInstance.State>(this.OnStoryStateChanged));
-		base.GetComponent<KBatchedAnimController>().onAnimComplete -= this.OnAnimQueueComplete;
 	}
 
 	private void OnStoryStateChanged(StoryInstance.State state)
@@ -62,15 +61,6 @@ public class LonelyMinionMailbox : KMonoBehaviour
 	private void OnStorageChanged(object data)
 	{
 		this.House.MailboxContentChanged(data as GameObject);
-	}
-
-	private void OnAnimQueueComplete(HashedString name)
-	{
-		if (name != LonelyMinionMailboxConfig.CleanupAnimation)
-		{
-			return;
-		}
-		global::UnityEngine.Object.Destroy(base.gameObject);
 	}
 
 	public LonelyMinionHouse.Instance House;

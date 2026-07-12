@@ -107,6 +107,8 @@ public class GameTags
 
 	public static readonly Tag StoryTraitResource = TagManager.Create("StoryTraitResource");
 
+	public static readonly Tag DevBuilding = TagManager.Create("DevBuilding");
+
 	public static readonly Tag Incapacitated = TagManager.Create("Incapacitated");
 
 	public static readonly Tag CaloriesDepleted = TagManager.Create("CaloriesDepleted");

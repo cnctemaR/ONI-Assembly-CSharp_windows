@@ -52,6 +52,7 @@ public enum Action
 	Plan12,
 	Plan13,
 	Plan14,
+	Plan15,
 	CopyBuilding,
 	BuildCategoryLadders,
 	BuildCategoryTiles,
@@ -277,5 +278,6 @@ public enum Action
 	BuildMenuRight,
 	AnalogCamera,
 	AnalogCursor,
+	Disconnect,
 	NumActions
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using Database;
 using STRINGS;
 using UnityEngine;
@@ -7,7 +8,7 @@ using UnityEngine.UI;
 
 public class KleiInventoryScreen : KModalScreen
 {
-	private string SelectedItemFacadeID { get; set; }
+	private PermitResource SelectedPermit { get; set; }
 
 	private PermitCategory SelectedCategory { get; set; }
 
@@ -106,6 +107,7 @@ public class KleiInventoryScreen : KModalScreen
 		this.AddPermitCategory(PermitCategory.DupeBottoms);
 		this.AddPermitCategory(PermitCategory.DupeGloves);
 		this.AddPermitCategory(PermitCategory.DupeShoes);
+		this.AddPermitCategory(PermitCategory.JoyResponse);
 	}
 
 	private void AddPermitCategory(PermitCategory permitCategory)
@@ -115,17 +117,20 @@ public class KleiInventoryScreen : KModalScreen
 		component.GetReference<LocText>("Label").SetText(PermitCategories.GetUppercaseDisplayName(permitCategory));
 		component.GetReference<Image>("Icon").sprite = Assets.GetSprite(PermitCategories.GetIconName(permitCategory));
 		MultiToggle component2 = gameObject.GetComponent<MultiToggle>();
+		MultiToggle multiToggle = component2;
+		multiToggle.onEnter = (global::System.Action)Delegate.Combine(multiToggle.onEnter, new global::System.Action(this.OnMouseOverToggle));
 		component2.onClick = delegate
 		{
 			this.SelectCategory(permitCategory);
 		};
 		this.categoryToggles.Add(permitCategory, component2);
 		this.emptyCategories.Add(permitCategory, true);
+		this.SetCatogoryClickUISound(permitCategory, component2);
 	}
 
 	public void PopulateGallery()
 	{
-		foreach (KeyValuePair<string, MultiToggle> keyValuePair in this.galleryGridButtons)
+		foreach (KeyValuePair<PermitResource, MultiToggle> keyValuePair in this.galleryGridButtons)
 		{
 			this.RecycleGalleryGridButton(keyValuePair.Value.gameObject);
 		}
@@ -133,21 +138,21 @@ public class KleiInventoryScreen : KModalScreen
 		this.galleryGridLayouter.ImmediateSizeGridToScreenResolution();
 		foreach (PermitResource permitResource in Db.Get().Permits.resources)
 		{
-			if (PermitResources.ShouldDisplayPermitInSupplyCloset(permitResource.Id))
+			if (permitResource.Rarity != PermitRarity.Universal)
 			{
-				this.AddItemToGallery(permitResource.Id);
+				this.AddItemToGallery(permitResource);
 			}
 		}
 	}
 
-	private void AddItemToGallery(string facadeID)
+	private void AddItemToGallery(PermitResource permit)
 	{
-		if (this.galleryGridButtons.ContainsKey(facadeID))
+		if (this.galleryGridButtons.ContainsKey(permit))
 		{
 			return;
 		}
-		PermitPresentationInfo permitPresentationInfo = PermitItems.GetPermitPresentationInfo(facadeID);
-		this.emptyCategories[permitPresentationInfo.category] = false;
+		PermitPresentationInfo permitPresentationInfo = permit.GetPermitPresentationInfo();
+		this.emptyCategories[permit.Category] = false;
 		GameObject availableGridButton = this.GetAvailableGridButton();
 		HierarchyReferences component = availableGridButton.GetComponent<HierarchyReferences>();
 		Image reference = component.GetReference<Image>("Icon");
@@ -155,11 +160,12 @@ public class KleiInventoryScreen : KModalScreen
 		Image reference3 = component.GetReference<Image>("IsUnownedOverlay");
 		MultiToggle component2 = availableGridButton.GetComponent<MultiToggle>();
 		reference.sprite = permitPresentationInfo.sprite;
-		if (permitPresentationInfo.ownedCount.HasValue)
+		if (permit.IsOwnable())
 		{
-			reference2.text = UI.KLEI_INVENTORY_SCREEN.ITEM_PLAYER_OWNED_AMOUNT_ICON.Replace("{OwnedCount}", permitPresentationInfo.ownedCount.Value.ToString());
-			reference2.gameObject.SetActive(permitPresentationInfo.ownedCount.Value > 0);
-			reference3.gameObject.SetActive(permitPresentationInfo.ownedCount.Value <= 0);
+			int ownedCount = PermitItems.GetOwnedCount(permit);
+			reference2.text = UI.KLEI_INVENTORY_SCREEN.ITEM_PLAYER_OWNED_AMOUNT_ICON.Replace("{OwnedCount}", ownedCount.ToString());
+			reference2.gameObject.SetActive(ownedCount > 0);
+			reference3.gameObject.SetActive(ownedCount <= 0);
 		}
 		else
 		{
@@ -167,12 +173,14 @@ public class KleiInventoryScreen : KModalScreen
 			reference3.gameObject.SetActive(false);
 		}
 		MultiToggle multiToggle = component2;
-		multiToggle.onClick = (global::System.Action)Delegate.Combine(multiToggle.onClick, new global::System.Action(delegate
+		multiToggle.onEnter = (global::System.Action)Delegate.Combine(multiToggle.onEnter, new global::System.Action(this.OnMouseOverToggle));
+		component2.onClick = delegate
 		{
-			this.SelectItem(facadeID);
-		}));
-		this.galleryGridButtons.Add(facadeID, component2);
-		KleiItemsUI.ConfigureTooltipOn(availableGridButton, KleiItemsUI.GetTooltipStringFor(permitPresentationInfo));
+			this.SelectItem(permit);
+		};
+		this.galleryGridButtons.Add(permit, component2);
+		this.SetItemClickUISound(permit, component2);
+		KleiItemsUI.ConfigureTooltipOn(availableGridButton, KleiItemsUI.GetTooltipStringFor(permit));
 	}
 
 	public void SelectCategory(PermitCategory category)
@@ -189,9 +197,9 @@ public class KleiInventoryScreen : KModalScreen
 
 	private void SelectDefaultCategoryItem()
 	{
-		foreach (KeyValuePair<string, MultiToggle> keyValuePair in this.galleryGridButtons)
+		foreach (KeyValuePair<PermitResource, MultiToggle> keyValuePair in this.galleryGridButtons)
 		{
-			if (PermitItems.GetPermitPresentationInfo(keyValuePair.Key).category == this.SelectedCategory)
+			if (keyValuePair.Key.Category == this.SelectedCategory)
 			{
 				this.SelectItem(keyValuePair.Key);
 				return;
@@ -200,33 +208,33 @@ public class KleiInventoryScreen : KModalScreen
 		this.SelectItem(null);
 	}
 
-	public void SelectItem(string facadeID)
+	public void SelectItem(PermitResource permit)
 	{
-		this.SelectedItemFacadeID = facadeID;
+		this.SelectedPermit = permit;
 		this.RefreshGallery();
 		this.RefreshDetails();
 	}
 
 	private void RefreshGallery()
 	{
-		foreach (KeyValuePair<string, MultiToggle> keyValuePair in this.galleryGridButtons)
+		foreach (KeyValuePair<PermitResource, MultiToggle> keyValuePair in this.galleryGridButtons)
 		{
-			string text;
+			PermitResource permitResource;
 			MultiToggle multiToggle;
-			keyValuePair.Deconstruct<string, MultiToggle>(out text, out multiToggle);
-			string text2 = text;
+			keyValuePair.Deconstruct<PermitResource, MultiToggle>(out permitResource, out multiToggle);
+			PermitResource permitResource2 = permitResource;
 			MultiToggle multiToggle2 = multiToggle;
-			PermitPresentationInfo permitPresentationInfo = PermitItems.GetPermitPresentationInfo(text2);
-			multiToggle2.gameObject.SetActive(permitPresentationInfo.category == this.SelectedCategory);
-			multiToggle2.ChangeState((text2 == this.SelectedItemFacadeID) ? 1 : 0);
+			multiToggle2.gameObject.SetActive(permitResource2.Category == this.SelectedCategory);
+			multiToggle2.ChangeState((permitResource2 == this.SelectedPermit) ? 1 : 0);
 			HierarchyReferences component = multiToggle2.gameObject.GetComponent<HierarchyReferences>();
 			LocText reference = component.GetReference<LocText>("OwnedCountLabel");
 			Image reference2 = component.GetReference<Image>("IsUnownedOverlay");
-			if (permitPresentationInfo.ownedCount.HasValue)
+			if (permitResource2.IsOwnable())
 			{
-				reference.text = UI.KLEI_INVENTORY_SCREEN.ITEM_PLAYER_OWNED_AMOUNT_ICON.Replace("{OwnedCount}", permitPresentationInfo.ownedCount.Value.ToString());
-				reference.gameObject.SetActive(permitPresentationInfo.ownedCount.Value > 0);
-				reference2.gameObject.SetActive(permitPresentationInfo.ownedCount.Value <= 0);
+				int ownedCount = PermitItems.GetOwnedCount(permitResource2);
+				reference.text = UI.KLEI_INVENTORY_SCREEN.ITEM_PLAYER_OWNED_AMOUNT_ICON.Replace("{OwnedCount}", ownedCount.ToString());
+				reference.gameObject.SetActive(ownedCount > 0);
+				reference2.gameObject.SetActive(ownedCount <= 0);
 			}
 			else
 			{
@@ -254,29 +262,167 @@ public class KleiInventoryScreen : KModalScreen
 
 	private void RefreshDetails()
 	{
-		PermitResource permitResource = Db.Get().Permits.TryGet(this.SelectedItemFacadeID);
-		PermitPresentationInfo permitPresentationInfo = PermitItems.GetPermitPresentationInfo(this.SelectedItemFacadeID);
-		this.permitVis.ConfigureWith(permitResource, permitPresentationInfo);
-		this.selectionHeaderLabel.SetText(permitPresentationInfo.name);
-		this.selectionNameLabel.SetText(permitPresentationInfo.name);
-		this.selectionDescriptionLabel.gameObject.SetActive(!string.IsNullOrWhiteSpace(permitPresentationInfo.description));
-		this.selectionDescriptionLabel.SetText(permitPresentationInfo.description);
+		PermitResource selectedPermit = this.SelectedPermit;
+		PermitPresentationInfo permitPresentationInfo = selectedPermit.GetPermitPresentationInfo();
+		this.permitVis.ConfigureWith(selectedPermit);
+		this.selectionHeaderLabel.SetText(selectedPermit.Name);
+		this.selectionNameLabel.SetText(selectedPermit.Name);
+		this.selectionDescriptionLabel.gameObject.SetActive(!string.IsNullOrWhiteSpace(selectedPermit.Description));
+		this.selectionDescriptionLabel.SetText(selectedPermit.Description);
 		this.selectionFacadeForLabel.gameObject.SetActive(!string.IsNullOrWhiteSpace(permitPresentationInfo.facadeFor));
 		this.selectionFacadeForLabel.SetText(permitPresentationInfo.facadeFor);
-		this.selectionRarityDetailsLabel.gameObject.SetActive(!string.IsNullOrWhiteSpace(permitPresentationInfo.rarityDetails));
-		this.selectionRarityDetailsLabel.SetText(permitPresentationInfo.rarityDetails);
-		this.selectionOwnedCount.gameObject.SetActive(!permitPresentationInfo.isNone);
-		if (!permitPresentationInfo.ownedCount.HasValue)
+		string text = UI.KLEI_INVENTORY_SCREEN.ITEM_RARITY_DETAILS.Replace("{RarityName}", selectedPermit.Rarity.GetLocStringName());
+		this.selectionRarityDetailsLabel.gameObject.SetActive(!string.IsNullOrWhiteSpace(text));
+		this.selectionRarityDetailsLabel.SetText(text);
+		this.selectionOwnedCount.gameObject.SetActive(true);
+		if (!selectedPermit.IsOwnable())
 		{
 			this.selectionOwnedCount.SetText(UI.KLEI_INVENTORY_SCREEN.ITEM_PLAYER_UNLOCKED_BUT_UNOWNABLE);
 			return;
 		}
-		if (permitPresentationInfo.ownedCount.Value > 0)
+		int ownedCount = PermitItems.GetOwnedCount(selectedPermit);
+		if (ownedCount > 0)
 		{
-			this.selectionOwnedCount.SetText(UI.KLEI_INVENTORY_SCREEN.ITEM_PLAYER_OWNED_AMOUNT.Replace("{OwnedCount}", permitPresentationInfo.ownedCount.Value.ToString()));
+			this.selectionOwnedCount.SetText(UI.KLEI_INVENTORY_SCREEN.ITEM_PLAYER_OWNED_AMOUNT.Replace("{OwnedCount}", ownedCount.ToString()));
 			return;
 		}
 		this.selectionOwnedCount.SetText(KleiItemsUI.WrapWithColor(UI.KLEI_INVENTORY_SCREEN.ITEM_PLAYER_OWN_NONE, KleiItemsUI.TEXT_COLOR__PERMIT_NOT_OWNED));
+	}
+
+	private void SetCatogoryClickUISound(PermitCategory category, MultiToggle toggle)
+	{
+		if (!this.categoryToggles.ContainsKey(category))
+		{
+			toggle.states[1].on_click_override_sound_path = "";
+			toggle.states[0].on_click_override_sound_path = "";
+			return;
+		}
+		toggle.states[1].on_click_override_sound_path = "General_Category_Click";
+		toggle.states[0].on_click_override_sound_path = "General_Category_Click";
+	}
+
+	private void SetItemClickUISound(PermitResource permit, MultiToggle toggle)
+	{
+		string facadeItemSoundName = KleiInventoryScreen.GetFacadeItemSoundName(permit);
+		toggle.states[1].on_click_override_sound_path = facadeItemSoundName + "_Click";
+		toggle.states[1].sound_parameter_name = "Unlocked";
+		toggle.states[1].sound_parameter_value = (permit.IsUnlocked() ? 1f : 0f);
+		toggle.states[1].has_sound_parameter = true;
+		toggle.states[0].on_click_override_sound_path = facadeItemSoundName + "_Click";
+		toggle.states[0].sound_parameter_name = "Unlocked";
+		toggle.states[0].sound_parameter_value = (permit.IsUnlocked() ? 1f : 0f);
+		toggle.states[0].has_sound_parameter = true;
+	}
+
+	public static string GetFacadeItemSoundName(PermitResource permit)
+	{
+		if (permit == null)
+		{
+			return "HUD";
+		}
+		switch (permit.Category)
+		{
+		case PermitCategory.DupeTops:
+			return "tops";
+		case PermitCategory.DupeBottoms:
+			return "bottoms";
+		case PermitCategory.DupeGloves:
+			return "gloves";
+		case PermitCategory.DupeShoes:
+			return "shoes";
+		case PermitCategory.DupeHats:
+			return "hats";
+		default:
+			if (permit.Category == PermitCategory.Building)
+			{
+				bool flag;
+				BuildingDef buildingDef;
+				KleiPermitVisUtil.GetBuildingDef(permit).Deconstruct(out flag, out buildingDef);
+				bool flag2 = flag;
+				BuildingDef buildingDef2 = buildingDef;
+				if (!flag2)
+				{
+					return "HUD";
+				}
+				string prefabID = buildingDef2.PrefabID;
+				if (prefabID != null)
+				{
+					if (prefabID == "ExteriorWall")
+					{
+						return "wall";
+					}
+					if (prefabID == "FlowerVase" || prefabID == "FlowerVaseWall")
+					{
+						return "flowervase";
+					}
+					if (prefabID == "Bed")
+					{
+						return "bed";
+					}
+					if (prefabID == "LuxuryBed")
+					{
+						string id = permit.Id;
+						if (id != null)
+						{
+							if (id == "LuxuryBed_boat")
+							{
+								return "elegantbed_boat";
+							}
+							if (id == "LuxuryBed_bouncy")
+							{
+								return "elegantbed_bouncy";
+							}
+						}
+						return "elegantbed";
+					}
+					if (prefabID == "CeilingLight")
+					{
+						return "ceilingLight";
+					}
+				}
+			}
+			if (permit.Category == PermitCategory.Artwork)
+			{
+				bool flag;
+				BuildingDef buildingDef;
+				KleiPermitVisUtil.GetBuildingDef(permit).Deconstruct(out flag, out buildingDef);
+				bool flag3 = flag;
+				BuildingDef buildingDef3 = buildingDef;
+				if (!flag3)
+				{
+					return "HUD";
+				}
+				ArtableStage artableStage = (ArtableStage)permit;
+				if (KleiInventoryScreen.<GetFacadeItemSoundName>g__Has|47_0<Sculpture>(buildingDef3))
+				{
+					if (buildingDef3.PrefabID == "IceSculpture")
+					{
+						return "icesculpture";
+					}
+					return "sculpture";
+				}
+				else if (KleiInventoryScreen.<GetFacadeItemSoundName>g__Has|47_0<Painting>(buildingDef3))
+				{
+					return "painting";
+				}
+			}
+			if (permit.Category == PermitCategory.JoyResponse && permit is BalloonArtistFacadeResource)
+			{
+				return "balloon";
+			}
+			return "HUD";
+		}
+	}
+
+	private void OnMouseOverToggle()
+	{
+		KFMOD.PlayUISound(GlobalAssets.GetSound("HUD_Mouseover", false));
+	}
+
+	[CompilerGenerated]
+	internal static bool <GetFacadeItemSoundName>g__Has|47_0<T>(BuildingDef buildingDef) where T : Component
+	{
+		return !buildingDef.BuildingComplete.GetComponent<T>().IsNullOrDestroyed();
 	}
 
 	[Header("Header")]
@@ -304,7 +450,7 @@ public class KleiInventoryScreen : KModalScreen
 	[SerializeField]
 	private GameObject gridItemPrefab;
 
-	private Dictionary<string, MultiToggle> galleryGridButtons = new Dictionary<string, MultiToggle>();
+	private Dictionary<PermitResource, MultiToggle> galleryGridButtons = new Dictionary<PermitResource, MultiToggle>();
 
 	private List<GameObject> recycledGalleryGridButtons = new List<GameObject>();
 
@@ -331,4 +477,11 @@ public class KleiInventoryScreen : KModalScreen
 
 	[SerializeField]
 	private LocText selectionOwnedCount;
+
+	private enum MultiToggleState
+	{
+		Default,
+		Selected,
+		NonInteractable
+	}
 }

@@ -13,7 +13,9 @@ public class Refrigerator : KMonoBehaviour, IUserControlledCapacity
 	protected override void OnSpawn()
 	{
 		base.GetComponent<KAnimControllerBase>().Play("off", KAnim.PlayMode.Once, 1f, 0f);
-		base.GetComponent<FoodStorage>().FilteredStorage = this.filteredStorage;
+		FoodStorage component = base.GetComponent<FoodStorage>();
+		component.FilteredStorage = this.filteredStorage;
+		component.SpicedFoodOnly = component.SpicedFoodOnly;
 		this.filteredStorage.FilterChanged();
 		this.UpdateLogicCircuit();
 		base.Subscribe<Refrigerator>(-905833192, Refrigerator.OnCopySettingsDelegate);

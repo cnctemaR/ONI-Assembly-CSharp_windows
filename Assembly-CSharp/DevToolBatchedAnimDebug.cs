@@ -108,13 +108,17 @@ public class DevToolBatchedAnimDebug : DevTool
 			}
 			if (ImGui.BeginTabItem("Anim Frame Data"))
 			{
-				ImGui.Text("Current frame: " + component.GetCurrentFrameIndex().ToString());
-				ImGuiEx.InputIntRange("Frame Index", ref this.FrameIndex, 0, batchGroupData.GetAnimFrames().Count);
+				ImGui.Text("Current anim: " + component.CurrentAnim.name);
+				ImGui.Text("Current frame index: " + component.GetCurrentFrameIndex().ToString());
+				ImGuiEx.InputIntRange("Frame Index", ref this.FrameIndex, 0, batchGroupData.GetAnimFrames().Count - 1);
 				KAnim.Anim.Frame frame = batchGroupData.GetFrame(this.FrameIndex);
 				ImGui.Text(string.Format("Frame [{0}]: firstElementIdx= {1} numElements= {2}", this.FrameIndex, frame.firstElementIdx, frame.numElements));
-				ImGuiEx.InputIntRange("Frame Element Index", ref this.FrameElementIndex, 0, frame.numElements);
-				KAnim.Anim.FrameElement frameElement = batchGroupData.GetFrameElement(frame.firstElementIdx + this.FrameElementIndex);
-				ImGui.Text(string.Format("FrameElement [{0}]: symbolIdx= {1} symbol= {2}", frame.firstElementIdx + this.FrameElementIndex, frameElement.symbolIdx, frameElement.symbol));
+				ImGui.Text("Frame Elements: ");
+				for (int k = 0; k < frame.numElements; k++)
+				{
+					KAnim.Anim.FrameElement frameElement = batchGroupData.GetFrameElement(frame.firstElementIdx + k);
+					ImGui.Text(string.Format("FrameElement [{0}]: symbolIdx= {1} symbol= {2}", frame.firstElementIdx + k, frameElement.symbolIdx, frameElement.symbol));
+				}
 				ImGui.EndTabItem();
 			}
 			if (ImGui.BeginTabItem("Texture atlases"))
@@ -126,11 +130,11 @@ public class DevToolBatchedAnimDebug : DevTool
 				{
 					list.AddRange(component2.GetAtlasList().GetTextures());
 				}
-				for (int k = 0; k < list.Count; k++)
+				for (int l = 0; l < list.Count; l++)
 				{
-					Texture2D texture2D = list[k];
-					string text = ((k >= num3) ? "symbol override" : "base");
-					ImGui.Text(string.Format("[{0}]: {1}, [{2},{3}] ({4})", new object[] { k, texture2D.name, texture2D.width, texture2D.height, text }));
+					Texture2D texture2D = list[l];
+					string text = ((l >= num3) ? "symbol override" : "base");
+					ImGui.Text(string.Format("[{0}]: {1}, [{2},{3}] ({4})", new object[] { l, texture2D.name, texture2D.width, texture2D.height, text }));
 					if (ImGui.IsItemHovered())
 					{
 						ImGui.BeginTooltip();
@@ -157,6 +161,4 @@ public class DevToolBatchedAnimDebug : DevTool
 	private string Filter = "";
 
 	private int FrameIndex;
-
-	private int FrameElementIndex;
 }

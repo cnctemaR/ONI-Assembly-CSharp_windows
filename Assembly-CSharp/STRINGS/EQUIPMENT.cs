@@ -53,7 +53,7 @@ namespace STRINGS
 					"."
 				});
 
-				public static LocString REPAIR_WORN_RECIPE_NAME = "Repair" + EQUIPMENT.PREFABS.ATMO_SUIT.NAME;
+				public static LocString REPAIR_WORN_RECIPE_NAME = "Repair " + EQUIPMENT.PREFABS.ATMO_SUIT.NAME;
 
 				public static LocString REPAIR_WORN_DESC = "Restore a " + UI.FormatAsLink("Worn Atmo Suit", "ATMO_SUIT") + " to working order.";
 			}
@@ -294,65 +294,114 @@ namespace STRINGS
 				{
 					public class BASIC_BLUE_MIDDLE
 					{
-						public static LocString NAME = UI.FormatAsLink("Basic Aqua Gloves", "BASIC_BLUE_MIDDLE");
+						public static LocString NAME = "Basic Aqua Gloves";
 
 						public static LocString DESC = "A good, solid pair of aqua-blue gloves that go with everything.";
 					}
 
 					public class BASIC_YELLOW
 					{
-						public static LocString NAME = UI.FormatAsLink("Basic Yellow Gloves", "BASIC_YELLOW");
+						public static LocString NAME = "Basic Yellow Gloves";
 
 						public static LocString DESC = "A good, solid pair of yellow gloves that go with everything.";
 					}
 
 					public class BASIC_BLACK
 					{
-						public static LocString NAME = UI.FormatAsLink("Basic Black Gloves", "BASIC_BLACK");
+						public static LocString NAME = "Basic Black Gloves";
 
 						public static LocString DESC = "A good, solid pair of black gloves that go with everything.";
 					}
 
 					public class BASIC_PINK_ORCHID
 					{
-						public static LocString NAME = UI.FormatAsLink("Basic Bubblegum Gloves", "BASIC_PINK_ORCHID");
+						public static LocString NAME = "Basic Bubblegum Gloves";
 
 						public static LocString DESC = "A good, solid pair of bubblegum-pink gloves that go with everything.";
 					}
 
 					public class BASIC_GREEN
 					{
-						public static LocString NAME = UI.FormatAsLink("Basic Green Gloves", "BASIC_GREEN");
+						public static LocString NAME = "Basic Green Gloves";
 
 						public static LocString DESC = "A good, solid pair of green gloves that go with everything.";
 					}
 
 					public class BASIC_ORANGE
 					{
-						public static LocString NAME = UI.FormatAsLink("Basic Orange Gloves", "BASIC_ORANGE");
+						public static LocString NAME = "Basic Orange Gloves";
 
 						public static LocString DESC = "A good, solid pair of orange gloves that go with everything.";
 					}
 
 					public class BASIC_PURPLE
 					{
-						public static LocString NAME = UI.FormatAsLink("Basic Purple Gloves", "BASIC_PURPLE");
+						public static LocString NAME = "Basic Purple Gloves";
 
 						public static LocString DESC = "A good, solid pair of purple gloves that go with everything.";
 					}
 
 					public class BASIC_RED
 					{
-						public static LocString NAME = UI.FormatAsLink("Basic Red Gloves", "BASIC_RED");
+						public static LocString NAME = "Basic Red Gloves";
 
 						public static LocString DESC = "A good, solid pair of red gloves that go with everything.";
 					}
 
 					public class BASIC_WHITE
 					{
-						public static LocString NAME = UI.FormatAsLink("Basic White Gloves", "BASIC_WHITE");
+						public static LocString NAME = "Basic White Gloves";
 
 						public static LocString DESC = "A good, solid pair of white gloves that go with everything.";
+					}
+
+					public class GLOVES_ATHLETIC_DEEPRED
+					{
+						public static LocString NAME = "Team Captain Sports Gloves";
+
+						public static LocString DESC = "Red-striped gloves for winning at any activity.";
+					}
+
+					public class GLOVES_ATHLETIC_SATSUMA
+					{
+						public static LocString NAME = "Superfan Sports Gloves";
+
+						public static LocString DESC = "Orange-striped gloves for enthusiastic athletes.";
+					}
+
+					public class GLOVES_ATHLETIC_LEMON
+					{
+						public static LocString NAME = "Hype Sports Gloves";
+
+						public static LocString DESC = "Yellow-striped gloves for athletes who seek to raise the bar.";
+					}
+
+					public class GLOVES_ATHLETIC_KELLYGREEN
+					{
+						public static LocString NAME = "Go Team Sports Gloves";
+
+						public static LocString DESC = "Green-striped gloves for the perenially good sport.";
+					}
+
+					public class GLOVES_ATHLETIC_COBALT
+					{
+						public static LocString NAME = "True Blue Sports Gloves";
+
+						public static LocString DESC = "Blue-striped gloves perfect for shaking hands after the game.";
+					}
+
+					public class GLOVES_ATHLETIC_FLAMINGO
+					{
+						public static LocString NAME = "Pep Rally Sports Gloves";
+
+						public static LocString DESC = "Pink-striped glove designed to withstand countless high-fives.";
+					}
+
+					public class GLOVES_ATHLETIC_CHARCOAL
+					{
+						public static LocString NAME = "Underdog Sports Gloves";
+
+						public static LocString DESC = "The muted stripe minimizes distractions so its wearer can focus on trying very, very hard.";
 					}
 				}
 			}
@@ -373,65 +422,114 @@ namespace STRINGS
 				{
 					public class BASIC_BLUE_MIDDLE
 					{
-						public static LocString NAME = UI.FormatAsLink("Basic Aqua Shirt", "BASIC_BLUE_MIDDLE");
+						public static LocString NAME = "Basic Aqua Shirt";
 
 						public static LocString DESC = "A nice aqua-blue shirt that goes with everything.";
 					}
 
 					public class BASIC_BLACK
 					{
-						public static LocString NAME = UI.FormatAsLink("Basic Black Shirt", "BASIC_BLACK");
+						public static LocString NAME = "Basic Black Shirt";
 
 						public static LocString DESC = "A nice black shirt that goes with everything.";
 					}
 
 					public class BASIC_PINK_ORCHID
 					{
-						public static LocString NAME = UI.FormatAsLink("Basic Bubblegum Shirt", "BASIC_PINK_ORCHID");
+						public static LocString NAME = "Basic Bubblegum Shirt";
 
 						public static LocString DESC = "A nice bubblegum-pink shirt that goes with everything.";
 					}
 
 					public class BASIC_GREEN
 					{
-						public static LocString NAME = UI.FormatAsLink("Basic Green Shirt", "BASIC_GREEN");
+						public static LocString NAME = "Basic Green Shirt";
 
 						public static LocString DESC = "A nice green shirt that goes with everything.";
 					}
 
 					public class BASIC_ORANGE
 					{
-						public static LocString NAME = UI.FormatAsLink("Basic Orange Shirt", "BASIC_ORANGE");
+						public static LocString NAME = "Basic Orange Shirt";
 
 						public static LocString DESC = "A nice orange shirt that goes with everything.";
 					}
 
 					public class BASIC_PURPLE
 					{
-						public static LocString NAME = UI.FormatAsLink("Basic Purple Shirt", "BASIC_PURPLE");
+						public static LocString NAME = "Basic Purple Shirt";
 
 						public static LocString DESC = "A nice purple shirt that goes with everything.";
 					}
 
 					public class BASIC_RED_BURNT
 					{
-						public static LocString NAME = UI.FormatAsLink("Basic Red Shirt", "BASIC_RED_BURNT");
+						public static LocString NAME = "Basic Red Shirt";
 
 						public static LocString DESC = "A nice red shirt that goes with everything.";
 					}
 
 					public class BASIC_WHITE
 					{
-						public static LocString NAME = UI.FormatAsLink("Basic White Shirt", "BASIC_WHITE");
+						public static LocString NAME = "Basic White Shirt";
 
 						public static LocString DESC = "A nice white shirt that goes with everything.";
 					}
 
 					public class BASIC_YELLOW
 					{
-						public static LocString NAME = UI.FormatAsLink("Basic Yellow Shirt", "BASIC_YELLOW");
+						public static LocString NAME = "Basic Yellow Shirt";
 
 						public static LocString DESC = "A nice yellow shirt that goes with everything.";
+					}
+
+					public class RAGLANTOP_DEEPRED
+					{
+						public static LocString NAME = "Team Captain T-shirt";
+
+						public static LocString DESC = "A slightly sweat-stained tee for natural leaders.";
+					}
+
+					public class RAGLANTOP_COBALT
+					{
+						public static LocString NAME = "True Blue T-shirt";
+
+						public static LocString DESC = "A slightly sweat-stained tee for the real team players.";
+					}
+
+					public class RAGLANTOP_FLAMINGO
+					{
+						public static LocString NAME = "Pep Rally T-shirt";
+
+						public static LocString DESC = "A slightly sweat-stained tee to boost team spirits.";
+					}
+
+					public class RAGLANTOP_KELLYGREEN
+					{
+						public static LocString NAME = "Go Team T-shirt";
+
+						public static LocString DESC = "A slightly sweat-stained tee for cheering from the sidelines.";
+					}
+
+					public class RAGLANTOP_CHARCOAL
+					{
+						public static LocString NAME = "Underdog T-shirt";
+
+						public static LocString DESC = "For those who don't win a lot.";
+					}
+
+					public class RAGLANTOP_LEMON
+					{
+						public static LocString NAME = "Hype T-shirt";
+
+						public static LocString DESC = "A slightly sweat-stained tee to wear when talking a big game.";
+					}
+
+					public class RAGLANTOP_SATSUMA
+					{
+						public static LocString NAME = "Superfan T-shirt";
+
+						public static LocString DESC = "A slightly sweat-stained tee for the long-time supporter.";
 					}
 				}
 			}
@@ -452,65 +550,114 @@ namespace STRINGS
 				{
 					public class BASIC_BLUE_MIDDLE
 					{
-						public static LocString NAME = UI.FormatAsLink("Basic Aqua Pants", "BASIC_BLUE_MIDDLE");
+						public static LocString NAME = "Basic Aqua Pants";
 
 						public static LocString DESC = "A clean pair of aqua-blue pants that go with everything.";
 					}
 
 					public class BASIC_PINK_ORCHID
 					{
-						public static LocString NAME = UI.FormatAsLink("Basic Bubblegum Pants", "BASIC_PINK_ORCHID");
+						public static LocString NAME = "Basic Bubblegum Pants";
 
 						public static LocString DESC = "A clean pair of bubblegum-pink pants that go with everything.";
 					}
 
 					public class BASIC_GREEN
 					{
-						public static LocString NAME = UI.FormatAsLink("Basic Green Pants", "BASIC_GREEN");
+						public static LocString NAME = "Basic Green Pants";
 
 						public static LocString DESC = "A clean pair of green pants that go with everything.";
 					}
 
 					public class BASIC_ORANGE
 					{
-						public static LocString NAME = UI.FormatAsLink("Basic Orange Pants", "BASIC_ORANGE");
+						public static LocString NAME = "Basic Orange Pants";
 
 						public static LocString DESC = "A clean pair of orange pants that go with everything.";
 					}
 
 					public class BASIC_PURPLE
 					{
-						public static LocString NAME = UI.FormatAsLink("Basic Purple Pants", "BASIC_PURPLE");
+						public static LocString NAME = "Basic Purple Pants";
 
 						public static LocString DESC = "A clean pair of purple pants that go with everything.";
 					}
 
 					public class BASIC_RED
 					{
-						public static LocString NAME = UI.FormatAsLink("Basic Red Pants", "BASIC_RED");
+						public static LocString NAME = "Basic Red Pants";
 
 						public static LocString DESC = "A clean pair of red pants that go with everything.";
 					}
 
 					public class BASIC_WHITE
 					{
-						public static LocString NAME = UI.FormatAsLink("Basic White Pants", "BASIC_WHITE");
+						public static LocString NAME = "Basic White Pants";
 
 						public static LocString DESC = "A clean pair of white pants that go with everything.";
 					}
 
 					public class BASIC_YELLOW
 					{
-						public static LocString NAME = UI.FormatAsLink("Basic Yellow Pants", "BASIC_YELLOW");
+						public static LocString NAME = "Basic Yellow Pants";
 
 						public static LocString DESC = "A clean pair of yellow pants that go with everything.";
 					}
 
 					public class BASIC_BLACK
 					{
-						public static LocString NAME = UI.FormatAsLink("Basic Black Pants", "BASIC_BLACK");
+						public static LocString NAME = "Basic Black Pants";
 
 						public static LocString DESC = "A clean pair of black pants that go with everything.";
+					}
+
+					public class SHORTS_BASIC_DEEPRED
+					{
+						public static LocString NAME = "Team Captain Shorts";
+
+						public static LocString DESC = "A fresh pair of shorts for natural leaders.";
+					}
+
+					public class SHORTS_BASIC_SATSUMA
+					{
+						public static LocString NAME = "Superfan Shorts";
+
+						public static LocString DESC = "A fresh pair of shorts for long-time supporters of...shorts.";
+					}
+
+					public class SHORTS_BASIC_YELLOWCAKE
+					{
+						public static LocString NAME = "Yellowcake Shorts";
+
+						public static LocString DESC = "A fresh pair of uranium-powder-colored shorts that are definitely not radioactive. Probably.";
+					}
+
+					public class SHORTS_BASIC_KELLYGREEN
+					{
+						public static LocString NAME = "Go Team Shorts";
+
+						public static LocString DESC = "A fresh pair of shorts for cheering from the sidelines.";
+					}
+
+					public class SHORTS_BASIC_BLUE_COBALT
+					{
+						public static LocString NAME = "True Blue Shorts";
+
+						public static LocString DESC = "A fresh pair of shorts for the real team players.";
+					}
+
+					public class SHORTS_BASIC_PINK_FLAMINGO
+					{
+						public static LocString NAME = "Pep Rally Shorts";
+
+						public static LocString DESC = "The peppiest pair of shorts this side of the asteroid.";
+					}
+
+					public class SHORTS_BASIC_CHARCOAL
+					{
+						public static LocString NAME = "Underdog Shorts";
+
+						public static LocString DESC = "A fresh pair of shorts. They're cleaner than they look.";
 					}
 				}
 			}
@@ -531,65 +678,114 @@ namespace STRINGS
 				{
 					public class BASIC_BLUE_MIDDLE
 					{
-						public static LocString NAME = UI.FormatAsLink("Basic Aqua Shoes", "BASIC_BLUE_MIDDLE");
+						public static LocString NAME = "Basic Aqua Shoes";
 
 						public static LocString DESC = "A fresh pair of aqua-blue shoes that go with everything.";
 					}
 
 					public class BASIC_PINK_ORCHID
 					{
-						public static LocString NAME = UI.FormatAsLink("Basic Bubblegum Shoes", "BASIC_PINK_ORCHID");
+						public static LocString NAME = "Basic Bubblegum Shoes";
 
 						public static LocString DESC = "A fresh pair of bubblegum-pink shoes that go with everything.";
 					}
 
 					public class BASIC_GREEN
 					{
-						public static LocString NAME = UI.FormatAsLink("Basic Green Shoes", "BASIC_GREEN");
+						public static LocString NAME = "Basic Green Shoes";
 
 						public static LocString DESC = "A fresh pair of green shoes that go with everything.";
 					}
 
 					public class BASIC_ORANGE
 					{
-						public static LocString NAME = UI.FormatAsLink("Basic Orange Shoes", "BASIC_ORANGE");
+						public static LocString NAME = "Basic Orange Shoes";
 
 						public static LocString DESC = "A fresh pair of orange shoes that go with everything.";
 					}
 
 					public class BASIC_PURPLE
 					{
-						public static LocString NAME = UI.FormatAsLink("Basic Purple Shoes", "BASIC_PURPLE");
+						public static LocString NAME = "Basic Purple Shoes";
 
 						public static LocString DESC = "A fresh pair of purple shoes that go with everything.";
 					}
 
 					public class BASIC_RED
 					{
-						public static LocString NAME = UI.FormatAsLink("Basic Red Shoes", "BASIC_RED");
+						public static LocString NAME = "Basic Red Shoes";
 
 						public static LocString DESC = "A fresh pair of red shoes that go with everything.";
 					}
 
 					public class BASIC_WHITE
 					{
-						public static LocString NAME = UI.FormatAsLink("Basic White Shoes", "BASIC_WHITE");
+						public static LocString NAME = "Basic White Shoes";
 
 						public static LocString DESC = "A fresh pair of white shoes that go with everything.";
 					}
 
 					public class BASIC_YELLOW
 					{
-						public static LocString NAME = UI.FormatAsLink("Basic Yellow Shoes", "BASIC_YELLOW");
+						public static LocString NAME = "Basic Yellow Shoes";
 
 						public static LocString DESC = "A fresh pair of yellow shoes that go with everything.";
 					}
 
 					public class BASIC_BLACK
 					{
-						public static LocString NAME = UI.FormatAsLink("Basic Black Shoes", "BASIC_BLACK");
+						public static LocString NAME = "Basic Black Shoes";
 
 						public static LocString DESC = "A fresh pair of black shoes that go with everything.";
+					}
+
+					public class SOCKS_ATHLETIC_DEEPRED
+					{
+						public static LocString NAME = "Team Captain Gym Socks";
+
+						public static LocString DESC = "Breathable socks with sporty red stripes.";
+					}
+
+					public class SOCKS_ATHLETIC_SATSUMA
+					{
+						public static LocString NAME = "Superfan Gym Socks";
+
+						public static LocString DESC = "Breathable socks with sporty orange stripes.";
+					}
+
+					public class SOCKS_ATHLETIC_LEMON
+					{
+						public static LocString NAME = "Hype Gym Socks";
+
+						public static LocString DESC = "Breathable socks with sporty yellow stripes.";
+					}
+
+					public class SOCKS_ATHLETIC_KELLYGREEN
+					{
+						public static LocString NAME = "Go Team Gym Socks";
+
+						public static LocString DESC = "Breathable socks with sporty green stripes.";
+					}
+
+					public class SOCKS_ATHLETIC_COBALT
+					{
+						public static LocString NAME = "True Blue Gym Socks";
+
+						public static LocString DESC = "Breathable socks with sporty blue stripes.";
+					}
+
+					public class SOCKS_ATHLETIC_FLAMINGO
+					{
+						public static LocString NAME = "Pep Rally Gym Socks";
+
+						public static LocString DESC = "Breathable socks with sporty pink stripes.";
+					}
+
+					public class SOCKS_ATHLETIC_CHARCOAL
+					{
+						public static LocString NAME = "Underdog Gym Socks";
+
+						public static LocString DESC = "Breathable socks that do nothing whatsoever to eliminate foot odor.";
 					}
 				}
 			}
@@ -631,6 +827,107 @@ namespace STRINGS
 				public static LocString RECIPE_DESC = "Gives Duplicants a boost in brain function.\n\nSupplied by Duplicants with the Balloon Artist " + UI.FormatAsLink("Overjoyed", "MORALE") + " response";
 
 				public static LocString GENERICNAME = "Balloon Friend";
+
+				public class FACADES
+				{
+					public class DEFAULT_BALLOON
+					{
+						public static LocString NAME = UI.FormatAsLink("Balloon Friend", "EQUIPPABLEBALLOON");
+
+						public static LocString DESC = "A floating friend to reassure my Duplicants that they are so very, very clever.";
+					}
+
+					public class BALLOON_FIREENGINE_LONG_SPARKLES
+					{
+						public static LocString NAME = UI.FormatAsLink("Magma Glitter", "EQUIPPABLEBALLOON");
+
+						public static LocString DESC = "They float <i>and</i> sparkle!";
+					}
+
+					public class BALLOON_YELLOW_LONG_SPARKLES
+					{
+						public static LocString NAME = UI.FormatAsLink("Lavatory Glitter", "EQUIPPABLEBALLOON");
+
+						public static LocString DESC = "Sparkly balloons in an all-too-familiar hue.";
+					}
+
+					public class BALLOON_BLUE_LONG_SPARKLES
+					{
+						public static LocString NAME = UI.FormatAsLink("Wheezewort Glitter", "EQUIPPABLEBALLOON");
+
+						public static LocString DESC = "They float <i>and</i> sparkle!";
+					}
+
+					public class BALLOON_GREEN_LONG_SPARKLES
+					{
+						public static LocString NAME = UI.FormatAsLink("Mush Bar Glitter", "EQUIPPABLEBALLOON");
+
+						public static LocString DESC = "They float <i>and</i> sparkle!";
+					}
+
+					public class BALLOON_PINK_LONG_SPARKLES
+					{
+						public static LocString NAME = UI.FormatAsLink("Petal Glitter", "EQUIPPABLEBALLOON");
+
+						public static LocString DESC = "They float <i>and</i> sparkle!";
+					}
+
+					public class BALLOON_PURPLE_LONG_SPARKLES
+					{
+						public static LocString NAME = UI.FormatAsLink("Dusky Glitter", "EQUIPPABLEBALLOON");
+
+						public static LocString DESC = "They float <i>and</i> sparkle!";
+					}
+
+					public class BALLOON_BABY_PACU_EGG
+					{
+						public static LocString NAME = UI.FormatAsLink("Floatie Fish", "EQUIPPABLEBALLOON");
+
+						public static LocString DESC = "They do not taste as good as the real thing.";
+					}
+
+					public class BALLOON_BABY_GLOSSY_DRECKO_EGG
+					{
+						public static LocString NAME = UI.FormatAsLink("Glossy Glee", "EQUIPPABLEBALLOON");
+
+						public static LocString DESC = "A happy little trio of inflatable critters.";
+					}
+
+					public class BALLOON_BABY_HATCH_EGG
+					{
+						public static LocString NAME = UI.FormatAsLink("Helium Hatches", "EQUIPPABLEBALLOON");
+
+						public static LocString DESC = "A happy little trio of inflatable critters.";
+					}
+
+					public class BALLOON_BABY_POKESHELL_EGG
+					{
+						public static LocString NAME = UI.FormatAsLink("Peppy Pokeshells", "EQUIPPABLEBALLOON");
+
+						public static LocString DESC = "A happy little trio of inflatable critters.";
+					}
+
+					public class BALLOON_BABY_PUFT_EGG
+					{
+						public static LocString NAME = UI.FormatAsLink("Puffed-Up Pufts", "EQUIPPABLEBALLOON");
+
+						public static LocString DESC = "A happy little trio of inflatable critters.";
+					}
+
+					public class BALLOON_BABY_SHOVOLE_EGG
+					{
+						public static LocString NAME = UI.FormatAsLink("Voley Voley Voles", "EQUIPPABLEBALLOON");
+
+						public static LocString DESC = "A happy little trio of inflatable critters.";
+					}
+
+					public class BALLOON_BABY_PIP_EGG
+					{
+						public static LocString NAME = UI.FormatAsLink("Pip Pip Hooray", "EQUIPPABLEBALLOON");
+
+						public static LocString DESC = "A happy little trio of inflatable critters.";
+					}
+				}
 			}
 
 			public class SLEEPCLINICPAJAMAS

@@ -1,0 +1,33 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <ProjectGuid>{95FD58EB-1DE6-446B-8517-7D6E7F2C64CB}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>Unity.MemoryProfiler</RootNamespace>
+    <AssemblyName>Unity.MemoryProfiler</AssemblyName>
+    <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
+    <FileAlignment>512</FileAlignment>
+    <TargetFramework>net40</TargetFramework>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+    <EnableDefaultItems>False</EnableDefaultItems>
+  </PropertyGroup>
+  <PropertyGroup />
+  <ItemGroup>
+    <Compile Include="DefaultMetadataCollect.cs" />
+    <Compile Include="MetadataCollect.cs" />
+    <Compile Include="MetadataInjector.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\mscorlib\mscorlib.csproj">
+      <Project>{95FD58EB-1DE6-446B-8517-7D6E7F2C64BC}</Project>
+      <Name>mscorlib</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
+      <Project>{95FD58EB-1DE6-446B-8517-7D6E7F2C64D8}</Project>
+      <Name>UnityEngine.CoreModule</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup />
+</Project>

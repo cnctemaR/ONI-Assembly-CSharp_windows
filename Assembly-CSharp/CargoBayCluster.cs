@@ -77,7 +77,9 @@ public class CargoBayCluster : KMonoBehaviour, IUserControlledCapacity
 		base.GetComponent<KBatchedAnimController>().Play("grounded", KAnim.PlayMode.Loop, 1f, 0f);
 		base.Subscribe<CargoBayCluster>(493375141, CargoBayCluster.OnRefreshUserMenuDelegate);
 		this.meter = new MeterController(base.GetComponent<KBatchedAnimController>(), "meter_target", "meter", Meter.Offset.Infront, Grid.SceneLayer.NoLayer, new string[] { "meter_target", "meter_fill", "meter_frame", "meter_OL" });
-		this.meter.gameObject.GetComponent<KBatchedAnimTracker>().matchParentOffset = true;
+		KBatchedAnimTracker component = this.meter.gameObject.GetComponent<KBatchedAnimTracker>();
+		component.matchParentOffset = true;
+		component.forceAlwaysAlive = true;
 		this.OnStorageChange(null);
 		base.Subscribe<CargoBayCluster>(-1697596308, CargoBayCluster.OnStorageChangeDelegate);
 	}

@@ -519,6 +519,8 @@ public class FallingWater : KMonoBehaviour, ISim200ms
 		this.mesh.SetColors(colours);
 		this.mesh.SetTriangles(indices, 0);
 		int num10 = LayerMask.NameToLayer("Water");
+		Vector4 vector5 = PropertyTextures.CalculateClusterWorldSize();
+		this.material.SetVector("_ClusterWorldSizeInfo", vector5);
 		Graphics.DrawMesh(this.mesh, this.renderOffset, Quaternion.identity, this.material, num10, null, 0, this.propertyBlock);
 	}
 

@@ -1,6 +1,4 @@
 ﻿using System;
-using FMOD.Studio;
-using UnityEngine;
 
 public class UIAnimationSoundEvent : SoundEvent
 {
@@ -21,7 +19,7 @@ public class UIAnimationSoundEvent : SoundEvent
 			LoopingSounds component = behaviour.GetComponent<LoopingSounds>();
 			if (component == null)
 			{
-				global::Debug.Log(behaviour.name + " (UI Object) is missing LoopingSounds component.");
+				Debug.Log(behaviour.name + " (UI Object) is missing LoopingSounds component.");
 				return;
 			}
 			if (!component.StartSound(base.sound, false, false, false))
@@ -32,10 +30,21 @@ public class UIAnimationSoundEvent : SoundEvent
 		}
 		else
 		{
-			EventInstance eventInstance = KFMOD.BeginOneShot(base.sound, Vector3.zero, 1f);
-			eventInstance.setParameterByName(UIAnimationSoundEvent.X_POSITION_PARAMETER, behaviour.controller.transform.GetPosition().x / (float)Screen.width, false);
-			eventInstance.setParameterByName(UIAnimationSoundEvent.Y_POSITION_PARAMETER, behaviour.controller.transform.GetPosition().y / (float)Screen.height, false);
-			KFMOD.EndOneShot(eventInstance);
+			try
+			{
+				if (SoundListenerController.Instance == null)
+				{
+					KFMOD.PlayUISound(base.sound);
+				}
+				else
+				{
+					KFMOD.PlayOneShot(base.sound, SoundListenerController.Instance.transform.GetPosition(), 1f);
+				}
+			}
+			catch
+			{
+				DebugUtil.LogWarningArgs(new object[] { "AUDIOERROR: Missing [" + base.sound + "]" });
+			}
 		}
 	}
 
@@ -50,8 +59,4 @@ public class UIAnimationSoundEvent : SoundEvent
 			}
 		}
 	}
-
-	private static string X_POSITION_PARAMETER = "Screen_Position_X";
-
-	private static string Y_POSITION_PARAMETER = "Screen_Position_Y";
 }

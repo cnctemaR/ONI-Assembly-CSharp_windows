@@ -28,7 +28,7 @@ namespace Klei.Input
 		{
 			get
 			{
-				return this.inputAction;
+				return (global::Action)Enum.Parse(typeof(global::Action), this.inputAction);
 			}
 		}
 
@@ -43,7 +43,7 @@ namespace Klei.Input
 
 		[SerializeField]
 		[Tooltip("This will serve as a key for activating different configs. Currently, these Actionsare how we indicate that different input modes are desired.\nAssigning Action.Invalid to this field will indicate that this is the \"default\" config")]
-		private global::Action inputAction;
+		private string inputAction = global::Action.Invalid.ToString();
 
 		public class Comparer : IComparer<InterfaceToolConfig>
 		{

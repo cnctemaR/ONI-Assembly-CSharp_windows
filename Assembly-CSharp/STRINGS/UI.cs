@@ -482,15 +482,6 @@ namespace STRINGS
 			Standby
 		}
 
-		public class FACADE_COLOURS
-		{
-			public static string BASIC_PINK_ORCHID = "bubblegum";
-
-			public static string BASIC_BLUE_MIDDLE = "aqua";
-
-			public static string BASIC_YELLOW = "yellow";
-		}
-
 		public class VANILLA
 		{
 			public static LocString NAME = "base game";
@@ -531,9 +522,9 @@ namespace STRINGS
 			{
 				public static LocString ALWAYS = UI.CLICK(UI.ClickType.Click) + " to pin this diagnostic to the sidebar - Current State: <b>Visible On Alert Only</b>";
 
-				public static LocString ALERT_ONLY = UI.CLICK(UI.ClickType.Click) + " to subscribe to this diagnostic - Current State:  <b>Never Visible      </b>";
+				public static LocString ALERT_ONLY = UI.CLICK(UI.ClickType.Click) + " to subscribe to this diagnostic - Current State: <b>Never Visible</b>";
 
-				public static LocString NEVER = UI.CLICK(UI.ClickType.Click) + " to mute this diagnostic on the sidebar -  Current State: <b>Always Visible</b>";
+				public static LocString NEVER = UI.CLICK(UI.ClickType.Click) + " to mute this diagnostic on the sidebar - Current State: <b>Always Visible</b>";
 
 				public static LocString TUTORIAL_DISABLED = UI.CLICK(UI.ClickType.Click) + " to enable this diagnostic -  Current State: <b>Temporarily disabled</b>";
 			}
@@ -3266,13 +3257,13 @@ namespace STRINGS
 
 			public class MOTD
 			{
-				public static LocString IMAGE_HEADER = "HOT SHOTS";
+				public static LocString IMAGE_HEADER = "FEB 2023 QOL";
 
 				public static LocString NEWS_HEADER = "JOIN THE DISCUSSION";
 
 				public static LocString NEWS_BODY = "Stay up to date by joining our mailing list, or head on over to the forums and join the discussion.";
 
-				public static LocString PATCH_NOTES_SUMMARY = "This update includes:\n\n•<indent=20px>The \"Mysterious Hermit\" Story Trait. </indent>\n•<indent=20px>New Buildings:</indent>\n<indent=40px>•    The geyser manipulating \"Geotuner\".</indent>\n<indent=40px>•    The rocket boosting \"Mission Control Station\".</indent>\n<indent=40px>•    The liquid cooled \"Conduction Panel\".</indent>\n•<indent=20px>Two new room types: \"Laboratory\", and a new kind of \"Private Bedroom\".</indent>\n•<indent=20px>Introduction of the \"Supply Closet\" for managing cosmetic items.</indent>\n•<indent=20px>Tuning changes, bugs fixes, and quality of Life improvements.</indent>\n\n   Check out the full patch notes for more details!";
+				public static LocString PATCH_NOTES_SUMMARY = "This update includes:\n\n•<indent=20px>New search function and subcategories view for the build menu.</indent>\n•<indent=20px>New Disconnect tool.</indent>\n•<indent=20px>New Supply Closet music.</indent>\n•<indent=20px>Bug fixes and quality of life improvements.</indent>\n\n   Check out the full patch notes for more details!";
 
 				public static LocString UPDATE_TEXT = "LAUNCHED!";
 
@@ -4091,7 +4082,7 @@ namespace STRINGS
 
 				public static LocString ENABLE_BUTTON = "Enable Data Communication";
 
-				public static LocString DESCRIPTION = "Collecting user data helps us improve the game.\nPlayers who opt out of data communication will no longer send crash reports and play data to the game team. They will also no longer be able to unlock items.\n\nFor more details on our privacy policy and how we use the data we collect, please visit our <color=#ECA6C9><u><b>privacy center</b></u></color>.";
+				public static LocString DESCRIPTION = "Collecting user data helps us improve the game.\n\nPlayers who opt out of data communication will no longer send us crash reports and play data.\n\nThey will also be unable to receive new item unlocks from our servers, though existing unlocked items will continue to function.\n\nFor more details on our privacy policy and how we use the data we collect, please visit our <color=#ECA6C9><u><b>privacy center</b></u></color>.";
 
 				public static LocString DONE_BUTTON = "Done";
 
@@ -4362,6 +4353,8 @@ namespace STRINGS
 
 			public static LocString CLOTHING_ITEM_FACADE_FOR = "This blueprint can be used in any outfit.";
 
+			public static LocString BALLOON_ARTIST_FACADE_FOR = "This blueprint can be used by any Balloon Artist.";
+
 			public static LocString ITEM_RARITY_DETAILS = "{RarityName} quality.";
 
 			public static LocString ITEM_PLAYER_OWNED_AMOUNT = "My colony has {OwnedCount} of these blueprints.";
@@ -4407,6 +4400,13 @@ namespace STRINGS
 				public static LocString ARTWORKS = "Artwork";
 
 				public static LocString MONUMENTPARTS = "Monuments";
+
+				public static LocString JOY_RESPONSE = "Overjoyed Responses";
+
+				public static class JOY_RESPONSES
+				{
+					public static LocString BALLOON_ARTIST = "Balloon Artist";
+				}
 			}
 
 			public static class COLUMN_HEADERS
@@ -4495,9 +4495,9 @@ namespace STRINGS
 
 			public static LocString BUTTON_CLAIM = "Check Shipments";
 
-			public static LocString BUTTON_CLAIM_DESCRIPTION = "Check for available blueprints on the Klei Rewards webpage";
+			public static LocString BUTTON_CLAIM_DESCRIPTION = "Check for available blueprints on the Klei Rewards website";
 
-			public static LocString UNOPENED_ITEMS_TOOLTIP = "You may have items available for you to claim on the Klei Rewards webpage";
+			public static LocString UNOPENED_ITEMS_TOOLTIP = "You may have blueprints available to claim on the Klei Rewards website";
 		}
 
 		public class LOCKER_NAVIGATOR
@@ -4510,11 +4510,27 @@ namespace STRINGS
 			{
 				public static LocString HEADER = "Data Communication is Disabled";
 
-				public static LocString BODY = "Data Communication must be enabled to recieve any newly unlocked items. This setting can be found in the Options menu.\n\nExisting item unlocks can still be used while Data Communication is disabled.";
+				public static LocString BODY = "Data Communication must be enabled in order to access newly unlocked items. This setting can be found in the Options menu.\n\nExisting item unlocks can still be used while Data Communication is disabled.";
 
 				public static LocString BUTTON_OK = "Continue";
 
-				public static LocString BUTTON_OPEN_SETTINGS = "Open Options";
+				public static LocString BUTTON_OPEN_SETTINGS = "Options Menu";
+			}
+		}
+
+		public class JOY_RESPONSE_DESIGNER_SCREEN
+		{
+			public static LocString CATEGORY_HEADER = "OVERJOYED RESPONSES";
+
+			public static LocString BUTTON_APPLY_TO_MINION = "Assign to {MinionName}";
+
+			public static LocString TOOLTIP_NO_FACADES_FOR_JOY_TRAIT = "There aren't any blueprints for {JoyResponseType} Duplicants yet";
+
+			public static LocString TOOLTIP_PICK_JOY_RESPONSE_ERROR_LOCKED = "Cannot assign this overjoyed response to {MinionName} because my colony doesn't have it's blueprint yet";
+
+			public class CHANGES_NOT_SAVED_WARNING_POPUP
+			{
+				public static LocString HEADER = "Discard changes to {MinionName}'s overjoyed response?";
 			}
 		}
 
@@ -4583,6 +4599,8 @@ namespace STRINGS
 			public static LocString MINIONS_OUTFIT = "{MinionName}'s Current Outfit";
 
 			public static LocString NONE = "Default Outfit";
+
+			public static LocString NONE_JOY_RESPONSE = "Default Overjoyed Blueprint";
 		}
 
 		public class OUTFIT_DESCRIPTION
@@ -4600,6 +4618,8 @@ namespace STRINGS
 			public static LocString NO_DUPE_HATS = "Default Headgear";
 
 			public static LocString NO_DUPE_ACCESSORIES = "Default Accessory";
+
+			public static LocString NO_JOY_RESPONSE = "Default Overjoyed Response";
 		}
 
 		public class MINION_BROWSER_SCREEN
@@ -4610,7 +4630,11 @@ namespace STRINGS
 
 			public static LocString BUTTON_EDIT_OUTFIT_ITEMS = "Restyle Outfit";
 
+			public static LocString BUTTON_EDIT_JOY_RESPONSE = "Restyle Overjoyed Response";
+
 			public static LocString OUTFIT_TYPE_CLOTHING = "CLOTHING";
+
+			public static LocString OUTFIT_TYPE_JOY_RESPONSE = "OVERJOYED RESPONSE";
 		}
 
 		public class PERMIT_RARITY
@@ -4675,6 +4699,41 @@ namespace STRINGS
 			public class BASIC_PINK_ORCHID
 			{
 				public static LocString NAME = "Basic Bubblegum Outfit";
+			}
+
+			public class BASIC_DEEPRED
+			{
+				public static LocString NAME = "Team Captain Outfit";
+			}
+
+			public class BASIC_BLUE_COBALT
+			{
+				public static LocString NAME = "True Blue Outfit";
+			}
+
+			public class BASIC_PINK_FLAMINGO
+			{
+				public static LocString NAME = "Pep Rally Outfit";
+			}
+
+			public class BASIC_GREEN_KELLY
+			{
+				public static LocString NAME = "Go Team! Outfit";
+			}
+
+			public class BASIC_GREY_CHARCOAL
+			{
+				public static LocString NAME = "Underdog Outfit";
+			}
+
+			public class BASIC_LEMON
+			{
+				public static LocString NAME = "Team Hype Outfit";
+			}
+
+			public class BASIC_SATSUMA
+			{
+				public static LocString NAME = "Superfan Outfit";
 			}
 		}
 
@@ -5624,7 +5683,7 @@ namespace STRINGS
 
 			public static LocString NO_CODEX_ENTRY = "No database entry available";
 
-			public static LocString CHANGE_OUTFIT = "Change this Duplicant's ouitfit";
+			public static LocString CHANGE_OUTFIT = "Change this Duplicant's outfit";
 
 			public static LocString METERSCREEN_AVGSTRESS = "Highest Stress: {0}";
 
@@ -7099,7 +7158,7 @@ namespace STRINGS
 			{
 				public static LocString TITLE = "<b>Welcome to Oxygen Not Included!</b>";
 
-				public static LocString BODY = "Whoops!\n\nYou’re about to opt in to the <b>Previous Update branch</b>. That means opting out of all new features, fixes and content from the live branch.\n\nThis branch is temporary. It will be replaced when the next update is released. It’s also completely unsupported—please don’t report bugs or issues you find here.\n\nAre you sure you want to opt in?";
+				public static LocString BODY = "Whoops!\n\nYou're about to opt in to the <b>Previous Update branch</b>. That means opting out of all new features, fixes and content from the live branch.\n\nThis branch is temporary. It will be replaced when the next update is released. It's also completely unsupported—please don't report bugs or issues you find here.\n\nAre you sure you want to opt in?";
 
 				public static LocString CONTINUEBUTTON = "Play Old Version";
 
@@ -7517,7 +7576,7 @@ namespace STRINGS
 				{
 					public static LocString NAME = "LIGHT OVERLAY";
 
-					public static LocString LITAREA = "<b>Lit Area</b>\nWorking in well lit areas improves Duplicant " + UI.PRE_KEYWORD + "Morale" + UI.PST_KEYWORD;
+					public static LocString LITAREA = "<b>Lit Area</b>\nWorking in well-lit areas improves Duplicant " + UI.PRE_KEYWORD + "Morale" + UI.PST_KEYWORD;
 
 					public static LocString DARK = "<b>Unlit Area</b>\nWorking in the dark has no effect on Duplicants";
 				}
@@ -8834,6 +8893,8 @@ namespace STRINGS
 
 			public class ROCKETRESTRICTIONSIDESCREEN
 			{
+				public static LocString TITLE = "Rocket Restrictions";
+
 				public static LocString BUILDING_RESTRICTIONS_LABEL = "Interior Building Restrictions";
 
 				public static LocString NONE_RESTRICTION_BUTTON = "None";
@@ -9714,13 +9775,13 @@ namespace STRINGS
 					" and output"
 				});
 
-				public static LocString GEOTUNER_LIMIT_TOOLTIP = "This geyser cannot be targeted by more Geotuners.";
+				public static LocString GEOTUNER_LIMIT_TOOLTIP = "This geyser cannot be targeted by more " + UI.PRE_KEYWORD + "Geotuners" + UI.PST_KEYWORD;
 
 				public static LocString STUDIED_TOOLTIP_MATERIAL = "Required resource: {MATERIAL}";
 
 				public static LocString STUDIED_TOOLTIP_POTENTIAL_OUTPUT = "Potential Output {POTENTIAL_OUTPUT}";
 
-				public static LocString STUDIED_TOOLTIP_BASE_TEMP = "Base  {BASE}";
+				public static LocString STUDIED_TOOLTIP_BASE_TEMP = "Base {BASE}";
 
 				public static LocString STUDIED_TOOLTIP_VISIT_GEYSER = "Double-click to view this geyser";
 
@@ -11315,7 +11376,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = UI.FormatAsLink("Base", "BUILD_CATEGORY_BASE");
 
-				public static LocString TOOLTIP = "Maintain your colony's infrastructure with these homebase basics. {Hotkey}";
+				public static LocString TOOLTIP = "Maintain the colony's infrastructure with these homebase basics. {Hotkey}";
 			}
 
 			public static class INFRASTRUCTURE
@@ -11360,15 +11421,30 @@ namespace STRINGS
 				public static LocString BUILDMENUTITLE = "Ladders";
 
 				public static LocString TOOLTIP = "";
+
+				public static LocString INVISIBLETAG = "";
 			}
 
 			public static class TILES
 			{
-				public static LocString NAME = "Tiles";
+				public static LocString NAME = "Tiles and Drywall";
 
-				public static LocString BUILDMENUTITLE = "Tiles";
+				public static LocString BUILDMENUTITLE = "Tiles and Drywall";
 
 				public static LocString TOOLTIP = "";
+
+				public static LocString INVISIBLETAG = "";
+			}
+
+			public static class PRINTINGPODS
+			{
+				public static LocString NAME = "Printing Pods";
+
+				public static LocString BUILDMENUTITLE = "Printing Pods";
+
+				public static LocString TOOLTIP = "";
+
+				public static LocString INVISIBLETAG = "";
 			}
 
 			public static class DOORS
@@ -11378,15 +11454,8 @@ namespace STRINGS
 				public static LocString BUILDMENUTITLE = "Doors";
 
 				public static LocString TOOLTIP = "";
-			}
 
-			public static class TRAVELTUBES
-			{
-				public static LocString NAME = "Transit\nTubes";
-
-				public static LocString BUILDMENUTITLE = "Transit Tubes";
-
-				public static LocString TOOLTIP = "";
+				public static LocString INVISIBLETAG = "";
 			}
 
 			public static class STORAGE
@@ -11396,105 +11465,63 @@ namespace STRINGS
 				public static LocString BUILDMENUTITLE = "Storage";
 
 				public static LocString TOOLTIP = "";
+
+				public static LocString INVISIBLETAG = "";
 			}
 
-			public static class RESEARCH
+			public static class TRANSPORT
 			{
-				public static LocString NAME = "Research";
+				public static LocString NAME = "Transit Tubes";
 
-				public static LocString BUILDMENUTITLE = "Research";
+				public static LocString BUILDMENUTITLE = "Transit Tubes";
 
 				public static LocString TOOLTIP = "";
+
+				public static LocString INVISIBLETAG = "";
 			}
 
-			public static class GENERATORS
+			public static class PRODUCERS
 			{
-				public static LocString NAME = "Generators";
+				public static LocString NAME = "Production";
 
-				public static LocString BUILDMENUTITLE = "Generators";
+				public static LocString BUILDMENUTITLE = "Production";
 
 				public static LocString TOOLTIP = "";
+
+				public static LocString INVISIBLETAG = "";
 			}
 
-			public static class WIRES
+			public static class SCRUBBERS
 			{
-				public static LocString NAME = "Wires";
+				public static LocString NAME = "Purification";
 
-				public static LocString BUILDMENUTITLE = "Wires";
+				public static LocString BUILDMENUTITLE = "Purification";
 
 				public static LocString TOOLTIP = "";
+
+				public static LocString INVISIBLETAG = "";
 			}
 
-			public static class POWERCONTROL
+			public static class BATTERIES
 			{
-				public static LocString NAME = "Power\nRegulation";
+				public static LocString NAME = "Batteries";
 
-				public static LocString BUILDMENUTITLE = "Power Regulation";
+				public static LocString BUILDMENUTITLE = "Batteries";
 
 				public static LocString TOOLTIP = "";
+
+				public static LocString INVISIBLETAG = "";
 			}
 
-			public static class PLUMBINGSTRUCTURES
+			public static class SWITCHES
 			{
-				public static LocString NAME = "Plumbing";
+				public static LocString NAME = "Switches";
 
-				public static LocString BUILDMENUTITLE = "Plumbing";
-
-				public static LocString TOOLTIP = "Get your water running and the sewage flowing. {Hotkey}";
-			}
-
-			public static class PIPES
-			{
-				public static LocString NAME = "Pipes";
-
-				public static LocString BUILDMENUTITLE = "Pipes";
+				public static LocString BUILDMENUTITLE = "Switches";
 
 				public static LocString TOOLTIP = "";
-			}
 
-			public static class VENTILATIONSTRUCTURES
-			{
-				public static LocString NAME = "Ventilation";
-
-				public static LocString BUILDMENUTITLE = "Ventilation";
-
-				public static LocString TOOLTIP = "Control the flow of gas in your base. {Hotkey}";
-			}
-
-			public static class CONVEYANCE
-			{
-				public static LocString NAME = "Ore\nTransport";
-
-				public static LocString BUILDMENUTITLE = "Ore Transport";
-
-				public static LocString TOOLTIP = "Move solids objects around. {Hotkey}";
-			}
-
-			public static class LOGICWIRING
-			{
-				public static LocString NAME = "Logic\nWiring";
-
-				public static LocString BUILDMENUTITLE = "Logic Wiring";
-
-				public static LocString TOOLTIP = "";
-			}
-
-			public static class LOGICGATES
-			{
-				public static LocString NAME = "Logic\nGates";
-
-				public static LocString BUILDMENUTITLE = "Logic Gates";
-
-				public static LocString TOOLTIP = "";
-			}
-
-			public static class LOGICSWITCHES
-			{
-				public static LocString NAME = "Logic\nSwitches";
-
-				public static LocString BUILDMENUTITLE = "Logic Switches";
-
-				public static LocString TOOLTIP = "";
+				public static LocString INVISIBLETAG = "";
 			}
 
 			public static class COOKING
@@ -11504,6 +11531,8 @@ namespace STRINGS
 				public static LocString BUILDMENUTITLE = "Cooking";
 
 				public static LocString TOOLTIP = "";
+
+				public static LocString INVISIBLETAG = "";
 			}
 
 			public static class FARMING
@@ -11513,6 +11542,8 @@ namespace STRINGS
 				public static LocString BUILDMENUTITLE = "Farming";
 
 				public static LocString TOOLTIP = "";
+
+				public static LocString INVISIBLETAG = "";
 			}
 
 			public static class RANCHING
@@ -11522,6 +11553,305 @@ namespace STRINGS
 				public static LocString BUILDMENUTITLE = "Ranching";
 
 				public static LocString TOOLTIP = "";
+
+				public static LocString INVISIBLETAG = "";
+			}
+
+			public static class WASHROOM
+			{
+				public static LocString NAME = "Washroom";
+
+				public static LocString BUILDMENUTITLE = "Washroom";
+
+				public static LocString TOOLTIP = "";
+
+				public static LocString INVISIBLETAG = "";
+			}
+
+			public static class VALVES
+			{
+				public static LocString NAME = "Valves";
+
+				public static LocString BUILDMENUTITLE = "Valves";
+
+				public static LocString TOOLTIP = "";
+
+				public static LocString INVISIBLETAG = "";
+			}
+
+			public static class PUMPS
+			{
+				public static LocString NAME = "Pumps";
+
+				public static LocString BUILDMENUTITLE = "Pumps";
+
+				public static LocString TOOLTIP = "";
+
+				public static LocString INVISIBLETAG = "";
+			}
+
+			public static class SENSORS
+			{
+				public static LocString NAME = "Sensors";
+
+				public static LocString BUILDMENUTITLE = "Sensors";
+
+				public static LocString TOOLTIP = "";
+
+				public static LocString INVISIBLETAG = "";
+			}
+
+			public static class PORTS
+			{
+				public static LocString NAME = "Ports";
+
+				public static LocString BUILDMENUTITLE = "Ports";
+
+				public static LocString TOOLTIP = "";
+
+				public static LocString INVISIBLETAG = "";
+			}
+
+			public static class MATERIALS
+			{
+				public static LocString NAME = "Materials";
+
+				public static LocString BUILDMENUTITLE = "Materials";
+
+				public static LocString TOOLTIP = "";
+
+				public static LocString INVISIBLETAG = "";
+			}
+
+			public static class OIL
+			{
+				public static LocString NAME = "Oil";
+
+				public static LocString BUILDMENUTITLE = "Oil";
+
+				public static LocString TOOLTIP = "";
+
+				public static LocString INVISIBLETAG = "";
+			}
+
+			public static class ADVANCED
+			{
+				public static LocString NAME = "Advanced";
+
+				public static LocString BUILDMENUTITLE = "Advanced";
+
+				public static LocString TOOLTIP = "";
+
+				public static LocString INVISIBLETAG = "";
+			}
+
+			public static class BEDS
+			{
+				public static LocString NAME = "Beds";
+
+				public static LocString BUILDMENUTITLE = "Beds";
+
+				public static LocString TOOLTIP = "";
+
+				public static LocString INVISIBLETAG = "";
+			}
+
+			public static class LIGHTS
+			{
+				public static LocString NAME = "Lights";
+
+				public static LocString BUILDMENUTITLE = "Lights";
+
+				public static LocString TOOLTIP = "";
+
+				public static LocString INVISIBLETAG = "";
+			}
+
+			public static class DINING
+			{
+				public static LocString NAME = "Dining";
+
+				public static LocString BUILDMENUTITLE = "Dining";
+
+				public static LocString TOOLTIP = "";
+
+				public static LocString INVISIBLETAG = "";
+			}
+
+			public static class MANUFACTURING
+			{
+				public static LocString NAME = "Manufacturing";
+
+				public static LocString BUILDMENUTITLE = "Manufacturing";
+
+				public static LocString TOOLTIP = "";
+
+				public static LocString INVISIBLETAG = "";
+			}
+
+			public static class TEMPERATURE
+			{
+				public static LocString NAME = "Temperature";
+
+				public static LocString BUILDMENUTITLE = "Temperature";
+
+				public static LocString TOOLTIP = "";
+
+				public static LocString INVISIBLETAG = "";
+			}
+
+			public static class RESEARCH
+			{
+				public static LocString NAME = "Research";
+
+				public static LocString BUILDMENUTITLE = "Research";
+
+				public static LocString TOOLTIP = "";
+
+				public static LocString INVISIBLETAG = "";
+			}
+
+			public static class GENERATORS
+			{
+				public static LocString NAME = "Generators";
+
+				public static LocString BUILDMENUTITLE = "Generators";
+
+				public static LocString TOOLTIP = "";
+
+				public static LocString INVISIBLETAG = "";
+			}
+
+			public static class WIRES
+			{
+				public static LocString NAME = "Wires";
+
+				public static LocString BUILDMENUTITLE = "Wires";
+
+				public static LocString TOOLTIP = "";
+
+				public static LocString INVISIBLETAG = "";
+			}
+
+			public static class LOGICGATES
+			{
+				public static LocString NAME = "Gates";
+
+				public static LocString BUILDMENUTITLE = "Gates";
+
+				public static LocString TOOLTIP = "";
+
+				public static LocString INVISIBLETAG = "";
+			}
+
+			public static class TRANSMISSIONS
+			{
+				public static LocString NAME = "Transmissions";
+
+				public static LocString BUILDMENUTITLE = "Transmissions";
+
+				public static LocString TOOLTIP = "";
+
+				public static LocString INVISIBLETAG = "";
+			}
+
+			public static class LOGICMANAGER
+			{
+				public static LocString NAME = "Monitoring";
+
+				public static LocString BUILDMENUTITLE = "Monitoring";
+
+				public static LocString TOOLTIP = "";
+
+				public static LocString INVISIBLETAG = "";
+			}
+
+			public static class LOGICAUDIO
+			{
+				public static LocString NAME = "Ambience";
+
+				public static LocString BUILDMENUTITLE = "Ambience";
+
+				public static LocString TOOLTIP = "";
+
+				public static LocString INVISIBLETAG = "";
+			}
+
+			public static class CONVEYANCESTRUCTURES
+			{
+				public static LocString NAME = "Structural";
+
+				public static LocString BUILDMENUTITLE = "Structural";
+
+				public static LocString TOOLTIP = "";
+
+				public static LocString INVISIBLETAG = "";
+			}
+
+			public static class BUILDMENUPORTS
+			{
+				public static LocString NAME = "Ports";
+
+				public static LocString BUILDMENUTITLE = "Ports";
+
+				public static LocString TOOLTIP = "";
+
+				public static LocString INVISIBLETAG = "";
+			}
+
+			public static class POWERCONTROL
+			{
+				public static LocString NAME = "Power\nRegulation";
+
+				public static LocString BUILDMENUTITLE = "Power Regulation";
+
+				public static LocString TOOLTIP = "";
+
+				public static LocString INVISIBLETAG = "";
+			}
+
+			public static class PLUMBINGSTRUCTURES
+			{
+				public static LocString NAME = "Plumbing";
+
+				public static LocString BUILDMENUTITLE = "Plumbing";
+
+				public static LocString TOOLTIP = "Get the colony's water running and its sewage flowing. {Hotkey}";
+
+				public static LocString INVISIBLETAG = "";
+			}
+
+			public static class PIPES
+			{
+				public static LocString NAME = "Pipes";
+
+				public static LocString BUILDMENUTITLE = "Pipes";
+
+				public static LocString TOOLTIP = "";
+
+				public static LocString INVISIBLETAG = "";
+			}
+
+			public static class VENTILATIONSTRUCTURES
+			{
+				public static LocString NAME = "Ventilation";
+
+				public static LocString BUILDMENUTITLE = "Ventilation";
+
+				public static LocString TOOLTIP = "Control the flow of gas in your base. {Hotkey}";
+
+				public static LocString INVISIBLETAG = "";
+			}
+
+			public static class CONVEYANCE
+			{
+				public static LocString NAME = "Ore\nTransport";
+
+				public static LocString BUILDMENUTITLE = "Ore Transport";
+
+				public static LocString TOOLTIP = "Transport ore and solid materials around my base. {Hotkey}";
+
+				public static LocString INVISIBLETAG = "";
 			}
 
 			public static class HYGIENE
@@ -11530,7 +11860,9 @@ namespace STRINGS
 
 				public static LocString BUILDMENUTITLE = "Hygiene";
 
-				public static LocString TOOLTIP = "Keep my Duplicants clean.";
+				public static LocString TOOLTIP = "Keeps my Duplicants clean.";
+
+				public static LocString INVISIBLETAG = "";
 			}
 
 			public static class MEDICAL
@@ -11540,6 +11872,19 @@ namespace STRINGS
 				public static LocString BUILDMENUTITLE = "Medical";
 
 				public static LocString TOOLTIP = "A cure for everything but the common cold. {Hotkey}";
+
+				public static LocString INVISIBLETAG = "";
+			}
+
+			public static class WELLNESS
+			{
+				public static LocString NAME = "Wellness";
+
+				public static LocString BUILDMENUTITLE = "Wellness";
+
+				public static LocString TOOLTIP = "";
+
+				public static LocString INVISIBLETAG = "";
 			}
 
 			public static class RECREATION
@@ -11549,6 +11894,8 @@ namespace STRINGS
 				public static LocString BUILDMENUTITLE = "Recreation";
 
 				public static LocString TOOLTIP = "Everything needed to reduce stress and increase fun.";
+
+				public static LocString INVISIBLETAG = "";
 			}
 
 			public static class FURNITURE
@@ -11558,6 +11905,8 @@ namespace STRINGS
 				public static LocString BUILDMENUTITLE = "Furniture";
 
 				public static LocString TOOLTIP = "Amenities to keep my Duplicants happy, comfy and efficient. {Hotkey}";
+
+				public static LocString INVISIBLETAG = "";
 			}
 
 			public static class DECOR
@@ -11567,6 +11916,8 @@ namespace STRINGS
 				public static LocString BUILDMENUTITLE = "Decor";
 
 				public static LocString TOOLTIP = "Spruce up your colony with some lovely interior decorating. {Hotkey}";
+
+				public static LocString INVISIBLETAG = "";
 			}
 
 			public static class OXYGEN
@@ -11575,16 +11926,20 @@ namespace STRINGS
 
 				public static LocString BUILDMENUTITLE = "Oxygen";
 
-				public static LocString TOOLTIP = "Everything you need to keep your colony breathing. {Hotkey}";
+				public static LocString TOOLTIP = "Everything I need to keep my colony breathing. {Hotkey}";
+
+				public static LocString INVISIBLETAG = "";
 			}
 
 			public static class UTILITIES
 			{
-				public static LocString NAME = "Temperature\nControl";
+				public static LocString NAME = "Temperature";
 
-				public static LocString BUILDMENUTITLE = "Temperature Control";
+				public static LocString BUILDMENUTITLE = "Temperature";
 
 				public static LocString TOOLTIP = "";
+
+				public static LocString INVISIBLETAG = "";
 			}
 
 			public static class REFINING
@@ -11594,15 +11949,107 @@ namespace STRINGS
 				public static LocString BUILDMENUTITLE = "Refinement";
 
 				public static LocString TOOLTIP = "Use the resources you want, filter the ones you don't. {Hotkey}";
+
+				public static LocString INVISIBLETAG = "";
 			}
 
 			public static class EQUIPMENT
 			{
-				public static LocString NAME = "Stations";
+				public static LocString NAME = "Equipment";
 
-				public static LocString BUILDMENUTITLE = "Stations";
+				public static LocString BUILDMENUTITLE = "Equipment";
 
 				public static LocString TOOLTIP = "Unlock new technologies through the power of science! {Hotkey}";
+
+				public static LocString INVISIBLETAG = "";
+			}
+
+			public static class ARCHAEOLOGY
+			{
+				public static LocString NAME = "Archaeology";
+
+				public static LocString BUILDMENUTITLE = "Archaeology";
+
+				public static LocString TOOLTIP = "";
+
+				public static LocString INVISIBLETAG = "";
+			}
+
+			public static class INDUSTRIALSTATION
+			{
+				public static LocString NAME = "Industrial";
+
+				public static LocString BUILDMENUTITLE = "Industrial";
+
+				public static LocString TOOLTIP = "";
+
+				public static LocString INVISIBLETAG = "";
+			}
+
+			public static class TELESCOPES
+			{
+				public static LocString NAME = "Telescopes";
+
+				public static LocString BUILDMENUTITLE = "Telescopes";
+
+				public static LocString TOOLTIP = "Unlock new technologies through the power of science! {Hotkey}";
+
+				public static LocString INVISIBLETAG = "";
+			}
+
+			public static class FITTINGS
+			{
+				public static LocString NAME = "Fittings";
+
+				public static LocString BUILDMENUTITLE = "Fittings";
+
+				public static LocString TOOLTIP = "";
+
+				public static LocString INVISIBLETAG = "";
+			}
+
+			public static class SANITATION
+			{
+				public static LocString NAME = "Sanitation";
+
+				public static LocString BUILDMENUTITLE = "Sanitation";
+
+				public static LocString TOOLTIP = "";
+
+				public static LocString INVISIBLETAG = "";
+			}
+
+			public static class AUTOMATED
+			{
+				public static LocString NAME = "Automated";
+
+				public static LocString BUILDMENUTITLE = "Automated";
+
+				public static LocString TOOLTIP = "";
+
+				public static LocString INVISIBLETAG = "";
+			}
+
+			public static class ROCKETSTRUCTURES
+			{
+				public static LocString NAME = "Structural";
+
+				public static LocString BUILDMENUTITLE = "Structural";
+
+				public static LocString TOOLTIP = "";
+
+				public static LocString INVISIBLETAG = "";
+			}
+
+			public static class ROCKETNAV
+			{
+				public static LocString NAME = "Navigation";
+
+				public static LocString BUILDMENUTITLE = "Navigation";
+
+				public static LocString TOOLTIP = "";
+
+				public static LocString INVISIBLETAG = "";
 			}
 
 			public static class CONDUITSENSORS
@@ -11612,6 +12059,8 @@ namespace STRINGS
 				public static LocString BUILDMENUTITLE = "Pipe Sensors";
 
 				public static LocString TOOLTIP = "";
+
+				public static LocString INVISIBLETAG = "";
 			}
 
 			public static class ROCKETRY
@@ -11621,6 +12070,8 @@ namespace STRINGS
 				public static LocString BUILDMENUTITLE = "Rocketry";
 
 				public static LocString TOOLTIP = "Rocketry {Hotkey}";
+
+				public static LocString INVISIBLETAG = "";
 			}
 		}
 
@@ -11788,7 +12239,7 @@ namespace STRINGS
 
 				public static LocString TOOLNAME = "Place tool";
 
-				public static LocString TOOLACTION = UI.CLICK(UI.ClickType.CLICK) + "  TO PLACE";
+				public static LocString TOOLACTION = UI.CLICK(UI.ClickType.CLICK) + " TO PLACE";
 
 				public class REASONS
 				{
@@ -11836,6 +12287,17 @@ namespace STRINGS
 				public static LocString NAME = "Disinfect";
 
 				public static LocString TOOLNAME = "Disinfect tool";
+
+				public static LocString TOOLACTION = "DRAG";
+			}
+
+			public class DISCONNECT
+			{
+				public static LocString NAME = "Disconnect";
+
+				public static LocString TOOLTIP = "Sever conduits and connectors {Hotkey}";
+
+				public static LocString TOOLNAME = "Disconnect tool";
 
 				public static LocString TOOLACTION = "DRAG";
 			}
@@ -12471,6 +12933,21 @@ namespace STRINGS
 
 				public static LocString ALL_TOOLTIP = "These conditions must be fulfilled in order to launch a rocket mission";
 			}
+		}
+
+		public class BUILDMENU
+		{
+			public static LocString GRID_VIEW_TOGGLE_TOOLTIP = "Toggle Grid View";
+
+			public static LocString LIST_VIEW_TOGGLE_TOOLTIP = "Toggle List View";
+
+			public static LocString NO_SEARCH_RESULTS = "NO RESULTS FOUND";
+
+			public static LocString SEARCH_RESULTS_HEADER = "SEARCH RESULTS";
+
+			public static LocString SEARCH_TEXT_PLACEHOLDER = "Search all buildings...";
+
+			public static LocString CLEAR_SEARCH_TOOLTIP = "Clear search";
 		}
 
 		public class BUILDINGEFFECTS

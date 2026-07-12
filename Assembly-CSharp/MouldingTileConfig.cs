@@ -40,6 +40,7 @@ public class MouldingTileConfig : IBuildingConfig
 		buildingDef.BlockTileMaterial = Assets.GetMaterial("tiles_solid");
 		buildingDef.DecorBlockTileInfo = Assets.GetBlockTileDecorInfo("tiles_bunker_tops_decor_info");
 		buildingDef.DecorPlaceBlockTileInfo = Assets.GetBlockTileDecorInfo("tiles_bunker_tops_decor_place_info");
+		buildingDef.Deprecated = true;
 		return buildingDef;
 	}
 

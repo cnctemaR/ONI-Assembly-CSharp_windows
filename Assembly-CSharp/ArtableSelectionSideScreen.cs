@@ -71,10 +71,9 @@ public class ArtableSelectionSideScreen : SideScreenContent
 			if (!(artableStage.id == "Default"))
 			{
 				GameObject gameObject = Util.KInstantiateUI(this.stateButtonPrefab, this.buttonContainer.gameObject, true);
-				PermitPresentationInfo permitPresentationInfo = PermitItems.GetPermitPresentationInfo(artableStage.PermitId);
-				Sprite sprite = permitPresentationInfo.sprite;
+				Sprite sprite = artableStage.GetPermitPresentationInfo().sprite;
 				MultiToggle component = gameObject.GetComponent<MultiToggle>();
-				component.GetComponent<ToolTip>().SetSimpleTooltip(permitPresentationInfo.name);
+				component.GetComponent<ToolTip>().SetSimpleTooltip(artableStage.Name);
 				component.GetComponent<HierarchyReferences>().GetReference<Image>("Icon").sprite = sprite;
 				this.buttons.Add(artableStage.id, component);
 			}

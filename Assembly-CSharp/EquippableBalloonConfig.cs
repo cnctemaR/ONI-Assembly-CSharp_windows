@@ -22,46 +22,50 @@ public class EquippableBalloonConfig : IEquipmentConfig
 
 	private void OnEquipBalloon(Equippable eq)
 	{
-		if (eq != null && eq.assignee != null)
+		if (!eq.IsNullOrDestroyed() && !eq.assignee.IsNullOrDestroyed())
 		{
 			Ownables soleOwner = eq.assignee.GetSoleOwner();
-			if (soleOwner == null)
+			if (soleOwner.IsNullOrDestroyed())
 			{
 				return;
 			}
-			MinionAssignablesProxy component = soleOwner.GetComponent<MinionAssignablesProxy>();
-			Effects component2 = (component.target as KMonoBehaviour).GetComponent<Effects>();
-			if (component2 != null)
+			KMonoBehaviour kmonoBehaviour = (KMonoBehaviour)soleOwner.GetComponent<MinionAssignablesProxy>().target;
+			Effects component = kmonoBehaviour.GetComponent<Effects>();
+			KSelectable component2 = kmonoBehaviour.GetComponent<KSelectable>();
+			if (!component.IsNullOrDestroyed())
 			{
-				component2.Add("HasBalloon", false);
-				this.fx = new BalloonFX.Instance((component.target as KMonoBehaviour).GetComponent<KMonoBehaviour>());
-				this.fx.StartSM();
+				component.Add("HasBalloon", false);
+				EquippableBalloon component3 = eq.GetComponent<EquippableBalloon>();
+				EquippableBalloon.StatesInstance statesInstance = (EquippableBalloon.StatesInstance)component3.GetSMI();
+				component2.AddStatusItem(Db.Get().DuplicantStatusItems.JoyResponse_HasBalloon, statesInstance);
+				this.SpawnFxInstanceFor(kmonoBehaviour);
+				component3.ApplyBalloonOverrideToBalloonFx();
 			}
 		}
 	}
 
 	private void OnUnequipBalloon(Equippable eq)
 	{
-		if (eq != null && eq.assignee != null)
+		if (!eq.IsNullOrDestroyed() && !eq.assignee.IsNullOrDestroyed())
 		{
 			Ownables soleOwner = eq.assignee.GetSoleOwner();
-			if (soleOwner == null)
+			if (soleOwner.IsNullOrDestroyed())
 			{
 				return;
 			}
 			MinionAssignablesProxy component = soleOwner.GetComponent<MinionAssignablesProxy>();
 			if (!component.target.IsNullOrDestroyed())
 			{
-				Effects component2 = (component.target as KMonoBehaviour).GetComponent<Effects>();
-				if (component2 != null)
+				KMonoBehaviour kmonoBehaviour = (KMonoBehaviour)component.target;
+				Effects component2 = kmonoBehaviour.GetComponent<Effects>();
+				KSelectable component3 = kmonoBehaviour.GetComponent<KSelectable>();
+				if (!component2.IsNullOrDestroyed())
 				{
 					component2.Remove("HasBalloon");
+					component3.RemoveStatusItem(Db.Get().DuplicantStatusItems.JoyResponse_HasBalloon, false);
+					this.DestroyFxInstanceFor(kmonoBehaviour);
 				}
 			}
-		}
-		if (this.fx != null)
-		{
-			this.fx.StopSM("Unequipped");
 		}
 		Util.KDestroyGameObject(eq.gameObject);
 	}
@@ -70,7 +74,7 @@ public class EquippableBalloonConfig : IEquipmentConfig
 	{
 		go.GetComponent<KPrefabID>().AddTag(GameTags.Clothes, false);
 		Equippable equippable = go.GetComponent<Equippable>();
-		if (equippable == null)
+		if (equippable.IsNullOrDestroyed())
 		{
 			equippable = go.AddComponent<Equippable>();
 		}
@@ -79,7 +83,15 @@ public class EquippableBalloonConfig : IEquipmentConfig
 		go.AddOrGet<EquippableBalloon>();
 	}
 
-	public const string ID = "EquippableBalloon";
+	private void SpawnFxInstanceFor(KMonoBehaviour target)
+	{
+		new BalloonFX.Instance(target.GetComponent<KMonoBehaviour>()).StartSM();
+	}
 
-	private BalloonFX.Instance fx;
+	private void DestroyFxInstanceFor(KMonoBehaviour target)
+	{
+		target.GetSMI<BalloonFX.Instance>().StopSM("Unequipped");
+	}
+
+	public const string ID = "EquippableBalloon";
 }

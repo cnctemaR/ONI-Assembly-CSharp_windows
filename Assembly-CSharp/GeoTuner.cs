@@ -18,11 +18,8 @@ public class GeoTuner : GameStateMachine<GeoTuner, GeoTuner.Instance, IStateMach
 			.TagTransition(GameTags.Operational, this.operational, false);
 		this.nonOperational.off.PlayAnim("off");
 		this.nonOperational.switchingGeyser.QueueAnim("geyser_down", false, null).OnAnimQueueComplete(this.nonOperational.down);
-		this.nonOperational.down.PlayAnim("geyser_up").Enter(new StateMachine<GeoTuner, GeoTuner.Instance, IStateMachineTarget, GeoTuner.Def>.State.Callback(GeoTuner.RefreshAnimationGeyserSymbolType)).Enter(new StateMachine<GeoTuner, GeoTuner.Instance, IStateMachineTarget, GeoTuner.Def>.State.Callback(GeoTuner.TriggerSoundsForGeyserChange))
-			.ScheduleActionNextFrame("Switch Animation Completed", delegate(GeoTuner.Instance smi)
-			{
-				smi.GoTo(this.nonOperational);
-			});
+		this.nonOperational.down.PlayAnim("geyser_up").QueueAnim("off", false, null).Enter(new StateMachine<GeoTuner, GeoTuner.Instance, IStateMachineTarget, GeoTuner.Def>.State.Callback(GeoTuner.RefreshAnimationGeyserSymbolType))
+			.Enter(new StateMachine<GeoTuner, GeoTuner.Instance, IStateMachineTarget, GeoTuner.Def>.State.Callback(GeoTuner.TriggerSoundsForGeyserChange));
 		this.operational.PlayAnim("on").Enter(delegate(GeoTuner.Instance smi)
 		{
 			smi.RefreshLogicOutput();

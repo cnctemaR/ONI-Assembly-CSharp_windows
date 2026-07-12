@@ -13,7 +13,7 @@ public class DevTool_StoryTrait_CritterManipulator : DevTool
 			ImGui.Separator();
 			foreach (Tag tag in this.GetCritterSpeciesTags())
 			{
-				this.Button_OpenSpecies(tag, GravitasCreatureManipulatorConfig.GetNameForSpeciesTag(tag));
+				this.Button_OpenSpecies(tag, GravitasCreatureManipulatorConfig.GetNameForSpeciesTag(tag).Unwrap());
 			}
 		}
 	}

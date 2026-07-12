@@ -12,7 +12,7 @@ namespace Database
 		public KAnimFile AnimFile { get; private set; }
 
 		public EquippableFacadeResource(string id, string name, string buildOverride, string defID, string animFile)
-			: base(id, name, PermitCategory.Equipment, PermitRarity.Unknown)
+			: base(id, name, "n/a", PermitCategory.Equipment, PermitRarity.Unknown)
 		{
 			this.DefID = defID;
 			this.BuildOverride = buildOverride;
@@ -32,12 +32,7 @@ namespace Database
 		public override PermitPresentationInfo GetPermitPresentationInfo()
 		{
 			PermitPresentationInfo permitPresentationInfo = default(PermitPresentationInfo);
-			permitPresentationInfo.name = Strings.Get("STRINGS.EQUIPMENT.PREFABS." + this.DefID.ToUpper() + ".FACADES." + this.Name.ToUpper());
 			permitPresentationInfo.sprite = this.GetUISprite().first;
-			permitPresentationInfo.category = this.PermitCategory;
-			permitPresentationInfo.buildOverride = this.BuildOverride;
-			permitPresentationInfo.SetRarityDetailsFor(this.Rarity);
-			permitPresentationInfo.ownedCount = PermitItems.GetOwnedCount(this);
 			GameObject gameObject = Assets.TryGetPrefab(this.DefID);
 			if (gameObject == null || !gameObject)
 			{

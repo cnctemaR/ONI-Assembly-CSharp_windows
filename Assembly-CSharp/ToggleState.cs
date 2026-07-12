@@ -10,6 +10,12 @@ public struct ToggleState
 
 	public string on_release_override_sound_path;
 
+	public string sound_parameter_name;
+
+	public float sound_parameter_value;
+
+	public bool has_sound_parameter;
+
 	public Sprite sprite;
 
 	public Color color;

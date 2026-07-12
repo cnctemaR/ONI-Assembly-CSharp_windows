@@ -14,7 +14,7 @@ public class KleiPermitDioramaVis_ArtableSticker : KMonoBehaviour, IKleiPermitDi
 		SymbolOverrideControllerUtil.AddToPrefab(this.buildingKAnim.gameObject);
 	}
 
-	public void ConfigureWith(PermitResource permit, PermitPresentationInfo permitPresInfo)
+	public void ConfigureWith(PermitResource permit)
 	{
 		DbStickerBomb dbStickerBomb = (DbStickerBomb)permit;
 		KleiPermitVisUtil.ConfigureToRenderBuilding(this.buildingKAnim, dbStickerBomb);

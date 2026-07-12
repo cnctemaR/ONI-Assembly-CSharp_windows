@@ -13,7 +13,7 @@ public class KleiPermitDioramaVis_DupeEquipment : KMonoBehaviour, IKleiPermitDio
 	{
 	}
 
-	public void ConfigureWith(PermitResource permit, PermitPresentationInfo permitPresInfo)
+	public void ConfigureWith(PermitResource permit)
 	{
 		ClothingItemResource clothingItemResource = permit as ClothingItemResource;
 		if (clothingItemResource != null)

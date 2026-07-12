@@ -392,7 +392,16 @@ public class ReorderableBuilding : KMonoBehaviour
 		{
 			component2.CraftInterface.AddModule(component3);
 		}
-		Util.KDestroyGameObject(base.gameObject);
+		Deconstructable component4 = base.GetComponent<Deconstructable>();
+		if (component4 != null)
+		{
+			component4.SetAllowDeconstruction(true);
+			component4.ForceDestroyAndGetMaterials();
+		}
+		else
+		{
+			Util.KDestroyGameObject(base.gameObject);
+		}
 		return gameObject2;
 	}
 
@@ -408,14 +417,13 @@ public class ReorderableBuilding : KMonoBehaviour
 
 	public bool CanChangeModule()
 	{
-		string text;
 		if (base.GetComponent<BuildingUnderConstruction>() != null)
 		{
-			text = base.GetComponent<BuildingUnderConstruction>().Def.PrefabID;
+			string prefabID = base.GetComponent<BuildingUnderConstruction>().Def.PrefabID;
 		}
 		else
 		{
-			text = base.GetComponent<Building>().Def.PrefabID;
+			string prefabID2 = base.GetComponent<Building>().Def.PrefabID;
 		}
 		RocketModuleCluster component = base.GetComponent<RocketModuleCluster>();
 		if (component != null)
@@ -432,7 +440,7 @@ public class ReorderableBuilding : KMonoBehaviour
 				return false;
 			}
 		}
-		return text != this.templateBuildingID && text != Assets.GetBuildingDef(this.templateBuildingID).BuildingUnderConstruction.PrefabID();
+		return true;
 	}
 
 	public bool CanRemoveModule()
@@ -574,8 +582,6 @@ public class ReorderableBuilding : KMonoBehaviour
 			}
 		}
 	}
-
-	public string templateBuildingID = "UnconstructedRocketModule";
 
 	private bool cancelShield;
 

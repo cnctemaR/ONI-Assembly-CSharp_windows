@@ -166,6 +166,47 @@ public readonly struct Updater : IEnumerator
 		});
 	}
 
+	public static Updater Loop(params Func<Updater>[] makeUpdaterFns)
+	{
+		return Updater.Internal_Loop(Option.None, makeUpdaterFns);
+	}
+
+	public static Updater Loop(int loopCount, params Func<Updater>[] makeUpdaterFns)
+	{
+		return Updater.Internal_Loop(loopCount, makeUpdaterFns);
+	}
+
+	public static Updater Internal_Loop(Option<int> limitLoopCount, Func<Updater>[] makeUpdaterFns)
+	{
+		if (makeUpdaterFns == null || makeUpdaterFns.Length == 0)
+		{
+			return Updater.None();
+		}
+		int completedLoopCount = 0;
+		int currentIndex = 0;
+		Updater currentUpdater = makeUpdaterFns[currentIndex]();
+		return new Updater(delegate(float dt)
+		{
+			if (currentUpdater.Internal_Update(dt) == UpdaterResult.Complete)
+			{
+				int num = currentIndex;
+				currentIndex = num + 1;
+				if (currentIndex >= makeUpdaterFns.Length)
+				{
+					currentIndex -= makeUpdaterFns.Length;
+					num = completedLoopCount;
+					completedLoopCount = num + 1;
+					if (limitLoopCount.IsSome() && completedLoopCount >= limitLoopCount.Unwrap())
+					{
+						return UpdaterResult.Complete;
+					}
+				}
+				currentUpdater = makeUpdaterFns[currentIndex]();
+			}
+			return UpdaterResult.NotComplete;
+		});
+	}
+
 	public static Updater Parallel(params Updater[] updaters)
 	{
 		bool[] isCompleted = new bool[updaters.Length];
@@ -214,7 +255,7 @@ public readonly struct Updater : IEnumerator
 
 	public static Promise RunRoutine(MonoBehaviour monoBehaviour, IEnumerator coroutine)
 	{
-		Updater.<>c__DisplayClass22_0 CS$<>8__locals1 = new Updater.<>c__DisplayClass22_0();
+		Updater.<>c__DisplayClass25_0 CS$<>8__locals1 = new Updater.<>c__DisplayClass25_0();
 		CS$<>8__locals1.coroutine = coroutine;
 		CS$<>8__locals1.willComplete = new Promise();
 		monoBehaviour.StartCoroutine(CS$<>8__locals1.<RunRoutine>g__Routine|0());
@@ -228,7 +269,7 @@ public readonly struct Updater : IEnumerator
 
 	public static Promise Run(MonoBehaviour monoBehaviour, Updater updater)
 	{
-		Updater.<>c__DisplayClass24_0 CS$<>8__locals1 = new Updater.<>c__DisplayClass24_0();
+		Updater.<>c__DisplayClass27_0 CS$<>8__locals1 = new Updater.<>c__DisplayClass27_0();
 		CS$<>8__locals1.updater = updater;
 		CS$<>8__locals1.willComplete = new Promise();
 		monoBehaviour.StartCoroutine(CS$<>8__locals1.<Run>g__Routine|0());

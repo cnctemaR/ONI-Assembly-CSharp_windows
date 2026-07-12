@@ -26,7 +26,9 @@ public class MedicineInfo
 
 	public static Tag GetSupplyTagForStation(string stationID)
 	{
-		return new Tag(stationID + GameTags.MedicalSupplies.Name);
+		Tag tag = TagManager.Create(stationID + GameTags.MedicalSupplies.Name);
+		Assets.AddCountableTag(tag);
+		return tag;
 	}
 
 	public string id;

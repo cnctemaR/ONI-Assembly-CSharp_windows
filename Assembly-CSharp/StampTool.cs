@@ -9,12 +9,18 @@ public class StampTool : InterfaceTool
 	public static void DestroyInstance()
 	{
 		StampTool.Instance = null;
+		StampTool.previewPool = null;
+		StampTool.placerPool = null;
+		StampTool.previewPoolTransform = null;
+		StampTool.placerPoolTransform = null;
 	}
 
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
 		StampTool.Instance = this;
+		StampTool.placerPool = new GameObjectPool(new Func<GameObject>(StampTool.InstantiatePlacer), 0);
+		StampTool.previewPool = new HashMapObjectPool<Tag, Building>(new Func<Tag, Building>(StampTool.InstantiatePreview), 0);
 	}
 
 	private void Update()
@@ -26,7 +32,7 @@ public class StampTool : InterfaceTool
 	{
 		this.selectAffected = SelectAffected;
 		this.deactivateOnStamp = DeactivateOnStamp;
-		if (this.stampTemplate == template)
+		if (this.stampTemplate == template || template == null || template.cells == null)
 		{
 			return;
 		}
@@ -356,13 +362,13 @@ public class StampTool : InterfaceTool
 
 	public static StampTool Instance;
 
-	private static HashMapObjectPool<Tag, Building> previewPool = new HashMapObjectPool<Tag, Building>(new Func<Tag, Building>(StampTool.InstantiatePreview), 0);
+	private static HashMapObjectPool<Tag, Building> previewPool;
 
-	private static GameObjectPool placerPool = new GameObjectPool(new Func<GameObject>(StampTool.InstantiatePlacer), 0);
+	private static GameObjectPool placerPool;
 
-	private static Transform previewPoolTransform = null;
+	private static Transform previewPoolTransform;
 
-	private static Transform placerPoolTransform = null;
+	private static Transform placerPoolTransform;
 
 	public TemplateContainer stampTemplate;
 

@@ -204,8 +204,19 @@ public class SuitLocker : StateMachineComponent<SuitLocker.StatesInstance>
 			return;
 		}
 		base.GetComponent<Storage>().Drop(storedOutfit.gameObject, true);
+		Prioritizable component = storedOutfit.GetComponent<Prioritizable>();
+		PrioritySetting masterPriority = component.GetMasterPriority();
+		PrioritySetting prioritySetting = new PrioritySetting(PriorityScreen.PriorityClass.basic, 5);
+		if (component != null && component.GetMasterPriority().priority_class == PriorityScreen.PriorityClass.topPriority)
+		{
+			component.SetMasterPriority(prioritySetting);
+		}
 		storedOutfit.GetComponent<Equippable>().Assign(equipment.GetComponent<IAssignableIdentity>());
 		storedOutfit.GetComponent<EquippableWorkable>().CancelChore("Manual equip");
+		if (component != null && component.GetMasterPriority() != masterPriority)
+		{
+			component.SetMasterPriority(masterPriority);
+		}
 		equipment.Equip(storedOutfit.GetComponent<Equippable>());
 		this.returnSuitWorkable.CreateChore();
 	}

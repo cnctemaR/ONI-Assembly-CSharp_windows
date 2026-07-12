@@ -92,13 +92,23 @@ public class AchievementWidget : KMonoBehaviour
 			yield return SequenceUtil.WaitForNextFrame;
 		}
 		icon.transform.localScale = Vector3.one;
-		canvas.overrideSorting = false;
+		this.CompleteFlourish();
 		for (float i = 0f; i < 0.6f; i += Time.unscaledDeltaTime)
 		{
 			yield return SequenceUtil.WaitForNextFrame;
 		}
 		base.transform.localScale = Vector3.one;
 		yield break;
+	}
+
+	public void CompleteFlourish()
+	{
+		Canvas canvas = base.GetComponent<Canvas>();
+		if (canvas == null)
+		{
+			canvas = base.gameObject.AddComponent<Canvas>();
+		}
+		canvas.overrideSorting = false;
 	}
 
 	public void SetAchievedNow()

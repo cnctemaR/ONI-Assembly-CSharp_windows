@@ -56,28 +56,16 @@ namespace Database
 			GameplayEventPreconditions instance2 = GameplayEventPreconditions.Instance;
 			Skills skills = Db.Get().Skills;
 			RoomTypes roomTypes = Db.Get().RoomTypes;
-			this.BonusDream1 = base.Add(new BonusEvent("BonusDream1", null, 1, false, 0).TriggerOnUseBuilding(1, new string[]
-			{
-				BedConfig.ID,
-				LuxuryBedConfig.ID
-			}).SetRoomConstraints(false, new RoomType[] { roomTypes.Barracks }).AddPrecondition(instance2.BuildingExists(BedConfig.ID, 2))
-				.AddPriorityBoost(instance2.BuildingExists(BedConfig.ID, 5), 1)
-				.AddPriorityBoost(instance2.BuildingExists(LuxuryBedConfig.ID, 1), 5)
+			this.BonusDream1 = base.Add(new BonusEvent("BonusDream1", null, 1, false, 0).TriggerOnUseBuilding(1, new string[] { "Bed", "LuxuryBed" }).SetRoomConstraints(false, new RoomType[] { roomTypes.Barracks }).AddPrecondition(instance2.BuildingExists("Bed", 2))
+				.AddPriorityBoost(instance2.BuildingExists("Bed", 5), 1)
+				.AddPriorityBoost(instance2.BuildingExists("LuxuryBed", 1), 5)
 				.TrySpawnEventOnSuccess("BonusDream2"));
-			this.BonusDream2 = base.Add(new BonusEvent("BonusDream2", null, 1, false, 10).TriggerOnUseBuilding(10, new string[]
-			{
-				BedConfig.ID,
-				LuxuryBedConfig.ID
-			}).AddPrecondition(instance2.PastEventCountAndNotActive(this.BonusDream1, 1)).AddPrecondition(instance2.Or(instance2.RoomBuilt(roomTypes.Barracks), instance2.RoomBuilt(roomTypes.Bedroom)))
-				.AddPriorityBoost(instance2.BuildingExists(LuxuryBedConfig.ID, 1), 5)
+			this.BonusDream2 = base.Add(new BonusEvent("BonusDream2", null, 1, false, 10).TriggerOnUseBuilding(10, new string[] { "Bed", "LuxuryBed" }).AddPrecondition(instance2.PastEventCountAndNotActive(this.BonusDream1, 1)).AddPrecondition(instance2.Or(instance2.RoomBuilt(roomTypes.Barracks), instance2.RoomBuilt(roomTypes.Bedroom)))
+				.AddPriorityBoost(instance2.BuildingExists("LuxuryBed", 1), 5)
 				.TrySpawnEventOnSuccess("BonusDream3"));
-			this.BonusDream3 = base.Add(new BonusEvent("BonusDream3", null, 1, false, 20).TriggerOnUseBuilding(10, new string[]
-			{
-				BedConfig.ID,
-				LuxuryBedConfig.ID
-			}).AddPrecondition(instance2.PastEventCountAndNotActive(this.BonusDream2, 1)).AddPrecondition(instance2.Or(instance2.RoomBuilt(roomTypes.Barracks), instance2.RoomBuilt(roomTypes.Bedroom)))
+			this.BonusDream3 = base.Add(new BonusEvent("BonusDream3", null, 1, false, 20).TriggerOnUseBuilding(10, new string[] { "Bed", "LuxuryBed" }).AddPrecondition(instance2.PastEventCountAndNotActive(this.BonusDream2, 1)).AddPrecondition(instance2.Or(instance2.RoomBuilt(roomTypes.Barracks), instance2.RoomBuilt(roomTypes.Bedroom)))
 				.TrySpawnEventOnSuccess("BonusDream4"));
-			this.BonusDream4 = base.Add(new BonusEvent("BonusDream4", null, 1, false, 30).TriggerOnUseBuilding(10, new string[] { LuxuryBedConfig.ID }).AddPrecondition(instance2.PastEventCountAndNotActive(this.BonusDream2, 1)).AddPrecondition(instance2.Or(instance2.RoomBuilt(roomTypes.Barracks), instance2.RoomBuilt(roomTypes.Bedroom))));
+			this.BonusDream4 = base.Add(new BonusEvent("BonusDream4", null, 1, false, 30).TriggerOnUseBuilding(10, new string[] { "LuxuryBed" }).AddPrecondition(instance2.PastEventCountAndNotActive(this.BonusDream2, 1)).AddPrecondition(instance2.Or(instance2.RoomBuilt(roomTypes.Barracks), instance2.RoomBuilt(roomTypes.Bedroom))));
 			this.BonusToilet1 = base.Add(new BonusEvent("BonusToilet1", null, 1, false, 0).TriggerOnUseBuilding(1, new string[] { "Outhouse", "FlushToilet" }).AddPrecondition(instance2.Or(instance2.BuildingExists("Outhouse", 2), instance2.BuildingExists("FlushToilet", 1))).AddPrecondition(instance2.Or(instance2.BuildingExists("WashBasin", 2), instance2.BuildingExists("WashSink", 1)))
 				.AddPriorityBoost(instance2.BuildingExists("FlushToilet", 1), 1)
 				.TrySpawnEventOnSuccess("BonusToilet2"));

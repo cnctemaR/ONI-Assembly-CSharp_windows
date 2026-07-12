@@ -12,7 +12,7 @@ public class OutfitDesignerScreen : KMonoBehaviour
 {
 	public OutfitDesignerScreenConfig Config { get; private set; }
 
-	public Option<string> SelectedPermitID { get; private set; }
+	public PermitResource SelectedPermit { get; private set; }
 
 	public PermitCategory SelectedCategory { get; private set; }
 
@@ -106,11 +106,11 @@ public class OutfitDesignerScreen : KMonoBehaviour
 			return;
 		}
 		this.RegisterPreventScreenPop();
-		Accessorizer component = this.minionOrMannequin.SetFrom(config.minionPersonality).SpawnedAvatar.GetComponent<Accessorizer>();
+		this.minionOrMannequin.SetFrom(config.minionPersonality).SpawnedAvatar.GetComponent<WearableAccessorizer>();
 		using (ListPool<ClothingItemResource, OutfitDesignerScreen>.PooledList pooledList = PoolsFor<OutfitDesignerScreen>.AllocateList<ClothingItemResource>())
 		{
 			this.outfitState.AddItemValuesTo(pooledList);
-			component.ApplyClothingItems(pooledList, true);
+			this.minionOrMannequin.SetFrom(config.minionPersonality).SetOutfit(pooledList);
 		}
 		this.PopulateCategories();
 		this.SelectCategory(OutfitDesignerScreen.outfitTypeToCategoriesDict[this.outfitState.outfitType][0]);
@@ -221,7 +221,7 @@ public class OutfitDesignerScreen : KMonoBehaviour
 	private void RefreshOutfitState()
 	{
 		this.selectionHeaderLabel.text = this.outfitState.name;
-		this.outfitDescriptionPanel.Refresh(this.outfitState);
+		this.outfitDescriptionPanel.Refresh(this.outfitState, ClothingOutfitUtility.OutfitType.Clothing);
 		this.UpdateSaveButtons();
 	}
 
@@ -248,6 +248,8 @@ public class OutfitDesignerScreen : KMonoBehaviour
 			component.GetReference<LocText>("Label").SetText(PermitCategories.GetUppercaseDisplayName(CS$<>8__locals1.permitCategory));
 			component.GetReference<Image>("Icon").sprite = Assets.GetSprite(PermitCategories.GetIconName(CS$<>8__locals1.permitCategory));
 			MultiToggle toggle = gameObject.GetComponent<MultiToggle>();
+			MultiToggle toggle2 = toggle;
+			toggle2.onEnter = (global::System.Action)Delegate.Combine(toggle2.onEnter, new global::System.Action(this.OnMouseOverToggle));
 			toggle.onClick = delegate
 			{
 				CS$<>8__locals1.<>4__this.SelectCategory(CS$<>8__locals1.permitCategory);
@@ -256,6 +258,7 @@ public class OutfitDesignerScreen : KMonoBehaviour
 			{
 				toggle.ChangeState((CS$<>8__locals1.permitCategory == CS$<>8__locals1.<>4__this.SelectedCategory) ? 1 : 0);
 			}));
+			this.SetCatogoryClickUISound(CS$<>8__locals1.permitCategory, toggle);
 		}
 	}
 
@@ -268,10 +271,10 @@ public class OutfitDesignerScreen : KMonoBehaviour
 		ref Option<ClothingItemResource> itemSlotForCategory = ref this.outfitState.GetItemSlotForCategory(permitCategory);
 		if (itemSlotForCategory.HasValue)
 		{
-			this.SelectPermit(itemSlotForCategory.Value.Id);
+			this.SelectPermit(itemSlotForCategory.Value);
 			return;
 		}
-		this.SelectPermit(Option.None);
+		this.SelectPermit(null);
 	}
 
 	private void RefreshGallery()
@@ -286,20 +289,20 @@ public class OutfitDesignerScreen : KMonoBehaviour
 	{
 		this.RefreshGalleryFn = null;
 		this.galleryGridItemPool.ReturnAll();
-		this.<PopulateGallery>g__AddGridIconForPermitId|48_0(Option.None);
+		this.<PopulateGallery>g__AddGridIconForPermit|48_0(null);
 		foreach (PermitResource permitResource in Db.Get().Permits.resources)
 		{
-			if (PermitResources.ShouldDisplayPermitInSupplyCloset(permitResource.Id) && permitResource.PermitCategory == this.SelectedCategory)
+			if (permitResource.Category == this.SelectedCategory)
 			{
-				this.<PopulateGallery>g__AddGridIconForPermitId|48_0(permitResource.Id);
+				this.<PopulateGallery>g__AddGridIconForPermit|48_0(permitResource);
 			}
 		}
 		this.RefreshGallery();
 	}
 
-	public void SelectPermit(Option<string> permitId)
+	public void SelectPermit(PermitResource permit)
 	{
-		this.SelectedPermitID = permitId;
+		this.SelectedPermit = permit;
 		this.RefreshGallery();
 		this.UpdateSelectedItemDetails();
 		this.UpdateSaveButtons();
@@ -308,11 +311,9 @@ public class OutfitDesignerScreen : KMonoBehaviour
 	public unsafe void UpdateSelectedItemDetails()
 	{
 		Option<ClothingItemResource> option = Option.None;
-		if (this.SelectedPermitID.HasValue)
+		if (this.SelectedPermit != null)
 		{
-			PermitResource permitResource = Db.Get().Permits.Get(this.SelectedPermitID);
-			permitResource.GetPermitPresentationInfo();
-			ClothingItemResource clothingItemResource = permitResource as ClothingItemResource;
+			ClothingItemResource clothingItemResource = this.SelectedPermit as ClothingItemResource;
 			if (clothingItemResource != null)
 			{
 				option = clothingItemResource;
@@ -321,7 +322,7 @@ public class OutfitDesignerScreen : KMonoBehaviour
 		*this.outfitState.GetItemSlotForCategory(this.SelectedCategory) = option;
 		this.minionOrMannequin.current.SetOutfit(this.outfitState);
 		this.minionOrMannequin.current.ReactToClothingItemChange(this.SelectedCategory);
-		this.outfitDescriptionPanel.Refresh(this.outfitState);
+		this.outfitDescriptionPanel.Refresh(this.outfitState, ClothingOutfitUtility.OutfitType.Clothing);
 	}
 
 	private void RegisterPreventScreenPop()
@@ -487,15 +488,68 @@ public class OutfitDesignerScreen : KMonoBehaviour
 		});
 	}
 
+	private void SetCatogoryClickUISound(PermitCategory category, MultiToggle toggle)
+	{
+		toggle.states[1].on_click_override_sound_path = category.ToString() + "_Click";
+		toggle.states[0].on_click_override_sound_path = category.ToString() + "_Click";
+	}
+
+	private void SetItemClickUISound(PermitResource permit, MultiToggle toggle)
+	{
+		if (permit == null)
+		{
+			toggle.states[1].on_click_override_sound_path = "HUD_Click";
+			toggle.states[0].on_click_override_sound_path = "HUD_Click";
+			return;
+		}
+		string clothingItemSoundName = OutfitDesignerScreen.GetClothingItemSoundName(permit);
+		toggle.states[1].on_click_override_sound_path = clothingItemSoundName + "_Click";
+		toggle.states[1].sound_parameter_name = "Unlocked";
+		toggle.states[1].sound_parameter_value = (permit.IsUnlocked() ? 1f : 0f);
+		toggle.states[1].has_sound_parameter = true;
+		toggle.states[0].on_click_override_sound_path = clothingItemSoundName + "_Click";
+		toggle.states[0].sound_parameter_name = "Unlocked";
+		toggle.states[0].sound_parameter_value = (permit.IsUnlocked() ? 1f : 0f);
+		toggle.states[0].has_sound_parameter = true;
+	}
+
+	public static string GetClothingItemSoundName(PermitResource permit)
+	{
+		if (permit == null)
+		{
+			return "HUD";
+		}
+		switch (permit.Category)
+		{
+		case PermitCategory.DupeTops:
+			return "tops";
+		case PermitCategory.DupeBottoms:
+			return "bottoms";
+		case PermitCategory.DupeGloves:
+			return "gloves";
+		case PermitCategory.DupeShoes:
+			return "shoes";
+		case PermitCategory.DupeHats:
+			return "hats";
+		default:
+			return "HUD";
+		}
+	}
+
+	private void OnMouseOverToggle()
+	{
+		KFMOD.PlayUISound(GlobalAssets.GetSound("HUD_Mouseover", false));
+	}
+
 	[CompilerGenerated]
-	private void <PopulateGallery>g__AddGridIconForPermitId|48_0(Option<string> permitId)
+	private void <PopulateGallery>g__AddGridIconForPermit|48_0(PermitResource permit)
 	{
 		GameObject gameObject = this.galleryGridItemPool.Borrow();
 		HierarchyReferences component = gameObject.GetComponent<HierarchyReferences>();
 		Image reference = component.GetReference<Image>("Icon");
 		MultiToggle toggle = gameObject.GetComponent<MultiToggle>();
 		Image isUnownedOverlay = component.GetReference<Image>("IsUnownedOverlay");
-		if (!permitId.HasValue)
+		if (permit == null)
 		{
 			reference.sprite = KleiItemsUI.GetNoneClothingItemIcon(this.SelectedCategory);
 			KleiItemsUI.ConfigureTooltipOn(gameObject, KleiItemsUI.GetNoneClothingItemString(this.SelectedCategory));
@@ -503,22 +557,25 @@ public class OutfitDesignerScreen : KMonoBehaviour
 		}
 		else
 		{
-			PermitPresentationInfo permitPresInfo = Db.Get().Permits.Get(permitId).GetPermitPresentationInfo();
-			reference.sprite = permitPresInfo.sprite;
-			KleiItemsUI.ConfigureTooltipOn(gameObject, KleiItemsUI.GetTooltipStringFor(permitPresInfo));
+			PermitPresentationInfo permitPresentationInfo = permit.GetPermitPresentationInfo();
+			reference.sprite = permitPresentationInfo.sprite;
+			KleiItemsUI.ConfigureTooltipOn(gameObject, KleiItemsUI.GetTooltipStringFor(permit));
 			this.RefreshGalleryFn = (global::System.Action)Delegate.Combine(this.RefreshGalleryFn, new global::System.Action(delegate
 			{
-				isUnownedOverlay.gameObject.SetActive(!permitPresInfo.IsUnlocked());
+				isUnownedOverlay.gameObject.SetActive(!permit.IsUnlocked());
 			}));
 		}
+		MultiToggle toggle2 = toggle;
+		toggle2.onEnter = (global::System.Action)Delegate.Combine(toggle2.onEnter, new global::System.Action(this.OnMouseOverToggle));
 		toggle.onClick = delegate
 		{
-			this.SelectPermit(permitId);
+			this.SelectPermit(permit);
 		};
 		this.RefreshGalleryFn = (global::System.Action)Delegate.Combine(this.RefreshGalleryFn, new global::System.Action(delegate
 		{
-			toggle.ChangeState((permitId == this.SelectedPermitID) ? 1 : 0);
+			toggle.ChangeState((permit == this.SelectedPermit) ? 1 : 0);
 		}));
+		this.SetItemClickUISound(permit, toggle);
 	}
 
 	[Header("CategoryColumn")]

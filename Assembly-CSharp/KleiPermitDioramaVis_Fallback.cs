@@ -15,7 +15,7 @@ public class KleiPermitDioramaVis_Fallback : KMonoBehaviour, IKleiPermitDioramaV
 	{
 	}
 
-	public void ConfigureWith(PermitResource permit, PermitPresentationInfo permitPresInfo)
+	public void ConfigureWith(PermitResource permit)
 	{
 		this.sprite.sprite = PermitPresentationInfo.GetUnknownSprite();
 		this.editorOnlyErrorMessageParent.gameObject.SetActive(false);

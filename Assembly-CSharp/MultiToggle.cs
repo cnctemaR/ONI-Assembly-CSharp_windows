@@ -37,6 +37,7 @@ public class MultiToggle : KMonoBehaviour, IPointerClickHandler, IEventSystemHan
 		{
 			this.RefreshHoverColor();
 			this.pointerOver = false;
+			this.StopHolding();
 		}
 	}
 
@@ -222,12 +223,21 @@ public class MultiToggle : KMonoBehaviour, IPointerClickHandler, IEventSystemHan
 		this.clickHeldDown = true;
 		if (this.play_sound_on_click)
 		{
-			if (this.states[this.state].on_click_override_sound_path == "")
+			ToggleState toggleState = this.states[this.state];
+			string on_click_override_sound_path = toggleState.on_click_override_sound_path;
+			bool has_sound_parameter = toggleState.has_sound_parameter;
+			if (on_click_override_sound_path == "")
 			{
 				KFMOD.PlayUISound(GlobalAssets.GetSound("HUD_Click", false));
 				return;
 			}
-			KFMOD.PlayUISound(GlobalAssets.GetSound(this.states[this.state].on_click_override_sound_path, false));
+			if (on_click_override_sound_path != "" && has_sound_parameter)
+			{
+				KFMOD.PlayUISoundWithParameter(GlobalAssets.GetSound("General_Item_Click", false), toggleState.sound_parameter_name, toggleState.sound_parameter_value);
+				KFMOD.PlayUISoundWithParameter(GlobalAssets.GetSound(on_click_override_sound_path, false), toggleState.sound_parameter_name, toggleState.sound_parameter_value);
+				return;
+			}
+			KFMOD.PlayUISound(GlobalAssets.GetSound(on_click_override_sound_path, false));
 		}
 	}
 
@@ -237,6 +247,11 @@ public class MultiToggle : KMonoBehaviour, IPointerClickHandler, IEventSystemHan
 		{
 			return;
 		}
+		this.StopHolding();
+	}
+
+	private void StopHolding()
+	{
 		if (this.clickHeldDown)
 		{
 			if (this.play_sound_on_release && this.states[this.state].on_release_override_sound_path != "")

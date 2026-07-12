@@ -85,6 +85,14 @@ public static class Localization
 				text3 = text3.Replace("\\", "\\\\");
 				text3 = text3.Replace("\"", "\\\"");
 				text3 = text3.Replace("\n", "\\n");
+				if (text3.Contains("’") || text3.Contains("“") || text3.Contains("”") || text3.Contains("…"))
+				{
+					global::UnityEngine.Debug.LogError("Smart quotes or ellipses detected in " + text2);
+				}
+				text3 = text3.Replace("’", "'");
+				text3 = text3.Replace("“", "\\\"");
+				text3 = text3.Replace("”", "\\\"");
+				text3 = text3.Replace("…", "...");
 				writer.WriteLine("#. " + text2);
 				writer.WriteLine("msgctxt \"{0}\"", text2);
 				writer.WriteLine("msgid \"" + text3 + "\"");

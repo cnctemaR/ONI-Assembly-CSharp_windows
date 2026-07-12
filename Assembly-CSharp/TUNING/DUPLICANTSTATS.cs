@@ -619,13 +619,6 @@ namespace TUNING
 				rarity = DUPLICANTSTATS.RARITY_LEGENDARY,
 				dlcId = "",
 				doNotGenerateTrait = true
-			},
-			new DUPLICANTSTATS.TraitVal
-			{
-				id = "CustomOutfit",
-				rarity = DUPLICANTSTATS.RARITY_LEGENDARY,
-				dlcId = "",
-				doNotGenerateTrait = true
 			}
 		};
 

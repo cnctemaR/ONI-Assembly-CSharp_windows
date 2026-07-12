@@ -46,10 +46,25 @@ public readonly struct OutfitBrowserScreenConfig
 		return new OutfitBrowserScreenConfig(ClothingOutfitTarget.FromMinion(minionInstance), personality, minionInstance);
 	}
 
+	public static OutfitBrowserScreenConfig Minion(MinionBrowserScreen.GridItem item)
+	{
+		MinionBrowserScreen.GridItem.PersonalityTarget personalityTarget = item as MinionBrowserScreen.GridItem.PersonalityTarget;
+		if (personalityTarget != null)
+		{
+			return OutfitBrowserScreenConfig.Minion(personalityTarget.personality);
+		}
+		MinionBrowserScreen.GridItem.MinionInstanceTarget minionInstanceTarget = item as MinionBrowserScreen.GridItem.MinionInstanceTarget;
+		if (minionInstanceTarget != null)
+		{
+			return OutfitBrowserScreenConfig.Minion(minionInstanceTarget.minionInstance);
+		}
+		throw new NotImplementedException();
+	}
+
 	public void ApplyAndOpenScreen()
 	{
 		LockerNavigator.Instance.outfitBrowserScreen.GetComponent<OutfitBrowserScreen>().Configure(this);
-		LockerNavigator.Instance.PushScreen(LockerNavigator.Instance.outfitBrowserScreen);
+		LockerNavigator.Instance.PushScreen(LockerNavigator.Instance.outfitBrowserScreen, null);
 	}
 
 	public readonly Option<ClothingOutfitTarget> selectedTarget;

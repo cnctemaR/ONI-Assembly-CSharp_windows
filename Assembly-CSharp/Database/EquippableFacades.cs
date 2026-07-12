@@ -13,7 +13,7 @@ namespace Database
 			: base("EquippableFacades", parent)
 		{
 			base.Initialize();
-			foreach (EquippableFacades.Info info in EquippableFacades.Infos)
+			foreach (EquippableFacades.Info info in EquippableFacades.Infos_All)
 			{
 				this.Add(info.id, info.name, info.defID, info.buildOverride, info.animFile);
 			}
@@ -61,7 +61,7 @@ namespace Database
 			this.resources.Add(equippableFacadeResource);
 		}
 
-		public static EquippableFacades.Info[] Infos = new EquippableFacades.Info[]
+		public static EquippableFacades.Info[] Infos_Default = new EquippableFacades.Info[]
 		{
 			new EquippableFacades.Info("clubshirt", EQUIPMENT.PREFABS.CUSTOMCLOTHING.FACADES.CLUBSHIRT, "CustomClothing", "body_shirt_clubshirt_kanim", "shirt_clubshirt_kanim"),
 			new EquippableFacades.Info("cummerbund", EQUIPMENT.PREFABS.CUSTOMCLOTHING.FACADES.CUMMERBUND, "CustomClothing", "body_shirt_cummerbund_kanim", "shirt_cummerbund_kanim"),
@@ -76,6 +76,10 @@ namespace Database
 			new EquippableFacades.Info("triangles", EQUIPMENT.PREFABS.CUSTOMCLOTHING.FACADES.TRIANGLES, "CustomClothing", "body_shirt_triangles_kanim", "shirt_triangles_kanim"),
 			new EquippableFacades.Info("workout", EQUIPMENT.PREFABS.CUSTOMCLOTHING.FACADES.WORKOUT, "CustomClothing", "body_suit_workout_kanim", "suit_workout_kanim")
 		};
+
+		public static EquippableFacades.Info[] Infos_Skins = new EquippableFacades.Info[0];
+
+		public static EquippableFacades.Info[] Infos_All = EquippableFacades.Infos_Default;
 
 		public struct Info
 		{

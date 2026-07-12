@@ -31,6 +31,7 @@ public class TemporalTearOpenerConfig : IBuildingConfig
 		buildingDef.UseHighEnergyParticleInputPort = true;
 		buildingDef.HighEnergyParticleInputOffset = new CellOffset(0, 2);
 		buildingDef.LogicOutputPorts = new List<LogicPorts.Port> { LogicPorts.Port.OutputPort("HEP_STORAGE", new CellOffset(0, 0), global::STRINGS.BUILDINGS.PREFABS.HEPENGINE.LOGIC_PORT_STORAGE, global::STRINGS.BUILDINGS.PREFABS.HEPENGINE.LOGIC_PORT_STORAGE_ACTIVE, global::STRINGS.BUILDINGS.PREFABS.HEPENGINE.LOGIC_PORT_STORAGE_INACTIVE, false, false) };
+		buildingDef.ShowInBuildMenu = false;
 		return buildingDef;
 	}
 

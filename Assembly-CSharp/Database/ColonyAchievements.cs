@@ -139,11 +139,7 @@ namespace Database
 			this.BasicComforts = base.Add(new ColonyAchievement("BasicComforts", "BASIC_COMFORTS", COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.BASIC_COMFORTS, COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.BASIC_COMFORTS_DESCRIPTION, false, new List<ColonyAchievementRequirement>
 			{
 				new AtLeastOneBuildingForEachDupe(new List<Tag> { "FlushToilet", "Outhouse" }),
-				new AtLeastOneBuildingForEachDupe(new List<Tag>
-				{
-					BedConfig.ID,
-					LuxuryBedConfig.ID
-				})
+				new AtLeastOneBuildingForEachDupe(new List<Tag> { "Bed", "LuxuryBed" })
 			}, "", "", "", "", null, default(EventReference), "1bed_1toilet", null));
 			this.PlumbedWashrooms = base.Add(new ColonyAchievement("PlumbedWashrooms", "PLUMBED_WASHROOMS", COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.PLUMBED_WASHROOMS, COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.PLUMBED_WASHROOMS_DESCRIPTION, false, new List<ColonyAchievementRequirement>
 			{

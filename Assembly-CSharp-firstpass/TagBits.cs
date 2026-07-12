@@ -9,6 +9,7 @@ public struct TagBits
 		this.bits1 = other.bits1;
 		this.bits2 = other.bits2;
 		this.bits3 = other.bits3;
+		this.bits4 = other.bits4;
 	}
 
 	public TagBits(Tag tag)
@@ -17,6 +18,7 @@ public struct TagBits
 		this.bits1 = 0UL;
 		this.bits2 = 0UL;
 		this.bits3 = 0UL;
+		this.bits4 = 0UL;
 		this.SetTag(tag);
 	}
 
@@ -26,6 +28,7 @@ public struct TagBits
 		this.bits1 = 0UL;
 		this.bits2 = 0UL;
 		this.bits3 = 0UL;
+		this.bits4 = 0UL;
 		if (tags == null)
 		{
 			return;
@@ -43,6 +46,7 @@ public struct TagBits
 		this.GetTagsVerySlow(1, this.bits1, list);
 		this.GetTagsVerySlow(2, this.bits2, list);
 		this.GetTagsVerySlow(3, this.bits3, list);
+		this.GetTagsVerySlow(4, this.bits4, list);
 		return list;
 	}
 
@@ -69,7 +73,7 @@ public struct TagBits
 		TagBits.tagTable.Add(tag, count);
 		TagBits.inverseTagTable.Add(tag);
 		DebugUtil.Assert(TagBits.inverseTagTable.Count == count + 1);
-		if (TagBits.tagTable.Count >= 256)
+		if (TagBits.tagTable.Count >= 320)
 		{
 			string text = "Out of tag bits:\n";
 			int num = 0;
@@ -110,6 +114,11 @@ public struct TagBits
 			this.bits3 |= 1UL << num;
 			return;
 		}
+		if (num < 320)
+		{
+			this.bits4 |= 1UL << num;
+			return;
+		}
 		Debug.LogError("Out of bits!");
 	}
 
@@ -136,6 +145,11 @@ public struct TagBits
 			this.bits3 &= ~(1UL << num);
 			return;
 		}
+		if (num < 320)
+		{
+			this.bits4 &= ~(1UL << num);
+			return;
+		}
 		Debug.LogError("Out of bits!");
 	}
 
@@ -145,21 +159,22 @@ public struct TagBits
 		this.bits1 = 0UL;
 		this.bits2 = 0UL;
 		this.bits3 = 0UL;
+		this.bits4 = 0UL;
 	}
 
 	public bool HasAll(ref TagBits tag_bits)
 	{
-		return (this.bits0 & tag_bits.bits0) == tag_bits.bits0 && (this.bits1 & tag_bits.bits1) == tag_bits.bits1 && (this.bits2 & tag_bits.bits2) == tag_bits.bits2 && (this.bits3 & tag_bits.bits3) == tag_bits.bits3;
+		return (this.bits0 & tag_bits.bits0) == tag_bits.bits0 && (this.bits1 & tag_bits.bits1) == tag_bits.bits1 && (this.bits2 & tag_bits.bits2) == tag_bits.bits2 && (this.bits3 & tag_bits.bits3) == tag_bits.bits3 && (this.bits4 & tag_bits.bits4) == tag_bits.bits4;
 	}
 
 	public bool HasAny(ref TagBits tag_bits)
 	{
-		return ((this.bits0 & tag_bits.bits0) | (this.bits1 & tag_bits.bits1) | (this.bits2 & tag_bits.bits2) | (this.bits3 & tag_bits.bits3)) > 0UL;
+		return ((this.bits0 & tag_bits.bits0) | (this.bits1 & tag_bits.bits1) | (this.bits2 & tag_bits.bits2) | (this.bits3 & tag_bits.bits3) | (this.bits4 & tag_bits.bits4)) > 0UL;
 	}
 
 	public bool AreEqual(ref TagBits tag_bits)
 	{
-		return tag_bits.bits0 == this.bits0 && tag_bits.bits1 == this.bits1 && tag_bits.bits2 == this.bits2 && tag_bits.bits3 == this.bits3;
+		return tag_bits.bits0 == this.bits0 && tag_bits.bits1 == this.bits1 && tag_bits.bits2 == this.bits2 && tag_bits.bits3 == this.bits3 && tag_bits.bits4 == this.bits4;
 	}
 
 	public void And(ref TagBits rhs)
@@ -168,6 +183,7 @@ public struct TagBits
 		this.bits1 &= rhs.bits1;
 		this.bits2 &= rhs.bits2;
 		this.bits3 &= rhs.bits3;
+		this.bits4 &= rhs.bits4;
 	}
 
 	public void Or(ref TagBits rhs)
@@ -176,6 +192,7 @@ public struct TagBits
 		this.bits1 |= rhs.bits1;
 		this.bits2 |= rhs.bits2;
 		this.bits3 |= rhs.bits3;
+		this.bits4 |= rhs.bits4;
 	}
 
 	public void Xor(ref TagBits rhs)
@@ -184,6 +201,7 @@ public struct TagBits
 		this.bits1 ^= rhs.bits1;
 		this.bits2 ^= rhs.bits2;
 		this.bits3 ^= rhs.bits3;
+		this.bits4 ^= rhs.bits4;
 	}
 
 	public void Complement()
@@ -192,6 +210,7 @@ public struct TagBits
 		this.bits1 = ~this.bits1;
 		this.bits2 = ~this.bits2;
 		this.bits3 = ~this.bits3;
+		this.bits4 = ~this.bits4;
 	}
 
 	public static TagBits MakeComplement(ref TagBits rhs)
@@ -205,7 +224,7 @@ public struct TagBits
 
 	private static List<Tag> inverseTagTable = new List<Tag>();
 
-	private const int Capacity = 256;
+	private const int Capacity = 320;
 
 	private ulong bits0;
 
@@ -214,6 +233,8 @@ public struct TagBits
 	private ulong bits2;
 
 	private ulong bits3;
+
+	private ulong bits4;
 
 	public static TagBits None = default(TagBits);
 }

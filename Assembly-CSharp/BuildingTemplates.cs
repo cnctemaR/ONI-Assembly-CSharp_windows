@@ -206,6 +206,7 @@ public class BuildingTemplates
 		RocketModulePerformance rocketModulePerformance = new RocketModulePerformance((float)burden, fuelCostPerDistance, enginePower);
 		template.GetComponent<RocketModuleCluster>().performanceStats = rocketModulePerformance;
 		template.GetComponent<Building>().Def.BuildingUnderConstruction.GetComponent<RocketModuleCluster>().performanceStats = rocketModulePerformance;
+		def.ShowInBuildMenu = false;
 		return template;
 	}
 

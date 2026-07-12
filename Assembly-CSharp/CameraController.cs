@@ -393,6 +393,14 @@ public class CameraController : KMonoBehaviour, IInputHandler
 		return flag;
 	}
 
+	private bool IsMouseOverGameWindow
+	{
+		get
+		{
+			return 0f <= Input.mousePosition.x && 0f <= Input.mousePosition.y && (float)Screen.width >= Input.mousePosition.x && (float)Screen.height >= Input.mousePosition.y;
+		}
+	}
+
 	private void SetInfoText(string text)
 	{
 		this.infoText.text = text;
@@ -425,14 +433,14 @@ public class CameraController : KMonoBehaviour, IInputHandler
 			{
 				SpeedControlScreen.Instance.TogglePause(false);
 			}
-			else if (e.TryConsume(global::Action.ZoomIn))
+			else if (e.TryConsume(global::Action.ZoomIn) && this.IsMouseOverGameWindow)
 			{
 				float num = this.targetOrthographicSize * (1f / this.zoomFactor);
 				this.targetOrthographicSize = Mathf.Max(num, this.minOrthographicSize);
 				this.overrideZoomSpeed = 0f;
 				this.isTargetPosSet = false;
 			}
-			else if (e.TryConsume(global::Action.ZoomOut))
+			else if (e.TryConsume(global::Action.ZoomOut) && this.IsMouseOverGameWindow)
 			{
 				float num2 = this.targetOrthographicSize * this.zoomFactor;
 				this.targetOrthographicSize = Mathf.Min(num2, this.FreeCameraEnabled ? TuningData<CameraController.Tuning>.Get().maxOrthographicSizeDebug : this.maxOrthographicSize);

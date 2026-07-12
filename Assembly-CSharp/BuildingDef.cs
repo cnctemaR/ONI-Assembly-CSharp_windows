@@ -147,15 +147,13 @@ public class BuildingDef : Def
 	public List<Tag> DefaultElements()
 	{
 		List<Tag> list = new List<Tag>();
-		foreach (string text in this.MaterialCategory)
+		string[] materialCategory = this.MaterialCategory;
+		for (int i = 0; i < materialCategory.Length; i++)
 		{
-			foreach (Element element in ElementLoader.elements)
+			List<Tag> validMaterials = MaterialSelector.GetValidMaterials(materialCategory[i]);
+			if (validMaterials.Count != 0)
 			{
-				if (element.IsSolid && (element.tag.Name == text || element.HasTag(text)))
-				{
-					list.Add(element.tag);
-					break;
-				}
+				list.Add(validMaterials[0]);
 			}
 		}
 		return list;

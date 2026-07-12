@@ -937,7 +937,7 @@ namespace Database
 				Clustercraft clustercraft = data as Clustercraft;
 				return str.Replace("{0}", (spacecraft != null) ? spacecraft.rocketName : clustercraft.Name);
 			};
-			this.NoRocketsToMissionControlBoost = this.CreateStatusItem("NoRocketsToMissionControlClusterBoost", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
+			this.NoRocketsToMissionControlBoost = this.CreateStatusItem("NoRocketsToMissionControlBoost", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
 			this.NoRocketsToMissionControlClusterBoost = this.CreateStatusItem("NoRocketsToMissionControlClusterBoost", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
 			this.NoRocketsToMissionControlClusterBoost.resolveStringCallback = delegate(string str, object data)
 			{

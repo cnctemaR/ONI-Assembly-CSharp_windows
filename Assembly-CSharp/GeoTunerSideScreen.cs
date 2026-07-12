@@ -52,7 +52,7 @@ public class GeoTunerSideScreen : SideScreenContent
 		}
 		foreach (Geyser geyser2 in items)
 		{
-			if (!geyser2.GetComponent<Studyable>().Studied && geyser2.GetComponent<Uncoverable>().IsUncovered)
+			if (!geyser2.GetComponent<Studyable>().Studied && Grid.Visible[Grid.PosToCell(geyser2)] > 0 && geyser2.GetComponent<Uncoverable>().IsUncovered)
 			{
 				this.SetRow(num++, UI.StripLinkFormatting(geyser2.GetProperName()), Def.GetUISprite(geyser2.gameObject, "ui", false).first, geyser2, false);
 			}

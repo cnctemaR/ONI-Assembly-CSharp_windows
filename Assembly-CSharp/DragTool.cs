@@ -111,7 +111,7 @@ public class DragTool : InterfaceTool
 				return;
 			}
 		}
-		else if (mode == DragTool.Mode.Box)
+		else if (mode == DragTool.Mode.Box || mode == DragTool.Mode.Line)
 		{
 			if (this.visualizer != null)
 			{
@@ -154,7 +154,8 @@ public class DragTool : InterfaceTool
 		}
 		this.dragging = false;
 		this.RemoveCurrentAreaText();
-		if (this.GetMode() == DragTool.Mode.Box && this.areaVisualizer != null)
+		DragTool.Mode mode = this.GetMode();
+		if ((mode == DragTool.Mode.Box || mode == DragTool.Mode.Line) && this.areaVisualizer != null)
 		{
 			this.areaVisualizer.SetActive(false);
 		}
@@ -180,7 +181,12 @@ public class DragTool : InterfaceTool
 		this.dragging = false;
 		cursor_pos = this.ClampPositionToWorld(cursor_pos, ClusterManager.Instance.activeWorld);
 		this.RemoveCurrentAreaText();
-		if (this.GetMode() == DragTool.Mode.Box && this.areaVisualizer != null)
+		DragTool.Mode mode = this.GetMode();
+		if (mode == DragTool.Mode.Line)
+		{
+			cursor_pos = this.SnapToLine(cursor_pos);
+		}
+		if ((mode == DragTool.Mode.Box || mode == DragTool.Mode.Line) && this.areaVisualizer != null)
 		{
 			this.areaVisualizer.SetActive(false);
 			int num;
@@ -241,42 +247,57 @@ public class DragTool : InterfaceTool
 		return position;
 	}
 
+	protected Vector3 SnapToLine(Vector3 cursorPos)
+	{
+		Vector3 vector = cursorPos - this.downPos;
+		if (this.canChangeDragAxis || this.dragAxis == DragTool.DragAxis.Invalid)
+		{
+			this.dragAxis = DragTool.DragAxis.Invalid;
+			if (vector.sqrMagnitude > 0.707f)
+			{
+				if (Mathf.Abs(vector.x) < Mathf.Abs(vector.y))
+				{
+					this.dragAxis = DragTool.DragAxis.Vertical;
+				}
+				else
+				{
+					this.dragAxis = DragTool.DragAxis.Horizontal;
+				}
+			}
+		}
+		DragTool.DragAxis dragAxis = this.dragAxis;
+		if (dragAxis != DragTool.DragAxis.Horizontal)
+		{
+			if (dragAxis == DragTool.DragAxis.Vertical)
+			{
+				cursorPos.x = this.downPos.x;
+				if (this.lineModeMaxLength != -1)
+				{
+					cursorPos.y = this.downPos.y + Mathf.Sign(vector.y) * (float)(this.lineModeMaxLength - 1);
+				}
+			}
+		}
+		else
+		{
+			cursorPos.y = this.downPos.y;
+			if (this.lineModeMaxLength != -1)
+			{
+				cursorPos.x = this.downPos.x + Mathf.Sign(vector.x) * (float)(this.lineModeMaxLength - 1);
+			}
+		}
+		return cursorPos;
+	}
+
 	public override void OnMouseMove(Vector3 cursorPos)
 	{
 		cursorPos = this.ClampPositionToWorld(cursorPos, ClusterManager.Instance.activeWorld);
-		if (this.dragging)
+		if (this.dragging && (Input.GetKey((KeyCode)Global.GetInputManager().GetDefaultController().GetInputForAction(global::Action.DragStraight)) || this.GetMode() == DragTool.Mode.Line))
 		{
-			if (Input.GetKey((KeyCode)Global.GetInputManager().GetDefaultController().GetInputForAction(global::Action.DragStraight)))
-			{
-				Vector3 vector = cursorPos - this.downPos;
-				if ((this.canChangeDragAxis || this.dragAxis == DragTool.DragAxis.Invalid) && vector.sqrMagnitude > 0.707f)
-				{
-					if (Mathf.Abs(vector.x) < Mathf.Abs(vector.y))
-					{
-						this.dragAxis = DragTool.DragAxis.Vertical;
-					}
-					else
-					{
-						this.dragAxis = DragTool.DragAxis.Horizontal;
-					}
-				}
-			}
-			else
-			{
-				this.dragAxis = DragTool.DragAxis.Invalid;
-			}
-			DragTool.DragAxis dragAxis = this.dragAxis;
-			if (dragAxis != DragTool.DragAxis.Horizontal)
-			{
-				if (dragAxis == DragTool.DragAxis.Vertical)
-				{
-					cursorPos.x = this.downPos.x;
-				}
-			}
-			else
-			{
-				cursorPos.y = this.downPos.y;
-			}
+			cursorPos = this.SnapToLine(cursorPos);
+		}
+		else
+		{
+			this.dragAxis = DragTool.DragAxis.Invalid;
 		}
 		base.OnMouseMove(cursorPos);
 		if (!this.dragging)
@@ -286,19 +307,19 @@ public class DragTool : InterfaceTool
 		DragTool.Mode mode = this.GetMode();
 		if (mode != DragTool.Mode.Brush)
 		{
-			if (mode == DragTool.Mode.Box)
+			if (mode - DragTool.Mode.Box <= 1)
 			{
-				Vector2 vector2 = Vector3.Max(this.downPos, cursorPos);
-				Vector2 vector3 = Vector3.Min(this.downPos, cursorPos);
+				Vector2 vector = Vector3.Max(this.downPos, cursorPos);
+				Vector2 vector2 = Vector3.Min(this.downPos, cursorPos);
+				vector = base.GetWorldRestrictedPosition(vector);
 				vector2 = base.GetWorldRestrictedPosition(vector2);
-				vector3 = base.GetWorldRestrictedPosition(vector3);
-				vector2 = base.GetRegularizedPos(vector2, false);
-				vector3 = base.GetRegularizedPos(vector3, true);
-				Vector2 vector4 = vector2 - vector3;
-				Vector2 vector5 = (vector2 + vector3) * 0.5f;
-				this.areaVisualizer.transform.SetPosition(new Vector2(vector5.x, vector5.y));
-				int num = (int)(vector2.x - vector3.x + (vector2.y - vector3.y) - 1f);
-				if (this.areaVisualizerSpriteRenderer.size != vector4)
+				vector = base.GetRegularizedPos(vector, false);
+				vector2 = base.GetRegularizedPos(vector2, true);
+				Vector2 vector3 = vector - vector2;
+				Vector2 vector4 = (vector + vector2) * 0.5f;
+				this.areaVisualizer.transform.SetPosition(new Vector2(vector4.x, vector4.y));
+				int num = (int)(vector.x - vector2.x + (vector.y - vector2.y) - 1f);
+				if (this.areaVisualizerSpriteRenderer.size != vector3)
 				{
 					string sound = GlobalAssets.GetSound(this.GetDragSound(), false);
 					if (sound != null)
@@ -310,14 +331,14 @@ public class DragTool : InterfaceTool
 						SoundEvent.EndOneShot(eventInstance);
 					}
 				}
-				this.areaVisualizerSpriteRenderer.size = vector4;
+				this.areaVisualizerSpriteRenderer.size = vector3;
 				if (this.areaVisualizerText != Guid.Empty)
 				{
-					Vector2I vector2I = new Vector2I(Mathf.RoundToInt(vector4.x), Mathf.RoundToInt(vector4.y));
+					Vector2I vector2I = new Vector2I(Mathf.RoundToInt(vector3.x), Mathf.RoundToInt(vector3.y));
 					LocText component = NameDisplayScreen.Instance.GetWorldText(this.areaVisualizerText).GetComponent<LocText>();
 					component.text = string.Format(UI.TOOLS.TOOL_AREA_FMT, vector2I.x, vector2I.y, vector2I.x * vector2I.y);
-					Vector2 vector6 = vector5;
-					component.transform.SetPosition(vector6);
+					Vector2 vector5 = vector4;
+					component.transform.SetPosition(vector5);
 				}
 			}
 		}
@@ -329,9 +350,9 @@ public class DragTool : InterfaceTool
 				int dragLength = this.GetDragLength();
 				LocText component2 = NameDisplayScreen.Instance.GetWorldText(this.areaVisualizerText).GetComponent<LocText>();
 				component2.text = string.Format(UI.TOOLS.TOOL_LENGTH_FMT, dragLength);
-				Vector3 vector7 = Grid.CellToPos(Grid.PosToCell(cursorPos));
-				vector7 += new Vector3(0f, 1f, 0f);
-				component2.transform.SetPosition(vector7);
+				Vector3 vector6 = Grid.CellToPos(Grid.PosToCell(cursorPos));
+				vector6 += new Vector3(0f, 1f, 0f);
+				component2.transform.SetPosition(vector6);
 			}
 		}
 		this.previousCursorPos = cursorPos;
@@ -427,9 +448,9 @@ public class DragTool : InterfaceTool
 	protected void SetMode(DragTool.Mode newMode)
 	{
 		this.mode = newMode;
-		DragTool.Mode mode = this.mode;
-		if (mode == DragTool.Mode.Brush)
+		switch (this.mode)
 		{
+		case DragTool.Mode.Brush:
 			if (this.areaVisualizer != null)
 			{
 				this.areaVisualizer.SetActive(false);
@@ -440,42 +461,48 @@ public class DragTool : InterfaceTool
 			}
 			base.SetCursor(this.cursor, this.cursorOffset, CursorMode.Auto);
 			return;
-		}
-		if (mode != DragTool.Mode.Box)
-		{
+		case DragTool.Mode.Box:
+			if (this.visualizer != null)
+			{
+				this.visualizer.SetActive(true);
+			}
+			this.mode = DragTool.Mode.Box;
+			base.SetCursor(this.boxCursor, this.cursorOffset, CursorMode.Auto);
+			return;
+		case DragTool.Mode.Line:
+			if (this.visualizer != null)
+			{
+				this.visualizer.SetActive(true);
+			}
+			this.mode = DragTool.Mode.Line;
+			base.SetCursor(this.boxCursor, this.cursorOffset, CursorMode.Auto);
+			return;
+		default:
 			return;
 		}
-		if (this.visualizer != null)
-		{
-			this.visualizer.SetActive(true);
-		}
-		this.mode = DragTool.Mode.Box;
-		base.SetCursor(this.boxCursor, this.cursorOffset, CursorMode.Auto);
 	}
 
 	public override void OnFocus(bool focus)
 	{
 		DragTool.Mode mode = this.GetMode();
-		if (mode != DragTool.Mode.Brush)
-		{
-			if (mode == DragTool.Mode.Box)
-			{
-				if (this.visualizer != null && !this.dragging)
-				{
-					this.visualizer.SetActive(focus);
-				}
-				this.hasFocus = focus || this.dragging;
-			}
-		}
-		else
+		if (mode == DragTool.Mode.Brush)
 		{
 			if (this.visualizer != null)
 			{
 				this.visualizer.SetActive(focus);
 			}
 			this.hasFocus = focus;
+			return;
 		}
-		base.OnFocus(focus);
+		if (mode - DragTool.Mode.Box > 1)
+		{
+			return;
+		}
+		if (this.visualizer != null && !this.dragging)
+		{
+			this.visualizer.SetActive(focus);
+		}
+		this.hasFocus = focus || this.dragging;
 	}
 
 	private void OnTutorialOpened(object data)
@@ -486,11 +513,6 @@ public class DragTool : InterfaceTool
 	public override bool ShowHoverUI()
 	{
 		return this.dragging || base.ShowHoverUI();
-	}
-
-	public override void LateUpdate()
-	{
-		base.LateUpdate();
 	}
 
 	[SerializeField]
@@ -523,6 +545,8 @@ public class DragTool : InterfaceTool
 
 	protected bool canChangeDragAxis = true;
 
+	protected int lineModeMaxLength = -1;
+
 	protected Vector3 downPos;
 
 	private VirtualInputModule currentVirtualInputInUse;
@@ -538,6 +562,7 @@ public class DragTool : InterfaceTool
 	public enum Mode
 	{
 		Brush,
-		Box
+		Box,
+		Line
 	}
 }

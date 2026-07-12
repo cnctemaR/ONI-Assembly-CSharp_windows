@@ -32,6 +32,7 @@ public class ExteriorWallConfig : IBuildingConfig
 		buildingDef.DefaultAnimState = "off";
 		buildingDef.ObjectLayer = ObjectLayer.Backwall;
 		buildingDef.SceneLayer = Grid.SceneLayer.Backwall;
+		buildingDef.PermittedRotations = PermittedRotations.R360;
 		buildingDef.ReplacementLayer = ObjectLayer.ReplacementBackwall;
 		buildingDef.ReplacementCandidateLayers = new List<ObjectLayer>
 		{

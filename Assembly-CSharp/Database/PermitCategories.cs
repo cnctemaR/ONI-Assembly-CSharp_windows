@@ -83,6 +83,10 @@ namespace Database
 			{
 				PermitCategory.Artwork,
 				new PermitCategories.CategoryInfo(UI.KLEI_INVENTORY_SCREEN.CATEGORIES.ARTWORKS, "icon_inventory_artworks")
+			},
+			{
+				PermitCategory.JoyResponse,
+				new PermitCategories.CategoryInfo(UI.KLEI_INVENTORY_SCREEN.CATEGORIES.JOY_RESPONSE, "icon_inventory_joyresponses")
 			}
 		};
 

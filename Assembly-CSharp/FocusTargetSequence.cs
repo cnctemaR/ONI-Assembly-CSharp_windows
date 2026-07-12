@@ -17,25 +17,43 @@ public static class FocusTargetSequence
 		}
 		coroutineRunner.StopCoroutine(FocusTargetSequence.sequenceCoroutine);
 		FocusTargetSequence.sequenceCoroutine = null;
+		if (FocusTargetSequence.prevSpeed >= 0)
+		{
+			SpeedControlScreen.Instance.SetSpeed(FocusTargetSequence.prevSpeed);
+		}
+		if (SpeedControlScreen.Instance.IsPaused && !FocusTargetSequence.wasPaused)
+		{
+			SpeedControlScreen.Instance.Unpause(false);
+		}
+		if (!SpeedControlScreen.Instance.IsPaused && FocusTargetSequence.wasPaused)
+		{
+			SpeedControlScreen.Instance.Pause(false, false);
+		}
+		FocusTargetSequence.SetUIVisible(true);
+		CameraController.Instance.SetWorldInteractive(true);
+		SelectTool.Instance.Select(FocusTargetSequence.prevSelected, true);
+		FocusTargetSequence.prevSelected = null;
+		FocusTargetSequence.wasPaused = false;
+		FocusTargetSequence.prevSpeed = -1;
 	}
 
 	public static IEnumerator RunSequence(FocusTargetSequence.Data sequenceData)
 	{
 		SaveGame.Instance.GetComponent<UserNavigation>();
 		CameraController.Instance.FadeOut(1f, 1f, null);
-		int speed = SpeedControlScreen.Instance.GetSpeed();
+		FocusTargetSequence.prevSpeed = SpeedControlScreen.Instance.GetSpeed();
 		SpeedControlScreen.Instance.SetSpeed(0);
-		bool wasPaused = SpeedControlScreen.Instance.IsPaused;
-		if (!wasPaused)
+		FocusTargetSequence.wasPaused = SpeedControlScreen.Instance.IsPaused;
+		if (!FocusTargetSequence.wasPaused)
 		{
 			SpeedControlScreen.Instance.Pause(false, false);
 		}
 		PlayerController.Instance.CancelDragging();
 		CameraController.Instance.SetWorldInteractive(false);
 		yield return CameraController.Instance.activeFadeRoutine;
-		KSelectable selectedObject = SelectTool.Instance.selected;
+		FocusTargetSequence.prevSelected = SelectTool.Instance.selected;
 		SelectTool.Instance.Select(null, true);
-		RootMenu.Instance.Show(false);
+		FocusTargetSequence.SetUIVisible(false);
 		ClusterManager.Instance.SetActiveWorld(sequenceData.WorldId);
 		ManagementMenu.Instance.CloseAll();
 		CameraController.Instance.SnapTo(sequenceData.Target, sequenceData.OrthographicSize);
@@ -58,8 +76,8 @@ public static class FocusTargetSequence
 			SpeedControlScreen.Instance.Pause(false, false);
 		}
 		CameraController.Instance.SetWorldInteractive(true);
-		SpeedControlScreen.Instance.SetSpeed(speed);
-		if (SpeedControlScreen.Instance.IsPaused && !wasPaused)
+		SpeedControlScreen.Instance.SetSpeed(FocusTargetSequence.prevSpeed);
+		if (SpeedControlScreen.Instance.IsPaused && !FocusTargetSequence.wasPaused)
 		{
 			SpeedControlScreen.Instance.Unpause(false);
 		}
@@ -67,14 +85,51 @@ public static class FocusTargetSequence
 		{
 			sequenceData.CompleteCB();
 		}
-		RootMenu.Instance.Show(true);
-		SelectTool.Instance.Select(selectedObject, true);
+		FocusTargetSequence.SetUIVisible(true);
+		SelectTool.Instance.Select(FocusTargetSequence.prevSelected, true);
 		sequenceData.Clear();
 		FocusTargetSequence.sequenceCoroutine = null;
+		FocusTargetSequence.prevSpeed = -1;
+		FocusTargetSequence.wasPaused = false;
+		FocusTargetSequence.prevSelected = null;
 		yield break;
 	}
 
-	private static Coroutine sequenceCoroutine;
+	private static void SetUIVisible(bool visible)
+	{
+		NotificationScreen.Instance.Show(visible);
+		OverlayMenu.Instance.Show(visible);
+		ManagementMenu.Instance.Show(visible);
+		ToolMenu.Instance.Show(visible);
+		ToolMenu.Instance.PriorityScreen.Show(visible);
+		PinnedResourcesPanel.Instance.Show(visible);
+		TopLeftControlScreen.Instance.Show(visible);
+		global::DateTime.Instance.Show(visible);
+		BuildWatermark.Instance.Show(visible);
+		BuildWatermark.Instance.Show(visible);
+		ColonyDiagnosticScreen.Instance.Show(visible);
+		RootMenu.Instance.Show(visible);
+		if (PlanScreen.Instance != null)
+		{
+			PlanScreen.Instance.Show(visible);
+		}
+		if (BuildMenu.Instance != null)
+		{
+			BuildMenu.Instance.Show(visible);
+		}
+		if (WorldSelector.Instance != null)
+		{
+			WorldSelector.Instance.Show(visible);
+		}
+	}
+
+	private static Coroutine sequenceCoroutine = null;
+
+	private static KSelectable prevSelected = null;
+
+	private static bool wasPaused = false;
+
+	private static int prevSpeed = -1;
 
 	public struct Data
 	{

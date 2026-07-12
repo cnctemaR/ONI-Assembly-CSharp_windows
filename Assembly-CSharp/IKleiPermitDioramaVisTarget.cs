@@ -8,5 +8,5 @@ public interface IKleiPermitDioramaVisTarget
 
 	void ConfigureSetup();
 
-	void ConfigureWith(PermitResource permit, PermitPresentationInfo permitPresInfo);
+	void ConfigureWith(PermitResource permit);
 }

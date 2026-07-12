@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{EA9301EF-341A-4564-B69E-CA8966F0461E}</ProjectGuid>
+    <ProjectGuid>{95FD58EB-1DE6-446B-8517-7D6E7F2C64DE}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>UnityEngine.GIModule</RootNamespace>
     <AssemblyName>UnityEngine.GIModule</AssemblyName>
@@ -18,7 +18,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
-      <Project>{EA9301EF-341A-4564-B69E-CA8966F0462E}</Project>
+      <Project>{95FD58EB-1DE6-446B-8517-7D6E7F2C64EE}</Project>
       <Name>UnityEngine.SharedInternalsModule</Name>
     </ProjectReference>
   </ItemGroup>

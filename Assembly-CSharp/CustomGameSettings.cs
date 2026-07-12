@@ -123,15 +123,24 @@ public class CustomGameSettings : KMonoBehaviour
 		}
 		foreach (Story story in Db.Get().Stories.resources)
 		{
-			long num = (long)global::Util.IntPow(3, story.kleiUseOnlyCoordinateOffset);
+			long num = (long)((story.kleiUseOnlyCoordinateOffset == -1) ? (-1) : global::Util.IntPow(3, story.kleiUseOnlyCoordinateOffset));
+			int num2 = ((story.kleiUseOnlyCoordinateOffset == -1) ? (-1) : 3);
 			SettingConfig settingConfig = new ListSettingConfig(story.Id, "", "", new List<SettingLevel>
 			{
 				new SettingLevel("Disabled", "", "", 0L, null),
 				new SettingLevel("Guaranteed", "", "", 1L, null)
-			}, "Disabled", "Disabled", num, 3L, false, false, "", "", false);
+			}, "Disabled", "Disabled", num, (long)num2, false, false, "", "", false);
 			this.AddStorySettingConfig(settingConfig);
 		}
 		this.VerifySettingCoordinates();
+	}
+
+	public void DisableAllStories()
+	{
+		foreach (KeyValuePair<string, SettingConfig> keyValuePair in this.StorySettings)
+		{
+			this.SetStorySetting(keyValuePair.Value, false);
+		}
 	}
 
 	public void SetSurvivalDefaults()
@@ -718,7 +727,7 @@ public class CustomGameSettings : KMonoBehaviour
 	public bool IsStoryActive(string id, string level)
 	{
 		SettingConfig settingConfig;
-		return this.StorySettings.TryGetValue(id, out settingConfig) && (settingConfig != null && settingConfig.coordinate_dimension >= 0L && settingConfig.coordinate_dimension_width >= 0L) && level == "Guaranteed";
+		return this.StorySettings.TryGetValue(id, out settingConfig) && settingConfig != null && level == "Guaranteed";
 	}
 
 	private static CustomGameSettings instance;

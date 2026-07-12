@@ -34,7 +34,7 @@ public class KleiPermitDioramaVis_BuildingOnBackground : KMonoBehaviour, IKleiPe
 		return base.gameObject;
 	}
 
-	public void ConfigureWith(PermitResource permit, PermitPresentationInfo permitPresInfo)
+	public void ConfigureWith(PermitResource permit)
 	{
 		BuildingFacadeResource buildingFacadeResource = (BuildingFacadeResource)permit;
 		BuildingDef value = KleiPermitVisUtil.GetBuildingDef(permit).Value;

@@ -53,7 +53,7 @@ public static class CodexEntryGenerator
 
 	private static CodexEntry GenerateSingleBuildingEntry(BuildingDef def, string categoryEntryID)
 	{
-		if (def.DebugOnly)
+		if (def.DebugOnly || def.Deprecated)
 		{
 			return null;
 		}

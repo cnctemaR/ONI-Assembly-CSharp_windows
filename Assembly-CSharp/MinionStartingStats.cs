@@ -469,6 +469,7 @@ public class MinionStartingStats : ITelepadDeliverable
 		this.ApplyAccessories(go);
 		this.ApplyExperience(go);
 		this.ApplyOutfit(this.personality, go);
+		this.ApplyJoyResponseOutfit(this.personality, go);
 	}
 
 	public void ApplyExperience(GameObject go)
@@ -493,9 +494,15 @@ public class MinionStartingStats : ITelepadDeliverable
 			Option<ClothingOutfitTarget> option = ClothingOutfitTarget.TryFromId(personality.outfitIds[ClothingOutfitUtility.OutfitType.Clothing]);
 			if (option.HasValue)
 			{
-				go.GetComponent<Accessorizer>().ApplyClothingItems(option.Value.ReadItemValues(), true);
+				go.GetComponent<WearableAccessorizer>().ApplyClothingItems(option.Value.ReadItemValues());
 			}
 		}
+	}
+
+	public void ApplyJoyResponseOutfit(Personality personality, GameObject go)
+	{
+		JoyResponseOutfitTarget joyResponseOutfitTarget = JoyResponseOutfitTarget.FromPersonality(personality);
+		JoyResponseOutfitTarget.FromMinion(go).WriteFacadeId(joyResponseOutfitTarget.ReadFacadeId());
 	}
 
 	public void ApplyRace(GameObject go)
@@ -517,15 +524,16 @@ public class MinionStartingStats : ITelepadDeliverable
 			body = HashCache.Get().Add(string.Format("torso_{0:000}", p.body)),
 			hat = HashedString.Invalid,
 			faceFX = HashedString.Invalid,
-			legs = HashCache.Get().Add("leg"),
 			armLowerSkin = HashCache.Get().Add(string.Format("arm_lower_{0:000}", p.headShape)),
 			armUpperSkin = HashCache.Get().Add(string.Format("arm_upper_{0:000}", p.headShape)),
 			legSkin = HashCache.Get().Add(string.Format("leg_skin_{0:000}", p.headShape)),
-			belt = HashCache.Get().Add("belt"),
-			pelvis = HashCache.Get().Add("pelvis"),
-			foot = HashCache.Get().Add("foot"),
-			hand = HashCache.Get().Add("hand_paint"),
-			cuff = HashCache.Get().Add("cuff")
+			neck = HashCache.Get().Add((p.neck != 0) ? string.Format("neck_{0:000}", p.neck) : "neck"),
+			legs = HashCache.Get().Add((p.leg != 0) ? string.Format("leg_{0:000}", p.leg) : "leg"),
+			belt = HashCache.Get().Add((p.belt != 0) ? string.Format("belt_{0:000}", p.belt) : "belt"),
+			pelvis = HashCache.Get().Add((p.pelvis != 0) ? string.Format("pelvis_{0:000}", p.pelvis) : "pelvis"),
+			foot = HashCache.Get().Add((p.foot != 0) ? string.Format("foot_{0:000}", p.foot) : "foot"),
+			hand = HashCache.Get().Add((p.hand != 0) ? string.Format("hand_paint_{0:000}", p.hand) : "hand_paint"),
+			cuff = HashCache.Get().Add((p.cuff != 0) ? string.Format("cuff_{0:000}", p.cuff) : "cuff")
 		};
 	}
 

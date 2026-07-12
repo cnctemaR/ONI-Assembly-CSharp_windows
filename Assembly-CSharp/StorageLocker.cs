@@ -26,6 +26,7 @@ public class StorageLocker : KMonoBehaviour, IUserControlledCapacity
 		{
 			this.nameable.SetName(this.lockerName);
 		}
+		base.Trigger(-1683615038, null);
 	}
 
 	protected override void OnCleanUp()

@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using Klei;
 using STRINGS;
 
 namespace Database
@@ -22,7 +19,13 @@ namespace Database
 			this.Add("BasicAqua", new string[] { "TopBasicAqua", "BottomBasicAqua", "GlovesBasicAqua", "ShoesBasicAqua" }, UI.OUTFITS.BASIC_AQUA.NAME);
 			this.Add("BasicPurple", new string[] { "TopBasicPurple", "BottomBasicPurple", "GlovesBasicPurple", "ShoesBasicPurple" }, UI.OUTFITS.BASIC_PURPLE.NAME);
 			this.Add("BasicPinkOrchid", new string[] { "TopBasicPinkOrchid", "BottomBasicPinkOrchid", "GlovesBasicPinkOrchid", "ShoesBasicPinkOrchid" }, UI.OUTFITS.BASIC_PINK_ORCHID.NAME);
-			this.Load(items_resource);
+			this.Add("BasicDeepRed", new string[] { "TopRaglanDeepRed", "ShortsBasicDeepRed", "GlovesAthleticRedDeep", "SocksAthleticDeepRed" }, UI.OUTFITS.BASIC_DEEPRED.NAME);
+			this.Add("BasicOrangeSatsuma", new string[] { "TopRaglanSatsuma", "ShortsBasicSatsuma", "GlovesAthleticOrangeSatsuma", "SocksAthleticOrangeSatsuma" }, UI.OUTFITS.BASIC_SATSUMA.NAME);
+			this.Add("BasicLemon", new string[] { "TopRaglanLemon", "ShortsBasicYellowcake", "GlovesAthleticYellowLemon", "SocksAthleticYellowLemon" }, UI.OUTFITS.BASIC_LEMON.NAME);
+			this.Add("BasicBlueCobalt", new string[] { "TopRaglanCobalt", "ShortsBasicBlueCobalt", "GlovesAthleticBlueCobalt", "SocksAthleticBlueCobalt" }, UI.OUTFITS.BASIC_BLUE_COBALT.NAME);
+			this.Add("BasicGreenKelly", new string[] { "TopRaglanKellyGreen", "ShortsBasicKellyGreen", "GlovesAthleticGreenKelly", "SocksAthleticGreenKelly" }, UI.OUTFITS.BASIC_GREEN_KELLY.NAME);
+			this.Add("BasicPinkFlamingo", new string[] { "TopRaglanFlamingo", "ShortsBasicPinkFlamingo", "GlovesAthleticPinkFlamingo", "SocksAthleticPinkFlamingo" }, UI.OUTFITS.BASIC_PINK_FLAMINGO.NAME);
+			this.Add("BasicGreyCharcoal", new string[] { "TopRaglanCharcoal", "ShortsBasicCharcoal", "GlovesAthleticGreyCharcoal", "SocksAthleticGreyCharcoal" }, UI.OUTFITS.BASIC_GREY_CHARCOAL.NAME);
 			ClothingOutfitUtility.LoadClothingOutfitData(this);
 		}
 
@@ -32,76 +35,10 @@ namespace Database
 			this.resources.Add(clothingOutfitResource);
 		}
 
-		public void Load(ClothingItems items_resource)
-		{
-			ListPool<YamlIO.Error, ClothingItemResource>.PooledList errors = ListPool<YamlIO.Error, ClothingItemResource>.Allocate();
-			List<FileHandle> list = new List<FileHandle>();
-			DirectoryInfo directoryInfo = new DirectoryInfo(FileSystem.Normalize(Path.Combine(new string[] { Db.GetPath("", "clothing") })));
-			if (directoryInfo.Exists)
-			{
-				FileSystem.GetFiles(directoryInfo.FullName, "*.yaml", list);
-				YamlIO.ErrorHandler <>9__0;
-				foreach (FileHandle fileHandle in list)
-				{
-					try
-					{
-						FileHandle fileHandle2 = fileHandle;
-						YamlIO.ErrorHandler errorHandler;
-						if ((errorHandler = <>9__0) == null)
-						{
-							errorHandler = (<>9__0 = delegate(YamlIO.Error error, bool force_log_as_warning)
-							{
-								errors.Add(error);
-							});
-						}
-						ClothingOutfits.ClothingOutfitInfo clothingOutfitInfo = YamlIO.LoadFile<ClothingOutfits.ClothingOutfitInfo>(fileHandle2, errorHandler, null);
-						if (errors.Count == 0)
-						{
-							string[] array = new string[clothingOutfitInfo.items.Count];
-							for (int i = 0; i < clothingOutfitInfo.items.Count; i++)
-							{
-								ClothingOutfits.ClothingOutfitInfo.ClothingItem clothingItem = clothingOutfitInfo.items[i];
-								if (Assets.GetAnim(clothingItem.animFilename) == null)
-								{
-									Debug.LogError(string.Concat(new string[] { "missing anim file ", clothingItem.animFilename, " for ClothingItem ", clothingItem.id, " in ", fileHandle.full_path }));
-								}
-								else if (clothingItem.id == null)
-								{
-									Debug.LogError("missing clothing item id in " + fileHandle.full_path);
-								}
-								else
-								{
-									if (items_resource.TryGet(clothingItem.id) == null)
-									{
-										items_resource.Add(clothingItem.id, clothingItem.name, clothingItem.description, PermitCategories.GetCategoryForId(clothingItem.category), PermitRarity.Unknown, clothingItem.animFilename);
-									}
-									array[i] = clothingItem.id;
-								}
-							}
-							if (clothingOutfitInfo.id != null)
-							{
-								this.Add(clothingOutfitInfo.id, array, clothingOutfitInfo.id + " (yaml)");
-							}
-						}
-						else
-						{
-							Debug.LogError("Failed to load clothing outfit " + fileHandle.full_path + " \n " + errors[0].message);
-						}
-					}
-					catch (Exception ex)
-					{
-						Debug.LogError(string.Format("Failed to load clothing outfit {0} error {1}", fileHandle.full_path, ex));
-					}
-				}
-			}
-			this.resources = this.resources.Distinct<ClothingOutfitResource>().ToList<ClothingOutfitResource>();
-			errors.Recycle();
-		}
-
 		public void SetDuplicantPersonalityOutfit(string personalityId, Option<string> outfit_id, ClothingOutfitUtility.OutfitType outfit_type = ClothingOutfitUtility.OutfitType.Clothing)
 		{
-			Db.Get().Personalities.Get(personalityId).SetOutfit(outfit_type, outfit_id);
-			CustomClothingOutfits.Instance.SetDuplicantPerosonalityOutfit(personalityId, outfit_id, outfit_type);
+			Db.Get().Personalities.Get(personalityId).Internal_SetOutfit(outfit_type, outfit_id);
+			CustomClothingOutfits.Instance.Internal_SetDuplicantPersonalityOutfit(personalityId, outfit_id, outfit_type);
 		}
 
 		public class ClothingOutfitInfo

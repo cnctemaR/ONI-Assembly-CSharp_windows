@@ -252,7 +252,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Hot Diggity!";
 
-				public static LocString DESCRIPTION = "Some interesting data has revealed that {dupe} has had a marked increase in physical abilities, an increase that cannot entirely be attributed to the usual improvements that occur after regular physical activity.\n\nBased on previous observations this Duplicant's positive associations with digging appear to account for this additional physical boost.\n\nThis would mean the personal preferences of my Duplicants are directly correlated to how hard they work.  How interesting...";
+				public static LocString DESCRIPTION = "Some interesting data has revealed that {dupe} has had a marked increase in physical abilities, an increase that cannot entirely be attributed to the usual improvements that occur after regular physical activity.\n\nBased on previous observations this Duplicant's positive associations with digging appear to account for this additional physical boost.\n\nThis would mean the personal preferences of my Duplicants are directly correlated to how hard they work. How interesting...";
 			}
 
 			public class BONUSSTORAGE
@@ -315,7 +315,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Lit-erally Great";
 
-				public static LocString DESCRIPTION = "{dupe}'s recent time in a well lit area has greatly improved this Duplicant's ability to work with, and on, machinery.\n\nThis supports the prevailing theory that a well lit workspace has many benefits beyond just improving my Duplicant's ability to see.";
+				public static LocString DESCRIPTION = "{dupe}'s recent time in a well-lit area has greatly improved this Duplicant's ability to work with, and on, machinery.\n\nThis supports the prevailing theory that a well-lit workspace has many benefits beyond just improving my Duplicant's ability to see.";
 			}
 
 			public class BONUSTALKER

@@ -15,6 +15,7 @@ public class DeathMonitor : GameStateMachine<DeathMonitor, DeathMonitor.Instance
 		});
 		this.die.ToggleTag(GameTags.Dying).Enter("Die", delegate(DeathMonitor.Instance smi)
 		{
+			smi.gameObject.AddTag(GameTags.PreventChoreInterruption);
 			Death death = this.death.Get(smi);
 			if (smi.IsDuplicant)
 			{
@@ -44,7 +45,10 @@ public class DeathMonitor : GameStateMachine<DeathMonitor, DeathMonitor.Instance
 			}
 		}).EventTransition(GameHashes.OnStore, this.dead.carried, (DeathMonitor.Instance smi) => smi.IsDuplicant && smi.HasTag(GameTags.Stored));
 		this.dead.carried.ToggleAnims("anim_dead_carried_kanim", 0f, "").PlayAnim("idle_default", KAnim.PlayMode.Loop).EventTransition(GameHashes.OnStore, this.dead.ground, (DeathMonitor.Instance smi) => !smi.HasTag(GameTags.Stored));
-		this.dead_creature.ToggleTag(GameTags.Dead).PlayAnim("idle_dead", KAnim.PlayMode.Loop);
+		this.dead_creature.Enter(delegate(DeathMonitor.Instance smi)
+		{
+			smi.gameObject.AddTag(GameTags.Dead);
+		}).PlayAnim("idle_dead", KAnim.PlayMode.Loop);
 	}
 
 	public GameStateMachine<DeathMonitor, DeathMonitor.Instance, IStateMachineTarget, DeathMonitor.Def>.State alive;

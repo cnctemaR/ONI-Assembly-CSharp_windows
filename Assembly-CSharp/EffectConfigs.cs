@@ -19,6 +19,14 @@ public class EffectConfigs : IMultiEntityConfig
 			},
 			new
 			{
+				id = EffectConfigs.EffectTemplateOverrideId,
+				animFiles = new string[0],
+				initialAnim = "",
+				initialMode = KAnim.PlayMode.Once,
+				destroyOnAnimComplete = false
+			},
+			new
+			{
 				id = EffectConfigs.AttackSplashId,
 				animFiles = new string[] { "attack_beam_contact_fx_kanim" },
 				initialAnim = "loop",
@@ -68,6 +76,10 @@ public class EffectConfigs : IMultiEntityConfig
 			kbatchedAnimController.initialMode = anon2.initialMode;
 			kbatchedAnimController.isMovable = true;
 			kbatchedAnimController.destroyOnAnimComplete = anon2.destroyOnAnimComplete;
+			if (anon2.id == EffectConfigs.EffectTemplateOverrideId)
+			{
+				SymbolOverrideControllerUtil.AddToPrefab(gameObject);
+			}
 			if (anon2.animFiles.Length != 0)
 			{
 				KAnimFile[] array = new KAnimFile[anon2.animFiles.Length];
@@ -92,6 +104,8 @@ public class EffectConfigs : IMultiEntityConfig
 	}
 
 	public static string EffectTemplateId = "EffectTemplateFx";
+
+	public static string EffectTemplateOverrideId = "EffectTemplateOverrideFx";
 
 	public static string AttackSplashId = "AttackSplashFx";
 

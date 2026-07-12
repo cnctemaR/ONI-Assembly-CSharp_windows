@@ -6,10 +6,10 @@ public class BedConfig : IBuildingConfig
 {
 	public override BuildingDef CreateBuildingDef()
 	{
-		string id = BedConfig.ID;
+		string text = "Bed";
 		int num = 2;
 		int num2 = 2;
-		string text = "bedlg_kanim";
+		string text2 = "bedlg_kanim";
 		int num3 = 10;
 		float num4 = 10f;
 		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER3;
@@ -17,7 +17,7 @@ public class BedConfig : IBuildingConfig
 		float num5 = 1600f;
 		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloor;
 		EffectorValues none = NOISE_POLLUTION.NONE;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(id, num, num2, text, num3, num4, tier, raw_MINERALS, num5, buildLocationRule, BUILDINGS.DECOR.NONE, none, 0.2f);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, raw_MINERALS, num5, buildLocationRule, BUILDINGS.DECOR.NONE, none, 0.2f);
 		buildingDef.Overheatable = false;
 		buildingDef.AudioCategory = "Metal";
 		return buildingDef;
@@ -42,5 +42,5 @@ public class BedConfig : IBuildingConfig
 		go.AddOrGetDef<RocketUsageRestriction.Def>();
 	}
 
-	public static string ID = "Bed";
+	public const string ID = "Bed";
 }

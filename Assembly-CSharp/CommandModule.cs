@@ -170,6 +170,7 @@ public class CommandModule : StateMachineComponent<CommandModule.StatesInstance>
 		{
 			default_state = this.grounded;
 			this.grounded.PlayAnim("grounded", KAnim.PlayMode.Loop).DefaultState(this.grounded.awaitingAstronaut).TagTransition(GameTags.RocketNotOnGround, this.spaceborne, false);
+			this.grounded.refreshChore.GoTo(this.grounded.awaitingAstronaut);
 			this.grounded.awaitingAstronaut.Enter(delegate(CommandModule.StatesInstance smi)
 			{
 				if (smi.CheckStoredMinionIsAssignee())
@@ -182,6 +183,10 @@ public class CommandModule : StateMachineComponent<CommandModule.StatesInstance>
 				if (smi.CheckStoredMinionIsAssignee())
 				{
 					smi.GoTo(this.grounded.hasAstronaut);
+				}
+				else
+				{
+					smi.GoTo(this.grounded.refreshChore);
 				}
 				Game.Instance.userMenu.Refresh(smi.gameObject);
 			}).ToggleChore((CommandModule.StatesInstance smi) => smi.master.CreateWorkChore(), this.grounded.hasAstronaut);
@@ -227,6 +232,8 @@ public class CommandModule : StateMachineComponent<CommandModule.StatesInstance>
 
 		public class GroundedStates : GameStateMachine<CommandModule.States, CommandModule.StatesInstance, CommandModule, object>.State
 		{
+			public GameStateMachine<CommandModule.States, CommandModule.StatesInstance, CommandModule, object>.State refreshChore;
+
 			public GameStateMachine<CommandModule.States, CommandModule.StatesInstance, CommandModule, object>.State awaitingAstronaut;
 
 			public GameStateMachine<CommandModule.States, CommandModule.StatesInstance, CommandModule, object>.State hasAstronaut;

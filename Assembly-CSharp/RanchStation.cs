@@ -233,9 +233,8 @@ public class RanchStation : GameStateMachine<RanchStation, RanchStation.Instance
 			{
 				return;
 			}
-			for (int i = this.targetRanchables.Count - 1; i >= 0; i--)
+			foreach (RanchableMonitor.Instance instance in this.targetRanchables.ToArray())
 			{
-				RanchableMonitor.Instance instance = this.targetRanchables[i];
 				if (instance.States == null)
 				{
 					this.Abandon(instance);
@@ -302,7 +301,7 @@ public class RanchStation : GameStateMachine<RanchStation, RanchStation.Instance
 
 		public void TriggerRanchStationNoLongerAvailable()
 		{
-			for (int i = 0; i < this.targetRanchables.Count; i++)
+			for (int i = this.targetRanchables.Count - 1; i >= 0; i--)
 			{
 				RanchableMonitor.Instance instance = this.targetRanchables[i];
 				if (!instance.IsNullOrStopped() && !instance.States.IsNullOrStopped())

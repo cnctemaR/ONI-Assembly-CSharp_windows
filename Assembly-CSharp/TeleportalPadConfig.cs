@@ -27,6 +27,7 @@ public class TeleportalPadConfig : IBuildingConfig
 		buildingDef.DefaultAnimState = "idle";
 		buildingDef.RequiresPowerInput = true;
 		buildingDef.PowerInputOffset = new CellOffset(2, 0);
+		buildingDef.ShowInBuildMenu = false;
 		buildingDef.LogicInputPorts = new List<LogicPorts.Port>
 		{
 			LogicPorts.Port.InputPort("TeleportalPad_ID_PORT_0", new CellOffset(-1, 0), global::STRINGS.BUILDINGS.PREFABS.TELEPORTALPAD.LOGIC_PORT, global::STRINGS.BUILDINGS.PREFABS.TELEPORTALPAD.LOGIC_PORT_ACTIVE, global::STRINGS.BUILDINGS.PREFABS.TELEPORTALPAD.LOGIC_PORT_INACTIVE, false, false),

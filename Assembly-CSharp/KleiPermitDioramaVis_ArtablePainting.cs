@@ -14,7 +14,7 @@ public class KleiPermitDioramaVis_ArtablePainting : KMonoBehaviour, IKleiPermitD
 		SymbolOverrideControllerUtil.AddToPrefab(this.buildingKAnim.gameObject);
 	}
 
-	public void ConfigureWith(PermitResource permit, PermitPresentationInfo permitPresInfo)
+	public void ConfigureWith(PermitResource permit)
 	{
 		ArtableStage artableStage = (ArtableStage)permit;
 		KleiPermitVisUtil.ConfigureToRenderBuilding(this.buildingKAnim, artableStage);

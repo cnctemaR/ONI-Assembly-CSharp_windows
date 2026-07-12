@@ -7,7 +7,7 @@ public class KleiItemDropScreen_PermitVis : KMonoBehaviour
 {
 	public void ConfigureWith(PermitResource permit)
 	{
-		PermitPresentationInfo permitPresentationInfo = PermitItems.GetPermitPresentationInfo(permit.Id);
+		PermitPresentationInfo permitPresentationInfo = permit.GetPermitPresentationInfo();
 		bool flag = permit != null;
 		this.ResetState();
 		this.equipmentVis.gameObject.SetActive(false);
@@ -18,7 +18,7 @@ public class KleiItemDropScreen_PermitVis : KMonoBehaviour
 			this.fallbackVis.ConfigureWith(permit, permitPresentationInfo);
 			return;
 		}
-		if (permit.PermitCategory == PermitCategory.Equipment)
+		if (permit.Category == PermitCategory.Equipment)
 		{
 			this.equipmentVis.gameObject.SetActive(true);
 			this.equipmentVis.ConfigureWith(permit, permitPresentationInfo);

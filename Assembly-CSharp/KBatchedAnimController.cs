@@ -641,6 +641,17 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 		this.SetDirty();
 	}
 
+	public SymbolOverrideController SetupSymbolOverriding()
+	{
+		if (!this.symbolOverrideController.IsNullOrDestroyed())
+		{
+			return this.symbolOverrideController;
+		}
+		this.usingNewSymbolOverrideSystem = true;
+		this.symbolOverrideController = SymbolOverrideControllerUtil.AddToPrefab(base.gameObject);
+		return this.symbolOverrideController;
+	}
+
 	public bool ApplySymbolOverrides()
 	{
 		this.batch.atlases.Apply(this.batch.matProperties);

@@ -29,6 +29,7 @@ public class DevRadiationGeneratorConfig : IBuildingConfig
 
 	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
+		go.AddTag(GameTags.DevBuilding);
 		RadiationEmitter radiationEmitter = go.AddOrGet<RadiationEmitter>();
 		radiationEmitter.emitType = RadiationEmitter.RadiationEmitterType.Constant;
 		radiationEmitter.radiusProportionalToRads = false;

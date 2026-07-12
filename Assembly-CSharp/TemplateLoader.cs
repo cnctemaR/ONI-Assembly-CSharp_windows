@@ -241,45 +241,112 @@ public static class TemplateLoader
 		if (id != null)
 		{
 			uint num = <PrivateImplementationDetails>.ComputeStringHash(id);
-			if (num <= 1213766155U)
+			if (num <= 1938276536U)
 			{
-				if (num > 379600269U)
+				if (num <= 609727380U)
 				{
-					if (num != 609727380U)
+					if (num != 301047391U)
 					{
-						if (num != 848332507U)
+						if (num != 379600269U)
 						{
-							if (num != 1213766155U)
+							if (num != 609727380U)
 							{
 								return;
 							}
-							if (!(id == "TravelTube"))
+							if (!(id == "GasConduit"))
 							{
 								return;
 							}
-							spawned.GetComponent<TravelTube>().SetFirstFrameCallback(delegate
-							{
-								Game.Instance.travelTubeSystem.SetConnections(connection, cell, true);
-								KAnimGraphTileVisualizer component = spawned.GetComponent<KAnimGraphTileVisualizer>();
-								if (component != null)
-								{
-									component.Refresh();
-								}
-							});
-							return;
+							goto IL_01DE;
 						}
-						else if (!(id == "InsulatedGasConduit"))
+						else
 						{
-							return;
+							if (!(id == "LiquidConduit"))
+							{
+								return;
+							}
+							goto IL_01FB;
 						}
 					}
-					else if (!(id == "GasConduit"))
+					else if (!(id == "WireRefined"))
 					{
 						return;
 					}
-					spawned.GetComponent<Conduit>().SetFirstFrameCallback(delegate
+				}
+				else if (num != 848332507U)
+				{
+					if (num != 1213766155U)
 					{
-						Game.Instance.gasConduitSystem.SetConnections(connection, cell, true);
+						if (num != 1938276536U)
+						{
+							return;
+						}
+						if (!(id == "Wire"))
+						{
+							return;
+						}
+					}
+					else
+					{
+						if (!(id == "TravelTube"))
+						{
+							return;
+						}
+						spawned.GetComponent<TravelTube>().SetFirstFrameCallback(delegate
+						{
+							Game.Instance.travelTubeSystem.SetConnections(connection, cell, true);
+							KAnimGraphTileVisualizer component = spawned.GetComponent<KAnimGraphTileVisualizer>();
+							if (component != null)
+							{
+								component.Refresh();
+							}
+						});
+						return;
+					}
+				}
+				else
+				{
+					if (!(id == "InsulatedGasConduit"))
+					{
+						return;
+					}
+					goto IL_01DE;
+				}
+			}
+			else if (num <= 3711470516U)
+			{
+				if (num != 3228988836U)
+				{
+					if (num != 3324196971U)
+					{
+						if (num != 3711470516U)
+						{
+							return;
+						}
+						if (!(id == "InsulatedLiquidConduit"))
+						{
+							return;
+						}
+						goto IL_01FB;
+					}
+					else
+					{
+						if (!(id == "GasConduitRadiant"))
+						{
+							return;
+						}
+						goto IL_01DE;
+					}
+				}
+				else
+				{
+					if (!(id == "LogicWire"))
+					{
+						return;
+					}
+					spawned.GetComponent<LogicWire>().SetFirstFrameCallback(delegate
+					{
+						Game.Instance.logicCircuitSystem.SetConnections(connection, cell, true);
 						KAnimGraphTileVisualizer component2 = spawned.GetComponent<KAnimGraphTileVisualizer>();
 						if (component2 != null)
 						{
@@ -288,97 +355,68 @@ public static class TemplateLoader
 					});
 					return;
 				}
-				if (num != 301047391U)
-				{
-					if (num != 379600269U)
-					{
-						return;
-					}
-					if (!(id == "LiquidConduit"))
-					{
-						return;
-					}
-					goto IL_01AB;
-				}
-				else if (!(id == "WireRefined"))
-				{
-					return;
-				}
 			}
-			else if (num <= 3228988836U)
-			{
-				if (num != 1827504487U)
-				{
-					if (num != 1938276536U)
-					{
-						if (num != 3228988836U)
-						{
-							return;
-						}
-						if (!(id == "LogicWire"))
-						{
-							return;
-						}
-						spawned.GetComponent<LogicWire>().SetFirstFrameCallback(delegate
-						{
-							Game.Instance.logicCircuitSystem.SetConnections(connection, cell, true);
-							KAnimGraphTileVisualizer component3 = spawned.GetComponent<KAnimGraphTileVisualizer>();
-							if (component3 != null)
-							{
-								component3.Refresh();
-							}
-						});
-						return;
-					}
-					else if (!(id == "Wire"))
-					{
-						return;
-					}
-				}
-				else if (!(id == "InsulatedWire"))
-				{
-					return;
-				}
-			}
-			else if (num != 3711470516U)
+			else if (num <= 3863001292U)
 			{
 				if (num != 3716494409U)
 				{
-					if (num != 4113070310U)
+					if (num != 3863001292U)
 					{
 						return;
 					}
-					if (!(id == "SolidConduit"))
+					if (!(id == "LiquidConduitRadiant"))
 					{
 						return;
 					}
-					spawned.GetComponent<SolidConduit>().SetFirstFrameCallback(delegate
-					{
-						Game.Instance.solidConduitSystem.SetConnections(connection, cell, true);
-						KAnimGraphTileVisualizer component4 = spawned.GetComponent<KAnimGraphTileVisualizer>();
-						if (component4 != null)
-						{
-							component4.Refresh();
-						}
-					});
-					return;
+					goto IL_01FB;
 				}
 				else if (!(id == "HighWattageWire"))
 				{
 					return;
 				}
 			}
-			else
+			else if (num != 4113070310U)
 			{
-				if (!(id == "InsulatedLiquidConduit"))
+				if (num != 4243975822U)
 				{
 					return;
 				}
-				goto IL_01AB;
+				if (!(id == "WireRefinedHighWattage"))
+				{
+					return;
+				}
+			}
+			else
+			{
+				if (!(id == "SolidConduit"))
+				{
+					return;
+				}
+				spawned.GetComponent<SolidConduit>().SetFirstFrameCallback(delegate
+				{
+					Game.Instance.solidConduitSystem.SetConnections(connection, cell, true);
+					KAnimGraphTileVisualizer component3 = spawned.GetComponent<KAnimGraphTileVisualizer>();
+					if (component3 != null)
+					{
+						component3.Refresh();
+					}
+				});
+				return;
 			}
 			spawned.GetComponent<Wire>().SetFirstFrameCallback(delegate
 			{
 				Game.Instance.electricalConduitSystem.SetConnections(connection, cell, true);
+				KAnimGraphTileVisualizer component4 = spawned.GetComponent<KAnimGraphTileVisualizer>();
+				if (component4 != null)
+				{
+					component4.Refresh();
+				}
+			});
+			return;
+			IL_01DE:
+			spawned.GetComponent<Conduit>().SetFirstFrameCallback(delegate
+			{
+				Game.Instance.gasConduitSystem.SetConnections(connection, cell, true);
 				KAnimGraphTileVisualizer component5 = spawned.GetComponent<KAnimGraphTileVisualizer>();
 				if (component5 != null)
 				{
@@ -386,7 +424,7 @@ public static class TemplateLoader
 				}
 			});
 			return;
-			IL_01AB:
+			IL_01FB:
 			spawned.GetComponent<Conduit>().SetFirstFrameCallback(delegate
 			{
 				Game.Instance.liquidConduitSystem.SetConnections(connection, cell, true);

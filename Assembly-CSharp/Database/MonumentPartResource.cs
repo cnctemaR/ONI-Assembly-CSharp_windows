@@ -12,7 +12,7 @@ namespace Database
 		public string State { get; private set; }
 
 		public MonumentPartResource(string id, string animFilename, string state, string symbolName, MonumentPartResource.Part part)
-			: base(id, PermitCategory.Artwork, PermitRarity.Unknown)
+			: base(id, "TODO:DbMonumentParts", "TODO:DbMonumentParts", PermitCategory.Artwork, PermitRarity.Unknown)
 		{
 			this.AnimFile = Assets.GetAnim(animFilename);
 			this.SymbolName = symbolName;
@@ -29,11 +29,7 @@ namespace Database
 		public override PermitPresentationInfo GetPermitPresentationInfo()
 		{
 			PermitPresentationInfo permitPresentationInfo = default(PermitPresentationInfo);
-			permitPresentationInfo.name = string.Format("_{0}", this.Id);
 			permitPresentationInfo.sprite = this.GetUISprite().first;
-			permitPresentationInfo.category = this.PermitCategory;
-			permitPresentationInfo.SetRarityDetailsFor(this.Rarity);
-			permitPresentationInfo.ownedCount = PermitItems.GetOwnedCount(this);
 			permitPresentationInfo.SetFacadeForText("_monument part");
 			return permitPresentationInfo;
 		}

@@ -32,6 +32,7 @@ public class DevGeneratorConfig : IBuildingConfig
 
 	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
+		go.AddTag(GameTags.DevBuilding);
 		DevGenerator devGenerator = go.AddOrGet<DevGenerator>();
 		devGenerator.powerDistributionOrder = 9;
 		devGenerator.wattageRating = 100000f;

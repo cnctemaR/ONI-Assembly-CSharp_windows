@@ -12,6 +12,7 @@ public class DevToolSaveGameInfo : DevTool
 		}
 		ImGui.Text("Seed: " + CustomGameSettings.Instance.GetSettingsCoordinate());
 		ImGui.Text("Generated: " + Game.Instance.dateGenerated);
+		ImGui.Text("DebugWasUsed: " + Game.Instance.debugWasUsed.ToString());
 		ImGui.PushItemWidth(100f);
 		ImGui.NewLine();
 		ImGui.Text("Changelists played on");

@@ -38,10 +38,9 @@ public class LockerNavigator : KModalScreen
 	public override void Show(bool show = true)
 	{
 		base.Show(show);
-		if (!show && this.navigationHistory.Count > 0)
+		if (!show)
 		{
-			this.navigationHistory[this.navigationHistory.Count - 1].SetActive(false);
-			this.navigationHistory.Clear();
+			this.PopAllScreens();
 		}
 		StreamedTextures.SetBundlesLoaded(show);
 	}
@@ -51,7 +50,7 @@ public class LockerNavigator : KModalScreen
 		this.PopScreen();
 	}
 
-	public void PushScreen(GameObject screen)
+	public void PushScreen(GameObject screen, global::System.Action onClose = null)
 	{
 		if (screen == null)
 		{
@@ -60,21 +59,22 @@ public class LockerNavigator : KModalScreen
 		if (this.navigationHistory.Count == 0)
 		{
 			this.Show(true);
-			if (KPrivacyPrefs.instance.disableDataCollection)
+			if (!LockerNavigator.didDisplayDataCollectionWarningPopupOnce && KPrivacyPrefs.instance.disableDataCollection)
 			{
 				LockerNavigator.MakeDataCollectionWarningPopup(base.gameObject.transform.parent.gameObject);
+				LockerNavigator.didDisplayDataCollectionWarningPopupOnce = true;
 			}
 		}
-		if (this.navigationHistory.Count > 0 && screen == this.navigationHistory[this.navigationHistory.Count - 1])
+		if (this.navigationHistory.Count > 0 && screen == this.navigationHistory[this.navigationHistory.Count - 1].screen)
 		{
 			return;
 		}
 		if (this.navigationHistory.Count > 0)
 		{
-			this.navigationHistory[this.navigationHistory.Count - 1].SetActive(false);
+			this.navigationHistory[this.navigationHistory.Count - 1].screen.SetActive(false);
 		}
-		this.navigationHistory.Add(screen);
-		this.navigationHistory[this.navigationHistory.Count - 1].SetActive(true);
+		this.navigationHistory.Add(new LockerNavigator.HistoryEntry(screen, onClose));
+		this.navigationHistory[this.navigationHistory.Count - 1].screen.SetActive(true);
 		if (!base.gameObject.activeSelf)
 		{
 			base.gameObject.SetActive(true);
@@ -94,20 +94,31 @@ public class LockerNavigator : KModalScreen
 				return true;
 			}
 		}
-		this.navigationHistory[this.navigationHistory.Count - 1].SetActive(false);
-		this.navigationHistory.RemoveAt(this.navigationHistory.Count - 1);
+		int num2 = this.navigationHistory.Count - 1;
+		LockerNavigator.HistoryEntry historyEntry = this.navigationHistory[num2];
+		historyEntry.screen.SetActive(false);
+		if (historyEntry.onClose.IsSome())
+		{
+			historyEntry.onClose.Unwrap()();
+		}
+		this.navigationHistory.RemoveAt(num2);
 		if (this.navigationHistory.Count > 0)
 		{
-			this.navigationHistory[this.navigationHistory.Count - 1].SetActive(true);
+			this.navigationHistory[this.navigationHistory.Count - 1].screen.SetActive(true);
 			this.RefreshButtons();
 			return true;
 		}
 		this.Show(false);
+		MusicManager.instance.SetSongParameter("Music_SupplyCloset", "SupplyClosetView", "initial", true);
 		return false;
 	}
 
 	public void PopAllScreens()
 	{
+		if (this.navigationHistory.Count == 0 && this.preventScreenPop.Count == 0)
+		{
+			return;
+		}
 		int num = 0;
 		while (this.PopScreen())
 		{
@@ -193,9 +204,31 @@ public class LockerNavigator : KModalScreen
 	[SerializeField]
 	public GameObject outfitBrowserScreen;
 
-	private List<GameObject> navigationHistory = new List<GameObject>();
+	[SerializeField]
+	public GameObject joyResponseDesignerScreen;
+
+	private const string LOCKER_MENU_MUSIC = "Music_SupplyCloset";
+
+	private const string MUSIC_PARAMETER = "SupplyClosetView";
+
+	private List<LockerNavigator.HistoryEntry> navigationHistory = new List<LockerNavigator.HistoryEntry>();
 
 	private Dictionary<string, GameObject> screens = new Dictionary<string, GameObject>();
 
+	private static bool didDisplayDataCollectionWarningPopupOnce;
+
 	public List<Func<bool>> preventScreenPop = new List<Func<bool>>();
+
+	public readonly struct HistoryEntry
+	{
+		public HistoryEntry(GameObject screen, global::System.Action onClose = null)
+		{
+			this.screen = screen;
+			this.onClose = onClose;
+		}
+
+		public readonly GameObject screen;
+
+		public readonly Option<global::System.Action> onClose;
+	}
 }

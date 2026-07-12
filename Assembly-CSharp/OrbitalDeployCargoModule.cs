@@ -73,6 +73,20 @@ public class OrbitalDeployCargoModule : GameStateMachine<OrbitalDeployCargoModul
 		{
 			this.storage = base.GetComponent<Storage>();
 			base.GetComponent<RocketModule>().AddModuleCondition(ProcessCondition.ProcessConditionType.RocketStorage, new LoadingCompleteCondition(this.storage));
+			base.gameObject.Subscribe(-1683615038, new Action<object>(this.SetupMeter));
+		}
+
+		private void SetupMeter(object obj)
+		{
+			KBatchedAnimTracker componentInChildren = base.gameObject.GetComponentInChildren<KBatchedAnimTracker>();
+			componentInChildren.forceAlwaysAlive = true;
+			componentInChildren.matchParentOffset = true;
+		}
+
+		protected override void OnCleanUp()
+		{
+			base.gameObject.Unsubscribe(-1683615038, new Action<object>(this.SetupMeter));
+			base.OnCleanUp();
 		}
 
 		public bool NeedsVisualUpdate()

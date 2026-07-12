@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using STRINGS;
 using UnityEngine;
 
@@ -11,11 +12,14 @@ public class ConditionAllModulesComplete : ProcessCondition
 
 	public override ProcessCondition.Status EvaluateCondition()
 	{
-		foreach (GameObject gameObject in AttachableBuilding.GetAttachedNetwork(this.launchable.LaunchableGameObject.GetComponent<AttachableBuilding>()))
+		using (List<GameObject>.Enumerator enumerator = AttachableBuilding.GetAttachedNetwork(this.launchable.LaunchableGameObject.GetComponent<AttachableBuilding>()).GetEnumerator())
 		{
-			if (gameObject.GetComponent<Constructable>() != null || gameObject.GetComponent<Building>().Def.PrefabID == "UnconstructedRocketModule")
+			while (enumerator.MoveNext())
 			{
-				return ProcessCondition.Status.Failure;
+				if (enumerator.Current.GetComponent<Constructable>() != null)
+				{
+					return ProcessCondition.Status.Failure;
+				}
 			}
 		}
 		return ProcessCondition.Status.Ready;

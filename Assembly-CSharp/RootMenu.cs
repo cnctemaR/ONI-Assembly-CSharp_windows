@@ -188,6 +188,7 @@ public class RootMenu : KScreen
 	private void OnUIClear(object data)
 	{
 		this.CloseSubMenus();
+		SelectTool.Instance.Select(null, true);
 		if (global::UnityEngine.EventSystems.EventSystem.current != null)
 		{
 			global::UnityEngine.EventSystems.EventSystem.current.SetSelectedGameObject(null);

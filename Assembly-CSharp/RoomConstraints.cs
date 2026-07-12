@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Database;
 using STRINGS;
+using UnityEngine;
 
 public static class RoomConstraints
 {
@@ -305,11 +306,17 @@ public static class RoomConstraints
 				int num12 = Grid.XYToCell(num9, num10);
 				if (Game.Instance.roomProber.GetCavityForCell(num11) == room.cavity)
 				{
-					flag2 &= Grid.Objects[num11, 2] != null;
+					GameObject gameObject = Grid.Objects[num11, 2];
+					flag2 &= gameObject != null && !gameObject.HasTag(GameTags.UnderConstruction);
 				}
 				if (Game.Instance.roomProber.GetCavityForCell(num12) == room.cavity)
 				{
-					flag2 &= Grid.Objects[num12, 2] != null;
+					GameObject gameObject2 = Grid.Objects[num12, 2];
+					flag2 &= gameObject2 != null && !gameObject2.HasTag(GameTags.UnderConstruction);
+				}
+				if (!flag2)
+				{
+					return false;
 				}
 				num10++;
 			}

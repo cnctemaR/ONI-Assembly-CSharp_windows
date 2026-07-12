@@ -83,7 +83,9 @@ public class ResourceHarvestModule : GameStateMachine<ResourceHarvestModule, Res
 			base.GetComponent<RocketModule>().AddModuleCondition(ProcessCondition.ProcessConditionType.RocketStorage, new ConditionHasResource(this.storage, SimHashes.Diamond, 1000f));
 			base.Subscribe(-1697596308, new Action<object>(this.UpdateMeter));
 			this.meter = new MeterController(base.GetComponent<KBatchedAnimController>(), "meter_target", "meter", Meter.Offset.Infront, Grid.SceneLayer.NoLayer, new string[] { "meter_target", "meter_fill", "meter_frame", "meter_OL" });
-			this.meter.gameObject.GetComponent<KBatchedAnimTracker>().matchParentOffset = true;
+			KBatchedAnimTracker component = this.meter.gameObject.GetComponent<KBatchedAnimTracker>();
+			component.matchParentOffset = true;
+			component.forceAlwaysAlive = true;
 			this.UpdateMeter(null);
 		}
 

@@ -1,13 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
+using STRINGS;
+using TUNING;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class PlanBuildingToggle : KToggle
 {
-	public void Config(BuildingDef def)
+	public void Config(BuildingDef def, PlanScreen planScreen, HashedString buildingCategory)
 	{
 		this.def = def;
+		this.planScreen = planScreen;
+		this.buildingCategory = buildingCategory;
 		this.techItem = Db.Get().TechItems.TryGet(def.PrefabID);
 		this.gameSubscriptions.Add(Game.Instance.Subscribe(-107300940, new Action<object>(this.CheckResearch)));
 		this.gameSubscriptions.Add(Game.Instance.Subscribe(-1948169901, new Action<object>(this.CheckResearch)));
@@ -16,7 +20,16 @@ public class PlanBuildingToggle : KToggle
 		base.onClick += delegate
 		{
 			PlanScreen.Instance.OnSelectBuilding(this.gameObject, def, null);
+			this.RefreshDisplay();
 		};
+		if (global::TUNING.BUILDINGS.PLANSUBCATEGORYSORTING.ContainsKey(def.PrefabID))
+		{
+			Strings.TryGet("STRINGS.UI.NEWBUILDCATEGORIES." + global::TUNING.BUILDINGS.PLANSUBCATEGORYSORTING[def.PrefabID].ToUpper() + ".NAME", out this.subcategoryName);
+		}
+		else
+		{
+			global::Debug.LogWarning("Building " + def.PrefabID + " has not been added to plan screen subcategory organization in BuildingTuning.cs");
+		}
 		this.CheckResearch(null);
 		this.Refresh();
 	}
@@ -39,20 +52,41 @@ public class PlanBuildingToggle : KToggle
 		this.researchComplete = PlanScreen.TechRequirementsMet(this.techItem);
 	}
 
+	public bool CheckBuildingPassesSearchFilter(Def building)
+	{
+		if (BuildingGroupScreen.SearchIsEmpty)
+		{
+			return this.StandardDisplayFilter();
+		}
+		string text = BuildingGroupScreen.Instance.inputField.text;
+		string text2 = UI.StripLinkFormatting(building.Name).ToLower();
+		text = text.ToUpper();
+		return text2.ToUpper().Contains(text) || (this.subcategoryName != null && this.subcategoryName.String.ToUpper().Contains(text));
+	}
+
+	private bool StandardDisplayFilter()
+	{
+		return (this.researchComplete || DebugHandler.InstantBuildMode || Game.Instance.SandboxModeActive) && (this.planScreen.ActiveCategoryToggleInfo == null || this.buildingCategory == (HashedString)this.planScreen.ActiveCategoryToggleInfo.userData);
+	}
+
 	public bool Refresh()
 	{
-		bool flag = this.researchComplete || DebugHandler.InstantBuildMode || Game.Instance.SandboxModeActive;
+		bool flag;
+		if (BuildingGroupScreen.SearchIsEmpty)
+		{
+			flag = this.StandardDisplayFilter();
+		}
+		else
+		{
+			flag = this.CheckBuildingPassesSearchFilter(this.def);
+		}
 		bool flag2 = false;
 		if (base.gameObject.activeSelf != flag)
 		{
 			base.gameObject.SetActive(flag);
 			flag2 = true;
 		}
-		if (!base.gameObject.activeInHierarchy)
-		{
-			return flag2;
-		}
-		if (this.bgImage == null)
+		if (!base.gameObject.activeSelf)
 		{
 			return flag2;
 		}
@@ -62,12 +96,22 @@ public class PlanBuildingToggle : KToggle
 		return flag2;
 	}
 
+	public void SwitchViewMode(bool listView)
+	{
+		this.text.gameObject.SetActive(!listView);
+		this.text_listView.gameObject.SetActive(listView);
+		this.buildingIcon.gameObject.SetActive(!listView);
+		this.buildingIcon_listView.gameObject.SetActive(listView);
+	}
+
 	private void RefreshLabel()
 	{
 		if (this.text != null)
 		{
 			this.text.fontSize = (float)(ScreenResolutionMonitor.UsingGamepadUIMode() ? PlanScreen.fontSizeBigMode : PlanScreen.fontSizeStandardMode);
+			this.text_listView.fontSize = (float)(ScreenResolutionMonitor.UsingGamepadUIMode() ? PlanScreen.fontSizeBigMode : PlanScreen.fontSizeStandardMode);
 			this.text.text = this.def.Name;
+			this.text_listView.text = this.def.Name;
 		}
 	}
 
@@ -76,34 +120,32 @@ public class PlanBuildingToggle : KToggle
 		PlanScreen.RequirementsState buildableState = PlanScreen.Instance.GetBuildableState(this.def);
 		bool flag = buildableState == PlanScreen.RequirementsState.Complete || DebugHandler.InstantBuildMode || Game.Instance.SandboxModeActive;
 		bool flag2 = base.gameObject == PlanScreen.Instance.SelectedBuildingGameObject;
-		ImageToggleState.State state = ((buildableState == PlanScreen.RequirementsState.Complete) ? ImageToggleState.State.Inactive : ImageToggleState.State.Disabled);
 		if (flag2 && flag)
 		{
-			state = ImageToggleState.State.Active;
+			this.toggle.ChangeState(1);
 		}
 		else if (!flag2 && flag)
 		{
-			state = ImageToggleState.State.Inactive;
+			this.toggle.ChangeState(0);
 		}
 		else if (flag2 && !flag)
 		{
-			state = ImageToggleState.State.DisabledActive;
+			this.toggle.ChangeState(3);
 		}
 		else if (!flag2 && !flag)
 		{
-			state = ImageToggleState.State.Disabled;
+			this.toggle.ChangeState(2);
 		}
-		this.imageToggleState.SetState(state);
 		this.RefreshBuildingButtonIconAndColors(flag);
 		this.RefreshFG(buildableState);
 	}
 
 	private void PositionTooltip()
 	{
-		this.tooltip.overrideParentObject = PlanScreen.Instance.buildingGroupsRoot;
+		this.tooltip.overrideParentObject = (PlanScreen.Instance.ProductInfoScreen.gameObject.activeSelf ? PlanScreen.Instance.ProductInfoScreen.rectTransform() : PlanScreen.Instance.buildingGroupsRoot);
 		this.tooltip.tooltipPivot = Vector2.zero;
 		this.tooltip.parentPositionAnchor = new Vector2(1f, 0f);
-		this.tooltip.tooltipPositionOffset = (PlanScreen.Instance.ProductInfoScreen.gameObject.activeSelf ? new Vector2(16f + PlanScreen.Instance.ProductInfoScreen.rectTransform().sizeDelta.x, 0f) : new Vector2(-40f, 0f));
+		this.tooltip.tooltipPositionOffset = new Vector2(4f, 0f);
 		this.tooltip.ClearMultiStringTooltip();
 		string name = this.def.Name;
 		string effect = this.def.Effect;
@@ -119,26 +161,14 @@ public class PlanBuildingToggle : KToggle
 		}
 		this.buildingIcon.sprite = this.sprite;
 		this.buildingIcon.SetNativeSize();
+		this.buildingIcon_listView.sprite = this.sprite;
 		float num = (ScreenResolutionMonitor.UsingGamepadUIMode() ? 3.25f : 4f);
 		this.buildingIcon.rectTransform().sizeDelta /= num;
 		Material material = (buttonAvailable ? PlanScreen.Instance.defaultUIMaterial : PlanScreen.Instance.desaturatedUIMaterial);
 		if (this.buildingIcon.material != material)
 		{
 			this.buildingIcon.material = material;
-			if (!buttonAvailable)
-			{
-				if (this.researchComplete)
-				{
-					this.buildingIcon.color = new Color(1f, 1f, 1f, 0.6f);
-					return;
-				}
-				this.buildingIcon.color = new Color(1f, 1f, 1f, 0.15f);
-				return;
-			}
-			else
-			{
-				this.buildingIcon.color = Color.white;
-			}
+			this.buildingIcon_listView.material = material;
 		}
 	}
 
@@ -174,17 +204,28 @@ public class PlanBuildingToggle : KToggle
 	private Sprite sprite;
 
 	[SerializeField]
+	private MultiToggle toggle;
+
+	[SerializeField]
 	private ToolTip tooltip;
 
 	[SerializeField]
 	private LocText text;
 
 	[SerializeField]
-	private ImageToggleState imageToggleState;
+	private LocText text_listView;
 
 	[SerializeField]
 	private Image buildingIcon;
 
 	[SerializeField]
+	private Image buildingIcon_listView;
+
+	[SerializeField]
 	private Image fgIcon;
+
+	[SerializeField]
+	private PlanScreen planScreen;
+
+	private StringEntry subcategoryName;
 }

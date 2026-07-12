@@ -23,6 +23,7 @@ public class MannequinUIPortrait : IEntityConfig
 		layoutElement.preferredWidth = 100f;
 		gameObject.AddOrGet<BoxCollider2D>().size = new Vector2(1f, 1f);
 		gameObject.AddOrGet<Accessorizer>();
+		gameObject.AddOrGet<WearableAccessorizer>();
 		KBatchedAnimController kbatchedAnimController = gameObject.AddOrGet<KBatchedAnimController>();
 		kbatchedAnimController.materialType = KAnimBatchGroup.MaterialType.UI;
 		kbatchedAnimController.animScale = 0.5f;

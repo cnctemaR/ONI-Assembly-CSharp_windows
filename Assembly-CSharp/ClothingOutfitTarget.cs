@@ -83,12 +83,8 @@ public readonly struct ClothingOutfitTarget : IEquatable<ClothingOutfitTarget>
 	{
 		foreach (string text in itemIds)
 		{
-			bool flag;
-			int num;
-			PermitItems.GetOwnedCount(text).Deconstruct(out flag, out num);
-			bool flag2 = flag;
-			int num2 = num;
-			if (flag2 && num2 <= 0)
+			PermitResource permitResource = Db.Get().Permits.TryGet(text);
+			if (permitResource != null && permitResource.IsOwnable() && PermitItems.GetOwnedCount(permitResource) <= 0)
 			{
 				return true;
 			}
@@ -336,7 +332,7 @@ public readonly struct ClothingOutfitTarget : IEquatable<ClothingOutfitTarget>
 		public MinionInstance(GameObject minionInstance)
 		{
 			this.minionInstance = minionInstance;
-			this.accessorizer = minionInstance.GetComponent<Accessorizer>();
+			this.accessorizer = minionInstance.GetComponent<WearableAccessorizer>();
 		}
 
 		public string[] ReadItems()
@@ -346,7 +342,7 @@ public readonly struct ClothingOutfitTarget : IEquatable<ClothingOutfitTarget>
 
 		public void WriteItems(string[] items)
 		{
-			this.accessorizer.ApplyClothingItems(items.Select<string, ClothingItemResource>((string i) => Db.Get().Permits.ClothingItems.Get(i)), true);
+			this.accessorizer.ApplyClothingItems(items.Select<string, ClothingItemResource>((string i) => Db.Get().Permits.ClothingItems.Get(i)));
 		}
 
 		public string ReadName()
@@ -366,7 +362,7 @@ public readonly struct ClothingOutfitTarget : IEquatable<ClothingOutfitTarget>
 
 		public readonly GameObject minionInstance;
 
-		public readonly Accessorizer accessorizer;
+		public readonly WearableAccessorizer accessorizer;
 	}
 
 	public readonly struct UserAuthored : ClothingOutfitTarget.Implementation
@@ -425,7 +421,7 @@ public readonly struct ClothingOutfitTarget : IEquatable<ClothingOutfitTarget>
 
 		public void WriteItems(string[] items)
 		{
-			CustomClothingOutfits.Instance.EditOutfit(this.OutfitId, items);
+			CustomClothingOutfits.Instance.Internal_EditOutfit(this.OutfitId, items);
 		}
 
 		public string ReadName()
@@ -445,18 +441,18 @@ public readonly struct ClothingOutfitTarget : IEquatable<ClothingOutfitTarget>
 			}
 			if (CustomClothingOutfits.Instance.OutfitData.CustomOutfits.ContainsKey(this.OutfitId))
 			{
-				CustomClothingOutfits.Instance.RenameOutfit(this.OutfitId, name);
+				CustomClothingOutfits.Instance.Internal_RenameOutfit(this.OutfitId, name);
 			}
 			else
 			{
-				CustomClothingOutfits.Instance.EditOutfit(name, ClothingOutfitTargetExtensions.NO_ITEMS);
+				CustomClothingOutfits.Instance.Internal_EditOutfit(name, ClothingOutfitTargetExtensions.NO_ITEMS);
 			}
 			this.m_outfitId[0] = name;
 		}
 
 		public void Delete()
 		{
-			CustomClothingOutfits.Instance.RemoveOutfit(this.OutfitId);
+			CustomClothingOutfits.Instance.Internal_RemoveOutfit(this.OutfitId);
 		}
 
 		private readonly string[] m_outfitId;

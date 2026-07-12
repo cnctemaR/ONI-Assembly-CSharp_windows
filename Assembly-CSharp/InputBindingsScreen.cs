@@ -242,7 +242,7 @@ public class InputBindingsScreen : KModalScreen
 		for (int i = 0; i < GameInputMapping.KeyBindings.Length; i++)
 		{
 			BindingEntry bindingEntry = GameInputMapping.KeyBindings[i];
-			if (bindingEntry.mKeyCode == KKeyCode.None && (BuildMenu.UseHotkeyBuildMenu() || !bindingEntry.mIgnoreRootConflics))
+			if (bindingEntry.mKeyCode == KKeyCode.None && bindingEntry.mRebindable && (BuildMenu.UseHotkeyBuildMenu() || !bindingEntry.mIgnoreRootConflics))
 			{
 				num++;
 			}

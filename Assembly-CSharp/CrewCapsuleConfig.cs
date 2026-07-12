@@ -27,6 +27,7 @@ public class CrewCapsuleConfig : IBuildingConfig
 		buildingDef.InputConduitType = ConduitType.Gas;
 		buildingDef.RequiresPowerInput = true;
 		buildingDef.EnergyConsumptionWhenActive = 10f;
+		buildingDef.Deprecated = true;
 		return buildingDef;
 	}
 

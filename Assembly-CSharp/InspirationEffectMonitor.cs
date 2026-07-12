@@ -13,6 +13,7 @@ public class InspirationEffectMonitor : GameStateMachine<InspirationEffectMonito
 			this.shouldCatchyTune.Set(false, smi, false);
 		}).ToggleEffect("HeardJoySinger").ToggleThought(Db.Get().Thoughts.CatchyTune, null)
 			.EventHandler(GameHashes.StartWork, new GameStateMachine<InspirationEffectMonitor, InspirationEffectMonitor.Instance, IStateMachineTarget, InspirationEffectMonitor.Def>.GameEvent.Callback(this.TryThinkCatchyTune))
+			.ToggleStatusItem(Db.Get().DuplicantStatusItems.JoyResponse_HeardJoySinger, null)
 			.Enter(delegate(InspirationEffectMonitor.Instance smi)
 			{
 				this.SingCatchyTune(smi);

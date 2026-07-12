@@ -112,7 +112,7 @@ namespace STRINGS
 				UI.FormatAsLink("Chlorine", "CHLORINE"),
 				" and ",
 				UI.FormatAsLink("Hydrogen", "HYDROGEN"),
-				" gas, toxic to Duplicants. When exploring here, it is worth setting up a good  system."
+				" gas, toxic to Duplicants. When exploring here, it is worth setting up a good system."
 			});
 
 			public static LocString UTILITY = string.Concat(new string[]
@@ -154,7 +154,7 @@ namespace STRINGS
 				UI.FormatAsLink("Crude Oil", "CRUDEOIL"),
 				" into ",
 				UI.FormatAsLink("Petroleum", "PETROLEUM"),
-				". In order to prevent the extreme temperatures of this biome invading other parts of my base, suitable insulation must be constructed using materials with high melting points like  ",
+				". In order to prevent the extreme temperatures of this biome invading other parts of my base, suitable insulation must be constructed using materials with high melting points like ",
 				UI.FormatAsLink("Ceramic", "CERAMIC"),
 				" or ",
 				UI.FormatAsLink("Obsidian", "OBSIDIAN"),
@@ -168,7 +168,7 @@ namespace STRINGS
 		{
 			public static LocString NAME = "Marsh";
 
-			public static LocString DESC = UI.FormatAsLink("Polluted Oxygen", "CONTAMINATEDOXYGEN") + " dominates the atmosphere of the Marsh Biome as it escapes from the " + UI.FormatAsLink("Polluted Dirt", "TOXICSAND") + " this biome is known for.";
+			public static LocString DESC = UI.FormatAsLink("Polluted Oxygen", "CONTAMINATEDOXYGEN") + " dominates the atmosphere of the Marsh Biome as it escapes from the " + UI.FormatAsLink("Slime", "SLIMEMOLD") + " this biome is known for.";
 
 			public static LocString UTILITY = string.Concat(new string[]
 			{
@@ -407,7 +407,7 @@ namespace STRINGS
 				UI.FormatAsLink("Sweetle", "DIVERGENTBEETLE"),
 				" and ",
 				UI.FormatAsLink("Grubgrub", "DIVERGENTWORM"),
-				" make interesting creatures to domesticate as they co-exist with the  ",
+				" make interesting creatures to domesticate as they co-exist with the ",
 				UI.FormatAsLink("Grubfruit Plants", "WORMPLANT"),
 				" to produce a much higher quality food than the ",
 				UI.FormatAsLink("Spindly Grubfruit Plant", "WORMPLANT"),
@@ -466,7 +466,7 @@ namespace STRINGS
 				" and require no extra light to grow.\n\nFortunately ",
 				UI.FormatAsLink("Polluted Water", "DIRTYWATER"),
 				" is abundant in this biome and will require a ",
-				UI.FormatAsLink("Liquid Filter", "LIQUIDFILTER"),
+				UI.FormatAsLink("Water Sieve", "WATERPURIFIER"),
 				" to turn into something my Duplicants can drink. Additionally my Duplicants can use a ",
 				UI.FormatAsLink("Sludge Press", "SLUDGEPRESS"),
 				" to filter clean water from ",

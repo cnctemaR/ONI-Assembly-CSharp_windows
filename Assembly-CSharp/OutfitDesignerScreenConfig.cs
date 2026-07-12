@@ -44,10 +44,25 @@ public readonly struct OutfitDesignerScreenConfig
 		return new OutfitDesignerScreenConfig(outfit.HasValue ? outfit.Value : ClothingOutfitTarget.FromMinion(targetMinionInstance), personality, targetMinionInstance, null);
 	}
 
+	public static OutfitDesignerScreenConfig Minion(Option<ClothingOutfitTarget> outfit, MinionBrowserScreen.GridItem item)
+	{
+		MinionBrowserScreen.GridItem.PersonalityTarget personalityTarget = item as MinionBrowserScreen.GridItem.PersonalityTarget;
+		if (personalityTarget != null)
+		{
+			return OutfitDesignerScreenConfig.Minion(outfit, personalityTarget.personality);
+		}
+		MinionBrowserScreen.GridItem.MinionInstanceTarget minionInstanceTarget = item as MinionBrowserScreen.GridItem.MinionInstanceTarget;
+		if (minionInstanceTarget != null)
+		{
+			return OutfitDesignerScreenConfig.Minion(outfit, minionInstanceTarget.minionInstance);
+		}
+		throw new NotImplementedException();
+	}
+
 	public void ApplyAndOpenScreen()
 	{
 		LockerNavigator.Instance.outfitDesignerScreen.GetComponent<OutfitDesignerScreen>().Configure(this);
-		LockerNavigator.Instance.PushScreen(LockerNavigator.Instance.outfitDesignerScreen);
+		LockerNavigator.Instance.PushScreen(LockerNavigator.Instance.outfitDesignerScreen, null);
 	}
 
 	public readonly ClothingOutfitTarget sourceTarget;

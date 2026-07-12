@@ -440,8 +440,11 @@ public class DetailsScreen : KTabMenu
 
 	public void OnClickChangeOutfit()
 	{
-		LockerNavigator.Instance.PushScreen(LockerNavigator.Instance.outfitBrowserScreen);
-		LockerNavigator.Instance.outfitBrowserScreen.GetComponent<OutfitBrowserScreen>().Configure(OutfitBrowserScreenConfig.Minion(this.target));
+		AudioMixer.instance.Start(AudioMixerSnapshots.Get().FrontEndSupplyClosetSnapshot);
+		MinionBrowserScreenConfig.MinionInstances(this.target).ApplyAndOpenScreen(delegate
+		{
+			AudioMixer.instance.Stop(AudioMixerSnapshots.Get().FrontEndSupplyClosetSnapshot, STOP_MODE.ALLOWFADEOUT);
+		});
 	}
 
 	public void DeselectAndClose()

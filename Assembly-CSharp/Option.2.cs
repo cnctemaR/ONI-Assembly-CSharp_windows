@@ -7,15 +7,24 @@ public static class Option
 		return new Option<T>(value);
 	}
 
-	public static Option.Value_None None
+	public static Option<T> Maybe<T>(T value)
+	{
+		if (value.IsNullOrDestroyed())
+		{
+			return default(Option<T>);
+		}
+		return new Option<T>(value);
+	}
+
+	public static Option.Internal.Value_None None
 	{
 		get
 		{
-			return default(Option.Value_None);
+			return default(Option.Internal.Value_None);
 		}
 	}
 
-	public static bool AllHaveValues(params Option.Value_HasValue[] options)
+	public static bool AllHaveValues(params Option.Internal.Value_HasValue[] options)
 	{
 		if (options == null || options.Length == 0)
 		{
@@ -31,17 +40,20 @@ public static class Option
 		return true;
 	}
 
-	public readonly struct Value_None
+	public static class Internal
 	{
-	}
-
-	public readonly struct Value_HasValue
-	{
-		public Value_HasValue(bool hasValue)
+		public readonly struct Value_None
 		{
-			this.HasValue = hasValue;
 		}
 
-		public readonly bool HasValue;
+		public readonly struct Value_HasValue
+		{
+			public Value_HasValue(bool hasValue)
+			{
+				this.HasValue = hasValue;
+			}
+
+			public readonly bool HasValue;
+		}
 	}
 }

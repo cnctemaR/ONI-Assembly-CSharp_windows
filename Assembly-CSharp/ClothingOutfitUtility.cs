@@ -15,8 +15,12 @@ public static class ClothingOutfitUtility
 		{
 			return UI.MINION_BROWSER_SCREEN.OUTFIT_TYPE_CLOTHING;
 		}
-		DebugUtil.DevAssert(false, string.Format("Couldn't find name for outfit type: {0}", self), null);
-		return self.ToString();
+		if (self != ClothingOutfitUtility.OutfitType.JoyResponse)
+		{
+			DebugUtil.DevAssert(false, string.Format("Couldn't find name for outfit type: {0}", self), null);
+			return self.ToString();
+		}
+		return UI.MINION_BROWSER_SCREEN.OUTFIT_TYPE_JOY_RESPONSE;
 	}
 
 	public static bool SaveClothingOutfitData()
@@ -170,7 +174,7 @@ public static class ClothingOutfitUtility
 				{
 					foreach (KeyValuePair<ClothingOutfitUtility.OutfitType, string> keyValuePair3 in keyValuePair2.Value)
 					{
-						personalityFromNameStringKey.SetOutfit(keyValuePair3.Key, keyValuePair3.Value);
+						personalityFromNameStringKey.Internal_SetOutfit(keyValuePair3.Key, keyValuePair3.Value);
 					}
 				}
 			}
@@ -182,6 +186,7 @@ public static class ClothingOutfitUtility
 	public enum OutfitType
 	{
 		Clothing,
+		JoyResponse,
 		LENGTH
 	}
 }

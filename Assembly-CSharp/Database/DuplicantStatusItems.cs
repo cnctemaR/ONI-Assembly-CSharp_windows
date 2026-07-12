@@ -442,6 +442,18 @@ namespace Database
 				ClinicDreamable clinicDreamable = (ClinicDreamable)data;
 				return str.Replace("{time}", GameUtil.GetFormattedTime(clinicDreamable.WorkTimeRemaining, "F0"));
 			};
+			this.JoyResponse_HasBalloon = this.CreateStatusItem("JoyResponse_HasBalloon", DUPLICANTS.MODIFIERS.HASBALLOON.NAME, DUPLICANTS.MODIFIERS.HASBALLOON.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Good, false, OverlayModes.None.ID, 2);
+			this.JoyResponse_HasBalloon.resolveTooltipCallback = delegate(string str, object data)
+			{
+				EquippableBalloon.StatesInstance statesInstance2 = (EquippableBalloon.StatesInstance)data;
+				return str + "\n\n" + DUPLICANTS.MODIFIERS.TIME_REMAINING.Replace("{0}", GameUtil.GetFormattedCycles(statesInstance2.transitionTime - GameClock.Instance.GetTime(), "F1", false));
+			};
+			this.JoyResponse_HeardJoySinger = this.CreateStatusItem("JoyResponse_HeardJoySinger", DUPLICANTS.MODIFIERS.HEARDJOYSINGER.NAME, DUPLICANTS.MODIFIERS.HEARDJOYSINGER.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Good, false, OverlayModes.None.ID, 2);
+			this.JoyResponse_HeardJoySinger.resolveTooltipCallback = delegate(string str, object data)
+			{
+				InspirationEffectMonitor.Instance instance3 = (InspirationEffectMonitor.Instance)data;
+				return str + "\n\n" + DUPLICANTS.MODIFIERS.TIME_REMAINING.Replace("{0}", GameUtil.GetFormattedCycles(instance3.sm.inspirationTimeRemaining.Get(instance3), "F1", false));
+			};
 		}
 
 		public StatusItem Idle;
@@ -655,6 +667,10 @@ namespace Database
 		public StatusItem MegaBrainTank_Pajamas_Wearing;
 
 		public StatusItem MegaBrainTank_Pajamas_Sleeping;
+
+		public StatusItem JoyResponse_HasBalloon;
+
+		public StatusItem JoyResponse_HeardJoySinger;
 
 		private const int NONE_OVERLAY = 0;
 	}

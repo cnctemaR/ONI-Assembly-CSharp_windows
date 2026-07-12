@@ -164,7 +164,7 @@ public class Game : KMonoBehaviour
 		Singleton<CellChangeMonitor>.Instance.SetGridSize(Grid.WidthInCells, Grid.HeightInCells);
 		this.unlocks = base.GetComponent<Unlocks>();
 		this.changelistsPlayedOn = new List<uint>();
-		this.changelistsPlayedOn.Add(537329U);
+		this.changelistsPlayedOn.Add(544519U);
 		this.dateGenerated = global::System.DateTime.UtcNow.ToString("U", CultureInfo.InvariantCulture);
 	}
 
@@ -595,8 +595,6 @@ public class Game : KMonoBehaviour
 				Sim.DebugProperties debugProperties;
 				debugProperties.buildingTemperatureScale = 100f;
 				debugProperties.buildingToBuildingTemperatureScale = 0.001f;
-				debugProperties.contaminatedOxygenEmitProbability = 0.001f;
-				debugProperties.contaminatedOxygenConversionPercent = 0.001f;
 				debugProperties.biomeTemperatureLerpRate = 0.001f;
 				debugProperties.isDebugEditing = ((DebugPaintElementScreen.Instance != null && DebugPaintElementScreen.Instance.gameObject.activeSelf) ? 1 : 0);
 				debugProperties.pad0 = (debugProperties.pad1 = (debugProperties.pad2 = 0));
@@ -914,7 +912,7 @@ public class Game : KMonoBehaviour
 		{
 			return;
 		}
-		uint num = 537329U;
+		uint num = 544519U;
 		string text = global::System.DateTime.Now.ToShortDateString();
 		string text2 = global::System.DateTime.Now.ToShortTimeString();
 		string fileName = Path.GetFileName(GenericGameSettings.instance.performanceCapture.saveGame);
@@ -1131,9 +1129,9 @@ public class Game : KMonoBehaviour
 		gameSaveData.savedInfo = this.savedInfo;
 		global::Debug.Assert(gameSaveData.worldDetail != null, "World detail null");
 		gameSaveData.dateGenerated = this.dateGenerated;
-		if (!this.changelistsPlayedOn.Contains(537329U))
+		if (!this.changelistsPlayedOn.Contains(544519U))
 		{
-			this.changelistsPlayedOn.Add(537329U);
+			this.changelistsPlayedOn.Add(544519U);
 		}
 		gameSaveData.changelistsPlayedOn = this.changelistsPlayedOn;
 		if (this.OnSave != null)
@@ -1168,6 +1166,7 @@ public class Game : KMonoBehaviour
 		DebugUtil.LogArgs(new object[] { "SAVEINFO" });
 		DebugUtil.LogArgs(new object[] { " - Generated: " + this.dateGenerated });
 		DebugUtil.LogArgs(new object[] { " - Played on: " + string.Join<uint>(", ", this.changelistsPlayedOn) });
+		DebugUtil.LogArgs(new object[] { " - Debug was used: " + Game.Instance.debugWasUsed.ToString() });
 		this.savedInfo = gameSaveData.savedInfo;
 		this.savedInfo.InitializeEmptyVariables();
 		CustomGameSettings.Instance.Print();
@@ -1510,6 +1509,7 @@ public class Game : KMonoBehaviour
 		BuildTool.DestroyInstance();
 		DebugTool.DestroyInstance();
 		DeconstructTool.DestroyInstance();
+		DisconnectTool.DestroyInstance();
 		DigTool.DestroyInstance();
 		DisinfectTool.DestroyInstance();
 		HarvestTool.DestroyInstance();

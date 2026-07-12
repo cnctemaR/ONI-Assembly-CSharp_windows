@@ -4,7 +4,7 @@ using STRINGS;
 using UnityEngine;
 
 [AddComponentMenu("KMonoBehaviour/Workable/EmptyConduitWorkable")]
-public class EmptyConduitWorkable : Workable
+public class EmptyConduitWorkable : Workable, IEmptyConduitWorkable
 {
 	protected override void OnPrefabInit()
 	{
@@ -35,12 +35,18 @@ public class EmptyConduitWorkable : Workable
 
 	public void MarkForEmptying()
 	{
-		if (this.chore == null)
+		if (this.chore == null && this.HasContents())
 		{
 			StatusItem statusItem = this.GetStatusItem();
 			base.GetComponent<KSelectable>().ToggleStatusItem(statusItem, true, null);
 			this.CreateWorkChore();
 		}
+	}
+
+	private bool HasContents()
+	{
+		int num = Grid.PosToCell(base.transform.GetPosition());
+		return this.GetFlowManager().GetContents(num).mass > 0f;
 	}
 
 	private void CancelEmptying()
@@ -132,7 +138,7 @@ public class EmptyConduitWorkable : Workable
 		{
 			if (this.elapsedTime > 4f)
 			{
-				this.EmptyPipeContents();
+				this.EmptyContents();
 				this.emptiedPipe = true;
 				this.elapsedTime = 0f;
 			}
@@ -163,7 +169,7 @@ public class EmptyConduitWorkable : Workable
 		return true;
 	}
 
-	public void EmptyPipeContents()
+	public void EmptyContents()
 	{
 		int num = Grid.PosToCell(base.transform.GetPosition());
 		ConduitFlow.ConduitContents conduitContents = this.GetFlowManager().RemoveElement(num, float.PositiveInfinity);

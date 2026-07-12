@@ -44,6 +44,7 @@ public class Global : MonoBehaviour
 			new BindingEntry("Root", GamepadButton.NumButtons, KKeyCode.N, Modifier.None, global::Action.Capture, true, false),
 			new BindingEntry("Root", GamepadButton.NumButtons, KKeyCode.Y, Modifier.None, global::Action.Harvest, true, false),
 			new BindingEntry("Root", GamepadButton.NumButtons, KKeyCode.Insert, Modifier.None, global::Action.EmptyPipe, true, false),
+			new BindingEntry("Root", GamepadButton.NumButtons, KKeyCode.D, Modifier.Shift, global::Action.Disconnect, true, false),
 			new BindingEntry("Root", GamepadButton.NumButtons, KKeyCode.P, Modifier.None, global::Action.Prioritize, true, false),
 			new BindingEntry("Root", GamepadButton.NumButtons, KKeyCode.S, Modifier.Alt, global::Action.ToggleScreenshotMode, true, false),
 			new BindingEntry("Root", GamepadButton.NumButtons, KKeyCode.C, Modifier.None, global::Action.BuildingCancel, true, false),
@@ -68,6 +69,7 @@ public class Global : MonoBehaviour
 			new BindingEntry("Root", GamepadButton.NumButtons, KKeyCode.Equals, Modifier.None, global::Action.Plan12, true, false),
 			new BindingEntry("Root", GamepadButton.NumButtons, KKeyCode.Minus, Modifier.Shift, global::Action.Plan13, true, false),
 			new BindingEntry("Root", GamepadButton.NumButtons, KKeyCode.Equals, Modifier.Shift, global::Action.Plan14, true, false),
+			new BindingEntry("Root", GamepadButton.NumButtons, KKeyCode.Backspace, Modifier.Shift, global::Action.Plan15, true, false),
 			new BindingEntry("Root", GamepadButton.NumButtons, KKeyCode.B, Modifier.None, global::Action.CopyBuilding, true, false),
 			new BindingEntry("Root", GamepadButton.RT, KKeyCode.MouseScrollUp, Modifier.None, global::Action.ZoomIn, true, false),
 			new BindingEntry("Root", GamepadButton.LT, KKeyCode.MouseScrollDown, Modifier.None, global::Action.ZoomOut, true, false),
@@ -629,7 +631,7 @@ public class Global : MonoBehaviour
 	private void SetONIStaticSessionVariables()
 	{
 		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Branch", "release");
-		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Build", 537329U);
+		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Build", 544519U);
 		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("SaveFolderWriteTest", Global.saveFolderTestResult);
 		if (KPlayerPrefs.HasKey(UnitConfigurationScreen.MassUnitKey))
 		{

@@ -210,6 +210,24 @@ public class MusicManager : KMonoBehaviour, ISerializationCallbackReceiver
 		}
 	}
 
+	public void SetSongParameter(string song_name, string parameter_name, string parameter_lable, bool shouldLog = true)
+	{
+		if (shouldLog)
+		{
+			this.Log(string.Format("Set Param {0}: {1}, {2}", song_name, parameter_name, parameter_lable));
+		}
+		MusicManager.SongInfo songInfo = null;
+		if (!this.activeSongs.TryGetValue(song_name, out songInfo))
+		{
+			return;
+		}
+		FMOD.Studio.EventInstance ev = songInfo.ev;
+		if (ev.isValid())
+		{
+			ev.setParameterByNameWithLabel(parameter_name, parameter_lable, false);
+		}
+	}
+
 	public bool SongIsPlaying(string song_name)
 	{
 		MusicManager.SongInfo songInfo = null;
@@ -269,6 +287,17 @@ public class MusicManager : KMonoBehaviour, ISerializationCallbackReceiver
 			if (keyValuePair.Value != null)
 			{
 				this.StartFadeToPause(keyValuePair.Value.ev, paused, 0.25f);
+			}
+		}
+	}
+
+	public void OnSupplyClosetMenu(bool paused, float fadeTime)
+	{
+		foreach (KeyValuePair<string, MusicManager.SongInfo> keyValuePair in this.activeSongs)
+		{
+			if (keyValuePair.Value != null && (paused || !keyValuePair.Value.dynamic))
+			{
+				this.StartFadeToPause(keyValuePair.Value.ev, paused, fadeTime);
 			}
 		}
 	}

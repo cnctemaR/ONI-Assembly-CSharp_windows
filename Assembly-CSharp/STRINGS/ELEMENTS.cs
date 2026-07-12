@@ -494,7 +494,7 @@ namespace STRINGS
 		{
 			public static LocString NAME = UI.FormatAsLink("Crushed Ice", "CRUSHEDICE");
 
-			public static LocString DESC = "(H<sub>2</sub>0) A slush of crushed, semi-solid ice.";
+			public static LocString DESC = "(H<sub>2</sub>O) A slush of crushed, semi-solid ice.";
 		}
 
 		public class CRUSHEDROCK
@@ -725,7 +725,7 @@ namespace STRINGS
 		{
 			public static LocString NAME = UI.FormatAsLink("Ice", "ICE");
 
-			public static LocString DESC = "(H<sub>2</sub>0) Ice is clean water frozen into a " + UI.FormatAsLink("Solid", "ELEMENTS_SOLID") + " state.";
+			public static LocString DESC = "(H<sub>2</sub>O) Ice is clean water frozen into a " + UI.FormatAsLink("Solid", "ELEMENTS_SOLID") + " state.";
 		}
 
 		public class IGNEOUSROCK
@@ -1436,7 +1436,7 @@ namespace STRINGS
 		{
 			public static LocString NAME = UI.FormatAsLink("Snow", "SNOW");
 
-			public static LocString DESC = "(H<sub>2</sub>0) Snow is a mass of loose, crystalline ice particles.\n\nIt becomes " + UI.FormatAsLink("Water", "WATER") + " when melted.";
+			public static LocString DESC = "(H<sub>2</sub>O) Snow is a mass of loose, crystalline ice particles.\n\nIt becomes " + UI.FormatAsLink("Water", "WATER") + " when melted.";
 		}
 
 		public class SOLIDCARBONDIOXIDE
@@ -1592,7 +1592,7 @@ namespace STRINGS
 
 			public static LocString DESC = string.Concat(new string[]
 			{
-				"(H<sub>2</sub>0) Steam is ",
+				"(H<sub>2</sub>O) Steam is ",
 				ELEMENTS.WATER.NAME,
 				" that has been heated into a scalding ",
 				UI.FormatAsLink("Gas", "ELEMENTS_GAS"),

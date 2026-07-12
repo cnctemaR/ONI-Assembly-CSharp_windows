@@ -7,22 +7,15 @@ namespace Database
 {
 	public class ClothingItemResource : PermitResource
 	{
-		public string Description { get; private set; }
-
 		public string animFilename { get; private set; }
 
 		public KAnimFile AnimFile { get; private set; }
 
-		public PermitCategory Category { get; private set; }
-
 		public ClothingItemResource(string id, string name, string desc, PermitCategory category, PermitRarity rarity, string animFile)
-			: base(id, name, category, rarity)
+			: base(id, name, desc, category, rarity)
 		{
-			this.Description = desc;
 			this.AnimFile = Assets.GetAnim(animFile);
 			this.animFilename = animFile;
-			this.Category = category;
-			Db.Get().Accessories.AddAccessories(id, this.AnimFile);
 		}
 
 		public global::Tuple<Sprite, Color> GetUISprite()
@@ -38,13 +31,8 @@ namespace Database
 		public override PermitPresentationInfo GetPermitPresentationInfo()
 		{
 			PermitPresentationInfo permitPresentationInfo = default(PermitPresentationInfo);
-			permitPresentationInfo.name = ((this.Name != null) ? this.Name : "NAME NOT POPULATED (DbClothingItems)");
-			permitPresentationInfo.description = this.Description;
 			permitPresentationInfo.sprite = this.GetUISprite().first;
-			permitPresentationInfo.category = this.PermitCategory;
 			permitPresentationInfo.SetFacadeForText(UI.KLEI_INVENTORY_SCREEN.CLOTHING_ITEM_FACADE_FOR);
-			permitPresentationInfo.SetRarityDetailsFor(this.Rarity);
-			permitPresentationInfo.ownedCount = PermitItems.GetOwnedCount(this);
 			return permitPresentationInfo;
 		}
 

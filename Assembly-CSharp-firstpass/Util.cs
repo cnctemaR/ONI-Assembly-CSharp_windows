@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using System.Threading;
 using KSerialization;
@@ -23,6 +24,11 @@ public static class Util
 		object obj = list_or_array[index_a];
 		list_or_array[index_a] = list_or_array[index_b];
 		list_or_array[index_b] = obj;
+	}
+
+	public static float Remap(this float value, [TupleElementNames(new string[] { "min", "max" })] ValueTuple<float, float> fromRange, [TupleElementNames(new string[] { "min", "max" })] ValueTuple<float, float> toRange)
+	{
+		return (value - fromRange.Item1) / (fromRange.Item2 - fromRange.Item1) * (toRange.Item2 - toRange.Item1) + toRange.Item1;
 	}
 
 	public static void InitializeComponent(Component cmp)
@@ -577,6 +583,14 @@ public static class Util
 		}
 		array2[array.Length] = item;
 		return array2;
+	}
+
+	public static T[] Concat<T>(this T[] a1, T[] a2)
+	{
+		T[] array = new T[a1.Length + a2.Length];
+		a1.CopyTo(array, 0);
+		a2.CopyTo(array, a1.Length);
+		return array;
 	}
 
 	public static string GetKleiRootPath()

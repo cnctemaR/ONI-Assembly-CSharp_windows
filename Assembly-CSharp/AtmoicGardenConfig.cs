@@ -28,6 +28,7 @@ public class AtmoicGardenConfig : IBuildingConfig
 		buildingDef.PowerInputOffset = new CellOffset(1, 0);
 		buildingDef.UtilityInputOffset = new CellOffset(0, 0);
 		buildingDef.LogicInputPorts = LogicOperationalController.CreateSingleInputPortList(new CellOffset(-1, 0));
+		buildingDef.Deprecated = true;
 		return buildingDef;
 	}
 

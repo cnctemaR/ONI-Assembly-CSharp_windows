@@ -116,7 +116,7 @@ public class StickerBomb : StateMachineComponent<StickerBomb.StatesInstance>
 		}
 		DbStickerBomb randomSticker = Db.GetStickerBombs().GetRandomSticker();
 		this.stickerName = randomSticker.Id;
-		this.stickerType = string.Format("{0}_{1}", newStickerType, randomSticker.stickerName);
+		this.stickerType = string.Format("{0}_{1}", newStickerType, randomSticker.Name);
 		base.GetComponent<KBatchedAnimController>().SwapAnims(new KAnimFile[] { randomSticker.animFile });
 	}
 

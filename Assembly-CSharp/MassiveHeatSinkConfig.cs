@@ -25,6 +25,7 @@ public class MassiveHeatSinkConfig : IBuildingConfig
 		buildingDef.AudioCategory = "Metal";
 		buildingDef.UtilityInputOffset = new CellOffset(0, 0);
 		buildingDef.InputConduitType = ConduitType.Gas;
+		buildingDef.ShowInBuildMenu = false;
 		return buildingDef;
 	}
 

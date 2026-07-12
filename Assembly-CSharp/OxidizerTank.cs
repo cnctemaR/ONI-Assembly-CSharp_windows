@@ -29,12 +29,12 @@ public class OxidizerTank : KMonoBehaviour, IUserControlledCapacity
 			{
 				component.capacityKG = this.targetFillMass;
 			}
-			ManualDeliveryKG component2 = base.GetComponent<ManualDeliveryKG>();
-			if (component2 != null)
-			{
-				component2.capacity = (component2.refillMass = this.targetFillMass);
-			}
 			base.Trigger(-945020481, this);
+			this.OnStorageCapacityChanged(this.targetFillMass);
+			if (this.filteredStorage != null)
+			{
+				this.filteredStorage.FilterChanged();
+			}
 		}
 	}
 
@@ -108,6 +108,10 @@ public class OxidizerTank : KMonoBehaviour, IUserControlledCapacity
 		if (this.supportsMultipleOxidizers)
 		{
 			this.filteredStorage = new FilteredStorage(this, null, this, true, Db.Get().ChoreTypes.Fetch);
+			this.filteredStorage.FilterChanged();
+			KBatchedAnimTracker componentInChildren = base.gameObject.GetComponentInChildren<KBatchedAnimTracker>();
+			componentInChildren.forceAlwaysAlive = true;
+			componentInChildren.matchParentOffset = true;
 		}
 	}
 
@@ -132,8 +136,6 @@ public class OxidizerTank : KMonoBehaviour, IUserControlledCapacity
 		this.UserMaxCapacity = Mathf.Min(this.UserMaxCapacity, this.maxFillMass);
 		base.Subscribe<OxidizerTank>(-887025858, OxidizerTank.OnRocketLandedDelegate);
 		base.Subscribe<OxidizerTank>(-1697596308, OxidizerTank.OnStorageChangeDelegate);
-		this.meter = new MeterController(base.GetComponent<KBatchedAnimController>(), "meter_target", "meter", Meter.Offset.Infront, Grid.SceneLayer.NoLayer, new string[] { "meter_target", "meter_fill", "meter_frame", "meter_OL" });
-		this.meter.gameObject.GetComponent<KBatchedAnimTracker>().matchParentOffset = true;
 	}
 
 	public float GetTotalOxidizerAvailable()
@@ -158,7 +160,20 @@ public class OxidizerTank : KMonoBehaviour, IUserControlledCapacity
 
 	private void OnStorageChange(object data)
 	{
-		this.meter.SetPositionPercent(this.storage.MassStored() / this.storage.capacityKg);
+		this.RefreshMeter();
+	}
+
+	private void OnStorageCapacityChanged(float newCapacity)
+	{
+		this.RefreshMeter();
+	}
+
+	private void RefreshMeter()
+	{
+		if (this.filteredStorage != null)
+		{
+			this.filteredStorage.FilterChanged();
+		}
 	}
 
 	private void OnRocketLanded(object data)
@@ -166,6 +181,10 @@ public class OxidizerTank : KMonoBehaviour, IUserControlledCapacity
 		if (this.consumeOnLand)
 		{
 			this.storage.ConsumeAllIgnoringDisease();
+		}
+		if (this.filteredStorage != null)
+		{
+			this.filteredStorage.FilterChanged();
 		}
 	}
 
@@ -181,6 +200,7 @@ public class OxidizerTank : KMonoBehaviour, IUserControlledCapacity
 	[ContextMenu("Fill Tank")]
 	public void DEBUG_FillTank(SimHashes element)
 	{
+		base.GetComponent<FlatTagFilterable>().selectedTags.Add(element.CreateTag());
 		if (ElementLoader.FindElementByHash(element).IsLiquid)
 		{
 			this.storage.AddLiquid(element, this.targetFillMass, ElementLoader.FindElementByHash(element).defaultValues.temperature, 0, 0, false, true);

@@ -9,7 +9,7 @@ public class DevLifeSupportConfig : IBuildingConfig
 		string text = "DevLifeSupport";
 		int num = 1;
 		int num2 = 1;
-		string text2 = "dev_generator_kanim";
+		string text2 = "dev_life_support_kanim";
 		int num3 = 30;
 		float num4 = 30f;
 		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER5;
@@ -28,6 +28,7 @@ public class DevLifeSupportConfig : IBuildingConfig
 
 	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
+		go.AddTag(GameTags.DevBuilding);
 		Storage storage = BuildingTemplates.CreateDefaultStorage(go, false);
 		storage.showInUI = true;
 		storage.capacityKg = 200f;

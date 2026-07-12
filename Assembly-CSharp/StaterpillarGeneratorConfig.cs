@@ -38,6 +38,7 @@ public class StaterpillarGeneratorConfig : IBuildingConfig
 		buildingDef.RequiresPowerOutput = true;
 		buildingDef.PowerOutputOffset = new CellOffset(0, 1);
 		buildingDef.PlayConstructionSounds = false;
+		buildingDef.ShowInBuildMenu = false;
 		return buildingDef;
 	}
 

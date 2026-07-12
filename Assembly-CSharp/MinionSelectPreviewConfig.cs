@@ -33,6 +33,7 @@ public class MinionSelectPreviewConfig : IEntityConfig
 		gameObject.AddOrGet<BoxCollider2D>().size = new Vector2(1f, 1f);
 		gameObject.AddOrGet<FaceGraph>();
 		gameObject.AddOrGet<Accessorizer>();
+		gameObject.AddOrGet<WearableAccessorizer>();
 		KBatchedAnimController kbatchedAnimController = gameObject.AddOrGet<KBatchedAnimController>();
 		kbatchedAnimController.materialType = KAnimBatchGroup.MaterialType.UI;
 		kbatchedAnimController.animScale = 0.5f;

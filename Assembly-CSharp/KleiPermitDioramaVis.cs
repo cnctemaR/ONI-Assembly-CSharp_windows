@@ -16,29 +16,29 @@ public class KleiPermitDioramaVis : KMonoBehaviour
 		}
 	}
 
-	public void ConfigureWith(PermitResource permit, PermitPresentationInfo permitPresInfo)
+	public void ConfigureWith(PermitResource permit)
 	{
 		foreach (IKleiPermitDioramaVisTarget kleiPermitDioramaVisTarget in this.allVisList)
 		{
 			kleiPermitDioramaVisTarget.GetGameObject().SetActive(false);
 		}
-		IKleiPermitDioramaVisTarget permitVisTarget = this.GetPermitVisTarget(permit, permitPresInfo);
+		IKleiPermitDioramaVisTarget permitVisTarget = this.GetPermitVisTarget(permit);
 		permitVisTarget.GetGameObject().SetActive(true);
-		permitVisTarget.ConfigureWith(permit, permitPresInfo);
+		permitVisTarget.ConfigureWith(permit);
 	}
 
-	public IKleiPermitDioramaVisTarget GetPermitVisTarget(PermitResource permit, PermitPresentationInfo permitPresInfo)
+	public IKleiPermitDioramaVisTarget GetPermitVisTarget(PermitResource permit)
 	{
 		KleiPermitDioramaVis.lastRenderedPermit = permit;
 		if (permit == null)
 		{
 			return this.fallbackVis.WithError(string.Format("Given invalid permit: {0}", permit));
 		}
-		if (permit.PermitCategory == PermitCategory.Equipment || permit.PermitCategory == PermitCategory.DupeTops || permit.PermitCategory == PermitCategory.DupeBottoms || permit.PermitCategory == PermitCategory.DupeGloves || permit.PermitCategory == PermitCategory.DupeShoes || permit.PermitCategory == PermitCategory.DupeHats || permit.PermitCategory == PermitCategory.DupeAccessories)
+		if (permit.Category == PermitCategory.Equipment || permit.Category == PermitCategory.DupeTops || permit.Category == PermitCategory.DupeBottoms || permit.Category == PermitCategory.DupeGloves || permit.Category == PermitCategory.DupeShoes || permit.Category == PermitCategory.DupeHats || permit.Category == PermitCategory.DupeAccessories)
 		{
 			return this.equipmentVis;
 		}
-		if (permit.PermitCategory == PermitCategory.Building)
+		if (permit.Category == PermitCategory.Building)
 		{
 			bool flag;
 			BuildLocationRule buildLocationRule;
@@ -58,23 +58,21 @@ public class KleiPermitDioramaVis : KMonoBehaviour
 				string prefabID = KleiPermitVisUtil.GetBuildingDef(permit).Value.PrefabID;
 				if (prefabID == "FlowerVaseHanging" || prefabID == "FlowerVaseHangingFancy")
 				{
-					return this.hangingPlanterVis;
+					return this.buildingPresentationStandHangingVis;
 				}
-				return this.pedestalAndItemVis;
+				return this.buildingPresentationStandVis.WithAlignment(Alignment.Top());
 			}
 			case BuildLocationRule.OnWall:
+				return this.buildingPresentationStandVis.WithAlignment(Alignment.Left());
 			case BuildLocationRule.InCorner:
+				return this.buildingPresentationStandVis.WithAlignment(Alignment.TopLeft());
 			case BuildLocationRule.NotInTiles:
 				return this.pedestalAndItemVis;
 			}
 			return this.fallbackVis.WithError(string.Format("No visualization available for building with BuildLocationRule of {0}", buildLocationRule2));
 		}
-		else
+		else if (permit.Category == PermitCategory.Artwork)
 		{
-			if (permit.PermitCategory != PermitCategory.Artwork)
-			{
-				return this.fallbackVis.WithError("No visualization has been defined for permit with id \"" + permit.Id + "\"");
-			}
 			bool flag;
 			BuildingDef buildingDef;
 			KleiPermitVisUtil.GetBuildingDef(permit).Deconstruct(out flag, out buildingDef);
@@ -85,20 +83,32 @@ public class KleiPermitDioramaVis : KMonoBehaviour
 				return this.fallbackVis.WithError("Couldn't find building def for Artable " + permit.Id);
 			}
 			ArtableStage artableStage = (ArtableStage)permit;
-			if (KleiPermitDioramaVis.<GetPermitVisTarget>g__Has|11_0<Sculpture>(buildingDef2))
+			if (KleiPermitDioramaVis.<GetPermitVisTarget>g__Has|14_0<Sculpture>(buildingDef2))
 			{
 				return this.artableSculptureVis;
 			}
-			if (KleiPermitDioramaVis.<GetPermitVisTarget>g__Has|11_0<Painting>(buildingDef2))
+			if (KleiPermitDioramaVis.<GetPermitVisTarget>g__Has|14_0<Painting>(buildingDef2))
 			{
 				return this.artablePaintingVis;
 			}
 			return this.fallbackVis.WithError("No visualization available for Artable " + permit.Id);
 		}
+		else
+		{
+			if (permit.Category != PermitCategory.JoyResponse)
+			{
+				return this.fallbackVis.WithError("No visualization has been defined for permit with id \"" + permit.Id + "\"");
+			}
+			if (permit is BalloonArtistFacadeResource)
+			{
+				return this.joyResponseBalloonVis;
+			}
+			return this.fallbackVis.WithError("No visualization available for JoyResponse " + permit.Id);
+		}
 	}
 
 	[CompilerGenerated]
-	internal static bool <GetPermitVisTarget>g__Has|11_0<T>(BuildingDef buildingDef) where T : Component
+	internal static bool <GetPermitVisTarget>g__Has|14_0<T>(BuildingDef buildingDef) where T : Component
 	{
 		return !buildingDef.BuildingComplete.GetComponent<T>().IsNullOrDestroyed();
 	}
@@ -113,16 +123,25 @@ public class KleiPermitDioramaVis : KMonoBehaviour
 	private KleiPermitDioramaVis_BuildingOnFloor buildingOnFloorVis;
 
 	[SerializeField]
-	private KleiPermitDioramaVis_PedestalAndItem pedestalAndItemVis;
+	private KleiPermitDioramaVis_BuildingPresentationStand buildingPresentationStandVis;
 
 	[SerializeField]
-	private KleiPermitDioramaVis_HangingPlanter hangingPlanterVis;
+	private KleiPermitDioramaVis_BuildingPresentationStandHanging buildingPresentationStandHangingVis;
+
+	[SerializeField]
+	private KleiPermitDioramaVis_BuildingHangingHook buildingHangingHookVis;
+
+	[SerializeField]
+	private KleiPermitDioramaVis_PedestalAndItem pedestalAndItemVis;
 
 	[SerializeField]
 	private KleiPermitDioramaVis_ArtablePainting artablePaintingVis;
 
 	[SerializeField]
 	private KleiPermitDioramaVis_ArtableSculpture artableSculptureVis;
+
+	[SerializeField]
+	private KleiPermitDioramaVis_JoyResponseBalloon joyResponseBalloonVis;
 
 	private IReadOnlyList<IKleiPermitDioramaVisTarget> allVisList;
 

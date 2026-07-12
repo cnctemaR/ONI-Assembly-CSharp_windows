@@ -32,6 +32,8 @@ namespace STRINGS
 
 			public static LocString EMPTYPIPE = "Empty Pipe";
 
+			public static LocString DISCONNECT = "Disconnect";
+
 			public static LocString PRIORITIZE = "Prioritize";
 
 			public static LocString TOGGLESCREENSHOTMODE = "Toggle Screenshot Mode";
@@ -44,33 +46,35 @@ namespace STRINGS
 
 			public static LocString CAMERAHOME = "Camera Home";
 
-			public static LocString PLAN1 = "Plan 1";
+			public static LocString PLAN1 = "Base Build Menu";
 
-			public static LocString PLAN2 = "Plan 2";
+			public static LocString PLAN2 = "Oxygen Build Menu";
 
-			public static LocString PLAN3 = "Plan 3";
+			public static LocString PLAN3 = "Power Build Menu";
 
-			public static LocString PLAN4 = "Plan 4";
+			public static LocString PLAN4 = "Food Build Menu";
 
-			public static LocString PLAN5 = "Plan 5";
+			public static LocString PLAN5 = "Plumbing Build Menu";
 
-			public static LocString PLAN6 = "Plan 6";
+			public static LocString PLAN6 = "Ventilation Build Menu";
 
-			public static LocString PLAN7 = "Plan 7";
+			public static LocString PLAN7 = "Refinement Build Menu";
 
-			public static LocString PLAN8 = "Plan 8";
+			public static LocString PLAN8 = "Medicine Build Menu";
 
-			public static LocString PLAN9 = "Plan 9";
+			public static LocString PLAN9 = "Furniture Build Menu";
 
-			public static LocString PLAN10 = "Plan 10";
+			public static LocString PLAN10 = "Station Build Menu";
 
-			public static LocString PLAN11 = "Plan 11";
+			public static LocString PLAN11 = "Utility Build Menu";
 
-			public static LocString PLAN12 = "Plan 12";
+			public static LocString PLAN12 = "Automation Build Menu";
 
-			public static LocString PLAN13 = "Plan 13";
+			public static LocString PLAN13 = "Shipping Build Menu";
 
-			public static LocString PLAN14 = "Plan 14";
+			public static LocString PLAN14 = "Rocketry Build Menu";
+
+			public static LocString PLAN15 = "Radiation Build Menu";
 
 			public static LocString COPYBUILDING = "Copy Building";
 
@@ -78,35 +82,35 @@ namespace STRINGS
 
 			public static LocString ZOOMOUT = "Zoom Out";
 
-			public static LocString OVERLAY1 = "Overlay 1";
+			public static LocString OVERLAY1 = "Oxygen Overlay";
 
-			public static LocString OVERLAY2 = "Overlay 2";
+			public static LocString OVERLAY2 = "Power Overlay";
 
-			public static LocString OVERLAY3 = "Overlay 3";
+			public static LocString OVERLAY3 = "Temperature Overlay";
 
-			public static LocString OVERLAY4 = "Overlay 4";
+			public static LocString OVERLAY4 = "Materials Overlay";
 
-			public static LocString OVERLAY5 = "Overlay 5";
+			public static LocString OVERLAY5 = "Light Overlay";
 
-			public static LocString OVERLAY6 = "Overlay 6";
+			public static LocString OVERLAY6 = "Plumbing Overlay";
 
-			public static LocString OVERLAY7 = "Overlay 7";
+			public static LocString OVERLAY7 = "Ventilation Overlay";
 
-			public static LocString OVERLAY8 = "Overlay 8";
+			public static LocString OVERLAY8 = "Decor Overlay";
 
-			public static LocString OVERLAY9 = "Overlay 9";
+			public static LocString OVERLAY9 = "Germ Overlay";
 
-			public static LocString OVERLAY10 = "Overlay 10";
+			public static LocString OVERLAY10 = "Farming Overlay";
 
-			public static LocString OVERLAY11 = "Overlay 11";
+			public static LocString OVERLAY11 = "Room Overlay";
 
-			public static LocString OVERLAY12 = "Overlay 12";
+			public static LocString OVERLAY12 = "Exosuit Overlay";
 
-			public static LocString OVERLAY13 = "Overlay 13";
+			public static LocString OVERLAY13 = "Automation Overlay";
 
-			public static LocString OVERLAY14 = "Overlay 14";
+			public static LocString OVERLAY14 = "Conveyor Overlay";
 
-			public static LocString OVERLAY15 = "Overlay 15";
+			public static LocString OVERLAY15 = "Radiation Overlay";
 
 			public static LocString SPEEDUP = "Speed Up";
 

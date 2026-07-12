@@ -81,5 +81,7 @@ public class ContactConductivePipeBridgeConfig : IBuildingConfig
 
 	public const string ID = "ContactConductivePipeBridge";
 
+	public const float NO_LIQUIDS_COOLDOWN = 1.5f;
+
 	private const ConduitType CONDUIT_TYPE = ConduitType.Liquid;
 }

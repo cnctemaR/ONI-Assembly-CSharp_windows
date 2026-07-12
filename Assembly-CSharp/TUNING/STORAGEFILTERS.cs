@@ -38,7 +38,8 @@ namespace TUNING
 			GameTags.ManufacturedMaterial,
 			GameTags.Egg,
 			GameTags.RareMaterials,
-			GameTags.Other
+			GameTags.Other,
+			GameTags.StoryTraitResource
 		};
 
 		public static List<Tag> LIQUIDS = new List<Tag> { GameTags.Liquid };

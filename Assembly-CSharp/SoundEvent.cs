@@ -35,10 +35,7 @@ public class SoundEvent : AnimEvent
 		{
 			this.sound = GlobalAssets.GetSound(sound_name, false);
 			this.soundHash = new HashedString(this.sound);
-			if (this.sound != null)
-			{
-				this.sound == "";
-			}
+			string.IsNullOrEmpty(this.sound);
 		}
 		this.minInterval = min_interval;
 		this.looping = is_looping;

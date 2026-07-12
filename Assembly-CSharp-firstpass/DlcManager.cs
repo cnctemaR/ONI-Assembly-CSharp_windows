@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 
 public class DlcManager
@@ -137,6 +138,22 @@ public class DlcManager
 		{
 			flag = DistributionPlatform.Inst.IsDLCSubscribed(dlcId);
 			DlcManager.dlcSubscribedCache[dlcId] = flag;
+		}
+		bool flag2 = DlcManager.CheckForExpansionFileExistence();
+		return flag && flag2;
+	}
+
+	private static bool CheckForExpansionFileExistence()
+	{
+		string text = Path.Combine(Application.streamingAssetsPath, "expansion1_bundle");
+		bool flag = false;
+		try
+		{
+			flag = File.Exists(text);
+		}
+		catch (Exception ex)
+		{
+			global::Debug.Log("[DlcManager] Error at reading file. CheckPlatformSubscription() - " + ex.Message);
 		}
 		return flag;
 	}
@@ -284,6 +301,8 @@ public class DlcManager
 	public const string VANILLA_ID = "";
 
 	public const string EXPANSION1_ID = "EXPANSION1_ID";
+
+	public const string EXPANSION1_VERIFICATION_FILE_NAME = "expansion1_bundle";
 
 	public const string VANILLA_DIRECTORY = "";
 

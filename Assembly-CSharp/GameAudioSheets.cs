@@ -125,6 +125,10 @@ public class GameAudioSheets : AudioSheets
 		{
 			soundEvent = new UIAnimationSoundEvent(file_name, sound_name, frame, false);
 		}
+		else if (type == "UIAnimationVoiceSoundEvent")
+		{
+			soundEvent = new UIAnimationVoiceSoundEvent(file_name, sound_name, frame, false);
+		}
 		else if (type == "UIAnimationLoopingSoundEvent")
 		{
 			soundEvent = new UIAnimationSoundEvent(file_name, sound_name, frame, true);

@@ -22,11 +22,11 @@ public class DevPumpLiquidConfig : IBuildingConfig
 		buildingDef.OutputConduitType = ConduitType.Liquid;
 		buildingDef.Floodable = false;
 		buildingDef.Invincible = true;
+		buildingDef.Overheatable = false;
 		buildingDef.Entombable = false;
 		buildingDef.ViewMode = OverlayModes.LiquidConduits.ID;
 		buildingDef.AudioCategory = "Metal";
 		buildingDef.UtilityOutputOffset = this.primaryPort.offset;
-		buildingDef.LogicInputPorts = LogicOperationalController.CreateSingleInputPortList(new CellOffset(0, 1));
 		GeneratedBuildings.RegisterWithOverlay(OverlayScreen.LiquidVentIDs, "DevPumpLiquid");
 		buildingDef.DebugOnly = true;
 		return buildingDef;
@@ -34,13 +34,13 @@ public class DevPumpLiquidConfig : IBuildingConfig
 
 	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
+		go.AddTag(GameTags.DevBuilding);
 		base.ConfigureBuildingTemplate(go, prefab_tag);
 		GeneratedBuildings.MakeBuildingAlwaysOperational(go);
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
-		go.AddOrGet<LogicOperationalController>();
 		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.IndustrialMachinery, false);
 		go.AddOrGet<LoopingSounds>();
 		go.AddOrGet<DevPump>().elementState = Filterable.ElementState.Liquid;

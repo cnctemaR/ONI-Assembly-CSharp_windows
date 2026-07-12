@@ -239,13 +239,7 @@ namespace Database
 			new Tech("NuclearRefinement", new List<string> { "NuclearReactor", "UraniumCentrifuge", "HEPBridgeTile" }, this, null);
 			new Tech("FineArt", new List<string> { "Canvas", "Sculpture" }, this, null);
 			new Tech("EnvironmentalAppreciation", new List<string> { "BeachChair" }, this, null);
-			new Tech("Luxury", new List<string>
-			{
-				LuxuryBedConfig.ID,
-				"LadderFast",
-				"PlasticTile",
-				"ClothingAlterationStation"
-			}, this, null);
+			new Tech("Luxury", new List<string> { "LuxuryBed", "LadderFast", "PlasticTile", "ClothingAlterationStation" }, this, null);
 			new Tech("RefractiveDecor", new List<string> { "CanvasWide", "MetalSculpture" }, this, null);
 			new Tech("GlassFurnishings", new List<string> { "GlassTile", "FlowerVaseHangingFancy", "SunLamp" }, this, null);
 			new Tech("Screens", new List<string> { PixelPackConfig.ID }, this, null);

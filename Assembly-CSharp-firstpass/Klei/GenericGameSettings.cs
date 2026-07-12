@@ -66,6 +66,8 @@ namespace Klei
 
 		public string[] devWorldGenSkip { get; set; }
 
+		public string[] devStoryTraits { get; set; }
+
 		public GenericGameSettings.PerformanceCapture performanceCapture { get; set; }
 
 		private static string Path

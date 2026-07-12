@@ -33,6 +33,7 @@ public class StaterpillarGasConnectorConfig : IBuildingConfig
 		buildingDef.OutputConduitType = ConduitType.Gas;
 		buildingDef.UtilityOutputOffset = new CellOffset(0, 1);
 		buildingDef.PlayConstructionSounds = false;
+		buildingDef.ShowInBuildMenu = false;
 		return buildingDef;
 	}
 

@@ -49,6 +49,24 @@ public class StoredMinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableId
 		{
 			this.bodyData = Accessorizer.UpdateAccessorySlots(this.nameStringKey, ref this.accessories);
 		}
+		List<ResourceRef<Accessory>> list = this.accessories.FindAll((ResourceRef<Accessory> acc) => acc.Get() == null);
+		if (list.Count > 0)
+		{
+			List<ClothingItemResource> list2 = new List<ClothingItemResource>();
+			foreach (ResourceRef<Accessory> resourceRef in list)
+			{
+				ClothingItemResource clothingItemResource = Db.Get().Permits.ClothingItems.TryResolveAccessoryResource(resourceRef.Guid);
+				if (clothingItemResource != null && !list2.Contains(clothingItemResource))
+				{
+					list2.Add(clothingItemResource);
+				}
+			}
+			foreach (ClothingItemResource clothingItemResource2 in list2)
+			{
+				this.clothingItems.Add(new ResourceRef<ClothingItemResource>(clothingItemResource2));
+			}
+			this.bodyData = Accessorizer.UpdateAccessorySlots(this.nameStringKey, ref this.accessories);
+		}
 		this.OnDeserializeModifiers();
 	}
 
@@ -132,6 +150,16 @@ public class StoredMinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableId
 	public void ValidateProxy()
 	{
 		this.assignableProxy = MinionAssignablesProxy.InitAssignableProxy(this.assignableProxy, this);
+	}
+
+	public string[] GetClothingItemIds()
+	{
+		string[] array = new string[this.clothingItems.Count];
+		for (int i = 0; i < this.clothingItems.Count; i++)
+		{
+			array[i] = this.clothingItems[i].Get().Id;
+		}
+		return array;
 	}
 
 	private void CleanupLimboMinions()
@@ -345,6 +373,9 @@ public class StoredMinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableId
 
 	[Serialize]
 	public List<ResourceRef<Accessory>> accessories;
+
+	[Serialize]
+	public List<ResourceRef<ClothingItemResource>> clothingItems = new List<ResourceRef<ClothingItemResource>>();
 
 	[Obsolete("Deprecated, use forbiddenTagSet")]
 	[Serialize]

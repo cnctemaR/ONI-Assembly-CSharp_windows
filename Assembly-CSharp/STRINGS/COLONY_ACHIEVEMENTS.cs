@@ -171,7 +171,7 @@ namespace STRINGS
 
 			public static LocString BASIC_PUMPING = "Oxygen Not Occluded";
 
-			public static LocString BASIC_PUMPING_DESCRIPTION = "Distribute 1000 " + UI.UNITSUFFIXES.MASS.KILOGRAM + " of Oxygen using gas vents.";
+			public static LocString BASIC_PUMPING_DESCRIPTION = "Distribute 1000" + UI.UNITSUFFIXES.MASS.KILOGRAM + " of Oxygen using gas vents.";
 
 			public static LocString MASTERPIECE_PAINTING = "Art Underground";
 

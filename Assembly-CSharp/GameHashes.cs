@@ -26,6 +26,7 @@ public enum GameHashes
 	OnStorageChange = -1697596308,
 	UpdateStorageInfo = -1197125120,
 	OnStore = 856640610,
+	OnStorageLockerSetupComplete = -1683615038,
 	Died = 1623392196,
 	DeathAnimComplete = -66249442,
 	Revived = -1117766961,

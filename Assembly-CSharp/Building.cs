@@ -54,12 +54,14 @@ public class Building : KMonoBehaviour, IGameObjectEffectDescriptor, IUniformGri
 
 	public bool PlacementCellsContainCell(int cell)
 	{
-		bool flag = false;
 		for (int i = 0; i < this.PlacementCells.Length; i++)
 		{
-			flag |= this.PlacementCells[i] == cell;
+			if (this.PlacementCells[i] == cell)
+			{
+				return true;
+			}
 		}
-		return flag;
+		return false;
 	}
 
 	public void RefreshCells()

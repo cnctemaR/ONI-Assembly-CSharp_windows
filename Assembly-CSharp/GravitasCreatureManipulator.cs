@@ -241,7 +241,7 @@ public class GravitasCreatureManipulator : GameStateMachine<GravitasCreatureMani
 			if (base.smi.IsInsideState(base.sm.operational.idle))
 			{
 				Navigator component = pickupable.GetComponent<Navigator>();
-				if (component != null && this.IsAccepted(component.gameObject))
+				if (component != null && this.IsAccepted(component.gameObject) && !pickupable.HasTag(GameTags.Dead))
 				{
 					component.GoTo(base.smi.pickupCell, null);
 				}
@@ -317,7 +317,12 @@ public class GravitasCreatureManipulator : GameStateMachine<GravitasCreatureMani
 			}
 			else if (flag)
 			{
-				tag = FertilityMonitor.EggBreedingRoll(Assets.GetPrefab(smi.def.adultPrefab).GetDef<FertilityMonitor.Def>().initialBreedingWeights, true);
+				FertilityMonitor.Def def = Assets.GetPrefab(smi.def.adultPrefab).GetDef<FertilityMonitor.Def>();
+				if (def == null)
+				{
+					return;
+				}
+				tag = FertilityMonitor.EggBreedingRoll(def.initialBreedingWeights, true);
 			}
 			if (!tag.IsValid)
 			{

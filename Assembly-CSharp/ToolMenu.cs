@@ -242,6 +242,7 @@ public class ToolMenu : KScreen
 		this.basicTools.Add(ToolMenu.CreateToolCollection(UI.TOOLS.CAPTURE.NAME, "icon_action_capture", global::Action.Capture, "CaptureTool", UI.TOOLTIPS.CAPTUREBUTTON, false));
 		this.basicTools.Add(ToolMenu.CreateToolCollection(UI.TOOLS.HARVEST.NAME, "icon_action_harvest", global::Action.Harvest, "HarvestTool", UI.TOOLTIPS.HARVESTBUTTON, false));
 		this.basicTools.Add(ToolMenu.CreateToolCollection(UI.TOOLS.EMPTY_PIPE.NAME, "icon_action_empty_pipes", global::Action.EmptyPipe, "EmptyPipeTool", UI.TOOLS.EMPTY_PIPE.TOOLTIP, false));
+		this.basicTools.Add(ToolMenu.CreateToolCollection(UI.TOOLS.DISCONNECT.NAME, "icon_action_disconnect", global::Action.Disconnect, "DisconnectTool", UI.TOOLS.DISCONNECT.TOOLTIP, false));
 	}
 
 	private void InstantiateCollectionsUI(IList<ToolMenu.ToolCollection> collections)
@@ -253,6 +254,7 @@ public class ToolMenu : KScreen
 		GameObject gameObject5 = Util.KInstantiateUI(this.smallToolTopRow, gameObject3, true);
 		GameObject gameObject6 = Util.KInstantiateUI(this.sandboxToolSet, gameObject, true);
 		bool flag = true;
+		int num = 0;
 		for (int i = 0; i < collections.Count; i++)
 		{
 			GameObject gameObject7;
@@ -268,6 +270,7 @@ public class ToolMenu : KScreen
 			{
 				gameObject7 = (flag ? gameObject5 : gameObject4);
 				flag = !flag;
+				num++;
 			}
 			ToolMenu.ToolCollection tc = collections[i];
 			tc.toggle = Util.KInstantiateUI((collections[i].tools.Count > 1) ? this.collectionIconPrefab : ((collections == this.sandboxTools) ? this.sandboxToolIconPrefab : (collections[i].largeIcon ? this.toolIconLargePrefab : this.toolIconPrefab)), gameObject7, true);
@@ -335,6 +338,11 @@ public class ToolMenu : KScreen
 					component2.Collapse(action);
 				}
 			}
+		}
+		if (num > 0 && num % 2 == 0)
+		{
+			gameObject4.GetComponent<HorizontalLayoutGroup>().padding.left = 26;
+			gameObject5.GetComponent<HorizontalLayoutGroup>().padding.right = 26;
 		}
 		if (gameObject2.transform.childCount == 0)
 		{
@@ -692,6 +700,7 @@ public class ToolMenu : KScreen
 					{
 						string text = GameUtil.ReplaceHotkeyString(row[i].tools[0].tooltip, row[i].tools[0].hotkey);
 						component2.ClearMultiStringTooltip();
+						component2.AddMultiStringTooltip(row[i].tools[0].text, this.TooltipHeader);
 						component2.AddMultiStringTooltip(text, this.ToggleToolTipTextStyleSetting);
 					}
 					else
@@ -850,6 +859,9 @@ public class ToolMenu : KScreen
 
 	[SerializeField]
 	public TextStyleSetting CategoryLabelTextStyle_LeftAlign;
+
+	[SerializeField]
+	private TextStyleSetting TooltipHeader;
 
 	private int smallCollectionMax = 5;
 

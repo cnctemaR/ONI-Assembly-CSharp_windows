@@ -33,6 +33,7 @@ public class RocketInteriorLiquidInputPortConfig : IBuildingConfig
 		buildingDef.BaseTimeUntilRepair = -1f;
 		buildingDef.AudioCategory = "Metal";
 		buildingDef.SceneLayer = Grid.SceneLayer.TileMain;
+		buildingDef.ShowInBuildMenu = false;
 		return buildingDef;
 	}
 

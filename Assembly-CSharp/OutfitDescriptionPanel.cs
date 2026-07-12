@@ -7,65 +7,112 @@ using UnityEngine.UI;
 
 public class OutfitDescriptionPanel : KMonoBehaviour
 {
-	public void Refresh(Option<ClothingOutfitTarget> outfit)
+	public void Refresh(PermitResource permitResource, ClothingOutfitUtility.OutfitType outfitType)
+	{
+		if (permitResource != null)
+		{
+			this.Refresh(permitResource.Name, new string[] { permitResource.Id }, outfitType);
+			return;
+		}
+		this.Refresh(UI.OUTFIT_NAME.NONE, OutfitDescriptionPanel.NO_ITEMS, outfitType);
+	}
+
+	public void Refresh(Option<ClothingOutfitTarget> outfit, ClothingOutfitUtility.OutfitType outfitType)
 	{
 		if (outfit.HasValue)
 		{
-			this.Refresh(outfit.Value.ReadName(), outfit.Value.ReadItems());
+			this.Refresh(outfit.Value.ReadName(), outfit.Value.ReadItems(), outfitType);
 			return;
 		}
-		this.Refresh(UI.OUTFIT_NAME.NONE, OutfitDescriptionPanel.NO_ITEMS);
-	}
-
-	public void Refresh(OutfitDesignerScreen_OutfitState outfitState)
-	{
-		this.Refresh(outfitState.name, outfitState.GetItems());
-	}
-
-	public void Refresh(string name, string[] itemIds)
-	{
-		this.outfitNameLabel.SetText(name);
-		this.ClearItemDescRows();
-		using (DictionaryPool<PermitCategory, Option<ClothingItemResource>, OutfitDescriptionPanel>.PooledDictionary pooledDictionary = PoolsFor<OutfitDescriptionPanel>.AllocateDict<PermitCategory, Option<ClothingItemResource>>())
+		if (outfitType == ClothingOutfitUtility.OutfitType.Clothing)
 		{
-			using (ListPool<ClothingItemResource, OutfitDescriptionPanel>.PooledList pooledList = PoolsFor<OutfitDescriptionPanel>.AllocateList<ClothingItemResource>())
+			this.Refresh(UI.OUTFIT_NAME.NONE, OutfitDescriptionPanel.NO_ITEMS, outfitType);
+			return;
+		}
+		if (outfitType != ClothingOutfitUtility.OutfitType.JoyResponse)
+		{
+			return;
+		}
+		this.Refresh(UI.OUTFIT_NAME.NONE_JOY_RESPONSE, OutfitDescriptionPanel.NO_ITEMS, outfitType);
+	}
+
+	public void Refresh(OutfitDesignerScreen_OutfitState outfitState, ClothingOutfitUtility.OutfitType outfitType)
+	{
+		this.Refresh(outfitState.name, outfitState.GetItems(), outfitType);
+	}
+
+	public void Refresh(string name, string[] itemIds, ClothingOutfitUtility.OutfitType outfitType)
+	{
+		this.ClearItemDescRows();
+		using (DictionaryPool<PermitCategory, Option<PermitResource>, OutfitDescriptionPanel>.PooledDictionary pooledDictionary = PoolsFor<OutfitDescriptionPanel>.AllocateDict<PermitCategory, Option<PermitResource>>())
+		{
+			using (ListPool<PermitResource, OutfitDescriptionPanel>.PooledList pooledList = PoolsFor<OutfitDescriptionPanel>.AllocateList<PermitResource>())
 			{
-				pooledDictionary.Add(PermitCategory.DupeTops, Option.None);
-				pooledDictionary.Add(PermitCategory.DupeGloves, Option.None);
-				pooledDictionary.Add(PermitCategory.DupeBottoms, Option.None);
-				pooledDictionary.Add(PermitCategory.DupeShoes, Option.None);
-				foreach (string text in itemIds)
+				ClothingOutfitUtility.OutfitType outfitType2 = outfitType;
+				if (outfitType2 != ClothingOutfitUtility.OutfitType.Clothing)
 				{
-					ClothingItemResource clothingItemResource = (ClothingItemResource)Db.Get().Permits.Get(text);
-					Option<ClothingItemResource> option;
-					if (pooledDictionary.TryGetValue(clothingItemResource.PermitCategory, out option) && !option.HasValue)
+					if (outfitType2 == ClothingOutfitUtility.OutfitType.JoyResponse)
 					{
-						pooledDictionary[clothingItemResource.PermitCategory] = clothingItemResource;
+						if (itemIds != null && itemIds.Length != 0)
+						{
+							if (Db.Get().Permits.BalloonArtistFacades.TryGet(itemIds[0]) != null)
+							{
+								this.outfitDescriptionLabel.gameObject.SetActive(true);
+								string text = DUPLICANTS.TRAITS.BALLOONARTIST.NAME;
+								this.outfitNameLabel.SetText(text);
+								this.outfitDescriptionLabel.SetText(name);
+							}
+						}
+						else
+						{
+							this.outfitNameLabel.SetText(name);
+							this.outfitDescriptionLabel.gameObject.SetActive(false);
+						}
+						pooledDictionary.Add(PermitCategory.JoyResponse, Option.None);
+					}
+				}
+				else
+				{
+					this.outfitNameLabel.SetText(name);
+					this.outfitDescriptionLabel.gameObject.SetActive(false);
+					pooledDictionary.Add(PermitCategory.DupeTops, Option.None);
+					pooledDictionary.Add(PermitCategory.DupeGloves, Option.None);
+					pooledDictionary.Add(PermitCategory.DupeBottoms, Option.None);
+					pooledDictionary.Add(PermitCategory.DupeShoes, Option.None);
+				}
+				foreach (string text2 in itemIds)
+				{
+					PermitResource permitResource = Db.Get().Permits.Get(text2);
+					Option<PermitResource> option;
+					if (pooledDictionary.TryGetValue(permitResource.Category, out option) && !option.HasValue)
+					{
+						pooledDictionary[permitResource.Category] = permitResource;
 					}
 					else
 					{
-						pooledList.Add(clothingItemResource);
+						pooledList.Add(permitResource);
 					}
 				}
-				foreach (KeyValuePair<PermitCategory, Option<ClothingItemResource>> keyValuePair in pooledDictionary)
+				foreach (KeyValuePair<PermitCategory, Option<PermitResource>> keyValuePair in pooledDictionary)
 				{
 					PermitCategory permitCategory;
-					Option<ClothingItemResource> option2;
-					keyValuePair.Deconstruct<PermitCategory, Option<ClothingItemResource>>(out permitCategory, out option2);
+					Option<PermitResource> option2;
+					keyValuePair.Deconstruct<PermitCategory, Option<PermitResource>>(out permitCategory, out option2);
 					PermitCategory permitCategory2 = permitCategory;
-					Option<ClothingItemResource> option3 = option2;
+					Option<PermitResource> option3 = option2;
 					if (option3.HasValue)
 					{
-						this.AddItemDescRow(option3.Value.GetPermitPresentationInfo());
+						this.AddItemDescRow(option3.Value);
 					}
 					else
 					{
-						this.AddItemDescRow(KleiItemsUI.GetNoneClothingItemIcon(permitCategory2), KleiItemsUI.GetNoneClothingItemString(permitCategory2), default(Option<string>), 1f);
+						this.AddItemDescRow(KleiItemsUI.GetNoneClothingItemIcon(permitCategory2), KleiItemsUI.GetNoneClothingItemString(permitCategory2), null, 1f);
 					}
 				}
-				foreach (ClothingItemResource clothingItemResource2 in pooledList)
+				foreach (PermitResource permitResource2 in pooledList)
 				{
-					this.AddItemDescRow(clothingItemResource2.GetPermitPresentationInfo());
+					ClothingItemResource clothingItemResource = (ClothingItemResource)permitResource2;
+					this.AddItemDescRow(clothingItemResource);
 				}
 			}
 		}
@@ -81,7 +128,7 @@ public class OutfitDescriptionPanel : KMonoBehaviour
 		}
 		KleiItemsStatusRefresher.AddOrGetListener(this).OnRefreshUI(delegate
 		{
-			this.Refresh(name, itemIds);
+			this.Refresh(name, itemIds, outfitType);
 		});
 	}
 
@@ -94,13 +141,15 @@ public class OutfitDescriptionPanel : KMonoBehaviour
 		this.itemDescriptionRows.Clear();
 	}
 
-	private void AddItemDescRow(PermitPresentationInfo presInfo)
+	private void AddItemDescRow(PermitResource permit)
 	{
-		Option<string> option = (presInfo.IsUnlocked() ? Option.None : Option.Some<string>(UI.KLEI_INVENTORY_SCREEN.ITEM_PLAYER_OWN_NONE));
-		this.AddItemDescRow(presInfo.sprite, presInfo.name, option, presInfo.IsUnlocked() ? 1f : 0.7f);
+		PermitPresentationInfo permitPresentationInfo = permit.GetPermitPresentationInfo();
+		bool flag = permit.IsUnlocked();
+		string text = (flag ? null : UI.KLEI_INVENTORY_SCREEN.ITEM_PLAYER_OWN_NONE);
+		this.AddItemDescRow(permitPresentationInfo.sprite, permit.Name, text, flag ? 1f : 0.7f);
 	}
 
-	private void AddItemDescRow(Sprite icon, string text, Option<string> tooltip = default(Option<string>), float alpha = 1f)
+	private void AddItemDescRow(Sprite icon, string text, string tooltip = null, float alpha = 1f)
 	{
 		GameObject gameObject = Util.KInstantiateUI(this.itemDescriptionRowPrefab, this.itemDescriptionContainer, true);
 		this.itemDescriptionRows.Add(gameObject);
@@ -109,9 +158,9 @@ public class OutfitDescriptionPanel : KMonoBehaviour
 		component.GetReference<LocText>("Label").SetText(text);
 		gameObject.AddOrGet<CanvasGroup>().alpha = alpha;
 		gameObject.AddOrGet<NonDrawingGraphic>();
-		if (tooltip.HasValue)
+		if (tooltip != null)
 		{
-			gameObject.AddOrGet<ToolTip>().SetSimpleTooltip(tooltip.Value);
+			gameObject.AddOrGet<ToolTip>().SetSimpleTooltip(tooltip);
 			return;
 		}
 		gameObject.AddOrGet<ToolTip>().ClearMultiStringTooltip();
@@ -119,6 +168,9 @@ public class OutfitDescriptionPanel : KMonoBehaviour
 
 	[SerializeField]
 	public LocText outfitNameLabel;
+
+	[SerializeField]
+	public LocText outfitDescriptionLabel;
 
 	[SerializeField]
 	private GameObject itemDescriptionRowPrefab;

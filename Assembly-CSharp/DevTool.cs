@@ -3,6 +3,8 @@ using ImGuiNET;
 
 public abstract class DevTool
 {
+	public event global::System.Action OnInit;
+
 	public event global::System.Action OnUninit;
 
 	public DevTool()
@@ -14,7 +16,7 @@ public abstract class DevTool
 	{
 		if (this.RequiresGameRunning && Game.Instance == null)
 		{
-			ImGui.Text("Game not loaded");
+			ImGui.Text("Game must be loaded to use this devtool.");
 			return;
 		}
 		this.RenderTo(panel);
@@ -26,6 +28,19 @@ public abstract class DevTool
 	}
 
 	protected abstract void RenderTo(DevPanel panel);
+
+	public void Internal_TryInit()
+	{
+		if (this.didInit)
+		{
+			return;
+		}
+		this.didInit = true;
+		if (this.OnInit != null)
+		{
+			this.OnInit();
+		}
+	}
 
 	public void Internal_Uninit()
 	{
@@ -42,4 +57,6 @@ public abstract class DevTool
 	public bool isRequestingToClosePanel;
 
 	public ImGuiWindowFlags drawFlags;
+
+	private bool didInit;
 }

@@ -47,6 +47,10 @@ public static class ImGuiEx
 
 	public static bool InputFilter(string label, ref string filter, uint maxCharacterCount = 50U)
 	{
+		if (filter == null)
+		{
+			filter = "";
+		}
 		bool flag = false;
 		if (ImGui.Button("X"))
 		{
@@ -66,6 +70,18 @@ public static class ImGuiEx
 			ImGui.SetTooltip(help);
 			ImGui.EndTooltip();
 		}
+	}
+
+	public static bool Button(string txt, string error)
+	{
+		bool flag = error == null;
+		bool flag2 = ImGuiEx.Button(txt, flag);
+		if (!flag)
+		{
+			ImGuiEx.TooltipForPrevious(error);
+			return false;
+		}
+		return flag2;
 	}
 
 	public static bool Button(string txt, bool enabled)

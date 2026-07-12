@@ -292,6 +292,10 @@ namespace STRINGS
 			public static LocString CONVEYOR = "Shipping Build";
 
 			public static LocString COMPOST_FORMAT = "{Item}";
+
+			public static LocString ADVANCEDDOCTORSTATIONMEDICALSUPPLIES = "Serum Vial";
+
+			public static LocString DOCTORSTATIONMEDICALSUPPLIES = "Medical Pack";
 		}
 
 		public class STATUSITEMS
@@ -772,7 +776,7 @@ namespace STRINGS
 					UI.FormatAsHotKey(global::Action.SlowDown),
 					". Pressing ",
 					UI.FormatAsHotKey(global::Action.TogglePause),
-					" will pause the flow of time entirely.\n\n•  I'll keep records of everything I discover in my personal DATABASE ",
+					" will pause the flow of time entirely.\n\n• I'll keep records of everything I discover in my personal DATABASE ",
 					UI.FormatAsHotKey(global::Action.ManageDatabase),
 					" to refer back to if I forget anything important."
 				});
@@ -789,7 +793,7 @@ namespace STRINGS
 					UI.FormatAsHotKey(global::Action.CycleSpeed),
 					". Pressing ",
 					UI.FormatAsHotKey(global::Action.TogglePause),
-					" will pause the flow of time entirely.\n\n•  I'll keep records of everything I discover in my personal DATABASE ",
+					" will pause the flow of time entirely.\n\n• I'll keep records of everything I discover in my personal DATABASE ",
 					UI.FormatAsHotKey(global::Action.ManageDatabase),
 					" to refer back to if I forget anything important."
 				});
@@ -1152,7 +1156,7 @@ namespace STRINGS
 				{
 					"When connecting pipes for plumbing, it is useful to have the Plumbing Overlay ",
 					UI.FormatAsHotKey(global::Action.Overlay6),
-					" selected. Each building which requires plumbing must have their Building Intake connected to the Output Pipe from a source such as a Liquid Pump. Liquid Pumps must be submerged in liquid and attached to a power source to function.\n\nBuildings often output contaminated water which must flow out of the building through piping from the Output Pipe. The water can then be expelled through a Liquid Vent, or filtered through a Liquid Filter for reuse.\n\nVentilation applies the same principles to gases. Select the Ventilation Overlay ",
+					" selected. Each building which requires plumbing must have their Building Intake connected to the Output Pipe from a source such as a Liquid Pump. Liquid Pumps must be submerged in liquid and attached to a power source to function.\n\nBuildings often output contaminated water which must flow out of the building through piping from the Output Pipe. The water can then be expelled through a Liquid Vent, or filtered through a Water Sieve for reuse.\n\nVentilation applies the same principles to gases. Select the Ventilation Overlay ",
 					UI.FormatAsHotKey(global::Action.Overlay7),
 					" to see how gases are being moved around the colony."
 				});

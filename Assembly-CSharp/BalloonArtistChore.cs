@@ -1,4 +1,5 @@
 ﻿using System;
+using Database;
 using STRINGS;
 using TUNING;
 using UnityEngine;
@@ -46,10 +47,14 @@ public class BalloonArtistChore : Chore<BalloonArtistChore.StatesInstance>, IWor
 			this.balloonStand.ToggleAnims("anim_interacts_balloon_artist_kanim", 0f, "").Enter(delegate(BalloonArtistChore.StatesInstance smi)
 			{
 				smi.SpawnBalloonStand();
-			}).Exit(delegate(BalloonArtistChore.StatesInstance smi)
+			}).Enter(delegate(BalloonArtistChore.StatesInstance smi)
 			{
-				smi.DestroyBalloonStand();
+				this.balloonArtist.GetSMI<BalloonArtist.Instance>(smi).Internal_InitBalloons();
 			})
+				.Exit(delegate(BalloonArtistChore.StatesInstance smi)
+				{
+					smi.DestroyBalloonStand();
+				})
 				.DefaultState(this.balloonStand.idle);
 			this.balloonStand.idle.PlayAnim("working_pre").QueueAnim("working_loop", true, null).OnSignal(this.giveBalloonOut, this.balloonStand.giveBalloon);
 			this.balloonStand.giveBalloon.PlayAnim("working_pst").OnAnimQueueComplete(this.balloonStand.idle);
@@ -130,9 +135,21 @@ public class BalloonArtistChore : Chore<BalloonArtistChore.StatesInstance>, IWor
 			this.balloonStand.DeleteObject();
 		}
 
-		public void GiveBalloon()
+		public BalloonOverrideSymbol GetBalloonOverride()
 		{
-			this.balloonArtist.GetSMI<BalloonArtist.Instance>().GiveBalloon();
+			return this.balloonArtist.GetSMI<BalloonArtist.Instance>().GetCurrentBalloonSymbolOverride();
+		}
+
+		public void NextBalloonOverride()
+		{
+			this.balloonArtist.GetSMI<BalloonArtist.Instance>().ApplyNextBalloonSymbolOverride();
+		}
+
+		public void GiveBalloon(BalloonOverrideSymbol balloonOverride)
+		{
+			BalloonArtist.Instance smi = this.balloonArtist.GetSMI<BalloonArtist.Instance>();
+			smi.GiveBalloon();
+			balloonOverride.ApplyTo(smi);
 			base.smi.sm.giveBalloonOut.Trigger(base.smi);
 		}
 

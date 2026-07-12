@@ -17,9 +17,9 @@ public class AccessorySlot : Resource
 
 	public KAnimFile defaultAnimFile { get; private set; }
 
-	public bool Required { get; private set; }
+	public int overrideLayer { get; private set; }
 
-	public AccessorySlot(string id, ResourceSet parent, KAnimFile swap_build, bool required = false)
+	public AccessorySlot(string id, ResourceSet parent, KAnimFile swap_build, int overrideLayer = 0)
 		: base(id, parent, null)
 	{
 		if (swap_build == null)
@@ -29,11 +29,11 @@ public class AccessorySlot : Resource
 		this.targetSymbolId = new KAnimHashedString("snapTo_" + id.ToLower());
 		this.accessories = new List<Accessory>();
 		this.file = swap_build;
-		this.Required = required;
+		this.overrideLayer = overrideLayer;
 		this.defaultAnimFile = swap_build;
 	}
 
-	public AccessorySlot(string id, ResourceSet parent, KAnimHashedString target_symbol_id, KAnimFile swap_build, bool required = false, KAnimFile defaultAnimFile = null)
+	public AccessorySlot(string id, ResourceSet parent, KAnimHashedString target_symbol_id, KAnimFile swap_build, KAnimFile defaultAnimFile = null, int overrideLayer = 0)
 		: base(id, parent, null)
 	{
 		if (swap_build == null)
@@ -43,8 +43,8 @@ public class AccessorySlot : Resource
 		this.targetSymbolId = target_symbol_id;
 		this.accessories = new List<Accessory>();
 		this.file = swap_build;
-		this.Required = required;
 		this.defaultAnimFile = ((defaultAnimFile != null) ? defaultAnimFile : swap_build);
+		this.overrideLayer = overrideLayer;
 	}
 
 	public void AddAccessories(KAnimFile default_build, ResourceSet parent)

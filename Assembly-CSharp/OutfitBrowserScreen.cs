@@ -65,7 +65,7 @@ public class OutfitBrowserScreen : KMonoBehaviour
 		KleiItemsStatusRefresher.AddOrGetListener(this).OnRefreshUI(delegate
 		{
 			this.RefreshGallery();
-			this.outfitDescriptionPanel.Refresh(this.selectedOutfit);
+			this.outfitDescriptionPanel.Refresh(this.selectedOutfit, ClothingOutfitUtility.OutfitType.Clothing);
 		});
 		KleiItemsStatusRefresher.RequestRefreshFromServer();
 	}
@@ -178,7 +178,7 @@ public class OutfitBrowserScreen : KMonoBehaviour
 		this.selectedOutfit = outfit;
 		this.dioramaMinionOrMannequin.current.SetOutfit(outfit);
 		this.dioramaMinionOrMannequin.current.ReactToFullOutfitChange();
-		this.outfitDescriptionPanel.Refresh(outfit);
+		this.outfitDescriptionPanel.Refresh(outfit, ClothingOutfitUtility.OutfitType.Clothing);
 		OutfitBrowserScreenConfig outfitBrowserScreenConfig = this.Config;
 		if (!outfitBrowserScreenConfig.minionPersonality.HasValue)
 		{
@@ -219,7 +219,7 @@ public class OutfitBrowserScreen : KMonoBehaviour
 		if (outfitBrowserScreenConfig.targetMinionInstance.HasValue)
 		{
 			outfitBrowserScreenConfig = this.Config;
-			outfitBrowserScreenConfig.targetMinionInstance.Value.GetComponent<Accessorizer>().ApplyClothingItems(this.selectedOutfit.ReadItemValues(), true);
+			outfitBrowserScreenConfig.targetMinionInstance.Value.GetComponent<WearableAccessorizer>().ApplyClothingItems(this.selectedOutfit.ReadItemValues());
 		}
 		else
 		{
@@ -291,6 +291,30 @@ public class OutfitBrowserScreen : KMonoBehaviour
 		});
 	}
 
+	private void SetButtonClickUISound(Option<ClothingOutfitTarget> target, MultiToggle toggle)
+	{
+		if (!target.HasValue)
+		{
+			toggle.states[1].on_click_override_sound_path = "HUD_Click";
+			toggle.states[0].on_click_override_sound_path = "HUD_Click";
+			return;
+		}
+		bool flag = !target.Value.DoesContainNonOwnedItems();
+		toggle.states[1].on_click_override_sound_path = "ClothingItem_Click";
+		toggle.states[1].sound_parameter_name = "Unlocked";
+		toggle.states[1].sound_parameter_value = (flag ? 1f : 0f);
+		toggle.states[1].has_sound_parameter = true;
+		toggle.states[0].on_click_override_sound_path = "ClothingItem_Click";
+		toggle.states[0].sound_parameter_name = "Unlocked";
+		toggle.states[0].sound_parameter_value = (flag ? 1f : 0f);
+		toggle.states[0].has_sound_parameter = true;
+	}
+
+	private void OnMouseOverToggle()
+	{
+		KFMOD.PlayUISound(GlobalAssets.GetSound("HUD_Mouseover", false));
+	}
+
 	[CompilerGenerated]
 	private void <PopulateGallery>g__AddGridIconForTarget|29_0(Option<ClothingOutfitTarget> target)
 	{
@@ -307,6 +331,8 @@ public class OutfitBrowserScreen : KMonoBehaviour
 			gameObject2.GetComponent<Image>().sprite = KleiItemsUI.GetNoneOutfitIcon();
 		}
 		MultiToggle button = spawn.GetComponent<MultiToggle>();
+		MultiToggle button2 = button;
+		button2.onEnter = (global::System.Action)Delegate.Combine(button2.onEnter, new global::System.Action(this.OnMouseOverToggle));
 		button.onClick = delegate
 		{
 			this.SelectOutfit(target, false);
@@ -323,6 +349,7 @@ public class OutfitBrowserScreen : KMonoBehaviour
 			KleiItemsUI.ConfigureTooltipOn(spawn, KleiItemsUI.WrapAsToolTipTitle(target.Value.ReadName()));
 			isUnownedOverlayGO.SetActive(target.Value.DoesContainNonOwnedItems());
 		}));
+		this.SetButtonClickUISound(target, button);
 	}
 
 	[Header("ItemGalleryColumn")]

@@ -169,10 +169,6 @@ public class ModifierSet : ScriptableObject
 
 		public bool ShowInUI;
 
-		public float Tier;
-
-		public string Notes;
-
 		public string StompGroup;
 
 		public bool IsBad;

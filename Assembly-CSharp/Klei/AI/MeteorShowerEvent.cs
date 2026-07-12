@@ -124,12 +124,28 @@ namespace Klei.AI
 				this.timeRemaining = this.gameplayEvent.duration;
 				this.timeBetweenMeteors = this.gameplayEvent.secondsPerMeteor;
 				this.m_worldId = eventInstance.worldId;
+				Game.Instance.Subscribe(1983128072, new Action<object>(this.OnActiveWorldChanged));
+			}
+
+			private void OnActiveWorldChanged(object data)
+			{
+				int first = ((global::Tuple<int, int>)data).first;
+				if (this.activeMeteorBackground != null)
+				{
+					this.activeMeteorBackground.GetComponent<ParticleSystemRenderer>().enabled = first == this.m_worldId;
+				}
 			}
 
 			public override void StopSM(string reason)
 			{
 				this.StopBackgroundEffects();
 				base.StopSM(reason);
+			}
+
+			protected override void OnCleanUp()
+			{
+				Game.Instance.Unsubscribe(1983128072, new Action<object>(this.OnActiveWorldChanged));
+				base.OnCleanUp();
 			}
 
 			public void StartBackgroundEffects()

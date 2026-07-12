@@ -22,11 +22,11 @@ public class DevPumpGasConfig : IBuildingConfig
 		buildingDef.OutputConduitType = ConduitType.Gas;
 		buildingDef.Floodable = false;
 		buildingDef.Invincible = true;
+		buildingDef.Overheatable = false;
 		buildingDef.Entombable = false;
 		buildingDef.ViewMode = OverlayModes.GasConduits.ID;
 		buildingDef.AudioCategory = "Metal";
 		buildingDef.UtilityOutputOffset = this.primaryPort.offset;
-		buildingDef.LogicInputPorts = LogicOperationalController.CreateSingleInputPortList(new CellOffset(0, 1));
 		GeneratedBuildings.RegisterWithOverlay(OverlayScreen.GasVentIDs, "DevPumpGas");
 		buildingDef.DebugOnly = true;
 		return buildingDef;
@@ -40,7 +40,7 @@ public class DevPumpGasConfig : IBuildingConfig
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
-		go.AddOrGet<LogicOperationalController>();
+		go.AddTag(GameTags.DevBuilding);
 		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.IndustrialMachinery, false);
 		go.AddOrGet<LoopingSounds>();
 		go.AddOrGet<DevPump>().elementState = Filterable.ElementState.Gas;

@@ -17,7 +17,7 @@ namespace Database
 		public ArtableStages(ResourceSet parent)
 			: base("ArtableStages", parent)
 		{
-			foreach (ArtableStages.Info info in ArtableStages.Infos)
+			foreach (ArtableStages.Info info in ArtableStages.Infos_All)
 			{
 				this.Add(info.id, info.name, info.desc, info.rarity, info.animFile, info.anim, info.decor_value, info.cheer_on_complete, info.status_id, info.prefabId, info.symbolname);
 			}
@@ -33,7 +33,7 @@ namespace Database
 			return this.GetPrefabStages(prefab_id).Find((ArtableStage stage) => stage.statusItem == Db.Get().ArtableStatuses.AwaitingArting);
 		}
 
-		public static ArtableStages.Info[] Infos = new ArtableStages.Info[]
+		public static ArtableStages.Info[] Infos_Default = new ArtableStages.Info[]
 		{
 			new ArtableStages.Info("Canvas_Bad", BUILDINGS.PREFABS.CANVAS.FACADES.ART_A.NAME, BUILDINGS.PREFABS.CANVAS.FACADES.ART_A.DESC, PermitRarity.Universal, "painting_art_a_kanim", "art_a", 5, false, "LookingUgly", "Canvas", "canvas"),
 			new ArtableStages.Info("Canvas_Average", BUILDINGS.PREFABS.CANVAS.FACADES.ART_B.NAME, BUILDINGS.PREFABS.CANVAS.FACADES.ART_B.DESC, PermitRarity.Universal, "painting_art_b_kanim", "art_b", 10, false, "LookingOkay", "Canvas", "canvas"),
@@ -76,7 +76,11 @@ namespace Database
 			new ArtableStages.Info("MetalSculpture_Average", BUILDINGS.PREFABS.METALSCULPTURE.FACADES.SCULPTURE_METAL_GOOD_1.NAME, BUILDINGS.PREFABS.METALSCULPTURE.FACADES.SCULPTURE_METAL_GOOD_1.DESC, PermitRarity.Universal, "sculpture_metal_good_1_kanim", "good_1", 10, false, "LookingOkay", "MetalSculpture", ""),
 			new ArtableStages.Info("MetalSculpture_Good1", BUILDINGS.PREFABS.METALSCULPTURE.FACADES.SCULPTURE_METAL_AMAZING_1.NAME, BUILDINGS.PREFABS.METALSCULPTURE.FACADES.SCULPTURE_METAL_AMAZING_1.DESC, PermitRarity.Universal, "sculpture_metal_amazing_1_kanim", "amazing_1", 15, true, "LookingGreat", "MetalSculpture", ""),
 			new ArtableStages.Info("MetalSculpture_Good2", BUILDINGS.PREFABS.METALSCULPTURE.FACADES.SCULPTURE_METAL_AMAZING_2.NAME, BUILDINGS.PREFABS.METALSCULPTURE.FACADES.SCULPTURE_METAL_AMAZING_2.DESC, PermitRarity.Universal, "sculpture_metal_amazing_2_kanim", "amazing_2", 15, true, "LookingGreat", "MetalSculpture", ""),
-			new ArtableStages.Info("MetalSculpture_Good3", BUILDINGS.PREFABS.METALSCULPTURE.FACADES.SCULPTURE_METAL_AMAZING_3.NAME, BUILDINGS.PREFABS.METALSCULPTURE.FACADES.SCULPTURE_METAL_AMAZING_3.DESC, PermitRarity.Universal, "sculpture_metal_amazing_3_kanim", "amazing_3", 15, true, "LookingGreat", "MetalSculpture", ""),
+			new ArtableStages.Info("MetalSculpture_Good3", BUILDINGS.PREFABS.METALSCULPTURE.FACADES.SCULPTURE_METAL_AMAZING_3.NAME, BUILDINGS.PREFABS.METALSCULPTURE.FACADES.SCULPTURE_METAL_AMAZING_3.DESC, PermitRarity.Universal, "sculpture_metal_amazing_3_kanim", "amazing_3", 15, true, "LookingGreat", "MetalSculpture", "")
+		};
+
+		public static ArtableStages.Info[] Infos_Skins = new ArtableStages.Info[]
+		{
 			new ArtableStages.Info("Canvas_Good7", BUILDINGS.PREFABS.CANVAS.FACADES.ART_I.NAME, BUILDINGS.PREFABS.CANVAS.FACADES.ART_I.DESC, PermitRarity.Decent, "painting_art_i_kanim", "art_i", 15, true, "LookingGreat", "Canvas", "canvas"),
 			new ArtableStages.Info("Canvas_Good8", BUILDINGS.PREFABS.CANVAS.FACADES.ART_J.NAME, BUILDINGS.PREFABS.CANVAS.FACADES.ART_J.DESC, PermitRarity.Decent, "painting_art_j_kanim", "art_j", 15, true, "LookingGreat", "Canvas", "canvas"),
 			new ArtableStages.Info("Canvas_Good9", BUILDINGS.PREFABS.CANVAS.FACADES.ART_K.NAME, BUILDINGS.PREFABS.CANVAS.FACADES.ART_K.DESC, PermitRarity.Decent, "painting_art_k_kanim", "art_k", 15, true, "LookingGreat", "Canvas", "canvas"),
@@ -93,6 +97,8 @@ namespace Database
 			new ArtableStages.Info("MarbleSculpture_Good5", BUILDINGS.PREFABS.MARBLESCULPTURE.FACADES.SCULPTURE_MARBLE_AMAZING_5.NAME, BUILDINGS.PREFABS.MARBLESCULPTURE.FACADES.SCULPTURE_MARBLE_AMAZING_5.DESC, PermitRarity.Decent, "sculpture_marble_amazing_5_kanim", "amazing_5", 15, true, "LookingGreat", "MarbleSculpture", ""),
 			new ArtableStages.Info("IceSculpture_Average2", BUILDINGS.PREFABS.ICESCULPTURE.FACADES.ICESCULPTURE_AMAZING_2.NAME, BUILDINGS.PREFABS.ICESCULPTURE.FACADES.ICESCULPTURE_AMAZING_2.DESC, PermitRarity.Decent, "icesculpture_idle_2_kanim", "idle_2", 10, false, "LookingOkay", "IceSculpture", "")
 		};
+
+		public static ArtableStages.Info[] Infos_All = ArtableStages.Infos_Default.Concat<ArtableStages.Info>(ArtableStages.Infos_Skins);
 
 		public struct Info
 		{

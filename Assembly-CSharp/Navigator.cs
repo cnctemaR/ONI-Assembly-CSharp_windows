@@ -194,9 +194,9 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>, ISaveL
 		bool flag = false;
 		if (path.IsValid())
 		{
-			flag = this.reservedCell != NavigationReservations.InvalidReservation || this.CanReach(this.reservedCell);
 			int num = Grid.PosToCell(this.target);
-			flag |= Grid.IsCellOffsetOf(this.reservedCell, num, this.targetOffsets);
+			flag = this.reservedCell != NavigationReservations.InvalidReservation && this.CanReach(this.reservedCell);
+			flag &= Grid.IsCellOffsetOf(this.reservedCell, num, this.targetOffsets);
 		}
 		if (flag)
 		{

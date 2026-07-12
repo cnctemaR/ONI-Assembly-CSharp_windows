@@ -134,12 +134,13 @@ public class WarpPortal : Workable
 	public IEnumerator DelayedWarp(WarpReceiver receiver)
 	{
 		yield return SequenceUtil.WaitForEndOfFrame;
-		int myWorldId = receiver.GetMyWorldId();
-		CameraController.Instance.ActiveWorldStarWipe(myWorldId, Grid.CellToPos(Grid.PosToCell(receiver)), 10f, null);
+		int myWorldId = base.worker.GetMyWorldId();
+		int myWorldId2 = receiver.GetMyWorldId();
+		CameraController.Instance.ActiveWorldStarWipe(myWorldId2, Grid.CellToPos(Grid.PosToCell(receiver)), 10f, null);
 		Worker worker = base.worker;
 		worker.StopWork();
 		receiver.ReceiveWarpedDuplicant(worker);
-		ClusterManager.Instance.MigrateMinion(worker.GetComponent<MinionIdentity>(), myWorldId);
+		ClusterManager.Instance.MigrateMinion(worker.GetComponent<MinionIdentity>(), myWorldId2, myWorldId);
 		this.delayWarpRoutine = null;
 		yield break;
 	}

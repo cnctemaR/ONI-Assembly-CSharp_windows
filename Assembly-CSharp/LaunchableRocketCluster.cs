@@ -156,9 +156,16 @@ public class LaunchableRocketCluster : StateMachineComponent<LaunchableRocketClu
 			{
 				craftInterface.Trigger(-1277991738, base.master.gameObject);
 				WorldContainer component = craftInterface.GetComponent<WorldContainer>();
-				foreach (MinionIdentity minionIdentity in Components.MinionIdentities.GetWorldItems(component.id, false))
+				List<MinionIdentity> worldItems = Components.MinionIdentities.GetWorldItems(component.id, false);
+				MinionMigrationEventArgs e = new MinionMigrationEventArgs
 				{
-					Game.Instance.Trigger(586301400, minionIdentity);
+					prevWorldId = component.id,
+					targetWorldId = component.id
+				};
+				foreach (MinionIdentity minionIdentity in worldItems)
+				{
+					e.minionId = minionIdentity;
+					Game.Instance.Trigger(586301400, e);
 				}
 			}
 			this.constantVelocityPhase_maxSpeed = 0f;
@@ -392,9 +399,16 @@ public class LaunchableRocketCluster : StateMachineComponent<LaunchableRocketClu
 				{
 					craftInterface.Trigger(-887025858, smi.gameObject);
 					WorldContainer component = craftInterface.GetComponent<WorldContainer>();
-					foreach (MinionIdentity minionIdentity in Components.MinionIdentities.GetWorldItems(component.id, false))
+					List<MinionIdentity> worldItems = Components.MinionIdentities.GetWorldItems(component.id, false);
+					MinionMigrationEventArgs e = new MinionMigrationEventArgs
 					{
-						Game.Instance.Trigger(586301400, minionIdentity);
+						prevWorldId = component.id,
+						targetWorldId = component.id
+					};
+					foreach (MinionIdentity minionIdentity in worldItems)
+					{
+						e.minionId = minionIdentity;
+						Game.Instance.Trigger(586301400, e);
 					}
 				}
 				smi.GoTo(this.grounded);

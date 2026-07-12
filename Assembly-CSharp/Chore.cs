@@ -38,7 +38,7 @@ public abstract class Chore
 
 	public bool IsValid()
 	{
-		return this.provider != null;
+		return this.provider != null && this.gameObject.GetMyWorldId() != -1;
 	}
 
 	public bool IsPreemptable { get; protected set; }

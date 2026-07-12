@@ -12,6 +12,7 @@ public class ChoreProvider : KMonoBehaviour
 	{
 		base.OnPrefabInit();
 		Game.Instance.Subscribe(880851192, new Action<object>(this.OnWorldParentChanged));
+		Game.Instance.Subscribe(586301400, new Action<object>(this.OnMinionMigrated));
 	}
 
 	protected override void OnSpawn()
@@ -23,18 +24,15 @@ public class ChoreProvider : KMonoBehaviour
 	protected override void OnCleanUp()
 	{
 		base.OnCleanUp();
-		Game.Instance.Unsubscribe(880851192);
+		Game.Instance.Unsubscribe(880851192, new Action<object>(this.OnWorldParentChanged));
+		Game.Instance.Unsubscribe(586301400, new Action<object>(this.OnMinionMigrated));
 	}
 
 	protected virtual void OnWorldParentChanged(object data)
 	{
 		WorldParentChangedEventArgs e = data as WorldParentChangedEventArgs;
-		if (e == null || e.lastParentId == (int)ClusterManager.INVALID_WORLD_IDX)
-		{
-			return;
-		}
 		List<Chore> list;
-		if (!this.choreWorldMap.TryGetValue(e.lastParentId, out list))
+		if (e == null || e.lastParentId == (int)ClusterManager.INVALID_WORLD_IDX || e.lastParentId == e.world.ParentWorldId || !this.choreWorldMap.TryGetValue(e.lastParentId, out list))
 		{
 			return;
 		}
@@ -44,6 +42,22 @@ public class ChoreProvider : KMonoBehaviour
 			list2 = (this.choreWorldMap[e.world.ParentWorldId] = new List<Chore>());
 		}
 		this.TransferChores<Chore>(list, list2, e.world.ParentWorldId);
+	}
+
+	protected virtual void OnMinionMigrated(object data)
+	{
+		MinionMigrationEventArgs e = data as MinionMigrationEventArgs;
+		List<Chore> list;
+		if (e == null || !(e.minionId.gameObject == base.gameObject) || e.prevWorldId == e.targetWorldId || !this.choreWorldMap.TryGetValue(e.prevWorldId, out list))
+		{
+			return;
+		}
+		List<Chore> list2;
+		if (!this.choreWorldMap.TryGetValue(e.targetWorldId, out list2))
+		{
+			list2 = (this.choreWorldMap[e.targetWorldId] = new List<Chore>());
+		}
+		this.TransferChores<Chore>(list, list2, e.targetWorldId);
 	}
 
 	protected void TransferChores<T>(List<T> oldChores, List<T> newChores, int transferId) where T : Chore

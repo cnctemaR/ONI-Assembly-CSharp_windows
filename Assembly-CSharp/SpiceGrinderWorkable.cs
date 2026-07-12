@@ -46,6 +46,10 @@ public class SpiceGrinderWorkable : Workable, IConfigurableConsumer
 
 	protected override void OnCompleteWork(Worker worker)
 	{
+		if (this.Grinder.CurrentFood == null)
+		{
+			return;
+		}
 		this.Grinder.SpiceFood();
 	}
 

@@ -19,12 +19,13 @@ public class AssignmentManager : KMonoBehaviour
 
 	protected void MinionMigration(object data)
 	{
+		MinionMigrationEventArgs e = data as MinionMigrationEventArgs;
 		foreach (Assignable assignable in this.assignables)
 		{
 			if (assignable.assignee != null)
 			{
 				Ownables soleOwner = assignable.assignee.GetSoleOwner();
-				if (soleOwner != null && soleOwner.GetComponent<MinionAssignablesProxy>() != null && assignable.assignee.GetSoleOwner().GetComponent<MinionAssignablesProxy>().GetTargetGameObject() == ((MinionIdentity)data).gameObject)
+				if (soleOwner != null && soleOwner.GetComponent<MinionAssignablesProxy>() != null && assignable.assignee.GetSoleOwner().GetComponent<MinionAssignablesProxy>().GetTargetGameObject() == e.minionId.gameObject)
 				{
 					assignable.Unassign();
 				}

@@ -349,6 +349,11 @@ public class ClusterManager : KMonoBehaviour, ISaveLoadable
 
 	public void MigrateMinion(MinionIdentity minion, int targetID)
 	{
+		this.MigrateMinion(minion, targetID, minion.GetMyWorldId());
+	}
+
+	public void MigrateMinion(MinionIdentity minion, int targetID, int prevID)
+	{
 		if (!ClusterManager.Instance.GetWorld(targetID).IsDiscovered)
 		{
 			ClusterManager.Instance.GetWorld(targetID).SetDiscovered(false);
@@ -357,8 +362,11 @@ public class ClusterManager : KMonoBehaviour, ISaveLoadable
 		{
 			ClusterManager.Instance.GetWorld(targetID).SetDupeVisited();
 		}
-		Game.Instance.assignmentManager.RemoveFromWorld(minion, minion.GetMyWorldId());
-		Game.Instance.Trigger(586301400, minion);
+		this.migrationEvArg.minionId = minion;
+		this.migrationEvArg.prevWorldId = prevID;
+		this.migrationEvArg.targetWorldId = targetID;
+		Game.Instance.assignmentManager.RemoveFromWorld(minion, this.migrationEvArg.prevWorldId);
+		Game.Instance.Trigger(586301400, this.migrationEvArg);
 	}
 
 	public int GetLandingBeaconLocation(int worldId)
@@ -647,6 +655,8 @@ public class ClusterManager : KMonoBehaviour, ISaveLoadable
 	private ClusterPOIManager m_clusterPOIsManager;
 
 	private Dictionary<int, List<IAssignableIdentity>> minionsByWorld = new Dictionary<int, List<IAssignableIdentity>>();
+
+	private MinionMigrationEventArgs migrationEvArg = new MinionMigrationEventArgs();
 
 	private List<int> _worldIDs = new List<int>();
 }

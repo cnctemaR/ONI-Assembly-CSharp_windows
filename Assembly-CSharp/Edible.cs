@@ -321,7 +321,7 @@ public class Edible : Workable, IGameObjectEffectDescriptor, ISaveLoadable, IExt
 		this.unitsConsumed = float.NaN;
 		this.caloriesConsumed = float.NaN;
 		this.totalUnits = float.NaN;
-		if (this.Units <= 0f)
+		if (this.Units < 0.001f)
 		{
 			base.gameObject.DeleteObject();
 		}

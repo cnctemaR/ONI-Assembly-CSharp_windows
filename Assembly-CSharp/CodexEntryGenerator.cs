@@ -59,7 +59,7 @@ public static class CodexEntryGenerator
 		Dictionary<string, CodexEntry> dictionary = new Dictionary<string, CodexEntry>();
 		foreach (Tag tag in RoomConstraints.ConstraintTags.AllTags)
 		{
-			if (!CodexEntryGenerator.HiddenRoomConstrainTags.Contains(tag))
+			if (!CodexEntryGenerator.HiddenRoomConstrainTags.Contains(tag) && (DlcManager.FeatureClusterSpaceEnabled() || !(tag == RoomConstraints.ConstraintTags.RocketInterior)))
 			{
 				CodexEntry codexEntry = CodexEntryGenerator.GenerateEntryForSpecificBuildingRequirementClass(tag, text2);
 				dictionary.Add(codexEntry.id, codexEntry);

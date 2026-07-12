@@ -26,7 +26,7 @@ public class IdleDiagnostic : ColonyDiagnostic
 		{
 			diagnosticResult.opinion = ColonyDiagnostic.DiagnosticResult.Opinion.Normal;
 			diagnosticResult.Message = UI.COLONY_DIAGNOSTICS.IDLEDIAGNOSTIC.NORMAL;
-			if (this.tracker.GetMinValue(30f) > 0f && this.tracker.GetCurrentValue() > 0f)
+			if (this.tracker.GetMinValue(5f) > 0f && this.tracker.GetCurrentValue() > 0f)
 			{
 				diagnosticResult.opinion = ColonyDiagnostic.DiagnosticResult.Opinion.Concern;
 				diagnosticResult.Message = UI.COLONY_DIAGNOSTICS.IDLEDIAGNOSTIC.IDLE;

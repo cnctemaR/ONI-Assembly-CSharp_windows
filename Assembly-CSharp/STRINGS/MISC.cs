@@ -264,6 +264,8 @@ namespace STRINGS
 
 			public static LocString STORYTRAITRESOURCE = "Story Trait";
 
+			public static LocString GLASS = "Glass";
+
 			public static LocString COMMAND_MODULE = "Command Module";
 
 			public static LocString HABITAT_MODULE = "Habitat Module";
@@ -1469,9 +1471,9 @@ namespace STRINGS
 
 			public class NEEDSLEEP
 			{
-				public static LocString NAME = "No " + UI.FormatAsLink("Cots", "COT") + " built";
+				public static LocString NAME = "No " + UI.FormatAsLink("Cots", "BED") + " built";
 
-				public static LocString TOOLTIP = "My Duplicants would appreciate a place to sleep\n\n" + UI.FormatAsLink("Cots", "COT") + " can be built from the " + UI.FormatAsBuildMenuTab("Furniture Tab", global::Action.Plan9);
+				public static LocString TOOLTIP = "My Duplicants would appreciate a place to sleep\n\n" + UI.FormatAsLink("Cots", "BED") + " can be built from the " + UI.FormatAsBuildMenuTab("Furniture Tab", global::Action.Plan9);
 			}
 
 			public class NEEDENERGYSOURCE

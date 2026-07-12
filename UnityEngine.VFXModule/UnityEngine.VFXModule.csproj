@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{2785D10E-B5AA-43D6-9485-CCF3B079B903}</ProjectGuid>
+    <ProjectGuid>{4DD12848-90ED-48FF-8C4B-204D71E58016}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>UnityEngine.VFXModule</RootNamespace>
     <AssemblyName>UnityEngine.VFXModule</AssemblyName>
@@ -42,11 +42,11 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
-      <Project>{2785D10E-B5AA-43D6-9485-CCF3B079B8D1}</Project>
+      <Project>{4DD12848-90ED-48FF-8C4B-204D71E57FE4}</Project>
       <Name>UnityEngine.CoreModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
-      <Project>{2785D10E-B5AA-43D6-9485-CCF3B079B8E7}</Project>
+      <Project>{4DD12848-90ED-48FF-8C4B-204D71E57FFA}</Project>
       <Name>UnityEngine.SharedInternalsModule</Name>
     </ProjectReference>
   </ItemGroup>

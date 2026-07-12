@@ -778,6 +778,8 @@ namespace STRINGS
 
 				public static LocString DESCRIPTION = "Reboot an ambitious collaborative project spearheaded by Gravitas's bioengineering and robotics departments.\n\nIf correctly rebuilt, it could save Duplicant lives.";
 
+				public static LocString DESCRIPTION_SHORT = "Reboot an ambitious collaborative project spearheaded by Gravitas's bioengineering and robotics departments.";
+
 				public class UI_SIDESCREENS
 				{
 					public static LocString REVEAL_BTN = "Restore Building";
@@ -1325,6 +1327,8 @@ namespace STRINGS
 				public static LocString DESCRIPTION = "Buildings that give Duplicants a sanitary and dignified place to conduct essential \"business\"...and then flush away the evidence.";
 
 				public static LocString FLAVOUR = "";
+
+				public static LocString ROOMSREQUIRING = "    • " + UI.FormatAsLink("Washroom", "PLUMBEDBATHROOM");
 			}
 
 			public class SCIENCEBUILDING
@@ -1334,6 +1338,8 @@ namespace STRINGS
 				public static LocString DESCRIPTION = "Buildings that allow Duplicants to learn about the world around them, and beyond.";
 
 				public static LocString FLAVOUR = "";
+
+				public static LocString ROOMSREQUIRING = "    • " + UI.FormatAsLink("Laboratory", "LABORATORY");
 			}
 
 			public class DECORATION
@@ -1343,6 +1349,20 @@ namespace STRINGS
 				public static LocString DESCRIPTION = "Buildings that give the colony a valuable aesthetic boost, and allow Duplicants to express themselves creatively.";
 
 				public static LocString FLAVOUR = "";
+
+				public static LocString ROOMSREQUIRING = string.Concat(new string[]
+				{
+					"    • ",
+					UI.FormatAsLink("Luxury Barracks", "BEDROOM"),
+					"\n    • ",
+					UI.FormatAsLink("Private Bedroom", "PRIVATE BEDROOM"),
+					"\n    • ",
+					UI.FormatAsLink("Great Hall", "GREATHALL"),
+					"\n    • ",
+					UI.FormatAsLink("Massage Clinic", "MASSAGECLINIC"),
+					"\n    • ",
+					UI.FormatAsLink("Recreation Room", "REC_ROOM")
+				});
 			}
 
 			public class RANCHSTATIONTYPE
@@ -1352,6 +1372,8 @@ namespace STRINGS
 				public static LocString DESCRIPTION = "Buildings dedicated to critter husbandry.";
 
 				public static LocString FLAVOUR = "";
+
+				public static LocString ROOMSREQUIRING = "    • " + UI.FormatAsLink("Stable", "CREATUREPEN");
 			}
 
 			public class BEDTYPE
@@ -1361,6 +1383,34 @@ namespace STRINGS
 				public static LocString DESCRIPTION = "Buildings that allow Duplicants to get much-needed rest. If a Duplicant is not assigned one, they will sleep on the floor.";
 
 				public static LocString FLAVOUR = "";
+
+				public static LocString CONFLICTINGROOMS = string.Concat(new string[]
+				{
+					"    • ",
+					UI.FormatAsLink("Luxury Barracks", "BEDROOM"),
+					" (No ",
+					UI.FormatAsLink("Cots", "BED"),
+					")\n    • ",
+					UI.FormatAsLink("Private Bedroom", "PRIVATE BEDROOM"),
+					" (No ",
+					UI.FormatAsLink("Cots", "BED"),
+					")"
+				});
+
+				public static LocString ROOMSREQUIRING = string.Concat(new string[]
+				{
+					"    • ",
+					UI.FormatAsLink("Barracks", "BARRACKS"),
+					"\n    • ",
+					UI.FormatAsLink("Luxury Barracks", "BEDROOM"),
+					" (one or more ",
+					UI.FormatAsLink("Comfy Beds", "LUXURYBED"),
+					")\n    • ",
+					UI.FormatAsLink("Private Bedroom", "PRIVATE BEDROOM"),
+					" (single ",
+					UI.FormatAsLink("Comfy Bed", "LUXURYBED"),
+					")"
+				});
 			}
 
 			public class LIGHTSOURCE
@@ -1370,15 +1420,19 @@ namespace STRINGS
 				public static LocString DESCRIPTION = "Buildings that produce light, either by design or as a result of their primary operations.";
 
 				public static LocString FLAVOUR = "";
+
+				public static LocString ROOMSREQUIRING = "    • " + UI.FormatAsLink("Laboratory", "LABORATORY");
 			}
 
 			public class ROCKETINTERIOR
 			{
 				public static LocString TITLE = "Rocket Interior";
 
-				public static LocString DESCRIPTION = "Buildings that cannot be built anywhere other than inside a rocket.";
+				public static LocString DESCRIPTION = "Buildings that must be built inside a rocket.";
 
 				public static LocString FLAVOUR = "";
+
+				public static LocString CONFLICTINGROOMS = "    •  Any room that is not inside a rocket.";
 			}
 
 			public class CREATURERELOCATOR
@@ -1397,6 +1451,8 @@ namespace STRINGS
 				public static LocString DESCRIPTION = "Buildings that transform individual ingredients into delicious meals.";
 
 				public static LocString FLAVOUR = "";
+
+				public static LocString ROOMSREQUIRING = "    • " + UI.FormatAsLink("Kitchen", "KITCHEN");
 			}
 		}
 

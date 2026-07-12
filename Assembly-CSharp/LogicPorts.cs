@@ -154,14 +154,21 @@ public class LogicPorts : KMonoBehaviour, IGameObjectEffectDescriptor, IRenderEv
 					(this.outputPorts[j] as LogicEventSender).SetValue(this.serializedOutputValues[j]);
 				}
 			}
+			else
+			{
+				for (int k = 0; k < this.outputPorts.Count; k++)
+				{
+					(this.outputPorts[k] as LogicEventSender).SetValue(0);
+				}
+			}
 		}
 		this.serializedOutputValues = null;
 		if (this.inputPortInfo != null)
 		{
 			this.inputPorts = new List<ILogicUIElement>();
-			for (int k = 0; k < this.inputPortInfo.Length; k++)
+			for (int l = 0; l < this.inputPortInfo.Length; l++)
 			{
-				LogicPorts.Port info = this.inputPortInfo[k];
+				LogicPorts.Port info = this.inputPortInfo[l];
 				LogicEventHandler logicEventHandler = new LogicEventHandler(this.GetActualCell(info.cellOffset), delegate(int new_value, int prev_value)
 				{
 					if (this != null)

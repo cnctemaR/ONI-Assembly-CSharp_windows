@@ -149,17 +149,41 @@ public class MotdDataFetchRequest : IDisposable
 		{
 			return;
 		}
-		if (Directory.Exists(MotdDataFetchRequest.GetCachePath()))
+		try
 		{
-			Directory.Delete(MotdDataFetchRequest.GetCachePath(), true);
-		}
-		Directory.CreateDirectory(MotdDataFetchRequest.GetCachePath());
-		foreach (MotdData_Box motdData_Box in data.boxesLive)
-		{
-			if (motdData_Box.image != null && motdData_Box.resolvedImage != null)
+			if (Directory.Exists(MotdDataFetchRequest.GetCachePath()))
 			{
-				File.WriteAllBytes(MotdDataFetchRequest.GetCachedFilePath(motdData_Box.image), motdData_Box.resolvedImage.EncodeToPNG());
+				Directory.Delete(MotdDataFetchRequest.GetCachePath(), true);
 			}
+			Directory.CreateDirectory(MotdDataFetchRequest.GetCachePath());
+		}
+		catch (Exception ex)
+		{
+			global::Debug.LogWarning(string.Format("MOTD Error: Failed to clear old image cache --- {0}", ex));
+		}
+		try
+		{
+			if (Directory.Exists(MotdDataFetchRequest.GetCachePath()))
+			{
+				using (List<MotdData_Box>.Enumerator enumerator = data.boxesLive.GetEnumerator())
+				{
+					while (enumerator.MoveNext())
+					{
+						MotdData_Box motdData_Box = enumerator.Current;
+						if (motdData_Box.image != null && motdData_Box.resolvedImage != null)
+						{
+							File.WriteAllBytes(MotdDataFetchRequest.GetCachedFilePath(motdData_Box.image), motdData_Box.resolvedImage.EncodeToPNG());
+						}
+					}
+					goto IL_00B3;
+				}
+			}
+			global::Debug.LogWarning("MOTD Error: Failed to write cached motd images, couldn't find a valid cache directory");
+			IL_00B3:;
+		}
+		catch (Exception ex2)
+		{
+			global::Debug.LogWarning(string.Format("MOTD Error: Failed to write cached motd images --- {0}", ex2));
 		}
 	}
 

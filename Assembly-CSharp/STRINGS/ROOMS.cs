@@ -369,7 +369,7 @@ namespace STRINGS
 
 			public class NO_COTS
 			{
-				public static LocString NAME = "No " + UI.FormatAsLink("Cots", "COT");
+				public static LocString NAME = "No " + UI.FormatAsLink("Cots", "BED");
 
 				public static LocString DESCRIPTION = "Room cannot contain a Cot";
 			}

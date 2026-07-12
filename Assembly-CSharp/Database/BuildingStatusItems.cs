@@ -1278,7 +1278,7 @@ namespace Database
 				str = str.Replace("{Item}", (data as GameObject).GetProperName());
 				return str;
 			};
-			this.ArtifactAnalysisAnalyzing = this.CreateStatusItem("COMPLEXFABRICATOR.ANALYZYING", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
+			this.ArtifactAnalysisAnalyzing = this.CreateStatusItem("COMPLEXFABRICATOR.ANALYZING", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
 			this.ArtifactAnalysisAnalyzing.resolveStringCallback = delegate(string str, object data)
 			{
 				if (data as GameObject != null)

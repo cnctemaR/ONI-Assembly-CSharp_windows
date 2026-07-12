@@ -420,6 +420,20 @@ public class Storage : Workable, ISaveLoadableDetails, IGameObjectEffectDescript
 		}
 	}
 
+	public bool TransferMass(Storage dest_storage, Tag tag, float amount, bool flatten = false, bool block_events = false, bool hide_popups = false)
+	{
+		float num = amount;
+		while (num > 0f && this.GetAmountAvailable(tag) > 0f)
+		{
+			num -= this.Transfer(dest_storage, tag, num, block_events, hide_popups);
+		}
+		if (flatten)
+		{
+			dest_storage.Flatten(tag);
+		}
+		return num <= 0f;
+	}
+
 	public float Transfer(Storage dest_storage, Tag tag, float amount, bool block_events = false, bool hide_popups = false)
 	{
 		GameObject gameObject = this.FindFirst(tag);
@@ -811,6 +825,22 @@ public class Storage : Workable, ISaveLoadableDetails, IGameObjectEffectDescript
 			}
 		}
 		return primaryElement;
+	}
+
+	private void Flatten(Tag tag_to_combine)
+	{
+		GameObject gameObject = this.FindFirst(tag_to_combine);
+		PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
+		for (int i = this.items.Count - 1; i >= 0; i--)
+		{
+			GameObject gameObject2 = this.items[i];
+			if (gameObject2.HasTag(tag_to_combine) && gameObject2 != gameObject)
+			{
+				PrimaryElement component2 = gameObject2.GetComponent<PrimaryElement>();
+				component.Mass += component2.Mass;
+				this.ConsumeIgnoringDisease(gameObject2);
+			}
+		}
 	}
 
 	public HashSet<Tag> GetAllIDsInStorage()

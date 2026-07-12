@@ -54,9 +54,18 @@ public class Movable : Workable
 					this.cancelHandle = base.Subscribe(2127324410, new Action<object>(this.CleanupMove));
 				}
 				base.gameObject.AddTag(GameTags.MarkedForMove);
-				return;
 			}
-			this.isMarkedForMove = false;
+			else
+			{
+				this.isMarkedForMove = false;
+			}
+		}
+		if (this.IsCritter())
+		{
+			this.skillsUpdateHandle = Game.Instance.Subscribe(-1523247426, new Action<object>(this.UpdateStatusItem));
+			this.shouldShowSkillPerkStatusItem = this.isMarkedForMove;
+			this.requiredSkillPerk = Db.Get().SkillPerks.CanWrangleCreatures.Id;
+			this.UpdateStatusItem();
 		}
 	}
 
@@ -141,6 +150,7 @@ public class Movable : Workable
 				this.cancelHandle = -1;
 			}
 		}
+		this.UpdateStatusItem();
 	}
 
 	private void ClearStorageProxy()
@@ -193,6 +203,21 @@ public class Movable : Workable
 		this.StorageProxy.GetComponent<CancellableMove>().SetMovable(this);
 		base.gameObject.AddTag(GameTags.MarkedForMove);
 		this.cancelHandle = base.Subscribe(2127324410, new Action<object>(this.CleanupMove));
+		this.UpdateStatusItem();
+	}
+
+	private void UpdateStatusItem()
+	{
+		if (this.IsCritter())
+		{
+			this.shouldShowSkillPerkStatusItem = this.isMarkedForMove;
+			base.UpdateStatusItem(null);
+		}
+	}
+
+	private bool IsCritter()
+	{
+		return base.GetComponent<Capturable>() != null;
 	}
 
 	public bool CanMoveTo(int cell)

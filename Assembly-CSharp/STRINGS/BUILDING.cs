@@ -3731,7 +3731,7 @@ namespace STRINGS
 					public static LocString TOOLTIP = "This building is currently conducting important research";
 				}
 
-				public class ANALYZYINGn
+				public class ANALYZING
 				{
 					public static LocString NAME = "Analyzing {Item}";
 

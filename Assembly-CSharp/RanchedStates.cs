@@ -53,7 +53,8 @@ public class RanchedStates : GameStateMachine<RanchedStates, RanchedStates.Insta
 		{
 			smi.GetComponent<Facing>().Face(smi.GetRanchStation().transform.GetPosition());
 		}).PlayAnim("excited_loop")
-			.OnAnimQueueComplete(this.ranch.Cheer.Pst);
+			.OnAnimQueueComplete(this.ranch.Cheer.Pst)
+			.ScheduleGoTo((RanchedStates.Instance smi) => smi.cheerAnimLength, this.ranch.Move);
 		this.ranch.Cheer.Pst.ScheduleGoTo(0.2f, this.ranch.Move);
 		this.ranch.Move.DefaultState(this.ranch.Move.MoveToRanch).Enter("Speedup", delegate(RanchedStates.Instance smi)
 		{
@@ -175,6 +176,8 @@ public class RanchedStates : GameStateMachine<RanchedStates, RanchedStates.Insta
 			this.animController = base.GetComponent<KBatchedAnimController>();
 			this.OriginalSpeed = this.Monitor.NavComponent.defaultSpeed;
 			chore.AddPrecondition(ChorePreconditions.instance.CheckBehaviourPrecondition, GameTags.Creatures.WantsToGetRanched);
+			KAnim.Anim anim = base.smi.Get<KBatchedAnimController>().AnimFiles[0].GetData().GetAnim("excited_loop");
+			this.cheerAnimLength = ((anim != null) ? (anim.totalTime + 0.2f) : 1.2f);
 		}
 
 		public RanchStation.Instance GetRanchStation()
@@ -276,6 +279,8 @@ public class RanchedStates : GameStateMachine<RanchedStates, RanchedStates.Insta
 		private KBatchedAnimController animController;
 
 		private RanchableMonitor.Instance ranchMonitor;
+
+		public float cheerAnimLength;
 	}
 
 	public class RanchStates : GameStateMachine<RanchedStates, RanchedStates.Instance, IStateMachineTarget, RanchedStates.Def>.State

@@ -79,11 +79,6 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 			global::Debug.Log(string.Format("Pickupable {0} is not valid for chore because it has the forbidden tags: {1}", pickupable, string.Join<Tag>(",", chore.forbiddenTags)));
 			return false;
 		}
-		if (component.HasTag(GameTags.MarkedForMove))
-		{
-			global::Debug.Log(string.Format("Pickupable {0} is marked for move.", pickupable));
-			return false;
-		}
 		return pickupable.isChoreAllowedToPickup(chore.choreType);
 	}
 
@@ -258,6 +253,10 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 			this.deliverables.RemoveAll(delegate(Pickupable x)
 			{
 				if (x == null || x.TotalAmount <= 0f)
+				{
+					return true;
+				}
+				if (x.HasTag(GameTags.MarkedForMove))
 				{
 					return true;
 				}

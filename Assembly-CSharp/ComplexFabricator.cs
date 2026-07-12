@@ -1020,7 +1020,7 @@ public class ComplexFabricator : KMonoBehaviour, ISim200ms, ISim1000ms
 			}
 			if (recipeElement3.Edible)
 			{
-				this.buildStorage.Transfer(this.outStorage, recipeElement3.material, recipeElement3.amount, true, true);
+				this.buildStorage.TransferMass(this.outStorage, recipeElement3.material, recipeElement3.amount, true, true, true);
 			}
 			else
 			{
@@ -1116,7 +1116,7 @@ public class ComplexFabricator : KMonoBehaviour, ISim200ms, ISim1000ms
 					if (component6 != null)
 					{
 						Storage component7 = component6.GetComponent<Storage>();
-						this.outStorage.Transfer(component7, recipeElement2.material, num9, false, false);
+						this.outStorage.TransferMass(component7, recipeElement2.material, num9, true, false, false);
 						component7.items[0].AddTag(GameTags.Dehydrated);
 					}
 					gameObject3.SetActive(true);

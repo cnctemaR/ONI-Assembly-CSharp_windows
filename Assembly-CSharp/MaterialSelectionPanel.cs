@@ -14,6 +14,10 @@ public class MaterialSelectionPanel : KScreen, IRender200ms
 	{
 		get
 		{
+			if (this.materialSelectors.Count == 0)
+			{
+				return null;
+			}
 			return this.materialSelectors[0].CurrentSelectedElement;
 		}
 	}

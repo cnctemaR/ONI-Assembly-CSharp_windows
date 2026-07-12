@@ -224,7 +224,6 @@ public class HarvestDesignatable : KMonoBehaviour
 		if (component != null)
 		{
 			component.Trigger(2127324410, null);
-			return;
 		}
 		this.SetHarvestWhenReady(false);
 	}

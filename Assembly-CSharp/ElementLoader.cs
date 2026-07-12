@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Klei;
 using ProcGenGame;
@@ -18,19 +19,22 @@ public class ElementLoader
 		YamlIO.ErrorHandler <>9__0;
 		foreach (FileHandle fileHandle in pooledList)
 		{
-			string full_path = fileHandle.full_path;
-			YamlIO.ErrorHandler errorHandler;
-			if ((errorHandler = <>9__0) == null)
+			if (!Path.GetFileName(fileHandle.full_path).StartsWith("."))
 			{
-				errorHandler = (<>9__0 = delegate(YamlIO.Error error, bool force_log_as_warning)
+				string full_path = fileHandle.full_path;
+				YamlIO.ErrorHandler errorHandler;
+				if ((errorHandler = <>9__0) == null)
 				{
-					errors.Add(error);
-				});
-			}
-			ElementLoader.ElementEntryCollection elementEntryCollection = YamlIO.LoadFile<ElementLoader.ElementEntryCollection>(full_path, errorHandler, null);
-			if (elementEntryCollection != null)
-			{
-				list.AddRange(elementEntryCollection.elements);
+					errorHandler = (<>9__0 = delegate(YamlIO.Error error, bool force_log_as_warning)
+					{
+						errors.Add(error);
+					});
+				}
+				ElementLoader.ElementEntryCollection elementEntryCollection = YamlIO.LoadFile<ElementLoader.ElementEntryCollection>(full_path, errorHandler, null);
+				if (elementEntryCollection != null)
+				{
+					list.AddRange(elementEntryCollection.elements);
+				}
 			}
 		}
 		pooledList.Recycle();

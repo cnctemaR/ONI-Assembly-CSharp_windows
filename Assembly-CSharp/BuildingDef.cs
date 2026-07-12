@@ -1206,6 +1206,11 @@ public class BuildingDef : Def
 
 	private bool IsValidWireBridgeLocation(GameObject source_go, int cell, Orientation orientation, out string fail_reason)
 	{
+		if (source_go == null)
+		{
+			fail_reason = null;
+			return true;
+		}
 		UtilityNetworkLink component = source_go.GetComponent<UtilityNetworkLink>();
 		if (component != null)
 		{
@@ -1224,6 +1229,11 @@ public class BuildingDef : Def
 
 	private bool IsValidHighWattBridgeLocation(GameObject source_go, int cell, Orientation orientation, out string fail_reason)
 	{
+		if (source_go == null)
+		{
+			fail_reason = null;
+			return true;
+		}
 		UtilityNetworkLink component = source_go.GetComponent<UtilityNetworkLink>();
 		if (component != null)
 		{

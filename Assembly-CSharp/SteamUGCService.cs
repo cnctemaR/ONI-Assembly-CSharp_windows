@@ -336,15 +336,10 @@ public class SteamUGCService : MonoBehaviour
 
 	private void OnDownloadItemComplete(DownloadItemResult_t callback)
 	{
-		if (callback.m_unAppID == new AppId_t(457140U) || callback.m_unAppID == new AppId_t(1452490U))
+		if ((callback.m_unAppID == new AppId_t(457140U) || callback.m_unAppID == new AppId_t(1452490U)) && callback.m_eResult == EResult.k_EResultOK)
 		{
-			string text = string.Format("Mod Steam PublishedFileId_t {0} DownloadItemResult_t result {1}", callback.m_nPublishedFileId, callback.m_eResult);
-			KCrashReporter.ReportDevNotification("SteamUGCService Mod DownloadItemResult_t Callback - remove me!", Environment.StackTrace, text, false);
-			if (callback.m_eResult == EResult.k_EResultOK)
-			{
-				this.queries.Add(callback.m_nPublishedFileId);
-				this.awaiting_download.Remove(callback.m_nPublishedFileId);
-			}
+			this.queries.Add(callback.m_nPublishedFileId);
+			this.awaiting_download.Remove(callback.m_nPublishedFileId);
 		}
 	}
 

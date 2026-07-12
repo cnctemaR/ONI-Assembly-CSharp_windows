@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{7FC8B6E5-0E2C-426A-ADAB-1E95A8B3EB1C}</ProjectGuid>
+    <ProjectGuid>{F6C37EB5-8222-4B13-B460-7B7BA4A83644}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>UnityEngine</RootNamespace>
     <AssemblyName>UnityEngine.InputLegacyModule</AssemblyName>
@@ -32,11 +32,11 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
-      <Project>{7FC8B6E5-0E2C-426A-ADAB-1E95A8B3EB11}</Project>
+      <Project>{F6C37EB5-8222-4B13-B460-7B7BA4A83639}</Project>
       <Name>UnityEngine.CoreModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
-      <Project>{7FC8B6E5-0E2C-426A-ADAB-1E95A8B3EB27}</Project>
+      <Project>{F6C37EB5-8222-4B13-B460-7B7BA4A8364F}</Project>
       <Name>UnityEngine.SharedInternalsModule</Name>
     </ProjectReference>
   </ItemGroup>

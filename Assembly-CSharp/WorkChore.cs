@@ -81,7 +81,7 @@ public class WorkChore<WorkableType> : Chore<WorkChore<WorkableType>.StatesInsta
 		WorkableType workableType = base.target as WorkableType;
 		if (workableType != null)
 		{
-			return base.provider != null && Grid.WorldIdx[workableType.GetCell()] != byte.MaxValue;
+			return base.provider != null && Grid.IsWorldValidCell(workableType.GetCell());
 		}
 		return base.IsValid();
 	}

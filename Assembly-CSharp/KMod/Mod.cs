@@ -260,21 +260,24 @@ namespace KMod
 					list2.Add(archivedVersion);
 					foreach (FileSystemItem fileSystemItem in list)
 					{
-						string text = Path.Combine("archived_versions", fileSystemItem.name);
-						Mod.PackagedModInfo modInfoForFolder = this.GetModInfoForFolder(text);
-						if (modInfoForFolder != null)
+						if (fileSystemItem.type != FileSystemItem.ItemType.File)
 						{
-							list2.Add(new Mod.ArchivedVersion
+							string text = Path.Combine("archived_versions", fileSystemItem.name);
+							Mod.PackagedModInfo modInfoForFolder = this.GetModInfoForFolder(text);
+							if (modInfoForFolder != null)
 							{
-								relativePath = text,
-								info = modInfoForFolder
-							});
+								list2.Add(new Mod.ArchivedVersion
+								{
+									relativePath = text,
+									info = modInfoForFolder
+								});
+							}
 						}
 					}
 					list2 = list2.Where<Mod.ArchivedVersion>((Mod.ArchivedVersion v) => this.DoesModSupportCurrentContent(v.info)).ToList<Mod.ArchivedVersion>();
 					list2 = list2.Where<Mod.ArchivedVersion>((Mod.ArchivedVersion v) => v.info.APIVersion == 2 || v.info.APIVersion == 0).ToList<Mod.ArchivedVersion>();
 					Mod.ArchivedVersion archivedVersion2 = (from v in list2
-						where (long)v.info.minimumSupportedBuild <= 596100L
+						where (long)v.info.minimumSupportedBuild <= 596666L
 						orderby v.info.minimumSupportedBuild descending
 						select v).FirstOrDefault<Mod.ArchivedVersion>();
 					if (archivedVersion2 == null)

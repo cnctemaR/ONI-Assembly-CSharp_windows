@@ -9332,7 +9332,7 @@ namespace STRINGS
 
 			public static LocString LOADFAILED = "Load Failed: {0}\nSave Version: {1}\nExpected: {2}";
 
-			public static LocString REPORTEDERROR_SUCCESS = "Reported Error";
+			public static LocString REPORTEDERROR_SUCCESS = "Thank you for reporting this error.";
 
 			public static LocString REPORTEDERROR_FAILURE_TOO_LARGE = "Unable to report error. Save file is too large. Please contact us using the bug tracker.";
 

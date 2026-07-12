@@ -103,6 +103,7 @@ public class ConduitDispenser : KMonoBehaviour, ISaveLoadable, IConduitDispenser
 			PrimaryElement primaryElement = this.FindSuitableElement();
 			if (primaryElement != null)
 			{
+				primaryElement.KeepZeroMassObject = true;
 				this.empty = false;
 				float num = this.GetConduitManager().AddElement(this.utilityCell, primaryElement.ElementID, primaryElement.Mass, primaryElement.Temperature, primaryElement.DiseaseIdx, primaryElement.DiseaseCount);
 				if (num > 0f)

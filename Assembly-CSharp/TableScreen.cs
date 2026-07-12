@@ -198,17 +198,22 @@ public class TableScreen : ShowOptimizedKScreen
 		foreach (KeyValuePair<int, GameObject> keyValuePair2 in this.worldDividers)
 		{
 			Component reference = keyValuePair2.Value.GetComponent<HierarchyReferences>().GetReference("NobodyRow");
-			reference.gameObject.SetActive(true);
+			bool flag = true;
 			foreach (object obj in Components.MinionAssignablesProxy)
 			{
 				MinionAssignablesProxy minionAssignablesProxy = (MinionAssignablesProxy)obj;
 				if (minionAssignablesProxy != null && minionAssignablesProxy.GetTargetGameObject() != null && minionAssignablesProxy.GetTargetGameObject().GetMyWorld().id == keyValuePair2.Key)
 				{
-					reference.gameObject.SetActive(false);
+					flag = false;
 					break;
 				}
 			}
-			keyValuePair2.Value.SetActive(ClusterManager.Instance.GetWorld(keyValuePair2.Key).IsDiscovered && DlcManager.FeatureClusterSpaceEnabled());
+			reference.gameObject.SetActive(flag);
+			bool flag2 = ClusterManager.Instance.GetWorld(keyValuePair2.Key).IsDiscovered && DlcManager.FeatureClusterSpaceEnabled();
+			if (keyValuePair2.Value.activeSelf != flag2)
+			{
+				keyValuePair2.Value.SetActive(flag2);
+			}
 		}
 		using (Dictionary<IAssignableIdentity, bool>.Enumerator enumerator7 = this.obsoleteMinionRowStatus.GetEnumerator())
 		{
@@ -623,7 +628,7 @@ public class TableScreen : ShowOptimizedKScreen
 			if (widgetRow.isDefault)
 			{
 				locText2.text = UI.JOBSCREEN_DEFAULT;
-				if (locText != null)
+				if (locText != null && locText.gameObject.activeSelf)
 				{
 					locText.gameObject.SetActive(false);
 				}

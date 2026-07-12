@@ -29,7 +29,7 @@ public class NameDisplayScreen : KScreen
 			new global::System.Action(this.LateUpdatePart1),
 			new global::System.Action(this.LateUpdatePart2)
 		};
-		this.bindOnOverlayChange();
+		this.BindOnOverlayChange();
 	}
 
 	protected override void OnCleanUp()
@@ -43,7 +43,7 @@ public class NameDisplayScreen : KScreen
 		}
 	}
 
-	private void bindOnOverlayChange()
+	private void BindOnOverlayChange()
 	{
 		if (this.isOverlayChangeBound)
 		{
@@ -61,20 +61,7 @@ public class NameDisplayScreen : KScreen
 	{
 		HashedString hashedString = this.lastKnownOverlayID;
 		this.lastKnownOverlayID = new_mode;
-		if (hashedString != OverlayModes.None.ID && new_mode != OverlayModes.None.ID)
-		{
-			return;
-		}
-		bool flag = new_mode == OverlayModes.None.ID;
-		int count = this.entries.Count;
-		for (int i = 0; i < count; i++)
-		{
-			NameDisplayScreen.Entry entry = this.entries[i];
-			if (!(entry.world_go == null))
-			{
-				entry.display_go.SetActive(flag);
-			}
-		}
+		this.nameDisplayCanvas.enabled = this.lastKnownOverlayID == OverlayModes.None.ID;
 	}
 
 	private void OnHealthAdded(Health health)
@@ -100,11 +87,11 @@ public class NameDisplayScreen : KScreen
 		return component != null && component.shouldShowName;
 	}
 
-	public Guid AddWorldText(string initialText, GameObject prefab)
+	public Guid AddAreaText(string initialText, GameObject prefab)
 	{
 		NameDisplayScreen.TextEntry textEntry = new NameDisplayScreen.TextEntry();
 		textEntry.guid = Guid.NewGuid();
-		textEntry.display_go = Util.KInstantiateUI(prefab, base.gameObject, true);
+		textEntry.display_go = Util.KInstantiateUI(prefab, this.areaTextDisplayCanvas.gameObject, true);
 		textEntry.display_go.GetComponentInChildren<LocText>().text = initialText;
 		this.textEntries.Add(textEntry);
 		return textEntry.guid;
@@ -147,7 +134,7 @@ public class NameDisplayScreen : KScreen
 		NameDisplayScreen.Entry entry = new NameDisplayScreen.Entry();
 		entry.world_go = representedObject;
 		entry.world_go_anim_controller = representedObject.GetComponent<KAnimControllerBase>();
-		GameObject gameObject = Util.KInstantiateUI(this.ShouldShowName(representedObject) ? this.nameAndBarsPrefab : this.barsPrefab, base.gameObject, true);
+		GameObject gameObject = Util.KInstantiateUI(this.ShouldShowName(representedObject) ? this.nameAndBarsPrefab : this.barsPrefab, this.nameDisplayCanvas.gameObject, true);
 		entry.display_go = gameObject;
 		entry.display_go_rect = gameObject.GetComponent<RectTransform>();
 		if (this.worldSpace)
@@ -315,7 +302,7 @@ public class NameDisplayScreen : KScreen
 		{
 			return;
 		}
-		this.bindOnOverlayChange();
+		this.BindOnOverlayChange();
 		Camera mainCamera = Game.MainCamera;
 		if (mainCamera == null)
 		{
@@ -335,6 +322,15 @@ public class NameDisplayScreen : KScreen
 	{
 		CameraController instance = CameraController.Instance;
 		Transform followTarget = instance.followTarget;
+		bool flag = visibleToZoom && this.lastKnownOverlayID == OverlayModes.None.ID;
+		if (this.nameDisplayCanvas.enabled != flag)
+		{
+			this.nameDisplayCanvas.enabled = flag;
+		}
+		if (!flag)
+		{
+			return;
+		}
 		int count = this.entries.Count;
 		for (int i = 0; i < count; i++)
 		{
@@ -343,23 +339,15 @@ public class NameDisplayScreen : KScreen
 			if (!(world_go == null))
 			{
 				Vector3 vector = world_go.transform.GetPosition();
-				if (visibleToZoom && CameraController.Instance.IsVisiblePos(vector))
+				if (instance != null && followTarget == world_go.transform)
 				{
-					if (instance != null && followTarget == world_go.transform)
-					{
-						vector = instance.followTargetPos;
-					}
-					else if (entry.world_go_anim_controller != null)
-					{
-						vector = entry.world_go_anim_controller.GetWorldPivot();
-					}
-					entry.display_go_rect.anchoredPosition = (this.worldSpace ? vector : base.WorldToScreen(vector));
-					entry.display_go.SetActive(true);
+					vector = instance.followTargetPos;
 				}
-				else if (entry.display_go.activeSelf)
+				else if (entry.world_go_anim_controller != null)
 				{
-					entry.display_go.SetActive(false);
+					vector = entry.world_go_anim_controller.GetWorldPivot();
 				}
+				entry.display_go_rect.anchoredPosition = (this.worldSpace ? vector : base.WorldToScreen(vector));
 			}
 		}
 	}
@@ -578,6 +566,12 @@ public class NameDisplayScreen : KScreen
 	private float HideDistance;
 
 	public static NameDisplayScreen Instance;
+
+	[SerializeField]
+	private Canvas nameDisplayCanvas;
+
+	[SerializeField]
+	private Canvas areaTextDisplayCanvas;
 
 	public GameObject nameAndBarsPrefab;
 

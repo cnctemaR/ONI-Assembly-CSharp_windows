@@ -89,7 +89,9 @@ public class ClustercraftExteriorDoor : KMonoBehaviour
 
 	private void OnLaunch(object data)
 	{
-		base.GetComponent<NavTeleporter>().EnableTwoWayTarget(false);
+		NavTeleporter component = base.GetComponent<NavTeleporter>();
+		component.EnableTwoWayTarget(false);
+		component.Deregister();
 		WorldContainer targetWorld = this.GetTargetWorld();
 		if (targetWorld != null)
 		{

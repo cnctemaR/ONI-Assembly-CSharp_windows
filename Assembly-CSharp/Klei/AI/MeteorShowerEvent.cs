@@ -29,6 +29,7 @@ namespace Klei.AI
 		public MeteorShowerEvent(string id, float duration, float secondsPerMeteor, MathUtil.MinMax secondsBombardmentOff = default(MathUtil.MinMax), MathUtil.MinMax secondsBombardmentOn = default(MathUtil.MinMax), string clusterMapMeteorShowerID = null, bool affectedByDifficulty = true)
 			: base(id, 0, 0)
 		{
+			this.allowMultipleEventInstances = true;
 			this.clusterMapMeteorShowerID = clusterMapMeteorShowerID;
 			this.duration = duration;
 			this.secondsPerMeteor = secondsPerMeteor;
@@ -56,11 +57,7 @@ namespace Klei.AI
 
 		public override bool IsAllowed()
 		{
-			if (this.affectedByDifficulty)
-			{
-				return CustomGameSettings.Instance.GetCurrentQualitySetting(CustomGameSettingConfigs.MeteorShowers).id != "ClearSkies";
-			}
-			return base.IsAllowed();
+			return base.IsAllowed() && (!this.affectedByDifficulty || CustomGameSettings.Instance.GetCurrentQualitySetting(CustomGameSettingConfigs.MeteorShowers).id != "ClearSkies");
 		}
 
 		private List<MeteorShowerEvent.BombardmentInfo> bombardmentInfo;
@@ -168,7 +165,7 @@ namespace Klei.AI
 					smi.sm.clusterMapMeteorShower.Set(gameObject, smi, false);
 				}
 				GameObject gameObject2 = smi.sm.clusterMapMeteorShower.Get(smi);
-				gameObject2.GetDef<ClusterMapMeteorShower.Def>().eventID = smi.gameplayEvent.Id;
+				gameObject2.GetDef<ClusterMapMeteorShower.Def>();
 				gameObject2.Subscribe(1796608350, new Action<object>(smi.OnClusterMapDestinationReached));
 			}
 
@@ -207,6 +204,11 @@ namespace Klei.AI
 
 		public class StatesInstance : GameplayEventStateMachine<MeteorShowerEvent.States, MeteorShowerEvent.StatesInstance, GameplayEventManager, MeteorShowerEvent>.GameplayEventStateMachineInstance
 		{
+			public float GetSleepTimerValue()
+			{
+				return Mathf.Clamp(GameplayEventManager.Instance.GetSleepTimer(this.gameplayEvent) - GameUtil.GetCurrentTimeInCycles(), 0f, float.MaxValue);
+			}
+
 			public StatesInstance(GameplayEventManager master, GameplayEventInstance eventInstance, MeteorShowerEvent meteorShowerEvent)
 				: base(master, eventInstance, meteorShowerEvent)
 			{
@@ -307,7 +309,10 @@ namespace Klei.AI
 				this.nextMeteorTime -= dt;
 				while (this.nextMeteorTime < 0f)
 				{
-					this.DoBombardment(this.gameplayEvent.bombardmentInfo);
+					if (this.GetSleepTimerValue() <= 0f)
+					{
+						this.DoBombardment(this.gameplayEvent.bombardmentInfo);
+					}
 					this.nextMeteorTime += this.GetNextMeteorTime();
 				}
 			}
@@ -334,7 +339,7 @@ namespace Klei.AI
 			private GameObject SpawnBombard(string prefab)
 			{
 				WorldContainer worldContainer = ClusterManager.Instance.GetWorld(this.m_worldId);
-				float num = (float)worldContainer.Width * global::UnityEngine.Random.value + (float)worldContainer.WorldOffset.x;
+				float num = (float)(worldContainer.Width - 1) * global::UnityEngine.Random.value + (float)worldContainer.WorldOffset.x;
 				float num2 = (float)(worldContainer.Height + worldContainer.WorldOffset.y - 1);
 				float layerZ = Grid.GetLayerZ(Grid.SceneLayer.FXFront);
 				Vector3 vector = new Vector3(num, num2, layerZ);

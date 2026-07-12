@@ -46,7 +46,10 @@ public class UIMinion : KMonoBehaviour, UIMinionOrMannequin.ITarget
 
 	public void SetOutfit(ClothingOutfitUtility.OutfitType outfitType, IEnumerable<ClothingItemResource> outfit)
 	{
-		this.SpawnedAvatar.GetComponent<WearableAccessorizer>().ApplyClothingItems(outfit);
+		outfit = UIMinionOrMannequinITargetExtensions.GetOutfitWithDefaultItems(outfitType, outfit);
+		WearableAccessorizer component = this.SpawnedAvatar.GetComponent<WearableAccessorizer>();
+		component.ClearAllOutfitItems(null);
+		component.ApplyClothingItems(outfitType, outfit);
 	}
 
 	public MinionVoice GetMinionVoice()

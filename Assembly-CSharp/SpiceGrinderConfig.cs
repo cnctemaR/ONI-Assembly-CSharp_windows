@@ -53,6 +53,7 @@ public class SpiceGrinderConfig : IBuildingConfig
 		storage.showCapacityStatusItem = false;
 		storage.allowSettingOnlyFetchMarkedItems = false;
 		storage.showSideScreenTitleBar = true;
+		storage.SetDefaultStoredItemModifiers(Storage.StandardFabricatorStorage);
 		Storage storage2 = go.AddComponent<Storage>();
 		storage2.showInUI = true;
 		storage2.showDescriptor = true;
@@ -61,10 +62,7 @@ public class SpiceGrinderConfig : IBuildingConfig
 		storage2.storageFullMargin = STORAGE.STORAGE_LOCKER_FILLED_MARGIN;
 		storage2.fetchCategory = Storage.FetchCategory.Building;
 		storage2.showCapacityStatusItem = true;
-		storage2.SetDefaultStoredItemModifiers(Storage.StandardSealedStorage);
-		ManualDeliveryKG manualDeliveryKG = go.AddComponent<ManualDeliveryKG>();
-		manualDeliveryKG.SetStorage(storage2);
-		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.CookFetch.IdHash;
+		storage2.SetDefaultStoredItemModifiers(Storage.StandardFabricatorStorage);
 		RoomTracker roomTracker = go.AddOrGet<RoomTracker>();
 		roomTracker.requiredRoomType = Db.Get().RoomTypes.Kitchen.Id;
 		roomTracker.requirement = RoomTracker.Requirement.Required;

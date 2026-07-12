@@ -116,7 +116,7 @@ public class EntityTemplates
 		float num = 0.5f * (float)((width + 1) % 2);
 		kboxCollider2D.offset = new Vector2f(num, (float)height / 2f);
 		template.GetComponent<KBatchedAnimController>().Offset = new Vector3(num, 0f, 0f);
-		template.AddOrGet<OccupyArea>().OccupiedCellsOffsets = EntityTemplates.GenerateOffsets(width, height);
+		template.AddOrGet<OccupyArea>().SetCellOffsets(EntityTemplates.GenerateOffsets(width, height));
 		DecorProvider decorProvider = template.AddOrGet<DecorProvider>();
 		decorProvider.SetValues(decor);
 		decorProvider.overrideName = name;
@@ -128,6 +128,19 @@ public class EntityTemplates
 		GameObject gameObject = global::UnityEngine.Object.Instantiate<GameObject>(EntityTemplates.placedEntityTemplate);
 		global::UnityEngine.Object.DontDestroyOnLoad(gameObject);
 		EntityTemplates.ConfigPlacedEntity(gameObject, id, name, desc, mass, anim, initialAnim, sceneLayer, width, height, decor, noise, element, additionalTags, defaultTemperature);
+		return gameObject;
+	}
+
+	public static GameObject CreatePlacedEntity(string id, string name, string desc, float mass, KAnimFile anim, string initialAnim, Grid.SceneLayer sceneLayer, int width, int height, EffectorValues decor, PermittedRotations permittedRotation, Orientation orientation = Orientation.Neutral, EffectorValues noise = default(EffectorValues), SimHashes element = SimHashes.Creature, List<Tag> additionalTags = null, float defaultTemperature = 293f)
+	{
+		GameObject gameObject = EntityTemplates.CreatePlacedEntity(id, name, desc, mass, anim, initialAnim, sceneLayer, width, height, decor, noise, element, additionalTags, defaultTemperature);
+		if (permittedRotation != PermittedRotations.Unrotatable)
+		{
+			Rotatable rotatable = gameObject.AddOrGet<Rotatable>();
+			rotatable.SetSize(width, height);
+			rotatable.permittedRotations = permittedRotation;
+			rotatable.SetOrientation(orientation);
+		}
 		return gameObject;
 	}
 
@@ -143,7 +156,7 @@ public class EntityTemplates
 		OccupyArea component2 = template.GetComponent<OccupyArea>();
 		if (component2)
 		{
-			component2.OccupiedCellsOffsets = EntityTemplates.GenerateHangingOffsets(width, height);
+			component2.SetCellOffsets(EntityTemplates.GenerateHangingOffsets(width, height));
 		}
 		return template;
 	}
@@ -424,6 +437,7 @@ public class EntityTemplates
 			Pickupable pickupable = gameObject.AddOrGet<Pickupable>();
 			pickupable.SetWorkTime(5f);
 			pickupable.sortOrder = sortOrder;
+			gameObject.AddOrGet<Movable>();
 		}
 		return gameObject;
 	}
@@ -444,7 +458,8 @@ public class EntityTemplates
 		EntityTemplates.baseOreTemplate.AddComponent<KBatchedAnimController>();
 		EntityTemplates.baseOreTemplate.AddComponent<SimTemperatureTransfer>();
 		EntityTemplates.baseOreTemplate.AddComponent<Modifiers>();
-		EntityTemplates.baseOreTemplate.AddOrGet<OccupyArea>().OccupiedCellsOffsets = new CellOffset[1];
+		EntityTemplates.baseOreTemplate.AddComponent<Movable>();
+		EntityTemplates.baseOreTemplate.AddOrGet<OccupyArea>().SetCellOffsets(new CellOffset[1]);
 		DecorProvider decorProvider = EntityTemplates.baseOreTemplate.AddOrGet<DecorProvider>();
 		decorProvider.baseDecor = -10f;
 		decorProvider.baseRadius = 1f;

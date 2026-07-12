@@ -508,6 +508,14 @@ public class Grid
 		return new CellOffset(num3 - num, num4 - num2);
 	}
 
+	public static CellOffset GetCellOffsetDirection(int base_cell, int offset_cell)
+	{
+		CellOffset offset = Grid.GetOffset(base_cell, offset_cell);
+		offset.x = Mathf.Clamp(offset.x, -1, 1);
+		offset.y = Mathf.Clamp(offset.y, -1, 1);
+		return offset;
+	}
+
 	public static int OffsetCell(int cell, CellOffset offset)
 	{
 		return cell + offset.x + offset.y * Grid.WidthInCells;
@@ -855,7 +863,7 @@ public class Grid
 
 	public static bool VisibilityTest(int x, int y, int x2, int y2, bool blocking_tile_visible = false)
 	{
-		return Grid.TestLineOfSight(x, y, x2, y2, Grid.VisibleBlockingDelegate, blocking_tile_visible);
+		return Grid.TestLineOfSight(x, y, x2, y2, Grid.VisibleBlockingDelegate, blocking_tile_visible, false);
 	}
 
 	public static bool VisibilityTest(int cell, int target_cell, bool blocking_tile_visible = false)
@@ -876,7 +884,7 @@ public class Grid
 
 	public static bool IsPhysicallyAccessible(int x, int y, int x2, int y2, bool blocking_tile_visible = false)
 	{
-		return Grid.TestLineOfSight(x, y, x2, y2, Grid.PhysicalBlockingDelegate, blocking_tile_visible);
+		return Grid.TestLineOfSight(x, y, x2, y2, Grid.PhysicalBlockingDelegate, blocking_tile_visible, false);
 	}
 
 	public static void CollectCellsInLine(int startCell, int endCell, HashSet<int> outputCells)
@@ -921,7 +929,7 @@ public class Grid
 		return cellsClear > 0;
 	}
 
-	public static bool TestLineOfSight(int x, int y, int x2, int y2, Func<int, bool> blocking_cb, bool blocking_tile_visible = false)
+	public static bool TestLineOfSight(int x, int y, int x2, int y2, Func<int, bool> blocking_cb, bool blocking_tile_visible = false, bool allow_invalid_cells = false)
 	{
 		int num = x;
 		int num2 = y;
@@ -975,7 +983,7 @@ public class Grid
 		for (int i = 0; i <= num9; i++)
 		{
 			int num12 = Grid.XYToCell(x, y);
-			if (!Grid.IsValidCell(num12))
+			if (!allow_invalid_cells && !Grid.IsValidCell(num12))
 			{
 				return false;
 			}

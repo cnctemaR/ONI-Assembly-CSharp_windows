@@ -67,10 +67,18 @@ public class MissileLauncher : GameStateMachine<MissileLauncher, MissileLauncher
 			smi.LaunchMissile();
 			this.cannonTarget.Get(smi).GetComponent<KBatchedAnimController>().Play("Cannon_shooting_pre", KAnim.PlayMode.Once, 1f, 0f);
 		});
-		this.Launch.pst.Enter(delegate(MissileLauncher.Instance smi)
+		this.Launch.pst.Target(this.masterTarget).Enter(delegate(MissileLauncher.Instance smi)
 		{
 			smi.SetOreChunk();
-		}).Target(this.cannonTarget).PlayAnim("Cannon_shooting_pst")
+			KAnimControllerBase component = smi.GetComponent<KAnimControllerBase>();
+			if (smi.GetComponent<Storage>().Count <= 0)
+			{
+				component.Play("base_shooting_pst_last", KAnim.PlayMode.Once, 1f, 0f);
+				return;
+			}
+			component.Play("base_shooting_pst", KAnim.PlayMode.Once, 1f, 0f);
+		}).Target(this.cannonTarget)
+			.PlayAnim("Cannon_shooting_pst")
 			.OnAnimQueueComplete(this.Cooldown);
 		this.Cooldown.Update("Rotate", delegate(MissileLauncher.Instance smi, float dt)
 		{
@@ -80,13 +88,17 @@ public class MissileLauncher : GameStateMachine<MissileLauncher, MissileLauncher
 			smi.SpawnOre();
 		}).Enter(delegate(MissileLauncher.Instance smi)
 		{
-			KAnimControllerBase component = smi.GetComponent<KAnimControllerBase>();
+			KAnimControllerBase component2 = smi.GetComponent<KAnimControllerBase>();
 			if (smi.GetComponent<Storage>().Count <= 0)
 			{
-				component.Play("base_shooting_pst_last", KAnim.PlayMode.Once, 1f, 0f);
-				return;
+				component2.Play("base_ejecting_last", KAnim.PlayMode.Once, 1f, 0f);
 			}
-			component.Play("base_shooting_pst", KAnim.PlayMode.Once, 1f, 0f);
+			else
+			{
+				component2.Play("base_ejecting", KAnim.PlayMode.Once, 1f, 0f);
+			}
+			smi.sm.rotationComplete.Set(false, smi, false);
+			smi.sm.meteorTarget.Set(null, smi, false);
 		})
 			.OnAnimQueueComplete(this.On.searching);
 		this.Nosurfacesight.Target(this.masterTarget).PlayAnim("working_pst").QueueAnim("error", false, null)
@@ -261,23 +273,23 @@ public class MissileLauncher : GameStateMachine<MissileLauncher, MissileLauncher
 
 		public void LaunchMissile()
 		{
-			GameObject gameObject = base.smi.sm.meteorTarget.Get(base.smi);
-			if (!gameObject.IsNullOrDestroyed())
+			GameObject gameObject = this.MissileStorage.FindFirst("MissileBasic");
+			if (gameObject != null)
 			{
-				GameObject gameObject2 = this.MissileStorage.FindFirst("MissileBasic");
-				if (gameObject2 != null)
+				Pickupable pickupable = gameObject.GetComponent<Pickupable>();
+				if (pickupable.TotalAmount <= 1f)
 				{
-					Pickupable pickupable = gameObject2.GetComponent<Pickupable>();
-					if (pickupable.TotalAmount <= 1f)
-					{
-						this.MissileStorage.Drop(pickupable.gameObject, true);
-					}
-					else
-					{
-						pickupable = EntitySplitter.Split(pickupable, 1f, null);
-					}
-					this.SetMissileElement(gameObject2);
-					pickupable.GetSMI<MissileProjectile.StatesInstance>().PrepareLaunch(gameObject.GetComponent<Comet>(), base.def.launchSpeed, this.launchPosition, base.smi.cannonRotation);
+					this.MissileStorage.Drop(pickupable.gameObject, true);
+				}
+				else
+				{
+					pickupable = EntitySplitter.Split(pickupable, 1f, null);
+				}
+				this.SetMissileElement(gameObject);
+				GameObject gameObject2 = base.smi.sm.meteorTarget.Get(base.smi);
+				if (!gameObject2.IsNullOrDestroyed())
+				{
+					pickupable.GetSMI<MissileProjectile.StatesInstance>().PrepareLaunch(gameObject2.GetComponent<Comet>(), base.def.launchSpeed, this.launchPosition, base.smi.cannonRotation);
 				}
 			}
 		}
@@ -304,12 +316,12 @@ public class MissileLauncher : GameStateMachine<MissileLauncher, MissileLauncher
 					Vector3 targetPosition = comet.TargetPosition;
 					float num2;
 					Vector3 vector = this.CalculateCollisionPoint(targetPosition, comet.Velocity, out num2);
-					int num3 = Grid.PosToCell(vector);
-					float num4 = Vector3.Distance(vector, this.launchPosition);
-					if (Grid.IsValidCell(num3) && !Grid.IsSolidCell(num3) && num4 < num && num2 > this.launchAnimTime && this.IsMeteorInRange(vector) && this.IsPathClear(this.launchPosition, targetPosition))
+					Grid.PosToCell(vector);
+					float num3 = Vector3.Distance(vector, this.launchPosition);
+					if (num3 < num && num2 > this.launchAnimTime && this.IsMeteorInRange(vector) && this.IsPathClear(this.launchPosition, targetPosition))
 					{
 						gameObject = comet.gameObject;
-						num = num4;
+						num = num3;
 					}
 				}
 			}
@@ -327,7 +339,19 @@ public class MissileLauncher : GameStateMachine<MissileLauncher, MissileLauncher
 		{
 			Vector2I vector2I = Grid.PosToXY(startPoint);
 			Vector2I vector2I2 = Grid.PosToXY(endPoint);
-			return Grid.TestLineOfSight(vector2I.x, vector2I.y, vector2I2.x, vector2I2.y, new Func<int, bool>(Grid.IsSolidCell), false);
+			return Grid.TestLineOfSight(vector2I.x, vector2I.y, vector2I2.x, vector2I2.y, new Func<int, bool>(this.IsCellBlockedFromSky), false, true);
+		}
+
+		public bool IsCellBlockedFromSky(int cell)
+		{
+			if (Grid.IsValidCell(cell) && (int)Grid.WorldIdx[cell] == this.myWorld.id)
+			{
+				return Grid.Solid[cell];
+			}
+			int num;
+			int num2;
+			Grid.CellToXY(cell, out num, out num2);
+			return num2 <= this.launchXY.Y;
 		}
 
 		public Vector3 CalculateCollisionPoint(Vector3 targetPosition, Vector3 targetVelocity, out float timeToCollision)

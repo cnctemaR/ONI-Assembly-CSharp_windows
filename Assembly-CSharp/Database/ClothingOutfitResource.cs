@@ -8,7 +8,7 @@ namespace Database
 		public string[] itemsInOutfit { get; private set; }
 
 		public ClothingOutfitResource(string id, string[] items_in_outfit, LocString name, ClothingOutfitUtility.OutfitType outfitType)
-			: base(name, null, null)
+			: base(id, name)
 		{
 			this.itemsInOutfit = items_in_outfit;
 			this.outfitType = outfitType;

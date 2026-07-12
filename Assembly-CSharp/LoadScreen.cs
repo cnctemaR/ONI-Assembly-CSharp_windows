@@ -58,6 +58,15 @@ public class LoadScreen : KModalScreen
 				this.ShowSaveInfo();
 			};
 		}
+		if (this.loadMoreButton != null)
+		{
+			this.loadMoreButton.onClick += delegate
+			{
+				this.displayedPageCount++;
+				this.RefreshColonyList();
+				this.ShowColonyList();
+			};
+		}
 	}
 
 	private bool IsInMenu()
@@ -75,6 +84,7 @@ public class LoadScreen : KModalScreen
 		base.OnActivate();
 		WorldGen.LoadSettings(false);
 		this.SetCloudSaveInfoActive(this.CloudSavesVisible());
+		this.displayedPageCount = 1;
 		this.RefreshColonyList();
 		this.ShowColonyList();
 		bool cloudSavesAvailable = SaveLoader.GetCloudSavesAvailable();
@@ -293,10 +303,18 @@ public class LoadScreen : KModalScreen
 		Dictionary<string, List<LoadScreen.SaveGameFileDetails>> colonies = this.GetColonies(true);
 		if (colonies.Count > 0)
 		{
+			int num = 0;
 			foreach (KeyValuePair<string, List<LoadScreen.SaveGameFileDetails>> keyValuePair in colonies)
 			{
+				if (num >= this.displayedPageCount * 20)
+				{
+					break;
+				}
 				this.AddColonyToList(keyValuePair.Value);
+				num++;
 			}
+			this.loadMoreButton.gameObject.SetActive(colonies.Count != num);
+			this.loadMoreButton.gameObject.transform.SetAsLastSibling();
 		}
 	}
 
@@ -830,8 +848,8 @@ public class LoadScreen : KModalScreen
 					save.FileName,
 					save.FileHeader.buildVersion,
 					save.FileInfo.saveMinorVersion,
-					552078U,
-					31
+					561558U,
+					32
 				});
 			}
 			return false;
@@ -846,7 +864,7 @@ public class LoadScreen : KModalScreen
 					save.FileInfo.saveMajorVersion,
 					save.FileInfo.saveMinorVersion,
 					7,
-					31
+					32
 				});
 			}
 			return false;
@@ -1158,7 +1176,7 @@ public class LoadScreen : KModalScreen
 
 	private static bool IsSaveFileFromUnsupportedFutureBuild(SaveGame.Header header, SaveGame.GameInfo gameInfo)
 	{
-		return gameInfo.saveMajorVersion > 7 || (gameInfo.saveMajorVersion == 7 && gameInfo.saveMinorVersion > 31) || header.buildVersion > 552078U;
+		return gameInfo.saveMajorVersion > 7 || (gameInfo.saveMajorVersion == 7 && gameInfo.saveMinorVersion > 32) || header.buildVersion > 561558U;
 	}
 
 	private static bool IsSaveFromCurrentDLC(SaveGame.GameInfo gameInfo, out string saveDlcName)
@@ -1237,15 +1255,15 @@ public class LoadScreen : KModalScreen
 		SaveGame.GameInfo gameInfo = SaveLoader.LoadHeader(filename, out header);
 		string text = null;
 		string text2 = null;
-		if (header.buildVersion > 552078U)
+		if (header.buildVersion > 561558U)
 		{
 			text = header.buildVersion.ToString();
-			text2 = 552078U.ToString();
+			text2 = 561558U.ToString();
 		}
 		else if (gameInfo.saveMajorVersion < 7)
 		{
 			text = string.Format("v{0}.{1}", gameInfo.saveMajorVersion, gameInfo.saveMinorVersion);
-			text2 = string.Format("v{0}.{1}", 7, 31);
+			text2 = string.Format("v{0}.{1}", 7, 32);
 		}
 		if (!flag)
 		{
@@ -1362,6 +1380,8 @@ public class LoadScreen : KModalScreen
 
 	private const string CLOUD_TUTORIAL_KEY = "LoadScreenCloudTutorialTimes";
 
+	private const int ITEMS_PER_PAGE = 20;
+
 	[SerializeField]
 	private KButton closeButton;
 
@@ -1379,6 +1399,9 @@ public class LoadScreen : KModalScreen
 
 	[SerializeField]
 	private HierarchyReferences saveButtonPrefab;
+
+	[SerializeField]
+	private KButton loadMoreButton;
 
 	[Space]
 	[SerializeField]
@@ -1422,6 +1445,8 @@ public class LoadScreen : KModalScreen
 	private ConfirmDialogScreen errorScreen;
 
 	private InspectSaveScreen inspectScreenInstance;
+
+	private int displayedPageCount = 1;
 
 	private struct SaveGameFileDetails
 	{

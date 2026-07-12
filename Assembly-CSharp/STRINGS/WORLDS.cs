@@ -379,6 +379,13 @@ namespace STRINGS
 			public static LocString DESCRIPTION = "An irradiated world with renewable water sources.\n\n<smallcaps>Both the radioactive biome and the ocean biome present unique challenges yet considerable payoffs.</smallcaps>\n\n";
 		}
 
+		public static class STRANGE_ASTEROID_KF23
+		{
+			public static LocString NAME = "Skewed Asteroid";
+
+			public static LocString DESCRIPTION = "A tilted world, at once strange and...strangely familiar. Its singular terrain is consistent across all universes.\n\nThis resistance to the fluidity of temporal shifts has the cosmos buzzing, as individual colonies compare notes on successes, failures and the bizarre redistribution of resources.\n\n<smallcaps>Released for Klei Fest 2023.";
+		}
+
 		public class TINYSTART
 		{
 			public static LocString NAME = "Tiny Start FOR DEVS";

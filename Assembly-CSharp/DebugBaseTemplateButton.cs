@@ -382,6 +382,12 @@ public class DebugBaseTemplateButton : KScreen
 				int num = Grid.PosToCell(t as KMonoBehaviour);
 				if (this.SelectedCells.Contains(num) && !(t as KMonoBehaviour).gameObject.GetComponent<MinionBrain>())
 				{
+					Orientation orientation = Orientation.Neutral;
+					Rotatable component = (t as KMonoBehaviour).GetComponent<Rotatable>();
+					if (component != null)
+					{
+						orientation = component.Orientation;
+					}
 					int num2;
 					int num3;
 					Grid.CellToXY(num, out num2, out num3);
@@ -392,14 +398,14 @@ public class DebugBaseTemplateButton : KScreen
 					float num5 = 1f;
 					string text = null;
 					int num6 = 0;
-					PrimaryElement component = (t as KMonoBehaviour).gameObject.GetComponent<PrimaryElement>();
-					if (component != null)
+					PrimaryElement component2 = (t as KMonoBehaviour).gameObject.GetComponent<PrimaryElement>();
+					if (component2 != null)
 					{
-						simHashes = component.ElementID;
-						num5 = component.Units;
-						num4 = component.Temperature;
-						text = ((component.DiseaseIdx != byte.MaxValue) ? Db.Get().Diseases[(int)component.DiseaseIdx].Id : null);
-						num6 = component.DiseaseCount;
+						simHashes = component2.ElementID;
+						num5 = component2.Units;
+						num4 = component2.Temperature;
+						text = ((component2.DiseaseIdx != byte.MaxValue) ? Db.Get().Diseases[(int)component2.DiseaseIdx].Id : null);
+						num6 = component2.DiseaseCount;
 					}
 					List<Prefab.template_amount_value> list = new List<Prefab.template_amount_value>();
 					if ((t as KMonoBehaviour).gameObject.GetAmounts() != null)
@@ -411,13 +417,33 @@ public class DebugBaseTemplateButton : KScreen
 					}
 					if ((t as KMonoBehaviour).gameObject.GetComponent<ElementChunk>() != null)
 					{
-						Prefab prefab = new Prefab((t as KMonoBehaviour).PrefabID().Name, Prefab.Type.Ore, num2, num3, simHashes, num4, num5, text, num6, Orientation.Neutral, list.ToArray(), null, 0);
+						string name = (t as KMonoBehaviour).PrefabID().Name;
+						Prefab.Type type = Prefab.Type.Ore;
+						int num7 = num2;
+						int num8 = num3;
+						SimHashes simHashes2 = simHashes;
+						float num9 = num4;
+						float num10 = num5;
+						string text2 = text;
+						int num11 = num6;
+						Prefab.template_amount_value[] array = list.ToArray();
+						Prefab prefab = new Prefab(name, type, num7, num8, simHashes2, num9, num10, text2, num11, orientation, array, null, 0);
 						_primaryElementOres.Add(prefab);
 						_excludeEntities.Add((t as KMonoBehaviour).gameObject);
 					}
 					else
 					{
-						Prefab prefab = new Prefab((t as KMonoBehaviour).PrefabID().Name, Prefab.Type.Other, num2, num3, simHashes, num4, num5, text, num6, Orientation.Neutral, list.ToArray(), null, 0);
+						string name2 = (t as KMonoBehaviour).PrefabID().Name;
+						Prefab.Type type2 = Prefab.Type.Other;
+						int num12 = num2;
+						int num13 = num3;
+						SimHashes simHashes3 = simHashes;
+						float num14 = num4;
+						float num15 = num5;
+						string text3 = text;
+						int num16 = num6;
+						Prefab.template_amount_value[] array = list.ToArray();
+						Prefab prefab = new Prefab(name2, type2, num12, num13, simHashes3, num14, num15, text3, num16, orientation, array, null, 0);
 						_otherEntities.Add(prefab);
 						_excludeEntities.Add((t as KMonoBehaviour).gameObject);
 					}

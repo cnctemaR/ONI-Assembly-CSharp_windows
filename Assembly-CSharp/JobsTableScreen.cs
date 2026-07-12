@@ -475,12 +475,12 @@ public class JobsTableScreen : TableScreen
 		}
 		OptionSelector component = widget_go.GetComponent<OptionSelector>();
 		int num3 = ((priority_mgr != null) ? priority_mgr.GetAssociatedSkillLevel(chore_group) : 0);
-		Color32 color = new Color32(byte.MaxValue, byte.MaxValue, byte.MaxValue, 128);
+		Color32 color = GlobalAssets.Instance.colorSet.PrioritiesNeutralColor;
 		if (num3 > 0)
 		{
 			float num4 = (float)(num3 - this.skillLevelLow);
 			num4 /= (float)(this.skillLevelHigh - this.skillLevelLow);
-			color = Color32.Lerp(this.skillOutlineColourLow, this.skillOutlineColourHigh, num4);
+			color = Color32.Lerp(GlobalAssets.Instance.colorSet.PrioritiesLowColor, GlobalAssets.Instance.colorSet.PrioritiesHighColor, num4);
 		}
 		component.ConfigureItem(flag, new OptionSelector.DisplayOptionInfo
 		{
@@ -934,12 +934,6 @@ public class JobsTableScreen : TableScreen
 		Game.Instance.advancedPersonalPriorities = !Game.Instance.advancedPersonalPriorities;
 		this.toggleAdvancedModeButton.fgImage.gameObject.SetActive(Game.Instance.advancedPersonalPriorities);
 	}
-
-	[SerializeField]
-	private Color32 skillOutlineColourLow = Color.white;
-
-	[SerializeField]
-	private Color32 skillOutlineColourHigh = new Color(0.72156864f, 0.44313726f, 0.5803922f);
 
 	[SerializeField]
 	private int skillLevelLow = 1;

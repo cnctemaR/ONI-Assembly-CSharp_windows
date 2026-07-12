@@ -17,10 +17,10 @@ public class Rotatable : KMonoBehaviour, ISaveLoadable
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		if (this.building != null)
+		Building component = base.GetComponent<Building>();
+		if (component != null)
 		{
-			BuildingDef def = base.GetComponent<Building>().Def;
-			this.SetSize(def.WidthInCells, def.HeightInCells);
+			this.SetSize(component.Def.WidthInCells, component.Def.HeightInCells);
 		}
 		this.OrientVisualizer(this.orientation);
 		this.OrientCollider(this.orientation);
@@ -254,6 +254,25 @@ public class Rotatable : KMonoBehaviour, ISaveLoadable
 		}
 	}
 
+	public Vector2I GetRotatedOffset(Vector2I offset)
+	{
+		switch (this.orientation)
+		{
+		default:
+			return offset;
+		case Orientation.R90:
+			return new Vector2I(offset.y, -offset.x);
+		case Orientation.R180:
+			return new Vector2I(-offset.x, -offset.y);
+		case Orientation.R270:
+			return new Vector2I(-offset.y, offset.x);
+		case Orientation.FlipH:
+			return new Vector2I(-offset.x, offset.y);
+		case Orientation.FlipV:
+			return new Vector2I(offset.x, -offset.y);
+		}
+	}
+
 	public Orientation GetOrientation()
 	{
 		return this.orientation;
@@ -266,12 +285,6 @@ public class Rotatable : KMonoBehaviour, ISaveLoadable
 			return this.orientation > Orientation.Neutral;
 		}
 	}
-
-	[MyCmpReq]
-	private KBatchedAnimController batchedAnimController;
-
-	[MyCmpGet]
-	private Building building;
 
 	[Serialize]
 	[SerializeField]

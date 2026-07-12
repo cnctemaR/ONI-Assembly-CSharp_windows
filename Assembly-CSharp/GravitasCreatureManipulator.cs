@@ -236,15 +236,6 @@ public class GravitasCreatureManipulator : GameStateMachine<GravitasCreatureMani
 			if (pickupable.GetComponent<KCollider2D>().bounds.size.x > 1.5f)
 			{
 				this.DetectCreature(obj);
-				return;
-			}
-			if (base.smi.IsInsideState(base.sm.operational.idle))
-			{
-				Navigator component = pickupable.GetComponent<Navigator>();
-				if (component != null && this.IsAccepted(component.gameObject) && !pickupable.HasTag(GameTags.Dead))
-				{
-					component.GoTo(base.smi.pickupCell, null);
-				}
 			}
 		}
 

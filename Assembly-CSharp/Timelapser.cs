@@ -46,12 +46,22 @@ public class Timelapser : KMonoBehaviour
 	{
 		if (this.previewScreenshot)
 		{
+			if (this.bufferRenderTexture != null)
+			{
+				this.bufferRenderTexture.DestroyRenderTexture();
+			}
 			this.bufferRenderTexture = new RenderTexture(this.previewScreenshotResolution.x, this.previewScreenshotResolution.y, 32, RenderTextureFormat.ARGB32);
+			this.bufferRenderTexture.name = "Timelapser.PreviewScreenshot";
 			return;
 		}
 		if (this.timelapseUserEnabled)
 		{
+			if (this.bufferRenderTexture != null)
+			{
+				this.bufferRenderTexture.DestroyRenderTexture();
+			}
 			this.bufferRenderTexture = new RenderTexture(SaveGame.Instance.TimelapseResolution.x, SaveGame.Instance.TimelapseResolution.y, 32, RenderTextureFormat.ARGB32);
+			this.bufferRenderTexture.name = "Timelapser.Timelapse";
 		}
 	}
 

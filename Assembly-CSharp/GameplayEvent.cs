@@ -25,7 +25,13 @@ public abstract class GameplayEvent : Resource, IComparable<GameplayEvent>
 				return false;
 			}
 		}
-		return true;
+		float sleepTimer = GameplayEventManager.Instance.GetSleepTimer(this);
+		return GameUtil.GetCurrentTimeInCycles() >= sleepTimer;
+	}
+
+	public void SetSleepTimer(float timeToSleepUntil)
+	{
+		GameplayEventManager.Instance.SetSleepTimerForEvent(this, timeToSleepUntil);
 	}
 
 	public virtual bool WillNeverRunAgain()

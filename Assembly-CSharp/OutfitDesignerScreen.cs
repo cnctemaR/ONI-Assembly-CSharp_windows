@@ -37,6 +37,7 @@ public class OutfitDesignerScreen : KMonoBehaviour
 		{
 			Dictionary<ClothingOutfitUtility.OutfitType, PermitCategory[]> dictionary = new Dictionary<ClothingOutfitUtility.OutfitType, PermitCategory[]>();
 			dictionary[ClothingOutfitUtility.OutfitType.Clothing] = ClothingOutfitUtility.PERMIT_CATEGORIES_FOR_CLOTHING;
+			dictionary[ClothingOutfitUtility.OutfitType.AtmoSuit] = ClothingOutfitUtility.PERMIT_CATEGORIES_FOR_ATMO_SUITS;
 			OutfitDesignerScreen.outfitTypeToCategoriesDict = dictionary;
 		}
 	}
@@ -66,7 +67,6 @@ public class OutfitDesignerScreen : KMonoBehaviour
 			this.RefreshGallery();
 			this.RefreshOutfitState();
 		});
-		KleiItemsStatusRefresher.RequestRefreshFromServer();
 	}
 
 	protected override void OnCmpDisable()
@@ -125,7 +125,8 @@ public class OutfitDesignerScreen : KMonoBehaviour
 				ClothingOutfitUtility.OutfitType outfitType = outfitDesignerScreenConfig2.sourceTarget.OutfitType;
 				outfitDesignerScreenConfig2 = this.Config;
 				ClothingOutfitTarget clothingOutfitTarget = ClothingOutfitTarget.FromMinion(outfitType, outfitDesignerScreenConfig2.targetMinionInstance.Value);
-				clothingOutfitTarget.WriteItems(this.outfitState.GetItems());
+				outfitDesignerScreenConfig2 = this.Config;
+				clothingOutfitTarget.WriteItems(outfitDesignerScreenConfig2.sourceTarget.OutfitType, this.outfitState.GetItems());
 				if (this.Config.onWriteToOutfitTargetFn != null)
 				{
 					this.Config.onWriteToOutfitTargetFn(clothingOutfitTarget);
@@ -167,7 +168,7 @@ public class OutfitDesignerScreen : KMonoBehaviour
 			this.primaryButton.onClick += delegate
 			{
 				this.outfitState.destinationTarget.WriteName(this.outfitState.name);
-				this.outfitState.destinationTarget.WriteItems(this.outfitState.GetItems());
+				this.outfitState.destinationTarget.WriteItems(this.outfitState.outfitType, this.outfitState.GetItems());
 				OutfitDesignerScreenConfig outfitDesignerScreenConfig3 = this.Config;
 				if (outfitDesignerScreenConfig3.minionPersonality.HasValue)
 				{
@@ -236,7 +237,7 @@ public class OutfitDesignerScreen : KMonoBehaviour
 		PermitCategory[] array = OutfitDesignerScreen.outfitTypeToCategoriesDict[this.outfitState.outfitType];
 		for (int i = 0; i < array.Length; i++)
 		{
-			OutfitDesignerScreen.<>c__DisplayClass44_0 CS$<>8__locals1 = new OutfitDesignerScreen.<>c__DisplayClass44_0();
+			OutfitDesignerScreen.<>c__DisplayClass45_0 CS$<>8__locals1 = new OutfitDesignerScreen.<>c__DisplayClass45_0();
 			CS$<>8__locals1.<>4__this = this;
 			CS$<>8__locals1.permitCategory = array[i];
 			GameObject gameObject = this.categoryRowPool.Borrow();
@@ -285,16 +286,12 @@ public class OutfitDesignerScreen : KMonoBehaviour
 	{
 		this.RefreshGalleryFn = null;
 		this.galleryGridItemPool.ReturnAll();
-		this.<PopulateGallery>g__AddGridIconForPermit|48_0(null);
+		this.<PopulateGallery>g__AddGridIconForPermit|49_0(null);
 		foreach (ClothingItemResource clothingItemResource in Db.Get().Permits.ClothingItems.resources)
 		{
-			if (clothingItemResource.Category == this.SelectedCategory)
+			if (clothingItemResource.Category == this.SelectedCategory && clothingItemResource.outfitType == this.Config.sourceTarget.OutfitType && !clothingItemResource.Id.StartsWith("visonly_"))
 			{
-				if (clothingItemResource.outfitType != this.Config.sourceTarget.OutfitType)
-				{
-					return;
-				}
-				this.<PopulateGallery>g__AddGridIconForPermit|48_0(clothingItemResource);
+				this.<PopulateGallery>g__AddGridIconForPermit|49_0(clothingItemResource);
 			}
 		}
 		this.RefreshGallery();
@@ -323,6 +320,7 @@ public class OutfitDesignerScreen : KMonoBehaviour
 		this.minionOrMannequin.current.SetOutfit(this.outfitState);
 		this.minionOrMannequin.current.ReactToClothingItemChange(this.SelectedCategory);
 		this.outfitDescriptionPanel.Refresh(this.outfitState);
+		this.dioramaBG.sprite = KleiPermitDioramaVis.GetDioramaBackground(this.SelectedCategory);
 	}
 
 	private void RegisterPreventScreenPop()
@@ -417,8 +415,8 @@ public class OutfitDesignerScreen : KMonoBehaviour
 				{
 					clothingOutfitTarget2 = ClothingOutfitTarget.ForNewTemplateOutfit(outfitState.outfitType, proposal.candidateName);
 				}
-				clothingOutfitTarget2.WriteItems(outfitState.GetItems());
-				clothingOutfitTarget.WriteItems(outfitState.GetItems());
+				clothingOutfitTarget2.WriteItems(outfitState.outfitType, outfitState.GetItems());
+				clothingOutfitTarget.WriteItems(outfitState.outfitType, outfitState.GetItems());
 				if (onWriteToOutfitTargetFn != null)
 				{
 					onWriteToOutfitTargetFn(clothingOutfitTarget2);
@@ -470,7 +468,7 @@ public class OutfitDesignerScreen : KMonoBehaviour
 				if (proposal.result == ClothingOutfitNameProposal.Result.NewOutfit)
 				{
 					ClothingOutfitTarget clothingOutfitTarget = ClothingOutfitTarget.ForNewTemplateOutfit(outfitTemplate.OutfitType, proposal.candidateName);
-					clothingOutfitTarget.WriteItems(outfitState.GetItems());
+					clothingOutfitTarget.WriteItems(outfitState.outfitType, outfitState.GetItems());
 					if (minionPersonality.HasValue)
 					{
 						Db.Get().Permits.ClothingOutfits.SetDuplicantPersonalityOutfit(minionPersonality.Value.Id, clothingOutfitTarget.OutfitId, clothingOutfitTarget.OutfitType);
@@ -543,7 +541,7 @@ public class OutfitDesignerScreen : KMonoBehaviour
 	}
 
 	[CompilerGenerated]
-	private void <PopulateGallery>g__AddGridIconForPermit|48_0(PermitResource permit)
+	private void <PopulateGallery>g__AddGridIconForPermit|49_0(PermitResource permit)
 	{
 		GameObject gameObject = this.galleryGridItemPool.Borrow();
 		HierarchyReferences component = gameObject.GetComponent<HierarchyReferences>();
@@ -553,7 +551,7 @@ public class OutfitDesignerScreen : KMonoBehaviour
 		if (permit == null)
 		{
 			reference.sprite = KleiItemsUI.GetNoneClothingItemIcon(this.SelectedCategory);
-			KleiItemsUI.ConfigureTooltipOn(gameObject, KleiItemsUI.GetNoneClothingItemString(this.SelectedCategory));
+			KleiItemsUI.ConfigureTooltipOn(gameObject, KleiItemsUI.GetNoneTooltipStringFor(this.SelectedCategory));
 			isUnownedOverlay.gameObject.SetActive(false);
 		}
 		else
@@ -608,6 +606,9 @@ public class OutfitDesignerScreen : KMonoBehaviour
 
 	[SerializeField]
 	private UIMinionOrMannequin minionOrMannequin;
+
+	[SerializeField]
+	private Image dioramaBG;
 
 	[SerializeField]
 	private KButton primaryButton;

@@ -12,6 +12,70 @@ public struct CellOffset : IEquatable<CellOffset>
 		}
 	}
 
+	public static CellOffset left
+	{
+		get
+		{
+			return new CellOffset(-1, 0);
+		}
+	}
+
+	public static CellOffset up
+	{
+		get
+		{
+			return new CellOffset(0, 1);
+		}
+	}
+
+	public static CellOffset right
+	{
+		get
+		{
+			return new CellOffset(1, 0);
+		}
+	}
+
+	public static CellOffset down
+	{
+		get
+		{
+			return new CellOffset(0, -1);
+		}
+	}
+
+	public static CellOffset leftup
+	{
+		get
+		{
+			return new CellOffset(-1, 1);
+		}
+	}
+
+	public static CellOffset leftdown
+	{
+		get
+		{
+			return new CellOffset(-1, -1);
+		}
+	}
+
+	public static CellOffset rightup
+	{
+		get
+		{
+			return new CellOffset(1, 1);
+		}
+	}
+
+	public static CellOffset rightdown
+	{
+		get
+		{
+			return new CellOffset(1, -1);
+		}
+	}
+
 	public CellOffset(int x, int y)
 	{
 		this.x = x;

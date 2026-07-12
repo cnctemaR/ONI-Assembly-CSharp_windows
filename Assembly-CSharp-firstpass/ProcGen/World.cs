@@ -208,6 +208,7 @@ namespace ProcGen
 				this.allowDuplicates = false;
 				this.useRelaxedFiltering = false;
 				this.overrideOffset = Vector2I.zero;
+				this.overridePlacement = Vector2I.minusone;
 			}
 
 			public string ruleId { get; private set; }
@@ -231,6 +232,8 @@ namespace ProcGen
 			public bool useRelaxedFiltering { get; private set; }
 
 			public Vector2I overrideOffset { get; set; }
+
+			public Vector2I overridePlacement { get; set; }
 
 			public List<World.AllowedCellsFilter> allowedCellsFilter { get; private set; }
 

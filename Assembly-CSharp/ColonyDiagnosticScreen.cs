@@ -16,7 +16,8 @@ public class ColonyDiagnosticScreen : KScreen, ISim1000ms
 		MultiToggle multiToggle = this.seeAllButton;
 		multiToggle.onClick = (global::System.Action)Delegate.Combine(multiToggle.onClick, new global::System.Action(delegate
 		{
-			AllDiagnosticsScreen.Instance.Show(!AllDiagnosticsScreen.Instance.gameObject.activeSelf);
+			bool flag = !AllDiagnosticsScreen.Instance.isHiddenButActive;
+			AllDiagnosticsScreen.Instance.Show(!flag);
 		}));
 	}
 

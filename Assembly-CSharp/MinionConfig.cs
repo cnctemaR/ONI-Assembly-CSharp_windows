@@ -258,11 +258,11 @@ public class MinionConfig : IEntityConfig
 		OccupyArea occupyArea = gameObject.AddOrGet<OccupyArea>();
 		occupyArea.objectLayers = new ObjectLayer[1];
 		occupyArea.ApplyToCells = false;
-		occupyArea.OccupiedCellsOffsets = new CellOffset[]
+		occupyArea.SetCellOffsets(new CellOffset[]
 		{
 			new CellOffset(0, 0),
 			new CellOffset(0, 1)
-		};
+		});
 		gameObject.AddOrGet<Pickupable>();
 		CreatureSimTemperatureTransfer creatureSimTemperatureTransfer = gameObject.AddOrGet<CreatureSimTemperatureTransfer>();
 		creatureSimTemperatureTransfer.SurfaceArea = 10f;

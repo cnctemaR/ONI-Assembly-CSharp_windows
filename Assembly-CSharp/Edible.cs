@@ -349,11 +349,27 @@ public class Edible : Workable, IGameObjectEffectDescriptor, ISaveLoadable, IExt
 		return this.foodInfo.Quality;
 	}
 
+	public int GetMorale()
+	{
+		int num = 0;
+		string effectForFoodQuality = Edible.GetEffectForFoodQuality(this.foodInfo.Quality);
+		foreach (AttributeModifier attributeModifier in Db.Get().effects.Get(effectForFoodQuality).SelfModifiers)
+		{
+			if (attributeModifier.AttributeId == Db.Get().Attributes.QualityOfLife.Id)
+			{
+				num += Mathf.RoundToInt(attributeModifier.Value);
+			}
+		}
+		return num;
+	}
+
 	public override List<Descriptor> GetDescriptors(GameObject go)
 	{
 		List<Descriptor> list = new List<Descriptor>();
 		list.Add(new Descriptor(string.Format(UI.GAMEOBJECTEFFECTS.CALORIES, GameUtil.GetFormattedCalories(this.foodInfo.CaloriesPerUnit, GameUtil.TimeSlice.None, true)), string.Format(UI.GAMEOBJECTEFFECTS.TOOLTIPS.CALORIES, GameUtil.GetFormattedCalories(this.foodInfo.CaloriesPerUnit, GameUtil.TimeSlice.None, true)), Descriptor.DescriptorType.Information, false));
 		list.Add(new Descriptor(string.Format(UI.GAMEOBJECTEFFECTS.FOOD_QUALITY, GameUtil.GetFormattedFoodQuality(this.foodInfo.Quality)), string.Format(UI.GAMEOBJECTEFFECTS.TOOLTIPS.FOOD_QUALITY, GameUtil.GetFormattedFoodQuality(this.foodInfo.Quality)), Descriptor.DescriptorType.Effect, false));
+		int morale = this.GetMorale();
+		list.Add(new Descriptor(string.Format(UI.GAMEOBJECTEFFECTS.FOOD_MORALE, GameUtil.AddPositiveSign(morale.ToString(), morale > 0)), string.Format(UI.GAMEOBJECTEFFECTS.TOOLTIPS.FOOD_MORALE, GameUtil.AddPositiveSign(morale.ToString(), morale > 0)), Descriptor.DescriptorType.Effect, false));
 		foreach (string text in this.foodInfo.Effects)
 		{
 			string text2 = "";

@@ -370,6 +370,7 @@ public enum GameHashes
 	WorkableStartWork = 853695848,
 	WorkableCompleteWork = -2011693419,
 	WorkableStopWork = 679550494,
+	WorkableEntombOffset = 580035959,
 	StartReactable = -909573545,
 	EndReactable = 824899998,
 	TeleporterIDsChanged = -1266722732,
@@ -426,5 +427,6 @@ public enum GameHashes
 	CatchyTune = -1278274506,
 	MegaBrainTankCandidateDupesChanged = 374655100,
 	DreamsOn = -1768884913,
-	DreamsOff = 49503455
+	DreamsOff = 49503455,
+	MarkForMove = 1122777325
 }

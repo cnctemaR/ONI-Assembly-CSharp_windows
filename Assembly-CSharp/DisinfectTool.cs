@@ -23,7 +23,7 @@ public class DisinfectTool : DragTool
 
 	protected override void OnDragTool(int cell, int distFromOrigin)
 	{
-		for (int i = 0; i < 44; i++)
+		for (int i = 0; i < 45; i++)
 		{
 			GameObject gameObject = Grid.Objects[cell, i];
 			if (gameObject != null)

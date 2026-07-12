@@ -33,6 +33,14 @@ namespace Database
 			this.Add("JellypuffSatsuma", new string[] { "TopJellypuffJacketSatsuma", "GlovesCufflessSatsuma" }, UI.OUTFITS.JELLYPUFF_SATSUMA.NAME, ClothingOutfitUtility.OutfitType.Clothing);
 			this.Add("JellypuffStrawberry", new string[] { "TopJellypuffJacketStrawberry", "GlovesCufflessStrawberry" }, UI.OUTFITS.JELLYPUFF_STRAWBERRY.NAME, ClothingOutfitUtility.OutfitType.Clothing);
 			this.Add("JellypuffWatermelon", new string[] { "TopJellypuffJacketWatermelon", "GlovesCufflessWatermelon" }, UI.OUTFITS.JELLYPUFF_WATERMELON.NAME, ClothingOutfitUtility.OutfitType.Clothing);
+			this.Add("Athlete", new string[] { "TopAthlete", "PantsAthlete", "GlovesAthlete", "ShoesBasicBlack" }, UI.OUTFITS.ATHLETE.NAME, ClothingOutfitUtility.OutfitType.Clothing);
+			this.Add("Circuit", new string[] { "TopCircuitGreen", "PantsCircuitGreen", "GlovesCircuitGreen" }, UI.OUTFITS.CIRCUIT.NAME, ClothingOutfitUtility.OutfitType.Clothing);
+			this.Add("AtmoLimone", new string[] { "AtmoHelmetLimone", "AtmoSuitBasicYellow", "AtmoGlovesLime", "AtmoBeltBasicLime", "AtmoShoesBasicYellow" }, UI.OUTFITS.ATMOSUIT_LIMONE.NAME, ClothingOutfitUtility.OutfitType.AtmoSuit);
+			this.Add("AtmoPuft", new string[] { "AtmoHelmetPuft", "AtmoSuitPuft", "AtmoGlovesPuft", "AtmoBeltPuft", "AtmoShoesPuft" }, UI.OUTFITS.ATMOSUIT_PUFT.NAME, ClothingOutfitUtility.OutfitType.AtmoSuit);
+			this.Add("AtmoSparkleRed", new string[] { "AtmoHelmetSparkleRed", "AtmoSuitSparkleRed", "AtmoGlovesSparkleRed", "AtmoBeltSparkleRed", "AtmoShoesSparkleBlack" }, UI.OUTFITS.ATMOSUIT_SPARKLE_RED.NAME, ClothingOutfitUtility.OutfitType.AtmoSuit);
+			this.Add("AtmoSparkleBlue", new string[] { "AtmoHelmetSparkleBlue", "AtmoSuitSparkleBlue", "AtmoGlovesSparkleBlue", "AtmoBeltSparkleBlue", "AtmoShoesSparkleBlack" }, UI.OUTFITS.ATMOSUIT_SPARKLE_BLUE.NAME, ClothingOutfitUtility.OutfitType.AtmoSuit);
+			this.Add("AtmoSparkleGreen", new string[] { "AtmoHelmetSparkleGreen", "AtmoSuitSparkleGreen", "AtmoGlovesSparkleGreen", "AtmoBeltSparkleGreen", "AtmoShoesSparkleBlack" }, UI.OUTFITS.ATMOSUIT_SPARKLE_GREEN.NAME, ClothingOutfitUtility.OutfitType.AtmoSuit);
+			this.Add("AtmoSparkleLavender", new string[] { "AtmoHelmetSparklePurple", "AtmoSuitSparkleLavender", "AtmoGlovesSparkleLavender", "AtmoBeltSparkleLavender", "AtmoShoesSparkleBlack" }, UI.OUTFITS.ATMOSUIT_SPARKLE_LAVENDER.NAME, ClothingOutfitUtility.OutfitType.AtmoSuit);
 			ClothingOutfitUtility.LoadClothingOutfitData(this);
 		}
 

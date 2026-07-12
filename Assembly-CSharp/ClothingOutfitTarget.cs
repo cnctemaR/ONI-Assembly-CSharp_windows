@@ -25,12 +25,12 @@ public readonly struct ClothingOutfitTarget : IEquatable<ClothingOutfitTarget>
 
 	public string[] ReadItems()
 	{
-		return this.impl.ReadItems().Where<string>(new Func<string, bool>(ClothingOutfitTarget.DoesClothingItemExist)).ToArray<string>();
+		return this.impl.ReadItems(this.OutfitType).Where<string>(new Func<string, bool>(ClothingOutfitTarget.DoesClothingItemExist)).ToArray<string>();
 	}
 
-	public void WriteItems(string[] items)
+	public void WriteItems(ClothingOutfitUtility.OutfitType outfitType, string[] items)
 	{
-		this.impl.WriteItems(items);
+		this.impl.WriteItems(outfitType, items);
 	}
 
 	public bool CanWriteItems
@@ -170,9 +170,10 @@ public readonly struct ClothingOutfitTarget : IEquatable<ClothingOutfitTarget>
 			return Option.None;
 		}
 		SerializableOutfitData.Version2.CustomTemplateOutfitEntry customTemplateOutfitEntry;
-		if (CustomClothingOutfits.Instance.Internal_GetOutfitData().OutfitIdToUserAuthoredTemplateOutfit.TryGetValue(outfitId, out customTemplateOutfitEntry))
+		ClothingOutfitUtility.OutfitType outfitType;
+		if (CustomClothingOutfits.Instance.Internal_GetOutfitData().OutfitIdToUserAuthoredTemplateOutfit.TryGetValue(outfitId, out customTemplateOutfitEntry) && Enum.TryParse<ClothingOutfitUtility.OutfitType>(customTemplateOutfitEntry.outfitType, true, out outfitType))
 		{
-			return new ClothingOutfitTarget(new ClothingOutfitTarget.UserAuthoredTemplate(customTemplateOutfitEntry.outfitType, outfitId));
+			return new ClothingOutfitTarget(new ClothingOutfitTarget.UserAuthoredTemplate(outfitType, outfitId));
 		}
 		ClothingOutfitResource clothingOutfitResource = Db.Get().Permits.ClothingOutfits.TryGet(outfitId);
 		if (!clothingOutfitResource.IsNullOrDestroyed())
@@ -200,8 +201,11 @@ public readonly struct ClothingOutfitTarget : IEquatable<ClothingOutfitTarget>
 			SerializableOutfitData.Version2.CustomTemplateOutfitEntry customTemplateOutfitEntry;
 			keyValuePair.Deconstruct<string, SerializableOutfitData.Version2.CustomTemplateOutfitEntry>(out text, out customTemplateOutfitEntry);
 			string text2 = text;
-			SerializableOutfitData.Version2.CustomTemplateOutfitEntry customTemplateOutfitEntry2 = customTemplateOutfitEntry;
-			yield return new ClothingOutfitTarget(new ClothingOutfitTarget.UserAuthoredTemplate(customTemplateOutfitEntry2.outfitType, text2));
+			ClothingOutfitUtility.OutfitType outfitType;
+			if (Enum.TryParse<ClothingOutfitUtility.OutfitType>(customTemplateOutfitEntry.outfitType, true, out outfitType))
+			{
+				yield return new ClothingOutfitTarget(new ClothingOutfitTarget.UserAuthoredTemplate(outfitType, text2));
+			}
 		}
 		Dictionary<string, SerializableOutfitData.Version2.CustomTemplateOutfitEntry>.Enumerator enumerator2 = default(Dictionary<string, SerializableOutfitData.Version2.CustomTemplateOutfitEntry>.Enumerator);
 		yield break;
@@ -211,6 +215,18 @@ public readonly struct ClothingOutfitTarget : IEquatable<ClothingOutfitTarget>
 	public static ClothingOutfitTarget GetRandom()
 	{
 		return ClothingOutfitTarget.GetAllTemplates().GetRandom<ClothingOutfitTarget>();
+	}
+
+	public static Option<ClothingOutfitTarget> GetRandom(ClothingOutfitUtility.OutfitType onlyOfType)
+	{
+		IEnumerable<ClothingOutfitTarget> enumerable = from t in ClothingOutfitTarget.GetAllTemplates()
+			where t.OutfitType == onlyOfType
+			select t;
+		if (enumerable == null || enumerable.Count<ClothingOutfitTarget>() == 0)
+		{
+			return Option.None;
+		}
+		return enumerable.GetRandom<ClothingOutfitTarget>();
 	}
 
 	public static string GetUniqueNameIdFrom(string preferredName)
@@ -278,15 +294,19 @@ public readonly struct ClothingOutfitTarget : IEquatable<ClothingOutfitTarget>
 
 	public readonly ClothingOutfitTarget.Implementation impl;
 
+	public static readonly string[] NO_ITEMS = new string[0];
+
+	public static readonly ClothingItemResource[] NO_ITEM_VALUES = new ClothingItemResource[0];
+
 	public interface Implementation
 	{
 		string OutfitId { get; }
 
 		ClothingOutfitUtility.OutfitType OutfitType { get; }
 
-		string[] ReadItems();
+		string[] ReadItems(ClothingOutfitUtility.OutfitType outfitType);
 
-		void WriteItems(string[] items);
+		void WriteItems(ClothingOutfitUtility.OutfitType outfitType, string[] items);
 
 		bool CanWriteItems { get; }
 
@@ -357,14 +377,15 @@ public readonly struct ClothingOutfitTarget : IEquatable<ClothingOutfitTarget>
 			this.accessorizer = minionInstance.GetComponent<WearableAccessorizer>();
 		}
 
-		public string[] ReadItems()
+		public string[] ReadItems(ClothingOutfitUtility.OutfitType outfitType)
 		{
-			return this.accessorizer.GetClothingItemIds();
+			return this.accessorizer.GetClothingItemsIds(outfitType);
 		}
 
-		public void WriteItems(string[] items)
+		public void WriteItems(ClothingOutfitUtility.OutfitType outfitType, string[] items)
 		{
-			this.accessorizer.ApplyClothingItems(items.Select<string, ClothingItemResource>((string i) => Db.Get().Permits.ClothingItems.Get(i)));
+			this.accessorizer.ClearAllOutfitItems(new ClothingOutfitUtility.OutfitType?(outfitType));
+			this.accessorizer.AddCustomClothingOutfit(outfitType, items.Select<string, ClothingItemResource>((string i) => Db.Get().Permits.ClothingItems.Get(i)));
 		}
 
 		public string ReadName()
@@ -442,20 +463,21 @@ public readonly struct ClothingOutfitTarget : IEquatable<ClothingOutfitTarget>
 			this.m_outfitType = outfitType;
 		}
 
-		public string[] ReadItems()
+		public string[] ReadItems(ClothingOutfitUtility.OutfitType outfitType)
 		{
 			SerializableOutfitData.Version2.CustomTemplateOutfitEntry customTemplateOutfitEntry;
 			if (CustomClothingOutfits.Instance.Internal_GetOutfitData().OutfitIdToUserAuthoredTemplateOutfit.TryGetValue(this.OutfitId, out customTemplateOutfitEntry))
 			{
-				global::Debug.Assert(customTemplateOutfitEntry.outfitType == this.m_outfitType);
+				ClothingOutfitUtility.OutfitType outfitType2;
+				global::Debug.Assert(Enum.TryParse<ClothingOutfitUtility.OutfitType>(customTemplateOutfitEntry.outfitType, true, out outfitType2) && outfitType2 == this.m_outfitType);
 				return customTemplateOutfitEntry.itemIds;
 			}
-			return ClothingOutfitTargetExtensions.NO_ITEMS;
+			return ClothingOutfitTarget.NO_ITEMS;
 		}
 
-		public void WriteItems(string[] items)
+		public void WriteItems(ClothingOutfitUtility.OutfitType outfitType, string[] items)
 		{
-			CustomClothingOutfits.Instance.Internal_EditOutfit(this.m_outfitType, this.OutfitId, items);
+			CustomClothingOutfits.Instance.Internal_EditOutfit(outfitType, this.OutfitId, items);
 		}
 
 		public string ReadName()
@@ -479,7 +501,7 @@ public readonly struct ClothingOutfitTarget : IEquatable<ClothingOutfitTarget>
 			}
 			else
 			{
-				CustomClothingOutfits.Instance.Internal_EditOutfit(this.m_outfitType, name, ClothingOutfitTargetExtensions.NO_ITEMS);
+				CustomClothingOutfits.Instance.Internal_EditOutfit(this.m_outfitType, name, ClothingOutfitTarget.NO_ITEMS);
 			}
 			this.m_outfitId[0] = name;
 		}
@@ -548,12 +570,12 @@ public readonly struct ClothingOutfitTarget : IEquatable<ClothingOutfitTarget>
 			this.resource = outfit;
 		}
 
-		public string[] ReadItems()
+		public string[] ReadItems(ClothingOutfitUtility.OutfitType outfitType)
 		{
 			return this.resource.itemsInOutfit;
 		}
 
-		public void WriteItems(string[] items)
+		public void WriteItems(ClothingOutfitUtility.OutfitType outfitType, string[] items)
 		{
 			throw new InvalidOperationException("Can not set items on a Db authored outfit");
 		}

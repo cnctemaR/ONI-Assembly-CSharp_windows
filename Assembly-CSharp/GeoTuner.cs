@@ -168,7 +168,7 @@ public class GeoTuner : GameStateMachine<GeoTuner, GeoTuner.Instance, IStateMach
 	private static bool GeyserExitEruptionTransition(GeoTuner.Instance smi, float dt)
 	{
 		Geyser assignedGeyser = smi.GetAssignedGeyser();
-		return assignedGeyser != null && assignedGeyser.smi.GetCurrentState().parent != assignedGeyser.smi.sm.erupt;
+		return assignedGeyser != null && assignedGeyser.smi.GetCurrentState() != null && assignedGeyser.smi.GetCurrentState().parent != assignedGeyser.smi.sm.erupt;
 	}
 
 	public static void OnResearchCompleted(GeoTuner.Instance smi)

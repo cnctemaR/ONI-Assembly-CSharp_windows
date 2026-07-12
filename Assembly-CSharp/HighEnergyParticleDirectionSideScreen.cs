@@ -48,7 +48,7 @@ public class HighEnergyParticleDirectionSideScreen : SideScreenContent
 		{
 			flag = flag && component.directionControllable;
 		}
-		bool flag2 = target.GetComponent<HighEnergyParticleSpawner>() != null || target.GetComponent<ManualHighEnergyParticleSpawner>() != null;
+		bool flag2 = target.GetComponent<HighEnergyParticleSpawner>() != null || target.GetComponent<ManualHighEnergyParticleSpawner>() != null || target.GetComponent<DevHEPSpawner>() != null;
 		return (flag || flag2) && target.GetComponent<IHighEnergyParticleDirection>() != null;
 	}
 

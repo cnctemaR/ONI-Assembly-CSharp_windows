@@ -99,7 +99,8 @@ public class SuitMarker : KMonoBehaviour
 				{
 					break;
 				}
-				if (!suit_lockers.Contains(component2))
+				Operational component3 = gameObject.GetComponent<Operational>();
+				if ((!(component3 != null) || component3.GetFlag(BuildingEnabledButton.EnabledFlag)) && !suit_lockers.Contains(component2))
 				{
 					suit_lockers.Add(component2);
 				}
@@ -260,7 +261,7 @@ public class SuitMarker : KMonoBehaviour
 
 		public override bool InternalCanBegin(GameObject newReactor, Navigator.ActiveTransition transition)
 		{
-			return !newReactor.GetComponent<MinionIdentity>().GetEquipment().IsSlotOccupied(Db.Get().AssignableSlots.Suit) && base.InternalCanBegin(newReactor, transition) && Grid.HasSuit(Grid.PosToCell(this.suitMarker), newReactor.GetComponent<KPrefabID>().InstanceID);
+			return !newReactor.GetComponent<MinionIdentity>().GetEquipment().IsSlotOccupied(Db.Get().AssignableSlots.Suit) && base.InternalCanBegin(newReactor, transition);
 		}
 
 		protected override void InternalBegin()
@@ -317,7 +318,8 @@ public class SuitMarker : KMonoBehaviour
 
 		public override bool InternalCanBegin(GameObject newReactor, Navigator.ActiveTransition transition)
 		{
-			return newReactor.GetComponent<MinionIdentity>().GetEquipment().IsSlotOccupied(Db.Get().AssignableSlots.Suit) && base.InternalCanBegin(newReactor, transition);
+			Navigator component = newReactor.GetComponent<Navigator>();
+			return newReactor.GetComponent<MinionIdentity>().GetEquipment().IsSlotOccupied(Db.Get().AssignableSlots.Suit) && component != null && (component.flags & this.suitMarker.PathFlag) > PathFinder.PotentialPath.Flags.None && base.InternalCanBegin(newReactor, transition);
 		}
 
 		protected override void InternalBegin()

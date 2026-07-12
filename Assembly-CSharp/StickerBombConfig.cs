@@ -21,7 +21,7 @@ public class StickerBombConfig : IEntityConfig
 
 	public void OnPrefabInit(GameObject inst)
 	{
-		inst.AddOrGet<OccupyArea>().OccupiedCellsOffsets = new CellOffset[1];
+		inst.AddOrGet<OccupyArea>().SetCellOffsets(new CellOffset[1]);
 		inst.AddComponent<Modifiers>();
 		inst.AddOrGet<DecorProvider>().SetValues(DECOR.BONUS.TIER2);
 	}

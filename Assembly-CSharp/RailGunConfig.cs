@@ -81,18 +81,51 @@ public class RailGunConfig : IBuildingConfig
 		storage.allowSettingOnlyFetchMarkedItems = false;
 		storage.fetchCategory = Storage.FetchCategory.GeneralStorage;
 		storage.capacityKg = 1200f;
+		RailGunConfig.AddVisualizer(go);
 	}
 
 	public override void DoPostConfigurePreview(BuildingDef def, GameObject go)
 	{
-		base.DoPostConfigurePreview(def, go);
 		this.AttachPorts(go);
+		RailGunConfig.AddVisualizer(go);
 	}
 
 	public override void DoPostConfigureUnderConstruction(GameObject go)
 	{
-		base.DoPostConfigureUnderConstruction(go);
 		this.AttachPorts(go);
+		RailGunConfig.AddVisualizer(go);
+	}
+
+	private static void AddVisualizer(GameObject prefab)
+	{
+		SkyVisibilityVisualizer skyVisibilityVisualizer = prefab.AddOrGet<SkyVisibilityVisualizer>();
+		skyVisibilityVisualizer.RangeMin = -2;
+		skyVisibilityVisualizer.RangeMax = 1;
+		skyVisibilityVisualizer.AllOrNothingVisibility = true;
+		prefab.GetComponent<KPrefabID>().instantiateFn += delegate(GameObject go)
+		{
+			go.GetComponent<SkyVisibilityVisualizer>().SkyVisibilityCb = new Func<int, bool>(RailGunConfig.RailGunSkyVisibility);
+		};
+	}
+
+	private static bool RailGunSkyVisibility(int cell)
+	{
+		DebugUtil.DevAssert(ClusterManager.Instance != null, "RailGun assumes DLC", null);
+		if (Grid.IsValidCell(cell) && Grid.WorldIdx[cell] != 255)
+		{
+			int num = (int)ClusterManager.Instance.GetWorld((int)Grid.WorldIdx[cell]).maximumBounds.y;
+			int num2 = cell;
+			while (Grid.CellRow(num2) <= num)
+			{
+				if (!Grid.IsValidCell(num2) || Grid.Solid[num2])
+				{
+					return false;
+				}
+				num2 = Grid.CellAbove(num2);
+			}
+			return true;
+		}
+		return false;
 	}
 
 	public const string ID = "RailGun";

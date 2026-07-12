@@ -1,13 +1,12 @@
 ﻿using System;
-using Database;
 using UnityEngine;
 
-public class KleiItemDropScreen_PermitVis_DupeEquipment : KMonoBehaviour, IKleiItemDropScreen_PermitVis_Target
+public class KleiItemDropScreen_PermitVis_DupeEquipment : KMonoBehaviour
 {
-	public void ConfigureWith(PermitResource permit, PermitPresentationInfo permitPresInfo)
+	public void ConfigureWith(DropScreenPresentationInfo info)
 	{
 		this.dupeKAnim.GetComponent<UIDupeRandomizer>().Randomize();
-		KAnimFile anim = Assets.GetAnim((permit as EquippableFacadeResource).BuildOverride);
+		KAnimFile anim = Assets.GetAnim(info.BuildOverride);
 		this.dupeKAnim.AddAnimOverrides(anim, 0f);
 		KAnimHashedString kanimHashedString = new KAnimHashedString("snapto_neck");
 		KAnim.Build.Symbol symbol = anim.GetData().build.GetSymbol(kanimHashedString);

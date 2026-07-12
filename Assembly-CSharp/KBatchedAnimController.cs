@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using UnityEngine;
 using UnityEngine.UI;
@@ -309,13 +310,43 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 		}
 	}
 
-	public override void UpdateHidden()
+	public override void UpdateHiddenSymbol(KAnimHashedString symbolToUpdate)
+	{
+		KBatchGroupData batchGroupData = KAnimBatchManager.instance.GetBatchGroupData(this.batchGroupID);
+		for (int i = 0; i < batchGroupData.frameElementSymbols.Count; i++)
+		{
+			if (!(symbolToUpdate != batchGroupData.frameElementSymbols[i].hash))
+			{
+				KAnim.Build.Symbol symbol = batchGroupData.frameElementSymbols[i];
+				bool flag = !this.hiddenSymbolsSet.Contains(symbol.hash);
+				base.symbolInstanceGpuData.SetVisible(i, flag);
+			}
+		}
+		this.SetDirty();
+	}
+
+	public override void UpdateHiddenSymbolSet(HashSet<KAnimHashedString> symbolsToUpdate)
+	{
+		KBatchGroupData batchGroupData = KAnimBatchManager.instance.GetBatchGroupData(this.batchGroupID);
+		for (int i = 0; i < batchGroupData.frameElementSymbols.Count; i++)
+		{
+			if (symbolsToUpdate.Contains(batchGroupData.frameElementSymbols[i].hash))
+			{
+				KAnim.Build.Symbol symbol = batchGroupData.frameElementSymbols[i];
+				bool flag = !this.hiddenSymbolsSet.Contains(symbol.hash);
+				base.symbolInstanceGpuData.SetVisible(i, flag);
+			}
+		}
+		this.SetDirty();
+	}
+
+	public override void UpdateAllHiddenSymbols()
 	{
 		KBatchGroupData batchGroupData = KAnimBatchManager.instance.GetBatchGroupData(this.batchGroupID);
 		for (int i = 0; i < batchGroupData.frameElementSymbols.Count; i++)
 		{
 			KAnim.Build.Symbol symbol = batchGroupData.frameElementSymbols[i];
-			bool flag = !this.hiddenSymbols.Contains(symbol.hash);
+			bool flag = !this.hiddenSymbolsSet.Contains(symbol.hash);
 			base.symbolInstanceGpuData.SetVisible(i, flag);
 		}
 		this.SetDirty();
@@ -478,22 +509,19 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 
 	public override Matrix2x3 GetSymbolLocalTransform(HashedString symbol, out bool symbolVisible)
 	{
-		if (this.curAnimFrameIdx != -1 && this.batch != null)
+		KAnim.Anim.Frame frame;
+		if (this.curAnimFrameIdx != -1 && this.batch != null && this.batch.group.data.TryGetFrame(this.curAnimFrameIdx, out frame))
 		{
-			KAnim.Anim.Frame frame = this.batch.group.data.GetFrame(this.curAnimFrameIdx);
-			if (frame != KAnim.Anim.Frame.InvalidFrame)
+			for (int i = 0; i < frame.numElements; i++)
 			{
-				for (int i = 0; i < frame.numElements; i++)
+				int num = frame.firstElementIdx + i;
+				if (num < this.batch.group.data.frameElements.Count)
 				{
-					int num = frame.firstElementIdx + i;
-					if (num < this.batch.group.data.frameElements.Count)
+					KAnim.Anim.FrameElement frameElement = this.batch.group.data.frameElements[num];
+					if (frameElement.symbol == symbol)
 					{
-						KAnim.Anim.FrameElement frameElement = this.batch.group.data.frameElements[num];
-						if (frameElement.symbol == symbol)
-						{
-							symbolVisible = true;
-							return frameElement.transform;
-						}
+						symbolVisible = true;
+						return frameElement.transform;
 					}
 				}
 			}
@@ -539,7 +567,7 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 			this.materialType = KAnimBatchGroup.MaterialType.Human;
 		}
 		this.symbolOverrideController = base.GetComponent<SymbolOverrideController>();
-		this.UpdateHidden();
+		this.UpdateAllHiddenSymbols();
 		this.hasEnableRun = false;
 	}
 

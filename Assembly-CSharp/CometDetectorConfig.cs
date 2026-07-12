@@ -48,7 +48,35 @@ public class CometDetectorConfig : IBuildingConfig
 			go.AddOrGetDef<CometDetector.Def>();
 		}
 		go.GetComponent<KPrefabID>().AddTag(GameTags.OverlayBehindConduits, false);
+		CometDetectorConfig.AddVisualizer(go);
+	}
+
+	public override void DoPostConfigurePreview(BuildingDef def, GameObject go)
+	{
+		CometDetectorConfig.AddVisualizer(go);
+	}
+
+	public override void DoPostConfigureUnderConstruction(GameObject go)
+	{
+		CometDetectorConfig.AddVisualizer(go);
+	}
+
+	private static void AddVisualizer(GameObject prefab)
+	{
+		ScannerNetworkVisualizer scannerNetworkVisualizer = prefab.AddOrGet<ScannerNetworkVisualizer>();
+		scannerNetworkVisualizer.RangeMin = -15;
+		scannerNetworkVisualizer.RangeMax = 15;
 	}
 
 	public static string ID = "CometDetector";
+
+	public const float COVERAGE_REQUIRED_01 = 0.5f;
+
+	public const float BEST_WARNING_TIME_IN_SECONDS = 200f;
+
+	public const float WORST_WARNING_TIME_IN_SECONDS = 1f;
+
+	public const int SCAN_RADIUS = 15;
+
+	public static readonly SkyVisibilityInfo SKY_VISIBILITY_INFO = new SkyVisibilityInfo(new CellOffset(0, 0), 15, new CellOffset(0, 0), 15, 1);
 }

@@ -41,7 +41,9 @@ public class BipedTransitionLayer : TransitionDriver.OverrideLayer
 		int num2 = Grid.PosToCell(navigator);
 		float num3 = 1f;
 		bool flag4 = (navigator.flags & PathFinder.PotentialPath.Flags.HasAtmoSuit) > PathFinder.PotentialPath.Flags.None;
-		if ((navigator.flags & PathFinder.PotentialPath.Flags.HasJetPack) <= PathFinder.PotentialPath.Flags.None && !flag4 && Grid.IsSubstantialLiquid(num2, 0.35f))
+		bool flag5 = (navigator.flags & PathFinder.PotentialPath.Flags.HasJetPack) > PathFinder.PotentialPath.Flags.None;
+		bool flag6 = (navigator.flags & PathFinder.PotentialPath.Flags.HasLeadSuit) > PathFinder.PotentialPath.Flags.None;
+		if (!flag5 && !flag4 && !flag6 && Grid.IsSubstantialLiquid(num2, 0.35f))
 		{
 			num3 = 0.5f;
 		}

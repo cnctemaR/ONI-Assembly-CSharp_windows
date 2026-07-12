@@ -10,16 +10,18 @@ public static class ClothingOutfitUtility
 {
 	public static string GetName(this ClothingOutfitUtility.OutfitType self)
 	{
-		if (self == ClothingOutfitUtility.OutfitType.Clothing)
+		switch (self)
 		{
+		case ClothingOutfitUtility.OutfitType.Clothing:
 			return UI.MINION_BROWSER_SCREEN.OUTFIT_TYPE_CLOTHING;
-		}
-		if (self != ClothingOutfitUtility.OutfitType.JoyResponse)
-		{
+		case ClothingOutfitUtility.OutfitType.JoyResponse:
+			return UI.MINION_BROWSER_SCREEN.OUTFIT_TYPE_JOY_RESPONSE;
+		case ClothingOutfitUtility.OutfitType.AtmoSuit:
+			return UI.MINION_BROWSER_SCREEN.OUTFIT_TYPE_ATMOSUIT;
+		default:
 			DebugUtil.DevAssert(false, string.Format("Couldn't find name for outfit type: {0}", self), null);
 			return self.ToString();
 		}
-		return UI.MINION_BROWSER_SCREEN.OUTFIT_TYPE_JOY_RESPONSE;
 	}
 
 	public static bool SaveClothingOutfitData()
@@ -33,7 +35,7 @@ public static class ClothingOutfitUtility
 		{
 			Directory.CreateDirectory(text);
 		}
-		string text2 = Path.Combine(text, ClothingOutfitUtility.outfitfile);
+		string text2 = Path.Combine(text, ClothingOutfitUtility.OutfitFile_U47_to_Present);
 		string text3 = SerializableOutfitData.ToJsonString(SerializableOutfitData.ToJson(CustomClothingOutfits.Instance.Internal_GetOutfitData()));
 		bool flag = false;
 		try
@@ -47,27 +49,46 @@ public static class ClothingOutfitUtility
 		}
 		catch (Exception)
 		{
-			Debug.LogWarningFormat("SaveClothingOutfitData failed", Array.Empty<object>());
+			DebugUtil.DevAssert(false, "SaveClothingOutfitData failed", null);
 		}
 		return flag;
 	}
 
 	public static void LoadClothingOutfitData(ClothingOutfits dbClothingOutfits)
 	{
-		string text = Path.Combine(Util.RootFolder(), Util.GetKleiItemUserDataFolderName(), ClothingOutfitUtility.outfitfile);
-		if (!File.Exists(text))
+		SerializableOutfitData.Version2 version = null;
+		bool flag;
+		try
+		{
+			string text = Path.Combine(Util.RootFolder(), Util.GetKleiItemUserDataFolderName(), ClothingOutfitUtility.OutfitFile_U47_to_Present);
+			if (!File.Exists(text))
+			{
+				text = Path.Combine(Util.RootFolder(), Util.GetKleiItemUserDataFolderName(), ClothingOutfitUtility.OutfitFile_U44_to_U46);
+				if (!File.Exists(text))
+				{
+					return;
+				}
+			}
+			string text2;
+			using (FileStream fileStream = File.Open(text, FileMode.Open))
+			{
+				using (StreamReader streamReader = new StreamReader(fileStream, new UTF8Encoding(false, true)))
+				{
+					text2 = streamReader.ReadToEnd();
+				}
+			}
+			version = SerializableOutfitData.FromJson(JObject.Parse(text2));
+			flag = true;
+		}
+		catch
+		{
+			flag = false;
+			DebugUtil.DevAssert(false, "LoadClothingOutfitData failed", null);
+		}
+		if (!flag || version == null)
 		{
 			return;
 		}
-		string text2;
-		using (FileStream fileStream = File.Open(text, FileMode.Open))
-		{
-			using (StreamReader streamReader = new StreamReader(fileStream, new UTF8Encoding(false, true)))
-			{
-				text2 = streamReader.ReadToEnd();
-			}
-		}
-		SerializableOutfitData.Version2 version = SerializableOutfitData.FromJson(JObject.Parse(text2));
 		foreach (KeyValuePair<string, SerializableOutfitData.Version2.CustomTemplateOutfitEntry> keyValuePair in version.OutfitIdToUserAuthoredTemplateOutfit)
 		{
 			string text3;
@@ -81,13 +102,13 @@ public static class ClothingOutfitUtility
 			}
 		}
 		List<string> list = new List<string>();
-		foreach (KeyValuePair<string, Dictionary<ClothingOutfitUtility.OutfitType, string>> keyValuePair2 in version.PersonalityIdToAssignedOutfits)
+		foreach (KeyValuePair<string, Dictionary<string, string>> keyValuePair2 in version.PersonalityIdToAssignedOutfits)
 		{
 			string text3;
-			Dictionary<ClothingOutfitUtility.OutfitType, string> dictionary;
-			keyValuePair2.Deconstruct<string, Dictionary<ClothingOutfitUtility.OutfitType, string>>(out text3, out dictionary);
+			Dictionary<string, string> dictionary;
+			keyValuePair2.Deconstruct<string, Dictionary<string, string>>(out text3, out dictionary);
 			string text5 = text3;
-			Dictionary<ClothingOutfitUtility.OutfitType, string> dictionary2 = dictionary;
+			Dictionary<string, string> dictionary2 = dictionary;
 			Personality personalityFromNameStringKey = Db.Get().Personalities.GetPersonalityFromNameStringKey(text5);
 			if (personalityFromNameStringKey.IsNullOrDestroyed())
 			{
@@ -95,13 +116,17 @@ public static class ClothingOutfitUtility
 			}
 			else
 			{
-				foreach (KeyValuePair<ClothingOutfitUtility.OutfitType, string> keyValuePair3 in dictionary2)
+				foreach (KeyValuePair<string, string> keyValuePair3 in dictionary2)
 				{
+					string text6;
+					keyValuePair3.Deconstruct<string, string>(out text3, out text6);
+					string text7 = text3;
+					string text8 = text6;
 					ClothingOutfitUtility.OutfitType outfitType;
-					keyValuePair3.Deconstruct<ClothingOutfitUtility.OutfitType, string>(out outfitType, out text3);
-					ClothingOutfitUtility.OutfitType outfitType2 = outfitType;
-					string text6 = text3;
-					personalityFromNameStringKey.Internal_SetSelectedTemplateOutfitId(outfitType2, text6);
+					if (Enum.TryParse<ClothingOutfitUtility.OutfitType>(text7, true, out outfitType))
+					{
+						personalityFromNameStringKey.Internal_SetSelectedTemplateOutfitId(outfitType, text8);
+					}
 				}
 				if (text5 != personalityFromNameStringKey.Id)
 				{
@@ -109,30 +134,30 @@ public static class ClothingOutfitUtility
 				}
 			}
 		}
-		foreach (string text7 in list)
+		foreach (string text9 in list)
 		{
-			Personality personalityFromNameStringKey2 = Db.Get().Personalities.GetPersonalityFromNameStringKey(text7);
-			if (!personalityFromNameStringKey2.IsNullOrDestroyed() && version.PersonalityIdToAssignedOutfits.ContainsKey(text7))
+			Personality personalityFromNameStringKey2 = Db.Get().Personalities.GetPersonalityFromNameStringKey(text9);
+			if (!personalityFromNameStringKey2.IsNullOrDestroyed() && version.PersonalityIdToAssignedOutfits.ContainsKey(text9))
 			{
 				string id = personalityFromNameStringKey2.Id;
-				Dictionary<ClothingOutfitUtility.OutfitType, string> dictionary3 = version.PersonalityIdToAssignedOutfits[text7];
-				version.PersonalityIdToAssignedOutfits.Remove(text7);
-				Dictionary<ClothingOutfitUtility.OutfitType, string> dictionary4;
+				Dictionary<string, string> dictionary3 = version.PersonalityIdToAssignedOutfits[text9];
+				version.PersonalityIdToAssignedOutfits.Remove(text9);
+				Dictionary<string, string> dictionary4;
 				if (version.PersonalityIdToAssignedOutfits.TryGetValue(id, out dictionary4))
 				{
-					using (Dictionary<ClothingOutfitUtility.OutfitType, string>.Enumerator enumerator3 = dictionary3.GetEnumerator())
+					using (Dictionary<string, string>.Enumerator enumerator3 = dictionary3.GetEnumerator())
 					{
 						while (enumerator3.MoveNext())
 						{
-							KeyValuePair<ClothingOutfitUtility.OutfitType, string> keyValuePair4 = enumerator3.Current;
+							KeyValuePair<string, string> keyValuePair4 = enumerator3.Current;
 							string text3;
-							ClothingOutfitUtility.OutfitType outfitType;
-							keyValuePair4.Deconstruct<ClothingOutfitUtility.OutfitType, string>(out outfitType, out text3);
-							ClothingOutfitUtility.OutfitType outfitType3 = outfitType;
-							string text8 = text3;
-							if (!dictionary4.ContainsKey(outfitType3))
+							string text6;
+							keyValuePair4.Deconstruct<string, string>(out text6, out text3);
+							string text10 = text6;
+							string text11 = text3;
+							if (!dictionary4.ContainsKey(text10))
 							{
-								dictionary4[outfitType3] = text8;
+								dictionary4[text10] = text11;
 							}
 						}
 						continue;
@@ -152,12 +177,24 @@ public static class ClothingOutfitUtility
 		PermitCategory.DupeShoes
 	};
 
-	private static string outfitfile = "OutfitUserData.json";
+	public static readonly PermitCategory[] PERMIT_CATEGORIES_FOR_ATMO_SUITS = new PermitCategory[]
+	{
+		PermitCategory.AtmoSuitHelmet,
+		PermitCategory.AtmoSuitBody,
+		PermitCategory.AtmoSuitGloves,
+		PermitCategory.AtmoSuitBelt,
+		PermitCategory.AtmoSuitShoes
+	};
+
+	private static string OutfitFile_U44_to_U46 = "OutfitUserData.json";
+
+	private static string OutfitFile_U47_to_Present = "OutfitUserData2.json";
 
 	public enum OutfitType
 	{
 		Clothing,
 		JoyResponse,
+		AtmoSuit,
 		LENGTH
 	}
 }

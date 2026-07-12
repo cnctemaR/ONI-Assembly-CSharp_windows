@@ -18,12 +18,41 @@ public class MoveToLocationTool : InterfaceTool
 	public void Activate(Navigator navigator)
 	{
 		this.targetNavigator = navigator;
+		this.targetMovable = null;
+		PlayerController.Instance.ActivateTool(this);
+	}
+
+	public void Activate(Movable movable)
+	{
+		this.targetNavigator = null;
+		this.targetMovable = movable;
 		PlayerController.Instance.ActivateTool(this);
 	}
 
 	public bool CanMoveTo(int target_cell)
 	{
-		return this.targetNavigator.CanReach(target_cell);
+		if (this.targetNavigator != null)
+		{
+			return this.targetNavigator.GetSMI<MoveToLocationMonitor.Instance>() != null && this.targetNavigator.CanReach(target_cell);
+		}
+		return this.targetMovable != null && this.targetMovable.CanMoveTo(target_cell);
+	}
+
+	private void SetMoveToLocation(int target_cell)
+	{
+		if (this.targetNavigator != null)
+		{
+			MoveToLocationMonitor.Instance smi = this.targetNavigator.GetSMI<MoveToLocationMonitor.Instance>();
+			if (smi != null)
+			{
+				smi.MoveToLocation(target_cell);
+				return;
+			}
+		}
+		else if (this.targetMovable != null)
+		{
+			this.targetMovable.MoveToLocation(target_cell);
+		}
 	}
 
 	protected override void OnActivateTool()
@@ -45,14 +74,13 @@ public class MoveToLocationTool : InterfaceTool
 	public override void OnLeftClickDown(Vector3 cursor_pos)
 	{
 		base.OnLeftClickDown(cursor_pos);
-		if (this.targetNavigator != null)
+		if (this.targetNavigator != null || this.targetMovable != null)
 		{
 			int mouseCell = DebugHandler.GetMouseCell();
-			MoveToLocationMonitor.Instance smi = this.targetNavigator.GetSMI<MoveToLocationMonitor.Instance>();
-			if (this.CanMoveTo(mouseCell) && smi != null)
+			if (this.CanMoveTo(mouseCell))
 			{
 				KMonoBehaviour.PlaySound(GlobalAssets.GetSound("HUD_Click", false));
-				smi.MoveToLocation(mouseCell);
+				this.SetMoveToLocation(mouseCell);
 				SelectTool.Instance.Activate();
 				return;
 			}
@@ -84,4 +112,6 @@ public class MoveToLocationTool : InterfaceTool
 	public static MoveToLocationTool Instance;
 
 	private Navigator targetNavigator;
+
+	private Movable targetMovable;
 }

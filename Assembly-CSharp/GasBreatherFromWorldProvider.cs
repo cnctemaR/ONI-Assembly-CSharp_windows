@@ -28,6 +28,11 @@ public class GasBreatherFromWorldProvider : OxygenBreather.IGasProvider
 		return false;
 	}
 
+	public bool IsLowOxygen()
+	{
+		return this.oxygenBreather.IsLowOxygenAtMouthCell();
+	}
+
 	public bool ConsumeGas(OxygenBreather oxygen_breather, float gas_consumed)
 	{
 		if (this.nav.CurrentNavType != NavType.Tube)

@@ -1691,6 +1691,20 @@ namespace STRINGS
 
 						public static LocString DESC = "The perfect painting for dark, dank spaces.";
 					}
+
+					public class ART_L
+					{
+						public static LocString NAME = UI.FormatAsLink("Post-Ear Era", "ART_L");
+
+						public static LocString DESC = "The furry hat helped keep the artist's bandage on.";
+					}
+
+					public class ART_M
+					{
+						public static LocString NAME = UI.FormatAsLink("Maternal Gaze", "ART_M");
+
+						public static LocString DESC = "She's not angry, just disappointed.";
+					}
 				}
 			}
 
@@ -1779,6 +1793,20 @@ namespace STRINGS
 
 						public static LocString DESC = "A moody study of the renowned tunneler.";
 					}
+
+					public class ART_WIDE_J
+					{
+						public static LocString NAME = UI.FormatAsLink("The Swell Swell", "ART_WIDE_J");
+
+						public static LocString DESC = "As far as wave-themed art goes, it's great.";
+					}
+
+					public class ART_WIDE_K
+					{
+						public static LocString NAME = UI.FormatAsLink("Flight of the Slicksters", "ART_WIDE_K");
+
+						public static LocString DESC = "The delight on the subjects' faces is contagious.";
+					}
 				}
 			}
 
@@ -1866,6 +1894,20 @@ namespace STRINGS
 						public static LocString NAME = UI.FormatAsLink("Pei Phone", "ART_TALL_I");
 
 						public static LocString DESC = "When the future calls, Duplicants answer.";
+					}
+
+					public class ART_TALL_J
+					{
+						public static LocString NAME = UI.FormatAsLink("Duplicants of the Galaxy", "ART_TALL_J");
+
+						public static LocString DESC = "A poster for a blockbuster film that was never made.";
+					}
+
+					public class ART_TALL_K
+					{
+						public static LocString NAME = UI.FormatAsLink("Cubist Loo", "ART_TALL_K");
+
+						public static LocString DESC = "The glass and frame are hydrophobic, for easy cleaning.";
 					}
 				}
 			}
@@ -2260,6 +2302,44 @@ namespace STRINGS
 					UI.FormatAsLink("Morale", "MORALE"),
 					".\n\nMust be hung from a ceiling."
 				});
+
+				public class FACADES
+				{
+					public class RETRO_RED
+					{
+						public static LocString NAME = UI.FormatAsLink("Bold Hanging Pot", "FLOWERVASEHANGING");
+
+						public static LocString DESC = "Suspended vessels really elevate a plant display.";
+					}
+
+					public class RETRO_GREEN
+					{
+						public static LocString NAME = UI.FormatAsLink("Bright Hanging Pot", "FLOWERVASEHANGING");
+
+						public static LocString DESC = "Suspended vessels really elevate a plant display.";
+					}
+
+					public class RETRO_BLUE
+					{
+						public static LocString NAME = UI.FormatAsLink("Dreamy Hanging Pot", "FLOWERVASEHANGING");
+
+						public static LocString DESC = "Suspended vessels really elevate a plant display.";
+					}
+
+					public class RETRO_YELLOW
+					{
+						public static LocString NAME = UI.FormatAsLink("Sunny Hanging Pot", "FLOWERVASEHANGING");
+
+						public static LocString DESC = "Suspended vessels really elevate a plant display.";
+					}
+
+					public class RETRO_WHITE
+					{
+						public static LocString NAME = UI.FormatAsLink("Elegant Hanging Pot", "FLOWERVASEHANGING");
+
+						public static LocString DESC = "Suspended vessels really elevate a plant display.";
+					}
+				}
 			}
 
 			public class FLOWERVASEHANGINGFANCY
@@ -3364,7 +3444,28 @@ namespace STRINGS
 					{
 						public static LocString NAME = UI.FormatAsLink("Juicy Watermelon", "EXTERIORWALL");
 
-						public static LocString DESC = "Far more practical than gluing real fruit at a wall.";
+						public static LocString DESC = "Far more practical than gluing real fruit on a wall.";
+					}
+
+					public class TROPICAL
+					{
+						public static LocString NAME = UI.FormatAsLink("Sporechid Print", "EXTERIORWALL");
+
+						public static LocString DESC = "The original scratch-and-sniff version was immediately recalled.";
+					}
+
+					public class TOILETPAPER
+					{
+						public static LocString NAME = UI.FormatAsLink("De-loo-xe", "EXTERIORWALL");
+
+						public static LocString DESC = "Softly undulating lines create an undeniable air of loo-xury.";
+					}
+
+					public class PLUNGER
+					{
+						public static LocString NAME = UI.FormatAsLink("Plunger Print", "EXTERIORWALL");
+
+						public static LocString DESC = "Unclogs one's creative impulses.";
 					}
 				}
 			}
@@ -4294,14 +4395,14 @@ namespace STRINGS
 					{
 						public static LocString NAME = UI.FormatAsLink("Cubi I", "ICESCULPTURE_CRAP");
 
-						public static LocString DESC = "";
+						public static LocString DESC = "It's structurally unsound, but otherwise not entirely terrible.";
 					}
 
 					public class ICESCULPTURE_AMAZING_1
 					{
 						public static LocString NAME = UI.FormatAsLink("Exquisite Chompers", "ICESCULPTURE_AMAZING_1");
 
-						public static LocString DESC = "";
+						public static LocString DESC = "These incisors are the stuff of dental legend.";
 					}
 
 					public class ICESCULPTURE_AMAZING_2
@@ -5612,7 +5713,7 @@ namespace STRINGS
 
 				public static LocString DESC = "Build this feeder above a body of water to feed the fish within.";
 
-				public static LocString EFFECT = "Automatically dispenses stored " + UI.FormatAsLink("Critter", "CRITTERS") + " food into the area below.\n\nDispenses once per day.";
+				public static LocString EFFECT = "Automatically dispenses stored " + UI.FormatAsLink("Critter", "CRITTERS") + " food into the area below.\n\nDispenses continuously as food is consumed.";
 			}
 
 			public class FISHTRAP
@@ -7125,6 +7226,21 @@ namespace STRINGS
 				public static LocString DESC = "Radbolts are necessary for producing Materials Science research.";
 
 				public static LocString EFFECT = "Attracts nearby " + UI.FormatAsLink("Radiation", "RADIATION") + " to generate Radbolts.\n\nEmits generated Radbolts in the direction of your choosing when the set Radbolt threshold is reached.\n\nRadbolts collected will rapidly decay while this building is disabled.";
+
+				public static LocString LOGIC_PORT = "Do not emit Radbolts";
+
+				public static LocString LOGIC_PORT_ACTIVE = UI.FormatAsAutomationState("Green Signal", UI.AutomationState.Active) + ": Emit Radbolts";
+
+				public static LocString LOGIC_PORT_INACTIVE = UI.FormatAsAutomationState("Red Signal", UI.AutomationState.Standby) + ": Do not emit Radbolts";
+			}
+
+			public class DEVHEPSPAWNER
+			{
+				public static LocString NAME = "Dev Radbolt Generator";
+
+				public static LocString DESC = "Radbolts are necessary for producing Materials Science research.";
+
+				public static LocString EFFECT = "Generates Radbolts.";
 
 				public static LocString LOGIC_PORT = "Do not emit Radbolts";
 

@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using Klei.AI;
 using KSerialization;
-using UnityEngine;
 
 public class ClusterCometDetector : GameStateMachine<ClusterCometDetector, ClusterCometDetector.Instance, IStateMachineTarget, ClusterCometDetector.Def>
 {
@@ -47,10 +45,7 @@ public class ClusterCometDetector : GameStateMachine<ClusterCometDetector, Clust
 		this.on.working.pre.PlayAnim("detect_pre").OnAnimQueueComplete(this.on.working.loop);
 		this.on.working.loop.PlayAnim("detect_loop", KAnim.PlayMode.Loop).EventTransition(GameHashes.OperationalChanged, this.on.working.pst, (ClusterCometDetector.Instance smi) => !smi.GetComponent<Operational>().IsOperational).EventTransition(GameHashes.ActiveChanged, this.on.working.pst, (ClusterCometDetector.Instance smi) => !smi.GetComponent<Operational>().IsActive)
 			.TagTransition(GameTags.Detecting, this.on.working.pst, true);
-		this.on.working.pst.PlayAnim("detect_pst").OnAnimQueueComplete(this.on.loop).Enter("Reroll", delegate(ClusterCometDetector.Instance smi)
-		{
-			smi.RerollAccuracy();
-		});
+		this.on.working.pst.PlayAnim("detect_pst").OnAnimQueueComplete(this.on.loop);
 	}
 
 	public GameStateMachine<ClusterCometDetector, ClusterCometDetector.Instance, IStateMachineTarget, ClusterCometDetector.Def>.State off;
@@ -87,11 +82,6 @@ public class ClusterCometDetector : GameStateMachine<ClusterCometDetector, Clust
 			: base(master, def)
 		{
 			this.detectorNetworkDef = new DetectorNetwork.Def();
-			this.detectorNetworkDef.interferenceRadius = 15;
-			this.detectorNetworkDef.worstWarningTime = 1f;
-			this.detectorNetworkDef.bestWarningTime = 200f;
-			this.detectorNetworkDef.bestNetworkSize = 6;
-			this.RerollAccuracy();
 		}
 
 		public override void StartSM()
@@ -129,76 +119,35 @@ public class ClusterCometDetector : GameStateMachine<ClusterCometDetector, Clust
 
 		public void ScanSky(bool expectedDetectionForState)
 		{
-			float detectTime = this.GetDetectTime();
-			int myWorldId = this.GetMyWorldId();
-			if (this.GetDetectorState() == ClusterCometDetector.Instance.ClusterCometDetectorState.MeteorShower)
+			Option<SpaceScannerTarget> option;
+			switch (this.GetDetectorState())
 			{
-				SaveGame.Instance.GetComponent<GameplayEventManager>().GetActiveEventsOfType<MeteorShowerEvent>(myWorldId, ref this.meteorShowers);
-				float num = float.MaxValue;
-				foreach (GameplayEventInstance gameplayEventInstance in this.meteorShowers)
+			case ClusterCometDetector.Instance.ClusterCometDetectorState.MeteorShower:
+				option = SpaceScannerTarget.MeteorShower();
+				break;
+			case ClusterCometDetector.Instance.ClusterCometDetectorState.BallisticObject:
+				option = SpaceScannerTarget.BallisticObject();
+				break;
+			case ClusterCometDetector.Instance.ClusterCometDetectorState.Rocket:
+				if (this.targetCraft != null && this.targetCraft.Get() != null)
 				{
-					MeteorShowerEvent.StatesInstance statesInstance = gameplayEventInstance.smi as MeteorShowerEvent.StatesInstance;
-					if (statesInstance != null)
-					{
-						num = Mathf.Min(num, statesInstance.TimeUntilNextShower());
-					}
+					option = SpaceScannerTarget.RocketDlc1(this.targetCraft.Get());
 				}
-				this.meteorShowers.Clear();
-				this.UpdateDetectionState(num < detectTime, expectedDetectionForState);
-			}
-			if (this.GetDetectorState() == ClusterCometDetector.Instance.ClusterCometDetectorState.BallisticObject)
-			{
-				float num2 = float.MaxValue;
-				foreach (object obj in Components.ClusterTravelers)
+				else
 				{
-					ClusterTraveler clusterTraveler = (ClusterTraveler)obj;
-					bool flag = clusterTraveler.IsTraveling();
-					bool flag2 = clusterTraveler.GetComponent<Clustercraft>() != null;
-					if (flag && !flag2 && clusterTraveler.GetDestinationWorldID() == myWorldId)
-					{
-						num2 = Mathf.Min(num2, clusterTraveler.TravelETA());
-					}
+					option = Option.None;
 				}
-				this.UpdateDetectionState(num2 < detectTime, expectedDetectionForState);
+				break;
+			default:
+				throw new NotImplementedException();
 			}
-			if (this.GetDetectorState() == ClusterCometDetector.Instance.ClusterCometDetectorState.Rocket && this.targetCraft != null)
-			{
-				Clustercraft clustercraft = this.targetCraft.Get();
-				if (!clustercraft.IsNullOrDestroyed())
-				{
-					ClusterTraveler component = clustercraft.GetComponent<ClusterTraveler>();
-					bool flag3 = false;
-					if (clustercraft.Status != Clustercraft.CraftStatus.Grounded)
-					{
-						bool flag4 = component.GetDestinationWorldID() == myWorldId;
-						bool flag5 = component.IsTraveling();
-						bool flag6 = clustercraft.HasResourcesToMove(1, Clustercraft.CombustionResource.All);
-						float num3 = component.TravelETA();
-						flag3 = (flag4 && flag5 && flag6 && num3 < detectTime) || (!flag5 && flag4 && clustercraft.Status == Clustercraft.CraftStatus.Landing);
-						if (!flag3)
-						{
-							ClusterGridEntity adjacentAsteroid = clustercraft.GetAdjacentAsteroid();
-							flag3 = ((adjacentAsteroid != null) ? ClusterUtil.GetAsteroidWorldIdAtLocation(adjacentAsteroid.Location) : 255) == myWorldId && clustercraft.Status == Clustercraft.CraftStatus.Launching;
-						}
-					}
-					this.UpdateDetectionState(flag3, expectedDetectionForState);
-				}
-			}
-		}
-
-		public void RerollAccuracy()
-		{
-			this.nextAccuracy = global::UnityEngine.Random.value;
+			bool flag = option.IsSome() && Game.Instance.spaceScannerNetworkManager.IsTargetDetectedOnWorld(this.GetMyWorldId(), option.Unwrap());
+			this.UpdateDetectionState(flag, expectedDetectionForState);
 		}
 
 		public void SetLogicSignal(bool on)
 		{
 			base.GetComponent<LogicPorts>().SendSignal(LogicSwitch.PORT_ID, on ? 1 : 0);
-		}
-
-		public float GetDetectTime()
-		{
-			return this.detectorNetwork.GetDetectTimeRange().Lerp(this.nextAccuracy);
 		}
 
 		public void SetDetectorState(ClusterCometDetector.Instance.ClusterCometDetectorState newState)
@@ -223,31 +172,17 @@ public class ClusterCometDetector : GameStateMachine<ClusterCometDetector, Clust
 
 		public Clustercraft GetClustercraftTarget()
 		{
-			Ref<Clustercraft> @ref = this.targetCraft;
-			if (@ref == null)
+			if (this.targetCraft == null)
 			{
 				return null;
 			}
-			return @ref.Get();
+			return this.targetCraft.Get();
 		}
 
 		public bool ShowWorkingStatus;
 
-		private const float BEST_WARNING_TIME = 200f;
-
-		private const float WORST_WARNING_TIME = 1f;
-
-		private const float VARIANCE = 50f;
-
-		private const int MAX_DISH_COUNT = 6;
-
-		private const int INTERFERENCE_RADIUS = 15;
-
 		[Serialize]
 		private ClusterCometDetector.Instance.ClusterCometDetectorState detectorState;
-
-		[Serialize]
-		private float nextAccuracy;
 
 		[Serialize]
 		private Ref<Clustercraft> targetCraft;

@@ -69,6 +69,7 @@ public class MissileLauncherConfig : IBuildingConfig
 		manualDeliveryKG.refillMass = 5f;
 		manualDeliveryKG.MinimumMass = 1f;
 		manualDeliveryKG.capacity = storage.Capacity() / 10f;
+		manualDeliveryKG.MassPerUnit = 10f;
 		SolidConduitConsumer solidConduitConsumer = go.AddOrGet<SolidConduitConsumer>();
 		solidConduitConsumer.alwaysConsume = true;
 		solidConduitConsumer.capacityKG = storage.Capacity();
@@ -78,15 +79,44 @@ public class MissileLauncherConfig : IBuildingConfig
 	private void AddVisualizer(GameObject go)
 	{
 		RangeVisualizer rangeVisualizer = go.AddOrGet<RangeVisualizer>();
-		rangeVisualizer.RangeMin.x = MissileLauncher.Def.LaunchOffset.x - MissileLauncher.Def.launchRange.x;
-		rangeVisualizer.RangeMax.x = MissileLauncher.Def.LaunchOffset.x + MissileLauncher.Def.launchRange.x;
-		rangeVisualizer.RangeMin.y = MissileLauncher.Def.LaunchOffset.y;
-		rangeVisualizer.RangeMax.y = MissileLauncher.Def.LaunchOffset.y + MissileLauncher.Def.launchRange.y;
+		rangeVisualizer.OriginOffset = MissileLauncher.Def.LaunchOffset.ToVector2I();
+		rangeVisualizer.RangeMin.x = -MissileLauncher.Def.launchRange.x;
+		rangeVisualizer.RangeMax.x = MissileLauncher.Def.launchRange.x;
+		rangeVisualizer.RangeMin.y = 0;
+		rangeVisualizer.RangeMax.y = MissileLauncher.Def.launchRange.y;
+		rangeVisualizer.AllowLineOfSightInvalidCells = true;
+		go.GetComponent<KPrefabID>().instantiateFn += delegate(GameObject go)
+		{
+			go.GetComponent<RangeVisualizer>().BlockingCb = new Func<int, bool>(MissileLauncherConfig.IsCellSkyBlocked);
+		};
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
 		SymbolOverrideControllerUtil.AddToPrefab(go);
+	}
+
+	public static bool IsCellSkyBlocked(int cell)
+	{
+		if (PlayerController.Instance != null)
+		{
+			int num = Grid.InvalidCell;
+			BuildTool buildTool = PlayerController.Instance.ActiveTool as BuildTool;
+			SelectTool selectTool = PlayerController.Instance.ActiveTool as SelectTool;
+			if (buildTool != null)
+			{
+				num = buildTool.GetLastCell;
+			}
+			else if (selectTool != null)
+			{
+				num = Grid.PosToCell(selectTool.selected);
+			}
+			if (Grid.IsValidCell(cell) && Grid.IsValidCell(num) && Grid.WorldIdx[cell] == Grid.WorldIdx[num])
+			{
+				return Grid.Solid[cell];
+			}
+		}
+		return false;
 	}
 
 	public const string ID = "MissileLauncher";

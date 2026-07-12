@@ -60,8 +60,8 @@ public class BlinkMonitor : GameStateMachine<BlinkMonitor, BlinkMonitor.Instance
 		{
 			return;
 		}
-		KAnim.Anim.Frame frame = smi.eyes.GetBatch().group.data.GetFrame(currentFrameIndex);
-		if (frame == KAnim.Anim.Frame.InvalidFrame)
+		KAnim.Anim.Frame frame;
+		if (!smi.eyes.GetBatch().group.data.TryGetFrame(currentFrameIndex, out frame))
 		{
 			return;
 		}

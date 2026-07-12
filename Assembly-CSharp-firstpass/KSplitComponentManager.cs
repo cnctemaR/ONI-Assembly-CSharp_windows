@@ -22,7 +22,7 @@ public abstract class KSplitComponentManager<Header, Payload> : KSplitCompactedV
 		this.RemoveFromCleanupList(instance);
 		if (!this.instanceHandleMap.TryGetValue(instance, out handle))
 		{
-			handle = base.Allocate(header, ref payload);
+			handle = base.Allocate(in header, in payload);
 			this.instanceHandleMap[instance] = handle;
 		}
 		else

@@ -71,26 +71,6 @@ public class KAnimFileData
 		return null;
 	}
 
-	public KAnim.Anim.FrameElement GetAnimFrameElement(int index)
-	{
-		global::Debug.Assert(index >= 0 && index < this.elementCount);
-		KBatchGroupData batchGroupData = KAnimBatchManager.Instance().GetBatchGroupData(this.animBatchTag);
-		if (batchGroupData == null)
-		{
-			global::Debug.LogErrorFormat("[{0}] No such batch group [{1}]", new object[]
-			{
-				this.name,
-				this.animBatchTag.ToString()
-			});
-		}
-		return batchGroupData.GetFrameElement(this.firstElementIndex + index);
-	}
-
-	public KAnim.Anim.FrameElement FindAnimFrameElement(KAnimHashedString symbolName)
-	{
-		return KAnimBatchManager.Instance().GetBatchGroupData(this.animBatchTag).frameElements.Find((KAnim.Anim.FrameElement match) => match.symbol == symbolName);
-	}
-
 	public const int NO_RECORD = -1;
 
 	public int index;

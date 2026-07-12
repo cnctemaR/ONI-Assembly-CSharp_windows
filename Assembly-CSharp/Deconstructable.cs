@@ -130,7 +130,7 @@ public class Deconstructable : Workable
 			}
 			component2.DestroySelf(delegate
 			{
-				this.TriggerDestroy(temperature, disease_idx, disease_count);
+				this.TriggerDestroy(temperature, disease_idx, disease_count, worker);
 			});
 		}
 		else
@@ -165,16 +165,21 @@ public class Deconstructable : Workable
 		return this.TriggerDestroy(temperature, diseaseIdx, diseaseCount);
 	}
 
-	private List<GameObject> TriggerDestroy(float temperature, byte disease_idx, int disease_count)
+	private List<GameObject> TriggerDestroy(float temperature, byte disease_idx, int disease_count, Worker tile_worker)
 	{
 		if (this == null || this.destroyed)
 		{
 			return null;
 		}
-		List<GameObject> list = this.SpawnItemsFromConstruction(temperature, disease_idx, disease_count);
+		List<GameObject> list = this.SpawnItemsFromConstruction(temperature, disease_idx, disease_count, tile_worker);
 		this.destroyed = true;
 		base.gameObject.DeleteObject();
 		return list;
+	}
+
+	private List<GameObject> TriggerDestroy(float temperature, byte disease_idx, int disease_count)
+	{
+		return this.TriggerDestroy(temperature, disease_idx, disease_count, base.worker);
 	}
 
 	private void QueueDeconstruction()
@@ -227,16 +232,16 @@ public class Deconstructable : Workable
 		}
 	}
 
-	public void SpawnItemsFromConstruction()
+	public void SpawnItemsFromConstruction(Worker chore_worker)
 	{
 		PrimaryElement component = base.GetComponent<PrimaryElement>();
 		float temperature = component.Temperature;
 		byte diseaseIdx = component.DiseaseIdx;
 		int diseaseCount = component.DiseaseCount;
-		this.SpawnItemsFromConstruction(temperature, diseaseIdx, diseaseCount);
+		this.SpawnItemsFromConstruction(temperature, diseaseIdx, diseaseCount, chore_worker);
 	}
 
-	private List<GameObject> SpawnItemsFromConstruction(float temperature, byte disease_idx, int disease_count)
+	private List<GameObject> SpawnItemsFromConstruction(float temperature, byte disease_idx, int disease_count, Worker construction_worker)
 	{
 		List<GameObject> list = new List<GameObject>();
 		if (!this.allowDeconstruction)
@@ -256,7 +261,7 @@ public class Deconstructable : Workable
 		int num = 0;
 		while (num < this.constructionElements.Length && array.Length > num)
 		{
-			GameObject gameObject = this.SpawnItem(base.transform.GetPosition(), this.constructionElements[num], array[num], temperature, disease_idx, disease_count);
+			GameObject gameObject = this.SpawnItem(base.transform.GetPosition(), this.constructionElements[num], array[num], temperature, disease_idx, disease_count, construction_worker);
 			int num2 = Grid.PosToCell(gameObject.transform.GetPosition());
 			int num3 = Grid.CellAbove(num2);
 			Vector2 zero;
@@ -279,7 +284,7 @@ public class Deconstructable : Workable
 		return list;
 	}
 
-	public GameObject SpawnItem(Vector3 position, Tag src_element, float src_mass, float src_temperature, byte disease_idx, int disease_count)
+	public GameObject SpawnItem(Vector3 position, Tag src_element, float src_mass, float src_temperature, byte disease_idx, int disease_count, Worker chore_worker)
 	{
 		GameObject gameObject = null;
 		int num = Grid.PosToCell(position);
@@ -300,6 +305,7 @@ public class Deconstructable : Workable
 					num2 -= 400f;
 				}
 				gameObject = element.substance.SpawnResource(Grid.CellToPosCBC(num5, Grid.SceneLayer.Ore), num6, src_temperature, disease_idx, disease_count, false, false, false);
+				gameObject.Trigger(580035959, chore_worker);
 				num3++;
 			}
 		}
@@ -312,6 +318,7 @@ public class Deconstructable : Workable
 				int num9 = Grid.OffsetCell(num, placementOffsets[num8]);
 				gameObject = GameUtil.KInstantiate(Assets.GetPrefab(src_element), Grid.CellToPosCBC(num9, Grid.SceneLayer.Ore), Grid.SceneLayer.Ore, null, 0);
 				gameObject.SetActive(true);
+				gameObject.Trigger(580035959, chore_worker);
 				num7++;
 			}
 		}

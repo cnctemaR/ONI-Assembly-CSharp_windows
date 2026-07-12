@@ -18,7 +18,7 @@ public class FoodSplatConfig : IEntityConfig
 
 	public void OnPrefabInit(GameObject inst)
 	{
-		inst.AddOrGet<OccupyArea>().OccupiedCellsOffsets = new CellOffset[1];
+		inst.AddOrGet<OccupyArea>().SetCellOffsets(new CellOffset[1]);
 		inst.AddComponent<Modifiers>();
 		inst.AddOrGet<KSelectable>();
 		inst.AddOrGet<DecorProvider>().SetValues(DECOR.PENALTY.TIER2);

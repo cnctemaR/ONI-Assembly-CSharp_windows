@@ -41,7 +41,7 @@ public class LeadSuitConfig : IEquipmentConfig
 				Navigator component = targetGameObject.GetComponent<Navigator>();
 				if (component != null)
 				{
-					component.SetFlags(PathFinder.PotentialPath.Flags.HasAtmoSuit);
+					component.SetFlags(PathFinder.PotentialPath.Flags.HasLeadSuit);
 				}
 				MinionResume component2 = targetGameObject.GetComponent<MinionResume>();
 				if (component2 != null && component2.HasPerk(Db.Get().SkillPerks.ExosuitExpertise.Id))
@@ -68,7 +68,7 @@ public class LeadSuitConfig : IEquipmentConfig
 						Navigator component3 = targetGameObject2.GetComponent<Navigator>();
 						if (component3 != null)
 						{
-							component3.ClearFlags(PathFinder.PotentialPath.Flags.HasAtmoSuit);
+							component3.ClearFlags(PathFinder.PotentialPath.Flags.HasLeadSuit);
 						}
 						Effects component4 = targetGameObject2.GetComponent<Effects>();
 						if (component4 != null && component4.HasEffect("SoiledSuit"))
@@ -114,7 +114,7 @@ public class LeadSuitConfig : IEquipmentConfig
 
 	public static ComplexRecipe recipe;
 
-	private const PathFinder.PotentialPath.Flags suit_flags = PathFinder.PotentialPath.Flags.HasAtmoSuit;
+	private const PathFinder.PotentialPath.Flags suit_flags = PathFinder.PotentialPath.Flags.HasLeadSuit;
 
 	private AttributeModifier expertAthleticsModifier;
 }

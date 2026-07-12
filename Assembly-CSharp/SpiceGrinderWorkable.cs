@@ -74,7 +74,5 @@ public class SpiceGrinderWorkable : Workable, IConfigurableConsumer
 	[SerializeField]
 	public Vector3 finishedSeedDropOffset;
 
-	private Notification notification;
-
 	public SpiceGrinder.StatesInstance Grinder;
 }

@@ -210,7 +210,7 @@ public class AutoMiner : StateMachineComponent<AutoMiner.Instance>, ISim1000ms
 					int num8;
 					int num9;
 					Grid.CellToXY(num7, out num8, out num9);
-					if (Grid.IsValidCell(num7) && AutoMiner.ValidDigCell(num7) && Grid.TestLineOfSight(num3, num4, num8, num9, new Func<int, bool>(AutoMiner.DigBlockingCB), false))
+					if (Grid.IsValidCell(num7) && AutoMiner.ValidDigCell(num7) && Grid.TestLineOfSight(num3, num4, num8, num9, new Func<int, bool>(AutoMiner.DigBlockingCB), false, false))
 					{
 						if (num7 == this.dig_cell)
 						{
@@ -241,7 +241,7 @@ public class AutoMiner : StateMachineComponent<AutoMiner.Instance>, ISim1000ms
 
 	public static bool DigBlockingCB(int cell)
 	{
-		return Grid.Foundation[cell] || Grid.Element[cell].hardness >= 150;
+		return (Grid.Foundation[cell] && Grid.Solid[cell]) || Grid.Element[cell].hardness >= 150;
 	}
 
 	private void RotateArm(Vector3 target_dir, bool warp, float dt)

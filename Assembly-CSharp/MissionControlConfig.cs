@@ -41,9 +41,7 @@ public class MissionControlConfig : IBuildingConfig
 		Prioritizable.AddRef(go);
 		go.AddOrGet<BuildingComplete>().isManuallyOperated = true;
 		go.AddOrGetDef<PoweredController.Def>();
-		SkyVisibilityMonitor.Def def2 = go.AddOrGetDef<SkyVisibilityMonitor.Def>();
-		def2.ScanRadius = 1;
-		def2.ScanOriginOffset = new CellOffset(0, def.HeightInCells);
+		go.AddOrGetDef<SkyVisibilityMonitor.Def>().skyVisibilityInfo = MissionControlConfig.SKY_VISIBILITY_INFO;
 		go.AddOrGetDef<MissionControl.Def>();
 		MissionControlWorkable missionControlWorkable = go.AddOrGet<MissionControlWorkable>();
 		missionControlWorkable.requiredSkillPerk = Db.Get().SkillPerks.CanMissionControl.Id;
@@ -55,6 +53,26 @@ public class MissionControlConfig : IBuildingConfig
 		RoomTracker roomTracker = go.AddOrGet<RoomTracker>();
 		roomTracker.requiredRoomType = Db.Get().RoomTypes.Laboratory.Id;
 		roomTracker.requirement = RoomTracker.Requirement.Required;
+		MissionControlConfig.AddVisualizer(go);
+	}
+
+	public override void DoPostConfigurePreview(BuildingDef def, GameObject go)
+	{
+		MissionControlConfig.AddVisualizer(go);
+	}
+
+	public override void DoPostConfigureUnderConstruction(GameObject go)
+	{
+		MissionControlConfig.AddVisualizer(go);
+	}
+
+	private static void AddVisualizer(GameObject prefab)
+	{
+		SkyVisibilityVisualizer skyVisibilityVisualizer = prefab.AddOrGet<SkyVisibilityVisualizer>();
+		skyVisibilityVisualizer.OriginOffset.y = 2;
+		skyVisibilityVisualizer.RangeMin = -1;
+		skyVisibilityVisualizer.RangeMax = 1;
+		skyVisibilityVisualizer.SkipOnModuleInteriors = true;
 	}
 
 	public const string ID = "MissionControl";
@@ -62,4 +80,10 @@ public class MissionControlConfig : IBuildingConfig
 	public const float EFFECT_DURATION = 600f;
 
 	public const float SPEED_MULTIPLIER = 1.2f;
+
+	public const int SCAN_RADIUS = 1;
+
+	public const int VERTICAL_SCAN_OFFSET = 2;
+
+	public static readonly SkyVisibilityInfo SKY_VISIBILITY_INFO = new SkyVisibilityInfo(new CellOffset(0, 2), 1, new CellOffset(0, 2), 1, 0);
 }

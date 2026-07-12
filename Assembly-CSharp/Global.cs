@@ -349,6 +349,10 @@ public class Global : MonoBehaviour
 				global::Debug.Log(string.Concat(array4));
 				ThreadedHttps<KleiAccount>.Instance.AuthenticateUser(new KleiAccount.GetUserIDdelegate(this.OnGetUserIdKey), false);
 			}
+			else
+			{
+				global::Debug.Log("Data collection disabled, account will not be used.");
+			}
 		}
 		else
 		{
@@ -619,7 +623,6 @@ public class Global : MonoBehaviour
 			ThreadedHttps<KleiMetrics>.Instance.SetCallBacks(new global::System.Action(this.SetONIStaticSessionVariables), new Action<Dictionary<string, object>>(this.SetONIDynamicSessionVariables));
 			ThreadedHttps<KleiMetrics>.Instance.StartSession();
 			KleiItems.AddRequestInventoryRefresh();
-			KleiItems.AddRequestUserRewardsInfo();
 		}
 		ThreadedHttps<KleiMetrics>.Instance.SetLastUserAction(KInputManager.lastUserActionTicks);
 		Localization.VerifyTranslationModSubscription(this.globalCanvas);
@@ -632,7 +635,7 @@ public class Global : MonoBehaviour
 	private void SetONIStaticSessionVariables()
 	{
 		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Branch", "release");
-		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Build", 552078U);
+		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Build", 561558U);
 		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("SaveFolderWriteTest", Global.saveFolderTestResult);
 		if (KPlayerPrefs.HasKey(UnitConfigurationScreen.MassUnitKey))
 		{

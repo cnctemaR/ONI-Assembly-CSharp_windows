@@ -35,7 +35,7 @@ public class Accessorizer : KMonoBehaviour
 		}
 		if (this.clothingItems.Count > 0)
 		{
-			base.GetComponent<WearableAccessorizer>().ApplyClothingItems(this.clothingItems.Select<ResourceRef<ClothingItemResource>, ClothingItemResource>((ResourceRef<ClothingItemResource> i) => i.Get()));
+			base.GetComponent<WearableAccessorizer>().ApplyClothingItems(ClothingOutfitUtility.OutfitType.Clothing, this.clothingItems.Select<ResourceRef<ClothingItemResource>, ClothingItemResource>((ResourceRef<ClothingItemResource> i) => i.Get()));
 			this.clothingItems.Clear();
 		}
 		this.ApplyAccessories();

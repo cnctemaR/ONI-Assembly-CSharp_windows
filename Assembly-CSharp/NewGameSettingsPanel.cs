@@ -82,9 +82,9 @@ public class NewGameSettingsPanel : KMonoBehaviour
 		this.settings.ParseAndApplyStoryTraitSettingsCode(code);
 	}
 
-	public void SetSetting(SettingConfig setting, string level)
+	public void SetSetting(SettingConfig setting, string level, bool notify = true)
 	{
-		this.settings.SetQualitySetting(setting, level);
+		this.settings.SetQualitySetting(setting, level, notify);
 	}
 
 	public string GetSetting(SettingConfig setting)

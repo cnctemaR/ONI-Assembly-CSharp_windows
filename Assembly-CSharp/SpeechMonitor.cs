@@ -59,8 +59,8 @@ public class SpeechMonitor : GameStateMachine<SpeechMonitor, SpeechMonitor.Insta
 		{
 			return false;
 		}
-		if (KAnimBatchManager.Instance().GetBatchGroupData(currentAnim.animFile.animBatchTag).GetFrame(currentFrameIndex)
-			.hasHead)
+		KAnim.Anim.Frame frame;
+		if (KAnimBatchManager.Instance().GetBatchGroupData(currentAnim.animFile.animBatchTag).TryGetFrame(currentFrameIndex, out frame) && frame.hasHead)
 		{
 			flag = true;
 		}
@@ -104,8 +104,8 @@ public class SpeechMonitor : GameStateMachine<SpeechMonitor, SpeechMonitor.Insta
 		{
 			return frameElement;
 		}
-		KAnim.Anim.Frame frame = controller.GetBatch().group.data.GetFrame(currentFrameIndex);
-		if (frame == KAnim.Anim.Frame.InvalidFrame)
+		KAnim.Anim.Frame frame;
+		if (!controller.GetBatch().group.data.TryGetFrame(currentFrameIndex, out frame))
 		{
 			return frameElement;
 		}

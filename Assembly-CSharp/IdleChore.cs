@@ -24,6 +24,9 @@ public class IdleChore : Chore<IdleChore.StatesInstance>
 			NavType currentNavType = base.GetComponent<Navigator>().CurrentNavType;
 			base.sm.isOnLadder.Set(currentNavType == NavType.Ladder || currentNavType == NavType.Pole, this, false);
 			base.sm.isOnTube.Set(currentNavType == NavType.Tube, this, false);
+			int num = Grid.PosToCell(base.smi);
+			bool flag = base.sm.isOnSuitMarkerCell.Get(base.smi);
+			base.sm.isOnSuitMarkerCell.Set(Grid.IsValidCell(num) && Grid.HasSuitMarker[num] && !flag, this, false);
 		}
 
 		public int GetIdleCell()
@@ -55,6 +58,7 @@ public class IdleChore : Chore<IdleChore.StatesInstance>
 				.ToggleStateMachine((IdleChore.StatesInstance smi) => new TaskAvailabilityMonitor.Instance(smi.master))
 				.ToggleTag(GameTags.Idle);
 			this.idle.onfloor.PlayAnim("idle_default", KAnim.PlayMode.Loop).ParamTransition<bool>(this.isOnLadder, this.idle.onladder, GameStateMachine<IdleChore.States, IdleChore.StatesInstance, IdleChore, object>.IsTrue).ParamTransition<bool>(this.isOnTube, this.idle.ontube, GameStateMachine<IdleChore.States, IdleChore.StatesInstance, IdleChore, object>.IsTrue)
+				.ParamTransition<bool>(this.isOnSuitMarkerCell, this.idle.onsuitmarker, GameStateMachine<IdleChore.States, IdleChore.StatesInstance, IdleChore, object>.IsTrue)
 				.ToggleScheduleCallback("IdleMove", (IdleChore.StatesInstance smi) => (float)global::UnityEngine.Random.Range(5, 15), delegate(IdleChore.StatesInstance smi)
 				{
 					smi.GoTo(this.idle.move);
@@ -70,6 +74,18 @@ public class IdleChore : Chore<IdleChore.StatesInstance>
 					smi.GoTo(this.idle.move);
 				}
 			}, UpdateRate.SIM_1000ms, false);
+			this.idle.onsuitmarker.PlayAnim("idle_default", KAnim.PlayMode.Loop).Enter(delegate(IdleChore.StatesInstance smi)
+			{
+				Navigator component = smi.GetComponent<Navigator>();
+				int num = Grid.PosToCell(component);
+				Grid.SuitMarker.Flags flags;
+				PathFinder.PotentialPath.Flags flags2;
+				Grid.TryGetSuitMarkerFlags(num, out flags, out flags2);
+				IdleSuitMarkerCellQuery idleSuitMarkerCellQuery = new IdleSuitMarkerCellQuery((flags & Grid.SuitMarker.Flags.Rotated) > (Grid.SuitMarker.Flags)0, Grid.CellToXY(num).X);
+				component.RunQuery(idleSuitMarkerCellQuery);
+				component.GoTo(idleSuitMarkerCellQuery.GetResultCell(), null);
+			}).EventTransition(GameHashes.DestinationReached, this.idle, null)
+				.EventTransition(GameHashes.NavigationFailed, this.idle, null);
 			this.idle.move.Transition(this.idle, (IdleChore.StatesInstance smi) => !smi.HasIdleCell(), UpdateRate.SIM_200ms).TriggerOnEnter(GameHashes.BeginWalk, null).TriggerOnExit(GameHashes.EndWalk, null)
 				.ToggleAnims("anim_loco_walk_kanim", 0f, "")
 				.MoveTo((IdleChore.StatesInstance smi) => smi.GetIdleCell(), this.idle, this.idle, false)
@@ -87,6 +103,8 @@ public class IdleChore : Chore<IdleChore.StatesInstance>
 
 		public StateMachine<IdleChore.States, IdleChore.StatesInstance, IdleChore, object>.BoolParameter isOnTube;
 
+		public StateMachine<IdleChore.States, IdleChore.StatesInstance, IdleChore, object>.BoolParameter isOnSuitMarkerCell;
+
 		public StateMachine<IdleChore.States, IdleChore.StatesInstance, IdleChore, object>.TargetParameter idler;
 
 		public IdleChore.States.IdleState idle;
@@ -98,6 +116,8 @@ public class IdleChore : Chore<IdleChore.StatesInstance>
 			public GameStateMachine<IdleChore.States, IdleChore.StatesInstance, IdleChore, object>.State onladder;
 
 			public GameStateMachine<IdleChore.States, IdleChore.StatesInstance, IdleChore, object>.State ontube;
+
+			public GameStateMachine<IdleChore.States, IdleChore.StatesInstance, IdleChore, object>.State onsuitmarker;
 
 			public GameStateMachine<IdleChore.States, IdleChore.StatesInstance, IdleChore, object>.State move;
 		}

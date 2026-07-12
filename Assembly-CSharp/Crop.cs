@@ -38,7 +38,6 @@ public class Crop : KMonoBehaviour, IGameObjectEffectDescriptor
 	{
 		base.OnSpawn();
 		base.Subscribe<Crop>(1272413801, Crop.OnHarvestDelegate);
-		base.Subscribe<Crop>(-1736624145, Crop.OnSeedDroppedDelegate);
 	}
 
 	public void Configure(Crop.CropVal cropval)
@@ -101,10 +100,6 @@ public class Crop : KMonoBehaviour, IGameObjectEffectDescriptor
 	}
 
 	private void OnHarvest(object obj)
-	{
-	}
-
-	public void OnSeedDropped(object data)
 	{
 	}
 
@@ -175,11 +170,6 @@ public class Crop : KMonoBehaviour, IGameObjectEffectDescriptor
 	private static readonly EventSystem.IntraObjectHandler<Crop> OnHarvestDelegate = new EventSystem.IntraObjectHandler<Crop>(delegate(Crop component, object data)
 	{
 		component.OnHarvest(data);
-	});
-
-	private static readonly EventSystem.IntraObjectHandler<Crop> OnSeedDroppedDelegate = new EventSystem.IntraObjectHandler<Crop>(delegate(Crop component, object data)
-	{
-		component.OnSeedDropped(data);
 	});
 
 	[Serializable]

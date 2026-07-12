@@ -404,6 +404,8 @@ namespace STRINGS
 
 		public static LocString WELCOMEMESSAGEBODY_SPACEDOUT = "The asteroid we call home has collided with an anomalous planet, decimating our colony. Rebuilding it is of the utmost importance.\n\nI've detected a new cluster of material-rich planetoids in nearby space. If I can guide the Duplicants through the perils of space travel, we could build a colony even bigger and better than before.";
 
+		public static LocString WELCOMEMESSAGEBODY_KF23 = "This asteroid is oddly tilted, as though a powerful external force once knocked it off its axis.\n\nI'll need to recalibrate my approach to colony-building in order to make the most of this unusual distribution of resources.";
+
 		public static LocString WELCOMEMESSAGEBEGIN = "BEGIN";
 
 		public static LocString VIEWDUPLICANTS = "Choose a Blueprint";
@@ -3210,6 +3212,8 @@ namespace STRINGS
 						public static LocString NAME = "Worldgen Seed";
 
 						public static LocString TOOLTIP = "This number chooses the procedural parameters that create your unique map\n\nWorldgen seeds can be copied and pasted so others can play a replica of your world configuration";
+
+						public static LocString FIXEDSEED = "This is a predetermined seed, and cannot be changed";
 					}
 
 					public class TELEPORTERS
@@ -3384,6 +3388,8 @@ namespace STRINGS
 
 				public static LocString SHUFFLETOOLTIP = "Reroll World Seed\n\nThis will shuffle the layout of your world and the geographical traits listed below";
 
+				public static LocString SHUFFLETOOLTIP_DISABLED = "This world's seed is predetermined. It cannot be changed";
+
 				public static LocString HEADER_ASTEROID_STARTING = "Starting Asteroid";
 
 				public static LocString HEADER_ASTEROID_NEARBY = "Nearby Asteroids";
@@ -3402,7 +3408,7 @@ namespace STRINGS
 
 				public static LocString TOO_MANY_TRAITS_WARNING = UI.YELLOW_PREFIX + "Too many!" + UI.COLOR_SUFFIX;
 
-				public static LocString TOO_MANY_TRAITS_WARNING_TOOLTIP = UI.YELLOW_PREFIX + "Squeezing this many story traits into this asteroid may cause world gen to fail\n\nConsider lowering the number of story traits or changing the selected asteroid" + UI.COLOR_SUFFIX;
+				public static LocString TOO_MANY_TRAITS_WARNING_TOOLTIP = UI.YELLOW_PREFIX + "Squeezing this many story traits into this asteroid may cause worldgen to fail\n\nConsider lowering the number of story traits or changing the selected asteroid" + UI.COLOR_SUFFIX;
 
 				public static LocString SHUFFLE_STORY_TRAITS_TOOLTIP = "Randomize Story Traits\n\nThis will select a comfortable number of story traits for the starting asteroid";
 
@@ -3430,13 +3436,21 @@ namespace STRINGS
 
 				public static LocString BLANK_DESC = "Select an asteroid style...";
 
-				public static LocString VANILLA_TITLE = "Classic";
+				public static LocString VANILLA_TITLE = "Standard";
 
-				public static LocString VANILLA_DESC = "Scenarios similar to the <b>classic Oxygen Not Included</b> experience. Large starting asteroids with many resources.\nLess emphasis on space travel.";
+				public static LocString VANILLA_DESC = "Scenarios designed for classic gameplay.";
+
+				public static LocString CLASSIC_TITLE = "Classic";
+
+				public static LocString CLASSIC_DESC = "Scenarios similar to the <b>classic Oxygen Not Included</b> experience. Large starting asteroids with many resources.\nLess emphasis on space travel.";
 
 				public static LocString SPACEDOUT_TITLE = "Spaced Out!";
 
 				public static LocString SPACEDOUT_DESC = "Scenarios designed for the <b>Spaced Out! DLC</b>.\nSmaller starting asteroids with resources distributed across the starmap. More emphasis on space travel.";
+
+				public static LocString EVENT_TITLE = "The Lab";
+
+				public static LocString EVENT_DESC = "Alternative gameplay experiences, including experimental scenarios designed for special events.";
 			}
 
 			public class PATCHNOTESSCREEN
@@ -3450,13 +3464,13 @@ namespace STRINGS
 
 			public class MOTD
 			{
-				public static LocString IMAGE_HEADER = "WHATTA BLAST!";
+				public static LocString IMAGE_HEADER = "JUNE 2023 QOL";
 
 				public static LocString NEWS_HEADER = "JOIN THE DISCUSSION";
 
 				public static LocString NEWS_BODY = "Stay up to date by joining our mailing list, or head on over to the forums and join the discussion.";
 
-				public static LocString PATCH_NOTES_SUMMARY = "This update includes:\n\n•<indent=20px>New Meteor Blaster and Blastshot Maker buildings.</indent>\n•<indent=20px>New meteor showers in Spaced Out!</indent>\n•<indent=20px>Customizable meteor shower intensity.</indent>\n•<indent=20px>Bug fixes and quality of life improvements.</indent>\n\n   Check out the full patch notes for more details!";
+				public static LocString PATCH_NOTES_SUMMARY = "This update includes:\n\n•<indent=20px>Significant changes to Space Scanner and telescopes.</indent>\n•<indent=20px>New category of cosmetic skins.</indent>\n•<indent=20px>New Move To tool for transporting objects.</indent>\n•<indent=20px>A strange new asteroid and Puft Atmo Suit skin for Klei Fest.</indent>\n•<indent=20px>Bug fixes and quality of life improvements.</indent>\n\n   Check out the full patch notes for more details!";
 
 				public static LocString UPDATE_TEXT = "LAUNCHED!";
 
@@ -3477,23 +3491,23 @@ namespace STRINGS
 
 				public static LocString SAVEDETAILS = "<b>File:</b> {0}\n\n<b>Save Date:</b>\n{1}\n\n<b>Base Name:</b> {2}\n<b>Duplicants Alive:</b> {3}\n<b>Cycle(s) Survived:</b> {4}";
 
-				public static LocString AUTOSAVEWARNING = "<color=#ff0000>Autosave: This file will get deleted as new autosaves are created</color>";
+				public static LocString AUTOSAVEWARNING = "<color=#F44A47FF>Autosave: This file will get deleted as new autosaves are created</color>";
 
-				public static LocString CORRUPTEDSAVE = "<b><color=#ff0000>Could not load file {0}. Its data may be corrupted.</color></b>";
+				public static LocString CORRUPTEDSAVE = "<b><color=#F44A47FF>Could not load file {0}. Its data may be corrupted.</color></b>";
 
-				public static LocString SAVE_FROM_SPACED_OUT_TOOLTIP = "<color=#ff0000>This save was created in the <i>Spaced Out!</i> DLC. Activate the DLC to play it</color>";
+				public static LocString SAVE_FROM_SPACED_OUT_TOOLTIP = "<color=#F44A47FF>This save was created in the <i>Spaced Out!</i> DLC. Activate the DLC to play it</color>";
 
-				public static LocString SAVE_FROM_VANILLA_TOOLTIP = "<color=#ff0000>This save was created in the base game. Deactivate the <i>Spaced Out!</i> DLC to play it.</color>";
+				public static LocString SAVE_FROM_VANILLA_TOOLTIP = "<color=#F44A47FF>This save was created in the base game. Deactivate the <i>Spaced Out!</i> DLC to play it.</color>";
 
 				public static LocString SAVE_IS_SPACED_OUT_TOOLTIP = "<i>Spaced Out!</i> DLC save";
 
 				public static LocString SAVE_IS_VANILLA_TOOLTIP = "Base game save";
 
-				public static LocString SAVE_TOO_NEW = "<b><color=#ff0000>Could not load file {0}. File is using build {1}, v{2}. This build is {3}, v{4}.</color></b>";
+				public static LocString SAVE_TOO_NEW = "<b><color=#F44A47FF>Could not load file {0}. File is using build {1}, v{2}. This build is {3}, v{4}.</color></b>";
 
-				public static LocString SAVE_MISSING_CONTENT = "<b><color=#ff0000>Could not load file {0}. File was saved with content that is not currently installed.</color></b>";
+				public static LocString SAVE_MISSING_CONTENT = "<b><color=#F44A47FF>Could not load file {0}. File was saved with content that is not currently installed.</color></b>";
 
-				public static LocString UNSUPPORTED_SAVE_VERSION = "<b><color=#ff0000>This save file is from a previous version of the game and is no longer supported.</color></b>";
+				public static LocString UNSUPPORTED_SAVE_VERSION = "<b><color=#F44A47FF>This save file is from a previous version of the game and is no longer supported.</color></b>";
 
 				public static LocString MORE_INFO = "More Info";
 
@@ -3511,11 +3525,13 @@ namespace STRINGS
 
 				public static LocString COLONY_INFO_FMT = "{0}: {1}";
 
+				public static LocString LOAD_MORE_COLONIES_BUTTON = "Load more...";
+
 				public static LocString VANILLA_RESTART = "Loading this colony will require restarting the game with " + UI.DLC1.NAME_ITAL + " content disabled";
 
 				public static LocString EXPANSION1_RESTART = "Loading this colony will require restarting the game with " + UI.DLC1.NAME_ITAL + " content enabled";
 
-				public static LocString UNSUPPORTED_VANILLA_TEMP = "<b><color=#ff0000>This save file is from the base version of the game and currently cannot be loaded while " + UI.DLC1.NAME_ITAL + " is installed.</color></b>";
+				public static LocString UNSUPPORTED_VANILLA_TEMP = "<b><color=#F44A47FF>This save file is from the base version of the game and currently cannot be loaded while " + UI.DLC1.NAME_ITAL + " is installed.</color></b>";
 
 				public static LocString CONTENT = "Content";
 
@@ -4262,15 +4278,15 @@ namespace STRINGS
 			{
 				public static LocString TITLE = "WORLD GENERATION OPTIONS";
 
-				public static LocString USE_SEED = "Set World Gen Seed";
+				public static LocString USE_SEED = "Set Worldgen Seed";
 
 				public static LocString DONE_BUTTON = "Done";
 
 				public static LocString RANDOM_BUTTON = "Randomize";
 
-				public static LocString RANDOM_BUTTON_TOOLTIP = "Randomize a new world gen seed";
+				public static LocString RANDOM_BUTTON_TOOLTIP = "Randomize a new worldgen seed";
 
-				public static LocString TOOLTIP = "This will override the current world gen seed";
+				public static LocString TOOLTIP = "This will override the current worldgen seed";
 			}
 
 			public class METRICS_OPTIONS_SCREEN
@@ -4439,6 +4455,16 @@ namespace STRINGS
 				public static LocString MERGEDOWNCHANGES_SIMULATION = "•<indent=20px>Many <b>simulation bugs</b> have been fixed.</indent>\n•<indent=20px>This may <b>change the effectiveness</b> of certain contraptions and " + BUILDINGS.PREFABS.STEAMTURBINE2.NAME + " setups.</indent>";
 
 				public static LocString MERGEDOWNCHANGES_BUILDINGS = "•<indent=20px>The <b>" + BUILDINGS.PREFABS.OXYGENMASKSTATION.NAME + "</b> has been added to aid early-game exploration.</indent>\n•<indent=20px>Use the new <b>Meter Valves</b> for precise control of resources in pipes.</indent>";
+
+				public static LocString SPACESCANNERANDTELESCOPECHANGES_TITLE = "JUNE 2023 QoL UPDATE CHANGES";
+
+				public static LocString SPACESCANNERANDTELESCOPECHANGES_SUMMARY = "There have been significant changes to <b>Space Scanners</b> and <b>Telescopes</b> since this save file was created!\n\nMeteor showers have been disabled for 20 cycles to provide time to adapt.";
+
+				public static LocString SPACESCANNERANDTELESCOPECHANGES_WARNING = "Please note these changes which may affect your existing colony:\n\n";
+
+				public static LocString SPACESCANNERANDTELESCOPECHANGES_SPACESCANNERS = "•<indent=20px>Automation is synced between all Space Scanners targeting the same object.</indent>\n•<indent=20px>Network quality based on the total percentage of sky covered.</indent>\n•<indent=20px>Industrial machinery no longer impacts network quality.</indent>";
+
+				public static LocString SPACESCANNERANDTELESCOPECHANGES_TELESCOPES = "•<indent=20px>Telescopes have a symmetrical scanning range.</indent>\n•<indent=20px>Obstructions block visibility from the blocked tile out toward the outer edge of scanning range.</indent>";
 			}
 		}
 
@@ -4582,15 +4608,15 @@ namespace STRINGS
 
 				public static LocString DUPE_ACCESSORIES = "Accessories";
 
-				public static LocString ATMO_SUIT_HELMET = "Atmo Suit Helmet";
+				public static LocString ATMO_SUIT_HELMET = "Atmo Helmets";
 
-				public static LocString ATMO_SUIT_BODY = "Atmo Suit Body";
+				public static LocString ATMO_SUIT_BODY = "Atmo Suits";
 
-				public static LocString ATMO_SUIT_GLOVES = "Atmo Suit Gloves";
+				public static LocString ATMO_SUIT_GLOVES = "Atmo Gloves";
 
-				public static LocString ATMO_SUIT_BELT = "Atmo Suit Belt";
+				public static LocString ATMO_SUIT_BELT = "Atmo Belts";
 
-				public static LocString ATMO_SUIT_BOOTS = "Atmo Suit Boots";
+				public static LocString ATMO_SUIT_SHOES = "Atmo Boots";
 
 				public static LocString PRIMOGARB = "Primo Garb";
 
@@ -4667,6 +4693,10 @@ namespace STRINGS
 			public static LocString TOOLTIP_RENAME_OUTFIT = "Rename Outfit";
 
 			public static LocString TOOLTIP_RENAME_OUTFIT_ERROR_READONLY = "This outfit cannot be renamed";
+
+			public static LocString TOOLTIP_FILTER_BY_CLOTHING = "View your Clothing Outfits";
+
+			public static LocString TOOLTIP_FILTER_BY_ATMO_SUITS = "View your Atmo Suit Outfits";
 
 			public static class COLUMN_HEADERS
 			{
@@ -4823,7 +4853,7 @@ namespace STRINGS
 
 			public static LocString NONE = "Default Outfit";
 
-			public static LocString NONE_JOY_RESPONSE = "Default Overjoyed Blueprint";
+			public static LocString NONE_JOY_RESPONSE = "Default Overjoyed Response";
 
 			public static LocString NONE_ATMO_SUIT = "Default Atmo Suit";
 		}
@@ -4832,29 +4862,9 @@ namespace STRINGS
 		{
 			public static LocString CONTAINS_NON_OWNED_ITEMS = "This outfit cannot be worn because my colony doesn't have all of its blueprints yet.";
 
-			public static LocString NO_DUPE_TOPS = "Default Top";
+			public static LocString NO_JOY_RESPONSE_NAME = "Default Overjoyed Response";
 
-			public static LocString NO_DUPE_BOTTOMS = "Default Bottom";
-
-			public static LocString NO_DUPE_GLOVES = "Default Gloves";
-
-			public static LocString NO_DUPE_SHOES = "Default Footwear";
-
-			public static LocString NO_DUPE_HATS = "Default Headgear";
-
-			public static LocString NO_DUPE_ACCESSORIES = "Default Accessory";
-
-			public static LocString NO_JOY_RESPONSE = "Default Overjoyed Response";
-
-			public static LocString NO_ATMO_SUIT_HELMET = "Default Helmet";
-
-			public static LocString NO_ATMO_SUIT_BODY = "Default Body";
-
-			public static LocString NO_ATMO_SUIT_GLOVES = "Default Gloves";
-
-			public static LocString NO_ATMO_SUIT_BELT = "Default Belt";
-
-			public static LocString NO_ATMO_SUIT_BOOTS = "Default Boots";
+			public static LocString NO_JOY_RESPONSE_DESC = "Default response to an overjoyed state.";
 		}
 
 		public class MINION_BROWSER_SCREEN
@@ -5008,6 +5018,46 @@ namespace STRINGS
 			public class JELLYPUFF_WATERMELON
 			{
 				public static LocString NAME = "Watermelon Jelly Outfit";
+			}
+
+			public class ATHLETE
+			{
+				public static LocString NAME = "Racing Outfit";
+			}
+
+			public class CIRCUIT
+			{
+				public static LocString NAME = "LED Party Outfit";
+			}
+
+			public class ATMOSUIT_LIMONE
+			{
+				public static LocString NAME = "Citrus Atmo Outfit";
+			}
+
+			public class ATMOSUIT_SPARKLE_RED
+			{
+				public static LocString NAME = "Red Glitter Atmo Outfit";
+			}
+
+			public class ATMOSUIT_SPARKLE_BLUE
+			{
+				public static LocString NAME = "Blue Glitter Atmo Outfit";
+			}
+
+			public class ATMOSUIT_SPARKLE_GREEN
+			{
+				public static LocString NAME = "Green Glitter Atmo Outfit";
+			}
+
+			public class ATMOSUIT_SPARKLE_LAVENDER
+			{
+				public static LocString NAME = "Violet Glitter Atmo Outfit";
+			}
+
+			public class ATMOSUIT_PUFT
+			{
+				public static LocString NAME = "Puft Atmo Outfit";
 			}
 		}
 
@@ -6797,9 +6847,9 @@ namespace STRINGS
 
 						public static LocString FAILURE = "No crew members have boarded this rocket\n\nDuplicants must be assigned to the rocket crew and have access to the module's hatch to board\n\n    • {0}/{1} Boarded";
 
-						public static LocString WARNING = "Some Duplicants assigned to this rocket crew have not yet boarded\n\n    • {0}/{1} Boarded";
+						public static LocString WARNING = "Some Duplicants assigned to this rocket crew have not yet boarded\n    • {0}/{1} Boarded";
 
-						public static LocString NONE = "There are no Duplicants assigned to this rocket crew\n\n    • {0}/{1} Boarded";
+						public static LocString NONE = "There are no Duplicants assigned to this rocket crew\n    • {0}/{1} Boarded";
 					}
 				}
 
@@ -8356,7 +8406,9 @@ namespace STRINGS
 
 			public static LocString FOOD_AVAILABLE = "Available: {0}";
 
-			public static LocString FOOD_QUALITY = UI.PRE_KEYWORD + "Morale" + UI.PST_KEYWORD + ": {0}";
+			public static LocString FOOD_MORALE = UI.PRE_KEYWORD + "Morale" + UI.PST_KEYWORD + ": {0}";
+
+			public static LocString FOOD_QUALITY = UI.PRE_KEYWORD + "Quality" + UI.PST_KEYWORD + ": {0}";
 
 			public static LocString FOOD_QUALITY_VS_EXPECTATION = string.Concat(new string[]
 			{
@@ -11397,6 +11449,17 @@ namespace STRINGS
 				public static LocString TOOLTIP_OFF = "Cancel this compost order";
 			}
 
+			public class PICKUPABLEMOVE
+			{
+				public static LocString NAME = "Move To";
+
+				public static LocString TOOLTIP = "Move this object to a specific location";
+
+				public static LocString NAME_OFF = "Cancel Move";
+
+				public static LocString TOOLTIP_OFF = "Cancel order to move this object";
+			}
+
 			public class UNEQUIP
 			{
 				public static LocString NAME = "Unequip {0}";
@@ -12747,6 +12810,8 @@ namespace STRINGS
 				public static LocString GROUPNAME_WORLDTRAITS = "WORLD TRAITS";
 
 				public static LocString GROUPNAME_CLUSTER_POI = "POINT OF INTEREST";
+
+				public static LocString GROUPNAME_MOVABLE = "MOVING";
 
 				public static LocString NO_METEORSHOWERS = "No meteor showers forecasted";
 
@@ -14353,6 +14418,8 @@ namespace STRINGS
 
 			public static LocString FOOD_QUALITY = "Quality: {0}";
 
+			public static LocString FOOD_MORALE = "Morale: {0}";
+
 			public static LocString FORGAVEATTACKER = "Forgiveness";
 
 			public static LocString COLDBREATHER = UI.FormatAsLink("Cooling Effect", "HEAT");
@@ -14445,6 +14512,8 @@ namespace STRINGS
 				public static LocString CALORIES = "+{0}";
 
 				public static LocString FOOD_QUALITY = "Quality: {0}";
+
+				public static LocString FOOD_MORALE = "Morale: {0}";
 
 				public static LocString COLDBREATHER = "Lowers ambient air temperature";
 

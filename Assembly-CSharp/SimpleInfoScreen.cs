@@ -12,6 +12,8 @@ public class SimpleInfoScreen : TargetScreen, ISim4000ms, ISim1000ms
 {
 	public GameObject StoragePanel { get; private set; }
 
+	public GameObject MovePanel { get; private set; }
+
 	public override bool IsValidForTarget(GameObject target)
 	{
 		return true;
@@ -57,6 +59,8 @@ public class SimpleInfoScreen : TargetScreen, ISim4000ms, ISim1000ms
 		this.StoragePanel = global::Util.KInstantiateUI(ScreenPrefabs.Instance.CollapsableContentPanel, base.gameObject, false);
 		this.stressPanel = global::Util.KInstantiateUI(ScreenPrefabs.Instance.CollapsableContentPanel, base.gameObject, false);
 		this.stressDrawer = new DetailsPanelDrawer(this.attributesLabelTemplate, this.stressPanel.GetComponent<CollapsibleDetailContentPanel>().Content.gameObject);
+		this.MovePanel = global::Util.KInstantiateUI(ScreenPrefabs.Instance.CollapsableContentPanel, base.gameObject, false);
+		this.MovePanel.GetComponent<CollapsibleDetailContentPanel>().SetTitle(UI.DETAILTABS.SIMPLEINFO.GROUPNAME_MOVABLE);
 		this.stampContainer = global::Util.KInstantiateUI(this.StampContainerTemplate, gameObject, false);
 		base.Subscribe<SimpleInfoScreen>(-1514841199, SimpleInfoScreen.OnRefreshDataDelegate);
 	}
@@ -250,6 +254,7 @@ public class SimpleInfoScreen : TargetScreen, ISim4000ms, ISim1000ms
 		}
 		this.RefreshStress();
 		this.RefreshStorage();
+		this.RefreshMovePanel();
 		this.rocketSimpleInfoPanel.Refresh(this.rocketStatusContainer, this.selectedTarget);
 	}
 
@@ -485,6 +490,108 @@ public class SimpleInfoScreen : TargetScreen, ISim4000ms, ISim1000ms
 		if (num == 0)
 		{
 			this.AddOrGetStorageLabel(this.storageLabels, this.StoragePanel, "empty").GetComponentInChildren<LocText>().text = UI.DETAILTABS.DETAILS.STORAGE_EMPTY;
+		}
+	}
+
+	private void RefreshMovePanel()
+	{
+		if (this.selectedTarget == null)
+		{
+			this.MovePanel.gameObject.SetActive(false);
+			return;
+		}
+		CancellableMove component = this.selectedTarget.GetComponent<CancellableMove>();
+		Movable component2 = this.selectedTarget.GetComponent<Movable>();
+		if (component == null && (component2 == null || !component2.IsMarkedForMove))
+		{
+			this.MovePanel.gameObject.SetActive(false);
+			return;
+		}
+		this.MovePanel.gameObject.SetActive(true);
+		foreach (KeyValuePair<string, GameObject> keyValuePair in this.storageLabels)
+		{
+			keyValuePair.Value.SetActive(false);
+		}
+		if (component != null)
+		{
+			List<Ref<Movable>> movingObjects = component.movingObjects;
+			int num = 0;
+			using (List<Ref<Movable>>.Enumerator enumerator2 = movingObjects.GetEnumerator())
+			{
+				while (enumerator2.MoveNext())
+				{
+					Ref<Movable> @ref = enumerator2.Current;
+					ListPool<global::Tuple<string, TextStyleSetting>, SimpleInfoScreen>.PooledList pooledList = ListPool<global::Tuple<string, TextStyleSetting>, SimpleInfoScreen>.Allocate();
+					Movable movable = @ref.Get();
+					GameObject gameObject = ((movable != null) ? movable.gameObject : null);
+					if (!(gameObject == null) && !gameObject.HasTag(GameTags.Stored))
+					{
+						PrimaryElement component3 = gameObject.GetComponent<PrimaryElement>();
+						if (!(component3 != null) || component3.Mass != 0f)
+						{
+							Rottable.Instance smi = gameObject.GetSMI<Rottable.Instance>();
+							HighEnergyParticleStorage component4 = gameObject.GetComponent<HighEnergyParticleStorage>();
+							string text = "";
+							pooledList.Clear();
+							if (component3 != null && component4 == null)
+							{
+								text = GameUtil.GetUnitFormattedName(gameObject, false);
+								text = string.Format(UI.DETAILTABS.DETAILS.CONTENTS_MASS, text, GameUtil.GetFormattedMass(component3.Mass, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"));
+								text = string.Format(UI.DETAILTABS.DETAILS.CONTENTS_TEMPERATURE, text, GameUtil.GetFormattedTemperature(component3.Temperature, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false));
+							}
+							if (component4 != null)
+							{
+								text = ITEMS.RADIATION.HIGHENERGYPARITCLE.NAME;
+								text = string.Format(UI.DETAILTABS.DETAILS.CONTENTS_MASS, text, GameUtil.GetFormattedHighEnergyParticles(component4.Particles, GameUtil.TimeSlice.None, true));
+							}
+							if (smi != null)
+							{
+								string text2 = smi.StateString();
+								if (!string.IsNullOrEmpty(text2))
+								{
+									text += string.Format(UI.DETAILTABS.DETAILS.CONTENTS_ROTTABLE, text2);
+								}
+								pooledList.Add(new global::Tuple<string, TextStyleSetting>(smi.GetToolTip(), PluginAssets.Instance.defaultTextStyleSetting));
+							}
+							if (component3.DiseaseIdx != 255)
+							{
+								text += string.Format(UI.DETAILTABS.DETAILS.CONTENTS_DISEASED, GameUtil.GetFormattedDisease(component3.DiseaseIdx, component3.DiseaseCount, false));
+								string formattedDisease = GameUtil.GetFormattedDisease(component3.DiseaseIdx, component3.DiseaseCount, true);
+								pooledList.Add(new global::Tuple<string, TextStyleSetting>(formattedDisease, PluginAssets.Instance.defaultTextStyleSetting));
+							}
+							GameObject gameObject2 = this.AddOrGetStorageLabel(this.storageLabels, this.MovePanel, "storage_" + num.ToString());
+							num++;
+							gameObject2.GetComponentInChildren<LocText>().text = text;
+							gameObject2.GetComponentInChildren<ToolTip>().ClearMultiStringTooltip();
+							foreach (global::Tuple<string, TextStyleSetting> tuple in pooledList)
+							{
+								gameObject2.GetComponentInChildren<ToolTip>().AddMultiStringTooltip(tuple.first, tuple.second);
+							}
+							KButton component5 = gameObject2.GetComponent<KButton>();
+							GameObject select_target2 = gameObject;
+							component5.onClick += delegate
+							{
+								SelectTool.Instance.SelectAndFocus(select_target2.transform.GetPosition(), select_target2.GetComponent<KSelectable>(), new Vector3(5f, 0f, 0f));
+							};
+							pooledList.Recycle();
+						}
+					}
+				}
+				return;
+			}
+		}
+		if (component2 != null && component2.IsMarkedForMove)
+		{
+			GameObject gameObject3 = this.AddOrGetStorageLabel(this.storageLabels, this.MovePanel, "moveplacer");
+			gameObject3.GetComponentInChildren<LocText>().text = MISC.PLACERS.MOVEPICKUPABLEPLACER.PLACER_STATUS;
+			gameObject3.GetComponentInChildren<ToolTip>().ClearMultiStringTooltip();
+			gameObject3.GetComponentInChildren<ToolTip>().SetSimpleTooltip(MISC.PLACERS.MOVEPICKUPABLEPLACER.PLACER_STATUS_TOOLTIP);
+			KButton component6 = gameObject3.GetComponent<KButton>();
+			Storage select_target = component2.StorageProxy;
+			component6.onClick += delegate
+			{
+				SelectTool.Instance.SelectAndFocus(select_target.transform.GetPosition(), select_target.GetComponent<KSelectable>(), new Vector3(5f, 0f, 0f));
+			};
 		}
 	}
 

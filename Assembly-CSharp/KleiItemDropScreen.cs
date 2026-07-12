@@ -112,7 +112,7 @@ public class KleiItemDropScreen : KModalScreen
 		this.acceptButton.onClick += delegate
 		{
 			this.giftRevealed = true;
-			KleiItems.AddRequestItemOpened(item.ItemId);
+			PermitItems.QueueRequestOpenOrUnboxItem(item);
 		};
 		this.acknowledgeButton.onClick += delegate
 		{
@@ -258,42 +258,69 @@ public class KleiItemDropScreen : KModalScreen
 		this.animatedPod.Play("additional_pre", KAnim.PlayMode.Once, 1f, 0f);
 		this.animatedPod.Queue("working_loop", KAnim.PlayMode.Loop, 1f, 0f);
 		yield return Updater.WaitForSeconds(1f);
-		PermitResource permit = Db.Get().Permits.Get(item.PermitId);
-		this.permitVisualizer.ConfigureWith(permit);
-		yield return this.permitVisualizer.AnimateIn();
-		KFMOD.PlayUISoundWithLabeledParameter(GlobalAssets.GetSound("GiftItemDrop_Rarity", false), "GiftItemRarity", string.Format("{0}", permit.Rarity));
-		this.itemNameLabel.SetText(permit.Name);
-		this.itemDescriptionLabel.SetText(permit.Description);
-		this.itemRarityLabel.SetText(permit.Rarity.GetLocStringName());
-		PermitCategory category = permit.Category;
+		DropScreenPresentationInfo dropScreenPresentationInfo;
+		dropScreenPresentationInfo.UseEquipmentVis = false;
+		dropScreenPresentationInfo.BuildOverride = null;
+		dropScreenPresentationInfo.Sprite = null;
+		string name = "";
+		string desc = "";
+		PermitRarity rarity = PermitRarity.Unknown;
+		string categoryString = "";
 		string text;
-		if (category != PermitCategory.Building)
+		if (PermitItems.TryGetBoxInfo(item, out name, out desc, out text))
 		{
-			if (category != PermitCategory.Artwork)
+			dropScreenPresentationInfo.UseEquipmentVis = false;
+			dropScreenPresentationInfo.BuildOverride = null;
+			dropScreenPresentationInfo.Sprite = Assets.GetSprite(text);
+			rarity = PermitRarity.Loyalty;
+		}
+		else
+		{
+			PermitResource permitResource = Db.Get().Permits.Get(item.Id);
+			dropScreenPresentationInfo.Sprite = permitResource.GetPermitPresentationInfo().sprite;
+			dropScreenPresentationInfo.UseEquipmentVis = permitResource.Category == PermitCategory.Equipment;
+			if (permitResource is EquippableFacadeResource)
 			{
-				if (category != PermitCategory.JoyResponse)
+				dropScreenPresentationInfo.BuildOverride = (permitResource as EquippableFacadeResource).BuildOverride;
+			}
+			name = permitResource.Name;
+			desc = permitResource.Description;
+			rarity = permitResource.Rarity;
+			PermitCategory category = permitResource.Category;
+			if (category != PermitCategory.Building)
+			{
+				if (category != PermitCategory.Artwork)
 				{
-					text = PermitCategories.GetDisplayName(permit.Category);
+					if (category != PermitCategory.JoyResponse)
+					{
+						categoryString = PermitCategories.GetDisplayName(permitResource.Category);
+					}
+					else
+					{
+						categoryString = PermitCategories.GetDisplayName(permitResource.Category);
+						if (permitResource is BalloonArtistFacadeResource)
+						{
+							categoryString = PermitCategories.GetDisplayName(permitResource.Category) + ": " + UI.KLEI_INVENTORY_SCREEN.CATEGORIES.JOY_RESPONSES.BALLOON_ARTIST;
+						}
+					}
 				}
 				else
 				{
-					text = PermitCategories.GetDisplayName(permit.Category);
-					if (permit is BalloonArtistFacadeResource)
-					{
-						text = PermitCategories.GetDisplayName(permit.Category) + ": " + UI.KLEI_INVENTORY_SCREEN.CATEGORIES.JOY_RESPONSES.BALLOON_ARTIST;
-					}
+					categoryString = Assets.GetPrefab((permitResource as ArtableStage).prefabId).GetProperName();
 				}
 			}
 			else
 			{
-				text = Assets.GetPrefab((permit as ArtableStage).prefabId).GetProperName();
+				categoryString = Assets.GetPrefab((permitResource as BuildingFacadeResource).PrefabID).GetProperName();
 			}
 		}
-		else
-		{
-			text = Assets.GetPrefab((permit as BuildingFacadeResource).PrefabID).GetProperName();
-		}
-		this.itemCategoryLabel.SetText(text);
+		this.permitVisualizer.ConfigureWith(dropScreenPresentationInfo);
+		yield return this.permitVisualizer.AnimateIn();
+		KFMOD.PlayUISoundWithLabeledParameter(GlobalAssets.GetSound("GiftItemDrop_Rarity", false), "GiftItemRarity", string.Format("{0}", rarity));
+		this.itemNameLabel.SetText(name);
+		this.itemDescriptionLabel.SetText(desc);
+		this.itemRarityLabel.SetText(rarity.GetLocStringName());
+		this.itemCategoryLabel.SetText(categoryString);
 		this.itemTextContainerPosition.SetOn(this.itemTextContainer);
 		yield return Updater.Parallel(new Updater[] { PresUtil.OffsetToAndFade(this.itemTextContainer.rectTransform(), animate_offset, 1f, 0.125f, Easing.CircInOut) });
 		yield return Updater.Until(() => this.giftAcknowledged);
@@ -305,7 +332,9 @@ public class KleiItemDropScreen : KModalScreen
 		this.itemRarityLabel.SetText("");
 		this.itemCategoryLabel.SetText("");
 		yield return this.permitVisualizer.AnimateOut();
-		permit = null;
+		name = null;
+		desc = null;
+		categoryString = null;
 		this.PresentNextUnopenedItem(false);
 		yield break;
 	}

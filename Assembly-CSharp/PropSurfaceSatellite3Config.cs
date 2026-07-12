@@ -40,13 +40,7 @@ public class PropSurfaceSatellite3Config : IEntityConfig
 		SetLocker component = inst.GetComponent<SetLocker>();
 		component.possible_contents_ids = PropSurfaceSatellite1Config.GetLockerBaseContents();
 		component.ChooseContents();
-		OccupyArea component2 = inst.GetComponent<OccupyArea>();
-		component2.objectLayers = new ObjectLayer[] { ObjectLayer.Building };
-		int num = Grid.PosToCell(inst);
-		foreach (CellOffset cellOffset in component2.OccupiedCellsOffsets)
-		{
-			Grid.GravitasFacility[Grid.OffsetCell(num, cellOffset)] = true;
-		}
+		inst.GetComponent<OccupyArea>().objectLayers = new ObjectLayer[] { ObjectLayer.Building };
 		RadiationEmitter radiationEmitter = inst.AddOrGet<RadiationEmitter>();
 		radiationEmitter.emitType = RadiationEmitter.RadiationEmitterType.Constant;
 		radiationEmitter.radiusProportionalToRads = false;

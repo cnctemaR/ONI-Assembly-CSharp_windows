@@ -28,6 +28,11 @@ public class WattsonMessage : KScreen
 
 	private IEnumerator ExpandPanel()
 	{
+		if (CustomGameSettings.Instance.GetSettingsCoordinate().StartsWith("KF23"))
+		{
+			this.message.SetText(UI.WELCOMEMESSAGEBODY_KF23);
+			this.dialog.rectTransform().rotation = Quaternion.Euler(0f, 0f, -90f);
+		}
 		yield return SequenceUtil.WaitForSecondsRealtime(0.2f);
 		float height = 0f;
 		while (height < 299f)
@@ -35,6 +40,20 @@ public class WattsonMessage : KScreen
 			height = Mathf.Lerp(this.dialog.rectTransform().sizeDelta.y, 300f, Time.unscaledDeltaTime * 15f);
 			this.dialog.rectTransform().sizeDelta = new Vector2(this.dialog.rectTransform().sizeDelta.x, height);
 			yield return 0;
+		}
+		if (CustomGameSettings.Instance.GetSettingsCoordinate().StartsWith("KF23"))
+		{
+			Quaternion initialOrientation = Quaternion.Euler(0f, 0f, -90f);
+			yield return SequenceUtil.WaitForSecondsRealtime(1f);
+			float t = 0f;
+			float duration = 0.5f;
+			while (t < duration)
+			{
+				t += Time.unscaledDeltaTime;
+				this.dialog.rectTransform().rotation = Quaternion.Slerp(initialOrientation, Quaternion.identity, t / duration);
+				yield return 0;
+			}
+			initialOrientation = default(Quaternion);
 		}
 		yield return null;
 		yield break;
@@ -119,6 +138,7 @@ public class WattsonMessage : KScreen
 		{
 			KAnimControllerBase kac = telepad.GetComponent<KAnimControllerBase>();
 			kac.Play(WattsonMessage.WorkLoopAnims, KAnim.PlayMode.Loop);
+			NameDisplayScreen.Instance.gameObject.SetActive(false);
 			for (int i = 0; i < Components.LiveMinionIdentities.Count; i++)
 			{
 				int idx = i + 1;
@@ -136,6 +156,7 @@ public class WattsonMessage : KScreen
 						this.birthsComplete++;
 						if (this.birthsComplete == Components.LiveMinionIdentities.Count - 1 && base.IsActive())
 						{
+							NameDisplayScreen.Instance.gameObject.SetActive(true);
 							this.PauseAndShowMessage();
 						}
 					}));

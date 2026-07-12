@@ -1,4 +1,6 @@
 ﻿using System;
+using Database;
+using UnityEngine;
 
 public class SkyVisibilityMonitor : GameStateMachine<SkyVisibilityMonitor, SkyVisibilityMonitor.Instance, IStateMachineTarget, SkyVisibilityMonitor.Def>
 {
@@ -11,8 +13,14 @@ public class SkyVisibilityMonitor : GameStateMachine<SkyVisibilityMonitor, SkyVi
 	public static void CheckSkyVisibility(SkyVisibilityMonitor.Instance smi, float dt)
 	{
 		bool hasSkyVisibility = smi.HasSkyVisibility;
-		Grid.IsRangeExposedToSunlight(Grid.OffsetCell(Grid.PosToCell(smi), smi.def.ScanOriginOffset), smi.def.ScanRadius, smi.def.ScanShape, out smi.NumClearCells, 1);
-		if (hasSkyVisibility == smi.HasSkyVisibility)
+		ValueTuple<bool, float> visibilityOf = smi.def.skyVisibilityInfo.GetVisibilityOf(smi.gameObject);
+		bool item = visibilityOf.Item1;
+		float item2 = visibilityOf.Item2;
+		smi.Internal_SetPercentClearSky(item2);
+		KSelectable component = smi.GetComponent<KSelectable>();
+		component.ToggleStatusItem(Db.Get().BuildingStatusItems.SkyVisNone, !item, smi);
+		component.ToggleStatusItem(Db.Get().BuildingStatusItems.SkyVisLimited, item && item2 < 1f, smi);
+		if (hasSkyVisibility == item)
 		{
 			return;
 		}
@@ -23,22 +31,16 @@ public class SkyVisibilityMonitor : GameStateMachine<SkyVisibilityMonitor, SkyVi
 	{
 		public Operational.State AffectedOperationalState;
 
-		public string StatusItemId = "SPACE_VISIBILITY_NONE";
-
-		public int ScanRadius = 15;
-
-		public CellOffset ScanShape = new CellOffset(1, 0);
-
-		public CellOffset ScanOriginOffset = new CellOffset(0, 0);
+		public SkyVisibilityInfo skyVisibilityInfo;
 	}
 
-	public new class Instance : GameStateMachine<SkyVisibilityMonitor, SkyVisibilityMonitor.Instance, IStateMachineTarget, SkyVisibilityMonitor.Def>.GameInstance
+	public new class Instance : GameStateMachine<SkyVisibilityMonitor, SkyVisibilityMonitor.Instance, IStateMachineTarget, SkyVisibilityMonitor.Def>.GameInstance, BuildingStatusItems.ISkyVisInfo
 	{
 		public bool HasSkyVisibility
 		{
 			get
 			{
-				return this.PercentClearSky > 0f;
+				return this.PercentClearSky > 0f && !Mathf.Approximately(0f, this.PercentClearSky);
 			}
 		}
 
@@ -46,22 +48,27 @@ public class SkyVisibilityMonitor : GameStateMachine<SkyVisibilityMonitor, SkyVi
 		{
 			get
 			{
-				return (float)this.NumClearCells * (float)(base.def.ScanRadius + 1);
+				return this.percentClearSky01;
 			}
+		}
+
+		public void Internal_SetPercentClearSky(float percent01)
+		{
+			this.percentClearSky01 = percent01;
+		}
+
+		float BuildingStatusItems.ISkyVisInfo.GetPercentVisible01()
+		{
+			return this.percentClearSky01;
 		}
 
 		public Instance(IStateMachineTarget master, SkyVisibilityMonitor.Def def)
 			: base(master, def)
 		{
-			if (string.IsNullOrEmpty(def.StatusItemId))
-			{
-				return;
-			}
 			if (def.AffectedOperationalState != Operational.State.None)
 			{
 				this.skyVisibilityFlag = new Operational.Flag("sky visibility", Operational.Flag.GetFlagType(def.AffectedOperationalState));
 			}
-			this.visibilityStatusItem = new StatusItem(def.StatusItemId, "BUILDING", "status_item_no_sky", StatusItem.IconType.Custom, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 129022, new Func<string, object, string>(SkyVisibilityMonitor.Instance.GetStatusItemString));
 		}
 
 		public override void StartSM()
@@ -87,13 +94,7 @@ public class SkyVisibilityMonitor : GameStateMachine<SkyVisibilityMonitor, SkyVi
 			}
 		}
 
-		private static string GetStatusItemString(string src_str, object data)
-		{
-			SkyVisibilityMonitor.Instance instance = (SkyVisibilityMonitor.Instance)data;
-			return src_str.Replace("{VISIBILITY}", GameUtil.GetFormattedPercent(instance.PercentClearSky * 100f, GameUtil.TimeSlice.None)).Replace("{RADIUS}", instance.def.ScanRadius.ToString());
-		}
-
-		public int NumClearCells;
+		private float percentClearSky01;
 
 		public global::System.Action SkyVisibilityChanged;
 

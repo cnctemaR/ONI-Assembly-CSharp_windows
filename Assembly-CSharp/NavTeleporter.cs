@@ -106,7 +106,7 @@ public class NavTeleporter : KMonoBehaviour
 		Pathfinding.Instance.AddDirtyNavGridCell(this.lastRegisteredCell);
 	}
 
-	private void Deregister()
+	public void Deregister()
 	{
 		if (this.lastRegisteredCell != Grid.InvalidCell)
 		{

@@ -45,12 +45,13 @@ public class SolidTransferArmConfig : IBuildingConfig
 
 	private static void AddVisualizer(GameObject prefab, bool movable)
 	{
-		StationaryChoreRangeVisualizer stationaryChoreRangeVisualizer = prefab.AddOrGet<StationaryChoreRangeVisualizer>();
-		stationaryChoreRangeVisualizer.x = -4;
-		stationaryChoreRangeVisualizer.y = -4;
-		stationaryChoreRangeVisualizer.width = 9;
-		stationaryChoreRangeVisualizer.height = 9;
-		stationaryChoreRangeVisualizer.movable = movable;
+		RangeVisualizer rangeVisualizer = prefab.AddOrGet<RangeVisualizer>();
+		rangeVisualizer.OriginOffset = new Vector2I(0, 0);
+		rangeVisualizer.RangeMin.x = -4;
+		rangeVisualizer.RangeMin.y = -4;
+		rangeVisualizer.RangeMax.x = 4;
+		rangeVisualizer.RangeMax.y = 4;
+		rangeVisualizer.BlockingTileVisible = true;
 	}
 
 	public const string ID = "SolidTransferArm";

@@ -80,7 +80,8 @@ public class FaceGraph : KMonoBehaviour
 			return false;
 		}
 		KBatchGroupData batchGroupData = KAnimBatchManager.Instance().GetBatchGroupData(currentAnim.animFile.animBatchTag);
-		KAnim.Anim.Frame frame = batchGroupData.GetFrame(currentFrameIndex);
+		KAnim.Anim.Frame frame;
+		batchGroupData.TryGetFrame(currentFrameIndex, out frame);
 		for (int i = 0; i < frame.numElements; i++)
 		{
 			KAnim.Anim.FrameElement frameElement = batchGroupData.GetFrameElement(frame.firstElementIdx + i);
@@ -110,18 +111,21 @@ public class FaceGraph : KMonoBehaviour
 			if (anim2.hash == hashedString)
 			{
 				anim = anim2;
-				KAnim.Anim.Frame frame = anim.GetFrame(shapes_file.GetData().build.batchTag, 0);
-				for (int i = 0; i < frame.numElements; i++)
+				KAnim.Anim.Frame frame;
+				if (anim.TryGetFrame(shapes_file.GetData().build.batchTag, 0, out frame))
 				{
-					frameElement = KAnimBatchManager.Instance().GetBatchGroupData(shapes_file.GetData().animBatchTag).GetFrameElement(frame.firstElementIdx + i);
-					if (!(frameElement.symbol != symbol_name_in_shape_file))
+					for (int i = 0; i < frame.numElements; i++)
 					{
-						if (flag2 || !should_use_sideways_symbol)
+						frameElement = KAnimBatchManager.Instance().GetBatchGroupData(shapes_file.GetData().animBatchTag).GetFrameElement(frame.firstElementIdx + i);
+						if (!(frameElement.symbol != symbol_name_in_shape_file))
 						{
-							flag = true;
+							if (flag2 || !should_use_sideways_symbol)
+							{
+								flag = true;
+							}
+							flag2 = true;
+							break;
 						}
-						flag2 = true;
-						break;
 					}
 				}
 			}

@@ -71,7 +71,10 @@ public class CustomGameSettings : KMonoBehaviour
 		this.CurrentQualityLevelsBySetting.TryGetValue(CustomGameSettingConfigs.ClusterLayout.id, out clusterDefaultName);
 		if (clusterDefaultName.IsNullOrWhiteSpace())
 		{
-			DebugUtil.DevAssert(!DlcManager.IsExpansion1Active(), "Deserializing CustomGameSettings.ClusterLayout: ClusterLayout is blank, using default cluster instead", null);
+			if (!DlcManager.IsExpansion1Active())
+			{
+				DebugUtil.LogWarningArgs(new object[] { "Deserializing CustomGameSettings.ClusterLayout: ClusterLayout is blank, using default cluster instead" });
+			}
 			clusterDefaultName = WorldGenSettings.ClusterDefaultName;
 			this.SetQualitySetting(CustomGameSettingConfigs.ClusterLayout, clusterDefaultName);
 		}
@@ -176,9 +179,14 @@ public class CustomGameSettings : KMonoBehaviour
 
 	public void SetQualitySetting(SettingConfig config, string value)
 	{
+		this.SetQualitySetting(config, value, true);
+	}
+
+	public void SetQualitySetting(SettingConfig config, string value, bool notify)
+	{
 		this.CurrentQualityLevelsBySetting[config.id] = value;
 		this.CheckCustomGameMode();
-		if (this.OnQualitySettingChanged != null)
+		if (notify && this.OnQualitySettingChanged != null)
 		{
 			this.OnQualitySettingChanged(config, this.GetCurrentQualitySetting(config));
 		}
@@ -296,6 +304,16 @@ public class CustomGameSettings : KMonoBehaviour
 		{
 			this.CurrentQualityLevelsBySetting[config.id] = config.GetDefaultLevelId();
 		}
+	}
+
+	public ClusterLayout GetCurrentClusterLayout()
+	{
+		SettingLevel currentQualitySetting = CustomGameSettings.Instance.GetCurrentQualitySetting(CustomGameSettingConfigs.ClusterLayout);
+		if (currentQualitySetting == null)
+		{
+			return null;
+		}
+		return SettingsCache.clusterLayouts.GetClusterData(currentQualitySetting.id);
 	}
 
 	public void LoadClusters()

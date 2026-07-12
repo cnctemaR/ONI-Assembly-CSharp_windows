@@ -155,6 +155,7 @@ public class DevToolSimDebug : DevTool
 			ImGui.Text("HasDoor: " + Grid.HasDoor[num3].ToString());
 			ImGui.Text("HasLadder: " + Grid.HasLadder[num3].ToString());
 			ImGui.Text("HasPole: " + Grid.HasPole[num3].ToString());
+			ImGui.Text("GravitasFacility: " + Grid.GravitasFacility[num3].ToString());
 			ImGui.Text("HasNavTeleporter: " + Grid.HasNavTeleporter[num3].ToString());
 			ImGui.Text("IsTileUnderConstruction: " + Grid.IsTileUnderConstruction[num3].ToString());
 			ImGui.Text("LiquidVisPlacers: " + Game.Instance.liquidConduitSystem.GetConnections(num3, false).ToString());
@@ -166,6 +167,7 @@ public class DevToolSimDebug : DevTool
 			ImGui.Text("World Idx: " + Grid.WorldIdx[num3].ToString());
 			ImGui.Text("ZoneType: " + World.Instance.zoneRenderData.GetSubWorldZoneType(num3).ToString());
 			ImGui.Text("Light Intensity: " + Grid.LightIntensity[num3].ToString());
+			ImGui.Text("Sunlight: " + Grid.ExposedToSunlight[num3].ToString());
 			ImGui.Text("Radiation: " + Grid.Radiation[num3].ToString());
 			this.showAccessRestrictions = ImGui.CollapsingHeader("Access Restrictions");
 			if (this.showAccessRestrictions)
@@ -202,7 +204,7 @@ public class DevToolSimDebug : DevTool
 			if (this.showGridContents)
 			{
 				ImGui.Indent();
-				for (int i = 0; i < 44; i++)
+				for (int i = 0; i < 45; i++)
 				{
 					GameObject gameObject = Grid.Objects[num3, i];
 					ImGui.Text(Enum.GetName(typeof(ObjectLayer), i) + ": " + ((gameObject != null) ? gameObject.name : "None"));
@@ -296,7 +298,7 @@ public class DevToolSimDebug : DevTool
 						this.showCreatures = ImGui.CollapsingHeader("Creatures (" + room.cavity.creatures.Count.ToString() + ")");
 						if (!this.showCreatures)
 						{
-							goto IL_0C0F;
+							goto IL_0C53;
 						}
 						using (List<KPrefabID>.Enumerator enumerator4 = room.cavity.creatures.GetEnumerator())
 						{
@@ -305,7 +307,7 @@ public class DevToolSimDebug : DevTool
 								KPrefabID kprefabID2 = enumerator4.Current;
 								ImGui.Text(kprefabID2.ToString());
 							}
-							goto IL_0C0F;
+							goto IL_0C53;
 						}
 					}
 					ImGui.Text("Is Room: False");
@@ -314,7 +316,7 @@ public class DevToolSimDebug : DevTool
 				{
 					ImGui.Text("No Cavity Detected");
 				}
-				IL_0C0F:
+				IL_0C53:
 				ImGui.Unindent();
 			}
 			this.showPropertyInfo = ImGui.CollapsingHeader("Property Info");

@@ -50,7 +50,7 @@ public class MinionStorage : KMonoBehaviour
 		Accessorizer component2 = src_id.GetComponent<Accessorizer>();
 		dest_id.accessories = component2.GetAccessories();
 		WearableAccessorizer component3 = src_id.GetComponent<WearableAccessorizer>();
-		dest_id.clothingItems = component3.GetClothingItems();
+		dest_id.customClothingItems = component3.GetCustomClothingItems();
 		dest_id.wearables = component3.Wearables;
 		ConsumableConsumer component4 = src_id.GetComponent<ConsumableConsumer>();
 		if (component4.forbiddenTagSet != null)
@@ -116,7 +116,7 @@ public class MinionStorage : KMonoBehaviour
 		{
 			dest_id.GetComponent<Accessorizer>().SetAccessories(src_id.accessories);
 		}
-		dest_id.GetComponent<WearableAccessorizer>().RestoreWearables(src_id.wearables, src_id.clothingItems);
+		dest_id.GetComponent<WearableAccessorizer>().RestoreWearables(src_id.wearables, src_id.customClothingItems);
 		ConsumableConsumer component = dest_id.GetComponent<ConsumableConsumer>();
 		if (src_id.forbiddenTagSet != null)
 		{

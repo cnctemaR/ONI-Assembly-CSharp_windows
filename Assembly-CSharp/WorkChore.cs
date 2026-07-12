@@ -108,6 +108,10 @@ public class WorkChore<WorkableType> : Chore<WorkChore<WorkableType>.StatesInsta
 		{
 			return false;
 		}
+		if (workable.worker != null && (workable.worker.state == Worker.State.PendingCompletion || workable.worker.state == Worker.State.Completing))
+		{
+			return false;
+		}
 		if (this.preemption_cb != null)
 		{
 			if (!this.preemption_cb(context))

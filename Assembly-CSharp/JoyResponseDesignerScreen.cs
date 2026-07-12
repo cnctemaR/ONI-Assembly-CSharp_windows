@@ -61,7 +61,6 @@ public class JoyResponseDesignerScreen : KMonoBehaviour
 		{
 			this.Configure(this.Config);
 		});
-		KleiItemsStatusRefresher.RequestRefreshFromServer();
 	}
 
 	public void Configure(JoyResponseScreenConfig config)
@@ -312,7 +311,15 @@ public class JoyResponseDesignerScreen : KMonoBehaviour
 		HierarchyReferences component = gameObject.GetComponent<HierarchyReferences>();
 		component.GetReference<Image>("Icon").sprite = item.GetIcon();
 		component.GetReference<Image>("IsUnownedOverlay").gameObject.SetActive(!item.IsUnlocked());
-		gameObject.AddOrGet<ToolTip>().SetSimpleTooltip(item.GetName());
+		Option<PermitResource> permitResource = item.GetPermitResource();
+		if (permitResource.IsSome())
+		{
+			KleiItemsUI.ConfigureTooltipOn(gameObject, KleiItemsUI.GetTooltipStringFor(permitResource.Unwrap()));
+		}
+		else
+		{
+			KleiItemsUI.ConfigureTooltipOn(gameObject, KleiItemsUI.GetNoneTooltipStringFor(PermitCategory.JoyResponse));
+		}
 		MultiToggle toggle = gameObject.GetComponent<MultiToggle>();
 		MultiToggle toggle3 = toggle;
 		toggle3.onEnter = (global::System.Action)Delegate.Combine(toggle3.onEnter, new global::System.Action(this.OnMouseOverToggle));
@@ -444,7 +451,7 @@ public class JoyResponseDesignerScreen : KMonoBehaviour
 
 			public override string GetName()
 			{
-				return this.permit.AndThen<string>((BalloonArtistFacadeResource p) => p.Name).UnwrapOrElse(() => KleiItemsUI.GetNoneClothingItemString(PermitCategory.JoyResponse), null);
+				return this.permit.AndThen<string>((BalloonArtistFacadeResource p) => p.Name).UnwrapOrElse(() => KleiItemsUI.GetNoneClothingItemStrings(PermitCategory.JoyResponse).Item1, null);
 			}
 
 			public override string GetUniqueId()

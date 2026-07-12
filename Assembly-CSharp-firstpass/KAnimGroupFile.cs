@@ -279,7 +279,7 @@ public class KAnimGroupFile : ScriptableObject
 								{
 									KAnim.Build.SymbolFrameInstance symbolFrameInstance = batchGroupData.GetSymbolFrameInstance(n + symbol.firstFrameIdx);
 									KAnim.Build.SymbolFrameInstance symbolFrameInstance2 = default(KAnim.Build.SymbolFrameInstance);
-									symbolFrameInstance2.symbolFrame = symbolFrameInstance.symbolFrame;
+									symbolFrameInstance2 = symbolFrameInstance;
 									symbolFrameInstance2.buildImageIdx = -1;
 									symbolFrameInstance2.symbolIdx = batchGroupData2.GetSymbolCount();
 									batchGroupData2.symbolFrameInstances.Add(symbolFrameInstance2);

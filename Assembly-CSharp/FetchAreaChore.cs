@@ -79,6 +79,11 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 			global::Debug.Log(string.Format("Pickupable {0} is not valid for chore because it has the forbidden tags: {1}", pickupable, string.Join<Tag>(",", chore.forbiddenTags)));
 			return false;
 		}
+		if (component.HasTag(GameTags.MarkedForMove))
+		{
+			global::Debug.Log(string.Format("Pickupable {0} is marked for move.", pickupable));
+			return false;
+		}
 		return true;
 	}
 
@@ -149,7 +154,7 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 				}
 				Pickupable pickupable2 = scenePartitionerEntry.obj as Pickupable;
 				KPrefabID component = pickupable2.GetComponent<KPrefabID>();
-				if (!(component.PrefabTag != prefabTag) && pickupable2.UnreservedAmount > 0f && (this.rootChore.criteria != FetchChore.MatchCriteria.MatchID || this.rootChore.tags.Contains(component.PrefabTag)) && (this.rootChore.criteria != FetchChore.MatchCriteria.MatchTags || component.HasTag(this.rootChore.tagsFirst)) && (!this.rootChore.requiredTag.IsValid || component.HasTag(this.rootChore.requiredTag)) && !component.HasAnyTags(this.rootChore.forbiddenTags) && !list.Contains(pickupable2) && this.rootContext.consumerState.consumer.CanReach(pickupable2))
+				if (!(component.PrefabTag != prefabTag) && pickupable2.UnreservedAmount > 0f && (this.rootChore.criteria != FetchChore.MatchCriteria.MatchID || this.rootChore.tags.Contains(component.PrefabTag)) && (this.rootChore.criteria != FetchChore.MatchCriteria.MatchTags || component.HasTag(this.rootChore.tagsFirst)) && (!this.rootChore.requiredTag.IsValid || component.HasTag(this.rootChore.requiredTag)) && !component.HasAnyTags(this.rootChore.forbiddenTags) && !list.Contains(pickupable2) && this.rootContext.consumerState.consumer.CanReach(pickupable2) && !pickupable2.HasTag(GameTags.MarkedForMove))
 				{
 					float unreservedAmount = pickupable2.UnreservedAmount;
 					list.Add(pickupable2);
@@ -279,7 +284,7 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 				this.GoTo(base.sm.delivering.next);
 				return;
 			}
-			base.sm.fetchTarget.Set(this.reservations[0].pickupable, base.smi);
+			this.SetFetchTarget(this.reservations[0].pickupable);
 			base.sm.fetchResultTarget.Set(null, base.smi);
 			base.sm.fetchAmount.Set(this.reservations[0].amount, base.smi, false);
 			if (!(this.reservations[0].pickupable != null))
@@ -298,6 +303,15 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 				return;
 			}
 			this.GoTo(base.sm.fetching.fetchfail);
+		}
+
+		public void SetFetchTarget(Pickupable fetching)
+		{
+			base.sm.fetchTarget.Set(fetching, base.smi);
+			if (fetching != null)
+			{
+				fetching.Subscribe(1122777325, new Action<object>(this.OnMarkForMove));
+			}
 		}
 
 		public void DeliverFail()
@@ -347,6 +361,10 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 
 		public void FetchFail()
 		{
+			if (base.smi.sm.fetchTarget.Get(base.smi) != null)
+			{
+				base.smi.sm.fetchTarget.Get(base.smi).Unsubscribe(1122777325, new Action<object>(this.OnMarkForMove));
+			}
 			this.reservations[0].Cleanup();
 			this.reservations.RemoveAt(0);
 			this.GoTo(base.sm.fetching.next);
@@ -388,10 +406,13 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 				{
 					break;
 				}
-				float num2 = Math.Min(num, pickupable.UnreservedAmount);
-				num -= num2;
-				FetchAreaChore.StatesInstance.Reservation reservation = new FetchAreaChore.StatesInstance.Reservation(choreConsumer, pickupable, num2);
-				this.reservations.Add(reservation);
+				if (!pickupable.HasTag(GameTags.MarkedForMove))
+				{
+					float num2 = Math.Min(num, pickupable.UnreservedAmount);
+					num -= num2;
+					FetchAreaChore.StatesInstance.Reservation reservation = new FetchAreaChore.StatesInstance.Reservation(choreConsumer, pickupable, num2);
+					this.reservations.Add(reservation);
+				}
 			}
 		}
 
@@ -445,6 +466,22 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 				}
 			}
 			return false;
+		}
+
+		public void OnMarkForMove(object data)
+		{
+			GameObject gameObject = base.smi.sm.fetchTarget.Get(base.smi);
+			GameObject gameObject2 = data as GameObject;
+			if (gameObject != null)
+			{
+				if (gameObject == gameObject2)
+				{
+					gameObject2.Unsubscribe(1122777325, new Action<object>(this.OnMarkForMove));
+					base.smi.sm.fetchTarget.Set(null, base.smi);
+					return;
+				}
+				global::Debug.LogError("Listening for MarkForMove on the incorrect fetch target. Subscriptions did not update correctly.");
+			}
 		}
 
 		private List<FetchChore> chores = new List<FetchChore>();
@@ -623,7 +660,14 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 				smi.SetupFetch();
 			});
 			this.fetching.movetopickupable.InitializeStates(this.fetcher, this.fetchTarget, this.fetching.pickup, this.fetching.fetchfail, null, NavigationTactics.ReduceTravelDistance);
-			this.fetching.pickup.DoPickup(this.fetchTarget, this.fetchResultTarget, this.fetchAmount, this.fetching.fetchcomplete, this.fetching.fetchfail);
+			this.fetching.pickup.DoPickup(this.fetchTarget, this.fetchResultTarget, this.fetchAmount, this.fetching.fetchcomplete, this.fetching.fetchfail).Exit(delegate(FetchAreaChore.StatesInstance smi)
+			{
+				GameObject gameObject = smi.sm.fetchTarget.Get(smi);
+				if (gameObject != null)
+				{
+					gameObject.Unsubscribe(1122777325, new Action<object>(smi.OnMarkForMove));
+				}
+			});
 			this.fetching.fetchcomplete.Enter(delegate(FetchAreaChore.StatesInstance smi)
 			{
 				smi.FetchComplete();

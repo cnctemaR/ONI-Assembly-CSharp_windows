@@ -35,7 +35,7 @@ public abstract class NewGameSettingWidget : KMonoBehaviour
 		this.panel.Refresh();
 	}
 
-	protected bool IsEnabled()
+	protected virtual bool IsEnabled()
 	{
 		return this.widget_enabled;
 	}

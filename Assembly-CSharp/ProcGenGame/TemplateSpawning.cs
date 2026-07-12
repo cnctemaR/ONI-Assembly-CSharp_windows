@@ -155,6 +155,7 @@ namespace ProcGenGame
 		private static bool ApplyTemplateRule(WorldGenSettings settings, List<TerrainCell> terrainCells, SeededRandom myRandom, ref List<TemplateSpawning.TemplateSpawner> templateSpawnTargets, ref List<RectInt> placedPOIBounds, global::ProcGen.World.TemplateSpawnRules rule, ref HashSet<string> usedTemplates, out string errorMessage, ref List<TemplateSpawning.TemplateSpawner> newTemplateSpawnTargets)
 		{
 			int i = 0;
+			Predicate<TerrainCell> <>9__0;
 			while (i < rule.times)
 			{
 				ListPool<string, TemplateSpawning>.PooledList pooledList = ListPool<string, TemplateSpawning>.Allocate();
@@ -184,18 +185,13 @@ namespace ProcGenGame
 								}
 							}
 						}
-						goto IL_00B2;
+						goto IL_00CC;
 					}
-					goto IL_00A5;
 				}
-				goto IL_00A5;
-				IL_00B2:
+				goto IL_00BB;
+				IL_00CC:
 				pooledList.ShuffleSeeded<string>(myRandom.RandomSource());
-				if (pooledList.Count == 0)
-				{
-					pooledList.Recycle();
-				}
-				else
+				if (pooledList.Count != 0)
 				{
 					int num = 0;
 					int num2 = 0;
@@ -238,10 +234,39 @@ namespace ProcGenGame
 						if (template != null)
 						{
 							bool flag = num > 0;
-							TerrainCell terrainCell = TemplateSpawning.FindTargetForTemplate(template, rule, terrainCells, myRandom, ref templateSpawnTargets, ref placedPOIBounds, flag, settings);
+							Vector2I vector2I = Vector2I.zero;
+							TerrainCell terrainCell;
+							if (rule.overridePlacement != Vector2I.minusone)
+							{
+								vector2I = rule.overridePlacement;
+								Predicate<TerrainCell> predicate;
+								if ((predicate = <>9__0) == null)
+								{
+									predicate = (<>9__0 = (TerrainCell x) => x.poly.Contains(rule.overridePlacement));
+								}
+								terrainCell = terrainCells.Find(predicate);
+								if (num > 0 && terrainCell.node.templateTag != Tag.Invalid)
+								{
+									errorMessage = string.Format("Tried to place '{0}' at ({1},{2}) using overridePlacement but '{3}' is already there.", new object[]
+									{
+										text3,
+										vector2I.x,
+										vector2I.y,
+										terrainCell.node.templateTag
+									});
+									return false;
+								}
+							}
+							else
+							{
+								terrainCell = TemplateSpawning.FindTargetForTemplate(template, rule, terrainCells, myRandom, ref templateSpawnTargets, ref placedPOIBounds, flag, settings);
+								if (terrainCell != null)
+								{
+									vector2I = new Vector2I((int)terrainCell.poly.Centroid().x + rule.overrideOffset.x, (int)terrainCell.poly.Centroid().y + rule.overrideOffset.y);
+								}
+							}
 							if (terrainCell != null)
 							{
-								Vector2I vector2I = new Vector2I((int)terrainCell.poly.Centroid().x + rule.overrideOffset.x, (int)terrainCell.poly.Centroid().y + rule.overrideOffset.y);
 								RectInt templateBounds = template.GetTemplateBounds(vector2I, TemplateSpawning.s_poiPadding);
 								TemplateSpawning.TemplateSpawner templateSpawner = new TemplateSpawning.TemplateSpawner(vector2I, templateBounds, template, terrainCell);
 								templateSpawnTargets.Add(templateSpawner);
@@ -278,12 +303,15 @@ namespace ProcGenGame
 						});
 						return false;
 					}
+					goto IL_047C;
 				}
+				pooledList.Recycle();
+				IL_047C:
 				i++;
 				continue;
-				IL_00A5:
+				IL_00BB:
 				pooledList.AddRange(rule.names);
-				goto IL_00B2;
+				goto IL_00CC;
 			}
 			errorMessage = "";
 			return true;

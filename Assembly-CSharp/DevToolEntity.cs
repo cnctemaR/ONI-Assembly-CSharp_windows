@@ -17,6 +17,7 @@ public class DevToolEntity : DevTool
 			ImGui.EndMenuBar();
 		}
 		ImGui.Text(this.currentTargetOpt.IsNone() ? "Pick target:" : "Change target:");
+		ImGui.SameLine();
 		if (ImGui.Button("Eyedrop"))
 		{
 			panel.PushDevTool(new DevToolEntity_EyeDrop(delegate(DevToolEntityTarget result)
@@ -41,19 +42,20 @@ public class DevToolEntity : DevTool
 			}
 		}
 		ImGui.Separator();
-		ImGui.Separator();
 		ImGui.Spacing();
 		if (this.currentTargetOpt.IsNone())
 		{
-			ImGui.Text("<nothing selected>");
 			this.Name = "Entity";
+			ImGui.Text("<nothing selected>");
 		}
 		else
 		{
-			ImGui.Checkbox("Draw Bounding Box", ref this.shouldDrawBoundingBox);
-			ImGuiEx.SimpleField("Entity Name", this.currentTargetOpt.Unwrap().ToString());
 			this.Name = "Entity: " + this.currentTargetOpt.Unwrap().ToString();
+			this.Name = "EntityType: " + this.currentTargetOpt.Unwrap().GetType().FullName.Substring("For".Length);
+			ImGuiEx.SimpleField("Entity Name", this.currentTargetOpt.Unwrap().ToString());
 		}
+		ImGui.Spacing();
+		ImGui.Separator();
 		ImGui.Spacing();
 		if (this.currentTargetOpt.IsNone())
 		{
@@ -78,26 +80,63 @@ public class DevToolEntity : DevTool
 				option = Option.None;
 			}
 		}
-		if (option.IsSome() && ImGui.Button(string.Format("DevTool Inspect###ID_Inspect_{0}", option.Unwrap().GetInstanceID())))
+		if (ImGui.CollapsingHeader("Actions", ImGuiTreeNodeFlags.DefaultOpen))
 		{
-			DevToolSceneInspector.Inspect(option.Unwrap());
+			ImGui.Indent();
+			ImGui.Checkbox("Draw Bounding Box", ref this.shouldDrawBoundingBox);
+			if (option.IsSome())
+			{
+				GameObject gameObject = option.Unwrap();
+				if (ImGui.Button(string.Format("Inspect GameObject in DevTools###ID_InspectInGame_{0}", gameObject.GetInstanceID())))
+				{
+					DevToolSceneInspector.Inspect(gameObject);
+				}
+				WildnessMonitor.Instance smi = gameObject.GetSMI<WildnessMonitor.Instance>();
+				if (smi.IsNullOrDestroyed())
+				{
+					ImGuiEx.Button("Taming: Covert to Tamed", "No WildnessMonitor.Instance found on the selected GameObject");
+				}
+				else
+				{
+					WildnessMonitor wildnessMonitor = (WildnessMonitor)smi.GetStateMachine();
+					if (smi.GetCurrentState() != wildnessMonitor.tame)
+					{
+						if (ImGui.Button("Taming: Convert to Tamed"))
+						{
+							smi.wildness.SetValue(0f);
+							smi.GoTo(wildnessMonitor.tame);
+						}
+					}
+					else if (ImGui.Button("Taming: Convert to Untamed"))
+					{
+						smi.wildness.value = smi.wildness.GetMax();
+						smi.GoTo(wildnessMonitor.wild);
+					}
+				}
+			}
+			ImGui.Unindent();
 		}
-		ImGui.Separator();
-		if (ImGuiEx.Button("Debug Status Items", DevToolStatusItems.GetErrorForCandidateTarget(devToolEntityTarget).UnwrapOrDefault()))
+		ImGui.Spacing();
+		if (ImGui.CollapsingHeader("Related DevTools", ImGuiTreeNodeFlags.DefaultOpen))
 		{
-			panel.PushDevTool(new DevToolStatusItems((DevToolEntityTarget.ForWorldGameObject)devToolEntityTarget));
-		}
-		if (ImGuiEx.Button("Debug Cavity", DevToolCavity.GetErrorForCandidateTarget(devToolEntityTarget).UnwrapOrDefault()))
-		{
-			panel.PushDevTool(new DevToolCavity((DevToolEntityTarget.ForSimCell)devToolEntityTarget));
-		}
-		if (ImGuiEx.Button("Debug GoTo", DevToolEntity_DebugGoTo.GetErrorForCandidateTarget(devToolEntityTarget).UnwrapOrDefault()))
-		{
-			panel.PushDevTool(new DevToolEntity_DebugGoTo((DevToolEntityTarget.ForWorldGameObject)devToolEntityTarget));
-		}
-		if (ImGuiEx.Button("Debug RanchStation", DevToolEntity_RanchStation.GetErrorForCandidateTarget(devToolEntityTarget).UnwrapOrDefault()))
-		{
-			panel.PushDevTool(new DevToolEntity_RanchStation((DevToolEntityTarget.ForWorldGameObject)devToolEntityTarget));
+			ImGui.Indent();
+			if (ImGuiEx.Button("Debug Status Items", DevToolStatusItems.GetErrorForCandidateTarget(devToolEntityTarget).UnwrapOrDefault()))
+			{
+				panel.PushDevTool(new DevToolStatusItems((DevToolEntityTarget.ForWorldGameObject)devToolEntityTarget));
+			}
+			if (ImGuiEx.Button("Debug Cavity", DevToolCavity.GetErrorForCandidateTarget(devToolEntityTarget).UnwrapOrDefault()))
+			{
+				panel.PushDevTool(new DevToolCavity((DevToolEntityTarget.ForSimCell)devToolEntityTarget));
+			}
+			if (ImGuiEx.Button("Debug GoTo", DevToolEntity_DebugGoTo.GetErrorForCandidateTarget(devToolEntityTarget).UnwrapOrDefault()))
+			{
+				panel.PushDevTool(new DevToolEntity_DebugGoTo((DevToolEntityTarget.ForWorldGameObject)devToolEntityTarget));
+			}
+			if (ImGuiEx.Button("Debug RanchStation", DevToolEntity_RanchStation.GetErrorForCandidateTarget(devToolEntityTarget).UnwrapOrDefault()))
+			{
+				panel.PushDevTool(new DevToolEntity_RanchStation((DevToolEntityTarget.ForWorldGameObject)devToolEntityTarget));
+			}
+			ImGui.Unindent();
 		}
 		if (this.shouldDrawBoundingBox)
 		{

@@ -114,15 +114,15 @@ public class FullBodyUIMinionWidget : KMonoBehaviour
 		string[] array = null;
 		if (identity != null)
 		{
-			array = identity.GetComponent<WearableAccessorizer>().GetClothingItemIds();
+			array = identity.GetComponent<WearableAccessorizer>().GetClothingItemsIds(ClothingOutfitUtility.OutfitType.Clothing);
 		}
 		else if (storedMinionIdentity != null)
 		{
-			array = storedMinionIdentity.GetClothingItemIds();
+			array = storedMinionIdentity.GetClothingItemIds(ClothingOutfitUtility.OutfitType.Clothing);
 		}
 		if (array != null)
 		{
-			this.animController.GetComponent<WearableAccessorizer>().ApplyClothingItems(array.Select<string, ClothingItemResource>((string i) => Db.Get().Permits.ClothingItems.Get(i)));
+			this.animController.GetComponent<WearableAccessorizer>().ApplyClothingItems(ClothingOutfitUtility.OutfitType.Clothing, array.Select<string, ClothingItemResource>((string i) => Db.Get().Permits.ClothingItems.Get(i)));
 		}
 	}
 

@@ -131,15 +131,17 @@ public class OutfitDesignerScreen_OutfitState
 
 		public static OutfitDesignerScreen_OutfitState.Slots For(ClothingOutfitUtility.OutfitType outfitType)
 		{
-			if (outfitType == ClothingOutfitUtility.OutfitType.Clothing)
+			switch (outfitType)
 			{
+			case ClothingOutfitUtility.OutfitType.Clothing:
 				return new OutfitDesignerScreen_OutfitState.Slots.Clothing();
-			}
-			if (outfitType != ClothingOutfitUtility.OutfitType.JoyResponse)
-			{
+			case ClothingOutfitUtility.OutfitType.JoyResponse:
+				throw new NotSupportedException("OutfitType.JoyResponse cannot be used with OutfitDesignerScreen_OutfitState. Use JoyResponseOutfitTarget instead.");
+			case ClothingOutfitUtility.OutfitType.AtmoSuit:
+				return new OutfitDesignerScreen_OutfitState.Slots.Atmosuit();
+			default:
 				throw new NotImplementedException();
 			}
-			throw new NotSupportedException("OutfitType.JoyResponse cannot be used with OutfitDesignerScreen_OutfitState. Use JoyResponseOutfitTarget instead.");
 		}
 
 		public abstract ref Option<ClothingItemResource> GetItemSlotForCategory(PermitCategory category);
@@ -242,6 +244,79 @@ public class OutfitDesignerScreen_OutfitState
 				if (category == PermitCategory.DupeAccessories)
 				{
 					return this.accessorySlot;
+				}
+				return base.FallbackSlot(this, category);
+			}
+		}
+
+		public class Atmosuit : OutfitDesignerScreen_OutfitState.Slots
+		{
+			public Atmosuit()
+				: base(5)
+			{
+			}
+
+			public ref Option<ClothingItemResource> helmetSlot
+			{
+				get
+				{
+					return ref this.array[0];
+				}
+			}
+
+			public ref Option<ClothingItemResource> bodySlot
+			{
+				get
+				{
+					return ref this.array[1];
+				}
+			}
+
+			public ref Option<ClothingItemResource> glovesSlot
+			{
+				get
+				{
+					return ref this.array[2];
+				}
+			}
+
+			public ref Option<ClothingItemResource> beltSlot
+			{
+				get
+				{
+					return ref this.array[3];
+				}
+			}
+
+			public ref Option<ClothingItemResource> shoesSlot
+			{
+				get
+				{
+					return ref this.array[4];
+				}
+			}
+
+			public override ref Option<ClothingItemResource> GetItemSlotForCategory(PermitCategory category)
+			{
+				if (category == PermitCategory.AtmoSuitHelmet)
+				{
+					return this.helmetSlot;
+				}
+				if (category == PermitCategory.AtmoSuitBody)
+				{
+					return this.bodySlot;
+				}
+				if (category == PermitCategory.AtmoSuitGloves)
+				{
+					return this.glovesSlot;
+				}
+				if (category == PermitCategory.AtmoSuitBelt)
+				{
+					return this.beltSlot;
+				}
+				if (category == PermitCategory.AtmoSuitShoes)
+				{
+					return this.shoesSlot;
 				}
 				return base.FallbackSlot(this, category);
 			}

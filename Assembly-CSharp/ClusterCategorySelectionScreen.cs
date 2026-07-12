@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using ProcGen;
 using STRINGS;
 using UnityEngine;
 using UnityEngine.UI;
@@ -8,86 +10,72 @@ public class ClusterCategorySelectionScreen : NewGameFlowScreen
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		HierarchyReferences component = this.vanillaButton.GetComponent<HierarchyReferences>();
-		this.vanillaButtonHeader = component.GetReference<RectTransform>("HeaderBackground").GetComponent<Image>();
-		this.vanillalButtonSelectionFrame = component.GetReference<RectTransform>("SelectionFrame").GetComponent<Image>();
-		MultiToggle multiToggle = this.vanillaButton;
-		multiToggle.onEnter = (global::System.Action)Delegate.Combine(multiToggle.onEnter, new global::System.Action(this.OnHoverEnterVanilla));
-		MultiToggle multiToggle2 = this.vanillaButton;
-		multiToggle2.onExit = (global::System.Action)Delegate.Combine(multiToggle2.onExit, new global::System.Action(this.OnHoverExitVanilla));
-		MultiToggle multiToggle3 = this.vanillaButton;
-		multiToggle3.onClick = (global::System.Action)Delegate.Combine(multiToggle3.onClick, new global::System.Action(this.OnClickVanilla));
-		HierarchyReferences component2 = this.spacedOutButton.GetComponent<HierarchyReferences>();
-		this.spacedOutButtonHeader = component2.GetReference<RectTransform>("HeaderBackground").GetComponent<Image>();
-		this.spacedOutButtonSelectionFrame = component2.GetReference<RectTransform>("SelectionFrame").GetComponent<Image>();
-		MultiToggle multiToggle4 = this.spacedOutButton;
-		multiToggle4.onEnter = (global::System.Action)Delegate.Combine(multiToggle4.onEnter, new global::System.Action(this.OnHoverEnterSpacedOut));
-		MultiToggle multiToggle5 = this.spacedOutButton;
-		multiToggle5.onExit = (global::System.Action)Delegate.Combine(multiToggle5.onExit, new global::System.Action(this.OnHoverExitSpacedOut));
-		MultiToggle multiToggle6 = this.spacedOutButton;
-		multiToggle6.onClick = (global::System.Action)Delegate.Combine(multiToggle6.onClick, new global::System.Action(this.OnClickSpacedOut));
 		this.closeButton.onClick += base.NavigateBackward;
+		int num = 0;
+		using (Dictionary<string, ClusterLayout>.ValueCollection.Enumerator enumerator = SettingsCache.clusterLayouts.clusterCache.Values.GetEnumerator())
+		{
+			while (enumerator.MoveNext())
+			{
+				if (enumerator.Current.clusterCategory == 3)
+				{
+					num++;
+				}
+			}
+		}
+		if (num > 0)
+		{
+			this.eventStyle.button.gameObject.SetActive(true);
+			this.eventStyle.Init(this.descriptionArea, UI.FRONTEND.CLUSTERCATEGORYSELECTSCREEN.EVENT_DESC, UI.FRONTEND.CLUSTERCATEGORYSELECTSCREEN.EVENT_TITLE);
+			MultiToggle button = this.eventStyle.button;
+			button.onClick = (global::System.Action)Delegate.Combine(button.onClick, new global::System.Action(delegate
+			{
+				this.OnClickOption(ClusterLayout.ClusterCategory.special);
+			}));
+		}
+		if (DlcManager.IsExpansion1Active())
+		{
+			this.classicStyle.button.gameObject.SetActive(true);
+			this.classicStyle.Init(this.descriptionArea, UI.FRONTEND.CLUSTERCATEGORYSELECTSCREEN.CLASSIC_DESC, UI.FRONTEND.CLUSTERCATEGORYSELECTSCREEN.CLASSIC_TITLE);
+			MultiToggle button2 = this.classicStyle.button;
+			button2.onClick = (global::System.Action)Delegate.Combine(button2.onClick, new global::System.Action(delegate
+			{
+				this.OnClickOption(ClusterLayout.ClusterCategory.spacedOutVanillaStyle);
+			}));
+			this.spacedOutStyle.button.gameObject.SetActive(true);
+			this.spacedOutStyle.Init(this.descriptionArea, UI.FRONTEND.CLUSTERCATEGORYSELECTSCREEN.SPACEDOUT_DESC, UI.FRONTEND.CLUSTERCATEGORYSELECTSCREEN.SPACEDOUT_TITLE);
+			MultiToggle button3 = this.spacedOutStyle.button;
+			button3.onClick = (global::System.Action)Delegate.Combine(button3.onClick, new global::System.Action(delegate
+			{
+				this.OnClickOption(ClusterLayout.ClusterCategory.spacedOutStyle);
+			}));
+			this.panel.sizeDelta = ((num > 0) ? new Vector2(622f, this.panel.sizeDelta.y) : new Vector2(480f, this.panel.sizeDelta.y));
+			return;
+		}
+		this.vanillaStyle.button.gameObject.SetActive(true);
+		this.vanillaStyle.Init(this.descriptionArea, UI.FRONTEND.CLUSTERCATEGORYSELECTSCREEN.VANILLA_DESC, UI.FRONTEND.CLUSTERCATEGORYSELECTSCREEN.VANILLA_TITLE);
+		MultiToggle button4 = this.vanillaStyle.button;
+		button4.onClick = (global::System.Action)Delegate.Combine(button4.onClick, new global::System.Action(delegate
+		{
+			this.OnClickOption(ClusterLayout.ClusterCategory.vanilla);
+		}));
+		this.panel.sizeDelta = new Vector2(480f, this.panel.sizeDelta.y);
+		this.eventStyle.kanim.Play("lab_asteroid_standard", KAnim.PlayMode.Once, 1f, 0f);
 	}
 
-	private void OnHoverEnterVanilla()
-	{
-		KMonoBehaviour.PlaySound(GlobalAssets.GetSound("HUD_Mouseover", false));
-		this.vanillalButtonSelectionFrame.SetAlpha(1f);
-		this.vanillaButtonHeader.color = new Color(0.7019608f, 0.3647059f, 0.53333336f, 1f);
-		this.descriptionArea.text = UI.FRONTEND.CLUSTERCATEGORYSELECTSCREEN.VANILLA_DESC;
-	}
-
-	private void OnHoverExitVanilla()
-	{
-		KMonoBehaviour.PlaySound(GlobalAssets.GetSound("HUD_Mouseover", false));
-		this.vanillalButtonSelectionFrame.SetAlpha(0f);
-		this.vanillaButtonHeader.color = new Color(0.30980393f, 0.34117648f, 0.38431373f, 1f);
-		this.descriptionArea.text = UI.FRONTEND.CLUSTERCATEGORYSELECTSCREEN.BLANK_DESC;
-	}
-
-	private void OnClickVanilla()
+	private void OnClickOption(ClusterLayout.ClusterCategory clusterCategory)
 	{
 		this.Deactivate();
-		DestinationSelectPanel.ChosenClusterCategorySetting = 1;
+		DestinationSelectPanel.ChosenClusterCategorySetting = (int)clusterCategory;
 		base.NavigateForward();
 	}
 
-	private void OnHoverEnterSpacedOut()
-	{
-		KMonoBehaviour.PlaySound(GlobalAssets.GetSound("HUD_Mouseover", false));
-		this.spacedOutButtonSelectionFrame.SetAlpha(1f);
-		this.spacedOutButtonHeader.color = new Color(0.7019608f, 0.3647059f, 0.53333336f, 1f);
-		this.descriptionArea.text = UI.FRONTEND.CLUSTERCATEGORYSELECTSCREEN.SPACEDOUT_DESC;
-	}
+	public ClusterCategorySelectionScreen.ButtonConfig vanillaStyle;
 
-	private void OnHoverExitSpacedOut()
-	{
-		KMonoBehaviour.PlaySound(GlobalAssets.GetSound("HUD_Mouseover", false));
-		this.spacedOutButtonSelectionFrame.SetAlpha(0f);
-		this.spacedOutButtonHeader.color = new Color(0.30980393f, 0.34117648f, 0.38431373f, 1f);
-		this.descriptionArea.text = UI.FRONTEND.CLUSTERCATEGORYSELECTSCREEN.BLANK_DESC;
-	}
+	public ClusterCategorySelectionScreen.ButtonConfig classicStyle;
 
-	private void OnClickSpacedOut()
-	{
-		this.Deactivate();
-		DestinationSelectPanel.ChosenClusterCategorySetting = 2;
-		base.NavigateForward();
-	}
+	public ClusterCategorySelectionScreen.ButtonConfig spacedOutStyle;
 
-	[SerializeField]
-	private MultiToggle spacedOutButton;
-
-	private Image spacedOutButtonHeader;
-
-	private Image spacedOutButtonSelectionFrame;
-
-	[SerializeField]
-	private MultiToggle vanillaButton;
-
-	private Image vanillaButtonHeader;
-
-	private Image vanillalButtonSelectionFrame;
+	public ClusterCategorySelectionScreen.ButtonConfig eventStyle;
 
 	[SerializeField]
 	private LocText descriptionArea;
@@ -96,8 +84,53 @@ public class ClusterCategorySelectionScreen : NewGameFlowScreen
 	private KButton closeButton;
 
 	[SerializeField]
-	private KBatchedAnimController nosweatAnim;
+	private RectTransform panel;
 
-	[SerializeField]
-	private KBatchedAnimController survivalAnim;
+	[Serializable]
+	public class ButtonConfig
+	{
+		public void Init(LocText descriptionArea, string hoverDescriptionText, string headerText)
+		{
+			this.descriptionArea = descriptionArea;
+			this.hoverDescriptionText = hoverDescriptionText;
+			this.headerLabel.SetText(headerText);
+			MultiToggle multiToggle = this.button;
+			multiToggle.onEnter = (global::System.Action)Delegate.Combine(multiToggle.onEnter, new global::System.Action(this.OnHoverEnter));
+			MultiToggle multiToggle2 = this.button;
+			multiToggle2.onExit = (global::System.Action)Delegate.Combine(multiToggle2.onExit, new global::System.Action(this.OnHoverExit));
+			HierarchyReferences component = this.button.GetComponent<HierarchyReferences>();
+			this.headerImage = component.GetReference<RectTransform>("HeaderBackground").GetComponent<Image>();
+			this.selectionFrame = component.GetReference<RectTransform>("SelectionFrame").GetComponent<Image>();
+		}
+
+		private void OnHoverEnter()
+		{
+			KMonoBehaviour.PlaySound(GlobalAssets.GetSound("HUD_Mouseover", false));
+			this.selectionFrame.SetAlpha(1f);
+			this.headerImage.color = new Color(0.7019608f, 0.3647059f, 0.53333336f, 1f);
+			this.descriptionArea.text = this.hoverDescriptionText;
+		}
+
+		private void OnHoverExit()
+		{
+			KMonoBehaviour.PlaySound(GlobalAssets.GetSound("HUD_Mouseover", false));
+			this.selectionFrame.SetAlpha(0f);
+			this.headerImage.color = new Color(0.30980393f, 0.34117648f, 0.38431373f, 1f);
+			this.descriptionArea.text = UI.FRONTEND.CLUSTERCATEGORYSELECTSCREEN.BLANK_DESC;
+		}
+
+		public MultiToggle button;
+
+		public Image headerImage;
+
+		public LocText headerLabel;
+
+		public Image selectionFrame;
+
+		public KAnimControllerBase kanim;
+
+		private string hoverDescriptionText;
+
+		private LocText descriptionArea;
+	}
 }

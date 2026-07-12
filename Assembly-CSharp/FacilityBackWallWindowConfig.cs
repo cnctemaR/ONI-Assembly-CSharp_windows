@@ -18,6 +18,7 @@ public class FacilityBackWallWindowConfig : IBuildingConfig
 		BuildLocationRule buildLocationRule = BuildLocationRule.NotInTiles;
 		EffectorValues none = NOISE_POLLUTION.NONE;
 		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, glasses, num5, buildLocationRule, DECOR.BONUS.TIER3, none, 0.2f);
+		buildingDef.PermittedRotations = PermittedRotations.R90;
 		buildingDef.Floodable = false;
 		buildingDef.Overheatable = false;
 		buildingDef.AudioCategory = "Metal";

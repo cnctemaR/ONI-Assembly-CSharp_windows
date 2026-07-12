@@ -3,6 +3,11 @@ using UnityEngine;
 
 public class WarpConduitSender : StateMachineComponent<WarpConduitSender.StatesInstance>, ISecondaryInput
 {
+	private bool IsSending()
+	{
+		return base.smi.master.gasPort.IsOn() || base.smi.master.liquidPort.IsOn() || base.smi.master.solidPort.IsOn();
+	}
+
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
@@ -138,17 +143,18 @@ public class WarpConduitSender : StateMachineComponent<WarpConduitSender.StatesI
 			this.airlock = new MeterController(parent.GetComponent<KBatchedAnimController>(), text2, text, Meter.Offset.Infront, Grid.SceneLayer.NoLayer, new string[] { text2 });
 		}
 
+		public bool IsOn()
+		{
+			if (this.solidConsumer != null)
+			{
+				return this.solidConsumer.IsConsuming;
+			}
+			return this.conduitConsumer != null && (this.conduitConsumer.IsConnected && this.conduitConsumer.IsSatisfied) && this.conduitConsumer.consumedLastTick;
+		}
+
 		public void Update()
 		{
-			bool flag = false;
-			if (this.conduitConsumer != null)
-			{
-				flag = this.conduitConsumer.IsConnected && this.conduitConsumer.IsSatisfied && this.conduitConsumer.consumedLastTick;
-			}
-			else if (this.solidConsumer != null)
-			{
-				flag = this.solidConsumer.IsConnected && this.solidConsumer.IsConsuming;
-			}
+			bool flag = this.IsOn();
 			if (flag != this.open)
 			{
 				this.open = flag;
@@ -212,13 +218,26 @@ public class WarpConduitSender : StateMachineComponent<WarpConduitSender.StatesI
 				smi.master.gasPort.Update();
 				smi.master.liquidPort.Update();
 				smi.master.solidPort.Update();
-			}, UpdateRate.SIM_200ms, false);
+			}, UpdateRate.SIM_1000ms, false);
 			this.on.working.PlayAnim("working_pre").QueueAnim("working_loop", true, null).ToggleMainStatusItem(Db.Get().BuildingStatusItems.Working, null)
+				.Update(delegate(WarpConduitSender.StatesInstance smi, float dt)
+				{
+					if (!smi.master.IsSending())
+					{
+						smi.GoTo(this.on.waiting);
+					}
+				}, UpdateRate.SIM_1000ms, false)
 				.Exit(delegate(WarpConduitSender.StatesInstance smi)
 				{
 					smi.Play("working_pst", KAnim.PlayMode.Once);
 				});
-			this.on.waiting.QueueAnim("idle", false, null).ToggleMainStatusItem(Db.Get().BuildingStatusItems.Normal, null).EventTransition(GameHashes.OnStorageChange, this.on.working, (WarpConduitSender.StatesInstance smi) => smi.GetComponent<Storage>().MassStored() > 0f);
+			this.on.waiting.QueueAnim("idle", false, null).ToggleMainStatusItem(Db.Get().BuildingStatusItems.Normal, null).Update(delegate(WarpConduitSender.StatesInstance smi, float dt)
+			{
+				if (smi.master.IsSending())
+				{
+					smi.GoTo(this.on.working);
+				}
+			}, UpdateRate.SIM_1000ms, false);
 		}
 
 		public GameStateMachine<WarpConduitSender.States, WarpConduitSender.StatesInstance, WarpConduitSender, object>.State off;

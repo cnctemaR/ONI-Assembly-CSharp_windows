@@ -207,7 +207,7 @@ public class ConduitConsumer : KMonoBehaviour, IConduitConsumer
 	private void Consume(float dt, ConduitFlow conduit_mgr)
 	{
 		this.IsSatisfied = false;
-		this.consumedLastTick = true;
+		this.consumedLastTick = false;
 		if (this.building.Def.CanMove)
 		{
 			this.utilityCell = this.GetInputCell(conduit_mgr.conduitType);
@@ -254,7 +254,7 @@ public class ConduitConsumer : KMonoBehaviour, IConduitConsumer
 		{
 			if (num2 > 0f)
 			{
-				this.consumedLastTick = false;
+				this.consumedLastTick = true;
 				int num3 = (int)((float)contents.diseaseCount * (num2 / contents.mass));
 				Element element2 = ElementLoader.FindElementByHash(contents.element);
 				ConduitType conduitType = this.conduitType;
@@ -285,7 +285,7 @@ public class ConduitConsumer : KMonoBehaviour, IConduitConsumer
 		}
 		else if (num2 > 0f)
 		{
-			this.consumedLastTick = false;
+			this.consumedLastTick = true;
 			if (this.wrongElementResult == ConduitConsumer.WrongElementResult.Dump)
 			{
 				int num4 = (int)((float)contents.diseaseCount * (num2 / contents.mass));

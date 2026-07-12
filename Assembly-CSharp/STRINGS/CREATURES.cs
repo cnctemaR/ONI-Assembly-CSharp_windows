@@ -1265,7 +1265,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = UI.FormatAsLink("Gas Grass", "GASGRASS");
 
-				public static LocString DESC = "Gas Grass.";
+				public static LocString DESC = "Gas Grass is an alien lifeform tentatively categorized as a \"plant,\" which makes up the entirety of the " + UI.FormatAsLink("Gassy Moo's", "MOO") + " diet.";
 
 				public static LocString DOMESTICATEDDESC = "An alien grass variety that is eaten by " + UI.FormatAsLink("Gassy Moos", "MOO") + ".";
 			}
@@ -2733,15 +2733,19 @@ namespace STRINGS
 
 			public class WRONGIRRIGATIONMAJOR
 			{
-				public static LocString NAME = "    • " + CREATURES.STATS.IRRIGATION.NAME;
+				public static LocString NAME = "    • Irrigation (Stored)";
 
 				public static LocString TOOLTIP = string.Concat(new string[]
 				{
-					"This farm is storing materials that are not suitable for this plant\n\n",
+					"This farm is storing ",
+					UI.PRE_KEYWORD,
+					"Liquids",
+					UI.PST_KEYWORD,
+					" that are not suitable for this plant\n\n",
 					UI.PRE_KEYWORD,
 					"Empty Storage",
 					UI.PST_KEYWORD,
-					" on this building to remove the incorrect materials"
+					" on this building to remove the unusable liquids"
 				});
 
 				public static LocString LINE_ITEM = "        " + CREATURES.STATUSITEMS.WRONGIRRIGATION.LINE_ITEM;

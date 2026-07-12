@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [AddComponentMenu("KMonoBehaviour/scripts/StationaryChoreRangeVisualizer")]
+[Obsolete("Deprecated, use RangeVisualizer")]
 public class StationaryChoreRangeVisualizer : KMonoBehaviour
 {
 	protected override void OnSpawn()
@@ -74,7 +75,7 @@ public class StationaryChoreRangeVisualizer : KMonoBehaviour
 					int num5;
 					int num6;
 					Grid.CellToXY(num4, out num5, out num6);
-					if (Grid.TestLineOfSight(num2, num3, num5, num6, this.blocking_cb, this.blocking_tile_visible))
+					if (Grid.TestLineOfSight(num2, num3, num5, num6, this.blocking_cb, this.blocking_tile_visible, false))
 					{
 						this.newCells.Add(num4);
 					}

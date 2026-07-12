@@ -126,7 +126,7 @@ public class Constructable : Workable, ISaveLoadable
 				Deconstructable component7 = replacementCandidate.GetComponent<Deconstructable>();
 				if (component7 != null)
 				{
-					component7.SpawnItemsFromConstruction();
+					component7.SpawnItemsFromConstruction(worker);
 				}
 				replacementCandidate.Trigger(1606648047, this.building.Def.TileLayer);
 				replacementCandidate.DeleteObject();

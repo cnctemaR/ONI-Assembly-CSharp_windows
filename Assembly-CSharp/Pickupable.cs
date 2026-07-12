@@ -220,6 +220,7 @@ public class Pickupable : Workable, IHasSortOrder
 		base.Subscribe<Pickupable>(1807976145, Pickupable.OnOreSizeChangedDelegate);
 		base.Subscribe<Pickupable>(-1432940121, Pickupable.OnReachableChangedDelegate);
 		base.Subscribe<Pickupable>(-778359855, Pickupable.RefreshStorageTagsDelegate);
+		base.Subscribe<Pickupable>(580035959, Pickupable.OnWorkableEntombOffset);
 		this.KPrefabID.AddTag(GameTags.Pickupable, false);
 		Components.Pickupables.Add(this);
 	}
@@ -249,7 +250,7 @@ public class Pickupable : Workable, IHasSortOrder
 			component.SetStatusIndicatorOffset(new Vector3(0f, -0.65f, 0f));
 		}
 		this.OnTagsChanged(null);
-		this.TryToOffsetIfBuried();
+		this.TryToOffsetIfBuried(CellOffset.none);
 		DecorProvider component2 = base.GetComponent<DecorProvider>();
 		if (component2 != null && string.IsNullOrEmpty(component2.overrideName))
 		{
@@ -303,10 +304,82 @@ public class Pickupable : Workable, IHasSortOrder
 
 	private void OnSolidChanged(object data)
 	{
-		this.TryToOffsetIfBuried();
+		this.TryToOffsetIfBuried(CellOffset.none);
 	}
 
-	public void TryToOffsetIfBuried()
+	private void SetWorkableOffset(object data)
+	{
+		CellOffset cellOffset = CellOffset.none;
+		Worker worker = data as Worker;
+		if (worker != null)
+		{
+			int num = Grid.PosToCell(worker);
+			int num2 = Grid.PosToCell(this);
+			cellOffset = (Grid.IsValidCell(num) ? Grid.GetCellOffsetDirection(num2, num) : CellOffset.none);
+		}
+		this.TryToOffsetIfBuried(cellOffset);
+	}
+
+	private CellOffset[] GetPreferedOffsets(CellOffset preferedDirectionOffset)
+	{
+		if (preferedDirectionOffset == CellOffset.left || preferedDirectionOffset == CellOffset.leftup)
+		{
+			return new CellOffset[]
+			{
+				CellOffset.up,
+				CellOffset.left,
+				CellOffset.leftup
+			};
+		}
+		if (preferedDirectionOffset == CellOffset.right || preferedDirectionOffset == CellOffset.rightup)
+		{
+			return new CellOffset[]
+			{
+				CellOffset.up,
+				CellOffset.right,
+				CellOffset.rightup
+			};
+		}
+		if (preferedDirectionOffset == CellOffset.up)
+		{
+			return new CellOffset[]
+			{
+				CellOffset.up,
+				CellOffset.rightup,
+				CellOffset.leftup
+			};
+		}
+		if (preferedDirectionOffset == CellOffset.leftdown)
+		{
+			return new CellOffset[]
+			{
+				CellOffset.down,
+				CellOffset.leftdown,
+				CellOffset.left
+			};
+		}
+		if (preferedDirectionOffset == CellOffset.rightdown)
+		{
+			return new CellOffset[]
+			{
+				CellOffset.down,
+				CellOffset.rightdown,
+				CellOffset.right
+			};
+		}
+		if (preferedDirectionOffset == CellOffset.down)
+		{
+			return new CellOffset[]
+			{
+				CellOffset.down,
+				CellOffset.leftdown,
+				CellOffset.rightdown
+			};
+		}
+		return new CellOffset[0];
+	}
+
+	public void TryToOffsetIfBuried(CellOffset offset)
 	{
 		if (this.KPrefabID.HasTag(GameTags.Stored) || this.KPrefabID.HasTag(GameTags.Equipped))
 		{
@@ -320,9 +393,10 @@ public class Pickupable : Workable, IHasSortOrder
 		DeathMonitor.Instance smi = base.gameObject.GetSMI<DeathMonitor.Instance>();
 		if ((smi == null || smi.IsDead()) && ((Grid.Solid[num] && Grid.Foundation[num]) || Grid.Properties[num] != 0))
 		{
-			for (int i = 0; i < Pickupable.displacementOffsets.Length; i++)
+			CellOffset[] array = this.GetPreferedOffsets(offset).Concat<CellOffset>(Pickupable.displacementOffsets);
+			for (int i = 0; i < array.Length; i++)
 			{
-				int num2 = Grid.OffsetCell(num, Pickupable.displacementOffsets[i]);
+				int num2 = Grid.OffsetCell(num, array[i]);
 				if (Grid.IsValidCell(num2) && !Grid.Solid[num2])
 				{
 					Vector3 vector = Grid.CellToPosCBC(num2, Grid.SceneLayer.Move);
@@ -940,6 +1014,11 @@ public class Pickupable : Workable, IHasSortOrder
 	private static readonly EventSystem.IntraObjectHandler<Pickupable> RefreshStorageTagsDelegate = new EventSystem.IntraObjectHandler<Pickupable>(delegate(Pickupable component, object data)
 	{
 		component.RefreshStorageTags(data);
+	});
+
+	private static readonly EventSystem.IntraObjectHandler<Pickupable> OnWorkableEntombOffset = new EventSystem.IntraObjectHandler<Pickupable>(delegate(Pickupable component, object data)
+	{
+		component.SetWorkableOffset(data);
 	});
 
 	private static readonly EventSystem.IntraObjectHandler<Pickupable> OnTagsChangedDelegate = new EventSystem.IntraObjectHandler<Pickupable>(delegate(Pickupable component, object data)

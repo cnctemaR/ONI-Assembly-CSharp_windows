@@ -50,17 +50,16 @@ public class AutoMinerConfig : IBuildingConfig
 
 	private static void AddVisualizer(GameObject prefab, bool movable)
 	{
-		StationaryChoreRangeVisualizer stationaryChoreRangeVisualizer = prefab.AddOrGet<StationaryChoreRangeVisualizer>();
-		stationaryChoreRangeVisualizer.x = -7;
-		stationaryChoreRangeVisualizer.y = 0;
-		stationaryChoreRangeVisualizer.width = 16;
-		stationaryChoreRangeVisualizer.height = 9;
-		stationaryChoreRangeVisualizer.vision_offset = new CellOffset(0, 1);
-		stationaryChoreRangeVisualizer.movable = movable;
-		stationaryChoreRangeVisualizer.blocking_tile_visible = false;
+		RangeVisualizer rangeVisualizer = prefab.AddOrGet<RangeVisualizer>();
+		rangeVisualizer.RangeMin.x = -7;
+		rangeVisualizer.RangeMin.y = -1;
+		rangeVisualizer.RangeMax.x = 8;
+		rangeVisualizer.RangeMax.y = 7;
+		rangeVisualizer.OriginOffset = new Vector2I(0, 1);
+		rangeVisualizer.BlockingTileVisible = false;
 		prefab.GetComponent<KPrefabID>().instantiateFn += delegate(GameObject go)
 		{
-			go.GetComponent<StationaryChoreRangeVisualizer>().blocking_cb = new Func<int, bool>(AutoMiner.DigBlockingCB);
+			go.GetComponent<RangeVisualizer>().BlockingCb = new Func<int, bool>(AutoMiner.DigBlockingCB);
 		};
 	}
 

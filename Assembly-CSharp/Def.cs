@@ -172,25 +172,6 @@ public class Def : ScriptableObject
 		{
 			return Assets.GetSprite("unknown");
 		}
-		KAnim.Anim.Frame frame = KAnim.Anim.Frame.InvalidFrame;
-		for (int i = 0; i < data.animCount; i++)
-		{
-			KAnim.Anim anim = data.GetAnim(i);
-			if (anim.name == animName)
-			{
-				frame = anim.GetFrame(data.batchTag, 0);
-			}
-		}
-		if (!frame.IsValid())
-		{
-			DebugUtil.LogWarningArgs(new object[] { string.Format("missing '{0}' anim in '{1}'", animName, animFile) });
-			return Assets.GetSprite("unknown");
-		}
-		if (data.elementCount == 0)
-		{
-			return Assets.GetSprite("unknown");
-		}
-		KAnim.Anim.FrameElement frameElement = default(KAnim.Anim.FrameElement);
 		if (string.IsNullOrEmpty(symbolName))
 		{
 			symbolName = animName;
@@ -199,43 +180,32 @@ public class Def : ScriptableObject
 		KAnim.Build.Symbol symbol = data.build.GetSymbol(kanimHashedString);
 		if (symbol == null)
 		{
-			DebugUtil.LogWarningArgs(new object[] { animFile.name, animName, "placeSymbol [", frameElement.symbol, "] is missing" });
+			DebugUtil.LogWarningArgs(new object[] { animFile.name, animName, "placeSymbol [", symbolName, "] is missing" });
 			return Assets.GetSprite("unknown");
 		}
-		int frame2 = frameElement.frame;
-		KAnim.Build.SymbolFrame symbolFrame = symbol.GetFrame(frame2).symbolFrame;
-		if (symbolFrame == null)
-		{
-			DebugUtil.LogWarningArgs(new object[] { animName, "SymbolFrame [", frameElement.frame, "] is missing" });
-			return Assets.GetSprite("unknown");
-		}
+		int num = 0;
+		KAnim.Build.SymbolFrameInstance frame = symbol.GetFrame(num);
 		Texture2D texture = data.build.GetTexture(0);
 		global::Debug.Assert(texture != null, "Invalid texture on " + animFile.name);
-		float x = symbolFrame.uvMin.x;
-		float x2 = symbolFrame.uvMax.x;
-		float y = symbolFrame.uvMax.y;
-		float y2 = symbolFrame.uvMin.y;
-		int num = (int)((float)texture.width * Mathf.Abs(x2 - x));
-		int num2 = (int)((float)texture.height * Mathf.Abs(y2 - y));
-		float num3 = Mathf.Abs(symbolFrame.bboxMax.x - symbolFrame.bboxMin.x);
+		float x = frame.uvMin.x;
+		float x2 = frame.uvMax.x;
+		float y = frame.uvMax.y;
+		float y2 = frame.uvMin.y;
+		int num2 = (int)((float)texture.width * Mathf.Abs(x2 - x));
+		int num3 = (int)((float)texture.height * Mathf.Abs(y2 - y));
+		float num4 = Mathf.Abs(frame.bboxMax.x - frame.bboxMin.x);
 		Rect rect = default(Rect);
-		rect.width = (float)num;
-		rect.height = (float)num2;
+		rect.width = (float)num2;
+		rect.height = (float)num3;
 		rect.x = (float)((int)((float)texture.width * x));
 		rect.y = (float)((int)((float)texture.height * y));
-		float num4 = 100f;
-		if (num != 0)
+		float num5 = 100f;
+		if (num2 != 0)
 		{
-			num4 = 100f / (num3 / (float)num);
+			num5 = 100f / (num4 / (float)num2);
 		}
-		Sprite sprite = Sprite.Create(texture, rect, centered ? new Vector2(0.5f, 0.5f) : Vector2.zero, num4, 0U, SpriteMeshType.FullRect);
-		sprite.name = string.Format("{0}:{1}:{2}:{3}", new object[]
-		{
-			texture.name,
-			animName,
-			frameElement.frame.ToString(),
-			centered
-		});
+		Sprite sprite = Sprite.Create(texture, rect, centered ? new Vector2(0.5f, 0.5f) : Vector2.zero, num5, 0U, SpriteMeshType.FullRect);
+		sprite.name = string.Format("{0}:{1}:{2}", texture.name, animName, centered);
 		Def.knownUISprites[tuple] = sprite;
 		return sprite;
 	}

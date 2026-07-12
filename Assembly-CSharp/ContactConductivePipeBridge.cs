@@ -42,23 +42,24 @@ public class ContactConductivePipeBridge : GameStateMachine<ContactConductivePip
 	private static void ExchangeStorageTemperatureWithBuilding200ms(ContactConductivePipeBridge.Instance smi, Storage storage, Building building, Tag tag, float dt)
 	{
 		List<GameObject> items = storage.items;
+		PrimaryElement component = building.GetComponent<PrimaryElement>();
+		float num = component.Element.thermalConductivity * building.Def.ThermalConductivity;
 		for (int i = 0; i < items.Count; i++)
 		{
-			PrimaryElement component = items[i].GetComponent<PrimaryElement>();
-			if (component.Mass > 0f && component.HasTag(tag))
+			PrimaryElement component2 = items[i].GetComponent<PrimaryElement>();
+			if (component2.Mass > 0f && component2.HasTag(tag))
 			{
-				PrimaryElement primaryElement = component;
-				PrimaryElement component2 = building.GetComponent<PrimaryElement>();
-				float num = primaryElement.Mass * primaryElement.Element.specificHeatCapacity;
-				float num2 = building.Def.MassForTemperatureModification * component2.Element.specificHeatCapacity;
-				float temperature = component2.Temperature;
+				PrimaryElement primaryElement = component2;
+				float num2 = primaryElement.Mass * primaryElement.Element.specificHeatCapacity;
+				float num3 = building.Def.MassForTemperatureModification * component.Element.specificHeatCapacity;
+				float temperature = component.Temperature;
 				float temperature2 = primaryElement.Temperature;
-				float finalContentTemperature = ContactConductivePipeBridge.GetFinalContentTemperature(ContactConductivePipeBridge.GetKilloJoulesTransfered(ContactConductivePipeBridge.CalculateMaxWattsTransfered(temperature, component2.Element.thermalConductivity, temperature2, primaryElement.Element.thermalConductivity), dt, temperature, num2, temperature2, num), temperature, num2, temperature2, num);
-				float finalBuildingTemperature = ContactConductivePipeBridge.GetFinalBuildingTemperature(temperature2, finalContentTemperature, num, temperature, num2);
+				float finalContentTemperature = ContactConductivePipeBridge.GetFinalContentTemperature(ContactConductivePipeBridge.GetKilloJoulesTransfered(ContactConductivePipeBridge.CalculateMaxWattsTransfered(temperature, num, temperature2, primaryElement.Element.thermalConductivity), dt, temperature, num3, temperature2, num2), temperature, num3, temperature2, num2);
+				float finalBuildingTemperature = ContactConductivePipeBridge.GetFinalBuildingTemperature(temperature2, finalContentTemperature, num2, temperature, num3);
 				if ((finalBuildingTemperature >= 0f && finalBuildingTemperature <= 10000f) & (finalContentTemperature >= 0f && finalContentTemperature <= 10000f))
 				{
 					primaryElement.Temperature = finalContentTemperature;
-					component2.Temperature = finalBuildingTemperature;
+					component.Temperature = finalBuildingTemperature;
 				}
 			}
 		}

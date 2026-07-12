@@ -49,6 +49,11 @@ public class StoredMinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableId
 		{
 			this.bodyData = Accessorizer.UpdateAccessorySlots(this.nameStringKey, ref this.accessories);
 		}
+		if (this.clothingItems.Count > 0)
+		{
+			this.customClothingItems[ClothingOutfitUtility.OutfitType.Clothing] = new List<ResourceRef<ClothingItemResource>>(this.clothingItems);
+			this.clothingItems.Clear();
+		}
 		List<ResourceRef<Accessory>> list = this.accessories.FindAll((ResourceRef<Accessory> acc) => acc.Get() == null);
 		if (list.Count > 0)
 		{
@@ -59,11 +64,8 @@ public class StoredMinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableId
 				if (clothingItemResource != null && !list2.Contains(clothingItemResource))
 				{
 					list2.Add(clothingItemResource);
+					this.customClothingItems[ClothingOutfitUtility.OutfitType.Clothing].Add(new ResourceRef<ClothingItemResource>(clothingItemResource));
 				}
-			}
-			foreach (ClothingItemResource clothingItemResource2 in list2)
-			{
-				this.clothingItems.Add(new ResourceRef<ClothingItemResource>(clothingItemResource2));
 			}
 			this.bodyData = Accessorizer.UpdateAccessorySlots(this.nameStringKey, ref this.accessories);
 		}
@@ -152,14 +154,18 @@ public class StoredMinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableId
 		this.assignableProxy = MinionAssignablesProxy.InitAssignableProxy(this.assignableProxy, this);
 	}
 
-	public string[] GetClothingItemIds()
+	public string[] GetClothingItemIds(ClothingOutfitUtility.OutfitType outfitType)
 	{
-		string[] array = new string[this.clothingItems.Count];
-		for (int i = 0; i < this.clothingItems.Count; i++)
+		if (this.customClothingItems.ContainsKey(outfitType))
 		{
-			array[i] = this.clothingItems[i].Get().Id;
+			string[] array = new string[this.customClothingItems[outfitType].Count];
+			for (int i = 0; i < this.customClothingItems[outfitType].Count; i++)
+			{
+				array[i] = this.customClothingItems[outfitType][i].Get().Id;
+			}
+			return array;
 		}
-		return array;
+		return null;
 	}
 
 	private void CleanupLimboMinions()
@@ -374,8 +380,12 @@ public class StoredMinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableId
 	[Serialize]
 	public List<ResourceRef<Accessory>> accessories;
 
+	[Obsolete("Deprecated, use customClothingItems")]
 	[Serialize]
 	public List<ResourceRef<ClothingItemResource>> clothingItems = new List<ResourceRef<ClothingItemResource>>();
+
+	[Serialize]
+	public Dictionary<ClothingOutfitUtility.OutfitType, List<ResourceRef<ClothingItemResource>>> customClothingItems = new Dictionary<ClothingOutfitUtility.OutfitType, List<ResourceRef<ClothingItemResource>>>();
 
 	[Serialize]
 	public Dictionary<WearableAccessorizer.WearableType, WearableAccessorizer.Wearable> wearables = new Dictionary<WearableAccessorizer.WearableType, WearableAccessorizer.Wearable>();

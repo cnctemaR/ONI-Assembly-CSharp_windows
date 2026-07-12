@@ -371,7 +371,11 @@ public class LaunchableRocketCluster : StateMachineComponent<LaunchableRocketClu
 				.TriggerOnEnter(GameHashes.StartRocketLaunch, null)
 				.Exit(delegate(LaunchableRocketCluster.StatesInstance smi)
 				{
-					smi.gameObject.GetMyWorld().RevealSurface();
+					WorldContainer myWorld = smi.gameObject.GetMyWorld();
+					if (myWorld != null)
+					{
+						myWorld.RevealSurface();
+					}
 				});
 			this.not_grounded.space.EnterTransition(this.not_grounded.landing_setup, (LaunchableRocketCluster.StatesInstance smi) => smi.IsNotSpaceBound()).EventTransition(GameHashes.DoReturnRocket, this.not_grounded.landing_setup, null).Enter(delegate(LaunchableRocketCluster.StatesInstance smi)
 			{

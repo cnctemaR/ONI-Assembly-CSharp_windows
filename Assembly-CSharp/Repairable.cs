@@ -99,6 +99,7 @@ public class Repairable : Workable
 		{
 			component.SetFlag(Repairable.repairedFlag, false);
 		}
+		this.smi.sm.worker.Set(worker, this.smi);
 		this.timeSpentRepairing = 0f;
 	}
 
@@ -247,7 +248,17 @@ public class Repairable : Workable
 			if (base.smi.master.storageProxy != null)
 			{
 				base.smi.master.transform.GetComponent<Prioritizable>().RemoveRef();
-				base.smi.master.storageProxy.DropAll(false, false, default(Vector3), true, null);
+				List<GameObject> list = new List<GameObject>();
+				base.smi.master.storageProxy.DropAll(false, false, default(Vector3), true, list);
+				GameObject gameObject = base.smi.sm.worker.Get(base.smi);
+				if (gameObject != null)
+				{
+					foreach (GameObject gameObject2 in list)
+					{
+						gameObject2.Trigger(580035959, gameObject.GetComponent<Worker>());
+					}
+				}
+				base.smi.sm.worker.Set(null, base.smi);
 				Util.KDestroyGameObject(base.smi.master.storageProxy.gameObject);
 			}
 		}
@@ -331,6 +342,8 @@ public class Repairable : Workable
 		public Repairable.States.AllowedState allowed;
 
 		public GameStateMachine<Repairable.States, Repairable.SMInstance, Repairable, object>.State repaired;
+
+		public StateMachine<Repairable.States, Repairable.SMInstance, Repairable, object>.TargetParameter worker;
 
 		public static readonly Chore.Precondition IsNotBeingAttacked = new Chore.Precondition
 		{

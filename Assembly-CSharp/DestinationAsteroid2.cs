@@ -22,7 +22,7 @@ public class DestinationAsteroid2 : KMonoBehaviour
 			global::ProcGen.World getStartWorld = newAsteroidData.GetStartWorld;
 			KAnimFile kanimFile;
 			Assets.TryGetAnim(getStartWorld.asteroidIcon.IsNullOrWhiteSpace() ? AsteroidGridEntity.DEFAULT_ASTEROID_ICON_ANIM : getStartWorld.asteroidIcon, out kanimFile);
-			if (DlcManager.FeatureClusterSpaceEnabled() && kanimFile != null)
+			if (kanimFile != null)
 			{
 				this.asteroidImage.gameObject.SetActive(false);
 				this.animController.AnimFiles = new KAnimFile[] { kanimFile };

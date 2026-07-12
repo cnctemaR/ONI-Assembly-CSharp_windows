@@ -4,7 +4,7 @@ using STRINGS;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class AllResourcesScreen : KScreen, ISim4000ms, ISim1000ms
+public class AllResourcesScreen : ShowOptimizedKScreen, ISim4000ms, ISim1000ms
 {
 	protected override void OnPrefabInit()
 	{
@@ -46,10 +46,10 @@ public class AllResourcesScreen : KScreen, ISim4000ms, ISim1000ms
 		{
 			this.searchInputField.text = "";
 		};
-		this.searchInputField.onValueChanged.AddListener(delegate(string value)
+		this.searchInputField.OnValueChangesPaused = delegate
 		{
-			this.SearchFilter(value);
-		});
+			this.SearchFilter(this.searchInputField.text);
+		};
 		KInputTextField kinputTextField = this.searchInputField;
 		kinputTextField.onFocus = (global::System.Action)Delegate.Combine(kinputTextField.onFocus, new global::System.Action(delegate
 		{
@@ -65,7 +65,6 @@ public class AllResourcesScreen : KScreen, ISim4000ms, ISim1000ms
 	protected override void OnShow(bool show)
 	{
 		base.OnShow(show);
-		this.currentlyShown = show;
 		if (show)
 		{
 			ManagementMenu.Instance.CloseAll();
@@ -76,6 +75,10 @@ public class AllResourcesScreen : KScreen, ISim4000ms, ISim1000ms
 
 	public override void OnKeyDown(KButtonEvent e)
 	{
+		if (this.isHiddenButActive)
+		{
+			return;
+		}
 		if (e.TryConsume(global::Action.Escape))
 		{
 			KMonoBehaviour.PlaySound(GlobalAssets.GetSound("HUD_Click_Close", false));
@@ -92,6 +95,10 @@ public class AllResourcesScreen : KScreen, ISim4000ms, ISim1000ms
 
 	public override void OnKeyUp(KButtonEvent e)
 	{
+		if (this.isHiddenButActive)
+		{
+			return;
+		}
 		if (PlayerController.Instance.ConsumeIfNotDragging(e, global::Action.MouseRight))
 		{
 			KMonoBehaviour.PlaySound(GlobalAssets.GetSound("HUD_Click_Close", false));
@@ -521,13 +528,17 @@ public class AllResourcesScreen : KScreen, ISim4000ms, ISim1000ms
 			if (keyValuePair2.Value.GameObject.activeSelf != this.currentlyDisplayedRows[keyValuePair2.Key])
 			{
 				keyValuePair2.Value.GameObject.SetActive(this.currentlyDisplayedRows[keyValuePair2.Key]);
+				if (!this.currentlyDisplayedRows[keyValuePair2.Key] && keyValuePair2.Value.horizontalLayoutGroup.enabled)
+				{
+					keyValuePair2.Value.horizontalLayoutGroup.enabled = false;
+				}
 			}
 		}
 	}
 
 	public void Sim4000ms(float dt)
 	{
-		if (!this.currentlyShown)
+		if (this.isHiddenButActive)
 		{
 			return;
 		}
@@ -536,7 +547,7 @@ public class AllResourcesScreen : KScreen, ISim4000ms, ISim1000ms
 
 	public void Sim1000ms(float dt)
 	{
-		if (!this.currentlyShown)
+		if (this.isHiddenButActive)
 		{
 			return;
 		}
@@ -558,8 +569,6 @@ public class AllResourcesScreen : KScreen, ISim4000ms, ISim1000ms
 	public KButton closeButton;
 
 	public bool allowRefresh = true;
-
-	private bool currentlyShown;
 
 	[SerializeField]
 	private KInputTextField searchInputField;
@@ -656,10 +665,13 @@ public class AllResourcesScreen : KScreen, ISim4000ms, ISim1000ms
 			HierarchyReferences component = base.GameObject.GetComponent<HierarchyReferences>();
 			this.notificiationToggle = component.GetReference<MultiToggle>("NotificationToggle");
 			this.pinToggle = component.GetReference<MultiToggle>("PinToggle");
+			this.horizontalLayoutGroup = gameObject.GetComponent<HorizontalLayoutGroup>();
 		}
 
 		public MultiToggle notificiationToggle;
 
 		public MultiToggle pinToggle;
+
+		public HorizontalLayoutGroup horizontalLayoutGroup;
 	}
 }

@@ -485,6 +485,11 @@ public static class TemplateLoader
 			sceneLayer = component.sceneLayer;
 		}
 		GameObject gameObject = Scenario.SpawnPrefab(root_cell, location_x, location_y, prefab.id, sceneLayer);
+		Rotatable component2 = gameObject.GetComponent<Rotatable>();
+		if (component2 != null)
+		{
+			component2.SetOrientation(prefab.rotationOrientation);
+		}
 		if (gameObject == null)
 		{
 			global::Debug.LogWarning("Null prefab for " + prefab.id);

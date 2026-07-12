@@ -46,5 +46,6 @@ public enum ObjectLayer
 	Rover,
 	Critter,
 	ReplacementBackwall,
+	MovePlacer,
 	NumLayers
 }

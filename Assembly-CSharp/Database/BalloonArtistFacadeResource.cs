@@ -23,7 +23,7 @@ namespace Database
 		public override PermitPresentationInfo GetPermitPresentationInfo()
 		{
 			PermitPresentationInfo permitPresentationInfo = default(PermitPresentationInfo);
-			permitPresentationInfo.sprite = ClothingItemResource.GetUISprite(this.AnimFile);
+			permitPresentationInfo.sprite = Def.GetUISpriteFromMultiObjectAnim(this.AnimFile, "ui", false, "");
 			permitPresentationInfo.SetFacadeForText(UI.KLEI_INVENTORY_SCREEN.BALLOON_ARTIST_FACADE_FOR);
 			return permitPresentationInfo;
 		}

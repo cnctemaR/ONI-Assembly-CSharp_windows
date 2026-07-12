@@ -23,7 +23,6 @@ public class TopLeftControlScreen : KScreen
 		MultiToggle multiToggle2 = this.kleiItemDropButton;
 		multiToggle2.onClick = (global::System.Action)Delegate.Combine(multiToggle2.onClick, new global::System.Action(this.OnClickKleiItemDropButton));
 		KleiItemsStatusRefresher.AddOrGetListener(this).OnRefreshUI(new global::System.Action(this.RefreshKleiItemDropButton));
-		KleiItemsStatusRefresher.RequestRefreshFromServer();
 		this.RefreshKleiItemDropButton();
 		Game.Instance.Subscribe(-1948169901, delegate(object data)
 		{

@@ -43,8 +43,13 @@ public class SteamTurbineConfig2 : IBuildingConfig
 
 	public override void DoPostConfigureUnderConstruction(GameObject go)
 	{
-		base.DoPostConfigureUnderConstruction(go);
 		go.GetComponent<Constructable>().requiredSkillPerk = Db.Get().SkillPerks.CanPowerTinker.Id;
+		SteamTurbineConfig2.AddVisualizer(go);
+	}
+
+	public override void DoPostConfigurePreview(BuildingDef def, GameObject go)
+	{
+		SteamTurbineConfig2.AddVisualizer(go);
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)
@@ -85,6 +90,27 @@ public class SteamTurbineConfig2 : IBuildingConfig
 			game_object.GetComponent<SteamTurbine>().SetStorage(components[1], components[0]);
 		};
 		Tinkerable.MakePowerTinkerable(go);
+		SteamTurbineConfig2.AddVisualizer(go);
+	}
+
+	private static void AddVisualizer(GameObject go)
+	{
+		RangeVisualizer rangeVisualizer = go.AddOrGet<RangeVisualizer>();
+		rangeVisualizer.RangeMin.x = -2;
+		rangeVisualizer.RangeMin.y = -2;
+		rangeVisualizer.RangeMax.x = 2;
+		rangeVisualizer.RangeMax.y = -2;
+		rangeVisualizer.TestLineOfSight = false;
+		go.GetComponent<KPrefabID>().instantiateFn += delegate(GameObject go)
+		{
+			go.GetComponent<RangeVisualizer>().BlockingCb = new Func<int, bool>(SteamTurbineConfig2.SteamTurbineBlockingCB);
+		};
+	}
+
+	public static bool SteamTurbineBlockingCB(int cell)
+	{
+		Element element = ElementLoader.elements[(int)Grid.ElementIdx[cell]];
+		return element.IsLiquid || element.IsSolid;
 	}
 
 	public const string ID = "SteamTurbine2";

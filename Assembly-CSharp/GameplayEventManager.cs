@@ -20,10 +20,7 @@ public class GameplayEventManager : KMonoBehaviour
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		GameScheduler.Instance.ScheduleNextFrame("GameplayEventManager", delegate(object obj)
-		{
-			this.RestoreEvents();
-		}, null, null);
+		this.RestoreEvents();
 	}
 
 	protected override void OnCleanUp()
@@ -35,10 +32,27 @@ public class GameplayEventManager : KMonoBehaviour
 	private void RestoreEvents()
 	{
 		this.activeEvents.RemoveAll((GameplayEventInstance x) => Db.Get().GameplayEvents.TryGet(x.eventID) == null);
-		foreach (GameplayEventInstance gameplayEventInstance in this.activeEvents)
+		for (int i = this.activeEvents.Count - 1; i >= 0; i--)
 		{
-			this.StartEventInstance(gameplayEventInstance, null);
+			GameplayEventInstance gameplayEventInstance = this.activeEvents[i];
+			if (gameplayEventInstance.smi == null)
+			{
+				this.StartEventInstance(gameplayEventInstance, null);
+			}
 		}
+	}
+
+	public void SetSleepTimerForEvent(GameplayEvent eventType, float time)
+	{
+		this.sleepTimers[eventType.IdHash] = time;
+	}
+
+	public float GetSleepTimer(GameplayEvent eventType)
+	{
+		float num = 0f;
+		this.sleepTimers.TryGetValue(eventType.IdHash, out num);
+		this.sleepTimers[eventType.IdHash] = num;
+		return num;
 	}
 
 	public bool IsGameplayEventActive(GameplayEvent eventType)
@@ -72,6 +86,17 @@ public class GameplayEventManager : KMonoBehaviour
 		}
 	}
 
+	public void GetActiveEventsOfType<T>(ref List<GameplayEventInstance> results) where T : GameplayEvent
+	{
+		foreach (GameplayEventInstance gameplayEventInstance in this.activeEvents)
+		{
+			if (gameplayEventInstance.gameplayEvent is T)
+			{
+				results.Add(gameplayEventInstance);
+			}
+		}
+	}
+
 	private GameplayEventInstance CreateGameplayEvent(GameplayEvent gameplayEvent, int worldId)
 	{
 		return gameplayEvent.CreateInstance(worldId);
@@ -90,6 +115,20 @@ public class GameplayEventManager : KMonoBehaviour
 			gameplayEventInstance = this.StartNewEvent(eventType, worldId, null);
 		}
 		return gameplayEventInstance;
+	}
+
+	public void RemoveActiveEvent(GameplayEventInstance eventInstance, string reason = "RemoveActiveEvent() called")
+	{
+		GameplayEventInstance gameplayEventInstance = this.activeEvents.Find((GameplayEventInstance x) => x == eventInstance);
+		if (gameplayEventInstance != null)
+		{
+			if (gameplayEventInstance.smi != null)
+			{
+				gameplayEventInstance.smi.StopSM(reason);
+				return;
+			}
+			this.activeEvents.Remove(gameplayEventInstance);
+		}
 	}
 
 	public GameplayEventInstance StartNewEvent(GameplayEvent eventType, int worldId = -1, Action<StateMachine.Instance> setupActionsBeforeStart = null)
@@ -145,4 +184,7 @@ public class GameplayEventManager : KMonoBehaviour
 
 	[Serialize]
 	private Dictionary<HashedString, int> pastEvents = new Dictionary<HashedString, int>();
+
+	[Serialize]
+	private Dictionary<HashedString, float> sleepTimers = new Dictionary<HashedString, float>();
 }

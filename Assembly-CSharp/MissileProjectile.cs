@@ -30,9 +30,6 @@ public class MissileProjectile : GameStateMachine<MissileProjectile, MissileProj
 			{
 				componentsInChildren[i].emission.enabled = false;
 			}
-		}).ScheduleAction("Destroy", 2f, delegate(MissileProjectile.StatesInstance smi)
-		{
-			Util.KDestroyGameObject(smi.gameObject);
 		});
 	}
 
@@ -48,11 +45,19 @@ public class MissileProjectile : GameStateMachine<MissileProjectile, MissileProj
 	{
 		public float ExplosionRange = 2f;
 
-		public SpawnFXHashes explosionEffectHash = SpawnFXHashes.MissileExplosion;
+		public string explosionEffectAnim = "missile_explosion_kanim";
 	}
 
 	public class StatesInstance : GameStateMachine<MissileProjectile, MissileProjectile.StatesInstance, IStateMachineTarget, MissileProjectile.Def>.GameInstance
 	{
+		private Vector3 Position
+		{
+			get
+			{
+				return base.transform.position + this.animController.Offset;
+			}
+		}
+
 		public StatesInstance(IStateMachineTarget master, MissileProjectile.Def def)
 			: base(master, def)
 		{
@@ -69,33 +74,43 @@ public class MissileProjectile : GameStateMachine<MissileProjectile, MissileProj
 
 		public void UpdateLaunch(float dt)
 		{
-			if (base.gameObject.GetMyWorld() != null)
+			int myWorldId = base.gameObject.GetMyWorldId();
+			Comet comet = base.sm.meteorTarget.Get(base.smi);
+			if (!comet.IsNullOrDestroyed())
 			{
-				Comet comet = base.sm.meteorTarget.Get(base.smi);
-				if (!comet.IsNullOrDestroyed())
+				Vector3 targetPosition = comet.TargetPosition;
+				base.sm.triggerexplode.Set(this.InExplosionRange(targetPosition, this.Position), base.smi, false);
+				Vector3 vector = Vector3.Normalize(targetPosition - this.Position);
+				Vector3 normalized = (targetPosition - this.Position).normalized;
+				float num = MathUtil.AngleSigned(Vector3.up, vector, Vector3.forward);
+				this.animController.Rotation = num;
+				if (Grid.IsValidCellInWorld(Grid.PosToCell(this.Position), myWorldId))
 				{
-					Vector3 position = base.gameObject.transform.position;
-					Vector3 targetPosition = comet.TargetPosition;
-					base.sm.triggerexplode.Set(this.InExplosionRange(targetPosition, position), base.smi, false);
-					Vector3 vector = Vector3.Normalize(targetPosition - position);
-					Vector3 normalized = (targetPosition - position).normalized;
-					base.transform.SetPosition(position + normalized * (this.launchSpeed * dt));
-					float num = MathUtil.AngleSigned(Vector3.up, vector, Vector3.forward);
-					this.animController.Rotation = num;
-					return;
+					base.transform.SetPosition(base.transform.position + normalized * (this.launchSpeed * dt));
 				}
-				if (!base.sm.triggerexplode.Get(base.smi))
+				else
 				{
-					if (!base.smi.smokeTrailFX.IsNullOrDestroyed())
-					{
-						Util.KDestroyGameObject(base.smi.smokeTrailFX);
-					}
-					if (!GameComps.Fallers.Has(base.gameObject))
-					{
-						GameComps.Fallers.Add(base.gameObject, Vector2.down);
-					}
-					base.gameObject.GetComponent<KSelectable>().enabled = true;
+					this.animController.Offset += normalized * (this.launchSpeed * dt);
 				}
+				ParticleSystem[] componentsInChildren = base.smi.smokeTrailFX.GetComponentsInChildren<ParticleSystem>();
+				for (int i = 0; i < componentsInChildren.Length; i++)
+				{
+					componentsInChildren[i].gameObject.transform.SetPositionAndRotation(this.Position, Quaternion.identity);
+				}
+				return;
+			}
+			if (!base.sm.triggerexplode.Get(base.smi))
+			{
+				if (!base.smi.smokeTrailFX.IsNullOrDestroyed())
+				{
+					Util.KDestroyGameObject(base.smi.smokeTrailFX);
+				}
+				if (!GameComps.Fallers.Has(base.gameObject))
+				{
+					GameComps.Fallers.Add(base.gameObject, Vector2.down);
+				}
+				base.gameObject.GetComponent<KSelectable>().enabled = true;
+				base.smi.GoTo("root");
 			}
 		}
 
@@ -128,9 +143,9 @@ public class MissileProjectile : GameStateMachine<MissileProjectile, MissileProj
 			{
 				GameComps.Fallers.Remove(base.gameObject);
 			}
-			Vector3 position = base.transform.GetPosition();
+			Vector3 position = base.gameObject.transform.position;
 			position.z = Grid.GetLayerZ(Grid.SceneLayer.FXFront2);
-			Game.Instance.SpawnFX(base.def.explosionEffectHash, position, 0f);
+			this.SpawnExplosionFX(base.def.explosionEffectAnim, position, this.animController.Offset);
 			this.animController.SetSymbolVisiblity("missile_body", false);
 			this.animController.SetSymbolVisiblity("missile_head", false);
 		}
@@ -138,6 +153,17 @@ public class MissileProjectile : GameStateMachine<MissileProjectile, MissileProj
 		private bool InExplosionRange(Vector3 target_pos, Vector3 current_pos)
 		{
 			return Vector2.Distance(target_pos, current_pos) <= base.def.ExplosionRange;
+		}
+
+		private void SpawnExplosionFX(string anim, Vector3 pos, Vector3 offset)
+		{
+			KBatchedAnimController kbatchedAnimController = FXHelpers.CreateEffect(anim, pos, base.gameObject.transform, false, Grid.SceneLayer.FXFront2, false);
+			kbatchedAnimController.Offset = offset;
+			kbatchedAnimController.Play("idle", KAnim.PlayMode.Once, 1f, 0f);
+			kbatchedAnimController.onAnimComplete += delegate(HashedString obj)
+			{
+				Util.KDestroyGameObject(base.gameObject);
+			};
 		}
 
 		public KBatchedAnimController animController;

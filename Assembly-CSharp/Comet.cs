@@ -77,19 +77,19 @@ public class Comet : KMonoBehaviour, ISim33ms
 		Vector3 vector = new Vector3(this.velocity.x, this.velocity.y, 0f);
 		WorldContainer myWorld = base.gameObject.GetMyWorld();
 		float num = ((float)(myWorld.WorldOffset.y + myWorld.Height) + 20f) * Grid.CellSizeInMeters - position2.y;
-		float num2 = Vector3.Angle(Vector3.up, -vector);
+		float num2 = Vector3.Angle(Vector3.up, -vector) * 0.017453292f;
 		float num3 = Mathf.Abs(num / Mathf.Cos(num2));
-		ref Vector3 ptr = position2 - vector.normalized * num3;
+		Vector3 vector2 = position2 - vector.normalized * num3;
 		float num4 = (float)(myWorld.WorldOffset.x + myWorld.Width) * Grid.CellSizeInMeters;
-		if (ptr.x > num4)
+		if (vector2.x < (float)myWorld.WorldOffset.x * Grid.CellSizeInMeters || vector2.x > num4)
 		{
 			float num5 = ((vector.x < 0f) ? (num4 - position2.x) : (position2.x - (float)myWorld.WorldOffset.x * Grid.CellSizeInMeters));
-			num2 = Vector3.Angle((vector.x < 0f) ? Vector3.right : Vector3.left, -vector);
+			num2 = Vector3.Angle((vector.x < 0f) ? Vector3.right : Vector3.left, -vector) * 0.017453292f;
 			num3 = Mathf.Abs(num5 / Mathf.Cos(num2));
 		}
-		Vector3 vector2 = -vector.normalized * num3;
-		(position2 + vector2).z = position.z;
-		this.offsetPosition = vector2;
+		Vector3 vector3 = -vector.normalized * num3;
+		(position2 + vector3).z = position.z;
+		this.offsetPosition = vector3;
 		this.anim.Offset = this.offsetPosition;
 		Grid.PosToCell(this.offsetPosition);
 	}
@@ -508,15 +508,19 @@ public class Comet : KMonoBehaviour, ISim33ms
 		{
 			return;
 		}
-		if (this.offsetPosition != Vector3.zero)
+		if (this.offsetPosition.y > 0f)
 		{
 			Vector3 vector = new Vector3(this.velocity.x * dt, this.velocity.y * dt, 0f);
-			Vector3 vector2 = ((this.offsetPosition.magnitude < vector.magnitude) ? Vector3.zero : (this.offsetPosition + vector));
+			Vector3 vector2 = this.offsetPosition + vector;
 			this.offsetPosition = vector2;
 			this.anim.Offset = this.offsetPosition;
 		}
 		else
 		{
+			if (this.anim.Offset != Vector3.zero)
+			{
+				this.anim.Offset = Vector3.zero;
+			}
 			if (!this.selectable.enabled)
 			{
 				this.selectable.enabled = true;

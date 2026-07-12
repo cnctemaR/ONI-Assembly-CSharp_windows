@@ -150,6 +150,7 @@ namespace ProcGen
 			this.voronoiTree.AddTagToChildren(WorldGenTags.Overworld);
 			this.TagTopAndBottomSites(WorldGenTags.AtSurface, WorldGenTags.AtDepths);
 			this.TagEdgeSites(WorldGenTags.AtEdge, WorldGenTags.AtEdge);
+			this.TagEdgeSites(WorldGenTags.AtLeft, WorldGenTags.AtRight);
 			WorldLayout.ResetMapGraphFromVoronoiTree(this.voronoiTree.ImmediateChildren(), this.overworldGraph, true);
 			this.PropagateDistanceTags(this.voronoiTree, WorldGenTags.DistanceTags);
 			this.ConvertUnknownCells(this.myRandom, isRunningDebugGen);

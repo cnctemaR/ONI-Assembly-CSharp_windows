@@ -38,6 +38,7 @@ public class OrbitalObject : KMonoBehaviour, IRenderEveryTick
 		kbatchedAnimController.AnimFiles = new KAnimFile[] { Assets.GetAnim(this.animFilename) };
 		kbatchedAnimController.initialMode = KAnim.PlayMode.Loop;
 		kbatchedAnimController.visibilityType = KAnimControllerBase.VisibilityType.Always;
+		this.animController = kbatchedAnimController;
 	}
 
 	public void RenderEveryTick(float dt)
@@ -54,7 +55,13 @@ public class OrbitalObject : KMonoBehaviour, IRenderEveryTick
 			vector2.y = Camera.main.ViewportToWorldPoint(vector2).y;
 		}
 		bool flag2 = (!this.orbitData.rotatesBehind || !flag) && (this.world == null || ClusterManager.Instance.activeWorldId == this.world.id);
-		base.gameObject.transform.SetPosition(vector2);
+		Vector3 vector3 = vector2 - base.gameObject.transform.position;
+		vector3.z = 0f;
+		this.animController.Offset = vector3;
+		Vector3 vector4 = vector2;
+		vector4.x = this.worldOrbitingOrigin.x;
+		vector4.y = this.worldOrbitingOrigin.y;
+		base.gameObject.transform.SetPosition(vector4);
 		if (this.orbitData.periodInCycles > 0f)
 		{
 			base.gameObject.transform.localScale = Vector3.one * (CameraController.Instance.baseCamera.orthographicSize / this.orbitData.distance);
@@ -140,6 +147,8 @@ public class OrbitalObject : KMonoBehaviour, IRenderEveryTick
 	private WorldContainer world;
 
 	private OrbitalData orbitData;
+
+	private KBatchedAnimController animController;
 
 	[Serialize]
 	private string animFilename;

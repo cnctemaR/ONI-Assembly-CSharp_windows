@@ -1,31 +1,22 @@
 ﻿using System;
 using System.Collections;
-using Database;
 using UnityEngine;
 
 public class KleiItemDropScreen_PermitVis : KMonoBehaviour
 {
-	public void ConfigureWith(PermitResource permit)
+	public void ConfigureWith(DropScreenPresentationInfo info)
 	{
-		PermitPresentationInfo permitPresentationInfo = permit.GetPermitPresentationInfo();
-		bool flag = permit != null;
 		this.ResetState();
 		this.equipmentVis.gameObject.SetActive(false);
 		this.fallbackVis.gameObject.SetActive(false);
-		if (!flag)
-		{
-			this.fallbackVis.gameObject.SetActive(true);
-			this.fallbackVis.ConfigureWith(permit, permitPresentationInfo);
-			return;
-		}
-		if (permit.Category == PermitCategory.Equipment)
+		if (info.UseEquipmentVis)
 		{
 			this.equipmentVis.gameObject.SetActive(true);
-			this.equipmentVis.ConfigureWith(permit, permitPresentationInfo);
+			this.equipmentVis.ConfigureWith(info);
 			return;
 		}
 		this.fallbackVis.gameObject.SetActive(true);
-		this.fallbackVis.ConfigureWith(permit, permitPresentationInfo);
+		this.fallbackVis.ConfigureWith(info);
 	}
 
 	public Promise AnimateIn()

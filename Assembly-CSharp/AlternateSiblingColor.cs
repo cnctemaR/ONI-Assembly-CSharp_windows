@@ -20,9 +20,20 @@ public class AlternateSiblingColor : KMonoBehaviour
 		this.image.color = (evenIndex ? this.evenColor : this.oddColor);
 	}
 
+	private void Update()
+	{
+		if (this.mySiblingIndex != base.transform.GetSiblingIndex())
+		{
+			this.mySiblingIndex = base.transform.GetSiblingIndex();
+			this.RefreshColor(this.mySiblingIndex % 2 == 0);
+		}
+	}
+
 	public Color evenColor;
 
 	public Color oddColor;
 
 	public Image image;
+
+	private int mySiblingIndex;
 }

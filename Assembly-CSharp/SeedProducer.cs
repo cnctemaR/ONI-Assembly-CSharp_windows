@@ -50,7 +50,7 @@ public class SeedProducer : KMonoBehaviour, IGameObjectEffectDescriptor
 			PrimaryElement component4 = gameObject.GetComponent<PrimaryElement>();
 			component4.Temperature = component3.Temperature;
 			component4.Units = (float)units;
-			base.Trigger(472291861, gameObject.GetComponent<PlantableSeed>());
+			base.Trigger(472291861, gameObject);
 			gameObject.SetActive(true);
 			string text = gameObject.GetProperName();
 			if (component != null)
@@ -70,7 +70,12 @@ public class SeedProducer : KMonoBehaviour, IGameObjectEffectDescriptor
 			return;
 		}
 		GameObject gameObject = this.ProduceSeed(this.seedInfo.seedId, 1, false);
-		base.Trigger(-1736624145, gameObject.GetComponent<PlantableSeed>());
+		Uprootable component = base.GetComponent<Uprootable>();
+		if (component != null && component.worker != null)
+		{
+			gameObject.Trigger(580035959, component.worker);
+		}
+		base.Trigger(-1736624145, gameObject);
 		this.droppedSeedAlready = true;
 	}
 
@@ -90,7 +95,10 @@ public class SeedProducer : KMonoBehaviour, IGameObjectEffectDescriptor
 				num += completed_by.GetComponent<AttributeConverters>().Get(Db.Get().AttributeConverters.SeedHarvestChance).Evaluate();
 			}
 			int num2 = ((global::UnityEngine.Random.Range(0f, 1f) <= num) ? 1 : 0);
-			this.ProduceSeed(this.seedInfo.seedId, num2, true);
+			if (num2 > 0)
+			{
+				this.ProduceSeed(this.seedInfo.seedId, num2, true).Trigger(580035959, completed_by);
+			}
 		}
 	}
 

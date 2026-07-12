@@ -30,7 +30,8 @@ public class SaveUpgradeWarning : KMonoBehaviour
 		{
 			new SaveUpgradeWarning.Upgrade(7, 5, new global::System.Action(this.SuddenMoraleHelper)),
 			new SaveUpgradeWarning.Upgrade(7, 13, new global::System.Action(this.BedAndBathHelper)),
-			new SaveUpgradeWarning.Upgrade(7, 16, new global::System.Action(this.NewAutomationWarning))
+			new SaveUpgradeWarning.Upgrade(7, 16, new global::System.Action(this.NewAutomationWarning)),
+			new SaveUpgradeWarning.Upgrade(7, 32, new global::System.Action(this.SpaceScannersAndTelescopeUpdateWarning))
 		};
 		if (DlcManager.IsPureVanilla())
 		{
@@ -97,7 +98,7 @@ public class SaveUpgradeWarning : KMonoBehaviour
 		for (int i = 0; i < array.Length; i++)
 		{
 			BuildingDef buildingDef = Assets.GetBuildingDef(array[i]);
-			screen.AddSprite(buildingDef.GetUISprite("ui", false), buildingDef.Name, -1f, -1f);
+			screen.AddListRow(buildingDef.GetUISprite("ui", false), buildingDef.Name, 150f, 50f);
 		}
 		screen.PopupConfirmDialog(UI.FRONTEND.SAVEUPGRADEWARNINGS.NEWAUTOMATIONWARNING, UI.FRONTEND.SAVEUPGRADEWARNINGS.NEWAUTOMATIONWARNING_TITLE);
 		base.StartCoroutine(this.SendAutomationWarningNotifications());
@@ -148,6 +149,47 @@ public class SaveUpgradeWarning : KMonoBehaviour
 		yield break;
 	}
 
+	private IEnumerator TemporaryDisableMeteorShowers(float timeOffDurationInCycles)
+	{
+		yield return SequenceUtil.WaitForEndOfFrame;
+		float num = GameUtil.GetCurrentTimeInCycles() + timeOffDurationInCycles;
+		foreach (GameplayEvent gameplayEvent in Db.Get().GameplayEvents.resources)
+		{
+			if (gameplayEvent is MeteorShowerEvent && !(gameplayEvent.Id == Db.Get().GameplayEvents.GassyMooteorEvent.Id))
+			{
+				gameplayEvent.SetSleepTimer(num);
+			}
+		}
+		if (DlcManager.IsPureVanilla())
+		{
+			List<GameplayEventInstance> list = new List<GameplayEventInstance>();
+			GameplayEventManager.Instance.GetActiveEventsOfType<MeteorShowerEvent>(ref list);
+			using (List<GameplayEventInstance>.Enumerator enumerator2 = list.GetEnumerator())
+			{
+				while (enumerator2.MoveNext())
+				{
+					GameplayEventInstance gameplayEventInstance = enumerator2.Current;
+					GameplayEventManager.Instance.RemoveActiveEvent(gameplayEventInstance, "Cancelled by SaveUpgradeWarning for player's convenience by providing a window of time without meteors to allow players to adapt to new updates made to relevant buildings");
+				}
+				yield break;
+			}
+		}
+		yield break;
+	}
+
+	private void SpaceScannersAndTelescopeUpdateWarning()
+	{
+		SpriteListDialogScreen screen = Util.KInstantiateUI<SpriteListDialogScreen>(ScreenPrefabs.Instance.SpriteListDialogScreen.gameObject, GameScreenManager.Instance.ssOverlayCanvas.gameObject, true);
+		screen.AddOption(UI.CONFIRMDIALOG.OK, delegate
+		{
+			screen.Deactivate();
+		});
+		screen.AddListRow(Assets.GetSprite("space_scanner_range"), UI.FRONTEND.SAVEUPGRADEWARNINGS.SPACESCANNERANDTELESCOPECHANGES_SPACESCANNERS, 150f, 120f);
+		screen.AddListRow(Assets.GetSprite("telescope_range"), UI.FRONTEND.SAVEUPGRADEWARNINGS.SPACESCANNERANDTELESCOPECHANGES_TELESCOPES, 150f, 120f);
+		screen.PopupConfirmDialog(UI.FRONTEND.SAVEUPGRADEWARNINGS.SPACESCANNERANDTELESCOPECHANGES_SUMMARY + "\n\n" + UI.FRONTEND.SAVEUPGRADEWARNINGS.SPACESCANNERANDTELESCOPECHANGES_WARNING, UI.FRONTEND.SAVEUPGRADEWARNINGS.SPACESCANNERANDTELESCOPECHANGES_TITLE);
+		base.StartCoroutine(this.TemporaryDisableMeteorShowers(20f));
+	}
+
 	private void MergedownWarning()
 	{
 		SpriteListDialogScreen screen = Util.KInstantiateUI<SpriteListDialogScreen>(ScreenPrefabs.Instance.SpriteListDialogScreen.gameObject, GameScreenManager.Instance.ssOverlayCanvas.gameObject, true);
@@ -159,10 +201,10 @@ public class SaveUpgradeWarning : KMonoBehaviour
 		{
 			screen.Deactivate();
 		});
-		screen.AddSprite(Assets.GetSprite("upgrade_mergedown_fridge"), UI.FRONTEND.SAVEUPGRADEWARNINGS.MERGEDOWNCHANGES_FOOD, 150f, 120f);
-		screen.AddSprite(Assets.GetSprite("upgrade_mergedown_deodorizer"), UI.FRONTEND.SAVEUPGRADEWARNINGS.MERGEDOWNCHANGES_AIRFILTER, 150f, 120f);
-		screen.AddSprite(Assets.GetSprite("upgrade_mergedown_steamturbine"), UI.FRONTEND.SAVEUPGRADEWARNINGS.MERGEDOWNCHANGES_SIMULATION, 150f, 120f);
-		screen.AddSprite(Assets.GetSprite("upgrade_mergedown_oxygen_meter"), UI.FRONTEND.SAVEUPGRADEWARNINGS.MERGEDOWNCHANGES_BUILDINGS, 150f, 120f);
+		screen.AddListRow(Assets.GetSprite("upgrade_mergedown_fridge"), UI.FRONTEND.SAVEUPGRADEWARNINGS.MERGEDOWNCHANGES_FOOD, 150f, 120f);
+		screen.AddListRow(Assets.GetSprite("upgrade_mergedown_deodorizer"), UI.FRONTEND.SAVEUPGRADEWARNINGS.MERGEDOWNCHANGES_AIRFILTER, 150f, 120f);
+		screen.AddListRow(Assets.GetSprite("upgrade_mergedown_steamturbine"), UI.FRONTEND.SAVEUPGRADEWARNINGS.MERGEDOWNCHANGES_SIMULATION, 150f, 120f);
+		screen.AddListRow(Assets.GetSprite("upgrade_mergedown_oxygen_meter"), UI.FRONTEND.SAVEUPGRADEWARNINGS.MERGEDOWNCHANGES_BUILDINGS, 150f, 120f);
 		screen.PopupConfirmDialog(UI.FRONTEND.SAVEUPGRADEWARNINGS.MERGEDOWNCHANGES, UI.FRONTEND.SAVEUPGRADEWARNINGS.MERGEDOWNCHANGES_TITLE);
 		base.StartCoroutine(this.SendAutomationWarningNotifications());
 	}

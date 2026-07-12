@@ -92,6 +92,10 @@ namespace ProcGen
 
 		public static readonly Tag AtEdge = TagManager.Create("AtEdge");
 
+		public static readonly Tag AtLeft = TagManager.Create("AtLeft");
+
+		public static readonly Tag AtRight = TagManager.Create("AtRight");
+
 		public static readonly Tag EdgeOfVoid = TagManager.Create("EdgeOfVoid");
 
 		public static readonly Tag Dry = TagManager.Create("Dry");
@@ -200,7 +204,9 @@ namespace ProcGen
 			WorldGenTags.AtSurface,
 			WorldGenTags.AtDepths,
 			WorldGenTags.AtEdge,
-			WorldGenTags.AtStart
+			WorldGenTags.AtStart,
+			WorldGenTags.AtLeft,
+			WorldGenTags.AtRight
 		});
 	}
 }

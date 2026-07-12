@@ -120,7 +120,7 @@ public class Clearable : Workable, ISaveLoadable, IRender1000ms
 
 	private void OnRefreshUserMenu(object data)
 	{
-		if (!this.isClearable || base.GetComponent<Health>() != null || this.HasTag(GameTags.Stored))
+		if (!this.isClearable || base.GetComponent<Health>() != null || this.HasTag(GameTags.Stored) || this.HasTag(GameTags.MarkedForMove))
 		{
 			return;
 		}

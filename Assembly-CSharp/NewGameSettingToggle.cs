@@ -29,7 +29,7 @@ public class NewGameSettingToggle : NewGameSettingWidget
 
 	public void ToggleSetting()
 	{
-		if (base.IsEnabled())
+		if (this.IsEnabled())
 		{
 			CustomGameSettings.Instance.ToggleSettingLevel(this.config);
 			base.RefreshAll();

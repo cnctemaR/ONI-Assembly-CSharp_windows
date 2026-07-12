@@ -53,6 +53,7 @@ public class KleiInventoryScreen : KModalScreen
 		if (show)
 		{
 			this.galleryGridLayouter.RequestGridResize();
+			this.categoryListContent.GetComponent<RectTransform>().offsetMax = new Vector2(0f, 0f);
 			this.PopulateCategories();
 			this.PopulateGallery();
 			this.SelectCategory(PermitCategory.Building);
@@ -68,7 +69,6 @@ public class KleiInventoryScreen : KModalScreen
 			this.RefreshGallery();
 			this.RefreshDetails();
 		});
-		KleiItemsStatusRefresher.RequestRefreshFromServer();
 	}
 
 	private void Update()
@@ -108,6 +108,11 @@ public class KleiInventoryScreen : KModalScreen
 		this.AddPermitCategory(PermitCategory.DupeGloves);
 		this.AddPermitCategory(PermitCategory.DupeShoes);
 		this.AddPermitCategory(PermitCategory.JoyResponse);
+		this.AddPermitCategory(PermitCategory.AtmoSuitHelmet);
+		this.AddPermitCategory(PermitCategory.AtmoSuitBody);
+		this.AddPermitCategory(PermitCategory.AtmoSuitGloves);
+		this.AddPermitCategory(PermitCategory.AtmoSuitBelt);
+		this.AddPermitCategory(PermitCategory.AtmoSuitShoes);
 	}
 
 	private void AddPermitCategory(PermitCategory permitCategory)
@@ -138,7 +143,7 @@ public class KleiInventoryScreen : KModalScreen
 		this.galleryGridLayouter.ImmediateSizeGridToScreenResolution();
 		foreach (PermitResource permitResource in Db.Get().Permits.resources)
 		{
-			if (permitResource.Rarity != PermitRarity.Universal)
+			if ((permitResource.Rarity != PermitRarity.Universal || permitResource.Category == PermitCategory.AtmoSuitHelmet || permitResource.Category == PermitCategory.AtmoSuitBody || permitResource.Category == PermitCategory.AtmoSuitGloves || permitResource.Category == PermitCategory.AtmoSuitBelt || permitResource.Category == PermitCategory.AtmoSuitShoes) && !permitResource.Id.StartsWith("visonly_"))
 			{
 				this.AddItemToGallery(permitResource);
 			}
@@ -265,6 +270,15 @@ public class KleiInventoryScreen : KModalScreen
 		PermitResource selectedPermit = this.SelectedPermit;
 		PermitPresentationInfo permitPresentationInfo = selectedPermit.GetPermitPresentationInfo();
 		this.permitVis.ConfigureWith(selectedPermit);
+		this.selectionDetailsScrollRect.rectTransform().anchorMin = new Vector2(0f, 0f);
+		this.selectionDetailsScrollRect.rectTransform().anchorMax = new Vector2(1f, 1f);
+		this.selectionDetailsScrollRect.rectTransform().sizeDelta = new Vector2(-24f, 0f);
+		this.selectionDetailsScrollRect.rectTransform().anchoredPosition = Vector2.zero;
+		this.selectionDetailsScrollRect.content.rectTransform().sizeDelta = new Vector2(0f, this.selectionDetailsScrollRect.content.rectTransform().sizeDelta.y);
+		this.selectionDetailsScrollRectScrollBarContainer.anchorMin = new Vector2(1f, 0f);
+		this.selectionDetailsScrollRectScrollBarContainer.anchorMax = new Vector2(1f, 1f);
+		this.selectionDetailsScrollRectScrollBarContainer.sizeDelta = new Vector2(24f, 0f);
+		this.selectionDetailsScrollRectScrollBarContainer.anchoredPosition = Vector2.zero;
 		this.selectionHeaderLabel.SetText(selectedPermit.Name);
 		this.selectionNameLabel.SetText(selectedPermit.Name);
 		this.selectionDescriptionLabel.gameObject.SetActive(!string.IsNullOrWhiteSpace(selectedPermit.Description));
@@ -332,86 +346,160 @@ public class KleiInventoryScreen : KModalScreen
 			return "shoes";
 		case PermitCategory.DupeHats:
 			return "hats";
-		default:
-			if (permit.Category == PermitCategory.Building)
+		case PermitCategory.AtmoSuitHelmet:
+			return "atmosuit_helmet";
+		case PermitCategory.AtmoSuitBody:
+			return "tops";
+		case PermitCategory.AtmoSuitGloves:
+			return "gloves";
+		case PermitCategory.AtmoSuitBelt:
+			return "belt";
+		case PermitCategory.AtmoSuitShoes:
+			return "shoes";
+		}
+		if (permit.Category == PermitCategory.Building)
+		{
+			bool flag;
+			BuildingDef buildingDef;
+			KleiPermitVisUtil.GetBuildingDef(permit).Deconstruct(out flag, out buildingDef);
+			bool flag2 = flag;
+			BuildingDef buildingDef2 = buildingDef;
+			if (!flag2)
 			{
-				bool flag;
-				BuildingDef buildingDef;
-				KleiPermitVisUtil.GetBuildingDef(permit).Deconstruct(out flag, out buildingDef);
-				bool flag2 = flag;
-				BuildingDef buildingDef2 = buildingDef;
-				if (!flag2)
+				return "HUD";
+			}
+			string prefabID = buildingDef2.PrefabID;
+			if (prefabID != null)
+			{
+				uint num = <PrivateImplementationDetails>.ComputeStringHash(prefabID);
+				if (num <= 2028863301U)
 				{
-					return "HUD";
-				}
-				string prefabID = buildingDef2.PrefabID;
-				if (prefabID != null)
-				{
-					if (prefabID == "ExteriorWall")
+					if (num <= 595816591U)
 					{
-						return "wall";
-					}
-					if (prefabID == "FlowerVase" || prefabID == "FlowerVaseWall")
-					{
-						return "flowervase";
-					}
-					if (prefabID == "Bed")
-					{
-						return "bed";
-					}
-					if (prefabID == "LuxuryBed")
-					{
-						string id = permit.Id;
-						if (id != null)
+						if (num != 228062815U)
 						{
-							if (id == "LuxuryBed_boat")
+							if (num != 595816591U)
 							{
-								return "elegantbed_boat";
+								goto IL_022B;
 							}
-							if (id == "LuxuryBed_bouncy")
+							if (!(prefabID == "FlowerVase"))
 							{
-								return "elegantbed_bouncy";
+								goto IL_022B;
 							}
 						}
-						return "elegantbed";
+						else
+						{
+							if (!(prefabID == "LuxuryBed"))
+							{
+								goto IL_022B;
+							}
+							string id = permit.Id;
+							if (id != null)
+							{
+								if (id == "LuxuryBed_boat")
+								{
+									return "elegantbed_boat";
+								}
+								if (id == "LuxuryBed_bouncy")
+								{
+									return "elegantbed_bouncy";
+								}
+							}
+							return "elegantbed";
+						}
 					}
-					if (prefabID == "CeilingLight")
+					else if (num != 1633134164U)
 					{
+						if (num != 2028863301U)
+						{
+							goto IL_022B;
+						}
+						if (!(prefabID == "FlowerVaseHanging"))
+						{
+							goto IL_022B;
+						}
+					}
+					else
+					{
+						if (!(prefabID == "CeilingLight"))
+						{
+							goto IL_022B;
+						}
 						return "ceilingLight";
 					}
 				}
-			}
-			if (permit.Category == PermitCategory.Artwork)
-			{
-				bool flag;
-				BuildingDef buildingDef;
-				KleiPermitVisUtil.GetBuildingDef(permit).Deconstruct(out flag, out buildingDef);
-				bool flag3 = flag;
-				BuildingDef buildingDef3 = buildingDef;
-				if (!flag3)
+				else if (num <= 3048425356U)
 				{
-					return "HUD";
-				}
-				ArtableStage artableStage = (ArtableStage)permit;
-				if (KleiInventoryScreen.<GetFacadeItemSoundName>g__Has|47_0<Sculpture>(buildingDef3))
-				{
-					if (buildingDef3.PrefabID == "IceSculpture")
+					if (num != 2899744071U)
 					{
-						return "icesculpture";
+						if (num != 3048425356U)
+						{
+							goto IL_022B;
+						}
+						if (!(prefabID == "Bed"))
+						{
+							goto IL_022B;
+						}
+						return "bed";
 					}
-					return "sculpture";
+					else
+					{
+						if (!(prefabID == "ExteriorWall"))
+						{
+							goto IL_022B;
+						}
+						return "wall";
+					}
 				}
-				else if (KleiInventoryScreen.<GetFacadeItemSoundName>g__Has|47_0<Painting>(buildingDef3))
+				else if (num != 3132083755U)
 				{
-					return "painting";
+					if (num != 3958671086U)
+					{
+						goto IL_022B;
+					}
+					if (!(prefabID == "FlowerVaseHangingFancy"))
+					{
+						goto IL_022B;
+					}
 				}
+				else if (!(prefabID == "FlowerVaseWall"))
+				{
+					goto IL_022B;
+				}
+				return "flowervase";
 			}
-			if (permit.Category == PermitCategory.JoyResponse && permit is BalloonArtistFacadeResource)
-			{
-				return "balloon";
-			}
-			return "HUD";
 		}
+		IL_022B:
+		if (permit.Category == PermitCategory.Artwork)
+		{
+			bool flag;
+			BuildingDef buildingDef;
+			KleiPermitVisUtil.GetBuildingDef(permit).Deconstruct(out flag, out buildingDef);
+			bool flag3 = flag;
+			BuildingDef buildingDef3 = buildingDef;
+			if (!flag3)
+			{
+				return "HUD";
+			}
+			ArtableStage artableStage = (ArtableStage)permit;
+			if (KleiInventoryScreen.<GetFacadeItemSoundName>g__Has|49_0<Sculpture>(buildingDef3))
+			{
+				if (buildingDef3.PrefabID == "IceSculpture")
+				{
+					return "icesculpture";
+				}
+				return "sculpture";
+			}
+			else if (KleiInventoryScreen.<GetFacadeItemSoundName>g__Has|49_0<Painting>(buildingDef3))
+			{
+				return "painting";
+			}
+		}
+		if (permit.Category == PermitCategory.JoyResponse && permit is BalloonArtistFacadeResource)
+		{
+			return "balloon";
+		}
+		return "HUD";
 	}
 
 	private void OnMouseOverToggle()
@@ -420,7 +508,7 @@ public class KleiInventoryScreen : KModalScreen
 	}
 
 	[CompilerGenerated]
-	internal static bool <GetFacadeItemSoundName>g__Has|47_0<T>(BuildingDef buildingDef) where T : Component
+	internal static bool <GetFacadeItemSoundName>g__Has|49_0<T>(BuildingDef buildingDef) where T : Component
 	{
 		return !buildingDef.BuildingComplete.GetComponent<T>().IsNullOrDestroyed();
 	}
@@ -462,6 +550,12 @@ public class KleiInventoryScreen : KModalScreen
 
 	[SerializeField]
 	private KleiPermitDioramaVis permitVis;
+
+	[SerializeField]
+	private KScrollRect selectionDetailsScrollRect;
+
+	[SerializeField]
+	private RectTransform selectionDetailsScrollRectScrollBarContainer;
 
 	[SerializeField]
 	private LocText selectionNameLabel;

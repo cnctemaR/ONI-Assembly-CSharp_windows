@@ -131,6 +131,11 @@ public class SuitTank : KMonoBehaviour, IGameObjectEffectDescriptor, OxygenBreat
 		return base.GetComponent<KPrefabID>().HasTag(GameTags.AirtightSuit);
 	}
 
+	public bool IsLowOxygen()
+	{
+		return this.IsEmpty();
+	}
+
 	[ContextMenu("SetToRefillAmount")]
 	public void SetToRefillAmount()
 	{

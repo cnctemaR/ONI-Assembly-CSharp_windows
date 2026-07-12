@@ -129,6 +129,10 @@ public class FetchManager : KMonoBehaviour, ISim1000ms
 		{
 			return false;
 		}
+		if (kprefabID.HasTag(GameTags.MarkedForMove))
+		{
+			return false;
+		}
 		if (storage != null)
 		{
 			if (!storage.ignoreSourcePriority && destination.ShouldOnlyTransferFromLowerPriority && destination.masterPriority <= storage.masterPriority)

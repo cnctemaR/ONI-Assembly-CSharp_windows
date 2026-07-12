@@ -31,7 +31,8 @@ public static class SerializableOutfitData
 		}
 		if (versionFrom != 2)
 		{
-			throw new NotSupportedException(string.Format("Version {0} of OutfitData is not supported", versionFrom));
+			DebugUtil.DevAssert(false, string.Format("Version {0} of OutfitData is not supported", versionFrom), null);
+			return new SerializableOutfitData.Version2();
 		}
 		return SerializableOutfitData.Version2.FromJson(jsonData);
 	}
@@ -79,13 +80,32 @@ public static class SerializableOutfitData
 				string[] array2 = array;
 				dictionary.Add(text2, new SerializableOutfitData.Version2.CustomTemplateOutfitEntry
 				{
-					outfitType = ClothingOutfitUtility.OutfitType.Clothing,
+					outfitType = "Clothing",
 					itemIds = array2
 				});
 			}
+			Dictionary<string, Dictionary<string, string>> dictionary2 = new Dictionary<string, Dictionary<string, string>>();
+			foreach (KeyValuePair<string, Dictionary<ClothingOutfitUtility.OutfitType, string>> keyValuePair2 in data.DuplicantOutfits)
+			{
+				string text;
+				Dictionary<ClothingOutfitUtility.OutfitType, string> dictionary3;
+				keyValuePair2.Deconstruct<string, Dictionary<ClothingOutfitUtility.OutfitType, string>>(out text, out dictionary3);
+				string text3 = text;
+				Dictionary<ClothingOutfitUtility.OutfitType, string> dictionary4 = dictionary3;
+				Dictionary<string, string> dictionary5 = new Dictionary<string, string>();
+				dictionary2[text3] = dictionary5;
+				foreach (KeyValuePair<ClothingOutfitUtility.OutfitType, string> keyValuePair3 in dictionary4)
+				{
+					ClothingOutfitUtility.OutfitType outfitType;
+					keyValuePair3.Deconstruct<ClothingOutfitUtility.OutfitType, string>(out outfitType, out text);
+					ClothingOutfitUtility.OutfitType outfitType2 = outfitType;
+					string text4 = text;
+					dictionary5.Add(Enum.GetName(typeof(ClothingOutfitUtility.OutfitType), outfitType2), text4);
+				}
+			}
 			return new SerializableOutfitData.Version2
 			{
-				PersonalityIdToAssignedOutfits = data.DuplicantOutfits,
+				PersonalityIdToAssignedOutfits = dictionary2,
 				OutfitIdToUserAuthoredTemplateOutfit = dictionary
 			};
 		}
@@ -113,7 +133,7 @@ public static class SerializableOutfitData
 			return SerializableOutfitData.Version2.s_serializer;
 		}
 
-		public Dictionary<string, Dictionary<ClothingOutfitUtility.OutfitType, string>> PersonalityIdToAssignedOutfits = new Dictionary<string, Dictionary<ClothingOutfitUtility.OutfitType, string>>();
+		public Dictionary<string, Dictionary<string, string>> PersonalityIdToAssignedOutfits = new Dictionary<string, Dictionary<string, string>>();
 
 		public Dictionary<string, SerializableOutfitData.Version2.CustomTemplateOutfitEntry> OutfitIdToUserAuthoredTemplateOutfit = new Dictionary<string, SerializableOutfitData.Version2.CustomTemplateOutfitEntry>();
 
@@ -121,7 +141,7 @@ public static class SerializableOutfitData
 
 		public class CustomTemplateOutfitEntry
 		{
-			public ClothingOutfitUtility.OutfitType outfitType;
+			public string outfitType;
 
 			public string[] itemIds;
 		}

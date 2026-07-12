@@ -80,21 +80,15 @@ public class LockerMenuScreen : KModalScreen
 			}
 		}
 		this.RefreshClaimItemsButton();
-		if (show)
-		{
-			KleiItemsStatusRefresher.RequestRefreshFromServer();
-		}
 	}
 
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		KleiItems.AddUserRewardInfoReceivedCallback(new KleiItems.UserRewardInfoReceivedCallback(this.RefreshClaimItemsButton));
 	}
 
 	protected override void OnForcedCleanUp()
 	{
-		KleiItems.RemoveUserRewardInfoReceivedCallback(new KleiItems.UserRewardInfoReceivedCallback(this.RefreshClaimItemsButton));
 		base.OnForcedCleanUp();
 	}
 

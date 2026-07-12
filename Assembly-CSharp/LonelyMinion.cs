@@ -168,6 +168,10 @@ public class LonelyMinion : GameStateMachine<LonelyMinion, LonelyMinion.Instance
 	private void OnBecomeActive(LonelyMinion.Instance smi)
 	{
 		LonelyMinionHouse.Instance smi2 = smi.transform.parent.GetSMI<LonelyMinionHouse.Instance>();
+		if (smi2 == null)
+		{
+			return;
+		}
 		smi.AnimController.GetSynchronizer().Add(smi2.AnimController);
 		if (smi.StartingAverageDecor == float.NegativeInfinity)
 		{

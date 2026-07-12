@@ -31,7 +31,7 @@ public class NewGameSettingList : NewGameSettingWidget
 
 	private void DoCycleLeft()
 	{
-		if (base.IsEnabled())
+		if (this.IsEnabled())
 		{
 			CustomGameSettings.Instance.CycleSettingLevel(this.config, -1);
 			base.RefreshAll();
@@ -40,7 +40,7 @@ public class NewGameSettingList : NewGameSettingWidget
 
 	private void DoCycleRight()
 	{
-		if (base.IsEnabled())
+		if (this.IsEnabled())
 		{
 			CustomGameSettings.Instance.CycleSettingLevel(this.config, 1);
 			base.RefreshAll();

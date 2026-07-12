@@ -48,6 +48,7 @@ public class SuitWearer : GameStateMachine<SuitWearer, SuitWearer.Instance>
 			bool flag = (this.navigator.flags & PathFinder.PotentialPath.Flags.HasAtmoSuit) > PathFinder.PotentialPath.Flags.None;
 			bool flag2 = (this.navigator.flags & PathFinder.PotentialPath.Flags.HasJetPack) > PathFinder.PotentialPath.Flags.None;
 			bool flag3 = (this.navigator.flags & PathFinder.PotentialPath.Flags.HasOxygenMask) > PathFinder.PotentialPath.Flags.None;
+			bool flag4 = (this.navigator.flags & PathFinder.PotentialPath.Flags.HasLeadSuit) > PathFinder.PotentialPath.Flags.None;
 			for (int i = 0; i < path.nodes.Count - 1; i++)
 			{
 				int cell = path.nodes[i].cell;
@@ -55,42 +56,43 @@ public class SuitWearer : GameStateMachine<SuitWearer, SuitWearer.Instance>
 				PathFinder.PotentialPath.Flags flags2 = PathFinder.PotentialPath.Flags.None;
 				if (Grid.TryGetSuitMarkerFlags(cell, out flags, out flags2))
 				{
-					bool flag4 = (flags2 & PathFinder.PotentialPath.Flags.HasAtmoSuit) > PathFinder.PotentialPath.Flags.None;
-					bool flag5 = (flags2 & PathFinder.PotentialPath.Flags.HasJetPack) > PathFinder.PotentialPath.Flags.None;
-					bool flag6 = (flags2 & PathFinder.PotentialPath.Flags.HasOxygenMask) > PathFinder.PotentialPath.Flags.None;
-					bool flag7 = flag2 || flag || flag3;
-					bool flag8 = flag4 == flag && flag5 == flag2 && flag6 == flag3;
-					bool flag9 = SuitMarker.DoesTraversalDirectionRequireSuit(cell, path.nodes[i + 1].cell, flags);
-					if (flag9 && !flag7)
+					bool flag5 = (flags2 & PathFinder.PotentialPath.Flags.HasAtmoSuit) > PathFinder.PotentialPath.Flags.None;
+					bool flag6 = (flags2 & PathFinder.PotentialPath.Flags.HasJetPack) > PathFinder.PotentialPath.Flags.None;
+					bool flag7 = (flags2 & PathFinder.PotentialPath.Flags.HasOxygenMask) > PathFinder.PotentialPath.Flags.None;
+					bool flag8 = (flags2 & PathFinder.PotentialPath.Flags.HasLeadSuit) > PathFinder.PotentialPath.Flags.None;
+					bool flag9 = flag2 || flag || flag3 || flag4;
+					bool flag10 = flag5 == flag && flag6 == flag2 && flag7 == flag3 && flag8 == flag4;
+					bool flag11 = SuitMarker.DoesTraversalDirectionRequireSuit(cell, path.nodes[i + 1].cell, flags);
+					if (flag11 && !flag9)
 					{
 						Grid.ReserveSuit(cell, this.prefabInstanceID, true);
 						this.suitReservations.Add(cell);
-						if (flag4)
+						if (flag5)
 						{
 							flag = true;
 						}
-						if (flag5)
+						if (flag6)
 						{
 							flag2 = true;
 						}
-						if (flag6)
+						if (flag7)
 						{
 							flag3 = true;
 						}
 					}
-					else if (!flag9 && flag8 && Grid.HasEmptyLocker(cell, this.prefabInstanceID))
+					else if (!flag11 && flag10 && Grid.HasEmptyLocker(cell, this.prefabInstanceID))
 					{
 						Grid.ReserveEmptyLocker(cell, this.prefabInstanceID, true);
 						this.emptyLockerReservations.Add(cell);
-						if (flag4)
+						if (flag5)
 						{
 							flag = false;
 						}
-						if (flag5)
+						if (flag6)
 						{
 							flag2 = false;
 						}
-						if (flag6)
+						if (flag7)
 						{
 							flag3 = false;
 						}

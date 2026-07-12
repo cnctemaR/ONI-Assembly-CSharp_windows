@@ -18,7 +18,7 @@ public class GameScenePartitioner : KMonoBehaviour
 	{
 		global::Debug.Assert(GameScenePartitioner.instance == null);
 		GameScenePartitioner.instance = this;
-		this.partitioner = new ScenePartitioner(16, 64, Grid.WidthInCells, Grid.HeightInCells);
+		this.partitioner = new ScenePartitioner(16, 65, Grid.WidthInCells, Grid.HeightInCells);
 		this.solidChangedLayer = this.partitioner.CreateMask("SolidChanged");
 		this.liquidChangedLayer = this.partitioner.CreateMask("LiquidChanged");
 		this.digDestroyedLayer = this.partitioner.CreateMask("DigDestroyed");
@@ -44,8 +44,8 @@ public class GameScenePartitioner : KMonoBehaviour
 		this.completeBuildings = this.partitioner.CreateMask("CompleteBuildings");
 		this.prioritizableObjects = this.partitioner.CreateMask("PrioritizableObjects");
 		this.contactConductiveLayer = this.partitioner.CreateMask("ContactConductiveLayer");
-		this.objectLayers = new ScenePartitionerLayer[44];
-		for (int i = 0; i < 44; i++)
+		this.objectLayers = new ScenePartitionerLayer[45];
+		for (int i = 0; i < 45; i++)
 		{
 			ObjectLayer objectLayer = (ObjectLayer)i;
 			this.objectLayers[i] = this.partitioner.CreateMask(objectLayer.ToString());

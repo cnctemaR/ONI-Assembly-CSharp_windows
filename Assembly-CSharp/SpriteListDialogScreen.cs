@@ -38,12 +38,18 @@ public class SpriteListDialogScreen : KModalScreen
 		});
 	}
 
-	public void AddSprite(Sprite sprite, string text, float width = -1f, float height = -1f)
+	public void AddListRow(Sprite sprite, string text, float width = -1f, float height = -1f)
 	{
 		GameObject gameObject = Util.KInstantiateUI(this.listPrefab, this.listPanel, true);
 		gameObject.GetComponentInChildren<LocText>().text = text;
 		Image componentInChildren = gameObject.GetComponentInChildren<Image>();
 		componentInChildren.sprite = sprite;
+		if (sprite == null)
+		{
+			Color color = componentInChildren.color;
+			color.a = 0f;
+			componentInChildren.color = color;
+		}
 		if (width >= 0f || height >= 0f)
 		{
 			componentInChildren.GetComponent<AspectRatioFitter>().enabled = false;
@@ -55,7 +61,7 @@ public class SpriteListDialogScreen : KModalScreen
 			return;
 		}
 		AspectRatioFitter component2 = componentInChildren.GetComponent<AspectRatioFitter>();
-		float num = sprite.rect.width / sprite.rect.height;
+		float num = ((sprite == null) ? 1f : (sprite.rect.width / sprite.rect.height));
 		component2.aspectRatio = num;
 	}
 

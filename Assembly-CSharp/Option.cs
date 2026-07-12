@@ -200,6 +200,14 @@ public readonly struct Option<T> : IEquatable<Option<T>>, IEquatable<T>
 		return this.HasValue && EqualityComparer<T>.Default.Equals(this.value, other);
 	}
 
+	public static Option<T> None
+	{
+		get
+		{
+			return default(Option<T>);
+		}
+	}
+
 	[Serialize]
 	private readonly bool hasValue;
 

@@ -1,5 +1,6 @@
 ﻿using System;
 using TUNING;
+using UnityEngine;
 
 public class MissionControlWorkable : Workable
 {
@@ -50,6 +51,11 @@ public class MissionControlWorkable : Workable
 		this.operational.SetActive(true, false);
 	}
 
+	public override float GetEfficiencyMultiplier(Worker worker)
+	{
+		return base.GetEfficiencyMultiplier(worker) * Mathf.Clamp01(this.GetSMI<SkyVisibilityMonitor.Instance>().PercentClearSky);
+	}
+
 	protected override bool OnWorkTick(Worker worker, float dt)
 	{
 		if (this.TargetSpacecraft == null)
@@ -62,7 +68,7 @@ public class MissionControlWorkable : Workable
 
 	protected override void OnCompleteWork(Worker worker)
 	{
-		Debug.Assert(this.TargetSpacecraft != null);
+		global::Debug.Assert(this.TargetSpacecraft != null);
 		base.gameObject.GetSMI<MissionControl.Instance>().ApplyEffect(this.TargetSpacecraft);
 		base.OnCompleteWork(worker);
 	}

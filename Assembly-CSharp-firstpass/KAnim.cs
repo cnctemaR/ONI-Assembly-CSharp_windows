@@ -11,11 +11,6 @@ public class KAnim
 		Paused
 	}
 
-	public enum LayerFlags
-	{
-		FG = 1
-	}
-
 	public enum SymbolFlags
 	{
 		Bloom = 1,
@@ -24,14 +19,7 @@ public class KAnim
 		FG = 8
 	}
 
-	[Serializable]
-	public struct AnimHashTable
-	{
-		public KAnimHashedString[] hashes;
-	}
-
 	[DebuggerDisplay("{id} {animFile}")]
-	[Serializable]
 	public class Anim
 	{
 		public int index { get; private set; }
@@ -69,70 +57,9 @@ public class KAnim
 			return num;
 		}
 
-		private static KBatchGroupData GetAnimBatchGroupData(KAnimFileData animFile)
+		public bool TryGetFrame(HashedString batchTag, int idx, out KAnim.Anim.Frame frame)
 		{
-			if (!animFile.batchTag.IsValid)
-			{
-				global::Debug.LogErrorFormat("Invalid batchTag for anim [{0}]", new object[] { animFile.name });
-			}
-			global::Debug.Assert(animFile.batchTag.IsValid, "Invalid batch tag");
-			KAnimGroupFile.Group group = KAnimGroupFile.GetGroup(animFile.batchTag);
-			if (group == null)
-			{
-				global::Debug.LogErrorFormat("Null group for tag [{0}]", new object[] { animFile.batchTag });
-			}
-			HashedString hashedString = animFile.batchTag;
-			if (group.renderType == KAnimBatchGroup.RendererType.DontRender || group.renderType == KAnimBatchGroup.RendererType.AnimOnly)
-			{
-				if (!group.swapTarget.IsValid)
-				{
-					global::Debug.LogErrorFormat("Invalid swap target for group [{0}]", new object[] { group.id });
-				}
-				hashedString = group.swapTarget;
-			}
-			KBatchGroupData batchGroupData = KAnimBatchManager.Instance().GetBatchGroupData(hashedString);
-			if (batchGroupData == null)
-			{
-				global::Debug.LogErrorFormat("Null batch group for tag [{0}]", new object[] { hashedString });
-			}
-			return batchGroupData;
-		}
-
-		public KAnim.Anim.Frame GetFrame(KAnimFileData animFile, KAnim.PlayMode mode, float t)
-		{
-			int frameIdx = this.GetFrameIdx(mode, t);
-			KAnim.Anim.Frame frame;
-			if (frameIdx >= 0 && animFile.batchTag.IsValid && animFile.batchTag != KAnimBatchManager.NO_BATCH)
-			{
-				frame = KAnim.Anim.GetAnimBatchGroupData(animFile).GetFrame(this.firstFrameIdx + frameIdx);
-			}
-			else
-			{
-				frame = KAnim.Anim.Frame.InvalidFrame;
-			}
-			return frame;
-		}
-
-		public KAnim.Anim.Frame GetFrame(HashedString batchTag, int idx)
-		{
-			return KAnimBatchManager.Instance().GetBatchGroupData(batchTag).GetFrame(idx + this.firstFrameIdx);
-		}
-
-		public KAnim.Anim Copy()
-		{
-			return new KAnim.Anim(this.animFile, this.index)
-			{
-				name = this.name,
-				id = this.id,
-				hash = this.hash,
-				rootSymbol = this.rootSymbol,
-				frameRate = this.frameRate,
-				firstFrameIdx = this.firstFrameIdx,
-				numFrames = this.numFrames,
-				totalTime = this.totalTime,
-				scaledBoundingRadius = this.scaledBoundingRadius,
-				unScaledSize = this.unScaledSize
-			};
+			return KAnimBatchManager.Instance().GetBatchGroupData(batchTag).TryGetFrame(idx + this.firstFrameIdx, out frame);
 		}
 
 		public string name;
@@ -155,50 +82,15 @@ public class KAnim
 
 		public Vector2 unScaledSize = Vector2.zero;
 
-		[Serializable]
 		public struct Frame
 		{
-			public bool IsValid()
-			{
-				return this.idx != -1;
-			}
-
-			public static bool operator ==(KAnim.Anim.Frame a, KAnim.Anim.Frame b)
-			{
-				return a.idx == b.idx;
-			}
-
-			public static bool operator !=(KAnim.Anim.Frame a, KAnim.Anim.Frame b)
-			{
-				return a.idx != b.idx;
-			}
-
-			public override bool Equals(object obj)
-			{
-				KAnim.Anim.Frame frame = (KAnim.Anim.Frame)obj;
-				return this.idx == frame.idx;
-			}
-
-			public override int GetHashCode()
-			{
-				return this.idx;
-			}
-
 			public int firstElementIdx;
-
-			public int idx;
 
 			public int numElements;
 
 			public bool hasHead;
-
-			public static readonly KAnim.Anim.Frame InvalidFrame = new KAnim.Anim.Frame
-			{
-				idx = -1
-			};
 		}
 
-		[Serializable]
 		public struct FrameElement
 		{
 			public Matrix2x3 transform;
@@ -211,24 +103,8 @@ public class KAnim
 		}
 	}
 
-	[Serializable]
-	public class Build : ISerializationCallbackReceiver
+	public class Build
 	{
-		public void OnBeforeSerialize()
-		{
-		}
-
-		public void OnAfterDeserialize()
-		{
-			if (this.symbols != null)
-			{
-				for (int i = 0; i < this.symbols.Length; i++)
-				{
-					this.symbols[i].build = this;
-				}
-			}
-		}
-
 		public KAnim.Build.Symbol GetSymbolByIndex(uint index)
 		{
 			if ((ulong)index >= (ulong)((long)this.symbols.Length))
@@ -245,18 +121,6 @@ public class KAnim
 				global::Debug.LogError("Invalid texture index:" + index.ToString());
 			}
 			return KAnimBatchManager.Instance().GetBatchGroupData(this.batchTag).GetTexure(this.textureStartIdx + index);
-		}
-
-		public int GetSymbolOffset(KAnimHashedString symbol_name)
-		{
-			for (int i = 0; i < this.symbols.Length; i++)
-			{
-				if (this.symbols[i].hash == symbol_name)
-				{
-					return i;
-				}
-			}
-			return -1;
 		}
 
 		public KAnim.Build.Symbol GetSymbol(KAnimHashedString symbol_name)
@@ -290,21 +154,11 @@ public class KAnim
 
 		public KAnim.Build.Symbol[] symbols;
 
-		public KAnim.Build.SymbolFrame[] frames;
-
-		[Serializable]
-		public class SymbolFrame : IComparable<KAnim.Build.SymbolFrame>
+		public struct SymbolFrameInstance
 		{
-			public int CompareTo(KAnim.Build.SymbolFrame obj)
-			{
-				return this.sourceFrameNum.CompareTo(obj.sourceFrameNum);
-			}
-
 			public int sourceFrameNum;
 
 			public int duration;
-
-			public KAnimHashedString fileNameHash;
 
 			public Vector2 uvMin;
 
@@ -313,11 +167,6 @@ public class KAnim
 			public Vector2 bboxMin;
 
 			public Vector2 bboxMax;
-		}
-
-		public struct SymbolFrameInstance
-		{
-			public KAnim.Build.SymbolFrame symbolFrame;
 
 			public int buildImageIdx;
 
@@ -325,8 +174,7 @@ public class KAnim
 		}
 
 		[DebuggerDisplay("{hash} {path} {folder} {colourChannel}")]
-		[Serializable]
-		public class Symbol : IComparable
+		public class Symbol
 		{
 			public int GetFrameIdx(int frame)
 			{
@@ -348,52 +196,10 @@ public class KAnim
 				return this.frameLookup[frame];
 			}
 
-			public bool HasFrame(int frame)
-			{
-				return this.GetFrameIdx(frame) >= 0;
-			}
-
 			public KAnim.Build.SymbolFrameInstance GetFrame(int frame)
 			{
 				int frameIdx = this.GetFrameIdx(frame);
 				return KAnimBatchManager.Instance().GetBatchGroupData(this.build.batchTag).GetSymbolFrameInstance(frameIdx);
-			}
-
-			public int CompareTo(object obj)
-			{
-				if (obj == null)
-				{
-					return 1;
-				}
-				if (obj.GetType() == typeof(HashedString))
-				{
-					HashedString hashedString = (HashedString)obj;
-					return this.hash.HashValue.CompareTo(hashedString.HashValue);
-				}
-				KAnim.Build.Symbol symbol = (KAnim.Build.Symbol)obj;
-				return this.hash.HashValue.CompareTo(symbol.hash.HashValue);
-			}
-
-			public bool HasFlag(KAnim.SymbolFlags flag)
-			{
-				return (this.flags & (int)flag) != 0;
-			}
-
-			public KAnim.Build.Symbol Copy()
-			{
-				KAnim.Build.Symbol symbol = new KAnim.Build.Symbol();
-				symbol.hash = this.hash;
-				symbol.path = this.path;
-				symbol.folder = this.folder;
-				symbol.colourChannel = this.colourChannel;
-				symbol.flags = this.flags;
-				symbol.firstFrameIdx = this.firstFrameIdx;
-				symbol.numFrames = this.numFrames;
-				symbol.numLookupFrames = this.numLookupFrames;
-				symbol.frameLookup = new int[this.frameLookup.Length];
-				symbol.symbolIndexInSourceBuild = this.symbolIndexInSourceBuild;
-				Array.Copy(this.frameLookup, symbol.frameLookup, symbol.frameLookup.Length);
-				return symbol;
 			}
 
 			[NonSerialized]

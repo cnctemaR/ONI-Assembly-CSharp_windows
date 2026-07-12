@@ -20,7 +20,10 @@ public class Dumpable : Workable
 		{
 			this.CreateChore();
 		}
-		base.SetWorkTime(0.1f);
+		this.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_dumpable_kanim") };
+		this.workAnims = new HashedString[] { "working" };
+		this.synchronizeAnims = false;
+		base.SetWorkTime(1f);
 	}
 
 	public void ToggleDumping()

@@ -273,13 +273,13 @@ public class IrrigationMonitor : GameStateMachine<IrrigationMonitor, IrrigationM
 				{
 					text = this.GetIncorrectLiquidStatusItem().resolveStringCallback(CREATURES.STATUSITEMS.WRONGIRRIGATION.NAME, this);
 				}
-				else if (base.smi.IsInsideState(base.smi.sm.replanted.starved))
-				{
-					text = this.GetStarvedStatusItem().resolveStringCallback(CREATURES.STATUSITEMS.NEEDSIRRIGATION.NAME, this);
-				}
 				else if (base.smi.IsInsideState(base.smi.sm.replanted.starved.wrongLiquid))
 				{
 					text = this.GetIncorrectLiquidStatusItemMajor().resolveStringCallback(CREATURES.STATUSITEMS.WRONGIRRIGATIONMAJOR.NAME, this);
+				}
+				else if (base.smi.IsInsideState(base.smi.sm.replanted.starved))
+				{
+					text = this.GetStarvedStatusItem().resolveStringCallback(CREATURES.STATUSITEMS.NEEDSIRRIGATION.NAME, this);
 				}
 				return text;
 			}

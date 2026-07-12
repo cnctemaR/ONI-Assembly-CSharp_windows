@@ -4,7 +4,7 @@ using STRINGS;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class AllDiagnosticsScreen : KScreen, ISim4000ms, ISim1000ms
+public class AllDiagnosticsScreen : ShowOptimizedKScreen, ISim4000ms, ISim1000ms
 {
 	protected override void OnPrefabInit()
 	{
@@ -82,6 +82,10 @@ public class AllDiagnosticsScreen : KScreen, ISim4000ms, ISim1000ms
 
 	public override void OnKeyDown(KButtonEvent e)
 	{
+		if (this.isHiddenButActive)
+		{
+			return;
+		}
 		if (e.TryConsume(global::Action.Escape))
 		{
 			KMonoBehaviour.PlaySound(GlobalAssets.GetSound("HUD_Click_Close", false));
@@ -103,6 +107,10 @@ public class AllDiagnosticsScreen : KScreen, ISim4000ms, ISim1000ms
 
 	public override void OnKeyUp(KButtonEvent e)
 	{
+		if (this.isHiddenButActive)
+		{
+			return;
+		}
 		if (PlayerController.Instance.ConsumeIfNotDragging(e, global::Action.MouseRight))
 		{
 			KMonoBehaviour.PlaySound(GlobalAssets.GetSound("HUD_Click_Close", false));

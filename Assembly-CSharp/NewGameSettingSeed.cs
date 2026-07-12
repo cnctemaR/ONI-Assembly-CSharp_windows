@@ -1,5 +1,7 @@
 ﻿using System;
 using Klei.CustomSettings;
+using ProcGen;
+using STRINGS;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -24,6 +26,22 @@ public class NewGameSettingSeed : NewGameSettingWidget
 	public override void Refresh()
 	{
 		string currentQualitySettingLevelId = CustomGameSettings.Instance.GetCurrentQualitySettingLevelId(this.config);
+		ClusterLayout currentClusterLayout = CustomGameSettings.Instance.GetCurrentClusterLayout();
+		this.allowChange = currentClusterLayout.fixedCoordinate == -1;
+		this.Input.interactable = this.allowChange;
+		this.RandomizeButton.isInteractable = this.allowChange;
+		if (this.allowChange)
+		{
+			this.InputToolTip.enabled = false;
+			this.RandomizeButtonToolTip.enabled = false;
+		}
+		else
+		{
+			this.InputToolTip.enabled = true;
+			this.RandomizeButtonToolTip.enabled = true;
+			this.InputToolTip.SetSimpleTooltip(UI.FRONTEND.CUSTOMGAMESETTINGSSCREEN.SETTINGS.WORLDGEN_SEED.FIXEDSEED);
+			this.RandomizeButtonToolTip.SetSimpleTooltip(UI.FRONTEND.CUSTOMGAMESETTINGSSCREEN.SETTINGS.WORLDGEN_SEED.FIXEDSEED);
+		}
 		this.Input.text = currentQualitySettingLevelId;
 	}
 
@@ -87,6 +105,11 @@ public class NewGameSettingSeed : NewGameSettingWidget
 		this.SetSeed(num);
 	}
 
+	protected override bool IsEnabled()
+	{
+		return this.allowChange;
+	}
+
 	[SerializeField]
 	private LocText Label;
 
@@ -99,7 +122,15 @@ public class NewGameSettingSeed : NewGameSettingWidget
 	[SerializeField]
 	private KButton RandomizeButton;
 
+	[SerializeField]
+	private ToolTip InputToolTip;
+
+	[SerializeField]
+	private ToolTip RandomizeButtonToolTip;
+
 	private const int MAX_VALID_SEED = 2147483647;
 
 	private SeedSettingConfig config;
+
+	private bool allowChange = true;
 }

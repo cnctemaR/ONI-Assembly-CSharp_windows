@@ -1,5 +1,6 @@
 ﻿using System;
 using TUNING;
+using UnityEngine;
 
 public class MissionControlClusterWorkable : Workable
 {
@@ -55,6 +56,11 @@ public class MissionControlClusterWorkable : Workable
 		this.operational.SetActive(true, false);
 	}
 
+	public override float GetEfficiencyMultiplier(Worker worker)
+	{
+		return base.GetEfficiencyMultiplier(worker) * Mathf.Clamp01(this.GetSMI<SkyVisibilityMonitor.Instance>().PercentClearSky);
+	}
+
 	protected override bool OnWorkTick(Worker worker, float dt)
 	{
 		if (this.TargetClustercraft == null || !MissionControlClusterWorkable.IsRocketInRange(base.gameObject.GetMyWorldLocation(), this.TargetClustercraft.Location))
@@ -67,7 +73,7 @@ public class MissionControlClusterWorkable : Workable
 
 	protected override void OnCompleteWork(Worker worker)
 	{
-		Debug.Assert(this.TargetClustercraft != null);
+		global::Debug.Assert(this.TargetClustercraft != null);
 		base.gameObject.GetSMI<MissionControlCluster.Instance>().ApplyEffect(this.TargetClustercraft);
 		base.OnCompleteWork(worker);
 	}

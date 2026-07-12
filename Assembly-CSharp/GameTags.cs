@@ -109,6 +109,8 @@ public class GameTags
 
 	public static readonly Tag DevBuilding = TagManager.Create("DevBuilding");
 
+	public static readonly Tag MarkedForMove = TagManager.Create("MarkedForMove");
+
 	public static readonly Tag Incapacitated = TagManager.Create("Incapacitated");
 
 	public static readonly Tag CaloriesDepleted = TagManager.Create("CaloriesDepleted");

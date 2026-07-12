@@ -28,7 +28,7 @@ public class OxygenBreather : KMonoBehaviour, ISim200ms
 		GameUtil.SubscribeToTags<OxygenBreather>(this, OxygenBreather.OnDeadTagAddedDelegate, true);
 	}
 
-	public bool IsLowOxygen()
+	public bool IsLowOxygenAtMouthCell()
 	{
 		return this.GetOxygenPressure(this.mouthCell) < this.lowOxygenThreshold;
 	}
@@ -302,5 +302,7 @@ public class OxygenBreather : KMonoBehaviour, ISim200ms
 		bool ShouldEmitCO2();
 
 		bool ShouldStoreCO2();
+
+		bool IsLowOxygen();
 	}
 }

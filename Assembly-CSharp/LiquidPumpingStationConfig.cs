@@ -61,7 +61,7 @@ public class LiquidPumpingStationConfig : IBuildingConfig
 	public override void DoPostConfigureComplete(GameObject go)
 	{
 		LiquidPumpingStationConfig.AddGuide(go.GetComponent<Building>().Def.BuildingPreview, false);
-		LiquidPumpingStationConfig.AddGuide(go.GetComponent<Building>().Def.BuildingUnderConstruction, true);
+		LiquidPumpingStationConfig.AddGuide(go.GetComponent<Building>().Def.BuildingUnderConstruction, false);
 		go.AddOrGet<FakeFloorAdder>().floorOffsets = new CellOffset[]
 		{
 			new CellOffset(0, 0),
@@ -70,4 +70,6 @@ public class LiquidPumpingStationConfig : IBuildingConfig
 	}
 
 	public const string ID = "LiquidPumpingStation";
+
+	public const int TAIL_LENGTH = 4;
 }

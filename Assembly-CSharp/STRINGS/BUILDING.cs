@@ -2945,18 +2945,11 @@ namespace STRINGS
 				});
 			}
 
-			public class DETECTORQUALITY
-			{
-				public static LocString NAME = "Scan Quality: {Quality}";
-
-				public static LocString TOOLTIP = "This scanner dish is currently scanning at <b>{Quality}</b> effectiveness\n\nDecreased scan quality may be due to:\n    • Interference from nearby industrial machinery\n    • Rock or tile obstructing the dish's line of sight on space";
-			}
-
 			public class NETWORKQUALITY
 			{
 				public static LocString NAME = "Scan Network Quality: {TotalQuality}";
 
-				public static LocString TOOLTIP = "This scanner network is scanning at <b>{TotalQuality}</b> effectiveness\n\nIt will detect incoming objects <b>{WorstTime}</b> to <b>{BestTime}</b> before they arrive\n\nBuild multiple " + BUILDINGS.PREFABS.COMETDETECTOR.NAME + "s and ensure they're each scanning effectively for the best detection results";
+				public static LocString TOOLTIP = "This scanner network is scanning at <b>{TotalQuality}</b> effectiveness\n\nIt will detect incoming objects <b>{WorstTime}</b> to <b>{BestTime}</b> before they arrive\n\nBuild multiple " + BUILDINGS.PREFABS.COMETDETECTOR.NAME + "s to increase surface coverage and improve network quality\n\n    • Surface Coverage: <b>{Coverage}</b>";
 			}
 
 			public class DETECTORSCANNING
@@ -2977,14 +2970,14 @@ namespace STRINGS
 			{
 				public static LocString NAME = "No Line of Sight";
 
-				public static LocString TOOLTIP = "This building has no view of space\n\nEnsure an unblocked view of the sky is available to collect " + UI.FormatAsManagementMenu("Starmap") + " data\n    • Visibility: <b>{VISIBILITY}</b>\n    • Scan Radius: <b>{RADIUS}</b> cells";
+				public static LocString TOOLTIP = "This building has no view of space\n\nTo properly function, this building requires an unblocked view of space\n    • Efficiency: <b>{VISIBILITY}</b>";
 			}
 
 			public class SPACE_VISIBILITY_REDUCED
 			{
 				public static LocString NAME = "Reduced Visibility";
 
-				public static LocString TOOLTIP = "This building has an inadequate or obscured view of space\n\nEnsure an unblocked view of the sky is available to collect " + UI.FormatAsManagementMenu("Starmap") + " data\n    • Visibility: <b>{VISIBILITY}</b>\n    • Scan Radius: <b>{RADIUS}</b> cells";
+				public static LocString TOOLTIP = "This building has a partially obstructed view of space\n\nTo operate at maximum speed, this building requires an unblocked view of space\n    • Efficiency: <b>{VISIBILITY}</b>";
 			}
 
 			public class LANDEDROCKETLACKSPASSENGERMODULE
@@ -3007,14 +3000,14 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Launch Path Blocked";
 
-				public static LocString TOOLTIP = "There are obstructions in the launch trajectory of this " + UI.FormatAsLink("Interplanetary Launcher", "RAILGUN") + ":\n    • {0}\n\nThis launcher requires a clear path to launch payloads";
+				public static LocString TOOLTIP = "There are obstructions in the launch trajectory of this " + UI.FormatAsLink("Interplanetary Launcher", "RAILGUN") + "\n\nThis launcher requires a clear path to launch payloads";
 			}
 
 			public class RAILGUN_NO_DESTINATION
 			{
 				public static LocString NAME = "No Delivery Destination";
 
-				public static LocString TOOLTIP = "A delivery destination has not been set    • {0}";
+				public static LocString TOOLTIP = "A delivery destination has not been set";
 			}
 
 			public class NOSURFACESIGHT

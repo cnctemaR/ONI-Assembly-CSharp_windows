@@ -100,7 +100,7 @@ public class DragTool : InterfaceTool
 		this.RemoveCurrentAreaText();
 		if (this.areaVisualizerTextPrefab != null)
 		{
-			this.areaVisualizerText = NameDisplayScreen.Instance.AddWorldText("", this.areaVisualizerTextPrefab);
+			this.areaVisualizerText = NameDisplayScreen.Instance.AddAreaText("", this.areaVisualizerTextPrefab);
 			NameDisplayScreen.Instance.GetWorldText(this.areaVisualizerText).GetComponent<LocText>().color = this.areaColour;
 		}
 		DragTool.Mode mode = this.GetMode();

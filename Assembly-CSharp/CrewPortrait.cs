@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -206,6 +207,8 @@ public class CrewPortrait : KMonoBehaviour
 		component.RemoveAllSymbolOverrides(0);
 		if (minionIdentity != null)
 		{
+			HashSet<KAnimHashedString> hashSet = new HashSet<KAnimHashedString>();
+			HashSet<KAnimHashedString> hashSet2 = new HashSet<KAnimHashedString>();
 			Accessorizer component2 = minionIdentity.GetComponent<Accessorizer>();
 			foreach (AccessorySlot accessorySlot in Db.Get().AccessorySlots.resources)
 			{
@@ -213,18 +216,22 @@ public class CrewPortrait : KMonoBehaviour
 				if (accessory != null)
 				{
 					component.AddSymbolOverride(accessorySlot.targetSymbolId, accessory.symbol, 0);
-					controller.SetSymbolVisiblity(accessorySlot.targetSymbolId, true);
+					hashSet.Add(accessorySlot.targetSymbolId);
 				}
 				else
 				{
-					controller.SetSymbolVisiblity(accessorySlot.targetSymbolId, false);
+					hashSet2.Add(accessorySlot.targetSymbolId);
 				}
 			}
+			controller.BatchSetSymbolsVisiblity(hashSet, true);
+			controller.BatchSetSymbolsVisiblity(hashSet2, false);
 			component.AddSymbolOverride(Db.Get().AccessorySlots.HatHair.targetSymbolId, Db.Get().AccessorySlots.HatHair.Lookup("hat_" + HashCache.Get().Get(component2.GetAccessory(Db.Get().AccessorySlots.Hair).symbol.hash)).symbol, 1);
 			CrewPortrait.RefreshHat(minionIdentity, controller);
 		}
 		else
 		{
+			HashSet<KAnimHashedString> hashSet3 = new HashSet<KAnimHashedString>();
+			HashSet<KAnimHashedString> hashSet4 = new HashSet<KAnimHashedString>();
 			StoredMinionIdentity storedMinionIdentity = identityObject as StoredMinionIdentity;
 			if (storedMinionIdentity == null)
 			{
@@ -245,13 +252,15 @@ public class CrewPortrait : KMonoBehaviour
 				if (accessory2 != null)
 				{
 					component.AddSymbolOverride(accessorySlot2.targetSymbolId, accessory2.symbol, 0);
-					controller.SetSymbolVisiblity(accessorySlot2.targetSymbolId, true);
+					hashSet3.Add(accessorySlot2.targetSymbolId);
 				}
 				else
 				{
-					controller.SetSymbolVisiblity(accessorySlot2.targetSymbolId, false);
+					hashSet4.Add(accessorySlot2.targetSymbolId);
 				}
 			}
+			controller.BatchSetSymbolsVisiblity(hashSet3, true);
+			controller.BatchSetSymbolsVisiblity(hashSet4, false);
 			component.AddSymbolOverride(Db.Get().AccessorySlots.HatHair.targetSymbolId, Db.Get().AccessorySlots.HatHair.Lookup("hat_" + HashCache.Get().Get(storedMinionIdentity.GetAccessory(Db.Get().AccessorySlots.Hair).symbol.hash)).symbol, 1);
 			CrewPortrait.RefreshHat(storedMinionIdentity, controller);
 		}

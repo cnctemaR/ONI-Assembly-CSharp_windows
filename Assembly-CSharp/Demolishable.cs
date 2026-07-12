@@ -50,21 +50,13 @@ public class Demolishable : Workable
 		this.multitoolHitEffectTag = EffectConfigs.DemolishSplashId;
 		this.workingPstComplete = null;
 		this.workingPstFailed = null;
-		CellOffset[][] array = OffsetGroups.InvertedStandardTable;
-		CellOffset[] array2 = null;
 		Building component = base.GetComponent<Building>();
 		if (component != null && component.Def.IsTilePiece)
 		{
-			array = OffsetGroups.InvertedStandardTableWithCorners;
-			array2 = component.Def.ConstructionOffsetFilter;
 			base.SetWorkTime(component.Def.ConstructionTime * 0.5f);
+			return;
 		}
-		else
-		{
-			base.SetWorkTime(30f);
-		}
-		CellOffset[][] array3 = OffsetGroups.BuildReachabilityTable(this.placementOffsets, array, array2);
-		base.SetOffsetTable(array3);
+		base.SetWorkTime(30f);
 	}
 
 	protected override void OnSpawn()
@@ -74,6 +66,16 @@ public class Demolishable : Workable
 		base.Subscribe<Demolishable>(-111137758, Demolishable.OnRefreshUserMenuDelegate);
 		base.Subscribe<Demolishable>(2127324410, Demolishable.OnCancelDelegate);
 		base.Subscribe<Demolishable>(-790448070, Demolishable.OnDeconstructDelegate);
+		CellOffset[][] array = OffsetGroups.InvertedStandardTable;
+		CellOffset[] array2 = null;
+		Building component = base.GetComponent<Building>();
+		if (component != null && component.Def.IsTilePiece)
+		{
+			array = OffsetGroups.InvertedStandardTableWithCorners;
+			array2 = component.Def.ConstructionOffsetFilter;
+		}
+		CellOffset[][] array3 = OffsetGroups.BuildReachabilityTable(this.placementOffsets, array, array2);
+		base.SetOffsetTable(array3);
 		if (this.isMarkedForDemolition)
 		{
 			this.QueueDemolition();

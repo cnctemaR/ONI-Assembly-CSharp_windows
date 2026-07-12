@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 
-public class KSplitCompactedVector<Header, Payload> : KCompactedVectorBase, ICollection, IEnumerable
+public class KSplitCompactedVector<Header, Payload> : KCompactedVectorBase, ICollection, IEnumerable, IEnumerable<KSplitCompactedVector<Header, Payload>.Enumerator.Value>
 {
 	public KSplitCompactedVector(int initial_count = 0)
 		: base(initial_count)
@@ -11,7 +11,7 @@ public class KSplitCompactedVector<Header, Payload> : KCompactedVectorBase, ICol
 		this.payloads = new List<Payload>(initial_count);
 	}
 
-	public HandleVector<int>.Handle Allocate(Header header, ref Payload payload)
+	public HandleVector<int>.Handle Allocate(in Header header, in Payload payload)
 	{
 		this.headers.Add(header);
 		this.payloads.Add(payload);
@@ -116,7 +116,17 @@ public class KSplitCompactedVector<Header, Payload> : KCompactedVectorBase, ICol
 		throw new NotImplementedException();
 	}
 
-	public IEnumerator GetEnumerator()
+	IEnumerator IEnumerable.GetEnumerator()
+	{
+		return new KSplitCompactedVector<Header, Payload>.Enumerator(this.headers.GetEnumerator(), this.payloads.GetEnumerator());
+	}
+
+	IEnumerator<KSplitCompactedVector<Header, Payload>.Enumerator.Value> IEnumerable<KSplitCompactedVector<Header, Payload>.Enumerator.Value>.GetEnumerator()
+	{
+		return new KSplitCompactedVector<Header, Payload>.Enumerator(this.headers.GetEnumerator(), this.payloads.GetEnumerator());
+	}
+
+	public KSplitCompactedVector<Header, Payload>.Enumerator GetEnumerator()
 	{
 		return new KSplitCompactedVector<Header, Payload>.Enumerator(this.headers.GetEnumerator(), this.payloads.GetEnumerator());
 	}
@@ -125,9 +135,17 @@ public class KSplitCompactedVector<Header, Payload> : KCompactedVectorBase, ICol
 
 	protected List<Payload> payloads;
 
-	private struct Enumerator : IEnumerator
+	public struct Enumerator : IEnumerator, IEnumerator<KSplitCompactedVector<Header, Payload>.Enumerator.Value>, IDisposable
 	{
-		public object Current
+		object IEnumerator.Current
+		{
+			get
+			{
+				return this.Current;
+			}
+		}
+
+		public KSplitCompactedVector<Header, Payload>.Enumerator.Value Current
 		{
 			get
 			{
@@ -155,6 +173,10 @@ public class KSplitCompactedVector<Header, Payload> : KCompactedVectorBase, ICol
 		{
 			this.headerCurrent = this.headerBegin;
 			this.payloadCurrent = this.payloadBegin;
+		}
+
+		public void Dispose()
+		{
 		}
 
 		private readonly List<Header>.Enumerator headerBegin;

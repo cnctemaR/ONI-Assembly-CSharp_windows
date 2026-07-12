@@ -25,6 +25,8 @@ namespace ProcGen
 
 		public bool disableStoryTraits { get; set; }
 
+		public int fixedCoordinate { get; private set; }
+
 		public ClusterLayout.Skip skip { get; private set; }
 
 		public int clusterCategory { get; private set; }
@@ -44,6 +46,7 @@ namespace ProcGen
 		public ClusterLayout()
 		{
 			this.numRings = 12;
+			this.fixedCoordinate = -1;
 		}
 
 		public static string GetName(string path, string addPrefix)
@@ -94,7 +97,8 @@ namespace ProcGen
 		{
 			vanilla,
 			spacedOutVanillaStyle,
-			spacedOutStyle
+			spacedOutStyle,
+			special
 		}
 	}
 }

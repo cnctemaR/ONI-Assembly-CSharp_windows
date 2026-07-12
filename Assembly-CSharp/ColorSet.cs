@@ -89,6 +89,13 @@ public class ColorSet : ScriptableObject
 
 	public Color32 NotificationEvent;
 
+	[Header("PrioritiesScreen")]
+	public Color32 PrioritiesNeutralColor;
+
+	public Color32 PrioritiesLowColor;
+
+	public Color32 PrioritiesHighColor;
+
 	[Header("Info Screen Status Items")]
 	public Color32 statusItemBad;
 

@@ -123,7 +123,6 @@ public class KGlobalAnimParser
 				anim.unScaledSize.x = Math.Max(anim.unScaledSize.x, num6 / 0.005f);
 				anim.unScaledSize.y = Math.Max(anim.unScaledSize.y, num7 / 0.005f);
 				anim.scaledBoundingRadius = Math.Max(anim.scaledBoundingRadius, Mathf.Sqrt(num8 * num8 + num8 * num8));
-				frame.idx = data.animFrames.Count;
 				frame.firstElementIdx = data.frameElements.Count;
 				frame.numElements = reader.ReadInt32();
 				frame.hasHead = false;
@@ -208,7 +207,7 @@ public class KGlobalAnimParser
 			global::Debug.LogErrorFormat("[{1}] Failed to get group [{0}]", new object[] { data.groupID, fileNameHash.DebuggerDisplay });
 		}
 		int num2 = reader.ReadInt32();
-		int num3 = reader.ReadInt32();
+		reader.ReadInt32();
 		KAnim.Build build = data.AddNewBuildFile(fileNameHash);
 		build.textureCount = textures.Count;
 		if (textures.Count > 0)
@@ -216,11 +215,9 @@ public class KGlobalAnimParser
 			data.AddTextures(textures);
 		}
 		build.symbols = new KAnim.Build.Symbol[num2];
-		build.frames = new KAnim.Build.SymbolFrame[num3];
 		build.name = reader.ReadKleiString();
 		build.batchTag = (group.swapTarget.IsValid ? group.target : data.groupID);
 		build.fileHash = fileNameHash;
-		int num4 = 0;
 		for (int i = 0; i < build.symbols.Length; i++)
 		{
 			KAnimHashedString kanimHashedString2 = new KAnimHashedString(reader.ReadInt32());
@@ -236,16 +233,15 @@ public class KGlobalAnimParser
 			symbol.firstFrameIdx = data.symbolFrameInstances.Count;
 			symbol.numFrames = reader.ReadInt32();
 			symbol.symbolIndexInSourceBuild = i;
-			int num5 = 0;
+			int num3 = 0;
 			for (int j = 0; j < symbol.numFrames; j++)
 			{
-				KAnim.Build.SymbolFrame symbolFrame = new KAnim.Build.SymbolFrame();
-				KAnim.Build.SymbolFrameInstance symbolFrameInstance = default(KAnim.Build.SymbolFrameInstance);
-				symbolFrameInstance.symbolFrame = symbolFrame;
-				symbolFrame.fileNameHash = fileNameHash;
-				symbolFrame.sourceFrameNum = reader.ReadInt32();
-				symbolFrame.duration = reader.ReadInt32();
-				symbolFrameInstance.buildImageIdx = data.textureStartIndex[fileNameHash] + reader.ReadInt32();
+				KAnim.Build.SymbolFrameInstance symbolFrameInstance = new KAnim.Build.SymbolFrameInstance
+				{
+					sourceFrameNum = reader.ReadInt32(),
+					duration = reader.ReadInt32(),
+					buildImageIdx = data.textureStartIndex[fileNameHash] + reader.ReadInt32()
+				};
 				if (symbolFrameInstance.buildImageIdx >= textures.Count + data.textureStartIndex[fileNameHash])
 				{
 					global::Debug.LogErrorFormat("{0} Symbol: [{1}] tex count: [{2}] buildImageIdx: [{3}] group total [{4}]", new object[]
@@ -258,24 +254,22 @@ public class KGlobalAnimParser
 					});
 				}
 				symbolFrameInstance.symbolIdx = data.GetSymbolCount();
-				num5 = Math.Max(symbolFrame.sourceFrameNum + symbolFrame.duration, num5);
+				num3 = Math.Max(symbolFrameInstance.sourceFrameNum + symbolFrameInstance.duration, num3);
+				float num4 = reader.ReadSingle();
+				float num5 = reader.ReadSingle();
 				float num6 = reader.ReadSingle();
 				float num7 = reader.ReadSingle();
+				symbolFrameInstance.bboxMin = new Vector2(num4 - num6 * 0.5f, num5 - num7 * 0.5f);
+				symbolFrameInstance.bboxMax = new Vector2(num4 + num6 * 0.5f, num5 + num7 * 0.5f);
 				float num8 = reader.ReadSingle();
 				float num9 = reader.ReadSingle();
-				symbolFrame.bboxMin = new Vector2(num6 - num8 * 0.5f, num7 - num9 * 0.5f);
-				symbolFrame.bboxMax = new Vector2(num6 + num8 * 0.5f, num7 + num9 * 0.5f);
 				float num10 = reader.ReadSingle();
 				float num11 = reader.ReadSingle();
-				float num12 = reader.ReadSingle();
-				float num13 = reader.ReadSingle();
-				symbolFrame.uvMin = new Vector2(num10, 1f - num11);
-				symbolFrame.uvMax = new Vector2(num12, 1f - num13);
-				build.frames[num4] = symbolFrame;
+				symbolFrameInstance.uvMin = new Vector2(num8, 1f - num9);
+				symbolFrameInstance.uvMax = new Vector2(num10, 1f - num11);
 				data.symbolFrameInstances.Add(symbolFrameInstance);
-				num4++;
 			}
-			symbol.numLookupFrames = num5;
+			symbol.numLookupFrames = num3;
 			data.AddBuildSymbol(symbol);
 			build.symbols[i] = symbol;
 		}
@@ -307,7 +301,7 @@ public class KGlobalAnimParser
 					for (int j = symbol.firstFrameIdx; j < symbol.firstFrameIdx + symbol.numFrames; j++)
 					{
 						KAnim.Build.SymbolFrameInstance symbolFrameInstance = data.GetSymbolFrameInstance(j);
-						num = Mathf.Max(num, symbolFrameInstance.symbolFrame.sourceFrameNum + symbolFrameInstance.symbolFrame.duration);
+						num = Mathf.Max(num, symbolFrameInstance.sourceFrameNum + symbolFrameInstance.duration);
 					}
 					symbol.numLookupFrames = num;
 				}
@@ -337,56 +331,39 @@ public class KGlobalAnimParser
 					for (int l = symbol.firstFrameIdx; l < symbol.firstFrameIdx + symbol.numFrames; l++)
 					{
 						KAnim.Build.SymbolFrameInstance symbolFrameInstance2 = data.GetSymbolFrameInstance(l);
-						if (symbolFrameInstance2.symbolFrame == null)
+						for (int m = symbolFrameInstance2.sourceFrameNum; m < symbolFrameInstance2.sourceFrameNum + symbolFrameInstance2.duration; m++)
 						{
-							string[] array2 = new string[7];
-							array2[0] = "No symbol frame  [";
-							array2[1] = data.groupID.ToString();
-							array2[2] = "] symFrameIdx: [";
-							array2[3] = l.ToString();
-							array2[4] = "] id: [";
-							int num3 = 5;
-							KAnimHashedString kanimHashedString = symbol.hash;
-							array2[num3] = kanimHashedString.ToString();
-							array2[6] = "]";
-							global::Debug.LogWarning(string.Concat(array2));
-						}
-						else
-						{
-							for (int m = symbolFrameInstance2.symbolFrame.sourceFrameNum; m < symbolFrameInstance2.symbolFrame.sourceFrameNum + symbolFrameInstance2.symbolFrame.duration; m++)
+							if (m >= symbol.frameLookup.Length)
 							{
-								if (m >= symbol.frameLookup.Length)
-								{
-									string[] array3 = new string[11];
-									array3[0] = "Too many lookup frames [";
-									array3[1] = m.ToString();
-									array3[2] = ">=";
-									array3[3] = symbol.frameLookup.Length.ToString();
-									array3[4] = "] for  [";
-									array3[5] = data.groupID.ToString();
-									array3[6] = "] idx: [";
-									array3[7] = i.ToString();
-									array3[8] = "] id: [";
-									int num4 = 9;
-									KAnimHashedString kanimHashedString = symbol.hash;
-									array3[num4] = kanimHashedString.ToString();
-									array3[10] = "]";
-									global::Debug.LogWarning(string.Concat(array3));
-								}
-								else
-								{
-									symbol.frameLookup[m] = l;
-								}
+								string[] array2 = new string[11];
+								array2[0] = "Too many lookup frames [";
+								array2[1] = m.ToString();
+								array2[2] = ">=";
+								array2[3] = symbol.frameLookup.Length.ToString();
+								array2[4] = "] for  [";
+								array2[5] = data.groupID.ToString();
+								array2[6] = "] idx: [";
+								array2[7] = i.ToString();
+								array2[8] = "] id: [";
+								int num3 = 9;
+								KAnimHashedString kanimHashedString = symbol.hash;
+								array2[num3] = kanimHashedString.ToString();
+								array2[10] = "]";
+								global::Debug.LogWarning(string.Concat(array2));
+							}
+							else
+							{
+								symbol.frameLookup[m] = l;
 							}
 						}
 					}
 					string text = HashCache.Get().Get(symbol.path);
 					if (!string.IsNullOrEmpty(text))
 					{
-						int num5 = text.IndexOf("/");
-						if (num5 != -1)
+						int num4 = text.IndexOf("/");
+						if (num4 != -1)
 						{
-							string text2 = text.Substring(0, num5);
+							string text2 = text.Substring(0, num4);
 							symbol.folder = new KAnimHashedString(text2);
 							HashCache.Get().Add(symbol.folder.HashValue, text2);
 						}

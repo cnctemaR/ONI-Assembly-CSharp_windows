@@ -46,10 +46,10 @@ public class SymbolOverrideInfoGpuData
 			int num3 = num;
 			symbolOverrideInfos[num3].atlas = (float)atlas_idx;
 			symbolOverrideInfos[num3].isoverriden = 1f;
-			symbolOverrideInfos[num3].bboxMin = symbolFrameInstance.symbolFrame.bboxMin;
-			symbolOverrideInfos[num3].bboxMax = symbolFrameInstance.symbolFrame.bboxMax;
-			symbolOverrideInfos[num3].uvMin = symbolFrameInstance.symbolFrame.uvMin;
-			symbolOverrideInfos[num3].uvMax = symbolFrameInstance.symbolFrame.uvMax;
+			symbolOverrideInfos[num3].bboxMin = symbolFrameInstance.bboxMin;
+			symbolOverrideInfos[num3].bboxMax = symbolFrameInstance.bboxMax;
+			symbolOverrideInfos[num3].uvMin = symbolFrameInstance.uvMin;
+			symbolOverrideInfos[num3].uvMax = symbolFrameInstance.uvMax;
 		}
 		this.MarkDirty();
 	}
@@ -59,10 +59,10 @@ public class SymbolOverrideInfoGpuData
 		SymbolOverrideInfoGpuData.SymbolOverrideInfo[] symbolOverrideInfos = this.symbolOverrideInfos;
 		symbolOverrideInfos[symbol_idx].atlas = (float)symbol_frame_instance.buildImageIdx;
 		symbolOverrideInfos[symbol_idx].isoverriden = 1f;
-		symbolOverrideInfos[symbol_idx].bboxMin = symbol_frame_instance.symbolFrame.bboxMin;
-		symbolOverrideInfos[symbol_idx].bboxMax = symbol_frame_instance.symbolFrame.bboxMax;
-		symbolOverrideInfos[symbol_idx].uvMin = symbol_frame_instance.symbolFrame.uvMin;
-		symbolOverrideInfos[symbol_idx].uvMax = symbol_frame_instance.symbolFrame.uvMax;
+		symbolOverrideInfos[symbol_idx].bboxMin = symbol_frame_instance.bboxMin;
+		symbolOverrideInfos[symbol_idx].bboxMax = symbol_frame_instance.bboxMax;
+		symbolOverrideInfos[symbol_idx].uvMin = symbol_frame_instance.uvMin;
+		symbolOverrideInfos[symbol_idx].uvMax = symbol_frame_instance.uvMax;
 		this.MarkDirty();
 	}
 

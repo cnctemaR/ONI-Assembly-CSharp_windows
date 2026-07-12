@@ -190,7 +190,7 @@ public class EmptyConduitWorkable : Workable, IEmptyConduitWorkable
 			{
 				chunkManager = GasSourceManager.Instance;
 			}
-			chunkManager.CreateChunk(conduitContents.element, conduitContents.mass, conduitContents.temperature, conduitContents.diseaseIdx, conduitContents.diseaseCount, Grid.CellToPosCCC(num, Grid.SceneLayer.Ore));
+			chunkManager.CreateChunk(conduitContents.element, conduitContents.mass, conduitContents.temperature, conduitContents.diseaseIdx, conduitContents.diseaseCount, Grid.CellToPosCCC(num, Grid.SceneLayer.Ore)).Trigger(580035959, base.worker);
 		}
 	}
 

@@ -7,6 +7,15 @@ using UnityEngine;
 [AddComponentMenu("KMonoBehaviour/scripts/OccupyArea")]
 public class OccupyArea : KMonoBehaviour
 {
+	public CellOffset[] OccupiedCellsOffsets
+	{
+		get
+		{
+			this.UpdateRotatedCells();
+			return this._RotatedOccupiedCellsOffsets;
+		}
+	}
+
 	public bool ApplyToCells
 	{
 		get
@@ -62,7 +71,23 @@ public class OccupyArea : KMonoBehaviour
 
 	public void SetCellOffsets(CellOffset[] cells)
 	{
-		this.OccupiedCellsOffsets = cells;
+		this._UnrotatedOccupiedCellsOffsets = cells;
+		this._RotatedOccupiedCellsOffsets = cells;
+		this.UpdateRotatedCells();
+	}
+
+	private void UpdateRotatedCells()
+	{
+		if (this.rotatable != null && this.appliedOrientation != this.rotatable.Orientation)
+		{
+			this._RotatedOccupiedCellsOffsets = new CellOffset[this._UnrotatedOccupiedCellsOffsets.Length];
+			for (int i = 0; i < this._UnrotatedOccupiedCellsOffsets.Length; i++)
+			{
+				CellOffset cellOffset = this._UnrotatedOccupiedCellsOffsets[i];
+				this._RotatedOccupiedCellsOffsets[i] = this.rotatable.GetRotatedCellOffset(cellOffset);
+			}
+			this.appliedOrientation = this.rotatable.Orientation;
+		}
 	}
 
 	public bool CheckIsOccupying(int checkCell)
@@ -279,13 +304,20 @@ public class OccupyArea : KMonoBehaviour
 		return true;
 	}
 
-	public CellOffset[] OccupiedCellsOffsets;
-
 	private CellOffset[] AboveOccupiedCellOffsets;
 
 	private CellOffset[] BelowOccupiedCellOffsets;
 
 	private int[] occupiedGridCells;
+
+	[MyCmpGet]
+	private Rotatable rotatable;
+
+	private Orientation appliedOrientation;
+
+	public CellOffset[] _UnrotatedOccupiedCellsOffsets;
+
+	public CellOffset[] _RotatedOccupiedCellsOffsets;
 
 	public ObjectLayer[] objectLayers = new ObjectLayer[0];
 

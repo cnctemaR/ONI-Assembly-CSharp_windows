@@ -11,7 +11,8 @@ public class DeathStates : GameStateMachine<DeathStates, DeathStates.Instance, I
 		{
 			smi.EnableGravityIfNecessary();
 		}).PlayAnim("Death")
-			.OnAnimQueueComplete(this.pst);
+			.OnAnimQueueComplete(this.pst)
+			.ScheduleGoTo((DeathStates.Instance smi) => smi.def.DIE_ANIMATION_EXPIRATION_TIME, this.pst);
 		this.pst.TriggerOnEnter(GameHashes.DeathAnimComplete, null).TriggerOnEnter(GameHashes.Died, null).Enter("Butcher", delegate(DeathStates.Instance smi)
 		{
 			if (smi.gameObject.GetComponent<Butcherable>() != null)
@@ -33,6 +34,7 @@ public class DeathStates : GameStateMachine<DeathStates, DeathStates.Instance, I
 
 	public class Def : StateMachine.BaseDef
 	{
+		public float DIE_ANIMATION_EXPIRATION_TIME = 4f;
 	}
 
 	public new class Instance : GameStateMachine<DeathStates, DeathStates.Instance, IStateMachineTarget, DeathStates.Def>.GameInstance

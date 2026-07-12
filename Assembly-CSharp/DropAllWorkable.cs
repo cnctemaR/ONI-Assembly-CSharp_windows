@@ -91,11 +91,7 @@ public class DropAllWorkable : Workable
 					{
 						gameObject.RemoveTag(tag);
 					}
-					Pickupable component = gameObject.GetComponent<Pickupable>();
-					if (component != null)
-					{
-						component.TryToOffsetIfBuried();
-					}
+					gameObject.Trigger(580035959, worker);
 				}
 			}
 		}

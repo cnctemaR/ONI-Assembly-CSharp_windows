@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{2483DBCE-5D65-48C0-BF1A-7FAD0F55F2B3}</ProjectGuid>
+    <ProjectGuid>{E9D1473C-22BE-4158-93C3-50689245E29C}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>UnityEngine.XR.Tango</RootNamespace>
     <AssemblyName>UnityEngine.ARModule</AssemblyName>
@@ -21,11 +21,11 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
-      <Project>{2483DBCE-5D65-48C0-BF1A-7FAD0F55F2B9}</Project>
+      <Project>{E9D1473C-22BE-4158-93C3-50689245E2A2}</Project>
       <Name>UnityEngine.CoreModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
-      <Project>{2483DBCE-5D65-48C0-BF1A-7FAD0F55F2CF}</Project>
+      <Project>{E9D1473C-22BE-4158-93C3-50689245E2B8}</Project>
       <Name>UnityEngine.SharedInternalsModule</Name>
     </ProjectReference>
   </ItemGroup>

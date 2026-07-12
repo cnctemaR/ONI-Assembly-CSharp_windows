@@ -46,6 +46,10 @@ public class UIMannequin : KMonoBehaviour, UIMinionOrMannequin.ITarget
 
 	public void SetOutfit(ClothingOutfitUtility.OutfitType outfitType, IEnumerable<ClothingItemResource> outfit)
 	{
+		if (this.shouldShowOutfitWithDefaultItems)
+		{
+			outfit = UIMinionOrMannequinITargetExtensions.GetOutfitWithDefaultItems(outfitType, outfit);
+		}
 		MinionConfig.ConfigureSymbols(this.SpawnedAvatar, false);
 		SymbolOverrideController component = this.SpawnedAvatar.GetComponent<SymbolOverrideController>();
 		foreach (ClothingItemResource clothingItemResource in outfit)
@@ -73,4 +77,6 @@ public class UIMannequin : KMonoBehaviour, UIMinionOrMannequin.ITarget
 	private KBatchedAnimController animController;
 
 	private GameObject spawn;
+
+	public bool shouldShowOutfitWithDefaultItems = true;
 }

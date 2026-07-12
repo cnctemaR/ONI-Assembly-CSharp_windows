@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using STRINGS;
 using UnityEngine;
 
@@ -1149,6 +1150,8 @@ namespace Database
 				str = str.Replace("{1}", num18.ToString());
 				return str;
 			};
+			this.SkyVisNone = new StatusItem("SkyVisNone", BUILDING.STATUSITEMS.SPACE_VISIBILITY_NONE.NAME, BUILDING.STATUSITEMS.SPACE_VISIBILITY_NONE.TOOLTIP, "status_item_no_sky", StatusItem.IconType.Custom, NotificationType.Bad, false, OverlayModes.None.ID, 129022, true, new Func<string, object, string>(BuildingStatusItems.<CreateStatusItems>g__SkyVisResolveStringCallback|268_94));
+			this.SkyVisLimited = new StatusItem("SkyVisLimited", BUILDING.STATUSITEMS.SPACE_VISIBILITY_REDUCED.NAME, BUILDING.STATUSITEMS.SPACE_VISIBILITY_REDUCED.TOOLTIP, "status_item_no_sky", StatusItem.IconType.Info, NotificationType.BadMinor, false, OverlayModes.None.ID, 129022, false, new Func<string, object, string>(BuildingStatusItems.<CreateStatusItems>g__SkyVisResolveStringCallback|268_94));
 			this.CreatureManipulatorWaiting = this.CreateStatusItem("CreatureManipulatorWaiting", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
 			this.CreatureManipulatorProgress = this.CreateStatusItem("CreatureManipulatorProgress", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
 			this.CreatureManipulatorProgress.resolveStringCallback = delegate(string str, object data)
@@ -1228,6 +1231,13 @@ namespace Database
 				flag = OverlayScreen.RadiationIDs.Contains(prefabTag6);
 			}
 			return flag;
+		}
+
+		[CompilerGenerated]
+		internal static string <CreateStatusItems>g__SkyVisResolveStringCallback|268_94(string str, object data)
+		{
+			BuildingStatusItems.ISkyVisInfo skyVisInfo = (BuildingStatusItems.ISkyVisInfo)data;
+			return str.Replace("{VISIBILITY}", GameUtil.GetFormattedPercent(skyVisInfo.GetPercentVisible01() * 100f, GameUtil.TimeSlice.None));
 		}
 
 		public StatusItem MissingRequirements;
@@ -1730,6 +1740,10 @@ namespace Database
 
 		public StatusItem GeyserGeotuned;
 
+		public StatusItem SkyVisNone;
+
+		public StatusItem SkyVisLimited;
+
 		public StatusItem CreatureManipulatorWaiting;
 
 		public StatusItem CreatureManipulatorProgress;
@@ -1753,5 +1767,10 @@ namespace Database
 		public StatusItem FossilHuntExcavationOrdered;
 
 		public StatusItem FossilHuntExcavationInProgress;
+
+		public interface ISkyVisInfo
+		{
+			float GetPercentVisible01();
+		}
 	}
 }

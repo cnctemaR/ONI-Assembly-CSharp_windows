@@ -1,12 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
+using Database;
 using STRINGS;
 using TUNING;
 using UnityEngine;
 
 [AddComponentMenu("KMonoBehaviour/Workable/Telescope")]
-public class Telescope : Workable, OxygenBreather.IGasProvider, IGameObjectEffectDescriptor, ISim200ms
+public class Telescope : Workable, OxygenBreather.IGasProvider, IGameObjectEffectDescriptor, ISim200ms, BuildingStatusItems.ISkyVisInfo
 {
+	float BuildingStatusItems.ISkyVisInfo.GetPercentVisible01()
+	{
+		return this.percentClear;
+	}
+
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
@@ -21,13 +27,6 @@ public class Telescope : Workable, OxygenBreather.IGasProvider, IGameObjectEffec
 		base.OnSpawn();
 		SpacecraftManager.instance.Subscribe(532901469, new Action<object>(this.UpdateWorkingState));
 		Components.Telescopes.Add(this);
-		if (Telescope.reducedVisibilityStatusItem == null)
-		{
-			Telescope.reducedVisibilityStatusItem = new StatusItem("SPACE_VISIBILITY_REDUCED", "BUILDING", "status_item_no_sky", StatusItem.IconType.Info, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 129022, null);
-			Telescope.reducedVisibilityStatusItem.resolveStringCallback = new Func<string, object, string>(Telescope.GetStatusItemString);
-			Telescope.noVisibilityStatusItem = new StatusItem("SPACE_VISIBILITY_NONE", "BUILDING", "status_item_no_sky", StatusItem.IconType.Custom, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 129022, null);
-			Telescope.noVisibilityStatusItem.resolveStringCallback = new Func<string, object, string>(Telescope.GetStatusItemString);
-		}
 		this.OnWorkableEventCB = (Action<Workable, Workable.WorkableEvent>)Delegate.Combine(this.OnWorkableEventCB, new Action<Workable, Workable.WorkableEvent>(this.OnWorkableEvent));
 		this.operational = base.GetComponent<Operational>();
 		this.storage = base.GetComponent<Storage>();
@@ -43,26 +42,21 @@ public class Telescope : Workable, OxygenBreather.IGasProvider, IGameObjectEffec
 
 	public void Sim200ms(float dt)
 	{
-		Extents extents = base.GetComponent<Building>().GetExtents();
-		int num;
-		bool flag = Grid.IsRangeExposedToSunlight(Grid.XYToCell(extents.x, extents.y), this.clearScanCellRadius, new CellOffset(1, 0), out num, 1);
-		this.percentClear = (float)num / (float)(this.clearScanCellRadius * 2 + 1);
+		base.GetComponent<Building>().GetExtents();
+		ValueTuple<bool, float> visibilityOf = TelescopeConfig.SKY_VISIBILITY_INFO.GetVisibilityOf(base.gameObject);
+		bool item = visibilityOf.Item1;
+		float item2 = visibilityOf.Item2;
+		this.percentClear = item2;
 		KSelectable component = base.GetComponent<KSelectable>();
+		component.ToggleStatusItem(Db.Get().BuildingStatusItems.SkyVisNone, !item, this);
+		component.ToggleStatusItem(Db.Get().BuildingStatusItems.SkyVisLimited, item && item2 < 1f, this);
 		Operational component2 = base.GetComponent<Operational>();
-		component.ToggleStatusItem(Telescope.noVisibilityStatusItem, !flag, this);
-		component.ToggleStatusItem(Telescope.reducedVisibilityStatusItem, flag && this.percentClear < 1f, this);
-		component2.SetFlag(Telescope.visibleSkyFlag, flag);
+		component2.SetFlag(Telescope.visibleSkyFlag, item);
 		if (!component2.IsActive && component2.IsOperational && this.chore == null)
 		{
 			this.chore = this.CreateChore();
 			base.SetWorkTime(float.PositiveInfinity);
 		}
-	}
-
-	private static string GetStatusItemString(string src_str, object data)
-	{
-		Telescope telescope = (Telescope)data;
-		return src_str.Replace("{VISIBILITY}", GameUtil.GetFormattedPercent(telescope.percentClear * 100f, GameUtil.TimeSlice.None)).Replace("{RADIUS}", telescope.clearScanCellRadius.ToString());
 	}
 
 	private void OnWorkableEvent(Workable workable, Workable.WorkableEvent ev)
@@ -99,6 +93,11 @@ public class Telescope : Workable, OxygenBreather.IGasProvider, IGameObjectEffec
 		component.GetComponent<CreatureSimTemperatureTransfer>().enabled = true;
 		base.ShowProgressBar(false);
 		component2.RemoveTag(GameTags.Shaded);
+	}
+
+	public override float GetEfficiencyMultiplier(Worker worker)
+	{
+		return base.GetEfficiencyMultiplier(worker) * Mathf.Clamp01(this.percentClear);
 	}
 
 	protected override bool OnWorkTick(Worker worker, float dt)
@@ -186,6 +185,16 @@ public class Telescope : Workable, OxygenBreather.IGasProvider, IGameObjectEffec
 		return flag;
 	}
 
+	public bool IsLowOxygen()
+	{
+		if (this.storage.items.Count <= 0)
+		{
+			return true;
+		}
+		PrimaryElement primaryElement = this.storage.FindFirstWithMass(GameTags.Breathable, 0f);
+		return primaryElement == null || primaryElement.Mass == 0f;
+	}
+
 	public int clearScanCellRadius = 15;
 
 	private OxygenBreather.IGasProvider workerGasProvider;
@@ -195,10 +204,6 @@ public class Telescope : Workable, OxygenBreather.IGasProvider, IGameObjectEffec
 	private float percentClear;
 
 	private static readonly Operational.Flag visibleSkyFlag = new Operational.Flag("VisibleSky", Operational.Flag.Type.Requirement);
-
-	private static StatusItem reducedVisibilityStatusItem;
-
-	private static StatusItem noVisibilityStatusItem;
 
 	private Storage storage;
 

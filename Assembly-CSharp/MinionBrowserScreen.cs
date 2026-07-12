@@ -46,7 +46,6 @@ public class MinionBrowserScreen : KMonoBehaviour
 			this.RefreshGallery();
 			this.RefreshPreview();
 		});
-		KleiItemsStatusRefresher.RequestRefreshFromServer();
 	}
 
 	private void Update()
@@ -92,7 +91,7 @@ public class MinionBrowserScreen : KMonoBehaviour
 		this.galleryGridItemPool.ReturnAll();
 		foreach (MinionBrowserScreen.GridItem gridItem in this.Config.items)
 		{
-			this.<PopulateGallery>g__AddGridIcon|31_0(gridItem);
+			this.<PopulateGallery>g__AddGridIcon|32_0(gridItem);
 		}
 		this.RefreshGallery();
 		this.SelectMinion(this.Config.defaultSelectedItem.Unwrap());
@@ -114,6 +113,7 @@ public class MinionBrowserScreen : KMonoBehaviour
 		this.detailHeaderIcon.sprite = this.selectedGridItem.GetIcon();
 		this.RefreshOutfitDescription();
 		this.RefreshPreviewButtonsInteractable();
+		this.SetDioramaBG();
 	}
 
 	private void RefreshOutfitDescription()
@@ -150,6 +150,11 @@ public class MinionBrowserScreen : KMonoBehaviour
 		}
 	}
 
+	private void SetDioramaBG()
+	{
+		this.dioramaBGImage.sprite = KleiPermitDioramaVis.GetDioramaBackground(this.currentOutfitType);
+	}
+
 	private Option<string> GetJoyResponseEditError()
 	{
 		string joyTrait = this.selectedGridItem.GetPersonality().joyTrait;
@@ -163,64 +168,72 @@ public class MinionBrowserScreen : KMonoBehaviour
 	public void SetEditingOutfitType(ClothingOutfitUtility.OutfitType outfitType)
 	{
 		this.currentOutfitType = outfitType;
-		ClothingOutfitUtility.OutfitType outfitType2 = outfitType;
-		if (outfitType2 != ClothingOutfitUtility.OutfitType.Clothing)
+		switch (outfitType)
 		{
-			if (outfitType2 != ClothingOutfitUtility.OutfitType.JoyResponse)
-			{
-				throw new NotImplementedException();
-			}
-			this.editButtonText.text = UI.MINION_BROWSER_SCREEN.BUTTON_EDIT_JOY_RESPONSE;
-			this.changeOutfitButton.gameObject.SetActive(false);
-		}
-		else
-		{
+		case ClothingOutfitUtility.OutfitType.Clothing:
 			this.editButtonText.text = UI.MINION_BROWSER_SCREEN.BUTTON_EDIT_OUTFIT_ITEMS;
 			this.changeOutfitButton.gameObject.SetActive(true);
+			break;
+		case ClothingOutfitUtility.OutfitType.JoyResponse:
+			this.editButtonText.text = UI.MINION_BROWSER_SCREEN.BUTTON_EDIT_JOY_RESPONSE;
+			this.changeOutfitButton.gameObject.SetActive(false);
+			break;
+		case ClothingOutfitUtility.OutfitType.AtmoSuit:
+			this.editButtonText.text = UI.MINION_BROWSER_SCREEN.BUTTON_EDIT_ATMO_SUIT_OUTFIT_ITEMS;
+			this.changeOutfitButton.gameObject.SetActive(true);
+			break;
+		default:
+			throw new NotImplementedException();
 		}
 		this.RefreshPreviewButtonsInteractable();
 		this.OnEditClickedFn = delegate
 		{
-			ClothingOutfitUtility.OutfitType outfitType3 = outfitType;
-			if (outfitType3 == ClothingOutfitUtility.OutfitType.Clothing)
+			switch (outfitType)
 			{
+			case ClothingOutfitUtility.OutfitType.Clothing:
+			case ClothingOutfitUtility.OutfitType.AtmoSuit:
 				OutfitDesignerScreenConfig.Minion(this.selectedOutfit.IsSome() ? this.selectedOutfit.Unwrap() : ClothingOutfitTarget.ForNewTemplateOutfit(outfitType), this.selectedGridItem).ApplyAndOpenScreen();
 				return;
-			}
-			if (outfitType3 != ClothingOutfitUtility.OutfitType.JoyResponse)
+			case ClothingOutfitUtility.OutfitType.JoyResponse:
 			{
+				JoyResponseScreenConfig joyResponseScreenConfig = JoyResponseScreenConfig.From(this.selectedGridItem);
+				joyResponseScreenConfig = joyResponseScreenConfig.WithInitialSelection(this.selectedGridItem.GetJoyResponseOutfitTarget().ReadFacadeId().AndThen<BalloonArtistFacadeResource>((string id) => Db.Get().Permits.BalloonArtistFacades.Get(id)));
+				joyResponseScreenConfig.ApplyAndOpenScreen();
+				return;
+			}
+			default:
 				throw new NotImplementedException();
 			}
-			JoyResponseScreenConfig joyResponseScreenConfig = JoyResponseScreenConfig.From(this.selectedGridItem);
-			joyResponseScreenConfig = joyResponseScreenConfig.WithInitialSelection(this.selectedGridItem.GetJoyResponseOutfitTarget().ReadFacadeId().AndThen<BalloonArtistFacadeResource>((string id) => Db.Get().Permits.BalloonArtistFacades.Get(id)));
-			joyResponseScreenConfig.ApplyAndOpenScreen();
 		};
 		this.RefreshOutfitDescriptionFn = delegate
 		{
-			ClothingOutfitUtility.OutfitType outfitType4 = outfitType;
-			if (outfitType4 == ClothingOutfitUtility.OutfitType.Clothing)
+			switch (outfitType)
 			{
+			case ClothingOutfitUtility.OutfitType.Clothing:
+			case ClothingOutfitUtility.OutfitType.AtmoSuit:
 				this.selectedOutfit = this.selectedGridItem.GetClothingOutfitTarget(outfitType);
 				this.UIMinion.SetOutfit(outfitType, this.selectedOutfit);
 				this.outfitDescriptionPanel.Refresh(this.selectedOutfit, outfitType);
 				return;
-			}
-			if (outfitType4 != ClothingOutfitUtility.OutfitType.JoyResponse)
+			case ClothingOutfitUtility.OutfitType.JoyResponse:
 			{
+				this.selectedOutfit = this.selectedGridItem.GetClothingOutfitTarget(ClothingOutfitUtility.OutfitType.Clothing);
+				this.UIMinion.SetOutfit(ClothingOutfitUtility.OutfitType.Clothing, this.selectedOutfit);
+				string text = this.selectedGridItem.GetJoyResponseOutfitTarget().ReadFacadeId().UnwrapOr(null, null);
+				this.outfitDescriptionPanel.Refresh((text != null) ? Db.Get().Permits.Get(text) : null, outfitType);
+				return;
+			}
+			default:
 				throw new NotImplementedException();
 			}
-			this.selectedOutfit = this.selectedGridItem.GetClothingOutfitTarget(ClothingOutfitUtility.OutfitType.Clothing);
-			this.UIMinion.SetOutfit(ClothingOutfitUtility.OutfitType.Clothing, this.selectedOutfit);
-			string text = this.selectedGridItem.GetJoyResponseOutfitTarget().ReadFacadeId().UnwrapOr(null, null);
-			this.outfitDescriptionPanel.Refresh((text != null) ? Db.Get().Permits.Get(text) : null, outfitType);
 		};
 		this.RefreshOutfitDescription();
 	}
 
 	private MinionBrowserScreen.CyclerUI.OnSelectedFn[] CreateCycleOptions()
 	{
-		MinionBrowserScreen.CyclerUI.OnSelectedFn[] array = new MinionBrowserScreen.CyclerUI.OnSelectedFn[2];
-		for (int i = 0; i < 2; i++)
+		MinionBrowserScreen.CyclerUI.OnSelectedFn[] array = new MinionBrowserScreen.CyclerUI.OnSelectedFn[3];
+		for (int i = 0; i < 3; i++)
 		{
 			ClothingOutfitUtility.OutfitType outfitType = (ClothingOutfitUtility.OutfitType)i;
 			array[i] = delegate
@@ -240,7 +253,7 @@ public class MinionBrowserScreen : KMonoBehaviour
 	}
 
 	[CompilerGenerated]
-	private void <PopulateGallery>g__AddGridIcon|31_0(MinionBrowserScreen.GridItem item)
+	private void <PopulateGallery>g__AddGridIcon|32_0(MinionBrowserScreen.GridItem item)
 	{
 		GameObject gameObject = this.galleryGridItemPool.Borrow();
 		gameObject.GetComponent<HierarchyReferences>().GetReference<Image>("Icon").sprite = item.GetIcon();
@@ -299,6 +312,10 @@ public class MinionBrowserScreen : KMonoBehaviour
 	private Option<ClothingOutfitUtility.OutfitType> selectedOutfitType;
 
 	private Option<ClothingOutfitTarget> selectedOutfit;
+
+	[Header("Diorama Backgrounds")]
+	[SerializeField]
+	private Image dioramaBGImage;
 
 	private MinionBrowserScreen.GridItem selectedGridItem;
 

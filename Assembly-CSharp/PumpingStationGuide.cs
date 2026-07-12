@@ -50,12 +50,26 @@ public class PumpingStationGuide : KMonoBehaviour, IRenderEveryTick
 	public static void OccupyArea(GameObject go, int depth_available)
 	{
 		int num = Grid.PosToCell(go.transform.GetPosition());
-		for (int i = 1; i <= depth_available; i++)
+		for (int i = 1; i <= 4; i++)
 		{
 			int num2 = Grid.OffsetCell(num, 0, -i);
 			int num3 = Grid.OffsetCell(num, 1, -i);
-			Grid.ObjectLayers[1][num2] = go;
-			Grid.ObjectLayers[1][num3] = go;
+			if (i <= depth_available)
+			{
+				Grid.ObjectLayers[1][num2] = go;
+				Grid.ObjectLayers[1][num3] = go;
+			}
+			else
+			{
+				if (Grid.ObjectLayers[1].ContainsKey(num2) && Grid.ObjectLayers[1][num2] == go)
+				{
+					Grid.ObjectLayers[1][num2] = null;
+				}
+				if (Grid.ObjectLayers[1].ContainsKey(num3) && Grid.ObjectLayers[1][num3] == go)
+				{
+					Grid.ObjectLayers[1][num3] = null;
+				}
+			}
 		}
 	}
 

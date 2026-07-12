@@ -1,13 +1,12 @@
 ﻿using System;
-using Database;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class KleiItemDropScreen_PermitVis_Fallback : KMonoBehaviour, IKleiItemDropScreen_PermitVis_Target
+public class KleiItemDropScreen_PermitVis_Fallback : KMonoBehaviour
 {
-	public void ConfigureWith(PermitResource permit, PermitPresentationInfo permitPresInfo)
+	public void ConfigureWith(DropScreenPresentationInfo info)
 	{
-		this.sprite.sprite = permitPresInfo.sprite;
+		this.sprite.sprite = info.Sprite;
 	}
 
 	[SerializeField]

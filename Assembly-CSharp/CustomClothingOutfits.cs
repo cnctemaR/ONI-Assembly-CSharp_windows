@@ -31,13 +31,18 @@ public class CustomClothingOutfits
 		if (!this.serializableOutfitData.OutfitIdToUserAuthoredTemplateOutfit.TryGetValue(outfit_name, out customTemplateOutfitEntry))
 		{
 			customTemplateOutfitEntry = new SerializableOutfitData.Version2.CustomTemplateOutfitEntry();
-			customTemplateOutfitEntry.outfitType = outfit_type;
+			customTemplateOutfitEntry.outfitType = Enum.GetName(typeof(ClothingOutfitUtility.OutfitType), outfit_type);
 			customTemplateOutfitEntry.itemIds = outfit_items;
 			this.serializableOutfitData.OutfitIdToUserAuthoredTemplateOutfit[outfit_name] = customTemplateOutfitEntry;
 		}
 		else
 		{
-			if (customTemplateOutfitEntry.outfitType != outfit_type)
+			ClothingOutfitUtility.OutfitType outfitType;
+			if (!Enum.TryParse<ClothingOutfitUtility.OutfitType>(customTemplateOutfitEntry.outfitType, true, out outfitType))
+			{
+				throw new NotSupportedException(string.Concat(new string[] { "Cannot edit outfit \"", outfit_name, "\" of unknown outfit type \"", customTemplateOutfitEntry.outfitType, "\"" }));
+			}
+			if (outfitType != outfit_type)
 			{
 				throw new NotSupportedException(string.Format("Cannot edit outfit \"{0}\" of outfit type \"{1}\" to be an outfit of type \"{2}\"", outfit_name, customTemplateOutfitEntry.outfitType, outfit_type));
 			}
@@ -57,38 +62,39 @@ public class CustomClothingOutfits
 			throw new ArgumentException(string.Concat(new string[] { "Can't rename outfit \"", old_outfit_name, "\" to \"", new_outfit_name, "\": entry \"", new_outfit_name, "\" already exists" }));
 		}
 		this.serializableOutfitData.OutfitIdToUserAuthoredTemplateOutfit.Add(new_outfit_name, this.serializableOutfitData.OutfitIdToUserAuthoredTemplateOutfit[old_outfit_name]);
-		foreach (KeyValuePair<string, Dictionary<ClothingOutfitUtility.OutfitType, string>> keyValuePair in this.serializableOutfitData.PersonalityIdToAssignedOutfits)
+		foreach (KeyValuePair<string, Dictionary<string, string>> keyValuePair in this.serializableOutfitData.PersonalityIdToAssignedOutfits)
 		{
 			string text;
-			Dictionary<ClothingOutfitUtility.OutfitType, string> dictionary;
-			keyValuePair.Deconstruct<string, Dictionary<ClothingOutfitUtility.OutfitType, string>>(out text, out dictionary);
+			Dictionary<string, string> dictionary;
+			keyValuePair.Deconstruct<string, Dictionary<string, string>>(out text, out dictionary);
 			string text2 = text;
-			Dictionary<ClothingOutfitUtility.OutfitType, string> dictionary2 = dictionary;
+			Dictionary<string, string> dictionary2 = dictionary;
 			if (dictionary2 != null)
 			{
-				using (ListPool<ClothingOutfitUtility.OutfitType, CustomClothingOutfits>.PooledList pooledList = PoolsFor<CustomClothingOutfits>.AllocateList<ClothingOutfitUtility.OutfitType>())
+				using (ListPool<string, CustomClothingOutfits>.PooledList pooledList = PoolsFor<CustomClothingOutfits>.AllocateList<string>())
 				{
-					foreach (KeyValuePair<ClothingOutfitUtility.OutfitType, string> keyValuePair2 in dictionary2)
+					foreach (KeyValuePair<string, string> keyValuePair2 in dictionary2)
 					{
-						ClothingOutfitUtility.OutfitType outfitType;
-						keyValuePair2.Deconstruct<ClothingOutfitUtility.OutfitType, string>(out outfitType, out text);
-						ClothingOutfitUtility.OutfitType outfitType2 = outfitType;
-						if (text == old_outfit_name)
+						string text3;
+						keyValuePair2.Deconstruct<string, string>(out text, out text3);
+						string text4 = text;
+						if (text3 == old_outfit_name)
 						{
-							pooledList.Add(outfitType2);
+							pooledList.Add(text4);
 						}
 					}
-					foreach (ClothingOutfitUtility.OutfitType outfitType3 in pooledList)
+					foreach (string text5 in pooledList)
 					{
-						dictionary2[outfitType3] = new_outfit_name;
+						dictionary2[text5] = new_outfit_name;
 						Personality personalityFromNameStringKey = Db.Get().Personalities.GetPersonalityFromNameStringKey(text2);
+						ClothingOutfitUtility.OutfitType outfitType;
 						if (personalityFromNameStringKey.IsNullOrDestroyed())
 						{
 							DebugUtil.DevAssert(false, string.Concat(new string[] { "<Renaming Outfit Error> Couldn't find personality \"", text2, "\" to switch their outfit preference from \"", old_outfit_name, "\" to \"", new_outfit_name, "\"" }), null);
 						}
-						else
+						else if (Enum.TryParse<ClothingOutfitUtility.OutfitType>(text5, true, out outfitType))
 						{
-							personalityFromNameStringKey.Internal_SetSelectedTemplateOutfitId(outfitType3, new_outfit_name);
+							personalityFromNameStringKey.Internal_SetSelectedTemplateOutfitId(outfitType, new_outfit_name);
 						}
 					}
 				}
@@ -102,38 +108,39 @@ public class CustomClothingOutfits
 	{
 		if (this.serializableOutfitData.OutfitIdToUserAuthoredTemplateOutfit.Remove(outfit_name))
 		{
-			foreach (KeyValuePair<string, Dictionary<ClothingOutfitUtility.OutfitType, string>> keyValuePair in this.serializableOutfitData.PersonalityIdToAssignedOutfits)
+			foreach (KeyValuePair<string, Dictionary<string, string>> keyValuePair in this.serializableOutfitData.PersonalityIdToAssignedOutfits)
 			{
 				string text;
-				Dictionary<ClothingOutfitUtility.OutfitType, string> dictionary;
-				keyValuePair.Deconstruct<string, Dictionary<ClothingOutfitUtility.OutfitType, string>>(out text, out dictionary);
+				Dictionary<string, string> dictionary;
+				keyValuePair.Deconstruct<string, Dictionary<string, string>>(out text, out dictionary);
 				string text2 = text;
-				Dictionary<ClothingOutfitUtility.OutfitType, string> dictionary2 = dictionary;
+				Dictionary<string, string> dictionary2 = dictionary;
 				if (dictionary2 != null)
 				{
-					using (ListPool<ClothingOutfitUtility.OutfitType, CustomClothingOutfits>.PooledList pooledList = PoolsFor<CustomClothingOutfits>.AllocateList<ClothingOutfitUtility.OutfitType>())
+					using (ListPool<string, CustomClothingOutfits>.PooledList pooledList = PoolsFor<CustomClothingOutfits>.AllocateList<string>())
 					{
-						foreach (KeyValuePair<ClothingOutfitUtility.OutfitType, string> keyValuePair2 in dictionary2)
+						foreach (KeyValuePair<string, string> keyValuePair2 in dictionary2)
 						{
-							ClothingOutfitUtility.OutfitType outfitType;
-							keyValuePair2.Deconstruct<ClothingOutfitUtility.OutfitType, string>(out outfitType, out text);
-							ClothingOutfitUtility.OutfitType outfitType2 = outfitType;
-							if (text == outfit_name)
+							string text3;
+							keyValuePair2.Deconstruct<string, string>(out text, out text3);
+							string text4 = text;
+							if (text3 == outfit_name)
 							{
-								pooledList.Add(outfitType2);
+								pooledList.Add(text4);
 							}
 						}
-						foreach (ClothingOutfitUtility.OutfitType outfitType3 in pooledList)
+						foreach (string text5 in pooledList)
 						{
-							dictionary2.Remove(outfitType3);
+							dictionary2.Remove(text5);
 							Personality personalityFromNameStringKey = Db.Get().Personalities.GetPersonalityFromNameStringKey(text2);
+							ClothingOutfitUtility.OutfitType outfitType;
 							if (personalityFromNameStringKey.IsNullOrDestroyed())
 							{
 								DebugUtil.DevAssert(false, "<Deleting Outfit Error> Couldn't find personality \"" + text2 + "\" to clear their outfit preference", null);
 							}
-							else
+							else if (Enum.TryParse<ClothingOutfitUtility.OutfitType>(text5, true, out outfitType))
 							{
-								personalityFromNameStringKey.Internal_SetSelectedTemplateOutfitId(outfitType3, Option.None);
+								personalityFromNameStringKey.Internal_SetSelectedTemplateOutfitId(outfitType, Option.None);
 							}
 						}
 					}
@@ -145,18 +152,19 @@ public class CustomClothingOutfits
 
 	public void Internal_SetDuplicantPersonalityOutfit(string personalityId, Option<string> outfit_id, ClothingOutfitUtility.OutfitType outfit_type)
 	{
-		Dictionary<ClothingOutfitUtility.OutfitType, string> dictionary;
+		string name = Enum.GetName(typeof(ClothingOutfitUtility.OutfitType), outfit_type);
+		Dictionary<string, string> dictionary;
 		if (outfit_id.HasValue)
 		{
 			if (!this.serializableOutfitData.PersonalityIdToAssignedOutfits.ContainsKey(personalityId))
 			{
-				this.serializableOutfitData.PersonalityIdToAssignedOutfits.Add(personalityId, new Dictionary<ClothingOutfitUtility.OutfitType, string>());
+				this.serializableOutfitData.PersonalityIdToAssignedOutfits.Add(personalityId, new Dictionary<string, string>());
 			}
-			this.serializableOutfitData.PersonalityIdToAssignedOutfits[personalityId][outfit_type] = outfit_id.Value;
+			this.serializableOutfitData.PersonalityIdToAssignedOutfits[personalityId][name] = outfit_id.Value;
 		}
 		else if (this.serializableOutfitData.PersonalityIdToAssignedOutfits.TryGetValue(personalityId, out dictionary))
 		{
-			dictionary.Remove(outfit_type);
+			dictionary.Remove(name);
 			if (dictionary.Count == 0)
 			{
 				this.serializableOutfitData.PersonalityIdToAssignedOutfits.Remove(personalityId);

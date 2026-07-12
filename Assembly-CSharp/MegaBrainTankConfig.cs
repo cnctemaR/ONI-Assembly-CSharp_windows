@@ -69,7 +69,8 @@ public class MegaBrainTankConfig : IBuildingConfig
 		storage.capacityKg = 30f;
 		ManualDeliveryKG manualDeliveryKG = go.AddOrGet<ManualDeliveryKG>();
 		manualDeliveryKG.SetStorage(storage);
-		manualDeliveryKG.RequestItem(DreamJournalConfig.ID, 1f);
+		manualDeliveryKG.requestedItemTag = DreamJournalConfig.ID;
+		manualDeliveryKG.MinimumMass = 1f;
 		manualDeliveryKG.refillMass = 24f;
 		manualDeliveryKG.capacity = 25f;
 		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.Fetch.IdHash;

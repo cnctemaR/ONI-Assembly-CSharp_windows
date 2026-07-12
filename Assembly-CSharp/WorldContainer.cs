@@ -975,7 +975,7 @@ public class WorldContainer : KMonoBehaviour
 
 	public void CancelChores()
 	{
-		for (int i = 0; i < 44; i++)
+		for (int i = 0; i < 45; i++)
 		{
 			int num = (int)this.minimumBounds.x;
 			while ((float)num <= this.maximumBounds.x)

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public abstract class KAnimControllerBase : MonoBehaviour
+public abstract class KAnimControllerBase : MonoBehaviour, ISerializationCallbackReceiver
 {
 	protected KAnimControllerBase()
 	{
@@ -408,7 +408,11 @@ public abstract class KAnimControllerBase : MonoBehaviour
 
 	public abstract Matrix2x3 GetSymbolLocalTransform(HashedString symbol, out bool symbolVisible);
 
-	public abstract void UpdateHidden();
+	public abstract void UpdateAllHiddenSymbols();
+
+	public abstract void UpdateHiddenSymbol(KAnimHashedString specificSymbol);
+
+	public abstract void UpdateHiddenSymbolSet(HashSet<KAnimHashedString> specificSymbols);
 
 	public abstract void TriggerStop();
 
@@ -626,22 +630,41 @@ public abstract class KAnimControllerBase : MonoBehaviour
 
 	public bool GetSymbolVisiblity(KAnimHashedString symbol)
 	{
-		return !this.hiddenSymbols.Contains(symbol);
+		return !this.hiddenSymbolsSet.Contains(symbol);
 	}
 
 	public void SetSymbolVisiblity(KAnimHashedString symbol, bool is_visible)
 	{
 		if (is_visible)
 		{
-			this.hiddenSymbols.Remove(symbol);
+			this.hiddenSymbolsSet.Remove(symbol);
 		}
-		else if (!this.hiddenSymbols.Contains(symbol))
+		else if (!this.hiddenSymbolsSet.Contains(symbol))
 		{
-			this.hiddenSymbols.Add(symbol);
+			this.hiddenSymbolsSet.Add(symbol);
 		}
 		if (this.curBuild != null)
 		{
-			this.UpdateHidden();
+			this.UpdateHiddenSymbol(symbol);
+		}
+	}
+
+	public void BatchSetSymbolsVisiblity(HashSet<KAnimHashedString> symbols, bool is_visible)
+	{
+		foreach (KAnimHashedString kanimHashedString in symbols)
+		{
+			if (is_visible)
+			{
+				this.hiddenSymbolsSet.Remove(kanimHashedString);
+			}
+			else if (!this.hiddenSymbolsSet.Contains(kanimHashedString))
+			{
+				this.hiddenSymbolsSet.Add(kanimHashedString);
+			}
+		}
+		if (this.curBuild != null)
+		{
+			this.UpdateHiddenSymbolSet(symbols);
 		}
 	}
 
@@ -974,6 +997,18 @@ public abstract class KAnimControllerBase : MonoBehaviour
 		Util.KDestroyGameObject(base.gameObject);
 	}
 
+	void ISerializationCallbackReceiver.OnBeforeSerialize()
+	{
+		this.hiddenSymbols.Clear();
+		this.hiddenSymbols = new List<KAnimHashedString>(this.hiddenSymbolsSet);
+	}
+
+	void ISerializationCallbackReceiver.OnAfterDeserialize()
+	{
+		this.hiddenSymbolsSet = new HashSet<KAnimHashedString>(this.hiddenSymbols);
+		this.hiddenSymbols.Clear();
+	}
+
 	[NonSerialized]
 	public GameObject showWhenMissing;
 
@@ -1017,9 +1052,9 @@ public abstract class KAnimControllerBase : MonoBehaviour
 
 	protected KAnim.Anim curAnim;
 
-	protected int curAnimFrameIdx = KAnim.Anim.Frame.InvalidFrame.idx;
+	protected int curAnimFrameIdx = -1;
 
-	protected int prevAnimFrame = KAnim.Anim.Frame.InvalidFrame.idx;
+	protected int prevAnimFrame = -1;
 
 	public bool usingNewSymbolOverrideSystem;
 
@@ -1072,6 +1107,9 @@ public abstract class KAnimControllerBase : MonoBehaviour
 
 	[SerializeField]
 	protected List<KAnimHashedString> hiddenSymbols = new List<KAnimHashedString>();
+
+	[SerializeField]
+	protected HashSet<KAnimHashedString> hiddenSymbolsSet = new HashSet<KAnimHashedString>();
 
 	protected Dictionary<HashedString, KAnimControllerBase.AnimLookupData> anims = new Dictionary<HashedString, KAnimControllerBase.AnimLookupData>();
 

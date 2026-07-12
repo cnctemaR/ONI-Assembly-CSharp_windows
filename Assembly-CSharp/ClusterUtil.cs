@@ -88,30 +88,40 @@ public static class ClusterUtil
 
 	public static bool IsMyWorld(this GameObject go, GameObject otherGo)
 	{
+		int num = Grid.PosToCell(otherGo);
+		return go.IsMyWorld(num);
+	}
+
+	public static bool IsMyWorld(this GameObject go, int otherCell)
+	{
 		int num = Grid.PosToCell(go);
-		int num2 = Grid.PosToCell(otherGo);
-		return Grid.IsValidCell(num) && Grid.IsValidCell(num2) && Grid.WorldIdx[num] == Grid.WorldIdx[num2];
+		return Grid.IsValidCell(num) && Grid.IsValidCell(otherCell) && Grid.WorldIdx[num] == Grid.WorldIdx[otherCell];
 	}
 
 	public static bool IsMyParentWorld(this GameObject go, GameObject otherGo)
 	{
+		int num = Grid.PosToCell(otherGo);
+		return go.IsMyParentWorld(num);
+	}
+
+	public static bool IsMyParentWorld(this GameObject go, int otherCell)
+	{
 		int num = Grid.PosToCell(go);
-		int num2 = Grid.PosToCell(otherGo);
-		if (Grid.IsValidCell(num) && Grid.IsValidCell(num2))
+		if (Grid.IsValidCell(num) && Grid.IsValidCell(otherCell))
 		{
-			if (Grid.WorldIdx[num] == Grid.WorldIdx[num2])
+			if (Grid.WorldIdx[num] == Grid.WorldIdx[otherCell])
 			{
 				return true;
 			}
 			WorldContainer world = ClusterManager.Instance.GetWorld((int)Grid.WorldIdx[num]);
-			WorldContainer world2 = ClusterManager.Instance.GetWorld((int)Grid.WorldIdx[num2]);
+			WorldContainer world2 = ClusterManager.Instance.GetWorld((int)Grid.WorldIdx[otherCell]);
 			if (world == null)
 			{
 				DebugUtil.DevLogError(string.Format("{0} at {1} has a valid cell but no world", go, num));
 			}
 			if (world2 == null)
 			{
-				DebugUtil.DevLogError(string.Format("{0} at {1} has a valid cell but no world", otherGo, num2));
+				DebugUtil.DevLogError(string.Format("{0} is a valid cell but no world", otherCell));
 			}
 			if (world != null && world2 != null && world.ParentWorldId == world2.ParentWorldId)
 			{

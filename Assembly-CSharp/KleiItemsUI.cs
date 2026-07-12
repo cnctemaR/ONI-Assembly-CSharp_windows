@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 using Database;
 using STRINGS;
 using UnityEngine;
@@ -37,27 +38,38 @@ public static class KleiItemsUI
 		return Assets.GetSprite("NoTraits");
 	}
 
-	public static string GetNoneClothingItemString(PermitCategory category)
+	[return: TupleElementNames(new string[] { "name", "desc" })]
+	public static ValueTuple<string, string> GetNoneClothingItemStrings(PermitCategory category)
 	{
 		switch (category)
 		{
 		case PermitCategory.DupeTops:
-			return UI.OUTFIT_DESCRIPTION.NO_DUPE_TOPS;
+			return new ValueTuple<string, string>(EQUIPMENT.PREFABS.CLOTHING_TOPS.NAME, EQUIPMENT.PREFABS.CLOTHING_TOPS.DESC);
 		case PermitCategory.DupeBottoms:
-			return UI.OUTFIT_DESCRIPTION.NO_DUPE_BOTTOMS;
+			return new ValueTuple<string, string>(EQUIPMENT.PREFABS.CLOTHING_BOTTOMS.NAME, EQUIPMENT.PREFABS.CLOTHING_BOTTOMS.DESC);
 		case PermitCategory.DupeGloves:
-			return UI.OUTFIT_DESCRIPTION.NO_DUPE_GLOVES;
+			return new ValueTuple<string, string>(EQUIPMENT.PREFABS.CLOTHING_GLOVES.NAME, EQUIPMENT.PREFABS.CLOTHING_GLOVES.DESC);
 		case PermitCategory.DupeShoes:
-			return UI.OUTFIT_DESCRIPTION.NO_DUPE_SHOES;
+			return new ValueTuple<string, string>(EQUIPMENT.PREFABS.CLOTHING_SHOES.NAME, EQUIPMENT.PREFABS.CLOTHING_SHOES.DESC);
 		case PermitCategory.DupeHats:
-			return UI.OUTFIT_DESCRIPTION.NO_DUPE_HATS;
+			return new ValueTuple<string, string>(EQUIPMENT.PREFABS.CLOTHING_HATS.NAME, EQUIPMENT.PREFABS.CLOTHING_HATS.DESC);
 		case PermitCategory.DupeAccessories:
-			return UI.OUTFIT_DESCRIPTION.NO_DUPE_ACCESSORIES;
+			return new ValueTuple<string, string>(EQUIPMENT.PREFABS.CLOTHING_ACCESORIES.NAME, EQUIPMENT.PREFABS.CLOTHING_ACCESORIES.DESC);
+		case PermitCategory.AtmoSuitHelmet:
+			return new ValueTuple<string, string>(EQUIPMENT.PREFABS.ATMO_SUIT_HELMET.NAME, EQUIPMENT.PREFABS.ATMO_SUIT_HELMET.DESC);
+		case PermitCategory.AtmoSuitBody:
+			return new ValueTuple<string, string>(EQUIPMENT.PREFABS.ATMO_SUIT_BODY.NAME, EQUIPMENT.PREFABS.ATMO_SUIT_BODY.DESC);
+		case PermitCategory.AtmoSuitGloves:
+			return new ValueTuple<string, string>(EQUIPMENT.PREFABS.ATMO_SUIT_GLOVES.NAME, EQUIPMENT.PREFABS.ATMO_SUIT_GLOVES.DESC);
+		case PermitCategory.AtmoSuitBelt:
+			return new ValueTuple<string, string>(EQUIPMENT.PREFABS.ATMO_SUIT_BELT.NAME, EQUIPMENT.PREFABS.ATMO_SUIT_BELT.DESC);
+		case PermitCategory.AtmoSuitShoes:
+			return new ValueTuple<string, string>(EQUIPMENT.PREFABS.ATMO_SUIT_SHOES.NAME, EQUIPMENT.PREFABS.ATMO_SUIT_SHOES.DESC);
 		case PermitCategory.JoyResponse:
-			return UI.OUTFIT_DESCRIPTION.NO_JOY_RESPONSE;
+			return new ValueTuple<string, string>(UI.OUTFIT_DESCRIPTION.NO_JOY_RESPONSE_NAME, UI.OUTFIT_DESCRIPTION.NO_JOY_RESPONSE_DESC);
 		}
 		DebugUtil.DevAssert(false, string.Format("Couldn't find \"no item\" string for category {0}", category), null);
-		return "-";
+		return new ValueTuple<string, string>("-", "-");
 	}
 
 	public static void ConfigureTooltipOn(GameObject gameObject, Option<LocString> tooltipText = default(Option<LocString>))
@@ -108,6 +120,14 @@ public static class KleiItemsUI
 			text = text + "\n\n" + KleiItemsUI.WrapWithColor(UI.KLEI_INVENTORY_SCREEN.ITEM_PLAYER_OWN_NONE, KleiItemsUI.TEXT_COLOR__PERMIT_NOT_OWNED);
 		}
 		return text;
+	}
+
+	public static string GetNoneTooltipStringFor(PermitCategory category)
+	{
+		ValueTuple<string, string> noneClothingItemStrings = KleiItemsUI.GetNoneClothingItemStrings(category);
+		string item = noneClothingItemStrings.Item1;
+		string item2 = noneClothingItemStrings.Item2;
+		return KleiItemsUI.WrapAsToolTipTitle(item) + "\n" + item2;
 	}
 
 	public static Color GetColor(string input)

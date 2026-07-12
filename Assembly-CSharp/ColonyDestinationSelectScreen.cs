@@ -172,8 +172,13 @@ public class ColonyDestinationSelectScreen : NewGameFlowScreen
 
 	private void ShuffleClicked()
 	{
+		ClusterLayout currentClusterLayout = CustomGameSettings.Instance.GetCurrentClusterLayout();
 		int num = this.random.Next();
-		this.newGameSettings.SetSetting(CustomGameSettingConfigs.WorldgenSeed, num.ToString());
+		if (currentClusterLayout != null && currentClusterLayout.fixedCoordinate != -1)
+		{
+			num = currentClusterLayout.fixedCoordinate;
+		}
+		this.newGameSettings.SetSetting(CustomGameSettingConfigs.WorldgenSeed, num.ToString(), true);
 	}
 
 	private void StoryTraitShuffleClicked()
@@ -204,9 +209,9 @@ public class ColonyDestinationSelectScreen : NewGameFlowScreen
 		}
 		if (clusterLayout != null)
 		{
-			this.newGameSettings.SetSetting(CustomGameSettingConfigs.ClusterLayout, clusterLayout.filePath);
+			this.newGameSettings.SetSetting(CustomGameSettingConfigs.ClusterLayout, clusterLayout.filePath, true);
 		}
-		this.newGameSettings.SetSetting(CustomGameSettingConfigs.WorldgenSeed, array[2]);
+		this.newGameSettings.SetSetting(CustomGameSettingConfigs.WorldgenSeed, array[2], true);
 		this.newGameSettings.ConsumeSettingsCode(array[3]);
 		string text3 = ((array.Length >= 5) ? array[4] : "0");
 		this.newGameSettings.ConsumeStoryTraitsCode(text3);
@@ -242,18 +247,32 @@ public class ColonyDestinationSelectScreen : NewGameFlowScreen
 		string setting = this.newGameSettings.GetSetting(CustomGameSettingConfigs.ClusterLayout);
 		string setting2 = this.newGameSettings.GetSetting(CustomGameSettingConfigs.WorldgenSeed);
 		this.destinationMapPanel.UpdateDisplayedClusters();
-		int num;
-		int.TryParse(setting2, out num);
+		int fixedCoordinate;
+		int.TryParse(setting2, out fixedCoordinate);
+		ClusterLayout currentClusterLayout = CustomGameSettings.Instance.GetCurrentClusterLayout();
+		if (currentClusterLayout.fixedCoordinate != -1)
+		{
+			this.newGameSettings.SetSetting(CustomGameSettingConfigs.WorldgenSeed, currentClusterLayout.fixedCoordinate.ToString(), false);
+			fixedCoordinate = currentClusterLayout.fixedCoordinate;
+			this.shuffleButton.isInteractable = false;
+			this.shuffleButton.GetComponent<ToolTip>().SetSimpleTooltip(UI.FRONTEND.COLONYDESTINATIONSCREEN.SHUFFLETOOLTIP_DISABLED);
+		}
+		else
+		{
+			this.coordinate.interactable = true;
+			this.shuffleButton.isInteractable = true;
+			this.shuffleButton.GetComponent<ToolTip>().SetSimpleTooltip(UI.FRONTEND.COLONYDESTINATIONSCREEN.SHUFFLETOOLTIP);
+		}
 		ColonyDestinationAsteroidBeltData cluster;
 		try
 		{
-			cluster = this.destinationMapPanel.SelectCluster(setting, num);
+			cluster = this.destinationMapPanel.SelectCluster(setting, fixedCoordinate);
 		}
 		catch
 		{
 			string defaultAsteroid = this.destinationMapPanel.GetDefaultAsteroid();
-			this.newGameSettings.SetSetting(CustomGameSettingConfigs.ClusterLayout, defaultAsteroid);
-			cluster = this.destinationMapPanel.SelectCluster(defaultAsteroid, num);
+			this.newGameSettings.SetSetting(CustomGameSettingConfigs.ClusterLayout, defaultAsteroid, true);
+			cluster = this.destinationMapPanel.SelectCluster(defaultAsteroid, fixedCoordinate);
 		}
 		if (DlcManager.IsContentActive("EXPANSION1_ID"))
 		{
@@ -285,7 +304,7 @@ public class ColonyDestinationSelectScreen : NewGameFlowScreen
 
 	private void OnAsteroidClicked(ColonyDestinationAsteroidBeltData cluster)
 	{
-		this.newGameSettings.SetSetting(CustomGameSettingConfigs.ClusterLayout, cluster.beltPath);
+		this.newGameSettings.SetSetting(CustomGameSettingConfigs.ClusterLayout, cluster.beltPath, true);
 		this.ShuffleClicked();
 	}
 

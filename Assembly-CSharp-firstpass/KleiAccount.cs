@@ -39,7 +39,7 @@ public class KleiAccount : ThreadedHttps<KleiAccount>
 		}
 		else
 		{
-			Debug.Log("[Account] Error logging in: " + text);
+			Debug.Log("[Account] Error logging in: " + text + " for ticket=" + ((this.authTicket != null) ? this.EncodeToAsciiHEX(this.authTicket) : "<unknown>"));
 			this.gotUserID();
 		}
 		base.End();

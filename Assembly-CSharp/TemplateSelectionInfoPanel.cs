@@ -89,7 +89,7 @@ public class TemplateSelectionInfoPanel : KMonoBehaviour, IRender1000ms
 	private static float GetCellEntityEnergy(int cell, ref List<GameObject> ignoreObjects)
 	{
 		float num = 0f;
-		for (int i = 0; i < 44; i++)
+		for (int i = 0; i < 45; i++)
 		{
 			GameObject gameObject = Grid.Objects[cell, i];
 			if (!(gameObject == null) && !ignoreObjects.Contains(gameObject))

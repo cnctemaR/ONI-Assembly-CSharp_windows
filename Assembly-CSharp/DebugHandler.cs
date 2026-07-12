@@ -214,6 +214,10 @@ public class DebugHandler : IInputHandler
 				ManagementMenu.Instance.CheckSkills(null);
 				ManagementMenu.Instance.CheckStarmap(null);
 			}
+			if (SelectTool.Instance.selected != null)
+			{
+				DetailsScreen.Instance.Refresh(SelectTool.Instance.selected.gameObject);
+			}
 			Game.Instance.Trigger(1594320620, "all_the_things");
 		}
 		else if (e.TryConsume(global::Action.DebugExplosion))
@@ -236,7 +240,7 @@ public class DebugHandler : IInputHandler
 			{
 				if (!(DiscoveredResources.Instance != null))
 				{
-					goto IL_0B34;
+					goto IL_0B5F;
 				}
 				using (List<Element>.Enumerator enumerator = ElementLoader.elements.GetEnumerator())
 				{
@@ -245,7 +249,7 @@ public class DebugHandler : IInputHandler
 						Element element = enumerator.Current;
 						DiscoveredResources.Instance.Discover(element.tag, element.GetMaterialCategoryTag());
 					}
-					goto IL_0B34;
+					goto IL_0B5F;
 				}
 			}
 			if (e.TryConsume(global::Action.DebugToggleUI))
@@ -351,7 +355,7 @@ public class DebugHandler : IInputHandler
 								smi2.GoToCursor();
 							}
 						}
-						goto IL_0B34;
+						goto IL_0B5F;
 					}
 				}
 				if (e.TryConsume(global::Action.DebugTeleport))
@@ -510,7 +514,7 @@ public class DebugHandler : IInputHandler
 				}
 			}
 		}
-		IL_0B34:
+		IL_0B5F:
 		if (e.Consumed && Game.Instance != null)
 		{
 			Game.Instance.debugWasUsed = true;

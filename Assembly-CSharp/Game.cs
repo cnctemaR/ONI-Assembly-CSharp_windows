@@ -159,12 +159,13 @@ public class Game : KMonoBehaviour
 		new GameNavGrids(Pathfinding.Instance);
 		this.screenMgr = global::Util.KInstantiate(this.screenManagerPrefab, null, null).GetComponent<GameScreenManager>();
 		this.roomProber = new RoomProber();
+		this.spaceScannerNetworkManager = new SpaceScannerNetworkManager();
 		this.fetchManager = base.gameObject.AddComponent<FetchManager>();
 		this.ediblesManager = base.gameObject.AddComponent<EdiblesManager>();
 		Singleton<CellChangeMonitor>.Instance.SetGridSize(Grid.WidthInCells, Grid.HeightInCells);
 		this.unlocks = base.GetComponent<Unlocks>();
 		this.changelistsPlayedOn = new List<uint>();
-		this.changelistsPlayedOn.Add(552078U);
+		this.changelistsPlayedOn.Add(561558U);
 		this.dateGenerated = global::System.DateTime.UtcNow.ToString("U", CultureInfo.InvariantCulture);
 	}
 
@@ -265,6 +266,7 @@ public class Game : KMonoBehaviour
 		base.Subscribe<Game>(1983128072, Game.ActiveWorldChangedDelegate);
 		this.solidConduitFlow.Initialize();
 		SimAndRenderScheduler.instance.Add(this.roomProber, false);
+		SimAndRenderScheduler.instance.Add(this.spaceScannerNetworkManager, false);
 		SimAndRenderScheduler.instance.Add(KComponentSpawn.instance, false);
 		SimAndRenderScheduler.instance.RegisterBatchUpdate<ISim200ms, AmountInstance>(new UpdateBucketWithUpdater<ISim200ms>.BatchUpdateDelegate(AmountInstance.BatchUpdate));
 		SimAndRenderScheduler.instance.RegisterBatchUpdate<ISim1000ms, SolidTransferArm>(new UpdateBucketWithUpdater<ISim1000ms>.BatchUpdateDelegate(SolidTransferArm.BatchUpdate));
@@ -687,7 +689,6 @@ public class Game : KMonoBehaviour
 		this.solidConduitFlow.RenderEveryTick(deltaTime);
 		Pathfinding.Instance.RenderEveryTick();
 		Singleton<CellChangeMonitor>.Instance.RenderEveryTick();
-		RangeVisualizerEffect.Instance.UpdateEnabled();
 		this.SimEveryTick(deltaTime);
 	}
 
@@ -913,7 +914,7 @@ public class Game : KMonoBehaviour
 		{
 			return;
 		}
-		uint num = 552078U;
+		uint num = 561558U;
 		string text = global::System.DateTime.Now.ToShortDateString();
 		string text2 = global::System.DateTime.Now.ToShortTimeString();
 		string fileName = Path.GetFileName(GenericGameSettings.instance.performanceCapture.saveGame);
@@ -1130,9 +1131,9 @@ public class Game : KMonoBehaviour
 		gameSaveData.savedInfo = this.savedInfo;
 		global::Debug.Assert(gameSaveData.worldDetail != null, "World detail null");
 		gameSaveData.dateGenerated = this.dateGenerated;
-		if (!this.changelistsPlayedOn.Contains(552078U))
+		if (!this.changelistsPlayedOn.Contains(561558U))
 		{
-			this.changelistsPlayedOn.Add(552078U);
+			this.changelistsPlayedOn.Add(561558U);
 		}
 		gameSaveData.changelistsPlayedOn = this.changelistsPlayedOn;
 		if (this.OnSave != null)
@@ -1631,6 +1632,8 @@ public class Game : KMonoBehaviour
 	public float currentFallbackSunlightIntensity;
 
 	public RoomProber roomProber;
+
+	public SpaceScannerNetworkManager spaceScannerNetworkManager;
 
 	public FetchManager fetchManager;
 

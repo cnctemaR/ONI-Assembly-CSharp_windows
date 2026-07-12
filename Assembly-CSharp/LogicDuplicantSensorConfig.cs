@@ -39,12 +39,13 @@ public class LogicDuplicantSensorConfig : IBuildingConfig
 
 	private static void AddVisualizer(GameObject prefab, bool movable)
 	{
-		StationaryChoreRangeVisualizer stationaryChoreRangeVisualizer = prefab.AddOrGet<StationaryChoreRangeVisualizer>();
-		stationaryChoreRangeVisualizer.x = -2;
-		stationaryChoreRangeVisualizer.y = 0;
-		stationaryChoreRangeVisualizer.width = 5;
-		stationaryChoreRangeVisualizer.height = 5;
-		stationaryChoreRangeVisualizer.movable = movable;
+		RangeVisualizer rangeVisualizer = prefab.AddOrGet<RangeVisualizer>();
+		rangeVisualizer.OriginOffset = new Vector2I(0, 0);
+		rangeVisualizer.RangeMin.x = -2;
+		rangeVisualizer.RangeMin.y = 0;
+		rangeVisualizer.RangeMax.x = 2;
+		rangeVisualizer.RangeMax.y = 4;
+		rangeVisualizer.BlockingTileVisible = true;
 	}
 
 	public const string ID = "LogicDuplicantSensor";

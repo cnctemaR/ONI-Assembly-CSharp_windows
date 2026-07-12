@@ -21,7 +21,12 @@ public class FloorSoundEvent : SoundEvent
 			vector = component.GetPivotSymbolPosition();
 		}
 		int num = Grid.PosToCell(vector);
-		string text = GlobalAssets.GetSound(StringFormatter.Combine(FloorSoundEvent.GetAudioCategory(Grid.CellBelow(num)), "_", base.name), true);
+		int num2 = Grid.CellBelow(num);
+		if (!Grid.IsValidCell(num2))
+		{
+			return;
+		}
+		string text = GlobalAssets.GetSound(StringFormatter.Combine(FloorSoundEvent.GetAudioCategory(num2), "_", base.name), true);
 		if (text == null)
 		{
 			text = GlobalAssets.GetSound(StringFormatter.Combine("Rock_", base.name), true);
@@ -47,17 +52,17 @@ public class FloorSoundEvent : SoundEvent
 			return;
 		}
 		bool isLiquid = Grid.Element[num].IsLiquid;
-		float num2 = 0f;
+		float num3 = 0f;
 		if (isLiquid)
 		{
-			num2 = SoundUtil.GetLiquidDepth(num);
+			num3 = SoundUtil.GetLiquidDepth(num);
 			string sound = GlobalAssets.GetSound("Liquid_footstep", true);
 			if (sound != null && (base.objectIsSelectedAndVisible || SoundEvent.ShouldPlaySound(behaviour.controller, sound, base.looping, this.isDynamic)))
 			{
 				FMOD.Studio.EventInstance eventInstance = SoundEvent.BeginOneShot(sound, vector, SoundEvent.GetVolume(base.objectIsSelectedAndVisible), false);
-				if (num2 > 0f)
+				if (num3 > 0f)
 				{
-					eventInstance.setParameterByName("liquidDepth", num2, false);
+					eventInstance.setParameterByName("liquidDepth", num3, false);
 				}
 				SoundEvent.EndOneShot(eventInstance);
 			}
@@ -67,9 +72,9 @@ public class FloorSoundEvent : SoundEvent
 			FMOD.Studio.EventInstance eventInstance2 = SoundEvent.BeginOneShot(text, vector, 1f, false);
 			if (eventInstance2.isValid())
 			{
-				if (num2 > 0f)
+				if (num3 > 0f)
 				{
-					eventInstance2.setParameterByName("liquidDepth", num2, false);
+					eventInstance2.setParameterByName("liquidDepth", num3, false);
 				}
 				if (behaviour.controller.HasAnimationFile("anim_loco_walk_kanim"))
 				{

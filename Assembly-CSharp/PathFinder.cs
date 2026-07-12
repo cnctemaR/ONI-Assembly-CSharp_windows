@@ -372,7 +372,8 @@ public class PathFinder
 			HasAtmoSuit = 1,
 			HasJetPack = 2,
 			HasOxygenMask = 4,
-			PerformSuitChecks = 8
+			PerformSuitChecks = 8,
+			HasLeadSuit = 16
 		}
 	}
 

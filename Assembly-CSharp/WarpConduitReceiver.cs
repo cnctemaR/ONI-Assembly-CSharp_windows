@@ -3,22 +3,9 @@ using UnityEngine;
 
 public class WarpConduitReceiver : StateMachineComponent<WarpConduitReceiver.StatesInstance>, ISecondaryOutput
 {
-	private bool CanTransferFromSender()
+	private bool IsReceiving()
 	{
-		bool flag = false;
-		if ((base.smi.master.senderGasStorage.MassStored() > 0f || base.smi.master.senderGasStorage.items.Count > 0) && base.smi.master.gasPort.dispenser.GetConduitManager().GetPermittedFlow(base.smi.master.gasPort.outputCell) != ConduitFlow.FlowDirections.None)
-		{
-			flag = true;
-		}
-		if ((base.smi.master.senderLiquidStorage.MassStored() > 0f || base.smi.master.senderLiquidStorage.items.Count > 0) && base.smi.master.liquidPort.dispenser.GetConduitManager().GetPermittedFlow(base.smi.master.liquidPort.outputCell) != ConduitFlow.FlowDirections.None)
-		{
-			flag = true;
-		}
-		if ((base.smi.master.senderSolidStorage.MassStored() > 0f || base.smi.master.senderSolidStorage.items.Count > 0) && base.smi.master.solidPort.dispenser != null && base.smi.master.solidPort.dispenser.GetConduitManager().GetPermittedFlow(base.smi.master.solidPort.outputCell) != ConduitFlow.FlowDirections.None)
-		{
-			flag = true;
-		}
-		return flag;
+		return base.smi.master.gasPort.IsOn() || base.smi.master.liquidPort.IsOn() || base.smi.master.solidPort.IsOn();
 	}
 
 	protected override void OnSpawn()
@@ -159,6 +146,7 @@ public class WarpConduitReceiver : StateMachineComponent<WarpConduitReceiver.Sta
 				solidConduitDispenser.alwaysDispense = true;
 				solidConduitDispenser.useSecondaryOutput = true;
 				solidConduitDispenser.solidOnly = true;
+				this.solidDispenser = solidConduitDispenser;
 				this.networkItem = new FlowUtilityNetwork.NetworkItem(ConduitType.Solid, Endpoint.Source, this.outputCell, parent);
 				Game.Instance.solidConduitSystem.AddToNetworks(this.outputCell, this.networkItem, true);
 			}
@@ -170,18 +158,18 @@ public class WarpConduitReceiver : StateMachineComponent<WarpConduitReceiver.Sta
 			this.airlock = new MeterController(parent.GetComponent<KBatchedAnimController>(), text2, text, Meter.Offset.Infront, Grid.SceneLayer.NoLayer, new string[] { text2 });
 		}
 
+		public bool IsOn()
+		{
+			if (this.solidDispenser != null)
+			{
+				return this.solidDispenser.IsDispensing;
+			}
+			return this.dispenser != null && !this.dispenser.blocked && !this.dispenser.empty;
+		}
+
 		public void UpdatePortAnim()
 		{
-			bool flag;
-			if (this.portInfo != null && this.portInfo.conduitType == ConduitType.Solid)
-			{
-				flag = this.networkItem.GameObject.GetComponent<SolidConduitDispenser>().IsDispensing;
-			}
-			else
-			{
-				flag = this.dispenser != null && !this.dispenser.blocked && !this.dispenser.empty;
-				flag = flag && this.dispenser.GetConduitManager().GetPermittedFlow(this.outputCell) > ConduitFlow.FlowDirections.None;
-			}
+			bool flag = this.IsOn();
 			if (flag != this.open)
 			{
 				this.open = flag;
@@ -202,6 +190,8 @@ public class WarpConduitReceiver : StateMachineComponent<WarpConduitReceiver.Sta
 		public FlowUtilityNetwork.NetworkItem networkItem;
 
 		public ConduitDispenser dispenser;
+
+		public SolidConduitDispenser solidDispenser;
 
 		public MeterController airlock;
 
@@ -238,27 +228,27 @@ public class WarpConduitReceiver : StateMachineComponent<WarpConduitReceiver.Sta
 				smi.master.liquidPort.UpdatePortAnim();
 				smi.master.solidPort.UpdatePortAnim();
 			}).EventTransition(GameHashes.OperationalFlagChanged, this.on, (WarpConduitReceiver.StatesInstance smi) => smi.GetComponent<Operational>().GetFlag(WarpConduitStatus.warpConnectedFlag));
-			this.on.DefaultState(this.on.empty).Update(delegate(WarpConduitReceiver.StatesInstance smi, float dt)
+			this.on.DefaultState(this.on.idle).Update(delegate(WarpConduitReceiver.StatesInstance smi, float dt)
 			{
 				smi.master.gasPort.UpdatePortAnim();
 				smi.master.liquidPort.UpdatePortAnim();
 				smi.master.solidPort.UpdatePortAnim();
-			}, UpdateRate.SIM_200ms, false);
-			this.on.empty.QueueAnim("idle", false, null).ToggleMainStatusItem(Db.Get().BuildingStatusItems.Normal, null).Update(delegate(WarpConduitReceiver.StatesInstance smi, float dt)
+			}, UpdateRate.SIM_1000ms, false);
+			this.on.idle.QueueAnim("idle", false, null).ToggleMainStatusItem(Db.Get().BuildingStatusItems.Normal, null).Update(delegate(WarpConduitReceiver.StatesInstance smi, float dt)
 			{
-				if (smi.master.CanTransferFromSender())
+				if (smi.master.IsReceiving())
 				{
-					smi.GoTo(this.on.hasResources);
+					smi.GoTo(this.on.working);
 				}
-			}, UpdateRate.SIM_200ms, false);
-			this.on.hasResources.PlayAnim("working_pre").QueueAnim("working_loop", true, null).ToggleMainStatusItem(Db.Get().BuildingStatusItems.Working, null)
+			}, UpdateRate.SIM_1000ms, false);
+			this.on.working.PlayAnim("working_pre").QueueAnim("working_loop", true, null).ToggleMainStatusItem(Db.Get().BuildingStatusItems.Working, null)
 				.Update(delegate(WarpConduitReceiver.StatesInstance smi, float dt)
 				{
-					if (!smi.master.CanTransferFromSender())
+					if (!smi.master.IsReceiving())
 					{
-						smi.GoTo(this.on.empty);
+						smi.GoTo(this.on.idle);
 					}
-				}, UpdateRate.SIM_200ms, false)
+				}, UpdateRate.SIM_1000ms, false)
 				.Exit(delegate(WarpConduitReceiver.StatesInstance smi)
 				{
 					smi.Play("working_pst", KAnim.PlayMode.Once);
@@ -271,9 +261,9 @@ public class WarpConduitReceiver : StateMachineComponent<WarpConduitReceiver.Sta
 
 		public class onStates : GameStateMachine<WarpConduitReceiver.States, WarpConduitReceiver.StatesInstance, WarpConduitReceiver, object>.State
 		{
-			public GameStateMachine<WarpConduitReceiver.States, WarpConduitReceiver.StatesInstance, WarpConduitReceiver, object>.State hasResources;
+			public GameStateMachine<WarpConduitReceiver.States, WarpConduitReceiver.StatesInstance, WarpConduitReceiver, object>.State working;
 
-			public GameStateMachine<WarpConduitReceiver.States, WarpConduitReceiver.StatesInstance, WarpConduitReceiver, object>.State empty;
+			public GameStateMachine<WarpConduitReceiver.States, WarpConduitReceiver.StatesInstance, WarpConduitReceiver, object>.State idle;
 		}
 	}
 }

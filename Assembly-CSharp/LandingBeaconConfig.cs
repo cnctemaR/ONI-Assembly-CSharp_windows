@@ -45,14 +45,48 @@ public class LandingBeaconConfig : IBuildingConfig
 
 	public override void DoPostConfigurePreview(BuildingDef def, GameObject go)
 	{
+		LandingBeaconConfig.AddVisualizer(go);
 	}
 
 	public override void DoPostConfigureUnderConstruction(GameObject go)
 	{
+		LandingBeaconConfig.AddVisualizer(go);
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
+		LandingBeaconConfig.AddVisualizer(go);
+	}
+
+	private static void AddVisualizer(GameObject prefab)
+	{
+		SkyVisibilityVisualizer skyVisibilityVisualizer = prefab.AddOrGet<SkyVisibilityVisualizer>();
+		skyVisibilityVisualizer.RangeMin = 0;
+		skyVisibilityVisualizer.RangeMax = 0;
+		prefab.GetComponent<KPrefabID>().instantiateFn += delegate(GameObject go)
+		{
+			go.GetComponent<SkyVisibilityVisualizer>().SkyVisibilityCb = new Func<int, bool>(LandingBeaconConfig.BeaconSkyVisibility);
+		};
+	}
+
+	private static bool BeaconSkyVisibility(int cell)
+	{
+		DebugUtil.DevAssert(ClusterManager.Instance != null, "beacon assumes DLC", null);
+		if (Grid.IsValidCell(cell) && Grid.WorldIdx[cell] != 255)
+		{
+			int num = (int)ClusterManager.Instance.GetWorld((int)Grid.WorldIdx[cell]).maximumBounds.y;
+			int num2 = cell;
+			while (Grid.CellRow(num2) <= num)
+			{
+				if (!Grid.IsValidCell(num2) || Grid.Solid[num2])
+				{
+					return false;
+				}
+				num2 = Grid.CellAbove(num2);
+			}
+			return true;
+		}
+		return false;
 	}
 
 	public const string ID = "LandingBeacon";

@@ -437,7 +437,8 @@ public class ConsumablesTableScreen : TableScreen
 			if (foodInfo != null)
 			{
 				tooltip.AddMultiStringTooltip(string.Format(UI.CONSUMABLESSCREEN.FOOD_AVAILABLE, GameUtil.GetFormattedCalories(ClusterManager.Instance.activeWorld.worldInventory.GetAmount(consumableInfoTableColumn.consumable_info.ConsumableId.ToTag(), false) * foodInfo.CaloriesPerUnit, GameUtil.TimeSlice.None, true)), null);
-				tooltip.AddMultiStringTooltip(string.Format(UI.CONSUMABLESSCREEN.FOOD_QUALITY, GameUtil.AddPositiveSign(num.ToString(), num > 0)), null);
+				tooltip.AddMultiStringTooltip(string.Format(UI.CONSUMABLESSCREEN.FOOD_MORALE, GameUtil.AddPositiveSign(num.ToString(), num > 0)), null);
+				tooltip.AddMultiStringTooltip(string.Format(UI.CONSUMABLESSCREEN.FOOD_QUALITY, GameUtil.GetFormattedFoodQuality(foodInfo.Quality), GameUtil.AddPositiveSign(foodInfo.Quality.ToString(), foodInfo.Quality > 0)), null);
 				tooltip.AddMultiStringTooltip("\n" + foodInfo.Description, null);
 				return;
 			}

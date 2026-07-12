@@ -98,7 +98,8 @@ namespace ProcGen
 					}
 				}
 			}
-			return null;
+			string absoluteContentPath2 = SettingsCache.GetAbsoluteContentPath("", "worldgen/");
+			return path.Substring(absoluteContentPath2.Length);
 		}
 
 		public static void CloneInToNewWorld(MutatedWorldData worldData)
@@ -256,7 +257,7 @@ namespace ProcGen
 			}
 		}
 
-		public static void LoadSubworlds(List<WeightedSubworldName> subworlds, string prefix, List<YamlIO.Error> errors)
+		public static void LoadSubworlds(List<WeightedSubworldName> subworlds, List<YamlIO.Error> errors)
 		{
 			foreach (WeightedSubworldName weightedSubworldName in subworlds)
 			{
@@ -468,23 +469,23 @@ namespace ProcGen
 			SettingsCache.clusterLayouts.LoadFiles(worldgenFolderPath, addPrefix, errors);
 			HashSet<string> hashSet = new HashSet<string>(from worldPlacment in SettingsCache.clusterLayouts.clusterCache.Values.SelectMany<ClusterLayout, WorldPlacement>((ClusterLayout clusterLayout) => clusterLayout.worldPlacements)
 				select worldPlacment.world);
-			SettingsCache.worlds.LoadReferencedWorlds(worldgenFolderPath, addPrefix, hashSet, errors);
+			SettingsCache.worlds.LoadReferencedWorlds(hashSet, errors);
 			SettingsCache.LoadWorldTraits(worldgenFolderPath, addPrefix, errors);
 			SettingsCache.LoadStoryTraits(worldgenFolderPath, addPrefix, errors);
 			foreach (KeyValuePair<string, World> keyValuePair in SettingsCache.worlds.worldCache)
 			{
 				SettingsCache.LoadFeatures(keyValuePair.Value.globalFeatures, errors);
-				SettingsCache.LoadSubworlds(keyValuePair.Value.subworldFiles, addPrefix, errors);
+				SettingsCache.LoadSubworlds(keyValuePair.Value.subworldFiles, errors);
 			}
 			foreach (KeyValuePair<string, WorldTrait> keyValuePair2 in SettingsCache.worldTraits)
 			{
 				SettingsCache.LoadFeatures(keyValuePair2.Value.globalFeatureMods, errors);
-				SettingsCache.LoadSubworlds(keyValuePair2.Value.additionalSubworldFiles, addPrefix, errors);
+				SettingsCache.LoadSubworlds(keyValuePair2.Value.additionalSubworldFiles, errors);
 			}
 			foreach (KeyValuePair<string, WorldTrait> keyValuePair3 in SettingsCache.storyTraits)
 			{
 				SettingsCache.LoadFeatures(keyValuePair3.Value.globalFeatureMods, errors);
-				SettingsCache.LoadSubworlds(keyValuePair3.Value.additionalSubworldFiles, addPrefix, errors);
+				SettingsCache.LoadSubworlds(keyValuePair3.Value.additionalSubworldFiles, errors);
 			}
 			SettingsCache.layers = SettingsCache.MergeLoad<LevelLayerSettings>(SettingsCache.layers, worldgenFolderPath + "layers.yaml", errors);
 			SettingsCache.layers.LevelLayers.ConvertBandSizeToMaxSize();

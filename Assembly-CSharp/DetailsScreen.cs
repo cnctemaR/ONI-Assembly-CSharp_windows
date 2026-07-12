@@ -248,37 +248,39 @@ public class DetailsScreen : KTabMenu
 		this.tabHeaderContainer.gameObject.SetActive(base.CountTabs() > 1);
 		if (this.sideScreens != null && this.sideScreens.Count > 0)
 		{
-			bool areAnyValid = false;
-			this.sideScreens.ForEach(delegate(DetailsScreen.SideScreenRef scn)
+			bool flag4 = false;
+			foreach (DetailsScreen.SideScreenRef sideScreenRef in this.sideScreens)
 			{
-				if (!scn.screenPrefab.IsValidForTarget(this.target))
+				if (!sideScreenRef.screenPrefab.IsValidForTarget(this.target))
 				{
-					if (scn.screenInstance != null && scn.screenInstance.gameObject.activeSelf)
+					if (sideScreenRef.screenInstance != null && sideScreenRef.screenInstance.gameObject.activeSelf)
 					{
-						scn.screenInstance.gameObject.SetActive(false);
+						sideScreenRef.screenInstance.gameObject.SetActive(false);
 					}
-					return;
 				}
-				areAnyValid = true;
-				if (scn.screenInstance == null)
+				else
 				{
-					scn.screenInstance = global::Util.KInstantiateUI<SideScreenContent>(scn.screenPrefab.gameObject, this.sideScreenContentBody, false);
+					flag4 = true;
+					if (sideScreenRef.screenInstance == null)
+					{
+						sideScreenRef.screenInstance = global::Util.KInstantiateUI<SideScreenContent>(sideScreenRef.screenPrefab.gameObject, this.sideScreenContentBody, false);
+					}
+					if (!this.sideScreen.activeSelf)
+					{
+						this.sideScreen.SetActive(true);
+					}
+					sideScreenRef.screenInstance.SetTarget(this.target);
+					sideScreenRef.screenInstance.Show(true);
+					int sideScreenSortOrder = sideScreenRef.screenInstance.GetSideScreenSortOrder();
+					this.sortedSideScreens.Add(new KeyValuePair<GameObject, int>(sideScreenRef.screenInstance.gameObject, sideScreenSortOrder));
+					if (this.currentSideScreen == null || !this.currentSideScreen.gameObject.activeSelf || sideScreenSortOrder > this.sortedSideScreens.Find((KeyValuePair<GameObject, int> match) => match.Key == this.currentSideScreen.gameObject).Value)
+					{
+						this.currentSideScreen = sideScreenRef.screenInstance;
+					}
+					this.RefreshTitle();
 				}
-				if (!this.sideScreen.activeSelf)
-				{
-					this.sideScreen.SetActive(true);
-				}
-				scn.screenInstance.SetTarget(this.target);
-				scn.screenInstance.Show(true);
-				int sideScreenSortOrder = scn.screenInstance.GetSideScreenSortOrder();
-				this.sortedSideScreens.Add(new KeyValuePair<GameObject, int>(scn.screenInstance.gameObject, sideScreenSortOrder));
-				if (this.currentSideScreen == null || !this.currentSideScreen.gameObject.activeSelf || sideScreenSortOrder > this.sortedSideScreens.Find((KeyValuePair<GameObject, int> match) => match.Key == this.currentSideScreen.gameObject).Value)
-				{
-					this.currentSideScreen = scn.screenInstance;
-				}
-				this.RefreshTitle();
-			});
-			if (!areAnyValid)
+			}
+			if (!flag4)
 			{
 				this.sideScreen.SetActive(false);
 			}

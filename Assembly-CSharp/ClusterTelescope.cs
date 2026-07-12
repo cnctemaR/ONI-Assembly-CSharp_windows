@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Database;
 using Klei.AI;
 using KSerialization;
 using STRINGS;
@@ -8,18 +9,20 @@ using UnityEngine;
 
 public class ClusterTelescope : GameStateMachine<ClusterTelescope, ClusterTelescope.Instance, IStateMachineTarget, ClusterTelescope.Def>
 {
-	private static string GetStatusItemString(string src_str, object data)
-	{
-		ClusterTelescope.Instance instance = (ClusterTelescope.Instance)data;
-		return src_str.Replace("{VISIBILITY}", GameUtil.GetFormattedPercent(instance.PercentClear * 100f, GameUtil.TimeSlice.None)).Replace("{RADIUS}", instance.def.clearScanCellRadius.ToString());
-	}
-
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
 		base.serializable = StateMachine.SerializeType.ParamsOnly;
 		default_state = this.ready.no_visibility;
+		this.root.Update(delegate(ClusterTelescope.Instance smi, float dt)
+		{
+			KSelectable component = smi.GetComponent<KSelectable>();
+			bool flag = Mathf.Approximately(0f, smi.PercentClear) || smi.PercentClear < 0f;
+			bool flag2 = Mathf.Approximately(1f, smi.PercentClear) || smi.PercentClear > 1f;
+			component.ToggleStatusItem(Db.Get().BuildingStatusItems.SkyVisNone, flag, smi);
+			component.ToggleStatusItem(Db.Get().BuildingStatusItems.SkyVisLimited, !flag && !flag2, smi);
+		}, UpdateRate.SIM_200ms, false);
 		this.ready.DoNothing();
-		this.ready.no_visibility.UpdateTransition(this.ready.ready_to_work, (ClusterTelescope.Instance smi, float dt) => smi.HasSkyVisibility(), UpdateRate.SIM_200ms, false).ToggleStatusItem(ClusterTelescope.noVisibilityStatusItem, null);
+		this.ready.no_visibility.UpdateTransition(this.ready.ready_to_work, (ClusterTelescope.Instance smi, float dt) => smi.HasSkyVisibility(), UpdateRate.SIM_200ms, false);
 		this.ready.ready_to_work.UpdateTransition(this.ready.no_visibility, (ClusterTelescope.Instance smi, float dt) => !smi.HasSkyVisibility(), UpdateRate.SIM_200ms, false).DefaultState(this.ready.ready_to_work.decide);
 		this.ready.ready_to_work.decide.EnterTransition(this.ready.ready_to_work.identifyMeteorShower, (ClusterTelescope.Instance smi) => smi.ShouldBeWorkingOnMeteorIdentification()).EnterTransition(this.ready.ready_to_work.revealTile, (ClusterTelescope.Instance smi) => smi.ShouldBeWorkingOnRevealingTile()).EnterTransition(this.all_work_complete, (ClusterTelescope.Instance smi) => !smi.IsAnyAvailableWorkToBeDone());
 		this.ready.ready_to_work.identifyMeteorShower.OnSignal(this.MeteorIdenificationPriorityChangeSignal, this.ready.ready_to_work.decide, (ClusterTelescope.Instance smi) => !smi.ShouldBeWorkingOnMeteorIdentification()).ParamTransition<GameObject>(this.meteorShowerTarget, this.ready.ready_to_work.decide, GameStateMachine<ClusterTelescope, ClusterTelescope.Instance, IStateMachineTarget, ClusterTelescope.Def>.IsNull).EventTransition(GameHashes.ClusterMapMeteorShowerIdentified, (ClusterTelescope.Instance smi) => Game.Instance, this.ready.ready_to_work.decide, (ClusterTelescope.Instance smi) => !smi.ShouldBeWorkingOnMeteorIdentification())
@@ -30,8 +33,6 @@ public class ClusterTelescope : GameStateMachine<ClusterTelescope, ClusterTelesc
 		this.all_work_complete.OnSignal(this.MeteorIdenificationPriorityChangeSignal, this.ready.no_visibility, (ClusterTelescope.Instance smi) => smi.IsAnyAvailableWorkToBeDone()).ToggleMainStatusItem(Db.Get().BuildingStatusItems.ClusterTelescopeAllWorkComplete, null).EventTransition(GameHashes.ClusterLocationChanged, (ClusterTelescope.Instance smi) => Game.Instance, this.ready.no_visibility, (ClusterTelescope.Instance smi) => smi.IsAnyAvailableWorkToBeDone())
 			.EventTransition(GameHashes.ClusterMapMeteorShowerMoved, (ClusterTelescope.Instance smi) => Game.Instance, this.ready.no_visibility, (ClusterTelescope.Instance smi) => smi.ShouldBeWorkingOnMeteorIdentification());
 	}
-
-	private static StatusItem noVisibilityStatusItem = new StatusItem("SPACE_VISIBILITY_NONE", "BUILDING", "status_item_no_sky", StatusItem.IconType.Custom, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 129022, new Func<string, object, string>(ClusterTelescope.GetStatusItemString));
 
 	public GameStateMachine<ClusterTelescope, ClusterTelescope.Instance, IStateMachineTarget, ClusterTelescope.Def>.State all_work_complete;
 
@@ -50,6 +51,8 @@ public class ClusterTelescope : GameStateMachine<ClusterTelescope, ClusterTelesc
 		public KAnimFile[] workableOverrideAnims;
 
 		public bool providesOxygen;
+
+		public SkyVisibilityInfo skyVisibilityInfo;
 	}
 
 	public class WorkStates : GameStateMachine<ClusterTelescope, ClusterTelescope.Instance, IStateMachineTarget, ClusterTelescope.Def>.State
@@ -68,7 +71,7 @@ public class ClusterTelescope : GameStateMachine<ClusterTelescope, ClusterTelesc
 		public ClusterTelescope.WorkStates ready_to_work;
 	}
 
-	public new class Instance : GameStateMachine<ClusterTelescope, ClusterTelescope.Instance, IStateMachineTarget, ClusterTelescope.Def>.GameInstance, ICheckboxControl
+	public new class Instance : GameStateMachine<ClusterTelescope, ClusterTelescope.Instance, IStateMachineTarget, ClusterTelescope.Def>.GameInstance, ICheckboxControl, BuildingStatusItems.ISkyVisInfo
 	{
 		public float PercentClear
 		{
@@ -76,6 +79,11 @@ public class ClusterTelescope : GameStateMachine<ClusterTelescope, ClusterTelesc
 			{
 				return this.m_percentClear;
 			}
+		}
+
+		float BuildingStatusItems.ISkyVisInfo.GetPercentVisible01()
+		{
+			return this.m_percentClear;
 		}
 
 		private bool hasMeteorShowerTarget
@@ -193,11 +201,11 @@ public class ClusterTelescope : GameStateMachine<ClusterTelescope, ClusterTelesc
 
 		public bool HasSkyVisibility()
 		{
-			Extents extents = base.GetComponent<Building>().GetExtents();
-			int num;
-			bool flag = Grid.IsRangeExposedToSunlight(Grid.XYToCell(extents.x, extents.y), base.def.clearScanCellRadius, new CellOffset(1, 0), out num, 1);
-			this.m_percentClear = (float)num / (float)(base.def.clearScanCellRadius * 2 + 1);
-			return flag;
+			ValueTuple<bool, float> visibilityOf = base.def.skyVisibilityInfo.GetVisibilityOf(base.gameObject);
+			bool item = visibilityOf.Item1;
+			float item2 = visibilityOf.Item2;
+			this.m_percentClear = item2;
+			return item;
 		}
 
 		public string CheckboxTitleKey
@@ -298,7 +306,7 @@ public class ClusterTelescope : GameStateMachine<ClusterTelescope, ClusterTelesc
 			}
 			KPrefabID component = worker.GetComponent<KPrefabID>();
 			OxygenBreather component2 = worker.GetComponent<OxygenBreather>();
-			Attributes attributes = worker.GetAttributes();
+			Klei.AI.Attributes attributes = worker.GetAttributes();
 			if (ev == Workable.WorkableEvent.WorkStarted)
 			{
 				base.ShowProgressBar(true);
@@ -350,6 +358,11 @@ public class ClusterTelescope : GameStateMachine<ClusterTelescope, ClusterTelesc
 			descriptor.SetupDescriptor(element.tag.ProperName(), string.Format(global::STRINGS.BUILDINGS.PREFABS.TELESCOPE.REQUIREMENT_TOOLTIP, element.tag.ProperName()), Descriptor.DescriptorType.Requirement);
 			descriptors.Add(descriptor);
 			return descriptors;
+		}
+
+		public override float GetEfficiencyMultiplier(Worker worker)
+		{
+			return base.GetEfficiencyMultiplier(worker) * Mathf.Clamp01(this.m_telescope.PercentClear);
 		}
 
 		protected override bool OnWorkTick(Worker worker, float dt)
@@ -417,6 +430,16 @@ public class ClusterTelescope : GameStateMachine<ClusterTelescope, ClusterTelesc
 			return flag;
 		}
 
+		public bool IsLowOxygen()
+		{
+			if (this.storage.items.Count <= 0)
+			{
+				return true;
+			}
+			PrimaryElement primaryElement = this.storage.FindFirstWithMass(GameTags.Breathable, 0f);
+			return primaryElement == null || primaryElement.Mass == 0f;
+		}
+
 		[MySmiReq]
 		private ClusterTelescope.Instance m_telescope;
 
@@ -479,7 +502,7 @@ public class ClusterTelescope : GameStateMachine<ClusterTelescope, ClusterTelesc
 			}
 			KPrefabID component = worker.GetComponent<KPrefabID>();
 			OxygenBreather component2 = worker.GetComponent<OxygenBreather>();
-			Attributes attributes = worker.GetAttributes();
+			Klei.AI.Attributes attributes = worker.GetAttributes();
 			if (ev == Workable.WorkableEvent.WorkStarted)
 			{
 				base.ShowProgressBar(true);
@@ -608,6 +631,16 @@ public class ClusterTelescope : GameStateMachine<ClusterTelescope, ClusterTelesc
 			bool flag = component.Mass >= amount;
 			component.Mass = Mathf.Max(0f, component.Mass - amount);
 			return flag;
+		}
+
+		public bool IsLowOxygen()
+		{
+			if (this.storage.items.Count <= 0)
+			{
+				return true;
+			}
+			GameObject gameObject = this.storage.items[0];
+			return !(gameObject == null) && gameObject.GetComponent<PrimaryElement>().Mass > 0f;
 		}
 
 		[MySmiReq]

@@ -36,10 +36,25 @@ public class LogicInterasteroidSenderConfig : IBuildingConfig
 
 	public override void DoPostConfigurePreview(BuildingDef def, GameObject go)
 	{
+		LogicInterasteroidSenderConfig.AddVisualizer(go);
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
+		LogicInterasteroidSenderConfig.AddVisualizer(go);
+	}
+
+	public override void DoPostConfigureUnderConstruction(GameObject go)
+	{
+		LogicInterasteroidSenderConfig.AddVisualizer(go);
+	}
+
+	private static void AddVisualizer(GameObject prefab)
+	{
+		SkyVisibilityVisualizer skyVisibilityVisualizer = prefab.AddOrGet<SkyVisibilityVisualizer>();
+		skyVisibilityVisualizer.RangeMin = 0;
+		skyVisibilityVisualizer.RangeMax = 0;
+		skyVisibilityVisualizer.SkipOnModuleInteriors = true;
 	}
 
 	public const string ID = "LogicInterasteroidSender";

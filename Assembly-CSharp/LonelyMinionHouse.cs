@@ -559,7 +559,8 @@ public class LonelyMinionHouse : StoryTraitStateMachine<LonelyMinionHouse, Lonel
 				}
 			}
 			List<KAnim.Anim.FrameElement> frameElements = this.lonelyMinion.AnimController.GetBatch().group.data.frameElements;
-			KAnim.Anim.Frame frame = this.lonelyMinion.AnimController.GetBatch().group.data.GetFrame(num);
+			KAnim.Anim.Frame frame;
+			this.lonelyMinion.AnimController.GetBatch().group.data.TryGetFrame(num, out frame);
 			bool flag = false;
 			Matrix2x3 matrix2x = default(Matrix2x3);
 			int num2 = 0;

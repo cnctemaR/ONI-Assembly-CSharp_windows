@@ -166,7 +166,7 @@ public class KAnimBatchGroup
 			});
 		}
 		NativeArray<float> floatDataPointer = this.buildAndAnimTex.GetFloatDataPointer();
-		int num2 = this.data.WriteBuildData(this.data.symbolFrameInstances, floatDataPointer);
+		int num2 = this.data.WriteBuildData(floatDataPointer);
 		this.data.WriteAnimData(num2, floatDataPointer);
 		this.buildAndAnimTex.texture.Apply(false, true);
 	}

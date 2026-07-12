@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 
-public class KCompactedVector<T> : KCompactedVectorBase, ICollection, IEnumerable
+public class KCompactedVector<T> : KCompactedVectorBase, ICollection, IEnumerable, IEnumerable<T>
 {
 	public KCompactedVector(int initial_count = 0)
 		: base(initial_count)
@@ -86,7 +86,17 @@ public class KCompactedVector<T> : KCompactedVectorBase, ICollection, IEnumerabl
 		throw new NotImplementedException();
 	}
 
-	public IEnumerator GetEnumerator()
+	IEnumerator IEnumerable.GetEnumerator()
+	{
+		return this.data.GetEnumerator();
+	}
+
+	IEnumerator<T> IEnumerable<T>.GetEnumerator()
+	{
+		return this.data.GetEnumerator();
+	}
+
+	public List<T>.Enumerator GetEnumerator()
 	{
 		return this.data.GetEnumerator();
 	}

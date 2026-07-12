@@ -294,12 +294,10 @@ public class MainMenu : KScreen
 			global::Util.KInstantiateUI(ScreenPrefabs.Instance.WorldGenScreen.gameObject, base.gameObject, true);
 		}
 		this.RefreshInventoryNotification();
-		KleiItems.AddUserRewardInfoReceivedCallback(new KleiItems.UserRewardInfoReceivedCallback(this.RefreshInventoryNotification));
 	}
 
 	protected override void OnForcedCleanUp()
 	{
-		KleiItems.RemoveUserRewardInfoReceivedCallback(new KleiItems.UserRewardInfoReceivedCallback(this.RefreshInventoryNotification));
 		base.OnForcedCleanUp();
 	}
 
@@ -494,7 +492,7 @@ public class MainMenu : KScreen
 					header = saveFileEntry.header;
 					gameInfo = saveFileEntry.headerData;
 				}
-				if (header.buildVersion > 552078U || gameInfo.saveMajorVersion != 7 || gameInfo.saveMinorVersion > 31)
+				if (header.buildVersion > 561558U || gameInfo.saveMajorVersion != 7 || gameInfo.saveMinorVersion > 32)
 				{
 					flag = false;
 				}

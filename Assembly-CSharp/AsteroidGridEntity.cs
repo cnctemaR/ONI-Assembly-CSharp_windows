@@ -144,7 +144,12 @@ public class AsteroidGridEntity : ClusterGridEntity
 		{
 			return;
 		}
-		KBatchedAnimController animController = ClusterMapScreen.Instance.GetEntityVisAnim(this).GetAnimController(2);
+		ClusterMapVisualizer entityVisAnim = ClusterMapScreen.Instance.GetEntityVisAnim(this);
+		if (entityVisAnim == null)
+		{
+			return;
+		}
+		KBatchedAnimController animController = entityVisAnim.GetAnimController(2);
 		if (animController != null)
 		{
 			List<GameplayEventInstance> list = new List<GameplayEventInstance>();

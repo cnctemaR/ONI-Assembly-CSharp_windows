@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Events;
 using UnityEngine.UI;
 
 public class ResearchScreenSideBar : KScreen
@@ -13,7 +12,10 @@ public class ResearchScreenSideBar : KScreen
 		this.PopulateFilterButtons();
 		this.RefreshCategoriesContentExpanded();
 		this.RefreshWidgets();
-		this.searchBox.onValueChanged.AddListener(new UnityAction<string>(this.UpdateCurrentSearch));
+		this.searchBox.OnValueChangesPaused = delegate
+		{
+			this.UpdateCurrentSearch(this.searchBox.text);
+		};
 		KInputTextField kinputTextField = this.searchBox;
 		kinputTextField.onFocus = (global::System.Action)Delegate.Combine(kinputTextField.onFocus, new global::System.Action(delegate
 		{

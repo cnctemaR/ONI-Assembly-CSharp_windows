@@ -493,6 +493,7 @@ namespace TUNING
 			{ "RocketInteriorSolidOutput", "fittings" },
 			{ "ManualHighEnergyParticleSpawner", "producers" },
 			{ "HighEnergyParticleSpawner", "producers" },
+			{ "DevHEPSpawner", "producers" },
 			{ "HighEnergyParticleRedirector", "transmissions" },
 			{ "HEPBattery", "batteries" },
 			{ "HEPBridgeTile", "transmissions" },
@@ -759,7 +760,7 @@ namespace TUNING
 				"LandingBeacon",
 				"MissileLauncher"
 			}, ""),
-			new PlanScreen.PlanInfo(new HashedString("HEP"), true, new List<string> { "RadiationLight", "ManualHighEnergyParticleSpawner", "NuclearReactor", "UraniumCentrifuge", "HighEnergyParticleSpawner", "HighEnergyParticleRedirector", "HEPBattery", "HEPBridgeTile", "DevRadiationGenerator" }, "EXPANSION1_ID")
+			new PlanScreen.PlanInfo(new HashedString("HEP"), true, new List<string> { "RadiationLight", "ManualHighEnergyParticleSpawner", "NuclearReactor", "UraniumCentrifuge", "HighEnergyParticleSpawner", "DevHEPSpawner", "HighEnergyParticleRedirector", "HEPBattery", "HEPBridgeTile", "DevRadiationGenerator" }, "EXPANSION1_ID")
 		};
 
 		public static List<Type> COMPONENT_DESCRIPTION_ORDER = new List<Type>

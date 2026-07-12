@@ -439,9 +439,9 @@ namespace STRINGS
 
 			public class CLUSTERMETEORREMAININGTRAVELTIME
 			{
-				public static LocString NAME = "Time before collision: {time}";
+				public static LocString NAME = "Time to collision: {time}";
 
-				public static LocString TOOLTIP = "The remaining time before this meteor reaches its destination";
+				public static LocString TOOLTIP = "The time remaining before this meteor reaches its destination";
 			}
 
 			public class ELEMENTALCATEGORY
@@ -747,6 +747,20 @@ namespace STRINGS
 				public static LocString NAME = "Temporal Tear closed";
 
 				public static LocString TOOLTIP = "Perhaps some technology could open the passage";
+			}
+
+			public class MARKEDFORMOVE
+			{
+				public static LocString NAME = "Pending Move";
+
+				public static LocString TOOLTIP = "Waiting for a Duplicant to move this object";
+			}
+
+			public class MOVESTORAGEUNREACHABLE
+			{
+				public static LocString NAME = "Unreachable Move";
+
+				public static LocString TOOLTIP = "Duplicants cannot reach this object to move it";
 			}
 		}
 
@@ -1915,6 +1929,15 @@ namespace STRINGS
 			public class MOPPLACER
 			{
 				public static LocString NAME = "Mop";
+			}
+
+			public class MOVEPICKUPABLEPLACER
+			{
+				public static LocString NAME = "Move Here";
+
+				public static LocString PLACER_STATUS = "Next Destination";
+
+				public static LocString PLACER_STATUS_TOOLTIP = "Click to see where this item will be moved to";
 			}
 		}
 

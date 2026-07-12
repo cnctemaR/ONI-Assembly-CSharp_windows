@@ -11,52 +11,55 @@ using UnityEngine;
 
 public class KleiItems : ThreadedHttps<KleiItems>
 {
-	public static IEnumerable<KleiItems.ItemData> IterateInventory(Dictionary<string, string> item_to_permit)
+	public static IEnumerable<KleiItems.ItemData> IterateInventory(Dictionary<string, string> item_to_permit, HashSet<string> boxes)
 	{
 		if (KleiItems.InventoryData.AllItems != null)
 		{
+			int actual_item_count = 0;
+			KleiItems.ItemData[] items = new KleiItems.ItemData[KleiItems.InventoryData.AllItems.Count];
+			int num;
 			foreach (KleiItems.Item item in KleiItems.InventoryData.AllItems)
 			{
 				string text;
 				if (item_to_permit.TryGetValue(item.ItemType, out text))
 				{
-					KleiItems.ItemData itemData;
-					itemData.PermitId = text;
-					itemData.ItemId = item.ItemId;
-					itemData.IsOpened = item.IsOpened;
-					yield return itemData;
+					items[actual_item_count].Id = text;
+					items[actual_item_count].ItemId = item.ItemId;
+					items[actual_item_count].IsOpened = item.IsOpened;
+					num = actual_item_count + 1;
+					actual_item_count = num;
+				}
+				else if (boxes.Contains(item.ItemType))
+				{
+					items[actual_item_count].Id = item.ItemType;
+					items[actual_item_count].ItemId = item.ItemId;
+					items[actual_item_count].IsOpened = item.IsOpened;
+					num = actual_item_count + 1;
+					actual_item_count = num;
 				}
 			}
-			List<KleiItems.Item>.Enumerator enumerator = default(List<KleiItems.Item>.Enumerator);
+			for (int i = 0; i < actual_item_count; i = num)
+			{
+				yield return items[i];
+				num = i + 1;
+			}
+			items = null;
 		}
-		yield break;
 		yield break;
 	}
 
-	public static bool HasUnopenedItem(Dictionary<string, string> item_to_permit)
+	public static bool HasUnopenedItem(Dictionary<string, string> item_to_permit, HashSet<string> boxes)
 	{
 		if (KleiItems.InventoryData.AllItems != null)
 		{
 			foreach (KleiItems.Item item in KleiItems.InventoryData.AllItems)
 			{
-				if (item_to_permit.ContainsKey(item.ItemType) && !item.IsOpened)
+				if ((item_to_permit.ContainsKey(item.ItemType) || boxes.Contains(item.ItemType)) && !item.IsOpened)
 				{
 					return true;
 				}
 			}
 			return false;
-		}
-		return false;
-	}
-
-	public static bool HasUnclaimedRewards(HashSet<string> claimable)
-	{
-		for (int i = 0; i < KleiItems.InventoryData.UnclaimedRewards.Count; i++)
-		{
-			if (claimable.Contains(KleiItems.InventoryData.UnclaimedRewards[i]))
-			{
-				return true;
-			}
 		}
 		return false;
 	}
@@ -112,14 +115,14 @@ public class KleiItems : ThreadedHttps<KleiItems>
 		ThreadedHttps<KleiItems>.Instance.AddRequest(KleiItems.Request.RequestType.SetItemOpened, itemId);
 	}
 
+	public static void AddRequestMysteryBoxOpened(ulong itemId)
+	{
+		ThreadedHttps<KleiItems>.Instance.AddRequest(KleiItems.Request.RequestType.OpenMysteryBox, itemId);
+	}
+
 	public static void AddRequestTick()
 	{
 		ThreadedHttps<KleiItems>.Instance.AddRequest(KleiItems.Request.RequestType.Tick, null);
-	}
-
-	public static void AddRequestUserRewardsInfo()
-	{
-		ThreadedHttps<KleiItems>.Instance.AddRequest(KleiItems.Request.RequestType.GetUserRewardsInfo, null);
 	}
 
 	public static void AddInventoryRefreshCallback(KleiItems.InventoryRefreshCallback cb)
@@ -130,16 +133,6 @@ public class KleiItems : ThreadedHttps<KleiItems>
 	public static void RemoveInventoryRefreshCallback(KleiItems.InventoryRefreshCallback cb)
 	{
 		ThreadedHttps<KleiItems>.Instance.InventoryRefreshCbs.Remove(cb);
-	}
-
-	public static void AddUserRewardInfoReceivedCallback(KleiItems.UserRewardInfoReceivedCallback cb)
-	{
-		ThreadedHttps<KleiItems>.Instance.UserRewardsInfoReceivedCbs.Add(cb);
-	}
-
-	public static void RemoveUserRewardInfoReceivedCallback(KleiItems.UserRewardInfoReceivedCallback cb)
-	{
-		ThreadedHttps<KleiItems>.Instance.UserRewardsInfoReceivedCbs.Remove(cb);
 	}
 
 	public void Update()
@@ -157,13 +150,13 @@ public class KleiItems : ThreadedHttps<KleiItems>
 				{
 					this.OnItemOpenedReply(this.Response);
 				}
+				else if (activeRequest.Type == KleiItems.Request.RequestType.OpenMysteryBox)
+				{
+					this.OnOpenMysteryBoxReply(this.Response);
+				}
 				else if (activeRequest.Type == KleiItems.Request.RequestType.Tick)
 				{
 					this.OnTickReply(this.Response);
-				}
-				else if (activeRequest.Type == KleiItems.Request.RequestType.GetUserRewardsInfo)
-				{
-					this.OnRewardsInfoReply(this.Response);
 				}
 			}
 			this.RequestStarted = false;
@@ -188,13 +181,13 @@ public class KleiItems : ThreadedHttps<KleiItems>
 			{
 				flag = this.RequestItemOpened((ulong)request.Data);
 			}
+			else if (request.Type == KleiItems.Request.RequestType.OpenMysteryBox)
+			{
+				flag = this.RequestOpenMysteryBox((ulong)request.Data);
+			}
 			else if (request.Type == KleiItems.Request.RequestType.Tick)
 			{
 				flag = this.RequestTick();
-			}
-			else if (request.Type == KleiItems.Request.RequestType.GetUserRewardsInfo)
-			{
-				flag = this.RequestUserRewardsInfo();
 			}
 			if (flag)
 			{
@@ -216,7 +209,6 @@ public class KleiItems : ThreadedHttps<KleiItems>
 		this.TimeToNextTick = 360f;
 		KleiItems.InventoryData.AllItems = new List<KleiItems.Item>();
 		KleiItems.InventoryData.ItemsByType = new Dictionary<string, List<KleiItems.Item>>();
-		KleiItems.InventoryData.UnclaimedRewards = new List<string>();
 	}
 
 	private void AddRequest(KleiItems.Request.RequestType type, object data)
@@ -301,7 +293,7 @@ public class KleiItems : ThreadedHttps<KleiItems>
 					KleiItems.Item item2;
 					item2.ItemId = item.ItemID;
 					item2.ItemType = item.ItemType;
-					item2.IsOpened = item.Context != 3;
+					item2.IsOpened = item.Context != 3 && item.Context != 4;
 					KleiItems.InventoryData.AllItems.Add(item2);
 					List<KleiItems.Item> list;
 					if (KleiItems.InventoryData.ItemsByType.TryGetValue(item2.ItemType, out list))
@@ -357,6 +349,35 @@ public class KleiItems : ThreadedHttps<KleiItems>
 		this.HandleError(this.ActiveRequest, setItemOpenedReply.ErrorCode);
 	}
 
+	private bool RequestOpenMysteryBox(ulong itemId)
+	{
+		string kleiToken = KleiAccount.KleiToken;
+		if (string.IsNullOrEmpty(kleiToken))
+		{
+			return false;
+		}
+		this.StartHttpsRequest(KleiItemsConfig.SERVER_URL + "clientitems/ONI/OpenMysteryBox");
+		string text = JsonConvert.SerializeObject(new Dictionary<string, object>
+		{
+			{ "ClientToken", kleiToken },
+			{ "ItemID", itemId }
+		});
+		byte[] bytes = Encoding.UTF8.GetBytes(text);
+		base.PutPacket(bytes, false);
+		return true;
+	}
+
+	private void OnOpenMysteryBoxReply(string response)
+	{
+		KleiItems.OpenMysteryBoxReply openMysteryBoxReply = JsonConvert.DeserializeObject<KleiItems.OpenMysteryBoxReply>(response);
+		if (!openMysteryBoxReply.Error)
+		{
+			KleiItems.AddRequestInventoryRefresh();
+			return;
+		}
+		this.HandleError(this.ActiveRequest, openMysteryBoxReply.ErrorCode);
+	}
+
 	private bool RequestTick()
 	{
 		string kleiToken = KleiAccount.KleiToken;
@@ -386,46 +407,6 @@ public class KleiItems : ThreadedHttps<KleiItems>
 		{
 			this.HandleError(this.ActiveRequest, tickReply.ErrorCode);
 		}
-	}
-
-	private bool RequestUserRewardsInfo()
-	{
-		string kleiToken = KleiAccount.KleiToken;
-		if (string.IsNullOrEmpty(kleiToken))
-		{
-			return false;
-		}
-		this.StartHttpsRequest(KleiItemsConfig.SERVER_URL + "clientitems/ONI/GetUserRewardsInfo");
-		string text = JsonConvert.SerializeObject(new Dictionary<string, object> { { "Token", kleiToken } });
-		byte[] bytes = Encoding.UTF8.GetBytes(text);
-		base.PutPacket(bytes, false);
-		return true;
-	}
-
-	private void OnRewardsInfoReply(string response)
-	{
-		KleiItems.RewardsInfoReply rewardsInfoReply = JsonConvert.DeserializeObject<KleiItems.RewardsInfoReply>(response);
-		if (!rewardsInfoReply.Error)
-		{
-			KleiItems.InventoryData.UnclaimedRewards.Clear();
-			foreach (KeyValuePair<string, KleiItems.RewardsInfoReply.Info> keyValuePair in rewardsInfoReply.ItemRewards)
-			{
-				if (!keyValuePair.Value.Claimed)
-				{
-					KleiItems.InventoryData.UnclaimedRewards.Add(keyValuePair.Key);
-				}
-			}
-			using (List<KleiItems.UserRewardInfoReceivedCallback>.Enumerator enumerator2 = this.UserRewardsInfoReceivedCbs.GetEnumerator())
-			{
-				while (enumerator2.MoveNext())
-				{
-					KleiItems.UserRewardInfoReceivedCallback userRewardInfoReceivedCallback = enumerator2.Current;
-					userRewardInfoReceivedCallback();
-				}
-				return;
-			}
-		}
-		this.HandleError(this.ActiveRequest, rewardsInfoReply.ErrorCode);
 	}
 
 	private static uint hash(string s, uint seed = 0U)
@@ -559,11 +540,9 @@ public class KleiItems : ThreadedHttps<KleiItems>
 
 	private List<KleiItems.InventoryRefreshCallback> InventoryRefreshCbs = new List<KleiItems.InventoryRefreshCallback>();
 
-	private List<KleiItems.UserRewardInfoReceivedCallback> UserRewardsInfoReceivedCbs = new List<KleiItems.UserRewardInfoReceivedCallback>();
-
 	public struct ItemData
 	{
-		public string PermitId;
+		public string Id;
 
 		public ulong ItemId;
 
@@ -571,8 +550,6 @@ public class KleiItems : ThreadedHttps<KleiItems>
 	}
 
 	public delegate void InventoryRefreshCallback();
-
-	public delegate void UserRewardInfoReceivedCallback();
 
 	private struct Item
 	{
@@ -588,8 +565,6 @@ public class KleiItems : ThreadedHttps<KleiItems>
 		public List<KleiItems.Item> AllItems;
 
 		public Dictionary<string, List<KleiItems.Item>> ItemsByType;
-
-		public List<string> UnclaimedRewards;
 	}
 
 	private struct Request
@@ -602,8 +577,8 @@ public class KleiItems : ThreadedHttps<KleiItems>
 		{
 			GetAllItems,
 			SetItemOpened,
-			Tick,
-			GetUserRewardsInfo
+			OpenMysteryBox,
+			Tick
 		}
 	}
 
@@ -632,6 +607,24 @@ public class KleiItems : ThreadedHttps<KleiItems>
 		public string ErrorCode;
 	}
 
+	private struct OpenMysteryBoxReply
+	{
+		public bool Error;
+
+		public string ErrorCode;
+
+		public KleiItems.OpenMysteryBoxReply.Item[] Items;
+
+		public struct Item
+		{
+			public ulong ItemID;
+
+			public string ItemType;
+
+			public int Context;
+		}
+	}
+
 	private struct TickReply
 	{
 		public bool Error;
@@ -639,20 +632,6 @@ public class KleiItems : ThreadedHttps<KleiItems>
 		public string ErrorCode;
 
 		public bool GiftReceived;
-	}
-
-	private struct RewardsInfoReply
-	{
-		public bool Error;
-
-		public string ErrorCode;
-
-		public Dictionary<string, KleiItems.RewardsInfoReply.Info> ItemRewards;
-
-		public struct Info
-		{
-			public bool Claimed;
-		}
 	}
 
 	private struct InventoryCache

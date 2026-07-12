@@ -53,7 +53,7 @@ internal class NestingPoopState : GameStateMachine<NestingPoopState, NestingPoop
 
 		private static bool IsValidNestingCell(int cell, object arg)
 		{
-			return Grid.IsValidCell(cell) && !Grid.Solid[cell] && Grid.Solid[Grid.CellBelow(cell)] && (NestingPoopState.Instance.IsValidPoopFromCell(cell, true) || NestingPoopState.Instance.IsValidPoopFromCell(cell, false));
+			return Grid.IsValidCell(cell) && !Grid.Solid[cell] && Grid.IsValidCell(Grid.CellBelow(cell)) && Grid.Solid[Grid.CellBelow(cell)] && (NestingPoopState.Instance.IsValidPoopFromCell(cell, true) || NestingPoopState.Instance.IsValidPoopFromCell(cell, false));
 		}
 
 		private static bool IsValidPoopFromCell(int cell, bool look_left)

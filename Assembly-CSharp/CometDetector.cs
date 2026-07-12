@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using Klei.AI;
 using KSerialization;
-using UnityEngine;
 
 public class CometDetector : GameStateMachine<CometDetector, CometDetector.Instance, IStateMachineTarget, CometDetector.Def>
 {
@@ -47,10 +45,7 @@ public class CometDetector : GameStateMachine<CometDetector, CometDetector.Insta
 		this.on.working.pre.PlayAnim("detect_pre").OnAnimQueueComplete(this.on.working.loop);
 		this.on.working.loop.PlayAnim("detect_loop", KAnim.PlayMode.Loop).EventTransition(GameHashes.OperationalChanged, this.on.working.pst, (CometDetector.Instance smi) => !smi.GetComponent<Operational>().IsOperational).EventTransition(GameHashes.ActiveChanged, this.on.working.pst, (CometDetector.Instance smi) => !smi.GetComponent<Operational>().IsActive)
 			.TagTransition(GameTags.Detecting, this.on.working.pst, true);
-		this.on.working.pst.PlayAnim("detect_pst").OnAnimQueueComplete(this.on.loop).Enter("Reroll", delegate(CometDetector.Instance smi)
-		{
-			smi.RerollAccuracy();
-		});
+		this.on.working.pst.PlayAnim("detect_pst").OnAnimQueueComplete(this.on.loop);
 	}
 
 	public GameStateMachine<CometDetector, CometDetector.Instance, IStateMachineTarget, CometDetector.Def>.State off;
@@ -87,12 +82,7 @@ public class CometDetector : GameStateMachine<CometDetector, CometDetector.Insta
 			: base(master, def)
 		{
 			this.detectorNetworkDef = new DetectorNetwork.Def();
-			this.detectorNetworkDef.interferenceRadius = 15;
-			this.detectorNetworkDef.worstWarningTime = 1f;
-			this.detectorNetworkDef.bestWarningTime = 200f;
-			this.detectorNetworkDef.bestNetworkSize = 6;
 			this.targetCraft = new Ref<LaunchConditionManager>();
-			this.RerollAccuracy();
 		}
 
 		public override void StartSM()
@@ -130,51 +120,27 @@ public class CometDetector : GameStateMachine<CometDetector, CometDetector.Insta
 
 		public void ScanSky(bool expectedDetectionForState)
 		{
-			float detectTime = this.GetDetectTime();
-			if (this.targetCraft.Get() == null)
+			LaunchConditionManager launchConditionManager = this.targetCraft.Get();
+			Option<SpaceScannerTarget> option;
+			if (launchConditionManager == null)
 			{
-				SaveGame.Instance.GetComponent<GameplayEventManager>().GetActiveEventsOfType<MeteorShowerEvent>(this.GetMyWorldId(), ref this.meteorShowers);
-				float num = float.MaxValue;
-				foreach (GameplayEventInstance gameplayEventInstance in this.meteorShowers)
-				{
-					MeteorShowerEvent.StatesInstance statesInstance = gameplayEventInstance.smi as MeteorShowerEvent.StatesInstance;
-					if (statesInstance != null)
-					{
-						num = Mathf.Min(num, statesInstance.TimeUntilNextShower());
-					}
-				}
-				this.meteorShowers.Clear();
-				this.UpdateDetectionState(num < detectTime, expectedDetectionForState);
-				return;
+				option = SpaceScannerTarget.MeteorShower();
 			}
-			Spacecraft spacecraftFromLaunchConditionManager = SpacecraftManager.instance.GetSpacecraftFromLaunchConditionManager(this.targetCraft.Get());
-			if (spacecraftFromLaunchConditionManager.state == Spacecraft.MissionState.Destroyed)
+			else if (SpacecraftManager.instance.GetSpacecraftFromLaunchConditionManager(this.targetCraft.Get()).state == Spacecraft.MissionState.Destroyed)
 			{
-				this.targetCraft.Set(null);
-				this.UpdateDetectionState(false, expectedDetectionForState);
-				return;
+				option = Option.None;
 			}
-			if (spacecraftFromLaunchConditionManager.state == Spacecraft.MissionState.Launching || spacecraftFromLaunchConditionManager.state == Spacecraft.MissionState.WaitingToLand || spacecraftFromLaunchConditionManager.state == Spacecraft.MissionState.Landing || (spacecraftFromLaunchConditionManager.state == Spacecraft.MissionState.Underway && spacecraftFromLaunchConditionManager.GetTimeLeft() <= detectTime))
+			else
 			{
-				this.UpdateDetectionState(true, expectedDetectionForState);
-				return;
+				option = SpaceScannerTarget.RocketBaseGame(launchConditionManager);
 			}
-			this.UpdateDetectionState(false, expectedDetectionForState);
-		}
-
-		public void RerollAccuracy()
-		{
-			this.nextAccuracy = global::UnityEngine.Random.value;
+			bool flag = option.IsSome() && Game.Instance.spaceScannerNetworkManager.IsTargetDetectedOnWorld(this.GetMyWorldId(), option.Unwrap());
+			this.UpdateDetectionState(flag, expectedDetectionForState);
 		}
 
 		public void SetLogicSignal(bool on)
 		{
 			base.GetComponent<LogicPorts>().SendSignal(LogicSwitch.PORT_ID, on ? 1 : 0);
-		}
-
-		public float GetDetectTime()
-		{
-			return this.detectorNetwork.GetDetectTimeRange().Lerp(this.nextAccuracy);
 		}
 
 		public void SetTargetCraft(LaunchConditionManager target)
@@ -188,19 +154,6 @@ public class CometDetector : GameStateMachine<CometDetector, CometDetector.Insta
 		}
 
 		public bool ShowWorkingStatus;
-
-		private const float BEST_WARNING_TIME = 200f;
-
-		private const float WORST_WARNING_TIME = 1f;
-
-		private const float VARIANCE = 50f;
-
-		private const int MAX_DISH_COUNT = 6;
-
-		private const int INTERFERENCE_RADIUS = 15;
-
-		[Serialize]
-		private float nextAccuracy;
 
 		[Serialize]
 		private Ref<LaunchConditionManager> targetCraft;

@@ -563,6 +563,8 @@ public class Assets : KMonoBehaviour, ISerializationCallbackReceiver
 
 	public MopPlacerConfig.MopPlacerAssets mopPlacerAssets;
 
+	public MovePickupablePlacerConfig.MovePickupablePlacerAssets movePickupToPlacerAssets;
+
 	public ComicData[] comics;
 
 	public static Assets instance;

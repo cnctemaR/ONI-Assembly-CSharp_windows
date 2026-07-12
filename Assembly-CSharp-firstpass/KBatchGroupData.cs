@@ -229,13 +229,15 @@ public class KBatchGroupData
 		return this.frameElementSymbols[idx];
 	}
 
-	public KAnim.Anim.Frame GetFrame(int index)
+	public bool TryGetFrame(int index, out KAnim.Anim.Frame frame)
 	{
 		if (index < 0 || index >= this.animFrames.Count)
 		{
-			return KAnim.Anim.Frame.InvalidFrame;
+			frame = default(KAnim.Anim.Frame);
+			return false;
 		}
-		return this.animFrames[index];
+		frame = this.animFrames[index];
+		return true;
 	}
 
 	public KAnim.Anim.FrameElement GetFrameElement(int index)
@@ -342,43 +344,36 @@ public class KBatchGroupData
 		return num;
 	}
 
-	public int WriteBuildData(List<KAnim.Build.SymbolFrameInstance> symbol_frame_instances, NativeArray<float> data)
+	public int WriteBuildData(NativeArray<float> data)
 	{
-		for (int i = 0; i < symbol_frame_instances.Count; i++)
+		for (int i = 0; i < this.symbolFrameInstances.Count; i++)
 		{
-			this.Write(data, i * 12, i, this.symbolFrameInstances[i].buildImageIdx, symbol_frame_instances[i]);
+			int num = i * 12;
+			KAnim.Build.SymbolFrameInstance symbolFrameInstance = this.symbolFrameInstances[i];
+			int buildImageIdx = symbolFrameInstance.buildImageIdx;
+			data[num] = (float)buildImageIdx;
+			KAnim.Build.Symbol buildSymbol = this.GetBuildSymbol(symbolFrameInstance.symbolIdx);
+			if (buildSymbol == null)
+			{
+				data[num + 1] = 0f;
+				data[num + 2] = 0f;
+			}
+			else
+			{
+				data[num + 1] = (float)buildSymbol.flags;
+				data[num + 2] = (float)buildSymbol.symbolIndexInSourceBuild;
+			}
+			data[num + 3] = 3.452817E+09f;
+			data[num + 4] = symbolFrameInstance.bboxMin.x;
+			data[num + 5] = symbolFrameInstance.bboxMin.y;
+			data[num + 6] = symbolFrameInstance.bboxMax.x;
+			data[num + 7] = symbolFrameInstance.bboxMax.y;
+			data[num + 8] = symbolFrameInstance.uvMin.x;
+			data[num + 9] = symbolFrameInstance.uvMin.y;
+			data[num + 10] = symbolFrameInstance.uvMax.x;
+			data[num + 11] = symbolFrameInstance.uvMax.y;
 		}
-		return symbol_frame_instances.Count * 12;
-	}
-
-	private void Write(NativeArray<float> data, int startIndex, int thisFrameIndex, int atlasIndex, KAnim.Build.SymbolFrameInstance symbol_frame_instance)
-	{
-		data[startIndex] = (float)atlasIndex;
-		KAnim.Build.SymbolFrame symbolFrame = symbol_frame_instance.symbolFrame;
-		KAnim.Build.Symbol buildSymbol = this.GetBuildSymbol(symbol_frame_instance.symbolIdx);
-		if (buildSymbol == null || symbolFrame == null)
-		{
-			data[startIndex + 1] = 0f;
-			data[startIndex + 2] = 0f;
-		}
-		else
-		{
-			data[startIndex + 1] = (float)buildSymbol.flags;
-			data[startIndex + 2] = (float)buildSymbol.symbolIndexInSourceBuild;
-		}
-		data[startIndex + 3] = 3.452817E+09f;
-		if (symbolFrame == null)
-		{
-			return;
-		}
-		data[startIndex + 4] = symbolFrame.bboxMin.x;
-		data[startIndex + 5] = symbolFrame.bboxMin.y;
-		data[startIndex + 6] = symbolFrame.bboxMax.x;
-		data[startIndex + 7] = symbolFrame.bboxMax.y;
-		data[startIndex + 8] = symbolFrame.uvMin.x;
-		data[startIndex + 9] = symbolFrame.uvMin.y;
-		data[startIndex + 10] = symbolFrame.uvMax.x;
-		data[startIndex + 11] = symbolFrame.uvMax.y;
+		return this.symbolFrameInstances.Count * 12;
 	}
 
 	private void WriteAnimFrame(NativeArray<float> data, int startIndex, int firstElementIdx, int numElements)

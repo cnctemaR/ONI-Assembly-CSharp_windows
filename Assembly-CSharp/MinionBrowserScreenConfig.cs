@@ -26,8 +26,7 @@ public readonly struct MinionBrowserScreenConfig
 
 	public static MinionBrowserScreenConfig MinionInstances(Option<GameObject> defaultSelectedMinionInstance = default(Option<GameObject>))
 	{
-		MinionBrowserScreen.GridItem.MinionInstanceTarget[] items = (from minionIdentity in global::UnityEngine.Object.FindObjectsOfType<MinionIdentity>()
-			select MinionBrowserScreen.GridItem.Of(minionIdentity.gameObject)).ToArray<MinionBrowserScreen.GridItem.MinionInstanceTarget>();
+		MinionBrowserScreen.GridItem.MinionInstanceTarget[] items = Components.MinionIdentities.Items.Select<MinionIdentity, MinionBrowserScreen.GridItem.MinionInstanceTarget>((MinionIdentity minionIdentity) => MinionBrowserScreen.GridItem.Of(minionIdentity.gameObject)).ToArray<MinionBrowserScreen.GridItem.MinionInstanceTarget>();
 		Option<MinionBrowserScreen.GridItem> option = defaultSelectedMinionInstance.AndThen<MinionBrowserScreen.GridItem>((GameObject minionInstance) => items.FirstOrDefault<MinionBrowserScreen.GridItem.MinionInstanceTarget>((MinionBrowserScreen.GridItem.MinionInstanceTarget item) => item.minionInstance == minionInstance));
 		if (option.IsNone() && items.Length != 0)
 		{

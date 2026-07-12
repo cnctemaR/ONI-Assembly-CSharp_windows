@@ -20,6 +20,7 @@ public class LiquidPumpingStation : Workable, ISim200ms
 		this.Sim200ms(0f);
 		base.SetWorkTime(10f);
 		this.RefreshDepthAvailable();
+		this.RegisterListenersToCellChanges();
 		this.meter = new MeterController(base.GetComponent<KBatchedAnimController>(), "meter_target", "meter", Meter.Offset.Behind, Grid.SceneLayer.NoLayer, new string[] { "meter_target", "meter_arrow", "meter_scale" });
 		foreach (GameObject gameObject in base.GetComponent<Storage>().items)
 		{
@@ -30,11 +31,39 @@ public class LiquidPumpingStation : Workable, ISim200ms
 		}
 	}
 
+	private void RegisterListenersToCellChanges()
+	{
+		int widthInCells = base.GetComponent<BuildingComplete>().Def.WidthInCells;
+		CellOffset[] array = new CellOffset[widthInCells * 4];
+		for (int i = 0; i < 4; i++)
+		{
+			int num = -(i + 1);
+			for (int j = 0; j < widthInCells; j++)
+			{
+				array[i * widthInCells + j] = new CellOffset(j, num);
+			}
+		}
+		Extents extents = new Extents(Grid.PosToCell(base.transform.GetPosition()), array);
+		this.partitionerEntry_solids = GameScenePartitioner.Instance.Add("LiquidPumpingStation", base.gameObject, extents, GameScenePartitioner.Instance.solidChangedLayer, new Action<object>(this.OnLowerCellChanged));
+		this.partitionerEntry_buildings = GameScenePartitioner.Instance.Add("LiquidPumpingStation", base.gameObject, extents, GameScenePartitioner.Instance.objectLayers[1], new Action<object>(this.OnLowerCellChanged));
+	}
+
+	private void UnregisterListenersToCellChanges()
+	{
+		GameScenePartitioner.Instance.Free(ref this.partitionerEntry_solids);
+		GameScenePartitioner.Instance.Free(ref this.partitionerEntry_buildings);
+	}
+
+	private void OnLowerCellChanged(object o)
+	{
+		this.RefreshDepthAvailable();
+	}
+
 	private void RefreshDepthAvailable()
 	{
 		int num = PumpingStationGuide.GetDepthAvailable(Grid.PosToCell(this), base.gameObject);
 		int num2 = 4;
-		if (num > this.depthAvailable)
+		if (num != this.depthAvailable)
 		{
 			KAnimControllerBase component = base.GetComponent<KAnimControllerBase>();
 			for (int i = 1; i <= num2; i++)
@@ -128,7 +157,6 @@ public class LiquidPumpingStation : Workable, ISim200ms
 		{
 			this.RefreshStatusItem();
 		}
-		this.RefreshDepthAvailable();
 	}
 
 	private void RefreshStatusItem()
@@ -263,6 +291,7 @@ public class LiquidPumpingStation : Workable, ISim200ms
 
 	protected override void OnCleanUp()
 	{
+		this.UnregisterListenersToCellChanges();
 		base.OnCleanUp();
 		if (this.session != null)
 		{
@@ -297,6 +326,10 @@ public class LiquidPumpingStation : Workable, ISim200ms
 	private int infoCount;
 
 	private int depthAvailable = -1;
+
+	private HandleVector<int>.Handle partitionerEntry_buildings;
+
+	private HandleVector<int>.Handle partitionerEntry_solids;
 
 	private LiquidPumpingStation.WorkSession session;
 

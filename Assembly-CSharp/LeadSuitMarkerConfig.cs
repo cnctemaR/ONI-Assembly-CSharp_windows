@@ -42,7 +42,7 @@ public class LeadSuitMarkerConfig : IBuildingConfig
 		{
 			new Tag("LeadSuitLocker")
 		};
-		suitMarker.PathFlag = PathFinder.PotentialPath.Flags.HasAtmoSuit;
+		suitMarker.PathFlag = PathFinder.PotentialPath.Flags.HasLeadSuit;
 		go.AddOrGet<AnimTileable>().tags = new Tag[]
 		{
 			new Tag("LeadSuitMarker"),

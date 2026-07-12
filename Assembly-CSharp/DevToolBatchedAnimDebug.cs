@@ -118,7 +118,8 @@ public class DevToolBatchedAnimDebug : DevTool
 				ImGui.Text("Current anim: " + component.CurrentAnim.name);
 				ImGui.Text("Current frame index: " + component.GetCurrentFrameIndex().ToString());
 				ImGuiEx.InputIntRange("Frame Index", ref this.FrameIndex, 0, batchGroupData.GetAnimFrames().Count - 1);
-				KAnim.Anim.Frame frame = batchGroupData.GetFrame(this.FrameIndex);
+				KAnim.Anim.Frame frame;
+				batchGroupData.TryGetFrame(this.FrameIndex, out frame);
 				ImGui.Text(string.Format("Frame [{0}]: firstElementIdx= {1} numElements= {2}", this.FrameIndex, frame.firstElementIdx, frame.numElements));
 				ImGui.Text("Frame Elements: ");
 				for (int k = 0; k < frame.numElements; k++)

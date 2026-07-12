@@ -22,7 +22,8 @@ public class BreathMonitor : GameStateMachine<BreathMonitor, BreathMonitor.Insta
 
 	private static bool IsLowBreath(BreathMonitor.Instance smi)
 	{
-		if (smi.master.gameObject.GetMyWorld().AlertManager.IsRedAlert())
+		WorldContainer myWorld = smi.master.gameObject.GetMyWorld();
+		if (!(myWorld == null) && myWorld.AlertManager.IsRedAlert())
 		{
 			return smi.breath.value < 45.454548f;
 		}

@@ -58,6 +58,255 @@ namespace STRINGS
 				public static LocString REPAIR_WORN_DESC = "Restore a " + UI.FormatAsLink("Worn Atmo Suit", "ATMO_SUIT") + " to working order.";
 			}
 
+			public class ATMO_SUIT_SET
+			{
+				public class PUFT
+				{
+					public static LocString NAME = "Puft Atmo Suit";
+
+					public static LocString DESC = "Critter-forward protective gear for the intrepid explorer!\nReleased for Klei Fest 2023.";
+				}
+			}
+
+			public class ATMO_SUIT_HELMET
+			{
+				public static LocString NAME = "Default Atmo Helmet";
+
+				public static LocString DESC = "Default helmet for atmo suits.";
+
+				public class FACADES
+				{
+					public class SPARKLE_RED
+					{
+						public static LocString NAME = "Red Glitter Atmo Helmet";
+
+						public static LocString DESC = "Protective gear at its sparkliest.";
+					}
+
+					public class SPARKLE_GREEN
+					{
+						public static LocString NAME = "Green Glitter Atmo Helmet";
+
+						public static LocString DESC = "Protective gear at its sparkliest.";
+					}
+
+					public class SPARKLE_BLUE
+					{
+						public static LocString NAME = "Blue Glitter Atmo Helmet";
+
+						public static LocString DESC = "Protective gear at its sparkliest.";
+					}
+
+					public class SPARKLE_PURPLE
+					{
+						public static LocString NAME = "Violet Glitter Atmo Helmet";
+
+						public static LocString DESC = "Protective gear at its sparkliest.";
+					}
+
+					public class LIMONE
+					{
+						public static LocString NAME = "Citrus Atmo Helmet";
+
+						public static LocString DESC = "Fresh, fruity and full of breathable air.";
+					}
+
+					public class PUFT
+					{
+						public static LocString NAME = "Puft Atmo Helmet";
+
+						public static LocString DESC = "Convincing enough to fool most Pufts and even a few Duplicants.\nReleased for Klei Fest 2023.";
+					}
+				}
+			}
+
+			public class ATMO_SUIT_BODY
+			{
+				public static LocString NAME = "Default Atmo Uniform";
+
+				public static LocString DESC = "Default top and bottom of an atmo suit.";
+
+				public class FACADES
+				{
+					public class SPARKLE_RED
+					{
+						public static LocString NAME = "Red Glitter Atmo Suit";
+
+						public static LocString DESC = "Protects the wearer from hostile environments <i>and</i> drab fashion.";
+					}
+
+					public class SPARKLE_GREEN
+					{
+						public static LocString NAME = "Green Glitter Atmo Suit";
+
+						public static LocString DESC = "Protects the wearer from hostile environments <i>and</i> drab fashion.";
+					}
+
+					public class SPARKLE_BLUE
+					{
+						public static LocString NAME = "Blue Glitter Atmo Suit";
+
+						public static LocString DESC = "Protects the wearer from hostile environments <i>and</i> drab fashion.";
+					}
+
+					public class SPARKLE_LAVENDER
+					{
+						public static LocString NAME = "Violet Glitter Atmo Suit";
+
+						public static LocString DESC = "Protects the wearer from hostile environments <i>and</i> drab fashion.";
+					}
+
+					public class LIMONE
+					{
+						public static LocString NAME = "Citrus Atmo Suit";
+
+						public static LocString DESC = "Perfect for summery, atmospheric excursions.";
+					}
+
+					public class PUFT
+					{
+						public static LocString NAME = "Puft Atmo Suit";
+
+						public static LocString DESC = "Warning: prolonged wear may result in feelings of Puft-up pride.\nReleased for Klei Fest 2023.";
+					}
+				}
+			}
+
+			public class ATMO_SUIT_GLOVES
+			{
+				public static LocString NAME = "Default Atmo Gloves";
+
+				public static LocString DESC = "Default atmo suit gloves.";
+
+				public class FACADES
+				{
+					public class SPARKLE_RED
+					{
+						public static LocString NAME = "Red Glitter Atmo Gloves";
+
+						public static LocString DESC = "Sparkly red gloves for hostile environments.";
+					}
+
+					public class SPARKLE_GREEN
+					{
+						public static LocString NAME = "Green Glitter Atmo Gloves";
+
+						public static LocString DESC = "Sparkly green gloves for hostile environments.";
+					}
+
+					public class SPARKLE_BLUE
+					{
+						public static LocString NAME = "Blue Glitter Atmo Gloves";
+
+						public static LocString DESC = "Sparkly blue gloves for hostile environments.";
+					}
+
+					public class SPARKLE_LAVENDER
+					{
+						public static LocString NAME = "Violet Glitter Atmo Gloves";
+
+						public static LocString DESC = "Sparkly violet gloves for hostile environments.";
+					}
+
+					public class LIMONE
+					{
+						public static LocString NAME = "Citrus Atmo Gloves";
+
+						public static LocString DESC = "Lime-inspired gloves brighten up hostile environments.";
+					}
+
+					public class PUFT
+					{
+						public static LocString NAME = "Puft Atmo Gloves";
+
+						public static LocString DESC = "A little Puft-love for delicate extremities.\nReleased for Klei Fest 2023.";
+					}
+				}
+			}
+
+			public class ATMO_SUIT_BELT
+			{
+				public static LocString NAME = "Default Atmo Belt";
+
+				public static LocString DESC = "Default belt for atmo suits.";
+
+				public class FACADES
+				{
+					public class SPARKLE_RED
+					{
+						public static LocString NAME = "Red Glitter Atmo Belt";
+
+						public static LocString DESC = "It's red! It's shiny! It keeps atmo suit pants on!";
+					}
+
+					public class SPARKLE_GREEN
+					{
+						public static LocString NAME = "Green Glitter Atmo Belt";
+
+						public static LocString DESC = "It's green! It's shiny! It keeps atmo suit pants on!";
+					}
+
+					public class SPARKLE_BLUE
+					{
+						public static LocString NAME = "Blue Glitter Atmo Belt";
+
+						public static LocString DESC = "It's blue! It's shiny! It keeps atmo suit pants on!";
+					}
+
+					public class SPARKLE_LAVENDER
+					{
+						public static LocString NAME = "Violet Glitter Atmo Belt";
+
+						public static LocString DESC = "It's violet! It's shiny! It keeps atmo suit pants on!";
+					}
+
+					public class LIMONE
+					{
+						public static LocString NAME = "Citrus Atmo Belt";
+
+						public static LocString DESC = "This lime-hued belt really pulls an atmo suit together.";
+					}
+
+					public class PUFT
+					{
+						public static LocString NAME = "Puft Atmo Belt";
+
+						public static LocString DESC = "If critters wore belts...\nReleased for Klei Fest 2023.";
+					}
+				}
+			}
+
+			public class ATMO_SUIT_SHOES
+			{
+				public static LocString NAME = "Default Atmo Boots";
+
+				public static LocString DESC = "Default footwear for atmo suits.";
+
+				public class FACADES
+				{
+					public class LIMONE
+					{
+						public static LocString NAME = "Citrus Atmo Boots";
+
+						public static LocString DESC = "Cheery boots for stomping around in hostile environments.";
+					}
+
+					public class PUFT
+					{
+						public static LocString NAME = "Puft Atmo Boots";
+
+						public static LocString DESC = "These boots were made for puft-ing.\nReleased for Klei Fest 2023.";
+					}
+
+					public class SPARKLE_BLACK
+					{
+						public static LocString NAME = "Black Glitter Atmo Boots";
+
+						public static LocString DESC = "A timeless color, with a little pizzazz.";
+					}
+				}
+			}
+
 			public class AQUA_SUIT
 			{
 				public static LocString NAME = UI.FormatAsLink("Aqua Suit", "AQUA_SUIT");
@@ -280,15 +529,9 @@ namespace STRINGS
 
 			public class CLOTHING_GLOVES
 			{
-				public static LocString NAME = UI.FormatAsLink("Gloves", "CLOTHING_GLOVES");
+				public static LocString NAME = "Default Gloves";
 
-				public static LocString GENERICNAME = "Clothing";
-
-				public static LocString DESC = "Testing desc for gloves skins";
-
-				public static LocString EFFECT = "Testing effect for gloves skins";
-
-				public static LocString RECIPE_DESC = "Testing recipe desc for gloves skins";
+				public static LocString DESC = "The default gloves.";
 
 				public class FACADES
 				{
@@ -452,20 +695,42 @@ namespace STRINGS
 
 						public static LocString DESC = "Wrist coverage is <i>so</i> overrated.";
 					}
+
+					public class CIRCUIT_GREEN
+					{
+						public static LocString NAME = "LED Gloves";
+
+						public static LocString DESC = "Great for gesticulating at parties.";
+					}
+
+					public class ATHLETE
+					{
+						public static LocString NAME = "Racing Gloves";
+
+						public static LocString DESC = "Crafted for high-speed handshakes.";
+					}
+
+					public class BASIC_BROWN_KHAKI
+					{
+						public static LocString NAME = "Basic Khaki Gloves";
+
+						public static LocString DESC = "They don't show dirt.";
+					}
+
+					public class BASIC_BLUEGREY
+					{
+						public static LocString NAME = "Basic Gunmetal Gloves";
+
+						public static LocString DESC = "A tough name for soft gloves.";
+					}
 				}
 			}
 
 			public class CLOTHING_TOPS
 			{
-				public static LocString NAME = UI.FormatAsLink("Tops", "CLOTHING_TOPS");
+				public static LocString NAME = "Default Top";
 
-				public static LocString GENERICNAME = "Clothing";
-
-				public static LocString DESC = "Testing desc for tops skins";
-
-				public static LocString EFFECT = "Testing effect for tops skins";
-
-				public static LocString RECIPE_DESC = "Testing recipe desc for tops skins";
+				public static LocString DESC = "The default shirt.";
 
 				public class FACADES
 				{
@@ -629,20 +894,42 @@ namespace STRINGS
 
 						public static LocString DESC = "It's best to keep jelly-filled puffer jackets away from sharp corners.";
 					}
+
+					public class CIRCUIT_GREEN
+					{
+						public static LocString NAME = "LED Jacket";
+
+						public static LocString DESC = "For dancing in the dark.";
+					}
+
+					public class TSHIRT_WHITE
+					{
+						public static LocString NAME = "Classic White Tee";
+
+						public static LocString DESC = "It's practically begging for a big Bog Jelly stain down the front.";
+					}
+
+					public class TSHIRT_MAGENTA
+					{
+						public static LocString NAME = "Classic Magenta Tee";
+
+						public static LocString DESC = "It will never chafe against delicate inner-elbow skin.";
+					}
+
+					public class ATHLETE
+					{
+						public static LocString NAME = "Racing Jacket";
+
+						public static LocString DESC = "The epitome of fast fashion.";
+					}
 				}
 			}
 
 			public class CLOTHING_BOTTOMS
 			{
-				public static LocString NAME = UI.FormatAsLink("Bottoms", "CLOTHING_BOTTOMS");
+				public static LocString NAME = "Default Bottom";
 
-				public static LocString GENERICNAME = "Clothing";
-
-				public static LocString DESC = "Testing desc for bottoms skins";
-
-				public static LocString EFFECT = "Testing effect for bottoms skins";
-
-				public static LocString RECIPE_DESC = "Testing recipe desc for bottoms skins";
+				public static LocString DESC = "The default bottoms.";
 
 				public class FACADES
 				{
@@ -757,20 +1044,42 @@ namespace STRINGS
 
 						public static LocString DESC = "A fresh pair of shorts. They're cleaner than they look.";
 					}
+
+					public class CIRCUIT_GREEN
+					{
+						public static LocString NAME = "LED Pants";
+
+						public static LocString DESC = "These legs are lit.";
+					}
+
+					public class ATHLETE
+					{
+						public static LocString NAME = "Racing Pants";
+
+						public static LocString DESC = "Fast, furious fashion.";
+					}
+
+					public class BASIC_LIGHTBROWN
+					{
+						public static LocString NAME = "Basic Khaki Pants";
+
+						public static LocString DESC = "Transition effortlessly from subterranean day to subterranean night.";
+					}
+
+					public class BASIC_REDORANGE
+					{
+						public static LocString NAME = "Basic Crimson Pants";
+
+						public static LocString DESC = "Like red pants, but slightly fancier-sounding.";
+					}
 				}
 			}
 
 			public class CLOTHING_SHOES
 			{
-				public static LocString NAME = UI.FormatAsLink("Shoes", "CLOTHING_SHOES");
+				public static LocString NAME = "Default Footwear";
 
-				public static LocString GENERICNAME = "Clothing";
-
-				public static LocString DESC = "Testing desc for shoes skins";
-
-				public static LocString EFFECT = "Testing effect for shoes skins";
-
-				public static LocString RECIPE_DESC = "Testing recipe desc for shoes skins";
+				public static LocString DESC = "The default style of footwear.";
 
 				public class FACADES
 				{
@@ -837,6 +1146,20 @@ namespace STRINGS
 						public static LocString DESC = "A fresh pair of black shoes that go with everything.";
 					}
 
+					public class BASIC_BLUEGREY
+					{
+						public static LocString NAME = "Basic Gunmetal Shoes";
+
+						public static LocString DESC = "A fresh pair of pastel shoes that go with everything.";
+					}
+
+					public class BASIC_TAN
+					{
+						public static LocString NAME = "Basic Tan Shoes";
+
+						public static LocString DESC = "They're remarkably unremarkable.";
+					}
+
 					public class SOCKS_ATHLETIC_DEEPRED
 					{
 						public static LocString NAME = "Team Captain Gym Socks";
@@ -885,6 +1208,28 @@ namespace STRINGS
 
 						public static LocString DESC = "Breathable socks that do nothing whatsoever to eliminate foot odor.";
 					}
+				}
+			}
+
+			public class CLOTHING_HATS
+			{
+				public static LocString NAME = "Default Headgear";
+
+				public static LocString DESC = "<DESC>";
+
+				public class FACADES
+				{
+				}
+			}
+
+			public class CLOTHING_ACCESORIES
+			{
+				public static LocString NAME = "Default Accessory";
+
+				public static LocString DESC = "<DESC>";
+
+				public class FACADES
+				{
 				}
 			}
 

@@ -92,8 +92,6 @@ public class Components
 
 	public static Components.Cmps<DiseaseSourceVisualizer> DiseaseSourceVisualizers = new Components.Cmps<DiseaseSourceVisualizer>();
 
-	public static Components.Cmps<DetectorNetwork.Instance> DetectorNetworks = new Components.Cmps<DetectorNetwork.Instance>();
-
 	public static Components.Cmps<Grave> Graves = new Components.Cmps<Grave>();
 
 	public static Components.Cmps<AttachableBuilding> AttachableBuildings = new Components.Cmps<AttachableBuilding>();
@@ -168,13 +166,17 @@ public class Components
 
 	public static Components.CmpsByWorld<Comet> Meteors = new Components.CmpsByWorld<Comet>();
 
+	public static Components.CmpsByWorld<DetectorNetwork.Instance> DetectorNetworks = new Components.CmpsByWorld<DetectorNetwork.Instance>();
+
+	public static Components.CmpsByWorld<ScannerNetworkVisualizer> ScannerVisualizers = new Components.CmpsByWorld<ScannerNetworkVisualizer>();
+
 	public static Components.Cmps<IncubationMonitor.Instance> IncubationMonitors = new Components.Cmps<IncubationMonitor.Instance>();
 
 	public static Components.Cmps<FixedCapturableMonitor.Instance> FixedCapturableMonitors = new Components.Cmps<FixedCapturableMonitor.Instance>();
 
 	public static Components.Cmps<BeeHive.StatesInstance> BeeHives = new Components.Cmps<BeeHive.StatesInstance>();
 
-	public class Cmps<T> : ICollection, IEnumerable
+	public class Cmps<T> : ICollection, IEnumerable, IEnumerable<T>
 	{
 		public List<T> Items
 		{
@@ -303,6 +305,16 @@ public class Components
 			throw new NotImplementedException();
 		}
 
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return this.items.GetEnumerator();
+		}
+
+		IEnumerator<T> IEnumerable<T>.GetEnumerator()
+		{
+			return this.items.GetEnumerator();
+		}
+
 		public IEnumerator GetEnumerator()
 		{
 			return this.items.GetEnumerator();
@@ -363,20 +375,9 @@ public class Components
 			return this.CreateOrGetCmps(worldId).Items;
 		}
 
-		public IEnumerator GetWorldEnumerator(int worldId)
+		public Dictionary<int, Components.Cmps<T>>.KeyCollection GetWorldsIds()
 		{
-			return this.CreateOrGetCmps(worldId).GetEnumerator();
-		}
-
-		public int[] GetWorldsIDs()
-		{
-			int[] array = new int[this.m_CmpsByWorld.Keys.Count];
-			int num = 0;
-			foreach (int num2 in this.m_CmpsByWorld.Keys)
-			{
-				array[num++] = num2;
-			}
-			return array;
+			return this.m_CmpsByWorld.Keys;
 		}
 
 		public int GlobalCount

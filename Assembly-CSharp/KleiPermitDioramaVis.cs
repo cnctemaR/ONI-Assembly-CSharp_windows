@@ -34,7 +34,7 @@ public class KleiPermitDioramaVis : KMonoBehaviour
 		{
 			return this.fallbackVis.WithError(string.Format("Given invalid permit: {0}", permit));
 		}
-		if (permit.Category == PermitCategory.Equipment || permit.Category == PermitCategory.DupeTops || permit.Category == PermitCategory.DupeBottoms || permit.Category == PermitCategory.DupeGloves || permit.Category == PermitCategory.DupeShoes || permit.Category == PermitCategory.DupeHats || permit.Category == PermitCategory.DupeAccessories)
+		if (permit.Category == PermitCategory.Equipment || permit.Category == PermitCategory.DupeTops || permit.Category == PermitCategory.DupeBottoms || permit.Category == PermitCategory.DupeGloves || permit.Category == PermitCategory.DupeShoes || permit.Category == PermitCategory.DupeHats || permit.Category == PermitCategory.DupeAccessories || permit.Category == PermitCategory.AtmoSuitHelmet || permit.Category == PermitCategory.AtmoSuitBody || permit.Category == PermitCategory.AtmoSuitGloves || permit.Category == PermitCategory.AtmoSuitBelt || permit.Category == PermitCategory.AtmoSuitShoes)
 		{
 			return this.equipmentVis;
 		}
@@ -58,7 +58,7 @@ public class KleiPermitDioramaVis : KMonoBehaviour
 				string prefabID = KleiPermitVisUtil.GetBuildingDef(permit).Value.PrefabID;
 				if (prefabID == "FlowerVaseHanging" || prefabID == "FlowerVaseHangingFancy")
 				{
-					return this.buildingPresentationStandHangingVis;
+					return this.buildingHangingHookVis;
 				}
 				return this.buildingPresentationStandVis.WithAlignment(Alignment.Top());
 			}
@@ -104,6 +104,48 @@ public class KleiPermitDioramaVis : KMonoBehaviour
 				return this.joyResponseBalloonVis;
 			}
 			return this.fallbackVis.WithError("No visualization available for JoyResponse " + permit.Id);
+		}
+	}
+
+	public static Sprite GetDioramaBackground(PermitCategory permitCategory)
+	{
+		switch (permitCategory)
+		{
+		case PermitCategory.DupeTops:
+		case PermitCategory.DupeBottoms:
+		case PermitCategory.DupeGloves:
+		case PermitCategory.DupeShoes:
+		case PermitCategory.DupeHats:
+		case PermitCategory.DupeAccessories:
+			return Assets.GetSprite("screen_bg_clothing");
+		case PermitCategory.AtmoSuitHelmet:
+		case PermitCategory.AtmoSuitBody:
+		case PermitCategory.AtmoSuitGloves:
+		case PermitCategory.AtmoSuitBelt:
+		case PermitCategory.AtmoSuitShoes:
+			return Assets.GetSprite("screen_bg_atmosuit");
+		case PermitCategory.Building:
+			return Assets.GetSprite("screen_bg_buildings");
+		case PermitCategory.Artwork:
+			return Assets.GetSprite("screen_bg_art");
+		case PermitCategory.JoyResponse:
+			return Assets.GetSprite("screen_bg_joyresponse");
+		}
+		return null;
+	}
+
+	public static Sprite GetDioramaBackground(ClothingOutfitUtility.OutfitType outfitType)
+	{
+		switch (outfitType)
+		{
+		case ClothingOutfitUtility.OutfitType.Clothing:
+			return Assets.GetSprite("screen_bg_clothing");
+		case ClothingOutfitUtility.OutfitType.JoyResponse:
+			return Assets.GetSprite("screen_bg_joyresponse");
+		case ClothingOutfitUtility.OutfitType.AtmoSuit:
+			return Assets.GetSprite("screen_bg_atmosuit");
+		default:
+			return null;
 		}
 	}
 

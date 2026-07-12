@@ -172,6 +172,7 @@ public class RailGun : StateMachineComponent<RailGun.StatesInstance>, ISim200ms,
 				if (!Grid.IsValidCell(num6) || Grid.Solid[num6])
 				{
 					flag = false;
+					break;
 				}
 				num6 = Grid.CellAbove(num6);
 			}

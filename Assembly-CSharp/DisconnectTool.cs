@@ -77,7 +77,7 @@ public class DisconnectTool : FilteredDragTool
 				int num = Grid.XYToCell(i, j);
 				if (Grid.IsVisible(num))
 				{
-					for (int k = 0; k < 44; k++)
+					for (int k = 0; k < 45; k++)
 					{
 						GameObject gameObject = Grid.Objects[num, k];
 						if (!(gameObject == null))

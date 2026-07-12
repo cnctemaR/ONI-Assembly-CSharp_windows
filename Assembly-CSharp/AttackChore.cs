@@ -121,7 +121,7 @@ public class AttackChore : Chore<AttackChore.StatesInstance>
 			{
 				smi.master.GetComponent<Weapon>().Configure(1f, 1f, AttackProperties.DamageType.Standard, AttackProperties.TargetType.Single, 1, 0f);
 			});
-			this.approachtarget.InitializeStates(this.attacker, this.attackTarget, this.attack, null, null, NavigationTactics.Range_3_ProhibitOverlap).Enter(delegate(AttackChore.StatesInstance smi)
+			this.approachtarget.InitializeStates(this.attacker, this.attackTarget, this.attack, null, MinionConfig.ATTACK_OFFSETS, NavigationTactics.Range_3_ProhibitOverlap).Enter(delegate(AttackChore.StatesInstance smi)
 			{
 				smi.master.CleanUpMultitool();
 				smi.master.Trigger(1039067354, this.attackTarget.Get(smi));

@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{0789841E-8170-48A8-9E98-30FA1C3253D9}</ProjectGuid>
+    <ProjectGuid>{60680212-E691-4C44-A960-C54EC515A895}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>UnityEngine.VideoModule</RootNamespace>
     <AssemblyName>UnityEngine.VideoModule</AssemblyName>
@@ -34,15 +34,15 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\UnityEngine.AudioModule\UnityEngine.AudioModule.csproj">
-      <Project>{0789841E-8170-48A8-9E98-30FA1C3253A2}</Project>
+      <Project>{60680212-E691-4C44-A960-C54EC515A85E}</Project>
       <Name>UnityEngine.AudioModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
-      <Project>{0789841E-8170-48A8-9E98-30FA1C3253A6}</Project>
+      <Project>{60680212-E691-4C44-A960-C54EC515A862}</Project>
       <Name>UnityEngine.CoreModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
-      <Project>{0789841E-8170-48A8-9E98-30FA1C3253BC}</Project>
+      <Project>{60680212-E691-4C44-A960-C54EC515A878}</Project>
       <Name>UnityEngine.SharedInternalsModule</Name>
     </ProjectReference>
   </ItemGroup>

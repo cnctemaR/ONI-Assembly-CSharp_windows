@@ -700,6 +700,7 @@ public class Pickupable : Workable, IHasSortOrder
 		{
 			int cachedCell = this.cachedCell;
 			this.RefreshStorageTags(data);
+			this.RemoveFaller();
 			if (this.storage != null)
 			{
 				if (this.carryAnimOverride != null && this.storage.GetComponent<Navigator>() != null)

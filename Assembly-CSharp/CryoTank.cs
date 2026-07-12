@@ -228,8 +228,12 @@ public class CryoTank : StateMachineComponent<CryoTank.StatesInstance>, ISidescr
 				}
 			}, UpdateRate.SIM_200ms, false).Exit(delegate(CryoTank.StatesInstance smi)
 			{
-				smi.sm.defrostedDuplicant.Get(smi).GetComponent<KBatchedAnimController>().SetSceneLayer(Grid.SceneLayer.Move);
-				smi.master.Cheer();
+				GameObject gameObject = smi.sm.defrostedDuplicant.Get(smi);
+				if (gameObject != null)
+				{
+					gameObject.GetComponent<KBatchedAnimController>().SetSceneLayer(Grid.SceneLayer.Move);
+					smi.master.Cheer();
+				}
 			});
 			this.off.PlayAnim("off").Enter(delegate(CryoTank.StatesInstance smi)
 			{

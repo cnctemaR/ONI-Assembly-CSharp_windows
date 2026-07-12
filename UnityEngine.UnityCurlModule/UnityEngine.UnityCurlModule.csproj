@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{0789841E-8170-48A8-9E98-30FA1C3253D0}</ProjectGuid>
+    <ProjectGuid>{60680212-E691-4C44-A960-C54EC515A88C}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>Unity.Curl</RootNamespace>
     <AssemblyName>UnityEngine.UnityCurlModule</AssemblyName>
@@ -21,7 +21,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
-      <Project>{0789841E-8170-48A8-9E98-30FA1C3253BC}</Project>
+      <Project>{60680212-E691-4C44-A960-C54EC515A878}</Project>
       <Name>UnityEngine.SharedInternalsModule</Name>
     </ProjectReference>
   </ItemGroup>

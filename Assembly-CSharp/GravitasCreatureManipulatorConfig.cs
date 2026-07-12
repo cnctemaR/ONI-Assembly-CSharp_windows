@@ -140,6 +140,18 @@ public class GravitasCreatureManipulatorConfig : IBuildingConfig
 		{
 			return Option.Some<string>(global::STRINGS.CREATURES.FAMILY_PLURAL.BEETASPECIES);
 		}
+		if (species == GameTags.Creatures.Species.BellySpecies)
+		{
+			return Option.Some<string>(global::STRINGS.CREATURES.FAMILY_PLURAL.BELLYSPECIES);
+		}
+		if (species == GameTags.Creatures.Species.SealSpecies)
+		{
+			return Option.Some<string>(global::STRINGS.CREATURES.FAMILY_PLURAL.SEALSPECIES);
+		}
+		if (species == GameTags.Creatures.Species.DeerSpecies)
+		{
+			return Option.Some<string>(global::STRINGS.CREATURES.FAMILY_PLURAL.DEERSPECIES);
+		}
 		return Option.None;
 	}
 
@@ -200,6 +212,18 @@ public class GravitasCreatureManipulatorConfig : IBuildingConfig
 		if (species == GameTags.Creatures.Species.BeetaSpecies)
 		{
 			return Option.Some<string>(CODEX.STORY_TRAITS.CRITTER_MANIPULATOR.SPECIES_ENTRIES.BEETA);
+		}
+		if (species == GameTags.Creatures.Species.BellySpecies)
+		{
+			return Option.Some<string>(CODEX.STORY_TRAITS.CRITTER_MANIPULATOR.SPECIES_ENTRIES.ICEBELLY);
+		}
+		if (species == GameTags.Creatures.Species.SealSpecies)
+		{
+			return Option.Some<string>(CODEX.STORY_TRAITS.CRITTER_MANIPULATOR.SPECIES_ENTRIES.SEAL);
+		}
+		if (species == GameTags.Creatures.Species.DeerSpecies)
+		{
+			return Option.Some<string>(CODEX.STORY_TRAITS.CRITTER_MANIPULATOR.SPECIES_ENTRIES.WOODDEER);
 		}
 		return Option.None;
 	}

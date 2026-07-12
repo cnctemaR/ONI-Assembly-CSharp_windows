@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{60680212-E691-4C44-A960-C54EC515A838}</ProjectGuid>
+    <ProjectGuid>{4474CC3B-DAAF-48AD-A509-3D83A0F287CE}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>Assembly-CSharp-firstpass</RootNamespace>
     <AssemblyName>Assembly-CSharp-firstpass</AssemblyName>
@@ -1324,6 +1324,8 @@
     <Compile Include="KProfilerEnd.cs" />
     <Compile Include="KProfilerEndpoint.cs" />
     <Compile Include="KProfilerPluginEndpoint.cs" />
+    <Compile Include="KProfilerUnityCodeBegin.cs" />
+    <Compile Include="KProfilerUnityCodeEnd.cs" />
     <Compile Include="KRandom.cs" />
     <Compile Include="KRectStretcher.cs" />
     <Compile Include="KScreen.cs" />
@@ -1469,6 +1471,7 @@
     <Compile Include="ProcGen\ClusterLayouts.cs" />
     <Compile Include="ProcGen\ComposableDictionary.cs" />
     <Compile Include="ProcGen\DefaultSettings.cs" />
+    <Compile Include="ProcGen\DlcMixingSettings.cs" />
     <Compile Include="ProcGen\ElementChoiceGroup.cs" />
     <Compile Include="ProcGen\Feature.cs" />
     <Compile Include="ProcGen\FeatureConverter.cs" />
@@ -1485,6 +1488,7 @@
     <Compile Include="ProcGen\Mob.cs" />
     <Compile Include="ProcGen\MobReference.cs" />
     <Compile Include="ProcGen\MobSettings.cs" />
+    <Compile Include="ProcGen\MutatedClusterLayout.cs" />
     <Compile Include="ProcGen\MutatedWorldData.cs" />
     <Compile Include="ProcGen\Node.cs" />
     <Compile Include="ProcGen\Noise\Combiner.cs" />
@@ -1510,6 +1514,7 @@
     <Compile Include="ProcGen\SpaceMapPOIPlacement.cs" />
     <Compile Include="ProcGen\StartingWorldElementSetting.cs" />
     <Compile Include="ProcGen\SubWorld.cs" />
+    <Compile Include="ProcGen\SubworldMixingSettings.cs" />
     <Compile Include="ProcGen\Temperature.cs" />
     <Compile Include="ProcGen\TerrainElementBandSettings.cs" />
     <Compile Include="ProcGen\Util.cs" />
@@ -1524,6 +1529,7 @@
     <Compile Include="ProcGen\WorldDisplayInfo.cs" />
     <Compile Include="ProcGen\WorldGenSettings.cs" />
     <Compile Include="ProcGen\WorldGenTags.cs" />
+    <Compile Include="ProcGen\WorldMixingSettings.cs" />
     <Compile Include="ProcGen\WorldPlacement.cs" />
     <Compile Include="ProcGen\Worlds.cs" />
     <Compile Include="ProcGen\WorldTrait.cs" />
@@ -2402,83 +2408,83 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\com.rlabrecque.steamworks.net\com.rlabrecque.steamworks.net.csproj">
-      <Project>{60680212-E691-4C44-A960-C54EC515A83A}</Project>
+      <Project>{4474CC3B-DAAF-48AD-A509-3D83A0F287D0}</Project>
       <Name>com.rlabrecque.steamworks.net</Name>
     </ProjectReference>
     <ProjectReference Include="..\FMODUnity\FMODUnity.csproj">
-      <Project>{60680212-E691-4C44-A960-C54EC515A83B}</Project>
+      <Project>{4474CC3B-DAAF-48AD-A509-3D83A0F287D1}</Project>
       <Name>FMODUnity</Name>
     </ProjectReference>
     <ProjectReference Include="..\ImGui.NET\ImGui.NET.csproj">
-      <Project>{60680212-E691-4C44-A960-C54EC515A840}</Project>
+      <Project>{4474CC3B-DAAF-48AD-A509-3D83A0F287D6}</Project>
       <Name>ImGui.NET</Name>
     </ProjectReference>
     <ProjectReference Include="..\Ionic.Zip\Ionic.Zip.csproj">
-      <Project>{60680212-E691-4C44-A960-C54EC515A841}</Project>
+      <Project>{4474CC3B-DAAF-48AD-A509-3D83A0F287D7}</Project>
       <Name>Ionic.Zip</Name>
     </ProjectReference>
     <ProjectReference Include="..\LibNoiseDotNet\LibNoiseDotNet.csproj">
-      <Project>{60680212-E691-4C44-A960-C54EC515A842}</Project>
+      <Project>{4474CC3B-DAAF-48AD-A509-3D83A0F287D8}</Project>
       <Name>LibNoiseDotNet</Name>
     </ProjectReference>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{60680212-E691-4C44-A960-C54EC515A845}</Project>
+      <Project>{4474CC3B-DAAF-48AD-A509-3D83A0F287DB}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
     <ProjectReference Include="..\Newtonsoft.Json\Newtonsoft.Json.csproj">
-      <Project>{60680212-E691-4C44-A960-C54EC515A846}</Project>
+      <Project>{4474CC3B-DAAF-48AD-A509-3D83A0F287DC}</Project>
       <Name>Newtonsoft.Json</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Core\System.Core.csproj">
-      <Project>{60680212-E691-4C44-A960-C54EC515A848}</Project>
+      <Project>{4474CC3B-DAAF-48AD-A509-3D83A0F287DE}</Project>
       <Name>System.Core</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Xml.Linq\System.Xml.Linq.csproj">
-      <Project>{60680212-E691-4C44-A960-C54EC515A854}</Project>
+      <Project>{4474CC3B-DAAF-48AD-A509-3D83A0F287EA}</Project>
       <Name>System.Xml.Linq</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Xml\System.Xml.csproj">
-      <Project>{60680212-E691-4C44-A960-C54EC515A853}</Project>
+      <Project>{4474CC3B-DAAF-48AD-A509-3D83A0F287E9}</Project>
       <Name>System.Xml</Name>
     </ProjectReference>
     <ProjectReference Include="..\System\System.csproj">
-      <Project>{60680212-E691-4C44-A960-C54EC515A84A}</Project>
+      <Project>{4474CC3B-DAAF-48AD-A509-3D83A0F287E0}</Project>
       <Name>System</Name>
     </ProjectReference>
     <ProjectReference Include="..\Unity.TextMeshPro\Unity.TextMeshPro.csproj">
-      <Project>{60680212-E691-4C44-A960-C54EC515A856}</Project>
+      <Project>{4474CC3B-DAAF-48AD-A509-3D83A0F287EC}</Project>
       <Name>Unity.TextMeshPro</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.AnimationModule\UnityEngine.AnimationModule.csproj">
-      <Project>{60680212-E691-4C44-A960-C54EC515A85B}</Project>
+      <Project>{4474CC3B-DAAF-48AD-A509-3D83A0F287F1}</Project>
       <Name>UnityEngine.AnimationModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.AssetBundleModule\UnityEngine.AssetBundleModule.csproj">
-      <Project>{60680212-E691-4C44-A960-C54EC515A85D}</Project>
+      <Project>{4474CC3B-DAAF-48AD-A509-3D83A0F287F3}</Project>
       <Name>UnityEngine.AssetBundleModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
-      <Project>{60680212-E691-4C44-A960-C54EC515A862}</Project>
+      <Project>{4474CC3B-DAAF-48AD-A509-3D83A0F287F8}</Project>
       <Name>UnityEngine.CoreModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.IMGUIModule\UnityEngine.IMGUIModule.csproj">
-      <Project>{60680212-E691-4C44-A960-C54EC515A86C}</Project>
+      <Project>{4474CC3B-DAAF-48AD-A509-3D83A0F28802}</Project>
       <Name>UnityEngine.IMGUIModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.InputLegacyModule\UnityEngine.InputLegacyModule.csproj">
-      <Project>{60680212-E691-4C44-A960-C54EC515A86D}</Project>
+      <Project>{4474CC3B-DAAF-48AD-A509-3D83A0F28803}</Project>
       <Name>UnityEngine.InputLegacyModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.TextRenderingModule\UnityEngine.TextRenderingModule.csproj">
-      <Project>{60680212-E691-4C44-A960-C54EC515A881}</Project>
+      <Project>{4474CC3B-DAAF-48AD-A509-3D83A0F28817}</Project>
       <Name>UnityEngine.TextRenderingModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.UIModule\UnityEngine.UIModule.csproj">
-      <Project>{60680212-E691-4C44-A960-C54EC515A887}</Project>
+      <Project>{4474CC3B-DAAF-48AD-A509-3D83A0F2881D}</Project>
       <Name>UnityEngine.UIModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.UI\UnityEngine.UI.csproj">
-      <Project>{60680212-E691-4C44-A960-C54EC515A884}</Project>
+      <Project>{4474CC3B-DAAF-48AD-A509-3D83A0F2881A}</Project>
       <Name>UnityEngine.UI</Name>
     </ProjectReference>
   </ItemGroup>

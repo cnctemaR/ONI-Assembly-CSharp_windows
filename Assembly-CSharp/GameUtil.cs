@@ -507,6 +507,18 @@ public static class GameUtil
 		return GameUtil.AddTimeSliceText(GameUtil.GetStandardFloat(calories) + text, timeSlice);
 	}
 
+	public static string GetFormattedPlantConsumptionValuePerCycle(Tag plantTag, float consumer_caloriesLossPerCaloriesPerKG, bool perCycle = true)
+	{
+		GameObject prefab = Assets.GetPrefab(plantTag);
+		IPlantConsumptionInstructions plantConsumptionInstructions = prefab.GetComponent<IPlantConsumptionInstructions>();
+		plantConsumptionInstructions = ((plantConsumptionInstructions != null) ? plantConsumptionInstructions : prefab.GetSMI<IPlantConsumptionInstructions>());
+		if (plantConsumptionInstructions == null)
+		{
+			return "Error";
+		}
+		return plantConsumptionInstructions.GetFormattedConsumptionPerCycle(consumer_caloriesLossPerCaloriesPerKG);
+	}
+
 	public static string GetFormattedPlantGrowth(float percent, GameUtil.TimeSlice timeSlice = GameUtil.TimeSlice.None)
 	{
 		percent = GameUtil.ApplyTimeSlice(percent, timeSlice);
@@ -698,7 +710,7 @@ public static class GameUtil
 		{
 			return UI.OVERLAYS.LIGHTING.RANGES.NO_LIGHT;
 		}
-		if (lux < 100)
+		if (lux < 500)
 		{
 			return UI.OVERLAYS.LIGHTING.RANGES.VERY_LOW_LIGHT;
 		}
@@ -2476,6 +2488,26 @@ public static class GameUtil
 		}
 		num -= tolerance;
 		return num * 1000f;
+	}
+
+	public static void FocusCamera(Transform target, bool select = true)
+	{
+		GameUtil.FocusCamera(target.GetPosition());
+		if (select)
+		{
+			KSelectable component = target.GetComponent<KSelectable>();
+			SelectTool.Instance.Select(component, false);
+		}
+	}
+
+	public static void FocusCamera(Vector3 position)
+	{
+		CameraController.Instance.CameraGoTo(position, 2f, true);
+	}
+
+	public static void FocusCamera(int cell)
+	{
+		GameUtil.FocusCamera(Grid.CellToPos(cell));
 	}
 
 	public static string RandomValueFromSeparatedString(string source, string separator = "\n")

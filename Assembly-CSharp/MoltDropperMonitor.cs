@@ -1,4 +1,5 @@
 ﻿using System;
+using Klei.AI;
 using KSerialization;
 using UnityEngine;
 
@@ -11,28 +12,42 @@ public class MoltDropperMonitor : GameStateMachine<MoltDropperMonitor, MoltDropp
 		{
 			smi.spawnedThisCycle = false;
 		});
-		this.satisfied.OnSignal(this.cellChangedSignal, this.drop, (MoltDropperMonitor.Instance smi) => smi.ShouldDropElement());
-		this.drop.Enter(delegate(MoltDropperMonitor.Instance smi)
+		this.satisfied.UpdateTransition(this.drop, (MoltDropperMonitor.Instance smi, float dt) => smi.ShouldDropElement(), UpdateRate.SIM_4000ms, false);
+		this.drop.DefaultState(this.drop.dropping);
+		this.drop.dropping.EnterTransition(this.drop.complete, (MoltDropperMonitor.Instance smi) => !smi.def.synchWithBehaviour).ToggleBehaviour(GameTags.Creatures.ReadyToMolt, (MoltDropperMonitor.Instance smi) => true, delegate(MoltDropperMonitor.Instance smi)
+		{
+			smi.GoTo(this.drop.complete);
+		});
+		this.drop.complete.Enter(delegate(MoltDropperMonitor.Instance smi)
 		{
 			smi.Drop();
-		}).EventTransition(GameHashes.NewDay, (MoltDropperMonitor.Instance smi) => GameClock.Instance, this.satisfied, null);
+		}).TriggerOnEnter(GameHashes.Molt, null).EventTransition(GameHashes.NewDay, (MoltDropperMonitor.Instance smi) => GameClock.Instance, this.satisfied, null);
 	}
 
 	public StateMachine<MoltDropperMonitor, MoltDropperMonitor.Instance, IStateMachineTarget, MoltDropperMonitor.Def>.BoolParameter droppedThisCycle = new StateMachine<MoltDropperMonitor, MoltDropperMonitor.Instance, IStateMachineTarget, MoltDropperMonitor.Def>.BoolParameter(false);
 
 	public GameStateMachine<MoltDropperMonitor, MoltDropperMonitor.Instance, IStateMachineTarget, MoltDropperMonitor.Def>.State satisfied;
 
-	public GameStateMachine<MoltDropperMonitor, MoltDropperMonitor.Instance, IStateMachineTarget, MoltDropperMonitor.Def>.State drop;
-
-	public StateMachine<MoltDropperMonitor, MoltDropperMonitor.Instance, IStateMachineTarget, MoltDropperMonitor.Def>.Signal cellChangedSignal;
+	public MoltDropperMonitor.DropStates drop;
 
 	public class Def : StateMachine.BaseDef
 	{
+		public bool synchWithBehaviour;
+
 		public string onGrowDropID;
 
 		public float massToDrop;
 
-		public SimHashes blockedElement;
+		public string amountName;
+
+		public Func<MoltDropperMonitor.Instance, bool> isReadyToMolt;
+	}
+
+	public class DropStates : GameStateMachine<MoltDropperMonitor, MoltDropperMonitor.Instance, IStateMachineTarget, MoltDropperMonitor.Def>.State
+	{
+		public GameStateMachine<MoltDropperMonitor, MoltDropperMonitor.Instance, IStateMachineTarget, MoltDropperMonitor.Def>.State dropping;
+
+		public GameStateMachine<MoltDropperMonitor, MoltDropperMonitor.Instance, IStateMachineTarget, MoltDropperMonitor.Def>.State complete;
 	}
 
 	public new class Instance : GameStateMachine<MoltDropperMonitor, MoltDropperMonitor.Instance, IStateMachineTarget, MoltDropperMonitor.Def>.GameInstance
@@ -40,23 +55,31 @@ public class MoltDropperMonitor : GameStateMachine<MoltDropperMonitor, MoltDropp
 		public Instance(IStateMachineTarget master, MoltDropperMonitor.Def def)
 			: base(master, def)
 		{
-			Singleton<CellChangeMonitor>.Instance.RegisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChange), "ElementDropperMonitor.Instance");
+			if (!string.IsNullOrEmpty(def.amountName))
+			{
+				AmountInstance amountInstance = Db.Get().Amounts.Get(def.amountName).Lookup(base.smi.gameObject);
+				amountInstance.OnMaxValueReached = (global::System.Action)Delegate.Combine(amountInstance.OnMaxValueReached, new global::System.Action(this.OnAmountMaxValueReached));
+			}
 		}
 
-		public override void StopSM(string reason)
+		private void OnAmountMaxValueReached()
 		{
-			base.StopSM(reason);
-			Singleton<CellChangeMonitor>.Instance.UnregisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChange));
+			this.lastTineAmountReachedMax = GameClock.Instance.GetTime();
 		}
 
-		private void OnCellChange()
+		protected override void OnCleanUp()
 		{
-			base.sm.cellChangedSignal.Trigger(this);
+			if (!string.IsNullOrEmpty(base.def.amountName))
+			{
+				AmountInstance amountInstance = Db.Get().Amounts.Get(base.def.amountName).Lookup(base.smi.gameObject);
+				amountInstance.OnMaxValueReached = (global::System.Action)Delegate.Remove(amountInstance.OnMaxValueReached, new global::System.Action(this.OnAmountMaxValueReached));
+			}
+			base.OnCleanUp();
 		}
 
 		public bool ShouldDropElement()
 		{
-			return this.IsValidTimeToDrop() && !base.smi.HasTag(GameTags.Creatures.Hungry) && base.smi.HasTag(GameTags.Creatures.Happy) && this.IsValidDropCell();
+			return base.def.isReadyToMolt(this);
 		}
 
 		public void Drop()
@@ -66,6 +89,11 @@ public class MoltDropperMonitor : GameStateMachine<MoltDropperMonitor, MoltDropp
 			gameObject.GetComponent<PrimaryElement>().Mass = base.def.massToDrop;
 			this.spawnedThisCycle = true;
 			this.timeOfLastDrop = GameClock.Instance.GetTime();
+			if (!string.IsNullOrEmpty(base.def.amountName))
+			{
+				AmountInstance amountInstance = Db.Get().Amounts.Get(base.def.amountName).Lookup(base.smi.gameObject);
+				amountInstance.value = amountInstance.GetMin();
+			}
 		}
 
 		private int GetDropSpawnLocation()
@@ -79,21 +107,16 @@ public class MoltDropperMonitor : GameStateMachine<MoltDropperMonitor, MoltDropp
 			return num;
 		}
 
-		public bool IsValidTimeToDrop()
-		{
-			return !this.spawnedThisCycle && (this.timeOfLastDrop <= 0f || GameClock.Instance.GetTime() - this.timeOfLastDrop > 600f);
-		}
-
-		public bool IsValidDropCell()
-		{
-			int num = Grid.PosToCell(base.transform.GetPosition());
-			return Grid.IsValidCell(num) && Grid.Element[num].id != base.def.blockedElement;
-		}
+		[MyCmpGet]
+		public KPrefabID prefabID;
 
 		[Serialize]
 		public bool spawnedThisCycle;
 
 		[Serialize]
 		public float timeOfLastDrop;
+
+		[Serialize]
+		public float lastTineAmountReachedMax;
 	}
 }

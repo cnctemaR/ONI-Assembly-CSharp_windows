@@ -19,6 +19,20 @@ public class SetLocker : StateMachineComponent<SetLocker.StatesInstance>, ISides
 	{
 		base.OnSpawn();
 		base.smi.StartSM();
+		if (this.contents == null)
+		{
+			this.ChooseContents();
+			return;
+		}
+		string[] array = this.contents;
+		for (int i = 0; i < array.Length; i++)
+		{
+			if (Assets.GetPrefab(array[i]) == null)
+			{
+				this.ChooseContents();
+				return;
+			}
+		}
 	}
 
 	public void DropContents()
@@ -27,18 +41,22 @@ public class SetLocker : StateMachineComponent<SetLocker.StatesInstance>, ISides
 		{
 			return;
 		}
-		for (int i = 0; i < this.contents.Length; i++)
-		{
-			Scenario.SpawnPrefab(Grid.PosToCell(base.gameObject), this.dropOffset.x, this.dropOffset.y, this.contents[i], Grid.SceneLayer.Front).SetActive(true);
-			PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Plus, Assets.GetPrefab(this.contents[i].ToTag()).GetProperName(), base.smi.master.transform, 1.5f, false);
-		}
 		if (DlcManager.IsExpansion1Active() && this.numDataBanks.Length >= 2)
 		{
 			int num = global::UnityEngine.Random.Range(this.numDataBanks[0], this.numDataBanks[1]);
-			for (int j = 0; j <= num; j++)
+			for (int i = 0; i <= num; i++)
 			{
 				Scenario.SpawnPrefab(Grid.PosToCell(base.gameObject), this.dropOffset.x, this.dropOffset.y, "OrbitalResearchDatabank", Grid.SceneLayer.Front).SetActive(true);
 				PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Plus, Assets.GetPrefab("OrbitalResearchDatabank".ToTag()).GetProperName(), base.smi.master.transform, 1.5f, false);
+			}
+		}
+		for (int j = 0; j < this.contents.Length; j++)
+		{
+			GameObject gameObject = Scenario.SpawnPrefab(Grid.PosToCell(base.gameObject), this.dropOffset.x, this.dropOffset.y, this.contents[j], Grid.SceneLayer.Front);
+			if (gameObject != null)
+			{
+				gameObject.SetActive(true);
+				PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Plus, Assets.GetPrefab(this.contents[j].ToTag()).GetProperName(), base.smi.master.transform, 1.5f, false);
 			}
 		}
 		base.gameObject.Trigger(-372600542, this);
@@ -149,6 +167,8 @@ public class SetLocker : StateMachineComponent<SetLocker.StatesInstance>, ISides
 	[Serialize]
 	private string[] contents;
 
+	public bool dropOnDeconstruct;
+
 	[Serialize]
 	private bool used;
 
@@ -159,6 +179,18 @@ public class SetLocker : StateMachineComponent<SetLocker.StatesInstance>, ISides
 		public StatesInstance(SetLocker master)
 			: base(master)
 		{
+		}
+
+		public override void StartSM()
+		{
+			base.StartSM();
+			base.smi.Subscribe(-702296337, delegate(object o)
+			{
+				if (base.smi.master.dropOnDeconstruct && base.smi.IsInsideState(base.smi.sm.closed))
+				{
+					base.smi.master.DropContents();
+				}
+			});
 		}
 	}
 
@@ -179,10 +211,12 @@ public class SetLocker : StateMachineComponent<SetLocker.StatesInstance>, ISides
 					}
 				}
 			});
-			this.open.PlayAnim("working").OnAnimQueueComplete(this.off).Exit(delegate(SetLocker.StatesInstance smi)
-			{
-				smi.master.DropContents();
-			});
+			this.open.PlayAnim("working_pre").QueueAnim("working_loop", false, null).QueueAnim("working_pst", false, null)
+				.OnAnimQueueComplete(this.off)
+				.Exit(delegate(SetLocker.StatesInstance smi)
+				{
+					smi.master.DropContents();
+				});
 			this.off.PlayAnim("off").Enter(delegate(SetLocker.StatesInstance smi)
 			{
 				if (smi.master.machineSound != null)

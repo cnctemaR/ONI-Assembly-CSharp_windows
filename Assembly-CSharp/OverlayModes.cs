@@ -634,6 +634,8 @@ public abstract class OverlayModes
 			foreach (Tag tag in new Tag[]
 			{
 				new Tag("Tile"),
+				new Tag("SnowTile"),
+				new Tag("WoodTile"),
 				new Tag("MeshTile"),
 				new Tag("InsulationTile"),
 				new Tag("GasPermeableMembrane"),
@@ -2008,6 +2010,10 @@ public abstract class OverlayModes
 		{
 		}
 
+		public virtual void OnRenderImage(RenderTexture src, RenderTexture dest)
+		{
+		}
+
 		public abstract string GetSoundName();
 
 		protected bool InFilter(string layer, Dictionary<string, ToolParameterMenu.ToggleState> filter)
@@ -2619,10 +2625,10 @@ public abstract class OverlayModes
 						BuildingCellVisualizer component2 = generator.GetComponent<BuildingCellVisualizer>();
 						if (component2 != null)
 						{
-							Image outputIcon = component2.GetOutputIcon();
-							if (outputIcon != null)
+							Image powerOutputIcon = component2.GetPowerOutputIcon();
+							if (powerOutputIcon != null)
 							{
-								outputIcon.color = color;
+								powerOutputIcon.color = color;
 							}
 						}
 					}
@@ -2635,10 +2641,10 @@ public abstract class OverlayModes
 						powerLabel.text = ((num2 != 0) ? ("-" + text) : text);
 						powerLabel.color = color2;
 						unitLabel.color = color2;
-						Image inputIcon = item.GetComponentInChildren<BuildingCellVisualizer>().GetInputIcon();
-						if (inputIcon != null)
+						Image powerInputIcon = item.GetComponentInChildren<BuildingCellVisualizer>().GetPowerInputIcon();
+						if (powerInputIcon != null)
 						{
-							inputIcon.color = color2;
+							powerInputIcon.color = color2;
 						}
 					}
 				}
@@ -3392,11 +3398,27 @@ public abstract class OverlayModes
 			this.legendFilters = this.CreateDefaultFilters();
 		}
 
+		public override void Update()
+		{
+			base.Update();
+			if (this.previousUserSetting != SimDebugView.Instance.user_temperatureThresholds)
+			{
+				this.RefreshLegendValues();
+				this.previousUserSetting = SimDebugView.Instance.user_temperatureThresholds;
+			}
+		}
+
 		public override void Enable()
 		{
 			base.Enable();
+			this.previousUserSetting = SimDebugView.Instance.user_temperatureThresholds;
+			this.RefreshLegendValues();
+		}
+
+		public void RefreshLegendValues()
+		{
 			int num = SimDebugView.Instance.temperatureThresholds.Length - 1;
-			for (int i = 0; i < this.temperatureLegend.Count; i++)
+			for (int i = 0; i < num; i++)
 			{
 				this.temperatureLegend[i].colour = GlobalAssets.Instance.colorSet.GetColorByName(SimDebugView.Instance.temperatureThresholds[num - i].colorName);
 				this.temperatureLegend[i].desc_arg = GameUtil.GetFormattedTemperature(SimDebugView.Instance.temperatureThresholds[num - i].value, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false);
@@ -3412,6 +3434,10 @@ public abstract class OverlayModes
 					ToolParameterMenu.ToggleState.On
 				},
 				{
+					ToolParameterMenu.FILTERLAYERS.RELATIVETEMPERATURE,
+					ToolParameterMenu.ToggleState.Off
+				},
+				{
 					ToolParameterMenu.FILTERLAYERS.HEATFLOW,
 					ToolParameterMenu.ToggleState.Off
 				},
@@ -3420,6 +3446,15 @@ public abstract class OverlayModes
 					ToolParameterMenu.ToggleState.Off
 				}
 			};
+		}
+
+		public override void OnRenderImage(RenderTexture src, RenderTexture dest)
+		{
+			if (Game.IsQuitting())
+			{
+				return;
+			}
+			KAnimBatchManager.Instance().RenderKAnimTemperaturePostProcessingEffects();
 		}
 
 		public override List<LegendEntry> GetCustomLegendData()
@@ -3434,6 +3469,8 @@ public abstract class OverlayModes
 				return this.heatFlowLegend;
 			case Game.TemperatureOverlayModes.StateChange:
 				return this.stateChangeLegend;
+			case Game.TemperatureOverlayModes.RelativeTemperature:
+				return new List<LegendEntry>();
 			default:
 				return this.temperatureLegend;
 			}
@@ -3448,6 +3485,10 @@ public abstract class OverlayModes
 			if (base.InFilter(ToolParameterMenu.FILTERLAYERS.ABSOLUTETEMPERATURE, this.legendFilters))
 			{
 				Game.Instance.temperatureOverlayMode = Game.TemperatureOverlayModes.AbsoluteTemperature;
+			}
+			if (base.InFilter(ToolParameterMenu.FILTERLAYERS.RELATIVETEMPERATURE, this.legendFilters))
+			{
+				Game.Instance.temperatureOverlayMode = Game.TemperatureOverlayModes.RelativeTemperature;
 			}
 			if (base.InFilter(ToolParameterMenu.FILTERLAYERS.ADAPTIVETEMPERATURE, this.legendFilters))
 			{
@@ -3475,6 +3516,10 @@ public abstract class OverlayModes
 				Infrared.Instance.SetMode(Infrared.Mode.Disabled);
 				CameraController.Instance.ToggleColouredOverlayView(false);
 				return;
+			case Game.TemperatureOverlayModes.RelativeTemperature:
+				Infrared.Instance.SetMode(Infrared.Mode.Infrared);
+				CameraController.Instance.ToggleColouredOverlayView(true);
+				return;
 			default:
 				return;
 			}
@@ -3489,6 +3534,8 @@ public abstract class OverlayModes
 
 		public static readonly HashedString ID = "Temperature";
 
+		private Vector2 previousUserSetting;
+
 		public List<LegendEntry> temperatureLegend = new List<LegendEntry>
 		{
 			new LegendEntry(UI.OVERLAYS.TEMPERATURE.MAXHOT, UI.OVERLAYS.TEMPERATURE.TOOLTIPS.TEMPERATURE, new Color(0.8901961f, 0.13725491f, 0.12941177f), null, null, true),
@@ -3498,14 +3545,18 @@ public abstract class OverlayModes
 			new LegendEntry(UI.OVERLAYS.TEMPERATURE.TEMPERATE, UI.OVERLAYS.TEMPERATURE.TOOLTIPS.TEMPERATURE, new Color(0.23137255f, 0.99607843f, 0.2901961f), null, null, true),
 			new LegendEntry(UI.OVERLAYS.TEMPERATURE.COLD, UI.OVERLAYS.TEMPERATURE.TOOLTIPS.TEMPERATURE, new Color(0.12156863f, 0.6313726f, 1f), null, null, true),
 			new LegendEntry(UI.OVERLAYS.TEMPERATURE.VERYCOLD, UI.OVERLAYS.TEMPERATURE.TOOLTIPS.TEMPERATURE, new Color(0.16862746f, 0.79607844f, 1f), null, null, true),
-			new LegendEntry(UI.OVERLAYS.TEMPERATURE.EXTREMECOLD, UI.OVERLAYS.TEMPERATURE.TOOLTIPS.TEMPERATURE, new Color(0.5019608f, 0.99607843f, 0.9411765f), null, null, true)
+			new LegendEntry(UI.OVERLAYS.TEMPERATURE.EXTREMECOLD, UI.OVERLAYS.TEMPERATURE.TOOLTIPS.TEMPERATURE, new Color(0.5019608f, 0.99607843f, 0.9411765f), null, null, true),
+			new LegendEntry(UI.OVERLAYS.TEMPERATURE.HEATSOURCES, UI.OVERLAYS.TEMPERATURE.TOOLTIPS.HEATSOURCES, Color.white, null, Assets.GetSprite("heat_source"), true),
+			new LegendEntry(UI.OVERLAYS.TEMPERATURE.HEATSINK, UI.OVERLAYS.TEMPERATURE.TOOLTIPS.HEATSINK, Color.white, null, Assets.GetSprite("heat_sink"), true)
 		};
 
 		public List<LegendEntry> heatFlowLegend = new List<LegendEntry>
 		{
 			new LegendEntry(UI.OVERLAYS.HEATFLOW.HEATING, UI.OVERLAYS.HEATFLOW.TOOLTIPS.HEATING, new Color(0.9098039f, 0.25882354f, 0.14901961f), null, null, true),
 			new LegendEntry(UI.OVERLAYS.HEATFLOW.NEUTRAL, UI.OVERLAYS.HEATFLOW.TOOLTIPS.NEUTRAL, new Color(0.30980393f, 0.30980393f, 0.30980393f), null, null, true),
-			new LegendEntry(UI.OVERLAYS.HEATFLOW.COOLING, UI.OVERLAYS.HEATFLOW.TOOLTIPS.COOLING, new Color(0.2509804f, 0.6313726f, 0.90588236f), null, null, true)
+			new LegendEntry(UI.OVERLAYS.HEATFLOW.COOLING, UI.OVERLAYS.HEATFLOW.TOOLTIPS.COOLING, new Color(0.2509804f, 0.6313726f, 0.90588236f), null, null, true),
+			new LegendEntry(UI.OVERLAYS.TEMPERATURE.HEATSOURCES, UI.OVERLAYS.TEMPERATURE.TOOLTIPS.HEATSOURCES, Color.white, null, Assets.GetSprite("heat_source"), true),
+			new LegendEntry(UI.OVERLAYS.TEMPERATURE.HEATSINK, UI.OVERLAYS.TEMPERATURE.TOOLTIPS.HEATSINK, Color.white, null, Assets.GetSprite("heat_sink"), true)
 		};
 
 		public List<LegendEntry> expandedTemperatureLegend = new List<LegendEntry>
@@ -3517,14 +3568,18 @@ public abstract class OverlayModes
 			new LegendEntry(UI.OVERLAYS.TEMPERATURE.TEMPERATE, UI.OVERLAYS.TEMPERATURE.TOOLTIPS.TEMPERATURE, new Color(0.23137255f, 0.99607843f, 0.2901961f), null, null, true),
 			new LegendEntry(UI.OVERLAYS.TEMPERATURE.COLD, UI.OVERLAYS.TEMPERATURE.TOOLTIPS.TEMPERATURE, new Color(0.12156863f, 0.6313726f, 1f), null, null, true),
 			new LegendEntry(UI.OVERLAYS.TEMPERATURE.VERYCOLD, UI.OVERLAYS.TEMPERATURE.TOOLTIPS.TEMPERATURE, new Color(0.16862746f, 0.79607844f, 1f), null, null, true),
-			new LegendEntry(UI.OVERLAYS.TEMPERATURE.EXTREMECOLD, UI.OVERLAYS.TEMPERATURE.TOOLTIPS.TEMPERATURE, new Color(0.5019608f, 0.99607843f, 0.9411765f), null, null, true)
+			new LegendEntry(UI.OVERLAYS.TEMPERATURE.EXTREMECOLD, UI.OVERLAYS.TEMPERATURE.TOOLTIPS.TEMPERATURE, new Color(0.5019608f, 0.99607843f, 0.9411765f), null, null, true),
+			new LegendEntry(UI.OVERLAYS.TEMPERATURE.HEATSOURCES, UI.OVERLAYS.TEMPERATURE.TOOLTIPS.HEATSOURCES, Color.white, null, Assets.GetSprite("heat_source"), true),
+			new LegendEntry(UI.OVERLAYS.TEMPERATURE.HEATSINK, UI.OVERLAYS.TEMPERATURE.TOOLTIPS.HEATSINK, Color.white, null, Assets.GetSprite("heat_sink"), true)
 		};
 
 		public List<LegendEntry> stateChangeLegend = new List<LegendEntry>
 		{
 			new LegendEntry(UI.OVERLAYS.STATECHANGE.HIGHPOINT, UI.OVERLAYS.STATECHANGE.TOOLTIPS.HIGHPOINT, new Color(0.8901961f, 0.13725491f, 0.12941177f), null, null, true),
 			new LegendEntry(UI.OVERLAYS.STATECHANGE.STABLE, UI.OVERLAYS.STATECHANGE.TOOLTIPS.STABLE, new Color(0.23137255f, 0.99607843f, 0.2901961f), null, null, true),
-			new LegendEntry(UI.OVERLAYS.STATECHANGE.LOWPOINT, UI.OVERLAYS.STATECHANGE.TOOLTIPS.LOWPOINT, new Color(0.5019608f, 0.99607843f, 0.9411765f), null, null, true)
+			new LegendEntry(UI.OVERLAYS.STATECHANGE.LOWPOINT, UI.OVERLAYS.STATECHANGE.TOOLTIPS.LOWPOINT, new Color(0.5019608f, 0.99607843f, 0.9411765f), null, null, true),
+			new LegendEntry(UI.OVERLAYS.TEMPERATURE.HEATSOURCES, UI.OVERLAYS.TEMPERATURE.TOOLTIPS.HEATSOURCES, Color.white, null, Assets.GetSprite("heat_source"), true),
+			new LegendEntry(UI.OVERLAYS.TEMPERATURE.HEATSINK, UI.OVERLAYS.TEMPERATURE.TOOLTIPS.HEATSINK, Color.white, null, Assets.GetSprite("heat_sink"), true)
 		};
 	}
 

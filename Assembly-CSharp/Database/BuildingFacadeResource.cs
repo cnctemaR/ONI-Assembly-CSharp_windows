@@ -6,39 +6,19 @@ namespace Database
 {
 	public class BuildingFacadeResource : PermitResource
 	{
-		[Obsolete]
+		[Obsolete("Please use constructor with dlcIds parameter")]
 		public BuildingFacadeResource(string Id, string Name, string Description, PermitRarity Rarity, string PrefabID, string AnimFile, Dictionary<string, string> workables = null)
-			: base(Id, Name, Description, PermitCategory.Building, Rarity, DlcManager.AVAILABLE_ALL_VERSIONS)
+			: this(Id, Name, Description, Rarity, PrefabID, AnimFile, DlcManager.AVAILABLE_ALL_VERSIONS, workables)
+		{
+		}
+
+		public BuildingFacadeResource(string Id, string Name, string Description, PermitRarity Rarity, string PrefabID, string AnimFile, string[] dlcIds, Dictionary<string, string> workables = null)
+			: base(Id, Name, Description, PermitCategory.Building, Rarity, dlcIds)
 		{
 			this.Id = Id;
 			this.PrefabID = PrefabID;
 			this.AnimFile = AnimFile;
 			this.InteractFile = workables;
-		}
-
-		public BuildingFacadeResource(string Id, string Name, string Description, PermitRarity Rarity, string PrefabID, string AnimFile, string[] DLCIds, Dictionary<string, string> workables = null)
-			: base(Id, Name, Description, PermitCategory.Building, Rarity, DLCIds)
-		{
-			this.Id = Id;
-			this.PrefabID = PrefabID;
-			this.AnimFile = AnimFile;
-			this.InteractFile = workables;
-		}
-
-		public BuildingFacadeResource(string Id, string Name, string Description, PermitRarity Rarity, string PrefabID, string AnimFile, string[] DLCIds, List<FacadeInfo.workable> workables = null)
-			: base(Id, Name, Description, PermitCategory.Building, Rarity, DLCIds)
-		{
-			this.Id = Id;
-			this.PrefabID = PrefabID;
-			this.AnimFile = AnimFile;
-			this.InteractFile = new Dictionary<string, string>();
-			if (workables != null)
-			{
-				foreach (FacadeInfo.workable workable in workables)
-				{
-					this.InteractFile.Add(workable.workableName, workable.workableAnim);
-				}
-			}
 		}
 
 		public void Init()

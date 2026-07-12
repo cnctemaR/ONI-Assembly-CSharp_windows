@@ -48,9 +48,9 @@ public class FoodFightChore : Chore<FoodFightChore.StatesInstance>
 			return;
 		}
 		base.smi.sm.ediblesource.Set(edible.gameObject, base.smi, false);
-		KCrashReporter.Assert(edible.FoodInfo.CaloriesPerUnit > 0f, edible.GetProperName() + " has invalid calories per unit. Will result in NaNs");
+		KCrashReporter.Assert(edible.FoodInfo.CaloriesPerUnit > 0f, edible.GetProperName() + " has invalid calories per unit. Will result in NaNs", null);
 		float num = 0.5f;
-		KCrashReporter.Assert(num > 0f, "FoodFightChore is requesting an invalid amount of food");
+		KCrashReporter.Assert(num > 0f, "FoodFightChore is requesting an invalid amount of food", null);
 		base.smi.sm.requestedfoodunits.Set(num, base.smi, false);
 		base.smi.sm.eater.Set(context.consumerState.gameObject, base.smi, false);
 		base.Begin(context);
@@ -110,20 +110,20 @@ public class FoodFightChore : Chore<FoodFightChore.StatesInstance>
 		{
 			default_state = this.fetch;
 			base.Target(this.eater);
-			this.root.ToggleAnims("anim_loco_run_angry_kanim", 0f, "");
-			this.fetch.InitializeStates(this.eater, this.ediblesource, this.ediblechunk, this.requestedfoodunits, this.actualfoodunits, this.moveToArena, null).ToggleAnims("anim_loco_run_angry_kanim", 0f, "");
+			this.root.ToggleAnims("anim_loco_run_angry_kanim", 0f);
+			this.fetch.InitializeStates(this.eater, this.ediblesource, this.ediblechunk, this.requestedfoodunits, this.actualfoodunits, this.moveToArena, null).ToggleAnims("anim_loco_run_angry_kanim", 0f);
 			this.moveToArena.InitializeStates(this.eater, this.locator, this.waitForParticipants, null, null, null);
 			this.waitForParticipants.Enter(delegate(FoodFightChore.StatesInstance smi)
 			{
 				smi.master.GetComponent<Facing>().SetFacing(Game.Instance.roomProber.GetRoomOfGameObject(smi.master.gameObject).cavity.GetCenter().x <= smi.master.transform.position.x);
-			}).ToggleAnims("anim_rage_kanim", 0f, "").PlayAnim("idle_pre")
+			}).ToggleAnims("anim_rage_kanim", 0f).PlayAnim("idle_pre")
 				.QueueAnim("idle_default", true, null)
 				.ScheduleGoTo(30f, this.emoteRoar)
 				.EventTransition(GameHashes.GameplayEventCommence, this.emoteRoar, null);
 			this.emoteRoar.Enter("ChooseTarget", delegate(FoodFightChore.StatesInstance smi)
 			{
 				smi.UpdateAttackTarget();
-			}).ToggleAnims("anim_rage_kanim", 0f, "").PlayAnim("rage_pre")
+			}).ToggleAnims("anim_rage_kanim", 0f).PlayAnim("rage_pre")
 				.QueueAnim("rage_loop", false, null)
 				.QueueAnim("rage_pst", false, null)
 				.OnAnimQueueComplete(this.fight);

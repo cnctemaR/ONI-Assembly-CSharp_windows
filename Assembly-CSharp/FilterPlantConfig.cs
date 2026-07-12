@@ -54,7 +54,7 @@ public class FilterPlantConfig : IEntityConfig
 		elementConsumer.consumptionRadius = 4;
 		elementConsumer.sampleCellOffset = new Vector3(0f, 0f);
 		elementConsumer.consumptionRate = 0.008333334f;
-		EntityTemplates.CreateAndRegisterPreviewForPlant(EntityTemplates.CreateAndRegisterSeedForPlant(gameObject, SeedProducer.ProductionType.Harvest, "FilterPlantSeed", global::STRINGS.CREATURES.SPECIES.SEEDS.FILTERPLANT.NAME, global::STRINGS.CREATURES.SPECIES.SEEDS.FILTERPLANT.DESC, Assets.GetAnim("seed_cactus_kanim"), "object", 1, new List<Tag> { GameTags.CropSeed }, SingleEntityReceptacle.ReceptacleDirection.Top, default(Tag), 21, global::STRINGS.CREATURES.SPECIES.FILTERPLANT.DOMESTICATEDDESC, EntityTemplates.CollisionShape.CIRCLE, 0.35f, 0.35f, null, "", false), "FilterPlant_preview", Assets.GetAnim("cactus_kanim"), "place", 1, 2);
+		EntityTemplates.CreateAndRegisterPreviewForPlant(EntityTemplates.CreateAndRegisterSeedForPlant(gameObject, SeedProducer.ProductionType.Harvest, "FilterPlantSeed", global::STRINGS.CREATURES.SPECIES.SEEDS.FILTERPLANT.NAME, global::STRINGS.CREATURES.SPECIES.SEEDS.FILTERPLANT.DESC, Assets.GetAnim("seed_cactus_kanim"), "object", 1, new List<Tag> { GameTags.CropSeed }, SingleEntityReceptacle.ReceptacleDirection.Top, default(Tag), 21, global::STRINGS.CREATURES.SPECIES.FILTERPLANT.DOMESTICATEDDESC, EntityTemplates.CollisionShape.CIRCLE, 0.35f, 0.35f, null, "", false, this.GetDlcIds()), "FilterPlant_preview", Assets.GetAnim("cactus_kanim"), "place", 1, 2);
 		gameObject.AddTag(GameTags.DeprecatedContent);
 		return gameObject;
 	}

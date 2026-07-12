@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using ProcGen;
+using ProcGenGame;
 using STRINGS;
 using UnityEngine;
 
@@ -36,11 +37,11 @@ public class ColonyDestinationAsteroidBeltData
 	{
 		get
 		{
-			if (this.cluster == null)
+			if (this.clusterLayout == null)
 			{
 				return "";
 			}
-			return this.cluster.name;
+			return this.clusterLayout.name;
 		}
 	}
 
@@ -48,11 +49,11 @@ public class ColonyDestinationAsteroidBeltData
 	{
 		get
 		{
-			if (this.cluster == null)
+			if (this.clusterLayout == null)
 			{
 				return WorldGenSettings.ClusterDefaultName;
 			}
-			return this.cluster.filePath;
+			return this.clusterLayout.filePath;
 		}
 	}
 
@@ -62,7 +63,11 @@ public class ColonyDestinationAsteroidBeltData
 	{
 		get
 		{
-			return this.cluster;
+			if (this.mutatedClusterLayout != null)
+			{
+				return this.mutatedClusterLayout.layout;
+			}
+			return this.clusterLayout;
 		}
 	}
 
@@ -81,14 +86,7 @@ public class ColonyDestinationAsteroidBeltData
 		this.worlds = new List<global::ProcGen.World>();
 		if (clusterPath != null)
 		{
-			this.cluster = SettingsCache.clusterLayouts.GetClusterData(clusterPath);
-			for (int i = 0; i < this.cluster.worldPlacements.Count; i++)
-			{
-				if (i != this.cluster.startWorldIndex)
-				{
-					this.worlds.Add(SettingsCache.worlds.GetWorldData(this.cluster.worldPlacements[i].world));
-				}
-			}
+			this.clusterLayout = SettingsCache.clusterLayouts.GetClusterData(clusterPath);
 		}
 		this.ReInitialize(seed);
 	}
@@ -114,7 +112,22 @@ public class ColonyDestinationAsteroidBeltData
 		this.paramDescriptors.Clear();
 		this.traitDescriptors.Clear();
 		this.sprite = ColonyDestinationAsteroidBeltData.GetUISprite(this.startWorld.asteroidIcon);
-		this.difficulty = this.cluster.difficulty;
+		this.difficulty = this.clusterLayout.difficulty;
+		this.mutatedClusterLayout = WorldgenMixing.DoWorldMixing(this.clusterLayout, seed, true, true);
+		this.RemixClusterLayout();
+	}
+
+	public void RemixClusterLayout()
+	{
+		WorldgenMixing.RefreshWorldMixing(this.mutatedClusterLayout, this.seed, true, true);
+		this.worlds.Clear();
+		for (int i = 0; i < this.Layout.worldPlacements.Count; i++)
+		{
+			if (i != this.Layout.startWorldIndex)
+			{
+				this.worlds.Add(SettingsCache.worlds.GetWorldData(this.Layout.worldPlacements[i].world));
+			}
+		}
 	}
 
 	public List<AsteroidDescriptor> GetParamDescriptors()
@@ -138,9 +151,9 @@ public class ColonyDestinationAsteroidBeltData
 	private List<AsteroidDescriptor> GenerateParamDescriptors()
 	{
 		List<AsteroidDescriptor> list = new List<AsteroidDescriptor>();
-		if (this.cluster != null && DlcManager.FeatureClusterSpaceEnabled())
+		if (this.clusterLayout != null && DlcManager.FeatureClusterSpaceEnabled())
 		{
-			list.Add(new AsteroidDescriptor(string.Format(WORLDS.SURVIVAL_CHANCE.CLUSTERNAME, Strings.Get(this.cluster.name)), Strings.Get(this.cluster.description), Color.white, null, null));
+			list.Add(new AsteroidDescriptor(string.Format(WORLDS.SURVIVAL_CHANCE.CLUSTERNAME, Strings.Get(this.clusterLayout.name)), Strings.Get(this.clusterLayout.description), Color.white, null, null));
 		}
 		list.Add(new AsteroidDescriptor(string.Format(WORLDS.SURVIVAL_CHANCE.PLANETNAME, this.startWorldName), null, Color.white, null, null));
 		list.Add(new AsteroidDescriptor(Strings.Get(this.startWorld.description), null, Color.white, null, null));
@@ -226,7 +239,7 @@ public class ColonyDestinationAsteroidBeltData
 				int num = this.seed;
 				if (num > 0)
 				{
-					num += this.cluster.worldPlacements.FindIndex((WorldPlacement x) => x.world == world.filePath);
+					num += this.clusterLayout.worldPlacements.FindIndex((WorldPlacement x) => x.world == world.filePath);
 				}
 				foreach (string text in SettingsCache.GetRandomTraits(num, world))
 				{
@@ -240,7 +253,9 @@ public class ColonyDestinationAsteroidBeltData
 
 	private global::ProcGen.World startWorld;
 
-	private ClusterLayout cluster;
+	private ClusterLayout clusterLayout;
+
+	private MutatedClusterLayout mutatedClusterLayout;
 
 	private List<AsteroidDescriptor> paramDescriptors = new List<AsteroidDescriptor>();
 

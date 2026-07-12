@@ -121,12 +121,12 @@ public class BansheeChore : Chore<BansheeChore.StatesInstance>
 			this.findAudience.Enter("FindAudience", delegate(BansheeChore.StatesInstance smi)
 			{
 				smi.FindAudience();
-			}).ToggleAnims("anim_loco_banshee_kanim", 0f, "");
-			this.moveToAudience.MoveTo((BansheeChore.StatesInstance smi) => smi.sm.targetWailLocation.Get(smi), this.wail, this.delay, false).ToggleAnims("anim_loco_banshee_kanim", 0f, "");
+			}).ToggleAnims("anim_loco_banshee_kanim", 0f);
+			this.moveToAudience.MoveTo((BansheeChore.StatesInstance smi) => smi.sm.targetWailLocation.Get(smi), this.wail, this.delay, false).ToggleAnims("anim_loco_banshee_kanim", 0f);
 			this.wail.defaultState = this.wail.pre.DoNotification((BansheeChore.StatesInstance smi) => smi.notification);
-			this.wail.pre.ToggleAnims("anim_banshee_kanim", 0f, "").PlayAnim("working_pre").ToggleEffect((BansheeChore.StatesInstance smi) => this.wailPreEffect)
+			this.wail.pre.ToggleAnims("anim_banshee_kanim", 0f).PlayAnim("working_pre").ToggleEffect((BansheeChore.StatesInstance smi) => this.wailPreEffect)
 				.OnAnimQueueComplete(this.wail.loop);
-			this.wail.loop.ToggleAnims("anim_banshee_kanim", 0f, "").Enter(delegate(BansheeChore.StatesInstance smi)
+			this.wail.loop.ToggleAnims("anim_banshee_kanim", 0f).Enter(delegate(BansheeChore.StatesInstance smi)
 			{
 				smi.Play("working_loop", KAnim.PlayMode.Loop);
 				AcousticDisturbance.Emit(smi.master.gameObject, STRESS.BANSHEE_WAIL_RADIUS);
@@ -135,16 +135,16 @@ public class BansheeChore : Chore<BansheeChore.StatesInstance>
 				{
 					smi.BotherAudience(dt);
 				}, UpdateRate.SIM_200ms, false);
-			this.wail.pst.ToggleAnims("anim_banshee_kanim", 0f, "").QueueAnim("working_pst", false, null).EventHandlerTransition(GameHashes.AnimQueueComplete, this.recover, (BansheeChore.StatesInstance smi, object data) => true)
+			this.wail.pst.ToggleAnims("anim_banshee_kanim", 0f).QueueAnim("working_pst", false, null).EventHandlerTransition(GameHashes.AnimQueueComplete, this.recover, (BansheeChore.StatesInstance smi, object data) => true)
 				.ScheduleGoTo(3f, this.recover);
-			this.recover.ToggleEffect((BansheeChore.StatesInstance smi) => this.wailRecoverEffect).ToggleAnims("anim_emotes_default_kanim", 0f, "").QueueAnim("breathe_pre", false, null)
+			this.recover.ToggleEffect((BansheeChore.StatesInstance smi) => this.wailRecoverEffect).ToggleAnims("anim_emotes_default_kanim", 0f).QueueAnim("breathe_pre", false, null)
 				.QueueAnim("breathe_loop", false, null)
 				.QueueAnim("breathe_loop", false, null)
 				.QueueAnim("breathe_loop", false, null)
 				.QueueAnim("breathe_pst", false, null)
 				.OnAnimQueueComplete(this.complete);
 			this.delay.ScheduleGoTo(1f, this.wander);
-			this.wander.MoveTo((BansheeChore.StatesInstance smi) => smi.FindIdleCell(), this.findAudience, this.findAudience, false).ToggleAnims("anim_loco_banshee_kanim", 0f, "");
+			this.wander.MoveTo((BansheeChore.StatesInstance smi) => smi.FindIdleCell(), this.findAudience, this.findAudience, false).ToggleAnims("anim_loco_banshee_kanim", 0f);
 			this.complete.Enter(delegate(BansheeChore.StatesInstance smi)
 			{
 				smi.StopSM("complete");

@@ -134,6 +134,8 @@ namespace ProcGen
 
 		public static readonly Tag SprinkleOfOxyRock = TagManager.Create("SprinkleOfOxyRock");
 
+		public static readonly Tag Mixing = TagManager.Create("Mixing");
+
 		public static readonly Tag RocketInterior = TagManager.Create("RocketInterior");
 
 		public static readonly Tag DEBUG_Split = TagManager.Create("DEBUG_Split");

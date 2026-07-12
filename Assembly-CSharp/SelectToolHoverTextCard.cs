@@ -123,7 +123,7 @@ public class SelectToolHoverTextCard : HoverTextConfiguration
 				float thermalComfort = GameUtil.GetThermalComfort(num, 0f);
 				float thermalComfort2 = GameUtil.GetThermalComfort(num, -0.08368001f);
 				float num2 = 0f;
-				if (thermalComfort2 * 0.001f > -0.27893335f - num2 && thermalComfort2 * 0.001f < 0.27893335f + num2)
+				if (thermalComfort2 * 0.001f > -0.11157334f - num2 && thermalComfort2 * 0.001f < 0.11157334f + num2)
 				{
 					text = UI.OVERLAYS.HEATFLOW.NEUTRAL;
 				}

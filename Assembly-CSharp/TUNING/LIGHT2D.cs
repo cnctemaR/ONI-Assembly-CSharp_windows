@@ -11,6 +11,8 @@ namespace TUNING
 
 		public static readonly Color LIGHT_PURPLE = new Color(0.9f, 0.4f, 0.74f, 1f);
 
+		public static readonly Color LIGHT_PINK = new Color(0.9f, 0.4f, 0.6f, 1f);
+
 		public static readonly Color LIGHT_YELLOW = new Color(0.57f, 0.55f, 0.44f, 1f);
 
 		public static readonly Color LIGHT_OVERLAY = new Color(0.56f, 0.56f, 0.56f, 1f);
@@ -65,6 +67,28 @@ namespace TUNING
 
 		public static readonly Vector2 SUNLAMP_DIRECTION = LIGHT2D.DEFAULT_DIRECTION;
 
+		public const int MERCURYCEILINGLIGHT_LUX = 60000;
+
+		public const float MERCURYCEILINGLIGHT_RANGE = 8f;
+
+		public const float MERCURYCEILINGLIGHT_ANGLE = 2.6f;
+
+		public const float MERCURYCEILINGLIGHT_FALLOFFRATE = 0.4f;
+
+		public const int MERCURYCEILINGLIGHT_WIDTH = 3;
+
+		public const global::LightShape MERCURYCEILINGLIGHT_SHAPE = global::LightShape.Quad;
+
+		public static readonly Color MERCURYCEILINGLIGHT_LUX_OVERLAYCOLOR = LIGHT2D.LIGHT_OVERLAY;
+
+		public static readonly Color MERCURYCEILINGLIGHT_COLOR = LIGHT2D.LIGHT_PINK;
+
+		public static readonly Vector2 MERCURYCEILINGLIGHT_OFFSET = new Vector2(0.05f, 0.65f);
+
+		public static readonly Vector2 MERCURYCEILINGLIGHT_DIRECTIONVECTOR = LIGHT2D.DEFAULT_DIRECTION;
+
+		public const DiscreteShadowCaster.Direction MERCURYCEILINGLIGHT_DIRECTION = DiscreteShadowCaster.Direction.South;
+
 		public static readonly Color LIGHT_PREVIEW_COLOR = LIGHT2D.LIGHT_YELLOW;
 
 		public const float HEADQUARTERS_RANGE = 5f;
@@ -78,6 +102,22 @@ namespace TUNING
 		public static readonly Vector2 HEADQUARTERS_OFFSET = new Vector2(0.5f, 3f);
 
 		public static readonly Vector2 EXOBASE_HEADQUARTERS_OFFSET = new Vector2(0f, 2.5f);
+
+		public const float POI_TECH_UNLOCK_RANGE = 5f;
+
+		public const float POI_TECH_UNLOCK_ANGLE = 2.6f;
+
+		public const global::LightShape POI_TECH_UNLOCK_SHAPE = global::LightShape.Cone;
+
+		public static readonly Color POI_TECH_UNLOCK_COLOR = LIGHT2D.LIGHT_YELLOW;
+
+		public static readonly Color POI_TECH_UNLOCK_OVERLAYCOLOR = LIGHT2D.LIGHT_OVERLAY;
+
+		public static readonly Vector2 POI_TECH_UNLOCK_OFFSET = new Vector2(0f, 3.4f);
+
+		public const int POI_TECH_UNLOCK_LUX = 1800;
+
+		public static readonly Vector2 POI_TECH_DIRECTION = LIGHT2D.DEFAULT_DIRECTION;
 
 		public const float ENGINE_RANGE = 10f;
 
@@ -180,5 +220,19 @@ namespace TUNING
 		public static readonly Vector2 BIOLUMROCK_OFFSET = new Vector2(0.05f, 0.33f);
 
 		public static readonly Vector2 BIOLUMROCK_DIRECTION = LIGHT2D.DEFAULT_DIRECTION;
+
+		public const float PINKROCK_RANGE = 2f;
+
+		public const float PINKROCK_ANGLE = 0f;
+
+		public const global::LightShape PINKROCK_SHAPE = global::LightShape.Circle;
+
+		public static readonly Color PINKROCK_COLOR = LIGHT2D.LIGHT_PINK;
+
+		public static readonly Color PINKROCK_OVERLAYCOLOR = LIGHT2D.LIGHT_OVERLAY;
+
+		public static readonly Vector2 PINKROCK_OFFSET = new Vector2(0.05f, 0.33f);
+
+		public static readonly Vector2 PINKROCK_DIRECTION = LIGHT2D.DEFAULT_DIRECTION;
 	}
 }

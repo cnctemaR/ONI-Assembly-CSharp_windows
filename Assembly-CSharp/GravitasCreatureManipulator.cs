@@ -217,7 +217,7 @@ public class GravitasCreatureManipulator : GameStateMachine<GravitasCreatureMani
 
 		public void UpdateMeter()
 		{
-			this.m_progressMeter.SetPositionPercent(Mathf.Clamp01((float)this.ScannedSpecies.Count / (float)base.smi.def.numSpeciesToUnlockMorphMode - 0.1f));
+			this.m_progressMeter.SetPositionPercent(Mathf.Clamp01((float)this.ScannedSpecies.Count / (float)base.smi.def.numSpeciesToUnlockMorphMode));
 		}
 
 		public bool IsAccepted(GameObject go)

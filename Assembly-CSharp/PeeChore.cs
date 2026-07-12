@@ -58,7 +58,7 @@ public class PeeChore : Chore<PeeChore.StatesInstance>
 		{
 			default_state = this.running;
 			base.Target(this.worker);
-			this.running.ToggleAnims("anim_expel_kanim", 0f, "").ToggleEffect("StressfulyEmptyingBladder").DoNotification((PeeChore.StatesInstance smi) => smi.stressfullyEmptyingBladder)
+			this.running.ToggleAnims("anim_expel_kanim", 0f).ToggleEffect("StressfulyEmptyingBladder").DoNotification((PeeChore.StatesInstance smi) => smi.stressfullyEmptyingBladder)
 				.DoReport(ReportManager.ReportType.ToiletIncident, (PeeChore.StatesInstance smi) => 1f, (PeeChore.StatesInstance smi) => this.masterTarget.Get(smi).GetProperName())
 				.DoTutorial(Tutorial.TutorialMessages.TM_Mopping)
 				.Transition(null, (PeeChore.StatesInstance smi) => smi.IsDonePeeing(), UpdateRate.SIM_200ms)

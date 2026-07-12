@@ -1,7 +1,6 @@
 ﻿using System;
 using STRINGS;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class DLCToggle : KMonoBehaviour
 {
@@ -9,9 +8,6 @@ public class DLCToggle : KMonoBehaviour
 	{
 		this.expansion1Active = DlcManager.IsExpansion1Active();
 		this.button.onClick += this.ToggleExpansion1Cicked;
-		this.label.text = (this.expansion1Active ? UI.FRONTEND.MAINMENU.DLC.DEACTIVATE_EXPANSION1 : UI.FRONTEND.MAINMENU.DLC.ACTIVATE_EXPANSION1);
-		this.logo.sprite = (this.expansion1Active ? GlobalResources.Instance().baseGameLogoSmall : GlobalResources.Instance().expansion1LogoSmall);
-		this.logo.gameObject.SetActive(!this.expansion1Active);
 	}
 
 	private void ToggleExpansion1Cicked()
@@ -27,12 +23,6 @@ public class DLCToggle : KMonoBehaviour
 
 	[SerializeField]
 	private KButton button;
-
-	[SerializeField]
-	private LocText label;
-
-	[SerializeField]
-	private Image logo;
 
 	private bool expansion1Active;
 }

@@ -92,10 +92,10 @@ public class SaveGame : KMonoBehaviour, ISaveLoadable
 	public byte[] GetSaveHeader(bool isAutoSave, bool isCompressed, out SaveGame.Header header)
 	{
 		string originalSaveFileName = SaveLoader.GetOriginalSaveFileName(SaveLoader.GetActiveSaveFilePath());
-		string text = JsonConvert.SerializeObject(new SaveGame.GameInfo(GameClock.Instance.GetCycle(), Components.LiveMinionIdentities.Count, this.baseName, isAutoSave, originalSaveFileName, SaveLoader.Instance.GameInfo.clusterId, SaveLoader.Instance.GameInfo.worldTraits, SaveLoader.Instance.GameInfo.colonyGuid, DlcManager.GetHighestActiveDlcId(), this.sandboxEnabled));
+		string text = JsonConvert.SerializeObject(new SaveGame.GameInfo(GameClock.Instance.GetCycle(), Components.LiveMinionIdentities.Count, this.baseName, isAutoSave, originalSaveFileName, SaveLoader.Instance.GameInfo.clusterId, SaveLoader.Instance.GameInfo.worldTraits, SaveLoader.Instance.GameInfo.colonyGuid, SaveLoader.Instance.GameInfo.dlcIds, this.sandboxEnabled));
 		byte[] bytes = Encoding.UTF8.GetBytes(text);
 		header = default(SaveGame.Header);
-		header.buildVersion = 600112U;
+		header.buildVersion = 622222U;
 		header.headerSize = bytes.Length;
 		header.headerVersion = 1U;
 		header.compression = (isCompressed ? 1 : 0);
@@ -158,6 +158,10 @@ public class SaveGame : KMonoBehaviour, ISaveLoadable
 		if (gameInfo.IsVersionOlderThan(7, 20))
 		{
 			gameInfo.dlcId = "";
+		}
+		if (gameInfo.IsVersionOlderThan(7, 34))
+		{
+			gameInfo.dlcIds = new List<string> { gameInfo.dlcId };
 		}
 		return gameInfo;
 	}
@@ -267,6 +271,9 @@ public class SaveGame : KMonoBehaviour, ISaveLoadable
 	public bool sandboxEnabled;
 
 	[Serialize]
+	public float relativeTemperatureOverlaySliderValue = 294.15f;
+
+	[Serialize]
 	private int autoSaveCycleInterval = 1;
 
 	[Serialize]
@@ -308,7 +315,7 @@ public class SaveGame : KMonoBehaviour, ISaveLoadable
 
 	public struct GameInfo
 	{
-		public GameInfo(int numberOfCycles, int numberOfDuplicants, string baseName, bool isAutoSave, string originalSaveName, string clusterId, string[] worldTraits, Guid colonyGuid, string dlcId, bool sandboxEnabled = false)
+		public GameInfo(int numberOfCycles, int numberOfDuplicants, string baseName, bool isAutoSave, string originalSaveName, string clusterId, string[] worldTraits, Guid colonyGuid, List<string> dlcIds, bool sandboxEnabled = false)
 		{
 			this.numberOfCycles = numberOfCycles;
 			this.numberOfDuplicants = numberOfDuplicants;
@@ -319,9 +326,10 @@ public class SaveGame : KMonoBehaviour, ISaveLoadable
 			this.worldTraits = worldTraits;
 			this.colonyGuid = colonyGuid;
 			this.sandboxEnabled = sandboxEnabled;
-			this.dlcId = dlcId;
+			this.dlcIds = dlcIds;
+			this.dlcId = null;
 			this.saveMajorVersion = 7;
-			this.saveMinorVersion = 33;
+			this.saveMinorVersion = 34;
 		}
 
 		public bool IsVersionOlderThan(int major, int minor)
@@ -332,6 +340,24 @@ public class SaveGame : KMonoBehaviour, ISaveLoadable
 		public bool IsVersionExactly(int major, int minor)
 		{
 			return this.saveMajorVersion == major && this.saveMinorVersion == minor;
+		}
+
+		public bool IsCompatableWithCurrentDlcConfiguration(out HashSet<string> dlcIdsToEnable, out HashSet<string> dlcIdToDisable)
+		{
+			dlcIdsToEnable = new HashSet<string>();
+			foreach (string text in this.dlcIds)
+			{
+				if (!DlcManager.IsContentSubscribed(text))
+				{
+					dlcIdsToEnable.Add(text);
+				}
+			}
+			dlcIdToDisable = new HashSet<string>();
+			if (!this.dlcIds.Contains("EXPANSION1_ID") && DlcManager.IsExpansion1Active())
+			{
+				dlcIdToDisable.Add("EXPANSION1_ID");
+			}
+			return dlcIdsToEnable.Count == 0 && dlcIdToDisable.Count == 0;
 		}
 
 		public int numberOfCycles;
@@ -356,6 +382,9 @@ public class SaveGame : KMonoBehaviour, ISaveLoadable
 
 		public Guid colonyGuid;
 
+		[Obsolete("Please use dlcIds instead.")]
 		public string dlcId;
+
+		public List<string> dlcIds;
 	}
 }

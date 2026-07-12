@@ -11,7 +11,7 @@ public class LightShapePreview : KMonoBehaviour
 		{
 			this.previousCell = num;
 			LightGridManager.DestroyPreview();
-			LightGridManager.CreatePreview(Grid.OffsetCell(num, this.offset), this.radius, this.shape, this.lux);
+			LightGridManager.CreatePreview(Grid.OffsetCell(num, this.offset), this.radius, this.shape, this.lux, this.width, this.direction);
 		}
 	}
 
@@ -23,6 +23,10 @@ public class LightShapePreview : KMonoBehaviour
 	public float radius;
 
 	public int lux;
+
+	public int width;
+
+	public DiscreteShadowCaster.Direction direction;
 
 	public global::LightShape shape;
 

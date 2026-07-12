@@ -132,10 +132,12 @@ namespace Database
 				}
 				return str;
 			};
+			this.SleepingExhausted = this.CreateStatusItem("SleepingExhausted", "DUPLICANTS", "", StatusItem.IconType.Exclamation, NotificationType.Bad, false, OverlayModes.None.ID, true, 2);
 			this.SleepingInterruptedByNoise = this.CreateStatusItem("SleepingInterruptedByNoise", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 2);
 			this.SleepingInterruptedByLight = this.CreateStatusItem("SleepingInterruptedByLight", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 2);
 			this.SleepingInterruptedByFearOfDark = this.CreateStatusItem("SleepingInterruptedByFearOfDark", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 2);
 			this.SleepingInterruptedByMovement = this.CreateStatusItem("SleepingInterruptedByMovement", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 2);
+			this.SleepingInterruptedByCold = this.CreateStatusItem("SleepingInterruptedByCold", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 2);
 			this.Eating = this.CreateStatusItem("Eating", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 2);
 			this.Eating.resolveStringCallback = func;
 			this.Digging = this.CreateStatusItem("Digging", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 2);
@@ -158,6 +160,7 @@ namespace Database
 				}
 				return str;
 			};
+			this.ResearchingFromPOI = this.CreateStatusItem("ResearchingFromPOI", DUPLICANTS.STATUSITEMS.RESEARCHING_FROM_POI.NAME, DUPLICANTS.STATUSITEMS.RESEARCHING_FROM_POI.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, 2);
 			this.MissionControlling = this.CreateStatusItem("MissionControlling", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 2);
 			this.Tinkering = this.CreateStatusItem("Tinkering", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 2);
 			this.Tinkering.resolveStringCallback = delegate(string str, object data)
@@ -227,10 +230,13 @@ namespace Database
 			this.Cold = this.CreateStatusItem("Cold", "DUPLICANTS", "", StatusItem.IconType.Exclamation, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 2);
 			this.Cold.resolveTooltipCallback = delegate(string str, object data)
 			{
+				ExternalTemperatureMonitor.Instance smi = ((ColdImmunityMonitor.Instance)data).GetSMI<ExternalTemperatureMonitor.Instance>();
 				str = str.Replace("{StressModification}", GameUtil.GetFormattedPercent(Db.Get().effects.Get("ColdAir").SelfModifiers[0].Value, GameUtil.TimeSlice.PerCycle));
-				float num = ((ExternalTemperatureMonitor.Instance)data).temperatureTransferer.average_kilowatts_exchanged.GetWeightedAverage * 1000f;
+				str = str.Replace("{StaminaModification}", GameUtil.GetFormattedPercent(Db.Get().effects.Get("ColdAir").SelfModifiers[1].Value, GameUtil.TimeSlice.PerCycle));
+				str = str.Replace("{AthleticsModification}", Db.Get().effects.Get("ColdAir").SelfModifiers[2].Value.ToString());
+				float num = smi.temperatureTransferer.average_kilowatts_exchanged.GetUnweightedAverage * 1000f;
 				str = str.Replace("{currentTransferWattage}", GameUtil.GetFormattedHeatEnergyRate(num, GameUtil.HeatEnergyFormatterUnit.Automatic));
-				AttributeInstance attributeInstance = ((ExternalTemperatureMonitor.Instance)data).attributes.Get("ThermalConductivityBarrier");
+				AttributeInstance attributeInstance = smi.attributes.Get("ThermalConductivityBarrier");
 				string text2 = "<b>" + attributeInstance.GetFormattedValue() + "</b>";
 				for (int num2 = 0; num2 != attributeInstance.Modifiers.Count; num2++)
 				{
@@ -249,13 +255,26 @@ namespace Database
 				str = str.Replace("{conductivityBarrier}", text2);
 				return str;
 			};
+			this.ExitingCold = this.CreateStatusItem("ExitingCold", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 2);
+			this.ExitingCold.resolveTooltipCallback = delegate(string str, object data)
+			{
+				ColdImmunityMonitor.Instance instance = (ColdImmunityMonitor.Instance)data;
+				str = str.Replace("{0}", GameUtil.GetFormattedTime(instance.ColdCountdown, "F0"));
+				str = str.Replace("{StressModification}", GameUtil.GetFormattedPercent(Db.Get().effects.Get("ColdAir").SelfModifiers[0].Value, GameUtil.TimeSlice.PerCycle));
+				str = str.Replace("{StaminaModification}", GameUtil.GetFormattedPercent(Db.Get().effects.Get("ColdAir").SelfModifiers[1].Value, GameUtil.TimeSlice.PerCycle));
+				str = str.Replace("{AthleticsModification}", Db.Get().effects.Get("ColdAir").SelfModifiers[2].Value.ToString());
+				return str;
+			};
 			this.Hot = this.CreateStatusItem("Hot", "DUPLICANTS", "", StatusItem.IconType.Exclamation, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 2);
 			this.Hot.resolveTooltipCallback = delegate(string str, object data)
 			{
+				ExternalTemperatureMonitor.Instance smi2 = ((HeatImmunityMonitor.Instance)data).GetSMI<ExternalTemperatureMonitor.Instance>();
 				str = str.Replace("{StressModification}", GameUtil.GetFormattedPercent(Db.Get().effects.Get("WarmAir").SelfModifiers[0].Value, GameUtil.TimeSlice.PerCycle));
-				float num3 = ((ExternalTemperatureMonitor.Instance)data).temperatureTransferer.average_kilowatts_exchanged.GetWeightedAverage * 1000f;
+				str = str.Replace("{StaminaModification}", GameUtil.GetFormattedPercent(Db.Get().effects.Get("WarmAir").SelfModifiers[1].Value, GameUtil.TimeSlice.PerCycle));
+				str = str.Replace("{AthleticsModification}", Db.Get().effects.Get("WarmAir").SelfModifiers[2].Value.ToString());
+				float num3 = smi2.temperatureTransferer.average_kilowatts_exchanged.GetUnweightedAverage * 1000f;
 				str = str.Replace("{currentTransferWattage}", GameUtil.GetFormattedHeatEnergyRate(num3, GameUtil.HeatEnergyFormatterUnit.Automatic));
-				AttributeInstance attributeInstance2 = ((ExternalTemperatureMonitor.Instance)data).attributes.Get("ThermalConductivityBarrier");
+				AttributeInstance attributeInstance2 = smi2.attributes.Get("ThermalConductivityBarrier");
 				string text3 = "<b>" + attributeInstance2.GetFormattedValue() + "</b>";
 				for (int num4 = 0; num4 != attributeInstance2.Modifiers.Count; num4++)
 				{
@@ -272,6 +291,16 @@ namespace Database
 					});
 				}
 				str = str.Replace("{conductivityBarrier}", text3);
+				return str;
+			};
+			this.ExitingHot = this.CreateStatusItem("ExitingHot", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 2);
+			this.ExitingHot.resolveTooltipCallback = delegate(string str, object data)
+			{
+				HeatImmunityMonitor.Instance instance2 = (HeatImmunityMonitor.Instance)data;
+				str = str.Replace("{0}", GameUtil.GetFormattedTime(instance2.HeatCountdown, "F0"));
+				str = str.Replace("{StressModification}", GameUtil.GetFormattedPercent(Db.Get().effects.Get("WarmAir").SelfModifiers[0].Value, GameUtil.TimeSlice.PerCycle));
+				str = str.Replace("{StaminaModification}", GameUtil.GetFormattedPercent(Db.Get().effects.Get("WarmAir").SelfModifiers[1].Value, GameUtil.TimeSlice.PerCycle));
+				str = str.Replace("{AthleticsModification}", Db.Get().effects.Get("WarmAir").SelfModifiers[2].Value.ToString());
 				return str;
 			};
 			this.BodyRegulatingHeating = this.CreateStatusItem("BodyRegulatingHeating", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 2);
@@ -298,9 +327,9 @@ namespace Database
 			this.Incapacitated.AddNotification(null, null, null);
 			this.Incapacitated.resolveStringCallback = delegate(string str, object data)
 			{
-				IncapacitationMonitor.Instance instance = (IncapacitationMonitor.Instance)data;
-				float bleedLifeTime = instance.GetBleedLifeTime(instance);
-				str = str.Replace("{CauseOfIncapacitation}", instance.GetCauseOfIncapacitation().Name);
+				IncapacitationMonitor.Instance instance3 = (IncapacitationMonitor.Instance)data;
+				float bleedLifeTime = instance3.GetBleedLifeTime(instance3);
+				str = str.Replace("{CauseOfIncapacitation}", instance3.GetCauseOfIncapacitation().Name);
 				return str.Replace("{TimeUntilDeath}", GameUtil.GetFormattedTime(bleedLifeTime, "F0"));
 			};
 			this.Relocating = this.CreateStatusItem("Relocating", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 2);
@@ -343,12 +372,12 @@ namespace Database
 				string name2 = Db.Get().Sicknesses.Get(exposureStatusData3.exposure_type.sickness_id).Name;
 				AttributeInstance attributeInstance3 = Db.Get().Attributes.GermResistance.Lookup(exposureStatusData3.owner.gameObject);
 				string lastDiseaseSource = exposureStatusData3.owner.GetLastDiseaseSource(exposureStatusData3.exposure_type.germ_id);
-				GermExposureMonitor.Instance smi = exposureStatusData3.owner.GetSMI<GermExposureMonitor.Instance>();
+				GermExposureMonitor.Instance smi3 = exposureStatusData3.owner.GetSMI<GermExposureMonitor.Instance>();
 				float num5 = (float)exposureStatusData3.exposure_type.base_resistance + GERM_EXPOSURE.EXPOSURE_TIER_RESISTANCE_BONUSES[0];
 				float totalValue = attributeInstance3.GetTotalValue();
-				float resistanceToExposureType = smi.GetResistanceToExposureType(exposureStatusData3.exposure_type, -1f);
+				float resistanceToExposureType = smi3.GetResistanceToExposureType(exposureStatusData3.exposure_type, -1f);
 				float contractionChance = GermExposureMonitor.GetContractionChance(resistanceToExposureType);
-				float exposureTier = smi.GetExposureTier(exposureStatusData3.exposure_type.germ_id);
+				float exposureTier = smi3.GetExposureTier(exposureStatusData3.exposure_type.germ_id);
 				float num6 = GERM_EXPOSURE.EXPOSURE_TIER_RESISTANCE_BONUSES[(int)exposureTier - 1] - GERM_EXPOSURE.EXPOSURE_TIER_RESISTANCE_BONUSES[0];
 				str = str.Replace("{Severity}", DUPLICANTS.STATUSITEMS.EXPOSEDTOGERMS.EXPOSURE_TIERS[(int)exposureTier - 1].ToString());
 				str = str.Replace("{Sickness}", name2);
@@ -390,16 +419,16 @@ namespace Database
 			this.GasLiquidIrritation.resolveStringCallback = (string str, object data) => ((GasLiquidExposureMonitor.Instance)data).IsMajorIrritation() ? DUPLICANTS.STATUSITEMS.GASLIQUIDEXPOSURE.NAME_MAJOR : DUPLICANTS.STATUSITEMS.GASLIQUIDEXPOSURE.NAME_MINOR;
 			this.GasLiquidIrritation.resolveTooltipCallback = delegate(string str, object data)
 			{
-				GasLiquidExposureMonitor.Instance instance2 = (GasLiquidExposureMonitor.Instance)data;
+				GasLiquidExposureMonitor.Instance instance4 = (GasLiquidExposureMonitor.Instance)data;
 				string text6 = DUPLICANTS.STATUSITEMS.GASLIQUIDEXPOSURE.TOOLTIP;
 				string text7 = "";
-				Effect appliedEffect = instance2.sm.GetAppliedEffect(instance2);
+				Effect appliedEffect = instance4.sm.GetAppliedEffect(instance4);
 				if (appliedEffect != null)
 				{
 					text7 = Effect.CreateTooltip(appliedEffect, false, "\n    • ", true);
 				}
-				string text8 = DUPLICANTS.STATUSITEMS.GASLIQUIDEXPOSURE.TOOLTIP_EXPOSED.Replace("{element}", instance2.CurrentlyExposedToElement().name);
-				float currentExposure = instance2.sm.GetCurrentExposure(instance2);
+				string text8 = DUPLICANTS.STATUSITEMS.GASLIQUIDEXPOSURE.TOOLTIP_EXPOSED.Replace("{element}", instance4.CurrentlyExposedToElement().name);
+				float currentExposure = instance4.sm.GetCurrentExposure(instance4);
 				if (currentExposure < 0f)
 				{
 					text8 = text8.Replace("{rate}", DUPLICANTS.STATUSITEMS.GASLIQUIDEXPOSURE.TOOLTIP_RATE_DECREASE);
@@ -412,7 +441,7 @@ namespace Database
 				{
 					text8 = text8.Replace("{rate}", DUPLICANTS.STATUSITEMS.GASLIQUIDEXPOSURE.TOOLTIP_RATE_STAYS);
 				}
-				float num7 = (instance2.exposure - instance2.minorIrritationThreshold) / Math.Abs(instance2.exposureRate);
+				float num7 = (instance4.exposure - instance4.minorIrritationThreshold) / Math.Abs(instance4.exposureRate);
 				string text9 = DUPLICANTS.STATUSITEMS.GASLIQUIDEXPOSURE.TOOLTIP_EXPOSURE_LEVEL.Replace("{time}", GameUtil.GetFormattedTime(num7, "F0"));
 				return string.Concat(new string[] { text6, "\n\n", text7, "\n\n", text8, "\n\n", text9 });
 			};
@@ -461,8 +490,8 @@ namespace Database
 			this.JoyResponse_HeardJoySinger = this.CreateStatusItem("JoyResponse_HeardJoySinger", DUPLICANTS.MODIFIERS.HEARDJOYSINGER.NAME, DUPLICANTS.MODIFIERS.HEARDJOYSINGER.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Good, false, OverlayModes.None.ID, 2);
 			this.JoyResponse_HeardJoySinger.resolveTooltipCallback = delegate(string str, object data)
 			{
-				InspirationEffectMonitor.Instance instance3 = (InspirationEffectMonitor.Instance)data;
-				return str + "\n\n" + DUPLICANTS.MODIFIERS.TIME_REMAINING.Replace("{0}", GameUtil.GetFormattedCycles(instance3.sm.inspirationTimeRemaining.Get(instance3), "F1", false));
+				InspirationEffectMonitor.Instance instance5 = (InspirationEffectMonitor.Instance)data;
+				return str + "\n\n" + DUPLICANTS.MODIFIERS.TIME_REMAINING.Replace("{0}", GameUtil.GetFormattedCycles(instance5.sm.inspirationTimeRemaining.Get(instance5), "F1", false));
 			};
 			this.JoyResponse_StickerBombing = this.CreateStatusItem("JoyResponse_StickerBombing", DUPLICANTS.MODIFIERS.ISSTICKERBOMBING.NAME, DUPLICANTS.MODIFIERS.ISSTICKERBOMBING.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Good, false, OverlayModes.None.ID, 2);
 			this.Meteorphile = this.CreateStatusItem("Meteorphile", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 2);
@@ -508,6 +537,10 @@ namespace Database
 
 		public StatusItem Cold;
 
+		public StatusItem ExitingCold;
+
+		public StatusItem ExitingHot;
+
 		public StatusItem QuarantineAreaUnassigned;
 
 		public StatusItem QuarantineAreaUnreachable;
@@ -548,6 +581,8 @@ namespace Database
 
 		public StatusItem Sleeping;
 
+		public StatusItem SleepingExhausted;
+
 		public StatusItem SleepingInterruptedByLight;
 
 		public StatusItem SleepingInterruptedByNoise;
@@ -555,6 +590,8 @@ namespace Database
 		public StatusItem SleepingInterruptedByFearOfDark;
 
 		public StatusItem SleepingInterruptedByMovement;
+
+		public StatusItem SleepingInterruptedByCold;
 
 		public StatusItem SleepingPeacefully;
 
@@ -575,6 +612,8 @@ namespace Database
 		public StatusItem Mushing;
 
 		public StatusItem Researching;
+
+		public StatusItem ResearchingFromPOI;
 
 		public StatusItem MissionControlling;
 

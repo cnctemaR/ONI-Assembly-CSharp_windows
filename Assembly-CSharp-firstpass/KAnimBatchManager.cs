@@ -214,6 +214,47 @@ public class KAnimBatchManager
 		}
 	}
 
+	public void RenderKAnimTemperaturePostProcessingEffects()
+	{
+		if (!this.ready)
+		{
+			return;
+		}
+		int num = LayerMask.NameToLayer("Overlay");
+		foreach (BatchSet batchSet in this.activeBatchSets)
+		{
+			DebugUtil.Assert(batchSet != null);
+			DebugUtil.Assert(batchSet.group != null);
+			Mesh mesh = batchSet.group.mesh;
+			for (int i = 0; i < batchSet.batchCount; i++)
+			{
+				KAnimBatch batch = batchSet.GetBatch(i);
+				float num2 = 0.01f / (float)(1 + batch.id % 256);
+				if (batch.size != 0 && batch.active && batch.materialType == KAnimBatchGroup.MaterialType.Default)
+				{
+					bool flag = false;
+					using (List<KAnimConverter.IAnimConverter>.Enumerator enumerator2 = batch.Controllers.GetEnumerator())
+					{
+						while (enumerator2.MoveNext())
+						{
+							if ((enumerator2.Current.GetPostProcessingEffectsCompatibility() & KAnimConverter.PostProcessingEffects.TemperatureOverlay) != (KAnimConverter.PostProcessingEffects)0)
+							{
+								flag = true;
+								break;
+							}
+						}
+					}
+					if (flag)
+					{
+						Vector3 zero = Vector3.zero;
+						zero.z = batch.position.z + num2;
+						Graphics.DrawMesh(mesh, zero, Quaternion.identity, batchSet.group.GetTemperaturePostProcessingMaterial(batch.materialType), num, null, 0, batch.matProperties);
+					}
+				}
+			}
+		}
+	}
+
 	public void CompleteInit()
 	{
 		this.ready = true;

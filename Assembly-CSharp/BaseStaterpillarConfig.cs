@@ -85,7 +85,7 @@ public class BaseStaterpillarConfig
 		{
 			if (element.IsSolid && element.materialCategory == GameTags.Metal && element.HasTag(GameTags.Ore) && !element.disabled && !list.Contains(element.id))
 			{
-				list2.Add(new Diet.Info(new HashSet<Tag>(new Tag[] { element.tag }), poopTag, caloriesPerKg, producedConversionRate, diseaseId, diseasePerKgProduced, false, false));
+				list2.Add(new Diet.Info(new HashSet<Tag>(new Tag[] { element.tag }), poopTag, caloriesPerKg, producedConversionRate, diseaseId, diseasePerKgProduced, false, false, false));
 			}
 		}
 		return list2;
@@ -98,7 +98,7 @@ public class BaseStaterpillarConfig
 		{
 			if (element.IsSolid && element.materialCategory == GameTags.RefinedMetal && !element.disabled)
 			{
-				list.Add(new Diet.Info(new HashSet<Tag>(new Tag[] { element.tag }), poopTag, caloriesPerKg, producedConversionRate, diseaseId, diseasePerKgProduced, false, false));
+				list.Add(new Diet.Info(new HashSet<Tag>(new Tag[] { element.tag }), poopTag, caloriesPerKg, producedConversionRate, diseaseId, diseasePerKgProduced, false, false, false));
 			}
 		}
 		return list;

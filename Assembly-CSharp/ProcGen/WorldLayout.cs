@@ -972,6 +972,13 @@ namespace ProcGen
 			return list;
 		}
 
+		public List<Node> GetInternalNonLeafNodesWithTag(Tag tag)
+		{
+			List<Node> list = new List<Node>();
+			this.voronoiTree.GetInternalNonLeafNodes(list, (Node node) => node.tags != null && node.tags.Contains(tag));
+			return list;
+		}
+
 		public List<Node> GetTerrainNodesForTag(Tag tag)
 		{
 			List<Node> list = new List<Node>();

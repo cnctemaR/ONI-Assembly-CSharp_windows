@@ -100,6 +100,10 @@ public class DestinationSelectPanel : KMonoBehaviour
 		this.UpdateDisplayedClusters();
 	}
 
+	public void Uninit()
+	{
+	}
+
 	private void Update()
 	{
 		if (!this.isDragging)
@@ -143,7 +147,7 @@ public class DestinationSelectPanel : KMonoBehaviour
 		this.asteroidData.Clear();
 		foreach (KeyValuePair<string, ClusterLayout> keyValuePair in SettingsCache.clusterLayouts.clusterCache)
 		{
-			if ((!DlcManager.FeatureClusterSpaceEnabled() || !(keyValuePair.Key == "clusters/SandstoneDefault")) && keyValuePair.Value.clusterCategory == DestinationSelectPanel.ChosenClusterCategorySetting)
+			if ((!DlcManager.FeatureClusterSpaceEnabled() || !(keyValuePair.Key == "clusters/SandstoneDefault")) && keyValuePair.Value.clusterCategory == (ClusterLayout.ClusterCategory)DestinationSelectPanel.ChosenClusterCategorySetting)
 			{
 				this.clusterKeys.Add(keyValuePair.Key);
 				ColonyDestinationAsteroidBeltData colonyDestinationAsteroidBeltData = new ColonyDestinationAsteroidBeltData(keyValuePair.Value.GetStartWorld(), 0, keyValuePair.Key);
@@ -257,6 +261,13 @@ public class DestinationSelectPanel : KMonoBehaviour
 
 	public string GetDefaultAsteroid()
 	{
+		foreach (string text in this.clusterKeys)
+		{
+			if (this.asteroidData[text].Layout.menuOrder == 0)
+			{
+				return text;
+			}
+		}
 		return this.clusterKeys.First<string>();
 	}
 
@@ -306,7 +317,7 @@ public class DestinationSelectPanel : KMonoBehaviour
 					List<string> list = new List<string>();
 					foreach (KeyValuePair<string, SettingConfig> keyValuePair in CustomGameSettings.Instance.QualitySettings)
 					{
-						if (keyValuePair.Value.coordinate_dimension >= 0L && keyValuePair.Value.coordinate_dimension_width >= 0L)
+						if (keyValuePair.Value.coordinate_range >= 0L)
 						{
 							SettingLevel currentQualitySetting = CustomGameSettings.Instance.GetCurrentQualitySetting(keyValuePair.Key);
 							if (currentQualitySetting.id != keyValuePair.Value.GetDefaultLevelId())

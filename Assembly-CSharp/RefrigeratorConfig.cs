@@ -51,7 +51,7 @@ public class RefrigeratorConfig : IBuildingConfig
 		storage.fetchCategory = Storage.FetchCategory.GeneralStorage;
 		storage.showCapacityStatusItem = true;
 		Prioritizable.AddRef(go);
-		go.AddOrGet<TreeFilterable>();
+		go.AddOrGet<TreeFilterable>().allResourceFilterLabelString = UI.UISIDESCREENS.TREEFILTERABLESIDESCREEN.ALLBUTTON_EDIBLES;
 		go.AddOrGet<FoodStorage>();
 		go.AddOrGet<Refrigerator>();
 		RefrigeratorController.Def def = go.AddOrGetDef<RefrigeratorController.Def>();

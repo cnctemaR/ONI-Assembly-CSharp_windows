@@ -1,32 +1,34 @@
 ﻿using System;
+using System.Collections.Generic;
+using UnityEngine;
 
 public class RunningWeightedAverage
 {
-	public RunningWeightedAverage(float minValue = -3.4028235E+38f, float maxValue = 3.4028235E+38f, int sampleCount = 15, bool allowZero = true)
+	public RunningWeightedAverage(float minValue = -3.4028235E+38f, float maxValue = 3.4028235E+38f, int sampleCount = 20, bool allowZero = true)
 	{
 		this.min = minValue;
 		this.max = maxValue;
 		this.ignoreZero = !allowZero;
-		this.samples = new float[sampleCount];
-	}
-
-	public float GetWeightedAverage
-	{
-		get
-		{
-			return this.WeightedAverage();
-		}
+		this.samples = new List<global::Tuple<float, float>>();
 	}
 
 	public float GetUnweightedAverage
 	{
 		get
 		{
-			return this.WeightedAverage();
+			return this.GetAverageOfLastSeconds(4f);
 		}
 	}
 
-	public void AddSample(float value)
+	public bool HasEverHadValidValues
+	{
+		get
+		{
+			return this.validSampleCount >= this.maxSamples;
+		}
+	}
+
+	public void AddSample(float value, float timeOfRecord)
 	{
 		if (this.ignoreZero && value == 0f)
 		{
@@ -40,51 +42,48 @@ public class RunningWeightedAverage
 		{
 			value = this.min;
 		}
-		if (this.validValues < this.samples.Length)
+		if (this.validSampleCount <= this.maxSamples)
 		{
-			this.validValues++;
+			this.validSampleCount++;
 		}
-		for (int i = 0; i < this.samples.Length - 1; i++)
+		this.samples.Add(new global::Tuple<float, float>(value, timeOfRecord));
+		if (this.samples.Count > this.maxSamples)
 		{
-			this.samples[i] = this.samples[i + 1];
+			this.samples.RemoveAt(0);
 		}
-		this.samples[this.samples.Length - 1] = value;
 	}
 
-	private float WeightedAverage()
+	public int ValidRecordsInLastSeconds(float seconds)
 	{
-		float num = 0f;
-		float num2 = 0f;
-		for (int i = this.samples.Length - 1; i > this.samples.Length - 1 - this.validValues; i--)
+		int num = 0;
+		int num2 = this.samples.Count - 1;
+		while (num2 >= 0 && Time.time - this.samples[num2].second <= seconds)
 		{
-			float num3 = (float)(i + 1) / ((float)this.validValues + 1f);
-			num += this.samples[i] * num3;
-			num2 += num3;
-		}
-		num /= num2;
-		if (float.IsNaN(num))
-		{
-			return 0f;
+			num++;
+			num2--;
 		}
 		return num;
 	}
 
-	private float UnweightedAverage()
+	private float GetAverageOfLastSeconds(float seconds)
 	{
 		float num = 0f;
-		for (int i = this.samples.Length - 1; i > this.samples.Length - 1 - this.validValues; i--)
+		int num2 = 0;
+		int num3 = this.samples.Count - 1;
+		while (num3 >= 0 && Time.time - this.samples[num3].second <= seconds)
 		{
-			num += this.samples[i];
+			num += this.samples[num3].first;
+			num2++;
+			num3--;
 		}
-		num /= (float)this.samples.Length;
-		if (float.IsNaN(num))
+		if (num2 == 0)
 		{
 			return 0f;
 		}
-		return num;
+		return num / (float)num2;
 	}
 
-	private float[] samples;
+	private List<global::Tuple<float, float>> samples = new List<global::Tuple<float, float>>();
 
 	private float min;
 
@@ -92,5 +91,7 @@ public class RunningWeightedAverage
 
 	private bool ignoreZero;
 
-	private int validValues;
+	private int validSampleCount;
+
+	private int maxSamples = 20;
 }

@@ -17,6 +17,7 @@ namespace Database
 			this.FoodFightEvent = base.Add(new FoodFightEvent());
 			this.BaseGameMeteorEvents();
 			this.Expansion1MeteorEvents();
+			this.DLCMeteorEvents();
 			this.PrickleFlowerBlightEvent = base.Add(new PlantBlightEvent("PrickleFlowerBlightEvent", "PrickleFlower", 3600f, 30f));
 			this.CryoFriend = base.Add(new SimpleEvent("CryoFriend", GAMEPLAY_EVENTS.EVENT_TYPES.CRYOFRIEND.NAME, GAMEPLAY_EVENTS.EVENT_TYPES.CRYOFRIEND.DESCRIPTION, "cryofriend_kanim", GAMEPLAY_EVENTS.EVENT_TYPES.CRYOFRIEND.BUTTON, null));
 			this.WarpWorldReveal = base.Add(new SimpleEvent("WarpWorldReveal", GAMEPLAY_EVENTS.EVENT_TYPES.WARPWORLDREVEAL.NAME, GAMEPLAY_EVENTS.EVENT_TYPES.WARPWORLDREVEAL.DESCRIPTION, "warpworldreveal_kanim", GAMEPLAY_EVENTS.EVENT_TYPES.WARPWORLDREVEAL.BUTTON, null));
@@ -127,6 +128,16 @@ namespace Database
 			text2 = ClusterMapMeteorShowerConfig.GetFullID("Uranium");
 			minMax = METEORS.BOMBARDMENT_ON.UNLIMITED;
 			this.ClusterUraniumShower = base.Add(new MeteorShowerEvent(text15, num27, num28, METEORS.BOMBARDMENT_OFF.NONE, minMax, text2, true).AddMeteor(UraniumCometConfig.ID, 2.5f).AddMeteor(DustCometConfig.ID, 1f).AddMeteor(LightDustCometConfig.ID, 2f));
+		}
+
+		private void DLCMeteorEvents()
+		{
+			string text = "ClusterIceAndTreesShower";
+			float num = 300f;
+			float num2 = 1.4f;
+			string fullID = ClusterMapMeteorShowerConfig.GetFullID("IceAndTrees");
+			MathUtil.MinMax unlimited = METEORS.BOMBARDMENT_ON.UNLIMITED;
+			this.ClusterIceAndTreesShower = base.Add(new MeteorShowerEvent(text, num, num2, METEORS.BOMBARDMENT_OFF.NONE, unlimited, fullID, true).AddMeteor(SpaceTreeSeedCometConfig.ID, 1f).AddMeteor(HardIceCometConfig.ID, 2f).AddMeteor(SnowballCometConfig.ID, 22f));
 		}
 
 		private void BonusEvents()
@@ -282,6 +293,8 @@ namespace Database
 		public GameplayEvent ClusterOxyliteShower;
 
 		public GameplayEvent ClusterBleachStoneShower;
+
+		public GameplayEvent ClusterIceAndTreesShower;
 
 		public GameplayEvent BonusDream1;
 

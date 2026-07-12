@@ -20,7 +20,12 @@ public class ToolParameterMenu : KMonoBehaviour
 		foreach (KeyValuePair<string, ToolParameterMenu.ToggleState> keyValuePair in parameters)
 		{
 			GameObject gameObject = Util.KInstantiateUI(this.widgetPrefab, this.widgetContainer, true);
-			gameObject.GetComponentInChildren<LocText>().text = Strings.Get("STRINGS.UI.TOOLS.FILTERLAYERS." + keyValuePair.Key);
+			gameObject.GetComponentInChildren<LocText>().text = Strings.Get("STRINGS.UI.TOOLS.FILTERLAYERS." + keyValuePair.Key + ".NAME");
+			ToolTip componentInChildren = gameObject.GetComponentInChildren<ToolTip>();
+			if (componentInChildren != null)
+			{
+				componentInChildren.SetSimpleTooltip(Strings.Get("STRINGS.UI.TOOLS.FILTERLAYERS." + keyValuePair.Key + ".TOOLTIP"));
+			}
 			this.widgets.Add(keyValuePair.Key, gameObject);
 			MultiToggle toggle = gameObject.GetComponentInChildren<MultiToggle>();
 			ToolParameterMenu.ToggleState value = keyValuePair.Value;
@@ -174,6 +179,8 @@ public class ToolParameterMenu : KMonoBehaviour
 		public static string HEATFLOW = "HEATFLOW";
 
 		public static string ABSOLUTETEMPERATURE = "ABSOLUTETEMPERATURE";
+
+		public static string RELATIVETEMPERATURE = "RELATIVETEMPERATURE";
 
 		public static string ADAPTIVETEMPERATURE = "ADAPTIVETEMPERATURE";
 

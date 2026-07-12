@@ -17,7 +17,12 @@ public class Sculpture : Artable
 	public override void SetStage(string stage_id, bool skip_effect)
 	{
 		base.SetStage(stage_id, skip_effect);
-		if (!skip_effect && base.CurrentStage != "Default")
+		bool flag = base.CurrentStage == "Default";
+		if (Db.GetArtableStages().Get(stage_id) == null)
+		{
+			global::Debug.LogError("Missing stage: " + stage_id);
+		}
+		if (!skip_effect && !flag)
 		{
 			KBatchedAnimController kbatchedAnimController = FXHelpers.CreateEffect("sculpture_fx_kanim", base.transform.GetPosition(), base.transform, false, Grid.SceneLayer.Front, false);
 			kbatchedAnimController.destroyOnAnimComplete = true;

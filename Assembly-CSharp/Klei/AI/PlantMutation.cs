@@ -35,7 +35,7 @@ namespace Klei.AI
 			SeedProducer component = target.GetComponent<SeedProducer>();
 			if (component != null && component.seedInfo.productionType == SeedProducer.ProductionType.Harvest)
 			{
-				component.Configure(component.seedInfo.seedId, SeedProducer.ProductionType.Sterile, 0);
+				component.Configure(component.seedInfo.seedId, SeedProducer.ProductionType.Sterile, 1);
 			}
 			if (this.bonusCropID.IsValid)
 			{

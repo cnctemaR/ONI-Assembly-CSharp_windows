@@ -34,7 +34,8 @@ public class GravityComponents : KGameObjectComponentManager<GravityComponent>
 					vector2 *= tuning.maxVelocity / Mathf.Sqrt(sqrMagnitude);
 				}
 				int num2 = Grid.PosToCell(vector);
-				bool flag = Grid.IsVisiblyInLiquid(vector - new Vector2(0f, gravityComponent.bottomYOffset));
+				float groundOffset = GravityComponent.GetGroundOffset(gravityComponent);
+				bool flag = Grid.IsVisiblyInLiquid(vector - new Vector2(0f, groundOffset));
 				if (flag)
 				{
 					flag = true;
@@ -50,8 +51,8 @@ public class GravityComponents : KGameObjectComponentManager<GravityComponent>
 				gravityComponent.elapsedTime += dt;
 				Vector2 vector3 = vector + vector2 * dt;
 				Vector2 vector4 = vector3;
-				vector4.y = vector3.y - gravityComponent.bottomYOffset;
-				bool flag2 = Grid.IsVisiblyInLiquid(vector3 + new Vector2(0f, gravityComponent.bottomYOffset));
+				vector4.y = vector3.y - groundOffset;
+				bool flag2 = Grid.IsVisiblyInLiquid(vector3 + new Vector2(0f, groundOffset));
 				if (!flag && flag2)
 				{
 					KBatchedAnimController kbatchedAnimController = FXHelpers.CreateEffect("splash_step_kanim", new Vector3(vector3.x, vector3.y, 0f) + new Vector3(-0.38f, 0.75f, -0.1f), null, false, Grid.SceneLayer.FXFront, false);
@@ -91,7 +92,7 @@ public class GravityComponents : KGameObjectComponentManager<GravityComponent>
 					if (flag4)
 					{
 						Vector3 vector5 = Grid.CellToPosCBC(Grid.CellAbove(num6), Grid.SceneLayer.Move);
-						vector3.y = vector5.y + gravityComponent.bottomYOffset;
+						vector3.y = vector5.y + groundOffset;
 						gravityComponent.velocity.x = 0f;
 						flag3 = true;
 					}

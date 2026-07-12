@@ -101,7 +101,7 @@ public class SandboxToolParameterMenu : KScreen
 		{
 			string stringSetting2 = SandboxToolParameterMenu.instance.settings.GetStringSetting("SandboxTools.SelectedEntity");
 			GameObject gameObject = Assets.TryGetPrefab(stringSetting2);
-			if (gameObject == null)
+			if (gameObject == null || !SaveLoader.Instance.IsDlcListActiveForCurrentSave(gameObject.GetComponent<KPrefabID>().requiredDlcIds))
 			{
 				this.settings.ForceDefaultStringSetting("SandboxTools.SelectedEntity");
 				return;
@@ -239,7 +239,20 @@ public class SandboxToolParameterMenu : KScreen
 		{
 			if (!element2.disabled)
 			{
-				list.Add(element2);
+				bool flag = false;
+				Tag[] oreTags = element2.oreTags;
+				for (int i = 0; i < oreTags.Length; i++)
+				{
+					if (oreTags[i] == GameTags.HideFromSpawnTool)
+					{
+						flag = true;
+						break;
+					}
+				}
+				if (!flag)
+				{
+					list.Add(element2);
+				}
 			}
 		}
 		list.Sort((Element a, Element b) => a.name.CompareTo(b.name));
@@ -266,9 +279,17 @@ public class SandboxToolParameterMenu : KScreen
 			return (!kprefabID2.HasTag(GameTags.Egg) && EdiblesManager.GetAllFoodTypes().Find((EdiblesManager.FoodInfo match) => match.Id == idString) != null) || kprefabID2.HasTag(GameTags.Dehydrated);
 		}, null, Def.GetUISprite(Assets.GetPrefab("MushBar"), "ui", false));
 		list.Add(searchFilter);
-		SandboxToolParameterMenu.SelectorValue.SearchFilter searchFilter2 = new SandboxToolParameterMenu.SelectorValue.SearchFilter(UI.SANDBOXTOOLS.FILTERS.ENTITIES.COMETS, (object entity) => (entity as KPrefabID).HasTag(GameTags.Comet), null, Def.GetUISprite(Assets.GetPrefab(CopperCometConfig.ID), "ui", false));
+		SandboxToolParameterMenu.SelectorValue.SearchFilter searchFilter2 = new SandboxToolParameterMenu.SelectorValue.SearchFilter(UI.SANDBOXTOOLS.FILTERS.ENTITIES.COMETS, delegate(object entity)
+		{
+			KPrefabID kprefabID3 = entity as KPrefabID;
+			return kprefabID3.HasTag(GameTags.Comet) && SaveLoader.Instance.IsDlcListActiveForCurrentSave(kprefabID3.requiredDlcIds);
+		}, null, Def.GetUISprite(Assets.GetPrefab(CopperCometConfig.ID), "ui", false));
 		list.Add(searchFilter2);
-		SandboxToolParameterMenu.SelectorValue.SearchFilter searchFilter3 = new SandboxToolParameterMenu.SelectorValue.SearchFilter(UI.SANDBOXTOOLS.FILTERS.ENTITIES.SPECIAL, (object entity) => (entity as KPrefabID).PrefabID().Name == MinionConfig.ID, null, new global::Tuple<Sprite, Color>(Assets.GetSprite("ui_duplicant_portrait_placeholder"), Color.white));
+		SandboxToolParameterMenu.SelectorValue.SearchFilter searchFilter3 = new SandboxToolParameterMenu.SelectorValue.SearchFilter(UI.SANDBOXTOOLS.FILTERS.ENTITIES.SPECIAL, delegate(object entity)
+		{
+			KPrefabID kprefabID4 = entity as KPrefabID;
+			return (entity as KPrefabID).PrefabID().Name == MinionConfig.ID && SaveLoader.Instance.IsDlcListActiveForCurrentSave(kprefabID4.requiredDlcIds);
+		}, null, new global::Tuple<Sprite, Color>(Assets.GetSprite("ui_duplicant_portrait_placeholder"), Color.white));
 		list.Add(searchFilter3);
 		SandboxToolParameterMenu.SelectorValue.SearchFilter searchFilter4 = null;
 		searchFilter4 = new SandboxToolParameterMenu.SelectorValue.SearchFilter(UI.SANDBOXTOOLS.FILTERS.ENTITIES.CREATURE, (object entity) => false, null, Def.GetUISprite(Assets.GetPrefab("Hatch"), "ui", false));
@@ -277,7 +298,7 @@ public class SandboxToolParameterMenu : KScreen
 		foreach (GameObject gameObject in Assets.GetPrefabsWithTag(GameTags.CreatureBrain))
 		{
 			CreatureBrain brain = gameObject.GetComponent<CreatureBrain>();
-			if (!list2.Contains(brain.species))
+			if (!list2.Contains(brain.species) && SaveLoader.Instance.IsDlcListActiveForCurrentSave(brain.GetComponent<KPrefabID>().requiredDlcIds))
 			{
 				global::Tuple<Sprite, Color> tuple = new global::Tuple<Sprite, Color>(CodexCache.entries[brain.species.ToString().ToUpper()].icon, CodexCache.entries[brain.species.ToString().ToUpper()].iconColor);
 				list2.Add(brain.species);
@@ -303,12 +324,8 @@ public class SandboxToolParameterMenu : KScreen
 		list.Add(searchFilter7);
 		SandboxToolParameterMenu.SelectorValue.SearchFilter searchFilter8 = new SandboxToolParameterMenu.SelectorValue.SearchFilter(UI.SANDBOXTOOLS.FILTERS.ENTITIES.PLANTS, delegate(object entity)
 		{
-			if ((entity as KPrefabID).gameObject == null)
-			{
-				return false;
-			}
-			GameObject gameObject3 = (entity as KPrefabID).gameObject;
-			return gameObject3 != null && (gameObject3.GetComponent<Harvestable>() != null || gameObject3.GetComponent<WiltCondition>() != null);
+			KPrefabID kprefabID5 = entity as KPrefabID;
+			return !(kprefabID5 == null) && !(kprefabID5.gameObject == null) && (kprefabID5 != null && SaveLoader.Instance.IsDlcListActiveForCurrentSave(kprefabID5.requiredDlcIds)) && (kprefabID5.GetComponent<Harvestable>() != null || kprefabID5.GetComponent<WiltCondition>() != null);
 		}, null, Def.GetUISprite(Assets.GetPrefab("PrickleFlower"), "ui", false));
 		list.Add(searchFilter8);
 		SandboxToolParameterMenu.SelectorValue.SearchFilter searchFilter9 = new SandboxToolParameterMenu.SelectorValue.SearchFilter(UI.SANDBOXTOOLS.FILTERS.ENTITIES.SEEDS, delegate(object entity)
@@ -317,8 +334,8 @@ public class SandboxToolParameterMenu : KScreen
 			{
 				return false;
 			}
-			GameObject gameObject4 = (entity as KPrefabID).gameObject;
-			return gameObject4 != null && gameObject4.GetComponent<PlantableSeed>() != null;
+			GameObject gameObject3 = (entity as KPrefabID).gameObject;
+			return gameObject3 != null && gameObject3.GetComponent<PlantableSeed>() != null;
 		}, searchFilter8, Def.GetUISprite(Assets.GetPrefab("PrickleFlowerSeed"), "ui", false));
 		list.Add(searchFilter9);
 		SandboxToolParameterMenu.SelectorValue.SearchFilter searchFilter10 = new SandboxToolParameterMenu.SelectorValue.SearchFilter(UI.SANDBOXTOOLS.FILTERS.ENTITIES.INDUSTRIAL_PRODUCTS, delegate(object entity)
@@ -327,21 +344,24 @@ public class SandboxToolParameterMenu : KScreen
 			{
 				return false;
 			}
-			GameObject gameObject5 = (entity as KPrefabID).gameObject;
-			return gameObject5 != null && (gameObject5.HasTag(GameTags.IndustrialIngredient) || gameObject5.HasTag(GameTags.IndustrialProduct) || gameObject5.HasTag(GameTags.Medicine) || gameObject5.HasTag(GameTags.MedicalSupplies));
+			GameObject gameObject4 = (entity as KPrefabID).gameObject;
+			return gameObject4 != null && (gameObject4.HasTag(GameTags.IndustrialIngredient) || gameObject4.HasTag(GameTags.IndustrialProduct) || gameObject4.HasTag(GameTags.Medicine) || gameObject4.HasTag(GameTags.MedicalSupplies));
 		}, null, Def.GetUISprite(Assets.GetPrefab("BasicCure"), "ui", false));
 		list.Add(searchFilter10);
 		List<KPrefabID> list3 = new List<KPrefabID>();
 		foreach (KPrefabID kprefabID in Assets.Prefabs)
 		{
-			using (List<SandboxToolParameterMenu.SelectorValue.SearchFilter>.Enumerator enumerator3 = list.GetEnumerator())
+			if (SaveLoader.Instance.IsDlcListActiveForCurrentSave(kprefabID.requiredDlcIds) && !kprefabID.HasTag(GameTags.HideFromSpawnTool))
 			{
-				while (enumerator3.MoveNext())
+				using (List<SandboxToolParameterMenu.SelectorValue.SearchFilter>.Enumerator enumerator3 = list.GetEnumerator())
 				{
-					if (enumerator3.Current.condition(kprefabID))
+					while (enumerator3.MoveNext())
 					{
-						list3.Add(kprefabID);
-						break;
+						if (enumerator3.Current.condition(kprefabID))
+						{
+							list3.Add(kprefabID);
+							break;
+						}
 					}
 				}
 			}

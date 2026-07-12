@@ -114,7 +114,7 @@ public class KleiMetrics : ThreadedHttps<KleiMetrics>
 		return null;
 	}
 
-	protected static KleiMetrics.ExpansionsMetricsData[] Expansions()
+	protected static KleiMetrics.ExpansionsMetricsData[] Expansions(List<string> dlcsActive)
 	{
 		List<string> ownedDLCIds = DlcManager.GetOwnedDLCIds();
 		KleiMetrics.ExpansionsMetricsData[] array = new KleiMetrics.ExpansionsMetricsData[ownedDLCIds.Count];
@@ -123,7 +123,7 @@ public class KleiMetrics : ThreadedHttps<KleiMetrics>
 			array[i] = new KleiMetrics.ExpansionsMetricsData
 			{
 				Name = ownedDLCIds[i],
-				Activated = DlcManager.IsContentActive(ownedDLCIds[i])
+				Activated = dlcsActive.Contains(ownedDLCIds[i])
 			};
 		}
 		return array;
@@ -269,7 +269,6 @@ public class KleiMetrics : ThreadedHttps<KleiMetrics>
 		{
 			this.SetStaticSessionVariable("KU", KleiAccount.KleiUserID);
 		}
-		this.SetStaticSessionVariable("Expansions", KleiMetrics.Expansions());
 	}
 
 	private Dictionary<string, object> GetUserSession()
@@ -401,6 +400,20 @@ public class KleiMetrics : ThreadedHttps<KleiMetrics>
 		this.PostMetricData(dictionary, "StartNewGame");
 	}
 
+	public void SetExpansionsActive(List<string> expansions)
+	{
+		if (!this.enabled || !this.sessionStarted)
+		{
+			return;
+		}
+		this.SetStaticSessionVariable("Expansions", KleiMetrics.Expansions(expansions));
+	}
+
+	public void ClearGameFields()
+	{
+		this.RemoveStaticSessionVariable("Expansions");
+	}
+
 	public void EndGame()
 	{
 		if (!this.enabled)
@@ -411,6 +424,7 @@ public class KleiMetrics : ThreadedHttps<KleiMetrics>
 		{
 			return;
 		}
+		this.ClearGameFields();
 		Dictionary<string, object> dictionary = this.GetUserSession();
 		dictionary.Add("EndGame", true);
 		this.PostMetricData(dictionary, "EndGame");

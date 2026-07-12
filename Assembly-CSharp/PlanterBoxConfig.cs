@@ -30,6 +30,7 @@ public class PlanterBoxConfig : IBuildingConfig
 	{
 		Storage storage = go.AddOrGet<Storage>();
 		PlantablePlot plantablePlot = go.AddOrGet<PlantablePlot>();
+		plantablePlot.tagOnPlanted = GameTags.PlantedOnFloorVessel;
 		plantablePlot.AddDepositTag(GameTags.CropSeed);
 		plantablePlot.SetFertilizationFlags(true, false);
 		go.AddOrGet<CopyBuildingSettings>().copyGroupTag = GameTags.Farm;

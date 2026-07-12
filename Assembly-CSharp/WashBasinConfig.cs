@@ -12,9 +12,9 @@ public class WashBasinConfig : IBuildingConfig
 		string text2 = "wash_basin_kanim";
 		int num3 = 30;
 		float num4 = 30f;
-		string[] raw_MINERALS = MATERIALS.RAW_MINERALS;
+		string[] raw_MINERALS_OR_METALS = MATERIALS.RAW_MINERALS_OR_METALS;
 		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER1;
-		string[] array = raw_MINERALS;
+		string[] array = raw_MINERALS_OR_METALS;
 		float num5 = 1600f;
 		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloor;
 		EffectorValues tier2 = NOISE_POLLUTION.NOISY.TIER0;

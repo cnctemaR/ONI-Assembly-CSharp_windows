@@ -360,6 +360,7 @@ public class Global : MonoBehaviour
 		ThreadedHttps<KleiItems>.Instance.LoadInventoryCache();
 		this.modManager.Load(Content.LayerableFiles);
 		WorldGen.LoadSettings(true);
+		base.StartCoroutine(WorldGen.ListenForLoadSettingsErrorRoutine());
 		GlobalResources.Instance();
 	}
 
@@ -419,14 +420,17 @@ public class Global : MonoBehaviour
 
 	private void OnDlcAuthenticationFailed()
 	{
-		KScreen component = KScreenManager.AddChild(this.globalCanvas, ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject).GetComponent<KScreen>();
-		component.Activate();
-		ConfirmDialogScreen component2 = component.GetComponent<ConfirmDialogScreen>();
-		component2.deactivateOnCancelAction = false;
-		component2.PopupConfirmDialog(UI.FRONTEND.RAILFORCEQUIT.DLC_NOT_PURCHASED, delegate
+		if (DlcManager.IsExpansion1Active())
 		{
-			App.Quit();
-		}, null, null, null, null, null, null, null);
+			KScreen component = KScreenManager.AddChild(this.globalCanvas, ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject).GetComponent<KScreen>();
+			component.Activate();
+			ConfirmDialogScreen component2 = component.GetComponent<ConfirmDialogScreen>();
+			component2.deactivateOnCancelAction = false;
+			component2.PopupConfirmDialog(UI.FRONTEND.RAILFORCEQUIT.DLC_NOT_PURCHASED, delegate
+			{
+				App.Quit();
+			}, null, null, null, null, null, null, null);
+		}
 	}
 
 	private void RestoreLegacyMetricsSetting()
@@ -561,7 +565,7 @@ public class Global : MonoBehaviour
 			}
 			catch (Exception ex4)
 			{
-				KCrashReporter.Assert(false, "Test Data Locations / failed: " + ex4.Message);
+				KCrashReporter.Assert(false, "Test Data Locations / failed: " + ex4.Message, new string[] { KCrashReporter.CRASH_CATEGORY.FILEIO });
 			}
 		}
 	}
@@ -634,7 +638,7 @@ public class Global : MonoBehaviour
 	private void SetONIStaticSessionVariables()
 	{
 		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Branch", "release");
-		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Build", 600112U);
+		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Build", 622222U);
 		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("SaveFolderWriteTest", Global.saveFolderTestResult);
 		if (KPlayerPrefs.HasKey(UnitConfigurationScreen.MassUnitKey))
 		{

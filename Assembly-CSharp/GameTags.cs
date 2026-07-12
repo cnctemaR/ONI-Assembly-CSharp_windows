@@ -33,7 +33,11 @@ public class GameTags
 
 	public static readonly Tag Plant = TagManager.Create("Plant");
 
+	public static readonly Tag PlantBranch = TagManager.Create("PlantBranch");
+
 	public static readonly Tag GrowingPlant = TagManager.Create("GrowingPlant");
+
+	public static readonly Tag PlantedOnFloorVessel = TagManager.Create("PlantedOnFloorVessel");
 
 	public static readonly Tag Pickupable = TagManager.Create("Pickupable");
 
@@ -101,6 +105,8 @@ public class GameTags
 
 	public static readonly Tag MiscPickupable = TagManager.Create("MiscPickupable");
 
+	public static readonly Tag PlastifiableLiquid = TagManager.Create("PlastifiableLiquid");
+
 	public static readonly Tag CombustibleGas = TagManager.Create("CombustibleGas");
 
 	public static readonly Tag CombustibleLiquid = TagManager.Create("CombustibleLiquid");
@@ -116,6 +122,8 @@ public class GameTags
 	public static readonly Tag Robot = TagManager.Create("Robot");
 
 	public static readonly Tag StoryTraitResource = TagManager.Create("StoryTraitResource");
+
+	public static readonly Tag RoomProberBuilding = TagManager.Create("RoomProberBuilding");
 
 	public static readonly Tag DevBuilding = TagManager.Create("DevBuilding");
 
@@ -162,6 +170,8 @@ public class GameTags
 	public static readonly Tag FullyIncubated = TagManager.Create("FullyIncubated");
 
 	public static readonly Tag Amphibious = TagManager.Create("Amphibious");
+
+	public static readonly Tag LargeCreature = TagManager.Create("LargeCreature");
 
 	public static readonly Tag MoltShell = TagManager.Create("MoltShell");
 
@@ -232,6 +242,12 @@ public class GameTags
 	public static readonly Tag ConsumableOre = TagManager.Create("ConsumableOre");
 
 	public static readonly Tag Unstable = TagManager.Create("Unstable");
+
+	public static readonly Tag Sublimating = TagManager.Create("Sublimating");
+
+	public static readonly Tag HideFromSpawnTool = TagManager.Create("HideFromSpawnTool");
+
+	public static readonly Tag HideFromCodex = TagManager.Create("HideFromCodex");
 
 	public static readonly Tag EmitsLight = TagManager.Create("EmitsLight");
 
@@ -348,15 +364,12 @@ public class GameTags
 
 	public static readonly Tag WarmVest = TagManager.Create("Warm_Vest");
 
-	public static readonly Tag CoolVest = TagManager.Create("Cool_Vest");
-
 	public static readonly Tag FunkyVest = TagManager.Create("Funky_Vest");
 
 	public static readonly List<Tag> AllClothesTags = new List<Tag>
 	{
 		GameTags.Clothes,
 		GameTags.WarmVest,
-		GameTags.CoolVest,
 		GameTags.FunkyVest
 	};
 
@@ -393,6 +406,14 @@ public class GameTags
 	public static readonly Tag PerformingWorkRequest = TagManager.Create("PerformingWorkRequest");
 
 	public static readonly Tag RecoveringBreath = TagManager.Create("RecoveringBreath");
+
+	public static readonly Tag FeelingCold = TagManager.Create("FeelingCold");
+
+	public static readonly Tag FeelingWarm = TagManager.Create("FeelingWarm");
+
+	public static readonly Tag RecoveringWarmnth = TagManager.Create("RecoveringWarmnth");
+
+	public static readonly Tag RecoveringFromHeat = TagManager.Create("RecoveringFromHeat");
 
 	public static readonly Tag NoOxygen = TagManager.Create("NoOxygen");
 
@@ -592,6 +613,7 @@ public class GameTags
 		GameTags.Breathable,
 		GameTags.Unbreathable,
 		GameTags.ConsumableOre,
+		GameTags.Sublimating,
 		GameTags.Organics,
 		GameTags.Farmable,
 		GameTags.Agriculture,
@@ -628,6 +650,11 @@ public class GameTags
 	public static TagSet DisplayAsUnits = new TagSet(GameTags.UnitCategories);
 
 	public static TagSet DisplayAsInformation = new TagSet();
+
+	public static class Worlds
+	{
+		public static readonly Tag Ceres = TagManager.Create("Ceres");
+	}
 
 	public abstract class ChoreTypes
 	{
@@ -782,6 +809,8 @@ public class GameTags
 
 		public static readonly Tag CanMolt = TagManager.Create("CanMolt");
 
+		public static readonly Tag ReadyToMolt = TagManager.Create("ReadyToMolt");
+
 		public static readonly Tag CantReachEgg = TagManager.Create("CantReachEgg");
 
 		public static readonly Tag HasNoFoundation = TagManager.Create("HasNoFoundation");
@@ -823,6 +852,12 @@ public class GameTags
 			public static readonly Tag BeetaSpecies = TagManager.Create("BeetaSpecies");
 
 			public static readonly Tag DivergentSpecies = TagManager.Create("DivergentSpecies");
+
+			public static readonly Tag DeerSpecies = TagManager.Create("DeerSpecies");
+
+			public static readonly Tag BellySpecies = TagManager.Create("BellySpecies");
+
+			public static readonly Tag SealSpecies = TagManager.Create("SealSpecies");
 		}
 
 		public static class Behaviours

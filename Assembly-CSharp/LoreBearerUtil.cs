@@ -24,6 +24,21 @@ public static class LoreBearerUtil
 		};
 	}
 
+	public static void AddLoreTo(GameObject prefabOrGameObject, string[] collectionsToUnlockFrom)
+	{
+		KPrefabID component = prefabOrGameObject.GetComponent<KPrefabID>();
+		if (component.IsInitialized())
+		{
+			prefabOrGameObject.AddOrGet<LoreBearer>().Internal_SetContent(LoreBearerUtil.UnlockNextInCollections(collectionsToUnlockFrom));
+			return;
+		}
+		prefabOrGameObject.AddComponent<LoreBearer>();
+		component.prefabInitFn += delegate(GameObject gameObject)
+		{
+			gameObject.GetComponent<LoreBearer>().Internal_SetContent(LoreBearerUtil.UnlockNextInCollections(collectionsToUnlockFrom));
+		};
+	}
+
 	public static LoreBearerAction UnlockSpecificEntry(string unlockId, string searchDisplayText)
 	{
 		return delegate(InfoDialogScreen screen)
@@ -36,7 +51,7 @@ public static class LoreBearerUtil
 
 	public static void UnlockNextEmail(InfoDialogScreen screen)
 	{
-		string text = Game.Instance.unlocks.UnlockNext("emails");
+		string text = Game.Instance.unlocks.UnlockNext("emails", false);
 		if (text != null)
 		{
 			string text2 = "SEARCH" + global::UnityEngine.Random.Range(1, 6).ToString();
@@ -50,7 +65,7 @@ public static class LoreBearerUtil
 
 	public static void UnlockNextResearchNote(InfoDialogScreen screen)
 	{
-		string text = Game.Instance.unlocks.UnlockNext("researchnotes");
+		string text = Game.Instance.unlocks.UnlockNext("researchnotes", false);
 		if (text != null)
 		{
 			string text2 = "SEARCH" + global::UnityEngine.Random.Range(1, 3).ToString();
@@ -64,7 +79,7 @@ public static class LoreBearerUtil
 
 	public static void UnlockNextJournalEntry(InfoDialogScreen screen)
 	{
-		string text = Game.Instance.unlocks.UnlockNext("journals");
+		string text = Game.Instance.unlocks.UnlockNext("journals", false);
 		if (text != null)
 		{
 			string text2 = "SEARCH" + global::UnityEngine.Random.Range(1, 6).ToString();
@@ -78,7 +93,7 @@ public static class LoreBearerUtil
 
 	public static void UnlockNextDimensionalLore(InfoDialogScreen screen)
 	{
-		string text = Game.Instance.unlocks.UnlockNext("dimensionallore");
+		string text = Game.Instance.unlocks.UnlockNext("dimensionallore", true);
 		if (text != null)
 		{
 			string text2 = "SEARCH" + global::UnityEngine.Random.Range(1, 6).ToString();
@@ -92,7 +107,7 @@ public static class LoreBearerUtil
 
 	public static void UnlockNextSpaceEntry(InfoDialogScreen screen)
 	{
-		string text = Game.Instance.unlocks.UnlockNext("space");
+		string text = Game.Instance.unlocks.UnlockNext("space", false);
 		if (text != null)
 		{
 			string text2 = "SEARCH" + global::UnityEngine.Random.Range(1, 7).ToString();
@@ -118,6 +133,25 @@ public static class LoreBearerUtil
 		screen.AddPlainText(Strings.Get("STRINGS.UI.USERMENUACTIONS.READLORE.SEARCH_COMPUTER_FAIL." + text2));
 	}
 
+	public static LoreBearerAction UnlockNextInCollections(string[] collectionsToUnlockFrom)
+	{
+		return delegate(InfoDialogScreen screen)
+		{
+			foreach (string text in collectionsToUnlockFrom)
+			{
+				string text2 = Game.Instance.unlocks.UnlockNext(text, false);
+				if (text2 != null)
+				{
+					screen.AddPlainText(UI.USERMENUACTIONS.READLORE.SEARCH_OBJECT_SUCCESS.SEARCH1);
+					screen.AddOption(UI.USERMENUACTIONS.READLORE.GOTODATABASE, LoreBearerUtil.OpenCodexByLockKeyID(text2, false), false);
+					return;
+				}
+			}
+			string text3 = "SEARCH1";
+			screen.AddPlainText(Strings.Get("STRINGS.UI.USERMENUACTIONS.READLORE.SEARCH_OBJECT_FAIL." + text3));
+		};
+	}
+
 	public static void NerualVacillator(InfoDialogScreen screen)
 	{
 		Game.Instance.unlocks.Unlock("neuralvacillator", true);
@@ -129,27 +163,7 @@ public static class LoreBearerUtil
 		return delegate(InfoDialogScreen dialog)
 		{
 			dialog.Deactivate();
-			string entryForLock = CodexCache.GetEntryForLock(key);
-			if (entryForLock == null)
-			{
-				DebugUtil.DevLogError("Missing codex entry for lock: " + key);
-				return;
-			}
-			ContentContainer contentContainer = null;
-			if (focusContent)
-			{
-				CodexEntry codexEntry = CodexCache.FindEntry(entryForLock);
-				int num = 0;
-				while (contentContainer == null && num < codexEntry.contentContainers.Count)
-				{
-					if (!(codexEntry.contentContainers[num].lockID != key))
-					{
-						contentContainer = codexEntry.contentContainers[num];
-					}
-					num++;
-				}
-			}
-			ManagementMenu.Instance.OpenCodexToEntry(entryForLock, contentContainer);
+			ManagementMenu.Instance.OpenCodexToLockId(key, focusContent);
 		};
 	}
 

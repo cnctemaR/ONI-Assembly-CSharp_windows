@@ -595,6 +595,21 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 		}
 	}
 
+	public void SetShouldShowSkillPerkStatusItem(bool shouldItBeShown)
+	{
+		this.shouldShowSkillPerkStatusItem = shouldItBeShown;
+		if (this.skillsUpdateHandle != -1)
+		{
+			Game.Instance.Unsubscribe(this.skillsUpdateHandle);
+			this.skillsUpdateHandle = -1;
+		}
+		if (this.shouldShowSkillPerkStatusItem && !string.IsNullOrEmpty(this.requiredSkillPerk))
+		{
+			this.skillsUpdateHandle = Game.Instance.Subscribe(-1523247426, new Action<object>(this.UpdateStatusItem));
+		}
+		this.UpdateStatusItem(null);
+	}
+
 	public virtual bool InstantlyFinish(Worker worker)
 	{
 		float num = worker.workable.WorkTimeRemaining;

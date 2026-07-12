@@ -153,7 +153,11 @@ public class CancellableMove : Cancellable
 			else
 			{
 				Movable movable = this.movables[i].Get();
-				if (movable != null && Grid.PosToCell(movable) == Grid.PosToCell(this))
+				if (movable == null)
+				{
+					this.movables.RemoveAt(i);
+				}
+				else if (Grid.PosToCell(movable) == Grid.PosToCell(this))
 				{
 					movable.ClearMove();
 					this.movables.RemoveAt(i);

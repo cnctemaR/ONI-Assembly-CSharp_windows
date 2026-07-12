@@ -51,10 +51,7 @@ public class FoodRehydratorConfig : IBuildingConfig
 		storage.capacityKg = 5f;
 		storage.showInUI = true;
 		storage.showDescriptor = false;
-		storage.storageFilters = STORAGEFILTERS.DEHYDRATED;
 		storage.allowItemRemoval = false;
-		storage.storageFullMargin = STORAGE.STORAGE_LOCKER_FILLED_MARGIN;
-		storage.fetchCategory = Storage.FetchCategory.GeneralStorage;
 		storage.showCapacityStatusItem = true;
 		storage.showCapacityAsMainStatus = true;
 		ManualDeliveryKG manualDeliveryKG = go.AddOrGet<ManualDeliveryKG>();

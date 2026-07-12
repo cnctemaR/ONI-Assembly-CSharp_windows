@@ -145,7 +145,7 @@ public class OutfitDesignerScreen : KMonoBehaviour
 			};
 			this.updateSaveButtonsFn = (global::System.Action)Delegate.Combine(this.updateSaveButtonsFn, new global::System.Action(delegate
 			{
-				if (this.outfitState.DoesContainNonOwnedItems())
+				if (this.outfitState.DoesContainLockedItems())
 				{
 					this.primaryButton.isInteractable = false;
 					this.primaryButton.gameObject.AddOrGet<ToolTip>().SetSimpleTooltip(UI.OUTFIT_DESIGNER_SCREEN.OUTFIT_TEMPLATE.TOOLTIP_SAVE_ERROR_LOCKED);
@@ -197,7 +197,7 @@ public class OutfitDesignerScreen : KMonoBehaviour
 				{
 					this.primaryButton.isInteractable = false;
 					this.primaryButton.gameObject.AddOrGet<ToolTip>().SetSimpleTooltip(UI.OUTFIT_DESIGNER_SCREEN.OUTFIT_TEMPLATE.TOOLTIP_SAVE_ERROR_READONLY);
-					if (this.outfitState.DoesContainNonOwnedItems())
+					if (this.outfitState.DoesContainLockedItems())
 					{
 						this.secondaryButton.isInteractable = false;
 						this.secondaryButton.gameObject.AddOrGet<ToolTip>().SetSimpleTooltip(UI.OUTFIT_DESIGNER_SCREEN.OUTFIT_TEMPLATE.TOOLTIP_SAVE_ERROR_LOCKED);
@@ -209,7 +209,7 @@ public class OutfitDesignerScreen : KMonoBehaviour
 				}
 				else
 				{
-					if (this.outfitState.DoesContainNonOwnedItems())
+					if (this.outfitState.DoesContainLockedItems())
 					{
 						this.primaryButton.isInteractable = false;
 						this.primaryButton.gameObject.AddOrGet<ToolTip>().SetSimpleTooltip(UI.OUTFIT_DESIGNER_SCREEN.OUTFIT_TEMPLATE.TOOLTIP_SAVE_ERROR_LOCKED);

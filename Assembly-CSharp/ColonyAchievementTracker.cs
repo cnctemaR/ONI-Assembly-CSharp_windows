@@ -10,6 +10,96 @@ using UnityEngine;
 [AddComponentMenu("KMonoBehaviour/scripts/ColonyAchievementTracker")]
 public class ColonyAchievementTracker : KMonoBehaviour, ISaveLoadableDetails, IRenderEveryTick
 {
+	public bool GeothermalFacilityDiscovered
+	{
+		get
+		{
+			return (this.geothermalProgress & 1) == 1;
+		}
+		set
+		{
+			if (value)
+			{
+				this.geothermalProgress |= 1;
+				return;
+			}
+			DebugUtil.DevAssert(value, "unsetting progress? why", null);
+			this.geothermalProgress &= -2;
+		}
+	}
+
+	public bool GeothermalControllerRepaired
+	{
+		get
+		{
+			return (this.geothermalProgress & 2) == 2;
+		}
+		set
+		{
+			if (value)
+			{
+				this.geothermalProgress |= 2;
+				return;
+			}
+			DebugUtil.DevAssert(value, "unsetting progress? why", null);
+			this.geothermalProgress &= -3;
+		}
+	}
+
+	public bool GeothermalControllerHasVented
+	{
+		get
+		{
+			return (this.geothermalProgress & 4) == 4;
+		}
+		set
+		{
+			if (value)
+			{
+				this.geothermalProgress |= 4;
+				return;
+			}
+			DebugUtil.DevAssert(value, "unsetting progress? why", null);
+			this.geothermalProgress &= -5;
+		}
+	}
+
+	public bool GeothermalClearedEntombedVent
+	{
+		get
+		{
+			return (this.geothermalProgress & 8) == 8;
+		}
+		set
+		{
+			if (value)
+			{
+				this.geothermalProgress |= 8;
+				return;
+			}
+			DebugUtil.DevAssert(value, "unsetting progress? why", null);
+			this.geothermalProgress &= -9;
+		}
+	}
+
+	public bool GeothermalVictoryPopupDismissed
+	{
+		get
+		{
+			return (this.geothermalProgress & 16) == 16;
+		}
+		set
+		{
+			if (value)
+			{
+				this.geothermalProgress |= 16;
+				return;
+			}
+			DebugUtil.DevAssert(value, "unsetting progress? why", null);
+			this.geothermalProgress &= -17;
+		}
+	}
+
 	public List<string> achievementsToDisplay
 	{
 		get
@@ -432,6 +522,19 @@ public class ColonyAchievementTracker : KMonoBehaviour, ISaveLoadableDetails, IR
 
 	[Serialize]
 	public Dictionary<int, int> cyclesRocketDupeMoraleAboveRequirement = new Dictionary<int, int>();
+
+	[Serialize]
+	private int geothermalProgress;
+
+	private const int GEO_DISCOVERED_BIT = 1;
+
+	private const int GEO_CONTROLLER_REPAIRED_BIT = 2;
+
+	private const int GEO_CONTROLLER_VENTED_BIT = 4;
+
+	private const int GEO_CLEARED_ENTOMBED_BIT = 8;
+
+	private const int GEO_VICTORY_ACK_BIT = 16;
 
 	private SchedulerHandle checkAchievementsHandle;
 

@@ -1,22 +1,54 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using Klei;
 
 namespace ProcGen
 {
+	[DebuggerDisplay("{name} - worldSize = {worldsize}")]
 	[Serializable]
 	public class World
 	{
+		public string GetProperName()
+		{
+			StringEntry stringEntry;
+			if (!Strings.TryGet(this.name, out stringEntry))
+			{
+				return this.name;
+			}
+			return stringEntry.String;
+		}
+
+		public string GetProperDescription()
+		{
+			StringEntry stringEntry;
+			if (!Strings.TryGet(this.description, out stringEntry))
+			{
+				return this.description;
+			}
+			return stringEntry.String;
+		}
+
 		public string name { get; private set; }
 
 		public string description { get; private set; }
 
 		public string[] nameTables { get; private set; }
 
+		public string[] overrideName { get; private set; }
+
 		public string asteroidIcon { get; private set; }
 
 		public float iconScale { get; private set; }
+
+		public List<string> worldTags { get; set; }
+
+		public string dlcIdFrom { get; set; }
+
+		public string[] requiredDlcIds { get; set; }
+
+		public string[] forbiddenDlcIds { get; set; }
 
 		public bool disableWorldTraits { get; private set; }
 
@@ -40,6 +72,8 @@ namespace ProcGen
 
 		public List<World.AllowedCellsFilter> unknownCellsAllowedSubworlds { get; private set; }
 
+		public List<World.SubworldMixingRule> subworldMixingRules { get; private set; }
+
 		public string startSubworldName { get; private set; }
 
 		public string startingBaseTemplate { get; set; }
@@ -62,6 +96,7 @@ namespace ProcGen
 		{
 			this.subworldFiles = new List<WeightedSubworldName>();
 			this.unknownCellsAllowedSubworlds = new List<World.AllowedCellsFilter>();
+			this.subworldMixingRules = new List<World.SubworldMixingRule>();
 			this.startingBasePositionHorizontal = new MinMax(0.5f, 0.5f);
 			this.startingBasePositionVertical = new MinMax(0.5f, 0.5f);
 			this.globalFeatures = new Dictionary<string, int>();
@@ -70,10 +105,17 @@ namespace ProcGen
 			this.category = World.WorldCategory.Asteroid;
 			this.worldTraitScale = 1f;
 			this.iconScale = 1f;
+			this.worldTags = new List<string>();
 			this.worldTraitRules = new List<World.TraitRule>
 			{
 				new World.TraitRule(2, 4)
 			};
+			this.worldTemplateRules = new List<World.TemplateSpawnRules>();
+		}
+
+		public void ReplaceSeasons(List<string> seasons)
+		{
+			this.seasons = new List<string>(seasons);
 		}
 
 		public void ModStartLocation(MinMax hMod, MinMax vMod)
@@ -84,6 +126,17 @@ namespace ProcGen
 			startingBasePositionVertical.Mod(vMod);
 			this.startingBasePositionHorizontal = startingBasePositionHorizontal;
 			this.startingBasePositionVertical = startingBasePositionVertical;
+		}
+
+		public void AddUnknownCellsAllowedSubworlds(List<World.AllowedCellsFilter> additions)
+		{
+			this.unknownCellsAllowedSubworlds.AddRange(additions);
+			this.unknownCellsAllowedSubworlds = this.unknownCellsAllowedSubworlds.StableSort<World.AllowedCellsFilter>().ToList<World.AllowedCellsFilter>();
+		}
+
+		public void AddSeasons(List<string> additions)
+		{
+			this.seasons.AddRange(additions);
 		}
 
 		public void Validate()
@@ -112,6 +165,27 @@ namespace ProcGen
 					DebugUtil.LogWarningArgs(new object[] { "World " + this.filePath + ": defines subworldNames that are not used in unknownCellsAllowedSubworlds: \n" + string.Join(", ", usedSubworldFiles) });
 				}
 			}
+			if (this.subworldMixingRules != null)
+			{
+				foreach (World.SubworldMixingRule subworldMixingRule in this.subworldMixingRules)
+				{
+					bool flag = false;
+					using (List<World.AllowedCellsFilter>.Enumerator enumerator = this.unknownCellsAllowedSubworlds.GetEnumerator())
+					{
+						while (enumerator.MoveNext())
+						{
+							if (enumerator.Current.subworldNames.Contains(subworldMixingRule.name))
+							{
+								flag = true;
+							}
+						}
+					}
+					if (!flag)
+					{
+						DebugUtil.LogErrorArgs(new object[] { string.Concat(new string[] { "World ", this.filePath, ": defines a subworldMixingRule '", subworldMixingRule.name, "' but it's not referenced in unknownCellsAllowedSubworlds" }) });
+					}
+				}
+			}
 			if (this.worldTraitRules != null)
 			{
 				foreach (World.TraitRule traitRule in this.worldTraitRules)
@@ -123,6 +197,10 @@ namespace ProcGen
 
 		public bool IsValidTrait(WorldTrait trait)
 		{
+			if (this.disableWorldTraits)
+			{
+				return false;
+			}
 			foreach (World.TraitRule traitRule in this.worldTraitRules)
 			{
 				if (traitRule.specificTraits == null)
@@ -139,6 +217,12 @@ namespace ProcGen
 		}
 
 		public string filePath;
+
+		[NonSerialized]
+		public bool isModded;
+
+		[NonSerialized]
+		public List<string> generatedSubworlds;
 
 		public enum WorldCategory
 		{
@@ -198,6 +282,7 @@ namespace ProcGen
 			}
 		}
 
+		[DebuggerDisplay("{listRule}, someCount = {someCount}, moreCount = {moreCount}, priority = {priority}")]
 		[Serializable]
 		public class TemplateSpawnRules
 		{
@@ -221,6 +306,8 @@ namespace ProcGen
 
 			public int moreCount { get; private set; }
 
+			public Vector2I range { get; private set; }
+
 			public int times { get; private set; }
 
 			public float priority { get; private set; }
@@ -228,6 +315,8 @@ namespace ProcGen
 			public bool allowDuplicates { get; private set; }
 
 			public bool allowExtremeTemperatureOverlap { get; private set; }
+
+			public bool allowNearStart { get; private set; }
 
 			public bool useRelaxedFiltering { get; private set; }
 
@@ -249,6 +338,8 @@ namespace ProcGen
 					return true;
 				case World.TemplateSpawnRules.ListRule.GuaranteeAll:
 					return true;
+				case World.TemplateSpawnRules.ListRule.GuaranteeRange:
+					return true;
 				default:
 					return false;
 				}
@@ -260,14 +351,17 @@ namespace ProcGen
 				GuaranteeSome,
 				GuaranteeSomeTryMore,
 				GuaranteeAll,
+				GuaranteeRange,
 				TryOne,
 				TrySome,
+				TryRange,
 				TryAll
 			}
 		}
 
+		[DebuggerDisplay("command = {command}, tag = {tag}, minDistance = {minDistance}, maxDistance = {maxDistance}")]
 		[Serializable]
-		public class AllowedCellsFilter
+		public class AllowedCellsFilter : IComparable<World.AllowedCellsFilter>
 		{
 			public AllowedCellsFilter()
 			{
@@ -276,6 +370,7 @@ namespace ProcGen
 				this.subworldNames = new List<string>();
 				this.command = World.AllowedCellsFilter.Command.Replace;
 				this.ignoreIfMissingTag = false;
+				this.sortOrder = 0;
 			}
 
 			public World.AllowedCellsFilter.TagCommand tagcommand { get; private set; }
@@ -294,6 +389,8 @@ namespace ProcGen
 
 			public List<string> subworldNames { get; private set; }
 
+			public int sortOrder { get; private set; }
+
 			public bool ignoreIfMissingTag { get; set; }
 
 			public void Validate(string parentFile, List<WeightedSubworldName> parentCachedFiles)
@@ -305,11 +402,19 @@ namespace ProcGen
 						while (enumerator.MoveNext())
 						{
 							string subworld = enumerator.Current;
-							DebugUtil.DevAssert(parentCachedFiles.Any<WeightedSubworldName>((WeightedSubworldName val) => val.name == subworld), string.Concat(new string[] { "World ", parentFile, ": should include ", subworld, " in its subworldFiles since it's used in a command" }), null);
-							DebugUtil.DevAssert(FileSystem.FileExists(SettingsCache.RewriteWorldgenPathYaml(subworld)), "World " + parentFile + ": Incorrect subworldFile " + subworld, null);
+							if (!subworld.StartsWith("("))
+							{
+								DebugUtil.DevAssert(parentCachedFiles.Any<WeightedSubworldName>((WeightedSubworldName val) => val.name == subworld), string.Concat(new string[] { "World ", parentFile, ": should include ", subworld, " in its subworldFiles since it's used in a command" }), null);
+								DebugUtil.DevAssert(FileSystem.FileExists(SettingsCache.RewriteWorldgenPathYaml(subworld)), "World " + parentFile + ": Incorrect subworldFile " + subworld, null);
+							}
 						}
 					}
 				}
+			}
+
+			public int CompareTo(World.AllowedCellsFilter other)
+			{
+				return this.sortOrder.CompareTo(other.sortOrder);
 			}
 
 			public enum TagCommand
@@ -329,6 +434,29 @@ namespace ProcGen
 				ExceptWith,
 				SymmetricExceptWith,
 				All
+			}
+		}
+
+		[DebuggerDisplay("name = {name}, minCount = {minCount}, maxCount = {maxCount}")]
+		[Serializable]
+		public class SubworldMixingRule
+		{
+			public string name { get; private set; }
+
+			public int minCount { get; private set; }
+
+			public int maxCount { get; private set; }
+
+			public List<string> forbiddenTags { get; private set; }
+
+			public List<string> requiredTags { get; private set; }
+
+			public SubworldMixingRule()
+			{
+				this.forbiddenTags = new List<string>();
+				this.requiredTags = new List<string>();
+				this.maxCount = int.MaxValue;
+				this.minCount = 0;
 			}
 		}
 	}

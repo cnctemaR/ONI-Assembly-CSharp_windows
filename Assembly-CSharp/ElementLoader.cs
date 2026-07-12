@@ -10,6 +10,20 @@ using UnityEngine;
 
 public class ElementLoader
 {
+	public static float GetMinMeltingPointAmongElements(IList<Tag> elements)
+	{
+		float num = float.MaxValue;
+		for (int i = 0; i < elements.Count; i++)
+		{
+			Element element = ElementLoader.GetElement(elements[i]);
+			if (element != null)
+			{
+				num = Mathf.Min(num, element.highTemp);
+			}
+		}
+		return num;
+	}
+
 	public static List<ElementLoader.ElementEntry> CollectElementsFromYAML()
 	{
 		List<ElementLoader.ElementEntry> list = new List<ElementLoader.ElementEntry>();
@@ -178,16 +192,12 @@ public class ElementLoader
 
 	public static Element FindElementByName(string name)
 	{
-		Element element;
-		try
-		{
-			element = ElementLoader.FindElementByHash((SimHashes)Enum.Parse(typeof(SimHashes), name));
-		}
-		catch
-		{
-			element = ElementLoader.FindElementByHash((SimHashes)Hash.SDBMLower(name));
-		}
-		return element;
+		return ElementLoader.FindElementByHash((SimHashes)Hash.SDBMLower(name));
+	}
+
+	public static Element FindElementByTag(Tag tag)
+	{
+		return ElementLoader.GetElement(tag);
 	}
 
 	public static Element FindElementByHash(SimHashes hash)

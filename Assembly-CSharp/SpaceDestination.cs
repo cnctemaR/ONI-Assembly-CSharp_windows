@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Runtime.Serialization;
 using Database;
 using KSerialization;
@@ -8,6 +9,7 @@ using TUNING;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
+[DebuggerDisplay("{id}: {type} at distance {distance}")]
 public class SpaceDestination
 {
 	private static global::Tuple<SimHashes, MathUtil.MinMax> GetRareElement(SimHashes id)

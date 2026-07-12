@@ -87,16 +87,41 @@ public class Unlocks : KMonoBehaviour
 			string mesaCollectionID = metaUnlockCategory.mesaCollectionID;
 			int mesaUnlockCount = metaUnlockCategory.mesaUnlockCount;
 			int num = 0;
-			foreach (string text in this.lockCollections[mesaCollectionID])
+			bool flag = false;
+			if (SaveLoader.Instance != null)
 			{
-				if (this.IsUnlocked(text))
+				foreach (ClusterLayout.ClusterUnlock clusterUnlock in SaveLoader.Instance.ClusterLayout.clusterUnlocks)
 				{
-					num++;
+					if (clusterUnlock.id == mesaCollectionID)
+					{
+						foreach (string text in this.lockCollections[clusterUnlock.collection])
+						{
+							if (this.IsUnlocked(text))
+							{
+								num++;
+							}
+						}
+						if (clusterUnlock.orderRule == ClusterLayout.ClusterUnlock.OrderRule.Replace)
+						{
+							flag = true;
+							break;
+						}
+					}
+				}
+			}
+			if (!flag)
+			{
+				foreach (string text2 in this.lockCollections[mesaCollectionID])
+				{
+					if (this.IsUnlocked(text2))
+					{
+						num++;
+					}
 				}
 			}
 			if (num >= mesaUnlockCount)
 			{
-				this.UnlockNext(metaCollectionID);
+				this.UnlockNext(metaCollectionID, false);
 			}
 		}
 	}
@@ -194,9 +219,64 @@ public class Unlocks : KMonoBehaviour
 		}
 	}
 
-	public string UnlockNext(string collectionID)
+	private string GetNextClusterUnlock(string collectionID, out ClusterLayout.ClusterUnlock.OrderRule orderRule, bool randomize)
 	{
-		foreach (string text in this.lockCollections[collectionID])
+		foreach (ClusterLayout.ClusterUnlock clusterUnlock in SaveLoader.Instance.ClusterLayout.clusterUnlocks)
+		{
+			if (!(clusterUnlock.id != collectionID))
+			{
+				if (!this.lockCollections.ContainsKey(collectionID))
+				{
+					DebugUtil.DevLogError("Lore collection '" + collectionID + "' is missing");
+					orderRule = ClusterLayout.ClusterUnlock.OrderRule.Invalid;
+					return null;
+				}
+				string[] array = this.lockCollections[clusterUnlock.collection];
+				if (randomize)
+				{
+					array.Shuffle<string>();
+				}
+				foreach (string text in array)
+				{
+					if (!this.IsUnlocked(text))
+					{
+						orderRule = clusterUnlock.orderRule;
+						return text;
+					}
+				}
+				if (clusterUnlock.orderRule == ClusterLayout.ClusterUnlock.OrderRule.Replace)
+				{
+					orderRule = clusterUnlock.orderRule;
+					return null;
+				}
+			}
+		}
+		orderRule = ClusterLayout.ClusterUnlock.OrderRule.Invalid;
+		return null;
+	}
+
+	public string UnlockNext(string collectionID, bool randomize = false)
+	{
+		if (SaveLoader.Instance != null)
+		{
+			ClusterLayout.ClusterUnlock.OrderRule orderRule;
+			string nextClusterUnlock = this.GetNextClusterUnlock(collectionID, out orderRule, randomize);
+			if (nextClusterUnlock != null && (orderRule == ClusterLayout.ClusterUnlock.OrderRule.Prepend || orderRule == ClusterLayout.ClusterUnlock.OrderRule.Replace))
+			{
+				this.Unlock(nextClusterUnlock, true);
+				return nextClusterUnlock;
+			}
+			if (orderRule == ClusterLayout.ClusterUnlock.OrderRule.Replace)
+			{
+				return null;
+			}
+		}
+		string[] array = this.lockCollections[collectionID];
+		if (randomize)
+		{
+			array.Shuffle<string>();
+		}
+		foreach (string text in array)
 		{
 			if (string.IsNullOrEmpty(text))
 			{
@@ -206,6 +286,16 @@ public class Unlocks : KMonoBehaviour
 			{
 				this.Unlock(text, true);
 				return text;
+			}
+		}
+		if (SaveLoader.Instance != null)
+		{
+			ClusterLayout.ClusterUnlock.OrderRule orderRule2;
+			string nextClusterUnlock2 = this.GetNextClusterUnlock(collectionID, out orderRule2, randomize);
+			if (nextClusterUnlock2 != null && orderRule2 == ClusterLayout.ClusterUnlock.OrderRule.Append)
+			{
+				this.Unlock(nextClusterUnlock2, true);
+				return nextClusterUnlock2;
 			}
 		}
 		return null;
@@ -383,6 +473,10 @@ public class Unlocks : KMonoBehaviour
 			}
 		},
 		{
+			"dlc2emails",
+			new string[] { "email_newbaby", "email_cerestourism1", "email_cerestourism2", "email_voicemail" }
+		},
+		{
 			"journals",
 			new string[]
 			{
@@ -396,13 +490,14 @@ public class Unlocks : KMonoBehaviour
 			"researchnotes",
 			new string[]
 			{
-				"notes_clonedrats", "notes_agriculture1", "notes_husbandry1", "notes_hibiscus3", "notes_husbandry2", "notes_agriculture2", "notes_geneticooze", "notes_agriculture3", "notes_husbandry3", "notes_memoryimplantation",
-				"notes_husbandry4", "notes_agriculture4", "notes_neutronium", "notes_firstsuccess", "notes_neutroniumapplications", "notes_teleportation", "notes_AI", "cryotank_warning"
+				"notes_clonedrats", "misc_dishbot", "notes_agriculture1", "notes_husbandry1", "notes_hibiscus3", "misc_newsecurity", "notes_husbandry2", "notes_agriculture2", "notes_geneticooze", "notes_agriculture3",
+				"notes_husbandry3", "misc_casualfriday", "notes_memoryimplantation", "notes_husbandry4", "notes_agriculture4", "notes_neutronium", "misc_mailroometiquette", "notes_firstsuccess", "notes_neutroniumapplications", "notes_teleportation",
+				"notes_AI", "misc_politerequest", "cryotank_warning", "misc_unattendedcultures"
 			}
 		},
 		{
-			"misc",
-			new string[] { "misc_newsecurity", "misc_mailroometiquette", "misc_unattendedcultures", "misc_politerequest", "misc_casualfriday", "misc_dishbot" }
+			"dlc2researchnotes",
+			new string[] { "notes_cleanup" }
 		},
 		{
 			"dimensionallore",
@@ -411,6 +506,22 @@ public class Unlocks : KMonoBehaviour
 		{
 			"dimensionalloreMeta",
 			new string[] { "log9" }
+		},
+		{
+			"dlc2dimensionallore",
+			new string[] { "notes_tragicnews", "notes_tragicnews2", "notes_tragicnews3" }
+		},
+		{
+			"dlc2archivebuilding",
+			new string[] { "notes_welcometoceres" }
+		},
+		{
+			"dlc2geoplantinput",
+			new string[] { "notes_geoinputs" }
+		},
+		{
+			"dlc2geoplantcomplete",
+			new string[] { "notes_earthquake" }
 		},
 		{
 			"space",

@@ -23,10 +23,9 @@ namespace Database
 				return UI.PERMIT_RARITY.NIFTY;
 			case PermitRarity.Splendid:
 				return UI.PERMIT_RARITY.SPLENDID;
-			default:
-				DebugUtil.DevAssert(false, string.Format("Couldn't get name for rarity {0}", rarity), null);
-				return "-";
 			}
+			DebugUtil.DevAssert(false, string.Format("Couldn't get name for rarity {0}", rarity), null);
+			return "-";
 		}
 	}
 }

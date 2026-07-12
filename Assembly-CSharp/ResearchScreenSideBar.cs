@@ -27,12 +27,7 @@ public class ResearchScreenSideBar : KScreen
 		});
 		this.clearSearchButton.onClick += delegate
 		{
-			this.searchBox.text = "";
-			foreach (KeyValuePair<string, GameObject> keyValuePair in this.filterButtons)
-			{
-				this.filterStates[keyValuePair.Key] = false;
-				this.filterButtons[keyValuePair.Key].GetComponent<MultiToggle>().ChangeState(this.filterStates[keyValuePair.Key] ? 1 : 0);
-			}
+			this.ResetFilter();
 		};
 		this.ConfigCompletionFilters();
 		base.ConsumeMouseScroll = true;
@@ -344,25 +339,28 @@ public class ResearchScreenSideBar : KScreen
 		global::System.Action <>9__0;
 		foreach (TechItem techItem in Db.Get().Techs.Get(techID).unlockedItems)
 		{
-			GameObject gameObject2 = Util.KInstantiateUI(this.techItemPrefab, reference.gameObject, true);
-			gameObject2.GetComponentsInChildren<Image>()[1].sprite = techItem.UISprite();
-			gameObject2.GetComponentsInChildren<LocText>()[0].SetText(techItem.Name);
-			MultiToggle component2 = gameObject2.GetComponent<MultiToggle>();
-			Delegate onClick = component2.onClick;
-			global::System.Action action;
-			if ((action = <>9__0) == null)
+			if (SaveLoader.Instance.IsDlcListActiveForCurrentSave(techItem.dlcIds))
 			{
-				action = (<>9__0 = delegate
+				GameObject gameObject2 = Util.KInstantiateUI(this.techItemPrefab, reference.gameObject, true);
+				gameObject2.GetComponentsInChildren<Image>()[1].sprite = techItem.UISprite();
+				gameObject2.GetComponentsInChildren<LocText>()[0].SetText(techItem.Name);
+				MultiToggle component2 = gameObject2.GetComponent<MultiToggle>();
+				Delegate onClick = component2.onClick;
+				global::System.Action action;
+				if ((action = <>9__0) == null)
 				{
-					this.researchScreen.ZoomToTech(techID);
-				});
-			}
-			component2.onClick = (global::System.Action)Delegate.Combine(onClick, action);
-			gameObject2.GetComponentsInChildren<Image>()[0].color = (this.evenRow ? this.evenRowColor : this.oddRowColor);
-			this.evenRow = !this.evenRow;
-			if (!this.projectTechItems[techID].ContainsKey(techItem.Id))
-			{
-				this.projectTechItems[techID].Add(techItem.Id, gameObject2);
+					action = (<>9__0 = delegate
+					{
+						this.researchScreen.ZoomToTech(techID);
+					});
+				}
+				component2.onClick = (global::System.Action)Delegate.Combine(onClick, action);
+				gameObject2.GetComponentsInChildren<Image>()[0].color = (this.evenRow ? this.evenRowColor : this.oddRowColor);
+				this.evenRow = !this.evenRow;
+				if (!this.projectTechItems[techID].ContainsKey(techItem.Id))
+				{
+					this.projectTechItems[techID].Add(techItem.Id, gameObject2);
+				}
 			}
 		}
 		MultiToggle component3 = gameObject.GetComponent<MultiToggle>();
@@ -443,6 +441,18 @@ public class ResearchScreenSideBar : KScreen
 		{
 		}
 		return flag;
+	}
+
+	public void ResetFilter()
+	{
+		this.UpdateCurrentSearch("");
+		this.searchBox.text = "";
+		foreach (KeyValuePair<string, GameObject> keyValuePair in this.filterButtons)
+		{
+			this.filterStates[keyValuePair.Key] = false;
+			this.filterButtons[keyValuePair.Key].GetComponent<MultiToggle>().ChangeState(this.filterStates[keyValuePair.Key] ? 1 : 0);
+		}
+		this.SetCompletionFilter(ResearchScreenSideBar.CompletionState.All);
 	}
 
 	[Header("Containers")]

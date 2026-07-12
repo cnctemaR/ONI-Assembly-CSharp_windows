@@ -9,5 +9,6 @@ public enum NotificationType
 	Tutorial,
 	Messages,
 	DuplicantThreatening,
-	Event
+	Event,
+	MessageImportant
 }

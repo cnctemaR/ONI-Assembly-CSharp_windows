@@ -113,7 +113,7 @@ public class OutfitBrowserScreen : KMonoBehaviour
 			OutfitBrowserScreenConfig outfitBrowserScreenConfig2 = this.Config;
 			if (outfitBrowserScreenConfig2.minionPersonality.IsSome())
 			{
-				this.pickOutfitButton.isInteractable = !this.state.SelectedOutfitOpt.IsSome() || !this.state.SelectedOutfitOpt.Unwrap().DoesContainNonOwnedItems();
+				this.pickOutfitButton.isInteractable = !this.state.SelectedOutfitOpt.IsSome() || !this.state.SelectedOutfitOpt.Unwrap().DoesContainLockedItems();
 				GameObject gameObject = this.pickOutfitButton.gameObject;
 				Option<string> option2;
 				if (!this.pickOutfitButton.isInteractable)
@@ -308,7 +308,7 @@ public class OutfitBrowserScreen : KMonoBehaviour
 			toggle.states[0].on_click_override_sound_path = "HUD_Click";
 			return;
 		}
-		bool flag = !target.Value.DoesContainNonOwnedItems();
+		bool flag = !target.Value.DoesContainLockedItems();
 		toggle.states[1].on_click_override_sound_path = "ClothingItem_Click";
 		toggle.states[1].sound_parameter_name = "Unlocked";
 		toggle.states[1].sound_parameter_value = (flag ? 1f : 0f);
@@ -330,6 +330,7 @@ public class OutfitBrowserScreen : KMonoBehaviour
 		GameObject spawn = this.galleryGridItemPool.Borrow();
 		GameObject gameObject = spawn.transform.GetChild(1).gameObject;
 		GameObject isUnownedOverlayGO = spawn.transform.GetChild(2).gameObject;
+		GameObject dlcBannerGO = spawn.transform.GetChild(3).gameObject;
 		gameObject.SetActive(true);
 		bool flag = target.IsNone() || this.state.CurrentOutfitType == ClothingOutfitUtility.OutfitType.AtmoSuit;
 		UIMannequin componentInChildren = gameObject.GetComponentInChildren<UIMannequin>();
@@ -386,10 +387,30 @@ public class OutfitBrowserScreen : KMonoBehaviour
 			{
 				KleiItemsUI.ConfigureTooltipOn(spawn, KleiItemsUI.WrapAsToolTipTitle(KleiItemsUI.GetNoneOutfitName(this.state.CurrentOutfitType)));
 				isUnownedOverlayGO.SetActive(false);
-				return;
 			}
-			KleiItemsUI.ConfigureTooltipOn(spawn, KleiItemsUI.WrapAsToolTipTitle(target.Value.ReadName()));
-			isUnownedOverlayGO.SetActive(target.Value.DoesContainNonOwnedItems());
+			else
+			{
+				KleiItemsUI.ConfigureTooltipOn(spawn, KleiItemsUI.WrapAsToolTipTitle(target.Value.ReadName()));
+				isUnownedOverlayGO.SetActive(target.Value.DoesContainLockedItems());
+			}
+			if (target.IsSome())
+			{
+				ClothingOutfitTarget.Implementation impl = target.Unwrap().impl;
+				if (impl is ClothingOutfitTarget.DatabaseAuthoredTemplate)
+				{
+					ClothingOutfitTarget.DatabaseAuthoredTemplate databaseAuthoredTemplate = (ClothingOutfitTarget.DatabaseAuthoredTemplate)impl;
+					string dlcIdFrom = databaseAuthoredTemplate.resource.GetDlcIdFrom();
+					if (DlcManager.IsDlcId(dlcIdFrom))
+					{
+						dlcBannerGO.GetComponent<Image>().color = DlcManager.GetDlcBannerColor(dlcIdFrom);
+						dlcBannerGO.SetActive(true);
+						return;
+					}
+					dlcBannerGO.SetActive(false);
+					return;
+				}
+			}
+			dlcBannerGO.SetActive(false);
 		}));
 		this.SetButtonClickUISound(target, button);
 	}

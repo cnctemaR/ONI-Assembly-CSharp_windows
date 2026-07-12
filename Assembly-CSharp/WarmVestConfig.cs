@@ -18,15 +18,19 @@ public class WarmVestConfig : IEquipmentConfig
 		ClothingWearer.ClothingInfo clothingInfo = ClothingWearer.ClothingInfo.WARM_CLOTHING;
 		List<AttributeModifier> list = new List<AttributeModifier>();
 		EquipmentDef equipmentDef = EquipmentTemplates.CreateEquipmentDef("Warm_Vest", global::TUNING.EQUIPMENT.CLOTHING.SLOT, SimHashes.Carbon, (float)global::TUNING.EQUIPMENT.VESTS.WARM_VEST_MASS, global::TUNING.EQUIPMENT.VESTS.WARM_VEST_ICON0, global::TUNING.EQUIPMENT.VESTS.SNAPON0, global::TUNING.EQUIPMENT.VESTS.WARM_VEST_ANIM0, 4, list, global::TUNING.EQUIPMENT.VESTS.SNAPON1, true, EntityTemplates.CollisionShape.RECTANGLE, 0.75f, 0.4f, null, null);
+		int decorMod = ClothingWearer.ClothingInfo.WARM_CLOTHING.decorMod;
 		Descriptor descriptor = new Descriptor(string.Format("{0}: {1}", DUPLICANTS.ATTRIBUTES.THERMALCONDUCTIVITYBARRIER.NAME, GameUtil.GetFormattedDistance(ClothingWearer.ClothingInfo.WARM_CLOTHING.conductivityMod)), string.Format("{0}: {1}", DUPLICANTS.ATTRIBUTES.THERMALCONDUCTIVITYBARRIER.NAME, GameUtil.GetFormattedDistance(ClothingWearer.ClothingInfo.WARM_CLOTHING.conductivityMod)), Descriptor.DescriptorType.Effect, false);
-		Descriptor descriptor2 = new Descriptor(string.Format("{0}: {1}", DUPLICANTS.ATTRIBUTES.DECOR.NAME, ClothingWearer.ClothingInfo.WARM_CLOTHING.decorMod), string.Format("{0}: {1}", DUPLICANTS.ATTRIBUTES.DECOR.NAME, ClothingWearer.ClothingInfo.WARM_CLOTHING.decorMod), Descriptor.DescriptorType.Effect, false);
+		Descriptor descriptor2 = new Descriptor(string.Format("{0}: {1}", DUPLICANTS.ATTRIBUTES.DECOR.NAME, decorMod), string.Format("{0}: {1}", DUPLICANTS.ATTRIBUTES.DECOR.NAME, decorMod), Descriptor.DescriptorType.Effect, false);
 		equipmentDef.additionalDescriptors.Add(descriptor);
-		equipmentDef.additionalDescriptors.Add(descriptor2);
+		if (decorMod != 0)
+		{
+			equipmentDef.additionalDescriptors.Add(descriptor2);
+		}
 		equipmentDef.OnEquipCallBack = delegate(Equippable eq)
 		{
-			CoolVestConfig.OnEquipVest(eq, clothingInfo);
+			ClothingWearer.ClothingInfo.OnEquipVest(eq, clothingInfo);
 		};
-		equipmentDef.OnUnequipCallBack = new Action<Equippable>(CoolVestConfig.OnUnequipVest);
+		equipmentDef.OnUnequipCallBack = new Action<Equippable>(ClothingWearer.ClothingInfo.OnUnequipVest);
 		equipmentDef.RecipeDescription = global::STRINGS.EQUIPMENT.PREFABS.WARM_VEST.RECIPE_DESC;
 		return equipmentDef;
 	}

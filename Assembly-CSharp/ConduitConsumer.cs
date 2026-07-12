@@ -145,7 +145,7 @@ public class ConduitConsumer : KMonoBehaviour, IConduitConsumer
 		}
 	}
 
-	private int GetInputCell(ConduitType inputConduitType)
+	protected virtual int GetInputCell(ConduitType inputConduitType)
 	{
 		if (this.useSecondaryInput)
 		{
@@ -331,7 +331,7 @@ public class ConduitConsumer : KMonoBehaviour, IConduitConsumer
 	public Operational operational;
 
 	[MyCmpReq]
-	private Building building;
+	protected Building building;
 
 	public Operational.State OperatingRequirement;
 

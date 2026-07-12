@@ -10,7 +10,7 @@ public abstract class AudioSheets : ScriptableObject
 		{
 			foreach (AudioSheet.SoundInfo soundInfo in audioSheet.soundInfos)
 			{
-				if (DlcManager.IsContentActive(soundInfo.RequiredDlcId))
+				if (DlcManager.IsContentSubscribed(soundInfo.RequiredDlcId))
 				{
 					string text = soundInfo.Type;
 					if (text == null || text == "")

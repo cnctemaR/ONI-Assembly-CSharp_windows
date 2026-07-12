@@ -310,38 +310,55 @@ public class RetiredColonyInfoScreen : KModalScreen
 		this.UpdateAchievementData(null, null);
 	}
 
+	private bool IsAchievementValidForDLCContext(string[] dlcid, string clusterTag)
+	{
+		return DlcManager.HasAnyContentSubscribed(dlcid) && (!(SaveLoader.Instance != null) || ((clusterTag == null || CustomGameSettings.Instance.GetCurrentClusterLayout().clusterTags.Contains(clusterTag)) && SaveLoader.Instance.IsDlcListActiveForCurrentSave(dlcid)));
+	}
+
 	private void PopulateAchievements()
 	{
 		foreach (ColonyAchievement colonyAchievement in Db.Get().ColonyAchievements.resources)
 		{
-			GameObject gameObject = global::Util.KInstantiateUI(colonyAchievement.isVictoryCondition ? this.victoryAchievementsPrefab : this.achievementsPrefab, this.achievementsContainer, true);
-			HierarchyReferences component = gameObject.GetComponent<HierarchyReferences>();
-			component.GetReference<LocText>("nameLabel").SetText(colonyAchievement.Name);
-			component.GetReference<LocText>("descriptionLabel").SetText(colonyAchievement.description);
-			if (string.IsNullOrEmpty(colonyAchievement.icon) || Assets.GetSprite(colonyAchievement.icon) == null)
+			if (this.IsAchievementValidForDLCContext(colonyAchievement.dlcIds, null))
 			{
-				if (Assets.GetSprite(colonyAchievement.Name) != null)
+				GameObject gameObject = global::Util.KInstantiateUI(colonyAchievement.isVictoryCondition ? this.victoryAchievementsPrefab : this.achievementsPrefab, this.achievementsContainer, true);
+				HierarchyReferences component = gameObject.GetComponent<HierarchyReferences>();
+				component.GetReference<LocText>("nameLabel").SetText(colonyAchievement.Name);
+				component.GetReference<LocText>("descriptionLabel").SetText(colonyAchievement.description);
+				if (string.IsNullOrEmpty(colonyAchievement.icon) || Assets.GetSprite(colonyAchievement.icon) == null)
 				{
-					component.GetReference<Image>("icon").sprite = Assets.GetSprite(colonyAchievement.Name);
+					if (Assets.GetSprite(colonyAchievement.Name) != null)
+					{
+						component.GetReference<Image>("icon").sprite = Assets.GetSprite(colonyAchievement.Name);
+					}
+					else
+					{
+						component.GetReference<Image>("icon").sprite = Assets.GetSprite("check");
+					}
 				}
 				else
 				{
-					component.GetReference<Image>("icon").sprite = Assets.GetSprite("check");
+					component.GetReference<Image>("icon").sprite = Assets.GetSprite(colonyAchievement.icon);
 				}
+				if (colonyAchievement.isVictoryCondition)
+				{
+					gameObject.transform.SetAsFirstSibling();
+				}
+				KImage reference = component.GetReference<KImage>("dlc_overlay");
+				if (DlcManager.IsDlcId(colonyAchievement.dlcIdFrom))
+				{
+					reference.gameObject.SetActive(true);
+					reference.sprite = Assets.GetSprite(DlcManager.GetDlcBanner(colonyAchievement.dlcIdFrom));
+					reference.color = DlcManager.GetDlcBannerColor(colonyAchievement.dlcIdFrom);
+				}
+				else
+				{
+					reference.gameObject.SetActive(false);
+				}
+				gameObject.GetComponent<MultiToggle>().ChangeState(2);
+				gameObject.GetComponent<AchievementWidget>().dlcIdFrom = colonyAchievement.dlcIdFrom;
+				this.achievementEntries.Add(colonyAchievement.Id, gameObject);
 			}
-			else
-			{
-				component.GetReference<Image>("icon").sprite = Assets.GetSprite(colonyAchievement.icon);
-			}
-			if (colonyAchievement.isVictoryCondition)
-			{
-				gameObject.transform.SetAsFirstSibling();
-			}
-			bool flag = !DlcManager.IsValidForVanilla(colonyAchievement.dlcIds);
-			component.GetReference<KImage>("dlc_overlay").gameObject.SetActive(flag);
-			gameObject.GetComponent<MultiToggle>().ChangeState(2);
-			gameObject.GetComponent<AchievementWidget>().dlcAchievement = flag;
-			this.achievementEntries.Add(colonyAchievement.Id, gameObject);
 		}
 		this.UpdateAchievementData(null, null);
 	}
@@ -434,6 +451,15 @@ public class RetiredColonyInfoScreen : KModalScreen
 						break;
 					}
 				}
+			}
+			ColonyAchievement colonyAchievement = Db.Get().ColonyAchievements.TryGet(keyValuePair.Key);
+			if (colonyAchievement != null && !this.IsAchievementValidForDLCContext(colonyAchievement.dlcIds, colonyAchievement.clusterTag))
+			{
+				keyValuePair.Value.SetActive(false);
+			}
+			else
+			{
+				keyValuePair.Value.SetActive(true);
 			}
 			if (!flag && data == null && this.retiredColonyData != null)
 			{

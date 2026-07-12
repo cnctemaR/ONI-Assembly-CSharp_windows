@@ -257,6 +257,22 @@ public class PlanterSideScreen : ReceptacleSideScreen
 		return base.GetEntityIcon(prefabTag);
 	}
 
+	protected override string GetEntityName(Tag prefabTag)
+	{
+		PlantableSeed component = Assets.GetPrefab(prefabTag).GetComponent<PlantableSeed>();
+		if (component != null)
+		{
+			return Assets.GetPrefab(component.PlantID).GetProperName();
+		}
+		return base.GetEntityName(prefabTag);
+	}
+
+	protected override string GetEntityTooltip(Tag prefabTag)
+	{
+		PlantableSeed component = Assets.GetPrefab(prefabTag).GetComponent<PlantableSeed>();
+		return string.Format(UI.UISIDESCREENS.PLANTERSIDESCREEN.TOOLTIPS.PLANT_TOGGLE_TOOLTIP, this.GetEntityName(prefabTag), component.domesticatedDescription, base.GetAvailableAmount(prefabTag));
+	}
+
 	protected override void SetResultDescriptions(GameObject seed_or_plant)
 	{
 		string text = "";

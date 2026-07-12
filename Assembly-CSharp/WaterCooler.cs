@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Klei;
 using Klei.AI;
 using KSerialization;
 using STRINGS;
@@ -209,6 +210,8 @@ public class WaterCooler : StateMachineComponent<WaterCooler.StatesInstance>, IA
 		new CellOffset(1, 0)
 	};
 
+	public static Action<GameObject, GameObject> OnDuplicantDrank;
+
 	private Chore[] chores;
 
 	private HandleVector<int>.Handle validNavCellChangedPartitionerEntry;
@@ -239,16 +242,24 @@ public class WaterCooler : StateMachineComponent<WaterCooler.StatesInstance>, IA
 			this.dispensing.Enter("StartMeter", delegate(WaterCooler.StatesInstance smi)
 			{
 				smi.StartMeter();
+			}).Enter("Set Active", delegate(WaterCooler.StatesInstance smi)
+			{
+				smi.SetOperationalActiveState(true);
 			}).Enter("UpdateDrinkChores.force", delegate(WaterCooler.StatesInstance smi)
 			{
 				smi.master.UpdateDrinkChores(true);
-			}).Update("UpdateDrinkChores", delegate(WaterCooler.StatesInstance smi, float dt)
-			{
-				smi.master.UpdateDrinkChores(true);
-			}, UpdateRate.SIM_200ms, false)
+			})
+				.Update("UpdateDrinkChores", delegate(WaterCooler.StatesInstance smi, float dt)
+				{
+					smi.master.UpdateDrinkChores(true);
+				}, UpdateRate.SIM_200ms, false)
 				.Exit("CancelDrinkChores", delegate(WaterCooler.StatesInstance smi)
 				{
 					smi.master.CancelDrinkChores();
+				})
+				.Exit("Set Inactive", delegate(WaterCooler.StatesInstance smi)
+				{
+					smi.SetOperationalActiveState(false);
 				})
 				.TagTransition(GameTags.Operational, this.unoperational, true)
 				.EventTransition(GameHashes.OnStorageChange, this.waitingfordelivery, (WaterCooler.StatesInstance smi) => !smi.HasMinimumMass())
@@ -272,10 +283,47 @@ public class WaterCooler : StateMachineComponent<WaterCooler.StatesInstance>, IA
 			base.Subscribe(-1697596308, new Action<object>(this.OnStorageChange));
 		}
 
+		public void Drink(GameObject druplicant, bool triggerOnDrinkCallback = true)
+		{
+			if (!this.HasMinimumMass())
+			{
+				return;
+			}
+			Tag tag = this.storage.items[0].PrefabID();
+			float num;
+			SimUtil.DiseaseInfo diseaseInfo;
+			float num2;
+			this.storage.ConsumeAndGetDisease(tag, 1f, out num, out diseaseInfo, out num2);
+			GermExposureMonitor.Instance smi = druplicant.GetSMI<GermExposureMonitor.Instance>();
+			if (smi != null)
+			{
+				smi.TryInjectDisease(diseaseInfo.idx, diseaseInfo.count, tag, Sickness.InfectionVector.Digestion);
+			}
+			Effects component = druplicant.GetComponent<Effects>();
+			if (tag == SimHashes.Milk.CreateTag())
+			{
+				component.Add("DuplicantGotMilk", true);
+			}
+			if (triggerOnDrinkCallback)
+			{
+				Action<GameObject, GameObject> onDuplicantDrank = WaterCooler.OnDuplicantDrank;
+				if (onDuplicantDrank == null)
+				{
+					return;
+				}
+				onDuplicantDrank(druplicant, base.gameObject);
+			}
+		}
+
 		private void OnStorageChange(object data)
 		{
 			float num = Mathf.Clamp01(this.storage.MassStored() / this.storage.capacityKg);
 			this.meter.SetPositionPercent(num);
+		}
+
+		public void SetOperationalActiveState(bool isActive)
+		{
+			this.operational.SetActive(isActive, false);
 		}
 
 		public void StartMeter()
@@ -293,6 +341,9 @@ public class WaterCooler : StateMachineComponent<WaterCooler.StatesInstance>, IA
 		{
 			return this.storage.GetMassAvailable(ElementLoader.GetElement(base.smi.master.ChosenBeverage).id) >= 1f;
 		}
+
+		[MyCmpGet]
+		private Operational operational;
 
 		private Storage storage;
 

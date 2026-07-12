@@ -1128,7 +1128,12 @@ public class Storage : Workable, ISaveLoadableDetails, IGameObjectEffectDescript
 	private void OnQueueDestroyObject(object data)
 	{
 		this.endOfLife = true;
-		this.DropAll(true, false, default(Vector3), true, null);
+		List<GameObject> list = new List<GameObject>();
+		this.DropAll(true, false, default(Vector3), true, list);
+		if (this.onDestroyItemsDropped != null)
+		{
+			this.onDestroyItemsDropped(list);
+		}
 		this.OnCleanUp();
 	}
 
@@ -1527,6 +1532,8 @@ public class Storage : Workable, ISaveLoadableDetails, IGameObjectEffectDescript
 	public bool showSideScreenTitleBar;
 
 	public bool useWideOffsets;
+
+	public Action<List<GameObject>> onDestroyItemsDropped;
 
 	public Vector2 dropOffset = Vector2.zero;
 

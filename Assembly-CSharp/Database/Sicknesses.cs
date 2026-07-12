@@ -17,8 +17,6 @@ namespace Database
 				this.RadiationSickness = base.Add(new RadiationSickness());
 			}
 			this.Allergies = base.Add(new Allergies());
-			this.ColdBrain = base.Add(new ColdBrain());
-			this.HeatRash = base.Add(new HeatRash());
 			this.Sunburn = base.Add(new Sunburn());
 		}
 
@@ -47,10 +45,6 @@ namespace Database
 		public Sickness Allergies;
 
 		public Sickness RadiationSickness;
-
-		public Sickness ColdBrain;
-
-		public Sickness HeatRash;
 
 		public Sickness Sunburn;
 	}

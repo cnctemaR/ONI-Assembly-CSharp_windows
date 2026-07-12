@@ -36,9 +36,16 @@ namespace STRINGS
 
 				public static LocString DESC = "Ensures my Duplicants can breathe easy, anytime, anywhere.";
 
-				public static LocString EFFECT = "Supplies Duplicants with <style=\"oxygen\">Oxygen</style> in toxic and low breathability environments.\n\nMust be refilled with oxygen at an " + UI.FormatAsLink("Atmo Suit Dock", "SUITLOCKER") + " when depleted.";
+				public static LocString EFFECT = string.Concat(new string[]
+				{
+					"Supplies Duplicants with ",
+					UI.FormatAsLink("Oxygen", "OXYGEN"),
+					" in toxic and low breathability environments, and protects against extreme temperatures.\n\nMust be refilled with oxygen at an ",
+					UI.FormatAsLink("Atmo Suit Dock", "SUITLOCKER"),
+					" when depleted."
+				});
 
-				public static LocString RECIPE_DESC = "Supplies Duplicants with <style=\"oxygen\">Oxygen</style> in toxic and low breathability environments.";
+				public static LocString RECIPE_DESC = "Supplies Duplicants with " + UI.FormatAsLink("Oxygen", "OXYGEN") + "  in toxic and low breathability environments.";
 
 				public static LocString GENERICNAME = "Suit";
 
@@ -673,7 +680,7 @@ namespace STRINGS
 
 			public class WARM_VEST
 			{
-				public static LocString NAME = UI.FormatAsLink("Warm Sweater", "WARM_VEST");
+				public static LocString NAME = UI.FormatAsLink("Warm Coat", "WARM_VEST");
 
 				public static LocString GENERICNAME = "Clothing";
 

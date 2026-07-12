@@ -97,12 +97,12 @@ public class NotificationScreen : KScreen
 		LocText[] array = this.LabelPrefab.GetComponentsInChildren<LocText>();
 		for (int i = 0; i < array.Length; i++)
 		{
-			array[i].color = this.normalColor;
+			array[i].color = GlobalAssets.Instance.colorSet.NotificationNormal;
 		}
 		array = this.MessagesPrefab.GetComponentsInChildren<LocText>();
 		for (int i = 0; i < array.Length; i++)
 		{
-			array[i].color = this.normalColor;
+			array[i].color = GlobalAssets.Instance.colorSet.NotificationNormal;
 		}
 		base.Subscribe(Messenger.Instance.gameObject, 1558809273, new Action<object>(this.OnNewMessage));
 		foreach (Message message in Messenger.Instance.Messages)
@@ -182,48 +182,54 @@ public class NotificationScreen : KScreen
 			{
 			case NotificationType.Bad:
 			case NotificationType.DuplicantThreatening:
-				colors.normalColor = this.badColorBG;
-				reference3.color = this.badColor;
-				reference2.color = this.badColor;
+				colors.normalColor = GlobalAssets.Instance.colorSet.NotificationBadBG;
+				reference3.color = GlobalAssets.Instance.colorSet.NotificationBad;
+				reference2.color = GlobalAssets.Instance.colorSet.NotificationBad;
 				reference2.sprite = ((notification.Type == NotificationType.Bad) ? this.icon_bad : this.icon_threatening);
-				goto IL_0300;
+				goto IL_043D;
 			case NotificationType.Tutorial:
-				colors.normalColor = this.warningColorBG;
-				reference3.color = this.warningColor;
-				reference2.color = this.warningColor;
+				colors.normalColor = GlobalAssets.Instance.colorSet.NotificationTutorialBG;
+				reference3.color = GlobalAssets.Instance.colorSet.NotificationTutorial;
+				reference2.color = GlobalAssets.Instance.colorSet.NotificationTutorial;
 				reference2.sprite = this.icon_warning;
-				goto IL_0300;
+				goto IL_043D;
 			case NotificationType.Messages:
 			{
-				colors.normalColor = this.messageColorBG;
-				reference3.color = this.messageColor;
-				reference2.color = this.messageColor;
+				colors.normalColor = GlobalAssets.Instance.colorSet.NotificationMessageBG;
+				reference3.color = GlobalAssets.Instance.colorSet.NotificationMessage;
+				reference2.color = GlobalAssets.Instance.colorSet.NotificationMessage;
 				reference2.sprite = this.icon_message;
 				MessageNotification messageNotification = notification as MessageNotification;
 				if (messageNotification == null)
 				{
-					goto IL_0300;
+					goto IL_043D;
 				}
 				TutorialMessage tutorialMessage = messageNotification.message as TutorialMessage;
 				if (tutorialMessage != null && !string.IsNullOrEmpty(tutorialMessage.videoClipId))
 				{
 					reference2.sprite = this.icon_video;
-					goto IL_0300;
+					goto IL_043D;
 				}
-				goto IL_0300;
+				goto IL_043D;
 			}
 			case NotificationType.Event:
-				colors.normalColor = this.eventColorBG;
-				reference3.color = this.eventColor;
-				reference2.color = this.eventColor;
+				colors.normalColor = GlobalAssets.Instance.colorSet.NotificationEventBG;
+				reference3.color = GlobalAssets.Instance.colorSet.NotificationEvent;
+				reference2.color = GlobalAssets.Instance.colorSet.NotificationEvent;
 				reference2.sprite = this.icon_event;
-				goto IL_0300;
+				goto IL_043D;
+			case NotificationType.MessageImportant:
+				colors.normalColor = GlobalAssets.Instance.colorSet.NotificationMessageImportantBG;
+				reference3.color = GlobalAssets.Instance.colorSet.NotificationMessageImportant;
+				reference2.color = GlobalAssets.Instance.colorSet.NotificationMessageImportant;
+				reference2.sprite = this.icon_message_important;
+				goto IL_043D;
 			}
-			colors.normalColor = this.normalColorBG;
-			reference3.color = this.normalColor;
-			reference2.color = this.normalColor;
+			colors.normalColor = GlobalAssets.Instance.colorSet.NotificationNormalBG;
+			reference3.color = GlobalAssets.Instance.colorSet.NotificationNormal;
+			reference2.color = GlobalAssets.Instance.colorSet.NotificationNormal;
 			reference2.sprite = this.icon_normal;
-			IL_0300:
+			IL_043D:
 			reference4.colors = colors;
 			reference4.onClick.AddListener(delegate
 			{
@@ -417,14 +423,7 @@ public class NotificationScreen : KScreen
 		this.notificationSounds[NotificationType.Messages] = "Message";
 		this.notificationSounds[NotificationType.DuplicantThreatening] = "Warning_DupeThreatening";
 		this.notificationSounds[NotificationType.Event] = "Message";
-	}
-
-	public Color32 BadColorBG
-	{
-		get
-		{
-			return this.badColorBG;
-		}
+		this.notificationSounds[NotificationType.MessageImportant] = "Message_Important";
 	}
 
 	public Sprite GetNotificationIcon(NotificationType type)
@@ -441,6 +440,8 @@ public class NotificationScreen : KScreen
 			return this.icon_threatening;
 		case NotificationType.Event:
 			return this.icon_event;
+		case NotificationType.MessageImportant:
+			return this.icon_message_important;
 		}
 		return this.icon_normal;
 	}
@@ -450,17 +451,19 @@ public class NotificationScreen : KScreen
 		switch (type)
 		{
 		case NotificationType.Bad:
-			return this.badColor;
+			return GlobalAssets.Instance.colorSet.NotificationBad;
 		case NotificationType.Tutorial:
-			return this.warningColor;
+			return GlobalAssets.Instance.colorSet.NotificationTutorial;
 		case NotificationType.Messages:
-			return this.messageColor;
+			return GlobalAssets.Instance.colorSet.NotificationMessage;
 		case NotificationType.DuplicantThreatening:
-			return this.badColor;
+			return GlobalAssets.Instance.colorSet.NotificationBad;
 		case NotificationType.Event:
-			return this.eventColor;
+			return GlobalAssets.Instance.colorSet.NotificationEvent;
+		case NotificationType.MessageImportant:
+			return GlobalAssets.Instance.colorSet.NotificationMessageImportant;
 		}
-		return this.normalColor;
+		return GlobalAssets.Instance.colorSet.NotificationNormal;
 	}
 
 	public Color GetNotificationBGColour(NotificationType type)
@@ -468,17 +471,19 @@ public class NotificationScreen : KScreen
 		switch (type)
 		{
 		case NotificationType.Bad:
-			return this.badColorBG;
+			return GlobalAssets.Instance.colorSet.NotificationBadBG;
 		case NotificationType.Tutorial:
-			return this.warningColorBG;
+			return GlobalAssets.Instance.colorSet.NotificationTutorialBG;
 		case NotificationType.Messages:
-			return this.messageColorBG;
+			return GlobalAssets.Instance.colorSet.NotificationMessageBG;
 		case NotificationType.DuplicantThreatening:
-			return this.badColorBG;
+			return GlobalAssets.Instance.colorSet.NotificationBadBG;
 		case NotificationType.Event:
-			return this.eventColorBG;
+			return GlobalAssets.Instance.colorSet.NotificationEventBG;
+		case NotificationType.MessageImportant:
+			return GlobalAssets.Instance.colorSet.NotificationMessageImportantBG;
 		}
-		return this.normalColorBG;
+		return GlobalAssets.Instance.colorSet.NotificationNormalBG;
 	}
 
 	public string GetNotificationSound(NotificationType type)
@@ -533,6 +538,12 @@ public class NotificationScreen : KScreen
 	private Color messageColor;
 
 	[SerializeField]
+	private Color messageImportantColorBG;
+
+	[SerializeField]
+	private Color messageImportantColor;
+
+	[SerializeField]
 	private Color eventColorBG;
 
 	[SerializeField]
@@ -547,6 +558,8 @@ public class NotificationScreen : KScreen
 	public Sprite icon_threatening;
 
 	public Sprite icon_message;
+
+	public Sprite icon_message_important;
 
 	public Sprite icon_video;
 

@@ -58,8 +58,8 @@ public class ReceptacleSideScreen : SideScreenContent, IRender1000ms
 				gameObject3.SetActive(true);
 				ReceptacleToggle newToggle = gameObject3.GetComponent<ReceptacleToggle>();
 				IReceptacleDirection component2 = gameObject2.GetComponent<IReceptacleDirection>();
-				string properName = gameObject2.GetProperName();
-				newToggle.title.text = properName;
+				string entityName = this.GetEntityName(gameObject2.PrefabID());
+				newToggle.title.text = entityName;
 				Sprite entityIcon = this.GetEntityIcon(gameObject2.PrefabID());
 				if (entityIcon == null)
 				{
@@ -74,6 +74,11 @@ public class ReceptacleSideScreen : SideScreenContent, IRender1000ms
 				{
 					this.CheckAmountsAndUpdate(null);
 				};
+				ToolTip component3 = newToggle.GetComponent<ToolTip>();
+				if (component3 != null)
+				{
+					component3.SetSimpleTooltip(this.GetEntityTooltip(gameObject2.PrefabID()));
+				}
 				this.depositObjectMap.Add(newToggle, new ReceptacleSideScreen.SelectableEntity
 				{
 					tag = gameObject2.PrefabID(),
@@ -277,6 +282,22 @@ public class ReceptacleSideScreen : SideScreenContent, IRender1000ms
 		this.activeEntityContainer.transform.GetChild(0).gameObject.GetComponentInChildrenOnly<Image>().sprite = this.GetEntityIcon(tag);
 	}
 
+	protected virtual string GetEntityName(Tag prefabTag)
+	{
+		return Assets.GetPrefab(prefabTag).GetProperName();
+	}
+
+	protected virtual string GetEntityTooltip(Tag prefabTag)
+	{
+		InfoDescription component = Assets.GetPrefab(prefabTag).GetComponent<InfoDescription>();
+		string text = this.GetEntityName(prefabTag);
+		if (component != null)
+		{
+			text = text + "\n\n" + component.description;
+		}
+		return text;
+	}
+
 	protected virtual Sprite GetEntityIcon(Tag prefabTag)
 	{
 		return Def.GetUISprite(Assets.GetPrefab(prefabTag), "ui", false).first;
@@ -411,7 +432,7 @@ public class ReceptacleSideScreen : SideScreenContent, IRender1000ms
 		return flag;
 	}
 
-	private float GetAvailableAmount(Tag tag)
+	protected float GetAvailableAmount(Tag tag)
 	{
 		if (this.ALLOW_ORDER_IGNORING_WOLRD_NEED)
 		{

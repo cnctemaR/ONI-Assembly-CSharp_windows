@@ -250,6 +250,10 @@ public class PlantablePlot : SingleEntityReceptacle, ISaveLoadable, IGameObjectE
 		ReceptacleMonitor component = plant.GetComponent<ReceptacleMonitor>();
 		if (component)
 		{
+			if (this.tagOnPlanted != Tag.Invalid)
+			{
+				component.AddTag(this.tagOnPlanted);
+			}
 			component.SetReceptacle(this);
 		}
 		plant.Trigger(1309017699, this.storage);
@@ -384,6 +388,8 @@ public class PlantablePlot : SingleEntityReceptacle, ISaveLoadable, IGameObjectE
 
 	[MyCmpAdd]
 	private CopyBuildingSettings copyBuildingSettings;
+
+	public Tag tagOnPlanted = Tag.Invalid;
 
 	[Serialize]
 	private Ref<KPrefabID> plantRef;

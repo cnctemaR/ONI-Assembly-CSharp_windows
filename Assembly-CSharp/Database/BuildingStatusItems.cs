@@ -204,6 +204,28 @@ namespace Database
 			this.NotInRequiredRoom.resolveStringCallback = func;
 			this.NotInRecommendedRoom = this.CreateStatusItem("NotInRecommendedRoom", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
 			this.NotInRecommendedRoom.resolveStringCallback = func;
+			this.MercuryLight_Charging = this.CreateStatusItem("MercuryLight_Charging", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
+			this.MercuryLight_Charging.resolveStringCallback = delegate(string str, object data)
+			{
+				MercuryLight.Instance instance2 = (MercuryLight.Instance)data;
+				str = string.Format(str, GameUtil.GetFormattedPercent(instance2.ChargeLevel * 100f, GameUtil.TimeSlice.None));
+				return str;
+			};
+			this.MercuryLight_Charging.resolveTooltipCallback = delegate(string str, object data)
+			{
+				MercuryLight.Instance instance3 = (MercuryLight.Instance)data;
+				str = string.Format(str, GameUtil.GetFormattedTime((1f - instance3.ChargeLevel) * instance3.def.TURN_ON_DELAY, "F0"));
+				return str;
+			};
+			this.MercuryLight_Depleating = this.CreateStatusItem("MercuryLight_Depleating", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
+			this.MercuryLight_Depleating.resolveStringCallback = delegate(string str, object data)
+			{
+				MercuryLight.Instance instance4 = (MercuryLight.Instance)data;
+				str = string.Format(str, GameUtil.GetFormattedPercent(instance4.ChargeLevel * 100f, GameUtil.TimeSlice.None));
+				return str;
+			};
+			this.MercuryLight_Charged = this.CreateStatusItem("MercuryLight_Charged", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
+			this.MercuryLight_Depleated = this.CreateStatusItem("MercuryLight_Depleated", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
 			this.WaitingForRepairMaterials = this.CreateStatusItem("WaitingForRepairMaterials", "BUILDING", "status_item_resource_unavailable", StatusItem.IconType.Exclamation, NotificationType.Neutral, true, OverlayModes.None.ID, false, 129022);
 			this.WaitingForRepairMaterials.resolveStringCallback = delegate(string str, object data)
 			{
@@ -301,6 +323,7 @@ namespace Database
 			this.NeedPower = this.CreateStatusItem("NeedPower", "BUILDING", "status_item_need_power", StatusItem.IconType.Custom, NotificationType.BadMinor, false, OverlayModes.Power.ID, true, 129022);
 			this.NotEnoughPower = this.CreateStatusItem("NotEnoughPower", "BUILDING", "status_item_need_power", StatusItem.IconType.Custom, NotificationType.BadMinor, false, OverlayModes.Power.ID, true, 129022);
 			this.PowerLoopDetected = this.CreateStatusItem("PowerLoopDetected", "BUILDING", "status_item_exclamation", StatusItem.IconType.Custom, NotificationType.BadMinor, false, OverlayModes.Power.ID, true, 129022);
+			this.CoolingWater = this.CreateStatusItem("CoolingWater", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
 			this.DispenseRequested = this.CreateStatusItem("DispenseRequested", "BUILDING", "status_item_exclamation", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
 			this.NewDuplicantsAvailable = this.CreateStatusItem("NewDuplicantsAvailable", "BUILDING", "status_item_new_duplicants_available", StatusItem.IconType.Custom, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 129022);
 			this.NewDuplicantsAvailable.AddNotification(null, null, null);
@@ -562,6 +585,34 @@ namespace Database
 			{
 				string text19 = GameInputMapping.FindEntry(global::Action.Overlay5).mKeyCode.ToString();
 				str = str.Replace("{LightGridOverlay}", text19);
+				return str;
+			};
+			this.KettleInsuficientSolids = this.CreateStatusItem("KettleInsuficientSolids", "BUILDING", "", StatusItem.IconType.Exclamation, NotificationType.Neutral, false, OverlayModes.None.ID, false, 129022);
+			this.KettleInsuficientSolids.resolveStringCallback = delegate(string str, object data)
+			{
+				IceKettle.Instance instance5 = (IceKettle.Instance)data;
+				str = string.Format(str, GameUtil.GetFormattedMass(instance5.def.KGToMeltPerBatch, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"));
+				return str;
+			};
+			this.KettleInsuficientFuel = this.CreateStatusItem("KettleInsuficientFuel", "BUILDING", "", StatusItem.IconType.Exclamation, NotificationType.Neutral, false, OverlayModes.None.ID, false, 129022);
+			this.KettleInsuficientFuel.resolveStringCallback = delegate(string str, object data)
+			{
+				IceKettle.Instance instance6 = (IceKettle.Instance)data;
+				str = string.Format(str, GameUtil.GetFormattedMass(instance6.FuelRequiredForNextBratch, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"));
+				return str;
+			};
+			this.KettleInsuficientLiquidSpace = this.CreateStatusItem("KettleInsuficientLiquidSpace", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
+			this.KettleInsuficientLiquidSpace.resolveStringCallback = delegate(string str, object data)
+			{
+				IceKettle.Instance instance7 = (IceKettle.Instance)data;
+				str = string.Format(str, GameUtil.GetFormattedMass(instance7.LiquidStored, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"), GameUtil.GetFormattedMass(instance7.LiquidTankCapacity, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"), GameUtil.GetFormattedMass(instance7.def.KGToMeltPerBatch, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"));
+				return str;
+			};
+			this.KettleMelting = this.CreateStatusItem("KettleMelting", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
+			this.KettleMelting.resolveStringCallback = delegate(string str, object data)
+			{
+				IceKettle.Instance instance8 = (IceKettle.Instance)data;
+				str = string.Format(str, GameUtil.GetFormattedTemperature(instance8.def.TargetTemperature, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false));
 				return str;
 			};
 			this.RationBoxContents = this.CreateStatusItem("RationBoxContents", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
@@ -1122,15 +1173,15 @@ namespace Database
 			this.GeoTunerBroadcasting = new StatusItem("GEOTUNER_CHARGED", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, false, 129022, null);
 			this.GeoTunerBroadcasting.resolveStringCallback = delegate(string str, object data)
 			{
-				GeoTuner.Instance instance2 = (GeoTuner.Instance)data;
-				str = str.Replace("{0}", ((float)Mathf.CeilToInt(instance2.sm.expirationTimer.Get(instance2) / instance2.enhancementDuration * 100f)).ToString() + "%");
+				GeoTuner.Instance instance9 = (GeoTuner.Instance)data;
+				str = str.Replace("{0}", ((float)Mathf.CeilToInt(instance9.sm.expirationTimer.Get(instance9) / instance9.enhancementDuration * 100f)).ToString() + "%");
 				return str;
 			};
 			this.GeoTunerBroadcasting.resolveTooltipCallback = delegate(string str, object data)
 			{
-				GeoTuner.Instance instance3 = (GeoTuner.Instance)data;
-				float num13 = instance3.sm.expirationTimer.Get(instance3);
-				float num14 = 100f / instance3.enhancementDuration;
+				GeoTuner.Instance instance10 = (GeoTuner.Instance)data;
+				float num13 = instance10.sm.expirationTimer.Get(instance10);
+				float num14 = 100f / instance10.enhancementDuration;
 				str = str.Replace("{0}", GameUtil.GetFormattedTime(num13, "F0"));
 				str = str.Replace("{1}", "-" + num14.ToString("0.00") + "%");
 				return str;
@@ -1195,25 +1246,25 @@ namespace Database
 				str = str.Replace("{1}", num18.ToString());
 				return str;
 			};
-			this.SkyVisNone = new StatusItem("SkyVisNone", BUILDING.STATUSITEMS.SPACE_VISIBILITY_NONE.NAME, BUILDING.STATUSITEMS.SPACE_VISIBILITY_NONE.TOOLTIP, "status_item_no_sky", StatusItem.IconType.Custom, NotificationType.Bad, false, OverlayModes.None.ID, 129022, true, new Func<string, object, string>(BuildingStatusItems.<CreateStatusItems>g__SkyVisResolveStringCallback|291_99));
-			this.SkyVisLimited = new StatusItem("SkyVisLimited", BUILDING.STATUSITEMS.SPACE_VISIBILITY_REDUCED.NAME, BUILDING.STATUSITEMS.SPACE_VISIBILITY_REDUCED.TOOLTIP, "status_item_no_sky", StatusItem.IconType.Info, NotificationType.BadMinor, false, OverlayModes.None.ID, 129022, false, new Func<string, object, string>(BuildingStatusItems.<CreateStatusItems>g__SkyVisResolveStringCallback|291_99));
+			this.SkyVisNone = new StatusItem("SkyVisNone", BUILDING.STATUSITEMS.SPACE_VISIBILITY_NONE.NAME, BUILDING.STATUSITEMS.SPACE_VISIBILITY_NONE.TOOLTIP, "status_item_no_sky", StatusItem.IconType.Custom, NotificationType.Bad, false, OverlayModes.None.ID, 129022, true, new Func<string, object, string>(BuildingStatusItems.<CreateStatusItems>g__SkyVisResolveStringCallback|311_106));
+			this.SkyVisLimited = new StatusItem("SkyVisLimited", BUILDING.STATUSITEMS.SPACE_VISIBILITY_REDUCED.NAME, BUILDING.STATUSITEMS.SPACE_VISIBILITY_REDUCED.TOOLTIP, "status_item_no_sky", StatusItem.IconType.Info, NotificationType.BadMinor, false, OverlayModes.None.ID, 129022, false, new Func<string, object, string>(BuildingStatusItems.<CreateStatusItems>g__SkyVisResolveStringCallback|311_106));
 			this.CreatureManipulatorWaiting = this.CreateStatusItem("CreatureManipulatorWaiting", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
 			this.CreatureManipulatorProgress = this.CreateStatusItem("CreatureManipulatorProgress", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
 			this.CreatureManipulatorProgress.resolveStringCallback = delegate(string str, object data)
 			{
-				GravitasCreatureManipulator.Instance instance4 = (GravitasCreatureManipulator.Instance)data;
-				return string.Format(str, instance4.ScannedSpecies.Count, instance4.def.numSpeciesToUnlockMorphMode);
+				GravitasCreatureManipulator.Instance instance11 = (GravitasCreatureManipulator.Instance)data;
+				return string.Format(str, instance11.ScannedSpecies.Count, instance11.def.numSpeciesToUnlockMorphMode);
 			};
 			this.CreatureManipulatorProgress.resolveTooltipCallback = delegate(string str, object data)
 			{
-				GravitasCreatureManipulator.Instance instance5 = (GravitasCreatureManipulator.Instance)data;
-				if (instance5.ScannedSpecies.Count == 0)
+				GravitasCreatureManipulator.Instance instance12 = (GravitasCreatureManipulator.Instance)data;
+				if (instance12.ScannedSpecies.Count == 0)
 				{
 					str = str + "\n • " + BUILDING.STATUSITEMS.CREATUREMANIPULATORPROGRESS.NO_DATA;
 				}
 				else
 				{
-					foreach (Tag tag in instance5.ScannedSpecies)
+					foreach (Tag tag in instance12.ScannedSpecies)
 					{
 						str = str + "\n • " + Strings.Get("STRINGS.CREATURES.FAMILY_PLURAL." + tag.ToString().ToUpper());
 					}
@@ -1310,29 +1361,132 @@ namespace Database
 			this.MorbRoverMakerGermCollectionProgress = this.CreateStatusItem("MorbRoverMakerGermCollectionProgress", CODEX.STORY_TRAITS.MORB_ROVER_MAKER.STATUSITEMS.GERM_COLLECTION_PROGRESS.NAME, CODEX.STORY_TRAITS.MORB_ROVER_MAKER.STATUSITEMS.GERM_COLLECTION_PROGRESS.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, 129022);
 			this.MorbRoverMakerGermCollectionProgress.resolveStringCallback = delegate(string str, object data)
 			{
-				MorbRoverMaker.Instance instance6 = (MorbRoverMaker.Instance)data;
-				return str.Replace("{0}", GameUtil.GetFormattedPercent(instance6.MorbDevelopment_Progress * 100f, GameUtil.TimeSlice.None));
+				MorbRoverMaker.Instance instance13 = (MorbRoverMaker.Instance)data;
+				return str.Replace("{0}", GameUtil.GetFormattedPercent(instance13.MorbDevelopment_Progress * 100f, GameUtil.TimeSlice.None));
 			};
 			this.MorbRoverMakerGermCollectionProgress.resolveTooltipCallback = delegate(string str, object data)
 			{
-				MorbRoverMaker.Instance instance7 = (MorbRoverMaker.Instance)data;
-				return str.Replace("{GERM_NAME}", Db.Get().Diseases[instance7.def.GERM_TYPE].Name).Replace("{0}", GameUtil.GetFormattedDiseaseAmount(instance7.def.MAX_GERMS_TAKEN_PER_PACKAGE, GameUtil.TimeSlice.PerSecond)).Replace("{1}", GameUtil.GetFormattedDiseaseAmount(instance7.MorbDevelopment_GermsCollected, GameUtil.TimeSlice.None))
-					.Replace("{2}", GameUtil.GetFormattedDiseaseAmount(instance7.def.GERMS_PER_ROVER, GameUtil.TimeSlice.None));
+				MorbRoverMaker.Instance instance14 = (MorbRoverMaker.Instance)data;
+				return str.Replace("{GERM_NAME}", Db.Get().Diseases[instance14.def.GERM_TYPE].Name).Replace("{0}", GameUtil.GetFormattedDiseaseAmount(instance14.def.MAX_GERMS_TAKEN_PER_PACKAGE, GameUtil.TimeSlice.PerSecond)).Replace("{1}", GameUtil.GetFormattedDiseaseAmount(instance14.MorbDevelopment_GermsCollected, GameUtil.TimeSlice.None))
+					.Replace("{2}", GameUtil.GetFormattedDiseaseAmount(instance14.def.GERMS_PER_ROVER, GameUtil.TimeSlice.None));
 			};
 			this.MorbRoverMakerNoGermsConsumedAlert = this.CreateStatusItem("MorbRoverMakerNoGermsConsumedAlert", CODEX.STORY_TRAITS.MORB_ROVER_MAKER.STATUSITEMS.NOGERMSCONSUMEDALERT.NAME, CODEX.STORY_TRAITS.MORB_ROVER_MAKER.STATUSITEMS.NOGERMSCONSUMEDALERT.TOOLTIP, "status_item_no_germs", StatusItem.IconType.Custom, NotificationType.Bad, false, OverlayModes.None.ID, 129022);
 			this.MorbRoverMakerNoGermsConsumedAlert.resolveStringCallback = delegate(string str, object data)
 			{
-				MorbRoverMaker.Instance instance8 = (MorbRoverMaker.Instance)data;
-				return str.Replace("{0}", Db.Get().Diseases[instance8.def.GERM_TYPE].Name);
+				MorbRoverMaker.Instance instance15 = (MorbRoverMaker.Instance)data;
+				return str.Replace("{0}", Db.Get().Diseases[instance15.def.GERM_TYPE].Name);
 			};
 			this.MorbRoverMakerNoGermsConsumedAlert.resolveTooltipCallback = delegate(string str, object data)
 			{
-				MorbRoverMaker.Instance instance9 = (MorbRoverMaker.Instance)data;
-				return str.Replace("{0}", Db.Get().Diseases[instance9.def.GERM_TYPE].Name);
+				MorbRoverMaker.Instance instance16 = (MorbRoverMaker.Instance)data;
+				return str.Replace("{0}", Db.Get().Diseases[instance16.def.GERM_TYPE].Name);
 			};
 			this.MorbRoverMakerCraftingBody = this.CreateStatusItem("MorbRoverMakerCraftingBody", CODEX.STORY_TRAITS.MORB_ROVER_MAKER.STATUSITEMS.CRAFTING_ROBOT_BODY.NAME, CODEX.STORY_TRAITS.MORB_ROVER_MAKER.STATUSITEMS.CRAFTING_ROBOT_BODY.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, 129022);
 			this.MorbRoverMakerReadyForDoctor = this.CreateStatusItem("MorbRoverMakerReadyForDoctor", CODEX.STORY_TRAITS.MORB_ROVER_MAKER.STATUSITEMS.DOCTOR_READY.NAME, CODEX.STORY_TRAITS.MORB_ROVER_MAKER.STATUSITEMS.DOCTOR_READY.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, 129022);
 			this.MorbRoverMakerDoctorWorking = this.CreateStatusItem("MorbRoverMakerDoctorWorking", CODEX.STORY_TRAITS.MORB_ROVER_MAKER.STATUSITEMS.BUILDING_BEING_WORKED_BY_DOCTOR.NAME, CODEX.STORY_TRAITS.MORB_ROVER_MAKER.STATUSITEMS.BUILDING_BEING_WORKED_BY_DOCTOR.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, 129022);
+			this.GeoVentQuestBlockage = this.CreateStatusItem("GeoVentQuestBlockage", COLONY_ACHIEVEMENTS.ACTIVATEGEOTHERMALPLANT.STATUSITEMS.VENT.QUEST_BLOCKED_NAME, COLONY_ACHIEVEMENTS.ACTIVATEGEOTHERMALPLANT.STATUSITEMS.VENT.QUEST_BLOCKED_TOOLTIP, "", StatusItem.IconType.Info, NotificationType.BadMinor, false, OverlayModes.None.ID, 129022);
+			this.GeoVentQuestBlockage.resolveStringCallback = (string str, object obj) => str.Replace("{Name}", (obj as GeothermalVent).GetProperName());
+			this.GeoVentQuestBlockage.resolveStringCallback_shouldStillCallIfDataIsNull = false;
+			this.GeoVentsDisconnected = this.CreateStatusItem("GeoVentsDisconnected", COLONY_ACHIEVEMENTS.ACTIVATEGEOTHERMALPLANT.STATUSITEMS.VENT.DISCONNECTED_NAME, COLONY_ACHIEVEMENTS.ACTIVATEGEOTHERMALPLANT.STATUSITEMS.VENT.DISCONNECTED_TOOLTIP, "", StatusItem.IconType.Info, NotificationType.BadMinor, false, OverlayModes.None.ID, 129022);
+			this.GeoVentsDisconnected.resolveStringCallback = (string str, object obj) => str.Replace("{Name}", (obj as GeothermalVent).GetProperName());
+			this.GeoVentsDisconnected.resolveStringCallback_shouldStillCallIfDataIsNull = false;
+			this.GeoVentsOverpressure = this.CreateStatusItem("GeoVentsOverpressure", COLONY_ACHIEVEMENTS.ACTIVATEGEOTHERMALPLANT.STATUSITEMS.VENT.OVERPRESSURE_NAME, COLONY_ACHIEVEMENTS.ACTIVATEGEOTHERMALPLANT.STATUSITEMS.VENT.OVERPRESSURE_TOOLTIP, "status_item_vent_disabled", StatusItem.IconType.Custom, NotificationType.BadMinor, false, OverlayModes.None.ID, 129022);
+			this.GeoVentsOverpressure.resolveStringCallback = (string str, object obj) => str.Replace("{Name}", (obj as GeothermalVent).GetProperName());
+			this.GeoVentsOverpressure.resolveStringCallback_shouldStillCallIfDataIsNull = false;
+			this.GeoControllerCantVent = this.CreateStatusItem("GeoControllerCantVent", COLONY_ACHIEVEMENTS.ACTIVATEGEOTHERMALPLANT.STATUSITEMS.CONTROLLER.CANNOT_PUSH_NO_CONNECTED_NAME, COLONY_ACHIEVEMENTS.ACTIVATEGEOTHERMALPLANT.STATUSITEMS.CONTROLLER.CANNOT_PUSH_NO_CONNECTED_TOOLTIP, "status_item_vent_disabled", StatusItem.IconType.Custom, NotificationType.BadMinor, false, OverlayModes.None.ID, 129022);
+			this.GeoControllerCantVent.resolveStringCallback = delegate(string str, object obj)
+			{
+				GeothermalController geothermalController = obj as GeothermalController;
+				if (geothermalController == null)
+				{
+					return str;
+				}
+				GeothermalVent geothermalVent = geothermalController.FirstObstructedVent();
+				if (geothermalVent == null)
+				{
+					return COLONY_ACHIEVEMENTS.ACTIVATEGEOTHERMALPLANT.STATUSITEMS.CONTROLLER.CANNOT_PUSH_NO_CONNECTED_NAME;
+				}
+				if (geothermalVent.IsEntombed())
+				{
+					return COLONY_ACHIEVEMENTS.ACTIVATEGEOTHERMALPLANT.STATUSITEMS.CONTROLLER.CANNOT_PUSH_ENTOMBED_VENT_NAME;
+				}
+				return COLONY_ACHIEVEMENTS.ACTIVATEGEOTHERMALPLANT.STATUSITEMS.CONTROLLER.CANNOT_PUSH_UNREADY_CONNECTION_NAME;
+			};
+			this.GeoControllerCantVent.resolveStringCallback_shouldStillCallIfDataIsNull = false;
+			this.GeoControllerCantVent.resolveTooltipCallback = delegate(string str, object obj)
+			{
+				GeothermalController geothermalController2 = obj as GeothermalController;
+				if (geothermalController2 == null)
+				{
+					return str;
+				}
+				GeothermalVent geothermalVent2 = geothermalController2.FirstObstructedVent();
+				if (geothermalVent2 == null)
+				{
+					return COLONY_ACHIEVEMENTS.ACTIVATEGEOTHERMALPLANT.STATUSITEMS.CONTROLLER.CANNOT_PUSH_NO_CONNECTED_TOOLTIP;
+				}
+				if (geothermalVent2.IsEntombed())
+				{
+					return COLONY_ACHIEVEMENTS.ACTIVATEGEOTHERMALPLANT.STATUSITEMS.CONTROLLER.CANNOT_PUSH_ENTOMBED_VENT_TOOLTIP;
+				}
+				return COLONY_ACHIEVEMENTS.ACTIVATEGEOTHERMALPLANT.STATUSITEMS.CONTROLLER.CANNOT_PUSH_UNREADY_CONNECTION_TOOLTIP;
+			};
+			this.GeoControllerCantVent.resolveTooltipCallback_shouldStillCallIfDataIsNull = false;
+			this.GeoControllerCantVent.statusItemClickCallback = delegate(object obj)
+			{
+				GeothermalController geothermalController3 = obj as GeothermalController;
+				GeothermalVent geothermalVent3 = ((geothermalController3 != null) ? geothermalController3.FirstObstructedVent() : null);
+				if (geothermalVent3 != null)
+				{
+					SelectTool.Instance.SelectAndFocus(geothermalVent3.transform.position, geothermalVent3.GetComponent<KSelectable>());
+				}
+			};
+			this.GeoVentsReady = this.CreateStatusItem("GeoVentsReady", COLONY_ACHIEVEMENTS.ACTIVATEGEOTHERMALPLANT.STATUSITEMS.VENT.READY_NAME, COLONY_ACHIEVEMENTS.ACTIVATEGEOTHERMALPLANT.STATUSITEMS.VENT.READY_TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, 129022);
+			this.GeoVentsReady.resolveStringCallback = (string str, object obj) => str.Replace("{Name}", (obj as GeothermalVent).GetProperName());
+			this.GeoVentsReady.resolveStringCallback_shouldStillCallIfDataIsNull = false;
+			this.GeoVentsVenting = this.CreateStatusItem("GeoVentsVenting", COLONY_ACHIEVEMENTS.ACTIVATEGEOTHERMALPLANT.STATUSITEMS.VENT.VENTING_NAME, COLONY_ACHIEVEMENTS.ACTIVATEGEOTHERMALPLANT.STATUSITEMS.VENT.VENTING_TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, 129022);
+			this.GeoVentsVenting.resolveStringCallback = delegate(string str, object obj)
+			{
+				GeothermalVent geothermalVent4 = obj as GeothermalVent;
+				return str.Replace("{Name}", geothermalVent4.GetProperName()).Replace("{Quantity}", GameUtil.GetFormattedMass(geothermalVent4.MaterialAvailable(), GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"));
+			};
+			this.GeoVentsVenting.resolveStringCallback_shouldStillCallIfDataIsNull = false;
+			this.GeoVentsVenting.resolveTooltipCallback = delegate(string str, object data)
+			{
+				GeothermalVent geothermalVent5 = data as GeothermalVent;
+				if (geothermalVent5 != null)
+				{
+					return str.Replace("{Quantity}", GameUtil.GetFormattedMass(geothermalVent5.MaterialAvailable(), GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"));
+				}
+				return str;
+			};
+			this.GeoVentsReady.resolveTooltipCallback_shouldStillCallIfDataIsNull = false;
+			this.GeoQuestPendingReconnectPipes = this.CreateStatusItem("GeoQuestPendingReconnectPipes", COLONY_ACHIEVEMENTS.ACTIVATEGEOTHERMALPLANT.STATUSITEMS.CONTROLLER.PENDING_RECONNECTION_NAME, COLONY_ACHIEVEMENTS.ACTIVATEGEOTHERMALPLANT.STATUSITEMS.CONTROLLER.PENDING_RECONNECTION_TOOLTIP, "", StatusItem.IconType.Info, NotificationType.BadMinor, false, OverlayModes.None.ID, 129022);
+			this.GeoQuestPendingUncover = this.CreateStatusItem("GeoQuestPendingUncover", COLONY_ACHIEVEMENTS.ACTIVATEGEOTHERMALPLANT.STATUSITEMS.VENT.PENDING_REVEAL_NAME, COLONY_ACHIEVEMENTS.ACTIVATEGEOTHERMALPLANT.STATUSITEMS.VENT.PENDING_REVEAL_TOOLTIP, "", StatusItem.IconType.Info, NotificationType.BadMinor, false, OverlayModes.None.ID, 129022);
+			this.GeoControllerOffline = this.CreateStatusItem("GeoControllerOffline", COLONY_ACHIEVEMENTS.ACTIVATEGEOTHERMALPLANT.STATUSITEMS.CONTROLLER.OFFLINE_NAME, COLONY_ACHIEVEMENTS.ACTIVATEGEOTHERMALPLANT.STATUSITEMS.CONTROLLER.OFFLINE_TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, 129022);
+			this.GeoControllerStorageStatus = this.CreateStatusItem("GeoControllerStorageStatus", COLONY_ACHIEVEMENTS.ACTIVATEGEOTHERMALPLANT.STATUSITEMS.CONTROLLER.STORAGE_STATUS_NAME, COLONY_ACHIEVEMENTS.ACTIVATEGEOTHERMALPLANT.STATUSITEMS.CONTROLLER.STORAGE_STATUS_TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, 129022);
+			this.GeoControllerStorageStatus = this.CreateStatusItem("GeoControllerStorageStatus", COLONY_ACHIEVEMENTS.ACTIVATEGEOTHERMALPLANT.STATUSITEMS.CONTROLLER.STORAGE_STATUS_NAME, COLONY_ACHIEVEMENTS.ACTIVATEGEOTHERMALPLANT.STATUSITEMS.CONTROLLER.STORAGE_STATUS_TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, 129022);
+			this.GeoControllerStorageStatus.resolveStringCallback = delegate(string str, object obj)
+			{
+				GeothermalController geothermalController4 = obj as GeothermalController;
+				float num19 = ((geothermalController4 != null) ? (geothermalController4.GetPressure() * 100f) : 0f);
+				return str.Replace("{Amount}", GameUtil.GetFormattedPercent(num19, GameUtil.TimeSlice.None));
+			};
+			this.GeoControllerStorageStatus.resolveTooltipCallback = delegate(string str, object obj)
+			{
+				GeothermalController geothermalController5 = obj as GeothermalController;
+				float num20 = ((geothermalController5 != null) ? geothermalController5.GetPressure() : 0f);
+				return str.Replace("{Amount}", GameUtil.GetFormattedMass(12000f * num20, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}")).Replace("{Threshold}", GameUtil.GetFormattedMass(12000f, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"));
+			};
+			this.GeoControllerStorageStatus.resolveStringCallback_shouldStillCallIfDataIsNull = (this.GeoControllerStorageStatus.resolveTooltipCallback_shouldStillCallIfDataIsNull = false);
+			this.GeoControllerTemperatureStatus = this.CreateStatusItem("GeoControllerTemperatureStatus", COLONY_ACHIEVEMENTS.ACTIVATEGEOTHERMALPLANT.STATUSITEMS.CONTROLLER.STORAGE_TEMPERATURE_NAME, COLONY_ACHIEVEMENTS.ACTIVATEGEOTHERMALPLANT.STATUSITEMS.CONTROLLER.STORAGE_TEMPERATURE_TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, 129022);
+			this.GeoControllerTemperatureStatus.resolveStringCallback = delegate(string str, object obj)
+			{
+				GeothermalController geothermalController6 = obj as GeothermalController;
+				float num21 = ((geothermalController6 != null) ? geothermalController6.ComputeContentTemperature() : 0f);
+				return str.Replace("{Temp}", GameUtil.GetFormattedTemperature(num21, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false));
+			};
+			this.GeoControllerTemperatureStatus.resolveStringCallback_shouldStillCallIfDataIsNull = (this.GeoControllerTemperatureStatus.resolveTooltipCallback_shouldStillCallIfDataIsNull = false);
 		}
 
 		private static bool ShowInUtilityOverlay(HashedString mode, object data)
@@ -1373,7 +1527,7 @@ namespace Database
 		}
 
 		[CompilerGenerated]
-		internal static string <CreateStatusItems>g__SkyVisResolveStringCallback|291_99(string str, object data)
+		internal static string <CreateStatusItems>g__SkyVisResolveStringCallback|311_106(string str, object data)
 		{
 			BuildingStatusItems.ISkyVisInfo skyVisInfo = (BuildingStatusItems.ISkyVisInfo)data;
 			return str.Replace("{VISIBILITY}", GameUtil.GetFormattedPercent(skyVisInfo.GetPercentVisible01() * 100f, GameUtil.TimeSlice.None));
@@ -1404,6 +1558,8 @@ namespace Database
 		public StatusItem ConstructableDigUnreachable;
 
 		public StatusItem ConstructionUnreachable;
+
+		public StatusItem CoolingWater;
 
 		public StatusItem DispenseRequested;
 
@@ -1899,6 +2055,14 @@ namespace Database
 
 		public StatusItem ClusterTelescopeMeteorWorking;
 
+		public StatusItem MercuryLight_Charging;
+
+		public StatusItem MercuryLight_Charged;
+
+		public StatusItem MercuryLight_Depleating;
+
+		public StatusItem MercuryLight_Depleated;
+
 		public StatusItem GeoTunerNoGeyserSelected;
 
 		public StatusItem GeoTunerResearchNeeded;
@@ -1914,6 +2078,14 @@ namespace Database
 		public StatusItem SkyVisNone;
 
 		public StatusItem SkyVisLimited;
+
+		public StatusItem KettleInsuficientSolids;
+
+		public StatusItem KettleInsuficientFuel;
+
+		public StatusItem KettleInsuficientLiquidSpace;
+
+		public StatusItem KettleMelting;
 
 		public StatusItem CreatureManipulatorWaiting;
 
@@ -1952,6 +2124,28 @@ namespace Database
 		public StatusItem MorbRoverMakerReadyForDoctor;
 
 		public StatusItem MorbRoverMakerDoctorWorking;
+
+		public StatusItem GeoVentQuestBlockage;
+
+		public StatusItem GeoVentsDisconnected;
+
+		public StatusItem GeoVentsOverpressure;
+
+		public StatusItem GeoControllerCantVent;
+
+		public StatusItem GeoVentsReady;
+
+		public StatusItem GeoVentsVenting;
+
+		public StatusItem GeoQuestPendingReconnectPipes;
+
+		public StatusItem GeoQuestPendingUncover;
+
+		public StatusItem GeoControllerOffline;
+
+		public StatusItem GeoControllerStorageStatus;
+
+		public StatusItem GeoControllerTemperatureStatus;
 
 		public interface ISkyVisInfo
 		{

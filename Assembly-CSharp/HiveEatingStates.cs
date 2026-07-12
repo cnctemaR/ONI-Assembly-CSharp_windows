@@ -87,7 +87,7 @@ public class HiveEatingStates : GameStateMachine<HiveEatingStates, HiveEatingSta
 			{
 				return;
 			}
-			Diet.Info dietInfo = smi.gameObject.AddOrGetDef<BeehiveCalorieMonitor.Def>().diet.GetDietInfo(component.PrefabTag);
+			Diet.Info dietInfo = smi.GetSMI<BeehiveCalorieMonitor.Instance>().stomach.diet.GetDietInfo(component.PrefabTag);
 			if (dietInfo == null)
 			{
 				return;

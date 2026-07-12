@@ -9,25 +9,14 @@ public static class BaseLightBugConfig
 	public static GameObject BaseLightBug(string id, string name, string desc, string anim_file, string traitId, Color lightColor, EffectorValues decor, bool is_baby, string symbolOverridePrefix = null)
 	{
 		GameObject gameObject = EntityTemplates.CreatePlacedEntity(id, name, desc, 5f, Assets.GetAnim(anim_file), "idle_loop", Grid.SceneLayer.Creatures, 1, 1, decor, default(EffectorValues), SimHashes.Creature, null, 293f);
-		GameObject gameObject2 = gameObject;
-		FactionManager.FactionID factionID = FactionManager.FactionID.Prey;
-		string text = "FlyerNavGrid1x1";
-		NavType navType = NavType.Hover;
-		int num = 32;
-		float num2 = 2f;
-		string text2 = "Meat";
-		int num3 = 0;
-		bool flag = true;
-		bool flag2 = true;
-		float freezing_ = CREATURES.TEMPERATURE.FREEZING_2;
-		EntityTemplates.ExtendEntityToBasicCreature(gameObject2, factionID, traitId, text, navType, num, num2, text2, num3, flag, flag2, CREATURES.TEMPERATURE.FREEZING_1, CREATURES.TEMPERATURE.HOT_1, freezing_, CREATURES.TEMPERATURE.HOT_2);
+		EntityTemplates.ExtendEntityToBasicCreature(gameObject, FactionManager.FactionID.Prey, traitId, "FlyerNavGrid1x1", NavType.Hover, 32, 2f, "Meat", 0, true, true, 283.15f, 313.15f, 173.15f, 373.15f);
 		if (symbolOverridePrefix != null)
 		{
 			gameObject.AddOrGet<SymbolOverrideController>().ApplySymbolOverridesByAffix(Assets.GetAnim(anim_file), symbolOverridePrefix, null, 0);
 		}
 		Pickupable pickupable = gameObject.AddOrGet<Pickupable>();
-		int num4 = CREATURES.SORTING.CRITTER_ORDER["LightBug"];
-		pickupable.sortOrder = num4;
+		int num = CREATURES.SORTING.CRITTER_ORDER["LightBug"];
+		pickupable.sortOrder = num;
 		KPrefabID component = gameObject.GetComponent<KPrefabID>();
 		component.AddTag(GameTags.Creatures.Flyer, false);
 		component.prefabInitFn += delegate(GameObject inst)
@@ -113,7 +102,7 @@ public static class BaseLightBugConfig
 	{
 		Diet diet = new Diet(new Diet.Info[]
 		{
-			new Diet.Info(consumed_tags, producedTag, caloriesPerKg, 1f, null, 0f, false, false)
+			new Diet.Info(consumed_tags, producedTag, caloriesPerKg, 1f, null, 0f, false, false, false)
 		});
 		prefab.AddOrGetDef<CreatureCalorieMonitor.Def>().diet = diet;
 		prefab.AddOrGetDef<SolidConsumerMonitor.Def>().diet = diet;

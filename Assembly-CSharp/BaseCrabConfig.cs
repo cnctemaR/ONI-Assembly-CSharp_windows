@@ -17,7 +17,7 @@ public static class BaseCrabConfig
 		{
 			text = "WalkerBabyNavGrid";
 		}
-		EntityTemplates.ExtendEntityToBasicCreature(gameObject, FactionManager.FactionID.Pest, traitId, text, NavType.Floor, 32, 2f, onDeathDropID, onDeathDropCount, false, false, 288.15f, 343.15f, 243.15f, 373.15f);
+		EntityTemplates.ExtendEntityToBasicCreature(gameObject, FactionManager.FactionID.Pest, traitId, text, NavType.Floor, 32, 2f, onDeathDropID, onDeathDropCount, false, false, 273.15f, 303.15f, 223.15f, 373.15f);
 		if (symbolOverridePrefix != null)
 		{
 			gameObject.AddOrGet<SymbolOverrideController>().ApplySymbolOverridesByAffix(Assets.GetAnim(anim_file), symbolOverridePrefix, null, 0);
@@ -90,7 +90,7 @@ public static class BaseCrabConfig
 		hashSet.Add(RotPileConfig.ID.ToTag());
 		return new List<Diet.Info>
 		{
-			new Diet.Info(hashSet, poopTag, caloriesPerKg, producedConversionRate, diseaseId, diseasePerKgProduced, false, false)
+			new Diet.Info(hashSet, poopTag, caloriesPerKg, producedConversionRate, diseaseId, diseasePerKgProduced, false, false, false)
 		};
 	}
 
@@ -102,7 +102,7 @@ public static class BaseCrabConfig
 		hashSet.Add(SimHashes.SlimeMold.CreateTag());
 		return new List<Diet.Info>
 		{
-			new Diet.Info(hashSet, poopTag, caloriesPerKg, producedConversionRate, diseaseId, diseasePerKgProduced, false, false)
+			new Diet.Info(hashSet, poopTag, caloriesPerKg, producedConversionRate, diseaseId, diseasePerKgProduced, false, false, false)
 		};
 	}
 
@@ -111,7 +111,7 @@ public static class BaseCrabConfig
 		Diet diet = new Diet(diet_infos.ToArray());
 		CreatureCalorieMonitor.Def def = prefab.AddOrGetDef<CreatureCalorieMonitor.Def>();
 		def.diet = diet;
-		def.minPoopSizeInCalories = referenceCaloriesPerKg * minPoopSizeInKg;
+		def.minConsumedCaloriesBeforePooping = referenceCaloriesPerKg * minPoopSizeInKg;
 		prefab.AddOrGetDef<SolidConsumerMonitor.Def>().diet = diet;
 		return prefab;
 	}

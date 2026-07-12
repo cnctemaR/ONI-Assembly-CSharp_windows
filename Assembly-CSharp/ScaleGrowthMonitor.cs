@@ -21,6 +21,10 @@ public class ScaleGrowthMonitor : GameStateMachine<ScaleGrowthMonitor, ScaleGrow
 
 	private static bool IsInCorrectAtmosphere(ScaleGrowthMonitor.Instance smi)
 	{
+		if (smi.def.targetAtmosphere == (SimHashes)0)
+		{
+			return true;
+		}
 		int num = Grid.PosToCell(smi);
 		return Grid.IsValidCell(num) && Grid.Element[num].id == smi.def.targetAtmosphere;
 	}

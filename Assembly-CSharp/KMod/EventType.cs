@@ -19,6 +19,7 @@ namespace KMod
 		RestartRequested,
 		BadWorldGen,
 		Deactivated,
-		DisabledEarlyAccess
+		DisabledEarlyAccess,
+		DownloadFailed
 	}
 }

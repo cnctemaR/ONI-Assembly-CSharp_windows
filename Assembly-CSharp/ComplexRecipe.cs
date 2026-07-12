@@ -5,6 +5,11 @@ using UnityEngine;
 
 public class ComplexRecipe
 {
+	public string[] GetDlcIds()
+	{
+		return this.dlcIds;
+	}
+
 	public bool ProductHasFacade { get; set; }
 
 	public Tag FirstResult
@@ -33,6 +38,18 @@ public class ComplexRecipe
 	public ComplexRecipe(string id, ComplexRecipe.RecipeElement[] ingredients, ComplexRecipe.RecipeElement[] results, int consumedHEP)
 		: this(id, ingredients, results, consumedHEP, 0)
 	{
+	}
+
+	public ComplexRecipe(string id, ComplexRecipe.RecipeElement[] ingredients, ComplexRecipe.RecipeElement[] results, string[] dlcIds)
+		: this(id, ingredients, results)
+	{
+		this.dlcIds = dlcIds;
+	}
+
+	public ComplexRecipe(string id, ComplexRecipe.RecipeElement[] ingredients, ComplexRecipe.RecipeElement[] results, int consumedHEP, int producedHEP, string[] dlcIds)
+		: this(id, ingredients, results, consumedHEP, producedHEP)
+	{
+		this.dlcIds = dlcIds;
 	}
 
 	public float TotalResultUnits()
@@ -158,6 +175,8 @@ public class ComplexRecipe
 	public int producedHEP;
 
 	public string recipeCategoryID = "";
+
+	private string[] dlcIds = DlcManager.AVAILABLE_ALL_VERSIONS;
 
 	public ComplexRecipe.RecipeNameDisplay nameDisplay;
 

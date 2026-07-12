@@ -334,6 +334,24 @@ namespace Database
 				new MathUtil.MinMax(100f, 200f)
 			} }, null, Db.Get().ArtifactDropRates.Perfect, 0, 0, 0, true));
 			this.Earth = base.Add(new SpaceDestinationType("Earth", parent, UI.SPACEDESTINATIONS.PLANETS.SHATTEREDPLANET.NAME, UI.SPACEDESTINATIONS.PLANETS.SHATTEREDPLANET.DESCRIPTION, 96, "earth", new Dictionary<SimHashes, MathUtil.MinMax>(), null, Db.Get().ArtifactDropRates.None, 0, 0, 0, false));
+			if (DlcManager.IsContentSubscribed("DLC2_ID"))
+			{
+				this.DLC2CeresSpaceDestination = base.Add(new SpaceDestinationType("DLC2CeresSpaceDestination", parent, UI.SPACEDESTINATIONS.PLANETS.DLC2CERESSPACEDESTINATION.NAME, UI.SPACEDESTINATIONS.PLANETS.DLC2CERESSPACEDESTINATION.DESCRIPTION, 96, "ceres_debris_field", new Dictionary<SimHashes, MathUtil.MinMax>
+				{
+					{
+						SimHashes.Cinnabar,
+						new MathUtil.MinMax(100f, 200f)
+					},
+					{
+						SimHashes.Mercury,
+						new MathUtil.MinMax(100f, 200f)
+					},
+					{
+						SimHashes.Ice,
+						new MathUtil.MinMax(100f, 200f)
+					}
+				}, new Dictionary<string, int> { { "WoodDeer", 1 } }, Db.Get().ArtifactDropRates.Good, 384000000, 383980000, 60, true));
+			}
 		}
 
 		public SpaceDestinationType Satellite;
@@ -381,6 +399,8 @@ namespace Database
 		public SpaceDestinationType SaltDesertPlanet;
 
 		public SpaceDestinationType Earth;
+
+		public SpaceDestinationType DLC2CeresSpaceDestination;
 
 		public static Dictionary<SimHashes, MathUtil.MinMax> extendedElementTable = new Dictionary<SimHashes, MathUtil.MinMax>
 		{

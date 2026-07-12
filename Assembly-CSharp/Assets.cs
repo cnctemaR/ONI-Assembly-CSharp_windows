@@ -122,6 +122,10 @@ public class Assets : KMonoBehaviour, ISerializationCallbackReceiver
 		{
 			this.AnimAssets.AddRange(BundledAssetsLoader.instance.Expansion1Assets.AnimAssets);
 		}
+		foreach (BundledAssets bundledAssets in BundledAssetsLoader.instance.DlcAssetsList)
+		{
+			this.AnimAssets.AddRange(bundledAssets.AnimAssets);
+		}
 		Assets.Anims = this.AnimAssets.Where<KAnimFile>((KAnimFile x) => x != null).ToList<KAnimFile>();
 		Assets.Anims.AddRange(Assets.ModLoadedKAnims);
 		Assets.AnimTable.Clear();
@@ -579,6 +583,8 @@ public class Assets : KMonoBehaviour, ISerializationCallbackReceiver
 		public HealthBar HealthBar;
 
 		public GameObject ResourceVisualizer;
+
+		public GameObject KAnimVisualizer;
 
 		public Image RegionCellBlocked;
 

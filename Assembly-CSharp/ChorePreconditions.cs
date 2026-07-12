@@ -355,6 +355,34 @@ public class ChorePreconditions
 		};
 		this.CanMoveToCell = precondition;
 		precondition = default(Chore.Precondition);
+		precondition.id = "CanMoveTo";
+		precondition.description = DUPLICANTS.CHORES.PRECONDITIONS.CAN_MOVE_TO;
+		precondition.fn = delegate(ref Chore.Precondition.Context context, object data)
+		{
+			if (context.consumerState.consumer == null)
+			{
+				return false;
+			}
+			Func<int> func = (Func<int>)data;
+			if (func == null)
+			{
+				return false;
+			}
+			int num5 = func();
+			if (!Grid.IsValidCell(num5))
+			{
+				return false;
+			}
+			int num6;
+			if (context.consumerState.consumer.GetNavigationCost(num5, out num6))
+			{
+				context.cost += num6;
+				return true;
+			}
+			return false;
+		};
+		this.CanMoveToDynamicCell = precondition;
+		precondition = default(Chore.Precondition);
 		precondition.id = "CanPickup";
 		precondition.description = DUPLICANTS.CHORES.PRECONDITIONS.CAN_PICKUP;
 		precondition.fn = delegate(ref Chore.Precondition.Context context, object data)
@@ -515,10 +543,10 @@ public class ChorePreconditions
 			{
 				return false;
 			}
-			int num5 = 0;
-			if (workerPrioritizable.GetWorkerPriority(context.consumerState.worker, out num5))
+			int num7 = 0;
+			if (workerPrioritizable.GetWorkerPriority(context.consumerState.worker, out num7))
 			{
-				context.consumerPriority += num5;
+				context.consumerPriority += num7;
 				return true;
 			}
 			return false;
@@ -637,6 +665,8 @@ public class ChorePreconditions
 	public Chore.Precondition CanMoveTo;
 
 	public Chore.Precondition CanMoveToCell;
+
+	public Chore.Precondition CanMoveToDynamicCell;
 
 	public Chore.Precondition CanPickup;
 

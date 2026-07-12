@@ -25,6 +25,13 @@ public class LoreBearer : KMonoBehaviour, ISidescreenButtonControl
 		return this;
 	}
 
+	public LoreBearer Internal_SetContent(LoreBearerAction action, string[] collectionsToUnlockFrom)
+	{
+		this.displayContentAction = action;
+		this.collectionsToUnlockFrom = collectionsToUnlockFrom;
+		return this;
+	}
+
 	public static InfoDialogScreen ShowPopupDialog()
 	{
 		return (InfoDialogScreen)GameScreenManager.Instance.StartScreen(ScreenPrefabs.Instance.InfoDialogScreen.gameObject, GameScreenManager.Instance.ssOverlayCanvas.gameObject, GameScreenManager.UIRenderTarget.ScreenSpaceOverlay);
@@ -102,6 +109,8 @@ public class LoreBearer : KMonoBehaviour, ISidescreenButtonControl
 	private bool BeenClicked;
 
 	public string BeenSearched = UI.USERMENUACTIONS.READLORE.ALREADY_SEARCHED;
+
+	private string[] collectionsToUnlockFrom;
 
 	private LoreBearerAction displayContentAction;
 }

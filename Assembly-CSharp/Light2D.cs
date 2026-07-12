@@ -54,6 +54,30 @@ public class Light2D : KMonoBehaviour, IGameObjectEffectDescriptor
 		}
 	}
 
+	public DiscreteShadowCaster.Direction LightDirection
+	{
+		get
+		{
+			return this.pending_emitter_state.direction;
+		}
+		set
+		{
+			this.pending_emitter_state.direction = this.MaybeDirty<DiscreteShadowCaster.Direction>(this.pending_emitter_state.direction, value, ref this.dirty_shape);
+		}
+	}
+
+	public int Width
+	{
+		get
+		{
+			return this.pending_emitter_state.width;
+		}
+		set
+		{
+			this.pending_emitter_state.width = this.MaybeDirty<int>(this.pending_emitter_state.width, value, ref this.dirty_shape);
+		}
+	}
+
 	public float Range
 	{
 		get
@@ -182,11 +206,33 @@ public class Light2D : KMonoBehaviour, IGameObjectEffectDescriptor
 	private Extents ComputeExtents()
 	{
 		Vector2I vector2I = Grid.CellToXY(this.origin);
-		int num = (int)this.Range;
-		Vector2I vector2I2 = new Vector2I(vector2I.x - num, vector2I.y - num);
-		int num2 = 2 * num;
-		int num3 = ((this.shape == global::LightShape.Circle) ? (2 * num) : num);
-		return new Extents(vector2I2.x, vector2I2.y, num2, num3);
+		int num = 0;
+		int num2 = 0;
+		int num3 = 0;
+		int num4 = 0;
+		global::LightShape shape = this.shape;
+		if (shape > global::LightShape.Cone)
+		{
+			if (shape == global::LightShape.Quad)
+			{
+				num3 = this.Width;
+				num4 = (int)this.Range;
+				int num5 = ((this.Width % 2 == 0) ? (this.Width / 2 - 1) : Mathf.FloorToInt((float)(this.Width - 1) * 0.5f));
+				Vector2I vector2I2 = vector2I - DiscreteShadowCaster.TravelDirectionToOrtogonalDiractionVector(this.LightDirection) * num5;
+				num = vector2I2.x;
+				num2 = vector2I2.y - num4;
+			}
+		}
+		else
+		{
+			int num6 = (int)this.Range;
+			int num7 = num6 * 2;
+			num = vector2I.x - num6;
+			num2 = vector2I.y - num6;
+			num3 = num7;
+			num4 = ((this.shape == global::LightShape.Circle) ? num7 : num6);
+		}
+		return new Extents(num, num2, num3, num4);
 	}
 
 	private void AddToScenePartitioner()
@@ -285,6 +331,8 @@ public class Light2D : KMonoBehaviour, IGameObjectEffectDescriptor
 		};
 	}
 
+	public bool autoRespondToOperational = true;
+
 	private bool dirty_shape;
 
 	private bool dirty_position;
@@ -313,7 +361,10 @@ public class Light2D : KMonoBehaviour, IGameObjectEffectDescriptor
 
 	private static readonly EventSystem.IntraObjectHandler<Light2D> OnOperationalChangedDelegate = new EventSystem.IntraObjectHandler<Light2D>(delegate(Light2D light, object data)
 	{
-		light.enabled = (bool)data;
+		if (light.autoRespondToOperational)
+		{
+			light.enabled = (bool)data;
+		}
 	});
 
 	public enum RefreshResult

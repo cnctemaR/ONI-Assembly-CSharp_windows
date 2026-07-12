@@ -1,13 +1,72 @@
 ﻿using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 public static class DiscreteShadowCaster
 {
-	public static void GetVisibleCells(int cell, List<int> visiblePoints, int range, LightShape shape, bool canSeeThroughTransparent = true)
+	public static DiscreteShadowCaster.Direction OctantToDirection(DiscreteShadowCaster.Octant octant)
+	{
+		switch (octant)
+		{
+		case DiscreteShadowCaster.Octant.N_NW:
+		case DiscreteShadowCaster.Octant.N_NE:
+			return DiscreteShadowCaster.Direction.North;
+		case DiscreteShadowCaster.Octant.E_NE:
+		case DiscreteShadowCaster.Octant.E_SE:
+			return DiscreteShadowCaster.Direction.East;
+		case DiscreteShadowCaster.Octant.S_SE:
+		case DiscreteShadowCaster.Octant.S_SW:
+			return DiscreteShadowCaster.Direction.South;
+		case DiscreteShadowCaster.Octant.W_SW:
+		case DiscreteShadowCaster.Octant.W_NW:
+			return DiscreteShadowCaster.Direction.West;
+		default:
+			return DiscreteShadowCaster.Direction.South;
+		}
+	}
+
+	public static Vector2I DirectionToVector(DiscreteShadowCaster.Direction dir)
+	{
+		switch (dir)
+		{
+		case DiscreteShadowCaster.Direction.North:
+			return new Vector2I(0, 1);
+		case DiscreteShadowCaster.Direction.East:
+			return new Vector2I(1, 0);
+		case DiscreteShadowCaster.Direction.South:
+			return new Vector2I(0, -1);
+		case DiscreteShadowCaster.Direction.West:
+			return new Vector2I(-1, 0);
+		default:
+			return default(Vector2I);
+		}
+	}
+
+	public static Vector2I TravelDirectionToOrtogonalDiractionVector(DiscreteShadowCaster.Direction dir)
+	{
+		switch (dir)
+		{
+		case DiscreteShadowCaster.Direction.North:
+		case DiscreteShadowCaster.Direction.South:
+			return new Vector2I(1, 0);
+		case DiscreteShadowCaster.Direction.East:
+		case DiscreteShadowCaster.Direction.West:
+			return new Vector2I(0, 1);
+		default:
+			return default(Vector2I);
+		}
+	}
+
+	public static void GetVisibleCells(int cell, List<int> visiblePoints, int range, global::LightShape shape, bool canSeeThroughTransparent = true)
+	{
+		DiscreteShadowCaster.GetVisibleCells(cell, visiblePoints, range, 0, DiscreteShadowCaster.Direction.South, shape, canSeeThroughTransparent);
+	}
+
+	public static void GetVisibleCells(int cell, List<int> visiblePoints, int range, int width, DiscreteShadowCaster.Direction direction, global::LightShape shape, bool canSeeThroughTransparent = true)
 	{
 		visiblePoints.Add(cell);
 		Vector2I vector2I = Grid.CellToXY(cell);
-		if (shape == LightShape.Circle)
+		if (shape == global::LightShape.Circle)
 		{
 			DiscreteShadowCaster.ScanOctant(vector2I, range, 1, DiscreteShadowCaster.Octant.N_NW, 1.0, 0.0, visiblePoints, canSeeThroughTransparent);
 			DiscreteShadowCaster.ScanOctant(vector2I, range, 1, DiscreteShadowCaster.Octant.N_NE, 1.0, 0.0, visiblePoints, canSeeThroughTransparent);
@@ -19,10 +78,57 @@ public static class DiscreteShadowCaster
 			DiscreteShadowCaster.ScanOctant(vector2I, range, 1, DiscreteShadowCaster.Octant.W_NW, 1.0, 0.0, visiblePoints, canSeeThroughTransparent);
 			return;
 		}
-		if (shape == LightShape.Cone)
+		if (shape == global::LightShape.Cone)
 		{
 			DiscreteShadowCaster.ScanOctant(vector2I, range, 1, DiscreteShadowCaster.Octant.S_SE, 1.0, 0.0, visiblePoints, canSeeThroughTransparent);
 			DiscreteShadowCaster.ScanOctant(vector2I, range, 1, DiscreteShadowCaster.Octant.S_SW, 1.0, 0.0, visiblePoints, canSeeThroughTransparent);
+			return;
+		}
+		if (shape == global::LightShape.Quad)
+		{
+			DiscreteShadowCaster.ScanQuad(vector2I, direction, width, range, visiblePoints, canSeeThroughTransparent);
+		}
+	}
+
+	public static void ScanQuad(Vector2I cellPos, DiscreteShadowCaster.Direction direction, int width, int range, List<int> visiblePoints, bool canSeeThroughTransparent)
+	{
+		if (width <= 0 || range <= 0)
+		{
+			return;
+		}
+		Vector2I[] array = new Vector2I[width];
+		int num = ((width % 2 == 0) ? (width / 2 - 1) : Mathf.FloorToInt((float)(width - 1) * 0.5f));
+		Vector2I vector2I = DiscreteShadowCaster.DirectionToVector(direction);
+		Vector2I vector2I2 = DiscreteShadowCaster.TravelDirectionToOrtogonalDiractionVector(direction);
+		Vector2I vector2I3 = cellPos - vector2I2 * num;
+		Vector2I vector2I4 = new Vector2I(-1, -1);
+		for (int i = 0; i < width; i++)
+		{
+			Vector2I vector2I5 = vector2I3 + vector2I2 * i;
+			bool flag = DiscreteShadowCaster.DoesOcclude(vector2I5.x, vector2I5.y, canSeeThroughTransparent);
+			array[i] = (flag ? vector2I4 : vector2I5);
+		}
+		foreach (Vector2I vector2I6 in array)
+		{
+			if (!(vector2I6 == vector2I4))
+			{
+				bool flag2 = false;
+				int num2 = 0;
+				while (!flag2 && num2 < range)
+				{
+					Vector2I vector2I7 = vector2I6 + vector2I * num2;
+					flag2 = flag2 || DiscreteShadowCaster.DoesOcclude(vector2I7.x, vector2I7.y, canSeeThroughTransparent);
+					if (!flag2)
+					{
+						int num3 = Grid.XYToCell(vector2I7.x, vector2I7.y);
+						if (!visiblePoints.Contains(num3))
+						{
+							visiblePoints.Add(num3);
+						}
+					}
+					num2++;
+				}
+			}
 		}
 	}
 
@@ -393,5 +499,13 @@ public static class DiscreteShadowCaster
 		S_SW,
 		W_SW,
 		W_NW
+	}
+
+	public enum Direction
+	{
+		North,
+		East,
+		South,
+		West
 	}
 }

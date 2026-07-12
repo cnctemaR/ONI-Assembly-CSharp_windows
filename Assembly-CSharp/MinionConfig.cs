@@ -61,7 +61,16 @@ public class MinionConfig : IEntityConfig
 		oxygenBreather.mouthOffset = new Vector2f(0.25f, 0.97f);
 		oxygenBreather.minCO2ToEmit = 0.02f;
 		oxygenBreather.breathableCells = OxygenBreather.DEFAULT_BREATHABLE_OFFSETS;
-		gameObject.AddOrGet<WarmBlooded>();
+		WarmBlooded warmBlooded = gameObject.AddOrGet<WarmBlooded>();
+		warmBlooded.complexity = WarmBlooded.ComplexityType.FullHomeostasis;
+		warmBlooded.KCal2Joules = 4184f;
+		warmBlooded.IdealTemperature = 310.15f;
+		warmBlooded.BaseGenerationKW = 0.08368001f;
+		warmBlooded.WarmingKW = 0.5578667f;
+		warmBlooded.CoolingKW = 0.5578667f;
+		warmBlooded.CaloriesModifierDescription = DUPLICANTS.MODIFIERS.BURNINGCALORIES.NAME;
+		warmBlooded.BodyRegulatorModifierDescription = DUPLICANTS.MODIFIERS.HOMEOSTASIS.NAME;
+		warmBlooded.BaseTemperatureModifierDescription = DUPLICANTS.MODIFIERS.BASEDUPLICANT.NAME;
 		gameObject.AddOrGet<MinionIdentity>();
 		GridVisibility gridVisibility = gameObject.AddOrGet<GridVisibility>();
 		gridVisibility.radius = 30;
@@ -289,8 +298,9 @@ public class MinionConfig : IEntityConfig
 		});
 		gameObject.AddOrGet<Pickupable>();
 		CreatureSimTemperatureTransfer creatureSimTemperatureTransfer = gameObject.AddOrGet<CreatureSimTemperatureTransfer>();
-		creatureSimTemperatureTransfer.SurfaceArea = 10f;
-		creatureSimTemperatureTransfer.Thickness = 0.01f;
+		creatureSimTemperatureTransfer.SurfaceArea = 1f;
+		creatureSimTemperatureTransfer.Thickness = 0.002f;
+		creatureSimTemperatureTransfer.GroundTransferScale = 0f;
 		gameObject.AddOrGet<SicknessTrigger>();
 		gameObject.AddOrGet<ClothingWearer>();
 		gameObject.AddOrGet<SuitEquipper>();
@@ -551,7 +561,6 @@ public class MinionConfig : IEntityConfig
 		modifiers.initialAmounts.Add(Db.Get().Amounts.Toxicity.Id);
 		modifiers.initialAmounts.Add(Db.Get().Amounts.Bladder.Id);
 		modifiers.initialAmounts.Add(Db.Get().Amounts.Temperature.Id);
-		modifiers.initialAmounts.Add(Db.Get().Amounts.ExternalTemperature.Id);
 		modifiers.initialAmounts.Add(Db.Get().Amounts.Decor.Id);
 		modifiers.initialAmounts.Add(Db.Get().Amounts.RadiationBalance.Id);
 	}

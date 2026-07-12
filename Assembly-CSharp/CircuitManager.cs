@@ -572,22 +572,84 @@ public class CircuitManager
 		return this.circuitInfo[(int)circuitID].wattsUsed;
 	}
 
-	public float GetWattsNeededWhenActive(ushort circuitID)
+	public float GetWattsNeededWhenActive(ushort originCircuitId)
 	{
-		if (circuitID == 65535)
+		if (originCircuitId == 65535)
 		{
 			return -1f;
 		}
-		float num = 0f;
-		foreach (IEnergyConsumer energyConsumer in this.circuitInfo[(int)circuitID].consumers)
+		HashSet<ushort> hashSet = new HashSet<ushort>();
+		HashSet<ushort> hashSet2 = new HashSet<ushort>();
+		HashSet<ushort> hashSet3 = new HashSet<ushort>();
+		hashSet2.Add(originCircuitId);
+		int num = 0;
+		while (hashSet2.Count > 0)
 		{
-			num += energyConsumer.WattsNeededWhenActive;
+			num++;
+			if (num > 100)
+			{
+				break;
+			}
+			foreach (ushort num2 in hashSet2)
+			{
+				if (num2 >= 0 && (int)num2 < this.circuitInfo.Count)
+				{
+					foreach (Battery battery in this.circuitInfo[(int)num2].inputTransformers)
+					{
+						ushort circuitID = battery.powerTransformer.CircuitID;
+						if (battery.powerTransformer.CircuitID != 65535)
+						{
+							hashSet3.Add(circuitID);
+						}
+					}
+					hashSet.Add(num2);
+				}
+			}
+			hashSet2.Clear();
+			foreach (ushort num3 in hashSet3)
+			{
+				if (!hashSet.Contains(num3))
+				{
+					hashSet2.Add(num3);
+				}
+			}
+			hashSet3.Clear();
 		}
-		foreach (Battery battery in this.circuitInfo[(int)circuitID].inputTransformers)
+		HashSet<ushort> hashSet4 = hashSet;
+		Dictionary<ushort, float> dictionary = new Dictionary<ushort, float>();
+		foreach (ushort num4 in hashSet4)
 		{
-			num += battery.WattsNeededWhenActive;
+			if (num4 >= 0 && (int)num4 < this.circuitInfo.Count)
+			{
+				float num5 = 0f;
+				foreach (IEnergyConsumer energyConsumer in this.circuitInfo[(int)num4].consumers)
+				{
+					num5 += energyConsumer.WattsNeededWhenActive;
+				}
+				dictionary.Add(num4, num5);
+			}
 		}
-		return num;
+		Dictionary<ushort, float> dictionary2 = new Dictionary<ushort, float>();
+		foreach (Battery battery2 in this.circuitInfo[(int)originCircuitId].inputTransformers)
+		{
+			float num6;
+			dictionary.TryGetValue(battery2.powerTransformer.CircuitID, out num6);
+			float num7 = Mathf.Min(battery2.powerTransformer.WattageRating, num6);
+			float num8;
+			dictionary2.TryGetValue(battery2.powerTransformer.CircuitID, out num8);
+			dictionary2[battery2.powerTransformer.CircuitID] = Mathf.Max(num8, num7);
+		}
+		float num9;
+		dictionary.TryGetValue(originCircuitId, out num9);
+		foreach (KeyValuePair<ushort, float> keyValuePair in dictionary2)
+		{
+			ushort num10;
+			float num11;
+			keyValuePair.Deconstruct<ushort, float>(out num10, out num11);
+			float num12 = num11;
+			num9 += num12;
+		}
+		return num9;
 	}
 
 	public float GetWattsGeneratedByCircuit(ushort circuitID)

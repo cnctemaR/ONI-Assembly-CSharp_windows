@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Diagnostics;
 
 namespace ProcGen
 {
+	[DebuggerDisplay("{subWorld.name} - minCount = {minCount}, maxCount = {maxCount}, weight = {weight}")]
 	public class WeightedSubWorld : IWeighted
 	{
 		public WeightedSubWorld(float weight, SubWorld subWorld, float overridePower = -1f, int minCount = 0, int maxCount = 2147483647, int priority = 0)

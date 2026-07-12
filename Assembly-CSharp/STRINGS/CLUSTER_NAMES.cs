@@ -148,7 +148,42 @@ namespace STRINGS
 		{
 			public static LocString NAME = "Moonlet Cluster - Radioactive Ocean";
 
-			public static LocString DESCRIPTION = "A cluster of visitable planetoids with a Radioactive Ocean starting world";
+			public static LocString DESCRIPTION = "A cluster of visitable planetoids with a Radioactive Ocean starting world.";
+		}
+
+		public static class CERES_BASE_CLUSTER
+		{
+			public static LocString NAME = "Ceres Cluster";
+
+			public static LocString DESCRIPTION = "A cluster of visitable planetoids with an Ice Cave starting world.";
+		}
+
+		public static class CERES_BASE_SHATTERED_CLUSTER
+		{
+			public static LocString NAME = "Blasted Ceres Cluster";
+
+			public static LocString DESCRIPTION = "A cluster of visitable planetoids with an Ice Cave starting world.";
+		}
+
+		public static class CERES_CLASSIC_CLUSTER
+		{
+			public static LocString NAME = "Ceres Cluster";
+
+			public static LocString DESCRIPTION = "A cluster of visitable planetoids with an Ice Cave starting world.";
+		}
+
+		public static class CERES_CLASSIC_SHATTERED_CLUSTER
+		{
+			public static LocString NAME = "Blasted Ceres Cluster";
+
+			public static LocString DESCRIPTION = "A cluster of visitable planetoids with an Ice Cave starting world.";
+		}
+
+		public static class CERES_SPACEDOUT_CLUSTER
+		{
+			public static LocString NAME = "Ceres Minor Cluster";
+
+			public static LocString DESCRIPTION = "A cluster of visitable planetoids with an Ice Cave starting world.";
 		}
 	}
 }

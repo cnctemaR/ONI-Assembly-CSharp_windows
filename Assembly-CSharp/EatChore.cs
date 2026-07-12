@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using FoodRehydrator;
 using Klei.AI;
 using STRINGS;
 using UnityEngine;
@@ -50,10 +51,10 @@ public class EatChore : Chore<EatChore.StatesInstance>
 			return;
 		}
 		base.smi.sm.ediblesource.Set(edible.gameObject, base.smi, false);
-		KCrashReporter.Assert(edible.FoodInfo.CaloriesPerUnit > 0f, edible.GetProperName() + " has invalid calories per unit. Will result in NaNs");
+		KCrashReporter.Assert(edible.FoodInfo.CaloriesPerUnit > 0f, edible.GetProperName() + " has invalid calories per unit. Will result in NaNs", null);
 		AmountInstance amountInstance = Db.Get().Amounts.Calories.Lookup(this.gameObject);
 		float num = (amountInstance.GetMax() - amountInstance.value) / edible.FoodInfo.CaloriesPerUnit;
-		KCrashReporter.Assert(num > 0f, "EatChore is requesting an invalid amount of food");
+		KCrashReporter.Assert(num > 0f, "EatChore is requesting an invalid amount of food", null);
 		base.smi.sm.requestedfoodunits.Set(num, base.smi, false);
 		base.smi.sm.eater.Set(context.consumerState.gameObject, base.smi, false);
 		base.Begin(context);
@@ -154,7 +155,7 @@ public class EatChore : Chore<EatChore.StatesInstance>
 	{
 		public override void InitializeStates(out StateMachine.BaseState default_state)
 		{
-			default_state = this.fetch;
+			default_state = this.chooseaction;
 			base.Target(this.eater);
 			this.root.Enter("SetMessStation", delegate(EatChore.StatesInstance smi)
 			{
@@ -163,6 +164,48 @@ public class EatChore : Chore<EatChore.StatesInstance>
 			{
 				smi.UpdateMessStation();
 			});
+			this.chooseaction.EnterTransition(this.rehydrate, (EatChore.StatesInstance smi) => this.ediblesource.Get(smi).HasTag(GameTags.Dehydrated)).EnterTransition(this.fetch, (EatChore.StatesInstance smi) => true);
+			this.rehydrate.Enter(delegate(EatChore.StatesInstance smi)
+			{
+				DehydratedFoodPackage component = this.ediblesource.Get(smi).GetComponent<Pickupable>().storage.gameObject.GetComponent<DehydratedFoodPackage>();
+				this.rehydrate.foodpackage.Set(component, smi);
+				GameObject rehydrator = component.Rehydrator;
+				this.rehydrate.rehydrator.Set((rehydrator != null) ? component.Rehydrator.GetComponent<AccessabilityManager>() : null, smi, false);
+				AccessabilityManager accessabilityManager = this.rehydrate.rehydrator.Get(smi);
+				if (!(accessabilityManager != null))
+				{
+					smi.GoTo(null);
+					return;
+				}
+				GameObject gameObject = this.eater.Get(smi);
+				if (accessabilityManager.CanAccess(gameObject))
+				{
+					accessabilityManager.Reserve(this.eater.Get(smi));
+					return;
+				}
+				smi.GoTo(null);
+			}).Exit(delegate(EatChore.StatesInstance smi)
+			{
+				AccessabilityManager accessabilityManager2 = this.rehydrate.rehydrator.Get(smi);
+				if (accessabilityManager2 != null)
+				{
+					accessabilityManager2.Unreserve();
+				}
+			}).DefaultState(this.rehydrate.approach);
+			this.rehydrate.approach.InitializeStates(this.eater, this.rehydrate.foodpackage, this.rehydrate.work, null, null, NavigationTactics.ReduceTravelDistance).OnTargetLost(this.ediblesource, null);
+			this.rehydrate.work.ToggleWork("Rehydrate", delegate(EatChore.StatesInstance smi)
+			{
+				Worker worker = this.eater.Get<Worker>(smi);
+				DehydratedFoodPackage dehydratedFoodPackage = this.rehydrate.foodpackage.Get<DehydratedFoodPackage>(smi);
+				worker.StartWork(new DehydratedFoodPackage.RehydrateStartWorkItem(dehydratedFoodPackage, delegate(GameObject result)
+				{
+					this.ediblechunk.Set(result, smi, false);
+				}));
+			}, delegate(EatChore.StatesInstance smi)
+			{
+				AccessabilityManager accessabilityManager3 = this.rehydrate.rehydrator.Get(smi);
+				return !(accessabilityManager3 == null) && accessabilityManager3.CanAccess(this.eater.Get<Worker>(smi).gameObject);
+			}, this.eatatmessstation, null);
 			this.fetch.InitializeStates(this.eater, this.ediblesource, this.ediblechunk, this.requestedfoodunits, this.actualfoodunits, this.eatatmessstation, null);
 			this.eatatmessstation.DefaultState(this.eatatmessstation.moveto).ParamTransition<GameObject>(this.messstation, this.eatonfloorstate, (EatChore.StatesInstance smi, GameObject p) => p == null).ParamTransition<GameObject>(this.messstation, this.eatonfloorstate, (EatChore.StatesInstance smi, GameObject p) => p != null && !p.GetComponent<Operational>().IsOperational);
 			this.eatatmessstation.moveto.InitializeStates(this.eater, this.messstation, this.eatatmessstation.eat, this.eatonfloorstate, null, null);
@@ -188,7 +231,7 @@ public class EatChore : Chore<EatChore.StatesInstance>
 				smi.DestroyLocator();
 			});
 			this.eatonfloorstate.moveto.InitializeStates(this.eater, this.locator, this.eatonfloorstate.eat, this.eatonfloorstate.eat, null, null);
-			this.eatonfloorstate.eat.ToggleAnims("anim_eat_floor_kanim", 0f, "").DoEat(this.ediblechunk, this.actualfoodunits, null, null);
+			this.eatonfloorstate.eat.ToggleAnims("anim_eat_floor_kanim", 0f).DoEat(this.ediblechunk, this.actualfoodunits, null, null);
 		}
 
 		public StateMachine<EatChore.States, EatChore.StatesInstance, EatChore, object>.TargetParameter eater;
@@ -204,6 +247,10 @@ public class EatChore : Chore<EatChore.StatesInstance>
 		public StateMachine<EatChore.States, EatChore.StatesInstance, EatChore, object>.FloatParameter actualfoodunits;
 
 		public StateMachine<EatChore.States, EatChore.StatesInstance, EatChore, object>.TargetParameter locator;
+
+		public GameStateMachine<EatChore.States, EatChore.StatesInstance, EatChore, object>.State chooseaction;
+
+		public EatChore.States.RehydrateSubState rehydrate;
 
 		public GameStateMachine<EatChore.States, EatChore.StatesInstance, EatChore, object>.FetchSubState fetch;
 
@@ -223,6 +270,17 @@ public class EatChore : Chore<EatChore.StatesInstance>
 			public GameStateMachine<EatChore.States, EatChore.StatesInstance, EatChore, object>.ApproachSubState<MessStation> moveto;
 
 			public GameStateMachine<EatChore.States, EatChore.StatesInstance, EatChore, object>.State eat;
+		}
+
+		public class RehydrateSubState : GameStateMachine<EatChore.States, EatChore.StatesInstance, EatChore, object>.State
+		{
+			public StateMachine<EatChore.States, EatChore.StatesInstance, EatChore, object>.TargetParameter foodpackage;
+
+			public StateMachine<EatChore.States, EatChore.StatesInstance, EatChore, object>.ObjectParameter<AccessabilityManager> rehydrator;
+
+			public GameStateMachine<EatChore.States, EatChore.StatesInstance, EatChore, object>.ApproachSubState<DehydratedFoodPackage> approach;
+
+			public GameStateMachine<EatChore.States, EatChore.StatesInstance, EatChore, object>.State work;
 		}
 	}
 }

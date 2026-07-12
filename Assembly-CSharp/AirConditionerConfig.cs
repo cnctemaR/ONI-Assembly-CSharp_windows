@@ -38,6 +38,7 @@ public class AirConditionerConfig : IBuildingConfig
 		AirConditioner airConditioner = go.AddOrGet<AirConditioner>();
 		airConditioner.temperatureDelta = -14f;
 		airConditioner.maxEnvironmentDelta = -50f;
+		go.AddOrGet<KBatchedAnimHeatPostProcessingEffect>();
 		Storage storage = BuildingTemplates.CreateDefaultStorage(go, false);
 		storage.showInUI = true;
 		storage.SetDefaultStoredItemModifiers(new List<Storage.StoredItemModifier>

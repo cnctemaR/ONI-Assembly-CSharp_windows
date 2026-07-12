@@ -34,4 +34,14 @@ public abstract class Message : ISaveLoadable
 	public virtual void OnClick()
 	{
 	}
+
+	public virtual NotificationType GetMessageType()
+	{
+		return NotificationType.Messages;
+	}
+
+	public virtual bool ShowDismissButton()
+	{
+		return true;
+	}
 }

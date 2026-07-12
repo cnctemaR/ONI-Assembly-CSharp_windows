@@ -49,9 +49,9 @@ public class UglyCryChore : Chore<UglyCryChore.StatesInstance>
 			this.uglyCryingEffect = new Effect("UglyCrying", DUPLICANTS.MODIFIERS.UGLY_CRYING.NAME, DUPLICANTS.MODIFIERS.UGLY_CRYING.TOOLTIP, 0f, true, false, true, null, -1f, 0f, null, "");
 			this.uglyCryingEffect.Add(new AttributeModifier(Db.Get().Attributes.Decor.Id, -30f, DUPLICANTS.MODIFIERS.UGLY_CRYING.NAME, false, false, true));
 			Db.Get().effects.Add(this.uglyCryingEffect);
-			this.cry.defaultState = this.cry.cry_pre.RemoveEffect("CryFace").ToggleAnims("anim_cry_kanim", 0f, "");
+			this.cry.defaultState = this.cry.cry_pre.RemoveEffect("CryFace").ToggleAnims("anim_cry_kanim", 0f);
 			this.cry.cry_pre.PlayAnim("working_pre").ScheduleGoTo(2f, this.cry.cry_loop);
-			this.cry.cry_loop.ToggleAnims("anim_cry_kanim", 0f, "").Enter(delegate(UglyCryChore.StatesInstance smi)
+			this.cry.cry_loop.ToggleAnims("anim_cry_kanim", 0f).Enter(delegate(UglyCryChore.StatesInstance smi)
 			{
 				smi.Play("working_loop", KAnim.PlayMode.Loop);
 			}).ScheduleGoTo(18f, this.cry.cry_pst)

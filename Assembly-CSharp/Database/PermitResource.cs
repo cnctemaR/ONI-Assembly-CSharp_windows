@@ -17,14 +17,27 @@ namespace Database
 
 		public abstract PermitPresentationInfo GetPermitPresentationInfo();
 
-		public bool IsOwnable()
+		public bool IsOwnableOnServer()
 		{
-			return this.Rarity != PermitRarity.Universal;
+			return this.Rarity != PermitRarity.Universal && this.Rarity != PermitRarity.UniversalLocked;
 		}
 
 		public bool IsUnlocked()
 		{
-			return !this.IsOwnable() || PermitItems.IsPermitUnlocked(this);
+			return this.Rarity == PermitRarity.Universal || PermitItems.IsPermitUnlocked(this);
+		}
+
+		public string GetDlcIdFrom()
+		{
+			if (this.DlcIds == DlcManager.AVAILABLE_ALL_VERSIONS || this.DlcIds == DlcManager.AVAILABLE_VANILLA_ONLY)
+			{
+				return null;
+			}
+			if (this.DlcIds.Length == 0)
+			{
+				return null;
+			}
+			return this.DlcIds[0];
 		}
 
 		public string Description;

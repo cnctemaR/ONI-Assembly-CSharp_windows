@@ -13,7 +13,7 @@ public class DietManager : KMonoBehaviour
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		this.diets = DietManager.CollectDiets(null);
+		this.diets = DietManager.CollectSaveDiets(null);
 		DietManager.Instance = this;
 	}
 
@@ -79,6 +79,41 @@ public class DietManager : KMonoBehaviour
 			}
 		}
 		return dictionary;
+	}
+
+	public static Dictionary<Tag, Diet> CollectSaveDiets(Tag[] target_species)
+	{
+		Dictionary<Tag, Diet> dictionary = new Dictionary<Tag, Diet>();
+		foreach (KPrefabID kprefabID in Assets.Prefabs)
+		{
+			CreatureCalorieMonitor.Def def = kprefabID.GetDef<CreatureCalorieMonitor.Def>();
+			BeehiveCalorieMonitor.Def def2 = kprefabID.GetDef<BeehiveCalorieMonitor.Def>();
+			Diet diet = null;
+			if (def != null)
+			{
+				diet = def.diet;
+			}
+			else if (def2 != null)
+			{
+				diet = def2.diet;
+			}
+			if (diet != null && (target_species == null || Array.IndexOf<Tag>(target_species, kprefabID.GetComponent<CreatureBrain>().species) >= 0))
+			{
+				dictionary[kprefabID.PrefabTag] = new Diet(diet);
+				dictionary[kprefabID.PrefabTag].FilterDLC();
+			}
+		}
+		return dictionary;
+	}
+
+	public Diet GetPrefabDiet(GameObject owner)
+	{
+		Diet diet;
+		if (this.diets.TryGetValue(owner.GetComponent<KPrefabID>().PrefabTag, out diet))
+		{
+			return diet;
+		}
+		return null;
 	}
 
 	private Dictionary<Tag, Diet> diets;

@@ -230,7 +230,7 @@ namespace Database
 
 		private Skill AddSkill(Skill skill)
 		{
-			if (DlcManager.IsContentActive(skill.dlcId))
+			if (DlcManager.IsContentSubscribed(skill.dlcId))
 			{
 				return base.Add(skill);
 			}

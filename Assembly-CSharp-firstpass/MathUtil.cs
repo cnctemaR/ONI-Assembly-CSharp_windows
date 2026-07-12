@@ -177,6 +177,11 @@ public static class MathUtil
 			return Mathf.Lerp(this.min, this.max, t);
 		}
 
+		public bool Contains(float t)
+		{
+			return t >= this.min && t <= this.max;
+		}
+
 		public override string ToString()
 		{
 			return string.Format("[{0}:{1}]", this.min, this.max);

@@ -156,6 +156,8 @@ public class Personality : Resource
 
 	public bool startingMinion;
 
+	public string requiredDlcId;
+
 	public class StartingAttribute
 	{
 		public StartingAttribute(Klei.AI.Attribute attribute, int value)

@@ -41,7 +41,7 @@ namespace TUNING
 
 		public const float OVERHEAT_DAMAGE_INTERVAL = 7.5f;
 
-		public const float MIN_BUILD_TEMPERATURE = 288.15f;
+		public const float MIN_BUILD_TEMPERATURE = 0f;
 
 		public const float MAX_BUILD_TEMPERATURE = 318.15f;
 
@@ -57,6 +57,8 @@ namespace TUNING
 			{ "FirePole", "ladders" },
 			{ "LadderFast", "ladders" },
 			{ "Tile", "tiles" },
+			{ "SnowTile", "tiles" },
+			{ "WoodTile", "tiles" },
 			{ "GasPermeableMembrane", "tiles" },
 			{ "MeshTile", "tiles" },
 			{ "InsulationTile", "tiles" },
@@ -82,6 +84,7 @@ namespace TUNING
 			{ "TravelTubeWallBridge", "transport" },
 			{ "MineralDeoxidizer", "producers" },
 			{ "SublimationStation", "producers" },
+			{ "Oxysconce", "producers" },
 			{ "Electrolyzer", "producers" },
 			{ "RustDeoxidizer", "producers" },
 			{ "AirFilter", "scrubbers" },
@@ -132,6 +135,7 @@ namespace TUNING
 			},
 			{ "MicrobeMusher", "cooking" },
 			{ "CookingStation", "cooking" },
+			{ "Deepfryer", "cooking" },
 			{ "GourmetCookingStation", "cooking" },
 			{ "SpiceGrinder", "cooking" },
 			{ "FoodDehydrator", "cooking" },
@@ -232,6 +236,7 @@ namespace TUNING
 			{ "SludgePress", "organic" },
 			{ "MilkFatSeparator", "organic" },
 			{ "MilkPress", "organic" },
+			{ "IceKettle", "materials" },
 			{ "WaterPurifier", "materials" },
 			{ "Desalinator", "materials" },
 			{ "RockCrusher", "materials" },
@@ -265,6 +270,7 @@ namespace TUNING
 			{ "CeilingLight", "lights" },
 			{ "SunLamp", "lights" },
 			{ "DevLightGenerator", "lights" },
+			{ "MercuryCeilingLight", "lights" },
 			{ "DiningTable", "dining" },
 			{ "WaterCooler", "recreation" },
 			{ "Phonobox", "recreation" },
@@ -291,6 +297,7 @@ namespace TUNING
 			{ "IceSculpture", "decor" },
 			{ "MarbleSculpture", "decor" },
 			{ "MetalSculpture", "decor" },
+			{ "WoodSculpture", "decor" },
 			{ "CrownMoulding", "decor" },
 			{ "CornerMoulding", "decor" },
 			{ "Canvas", "decor" },
@@ -332,6 +339,8 @@ namespace TUNING
 			{ "MissileLauncher", "missiles" },
 			{ "LeadSuitMarker", "equipment" },
 			{ "LeadSuitLocker", "equipment" },
+			{ "Campfire", "temperature" },
+			{ "DevHeater", "temperature" },
 			{ "SpaceHeater", "temperature" },
 			{ "LiquidHeater", "temperature" },
 			{ "LiquidConditioner", "temperature" },
@@ -525,11 +534,11 @@ namespace TUNING
 		{
 			new PlanScreen.PlanInfo(new HashedString("Base"), false, new List<string>
 			{
-				"Ladder", "FirePole", "LadderFast", "Tile", "GasPermeableMembrane", "MeshTile", "InsulationTile", "PlasticTile", "MetalTile", "GlassTile",
-				"StorageTile", "BunkerTile", "CarpetTile", "ExteriorWall", "ExobaseHeadquarters", "Door", "ManualPressureDoor", "PressureDoor", "BunkerDoor", "StorageLocker",
-				"StorageLockerSmart", "LiquidReservoir", "GasReservoir", "ObjectDispenser", "TravelTube", "TravelTubeEntrance", "TravelTubeWallBridge"
+				"Ladder", "FirePole", "LadderFast", "Tile", "SnowTile", "WoodTile", "GasPermeableMembrane", "MeshTile", "InsulationTile", "PlasticTile",
+				"MetalTile", "GlassTile", "StorageTile", "BunkerTile", "CarpetTile", "ExteriorWall", "ExobaseHeadquarters", "Door", "ManualPressureDoor", "PressureDoor",
+				"BunkerDoor", "StorageLocker", "StorageLockerSmart", "LiquidReservoir", "GasReservoir", "ObjectDispenser", "TravelTube", "TravelTubeEntrance", "TravelTubeWallBridge"
 			}, ""),
-			new PlanScreen.PlanInfo(new HashedString("Oxygen"), false, new List<string> { "MineralDeoxidizer", "SublimationStation", "AlgaeHabitat", "AirFilter", "CO2Scrubber", "Electrolyzer", "RustDeoxidizer" }, ""),
+			new PlanScreen.PlanInfo(new HashedString("Oxygen"), false, new List<string> { "MineralDeoxidizer", "SublimationStation", "Oxysconce", "AlgaeHabitat", "AirFilter", "CO2Scrubber", "Electrolyzer", "RustDeoxidizer" }, ""),
 			new PlanScreen.PlanInfo(new HashedString("Power"), false, new List<string>
 			{
 				"DevGenerator",
@@ -563,9 +572,9 @@ namespace TUNING
 			}, ""),
 			new PlanScreen.PlanInfo(new HashedString("Food"), false, new List<string>
 			{
-				"MicrobeMusher", "CookingStation", "GourmetCookingStation", "SpiceGrinder", "FoodDehydrator", "FoodRehydrator", "PlanterBox", "FarmTile", "HydroponicFarm", "RationBox",
-				"Refrigerator", "CreatureDeliveryPoint", "CritterPickUp", "CritterDropOff", "FishDeliveryPoint", "CreatureFeeder", "FishFeeder", "MilkFeeder", "EggIncubator", "EggCracker",
-				"CreatureGroundTrap", "WaterTrap", "CreatureAirTrap", "CritterCondo", "UnderwaterCritterCondo", "AirBorneCritterCondo"
+				"MicrobeMusher", "CookingStation", "Deepfryer", "GourmetCookingStation", "SpiceGrinder", "FoodDehydrator", "FoodRehydrator", "PlanterBox", "FarmTile", "HydroponicFarm",
+				"RationBox", "Refrigerator", "CreatureDeliveryPoint", "CritterPickUp", "CritterDropOff", "FishDeliveryPoint", "CreatureFeeder", "FishFeeder", "MilkFeeder", "EggIncubator",
+				"EggCracker", "CreatureGroundTrap", "WaterTrap", "CreatureAirTrap", "CritterCondo", "UnderwaterCritterCondo", "AirBorneCritterCondo"
 			}, ""),
 			new PlanScreen.PlanInfo(new HashedString("Plumbing"), false, new List<string>
 			{
@@ -640,6 +649,7 @@ namespace TUNING
 				"CeilingLight",
 				"SunLamp",
 				"DevLightGenerator",
+				"MercuryCeilingLight",
 				"DiningTable",
 				"WaterCooler",
 				"Phonobox",
@@ -661,6 +671,7 @@ namespace TUNING
 				"SmallSculpture",
 				"Sculpture",
 				"IceSculpture",
+				"WoodSculpture",
 				"MarbleSculpture",
 				"MetalSculpture",
 				"CrownMoulding",
@@ -683,8 +694,8 @@ namespace TUNING
 			}, ""),
 			new PlanScreen.PlanInfo(new HashedString("Utilities"), true, new List<string>
 			{
-				"SpaceHeater", "LiquidHeater", "LiquidCooledFan", "IceCooledFan", "IceMachine", "AirConditioner", "LiquidConditioner", "OreScrubber", "OilWellCap", "ThermalBlock",
-				"SweepBotStation"
+				"Campfire", "DevHeater", "IceKettle", "SpaceHeater", "LiquidHeater", "LiquidCooledFan", "IceCooledFan", "IceMachine", "AirConditioner", "LiquidConditioner",
+				"OreScrubber", "OilWellCap", "ThermalBlock", "SweepBotStation"
 			}, ""),
 			new PlanScreen.PlanInfo(new HashedString("Automation"), true, new List<string>
 			{
@@ -829,6 +840,8 @@ namespace TUNING
 			typeof(SuitTank),
 			typeof(IlluminationVulnerable),
 			typeof(TemperatureVulnerable),
+			typeof(ExternalTemperatureMonitor),
+			typeof(CritterTemperatureMonitor),
 			typeof(PressureVulnerable),
 			typeof(SubmersionMonitor),
 			typeof(BatterySmart),

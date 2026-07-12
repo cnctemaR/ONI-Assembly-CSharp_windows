@@ -39,7 +39,7 @@ namespace Klei.AI
 						}
 						else
 						{
-							num *= 2f;
+							num *= 1f;
 						}
 					}
 					else

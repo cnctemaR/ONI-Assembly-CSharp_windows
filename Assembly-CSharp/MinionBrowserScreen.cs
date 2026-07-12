@@ -259,6 +259,20 @@ public class MinionBrowserScreen : KMonoBehaviour
 		GameObject gameObject = this.galleryGridItemPool.Borrow();
 		gameObject.GetComponent<HierarchyReferences>().GetReference<Image>("Icon").sprite = item.GetIcon();
 		gameObject.GetComponent<HierarchyReferences>().GetReference<LocText>("Label").SetText(item.GetName());
+		string requiredDlcId = item.GetPersonality().requiredDlcId;
+		ToolTip component = gameObject.GetComponent<ToolTip>();
+		Image component2 = gameObject.transform.Find("DlcBanner").GetComponent<Image>();
+		if (DlcManager.IsDlcId(requiredDlcId))
+		{
+			component2.gameObject.SetActive(true);
+			component2.color = DlcManager.GetDlcBannerColor(requiredDlcId);
+			component.SetSimpleTooltip(string.Format(UI.MINION_BROWSER_SCREEN.TOOLTIP_FROM_DLC, DlcManager.GetDlcTitle(requiredDlcId)));
+		}
+		else
+		{
+			component2.gameObject.SetActive(false);
+			component.ClearMultiStringTooltip();
+		}
 		MultiToggle toggle = gameObject.GetComponent<MultiToggle>();
 		MultiToggle toggle3 = toggle;
 		toggle3.onEnter = (global::System.Action)Delegate.Combine(toggle3.onEnter, new global::System.Action(this.OnMouseOverToggle));

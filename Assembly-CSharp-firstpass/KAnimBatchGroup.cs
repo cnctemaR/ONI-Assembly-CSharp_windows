@@ -10,6 +10,16 @@ public class KAnimBatchGroup
 		KAnimBatchGroup.cache.Finalise();
 	}
 
+	private Material CreateTemperaturePostProcesingMaterial()
+	{
+		Material material = new Material(Shader.Find("Klei/BatchedAnimationPstTemperature"));
+		material.name = "Material:" + this.batchID.ToString() + "_PST";
+		material.SetFloat(KAnimBatchGroup.ShaderProperty_SYMBOLS_PER_BUILD, (float)this.data.maxSymbolsPerBuild);
+		material.SetFloat(KAnimBatchGroup.ShaderProperty_ANIM_TEXTURE_START_OFFSET, (float)(this.data.animDataStartOffset / 4));
+		material.SetFloat(KAnimBatchGroup.ShaderProperty_SYMBOL_OVERRIDES_PER_BUILD, (float)this.data.symbolFrameInstances.Count);
+		return material;
+	}
+
 	private Material CreateMaterial(KAnimBatchGroup.MaterialType material_type)
 	{
 		Material material = null;
@@ -44,6 +54,15 @@ public class KAnimBatchGroup
 			this.materials[(int)material_type] = this.CreateMaterial(material_type);
 		}
 		return this.materials[(int)material_type];
+	}
+
+	public Material GetTemperaturePostProcessingMaterial(KAnimBatchGroup.MaterialType material_type)
+	{
+		if (this.pstMaterial == null)
+		{
+			this.pstMaterial = this.CreateTemperaturePostProcesingMaterial();
+		}
+		return this.pstMaterial;
 	}
 
 	public int maxGroupSize { get; private set; }
@@ -266,6 +285,8 @@ public class KAnimBatchGroup
 	private static int ShaderProperty_INSTANCE_TEXTURE_SIZE = Shader.PropertyToID("INSTANCE_TEXTURE_SIZE");
 
 	private static int ShaderProperty_instanceTex = Shader.PropertyToID("instanceTex");
+
+	private Material pstMaterial;
 
 	private Material[] materials;
 

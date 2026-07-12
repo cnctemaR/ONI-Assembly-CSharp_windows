@@ -4,6 +4,22 @@ using TUNING;
 
 public static class CrabTuning
 {
+	public static bool IsReadyToMolt(MoltDropperMonitor.Instance smi)
+	{
+		return CrabTuning.IsValidTimeToDrop(smi) && CrabTuning.IsValidDropCell(smi) && !smi.prefabID.HasTag(GameTags.Creatures.Hungry) && smi.prefabID.HasTag(GameTags.Creatures.Happy);
+	}
+
+	public static bool IsValidTimeToDrop(MoltDropperMonitor.Instance smi)
+	{
+		return !smi.spawnedThisCycle && (smi.timeOfLastDrop <= 0f || GameClock.Instance.GetTime() - smi.timeOfLastDrop > 600f);
+	}
+
+	public static bool IsValidDropCell(MoltDropperMonitor.Instance smi)
+	{
+		int num = Grid.PosToCell(smi.transform.GetPosition());
+		return Grid.IsValidCell(num) && Grid.Element[num].id != SimHashes.Ethanol;
+	}
+
 	public static List<FertilityMonitor.BreedingChance> EGG_CHANCES_BASE = new List<FertilityMonitor.BreedingChance>
 	{
 		new FertilityMonitor.BreedingChance

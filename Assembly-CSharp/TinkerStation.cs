@@ -175,10 +175,10 @@ public class TinkerStation : Workable, IGameObjectEffectDescriptor, ISim1000ms
 		{
 			Effect effect = Db.Get().effects.Get(list[0].addedEffect);
 			descriptors.Add(new Descriptor(string.Format(UI.BUILDINGEFFECTS.ADDED_EFFECT, effect.Name), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.ADDED_EFFECT, effect.Name, Effect.CreateTooltip(effect, true, "\n    • ", true)), Descriptor.DescriptorType.Effect, false));
-			descriptors.Add(new Descriptor(UI.BUILDINGEFFECTS.IMPROVED_BUILDINGS, UI.BUILDINGEFFECTS.TOOLTIPS.IMPROVED_BUILDINGS, Descriptor.DescriptorType.Effect, false));
+			descriptors.Add(new Descriptor(this.EffectTitle, this.EffectTooltip, Descriptor.DescriptorType.Effect, false));
 			foreach (Tinkerable tinkerable in list)
 			{
-				Descriptor descriptor = new Descriptor(string.Format(UI.BUILDINGEFFECTS.IMPROVED_BUILDINGS_ITEM, tinkerable.GetProperName()), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.IMPROVED_BUILDINGS_ITEM, tinkerable.GetProperName()), Descriptor.DescriptorType.Effect, false);
+				Descriptor descriptor = new Descriptor(string.Format(this.EffectItemString, tinkerable.GetProperName()), string.Format(this.EffectItemTooltip, tinkerable.GetProperName()), Descriptor.DescriptorType.Effect, false);
 				descriptor.IncreaseIndent();
 				descriptors.Add(descriptor);
 			}
@@ -218,6 +218,14 @@ public class TinkerStation : Workable, IGameObjectEffectDescriptor, ISim1000ms
 	public Tag outputPrefab;
 
 	public float outputTemperature;
+
+	public string EffectTitle = UI.BUILDINGEFFECTS.IMPROVED_BUILDINGS;
+
+	public string EffectTooltip = UI.BUILDINGEFFECTS.TOOLTIPS.IMPROVED_BUILDINGS;
+
+	public string EffectItemString = UI.BUILDINGEFFECTS.IMPROVED_BUILDINGS_ITEM;
+
+	public string EffectItemTooltip = UI.BUILDINGEFFECTS.TOOLTIPS.IMPROVED_BUILDINGS_ITEM;
 
 	private static readonly EventSystem.IntraObjectHandler<TinkerStation> OnOperationalChangedDelegate = new EventSystem.IntraObjectHandler<TinkerStation>(delegate(TinkerStation component, object data)
 	{

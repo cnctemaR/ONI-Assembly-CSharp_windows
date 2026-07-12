@@ -1,4 +1,5 @@
 ﻿using System;
+using Klei;
 using KSerialization;
 using STRINGS;
 using UnityEngine;
@@ -70,7 +71,10 @@ public class SweepBotStation : KMonoBehaviour
 			return;
 		}
 		SimHashes sweepBotMaterial = primaryElement.ElementID;
-		primaryElement.Mass -= SweepBotConfig.MASS;
+		float temperature;
+		SimUtil.DiseaseInfo disease;
+		float num;
+		this.botMaterialStorage.ConsumeAndGetDisease(sweepBotMaterial.CreateTag(), SweepBotConfig.MASS, out num, out disease, out temperature);
 		this.UpdateMeter();
 		this.newSweepyHandle = GameScheduler.Instance.Schedule("MakeSweepy", 2f, delegate(object obj)
 		{
@@ -84,7 +88,13 @@ public class SweepBotStation : KMonoBehaviour
 			this.UpdateNameDisplay();
 			StorageUnloadMonitor.Instance smi = gameObject.GetSMI<StorageUnloadMonitor.Instance>();
 			smi.sm.sweepLocker.Set(this.sweepStorage, smi, false);
-			this.sweepBot.Get().GetComponent<PrimaryElement>().ElementID = sweepBotMaterial;
+			PrimaryElement component = this.sweepBot.Get().GetComponent<PrimaryElement>();
+			component.ElementID = sweepBotMaterial;
+			component.Temperature = temperature;
+			if (disease.idx != 255)
+			{
+				component.AddDisease(disease.idx, disease.count, "Inherited from the material used for its creation");
+			}
 			this.RefreshSweepBotSubscription();
 			this.newSweepyHandle.ClearScheduler();
 		}, null, null);

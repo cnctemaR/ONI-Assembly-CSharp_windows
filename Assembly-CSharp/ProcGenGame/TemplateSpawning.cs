@@ -89,7 +89,7 @@ namespace ProcGenGame
 					DebugUtil.LogErrorArgs(new object[] { text });
 					if (!isRunningDebugGen)
 					{
-						throw new TemplateSpawningException(text, UI.FRONTEND.SUPPORTWARNINGS.WORLD_GEN_FAILURE);
+						throw new WorldgenException(text, UI.FRONTEND.SUPPORTWARNINGS.WORLD_GEN_FAILURE);
 					}
 				}
 			}
@@ -194,46 +194,58 @@ namespace ProcGenGame
 				if (pooledList.Count != 0)
 				{
 					int num = 0;
+					if (rule.listRule == global::ProcGen.World.TemplateSpawnRules.ListRule.GuaranteeRange || rule.listRule == global::ProcGen.World.TemplateSpawnRules.ListRule.TryRange)
+					{
+						num = myRandom.RandomRange(rule.range.x, rule.range.y);
+					}
 					int num2 = 0;
+					int num3 = 0;
 					switch (rule.listRule)
 					{
 					case global::ProcGen.World.TemplateSpawnRules.ListRule.GuaranteeOne:
-						num = 1;
 						num2 = 1;
+						num3 = 1;
 						break;
 					case global::ProcGen.World.TemplateSpawnRules.ListRule.GuaranteeSome:
-						num = rule.someCount;
 						num2 = rule.someCount;
+						num3 = rule.someCount;
 						break;
 					case global::ProcGen.World.TemplateSpawnRules.ListRule.GuaranteeSomeTryMore:
-						num = rule.someCount;
-						num2 = rule.someCount + rule.moreCount;
+						num2 = rule.someCount;
+						num3 = rule.someCount + rule.moreCount;
 						break;
 					case global::ProcGen.World.TemplateSpawnRules.ListRule.GuaranteeAll:
-						num = pooledList.Count;
 						num2 = pooledList.Count;
+						num3 = pooledList.Count;
+						break;
+					case global::ProcGen.World.TemplateSpawnRules.ListRule.GuaranteeRange:
+						num2 = num;
+						num3 = num;
 						break;
 					case global::ProcGen.World.TemplateSpawnRules.ListRule.TryOne:
-						num2 = 1;
+						num3 = 1;
 						break;
 					case global::ProcGen.World.TemplateSpawnRules.ListRule.TrySome:
-						num2 = rule.someCount;
+						num3 = rule.someCount;
+						break;
+					case global::ProcGen.World.TemplateSpawnRules.ListRule.TryRange:
+						num3 = num;
 						break;
 					case global::ProcGen.World.TemplateSpawnRules.ListRule.TryAll:
-						num2 = pooledList.Count;
+						num3 = pooledList.Count;
 						break;
 					}
 					string text2 = "";
 					foreach (string text3 in pooledList)
 					{
-						if (num2 <= 0)
+						if (num3 <= 0)
 						{
 							break;
 						}
 						TemplateContainer template = TemplateCache.GetTemplate(text3);
 						if (template != null)
 						{
-							bool flag = num > 0;
+							bool flag = num2 > 0;
 							Vector2I vector2I = Vector2I.zero;
 							TerrainCell terrainCell;
 							if (rule.overridePlacement != Vector2I.minusone)
@@ -245,7 +257,7 @@ namespace ProcGenGame
 									predicate = (<>9__0 = (TerrainCell x) => x.poly.Contains(rule.overridePlacement));
 								}
 								terrainCell = terrainCells.Find(predicate);
-								if (num > 0 && terrainCell.node.templateTag != Tag.Invalid)
+								if (num2 > 0 && terrainCell.node.templateTag != Tag.Invalid)
 								{
 									errorMessage = string.Format("Tried to place '{0}' at ({1},{2}) using overridePlacement but '{3}' is already there.", new object[]
 									{
@@ -274,8 +286,8 @@ namespace ProcGenGame
 								placedPOIBounds.Add(templateBounds);
 								TemplateSpawning.UpdateNodeTags(terrainCell.node, text3, false);
 								usedTemplates.Add(text3);
+								num3--;
 								num2--;
-								num--;
 							}
 							else
 							{
@@ -284,7 +296,7 @@ namespace ProcGenGame
 						}
 					}
 					pooledList.Recycle();
-					if (num > 0)
+					if (num2 > 0)
 					{
 						string text4 = string.Join(", ", settings.GetWorldTraitIDs());
 						string text5 = string.Join(", ", settings.GetStoryTraitIDs());
@@ -303,10 +315,10 @@ namespace ProcGenGame
 						});
 						return false;
 					}
-					goto IL_047C;
+					goto IL_04E3;
 				}
 				pooledList.Recycle();
-				IL_047C:
+				IL_04E3:
 				i++;
 				continue;
 				IL_00BB:
@@ -335,7 +347,15 @@ namespace ProcGenGame
 		private static TerrainCell FindTargetForTemplate(TemplateContainer template, global::ProcGen.World.TemplateSpawnRules rule, List<TerrainCell> terrainCells, SeededRandom myRandom, ref List<TemplateSpawning.TemplateSpawner> templateSpawnTargets, ref List<RectInt> placedPOIBounds, bool guarantee, WorldGenSettings settings)
 		{
 			List<TerrainCell> list;
-			if (!rule.useRelaxedFiltering)
+			if (rule.allowNearStart)
+			{
+				list = terrainCells.FindAll(delegate(TerrainCell tc)
+				{
+					tc.LogInfo("Filtering Near Start", template.name, 0f);
+					return tc.IsSafeToSpawnPOINearStart(terrainCells, true) && TemplateSpawning.DoesCellMatchFilters(tc, rule.allowedCellsFilter);
+				});
+			}
+			else if (!rule.useRelaxedFiltering)
 			{
 				list = terrainCells.FindAll(delegate(TerrainCell tc)
 				{
@@ -352,9 +372,19 @@ namespace ProcGenGame
 				});
 			}
 			TemplateSpawning.RemoveOverlappingPOIs(ref list, ref terrainCells, ref placedPOIBounds, template, settings, rule.allowExtremeTemperatureOverlap, rule.overrideOffset);
-			if (list.Count == 0)
+			if (list.Count == 0 && guarantee)
 			{
-				if (guarantee && !rule.useRelaxedFiltering)
+				if (rule.allowNearStart && rule.useRelaxedFiltering)
+				{
+					DebugUtil.LogWarningArgs(new object[] { "Could not place " + template.name + " using normal rules, trying relaxed near start" });
+					list = terrainCells.FindAll(delegate(TerrainCell tc)
+					{
+						tc.LogInfo("Filtering Near Start Relaxed", template.name, 0f);
+						return tc.IsSafeToSpawnPOINearStartRelaxed(terrainCells, true) && TemplateSpawning.DoesCellMatchFilters(tc, rule.allowedCellsFilter);
+					});
+					TemplateSpawning.RemoveOverlappingPOIs(ref list, ref terrainCells, ref placedPOIBounds, template, settings, rule.allowExtremeTemperatureOverlap, rule.overrideOffset);
+				}
+				else if (!rule.useRelaxedFiltering)
 				{
 					DebugUtil.LogWarningArgs(new object[] { "Could not place " + template.name + " using normal rules, trying relaxed" });
 					list = terrainCells.FindAll(delegate(TerrainCell tc)
@@ -364,10 +394,10 @@ namespace ProcGenGame
 					});
 					TemplateSpawning.RemoveOverlappingPOIs(ref list, ref terrainCells, ref placedPOIBounds, template, settings, rule.allowExtremeTemperatureOverlap, rule.overrideOffset);
 				}
-				if (list.Count == 0)
-				{
-					return null;
-				}
+			}
+			if (list.Count == 0)
+			{
+				return null;
 			}
 			list.ShuffleSeeded<TerrainCell>(myRandom.RandomSource());
 			return list[list.Count - 1];

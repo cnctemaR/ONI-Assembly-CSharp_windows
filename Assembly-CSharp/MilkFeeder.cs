@@ -178,28 +178,6 @@ public class MilkFeeder : GameStateMachine<MilkFeeder, MilkFeeder.Instance, ISta
 			return roomOfGameObject != null && roomOfGameObject.roomType == Db.Get().RoomTypes.CreaturePen;
 		}
 
-		public CellOffset GetCellOffsetToDrinkCell(bool isGassyMoo, bool isGassyMooCramped)
-		{
-			Rotatable component = base.GetComponent<Rotatable>();
-			CellOffset rotatedCellOffset = component.GetRotatedCellOffset(MilkFeederConfig.DRINK_FROM_OFFSET);
-			if (isGassyMoo && component.IsRotated)
-			{
-				rotatedCellOffset.x--;
-			}
-			if (isGassyMoo && isGassyMooCramped)
-			{
-				if (component.IsRotated)
-				{
-					rotatedCellOffset.x += 2;
-				}
-				else
-				{
-					rotatedCellOffset.x -= 2;
-				}
-			}
-			return rotatedCellOffset;
-		}
-
 		public Storage milkStorage;
 
 		public MeterController storageMeter;

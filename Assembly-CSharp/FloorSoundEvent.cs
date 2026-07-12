@@ -128,6 +128,14 @@ public class FloorSoundEvent : SoundEvent
 				{
 					text = "Carpet";
 				}
+				else if (prefabID == "SnowTile")
+				{
+					text = "TileSnow";
+				}
+				else if (prefabID == "WoodTile")
+				{
+					text = "TileWood";
+				}
 				else
 				{
 					text = "Tile";

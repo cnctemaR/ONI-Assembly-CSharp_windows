@@ -60,16 +60,19 @@ public static class StreamedTextures
 				loadRequest2.Request = AssetBundle.LoadFromFileAsync(text3);
 				StreamedTextures.ActiveRequests.Add(loadRequest2);
 			}
-			if (DlcManager.IsExpansion1Active())
+			foreach (KeyValuePair<string, string[]> keyValuePair in StreamedTextures.DlcHiResBundles)
 			{
-				for (int l = 0; l < StreamedTextures.ExpansionBundles.Length; l++)
+				if (DlcManager.IsContentSubscribed(keyValuePair.Key))
 				{
-					string text4 = StreamedTextures.ExpansionBundles[l];
-					string text5 = Path.Combine(Application.streamingAssetsPath, text4);
-					StreamedTextures.LoadRequest loadRequest3 = default(StreamedTextures.LoadRequest);
-					loadRequest3.BundleName = text4;
-					loadRequest3.Request = AssetBundle.LoadFromFileAsync(text5);
-					StreamedTextures.ActiveRequests.Add(loadRequest3);
+					for (int l = 0; l < keyValuePair.Value.Length; l++)
+					{
+						string text4 = keyValuePair.Value[l];
+						string text5 = Path.Combine(Application.streamingAssetsPath, text4);
+						StreamedTextures.LoadRequest loadRequest3 = default(StreamedTextures.LoadRequest);
+						loadRequest3.BundleName = text4;
+						loadRequest3.Request = AssetBundle.LoadFromFileAsync(text5);
+						StreamedTextures.ActiveRequests.Add(loadRequest3);
+					}
 				}
 			}
 		}
@@ -86,7 +89,17 @@ public static class StreamedTextures
 
 	private static string[] VanillaBundles = new string[] { "hires_base_bundle" };
 
-	private static string[] ExpansionBundles = new string[] { "hires_expansion1_bundle" };
+	private static Dictionary<string, string[]> DlcHiResBundles = new Dictionary<string, string[]>
+	{
+		{
+			"EXPANSION1_ID",
+			new string[] { "hires_expansion1_bundle" }
+		},
+		{
+			"DLC2_ID",
+			new string[] { "hires_dlc2_bundle" }
+		}
+	};
 
 	private static bool ShouldBeLoaded = false;
 

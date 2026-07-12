@@ -3,9 +3,18 @@ using UnityEngine;
 
 public class KAnimConverter
 {
+	public enum PostProcessingEffects : byte
+	{
+		TemperatureOverlay = 1
+	}
+
 	public interface IAnimConverter
 	{
 		int GetMaxVisible();
+
+		KAnimConverter.PostProcessingEffects GetPostProcessingEffectsCompatibility();
+
+		float GetPostProcessingParams();
 
 		HashedString GetBatchGroupID(bool isEditorWindow = false);
 

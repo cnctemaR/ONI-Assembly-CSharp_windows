@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using STRINGS;
 using TUNING;
 using UnityEngine;
@@ -18,7 +19,7 @@ public class EscapePodConfig : IEntityConfig
 		float num = 100f;
 		EffectorValues tier = global::TUNING.BUILDINGS.DECOR.BONUS.TIER0;
 		EffectorValues tier2 = NOISE_POLLUTION.NOISY.TIER0;
-		GameObject gameObject = EntityTemplates.CreatePlacedEntity(text, text2, text3, num, Assets.GetAnim("escape_pod_kanim"), "grounded", Grid.SceneLayer.Building, 1, 2, tier, tier2, SimHashes.Creature, null, 293f);
+		GameObject gameObject = EntityTemplates.CreatePlacedEntity(text, text2, text3, num, Assets.GetAnim("escape_pod_kanim"), "grounded", Grid.SceneLayer.Building, 1, 2, tier, tier2, SimHashes.Creature, new List<Tag> { GameTags.RoomProberBuilding }, 293f);
 		gameObject.AddOrGet<KBatchedAnimController>().fgLayer = Grid.SceneLayer.BuildingFront;
 		TravellingCargoLander.Def def = gameObject.AddOrGetDef<TravellingCargoLander.Def>();
 		def.landerWidth = 1;

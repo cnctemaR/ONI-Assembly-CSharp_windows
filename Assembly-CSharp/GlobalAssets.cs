@@ -104,6 +104,7 @@ public class GlobalAssets : KMonoBehaviour
 		LocString.CreateLocStringKeys(typeof(LORE), "STRINGS.");
 		LocString.CreateLocStringKeys(typeof(CODEX), "STRINGS.");
 		LocString.CreateLocStringKeys(typeof(SUBWORLDS), "STRINGS.");
+		LocString.CreateLocStringKeys(typeof(BLUEPRINTS), "STRINGS.");
 	}
 
 	private void AddColorModeStyles()

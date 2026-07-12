@@ -87,7 +87,7 @@ public static class BaseRoverConfig
 		deconstructable.audioSize = "medium";
 		deconstructable.looseEntityDeconstructable = true;
 		gameObject.AddOrGetDef<RobotAi.Def>().DeleteOnDead = deleteOnDeath;
-		ChoreTable.Builder builder = new ChoreTable.Builder().Add(new RobotDeathStates.Def(), true, -1).Add(new FallStates.Def(), true, -1).Add(new DebugGoToStates.Def(), true, -1)
+		ChoreTable.Builder builder = new ChoreTable.Builder().Add(new RobotDeathStates.Def(), true, Db.Get().ChoreTypes.Die.priority).Add(new FallStates.Def(), true, -1).Add(new DebugGoToStates.Def(), true, -1)
 			.Add(new IdleStates.Def(), true, Db.Get().ChoreTypes.Idle.priority);
 		EntityTemplates.AddCreatureBrain(gameObject, builder, model, null);
 		KPrefabID kprefabID = gameObject.AddOrGet<KPrefabID>();
@@ -106,6 +106,7 @@ public static class BaseRoverConfig
 		gameObject.AddOrGet<SnapOn>();
 		component.SetSymbolVisiblity("snapto_pivot", false);
 		component.SetSymbolVisiblity("snapto_radar", false);
+		SymbolOverrideControllerUtil.AddToPrefab(gameObject);
 		BaseRoverConfig.SetupLaserEffects(gameObject);
 		return gameObject;
 	}

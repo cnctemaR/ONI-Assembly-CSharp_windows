@@ -16,7 +16,7 @@ public class ClusterCategorySelectionScreen : NewGameFlowScreen
 		{
 			while (enumerator.MoveNext())
 			{
-				if (enumerator.Current.clusterCategory == 3)
+				if (enumerator.Current.clusterCategory == ClusterLayout.ClusterCategory.Special)
 				{
 					num++;
 				}
@@ -29,7 +29,7 @@ public class ClusterCategorySelectionScreen : NewGameFlowScreen
 			MultiToggle button = this.eventStyle.button;
 			button.onClick = (global::System.Action)Delegate.Combine(button.onClick, new global::System.Action(delegate
 			{
-				this.OnClickOption(ClusterLayout.ClusterCategory.special);
+				this.OnClickOption(ClusterLayout.ClusterCategory.Special);
 			}));
 		}
 		if (DlcManager.IsExpansion1Active())
@@ -39,14 +39,14 @@ public class ClusterCategorySelectionScreen : NewGameFlowScreen
 			MultiToggle button2 = this.classicStyle.button;
 			button2.onClick = (global::System.Action)Delegate.Combine(button2.onClick, new global::System.Action(delegate
 			{
-				this.OnClickOption(ClusterLayout.ClusterCategory.spacedOutVanillaStyle);
+				this.OnClickOption(ClusterLayout.ClusterCategory.SpacedOutVanillaStyle);
 			}));
 			this.spacedOutStyle.button.gameObject.SetActive(true);
 			this.spacedOutStyle.Init(this.descriptionArea, UI.FRONTEND.CLUSTERCATEGORYSELECTSCREEN.SPACEDOUT_DESC, UI.FRONTEND.CLUSTERCATEGORYSELECTSCREEN.SPACEDOUT_TITLE);
 			MultiToggle button3 = this.spacedOutStyle.button;
 			button3.onClick = (global::System.Action)Delegate.Combine(button3.onClick, new global::System.Action(delegate
 			{
-				this.OnClickOption(ClusterLayout.ClusterCategory.spacedOutStyle);
+				this.OnClickOption(ClusterLayout.ClusterCategory.SpacedOutStyle);
 			}));
 			this.panel.sizeDelta = ((num > 0) ? new Vector2(622f, this.panel.sizeDelta.y) : new Vector2(480f, this.panel.sizeDelta.y));
 			return;
@@ -56,7 +56,7 @@ public class ClusterCategorySelectionScreen : NewGameFlowScreen
 		MultiToggle button4 = this.vanillaStyle.button;
 		button4.onClick = (global::System.Action)Delegate.Combine(button4.onClick, new global::System.Action(delegate
 		{
-			this.OnClickOption(ClusterLayout.ClusterCategory.vanilla);
+			this.OnClickOption(ClusterLayout.ClusterCategory.Vanilla);
 		}));
 		this.panel.sizeDelta = new Vector2(480f, this.panel.sizeDelta.y);
 		this.eventStyle.kanim.Play("lab_asteroid_standard", KAnim.PlayMode.Once, 1f, 0f);

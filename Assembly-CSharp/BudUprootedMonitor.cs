@@ -32,6 +32,10 @@ public class BudUprootedMonitor : KMonoBehaviour
 			base.GetComponent<KPrefabID>().AddTag(GameTags.Uprooted, false);
 			this.uprooted = true;
 			base.Trigger(-216549700, null);
+			if (this.destroyOnParentLost)
+			{
+				Util.KDestroyGameObject(base.gameObject);
+			}
 		}
 	}
 
@@ -51,6 +55,8 @@ public class BudUprootedMonitor : KMonoBehaviour
 
 	[Serialize]
 	private bool uprooted;
+
+	public bool destroyOnParentLost;
 
 	public Ref<KPrefabID> parentObject = new Ref<KPrefabID>();
 

@@ -66,7 +66,7 @@ public class RancherChore : Chore<RancherChore.RancherChoreStates.Instance>
 				smi.WaitForAvailableRanchable(dt);
 			}, UpdateRate.SIM_200ms, false);
 			this.ranchCritter.ScheduleGoTo(0.5f, this.ranchCritter.callForCritter).EventTransition(GameHashes.CreatureAbandonedRanchStation, this.waitForAvailableRanchable, null);
-			this.ranchCritter.callForCritter.ToggleAnims("anim_interacts_rancherstation_kanim", 0f, "").PlayAnim("calling_loop", KAnim.PlayMode.Loop).ScheduleActionNextFrame("TellCreatureRancherIsReady", delegate(RancherChore.RancherChoreStates.Instance smi)
+			this.ranchCritter.callForCritter.ToggleAnims("anim_interacts_rancherstation_kanim", 0f).PlayAnim("calling_loop", KAnim.PlayMode.Loop).ScheduleActionNextFrame("TellCreatureRancherIsReady", delegate(RancherChore.RancherChoreStates.Instance smi)
 			{
 				smi.ranchStation.MessageRancherReady();
 			})

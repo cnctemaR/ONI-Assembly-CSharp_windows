@@ -31,6 +31,8 @@ namespace STRINGS
 					UI.PST_KEYWORD,
 					" DLC Content"
 				});
+
+				public static LocString DLC_CONTENT = "\n\n<i>{0}</i> DLC Content";
 			}
 		}
 

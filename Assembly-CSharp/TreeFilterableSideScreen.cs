@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using STRINGS;
 using TMPro;
+using TUNING;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -166,17 +167,20 @@ public class TreeFilterableSideScreen : SideScreenContent
 		bool flag3 = false;
 		foreach (KeyValuePair<Tag, TreeFilterableSideScreenRow> keyValuePair in this.tagRowMap)
 		{
-			switch (keyValuePair.Value.GetState())
+			if (keyValuePair.Value.standardCommodity)
 			{
-			case TreeFilterableSideScreenRow.State.Off:
-				flag2 = true;
-				break;
-			case TreeFilterableSideScreenRow.State.Mixed:
-				flag3 = true;
-				break;
-			case TreeFilterableSideScreenRow.State.On:
-				flag = true;
-				break;
+				switch (keyValuePair.Value.GetState())
+				{
+				case TreeFilterableSideScreenRow.State.Off:
+					flag2 = true;
+					break;
+				case TreeFilterableSideScreenRow.State.Mixed:
+					flag3 = true;
+					break;
+				case TreeFilterableSideScreenRow.State.On:
+					flag = true;
+					break;
+				}
 			}
 		}
 		if (flag3)
@@ -209,24 +213,30 @@ public class TreeFilterableSideScreen : SideScreenContent
 				while (enumerator.MoveNext())
 				{
 					KeyValuePair<Tag, TreeFilterableSideScreenRow> keyValuePair = enumerator.Current;
-					keyValuePair.Value.ChangeCheckBoxState(TreeFilterableSideScreenRow.State.Off);
+					if (keyValuePair.Value.standardCommodity)
+					{
+						keyValuePair.Value.ChangeCheckBoxState(TreeFilterableSideScreenRow.State.Off);
+					}
 				}
-				goto IL_008C;
+				goto IL_00AB;
 			}
 			break;
 		}
 		case TreeFilterableSideScreenRow.State.Mixed:
-			goto IL_008C;
+			goto IL_00AB;
 		case TreeFilterableSideScreenRow.State.On:
 			break;
 		default:
-			goto IL_008C;
+			goto IL_00AB;
 		}
 		foreach (KeyValuePair<Tag, TreeFilterableSideScreenRow> keyValuePair2 in this.tagRowMap)
 		{
-			keyValuePair2.Value.ChangeCheckBoxState(TreeFilterableSideScreenRow.State.On);
+			if (keyValuePair2.Value.standardCommodity)
+			{
+				keyValuePair2.Value.ChangeCheckBoxState(TreeFilterableSideScreenRow.State.On);
+			}
 		}
-		IL_008C:
+		IL_00AB:
 		this.visualDirty = true;
 	}
 
@@ -269,7 +279,9 @@ public class TreeFilterableSideScreen : SideScreenContent
 		this.storage.Subscribe(1163645216, new Action<object>(this.OnOnlySpicedItemsSettingChanged));
 		this.OnOnlyFetchMarkedItemsSettingChanged(null);
 		this.OnOnlySpicedItemsSettingChanged(null);
+		this.allCheckBoxLabel.SetText(this.targetFilterable.allResourceFilterLabelString);
 		this.CreateCategories();
+		this.CreateSpecialItemRows();
 		this.titlebar.SetActive(false);
 		if (this.storage.showSideScreenTitleBar)
 		{
@@ -352,6 +364,7 @@ public class TreeFilterableSideScreen : SideScreenContent
 		}
 		TreeFilterableSideScreenRow freeElement = this.rowPool.GetFreeElement(this.rowGroup, true);
 		freeElement.Parent = this;
+		freeElement.standardCommodity = !STORAGEFILTERS.SPECIAL_STORAGE.Contains(rowTag);
 		this.tagRowMap.Add(rowTag, freeElement);
 		Dictionary<Tag, bool> dictionary = new Dictionary<Tag, bool>();
 		foreach (TreeFilterableSideScreen.TagOrderInfo tagOrderInfo in this.GetTagsSortedAlphabetically(DiscoveredResources.Instance.GetDiscoveredResourcesFromTag(rowTag)))
@@ -389,6 +402,33 @@ public class TreeFilterableSideScreen : SideScreenContent
 			return;
 		}
 		global::Debug.LogError("If you're filtering, your storage filter should have the filters set on it");
+	}
+
+	private void CreateSpecialItemRows()
+	{
+		this.specialItemsHeader.transform.SetAsLastSibling();
+		foreach (KeyValuePair<Tag, TreeFilterableSideScreenRow> keyValuePair in this.tagRowMap)
+		{
+			if (!keyValuePair.Value.standardCommodity)
+			{
+				keyValuePair.Value.transform.transform.SetAsLastSibling();
+			}
+		}
+		this.RefreshSpecialItemsHeader();
+	}
+
+	private void RefreshSpecialItemsHeader()
+	{
+		bool flag = false;
+		foreach (KeyValuePair<Tag, TreeFilterableSideScreenRow> keyValuePair in this.tagRowMap)
+		{
+			if (!keyValuePair.Value.standardCommodity)
+			{
+				flag = true;
+				break;
+			}
+		}
+		this.specialItemsHeader.gameObject.SetActive(flag);
 	}
 
 	protected override void OnCmpEnable()
@@ -474,6 +514,12 @@ public class TreeFilterableSideScreen : SideScreenContent
 		{
 			keyValuePair.Value.ShowToggleBox(!searching);
 		}
+		if (searching)
+		{
+			this.specialItemsHeader.gameObject.SetActive(false);
+			return;
+		}
+		this.RefreshSpecialItemsHeader();
 	}
 
 	private void ClearSearch()
@@ -505,6 +551,12 @@ public class TreeFilterableSideScreen : SideScreenContent
 
 	[SerializeField]
 	private MultiToggle allCheckBox;
+
+	[SerializeField]
+	private LocText allCheckBoxLabel;
+
+	[SerializeField]
+	private GameObject specialItemsHeader;
 
 	[SerializeField]
 	private MultiToggle onlyAllowTransportItemsCheckBox;

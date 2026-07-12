@@ -274,9 +274,10 @@ public class KleiInventoryScreen : KModalScreen
 		Image reference = component.GetReference<Image>("Icon");
 		LocText reference2 = component.GetReference<LocText>("OwnedCountLabel");
 		Image reference3 = component.GetReference<Image>("IsUnownedOverlay");
+		Image reference4 = component.GetReference<Image>("DlcBanner");
 		MultiToggle component2 = availableGridButton.GetComponent<MultiToggle>();
 		reference.sprite = permitPresentationInfo.sprite;
-		if (permit.IsOwnable())
+		if (permit.IsOwnableOnServer())
 		{
 			int ownedCount = PermitItems.GetOwnedCount(permit);
 			reference2.text = UI.KLEI_INVENTORY_SCREEN.ITEM_PLAYER_OWNED_AMOUNT_ICON.Replace("{OwnedCount}", ownedCount.ToString());
@@ -287,6 +288,16 @@ public class KleiInventoryScreen : KModalScreen
 		{
 			reference2.gameObject.SetActive(false);
 			reference3.gameObject.SetActive(false);
+		}
+		string dlcIdFrom = permit.GetDlcIdFrom();
+		if (DlcManager.IsDlcId(dlcIdFrom))
+		{
+			reference4.gameObject.SetActive(true);
+			reference4.color = DlcManager.GetDlcBannerColor(dlcIdFrom);
+		}
+		else
+		{
+			reference4.gameObject.SetActive(false);
 		}
 		MultiToggle multiToggle = component2;
 		multiToggle.onEnter = (global::System.Action)Delegate.Combine(multiToggle.onEnter, new global::System.Action(this.OnMouseOverToggle));
@@ -349,7 +360,7 @@ public class KleiInventoryScreen : KModalScreen
 			HierarchyReferences component = multiToggle2.gameObject.GetComponent<HierarchyReferences>();
 			LocText reference = component.GetReference<LocText>("OwnedCountLabel");
 			Image reference2 = component.GetReference<Image>("IsUnownedOverlay");
-			if (permitResource2.IsOwnable())
+			if (permitResource2.IsOwnableOnServer())
 			{
 				int ownedCount = PermitItems.GetOwnedCount(permitResource2);
 				reference.text = UI.KLEI_INVENTORY_SCREEN.ITEM_PLAYER_OWNED_AMOUNT_ICON.Replace("{OwnedCount}", ownedCount.ToString());
@@ -360,6 +371,15 @@ public class KleiInventoryScreen : KModalScreen
 					flag = false;
 				}
 				else if (this.showFilterState == 1 && ownedCount == 0)
+				{
+					flag = false;
+				}
+			}
+			else if (!permitResource2.IsUnlocked())
+			{
+				reference.gameObject.SetActive(false);
+				reference2.gameObject.SetActive(true);
+				if (this.showFilterState != 0)
 				{
 					flag = false;
 				}
@@ -420,22 +440,41 @@ public class KleiInventoryScreen : KModalScreen
 		this.selectionDescriptionLabel.SetText(selectedPermit.Description);
 		this.selectionFacadeForLabel.gameObject.SetActive(!string.IsNullOrWhiteSpace(permitPresentationInfo.facadeFor));
 		this.selectionFacadeForLabel.SetText(permitPresentationInfo.facadeFor);
-		string text = UI.KLEI_INVENTORY_SCREEN.ITEM_RARITY_DETAILS.Replace("{RarityName}", selectedPermit.Rarity.GetLocStringName());
-		this.selectionRarityDetailsLabel.gameObject.SetActive(!string.IsNullOrWhiteSpace(text));
-		this.selectionRarityDetailsLabel.SetText(text);
-		this.selectionOwnedCount.gameObject.SetActive(true);
-		if (!selectedPermit.IsOwnable())
+		string dlcIdFrom = selectedPermit.GetDlcIdFrom();
+		if (DlcManager.IsDlcId(dlcIdFrom))
 		{
-			this.selectionOwnedCount.SetText(UI.KLEI_INVENTORY_SCREEN.ITEM_PLAYER_UNLOCKED_BUT_UNOWNABLE);
+			this.selectionRarityDetailsLabel.gameObject.SetActive(false);
+			this.selectionOwnedCount.gameObject.SetActive(false);
+			this.selectionCollectionLabel.gameObject.SetActive(true);
+			if (selectedPermit.Rarity == PermitRarity.UniversalLocked)
+			{
+				this.selectionCollectionLabel.SetText(UI.KLEI_INVENTORY_SCREEN.COLLECTION_COMING_SOON.Replace("{Collection}", DlcManager.GetDlcTitle(dlcIdFrom)));
+				return;
+			}
+			this.selectionCollectionLabel.SetText(UI.KLEI_INVENTORY_SCREEN.COLLECTION.Replace("{Collection}", DlcManager.GetDlcTitle(dlcIdFrom)));
 			return;
 		}
-		int ownedCount = PermitItems.GetOwnedCount(selectedPermit);
-		if (ownedCount > 0)
+		else
 		{
-			this.selectionOwnedCount.SetText(UI.KLEI_INVENTORY_SCREEN.ITEM_PLAYER_OWNED_AMOUNT.Replace("{OwnedCount}", ownedCount.ToString()));
+			this.selectionCollectionLabel.gameObject.SetActive(false);
+			string text = UI.KLEI_INVENTORY_SCREEN.ITEM_RARITY_DETAILS.Replace("{RarityName}", selectedPermit.Rarity.GetLocStringName());
+			this.selectionRarityDetailsLabel.gameObject.SetActive(!string.IsNullOrWhiteSpace(text));
+			this.selectionRarityDetailsLabel.SetText(text);
+			this.selectionOwnedCount.gameObject.SetActive(true);
+			if (!selectedPermit.IsOwnableOnServer())
+			{
+				this.selectionOwnedCount.SetText(UI.KLEI_INVENTORY_SCREEN.ITEM_PLAYER_UNLOCKED_BUT_UNOWNABLE);
+				return;
+			}
+			int ownedCount = PermitItems.GetOwnedCount(selectedPermit);
+			if (ownedCount > 0)
+			{
+				this.selectionOwnedCount.SetText(UI.KLEI_INVENTORY_SCREEN.ITEM_PLAYER_OWNED_AMOUNT.Replace("{OwnedCount}", ownedCount.ToString()));
+				return;
+			}
+			this.selectionOwnedCount.SetText(KleiItemsUI.WrapWithColor(UI.KLEI_INVENTORY_SCREEN.ITEM_PLAYER_OWN_NONE, KleiItemsUI.TEXT_COLOR__PERMIT_NOT_OWNED));
 			return;
 		}
-		this.selectionOwnedCount.SetText(KleiItemsUI.WrapWithColor(UI.KLEI_INVENTORY_SCREEN.ITEM_PLAYER_OWN_NONE, KleiItemsUI.TEXT_COLOR__PERMIT_NOT_OWNED));
 	}
 
 	private KleiInventoryScreen.PermitPrintabilityState GetPermitPrintabilityState(PermitResource permit)
@@ -449,7 +488,7 @@ public class KleiInventoryScreen : KModalScreen
 		PermitItems.TryGetBarterPrice(this.SelectedPermit.Id, out num, out num2);
 		if (num == 0UL)
 		{
-			if (permit.Rarity == PermitRarity.Universal || permit.Rarity == PermitRarity.Loyalty || permit.Rarity == PermitRarity.Unknown)
+			if (permit.Rarity == PermitRarity.Universal || permit.Rarity == PermitRarity.UniversalLocked || permit.Rarity == PermitRarity.Loyalty || permit.Rarity == PermitRarity.Unknown)
 			{
 				return KleiInventoryScreen.PermitPrintabilityState.NotForSale;
 			}
@@ -624,52 +663,67 @@ public class KleiInventoryScreen : KModalScreen
 			{
 				return "HUD";
 			}
-			string prefabID = buildingDef.PrefabID;
-			if (prefabID != null)
+			string text = buildingDef.PrefabID;
+			if (text != null)
 			{
-				uint num = <PrivateImplementationDetails>.ComputeStringHash(prefabID);
+				uint num = <PrivateImplementationDetails>.ComputeStringHash(text);
 				if (num <= 2076384603U)
 				{
 					if (num <= 1633134164U)
 					{
-						if (num != 228062815U)
+						if (num <= 595816591U)
 						{
-							if (num != 595816591U)
+							if (num != 228062815U)
 							{
-								if (num != 1633134164U)
+								if (num != 595816591U)
 								{
-									goto IL_035E;
+									goto IL_039A;
 								}
-								if (!(prefabID == "CeilingLight"))
+								if (!(text == "FlowerVase"))
 								{
-									goto IL_035E;
+									goto IL_039A;
 								}
-								return "ceilingLight";
 							}
-							else if (!(prefabID == "FlowerVase"))
+							else
 							{
-								goto IL_035E;
+								if (!(text == "LuxuryBed"))
+								{
+									goto IL_039A;
+								}
+								string id = permit.Id;
+								if (id != null)
+								{
+									if (id == "LuxuryBed_boat")
+									{
+										return "elegantbed_boat";
+									}
+									if (id == "LuxuryBed_bouncy")
+									{
+										return "elegantbed_bouncy";
+									}
+								}
+								return "elegantbed";
 							}
+						}
+						else if (num != 1607642960U)
+						{
+							if (num != 1633134164U)
+							{
+								goto IL_039A;
+							}
+							if (!(text == "CeilingLight"))
+							{
+								goto IL_039A;
+							}
+							return "ceilingLight";
 						}
 						else
 						{
-							if (!(prefabID == "LuxuryBed"))
+							if (!(text == "FlushToilet"))
 							{
-								goto IL_035E;
+								goto IL_039A;
 							}
-							string id = permit.Id;
-							if (id != null)
-							{
-								if (id == "LuxuryBed_boat")
-								{
-									return "elegantbed_boat";
-								}
-								if (id == "LuxuryBed_bouncy")
-								{
-									return "elegantbed_bouncy";
-								}
-							}
-							return "elegantbed";
+							return "flushtoilate";
 						}
 					}
 					else if (num <= 1943253450U)
@@ -678,19 +732,19 @@ public class KleiInventoryScreen : KModalScreen
 						{
 							if (num != 1943253450U)
 							{
-								goto IL_035E;
+								goto IL_039A;
 							}
-							if (!(prefabID == "WaterCooler"))
+							if (!(text == "WaterCooler"))
 							{
-								goto IL_035E;
+								goto IL_039A;
 							}
 							return "watercooler";
 						}
 						else
 						{
-							if (!(prefabID == "RockCrusher"))
+							if (!(text == "RockCrusher"))
 							{
-								goto IL_035E;
+								goto IL_039A;
 							}
 							return "rockrefinery";
 						}
@@ -699,17 +753,17 @@ public class KleiInventoryScreen : KModalScreen
 					{
 						if (num != 2076384603U)
 						{
-							goto IL_035E;
+							goto IL_039A;
 						}
-						if (!(prefabID == "GasReservoir"))
+						if (!(text == "GasReservoir"))
 						{
-							goto IL_035E;
+							goto IL_039A;
 						}
 						return "gasstorage";
 					}
-					else if (!(prefabID == "FlowerVaseHanging"))
+					else if (!(text == "FlowerVaseHanging"))
 					{
-						goto IL_035E;
+						goto IL_039A;
 					}
 				}
 				else if (num <= 3048425356U)
@@ -720,19 +774,19 @@ public class KleiInventoryScreen : KModalScreen
 						{
 							if (num != 2722382738U)
 							{
-								goto IL_035E;
+								goto IL_039A;
 							}
-							if (!(prefabID == "PlanterBox"))
+							if (!(text == "PlanterBox"))
 							{
-								goto IL_035E;
+								goto IL_039A;
 							}
 							return "planterbox";
 						}
 						else
 						{
-							if (!(prefabID == "StorageLocker"))
+							if (!(text == "StorageLocker"))
 							{
-								goto IL_035E;
+								goto IL_039A;
 							}
 							return "storagelocker";
 						}
@@ -741,19 +795,19 @@ public class KleiInventoryScreen : KModalScreen
 					{
 						if (num != 3048425356U)
 						{
-							goto IL_035E;
+							goto IL_039A;
 						}
-						if (!(prefabID == "Bed"))
+						if (!(text == "Bed"))
 						{
-							goto IL_035E;
+							goto IL_039A;
 						}
 						return "bed";
 					}
 					else
 					{
-						if (!(prefabID == "ExteriorWall"))
+						if (!(text == "ExteriorWall"))
 						{
-							goto IL_035E;
+							goto IL_039A;
 						}
 						return "wall";
 					}
@@ -764,42 +818,42 @@ public class KleiInventoryScreen : KModalScreen
 					{
 						if (num != 3534553076U)
 						{
-							goto IL_035E;
+							goto IL_039A;
 						}
-						if (!(prefabID == "MassageTable"))
+						if (!(text == "MassageTable"))
 						{
-							goto IL_035E;
+							goto IL_039A;
 						}
 						return "massagetable";
 					}
-					else if (!(prefabID == "FlowerVaseWall"))
+					else if (!(text == "FlowerVaseWall"))
 					{
-						goto IL_035E;
+						goto IL_039A;
 					}
 				}
 				else if (num != 3903452895U)
 				{
 					if (num != 3958671086U)
 					{
-						goto IL_035E;
+						goto IL_039A;
 					}
-					if (!(prefabID == "FlowerVaseHangingFancy"))
+					if (!(text == "FlowerVaseHangingFancy"))
 					{
-						goto IL_035E;
+						goto IL_039A;
 					}
 				}
 				else
 				{
-					if (!(prefabID == "EggCracker"))
+					if (!(text == "EggCracker"))
 					{
-						goto IL_035E;
+						goto IL_039A;
 					}
 					return "eggcracker";
 				}
 				return "flowervase";
 			}
 		}
-		IL_035E:
+		IL_039A:
 		if (permit.Category == PermitCategory.Artwork)
 		{
 			BuildingDef buildingDef2 = KleiPermitVisUtil.GetBuildingDef(permit);
@@ -808,15 +862,23 @@ public class KleiInventoryScreen : KModalScreen
 				return "HUD";
 			}
 			ArtableStage artableStage = (ArtableStage)permit;
-			if (KleiInventoryScreen.<GetFacadeItemSoundName>g__Has|72_0<Sculpture>(buildingDef2))
+			if (KleiInventoryScreen.<GetFacadeItemSoundName>g__Has|76_0<Sculpture>(buildingDef2))
 			{
-				if (buildingDef2.PrefabID == "IceSculpture")
+				string text = buildingDef2.PrefabID;
+				if (text != null)
 				{
-					return "icesculpture";
+					if (text == "IceSculpture")
+					{
+						return "icesculpture";
+					}
+					if (text == "WoodSculpture")
+					{
+						return "woodsculpture";
+					}
 				}
 				return "sculpture";
 			}
-			else if (KleiInventoryScreen.<GetFacadeItemSoundName>g__Has|72_0<Painting>(buildingDef2))
+			if (KleiInventoryScreen.<GetFacadeItemSoundName>g__Has|76_0<Painting>(buildingDef2))
 			{
 				return "painting";
 			}
@@ -834,7 +896,7 @@ public class KleiInventoryScreen : KModalScreen
 	}
 
 	[CompilerGenerated]
-	internal static bool <GetFacadeItemSoundName>g__Has|72_0<T>(BuildingDef buildingDef) where T : Component
+	internal static bool <GetFacadeItemSoundName>g__Has|76_0<T>(BuildingDef buildingDef) where T : Component
 	{
 		return !buildingDef.BuildingComplete.GetComponent<T>().IsNullOrDestroyed();
 	}
@@ -877,6 +939,12 @@ public class KleiInventoryScreen : KModalScreen
 
 	[SerializeField]
 	private MultiToggle doublesOnlyToggle;
+
+	public const int FILTER_SHOW_ALL = 0;
+
+	public const int FILTER_SHOW_OWNED_ONLY = 1;
+
+	public const int FILTER_SHOW_DOUBLES_ONLY = 2;
 
 	private int showFilterState;
 
@@ -928,6 +996,9 @@ public class KleiInventoryScreen : KModalScreen
 
 	[SerializeField]
 	private LocText selectionFacadeForLabel;
+
+	[SerializeField]
+	private LocText selectionCollectionLabel;
 
 	[SerializeField]
 	private LocText selectionRarityDetailsLabel;

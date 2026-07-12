@@ -3,6 +3,38 @@ using UnityEngine;
 
 public class BuildingCellVisualizerResources : ScriptableObject
 {
+	public string heatSourceAnimFile
+	{
+		get
+		{
+			return "heat_fx_kanim";
+		}
+	}
+
+	public string heatAnimName
+	{
+		get
+		{
+			return "heatfx_a";
+		}
+	}
+
+	public string heatSinkAnimFile
+	{
+		get
+		{
+			return "heat_fx_kanim";
+		}
+	}
+
+	public string heatSinkAnimName
+	{
+		get
+		{
+			return "heatfx_b";
+		}
+	}
+
 	public Material backgroundMaterial { get; set; }
 
 	public Material iconBackgroundMaterial { get; set; }
@@ -136,6 +168,14 @@ public class BuildingCellVisualizerResources : ScriptableObject
 	public Color highEnergyParticleInputColour;
 
 	public Color highEnergyParticleOutputColour;
+
+	[Header("Heat Sources and Sinks")]
+	public Sprite heatSourceIcon;
+
+	public Sprite heatSinkIcon;
+
+	[Header("Alternate IO Colours")]
+	public BuildingCellVisualizerResources.IOColours alternateIOColours;
 
 	private static BuildingCellVisualizerResources _Instance;
 

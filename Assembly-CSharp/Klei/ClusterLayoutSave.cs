@@ -37,6 +37,10 @@ namespace Klei
 			public List<string> traits = new List<string>();
 
 			public List<string> storyTraits = new List<string>();
+
+			public List<string> seasons = new List<string>();
+
+			public List<string> generatedSubworlds = new List<string>();
 		}
 
 		public enum POIType

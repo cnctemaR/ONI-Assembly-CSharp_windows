@@ -1,55 +1,53 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using FoodRehydrator;
 using KSerialization;
 using UnityEngine;
 
-internal class DehydratedFoodPackage : Workable
+public class DehydratedFoodPackage : Workable, IApproachable
 {
+	public GameObject Rehydrator
+	{
+		get
+		{
+			Storage storage = base.gameObject.GetComponent<Pickupable>().storage;
+			if (storage != null)
+			{
+				return storage.gameObject;
+			}
+			return null;
+		}
+		private set
+		{
+		}
+	}
+
 	public override BuildingFacade GetBuildingFacade()
 	{
-		DebugUtil.DevAssert(this.rehydrator == null || this.rehydrator == base.gameObject.GetComponent<Pickupable>().storage.gameObject, "invalid rehydrator reference", null);
-		if (!(this.rehydrator != null))
+		if (!(this.Rehydrator != null))
 		{
 			return null;
 		}
-		return this.rehydrator.GetComponent<BuildingFacade>();
+		return this.Rehydrator.GetComponent<BuildingFacade>();
 	}
 
 	public override KAnimControllerBase GetAnimController()
 	{
-		DebugUtil.DevAssert(this.rehydrator == null || this.rehydrator == base.gameObject.GetComponent<Pickupable>().storage.gameObject, "invalid rehydrator reference", null);
-		if (!(this.rehydrator != null))
+		if (!(this.Rehydrator != null))
 		{
 			return null;
 		}
-		return this.rehydrator.GetComponent<KAnimControllerBase>();
-	}
-
-	public void StoredInRehydrator(GameObject rehydrator)
-	{
-		this.rehydrator = rehydrator;
-		this.storage.allowItemRemoval = true;
-		foreach (GameObject gameObject in this.storage.items)
-		{
-			gameObject.RemoveTag(GameTags.StoredPrivate);
-		}
-	}
-
-	public void RemovedFromRehydrator()
-	{
-		this.rehydrator = null;
-		this.storage.allowItemRemoval = false;
-		foreach (GameObject gameObject in this.storage.items)
-		{
-			gameObject.AddTag(GameTags.StoredPrivate);
-		}
+		return this.Rehydrator.GetComponent<KAnimControllerBase>();
 	}
 
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
+		base.SetOffsets(new CellOffset[]
+		{
+			default(CellOffset),
+			new CellOffset(0, -1)
+		});
 		if (this.storage.items.Count < 1)
 		{
 			this.storage.ConsumeAllIgnoringDisease(this.FoodTag);
@@ -58,10 +56,6 @@ internal class DehydratedFoodPackage : Workable
 			gameObject.SetActive(true);
 			gameObject.GetComponent<Edible>().Calories = 1000000f;
 			this.storage.Store(gameObject, false, false, true, false);
-			if (base.GetComponent<Pickupable>().storage != null && base.GetComponent<Pickupable>().storage.GetComponent<AccessabilityManager>() != null)
-			{
-				this.StoredInRehydrator(base.GetComponent<Pickupable>().storage.gameObject);
-			}
 		}
 		base.Subscribe(-1697596308, new Action<object>(this.StorageChangeHandler));
 		this.DehydrateItem(this.storage.items.ElementAtOrDefault<GameObject>(0));
@@ -70,14 +64,14 @@ internal class DehydratedFoodPackage : Workable
 	protected override void OnStartWork(Worker worker)
 	{
 		base.OnStartWork(worker);
-		if (this.rehydrator != null)
+		if (this.Rehydrator != null)
 		{
-			DehydratedManager component = this.rehydrator.GetComponent<DehydratedManager>();
+			DehydratedManager component = this.Rehydrator.GetComponent<DehydratedManager>();
 			if (component != null)
 			{
 				component.SetFabricatedFoodSymbol(this.FoodTag);
 			}
-			this.rehydrator.GetComponent<AccessabilityManager>().SetActiveWorkable(this);
+			this.Rehydrator.GetComponent<AccessabilityManager>().SetActiveWorkable(this);
 		}
 	}
 
@@ -91,24 +85,23 @@ internal class DehydratedFoodPackage : Workable
 		}
 		GameObject gameObject = this.storage.items[0];
 		this.storage.Transfer(worker.GetComponent<Storage>(), false, false);
-		DebugUtil.DevAssert(this.rehydrator == base.GetComponent<Pickupable>().storage.gameObject, "OnCompleteWork rehydrator mismatch", null);
-		DehydratedManager component = this.rehydrator.GetComponent<DehydratedManager>();
-		this.rehydrator.GetComponent<AccessabilityManager>().SetActiveWorkable(null);
+		DebugUtil.DevAssert(this.Rehydrator != null, "OnCompleteWork but no rehydrator", null);
+		DehydratedManager component = this.Rehydrator.GetComponent<DehydratedManager>();
+		this.Rehydrator.GetComponent<AccessabilityManager>().SetActiveWorkable(null);
 		component.ConsumeResourcesForRehydration(base.gameObject, gameObject);
-		this.rehydrator = null;
-		Pickupable.PickupableStartWorkInfo pickupableStartWorkInfo = (Pickupable.PickupableStartWorkInfo)worker.startWorkInfo;
-		if (pickupableStartWorkInfo != null && pickupableStartWorkInfo.setResultCb != null && gameObject != null)
+		DehydratedFoodPackage.RehydrateStartWorkItem rehydrateStartWorkItem = (DehydratedFoodPackage.RehydrateStartWorkItem)worker.startWorkInfo;
+		if (rehydrateStartWorkItem != null && rehydrateStartWorkItem.setResultCb != null && gameObject != null)
 		{
-			pickupableStartWorkInfo.setResultCb(gameObject);
+			rehydrateStartWorkItem.setResultCb(gameObject);
 		}
 	}
 
 	protected override void OnStopWork(Worker worker)
 	{
 		base.OnStopWork(worker);
-		if (this.rehydrator != null)
+		if (this.Rehydrator != null)
 		{
-			this.rehydrator.GetComponent<AccessabilityManager>().SetActiveWorkable(null);
+			this.Rehydrator.GetComponent<AccessabilityManager>().SetActiveWorkable(null);
 		}
 	}
 
@@ -133,10 +126,6 @@ internal class DehydratedFoodPackage : Workable
 			return;
 		}
 		item.AddTag(GameTags.Dehydrated);
-		Pickupable component = item.GetComponent<Pickupable>();
-		this.SwapPickupablesBehaviors(component);
-		component.allowedChoreTypes = new List<ChoreType> { Db.Get().ChoreTypes.Eat };
-		component.targetWorkable = this;
 	}
 
 	public void RehydrateItem(GameObject item)
@@ -149,10 +138,6 @@ internal class DehydratedFoodPackage : Workable
 		item.RemoveTag(GameTags.Dehydrated);
 		item.AddTag(GameTags.Rehydrated);
 		item.gameObject.GetComponent<KSelectable>().AddStatusItem(Db.Get().MiscStatusItems.RehydratedFood, null);
-		Pickupable component = item.GetComponent<Pickupable>();
-		this.SwapPickupablesBehaviors(component);
-		component.allowedChoreTypes = null;
-		component.targetWorkable = component;
 	}
 
 	private void Swap<Type>(ref Type a, ref Type b)
@@ -162,42 +147,23 @@ internal class DehydratedFoodPackage : Workable
 		b = type;
 	}
 
-	private void SwapPickupablesBehaviors(Pickupable pickup)
-	{
-		this.Swap<bool>(ref pickup.absorbable, ref this.containedObjectBehaviors.pickup_absorbable);
-		this.Swap<Func<Pickupable, float, Pickupable>>(ref pickup.OnTake, ref this.containedObjectBehaviors.pickupable_ontake);
-		this.Swap<Func<Pickupable, bool>>(ref pickup.CanAbsorb, ref this.containedObjectBehaviors.pickupable_canabsorb);
-		CellOffset[] offsets = pickup.GetOffsets();
-		pickup.SetOffsets(this.containedObjectBehaviors.pickupable_offset);
-		this.Swap<CellOffset[]>(ref offsets, ref this.containedObjectBehaviors.pickupable_offset);
-	}
-
 	[Serialize]
 	public Tag FoodTag;
 
 	[MyCmpReq]
 	private Storage storage;
 
-	private GameObject rehydrator;
-
-	private DehydratedFoodPackage.OverriddenPickupableProperties containedObjectBehaviors = new DehydratedFoodPackage.OverriddenPickupableProperties();
-
-	private class OverriddenPickupableProperties
+	public class RehydrateStartWorkItem : Worker.StartWorkInfo
 	{
-		public bool pickup_absorbable;
-
-		public Func<Pickupable, float, Pickupable> pickupable_ontake = delegate(Pickupable p, float _)
+		public RehydrateStartWorkItem(DehydratedFoodPackage pkg, Action<GameObject> setResultCB)
+			: base(pkg)
 		{
-			p.storage.Remove(p.gameObject, true);
-			return p;
-		};
+			this.package = pkg;
+			this.setResultCb = setResultCB;
+		}
 
-		public Func<Pickupable, bool> pickupable_canabsorb = (Pickupable _) => false;
+		public DehydratedFoodPackage package;
 
-		public CellOffset[] pickupable_offset = new CellOffset[]
-		{
-			default(CellOffset),
-			new CellOffset(0, -1)
-		};
+		public Action<GameObject> setResultCb;
 	}
 }

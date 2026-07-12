@@ -40,7 +40,9 @@ public class SandboxSpawnerTool : InterfaceTool
 		}
 		else
 		{
-			GameObject gameObject = GameUtil.KInstantiate(prefab, Grid.CellToPosCBC(this.currentCell, Grid.SceneLayer.Creatures), Grid.SceneLayer.Creatures, null, 0);
+			KBatchedAnimController component = prefab.GetComponent<KBatchedAnimController>();
+			Grid.SceneLayer sceneLayer = ((component == null) ? Grid.SceneLayer.Creatures : component.sceneLayer);
+			GameObject gameObject = GameUtil.KInstantiate(prefab, Grid.CellToPosCBC(this.currentCell, sceneLayer), sceneLayer, null, 0);
 			if (gameObject.GetComponent<Pickupable>() != null && !gameObject.HasTag(GameTags.Creature))
 			{
 				gameObject.transform.position += Vector3.up * (Grid.CellSizeInMeters / 3f);

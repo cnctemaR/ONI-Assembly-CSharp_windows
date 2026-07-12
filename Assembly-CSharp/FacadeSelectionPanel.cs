@@ -190,7 +190,7 @@ public class FacadeSelectionPanel : KMonoBehaviour
 		enumerable = enumerable.StableSort<ClothingOutfitTarget>((ClothingOutfitTarget a, ClothingOutfitTarget b) => a.OutfitId.CompareTo(b.OutfitId));
 		foreach (ClothingOutfitTarget clothingOutfitTarget in enumerable)
 		{
-			if (!clothingOutfitTarget.DoesContainNonOwnedItems())
+			if (!clothingOutfitTarget.DoesContainLockedItems())
 			{
 				this.AddNewOutfitToggle(clothingOutfitTarget.OutfitId, false);
 			}
@@ -377,34 +377,76 @@ public class FacadeSelectionPanel : KMonoBehaviour
 			HierarchyReferences component = gameObject.GetComponent<HierarchyReferences>();
 			component.GetReference<UIMannequin>("Mannequin").gameObject.SetActive(false);
 			component.GetReference<Image>("FGImage").SetAlpha(1f);
+			Sprite sprite;
+			string text;
+			string text2;
 			if (buildingFacadeID != "DEFAULT_FACADE")
 			{
 				BuildingFacadeResource buildingFacadeResource = Db.GetBuildingFacades().Get(buildingFacadeID);
-				gameObject.GetComponent<HierarchyReferences>().GetReference<Image>("FGImage").sprite = Def.GetUISpriteFromMultiObjectAnim(Assets.GetAnim(buildingFacadeResource.AnimFile), "ui", false, "");
-				this.gameObject.GetComponent<ToolTip>().SetSimpleTooltip(GameUtil.ApplyBoldString(buildingFacadeResource.Name) + "\n\n" + buildingFacadeResource.Description);
+				sprite = Def.GetUISpriteFromMultiObjectAnim(Assets.GetAnim(buildingFacadeResource.AnimFile), "ui", false, "");
+				text = KleiItemsUI.GetTooltipStringFor(buildingFacadeResource);
+				text2 = buildingFacadeResource.GetDlcIdFrom();
+			}
+			else
+			{
+				GameObject prefab = Assets.GetPrefab(buildingPrefabID);
+				Building component2 = prefab.GetComponent<Building>();
+				StringEntry stringEntry;
+				string text3;
+				if (Strings.TryGet(string.Concat(new string[]
+				{
+					"STRINGS.BUILDINGS.PREFABS.",
+					buildingPrefabID.ToUpperInvariant(),
+					".FACADES.DEFAULT_",
+					buildingPrefabID.ToUpperInvariant(),
+					".NAME"
+				}), out stringEntry))
+				{
+					text3 = stringEntry;
+				}
+				else if (component2 != null)
+				{
+					text3 = component2.Def.Name;
+				}
+				else
+				{
+					text3 = prefab.GetProperName();
+				}
+				StringEntry stringEntry2;
+				string text4;
+				if (Strings.TryGet(string.Concat(new string[]
+				{
+					"STRINGS.BUILDINGS.PREFABS.",
+					buildingPrefabID.ToUpperInvariant(),
+					".FACADES.DEFAULT_",
+					buildingPrefabID.ToUpperInvariant(),
+					".DESC"
+				}), out stringEntry2))
+				{
+					text4 = stringEntry2;
+				}
+				else if (component2 != null)
+				{
+					text4 = component2.Def.Desc;
+				}
+				else
+				{
+					text4 = "";
+				}
+				sprite = Def.GetUISprite(buildingPrefabID, "ui", false).first;
+				text = KleiItemsUI.WrapAsToolTipTitle(text3) + "\n" + text4;
+				text2 = null;
+			}
+			component.GetReference<Image>("FGImage").sprite = sprite;
+			this.gameObject.GetComponent<ToolTip>().SetSimpleTooltip(text);
+			Image reference = component.GetReference<Image>("DlcBanner");
+			if (DlcManager.IsDlcId(text2))
+			{
+				reference.gameObject.SetActive(true);
+				reference.color = DlcManager.GetDlcBannerColor(text2);
 				return;
 			}
-			component.GetReference<Image>("FGImage").sprite = Def.GetUISprite(buildingPrefabID, "ui", false).first;
-			StringEntry stringEntry;
-			Strings.TryGet(string.Concat(new string[]
-			{
-				"STRINGS.BUILDINGS.PREFABS.",
-				buildingPrefabID.ToUpperInvariant(),
-				".FACADES.DEFAULT_",
-				buildingPrefabID.ToUpperInvariant(),
-				".NAME"
-			}), out stringEntry);
-			StringEntry stringEntry2;
-			Strings.TryGet(string.Concat(new string[]
-			{
-				"STRINGS.BUILDINGS.PREFABS.",
-				buildingPrefabID.ToUpperInvariant(),
-				".FACADES.DEFAULT_",
-				buildingPrefabID.ToUpperInvariant(),
-				".DESC"
-			}), out stringEntry2);
-			GameObject prefab = Assets.GetPrefab(buildingPrefabID);
-			this.gameObject.GetComponent<ToolTip>().SetSimpleTooltip(GameUtil.ApplyBoldString((stringEntry != null) ? stringEntry.String : prefab.GetProperName()) + "\n\n" + ((stringEntry2 != null) ? stringEntry2.String : ""));
+			reference.gameObject.SetActive(false);
 		}
 
 		public FacadeToggle(string outfitID, GameObject gameObject, ClothingOutfitUtility.OutfitType outfitType)
@@ -430,6 +472,26 @@ public class FacadeSelectionPanel : KMonoBehaviour
 			{
 				component.GetReference<UIMannequin>("Mannequin").ClearOutfit(outfitType);
 				component2.SetSimpleTooltip(GameUtil.ApplyBoldString(UI.OUTFIT_NAME.NONE));
+			}
+			string text = null;
+			if (outfitID != "DEFAULT_FACADE")
+			{
+				ClothingOutfitTarget.Implementation impl = ClothingOutfitTarget.FromTemplateId(outfitID).impl;
+				if (impl is ClothingOutfitTarget.DatabaseAuthoredTemplate)
+				{
+					ClothingOutfitTarget.DatabaseAuthoredTemplate databaseAuthoredTemplate = (ClothingOutfitTarget.DatabaseAuthoredTemplate)impl;
+					text = databaseAuthoredTemplate.resource.GetDlcIdFrom();
+				}
+			}
+			Image reference2 = component.GetReference<Image>("DlcBanner");
+			if (DlcManager.IsDlcId(text))
+			{
+				reference2.gameObject.SetActive(true);
+				reference2.color = DlcManager.GetDlcBannerColor(text);
+			}
+			else
+			{
+				reference2.gameObject.SetActive(false);
 			}
 			Vector2 vector = new Vector2(0f, 0f);
 			if (outfitType == ClothingOutfitUtility.OutfitType.AtmoSuit)

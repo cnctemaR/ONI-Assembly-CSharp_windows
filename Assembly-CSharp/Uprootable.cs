@@ -5,7 +5,7 @@ using TUNING;
 using UnityEngine;
 
 [AddComponentMenu("KMonoBehaviour/Workable/Uprootable")]
-public class Uprootable : Workable
+public class Uprootable : Workable, IDigActionEntity
 {
 	public bool IsMarkedForUproot
 	{
@@ -201,6 +201,16 @@ public class Uprootable : Workable
 	{
 		base.OnStartWork(worker);
 		base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().MiscStatusItems.PendingUproot, false);
+	}
+
+	public void Dig()
+	{
+		this.Uproot();
+	}
+
+	public void MarkForDig(bool instantOnDebug = true)
+	{
+		this.MarkForUproot(instantOnDebug);
 	}
 
 	[Serialize]

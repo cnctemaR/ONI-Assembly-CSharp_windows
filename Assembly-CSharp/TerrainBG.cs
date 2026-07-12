@@ -9,6 +9,7 @@ public class TerrainBG : KMonoBehaviour
 		this.layer = LayerMask.NameToLayer("Default");
 		this.noiseVolume = this.CreateTexture3D(32);
 		this.starsPlane = this.CreateStarsPlane("StarsPlane");
+		this.northernLightsPlane = this.CreateNorthernLightsPlane("NorthernLightsPlane");
 		this.worldPlane = this.CreateWorldPlane("WorldPlane");
 		this.gasPlane = this.CreateGasPlane("GasPlane");
 		this.propertyBlocks = new MaterialPropertyBlock[Lighting.Instance.Settings.BackgroundLayers];
@@ -129,6 +130,37 @@ public class TerrainBG : KMonoBehaviour
 		return mesh;
 	}
 
+	public Mesh CreateNorthernLightsPlane(string name)
+	{
+		Mesh mesh = new Mesh();
+		mesh.name = name;
+		int num = 4;
+		Vector3[] array = new Vector3[num];
+		Vector2[] array2 = new Vector2[num];
+		int[] array3 = new int[6];
+		float num2 = 1f;
+		float num3 = this.northernLightSkySize * 0.5f;
+		array = new Vector3[]
+		{
+			new Vector3(-num2, -num3, 0f),
+			new Vector3(num2, -num3, 0f),
+			new Vector3(-num2, num3, 0f),
+			new Vector3(num2, num3, 0f)
+		};
+		array2 = new Vector2[]
+		{
+			new Vector2(0f, 0f),
+			new Vector2(1f, 0f),
+			new Vector2(0f, 1f),
+			new Vector2(1f, 1f)
+		};
+		array3 = new int[] { 0, 2, 1, 1, 2, 3 };
+		mesh.vertices = array;
+		mesh.uv = array2;
+		mesh.triangles = array3;
+		return mesh;
+	}
+
 	private void LateUpdate()
 	{
 		if (!this.doDraw)
@@ -156,6 +188,11 @@ public class TerrainBG : KMonoBehaviour
 		material.SetTexture("_NoiseVolume", this.noiseVolume);
 		Vector3 vector = new Vector3(0f, 0f, Grid.GetLayerZ(Grid.SceneLayer.Background) + 1f);
 		Graphics.DrawMesh(this.starsPlane, vector, Quaternion.identity, material, this.layer);
+		if (ClusterManager.Instance.activeWorld != null && ClusterManager.Instance.activeWorld.northernlights > 0)
+		{
+			Vector3 vector2 = new Vector3(CameraController.Instance.transform.position.x, CameraController.Instance.transform.position.y, Grid.GetLayerZ(Grid.SceneLayer.Background) + 0.8f);
+			Graphics.DrawMesh(this.northernLightsPlane, vector2, Quaternion.identity, this.northernLightMaterial_ceres, this.layer);
+		}
 		this.backgroundMaterial.renderQueue = RenderQueues.Backwall;
 		for (int i = 0; i < Lighting.Instance.Settings.BackgroundLayers; i++)
 		{
@@ -171,16 +208,18 @@ public class TerrainBG : KMonoBehaviour
 				}
 				MaterialPropertyBlock materialPropertyBlock = this.propertyBlocks[i];
 				materialPropertyBlock.SetVector("_BackWallParameters", new Vector4(num2, Lighting.Instance.Settings.BackgroundClip, num3, num4));
-				Vector3 vector2 = new Vector3(0f, 0f, Grid.GetLayerZ(Grid.SceneLayer.Background));
-				Graphics.DrawMesh(this.worldPlane, vector2, Quaternion.identity, this.backgroundMaterial, this.layer, null, 0, materialPropertyBlock);
+				Vector3 vector3 = new Vector3(0f, 0f, Grid.GetLayerZ(Grid.SceneLayer.Background));
+				Graphics.DrawMesh(this.worldPlane, vector3, Quaternion.identity, this.backgroundMaterial, this.layer, null, 0, materialPropertyBlock);
 			}
 		}
 		this.gasMaterial.renderQueue = RenderQueues.Gas;
-		Vector3 vector3 = new Vector3(0f, 0f, Grid.GetLayerZ(Grid.SceneLayer.Gas));
-		Graphics.DrawMesh(this.gasPlane, vector3, Quaternion.identity, this.gasMaterial, this.layer);
-		Vector3 vector4 = new Vector3(0f, 0f, Grid.GetLayerZ(Grid.SceneLayer.GasFront));
+		Vector3 vector4 = new Vector3(0f, 0f, Grid.GetLayerZ(Grid.SceneLayer.Gas));
 		Graphics.DrawMesh(this.gasPlane, vector4, Quaternion.identity, this.gasMaterial, this.layer);
+		Vector3 vector5 = new Vector3(0f, 0f, Grid.GetLayerZ(Grid.SceneLayer.GasFront));
+		Graphics.DrawMesh(this.gasPlane, vector5, Quaternion.identity, this.gasMaterial, this.layer);
 	}
+
+	public Material northernLightMaterial_ceres;
 
 	public Material starsMaterial_surface;
 
@@ -199,11 +238,15 @@ public class TerrainBG : KMonoBehaviour
 
 	private Mesh starsPlane;
 
+	private Mesh northernLightsPlane;
+
 	private Mesh worldPlane;
 
 	private Mesh gasPlane;
 
 	private int layer;
+
+	private float northernLightSkySize = 2f;
 
 	private MaterialPropertyBlock[] propertyBlocks;
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using STRINGS;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -109,6 +110,7 @@ public class OverlayLegend : KScreen
 		else
 		{
 			this.PopulateOverlayInfoUnits(overlayInfo, false);
+			this.PopulateOverlayDiagrams(overlayInfo, false);
 		}
 		this.ConfigureUIHeight();
 	}
@@ -153,6 +155,22 @@ public class OverlayLegend : KScreen
 	public void ClearLegend()
 	{
 		this.RemoveActiveObjects();
+		this.ClearFilters();
+		this.ClearDiagrams();
+		this.Show(false);
+	}
+
+	public void ClearFilters()
+	{
+		if (this.filterMenu != null)
+		{
+			global::UnityEngine.Object.Destroy(this.filterMenu.gameObject);
+		}
+		this.filterMenu = null;
+	}
+
+	public void ClearDiagrams()
+	{
 		for (int i = 0; i < this.activeDiagrams.Count; i++)
 		{
 			if (this.activeDiagrams[i] != null)
@@ -164,7 +182,6 @@ public class OverlayLegend : KScreen
 		Vector2 sizeDelta = this.diagramsParent.GetComponent<RectTransform>().sizeDelta;
 		sizeDelta.y = 0f;
 		this.diagramsParent.GetComponent<RectTransform>().sizeDelta = sizeDelta;
-		this.Show(false);
 	}
 
 	public OverlayLegend.OverlayInfo GetOverlayInfo(OverlayModes.Mode mode)
@@ -223,21 +240,41 @@ public class OverlayLegend : KScreen
 					freeUnitObject.SetActive(true);
 					freeUnitObject.transform.SetParent(this.activeUnitsParent.transform);
 				}
-				goto IL_0180;
+				return;
 			}
 		}
 		this.activeUnitsParent.SetActive(false);
-		IL_0180:
+	}
+
+	private void PopulateOverlayDiagrams(OverlayLegend.OverlayInfo overlayInfo, bool isRefresh = false)
+	{
 		if (!isRefresh)
 		{
+			if (overlayInfo.mode == OverlayModes.Temperature.ID)
+			{
+				Game.TemperatureOverlayModes temperatureOverlayMode = Game.Instance.temperatureOverlayMode;
+				if (temperatureOverlayMode != Game.TemperatureOverlayModes.AbsoluteTemperature)
+				{
+					if (temperatureOverlayMode == Game.TemperatureOverlayModes.RelativeTemperature)
+					{
+						this.ClearDiagrams();
+						overlayInfo = this.overlayInfoList.Find((OverlayLegend.OverlayInfo match) => match.name == UI.OVERLAYS.RELATIVETEMPERATURE.NAME);
+					}
+				}
+				else
+				{
+					SimDebugView.Instance.user_temperatureThresholds[0] = 0f;
+					SimDebugView.Instance.user_temperatureThresholds[1] = 2073f;
+				}
+			}
 			if (overlayInfo.diagrams != null && overlayInfo.diagrams.Count > 0)
 			{
 				this.diagramsParent.SetActive(true);
-				using (List<GameObject>.Enumerator enumerator2 = overlayInfo.diagrams.GetEnumerator())
+				using (List<GameObject>.Enumerator enumerator = overlayInfo.diagrams.GetEnumerator())
 				{
-					while (enumerator2.MoveNext())
+					while (enumerator.MoveNext())
 					{
-						GameObject gameObject = enumerator2.Current;
+						GameObject gameObject = enumerator.Current;
 						GameObject gameObject2 = Util.KInstantiateUI(gameObject, this.diagramsParent, false);
 						this.activeDiagrams.Add(gameObject2);
 					}
@@ -253,11 +290,13 @@ public class OverlayLegend : KScreen
 		if (isRefresh)
 		{
 			this.RemoveActiveObjects();
+			this.ClearDiagrams();
 		}
 		if (info.infoUnits != null && info.infoUnits.Count > 0)
 		{
 			this.PopulateOverlayInfoUnits(info, isRefresh);
 		}
+		this.PopulateOverlayDiagrams(info, false);
 		List<LegendEntry> customLegendData = this.currentMode.GetCustomLegendData();
 		if (customLegendData != null)
 		{
@@ -284,21 +323,21 @@ public class OverlayLegend : KScreen
 					freeUnitObject.SetActive(true);
 					freeUnitObject.transform.SetParent(this.activeUnitsParent.transform);
 				}
-				goto IL_0157;
+				goto IL_0165;
 			}
 		}
 		this.activeUnitsParent.SetActive(false);
-		IL_0157:
+		IL_0165:
 		if (!isRefresh && this.currentMode.legendFilters != null)
 		{
-			GameObject gameObject = Util.KInstantiateUI(this.toolParameterMenuPrefab, this.diagramsParent, false);
-			this.activeDiagrams.Add(gameObject);
-			this.diagramsParent.SetActive(true);
+			GameObject gameObject = Util.KInstantiateUI(this.toolParameterMenuPrefab, this.diagramsParent.transform.parent.gameObject, false);
+			gameObject.transform.SetAsFirstSibling();
 			this.filterMenu = gameObject.GetComponent<ToolParameterMenu>();
 			this.filterMenu.PopulateMenu(this.currentMode.legendFilters);
 			this.filterMenu.onParametersChanged += this.OnFiltersChanged;
 			this.OnFiltersChanged();
 		}
+		this.ConfigureUIHeight();
 	}
 
 	private void OnFiltersChanged()

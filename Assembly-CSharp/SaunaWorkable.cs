@@ -42,6 +42,7 @@ public class SaunaWorkable : Workable, IWorkerPrioritizable
 		{
 			component.Add(this.sauna.trackingEffect, true);
 		}
+		component.Add("WarmTouch", true).timeRemaining = 1800f;
 		this.operational.SetActive(false, false);
 	}
 

@@ -31,6 +31,11 @@ public class DiscoveredResources : KMonoBehaviour, ISaveLoadable, ISim4000ms
 		}
 	}
 
+	public void Discover(Tag tag)
+	{
+		this.Discover(tag, DiscoveredResources.GetCategoryForEntity(Assets.GetPrefab(tag).GetComponent<KPrefabID>()));
+	}
+
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();

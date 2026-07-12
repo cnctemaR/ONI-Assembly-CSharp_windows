@@ -36,7 +36,17 @@ public class KleiPermitBuildingAnimateIn : MonoBehaviour
 		kbatchedAnimController.initialAnim = "place";
 		KBatchedAnimController kbatchedAnimController2 = global::UnityEngine.Object.Instantiate<KBatchedAnimController>(sourceAnimController, sourceAnimController.transform.parent, false);
 		kbatchedAnimController2.gameObject.name = "KleiPermitBuildingAnimateIn.colorAnimController";
-		kbatchedAnimController2.initialAnim = sourceAnimController.AnimFiles[0].GetData().GetAnim(0).name;
+		KAnimFileData data = sourceAnimController.AnimFiles[0].GetData();
+		KAnim.Anim anim = data.GetAnim("idle");
+		if (anim == null)
+		{
+			anim = data.GetAnim("off");
+			if (anim == null)
+			{
+				anim = data.GetAnim(0);
+			}
+		}
+		kbatchedAnimController2.initialAnim = anim.name;
 		GameObject gameObject = new GameObject("KleiPermitBuildingAnimateIn");
 		gameObject.SetActive(false);
 		gameObject.transform.SetParent(sourceAnimController.transform.parent, false);

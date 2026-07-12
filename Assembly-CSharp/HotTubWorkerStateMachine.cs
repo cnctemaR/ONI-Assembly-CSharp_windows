@@ -7,7 +7,7 @@ public class HotTubWorkerStateMachine : GameStateMachine<HotTubWorkerStateMachin
 	{
 		default_state = this.pre_front;
 		base.Target(this.worker);
-		this.root.ToggleAnims("anim_interacts_hottub_kanim", 0f, "");
+		this.root.ToggleAnims("anim_interacts_hottub_kanim", 0f);
 		this.pre_front.PlayAnim("working_pre_front").OnAnimQueueComplete(this.pre_back);
 		this.pre_back.PlayAnim("working_pre_back").Enter(delegate(HotTubWorkerStateMachine.StatesInstance smi)
 		{

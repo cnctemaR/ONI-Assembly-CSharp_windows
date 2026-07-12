@@ -150,6 +150,10 @@ public class SimpleInfoScreen : DetailScreenTab, ISim4000ms, ISim1000ms
 		{
 			color = GlobalAssets.Instance.colorSet.statusItemEvent;
 		}
+		else if (status_item.item.notificationType == NotificationType.MessageImportant)
+		{
+			color = GlobalAssets.Instance.colorSet.statusItemMessageImportant;
+		}
 		else
 		{
 			color = this.statusItemTextColor_regular;
@@ -265,13 +269,11 @@ public class SimpleInfoScreen : DetailScreenTab, ISim4000ms, ISim1000ms
 			}
 			else if (component3 != null)
 			{
-				text = component3.DescFlavour;
-				text2 = component3.Desc;
+				text = component3.DescEffect + "\n\n" + component3.Desc;
 			}
 			else if (component4 != null)
 			{
-				text = component4.Def.Effect;
-				text2 = component4.Desc;
+				text = component4.DescEffect + "\n\n" + component4.Desc;
 			}
 			else if (component5 != null)
 			{
@@ -623,12 +625,12 @@ public class SimpleInfoScreen : DetailScreenTab, ISim4000ms, ISim1000ms
 			if (!this.geyserRows.ContainsKey(tag2))
 			{
 				this.geyserRows.Add(tag2, global::Util.KInstantiateUI(this.iconLabelRow, this.worldGeysersPanel.Content.gameObject, true));
-				HierarchyReferences component3 = this.geyserRows[tag2].GetComponent<HierarchyReferences>();
-				component3.GetReference<Image>("Icon").sprite = uisprite2.first;
-				component3.GetReference<Image>("Icon").color = uisprite2.second;
-				component3.GetReference<LocText>("NameLabel").SetText(UI.DETAILTABS.SIMPLEINFO.UNKNOWN_GEYSERS.Replace("{num}", count.ToString()));
-				component3.GetReference<LocText>("ValueLabel").gameObject.SetActive(false);
 			}
+			HierarchyReferences component3 = this.geyserRows[tag2].GetComponent<HierarchyReferences>();
+			component3.GetReference<Image>("Icon").sprite = uisprite2.first;
+			component3.GetReference<Image>("Icon").color = uisprite2.second;
+			component3.GetReference<LocText>("NameLabel").SetText(UI.DETAILTABS.SIMPLEINFO.UNKNOWN_GEYSERS.Replace("{num}", count.ToString()));
+			component3.GetReference<LocText>("ValueLabel").gameObject.SetActive(false);
 			this.geyserRows[tag2].SetActive(true);
 		}
 		Tag tag3 = "NoGeysers";
@@ -640,7 +642,7 @@ public class SimpleInfoScreen : DetailScreenTab, ISim4000ms, ISim1000ms
 			component4.GetReference<LocText>("NameLabel").SetText(UI.DETAILTABS.SIMPLEINFO.NO_GEYSERS);
 			component4.GetReference<LocText>("ValueLabel").gameObject.SetActive(false);
 		}
-		this.geyserRows[tag3].gameObject.SetActive(list.Count == 0);
+		this.geyserRows[tag3].gameObject.SetActive(list.Count == 0 && count == 0);
 		foreach (KeyValuePair<Tag, GameObject> keyValuePair3 in this.meteorShowerRows)
 		{
 			keyValuePair3.Value.SetActive(false);

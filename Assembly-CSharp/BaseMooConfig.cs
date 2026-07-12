@@ -12,7 +12,7 @@ public static class BaseMooConfig
 		float num = 50f;
 		EffectorValues tier = DECOR.BONUS.TIER0;
 		GameObject gameObject = EntityTemplates.CreatePlacedEntity(id, name, desc, num, Assets.GetAnim(anim_file), "idle_loop", Grid.SceneLayer.Creatures, 2, 2, tier, default(EffectorValues), SimHashes.Creature, null, 293f);
-		EntityTemplates.ExtendEntityToBasicCreature(gameObject, FactionManager.FactionID.Prey, traitId, "FlyerNavGrid2x2", NavType.Hover, 32, 2f, "Meat", 10, true, true, 123.149994f, 423.15f, 73.149994f, 473.15f);
+		EntityTemplates.ExtendEntityToBasicCreature(gameObject, FactionManager.FactionID.Prey, traitId, "FlyerNavGrid2x2", NavType.Hover, 32, 2f, "Meat", 10, true, true, 223.15f, 323.15f, 73.149994f, 473.15f);
 		if (!string.IsNullOrEmpty(symbol_override_prefix))
 		{
 			gameObject.AddOrGet<SymbolOverrideController>().ApplySymbolOverridesByAffix(Assets.GetAnim(anim_file), symbol_override_prefix, null, 0);
@@ -62,7 +62,7 @@ public static class BaseMooConfig
 			.Add(new DrinkMilkStates.Def
 			{
 				shouldBeBehindMilkTank = false,
-				isGassyMoo = true
+				drinkCellOffsetGetFn = new DrinkMilkStates.Def.DrinkCellOffsetGetFn(DrinkMilkStates.Def.DrinkCellOffsetGet_GassyMoo)
 			}, true, -1)
 			.Add(new PlayAnimsStates.Def(GameTags.Creatures.Poop, false, "poop", global::STRINGS.CREATURES.STATUSITEMS.EXPELLING_GAS.NAME, global::STRINGS.CREATURES.STATUSITEMS.EXPELLING_GAS.TOOLTIP), true, -1)
 			.Add(new MoveToLureStates.Def(), true, -1)
@@ -75,7 +75,6 @@ public static class BaseMooConfig
 			{
 				customIdleAnim = new IdleStates.Def.IdleAnimCallback(BaseMooConfig.CustomIdleAnim)
 			}, true, -1);
-		gameObject.AddOrGetDef<DrinkMilkMonitor.Def>().isGassyMoo = true;
 		EntityTemplates.AddCreatureBrain(gameObject, builder, GameTags.Creatures.Species.MooSpecies, symbol_override_prefix);
 		gameObject.AddOrGetDef<CritterCondoInteractMontior.Def>().condoPrefabTag = "AirBorneCritterCondo";
 		return gameObject;
@@ -85,11 +84,11 @@ public static class BaseMooConfig
 	{
 		Diet diet = new Diet(new Diet.Info[]
 		{
-			new Diet.Info(new HashSet<Tag> { consumed_tag }, producedTag, caloriesPerKg, producedConversionRate, diseaseId, diseasePerKgProduced, false, false)
+			new Diet.Info(new HashSet<Tag> { consumed_tag }, producedTag, caloriesPerKg, producedConversionRate, diseaseId, diseasePerKgProduced, false, false, false)
 		});
 		CreatureCalorieMonitor.Def def = prefab.AddOrGetDef<CreatureCalorieMonitor.Def>();
 		def.diet = diet;
-		def.minPoopSizeInCalories = minPoopSizeInKg * caloriesPerKg;
+		def.minConsumedCaloriesBeforePooping = minPoopSizeInKg * caloriesPerKg;
 		prefab.AddOrGetDef<SolidConsumerMonitor.Def>().diet = diet;
 		return prefab;
 	}

@@ -46,6 +46,8 @@ public class OrbitalData : Resource
 
 	public OrbitalData.OrbitalType orbitalType;
 
+	public Func<float> GetRenderZ;
+
 	public enum OrbitalType
 	{
 		world,

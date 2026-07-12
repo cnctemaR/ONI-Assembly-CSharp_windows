@@ -7,7 +7,7 @@ using UnityEngine;
 
 public static class BasePacuConfig
 {
-	public static GameObject CreatePrefab(string id, string base_trait_id, string name, string description, string anim_file, bool is_baby, string symbol_prefix, float warnLowTemp, float warnHighTemp)
+	public static GameObject CreatePrefab(string id, string base_trait_id, string name, string description, string anim_file, bool is_baby, string symbol_prefix, float warnLowTemp, float warnHighTemp, float lethalLowTemp, float lethalHighTemp)
 	{
 		float num = 200f;
 		EffectorValues tier = DECOR.BONUS.TIER0;
@@ -22,7 +22,7 @@ public static class BasePacuConfig
 		trait.Add(new AttributeModifier(Db.Get().Amounts.Age.maxAttribute.Id, 25f, name, false, false, true));
 		EntityTemplates.CreateAndRegisterBaggedCreature(gameObject, false, false, true);
 		gameObject.AddComponent<Movable>();
-		EntityTemplates.ExtendEntityToBasicCreature(gameObject, FactionManager.FactionID.Prey, base_trait_id, "SwimmerNavGrid", NavType.Swim, 32, 2f, "FishMeat", 1, false, false, warnLowTemp, warnHighTemp, warnLowTemp - 20f, warnHighTemp + 20f);
+		EntityTemplates.ExtendEntityToBasicCreature(gameObject, FactionManager.FactionID.Prey, base_trait_id, "SwimmerNavGrid", NavType.Swim, 32, 2f, "FishMeat", 1, false, false, warnLowTemp, warnHighTemp, lethalLowTemp, lethalHighTemp);
 		if (is_baby)
 		{
 			KBatchedAnimController component2 = gameObject.GetComponent<KBatchedAnimController>();
@@ -63,12 +63,12 @@ public static class BasePacuConfig
 		HashSet<Tag> hashSet = new HashSet<Tag>();
 		hashSet.Add(SimHashes.Algae.CreateTag());
 		List<Diet.Info> list = new List<Diet.Info>();
-		list.Add(new Diet.Info(hashSet, tag, BasePacuConfig.CALORIES_PER_KG_OF_ORE, global::TUNING.CREATURES.CONVERSION_EFFICIENCY.NORMAL, null, 0f, false, false));
+		list.Add(new Diet.Info(hashSet, tag, BasePacuConfig.CALORIES_PER_KG_OF_ORE, global::TUNING.CREATURES.CONVERSION_EFFICIENCY.NORMAL, null, 0f, false, false, false));
 		list.AddRange(BasePacuConfig.SeedDiet(tag, PacuTuning.STANDARD_CALORIES_PER_CYCLE, global::TUNING.CREATURES.CONVERSION_EFFICIENCY.NORMAL));
 		Diet diet = new Diet(list.ToArray());
 		CreatureCalorieMonitor.Def def3 = gameObject.AddOrGetDef<CreatureCalorieMonitor.Def>();
 		def3.diet = diet;
-		def3.minPoopSizeInCalories = BasePacuConfig.CALORIES_PER_KG_OF_ORE * BasePacuConfig.MIN_POOP_SIZE_IN_KG;
+		def3.minConsumedCaloriesBeforePooping = BasePacuConfig.CALORIES_PER_KG_OF_ORE * BasePacuConfig.MIN_POOP_SIZE_IN_KG;
 		gameObject.AddOrGetDef<SolidConsumerMonitor.Def>().diet = diet;
 		gameObject.AddOrGetDef<LureableMonitor.Def>().lures = new Tag[]
 		{
@@ -99,7 +99,7 @@ public static class BasePacuConfig
 					list.Add(new Diet.Info(new HashSet<Tag>
 					{
 						new Tag(gameObject.GetComponent<KPrefabID>().PrefabID())
-					}, poopTag, caloriesPerSeed, producedConversionRate, null, 0f, false, false));
+					}, poopTag, caloriesPerSeed, producedConversionRate, null, 0f, false, false, false));
 				}
 			}
 		}

@@ -648,6 +648,13 @@ namespace STRINGS
 
 				public static LocString DESCRIPTION = "Must be built inside a rocket";
 			}
+
+			public class WARMINGSTATION
+			{
+				public static LocString NAME = UI.FormatAsLink("Warming station", "BUILDCATEGORYREQUIREMENTCLASSWARMINGSTATION");
+
+				public static LocString DESCRIPTION = "Raises the ambient temperature";
+			}
 		}
 
 		public class DETAILS

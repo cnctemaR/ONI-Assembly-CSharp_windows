@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using Klei;
 using ObjectCloner;
 using ProcGen.Noise;
@@ -54,7 +53,12 @@ namespace ProcGen
 
 		public static string RewriteWorldgenPathYaml(string scopePath)
 		{
-			return SettingsCache.RewriteWorldgenPath(scopePath) + ".yaml";
+			string text = SettingsCache.RewriteWorldgenPath(scopePath);
+			if (!text.EndsWith(".yaml"))
+			{
+				text += ".yaml";
+			}
+			return text;
 		}
 
 		public static string GetScope(string dlcId)
@@ -87,9 +91,9 @@ namespace ProcGen
 
 		public static string GuessScopedPath(string path)
 		{
-			foreach (string text in DlcManager.RELEASE_ORDER)
+			foreach (string text in DlcManager.RELEASED_VERSIONS)
 			{
-				if (DlcManager.IsContentActive(text))
+				if (DlcManager.IsContentSubscribed(text))
 				{
 					string absoluteContentPath = SettingsCache.GetAbsoluteContentPath(text, "worldgen/");
 					if (path.StartsWith(absoluteContentPath))
@@ -182,6 +186,44 @@ namespace ProcGen
 			return null;
 		}
 
+		public static DlcMixingSettings GetCachedDlcMixingSettings(string name)
+		{
+			return SettingsCache.dlcMixingSettings[name];
+		}
+
+		public static WorldMixingSettings GetCachedWorldMixingSetting(string name)
+		{
+			return SettingsCache.worldMixingSettings[name];
+		}
+
+		public static WorldMixingSettings TryGetCachedWorldMixingSetting(string name)
+		{
+			WorldMixingSettings worldMixingSettings;
+			SettingsCache.worldMixingSettings.TryGetValue(name, out worldMixingSettings);
+			return worldMixingSettings;
+		}
+
+		public static SubworldMixingSettings GetCachedSubworldMixingSetting(string name)
+		{
+			return SettingsCache.subworldMixingSettings[name];
+		}
+
+		public static SubworldMixingSettings TryGetCachedSubworldMixingSetting(string name)
+		{
+			SubworldMixingSettings subworldMixingSettings;
+			SettingsCache.subworldMixingSettings.TryGetValue(name, out subworldMixingSettings);
+			return subworldMixingSettings;
+		}
+
+		public static SubWorld TryGetCachedSubWorld(string name)
+		{
+			if (SettingsCache.subworlds.ContainsKey(name))
+			{
+				return SettingsCache.subworlds[name];
+			}
+			return null;
+		}
+
 		public static SubWorld GetCachedSubWorld(string name)
 		{
 			if (SettingsCache.subworlds.ContainsKey(name))
@@ -261,42 +303,57 @@ namespace ProcGen
 		{
 			foreach (WeightedSubworldName weightedSubworldName in subworlds)
 			{
-				SubWorld subWorld = null;
-				string text = weightedSubworldName.name;
-				if (weightedSubworldName.overrideName != null && weightedSubworldName.overrideName.Length > 0)
-				{
-					text = weightedSubworldName.overrideName;
-				}
-				SubWorld subWorld2 = YamlIO.LoadFile<SubWorld>(SettingsCache.RewriteWorldgenPathYaml(text), null, null);
-				if (subWorld2 != null)
-				{
-					subWorld = subWorld2;
-					subWorld.name = text;
-					subWorld.EnforceTemplateSpawnRuleSelfConsistency();
-					SettingsCache.subworlds[text] = subWorld;
-					SettingsCache.noise.LoadTree(subWorld.biomeNoise);
-					SettingsCache.noise.LoadTree(subWorld.densityNoise);
-					SettingsCache.noise.LoadTree(subWorld.overrideNoise);
-				}
-				else
-				{
-					global::Debug.LogWarning("WorldGen: Attempting to load subworld: " + text + " failed");
-				}
-				if (subWorld.centralFeature != null)
-				{
-					subWorld.centralFeature.type = SettingsCache.LoadFeature(subWorld.centralFeature.type, errors);
-				}
-				foreach (WeightedBiome weightedBiome in subWorld.biomes)
-				{
-					SettingsCache.LoadBiome(weightedBiome.name, errors);
-					DebugUtil.Assert(SettingsCache.biomes.BiomeBackgroundElementBandConfigurations.ContainsKey(weightedBiome.name), subWorld.name, "(subworld) referenced a missing biome named", weightedBiome.name);
-				}
-				DebugUtil.Assert(subWorld.features != null, "Features list for subworld", subWorld.name, "was null! Either remove it from the .yaml or set it to the empty list []");
-				foreach (Feature feature in subWorld.features)
-				{
-					feature.type = SettingsCache.LoadFeature(feature.type, errors);
-				}
+				SettingsCache.LoadSubworld(weightedSubworldName, errors);
 			}
+		}
+
+		public static SubWorld LoadSubworld(WeightedSubworldName subworldWeightedName, List<YamlIO.Error> errors)
+		{
+			SubWorld subWorld = null;
+			string text = subworldWeightedName.name;
+			SubWorld subWorld2 = SettingsCache.TryGetCachedSubWorld(text);
+			if (subWorld2 != null)
+			{
+				if (!string.IsNullOrEmpty(subworldWeightedName.overrideName))
+				{
+					SettingsCache.subworlds[subworldWeightedName.overrideName] = SerializingCloner.Copy<SubWorld>(subWorld2);
+				}
+				return subWorld2;
+			}
+			if (!string.IsNullOrEmpty(subworldWeightedName.overrideName))
+			{
+				text = subworldWeightedName.overrideName;
+			}
+			SubWorld subWorld3 = YamlIO.LoadFile<SubWorld>(SettingsCache.RewriteWorldgenPathYaml(text), null, null);
+			if (subWorld3 != null)
+			{
+				subWorld = subWorld3;
+				subWorld.name = text;
+				subWorld.EnforceTemplateSpawnRuleSelfConsistency();
+				SettingsCache.subworlds[text] = subWorld;
+				SettingsCache.noise.LoadTree(subWorld.biomeNoise);
+				SettingsCache.noise.LoadTree(subWorld.densityNoise);
+				SettingsCache.noise.LoadTree(subWorld.overrideNoise);
+			}
+			else
+			{
+				global::Debug.LogWarning("WorldGen: Attempting to load subworld: " + text + " failed");
+			}
+			if (subWorld.centralFeature != null)
+			{
+				subWorld.centralFeature.type = SettingsCache.LoadFeature(subWorld.centralFeature.type, errors);
+			}
+			foreach (WeightedBiome weightedBiome in subWorld.biomes)
+			{
+				SettingsCache.LoadBiome(weightedBiome.name, errors);
+				DebugUtil.Assert(SettingsCache.biomes.BiomeBackgroundElementBandConfigurations.ContainsKey(weightedBiome.name), subWorld.name, "(subworld) referenced a missing biome named", weightedBiome.name);
+			}
+			DebugUtil.Assert(subWorld.features != null, "Features list for subworld", subWorld.name, "was null! Either remove it from the .yaml or set it to the empty list []");
+			foreach (Feature feature in subWorld.features)
+			{
+				feature.type = SettingsCache.LoadFeature(feature.type, errors);
+			}
+			return subWorld;
 		}
 
 		public static void LoadWorldTraits(string path, string prefix, List<YamlIO.Error> errors)
@@ -321,7 +378,7 @@ namespace ProcGen
 			}
 		}
 
-		public static void LoadTrait(FileHandle file, string path, string prefix, Dictionary<string, WorldTrait> traitsDict, List<YamlIO.Error> errors)
+		private static void LoadTrait(FileHandle file, string path, string prefix, Dictionary<string, WorldTrait> traitsDict, List<YamlIO.Error> errors)
 		{
 			WorldTrait worldTrait = YamlIO.LoadFile<WorldTrait>(file, delegate(YamlIO.Error error, bool force_log_as_warning)
 			{
@@ -333,21 +390,90 @@ namespace ProcGen
 				{
 					while (enumerator.MoveNext())
 					{
-						if (DlcManager.IsContentActive(enumerator.Current))
+						if (DlcManager.IsContentSubscribed(enumerator.Current))
 						{
 							return;
 						}
 					}
 				}
 			}
-			int num = SettingsCache.FirstUncommonCharacter(path, file.full_path);
-			string text = ((num > -1) ? file.full_path.Substring(num) : file.full_path);
-			text = Path.Combine(Path.GetDirectoryName(text), Path.GetFileNameWithoutExtension(text));
-			text = text.Replace('\\', '/');
-			text = prefix + text;
+			string text = SettingsCache.FileHandleToScopedPath(file, path, prefix);
 			worldTrait.filePath = text;
 			DebugUtil.DevAssert(!traitsDict.ContainsKey(text), "Overwriting trait " + text + " already exists", null);
 			traitsDict[text] = worldTrait;
+		}
+
+		public static void LoadDlcMixingSettings(string file, string addPrefix, List<YamlIO.Error> errors)
+		{
+			if (!File.Exists(file))
+			{
+				return;
+			}
+			FileHandle fileHandle = FileSystem.FindFileHandle(file);
+			DebugUtil.Assert(!addPrefix.IsNullOrWhiteSpace(), "A mixing file can only be included in a dlc directory");
+			string dlcIdFromContentDirectory = DlcManager.GetDlcIdFromContentDirectory(addPrefix.Substring(0, addPrefix.Length - 2));
+			DlcMixingSettings dlcMixingSettings = YamlIO.LoadFile<DlcMixingSettings>(fileHandle, delegate(YamlIO.Error error, bool forceLogAsWarning)
+			{
+				errors.Add(error);
+			}, null);
+			SettingsCache.dlcMixingSettings[dlcIdFromContentDirectory] = dlcMixingSettings;
+		}
+
+		public static void LoadWorldMixingSettings(string path, string prefix, List<YamlIO.Error> errors)
+		{
+			List<FileHandle> list = new List<FileHandle>();
+			FileSystem.GetFiles(FileSystem.Normalize(Path.Combine(path, "worldMixing")), "*.yaml", list);
+			YamlIO.ErrorHandler <>9__0;
+			foreach (FileHandle fileHandle in list)
+			{
+				FileHandle fileHandle2 = fileHandle;
+				YamlIO.ErrorHandler errorHandler;
+				if ((errorHandler = <>9__0) == null)
+				{
+					errorHandler = (<>9__0 = delegate(YamlIO.Error error, bool force_log_as_warning)
+					{
+						errors.Add(error);
+					});
+				}
+				WorldMixingSettings worldMixingSettings = YamlIO.LoadFile<WorldMixingSettings>(fileHandle2, errorHandler, null);
+				worldMixingSettings.isModded = fileHandle.source.IsModded();
+				string text = SettingsCache.FileHandleToScopedPath(fileHandle, path, prefix);
+				DebugUtil.DevAssert(!SettingsCache.worldMixingSettings.ContainsKey(text), "Overwriting worldMixing " + text + " already exists", null);
+				SettingsCache.worldMixingSettings[text] = worldMixingSettings;
+			}
+		}
+
+		public static void LoadSubworldMixingSettings(string path, string prefix, List<YamlIO.Error> errors)
+		{
+			List<FileHandle> list = new List<FileHandle>();
+			FileSystem.GetFiles(FileSystem.Normalize(Path.Combine(path, "subworldMixing")), "*.yaml", list);
+			YamlIO.ErrorHandler <>9__0;
+			foreach (FileHandle fileHandle in list)
+			{
+				FileHandle fileHandle2 = fileHandle;
+				YamlIO.ErrorHandler errorHandler;
+				if ((errorHandler = <>9__0) == null)
+				{
+					errorHandler = (<>9__0 = delegate(YamlIO.Error error, bool force_log_as_warning)
+					{
+						errors.Add(error);
+					});
+				}
+				SubworldMixingSettings subworldMixingSettings = YamlIO.LoadFile<SubworldMixingSettings>(fileHandle2, errorHandler, null);
+				subworldMixingSettings.isModded = fileHandle.source.IsModded();
+				string text = SettingsCache.FileHandleToScopedPath(fileHandle, path, prefix);
+				SubWorld subWorld = SettingsCache.LoadSubworld(subworldMixingSettings.subworld, errors);
+				if (subWorld.pdWeight != 1f)
+				{
+					DebugUtil.LogWarningArgs(new object[] { "WorldgenMixing: Subworld '" + subworldMixingSettings.subworld.name + "' loaded for subworld mixing has a pdWeight that's not equal to 1 which is not recommended." });
+				}
+				if (!subWorld.borderOverride.IsNullOrWhiteSpace())
+				{
+					DebugUtil.LogWarningArgs(new object[] { "WorldgenMixing: Subworld '" + subworldMixingSettings.subworld.name + "' loaded for subworld mixing has a borderOverride which could cause issues when mixing in beside extreme temperature subworlds." });
+				}
+				DebugUtil.DevAssert(!SettingsCache.subworldMixingSettings.ContainsKey(text), "WorldgenMixing: Overwriting subworldMixing " + text + " already exists", null);
+				SettingsCache.subworldMixingSettings[text] = subworldMixingSettings;
+			}
 		}
 
 		public static List<string> GetWorldNames()
@@ -378,6 +504,9 @@ namespace ProcGen
 			SettingsCache.storyTraits.Clear();
 			SettingsCache.subworlds.Clear();
 			SettingsCache.clusterLayouts.clusterCache.Clear();
+			SettingsCache.worldMixingSettings.Clear();
+			SettingsCache.subworldMixingSettings.Clear();
+			SettingsCache.dlcMixingSettings.Clear();
 			DebugUtil.LogArgs(new object[] { "World Settings cleared!" });
 		}
 
@@ -431,6 +560,15 @@ namespace ProcGen
 			}
 		}
 
+		private static string FileHandleToScopedPath(FileHandle file, string path, string prefix)
+		{
+			int num = SettingsCache.FirstUncommonCharacter(path, file.full_path);
+			string text = ((num > -1) ? file.full_path.Substring(num) : file.full_path);
+			text = Path.Combine(Path.GetDirectoryName(text), Path.GetFileNameWithoutExtension(text));
+			text = text.Replace('\\', '/');
+			return prefix + text;
+		}
+
 		private static int FirstUncommonCharacter(string a, string b)
 		{
 			int num = Mathf.Min(a.Length, b.Length);
@@ -452,9 +590,9 @@ namespace ProcGen
 				return false;
 			}
 			SettingsCache.defaults = YamlIO.LoadFile<DefaultSettings>(SettingsCache.GetAbsoluteContentPath("", "worldgen/") + "defaults.yaml", null, null);
-			foreach (string text in DlcManager.RELEASE_ORDER)
+			foreach (string text in DlcManager.RELEASED_VERSIONS)
 			{
-				if (DlcManager.IsContentActive(text))
+				if (DlcManager.IsContentSubscribed(text))
 				{
 					SettingsCache.LoadFiles(SettingsCache.GetAbsoluteContentPath(text, "worldgen/"), SettingsCache.GetScope(text), errors);
 				}
@@ -467,9 +605,7 @@ namespace ProcGen
 		private static bool LoadFiles(string worldgenFolderPath, string addPrefix, List<YamlIO.Error> errors)
 		{
 			SettingsCache.clusterLayouts.LoadFiles(worldgenFolderPath, addPrefix, errors);
-			HashSet<string> hashSet = new HashSet<string>(from worldPlacment in SettingsCache.clusterLayouts.clusterCache.Values.SelectMany<ClusterLayout, WorldPlacement>((ClusterLayout clusterLayout) => clusterLayout.worldPlacements)
-				select worldPlacment.world);
-			SettingsCache.worlds.LoadReferencedWorlds(hashSet, errors);
+			SettingsCache.worlds.LoadFiles(worldgenFolderPath, addPrefix, errors);
 			SettingsCache.LoadWorldTraits(worldgenFolderPath, addPrefix, errors);
 			SettingsCache.LoadStoryTraits(worldgenFolderPath, addPrefix, errors);
 			foreach (KeyValuePair<string, World> keyValuePair in SettingsCache.worlds.worldCache)
@@ -502,6 +638,9 @@ namespace ProcGen
 			{
 				keyValuePair5.Value.name = keyValuePair5.Key;
 			}
+			SettingsCache.LoadDlcMixingSettings(worldgenFolderPath + "mixing.yaml", addPrefix, errors);
+			SettingsCache.LoadWorldMixingSettings(worldgenFolderPath, addPrefix, errors);
+			SettingsCache.LoadSubworldMixingSettings(worldgenFolderPath, addPrefix, errors);
 			return true;
 		}
 
@@ -609,6 +748,12 @@ namespace ProcGen
 
 		private static Dictionary<string, BiomeSettings> biomeSettingsCache = new Dictionary<string, BiomeSettings>();
 
+		private static Dictionary<string, DlcMixingSettings> dlcMixingSettings = new Dictionary<string, DlcMixingSettings>();
+
+		public static Dictionary<string, WorldMixingSettings> worldMixingSettings = new Dictionary<string, WorldMixingSettings>();
+
+		public static Dictionary<string, SubworldMixingSettings> subworldMixingSettings = new Dictionary<string, SubworldMixingSettings>();
+
 		private static string[] s_sourceDelimiter = new string[] { "::" };
 
 		private static Dictionary<string, string> s_cachedPaths = new Dictionary<string, string>();
@@ -630,5 +775,7 @@ namespace ProcGen
 		private const string WORLD_TRAITS_PATH = "traits";
 
 		private const string STORY_TRAITS_PATH = "storytraits";
+
+		private const string MIXING_FILE_PATH = "mixing";
 	}
 }

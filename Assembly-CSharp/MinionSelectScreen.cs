@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Collections;
 using FMOD.Studio;
+using Klei.CustomSettings;
+using ProcGen;
 using STRINGS;
 using UnityEngine;
 
@@ -24,6 +27,20 @@ public class MinionSelectScreen : CharacterSelectionController
 			App.LoadScene("frontend");
 		};
 		this.InitializeContainers();
+		base.StartCoroutine(this.SetDefaultMinionsRoutine());
+	}
+
+	private IEnumerator SetDefaultMinionsRoutine()
+	{
+		yield return SequenceUtil.WaitForNextFrame;
+		SettingLevel currentQualitySetting = CustomGameSettings.Instance.GetCurrentQualitySetting(CustomGameSettingConfigs.ClusterLayout);
+		if (SettingsCache.clusterLayouts.GetClusterData(currentQualitySetting.id).clusterTags.Contains("CeresCluster"))
+		{
+			((CharacterContainer)this.containers[2]).SetMinion(new MinionStartingStats(Db.Get().Personalities.Get("FREYJA"), null, null, false));
+			((CharacterContainer)this.containers[1]).GenerateCharacter(true, null);
+			((CharacterContainer)this.containers[0]).GenerateCharacter(true, null);
+		}
+		yield break;
 	}
 
 	public void SetProceedButtonActive(bool state, string tooltip = null)
@@ -75,7 +92,7 @@ public class MinionSelectScreen : CharacterSelectionController
 			CharacterContainer characterContainer = (CharacterContainer)telepadDeliverableContainer;
 			this.selectedDeliverables.Add(characterContainer.Stats);
 		}
-		NewBaseScreen.Instance.Init(SaveLoader.Instance.ClusterLayout, this.selectedDeliverables.ToArray());
+		NewBaseScreen.Instance.Init(SaveLoader.Instance.Cluster, this.selectedDeliverables.ToArray());
 		if (this.OnProceedEvent != null)
 		{
 			this.OnProceedEvent();

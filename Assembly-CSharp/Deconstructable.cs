@@ -111,6 +111,7 @@ public class Deconstructable : Workable
 
 	protected override void OnCompleteWork(Worker worker)
 	{
+		base.Trigger(-702296337, this);
 		if (this.reconstructable != null)
 		{
 			this.reconstructable.TryCommenceReconstruct();
@@ -155,7 +156,6 @@ public class Deconstructable : Workable
 				KMonoBehaviour.PlaySound3DAtLocation(sound, base.gameObject.transform.GetPosition());
 			}
 		}
-		base.Trigger(-702296337, this);
 	}
 
 	public bool HasBeenDestroyed

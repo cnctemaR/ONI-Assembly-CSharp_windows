@@ -42,7 +42,6 @@ public class SetLockerConfig : IEntityConfig
 		component.possible_contents_ids = new string[][]
 		{
 			new string[] { "Warm_Vest" },
-			new string[] { "Cool_Vest" },
 			new string[] { "Funky_Vest" }
 		};
 		component.ChooseContents();

@@ -74,7 +74,7 @@ public class Constructable : Workable, ISaveLoadable
 		}
 		else
 		{
-			this.initialTemperature = Mathf.Clamp(num2 / num, 288.15f, 318.15f);
+			this.initialTemperature = Mathf.Clamp(num2 / num, 0f, 318.15f);
 		}
 		KAnimGraphTileVisualizer component2 = base.GetComponent<KAnimGraphTileVisualizer>();
 		UtilityConnections connections = ((component2 == null) ? ((UtilityConnections)0) : component2.Connections);
@@ -243,7 +243,8 @@ public class Constructable : Workable, ISaveLoadable
 		Element element = ElementLoader.GetElement(this.SelectedElementsTags[0]);
 		global::Debug.Assert(element != null, "Missing primary element for Constructable");
 		component.ElementID = element.id;
-		component.Temperature = (component.Temperature = 293.15f);
+		float num = component.Element.highTemp - 10f;
+		component.Temperature = (component.Temperature = Mathf.Min(this.building.Def.Temperature, num));
 		foreach (Recipe.Ingredient ingredient in this.Recipe.GetAllIngredients(this.selectedElementsTags))
 		{
 			this.fetchList.Add(ingredient.tag, null, ingredient.amount, Operational.State.None);
@@ -266,24 +267,24 @@ public class Constructable : Workable, ISaveLoadable
 		});
 		if (this.IsReplacementTile && this.building.Def.ReplacementLayer != ObjectLayer.NumLayers)
 		{
-			int num = Grid.PosToCell(base.transform.GetPosition());
-			GameObject gameObject = Grid.Objects[num, (int)this.building.Def.ReplacementLayer];
+			int num2 = Grid.PosToCell(base.transform.GetPosition());
+			GameObject gameObject = Grid.Objects[num2, (int)this.building.Def.ReplacementLayer];
 			if (gameObject == null || gameObject == base.gameObject)
 			{
-				Grid.Objects[num, (int)this.building.Def.ReplacementLayer] = base.gameObject;
+				Grid.Objects[num2, (int)this.building.Def.ReplacementLayer] = base.gameObject;
 				if (base.gameObject.GetComponent<SimCellOccupier>() != null)
 				{
-					int num2 = LayerMask.NameToLayer("Overlay");
-					World.Instance.blockTileRenderer.AddBlock(num2, this.building.Def, this.IsReplacementTile, SimHashes.Void, num);
+					int num3 = LayerMask.NameToLayer("Overlay");
+					World.Instance.blockTileRenderer.AddBlock(num3, this.building.Def, this.IsReplacementTile, SimHashes.Void, num2);
 				}
-				TileVisualizer.RefreshCell(num, this.building.Def.TileLayer, this.building.Def.ReplacementLayer);
+				TileVisualizer.RefreshCell(num2, this.building.Def.TileLayer, this.building.Def.ReplacementLayer);
 			}
 			else
 			{
 				global::Debug.LogError("multiple replacement tiles on the same cell!");
 				Util.KDestroyGameObject(base.gameObject);
 			}
-			GameObject gameObject2 = Grid.Objects[num, (int)this.building.Def.ObjectLayer];
+			GameObject gameObject2 = Grid.Objects[num2, (int)this.building.Def.ObjectLayer];
 			if (gameObject2 != null)
 			{
 				Deconstructable component2 = gameObject2.GetComponent<Deconstructable>();
@@ -297,11 +298,11 @@ public class Constructable : Workable, ISaveLoadable
 		this.waitForFetchesBeforeDigging = flag || this.building.Def.BuildingComplete.GetComponent<SimCellOccupier>() || this.building.Def.BuildingComplete.GetComponent<Door>() || this.building.Def.BuildingComplete.GetComponent<LiquidPumpingStation>();
 		if (flag)
 		{
-			int num3 = 0;
 			int num4 = 0;
-			Grid.CellToXY(Grid.PosToCell(this), out num3, out num4);
-			int num5 = num4 - 3;
-			this.ladderDetectionExtents = new Extents(num3, num5, 1, 5);
+			int num5 = 0;
+			Grid.CellToXY(Grid.PosToCell(this), out num4, out num5);
+			int num6 = num5 - 3;
+			this.ladderDetectionExtents = new Extents(num4, num6, 1, 5);
 			this.ladderParititonerEntry = GameScenePartitioner.Instance.Add("Constructable.OnNearbyBuildingLayerChanged", base.gameObject, this.ladderDetectionExtents, GameScenePartitioner.Instance.objectLayers[1], new Action<object>(this.OnNearbyBuildingLayerChanged));
 			this.OnNearbyBuildingLayerChanged(null);
 		}
@@ -408,7 +409,7 @@ public class Constructable : Workable, ISaveLoadable
 				if (num == num2 || num == num3)
 				{
 					BuildingCellVisualizer component = building.gameObject.GetComponent<BuildingCellVisualizer>();
-					if (component != null && (flag ? component.RequiresPower : component.RequiresUtilityConnection))
+					if (component != null && (flag ? ((component.addedPorts & (EntityCellVisualizer.Ports.PowerIn | EntityCellVisualizer.Ports.PowerOut)) > (EntityCellVisualizer.Ports)0) : ((component.addedPorts & (EntityCellVisualizer.Ports.GasIn | EntityCellVisualizer.Ports.GasOut | EntityCellVisualizer.Ports.LiquidIn | EntityCellVisualizer.Ports.LiquidOut | EntityCellVisualizer.Ports.SolidIn | EntityCellVisualizer.Ports.SolidOut)) > (EntityCellVisualizer.Ports)0)))
 					{
 						component.ConnectedEventWithDelay(delay, connectionCount, num, soundName);
 						return true;

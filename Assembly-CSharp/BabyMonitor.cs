@@ -48,6 +48,8 @@ public class BabyMonitor : GameStateMachine<BabyMonitor, BabyMonitor.Instance, I
 		public bool forceAdultNavType;
 
 		public float adultThreshold = 5f;
+
+		public Action<GameObject> configureAdultOnMaturation;
 	}
 
 	public new class Instance : GameStateMachine<BabyMonitor, BabyMonitor.Instance, IStateMachineTarget, BabyMonitor.Def>.GameInstance
@@ -98,6 +100,10 @@ public class BabyMonitor : GameStateMachine<BabyMonitor, BabyMonitor.Instance, I
 			}
 			base.smi.gameObject.Trigger(663420073, gameObject);
 			base.smi.gameObject.DeleteObject();
+			if (base.def.configureAdultOnMaturation != null)
+			{
+				base.def.configureAdultOnMaturation(gameObject);
+			}
 		}
 	}
 }

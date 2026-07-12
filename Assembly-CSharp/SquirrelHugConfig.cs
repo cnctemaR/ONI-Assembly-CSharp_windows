@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Klei.AI;
 using STRINGS;
 using TUNING;
@@ -32,7 +33,18 @@ public class SquirrelHugConfig : IEntityConfig
 
 	public GameObject CreatePrefab()
 	{
-		return EntityTemplates.ExtendEntityToFertileCreature(SquirrelHugConfig.CreateSquirrelHug("SquirrelHug", global::STRINGS.CREATURES.SPECIES.SQUIRREL.VARIANT_HUG.NAME, global::STRINGS.CREATURES.SPECIES.SQUIRREL.VARIANT_HUG.DESC, "squirrel_kanim", false), "SquirrelHugEgg", global::STRINGS.CREATURES.SPECIES.SQUIRREL.VARIANT_HUG.EGG_NAME, global::STRINGS.CREATURES.SPECIES.SQUIRREL.VARIANT_HUG.DESC, "egg_squirrel_kanim", SquirrelTuning.EGG_MASS, "SquirrelHugBaby", 60.000004f, 20f, SquirrelTuning.EGG_CHANCES_HUG, SquirrelHugConfig.EGG_SORT_ORDER, true, false, true, 1f, false);
+		GameObject gameObject = SquirrelHugConfig.CreateSquirrelHug("SquirrelHug", global::STRINGS.CREATURES.SPECIES.SQUIRREL.VARIANT_HUG.NAME, global::STRINGS.CREATURES.SPECIES.SQUIRREL.VARIANT_HUG.DESC, "squirrel_kanim", false);
+		string text = "SquirrelHugEgg";
+		string text2 = global::STRINGS.CREATURES.SPECIES.SQUIRREL.VARIANT_HUG.EGG_NAME;
+		string text3 = global::STRINGS.CREATURES.SPECIES.SQUIRREL.VARIANT_HUG.DESC;
+		string text4 = "egg_squirrel_kanim";
+		float egg_MASS = SquirrelTuning.EGG_MASS;
+		string text5 = "SquirrelHugBaby";
+		float num = 60.000004f;
+		float num2 = 20f;
+		List<FertilityMonitor.BreedingChance> egg_CHANCES_HUG = SquirrelTuning.EGG_CHANCES_HUG;
+		int egg_SORT_ORDER = SquirrelHugConfig.EGG_SORT_ORDER;
+		return EntityTemplates.ExtendEntityToFertileCreature(gameObject, text, text2, text3, text4, egg_MASS, text5, num, num2, egg_CHANCES_HUG, this.GetDlcIds(), egg_SORT_ORDER, true, false, true, 1f, false);
 	}
 
 	public void OnPrefabInit(GameObject prefab)

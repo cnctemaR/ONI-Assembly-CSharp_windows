@@ -306,10 +306,6 @@ public class Edible : Workable, IGameObjectEffectDescriptor, ISaveLoadable, IExt
 	{
 		DebugUtil.DevAssert(this.isBeingConsumed, "StopConsuming() called without StartConsuming()", null);
 		this.isBeingConsumed = false;
-		if (this.primaryElement != null && this.primaryElement.DiseaseCount > 0)
-		{
-			new EmoteChore(worker.GetComponent<ChoreProvider>(), Db.Get().ChoreTypes.EmoteHighPriority, Db.Get().Emotes.Minion.FoodPoisoning, 1, null);
-		}
 		for (int i = 0; i < this.foodInfo.Effects.Count; i++)
 		{
 			worker.GetComponent<Effects>().Add(this.foodInfo.Effects[i], true);

@@ -311,7 +311,7 @@ public class SteamUGCService : MonoBehaviour
 				}
 				else
 				{
-					KCrashReporter.ReportDevNotification("SteamUGCService.GetQueryUGCResult details_query is an invalid handle!", Environment.StackTrace, "", false);
+					KCrashReporter.ReportDevNotification("SteamUGCService.GetQueryUGCResult details_query is an invalid handle!", Environment.StackTrace, "", false, null);
 				}
 			}
 		}
@@ -336,7 +336,7 @@ public class SteamUGCService : MonoBehaviour
 
 	private void OnDownloadItemComplete(DownloadItemResult_t callback)
 	{
-		if ((callback.m_unAppID == new AppId_t(457140U) || callback.m_unAppID == new AppId_t(1452490U)) && callback.m_eResult == EResult.k_EResultOK)
+		if (SteamManager.ONI_STEAM_APP_IDS.Contains(callback.m_unAppID) && callback.m_eResult == EResult.k_EResultOK)
 		{
 			this.queries.Add(callback.m_nPublishedFileId);
 			this.awaiting_download.Remove(callback.m_nPublishedFileId);

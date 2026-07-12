@@ -231,7 +231,7 @@ public class InterfaceTool : KMonoBehaviour
 			catch (Exception ex)
 			{
 				string text = string.Format("SetCursor Failed new_cursor={0} offset={1} mode={2}", new_cursor, offset, mode);
-				KCrashReporter.ReportDevNotification("SetCursor Failed", ex.StackTrace, text, false);
+				KCrashReporter.ReportDevNotification("SetCursor Failed", ex.StackTrace, text, false, null);
 			}
 		}
 	}

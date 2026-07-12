@@ -8,7 +8,7 @@ public class PropGravitasFloorRobotConfig : IEntityConfig
 {
 	public string[] GetDlcIds()
 	{
-		return DlcManager.AVAILABLE_EXPANSION1_ONLY;
+		return DlcManager.AVAILABLE_ALL_VERSIONS;
 	}
 
 	public GameObject CreatePrefab()

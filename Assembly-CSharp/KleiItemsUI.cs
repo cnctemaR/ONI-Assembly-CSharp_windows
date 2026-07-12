@@ -126,12 +126,27 @@ public static class KleiItemsUI
 		{
 			text = text + "\n" + permit.Description;
 		}
-		string text2 = UI.KLEI_INVENTORY_SCREEN.ITEM_RARITY_DETAILS.Replace("{RarityName}", permit.Rarity.GetLocStringName());
-		if (!string.IsNullOrWhiteSpace(text2))
+		string dlcIdFrom = permit.GetDlcIdFrom();
+		if (DlcManager.IsDlcId(dlcIdFrom))
 		{
-			text = text + "\n\n" + text2;
+			if (permit.Rarity == PermitRarity.UniversalLocked)
+			{
+				text = text + "\n\n" + UI.KLEI_INVENTORY_SCREEN.COLLECTION_COMING_SOON.Replace("{Collection}", DlcManager.GetDlcTitle(dlcIdFrom));
+			}
+			else
+			{
+				text = text + "\n\n" + UI.KLEI_INVENTORY_SCREEN.COLLECTION.Replace("{Collection}", DlcManager.GetDlcTitle(dlcIdFrom));
+			}
 		}
-		if (permit.IsOwnable() && PermitItems.GetOwnedCount(permit) <= 0)
+		else
+		{
+			string text2 = UI.KLEI_INVENTORY_SCREEN.ITEM_RARITY_DETAILS.Replace("{RarityName}", permit.Rarity.GetLocStringName());
+			if (!string.IsNullOrWhiteSpace(text2))
+			{
+				text = text + "\n\n" + text2;
+			}
+		}
+		if (permit.IsOwnableOnServer() && PermitItems.GetOwnedCount(permit) <= 0)
 		{
 			text = text + "\n\n" + KleiItemsUI.WrapWithColor(UI.KLEI_INVENTORY_SCREEN.ITEM_PLAYER_OWN_NONE, KleiItemsUI.TEXT_COLOR__PERMIT_NOT_OWNED);
 		}

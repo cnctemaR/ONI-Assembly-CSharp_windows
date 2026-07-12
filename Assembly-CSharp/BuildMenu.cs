@@ -500,21 +500,37 @@ public class BuildMenu : KScreen
 	private void OnResearchComplete(object data)
 	{
 		HashSet<HashedString> hashSet = new HashSet<HashedString>();
-		Tech tech = (Tech)data;
-		foreach (TechItem techItem in tech.unlockedItems)
+		if (data is Tech)
 		{
-			BuildingDef buildingDef = Assets.GetBuildingDef(techItem.Id);
-			if (buildingDef == null)
+			Tech tech = (Tech)data;
+			using (List<TechItem>.Enumerator enumerator = tech.unlockedItems.GetEnumerator())
 			{
-				DebugUtil.LogWarningArgs(new object[] { string.Format("Tech '{0}' unlocked building '{1}' but no such building exists", tech.Name, techItem.Id) });
-			}
-			else
-			{
-				HashedString hashedString = this.tagCategoryMap[buildingDef.Tag];
-				hashSet.Add(hashedString);
-				this.AddParentCategories(hashedString, hashSet);
+				while (enumerator.MoveNext())
+				{
+					TechItem techItem = enumerator.Current;
+					BuildingDef buildingDef = Assets.GetBuildingDef(techItem.Id);
+					if (buildingDef == null)
+					{
+						DebugUtil.LogWarningArgs(new object[] { string.Format("Tech '{0}' unlocked building '{1}' but no such building exists", tech.Name, techItem.Id) });
+					}
+					else
+					{
+						HashedString hashedString = this.tagCategoryMap[buildingDef.Tag];
+						hashSet.Add(hashedString);
+						this.AddParentCategories(hashedString, hashSet);
+					}
+				}
+				goto IL_00E0;
 			}
 		}
+		if (data is BuildingDef)
+		{
+			BuildingDef buildingDef2 = data as BuildingDef;
+			HashedString hashedString2 = this.tagCategoryMap[buildingDef2.Tag];
+			hashSet.Add(hashedString2);
+			this.AddParentCategories(hashedString2, hashSet);
+		}
+		IL_00E0:
 		this.UpdateNotifications(hashSet, BuildMenu.OrderedBuildings);
 	}
 
@@ -584,6 +600,8 @@ public class BuildMenu : KScreen
 			new BuildMenu.DisplayInfo(BuildMenu.CacheHashString("Tiles"), "icon_category_base", global::Action.BuildCategoryTiles, KKeyCode.T, new List<BuildMenu.BuildingInfo>
 			{
 				new BuildMenu.BuildingInfo("Tile", global::Action.BuildMenuKeyT),
+				new BuildMenu.BuildingInfo("SnowTile", global::Action.BuildMenuKeyS),
+				new BuildMenu.BuildingInfo("WoodTile", global::Action.BuildMenuKeyO),
 				new BuildMenu.BuildingInfo("GasPermeableMembrane", global::Action.BuildMenuKeyA),
 				new BuildMenu.BuildingInfo("MeshTile", global::Action.BuildMenuKeyE),
 				new BuildMenu.BuildingInfo("InsulationTile", global::Action.BuildMenuKeyD),
@@ -642,6 +660,7 @@ public class BuildMenu : KScreen
 			{
 				new BuildMenu.BuildingInfo("MicrobeMusher", global::Action.BuildMenuKeyC),
 				new BuildMenu.BuildingInfo("CookingStation", global::Action.BuildMenuKeyG),
+				new BuildMenu.BuildingInfo("Deepfryer", global::Action.BuildMenuKeyG),
 				new BuildMenu.BuildingInfo("SpiceGrinder", global::Action.BuildMenuKeyG),
 				new BuildMenu.BuildingInfo("GourmetCookingStation", global::Action.BuildMenuKeyS),
 				new BuildMenu.BuildingInfo("EggCracker", global::Action.BuildMenuKeyE)
@@ -690,6 +709,7 @@ public class BuildMenu : KScreen
 				new BuildMenu.BuildingInfo("FloorLamp", global::Action.BuildMenuKeyF),
 				new BuildMenu.BuildingInfo("CeilingLight", global::Action.BuildMenuKeyT),
 				new BuildMenu.BuildingInfo("SunLamp", global::Action.BuildMenuKeyS),
+				new BuildMenu.BuildingInfo("MercuryCeilingLight", global::Action.BuildMenuKeyM),
 				new BuildMenu.BuildingInfo("RadiationLight", global::Action.BuildMenuKeyR)
 			}),
 			new BuildMenu.DisplayInfo(BuildMenu.CacheHashString("Decor"), "icon_category_furniture", global::Action.BuildCategoryDecor, KKeyCode.D, new List<BuildMenu.BuildingInfo>
@@ -775,6 +795,7 @@ public class BuildMenu : KScreen
 			}),
 			new BuildMenu.DisplayInfo(BuildMenu.CacheHashString("Plumbing Structures"), "icon_category_plumbing", global::Action.BuildCategoryPlumbingStructures, KKeyCode.B, new List<BuildMenu.BuildingInfo>
 			{
+				new BuildMenu.BuildingInfo("IceKettle", global::Action.BuildMenuKeyI),
 				new BuildMenu.BuildingInfo("LiquidPumpingStation", global::Action.BuildMenuKeyD),
 				new BuildMenu.BuildingInfo("BottleEmptier", global::Action.BuildMenuKeyB),
 				new BuildMenu.BuildingInfo("LiquidPump", global::Action.BuildMenuKeyQ),
@@ -813,6 +834,7 @@ public class BuildMenu : KScreen
 			{
 				new BuildMenu.BuildingInfo("MineralDeoxidizer", global::Action.BuildMenuKeyX),
 				new BuildMenu.BuildingInfo("SublimationStation", global::Action.BuildMenuKeyS),
+				new BuildMenu.BuildingInfo("Oxysconce", global::Action.BuildMenuKeyT),
 				new BuildMenu.BuildingInfo("AlgaeHabitat", global::Action.BuildMenuKeyA),
 				new BuildMenu.BuildingInfo("AirFilter", global::Action.BuildMenuKeyD),
 				new BuildMenu.BuildingInfo("CO2Scrubber", global::Action.BuildMenuKeyC),
@@ -821,6 +843,8 @@ public class BuildMenu : KScreen
 			}),
 			new BuildMenu.DisplayInfo(BuildMenu.CacheHashString("Utilities"), "icon_category_utilities", global::Action.BuildCategoryUtilities, KKeyCode.T, new List<BuildMenu.BuildingInfo>
 			{
+				new BuildMenu.BuildingInfo("Campfire", global::Action.BuildMenuKeyG),
+				new BuildMenu.BuildingInfo("DevHeater", global::Action.BuildMenuKeyH),
 				new BuildMenu.BuildingInfo("SpaceHeater", global::Action.BuildMenuKeyS),
 				new BuildMenu.BuildingInfo("LiquidHeater", global::Action.BuildMenuKeyT),
 				new BuildMenu.BuildingInfo("IceCooledFan", global::Action.BuildMenuKeyQ),

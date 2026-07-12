@@ -17,6 +17,7 @@ public class LeadSuitConfig : IEquipmentConfig
 		List<AttributeModifier> list = new List<AttributeModifier>();
 		list.Add(new AttributeModifier(global::TUNING.EQUIPMENT.ATTRIBUTE_MOD_IDS.ATHLETICS, (float)global::TUNING.EQUIPMENT.SUITS.LEADSUIT_ATHLETICS, global::STRINGS.EQUIPMENT.PREFABS.LEAD_SUIT.NAME, false, false, true));
 		list.Add(new AttributeModifier(Db.Get().Attributes.ScaldingThreshold.Id, (float)global::TUNING.EQUIPMENT.SUITS.LEADSUIT_SCALDING, global::STRINGS.EQUIPMENT.PREFABS.LEAD_SUIT.NAME, false, false, true));
+		list.Add(new AttributeModifier(Db.Get().Attributes.ScoldingThreshold.Id, (float)global::TUNING.EQUIPMENT.SUITS.LEADSUIT_SCOLDING, global::STRINGS.EQUIPMENT.PREFABS.LEAD_SUIT.NAME, false, false, true));
 		list.Add(new AttributeModifier(Db.Get().Attributes.RadiationResistance.Id, global::TUNING.EQUIPMENT.SUITS.LEADSUIT_RADIATION_SHIELDING, global::STRINGS.EQUIPMENT.PREFABS.LEAD_SUIT.NAME, false, false, true));
 		list.Add(new AttributeModifier(Db.Get().Attributes.Strength.Id, (float)global::TUNING.EQUIPMENT.SUITS.LEADSUIT_STRENGTH, global::STRINGS.EQUIPMENT.PREFABS.LEAD_SUIT.NAME, false, false, true));
 		list.Add(new AttributeModifier(global::TUNING.EQUIPMENT.ATTRIBUTE_MOD_IDS.INSULATION, (float)global::TUNING.EQUIPMENT.SUITS.LEADSUIT_INSULATION, global::STRINGS.EQUIPMENT.PREFABS.LEAD_SUIT.NAME, false, false, true));
@@ -28,7 +29,7 @@ public class LeadSuitConfig : IEquipmentConfig
 			GameTags.Clothes
 		}, null);
 		equipmentDef.wornID = "Worn_Lead_Suit";
-		equipmentDef.RecipeDescription = global::STRINGS.EQUIPMENT.PREFABS.ATMO_SUIT.RECIPE_DESC;
+		equipmentDef.RecipeDescription = global::STRINGS.EQUIPMENT.PREFABS.LEAD_SUIT.RECIPE_DESC;
 		equipmentDef.EffectImmunites.Add(Db.Get().effects.Get("SoakingWet"));
 		equipmentDef.EffectImmunites.Add(Db.Get().effects.Get("WetFeet"));
 		equipmentDef.EffectImmunites.Add(Db.Get().effects.Get("PoppedEarDrums"));

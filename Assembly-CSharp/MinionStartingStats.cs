@@ -159,9 +159,15 @@ public class MinionStartingStats : ITelepadDeliverable
 
 	private int GenerateTraits(bool is_starter_minion, List<ChoreGroup> disabled_chore_groups, string guaranteedAptitudeID = null, string guaranteedTraitID = null, bool isDebugMinion = false)
 	{
-		int statDelta = 0;
-		List<string> selectedTraits = new List<string>();
-		KRandom randSeed = new KRandom();
+		MinionStartingStats.<>c__DisplayClass17_0 CS$<>8__locals1 = new MinionStartingStats.<>c__DisplayClass17_0();
+		CS$<>8__locals1.<>4__this = this;
+		CS$<>8__locals1.is_starter_minion = is_starter_minion;
+		CS$<>8__locals1.isDebugMinion = isDebugMinion;
+		CS$<>8__locals1.guaranteedAptitudeID = guaranteedAptitudeID;
+		CS$<>8__locals1.disabled_chore_groups = disabled_chore_groups;
+		CS$<>8__locals1.statDelta = 0;
+		CS$<>8__locals1.selectedTraits = new List<string>();
+		CS$<>8__locals1.randSeed = new KRandom();
 		Trait trait = Db.Get().traits.Get(this.personality.stresstrait);
 		this.stressTrait = trait;
 		Trait trait2 = Db.Get().traits.Get(this.personality.joyTrait);
@@ -178,7 +184,7 @@ public class MinionStartingStats : ITelepadDeliverable
 		}
 		Func<List<DUPLICANTSTATS.TraitVal>, bool, bool> func = delegate(List<DUPLICANTSTATS.TraitVal> traitPossibilities, bool positiveTrait)
 		{
-			if (this.Traits.Count > DUPLICANTSTATS.MAX_TRAITS)
+			if (CS$<>8__locals1.<>4__this.Traits.Count > DUPLICANTSTATS.MAX_TRAITS)
 			{
 				return false;
 			}
@@ -193,7 +199,7 @@ public class MinionStartingStats : ITelepadDeliverable
 				}
 				if (DUPLICANTSTATS.rarityDeckActive.Count == DUPLICANTSTATS.RARITY_DECK.Count)
 				{
-					DUPLICANTSTATS.rarityDeckActive.ShuffleSeeded<int>(randSeed);
+					DUPLICANTSTATS.rarityDeckActive.ShuffleSeeded<int>(CS$<>8__locals1.randSeed);
 				}
 				num7 = DUPLICANTSTATS.rarityDeckActive[DUPLICANTSTATS.rarityDeckActive.Count - 1];
 				DUPLICANTSTATS.rarityDeckActive.RemoveAt(DUPLICANTSTATS.rarityDeckActive.Count - 1);
@@ -201,22 +207,22 @@ public class MinionStartingStats : ITelepadDeliverable
 			else
 			{
 				List<int> list = new List<int>();
-				if (is_starter_minion)
+				if (CS$<>8__locals1.is_starter_minion)
 				{
-					list.Add(this.rarityBalance - 1);
-					list.Add(this.rarityBalance);
-					list.Add(this.rarityBalance);
-					list.Add(this.rarityBalance + 1);
+					list.Add(CS$<>8__locals1.<>4__this.rarityBalance - 1);
+					list.Add(CS$<>8__locals1.<>4__this.rarityBalance);
+					list.Add(CS$<>8__locals1.<>4__this.rarityBalance);
+					list.Add(CS$<>8__locals1.<>4__this.rarityBalance + 1);
 				}
 				else
 				{
-					list.Add(this.rarityBalance - 2);
-					list.Add(this.rarityBalance - 1);
-					list.Add(this.rarityBalance);
-					list.Add(this.rarityBalance + 1);
-					list.Add(this.rarityBalance + 2);
+					list.Add(CS$<>8__locals1.<>4__this.rarityBalance - 2);
+					list.Add(CS$<>8__locals1.<>4__this.rarityBalance - 1);
+					list.Add(CS$<>8__locals1.<>4__this.rarityBalance);
+					list.Add(CS$<>8__locals1.<>4__this.rarityBalance + 1);
+					list.Add(CS$<>8__locals1.<>4__this.rarityBalance + 2);
 				}
-				list.ShuffleSeeded<int>(randSeed);
+				list.ShuffleSeeded<int>(CS$<>8__locals1.randSeed);
 				num7 = list[0];
 				num7 = Mathf.Max(DUPLICANTSTATS.RARITY_COMMON, num7);
 				num7 = Mathf.Min(DUPLICANTSTATS.RARITY_LEGENDARY, num7);
@@ -230,58 +236,49 @@ public class MinionStartingStats : ITelepadDeliverable
 					num6--;
 				}
 			}
-			list2.ShuffleSeeded<DUPLICANTSTATS.TraitVal>(randSeed);
-			foreach (DUPLICANTSTATS.TraitVal traitVal2 in list2)
+			list2.ShuffleSeeded<DUPLICANTSTATS.TraitVal>(CS$<>8__locals1.randSeed);
+			foreach (DUPLICANTSTATS.TraitVal traitVal3 in list2)
 			{
-				if (!DlcManager.IsContentActive(traitVal2.dlcId))
+				global::Debug.Assert(SaveLoader.Instance != null, "IsDLCActiveForCurrentSave should not be called from the front end");
+				if (!SaveLoader.Instance.IsDLCActiveForCurrentSave(traitVal3.dlcId))
 				{
 					num6--;
 				}
-				else if (selectedTraits.Contains(traitVal2.id))
+				else if (CS$<>8__locals1.selectedTraits.Contains(traitVal3.id))
 				{
 					num6--;
 				}
 				else
 				{
-					Trait trait5 = Db.Get().traits.TryGet(traitVal2.id);
+					Trait trait5 = Db.Get().traits.TryGet(traitVal3.id);
 					if (trait5 == null)
 					{
-						global::Debug.LogWarning("Trying to add nonexistent trait: " + traitVal2.id);
+						global::Debug.LogWarning("Trying to add nonexistent trait: " + traitVal3.id);
 						num6--;
 					}
-					else if (!isDebugMinion || trait5.disabledChoreGroups == null || trait5.disabledChoreGroups.Length == 0)
+					else if (!CS$<>8__locals1.isDebugMinion || trait5.disabledChoreGroups == null || trait5.disabledChoreGroups.Length == 0)
 					{
-						if (is_starter_minion && !trait5.ValidStarterTrait)
+						if (CS$<>8__locals1.is_starter_minion && !trait5.ValidStarterTrait)
 						{
 							num6--;
 						}
-						else if (traitVal2.doNotGenerateTrait)
+						else if (traitVal3.doNotGenerateTrait)
 						{
 							num6--;
 						}
-						else if (this.AreTraitAndAptitudesExclusive(traitVal2, this.skillAptitudes))
+						else if (CS$<>8__locals1.<>4__this.AreTraitAndAptitudesExclusive(traitVal3, CS$<>8__locals1.<>4__this.skillAptitudes))
 						{
 							num6--;
 						}
-						else if (is_starter_minion && guaranteedAptitudeID != null && this.AreTraitAndArchetypeExclusive(traitVal2, guaranteedAptitudeID))
+						else if (CS$<>8__locals1.is_starter_minion && CS$<>8__locals1.guaranteedAptitudeID != null && CS$<>8__locals1.<>4__this.AreTraitAndArchetypeExclusive(traitVal3, CS$<>8__locals1.guaranteedAptitudeID))
 						{
 							num6--;
 						}
 						else
 						{
-							if (!this.AreTraitsMutuallyExclusive(traitVal2, selectedTraits))
+							if (!CS$<>8__locals1.<>4__this.AreTraitsMutuallyExclusive(traitVal3, CS$<>8__locals1.selectedTraits))
 							{
-								selectedTraits.Add(traitVal2.id);
-								statDelta += traitVal2.statBonus;
-								this.rarityBalance += (positiveTrait ? (-traitVal2.rarity) : traitVal2.rarity);
-								this.Traits.Add(trait5);
-								if (trait5.disabledChoreGroups != null)
-								{
-									for (int k = 0; k < trait5.disabledChoreGroups.Length; k++)
-									{
-										disabled_chore_groups.Add(trait5.disabledChoreGroups[k]);
-									}
-								}
+								base.<GenerateTraits>g__SelectTrait|1(traitVal3, trait5, positiveTrait);
 								return true;
 							}
 							num6--;
@@ -293,7 +290,7 @@ public class MinionStartingStats : ITelepadDeliverable
 		};
 		int num;
 		int num2;
-		if (is_starter_minion)
+		if (CS$<>8__locals1.is_starter_minion)
 		{
 			num = 1;
 			num2 = 1;
@@ -306,12 +303,13 @@ public class MinionStartingStats : ITelepadDeliverable
 			}
 			if (DUPLICANTSTATS.podTraitConfigurationsActive.Count == DUPLICANTSTATS.POD_TRAIT_CONFIGURATIONS_DECK.Count)
 			{
-				DUPLICANTSTATS.podTraitConfigurationsActive.ShuffleSeeded<global::Tuple<int, int>>(randSeed);
+				DUPLICANTSTATS.podTraitConfigurationsActive.ShuffleSeeded<global::Tuple<int, int>>(CS$<>8__locals1.randSeed);
 			}
 			num = DUPLICANTSTATS.podTraitConfigurationsActive[DUPLICANTSTATS.podTraitConfigurationsActive.Count - 1].first;
 			num2 = DUPLICANTSTATS.podTraitConfigurationsActive[DUPLICANTSTATS.podTraitConfigurationsActive.Count - 1].second;
 			DUPLICANTSTATS.podTraitConfigurationsActive.RemoveAt(DUPLICANTSTATS.podTraitConfigurationsActive.Count - 1);
 		}
+		bool flag = false;
 		int num3 = 0;
 		int num4 = 0;
 		int num5 = (num2 + num) * 4;
@@ -322,15 +320,15 @@ public class MinionStartingStats : ITelepadDeliverable
 			{
 				Trait trait4 = Db.Get().traits.TryGet(traitVal.id);
 				bool positiveTrait2 = trait4.PositiveTrait;
-				selectedTraits.Add(traitVal.id);
-				statDelta += traitVal.statBonus;
+				CS$<>8__locals1.selectedTraits.Add(traitVal.id);
+				CS$<>8__locals1.statDelta += traitVal.statBonus;
 				this.rarityBalance += (positiveTrait2 ? (-traitVal.rarity) : traitVal.rarity);
 				this.Traits.Add(trait4);
 				if (trait4.disabledChoreGroups != null)
 				{
 					for (int i = 0; i < trait4.disabledChoreGroups.Length; i++)
 					{
-						disabled_chore_groups.Add(trait4.disabledChoreGroups[i]);
+						CS$<>8__locals1.disabled_chore_groups.Add(trait4.disabledChoreGroups[i]);
 					}
 				}
 				if (positiveTrait2)
@@ -341,6 +339,24 @@ public class MinionStartingStats : ITelepadDeliverable
 				{
 					num4++;
 				}
+			}
+		}
+		if (!flag)
+		{
+			if (this.congenitaltrait != null)
+			{
+				DUPLICANTSTATS.TraitVal traitVal2;
+				if (this.congenitaltrait.PositiveTrait)
+				{
+					num3++;
+					traitVal2 = DUPLICANTSTATS.GOODTRAITS.Find((DUPLICANTSTATS.TraitVal match) => match.id == CS$<>8__locals1.<>4__this.congenitaltrait.Id);
+				}
+				else
+				{
+					num4++;
+					traitVal2 = DUPLICANTSTATS.BADTRAITS.Find((DUPLICANTSTATS.TraitVal match) => match.id == CS$<>8__locals1.<>4__this.congenitaltrait.Id);
+				}
+				CS$<>8__locals1.<GenerateTraits>g__SelectTrait|1(traitVal2, this.congenitaltrait, this.congenitaltrait.PositiveTrait);
 			}
 		}
 		while (num5 > 0 && (num4 < num2 || num3 < num))
@@ -359,7 +375,7 @@ public class MinionStartingStats : ITelepadDeliverable
 		{
 			this.IsValid = true;
 		}
-		return statDelta;
+		return CS$<>8__locals1.statDelta;
 	}
 
 	private void GenerateAptitudes(string guaranteedAptitudeID = null)
@@ -553,10 +569,6 @@ public class MinionStartingStats : ITelepadDeliverable
 			component.Add(trait);
 		}
 		component.Add(this.stressTrait);
-		if (this.congenitaltrait != null)
-		{
-			component.Add(this.congenitaltrait);
-		}
 		component.Add(this.joyTrait);
 		go.GetComponent<MinionIdentity>().SetStickerType(this.stickerType);
 		MinionIdentity component2 = go.GetComponent<MinionIdentity>();

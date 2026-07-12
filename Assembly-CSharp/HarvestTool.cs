@@ -33,12 +33,17 @@ public class HarvestTool : DragTool
 					}
 					else if (this.options["DO_NOT_HARVEST"] == ToolParameterMenu.ToggleState.On)
 					{
+						Harvestable component = harvestDesignatable.GetComponent<Harvestable>();
+						if (component != null)
+						{
+							component.Trigger(2127324410, null);
+						}
 						harvestDesignatable.SetHarvestWhenReady(false);
 					}
-					Prioritizable component = harvestDesignatable.GetComponent<Prioritizable>();
-					if (component != null)
+					Prioritizable component2 = harvestDesignatable.GetComponent<Prioritizable>();
+					if (component2 != null)
 					{
-						component.SetMasterPriority(ToolMenu.Instance.PriorityScreen.GetLastSelectedPriority());
+						component2.SetMasterPriority(ToolMenu.Instance.PriorityScreen.GetLastSelectedPriority());
 					}
 				}
 			}

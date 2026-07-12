@@ -6,7 +6,7 @@ namespace Klei.CustomSettings
 	public class SeedSettingConfig : SettingConfig
 	{
 		public SeedSettingConfig(string id, string label, string tooltip, bool debug_only = false, bool triggers_custom_game = true)
-			: base(id, label, tooltip, "", "", -1L, -1L, debug_only, triggers_custom_game, "", "", false)
+			: base(id, label, tooltip, "", "", -1L, debug_only, triggers_custom_game, null, "", false)
 		{
 		}
 

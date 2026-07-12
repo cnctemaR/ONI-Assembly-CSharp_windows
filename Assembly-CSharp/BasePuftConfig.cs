@@ -6,12 +6,12 @@ using UnityEngine;
 
 public static class BasePuftConfig
 {
-	public static GameObject BasePuft(string id, string name, string desc, string traitId, string anim_file, bool is_baby, string symbol_override_prefix, float warningLowTemperature, float warningHighTemperature)
+	public static GameObject BasePuft(string id, string name, string desc, string traitId, string anim_file, bool is_baby, string symbol_override_prefix, float warningLowTemperature, float warningHighTemperature, float lethalLowTemperature, float lethalHighTemperature)
 	{
 		float num = 50f;
 		EffectorValues tier = DECOR.BONUS.TIER0;
 		GameObject gameObject = EntityTemplates.CreatePlacedEntity(id, name, desc, num, Assets.GetAnim(anim_file), "idle_loop", Grid.SceneLayer.Creatures, 1, 1, tier, default(EffectorValues), SimHashes.Creature, null, 293f);
-		EntityTemplates.ExtendEntityToBasicCreature(gameObject, FactionManager.FactionID.Prey, traitId, "FlyerNavGrid1x1", NavType.Hover, 32, 2f, "Meat", 1, true, true, warningLowTemperature, warningHighTemperature, warningLowTemperature - 45f, warningHighTemperature + 50f);
+		EntityTemplates.ExtendEntityToBasicCreature(gameObject, FactionManager.FactionID.Prey, traitId, "FlyerNavGrid1x1", NavType.Hover, 32, 2f, "Meat", 1, true, true, warningLowTemperature, warningHighTemperature, lethalLowTemperature, lethalHighTemperature);
 		if (!string.IsNullOrEmpty(symbol_override_prefix))
 		{
 			gameObject.AddOrGet<SymbolOverrideController>().ApplySymbolOverridesByAffix(Assets.GetAnim(anim_file), symbol_override_prefix, null, 0);
@@ -87,7 +87,7 @@ public static class BasePuftConfig
 	{
 		Diet.Info[] array = new Diet.Info[]
 		{
-			new Diet.Info(new HashSet<Tag> { consumed_tag }, producedTag, caloriesPerKg, producedConversionRate, diseaseId, diseasePerKgProduced, false, false)
+			new Diet.Info(new HashSet<Tag> { consumed_tag }, producedTag, caloriesPerKg, producedConversionRate, diseaseId, diseasePerKgProduced, false, false, false)
 		};
 		return BasePuftConfig.SetupDiet(prefab, array, caloriesPerKg, minPoopSizeInKg);
 	}
@@ -97,7 +97,7 @@ public static class BasePuftConfig
 		Diet diet = new Diet(diet_infos);
 		CreatureCalorieMonitor.Def def = prefab.AddOrGetDef<CreatureCalorieMonitor.Def>();
 		def.diet = diet;
-		def.minPoopSizeInCalories = minPoopSizeInKg * caloriesPerKg;
+		def.minConsumedCaloriesBeforePooping = minPoopSizeInKg * caloriesPerKg;
 		prefab.AddOrGetDef<GasAndLiquidConsumerMonitor.Def>().diet = diet;
 		return prefab;
 	}

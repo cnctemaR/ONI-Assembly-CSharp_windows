@@ -19,7 +19,7 @@ public class IceSculptureConfig : IBuildingConfig
 		EffectorValues none = NOISE_POLLUTION.NONE;
 		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, array, num5, buildLocationRule, new EffectorValues
 		{
-			amount = 20,
+			amount = 35,
 			radius = 8
 		}, none, 0.2f);
 		buildingDef.Floodable = false;
@@ -29,6 +29,7 @@ public class IceSculptureConfig : IBuildingConfig
 		buildingDef.ViewMode = OverlayModes.Decor.ID;
 		buildingDef.DefaultAnimState = "slab";
 		buildingDef.PermittedRotations = PermittedRotations.FlipH;
+		buildingDef.Temperature = 253.15f;
 		return buildingDef;
 	}
 

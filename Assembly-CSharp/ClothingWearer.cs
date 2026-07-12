@@ -45,9 +45,21 @@ public class ClothingWearer : KMonoBehaviour
 		if (this.currentClothing == null)
 		{
 			this.ChangeToDefaultClothes();
-			return;
 		}
-		this.ChangeClothes(this.currentClothing);
+		else
+		{
+			this.ChangeClothes(this.currentClothing);
+		}
+		this.spawnApplyClothesHandle = GameScheduler.Instance.Schedule("ApplySpawnClothes", 2f, delegate(object obj)
+		{
+			base.GetComponent<CreatureSimTemperatureTransfer>().RefreshRegistration();
+		}, null, null);
+	}
+
+	protected override void OnCleanUp()
+	{
+		this.spawnApplyClothesHandle.ClearScheduler();
+		base.OnCleanUp();
 	}
 
 	public void ChangeClothes(ClothingWearer.ClothingInfo clothingInfo)
@@ -66,6 +78,8 @@ public class ClothingWearer : KMonoBehaviour
 
 	private DecorProvider decorProvider;
 
+	private SchedulerHandle spawnApplyClothesHandle;
+
 	private AttributeModifier decorModifier;
 
 	private AttributeModifier conductivityModifier;
@@ -83,6 +97,66 @@ public class ClothingWearer : KMonoBehaviour
 			this.homeostasisEfficiencyMultiplier = _homeostasisEfficiencyMultiplier;
 		}
 
+		public static void OnEquipVest(Equippable eq, ClothingWearer.ClothingInfo clothingInfo)
+		{
+			if (eq == null || eq.assignee == null)
+			{
+				return;
+			}
+			Ownables soleOwner = eq.assignee.GetSoleOwner();
+			if (soleOwner == null)
+			{
+				return;
+			}
+			ClothingWearer component = (soleOwner.GetComponent<MinionAssignablesProxy>().target as KMonoBehaviour).GetComponent<ClothingWearer>();
+			if (component != null)
+			{
+				component.ChangeClothes(clothingInfo);
+				return;
+			}
+			global::Debug.LogWarning("Clothing item cannot be equipped to assignee because they lack ClothingWearer component");
+		}
+
+		public static void OnUnequipVest(Equippable eq)
+		{
+			if (eq != null && eq.assignee != null)
+			{
+				Ownables soleOwner = eq.assignee.GetSoleOwner();
+				if (soleOwner == null)
+				{
+					return;
+				}
+				MinionAssignablesProxy component = soleOwner.GetComponent<MinionAssignablesProxy>();
+				if (component == null)
+				{
+					return;
+				}
+				GameObject targetGameObject = component.GetTargetGameObject();
+				if (targetGameObject == null)
+				{
+					return;
+				}
+				ClothingWearer component2 = targetGameObject.GetComponent<ClothingWearer>();
+				if (component2 == null)
+				{
+					return;
+				}
+				component2.ChangeToDefaultClothes();
+			}
+		}
+
+		public static void SetupVest(GameObject go)
+		{
+			go.GetComponent<KPrefabID>().AddTag(GameTags.Clothes, false);
+			Equippable equippable = go.GetComponent<Equippable>();
+			if (equippable == null)
+			{
+				equippable = go.AddComponent<Equippable>();
+			}
+			equippable.SetQuality(global::QualityLevel.Poor);
+			go.GetComponent<KBatchedAnimController>().sceneLayer = Grid.SceneLayer.BuildingBack;
+		}
+
 		[Serialize]
 		public string name = "";
 
@@ -97,7 +171,7 @@ public class ClothingWearer : KMonoBehaviour
 
 		public static readonly ClothingWearer.ClothingInfo BASIC_CLOTHING = new ClothingWearer.ClothingInfo(EQUIPMENT.PREFABS.COOL_VEST.GENERICNAME, -5, 0.0025f, -1.25f);
 
-		public static readonly ClothingWearer.ClothingInfo WARM_CLOTHING = new ClothingWearer.ClothingInfo(EQUIPMENT.PREFABS.WARM_VEST.NAME, -10, 0.01f, -1.25f);
+		public static readonly ClothingWearer.ClothingInfo WARM_CLOTHING = new ClothingWearer.ClothingInfo(EQUIPMENT.PREFABS.WARM_VEST.NAME, 0, 0.008f, -1.25f);
 
 		public static readonly ClothingWearer.ClothingInfo COOL_CLOTHING = new ClothingWearer.ClothingInfo(EQUIPMENT.PREFABS.COOL_VEST.NAME, -10, 0.0005f, 0f);
 

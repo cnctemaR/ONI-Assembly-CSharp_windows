@@ -58,7 +58,7 @@ namespace STRINGS
 				"; and the ",
 				UI.FormatAsLink("Arbor Tree", "FOREST_TREE"),
 				" which provides ",
-				UI.FormatAsLink("Lumber", "WOOD"),
+				UI.FormatAsLink("Wood", "WOOD"),
 				" as a fuel source.\n\nA symbiotic relationship exists with the ",
 				UI.FormatAsLink("Arbor Tree", "FOREST_TREE"),
 				" and the native ",
@@ -98,7 +98,7 @@ namespace STRINGS
 				UI.FormatAsLink("Wolframite", "WOLFRAMITE"),
 				" have been detected here. This is an extremely rare metal that should be preserved for ",
 				UI.FormatAsLink("Tungsten", "TUNGSTEN"),
-				"production.\n\nThough my Duplicants appear more than happy to work in the Tundra Biome for short periods of time, I will need to provide proper ",
+				" production.\n\nThough my Duplicants appear more than happy to work in the Tundra Biome for short periods of time, I will need to provide proper ",
 				UI.FormatAsLink("equipment", "EQUIPMENT"),
 				" for them to avoid adverse affects to their well-being if they are working here for longer periods."
 			});
@@ -457,7 +457,7 @@ namespace STRINGS
 
 			public static LocString DESC = string.Concat(new string[]
 			{
-				"With its abundence of ",
+				"With its abundance of ",
 				UI.FormatAsLink("Polluted Oxygen", "CONTAMINATEDOXYGEN"),
 				" and lack of clean ",
 				UI.PRE_KEYWORD,
@@ -595,6 +595,123 @@ namespace STRINGS
 				" which eat valuable resources and excrete them at half the original mass.\n\nFortunately these pests can be wrangled up and used as a good food source for my Duplicants. However, extra care must be taken to contain these critters in pens made from either double thick walls or from ",
 				UI.FormatAsLink("Refined Metal", "REFINEDMETAL"),
 				" since they are capable of burrowing through most other materials."
+			});
+		}
+
+		public static class ICECAVES
+		{
+			public static LocString NAME = "Ice Cave";
+
+			public static LocString DESC = "The Ice Cave Biome's extremely low temperatures make thermal regulation the top priority.";
+
+			public static LocString UTILITY = string.Concat(new string[]
+			{
+				"The below-freezing climate in this biome keeps elements frozen solid, but once a colony has established the means necessary to melt the abundant ",
+				UI.FormatAsLink("Ice", "ICE"),
+				" deposits, it should be able to produce enough ",
+				UI.FormatAsLink("Water", "WATER"),
+				" to meet its needs. Initial scans reveal the presence of ",
+				UI.FormatAsLink("Cinnabar Ore", "CINNABAR"),
+				" that can be used in ",
+				UI.FormatAsLink("Power", "POWER"),
+				" systems.\n\n",
+				UI.FormatAsLink("Snow", "STABLESNOW"),
+				" is a readily available construction material. Note that its structural integrity may be undermined if surrounding areas become hot enough to trigger a state change.\n\n",
+				UI.FormatAsLink("Pikeapple Bushes", "HARDSKINBERRY"),
+				" feed both Duplicants and the native ",
+				UI.FormatAsLink("Flox", "WOODDEER"),
+				", a critter whose ",
+				UI.FormatAsLink("Wood", "WOOD"),
+				", antlers offer a renewable source of fuel and attractive temperature-stable construction materials.\n\nAlthough pockets of ",
+				UI.FormatAsLink("Oxygen", "OXYGEN"),
+				" allow Duplicants to begin the work of colony-building in this biome, the key to long-term survival is the cultivation of ",
+				UI.FormatAsLink("Alveo Vera", "BLUE_GRASS"),
+				" plants. They produce harvestable ",
+				UI.FormatAsLink("Oxylite", "OXYROCK"),
+				" and their beauty--much like that of the dreamy ",
+				UI.FormatAsLink("Idylla Flower", "ICEFLOWER"),
+				"--is a wonderful salve for existential dread."
+			});
+		}
+
+		public static class CARROTQUARRY
+		{
+			public static LocString NAME = "Cool Pool";
+
+			public static LocString DESC = "The Cool Pool Biome's chilly landscape features plentiful " + UI.FormatAsLink("Ethanol", "ETHANOL") + " lakes, making it an excellent destination for a colony eager to gather fuel resources.";
+
+			public static LocString UTILITY = string.Concat(new string[]
+			{
+				UI.FormatAsLink("Plume Squash", "CARROTPLANT"),
+				" is a calorie-dense crop that thrives in ",
+				UI.FormatAsLink("Oxygen", "OXYGEN"),
+				", ",
+				UI.FormatAsLink("Polluted Oxygen", "CONTAMINATEDOXYGEN"),
+				" and ",
+				UI.FormatAsLink("Carbon Dioxide", "CARBONDIOXIDE"),
+				" environments.\n\nThey make up the ",
+				UI.FormatAsLink("Bammoths'", "BELLYSPECIES"),
+				" entire diet. These gentle giants are a joy to ranch, ",
+				UI.FormatAsLink("Meat", "MEAT"),
+				", ",
+				UI.FormatAsLink("Phosphorite", "PHOSPHORITE"),
+				", ",
+				UI.FormatAsLink("Cinnabar Ore", "CINNABARORE"),
+				" and ",
+				UI.FormatAsLink("Reed Fiber", "BASIC_FABRIC"),
+				".\n\nThe latter is of particular importance, as my Duplicants will need to wear warmly insulated clothing if they are to survive these low temperatures.\n\nInitial investigations also reveal an abundance of ",
+				UI.FormatAsLink("Iron Ore", "IRONORE"),
+				" and ",
+				UI.FormatAsLink("Igneous Rock", "IGNEOUSROCK"),
+				" in this ",
+				UI.FormatAsLink("Oxygen", "OXYGEN"),
+				"-rich environment, ideal for industrial projects."
+			});
+		}
+
+		public static class SUGARWOODS
+		{
+			public static LocString NAME = "Nectar";
+
+			public static LocString DESC = string.Concat(new string[]
+			{
+				"The ",
+				UI.FormatAsLink("snow", "SNOW"),
+				"-laden Nectar Biome is home to the massive ",
+				UI.FormatAsLink("Bonbon Tree", "SPACETREE"),
+				". This complex plant produces ",
+				UI.FormatAsLink("Nectar", "SUGARWATER"),
+				", which can be refined into ",
+				UI.FormatAsLink("Sucrose", "SUCROSE"),
+				" and ",
+				UI.FormatAsLink("Steam", "STEAM"),
+				"."
+			});
+
+			public static LocString UTILITY = string.Concat(new string[]
+			{
+				UI.FormatAsLink("Spigot Seals", "SEALSPECIES"),
+				" consume this sweet liquid and produce ",
+				UI.FormatAsLink("Ethanol", "ETHANOL"),
+				" to shore up a colony's fuel supplies. Spigot Seal ranches also yield ",
+				UI.FormatAsLink("Tallow", "TALLOW"),
+				", a greasy substance that can be used for  ",
+				UI.FormatAsLink("Food", "FOOD"),
+				" or refined into ",
+				UI.FormatAsLink("Crude Oil", "CRUDEOIL"),
+				" to support local ",
+				UI.FormatAsLink("Power", "POWER"),
+				" systems.\n\nBeneath the ",
+				UI.FormatAsLink("Snow", "SNOW"),
+				" and ",
+				UI.FormatAsLink("Ice", "ICE"),
+				" are generous deposits of solid ",
+				UI.FormatAsLink("Mercury", "MERCURY"),
+				", a rare metal that can be liquefied for use in industrial cooling systems.\n\nThis biome is truly a sight to behold: in addition to the soft charm of the occasional ",
+				UI.FormatAsLink("Idylla Flower", "ICEFLOWER"),
+				", there is something quite heartwarming about the way that the  ",
+				UI.FormatAsLink("Shine Bugs'", "LIGHTBUG"),
+				" glowing lights glitter on the frozen landscape."
 			});
 		}
 	}

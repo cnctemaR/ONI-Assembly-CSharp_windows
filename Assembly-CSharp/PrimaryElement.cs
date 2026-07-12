@@ -214,7 +214,7 @@ public class PrimaryElement : KMonoBehaviour, ISaveLoadable
 		}
 		if (temperature <= 0f)
 		{
-			KCrashReporter.Assert(false, "Tried to set PrimaryElement.Temperature to a value <= 0");
+			KCrashReporter.Assert(false, "Tried to set PrimaryElement.Temperature to a value <= 0", null);
 		}
 		this.setTemperatureCallback(this, temperature);
 	}

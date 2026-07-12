@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using TUNING;
 using UnityEngine;
 
@@ -47,6 +48,11 @@ public class ElectrolyzerConfig : IBuildingConfig
 		Storage storage = go.AddOrGet<Storage>();
 		storage.capacityKg = 2f;
 		storage.showInUI = true;
+		storage.SetDefaultStoredItemModifiers(new List<Storage.StoredItemModifier>
+		{
+			Storage.StoredItemModifier.Hide,
+			Storage.StoredItemModifier.Insulate
+		});
 		ElementConverter elementConverter = go.AddOrGet<ElementConverter>();
 		elementConverter.consumedElements = new ElementConverter.ConsumedElement[]
 		{

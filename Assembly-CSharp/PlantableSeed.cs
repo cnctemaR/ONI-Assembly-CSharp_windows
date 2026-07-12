@@ -58,7 +58,7 @@ public class PlantableSeed : KMonoBehaviour, IReceptacleDirection, IGameObjectEf
 				Util.KDestroyGameObject(pickupable.gameObject);
 				return;
 			}
-			KCrashReporter.Assert(false, "Seed has fractional total amount < 1f");
+			KCrashReporter.Assert(false, "Seed has fractional total amount < 1f", null);
 		}
 	}
 

@@ -68,21 +68,25 @@ namespace ProcGenGame
 			this.allCells = new List<int>();
 			this.availableTerrainPoints = new HashSet<int>();
 			this.availableSpawnPoints = new HashSet<int>();
-			for (int i = 0; i < Grid.HeightInCells; i++)
+			int num = (int)this.poly.bounds.y;
+			while ((float)num < this.poly.bounds.y + this.poly.bounds.height)
 			{
-				for (int j = 0; j < Grid.WidthInCells; j++)
+				int num2 = (int)this.poly.bounds.x;
+				while ((float)num2 < this.poly.bounds.x + this.poly.bounds.width)
 				{
-					if (this.poly.Contains(new Vector2((float)j, (float)i)))
+					if (this.poly.Contains(new Vector2((float)num2, (float)num)))
 					{
-						int num = Grid.XYToCell(j, i);
-						this.availableTerrainPoints.Add(num);
-						this.availableSpawnPoints.Add(num);
-						if (claimedCells.Add(num))
+						int num3 = Grid.XYToCell(num2, num);
+						this.availableTerrainPoints.Add(num3);
+						this.availableSpawnPoints.Add(num3);
+						if (claimedCells.Add(num3))
 						{
-							this.allCells.Add(num);
+							this.allCells.Add(num3);
 						}
 					}
+					num2++;
 				}
+				num++;
 			}
 			this.LogInfo("Initialise cells", "", (float)this.allCells.Count);
 		}
@@ -994,6 +998,16 @@ namespace ProcGenGame
 			return this.IsSafeToSpawnPOI(allCells, TerrainCell.relaxedNoPOISpawnTags, TerrainCell.relaxedNoPOISpawnTagSet, log);
 		}
 
+		public bool IsSafeToSpawnPOINearStart(List<TerrainCell> allCells, bool log = true)
+		{
+			return this.IsSafeToSpawnPOI(allCells, TerrainCell.noPOISpawnTagsNearStart, TerrainCell.noPOISpawnNearStartTagSet, log);
+		}
+
+		public bool IsSafeToSpawnPOINearStartRelaxed(List<TerrainCell> allCells, bool log = true)
+		{
+			return this.IsSafeToSpawnPOI(allCells, TerrainCell.relaxedNoPOISpawnTagsAllowNearStart, TerrainCell.relaxedNoPOISpawnAllowNearStartTagSet, log);
+		}
+
 		private bool IsSafeToSpawnPOI(List<TerrainCell> allCells, Tag[] noSpawnTags, TagSet noSpawnTagSet, bool log)
 		{
 			return !this.node.tags.ContainsOne(noSpawnTagSet);
@@ -1041,6 +1055,18 @@ namespace ProcGenGame
 		};
 
 		private static readonly TagSet relaxedNoPOISpawnTagSet = new TagSet(TerrainCell.relaxedNoPOISpawnTags);
+
+		private static readonly Tag[] noPOISpawnTagsNearStart = new Tag[]
+		{
+			WorldGenTags.POI,
+			WorldGenTags.Feature
+		};
+
+		private static readonly TagSet noPOISpawnNearStartTagSet = new TagSet(TerrainCell.noPOISpawnTagsNearStart);
+
+		private static readonly Tag[] relaxedNoPOISpawnTagsAllowNearStart = new Tag[] { WorldGenTags.POI };
+
+		private static readonly TagSet relaxedNoPOISpawnAllowNearStartTagSet = new TagSet(TerrainCell.relaxedNoPOISpawnTagsAllowNearStart);
 
 		public delegate void SetValuesFunction(int index, object elem, Sim.PhysicsData pd, Sim.DiseaseCell dc);
 

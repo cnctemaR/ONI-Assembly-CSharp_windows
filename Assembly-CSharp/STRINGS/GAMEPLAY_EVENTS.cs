@@ -8,11 +8,11 @@ namespace STRINGS
 
 		public static LocString CANCELED_TOOLTIP = "The {0} event was canceled";
 
-		public static LocString DEFAULT_OPTION_NAME = "Okay";
+		public static LocString DEFAULT_OPTION_NAME = "OK";
 
 		public static LocString DEFAULT_OPTION_CONSIDER_NAME = "Let me think about it";
 
-		public static LocString CHAIN_EVENT_TOOLTIP = "This event is a chain event.";
+		public static LocString CHAIN_EVENT_TOOLTIP = "This event is a chain event";
 
 		public static LocString BONUS_EVENT_DESCRIPTION = "{effects} for {duration}";
 

@@ -12,7 +12,7 @@ public class LaunchInitializer : MonoBehaviour
 
 	public static int UpdateNumber()
 	{
-		return 51;
+		return 52;
 	}
 
 	private void Update()
@@ -29,8 +29,8 @@ public class LaunchInitializer : MonoBehaviour
 			}
 			GraphicsOptionsScreen.SetSettingsFromPrefs();
 			Util.ApplyInvariantCultureToThread(Thread.CurrentThread);
-			global::Debug.Log("Current date: " + global::System.DateTime.Now.ToString());
-			global::Debug.Log("release Build: " + BuildWatermark.GetBuildText());
+			global::Debug.Log("Date: " + global::System.DateTime.Now.ToString());
+			global::Debug.Log("Build: " + BuildWatermark.GetBuildText() + " (release)");
 			global::UnityEngine.Object.DontDestroyOnLoad(base.gameObject);
 			KPlayerPrefs.instance.Load();
 			DistributionPlatform.Initialize();
@@ -40,8 +40,15 @@ public class LaunchInitializer : MonoBehaviour
 			return;
 		}
 		global::Debug.Log("DistributionPlatform initialized.");
-		global::Debug.Log("release Build: " + BuildWatermark.GetBuildText());
-		global::Debug.Log(string.Format("EXPANSION1 installed: {0}  active: {1}", DlcManager.IsExpansion1Installed(), DlcManager.IsExpansion1Active()));
+		DebugUtil.LogArgs(new object[] { DebugUtil.LINE });
+		global::Debug.Log("Build: " + BuildWatermark.GetBuildText() + " (release)");
+		DebugUtil.LogArgs(new object[] { DebugUtil.LINE });
+		DebugUtil.LogArgs(new object[] { "DLC Information" });
+		foreach (string text in DlcManager.GetOwnedDLCIds())
+		{
+			global::Debug.Log(string.Format("- {0} loaded: {1}", text, DlcManager.IsContentSubscribed(text)));
+		}
+		DebugUtil.LogArgs(new object[] { DebugUtil.LINE });
 		KFMOD.Initialize();
 		for (int i = 0; i < this.SpawnPrefabs.Length; i++)
 		{
@@ -78,9 +85,9 @@ public class LaunchInitializer : MonoBehaviour
 
 	private const string PREFIX = "U";
 
-	private const int UPDATE_NUMBER = 51;
+	private const int UPDATE_NUMBER = 52;
 
-	private static readonly string BUILD_PREFIX = "U" + 51.ToString();
+	private static readonly string BUILD_PREFIX = "U" + 52.ToString();
 
 	public GameObject[] SpawnPrefabs;
 

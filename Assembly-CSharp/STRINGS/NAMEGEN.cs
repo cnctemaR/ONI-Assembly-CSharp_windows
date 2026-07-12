@@ -1118,6 +1118,8 @@ namespace STRINGS
 
 				public static LocString TUNDRA = "Brr'\nSnow\nTundr\nBlizz\nFreez\nChill\nFrig\nFroid\nCold\nFrost\n";
 
+				public static LocString CERES = "Wintr\nPolar\nSubzer\nImpass\nGlac\nBlust\nShivrr\n";
+
 				public static LocString MAGMA = "Fier\nMagm\nToast\nScorch\nBurn\nObsid\nLav\nMelt\nHot\nChar\n";
 
 				public static LocString SWAMP = "Goop\nMud\nMuck\nGross\nStink\nSmell\nYuck\nReek\nBlag\nSogg\nDripp\nUgh\nPustul\nIck\nCurd\nSlop\nPhlegm\nGurg\nSmear\nOoz\n";
@@ -1133,7 +1135,7 @@ namespace STRINGS
 
 			public class SUFFIXES
 			{
-				public static LocString GENERICLIST = "oni\nini\nani\nona\nina\nino\nano\nalin\nelin\nolin\nial\niol\niel\nila\nola\nera\nora\nato\nito\nilios\nista\nazon\nibo\n";
+				public static LocString GENERICLIST = "oni\nini\nani\nona\nina\nino\nano\nalin\nelin\nolin\nial\niol\niel\nela\nila\nola\nera\nora\nato\nito\nilios\nista\nazon\nibo\n";
 			}
 		}
 

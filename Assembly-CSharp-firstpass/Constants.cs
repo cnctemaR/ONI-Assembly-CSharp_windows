@@ -9,6 +9,8 @@ public static class Constants
 
 	public const float SECONDS_PER_CYCLE = 600f;
 
+	public const string TMP_ONI_ICONS_ASSET_NAME = "\"oni_sprite_assets\"";
+
 	public const int ScheduleBlocksPerCycle = 24;
 
 	public const int NIGHT_BLOCKS = 3;

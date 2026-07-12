@@ -3,6 +3,24 @@ using UnityEngine;
 
 public class MeterController
 {
+	public static float StandardLerp(float percentage, int frames)
+	{
+		return percentage;
+	}
+
+	public static float MinMaxStepLerp(float percentage, int frames)
+	{
+		if ((double)percentage <= 0.0 || frames <= 1)
+		{
+			return 0f;
+		}
+		if ((double)percentage >= 1.0 || frames == 2)
+		{
+			return 1f;
+		}
+		return (1f + percentage * (float)(frames - 2)) / (float)frames;
+	}
+
 	public KBatchedAnimController meterController { get; private set; }
 
 	public MeterController(KMonoBehaviour target, Meter.Offset front_back, Grid.SceneLayer user_specified_render_layer, params string[] symbols_to_hide)
@@ -100,7 +118,7 @@ public class MeterController
 		{
 			return;
 		}
-		this.meterController.SetPositionPercent(percent_full);
+		this.meterController.SetPositionPercent(this.interpolateFunction(percent_full, this.meterController.GetCurrentNumFrames()));
 	}
 
 	public void SetSymbolTint(KAnimHashedString symbol, Color32 colour)
@@ -121,6 +139,8 @@ public class MeterController
 	}
 
 	public GameObject gameObject;
+
+	public Func<float, int, float> interpolateFunction = new Func<float, int, float>(MeterController.MinMaxStepLerp);
 
 	private KAnimLink link;
 }

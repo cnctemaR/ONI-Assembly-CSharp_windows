@@ -14,13 +14,13 @@ namespace Klei.Input
 			}
 		}
 
-		protected override void Uproot(Uprootable uprootable)
+		protected override void EntityDig(IDigActionEntity digActionEntity)
 		{
-			if (uprootable == null)
+			if (digActionEntity == null)
 			{
 				return;
 			}
-			uprootable.AddTag(GameTags.Uprooted);
+			digActionEntity.Dig();
 		}
 	}
 }

@@ -25,6 +25,15 @@ public class AllResourcesScreen : ShowOptimizedKScreen, ISim4000ms, ISim1000ms
 		base.OnForcedCleanUp();
 	}
 
+	public void SetFilter(string filter)
+	{
+		if (string.IsNullOrEmpty(filter))
+		{
+			filter = "";
+		}
+		this.searchInputField.text = filter;
+	}
+
 	public void Init()
 	{
 		if (this.initialized)
@@ -70,7 +79,9 @@ public class AllResourcesScreen : ShowOptimizedKScreen, ISim4000ms, ISim1000ms
 			ManagementMenu.Instance.CloseAll();
 			AllDiagnosticsScreen.Instance.Show(false);
 			this.RefreshRows();
+			return;
 		}
+		this.SetFilter(null);
 	}
 
 	public override void OnKeyDown(KButtonEvent e)
@@ -281,8 +292,8 @@ public class AllResourcesScreen : ShowOptimizedKScreen, ISim4000ms, ISim1000ms
 	private bool PassesSearchFilter(Tag tag, string filter)
 	{
 		filter = filter.ToUpper();
-		string text = tag.ProperName().ToUpper();
-		return !(filter != "") || text.Contains(filter) || tag.Name.ToUpper().Contains(filter);
+		string text = tag.ProperNameStripLink().ToUpper();
+		return !(filter != "") || text.Contains(filter);
 	}
 
 	private void EnableCategoriesByActiveChildren()

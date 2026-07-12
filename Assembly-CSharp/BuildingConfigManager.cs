@@ -51,6 +51,7 @@ public class BuildingConfigManager : KMonoBehaviour
 		gameObject.name = buildingDef.PrefabID + "Template";
 		gameObject.GetComponent<Building>().Def = buildingDef;
 		gameObject.GetComponent<OccupyArea>().SetCellOffsets(buildingDef.PlacementOffsets);
+		gameObject.AddTag(GameTags.RoomProberBuilding);
 		if (buildingDef.Deprecated)
 		{
 			gameObject.GetComponent<KPrefabID>().AddTag(GameTags.DeprecatedContent, false);

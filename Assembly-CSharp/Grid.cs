@@ -483,12 +483,6 @@ public class Grid
 		return false;
 	}
 
-	public static bool IsCellOffsetOf(int cell, GameObject target, CellOffset[] target_offsets)
-	{
-		int num = Grid.PosToCell(target);
-		return Grid.IsCellOffsetOf(cell, num, target_offsets);
-	}
-
 	public static int GetCellDistance(int cell_a, int cell_b)
 	{
 		int num;

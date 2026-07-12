@@ -28,7 +28,7 @@ public class VomitChore : Chore<VomitChore.StatesInstance>
 		private static bool CanEmitLiquid(int cell)
 		{
 			bool flag = true;
-			if (Grid.Solid[cell] || (Grid.Properties[cell] & 2) != 0)
+			if (!Grid.IsValidCell(cell) || Grid.Solid[cell] || (Grid.Properties[cell] & 2) != 0)
 			{
 				flag = false;
 			}
@@ -93,10 +93,10 @@ public class VomitChore : Chore<VomitChore.StatesInstance>
 		{
 			default_state = this.moveto;
 			base.Target(this.vomiter);
-			this.root.ToggleAnims("anim_emotes_default_kanim", 0f, "");
-			this.moveto.TriggerOnEnter(GameHashes.BeginWalk, null).TriggerOnExit(GameHashes.EndWalk, null).ToggleAnims("anim_loco_vomiter_kanim", 0f, "")
+			this.root.ToggleAnims("anim_emotes_default_kanim", 0f);
+			this.moveto.TriggerOnEnter(GameHashes.BeginWalk, null).TriggerOnExit(GameHashes.EndWalk, null).ToggleAnims("anim_loco_vomiter_kanim", 0f)
 				.MoveTo((VomitChore.StatesInstance smi) => smi.GetVomitCell(), this.vomit, this.vomit, false);
-			this.vomit.DefaultState(this.vomit.buildup).ToggleAnims("anim_vomit_kanim", 0f, "").ToggleStatusItem((VomitChore.StatesInstance smi) => smi.statusItem, null)
+			this.vomit.DefaultState(this.vomit.buildup).ToggleAnims("anim_vomit_kanim", 0f).ToggleStatusItem((VomitChore.StatesInstance smi) => smi.statusItem, null)
 				.DoNotification((VomitChore.StatesInstance smi) => smi.notification)
 				.DoTutorial(Tutorial.TutorialMessages.TM_Mopping)
 				.Enter(delegate(VomitChore.StatesInstance smi)

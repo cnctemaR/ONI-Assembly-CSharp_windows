@@ -21,4 +21,13 @@ public class Painting : Artable
 		base.OnCleanUp();
 		Components.Paintings.Remove(this);
 	}
+
+	public override void SetStage(string stage_id, bool skip_effect)
+	{
+		base.SetStage(stage_id, skip_effect);
+		if (Db.GetArtableStages().Get(stage_id) == null)
+		{
+			Debug.LogError("Missing stage: " + stage_id);
+		}
+	}
 }

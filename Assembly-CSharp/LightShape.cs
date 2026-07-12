@@ -3,5 +3,6 @@
 public enum LightShape
 {
 	Circle,
-	Cone
+	Cone,
+	Quad
 }

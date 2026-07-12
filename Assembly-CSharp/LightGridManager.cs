@@ -4,6 +4,34 @@ using UnityEngine;
 
 public static class LightGridManager
 {
+	public static int ComputeFalloff(float fallOffRate, int cell, int originCell, global::LightShape lightShape, DiscreteShadowCaster.Direction lightDirection)
+	{
+		int num = originCell;
+		if (lightShape == global::LightShape.Quad)
+		{
+			Vector2I vector2I = Grid.CellToXY(num);
+			Vector2I vector2I2 = Grid.CellToXY(cell);
+			switch (lightDirection)
+			{
+			case DiscreteShadowCaster.Direction.North:
+			case DiscreteShadowCaster.Direction.South:
+			{
+				Vector2I vector2I3 = new Vector2I(vector2I2.x, vector2I.y);
+				num = Grid.XYToCell(vector2I3.x, vector2I3.y);
+				break;
+			}
+			case DiscreteShadowCaster.Direction.East:
+			case DiscreteShadowCaster.Direction.West:
+			{
+				Vector2I vector2I3 = new Vector2I(vector2I.x, vector2I2.y);
+				num = Grid.XYToCell(vector2I3.x, vector2I3.y);
+				break;
+			}
+			}
+		}
+		return LightGridManager.CalculateFalloff(fallOffRate, cell, num);
+	}
+
 	private static int CalculateFalloff(float falloffRate, int cell, int origin)
 	{
 		return Mathf.Max(1, Mathf.RoundToInt(falloffRate * (float)Mathf.Max(Grid.GetCellDistance(origin, cell), 1)));
@@ -31,15 +59,20 @@ public static class LightGridManager
 
 	public static void CreatePreview(int origin_cell, float radius, global::LightShape shape, int lux)
 	{
+		LightGridManager.CreatePreview(origin_cell, radius, shape, lux, 0, DiscreteShadowCaster.Direction.South);
+	}
+
+	public static void CreatePreview(int origin_cell, float radius, global::LightShape shape, int lux, int width, DiscreteShadowCaster.Direction direction)
+	{
 		LightGridManager.previewLightCells.Clear();
 		ListPool<int, LightGridManager.LightGridEmitter>.PooledList pooledList = ListPool<int, LightGridManager.LightGridEmitter>.Allocate();
 		pooledList.Add(origin_cell);
-		DiscreteShadowCaster.GetVisibleCells(origin_cell, pooledList, (int)radius, shape, true);
+		DiscreteShadowCaster.GetVisibleCells(origin_cell, pooledList, (int)radius, width, direction, shape, true);
 		foreach (int num in pooledList)
 		{
 			if (Grid.IsValidCell(num))
 			{
-				int num2 = lux / LightGridManager.CalculateFalloff(0.5f, num, origin_cell);
+				int num2 = lux / LightGridManager.ComputeFalloff(0.5f, num, origin_cell, shape, direction);
 				LightGridManager.previewLightCells.Add(new global::Tuple<int, int>(num, num2));
 				LightGridManager.previewLux[num] = num2;
 			}
@@ -57,7 +90,7 @@ public static class LightGridManager
 	{
 		public void UpdateLitCells()
 		{
-			DiscreteShadowCaster.GetVisibleCells(this.state.origin, this.litCells, (int)this.state.radius, this.state.shape, true);
+			DiscreteShadowCaster.GetVisibleCells(this.state.origin, this.litCells, (int)this.state.radius, this.state.width, this.state.direction, this.state.shape, true);
 		}
 
 		public void AddToGrid(bool update_lit_cells)
@@ -110,7 +143,7 @@ public static class LightGridManager
 
 		private int ComputeFalloff(int cell)
 		{
-			return LightGridManager.CalculateFalloff(this.state.falloffRate, this.state.origin, cell);
+			return LightGridManager.ComputeFalloff(this.state.falloffRate, cell, this.state.origin, this.state.shape, this.state.direction);
 		}
 
 		private LightGridManager.LightGridEmitter.State state = LightGridManager.LightGridEmitter.State.DEFAULT;
@@ -122,12 +155,16 @@ public static class LightGridManager
 		{
 			public bool Equals(LightGridManager.LightGridEmitter.State rhs)
 			{
-				return this.origin == rhs.origin && this.shape == rhs.shape && this.radius == rhs.radius && this.intensity == rhs.intensity && this.falloffRate == rhs.falloffRate && this.colour == rhs.colour;
+				return this.origin == rhs.origin && this.shape == rhs.shape && this.radius == rhs.radius && this.intensity == rhs.intensity && this.falloffRate == rhs.falloffRate && this.colour == rhs.colour && this.width == rhs.width && this.direction == rhs.direction;
 			}
 
 			public int origin;
 
 			public global::LightShape shape;
+
+			public int width;
+
+			public DiscreteShadowCaster.Direction direction;
 
 			public float radius;
 
@@ -144,7 +181,9 @@ public static class LightGridManager
 				radius = 4f,
 				intensity = 1,
 				falloffRate = 0.5f,
-				colour = Color.white
+				colour = Color.white,
+				direction = DiscreteShadowCaster.Direction.South,
+				width = 4
 			};
 		}
 	}

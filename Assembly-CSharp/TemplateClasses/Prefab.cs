@@ -11,7 +11,7 @@ namespace TemplateClasses
 			this.type = Prefab.Type.Other;
 		}
 
-		public Prefab(string _id, Prefab.Type _type, int loc_x, int loc_y, SimHashes _element, float _temperature = -1f, float _units = 1f, string _disease = null, int _disease_count = 0, Orientation _rotation = Orientation.Neutral, Prefab.template_amount_value[] _amount_values = null, Prefab.template_amount_value[] _other_values = null, int _connections = 0)
+		public Prefab(string _id, Prefab.Type _type, int loc_x, int loc_y, SimHashes _element, float _temperature = -1f, float _units = 1f, string _disease = null, int _disease_count = 0, Orientation _rotation = Orientation.Neutral, Prefab.template_amount_value[] _amount_values = null, Prefab.template_amount_value[] _other_values = null, int _connections = 0, string facadeIdId = null)
 		{
 			this.id = _id;
 			this.type = _type;
@@ -23,6 +23,7 @@ namespace TemplateClasses
 			this.units = _units;
 			this.diseaseName = _disease;
 			this.diseaseCount = _disease_count;
+			this.facadeId = facadeIdId;
 			this.rotationOrientation = _rotation;
 			if (_amount_values != null && _amount_values.Length != 0)
 			{
@@ -36,7 +37,7 @@ namespace TemplateClasses
 
 		public Prefab Clone(Vector2I offset)
 		{
-			Prefab prefab = new Prefab(this.id, this.type, offset.x + this.location_x, offset.y + this.location_y, this.element, this.temperature, this.units, this.diseaseName, this.diseaseCount, this.rotationOrientation, this.amounts, this.other_values, this.connections);
+			Prefab prefab = new Prefab(this.id, this.type, offset.x + this.location_x, offset.y + this.location_y, this.element, this.temperature, this.units, this.diseaseName, this.diseaseCount, this.rotationOrientation, this.amounts, this.other_values, this.connections, this.facadeId);
 			if (this.rottable != null)
 			{
 				prefab.rottable = new Rottable();
@@ -83,6 +84,8 @@ namespace TemplateClasses
 		public List<StorageItem> storage { get; set; }
 
 		public Prefab.Type type { get; set; }
+
+		public string facadeId { get; set; }
 
 		public int connections { get; set; }
 

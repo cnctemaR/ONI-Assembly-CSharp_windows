@@ -26,7 +26,7 @@ public class FossilHuntInitializer : StoryTraitStateMachine<FossilHuntInitialize
 		string text = rowLinkID.Replace("MOVECAMERATO", "");
 		if (Components.MajorFossilDigSites.Count > 0 && CodexCache.FormatLinkID(Components.MajorFossilDigSites[0].gameObject.PrefabID().ToString()) == text)
 		{
-			FossilHuntInitializer.FocusCamera(Components.MajorFossilDigSites[0].transform, true);
+			GameUtil.FocusCamera(Components.MajorFossilDigSites[0].transform, true);
 			return false;
 		}
 		foreach (object obj in Components.MinorFossilDigSites)
@@ -86,16 +86,6 @@ public class FossilHuntInitializer : StoryTraitStateMachine<FossilHuntInitialize
 			};
 		}
 		return new ICheckboxListGroupControl.ListGroup[0];
-	}
-
-	public static void FocusCamera(Transform target, bool select = true)
-	{
-		CameraController.Instance.CameraGoTo(target.GetPosition(), 2f, true);
-		if (select)
-		{
-			KSelectable component = target.GetComponent<KSelectable>();
-			SelectTool.Instance.Select(component, false);
-		}
 	}
 
 	private GameStateMachine<FossilHuntInitializer, FossilHuntInitializer.Instance, StateMachineController, FossilHuntInitializer.Def>.State Inactive;
@@ -347,7 +337,7 @@ public class FossilHuntInitializer : StoryTraitStateMachine<FossilHuntInitialize
 				.AddOption(CODEX.STORY_TRAITS.FOSSILHUNT.QUEST_AVAILABLE_POPUP.CHECK_BUTTON, delegate(InfoDialogScreen dialog)
 				{
 					dialog.Deactivate();
-					FossilHuntInitializer.FocusCamera(base.transform, true);
+					GameUtil.FocusCamera(base.transform, true);
 				}, false);
 		}
 

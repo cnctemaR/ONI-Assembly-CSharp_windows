@@ -9,7 +9,7 @@ public class MoleDelicacyConfig : IEntityConfig
 {
 	public static GameObject CreateMole(string id, string name, string desc, string anim_file, bool is_baby = false)
 	{
-		GameObject gameObject = BaseMoleConfig.BaseMole(id, name, desc, "MoleDelicacyBaseTrait", anim_file, is_baby, "del_", 5);
+		GameObject gameObject = BaseMoleConfig.BaseMole(id, name, desc, "MoleDelicacyBaseTrait", anim_file, is_baby, 173.15f, 373.15f, 73.149994f, 773.15f, "del_", 5);
 		gameObject.AddTag(GameTags.Creatures.Digger);
 		EntityTemplates.ExtendEntityToWildCreature(gameObject, MoleTuning.PEN_SIZE_PER_CREATURE);
 		Trait trait = Db.Get().CreateTrait("MoleDelicacyBaseTrait", name, name, null, false, null, true, true);
@@ -25,7 +25,7 @@ public class MoleDelicacyConfig : IEntityConfig
 		}, MoleDelicacyConfig.CALORIES_PER_KG_OF_DIRT, global::TUNING.CREATURES.CONVERSION_EFFICIENCY.NORMAL).ToArray());
 		CreatureCalorieMonitor.Def def = gameObject.AddOrGetDef<CreatureCalorieMonitor.Def>();
 		def.diet = diet;
-		def.minPoopSizeInCalories = MoleDelicacyConfig.MIN_POOP_SIZE_IN_CALORIES;
+		def.minConsumedCaloriesBeforePooping = MoleDelicacyConfig.MIN_POOP_SIZE_IN_CALORIES;
 		gameObject.AddOrGetDef<SolidConsumerMonitor.Def>().diet = diet;
 		gameObject.AddOrGetDef<OvercrowdingMonitor.Def>().spaceRequiredPerCreature = 0;
 		gameObject.AddOrGet<LoopingSounds>();
@@ -63,7 +63,7 @@ public class MoleDelicacyConfig : IEntityConfig
 		float num = 60.000004f;
 		float num2 = 20f;
 		int egg_SORT_ORDER = MoleDelicacyConfig.EGG_SORT_ORDER;
-		return EntityTemplates.ExtendEntityToFertileCreature(gameObject, text, text2, text3, text4, egg_MASS, text5, num, num2, MoleTuning.EGG_CHANCES_DELICACY, egg_SORT_ORDER, true, false, true, 1f, false);
+		return EntityTemplates.ExtendEntityToFertileCreature(gameObject, text, text2, text3, text4, egg_MASS, text5, num, num2, MoleTuning.EGG_CHANCES_DELICACY, this.GetDlcIds(), egg_SORT_ORDER, true, false, true, 1f, false);
 	}
 
 	public void OnPrefabInit(GameObject prefab)

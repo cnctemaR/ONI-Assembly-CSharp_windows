@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using ProcGen;
 using UnityEngine;
 
@@ -19,17 +20,17 @@ namespace Database
 
 		public void AddStoryMod(Story mod)
 		{
-			mod.kleiUseOnlyCoordinateOffset = -1;
+			mod.kleiUseOnlyCoordinateOrder = -1;
 			base.Add(mod);
 			this.resources.Sort();
 		}
 
-		public int GetHighestCoordinateOffset()
+		public int GetHighestCoordinate()
 		{
 			int num = 0;
 			foreach (Story story in this.resources)
 			{
-				num = Mathf.Max(num, story.kleiUseOnlyCoordinateOffset);
+				num = Mathf.Max(num, story.kleiUseOnlyCoordinateOrder);
 			}
 			return num;
 		}
@@ -47,6 +48,13 @@ namespace Database
 		public Story GetStoryFromStoryTrait(string storyTraitTemplate)
 		{
 			return this.resources.Find((Story x) => x.worldgenStoryTraitKey == storyTraitTemplate);
+		}
+
+		public List<Story> GetStoriesSortedByCoordinateOrder()
+		{
+			List<Story> list = new List<Story>(this.resources);
+			list.Sort((Story s1, Story s2) => s1.kleiUseOnlyCoordinateOrder.CompareTo(s2.kleiUseOnlyCoordinateOrder));
+			return list;
 		}
 
 		public Story MegaBrainTank;

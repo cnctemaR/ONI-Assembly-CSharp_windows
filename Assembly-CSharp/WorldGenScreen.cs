@@ -29,11 +29,9 @@ public class WorldGenScreen : NewGameFlowScreen
 		SaveLoader.SetActiveSaveFilePath(null);
 		try
 		{
-			int num = 0;
-			while (File.Exists(WorldGen.GetSIMSaveFilename(num)))
+			if (File.Exists(WorldGen.WORLDGEN_SAVE_FILENAME))
 			{
-				File.Delete(WorldGen.GetSIMSaveFilename(num));
-				num++;
+				File.Delete(WorldGen.WORLDGEN_SAVE_FILENAME);
 			}
 		}
 		catch (Exception ex)

@@ -11,6 +11,11 @@ public class ElementGradient : Gradient<string>
 	{
 	}
 
+	public ElementGradient(ElementGradient refToCopy)
+		: this(refToCopy.content, refToCopy.bandSize, null)
+	{
+	}
+
 	public ElementGradient(string content, float bandSize, SampleDescriber.Override overrides)
 		: base(content, bandSize)
 	{

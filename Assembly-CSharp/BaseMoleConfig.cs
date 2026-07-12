@@ -6,12 +6,12 @@ using UnityEngine;
 
 public static class BaseMoleConfig
 {
-	public static GameObject BaseMole(string id, string name, string desc, string traitId, string anim_file, bool is_baby, string symbolOverridePrefix = null, int on_death_drop_count = 10)
+	public static GameObject BaseMole(string id, string name, string desc, string traitId, string anim_file, bool is_baby, float warningLowTemperature, float warningHighTemperature, float lethalLowTemperature, float lethalHighTemperature, string symbolOverridePrefix = null, int on_death_drop_count = 10)
 	{
 		float num = 25f;
 		EffectorValues none = global::TUNING.BUILDINGS.DECOR.NONE;
 		GameObject gameObject = EntityTemplates.CreatePlacedEntity(id, name, desc, num, Assets.GetAnim(anim_file), "idle_loop", Grid.SceneLayer.Creatures, 1, 1, none, default(EffectorValues), SimHashes.Creature, null, 293f);
-		EntityTemplates.ExtendEntityToBasicCreature(gameObject, FactionManager.FactionID.Pest, traitId, "DiggerNavGrid", NavType.Floor, 32, 2f, "Meat", on_death_drop_count, true, false, 123.149994f, 673.15f, 73.149994f, 773.15f);
+		EntityTemplates.ExtendEntityToBasicCreature(gameObject, FactionManager.FactionID.Pest, traitId, "DiggerNavGrid", NavType.Floor, 32, 2f, "Meat", on_death_drop_count, true, false, warningLowTemperature, warningHighTemperature, lethalLowTemperature, lethalHighTemperature);
 		if (symbolOverridePrefix != null)
 		{
 			gameObject.AddOrGet<SymbolOverrideController>().ApplySymbolOverridesByAffix(Assets.GetAnim(anim_file), symbolOverridePrefix, null, 0);
@@ -62,7 +62,7 @@ public static class BaseMoleConfig
 		List<Diet.Info> list = new List<Diet.Info>();
 		foreach (Tag tag in elementTags)
 		{
-			list.Add(new Diet.Info(new HashSet<Tag> { tag }, tag, caloriesPerKg, producedConversionRate, null, 0f, true, false));
+			list.Add(new Diet.Info(new HashSet<Tag> { tag }, tag, caloriesPerKg, producedConversionRate, null, 0f, true, false, false));
 		}
 		return list;
 	}

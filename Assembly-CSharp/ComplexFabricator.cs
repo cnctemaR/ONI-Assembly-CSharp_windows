@@ -193,7 +193,7 @@ public class ComplexFabricator : KMonoBehaviour, ISim200ms, ISim1000ms
 
 	private void OnRefreshUserMenu(object data)
 	{
-		if (DlcManager.IsContentActive("EXPANSION1_ID") && this.HasRecipiesWithSeeds())
+		if (SaveLoader.Instance.IsDLCActiveForCurrentSave("EXPANSION1_ID") && this.HasRecipiesWithSeeds())
 		{
 			Game.Instance.userMenu.AddButton(base.gameObject, new KIconButtonMenu.ButtonInfo("action_switch_toggle", this.ForbidMutantSeeds ? UI.USERMENUACTIONS.ACCEPT_MUTANT_SEEDS.ACCEPT : UI.USERMENUACTIONS.ACCEPT_MUTANT_SEEDS.REJECT, delegate
 			{
@@ -225,7 +225,7 @@ public class ComplexFabricator : KMonoBehaviour, ISim200ms, ISim1000ms
 
 	private void UpdateMutantSeedStatusItem()
 	{
-		base.gameObject.GetComponent<KSelectable>().ToggleStatusItem(Db.Get().BuildingStatusItems.FabricatorAcceptsMutantSeeds, DlcManager.IsContentActive("EXPANSION1_ID") && this.HasRecipiesWithSeeds() && !this.forbidMutantSeeds, null);
+		base.gameObject.GetComponent<KSelectable>().ToggleStatusItem(Db.Get().BuildingStatusItems.FabricatorAcceptsMutantSeeds, SaveLoader.Instance.IsDLCActiveForCurrentSave("EXPANSION1_ID") && this.HasRecipiesWithSeeds() && !this.forbidMutantSeeds, null);
 	}
 
 	private void OnOperationalChanged(object data)
@@ -674,7 +674,7 @@ public class ComplexFabricator : KMonoBehaviour, ISim200ms, ISim1000ms
 				{
 					while (enumerator2.MoveNext())
 					{
-						if (enumerator2.Current == prefabTag)
+						if (enumerator2.Current == prefabTag && SaveLoader.Instance.IsDlcListActiveForCurrentSave(complexRecipe.GetDlcIds()))
 						{
 							list.Add(complexRecipe);
 						}

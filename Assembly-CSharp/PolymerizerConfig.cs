@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using STRINGS;
 using TUNING;
 using UnityEngine;
 
@@ -12,12 +14,12 @@ public class PolymerizerConfig : IBuildingConfig
 		string text2 = "plasticrefinery_kanim";
 		int num3 = 30;
 		float num4 = 30f;
-		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER4;
+		float[] tier = global::TUNING.BUILDINGS.CONSTRUCTION_MASS_KG.TIER4;
 		string[] all_METALS = MATERIALS.ALL_METALS;
 		float num5 = 1600f;
 		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloor;
 		EffectorValues tier2 = NOISE_POLLUTION.NOISY.TIER3;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, all_METALS, num5, buildLocationRule, BUILDINGS.DECOR.NONE, tier2, 0.2f);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, all_METALS, num5, buildLocationRule, global::TUNING.BUILDINGS.DECOR.NONE, tier2, 0.2f);
 		BuildingTemplates.CreateElectricalBuildingDef(buildingDef);
 		buildingDef.AudioCategory = "Metal";
 		buildingDef.AudioSize = "large";
@@ -31,6 +33,29 @@ public class PolymerizerConfig : IBuildingConfig
 		buildingDef.UtilityOutputOffset = new CellOffset(0, 1);
 		buildingDef.LogicInputPorts = LogicOperationalController.CreateSingleInputPortList(new CellOffset(0, 1));
 		buildingDef.PermittedRotations = PermittedRotations.FlipH;
+		buildingDef.ExtendCodexEntry = delegate(CodexEntry entry)
+		{
+			List<ContentContainer> list = new List<ContentContainer>();
+			CodexEntryGenerator.GenerateTitleContainers(MISC.TAGS.PLASTIFIABLELIQUID.text, list);
+			list.Add(new ContentContainer(new List<ICodexWidget>
+			{
+				new CodexSpacer(),
+				new CodexText(Strings.Get("STRINGS.MISC.TAGS.PLASTIFIABLELIQUID_DESC"), CodexTextStyle.Body, null),
+				new CodexSpacer()
+			}, ContentContainer.ContentLayout.Vertical));
+			List<ICodexWidget> list2 = new List<ICodexWidget>();
+			foreach (Element element in ElementLoader.elements)
+			{
+				if (element.HasTag(PolymerizerConfig.INPUT_ELEMENT_TAG) && !element.disabled)
+				{
+					list2.Add(new CodexIndentedLabelWithIcon(element.tag.ProperName(), CodexTextStyle.Body, Def.GetUISprite(element, "ui", false)));
+				}
+			}
+			list.Add(new ContentContainer(list2, ContentContainer.ContentLayout.Vertical));
+			CodexEntry codexEntry = new CodexEntry("PLASTIFIABLELIQUID", list, MISC.TAGS.PLASTIFIABLELIQUID.text);
+			CodexCache.AddEntry("PLASTIFIABLELIQUID", codexEntry, null);
+			return entry;
+		};
 		return buildingDef;
 	}
 
@@ -45,7 +70,7 @@ public class PolymerizerConfig : IBuildingConfig
 		ConduitConsumer conduitConsumer = go.AddOrGet<ConduitConsumer>();
 		conduitConsumer.conduitType = ConduitType.Liquid;
 		conduitConsumer.consumptionRate = 1.6666666f;
-		conduitConsumer.capacityTag = GameTagExtensions.Create(SimHashes.Petroleum);
+		conduitConsumer.capacityTag = PolymerizerConfig.INPUT_ELEMENT_TAG;
 		conduitConsumer.capacityKG = 1.6666666f;
 		conduitConsumer.forceAlwaysSatisfied = true;
 		conduitConsumer.wrongElementResult = ConduitConsumer.WrongElementResult.Dump;
@@ -56,7 +81,7 @@ public class PolymerizerConfig : IBuildingConfig
 		ElementConverter elementConverter = go.AddOrGet<ElementConverter>();
 		elementConverter.consumedElements = new ElementConverter.ConsumedElement[]
 		{
-			new ElementConverter.ConsumedElement(GameTagExtensions.Create(SimHashes.Petroleum), 0.8333333f, true)
+			new ElementConverter.ConsumedElement(PolymerizerConfig.INPUT_ELEMENT_TAG, 0.8333333f, true)
 		};
 		elementConverter.outputElements = new ElementConverter.OutputElement[]
 		{
@@ -90,7 +115,7 @@ public class PolymerizerConfig : IBuildingConfig
 
 	private const float GENERATED_EXHAUST_CO2_KG_PER_DAY = 5f;
 
-	public const SimHashes INPUT_ELEMENT = SimHashes.Petroleum;
+	public static Tag INPUT_ELEMENT_TAG = GameTags.PlastifiableLiquid;
 
 	private const SimHashes PRODUCED_ELEMENT = SimHashes.Polypropylene;
 

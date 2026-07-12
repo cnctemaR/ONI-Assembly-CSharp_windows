@@ -86,7 +86,7 @@ public class BingeEatChore : Chore<BingeEatChore.StatesInstance>
 			Db.Get().effects.Add(this.bingeEatingEffect);
 			this.root.ToggleEffect((BingeEatChore.StatesInstance smi) => this.bingeEatingEffect);
 			this.noTarget.GoTo(this.finish);
-			this.eat_pst.ToggleAnims("anim_eat_overeat_kanim", 0f, "").PlayAnim("working_pst").OnAnimQueueComplete(this.finish);
+			this.eat_pst.ToggleAnims("anim_eat_overeat_kanim", 0f).PlayAnim("working_pst").OnAnimQueueComplete(this.finish);
 			this.finish.Enter(delegate(BingeEatChore.StatesInstance smi)
 			{
 				smi.StopSM("complete/no more food");
@@ -96,7 +96,7 @@ public class BingeEatChore : Chore<BingeEatChore.StatesInstance>
 				smi.FindFood();
 			});
 			this.fetch.InitializeStates(this.eater, this.ediblesource, this.ediblechunk, this.requestedfoodunits, this.actualfoodunits, this.eat, this.cantFindFood);
-			this.eat.ToggleAnims("anim_eat_overeat_kanim", 0f, "").QueueAnim("working_loop", true, null).Enter(delegate(BingeEatChore.StatesInstance smi)
+			this.eat.ToggleAnims("anim_eat_overeat_kanim", 0f).QueueAnim("working_loop", true, null).Enter(delegate(BingeEatChore.StatesInstance smi)
 			{
 				this.isBingeEating.Set(true, smi, false);
 			})
@@ -105,7 +105,7 @@ public class BingeEatChore : Chore<BingeEatChore.StatesInstance>
 				{
 					this.isBingeEating.Set(false, smi, false);
 				});
-			this.cantFindFood.ToggleAnims("anim_interrupt_binge_eat_kanim", 0f, "").PlayAnim("interrupt_binge_eat").OnAnimQueueComplete(this.noTarget);
+			this.cantFindFood.ToggleAnims("anim_interrupt_binge_eat_kanim", 0f).PlayAnim("interrupt_binge_eat").OnAnimQueueComplete(this.noTarget);
 		}
 
 		public StateMachine<BingeEatChore.States, BingeEatChore.StatesInstance, BingeEatChore, object>.TargetParameter eater;

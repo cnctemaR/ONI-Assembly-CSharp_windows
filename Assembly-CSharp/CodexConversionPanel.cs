@@ -7,15 +7,20 @@ using UnityEngine.UI;
 public class CodexConversionPanel : CodexWidget<CodexConversionPanel>
 {
 	public CodexConversionPanel(string title, Tag ctag, float inputAmount, bool inputContinuous, Tag ptag, float outputAmount, bool outputContinuous, GameObject converter)
+		: this(title, ctag, inputAmount, inputContinuous, null, ptag, outputAmount, outputContinuous, null, converter)
+	{
+	}
+
+	public CodexConversionPanel(string title, Tag ctag, float inputAmount, bool inputContinuous, Func<Tag, float, bool, string> input_customFormating, Tag ptag, float outputAmount, bool outputContinuous, Func<Tag, float, bool, string> output_customFormating, GameObject converter)
 	{
 		this.title = title;
 		this.ins = new ElementUsage[]
 		{
-			new ElementUsage(ctag, inputAmount, inputContinuous)
+			new ElementUsage(ctag, inputAmount, inputContinuous, input_customFormating)
 		};
 		this.outs = new ElementUsage[]
 		{
-			new ElementUsage(ptag, outputAmount, outputContinuous)
+			new ElementUsage(ptag, outputAmount, outputContinuous, output_customFormating)
 		};
 		this.Converter = converter;
 	}
@@ -81,7 +86,7 @@ public class CodexConversionPanel : CodexWidget<CodexConversionPanel>
 					component.GetReference<Image>("Icon").color = uisprite.second;
 				}
 				GameUtil.TimeSlice timeSlice = (elementUsage.continuous ? GameUtil.TimeSlice.PerCycle : GameUtil.TimeSlice.None);
-				component.GetReference<LocText>("Amount").text = GameUtil.GetFormattedByTag(tag2, amount, timeSlice);
+				component.GetReference<LocText>("Amount").text = ((elementUsage.customFormating == null) ? GameUtil.GetFormattedByTag(tag2, amount, timeSlice) : elementUsage.customFormating(tag2, amount, elementUsage.continuous));
 				component.GetReference<LocText>("Amount").color = Color.black;
 				string text = tag2.ProperName();
 				GameObject prefab = Assets.GetPrefab(tag2);
@@ -125,7 +130,7 @@ public class CodexConversionPanel : CodexWidget<CodexConversionPanel>
 					component3.GetReference<Image>("Icon").color = uisprite3.second;
 				}
 				GameUtil.TimeSlice timeSlice2 = (elementUsage2.continuous ? GameUtil.TimeSlice.PerCycle : GameUtil.TimeSlice.None);
-				component3.GetReference<LocText>("Amount").text = GameUtil.GetFormattedByTag(tag, amount2, timeSlice2);
+				component3.GetReference<LocText>("Amount").text = ((elementUsage2.customFormating == null) ? GameUtil.GetFormattedByTag(tag, amount2, timeSlice2) : elementUsage2.customFormating(tag, amount2, elementUsage2.continuous));
 				component3.GetReference<LocText>("Amount").color = Color.black;
 				string text2 = tag.ProperName();
 				GameObject prefab2 = Assets.GetPrefab(tag);

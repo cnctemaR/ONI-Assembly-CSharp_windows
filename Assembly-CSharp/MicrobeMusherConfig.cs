@@ -117,6 +117,23 @@ public class MicrobeMusherConfig : IBuildingConfig
 			fabricators = new List<Tag> { "MicrobeMusher" },
 			sortOrder = 3
 		};
+		ComplexRecipe.RecipeElement[] array9 = new ComplexRecipe.RecipeElement[]
+		{
+			new ComplexRecipe.RecipeElement("Meat", 1f),
+			new ComplexRecipe.RecipeElement("Tallow", 1f)
+		};
+		ComplexRecipe.RecipeElement[] array10 = new ComplexRecipe.RecipeElement[]
+		{
+			new ComplexRecipe.RecipeElement("Pemmican".ToTag(), 1f, ComplexRecipe.RecipeElement.TemperatureOperation.AverageTemperature, false)
+		};
+		PemmicanConfig.recipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("MicrobeMusher", array9, array10), array9, array10, DlcManager.AVAILABLE_DLC_2)
+		{
+			time = FOOD.RECIPES.STANDARD_COOK_TIME,
+			description = ITEMS.FOOD.PEMMICAN.RECIPEDESC,
+			nameDisplay = ComplexRecipe.RecipeNameDisplay.Result,
+			fabricators = new List<Tag> { "MicrobeMusher" },
+			sortOrder = 4
+		};
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)

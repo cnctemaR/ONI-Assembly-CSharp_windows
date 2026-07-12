@@ -35,26 +35,31 @@ public class MaterialSelector : KScreen
 		this.ElementToggles.Clear();
 	}
 
-	public static List<Tag> GetValidMaterials(Tag materialTypeTag, bool omitDisabledElements = false)
+	public static List<Tag> GetValidMaterials(Tag _materialTypeTag, bool omitDisabledElements = false)
 	{
+		string[] array = _materialTypeTag.ToString().Split(new char[] { '&' });
 		List<Tag> list = new List<Tag>();
-		foreach (Element element in ElementLoader.elements)
+		for (int i = 0; i < array.Length; i++)
 		{
-			if ((!element.disabled || !omitDisabledElements) && element.IsSolid && (element.tag == materialTypeTag || element.HasTag(materialTypeTag)))
+			Tag tag = array[i];
+			foreach (Element element in ElementLoader.elements)
 			{
-				list.Add(element.tag);
-			}
-		}
-		foreach (Tag tag in GameTags.MaterialBuildingElements)
-		{
-			if (tag == materialTypeTag)
-			{
-				foreach (GameObject gameObject in Assets.GetPrefabsWithTag(tag))
+				if ((!element.disabled || !omitDisabledElements) && element.IsSolid && (element.tag == tag || element.HasTag(tag)))
 				{
-					KPrefabID component = gameObject.GetComponent<KPrefabID>();
-					if (component != null && !list.Contains(component.PrefabTag))
+					list.Add(element.tag);
+				}
+			}
+			foreach (Tag tag2 in GameTags.MaterialBuildingElements)
+			{
+				if (tag2 == tag)
+				{
+					foreach (GameObject gameObject in Assets.GetPrefabsWithTag(tag2))
 					{
-						list.Add(component.PrefabTag);
+						KPrefabID component = gameObject.GetComponent<KPrefabID>();
+						if (component != null && !list.Contains(component.PrefabTag))
+						{
+							list.Add(component.PrefabTag);
+						}
 					}
 				}
 			}
@@ -247,15 +252,22 @@ public class MaterialSelector : KScreen
 		Tag tag = null;
 		foreach (Tag tag2 in list)
 		{
-			float amount = ClusterManager.Instance.activeWorld.worldInventory.GetAmount(tag2, true);
-			if (amount >= this.activeMass && amount > num)
+			float num2 = ClusterManager.Instance.activeWorld.worldInventory.GetAmount(tag2, true);
+			if (MaterialSelector.DeprioritizeAutoSelectElementList.Contains(tag2))
 			{
-				num = amount;
+				num2 = Mathf.Min(this.activeMass, num2);
+			}
+			if (num2 >= this.activeMass && num2 > num)
+			{
+				num = num2;
 				tag = tag2;
 			}
 		}
 		if (tag != null)
 		{
+			UISounds.PlaySound(UISounds.Sound.Object_AutoSelected);
+			string text = ((ElementLoader.GetElement(tag) == null) ? tag.ToString() : tag.Name);
+			PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Resource, string.Format(MISC.POPFX.RESOURCE_SELECTION_CHANGED, text), null, Camera.main.ScreenToWorldPoint(KInputManager.GetMousePos()), 1.5f, false, false);
 			this.OnSelectMaterial(tag, this.activeRecipe, true);
 			return true;
 		}
@@ -343,11 +355,17 @@ public class MaterialSelector : KScreen
 			}
 		}
 		LocText componentInChildren = this.Headerbar.GetComponentInChildren<LocText>();
+		string[] array = this.activeIngredient.tag.ToString().Split(new char[] { '&' });
+		string text = array[0].ToTag().ProperName();
+		for (int i = 1; i < array.Length; i++)
+		{
+			text = text + " or " + array[i].ToTag().ProperName();
+		}
 		if (num == 0)
 		{
-			componentInChildren.text = string.Format(UI.PRODUCTINFO_MISSINGRESOURCES_TITLE, this.activeIngredient.tag.ProperName(), GameUtil.GetFormattedMass(this.activeIngredient.amount, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"));
-			string text = string.Format(UI.PRODUCTINFO_MISSINGRESOURCES_DESC, this.activeIngredient.tag.ProperName());
-			this.NoMaterialDiscovered.text = text;
+			componentInChildren.text = string.Format(UI.PRODUCTINFO_MISSINGRESOURCES_TITLE, text, GameUtil.GetFormattedMass(this.activeIngredient.amount, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"));
+			string text2 = string.Format(UI.PRODUCTINFO_MISSINGRESOURCES_DESC, text);
+			this.NoMaterialDiscovered.text = text2;
 			this.NoMaterialDiscovered.gameObject.SetActive(true);
 			this.NoMaterialDiscovered.color = Constants.NEGATIVE_COLOR;
 			this.BadBG.SetActive(true);
@@ -358,7 +376,7 @@ public class MaterialSelector : KScreen
 			this.LayoutContainer.SetActive(false);
 			return;
 		}
-		componentInChildren.text = string.Format(UI.PRODUCTINFO_SELECTMATERIAL, this.activeIngredient.tag.ProperName());
+		componentInChildren.text = string.Format(UI.PRODUCTINFO_SELECTMATERIAL, text);
 		this.NoMaterialDiscovered.gameObject.SetActive(false);
 		this.BadBG.SetActive(false);
 		this.LayoutContainer.SetActive(true);
@@ -432,6 +450,13 @@ public class MaterialSelector : KScreen
 		}
 		return hasSortOrder.sortOrder.CompareTo(hasSortOrder2.sortOrder);
 	}
+
+	public static List<Tag> DeprioritizeAutoSelectElementList = new List<Tag>
+	{
+		SimHashes.WoodLog.ToString().ToTag(),
+		SimHashes.SolidMercury.ToString().ToTag(),
+		SimHashes.Lead.ToString().ToTag()
+	};
 
 	public Tag CurrentSelectedElement;
 

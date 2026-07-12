@@ -62,8 +62,6 @@ public class PressureVulnerable : StateMachineComponent<PressureVulnerable.State
 		this.cell = Grid.PosToCell(this);
 		base.smi.sm.pressure.Set(1f, base.smi, false);
 		base.smi.sm.safe_element.Set(this.testAreaElementSafe, base.smi, false);
-		base.smi.master.pressureAccumulator = Game.Instance.accumulators.Add("pressureAccumulator", this);
-		base.smi.master.elementAccumulator = Game.Instance.accumulators.Add("elementAccumulator", this);
 		base.smi.StartSM();
 	}
 
@@ -147,15 +145,16 @@ public class PressureVulnerable : StateMachineComponent<PressureVulnerable.State
 
 	public void SlicedSim1000ms(float dt)
 	{
-		float pressureOverArea = this.GetPressureOverArea(this.cell);
-		Game.Instance.accumulators.Accumulate(base.smi.master.pressureAccumulator, pressureOverArea);
-		float averageRate = Game.Instance.accumulators.GetAverageRate(base.smi.master.pressureAccumulator);
-		this.displayPressureAmount.value = averageRate;
-		Game.Instance.accumulators.Accumulate(base.smi.master.elementAccumulator, this.testAreaElementSafe ? 1f : 0f);
-		float averageRate2 = Game.Instance.accumulators.GetAverageRate(base.smi.master.elementAccumulator);
-		bool flag = this.safe_atmospheres == null || this.safe_atmospheres.Count == 0 || averageRate2 > 0f;
+		float num = base.smi.sm.pressure.Get(base.smi) * 0.7f + this.GetPressureOverArea(this.cell) * 0.3f;
+		this.safe_element *= 0.7f;
+		if (this.testAreaElementSafe)
+		{
+			this.safe_element += 0.3f;
+		}
+		this.displayPressureAmount.value = num;
+		bool flag = this.safe_atmospheres == null || this.safe_atmospheres.Count == 0 || this.safe_element >= 0.06f;
 		base.smi.sm.safe_element.Set(flag, base.smi, false);
-		base.smi.sm.pressure.Set(averageRate, base.smi, false);
+		base.smi.sm.pressure.Set(num, base.smi, false);
 	}
 
 	public float GetExternalPressure()
@@ -171,7 +170,6 @@ public class PressureVulnerable : StateMachineComponent<PressureVulnerable.State
 		this.testAreaElementSafe = false;
 		this.currentAtmoElement = null;
 		this.occupyArea.TestArea(cell, this, PressureVulnerable.testAreaCB);
-		this.occupyArea.TestAreaAbove(cell, this, PressureVulnerable.testAreaCB);
 		PressureVulnerable.testAreaPressure = ((PressureVulnerable.testAreaCount > 0) ? (PressureVulnerable.testAreaPressure / (float)PressureVulnerable.testAreaCount) : 0f);
 		if (this.testAreaElementSafe != flag)
 		{
@@ -214,9 +212,13 @@ public class PressureVulnerable : StateMachineComponent<PressureVulnerable.State
 		return list;
 	}
 
-	private HandleVector<int>.Handle pressureAccumulator = HandleVector<int>.InvalidHandle;
+	private const float kTrailingWeight = 0.7f;
 
-	private HandleVector<int>.Handle elementAccumulator = HandleVector<int>.InvalidHandle;
+	private const float kLeadingWeight = 0.3f;
+
+	private const float kSafeElementThreshold = 0.06f;
+
+	private float safe_element = 1f;
 
 	private OccupyArea _occupyArea;
 

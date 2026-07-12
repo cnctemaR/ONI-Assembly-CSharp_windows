@@ -74,7 +74,7 @@ public class CargoBay : KMonoBehaviour
 				GameObject prefab = Assets.GetPrefab(keyValuePair2.Key);
 				if (prefab == null)
 				{
-					KCrashReporter.Assert(false, "Missing prefab: " + keyValuePair2.Key.Name);
+					KCrashReporter.Assert(false, "Missing prefab: " + keyValuePair2.Key.Name, null);
 				}
 				else
 				{

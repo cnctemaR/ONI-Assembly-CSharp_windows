@@ -82,6 +82,10 @@ public class HotTubConfig : IBuildingConfig
 
 	public const string ID = "HotTub";
 
+	public const string COLD_IMMUNITY_EFFECT_NAME = "WarmTouch";
+
+	public const float COLD_IMMUNITY_DURATION = 1800f;
+
 	private float WATER_AMOUNT = 100f;
 
 	private const float KDTU_TRANSFER_RATE = 15f;

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Text.RegularExpressions;
 using Klei;
@@ -7,6 +8,8 @@ using UnityEngine;
 
 namespace ProcGen
 {
+	[DebuggerDisplay("{name}")]
+	[Serializable]
 	public class ClusterLayout
 	{
 		public List<WorldPlacement> worldPlacements { get; set; }
@@ -17,9 +20,23 @@ namespace ProcGen
 
 		public string description { get; set; }
 
+		public string welcomeMessage { get; set; }
+
+		public ClusterLayout.ClusterAudioSettings clusterAudio { get; set; }
+
+		public List<ClusterLayout.ClusterUnlock> clusterUnlocks { get; set; }
+
+		[Obsolete("Use requiredDlcIds")]
 		public string requiredDlcId { get; set; }
 
+		[Obsolete("Use forbiddenDlcIds")]
 		public string forbiddenDlcId { get; set; }
+
+		public string dlcIdFrom { get; set; }
+
+		public string[] requiredDlcIds { get; set; }
+
+		public string[] forbiddenDlcIds { get; set; }
 
 		public int difficulty { get; set; }
 
@@ -29,7 +46,7 @@ namespace ProcGen
 
 		public ClusterLayout.Skip skip { get; private set; }
 
-		public int clusterCategory { get; private set; }
+		public ClusterLayout.ClusterCategory clusterCategory { get; set; }
 
 		public int startWorldIndex { get; set; }
 
@@ -43,10 +60,16 @@ namespace ProcGen
 
 		public string coordinatePrefix { get; private set; }
 
+		public List<string> clusterTags { get; private set; }
+
 		public ClusterLayout()
 		{
 			this.numRings = 12;
 			this.fixedCoordinate = -1;
+			this.welcomeMessage = null;
+			this.clusterAudio = new ClusterLayout.ClusterAudioSettings();
+			this.clusterTags = new List<string>();
+			this.clusterUnlocks = new List<ClusterLayout.ClusterUnlock>();
 		}
 
 		public static string GetName(string path, string addPrefix)
@@ -82,9 +105,76 @@ namespace ProcGen
 			return this.coordinatePrefix;
 		}
 
+		public bool HasAnyTags(List<string> tags)
+		{
+			foreach (string text in tags)
+			{
+				if (this.clusterTags.Contains(text))
+				{
+					return true;
+				}
+			}
+			return false;
+		}
+
+		public bool HasAllTags(List<string> tags)
+		{
+			foreach (string text in tags)
+			{
+				if (!this.clusterTags.Contains(text))
+				{
+					return false;
+				}
+			}
+			return true;
+		}
+
 		public const string directory = "clusters";
 
 		public string filePath;
+
+		[Serializable]
+		public class ClusterAudioSettings
+		{
+			public string musicWelcome { get; set; }
+
+			public string musicFirst { get; set; }
+
+			public string stingerDay { get; set; }
+
+			public string stingerNight { get; set; }
+
+			public ClusterAudioSettings()
+			{
+				this.musicWelcome = "Music_WattsonMessage";
+				this.musicFirst = null;
+				this.stingerDay = "Stinger_Day";
+				this.stingerNight = "Stinger_Loop_Night";
+			}
+		}
+
+		[Serializable]
+		public class ClusterUnlock
+		{
+			public string id { get; set; }
+
+			public string collection { get; set; }
+
+			public ClusterLayout.ClusterUnlock.OrderRule orderRule { get; private set; }
+
+			public ClusterUnlock()
+			{
+				this.orderRule = ClusterLayout.ClusterUnlock.OrderRule.Prepend;
+			}
+
+			public enum OrderRule
+			{
+				Prepend,
+				Append,
+				Replace,
+				Invalid
+			}
+		}
 
 		public enum Skip
 		{
@@ -95,10 +185,10 @@ namespace ProcGen
 
 		public enum ClusterCategory
 		{
-			vanilla,
-			spacedOutVanillaStyle,
-			spacedOutStyle,
-			special
+			Vanilla,
+			SpacedOutVanillaStyle,
+			SpacedOutStyle,
+			Special
 		}
 	}
 }

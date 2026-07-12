@@ -226,7 +226,7 @@ public class ThresholdSwitchSideScreen : SideScreenContent, IRender200ms
 	private LocText currentValue;
 
 	[SerializeField]
-	private LocText tresholdValue;
+	private LocText thresholdValue;
 
 	[SerializeField]
 	private KToggle aboveToggle;

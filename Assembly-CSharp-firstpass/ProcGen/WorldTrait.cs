@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using UnityEngine;
 
 namespace ProcGen
 {
+	[DebuggerDisplay("{name}")]
 	[Serializable]
 	public class WorldTrait
 	{
@@ -92,6 +94,7 @@ namespace ProcGen
 
 		private TagSet m_traitTagSet;
 
+		[DebuggerDisplay("{element} massMultiplier = {massMultiplier}, bandMultiplier = {bandMultiplier}")]
 		[Serializable]
 		public class ElementBandModifier
 		{

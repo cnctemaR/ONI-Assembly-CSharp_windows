@@ -34,7 +34,7 @@ public class SimTemperatureTransfer : KMonoBehaviour
 	{
 		get
 		{
-			return this.GroundTransferScale;
+			return this.groundTransferScale;
 		}
 		set
 		{
@@ -214,7 +214,7 @@ public class SimTemperatureTransfer : KMonoBehaviour
 	{
 		if (temperature <= 0f)
 		{
-			KCrashReporter.Assert(false, "STT.OnSetTemperature - Tried to set <= 0 degree temperature");
+			KCrashReporter.Assert(false, "STT.OnSetTemperature - Tried to set <= 0 degree temperature", null);
 			temperature = 293f;
 		}
 		SimTemperatureTransfer component = primary_element.GetComponent<SimTemperatureTransfer>();
@@ -289,7 +289,7 @@ public class SimTemperatureTransfer : KMonoBehaviour
 			int handleIndex = Sim.GetHandleIndex(handle);
 			if (Game.Instance.simData.elementChunks[handleIndex].temperature <= 0f)
 			{
-				KCrashReporter.Assert(false, "Bad temperature");
+				KCrashReporter.Assert(false, "Bad temperature", null);
 			}
 			SimTemperatureTransfer.handleInstanceMap[this.simHandle] = this;
 			if (this.pendingEnergyModifications > 0f)

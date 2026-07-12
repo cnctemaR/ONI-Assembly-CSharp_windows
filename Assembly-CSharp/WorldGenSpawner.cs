@@ -54,9 +54,9 @@ public class WorldGenSpawner : KMonoBehaviour
 	{
 		if (!this.hasPlacedTemplates)
 		{
-			global::Debug.Assert(SaveLoader.Instance.ClusterLayout != null, "Trying to place templates for an already-loaded save, no worldgen data available");
-			this.DoReveal(SaveLoader.Instance.ClusterLayout);
-			this.PlaceTemplates(SaveLoader.Instance.ClusterLayout);
+			global::Debug.Assert(SaveLoader.Instance.Cluster != null, "Trying to place templates for an already-loaded save, no worldgen data available");
+			this.DoReveal(SaveLoader.Instance.Cluster);
+			this.PlaceTemplates(SaveLoader.Instance.Cluster);
 			this.hasPlacedTemplates = true;
 		}
 		if (this.spawnInfos == null)
@@ -92,7 +92,7 @@ public class WorldGenSpawner : KMonoBehaviour
 	public void AddLegacySpawner(Tag tag, int cell)
 	{
 		Vector2I vector2I = Grid.CellToXY(cell);
-		this.AddSpawnable(new Prefab(tag.Name, Prefab.Type.Other, vector2I.x, vector2I.y, SimHashes.Carbon, -1f, 1f, null, 0, Orientation.Neutral, null, null, 0));
+		this.AddSpawnable(new Prefab(tag.Name, Prefab.Type.Other, vector2I.x, vector2I.y, SimHashes.Carbon, -1f, 1f, null, 0, Orientation.Neutral, null, null, 0, null));
 	}
 
 	public List<Tag> GetUnspawnedWithType<T>(int worldID) where T : KMonoBehaviour
@@ -186,10 +186,15 @@ public class WorldGenSpawner : KMonoBehaviour
 				prefab4.type = Prefab.Type.Pickupable;
 				this.AddSpawnable(prefab4);
 			}
+			foreach (Tag tag in worldGen.SpawnData.discoveredResources)
+			{
+				DiscoveredResources.Instance.Discover(tag);
+			}
 			worldGen.SpawnData.buildings.Clear();
 			worldGen.SpawnData.elementalOres.Clear();
 			worldGen.SpawnData.otherEntities.Clear();
 			worldGen.SpawnData.pickupables.Clear();
+			worldGen.SpawnData.discoveredResources.Clear();
 		}
 	}
 
@@ -344,7 +349,7 @@ public class WorldGenSpawner : KMonoBehaviour
 			if (gameObject != null && gameObject)
 			{
 				gameObject.SetActive(true);
-				gameObject.Trigger(1119167081, null);
+				gameObject.Trigger(1119167081, this.spawnInfo);
 			}
 			this.FreeResources();
 		}

@@ -160,10 +160,17 @@ public class ElementConsumer : SimComponent, ISaveLoadable, IGameObjectEffectDes
 				this.statusHandle = this.selectable.AddStatusItem(Db.Get().BuildingStatusItems.ElementConsumer, this);
 				return;
 			}
-			if (this.statusHandle != Guid.Empty)
+			if (this.statusHandle != Guid.Empty && !this.consumptionEnabled)
 			{
 				base.GetComponent<KSelectable>().RemoveStatusItem(this.statusHandle, false);
+				this.statusHandle = Guid.Empty;
+				return;
 			}
+		}
+		else if (this.statusHandle != Guid.Empty)
+		{
+			base.GetComponent<KSelectable>().RemoveStatusItem(this.statusHandle, false);
+			this.statusHandle = Guid.Empty;
 		}
 	}
 

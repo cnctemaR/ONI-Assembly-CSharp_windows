@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine;
 
 public class Components
 {
@@ -86,7 +87,7 @@ public class Components
 
 	public static Components.Cmps<HandSanitizer> HandSanitizers = new Components.Cmps<HandSanitizer>();
 
-	public static Components.Cmps<BuildingCellVisualizer> BuildingCellVisualizers = new Components.Cmps<BuildingCellVisualizer>();
+	public static Components.Cmps<EntityCellVisualizer> EntityCellVisualizers = new Components.Cmps<EntityCellVisualizer>();
 
 	public static Components.Cmps<RoleStation> RoleStations = new Components.Cmps<RoleStation>();
 
@@ -166,11 +167,17 @@ public class Components
 
 	public static Components.Cmps<MajorFossilDigSite.Instance> MajorFossilDigSites = new Components.Cmps<MajorFossilDigSite.Instance>();
 
+	public static Components.Cmps<GameObject> FoodRehydrators = new Components.Cmps<GameObject>();
+
 	public static Components.CmpsByWorld<Geyser> Geysers = new Components.CmpsByWorld<Geyser>();
 
 	public static Components.CmpsByWorld<GeoTuner.Instance> GeoTuners = new Components.CmpsByWorld<GeoTuner.Instance>();
 
 	public static Components.CmpsByWorld<CritterCondo.Instance> CritterCondos = new Components.CmpsByWorld<CritterCondo.Instance>();
+
+	public static Components.CmpsByWorld<GeothermalController> GeothermalControllers = new Components.CmpsByWorld<GeothermalController>();
+
+	public static Components.CmpsByWorld<GeothermalVent> GeothermalVents = new Components.CmpsByWorld<GeothermalVent>();
 
 	public static Components.CmpsByWorld<Comet> Meteors = new Components.CmpsByWorld<Comet>();
 
@@ -183,6 +190,8 @@ public class Components
 	public static Components.Cmps<FixedCapturableMonitor.Instance> FixedCapturableMonitors = new Components.Cmps<FixedCapturableMonitor.Instance>();
 
 	public static Components.Cmps<BeeHive.StatesInstance> BeeHives = new Components.Cmps<BeeHive.StatesInstance>();
+
+	public static Components.Cmps<StateMachine.Instance> EffectImmunityProviderStations = new Components.Cmps<StateMachine.Instance>();
 
 	public class Cmps<T> : ICollection, IEnumerable, IEnumerable<T>
 	{

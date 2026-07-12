@@ -113,6 +113,14 @@ public class Exhaust : KMonoBehaviour, ISim200ms
 		primary_element.KeepZeroMassObject = true;
 		primary_element.Mass = 0f;
 		primary_element.ModifyDiseaseCount(int.MinValue, "Exhaust.SimUpdate");
+		if (this.lastElementEmmited != primary_element.ElementID)
+		{
+			this.lastElementEmmited = primary_element.ElementID;
+			if (primary_element.Element != null && primary_element.Element.substance != null)
+			{
+				base.Trigger(-793429877, primary_element.Element.substance.colour);
+			}
+		}
 		this.recentlyExhausted = true;
 		return true;
 	}
@@ -167,6 +175,8 @@ public class Exhaust : KMonoBehaviour, ISim200ms
 	private const float MinSwitchTime = 1f;
 
 	private float elapsedSwitchTime;
+
+	private SimHashes lastElementEmmited;
 
 	private static readonly EventSystem.IntraObjectHandler<Exhaust> OnConduitStateChangedDelegate = new EventSystem.IntraObjectHandler<Exhaust>(delegate(Exhaust component, object data)
 	{

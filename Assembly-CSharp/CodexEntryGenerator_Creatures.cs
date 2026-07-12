@@ -30,6 +30,9 @@ public class CodexEntryGenerator_Creatures
 		CodexEntryGenerator_Creatures.<GenerateEntries>g__PushCritterEntry|6_1(GameTags.Creatures.Species.BeetaSpecies, CREATURES.FAMILY_PLURAL.BEETASPECIES, ref CS$<>8__locals1);
 		CodexEntryGenerator_Creatures.<GenerateEntries>g__PushCritterEntry|6_1(GameTags.Creatures.Species.DivergentSpecies, CREATURES.FAMILY_PLURAL.DIVERGENTSPECIES, ref CS$<>8__locals1);
 		CodexEntryGenerator_Creatures.<GenerateEntries>g__PushCritterEntry|6_1(GameTags.Robots.Models.SweepBot, CREATURES.FAMILY_PLURAL.SWEEPBOT, ref CS$<>8__locals1);
+		CodexEntryGenerator_Creatures.<GenerateEntries>g__PushCritterEntry|6_1(GameTags.Creatures.Species.DeerSpecies, CREATURES.FAMILY_PLURAL.DEERSPECIES, ref CS$<>8__locals1);
+		CodexEntryGenerator_Creatures.<GenerateEntries>g__PushCritterEntry|6_1(GameTags.Creatures.Species.SealSpecies, CREATURES.FAMILY_PLURAL.SEALSPECIES, ref CS$<>8__locals1);
+		CodexEntryGenerator_Creatures.<GenerateEntries>g__PushCritterEntry|6_1(GameTags.Creatures.Species.BellySpecies, CREATURES.FAMILY_PLURAL.BELLYSPECIES, ref CS$<>8__locals1);
 		CodexEntryGenerator_Creatures.<GenerateEntries>g__PopAndAddAllCritterEntries|6_2(ref CS$<>8__locals1);
 		return CS$<>8__locals1.results;
 	}
@@ -118,7 +121,7 @@ public class CodexEntryGenerator_Creatures
 		List<ContentContainer> list = new List<ContentContainer>();
 		foreach (GameObject gameObject in brains)
 		{
-			if (gameObject.GetDef<BabyMonitor.Def>() == null)
+			if (gameObject.GetDef<BabyMonitor.Def>() == null && SaveLoader.Instance.IsDlcListActiveForCurrentSave(gameObject.GetComponent<KPrefabID>().requiredDlcIds))
 			{
 				Sprite sprite = null;
 				CreatureBrain component = gameObject.GetComponent<CreatureBrain>();
@@ -204,22 +207,22 @@ public class CodexEntryGenerator_Creatures
 				}, ContentContainer.ContentLayout.Horizontal));
 			}
 		}
-		TemperatureVulnerable component = creature.GetComponent<TemperatureVulnerable>();
-		if (component != null)
+		CritterTemperatureMonitor.Def def2 = creature.GetDef<CritterTemperatureMonitor.Def>();
+		if (def2 != null)
 		{
 			containers.Add(new ContentContainer(new List<ICodexWidget>
 			{
 				new CodexSpacer(),
 				new CodexText(CODEX.HEADERS.COMFORTRANGE, CodexTextStyle.Subtitle, null),
-				new CodexText("    • " + string.Format(CODEX.CREATURE_DESCRIPTORS.TEMPERATURE.COMFORT_RANGE, GameUtil.GetFormattedTemperature(component.TemperatureWarningLow, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false), GameUtil.GetFormattedTemperature(component.TemperatureWarningHigh, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false)), CodexTextStyle.Body, null),
-				new CodexText("    • " + string.Format(CODEX.CREATURE_DESCRIPTORS.TEMPERATURE.NON_LETHAL_RANGE, GameUtil.GetFormattedTemperature(component.TemperatureLethalLow, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false), GameUtil.GetFormattedTemperature(component.TemperatureLethalHigh, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false)), CodexTextStyle.Body, null)
+				new CodexText("    • " + string.Format(CODEX.CREATURE_DESCRIPTORS.TEMPERATURE.COMFORT_RANGE, GameUtil.GetFormattedTemperature(def2.temperatureColdUncomfortable, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false), GameUtil.GetFormattedTemperature(def2.temperatureHotUncomfortable, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false)), CodexTextStyle.Body, null),
+				new CodexText("    • " + string.Format(CODEX.CREATURE_DESCRIPTORS.TEMPERATURE.NON_LETHAL_RANGE, GameUtil.GetFormattedTemperature(def2.temperatureColdDeadly, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false), GameUtil.GetFormattedTemperature(def2.temperatureHotDeadly, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false)), CodexTextStyle.Body, null)
 			}, ContentContainer.ContentLayout.Vertical));
 		}
-		Modifiers component2 = creature.GetComponent<Modifiers>();
-		if (component2 != null)
+		Modifiers component = creature.GetComponent<Modifiers>();
+		if (component != null)
 		{
 			Klei.AI.Attribute maxAttribute = Db.Get().Amounts.Age.maxAttribute;
-			float totalValue = AttributeInstance.GetTotalValue(maxAttribute, component2.GetPreModifiers(maxAttribute));
+			float totalValue = AttributeInstance.GetTotalValue(maxAttribute, component.GetPreModifiers(maxAttribute));
 			string text;
 			if (Mathf.Approximately(totalValue, 0f))
 			{
@@ -239,27 +242,27 @@ public class CodexEntryGenerator_Creatures
 				}, ContentContainer.ContentLayout.Vertical));
 			}
 		}
-		OvercrowdingMonitor.Def def2 = creature.GetDef<OvercrowdingMonitor.Def>();
-		if (def2 != null && def2.spaceRequiredPerCreature > 0)
+		OvercrowdingMonitor.Def def3 = creature.GetDef<OvercrowdingMonitor.Def>();
+		if (def3 != null && def3.spaceRequiredPerCreature > 0)
 		{
 			containers.Add(new ContentContainer(new List<ICodexWidget>
 			{
 				new CodexSpacer(),
 				new CodexText(CODEX.HEADERS.CRITTEROVERCROWDING, CodexTextStyle.Subtitle, null),
-				new CodexText("    • " + string.Format(CODEX.CREATURE_DESCRIPTORS.OVERCROWDING, def2.spaceRequiredPerCreature), CodexTextStyle.Body, null),
-				new CodexText("    • " + string.Format(CODEX.CREATURE_DESCRIPTORS.CONFINED, def2.spaceRequiredPerCreature), CodexTextStyle.Body, null)
+				new CodexText("    • " + string.Format(CODEX.CREATURE_DESCRIPTORS.OVERCROWDING, def3.spaceRequiredPerCreature), CodexTextStyle.Body, null),
+				new CodexText("    • " + string.Format(CODEX.CREATURE_DESCRIPTORS.CONFINED, def3.spaceRequiredPerCreature), CodexTextStyle.Body, null)
 			}, ContentContainer.ContentLayout.Vertical));
 		}
 		int num = 0;
 		string text2 = null;
 		Tag tag = default(Tag);
-		Butcherable component3 = creature.GetComponent<Butcherable>();
-		if (component3 != null && component3.drops != null)
+		Butcherable component2 = creature.GetComponent<Butcherable>();
+		if (component2 != null && component2.drops != null)
 		{
-			num = component3.drops.Length;
+			num = component2.drops.Length;
 			if (num > 0)
 			{
-				text2 = (tag.Name = component3.drops[0]);
+				text2 = (tag.Name = component2.drops[0]);
 			}
 		}
 		string text3 = null;
@@ -285,56 +288,59 @@ public class CodexEntryGenerator_Creatures
 			containers.Add(contentContainer2);
 		}
 		new List<Tag>();
-		Diet.Info[] array = null;
-		CreatureCalorieMonitor.Def def3 = creature.GetDef<CreatureCalorieMonitor.Def>();
-		BeehiveCalorieMonitor.Def def4 = creature.GetDef<BeehiveCalorieMonitor.Def>();
-		if (def3 != null)
+		Diet prefabDiet = DietManager.Instance.GetPrefabDiet(creature);
+		if (prefabDiet != null)
 		{
-			array = def3.diet.infos;
-		}
-		else if (def4 != null)
-		{
-			array = def4.diet.infos;
-		}
-		if (array != null && array.Length != 0)
-		{
-			float num2 = 0f;
-			foreach (AttributeModifier attributeModifier in Db.Get().traits.Get(creature.GetComponent<Modifiers>().initialTraits[0]).SelfModifiers)
+			Diet.Info[] infos = prefabDiet.infos;
+			if (infos != null && infos.Length != 0)
 			{
-				if (attributeModifier.AttributeId == Db.Get().Amounts.Calories.deltaAttribute.Id)
+				float num2 = 0f;
+				foreach (AttributeModifier attributeModifier in Db.Get().traits.Get(creature.GetComponent<Modifiers>().initialTraits[0]).SelfModifiers)
 				{
-					num2 = attributeModifier.Value;
-				}
-			}
-			List<ICodexWidget> list = new List<ICodexWidget>();
-			foreach (Diet.Info info in array)
-			{
-				if (info.consumedTags.Count != 0)
-				{
-					foreach (Tag tag2 in info.consumedTags)
+					if (attributeModifier.AttributeId == Db.Get().Amounts.Calories.deltaAttribute.Id)
 					{
-						Element element = ElementLoader.FindElementByHash(ElementLoader.GetElementID(tag2));
-						if ((element.id != SimHashes.Vacuum && element.id != SimHashes.Void) || !(Assets.GetPrefab(tag2) == null))
+						num2 = attributeModifier.Value;
+					}
+				}
+				List<ICodexWidget> list = new List<ICodexWidget>();
+				foreach (Diet.Info info in infos)
+				{
+					if (info.consumedTags.Count != 0)
+					{
+						foreach (Tag tag2 in info.consumedTags)
 						{
-							float num3 = -num2 / info.caloriesPerKg;
-							float num4 = num3 * info.producedConversionRate;
-							list.Add(new CodexConversionPanel(tag2.ProperName(), tag2, num3, true, info.producedElement, num4, true, creature));
+							Element element = ElementLoader.FindElementByHash(ElementLoader.GetElementID(tag2));
+							if ((element.id != SimHashes.Vacuum && element.id != SimHashes.Void) || !(Assets.GetPrefab(tag2) == null))
+							{
+								bool flag = prefabDiet.IsConsumedTagAbleToBeEatenDirectly(tag2);
+								float num3 = -num2 / info.caloriesPerKg;
+								float num4 = num3 * info.producedConversionRate;
+								if (flag)
+								{
+									list.Add(new CodexConversionPanel(tag2.ProperName(), tag2, num3, true, new Func<Tag, float, bool, string>(GameUtil.GetFormattedPlantConsumptionValuePerCycle), info.producedElement, num4, true, null, creature));
+								}
+								else
+								{
+									list.Add(new CodexConversionPanel(tag2.ProperName(), tag2, num3, true, info.producedElement, num4, true, creature));
+								}
+							}
 						}
 					}
 				}
+				ContentContainer contentContainer3 = new ContentContainer(list, ContentContainer.ContentLayout.Vertical);
+				containers.Add(new ContentContainer(new List<ICodexWidget>
+				{
+					new CodexSpacer(),
+					new CodexCollapsibleHeader(CODEX.HEADERS.DIET, contentContainer3)
+				}, ContentContainer.ContentLayout.Vertical));
+				containers.Add(contentContainer3);
+				containers.Add(new ContentContainer(new List<ICodexWidget>
+				{
+					new CodexSpacer(),
+					new CodexSpacer()
+				}, ContentContainer.ContentLayout.Vertical));
+				CodexEntryGenerator_Elements.GenerateMadeAndUsedContainers(creature.PrefabID(), containers);
 			}
-			ContentContainer contentContainer3 = new ContentContainer(list, ContentContainer.ContentLayout.Vertical);
-			containers.Add(new ContentContainer(new List<ICodexWidget>
-			{
-				new CodexSpacer(),
-				new CodexCollapsibleHeader(CODEX.HEADERS.DIET, contentContainer3)
-			}, ContentContainer.ContentLayout.Vertical));
-			containers.Add(contentContainer3);
-			containers.Add(new ContentContainer(new List<ICodexWidget>
-			{
-				new CodexSpacer(),
-				new CodexSpacer()
-			}, ContentContainer.ContentLayout.Vertical));
 		}
 	}
 

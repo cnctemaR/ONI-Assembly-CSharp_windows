@@ -28,6 +28,10 @@ public class OrbitalResearchDatabankConfig : IEntityConfig
 
 	public void OnSpawn(GameObject inst)
 	{
+		if (SaveLoader.Instance.IsDLCActiveForCurrentSave("DLC2_ID") && SaveLoader.Instance.ClusterLayout != null && SaveLoader.Instance.ClusterLayout.clusterTags.Contains("CeresCluster"))
+		{
+			inst.AddOrGet<KBatchedAnimController>().SwapAnims(new KAnimFile[] { Assets.GetAnim("floppy_disc_ceres_kanim") });
+		}
 	}
 
 	public const string ID = "OrbitalResearchDatabank";

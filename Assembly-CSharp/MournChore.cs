@@ -141,7 +141,7 @@ public class MournChore : Chore<MournChore.StatesInstance>
 		{
 			default_state = this.findOffset;
 			base.Target(this.mourner);
-			this.root.ToggleAnims("anim_react_mourning_kanim", 0f, "").Exit("DestroyLocator", delegate(MournChore.StatesInstance smi)
+			this.root.ToggleAnims("anim_react_mourning_kanim", 0f).Exit("DestroyLocator", delegate(MournChore.StatesInstance smi)
 			{
 				smi.DestroyLocator();
 			});

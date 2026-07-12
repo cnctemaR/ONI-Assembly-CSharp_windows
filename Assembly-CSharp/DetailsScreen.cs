@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using FMOD.Studio;
 using STRINGS;
 using UnityEngine;
@@ -47,7 +48,8 @@ public class DetailsScreen : KTabMenu
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		this.CodexEntryButton.onClick += this.OpenCodexEntry;
+		this.CodexEntryButton.onClick += this.CodexEntryButton_OnClick;
+		this.PinResourceButton.onClick += this.PinResourceButton_OnClick;
 		this.CloseButton.onClick += this.DeselectAndClose;
 		this.TabTitle.OnNameChanged += this.OnNameChanged;
 		this.TabTitle.OnStartedEditing += this.OnStartedEditing;
@@ -179,11 +181,138 @@ public class DetailsScreen : KTabMenu
 		return flag;
 	}
 
-	private void RefreshCodexButton()
+	private string CodexEntryButton_GetCodexId()
 	{
-		string selectedObjectCodexID = this.GetSelectedObjectCodexID();
-		this.CodexEntryButton.isInteractable = selectedObjectCodexID != "";
+		string text = "";
+		global::Debug.Assert(this.target != null, "Details Screen has no target");
+		KSelectable component = this.target.GetComponent<KSelectable>();
+		DebugUtil.AssertArgs(component != null, new object[] { "Details Screen target is not a KSelectable", this.target });
+		CellSelectionObject component2 = component.GetComponent<CellSelectionObject>();
+		BuildingUnderConstruction component3 = component.GetComponent<BuildingUnderConstruction>();
+		CreatureBrain component4 = component.GetComponent<CreatureBrain>();
+		PlantableSeed component5 = component.GetComponent<PlantableSeed>();
+		BudUprootedMonitor component6 = component.GetComponent<BudUprootedMonitor>();
+		if (component2 != null)
+		{
+			text = CodexCache.FormatLinkID(component2.element.id.ToString());
+		}
+		else if (component3 != null)
+		{
+			text = CodexCache.FormatLinkID(component3.Def.PrefabID);
+		}
+		else if (component4 != null)
+		{
+			text = CodexCache.FormatLinkID(component.PrefabID().ToString());
+			text = text.Replace("BABY", "");
+		}
+		else if (component5 != null)
+		{
+			text = CodexCache.FormatLinkID(component.PrefabID().ToString());
+			text = text.Replace("SEED", "");
+		}
+		else if (component6 != null)
+		{
+			if (component6.parentObject.Get() != null)
+			{
+				text = CodexCache.FormatLinkID(component6.parentObject.Get().PrefabID().ToString());
+			}
+			else if (component6.GetComponent<TreeBud>() != null)
+			{
+				text = CodexCache.FormatLinkID(component6.GetComponent<TreeBud>().buddingTrunk.Get().PrefabID().ToString());
+			}
+		}
+		else
+		{
+			text = CodexCache.FormatLinkID(component.PrefabID().ToString());
+		}
+		if (CodexCache.entries.ContainsKey(text) || CodexCache.FindSubEntry(text) != null)
+		{
+			return text;
+		}
+		return "";
+	}
+
+	private void CodexEntryButton_Refresh()
+	{
+		string text = this.CodexEntryButton_GetCodexId();
+		this.CodexEntryButton.isInteractable = text != "";
 		this.CodexEntryButton.GetComponent<ToolTip>().SetSimpleTooltip(this.CodexEntryButton.isInteractable ? UI.TOOLTIPS.OPEN_CODEX_ENTRY : UI.TOOLTIPS.NO_CODEX_ENTRY);
+	}
+
+	public void CodexEntryButton_OnClick()
+	{
+		string text = this.CodexEntryButton_GetCodexId();
+		if (text != "")
+		{
+			ManagementMenu.Instance.OpenCodexToEntry(text, null);
+		}
+	}
+
+	private bool PinResourceButton_TryGetResourceTagAndProperName(out Tag targetTag, out string targetProperName)
+	{
+		KPrefabID component = this.target.GetComponent<KPrefabID>();
+		if (component != null && DetailsScreen.<PinResourceButton_TryGetResourceTagAndProperName>g__ShouldUse|56_0(component.PrefabTag))
+		{
+			targetTag = component.PrefabTag;
+			targetProperName = component.GetProperName();
+			return true;
+		}
+		CellSelectionObject component2 = this.target.GetComponent<CellSelectionObject>();
+		if (component2 != null && DetailsScreen.<PinResourceButton_TryGetResourceTagAndProperName>g__ShouldUse|56_0(component2.element.tag))
+		{
+			targetTag = component2.element.tag;
+			targetProperName = component2.GetProperName();
+			return true;
+		}
+		targetTag = null;
+		targetProperName = null;
+		return false;
+	}
+
+	private void PinResourceButton_Refresh()
+	{
+		Tag tag;
+		string text;
+		if (this.PinResourceButton_TryGetResourceTagAndProperName(out tag, out text))
+		{
+			ClusterManager.Instance.activeWorld.worldInventory.pinnedResources.Contains(tag);
+			GameUtil.MeasureUnit measureUnit;
+			if (!AllResourcesScreen.Instance.units.TryGetValue(tag, out measureUnit))
+			{
+				measureUnit = GameUtil.MeasureUnit.quantity;
+			}
+			string text2;
+			switch (measureUnit)
+			{
+			case GameUtil.MeasureUnit.mass:
+				text2 = GameUtil.GetFormattedMass(ClusterManager.Instance.activeWorld.worldInventory.GetAmount(tag, false), GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}");
+				break;
+			case GameUtil.MeasureUnit.kcal:
+				text2 = GameUtil.GetFormattedCalories(RationTracker.Get().CountRationsByFoodType(tag.Name, ClusterManager.Instance.activeWorld.worldInventory, true), GameUtil.TimeSlice.None, true);
+				break;
+			case GameUtil.MeasureUnit.quantity:
+				text2 = GameUtil.GetFormattedUnits(ClusterManager.Instance.activeWorld.worldInventory.GetAmount(tag, false), GameUtil.TimeSlice.None, true, "");
+				break;
+			default:
+				text2 = "";
+				break;
+			}
+			this.PinResourceButton.gameObject.SetActive(true);
+			this.PinResourceButton.GetComponent<ToolTip>().SetSimpleTooltip(string.Format(UI.TOOLTIPS.OPEN_RESOURCE_INFO, text2, text));
+			return;
+		}
+		this.PinResourceButton.gameObject.SetActive(false);
+	}
+
+	public void PinResourceButton_OnClick()
+	{
+		Tag tag;
+		string text;
+		if (this.PinResourceButton_TryGetResourceTagAndProperName(out tag, out text))
+		{
+			AllResourcesScreen.Instance.SetFilter(UI.StripLinkFormatting(text));
+			AllResourcesScreen.Instance.Show(true);
+		}
 	}
 
 	public void OnRefreshData(object obj)
@@ -462,79 +591,6 @@ public class DetailsScreen : KTabMenu
 		this.sideScreen.transform.localScale = Vector3.one;
 	}
 
-	private string GetSelectedObjectCodexID()
-	{
-		string text = "";
-		global::Debug.Assert(this.target != null, "Details Screen has no target");
-		KSelectable component = this.target.GetComponent<KSelectable>();
-		DebugUtil.AssertArgs(component != null, new object[] { "Details Screen target is not a KSelectable", this.target });
-		CellSelectionObject component2 = component.GetComponent<CellSelectionObject>();
-		BuildingUnderConstruction component3 = component.GetComponent<BuildingUnderConstruction>();
-		CreatureBrain component4 = component.GetComponent<CreatureBrain>();
-		PlantableSeed component5 = component.GetComponent<PlantableSeed>();
-		BudUprootedMonitor component6 = component.GetComponent<BudUprootedMonitor>();
-		if (component2 != null)
-		{
-			text = CodexCache.FormatLinkID(component2.element.id.ToString());
-		}
-		else if (component3 != null)
-		{
-			text = CodexCache.FormatLinkID(component3.Def.PrefabID);
-		}
-		else if (component4 != null)
-		{
-			text = CodexCache.FormatLinkID(component.PrefabID().ToString());
-			text = text.Replace("BABY", "");
-		}
-		else if (component5 != null)
-		{
-			text = CodexCache.FormatLinkID(component.PrefabID().ToString());
-			text = text.Replace("SEED", "");
-		}
-		else if (component6 != null)
-		{
-			if (component6.parentObject.Get() != null)
-			{
-				text = CodexCache.FormatLinkID(component6.parentObject.Get().PrefabID().ToString());
-			}
-			else if (component6.GetComponent<TreeBud>() != null)
-			{
-				text = CodexCache.FormatLinkID(component6.GetComponent<TreeBud>().buddingTrunk.Get().PrefabID().ToString());
-			}
-		}
-		else
-		{
-			text = CodexCache.FormatLinkID(component.PrefabID().ToString());
-		}
-		if (CodexCache.entries.ContainsKey(text) || CodexCache.FindSubEntry(text) != null)
-		{
-			return text;
-		}
-		return "";
-	}
-
-	public void OpenCodexEntry()
-	{
-		string selectedObjectCodexID = this.GetSelectedObjectCodexID();
-		if (selectedObjectCodexID != "")
-		{
-			ManagementMenu.Instance.OpenCodexToEntry(selectedObjectCodexID, null);
-		}
-	}
-
-	public void OnClickChangeOutfit()
-	{
-		AudioMixer.instance.Start(AudioMixerSnapshots.Get().FrontEndSupplyClosetSnapshot);
-		MinionBrowserScreenConfig.MinionInstances(this.target).ApplyAndOpenScreen(delegate
-		{
-			AudioMixer.instance.Stop(AudioMixerSnapshots.Get().FrontEndSupplyClosetSnapshot, STOP_MODE.ALLOWFADEOUT);
-		});
-	}
-
-	public void OnClickChangeMaterial()
-	{
-	}
-
 	public void DeselectAndClose()
 	{
 		if (base.gameObject.activeInHierarchy)
@@ -614,7 +670,8 @@ public class DetailsScreen : KTabMenu
 
 	public void UpdateTitle()
 	{
-		this.RefreshCodexButton();
+		this.CodexEntryButton_Refresh();
+		this.PinResourceButton_Refresh();
 		this.TabTitle.SetTitle(this.target.GetProperName());
 		if (this.TabTitle != null)
 		{
@@ -694,10 +751,40 @@ public class DetailsScreen : KTabMenu
 		return this.tabHeader.ActivePanel;
 	}
 
+	[CompilerGenerated]
+	internal static bool <PinResourceButton_TryGetResourceTagAndProperName>g__ShouldUse|56_0(Tag targetTag)
+	{
+		foreach (Tag tag in GameTags.MaterialCategories)
+		{
+			if (DiscoveredResources.Instance.GetDiscoveredResourcesFromTag(tag).Contains(targetTag))
+			{
+				return true;
+			}
+		}
+		foreach (Tag tag2 in GameTags.CalorieCategories)
+		{
+			if (DiscoveredResources.Instance.GetDiscoveredResourcesFromTag(tag2).Contains(targetTag))
+			{
+				return true;
+			}
+		}
+		foreach (Tag tag3 in GameTags.UnitCategories)
+		{
+			if (DiscoveredResources.Instance.GetDiscoveredResourcesFromTag(tag3).Contains(targetTag))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
 	public static DetailsScreen Instance;
 
 	[SerializeField]
 	private KButton CodexEntryButton;
+
+	[SerializeField]
+	private KButton PinResourceButton;
 
 	[Header("Panels")]
 	public Transform UserMenuPanel;

@@ -9,9 +9,9 @@ public class Gradient<T>
 		this.content = content;
 	}
 
-	public T content { get; protected set; }
+	public T content { get; set; }
 
-	public float bandSize { get; protected set; }
+	public float bandSize { get; set; }
 
 	public float maxValue { get; set; }
 }

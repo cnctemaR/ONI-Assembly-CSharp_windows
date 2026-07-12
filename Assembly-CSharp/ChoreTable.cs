@@ -75,6 +75,20 @@ public class ChoreTable
 			return this.infos.Exists((ChoreTable.Builder.Info info) => info.def.GetType() == choreType);
 		}
 
+		public bool TryGetChoreDef<T>(out T def) where T : StateMachine.BaseDef
+		{
+			for (int i = 0; i < this.infos.Count; i++)
+			{
+				if (this.infos[i].def != null && typeof(T).IsAssignableFrom(this.infos[i].def.GetType()))
+				{
+					def = (T)((object)this.infos[i].def);
+					return true;
+				}
+			}
+			def = default(T);
+			return false;
+		}
+
 		public ChoreTable CreateTable()
 		{
 			DebugUtil.Assert(this.interruptGroupId == 0);

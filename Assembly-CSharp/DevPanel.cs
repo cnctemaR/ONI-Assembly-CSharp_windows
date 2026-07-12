@@ -104,6 +104,7 @@ public class DevPanel
 		}
 		ImGuiWindowFlags imGuiWindowFlags;
 		this.ConfigureImGuiWindowFor(currentDevTool, out imGuiWindowFlags);
+		currentDevTool.Internal_Update();
 		bool flag = true;
 		if (ImGui.Begin(currentDevTool.Name + "###ID_" + this.uniquePanelId, ref flag, imGuiWindowFlags))
 		{

@@ -93,21 +93,30 @@ public class ResearchEntry : KMonoBehaviour
 		string text = "";
 		foreach (TechItem techItem in this.targetTech.unlockedItems)
 		{
-			HierarchyReferences component2 = this.GetFreeIcon().GetComponent<HierarchyReferences>();
-			if (text != "")
+			if (SaveLoader.Instance.IsDlcListActiveForCurrentSave(techItem.dlcIds))
 			{
-				text += ", ";
+				HierarchyReferences component2 = this.GetFreeIcon().GetComponent<HierarchyReferences>();
+				if (text != "")
+				{
+					text += ", ";
+				}
+				text += techItem.Name;
+				component2.GetReference<KImage>("Icon").sprite = techItem.UISprite();
+				component2.GetReference<KImage>("Background");
+				KImage reference = component2.GetReference<KImage>("DLCOverlay");
+				bool flag = !DlcManager.IsValidForVanilla(techItem.dlcIds);
+				reference.gameObject.SetActive(flag);
+				if (flag)
+				{
+					reference.color = DlcManager.GetDlcBannerColor(techItem.dlcIds[0]);
+				}
+				string text2 = string.Format("{0}\n{1}", techItem.Name, techItem.description);
+				if (!DlcManager.IsValidForVanilla(techItem.dlcIds))
+				{
+					text2 += string.Format(RESEARCH.MESSAGING.DLC.DLC_CONTENT, DlcManager.GetDlcTitle(techItem.dlcIds[0]));
+				}
+				component2.GetComponent<ToolTip>().toolTip = text2;
 			}
-			text += techItem.Name;
-			component2.GetReference<KImage>("Icon").sprite = techItem.UISprite();
-			component2.GetReference<KImage>("Background");
-			component2.GetReference<KImage>("DLCOverlay").gameObject.SetActive(!DlcManager.IsValidForVanilla(techItem.dlcIds));
-			string text2 = string.Format("{0}\n{1}", techItem.Name, techItem.description);
-			if (!DlcManager.IsValidForVanilla(techItem.dlcIds))
-			{
-				text2 += RESEARCH.MESSAGING.DLC.EXPANSION1;
-			}
-			component2.GetComponent<ToolTip>().toolTip = text2;
 		}
 		text = string.Format(UI.RESEARCHSCREEN_UNLOCKSTOOLTIP, text);
 		this.researchName.GetComponent<ToolTip>().toolTip = string.Format("{0}\n{1}\n\n{2}", this.targetTech.Name, this.targetTech.desc, text);

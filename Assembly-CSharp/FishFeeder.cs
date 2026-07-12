@@ -125,7 +125,7 @@ public class FishFeeder : GameStateMachine<FishFeeder, FishFeeder.Instance, ISta
 
 		public void UpdateMutantSeedStatusItem()
 		{
-			base.gameObject.GetComponent<KSelectable>().ToggleStatusItem(this.mutantSeedStatusItem, DlcManager.IsContentActive("EXPANSION1_ID") && !this.forbidMutantSeeds, null);
+			base.gameObject.GetComponent<KSelectable>().ToggleStatusItem(this.mutantSeedStatusItem, SaveLoader.Instance.IsDLCActiveForCurrentSave("EXPANSION1_ID") && !this.forbidMutantSeeds, null);
 		}
 
 		private StatusItem mutantSeedStatusItem;

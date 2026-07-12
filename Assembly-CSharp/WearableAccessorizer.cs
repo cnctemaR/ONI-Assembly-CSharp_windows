@@ -628,7 +628,11 @@ public class WearableAccessorizer : KMonoBehaviour
 				this.buildAnims = new List<KAnimFile>();
 				for (int i = 0; i < this.animNames.Count; i++)
 				{
-					this.buildAnims.Add(Assets.GetAnim(this.animNames[i]));
+					KAnimFile kanimFile = null;
+					if (Assets.TryGetAnim(this.animNames[i], out kanimFile))
+					{
+						this.buildAnims.Add(kanimFile);
+					}
 				}
 			}
 		}

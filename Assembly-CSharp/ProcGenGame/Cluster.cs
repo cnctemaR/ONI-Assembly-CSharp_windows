@@ -14,7 +14,13 @@ namespace ProcGenGame
 	[Serializable]
 	public class Cluster
 	{
-		public ClusterLayout clusterLayout { get; private set; }
+		public ClusterLayout clusterLayout
+		{
+			get
+			{
+				return this.mutatedClusterLayout.layout;
+			}
+		}
 
 		public bool IsGenerationComplete { get; private set; }
 
@@ -30,12 +36,15 @@ namespace ProcGenGame
 		{
 		}
 
-		public Cluster(string name, int seed, List<string> chosenStoryTraitIds, bool assertMissingTraits, bool skipWorldTraits)
+		public Cluster(string clusterName, int seed, List<string> chosenStoryTraitIds, bool assertMissingTraits, bool skipWorldTraits, bool isRunningWorldgenDebug = false)
 		{
-			DebugUtil.Assert(!string.IsNullOrEmpty(name), "Cluster file is missing");
+			DebugUtil.Assert(!string.IsNullOrEmpty(clusterName), "Cluster file is missing");
 			this.seed = seed;
+			this.Id = clusterName;
+			this.assertMissingTraits = assertMissingTraits;
+			this.worldTraitsEnabled = seed > 0 && !skipWorldTraits;
 			WorldGen.LoadSettings(false);
-			this.clusterLayout = SettingsCache.clusterLayouts.clusterCache[name];
+			this.InitializeWorlds(false, isRunningWorldgenDebug);
 			this.unplacedStoryTraits = new List<WorldTrait>();
 			if (!this.clusterLayout.disableStoryTraits)
 			{
@@ -51,16 +60,34 @@ namespace ProcGenGame
 							this.unplacedStoryTraits.Add(cachedStoryTrait);
 						}
 					}
-					goto IL_00D5;
+					goto IL_00E9;
 				}
 			}
 			this.chosenStoryTraitIds = new List<string>();
-			IL_00D5:
-			this.Id = name;
-			bool flag = seed > 0 && !skipWorldTraits;
+			IL_00E9:
+			if (CustomGameSettings.Instance != null)
+			{
+				foreach (string text2 in CustomGameSettings.Instance.GetCurrentDlcMixingIds())
+				{
+					DlcMixingSettings cachedDlcMixingSettings = SettingsCache.GetCachedDlcMixingSettings(text2);
+					if (this.clusterLayout.poiPlacements != null)
+					{
+						this.clusterLayout.poiPlacements.AddRange(cachedDlcMixingSettings.spacePois);
+					}
+				}
+			}
+			if (this.clusterLayout.numRings > 0)
+			{
+				this.numRings = this.clusterLayout.numRings;
+			}
+		}
+
+		public void InitializeWorlds(bool reuseWorldgen = false, bool isRunningWorldgenDebug = false)
+		{
+			this.mutatedClusterLayout = WorldgenMixing.DoWorldMixing(SettingsCache.clusterLayouts.clusterCache[this.Id], this.seed, isRunningWorldgenDebug, false);
 			for (int i = 0; i < this.clusterLayout.worldPlacements.Count; i++)
 			{
-				global::ProcGen.World worldData = SettingsCache.worlds.GetWorldData(this.clusterLayout.worldPlacements[i].world);
+				global::ProcGen.World worldData = SettingsCache.worlds.GetWorldData(this.clusterLayout.worldPlacements[i], this.seed);
 				if (worldData != null)
 				{
 					this.clusterLayout.worldPlacements[i].SetSize(worldData.worldsize);
@@ -71,20 +98,45 @@ namespace ProcGenGame
 				}
 			}
 			this.size = BestFit.BestFitWorlds(this.clusterLayout.worldPlacements, false);
-			foreach (WorldPlacement worldPlacement in this.clusterLayout.worldPlacements)
+			int num = this.seed;
+			for (int j = 0; j < this.clusterLayout.worldPlacements.Count; j++)
 			{
+				WorldPlacement worldPlacement = this.clusterLayout.worldPlacements[j];
 				List<string> list = new List<string>();
-				if (flag)
+				global::ProcGen.World worldData2 = SettingsCache.worlds.GetWorldData(worldPlacement, num);
+				if (this.worldTraitsEnabled)
 				{
-					global::ProcGen.World worldData2 = SettingsCache.worlds.GetWorldData(worldPlacement.world);
-					list = SettingsCache.GetRandomTraits(seed, worldData2);
-					seed++;
+					list = SettingsCache.GetRandomTraits(num, worldData2);
+					num++;
 				}
-				WorldGen worldGen = new WorldGen(worldPlacement.world, list, null, assertMissingTraits);
+				WorldGen worldGen;
+				if (reuseWorldgen)
+				{
+					if (worldData2.name == this.worlds[j].Settings.world.name)
+					{
+						worldGen = this.worlds[j];
+					}
+					else
+					{
+						worldGen = new WorldGen(worldPlacement, num, list, null, this.assertMissingTraits);
+						this.worlds[j] = worldGen;
+					}
+				}
+				else
+				{
+					worldGen = new WorldGen(worldPlacement, num, list, null, this.assertMissingTraits);
+					this.worlds.Add(worldGen);
+				}
 				Vector2I worldsize = worldGen.Settings.world.worldsize;
 				worldGen.SetWorldSize(worldsize.x, worldsize.y);
 				worldGen.SetPosition(new Vector2I(worldPlacement.x, worldPlacement.y));
-				this.worlds.Add(worldGen);
+				if (!reuseWorldgen && worldPlacement.worldMixing.mixingWasApplied)
+				{
+					worldGen.Settings.world.worldTemplateRules.AddRange(worldPlacement.worldMixing.additionalWorldTemplateRules);
+					worldGen.Settings.world.subworldFiles.AddRange(worldPlacement.worldMixing.additionalSubworldFiles);
+					worldGen.Settings.world.AddUnknownCellsAllowedSubworlds(worldPlacement.worldMixing.additionalUnknownCellFilters);
+					worldGen.Settings.world.AddSeasons(worldPlacement.worldMixing.additionalSeasons);
+				}
 				if (worldPlacement.startWorld)
 				{
 					this.currentWorld = worldGen;
@@ -93,12 +145,8 @@ namespace ProcGenGame
 			}
 			if (this.currentWorld == null)
 			{
-				global::Debug.LogWarning(string.Format("Start world not set. Defaulting to first world {0}", this.worlds[0].Settings.world.name));
+				DebugUtil.DevLogErrorFormat("Start world not set. Defaulting to first world {0}", new object[] { this.worlds[0].Settings.world.name });
 				this.currentWorld = this.worlds[0];
-			}
-			if (this.clusterLayout.numRings > 0)
-			{
-				this.numRings = this.clusterLayout.numRings;
 			}
 		}
 
@@ -126,14 +174,18 @@ namespace ProcGenGame
 			}
 		}
 
-		public void Generate(WorldGen.OfflineCallbackFunction callbackFn, Action<OfflineWorldGen.ErrorInfo> error_cb, int worldSeed = -1, int layoutSeed = -1, int terrainSeed = -1, int noiseSeed = -1, bool doSimSettle = true, bool debug = false)
+		public void Generate(WorldGen.OfflineCallbackFunction callbackFn, Action<OfflineWorldGen.ErrorInfo> error_cb, int worldSeed = -1, int layoutSeed = -1, int terrainSeed = -1, int noiseSeed = -1, bool doSimSettle = true, bool debug = false, bool skipPlacingTemplates = false)
 		{
 			this.doSimSettle = doSimSettle;
 			for (int num = 0; num != this.worlds.Count; num++)
 			{
-				this.worlds[num].Initialise(callbackFn, error_cb, worldSeed + num, layoutSeed + num, terrainSeed + num, noiseSeed + num, debug);
+				if (this.ShouldSkipWorldCallback == null || !this.ShouldSkipWorldCallback(num, this.worlds[num]))
+				{
+					this.worlds[num].Initialise(callbackFn, error_cb, worldSeed + num, layoutSeed + num, terrainSeed + num, noiseSeed + num, debug, skipPlacingTemplates);
+				}
 			}
 			this.IsGenerationComplete = false;
+			this.ApplicationIsPlaying = Application.isPlaying;
 			this.thread = new Thread(new ThreadStart(this.ThreadMain));
 			global::Util.ApplyInvariantCultureToThread(this.thread);
 			this.thread.Start();
@@ -144,51 +196,91 @@ namespace ProcGenGame
 			this.thread = null;
 		}
 
+		private bool IsRunningDebugGen()
+		{
+			return !this.ApplicationIsPlaying;
+		}
+
 		private void BeginGeneration()
 		{
 			this.LogBeginGeneration();
+			try
+			{
+				WorldgenMixing.DoSubworldMixing(this, this.seed, this.ShouldSkipWorldCallback, this.IsRunningDebugGen());
+			}
+			catch (WorldgenException ex)
+			{
+				if (!this.IsRunningDebugGen())
+				{
+					this.currentWorld.ReportWorldGenError(ex, ex.userMessage);
+				}
+				this.StopThread();
+				return;
+			}
 			Sim.Cell[] array = null;
 			Sim.DiseaseCell[] array2 = null;
 			int num = 0;
+			AxialI startLoc = this.worlds[0].GetClusterLocation();
+			foreach (WorldGen worldGen in this.worlds)
+			{
+				if (worldGen.isStartingWorld)
+				{
+					startLoc = worldGen.GetClusterLocation();
+				}
+			}
 			List<WorldGen> list = new List<WorldGen>(this.worlds);
 			list.Sort(delegate(WorldGen a, WorldGen b)
 			{
-				WorldPlacement worldPlacement = this.clusterLayout.worldPlacements.Find((WorldPlacement x) => x.world == a.Settings.world.filePath);
-				WorldPlacement worldPlacement2 = this.clusterLayout.worldPlacements.Find((WorldPlacement x) => x.world == b.Settings.world.filePath);
-				return WorldPlacement.CompareLocationType(worldPlacement, worldPlacement2);
+				int distance = AxialUtil.GetDistance(startLoc, a.GetClusterLocation());
+				int distance2 = AxialUtil.GetDistance(startLoc, b.GetClusterLocation());
+				if (distance == distance2)
+				{
+					return 0;
+				}
+				if (distance >= distance2)
+				{
+					return 1;
+				}
+				return -1;
 			});
+			MemoryStream memoryStream = new MemoryStream();
+			BinaryWriter binaryWriter = new BinaryWriter(memoryStream);
 			for (int i = 0; i < list.Count; i++)
 			{
-				WorldGen worldGen = list[i];
-				if (this.ShouldSkipWorldCallback == null || !this.ShouldSkipWorldCallback(i, worldGen))
+				WorldGen worldGen2 = list[i];
+				if (this.ShouldSkipWorldCallback == null || !this.ShouldSkipWorldCallback(i, worldGen2))
 				{
 					DebugUtil.Separator();
-					DebugUtil.LogArgs(new object[] { "Generating world: " + worldGen.Settings.world.filePath });
-					if (worldGen.Settings.GetWorldTraitIDs().Length != 0)
+					DebugUtil.LogArgs(new object[] { "Generating world: " + worldGen2.Settings.world.filePath });
+					if (worldGen2.Settings.GetWorldTraitIDs().Length != 0)
 					{
-						DebugUtil.LogArgs(new object[] { " - worldtraits: " + string.Join(", ", worldGen.Settings.GetWorldTraitIDs().ToArray<string>()) });
+						DebugUtil.LogArgs(new object[] { " - worldtraits: " + string.Join(", ", worldGen2.Settings.GetWorldTraitIDs().ToArray<string>()) });
 					}
 					if (this.PerWorldGenBeginCallback != null)
 					{
-						this.PerWorldGenBeginCallback(i, worldGen);
+						this.PerWorldGenBeginCallback(i, worldGen2);
 					}
 					List<WorldTrait> list2 = new List<WorldTrait>();
 					list2.AddRange(this.unplacedStoryTraits);
-					worldGen.Settings.SetStoryTraitCandidates(list2);
-					GridSettings.Reset(worldGen.GetSize().x, worldGen.GetSize().y);
-					worldGen.GenerateOffline();
-					worldGen.FinalizeStartLocation();
+					worldGen2.Settings.SetStoryTraitCandidates(list2);
+					GridSettings.Reset(worldGen2.GetSize().x, worldGen2.GetSize().y);
+					if (!worldGen2.GenerateOffline())
+					{
+						this.StopThread();
+						return;
+					}
+					worldGen2.FinalizeStartLocation();
 					array = null;
 					array2 = null;
 					List<WorldTrait> list3 = new List<WorldTrait>();
-					if (!worldGen.RenderOffline(this.doSimSettle, ref array, ref array2, num, ref list3, worldGen.isStartingWorld))
+					if (!worldGen2.RenderOffline(this.doSimSettle, binaryWriter, ref array, ref array2, num, ref list3, worldGen2.isStartingWorld))
 					{
 						this.StopThread();
 						return;
 					}
 					if (this.PerWorldGenCompleteCallback != null)
 					{
-						this.PerWorldGenCompleteCallback(i, worldGen, array, array2);
+						this.PerWorldGenCompleteCallback(i, worldGen2, array, array2);
 					}
 					foreach (WorldTrait worldTrait in list3)
 					{
@@ -219,7 +311,9 @@ namespace ProcGenGame
 				this.StopThread();
 				return;
 			}
-			this.Save();
+			BinaryWriter binaryWriter2 = new BinaryWriter(File.Open(WorldGen.WORLDGEN_SAVE_FILENAME, FileMode.Create));
+			this.Save(binaryWriter2);
+			binaryWriter2.Write(memoryStream.ToArray());
 			this.StopThread();
 			DebugUtil.Separator();
 			DebugUtil.LogArgs(new object[] { "WORLDGEN COMPLETE\n\n\n" });
@@ -234,9 +328,8 @@ namespace ProcGenGame
 		public bool AssignClusterLocations()
 		{
 			this.myRandom = new SeededRandom(this.seed);
-			ClusterLayout clusterLayout = SettingsCache.clusterLayouts.clusterCache[this.Id];
-			List<WorldPlacement> list = new List<WorldPlacement>(clusterLayout.worldPlacements);
-			List<SpaceMapPOIPlacement> list2 = ((clusterLayout.poiPlacements == null) ? new List<SpaceMapPOIPlacement>() : new List<SpaceMapPOIPlacement>(clusterLayout.poiPlacements));
+			List<WorldPlacement> list = new List<WorldPlacement>(SettingsCache.clusterLayouts.clusterCache[this.Id].worldPlacements);
+			List<SpaceMapPOIPlacement> list2 = ((this.clusterLayout.poiPlacements == null) ? new List<SpaceMapPOIPlacement>() : new List<SpaceMapPOIPlacement>(this.clusterLayout.poiPlacements));
 			this.currentWorld.SetClusterLocation(AxialI.ZERO);
 			HashSet<AxialI> assignedLocations = new HashSet<AxialI>();
 			HashSet<AxialI> worldForbiddenLocations = new HashSet<AxialI>();
@@ -313,6 +406,7 @@ namespace ProcGenGame
 				float num2 = 0.5f;
 				int num3 = 3;
 				int num4 = 0;
+				Func<AxialI, bool> <>9__4;
 				Func<AxialI, bool> <>9__2;
 				Func<AxialI, bool> <>9__3;
 				foreach (SpaceMapPOIPlacement spaceMapPOIPlacement in list2)
@@ -345,6 +439,18 @@ namespace ProcGenGame
 							}
 							list5 = rings2.Where<AxialI>(func2).ToList<AxialI>();
 						}
+						if (spaceMapPOIPlacement.guarantee && (list5 == null || list5.Count <= 0))
+						{
+							num4 = 0;
+							poiClumpLocations.Clear();
+							IEnumerable<AxialI> rings3 = AxialUtil.GetRings(AxialI.ZERO, spaceMapPOIPlacement.allowedRings.min, Mathf.Min(spaceMapPOIPlacement.allowedRings.max, this.numRings - 1));
+							Func<AxialI, bool> func3;
+							if ((func3 = <>9__4) == null)
+							{
+								func3 = (<>9__4 = (AxialI location) => !assignedLocations.Contains(location) && !poiWorldAvoidance.Contains(location));
+							}
+							list5 = rings3.Where<AxialI>(func3).ToList<AxialI>();
+						}
 						if (list5 != null && list5.Count > 0)
 						{
 							AxialI axialI5 = list5[this.myRandom.RandomRange(0, list5.Count)];
@@ -360,7 +466,7 @@ namespace ProcGenGame
 						}
 						else
 						{
-							global::Debug.LogWarning(string.Format("There is no room for a Space POI in ring range [{0}, {1}]", spaceMapPOIPlacement.allowedRings.min, spaceMapPOIPlacement.allowedRings.max));
+							global::Debug.LogWarning(string.Format("There is no room for a Space POI in ring range [{0}, {1}] with pois: {2}", spaceMapPOIPlacement.allowedRings.min, spaceMapPOIPlacement.allowedRings.max, string.Join("\n - ", spaceMapPOIPlacement.pois.ToArray())));
 						}
 					}
 				}
@@ -382,7 +488,7 @@ namespace ProcGenGame
 			this.BeginGeneration();
 		}
 
-		private void Save()
+		private void Save(BinaryWriter fileWriter)
 		{
 			try
 			{
@@ -405,13 +511,20 @@ namespace ProcGenGame
 								WorldGen worldGen = this.worlds[num];
 								if (this.ShouldSkipWorldCallback == null || !this.ShouldSkipWorldCallback(num, worldGen))
 								{
+									HashSet<string> hashSet = new HashSet<string>();
+									foreach (TerrainCell terrainCell in worldGen.TerrainCells)
+									{
+										hashSet.Add(terrainCell.node.GetSubworld());
+									}
 									clusterLayoutSave.worlds.Add(new ClusterLayoutSave.World
 									{
 										data = worldGen.data,
 										name = worldGen.Settings.world.filePath,
 										isDiscovered = worldGen.isStartingWorld,
 										traits = worldGen.Settings.GetWorldTraitIDs().ToList<string>(),
-										storyTraits = worldGen.Settings.GetStoryTraitIDs().ToList<string>()
+										storyTraits = worldGen.Settings.GetStoryTraitIDs().ToList<string>(),
+										seasons = worldGen.Settings.world.seasons,
+										generatedSubworlds = hashSet.ToList<string>()
 									});
 									if (worldGen == this.currentWorld)
 									{
@@ -426,11 +539,8 @@ namespace ProcGenGame
 							DebugUtil.LogErrorArgs(new object[] { "Couldn't serialize", ex.Message, ex.StackTrace });
 						}
 					}
-					using (BinaryWriter binaryWriter2 = new BinaryWriter(File.Open(WorldGen.WORLDGEN_SAVE_FILENAME, FileMode.Create)))
-					{
-						Manager.SerializeDirectory(binaryWriter2);
-						binaryWriter2.Write(memoryStream.ToArray());
-					}
+					Manager.SerializeDirectory(fileWriter);
+					fileWriter.Write(memoryStream.ToArray());
 				}
 			}
 			catch (Exception ex2)
@@ -439,19 +549,18 @@ namespace ProcGenGame
 			}
 		}
 
-		public static Cluster Load()
+		public static Cluster Load(FastReader reader)
 		{
 			Cluster cluster = new Cluster();
 			try
 			{
-				FastReader fastReader = new FastReader(File.ReadAllBytes(WorldGen.WORLDGEN_SAVE_FILENAME));
-				Manager.DeserializeDirectory(fastReader);
-				int position = fastReader.Position;
+				Manager.DeserializeDirectory(reader);
+				int position = reader.Position;
 				ClusterLayoutSave clusterLayoutSave = new ClusterLayoutSave();
-				if (!Deserializer.Deserialize(clusterLayoutSave, fastReader))
+				if (!Deserializer.Deserialize(clusterLayoutSave, reader))
 				{
-					fastReader.Position = position;
-					WorldGen worldGen = WorldGen.Load(fastReader, true);
+					reader.Position = position;
+					WorldGen worldGen = WorldGen.Load(reader, true);
 					cluster.worlds.Add(worldGen);
 					cluster.size = worldGen.GetSize();
 					cluster.currentWorld = cluster.worlds[0] ?? null;
@@ -462,6 +571,8 @@ namespace ProcGenGame
 					{
 						ClusterLayoutSave.World world = clusterLayoutSave.worlds[num];
 						WorldGen worldGen2 = new WorldGen(world.name, world.data, world.traits, world.storyTraits, false);
+						worldGen2.Settings.world.ReplaceSeasons(world.seasons);
+						worldGen2.Settings.world.generatedSubworlds = world.generatedSubworlds;
 						cluster.worlds.Add(worldGen2);
 						if (num == clusterLayoutSave.currentWorldIdx)
 						{
@@ -490,35 +601,33 @@ namespace ProcGenGame
 			return cluster;
 		}
 
-		public void LoadClusterLayoutSim(List<SimSaveFileStructure> loadedWorlds)
+		public void LoadClusterSim(List<SimSaveFileStructure> loadedWorlds, FastReader reader)
 		{
-			for (int num = 0; num != this.worlds.Count; num++)
+			try
 			{
-				SimSaveFileStructure simSaveFileStructure = new SimSaveFileStructure();
-				try
+				for (int num = 0; num != this.worlds.Count; num++)
 				{
-					FastReader fastReader = new FastReader(File.ReadAllBytes(WorldGen.GetSIMSaveFilename(num)));
-					Manager.DeserializeDirectory(fastReader);
-					Deserializer.Deserialize(simSaveFileStructure, fastReader);
-				}
-				catch (Exception ex)
-				{
-					if (!GenericGameSettings.instance.devAutoWorldGenActive)
+					SimSaveFileStructure simSaveFileStructure = new SimSaveFileStructure();
+					Manager.DeserializeDirectory(reader);
+					Deserializer.Deserialize(simSaveFileStructure, reader);
+					if (simSaveFileStructure.worldDetail == null)
 					{
-						DebugUtil.LogErrorArgs(new object[] { "LoadSim Error!\n", ex.Message, ex.StackTrace });
-						break;
+						if (!GenericGameSettings.instance.devAutoWorldGenActive)
+						{
+							global::Debug.LogError("Detail is null for world " + num.ToString());
+						}
+					}
+					else
+					{
+						loadedWorlds.Add(simSaveFileStructure);
 					}
 				}
-				if (simSaveFileStructure.worldDetail == null)
+			}
+			catch (Exception ex)
+			{
+				if (!GenericGameSettings.instance.devAutoWorldGenActive)
 				{
-					if (!GenericGameSettings.instance.devAutoWorldGenActive)
-					{
-						global::Debug.LogError("Detail is null for world " + num.ToString());
-					}
-				}
-				else
-				{
-					loadedWorlds.Add(simSaveFileStructure);
+					DebugUtil.LogErrorArgs(new object[] { "LoadSim Error!\n", ex.Message, ex.StackTrace });
 				}
 			}
 		}
@@ -534,6 +643,30 @@ namespace ProcGenGame
 		public void DEBUG_UpdateSeed(int seed)
 		{
 			this.seed = seed;
+			this.InitializeWorlds(true, true);
+		}
+
+		public int MaxSupportedSubworldMixings()
+		{
+			int num = 0;
+			foreach (WorldGen worldGen in this.worlds)
+			{
+				num += worldGen.Settings.world.subworldMixingRules.Count;
+			}
+			return num;
+		}
+
+		public int MaxSupportedWorldMixings()
+		{
+			int num = 0;
+			foreach (WorldPlacement worldPlacement in this.clusterLayout.worldPlacements)
+			{
+				if (worldPlacement.worldMixing != null && (worldPlacement.worldMixing.requiredTags.Count != 0 || worldPlacement.worldMixing.forbiddenTags.Count != 0))
+				{
+					num++;
+				}
+			}
+			return num;
 		}
 
 		public List<WorldGen> worlds = new List<WorldGen>();
@@ -546,26 +679,39 @@ namespace ProcGenGame
 
 		public int numRings = 5;
 
+		public bool worldTraitsEnabled;
+
+		public bool assertMissingTraits;
+
+		public Dictionary<ClusterLayoutSave.POIType, List<AxialI>> poiLocations = new Dictionary<ClusterLayoutSave.POIType, List<AxialI>>();
+
+		public Dictionary<AxialI, string> poiPlacements = new Dictionary<AxialI, string>();
+
 		private int seed;
 
 		private SeededRandom myRandom;
 
 		private bool doSimSettle = true;
 
+		[NonSerialized]
 		public Action<int, WorldGen> PerWorldGenBeginCallback;
 
+		[NonSerialized]
 		public Action<int, WorldGen, Sim.Cell[], Sim.DiseaseCell[]> PerWorldGenCompleteCallback;
 
+		[NonSerialized]
 		public Func<int, WorldGen, bool> ShouldSkipWorldCallback;
 
-		public Dictionary<ClusterLayoutSave.POIType, List<AxialI>> poiLocations = new Dictionary<ClusterLayoutSave.POIType, List<AxialI>>();
-
-		public Dictionary<AxialI, string> poiPlacements = new Dictionary<AxialI, string>();
-
+		[NonSerialized]
 		public List<WorldTrait> unplacedStoryTraits;
 
+		[NonSerialized]
 		public List<string> chosenStoryTraitIds;
 
+		private MutatedClusterLayout mutatedClusterLayout;
+
 		private Thread thread;
+
+		private bool ApplicationIsPlaying;
 	}
 }

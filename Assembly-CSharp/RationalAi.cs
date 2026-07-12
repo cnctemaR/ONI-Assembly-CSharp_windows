@@ -32,6 +32,12 @@ public class RationalAi : GameStateMachine<RationalAi, RationalAi.Instance>
 			.ToggleStateMachine((RationalAi.Instance smi) => new RoomMonitor.Instance(smi.master))
 			.ToggleStateMachine((RationalAi.Instance smi) => new TemperatureMonitor.Instance(smi.master))
 			.ToggleStateMachine((RationalAi.Instance smi) => new ExternalTemperatureMonitor.Instance(smi.master))
+			.ToggleStateMachine((RationalAi.Instance smi) => new ScaldingMonitor.Instance(smi.master, new ScaldingMonitor.Def
+			{
+				defaultScaldingTreshold = 345f
+			}))
+			.ToggleStateMachine((RationalAi.Instance smi) => new ColdImmunityMonitor.Instance(smi.master))
+			.ToggleStateMachine((RationalAi.Instance smi) => new HeatImmunityMonitor.Instance(smi.master))
 			.ToggleStateMachine((RationalAi.Instance smi) => new BladderMonitor.Instance(smi.master))
 			.ToggleStateMachine((RationalAi.Instance smi) => new SteppedInMonitor.Instance(smi.master))
 			.ToggleStateMachine((RationalAi.Instance smi) => new LightMonitor.Instance(smi.master))

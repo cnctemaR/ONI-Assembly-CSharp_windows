@@ -186,7 +186,10 @@ public class SubworldZoneRenderData : KMonoBehaviour
 		new Color32(145, 198, 213, 11),
 		new Color32(145, 198, 213, 12),
 		new Color32(145, 198, 213, 13),
-		new Color32(173, 222, 212, 14)
+		new Color32(173, 222, 212, 14),
+		new Color32(100, 100, 222, 18),
+		new Color32(222, 100, 222, 19),
+		new Color32(100, 222, 100, 20)
 	};
 
 	private const int NUM_COLOUR_BYTES = 3;
@@ -194,6 +197,7 @@ public class SubworldZoneRenderData : KMonoBehaviour
 	public int[] zoneTextureArrayIndices = new int[]
 	{
 		0, 1, 2, 3, 4, 5, 5, 3, 6, 7,
-		8, 9, 10, 11, 12, 7, 3, 13
+		8, 9, 10, 11, 12, 7, 3, 13, 0, 0,
+		0
 	};
 }

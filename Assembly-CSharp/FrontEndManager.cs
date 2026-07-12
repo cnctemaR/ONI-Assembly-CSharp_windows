@@ -30,7 +30,8 @@ public class FrontEndManager : KMonoBehaviour
 		GameObject[] array = new GameObject[]
 		{
 			ScreenPrefabs.Instance.MainMenuIntroShort,
-			ScreenPrefabs.Instance.MainMenuHealthyGameMessage
+			ScreenPrefabs.Instance.MainMenuHealthyGameMessage,
+			ScreenPrefabs.Instance.DLCBetaWarningScreen
 		};
 		for (int i = 0; i < array.Length; i++)
 		{

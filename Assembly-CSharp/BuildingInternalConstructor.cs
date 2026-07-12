@@ -137,7 +137,7 @@ public class BuildingInternalConstructor : GameStateMachine<BuildingInternalCons
 				float mass = massForConstruction.Mass;
 				float num = massForConstruction.Temperature * massForConstruction.Mass;
 				massForConstruction.Mass -= base.def.constructionMass;
-				Mathf.Clamp(num / mass, 288.15f, 318.15f);
+				Mathf.Clamp(num / mass, 0f, 318.15f);
 			}
 			else
 			{

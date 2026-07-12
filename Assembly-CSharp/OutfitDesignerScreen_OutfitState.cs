@@ -80,13 +80,13 @@ public class OutfitDesignerScreen_OutfitState
 		return list.ToArray();
 	}
 
-	public bool DoesContainNonOwnedItems()
+	public bool DoesContainLockedItems()
 	{
 		bool flag;
 		using (ListPool<string, OutfitDesignerScreen_OutfitState>.PooledList pooledList = PoolsFor<OutfitDesignerScreen_OutfitState>.AllocateList<string>())
 		{
 			this.AddItemsTo(pooledList);
-			flag = ClothingOutfitTarget.DoesContainNonOwnedItems(pooledList);
+			flag = ClothingOutfitTarget.DoesContainLockedItems(pooledList);
 		}
 		return flag;
 	}

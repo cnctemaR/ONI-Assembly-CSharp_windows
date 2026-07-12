@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.Serialization;
 using Delaunay.Geo;
 using Klei;
@@ -90,6 +91,14 @@ public class WorldContainer : KMonoBehaviour
 		}
 	}
 
+	public Dictionary<string, int> NorthernLightsFixedTraits
+	{
+		get
+		{
+			return this.northernLightsFixedTraits;
+		}
+	}
+
 	public Dictionary<string, int> CosmicRadiationFixedTraits
 	{
 		get
@@ -103,6 +112,14 @@ public class WorldContainer : KMonoBehaviour
 		get
 		{
 			return this.m_subworldNames;
+		}
+	}
+
+	public List<string> GeneratedBiomes
+	{
+		get
+		{
+			return this.m_generatedSubworlds;
 		}
 	}
 
@@ -350,6 +367,7 @@ public class WorldContainer : KMonoBehaviour
 	{
 		this.sunlight = this.GetSunlightValueFromFixedTrait();
 		this.cosmicRadiation = this.GetCosmicRadiationValueFromFixedTrait();
+		this.northernlights = this.GetNorthernlightValueFromFixedTrait();
 	}
 
 	private void RefreshHasTopPriorityChore()
@@ -377,6 +395,10 @@ public class WorldContainer : KMonoBehaviour
 
 	public string GetRandomName()
 	{
+		if (!this.overrideName.IsNullOrWhiteSpace())
+		{
+			return Strings.Get(this.overrideName);
+		}
 		return GameUtil.GenerateRandomWorldName(this.nameTables);
 	}
 
@@ -570,54 +592,93 @@ public class WorldContainer : KMonoBehaviour
 		}
 	}
 
-	private string GetSunlightFromFixedTraits(WorldGen world)
+	private int GetDefaultValueForFixedTraitCategory(Dictionary<string, int> traitCategory)
+	{
+		if (traitCategory == this.northernLightsFixedTraits)
+		{
+			return FIXEDTRAITS.NORTHERNLIGHTS.DEFAULT_VALUE;
+		}
+		if (traitCategory == this.sunlightFixedTraits)
+		{
+			return FIXEDTRAITS.SUNLIGHT.DEFAULT_VALUE;
+		}
+		if (traitCategory == this.cosmicRadiationFixedTraits)
+		{
+			return FIXEDTRAITS.COSMICRADIATION.DEFAULT_VALUE;
+		}
+		return 0;
+	}
+
+	private string GetDefaultFixedTraitFor(Dictionary<string, int> traitCategory)
+	{
+		if (traitCategory == this.northernLightsFixedTraits)
+		{
+			return FIXEDTRAITS.NORTHERNLIGHTS.NAME.DEFAULT;
+		}
+		if (traitCategory == this.sunlightFixedTraits)
+		{
+			return FIXEDTRAITS.SUNLIGHT.NAME.DEFAULT;
+		}
+		if (traitCategory == this.cosmicRadiationFixedTraits)
+		{
+			return FIXEDTRAITS.COSMICRADIATION.NAME.DEFAULT;
+		}
+		return null;
+	}
+
+	private string GetFixedTraitsFor(Dictionary<string, int> traitCategory, WorldGen world)
 	{
 		foreach (string text in world.Settings.world.fixedTraits)
 		{
-			if (this.sunlightFixedTraits.ContainsKey(text))
+			if (traitCategory.ContainsKey(text))
 			{
 				return text;
 			}
 		}
-		return FIXEDTRAITS.SUNLIGHT.NAME.DEFAULT;
+		return this.GetDefaultFixedTraitFor(traitCategory);
+	}
+
+	private int GetFixedTraitValueForTrait(Dictionary<string, int> traitCategory, ref string trait)
+	{
+		if (trait == null)
+		{
+			trait = this.GetDefaultFixedTraitFor(traitCategory);
+		}
+		if (traitCategory.ContainsKey(trait))
+		{
+			return traitCategory[trait];
+		}
+		return this.GetDefaultValueForFixedTraitCategory(traitCategory);
+	}
+
+	private string GetNorthernlightFixedTraits(WorldGen world)
+	{
+		return this.GetFixedTraitsFor(this.northernLightsFixedTraits, world);
+	}
+
+	private string GetSunlightFromFixedTraits(WorldGen world)
+	{
+		return this.GetFixedTraitsFor(this.sunlightFixedTraits, world);
 	}
 
 	private string GetCosmicRadiationFromFixedTraits(WorldGen world)
 	{
-		foreach (string text in world.Settings.world.fixedTraits)
-		{
-			if (this.cosmicRadiationFixedTraits.ContainsKey(text))
-			{
-				return text;
-			}
-		}
-		return FIXEDTRAITS.COSMICRADIATION.NAME.DEFAULT;
+		return this.GetFixedTraitsFor(this.cosmicRadiationFixedTraits, world);
+	}
+
+	private int GetNorthernlightValueFromFixedTrait()
+	{
+		return this.GetFixedTraitValueForTrait(this.northernLightsFixedTraits, ref this.northernLightFixedTrait);
 	}
 
 	private int GetSunlightValueFromFixedTrait()
 	{
-		if (this.sunlightFixedTrait == null)
-		{
-			this.sunlightFixedTrait = FIXEDTRAITS.SUNLIGHT.NAME.DEFAULT;
-		}
-		if (this.sunlightFixedTraits.ContainsKey(this.sunlightFixedTrait))
-		{
-			return this.sunlightFixedTraits[this.sunlightFixedTrait];
-		}
-		return FIXEDTRAITS.SUNLIGHT.DEFAULT_VALUE;
+		return this.GetFixedTraitValueForTrait(this.sunlightFixedTraits, ref this.sunlightFixedTrait);
 	}
 
 	private int GetCosmicRadiationValueFromFixedTrait()
 	{
-		if (this.cosmicRadiationFixedTrait == null)
-		{
-			this.cosmicRadiationFixedTrait = FIXEDTRAITS.COSMICRADIATION.NAME.DEFAULT;
-		}
-		if (this.cosmicRadiationFixedTraits.ContainsKey(this.cosmicRadiationFixedTrait))
-		{
-			return this.cosmicRadiationFixedTraits[this.cosmicRadiationFixedTrait];
-		}
-		return FIXEDTRAITS.COSMICRADIATION.DEFAULT_VALUE;
+		return this.GetFixedTraitValueForTrait(this.cosmicRadiationFixedTraits, ref this.cosmicRadiationFixedTrait);
 	}
 
 	public void SetWorldDetails(WorldGen world)
@@ -631,23 +692,27 @@ public class WorldContainer : KMonoBehaviour
 			this.isStartWorld = world.isStartingWorld;
 			this.worldName = world.Settings.world.filePath;
 			this.nameTables = world.Settings.world.nameTables;
+			this.worldTags = ((world.Settings.world.worldTags != null) ? world.Settings.world.worldTags.ToArray().ToTagArray() : new Tag[0]);
 			this.worldDescription = world.Settings.world.description;
 			this.worldType = world.Settings.world.name;
 			this.isModuleInterior = world.Settings.world.moduleInterior;
 			this.m_seasonIds = new List<string>(world.Settings.world.seasons);
+			this.m_generatedSubworlds = world.Settings.world.generatedSubworlds;
+			this.northernLightFixedTrait = this.GetNorthernlightFixedTraits(world);
 			this.sunlightFixedTrait = this.GetSunlightFromFixedTraits(world);
 			this.cosmicRadiationFixedTrait = this.GetCosmicRadiationFromFixedTraits(world);
 			this.sunlight = this.GetSunlightValueFromFixedTrait();
+			this.northernlights = this.GetNorthernlightValueFromFixedTrait();
 			this.cosmicRadiation = this.GetCosmicRadiationValueFromFixedTrait();
 			this.currentCosmicIntensity = (float)this.cosmicRadiation;
-			this.m_subworldNames = new List<string>();
-			foreach (WeightedSubworldName weightedSubworldName in world.Settings.world.subworldFiles)
+			HashSet<string> hashSet = new HashSet<string>();
+			foreach (string text in world.Settings.world.generatedSubworlds)
 			{
-				string text = weightedSubworldName.name;
 				text = text.Substring(0, text.LastIndexOf('/'));
 				text = text.Substring(text.LastIndexOf('/') + 1, text.Length - (text.LastIndexOf('/') + 1));
-				this.m_subworldNames.Add(text);
+				hashSet.Add(text);
 			}
+			this.m_subworldNames = hashSet.ToList<string>();
 			this.m_worldTraitIds = new List<string>();
 			this.m_worldTraitIds.AddRange(world.Settings.GetWorldTraitIDs());
 			this.m_storyTraitIds = new List<string>();
@@ -1124,10 +1189,10 @@ public class WorldContainer : KMonoBehaviour
 	private bool isDupeVisited;
 
 	[Serialize]
-	private float dupeVisitedTimestamp;
+	private float dupeVisitedTimestamp = -1f;
 
 	[Serialize]
-	private float discoveryTimestamp;
+	private float discoveryTimestamp = -1f;
 
 	[Serialize]
 	private bool isRoverVisited;
@@ -1142,10 +1207,19 @@ public class WorldContainer : KMonoBehaviour
 	public string[] nameTables;
 
 	[Serialize]
+	public Tag[] worldTags;
+
+	[Serialize]
+	public string overrideName;
+
+	[Serialize]
 	public string worldType;
 
 	[Serialize]
 	public string worldDescription;
+
+	[Serialize]
+	public int northernlights = FIXEDTRAITS.NORTHERNLIGHTS.DEFAULT_VALUE;
 
 	[Serialize]
 	public int sunlight = FIXEDTRAITS.SUNLIGHT.DEFAULT_VALUE;
@@ -1164,6 +1238,9 @@ public class WorldContainer : KMonoBehaviour
 
 	[Serialize]
 	public string cosmicRadiationFixedTrait;
+
+	[Serialize]
+	public string northernLightFixedTrait;
 
 	[Serialize]
 	public int fixedTraitsUpdateVersion = 1;
@@ -1213,6 +1290,18 @@ public class WorldContainer : KMonoBehaviour
 		{
 			FIXEDTRAITS.SUNLIGHT.NAME.VERY_VERY_VERY_HIGH,
 			FIXEDTRAITS.SUNLIGHT.VERY_VERY_VERY_HIGH
+		}
+	};
+
+	private Dictionary<string, int> northernLightsFixedTraits = new Dictionary<string, int>
+	{
+		{
+			FIXEDTRAITS.NORTHERNLIGHTS.NAME.NONE,
+			FIXEDTRAITS.NORTHERNLIGHTS.NONE
+		},
+		{
+			FIXEDTRAITS.NORTHERNLIGHTS.NAME.ENABLED,
+			FIXEDTRAITS.NORTHERNLIGHTS.ENABLED
 		}
 	};
 
@@ -1271,6 +1360,9 @@ public class WorldContainer : KMonoBehaviour
 
 	[Serialize]
 	private List<string> m_storyTraitIds;
+
+	[Serialize]
+	private List<string> m_generatedSubworlds;
 
 	private WorldParentChangedEventArgs parentChangeArgs = new WorldParentChangedEventArgs();
 

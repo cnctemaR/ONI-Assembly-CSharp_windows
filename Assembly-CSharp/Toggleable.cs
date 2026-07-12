@@ -5,7 +5,7 @@ using UnityEngine;
 [AddComponentMenu("KMonoBehaviour/Workable/Toggleable")]
 public class Toggleable : Workable
 {
-	private Toggleable()
+	protected Toggleable()
 	{
 		base.SetOffsetTable(OffsetGroups.InvertedStandardTable);
 	}

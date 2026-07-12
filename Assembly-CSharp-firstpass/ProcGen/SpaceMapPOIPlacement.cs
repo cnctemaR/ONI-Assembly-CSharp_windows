@@ -3,6 +3,7 @@ using System.Collections.Generic;
 
 namespace ProcGen
 {
+	[Serializable]
 	public class SpaceMapPOIPlacement
 	{
 		public List<string> pois { get; private set; }
@@ -19,5 +20,7 @@ namespace ProcGen
 		public bool avoidClumping { get; set; }
 
 		public bool canSpawnDuplicates { get; set; }
+
+		public bool guarantee { get; set; }
 	}
 }

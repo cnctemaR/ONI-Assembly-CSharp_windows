@@ -6,18 +6,6 @@ using UnityEngine;
 
 public class Navigator : StateMachineComponent<Navigator.StatesInstance>, ISaveLoadableDetails
 {
-	public bool IsFacingLeft
-	{
-		get
-		{
-			return this.facing.GetFacing();
-		}
-		set
-		{
-			this.facing.SetFacing(value);
-		}
-	}
-
 	public KMonoBehaviour target { get; set; }
 
 	public CellOffset[] targetOffsets { get; private set; }
@@ -283,7 +271,7 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>, ISaveL
 		if (play_idle)
 		{
 			HashedString idleAnim = this.NavGrid.GetIdleAnim(this.CurrentNavType);
-			base.GetComponent<KAnimControllerBase>().Play(idleAnim, KAnim.PlayMode.Loop, 1f, 0f);
+			this.animController.Play(idleAnim, KAnim.PlayMode.Loop, 1f, 0f);
 		}
 		if (arrived_at_destination)
 		{
@@ -323,7 +311,7 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>, ISaveL
 	{
 		if (base.gameObject.activeInHierarchy && this.IsMoving())
 		{
-			NavPathDrawer.Instance.DrawPath(base.GetComponent<KAnimControllerBase>().GetPivotSymbolPosition(), this.path);
+			NavPathDrawer.Instance.DrawPath(this.animController.GetPivotSymbolPosition(), this.path);
 		}
 	}
 
@@ -551,7 +539,7 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>, ISaveL
 	private PathFinderAbilities abilities;
 
 	[MyCmpReq]
-	private KSelectable selectable;
+	private KAnimControllerBase animController;
 
 	[NonSerialized]
 	public PathFinder.Path path;

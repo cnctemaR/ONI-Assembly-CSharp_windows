@@ -23,6 +23,10 @@ public struct InfraredVisualizerData
 		{
 			num = this.temperatureVulnerable.InternalTemperature;
 		}
+		else if (this.critterTemperatureMonitorInstance != null)
+		{
+			num = this.critterTemperatureMonitorInstance.GetTemperatureInternal();
+		}
 		if (num < 0f)
 		{
 			return;
@@ -40,12 +44,14 @@ public struct InfraredVisualizerData
 			this.structureTemperature = GameComps.StructureTemperatures.GetHandle(go);
 			this.primaryElement = go.GetComponent<PrimaryElement>();
 			this.temperatureVulnerable = go.GetComponent<TemperatureVulnerable>();
+			this.critterTemperatureMonitorInstance = go.GetSMI<CritterTemperatureMonitor.Instance>();
 			return;
 		}
 		this.temperatureAmount = null;
 		this.structureTemperature = HandleVector<int>.InvalidHandle;
 		this.primaryElement = null;
 		this.temperatureVulnerable = null;
+		this.critterTemperatureMonitorInstance = null;
 	}
 
 	public KAnimControllerBase controller;
@@ -57,4 +63,6 @@ public struct InfraredVisualizerData
 	public PrimaryElement primaryElement;
 
 	public TemperatureVulnerable temperatureVulnerable;
+
+	public CritterTemperatureMonitor.Instance critterTemperatureMonitorInstance;
 }

@@ -10,6 +10,16 @@ namespace Klei.AI
 	public class Effect : Modifier
 	{
 		public Effect(string id, string name, string description, float duration, bool show_in_ui, bool trigger_floating_text, bool is_bad, Emote emote = null, float emote_cooldown = -1f, float max_initial_delay = 0f, string stompGroup = null, string custom_icon = "")
+			: this(id, name, description, duration, show_in_ui, trigger_floating_text, is_bad, emote, max_initial_delay, stompGroup, false, custom_icon, emote_cooldown)
+		{
+		}
+
+		public Effect(string id, string name, string description, float duration, bool show_in_ui, bool trigger_floating_text, bool is_bad, Emote emote, float max_initial_delay, string stompGroup, bool showStatusInWorld, string custom_icon = "", float emote_cooldown = -1f)
+			: this(id, name, description, duration, null, show_in_ui, trigger_floating_text, is_bad, emote, max_initial_delay, stompGroup, showStatusInWorld, custom_icon, emote_cooldown)
+		{
+		}
+
+		public Effect(string id, string name, string description, float duration, string[] immunityEffects, bool show_in_ui, bool trigger_floating_text, bool is_bad, Emote emote, float max_initial_delay, string stompGroup, bool showStatusInWorld, string custom_icon = "", float emote_cooldown = -1f)
 			: base(id, name, description)
 		{
 			this.duration = duration;
@@ -21,6 +31,8 @@ namespace Klei.AI
 			this.maxInitialDelay = max_initial_delay;
 			this.stompGroup = stompGroup;
 			this.customIcon = custom_icon;
+			this.showStatusInWorld = showStatusInWorld;
+			this.immunityEffectsNames = immunityEffects;
 		}
 
 		public Effect(string id, string name, string description, float duration, bool show_in_ui, bool trigger_floating_text, bool is_bad, string emoteAnim, float emote_cooldown = -1f, string stompGroup = null, string custom_icon = "")
@@ -78,6 +90,19 @@ namespace Klei.AI
 					text = text + linePrefix + string.Format(DUPLICANTS.MODIFIERS.MODIFIER_FORMAT, attribute.Name, attributeModifier.GetFormattedString());
 				}
 			}
+			if (effect.immunityEffectsNames != null)
+			{
+				text += (string.IsNullOrEmpty(text) ? "" : (linePrefix + linePrefix));
+				text += ((showHeader && effect.immunityEffectsNames != null && effect.immunityEffectsNames.Length != 0) ? DUPLICANTS.MODIFIERS.EFFECT_IMMUNITIES_HEADER.text : "");
+				foreach (string text2 in effect.immunityEffectsNames)
+				{
+					Effect effect2 = Db.Get().effects.TryGet(text2);
+					if (effect2 != null)
+					{
+						text = text + linePrefix + string.Format(DUPLICANTS.MODIFIERS.IMMUNITY_FORMAT, effect2.Name);
+					}
+				}
+			}
 			if (stringEntry != null)
 			{
 				text = text + linePrefix + stringEntry;
@@ -127,7 +152,11 @@ namespace Klei.AI
 
 		public bool isBad;
 
+		public bool showStatusInWorld;
+
 		public string customIcon;
+
+		public string[] immunityEffectsNames;
 
 		public string emoteAnim;
 

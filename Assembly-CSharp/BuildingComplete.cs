@@ -49,6 +49,10 @@ public class BuildingComplete : Building
 			AttributeModifier attributeModifier2 = new AttributeModifier(attributeInstance.Id, attributeInstance.GetTotalValue(), null, false, false, true);
 			this.regionModifiers.Add(attributeModifier2);
 		}
+		if (this.Def.SelfHeatKilowattsWhenActive != 0f || this.Def.ExhaustKilowattsWhenActive != 0f)
+		{
+			base.gameObject.AddOrGet<KBatchedAnimHeatPostProcessingEffect>();
+		}
 		if (this.Def.UseStructureTemperature)
 		{
 			GameComps.StructureTemperatures.Add(base.gameObject);

@@ -39,7 +39,7 @@ public class MopTool : DragTool
 				GameObject gameObject = Grid.Objects[cell, 8];
 				if (!Grid.Solid[cell] && gameObject == null && Grid.Element[cell].IsLiquid)
 				{
-					bool flag = Grid.Solid[Grid.CellBelow(cell)];
+					bool flag = Grid.IsValidCell(Grid.CellBelow(cell)) && Grid.Solid[Grid.CellBelow(cell)];
 					bool flag2 = Grid.Mass[cell] <= MopTool.maxMopAmt;
 					if (flag && flag2)
 					{

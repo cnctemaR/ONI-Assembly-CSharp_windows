@@ -65,6 +65,16 @@ public class ModifierSet : ScriptableObject
 		};
 		this.effects.Get("WetFeet").AddEmotePrecondition(reactablePrecondition);
 		this.effects.Get("SoakingWet").AddEmotePrecondition(reactablePrecondition);
+		Effect effect2 = new Effect("PassedOutSleep", DUPLICANTS.MODIFIERS.PASSEDOUTSLEEP.NAME, DUPLICANTS.MODIFIERS.PASSEDOUTSLEEP.TOOLTIP, 0f, true, true, true, null, 0f, null, true, "status_item_exhausted", -1f);
+		effect2.Add(new AttributeModifier(Db.Get().Amounts.Stamina.deltaAttribute.Id, 0.6666667f, DUPLICANTS.MODIFIERS.PASSEDOUTSLEEP.NAME, false, false, true));
+		effect2.Add(new AttributeModifier(Db.Get().Amounts.Stress.deltaAttribute.Id, -0.033333335f, DUPLICANTS.MODIFIERS.PASSEDOUTSLEEP.NAME, false, false, true));
+		this.effects.Add(effect2);
+		Effect effect3 = new Effect("WarmTouch", DUPLICANTS.MODIFIERS.WARMTOUCH.NAME, DUPLICANTS.MODIFIERS.WARMTOUCH.TOOLTIP, 120f, new string[] { "WetFeet" }, true, true, false, null, 0f, null, false, "", -1f);
+		this.effects.Add(effect3);
+		Effect effect4 = new Effect("WarmTouchFood", DUPLICANTS.MODIFIERS.WARMTOUCHFOOD.NAME, DUPLICANTS.MODIFIERS.WARMTOUCHFOOD.TOOLTIP, 600f, new string[] { "WetFeet" }, true, true, false, null, 0f, null, false, "", -1f);
+		this.effects.Add(effect4);
+		Effect effect5 = new Effect("RefreshingTouch", DUPLICANTS.MODIFIERS.REFRESHINGTOUCH.NAME, DUPLICANTS.MODIFIERS.REFRESHINGTOUCH.TOOLTIP, 120f, true, true, false, null, -1f, 0f, null, "");
+		this.effects.Add(effect5);
 		this.CreateCritteEffects();
 	}
 
@@ -95,6 +105,12 @@ public class ModifierSet : ScriptableObject
 		effect8.Add(new AttributeModifier(Db.Get().Amounts.Beckoning.deltaAttribute.Id, MooTuning.WELLFED_EFFECT, global::STRINGS.CREATURES.MODIFIERS.MOOWELLFED.NAME, false, false, true));
 		effect8.Add(new AttributeModifier(Db.Get().Amounts.MilkProduction.deltaAttribute.Id, MooTuning.MILK_PRODUCTION_PERCENTAGE_PER_SECOND, global::STRINGS.CREATURES.MODIFIERS.MOOWELLFED.NAME, false, false, true));
 		this.effects.Add(effect8);
+		Effect effect9 = new Effect("WoodDeerWellFed", global::STRINGS.CREATURES.MODIFIERS.WOODDEERWELLFED.NAME, global::STRINGS.CREATURES.MODIFIERS.WOODDEERWELLFED.TOOLTIP, 1f, true, true, false, null, -1f, 0f, null, "");
+		effect9.Add(new AttributeModifier(Db.Get().Amounts.ScaleGrowth.deltaAttribute.Id, 100f / (WoodDeerConfig.ANTLER_GROWTH_TIME_IN_CYCLES * 600f), global::STRINGS.CREATURES.MODIFIERS.WOODDEERWELLFED.NAME, false, false, true));
+		this.effects.Add(effect9);
+		Effect effect10 = new Effect("IceBellyWellFed", global::STRINGS.CREATURES.MODIFIERS.ICEBELLYWELLFED.NAME, global::STRINGS.CREATURES.MODIFIERS.ICEBELLYWELLFED.TOOLTIP, 1f, true, true, false, null, -1f, 0f, null, "");
+		effect10.Add(new AttributeModifier(Db.Get().Amounts.ScaleGrowth.deltaAttribute.Id, 100f / (IceBellyConfig.SCALE_GROWTH_TIME_IN_CYCLES * 600f), global::STRINGS.CREATURES.MODIFIERS.ICEBELLYWELLFED.NAME, false, false, true));
+		this.effects.Add(effect10);
 	}
 
 	public Trait CreateTrait(string id, string name, string description, string group_name, bool should_save, ChoreGroup[] disabled_chore_groups, bool positive_trait, bool is_valid_starter_trait)

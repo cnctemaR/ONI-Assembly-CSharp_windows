@@ -81,10 +81,22 @@ public class ResourceRemainingDisplayScreen : KScreen
 				{
 					num2 = 0f;
 				}
+				string text2 = tag.ProperName();
+				if (MaterialSelector.DeprioritizeAutoSelectElementList.Contains(tag) && MaterialSelector.GetValidMaterials(this.currentRecipe.Ingredients[i].tag, false).Count > 1)
+				{
+					text2 = string.Concat(new string[]
+					{
+						"<b>",
+						UIConstants.ColorPrefixYellow,
+						text2,
+						UIConstants.ColorSuffix,
+						"</b>"
+					});
+				}
 				text = string.Concat(new string[]
 				{
 					text,
-					tag.ProperName(),
+					text2,
 					": ",
 					GameUtil.GetFormattedMass(num2, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"),
 					" / ",

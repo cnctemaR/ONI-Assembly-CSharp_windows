@@ -1,10 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using UnityEngine;
 
 public class DlcManager
 {
+	public static List<string> RELEASED_VERSIONS
+	{
+		get
+		{
+			if (DlcManager.released == null)
+			{
+				DlcManager.released = new List<string>(DlcManager.RELEASE_ORDER);
+				DlcManager.released.AddRange(DlcManager.DLC_PACKS.Keys);
+			}
+			return DlcManager.released;
+		}
+	}
+
 	public static void ClearCachedValues()
 	{
 		DlcManager.dlcPurchasedCache = new Dictionary<string, bool>();
@@ -33,12 +47,98 @@ public class DlcManager
 
 	public static string GetContentBundleName(string dlcId)
 	{
-		if (dlcId != null && dlcId == "EXPANSION1_ID")
+		if (dlcId == "EXPANSION1_ID")
 		{
 			return "expansion1_bundle";
 		}
-		global::Debug.LogError("No bundle exists for " + dlcId);
-		return null;
+		if (DlcManager.DLC_PACKS.ContainsKey(dlcId))
+		{
+			return DlcManager.DLC_PACKS[dlcId].bundleName;
+		}
+		DebugUtil.DevLogError("No bundle exists for " + dlcId);
+		return dlcId;
+	}
+
+	public static bool IsDlcId(string dlcId)
+	{
+		return !string.IsNullOrWhiteSpace(dlcId) && (dlcId == "EXPANSION1_ID" || DlcManager.DLC_PACKS.ContainsKey(dlcId));
+	}
+
+	public static string GetDlcTitle(string dlcId)
+	{
+		StringKey dlcTitle = new StringKey(dlcId);
+		if (dlcId == "EXPANSION1_ID")
+		{
+			dlcTitle = new StringKey("STRINGS.UI.DLC1.NAME");
+		}
+		if (DlcManager.DLC_PACKS.ContainsKey(dlcId))
+		{
+			dlcTitle = DlcManager.DLC_PACKS[dlcId].dlcTitle;
+		}
+		return string.Concat(new string[]
+		{
+			"<i><color=#",
+			DlcManager.GetDlcBannerColor(dlcId).ToHexString(),
+			">",
+			Strings.Get(dlcTitle),
+			"</color></i>"
+		});
+	}
+
+	public static string GetDlcSmallLogo(string dlcId)
+	{
+		if (dlcId == "EXPANSION1_ID")
+		{
+			return "SpacedOut_mini_logo";
+		}
+		if (DlcManager.DLC_PACKS.ContainsKey(dlcId))
+		{
+			return DlcManager.DLC_PACKS[dlcId].smallLogo;
+		}
+		DebugUtil.DevLogError("No bundle exists for " + dlcId);
+		return "unknown";
+	}
+
+	public static string GetDlcBanner(string dlcId)
+	{
+		if (dlcId == "EXPANSION1_ID")
+		{
+			return "expansion1_banner";
+		}
+		if (DlcManager.DLC_PACKS.ContainsKey(dlcId))
+		{
+			return DlcManager.DLC_PACKS[dlcId].banner;
+		}
+		DebugUtil.DevLogError("No bundle exists for " + dlcId);
+		return "unknown";
+	}
+
+	public static string GetDlcLargeLogo(string dlcId)
+	{
+		if (dlcId == "EXPANSION1_ID")
+		{
+			return "SpacedOut_logo_crop";
+		}
+		if (DlcManager.DLC_PACKS.ContainsKey(dlcId))
+		{
+			return DlcManager.DLC_PACKS[dlcId].largeLogo;
+		}
+		DebugUtil.DevLogError("No bundle exists for " + dlcId);
+		return "unknown";
+	}
+
+	public static Color GetDlcBannerColor(string dlcId)
+	{
+		if (dlcId == "EXPANSION1_ID")
+		{
+			return new Color(1f, 0.79607844f, 0.003921569f);
+		}
+		if (DlcManager.DLC_PACKS.ContainsKey(dlcId))
+		{
+			return DlcManager.DLC_PACKS[dlcId].bannerColor;
+		}
+		DebugUtil.DevLogError("No bundle exists for " + dlcId);
+		return Color.magenta;
 	}
 
 	public static string GetContentDirectoryName(string dlcId)
@@ -53,6 +153,11 @@ public class DlcManager
 			{
 				return "expansion1";
 			}
+		}
+		DlcManager.DlcInfo dlcInfo;
+		if (DlcManager.DLC_PACKS.TryGetValue(dlcId, out dlcInfo))
+		{
+			return dlcInfo.directory;
 		}
 		global::Debug.LogError("No content directory name exists for " + dlcId);
 		return null;
@@ -71,29 +176,81 @@ public class DlcManager
 				return "EXPANSION1_ID";
 			}
 		}
-		global::Debug.LogError("No dlcId matches content directory " + contentDirectory);
+		foreach (KeyValuePair<string, DlcManager.DlcInfo> keyValuePair in DlcManager.DLC_PACKS)
+		{
+			if (keyValuePair.Value.directory == contentDirectory)
+			{
+				return keyValuePair.Key;
+			}
+		}
+		global::Debug.LogError("No dlcId matches content directory '" + contentDirectory + "'");
 		return null;
 	}
 
 	public static void ToggleDLC(string id)
 	{
+		DebugUtil.Assert(id == "" || id == "EXPANSION1_ID", "Toggling DLC is only valid for vanilla or expansion1");
 		DlcManager.SetContentSettingEnabled(id, !DlcManager.IsContentSettingEnabled(id));
 	}
 
-	public static bool IsContentActive(string dlcId)
+	public static bool ShouldLoadDLCAssets(string dlcId)
+	{
+		return DlcManager.CheckPlatformSubscription(dlcId);
+	}
+
+	public static bool IsContentSubscribed(string dlcId)
 	{
 		return DlcManager.CheckPlatformSubscription(dlcId) && DlcManager.IsContentSettingEnabled(dlcId);
 	}
 
+	public static bool HasAllContentSubscribed(List<string> dlcIds)
+	{
+		using (List<string>.Enumerator enumerator = dlcIds.GetEnumerator())
+		{
+			while (enumerator.MoveNext())
+			{
+				if (!DlcManager.IsContentSubscribed(enumerator.Current))
+				{
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+
+	public static bool HasAllContentSubscribed(string[] dlcIds)
+	{
+		for (int i = 0; i < dlcIds.Length; i++)
+		{
+			if (!DlcManager.IsContentSubscribed(dlcIds[i]))
+			{
+				return false;
+			}
+		}
+		return true;
+	}
+
+	public static bool HasAnyContentSubscribed(string[] dlcIds)
+	{
+		for (int i = 0; i < dlcIds.Length; i++)
+		{
+			if (DlcManager.IsContentSubscribed(dlcIds[i]))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
 	public static bool IsDlcListValidForCurrentContent(string[] dlcIds)
 	{
-		if (DlcManager.GetHighestActiveDlcId() == "")
+		if (DlcManager.GetHighestActiveDlcId() == "" && dlcIds.Contains(""))
 		{
-			return Array.IndexOf<string>(dlcIds, "") != -1;
+			return true;
 		}
 		foreach (string text in dlcIds)
 		{
-			if (!(text == "") && DlcManager.IsContentActive(text))
+			if (!(text == "") && DlcManager.IsContentSubscribed(text))
 			{
 				return true;
 			}
@@ -139,8 +296,8 @@ public class DlcManager
 			flag = DistributionPlatform.Inst.IsDLCSubscribed(dlcId);
 			DlcManager.dlcSubscribedCache[dlcId] = flag;
 		}
-		bool flag2 = DlcManager.CheckForExpansionFileExistence();
-		return flag && flag2;
+		flag = flag && DlcManager.CheckForDLCFileInstallation(dlcId);
+		return flag;
 	}
 
 	private static bool CheckForExpansionFileExistence()
@@ -155,6 +312,38 @@ public class DlcManager
 		{
 			global::Debug.Log("[DlcManager] Error at reading file. CheckPlatformSubscription() - " + ex.Message);
 		}
+		return flag;
+	}
+
+	private static bool CheckForDLCFileInstallation(string dlcId)
+	{
+		bool flag = false;
+		if (DlcManager.dlcAssetsCache.TryGetValue(dlcId, out flag))
+		{
+			return flag;
+		}
+		if (dlcId == "")
+		{
+			flag = true;
+		}
+		else if (dlcId == "EXPANSION1_ID")
+		{
+			flag = DlcManager.CheckForExpansionFileExistence();
+		}
+		DlcManager.DlcInfo dlcInfo;
+		if (DlcManager.DLC_PACKS.TryGetValue(dlcId, out dlcInfo))
+		{
+			string text = Path.Combine(Application.streamingAssetsPath, dlcInfo.bundleName);
+			try
+			{
+				flag = File.Exists(text);
+			}
+			catch (Exception ex)
+			{
+				global::Debug.Log("[DlcManager] Error at reading file. CheckPlatformSubscription() - " + ex.Message);
+			}
+		}
+		DlcManager.dlcAssetsCache.Add(dlcId, flag);
 		return flag;
 	}
 
@@ -181,9 +370,9 @@ public class DlcManager
 	public static List<string> GetOwnedDLCIds()
 	{
 		List<string> list = new List<string>();
-		for (int i = DlcManager.RELEASE_ORDER.Count - 1; i >= 0; i--)
+		for (int i = DlcManager.RELEASED_VERSIONS.Count - 1; i >= 0; i--)
 		{
-			string text = DlcManager.RELEASE_ORDER[i];
+			string text = DlcManager.RELEASED_VERSIONS[i];
 			if (!DlcManager.IsVanillaId(text) && DlcManager.IsContentOwned(text))
 			{
 				list.Add(text);
@@ -195,10 +384,10 @@ public class DlcManager
 	public static List<string> GetActiveDLCIds()
 	{
 		List<string> list = new List<string>();
-		for (int i = DlcManager.RELEASE_ORDER.Count - 1; i >= 0; i--)
+		for (int i = DlcManager.RELEASED_VERSIONS.Count - 1; i >= 0; i--)
 		{
-			string text = DlcManager.RELEASE_ORDER[i];
-			if (!DlcManager.IsVanillaId(text) && DlcManager.IsContentActive(text))
+			string text = DlcManager.RELEASED_VERSIONS[i];
+			if (!DlcManager.IsVanillaId(text) && DlcManager.IsContentSubscribed(text))
 			{
 				list.Add(text);
 			}
@@ -219,23 +408,54 @@ public class DlcManager
 				return "S";
 			}
 		}
+		DlcManager.DlcInfo dlcInfo;
+		if (DlcManager.DLC_PACKS.TryGetValue(dlcId, out dlcInfo))
+		{
+			return dlcInfo.versionLetter;
+		}
 		global::Debug.LogError("No content letter exists for " + dlcId);
 		return null;
 	}
 
 	public static string GetActiveContentLetters()
 	{
-		if (DlcManager.IsPureVanilla())
-		{
-			return DlcManager.GetContentLetter("");
-		}
 		string text = "";
-		for (int i = 0; i < DlcManager.RELEASE_ORDER.Count; i++)
+		if (DlcManager.IsExpansion1Active())
 		{
-			string text2 = DlcManager.RELEASE_ORDER[i];
-			if (!DlcManager.IsVanillaId(text2) && DlcManager.IsContentActive(text2))
+			text += DlcManager.GetContentLetter("EXPANSION1_ID");
+		}
+		else
+		{
+			text += DlcManager.GetContentLetter("");
+		}
+		foreach (KeyValuePair<string, DlcManager.DlcInfo> keyValuePair in DlcManager.DLC_PACKS)
+		{
+			string id = keyValuePair.Value.id;
+			if (DlcManager.IsContentSubscribed(id))
 			{
-				text += DlcManager.GetContentLetter(text2);
+				text += DlcManager.GetContentLetter(id);
+			}
+		}
+		return text;
+	}
+
+	public static string GetSubscribedContentLetters()
+	{
+		string text = "";
+		if (DlcManager.IsExpansion1Active())
+		{
+			text += DlcManager.GetContentLetter("EXPANSION1_ID");
+		}
+		else
+		{
+			text += DlcManager.GetContentLetter("");
+		}
+		foreach (KeyValuePair<string, DlcManager.DlcInfo> keyValuePair in DlcManager.DLC_PACKS)
+		{
+			string id = keyValuePair.Value.id;
+			if (DlcManager.IsContentSettingEnabled(id))
+			{
+				text += DlcManager.GetContentLetter(id);
 			}
 		}
 		return text;
@@ -277,7 +497,7 @@ public class DlcManager
 
 	public static bool IsExpansion1Active()
 	{
-		return DlcManager.IsContentActive("EXPANSION1_ID");
+		return DlcManager.IsContentSubscribed("EXPANSION1_ID");
 	}
 
 	public static bool FeatureRadiationEnabled()
@@ -295,12 +515,28 @@ public class DlcManager
 		return DlcManager.IsExpansion1Active();
 	}
 
+	[Obsolete("Use DlcManager.IsContentSubscribed to check if content is loaded or SaveLoader.Instance.IsDLCActiveForCurrentSave to check if the content is available in a save. This method will be removed in the future.")]
+	public static bool IsContentActive(string dlcId)
+	{
+		DebugUtil.LogWarningArgs(new object[] { "A mod is calling IsContentActive which is obsolete and needs to be fixed." });
+		if (dlcId == "" || dlcId == "EXPANSION1_ID")
+		{
+			return DlcManager.IsContentSubscribed(dlcId);
+		}
+		DebugUtil.LogErrorArgs(new object[] { "IsContentActive was called with a newer DLC which is not allowed." });
+		return false;
+	}
+
 	[ThreadStatic]
 	public static readonly bool IsMainThread = true;
 
 	public const string VANILLA_ID = "";
 
 	public const string EXPANSION1_ID = "EXPANSION1_ID";
+
+	public const string DLC2_ID = "DLC2_ID";
+
+	public static readonly string[] AVAILABLE_DLC_2 = new string[] { "DLC2_ID" };
 
 	public const string EXPANSION1_VERIFICATION_FILE_NAME = "expansion1_bundle";
 
@@ -316,7 +552,51 @@ public class DlcManager
 
 	public static List<string> RELEASE_ORDER = new List<string> { "", "EXPANSION1_ID" };
 
+	public static Dictionary<string, DlcManager.DlcInfo> DLC_PACKS = new Dictionary<string, DlcManager.DlcInfo> { 
+	{
+		"DLC2_ID",
+		new DlcManager.DlcInfo("DLC2_ID", "dlc2_bundle", "C", "dlc2", "dlc2_mini_logo", "dlc2_logo", new StringKey("STRINGS.UI.DLC2.NAME"), "dlc2_banner", new Color(0.003921569f, 0.73333335f, 1f))
+	} };
+
+	private static List<string> released = null;
+
 	private static Dictionary<string, bool> dlcPurchasedCache = new Dictionary<string, bool>();
 
 	private static Dictionary<string, bool> dlcSubscribedCache = new Dictionary<string, bool>();
+
+	private static Dictionary<string, bool> dlcAssetsCache = new Dictionary<string, bool>();
+
+	public struct DlcInfo
+	{
+		public DlcInfo(string dlcName, string bundleName, string versionLetter, string directory, string smallLogo, string largeLogo, StringKey dlcTitle, string banner, Color bannerColor)
+		{
+			this.id = dlcName;
+			this.bundleName = bundleName;
+			this.versionLetter = versionLetter;
+			this.directory = directory;
+			this.smallLogo = smallLogo;
+			this.largeLogo = largeLogo;
+			this.dlcTitle = dlcTitle;
+			this.banner = banner;
+			this.bannerColor = bannerColor;
+		}
+
+		public string id;
+
+		public string bundleName;
+
+		public string versionLetter;
+
+		public string directory;
+
+		public string smallLogo;
+
+		public string largeLogo;
+
+		public string banner;
+
+		public Color bannerColor;
+
+		public StringKey dlcTitle;
+	}
 }

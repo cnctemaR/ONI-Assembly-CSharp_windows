@@ -15,8 +15,6 @@ public class FoodRehydratorSM : GameStateMachine<FoodRehydratorSM, FoodRehydrato
 		this.postactive.OnAnimQueueComplete(this.on);
 	}
 
-	private static readonly Operational.Flag foodRehydratorFlag = new Operational.Flag("food_rehydrator", Operational.Flag.Type.Requirement);
-
 	private GameStateMachine<FoodRehydratorSM, FoodRehydratorSM.StatesInstance, IStateMachineTarget, FoodRehydratorSM.Def>.State off;
 
 	private GameStateMachine<FoodRehydratorSM, FoodRehydratorSM.StatesInstance, IStateMachineTarget, FoodRehydratorSM.Def>.State on;

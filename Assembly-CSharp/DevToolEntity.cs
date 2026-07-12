@@ -178,6 +178,30 @@ public class DevToolEntity : DevTool
 		});
 	}
 
+	public static Vector2 GetPositionFor(GameObject gameObject)
+	{
+		if (Camera.main != null)
+		{
+			Camera main = Camera.main;
+			Vector2 vector = main.WorldToScreenPoint(gameObject.transform.position);
+			vector.y = (float)main.pixelHeight - vector.y;
+			return vector;
+		}
+		return Vector2.zero;
+	}
+
+	public static Vector2 GetScreenPosition(Vector3 pos)
+	{
+		if (Camera.main != null)
+		{
+			Camera main = Camera.main;
+			Vector2 vector = main.WorldToScreenPoint(pos);
+			vector.y = (float)main.pixelHeight - vector.y;
+			return vector;
+		}
+		return Vector2.zero;
+	}
+
 	public static void DrawBoundingBox([TupleElementNames(new string[] { "cornerA", "cornerB" })] ValueTuple<Vector2, Vector2> screenRect, string name, bool isFocused)
 	{
 		if (isFocused)

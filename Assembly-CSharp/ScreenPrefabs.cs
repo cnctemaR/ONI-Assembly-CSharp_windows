@@ -108,6 +108,8 @@ public class ScreenPrefabs : KMonoBehaviour
 
 	public GameObject OldVersionWarningScreen;
 
+	public GameObject DLCBetaWarningScreen;
+
 	[Header("Klei Items")]
 	public GameObject KleiItemDropScreen;
 

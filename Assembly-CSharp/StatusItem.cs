@@ -12,8 +12,7 @@ public class StatusItem : Resource
 		this.tooltipText = Strings.Get(composed_prefix + ".TOOLTIP");
 	}
 
-	public StatusItem(string id, string prefix, string icon, StatusItem.IconType icon_type, NotificationType notification_type, bool allow_multiples, HashedString render_overlay, bool showWorldIcon = true, int status_overlays = 129022, Func<string, object, string> resolve_string_callback = null)
-		: this(id, "STRINGS." + prefix + ".STATUSITEMS." + id.ToUpper())
+	private void SetIcon(string icon, StatusItem.IconType icon_type, NotificationType notification_type, bool allow_multiples, HashedString render_overlay, bool show_world_icon = true, int status_overlays = 129022, Func<string, object, string> resolve_string_callback = null)
 	{
 		switch (icon_type)
 		{
@@ -27,44 +26,35 @@ public class StatusItem : Resource
 		this.iconName = icon;
 		this.notificationType = notification_type;
 		this.sprite = Assets.GetTintedSprite(icon);
+		if (this.sprite == null)
+		{
+			this.sprite = new TintedSprite();
+			this.sprite.sprite = Assets.GetSprite(icon);
+			this.sprite.color = new Color(0f, 0f, 0f, 255f);
+		}
 		this.iconType = icon_type;
 		this.allowMultiples = allow_multiples;
 		this.render_overlay = render_overlay;
-		this.showShowWorldIcon = showWorldIcon;
+		this.showShowWorldIcon = show_world_icon;
 		this.status_overlays = status_overlays;
 		this.resolveStringCallback = resolve_string_callback;
 		if (this.sprite == null)
 		{
-			global::Debug.LogWarning("Status item '" + id + "' references a missing icon: " + icon);
+			global::Debug.LogWarning("Status item '" + this.Id + "' references a missing icon: " + icon);
 		}
+	}
+
+	public StatusItem(string id, string prefix, string icon, StatusItem.IconType icon_type, NotificationType notification_type, bool allow_multiples, HashedString render_overlay, bool showWorldIcon = true, int status_overlays = 129022, Func<string, object, string> resolve_string_callback = null)
+		: this(id, "STRINGS." + prefix + ".STATUSITEMS." + id.ToUpper())
+	{
+		this.SetIcon(icon, icon_type, notification_type, allow_multiples, render_overlay, showWorldIcon, status_overlays, resolve_string_callback);
 	}
 
 	public StatusItem(string id, string name, string tooltip, string icon, StatusItem.IconType icon_type, NotificationType notification_type, bool allow_multiples, HashedString render_overlay, int status_overlays = 129022, bool showWorldIcon = true, Func<string, object, string> resolve_string_callback = null)
 		: base(id, name)
 	{
-		switch (icon_type)
-		{
-		case StatusItem.IconType.Info:
-			icon = "dash";
-			break;
-		case StatusItem.IconType.Exclamation:
-			icon = "status_item_exclamation";
-			break;
-		}
-		this.iconName = icon;
-		this.notificationType = notification_type;
-		this.sprite = Assets.GetTintedSprite(icon);
 		this.tooltipText = tooltip;
-		this.iconType = icon_type;
-		this.allowMultiples = allow_multiples;
-		this.render_overlay = render_overlay;
-		this.status_overlays = status_overlays;
-		this.showShowWorldIcon = showWorldIcon;
-		this.resolveStringCallback = resolve_string_callback;
-		if (this.sprite == null)
-		{
-			global::Debug.LogWarning("Status item '" + id + "' references a missing icon: " + icon);
-		}
+		this.SetIcon(icon, icon_type, notification_type, allow_multiples, render_overlay, showWorldIcon, status_overlays, resolve_string_callback);
 	}
 
 	public void AddNotification(string sound_path = null, string notification_text = null, string notification_tooltip = null)

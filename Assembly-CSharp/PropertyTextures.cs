@@ -54,6 +54,7 @@ public class PropertyTextures : KMonoBehaviour, ISim200ms
 		this.PropTexWsToCsID = Shader.PropertyToID("_PropTexWsToCs");
 		this.PropTexCsToWsID = Shader.PropertyToID("_PropTexCsToWs");
 		this.TopBorderHeightID = Shader.PropertyToID("_TopBorderHeight");
+		this.CameraZoomID = Shader.PropertyToID("_CameraZoomInfo");
 	}
 
 	public void OnReset(object data = null)
@@ -252,33 +253,35 @@ public class PropertyTextures : KMonoBehaviour, ISim200ms
 		}
 		Shader.SetGlobalVector(this.WorldSizeID, new Vector4((float)Grid.WidthInCells, (float)Grid.HeightInCells, 1f / (float)Grid.WidthInCells, 1f / (float)Grid.HeightInCells));
 		Vector4 vector = PropertyTextures.CalculateClusterWorldSize();
+		float num = (CameraController.Instance.FreeCameraEnabled ? TuningData<CameraController.Tuning>.Get().maxOrthographicSizeDebug : 20f);
+		Shader.SetGlobalVector(this.CameraZoomID, new Vector4(CameraController.Instance.OrthographicSize, CameraController.Instance.minOrthographicSize, num, (CameraController.Instance.OrthographicSize - CameraController.Instance.minOrthographicSize) / (num - CameraController.Instance.minOrthographicSize)));
 		Shader.SetGlobalVector(this.ClusterWorldSizeID, vector);
 		Shader.SetGlobalVector(this.PropTexWsToCsID, new Vector4(0f, 0f, 1f, 1f));
 		Shader.SetGlobalVector(this.PropTexCsToWsID, new Vector4(0f, 0f, 1f, 1f));
 		Shader.SetGlobalFloat(this.TopBorderHeightID, ClusterManager.Instance.activeWorld.FullyEnclosedBorder ? 0f : ((float)Grid.TopBorderHeight));
-		int num;
 		int num2;
 		int num3;
 		int num4;
-		this.GetVisibleCellRange(out num, out num2, out num3, out num4);
+		int num5;
+		this.GetVisibleCellRange(out num2, out num3, out num4, out num5);
 		Shader.SetGlobalFloat(this.FogOfWarScaleID, PropertyTextures.FogOfWarScale);
-		int num5 = this.NextPropertyIdx;
-		this.NextPropertyIdx = num5 + 1;
-		int num6 = num5 % this.allTextureProperties.Count;
-		PropertyTextures.TextureProperties textureProperties = this.allTextureProperties[num6];
+		int num6 = this.NextPropertyIdx;
+		this.NextPropertyIdx = num6 + 1;
+		int num7 = num6 % this.allTextureProperties.Count;
+		PropertyTextures.TextureProperties textureProperties = this.allTextureProperties[num7];
 		while (textureProperties.updateEveryFrame)
 		{
-			num5 = this.NextPropertyIdx;
-			this.NextPropertyIdx = num5 + 1;
-			num6 = num5 % this.allTextureProperties.Count;
-			textureProperties = this.allTextureProperties[num6];
+			num6 = this.NextPropertyIdx;
+			this.NextPropertyIdx = num6 + 1;
+			num7 = num6 % this.allTextureProperties.Count;
+			textureProperties = this.allTextureProperties[num7];
 		}
 		for (int i = 0; i < this.allTextureProperties.Count; i++)
 		{
 			PropertyTextures.TextureProperties textureProperties2 = this.allTextureProperties[i];
-			if (num6 == i || textureProperties2.updateEveryFrame || GameUtil.IsCapturingTimeLapse())
+			if (num7 == i || textureProperties2.updateEveryFrame || GameUtil.IsCapturingTimeLapse())
 			{
-				this.UpdateProperty(ref textureProperties2, num, num2, num3, num4);
+				this.UpdateProperty(ref textureProperties2, num2, num3, num4, num5);
 			}
 		}
 		for (int j = 0; j < 14; j++)
@@ -753,6 +756,8 @@ public class PropertyTextures : KMonoBehaviour, ISim200ms
 	private int PropTexCsToWsID;
 
 	private int TopBorderHeightID;
+
+	private int CameraZoomID;
 
 	private int NextPropertyIdx;
 

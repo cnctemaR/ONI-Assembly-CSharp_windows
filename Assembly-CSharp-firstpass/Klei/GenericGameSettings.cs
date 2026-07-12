@@ -58,6 +58,8 @@ namespace Klei
 
 		public bool disableAutosave { get; private set; }
 
+		public bool quickDevTools { get; private set; }
+
 		public bool devAutoWorldGen { get; set; }
 
 		public int devWorldGenSeed { get; set; }
@@ -67,6 +69,12 @@ namespace Klei
 		public string[] devWorldGenSkip { get; set; }
 
 		public string[] devStoryTraits { get; set; }
+
+		public string[] devSubworldMixing { get; set; }
+
+		public string[] devWorldMixing { get; set; }
+
+		public string[] enabledDLCAddOns { get; set; }
 
 		public GenericGameSettings.PerformanceCapture performanceCapture { get; set; }
 

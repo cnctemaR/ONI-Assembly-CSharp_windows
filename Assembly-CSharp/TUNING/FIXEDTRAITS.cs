@@ -4,6 +4,24 @@ namespace TUNING
 {
 	public class FIXEDTRAITS
 	{
+		public class NORTHERNLIGHTS
+		{
+			public static int NONE = 0;
+
+			public static int ENABLED = 1;
+
+			public static int DEFAULT_VALUE = FIXEDTRAITS.NORTHERNLIGHTS.NONE;
+
+			public class NAME
+			{
+				public static string NONE = "northernLightsNone";
+
+				public static string ENABLED = "northernLightsOn";
+
+				public static string DEFAULT = FIXEDTRAITS.NORTHERNLIGHTS.NAME.NONE;
+			}
+		}
+
 		public class SUNLIGHT
 		{
 			public static int DEFAULT_SPACED_OUT_SUNLIGHT = 40000;

@@ -371,14 +371,17 @@ public class ResearchScreen : KModalScreen
 
 	private void OnResearchComplete(object data)
 	{
-		Tech tech = (Tech)data;
-		ResearchEntry entry = this.GetEntry(tech);
-		if (entry != null)
+		if (data is Tech)
 		{
-			entry.ResearchCompleted(true);
+			Tech tech = (Tech)data;
+			ResearchEntry entry = this.GetEntry(tech);
+			if (entry != null)
+			{
+				entry.ResearchCompleted(true);
+			}
+			this.UpdateProgressBars();
+			this.UpdatePointDisplay();
 		}
-		this.UpdateProgressBars();
-		this.UpdatePointDisplay();
 	}
 
 	private void UpdatePointDisplay()
@@ -467,6 +470,10 @@ public class ResearchScreen : KModalScreen
 	protected override void OnShow(bool show)
 	{
 		base.OnShow(show);
+		if (show)
+		{
+			this.sideBar.ResetFilter();
+		}
 		if (show)
 		{
 			if (DetailsScreen.Instance != null)
@@ -612,17 +619,20 @@ public class ResearchScreen : KModalScreen
 				flag = tech.category.ToUpper().Contains(filterString);
 				foreach (TechItem techItem in tech.unlockedItems)
 				{
-					if (UI.StripLinkFormatting(techItem.Name).ToLower().ToUpper()
-						.Contains(filterString))
+					if (SaveLoader.Instance.IsDlcListActiveForCurrentSave(techItem.dlcIds))
 					{
-						flag = true;
-						break;
-					}
-					if (UI.StripLinkFormatting(techItem.description).ToLower().ToUpper()
-						.Contains(filterString))
-					{
-						flag = true;
-						break;
+						if (UI.StripLinkFormatting(techItem.Name).ToLower().ToUpper()
+							.Contains(filterString))
+						{
+							flag = true;
+							break;
+						}
+						if (UI.StripLinkFormatting(techItem.description).ToLower().ToUpper()
+							.Contains(filterString))
+						{
+							flag = true;
+							break;
+						}
 					}
 				}
 			}

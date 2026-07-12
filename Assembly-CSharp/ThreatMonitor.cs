@@ -53,7 +53,16 @@ public class ThreatMonitor : GameStateMachine<ThreatMonitor, ThreatMonitor.Insta
 
 	private static bool DupeHasValidTarget(ThreatMonitor.Instance smi)
 	{
-		return smi.MainThreat != null && smi.MainThreat.GetComponent<FactionAlignment>().IsPlayerTargeted() && smi.navigator.CanReach(Grid.PosToCell(smi.MainThreat), smi.def.offsets);
+		bool flag = false;
+		if (smi.MainThreat != null && smi.MainThreat.GetComponent<FactionAlignment>().IsPlayerTargeted())
+		{
+			IApproachable component = smi.MainThreat.GetComponent<RangedAttackable>();
+			if (component != null)
+			{
+				flag = smi.navigator.GetNavigationCost(component) != -1;
+			}
+		}
+		return flag;
 	}
 
 	private static void DupeUpdateTarget(ThreatMonitor.Instance smi, float dt)

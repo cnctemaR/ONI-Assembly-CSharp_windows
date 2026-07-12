@@ -19,5 +19,8 @@ public enum SolidAmbienceType
 	UraniumOre,
 	Mud,
 	ToxicMud,
+	Snow,
+	Magnesium,
+	Cinnabar,
 	NumTypes
 }

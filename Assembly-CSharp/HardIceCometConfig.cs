@@ -6,7 +6,7 @@ public class HardIceCometConfig : IEntityConfig
 {
 	public string[] GetDlcIds()
 	{
-		return DlcManager.AVAILABLE_EXPANSION1_ONLY;
+		return DlcManager.AVAILABLE_EXPANSION1_ONLY.Append("DLC2_ID");
 	}
 
 	public GameObject CreatePrefab()

@@ -72,20 +72,24 @@ public class FactionAlignment : KMonoBehaviour
 	public void SetPlayerTargeted(bool state)
 	{
 		this.targeted = this.canBePlayerTargeted && state && this.targetable;
-		if (state && !Components.PlayerTargeted.Items.Contains(this))
+		if (state)
 		{
-			Components.PlayerTargeted.Add(this);
+			if (!Components.PlayerTargeted.Items.Contains(this))
+			{
+				Components.PlayerTargeted.Add(this);
+			}
+			this.SetPrioritizable(true);
 		}
 		else
 		{
 			Components.PlayerTargeted.Remove(this);
+			this.SetPrioritizable(false);
 		}
 		this.UpdateStatusItem();
 	}
 
 	private void UpdateStatusItem()
 	{
-		this.TogglePrioritizable(this.targeted);
 		if (this.targeted)
 		{
 			base.GetComponent<KSelectable>().AddStatusItem(Db.Get().MiscStatusItems.OrderAttack, null);
@@ -94,7 +98,7 @@ public class FactionAlignment : KMonoBehaviour
 		base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().MiscStatusItems.OrderAttack, false);
 	}
 
-	private void TogglePrioritizable(bool enable)
+	private void SetPrioritizable(bool enable)
 	{
 		Prioritizable component = base.GetComponent<Prioritizable>();
 		if (component == null || !this.updatePrioritizable)
@@ -107,7 +111,7 @@ public class FactionAlignment : KMonoBehaviour
 			this.hasBeenRegisterInPriority = true;
 			return;
 		}
-		if (component.IsPrioritizable() && this.hasBeenRegisterInPriority)
+		if (!enable && component.IsPrioritizable() && this.hasBeenRegisterInPriority)
 		{
 			Prioritizable.RemoveRef(base.gameObject);
 			this.hasBeenRegisterInPriority = false;

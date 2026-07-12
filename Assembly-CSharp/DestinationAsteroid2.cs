@@ -32,7 +32,6 @@ public class DestinationAsteroid2 : KMonoBehaviour
 				if (this.animController.HasAnimation(this.animController.initialAnim))
 				{
 					this.animController.Play(this.animController.initialAnim, KAnim.PlayMode.Loop, 1f, 0f);
-					return;
 				}
 			}
 			else
@@ -40,7 +39,21 @@ public class DestinationAsteroid2 : KMonoBehaviour
 				this.animController.gameObject.SetActive(false);
 				this.asteroidImage.gameObject.SetActive(true);
 				this.asteroidImage.sprite = this.asteroidData.sprite;
+				this.imageDlcFrom.gameObject.SetActive(false);
 			}
+			Sprite sprite = null;
+			if (DlcManager.IsDlcId(this.asteroidData.Layout.dlcIdFrom))
+			{
+				sprite = Assets.GetSprite(DlcManager.GetDlcSmallLogo(this.asteroidData.Layout.dlcIdFrom));
+			}
+			if (sprite != null)
+			{
+				this.imageDlcFrom.gameObject.SetActive(true);
+				this.imageDlcFrom.sprite = sprite;
+				return;
+			}
+			this.imageDlcFrom.gameObject.SetActive(false);
+			this.imageDlcFrom.sprite = sprite;
 		}
 	}
 
@@ -62,6 +75,9 @@ public class DestinationAsteroid2 : KMonoBehaviour
 
 	[SerializeField]
 	private KBatchedAnimController animController;
+
+	[SerializeField]
+	private Image imageDlcFrom;
 
 	private ColonyDestinationAsteroidBeltData asteroidData;
 }

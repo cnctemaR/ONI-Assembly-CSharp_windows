@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Steamworks;
 using STRINGS;
@@ -38,6 +39,16 @@ namespace KMod
 				});
 				return null;
 			}
+			if (!File.Exists(text))
+			{
+				KCrashReporter.ReportDevNotification("Steam failed to download mod", Environment.StackTrace, string.Format("Skipping installing mod '{0}' (https://steamcommunity.com/sharedfiles/filedetails/?id={1}) '{2}'", subscribed.title, subscribed.fileId, text), false, new string[] { KCrashReporter.CRASH_CATEGORY.MODSYSTEM });
+				Global.Instance.modManager.events.Add(new Event
+				{
+					event_type = EventType.DownloadFailed,
+					mod = label
+				});
+				return null;
+			}
 			ZipFile zipFile = new ZipFile(text);
 			KModHeader header = KModUtil.GetHeader(zipFile, label.defaultStaticID, subscribed.title, subscribed.description, false);
 			label.title = header.title;
@@ -55,7 +66,7 @@ namespace KMod
 				if (mod == null)
 				{
 					string text = string.Format("Mod Steam PublishedFileId_t {0}", publishedFileId_t);
-					KCrashReporter.ReportDevNotification(string.Format("SteamUGCService just told us ADDED id {0} was valid!", publishedFileId_t), Environment.StackTrace, text, false);
+					KCrashReporter.ReportDevNotification(string.Format("SteamUGCService just told us ADDED id {0} was valid!", publishedFileId_t), Environment.StackTrace, text, false, null);
 				}
 				else
 				{
@@ -72,7 +83,7 @@ namespace KMod
 				if (mod3 == null)
 				{
 					string text2 = string.Format("Mod Steam PublishedFileId_t {0}", publishedFileId_t2.m_PublishedFileId);
-					KCrashReporter.ReportDevNotification("SteamUGCService just told us UPDATED id was valid!", Environment.StackTrace, text2, false);
+					KCrashReporter.ReportDevNotification("SteamUGCService just told us UPDATED id was valid!", Environment.StackTrace, text2, false, null);
 				}
 				else
 				{

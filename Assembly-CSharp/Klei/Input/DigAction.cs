@@ -16,13 +16,13 @@ namespace Klei.Input
 			GameScenePartitioner.Instance.GatherEntries(num, num2, 1, 1, GameScenePartitioner.Instance.plants, pooledList);
 			if (pooledList.Count > 0)
 			{
-				this.Uproot((pooledList[0].obj as Component).GetComponent<Uprootable>());
+				this.EntityDig((pooledList[0].obj as Component).GetComponent<IDigActionEntity>());
 			}
 			pooledList.Recycle();
 		}
 
 		public abstract void Dig(int cell, int distFromOrigin);
 
-		protected abstract void Uproot(Uprootable uprootable);
+		protected abstract void EntityDig(IDigActionEntity digAction);
 	}
 }

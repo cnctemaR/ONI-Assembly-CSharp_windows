@@ -263,7 +263,7 @@ public class NavGrid
 		}
 	}
 
-	private Color NavTypeColor(NavType navType)
+	public Color NavTypeColor(NavType navType)
 	{
 		if (this.debugColorLookup == null)
 		{

@@ -333,6 +333,8 @@ public class KPrefabID : KMonoBehaviour, ISaveLoadable
 	[Serialize]
 	private HashSet<Tag> serializedTags = new HashSet<Tag>();
 
+	public string[] requiredDlcIds;
+
 	private HashSet<Tag> tags = new HashSet<Tag>();
 
 	private static Tag IgnoredHashTag = TagManager.Create("Preserved");

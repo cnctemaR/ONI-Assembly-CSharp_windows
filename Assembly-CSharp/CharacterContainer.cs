@@ -117,7 +117,33 @@ public class CharacterContainer : KScreen, ITelepadDeliverableContainer
 		KScreenManager.Instance.RefreshStack();
 	}
 
-	private void GenerateCharacter(bool is_starter, string guaranteedAptitudeID = null)
+	public void SetMinion(MinionStartingStats statsProposed)
+	{
+		if (this.controller != null && this.controller.IsSelected(this.stats))
+		{
+			this.DeselectDeliverable();
+		}
+		this.stats = statsProposed;
+		if (this.animController != null)
+		{
+			global::UnityEngine.Object.Destroy(this.animController.gameObject);
+			this.animController = null;
+		}
+		this.SetAnimator();
+		this.SetInfoText();
+		base.StartCoroutine(this.SetAttributes());
+		this.selectButton.ClearOnClick();
+		if (!this.controller.IsStarterMinion)
+		{
+			this.selectButton.enabled = true;
+			this.selectButton.onClick += delegate
+			{
+				this.SelectDeliverable();
+			};
+		}
+	}
+
+	public void GenerateCharacter(bool is_starter, string guaranteedAptitudeID = null)
 	{
 		int num = 0;
 		do
@@ -125,7 +151,7 @@ public class CharacterContainer : KScreen, ITelepadDeliverableContainer
 			this.stats = new MinionStartingStats(is_starter, guaranteedAptitudeID, null, false);
 			num++;
 		}
-		while (this.IsCharacterRedundant() && num < 20);
+		while (this.IsCharacterInvalid() && num < 20);
 		if (this.animController != null)
 		{
 			global::UnityEngine.Object.Destroy(this.animController.gameObject);
@@ -273,18 +299,19 @@ public class CharacterContainer : KScreen, ITelepadDeliverableContainer
 				LocText componentInChildren3 = gameObject3.GetComponentInChildren<LocText>();
 				componentInChildren3.text = trait.GetIgnoredEffectsString(false);
 				string text6 = "";
-				string text7 = "";
 				for (int m = 0; m < trait.ignoredEffects.Length; m++)
 				{
 					if (m > 0)
 					{
-						text6 += ", ";
-						text7 += "\n";
+						text6 += "\n";
 					}
-					text6 += Strings.Get("STRINGS.DUPLICANTS.MODIFIERS." + trait.ignoredEffects[m].ToUpper() + ".NAME");
-					text7 += Strings.Get("STRINGS.DUPLICANTS.MODIFIERS." + trait.ignoredEffects[m].ToUpper() + ".CAUSE");
+					text6 += string.Format(DUPLICANTS.TRAITS.IGNORED_EFFECTS_TOOLTIP, Strings.Get("STRINGS.DUPLICANTS.MODIFIERS." + trait.ignoredEffects[m].ToUpper() + ".NAME"), Strings.Get("STRINGS.DUPLICANTS.MODIFIERS." + trait.ignoredEffects[m].ToUpper() + ".CAUSE"));
+					if (m < trait.ignoredEffects.Length - 1)
+					{
+						text6 += ",";
+					}
 				}
-				componentInChildren3.GetComponent<ToolTip>().SetSimpleTooltip(string.Format(DUPLICANTS.TRAITS.IGNORED_EFFECTS_TOOLTIP, text6, text7));
+				componentInChildren3.GetComponent<ToolTip>().SetSimpleTooltip(text6);
 				this.traitEntries.Add(gameObject3);
 			}
 			StringEntry stringEntry;
@@ -324,25 +351,25 @@ public class CharacterContainer : KScreen, ITelepadDeliverableContainer
 					LocText locText3 = Util.KInstantiateUI<LocText>(this.aptitudeLabel.gameObject, gameObject5, false);
 					locText3.gameObject.SetActive(true);
 					locText3.text = skillGroup.Name;
-					string text8;
+					string text7;
 					if (skillGroup.choreGroupID != "")
 					{
 						ChoreGroup choreGroup = Db.Get().ChoreGroups.Get(skillGroup.choreGroupID);
-						text8 = string.Format(DUPLICANTS.ROLES.GROUPS.APTITUDE_DESCRIPTION_CHOREGROUP, skillGroup.Name, DUPLICANTSTATS.APTITUDE_BONUS, choreGroup.description);
+						text7 = string.Format(DUPLICANTS.ROLES.GROUPS.APTITUDE_DESCRIPTION_CHOREGROUP, skillGroup.Name, DUPLICANTSTATS.APTITUDE_BONUS, choreGroup.description);
 					}
 					else
 					{
-						text8 = string.Format(DUPLICANTS.ROLES.GROUPS.APTITUDE_DESCRIPTION, skillGroup.Name, DUPLICANTSTATS.APTITUDE_BONUS);
+						text7 = string.Format(DUPLICANTS.ROLES.GROUPS.APTITUDE_DESCRIPTION, skillGroup.Name, DUPLICANTSTATS.APTITUDE_BONUS);
 					}
-					locText3.GetComponent<ToolTip>().SetSimpleTooltip(text8);
+					locText3.GetComponent<ToolTip>().SetSimpleTooltip(text7);
 					float num = (float)this.stats.StartingLevels[keyValuePair.Key.relevantAttributes[0].Id];
 					LocText locText4 = Util.KInstantiateUI<LocText>(this.attributeLabelAptitude.gameObject, gameObject5, false);
 					locText4.gameObject.SetActive(true);
 					locText4.text = "+" + num.ToString() + " " + keyValuePair.Key.relevantAttributes[0].Name;
-					string text9 = keyValuePair.Key.relevantAttributes[0].Description;
-					text9 = string.Concat(new string[]
+					string text8 = keyValuePair.Key.relevantAttributes[0].Description;
+					text8 = string.Concat(new string[]
 					{
-						text9,
+						text8,
 						"\n\n",
 						keyValuePair.Key.relevantAttributes[0].Name,
 						": +",
@@ -351,9 +378,9 @@ public class CharacterContainer : KScreen, ITelepadDeliverableContainer
 					List<AttributeConverter> convertersForAttribute2 = Db.Get().AttributeConverters.GetConvertersForAttribute(keyValuePair.Key.relevantAttributes[0]);
 					for (int n = 0; n < convertersForAttribute2.Count; n++)
 					{
-						text9 = text9 + "\n    • " + convertersForAttribute2[n].DescriptionFromAttribute(convertersForAttribute2[n].multiplier * num, null);
+						text8 = text8 + "\n    • " + convertersForAttribute2[n].DescriptionFromAttribute(convertersForAttribute2[n].multiplier * num, null);
 					}
-					locText4.GetComponent<ToolTip>().SetSimpleTooltip(text9);
+					locText4.GetComponent<ToolTip>().SetSimpleTooltip(text8);
 					gameObject5.gameObject.SetActive(true);
 					this.aptitudeEntries.Add(gameObject5);
 				}
@@ -531,7 +558,7 @@ public class CharacterContainer : KScreen, ITelepadDeliverableContainer
 		this.archetypeDropDown.gameObject.SetActive(enable);
 	}
 
-	private void Reshuffle(bool is_starter)
+	public void Reshuffle(bool is_starter)
 	{
 		if (this.controller != null && this.controller.IsSelected(this.stats))
 		{
@@ -568,9 +595,9 @@ public class CharacterContainer : KScreen, ITelepadDeliverableContainer
 		this.selectButton.soundPlayer.Enabled = false;
 	}
 
-	private bool IsCharacterRedundant()
+	private bool IsCharacterInvalid()
 	{
-		return CharacterContainer.containers.Find((CharacterContainer c) => c != null && c.stats != null && c != this && c.stats.Name == this.stats.Name && c.stats.IsValid) != null || Components.LiveMinionIdentities.Items.Any<MinionIdentity>((MinionIdentity id) => id.GetProperName() == this.stats.Name);
+		return CharacterContainer.containers.Find((CharacterContainer container) => container != null && container.stats != null && container != this && container.stats.personality.Id == this.stats.personality.Id && container.stats.IsValid) != null || (SaveLoader.Instance != null && DlcManager.IsDlcId(this.stats.personality.requiredDlcId) && !SaveLoader.Instance.GameInfo.dlcIds.Contains(this.stats.personality.requiredDlcId)) || Components.LiveMinionIdentities.Items.Any<MinionIdentity>((MinionIdentity id) => id.personalityResourceId == this.stats.personality.Id);
 	}
 
 	public string GetValueColor(bool isPositive)

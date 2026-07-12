@@ -75,6 +75,10 @@ namespace KMod
 				title = UI.FRONTEND.MOD_EVENTS.ALL_MODS_DISABLED_EARLY_ACCESS;
 				title_tooltip = UI.FRONTEND.MOD_EVENTS.TOOLTIPS.ALL_MODS_DISABLED_EARLY_ACCESS;
 				return;
+			case EventType.DownloadFailed:
+				title = UI.FRONTEND.MOD_EVENTS.DOWNLOAD_FAILED;
+				title_tooltip = UI.FRONTEND.MOD_EVENTS.TOOLTIPS.DOWNLOAD_FAILED;
+				return;
 			default:
 				throw new ArgumentOutOfRangeException();
 			}

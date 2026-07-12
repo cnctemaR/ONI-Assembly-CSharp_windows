@@ -25,9 +25,9 @@ public class ScheduledUIInstantiation : KMonoBehaviour
 		this.completed = true;
 		foreach (ScheduledUIInstantiation.Instantiation instantiation in this.UIElements)
 		{
-			foreach (GameObject gameObject in instantiation.prefabs)
+			if (SaveLoader.Instance.IsDLCActiveForCurrentSave(instantiation.RequiredDlcId))
 			{
-				if (DlcManager.IsContentActive(instantiation.RequiredDlcId))
+				foreach (GameObject gameObject in instantiation.prefabs)
 				{
 					Vector3 vector = gameObject.rectTransform().anchoredPosition;
 					GameObject gameObject2 = Util.KInstantiateUI(gameObject, instantiation.parent.gameObject, false);

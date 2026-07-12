@@ -17,25 +17,14 @@ public static class BaseBeeConfig
 			navType = NavType.Floor;
 			num = 1;
 		}
-		GameObject gameObject2 = gameObject;
-		FactionManager.FactionID factionID = FactionManager.FactionID.Hostile;
-		string text2 = text;
-		NavType navType2 = navType;
-		int num2 = 32;
-		float num3 = (float)num;
-		string text3 = "Meat";
-		int num4 = 0;
-		bool flag = true;
-		bool flag2 = true;
-		float freezing_ = CREATURES.TEMPERATURE.FREEZING_10;
-		EntityTemplates.ExtendEntityToBasicCreature(gameObject2, factionID, traitId, text2, navType2, num2, num3, text3, num4, flag, flag2, CREATURES.TEMPERATURE.FREEZING_9, CREATURES.TEMPERATURE.FREEZING_1, freezing_, CREATURES.TEMPERATURE.FREEZING);
+		EntityTemplates.ExtendEntityToBasicCreature(gameObject, FactionManager.FactionID.Hostile, traitId, text, navType, 32, (float)num, "Meat", 0, true, true, 223.15f, 273.15f, 173.15f, 283.15f);
 		if (symbolOverridePrefix != null)
 		{
 			gameObject.AddOrGet<SymbolOverrideController>().ApplySymbolOverridesByAffix(Assets.GetAnim(anim_file), symbolOverridePrefix, null, 0);
 		}
 		Pickupable pickupable = gameObject.AddOrGet<Pickupable>();
-		int num5 = CREATURES.SORTING.CRITTER_ORDER["Bee"];
-		pickupable.sortOrder = num5;
+		int num2 = CREATURES.SORTING.CRITTER_ORDER["Bee"];
+		pickupable.sortOrder = num2;
 		KPrefabID component = gameObject.GetComponent<KPrefabID>();
 		component.prefabInitFn += delegate(GameObject inst)
 		{

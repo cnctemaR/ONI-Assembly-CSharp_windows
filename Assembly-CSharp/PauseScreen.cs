@@ -6,6 +6,7 @@ using ProcGen;
 using STRINGS;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.UI;
 
 public class PauseScreen : KModalButtonMenu
 {
@@ -71,7 +72,8 @@ public class PauseScreen : KModalButtonMenu
 				array[1],
 				array[2],
 				array[3],
-				array[4]
+				array[4],
+				array[5]
 			});
 		}
 		catch (Exception ex)
@@ -115,6 +117,7 @@ public class PauseScreen : KModalButtonMenu
 			AudioMixer.instance.Start(AudioMixerSnapshots.Get().ESCPauseSnapshot);
 			MusicManager.instance.OnEscapeMenu(true);
 			MusicManager.instance.PlaySong("Music_ESC_Menu", false);
+			this.RefreshDLCActivationButtons();
 			return;
 		}
 		ToolTipScreen.Instance.ClearToolTip(this.closeButton.GetComponent<ToolTip>());
@@ -255,6 +258,53 @@ public class PauseScreen : KModalButtonMenu
 		App.LoadScene("frontend");
 	}
 
+	private void RefreshDLCActivationButtons()
+	{
+		this.RefreshDLCButton("EXPANSION1_ID", this.dlc1ActivationButton, false);
+		this.RefreshDLCButton("DLC2_ID", this.dlc2ActivationButton, true);
+	}
+
+	private void RefreshDLCButton(string DLCID, MultiToggle button, bool userEditable)
+	{
+		button.ChangeState(SaveLoader.Instance.IsDLCActiveForCurrentSave(DLCID) ? 1 : 0);
+		button.GetComponent<Image>().material = (SaveLoader.Instance.IsDLCActiveForCurrentSave(DLCID) ? GlobalResources.Instance().AnimUIMaterial : GlobalResources.Instance().AnimMaterialUIDesaturated);
+		ToolTip component = button.GetComponent<ToolTip>();
+		string dlcTitle = DlcManager.GetDlcTitle(DLCID);
+		if (!DlcManager.IsContentSubscribed(DLCID))
+		{
+			component.SetSimpleTooltip(string.Format(UI.FRONTEND.PAUSE_SCREEN.ADD_DLC_MENU.DLC_DISABLED_NOT_EDITABLE_TOOLTIP, dlcTitle));
+			button.onClick = null;
+			return;
+		}
+		if (userEditable)
+		{
+			component.SetSimpleTooltip(SaveLoader.Instance.IsDLCActiveForCurrentSave(DLCID) ? string.Format(UI.FRONTEND.PAUSE_SCREEN.ADD_DLC_MENU.DLC_ENABLED_TOOLTIP, dlcTitle) : string.Format(UI.FRONTEND.PAUSE_SCREEN.ADD_DLC_MENU.DLC_DISABLED_TOOLTIP, dlcTitle));
+			button.onClick = delegate
+			{
+				this.OnClickAddDLCButton(DLCID);
+			};
+			return;
+		}
+		component.SetSimpleTooltip(SaveLoader.Instance.IsDLCActiveForCurrentSave(DLCID) ? string.Format(UI.FRONTEND.PAUSE_SCREEN.ADD_DLC_MENU.DLC_ENABLED_TOOLTIP, dlcTitle) : string.Format(UI.FRONTEND.PAUSE_SCREEN.ADD_DLC_MENU.DLC_DISABLED_NOT_EDITABLE_TOOLTIP, dlcTitle));
+		button.onClick = null;
+	}
+
+	private void OnClickAddDLCButton(string dlcID)
+	{
+		if (!SaveLoader.Instance.IsDLCActiveForCurrentSave(dlcID))
+		{
+			this.ConfirmDecision(UI.FRONTEND.PAUSE_SCREEN.ADD_DLC_MENU.CONFIRM, delegate
+			{
+				this.OnConfirmAddDLC(dlcID);
+			});
+		}
+	}
+
+	private void OnConfirmAddDLC(string dlcId)
+	{
+		SaveLoader.Instance.UpgradeActiveSaveDLCInfo(dlcId, true);
+	}
+
 	[SerializeField]
 	private OptionsMenuScreen optionsScreen;
 
@@ -275,6 +325,12 @@ public class PauseScreen : KModalButtonMenu
 
 	[SerializeField]
 	private CopyTextFieldToClipboard clipboard;
+
+	[SerializeField]
+	private MultiToggle dlc1ActivationButton;
+
+	[SerializeField]
+	private MultiToggle dlc2ActivationButton;
 
 	private float originalTimeScale;
 

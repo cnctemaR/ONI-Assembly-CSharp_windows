@@ -18,6 +18,10 @@ public class ResearchDatabankConfig : IEntityConfig
 			GameTags.IndustrialIngredient,
 			GameTags.Experimental
 		});
+		if (DlcManager.FeatureClusterSpaceEnabled())
+		{
+			gameObject.AddTag(GameTags.HideFromSpawnTool);
+		}
 		gameObject.AddOrGet<EntitySplitter>().maxStackSize = (float)ROCKETRY.DESTINATION_RESEARCH.BASIC;
 		return gameObject;
 	}
@@ -28,6 +32,10 @@ public class ResearchDatabankConfig : IEntityConfig
 
 	public void OnSpawn(GameObject inst)
 	{
+		if (SaveLoader.Instance.IsDLCActiveForCurrentSave("DLC2_ID") && SaveLoader.Instance.ClusterLayout != null && SaveLoader.Instance.ClusterLayout.clusterTags.Contains("CeresCluster"))
+		{
+			inst.AddOrGet<KBatchedAnimController>().SwapAnims(new KAnimFile[] { Assets.GetAnim("floppy_disc_ceres_kanim") });
+		}
 	}
 
 	public const string ID = "ResearchDatabank";

@@ -9,7 +9,7 @@ public class StaterpillarConfig : IEntityConfig
 {
 	public static GameObject CreateStaterpillar(string id, string name, string desc, string anim_file, bool is_baby)
 	{
-		GameObject gameObject = EntityTemplates.ExtendEntityToWildCreature(BaseStaterpillarConfig.BaseStaterpillar(id, name, desc, anim_file, "StaterpillarBaseTrait", is_baby, ObjectLayer.Wire, StaterpillarGeneratorConfig.ID, Tag.Invalid, null, 283.15f, 293.15f, 243.15f, 343.15f, null), global::TUNING.CREATURES.SPACE_REQUIREMENTS.TIER3);
+		GameObject gameObject = EntityTemplates.ExtendEntityToWildCreature(BaseStaterpillarConfig.BaseStaterpillar(id, name, desc, anim_file, "StaterpillarBaseTrait", is_baby, ObjectLayer.Wire, StaterpillarGeneratorConfig.ID, Tag.Invalid, null, 283.15f, 313.15f, 173.15f, 373.15f, null), global::TUNING.CREATURES.SPACE_REQUIREMENTS.TIER3);
 		Trait trait = Db.Get().CreateTrait("StaterpillarBaseTrait", name, name, null, false, null, true, true);
 		trait.Add(new AttributeModifier(Db.Get().Amounts.Calories.maxAttribute.Id, StaterpillarTuning.STANDARD_STOMACH_SIZE, name, false, false, true));
 		trait.Add(new AttributeModifier(Db.Get().Amounts.Calories.deltaAttribute.Id, -StaterpillarTuning.STANDARD_CALORIES_PER_CYCLE / 600f, UI.TOOLTIPS.BASE_VALUE, false, false, true));
@@ -30,7 +30,7 @@ public class StaterpillarConfig : IEntityConfig
 
 	public virtual GameObject CreatePrefab()
 	{
-		return EntityTemplates.ExtendEntityToFertileCreature(StaterpillarConfig.CreateStaterpillar("Staterpillar", global::STRINGS.CREATURES.SPECIES.STATERPILLAR.NAME, global::STRINGS.CREATURES.SPECIES.STATERPILLAR.DESC, "caterpillar_kanim", false), "StaterpillarEgg", global::STRINGS.CREATURES.SPECIES.STATERPILLAR.EGG_NAME, global::STRINGS.CREATURES.SPECIES.STATERPILLAR.DESC, "egg_caterpillar_kanim", StaterpillarTuning.EGG_MASS, "StaterpillarBaby", 60.000004f, 20f, StaterpillarTuning.EGG_CHANCES_BASE, 0, true, false, true, 1f, false);
+		return EntityTemplates.ExtendEntityToFertileCreature(StaterpillarConfig.CreateStaterpillar("Staterpillar", global::STRINGS.CREATURES.SPECIES.STATERPILLAR.NAME, global::STRINGS.CREATURES.SPECIES.STATERPILLAR.DESC, "caterpillar_kanim", false), "StaterpillarEgg", global::STRINGS.CREATURES.SPECIES.STATERPILLAR.EGG_NAME, global::STRINGS.CREATURES.SPECIES.STATERPILLAR.DESC, "egg_caterpillar_kanim", StaterpillarTuning.EGG_MASS, "StaterpillarBaby", 60.000004f, 20f, StaterpillarTuning.EGG_CHANCES_BASE, this.GetDlcIds(), 0, true, false, true, 1f, false);
 	}
 
 	public void OnPrefabInit(GameObject prefab)

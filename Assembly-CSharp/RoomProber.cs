@@ -162,11 +162,11 @@ public class RoomProber : ISim1000ms
 						}
 						if (!flag)
 						{
-							if (component.GetComponent<Deconstructable>())
+							if (component.HasTag(GameTags.RoomProberBuilding))
 							{
 								data.AddBuilding(component);
 							}
-							else if (component.HasTag(GameTags.Plant) && !component.IsPrefabID("ForestTreeBranch".ToTag()))
+							else if (component.HasTag(GameTags.Plant) && !component.HasTag(GameTags.PlantBranch))
 							{
 								data.AddPlants(component);
 							}

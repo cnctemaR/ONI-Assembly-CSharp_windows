@@ -36,6 +36,17 @@ public class KFMOD
 			{
 				instance.Banks.RemoveAll((string b) => b.StartsWith("expansion1_"));
 			}
+			using (Dictionary<string, DlcManager.DlcInfo>.Enumerator enumerator = DlcManager.DLC_PACKS.GetEnumerator())
+			{
+				while (enumerator.MoveNext())
+				{
+					KeyValuePair<string, DlcManager.DlcInfo> dlcInfo = enumerator.Current;
+					if (!DlcManager.IsContentSubscribed(dlcInfo.Value.id))
+					{
+						instance.Banks.RemoveAll((string b) => b.IndexOf(dlcInfo.Value.directory, StringComparison.OrdinalIgnoreCase) >= 0);
+					}
+				}
+			}
 			if (global::UnityEngine.Object.FindObjectsOfType<RuntimeManager>().Length != 0)
 			{
 				global::Debug.LogError("FMOD got initialized before we tried to initialize it! This will cause bad things to happen!");

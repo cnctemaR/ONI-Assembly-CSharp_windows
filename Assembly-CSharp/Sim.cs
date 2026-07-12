@@ -212,6 +212,8 @@ public static class Sim
 
 	public const float StandardTemperature = 293.15f;
 
+	public const float StandardMeltingPointOffset = 10f;
+
 	public const float StandardPressure = 101.3f;
 
 	public const float Epsilon = 0.0001f;

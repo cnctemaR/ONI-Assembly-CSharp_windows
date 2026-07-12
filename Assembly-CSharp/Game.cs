@@ -107,8 +107,8 @@ public class Game : KMonoBehaviour
 			"Level Loaded....",
 			SceneManager.GetActiveScene().name
 		});
-		Components.BuildingCellVisualizers.OnAdd += this.OnAddBuildingCellVisualizer;
-		Components.BuildingCellVisualizers.OnRemove += this.OnRemoveBuildingCellVisualizer;
+		Components.EntityCellVisualizers.OnAdd += this.OnAddBuildingCellVisualizer;
+		Components.EntityCellVisualizers.OnRemove += this.OnRemoveBuildingCellVisualizer;
 		Singleton<KBatchedAnimUpdater>.CreateInstance();
 		Singleton<CellChangeMonitor>.CreateInstance();
 		this.userMenu = new UserMenu();
@@ -165,7 +165,7 @@ public class Game : KMonoBehaviour
 		Singleton<CellChangeMonitor>.Instance.SetGridSize(Grid.WidthInCells, Grid.HeightInCells);
 		this.unlocks = base.GetComponent<Unlocks>();
 		this.changelistsPlayedOn = new List<uint>();
-		this.changelistsPlayedOn.Add(600112U);
+		this.changelistsPlayedOn.Add(622222U);
 		this.dateGenerated = global::System.DateTime.UtcNow.ToString("U", CultureInfo.InvariantCulture);
 	}
 
@@ -242,9 +242,9 @@ public class Game : KMonoBehaviour
 		{
 			global::Util.KInstantiate(this.tempIntroScreenPrefab, null, null);
 		}
-		if (SaveLoader.Instance.ClusterLayout != null)
+		if (SaveLoader.Instance.Cluster != null)
 		{
-			foreach (WorldGen worldGen in SaveLoader.Instance.ClusterLayout.worlds)
+			foreach (WorldGen worldGen in SaveLoader.Instance.Cluster.worlds)
 			{
 				this.Reset(worldGen.data.gameSpawnData, worldGen.WorldOffset);
 			}
@@ -582,6 +582,7 @@ public class Game : KMonoBehaviour
 					GameObject gameObject = Grid.Objects[gameCell, 9];
 					if (gameObject != null)
 					{
+						gameObject.Trigger(675471409, null);
 						global::Util.KDestroyGameObject(gameObject);
 					}
 				}
@@ -760,22 +761,22 @@ public class Game : KMonoBehaviour
 		this.UpdateOverlayScreen();
 	}
 
-	private void OnAddBuildingCellVisualizer(BuildingCellVisualizer building_cell_visualizer)
+	private void OnAddBuildingCellVisualizer(EntityCellVisualizer entity_cell_visualizer)
 	{
 		this.lastDrawnOverlayMode = default(HashedString);
 		if (PlayerController.Instance != null)
 		{
 			BuildTool buildTool = PlayerController.Instance.ActiveTool as BuildTool;
-			if (buildTool != null && buildTool.visualizer == building_cell_visualizer.gameObject)
+			if (buildTool != null && buildTool.visualizer == entity_cell_visualizer.gameObject)
 			{
-				this.previewVisualizer = building_cell_visualizer;
+				this.previewVisualizer = entity_cell_visualizer;
 			}
 		}
 	}
 
-	private void OnRemoveBuildingCellVisualizer(BuildingCellVisualizer building_cell_visualizer)
+	private void OnRemoveBuildingCellVisualizer(EntityCellVisualizer entity_cell_visualizer)
 	{
-		if (this.previewVisualizer == building_cell_visualizer)
+		if (this.previewVisualizer == entity_cell_visualizer)
 		{
 			this.previewVisualizer = null;
 		}
@@ -790,17 +791,15 @@ public class Game : KMonoBehaviour
 		HashedString mode = OverlayScreen.Instance.GetMode();
 		if (this.previewVisualizer != null)
 		{
-			this.previewVisualizer.DisableIcons();
 			this.previewVisualizer.DrawIcons(mode);
 		}
 		if (mode == this.lastDrawnOverlayMode)
 		{
 			return;
 		}
-		foreach (BuildingCellVisualizer buildingCellVisualizer in Components.BuildingCellVisualizers.Items)
+		foreach (EntityCellVisualizer entityCellVisualizer in Components.EntityCellVisualizers.Items)
 		{
-			buildingCellVisualizer.DisableIcons();
-			buildingCellVisualizer.DrawIcons(mode);
+			entityCellVisualizer.DrawIcons(mode);
 		}
 		this.lastDrawnOverlayMode = mode;
 	}
@@ -920,7 +919,7 @@ public class Game : KMonoBehaviour
 		{
 			return;
 		}
-		uint num = 600112U;
+		uint num = 622222U;
 		string text = global::System.DateTime.Now.ToShortDateString();
 		string text2 = global::System.DateTime.Now.ToShortTimeString();
 		string fileName = Path.GetFileName(GenericGameSettings.instance.performanceCapture.saveGame);
@@ -1144,9 +1143,9 @@ public class Game : KMonoBehaviour
 		gameSaveData.savedInfo = this.savedInfo;
 		global::Debug.Assert(gameSaveData.worldDetail != null, "World detail null");
 		gameSaveData.dateGenerated = this.dateGenerated;
-		if (!this.changelistsPlayedOn.Contains(600112U))
+		if (!this.changelistsPlayedOn.Contains(622222U))
 		{
-			this.changelistsPlayedOn.Add(600112U);
+			this.changelistsPlayedOn.Add(622222U);
 		}
 		gameSaveData.changelistsPlayedOn = this.changelistsPlayedOn;
 		if (this.OnSave != null)
@@ -1339,13 +1338,9 @@ public class Game : KMonoBehaviour
 	public void StartBE()
 	{
 		Resources.UnloadUnusedAssets();
-		if (TimeOfDay.Instance != null && !MusicManager.instance.SongIsPlaying("Stinger_Loop_Night") && TimeOfDay.Instance.GetCurrentTimeRegion() == TimeOfDay.TimeRegion.Night)
-		{
-			MusicManager.instance.PlaySong("Stinger_Loop_Night", false);
-			MusicManager.instance.SetSongParameter("Stinger_Loop_Night", "Music_PlayStinger", 0f, true);
-		}
 		AudioMixer.instance.Reset();
 		AudioMixer.instance.StartPersistentSnapshots();
+		MusicManager.instance.ConfigureSongs();
 		if (MusicManager.instance.ShouldPlayDynamicMusicLoadedGame())
 		{
 			MusicManager.instance.PlayDynamicMusic();
@@ -1798,7 +1793,7 @@ public class Game : KMonoBehaviour
 
 	private HashedString lastDrawnOverlayMode;
 
-	private BuildingCellVisualizer previewVisualizer;
+	private EntityCellVisualizer previewVisualizer;
 
 	public SafetyConditions safetyConditions = new SafetyConditions();
 
@@ -1943,11 +1938,11 @@ public class Game : KMonoBehaviour
 				string text = null;
 				if (this.releaseInfo.TryGetValue(num, out text))
 				{
-					KCrashReporter.Assert(false, "Trying to get data for handle that was already released by " + text);
+					KCrashReporter.Assert(false, "Trying to get data for handle that was already released by " + text, null);
 				}
 				else
 				{
-					KCrashReporter.Assert(false, "Trying to get data for handle that was released ...... magically");
+					KCrashReporter.Assert(false, "Trying to get data for handle that was released ...... magically", null);
 				}
 				throw ex;
 			}
@@ -1973,11 +1968,11 @@ public class Game : KMonoBehaviour
 				string text = null;
 				if (this.releaseInfo.TryGetValue(num, out text))
 				{
-					KCrashReporter.Assert(false, release_info + "is trying to release handle but it was already released by " + text);
+					KCrashReporter.Assert(false, release_info + "is trying to release handle but it was already released by " + text, null);
 				}
 				else
 				{
-					KCrashReporter.Assert(false, release_info + "is trying to release a handle that was already released by some unknown thing");
+					KCrashReporter.Assert(false, release_info + "is trying to release a handle that was already released by some unknown thing", null);
 				}
 				throw ex;
 			}
@@ -2004,7 +1999,8 @@ public class Game : KMonoBehaviour
 		AbsoluteTemperature,
 		AdaptiveTemperature,
 		HeatFlow,
-		StateChange
+		StateChange,
+		RelativeTemperature
 	}
 
 	[Serializable]

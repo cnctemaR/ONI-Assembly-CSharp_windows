@@ -90,7 +90,7 @@ public class DrinkMilkStates : GameStateMachine<DrinkMilkStates, DrinkMilkStates
 
 	private static void CheckIfCramped(DrinkMilkStates.Instance smi)
 	{
-		smi.isGassyMooCramped = smi.GetSMI<DrinkMilkMonitor.Instance>().doesTargetMilkFeederHaveSpaceForGassyMoo;
+		smi.critterIsCramped = smi.GetSMI<DrinkMilkMonitor.Instance>().doesTargetMilkFeederHaveSpaceForCritter;
 	}
 
 	private static void ReserveMilkFeeder(DrinkMilkStates.Instance smi)
@@ -130,12 +130,12 @@ public class DrinkMilkStates : GameStateMachine<DrinkMilkStates, DrinkMilkStates
 		{
 			return Grid.InvalidCell;
 		}
-		return smi.GetSMI<DrinkMilkMonitor.Instance>().GetDrinkCellOf(instance, smi.isGassyMooCramped);
+		return smi.GetSMI<DrinkMilkMonitor.Instance>().GetDrinkCellOf(instance, smi.critterIsCramped);
 	}
 
 	private static string GetAnimDrinkPre(DrinkMilkStates.Instance smi)
 	{
-		if (smi.isGassyMooCramped)
+		if (smi.critterIsCramped)
 		{
 			return "drink_cramped_pre";
 		}
@@ -144,7 +144,7 @@ public class DrinkMilkStates : GameStateMachine<DrinkMilkStates, DrinkMilkStates
 
 	private static string GetAnimDrinkLoop(DrinkMilkStates.Instance smi)
 	{
-		if (smi.isGassyMooCramped)
+		if (smi.critterIsCramped)
 		{
 			return "drink_cramped_loop";
 		}
@@ -153,7 +153,7 @@ public class DrinkMilkStates : GameStateMachine<DrinkMilkStates, DrinkMilkStates
 
 	private static string GetAnimDrinkPst(DrinkMilkStates.Instance smi)
 	{
-		if (smi.isGassyMooCramped)
+		if (smi.critterIsCramped)
 		{
 			return "drink_cramped_pst";
 		}
@@ -167,33 +167,26 @@ public class DrinkMilkStates : GameStateMachine<DrinkMilkStates, DrinkMilkStates
 		{
 			return;
 		}
+		bool isRotated = instance.GetComponent<Rotatable>().IsRotated;
 		float num;
-		if (smi.def.isGassyMoo)
+		if (smi.critterIsCramped)
 		{
-			bool isRotated = instance.GetComponent<Rotatable>().IsRotated;
-			if (smi.isGassyMooCramped)
-			{
-				if (isRotated)
-				{
-					num = -20f;
-				}
-				else
-				{
-					num = 20f;
-				}
-			}
-			else if (isRotated)
-			{
-				num = 20f;
-			}
-			else
+			if (isRotated)
 			{
 				num = -20f;
 			}
+			else
+			{
+				num = 20f;
+			}
+		}
+		else if (isRotated)
+		{
+			num = 20f;
 		}
 		else
 		{
-			num = 0f;
+			num = -20f;
 		}
 		IApproachable approachable = smi.sm.targetMilkFeeder.Get<IApproachable>(smi);
 		if (approachable == null)
@@ -216,9 +209,77 @@ public class DrinkMilkStates : GameStateMachine<DrinkMilkStates, DrinkMilkStates
 
 	public class Def : StateMachine.BaseDef
 	{
+		public static CellOffset DrinkCellOffsetGet_CritterOneByOne(MilkFeeder.Instance milkFeederInstance, DrinkMilkMonitor.Instance critterInstance, bool isCramped)
+		{
+			return milkFeederInstance.GetComponent<Rotatable>().GetRotatedCellOffset(MilkFeederConfig.DRINK_FROM_OFFSET);
+		}
+
+		public static CellOffset DrinkCellOffsetGet_GassyMoo(MilkFeeder.Instance milkFeederInstance, DrinkMilkMonitor.Instance critterInstance, bool isCramped)
+		{
+			Rotatable component = milkFeederInstance.GetComponent<Rotatable>();
+			CellOffset rotatedCellOffset = component.GetRotatedCellOffset(MilkFeederConfig.DRINK_FROM_OFFSET);
+			if (component.IsRotated)
+			{
+				rotatedCellOffset.x--;
+			}
+			if (isCramped)
+			{
+				if (component.IsRotated)
+				{
+					rotatedCellOffset.x += 2;
+				}
+				else
+				{
+					rotatedCellOffset.x -= 2;
+				}
+			}
+			return rotatedCellOffset;
+		}
+
+		public static CellOffset DrinkCellOffsetGet_BammothAdult(MilkFeeder.Instance milkFeederInstance, DrinkMilkMonitor.Instance critterInstance, bool isCramped)
+		{
+			Rotatable component = milkFeederInstance.GetComponent<Rotatable>();
+			CellOffset rotatedCellOffset = component.GetRotatedCellOffset(MilkFeederConfig.DRINK_FROM_OFFSET);
+			if (!isCramped)
+			{
+				int x = Grid.CellToXY(Grid.OffsetCell(Grid.PosToCell(milkFeederInstance), rotatedCellOffset)).x;
+				int x2 = Grid.PosToXY(critterInstance.transform.position).x;
+				if (x > x2 && !component.IsRotated)
+				{
+					rotatedCellOffset.x++;
+				}
+				else if (x < x2 && component.IsRotated)
+				{
+					rotatedCellOffset.x--;
+				}
+				else if (x == x2)
+				{
+					if (component.IsRotated)
+					{
+						rotatedCellOffset.x--;
+					}
+					else
+					{
+						rotatedCellOffset.x++;
+					}
+				}
+			}
+			else if (component.IsRotated)
+			{
+				rotatedCellOffset.x++;
+			}
+			else
+			{
+				rotatedCellOffset.x--;
+			}
+			return rotatedCellOffset;
+		}
+
 		public bool shouldBeBehindMilkTank = true;
 
-		public bool isGassyMoo;
+		public DrinkMilkStates.Def.DrinkCellOffsetGetFn drinkCellOffsetGetFn = new DrinkMilkStates.Def.DrinkCellOffsetGetFn(DrinkMilkStates.Def.DrinkCellOffsetGet_CritterOneByOne);
+
+		public delegate CellOffset DrinkCellOffsetGetFn(MilkFeeder.Instance milkFeederInstance, DrinkMilkMonitor.Instance critterInstance, bool isCramped);
 	}
 
 	public new class Instance : GameStateMachine<DrinkMilkStates, DrinkMilkStates.Instance, IStateMachineTarget, DrinkMilkStates.Def>.GameInstance
@@ -234,7 +295,7 @@ public class DrinkMilkStates : GameStateMachine<DrinkMilkStates, DrinkMilkStates
 			base.sm.requestedToStopFeeding.Trigger(base.smi);
 		}
 
-		public bool isGassyMooCramped;
+		public bool critterIsCramped;
 	}
 
 	public class EatingState : GameStateMachine<DrinkMilkStates, DrinkMilkStates.Instance, IStateMachineTarget, DrinkMilkStates.Def>.State

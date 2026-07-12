@@ -14,7 +14,7 @@ namespace ProcGenGame
 			foreach (KeyValuePair<int, string> keyValuePair in newItems)
 			{
 				Vector2I vector2I = Grid.CellToXY(keyValuePair.Key);
-				Prefab prefab = new Prefab(keyValuePair.Value, Prefab.Type.Other, vector2I.x, vector2I.y, (SimHashes)0, -1f, 1f, null, 0, Orientation.Neutral, null, null, 0);
+				Prefab prefab = new Prefab(keyValuePair.Value, Prefab.Type.Other, vector2I.x, vector2I.y, (SimHashes)0, -1f, 1f, null, 0, Orientation.Neutral, null, null, 0, null);
 				this.otherEntities.Add(prefab);
 			}
 		}
@@ -80,9 +80,16 @@ namespace ProcGenGame
 					else
 					{
 						Dictionary<int, int> dictionary = claimedCells;
-						int num3 = num2;
-						dictionary[num3]++;
+						int j = num2;
+						dictionary[j]++;
 					}
+				}
+			}
+			if (template.info != null && template.info.discover_tags != null)
+			{
+				foreach (Tag tag in template.info.discover_tags)
+				{
+					this.discoveredResources.Add(tag);
 				}
 			}
 		}
@@ -101,6 +108,8 @@ namespace ProcGenGame
 		public List<Prefab> elementalOres = new List<Prefab>();
 
 		public List<Prefab> otherEntities = new List<Prefab>();
+
+		public List<Tag> discoveredResources = new List<Tag>();
 
 		public List<KeyValuePair<Vector2I, bool>> preventFoWReveal = new List<KeyValuePair<Vector2I, bool>>();
 	}

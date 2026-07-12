@@ -564,7 +564,7 @@ namespace VoronoiTree
 			return new List<Node>(this.children);
 		}
 
-		public void GetLeafNodes(List<Node> nodes, Tree.LeafNodeTest test = null)
+		public void GetLeafNodes(List<Node> nodes, Tree.NodeTest test = null)
 		{
 			for (int i = 0; i < this.children.Count; i++)
 			{
@@ -599,6 +599,17 @@ namespace VoronoiTree
 					{
 						tree.GetInternalNodes(nodes);
 					}
+				}
+			}
+		}
+
+		public void GetInternalNonLeafNodes(List<Node> nodes, Tree.NodeTest test = null)
+		{
+			for (int i = 0; i < this.children.Count; i++)
+			{
+				if (this.children[i].type == Node.NodeType.Internal && (test == null || test(this.children[i])))
+				{
+					nodes.Add(this.children[i]);
 				}
 			}
 		}
@@ -671,6 +682,6 @@ namespace VoronoiTree
 
 		public bool dontRelaxChildren;
 
-		public delegate bool LeafNodeTest(Node node);
+		public delegate bool NodeTest(Node node);
 	}
 }

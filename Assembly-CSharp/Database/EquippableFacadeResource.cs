@@ -11,8 +11,14 @@ namespace Database
 
 		public KAnimFile AnimFile { get; private set; }
 
-		public EquippableFacadeResource(string id, string name, string buildOverride, string defID, string animFile)
-			: base(id, name, "n/a", PermitCategory.Equipment, PermitRarity.Unknown, DlcManager.AVAILABLE_ALL_VERSIONS)
+		[Obsolete("Please use constructor with dlcIds parameter")]
+		public EquippableFacadeResource(string id, string name, string desc, PermitRarity rarity, string buildOverride, string defID, string animFile)
+			: this(id, name, desc, rarity, buildOverride, defID, animFile, DlcManager.AVAILABLE_ALL_VERSIONS)
+		{
+		}
+
+		public EquippableFacadeResource(string id, string name, string desc, PermitRarity rarity, string buildOverride, string defID, string animFile, string[] dlcIds)
+			: base(id, name, desc, PermitCategory.Equipment, rarity, dlcIds)
 		{
 			this.DefID = defID;
 			this.BuildOverride = buildOverride;

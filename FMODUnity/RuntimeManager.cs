@@ -531,6 +531,10 @@ namespace FMODUnity
 			RuntimeManager.Instance.LoadingBanksRef++;
 			RuntimeManager.LoadedBank loadedBank2 = default(RuntimeManager.LoadedBank);
 			RESULT result = RuntimeManager.Instance.studioSystem.loadBankFile(text2, LOAD_BANK_FLAGS.NORMAL, out loadedBank2.Bank);
+			if (result != RESULT.OK)
+			{
+				global::UnityEngine.Debug.LogError(string.Format("Failed to load bank {0} error {1}", bankName, result));
+			}
 			RuntimeManager.Instance.loadedBankRegister(loadedBank2, text2, bankName, loadSamples, result);
 		}
 

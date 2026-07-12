@@ -80,7 +80,7 @@ public class Harvestable : Workable
 		KSelectable component = base.GetComponent<KSelectable>();
 		if (this.canBeHarvested)
 		{
-			component.AddStatusItem(Db.Get().CreatureStatusItems.ReadyForHarvest, null);
+			component.AddStatusItem(this.readyForHarvestStatusItem, null);
 			if (this.harvestDesignatable.HarvestWhenReady)
 			{
 				this.harvestDesignatable.MarkForHarvest();
@@ -92,7 +92,7 @@ public class Harvestable : Workable
 		}
 		else
 		{
-			component.RemoveStatusItem(Db.Get().CreatureStatusItems.ReadyForHarvest, false);
+			component.RemoveStatusItem(this.readyForHarvestStatusItem, false);
 			component.RemoveStatusItem(Db.Get().MiscStatusItems.NotMarkedForHarvest, false);
 		}
 		Game.Instance.userMenu.Refresh(base.gameObject);
@@ -106,14 +106,21 @@ public class Harvestable : Workable
 
 	protected virtual void OnCancel(object data)
 	{
+		bool flag = data == null || (data is bool && !(bool)data);
 		if (this.chore != null)
 		{
 			this.chore.Cancel("Cancel harvest");
 			this.chore = null;
 			base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().MiscStatusItems.PendingHarvest, false);
-			this.harvestDesignatable.SetHarvestWhenReady(false);
+			if (flag)
+			{
+				this.harvestDesignatable.SetHarvestWhenReady(false);
+			}
 		}
-		this.harvestDesignatable.MarkedForHarvest = false;
+		if (flag)
+		{
+			this.harvestDesignatable.MarkedForHarvest = false;
+		}
 	}
 
 	public bool HasChore()
@@ -123,7 +130,7 @@ public class Harvestable : Workable
 
 	public virtual void ForceCancelHarvest(object data = null)
 	{
-		this.OnCancel(null);
+		this.OnCancel(data);
 		base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().MiscStatusItems.PendingHarvest, false);
 		Game.Instance.userMenu.Refresh(base.gameObject);
 	}
@@ -139,6 +146,8 @@ public class Harvestable : Workable
 		base.OnStartWork(worker);
 		base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().MiscStatusItems.PendingHarvest, false);
 	}
+
+	public StatusItem readyForHarvestStatusItem = Db.Get().CreatureStatusItems.ReadyForHarvest;
 
 	public HarvestDesignatable harvestDesignatable;
 

@@ -68,7 +68,7 @@ public class BaseBeeHiveConfig : IEntityConfig
 			def2.harvestThreshold = 10f;
 			Diet diet = new Diet(new Diet.Info[]
 			{
-				new Diet.Info(new HashSet<Tag> { BeeHiveTuning.CONSUMED_ORE }, BeeHiveTuning.PRODUCED_ORE, BeeHiveTuning.CALORIES_PER_KG_OF_ORE, BeeHiveTuning.POOP_CONVERSTION_RATE, null, 0f, false, false)
+				new Diet.Info(new HashSet<Tag> { BeeHiveTuning.CONSUMED_ORE }, BeeHiveTuning.PRODUCED_ORE, BeeHiveTuning.CALORIES_PER_KG_OF_ORE, BeeHiveTuning.POOP_CONVERSTION_RATE, null, 0f, false, false, false)
 			});
 			gameObject.AddOrGetDef<BeehiveCalorieMonitor.Def>().diet = diet;
 			Trait trait = Db.Get().CreateTrait("BeeHiveBaseTrait", global::STRINGS.BUILDINGS.PREFABS.BEEHIVE.NAME, global::STRINGS.BUILDINGS.PREFABS.BEEHIVE.DESC, null, false, null, true, true);

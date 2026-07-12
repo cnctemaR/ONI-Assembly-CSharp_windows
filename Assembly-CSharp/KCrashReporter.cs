@@ -252,7 +252,7 @@ public class KCrashReporter : MonoBehaviour
 		return "";
 	}
 
-	public static void ReportDevNotification(string notification_name, string stack_trace, string details = "", bool includeSaveFile = false)
+	public static void ReportDevNotification(string notification_name, string stack_trace, string details = "", bool includeSaveFile = false, string[] extraCategories = null)
 	{
 		if (KCrashReporter.previouslyReportedDevNotifications == null)
 		{
@@ -265,7 +265,16 @@ public class KCrashReporter : MonoBehaviour
 		if (!KCrashReporter.previouslyReportedDevNotifications.Contains(hashValue))
 		{
 			KCrashReporter.previouslyReportedDevNotifications.Add(hashValue);
-			KCrashReporter.ReportError("DevNotification: " + notification_name, stack_trace, null, null, details, includeSaveFile, new string[] { KCrashReporter.CRASH_CATEGORY.DEVNOTIFICATION }, null);
+			if (extraCategories != null)
+			{
+				Array.Resize<string>(ref extraCategories, extraCategories.Length + 1);
+				extraCategories[extraCategories.Length - 1] = KCrashReporter.CRASH_CATEGORY.DEVNOTIFICATION;
+			}
+			else
+			{
+				extraCategories = new string[] { KCrashReporter.CRASH_CATEGORY.DEVNOTIFICATION };
+			}
+			KCrashReporter.ReportError("DevNotification: " + notification_name, stack_trace, null, null, details, includeSaveFile, extraCategories, null);
 		}
 		KCrashReporter.hasReportedError = hasReportedError;
 	}
@@ -379,7 +388,6 @@ public class KCrashReporter : MonoBehaviour
 		}
 		string text6 = JsonConvert.SerializeObject(error);
 		byte[] array4 = KCrashReporter.CreateArchiveZip(KCrashReporter.GetLogContents(), list2);
-		global::Debug.Log("Submitting crash...");
 		global::System.Action action = delegate
 		{
 			if (confirm_prefab != null && confirm_parent != null)
@@ -395,21 +403,29 @@ public class KCrashReporter : MonoBehaviour
 				((ConfirmDialogScreen)KScreenManager.Instance.StartScreen(confirm_prefab.gameObject, confirm_parent)).PopupConfirmDialog(text7, null, null, null, null, null, null, null, null);
 			}
 		};
-		Global.Instance.StartCoroutine(KCrashReporter.SubmitCrashAsync(text6, array4, action, action2));
+		KCrashReporter.pendingCrash = new KCrashReporter.PendingCrash
+		{
+			jsonString = text6,
+			archiveData = array4,
+			successCallback = action,
+			failureCallback = action2
+		};
 	}
 
 	private static IEnumerator SubmitCrashAsync(string jsonString, byte[] archiveData, global::System.Action successCallback, Action<long> failureCallback)
 	{
 		bool success = false;
 		Uri uri = new Uri("https://games-feedback.klei.com/submit");
-		WWWForm wwwform = new WWWForm();
-		wwwform.AddField("metadata", jsonString);
+		List<IMultipartFormSection> list = new List<IMultipartFormSection>
+		{
+			new MultipartFormDataSection("metadata", jsonString),
+			new MultipartFormFileSection("archiveFile", archiveData, "Archive.zip", "application/octet-stream")
+		};
 		if (KleiAccount.KleiToken != null)
 		{
-			wwwform.AddField("loginToken", KleiAccount.KleiToken);
+			list.Add(new MultipartFormDataSection("loginToken", KleiAccount.KleiToken));
 		}
-		wwwform.AddBinaryData("archiveFile", archiveData, "Archive.zip", "application/octet-stream");
-		using (UnityWebRequest w = UnityWebRequest.Post(uri, wwwform))
+		using (UnityWebRequest w = UnityWebRequest.Post(uri, list))
 		{
 			w.SendWebRequest();
 			while (!w.isDone)
@@ -453,12 +469,12 @@ public class KCrashReporter : MonoBehaviour
 		KCrashReporter.ReportError(msg, text, ScreenPrefabs.Instance.ConfirmDialogScreen, confirmParent, "", true, null, null);
 	}
 
-	public static void Assert(bool condition, string message)
+	public static void Assert(bool condition, string message, string[] extraCategories = null)
 	{
 		if (!condition && !KCrashReporter.hasReportedError)
 		{
 			StackTrace stackTrace = new StackTrace(1, true);
-			KCrashReporter.ReportError("ASSERT: " + message, stackTrace.ToString(), null, null, null, true, null, null);
+			KCrashReporter.ReportError("ASSERT: " + message, stackTrace.ToString(), null, null, null, true, extraCategories, null);
 		}
 	}
 
@@ -518,6 +534,17 @@ public class KCrashReporter : MonoBehaviour
 		return array2;
 	}
 
+	private void Update()
+	{
+		if (KCrashReporter.pendingCrash != null)
+		{
+			KCrashReporter.PendingCrash pendingCrash = KCrashReporter.pendingCrash;
+			KCrashReporter.pendingCrash = null;
+			global::Debug.Log("Submitting crash...");
+			base.StartCoroutine(KCrashReporter.SubmitCrashAsync(pendingCrash.jsonString, pendingCrash.archiveData, pendingCrash.successCallback, pendingCrash.failureCallback));
+		}
+	}
+
 	public static string MOST_RECENT_SAVEFILE = null;
 
 	public const string CRASH_REPORTER_SERVER = "https://games-feedback.klei.com";
@@ -559,6 +586,8 @@ public class KCrashReporter : MonoBehaviour
 
 	private static HashSet<int> previouslyReportedDevNotifications;
 
+	private static KCrashReporter.PendingCrash pendingCrash;
+
 	public class CRASH_CATEGORY
 	{
 		public static string DEVNOTIFICATION = "DevNotification";
@@ -578,6 +607,10 @@ public class KCrashReporter : MonoBehaviour
 		public static string SIM = "SimDll";
 
 		public static string FILEIO = "FileIO";
+
+		public static string MODSYSTEM = "ModSystem";
+
+		public static string WORLDGENFAILURE = "WorldgenFailure";
 	}
 
 	private class Error
@@ -585,15 +618,20 @@ public class KCrashReporter : MonoBehaviour
 		public Error()
 		{
 			this.userName = KCrashReporter.GetUserID();
+			this.platform = Util.GetOperatingSystem();
 			this.InitDefaultCategories();
 			this.InitSku();
 			this.InitSlackSummary();
 			if (DistributionPlatform.Inst.Initialized)
 			{
 				string text;
-				bool currentBetaName = SteamApps.GetCurrentBetaName(out text, 100);
+				bool flag = !SteamApps.GetCurrentBetaName(out text, 100);
 				this.branch = text;
-				if (currentBetaName || (text == "public_testing" && !global::UnityEngine.Debug.isDebugBuild))
+				if (text == "public_playtest")
+				{
+					this.branch = "public_testing";
+				}
+				if (flag || (text == "public_testing" && !global::UnityEngine.Debug.isDebugBuild))
 				{
 					this.branch = "default";
 				}
@@ -609,6 +647,13 @@ public class KCrashReporter : MonoBehaviour
 			if (DlcManager.IsExpansion1Active())
 			{
 				this.categories.Add(KCrashReporter.CRASH_CATEGORY.SPACEDOUT);
+			}
+			foreach (string text in DlcManager.GetActiveDLCIds())
+			{
+				if (!(text == "EXPANSION1_ID"))
+				{
+					this.categories.Add(text);
+				}
 			}
 			if (KCrashReporter.debugWasUsed)
 			{
@@ -635,7 +680,7 @@ public class KCrashReporter : MonoBehaviour
 			{
 				string text;
 				bool flag = !SteamApps.GetCurrentBetaName(out text, 100);
-				if (text == "public_testing" || text == "preview")
+				if (text == "public_testing" || text == "preview" || text == "public_playtest" || text == "playtest")
 				{
 					if (global::UnityEngine.Debug.isDebugBuild)
 					{
@@ -675,7 +720,7 @@ public class KCrashReporter : MonoBehaviour
 
 		public string userName;
 
-		public string platform = SystemInfo.operatingSystem;
+		public string platform;
 
 		public string version = LaunchInitializer.BuildPrefix();
 
@@ -683,7 +728,7 @@ public class KCrashReporter : MonoBehaviour
 
 		public string sku = "";
 
-		public int build = 600112;
+		public int build = 622222;
 
 		public string callstack = "";
 
@@ -714,5 +759,16 @@ public class KCrashReporter : MonoBehaviour
 		public bool isError = true;
 
 		public string emote = "";
+	}
+
+	public class PendingCrash
+	{
+		public string jsonString;
+
+		public byte[] archiveData;
+
+		public global::System.Action successCallback;
+
+		public Action<long> failureCallback;
 	}
 }

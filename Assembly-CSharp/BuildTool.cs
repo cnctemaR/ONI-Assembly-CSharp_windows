@@ -318,7 +318,8 @@ public class BuildTool : DragTool
 		}
 		else if (this.def.IsValidBuildLocation(this.visualizer, vector, this.buildingOrientation, false) && this.def.IsValidPlaceLocation(this.visualizer, vector, this.buildingOrientation, out text))
 		{
-			gameObject = this.def.Build(cell, this.buildingOrientation, null, this.selectedElements, 293.15f, this.facadeID, false, GameClock.Instance.GetTime());
+			float num = ElementLoader.GetMinMeltingPointAmongElements(this.selectedElements) - 10f;
+			gameObject = this.def.Build(cell, this.buildingOrientation, null, this.selectedElements, Mathf.Min(this.def.Temperature, num), this.facadeID, false, GameClock.Instance.GetTime());
 		}
 		if (gameObject == null && this.def.ReplacementLayer != ObjectLayer.NumLayers)
 		{
@@ -326,17 +327,25 @@ public class BuildTool : DragTool
 			if (replacementCandidate != null && !this.def.IsReplacementLayerOccupied(cell))
 			{
 				BuildingComplete component = replacementCandidate.GetComponent<BuildingComplete>();
-				if (component != null && component.Def.Replaceable && this.def.CanReplace(replacementCandidate) && (component.Def != this.def || this.selectedElements[0] != replacementCandidate.GetComponent<PrimaryElement>().Element.tag))
+				if (component != null && component.Def.Replaceable && this.def.CanReplace(replacementCandidate))
 				{
-					string text2;
-					if (!flag)
+					Tag tag = replacementCandidate.GetComponent<PrimaryElement>().Element.tag;
+					if (tag.GetHash() == 1542131326)
 					{
-						gameObject = this.def.TryReplaceTile(this.visualizer, vector, this.buildingOrientation, this.selectedElements, this.facadeID, 0);
-						Grid.Objects[cell, (int)this.def.ReplacementLayer] = gameObject;
+						tag = SimHashes.Snow.CreateTag();
 					}
-					else if (this.def.IsValidBuildLocation(this.visualizer, vector, this.buildingOrientation, true) && this.def.IsValidPlaceLocation(this.visualizer, vector, this.buildingOrientation, true, out text2))
+					if (component.Def != this.def || this.selectedElements[0] != tag)
 					{
-						gameObject = this.InstantBuildReplace(cell, vector, replacementCandidate);
+						string text2;
+						if (!flag)
+						{
+							gameObject = this.def.TryReplaceTile(this.visualizer, vector, this.buildingOrientation, this.selectedElements, this.facadeID, 0);
+							Grid.Objects[cell, (int)this.def.ReplacementLayer] = gameObject;
+						}
+						else if (this.def.IsValidBuildLocation(this.visualizer, vector, this.buildingOrientation, true) && this.def.IsValidPlaceLocation(this.visualizer, vector, this.buildingOrientation, true, out text2))
+						{
+							gameObject = this.InstantBuildReplace(cell, vector, replacementCandidate);
+						}
 					}
 				}
 			}
@@ -349,12 +358,14 @@ public class BuildTool : DragTool
 		if (tile.GetComponent<SimCellOccupier>() == null)
 		{
 			global::UnityEngine.Object.Destroy(tile);
-			return this.def.Build(cell, this.buildingOrientation, null, this.selectedElements, 293.15f, this.facadeID, false, GameClock.Instance.GetTime());
+			float num = ElementLoader.GetMinMeltingPointAmongElements(this.selectedElements) - 10f;
+			return this.def.Build(cell, this.buildingOrientation, null, this.selectedElements, Mathf.Min(this.def.Temperature, num), this.facadeID, false, GameClock.Instance.GetTime());
 		}
 		tile.GetComponent<SimCellOccupier>().DestroySelf(delegate
 		{
 			global::UnityEngine.Object.Destroy(tile);
-			GameObject gameObject = this.def.Build(cell, this.buildingOrientation, null, this.selectedElements, 293.15f, this.facadeID, false, GameClock.Instance.GetTime());
+			float num2 = ElementLoader.GetMinMeltingPointAmongElements(this.selectedElements) - 10f;
+			GameObject gameObject = this.def.Build(cell, this.buildingOrientation, null, this.selectedElements, Mathf.Min(this.def.Temperature, num2), this.facadeID, false, GameClock.Instance.GetTime());
 			this.PostProcessBuild(true, pos, gameObject);
 		});
 		return null;

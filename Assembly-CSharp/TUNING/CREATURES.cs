@@ -12,6 +12,8 @@ namespace TUNING
 
 		public const int DEFAULT_PROBING_RADIUS = 32;
 
+		public const float CREATURES_BASE_GENERATION_KILOWATTS = 10f;
+
 		public const float FERTILITY_TIME_BY_LIFESPAN = 0.6f;
 
 		public const float INCUBATION_TIME_BY_LIFESPAN = 0.2f;
@@ -60,6 +62,12 @@ namespace TUNING
 
 		public class TEMPERATURE
 		{
+			public const float SKIN_THICKNESS = 0.025f;
+
+			public const float SURFACE_AREA = 17.5f;
+
+			public const float GROUND_TRANSFER_SCALE = 0f;
+
 			public static float FREEZING_10 = 173f;
 
 			public static float FREEZING_9 = 183f;
@@ -83,6 +91,8 @@ namespace TUNING
 			public static float HOT_2 = 323f;
 
 			public static float HOT_3 = 333f;
+
+			public static float HOT_7 = 373f;
 		}
 
 		public class LIFESPAN
@@ -356,10 +366,11 @@ namespace TUNING
 					{
 						fertilityModFn = (<>9__2 = delegate(FertilityMonitor.Instance inst, Tag eggType)
 						{
-							TemperatureVulnerable component = inst.master.GetComponent<TemperatureVulnerable>();
-							if (component != null)
+							CritterTemperatureMonitor.Instance smi = inst.gameObject.GetSMI<CritterTemperatureMonitor.Instance>();
+							if (smi != null)
 							{
-								component.OnTemperature += delegate(float dt, float newTemp)
+								CritterTemperatureMonitor.Instance instance = smi;
+								instance.OnUpdate_GetTemperatureInternal = (Action<float, float>)Delegate.Combine(instance.OnUpdate_GetTemperatureInternal, new Action<float, float>(delegate(float dt, float newTemp)
 								{
 									if (newTemp > minTemp && newTemp < maxTemp)
 									{
@@ -370,7 +381,7 @@ namespace TUNING
 									{
 										inst.AddBreedingChance(eggType, dt * -modifierPerSecond);
 									}
-								};
+								}));
 								return;
 							}
 							DebugUtil.LogErrorArgs(new object[]
@@ -379,7 +390,7 @@ namespace TUNING
 								id,
 								"to",
 								inst.master.name,
-								"but it's not temperature vulnerable!"
+								"but it doesn't have a CritterTemperatureMonitor.Instance"
 							});
 						});
 					}
@@ -437,7 +448,10 @@ namespace TUNING
 				{ "Mole", 110 },
 				{ "Bee", 120 },
 				{ "Moo", 130 },
-				{ "Glom", 140 }
+				{ "Glom", 140 },
+				{ "WoodDeer", 140 },
+				{ "Seal", 150 },
+				{ "IceBelly", 160 }
 			};
 		}
 	}

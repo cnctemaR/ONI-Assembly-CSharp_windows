@@ -66,7 +66,7 @@ public class ClimbableTreeMonitor : GameStateMachine<ClimbableTreeMonitor, Climb
 					int num = Grid.PosToCell(kmonoBehaviour);
 					if (component.CanReach(num))
 					{
-						BuddingTrunk component2 = kmonoBehaviour.GetComponent<BuddingTrunk>();
+						ForestTreeSeedMonitor component2 = kmonoBehaviour.GetComponent<ForestTreeSeedMonitor>();
 						StorageLocker component3 = kmonoBehaviour.GetComponent<StorageLocker>();
 						if (component2 != null)
 						{

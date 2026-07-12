@@ -267,6 +267,22 @@ public class CookingStationConfig : IBuildingConfig
 				sortOrder = 20
 			};
 		}
+		ComplexRecipe.RecipeElement[] array27 = new ComplexRecipe.RecipeElement[]
+		{
+			new ComplexRecipe.RecipeElement("HardSkinBerry", 1f)
+		};
+		ComplexRecipe.RecipeElement[] array28 = new ComplexRecipe.RecipeElement[]
+		{
+			new ComplexRecipe.RecipeElement("CookedPikeapple", 1f, ComplexRecipe.RecipeElement.TemperatureOperation.Heated, false)
+		};
+		CookedPikeappleConfig.recipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("CookingStation", array27, array28), array27, array28)
+		{
+			time = FOOD.RECIPES.STANDARD_COOK_TIME,
+			description = ITEMS.FOOD.COOKEDPIKEAPPLE.RECIPEDESC,
+			nameDisplay = ComplexRecipe.RecipeNameDisplay.Result,
+			fabricators = new List<Tag> { "CookingStation" },
+			sortOrder = 18
+		};
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)

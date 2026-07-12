@@ -18,6 +18,13 @@ public class WattsonMessage : KScreen
 	{
 		base.OnPrefabInit();
 		Game.Instance.Subscribe(-122303817, new Action<object>(this.OnNewBaseCreated));
+		string welcomeMessage = CustomGameSettings.Instance.GetCurrentClusterLayout().welcomeMessage;
+		if (welcomeMessage != null)
+		{
+			StringEntry stringEntry;
+			this.message.SetText(Strings.TryGet(welcomeMessage, out stringEntry) ? stringEntry.String : welcomeMessage);
+			return;
+		}
 		if (DlcManager.IsExpansion1Active())
 		{
 			this.message.SetText(UI.WELCOMEMESSAGEBODY_SPACEDOUT);
@@ -30,7 +37,6 @@ public class WattsonMessage : KScreen
 	{
 		if (CustomGameSettings.Instance.GetSettingsCoordinate().StartsWith("KF23"))
 		{
-			this.message.SetText(UI.WELCOMEMESSAGEBODY_KF23);
 			this.dialog.rectTransform().rotation = Quaternion.Euler(0f, 0f, -90f);
 		}
 		yield return SequenceUtil.WaitForSecondsRealtime(0.2f);
@@ -178,8 +184,21 @@ public class WattsonMessage : KScreen
 			CameraController.Instance.OrthographicSize = TuningData<WattsonMessage.Tuning>.Get().initialOrthographicSize;
 			CameraController.Instance.CameraGoHome(0.5f);
 			this.startFade = true;
-			MusicManager.instance.PlaySong("Music_WattsonMessage", false);
+			MusicManager.instance.PlaySong(this.WelcomeMusic, false);
 		}, null, null));
+	}
+
+	private string WelcomeMusic
+	{
+		get
+		{
+			string musicWelcome = CustomGameSettings.Instance.GetCurrentClusterLayout().clusterAudio.musicWelcome;
+			if (!musicWelcome.IsNullOrWhiteSpace())
+			{
+				return musicWelcome;
+			}
+			return "Music_WattsonMessage";
+		}
 	}
 
 	protected void PauseAndShowMessage()
@@ -197,8 +216,8 @@ public class WattsonMessage : KScreen
 		base.OnDeactivate();
 		AudioMixer.instance.Stop(AudioMixerSnapshots.Get().IntroNIS, FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
 		AudioMixer.instance.StartPersistentSnapshots();
-		MusicManager.instance.StopSong("Music_WattsonMessage", true, FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
-		MusicManager.instance.PlayDynamicMusic();
+		MusicManager.instance.StopSong(this.WelcomeMusic, true, FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
+		MusicManager.instance.WattsonStartDynamicMusic();
 		AudioMixer.instance.activeNIS = false;
 		DemoTimer.Instance.CountdownActive = true;
 		SpeedControlScreen.Instance.Unpause(false);

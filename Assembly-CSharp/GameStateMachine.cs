@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using FoodRehydrator;
 using Klei.AI;
 using UnityEngine;
 
@@ -579,27 +578,21 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 			return this;
 		}
 
-		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State ToggleAnims(string anim_file, float priority = 0f, string RequiredDlc = "")
+		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State ToggleAnims(string anim_file, float priority = 0f)
 		{
 			StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.TargetParameter state_target = this.GetStateTarget();
 			this.Toggle("ToggleAnims(" + anim_file + ")", delegate(StateMachineInstanceType smi)
 			{
-				if (DlcManager.IsContentActive(RequiredDlc))
+				KAnimFile anim = Assets.GetAnim(anim_file);
+				if (anim == null)
 				{
-					KAnimFile anim = Assets.GetAnim(anim_file);
-					if (anim == null)
-					{
-						global::Debug.LogError("Trying to add missing override anims:" + anim_file);
-					}
-					state_target.Get<KAnimControllerBase>(smi).AddAnimOverrides(anim, priority);
+					global::Debug.LogError("Trying to add missing override anims:" + anim_file);
 				}
+				state_target.Get<KAnimControllerBase>(smi).AddAnimOverrides(anim, priority);
 			}, delegate(StateMachineInstanceType smi)
 			{
-				if (DlcManager.IsContentActive(RequiredDlc))
-				{
-					KAnimFile anim2 = Assets.GetAnim(anim_file);
-					state_target.Get<KAnimControllerBase>(smi).RemoveAnimOverrides(anim2);
-				}
+				KAnimFile anim2 = Assets.GetAnim(anim_file);
+				state_target.Get<KAnimControllerBase>(smi).RemoveAnimOverrides(anim2);
 			});
 			return this;
 		}
@@ -862,6 +855,59 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 			this.Exit("RemoveThought(" + thought.Id + ")", delegate(StateMachineInstanceType smi)
 			{
 				state_target.Get(smi).GetSMI<ThoughtGraph.Instance>().RemoveThought(thought);
+			});
+			return this;
+		}
+
+		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State ToggleCreatureThought(Func<StateMachineInstanceType, Thought> chooser_callback)
+		{
+			StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.TargetParameter state_target = this.GetStateTarget();
+			this.Enter("EnableCreatureThought()", delegate(StateMachineInstanceType smi)
+			{
+				Thought thought = chooser_callback(smi);
+				state_target.Get(smi).GetSMI<CreatureThoughtGraph.Instance>().AddThought(thought);
+			});
+			this.Exit("DisableCreatureThought()", delegate(StateMachineInstanceType smi)
+			{
+				Thought thought2 = chooser_callback(smi);
+				CreatureThoughtGraph.Instance smi2 = state_target.Get(smi).GetSMI<CreatureThoughtGraph.Instance>();
+				if (smi2 != null)
+				{
+					smi2.RemoveThought(thought2);
+				}
+			});
+			return this;
+		}
+
+		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State ToggleCreatureThought(Thought thought, Func<StateMachineInstanceType, bool> condition_callback = null)
+		{
+			StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.TargetParameter state_target = this.GetStateTarget();
+			this.Enter("AddCreatureThought(" + thought.Id + ")", delegate(StateMachineInstanceType smi)
+			{
+				if (condition_callback == null || condition_callback(smi))
+				{
+					state_target.Get(smi).GetSMI<CreatureThoughtGraph.Instance>().AddThought(thought);
+				}
+			});
+			if (condition_callback != null)
+			{
+				this.Update("ValidateCreatureThought(" + thought.Id + ")", delegate(StateMachineInstanceType smi, float dt)
+				{
+					if (condition_callback(smi))
+					{
+						state_target.Get(smi).GetSMI<CreatureThoughtGraph.Instance>().AddThought(thought);
+						return;
+					}
+					state_target.Get(smi).GetSMI<CreatureThoughtGraph.Instance>().RemoveThought(thought);
+				}, UpdateRate.SIM_200ms, false);
+			}
+			this.Exit("RemoveCreatureThought(" + thought.Id + ")", delegate(StateMachineInstanceType smi)
+			{
+				CreatureThoughtGraph.Instance smi2 = state_target.Get(smi).GetSMI<CreatureThoughtGraph.Instance>();
+				if (smi2 != null)
+				{
+					smi2.RemoveThought(thought);
+				}
 			});
 			return this;
 		}
@@ -1674,14 +1720,6 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 				}
 				actual_amount.Set(num3, smi, false);
 				int num4 = pickupable.Reserve("ToggleReserve", gameObject, num3);
-				if (pickupable.storage != null && pickupable.storage.GetComponent<DehydratedFoodPackage>() != null)
-				{
-					AccessabilityManager component = pickupable.storage.GetComponent<Pickupable>().storage.GetComponent<AccessabilityManager>();
-					if (component != null)
-					{
-						component.Reserve(gameObject);
-					}
-				}
 				smi.dataTable[data_idx] = num4;
 			});
 			this.Exit(string.Concat(new string[] { "Unreserve(", pickup_target.name, ", ", requested_amount.name, ")" }), delegate(StateMachineInstanceType smi)
@@ -1904,14 +1942,15 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 
 		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State ScheduleGoTo(float time, StateMachine.BaseState state)
 		{
-			this.Enter(string.Concat(new string[]
-			{
-				"ScheduleGoTo(",
-				time.ToString(),
-				", ",
-				state.name,
-				")"
-			}), delegate(StateMachineInstanceType smi)
+			string[] array = new string[5];
+			array[0] = "ScheduleGoTo(";
+			array[1] = time.ToString();
+			array[2] = ", ";
+			int num = 3;
+			StateMachine.BaseState state2 = state;
+			array[num] = ((state2 != null) ? state2.name : null);
+			array[4] = ")";
+			this.Enter(string.Concat(array), delegate(StateMachineInstanceType smi)
 			{
 				smi.ScheduleGoTo(time, state);
 			});

@@ -39,7 +39,7 @@ public class KBatchedAnimTracker : MonoBehaviour
 
 	private Vector4 MyAnimGetPosition()
 	{
-		if (this.controller.transform == this.myAnim.transform.parent)
+		if (this.myAnim != null && this.controller != null && this.controller.transform == this.myAnim.transform.parent)
 		{
 			Vector3 pivotSymbolPosition = this.myAnim.GetPivotSymbolPosition();
 			return new Vector4(pivotSymbolPosition.x - this.controller.Offset.x, pivotSymbolPosition.y - this.controller.Offset.y, pivotSymbolPosition.x, pivotSymbolPosition.y);

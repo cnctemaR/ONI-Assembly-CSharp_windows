@@ -260,16 +260,16 @@ public class NameDisplayScreen : KScreen
 			global::Debug.LogWarningFormat("CoolantBar added twice {0}", new object[] { component });
 			return;
 		}
-		else if (component is ThoughtGraph.Instance)
+		else if (component is ThoughtGraph.Instance || component is CreatureThoughtGraph.Instance)
 		{
 			if (!entry.thoughtBubble)
 			{
 				GameObject gameObject6 = Util.KInstantiateUI(EffectPrefabs.Instance.ThoughtBubble, entry.display_go, false);
 				entry.thoughtBubble = gameObject6.GetComponent<HierarchyReferences>();
-				gameObject6.name = "Thought Bubble";
+				gameObject6.name = ((component is CreatureThoughtGraph.Instance) ? "Creature " : "") + "Thought Bubble";
 				GameObject gameObject7 = Util.KInstantiateUI(EffectPrefabs.Instance.ThoughtBubbleConvo, entry.display_go, false);
 				entry.thoughtBubbleConvo = gameObject7.GetComponent<HierarchyReferences>();
-				gameObject7.name = "Thought Bubble Convo";
+				gameObject7.name = ((component is CreatureThoughtGraph.Instance) ? "Creature " : "") + "Thought Bubble Convo";
 				return;
 			}
 			global::Debug.LogWarningFormat("ThoughtGraph added twice {0}", new object[] { component });

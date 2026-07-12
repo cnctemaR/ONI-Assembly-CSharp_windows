@@ -413,14 +413,15 @@ public class BaseUtilityBuildTool : DragTool
 				string text;
 				if ((DebugHandler.InstantBuildMode || (Game.Instance.SandboxModeActive && SandboxToolParameterMenu.instance.settings.InstantBuild)) && this.def.IsValidBuildLocation(this.visualizer, vector, Orientation.Neutral, false) && this.def.IsValidPlaceLocation(this.visualizer, vector, Orientation.Neutral, out text))
 				{
+					float num2 = ElementLoader.GetMinMeltingPointAmongElements(this.selectedElements) - 10f;
 					BuildingDef buildingDef = this.def;
 					int cell = pathNode.cell;
 					Orientation orientation = Orientation.Neutral;
 					Storage storage = null;
 					IList<Tag> list = this.selectedElements;
-					float num2 = 293.15f;
+					float num3 = Mathf.Min(this.def.Temperature, num2);
 					float time = GameClock.Instance.GetTime();
-					gameObject = buildingDef.Build(cell, orientation, storage, list, num2, this.facadeID, true, time);
+					gameObject = buildingDef.Build(cell, orientation, storage, list, num3, this.facadeID, true, time);
 				}
 				else
 				{

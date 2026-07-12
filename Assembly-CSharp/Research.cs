@@ -131,10 +131,7 @@ public class Research : KMonoBehaviour, ISaveLoadable
 		{
 			return;
 		}
-		if (CS$<>8__locals1.ti == this.queuedTech[this.queuedTech.Count - 1] && clickedEntry)
-		{
-			this.SetActiveResearch(null, false);
-		}
+		this.SetActiveResearch(null, false);
 		int i;
 		int j;
 		for (i = CS$<>8__locals1.ti.tech.unlockedTech.Count - 1; i >= 0; i = j - 1)

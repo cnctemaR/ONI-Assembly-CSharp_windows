@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using FMOD.Studio;
 using Klei;
+using ProcGenGame;
 using Steamworks;
 using STRINGS;
 using UnityEngine;
@@ -68,6 +69,7 @@ public class MainMenu : KScreen
 		{
 			this.expansion1Ad.gameObject.SetActive(!flag);
 		}
+		this.RefreshDLCLogos();
 		this.motd.Setup();
 		if (DistributionPlatform.Initialized && DistributionPlatform.Inst.IsPreviousVersionBranch)
 		{
@@ -107,6 +109,53 @@ public class MainMenu : KScreen
 			this.expansion1Ad.GetComponent<HierarchyReferences>().GetReference<Image>("Image").sprite = sprite;
 		}
 		this.activateOnSpawn = true;
+	}
+
+	private void RefreshDLCLogos()
+	{
+		List<string> activeDLCIds = DlcManager.GetActiveDLCIds();
+		this.logoDLC1.material = (activeDLCIds.Contains("EXPANSION1_ID") ? GlobalResources.Instance().AnimUIMaterial : GlobalResources.Instance().AnimMaterialUIDesaturated);
+		this.logoDLC2.material = (activeDLCIds.Contains("DLC2_ID") ? GlobalResources.Instance().AnimUIMaterial : GlobalResources.Instance().AnimMaterialUIDesaturated);
+		if (DistributionPlatform.Initialized)
+		{
+			string DLC1_URL = "";
+			string DLC2_URL = "";
+			string name = DistributionPlatform.Inst.Name;
+			if (name != null)
+			{
+				if (!(name == "Steam"))
+				{
+					if (!(name == "Epic"))
+					{
+						if (name == "Rail")
+						{
+							DLC1_URL = "https://www.wegame.com.cn/store/2001539/";
+							DLC2_URL = "";
+						}
+					}
+					else
+					{
+						DLC1_URL = "https://store.epicgames.com/en-US/p/oxygen-not-included--spaced-out";
+						DLC2_URL = "";
+					}
+				}
+				else
+				{
+					DLC1_URL = "https://store.steampowered.com/app/1452490/Oxygen_Not_Included__Spaced_Out/";
+					DLC2_URL = "https://store.steampowered.com/app/2952300/Oxygen_Not_Included_The_Frosty_Planet_Pack/";
+				}
+			}
+			MultiToggle component = this.logoDLC1.GetComponent<MultiToggle>();
+			component.onClick = (global::System.Action)Delegate.Combine(component.onClick, new global::System.Action(delegate
+			{
+				App.OpenWebURL(DLC1_URL);
+			}));
+			MultiToggle component2 = this.logoDLC2.GetComponent<MultiToggle>();
+			component2.onClick = (global::System.Action)Delegate.Combine(component2.onClick, new global::System.Action(delegate
+			{
+				App.OpenWebURL(DLC2_URL);
+			}));
+		}
 	}
 
 	private void OnApplicationFocus(bool focus)
@@ -331,6 +380,7 @@ public class MainMenu : KScreen
 
 	private void NewGame()
 	{
+		WorldGen.WaitForPendingLoadSettings();
 		base.GetComponent<NewGameFlow>().BeginFlow();
 	}
 
@@ -426,11 +476,13 @@ public class MainMenu : KScreen
 					header = saveFileEntry.header;
 					gameInfo = saveFileEntry.headerData;
 				}
-				if (header.buildVersion > 600112U || gameInfo.saveMajorVersion != 7 || gameInfo.saveMinorVersion > 33)
+				if (header.buildVersion > 622222U || gameInfo.saveMajorVersion != 7 || gameInfo.saveMinorVersion > 34)
 				{
 					flag = false;
 				}
-				if (!DlcManager.IsContentActive(gameInfo.dlcId))
+				HashSet<string> hashSet;
+				HashSet<string> hashSet2;
+				if (!gameInfo.IsCompatableWithCurrentDlcConfiguration(out hashSet, out hashSet2))
 				{
 					flag = false;
 				}
@@ -485,6 +537,7 @@ public class MainMenu : KScreen
 	{
 		AudioMixer.instance.Reset();
 		MusicManager.instance.KillAllSongs(STOP_MODE.ALLOWFADEOUT);
+		MusicManager.instance.ConfigureSongs();
 		AudioMixer.instance.Start(AudioMixerSnapshots.Get().FrontEndSnapshot);
 		if (!AudioMixer.instance.SnapshotIsActive(AudioMixerSnapshots.Get().UserVolumeSettingsSnapshot))
 		{
@@ -651,6 +704,12 @@ public class MainMenu : KScreen
 
 	[SerializeField]
 	public string IntroShortName;
+
+	[SerializeField]
+	private Image logoDLC1;
+
+	[SerializeField]
+	private Image logoDLC2;
 
 	private KButton lockerButton;
 

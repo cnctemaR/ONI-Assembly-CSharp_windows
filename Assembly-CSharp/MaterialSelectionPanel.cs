@@ -257,7 +257,7 @@ public class MaterialSelectionPanel : KScreen, IRender200ms
 		this.materialSelectors[0].OnSelectMaterial(tag, this.activeRecipe, false);
 	}
 
-	public static MaterialSelectionPanel.SelectedElemInfo Filter(Tag materialCategoryTag)
+	public static MaterialSelectionPanel.SelectedElemInfo Filter(Tag _materialCategoryTag)
 	{
 		MaterialSelectionPanel.SelectedElemInfo selectedElemInfo = default(MaterialSelectionPanel.SelectedElemInfo);
 		selectedElemInfo.element = null;
@@ -266,40 +266,45 @@ public class MaterialSelectionPanel : KScreen, IRender200ms
 		{
 			return selectedElemInfo;
 		}
-		List<Tag> list = null;
-		if (!MaterialSelectionPanel.elementsWithTag.TryGetValue(materialCategoryTag, out list))
+		string[] array = _materialCategoryTag.ToString().Split(new char[] { '&' });
+		for (int i = 0; i < array.Length; i++)
 		{
-			list = new List<Tag>();
-			foreach (Element element in ElementLoader.elements)
+			Tag tag = array[i];
+			List<Tag> list = null;
+			if (!MaterialSelectionPanel.elementsWithTag.TryGetValue(tag, out list))
 			{
-				if (element.tag == materialCategoryTag || element.HasTag(materialCategoryTag))
+				list = new List<Tag>();
+				foreach (Element element in ElementLoader.elements)
 				{
-					list.Add(element.tag);
-				}
-			}
-			foreach (Tag tag in GameTags.MaterialBuildingElements)
-			{
-				if (tag == materialCategoryTag)
-				{
-					foreach (GameObject gameObject in Assets.GetPrefabsWithTag(tag))
+					if (element.tag == tag || element.HasTag(tag))
 					{
-						KPrefabID component = gameObject.GetComponent<KPrefabID>();
-						if (component != null && !list.Contains(component.PrefabTag))
+						list.Add(element.tag);
+					}
+				}
+				foreach (Tag tag2 in GameTags.MaterialBuildingElements)
+				{
+					if (tag2 == tag)
+					{
+						foreach (GameObject gameObject in Assets.GetPrefabsWithTag(tag2))
 						{
-							list.Add(component.PrefabTag);
+							KPrefabID component = gameObject.GetComponent<KPrefabID>();
+							if (component != null && !list.Contains(component.PrefabTag))
+							{
+								list.Add(component.PrefabTag);
+							}
 						}
 					}
 				}
+				MaterialSelectionPanel.elementsWithTag[tag] = list;
 			}
-			MaterialSelectionPanel.elementsWithTag[materialCategoryTag] = list;
-		}
-		foreach (Tag tag2 in list)
-		{
-			float amount = ClusterManager.Instance.activeWorld.worldInventory.GetAmount(tag2, true);
-			if (amount > selectedElemInfo.kgAvailable)
+			foreach (Tag tag3 in list)
 			{
-				selectedElemInfo.kgAvailable = amount;
-				selectedElemInfo.element = tag2;
+				float amount = ClusterManager.Instance.activeWorld.worldInventory.GetAmount(tag3, true);
+				if (amount > selectedElemInfo.kgAvailable)
+				{
+					selectedElemInfo.kgAvailable = amount;
+					selectedElemInfo.element = tag3;
+				}
 			}
 		}
 		return selectedElemInfo;

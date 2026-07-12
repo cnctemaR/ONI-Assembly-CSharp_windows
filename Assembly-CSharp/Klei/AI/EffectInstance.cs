@@ -13,6 +13,8 @@ namespace Klei.AI
 		{
 			this.effect = effect;
 			this.shouldSave = should_save;
+			this.DefineEffectImmunities();
+			this.ApplyImmunities();
 			this.ConfigureStatusItem();
 			if (effect.showInUI)
 			{
@@ -33,6 +35,43 @@ namespace Klei.AI
 			if (!string.IsNullOrEmpty(effect.emoteAnim))
 			{
 				this.RegisterEmote(effect.emoteAnim, effect.emoteCooldown);
+			}
+		}
+
+		protected void DefineEffectImmunities()
+		{
+			if (this.immunityEffects == null && this.effect.immunityEffectsNames != null)
+			{
+				this.immunityEffects = new Effect[this.effect.immunityEffectsNames.Length];
+				for (int i = 0; i < this.immunityEffects.Length; i++)
+				{
+					this.immunityEffects[i] = Db.Get().effects.Get(this.effect.immunityEffectsNames[i]);
+				}
+			}
+		}
+
+		protected void ApplyImmunities()
+		{
+			if (base.gameObject != null && this.immunityEffects != null)
+			{
+				Effects component = base.gameObject.GetComponent<Effects>();
+				for (int i = 0; i < this.immunityEffects.Length; i++)
+				{
+					component.Remove(this.immunityEffects[i]);
+					component.AddImmunity(this.immunityEffects[i], this.effect.IdHash.ToString(), false);
+				}
+			}
+		}
+
+		protected void RemoveImmunities()
+		{
+			if (base.gameObject != null && this.immunityEffects != null)
+			{
+				Effects component = base.gameObject.GetComponent<Effects>();
+				for (int i = 0; i < this.immunityEffects.Length; i++)
+				{
+					component.RemoveImmunity(this.immunityEffects[i], this.effect.IdHash.ToString());
+				}
 			}
 		}
 
@@ -95,6 +134,7 @@ namespace Klei.AI
 				this.reactable.Cleanup();
 				this.reactable = null;
 			}
+			this.RemoveImmunities();
 		}
 
 		public float GetTimeRemaining()
@@ -114,7 +154,15 @@ namespace Klei.AI
 			{
 				iconType = StatusItem.IconType.Custom;
 			}
-			this.statusItem = new StatusItem(this.effect.Id, this.effect.Name, this.effect.description, this.effect.customIcon, iconType, this.effect.isBad ? NotificationType.Bad : NotificationType.Neutral, false, OverlayModes.None.ID, 2, false, null);
+			string id = this.effect.Id;
+			string name = this.effect.Name;
+			string description = this.effect.description;
+			string customIcon = this.effect.customIcon;
+			StatusItem.IconType iconType2 = iconType;
+			NotificationType notificationType = (this.effect.isBad ? NotificationType.Bad : NotificationType.Neutral);
+			bool flag = false;
+			bool showStatusInWorld = this.effect.showStatusInWorld;
+			this.statusItem = new StatusItem(id, name, description, customIcon, iconType2, notificationType, flag, OverlayModes.None.ID, 2, showStatusInWorld, null);
 			this.statusItem.resolveStringCallback = new Func<string, object, string>(this.ResolveString);
 			this.statusItem.resolveTooltipCallback = new Func<string, object, string>(this.ResolveTooltip);
 		}
@@ -149,5 +197,7 @@ namespace Klei.AI
 		public float timeRemaining;
 
 		public EmoteReactable reactable;
+
+		protected Effect[] immunityEffects;
 	}
 }

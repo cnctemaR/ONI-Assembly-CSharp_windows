@@ -11,13 +11,7 @@ public class Polymerizer : StateMachineComponent<Polymerizer.StatesInstance>
 		this.plasticMeter = new MeterController(component, "meter_target", "meter", Meter.Offset.Infront, Grid.SceneLayer.NoLayer, new Vector3(0f, 0f, 0f), null);
 		this.oilMeter = new MeterController(component, "meter2_target", "meter2", Meter.Offset.Infront, Grid.SceneLayer.NoLayer, new Vector3(0f, 0f, 0f), null);
 		component.SetSymbolVisiblity("meter_target", true);
-		float num = 0f;
-		PrimaryElement primaryElement = this.storage.FindPrimaryElement(SimHashes.Petroleum);
-		if (primaryElement != null)
-		{
-			num = Mathf.Clamp01(primaryElement.Mass / this.consumer.capacityKG);
-		}
-		this.oilMeter.SetPositionPercent(num);
+		this.UpdateOilMeter();
 		base.smi.StartSM();
 		base.Subscribe<Polymerizer>(-1697596308, Polymerizer.OnStorageChangedDelegate);
 	}
@@ -70,12 +64,25 @@ public class Polymerizer : StateMachineComponent<Polymerizer.StatesInstance>
 		{
 			return;
 		}
-		PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
-		if (component.ElementID == SimHashes.Petroleum)
+		if (gameObject.HasTag(PolymerizerConfig.INPUT_ELEMENT_TAG))
 		{
-			float num = Mathf.Clamp01(component.Mass / this.consumer.capacityKG);
-			this.oilMeter.SetPositionPercent(num);
+			this.UpdateOilMeter();
 		}
+	}
+
+	private void UpdateOilMeter()
+	{
+		float num = 0f;
+		foreach (GameObject gameObject in this.storage.items)
+		{
+			if (gameObject.HasTag(PolymerizerConfig.INPUT_ELEMENT_TAG))
+			{
+				PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
+				num += component.Mass;
+			}
+		}
+		float num2 = Mathf.Clamp01(num / this.consumer.capacityKG);
+		this.oilMeter.SetPositionPercent(num2);
 	}
 
 	[SerializeField]

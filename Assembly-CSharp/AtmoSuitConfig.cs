@@ -20,6 +20,7 @@ public class AtmoSuitConfig : IEquipmentConfig
 		list.Add(new AttributeModifier(global::TUNING.EQUIPMENT.ATTRIBUTE_MOD_IDS.THERMAL_CONDUCTIVITY_BARRIER, global::TUNING.EQUIPMENT.SUITS.ATMOSUIT_THERMAL_CONDUCTIVITY_BARRIER, global::STRINGS.EQUIPMENT.PREFABS.ATMO_SUIT.NAME, false, false, true));
 		list.Add(new AttributeModifier(Db.Get().Attributes.Digging.Id, (float)global::TUNING.EQUIPMENT.SUITS.ATMOSUIT_DIGGING, global::STRINGS.EQUIPMENT.PREFABS.ATMO_SUIT.NAME, false, false, true));
 		list.Add(new AttributeModifier(Db.Get().Attributes.ScaldingThreshold.Id, (float)global::TUNING.EQUIPMENT.SUITS.ATMOSUIT_SCALDING, global::STRINGS.EQUIPMENT.PREFABS.ATMO_SUIT.NAME, false, false, true));
+		list.Add(new AttributeModifier(Db.Get().Attributes.ScoldingThreshold.Id, (float)global::TUNING.EQUIPMENT.SUITS.ATMOSUIT_SCOLDING, global::STRINGS.EQUIPMENT.PREFABS.ATMO_SUIT.NAME, false, false, true));
 		this.expertAthleticsModifier = new AttributeModifier(global::TUNING.EQUIPMENT.ATTRIBUTE_MOD_IDS.ATHLETICS, (float)(-(float)global::TUNING.EQUIPMENT.SUITS.ATMOSUIT_ATHLETICS), Db.Get().Skills.Suits1.Name, false, false, true);
 		EquipmentDef equipmentDef = EquipmentTemplates.CreateEquipmentDef("Atmo_Suit", global::TUNING.EQUIPMENT.SUITS.SLOT, SimHashes.Dirt, (float)global::TUNING.EQUIPMENT.SUITS.ATMOSUIT_MASS, "suit_oxygen_kanim", "", "body_oxygen_kanim", 6, list, null, true, EntityTemplates.CollisionShape.CIRCLE, 0.325f, 0.325f, new Tag[]
 		{
@@ -33,6 +34,8 @@ public class AtmoSuitConfig : IEquipmentConfig
 		equipmentDef.EffectImmunites.Add(Db.Get().effects.Get("SoakingWet"));
 		equipmentDef.EffectImmunites.Add(Db.Get().effects.Get("WetFeet"));
 		equipmentDef.EffectImmunites.Add(Db.Get().effects.Get("PoppedEarDrums"));
+		equipmentDef.EffectImmunites.Add(Db.Get().effects.Get("ColdAir"));
+		equipmentDef.EffectImmunites.Add(Db.Get().effects.Get("WarmAir"));
 		equipmentDef.OnEquipCallBack = delegate(Equippable eq)
 		{
 			Ownables soleOwner = eq.assignee.GetSoleOwner();
@@ -72,9 +75,14 @@ public class AtmoSuitConfig : IEquipmentConfig
 							component3.ClearFlags(PathFinder.PotentialPath.Flags.HasAtmoSuit);
 						}
 						Effects component4 = targetGameObject2.GetComponent<Effects>();
-						if (component4 != null && component4.HasEffect("SoiledSuit"))
+						if (component4 != null)
 						{
-							component4.Remove("SoiledSuit");
+							component4.RemoveImmunity(Db.Get().effects.Get("ColdAir"), "Atmo_Suit");
+							component4.RemoveImmunity(Db.Get().effects.Get("WarmAir"), "Atmo_Suit");
+							if (component4.HasEffect("SoiledSuit"))
+							{
+								component4.Remove("SoiledSuit");
+							}
 						}
 					}
 					Tag elementTag = eq.GetComponent<SuitTank>().elementTag;

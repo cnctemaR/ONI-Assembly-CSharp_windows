@@ -53,7 +53,7 @@ public static class CodexCache
 		text = CodexCache.FormatLinkID("disease");
 		dictionary.Add(text, CodexEntryGenerator.GenerateCategoryEntry(text, UI.CODEX.CATEGORYNAMES.DISEASE, CodexEntryGenerator.GenerateDiseaseEntries(), Assets.GetSprite("codexIconDisease"), false, true, null));
 		text = CodexCache.FormatLinkID("elements");
-		dictionary.Add(text, CodexEntryGenerator.GenerateCategoryEntry(text, UI.CODEX.CATEGORYNAMES.ELEMENTS, CodexEntryGenerator.GenerateElementEntries(), Assets.GetSprite("codexIconElements"), true, false, null));
+		dictionary.Add(text, CodexEntryGenerator.GenerateCategoryEntry(text, UI.CODEX.CATEGORYNAMES.ELEMENTS, CodexEntryGenerator_Elements.GenerateEntries(), Assets.GetSprite("codexIconElements"), true, false, null));
 		text = CodexCache.FormatLinkID("BUILDINGMATERIALCLASSES");
 		dictionary.Add(text, CodexEntryGenerator.GenerateCategoryEntry(text, UI.CODEX.CATEGORYNAMES.BUILDINGMATERIALCLASSES, CodexEntryGenerator.GenerateConstructionMaterialEntries(), Assets.GetSprite("ui_elements_classes"), true, false, null));
 		text = CodexCache.FormatLinkID("geysers");
@@ -79,6 +79,23 @@ public static class CodexCache
 		list.Add(categoryEntry);
 		foreach (KeyValuePair<string, CodexEntry> keyValuePair2 in CodexCache.entries)
 		{
+			if (keyValuePair2.Value.contentMadeAndUsed.Count > 0)
+			{
+				foreach (CodexEntry_MadeAndUsed codexEntry_MadeAndUsed in keyValuePair2.Value.contentMadeAndUsed)
+				{
+					List<ContentContainer> list2 = new List<ContentContainer>();
+					Element element = ElementLoader.GetElement(codexEntry_MadeAndUsed.tag);
+					if (element != null)
+					{
+						CodexEntryGenerator_Elements.GenerateElementDescriptionContainers(element, list2);
+					}
+					else
+					{
+						CodexEntryGenerator_Elements.GenerateMadeAndUsedContainers(codexEntry_MadeAndUsed.tag, list2);
+					}
+					keyValuePair2.Value.contentContainers.InsertRange(keyValuePair2.Value.contentContainers.Count, list2);
+				}
+			}
 			if (keyValuePair2.Value.subEntries.Count > 0)
 			{
 				keyValuePair2.Value.subEntries.Sort((SubEntry a, SubEntry b) => a.layoutPriority.CompareTo(b.layoutPriority));
@@ -97,24 +114,24 @@ public static class CodexCache
 				}
 				if (keyValuePair2.Value.subEntries.Count > 1)
 				{
-					List<ICodexWidget> list2 = new List<ICodexWidget>();
-					list2.Add(new CodexSpacer());
-					list2.Add(new CodexText(string.Format(CODEX.HEADERS.SUBENTRIES, keyValuePair2.Value.subEntries.Count - num, keyValuePair2.Value.subEntries.Count), CodexTextStyle.Subtitle, null));
+					List<ICodexWidget> list3 = new List<ICodexWidget>();
+					list3.Add(new CodexSpacer());
+					list3.Add(new CodexText(string.Format(CODEX.HEADERS.SUBENTRIES, keyValuePair2.Value.subEntries.Count - num, keyValuePair2.Value.subEntries.Count), CodexTextStyle.Subtitle, null));
 					foreach (SubEntry subEntry2 in keyValuePair2.Value.subEntries)
 					{
 						if (subEntry2.lockID != null && !Game.Instance.unlocks.IsUnlocked(subEntry2.lockID))
 						{
-							list2.Add(new CodexText(UI.FormatAsLink(CODEX.HEADERS.CONTENTLOCKED, UI.ExtractLinkID(subEntry2.name)), CodexTextStyle.Body, null));
+							list3.Add(new CodexText(UI.FormatAsLink(CODEX.HEADERS.CONTENTLOCKED, UI.ExtractLinkID(subEntry2.name)), CodexTextStyle.Body, null));
 						}
 						else
 						{
 							string text2 = UI.StripLinkFormatting(subEntry2.name);
 							text2 = UI.FormatAsLink(text2, subEntry2.id);
-							list2.Add(new CodexText(text2, CodexTextStyle.Body, null));
+							list3.Add(new CodexText(text2, CodexTextStyle.Body, null));
 						}
 					}
-					list2.Add(new CodexSpacer());
-					keyValuePair2.Value.contentContainers.Insert(keyValuePair2.Value.customContentLength, new ContentContainer(list2, ContentContainer.ContentLayout.Vertical));
+					list3.Add(new CodexSpacer());
+					keyValuePair2.Value.contentContainers.Insert(keyValuePair2.Value.customContentLength, new ContentContainer(list3, ContentContainer.ContentLayout.Vertical));
 				}
 			}
 			for (int i = 0; i < keyValuePair2.Value.subEntries.Count; i++)
@@ -186,7 +203,7 @@ public static class CodexCache
 		CodexCache.baseEntryPath = Application.streamingAssetsPath + "/codex";
 		foreach (CodexEntry codexEntry in CodexCache.CollectEntries(""))
 		{
-			if (codexEntry != null && codexEntry.id != null && codexEntry.contentContainers != null)
+			if (codexEntry != null && codexEntry.id != null && codexEntry.contentContainers != null && SaveLoader.Instance.IsDlcListActiveForCurrentSave(codexEntry.dlcIds))
 			{
 				if (CodexCache.entries.ContainsKey(CodexCache.FormatLinkID(codexEntry.id)))
 				{
@@ -203,7 +220,7 @@ public static class CodexCache
 		{
 			foreach (CodexEntry codexEntry2 in CodexCache.CollectEntries(Path.GetFileNameWithoutExtension(directories[i])))
 			{
-				if (codexEntry2 != null && codexEntry2.id != null && codexEntry2.contentContainers != null)
+				if (codexEntry2 != null && codexEntry2.id != null && codexEntry2.contentContainers != null && SaveLoader.Instance.IsDlcListActiveForCurrentSave(codexEntry2.dlcIds))
 				{
 					if (CodexCache.entries.ContainsKey(CodexCache.FormatLinkID(codexEntry2.id)))
 					{
@@ -226,7 +243,7 @@ public static class CodexCache
 			while (enumerator.MoveNext())
 			{
 				SubEntry v = enumerator.Current;
-				if (v.parentEntryID != null && v.id != null)
+				if (v.parentEntryID != null && v.id != null && SaveLoader.Instance.IsDlcListActiveForCurrentSave(v.dlcIds))
 				{
 					if (CodexCache.entries.ContainsKey(v.parentEntryID.ToUpper()))
 					{

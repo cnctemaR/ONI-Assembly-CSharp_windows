@@ -35,6 +35,7 @@ public class AirConditioner : KMonoBehaviour, ISaveLoadable, IGameObjectEffectDe
 			Tutorial.Instance.TutorialMessage(Tutorial.TutorialMessages.TM_Insulation, true);
 		}, null, null);
 		this.structureTemperature = GameComps.StructureTemperatures.GetHandle(base.gameObject);
+		base.gameObject.AddOrGet<EntityCellVisualizer>().AddPort(EntityCellVisualizer.Ports.HeatSource, default(CellOffset));
 		this.cooledAirOutputCell = this.building.GetUtilityOutputCell();
 	}
 
@@ -94,6 +95,7 @@ public class AirConditioner : KMonoBehaviour, ISaveLoadable, IGameObjectEffectDe
 				float num5 = (num - component.Temperature) * component.Element.specificHeatCapacity * num2;
 				float num6 = ((this.lastSampleTime > 0f) ? (Time.time - this.lastSampleTime) : 1f);
 				this.lastSampleTime = Time.time;
+				this.heatEffect.SetHeatBeingProducedValue(Mathf.Abs(num5));
 				GameComps.StructureTemperatures.ProduceEnergy(this.structureTemperature, -num5, BUILDING.STATUSITEMS.OPERATINGENERGY.PIPECONTENTS_TRANSFER, num6);
 				break;
 			}
@@ -118,6 +120,12 @@ public class AirConditioner : KMonoBehaviour, ISaveLoadable, IGameObjectEffectDe
 	private void OnActiveChanged(object data)
 	{
 		this.UpdateStatus();
+		if (this.operational.IsActive)
+		{
+			this.heatEffect.enabled = true;
+			return;
+		}
+		this.heatEffect.enabled = false;
 	}
 
 	private void UpdateStatus()
@@ -195,6 +203,9 @@ public class AirConditioner : KMonoBehaviour, ISaveLoadable, IGameObjectEffectDe
 
 	[MyCmpGet]
 	private OccupyArea occupyArea;
+
+	[MyCmpGet]
+	private KBatchedAnimHeatPostProcessingEffect heatEffect;
 
 	private HandleVector<int>.Handle structureTemperature;
 

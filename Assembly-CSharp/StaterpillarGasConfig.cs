@@ -20,7 +20,7 @@ public class StaterpillarGasConfig : IEntityConfig
 			inhaleTime = StaterpillarGasConfig.INHALE_TIME,
 			storageStatusItem = Db.Get().CreatureStatusItems.LookingForGas
 		};
-		GameObject gameObject = BaseStaterpillarConfig.BaseStaterpillar(id, name, desc, anim_file, "StaterpillarGasBaseTrait", is_baby, ObjectLayer.GasConduit, StaterpillarGasConnectorConfig.ID, GameTags.Unbreathable, "gas_", StaterpillarGasConfig.WARNING_LOW_TEMPERATURE, StaterpillarGasConfig.WARNING_HIGH_TEMPERATURE, StaterpillarGasConfig.LETHAL_LOW_TEMPERATURE, StaterpillarGasConfig.LETHAL_HIGH_TEMPERATURE, def);
+		GameObject gameObject = BaseStaterpillarConfig.BaseStaterpillar(id, name, desc, anim_file, "StaterpillarGasBaseTrait", is_baby, ObjectLayer.GasConduit, StaterpillarGasConnectorConfig.ID, GameTags.Unbreathable, "gas_", 263.15f, 313.15f, 173.15f, 373.15f, def);
 		gameObject = EntityTemplates.ExtendEntityToWildCreature(gameObject, global::TUNING.CREATURES.SPACE_REQUIREMENTS.TIER3);
 		if (!is_baby)
 		{
@@ -54,7 +54,7 @@ public class StaterpillarGasConfig : IEntityConfig
 
 	public virtual GameObject CreatePrefab()
 	{
-		return EntityTemplates.ExtendEntityToFertileCreature(StaterpillarGasConfig.CreateStaterpillarGas("StaterpillarGas", global::STRINGS.CREATURES.SPECIES.STATERPILLAR.VARIANT_GAS.NAME, global::STRINGS.CREATURES.SPECIES.STATERPILLAR.VARIANT_GAS.DESC, "caterpillar_kanim", false), "StaterpillarGasEgg", global::STRINGS.CREATURES.SPECIES.STATERPILLAR.VARIANT_GAS.EGG_NAME, global::STRINGS.CREATURES.SPECIES.STATERPILLAR.VARIANT_GAS.DESC, "egg_caterpillar_kanim", StaterpillarTuning.EGG_MASS, "StaterpillarGasBaby", 60.000004f, 20f, StaterpillarTuning.EGG_CHANCES_GAS, 1, true, false, true, 1f, false);
+		return EntityTemplates.ExtendEntityToFertileCreature(StaterpillarGasConfig.CreateStaterpillarGas("StaterpillarGas", global::STRINGS.CREATURES.SPECIES.STATERPILLAR.VARIANT_GAS.NAME, global::STRINGS.CREATURES.SPECIES.STATERPILLAR.VARIANT_GAS.DESC, "caterpillar_kanim", false), "StaterpillarGasEgg", global::STRINGS.CREATURES.SPECIES.STATERPILLAR.VARIANT_GAS.EGG_NAME, global::STRINGS.CREATURES.SPECIES.STATERPILLAR.VARIANT_GAS.DESC, "egg_caterpillar_kanim", StaterpillarTuning.EGG_MASS, "StaterpillarGasBaby", 60.000004f, 20f, StaterpillarTuning.EGG_CHANCES_GAS, this.GetDlcIds(), 1, true, false, true, 1f, false);
 	}
 
 	public void OnPrefabInit(GameObject prefab)
@@ -89,12 +89,4 @@ public class StaterpillarGasConfig : IEntityConfig
 	private static float CONSUMPTION_RATE = 0.5f;
 
 	private static float INHALE_TIME = 6f;
-
-	private static float LETHAL_LOW_TEMPERATURE = 243.15f;
-
-	private static float LETHAL_HIGH_TEMPERATURE = 363.15f;
-
-	private static float WARNING_LOW_TEMPERATURE = StaterpillarGasConfig.LETHAL_LOW_TEMPERATURE + 20f;
-
-	private static float WARNING_HIGH_TEMPERATURE = StaterpillarGasConfig.LETHAL_HIGH_TEMPERATURE - 20f;
 }

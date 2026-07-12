@@ -12,6 +12,22 @@ public class EquipmentDef : Def
 		}
 	}
 
+	public string Desc
+	{
+		get
+		{
+			return Strings.Get("STRINGS.EQUIPMENT.PREFABS." + this.Id.ToUpper() + ".DESC");
+		}
+	}
+
+	public string Effect
+	{
+		get
+		{
+			return Strings.Get("STRINGS.EQUIPMENT.PREFABS." + this.Id.ToUpper() + ".EFFECT");
+		}
+	}
+
 	public string GenericName
 	{
 		get

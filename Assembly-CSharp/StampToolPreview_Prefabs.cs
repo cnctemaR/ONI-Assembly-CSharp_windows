@@ -1,4 +1,5 @@
 ﻿using System;
+using Database;
 using TemplateClasses;
 using UnityEngine;
 
@@ -189,15 +190,28 @@ public class StampToolPreview_Prefabs : IStampToolPreviewPlugin
 			}
 			kanim.TintColour = color;
 		}));
+		BuildingFacade component2 = spawn.GetComponent<BuildingFacade>();
+		if (component2 != null && !prefabInfo.facadeId.IsNullOrWhiteSpace())
+		{
+			BuildingFacadeResource buildingFacadeResource = Db.GetBuildingFacades().TryGet(prefabInfo.facadeId);
+			if (buildingFacadeResource != null && buildingFacadeResource.IsUnlocked())
+			{
+				component2.ApplyBuildingFacade(buildingFacadeResource, false);
+			}
+		}
 	}
 
 	public static void SpawnPrefab_Default(StampToolPreviewContext context, Prefab prefabInfo, GameObject prefab)
 	{
+		KBatchedAnimController component = prefab.GetComponent<KBatchedAnimController>();
+		if (component == null)
+		{
+			return;
+		}
 		string text = prefab.GetComponent<KPrefabID>().GetDebugName() + "_visualizer";
 		int num = LayerMask.NameToLayer("Place");
 		GameObject spawn = new GameObject(text);
 		spawn.SetActive(false);
-		KBatchedAnimController component = prefab.GetComponent<KBatchedAnimController>();
 		KBatchedAnimController kanim = spawn.AddComponent<KBatchedAnimController>();
 		if (!component.IsNullOrDestroyed())
 		{

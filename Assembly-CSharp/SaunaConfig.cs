@@ -65,6 +65,10 @@ public class SaunaConfig : IBuildingConfig
 
 	public const string ID = "Sauna";
 
+	public const string COLD_IMMUNITY_EFFECT_NAME = "WarmTouch";
+
+	public const float COLD_IMMUNITY_DURATION = 1800f;
+
 	private const float STEAM_PER_USE_KG = 25f;
 
 	private const float WATER_OUTPUT_TEMP = 353.15f;

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -6,6 +7,7 @@ using System.Threading.Tasks;
 using Database;
 using Delaunay.Geo;
 using Klei;
+using Klei.CustomSettings;
 using KSerialization;
 using LibNoiseDotNet.Graphics.Tools.Noise.Builder;
 using ProcGen;
@@ -20,16 +22,11 @@ namespace ProcGenGame
 	[Serializable]
 	public class WorldGen
 	{
-		public static string GetSIMSaveFilename(int baseID = -1)
-		{
-			return global::System.IO.Path.Combine(global::Util.RootFolder(), (baseID == -1) ? "WorldGenSimSave.dat" : string.Format("{0}{1}{2}", "WorldGenSimSave", baseID, ".dat"));
-		}
-
 		public static string WORLDGEN_SAVE_FILENAME
 		{
 			get
 			{
-				return global::System.IO.Path.Combine(global::Util.RootFolder(), "WorldGenDataSave.dat");
+				return global::System.IO.Path.Combine(global::Util.RootFolder(), "WorldGenDataSave.worldgen");
 			}
 		}
 
@@ -251,6 +248,14 @@ namespace ProcGenGame
 			this.data = data;
 		}
 
+		public WorldGen(WorldPlacement world, int seed, List<string> chosenWorldTraits, List<string> chosenStoryTraits, bool assertMissingTraits)
+		{
+			WorldGen.LoadSettings(false);
+			this.Settings = new WorldGenSettings(world, seed, chosenWorldTraits, chosenStoryTraits, assertMissingTraits);
+			this.data = new Data();
+			this.data.chunkEdgeSize = this.Settings.GetIntSetting("ChunkEdgeSize");
+		}
+
 		public static void SetupDefaultElements()
 		{
 			WorldGen.voidElement = ElementLoader.FindElementByHash(SimHashes.Void);
@@ -281,6 +286,28 @@ namespace ProcGenGame
 				WorldGen.loadSettingsTask = null;
 			}
 			WorldGen.LoadSettings_Internal(is_playing, false);
+		}
+
+		public static void WaitForPendingLoadSettings()
+		{
+			if (WorldGen.loadSettingsTask != null)
+			{
+				WorldGen.loadSettingsTask.Wait();
+				WorldGen.loadSettingsTask = null;
+			}
+		}
+
+		public static IEnumerator ListenForLoadSettingsErrorRoutine()
+		{
+			while (WorldGen.loadSettingsTask != null)
+			{
+				if (WorldGen.loadSettingsTask.Exception != null)
+				{
+					throw WorldGen.loadSettingsTask.Exception;
+				}
+				yield return null;
+			}
+			yield break;
 		}
 
 		private static void LoadSettings_Internal(bool is_playing, bool preloadTemplates = false)
@@ -318,6 +345,27 @@ namespace ProcGenGame
 						}
 					}
 				}
+				if (CustomGameSettings.Instance != null)
+				{
+					foreach (KeyValuePair<string, WorldMixingSettings> keyValuePair in SettingsCache.worldMixingSettings)
+					{
+						string key = keyValuePair.Key;
+						if (keyValuePair.Value.isModded && CustomGameSettings.Instance.GetWorldMixingSettingForWorldgenFile(key) == null)
+						{
+							WorldMixingSettingConfig worldMixingSettingConfig = new WorldMixingSettingConfig(key, key, null, null, true, -1L);
+							CustomGameSettings.Instance.AddMixingSettingsConfig(worldMixingSettingConfig);
+						}
+					}
+					foreach (KeyValuePair<string, SubworldMixingSettings> keyValuePair2 in SettingsCache.subworldMixingSettings)
+					{
+						string key2 = keyValuePair2.Key;
+						if (keyValuePair2.Value.isModded && CustomGameSettings.Instance.GetSubworldMixingSettingForWorldgenFile(key2) == null)
+						{
+							SubworldMixingSettingConfig subworldMixingSettingConfig = new SubworldMixingSettingConfig(key2, key2, null, null, true, -1L);
+							CustomGameSettings.Instance.AddMixingSettingsConfig(subworldMixingSettingConfig);
+						}
+					}
+				}
 			}
 			CustomGameSettings.Instance != null;
 			if (is_playing)
@@ -343,7 +391,7 @@ namespace ProcGenGame
 			this.myRandom = new SeededRandom(worldSeed);
 		}
 
-		public void Initialise(WorldGen.OfflineCallbackFunction callbackFn, Action<OfflineWorldGen.ErrorInfo> error_cb, int worldSeed = -1, int layoutSeed = -1, int terrainSeed = -1, int noiseSeed = -1, bool debug = false)
+		public void Initialise(WorldGen.OfflineCallbackFunction callbackFn, Action<OfflineWorldGen.ErrorInfo> error_cb, int worldSeed = -1, int layoutSeed = -1, int terrainSeed = -1, int noiseSeed = -1, bool debug = false, bool skipPlacingTemplates = false)
 		{
 			if (this.wasLoaded)
 			{
@@ -354,6 +402,7 @@ namespace ProcGenGame
 			this.errorCallback = error_cb;
 			global::Debug.Assert(this.successCallbackFn != null);
 			this.isRunningDebugGen = debug;
+			this.skipPlacingTemplates = skipPlacingTemplates;
 			this.running = false;
 			int num = global::UnityEngine.Random.Range(0, int.MaxValue);
 			if (worldSeed == -1)
@@ -378,21 +427,14 @@ namespace ProcGenGame
 			WorldLayout.SetLayerGradient(SettingsCache.layers.LevelLayers);
 		}
 
-		public void DontGenerateNoiseData()
+		public bool GenerateOffline()
 		{
-			this.generateNoiseData = false;
-		}
-
-		public void GenerateOffline()
-		{
-			int num = 1;
-			int num2 = 0;
-			while (num2 < num && !this.GenerateWorldData())
+			if (!this.GenerateWorldData())
 			{
-				DebugUtil.DevLogError("Failed worldgen");
-				this.successCallbackFn(UI.WORLDGEN.RETRYCOUNT.key, (float)num2, WorldGenProgressStages.Stages.Failure);
-				num2++;
+				this.successCallbackFn(UI.WORLDGEN.FAILED.key, 1f, WorldGenProgressStages.Stages.Failure);
+				return false;
 			}
+			return true;
 		}
 
 		private void PlaceTemplateSpawners(Vector2I position, TemplateContainer template, ref Dictionary<int, int> claimedCells)
@@ -400,7 +442,7 @@ namespace ProcGenGame
 			this.data.gameSpawnData.AddTemplate(template, position, ref claimedCells);
 		}
 
-		public bool RenderOffline(bool doSettle, ref Sim.Cell[] cells, ref Sim.DiseaseCell[] dc, int baseId, ref List<WorldTrait> placedStoryTraits, bool isStartingWorld = false)
+		public bool RenderOffline(bool doSettle, BinaryWriter writer, ref Sim.Cell[] cells, ref Sim.DiseaseCell[] dc, int baseId, ref List<WorldTrait> placedStoryTraits, bool isStartingWorld = false)
 		{
 			float[] array = null;
 			dc = null;
@@ -422,9 +464,12 @@ namespace ProcGenGame
 			}
 			try
 			{
-				this.POISpawners = TemplateSpawning.DetermineTemplatesForWorld(this.Settings, this.data.terrainCells, this.myRandom, ref this.POIBounds, this.isRunningDebugGen, ref placedStoryTraits, this.successCallbackFn);
+				if (!this.skipPlacingTemplates)
+				{
+					this.POISpawners = TemplateSpawning.DetermineTemplatesForWorld(this.Settings, this.data.terrainCells, this.myRandom, ref this.POIBounds, this.isRunningDebugGen, ref placedStoryTraits, this.successCallbackFn);
+				}
 			}
-			catch (TemplateSpawningException ex)
+			catch (WorldgenException ex)
 			{
 				if (!this.isRunningDebugGen)
 				{
@@ -458,11 +503,14 @@ namespace ProcGenGame
 			}
 			if (doSettle)
 			{
-				this.running = WorldGenSimUtil.DoSettleSim(this.Settings, ref cells, ref array, ref dc, this.successCallbackFn, this.data, this.POISpawners, this.errorCallback, baseId);
+				this.running = WorldGenSimUtil.DoSettleSim(this.Settings, writer, ref cells, ref array, ref dc, this.successCallbackFn, this.data, this.POISpawners, this.errorCallback, baseId);
 			}
-			foreach (TemplateSpawning.TemplateSpawner templateSpawner in this.POISpawners)
+			if (!this.skipPlacingTemplates)
 			{
-				this.PlaceTemplateSpawners(templateSpawner.position, templateSpawner.container, ref this.claimedPOICells);
+				foreach (TemplateSpawning.TemplateSpawner templateSpawner in this.POISpawners)
+				{
+					this.PlaceTemplateSpawners(templateSpawner.position, templateSpawner.container, ref this.claimedPOICells);
+				}
 			}
 			if (doSettle)
 			{
@@ -513,14 +561,15 @@ namespace ProcGenGame
 					exception = e
 				});
 			}
+			GenericGameSettings.instance.devAutoWorldGenActive = false;
+			if (!flag)
+			{
+				KCrashReporter.ReportError("WorldgenFailure: ", e.StackTrace, null, null, text + " - " + e.Message, false, new string[] { KCrashReporter.CRASH_CATEGORY.WORLDGENFAILURE }, null);
+			}
 		}
 
 		public void SetWorldSize(int width, int height)
 		{
-			if (this.data.world != null && this.data.world.offset != Vector2I.zero)
-			{
-				global::Debug.LogWarning("Resetting world chunk to defaults.");
-			}
 			this.data.world = new Chunk(0, 0, width, height);
 		}
 
@@ -719,7 +768,7 @@ namespace ProcGenGame
 
 		public bool GenerateWorldData()
 		{
-			return (!this.generateNoiseData || this.GenerateNoiseData(this.successCallbackFn)) && this.GenerateLayout(this.successCallbackFn);
+			return this.GenerateNoiseData(this.successCallbackFn) && this.GenerateLayout(this.successCallbackFn);
 		}
 
 		public void EnsureEnoughElementsInStartingBiome(Sim.Cell[] cells)
@@ -1239,7 +1288,7 @@ namespace ProcGenGame
 
 		private void DrawWorldBorder(Sim.Cell[] cells, Chunk world, SeededRandom rnd, ref HashSet<int> borderCells, ref List<RectInt> poiBounds, WorldGen.OfflineCallbackFunction updateProgressFn)
 		{
-			WorldGen.<>c__DisplayClass137_0 CS$<>8__locals1 = new WorldGen.<>c__DisplayClass137_0();
+			WorldGen.<>c__DisplayClass136_0 CS$<>8__locals1 = new WorldGen.<>c__DisplayClass136_0();
 			CS$<>8__locals1.world = world;
 			bool boolSetting = this.Settings.GetBoolSetting("DrawWorldBorderForce");
 			int intSetting = this.Settings.GetIntSetting("WorldBorderThickness");
@@ -1597,7 +1646,11 @@ namespace ProcGenGame
 
 		private TerrainCell.ElementOverride GetElementFromBiomeElementTable(Chunk chunk, Vector2I pos, List<ElementGradient> table, float erode)
 		{
-			float num = this.GetValue(chunk, pos) * erode;
+			return WorldGen.GetElementFromBiomeElementTable(this.GetValue(chunk, pos) * erode, table);
+		}
+
+		public static TerrainCell.ElementOverride GetElementFromBiomeElementTable(float value, List<ElementGradient> table)
+		{
 			TerrainCell.ElementOverride elementOverride = TerrainCell.GetElementOverride(WorldGen.voidElement.tag.ToString(), null);
 			if (table.Count == 0)
 			{
@@ -1606,7 +1659,7 @@ namespace ProcGenGame
 			for (int i = 0; i < table.Count; i++)
 			{
 				global::Debug.Assert(table[i].content != null, i.ToString());
-				if (num < table[i].maxValue)
+				if (value < table[i].maxValue)
 				{
 					return TerrainCell.GetElementOverride(table[i].content, table[i].overrides);
 				}
@@ -1642,43 +1695,6 @@ namespace ProcGenGame
 				flag = false;
 			}
 			return flag;
-		}
-
-		public void SaveWorldGen()
-		{
-			try
-			{
-				Manager.Clear();
-				WorldGenSave worldGenSave = new WorldGenSave();
-				worldGenSave.version = new Vector2I(1, 1);
-				worldGenSave.data = this.data;
-				worldGenSave.worldID = this.Settings.world.filePath;
-				worldGenSave.traitIDs = new List<string>(this.Settings.GetWorldTraitIDs());
-				worldGenSave.storyTraitIDs = new List<string>(this.Settings.GetStoryTraitIDs());
-				using (MemoryStream memoryStream = new MemoryStream())
-				{
-					using (BinaryWriter binaryWriter = new BinaryWriter(memoryStream))
-					{
-						try
-						{
-							Serializer.Serialize(worldGenSave, binaryWriter);
-						}
-						catch (Exception ex)
-						{
-							DebugUtil.LogErrorArgs(new object[] { "Couldn't serialize", ex.Message, ex.StackTrace });
-						}
-					}
-					using (BinaryWriter binaryWriter2 = new BinaryWriter(File.Open(WorldGen.WORLDGEN_SAVE_FILENAME, FileMode.Create)))
-					{
-						Manager.SerializeDirectory(binaryWriter2);
-						binaryWriter2.Write(memoryStream.ToArray());
-					}
-				}
-			}
-			catch (Exception ex2)
-			{
-				DebugUtil.LogErrorArgs(new object[] { "Couldn't write", ex2.Message, ex2.StackTrace });
-			}
 		}
 
 		public static WorldGen Load(IReader reader, bool defaultDiscovered)
@@ -1724,11 +1740,7 @@ namespace ProcGenGame
 		{
 		}
 
-		private const string _SIM_SAVE_FILENAME = "WorldGenSimSave";
-
-		private const string _SIM_SAVE_EXTENSION = ".dat";
-
-		private const string _WORLDGEN_SAVE_FILENAME = "WorldGenDataSave.dat";
+		private const string _WORLDGEN_SAVE_FILENAME = "WorldGenDataSave.worldgen";
 
 		private const int heatScale = 2;
 
@@ -1762,7 +1774,7 @@ namespace ProcGenGame
 
 		public bool isRunningDebugGen;
 
-		private bool generateNoiseData = true;
+		public bool skipPlacingTemplates;
 
 		private HashSet<int> claimedCells = new HashSet<int>();
 

@@ -233,6 +233,8 @@ public class TreeFilterableSideScreenRow : KMonoBehaviour
 
 	public bool visualDirty;
 
+	public bool standardCommodity = true;
+
 	[SerializeField]
 	private LocText elementName;
 

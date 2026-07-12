@@ -5,7 +5,7 @@ using STRINGS;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class SpaceHeater : StateMachineComponent<SpaceHeater.StatesInstance>, IGameObjectEffectDescriptor
+public class SpaceHeater : StateMachineComponent<SpaceHeater.StatesInstance>, IGameObjectEffectDescriptor, ISingleSliderControl, ISliderControl
 {
 	public float TargetTemperature
 	{
@@ -15,6 +15,146 @@ public class SpaceHeater : StateMachineComponent<SpaceHeater.StatesInstance>, IG
 		}
 	}
 
+	public float MaxPower
+	{
+		get
+		{
+			return 240f;
+		}
+	}
+
+	public float MinPower
+	{
+		get
+		{
+			return 120f;
+		}
+	}
+
+	public float MaxSelfHeatKWs
+	{
+		get
+		{
+			return 32f;
+		}
+	}
+
+	public float MinSelfHeatKWs
+	{
+		get
+		{
+			return 16f;
+		}
+	}
+
+	public float MaxExhaustedKWs
+	{
+		get
+		{
+			return 4f;
+		}
+	}
+
+	public float MinExhaustedKWs
+	{
+		get
+		{
+			return 2f;
+		}
+	}
+
+	public float CurrentSelfHeatKW
+	{
+		get
+		{
+			return Mathf.Lerp(this.MinSelfHeatKWs, this.MaxSelfHeatKWs, this.UserSliderSetting);
+		}
+	}
+
+	public float CurrentExhaustedKW
+	{
+		get
+		{
+			return Mathf.Lerp(this.MinExhaustedKWs, this.MaxExhaustedKWs, this.UserSliderSetting);
+		}
+	}
+
+	public float CurrentPowerConsumption
+	{
+		get
+		{
+			return Mathf.Lerp(this.MinPower, this.MaxPower, this.UserSliderSetting);
+		}
+	}
+
+	public static void GenerateHeat(SpaceHeater.StatesInstance smi, float dt)
+	{
+		if (smi.master.produceHeat)
+		{
+			SpaceHeater.AddExhaustHeat(smi, dt);
+			SpaceHeater.AddSelfHeat(smi, dt);
+		}
+	}
+
+	private static float AddExhaustHeat(SpaceHeater.StatesInstance smi, float dt)
+	{
+		float currentExhaustedKW = smi.master.CurrentExhaustedKW;
+		StructureTemperatureComponents.ExhaustHeat(smi.master.extents, currentExhaustedKW, smi.master.overheatTemperature, dt);
+		return currentExhaustedKW;
+	}
+
+	public static void RefreshHeatEffect(SpaceHeater.StatesInstance smi)
+	{
+		if (smi.master.heatEffect != null && smi.master.produceHeat)
+		{
+			float num = (smi.IsInsideState(smi.sm.online.heating) ? (smi.master.CurrentExhaustedKW + smi.master.CurrentSelfHeatKW) : 0f);
+			smi.master.heatEffect.SetHeatBeingProducedValue(num);
+		}
+	}
+
+	private static float AddSelfHeat(SpaceHeater.StatesInstance smi, float dt)
+	{
+		float currentSelfHeatKW = smi.master.CurrentSelfHeatKW;
+		GameComps.StructureTemperatures.ProduceEnergy(smi.master.structureTemperature, currentSelfHeatKW * dt, BUILDINGS.PREFABS.STEAMTURBINE2.HEAT_SOURCE, dt);
+		return currentSelfHeatKW;
+	}
+
+	public void SetUserSpecifiedPowerConsumptionValue(float value)
+	{
+		if (this.produceHeat)
+		{
+			this.UserSliderSetting = (value - this.MinPower) / (this.MaxPower - this.MinPower);
+			SpaceHeater.RefreshHeatEffect(base.smi);
+			this.energyConsumer.BaseWattageRating = this.CurrentPowerConsumption;
+		}
+	}
+
+	protected override void OnPrefabInit()
+	{
+		if (this.produceHeat)
+		{
+			this.heatStatusItem = new StatusItem("OperatingEnergy", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022, null);
+			this.heatStatusItem.resolveStringCallback = delegate(string str, object data)
+			{
+				SpaceHeater.StatesInstance statesInstance = (SpaceHeater.StatesInstance)data;
+				float num = statesInstance.master.CurrentSelfHeatKW + statesInstance.master.CurrentExhaustedKW;
+				str = string.Format(str, GameUtil.GetFormattedHeatEnergy(num * 1000f, GameUtil.HeatEnergyFormatterUnit.Automatic));
+				return str;
+			};
+			this.heatStatusItem.resolveTooltipCallback = delegate(string str, object data)
+			{
+				SpaceHeater.StatesInstance statesInstance2 = (SpaceHeater.StatesInstance)data;
+				float num2 = statesInstance2.master.CurrentSelfHeatKW + statesInstance2.master.CurrentExhaustedKW;
+				str = str.Replace("{0}", GameUtil.GetFormattedHeatEnergy(num2 * 1000f, GameUtil.HeatEnergyFormatterUnit.Automatic));
+				string text = string.Format(BUILDING.STATUSITEMS.OPERATINGENERGY.LINEITEM, BUILDING.STATUSITEMS.OPERATINGENERGY.OPERATING, GameUtil.GetFormattedHeatEnergy(statesInstance2.master.CurrentSelfHeatKW * 1000f, GameUtil.HeatEnergyFormatterUnit.DTU_S));
+				text += string.Format(BUILDING.STATUSITEMS.OPERATINGENERGY.LINEITEM, BUILDING.STATUSITEMS.OPERATINGENERGY.EXHAUSTING, GameUtil.GetFormattedHeatEnergy(statesInstance2.master.CurrentExhaustedKW * 1000f, GameUtil.HeatEnergyFormatterUnit.DTU_S));
+				str = str.Replace("{1}", text);
+				return str;
+			};
+		}
+		base.OnPrefabInit();
+	}
+
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
@@ -22,7 +162,11 @@ public class SpaceHeater : StateMachineComponent<SpaceHeater.StatesInstance>, IG
 		{
 			Tutorial.Instance.TutorialMessage(Tutorial.TutorialMessages.TM_Insulation, true);
 		}, null, null);
+		this.extents = base.GetComponent<OccupyArea>().GetExtents();
+		this.overheatTemperature = base.GetComponent<BuildingComplete>().Def.OverheatTemperature;
+		this.structureTemperature = GameComps.StructureTemperatures.GetHandle(base.gameObject);
 		base.smi.StartSM();
+		this.SetUserSpecifiedPowerConsumptionValue(this.CurrentPowerConsumption);
 	}
 
 	public void SetLiquidHeater()
@@ -71,6 +215,65 @@ public class SpaceHeater : StateMachineComponent<SpaceHeater.StatesInstance>, IG
 		return list;
 	}
 
+	public string SliderTitleKey
+	{
+		get
+		{
+			return "STRINGS.UI.UISIDESCREENS.SPACEHEATERSIDESCREEN.TITLE";
+		}
+	}
+
+	public string SliderUnits
+	{
+		get
+		{
+			return UI.UNITSUFFIXES.ELECTRICAL.WATT;
+		}
+	}
+
+	public int SliderDecimalPlaces(int index)
+	{
+		return 0;
+	}
+
+	public float GetSliderMin(int index)
+	{
+		if (!this.produceHeat)
+		{
+			return 0f;
+		}
+		return this.MinPower;
+	}
+
+	public float GetSliderMax(int index)
+	{
+		if (!this.produceHeat)
+		{
+			return 0f;
+		}
+		return this.MaxPower;
+	}
+
+	public float GetSliderValue(int index)
+	{
+		return this.CurrentPowerConsumption;
+	}
+
+	public void SetSliderValue(float value, int index)
+	{
+		this.SetUserSpecifiedPowerConsumptionValue(value);
+	}
+
+	public string GetSliderTooltipKey(int index)
+	{
+		return "STRINGS.UI.UISIDESCREENS.SPACEHEATERSIDESCREEN.TOOLTIP";
+	}
+
+	string ISliderControl.GetSliderTooltip(int index)
+	{
+		return string.Format(Strings.Get("STRINGS.UI.UISIDESCREENS.SPACEHEATERSIDESCREEN.TOOLTIP"), GameUtil.GetFormattedHeatEnergyRate((this.CurrentSelfHeatKW + this.CurrentExhaustedKW) * 1000f, GameUtil.HeatEnergyFormatterUnit.Automatic));
+	}
+
 	public float targetTemperature = 308.15f;
 
 	public float minimumCellMass;
@@ -80,8 +283,30 @@ public class SpaceHeater : StateMachineComponent<SpaceHeater.StatesInstance>, IG
 	[SerializeField]
 	private bool heatLiquid;
 
+	[Serialize]
+	public float UserSliderSetting;
+
+	public bool produceHeat;
+
+	private StatusItem heatStatusItem;
+
+	private HandleVector<int>.Handle structureTemperature;
+
+	private Extents extents;
+
+	private float overheatTemperature;
+
 	[MyCmpReq]
 	private Operational operational;
+
+	[MyCmpReq]
+	private PrimaryElement primaryElement;
+
+	[MyCmpGet]
+	private KBatchedAnimHeatPostProcessingEffect heatEffect;
+
+	[MyCmpGet]
+	private EnergyConsumer energyConsumer;
 
 	private List<int> monitorCells = new List<int>();
 
@@ -107,7 +332,7 @@ public class SpaceHeater : StateMachineComponent<SpaceHeater.StatesInstance>, IG
 				SpaceHeater.StatesInstance statesInstance = (SpaceHeater.StatesInstance)obj;
 				return string.Format(str, GameUtil.GetFormattedTemperature(statesInstance.master.TargetTemperature, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false));
 			};
-			this.offline.EventTransition(GameHashes.OperationalChanged, this.online, (SpaceHeater.StatesInstance smi) => smi.master.operational.IsOperational);
+			this.offline.Enter(new StateMachine<SpaceHeater.States, SpaceHeater.StatesInstance, SpaceHeater, object>.State.Callback(SpaceHeater.RefreshHeatEffect)).EventTransition(GameHashes.OperationalChanged, this.online, (SpaceHeater.StatesInstance smi) => smi.master.operational.IsOperational);
 			this.online.EventTransition(GameHashes.OperationalChanged, this.offline, (SpaceHeater.StatesInstance smi) => !smi.master.operational.IsOperational).DefaultState(this.online.heating).Update("spaceheater_online", delegate(SpaceHeater.StatesInstance smi, float dt)
 			{
 				switch (smi.master.MonitorHeating(dt))
@@ -128,13 +353,16 @@ public class SpaceHeater : StateMachineComponent<SpaceHeater.StatesInstance>, IG
 					return;
 				}
 			}, UpdateRate.SIM_4000ms, false);
-			this.online.heating.Enter(delegate(SpaceHeater.StatesInstance smi)
+			this.online.heating.Enter(new StateMachine<SpaceHeater.States, SpaceHeater.StatesInstance, SpaceHeater, object>.State.Callback(SpaceHeater.RefreshHeatEffect)).Enter(delegate(SpaceHeater.StatesInstance smi)
 			{
 				smi.master.operational.SetActive(true, false);
-			}).Exit(delegate(SpaceHeater.StatesInstance smi)
-			{
-				smi.master.operational.SetActive(false, false);
-			});
+			}).ToggleStatusItem((SpaceHeater.StatesInstance smi) => smi.master.heatStatusItem, (SpaceHeater.StatesInstance smi) => smi)
+				.Update(new Action<SpaceHeater.StatesInstance, float>(SpaceHeater.GenerateHeat), UpdateRate.SIM_200ms, false)
+				.Exit(delegate(SpaceHeater.StatesInstance smi)
+				{
+					smi.master.operational.SetActive(false, false);
+				})
+				.Exit(new StateMachine<SpaceHeater.States, SpaceHeater.StatesInstance, SpaceHeater, object>.State.Callback(SpaceHeater.RefreshHeatEffect));
 			this.online.undermassliquid.ToggleCategoryStatusItem(Db.Get().StatusItemCategories.Heat, this.statusItemUnderMassLiquid, null);
 			this.online.undermassgas.ToggleCategoryStatusItem(Db.Get().StatusItemCategories.Heat, this.statusItemUnderMassGas, null);
 			this.online.overtemp.ToggleCategoryStatusItem(Db.Get().StatusItemCategories.Heat, this.statusItemOverTemp, null);

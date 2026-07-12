@@ -150,6 +150,8 @@ public abstract class StateMachine
 		public virtual void Configure(GameObject prefab)
 		{
 		}
+
+		public bool preventStartSMIOnSpawn;
 	}
 
 	public class Category : Resource

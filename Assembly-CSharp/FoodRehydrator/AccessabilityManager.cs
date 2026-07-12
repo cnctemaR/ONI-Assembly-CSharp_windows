@@ -8,7 +8,14 @@ namespace FoodRehydrator
 		protected override void OnSpawn()
 		{
 			base.OnSpawn();
+			Components.FoodRehydrators.Add(base.gameObject);
 			base.Subscribe(824508782, new Action<object>(this.ActiveChangedHandler));
+		}
+
+		protected override void OnCleanUp()
+		{
+			Components.FoodRehydrators.Remove(base.gameObject);
+			base.OnCleanUp();
 		}
 
 		public void Reserve(GameObject reserver)
@@ -19,7 +26,7 @@ namespace FoodRehydrator
 
 		public void Unreserve()
 		{
-			global::Debug.Assert(this.reserver != null);
+			this.activeWorkable = null;
 			this.reserver = null;
 		}
 
@@ -28,10 +35,6 @@ namespace FoodRehydrator
 			DebugUtil.DevAssert(this.activeWorkable == null || work == null, "FoodRehydrator::AccessabilityManager activating a second workable", null);
 			this.activeWorkable = work;
 			this.operational.SetActive(this.activeWorkable != null, false);
-			if (this.activeWorkable == null)
-			{
-				this.Unreserve();
-			}
 		}
 
 		public bool CanAccess(GameObject worker)
@@ -41,9 +44,17 @@ namespace FoodRehydrator
 
 		protected void ActiveChangedHandler(object obj)
 		{
-			if (!this.operational.IsActive && this.activeWorkable != null && this.activeWorkable.worker != null)
+			if (!this.operational.IsActive)
 			{
-				this.activeWorkable.worker.StopWork();
+				this.CancelActiveWorkable();
+			}
+		}
+
+		public void CancelActiveWorkable()
+		{
+			if (this.activeWorkable != null)
+			{
+				this.activeWorkable.StopWork(this.activeWorkable.worker, true);
 			}
 		}
 

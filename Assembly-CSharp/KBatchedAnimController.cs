@@ -881,6 +881,16 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 		this.UnregisterVisibilityListener();
 	}
 
+	public virtual KAnimConverter.PostProcessingEffects GetPostProcessingEffectsCompatibility()
+	{
+		return this.postProcessingEffectsAllowed;
+	}
+
+	public float GetPostProcessingParams()
+	{
+		return this.postProcessingParameters;
+	}
+
 	protected override void RefreshVisibilityListener()
 	{
 		if (!this.visibilityListenerRegistered)
@@ -959,4 +969,8 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 	public bool isMovable;
 
 	public Func<Vector4> getPositionDataFunctionInUse;
+
+	public KAnimConverter.PostProcessingEffects postProcessingEffectsAllowed;
+
+	public float postProcessingParameters;
 }

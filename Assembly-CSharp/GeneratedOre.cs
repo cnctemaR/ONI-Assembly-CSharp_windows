@@ -15,7 +15,7 @@ public class GeneratedOre
 				IOreConfig oreConfig = Activator.CreateInstance(type) as IOreConfig;
 				SimHashes elementID = oreConfig.ElementID;
 				Element element = ElementLoader.FindElementByHash(elementID);
-				if (element != null && DlcManager.IsContentActive(element.dlcId))
+				if (element != null && DlcManager.IsContentSubscribed(element.dlcId))
 				{
 					if (elementID != SimHashes.Void)
 					{
@@ -27,7 +27,7 @@ public class GeneratedOre
 		}
 		foreach (Element element2 in ElementLoader.elements)
 		{
-			if (element2 != null && !hashSet.Contains(element2.id) && DlcManager.IsContentActive(element2.dlcId) && element2.substance != null && element2.substance.anim != null)
+			if (element2 != null && !hashSet.Contains(element2.id) && DlcManager.IsContentSubscribed(element2.dlcId) && element2.substance != null && element2.substance.anim != null)
 			{
 				GameObject gameObject = null;
 				if (element2.IsSolid)

@@ -69,6 +69,17 @@ namespace STRINGS
 
 			public static LocString DEHYDRATED = "Dehydrated";
 
+			public static LocString PLASTIFIABLELIQUID = UI.FormatAsLink("Plastic Monomer", "PLASTIFIABLELIQUID");
+
+			public static LocString PLASTIFIABLELIQUID_DESC = string.Concat(new string[]
+			{
+				"Plastic monomers are organic compounds that can be processed into ",
+				UI.FormatAsLink("Plastics", "PLASTIC"),
+				" that have valuable applications as advanced building materials. Plastics derived from these monomers can also be used as packaging materials for ",
+				UI.FormatAsLink("Food", "FOOD"),
+				" preservation."
+			});
+
 			public static LocString REFINEDMETAL = UI.FormatAsLink("Refined Metal", "REFINEDMETAL");
 
 			public static LocString REFINEDMETAL_DESC = string.Concat(new string[]
@@ -113,7 +124,7 @@ namespace STRINGS
 
 			public static LocString BUILDINGWOOD_DESC = string.Concat(new string[]
 			{
-				"Wood is a renewable building material which can also be used as valuable fuel and electricity when refined at the ",
+				"Wood is a renewable building material which can also be used as a valuable source of fuel and electricity when refined at the ",
 				UI.FormatAsLink("Wood Burner", "WOODGASGENERATOR"),
 				" or the ",
 				UI.FormatAsLink("Ethanol Distiller", "ETHANOLDISTILLERY"),
@@ -124,15 +135,21 @@ namespace STRINGS
 
 			public static LocString CROPSEEDS = "Crop Seeds";
 
+			public static LocString CERAMIC = UI.FormatAsLink("Ceramic", "CERAMIC");
+
+			public static LocString POLYPROPYLENE = UI.FormatAsLink("Plastic", "POLYPROPYLENE");
+
 			public static LocString BAGABLECREATURE = UI.FormatAsLink("Critter", "CREATURES");
 
 			public static LocString SWIMMINGCREATURE = "Aquatic Critter";
 
 			public static LocString LIFE = "Life";
 
-			public static LocString LIQUIFIABLE = UI.FormatAsLink("Liquefiable", "LIQUIFIABLE");
+			public static LocString LIQUIFIABLE = "Liquefiable";
 
-			public static LocString LIQUID = UI.FormatAsLink("Liquid", "LIQUID");
+			public static LocString LIQUID = UI.FormatAsLink("Liquid", "ELEMENTS_LIQUID");
+
+			public static LocString LEAD = UI.FormatAsLink("Lead", "LEAD");
 
 			public static LocString SPECIAL = "Special";
 
@@ -149,6 +166,8 @@ namespace STRINGS
 			public static LocString ORGANICS = "Organic";
 
 			public static LocString CONSUMABLEORE = "Consumable Ore";
+
+			public static LocString SUBLIMATING = "Sublimators";
 
 			public static LocString ORE = "Ore";
 
@@ -276,6 +295,10 @@ namespace STRINGS
 
 			public static LocString RAW = "Raw Animal Product";
 
+			public static LocString FOSSIL = "Fossil";
+
+			public static LocString ICE = "Ice";
+
 			public static LocString ANY = "Any";
 
 			public static LocString TRANSPARENT = "Transparent";
@@ -293,7 +316,7 @@ namespace STRINGS
 
 			public static LocString FARMINGMATERIAL = "Fertilizer";
 
-			public static LocString INSULATOR = "Insulator";
+			public static LocString INSULATOR = UI.FormatAsLink("Insulator", "INSULATOR");
 
 			public static LocString INSULATOR_DESC = "Insulators have low thermal conductivity, and effectively reduce the speed at which " + UI.FormatAsLink("Heat", "Heat") + " is transferred through them.";
 
@@ -304,6 +327,14 @@ namespace STRINGS
 			public static LocString STORYTRAITRESOURCE = "Story Trait";
 
 			public static LocString GLASS = "Glass";
+
+			public static LocString OBSIDIAN = UI.FormatAsLink("Obsidian", "OBSIDIAN");
+
+			public static LocString DIAMOND = UI.FormatAsLink("Diamond", "DIAMOND");
+
+			public static LocString SNOW = UI.FormatAsLink("Snow", "STABLESNOW");
+
+			public static LocString WOODLOG = UI.FormatAsLink("Wood", "WOODLOG");
 
 			public static LocString COMMAND_MODULE = "Command Module";
 
@@ -841,11 +872,20 @@ namespace STRINGS
 
 				public static LocString TOOLTIP = "Duplicants cannot reach this object to move it";
 			}
+
+			public class PENDINGCARVE
+			{
+				public static LocString NAME = "Carve Errand";
+
+				public static LocString TOOLTIP = "Rock will be carved once a Duplicant is available";
+			}
 		}
 
 		public class POPFX
 		{
 			public static LocString RESOURCE_EATEN = "Resource Eaten";
+
+			public static LocString RESOURCE_SELECTION_CHANGED = "Changed to {0}";
 		}
 
 		public class NOTIFICATIONS
@@ -934,11 +974,19 @@ namespace STRINGS
 				{
 					"At 100% ",
 					UI.FormatAsLink("Stress", "STRESS"),
-					", a Duplicant will have a nervous breakdown and be unable to work.\n\nBreakdowns can manifest in different colony-threatening ways, such as the destruction of buildings or the binge eating of food.\n\nI can select a Duplicant and mouse over ",
+					", a Duplicant will have a nervous breakdown and be unable to work.\n\nBreakdowns can manifest in different colony-threatening ways, such as the destruction of buildings or the binge eating of food.\n\nI can help my Duplicants manage stressful situations by giving them access to good ",
+					UI.FormatAsLink("Food", "FOOD"),
+					", fancy ",
+					UI.FormatAsLink("Decor", "DECOR"),
+					" and comfort items which boost their ",
+					UI.FormatAsLink("Morale", "MORALE"),
+					".\n\nI can select a Duplicant and mouse over ",
 					UI.FormatAsLink("Stress", "STRESS"),
-					" in their STATUS TAB to view their individual ",
-					UI.FormatAsLink("Stress Factors", "STRESS"),
-					", and hopefully minimize them before they become a problem."
+					" or ",
+					UI.FormatAsLink("Morale", "MORALE"),
+					" in their CONDITION TAB to view current statuses, and hopefully manage things before they become a problem.\n\nRelated ",
+					UI.FormatAsLink("Video: Duplicant Morale", "VIDEOS13"),
+					" "
 				});
 
 				public static LocString TOOLTIP = "Notes on keeping Duplicants happy and productive";
@@ -1054,9 +1102,10 @@ namespace STRINGS
 					UI.FormatAsLink("Cold", "HEAT"),
 					" affect my Duplicants' internal body temperature and cause undue ",
 					UI.FormatAsLink("Stress", "STRESS"),
-					".\n\nOpening the ",
+					" or unscheduled naps.\n\nOpening the ",
 					UI.FormatAsOverlay("Temperature Overlay", global::Action.Overlay3),
-					" and checking the <b>Thermal Tolerance</b> box allows me to view all areas where my Duplicants will feel discomfort and be unable to regulate their internal body temperature."
+					" and checking the <b>Thermal Tolerance</b> box allows me to view all areas where my Duplicants will feel discomfort and be unable to regulate their internal body temperature.\n\nRelated ",
+					UI.FormatAsLink("Video: Insulation", "VIDEOS17")
 				});
 			}
 
@@ -1066,7 +1115,14 @@ namespace STRINGS
 
 				public static LocString TOOLTIP = "Notes on preventing building from breaking";
 
-				public static LocString MESSAGEBODY = "When constructing buildings, I should always take note of their " + UI.FormatAsLink("Overheat Temperature", "HEAT") + " and plan their locations accordingly. Maintaining low ambient temperatures and good ventilation in the colony will also help keep building temperatures down.\n\nIf I allow buildings to exceed their Overheat Temperature they will begin to take damage, and if left unattended, they will break down and be unusable until repaired.";
+				public static LocString MESSAGEBODY = string.Concat(new string[]
+				{
+					"When constructing buildings, I should always take note of their ",
+					UI.FormatAsLink("Overheat Temperature", "HEAT"),
+					" and plan their locations accordingly. Maintaining low ambient temperatures and good ventilation in the colony will also help keep building temperatures down.\n\nThe <b>Relative Temperature</b> slider tool in the ",
+					UI.FormatAsOverlay("Temperature Overlay", global::Action.Overlay3),
+					" allows me to change adjust the overlay's color-coding in order to highlight specific temperature ranges.\n\nIf I allow buildings to exceed their Overheat Temperature they will begin to take damage, and if left unattended, they will break down and be unusable until repaired."
+				});
 			}
 
 			public class LOTS_OF_GERMS
@@ -1088,7 +1144,8 @@ namespace STRINGS
 					UI.FormatAsOverlay("Germ Overlay", global::Action.Overlay9),
 					" to view all germ concentrations in my colony, and even detect the sources spawning them.\n\nBuilding Wash Basins from the ",
 					UI.FormatAsBuildMenuTab("Medicine Tab", global::Action.Plan8),
-					" near colony toilets will tell my Duplicants they need to wash up."
+					" near colony toilets will tell my Duplicants they need to wash up.\n\nRelated ",
+					UI.FormatAsLink("Video: Plumbing and Ventilation", "VIDEOS18")
 				});
 			}
 
@@ -1209,7 +1266,7 @@ namespace STRINGS
 
 				public static LocString TOOLTIP = "Notes on Duplicant expectations";
 
-				public static LocString MESSAGEBODY = "Food, Rooms, Decor, and Recreation all have an effect on Duplicant Morale. Good experiences improve their Morale, while poor experiences lower it. When a Duplicant's Morale is below their Expectations, they will become Stressed.\n\nDuplicants' Expectations will get higher as they are given new Skills, and the colony will have to be improved to keep up their Morale. An overview of Morale and Stress can be viewed on the Vitals screen.";
+				public static LocString MESSAGEBODY = "Food, Rooms, Decor, and Recreation all have an effect on Duplicant Morale. Good experiences improve their Morale, while poor experiences lower it. When a Duplicant's Morale is below their Expectations, they will become Stressed.\n\nDuplicants' Expectations will get higher as they are given new Skills, and the colony will have to be improved to keep up their Morale. An overview of Morale and Stress can be viewed on the Vitals screen.\n\nRelated " + UI.FormatAsLink("Tutorial: Stress Management", "MISCELLANEOUSTIPS");
 			}
 
 			public class POWER
@@ -1794,6 +1851,13 @@ namespace STRINGS
 				public static LocString TOOLTIP = "These fabricators have no recipes queued:";
 			}
 
+			public class BUILDING_MELTED
+			{
+				public static LocString NAME = "Building melted";
+
+				public static LocString TOOLTIP = "Extreme heat has melted these buildings:";
+			}
+
 			public class SUIT_DROPPED
 			{
 				public static LocString NAME = "No Docks available";
@@ -1990,6 +2054,17 @@ namespace STRINGS
 				public static LocString NAME = "Duplicant Crash Landed!";
 
 				public static LocString TOOLTIP = "A Duplicant has successfully crashed an Escape Pod onto the surface of a nearby Planetoid.";
+			}
+
+			public class POIRESEARCHUNLOCKCOMPLETE
+			{
+				public static LocString NAME = "Research Discovered";
+
+				public static LocString MESSAGEBODY = "Eureka! We've decrypted the Research Portal's final transmission. New buildings have become available:\n  {0}\n\nOne file was labeled \"Open This First.\" New Database Entry unlocked.";
+
+				public static LocString TOOLTIP = "{0} unlocked!";
+
+				public static LocString BUTTON_VIEW_LORE = "View entry";
 			}
 		}
 

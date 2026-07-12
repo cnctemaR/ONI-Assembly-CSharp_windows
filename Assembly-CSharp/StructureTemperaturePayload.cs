@@ -31,6 +31,7 @@ public struct StructureTemperaturePayload
 		this.overheatable = ((this.primaryElementBacking != null) ? this.primaryElementBacking.GetComponent<Overheatable>() : null);
 		this.building = go.GetComponent<Building>();
 		this.operational = go.GetComponent<Operational>();
+		this.heatEffect = go.GetComponent<KBatchedAnimHeatPostProcessingEffect>();
 		this.pendingEnergyModifications = 0f;
 		this.maxTemperature = 10000f;
 		this.energySourcesKW = null;
@@ -114,6 +115,8 @@ public struct StructureTemperaturePayload
 	public Building building;
 
 	public Operational operational;
+
+	public KBatchedAnimHeatPostProcessingEffect heatEffect;
 
 	public List<StructureTemperaturePayload.EnergySource> energySourcesKW;
 

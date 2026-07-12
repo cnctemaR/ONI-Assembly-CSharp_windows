@@ -135,10 +135,13 @@ public class Element : IComparable<Element>
 			for (int i = 0; i < this.oreTags.Length; i++)
 			{
 				Tag tag = new Tag(this.oreTags[i]);
-				text3 += tag.ProperName();
-				if (i < this.oreTags.Length - 1)
+				if (!(tag == GameTags.HideFromCodex) && !(tag == GameTags.HideFromSpawnTool))
 				{
-					text3 += ", ";
+					text3 += tag.ProperName();
+					if (i < this.oreTags.Length - 1)
+					{
+						text3 += ", ";
+					}
 				}
 			}
 			text += string.Format(ELEMENTS.ELEMENTPROPERTIES, text3);

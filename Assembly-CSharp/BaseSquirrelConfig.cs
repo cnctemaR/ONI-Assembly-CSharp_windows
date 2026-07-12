@@ -17,7 +17,7 @@ public static class BaseSquirrelConfig
 		{
 			text = "DreckoBabyNavGrid";
 		}
-		EntityTemplates.ExtendEntityToBasicCreature(gameObject, FactionManager.FactionID.Pest, traitId, text, NavType.Floor, 32, 2f, "Meat", 1, true, false, 283.15f, 293.15f, 243.15f, 343.15f);
+		EntityTemplates.ExtendEntityToBasicCreature(gameObject, FactionManager.FactionID.Pest, traitId, text, NavType.Floor, 32, 2f, "Meat", 1, true, false, 283.15f, 313.15f, 243.15f, 373.15f);
 		if (symbolOverridePrefix != null)
 		{
 			gameObject.AddOrGet<SymbolOverrideController>().ApplySymbolOverridesByAffix(Assets.GetAnim(anim_file), symbolOverridePrefix, null, 0);
@@ -89,7 +89,7 @@ public static class BaseSquirrelConfig
 			{
 				"ForestTree",
 				BasicFabricMaterialPlantConfig.ID
-			}, poopTag, caloriesPerKg, producedConversionRate, diseaseId, diseasePerKgProduced, false, true)
+			}, poopTag, caloriesPerKg, producedConversionRate, diseaseId, diseasePerKgProduced, false, true, false)
 		};
 	}
 
@@ -98,7 +98,7 @@ public static class BaseSquirrelConfig
 		Diet diet = new Diet(diet_infos);
 		CreatureCalorieMonitor.Def def = prefab.AddOrGetDef<CreatureCalorieMonitor.Def>();
 		def.diet = diet;
-		def.minPoopSizeInCalories = minPoopSizeInKg;
+		def.minConsumedCaloriesBeforePooping = minPoopSizeInKg;
 		prefab.AddOrGetDef<SolidConsumerMonitor.Def>().diet = diet;
 		return prefab;
 	}

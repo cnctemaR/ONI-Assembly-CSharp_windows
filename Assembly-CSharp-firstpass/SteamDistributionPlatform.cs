@@ -114,7 +114,8 @@ internal class SteamDistributionPlatform : MonoBehaviour, DistributionPlatform.I
 		bool purchasedDLC = false;
 		if (SteamManager.Initialized)
 		{
-			uint steamDlcID = this.DLCtoSteamIDMap[dlcID];
+			uint steamDlcID;
+			DebugUtil.AssertArgs(this.DLCtoSteamIDMap.TryGetValue(dlcID, out steamDlcID), new object[] { "DLC does not exist ", dlcID });
 			this.GetAuthTicket(delegate(byte[] ticket)
 			{
 				CSteamID steamID = global::Steamworks.SteamUser.GetSteamID();
@@ -133,7 +134,12 @@ internal class SteamDistributionPlatform : MonoBehaviour, DistributionPlatform.I
 
 	public bool IsDLCSubscribed(string dlcID)
 	{
-		uint num = this.DLCtoSteamIDMap[dlcID];
+		uint num;
+		if (!this.DLCtoSteamIDMap.TryGetValue(dlcID, out num))
+		{
+			DebugUtil.LogWarningArgs(new object[] { "Missing dlcID in DLCtoSteamIDMap", dlcID });
+			return false;
+		}
 		if (SteamManager.Initialized)
 		{
 			return SteamApps.BIsDlcInstalled(new AppId_t(num));
@@ -174,7 +180,11 @@ internal class SteamDistributionPlatform : MonoBehaviour, DistributionPlatform.I
 
 	private SteamDistributionPlatform.SteamUser mLocalUser;
 
-	private Dictionary<string, uint> DLCtoSteamIDMap = new Dictionary<string, uint> { { "EXPANSION1_ID", 1452490U } };
+	private Dictionary<string, uint> DLCtoSteamIDMap = new Dictionary<string, uint>
+	{
+		{ "EXPANSION1_ID", 1452490U },
+		{ "DLC2_ID", 2952300U }
+	};
 
 	public class SteamUserId : DistributionPlatform.UserId
 	{

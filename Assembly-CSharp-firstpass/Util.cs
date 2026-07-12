@@ -19,6 +19,17 @@ public static class Util
 		b = t;
 	}
 
+	public static IEnumerable Reverse(IList list)
+	{
+		int num;
+		for (int i = list.Count - 1; i >= 0; i = num)
+		{
+			yield return list[i];
+			num = i - 1;
+		}
+		yield break;
+	}
+
 	public static void Swap(IList list_or_array, in int index_a, in int index_b)
 	{
 		object obj = list_or_array[index_a];
@@ -607,6 +618,11 @@ public static class Util
 		return array;
 	}
 
+	public static string GetOperatingSystem()
+	{
+		return Util.operatingSystem;
+	}
+
 	public static string GetKleiRootPath()
 	{
 		if (Application.platform == RuntimePlatform.WindowsPlayer || Application.platform == RuntimePlatform.WindowsEditor)
@@ -830,4 +846,6 @@ public static class Util
 	private static string defaultRootFolder = Application.persistentDataPath;
 
 	private static string consoleLogPath = Application.consoleLogPath;
+
+	private static string operatingSystem = SystemInfo.operatingSystem;
 }

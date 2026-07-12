@@ -123,6 +123,17 @@ public class Building : KMonoBehaviour, IGameObjectEffectDescriptor, IUniformGri
 		}
 	}
 
+	public static void CreateBuildingMeltedNotification(GameObject building)
+	{
+		Vector3 pos = building.transform.GetPosition();
+		Notifier notifier = building.AddOrGet<Notifier>();
+		Notification notification = new Notification(MISC.NOTIFICATIONS.BUILDING_MELTED.NAME, NotificationType.Bad, (List<Notification> notificationList, object data) => MISC.NOTIFICATIONS.BUILDING_MELTED.TOOLTIP + notificationList.ReduceMessages(false), "/t• " + notifier.GetProperName(), true, 0f, delegate(object o)
+		{
+			GameUtil.FocusCamera(pos);
+		}, null, null, true, true, false);
+		notifier.Add(notification, "");
+	}
+
 	public void SetDescription(string desc)
 	{
 		this.description = desc;
@@ -132,10 +143,6 @@ public class Building : KMonoBehaviour, IGameObjectEffectDescriptor, IUniformGri
 	{
 		get
 		{
-			if (!this.description.IsNullOrWhiteSpace())
-			{
-				return this.description;
-			}
 			return this.Def.Desc;
 		}
 	}
@@ -144,10 +151,14 @@ public class Building : KMonoBehaviour, IGameObjectEffectDescriptor, IUniformGri
 	{
 		get
 		{
-			if (!this.descriptionFlavour.IsNullOrWhiteSpace())
-			{
-				return this.descriptionFlavour;
-			}
+			return this.descriptionFlavour;
+		}
+	}
+
+	public string DescEffect
+	{
+		get
+		{
 			return this.Def.Effect;
 		}
 	}
@@ -223,7 +234,7 @@ public class Building : KMonoBehaviour, IGameObjectEffectDescriptor, IUniformGri
 		return this.rotatable.GetRotatedCellOffset(offset);
 	}
 
-	private int GetBottomLeftCell()
+	public int GetBottomLeftCell()
 	{
 		return Grid.PosToCell(base.transform.GetPosition());
 	}

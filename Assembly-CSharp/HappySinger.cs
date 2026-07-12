@@ -11,8 +11,8 @@ public class HappySinger : GameStateMachine<HappySinger, HappySinger.Instance>
 		this.neutral.TagTransition(GameTags.Overjoyed, this.overjoyed, false);
 		this.overjoyed.DefaultState(this.overjoyed.idle).TagTransition(GameTags.Overjoyed, this.neutral, true).ToggleEffect("IsJoySinger")
 			.ToggleLoopingSound(this.soundPath, null, true, true, true)
-			.ToggleAnims("anim_loco_singer_kanim", 0f, "")
-			.ToggleAnims("anim_idle_singer_kanim", 0f, "")
+			.ToggleAnims("anim_loco_singer_kanim", 0f)
+			.ToggleAnims("anim_idle_singer_kanim", 0f)
 			.EventHandler(GameHashes.TagsChanged, delegate(HappySinger.Instance smi, object obj)
 			{
 				smi.musicParticleFX.SetActive(!smi.HasTag(GameTags.Asleep));

@@ -194,9 +194,9 @@ public class AchievementWidget : KMonoBehaviour
 		{
 			tooltip.AddMultiStringTooltip(COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.STATUS.EXPAND_TOOLTIP, null);
 		}
-		if (this.dlcAchievement)
+		if (DlcManager.IsDlcId(this.dlcIdFrom))
 		{
-			tooltip.AddMultiStringTooltip(COLONY_ACHIEVEMENTS.DLC.EXPANSION1, null);
+			tooltip.AddMultiStringTooltip(string.Format(COLONY_ACHIEVEMENTS.DLC_ACHIEVEMENT, DlcManager.GetDlcTitle(this.dlcIdFrom)), null);
 		}
 	}
 
@@ -510,5 +510,5 @@ public class AchievementWidget : KMonoBehaviour
 
 	private int numRequirementsDisplayed;
 
-	public bool dlcAchievement;
+	public string dlcIdFrom;
 }

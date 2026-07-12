@@ -166,7 +166,7 @@ public class CodexScreen : KScreen
 			string[] dlcIds = keyValuePair.Value.GetDlcIds();
 			for (int i = 0; i < dlcIds.Length; i++)
 			{
-				if (DlcManager.IsContentActive(dlcIds[i]))
+				if (SaveLoader.Instance.IsDLCActiveForCurrentSave(dlcIds[i]))
 				{
 					flag = true;
 					break;
@@ -175,7 +175,7 @@ public class CodexScreen : KScreen
 			string[] forbiddenDLCs = keyValuePair.Value.GetForbiddenDLCs();
 			for (int j = 0; j < forbiddenDLCs.Length; j++)
 			{
-				if (DlcManager.IsContentActive(forbiddenDLCs[j]))
+				if (SaveLoader.Instance.IsDLCActiveForCurrentSave(forbiddenDLCs[j]))
 				{
 					flag = false;
 					break;

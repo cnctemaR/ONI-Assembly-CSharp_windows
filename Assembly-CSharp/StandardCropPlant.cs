@@ -62,6 +62,8 @@ public class StandardCropPlant : StateMachineComponent<StandardCropPlant.StatesI
 	[MyCmpGet]
 	private Harvestable harvestable;
 
+	public bool wiltsOnReadyToHarvest;
+
 	public static StandardCropPlant.AnimSet defaultAnimSet = new StandardCropPlant.AnimSet
 	{
 		grow = "grow",
@@ -138,7 +140,9 @@ public class StandardCropPlant : StateMachineComponent<StandardCropPlant.StatesI
 				.Enter(new StateMachine<StandardCropPlant.States, StandardCropPlant.StatesInstance, StandardCropPlant, object>.State.Callback(StandardCropPlant.States.RefreshPositionPercent))
 				.Update(new Action<StandardCropPlant.StatesInstance, float>(StandardCropPlant.States.RefreshPositionPercent), UpdateRate.SIM_4000ms, false)
 				.EventHandler(GameHashes.ConsumePlant, new StateMachine<StandardCropPlant.States, StandardCropPlant.StatesInstance, StandardCropPlant, object>.State.Callback(StandardCropPlant.States.RefreshPositionPercent));
-			this.alive.pre_fruiting.PlayAnim((StandardCropPlant.StatesInstance smi) => smi.master.anims.grow_pst, KAnim.PlayMode.Once).TriggerOnEnter(GameHashes.BurstEmitDisease, null).EventTransition(GameHashes.AnimQueueComplete, this.alive.fruiting, null);
+			this.alive.pre_fruiting.PlayAnim((StandardCropPlant.StatesInstance smi) => smi.master.anims.grow_pst, KAnim.PlayMode.Once).TriggerOnEnter(GameHashes.BurstEmitDisease, null).EventTransition(GameHashes.AnimQueueComplete, this.alive.fruiting, null)
+				.EventTransition(GameHashes.Wilt, this.alive.wilting, null)
+				.ScheduleGoTo(2f, this.alive.fruiting);
 			this.alive.fruiting_lost.Enter(delegate(StandardCropPlant.StatesInstance smi)
 			{
 				if (smi.master.harvestable != null)
@@ -155,7 +159,7 @@ public class StandardCropPlant : StateMachineComponent<StandardCropPlant.StatesI
 				{
 					smi.master.harvestable.SetCanBeHarvested(true);
 				}
-			}).EventTransition(GameHashes.Wilt, this.alive.wilting, null)
+			}).EventHandlerTransition(GameHashes.Wilt, this.alive.wilting, (StandardCropPlant.StatesInstance smi, object obj) => smi.master.wiltsOnReadyToHarvest)
 				.EventTransition(GameHashes.Harvest, this.alive.harvest, null)
 				.EventTransition(GameHashes.Grow, this.alive.fruiting_lost, (StandardCropPlant.StatesInstance smi) => !smi.master.growing.ReachedNextHarvest());
 			this.alive.harvest.PlayAnim((StandardCropPlant.StatesInstance smi) => smi.master.anims.harvest, KAnim.PlayMode.Once).Enter(delegate(StandardCropPlant.StatesInstance smi)

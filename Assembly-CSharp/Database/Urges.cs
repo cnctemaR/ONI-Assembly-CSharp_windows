@@ -13,6 +13,7 @@ namespace Database
 			this.PacifyIdle = base.Add(new Urge("PacifyIdle"));
 			this.EmoteHighPriority = base.Add(new Urge("EmoteHighPriority"));
 			this.RecoverBreath = base.Add(new Urge("RecoverBreath"));
+			this.RecoverWarmth = base.Add(new Urge("RecoverWarmth"));
 			this.Aggression = base.Add(new Urge("Aggression"));
 			this.MoveToQuarantine = base.Add(new Urge("MoveToQuarantine"));
 			this.WashHands = base.Add(new Urge("WashHands"));
@@ -53,6 +54,8 @@ namespace Database
 		public Urge HealCritical;
 
 		public Urge RecoverBreath;
+
+		public Urge RecoverWarmth;
 
 		public Urge Emote;
 

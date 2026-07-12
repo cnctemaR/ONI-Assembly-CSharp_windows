@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 using FMOD.Studio;
 using KSerialization;
+using ProcGen;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
@@ -60,6 +61,29 @@ public class TimeOfDay : KMonoBehaviour, ISaveLoadable
 	{
 		base.OnSpawn();
 		this.timeRegion = this.GetCurrentTimeRegion();
+		string clusterId = SaveLoader.Instance.GameInfo.clusterId;
+		ClusterLayout clusterData = SettingsCache.clusterLayouts.GetClusterData(clusterId);
+		if (clusterData != null && !string.IsNullOrWhiteSpace(clusterData.clusterAudio.stingerDay))
+		{
+			this.stingerDay = clusterData.clusterAudio.stingerDay;
+		}
+		else
+		{
+			this.stingerDay = "Stinger_Day";
+		}
+		if (clusterData != null && !string.IsNullOrWhiteSpace(clusterData.clusterAudio.stingerNight))
+		{
+			this.stingerNight = clusterData.clusterAudio.stingerNight;
+		}
+		else
+		{
+			this.stingerNight = "Stinger_Loop_Night";
+		}
+		if (!MusicManager.instance.SongIsPlaying(this.stingerNight) && this.GetCurrentTimeRegion() == TimeOfDay.TimeRegion.Night)
+		{
+			MusicManager.instance.PlaySong(this.stingerNight, false);
+			MusicManager.instance.SetSongParameter(this.stingerNight, "Music_PlayStinger", 0f, true);
+		}
 		this.UpdateSunlightIntensity();
 	}
 
@@ -147,9 +171,9 @@ public class TimeOfDay : KMonoBehaviour, ISaveLoadable
 		if (new_region == TimeOfDay.TimeRegion.Day)
 		{
 			AudioMixer.instance.Stop(AudioMixerSnapshots.Get().NightStartedMigrated, STOP_MODE.ALLOWFADEOUT);
-			if (MusicManager.instance.SongIsPlaying("Stinger_Loop_Night"))
+			if (MusicManager.instance.SongIsPlaying(this.stingerNight))
 			{
-				MusicManager.instance.StopSong("Stinger_Loop_Night", true, STOP_MODE.ALLOWFADEOUT);
+				MusicManager.instance.StopSong(this.stingerNight, true, STOP_MODE.ALLOWFADEOUT);
 			}
 			if (milestoneReached)
 			{
@@ -157,7 +181,7 @@ public class TimeOfDay : KMonoBehaviour, ISaveLoadable
 			}
 			else
 			{
-				MusicManager.instance.PlaySong("Stinger_Day", false);
+				MusicManager.instance.PlaySong(this.stingerDay, false);
 			}
 			MusicManager.instance.PlayDynamicMusic();
 			return;
@@ -167,7 +191,7 @@ public class TimeOfDay : KMonoBehaviour, ISaveLoadable
 			return;
 		}
 		AudioMixer.instance.Start(AudioMixerSnapshots.Get().NightStartedMigrated);
-		MusicManager.instance.PlaySong("Stinger_Loop_Night", false);
+		MusicManager.instance.PlaySong(this.stingerNight, false);
 	}
 
 	public void SetScale(float new_scale)
@@ -185,6 +209,10 @@ public class TimeOfDay : KMonoBehaviour, ISaveLoadable
 	private EventInstance nightLPEvent;
 
 	public static TimeOfDay Instance;
+
+	public string stingerDay;
+
+	public string stingerNight;
 
 	private bool isEclipse;
 

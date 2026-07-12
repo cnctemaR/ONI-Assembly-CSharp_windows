@@ -58,8 +58,13 @@ public class SingleEntityReceptacle : Workable, IRender1000ms
 
 	public bool IsValidEntity(GameObject candidate)
 	{
-		IReceptacleDirection component = candidate.GetComponent<IReceptacleDirection>();
-		bool flag = this.rotatable != null || component == null || component.Direction == this.Direction;
+		KPrefabID component = candidate.GetComponent<KPrefabID>();
+		if (!SaveLoader.Instance.IsDlcListActiveForCurrentSave(component.requiredDlcIds))
+		{
+			return false;
+		}
+		IReceptacleDirection component2 = candidate.GetComponent<IReceptacleDirection>();
+		bool flag = this.rotatable != null || component2 == null || component2.Direction == this.Direction;
 		int num = 0;
 		while (flag && num < this.additionalCriteria.Count)
 		{

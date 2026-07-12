@@ -33,7 +33,17 @@ public class LightBugOrangeConfig : IEntityConfig
 	public GameObject CreatePrefab()
 	{
 		GameObject gameObject = LightBugOrangeConfig.CreateLightBug("LightBugOrange", global::STRINGS.CREATURES.SPECIES.LIGHTBUG.VARIANT_ORANGE.NAME, global::STRINGS.CREATURES.SPECIES.LIGHTBUG.VARIANT_ORANGE.DESC, "lightbug_kanim", false);
-		EntityTemplates.ExtendEntityToFertileCreature(gameObject, "LightBugOrangeEgg", global::STRINGS.CREATURES.SPECIES.LIGHTBUG.VARIANT_ORANGE.EGG_NAME, global::STRINGS.CREATURES.SPECIES.LIGHTBUG.VARIANT_ORANGE.DESC, "egg_lightbug_kanim", LightBugTuning.EGG_MASS, "LightBugOrangeBaby", 15.000001f, 5f, LightBugTuning.EGG_CHANCES_ORANGE, LightBugOrangeConfig.EGG_SORT_ORDER, true, false, true, 1f, false);
+		string text = "LightBugOrangeEgg";
+		string text2 = global::STRINGS.CREATURES.SPECIES.LIGHTBUG.VARIANT_ORANGE.EGG_NAME;
+		string text3 = global::STRINGS.CREATURES.SPECIES.LIGHTBUG.VARIANT_ORANGE.DESC;
+		string text4 = "egg_lightbug_kanim";
+		float egg_MASS = LightBugTuning.EGG_MASS;
+		string text5 = "LightBugOrangeBaby";
+		float num = 15.000001f;
+		float num2 = 5f;
+		List<FertilityMonitor.BreedingChance> egg_CHANCES_ORANGE = LightBugTuning.EGG_CHANCES_ORANGE;
+		int egg_SORT_ORDER = LightBugOrangeConfig.EGG_SORT_ORDER;
+		EntityTemplates.ExtendEntityToFertileCreature(gameObject, text, text2, text3, text4, egg_MASS, text5, num, num2, egg_CHANCES_ORANGE, this.GetDlcIds(), egg_SORT_ORDER, true, false, true, 1f, false);
 		return gameObject;
 	}
 

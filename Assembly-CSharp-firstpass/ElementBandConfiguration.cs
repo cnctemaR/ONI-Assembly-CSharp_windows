@@ -18,7 +18,7 @@ public class ElementBandConfiguration : List<ElementGradient>
 	{
 	}
 
-	public List<float> ConvertBandSizeToMaxSize()
+	public List<float> ConvertBandSizeToMaxSize(bool normalize = false)
 	{
 		List<float> list = new List<float>();
 		float num = 0f;
@@ -34,6 +34,10 @@ public class ElementBandConfiguration : List<ElementGradient>
 			elementGradient2.maxValue = num2 + elementGradient2.bandSize / num;
 			num2 = elementGradient2.maxValue;
 			list.Add(elementGradient2.maxValue);
+			if (normalize)
+			{
+				elementGradient2.bandSize /= num;
+			}
 		}
 		return list;
 	}

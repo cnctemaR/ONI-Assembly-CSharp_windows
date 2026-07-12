@@ -25,11 +25,11 @@ public class SleepClinicPajamas : IEquipmentConfig
 		Effect.AddModifierDescriptions(null, equipmentDef.additionalDescriptors, "SleepClinic", false);
 		equipmentDef.OnEquipCallBack = delegate(Equippable eq)
 		{
-			CoolVestConfig.OnEquipVest(eq, clothingInfo);
+			ClothingWearer.ClothingInfo.OnEquipVest(eq, clothingInfo);
 		};
 		equipmentDef.OnUnequipCallBack = delegate(Equippable eq)
 		{
-			CoolVestConfig.OnUnequipVest(eq);
+			ClothingWearer.ClothingInfo.OnUnequipVest(eq);
 			PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Negative, global::STRINGS.EQUIPMENT.PREFABS.SLEEPCLINICPAJAMAS.DESTROY_TOAST, eq.transform, 1.5f, false);
 			eq.gameObject.DeleteObject();
 		};

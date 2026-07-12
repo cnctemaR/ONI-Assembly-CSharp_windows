@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Klei.AI;
 using STRINGS;
 using TUNING;
@@ -8,7 +9,7 @@ public class OilFloaterDecorConfig : IEntityConfig
 {
 	public static GameObject CreateOilFloater(string id, string name, string desc, string anim_file, bool is_baby)
 	{
-		GameObject gameObject = BaseOilFloaterConfig.BaseOilFloater(id, name, desc, anim_file, "OilfloaterDecorBaseTrait", 283.15f, 343.15f, is_baby, "oxy_");
+		GameObject gameObject = BaseOilFloaterConfig.BaseOilFloater(id, name, desc, anim_file, "OilfloaterDecorBaseTrait", 273.15f, 323.15f, 223.15f, 373.15f, is_baby, "oxy_");
 		gameObject.AddOrGet<DecorProvider>().SetValues(DECOR.BONUS.TIER6);
 		EntityTemplates.ExtendEntityToWildCreature(gameObject, OilFloaterTuning.PEN_SIZE_PER_CREATURE);
 		Trait trait = Db.Get().CreateTrait("OilfloaterDecorBaseTrait", name, name, null, false, null, true, true);
@@ -27,7 +28,17 @@ public class OilFloaterDecorConfig : IEntityConfig
 	public GameObject CreatePrefab()
 	{
 		GameObject gameObject = OilFloaterDecorConfig.CreateOilFloater("OilfloaterDecor", global::STRINGS.CREATURES.SPECIES.OILFLOATER.VARIANT_DECOR.NAME, global::STRINGS.CREATURES.SPECIES.OILFLOATER.VARIANT_DECOR.DESC, "oilfloater_kanim", false);
-		EntityTemplates.ExtendEntityToFertileCreature(gameObject, "OilfloaterDecorEgg", global::STRINGS.CREATURES.SPECIES.OILFLOATER.VARIANT_DECOR.EGG_NAME, global::STRINGS.CREATURES.SPECIES.OILFLOATER.VARIANT_DECOR.DESC, "egg_oilfloater_kanim", OilFloaterTuning.EGG_MASS, "OilfloaterDecorBaby", 90f, 30f, OilFloaterTuning.EGG_CHANCES_DECOR, OilFloaterDecorConfig.EGG_SORT_ORDER, true, false, true, 1f, false);
+		string text = "OilfloaterDecorEgg";
+		string text2 = global::STRINGS.CREATURES.SPECIES.OILFLOATER.VARIANT_DECOR.EGG_NAME;
+		string text3 = global::STRINGS.CREATURES.SPECIES.OILFLOATER.VARIANT_DECOR.DESC;
+		string text4 = "egg_oilfloater_kanim";
+		float egg_MASS = OilFloaterTuning.EGG_MASS;
+		string text5 = "OilfloaterDecorBaby";
+		float num = 90f;
+		float num2 = 30f;
+		List<FertilityMonitor.BreedingChance> egg_CHANCES_DECOR = OilFloaterTuning.EGG_CHANCES_DECOR;
+		int egg_SORT_ORDER = OilFloaterDecorConfig.EGG_SORT_ORDER;
+		EntityTemplates.ExtendEntityToFertileCreature(gameObject, text, text2, text3, text4, egg_MASS, text5, num, num2, egg_CHANCES_DECOR, this.GetDlcIds(), egg_SORT_ORDER, true, false, true, 1f, false);
 		return gameObject;
 	}
 

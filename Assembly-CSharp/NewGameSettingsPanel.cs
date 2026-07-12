@@ -4,7 +4,7 @@ using Klei.CustomSettings;
 using UnityEngine;
 
 [AddComponentMenu("KMonoBehaviour/scripts/NewGameSettingsPanel")]
-public class NewGameSettingsPanel : KMonoBehaviour
+public class NewGameSettingsPanel : CustomGameSettingsPanelBase
 {
 	public void SetCloseAction(global::System.Action onClose)
 	{
@@ -18,58 +18,49 @@ public class NewGameSettingsPanel : KMonoBehaviour
 		}
 	}
 
-	public void Init()
+	public override void Init()
 	{
 		CustomGameSettings.Instance.LoadClusters();
 		Global.Instance.modManager.Report(base.gameObject);
 		this.settings = CustomGameSettings.Instance;
-		this.widgets = new List<NewGameSettingWidget>();
+		this.widgets = new List<CustomGameSettingWidget>();
 		foreach (KeyValuePair<string, SettingConfig> keyValuePair in this.settings.QualitySettings)
 		{
-			if ((!keyValuePair.Value.debug_only || DebugHandler.enabled) && (!keyValuePair.Value.editor_only || Application.isEditor) && DlcManager.IsContentActive(keyValuePair.Value.required_content))
+			if (keyValuePair.Value.ShowInUI())
 			{
 				ListSettingConfig listSettingConfig = keyValuePair.Value as ListSettingConfig;
 				if (listSettingConfig != null)
 				{
-					NewGameSettingList newGameSettingList = Util.KInstantiateUI<NewGameSettingList>(this.prefab_cycle_setting, this.content.gameObject, true);
-					newGameSettingList.Initialize(listSettingConfig, this, keyValuePair.Value.missing_content_default);
-					this.widgets.Add(newGameSettingList);
+					CustomGameSettingListWidget customGameSettingListWidget = Util.KInstantiateUI<CustomGameSettingListWidget>(this.prefab_cycle_setting, this.content.gameObject, false);
+					customGameSettingListWidget.Initialize(listSettingConfig, new Func<SettingConfig, SettingLevel>(CustomGameSettings.Instance.GetCurrentQualitySetting), new Func<ListSettingConfig, int, SettingLevel>(CustomGameSettings.Instance.CycleQualitySettingLevel));
+					customGameSettingListWidget.gameObject.SetActive(true);
+					base.AddWidget(customGameSettingListWidget);
 				}
 				else
 				{
 					ToggleSettingConfig toggleSettingConfig = keyValuePair.Value as ToggleSettingConfig;
 					if (toggleSettingConfig != null)
 					{
-						NewGameSettingToggle newGameSettingToggle = Util.KInstantiateUI<NewGameSettingToggle>(this.prefab_checkbox_setting, this.content.gameObject, true);
-						newGameSettingToggle.Initialize(toggleSettingConfig, this, keyValuePair.Value.missing_content_default);
-						this.widgets.Add(newGameSettingToggle);
+						CustomGameSettingToggleWidget customGameSettingToggleWidget = Util.KInstantiateUI<CustomGameSettingToggleWidget>(this.prefab_checkbox_setting, this.content.gameObject, false);
+						customGameSettingToggleWidget.Initialize(toggleSettingConfig, new Func<SettingConfig, SettingLevel>(CustomGameSettings.Instance.GetCurrentQualitySetting), new Func<ToggleSettingConfig, SettingLevel>(CustomGameSettings.Instance.ToggleQualitySettingLevel));
+						customGameSettingToggleWidget.gameObject.SetActive(true);
+						base.AddWidget(customGameSettingToggleWidget);
 					}
 					else
 					{
 						SeedSettingConfig seedSettingConfig = keyValuePair.Value as SeedSettingConfig;
 						if (seedSettingConfig != null)
 						{
-							NewGameSettingSeed newGameSettingSeed = Util.KInstantiateUI<NewGameSettingSeed>(this.prefab_seed_input_setting, this.content.gameObject, true);
-							newGameSettingSeed.Initialize(seedSettingConfig);
-							this.widgets.Add(newGameSettingSeed);
+							CustomGameSettingSeed customGameSettingSeed = Util.KInstantiateUI<CustomGameSettingSeed>(this.prefab_seed_input_setting, this.content.gameObject, false);
+							customGameSettingSeed.Initialize(seedSettingConfig);
+							customGameSettingSeed.gameObject.SetActive(true);
+							base.AddWidget(customGameSettingSeed);
 						}
 					}
 				}
 			}
 		}
 		this.Refresh();
-	}
-
-	public void Refresh()
-	{
-		foreach (NewGameSettingWidget newGameSettingWidget in this.widgets)
-		{
-			newGameSettingWidget.Refresh();
-		}
-		if (this.OnRefresh != null)
-		{
-			this.OnRefresh();
-		}
 	}
 
 	public void ConsumeSettingsCode(string code)
@@ -80,6 +71,11 @@ public class NewGameSettingsPanel : KMonoBehaviour
 	public void ConsumeStoryTraitsCode(string code)
 	{
 		this.settings.ParseAndApplyStoryTraitSettingsCode(code);
+	}
+
+	public void ConsumeMixingSettingsCode(string code)
+	{
+		this.settings.ParseAndApplyMixingSettingsCode(code);
 	}
 
 	public void SetSetting(SettingConfig setting, string level, bool notify = true)
@@ -124,8 +120,4 @@ public class NewGameSettingsPanel : KMonoBehaviour
 	private GameObject prefab_seed_input_setting;
 
 	private CustomGameSettings settings;
-
-	private List<NewGameSettingWidget> widgets;
-
-	public global::System.Action OnRefresh;
 }

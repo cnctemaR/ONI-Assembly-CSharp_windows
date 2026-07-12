@@ -53,8 +53,8 @@ public class TreeClimbStates : GameStateMachine<TreeClimbStates, TreeClimbStates
 		GameObject gameObject = smi.sm.target.Get(smi);
 		if (gameObject != null)
 		{
-			BuddingTrunk component = gameObject.GetComponent<BuddingTrunk>();
-			if (component)
+			ForestTreeSeedMonitor component = gameObject.GetComponent<ForestTreeSeedMonitor>();
+			if (component != null)
 			{
 				component.ExtractExtraSeed();
 				return;

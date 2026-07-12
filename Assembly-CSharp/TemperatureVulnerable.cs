@@ -59,8 +59,6 @@ public class TemperatureVulnerable : StateMachineComponent<TemperatureVulnerable
 		}
 	}
 
-	public event Action<float, float> OnTemperature;
-
 	public float InternalTemperature
 	{
 		get
@@ -162,10 +160,6 @@ public class TemperatureVulnerable : StateMachineComponent<TemperatureVulnerable
 		}
 		base.smi.sm.internalTemp.Set(this.InternalTemperature, base.smi, false);
 		this.displayTemperatureAmount.value = this.InternalTemperature;
-		if (this.OnTemperature != null)
-		{
-			this.OnTemperature(dt, this.InternalTemperature);
-		}
 	}
 
 	private static bool GetAverageTemperatureCb(int cell, object data)
@@ -243,13 +237,7 @@ public class TemperatureVulnerable : StateMachineComponent<TemperatureVulnerable
 		public StatesInstance(TemperatureVulnerable master)
 			: base(master)
 		{
-			if (Db.Get().Amounts.Maturity.Lookup(base.gameObject) != null)
-			{
-				this.hasMaturity = true;
-			}
 		}
-
-		public bool hasMaturity;
 	}
 
 	public class States : GameStateMachine<TemperatureVulnerable.States, TemperatureVulnerable.StatesInstance, TemperatureVulnerable>

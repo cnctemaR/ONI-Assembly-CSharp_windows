@@ -33,6 +33,7 @@ namespace TUNING
 			GameTags.Agriculture,
 			GameTags.Filter,
 			GameTags.ConsumableOre,
+			GameTags.Sublimating,
 			GameTags.Liquifiable,
 			GameTags.IndustrialProduct,
 			GameTags.IndustrialIngredient,
@@ -44,6 +45,13 @@ namespace TUNING
 			GameTags.Other,
 			GameTags.StoryTraitResource,
 			GameTags.Dehydrated
+		};
+
+		public static List<Tag> SPECIAL_STORAGE = new List<Tag>
+		{
+			GameTags.Clothes,
+			GameTags.Egg,
+			GameTags.Sublimating
 		};
 
 		public static List<Tag> STORAGE_LOCKERS_STANDARD = STORAGEFILTERS.NOT_EDIBLE_SOLIDS.Union<Tag>(new List<Tag> { GameTags.Medicine }).ToList<Tag>();

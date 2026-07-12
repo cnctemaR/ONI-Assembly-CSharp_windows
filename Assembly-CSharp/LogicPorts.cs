@@ -18,8 +18,9 @@ public class LogicPorts : KMonoBehaviour, IGameObjectEffectDescriptor, IRenderEv
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		this.isPhysical = base.GetComponent<BuildingComplete>() != null;
-		if (!this.isPhysical && base.GetComponent<BuildingUnderConstruction>() == null)
+		Building component = base.GetComponent<Building>();
+		this.isPhysical = component == null || component is BuildingComplete;
+		if (!this.isPhysical && !(component is BuildingUnderConstruction))
 		{
 			OverlayScreen instance = OverlayScreen.Instance;
 			instance.OnOverlayChanged = (Action<HashedString>)Delegate.Combine(instance.OnOverlayChanged, new Action<HashedString>(this.OnOverlayChanged));

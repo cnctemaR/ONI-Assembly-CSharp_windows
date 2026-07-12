@@ -96,11 +96,11 @@ public class HarvestDesignatable : KMonoBehaviour
 			Vector3 vector;
 			if (base.GetComponent<KPrefabID>().HasTag(GameTags.Hanging))
 			{
-				vector = new Vector3((float)(extents.x + extents.width / 2) + 0.5f, (float)(extents.y + extents.height));
+				vector = new Vector3((float)(extents.x + extents.width / 2) + 0.5f, (float)(extents.y + extents.height)) + this.iconOffset;
 			}
 			else
 			{
-				vector = new Vector3((float)(extents.x + extents.width / 2) + 0.5f, (float)extents.y);
+				vector = new Vector3((float)(extents.x + extents.width / 2) + 0.5f, (float)extents.y) + this.iconOffset;
 			}
 			this.HarvestWhenReadyOverlayIcon.transform.SetPosition(vector);
 			this.RefreshOverlayIcon(null);
@@ -244,6 +244,8 @@ public class HarvestDesignatable : KMonoBehaviour
 			Game.Instance.userMenu.AddButton(base.gameObject, buttonInfo, 1f);
 		}
 	}
+
+	public Vector2 iconOffset = Vector2.zero;
 
 	public bool defaultHarvestStateWhenPlanted = true;
 

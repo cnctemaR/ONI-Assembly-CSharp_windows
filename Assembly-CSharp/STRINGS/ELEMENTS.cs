@@ -1003,6 +1003,45 @@ namespace STRINGS
 			});
 		}
 
+		public class WOODLOG
+		{
+			public static LocString NAME = UI.FormatAsLink("Wood", "WOOD");
+
+			public static LocString DESC = string.Concat(new string[]
+			{
+				"Wood is a good source of ",
+				UI.FormatAsLink("Heat", "HEAT"),
+				" and ",
+				UI.FormatAsLink("Power", "POWER"),
+				".\n\nIts insulation properties and positive ",
+				UI.FormatAsLink("Decor", "DECOR"),
+				" also make it a useful <b>Construction Material</b>."
+			});
+		}
+
+		public class CINNABAR
+		{
+			public static LocString NAME = UI.FormatAsLink("Cinnabar Ore", "CINNABAR");
+
+			public static LocString DESC = string.Concat(new string[]
+			{
+				"(HgS) Cinnabar Ore, also known as mercury sulfide, is a conductive ",
+				UI.FormatAsLink("Metal", "RAWMETAL"),
+				" that can be refined into ",
+				UI.FormatAsLink("Mercury", "MERCURY"),
+				".\n\nIt is suitable for building ",
+				UI.FormatAsLink("Power", "POWER"),
+				" systems."
+			});
+		}
+
+		public class TALLOW
+		{
+			public static LocString NAME = UI.FormatAsLink("Tallow", "TALLOW");
+
+			public static LocString DESC = "A chunk of uncooked grease from a deceased " + CREATURES.SPECIES.SEAL.NAME + ".";
+		}
+
 		public class MERCURY
 		{
 			public static LocString NAME = UI.FormatAsLink("Mercury", "MERCURY");
@@ -1012,11 +1051,11 @@ namespace STRINGS
 
 		public class MERCURYGAS
 		{
-			public static LocString NAME = UI.FormatAsLink("Mercury", "MERCURYGAS");
+			public static LocString NAME = UI.FormatAsLink("Mercury Gas", "MERCURYGAS");
 
 			public static LocString DESC = string.Concat(new string[]
 			{
-				"(Hg) Mercury is a ",
+				"(Hg) Mercury Gas is a ",
 				UI.FormatAsLink("Metal", "RAWMETAL"),
 				" heated into a ",
 				UI.FormatAsLink("Gaseous", "ELEMENTS_GAS"),
@@ -1070,7 +1109,7 @@ namespace STRINGS
 		{
 			public static LocString NAME = UI.FormatAsLink("Liquid Carbon", "MOLTENCARBON");
 
-			public static LocString DESC = "(C) Carbon is an abundant, versatile element heated into a " + UI.FormatAsLink("Liquid", "ELEMENTS_LIQUID") + " state.";
+			public static LocString DESC = "(C) Liquid Carbon is an abundant, versatile element heated into a " + UI.FormatAsLink("Liquid", "ELEMENTS_LIQUID") + " state.";
 		}
 
 		public class MOLTENCOPPER
@@ -1462,6 +1501,13 @@ namespace STRINGS
 			public static LocString DESC = "(H<sub>2</sub>O) Snow is a mass of loose, crystalline ice particles.\n\nIt becomes " + UI.FormatAsLink("Water", "WATER") + " when melted.";
 		}
 
+		public class STABLESNOW
+		{
+			public static LocString NAME = "Packed " + ELEMENTS.SNOW.NAME;
+
+			public static LocString DESC = ELEMENTS.SNOW.DESC;
+		}
+
 		public class SOLIDCARBONDIOXIDE
 		{
 			public static LocString NAME = UI.FormatAsLink("Solid Carbon Dioxide", "SOLIDCARBONDIOXIDE");
@@ -1641,6 +1687,20 @@ namespace STRINGS
 				" ",
 				UI.FormatAsLink("Gas", "ELEMENTS_GAS"),
 				" composed of iron and carbon."
+			});
+		}
+
+		public class SUGARWATER
+		{
+			public static LocString NAME = UI.FormatAsLink("Nectar", "SUGARWATER");
+
+			public static LocString DESC = string.Concat(new string[]
+			{
+				"Nectar is a natural, lightly concentrated solution of ",
+				UI.FormatAsLink("Sucrose", "SUCROSE"),
+				" dissolved in ",
+				UI.FormatAsLink("Water", "WATER"),
+				"."
 			});
 		}
 
@@ -1941,21 +2001,14 @@ namespace STRINGS
 		{
 			public static LocString NAME = UI.FormatAsLink("Sucrose", "SUCROSE");
 
-			public static LocString DESC = "(C<sub>12</sub>H<sub>22</sub>O<sub>11</sub>) Sucrose is the raw form of sugar.\n\nIt can be used directly for cooking, or refined and eaten with meals to increase Duplicant " + UI.FormatAsLink("Morale", "MORALE") + ".";
+			public static LocString DESC = "(C<sub>12</sub>H<sub>22</sub>O<sub>11</sub>) Sucrose is the raw form of sugar.\n\nIt can be used for cooking higher-quality " + UI.FormatAsLink("Food", "FOOD") + ".";
 		}
 
 		public class MOLTENSUCROSE
 		{
 			public static LocString NAME = UI.FormatAsLink("Liquid Sucrose", "MOLTENSUCROSE");
 
-			public static LocString DESC = string.Concat(new string[]
-			{
-				"(C<sub>12</sub>H<sub>22</sub>O<sub>11</sub>) Sucrose is the raw form of sugar, heated into a ",
-				UI.FormatAsLink("Liquid", "ELEMENTS_LIQUID"),
-				" state.\n\nIt can be used directly for cooking, or refined and eaten with meals to increase Duplicant ",
-				UI.FormatAsLink("Morale", "MORALE"),
-				"."
-			});
+			public static LocString DESC = "(C<sub>12</sub>H<sub>22</sub>O<sub>11</sub>) Liquid Sucrose is the raw form of sugar, heated into a " + UI.FormatAsLink("Liquid", "ELEMENTS_LIQUID") + " state.";
 		}
 	}
 }

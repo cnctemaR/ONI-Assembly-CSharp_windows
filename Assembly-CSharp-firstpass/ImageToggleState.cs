@@ -103,7 +103,7 @@ public class ImageToggleState : KMonoBehaviour
 		this.SetInactive();
 	}
 
-	public void SetActive()
+	public virtual void SetActive()
 	{
 		if (this.currentState == ImageToggleState.State.Active)
 		{
@@ -168,7 +168,7 @@ public class ImageToggleState : KMonoBehaviour
 		this.ResetColor();
 	}
 
-	public void SetInactive()
+	public virtual void SetInactive()
 	{
 		if (this.currentState == ImageToggleState.State.Inactive)
 		{
@@ -195,7 +195,7 @@ public class ImageToggleState : KMonoBehaviour
 		}
 	}
 
-	public void SetDisabled()
+	public virtual void SetDisabled()
 	{
 		if (this.currentState == ImageToggleState.State.Disabled)
 		{
@@ -223,7 +223,7 @@ public class ImageToggleState : KMonoBehaviour
 		}
 	}
 
-	public void SetDisabledActive()
+	public virtual void SetDisabledActive()
 	{
 		this.isActive = false;
 		this.currentState = ImageToggleState.State.DisabledActive;

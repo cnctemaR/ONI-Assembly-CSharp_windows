@@ -34,16 +34,15 @@ public class PasteBaseTemplateScreen : KScreen
 			global::UnityEngine.Object.Destroy(gameObject);
 		}
 		this.m_template_buttons.Clear();
-		global::Debug.Log("Changing directory to " + this.m_CurrentDirectory);
 		if (this.m_CurrentDirectory == PasteBaseTemplateScreen.NO_DIRECTORY)
 		{
 			this.directory_path_text.text = "";
-			using (List<string>.Enumerator enumerator2 = DlcManager.RELEASE_ORDER.GetEnumerator())
+			using (List<string>.Enumerator enumerator2 = DlcManager.RELEASED_VERSIONS.GetEnumerator())
 			{
 				while (enumerator2.MoveNext())
 				{
 					string dlcId = enumerator2.Current;
-					if (DlcManager.IsContentActive(dlcId))
+					if (SaveLoader.Instance.IsDLCActiveForCurrentSave(dlcId))
 					{
 						GameObject gameObject2 = global::Util.KInstantiateUI(this.prefab_directory_button, this.button_list_container, true);
 						gameObject2.GetComponent<KButton>().onClick += delegate
@@ -57,18 +56,22 @@ public class PasteBaseTemplateScreen : KScreen
 			}
 			return;
 		}
-		string[] directories = Directory.GetDirectories(TemplateCache.RewriteTemplatePath(this.m_CurrentDirectory));
-		for (int i = 0; i < directories.Length; i++)
+		string text = TemplateCache.RewriteTemplatePath(this.m_CurrentDirectory);
+		if (Directory.Exists(text))
 		{
-			string text = directories[i];
-			string directory_name = global::System.IO.Path.GetFileNameWithoutExtension(text);
-			GameObject gameObject3 = global::Util.KInstantiateUI(this.prefab_directory_button, this.button_list_container, true);
-			gameObject3.GetComponent<KButton>().onClick += delegate
+			string[] directories = Directory.GetDirectories(text);
+			for (int i = 0; i < directories.Length; i++)
 			{
-				this.UpdateDirectory(directory_name);
-			};
-			gameObject3.GetComponentInChildren<LocText>().text = directory_name;
-			this.m_template_buttons.Add(gameObject3);
+				string text2 = directories[i];
+				string directory_name = global::System.IO.Path.GetFileNameWithoutExtension(text2);
+				GameObject gameObject3 = global::Util.KInstantiateUI(this.prefab_directory_button, this.button_list_container, true);
+				gameObject3.GetComponent<KButton>().onClick += delegate
+				{
+					this.UpdateDirectory(directory_name);
+				};
+				gameObject3.GetComponentInChildren<LocText>().text = directory_name;
+				this.m_template_buttons.Add(gameObject3);
+			}
 		}
 		ListPool<FileHandle, PasteBaseTemplateScreen>.PooledList pooledList = ListPool<FileHandle, PasteBaseTemplateScreen>.Allocate();
 		FileSystem.GetFiles(TemplateCache.RewriteTemplatePath(this.m_CurrentDirectory), "*.yaml", pooledList);

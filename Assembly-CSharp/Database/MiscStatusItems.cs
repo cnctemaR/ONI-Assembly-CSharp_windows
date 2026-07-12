@@ -97,6 +97,7 @@ namespace Database
 				str = str.Replace("{Disease}", GameUtil.GetFormattedDisease(cellSelectionObject4.diseaseIdx, cellSelectionObject4.diseaseCount, true));
 				return str;
 			};
+			this.GrowingBranches = new StatusItem("GrowingBranches", "MISC", "", StatusItem.IconType.Info, NotificationType.Good, false, OverlayModes.None.ID, true, 129022, null);
 			this.TreeFilterableTags = this.CreateStatusItem("TreeFilterableTags", "MISC", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
 			this.TreeFilterableTags.resolveStringCallback = delegate(string str, object data)
 			{
@@ -395,5 +396,7 @@ namespace Database
 		public StatusItem MarkedForMove;
 
 		public StatusItem MoveStorageUnreachable;
+
+		public StatusItem GrowingBranches;
 	}
 }

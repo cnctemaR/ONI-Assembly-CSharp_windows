@@ -63,29 +63,13 @@ public class ClothingFabricatorConfig : IBuildingConfig
 		};
 		ComplexRecipe.RecipeElement[] array3 = new ComplexRecipe.RecipeElement[]
 		{
-			new ComplexRecipe.RecipeElement("BasicFabric".ToTag(), (float)global::TUNING.EQUIPMENT.VESTS.COOL_VEST_MASS)
+			new ComplexRecipe.RecipeElement("BasicFabric".ToTag(), (float)global::TUNING.EQUIPMENT.VESTS.FUNKY_VEST_MASS)
 		};
 		ComplexRecipe.RecipeElement[] array4 = new ComplexRecipe.RecipeElement[]
 		{
-			new ComplexRecipe.RecipeElement("Cool_Vest".ToTag(), 1f, ComplexRecipe.RecipeElement.TemperatureOperation.AverageTemperature, false)
-		};
-		CoolVestConfig.recipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("ClothingFabricator", array3, array4), array3, array4)
-		{
-			time = global::TUNING.EQUIPMENT.VESTS.COOL_VEST_FABTIME,
-			description = global::STRINGS.EQUIPMENT.PREFABS.COOL_VEST.RECIPE_DESC,
-			nameDisplay = ComplexRecipe.RecipeNameDisplay.Result,
-			fabricators = new List<Tag> { "ClothingFabricator" },
-			sortOrder = 1
-		};
-		ComplexRecipe.RecipeElement[] array5 = new ComplexRecipe.RecipeElement[]
-		{
-			new ComplexRecipe.RecipeElement("BasicFabric".ToTag(), (float)global::TUNING.EQUIPMENT.VESTS.FUNKY_VEST_MASS)
-		};
-		ComplexRecipe.RecipeElement[] array6 = new ComplexRecipe.RecipeElement[]
-		{
 			new ComplexRecipe.RecipeElement("Funky_Vest".ToTag(), 1f, ComplexRecipe.RecipeElement.TemperatureOperation.AverageTemperature, false)
 		};
-		FunkyVestConfig.recipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("ClothingFabricator", array5, array6), array5, array6)
+		FunkyVestConfig.recipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("ClothingFabricator", array3, array4), array3, array4)
 		{
 			time = global::TUNING.EQUIPMENT.VESTS.FUNKY_VEST_FABTIME,
 			description = global::STRINGS.EQUIPMENT.PREFABS.FUNKY_VEST.RECIPE_DESC,

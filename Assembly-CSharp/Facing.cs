@@ -1,7 +1,7 @@
 ﻿using System;
+using KSerialization;
 using UnityEngine;
 
-[SkipSaveFileSerialization]
 [AddComponentMenu("KMonoBehaviour/scripts/Facing")]
 public class Facing : KMonoBehaviour
 {
@@ -11,19 +11,23 @@ public class Facing : KMonoBehaviour
 		this.log = new LoggerFS("Facing", 35);
 	}
 
+	protected override void OnSpawn()
+	{
+		base.OnSpawn();
+		this.UpdateMirror();
+	}
+
 	public void Face(float target_x)
 	{
 		float x = base.transform.GetLocalPosition().x;
 		if (target_x < x)
 		{
-			this.facingLeft = true;
-			this.UpdateMirror();
+			this.SetFacing(true);
 			return;
 		}
 		if (target_x > x)
 		{
-			this.facingLeft = false;
-			this.UpdateMirror();
+			this.SetFacing(false);
 		}
 	}
 
@@ -33,22 +37,19 @@ public class Facing : KMonoBehaviour
 		int num2 = Grid.CellColumn(Grid.PosToCell(target_pos));
 		if (num > num2)
 		{
-			this.facingLeft = true;
-			this.UpdateMirror();
+			this.SetFacing(true);
 			return;
 		}
 		if (num2 > num)
 		{
-			this.facingLeft = false;
-			this.UpdateMirror();
+			this.SetFacing(false);
 		}
 	}
 
 	[ContextMenu("Flip")]
 	public void SwapFacing()
 	{
-		this.facingLeft = !this.facingLeft;
-		this.UpdateMirror();
+		this.SetFacing(!this.facingLeft);
 	}
 
 	private void UpdateMirror()
@@ -96,5 +97,6 @@ public class Facing : KMonoBehaviour
 
 	private LoggerFS log;
 
-	private bool facingLeft;
+	[Serialize]
+	public bool facingLeft;
 }

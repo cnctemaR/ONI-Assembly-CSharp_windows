@@ -445,7 +445,7 @@ public class Door : Workable, ISaveLoadable, ISim200ms, INavDoor
 				{
 					num /= (float)placementCells.Length;
 					PrimaryElement component = base.GetComponent<PrimaryElement>();
-					KCrashReporter.Assert(num > 0f, "Door has calculated an invalid temperature");
+					KCrashReporter.Assert(num > 0f, "Door has calculated an invalid temperature", null);
 					component.Temperature = num;
 				}
 			}

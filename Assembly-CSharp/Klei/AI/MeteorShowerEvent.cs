@@ -343,7 +343,12 @@ namespace Klei.AI
 				float num2 = (float)(worldContainer.Height + worldContainer.WorldOffset.y - 1);
 				float layerZ = Grid.GetLayerZ(Grid.SceneLayer.FXFront);
 				Vector3 vector = new Vector3(num, num2, layerZ);
-				GameObject gameObject = Util.KInstantiate(Assets.GetPrefab(prefab), vector, Quaternion.identity, null, null, true, 0);
+				GameObject prefab2 = Assets.GetPrefab(prefab);
+				if (prefab2 == null)
+				{
+					return null;
+				}
+				GameObject gameObject = Util.KInstantiate(prefab2, vector, Quaternion.identity, null, null, true, 0);
 				Comet component = gameObject.GetComponent<Comet>();
 				if (component != null)
 				{
@@ -440,7 +445,7 @@ namespace Klei.AI
 							}
 							else
 							{
-								num *= 1.5f;
+								num *= 0.8f;
 							}
 						}
 						else

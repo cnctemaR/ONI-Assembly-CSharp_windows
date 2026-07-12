@@ -203,12 +203,28 @@ public class RockCrusherConfig : IBuildingConfig
 				new ComplexRecipe.RecipeElement(SimHashes.Graphite.CreateTag(), 100f * num3, ComplexRecipe.RecipeElement.TemperatureOperation.AverageTemperature, false),
 				new ComplexRecipe.RecipeElement(SimHashes.Sand.CreateTag(), 100f * (1f - num3), ComplexRecipe.RecipeElement.TemperatureOperation.AverageTemperature, false)
 			};
-			ComplexRecipe complexRecipe10 = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("RockCrusher", array19, array20), array19, array20);
+			ComplexRecipe complexRecipe10 = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("RockCrusher", array19, array20), array19, array20, DlcManager.AVAILABLE_EXPANSION1_ONLY);
 			complexRecipe10.time = 40f;
 			complexRecipe10.description = string.Format(global::STRINGS.BUILDINGS.PREFABS.ROCKCRUSHER.RECIPE_DESCRIPTION, SimHashes.Fullerene.CreateTag().ProperName(), SimHashes.Graphite.CreateTag().ProperName());
 			complexRecipe10.nameDisplay = ComplexRecipe.RecipeNameDisplay.IngredientToResult;
 			complexRecipe10.fabricators = new List<Tag> { TagManager.Create("RockCrusher") };
 		}
+		float num4 = 120f;
+		float num5 = num4 * 0.2667f;
+		ComplexRecipe.RecipeElement[] array21 = new ComplexRecipe.RecipeElement[]
+		{
+			new ComplexRecipe.RecipeElement("IceBellyPoop", num4)
+		};
+		ComplexRecipe.RecipeElement[] array22 = new ComplexRecipe.RecipeElement[]
+		{
+			new ComplexRecipe.RecipeElement(SimHashes.Phosphorite.CreateTag(), num5, ComplexRecipe.RecipeElement.TemperatureOperation.AverageTemperature, false),
+			new ComplexRecipe.RecipeElement(SimHashes.Clay.CreateTag(), num4 - num5, ComplexRecipe.RecipeElement.TemperatureOperation.AverageTemperature, false)
+		};
+		ComplexRecipe complexRecipe11 = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("RockCrusher", array21, array22), array21, array22, DlcManager.AVAILABLE_DLC_2);
+		complexRecipe11.time = 40f;
+		complexRecipe11.description = string.Format(global::STRINGS.BUILDINGS.PREFABS.ROCKCRUSHER.RECIPE_DESCRIPTION_TWO_OUTPUT, ITEMS.INDUSTRIAL_PRODUCTS.ICE_BELLY_POOP.NAME, SimHashes.Phosphorite.CreateTag().ProperName(), SimHashes.Clay.CreateTag().ProperName());
+		complexRecipe11.nameDisplay = ComplexRecipe.RecipeNameDisplay.Ingredient;
+		complexRecipe11.fabricators = new List<Tag> { TagManager.Create("RockCrusher") };
 		Prioritizable.AddRef(go);
 	}
 

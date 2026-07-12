@@ -49,7 +49,9 @@ public class LiquidVentConfig : IBuildingConfig
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
-		go.AddOrGetDef<VentController.Def>();
+		VentController.Def def = go.AddOrGetDef<VentController.Def>();
+		def.usingDynamicColor = true;
+		def.outputSubstanceAnimName = "leak";
 		go.GetComponent<KPrefabID>().AddTag(GameTags.OverlayInFrontOfConduits, false);
 	}
 

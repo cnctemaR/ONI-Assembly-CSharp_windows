@@ -33,14 +33,14 @@ public class SolidConsumerMonitor : GameStateMachine<SolidConsumerMonitor, Solid
 			return;
 		}
 		smi.ClearTargetEdible();
-		Diet diet = smi.def.diet;
+		Diet diet = smi.diet;
 		int num = 0;
 		int num2 = 0;
 		Grid.PosToXY(smi.gameObject.transform.GetPosition(), out num, out num2);
 		num -= 8;
 		num2 -= 8;
 		bool flag = false;
-		if (!diet.eatsPlantsDirectly)
+		if (!diet.AllConsumablesAreDirectlyEdiblePlants)
 		{
 			ListPool<Storage, SolidConsumerMonitor>.PooledList pooledList = ListPool<Storage, SolidConsumerMonitor>.Allocate();
 			int num3 = 32;
@@ -64,6 +64,7 @@ public class SolidConsumerMonitor : GameStateMachine<SolidConsumerMonitor, Solid
 										if (!component.HasAnyTags(SolidConsumerMonitor.creatureTags) && diet.GetDietInfo(component.PrefabTag) != null)
 										{
 											smi.SetTargetEdible(gameObject, cost);
+											smi.targetEdibleOffset = Vector3.zero;
 											flag = true;
 											break;
 										}
@@ -80,47 +81,61 @@ public class SolidConsumerMonitor : GameStateMachine<SolidConsumerMonitor, Solid
 			}
 			pooledList.Recycle();
 		}
-		if (diet.eatsPlantsDirectly)
+		bool flag2 = false;
+		if (diet.CanEatAnyPlantDirectly)
 		{
 			ListPool<ScenePartitionerEntry, GameScenePartitioner>.PooledList pooledList2 = ListPool<ScenePartitionerEntry, GameScenePartitioner>.Allocate();
 			GameScenePartitioner.Instance.GatherEntries(num, num2, 16, 16, GameScenePartitioner.Instance.plants, pooledList2);
 			foreach (ScenePartitionerEntry scenePartitionerEntry in pooledList2)
 			{
 				KPrefabID kprefabID = (KPrefabID)scenePartitionerEntry.obj;
-				int cost2 = smi.GetCost(kprefabID.gameObject);
-				if (smi.IsCloserThanTargetEdible(cost2) && !kprefabID.HasAnyTags(SolidConsumerMonitor.creatureTags) && diet.GetDietInfo(kprefabID.PrefabTag) != null)
+				Vector3 vector = kprefabID.transform.GetPosition();
+				bool flag3 = kprefabID.HasTag(GameTags.PlantedOnFloorVessel);
+				if (flag3)
+				{
+					vector += SolidConsumerMonitor.PLANT_ON_FLOOR_VESSEL_OFFSET;
+				}
+				int num4 = smi.GetCost(Grid.PosToCell(vector));
+				Vector3 vector2 = Vector3.zero;
+				if (smi.IsCloserThanTargetEdible(num4) && !kprefabID.HasAnyTags(SolidConsumerMonitor.creatureTags) && diet.GetDietInfo(kprefabID.PrefabTag) != null)
 				{
 					if (kprefabID.HasTag(GameTags.Plant))
 					{
-						float num4 = 0.25f;
-						float num5 = 0f;
-						BuddingTrunk component2 = kprefabID.GetComponent<BuddingTrunk>();
-						if (component2)
-						{
-							num5 = component2.GetMaxBranchMaturity();
-						}
-						else
-						{
-							AmountInstance amountInstance = Db.Get().Amounts.Maturity.Lookup(kprefabID);
-							if (amountInstance != null)
-							{
-								num5 = amountInstance.value / amountInstance.GetMax();
-							}
-						}
-						if (num5 < num4)
+						IPlantConsumptionInstructions plantConsumptionInstructions = kprefabID.GetComponent<IPlantConsumptionInstructions>();
+						plantConsumptionInstructions = ((plantConsumptionInstructions != null) ? plantConsumptionInstructions : kprefabID.GetSMI<IPlantConsumptionInstructions>());
+						if (plantConsumptionInstructions == null || !plantConsumptionInstructions.CanPlantBeEaten())
 						{
 							continue;
 						}
+						CellOffset[] allowedOffsets = plantConsumptionInstructions.GetAllowedOffsets();
+						if (allowedOffsets != null)
+						{
+							num4 = -1;
+							foreach (CellOffset cellOffset in allowedOffsets)
+							{
+								int cost2 = smi.GetCost(Grid.OffsetCell(Grid.PosToCell(vector), cellOffset));
+								if (cost2 != -1 && (num4 == -1 || cost2 < num4))
+								{
+									num4 = cost2;
+									vector2 = cellOffset.ToVector3();
+								}
+							}
+							if (num4 == -1)
+							{
+								continue;
+							}
+						}
 					}
-					smi.SetTargetEdible(kprefabID.gameObject, cost2);
+					smi.SetTargetEdible(kprefabID.gameObject, num4);
+					smi.targetEdibleOffset = vector2 + (flag3 ? SolidConsumerMonitor.PLANT_ON_FLOOR_VESSEL_OFFSET : Vector3.zero);
+					flag2 = true;
 				}
 			}
 			pooledList2.Recycle();
-			return;
 		}
-		if (smi.CanSearchForPickupables(flag))
+		if (!flag2 && diet.CanEatAnyNonDirectlyEdiblePlant && smi.CanSearchForPickupables(flag))
 		{
-			bool flag2 = false;
+			bool flag4 = false;
 			ListPool<ScenePartitionerEntry, GameScenePartitioner>.PooledList pooledList3 = ListPool<ScenePartitionerEntry, GameScenePartitioner>.Allocate();
 			GameScenePartitioner.Instance.GatherEntries(num, num2, 16, 16, GameScenePartitioner.Instance.pickupablesLayer, pooledList3);
 			foreach (ScenePartitionerEntry scenePartitionerEntry2 in pooledList3)
@@ -129,14 +144,17 @@ public class SolidConsumerMonitor : GameStateMachine<SolidConsumerMonitor, Solid
 				KPrefabID kprefabID2 = pickupable.KPrefabID;
 				if (!kprefabID2.HasAnyTags(SolidConsumerMonitor.creatureTags) && diet.GetDietInfo(kprefabID2.PrefabTag) != null)
 				{
-					bool flag3;
-					smi.ProcessEdible(pickupable.gameObject, out flag3);
-					flag2 = flag2 || flag3;
+					bool flag5;
+					smi.ProcessEdible(pickupable.gameObject, out flag5);
+					smi.targetEdibleOffset = Vector3.zero;
+					flag4 = flag4 || flag5;
 				}
 			}
 			pooledList3.Recycle();
 		}
 	}
+
+	public static Vector3 PLANT_ON_FLOOR_VESSEL_OFFSET = Vector3.down;
 
 	private GameStateMachine<SolidConsumerMonitor, SolidConsumerMonitor.Instance, IStateMachineTarget, SolidConsumerMonitor.Def>.State satisfied;
 
@@ -158,6 +176,7 @@ public class SolidConsumerMonitor : GameStateMachine<SolidConsumerMonitor, Solid
 		public Instance(IStateMachineTarget master, SolidConsumerMonitor.Def def)
 			: base(master, def)
 		{
+			this.diet = DietManager.Instance.GetPrefabDiet(base.gameObject);
 		}
 
 		public bool CanSearchForPickupables(bool foodAtFeeder)
@@ -176,7 +195,7 @@ public class SolidConsumerMonitor : GameStateMachine<SolidConsumerMonitor, Solid
 			{
 				return false;
 			}
-			int cost = this.GetCost(this.targetEdible);
+			int cost = this.GetCost(Grid.PosToCell(this.targetEdible.transform.GetPosition() + this.targetEdibleOffset));
 			return cost != -1 && this.targetEdibleCost <= cost + 4;
 		}
 
@@ -184,6 +203,7 @@ public class SolidConsumerMonitor : GameStateMachine<SolidConsumerMonitor, Solid
 		{
 			this.targetEdibleCost = -1;
 			this.targetEdible = null;
+			this.targetEdibleOffset = Vector3.zero;
 		}
 
 		public bool ProcessEdible(GameObject edible, out bool isReachable)
@@ -231,7 +251,7 @@ public class SolidConsumerMonitor : GameStateMachine<SolidConsumerMonitor, Solid
 			{
 				return;
 			}
-			Diet.Info dietInfo = base.def.diet.GetDietInfo(kprefabID.PrefabTag);
+			Diet.Info dietInfo = this.diet.GetDietInfo(kprefabID.PrefabTag);
 			if (dietInfo == null)
 			{
 				return;
@@ -241,65 +261,38 @@ public class SolidConsumerMonitor : GameStateMachine<SolidConsumerMonitor, Solid
 			PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Negative, properName, kprefabID.transform, 1.5f, false);
 			float num = amountInstance.GetMax() - amountInstance.value;
 			float num2 = dietInfo.ConvertCaloriesToConsumptionMass(num);
-			Growing component2 = kprefabID.GetComponent<Growing>();
-			if (component2 != null)
+			IPlantConsumptionInstructions plantConsumptionInstructions = kprefabID.GetComponent<IPlantConsumptionInstructions>();
+			plantConsumptionInstructions = ((plantConsumptionInstructions != null) ? plantConsumptionInstructions : kprefabID.GetSMI<IPlantConsumptionInstructions>());
+			if (plantConsumptionInstructions != null)
 			{
-				BuddingTrunk component3 = kprefabID.GetComponent<BuddingTrunk>();
-				if (component3)
-				{
-					float maxBranchMaturity = component3.GetMaxBranchMaturity();
-					num2 = Mathf.Min(num2, maxBranchMaturity);
-					component3.ConsumeMass(num2);
-				}
-				else
-				{
-					AmountInstance amountInstance2 = Db.Get().Amounts.Maturity.Lookup(component2.gameObject);
-					float growthUnitToMaturityRatio = this.GetGrowthUnitToMaturityRatio(amountInstance2.GetMax(), kprefabID);
-					float num3 = amountInstance2.value * growthUnitToMaturityRatio;
-					num2 = Mathf.Min(num2, num3);
-					component2.ConsumeGrowthUnits(num2, growthUnitToMaturityRatio);
-				}
+				num2 = plantConsumptionInstructions.ConsumePlant(num2);
 			}
 			else
 			{
 				num2 = Mathf.Min(num2, component.Mass);
 				component.Mass -= num2;
-				Pickupable component4 = component.GetComponent<Pickupable>();
-				if (component4.storage != null)
+				Pickupable component2 = component.GetComponent<Pickupable>();
+				if (component2.storage != null)
 				{
-					component4.storage.Trigger(-1452790913, base.gameObject);
-					component4.storage.Trigger(-1697596308, base.gameObject);
+					component2.storage.Trigger(-1452790913, base.gameObject);
+					component2.storage.Trigger(-1697596308, base.gameObject);
 				}
 			}
-			float num4 = dietInfo.ConvertConsumptionMassToCalories(num2);
+			float num3 = dietInfo.ConvertConsumptionMassToCalories(num2);
 			CreatureCalorieMonitor.CaloriesConsumedEvent caloriesConsumedEvent = new CreatureCalorieMonitor.CaloriesConsumedEvent
 			{
 				tag = kprefabID.PrefabTag,
-				calories = num4
+				calories = num3
 			};
 			base.Trigger(-2038961714, caloriesConsumedEvent);
 			this.targetEdible = null;
 		}
 
-		private float GetGrowthUnitToMaturityRatio(float maturityMax, KPrefabID prefab_id)
-		{
-			ResourceSet<Trait> traits = Db.Get().traits;
-			Tag prefabTag = prefab_id.PrefabTag;
-			Trait trait = traits.Get(prefabTag.ToString() + "Original");
-			if (trait != null)
-			{
-				AttributeModifier attributeModifier = trait.SelfModifiers.Find((AttributeModifier match) => match.AttributeId == "MaturityMax");
-				if (attributeModifier != null)
-				{
-					return attributeModifier.Value / maturityMax;
-				}
-			}
-			return 1f;
-		}
-
 		private const int RECALC_THRESHOLD = 4;
 
 		public GameObject targetEdible;
+
+		public Vector3 targetEdibleOffset;
 
 		private int targetEdibleCost;
 
@@ -308,5 +301,7 @@ public class SolidConsumerMonitor : GameStateMachine<SolidConsumerMonitor, Solid
 
 		[MyCmpGet]
 		private DrowningMonitor drowningMonitor;
+
+		public Diet diet;
 	}
 }

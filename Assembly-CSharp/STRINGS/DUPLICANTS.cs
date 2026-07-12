@@ -594,6 +594,24 @@ namespace STRINGS
 				public static LocString TOOLTIP = "";
 			}
 
+			public class RECOVERFROMHEAT
+			{
+				public static LocString NAME = "Recover from Heat";
+
+				public static LocString STATUS = "Recovering from heat";
+
+				public static LocString TOOLTIP = "This Duplicant's trying to cool down";
+			}
+
+			public class RECOVERWARMTH
+			{
+				public static LocString NAME = "Recover from Cold";
+
+				public static LocString STATUS = "Recovering from cold";
+
+				public static LocString TOOLTIP = "This Duplicant's trying to warm up";
+			}
+
 			public class MOVETOQUARANTINE
 			{
 				public static LocString NAME = "Move to Quarantine";
@@ -2088,6 +2106,24 @@ namespace STRINGS
 				public static LocString TOOLTIP_DISTURBER = "\n\nThey were sleeping peacefully until they were disturbed by <b>{Disturber}</b>";
 			}
 
+			public class SLEEPINGEXHAUSTED
+			{
+				public static LocString NAME = "Unscheduled Nap";
+
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"Cold ",
+					UI.PRE_KEYWORD,
+					"Temperatures",
+					UI.PST_KEYWORD,
+					" or lack of rest depleted this Duplicant's ",
+					UI.PRE_KEYWORD,
+					"Stamina",
+					UI.PST_KEYWORD,
+					"\n\nThey didn't have enough energy to make it to bedtime"
+				});
+			}
+
 			public class SLEEPINGPEACEFULLY
 			{
 				public static LocString NAME = "Sleeping peacefully";
@@ -2142,6 +2178,13 @@ namespace STRINGS
 				public static LocString NAME = "Interrupted Sleep: Bed Jostling";
 
 				public static LocString TOOLTIP = "This Duplicant was woken up because their bed was moved";
+			}
+
+			public class SLEEPINGINTERRUPTEDBYCOLD
+			{
+				public static LocString NAME = "Interrupted Sleep: Cold Room";
+
+				public static LocString TOOLTIP = "This Duplicant is having trouble sleeping because this room is too cold";
 			}
 
 			public class REDALERT
@@ -2224,7 +2267,21 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Chilly surroundings";
 
-				public static LocString TOOLTIP = "This Duplicant cannot retain enough heat to stay warm and may be under insulated for this area\n\nStress: <b>{StressModification}</b>\n\nCurrent Environmental Exchange: <b>{currentTransferWattage}</b>\n\nInsulation Thickness: {conductivityBarrier}";
+				public static LocString TOOLTIP = "This Duplicant cannot retain enough heat to stay warm and may be under-insulated for this area\n\nStress: <b>{StressModification}</b>\nStamina: <b>{StaminaModification}</b>\nAthletics: <b>{AthleticsModification}</b>\n\nCurrent Environmental Exchange: <b>{currentTransferWattage}</b>\n\nInsulation Thickness: {conductivityBarrier}";
+			}
+
+			public class EXITINGCOLD
+			{
+				public static LocString NAME = "Shivering";
+
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"This Duplicant was recently exposed to cold ",
+					UI.PRE_KEYWORD,
+					"Temperatures",
+					UI.PST_KEYWORD,
+					" and wants to warm up\n\nWithout a warming station, it will take {0} for them to recover\n\nStress: <b>{StressModification}</b>\nStamina: <b>{StaminaModification}</b>\nAthletics: <b>{AthleticsModification}</b>"
+				});
 			}
 
 			public class DAILYRATIONLIMITREACHED
@@ -2269,7 +2326,21 @@ namespace STRINGS
 					UI.PRE_KEYWORD,
 					"Heat",
 					UI.PST_KEYWORD,
-					" to stay cool and may be over insulated for this area\n\nStress Modification: <b>{StressModification}</b>\n\nCurrent Environmental Exchange: <b>{currentTransferWattage}</b>\n\nInsulation Thickness: {conductivityBarrier}"
+					" to stay cool and may be over-insulated for this area\n\nStress Modification: <b>{StressModification}</b>\nStamina: <b>{StaminaModification}</b>\nAthletics: <b>{AthleticsModification}</b>\n\nCurrent Environmental Exchange: <b>{currentTransferWattage}</b>\n\nInsulation Thickness: {conductivityBarrier}"
+				});
+			}
+
+			public class EXITINGHOT
+			{
+				public static LocString NAME = "Sweaty";
+
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"This Duplicant was recently exposed to hot ",
+					UI.PRE_KEYWORD,
+					"Temperatures",
+					UI.PST_KEYWORD,
+					" and wants to cool down\n\nWithout a cooling station, it will take {0} for them to recover\n\nStress: <b>{StressModification}</b>\nStamina: <b>{StaminaModification}</b>\nAthletics: <b>{AthleticsModification}</b>"
 				});
 			}
 
@@ -3285,6 +3356,13 @@ namespace STRINGS
 				public static LocString TOOLTIP = "This Duplicant is intently researching <b>{Tech}</b> technology";
 			}
 
+			public class RESEARCHING_FROM_POI
+			{
+				public static LocString NAME = "Unlocking Research";
+
+				public static LocString TOOLTIP = "This Duplicant is unlocking crucial technology";
+			}
+
 			public class MISSIONCONTROLLING
 			{
 				public static LocString NAME = "Mission Controlling";
@@ -3571,6 +3649,13 @@ namespace STRINGS
 					UI.PST_KEYWORD,
 					"'s well-being"
 				});
+			}
+
+			public class CARVING
+			{
+				public static LocString NAME = "Carving {Target}";
+
+				public static LocString TOOLTIP = "This Duplicant is carving away at a <b>{Target}</b>";
 			}
 		}
 
@@ -4023,17 +4108,6 @@ namespace STRINGS
 				public static LocString DESCRIPTION = "Pollen and other irritants are causing this poor Duplicant's immune system to overreact, resulting in needless sneezing and congestion";
 			}
 
-			public class COLDSICKNESS
-			{
-				public static LocString NAME = UI.FormatAsLink("Hypothermia", "COLDSICKNESS");
-
-				public static LocString DESCRIPTIVE_SYMPTOMS = "Nonlethal. Duplicants experience extreme body heat loss causing chills and discomfort.";
-
-				public static LocString DESCRIPTION = "This Duplicant's thought processes have been slowed to a crawl from extreme cold exposure";
-
-				public static LocString LEGEND_HOVERTEXT = "Area Causes Hypothermia\n";
-			}
-
 			public class SUNBURNSICKNESS
 			{
 				public static LocString NAME = UI.FormatAsLink("Sunburn", "SUNBURNSICKNESS");
@@ -4045,24 +4119,6 @@ namespace STRINGS
 				public static LocString SUNEXPOSURE = "Sun Exposure";
 
 				public static LocString DESCRIPTIVE_SYMPTOMS = "Nonlethal. Duplicants experience temporary discomfort due to dermatological damage.";
-			}
-
-			public class HEATSICKNESS
-			{
-				public static LocString NAME = UI.FormatAsLink("Heat Stroke", "HEATSICKNESS");
-
-				public static LocString DESCRIPTIVE_SYMPTOMS = "Nonlethal. Duplicants experience high fever and discomfort.";
-
-				public static LocString DESCRIPTION = string.Concat(new string[]
-				{
-					"This Duplicant's thought processes have short circuited from extreme ",
-					UI.PRE_KEYWORD,
-					"Heat",
-					UI.PST_KEYWORD,
-					" exposure"
-				});
-
-				public static LocString LEGEND_HOVERTEXT = "Area Causes Heat Stroke\n";
 			}
 
 			public class RADIATIONSICKNESS
@@ -4101,9 +4157,13 @@ namespace STRINGS
 		{
 			public static LocString MODIFIER_FORMAT = UI.PRE_KEYWORD + "{0}" + UI.PST_KEYWORD + ": {1}";
 
+			public static LocString IMMUNITY_FORMAT = UI.PRE_KEYWORD + "{0}" + UI.PST_KEYWORD;
+
 			public static LocString TIME_REMAINING = "Time Remaining: {0}";
 
 			public static LocString TIME_TOTAL = "\nDuration: {0}";
+
+			public static LocString EFFECT_IMMUNITIES_HEADER = UI.PRE_POS_MODIFIER + "Immune to:" + UI.PST_POS_MODIFIER;
 
 			public static LocString EFFECT_HEADER = UI.PRE_POS_MODIFIER + "Effects:" + UI.PST_POS_MODIFIER;
 
@@ -4280,12 +4340,14 @@ namespace STRINGS
 
 			public class WARMAIR
 			{
-				public static LocString NAME = "Warm Air";
+				public static LocString NAME = "Toasty Surroundings";
 			}
 
 			public class COLDAIR
 			{
-				public static LocString NAME = "Cold Air";
+				public static LocString NAME = "Chilly Surroundings";
+
+				public static LocString CAUSE = "Duplicants tire quickly and lose body heat in cold environments";
 			}
 
 			public class CLAUSTROPHOBIC
@@ -4378,6 +4440,34 @@ namespace STRINGS
 				});
 			}
 
+			public class WARMTOUCH
+			{
+				public static LocString NAME = "Frost Resistant";
+
+				public static LocString TOOLTIP = "This Duplicant recently visited a warming station, sauna, or hot tub\n\nThey are impervious to cold as a result";
+
+				public static LocString PROVIDERS_NAME = "Frost Resistance";
+
+				public static LocString PROVIDERS_TOOLTIP = string.Concat(new string[]
+				{
+					"Using this building provides temporary immunity to ",
+					UI.PRE_KEYWORD,
+					"Chilly Surroundings",
+					UI.PST_KEYWORD,
+					" and ",
+					UI.PRE_KEYWORD,
+					"Soggy Feet",
+					UI.PST_KEYWORD
+				});
+			}
+
+			public class REFRESHINGTOUCH
+			{
+				public static LocString NAME = "Heat Resistant";
+
+				public static LocString TOOLTIP = "This Duplicant recently visited a cooling station and is totally unbothered by heat as a result";
+			}
+
 			public class DUPLICANTGOTMILK
 			{
 				public static LocString NAME = "Extra Hydrated";
@@ -4437,6 +4527,27 @@ namespace STRINGS
 				public static LocString CAUSE = "Obtained by eating a very spicy meal";
 
 				public static LocString DESCRIPTION = "Duplicants find this spicy meal quite invigorating";
+			}
+
+			public class WARMTOUCHFOOD
+			{
+				public static LocString NAME = "Frost Resistant: Spicy Diet";
+
+				public static LocString TOOLTIP = "This Duplicant ate spicy food and feels so warm inside that they don't even notice the cold right now";
+
+				public static LocString CAUSE = "Obtained by eating a very spicy meal";
+
+				public static LocString DESCRIPTION = string.Concat(new string[]
+				{
+					"Eating this provides temporary immunity to ",
+					UI.PRE_KEYWORD,
+					"Chilly Surroundings",
+					UI.PST_KEYWORD,
+					" and ",
+					UI.PRE_KEYWORD,
+					"Soggy Feet",
+					UI.PST_KEYWORD
+				});
 			}
 
 			public class SEAFOODRADIATIONRESISTANCE
@@ -4859,6 +4970,13 @@ namespace STRINGS
 				public static LocString TOOLTIP = "This Duplicant was woken up when a friend climbed on their ladder bed";
 			}
 
+			public class BADSLEEPCOLD
+			{
+				public static LocString NAME = "Unrested: Cold Bedroom";
+
+				public static LocString TOOLTIP = "This Duplicant was shivering instead of sleeping";
+			}
+
 			public class TERRIBLESLEEP
 			{
 				public static LocString NAME = "Dead Tired: Snoring Friend";
@@ -4934,6 +5052,27 @@ namespace STRINGS
 				public static LocString NAME = "Severe Wounds";
 
 				public static LocString TOOLTIP = "This Duplicant sustained serious injuries that are impacting their work and well-being";
+			}
+
+			public class LIGHTWOUNDSCRITTER
+			{
+				public static LocString NAME = "Light Wounds";
+
+				public static LocString TOOLTIP = "This Critter sustained injuries that are a bit uncomfortable";
+			}
+
+			public class MODERATEWOUNDSCRITTER
+			{
+				public static LocString NAME = "Moderate Wounds";
+
+				public static LocString TOOLTIP = "This Critter sustained injuries that are really affecting their health";
+			}
+
+			public class SEVEREWOUNDSCRITTER
+			{
+				public static LocString NAME = "Severe Wounds";
+
+				public static LocString TOOLTIP = "This Critter sustained serious injuries that could prove life-threatening";
 			}
 
 			public class SANDBOXMORALEADJUSTMENT
@@ -5066,6 +5205,13 @@ namespace STRINGS
 				public static LocString NAME = "Bad leftovers";
 
 				public static LocString TOOLTIP = "This Duplicant is in a bad mood from having to eat stale " + UI.PRE_KEYWORD + "Food" + UI.PST_KEYWORD;
+			}
+
+			public class ATEFROZENFOOD
+			{
+				public static LocString NAME = "Ate frozen food";
+
+				public static LocString TOOLTIP = "This Duplicant is in a bad mood from having to eat deep-frozen " + UI.PRE_KEYWORD + "Food" + UI.PST_KEYWORD;
 			}
 
 			public class SMELLEDPUTRIDODOUR
@@ -6972,6 +7118,13 @@ namespace STRINGS
 				public static LocString DESC = "This Duplicant regards every plant as a potential friend";
 			}
 
+			public class FROSTPROOF
+			{
+				public static LocString NAME = "Frost Proof";
+
+				public static LocString DESC = "This Duplicant is too cool to be bothered by the cold";
+			}
+
 			public class CONSTRUCTIONUP
 			{
 				public static LocString NAME = "Handy";
@@ -7709,6 +7862,20 @@ namespace STRINGS
 
 				public static LocString DESC = "{0} loves his new colony, even if their collective body odor makes his eyes water.";
 			}
+
+			public class CALVIN
+			{
+				public static LocString NAME = "Calvin";
+
+				public static LocString DESC = "This {0} loves the thrill of running head-first into a wall to see what it's made of.";
+			}
+
+			public class FREYJA
+			{
+				public static LocString NAME = "Freyja";
+
+				public static LocString DESC = "This {0} has never stopped anyone from eating yellow snow.";
+			}
 		}
 
 		public class NEEDS
@@ -7902,6 +8069,20 @@ namespace STRINGS
 					"Temperature",
 					UI.PST_KEYWORD,
 					" at which a Duplicant will get burned."
+				});
+			}
+
+			public class SCOLDINGTHRESHOLD
+			{
+				public static LocString NAME = "Frostbite Threshold";
+
+				public static LocString DESC = string.Concat(new string[]
+				{
+					"Determines the ",
+					UI.PRE_KEYWORD,
+					"Temperature",
+					UI.PST_KEYWORD,
+					" at which a Duplicant will get frostbitten."
 				});
 			}
 

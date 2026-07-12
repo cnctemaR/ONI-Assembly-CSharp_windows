@@ -14,22 +14,11 @@ namespace STRINGS
 
 		public static LocString NOT_ACHIEVED_EVER = "This Initiative's never been fulfilled";
 
+		public static LocString DLC_ACHIEVEMENT = "<i>{0}</i> DLC Initiative";
+
 		public static LocString PRE_VICTORY_MESSAGE_HEADER = "- ALERT -";
 
 		public static LocString PRE_VICTORY_MESSAGE_BODY = "IMPERATIVE ACHIEVED: {0}";
-
-		public static class DLC
-		{
-			public static LocString EXPANSION1 = string.Concat(new string[]
-			{
-				UI.PRE_KEYWORD,
-				"\n\n<i>",
-				UI.DLC1.NAME,
-				"</i>",
-				UI.PST_KEYWORD,
-				" DLC Achievement"
-			});
-		}
 
 		public class MISC_REQUIREMENTS
 		{
@@ -44,6 +33,10 @@ namespace STRINGS
 			public static LocString WINCONDITION_ARTIFACTS = "Cosmic Archaeology";
 
 			public static LocString WINCONDITION_ARTIFACTS_DESCRIPTION = "Uncover the past to secure your future by fullfilling the requirements of the Exploration Imperative.";
+
+			public static LocString WINCONDITION_GEOTHERMAL = "Full Steam Ahead";
+
+			public static LocString WINCONDITION_GEOTHERMAL_DESCRIPTION = "Secure your colony's industrial future by fulfilling the Power Imperative.";
 
 			public static LocString NO_PLANTERBOX = "Locavore";
 
@@ -311,7 +304,7 @@ namespace STRINGS
 
 				public static LocString COLLECT_SPACE_ARTIFACTS = "Study different Space Artifacts at the Artifact Analysis Station.\nUnique Space Artifacts studied: {collectedCount} / {neededCount}";
 
-				public static LocString ESTABLISH_COLONIES = "Establish colonies on {goalBaseCount} asteroids by building and activating Mini-Pods.\nColonies established: {baseCount} / {neededCount}.";
+				public static LocString ESTABLISH_COLONIES = "Establish colonies on {goalBaseCount} asteroids by building and activating Mini-Pods.\nColonies established: {baseCount} / {neededCount}";
 
 				public static LocString OPEN_TEMPORAL_TEAR = "Open the Temporal Tear by finding and activating the Temporal Tear Opener";
 
@@ -479,6 +472,262 @@ namespace STRINGS
 				public static LocString SEVERAL_COLONIES = "Establish several colonies";
 
 				public static LocString SEVERAL_COLONIES_DESCRIPTION = "Establish colonies on {count} asteroids by building and activating Mini-Pods";
+			}
+		}
+
+		public class ACTIVATEGEOTHERMALPLANT
+		{
+			public static LocString NAME = "Full Steam Ahead";
+
+			public static LocString MYLOGNAME = "Warm Regards";
+
+			public static LocString DESCRIPTION = "";
+
+			public static LocString MESSAGE_TITLE = "WARM REGARDS";
+
+			public static LocString MESSAGE_BODY = "Though the journey has been long and marked by challenges that often seemed insurmountable, we have prevailed in harnessing this planet's core potential.\n\nWe now stand proudly at the precipice of a sustainably powered future...it is deeply humbling.\n\nI am hopeful that we have learned enough to wield this machinery more wisely than those who came before us.";
+
+			public class SIDESCREENS
+			{
+				public static LocString BRING_ONLINE_TITLE = "Reclaim Power Plant";
+
+				public static LocString BRING_ONLINE_DESC = "";
+
+				public static LocString BRING_VENT_ONLINE_TITLE = "Enable <link=\"{Target}\">{Name}</link>";
+
+				public static LocString BRING_VENT_ONLINE_TOOLTIP = "Restore this vent's functionality\n\nClick to show this vent";
+
+				public static LocString BRING_CONTROLLER_ONLINE_TITLE = "Enable <link=\"unused\">Geothermal Heat Pump</link>";
+
+				public static LocString BRING_CONTROLLER_ONLINE_TOOLTIP = string.Concat(new string[]
+				{
+					"Reconnect this building's ",
+					UI.PRE_KEYWORD,
+					"Steel",
+					UI.PST_KEYWORD,
+					" pipes to restore functionality\n\nClick to show this building"
+				});
+
+				public static LocString UTILIZE_GEOPLANT_TITLE = "Complete Inaugural Run";
+
+				public static LocString UTILIZE_GEOPLANT_DESC = string.Concat(new string[]
+				{
+					"Successfully heat a ",
+					UI.PRE_KEYWORD,
+					"Liquid",
+					UI.PST_KEYWORD,
+					" via the geothermal heat pump for the first time"
+				});
+			}
+
+			public class STATUSITEMS
+			{
+				public class VENT
+				{
+					public static LocString QUEST_BLOCKED_NAME = "Blocked";
+
+					public static LocString QUEST_BLOCKED_TOOLTIP = string.Concat(new string[]
+					{
+						"This geo vent is currently obstructed by a ",
+						UI.PRE_KEYWORD,
+						"Lead",
+						UI.PST_KEYWORD,
+						" mass\n\nIt will become usable once the obstruction has been cleared by piping in liquids hot enough to melt it"
+					});
+
+					public static LocString DISCONNECTED_NAME = "Disconnected";
+
+					public static LocString DISCONNECTED_TOOLTIP = "This geo vent is disconnected from the geothermal heat pump\n\nIt cannot recieve material in its current state";
+
+					public static LocString PENDING_REVEAL_NAME = "Pending Uncover";
+
+					public static LocString PENDING_REVEAL_TOOLTIP = "A Duplicant will be by shortly to remove this grimy old tarp";
+
+					public static LocString OVERPRESSURE_NAME = "Overpressure";
+
+					public static LocString OVERPRESSURE_TOOLTIP = string.Concat(new string[]
+					{
+						"High ",
+						UI.PRE_KEYWORD,
+						"Liquid",
+						UI.PST_KEYWORD,
+						" or ",
+						UI.PRE_KEYWORD,
+						"Gas",
+						UI.PST_KEYWORD,
+						" pressure in this area is preventing further emissions\n\nReduce pressure by pumping ",
+						UI.PRE_KEYWORD,
+						"Liquids",
+						UI.PST_KEYWORD,
+						" or ",
+						UI.PRE_KEYWORD,
+						"Gases",
+						UI.PST_KEYWORD,
+						" away or clearing more space\n\nClick here to show this vent"
+					});
+
+					public static LocString BLOCKED_NAME = "Blocked";
+
+					public static LocString BLOCKED_TOOLTIP = string.Concat(new string[]
+					{
+						"A ",
+						UI.PRE_KEYWORD,
+						"Pipe",
+						UI.PST_KEYWORD,
+						" has been obstructed and is preventing ",
+						UI.PRE_KEYWORD,
+						"Liquids",
+						UI.PST_KEYWORD,
+						" or ",
+						UI.PRE_KEYWORD,
+						"Gases",
+						UI.PST_KEYWORD,
+						" from flowing to this geo vent"
+					});
+
+					public static LocString READY_NAME = "Ready";
+
+					public static LocString READY_TOOLTIP = "This geo vent is ready to recieve materials";
+
+					public static LocString VENTING_NAME = "Venting: {Quantity} remaining";
+
+					public static LocString VENTING_TOOLTIP = "This geo vent is currently emitting materials\n\nIt has {Quantity} of materials left to emit before this process is complete";
+				}
+
+				public class CONTROLLER
+				{
+					public static LocString OFFLINE_NAME = "Offline";
+
+					public static LocString OFFLINE_TOOLTIP = "This building's plumbing must be reconnected before it can receive materials";
+
+					public static LocString PENDING_RECONNECTION_NAME = "Pending Reconnect";
+
+					public static LocString PENDING_RECONNECTION_TOOLTIP = "Waiting for a Duplicant to reconnect the plumbing";
+
+					public static LocString STORAGE_STATUS_NAME = "Pressure: {Amount}";
+
+					public static LocString STORAGE_STATUS_TOOLTIP = "When pressure reaches {Threshold}, this building's contents will be heated and pumped out to connected geo vents\n\nCurrent pressure: {Amount}/{Threshold}";
+
+					public static LocString STORAGE_TEMPERATURE_NAME = "Liquid Temperature: {Temp}";
+
+					public static LocString STORAGE_TEMPERATURE_TOOLTIP = string.Concat(new string[]
+					{
+						"The average temperature of liquids stored in this building is {Temp}\n\nThe initial ",
+						UI.PRE_KEYWORD,
+						"Temperature",
+						UI.PST_KEYWORD,
+						" of input liquid affects the materials emitted"
+					});
+
+					public static LocString CANNOT_PUSH_NO_CONNECTED_NAME = "No Geo Vents Connected";
+
+					public static LocString CANNOT_PUSH_NO_CONNECTED_TOOLTIP = "This building must be connected to at least one geo vent in order to function";
+
+					public static LocString CANNOT_PUSH_ENTOMBED_VENT_NAME = "Geo Vent Entombed";
+
+					public static LocString CANNOT_PUSH_ENTOMBED_VENT_TOOLTIP = "One or more connected geo vents are currently entombed\n\nAll connected geo vents must be available in order for this building to function\n\nClick here to show this vent";
+
+					public static LocString CANNOT_PUSH_UNREADY_CONNECTION_NAME = "Geo Vent Unavailable";
+
+					public static LocString CANNOT_PUSH_UNREADY_CONNECTION_TOOLTIP = "One or more connected geo vents are currently unavailable\n\nAll connected geo vents must be ready in order for this building to function\n\nClick here to show this vent";
+				}
+			}
+
+			public class BUTTONS
+			{
+				public static LocString CANCEL_UNCOVER_VENT_TITLE = "Cancel Uncover Vent";
+
+				public static LocString CANCEL_UNCOVER_VENT_TOOLTIP = "Cancel uncover vent order";
+
+				public static LocString REPAIR_CONTROLLER_TITLE = "Reconnect Heat Pump";
+
+				public static LocString REPAIR_CONTROLLER_TOOLTIP = string.Concat(new string[]
+				{
+					"Reconnect this building's  ",
+					UI.PRE_KEYWORD,
+					"Steel",
+					UI.PST_KEYWORD,
+					" plumbing system to restore function"
+				});
+
+				public static LocString CANCEL_REPAIR_CONTROLLER_TITLE = "Cancel Reconnect Pipes";
+
+				public static LocString CANCEL_REPAIR_CONTROLLER_TOOLTIP = "Cancel reconnect pipes order";
+
+				public static LocString INITIATE_FIRST_VENT_TITLE = "Activate Power Plant";
+
+				public static LocString INITIATE_FIRST_VENT_READY_TOOLTIP = string.Concat(new string[]
+				{
+					"Release ",
+					UI.PRE_KEYWORD,
+					"Liquids",
+					UI.PST_KEYWORD,
+					" from the geothermal heat pump to the geo vents for the first time"
+				});
+
+				public static LocString INITIATE_FIRST_VENT_FILLING_TOOLTIP = "Insufficient materials";
+
+				public static LocString INITIATE_FIRST_VENT_UNAVAILABLE_TOOLTIP = "No connected vents are currently ready to accept materials";
+
+				public static LocString DISCONNECT_TITLE = "Disconnect";
+
+				public static LocString DISCONNECT_TOOLTIP = "Disconnect this geo vent from the geothermal heat pump {Hotkey}";
+
+				public static LocString RECONNECT_TITLE = "Reconnect";
+
+				public static LocString RECONNECT_TOOLTIP = "Reconnect this geo vent to the geothermal heat pump {Hotkey}";
+			}
+
+			public class NOTIFICATIONS
+			{
+				public static LocString GEOTHERMAL_PLANT_FIRST_VENT_READY = "Geothermal Power Plant: Initiate";
+
+				public static LocString GEOTHERMAL_PLANT_FIRST_VENT_READY_TOOLTIP = "The geothermal power plant is ready to be activated";
+
+				public static LocString GEOTHERMAL_PLANT_RECONNECTED = "Geothermal Heat Pump: Ready";
+
+				public static LocString GEOTHERMAL_PLANT_RECONNECTED_TOOLTIP = "The geothermal heat pump is ready to receive materials";
+			}
+
+			public class POPUPS
+			{
+				public static LocString GEOTHERMAL_DISCOVERED_TITLE = "New Building: Geothermal Power Plant";
+
+				public static LocString GEOTHERMAL_DISOCVERED_DESC = "An abandoned geothermal power plant has been discovered!\n\nMy scans indicate that this facility comprises multiple buildings located throughout the planet, with plumbing entrenched so deeply in the terrain that much of it is beyond our reach.\n\nMost of the accessible portions look quite functional.";
+
+				public static LocString GEOTHERMAL_PLANT_REPAIRED_TITLE = "Progress Report: Geothermal Power Plant";
+
+				public static LocString GEOTHERMAL_PLANT_REPAIRED_DESC = "Success! My Duplicants have restored the plumbing system for the geothermal heat pump.\n\nWe can now use this building to pump liquids out to the connected geo vents. Constructing steam turbines at the venting sites will enable us to convert the resulting steam into power.\n\nThe vents also emit various byproducts. I'm sure I can find a use for them.";
+
+				public static LocString GEOPLANT_ERRUPTED_TITLE = "Completed: Geothermal Power Plant";
+
+				public static LocString GEOPLANT_ERRUPTED_DESC = "My Duplicants have successfully cleared the obstructed geo vent!\n\nWe can now maximize the full potential of this formidable heat and power source...and perhaps experiment with input temperatures to produce more interesting secondary byproducts.\n\nMy Duplicants seem keen to commemorate this accomplishment by keeping the obstruction as something of a trophy.";
+			}
+
+			public class REQUIREMENTS
+			{
+				public static LocString DISCOVER_GEOTHERMAL_FACILITY_TITLE = "Discover Geothermal Power Plant";
+
+				public static LocString DISCOVER_GEOTHERMAL_FACILITY_DESCRIPTION = "Discover the geothermal power plant buildings";
+
+				public static LocString REPAIR_CONTROLLER_TITLE = "Reconnect Geothermal Heat Pump";
+
+				public static LocString REPAIR_CONTROLLER_DESCRIPTION = "Reconnect the Geothermal Heat Pump's plumbing";
+
+				public static LocString ACTIVATE_PLANT_TITLE = "Operate Geothermal Power Plant";
+
+				public static LocString ACTIVATE_PLANT_DESCRIPTION = string.Concat(new string[]
+				{
+					"Pump ",
+					UI.PRE_KEYWORD,
+					"liquids",
+					UI.PST_KEYWORD,
+					" from the Geothermal Heat Pump into the Geo Vents"
+				});
+
+				public static LocString UNBLOCK_VENT_TITLE = "Clear Blocked Geo Vent";
+
+				public static LocString UNBLOCK_VENT_DESCRIPTION = "Clear the blocked Geo Vent to maximize the geothermal power plant's efficiency";
 			}
 		}
 	}

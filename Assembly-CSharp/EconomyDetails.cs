@@ -938,7 +938,7 @@ public class EconomyDetails
 				while (enumerator2.MoveNext())
 				{
 					PermitResource permit = enumerator2.Current;
-					if (BuildingFacades.Infos_Skins.Any<BuildingFacades.Info>((BuildingFacades.Info info) => info.Id == permit.Id) || ClothingItems.Infos_Skins.Any<ClothingItems.Info>((ClothingItems.Info info) => info.id == permit.Id) || ArtableStages.Infos_Skins.Any<ArtableStages.Info>((ArtableStages.Info info) => info.id == permit.Id))
+					if (Blueprints.Get().skinsRelease.buildingFacades.Any<BuildingFacadeInfo>((BuildingFacadeInfo info) => info.id == permit.Id) || Blueprints.Get().skinsRelease.clothingItems.Any<ClothingItemInfo>((ClothingItemInfo info) => info.id == permit.Id) || Blueprints.Get().skinsRelease.artables.Any<ArtableInfo>((ArtableInfo info) => info.id == permit.Id))
 					{
 						string text4 = TagManager.StripLinkFormatting(permit.Name);
 						streamWriter.Write(text4);

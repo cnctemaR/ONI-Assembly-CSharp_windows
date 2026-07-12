@@ -238,6 +238,7 @@ public class EventInfoScreen : KModalScreen
 		EventInfoScreen eventInfoScreen = (EventInfoScreen)KScreenManager.Instance.StartScreen(ScreenPrefabs.Instance.eventInfoScreen.gameObject, GameScreenManager.Instance.ssOverlayCanvas.gameObject);
 		eventInfoScreen.SetEventData(eventInfoData);
 		AudioMixer.instance.Start(AudioMixerSnapshots.Get().EventPopupSnapshot);
+		KFMOD.PlayUISound(GlobalAssets.GetSound("StoryTrait_Activation_Popup_short", false));
 		if (eventInfoData.showCallback != null)
 		{
 			eventInfoData.showCallback();

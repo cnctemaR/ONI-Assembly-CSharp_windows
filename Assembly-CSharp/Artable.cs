@@ -58,7 +58,8 @@ public class Artable : Workable
 			string text = string.Format("{0}_{1}", base.GetComponent<KPrefabID>().PrefabID().ToString(), this.currentStage);
 			if (Db.GetArtableStages().TryGet(text) == null)
 			{
-				global::Debug.LogError("Failed up to update " + this.currentStage + " to ArtableStages");
+				global::Debug.LogWarning("Failed up to update " + this.currentStage + " to ArtableStages");
+				this.currentStage = this.defaultArtworkId;
 				return;
 			}
 			this.currentStage = text;
@@ -152,6 +153,7 @@ public class Artable : Workable
 		KSelectable component = base.GetComponent<KSelectable>();
 		component.SetName(artableStage.Name);
 		component.SetStatusItem(Db.Get().StatusItemCategories.Main, artableStage.statusItem, this);
+		base.gameObject.GetComponent<BuildingComplete>().SetDescriptionFlavour(artableStage.Description);
 		this.shouldShowSkillPerkStatusItem = false;
 		this.UpdateStatusItem(null);
 	}

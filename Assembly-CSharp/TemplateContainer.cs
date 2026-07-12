@@ -124,6 +124,8 @@ public class TemplateContainer
 
 		public Tag[] tags { get; set; }
 
+		public Tag[] discover_tags { get; set; }
+
 		public RectInt GetBounds(Vector2I position, int padding)
 		{
 			return new RectInt(position.x + (int)this.min.x - padding, position.y + (int)this.min.y - padding, (int)this.size.x + padding * 2, (int)this.size.y + padding * 2);

@@ -353,7 +353,7 @@ public class StatusItemRenderer
 					float num7 = (float)j * num4 * 2f - num4 * (float)(num2 - 1);
 					if (statusItem3.sprite == null)
 					{
-						DebugUtil.DevLogError(string.Concat(new string[] { "Status Item ", statusItem3.Id, " has null sprite for icon '", statusItem3.iconName, "', you need to add the sprite to the TintedSprites list in the GameAssets prefab manually." }));
+						DebugUtil.DevLogError(string.Concat(new string[] { "Status Item ", statusItem3.Id, " has null sprite for icon '", statusItem3.iconName, "', you need to run Collect Sprites or manually add the sprite to the TintedSprites list in the GameAssets prefab." }));
 						statusItem3.iconName = "status_item_exclamation";
 						statusItem3.sprite = Assets.GetTintedSprite("status_item_exclamation");
 					}

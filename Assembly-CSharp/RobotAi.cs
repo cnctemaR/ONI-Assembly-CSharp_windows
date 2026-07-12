@@ -86,6 +86,22 @@ public class RobotAi : GameStateMachine<RobotAi, RobotAi.Instance>
 			ChoreConsumer component = base.GetComponent<ChoreConsumer>();
 			component.AddUrge(Db.Get().Urges.EmoteHighPriority);
 			component.AddUrge(Db.Get().Urges.EmoteIdle);
+			base.Subscribe(-1988963660, new Action<object>(this.OnBeginChore));
+		}
+
+		private void OnBeginChore(object data)
+		{
+			Storage component = base.GetComponent<Storage>();
+			if (component != null)
+			{
+				component.DropAll(false, false, default(Vector3), true, null);
+			}
+		}
+
+		protected override void OnCleanUp()
+		{
+			base.Unsubscribe(-1988963660, new Action<object>(this.OnBeginChore));
+			base.OnCleanUp();
 		}
 
 		public void RefreshUserMenu()

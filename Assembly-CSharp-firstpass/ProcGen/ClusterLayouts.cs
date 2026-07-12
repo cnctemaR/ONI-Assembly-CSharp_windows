@@ -56,11 +56,36 @@ namespace ProcGen
 					{
 						DebugUtil.LogWarningArgs(new object[] { "Failed to load cluster: ", cluster_file.full_path });
 					}
-					else if (clusterLayout.skip != ClusterLayout.Skip.Always && (clusterLayout.skip != ClusterLayout.Skip.EditorOnly || Application.isEditor) && (clusterLayout.requiredDlcId == null || DlcManager.IsContentActive(clusterLayout.requiredDlcId)) && (clusterLayout.forbiddenDlcId == null || !DlcManager.IsContentActive(clusterLayout.forbiddenDlcId)))
+					else
 					{
-						string name = ClusterLayout.GetName(cluster_file.full_path, addPrefix);
-						clusterLayout.filePath = name;
-						this.clusterCache[name] = clusterLayout;
+						if (!clusterLayout.requiredDlcId.IsNullOrWhiteSpace())
+						{
+							clusterLayout.requiredDlcIds = new string[] { clusterLayout.requiredDlcId };
+						}
+						else if (clusterLayout.requiredDlcIds == null)
+						{
+							clusterLayout.requiredDlcIds = new string[] { DlcManager.IsExpansion1Active() ? "EXPANSION1_ID" : "" };
+						}
+						if (!clusterLayout.forbiddenDlcId.IsNullOrWhiteSpace())
+						{
+							clusterLayout.forbiddenDlcIds = new string[] { clusterLayout.forbiddenDlcId };
+						}
+						if (clusterLayout.requiredDlcIds != null)
+						{
+							for (int i = 0; i < clusterLayout.requiredDlcIds.Length; i++)
+							{
+								if (clusterLayout.requiredDlcIds[i] == "VANILLA_ID")
+								{
+									clusterLayout.requiredDlcIds[i] = "";
+								}
+							}
+						}
+						if (clusterLayout.skip != ClusterLayout.Skip.Always && (clusterLayout.skip != ClusterLayout.Skip.EditorOnly || Application.isEditor) && (clusterLayout.requiredDlcIds == null || DlcManager.HasAllContentSubscribed(clusterLayout.requiredDlcIds)) && (clusterLayout.forbiddenDlcIds == null || !DlcManager.HasAnyContentSubscribed(clusterLayout.forbiddenDlcIds)))
+						{
+							string name = ClusterLayout.GetName(cluster_file.full_path, addPrefix);
+							clusterLayout.filePath = name;
+							this.clusterCache[name] = clusterLayout;
+						}
 					}
 				}
 			}

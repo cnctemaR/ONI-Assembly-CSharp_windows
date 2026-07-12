@@ -108,8 +108,8 @@ public class AsteroidDescriptorPanel : KMonoBehaviour
 				HierarchyReferences component = gameObject2.GetComponent<HierarchyReferences>();
 				gameObject2.transform.localScale = Vector3.one;
 				StringEntry stringEntry;
-				Strings.TryGet(headerData[i].first, out stringEntry);
-				component.GetReference<LocText>("NameLabel").SetText(stringEntry.String);
+				string text = (Strings.TryGet(headerData[i].first, out stringEntry) ? stringEntry.String : headerData[i].first);
+				component.GetReference<LocText>("NameLabel").SetText(text);
 				component.GetReference<Image>("Icon").sprite = headerData[i].second;
 				gameObject2.SetActive(true);
 				gameObject = component.GetReference<RectTransform>("Contents").gameObject;
@@ -160,6 +160,7 @@ public class AsteroidDescriptorPanel : KMonoBehaviour
 
 	public void RefreshAsteroidLines(ColonyDestinationAsteroidBeltData cluster, AsteroidDescriptorPanel selectedAsteroidDetailsPanel, List<string> storyTraits)
 	{
+		cluster.RemixClusterLayout();
 		foreach (KeyValuePair<global::ProcGen.World, GameObject> keyValuePair in this.asteroidLines)
 		{
 			if (!keyValuePair.Value.IsNullOrDestroyed())
@@ -236,43 +237,42 @@ public class AsteroidDescriptorPanel : KMonoBehaviour
 		RectTransform reference3 = component.GetReference<RectTransform>("TraitsRow");
 		LocText reference4 = component.GetReference<LocText>("TraitLabel");
 		ToolTip component2 = gameObject.GetComponent<ToolTip>();
+		Image component3 = gameObject.transform.Find("DlcBanner").GetComponent<Image>();
 		Sprite uisprite = ColonyDestinationAsteroidBeltData.GetUISprite(asteroid.asteroidIcon);
 		reference.sprite = uisprite;
-		StringEntry stringEntry;
-		Strings.TryGet(asteroid.name, out stringEntry);
-		reference2.SetText(stringEntry.String);
+		reference2.SetText(asteroid.GetProperName());
 		List<WorldTrait> worldTraits = cluster.GetWorldTraits(asteroid);
 		reference4.gameObject.SetActive(worldTraits.Count == 0);
 		reference4.SetText(UI.FRONTEND.COLONYDESTINATIONSCREEN.NO_TRAITS);
 		RectTransform reference5 = component.GetReference<RectTransform>("TraitIconPrefab");
 		foreach (WorldTrait worldTrait in worldTraits)
 		{
-			Image component3 = global::Util.KInstantiateUI(reference5.gameObject, reference3.gameObject, true).GetComponent<Image>();
+			Image component4 = global::Util.KInstantiateUI(reference5.gameObject, reference3.gameObject, true).GetComponent<Image>();
 			Sprite sprite = Assets.GetSprite(worldTrait.filePath.Substring(worldTrait.filePath.LastIndexOf("/") + 1));
 			if (sprite != null)
 			{
-				component3.sprite = sprite;
+				component4.sprite = sprite;
 			}
-			component3.color = global::Util.ColorFromHex(worldTrait.colorHex);
+			component4.color = global::Util.ColorFromHex(worldTrait.colorHex);
 		}
 		string text = "";
 		if (worldTraits.Count > 0)
 		{
 			for (int i = 0; i < worldTraits.Count; i++)
 			{
+				StringEntry stringEntry;
+				Strings.TryGet(worldTraits[i].name, out stringEntry);
 				StringEntry stringEntry2;
-				Strings.TryGet(worldTraits[i].name, out stringEntry2);
-				StringEntry stringEntry3;
-				Strings.TryGet(worldTraits[i].description, out stringEntry3);
+				Strings.TryGet(worldTraits[i].description, out stringEntry2);
 				text = string.Concat(new string[]
 				{
 					text,
 					"<color=#",
 					worldTraits[i].colorHex,
 					">",
-					stringEntry2.String,
+					stringEntry.String,
 					"</color>\n",
-					stringEntry3.String
+					stringEntry2.String
 				});
 				if (i != worldTraits.Count - 1)
 				{
@@ -284,7 +284,20 @@ public class AsteroidDescriptorPanel : KMonoBehaviour
 		{
 			text = UI.FRONTEND.COLONYDESTINATIONSCREEN.NO_TRAITS;
 		}
+		if (DlcManager.IsDlcId(asteroid.dlcIdFrom))
+		{
+			text = text + "\n\n" + string.Format(UI.FRONTEND.COLONYDESTINATIONSCREEN.MIXING_TOOLTIP_DLC_CONTENT, DlcManager.GetDlcTitle(asteroid.dlcIdFrom));
+		}
 		component2.SetSimpleTooltip(text);
+		if (DlcManager.IsDlcId(asteroid.dlcIdFrom))
+		{
+			component3.color = DlcManager.GetDlcBannerColor(asteroid.dlcIdFrom);
+			component3.gameObject.SetActive(true);
+		}
+		else
+		{
+			component3.gameObject.SetActive(false);
+		}
 		this.asteroidLines.Add(asteroid, gameObject);
 	}
 
@@ -293,12 +306,8 @@ public class AsteroidDescriptorPanel : KMonoBehaviour
 		detailPanel.SetTraitDescriptors(traitDescriptors, true);
 		detailPanel.selectedAsteroidIcon.sprite = ColonyDestinationAsteroidBeltData.GetUISprite(asteroid.asteroidIcon);
 		detailPanel.selectedAsteroidIcon.gameObject.SetActive(true);
-		StringEntry stringEntry;
-		Strings.TryGet(asteroid.name, out stringEntry);
-		detailPanel.selectedAsteroidLabel.SetText(stringEntry.String);
-		StringEntry stringEntry2;
-		Strings.TryGet(asteroid.description, out stringEntry2);
-		detailPanel.selectedAsteroidDescription.SetText(stringEntry2.String);
+		detailPanel.selectedAsteroidLabel.SetText(asteroid.GetProperName());
+		detailPanel.selectedAsteroidDescription.SetText(asteroid.GetProperDescription());
 	}
 
 	private void SetSelectedCluster(ColonyDestinationAsteroidBeltData cluster, AsteroidDescriptorPanel detailPanel, List<string> stories)
@@ -332,9 +341,13 @@ public class AsteroidDescriptorPanel : KMonoBehaviour
 		list.Add(list5);
 		detailPanel.SetTraitDescriptors(list, false, list2);
 		detailPanel.selectedAsteroidIcon.gameObject.SetActive(false);
+		string text2 = cluster.properName;
 		StringEntry stringEntry;
-		Strings.TryGet(cluster.properName, out stringEntry);
-		detailPanel.selectedAsteroidLabel.SetText(stringEntry.String);
+		if (Strings.TryGet(cluster.properName, out stringEntry))
+		{
+			text2 = stringEntry.String;
+		}
+		detailPanel.selectedAsteroidLabel.SetText(text2);
 		detailPanel.selectedAsteroidDescription.SetText("");
 	}
 

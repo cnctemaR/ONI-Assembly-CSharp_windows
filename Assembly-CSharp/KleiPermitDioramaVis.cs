@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using Database;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class KleiPermitDioramaVis : KMonoBehaviour
 {
@@ -41,9 +42,17 @@ public class KleiPermitDioramaVis : KMonoBehaviour
 		IKleiPermitDioramaVisTarget permitVisTarget = this.GetPermitVisTarget(permit);
 		permitVisTarget.GetGameObject().SetActive(true);
 		permitVisTarget.ConfigureWith(permit);
+		string dlcIdFrom = permit.GetDlcIdFrom();
+		if (DlcManager.IsDlcId(dlcIdFrom))
+		{
+			this.dlcImage.gameObject.SetActive(true);
+			this.dlcImage.sprite = Assets.GetSprite(DlcManager.GetDlcSmallLogo(dlcIdFrom));
+			return;
+		}
+		this.dlcImage.gameObject.SetActive(false);
 	}
 
-	public IKleiPermitDioramaVisTarget GetPermitVisTarget(PermitResource permit)
+	private IKleiPermitDioramaVisTarget GetPermitVisTarget(PermitResource permit)
 	{
 		KleiPermitDioramaVis.lastRenderedPermit = permit;
 		if (permit == null)
@@ -72,7 +81,7 @@ public class KleiPermitDioramaVis : KMonoBehaviour
 				{
 					return this.buildingOnFloorVis;
 				}
-				if (buildingDef.PrefabID == "RockCrusher" || buildingDef.PrefabID == "GasReservoir" || buildingDef.PrefabID == "ArcadeMachine" || buildingDef.PrefabID == "MicrobeMusher" || buildingDef.PrefabID == "FlushToilet" || buildingDef.PrefabID == "WashSink")
+				if (buildingDef.PrefabID == "RockCrusher" || buildingDef.PrefabID == "GasReservoir" || buildingDef.PrefabID == "ArcadeMachine" || buildingDef.PrefabID == "MicrobeMusher" || buildingDef.PrefabID == "FlushToilet" || buildingDef.PrefabID == "WashSink" || buildingDef.PrefabID == "Headquarters" || buildingDef.PrefabID == "GourmetCookingStation")
 				{
 					return this.buildingOnFloorBigVis;
 				}
@@ -100,7 +109,7 @@ public class KleiPermitDioramaVis : KMonoBehaviour
 					case BuildLocationRule.OnFloor:
 						break;
 					case BuildLocationRule.OnFloorOverSpace:
-						goto IL_028A;
+						goto IL_02AE;
 					case BuildLocationRule.OnCeiling:
 						return this.buildingOnCeilingVis.WithAlignment(Alignment.Top());
 					case BuildLocationRule.OnWall:
@@ -110,13 +119,13 @@ public class KleiPermitDioramaVis : KMonoBehaviour
 					default:
 						if (valueOrDefault != BuildLocationRule.OnFoundationRotatable)
 						{
-							goto IL_028A;
+							goto IL_02AE;
 						}
 						break;
 					}
 					return this.buildingOnFloorVis;
 				}
-				IL_028A:
+				IL_02AE:
 				return this.fallbackVis.WithError(string.Format("No visualization available for building with BuildLocationRule of {0}", buildLocationRule));
 			}
 		}
@@ -128,15 +137,22 @@ public class KleiPermitDioramaVis : KMonoBehaviour
 				return this.fallbackVis.WithError("Couldn't find building def for Artable " + permit.Id);
 			}
 			ArtableStage artableStage = (ArtableStage)permit;
-			if (KleiPermitDioramaVis.<GetPermitVisTarget>g__Has|20_0<Sculpture>(buildingDef2))
+			if (KleiPermitDioramaVis.<GetPermitVisTarget>g__Has|21_0<Sculpture>(buildingDef2))
 			{
+				if (buildingDef2.PrefabID == "WoodSculpture")
+				{
+					return this.artablePaintingVis;
+				}
 				return this.artableSculptureVis;
 			}
-			if (KleiPermitDioramaVis.<GetPermitVisTarget>g__Has|20_0<Painting>(buildingDef2))
+			else
 			{
-				return this.artablePaintingVis;
+				if (KleiPermitDioramaVis.<GetPermitVisTarget>g__Has|21_0<Painting>(buildingDef2))
+				{
+					return this.artablePaintingVis;
+				}
+				return this.fallbackVis.WithError("No visualization available for Artable " + permit.Id);
 			}
-			return this.fallbackVis.WithError("No visualization available for Artable " + permit.Id);
 		}
 		else
 		{
@@ -195,10 +211,13 @@ public class KleiPermitDioramaVis : KMonoBehaviour
 	}
 
 	[CompilerGenerated]
-	internal static bool <GetPermitVisTarget>g__Has|20_0<T>(BuildingDef buildingDef) where T : Component
+	internal static bool <GetPermitVisTarget>g__Has|21_0<T>(BuildingDef buildingDef) where T : Component
 	{
 		return !buildingDef.BuildingComplete.GetComponent<T>().IsNullOrDestroyed();
 	}
+
+	[SerializeField]
+	private Image dlcImage;
 
 	[SerializeField]
 	private KleiPermitDioramaVis_Fallback fallbackVis;

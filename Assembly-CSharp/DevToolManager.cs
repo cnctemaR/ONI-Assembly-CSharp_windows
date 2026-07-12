@@ -4,6 +4,7 @@ using System.IO;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using ImGuiNET;
+using Klei;
 using STRINGS;
 using UnityEngine;
 
@@ -14,6 +15,14 @@ public class DevToolManager
 		get
 		{
 			return this.showImGui;
+		}
+	}
+
+	private bool quickDevEnabled
+	{
+		get
+		{
+			return DebugHandler.enabled && GenericGameSettings.instance.quickDevTools;
 		}
 	}
 
@@ -135,9 +144,9 @@ public class DevToolManager
 
 	private void UpdateShortcuts()
 	{
-		if (this.showImGui && this.UserAcceptedWarning)
+		if ((this.showImGui || this.quickDevEnabled) && this.UserAcceptedWarning)
 		{
-			this.<UpdateShortcuts>g__DoUpdate|24_0();
+			this.<UpdateShortcuts>g__DoUpdate|26_0();
 		}
 	}
 
@@ -166,16 +175,16 @@ public class DevToolManager
 			this.doesImGuiWantInput = *ImGui.GetIO().WantCaptureMouse || *ImGui.GetIO().WantCaptureKeyboard;
 			if (!this.prevDoesImGuiWantInput && this.doesImGuiWantInput)
 			{
-				DevToolManager.<UpdateConsumingGameInputs>g__OnInputEnterImGui|26_0();
+				DevToolManager.<UpdateConsumingGameInputs>g__OnInputEnterImGui|28_0();
 			}
 			if (this.prevDoesImGuiWantInput && !this.doesImGuiWantInput)
 			{
-				DevToolManager.<UpdateConsumingGameInputs>g__OnInputExitImGui|26_1();
+				DevToolManager.<UpdateConsumingGameInputs>g__OnInputExitImGui|28_1();
 			}
 		}
 		if (this.prevShowImGui && this.prevDoesImGuiWantInput && !this.showImGui)
 		{
-			DevToolManager.<UpdateConsumingGameInputs>g__OnInputExitImGui|26_1();
+			DevToolManager.<UpdateConsumingGameInputs>g__OnInputExitImGui|28_1();
 		}
 		this.prevShowImGui = this.showImGui;
 		this.prevDoesImGuiWantInput = this.doesImGuiWantInput;
@@ -183,7 +192,7 @@ public class DevToolManager
 	}
 
 	[CompilerGenerated]
-	private void <UpdateShortcuts>g__DoUpdate|24_0()
+	private void <UpdateShortcuts>g__DoUpdate|26_0()
 	{
 		if ((Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl)) && Input.GetKeyDown(KeyCode.Space))
 		{
@@ -198,7 +207,7 @@ public class DevToolManager
 	}
 
 	[CompilerGenerated]
-	internal static void <UpdateConsumingGameInputs>g__OnInputEnterImGui|26_0()
+	internal static void <UpdateConsumingGameInputs>g__OnInputEnterImGui|28_0()
 	{
 		UnityMouseCatcherUI.SetEnabled(true);
 		GameInputManager inputManager = Global.GetInputManager();
@@ -209,7 +218,7 @@ public class DevToolManager
 	}
 
 	[CompilerGenerated]
-	internal static void <UpdateConsumingGameInputs>g__OnInputExitImGui|26_1()
+	internal static void <UpdateConsumingGameInputs>g__OnInputExitImGui|28_1()
 	{
 		UnityMouseCatcherUI.SetEnabled(false);
 	}

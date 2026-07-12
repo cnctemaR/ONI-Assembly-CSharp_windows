@@ -5,7 +5,7 @@ public class WoundMonitor : GameStateMachine<WoundMonitor, WoundMonitor.Instance
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
 		default_state = this.healthy;
-		this.root.ToggleAnims("anim_hits_kanim", 0f, "").EventHandler(GameHashes.HealthChanged, delegate(WoundMonitor.Instance smi, object data)
+		this.root.ToggleAnims("anim_hits_kanim", 0f).EventHandler(GameHashes.HealthChanged, delegate(WoundMonitor.Instance smi, object data)
 		{
 			smi.OnHealthChanged(data);
 		});
@@ -30,8 +30,8 @@ public class WoundMonitor : GameStateMachine<WoundMonitor, WoundMonitor.Instance
 		{
 			smi.GoToProperHeathState();
 		});
-		this.wounded.medium.ToggleAnims("anim_loco_wounded_kanim", 1f, "");
-		this.wounded.heavy.ToggleAnims("anim_loco_wounded_kanim", 3f, "").Update("LookForAvailableClinic", delegate(WoundMonitor.Instance smi, float dt)
+		this.wounded.medium.ToggleAnims("anim_loco_wounded_kanim", 1f);
+		this.wounded.heavy.ToggleAnims("anim_loco_wounded_kanim", 3f).Update("LookForAvailableClinic", delegate(WoundMonitor.Instance smi, float dt)
 		{
 			smi.FindAvailableMedicalBed();
 		}, UpdateRate.SIM_1000ms, false);

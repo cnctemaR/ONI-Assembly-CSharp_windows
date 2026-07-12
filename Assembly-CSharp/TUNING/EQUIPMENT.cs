@@ -72,11 +72,15 @@ namespace TUNING
 
 			public static int ATMOSUIT_SCALDING = 1000;
 
+			public static int ATMOSUIT_SCOLDING = -1000;
+
 			public static float ATMOSUIT_DECAY = -0.1f;
 
 			public static float LEADSUIT_THERMAL_CONDUCTIVITY_BARRIER = 0.3f;
 
 			public static int LEADSUIT_SCALDING = 1000;
+
+			public static int LEADSUIT_SCOLDING = -1000;
 
 			public static int LEADSUIT_INSULATION = 50;
 
@@ -131,27 +135,15 @@ namespace TUNING
 
 			public static string SNAPON1 = "snapTo_arm";
 
-			public static string WARM_VEST_ANIM0 = "body_shirt_hot01_kanim";
+			public static string WARM_VEST_ANIM0 = "body_shirt_hot_shearling_kanim";
 
-			public static string WARM_VEST_ANIM1 = "body_shirt_hot02_kanim";
-
-			public static string WARM_VEST_ICON0 = "shirt_hot01_kanim";
-
-			public static string WARM_VEST_ICON1 = "shirt_hot02_kanim";
+			public static string WARM_VEST_ICON0 = "shirt_hot_shearling_kanim";
 
 			public static float WARM_VEST_FABTIME = 180f;
 
 			public static float WARM_VEST_INSULATION = 0.01f;
 
 			public static int WARM_VEST_MASS = 4;
-
-			public static string COOL_VEST_ANIM0 = "body_shirt_cold01_kanim";
-
-			public static string COOL_VEST_ANIM1 = "body_shirt_cold02_kanim";
-
-			public static string COOL_VEST_ICON0 = "shirt_cold01_kanim";
-
-			public static string COOL_VEST_ICON1 = "shirt_cold02_kanim";
 
 			public static float COOL_VEST_FABTIME = EQUIPMENT.VESTS.WARM_VEST_FABTIME;
 

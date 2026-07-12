@@ -5,7 +5,7 @@ using STRINGS;
 using UnityEngine;
 
 [SkipSaveFileSerialization]
-public class IlluminationVulnerable : StateMachineComponent<IlluminationVulnerable.StatesInstance>, IGameObjectEffectDescriptor, IWiltCause
+public class IlluminationVulnerable : StateMachineComponent<IlluminationVulnerable.StatesInstance>, IGameObjectEffectDescriptor, IWiltCause, IIlluminationTracker
 {
 	public int LightIntensityThreshold
 	{
@@ -17,6 +17,25 @@ public class IlluminationVulnerable : StateMachineComponent<IlluminationVulnerab
 			}
 			return Mathf.RoundToInt(base.GetComponent<Modifiers>().GetPreModifiedAttributeValue(Db.Get().PlantAttributes.MinLightLux));
 		}
+	}
+
+	public string GetIlluminationUITooltip()
+	{
+		if ((this.prefersDarkness && this.IsComfortable()) || (!this.prefersDarkness && !this.IsComfortable()))
+		{
+			return UI.TOOLTIPS.VITALS_CHECKBOX_ILLUMINATION_DARK;
+		}
+		return UI.TOOLTIPS.VITALS_CHECKBOX_ILLUMINATION_LIGHT;
+	}
+
+	public string GetIlluminationUILabel()
+	{
+		return Db.Get().Amounts.Illumination.Name + "\n    • " + (this.prefersDarkness ? UI.GAMEOBJECTEFFECTS.DARKNESS.ToString() : GameUtil.GetFormattedLux(this.LightIntensityThreshold));
+	}
+
+	public bool ShouldIlluminationUICheckboxBeChecked()
+	{
+		return this.IsComfortable();
 	}
 
 	private OccupyArea occupyArea

@@ -32,7 +32,7 @@ public class StoryManager : KMonoBehaviour
 
 	public void InitialSaveSetup()
 	{
-		this.highestStoryCoordinateWhenGenerated = Db.Get().Stories.GetHighestCoordinateOffset();
+		this.highestStoryCoordinateWhenGenerated = Db.Get().Stories.GetHighestCoordinate();
 		foreach (WorldContainer worldContainer in ClusterManager.Instance.WorldContainers)
 		{
 			foreach (string text in worldContainer.StoryTraitIds)

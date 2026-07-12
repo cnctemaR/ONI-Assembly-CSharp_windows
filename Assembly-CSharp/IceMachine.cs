@@ -3,7 +3,7 @@ using KSerialization;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class IceMachine : StateMachineComponent<IceMachine.StatesInstance>
+public class IceMachine : StateMachineComponent<IceMachine.StatesInstance>, FewOptionSideScreen.IFewOptionSideScreen
 {
 	public void SetStorages(Storage waterStorage, Storage iceStorage)
 	{
@@ -31,7 +31,7 @@ public class IceMachine : StateMachineComponent<IceMachine.StatesInstance>
 			if (gameObject2 && gameObject2.GetComponent<PrimaryElement>().Temperature < gameObject2.GetComponent<PrimaryElement>().Element.lowTemp)
 			{
 				PrimaryElement component = gameObject2.GetComponent<PrimaryElement>();
-				this.waterStorage.AddOre(component.Element.lowTempTransitionTarget, component.Mass, component.Temperature, component.DiseaseIdx, component.DiseaseCount, false, true);
+				this.waterStorage.AddOre(this.targetProductionElement, component.Mass, component.Temperature, component.DiseaseIdx, component.DiseaseCount, false, true);
 				this.waterStorage.ConsumeIgnoringDisease(gameObject2);
 			}
 		}
@@ -42,6 +42,27 @@ public class IceMachine : StateMachineComponent<IceMachine.StatesInstance>
 	{
 		base.OnSpawn();
 		base.smi.StartSM();
+	}
+
+	public FewOptionSideScreen.IFewOptionSideScreen.Option[] GetOptions()
+	{
+		FewOptionSideScreen.IFewOptionSideScreen.Option[] array = new FewOptionSideScreen.IFewOptionSideScreen.Option[IceMachineConfig.ELEMENT_OPTIONS.Length];
+		for (int i = 0; i < array.Length; i++)
+		{
+			string text = Strings.Get("STRINGS.BUILDINGS.PREFABS.ICEMACHINE.OPTION_TOOLTIPS." + IceMachineConfig.ELEMENT_OPTIONS[i].ToString().ToUpper());
+			array[i] = new FewOptionSideScreen.IFewOptionSideScreen.Option(IceMachineConfig.ELEMENT_OPTIONS[i], ElementLoader.GetElement(IceMachineConfig.ELEMENT_OPTIONS[i]).name, Def.GetUISprite(IceMachineConfig.ELEMENT_OPTIONS[i], "ui", false), text);
+		}
+		return array;
+	}
+
+	public void OnOptionSelected(FewOptionSideScreen.IFewOptionSideScreen.Option option)
+	{
+		this.targetProductionElement = ElementLoader.GetElementID(option.tag);
+	}
+
+	public Tag GetSelectedOption()
+	{
+		return this.targetProductionElement.CreateTag();
 	}
 
 	[MyCmpGet]
@@ -56,6 +77,9 @@ public class IceMachine : StateMachineComponent<IceMachine.StatesInstance>
 	public float heatRemovalRate;
 
 	private static StatusItem iceStorageFullStatusItem;
+
+	[Serialize]
+	public SimHashes targetProductionElement = SimHashes.Ice;
 
 	public class StatesInstance : GameStateMachine<IceMachine.States, IceMachine.StatesInstance, IceMachine, object>.GameInstance
 	{
@@ -122,7 +146,8 @@ public class IceMachine : StateMachineComponent<IceMachine.StatesInstance>
 				{
 					smi.master.operational.SetActive(false, false);
 					smi.master.gameObject.GetComponent<ManualDeliveryKG>().Pause(false, "Done Working");
-				});
+				})
+				.ToggleStatusItem(Db.Get().BuildingStatusItems.CoolingWater, null);
 			this.on.working_pst.Exit(new StateMachine<IceMachine.States, IceMachine.StatesInstance, IceMachine, object>.State.Callback(this.DoTransfer)).PlayAnim("working_pst").OnAnimQueueComplete(this.on);
 		}
 

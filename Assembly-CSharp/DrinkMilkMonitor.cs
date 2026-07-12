@@ -80,26 +80,19 @@ public class DrinkMilkMonitor : GameStateMachine<DrinkMilkMonitor, DrinkMilkMoni
 			DrinkMilkMonitor.<>c__DisplayClass8_1 CS$<>8__locals2;
 			CS$<>8__locals2.canDrown = CS$<>8__locals1.smi.drowningMonitor != null && CS$<>8__locals1.smi.drowningMonitor.canDrownToDeath && !CS$<>8__locals1.smi.drowningMonitor.livesUnderWater;
 			CS$<>8__locals1.smi.targetMilkFeeder = null;
-			CS$<>8__locals1.smi.doesTargetMilkFeederHaveSpaceForGassyMoo = false;
+			CS$<>8__locals1.smi.doesTargetMilkFeederHaveSpaceForCritter = false;
 			CS$<>8__locals2.resultCost = -1;
 			foreach (MilkFeeder.Instance instance2 in pooledList)
 			{
 				DrinkMilkMonitor.<>c__DisplayClass8_2 CS$<>8__locals3;
 				CS$<>8__locals3.milkFeeder = instance2;
-				if (CS$<>8__locals1.smi.def.isGassyMoo)
+				if (DrinkMilkMonitor.<FindMilkFeederTarget>g__ConsiderCell|8_0(CS$<>8__locals1.smi.GetDrinkCellOf(CS$<>8__locals3.milkFeeder, false), ref CS$<>8__locals1, ref CS$<>8__locals2, ref CS$<>8__locals3))
 				{
-					if (DrinkMilkMonitor.<FindMilkFeederTarget>g__ConsiderCell|8_0(CS$<>8__locals1.smi.GetDrinkCellOf(CS$<>8__locals3.milkFeeder, false), ref CS$<>8__locals1, ref CS$<>8__locals2, ref CS$<>8__locals3))
-					{
-						CS$<>8__locals1.smi.doesTargetMilkFeederHaveSpaceForGassyMoo = false;
-					}
-					else if (DrinkMilkMonitor.<FindMilkFeederTarget>g__ConsiderCell|8_0(CS$<>8__locals1.smi.GetDrinkCellOf(CS$<>8__locals3.milkFeeder, true), ref CS$<>8__locals1, ref CS$<>8__locals2, ref CS$<>8__locals3))
-					{
-						CS$<>8__locals1.smi.doesTargetMilkFeederHaveSpaceForGassyMoo = true;
-					}
+					CS$<>8__locals1.smi.doesTargetMilkFeederHaveSpaceForCritter = false;
 				}
-				else
+				else if (DrinkMilkMonitor.<FindMilkFeederTarget>g__ConsiderCell|8_0(CS$<>8__locals1.smi.GetDrinkCellOf(CS$<>8__locals3.milkFeeder, true), ref CS$<>8__locals1, ref CS$<>8__locals2, ref CS$<>8__locals3))
 				{
-					DrinkMilkMonitor.<FindMilkFeederTarget>g__ConsiderCell|8_0(CS$<>8__locals1.smi.GetDrinkCellOf(CS$<>8__locals3.milkFeeder, CS$<>8__locals1.smi.doesTargetMilkFeederHaveSpaceForGassyMoo), ref CS$<>8__locals1, ref CS$<>8__locals2, ref CS$<>8__locals3);
+					CS$<>8__locals1.smi.doesTargetMilkFeederHaveSpaceForCritter = true;
 				}
 			}
 		}
@@ -138,9 +131,9 @@ public class DrinkMilkMonitor : GameStateMachine<DrinkMilkMonitor, DrinkMilkMoni
 
 	public class Def : StateMachine.BaseDef
 	{
-		public bool isGassyMoo;
-
 		public bool consumesMilk = true;
+
+		public DrinkMilkStates.Def.DrinkCellOffsetGetFn drinkCellOffsetGetFn;
 	}
 
 	public new class Instance : GameStateMachine<DrinkMilkMonitor, DrinkMilkMonitor.Instance, IStateMachineTarget, DrinkMilkMonitor.Def>.GameInstance
@@ -159,14 +152,14 @@ public class DrinkMilkMonitor : GameStateMachine<DrinkMilkMonitor, DrinkMilkMoni
 			base.sm.didFinishDrinkingMilk.Trigger(base.smi);
 		}
 
-		public int GetDrinkCellOf(MilkFeeder.Instance milkFeeder, bool isGassyMooCramped)
+		public int GetDrinkCellOf(MilkFeeder.Instance milkFeeder, bool isTwoByTwoCritterCramped)
 		{
-			return Grid.OffsetCell(Grid.PosToCell(milkFeeder), milkFeeder.GetCellOffsetToDrinkCell(base.def.isGassyMoo, isGassyMooCramped));
+			return Grid.OffsetCell(Grid.PosToCell(milkFeeder), base.def.drinkCellOffsetGetFn(milkFeeder, this, isTwoByTwoCritterCramped));
 		}
 
 		public MilkFeeder.Instance targetMilkFeeder;
 
-		public bool doesTargetMilkFeederHaveSpaceForGassyMoo;
+		public bool doesTargetMilkFeederHaveSpaceForCritter;
 
 		[MyCmpReq]
 		public Navigator navigator;

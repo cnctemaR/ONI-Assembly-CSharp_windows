@@ -85,14 +85,19 @@ namespace Klei.AI
 			string text = "";
 			if (this.ignoredEffects != null && this.ignoredEffects.Length != 0)
 			{
-				foreach (string text2 in this.ignoredEffects)
+				for (int i = 0; i < this.ignoredEffects.Length; i++)
 				{
+					string text2 = this.ignoredEffects[i];
 					if (list_entry)
 					{
 						text += DUPLICANTS.TRAITS.TRAIT_DESCRIPTION_LIST_ENTRY;
 					}
 					string text3 = Strings.Get("STRINGS.DUPLICANTS.MODIFIERS." + text2.ToUpper() + ".NAME");
 					text += string.Format(DUPLICANTS.TRAITS.IGNORED_EFFECTS, text3);
+					if (!list_entry && i < this.ignoredEffects.Length - 1)
+					{
+						text += "\n";
+					}
 				}
 			}
 			return text;

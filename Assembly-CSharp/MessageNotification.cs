@@ -13,6 +13,8 @@ public class MessageNotification : Notification
 	{
 		MessageNotification <>4__this = this;
 		this.message = m;
+		base.Type = m.GetMessageType();
+		this.showDismissButton = m.ShowDismissButton();
 		if (!this.message.PlayNotificationSound())
 		{
 			this.playSound = false;

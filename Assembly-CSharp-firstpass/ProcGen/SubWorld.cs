@@ -112,7 +112,10 @@ namespace ProcGen
 			RocketInterior,
 			Metallic,
 			Barren,
-			Moo
+			Moo,
+			IceCaves,
+			CarrotQuarry,
+			SugarWoods
 		}
 	}
 }

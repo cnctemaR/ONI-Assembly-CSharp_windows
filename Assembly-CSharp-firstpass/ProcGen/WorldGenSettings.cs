@@ -13,6 +13,8 @@ namespace ProcGen
 			}
 		}
 
+		public WorldPlacement.LocationType worldType { get; private set; }
+
 		public static string ClusterDefaultName
 		{
 			get
@@ -29,6 +31,37 @@ namespace ProcGen
 		{
 			DebugUtil.Assert(SettingsCache.worlds.HasWorld(worldName), "Failed to load world " + worldName);
 			World worldData = SettingsCache.worlds.GetWorldData(worldName);
+			List<WorldTrait> list = new List<WorldTrait>();
+			if (worldTraits != null)
+			{
+				foreach (string text in worldTraits)
+				{
+					WorldTrait cachedWorldTrait = SettingsCache.GetCachedWorldTrait(text, assertMissingTraits);
+					if (cachedWorldTrait != null)
+					{
+						list.Add(cachedWorldTrait);
+					}
+				}
+			}
+			List<WorldTrait> list2 = new List<WorldTrait>();
+			if (storyTraits != null)
+			{
+				foreach (string text2 in storyTraits)
+				{
+					WorldTrait cachedStoryTrait = SettingsCache.GetCachedStoryTrait(text2, assertMissingTraits);
+					if (cachedStoryTrait != null)
+					{
+						list2.Add(cachedStoryTrait);
+					}
+				}
+			}
+			this.mutatedWorldData = new MutatedWorldData(worldData, list, list2);
+		}
+
+		public WorldGenSettings(WorldPlacement placement, int seed, List<string> worldTraits, List<string> storyTraits, bool assertMissingTraits)
+		{
+			World worldData = SettingsCache.worlds.GetWorldData(placement, seed);
+			this.worldType = placement.locationType;
 			List<WorldTrait> list = new List<WorldTrait>();
 			if (worldTraits != null)
 			{

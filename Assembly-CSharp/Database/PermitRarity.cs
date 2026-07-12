@@ -6,6 +6,7 @@ namespace Database
 	{
 		Unknown,
 		Universal,
+		UniversalLocked,
 		Loyalty,
 		Common,
 		Decent,

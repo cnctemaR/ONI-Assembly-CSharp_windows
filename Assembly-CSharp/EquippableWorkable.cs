@@ -34,6 +34,16 @@ public class EquippableWorkable : Workable, ISaveLoadable
 	{
 		global::Debug.Assert(this.chore == null, "chore should be null");
 		this.chore = new EquipChore(this);
+		Chore chore = this.chore;
+		chore.onExit = (Action<Chore>)Delegate.Combine(chore.onExit, new Action<Chore>(this.OnChoreExit));
+	}
+
+	private void OnChoreExit(Chore chore)
+	{
+		if (!chore.isComplete)
+		{
+			this.RefreshChore(this.currentTarget);
+		}
 	}
 
 	public void CancelChore(string reason = "")
@@ -52,6 +62,7 @@ public class EquippableWorkable : Workable, ISaveLoadable
 		{
 			this.CancelChore("Equipment Reassigned");
 		}
+		this.currentTarget = target;
 		if (target != null && !target.GetSoleOwner().GetComponent<Equipment>().IsEquipped(this.equippable))
 		{
 			this.CreateChore();
@@ -82,6 +93,8 @@ public class EquippableWorkable : Workable, ISaveLoadable
 	private Equippable equippable;
 
 	private Chore chore;
+
+	private IAssignableIdentity currentTarget;
 
 	private global::QualityLevel quality;
 }

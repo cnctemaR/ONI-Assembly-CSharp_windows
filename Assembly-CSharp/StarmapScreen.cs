@@ -154,7 +154,7 @@ public class StarmapScreen : KModalScreen
 		this.forceScrollDown = true;
 	}
 
-	private void UpdateDestinationStates()
+	public void UpdateDestinationStates()
 	{
 		int num = 0;
 		int num2 = 0;

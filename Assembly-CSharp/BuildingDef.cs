@@ -5,6 +5,7 @@ using Klei;
 using Klei.AI;
 using ProcGen;
 using STRINGS;
+using TUNING;
 using UnityEngine;
 
 [Serializable]
@@ -1522,6 +1523,7 @@ public class BuildingDef : Def
 		this.CraftRecipe.Icon = this.UISprite;
 		for (int i = 0; i < this.MaterialCategory.Length; i++)
 		{
+			TagManager.Create(this.MaterialCategory[i], MATERIALS.GetMaterialString(this.MaterialCategory[i]));
 			Recipe.Ingredient ingredient = new Recipe.Ingredient(this.MaterialCategory[i], (float)((int)this.Mass[i]));
 			this.CraftRecipe.Ingredients.Add(ingredient);
 		}
@@ -1535,7 +1537,7 @@ public class BuildingDef : Def
 		}
 		if (!this.Deprecated)
 		{
-			Db.Get().TechItems.AddTechItem(this.PrefabID, this.Name, this.Effect, new Func<string, bool, Sprite>(this.GetUISprite), this.RequiredDlcIds);
+			Db.Get().TechItems.AddTechItem(this.PrefabID, this.Name, this.Effect, new Func<string, bool, Sprite>(this.GetUISprite), this.RequiredDlcIds, this.POIUnlockable);
 		}
 	}
 
@@ -1555,7 +1557,7 @@ public class BuildingDef : Def
 
 	public bool CheckRequiresBuildingCellVisualizer()
 	{
-		return this.CheckRequiresPowerInput() || this.CheckRequiresPowerOutput() || this.CheckRequiresGasInput() || this.CheckRequiresGasOutput() || this.CheckRequiresLiquidInput() || this.CheckRequiresLiquidOutput() || this.CheckRequiresSolidInput() || this.CheckRequiresSolidOutput() || this.CheckRequiresHighEnergyParticleInput() || this.CheckRequiresHighEnergyParticleOutput() || this.DiseaseCellVisName != null;
+		return this.CheckRequiresPowerInput() || this.CheckRequiresPowerOutput() || this.CheckRequiresGasInput() || this.CheckRequiresGasOutput() || this.CheckRequiresLiquidInput() || this.CheckRequiresLiquidOutput() || this.CheckRequiresSolidInput() || this.CheckRequiresSolidOutput() || this.CheckRequiresHighEnergyParticleInput() || this.CheckRequiresHighEnergyParticleOutput() || this.SelfHeatKilowattsWhenActive != 0f || this.ExhaustKilowattsWhenActive != 0f || this.DiseaseCellVisName != null;
 	}
 
 	public bool CheckRequiresPowerInput()
@@ -1620,6 +1622,11 @@ public class BuildingDef : Def
 		}
 	}
 
+	public bool IsValidDLC()
+	{
+		return SaveLoader.Instance.IsDlcListActiveForCurrentSave(this.RequiredDlcIds);
+	}
+
 	public string[] RequiredDlcIds;
 
 	public float EnergyConsumptionWhenActive;
@@ -1647,6 +1654,8 @@ public class BuildingDef : Def
 	public int HeightInCells;
 
 	public int HitPoints;
+
+	public float Temperature = 293.15f;
 
 	public bool RequiresPowerInput;
 
@@ -1706,6 +1715,10 @@ public class BuildingDef : Def
 	public bool OnePerWorld;
 
 	public bool PlayConstructionSounds = true;
+
+	public Func<CodexEntry, CodexEntry> ExtendCodexEntry;
+
+	public bool POIUnlockable;
 
 	public List<Tag> ReplacementTags;
 

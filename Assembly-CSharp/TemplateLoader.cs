@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Database;
 using Klei.AI;
 using TemplateClasses;
 using UnityEngine;
@@ -53,11 +54,18 @@ public static class TemplateLoader
 		{
 			global::Debug.LogError("No stamp template");
 		}
+		if (template.info != null && template.info.discover_tags != null)
+		{
+			foreach (Tag tag in template.info.discover_tags)
+			{
+				DiscoveredResources.Instance.Discover(tag);
+			}
+		}
 		if (template.buildings != null)
 		{
-			for (int i = 0; i < template.buildings.Count; i++)
+			for (int j = 0; j < template.buildings.Count; j++)
 			{
-				TemplateLoader.PlaceBuilding(template.buildings[i], num);
+				TemplateLoader.PlaceBuilding(template.buildings[j], num);
 			}
 		}
 		HandleVector<Game.CallbackInfo>.Handle handle = Game.Instance.callbackManager.Add(new Game.CallbackInfo(callback, false));
@@ -226,6 +234,18 @@ public static class TemplateLoader
 		if (prefab.connections != 0)
 		{
 			TemplateLoader.PlaceUtilityConnection(gameObject, prefab, root_cell);
+		}
+		if (!prefab.facadeId.IsNullOrWhiteSpace())
+		{
+			BuildingFacade component8 = gameObject.GetComponent<BuildingFacade>();
+			if (component8 != null)
+			{
+				BuildingFacadeResource buildingFacadeResource = Db.GetBuildingFacades().TryGet(prefab.facadeId);
+				if (buildingFacadeResource != null && buildingFacadeResource.IsUnlocked())
+				{
+					component8.ApplyBuildingFacade(buildingFacadeResource, false);
+				}
+			}
 		}
 		return gameObject;
 	}
@@ -603,7 +623,7 @@ public static class TemplateLoader
 		}
 		foreach (Pickupable pickupable in Components.Pickupables.Items)
 		{
-			if (Grid.IsCellOffsetOf(Grid.XYToCell(baseX, baseY), pickupable.gameObject, template_as_offsets))
+			if (Grid.IsCellOffsetOf(Grid.PosToCell(pickupable.gameObject), Grid.XYToCell(baseX, baseY), template_as_offsets))
 			{
 				Util.KDestroyGameObject(pickupable.gameObject);
 			}

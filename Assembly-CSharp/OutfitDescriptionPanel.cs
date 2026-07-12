@@ -22,9 +22,27 @@ public class OutfitDescriptionPanel : KMonoBehaviour
 		if (outfit.IsSome())
 		{
 			this.Refresh(outfit.Unwrap().ReadName(), outfit.Unwrap().ReadItems(), outfitType, personality);
-			return;
+			if (personality.IsNone() && outfit.IsSome())
+			{
+				ClothingOutfitTarget.Implementation impl = outfit.Unwrap().impl;
+				if (impl is ClothingOutfitTarget.DatabaseAuthoredTemplate)
+				{
+					ClothingOutfitTarget.DatabaseAuthoredTemplate databaseAuthoredTemplate = (ClothingOutfitTarget.DatabaseAuthoredTemplate)impl;
+					string dlcIdFrom = databaseAuthoredTemplate.resource.GetDlcIdFrom();
+					if (DlcManager.IsDlcId(dlcIdFrom))
+					{
+						this.collectionLabel.text = UI.KLEI_INVENTORY_SCREEN.COLLECTION.Replace("{Collection}", DlcManager.GetDlcTitle(dlcIdFrom));
+						this.collectionLabel.gameObject.SetActive(true);
+						this.collectionLabel.transform.SetAsLastSibling();
+						return;
+					}
+				}
+			}
 		}
-		this.Refresh(KleiItemsUI.GetNoneOutfitName(outfitType), OutfitDescriptionPanel.NO_ITEMS, outfitType, personality);
+		else
+		{
+			this.Refresh(KleiItemsUI.GetNoneOutfitName(outfitType), OutfitDescriptionPanel.NO_ITEMS, outfitType, personality);
+		}
 	}
 
 	public void Refresh(OutfitDesignerScreen_OutfitState outfitState, Option<Personality> personality)
@@ -112,7 +130,7 @@ public class OutfitDescriptionPanel : KMonoBehaviour
 				}
 			}
 		}
-		bool flag = ClothingOutfitTarget.DoesContainNonOwnedItems(outfitItemIds);
+		bool flag = ClothingOutfitTarget.DoesContainLockedItems(outfitItemIds);
 		this.usesUnownedItemsLabel.transform.SetAsLastSibling();
 		if (!flag)
 		{
@@ -123,6 +141,7 @@ public class OutfitDescriptionPanel : KMonoBehaviour
 			this.usesUnownedItemsLabel.SetText(KleiItemsUI.WrapWithColor(UI.OUTFIT_DESCRIPTION.CONTAINS_NON_OWNED_ITEMS, KleiItemsUI.TEXT_COLOR__PERMIT_NOT_OWNED));
 			this.usesUnownedItemsLabel.gameObject.SetActive(true);
 		}
+		this.collectionLabel.gameObject.SetActive(false);
 		KleiItemsStatusRefresher.AddOrGetListener(this).OnRefreshUI(delegate
 		{
 			this.Refresh(outfitName, outfitItemIds, outfitType, personality);
@@ -174,6 +193,9 @@ public class OutfitDescriptionPanel : KMonoBehaviour
 
 	[SerializeField]
 	private GameObject itemDescriptionContainer;
+
+	[SerializeField]
+	private LocText collectionLabel;
 
 	[SerializeField]
 	private LocText usesUnownedItemsLabel;

@@ -42,6 +42,7 @@ public class LiquidConditionerConfig : IBuildingConfig
 		airConditioner.temperatureDelta = -14f;
 		airConditioner.maxEnvironmentDelta = -50f;
 		airConditioner.isLiquidConditioner = true;
+		go.AddOrGet<KBatchedAnimHeatPostProcessingEffect>();
 		ConduitConsumer conduitConsumer = go.AddOrGet<ConduitConsumer>();
 		conduitConsumer.conduitType = ConduitType.Liquid;
 		conduitConsumer.consumptionRate = 10f;

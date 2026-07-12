@@ -249,28 +249,54 @@ public class SimDebugView : KMonoBehaviour
 		return Color.HSVToRGB((10f + (1f - num) * 171f) / 360f, num2, 1f);
 	}
 
-	public Color NormalizedTemperature(float temperature)
+	public Color NormalizedTemperature(float actualTemperature)
 	{
-		int num = 0;
-		int num2 = 0;
-		for (int i = 0; i < this.temperatureThresholds.Length; i++)
+		float num = this.user_temperatureThresholds[0];
+		float num2 = this.user_temperatureThresholds[1];
+		float num3 = num2 - num;
+		if (actualTemperature < num)
 		{
-			if (temperature <= this.temperatureThresholds[i].value)
+			return GlobalAssets.Instance.colorSet.GetColorByName(this.temperatureThresholds[0].colorName);
+		}
+		if (actualTemperature > num2)
+		{
+			return GlobalAssets.Instance.colorSet.GetColorByName(this.temperatureThresholds[this.temperatureThresholds.Length - 1].colorName);
+		}
+		int num4 = 0;
+		float num5 = 0f;
+		Game.TemperatureOverlayModes temperatureOverlayMode = Game.Instance.temperatureOverlayMode;
+		if (temperatureOverlayMode != Game.TemperatureOverlayModes.AbsoluteTemperature)
+		{
+			if (temperatureOverlayMode == Game.TemperatureOverlayModes.RelativeTemperature)
 			{
-				num2 = i;
-				break;
+				float num6 = num;
+				for (int i = 0; i < SimDebugView.relativeTemperatureColorIntervals.Length; i++)
+				{
+					if (actualTemperature < num6 + SimDebugView.relativeTemperatureColorIntervals[i] * num3)
+					{
+						num4 = i;
+						break;
+					}
+					num6 += SimDebugView.relativeTemperatureColorIntervals[i] * num3;
+				}
+				num5 = (actualTemperature - num6) / (SimDebugView.relativeTemperatureColorIntervals[num4] * num3);
 			}
-			num = i;
-			num2 = i;
 		}
-		float num3 = 0f;
-		if (num != num2)
+		else
 		{
-			num3 = (temperature - this.temperatureThresholds[num].value) / (this.temperatureThresholds[num2].value - this.temperatureThresholds[num].value);
+			float num7 = num;
+			for (int j = 0; j < SimDebugView.absoluteTemperatureColorIntervals.Length; j++)
+			{
+				if (actualTemperature < num7 + SimDebugView.absoluteTemperatureColorIntervals[j])
+				{
+					num4 = j;
+					break;
+				}
+				num7 += SimDebugView.absoluteTemperatureColorIntervals[j];
+			}
+			num5 = (actualTemperature - num7) / SimDebugView.absoluteTemperatureColorIntervals[num4];
 		}
-		num3 = Mathf.Max(num3, 0f);
-		num3 = Mathf.Min(num3, 1f);
-		return Color.Lerp(GlobalAssets.Instance.colorSet.GetColorByName(this.temperatureThresholds[num].colorName), GlobalAssets.Instance.colorSet.GetColorByName(this.temperatureThresholds[num2].colorName), num3);
+		return Color.Lerp(GlobalAssets.Instance.colorSet.GetColorByName(this.temperatureThresholds[num4].colorName), GlobalAssets.Instance.colorSet.GetColorByName(this.temperatureThresholds[num4 + 1].colorName), num5);
 	}
 
 	public Color NormalizedHeatFlow(int cell)
@@ -853,6 +879,8 @@ public class SimDebugView : KMonoBehaviour
 
 	public SimDebugView.ColorThreshold[] temperatureThresholds;
 
+	public Vector2 user_temperatureThresholds = Vector2.zero;
+
 	public SimDebugView.ColorThreshold[] heatFlowThresholds;
 
 	public Color32[] networkColours;
@@ -896,6 +924,10 @@ public class SimDebugView : KMonoBehaviour
 			new Action<SimDebugView, Texture>(SimDebugView.SetDisease)
 		}
 	};
+
+	private static float[] relativeTemperatureColorIntervals = new float[] { 0.4f, 0.05f, 0.05f, 0.05f, 0.05f, 0.2f, 0.2f };
+
+	private static float[] absoluteTemperatureColorIntervals = new float[] { 273.15f, 10f, 10f, 10f, 7f, 63f, 1700f, 10000f };
 
 	private Dictionary<HashedString, Func<SimDebugView, int, Color>> getColourFuncs = new Dictionary<HashedString, Func<SimDebugView, int, Color>>
 	{

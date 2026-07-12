@@ -17,7 +17,7 @@ public static class BaseHatchConfig
 		{
 			text = "WalkerBabyNavGrid";
 		}
-		EntityTemplates.ExtendEntityToBasicCreature(gameObject, FactionManager.FactionID.Pest, traitId, text, NavType.Floor, 32, 2f, "Meat", 2, true, false, 283.15f, 293.15f, 243.15f, 343.15f);
+		EntityTemplates.ExtendEntityToBasicCreature(gameObject, FactionManager.FactionID.Pest, traitId, text, NavType.Floor, 32, 2f, "Meat", 2, true, false, 283.15f, 313.15f, 243.15f, 373.15f);
 		if (symbolOverridePrefix != null)
 		{
 			gameObject.AddOrGet<SymbolOverrideController>().ApplySymbolOverridesByAffix(Assets.GetAnim(anim_file), symbolOverridePrefix, null, 0);
@@ -90,7 +90,7 @@ public static class BaseHatchConfig
 		hashSet.Add(SimHashes.SedimentaryRock.CreateTag());
 		return new List<Diet.Info>
 		{
-			new Diet.Info(hashSet, poopTag, caloriesPerKg, producedConversionRate, diseaseId, diseasePerKgProduced, false, false)
+			new Diet.Info(hashSet, poopTag, caloriesPerKg, producedConversionRate, diseaseId, diseasePerKgProduced, false, false, false)
 		};
 	}
 
@@ -103,21 +103,21 @@ public static class BaseHatchConfig
 		hashSet.Add(SimHashes.Granite.CreateTag());
 		return new List<Diet.Info>
 		{
-			new Diet.Info(hashSet, poopTag, caloriesPerKg, producedConversionRate, diseaseId, diseasePerKgProduced, false, false)
+			new Diet.Info(hashSet, poopTag, caloriesPerKg, producedConversionRate, diseaseId, diseasePerKgProduced, false, false, false)
 		};
 	}
 
 	public static List<Diet.Info> MetalDiet(Tag poopTag, float caloriesPerKg, float producedConversionRate, string diseaseId, float diseasePerKgProduced)
 	{
 		List<Diet.Info> list = new List<Diet.Info>();
-		list.Add(new Diet.Info(new HashSet<Tag>(new Tag[] { SimHashes.Cuprite.CreateTag() }), (poopTag == GameTags.Metal) ? SimHashes.Copper.CreateTag() : poopTag, caloriesPerKg, producedConversionRate, diseaseId, diseasePerKgProduced, false, false));
-		list.Add(new Diet.Info(new HashSet<Tag>(new Tag[] { SimHashes.GoldAmalgam.CreateTag() }), (poopTag == GameTags.Metal) ? SimHashes.Gold.CreateTag() : poopTag, caloriesPerKg, producedConversionRate, diseaseId, diseasePerKgProduced, false, false));
-		list.Add(new Diet.Info(new HashSet<Tag>(new Tag[] { SimHashes.IronOre.CreateTag() }), (poopTag == GameTags.Metal) ? SimHashes.Iron.CreateTag() : poopTag, caloriesPerKg, producedConversionRate, diseaseId, diseasePerKgProduced, false, false));
-		list.Add(new Diet.Info(new HashSet<Tag>(new Tag[] { SimHashes.Wolframite.CreateTag() }), (poopTag == GameTags.Metal) ? SimHashes.Tungsten.CreateTag() : poopTag, caloriesPerKg, producedConversionRate, diseaseId, diseasePerKgProduced, false, false));
-		list.Add(new Diet.Info(new HashSet<Tag>(new Tag[] { SimHashes.AluminumOre.CreateTag() }), (poopTag == GameTags.Metal) ? SimHashes.Aluminum.CreateTag() : poopTag, caloriesPerKg, producedConversionRate, diseaseId, diseasePerKgProduced, false, false));
+		list.Add(new Diet.Info(new HashSet<Tag>(new Tag[] { SimHashes.Cuprite.CreateTag() }), (poopTag == GameTags.Metal) ? SimHashes.Copper.CreateTag() : poopTag, caloriesPerKg, producedConversionRate, diseaseId, diseasePerKgProduced, false, false, false));
+		list.Add(new Diet.Info(new HashSet<Tag>(new Tag[] { SimHashes.GoldAmalgam.CreateTag() }), (poopTag == GameTags.Metal) ? SimHashes.Gold.CreateTag() : poopTag, caloriesPerKg, producedConversionRate, diseaseId, diseasePerKgProduced, false, false, false));
+		list.Add(new Diet.Info(new HashSet<Tag>(new Tag[] { SimHashes.IronOre.CreateTag() }), (poopTag == GameTags.Metal) ? SimHashes.Iron.CreateTag() : poopTag, caloriesPerKg, producedConversionRate, diseaseId, diseasePerKgProduced, false, false, false));
+		list.Add(new Diet.Info(new HashSet<Tag>(new Tag[] { SimHashes.Wolframite.CreateTag() }), (poopTag == GameTags.Metal) ? SimHashes.Tungsten.CreateTag() : poopTag, caloriesPerKg, producedConversionRate, diseaseId, diseasePerKgProduced, false, false, false));
+		list.Add(new Diet.Info(new HashSet<Tag>(new Tag[] { SimHashes.AluminumOre.CreateTag() }), (poopTag == GameTags.Metal) ? SimHashes.Aluminum.CreateTag() : poopTag, caloriesPerKg, producedConversionRate, diseaseId, diseasePerKgProduced, false, false, false));
 		if (ElementLoader.FindElementByHash(SimHashes.Cobaltite) != null)
 		{
-			list.Add(new Diet.Info(new HashSet<Tag>(new Tag[] { SimHashes.Cobaltite.CreateTag() }), (poopTag == GameTags.Metal) ? SimHashes.Cobalt.CreateTag() : poopTag, caloriesPerKg, producedConversionRate, diseaseId, diseasePerKgProduced, false, false));
+			list.Add(new Diet.Info(new HashSet<Tag>(new Tag[] { SimHashes.Cobaltite.CreateTag() }), (poopTag == GameTags.Metal) ? SimHashes.Cobalt.CreateTag() : poopTag, caloriesPerKg, producedConversionRate, diseaseId, diseasePerKgProduced, false, false, false));
 		}
 		return list;
 	}
@@ -132,21 +132,21 @@ public static class BaseHatchConfig
 		hashSet.Add(SimHashes.ToxicSand.CreateTag());
 		return new List<Diet.Info>
 		{
-			new Diet.Info(hashSet, poopTag, caloriesPerKg, producedConversionRate, diseaseId, diseasePerKgProduced, false, false)
+			new Diet.Info(hashSet, poopTag, caloriesPerKg, producedConversionRate, diseaseId, diseasePerKgProduced, false, false, false)
 		};
 	}
 
 	public static List<Diet.Info> FoodDiet(Tag poopTag, float caloriesPerKg, float producedConversionRate, string diseaseId, float diseasePerKgProduced)
 	{
 		List<Diet.Info> list = new List<Diet.Info>();
-		foreach (EdiblesManager.FoodInfo foodInfo in EdiblesManager.GetAllFoodTypes())
+		foreach (EdiblesManager.FoodInfo foodInfo in EdiblesManager.GetAllLoadedFoodTypes())
 		{
 			if (foodInfo.CaloriesPerUnit > 0f)
 			{
 				list.Add(new Diet.Info(new HashSet<Tag>
 				{
 					new Tag(foodInfo.Id)
-				}, poopTag, foodInfo.CaloriesPerUnit, producedConversionRate, diseaseId, diseasePerKgProduced, false, false));
+				}, poopTag, foodInfo.CaloriesPerUnit, producedConversionRate, diseaseId, diseasePerKgProduced, false, false, false));
 			}
 		}
 		return list;
@@ -157,7 +157,7 @@ public static class BaseHatchConfig
 		Diet diet = new Diet(diet_infos.ToArray());
 		CreatureCalorieMonitor.Def def = prefab.AddOrGetDef<CreatureCalorieMonitor.Def>();
 		def.diet = diet;
-		def.minPoopSizeInCalories = referenceCaloriesPerKg * minPoopSizeInKg;
+		def.minConsumedCaloriesBeforePooping = referenceCaloriesPerKg * minPoopSizeInKg;
 		prefab.AddOrGetDef<SolidConsumerMonitor.Def>().diet = diet;
 		return prefab;
 	}

@@ -84,7 +84,10 @@ public class ConduitDispenser : KMonoBehaviour, ISaveLoadable, IConduitDispenser
 
 	private void ConduitUpdate(float dt)
 	{
-		this.operational.SetFlag(ConduitDispenser.outputConduitFlag, this.IsConnected);
+		if (this.operational != null)
+		{
+			this.operational.SetFlag(ConduitDispenser.outputConduitFlag, this.IsConnected);
+		}
 		this.blocked = false;
 		if (this.isOn)
 		{
@@ -94,9 +97,9 @@ public class ConduitDispenser : KMonoBehaviour, ISaveLoadable, IConduitDispenser
 
 	private void Dispense(float dt)
 	{
-		if (this.operational.IsOperational || this.alwaysDispense)
+		if ((this.operational != null && this.operational.IsOperational) || this.alwaysDispense)
 		{
-			if (this.building.Def.CanMove)
+			if (this.building != null && this.building.Def.CanMove)
 			{
 				this.utilityCell = this.GetOutputCell(this.GetConduitManager().conduitType);
 			}
@@ -165,6 +168,10 @@ public class ConduitDispenser : KMonoBehaviour, ISaveLoadable, IConduitDispenser
 	private int GetOutputCell(ConduitType outputConduitType)
 	{
 		Building component = base.GetComponent<Building>();
+		if (!(component != null))
+		{
+			return Grid.OffsetCell(Grid.PosToCell(this), this.noBuildingOutputCellOffset);
+		}
 		if (this.useSecondaryOutput)
 		{
 			ISecondaryOutput[] components = base.GetComponents<ISecondaryOutput>();
@@ -204,15 +211,18 @@ public class ConduitDispenser : KMonoBehaviour, ISaveLoadable, IConduitDispenser
 	[SerializeField]
 	public bool useSecondaryOutput;
 
+	[SerializeField]
+	public CellOffset noBuildingOutputCellOffset;
+
 	private static readonly Operational.Flag outputConduitFlag = new Operational.Flag("output_conduit", Operational.Flag.Type.Functional);
 
-	[MyCmpReq]
+	[MyCmpGet]
 	private Operational operational;
 
 	[MyCmpReq]
 	public Storage storage;
 
-	[MyCmpReq]
+	[MyCmpGet]
 	private Building building;
 
 	private HandleVector<int>.Handle partitionerEntry;

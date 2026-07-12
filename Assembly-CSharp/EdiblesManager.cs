@@ -6,9 +6,15 @@ using UnityEngine;
 [AddComponentMenu("KMonoBehaviour/scripts/EdiblesManager")]
 public class EdiblesManager : KMonoBehaviour
 {
+	public static List<EdiblesManager.FoodInfo> GetAllLoadedFoodTypes()
+	{
+		return EdiblesManager.s_allFoodTypes.Where<EdiblesManager.FoodInfo>((EdiblesManager.FoodInfo x) => DlcManager.IsContentSubscribed(x.DlcId)).ToList<EdiblesManager.FoodInfo>();
+	}
+
 	public static List<EdiblesManager.FoodInfo> GetAllFoodTypes()
 	{
-		return EdiblesManager.s_allFoodTypes.Where<EdiblesManager.FoodInfo>((EdiblesManager.FoodInfo x) => DlcManager.IsContentActive(x.DlcId)).ToList<EdiblesManager.FoodInfo>();
+		global::Debug.Assert(SaveLoader.Instance != null, "Call GetAllLoadedFoodTypes from the frontend");
+		return EdiblesManager.s_allFoodTypes.Where<EdiblesManager.FoodInfo>((EdiblesManager.FoodInfo x) => SaveLoader.Instance.IsDLCActiveForCurrentSave(x.DlcId)).ToList<EdiblesManager.FoodInfo>();
 	}
 
 	public static EdiblesManager.FoodInfo GetFoodInfo(string foodID)

@@ -52,6 +52,7 @@ public class SafetyChecker
 			this.minionBrain = cmp.GetComponent<MinionBrain>();
 			this.temperatureTransferer = cmp.GetComponent<SimTemperatureTransfer>();
 			this.primaryElement = cmp.GetComponent<PrimaryElement>();
+			this.worldID = this.navigator.GetMyWorldId();
 		}
 
 		public Navigator navigator;
@@ -63,6 +64,8 @@ public class SafetyChecker
 		public PrimaryElement primaryElement;
 
 		public MinionBrain minionBrain;
+
+		public int worldID;
 
 		public int cell;
 	}

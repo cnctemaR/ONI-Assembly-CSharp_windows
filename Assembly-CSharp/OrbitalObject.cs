@@ -88,13 +88,13 @@ public class OrbitalObject : KMonoBehaviour, IRenderEveryTick
 			behind = vector.z > this.orbitData.behindZ;
 			Vector3 vector2 = Quaternion.Euler(this.angle, 0f, 0f) * (vector * num3);
 			vector3 = this.worldOrbitingOrigin + vector2;
-			vector3.z = this.orbitData.renderZ;
+			vector3.z = ((this.orbitData.GetRenderZ == null) ? this.orbitData.renderZ : this.orbitData.GetRenderZ());
 		}
 		else
 		{
 			behind = false;
 			vector3 = this.worldOrbitingOrigin;
-			vector3.z = this.orbitData.renderZ;
+			vector3.z = ((this.orbitData.GetRenderZ == null) ? this.orbitData.renderZ : this.orbitData.GetRenderZ());
 		}
 		return vector3;
 	}

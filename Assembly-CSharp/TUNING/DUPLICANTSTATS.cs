@@ -761,7 +761,7 @@ namespace TUNING
 				id = "ConstructionUp",
 				rarity = DUPLICANTSTATS.RARITY_UNCOMMON,
 				dlcId = "",
-				mutuallyExclusiveTraits = new List<string> { "ConstructionDown" }
+				mutuallyExclusiveTraits = new List<string> { "ConstructionDown", "CantBuild" }
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
@@ -793,6 +793,12 @@ namespace TUNING
 				id = "RadiationEater",
 				rarity = DUPLICANTSTATS.RARITY_EPIC,
 				dlcId = "EXPANSION1_ID"
+			},
+			new DUPLICANTSTATS.TraitVal
+			{
+				id = "FrostProof",
+				rarity = DUPLICANTSTATS.RARITY_COMMON,
+				dlcId = "DLC2_ID"
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
@@ -1127,7 +1133,7 @@ namespace TUNING
 
 			public const int VERY_LOW_LIGHT = 1;
 
-			public const int LOW_LIGHT = 100;
+			public const int LOW_LIGHT = 500;
 
 			public const int MEDIUM_LIGHT = 1000;
 
@@ -1235,7 +1241,7 @@ namespace TUNING
 
 				public const float BASIC = 0.0025f;
 
-				public const float THICK = 0.01f;
+				public const float THICK = 0.008f;
 			}
 
 			public class SWEAT_EFFICIENCY_MULTIPLIER

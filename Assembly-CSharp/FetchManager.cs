@@ -219,27 +219,50 @@ public class FetchManager : KMonoBehaviour, ISim1000ms
 		foreach (FetchManager.Pickup pickup2 in this.pickups)
 		{
 			Pickupable pickupable = pickup2.pickupable;
-			bool flag = FetchManager.IsFetchablePickup_Exclude(pickupable.KPrefabID, pickupable.storage, pickupable.UnreservedAmount, exclude_tags, required_tag, destination);
-			if (pickupable.storage != null)
-			{
-				DehydratedFoodPackage component = pickupable.storage.GetComponent<DehydratedFoodPackage>();
-				if (component != null)
-				{
-					Storage storage = component.GetComponent<Pickupable>().storage;
-					if (storage != null)
-					{
-						AccessabilityManager component2 = storage.GetComponent<AccessabilityManager>();
-						flag = component2 != null && component2.CanAccess(destination.gameObject);
-					}
-				}
-			}
-			if (flag)
+			if (FetchManager.IsFetchablePickup_Exclude(pickupable.KPrefabID, pickupable.storage, pickupable.UnreservedAmount, exclude_tags, required_tag, destination))
 			{
 				int num2 = (int)pickup2.PathCost + (5 - pickup2.foodQuality) * 50;
 				if (num2 < num)
 				{
 					pickup = pickup2;
 					num = num2;
+				}
+			}
+		}
+		Navigator component = destination.GetComponent<Navigator>();
+		if (component != null)
+		{
+			foreach (object obj in Components.FoodRehydrators)
+			{
+				GameObject gameObject = (GameObject)obj;
+				int num3 = Grid.PosToCell(gameObject);
+				int cost = component.PathProber.GetCost(num3);
+				if (cost != -1 && num > cost + 50 + 5)
+				{
+					AccessabilityManager accessabilityManager = ((gameObject != null) ? gameObject.GetComponent<AccessabilityManager>() : null);
+					if (accessabilityManager != null && accessabilityManager.CanAccess(destination.gameObject))
+					{
+						foreach (GameObject gameObject2 in gameObject.GetComponent<Storage>().items)
+						{
+							Storage storage = ((gameObject2 != null) ? gameObject2.GetComponent<Storage>() : null);
+							if (storage != null && !storage.IsEmpty())
+							{
+								Edible component2 = storage.items[0].GetComponent<Edible>();
+								Pickupable component3 = component2.GetComponent<Pickupable>();
+								if (FetchManager.IsFetchablePickup_Exclude(component3.KPrefabID, component3.storage, component3.UnreservedAmount, exclude_tags, required_tag, destination))
+								{
+									int num4 = cost + (5 - component2.FoodInfo.Quality + 1) * 50 + 5;
+									if (num4 < num)
+									{
+										pickup.pickupable = component3;
+										pickup.foodQuality = component2.FoodInfo.Quality;
+										pickup.tagBitsHash = component2.PrefabID().GetHashCode();
+										num = num4;
+									}
+								}
+							}
+						}
+					}
 				}
 			}
 		}

@@ -5,6 +5,8 @@ public abstract class DevTool
 {
 	public event global::System.Action OnInit;
 
+	public event global::System.Action OnUpdate;
+
 	public event global::System.Action OnUninit;
 
 	public DevTool()
@@ -39,6 +41,14 @@ public abstract class DevTool
 		if (this.OnInit != null)
 		{
 			this.OnInit();
+		}
+	}
+
+	public void Internal_Update()
+	{
+		if (this.OnUpdate != null)
+		{
+			this.OnUpdate();
 		}
 	}
 

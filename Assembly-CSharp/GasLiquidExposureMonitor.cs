@@ -57,6 +57,8 @@ public class GasLiquidExposureMonitor : GameStateMachine<GasLiquidExposureMonito
 		GasLiquidExposureMonitor.customExposureRates[SimHashes.CrudeOil] = num6;
 		GasLiquidExposureMonitor.customExposureRates[SimHashes.Naphtha] = num6;
 		GasLiquidExposureMonitor.customExposureRates[SimHashes.Petroleum] = num6;
+		GasLiquidExposureMonitor.customExposureRates[SimHashes.Mercury] = num6;
+		GasLiquidExposureMonitor.customExposureRates[SimHashes.MercuryGas] = num6;
 	}
 
 	public float GetCurrentExposure(GasLiquidExposureMonitor.Instance smi)

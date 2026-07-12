@@ -751,7 +751,7 @@ public class Pickupable : Workable, IHasSortOrder
 
 	public void UpdateCachedCell(int cell)
 	{
-		if (this.cachedCell != cell)
+		if (this.cachedCell != cell && this.storedPartitionerEntry.IsValid())
 		{
 			GameScenePartitioner.Instance.UpdatePosition(this.storedPartitionerEntry, cell);
 		}

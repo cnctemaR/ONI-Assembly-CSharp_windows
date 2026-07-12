@@ -390,14 +390,14 @@ namespace STRINGS
 		{
 			public static LocString NAME = "Tiny Start FOR DEVS";
 
-			public static LocString DESCRIPTION = "A cozy little starter location, just for Devs.";
+			public static LocString DESCRIPTION = "A cozy little starter location, just for devs.";
 		}
 
 		public class TINYEMPTY
 		{
 			public static LocString NAME = "Tiny Empty FOR DEVS";
 
-			public static LocString DESCRIPTION = "A fun-sized 'fixer upper', perfect for Game Devs.";
+			public static LocString DESCRIPTION = "A fun-sized 'fixer upper', perfect for game devs.";
 		}
 
 		public class BIGEMPTY
@@ -440,6 +440,48 @@ namespace STRINGS
 			public static LocString NAME = "Tiny Twin Asteroid FOR DEVS";
 
 			public static LocString DESCRIPTION = "Two small dev worlds for the price of one.";
+		}
+
+		public class CERESBASEGAME
+		{
+			public static LocString NAME = "Ceres";
+
+			public static LocString DESCRIPTION = "A frosty location with sub-zero temperatures throughout.\n\n<smallcaps>Duplicants who work in Ceres's sub-zero temperatures will need to wear or build warming equipment. Abundant natural fuel sources could lead to a well-powered colony.</smallcaps>";
+		}
+
+		public class CERESBASEGAMESHATTERED
+		{
+			public static LocString NAME = "Blasted Ceres";
+
+			public static LocString DESCRIPTION = "The heavily damaged remnants of a frosty location with sub-zero temperatures throughout.\n\n<smallcaps>Exploring the rubble of Blasted Ceres's sub-zero temperatures is particularly challenging, yet natural fuel sources provide a valuable payoff.</smallcaps>";
+		}
+
+		public class CERESCLASSICSHATTERED
+		{
+			public static LocString NAME = "Blasted Ceres";
+
+			public static LocString DESCRIPTION = "The heavily damaged remnants of a frosty location with sub-zero temperatures throughout.\n\n<smallcaps>Exploring the rubble of Blasted Ceres's sub-zero temperatures is particularly challenging, yet natural fuel sources provide a valuable payoff.</smallcaps>";
+		}
+
+		public class CERESSPACEDOUT
+		{
+			public static LocString NAME = "Ceres Minor";
+
+			public static LocString DESCRIPTION = "A smaller frosty starting world with sub-zero temperatures throughout.\n\n<smallcaps>Duplicants who work in Ceres's sub-zero temperatures will need to wear or build warming equipment. Abundant natural fuel sources could lead to a well-powered colony.</smallcaps>";
+		}
+
+		public class CERESCLASSIC
+		{
+			public static LocString NAME = "Ceres Asteroid";
+
+			public static LocString DESCRIPTION = "A frosty starting world with sub-zero temperatures throughout.\n\n<smallcaps>Duplicants who work in Ceres's sub-zero temperatures will need to wear or build warming equipment. Abundant natural fuel sources could lead to a well-powered colony.</smallcaps>";
+		}
+
+		public class CERESMIXING
+		{
+			public static LocString NAME = "Ceres Fragment";
+
+			public static LocString DESCRIPTION = "A fragment of a frosty starting world with sub-zero temperatures throughout.\n\n<smallcaps>Duplicants who work in sub-zero temperatures will need to wear or build warming equipment. Abundant natural fuel sources could lead to a well-powered colony.</smallcaps>";
 		}
 	}
 }

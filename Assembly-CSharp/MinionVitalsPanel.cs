@@ -31,6 +31,7 @@ public class MinionVitalsPanel : CollapsibleDetailContentPanel
 		this.AddAmountLine(Db.Get().Amounts.MilkProduction, null);
 		this.AddAmountLine(Db.Get().Amounts.ElementGrowth, null);
 		this.AddAmountLine(Db.Get().Amounts.Temperature, null);
+		this.AddAmountLine(Db.Get().Amounts.CritterTemperature, null);
 		this.AddAmountLine(Db.Get().Amounts.Decor, null);
 		this.AddAmountLine(Db.Get().Amounts.InternalBattery, null);
 		this.AddAmountLine(Db.Get().Amounts.InternalChemicalBattery, null);
@@ -315,11 +316,12 @@ public class MinionVitalsPanel : CollapsibleDetailContentPanel
 		}
 		if (component != null)
 		{
-			global::UnityEngine.Object component4 = component.GetComponent<Growing>();
+			IManageGrowingStates manageGrowingStates = component.GetComponent<IManageGrowingStates>();
+			manageGrowingStates = ((manageGrowingStates != null) ? manageGrowingStates : component.GetSMI<IManageGrowingStates>());
 			bool flag5 = component.HasTag(GameTags.Decoration);
 			this.conditionsContainerNormal.gameObject.SetActive(true);
 			this.conditionsContainerAdditional.gameObject.SetActive(!flag5);
-			if (component4 == null)
+			if (manageGrowingStates == null)
 			{
 				float num = 1f;
 				LocText reference = this.conditionsContainerNormal.GetComponent<HierarchyReferences>().GetReference<LocText>("Label");
@@ -327,8 +329,8 @@ public class MinionVitalsPanel : CollapsibleDetailContentPanel
 				reference.text = (flag5 ? string.Format(UI.VITALSSCREEN.CONDITIONS_GROWING.WILD_DECOR.BASE, Array.Empty<object>()) : string.Format(UI.VITALSSCREEN.CONDITIONS_GROWING.WILD_INSTANT.BASE, Util.FormatTwoDecimalPlace(num * 0.25f * 100f)));
 				reference.GetComponent<ToolTip>().SetSimpleTooltip(string.Format(UI.VITALSSCREEN.CONDITIONS_GROWING.WILD_INSTANT.TOOLTIP, Array.Empty<object>()));
 				LocText reference2 = this.conditionsContainerAdditional.GetComponent<HierarchyReferences>().GetReference<LocText>("Label");
-				ReceptacleMonitor component5 = selectedEntity.GetComponent<ReceptacleMonitor>();
-				reference2.color = ((component5 == null || component5.Replanted) ? Color.black : Color.grey);
+				ReceptacleMonitor component4 = selectedEntity.GetComponent<ReceptacleMonitor>();
+				reference2.color = ((component4 == null || component4.Replanted) ? Color.black : Color.grey);
 				reference2.text = string.Format(UI.VITALSSCREEN.CONDITIONS_GROWING.ADDITIONAL_DOMESTIC_INSTANT.BASE, Util.FormatTwoDecimalPlace(num * 100f));
 				reference2.GetComponent<ToolTip>().SetSimpleTooltip(string.Format(UI.VITALSSCREEN.CONDITIONS_GROWING.ADDITIONAL_DOMESTIC_INSTANT.TOOLTIP, Array.Empty<object>()));
 			}
@@ -336,13 +338,13 @@ public class MinionVitalsPanel : CollapsibleDetailContentPanel
 			{
 				LocText reference3 = this.conditionsContainerNormal.GetComponent<HierarchyReferences>().GetReference<LocText>("Label");
 				reference3.text = "";
-				reference3.text = string.Format(UI.VITALSSCREEN.CONDITIONS_GROWING.WILD.BASE, GameUtil.GetFormattedCycles(component.GetComponent<Growing>().WildGrowthTime(), "F1", false));
-				reference3.GetComponent<ToolTip>().SetSimpleTooltip(string.Format(UI.VITALSSCREEN.CONDITIONS_GROWING.WILD.TOOLTIP, GameUtil.GetFormattedCycles(component.GetComponent<Growing>().WildGrowthTime(), "F1", false)));
+				reference3.text = string.Format(UI.VITALSSCREEN.CONDITIONS_GROWING.WILD.BASE, GameUtil.GetFormattedCycles(manageGrowingStates.WildGrowthTime(), "F1", false));
+				reference3.GetComponent<ToolTip>().SetSimpleTooltip(string.Format(UI.VITALSSCREEN.CONDITIONS_GROWING.WILD.TOOLTIP, GameUtil.GetFormattedCycles(manageGrowingStates.WildGrowthTime(), "F1", false)));
 				LocText reference4 = this.conditionsContainerAdditional.GetComponent<HierarchyReferences>().GetReference<LocText>("Label");
 				reference4.color = (selectedEntity.GetComponent<ReceptacleMonitor>().Replanted ? Color.black : Color.grey);
 				reference4.text = "";
-				reference4.text = (flag4 ? string.Format(UI.VITALSSCREEN.CONDITIONS_GROWING.ADDITIONAL_DOMESTIC.BASE, GameUtil.GetFormattedCycles(component.GetComponent<Growing>().DomesticGrowthTime(), "F1", false)) : string.Format(UI.VITALSSCREEN.CONDITIONS_GROWING.DOMESTIC.BASE, GameUtil.GetFormattedCycles(component.GetComponent<Growing>().DomesticGrowthTime(), "F1", false)));
-				reference4.GetComponent<ToolTip>().SetSimpleTooltip(string.Format(UI.VITALSSCREEN.CONDITIONS_GROWING.ADDITIONAL_DOMESTIC.TOOLTIP, GameUtil.GetFormattedCycles(component.GetComponent<Growing>().DomesticGrowthTime(), "F1", false)));
+				reference4.text = (flag4 ? string.Format(UI.VITALSSCREEN.CONDITIONS_GROWING.ADDITIONAL_DOMESTIC.BASE, GameUtil.GetFormattedCycles(manageGrowingStates.DomesticGrowthTime(), "F1", false)) : string.Format(UI.VITALSSCREEN.CONDITIONS_GROWING.DOMESTIC.BASE, GameUtil.GetFormattedCycles(manageGrowingStates.DomesticGrowthTime(), "F1", false)));
+				reference4.GetComponent<ToolTip>().SetSimpleTooltip(string.Format(UI.VITALSSCREEN.CONDITIONS_GROWING.ADDITIONAL_DOMESTIC.TOOLTIP, GameUtil.GetFormattedCycles(manageGrowingStates.DomesticGrowthTime(), "F1", false)));
 			}
 			foreach (MinionVitalsPanel.AmountLine amountLine2 in this.amountsLines)
 			{
@@ -397,16 +399,16 @@ public class MinionVitalsPanel : CollapsibleDetailContentPanel
 
 	private string GetIlluminationTooltip(GameObject go)
 	{
-		IlluminationVulnerable component = go.GetComponent<IlluminationVulnerable>();
-		if (component == null)
+		IIlluminationTracker illuminationTracker = go.GetComponent<IIlluminationTracker>();
+		if (illuminationTracker == null)
+		{
+			illuminationTracker = go.GetSMI<IIlluminationTracker>();
+		}
+		if (illuminationTracker == null)
 		{
 			return "";
 		}
-		if ((component.prefersDarkness && component.IsComfortable()) || (!component.prefersDarkness && !component.IsComfortable()))
-		{
-			return UI.TOOLTIPS.VITALS_CHECKBOX_ILLUMINATION_DARK;
-		}
-		return UI.TOOLTIPS.VITALS_CHECKBOX_ILLUMINATION_LIGHT;
+		return illuminationTracker.GetIlluminationUITooltip();
 	}
 
 	private string GetRadiationTooltip(GameObject go)
@@ -523,8 +525,12 @@ public class MinionVitalsPanel : CollapsibleDetailContentPanel
 
 	private string GetIlluminationLabel(GameObject go)
 	{
-		IlluminationVulnerable component = go.GetComponent<IlluminationVulnerable>();
-		return Db.Get().Amounts.Illumination.Name + "\n    • " + (component.prefersDarkness ? UI.GAMEOBJECTEFFECTS.DARKNESS.ToString() : GameUtil.GetFormattedLux(component.LightIntensityThreshold));
+		IIlluminationTracker illuminationTracker = go.GetComponent<IIlluminationTracker>();
+		if (illuminationTracker == null)
+		{
+			illuminationTracker = go.GetSMI<IIlluminationTracker>();
+		}
+		return illuminationTracker.GetIlluminationUILabel();
 	}
 
 	private string GetAtmosphereLabel(GameObject go)
@@ -569,8 +575,12 @@ public class MinionVitalsPanel : CollapsibleDetailContentPanel
 
 	private bool check_illumination(GameObject go)
 	{
-		IlluminationVulnerable component = go.GetComponent<IlluminationVulnerable>();
-		return !(component != null) || component.IsComfortable();
+		IIlluminationTracker illuminationTracker = go.GetComponent<IIlluminationTracker>();
+		if (illuminationTracker == null)
+		{
+			illuminationTracker = go.GetSMI<IIlluminationTracker>();
+		}
+		return illuminationTracker == null || illuminationTracker.ShouldIlluminationUICheckboxBeChecked();
 	}
 
 	private bool check_radiation(GameObject go)

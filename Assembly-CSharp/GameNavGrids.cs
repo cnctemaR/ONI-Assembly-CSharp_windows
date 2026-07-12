@@ -20,6 +20,11 @@ public class GameNavGrids
 			new CellOffset(0, 0),
 			new CellOffset(0, 1)
 		});
+		this.WalkerGrid2x2 = this.CreateWalkerLargeNavigation(pathfinding, "WalkerNavGrid2x2", new CellOffset[]
+		{
+			new CellOffset(0, 0),
+			new CellOffset(0, 1)
+		});
 		this.CreateDreckoNavigation(pathfinding);
 		this.CreateDreckoBabyNavigation(pathfinding);
 		this.CreateFloaterNavigation(pathfinding);
@@ -650,6 +655,43 @@ public class GameNavGrids
 		return navGrid;
 	}
 
+	private NavGrid CreateWalkerLargeNavigation(Pathfinding pathfinding, string id, CellOffset[] bounding_offsets)
+	{
+		NavGrid.Transition[] array = new NavGrid.Transition[]
+		{
+			new NavGrid.Transition(NavType.Floor, NavType.Floor, 1, 0, NavAxis.NA, true, true, true, 1, "", new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0], true, 1f),
+			new NavGrid.Transition(NavType.Floor, NavType.Floor, 1, 1, NavAxis.NA, false, false, true, 1, "", new CellOffset[]
+			{
+				new CellOffset(2, 1)
+			}, new CellOffset[]
+			{
+				new CellOffset(1, 0),
+				new CellOffset(2, 0)
+			}, new NavOffset[0], new NavOffset[0], true, 1f),
+			new NavGrid.Transition(NavType.Floor, NavType.Floor, 1, -1, NavAxis.NA, false, false, true, 1, "", new CellOffset[]
+			{
+				new CellOffset(1, 0),
+				new CellOffset(2, 0),
+				new CellOffset(2, -1)
+			}, new CellOffset[0], new NavOffset[0], new NavOffset[0], true, 1f)
+		};
+		NavGrid.Transition[] array2 = this.MirrorTransitions(array);
+		NavGrid.NavTypeData[] array3 = new NavGrid.NavTypeData[]
+		{
+			new NavGrid.NavTypeData
+			{
+				navType = NavType.Floor,
+				idleAnim = "idle_loop"
+			}
+		};
+		NavGrid navGrid = new NavGrid(id, array2, array3, bounding_offsets, new NavTableValidator[]
+		{
+			new GameNavGrids.FloorValidator(false)
+		}, 2, 3, array2.Length);
+		pathfinding.AddNavGrid(navGrid);
+		return navGrid;
+	}
+
 	private void CreateDreckoNavigation(Pathfinding pathfinding)
 	{
 		CellOffset[] array = new CellOffset[]
@@ -1010,7 +1052,7 @@ public class GameNavGrids
 		{
 			new GameNavGrids.HoverValidator(),
 			new GameNavGrids.SwimValidator()
-		}, 2, 2, 22);
+		}, 2, 3, 22);
 		pathfinding.AddNavGrid(this.FloaterGrid);
 	}
 
@@ -1356,6 +1398,8 @@ public class GameNavGrids
 	public NavGrid WalkerBabyGrid1x1;
 
 	public NavGrid WalkerGrid1x2;
+
+	public NavGrid WalkerGrid2x2;
 
 	public NavGrid DreckoGrid;
 

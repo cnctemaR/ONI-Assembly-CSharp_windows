@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
 using KSerialization;
+using STRINGS;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
@@ -269,6 +270,8 @@ public class TreeFilterable : KMonoBehaviour, ISaveLoadable
 	public bool copySettingsEnabled = true;
 
 	public bool preventAutoAddOnDiscovery;
+
+	public string allResourceFilterLabelString = UI.UISIDESCREENS.TREEFILTERABLESIDESCREEN.ALLBUTTON;
 
 	public bool filterAllStoragesOnBuilding;
 

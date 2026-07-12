@@ -401,6 +401,11 @@ public class MissileLauncher : GameStateMachine<MissileLauncher, MissileLauncher
 
 		public void SetOreChunk()
 		{
+			if (!this.missileElement.IsValid)
+			{
+				global::Debug.LogWarning(string.Format("Missing element {0} for missile launcher. Defaulting to IronOre", this.missileElement));
+				this.missileElement = GameTags.IronOre;
+			}
 			KAnim.Build.Symbol symbolByIndex = Assets.GetPrefab(this.missileElement).GetComponent<KBatchedAnimController>().AnimFiles[0].GetData().build.GetSymbolByIndex(0U);
 			base.gameObject.GetComponent<SymbolOverrideController>().AddSymbolOverride("Shell", symbolByIndex, 0);
 		}

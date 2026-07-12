@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Text;
 using Steamworks;
 using UnityEngine;
@@ -121,6 +122,15 @@ public class SteamManager : MonoBehaviour
 	public const uint STEAM_APPLICATION_ID = 457140U;
 
 	public const uint STEAM_EXPANSION1_APPLICATION_ID = 1452490U;
+
+	public const uint STEAM_DLC2_APPLICATION_ID = 2952300U;
+
+	public static List<AppId_t> ONI_STEAM_APP_IDS = new List<AppId_t>
+	{
+		new AppId_t(457140U),
+		new AppId_t(1452490U),
+		new AppId_t(2952300U)
+	};
 
 	private static SteamManager s_instance;
 

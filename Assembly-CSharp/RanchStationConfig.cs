@@ -45,6 +45,11 @@ public class RanchStationConfig : IBuildingConfig
 			GameObject gameObject = targetRanchStation.GetSMI<RancherChore.RancherChoreStates.Instance>().sm.rancher.Get(smi2);
 			float num = 1f + gameObject.GetAttributes().Get(Db.Get().Attributes.Ranching.Id).GetTotalValue() * 0.1f;
 			creature_go.GetComponent<Effects>().Add("Ranched", true).timeRemaining *= num;
+			AmountInstance amountInstance = Db.Get().Amounts.HitPoints.Lookup(creature_go);
+			if (amountInstance != null)
+			{
+				amountInstance.ApplyDelta(amountInstance.GetMax() - amountInstance.value + 1f);
+			}
 		};
 		def.RanchedPreAnim = "grooming_pre";
 		def.RanchedLoopAnim = "grooming_loop";

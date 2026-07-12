@@ -69,7 +69,11 @@ public class SeedProducer : KMonoBehaviour, IGameObjectEffectDescriptor
 		{
 			return;
 		}
-		GameObject gameObject = this.ProduceSeed(this.seedInfo.seedId, 1, false);
+		if (this.seedInfo.newSeedsProduced <= 0)
+		{
+			return;
+		}
+		GameObject gameObject = this.ProduceSeed(this.seedInfo.seedId, this.seedInfo.newSeedsProduced, false);
 		Uprootable component = base.GetComponent<Uprootable>();
 		if (component != null && component.worker != null)
 		{

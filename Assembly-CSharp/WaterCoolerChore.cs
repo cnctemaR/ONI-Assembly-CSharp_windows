@@ -1,5 +1,4 @@
 ﻿using System;
-using Klei;
 using Klei.AI;
 using TUNING;
 
@@ -51,38 +50,29 @@ public class WaterCoolerChore : Chore<WaterCoolerChore.StatesInstance>, IWorkerP
 			default_state = this.drink_move;
 			base.Target(this.drinker);
 			this.drink_move.InitializeStates(this.drinker, this.masterTarget, this.drink, null, null, null);
-			this.drink.ToggleAnims("anim_interacts_watercooler_kanim", 0f, "").DefaultState(this.drink.drink);
+			this.drink.ToggleAnims("anim_interacts_watercooler_kanim", 0f).DefaultState(this.drink.drink);
 			this.drink.drink.Face(this.masterTarget, 0.5f).PlayAnim("working_pre").QueueAnim("working_loop", false, null)
 				.OnAnimQueueComplete(this.drink.post);
-			this.drink.post.Enter("Drink", new StateMachine<WaterCoolerChore.States, WaterCoolerChore.StatesInstance, WaterCoolerChore, object>.State.Callback(this.Drink)).PlayAnim("working_pst").OnAnimQueueComplete(this.chat_move);
+			this.drink.post.Enter("Drink", new StateMachine<WaterCoolerChore.States, WaterCoolerChore.StatesInstance, WaterCoolerChore, object>.State.Callback(this.TriggerDrink)).Enter("Mark", new StateMachine<WaterCoolerChore.States, WaterCoolerChore.StatesInstance, WaterCoolerChore, object>.State.Callback(this.MarkAsRecentlySocialized)).PlayAnim("working_pst")
+				.OnAnimQueueComplete(this.chat_move);
 			this.chat_move.InitializeStates(this.drinker, this.chitchatlocator, this.chat, null, null, null);
 			this.chat.ToggleWork<SocialGatheringPointWorkable>(this.chitchatlocator, this.success, null, null);
 			this.success.ReturnSuccess();
 		}
 
-		private void Drink(WaterCoolerChore.StatesInstance smi)
+		private void MarkAsRecentlySocialized(WaterCoolerChore.StatesInstance smi)
 		{
-			Storage storage = this.masterTarget.Get<Storage>(smi);
-			Worker worker = this.stateTarget.Get<Worker>(smi);
-			Tag tag = storage.items[0].PrefabID();
-			float num;
-			SimUtil.DiseaseInfo diseaseInfo;
-			float num2;
-			storage.ConsumeAndGetDisease(tag, 1f, out num, out diseaseInfo, out num2);
-			GermExposureMonitor.Instance smi2 = worker.GetSMI<GermExposureMonitor.Instance>();
-			if (smi2 != null)
-			{
-				smi2.TryInjectDisease(diseaseInfo.idx, diseaseInfo.count, tag, Sickness.InfectionVector.Digestion);
-			}
-			Effects component = worker.GetComponent<Effects>();
+			Effects component = this.stateTarget.Get<Worker>(smi).GetComponent<Effects>();
 			if (!string.IsNullOrEmpty(smi.master.trackingEffect))
 			{
 				component.Add(smi.master.trackingEffect, true);
 			}
-			if (tag == SimHashes.Milk.CreateTag())
-			{
-				component.Add("DuplicantGotMilk", true);
-			}
+		}
+
+		private void TriggerDrink(WaterCoolerChore.StatesInstance smi)
+		{
+			Worker worker = this.stateTarget.Get<Worker>(smi);
+			smi.master.target.gameObject.GetSMI<WaterCooler.StatesInstance>().Drink(worker.gameObject, true);
 		}
 
 		public StateMachine<WaterCoolerChore.States, WaterCoolerChore.StatesInstance, WaterCoolerChore, object>.TargetParameter drinker;

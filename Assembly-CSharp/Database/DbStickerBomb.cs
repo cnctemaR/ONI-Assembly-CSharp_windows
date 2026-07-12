@@ -4,8 +4,14 @@ namespace Database
 {
 	public class DbStickerBomb : PermitResource
 	{
-		public DbStickerBomb(string id, string stickerName, PermitRarity rarity, string animfilename, string sticker)
-			: base(id, stickerName, "TODO:DbStickers", PermitCategory.Artwork, rarity, DlcManager.AVAILABLE_ALL_VERSIONS)
+		[Obsolete("Please use constructor with dlcIds parameter")]
+		public DbStickerBomb(string id, string name, string desc, PermitRarity rarity, string animfilename, string sticker)
+			: this(id, name, desc, rarity, animfilename, sticker, DlcManager.AVAILABLE_ALL_VERSIONS)
+		{
+		}
+
+		public DbStickerBomb(string id, string name, string desc, PermitRarity rarity, string animfilename, string sticker, string[] dlcIds)
+			: base(id, name, desc, PermitCategory.Artwork, rarity, dlcIds)
 		{
 			this.id = id;
 			this.sticker = sticker;

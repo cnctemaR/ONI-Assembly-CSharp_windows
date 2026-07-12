@@ -174,15 +174,16 @@ public class CodexEntry
 		set
 		{
 			this._dlcIds = value;
-			string text = "";
+			string text = "[ ";
 			for (int i = 0; i < value.Length; i++)
 			{
-				text += value[i];
+				text += ((value[i] == "") ? "\"\" (VANILLA_ID)" : ("\"" + value[i] + "\""));
 				if (i != value.Length - 1)
 				{
-					text += "\n";
+					text += ", ";
 				}
 			}
+			text += " ]";
 		}
 	}
 
@@ -306,6 +307,18 @@ public class CodexEntry
 		set
 		{
 			this._subEntries = value;
+		}
+	}
+
+	public List<CodexEntry_MadeAndUsed> contentMadeAndUsed
+	{
+		get
+		{
+			return this._contentMadeAndUsed;
+		}
+		set
+		{
+			this._contentMadeAndUsed = value;
 		}
 	}
 
@@ -452,6 +465,8 @@ public class CodexEntry
 	private string _subtitle;
 
 	private List<SubEntry> _subEntries = new List<SubEntry>();
+
+	private List<CodexEntry_MadeAndUsed> _contentMadeAndUsed = new List<CodexEntry_MadeAndUsed>();
 
 	private Sprite _icon;
 

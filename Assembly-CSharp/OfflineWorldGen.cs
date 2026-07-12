@@ -24,7 +24,7 @@ public class OfflineWorldGen : KMonoBehaviour
 		if (!flag)
 		{
 			SaveLoader.SetActiveSaveFilePath(null);
-			flag = WorldGen.CanLoad(WorldGen.GetSIMSaveFilename(0));
+			flag = WorldGen.CanLoad(WorldGen.WORLDGEN_SAVE_FILENAME);
 		}
 		return flag;
 	}
@@ -158,7 +158,7 @@ public class OfflineWorldGen : KMonoBehaviour
 			return;
 		}
 		this.updateText.text = Strings.Get(this.currentConvertedCurrentStage.String);
-		if (!this.debug && this.currentConvertedCurrentStage.Hash == UI.WORLDGEN.COMPLETE.key.Hash && this.currentPercent >= 1f && this.clusterLayout.IsGenerationComplete)
+		if (!this.debug && this.currentConvertedCurrentStage.Hash == UI.WORLDGEN.COMPLETE.key.Hash && this.currentPercent >= 1f && this.cluster.IsGenerationComplete)
 		{
 			if (KCrashReporter.terminateOnError && KCrashReporter.hasCrash)
 			{
@@ -235,17 +235,16 @@ public class OfflineWorldGen : KMonoBehaviour
 	{
 		string text = "";
 		Func<int, WorldGen, bool> func = null;
-		SettingLevel currentQualitySetting = CustomGameSettings.Instance.GetCurrentQualitySetting(CustomGameSettingConfigs.WorldgenSeed);
-		this.seed = int.Parse(currentQualitySetting.id);
+		this.seed = CustomGameSettings.Instance.GetCurrentWorldgenSeed();
 		text = CustomGameSettings.Instance.GetCurrentQualitySetting(CustomGameSettingConfigs.ClusterLayout).id;
 		List<string> list = new List<string>();
 		foreach (string text2 in CustomGameSettings.Instance.GetCurrentStories())
 		{
 			list.Add(Db.Get().Stories.Get(text2).worldgenStoryTraitKey);
 		}
-		this.clusterLayout = new Cluster(text, this.seed, list, true, false);
-		this.clusterLayout.ShouldSkipWorldCallback = func;
-		this.clusterLayout.Generate(new WorldGen.OfflineCallbackFunction(this.UpdateProgress), new Action<OfflineWorldGen.ErrorInfo>(this.OnError), this.seed, this.seed, this.seed, this.seed, true, false);
+		this.cluster = new Cluster(text, this.seed, list, true, false, false);
+		this.cluster.ShouldSkipWorldCallback = func;
+		this.cluster.Generate(new WorldGen.OfflineCallbackFunction(this.UpdateProgress), new Action<OfflineWorldGen.ErrorInfo>(this.OnError), this.seed, this.seed, this.seed, this.seed, true, false, false);
 	}
 
 	private void OnError(OfflineWorldGen.ErrorInfo error)
@@ -320,7 +319,7 @@ public class OfflineWorldGen : KMonoBehaviour
 	[SerializeField]
 	private KBatchedAnimController asteriodAnim;
 
-	private Cluster clusterLayout;
+	private Cluster cluster;
 
 	private StringKey currentStringKeyRoot;
 

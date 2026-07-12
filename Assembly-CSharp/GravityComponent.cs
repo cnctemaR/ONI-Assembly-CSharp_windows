@@ -11,9 +11,8 @@ public struct GravityComponent
 		this.onLanded = on_landed;
 		this.landOnFakeFloors = land_on_fake_floors;
 		this.mayLeaveWorld = mayLeaveWorld;
-		KCollider2D component = transform.GetComponent<KCollider2D>();
-		this.extents = GravityComponent.GetExtents(component);
-		this.bottomYOffset = GravityComponent.GetGroundOffset(component);
+		this.collider2D = transform.GetComponent<KCollider2D>();
+		this.extents = GravityComponent.GetExtents(this.collider2D);
 	}
 
 	public static float GetGroundOffset(KCollider2D collider)
@@ -21,6 +20,15 @@ public struct GravityComponent
 		if (collider != null)
 		{
 			return collider.bounds.extents.y - collider.offset.y;
+		}
+		return 0f;
+	}
+
+	public static float GetGroundOffset(GravityComponent gravityComponent)
+	{
+		if (gravityComponent.collider2D != null)
+		{
+			return gravityComponent.extents.y - gravityComponent.collider2D.offset.y;
 		}
 		return 0f;
 	}
@@ -57,5 +65,5 @@ public struct GravityComponent
 
 	public Vector2 extents;
 
-	public float bottomYOffset;
+	public KCollider2D collider2D;
 }

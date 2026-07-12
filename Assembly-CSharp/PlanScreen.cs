@@ -268,7 +268,7 @@ public class PlanScreen : KIconToggleMenu
 		{
 			component.gameObject.SetActive(PlanScreen.Instance.gameObject.activeInHierarchy);
 			Sprite sprite = this.lastSelectedBuildingDef.GetUISprite("ui", false);
-			if (this.LastSelectedBuildingFacade != null && this.LastSelectedBuildingFacade != "DEFAULT_FACADE")
+			if (this.LastSelectedBuildingFacade != null && this.LastSelectedBuildingFacade != "DEFAULT_FACADE" && Db.Get().Permits.BuildingFacades.TryGet(this.LastSelectedBuildingFacade) != null)
 			{
 				sprite = Def.GetFacadeUISprite(this.LastSelectedBuildingFacade);
 			}
@@ -286,7 +286,7 @@ public class PlanScreen : KIconToggleMenu
 		for (int i = 0; i < global::TUNING.BUILDINGS.PLANORDER.Count; i++)
 		{
 			PlanScreen.PlanInfo planInfo = global::TUNING.BUILDINGS.PLANORDER[i];
-			if (DlcManager.IsContentActive(planInfo.RequiredDlcId))
+			if (SaveLoader.Instance.IsDLCActiveForCurrentSave(planInfo.RequiredDlcId))
 			{
 				global::Action action = ((i < 14) ? (global::Action.Plan1 + i) : global::Action.NumActions);
 				string text = HashCache.Get().Get(planInfo.category).ToUpper();
@@ -316,7 +316,7 @@ public class PlanScreen : KIconToggleMenu
 			for (int i = 0; i < global::TUNING.BUILDINGS.PLANORDER.Count; i++)
 			{
 				PlanScreen.PlanInfo planInfo = global::TUNING.BUILDINGS.PLANORDER[i];
-				if (DlcManager.IsContentActive(planInfo.RequiredDlcId))
+				if (SaveLoader.Instance.IsDLCActiveForCurrentSave(planInfo.RequiredDlcId))
 				{
 					global::Action action = ((i < 15) ? (global::Action.Plan1 + i) : global::Action.NumActions);
 					string text = PlanScreen.iconNameMap[planInfo.category];
@@ -906,7 +906,7 @@ public class PlanScreen : KIconToggleMenu
 			foreach (KeyValuePair<string, string> keyValuePair in planInfo.buildingAndSubcategoryData)
 			{
 				BuildingDef buildingDef = Assets.GetBuildingDef(keyValuePair.Key);
-				if (buildingDef.IsAvailable() && buildingDef.ShouldShowInBuildMenu())
+				if (buildingDef.IsAvailable() && buildingDef.ShouldShowInBuildMenu() && buildingDef.IsValidDLC())
 				{
 					dictionary.Add(buildingDef.PrefabID, planInfo.category);
 					if (!dictionary2.ContainsKey(keyValuePair.Value))
@@ -1251,22 +1251,40 @@ public class PlanScreen : KIconToggleMenu
 
 	public void OnResearchComplete(object tech)
 	{
-		foreach (TechItem techItem in ((Tech)tech).unlockedItems)
+		if (tech is Tech)
 		{
-			BuildingDef buildingDef = Assets.GetBuildingDef(techItem.Id);
-			if (buildingDef != null)
+			using (List<TechItem>.Enumerator enumerator = ((Tech)tech).unlockedItems.GetEnumerator())
 			{
-				this.UpdateDefResearched(buildingDef);
-				if (this.tagCategoryMap.ContainsKey(buildingDef.Tag))
+				while (enumerator.MoveNext())
 				{
-					HashedString hashedString = this.tagCategoryMap[buildingDef.Tag];
-					PlanScreen.ToggleEntry toggleEntry;
-					if (this.GetToggleEntryForCategory(hashedString, out toggleEntry))
-					{
-						toggleEntry.pendingResearchAttentions.Add(buildingDef.Tag);
-						toggleEntry.toggleInfo.toggle.GetComponent<PlanCategoryNotifications>().ToggleAttention(true);
-						toggleEntry.Refresh();
-					}
+					TechItem techItem = enumerator.Current;
+					BuildingDef buildingDef = Assets.GetBuildingDef(techItem.Id);
+					this.AddResearchedBuildingCategory(buildingDef);
+				}
+				return;
+			}
+		}
+		if (tech is BuildingDef)
+		{
+			BuildingDef buildingDef2 = tech as BuildingDef;
+			this.AddResearchedBuildingCategory(buildingDef2);
+		}
+	}
+
+	private void AddResearchedBuildingCategory(BuildingDef def)
+	{
+		if (def != null)
+		{
+			this.UpdateDefResearched(def);
+			if (this.tagCategoryMap.ContainsKey(def.Tag))
+			{
+				HashedString hashedString = this.tagCategoryMap[def.Tag];
+				PlanScreen.ToggleEntry toggleEntry;
+				if (this.GetToggleEntryForCategory(hashedString, out toggleEntry))
+				{
+					toggleEntry.pendingResearchAttentions.Add(def.Tag);
+					toggleEntry.toggleInfo.toggle.GetComponent<PlanCategoryNotifications>().ToggleAttention(true);
+					toggleEntry.Refresh();
 				}
 			}
 		}
@@ -1561,6 +1579,7 @@ public class PlanScreen : KIconToggleMenu
 		{
 			this.toggleInfo = toggle_info;
 			this.planCategory = plan_category;
+			building_defs.RemoveAll((BuildingDef def) => !SaveLoader.Instance.IsDlcListActiveForCurrentSave(def.RequiredDlcIds));
 			this.buildingDefs = building_defs;
 			this.hideIfNotResearched = hideIfNotResearched;
 			this.pendingResearchAttentions = new List<Tag>();

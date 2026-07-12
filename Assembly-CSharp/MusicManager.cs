@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using FMOD.Studio;
 using FMODUnity;
+using ProcGen;
 using UnityEngine;
 
 [AddComponentMenu("KMonoBehaviour/scripts/MusicManager")]
@@ -293,11 +294,25 @@ public class MusicManager : KMonoBehaviour, ISerializationCallbackReceiver
 
 	public void OnSupplyClosetMenu(bool paused, float fadeTime)
 	{
-		foreach (KeyValuePair<string, MusicManager.SongInfo> keyValuePair in this.activeSongs)
+		bool flag = !paused;
+		if (!PauseScreen.Instance.IsNullOrDestroyed() && PauseScreen.Instance.IsActive() && flag && MusicManager.instance.SongIsPlaying("Music_ESC_Menu"))
 		{
-			if (keyValuePair.Value != null && (paused || !keyValuePair.Value.dynamic))
+			MusicManager.SongInfo songInfo = this.songMap["Music_ESC_Menu"];
+			foreach (KeyValuePair<string, MusicManager.SongInfo> keyValuePair in this.activeSongs)
 			{
-				this.StartFadeToPause(keyValuePair.Value.ev, paused, fadeTime);
+				if (keyValuePair.Value != null && keyValuePair.Value != songInfo)
+				{
+					this.StartFadeToPause(keyValuePair.Value.ev, paused, 0.25f);
+				}
+			}
+			this.StartFadeToPause(songInfo.ev, false, 0.25f);
+			return;
+		}
+		foreach (KeyValuePair<string, MusicManager.SongInfo> keyValuePair2 in this.activeSongs)
+		{
+			if (keyValuePair2.Value != null)
+			{
+				this.StartFadeToPause(keyValuePair2.Value.ev, paused, fadeTime);
 			}
 		}
 	}
@@ -348,6 +363,19 @@ public class MusicManager : KMonoBehaviour, ISerializationCallbackReceiver
 		yield break;
 	}
 
+	public void WattsonStartDynamicMusic()
+	{
+		ClusterLayout currentClusterLayout = CustomGameSettings.Instance.GetCurrentClusterLayout();
+		if (currentClusterLayout != null && currentClusterLayout.clusterAudio != null && !string.IsNullOrWhiteSpace(currentClusterLayout.clusterAudio.musicFirst))
+		{
+			DebugUtil.Assert(this.fullSongPlaylist.songMap.ContainsKey(currentClusterLayout.clusterAudio.musicFirst), "Attempting to play dlc music that isn't in the fullSongPlaylist");
+			this.activePlaylist = this.fullSongPlaylist;
+			this.PlayDynamicMusic(currentClusterLayout.clusterAudio.musicFirst);
+			return;
+		}
+		this.PlayDynamicMusic();
+	}
+
 	public void PlayDynamicMusic()
 	{
 		if (this.DynamicMusicIsActive())
@@ -356,13 +384,18 @@ public class MusicManager : KMonoBehaviour, ISerializationCallbackReceiver
 			return;
 		}
 		string nextDynamicSong = this.GetNextDynamicSong();
-		if (nextDynamicSong == "NONE")
+		this.PlayDynamicMusic(nextDynamicSong);
+	}
+
+	private void PlayDynamicMusic(string song_name)
+	{
+		if (song_name == "NONE")
 		{
 			return;
 		}
-		this.PlaySong(nextDynamicSong, false);
+		this.PlaySong(song_name, false);
 		MusicManager.SongInfo songInfo;
-		if (this.activeSongs.TryGetValue(nextDynamicSong, out songInfo))
+		if (this.activeSongs.TryGetValue(song_name, out songInfo))
 		{
 			this.activeDynamicSong = songInfo;
 			AudioMixer.instance.Start(AudioMixerSnapshots.Get().DynamicMusicPlayingSnapshot);
@@ -385,14 +418,14 @@ public class MusicManager : KMonoBehaviour, ISerializationCallbackReceiver
 			AudioMixer.instance.SetSnapshotParameter(AudioMixerSnapshots.Get().DynamicMusicPlayingSnapshot, "intensity", songInfo.sfxAttenuationPercentage / 100f, true);
 			return;
 		}
-		this.Log("DynamicMusic song " + nextDynamicSong + " did not start.");
+		this.Log("DynamicMusic song " + song_name + " did not start.");
 		string text2 = "";
 		foreach (KeyValuePair<string, MusicManager.SongInfo> keyValuePair in this.activeSongs)
 		{
 			text2 = text2 + keyValuePair.Key + ", ";
 			global::Debug.Log(text2);
 		}
-		DebugUtil.DevAssert(false, "Song failed to play: " + nextDynamicSong, null);
+		DebugUtil.DevAssert(false, "Song failed to play: " + song_name, null);
 	}
 
 	public void StopDynamicMusic(bool stopImmediate = false)
@@ -582,8 +615,6 @@ public class MusicManager : KMonoBehaviour, ISerializationCallbackReceiver
 	{
 		MusicManager._instance = this;
 		this.ConfigureSongs();
-		this.fullSongPlaylist.ResetUnplayedSongs();
-		this.miniSongPlaylist.ResetUnplayedSongs();
 		this.nextMusicType = this.musicStyleOrder[this.musicTypeIterator];
 	}
 
@@ -592,13 +623,24 @@ public class MusicManager : KMonoBehaviour, ISerializationCallbackReceiver
 		MusicManager._instance = null;
 	}
 
+	private static bool IsValidForDLCContext(string dlcid)
+	{
+		if (SaveLoader.Instance != null)
+		{
+			return SaveLoader.Instance.IsDLCActiveForCurrentSave(dlcid);
+		}
+		return DlcManager.IsContentSubscribed(dlcid);
+	}
+
 	[ContextMenu("Reload")]
-	private void ConfigureSongs()
+	public void ConfigureSongs()
 	{
 		this.songMap.Clear();
+		this.fullSongPlaylist.Clear();
+		this.miniSongPlaylist.Clear();
 		foreach (MusicManager.DynamicSong dynamicSong in this.fullSongs)
 		{
-			if (DlcManager.IsContentActive(dynamicSong.requiredDlcId))
+			if (MusicManager.IsValidForDLCContext(dynamicSong.requiredDlcId))
 			{
 				string simpleSoundEventName = Assets.GetSimpleSoundEventName(dynamicSong.fmodEvent);
 				MusicManager.SongInfo songInfo = new MusicManager.SongInfo();
@@ -617,7 +659,7 @@ public class MusicManager : KMonoBehaviour, ISerializationCallbackReceiver
 		}
 		foreach (MusicManager.Minisong minisong in this.miniSongs)
 		{
-			if (DlcManager.IsContentActive(minisong.requiredDlcId))
+			if (MusicManager.IsValidForDLCContext(minisong.requiredDlcId))
 			{
 				string simpleSoundEventName2 = Assets.GetSimpleSoundEventName(minisong.fmodEvent);
 				MusicManager.SongInfo songInfo2 = new MusicManager.SongInfo();
@@ -636,7 +678,7 @@ public class MusicManager : KMonoBehaviour, ISerializationCallbackReceiver
 		}
 		foreach (MusicManager.Stinger stinger in this.stingers)
 		{
-			if (DlcManager.IsContentActive(stinger.requiredDlcId))
+			if (MusicManager.IsValidForDLCContext(stinger.requiredDlcId))
 			{
 				string simpleSoundEventName3 = Assets.GetSimpleSoundEventName(stinger.fmodEvent);
 				MusicManager.SongInfo songInfo3 = new MusicManager.SongInfo();
@@ -647,12 +689,12 @@ public class MusicManager : KMonoBehaviour, ISerializationCallbackReceiver
 				songInfo3.useTimeOfDay = false;
 				songInfo3.numberOfVariations = 0;
 				songInfo3.requiredDlcId = stinger.requiredDlcId;
-				this.SongMap[simpleSoundEventName3] = songInfo3;
+				this.songMap[simpleSoundEventName3] = songInfo3;
 			}
 		}
 		foreach (MusicManager.MenuSong menuSong in this.menuSongs)
 		{
-			if (DlcManager.IsContentActive(menuSong.requiredDlcId))
+			if (MusicManager.IsValidForDLCContext(menuSong.requiredDlcId))
 			{
 				string simpleSoundEventName4 = Assets.GetSimpleSoundEventName(menuSong.fmodEvent);
 				MusicManager.SongInfo songInfo4 = new MusicManager.SongInfo();
@@ -663,9 +705,11 @@ public class MusicManager : KMonoBehaviour, ISerializationCallbackReceiver
 				songInfo4.useTimeOfDay = false;
 				songInfo4.numberOfVariations = 0;
 				songInfo4.requiredDlcId = menuSong.requiredDlcId;
-				this.SongMap[simpleSoundEventName4] = songInfo4;
+				this.songMap[simpleSoundEventName4] = songInfo4;
 			}
 		}
+		this.fullSongPlaylist.ResetUnplayedSongs();
+		this.miniSongPlaylist.ResetUnplayedSongs();
 	}
 
 	public void OnBeforeSerialize()
@@ -870,6 +914,13 @@ public class MusicManager : KMonoBehaviour, ISerializationCallbackReceiver
 
 	public class DynamicSongPlaylist
 	{
+		public void Clear()
+		{
+			this.songMap.Clear();
+			this.unplayedSongs.Clear();
+			this.lastSongPlayed = "";
+		}
+
 		public string GetNextSong()
 		{
 			string text;
@@ -912,7 +963,7 @@ public class MusicManager : KMonoBehaviour, ISerializationCallbackReceiver
 			this.unplayedSongs.Clear();
 			foreach (KeyValuePair<string, MusicManager.SongInfo> keyValuePair in this.songMap)
 			{
-				if (DlcManager.IsContentActive(keyValuePair.Value.requiredDlcId))
+				if (MusicManager.IsValidForDLCContext(keyValuePair.Value.requiredDlcId))
 				{
 					this.unplayedSongs.Add(keyValuePair.Key);
 				}

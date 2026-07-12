@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{60680212-E691-4C44-A960-C54EC515A839}</ProjectGuid>
+    <ProjectGuid>{4474CC3B-DAAF-48AD-A509-3D83A0F287CF}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>Assembly-CSharp</RootNamespace>
     <AssemblyName>Assembly-CSharp</AssemblyName>
@@ -87,6 +87,7 @@
     <Compile Include="ArcadeMachineWorkable.cs" />
     <Compile Include="ArmTrapWorkable.cs" />
     <Compile Include="Artable.cs" />
+    <Compile Include="ArtableInfo.cs" />
     <Compile Include="ArtableSelectionSideScreen.cs" />
     <Compile Include="ArtifactAnalysisSideScreen.cs" />
     <Compile Include="ArtifactAnalysisStation.cs" />
@@ -170,6 +171,7 @@
     <Compile Include="BabyHatchHardConfig.cs" />
     <Compile Include="BabyHatchMetalConfig.cs" />
     <Compile Include="BabyHatchVeggieConfig.cs" />
+    <Compile Include="BabyIceBellyConfig.cs" />
     <Compile Include="BabyMoleConfig.cs" />
     <Compile Include="BabyMoleDelicacyConfig.cs" />
     <Compile Include="BabyMonitor.cs" />
@@ -180,11 +182,13 @@
     <Compile Include="BabyPuftBleachstoneConfig.cs" />
     <Compile Include="BabyPuftConfig.cs" />
     <Compile Include="BabyPuftOxyliteConfig.cs" />
+    <Compile Include="BabySealConfig.cs" />
     <Compile Include="BabySquirrelConfig.cs" />
     <Compile Include="BabySquirrelHugConfig.cs" />
     <Compile Include="BabyStaterpillarConfig.cs" />
     <Compile Include="BabyStaterpillarGasConfig.cs" />
     <Compile Include="BabyStaterpillarLiquidConfig.cs" />
+    <Compile Include="BabyWoodDeerConfig.cs" />
     <Compile Include="BabyWormConfig.cs" />
     <Compile Include="BackgroundEarthConfig.cs" />
     <Compile Include="Baggable.cs" />
@@ -193,6 +197,7 @@
     <Compile Include="BallisticClusterGridEntity.cs" />
     <Compile Include="BalloonArtist.cs" />
     <Compile Include="BalloonArtistChore.cs" />
+    <Compile Include="BalloonArtistFacadeInfo.cs" />
     <Compile Include="BalloonFX.cs" />
     <Compile Include="BalloonStandCellSensor.cs" />
     <Compile Include="BalloonStandConfig.cs" />
@@ -202,8 +207,10 @@
     <Compile Include="BaseBatteryConfig.cs" />
     <Compile Include="BaseBeeConfig.cs" />
     <Compile Include="BaseBeeHiveConfig.cs" />
+    <Compile Include="BaseBellyConfig.cs" />
     <Compile Include="BaseCometConfig.cs" />
     <Compile Include="BaseCrabConfig.cs" />
+    <Compile Include="BaseDeerConfig.cs" />
     <Compile Include="BaseDivergentConfig.cs" />
     <Compile Include="BaseDreckoConfig.cs" />
     <Compile Include="BaseHatchConfig.cs" />
@@ -217,6 +224,7 @@
     <Compile Include="BasePacuConfig.cs" />
     <Compile Include="BasePuftConfig.cs" />
     <Compile Include="BaseRoverConfig.cs" />
+    <Compile Include="BaseSealConfig.cs" />
     <Compile Include="BaseSquirrelConfig.cs" />
     <Compile Include="BaseStaterpillarConfig.cs" />
     <Compile Include="BaseUtilityBuildTool.cs" />
@@ -266,6 +274,7 @@
     <Compile Include="BeeSleepStates.cs" />
     <Compile Include="BeeTuning.cs" />
     <Compile Include="BeIncapacitatedChore.cs" />
+    <Compile Include="BellyTuning.cs" />
     <Compile Include="BerryPieConfig.cs" />
     <Compile Include="BestFit.cs" />
     <Compile Include="BingeEatChore.cs" />
@@ -277,6 +286,14 @@
     <Compile Include="BlinkMonitor.cs" />
     <Compile Include="BlockTileDecorInfo.cs" />
     <Compile Include="BloomEffect.cs" />
+    <Compile Include="BlueGrass.cs" />
+    <Compile Include="BlueGrassConfig.cs" />
+    <Compile Include="BlueprintCollection.cs" />
+    <Compile Include="BlueprintProvider.cs" />
+    <Compile Include="Blueprints.cs" />
+    <Compile Include="Blueprints_Default.cs" />
+    <Compile Include="Blueprints_DlcPack2.cs" />
+    <Compile Include="Blueprints_U51AndBefore.cs" />
     <Compile Include="Blur.cs" />
     <Compile Include="BottleEmptier.cs" />
     <Compile Include="BottleEmptierConfig.cs" />
@@ -313,6 +330,7 @@
     <Compile Include="BuildingEnabledButton.cs" />
     <Compile Include="BuildingFacade.cs" />
     <Compile Include="BuildingFacadeAnimateIn.cs" />
+    <Compile Include="BuildingFacadeInfo.cs" />
     <Compile Include="BuildingGroupScreen.cs" />
     <Compile Include="BuildingHP.cs" />
     <Compile Include="BuildingInternalConstructor.cs" />
@@ -354,6 +372,8 @@
     <Compile Include="CameraReferenceTexture.cs" />
     <Compile Include="CameraRenderTexture.cs" />
     <Compile Include="CameraSaveData.cs" />
+    <Compile Include="Campfire.cs" />
+    <Compile Include="CampfireConfig.cs" />
     <Compile Include="Cancellable.cs" />
     <Compile Include="CancellableDig.cs" />
     <Compile Include="CancellableMove.cs" />
@@ -377,6 +397,9 @@
     <Compile Include="CargoDropperStorage.cs" />
     <Compile Include="CargoLander.cs" />
     <Compile Include="CarpetTileConfig.cs" />
+    <Compile Include="CarrotConfig.cs" />
+    <Compile Include="CarrotPlantConfig.cs" />
+    <Compile Include="Carvable.cs" />
     <Compile Include="CategoryEntry.cs" />
     <Compile Include="CavityInfo.cs" />
     <Compile Include="CavityVisualizer.cs" />
@@ -409,6 +432,7 @@
     <Compile Include="CheckedHandleVector.cs" />
     <Compile Include="Checkpoint.cs" />
     <Compile Include="CheckpointConfig.cs" />
+    <Compile Include="ChilledBones.cs" />
     <Compile Include="Chlorinator.cs" />
     <Compile Include="ChlorinatorConfig.cs" />
     <Compile Include="ChlorineGeyserConfig.cs" />
@@ -441,6 +465,7 @@
     <Compile Include="ClosestEdibleSensor.cs" />
     <Compile Include="ClothingAlterationStationConfig.cs" />
     <Compile Include="ClothingFabricatorConfig.cs" />
+    <Compile Include="ClothingItemInfo.cs" />
     <Compile Include="ClothingOutfitNameProposal.cs" />
     <Compile Include="ClothingOutfitTarget.cs" />
     <Compile Include="ClothingOutfitUtility.cs" />
@@ -502,6 +527,8 @@
     <Compile Include="CodexEntry.cs" />
     <Compile Include="CodexEntryGenerator.cs" />
     <Compile Include="CodexEntryGenerator_Creatures.cs" />
+    <Compile Include="CodexEntryGenerator_Elements.cs" />
+    <Compile Include="CodexEntry_MadeAndUsed.cs" />
     <Compile Include="CodexImage.cs" />
     <Compile Include="CodexImageLayoutMB.cs" />
     <Compile Include="CodexIndentedLabelWithIcon.cs" />
@@ -521,6 +548,8 @@
     <Compile Include="CodexWidget.cs" />
     <Compile Include="ColdBreather.cs" />
     <Compile Include="ColdBreatherConfig.cs" />
+    <Compile Include="ColdImmunityMonitor.cs" />
+    <Compile Include="ColdImmunityProvider.cs" />
     <Compile Include="ColdWheatBreadConfig.cs" />
     <Compile Include="ColdWheatConfig.cs" />
     <Compile Include="CollapsibleDetailContentPanel.cs" />
@@ -602,6 +631,7 @@
     <Compile Include="ConduitType.cs" />
     <Compile Include="ConfigureConsumerSideScreen.cs" />
     <Compile Include="ConfirmDialogScreen.cs" />
+    <Compile Include="ConnectionManager.cs" />
     <Compile Include="Constructable.cs" />
     <Compile Include="ConsumableConsumer.cs" />
     <Compile Include="ConsumableInfoTableColumn.cs" />
@@ -618,9 +648,9 @@
     <Compile Include="CookedEggConfig.cs" />
     <Compile Include="CookedFishConfig.cs" />
     <Compile Include="CookedMeatConfig.cs" />
+    <Compile Include="CookedPikeappleConfig.cs" />
     <Compile Include="CookingStation.cs" />
     <Compile Include="CookingStationConfig.cs" />
-    <Compile Include="CoolVestConfig.cs" />
     <Compile Include="CopperCometConfig.cs" />
     <Compile Include="CopyBuildingSettings.cs" />
     <Compile Include="CopySettingsTool.cs" />
@@ -655,9 +685,11 @@
     <Compile Include="CreatureLightToggleController.cs" />
     <Compile Include="CreatureLure.cs" />
     <Compile Include="CreaturePathFinderAbilities.cs" />
+    <Compile Include="CreaturePoopLoot.cs" />
     <Compile Include="CreatureSimTemperatureTransfer.cs" />
     <Compile Include="CreatureSleepMonitor.cs" />
     <Compile Include="CreatureSleepStates.cs" />
+    <Compile Include="CreatureThoughtGraph.cs" />
     <Compile Include="CreatureTrapConfig.cs" />
     <Compile Include="CreatureVariationSoundEvent.cs" />
     <Compile Include="CreditsScreen.cs" />
@@ -678,6 +710,8 @@
     <Compile Include="CritterElementMonitor.cs" />
     <Compile Include="CritterPickUpConfig.cs" />
     <Compile Include="CritterSensorSideScreen.cs" />
+    <Compile Include="CritterTemperatureDeltaAsEnergyAmountDisplayer.cs" />
+    <Compile Include="CritterTemperatureMonitor.cs" />
     <Compile Include="CritterTrapPlant.cs" />
     <Compile Include="CritterTrapPlantConfig.cs" />
     <Compile Include="Crop.cs" />
@@ -692,7 +726,12 @@
     <Compile Include="CurryConfig.cs" />
     <Compile Include="CustomClothingConfig.cs" />
     <Compile Include="CustomClothingOutfits.cs" />
+    <Compile Include="CustomGameSettingListWidget.cs" />
     <Compile Include="CustomGameSettings.cs" />
+    <Compile Include="CustomGameSettingSeed.cs" />
+    <Compile Include="CustomGameSettingsPanelBase.cs" />
+    <Compile Include="CustomGameSettingToggleWidget.cs" />
+    <Compile Include="CustomGameSettingWidget.cs" />
     <Compile Include="CustomizableDialogScreen.cs" />
     <Compile Include="CylindricaConfig.cs" />
     <Compile Include="Database\Accessories.cs" />
@@ -730,6 +769,7 @@
     <Compile Include="Database\CalorieSurplus.cs" />
     <Compile Include="Database\ChoreGroups.cs" />
     <Compile Include="Database\ChoreTypes.cs" />
+    <Compile Include="Database\ClearBlockedGeothermalVent.cs" />
     <Compile Include="Database\ClothingItemResource.cs" />
     <Compile Include="Database\ClothingItems.cs" />
     <Compile Include="Database\ClothingOutfitResource.cs" />
@@ -751,6 +791,7 @@
     <Compile Include="Database\DbStickerBomb.cs" />
     <Compile Include="Database\Deaths.cs" />
     <Compile Include="Database\DefrostDuplicant.cs" />
+    <Compile Include="Database\DiscoverGeothermalFacility.cs" />
     <Compile Include="Database\Diseases.cs" />
     <Compile Include="Database\Dreams.cs" />
     <Compile Include="Database\DupesCompleteChoreInExoSuitForCycles.cs" />
@@ -761,13 +802,11 @@
     <Compile Include="Database\EatXKCalProducedByY.cs" />
     <Compile Include="Database\Emotes.cs" />
     <Compile Include="Database\EquipNDupes.cs" />
-    <Compile Include="Database\EquippableFacadeInfo.cs" />
     <Compile Include="Database\EquippableFacadeResource.cs" />
     <Compile Include="Database\EquippableFacades.cs" />
     <Compile Include="Database\EstablishColonies.cs" />
     <Compile Include="Database\ExploreOilFieldSubZone.cs" />
     <Compile Include="Database\Expressions.cs" />
-    <Compile Include="Database\FacadeInfo.cs" />
     <Compile Include="Database\Faces.cs" />
     <Compile Include="Database\FertilityModifiers.cs" />
     <Compile Include="Database\FractionalCycleNumber.cs" />
@@ -800,6 +839,7 @@
     <Compile Include="Database\Quests.cs" />
     <Compile Include="Database\RadBoltTravelDistance.cs" />
     <Compile Include="Database\ReachedSpace.cs" />
+    <Compile Include="Database\RepairGeothermalController.cs" />
     <Compile Include="Database\ResearchComplete.cs" />
     <Compile Include="Database\RevealAsteriod.cs" />
     <Compile Include="Database\RobotStatusItems.cs" />
@@ -840,6 +880,7 @@
     <Compile Include="Database\TuneUpGenerator.cs" />
     <Compile Include="Database\UpgradeAllBasicBuildings.cs" />
     <Compile Include="Database\Urges.cs" />
+    <Compile Include="Database\UseGeothermalPlant.cs" />
     <Compile Include="Database\VentXKG.cs" />
     <Compile Include="Database\VictoryColonyAchievementRequirement.cs" />
     <Compile Include="DataPoint.cs" />
@@ -871,6 +912,13 @@
     <Compile Include="DecorDisplayer.cs" />
     <Compile Include="DecorMonitor.cs" />
     <Compile Include="DecorProvider.cs" />
+    <Compile Include="DeepFriedFishConfig.cs" />
+    <Compile Include="DeepFriedMeatConfig.cs" />
+    <Compile Include="DeepFriedNoshConfig.cs" />
+    <Compile Include="DeepFriedShellfishConfig.cs" />
+    <Compile Include="Deepfryer.cs" />
+    <Compile Include="DeepfryerConfig.cs" />
+    <Compile Include="DeerTuning.cs" />
     <Compile Include="Def.cs" />
     <Compile Include="DefComponent.cs" />
     <Compile Include="DefendStates.cs" />
@@ -911,6 +959,7 @@
     <Compile Include="DevAutoPlumber.cs" />
     <Compile Include="DevGenerator.cs" />
     <Compile Include="DevGeneratorConfig.cs" />
+    <Compile Include="DevHeaterConfig.cs" />
     <Compile Include="DevHEPSpawner.cs" />
     <Compile Include="DevHEPSpawnerConfig.cs" />
     <Compile Include="DevLifeSupport.cs" />
@@ -934,6 +983,7 @@
     <Compile Include="DevToolChoreDebugger.cs" />
     <Compile Include="DevToolCommandPalette.cs" />
     <Compile Include="DevToolCommandPaletteUtil.cs" />
+    <Compile Include="DevToolDLCManager.cs" />
     <Compile Include="DevToolEntity.cs" />
     <Compile Include="DevToolEntityTarget.cs" />
     <Compile Include="DevToolEntity_DebugGoTo.cs" />
@@ -948,6 +998,7 @@
     <Compile Include="DevToolMenuNodeParent.cs" />
     <Compile Include="DevToolNavGrid.cs" />
     <Compile Include="DevToolObjectViewer.cs" />
+    <Compile Include="DevToolPOITechUnlocks.cs" />
     <Compile Include="DevToolPrintingPodDebug.cs" />
     <Compile Include="DevToolResearchDebugger.cs" />
     <Compile Include="DevToolSaveGameInfo.cs" />
@@ -962,6 +1013,7 @@
     <Compile Include="DevToolUI.cs" />
     <Compile Include="DevToolUnlockedIds.cs" />
     <Compile Include="DevToolUtil.cs" />
+    <Compile Include="DevToolWarmthZonesVisualizer.cs" />
     <Compile Include="DevToolWarning.cs" />
     <Compile Include="DevTool_StoryTraits_Reveal.cs" />
     <Compile Include="DevTool_StoryTrait_CritterManipulator.cs" />
@@ -980,6 +1032,10 @@
     <Compile Include="DiningTableConfig.cs" />
     <Compile Include="Direction.cs" />
     <Compile Include="DirectionControl.cs" />
+    <Compile Include="DirectlyEdiblePlant_Growth.cs" />
+    <Compile Include="DirectlyEdiblePlant_StorageElement.cs" />
+    <Compile Include="DirectlyEdiblePlant_TreeBranches.cs" />
+    <Compile Include="DirectVolumeHeater.cs" />
     <Compile Include="DirtyWaterConfig.cs" />
     <Compile Include="DisabledCreatureStates.cs" />
     <Compile Include="DisconnectTool.cs" />
@@ -1004,6 +1060,7 @@
     <Compile Include="DividerColumn.cs" />
     <Compile Include="DivisibleTask.cs" />
     <Compile Include="DLC1CosmicResearchCenterConfig.cs" />
+    <Compile Include="DLCBetaMessageScreen.cs" />
     <Compile Include="DLCToggle.cs" />
     <Compile Include="DoctorChoreWorkable.cs" />
     <Compile Include="DoctorMonitor.cs" />
@@ -1056,6 +1113,7 @@
     <Compile Include="EditableTitleBar.cs" />
     <Compile Include="EffectArea.cs" />
     <Compile Include="EffectConfigs.cs" />
+    <Compile Include="EffectImmunityProviderStation.cs" />
     <Compile Include="EffectorEntry.cs" />
     <Compile Include="EffectorEntryDecibel.cs" />
     <Compile Include="EffectorValues.cs" />
@@ -1109,6 +1167,8 @@
     <Compile Include="EnergySim.cs" />
     <Compile Include="EngineOnBottom.cs" />
     <Compile Include="EnterTemporalTearSequence.cs" />
+    <Compile Include="EntityCellVisualizer.cs" />
+    <Compile Include="EntityConduitConsumer.cs" />
     <Compile Include="EntityConfigManager.cs" />
     <Compile Include="EntityConfigOrder.cs" />
     <Compile Include="EntityElementExchanger.cs" />
@@ -1138,6 +1198,7 @@
     <Compile Include="EquippableBalloon.cs" />
     <Compile Include="EquippableBalloonConfig.cs" />
     <Compile Include="EquippableFacade.cs" />
+    <Compile Include="EquippableFacadeInfo.cs" />
     <Compile Include="EquippableWorkable.cs" />
     <Compile Include="EscapePodConfig.cs" />
     <Compile Include="EspressoMachine.cs" />
@@ -1283,6 +1344,7 @@
     <Compile Include="ForestForagePlantPlantedConfig.cs" />
     <Compile Include="ForestTreeBranchConfig.cs" />
     <Compile Include="ForestTreeConfig.cs" />
+    <Compile Include="ForestTreeSeedMonitor.cs" />
     <Compile Include="FossilBits.cs" />
     <Compile Include="FossilBitsLargeConfig.cs" />
     <Compile Include="FossilBitsSmallConfig.cs" />
@@ -1299,6 +1361,7 @@
     <Compile Include="FoundationMonitor.cs" />
     <Compile Include="FriedMushBarConfig.cs" />
     <Compile Include="FriedMushroomConfig.cs" />
+    <Compile Include="FriesCarrotConfig.cs" />
     <Compile Include="FrontEndBackground.cs" />
     <Compile Include="FrontEndManager.cs" />
     <Compile Include="FruitCakeConfig.cs" />
@@ -1397,6 +1460,13 @@
     <Compile Include="GeneticAnalysisStationConfig.cs" />
     <Compile Include="GeneticAnalysisStationSideScreen.cs" />
     <Compile Include="GeneticAnalysisStationWorkable.cs" />
+    <Compile Include="GeothermalController.cs" />
+    <Compile Include="GeothermalControllerConfig.cs" />
+    <Compile Include="GeothermalFirstEmissionSequence.cs" />
+    <Compile Include="GeothermalPlantComponent.cs" />
+    <Compile Include="GeothermalVent.cs" />
+    <Compile Include="GeothermalVentConfig.cs" />
+    <Compile Include="GeothermalVictorySequence.cs" />
     <Compile Include="GeoTuner.cs" />
     <Compile Include="GeoTunerConfig.cs" />
     <Compile Include="GeoTunerSideScreen.cs" />
@@ -1466,6 +1536,8 @@
     <Compile Include="HappinessMonitor.cs" />
     <Compile Include="HappySinger.cs" />
     <Compile Include="HardIceCometConfig.cs" />
+    <Compile Include="HardSkinBerryConfig.cs" />
+    <Compile Include="HardSkinBerryPlantConfig.cs" />
     <Compile Include="Harvestable.cs" />
     <Compile Include="HarvestableOverlayWidget.cs" />
     <Compile Include="HarvestablePOIClusterGridEntity.cs" />
@@ -1493,6 +1565,8 @@
     <Compile Include="HeatCompressorConfig.cs" />
     <Compile Include="HeatCubeConfig.cs" />
     <Compile Include="HeatDiagnostic.cs" />
+    <Compile Include="HeatImmunityMonitor.cs" />
+    <Compile Include="HeatImmunityProvider.cs" />
     <Compile Include="HelmetController.cs" />
     <Compile Include="HEPBattery.cs" />
     <Compile Include="HEPBatteryConfig.cs" />
@@ -1546,11 +1620,21 @@
     <Compile Include="IBaggedStateAnimationInstructions.cs" />
     <Compile Include="IBasicBuilding.cs" />
     <Compile Include="IBitRating.cs" />
+    <Compile Include="IBlueprintDlcInfo.cs" />
+    <Compile Include="IBlueprintInfo.cs" />
     <Compile Include="IBridgedNetworkItem.cs" />
     <Compile Include="IBuildingConfig.cs" />
+    <Compile Include="IceBellyConfig.cs" />
+    <Compile Include="IceBellyPoopConfig.cs" />
+    <Compile Include="IceCavesForagePlantConfig.cs" />
+    <Compile Include="IceCavesForagePlantPlantedConfig.cs" />
     <Compile Include="IceCooledFan.cs" />
     <Compile Include="IceCooledFanConfig.cs" />
     <Compile Include="IceCooledFanWorkable.cs" />
+    <Compile Include="IceFlowerConfig.cs" />
+    <Compile Include="IceKettle.cs" />
+    <Compile Include="IceKettleConfig.cs" />
+    <Compile Include="IceKettleWorkable.cs" />
     <Compile Include="IceMachine.cs" />
     <Compile Include="IceMachineConfig.cs" />
     <Compile Include="IceSculptureConfig.cs" />
@@ -1567,6 +1651,7 @@
     <Compile Include="IConfigurableConsumerIngredient.cs" />
     <Compile Include="IConfigurableConsumerOption.cs" />
     <Compile Include="IConsumableUIItem.cs" />
+    <Compile Include="IDigActionEntity.cs" />
     <Compile Include="IDisconnectable.cs" />
     <Compile Include="IDispenser.cs" />
     <Compile Include="IdleCellQuery.cs" />
@@ -1596,6 +1681,7 @@
     <Compile Include="IHasSortOrder.cs" />
     <Compile Include="IHaveUtilityNetworkMgr.cs" />
     <Compile Include="IHighEnergyParticleDirection.cs" />
+    <Compile Include="IIlluminationTracker.cs" />
     <Compile Include="IIntSliderControl.cs" />
     <Compile Include="IKComponentManager.cs" />
     <Compile Include="IKleiPermitDioramaVisTarget.cs" />
@@ -1608,6 +1694,7 @@
     <Compile Include="ILogicRibbonBitSelector.cs" />
     <Compile Include="ILogicUIElement.cs" />
     <Compile Include="ImageAspectRatioFitter.cs" />
+    <Compile Include="IManageGrowingStates.cs" />
     <Compile Include="IMenuNode.cs" />
     <Compile Include="ImGuiObjectDrawer\ArrayDrawer.cs" />
     <Compile Include="ImGuiObjectDrawer\CollectionDrawer.cs" />
@@ -1671,6 +1758,7 @@
     <Compile Include="InventoryOrganization.cs" />
     <Compile Include="IOreConfig.cs" />
     <Compile Include="IPersonalPriorityManager.cs" />
+    <Compile Include="IPlantConsumptionInstructions.cs" />
     <Compile Include="IPlayerControlledToggle.cs" />
     <Compile Include="IPolluter.cs" />
     <Compile Include="IProcessConditionSet.cs" />
@@ -1679,6 +1767,7 @@
     <Compile Include="IReachable.cs" />
     <Compile Include="IReadonlyTags.cs" />
     <Compile Include="IReceptacleDirection.cs" />
+    <Compile Include="IRelatedEntities.cs" />
     <Compile Include="IResearchCenter.cs" />
     <Compile Include="IronCometConfig.cs" />
     <Compile Include="IRottable.cs" />
@@ -1734,6 +1823,7 @@
     <Compile Include="KAnimSynchronizer.cs" />
     <Compile Include="KBatchedAnimController.cs" />
     <Compile Include="KBatchedAnimEventToggler.cs" />
+    <Compile Include="KBatchedAnimHeatPostProcessingEffect.cs" />
     <Compile Include="KBatchedAnimTracker.cs" />
     <Compile Include="KBatchedAnimUpdater.cs" />
     <Compile Include="KBoxCollider2D.cs" />
@@ -1797,7 +1887,6 @@
     <Compile Include="Klei\AI\AttributeModifierSickness.cs" />
     <Compile Include="Klei\AI\Attributes.cs" />
     <Compile Include="Klei\AI\BonusEvent.cs" />
-    <Compile Include="Klei\AI\ColdBrain.cs" />
     <Compile Include="Klei\AI\CommonSickEffectSickness.cs" />
     <Compile Include="Klei\AI\CreatureSpawnEvent.cs" />
     <Compile Include="Klei\AI\CustomSickEffectSickness.cs" />
@@ -1824,7 +1913,6 @@
     <Compile Include="Klei\AI\FoodSickness.cs" />
     <Compile Include="Klei\AI\GameplaySeason.cs" />
     <Compile Include="Klei\AI\GameplaySeasonInstance.cs" />
-    <Compile Include="Klei\AI\HeatRash.cs" />
     <Compile Include="Klei\AI\MeteorShowerEvent.cs" />
     <Compile Include="Klei\AI\MeteorShowerSeason.cs" />
     <Compile Include="Klei\AI\Modifications.cs" />
@@ -1860,11 +1948,16 @@
     <Compile Include="Klei\CallbackInfo.cs" />
     <Compile Include="Klei\ClusterLayoutSave.cs" />
     <Compile Include="Klei\CustomSettings\CustomGameSettingConfigs.cs" />
+    <Compile Include="Klei\CustomSettings\CustomMixingSettingsConfigs.cs" />
+    <Compile Include="Klei\CustomSettings\DlcMixingSettingConfig.cs" />
     <Compile Include="Klei\CustomSettings\ListSettingConfig.cs" />
+    <Compile Include="Klei\CustomSettings\MixingSettingConfig.cs" />
     <Compile Include="Klei\CustomSettings\SeedSettingConfig.cs" />
     <Compile Include="Klei\CustomSettings\SettingConfig.cs" />
     <Compile Include="Klei\CustomSettings\SettingLevel.cs" />
+    <Compile Include="Klei\CustomSettings\SubworldMixingSettingConfig.cs" />
     <Compile Include="Klei\CustomSettings\ToggleSettingConfig.cs" />
+    <Compile Include="Klei\CustomSettings\WorldMixingSettingConfig.cs" />
     <Compile Include="Klei\Data.cs" />
     <Compile Include="Klei\Input\ClearCellDigAction.cs" />
     <Compile Include="Klei\Input\DigAction.cs" />
@@ -2114,6 +2207,7 @@
     <Compile Include="LonelyMinionMailbox.cs" />
     <Compile Include="LonelyMinionMailboxConfig.cs" />
     <Compile Include="Loner.cs" />
+    <Compile Include="LongRangeSculpture.cs" />
     <Compile Include="LoopingSoundManager.cs" />
     <Compile Include="LoopingSoundParameterUpdater.cs" />
     <Compile Include="LoopingSounds.cs" />
@@ -2173,6 +2267,8 @@
     <Compile Include="MegaBrainTank.cs" />
     <Compile Include="MegaBrainTankConfig.cs" />
     <Compile Include="MemorySnapshot.cs" />
+    <Compile Include="MercuryCeilingLightConfig.cs" />
+    <Compile Include="MercuryLight.cs" />
     <Compile Include="MeshTileConfig.cs" />
     <Compile Include="MeshUtil.cs" />
     <Compile Include="Message.cs" />
@@ -2210,6 +2306,8 @@
     <Compile Include="MingleCellTracker.cs" />
     <Compile Include="MingleChore.cs" />
     <Compile Include="MingleMonitor.cs" />
+    <Compile Include="MiniComet.cs" />
+    <Compile Include="MiniCometConfig.cs" />
     <Compile Include="MinimumOperatingTemperature.cs" />
     <Compile Include="MiningSounds.cs" />
     <Compile Include="MinionAssignablesProxy.cs" />
@@ -2251,6 +2349,7 @@
     <Compile Include="MissionControlClusterWorkable.cs" />
     <Compile Include="MissionControlConfig.cs" />
     <Compile Include="MissionControlWorkable.cs" />
+    <Compile Include="MixingContentPanel.cs" />
     <Compile Include="MixManager.cs" />
     <Compile Include="ModeSelectScreen.cs" />
     <Compile Include="ModifierSet.cs" />
@@ -2275,9 +2374,11 @@
     <Compile Include="MoleTuning.cs" />
     <Compile Include="MoltDropperMonitor.cs" />
     <Compile Include="MoltStates.cs" />
+    <Compile Include="MoltStatesChore.cs" />
     <Compile Include="MonumentBottomConfig.cs" />
     <Compile Include="MonumentMiddleConfig.cs" />
     <Compile Include="MonumentPart.cs" />
+    <Compile Include="MonumentPartInfo.cs" />
     <Compile Include="MonumentSideScreen.cs" />
     <Compile Include="MonumentTopConfig.cs" />
     <Compile Include="MooConfig.cs" />
@@ -2357,11 +2458,7 @@
     <Compile Include="NewBaseScreen.cs" />
     <Compile Include="NewGameFlow.cs" />
     <Compile Include="NewGameFlowScreen.cs" />
-    <Compile Include="NewGameSettingList.cs" />
-    <Compile Include="NewGameSettingSeed.cs" />
     <Compile Include="NewGameSettingsPanel.cs" />
-    <Compile Include="NewGameSettingToggle.cs" />
-    <Compile Include="NewGameSettingWidget.cs" />
     <Compile Include="NextUpdateTimer.cs" />
     <Compile Include="NightOwl.cs" />
     <Compile Include="NiobiumGeyserConfig.cs" />
@@ -2490,6 +2587,7 @@
     <Compile Include="OxyliteRefinery.cs" />
     <Compile Include="OxyliteRefineryConfig.cs" />
     <Compile Include="OxyRockConfig.cs" />
+    <Compile Include="OxysconceConfig.cs" />
     <Compile Include="PacuCleanerConfig.cs" />
     <Compile Include="PacuConfig.cs" />
     <Compile Include="PacuFilletConfig.cs" />
@@ -2523,6 +2621,7 @@
     <Compile Include="PedestalArtifactSpawner.cs" />
     <Compile Include="PeeChore.cs" />
     <Compile Include="PeeChoreMonitor.cs" />
+    <Compile Include="PemmicanConfig.cs" />
     <Compile Include="PercentAttributeFormatter.cs" />
     <Compile Include="PermitItems.cs" />
     <Compile Include="PermittedRotations.cs" />
@@ -2537,6 +2636,8 @@
     <Compile Include="Pickupable.cs" />
     <Compile Include="PickupableSensor.cs" />
     <Compile Include="PICKUPABLETUNING.cs" />
+    <Compile Include="PinkRockCarvedConfig.cs" />
+    <Compile Include="PinkRockConfig.cs" />
     <Compile Include="PinnedResourcesPanel.cs" />
     <Compile Include="PioneerLanderConfig.cs" />
     <Compile Include="PioneerModuleConfig.cs" />
@@ -2556,6 +2657,8 @@
     <Compile Include="PlantablePlot.cs" />
     <Compile Include="PlantableSeed.cs" />
     <Compile Include="PlantAirConditioner.cs" />
+    <Compile Include="PlantBranch.cs" />
+    <Compile Include="PlantBranchGrower.cs" />
     <Compile Include="PlantElementAbsorber.cs" />
     <Compile Include="PlantElementAbsorbers.cs" />
     <Compile Include="PlantElementEmitter.cs" />
@@ -2572,8 +2675,13 @@
     <Compile Include="PlayerController.cs" />
     <Compile Include="PodLander.cs" />
     <Compile Include="POIBunkerExteriorDoor.cs" />
+    <Compile Include="POICeresTechUnlockConfig.cs" />
+    <Compile Include="POIDlc2ShowroomDoorConfig.cs" />
     <Compile Include="POIDoorInternalConfig.cs" />
     <Compile Include="POIFacilityDoorConfig.cs" />
+    <Compile Include="POITechItemUnlocks.cs" />
+    <Compile Include="POITechItemUnlockWorkable.cs" />
+    <Compile Include="POITechResearchCompleteMessage.cs" />
     <Compile Include="Polluter.cs" />
     <Compile Include="Polymerizer.cs" />
     <Compile Include="PolymerizerConfig.cs" />
@@ -2628,22 +2736,32 @@
     <Compile Include="ProcGenGame\River.cs" />
     <Compile Include="ProcGenGame\SymbolicMapElement.cs" />
     <Compile Include="ProcGenGame\TemplateSpawning.cs" />
-    <Compile Include="ProcGenGame\TemplateSpawningException.cs" />
     <Compile Include="ProcGenGame\TerrainCell.cs" />
     <Compile Include="ProcGenGame\WorldGen.cs" />
+    <Compile Include="ProcGenGame\WorldgenException.cs" />
+    <Compile Include="ProcGenGame\WorldgenMixing.cs" />
     <Compile Include="ProcGenGame\WorldGenSimUtil.cs" />
     <Compile Include="ProcGen\WorldLayout.cs" />
     <Compile Include="ProductInfoScreen.cs" />
+    <Compile Include="ProExoSetLockerConfig.cs" />
     <Compile Include="ProgressBar.cs" />
     <Compile Include="ProgressBarsConfig.cs" />
     <Compile Include="ProgressBarSideScreen.cs" />
     <Compile Include="Promise.2.cs" />
     <Compile Include="Promise.cs" />
+    <Compile Include="PropCeresPosterA.cs" />
+    <Compile Include="PropCeresPosterB.cs" />
+    <Compile Include="PropCeresPosterLargeConfig.cs" />
     <Compile Include="PropClockConfig.cs" />
+    <Compile Include="PropClothesHanger.cs" />
     <Compile Include="PropDeskConfig.cs" />
+    <Compile Include="PropDlc2Display1Config.cs" />
+    <Compile Include="PropDlc2GeothermalCartConfig.cs" />
     <Compile Include="PropElevatorConfig.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PropertyTextures.cs" />
+    <Compile Include="PropExoShelfLongConfig.cs" />
+    <Compile Include="PropExoShelfShortConfig.cs" />
     <Compile Include="PropFacilityChairConfig.cs" />
     <Compile Include="PropFacilityChairFlipConfig.cs" />
     <Compile Include="PropFacilityChandelierConfig.cs" />
@@ -2662,7 +2780,9 @@
     <Compile Include="PropGravitasCreaturePosterConfig.cs" />
     <Compile Include="PropGravitasDecorativeWindowConfig.cs" />
     <Compile Include="PropGravitasDeskPodiumConfig.cs" />
+    <Compile Include="PropGravitasDeskPodiumGeothermalPlantConfig.cs" />
     <Compile Include="PropGravitasDisplay4Config.cs" />
+    <Compile Include="PropGravitasFireExtinguisherConfig.cs" />
     <Compile Include="PropGravitasFirstAidKitConfig.cs" />
     <Compile Include="PropGravitasFloorRobotConfig.cs" />
     <Compile Include="PropGravitasHandScannerConfig.cs" />
@@ -2675,7 +2795,14 @@
     <Compile Include="PropGravitasRoboticTableConfig.cs" />
     <Compile Include="PropGravitasShelfConfig.cs" />
     <Compile Include="PropGravitasSmallSeedLockerConfig.cs" />
+    <Compile Include="PropGravitasToolCrateConfig.cs" />
+    <Compile Include="PropGravitasToolShelfConfig.cs" />
     <Compile Include="PropGravitasWallConfig.cs" />
+    <Compile Include="PropGravitasWallPurpleConfig.cs" />
+    <Compile Include="PropGravitasWallPurpleWhiteDiagonalConfig.cs" />
+    <Compile Include="PropHumanChesterfieldChairConfig.cs" />
+    <Compile Include="PropHumanChesterfieldSofaConfig.cs" />
+    <Compile Include="PropHumanMurphyBedConfig.cs" />
     <Compile Include="PropLightConfig.cs" />
     <Compile Include="PropReceptionDeskConfig.cs" />
     <Compile Include="PropSkeletonConfig.cs" />
@@ -2763,6 +2890,8 @@
     <Compile Include="RecipeManager.cs" />
     <Compile Include="Reconstructable.cs" />
     <Compile Include="RecoverBreathChore.cs" />
+    <Compile Include="RecoverFromColdChore.cs" />
+    <Compile Include="RecoverFromHeatChore.cs" />
     <Compile Include="RectTransformExtensions.cs" />
     <Compile Include="RedAlertMonitor.cs" />
     <Compile Include="Refinery.cs" />
@@ -2770,6 +2899,7 @@
     <Compile Include="Refrigerator.cs" />
     <Compile Include="RefrigeratorConfig.cs" />
     <Compile Include="RefrigeratorController.cs" />
+    <Compile Include="RelatedEntitiesSideScreen.cs" />
     <Compile Include="RelaxationPoint.cs" />
     <Compile Include="RemoteSoundEvent.cs" />
     <Compile Include="rendering\BackWall.cs" />
@@ -2804,6 +2934,8 @@
     <Compile Include="RescueIncapacitatedChore.cs" />
     <Compile Include="RescueSweepBotChore.cs" />
     <Compile Include="Research.cs" />
+    <Compile Include="ResearchButtonImageToggleState.cs" />
+    <Compile Include="ResearchButtonImageToggleStateUtilityFunctions.cs" />
     <Compile Include="ResearchCenter.cs" />
     <Compile Include="ResearchCenterConfig.cs" />
     <Compile Include="ResearchCompleted.cs" />
@@ -2954,6 +3086,7 @@
     <Compile Include="SaveManager.cs" />
     <Compile Include="SaveScreen.cs" />
     <Compile Include="SaveUpgradeWarning.cs" />
+    <Compile Include="ScaldingMonitor.cs" />
     <Compile Include="ScaleGrowthMonitor.cs" />
     <Compile Include="ScalerMask.cs" />
     <Compile Include="ScannerModule.cs" />
@@ -2998,8 +3131,10 @@
     <Compile Include="SculptingSoundEvent.cs" />
     <Compile Include="Sculpture.cs" />
     <Compile Include="SculptureConfig.cs" />
+    <Compile Include="SealConfig.cs" />
     <Compile Include="SealedDoorSideScreen.cs" />
     <Compile Include="SeaLettuceConfig.cs" />
+    <Compile Include="SealTuning.cs" />
     <Compile Include="SearchBar.cs" />
     <Compile Include="SeedPlantingMonitor.cs" />
     <Compile Include="SeedPlantingStates.cs" />
@@ -3104,6 +3239,7 @@
     <Compile Include="SneezeMonitor.cs" />
     <Compile Include="Snorer.cs" />
     <Compile Include="SnowballCometConfig.cs" />
+    <Compile Include="SnowTileConfig.cs" />
     <Compile Include="SocialChoreTracker.cs" />
     <Compile Include="SocialGatheringPoint.cs" />
     <Compile Include="SocialGatheringPointWorkable.cs" />
@@ -3161,6 +3297,13 @@
     <Compile Include="SpaceScannerNetworkManager.cs" />
     <Compile Include="SpaceScannerTarget.cs" />
     <Compile Include="SpaceScannerWorldData.cs" />
+    <Compile Include="SpaceTreeBranch.cs" />
+    <Compile Include="SpaceTreeBranchConfig.cs" />
+    <Compile Include="SpaceTreeConfig.cs" />
+    <Compile Include="SpaceTreePlant.cs" />
+    <Compile Include="SpaceTreeSeedCometConfig.cs" />
+    <Compile Include="SpaceTreeSeededComet.cs" />
+    <Compile Include="SpaceTreeSyrupHarvestWorkable.cs" />
     <Compile Include="SparkLayer.cs" />
     <Compile Include="SparkleStreaker.cs" />
     <Compile Include="Spawner.cs" />
@@ -3253,6 +3396,7 @@
     <Compile Include="StickerBomb.cs" />
     <Compile Include="StickerBombConfig.cs" />
     <Compile Include="StickerBomber.cs" />
+    <Compile Include="StickerBombFacadeInfo.cs" />
     <Compile Include="Stinky.cs" />
     <Compile Include="Storable.cs" />
     <Compile Include="Storage.cs" />
@@ -3261,6 +3405,7 @@
     <Compile Include="StorageLockerConfig.cs" />
     <Compile Include="StorageLockerSmart.cs" />
     <Compile Include="StorageLockerSmartConfig.cs" />
+    <Compile Include="StorageMeter.cs" />
     <Compile Include="StorageTile.cs" />
     <Compile Include="StorageTileConfig.cs" />
     <Compile Include="StorageTileSwitchItemWorkable.cs" />
@@ -3280,6 +3425,7 @@
     <Compile Include="StressTracker.cs" />
     <Compile Include="StringSearchableList.cs" />
     <Compile Include="StringSearchableListUtil.cs" />
+    <Compile Include="STRINGS\BLUEPRINTS.cs" />
     <Compile Include="STRINGS\BUILDING.cs" />
     <Compile Include="STRINGS\BUILDINGS.cs" />
     <Compile Include="STRINGS\CLUSTER_NAMES.cs" />
@@ -3304,6 +3450,7 @@
     <Compile Include="STRINGS\SUBWORLDS.cs" />
     <Compile Include="STRINGS\UI.cs" />
     <Compile Include="STRINGS\VIDEOS.cs" />
+    <Compile Include="STRINGS\WORLDGEN_MIXING.cs" />
     <Compile Include="STRINGS\WORLDS.cs" />
     <Compile Include="STRINGS\WORLD_TRAITS.cs" />
     <Compile Include="Structure.cs" />
@@ -3375,6 +3522,7 @@
     <Compile Include="TagNameComparer.cs" />
     <Compile Include="TakeMedicineChore.cs" />
     <Compile Include="TakeOffHatChore.cs" />
+    <Compile Include="TallowConfig.cs" />
     <Compile Include="TargetLocator.cs" />
     <Compile Include="TargetMessage.cs" />
     <Compile Include="TargetMessageDialog.cs" />
@@ -3404,6 +3552,7 @@
     <Compile Include="TemperatureControlledSwitchConfig.cs" />
     <Compile Include="TemperatureCookable.cs" />
     <Compile Include="TemperatureMonitor.cs" />
+    <Compile Include="TemperatureOverlayThresholdAdjustmentWidget.cs" />
     <Compile Include="TemperatureSwitchSideScreen.cs" />
     <Compile Include="TemperatureVulnerable.cs" />
     <Compile Include="TemperatureVulnerableUpdater.cs" />
@@ -3450,6 +3599,7 @@
     <Compile Include="ToePlantConfig.cs" />
     <Compile Include="TofuConfig.cs" />
     <Compile Include="Toggleable.cs" />
+    <Compile Include="ToggleGeothermalVentConnection.cs" />
     <Compile Include="ToggleState.cs" />
     <Compile Include="Toilet.cs" />
     <Compile Include="ToiletDiagnostic.cs" />
@@ -3558,6 +3708,7 @@
     <Compile Include="UnityMouseCatcherUI.cs" />
     <Compile Include="Unlocks.cs" />
     <Compile Include="Unsealable.cs" />
+    <Compile Include="UnstableEntombDefense.cs" />
     <Compile Include="UnstableGround.cs" />
     <Compile Include="UnstableGroundManager.cs" />
     <Compile Include="UpdateConsumedMassParameter.cs" />
@@ -3631,6 +3782,7 @@
     <Compile Include="WallInfo.cs" />
     <Compile Include="WallToiletConfig.cs" />
     <Compile Include="WarmBlooded.cs" />
+    <Compile Include="WarmthProvider.cs" />
     <Compile Include="WarmVestConfig.cs" />
     <Compile Include="WarpConduitReceiver.cs" />
     <Compile Include="WarpConduitReceiverConfig.cs" />
@@ -3657,6 +3809,7 @@
     <Compile Include="Weapon.cs" />
     <Compile Include="WeaponExtensions.cs" />
     <Compile Include="WearableAccessorizer.cs" />
+    <Compile Include="WellFedShearable.cs" />
     <Compile Include="WhiteBoard.cs" />
     <Compile Include="WidgetColumnIdentifier.cs" />
     <Compile Include="WildnessMonitor.cs" />
@@ -3675,8 +3828,12 @@
     <Compile Include="WireRefinedHighWattageConfig.cs" />
     <Compile Include="WireUtilityNetworkLink.cs" />
     <Compile Include="WireUtilitySemiVirtualNetworkLink.cs" />
+    <Compile Include="WoodDeerConfig.cs" />
     <Compile Include="WoodGasGeneratorConfig.cs" />
     <Compile Include="WoodLogConfig.cs" />
+    <Compile Include="WoodSculptureConfig.cs" />
+    <Compile Include="WoodStorageConfig.cs" />
+    <Compile Include="WoodTileConfig.cs" />
     <Compile Include="Workable.cs" />
     <Compile Include="WorkableReactable.cs" />
     <Compile Include="Workaholic.cs" />
@@ -3710,123 +3867,127 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\0Harmony\0Harmony.csproj">
-      <Project>{60680212-E691-4C44-A960-C54EC515A836}</Project>
+      <Project>{4474CC3B-DAAF-48AD-A509-3D83A0F287CC}</Project>
       <Name>0Harmony</Name>
     </ProjectReference>
     <ProjectReference Include="..\ArabicSupport\ArabicSupport.csproj">
-      <Project>{60680212-E691-4C44-A960-C54EC515A837}</Project>
+      <Project>{4474CC3B-DAAF-48AD-A509-3D83A0F287CD}</Project>
       <Name>ArabicSupport</Name>
     </ProjectReference>
     <ProjectReference Include="..\Assembly-CSharp-firstpass\Assembly-CSharp-firstpass.csproj">
-      <Project>{60680212-E691-4C44-A960-C54EC515A838}</Project>
+      <Project>{4474CC3B-DAAF-48AD-A509-3D83A0F287CE}</Project>
       <Name>Assembly-CSharp-firstpass</Name>
     </ProjectReference>
     <ProjectReference Include="..\com.rlabrecque.steamworks.net\com.rlabrecque.steamworks.net.csproj">
-      <Project>{60680212-E691-4C44-A960-C54EC515A83A}</Project>
+      <Project>{4474CC3B-DAAF-48AD-A509-3D83A0F287D0}</Project>
       <Name>com.rlabrecque.steamworks.net</Name>
     </ProjectReference>
     <ProjectReference Include="..\FMODUnity\FMODUnity.csproj">
-      <Project>{60680212-E691-4C44-A960-C54EC515A83B}</Project>
+      <Project>{4474CC3B-DAAF-48AD-A509-3D83A0F287D1}</Project>
       <Name>FMODUnity</Name>
     </ProjectReference>
     <ProjectReference Include="..\ImGui.NET\ImGui.NET.csproj">
-      <Project>{60680212-E691-4C44-A960-C54EC515A840}</Project>
+      <Project>{4474CC3B-DAAF-48AD-A509-3D83A0F287D6}</Project>
       <Name>ImGui.NET</Name>
     </ProjectReference>
     <ProjectReference Include="..\ImGui\ImGui.csproj">
-      <Project>{60680212-E691-4C44-A960-C54EC515A83F}</Project>
+      <Project>{4474CC3B-DAAF-48AD-A509-3D83A0F287D5}</Project>
       <Name>ImGui</Name>
     </ProjectReference>
     <ProjectReference Include="..\Ionic.Zip\Ionic.Zip.csproj">
-      <Project>{60680212-E691-4C44-A960-C54EC515A841}</Project>
+      <Project>{4474CC3B-DAAF-48AD-A509-3D83A0F287D7}</Project>
       <Name>Ionic.Zip</Name>
     </ProjectReference>
     <ProjectReference Include="..\LibNoiseDotNet\LibNoiseDotNet.csproj">
-      <Project>{60680212-E691-4C44-A960-C54EC515A842}</Project>
+      <Project>{4474CC3B-DAAF-48AD-A509-3D83A0F287D8}</Project>
       <Name>LibNoiseDotNet</Name>
     </ProjectReference>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{60680212-E691-4C44-A960-C54EC515A845}</Project>
+      <Project>{4474CC3B-DAAF-48AD-A509-3D83A0F287DB}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
     <ProjectReference Include="..\Newtonsoft.Json\Newtonsoft.Json.csproj">
-      <Project>{60680212-E691-4C44-A960-C54EC515A846}</Project>
+      <Project>{4474CC3B-DAAF-48AD-A509-3D83A0F287DC}</Project>
       <Name>Newtonsoft.Json</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Core\System.Core.csproj">
-      <Project>{60680212-E691-4C44-A960-C54EC515A848}</Project>
+      <Project>{4474CC3B-DAAF-48AD-A509-3D83A0F287DE}</Project>
       <Name>System.Core</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.IO.Compression\System.IO.Compression.csproj">
-      <Project>{60680212-E691-4C44-A960-C54EC515A84C}</Project>
+      <Project>{4474CC3B-DAAF-48AD-A509-3D83A0F287E2}</Project>
       <Name>System.IO.Compression</Name>
     </ProjectReference>
+    <ProjectReference Include="..\System.Numerics\System.Numerics.csproj">
+      <Project>{4474CC3B-DAAF-48AD-A509-3D83A0F287E3}</Project>
+      <Name>System.Numerics</Name>
+    </ProjectReference>
     <ProjectReference Include="..\System\System.csproj">
-      <Project>{60680212-E691-4C44-A960-C54EC515A84A}</Project>
+      <Project>{4474CC3B-DAAF-48AD-A509-3D83A0F287E0}</Project>
       <Name>System</Name>
     </ProjectReference>
     <ProjectReference Include="..\Unity.TextMeshPro\Unity.TextMeshPro.csproj">
-      <Project>{60680212-E691-4C44-A960-C54EC515A856}</Project>
+      <Project>{4474CC3B-DAAF-48AD-A509-3D83A0F287EC}</Project>
       <Name>Unity.TextMeshPro</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.AnimationModule\UnityEngine.AnimationModule.csproj">
-      <Project>{60680212-E691-4C44-A960-C54EC515A85B}</Project>
+      <Project>{4474CC3B-DAAF-48AD-A509-3D83A0F287F1}</Project>
       <Name>UnityEngine.AnimationModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.AssetBundleModule\UnityEngine.AssetBundleModule.csproj">
-      <Project>{60680212-E691-4C44-A960-C54EC515A85D}</Project>
+      <Project>{4474CC3B-DAAF-48AD-A509-3D83A0F287F3}</Project>
       <Name>UnityEngine.AssetBundleModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
-      <Project>{60680212-E691-4C44-A960-C54EC515A862}</Project>
+      <Project>{4474CC3B-DAAF-48AD-A509-3D83A0F287F8}</Project>
       <Name>UnityEngine.CoreModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.ImageConversionModule\UnityEngine.ImageConversionModule.csproj">
-      <Project>{60680212-E691-4C44-A960-C54EC515A86B}</Project>
+      <Project>{4474CC3B-DAAF-48AD-A509-3D83A0F28801}</Project>
       <Name>UnityEngine.ImageConversionModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.IMGUIModule\UnityEngine.IMGUIModule.csproj">
-      <Project>{60680212-E691-4C44-A960-C54EC515A86C}</Project>
+      <Project>{4474CC3B-DAAF-48AD-A509-3D83A0F28802}</Project>
       <Name>UnityEngine.IMGUIModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.InputLegacyModule\UnityEngine.InputLegacyModule.csproj">
-      <Project>{60680212-E691-4C44-A960-C54EC515A86D}</Project>
+      <Project>{4474CC3B-DAAF-48AD-A509-3D83A0F28803}</Project>
       <Name>UnityEngine.InputLegacyModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.ParticleSystemModule\UnityEngine.ParticleSystemModule.csproj">
-      <Project>{60680212-E691-4C44-A960-C54EC515A871}</Project>
+      <Project>{4474CC3B-DAAF-48AD-A509-3D83A0F28807}</Project>
       <Name>UnityEngine.ParticleSystemModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.Physics2DModule\UnityEngine.Physics2DModule.csproj">
-      <Project>{60680212-E691-4C44-A960-C54EC515A873}</Project>
+      <Project>{4474CC3B-DAAF-48AD-A509-3D83A0F28809}</Project>
       <Name>UnityEngine.Physics2DModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.PhysicsModule\UnityEngine.PhysicsModule.csproj">
-      <Project>{60680212-E691-4C44-A960-C54EC515A874}</Project>
+      <Project>{4474CC3B-DAAF-48AD-A509-3D83A0F2880A}</Project>
       <Name>UnityEngine.PhysicsModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.ScreenCaptureModule\UnityEngine.ScreenCaptureModule.csproj">
-      <Project>{60680212-E691-4C44-A960-C54EC515A877}</Project>
+      <Project>{4474CC3B-DAAF-48AD-A509-3D83A0F2880D}</Project>
       <Name>UnityEngine.ScreenCaptureModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.TextRenderingModule\UnityEngine.TextRenderingModule.csproj">
-      <Project>{60680212-E691-4C44-A960-C54EC515A881}</Project>
+      <Project>{4474CC3B-DAAF-48AD-A509-3D83A0F28817}</Project>
       <Name>UnityEngine.TextRenderingModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.UIModule\UnityEngine.UIModule.csproj">
-      <Project>{60680212-E691-4C44-A960-C54EC515A887}</Project>
+      <Project>{4474CC3B-DAAF-48AD-A509-3D83A0F2881D}</Project>
       <Name>UnityEngine.UIModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.UI\UnityEngine.UI.csproj">
-      <Project>{60680212-E691-4C44-A960-C54EC515A884}</Project>
+      <Project>{4474CC3B-DAAF-48AD-A509-3D83A0F2881A}</Project>
       <Name>UnityEngine.UI</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.UnityWebRequestModule\UnityEngine.UnityWebRequestModule.csproj">
-      <Project>{60680212-E691-4C44-A960-C54EC515A890}</Project>
+      <Project>{4474CC3B-DAAF-48AD-A509-3D83A0F28826}</Project>
       <Name>UnityEngine.UnityWebRequestModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.VideoModule\UnityEngine.VideoModule.csproj">
-      <Project>{60680212-E691-4C44-A960-C54EC515A895}</Project>
+      <Project>{4474CC3B-DAAF-48AD-A509-3D83A0F2882B}</Project>
       <Name>UnityEngine.VideoModule</Name>
     </ProjectReference>
   </ItemGroup>

@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using Database;
 using KSerialization;
+using ProcGen;
 using STRINGS;
 using TUNING;
 using UnityEngine;
@@ -165,19 +167,66 @@ public class SpacecraftManager : KMonoBehaviour, ISim1000ms
 				}
 			}
 		}
+		SpacecraftManager.<>c__DisplayClass12_0 CS$<>8__locals1;
+		CS$<>8__locals1.nextId = this.destinations.Count;
 		int num4 = krandom.Next(num2, num3);
+		List<SpaceDestination> list3 = new List<SpaceDestination>();
 		for (int k = 0; k < num4; k++)
 		{
 			int num5 = krandom.Next(0, list2.Count - 1);
 			int num6 = list2[num5];
 			list2.RemoveAt(num5);
-			List<string> list3 = list[num6];
-			string text = list3[krandom.Next(0, list3.Count)];
-			SpaceDestination spaceDestination = new SpaceDestination(this.destinations.Count, text, num6);
-			this.destinations.Add(spaceDestination);
+			List<string> list4 = list[num6];
+			string text = list4[krandom.Next(0, list4.Count)];
+			SpaceDestination spaceDestination = new SpaceDestination(SpacecraftManager.<GenerateRandomDestinations>g__GetNextID|12_0(ref CS$<>8__locals1), text, num6);
+			list3.Add(spaceDestination);
 		}
-		this.destinations.Add(new SpaceDestination(this.destinations.Count, Db.Get().SpaceDestinationTypes.Earth.Id, 4));
-		this.destinations.Add(new SpaceDestination(this.destinations.Count, Db.Get().SpaceDestinationTypes.Wormhole.Id, list.Count));
+		list2.ShuffleSeeded<int>(krandom);
+		List<SpaceDestination> list5 = new List<SpaceDestination>();
+		foreach (string text2 in CustomGameSettings.Instance.GetCurrentDlcMixingIds())
+		{
+			foreach (DlcMixingSettings.SpaceDestinationMix spaceDestinationMix in SettingsCache.GetCachedDlcMixingSettings(text2).spaceDesinations)
+			{
+				bool flag = false;
+				if (list2.Count > 0)
+				{
+					for (int l = 0; l < list2.Count; l++)
+					{
+						int num7 = list2[l];
+						if (num7 >= spaceDestinationMix.minTier && num7 <= spaceDestinationMix.maxTier)
+						{
+							SpaceDestination spaceDestination2 = new SpaceDestination(SpacecraftManager.<GenerateRandomDestinations>g__GetNextID|12_0(ref CS$<>8__locals1), spaceDestinationMix.type, num7);
+							list5.Add(spaceDestination2);
+							list2.RemoveAt(l);
+							flag = true;
+							break;
+						}
+					}
+				}
+				if (!flag)
+				{
+					for (int m = 0; m < list3.Count; m++)
+					{
+						SpaceDestination spaceDestination3 = list3[m];
+						if (spaceDestination3.distance >= spaceDestinationMix.minTier && spaceDestination3.distance <= spaceDestinationMix.maxTier)
+						{
+							list3[m] = new SpaceDestination(spaceDestination3.id, spaceDestinationMix.type, spaceDestination3.distance);
+							flag = true;
+							break;
+						}
+					}
+				}
+				if (!flag)
+				{
+					KCrashReporter.ReportDevNotification("Base game failed to mix a space destination", Environment.StackTrace, "", false, null);
+					global::UnityEngine.Debug.LogWarning("Mixing: Unable to place destination '" + spaceDestinationMix.type + "'");
+				}
+			}
+		}
+		this.destinations.AddRange(list3);
+		this.destinations.Add(new SpaceDestination(SpacecraftManager.<GenerateRandomDestinations>g__GetNextID|12_0(ref CS$<>8__locals1), Db.Get().SpaceDestinationTypes.Earth.Id, 4));
+		this.destinations.Add(new SpaceDestination(SpacecraftManager.<GenerateRandomDestinations>g__GetNextID|12_0(ref CS$<>8__locals1), Db.Get().SpaceDestinationTypes.Wormhole.Id, list.Count));
+		this.destinations.AddRange(list5);
 	}
 
 	private void RestoreDestinations()
@@ -476,6 +525,14 @@ public class SpacecraftManager : KMonoBehaviour, ISim1000ms
 		return true;
 	}
 
+	public void DEBUG_RevealStarmap()
+	{
+		foreach (SpaceDestination spaceDestination in this.destinations)
+		{
+			this.EarnDestinationAnalysisPoints(spaceDestination.id, (float)ROCKETRY.DESTINATION_ANALYSIS.COMPLETE);
+		}
+	}
+
 	public void SetStarmapAnalysisDestinationID(int id)
 	{
 		this.analyzeDestinationID = id;
@@ -490,6 +547,14 @@ public class SpacecraftManager : KMonoBehaviour, ISim1000ms
 	public bool HasAnalysisTarget()
 	{
 		return this.analyzeDestinationID != -1;
+	}
+
+	[CompilerGenerated]
+	internal static int <GenerateRandomDestinations>g__GetNextID|12_0(ref SpacecraftManager.<>c__DisplayClass12_0 A_0)
+	{
+		int nextId = A_0.nextId;
+		A_0.nextId = nextId + 1;
+		return nextId;
 	}
 
 	public static SpacecraftManager instance;

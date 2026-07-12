@@ -80,6 +80,11 @@ public class AsteroidGridEntity : ClusterGridEntity
 
 	protected override void OnSpawn()
 	{
+		KAnimFile kanimFile;
+		if (!Assets.TryGetAnim(this.m_asteroidAnim, out kanimFile))
+		{
+			this.m_asteroidAnim = AsteroidGridEntity.DEFAULT_ASTEROID_ICON_ANIM;
+		}
 		Game.Instance.Subscribe(-1298331547, new Action<object>(this.OnClusterLocationChanged));
 		Game.Instance.Subscribe(-1991583975, new Action<object>(this.OnFogOfWarRevealed));
 		Game.Instance.Subscribe(78366336, new Action<object>(this.OnMeteorShowerEventChanged));

@@ -466,7 +466,7 @@ public class AmbienceManager : KMonoBehaviour
 
 		public AmbienceManager.Layer radiationLayer;
 
-		public AmbienceManager.Layer[] solidLayers = new AmbienceManager.Layer[16];
+		public AmbienceManager.Layer[] solidLayers = new AmbienceManager.Layer[19];
 
 		private List<AmbienceManager.Layer> allLayers = new List<AmbienceManager.Layer>();
 

@@ -45,7 +45,7 @@ public class CosmeticsPanel : TargetPanel
 			FacadeSelectionPanel facadeSelectionPanel2 = this.selectionPanel;
 			facadeSelectionPanel2.OnFacadeSelectionChanged = (global::System.Action)Delegate.Combine(facadeSelectionPanel2.OnFacadeSelectionChanged, new global::System.Action(delegate
 			{
-				if (this.selectionPanel.SelectedFacade == "DEFAULT_FACADE")
+				if (this.selectionPanel.SelectedFacade == null || this.selectionPanel.SelectedFacade == "DEFAULT_FACADE" || Db.GetBuildingFacades().TryGet(this.selectionPanel.SelectedFacade).IsNullOrDestroyed())
 				{
 					buildingFacade.ApplyDefaultFacade(true);
 				}
@@ -85,7 +85,7 @@ public class CosmeticsPanel : TargetPanel
 			this.editButton.gameObject.SetActive(false);
 			this.mannequin.gameObject.SetActive(false);
 			this.buildingIcon.gameObject.SetActive(true);
-			if (component2.CurrentFacade != null && component2.CurrentFacade != "DEFAULT_FACADE")
+			if (component2.CurrentFacade != null && component2.CurrentFacade != "DEFAULT_FACADE" && !Db.GetBuildingFacades().TryGet(component2.CurrentFacade).IsNullOrDestroyed())
 			{
 				BuildingFacadeResource buildingFacadeResource = Db.GetBuildingFacades().Get(component2.CurrentFacade);
 				this.nameLabel.SetText(buildingFacadeResource.Name);

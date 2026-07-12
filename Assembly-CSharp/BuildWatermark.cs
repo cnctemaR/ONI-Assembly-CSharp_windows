@@ -26,19 +26,19 @@ public class BuildWatermark : KScreen
 		}
 		else
 		{
-			text += 600112U.ToString();
-			if (DistributionPlatform.Initialized)
-			{
-				text = text + "-" + DlcManager.GetActiveContentLetters();
-			}
-			else
-			{
-				text += "-?";
-			}
-			if (DebugHandler.enabled)
-			{
-				text += "D";
-			}
+			text += 622222U.ToString();
+		}
+		if (DistributionPlatform.Initialized)
+		{
+			text = text + "-" + DlcManager.GetSubscribedContentLetters();
+		}
+		else
+		{
+			text += "-?";
+		}
+		if (DebugHandler.enabled)
+		{
+			text += "D";
 		}
 		return text;
 	}

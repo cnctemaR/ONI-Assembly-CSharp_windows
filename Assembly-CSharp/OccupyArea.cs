@@ -69,6 +69,16 @@ public class OccupyArea : KMonoBehaviour
 		this.ValidatePosition();
 	}
 
+	public int GetOffsetCellWithRotation(CellOffset cellOffset)
+	{
+		CellOffset cellOffset2 = cellOffset;
+		if (this.rotatable != null)
+		{
+			cellOffset2 = this.rotatable.GetRotatedCellOffset(cellOffset);
+		}
+		return Grid.OffsetCell(Grid.PosToCell(base.gameObject), cellOffset2);
+	}
+
 	public void SetCellOffsets(CellOffset[] cells)
 	{
 		this._UnrotatedOccupiedCellsOffsets = cells;

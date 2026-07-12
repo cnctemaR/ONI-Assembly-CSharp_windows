@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using ObjectCloner;
 using UnityEngine;
 
 namespace ProcGen
 {
+	[DebuggerDisplay("{world.name}")]
 	public class MutatedWorldData
 	{
 		public MutatedWorldData(World world, List<WorldTrait> worldTraits, List<WorldTrait> storyTraits)
@@ -25,7 +27,15 @@ namespace ProcGen
 			this.ApplyWorldTraits();
 			foreach (ElementBandConfiguration elementBandConfiguration in this.biomes.BiomeBackgroundElementBandConfigurations.Values)
 			{
-				elementBandConfiguration.ConvertBandSizeToMaxSize();
+				elementBandConfiguration.ConvertBandSizeToMaxSize(false);
+			}
+		}
+
+		public void AddWorldTemplateRules(List<World.TemplateSpawnRules> rules)
+		{
+			foreach (World.TemplateSpawnRules templateSpawnRules in rules)
+			{
+				this.world.worldTemplateRules.Add(templateSpawnRules);
 			}
 		}
 
@@ -44,10 +54,7 @@ namespace ProcGen
 			{
 				this.world.subworldFiles.Add(weightedSubworldName);
 			}
-			foreach (World.AllowedCellsFilter allowedCellsFilter in trait.additionalUnknownCellFilters)
-			{
-				this.world.unknownCellsAllowedSubworlds.Add(allowedCellsFilter);
-			}
+			this.world.AddUnknownCellsAllowedSubworlds(trait.additionalUnknownCellFilters);
 			foreach (KeyValuePair<string, int> keyValuePair in trait.globalFeatureMods)
 			{
 				if (!this.world.globalFeatures.ContainsKey(keyValuePair.Key))
@@ -59,11 +66,11 @@ namespace ProcGen
 				string key = keyValuePair.Key;
 				globalFeatures[key] += num;
 			}
-			using (List<string>.Enumerator enumerator4 = trait.removeWorldTemplateRulesById.GetEnumerator())
+			using (List<string>.Enumerator enumerator3 = trait.removeWorldTemplateRulesById.GetEnumerator())
 			{
-				while (enumerator4.MoveNext())
+				while (enumerator3.MoveNext())
 				{
-					string rule = enumerator4.Current;
+					string rule = enumerator3.Current;
 					this.world.worldTemplateRules.RemoveAll((World.TemplateSpawnRules x) => x.ruleId == rule);
 				}
 			}

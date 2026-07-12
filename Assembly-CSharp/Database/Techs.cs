@@ -149,7 +149,7 @@ namespace Database
 			new Tech("FarmingTech", new List<string> { "AlgaeHabitat", "PlanterBox", "RationBox", "Compost" }, this, null);
 			new Tech("FineDining", new List<string> { "CookingStation", "EggCracker", "DiningTable", "FarmTile" }, this, null);
 			new Tech("FoodRepurposing", new List<string> { "Juicer", "SpiceGrinder", "MilkPress" }, this, null);
-			new Tech("FinerDining", new List<string> { "GourmetCookingStation", "FoodDehydrator", "FoodRehydrator" }, this, null);
+			new Tech("FinerDining", new List<string> { "GourmetCookingStation", "FoodDehydrator", "FoodRehydrator", "Deepfryer" }, this, null);
 			new Tech("Agriculture", new List<string> { "FarmStation", "FertilizerMaker", "Refrigerator", "HydroponicFarm", "ParkSign", "RadiationLight" }, this, null);
 			new Tech("Ranching", new List<string> { "RanchStation", "CreatureDeliveryPoint", "ShearingStation", "CreatureFeeder", "FishDeliveryPoint", "FishFeeder", "CritterPickUp", "CritterDropOff" }, this, null);
 			new Tech("AnimalControl", new List<string>
@@ -200,7 +200,7 @@ namespace Database
 				"LiquidConduitOverflow",
 				"LiquidReservoir"
 			}, this, null);
-			new Tech("PrecisionPlumbing", new List<string> { "EspressoMachine", "LiquidFuelTankCluster" }, this, null);
+			new Tech("PrecisionPlumbing", new List<string> { "EspressoMachine", "LiquidFuelTankCluster", "MercuryCeilingLight" }, this, null);
 			new Tech("SanitationSciences", new List<string>
 			{
 				"FlushToilet",
@@ -242,8 +242,8 @@ namespace Database
 			new Tech("NuclearRefinement", new List<string> { "NuclearReactor", "UraniumCentrifuge", "HEPBridgeTile" }, this, null);
 			new Tech("FineArt", new List<string> { "Canvas", "Sculpture" }, this, null);
 			new Tech("EnvironmentalAppreciation", new List<string> { "BeachChair" }, this, null);
-			new Tech("Luxury", new List<string> { "LuxuryBed", "LadderFast", "PlasticTile", "ClothingAlterationStation" }, this, null);
-			new Tech("RefractiveDecor", new List<string> { "CanvasWide", "MetalSculpture" }, this, null);
+			new Tech("Luxury", new List<string> { "LuxuryBed", "LadderFast", "PlasticTile", "ClothingAlterationStation", "WoodTile" }, this, null);
+			new Tech("RefractiveDecor", new List<string> { "CanvasWide", "MetalSculpture", "WoodSculpture" }, this, null);
 			new Tech("GlassFurnishings", new List<string> { "GlassTile", "FlowerVaseHangingFancy", "SunLamp" }, this, null);
 			new Tech("Screens", new List<string> { PixelPackConfig.ID }, this, null);
 			new Tech("RenaissanceArt", new List<string> { "CanvasTall", "MarbleSculpture" }, this, null);
@@ -253,7 +253,7 @@ namespace Database
 			new Tech("BetterHydroCarbonPropulsion", new List<string> { "KeroseneEngineCluster" }, this, null);
 			new Tech("CryoFuelPropulsion", new List<string> { "HydrogenEngineCluster", "OxidizerTankLiquidCluster" }, this, null);
 			new Tech("Suits", new List<string> { "SuitsOverlay", "AtmoSuit", "SuitFabricator", "SuitMarker", "SuitLocker" }, this, null);
-			new Tech("Jobs", new List<string> { "WaterCooler", "CraftingTable" }, this, null);
+			new Tech("Jobs", new List<string> { "WaterCooler", "CraftingTable", "Campfire" }, this, null);
 			new Tech("AdvancedResearch", new List<string> { "BetaResearchPoint", "AdvancedResearchCenter", "ResetSkillsStation", "ClusterTelescope", "ExobaseHeadquarters" }, this, null);
 			new Tech("SpaceProgram", new List<string>
 			{
@@ -293,7 +293,7 @@ namespace Database
 				"LeadSuitLocker",
 				LogicHEPSensorConfig.ID
 			}, this, null);
-			new Tech("TemperatureModulation", new List<string> { "LiquidCooledFan", "IceCooledFan", "IceMachine", "InsulationTile", "SpaceHeater" }, this, null);
+			new Tech("TemperatureModulation", new List<string> { "LiquidCooledFan", "IceCooledFan", "IceMachine", "IceKettle", "InsulationTile", "SpaceHeater" }, this, null);
 			new Tech("HVAC", new List<string>
 			{
 				"AirConditioner",
@@ -382,7 +382,7 @@ namespace Database
 			new Tech("Monuments", new List<string> { "MonumentBottom", "MonumentMiddle", "MonumentTop" }, this, null);
 			new Tech("SolidSpace", new List<string> { "SolidLogicValve", "SolidConduitOutbox", "SolidLimitValve", "SolidCargoBaySmall", "RocketInteriorSolidInput", "RocketInteriorSolidOutput", "ModularLaunchpadPortSolid", "ModularLaunchpadPortSolidUnloader" }, this, null);
 			new Tech("RoboticTools", new List<string> { "AutoMiner", "RailGunPayloadOpener" }, this, null);
-			new Tech("PortableGasses", new List<string> { "GasBottler", "BottleEmptierGas", "OxygenMask", "OxygenMaskLocker", "OxygenMaskMarker" }, this, null);
+			new Tech("PortableGasses", new List<string> { "GasBottler", "BottleEmptierGas", "OxygenMask", "OxygenMaskLocker", "OxygenMaskMarker", "Oxysconce" }, this, null);
 			this.InitExpansion1();
 		}
 

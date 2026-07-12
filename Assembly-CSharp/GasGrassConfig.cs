@@ -38,12 +38,13 @@ public class GasGrassConfig : IEntityConfig
 			}
 		});
 		gameObject.AddOrGet<StandardCropPlant>();
+		gameObject.AddOrGet<DirectlyEdiblePlant_Growth>();
 		gameObject.AddOrGet<HarvestDesignatable>().defaultHarvestStateWhenPlanted = false;
 		Modifiers component = gameObject.GetComponent<Modifiers>();
 		Db.Get().traits.Get(component.initialTraits[0]).Add(new AttributeModifier(Db.Get().PlantAttributes.MinLightLux.Id, 10000f, global::STRINGS.CREATURES.SPECIES.GASGRASS.NAME, false, false, true));
 		component.initialAttributes.Add(Db.Get().PlantAttributes.MinLightLux.Id);
 		gameObject.AddOrGet<IlluminationVulnerable>().SetPrefersDarkness(false);
-		EntityTemplates.CreateAndRegisterPreviewForPlant(EntityTemplates.CreateAndRegisterSeedForPlant(gameObject, DlcManager.FeaturePlantMutationsEnabled() ? SeedProducer.ProductionType.Harvest : SeedProducer.ProductionType.Hidden, "GasGrassSeed", global::STRINGS.CREATURES.SPECIES.SEEDS.GASGRASS.NAME, global::STRINGS.CREATURES.SPECIES.SEEDS.GASGRASS.DESC, Assets.GetAnim("seed_gassygrass_kanim"), "object", 1, new List<Tag> { GameTags.CropSeed }, SingleEntityReceptacle.ReceptacleDirection.Top, default(Tag), 22, global::STRINGS.CREATURES.SPECIES.GASGRASS.DOMESTICATEDDESC, EntityTemplates.CollisionShape.CIRCLE, 0.2f, 0.2f, null, "", false), "GasGrass_preview", Assets.GetAnim("gassygrass_kanim"), "place", 1, 1);
+		EntityTemplates.CreateAndRegisterPreviewForPlant(EntityTemplates.CreateAndRegisterSeedForPlant(gameObject, DlcManager.FeaturePlantMutationsEnabled() ? SeedProducer.ProductionType.Harvest : SeedProducer.ProductionType.Hidden, "GasGrassSeed", global::STRINGS.CREATURES.SPECIES.SEEDS.GASGRASS.NAME, global::STRINGS.CREATURES.SPECIES.SEEDS.GASGRASS.DESC, Assets.GetAnim("seed_gassygrass_kanim"), "object", 1, new List<Tag> { GameTags.CropSeed }, SingleEntityReceptacle.ReceptacleDirection.Top, default(Tag), 22, global::STRINGS.CREATURES.SPECIES.GASGRASS.DOMESTICATEDDESC, EntityTemplates.CollisionShape.CIRCLE, 0.2f, 0.2f, null, "", false, null), "GasGrass_preview", Assets.GetAnim("gassygrass_kanim"), "place", 1, 1);
 		SoundEventVolumeCache.instance.AddVolume("gassygrass_kanim", "GasGrass_grow", NOISE_POLLUTION.CREATURES.TIER3);
 		SoundEventVolumeCache.instance.AddVolume("gassygrass_kanim", "GasGrass_harvest", NOISE_POLLUTION.CREATURES.TIER3);
 		return gameObject;

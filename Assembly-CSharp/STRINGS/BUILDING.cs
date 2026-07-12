@@ -6,6 +6,75 @@ namespace STRINGS
 	{
 		public class STATUSITEMS
 		{
+			public class MERCURYLIGHT_CHARGING
+			{
+				public static LocString NAME = "Powering Up: {0}";
+
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"This building's ",
+					UI.PRE_KEYWORD,
+					"Light",
+					UI.PST_KEYWORD,
+					" levels are gradually increasing\n\nIf its ",
+					UI.PRE_KEYWORD,
+					"Liquid",
+					UI.PST_KEYWORD,
+					" and ",
+					UI.PRE_KEYWORD,
+					"Power",
+					UI.PST_KEYWORD,
+					" requirements continue to be met, it will reach maximum brightness in {0}"
+				});
+			}
+
+			public class MERCURYLIGHT_DEPLEATING
+			{
+				public static LocString NAME = "Brightness: {0}";
+
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"This building's ",
+					UI.PRE_KEYWORD,
+					"Light",
+					UI.PST_KEYWORD,
+					" output is decreasing because its ",
+					UI.PRE_KEYWORD,
+					"Liquid",
+					UI.PST_KEYWORD,
+					" and ",
+					UI.PRE_KEYWORD,
+					"Power",
+					UI.PST_KEYWORD,
+					" requirements are not being met\n\nIt will power off once its stores are depleted"
+				});
+			}
+
+			public class MERCURYLIGHT_DEPLEATED
+			{
+				public static LocString NAME = "Powered Off";
+
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"This building is non-operational due to a lack of resources\n\nIt will begin to power up when its ",
+					UI.PRE_KEYWORD,
+					"Liquid",
+					UI.PST_KEYWORD,
+					" and ",
+					UI.PRE_KEYWORD,
+					"Power",
+					UI.PST_KEYWORD,
+					" are met"
+				});
+			}
+
+			public class MERCURYLIGHT_CHARGED
+			{
+				public static LocString NAME = "Fully Charged";
+
+				public static LocString TOOLTIP = "This building is functioning at maximum capacity";
+			}
+
 			public class SPECIALCARGOBAYCLUSTERCRITTERSTORED
 			{
 				public static LocString NAME = "Contents: {0}";
@@ -1754,6 +1823,66 @@ namespace STRINGS
 				public static LocString TOOLTIP = "Open the " + UI.FormatAsOverlay("Light Overlay", global::Action.Overlay5) + " to view this light's visibility radius";
 			}
 
+			public class KETTLEINSUFICIENTSOLIDS
+			{
+				public static LocString NAME = "Insufficient " + UI.FormatAsLink("Ice", "ICE");
+
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"This building requires a minimum of {0} ",
+					UI.FormatAsLink("Ice", "ICE"),
+					" in order to function\n\nDeliver more ",
+					UI.FormatAsLink("Ice", "ICE"),
+					" to operate this building"
+				});
+			}
+
+			public class KETTLEINSUFICIENTFUEL
+			{
+				public static LocString NAME = "Insufficient " + UI.FormatAsLink("Wood", "WOODLOG");
+
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"Colder ",
+					UI.FormatAsLink("Ice", "ICE"),
+					" increases the amount of ",
+					UI.FormatAsLink("Wood", "WOODLOG"),
+					" required for melting\n\nCurrent requirement: minimum {0} ",
+					UI.FormatAsLink("Wood", "WOODLOG")
+				});
+			}
+
+			public class KETTLEINSUFICIENTLIQUIDSPACE
+			{
+				public static LocString NAME = "Requires Emptying";
+
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"This ",
+					UI.FormatAsLink("Ice Liquefier", "ICEKETTLE"),
+					" needs to be emptied of ",
+					UI.FormatAsLink("Water", "WATER"),
+					" in order to resume function\n\nIt requires at least {2} of storage space in order to function properly\n\nCurrently storing {0} of a maximum {1} ",
+					UI.FormatAsLink("Water", "WATER")
+				});
+			}
+
+			public class KETTLEMELTING
+			{
+				public static LocString NAME = "Melting Ice";
+
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"This building is currently melting stored ",
+					UI.FormatAsLink("Ice", "ICE"),
+					" to produce ",
+					UI.FormatAsLink("Water", "WATER"),
+					"\n\n",
+					UI.FormatAsLink("Water", "WATER"),
+					" output temperature: {0}"
+				});
+			}
+
 			public class RATIONBOXCONTENTS
 			{
 				public static LocString NAME = "Storing: {Stored}";
@@ -2231,6 +2360,20 @@ namespace STRINGS
 				public static LocString NAME = "Depleted";
 
 				public static LocString TOOLTIP = "This building has no more use";
+			}
+
+			public class COOLINGWATER
+			{
+				public static LocString NAME = "Cooling Water";
+
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"This building is cooling ",
+					UI.PRE_KEYWORD,
+					"Water",
+					UI.PST_KEYWORD,
+					" down to its freezing point"
+				});
 			}
 
 			public class EXCAVATOR_BOMB

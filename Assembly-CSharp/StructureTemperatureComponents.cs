@@ -170,21 +170,7 @@ public class StructureTemperatureComponents : KGameObjectSplitComponentManager<S
 				if (structureTemperaturePayload3.ExhaustKilowatts != 0f)
 				{
 					num2++;
-					Extents extents = structureTemperaturePayload3.GetExtents();
-					int num8 = extents.width * extents.height;
-					float num9 = structureTemperaturePayload3.ExhaustKilowatts * dt / (float)num8;
-					for (int i = 0; i < extents.height; i++)
-					{
-						int num10 = extents.y + i;
-						for (int j = 0; j < extents.width; j++)
-						{
-							int num11 = extents.x + j;
-							int num12 = num10 * Grid.WidthInCells + num11;
-							float num13 = Mathf.Min(Grid.Mass[num12], 1.5f) / 1.5f;
-							float num14 = num9 * num13;
-							SimMessages.ModifyEnergy(num12, num14, structureTemperaturePayload3.maxTemperature, SimMessages.EnergySourceID.StructureTemperature);
-						}
-					}
+					StructureTemperatureComponents.ExhaustHeat(structureTemperaturePayload3.GetExtents(), structureTemperaturePayload3.ExhaustKilowatts, structureTemperaturePayload3.maxTemperature, dt);
 					structureTemperaturePayload3.energySourcesKW = this.AccumulateProducedEnergyKW(structureTemperaturePayload3.energySourcesKW, structureTemperaturePayload3.ExhaustKilowatts, BUILDING.STATUSITEMS.OPERATINGENERGY.EXHAUSTING);
 				}
 			}
@@ -201,6 +187,24 @@ public class StructureTemperatureComponents : KGameObjectSplitComponentManager<S
 		pooledList.Recycle();
 	}
 
+	public static void ExhaustHeat(Extents extents, float kw, float maxTemperature, float dt)
+	{
+		int num = extents.width * extents.height;
+		float num2 = kw * dt / (float)num;
+		for (int i = 0; i < extents.height; i++)
+		{
+			int num3 = extents.y + i;
+			for (int j = 0; j < extents.width; j++)
+			{
+				int num4 = extents.x + j;
+				int num5 = num3 * Grid.WidthInCells + num4;
+				float num6 = Mathf.Min(Grid.Mass[num5], 1.5f) / 1.5f;
+				float num7 = num2 * num6;
+				SimMessages.ModifyEnergy(num5, num7, maxTemperature, SimMessages.EnergySourceID.StructureTemperature);
+			}
+		}
+	}
+
 	private static void UpdateSimState(ref StructureTemperaturePayload payload)
 	{
 		DebugUtil.Assert(Sim.IsValidHandle(payload.simHandleCopy));
@@ -215,6 +219,11 @@ public class StructureTemperatureComponents : KGameObjectSplitComponentManager<S
 		}
 		Extents extents = payload.GetExtents();
 		ushort idx = payload.primaryElement.Element.idx;
+		if (payload.heatEffect != null)
+		{
+			float num3 = ((payload.operational == null || payload.operational.IsActive) ? payload.ExhaustKilowatts : 0f);
+			payload.heatEffect.SetHeatBeingProducedValue(Mathf.Clamp(operatingKilowatts + num3, 0f, float.MaxValue));
+		}
 		SimMessages.ModifyBuildingHeatExchange(payload.simHandleCopy, extents, num, internalTemperature, def.ThermalConductivity, num2, operatingKilowatts, idx);
 	}
 
@@ -320,6 +329,7 @@ public class StructureTemperatureComponents : KGameObjectSplitComponentManager<S
 		if (element.highTempTransitionTarget != SimHashes.Unobtanium)
 		{
 			SimMessages.AddRemoveSubstance(Grid.PosToCell(primary_element.transform.GetPosition()), element.highTempTransitionTarget, CellEventLogger.Instance.OreMelted, primary_element.Mass, primary_element.Element.highTemp, primary_element.DiseaseIdx, primary_element.DiseaseCount, true, -1);
+			Building.CreateBuildingMeltedNotification(primary_element.gameObject);
 			Util.KDestroyGameObject(primary_element.gameObject);
 		}
 	}
@@ -455,7 +465,7 @@ public class StructureTemperatureComponents : KGameObjectSplitComponentManager<S
 	{
 		if (!GameComps.StructureTemperatures.IsVersionValid(handle))
 		{
-			KCrashReporter.Assert(false, "Handle version mismatch in StructureTemperature.SimUnregister");
+			KCrashReporter.Assert(false, "Handle version mismatch in StructureTemperature.SimUnregister", null);
 			return;
 		}
 		if (KMonoBehaviour.isLoadingScene)

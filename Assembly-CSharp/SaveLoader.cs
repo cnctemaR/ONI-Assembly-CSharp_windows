@@ -28,10 +28,22 @@ public class SaveLoader : KMonoBehaviour
 
 	public Action<Cluster> OnWorldGenComplete { get; set; }
 
-	public Cluster ClusterLayout
+	public Cluster Cluster
 	{
 		get
 		{
+			return this.m_cluster;
+		}
+	}
+
+	public ClusterLayout ClusterLayout
+	{
+		get
+		{
+			if (this.m_clusterLayout == null)
+			{
+				this.m_clusterLayout = CustomGameSettings.Instance.GetCurrentClusterLayout();
+			}
 			return this.m_clusterLayout;
 		}
 	}
@@ -82,20 +94,11 @@ public class SaveLoader : KMonoBehaviour
 			{
 				this.MoveCorruptFile(activeSaveFilePath);
 			}
-			int num = 0;
-			bool flag = WorldGen.CanLoad(WorldGen.GetSIMSaveFilename(num));
-			if (!flag || !this.LoadFromWorldGen())
+			if (!this.LoadFromWorldGen())
 			{
 				DebugUtil.LogWarningArgs(new object[] { "Couldn't start new game with current world gen, moving file" });
-				if (flag)
-				{
-					KMonoBehaviour.isLoadingScene = true;
-					while (FileSystem.FileExists(WorldGen.GetSIMSaveFilename(num)))
-					{
-						this.MoveCorruptFile(WorldGen.GetSIMSaveFilename(num));
-						num++;
-					}
-				}
+				KMonoBehaviour.isLoadingScene = true;
+				this.MoveCorruptFile(WorldGen.WORLDGEN_SAVE_FILENAME);
 				App.LoadScene("frontend");
 			}
 		}
@@ -283,7 +286,7 @@ public class SaveLoader : KMonoBehaviour
 
 	private void LogActiveMods()
 	{
-		string text = string.Format("Active Mods ({0}:", Global.Instance.modManager.mods.Count<Mod>((Mod x) => x.IsEnabledForActiveDlc()));
+		string text = string.Format("Active Mods ({0}):", Global.Instance.modManager.mods.Count<Mod>((Mod x) => x.IsEnabledForActiveDlc()));
 		foreach (Mod mod in Global.Instance.modManager.mods)
 		{
 			if (mod.IsEnabledForActiveDlc())
@@ -550,16 +553,6 @@ public class SaveLoader : KMonoBehaviour
 		return !string.IsNullOrEmpty(SaveLoader.GetUserID()) && SaveLoader.GetCloudSavePrefix() != null;
 	}
 
-	public static string GetLatestSaveFile()
-	{
-		List<SaveLoader.SaveFileEntry> allFiles = SaveLoader.GetAllFiles(true, SaveLoader.SaveType.both);
-		if (allFiles.Count == 0)
-		{
-			return null;
-		}
-		return allFiles[0].path;
-	}
-
 	public static string GetLatestSaveForCurrentDLC()
 	{
 		List<SaveLoader.SaveFileEntry> allFiles = SaveLoader.GetAllFiles(true, SaveLoader.SaveType.both);
@@ -570,7 +563,9 @@ public class SaveLoader : KMonoBehaviour
 			{
 				SaveGame.Header first = fileInfo.first;
 				SaveGame.GameInfo second = fileInfo.second;
-				if (second.saveMajorVersion >= 7 && DlcManager.GetHighestActiveDlcId() == second.dlcId)
+				HashSet<string> hashSet;
+				HashSet<string> hashSet2;
+				if (second.saveMajorVersion >= 7 && second.IsCompatableWithCurrentDlcConfiguration(out hashSet, out hashSet2))
 				{
 					return allFiles[i].path;
 				}
@@ -733,6 +728,7 @@ public class SaveLoader : KMonoBehaviour
 			IReader reader = new FastReader(array);
 			SaveGame.Header header;
 			this.GameInfo = SaveGame.GetHeader(reader, out header, filename);
+			ThreadedHttps<KleiMetrics>.Instance.SetExpansionsActive(this.GameInfo.dlcIds);
 			DebugUtil.LogArgs(new object[] { string.Format("Loading save file: {4}\n headerVersion:{0}, buildVersion:{1}, headerSize:{2}, IsCompressed:{3}", new object[] { header.headerVersion, header.buildVersion, header.headerSize, header.IsCompressed, filename }) });
 			DebugUtil.LogArgs(new object[] { string.Format("GameInfo loaded from save header:\n  numberOfCycles:{0},\n  numberOfDuplicants:{1},\n  baseName:{2},\n  isAutoSave:{3},\n  originalSaveName:{4},\n  clusterId:{5},\n  worldTraits:{6},\n  colonyGuid:{7},\n  saveVersion:{8}.{9}", new object[]
 			{
@@ -847,20 +843,31 @@ public class SaveLoader : KMonoBehaviour
 	{
 		DebugUtil.LogArgs(new object[] { "Attempting to start a new game with current world gen" });
 		WorldGen.LoadSettings(false);
-		this.m_clusterLayout = Cluster.Load();
+		FastReader fastReader = new FastReader(File.ReadAllBytes(WorldGen.WORLDGEN_SAVE_FILENAME));
+		this.m_cluster = Cluster.Load(fastReader);
 		ListPool<SimSaveFileStructure, SaveLoader>.PooledList pooledList = ListPool<SimSaveFileStructure, SaveLoader>.Allocate();
-		this.m_clusterLayout.LoadClusterLayoutSim(pooledList);
+		this.m_cluster.LoadClusterSim(pooledList, fastReader);
 		SaveGame.GameInfo gameInfo = this.GameInfo;
-		gameInfo.clusterId = this.m_clusterLayout.Id;
+		gameInfo.clusterId = this.m_cluster.Id;
 		gameInfo.colonyGuid = Guid.NewGuid();
+		ClusterLayout currentClusterLayout = CustomGameSettings.Instance.GetCurrentClusterLayout();
+		gameInfo.dlcIds = new List<string>(currentClusterLayout.requiredDlcIds);
+		foreach (string text in CustomGameSettings.Instance.GetCurrentDlcMixingIds())
+		{
+			if (!gameInfo.dlcIds.Contains(text))
+			{
+				gameInfo.dlcIds.Add(text);
+			}
+		}
 		this.GameInfo = gameInfo;
-		if (pooledList.Count != this.m_clusterLayout.worlds.Count)
+		ThreadedHttps<KleiMetrics>.Instance.SetExpansionsActive(this.GameInfo.dlcIds);
+		if (pooledList.Count != this.m_cluster.worlds.Count)
 		{
 			global::Debug.LogError("Attempt failed. Failed to load all worlds.");
 			pooledList.Recycle();
 			return false;
 		}
-		GridSettings.Reset(this.m_clusterLayout.size.x, this.m_clusterLayout.size.y);
+		GridSettings.Reset(this.m_cluster.size.x, this.m_cluster.size.y);
 		if (Application.isPlaying)
 		{
 			Singleton<KBatchedAnimUpdater>.Instance.InitializeGrid();
@@ -887,8 +894,8 @@ public class SaveLoader : KMonoBehaviour
 		}
 		Sim.SIM_Initialize(new Sim.GAME_MessageHandler(Sim.DLL_MessageHandler));
 		SimMessages.CreateSimElementsTable(ElementLoader.elements);
-		Sim.AllocateCells(this.m_clusterLayout.size.x, this.m_clusterLayout.size.y, false);
-		SimMessages.DefineWorldOffsets(this.m_clusterLayout.worlds.Select<WorldGen, SimMessages.WorldOffsetData>((WorldGen world) => new SimMessages.WorldOffsetData
+		Sim.AllocateCells(this.m_cluster.size.x, this.m_cluster.size.y, false);
+		SimMessages.DefineWorldOffsets(this.m_cluster.worlds.Select<WorldGen, SimMessages.WorldOffsetData>((WorldGen world) => new SimMessages.WorldOffsetData
 		{
 			worldOffsetX = world.WorldOffset.x,
 			worldOffsetY = world.WorldOffset.y,
@@ -901,8 +908,8 @@ public class SaveLoader : KMonoBehaviour
 		{
 			foreach (SimSaveFileStructure simSaveFileStructure2 in pooledList)
 			{
-				FastReader fastReader = new FastReader(simSaveFileStructure2.Sim);
-				if (Sim.Load(fastReader) != 0)
+				FastReader fastReader2 = new FastReader(simSaveFileStructure2.Sim);
+				if (Sim.Load(fastReader2) != 0)
 				{
 					DebugUtil.LogWarningArgs(new object[] { "\n--- Error loading save ---\nSimDLL found bad data\n" });
 					Sim.Shutdown();
@@ -922,8 +929,8 @@ public class SaveLoader : KMonoBehaviour
 		Sim.Start();
 		SceneInitializer.Instance.PostLoadPrefabs();
 		SceneInitializer.Instance.NewSaveGamePrefab();
-		this.cachedGSD = this.m_clusterLayout.currentWorld.SpawnData;
-		this.OnWorldGenComplete.Signal(this.m_clusterLayout);
+		this.cachedGSD = this.m_cluster.currentWorld.SpawnData;
+		this.OnWorldGenComplete.Signal(this.m_cluster);
 		OniMetrics.LogEvent(OniMetrics.Event.NewSave, "NewGame", true);
 		StoryManager.Instance.InitialSaveSetup();
 		ThreadedHttps<KleiMetrics>.Instance.IncrementGameCount();
@@ -953,6 +960,7 @@ public class SaveLoader : KMonoBehaviour
 		dictionary["SavedPrefabs"] = this.GetSavedPrefabMetrics();
 		dictionary["ResourcesAccessible"] = this.GetWorldInventoryMetrics();
 		dictionary["MinionMetrics"] = this.GetMinionMetrics();
+		dictionary["WorldMetrics"] = this.GetWorldMetrics();
 		if (is_auto_save)
 		{
 			dictionary["DailyReport"] = this.GetDailyReportMetrics();
@@ -960,6 +968,7 @@ public class SaveLoader : KMonoBehaviour
 			dictionary["AverageFrameTime"] = this.GetFrameTime();
 		}
 		dictionary["CustomGameSettings"] = CustomGameSettings.Instance.GetSettingsForMetrics();
+		dictionary["CustomMixingSettings"] = CustomGameSettings.Instance.GetSettingsForMixingMetrics();
 		ThreadedHttps<KleiMetrics>.Instance.SendEvent(dictionary, "ReportSaveMetrics");
 	}
 
@@ -1117,6 +1126,89 @@ public class SaveLoader : KMonoBehaviour
 		return 1f / component.FPS;
 	}
 
+	private List<SaveLoader.WorldMetricsData> GetWorldMetrics()
+	{
+		List<SaveLoader.WorldMetricsData> list = new List<SaveLoader.WorldMetricsData>();
+		if (Global.Instance != null)
+		{
+			foreach (WorldContainer worldContainer in ClusterManager.Instance.WorldContainers)
+			{
+				if (!worldContainer.IsModuleInterior)
+				{
+					float num = (worldContainer.IsDiscovered ? worldContainer.DiscoveryTimestamp : (-1f));
+					float num2 = (worldContainer.IsDupeVisited ? worldContainer.DupeVisitedTimestamp : (-1f));
+					list.Add(new SaveLoader.WorldMetricsData
+					{
+						Name = worldContainer.worldName,
+						DiscoveryTimestamp = num,
+						DupeVisitedTimestamp = num2
+					});
+				}
+			}
+		}
+		return list;
+	}
+
+	public bool IsDLCActiveForCurrentSave(string dlcid)
+	{
+		return DlcManager.IsContentSubscribed(dlcid) && (dlcid == "" || dlcid == "" || this.GameInfo.dlcIds.Contains(dlcid));
+	}
+
+	public bool IsDlcListActiveForCurrentSave(string[] dlcIds)
+	{
+		if (dlcIds == null || dlcIds.Length == 0)
+		{
+			return true;
+		}
+		foreach (string text in dlcIds)
+		{
+			if (text == "")
+			{
+				return true;
+			}
+			if (this.IsDLCActiveForCurrentSave(text))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public string GetSaveLoadContentLetters()
+	{
+		if (this.GameInfo.dlcIds.Count <= 0)
+		{
+			return "V";
+		}
+		string text = "";
+		foreach (string text2 in this.GameInfo.dlcIds)
+		{
+			text += DlcManager.GetContentLetter(text2);
+		}
+		return text;
+	}
+
+	public void UpgradeActiveSaveDLCInfo(string dlcId, bool trigger_load = false)
+	{
+		string activeSaveFolder = SaveLoader.GetActiveSaveFolder();
+		string text = SaveGame.Instance.BaseName + UI.FRONTEND.OPTIONS_SCREEN.TOGGLE_SANDBOX_SCREEN.BACKUP_SAVE_GAME_APPEND + ".sav";
+		string text2 = global::System.IO.Path.Combine(activeSaveFolder, text);
+		this.Save(text2, false, false);
+		if (!this.GameInfo.dlcIds.Contains(dlcId))
+		{
+			this.GameInfo.dlcIds.Add(dlcId);
+		}
+		string current_save = SaveLoader.GetActiveSaveFilePath();
+		this.Save(SaveLoader.GetActiveSaveFilePath(), false, false);
+		if (trigger_load)
+		{
+			LoadingOverlay.Load(delegate
+			{
+				LoadScreen.DoLoad(current_save);
+			});
+		}
+	}
+
 	[MyCmpGet]
 	private GridSettings gridSettings;
 
@@ -1147,7 +1239,9 @@ public class SaveLoader : KMonoBehaviour
 	[NonSerialized]
 	public SaveManager saveManager;
 
-	private Cluster m_clusterLayout;
+	private Cluster m_cluster;
+
+	private ClusterLayout m_clusterLayout;
 
 	private const string CorruptFileSuffix = "_";
 
@@ -1167,9 +1261,13 @@ public class SaveLoader : KMonoBehaviour
 
 	public const string METRIC_DAILY_REPORT_KEY = "DailyReport";
 
+	public const string METRIC_WORLD_METRICS_KEY = "WorldMetrics";
+
 	public const string METRIC_MINION_METRICS_KEY = "MinionMetrics";
 
 	public const string METRIC_CUSTOM_GAME_SETTINGS = "CustomGameSettings";
+
+	public const string METRIC_CUSTOM_MIXING_SETTINGS = "CustomMixingSettings";
 
 	public const string METRIC_PERFORMANCE_MEASUREMENTS = "PerformanceMeasurements";
 
@@ -1267,5 +1365,14 @@ public class SaveLoader : KMonoBehaviour
 		public string name;
 
 		public float value;
+	}
+
+	private struct WorldMetricsData
+	{
+		public string Name;
+
+		public float DiscoveryTimestamp;
+
+		public float DupeVisitedTimestamp;
 	}
 }

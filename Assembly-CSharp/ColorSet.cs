@@ -85,9 +85,29 @@ public class ColorSet : ScriptableObject
 	public Color32 eventNeutral;
 
 	[Header("Notifications")]
+	public Color32 NotificationNormal;
+
+	public Color32 NotificationNormalBG;
+
 	public Color32 NotificationBad;
 
+	public Color32 NotificationBadBG;
+
 	public Color32 NotificationEvent;
+
+	public Color32 NotificationEventBG;
+
+	public Color32 NotificationMessage;
+
+	public Color32 NotificationMessageBG;
+
+	public Color32 NotificationMessageImportant;
+
+	public Color32 NotificationMessageImportantBG;
+
+	public Color32 NotificationTutorial;
+
+	public Color32 NotificationTutorialBG;
 
 	[Header("PrioritiesScreen")]
 	public Color32 PrioritiesNeutralColor;
@@ -100,6 +120,8 @@ public class ColorSet : ScriptableObject
 	public Color32 statusItemBad;
 
 	public Color32 statusItemEvent;
+
+	public Color32 statusItemMessageImportant;
 
 	[Header("Germ Overlay")]
 	public Color32 germFoodPoisoning;

@@ -31,10 +31,13 @@ public class ReceptacleMonitor : StateMachineComponent<ReceptacleMonitor.StatesI
 		{
 			base.smi.sm.receptacle.Set(null, base.smi, false);
 			this.replanted = false;
-			return;
 		}
-		base.smi.sm.receptacle.Set(plot, base.smi, false);
-		this.replanted = true;
+		else
+		{
+			base.smi.sm.receptacle.Set(plot, base.smi, false);
+			this.replanted = true;
+		}
+		base.Trigger(-1636776682, null);
 	}
 
 	public void Sim1000ms(float dt)

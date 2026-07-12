@@ -82,17 +82,17 @@ public readonly struct ClothingOutfitTarget : IEquatable<ClothingOutfitTarget>
 		this.impl = impl;
 	}
 
-	public bool DoesContainNonOwnedItems()
+	public bool DoesContainLockedItems()
 	{
-		return ClothingOutfitTarget.DoesContainNonOwnedItems(this.ReadItems());
+		return ClothingOutfitTarget.DoesContainLockedItems(this.ReadItems());
 	}
 
-	public static bool DoesContainNonOwnedItems(IList<string> itemIds)
+	public static bool DoesContainLockedItems(IList<string> itemIds)
 	{
 		foreach (string text in itemIds)
 		{
 			PermitResource permitResource = Db.Get().Permits.TryGet(text);
-			if (permitResource != null && permitResource.IsOwnable() && PermitItems.GetOwnedCount(permitResource) <= 0)
+			if (permitResource != null && !permitResource.IsUnlocked())
 			{
 				return true;
 			}

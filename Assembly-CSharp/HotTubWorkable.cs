@@ -55,6 +55,7 @@ public class HotTubWorkable : Workable, IWorkerPrioritizable
 		{
 			component.Add(this.hotTub.specificEffect, true);
 		}
+		component.Add("WarmTouch", true).timeRemaining = 1800f;
 	}
 
 	public bool GetWorkerPriority(Worker worker, out int priority)

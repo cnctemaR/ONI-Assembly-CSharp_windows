@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Klei.AI;
 using STRINGS;
 using TUNING;
@@ -8,7 +9,7 @@ public class PuftOxyliteConfig : IEntityConfig
 {
 	public static GameObject CreatePuftOxylite(string id, string name, string desc, string anim_file, bool is_baby)
 	{
-		GameObject gameObject = BasePuftConfig.BasePuft(id, name, desc, "PuftOxyliteBaseTrait", anim_file, is_baby, "com_", 303.15f, 338.15f);
+		GameObject gameObject = BasePuftConfig.BasePuft(id, name, desc, "PuftOxyliteBaseTrait", anim_file, is_baby, "com_", 273.15f, 333.15f, 223.15f, 373.15f);
 		gameObject = EntityTemplates.ExtendEntityToWildCreature(gameObject, PuftTuning.PEN_SIZE_PER_CREATURE);
 		Trait trait = Db.Get().CreateTrait("PuftOxyliteBaseTrait", name, name, null, false, null, true, true);
 		trait.Add(new AttributeModifier(Db.Get().Amounts.Calories.maxAttribute.Id, PuftTuning.STANDARD_STOMACH_SIZE, name, false, false, true));
@@ -31,7 +32,18 @@ public class PuftOxyliteConfig : IEntityConfig
 
 	public GameObject CreatePrefab()
 	{
-		return EntityTemplates.ExtendEntityToFertileCreature(PuftOxyliteConfig.CreatePuftOxylite("PuftOxylite", global::STRINGS.CREATURES.SPECIES.PUFT.VARIANT_OXYLITE.NAME, global::STRINGS.CREATURES.SPECIES.PUFT.VARIANT_OXYLITE.DESC, "puft_kanim", false), "PuftOxyliteEgg", global::STRINGS.CREATURES.SPECIES.PUFT.VARIANT_OXYLITE.EGG_NAME, global::STRINGS.CREATURES.SPECIES.PUFT.VARIANT_OXYLITE.DESC, "egg_puft_kanim", PuftTuning.EGG_MASS, "PuftOxyliteBaby", 45f, 15f, PuftTuning.EGG_CHANCES_OXYLITE, PuftOxyliteConfig.EGG_SORT_ORDER, true, false, true, 1f, false);
+		GameObject gameObject = PuftOxyliteConfig.CreatePuftOxylite("PuftOxylite", global::STRINGS.CREATURES.SPECIES.PUFT.VARIANT_OXYLITE.NAME, global::STRINGS.CREATURES.SPECIES.PUFT.VARIANT_OXYLITE.DESC, "puft_kanim", false);
+		string text = "PuftOxyliteEgg";
+		string text2 = global::STRINGS.CREATURES.SPECIES.PUFT.VARIANT_OXYLITE.EGG_NAME;
+		string text3 = global::STRINGS.CREATURES.SPECIES.PUFT.VARIANT_OXYLITE.DESC;
+		string text4 = "egg_puft_kanim";
+		float egg_MASS = PuftTuning.EGG_MASS;
+		string text5 = "PuftOxyliteBaby";
+		float num = 45f;
+		float num2 = 15f;
+		List<FertilityMonitor.BreedingChance> egg_CHANCES_OXYLITE = PuftTuning.EGG_CHANCES_OXYLITE;
+		int egg_SORT_ORDER = PuftOxyliteConfig.EGG_SORT_ORDER;
+		return EntityTemplates.ExtendEntityToFertileCreature(gameObject, text, text2, text3, text4, egg_MASS, text5, num, num2, egg_CHANCES_OXYLITE, this.GetDlcIds(), egg_SORT_ORDER, true, false, true, 1f, false);
 	}
 
 	public void OnPrefabInit(GameObject prefab)

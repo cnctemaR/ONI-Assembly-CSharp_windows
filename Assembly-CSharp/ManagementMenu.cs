@@ -36,6 +36,7 @@ public class ManagementMenu : KIconToggleMenu
 		this.AddToggleTooltip(this.vitalsInfo, null);
 		this.researchInfo = new ManagementMenu.ManagementMenuToggleInfo(UI.RESEARCH, "OverviewUI_research_nav_icon", null, global::Action.ManageResearch, UI.TOOLTIPS.MANAGEMENTMENU_RESEARCH, "");
 		this.AddToggleTooltip(this.researchInfo, UI.TOOLTIPS.MANAGEMENTMENU_REQUIRES_RESEARCH);
+		this.researchInfo.prefabOverride = this.researchButtonPrefab;
 		this.jobsInfo = new ManagementMenu.ManagementMenuToggleInfo(UI.JOBS, "OverviewUI_priority_icon", null, global::Action.ManagePriorities, UI.TOOLTIPS.MANAGEMENTMENU_JOBS, "");
 		this.AddToggleTooltip(this.jobsInfo, null);
 		this.skillsInfo = new ManagementMenu.ManagementMenuToggleInfo(UI.SKILLS, "OverviewUI_jobs_icon", null, global::Action.ManageSkills, UI.TOOLTIPS.MANAGEMENTMENU_SKILLS, "");
@@ -488,6 +489,31 @@ public class ManagementMenu : KIconToggleMenu
 		this.ToggleScreen(this.ScreenInfoMatch[ManagementMenu.Instance.codexInfo]);
 	}
 
+	public void OpenCodexToLockId(string lockId, bool focusContent = false)
+	{
+		string entryForLock = CodexCache.GetEntryForLock(lockId);
+		if (entryForLock == null)
+		{
+			DebugUtil.LogWarningArgs(new object[] { "Could not open codex to lockId \"" + lockId + "\", couldn't find an entry that contained that lockId" });
+			return;
+		}
+		ContentContainer contentContainer = null;
+		if (focusContent)
+		{
+			CodexEntry codexEntry = CodexCache.FindEntry(entryForLock);
+			int num = 0;
+			while (contentContainer == null && num < codexEntry.contentContainers.Count)
+			{
+				if (!(codexEntry.contentContainers[num].lockID != lockId))
+				{
+					contentContainer = codexEntry.contentContainers[num];
+				}
+				num++;
+			}
+		}
+		this.OpenCodexToEntry(entryForLock, contentContainer);
+	}
+
 	public void OpenCodexToEntry(string id, ContentContainer targetContainer = null)
 	{
 		if (!this.codexScreen.gameObject.activeInHierarchy)
@@ -589,6 +615,9 @@ public class ManagementMenu : KIconToggleMenu
 	[Header("Management Menu Specific")]
 	[SerializeField]
 	private KToggle smallPrefab;
+
+	[SerializeField]
+	private KToggle researchButtonPrefab;
 
 	public KToggle PauseMenuButton;
 

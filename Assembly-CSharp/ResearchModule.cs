@@ -32,7 +32,7 @@ public class ResearchModule : KMonoBehaviour
 					GameObject prefab = Assets.GetPrefab(researchOpportunity.discoveredRareItem);
 					if (prefab == null)
 					{
-						KCrashReporter.Assert(false, "Missing prefab: " + researchOpportunity.discoveredRareItem);
+						KCrashReporter.Assert(false, "Missing prefab: " + researchOpportunity.discoveredRareItem, null);
 					}
 					else
 					{

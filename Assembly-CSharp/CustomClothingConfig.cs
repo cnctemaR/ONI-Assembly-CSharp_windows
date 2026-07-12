@@ -27,9 +27,9 @@ public class CustomClothingConfig : IEquipmentConfig
 		equipmentDef.additionalDescriptors.Add(descriptor2);
 		equipmentDef.OnEquipCallBack = delegate(Equippable eq)
 		{
-			CoolVestConfig.OnEquipVest(eq, clothingInfo);
+			ClothingWearer.ClothingInfo.OnEquipVest(eq, clothingInfo);
 		};
-		equipmentDef.OnUnequipCallBack = new Action<Equippable>(CoolVestConfig.OnUnequipVest);
+		equipmentDef.OnUnequipCallBack = new Action<Equippable>(ClothingWearer.ClothingInfo.OnUnequipVest);
 		equipmentDef.RecipeDescription = global::STRINGS.EQUIPMENT.PREFABS.CUSTOMCLOTHING.RECIPE_DESC;
 		foreach (EquippableFacadeResource equippableFacadeResource in Db.GetEquippableFacades().resources)
 		{

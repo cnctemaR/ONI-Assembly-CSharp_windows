@@ -52,7 +52,13 @@ public class SimCellOccupier : KMonoBehaviour, IGameObjectEffectDescriptor
 			Grid.RenderedByWorld[offset_cell] = false;
 			Game.Instance.GetComponent<EntombedItemVisualizer>().ForceClear(offset_cell);
 		});
+		base.Subscribe(675471409, new Action<object>(this.OnMelted));
 		base.Subscribe<SimCellOccupier>(-1699355994, SimCellOccupier.OnBuildingRepairedDelegate);
+	}
+
+	private void OnMelted(object o)
+	{
+		Building.CreateBuildingMeltedNotification(base.gameObject);
 	}
 
 	protected override void OnCleanUp()

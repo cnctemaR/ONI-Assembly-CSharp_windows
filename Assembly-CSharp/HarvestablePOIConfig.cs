@@ -424,7 +424,37 @@ public class HarvestablePOIConfig : IMultiEntityConfig
 				2.5f
 			}
 		}, 15000f, 25000f, 30000f, 60000f, true, HarvestablePOIConfig.AsteroidFieldOrbit, 20, "EXPANSION1_ID")));
-		list.RemoveAll((HarvestablePOIConfig.HarvestablePOIParams poi) => !poi.poiType.dlcID.IsNullOrWhiteSpace() && !DlcManager.IsContentActive(poi.poiType.dlcID));
+		list.Add(new HarvestablePOIConfig.HarvestablePOIParams("ceres_debris_field", new HarvestablePOIConfigurator.HarvestablePOIType("DLC2CeresField", new Dictionary<SimHashes, float>
+		{
+			{
+				SimHashes.Cinnabar,
+				4.5f
+			},
+			{
+				SimHashes.Mercury,
+				2.5f
+			},
+			{
+				SimHashes.Ice,
+				2.5f
+			}
+		}, 15000f, 25000f, 30000f, 60000f, true, HarvestablePOIConfig.AsteroidFieldOrbit, 20, "DLC2_ID")));
+		list.Add(new HarvestablePOIConfig.HarvestablePOIParams("ceres_starting_field", new HarvestablePOIConfigurator.HarvestablePOIType("DLC2CeresOreField", new Dictionary<SimHashes, float>
+		{
+			{
+				SimHashes.Cinnabar,
+				2.5f
+			},
+			{
+				SimHashes.Mercury,
+				2.5f
+			},
+			{
+				SimHashes.Ice,
+				3.5f
+			}
+		}, 15000f, 25000f, 30000f, 60000f, true, HarvestablePOIConfig.AsteroidFieldOrbit, 20, "DLC2_ID")));
+		list.RemoveAll((HarvestablePOIConfig.HarvestablePOIParams poi) => !poi.poiType.dlcID.IsNullOrWhiteSpace() && !DlcManager.IsContentSubscribed(poi.poiType.dlcID));
 		return list;
 	}
 
@@ -473,6 +503,10 @@ public class HarvestablePOIConfig : IMultiEntityConfig
 	public const string OxygenRichAsteroidField = "OxygenRichAsteroidField";
 
 	public const string InterstellarOcean = "InterstellarOcean";
+
+	public const string DLC2CeresField = "DLC2CeresField";
+
+	public const string DLC2CeresOreField = "DLC2CeresOreField";
 
 	private static readonly List<string> GasFieldOrbit = new List<string>
 	{

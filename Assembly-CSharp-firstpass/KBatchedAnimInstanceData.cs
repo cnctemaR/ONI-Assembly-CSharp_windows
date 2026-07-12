@@ -79,6 +79,8 @@ public class KBatchedAnimInstanceData
 		KBatchedAnimInstanceData.AnimInstanceData animInstanceData = this.converter.animInstanceData[0];
 		animInstanceData.curAnimFrameIndex = (float)this.target.GetCurrentFrameIndex();
 		animInstanceData.currentAnimNumFrames = (float)(this.target.IsVisible() ? this.target.GetCurrentNumFrames() : 0);
+		animInstanceData.currentAnimNumFrames *= 10f;
+		animInstanceData.currentAnimNumFrames += this.target.GetPostProcessingParams();
 		animInstanceData.currentAnimFirstFrameIdx = (float)this.target.GetFirstFrameIndex();
 		Vector4 positionData = this.target.GetPositionData();
 		animInstanceData.noOffset_x = positionData.x;
@@ -105,6 +107,8 @@ public class KBatchedAnimInstanceData
 	public const int SIZE_IN_BYTES = 112;
 
 	public const int SIZE_IN_FLOATS = 28;
+
+	public const int DIGITS_SHARED_FOR_PST_FXs = 1;
 
 	private KAnimConverter.IAnimConverter target;
 

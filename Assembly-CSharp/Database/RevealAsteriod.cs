@@ -1,5 +1,6 @@
 ﻿using System;
 using STRINGS;
+using UnityEngine;
 
 namespace Database
 {
@@ -14,15 +15,25 @@ namespace Database
 		{
 			this.amountRevealed = 0f;
 			float num = 0f;
-			for (int i = 0; i < Grid.Visible.Length; i++)
+			WorldContainer startWorld = ClusterManager.Instance.GetStartWorld();
+			Vector2 minimumBounds = startWorld.minimumBounds;
+			Vector2 maximumBounds = startWorld.maximumBounds;
+			int num2 = (int)minimumBounds.x;
+			while ((float)num2 <= maximumBounds.x)
 			{
-				if (Grid.Visible[i] > 0)
+				int num3 = (int)minimumBounds.y;
+				while ((float)num3 <= maximumBounds.y)
 				{
-					num += 1f;
+					if (Grid.Visible[Grid.PosToCell(new Vector2((float)num2, (float)num3))] > 0)
+					{
+						num += 1f;
+					}
+					num3++;
 				}
+				num2++;
 			}
-			this.amountRevealed = num / (float)Grid.Visible.Length;
-			return num / (float)Grid.Visible.Length > this.percentToReveal;
+			this.amountRevealed = num / (float)(startWorld.Width * startWorld.Height);
+			return this.amountRevealed > this.percentToReveal;
 		}
 
 		public void Deserialize(IReader reader)

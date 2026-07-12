@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{D77EAD7E-EB3D-4944-AC4A-1C87B872F298}</ProjectGuid>
+    <ProjectGuid>{C460FD8C-0D4B-4716-BC72-4A322E0920F8}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>UnityEngine</RootNamespace>
     <AssemblyName>UnityEngine.AndroidJNIModule</AssemblyName>
@@ -34,11 +34,11 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
-      <Project>{D77EAD7E-EB3D-4944-AC4A-1C87B872F2A0}</Project>
+      <Project>{C460FD8C-0D4B-4716-BC72-4A322E092100}</Project>
       <Name>UnityEngine.CoreModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
-      <Project>{D77EAD7E-EB3D-4944-AC4A-1C87B872F2B6}</Project>
+      <Project>{C460FD8C-0D4B-4716-BC72-4A322E092116}</Project>
       <Name>UnityEngine.SharedInternalsModule</Name>
     </ProjectReference>
   </ItemGroup>

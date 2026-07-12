@@ -35,8 +35,11 @@ public class BestFit
 			list.Add(new BestFit.Rect(vector2I2.x, vector2I2.y, worldPlacement.width, worldPlacement.height));
 			worldPlacement.SetPosition(vector2I2);
 		}
-		vector2I.x += 136;
-		vector2I.y = Math.Max(vector2I.y, 136);
+		if (DlcManager.FeatureClusterSpaceEnabled())
+		{
+			vector2I.x += 136;
+			vector2I.y = Math.Max(vector2I.y, 136);
+		}
 		return vector2I;
 	}
 

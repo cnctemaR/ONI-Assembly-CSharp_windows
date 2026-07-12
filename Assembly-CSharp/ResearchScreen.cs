@@ -434,7 +434,13 @@ public class ResearchScreen : KModalScreen
 	public override void Show(bool show = true)
 	{
 		this.mouseOver = false;
-		base.canvas.enabled = show;
+		foreach (Canvas canvas in base.GetComponentsInChildren<Canvas>(true))
+		{
+			if (canvas.enabled != show)
+			{
+				canvas.enabled = show;
+			}
+		}
 		CanvasGroup component = base.GetComponent<CanvasGroup>();
 		if (component != null)
 		{

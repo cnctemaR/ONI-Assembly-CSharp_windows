@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{F1DD01B3-F605-413E-B133-CA653E7C4CB0}</ProjectGuid>
+    <ProjectGuid>{12EB786B-C105-4FB1-B3F0-B8C07BF82943}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>UnityEngine</RootNamespace>
     <AssemblyName>UnityEngine.LocalizationModule</AssemblyName>
@@ -19,11 +19,11 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
-      <Project>{F1DD01B3-F605-413E-B133-CA653E7C4CA2}</Project>
+      <Project>{12EB786B-C105-4FB1-B3F0-B8C07BF82935}</Project>
       <Name>UnityEngine.CoreModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
-      <Project>{F1DD01B3-F605-413E-B133-CA653E7C4CB8}</Project>
+      <Project>{12EB786B-C105-4FB1-B3F0-B8C07BF8294B}</Project>
       <Name>UnityEngine.SharedInternalsModule</Name>
     </ProjectReference>
   </ItemGroup>

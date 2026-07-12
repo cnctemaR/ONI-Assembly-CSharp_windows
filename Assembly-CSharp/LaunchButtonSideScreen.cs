@@ -23,6 +23,7 @@ public class LaunchButtonSideScreen : SideScreenContent
 
 	public override void SetTarget(GameObject target)
 	{
+		bool flag = this.rocketModule == null || this.rocketModule.gameObject != target;
 		this.selectedPad = null;
 		this.rocketModule = target.GetComponent<RocketModuleCluster>();
 		if (this.rocketModule == null)
@@ -45,7 +46,10 @@ public class LaunchButtonSideScreen : SideScreenContent
 			CraftModuleInterface craftInterface = this.rocketModule.CraftInterface;
 			this.selectedPad = craftInterface.CurrentPad;
 		}
-		this.acknowledgeWarnings = false;
+		if (flag)
+		{
+			this.acknowledgeWarnings = false;
+		}
 		this.rocketModule.CraftInterface.Subscribe<LaunchButtonSideScreen>(543433792, LaunchButtonSideScreen.RefreshDelegate);
 		this.rocketModule.CraftInterface.Subscribe<LaunchButtonSideScreen>(1655598572, LaunchButtonSideScreen.RefreshDelegate);
 		this.Refresh();

@@ -534,7 +534,7 @@ public class Constructable : Workable, ISaveLoadable
 			});
 			this.OnDiggableReachabilityChanged(null);
 		}
-		bool flag = this.building.Def.IsValidBuildLocation(base.gameObject, base.transform.GetPosition(), this.building.Orientation, false);
+		bool flag = this.building.Def.IsValidBuildLocation(base.gameObject, base.transform.GetPosition(), this.building.Orientation, this.IsReplacementTile);
 		if (flag)
 		{
 			this.notifier.Remove(this.invalidLocation);

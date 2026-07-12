@@ -242,7 +242,7 @@ public class FallMonitor : GameStateMachine<FallMonitor, FallMonitor.Instance>
 				flag5 = flag5 && (!base.gameObject.HasTag(GameTags.Incapacitated) || (this.navigator.CurrentNavType != NavType.Ladder && this.navigator.CurrentNavType != NavType.Pole));
 				flag2 = (!flag5 && flag3 && Grid.Solid[num] && !Grid.DupePassable[num]) || (flag4 && Grid.Solid[num2] && !Grid.DupePassable[num2]) || (flag3 && Grid.DupeImpassable[num]) || (flag4 && Grid.DupeImpassable[num2]);
 				flag = !flag5 && !flag2;
-				if ((!flag3 && flag4) || Grid.WorldIdx[num] != Grid.WorldIdx[num2])
+				if ((!flag3 && flag4) || (flag4 && Grid.WorldIdx[num] != Grid.WorldIdx[num2] && Grid.IsWorldValidCell(num2)))
 				{
 					this.TeleportInWorld(num);
 				}
@@ -253,16 +253,16 @@ public class FallMonitor : GameStateMachine<FallMonitor, FallMonitor.Instance>
 
 		private void TeleportInWorld(int cell)
 		{
-			WorldContainer world;
-			do
+			int num = Grid.CellAbove(cell);
+			WorldContainer world = ClusterManager.Instance.GetWorld((int)Grid.WorldIdx[num]);
+			if (world != null)
 			{
-				int num = Grid.CellAbove(cell);
-				world = ClusterManager.Instance.GetWorld((int)Grid.WorldIdx[num]);
+				int safeCell = world.GetSafeCell();
+				global::Debug.Log(string.Format("Teleporting {0} to {1}", this.navigator.name, safeCell));
+				this.MoveToCell(safeCell, false);
+				return;
 			}
-			while (world == null);
-			int safeCell = world.GetSafeCell();
-			global::Debug.Log(string.Format("Teleporting {0} to {1}", this.navigator.name, safeCell));
-			this.MoveToCell(safeCell, false);
+			global::Debug.LogError(string.Format("Unable to teleport {0} stuck on {1}", this.navigator.name, cell));
 		}
 
 		private bool IsValidNavCell(int cell)

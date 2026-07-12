@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{C09ED3D5-9B58-46B6-A7D2-F5FE619DD8BA}</ProjectGuid>
+    <ProjectGuid>{3F735FDA-C479-4332-87DE-459D15749D0F}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>I18N.West</RootNamespace>
     <AssemblyName>I18N.West</AssemblyName>
@@ -49,7 +49,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\I18N\I18N.csproj">
-      <Project>{C09ED3D5-9B58-46B6-A7D2-F5FE619DD8B9}</Project>
+      <Project>{3F735FDA-C479-4332-87DE-459D15749D0E}</Project>
       <Name>I18N</Name>
     </ProjectReference>
   </ItemGroup>

@@ -7,7 +7,7 @@ public class NavTableValidator
 		foreach (CellOffset cellOffset in bounding_offsets)
 		{
 			int num = Grid.OffsetCell(cell, cellOffset);
-			if (!Grid.IsValidCell(num) || !NavTableValidator.IsCellPassable(num, is_dupe))
+			if (!Grid.IsWorldValidCell(num) || !NavTableValidator.IsCellPassable(num, is_dupe))
 			{
 				return false;
 			}

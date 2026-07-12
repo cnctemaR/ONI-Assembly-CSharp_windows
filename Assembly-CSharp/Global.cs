@@ -609,7 +609,7 @@ public class Global : MonoBehaviour
 	private void SetONIStaticSessionVariables()
 	{
 		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Branch", "release");
-		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Build", 512719U);
+		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Build", 514967U);
 		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("SaveFolderWriteTest", Global.saveFolderTestResult);
 		if (KPlayerPrefs.HasKey(UnitConfigurationScreen.MassUnitKey))
 		{
@@ -697,13 +697,13 @@ public class Global : MonoBehaviour
 				{
 					Console.WriteLine(string.Format("    {0}={1}", keyValuePair.Key.ToString(), keyValuePair.Value.ToString()));
 				}
-				catch (Exception)
+				catch
 				{
 				}
 			}
 			Console.WriteLine(string.Format("    {0}={1}", "System Language", Application.systemLanguage.ToString()));
 		}
-		catch (Exception)
+		catch
 		{
 		}
 	}

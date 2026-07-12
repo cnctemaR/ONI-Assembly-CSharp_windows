@@ -217,7 +217,7 @@ public class RancherChore : Chore<RancherChore.RancherChoreStates.Instance>
 		public override void OnPendingCompleteWork(Worker work)
 		{
 			RanchStation.Instance smi = base.gameObject.GetSMI<RanchStation.Instance>();
-			if (smi != null)
+			if (smi != null && smi.targetRanchable != null)
 			{
 				smi.targetRanchable.Get<KBatchedAnimController>().Play(smi.def.ranchedPstAnim, KAnim.PlayMode.Once, 1f, 0f);
 				RancherChore.RancherChoreStates.Instance smi2 = base.gameObject.GetSMI<RancherChore.RancherChoreStates.Instance>();

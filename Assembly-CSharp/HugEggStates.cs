@@ -76,7 +76,7 @@ public class HugEggStates : GameStateMachine<HugEggStates, HugEggStates.Instance
 		if (gameObject != null)
 		{
 			EggIncubator component = gameObject.GetComponent<EggIncubator>();
-			if (component != null)
+			if (component != null && component.Occupant != null)
 			{
 				component.Occupant.GetComponent<Effects>().Add("EggHug", true);
 				return;

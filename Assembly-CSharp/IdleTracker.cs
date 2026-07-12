@@ -10,6 +10,7 @@ public class IdleTracker : WorldTracker
 
 	public override void UpdateData()
 	{
+		this.objectsOfInterest.Clear();
 		int num = 0;
 		List<MinionIdentity> worldItems = Components.LiveMinionIdentities.GetWorldItems(base.WorldID, false);
 		for (int i = 0; i < worldItems.Count; i++)
@@ -17,6 +18,7 @@ public class IdleTracker : WorldTracker
 			if (worldItems[i].HasTag(GameTags.Idle))
 			{
 				num++;
+				this.objectsOfInterest.Add(worldItems[i].gameObject);
 			}
 		}
 		base.AddPoint((float)num);

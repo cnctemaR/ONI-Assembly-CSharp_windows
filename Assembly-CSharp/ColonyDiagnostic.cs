@@ -5,6 +5,16 @@ using UnityEngine;
 
 public abstract class ColonyDiagnostic : ISim4000ms
 {
+	public GameObject GetNextClickThroughObject()
+	{
+		if (this.aggregatedUniqueClickThroughObjects.Count == 0)
+		{
+			return null;
+		}
+		this.clickThroughIndex = (this.clickThroughIndex + 1) % this.aggregatedUniqueClickThroughObjects.Count;
+		return this.aggregatedUniqueClickThroughObjects[this.clickThroughIndex];
+	}
+
 	public ColonyDiagnostic(int worldID, string name)
 	{
 		this.worldID = worldID;
@@ -88,6 +98,7 @@ public abstract class ColonyDiagnostic : ISim4000ms
 	{
 		ColonyDiagnostic.DiagnosticResult diagnosticResult = new ColonyDiagnostic.DiagnosticResult(ColonyDiagnostic.DiagnosticResult.Opinion.Normal, "", null);
 		bool flag = false;
+		this.aggregatedUniqueClickThroughObjects.Clear();
 		foreach (KeyValuePair<string, DiagnosticCriterion> keyValuePair in this.criteria)
 		{
 			if (ColonyDiagnosticUtility.Instance.IsCriteriaEnabled(this.worldID, this.id, keyValuePair.Key))
@@ -99,6 +110,16 @@ public abstract class ColonyDiagnostic : ISim4000ms
 					diagnosticResult.opinion = diagnosticResult2.opinion;
 					diagnosticResult.Message = diagnosticResult2.Message;
 					diagnosticResult.clickThroughTarget = diagnosticResult2.clickThroughTarget;
+					if (diagnosticResult2.clickThroughObjects != null)
+					{
+						foreach (GameObject gameObject in diagnosticResult2.clickThroughObjects)
+						{
+							if (!this.aggregatedUniqueClickThroughObjects.Contains(gameObject))
+							{
+								this.aggregatedUniqueClickThroughObjects.Add(gameObject);
+							}
+						}
+					}
 				}
 			}
 		}
@@ -117,6 +138,10 @@ public abstract class ColonyDiagnostic : ISim4000ms
 			return this.IsWorldModuleInterior ? UI.COLONY_DIAGNOSTICS.NO_MINIONS_ROCKET : UI.COLONY_DIAGNOSTICS.NO_MINIONS_PLANETOID;
 		}
 	}
+
+	private int clickThroughIndex;
+
+	private List<GameObject> aggregatedUniqueClickThroughObjects = new List<GameObject>();
 
 	public string name;
 
@@ -149,6 +174,7 @@ public abstract class ColonyDiagnostic : ISim4000ms
 			this.message = message;
 			this.opinion = opinion;
 			this.clickThroughTarget = null;
+			this.clickThroughObjects = null;
 		}
 
 		public string Message
@@ -220,6 +246,8 @@ public abstract class ColonyDiagnostic : ISim4000ms
 		public ColonyDiagnostic.DiagnosticResult.Opinion opinion;
 
 		public global::Tuple<Vector3, GameObject> clickThroughTarget;
+
+		public List<GameObject> clickThroughObjects;
 
 		private string message;
 

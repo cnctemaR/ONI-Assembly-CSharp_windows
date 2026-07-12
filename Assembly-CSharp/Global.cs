@@ -220,6 +220,7 @@ public class Global : MonoBehaviour
 			new BindingEntry("Sandbox", GamepadButton.NumButtons, KKeyCode.S, Modifier.Shift, global::Action.ToggleSandboxTools, true, false),
 			new BindingEntry("Sandbox", GamepadButton.NumButtons, KKeyCode.R, Modifier.Shift, global::Action.SandboxReveal, true, false),
 			new BindingEntry("Sandbox", GamepadButton.NumButtons, KKeyCode.Z, Modifier.Shift, global::Action.SandboxCritterTool, true, false),
+			new BindingEntry("Sandbox", GamepadButton.NumButtons, KKeyCode.T, Modifier.Shift, global::Action.SandboxStoryTraitTool, true, false),
 			new BindingEntry("Sandbox", GamepadButton.NumButtons, KKeyCode.Mouse0, Modifier.Ctrl, global::Action.SandboxCopyElement, true, false),
 			new BindingEntry("SwitchActiveWorld", GamepadButton.NumButtons, KKeyCode.Alpha1, Modifier.Backtick, global::Action.SwitchActiveWorld1, true, false, DlcManager.AVAILABLE_EXPANSION1_ONLY),
 			new BindingEntry("SwitchActiveWorld", GamepadButton.NumButtons, KKeyCode.Alpha2, Modifier.Backtick, global::Action.SwitchActiveWorld2, true, false, DlcManager.AVAILABLE_EXPANSION1_ONLY),
@@ -633,7 +634,7 @@ public class Global : MonoBehaviour
 	private void SetONIStaticSessionVariables()
 	{
 		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Branch", "release");
-		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Build", 582745U);
+		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Build", 583005U);
 		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("SaveFolderWriteTest", Global.saveFolderTestResult);
 		if (KPlayerPrefs.HasKey(UnitConfigurationScreen.MassUnitKey))
 		{

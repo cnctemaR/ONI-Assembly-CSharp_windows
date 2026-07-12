@@ -278,12 +278,28 @@ public class ColonyDiagnosticScreen : KScreen, ISim1000ms
 			MultiToggle multiToggle = this.button;
 			multiToggle.onClick = (global::System.Action)Delegate.Combine(multiToggle.onClick, new global::System.Action(delegate
 			{
-				if (diagnostic.LatestResult.clickThroughTarget == null)
+				KSelectable kselectable = null;
+				Vector3 vector = Vector3.zero;
+				if (diagnostic.LatestResult.clickThroughTarget != null)
+				{
+					vector = diagnostic.LatestResult.clickThroughTarget.first;
+					kselectable = ((diagnostic.LatestResult.clickThroughTarget.second == null) ? null : diagnostic.LatestResult.clickThroughTarget.second.GetComponent<KSelectable>());
+				}
+				else
+				{
+					GameObject nextClickThroughObject = diagnostic.GetNextClickThroughObject();
+					if (nextClickThroughObject != null)
+					{
+						kselectable = nextClickThroughObject.GetComponent<KSelectable>();
+						vector = nextClickThroughObject.transform.GetPosition();
+					}
+				}
+				if (kselectable == null)
 				{
 					CameraController.Instance.ActiveWorldStarWipe(diagnostic.worldID, null);
 					return;
 				}
-				SelectTool.Instance.SelectAndFocus(diagnostic.LatestResult.clickThroughTarget.first, (diagnostic.LatestResult.clickThroughTarget.second == null) ? null : diagnostic.LatestResult.clickThroughTarget.second.GetComponent<KSelectable>());
+				SelectTool.Instance.SelectAndFocus(vector, kselectable);
 			}));
 			this.defaultIndicatorSizeDelta = Vector2.zero;
 			this.Update();

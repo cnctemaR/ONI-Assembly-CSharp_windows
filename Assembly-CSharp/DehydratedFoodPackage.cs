@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using FoodRehydrator;
-using Klei;
 using KSerialization;
 using UnityEngine;
 
@@ -27,7 +27,6 @@ internal class DehydratedFoodPackage : Workable
 		{
 			gameObject.RemoveTag(GameTags.StoredPrivate);
 		}
-		this.SwapContentsPickupBehavior(true);
 	}
 
 	public void RemovedFromRehydrator()
@@ -38,7 +37,6 @@ internal class DehydratedFoodPackage : Workable
 		{
 			gameObject.AddTag(GameTags.StoredPrivate);
 		}
-		this.SwapContentsPickupBehavior(false);
 	}
 
 	protected override void OnSpawn()
@@ -50,7 +48,6 @@ internal class DehydratedFoodPackage : Workable
 			int num = Grid.PosToCell(this);
 			GameObject gameObject = GameUtil.KInstantiate(Assets.GetPrefab(this.FoodTag), Grid.CellToPosCBC(num, Grid.SceneLayer.Creatures), Grid.SceneLayer.Creatures, null, 0);
 			gameObject.SetActive(true);
-			gameObject.AddTag(GameTags.Dehydrated);
 			gameObject.GetComponent<Edible>().Calories = 1000000f;
 			this.storage.Store(gameObject, false, false, true, false);
 			if (base.GetComponent<Pickupable>().storage != null && base.GetComponent<Pickupable>().storage.GetComponent<AccessabilityManager>() != null)
@@ -58,6 +55,8 @@ internal class DehydratedFoodPackage : Workable
 				this.StoredInRehydrator(base.GetComponent<Pickupable>().storage.gameObject);
 			}
 		}
+		base.Subscribe(-1697596308, new Action<object>(this.StorageChangeHandler));
+		this.DehydrateItem(this.storage.items.ElementAtOrDefault<GameObject>(0));
 	}
 
 	protected override void OnStartWork(Worker worker)
@@ -77,13 +76,18 @@ internal class DehydratedFoodPackage : Workable
 	protected override void OnCompleteWork(Worker worker)
 	{
 		base.OnCompleteWork(worker);
-		this.SwapContentsPickupBehavior(false);
-		GameObject gameObject = ((this.storage.items.Count > 0) ? this.storage.items[0] : null);
+		if (this.storage.items.Count != 1)
+		{
+			DebugUtil.DevAssert(false, "OnCompleteWork invalid contents of package", null);
+			return;
+		}
+		GameObject gameObject = this.storage.items[0];
 		this.storage.Transfer(worker.GetComponent<Storage>(), false, false);
-		DehydratedManager component = base.GetComponent<Pickupable>().storage.GetComponent<DehydratedManager>();
+		DebugUtil.DevAssert(this.rehydrator == base.GetComponent<Pickupable>().storage.gameObject, "OnCompleteWork rehydrator mismatch", null);
+		DehydratedManager component = this.rehydrator.GetComponent<DehydratedManager>();
 		this.rehydrator.GetComponent<AccessabilityManager>().SetActiveWorkable(null);
-		SimUtil.DiseaseInfo diseaseInfo = component.ConsumeResourcesFromRehydratingPackaged(base.gameObject);
-		gameObject.GetComponent<PrimaryElement>().AddDisease(diseaseInfo.idx, diseaseInfo.count, "rehydrating");
+		component.ConsumeResourcesForRehydration(base.gameObject, gameObject);
+		this.rehydrator = null;
 		Pickupable.PickupableStartWorkInfo pickupableStartWorkInfo = (Pickupable.PickupableStartWorkInfo)worker.startWorkInfo;
 		if (pickupableStartWorkInfo != null && pickupableStartWorkInfo.setResultCb != null && gameObject != null)
 		{
@@ -105,6 +109,44 @@ internal class DehydratedFoodPackage : Workable
 		base.OnCleanUp();
 	}
 
+	private void StorageChangeHandler(object obj)
+	{
+		GameObject gameObject = (GameObject)obj;
+		DebugUtil.DevAssert(!this.storage.items.Contains(gameObject), "Attempting to add item to a dehydrated food package which is not allowed", null);
+		this.RehydrateItem(gameObject);
+	}
+
+	public void DehydrateItem(GameObject item)
+	{
+		DebugUtil.DevAssert(item != null, "Attempting to dehydrate contents of an empty packet", null);
+		if (this.storage.items.Count != 1 || item == null)
+		{
+			DebugUtil.DevAssert(false, "DehydrateItem called, incorrect content", null);
+			return;
+		}
+		item.AddTag(GameTags.Dehydrated);
+		Pickupable component = item.GetComponent<Pickupable>();
+		this.SwapPickupablesBehaviors(component);
+		component.allowedChoreTypes = new List<ChoreType> { Db.Get().ChoreTypes.Eat };
+		component.targetWorkable = this;
+	}
+
+	public void RehydrateItem(GameObject item)
+	{
+		if (this.storage.items.Count != 0)
+		{
+			DebugUtil.DevAssert(false, "RehydrateItem called, incorrect storage content", null);
+			return;
+		}
+		item.RemoveTag(GameTags.Dehydrated);
+		item.AddTag(GameTags.Rehydrated);
+		item.gameObject.GetComponent<KSelectable>().AddStatusItem(Db.Get().MiscStatusItems.RehydratedFood, null);
+		Pickupable component = item.GetComponent<Pickupable>();
+		this.SwapPickupablesBehaviors(component);
+		component.allowedChoreTypes = null;
+		component.targetWorkable = component;
+	}
+
 	private void Swap<Type>(ref Type a, ref Type b)
 	{
 		Type type = a;
@@ -112,30 +154,14 @@ internal class DehydratedFoodPackage : Workable
 		b = type;
 	}
 
-	private void SwapContentsPickupBehavior(bool inPackage)
+	private void SwapPickupablesBehaviors(Pickupable pickup)
 	{
-		DebugUtil.Assert(this.storage.items.Count <= 1, "Packets are required to either be empty or contain only 1 item!");
-		if (this.storage.items.Count == 1)
-		{
-			GameObject gameObject = this.storage.items[0];
-			Pickupable component = gameObject.GetComponent<Pickupable>();
-			this.Swap<bool>(ref component.absorbable, ref this.containedObjectBehaviors.pickup_absorbable);
-			this.Swap<Func<Pickupable, float, Pickupable>>(ref component.OnTake, ref this.containedObjectBehaviors.pickupable_ontake);
-			this.Swap<Func<Pickupable, bool>>(ref component.CanAbsorb, ref this.containedObjectBehaviors.pickupable_canabsorb);
-			component.targetWorkable = (inPackage ? this : component);
-			CellOffset[] offsets = component.GetOffsets();
-			component.SetOffsets(this.containedObjectBehaviors.pickupable_offset);
-			this.Swap<CellOffset[]>(ref offsets, ref this.containedObjectBehaviors.pickupable_offset);
-			if (!inPackage)
-			{
-				component.allowedChoreTypes = null;
-				gameObject.gameObject.RemoveTag(GameTags.Dehydrated);
-				gameObject.gameObject.AddTag(GameTags.Rehydrated);
-				gameObject.gameObject.GetComponent<KSelectable>().AddStatusItem(Db.Get().MiscStatusItems.RehydratedFood, null);
-				return;
-			}
-			component.allowedChoreTypes = new List<ChoreType> { Db.Get().ChoreTypes.Eat };
-		}
+		this.Swap<bool>(ref pickup.absorbable, ref this.containedObjectBehaviors.pickup_absorbable);
+		this.Swap<Func<Pickupable, float, Pickupable>>(ref pickup.OnTake, ref this.containedObjectBehaviors.pickupable_ontake);
+		this.Swap<Func<Pickupable, bool>>(ref pickup.CanAbsorb, ref this.containedObjectBehaviors.pickupable_canabsorb);
+		CellOffset[] offsets = pickup.GetOffsets();
+		pickup.SetOffsets(this.containedObjectBehaviors.pickupable_offset);
+		this.Swap<CellOffset[]>(ref offsets, ref this.containedObjectBehaviors.pickupable_offset);
 	}
 
 	[Serialize]
@@ -146,9 +172,9 @@ internal class DehydratedFoodPackage : Workable
 
 	private GameObject rehydrator;
 
-	private DehydratedFoodPackage.ContainedObjectBehaviorOverrides containedObjectBehaviors = new DehydratedFoodPackage.ContainedObjectBehaviorOverrides();
+	private DehydratedFoodPackage.OverriddenPickupableProperties containedObjectBehaviors = new DehydratedFoodPackage.OverriddenPickupableProperties();
 
-	protected class ContainedObjectBehaviorOverrides
+	private class OverriddenPickupableProperties
 	{
 		public bool pickup_absorbable;
 

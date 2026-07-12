@@ -193,6 +193,8 @@ public abstract class Tracker
 
 	private const int defaultCyclesTracked = 5;
 
+	public List<GameObject> objectsOfInterest = new List<GameObject>();
+
 	protected List<DataPoint> dataPoints = new List<DataPoint>();
 
 	private int maxPoints = Mathf.CeilToInt(750f);

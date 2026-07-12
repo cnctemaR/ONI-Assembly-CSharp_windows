@@ -31,20 +31,21 @@ namespace FoodRehydrator
 			this.packagesMeter.SetPositionPercent((float)this.packages.items.Count / 5f);
 		}
 
-		public SimUtil.DiseaseInfo ConsumeResourcesFromRehydratingPackaged(GameObject packagedFood)
+		public void ConsumeResourcesForRehydration(GameObject package, GameObject food)
 		{
-			global::Debug.Assert(this.packages.items.Contains(packagedFood));
-			this.packages.ConsumeIgnoringDisease(packagedFood);
+			global::Debug.Assert(this.packages.items.Contains(package));
+			this.packages.ConsumeIgnoringDisease(package);
 			float num;
 			SimUtil.DiseaseInfo diseaseInfo;
 			float num2;
 			this.water.ConsumeAndGetDisease(FoodRehydratorConfig.REHYDRATION_TAG, 1f, out num, out diseaseInfo, out num2);
-			return diseaseInfo;
+			food.GetComponent<PrimaryElement>().AddDisease(diseaseInfo.idx, diseaseInfo.count, "rehydrating");
 		}
 
 		private void PackagedFoodAdded(GameObject package)
 		{
 			DehydratedFoodPackage component = package.GetComponent<DehydratedFoodPackage>();
+			DebugUtil.DevAssert(component != null, "PackagedFoodAdded missing component", null);
 			if (component != null)
 			{
 				component.StoredInRehydrator(base.gameObject);

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using STRINGS;
-using UnityEngine;
 
 public class IdleDiagnostic : ColonyDiagnostic
 {
@@ -30,11 +29,7 @@ public class IdleDiagnostic : ColonyDiagnostic
 			{
 				diagnosticResult.opinion = ColonyDiagnostic.DiagnosticResult.Opinion.Concern;
 				diagnosticResult.Message = UI.COLONY_DIAGNOSTICS.IDLEDIAGNOSTIC.IDLE;
-				MinionIdentity minionIdentity = Components.LiveMinionIdentities.GetWorldItems(base.worldID, false).Find((MinionIdentity match) => match.HasTag(GameTags.Idle));
-				if (minionIdentity != null)
-				{
-					diagnosticResult.clickThroughTarget = new global::Tuple<Vector3, GameObject>(minionIdentity.transform.position, minionIdentity.gameObject);
-				}
+				diagnosticResult.clickThroughObjects = this.tracker.objectsOfInterest;
 			}
 		}
 		return diagnosticResult;

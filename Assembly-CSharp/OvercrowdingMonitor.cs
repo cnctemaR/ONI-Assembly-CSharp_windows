@@ -12,6 +12,10 @@ public class OvercrowdingMonitor : GameStateMachine<OvercrowdingMonitor, Overcro
 
 	private static bool IsConfined(OvercrowdingMonitor.Instance smi)
 	{
+		if (smi.def.spaceRequiredPerCreature == 0)
+		{
+			return false;
+		}
 		if (smi.HasTag(GameTags.Creatures.Burrowed))
 		{
 			return false;

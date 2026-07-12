@@ -279,5 +279,6 @@ public enum Action
 	AnalogCamera,
 	AnalogCursor,
 	Disconnect,
+	SandboxStoryTraitTool,
 	NumActions
 }

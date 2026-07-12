@@ -1117,7 +1117,6 @@ public class ComplexFabricator : KMonoBehaviour, ISim200ms, ISim1000ms
 					{
 						Storage component7 = component6.GetComponent<Storage>();
 						this.outStorage.TransferMass(component7, recipeElement2.material, num9, true, false, false);
-						component7.items[0].AddTag(GameTags.Dehydrated);
 					}
 					gameObject3.SetActive(true);
 					gameObject3.GetComponent<KMonoBehaviour>().Trigger(748399584, null);

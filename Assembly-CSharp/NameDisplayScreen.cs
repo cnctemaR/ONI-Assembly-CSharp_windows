@@ -52,7 +52,7 @@ public class NameDisplayScreen : KScreen
 
 	public void RemoveWorldEntries(int worldId)
 	{
-		this.entries.RemoveAll((NameDisplayScreen.Entry entry) => entry.world_go.GetMyWorldId() == worldId);
+		this.entries.RemoveAll((NameDisplayScreen.Entry entry) => entry.world_go.IsNullOrDestroyed() || entry.world_go.GetMyWorldId() == worldId);
 	}
 
 	private void OnOverlayChanged(HashedString new_mode)

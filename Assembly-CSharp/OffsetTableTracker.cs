@@ -27,18 +27,18 @@ public class OffsetTableTracker : OffsetTracker
 			return;
 		}
 		base.UpdateCell(previous_cell, current_cell);
-		Extents extents = new Extents(current_cell, this.table);
-		extents.height += 2;
-		extents.y--;
 		if (!this.solidPartitionerEntry.IsValid())
 		{
+			Extents extents = new Extents(current_cell, this.table);
+			extents.height += 2;
+			extents.y--;
 			this.solidPartitionerEntry = GameScenePartitioner.Instance.Add("OffsetTableTracker.UpdateCell", this.cmp.gameObject, extents, GameScenePartitioner.Instance.solidChangedLayer, new Action<object>(this.OnCellChanged));
 			this.validNavCellChangedPartitionerEntry = GameScenePartitioner.Instance.Add("OffsetTableTracker.UpdateCell", this.cmp.gameObject, extents, GameScenePartitioner.Instance.validNavCellChangedLayer, new Action<object>(this.OnCellChanged));
 		}
 		else
 		{
-			GameScenePartitioner.Instance.UpdatePosition(this.solidPartitionerEntry, extents);
-			GameScenePartitioner.Instance.UpdatePosition(this.validNavCellChangedPartitionerEntry, extents);
+			GameScenePartitioner.Instance.UpdatePosition(this.solidPartitionerEntry, current_cell);
+			GameScenePartitioner.Instance.UpdatePosition(this.validNavCellChangedPartitionerEntry, current_cell);
 		}
 		this.offsets = null;
 	}

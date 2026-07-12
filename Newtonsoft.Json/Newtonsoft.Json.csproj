@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{03D1527E-ED3B-477D-BEE6-588298CF85FF}</ProjectGuid>
+    <ProjectGuid>{DABF94F6-8E15-4F56-8071-110A643F7B05}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>Newtonsoft.Json</RootNamespace>
     <AssemblyName>Newtonsoft.Json</AssemblyName>

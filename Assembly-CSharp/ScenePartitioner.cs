@@ -199,16 +199,6 @@ public class ScenePartitioner : ISim1000ms
 		this.Insert(entry);
 	}
 
-	public void UpdatePosition(Extents e, ScenePartitionerEntry entry)
-	{
-		this.Widthdraw(entry);
-		entry.x = e.x;
-		entry.y = e.y;
-		entry.width = e.width;
-		entry.height = e.height;
-		this.Insert(entry);
-	}
-
 	public void Remove(ScenePartitionerEntry entry)
 	{
 		Extents nodeExtents = this.GetNodeExtents(entry);

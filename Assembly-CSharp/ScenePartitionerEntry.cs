@@ -22,11 +22,6 @@ public class ScenePartitionerEntry
 		this.partitioner.UpdatePosition(x, y, this);
 	}
 
-	public void UpdatePosition(Extents e)
-	{
-		this.partitioner.UpdatePosition(e, this);
-	}
-
 	public void Release()
 	{
 		if (this.partitioner != null)

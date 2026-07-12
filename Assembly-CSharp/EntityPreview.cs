@@ -28,8 +28,9 @@ public class EntityPreview : KMonoBehaviour
 
 	private void OnCellChange()
 	{
-		GameScenePartitioner.Instance.UpdatePosition(this.solidPartitionerEntry, this.occupyArea.GetExtents());
-		GameScenePartitioner.Instance.UpdatePosition(this.objectPartitionerEntry, this.occupyArea.GetExtents());
+		int num = Grid.PosToCell(this);
+		GameScenePartitioner.Instance.UpdatePosition(this.solidPartitionerEntry, num);
+		GameScenePartitioner.Instance.UpdatePosition(this.objectPartitionerEntry, num);
 		this.OnAreaChanged(null);
 	}
 

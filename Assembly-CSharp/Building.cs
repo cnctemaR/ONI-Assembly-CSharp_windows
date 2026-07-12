@@ -146,10 +146,9 @@ public class Building : KMonoBehaviour, IGameObjectEffectDescriptor, IUniformGri
 		base.OnCleanUp();
 	}
 
-	public virtual void UpdatePosition()
+	public virtual void UpdatePosition(int cell)
 	{
-		this.RefreshCells();
-		GameScenePartitioner.Instance.UpdatePosition(this.scenePartitionerEntry, this.GetExtents());
+		GameScenePartitioner.Instance.UpdatePosition(this.scenePartitionerEntry, cell);
 	}
 
 	protected void RegisterBlockTileRenderer()

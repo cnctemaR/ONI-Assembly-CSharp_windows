@@ -34,9 +34,13 @@ public class ClusterMapVisualizer : KMonoBehaviour
 		{
 			new ClusterMapTravelAnimator.StatesInstance(this, this.entity).StartSM();
 		}
+	}
+
+	protected override void OnSpawn()
+	{
+		base.OnSpawn();
 		if (this.entity != null)
 		{
-			this.Show(ClusterMapScreen.GetRevealLevel(this.entity));
 			if (this.entity is Clustercraft)
 			{
 				new ClusterMapRocketAnimator.StatesInstance(this, this.entity).StartSM();

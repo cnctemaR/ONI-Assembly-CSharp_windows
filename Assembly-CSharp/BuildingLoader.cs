@@ -254,7 +254,7 @@ public class BuildingLoader : KMonoBehaviour
 		}
 		if (def.Entombable)
 		{
-			go.AddComponent<Structure>();
+			go.AddOrGet<Structure>();
 		}
 		if (def.RequiresPowerInput && def.AddLogicPowerPort)
 		{

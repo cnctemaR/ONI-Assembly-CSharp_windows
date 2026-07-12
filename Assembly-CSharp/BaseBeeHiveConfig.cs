@@ -44,7 +44,9 @@ public class BaseBeeHiveConfig : IEntityConfig
 			gameObject.AddOrGet<Health>();
 			gameObject.AddOrGet<CharacterOverlay>();
 			gameObject.AddOrGet<RangedAttackable>();
-			gameObject.AddOrGet<FactionAlignment>().Alignment = FactionManager.FactionID.Hostile;
+			FactionAlignment factionAlignment = gameObject.AddOrGet<FactionAlignment>();
+			factionAlignment.Alignment = FactionManager.FactionID.Hostile;
+			factionAlignment.updatePrioritizable = false;
 			gameObject.AddOrGet<Prioritizable>();
 			Prioritizable.AddRef(gameObject);
 			gameObject.AddOrGet<Effects>();

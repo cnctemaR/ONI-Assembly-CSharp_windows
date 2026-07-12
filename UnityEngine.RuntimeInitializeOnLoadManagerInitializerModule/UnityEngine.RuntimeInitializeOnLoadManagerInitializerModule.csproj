@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{86D2A58F-3730-40DB-8DD4-BCFA4B4B3C61}</ProjectGuid>
+    <ProjectGuid>{638F4CE0-7E49-466B-BBAF-0860AAEEAB6D}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>UnityEngine.RuntimeInitializeOnLoadManagerInitializerModule</RootNamespace>
     <AssemblyName>UnityEngine.RuntimeInitializeOnLoadManagerInitializerModule</AssemblyName>
@@ -18,7 +18,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
-      <Project>{86D2A58F-3730-40DB-8DD4-BCFA4B4B3C63}</Project>
+      <Project>{638F4CE0-7E49-466B-BBAF-0860AAEEAB6F}</Project>
       <Name>UnityEngine.SharedInternalsModule</Name>
     </ProjectReference>
   </ItemGroup>

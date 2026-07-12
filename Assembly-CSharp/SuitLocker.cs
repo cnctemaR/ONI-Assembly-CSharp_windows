@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using STRINGS;
 using TUNING;
 using UnityEngine;
@@ -547,31 +546,7 @@ public class SuitLocker : StateMachineComponent<SuitLocker.StatesInstance>
 					return false;
 				}
 				AssignableSlotInstance slot = equipment.GetSlot(Db.Get().AssignableSlots.Suit);
-				if (slot.assignable == null)
-				{
-					return false;
-				}
-				bool flag = slot.assignable.GetComponent<AtmoSuit>() != null;
-				bool flag2 = suitLocker.OutfitTags.Contains(GameTags.AtmoSuit);
-				if (flag && flag2)
-				{
-					return true;
-				}
-				bool flag3 = slot.assignable.GetComponent<JetSuitTank>() != null;
-				bool flag4 = suitLocker.GetComponent<JetSuitLocker>() != null;
-				if (flag3 && flag4)
-				{
-					return true;
-				}
-				bool flag5 = slot.assignable.GetComponent<LeadSuitTank>() != null;
-				bool flag6 = suitLocker.GetComponent<LeadSuitLocker>() != null;
-				if (flag5 && flag6)
-				{
-					return true;
-				}
-				bool flag7 = slot.assignable.GetComponent<OxygenMask>() != null;
-				bool flag8 = suitLocker.OutfitTags.Contains(GameTags.OxygenMask);
-				return flag7 && flag8;
+				return !(slot.assignable == null) && slot.assignable.HasAnyTags(suitLocker.OutfitTags);
 			};
 			this.SuitTypeMatchesLocker = precondition;
 			base..ctor();

@@ -87,7 +87,7 @@ public class FactionAlignment : KMonoBehaviour
 	private void TogglePrioritizable(bool enable)
 	{
 		Prioritizable component = base.GetComponent<Prioritizable>();
-		if (component == null)
+		if (component == null || !this.updatePrioritizable)
 		{
 			return;
 		}
@@ -142,6 +142,9 @@ public class FactionAlignment : KMonoBehaviour
 
 	[SerializeField]
 	public bool canBePlayerTargeted = true;
+
+	[SerializeField]
+	public bool updatePrioritizable = true;
 
 	[Serialize]
 	private bool alignmentActive = true;

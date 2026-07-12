@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{86D2A58F-3730-40DB-8DD4-BCFA4B4B3C5A}</ProjectGuid>
+    <ProjectGuid>{638F4CE0-7E49-466B-BBAF-0860AAEEAB66}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>UnityEngine</RootNamespace>
     <AssemblyName>UnityEngine.JSONSerializeModule</AssemblyName>
@@ -19,11 +19,11 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
-      <Project>{86D2A58F-3730-40DB-8DD4-BCFA4B4B3C4D}</Project>
+      <Project>{638F4CE0-7E49-466B-BBAF-0860AAEEAB59}</Project>
       <Name>UnityEngine.CoreModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
-      <Project>{86D2A58F-3730-40DB-8DD4-BCFA4B4B3C63}</Project>
+      <Project>{638F4CE0-7E49-466B-BBAF-0860AAEEAB6F}</Project>
       <Name>UnityEngine.SharedInternalsModule</Name>
     </ProjectReference>
   </ItemGroup>

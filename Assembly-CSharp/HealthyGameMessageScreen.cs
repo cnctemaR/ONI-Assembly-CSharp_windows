@@ -9,21 +9,29 @@ public class HealthyGameMessageScreen : KMonoBehaviour
 		base.OnPrefabInit();
 		this.confirmButton.onClick += delegate
 		{
-			string @string = KPlayerPrefs.GetString("PlayShortOnLaunch", "");
-			if (!string.IsNullOrEmpty(MainMenu.Instance.IntroShortName) && @string != MainMenu.Instance.IntroShortName)
-			{
-				VideoScreen component = KScreenManager.AddChild(FrontEndManager.Instance.gameObject, ScreenPrefabs.Instance.VideoScreen.gameObject).GetComponent<VideoScreen>();
-				component.PlayVideo(Assets.GetVideo(MainMenu.Instance.IntroShortName), false, AudioMixerSnapshots.Get().MainMenuVideoPlayingSnapshot, false);
-				component.OnStop = (global::System.Action)Delegate.Combine(component.OnStop, new global::System.Action(delegate
-				{
-					KPlayerPrefs.SetString("PlayShortOnLaunch", MainMenu.Instance.IntroShortName);
-					global::UnityEngine.Object.Destroy(base.gameObject);
-				}));
-				return;
-			}
-			global::UnityEngine.Object.Destroy(base.gameObject);
+			this.PlayIntroShort();
 		};
 		this.confirmButton.gameObject.SetActive(false);
+	}
+
+	private void PlayIntroShort()
+	{
+		string @string = KPlayerPrefs.GetString("PlayShortOnLaunch", "");
+		if (!string.IsNullOrEmpty(MainMenu.Instance.IntroShortName) && @string != MainMenu.Instance.IntroShortName)
+		{
+			VideoScreen component = KScreenManager.AddChild(FrontEndManager.Instance.gameObject, ScreenPrefabs.Instance.VideoScreen.gameObject).GetComponent<VideoScreen>();
+			component.PlayVideo(Assets.GetVideo(MainMenu.Instance.IntroShortName), false, AudioMixerSnapshots.Get().MainMenuVideoPlayingSnapshot, false);
+			component.OnStop = (global::System.Action)Delegate.Combine(component.OnStop, new global::System.Action(delegate
+			{
+				KPlayerPrefs.SetString("PlayShortOnLaunch", MainMenu.Instance.IntroShortName);
+				if (base.gameObject != null)
+				{
+					global::UnityEngine.Object.Destroy(base.gameObject);
+				}
+			}));
+			return;
+		}
+		global::UnityEngine.Object.Destroy(base.gameObject);
 	}
 
 	protected override void OnSpawn()
@@ -34,6 +42,10 @@ public class HealthyGameMessageScreen : KMonoBehaviour
 
 	private void Update()
 	{
+		if (!DistributionPlatform.Inst.IsDLCStatusReady())
+		{
+			return;
+		}
 		if (this.isFirstUpdate)
 		{
 			this.isFirstUpdate = false;
@@ -49,7 +61,8 @@ public class HealthyGameMessageScreen : KMonoBehaviour
 		}
 		if (num2 >= this.totalTime + 0.75f)
 		{
-			global::UnityEngine.Object.Destroy(base.gameObject);
+			this.canvasGroup.alpha = 1f;
+			this.confirmButton.gameObject.SetActive(true);
 			return;
 		}
 		if (num2 >= this.totalTime - this.fadeTime)

@@ -54,7 +54,6 @@ public class SolidFilterConfig : IBuildingConfig
 	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
 		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.IndustrialMachinery, false);
-		go.AddOrGet<Structure>();
 		go.AddOrGet<ElementFilter>().portInfo = this.secondaryPort;
 		go.AddOrGet<Filterable>().filterElementState = Filterable.ElementState.Solid;
 	}

@@ -47,7 +47,7 @@ public class RadiationDiagnostic : ColonyDiagnostic
 			foreach (MinionIdentity minionIdentity in worldItems)
 			{
 				RadiationMonitor.Instance smi = minionIdentity.GetSMI<RadiationMonitor.Instance>();
-				if (smi.sm.isSick.Get(smi))
+				if (smi != null && smi.sm.isSick.Get(smi))
 				{
 					diagnosticResult.opinion = ColonyDiagnostic.DiagnosticResult.Opinion.Concern;
 					diagnosticResult.Message = UI.COLONY_DIAGNOSTICS.RADIATIONDIAGNOSTIC.CRITERIA_RADIATION_SICKNESS.FAIL;
@@ -73,22 +73,25 @@ public class RadiationDiagnostic : ColonyDiagnostic
 		foreach (MinionIdentity minionIdentity in worldItems)
 		{
 			RadiationMonitor.Instance smi = minionIdentity.GetSMI<RadiationMonitor.Instance>();
-			RadiationMonitor sm = smi.sm;
-			GameObject gameObject = minionIdentity.gameObject;
-			Vector3 position = gameObject.transform.position;
-			float num = sm.currentExposurePerCycle.Get(smi);
-			float num2 = sm.radiationExposure.Get(smi);
-			if (RadiationMonitor.COMPARE_LT_MINOR(smi, num) && RadiationMonitor.COMPARE_RECOVERY_IMMEDIATE(smi, num2))
+			if (smi != null)
 			{
-				diagnosticResult.clickThroughTarget = new global::Tuple<Vector3, GameObject>(position, gameObject);
-				diagnosticResult.opinion = ColonyDiagnostic.DiagnosticResult.Opinion.Concern;
-				diagnosticResult.Message = UI.COLONY_DIAGNOSTICS.RADIATIONDIAGNOSTIC.CRITERIA_RADIATION_EXPOSURE.FAIL_CONCERN;
-			}
-			if (RadiationMonitor.COMPARE_GTE_DEADLY(smi, num))
-			{
-				diagnosticResult.clickThroughTarget = new global::Tuple<Vector3, GameObject>(position, minionIdentity.gameObject);
-				diagnosticResult.opinion = ColonyDiagnostic.DiagnosticResult.Opinion.Warning;
-				diagnosticResult.Message = UI.COLONY_DIAGNOSTICS.RADIATIONDIAGNOSTIC.CRITERIA_RADIATION_EXPOSURE.FAIL_WARNING;
+				RadiationMonitor sm = smi.sm;
+				GameObject gameObject = minionIdentity.gameObject;
+				Vector3 position = gameObject.transform.position;
+				float num = sm.currentExposurePerCycle.Get(smi);
+				float num2 = sm.radiationExposure.Get(smi);
+				if (RadiationMonitor.COMPARE_LT_MINOR(smi, num) && RadiationMonitor.COMPARE_RECOVERY_IMMEDIATE(smi, num2))
+				{
+					diagnosticResult.clickThroughTarget = new global::Tuple<Vector3, GameObject>(position, gameObject);
+					diagnosticResult.opinion = ColonyDiagnostic.DiagnosticResult.Opinion.Concern;
+					diagnosticResult.Message = UI.COLONY_DIAGNOSTICS.RADIATIONDIAGNOSTIC.CRITERIA_RADIATION_EXPOSURE.FAIL_CONCERN;
+				}
+				if (RadiationMonitor.COMPARE_GTE_DEADLY(smi, num))
+				{
+					diagnosticResult.clickThroughTarget = new global::Tuple<Vector3, GameObject>(position, minionIdentity.gameObject);
+					diagnosticResult.opinion = ColonyDiagnostic.DiagnosticResult.Opinion.Warning;
+					diagnosticResult.Message = UI.COLONY_DIAGNOSTICS.RADIATIONDIAGNOSTIC.CRITERIA_RADIATION_EXPOSURE.FAIL_WARNING;
+				}
 			}
 		}
 		return diagnosticResult;

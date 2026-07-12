@@ -271,7 +271,8 @@ namespace Database
 			new Tech("NotificationSystems", new List<string>
 			{
 				LogicHammerConfig.ID,
-				LogicAlarmConfig.ID
+				LogicAlarmConfig.ID,
+				"Telephone"
 			}, this, null);
 			new Tech("ArtificialFriends", new List<string> { "SweepBotStation", "ScoutModule" }, this, null);
 			new Tech("BasicRefinement", new List<string> { "RockCrusher", "Kiln" }, this, null);

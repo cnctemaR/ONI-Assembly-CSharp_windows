@@ -88,13 +88,28 @@ public class Telephone : StateMachineComponent<Telephone.StatesInstance>, IGameO
 		{
 			default_state = this.unoperational;
 			this.unoperational.PlayAnim("off").TagTransition(GameTags.Operational, this.ready, false);
-			this.ready.TagTransition(GameTags.Operational, this.unoperational, true).DefaultState(this.ready.idle).ToggleRecurringChore(new Func<Telephone.StatesInstance, Chore>(this.CreateChore), null);
-			this.ready.idle.WorkableStartTransition((Telephone.StatesInstance smi) => smi.master.GetComponent<TelephoneCallerWorkable>(), this.ready.calling).TagTransition(GameTags.TelephoneRinging, this.ready.ringing, false).PlayAnim("off");
+			this.ready.TagTransition(GameTags.Operational, this.unoperational, true).DefaultState(this.ready.idle).ToggleRecurringChore(new Func<Telephone.StatesInstance, Chore>(this.CreateChore), null)
+				.Enter(delegate(Telephone.StatesInstance smi)
+				{
+					using (List<Telephone>.Enumerator enumerator = Components.Telephones.Items.GetEnumerator())
+					{
+						while (enumerator.MoveNext())
+						{
+							if (enumerator.Current.isInUse)
+							{
+								smi.GoTo(this.ready.speaker);
+							}
+						}
+					}
+				});
+			this.ready.idle.WorkableStartTransition((Telephone.StatesInstance smi) => smi.master.GetComponent<TelephoneCallerWorkable>(), this.ready.dialing).TagTransition(GameTags.TelephoneRinging, this.ready.ringing, false).PlayAnim("off");
+			this.ready.dialing.PlayAnim("on_pre").OnAnimQueueComplete(this.ready.calling);
 			this.ready.calling.PlayAnim("on_pre").QueueAnim("on", true, null).Enter(delegate(Telephone.StatesInstance smi)
 			{
+				Telephone component = smi.GetComponent<Telephone>();
 				foreach (Telephone telephone in Components.Telephones.Items)
 				{
-					if (telephone.GetComponent<Operational>().IsOperational)
+					if (component != telephone && telephone.GetComponent<Operational>().IsOperational)
 					{
 						telephone.AddTag(GameTags.TelephoneRinging);
 					}
@@ -108,19 +123,18 @@ public class Telephone : StateMachineComponent<Telephone.StatesInstance>, IGameO
 					smi.GetComponent<Telephone>().RemoveTag(GameTags.TelephoneRinging);
 				});
 			this.ready.answer.PlayAnim("on_pre_loop_receiving").OnAnimQueueComplete(this.ready.talking.chatting);
-			this.ready.talking.DefaultState(this.ready.talking.babbling).ScheduleGoTo(25f, this.ready.hangup).PlayAnim("on_loop", KAnim.PlayMode.Loop)
-				.Enter(delegate(Telephone.StatesInstance smi)
-				{
-					smi.GetComponent<Telephone>().RemoveTag(GameTags.TelephoneRinging);
-				})
+			this.ready.talking.DefaultState(this.ready.talking.chatting).ScheduleGoTo(25f, this.ready.hangup).Enter(delegate(Telephone.StatesInstance smi)
+			{
+				smi.GetComponent<Telephone>().RemoveTag(GameTags.TelephoneRinging);
+			})
 				.EventHandler(GameHashes.PartyLineJoined, delegate(Telephone.StatesInstance smi)
 				{
 					this.UpdatePartyLine(smi);
 				})
 				.TriggerOnEnter(GameHashes.PartyLineJoined, null);
-			this.ready.talking.babbling.Transition(this.ready.talking.chatting, (Telephone.StatesInstance smi) => smi.CallAnswered(), UpdateRate.SIM_4000ms);
-			this.ready.talking.chatting.PlayAnim("on_loop", KAnim.PlayMode.Loop).Transition(this.ready.talking.babbling, (Telephone.StatesInstance smi) => !smi.CallAnswered(), UpdateRate.SIM_4000ms);
-			this.ready.speaker.PlayAnim("on_loop_nobody", KAnim.PlayMode.Loop).Transition(this.ready, (Telephone.StatesInstance smi) => !smi.CallAnswered(), UpdateRate.SIM_4000ms);
+			this.ready.talking.babbling.PlayAnim("on_loop", KAnim.PlayMode.Loop).Transition(this.ready.talking.chatting, (Telephone.StatesInstance smi) => smi.CallAnswered(), UpdateRate.SIM_4000ms);
+			this.ready.talking.chatting.PlayAnim("on_pre_loop").QueueAnim("on_loop", true, null).Transition(this.ready.talking.babbling, (Telephone.StatesInstance smi) => !smi.CallAnswered(), UpdateRate.SIM_4000ms);
+			this.ready.speaker.PlayAnim("on_loop_nobody", KAnim.PlayMode.Loop).Transition(this.ready, (Telephone.StatesInstance smi) => !smi.CallAnswered(), UpdateRate.SIM_4000ms).Transition(this.ready.answer, (Telephone.StatesInstance smi) => smi.GetComponent<Telephone>().isInUse, UpdateRate.SIM_33ms);
 			this.ready.hangup.OnAnimQueueComplete(this.ready);
 		}
 
@@ -162,6 +176,8 @@ public class Telephone : StateMachineComponent<Telephone.StatesInstance>, IGameO
 			public GameStateMachine<Telephone.States, Telephone.StatesInstance, Telephone, object>.State speaker;
 
 			public GameStateMachine<Telephone.States, Telephone.StatesInstance, Telephone, object>.State hangup;
+
+			public GameStateMachine<Telephone.States, Telephone.StatesInstance, Telephone, object>.State dialing;
 
 			public Telephone.States.ReadyStates.TalkingStates talking;
 

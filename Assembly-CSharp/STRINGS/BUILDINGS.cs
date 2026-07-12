@@ -845,19 +845,19 @@ namespace STRINGS
 
 				public static LocString DESC = "You never know who you'll meet on the other line.";
 
-				public static LocString EFFECT = "Provides a way for Duplicants to chat with their friends in different locations.\n\nChatting increases Duplicant " + UI.FormatAsLink("Morale", "MORALE") + ".";
+				public static LocString EFFECT = "Can be used by one Duplicant to chat with themselves or with other Duplicants in different locations.\n\nChatting increases Duplicant " + UI.FormatAsLink("Morale", "MORALE") + ".";
 
 				public static LocString EFFECT_BABBLE = "{attrib}: {amount} (No One)";
 
-				public static LocString EFFECT_BABBLE_TOOLTIP = "Duplicants will gain {amount} {attrib} if they chat to no one.";
+				public static LocString EFFECT_BABBLE_TOOLTIP = "Duplicants will gain {amount} {attrib} if they chat only with themselves.";
 
 				public static LocString EFFECT_CHAT = "{attrib}: {amount} (At least one duplicant)";
 
-				public static LocString EFFECT_CHAT_TOOLTIP = "Duplicants will gain {amount} {attrib} if they chat to at least one other duplicant.";
+				public static LocString EFFECT_CHAT_TOOLTIP = "Duplicants will gain {amount} {attrib} if they chat with at least one other Duplicant.";
 
 				public static LocString EFFECT_LONG_DISTANCE = "{attrib}: {amount} (At least one duplicant across space)";
 
-				public static LocString EFFECT_LONG_DISTANCE_TOOLTIP = "Duplicants will gain {amount} {attrib} if they chat to at least one other duplicant across space.";
+				public static LocString EFFECT_LONG_DISTANCE_TOOLTIP = "Duplicants will gain {amount} {attrib} if they chat with at least one other Duplicant across space.";
 			}
 
 			public class MODULARLIQUIDINPUT

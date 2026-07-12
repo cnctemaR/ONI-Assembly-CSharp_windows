@@ -5157,7 +5157,7 @@ namespace STRINGS
 
 			public class TELEPHONELONGDISTANCE
 			{
-				public static LocString NAME = "Long Distance";
+				public static LocString NAME = "Sociable";
 
 				public static LocString TOOLTIP = "This Duplicant chatted on the phone with at least one other Duplicant across space\n\nLeisure activities increase Duplicants' " + UI.PRE_KEYWORD + "Morale" + UI.PST_KEYWORD;
 			}

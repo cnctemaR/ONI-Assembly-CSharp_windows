@@ -1545,6 +1545,9 @@ public class BuildingDef : Def
 
 	public bool IsFoundation;
 
+	[Obsolete]
+	public bool isSolidTile;
+
 	public bool DragBuild;
 
 	public bool UseStructureTemperature = true;

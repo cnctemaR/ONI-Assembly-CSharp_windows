@@ -97,8 +97,11 @@ public class CritterTrapPlant : StateMachineComponent<CritterTrapPlant.StatesIns
 		public void VentGas()
 		{
 			PrimaryElement primaryElement = base.smi.master.storage.FindPrimaryElement(base.smi.master.outputElement);
-			SimMessages.AddRemoveSubstance(Grid.PosToCell(base.smi.transform.GetPosition()), primaryElement.ElementID, CellEventLogger.Instance.Dumpable, primaryElement.Mass, primaryElement.Temperature, primaryElement.DiseaseIdx, primaryElement.DiseaseCount, true, -1);
-			base.smi.master.storage.ConsumeIgnoringDisease(primaryElement.gameObject);
+			if (primaryElement != null)
+			{
+				SimMessages.AddRemoveSubstance(Grid.PosToCell(base.smi.transform.GetPosition()), primaryElement.ElementID, CellEventLogger.Instance.Dumpable, primaryElement.Mass, primaryElement.Temperature, primaryElement.DiseaseIdx, primaryElement.DiseaseCount, true, -1);
+				base.smi.master.storage.ConsumeIgnoringDisease(primaryElement.gameObject);
+			}
 		}
 
 		public bool ShouldVentGas()
@@ -133,12 +136,11 @@ public class CritterTrapPlant : StateMachineComponent<CritterTrapPlant.StatesIns
 			{
 				smi.AddGas(dt);
 			}, UpdateRate.SIM_4000ms, false).OnSignal(this.ventGas, this.trap.digesting.vent);
-			this.trap.digesting.vent_pre.PlayAnim("vent_pre").OnAnimQueueComplete(this.trap.digesting.vent);
-			this.trap.digesting.vent.PlayAnim("vent_loop", KAnim.PlayMode.Once).QueueAnim("vent_pst", false, null).Enter(delegate(CritterTrapPlant.StatesInstance smi)
+			this.trap.digesting.vent_pre.PlayAnim("vent_pre").Exit(delegate(CritterTrapPlant.StatesInstance smi)
 			{
 				smi.VentGas();
-			})
-				.OnAnimQueueComplete(this.trap.digesting.idle);
+			}).OnAnimQueueComplete(this.trap.digesting.vent);
+			this.trap.digesting.vent.PlayAnim("vent_loop", KAnim.PlayMode.Once).QueueAnim("vent_pst", false, null).OnAnimQueueComplete(this.trap.digesting.idle);
 			this.trap.wilting.PlayAnim("wilt1", KAnim.PlayMode.Loop).EventTransition(GameHashes.WiltRecover, this.trap, (CritterTrapPlant.StatesInstance smi) => !smi.master.wiltCondition.IsWilting());
 			this.fruiting.EventTransition(GameHashes.Wilt, this.fruiting.wilting, null).EventTransition(GameHashes.Harvest, this.harvest, null).DefaultState(this.fruiting.idle);
 			this.fruiting.enter.PlayAnim("open_harvest", KAnim.PlayMode.Once).Exit(delegate(CritterTrapPlant.StatesInstance smi)

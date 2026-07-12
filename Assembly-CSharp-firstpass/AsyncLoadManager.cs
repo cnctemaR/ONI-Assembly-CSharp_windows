@@ -53,7 +53,7 @@ public static class AsyncLoadManager<AsyncLoaderType>
 
 	private struct RunLoader : IWorkItem<object>
 	{
-		public void Run(object shared_data)
+		public void Run(object shared_data, int threadIndex)
 		{
 			this.loader.Run();
 		}

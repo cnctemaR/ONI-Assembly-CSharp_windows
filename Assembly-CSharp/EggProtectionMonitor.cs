@@ -201,7 +201,7 @@ public class EggProtectionMonitor : GameStateMachine<EggProtectionMonitor, EggPr
 				this.eggs = ListPool<int, EggProtectionMonitor>.Allocate();
 			}
 
-			public void Run(List<KPrefabID> prefab_ids)
+			public void Run(List<KPrefabID> prefab_ids, int threadIndex)
 			{
 				for (int num = this.start; num != this.end; num++)
 				{

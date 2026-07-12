@@ -970,7 +970,7 @@ public class PropertyTextures : KMonoBehaviour, ISim200ms
 			this.updateTextureCb = update_texture_cb;
 		}
 
-		public void Run(object shared_data)
+		public void Run(object shared_data, int threadIndex)
 		{
 			this.updateTextureCb(this.textureRegion, this.x0, this.y0, this.x1, this.y1);
 		}

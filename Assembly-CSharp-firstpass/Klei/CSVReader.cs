@@ -91,7 +91,7 @@ namespace Klei
 
 		private struct ParseWorkItem : IWorkItem<object>
 		{
-			public void Run(object shared_data)
+			public void Run(object shared_data, int threadIndex)
 			{
 				this.row = CSVReader.SplitCsvLine(this.line);
 			}

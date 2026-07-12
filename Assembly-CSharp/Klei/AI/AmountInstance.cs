@@ -182,24 +182,30 @@ namespace Klei.AI
 				}
 				this.amount_instances = amount_instances;
 				this.time_delta = time_delta;
-				this.results = ListPool<AmountInstance.BatchUpdateContext.Result, AmountInstance>.Allocate();
-				this.results.Capacity = this.amount_instances.Count;
+				this.results = new ListPool<AmountInstance.BatchUpdateContext.Result, AmountInstance.BatchUpdateContext>.PooledList[GlobalJobManager.ThreadCount];
+				for (int i = 0; i < GlobalJobManager.ThreadCount; i++)
+				{
+					this.results[i] = ListPool<AmountInstance.BatchUpdateContext.Result, AmountInstance.BatchUpdateContext>.Allocate();
+				}
 			}
 
 			public void Finish()
 			{
-				foreach (AmountInstance.BatchUpdateContext.Result result in this.results)
+				for (int i = 0; i < GlobalJobManager.ThreadCount; i++)
 				{
-					result.amount_instance.Publish(result.delta, result.previous);
+					foreach (AmountInstance.BatchUpdateContext.Result result in this.results[i])
+					{
+						result.amount_instance.Publish(result.delta, result.previous);
+					}
+					this.results[i].Recycle();
 				}
-				this.results.Recycle();
 			}
 
 			public List<UpdateBucketWithUpdater<ISim200ms>.Entry> amount_instances;
 
 			public float time_delta;
 
-			public ListPool<AmountInstance.BatchUpdateContext.Result, AmountInstance>.PooledList results;
+			public ListPool<AmountInstance.BatchUpdateContext.Result, AmountInstance.BatchUpdateContext>.PooledList[] results;
 
 			public struct Result
 			{
@@ -219,7 +225,7 @@ namespace Klei.AI
 				this.end = end;
 			}
 
-			public void Run(AmountInstance.BatchUpdateContext context)
+			public void Run(AmountInstance.BatchUpdateContext context, int threadIndex)
 			{
 				for (int num = this.start; num != this.end; num++)
 				{
@@ -227,7 +233,7 @@ namespace Klei.AI
 					float num2 = amountInstance.GetDelta() * context.time_delta;
 					if (num2 != 0f)
 					{
-						context.results.Add(new AmountInstance.BatchUpdateContext.Result
+						context.results[threadIndex].Add(new AmountInstance.BatchUpdateContext.Result
 						{
 							amount_instance = amountInstance,
 							previous = amountInstance.value,

@@ -510,7 +510,7 @@ public class SolidTransferArm : StateMachineComponent<SolidTransferArm.SMInstanc
 			this.reachable_cells_workspace = HashSetPool<int, SolidTransferArm>.Allocate();
 		}
 
-		public void Run(SolidTransferArm.BatchUpdateContext context)
+		public void Run(SolidTransferArm.BatchUpdateContext context, int threadIndex)
 		{
 			for (int num = this.start; num != this.end; num++)
 			{

@@ -839,7 +839,7 @@ public class ConduitFlow : IConduitFlow
 			this.publishTemperatureToSim.Initialize(this.conduits.Count, manager);
 			this.publishDiseaseToSim.Initialize(this.conduits.Count, manager);
 			this.resetConduit.Initialize(this.conduits.Count, manager);
-			this.clearPermanentDiseaseContainer.Run(this);
+			this.clearPermanentDiseaseContainer.Run(this, 0);
 			GlobalJobManager.Run(this.clearJob);
 			for (int num = 0; num != this.conduits.Count; num++)
 			{
@@ -986,7 +986,7 @@ public class ConduitFlow : IConduitFlow
 			}
 			this.publishTemperatureToGame.Initialize(this.conduits.Count, manager);
 			this.publishDiseaseToGame.Initialize(this.conduits.Count, manager);
-			this.publishTemperatureToGame.Run(this);
+			this.publishTemperatureToGame.Run(this, 0);
 			GlobalJobManager.Run(this.endFrameJob);
 		}
 
@@ -1805,7 +1805,7 @@ public class ConduitFlow : IConduitFlow
 			goto IL_032A;
 		}
 
-		public void Run(ConduitFlow outer)
+		public void Run(ConduitFlow outer, int threadIndex)
 		{
 			this.ComputeFlow(outer);
 			this.ComputeOrder(outer);
@@ -2408,7 +2408,7 @@ public class ConduitFlow : IConduitFlow
 			this.end = end;
 		}
 
-		public void Run(ConduitFlow.ConnectContext context)
+		public void Run(ConduitFlow.ConnectContext context, int threadIndex)
 		{
 			for (int num = this.start; num != this.end; num++)
 			{
@@ -2461,7 +2461,7 @@ public class ConduitFlow : IConduitFlow
 			this.network = network;
 		}
 
-		public void Run(ConduitFlow conduit_flow)
+		public void Run(ConduitFlow conduit_flow, int threadIndex)
 		{
 			global::Debug.Assert(this.continue_updating);
 			this.continue_updating = false;

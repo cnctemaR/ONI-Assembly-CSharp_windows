@@ -580,7 +580,7 @@ public class FetchManager : KMonoBehaviour, ISim1000ms
 			this.failed = ListPool<Pickupable, FetchManager.UpdateOffsetTables>.Allocate();
 		}
 
-		public void Run(object _)
+		public void Run(object _, int threadIndex)
 		{
 			if (Game.IsOnMainThread())
 			{
@@ -612,7 +612,7 @@ public class FetchManager : KMonoBehaviour, ISim1000ms
 
 	private struct UpdatePickupWorkItem : IWorkItem<object>
 	{
-		public void Run(object shared_data)
+		public void Run(object shared_data, int threadIndex)
 		{
 			this.fetchablesByPrefabId.UpdatePickups(this.pathProber, this.navigator, this.worker);
 		}

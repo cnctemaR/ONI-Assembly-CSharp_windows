@@ -2,5 +2,5 @@
 
 public interface IWorkItem<SharedDataType>
 {
-	void Run(SharedDataType shared_data);
+	void Run(SharedDataType shared_data, int threadIndex);
 }

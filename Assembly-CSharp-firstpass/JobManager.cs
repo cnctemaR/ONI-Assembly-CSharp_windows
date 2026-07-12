@@ -5,6 +5,14 @@ using System.Threading;
 
 public class JobManager
 {
+	public int ThreadCount
+	{
+		get
+		{
+			return this.threads.Count + 1;
+		}
+	}
+
 	public bool isShuttingDown { get; private set; }
 
 	private void Initialize()
@@ -12,16 +20,16 @@ public class JobManager
 		this.semaphore = new Semaphore(0, CPUBudget.coreCount - 1);
 		for (int i = 0; i < CPUBudget.coreCount - 1; i++)
 		{
-			this.threads.Add(new JobManager.WorkerThread(this.semaphore, this, string.Format("KWorker{0}", i)));
+			this.threads.Add(new JobManager.WorkerThread(this.semaphore, this, string.Format("KWorker{0}", i), i + 1));
 		}
 	}
 
-	public bool DoNextWorkItem()
+	public bool DoNextWorkItem(int threadIndex)
 	{
 		int num = Interlocked.Increment(ref this.nextWorkIndex);
 		if (num < this.workItems.Count)
 		{
-			this.workItems.InternalDoWorkItem(num);
+			this.workItems.InternalDoWorkItem(num, threadIndex);
 			return true;
 		}
 		return false;
@@ -52,7 +60,7 @@ public class JobManager
 		{
 			for (int i = 0; i < work_items.Count; i++)
 			{
-				work_items.InternalDoWorkItem(i);
+				work_items.InternalDoWorkItem(i, 0);
 			}
 			return;
 		}
@@ -61,7 +69,7 @@ public class JobManager
 		this.workItems = work_items;
 		Thread.MemoryBarrier();
 		this.semaphore.Release(this.threads.Count);
-		while (this.DoNextWorkItem())
+		while (this.DoNextWorkItem(0))
 		{
 		}
 		this.manualResetEvent.WaitOne();
@@ -101,7 +109,7 @@ public class JobManager
 
 	private class WorkerThread
 	{
-		public WorkerThread(Semaphore semaphore, JobManager job_manager, string name)
+		public WorkerThread(Semaphore semaphore, JobManager job_manager, string name, int threadIndex)
 		{
 			this.semaphore = semaphore;
 			this.thread = new Thread(new ParameterizedThreadStart(JobManager.WorkerThread.ThreadMain), 131072);
@@ -110,6 +118,7 @@ public class JobManager
 			this.thread.Name = name;
 			this.jobManager = job_manager;
 			this.exceptions = new List<Exception>();
+			this.threadIndex = threadIndex;
 			this.thread.Start(this);
 		}
 
@@ -127,7 +136,7 @@ public class JobManager
 					bool flag = true;
 					while (flag)
 					{
-						flag = this.jobManager.DoNextWorkItem();
+						flag = this.jobManager.DoNextWorkItem(this.threadIndex);
 					}
 				}
 				catch (Exception ex)
@@ -164,5 +173,7 @@ public class JobManager
 		private JobManager jobManager;
 
 		private List<Exception> exceptions;
+
+		private int threadIndex;
 	}
 }

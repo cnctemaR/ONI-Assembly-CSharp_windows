@@ -1190,7 +1190,7 @@ public class SimDebugView : KMonoBehaviour
 			this.y1 = Mathf.Clamp(y1, 0, Grid.HeightInCells - 1);
 		}
 
-		public void Run(SimDebugView.UpdateSimViewSharedData shared_data)
+		public void Run(SimDebugView.UpdateSimViewSharedData shared_data, int threadIndex)
 		{
 			Func<SimDebugView, int, Color> func;
 			if (!shared_data.instance.getColourFuncs.TryGetValue(shared_data.simViewMode, out func))

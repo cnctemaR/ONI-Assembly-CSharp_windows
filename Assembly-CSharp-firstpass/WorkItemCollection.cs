@@ -21,10 +21,10 @@ public class WorkItemCollection<WorkItemType, SharedDataType> : IWorkItemCollect
 		this.items.Add(work_item);
 	}
 
-	public void InternalDoWorkItem(int work_item_idx)
+	public void InternalDoWorkItem(int work_item_idx, int threadIndex)
 	{
 		WorkItemType workItemType = this.items[work_item_idx];
-		workItemType.Run(this.sharedData);
+		workItemType.Run(this.sharedData, threadIndex);
 		this.items[work_item_idx] = workItemType;
 	}
 

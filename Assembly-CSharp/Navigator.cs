@@ -304,7 +304,7 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>, ISaveL
 		if (forceUpdate || !this.executePathProbeTaskAsync)
 		{
 			this.pathProbeTask.Update();
-			this.pathProbeTask.Run(null);
+			this.pathProbeTask.Run(null, 0);
 		}
 	}
 
@@ -716,7 +716,7 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>, ISaveL
 			this.navigator.abilities.Refresh();
 		}
 
-		public void Run(object sharedData)
+		public void Run(object sharedData, int threadIndex)
 		{
 			this.navigator.PathProber.UpdateProbe(this.navigator.NavGrid, this.cell, this.navigator.CurrentNavType, this.navigator.abilities, this.navigator.flags);
 		}

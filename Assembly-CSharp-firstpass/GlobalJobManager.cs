@@ -7,6 +7,14 @@ public static class GlobalJobManager
 		GlobalJobManager.jobManager.Run(work_items);
 	}
 
+	public static int ThreadCount
+	{
+		get
+		{
+			return GlobalJobManager.jobManager.ThreadCount;
+		}
+	}
+
 	public static void Cleanup()
 	{
 		if (GlobalJobManager.jobManager != null)
@@ -17,4 +25,6 @@ public static class GlobalJobManager
 	}
 
 	private static JobManager jobManager = new JobManager();
+
+	public const int MainThreadIndex = 0;
 }

@@ -131,7 +131,7 @@ public class CreatureLightToggleController : GameStateMachine<CreatureLightToggl
 				emitter.RemoveFromGrid();
 			}
 
-			public void Run(object context)
+			public void Run(object context, int threadIndex)
 			{
 				this.emitter.UpdateLitCells();
 			}

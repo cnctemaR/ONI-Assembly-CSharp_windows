@@ -28,12 +28,12 @@ internal class TaskDivision<Task, SharedData> where Task : DivisibleTask<SharedD
 		this.tasks[this.tasks.Length - 1].end = count;
 	}
 
-	public void Run(SharedData sharedData)
+	public void Run(SharedData sharedData, int threadIndex)
 	{
 		Task[] array = this.tasks;
 		for (int i = 0; i < array.Length; i++)
 		{
-			array[i].Run(sharedData);
+			array[i].Run(sharedData, threadIndex);
 		}
 	}
 

@@ -180,88 +180,36 @@ public class ChoreProvider : KMonoBehaviour
 				list.RemoveAt(list.Count - 1);
 			}
 		}
-		int num = CPUBudget.coreCount * 4;
-		if (list.Count < num)
+		int num = 48;
+		if (list.Count > num)
 		{
-			using (List<Chore>.Enumerator enumerator = list.GetEnumerator())
+			ChoreProvider.batch_context.Setup(list, consumer_state);
+			ChoreProvider.batch_work_items.Reset(ChoreProvider.batch_context);
+			for (int j = 0; j < list.Count; j += 16)
 			{
-				while (enumerator.MoveNext())
-				{
-					Chore chore = enumerator.Current;
-					chore.CollectChores(consumer_state, succeeded, failed_contexts, false);
-				}
-				return;
+				ChoreProvider.batch_work_items.Add(new MultithreadedCollectChoreContext<List<Chore>>.WorkBlock<ChoreProvider.ChoreProviderCollectContext>(j, Math.Min(j + 16, list.Count)));
 			}
+			GlobalJobManager.Run(ChoreProvider.batch_work_items);
+			ChoreProvider.batch_context.Finish(succeeded, failed_contexts);
+			return;
 		}
-		ChoreProvider.batch_chore_collector.Reset(list);
-		int coreCount = CPUBudget.coreCount;
-		int num2 = Math.Min(24, list.Count / coreCount);
-		for (int j = 0; j < list.Count; j += num2)
+		foreach (Chore chore in list)
 		{
-			ChoreProvider.batch_chore_collector.Add(new ChoreProvider.ChoreProviderCollectTask(j, Math.Min(j + num2, list.Count), consumer_state));
-		}
-		GlobalJobManager.Run(ChoreProvider.batch_chore_collector);
-		for (int k = 0; k < ChoreProvider.batch_chore_collector.Count; k++)
-		{
-			ChoreProvider.batch_chore_collector.GetWorkItem(k).Finish(succeeded, failed_contexts);
+			chore.CollectChores(consumer_state, succeeded, failed_contexts, false);
 		}
 	}
 
 	public Dictionary<int, List<Chore>> choreWorldMap = new Dictionary<int, List<Chore>>();
 
-	private static WorkItemCollection<ChoreProvider.ChoreProviderCollectTask, List<Chore>> batch_chore_collector = new WorkItemCollection<ChoreProvider.ChoreProviderCollectTask, List<Chore>>();
+	private static ChoreProvider.ChoreProviderCollectContext batch_context = new ChoreProvider.ChoreProviderCollectContext();
 
-	private struct ChoreProviderCollectTask : IWorkItem<List<Chore>>
+	private static WorkItemCollection<MultithreadedCollectChoreContext<List<Chore>>.WorkBlock<ChoreProvider.ChoreProviderCollectContext>, ChoreProvider.ChoreProviderCollectContext> batch_work_items = new WorkItemCollection<MultithreadedCollectChoreContext<List<Chore>>.WorkBlock<ChoreProvider.ChoreProviderCollectContext>, ChoreProvider.ChoreProviderCollectContext>();
+
+	private class ChoreProviderCollectContext : MultithreadedCollectChoreContext<List<Chore>>
 	{
-		public ChoreProviderCollectTask(int start, int end, ChoreConsumerState consumer_state)
+		public override void CollectChore(int index, List<Chore.Precondition.Context> succeed, List<Chore.Precondition.Context> incomplete, List<Chore.Precondition.Context> failed)
 		{
-			this.start = start;
-			this.end = end;
-			this.consumer_state = consumer_state;
-			this.succeeded = ListPool<Chore.Precondition.Context, ChoreProvider.ChoreProviderCollectTask>.Allocate();
-			this.failed = ListPool<Chore.Precondition.Context, ChoreProvider.ChoreProviderCollectTask>.Allocate();
-			this.incomplete = ListPool<Chore.Precondition.Context, ChoreProvider.ChoreProviderCollectTask>.Allocate();
+			this.provider[index].CollectChores(this.consumerState, succeed, incomplete, failed, false);
 		}
-
-		public void Run(List<Chore> chores)
-		{
-			for (int i = this.start; i < this.end; i++)
-			{
-				chores[i].CollectChores(this.consumer_state, this.succeeded, this.incomplete, this.failed, false);
-			}
-		}
-
-		public void Finish(List<Chore.Precondition.Context> combined_succeeded, List<Chore.Precondition.Context> combined_failed)
-		{
-			combined_succeeded.AddRange(this.succeeded);
-			this.succeeded.Recycle();
-			combined_failed.AddRange(this.failed);
-			this.failed.Recycle();
-			foreach (Chore.Precondition.Context context in this.incomplete)
-			{
-				context.FinishPreconditions();
-				if (context.IsSuccess())
-				{
-					combined_succeeded.Add(context);
-				}
-				else
-				{
-					combined_failed.Add(context);
-				}
-			}
-			this.incomplete.Recycle();
-		}
-
-		private int start;
-
-		private int end;
-
-		private ChoreConsumerState consumer_state;
-
-		public ListPool<Chore.Precondition.Context, ChoreProvider.ChoreProviderCollectTask>.PooledList succeeded;
-
-		public ListPool<Chore.Precondition.Context, ChoreProvider.ChoreProviderCollectTask>.PooledList failed;
-
-		public ListPool<Chore.Precondition.Context, ChoreProvider.ChoreProviderCollectTask>.PooledList incomplete;
 	}
 }

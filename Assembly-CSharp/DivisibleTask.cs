@@ -2,7 +2,7 @@
 
 internal abstract class DivisibleTask<SharedData> : IWorkItem<SharedData>
 {
-	public void Run(SharedData sharedData)
+	public void Run(SharedData sharedData, int threadIndex)
 	{
 		this.RunDivision(sharedData);
 	}

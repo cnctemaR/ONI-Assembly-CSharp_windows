@@ -139,7 +139,7 @@ public class NavGridUpdater
 			this.teleportTransitions = teleport_transitions;
 		}
 
-		public void Run(object shared_data)
+		public void Run(object shared_data, int threadIndex)
 		{
 			for (int i = 0; i < Grid.WidthInCells; i++)
 			{
@@ -170,7 +170,7 @@ public class NavGridUpdater
 			this.validators = validators;
 		}
 
-		public void Run(object shared_data)
+		public void Run(object shared_data, int threadIndex)
 		{
 			for (int i = 0; i < Grid.WidthInCells; i++)
 			{

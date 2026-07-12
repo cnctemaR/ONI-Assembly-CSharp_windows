@@ -458,7 +458,7 @@ public class ConduitFlowVisualizer
 			this.moving_conduits.Capacity = num;
 		}
 
-		public void Run(ConduitFlowVisualizer.RenderMeshContext context)
+		public void Run(ConduitFlowVisualizer.RenderMeshContext context, int threadIndex)
 		{
 			Element element = null;
 			for (int num = this.start; num != this.end; num++)

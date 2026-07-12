@@ -77,7 +77,7 @@ public class Artable : Workable
 		Db db = Db.Get();
 		Tag tag = base.GetComponent<KPrefabID>().PrefabID();
 		List<ArtableStage> prefabStages = Db.GetArtableStages().GetPrefabStages(tag);
-		StatusItem artist_skill = db.ArtableStatuses.Ugly;
+		ArtableStatusItem artist_skill = db.ArtableStatuses.Ugly;
 		MinionResume component = worker.GetComponent<MinionResume>();
 		if (component != null)
 		{
@@ -89,9 +89,11 @@ public class Artable : Workable
 			{
 				artist_skill = db.ArtableStatuses.Okay;
 			}
-			prefabStages.RemoveAll((ArtableStage stage) => stage.id == this.defaultArtworkId);
 		}
-		prefabStages.RemoveAll((ArtableStage stage) => stage.statusItem != artist_skill);
+		prefabStages.RemoveAll((ArtableStage stage) => stage.statusItem.StatusType > artist_skill.StatusType || stage.statusItem.StatusType == ArtableStatuses.ArtableStatusType.AwaitingArting);
+		prefabStages.Sort((ArtableStage x, ArtableStage y) => y.statusItem.StatusType.CompareTo(x.statusItem.StatusType));
+		ArtableStatuses.ArtableStatusType highest_type = prefabStages[0].statusItem.StatusType;
+		prefabStages.RemoveAll((ArtableStage stage) => stage.statusItem.StatusType < highest_type);
 		prefabStages.Shuffle<ArtableStage>();
 		this.SetStage(prefabStages[0].id, false);
 		if (prefabStages[0].cheerOnComplete)

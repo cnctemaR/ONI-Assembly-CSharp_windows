@@ -4,7 +4,7 @@ namespace Database
 {
 	public class ArtableStage : Resource
 	{
-		public ArtableStage(string id, string name, string animFile, string anim, int decor_value, bool cheer_on_complete, StatusItem status_item, string prefabId, string symbolName = "")
+		public ArtableStage(string id, string name, string animFile, string anim, int decor_value, bool cheer_on_complete, ArtableStatusItem status_item, string prefabId, string symbolName = "")
 			: base(id, name)
 		{
 			this.id = id;
@@ -34,6 +34,6 @@ namespace Database
 
 		public bool cheerOnComplete;
 
-		public StatusItem statusItem;
+		public ArtableStatusItem statusItem;
 	}
 }

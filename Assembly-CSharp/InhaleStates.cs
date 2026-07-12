@@ -80,7 +80,7 @@ public class InhaleStates : GameStateMachine<InhaleStates, InhaleStates.Instance
 
 		public string inhaleAnimPre = "inhale_pre";
 
-		public string inhaleAnimLoop = "inhale_pre";
+		public string inhaleAnimLoop = "inhale_loop";
 
 		public string inhaleAnimPst = "inhale_pst";
 

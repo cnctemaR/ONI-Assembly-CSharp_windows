@@ -37,8 +37,8 @@ public class Oxyfern : StateMachineComponent<Oxyfern.StatesInstance>
 		GameUtil.KInstantiate(Assets.GetPrefab(EffectConfigs.PlantDeathId), base.gameObject.transform.GetPosition(), Grid.SceneLayer.FXFront, null, 0).SetActive(true);
 		base.gameObject.Trigger(1623392196, null);
 		base.gameObject.GetComponent<KBatchedAnimController>().StopAndClear();
-		global::UnityEngine.Object.Destroy(base.gameObject.GetComponent<KBatchedAnimController>());
 		Util.KDestroyGameObject(base.gameObject);
+		base.Unsubscribe<Oxyfern>(-216549700, Oxyfern.OnUprootedDelegate, false);
 	}
 
 	private void OnReplanted(object data = null)

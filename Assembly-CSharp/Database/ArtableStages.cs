@@ -6,7 +6,7 @@ namespace Database
 {
 	public class ArtableStages : ResourceSet<ArtableStage>
 	{
-		public ArtableStage Add(string id, string name, string animFile, string anim, int decor_value, bool cheer_on_complete, StatusItem status_item, string prefabId, string symbolname = "")
+		public ArtableStage Add(string id, string name, string animFile, string anim, int decor_value, bool cheer_on_complete, ArtableStatusItem status_item, string prefabId, string symbolname = "")
 		{
 			ArtableStage artableStage = new ArtableStage(id, name, animFile, anim, decor_value, cheer_on_complete, status_item, prefabId, symbolname);
 			this.resources.Add(artableStage);

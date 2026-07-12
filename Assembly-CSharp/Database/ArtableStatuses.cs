@@ -2,23 +2,38 @@
 
 namespace Database
 {
-	public class ArtableStatuses : ResourceSet<StatusItem>
+	public class ArtableStatuses : ResourceSet<ArtableStatusItem>
 	{
 		public ArtableStatuses(ResourceSet parent)
 			: base("ArtableStatuses", parent)
 		{
-			this.Ready = new StatusItem("AwaitingArting", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022, null);
-			this.Ugly = new StatusItem("LookingUgly", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022, null);
-			this.Okay = new StatusItem("LookingOkay", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022, null);
-			this.Great = new StatusItem("LookingGreat", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022, null);
+			this.Ready = this.Add("AwaitingArting", ArtableStatuses.ArtableStatusType.AwaitingArting);
+			this.Ugly = this.Add("LookingUgly", ArtableStatuses.ArtableStatusType.LookingUgly);
+			this.Okay = this.Add("LookingOkay", ArtableStatuses.ArtableStatusType.LookingOkay);
+			this.Great = this.Add("LookingGreat", ArtableStatuses.ArtableStatusType.LookingGreat);
 		}
 
-		public StatusItem Ready;
+		public ArtableStatusItem Add(string id, ArtableStatuses.ArtableStatusType statusType)
+		{
+			ArtableStatusItem artableStatusItem = new ArtableStatusItem(id, statusType);
+			this.resources.Add(artableStatusItem);
+			return artableStatusItem;
+		}
 
-		public StatusItem Ugly;
+		public ArtableStatusItem Ready;
 
-		public StatusItem Okay;
+		public ArtableStatusItem Ugly;
 
-		public StatusItem Great;
+		public ArtableStatusItem Okay;
+
+		public ArtableStatusItem Great;
+
+		public enum ArtableStatusType
+		{
+			AwaitingArting,
+			LookingUgly,
+			LookingOkay,
+			LookingGreat
+		}
 	}
 }

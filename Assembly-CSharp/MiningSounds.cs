@@ -45,7 +45,10 @@ public class MiningSounds : KMonoBehaviour
 
 	public void SetPercentComplete(float progress)
 	{
-		this.loopingSounds.SetParameter(this.miningSoundEvent, MiningSounds.HASH_PERCENTCOMPLETE, progress);
+		if (!this.miningSoundEvent.IsNull)
+		{
+			this.loopingSounds.SetParameter(this.miningSoundEvent, MiningSounds.HASH_PERCENTCOMPLETE, progress);
+		}
 	}
 
 	private static HashedString HASH_PERCENTCOMPLETE = "percentComplete";

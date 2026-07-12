@@ -100,8 +100,8 @@ namespace Database
 			new ArtableStages.Info("Canvas_Good11", BUILDINGS.PREFABS.CANVAS.FACADES.ART_M.NAME, BUILDINGS.PREFABS.CANVAS.FACADES.ART_M.DESC, PermitRarity.Decent, "painting_art_m_kanim", "art_m", 15, true, "LookingGreat", "Canvas", "canvas"),
 			new ArtableStages.Info("CanvasTall_Good8", BUILDINGS.PREFABS.CANVASTALL.FACADES.ART_TALL_J.NAME, BUILDINGS.PREFABS.CANVASTALL.FACADES.ART_TALL_J.DESC, PermitRarity.Decent, "painting_tall_art_j_kanim", "art_j", 15, true, "LookingGreat", "CanvasTall", "canvas"),
 			new ArtableStages.Info("CanvasTall_Good9", BUILDINGS.PREFABS.CANVASTALL.FACADES.ART_TALL_K.NAME, BUILDINGS.PREFABS.CANVASTALL.FACADES.ART_TALL_K.DESC, PermitRarity.Decent, "painting_tall_art_k_kanim", "art_k", 15, true, "LookingGreat", "CanvasTall", "canvas"),
-			new ArtableStages.Info("CanvasWide_Good8", BUILDINGS.PREFABS.CANVASWIDE.FACADES.ART_WIDE_J.NAME, BUILDINGS.PREFABS.CANVASWIDE.FACADES.ART_WIDE_J.DESC, PermitRarity.Decent, "painting_wide_art_j_kanim", "art_j", 15, true, "LookingGreat", "CanvasTall", "canvas"),
-			new ArtableStages.Info("CanvasWide_Good9", BUILDINGS.PREFABS.CANVASWIDE.FACADES.ART_WIDE_K.NAME, BUILDINGS.PREFABS.CANVASWIDE.FACADES.ART_WIDE_K.DESC, PermitRarity.Decent, "painting_wide_art_k_kanim", "art_k", 15, true, "LookingGreat", "CanvasTall", "canvas")
+			new ArtableStages.Info("CanvasWide_Good8", BUILDINGS.PREFABS.CANVASWIDE.FACADES.ART_WIDE_J.NAME, BUILDINGS.PREFABS.CANVASWIDE.FACADES.ART_WIDE_J.DESC, PermitRarity.Decent, "painting_wide_art_j_kanim", "art_j", 15, true, "LookingGreat", "CanvasWide", "canvas"),
+			new ArtableStages.Info("CanvasWide_Good9", BUILDINGS.PREFABS.CANVASWIDE.FACADES.ART_WIDE_K.NAME, BUILDINGS.PREFABS.CANVASWIDE.FACADES.ART_WIDE_K.DESC, PermitRarity.Decent, "painting_wide_art_k_kanim", "art_k", 15, true, "LookingGreat", "CanvasWide", "canvas")
 		};
 
 		public static ArtableStages.Info[] Infos_All = ArtableStages.Infos_Default.Concat<ArtableStages.Info>(ArtableStages.Infos_Skins);

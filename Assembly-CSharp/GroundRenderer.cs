@@ -582,12 +582,12 @@ public class GroundRenderer : KMonoBehaviour
 			{
 				return 0;
 			}
-			int num = 3;
+			SubWorld.ZoneType zoneType = SubWorld.ZoneType.Sandstone;
 			if (global::World.Instance != null && global::World.Instance.zoneRenderData != null)
 			{
-				global::World.Instance.zoneRenderData.GetSubWorldZoneType(cell);
+				zoneType = global::World.Instance.zoneRenderData.GetSubWorldZoneType(cell);
 			}
-			return num;
+			return (int)zoneType;
 		}
 
 		private static float GetStaticRandom(int x, int y)

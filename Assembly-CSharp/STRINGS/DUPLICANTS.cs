@@ -3137,6 +3137,15 @@ namespace STRINGS
 				public static LocString NO_BUILDING_WORK_ATTRIBUTE = "{0} Speed";
 			}
 
+			public class LABORATORYWORKEFFICIENCYBONUS
+			{
+				public static LocString NAME = "Lab Workspace";
+
+				public static LocString TOOLTIP = "Working in a Laboratory is allowing this Duplicant to work faster:\n    {0}";
+
+				public static LocString NO_BUILDING_WORK_ATTRIBUTE = "{0} Speed";
+			}
+
 			public class PICKINGUP
 			{
 				public static LocString NAME = "Picking up {Target}";
@@ -3177,6 +3186,13 @@ namespace STRINGS
 				public static LocString NAME = "Researching {Tech}";
 
 				public static LocString TOOLTIP = "This Duplicant is intently researching <b>{Tech}</b> technology";
+			}
+
+			public class MISSIONCONTROLLING
+			{
+				public static LocString NAME = "Mission Controlling";
+
+				public static LocString TOOLTIP = "This Duplicant is guiding a " + UI.PRE_KEYWORD + "Rocket" + UI.PST_KEYWORD;
 			}
 
 			public class STORING
@@ -3281,7 +3297,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Spicing Food";
 
-				public static LocString TOOLTIP = "This Duplicant is applying spice to some Food";
+				public static LocString TOOLTIP = "This Duplicant is adding spice to a meal";
 			}
 
 			public class CLEARING
@@ -4097,6 +4113,13 @@ namespace STRINGS
 				public static LocString NAME = "Barracks";
 
 				public static LocString TOOLTIP = "This Duplicant shares sleeping quarters with others";
+			}
+
+			public class LADDERBEDSTAMINA
+			{
+				public static LocString NAME = "Sleeping in a ladder bed";
+
+				public static LocString TOOLTIP = "This Duplicant's sleeping arrangements are adequate";
 			}
 
 			public class BEDROOMSTAMINA
@@ -6189,6 +6212,20 @@ namespace STRINGS
 
 			public static LocString GRANTED_SKILL_SHARED_SHORT_DESC_TOOLTIP = "This Duplicant receives a free " + UI.FormatAsKeyWord("Skill") + " without the drawback of increased " + UI.FormatAsKeyWord(DUPLICANTS.NEEDS.QUALITYOFLIFE.NAME);
 
+			public class CHATTY
+			{
+				public static LocString NAME = "Charismatic";
+
+				public static LocString DESC = string.Concat(new string[]
+				{
+					"This Duplicant's so charming, chatting with them is sometimes enough to trigger an ",
+					UI.PRE_KEYWORD,
+					"Overjoyed",
+					UI.PST_KEYWORD,
+					" response"
+				});
+			}
+
 			public class NEEDS
 			{
 				public class CLAUSTROPHOBIC
@@ -7509,6 +7546,13 @@ namespace STRINGS
 
 				public static LocString DESC = "This {0}'s favorite genre of music is \"festive power ballad\".";
 			}
+
+			public class JORGE
+			{
+				public static LocString NAME = "Jorge";
+
+				public static LocString DESC = "{0} is very excited to join the colony and settle into their new home!";
+			}
 		}
 
 		public class NEEDS
@@ -7843,6 +7887,8 @@ namespace STRINGS
 				public static LocString SPEEDMODIFIER = "{0} Skill Leveling";
 
 				public static LocString RESEARCHSPEED = "{0} Research Speed";
+
+				public static LocString GEOTUNER_SPEED_MODIFIER = "{0} Geotuning Speed";
 			}
 
 			public class COOKING

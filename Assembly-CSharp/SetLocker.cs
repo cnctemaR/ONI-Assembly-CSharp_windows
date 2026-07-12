@@ -126,6 +126,11 @@ public class SetLocker : StateMachineComponent<SetLocker.StatesInstance>, ISides
 		return 20;
 	}
 
+	public void SetButtonTextOverride(ButtonMenuTextOverride text)
+	{
+		throw new NotImplementedException();
+	}
+
 	public string[][] possible_contents_ids;
 
 	public string machineSound;

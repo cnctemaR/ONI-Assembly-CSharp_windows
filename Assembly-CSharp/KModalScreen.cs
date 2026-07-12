@@ -31,20 +31,9 @@ public class KModalScreen : KScreen
 		rectTransform.SetAsFirstSibling();
 		rectTransform.SetLocalPosition(Vector3.zero);
 		rectTransform.localScale = Vector3.one;
-		KCanvasScaler componentInParent = rectTransform.GetComponentInParent<KCanvasScaler>();
-		float num;
-		if (componentInParent != null)
-		{
-			num = componentInParent.GetCanvasScale();
-		}
-		else
-		{
-			num = rectTransform.lossyScale.x;
-		}
-		rectTransform.localScale = new Vector3(1f / num, 1f / num, 1f / num);
-		rectTransform.anchorMin = new Vector2(0.5f, 0.5f);
-		rectTransform.anchorMax = new Vector2(0.5f, 0.5f);
-		rectTransform.sizeDelta = new Vector2((float)Screen.width, (float)Screen.height);
+		rectTransform.anchorMin = new Vector2(0f, 0f);
+		rectTransform.anchorMax = new Vector2(1f, 1f);
+		rectTransform.sizeDelta = new Vector2(0f, 0f);
 	}
 
 	protected override void OnCmpEnable()

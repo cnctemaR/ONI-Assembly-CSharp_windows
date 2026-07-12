@@ -51,7 +51,7 @@ public class EquippableFacade : KMonoBehaviour
 		{
 			return Strings.Get("STRINGS.EQUIPMENT.PREFABS." + defID.ToUpper() + ".NAME");
 		}
-		return Strings.Get("STRINGS.EQUIPMENT.PREFABS.CUSTOMCLOTHING.FACADES." + facadeID.ToUpper());
+		return Db.GetEquippableFacades().Get(facadeID).Name;
 	}
 
 	[Serialize]

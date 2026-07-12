@@ -95,13 +95,13 @@ public class ResearchCenter : Workable, IGameObjectEffectDescriptor, ISim200ms, 
 
 	protected override bool OnWorkTick(Worker worker, float dt)
 	{
-		float num = (this.currentlyLit ? (1f + DUPLICANTSTATS.LIGHT.LIGHT_WORK_EFFICIENCY_BONUS) : 1f);
-		float num2 = 1f + Db.Get().AttributeConverters.ResearchSpeed.Lookup(worker).Evaluate() + num;
+		float efficiencyMultiplier = this.GetEfficiencyMultiplier(worker);
+		float num = 2f + efficiencyMultiplier;
 		if (Game.Instance.FastWorkersModeActive)
 		{
-			num2 *= 2f;
+			num *= 2f;
 		}
-		this.elementConverter.SetWorkSpeedMultiplier(num2);
+		this.elementConverter.SetWorkSpeedMultiplier(num);
 		return base.OnWorkTick(worker, dt);
 	}
 

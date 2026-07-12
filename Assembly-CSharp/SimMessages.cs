@@ -378,6 +378,51 @@ public static class SimMessages
 		}
 	}
 
+	public unsafe static void RegisterBuildingToBuildingHeatExchange(int structureTemperatureHandler, int callbackIdx = -1)
+	{
+		checked
+		{
+			SimMessages.RegisterBuildingToBuildingHeatExchangeMessage* ptr = stackalloc SimMessages.RegisterBuildingToBuildingHeatExchangeMessage[unchecked((UIntPtr)1) * (UIntPtr)sizeof(SimMessages.RegisterBuildingToBuildingHeatExchangeMessage)];
+			ptr->structureTemperatureHandler = structureTemperatureHandler;
+			ptr->callbackIdx = callbackIdx;
+			Sim.SIM_HandleMessage(-1338718217, sizeof(SimMessages.RegisterBuildingToBuildingHeatExchangeMessage), (byte*)ptr);
+		}
+	}
+
+	public unsafe static void AddBuildingToBuildingHeatExchange(int selfHandler, int buildingInContact, int cellsInContact)
+	{
+		checked
+		{
+			SimMessages.AddBuildingToBuildingHeatExchangeMessage* ptr = stackalloc SimMessages.AddBuildingToBuildingHeatExchangeMessage[unchecked((UIntPtr)1) * (UIntPtr)sizeof(SimMessages.AddBuildingToBuildingHeatExchangeMessage)];
+			ptr->selfHandler = selfHandler;
+			ptr->buildingInContactHandle = buildingInContact;
+			ptr->cellsInContact = cellsInContact;
+			Sim.SIM_HandleMessage(-1586724321, sizeof(SimMessages.AddBuildingToBuildingHeatExchangeMessage), (byte*)ptr);
+		}
+	}
+
+	public unsafe static void RemoveBuildingInContactFromBuildingToBuildingHeatExchange(int selfHandler, int buildingToRemove)
+	{
+		checked
+		{
+			SimMessages.RemoveBuildingInContactFromBuildingToBuildingHeatExchangeMessage* ptr = stackalloc SimMessages.RemoveBuildingInContactFromBuildingToBuildingHeatExchangeMessage[unchecked((UIntPtr)1) * (UIntPtr)sizeof(SimMessages.RemoveBuildingInContactFromBuildingToBuildingHeatExchangeMessage)];
+			ptr->selfHandler = selfHandler;
+			ptr->buildingNoLongerInContactHandler = buildingToRemove;
+			Sim.SIM_HandleMessage(-1993857213, sizeof(SimMessages.RemoveBuildingInContactFromBuildingToBuildingHeatExchangeMessage), (byte*)ptr);
+		}
+	}
+
+	public unsafe static void RemoveBuildingToBuildingHeatExchange(int selfHandler, int callback = -1)
+	{
+		checked
+		{
+			SimMessages.RemoveBuildingToBuildingHeatExchangeMessage* ptr = stackalloc SimMessages.RemoveBuildingToBuildingHeatExchangeMessage[unchecked((UIntPtr)1) * (UIntPtr)sizeof(SimMessages.RemoveBuildingToBuildingHeatExchangeMessage)];
+			ptr->callbackIdx = callback;
+			ptr->selfHandler = selfHandler;
+			Sim.SIM_HandleMessage(697100730, sizeof(SimMessages.RemoveBuildingToBuildingHeatExchangeMessage), (byte*)ptr);
+		}
+	}
+
 	public unsafe static void AddDiseaseEmitter(int callbackIdx)
 	{
 		checked
@@ -964,6 +1009,7 @@ public static class SimMessages
 			Sim.DebugProperties* ptr = stackalloc Sim.DebugProperties[unchecked((UIntPtr)1) * (UIntPtr)sizeof(Sim.DebugProperties)];
 			*ptr = properties;
 			ptr->buildingTemperatureScale = properties.buildingTemperatureScale;
+			ptr->buildingToBuildingTemperatureScale = properties.buildingToBuildingTemperatureScale;
 			Sim.SIM_HandleMessage(-1683118492, sizeof(Sim.DebugProperties), (byte*)ptr);
 		}
 	}
@@ -1268,6 +1314,40 @@ public static class SimMessages
 	}
 
 	[StructLayout(LayoutKind.Sequential, Pack = 4)]
+	public struct RegisterBuildingToBuildingHeatExchangeMessage
+	{
+		public int callbackIdx;
+
+		public int structureTemperatureHandler;
+	}
+
+	[StructLayout(LayoutKind.Sequential, Pack = 4)]
+	public struct AddBuildingToBuildingHeatExchangeMessage
+	{
+		public int selfHandler;
+
+		public int buildingInContactHandle;
+
+		public int cellsInContact;
+	}
+
+	[StructLayout(LayoutKind.Sequential, Pack = 4)]
+	public struct RemoveBuildingInContactFromBuildingToBuildingHeatExchangeMessage
+	{
+		public int selfHandler;
+
+		public int buildingNoLongerInContactHandler;
+	}
+
+	[StructLayout(LayoutKind.Sequential, Pack = 4)]
+	public struct RemoveBuildingToBuildingHeatExchangeMessage
+	{
+		public int callbackIdx;
+
+		public int selfHandler;
+	}
+
+	[StructLayout(LayoutKind.Sequential, Pack = 4)]
 	public struct AddDiseaseEmitterMessage
 	{
 		public int callbackIdx;
@@ -1502,7 +1582,8 @@ public static class SimMessages
 		HeatBulb,
 		WarmBlooded,
 		StructureTemperature,
-		Burner
+		Burner,
+		VacuumRadiator
 	}
 
 	[StructLayout(LayoutKind.Sequential, Pack = 4)]

@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class DevToolPrintingPodDebug : DevTool
 {
-	protected override void Render()
+	protected override void RenderTo(DevPanel panel)
 	{
 		if (Immigration.Instance != null)
 		{

@@ -161,6 +161,16 @@ public class BuildingDef : Def
 		return list;
 	}
 
+	public GameObject Build(int cell, Orientation orientation, Storage resource_storage, IList<Tag> selected_elements, float temperature, string facadeID, bool playsound = true, float timeBuilt = -1f)
+	{
+		GameObject gameObject = this.Build(cell, orientation, resource_storage, selected_elements, temperature, playsound, timeBuilt);
+		if (facadeID != null && facadeID != "DEFAULT_FACADE")
+		{
+			gameObject.GetComponent<BuildingFacade>().ApplyBuildingFacade(Db.GetBuildingFacades().Get(facadeID));
+		}
+		return gameObject;
+	}
+
 	public GameObject Build(int cell, Orientation orientation, Storage resource_storage, IList<Tag> selected_elements, float temperature, bool playsound = true, float timeBuilt = -1f)
 	{
 		Vector3 vector = Grid.CellToPosCBC(cell, this.SceneLayer);
@@ -215,6 +225,16 @@ public class BuildingDef : Def
 		if (this.IsValidPlaceLocation(src_go, pos, orientation, false, out text))
 		{
 			gameObject = this.Instantiate(pos, orientation, selected_elements, layer);
+		}
+		return gameObject;
+	}
+
+	public GameObject TryPlace(GameObject src_go, Vector3 pos, Orientation orientation, IList<Tag> selected_elements, string facadeID, int layer = 0)
+	{
+		GameObject gameObject = this.TryPlace(src_go, pos, orientation, selected_elements, layer);
+		if (gameObject != null && facadeID != null && facadeID != "DEFAULT_FACADE")
+		{
+			gameObject.GetComponent<BuildingFacade>().ApplyBuildingFacade(Db.GetBuildingFacades().Get(facadeID));
 		}
 		return gameObject;
 	}
@@ -279,20 +299,21 @@ public class BuildingDef : Def
 				break;
 			}
 			bool flag2 = this.BuildLocationRule == BuildLocationRule.LogicBridge || this.BuildLocationRule == BuildLocationRule.Conduit || this.BuildLocationRule == BuildLocationRule.WireBridge;
-			if (!replace_tile && !flag2)
+			GameObject gameObject = null;
+			if (replace_tile)
 			{
-				GameObject gameObject = Grid.Objects[num, (int)layer];
-				if (gameObject != null && gameObject != source_go)
+				gameObject = this.GetReplacementCandidate(num);
+			}
+			if (!flag2)
+			{
+				GameObject gameObject2 = Grid.Objects[num, (int)layer];
+				if (gameObject2 != null && gameObject2 != source_go && (gameObject == null || gameObject != gameObject2) && (gameObject2.GetComponent<Wire>() == null || this.BuildingComplete.GetComponent<Wire>() == null))
 				{
-					if (gameObject.GetComponent<Wire>() == null || this.BuildingComplete.GetComponent<Wire>() == null)
-					{
-						fail_reason = UI.TOOLTIPS.HELP_BUILDLOCATION_OCCUPIED;
-						flag = false;
-						break;
-					}
+					fail_reason = UI.TOOLTIPS.HELP_BUILDLOCATION_OCCUPIED;
+					flag = false;
 					break;
 				}
-				else if (tile_layer != ObjectLayer.NumLayers && Grid.Objects[num, (int)tile_layer] != null && Grid.Objects[num, (int)tile_layer].GetComponent<BuildingPreview>() == null)
+				if (tile_layer != ObjectLayer.NumLayers && (gameObject == null || gameObject == source_go) && Grid.Objects[num, (int)tile_layer] != null && Grid.Objects[num, (int)tile_layer].GetComponent<BuildingPreview>() == null)
 				{
 					fail_reason = UI.TOOLTIPS.HELP_BUILDLOCATION_OCCUPIED;
 					flag = false;
@@ -320,15 +341,15 @@ public class BuildingDef : Def
 						CellOffset rotatedCellOffset2 = Rotatable.GetRotatedCellOffset(def.solidOffsets[j], orientation);
 						flag3 |= rotatedCellOffset2 == rotatedCellOffset;
 					}
-					if (flag3 && !this.IsValidTileLocation(source_go, num, ref fail_reason))
+					if (flag3 && !this.IsValidTileLocation(source_go, num, replace_tile, ref fail_reason))
 					{
 						flag = false;
 						break;
 					}
-					GameObject gameObject2 = Grid.Objects[num, 1];
-					if (gameObject2 != null && gameObject2.GetComponent<BuildingPreview>() == null)
+					GameObject gameObject3 = Grid.Objects[num, 1];
+					if (gameObject3 != null && gameObject3.GetComponent<BuildingPreview>() == null)
 					{
-						Building component = gameObject2.GetComponent<Building>();
+						Building component = gameObject3.GetComponent<Building>();
 						if (flag3 || component == null || component.Def.AttachmentSlotTag != GameTags.Rocket)
 						{
 							fail_reason = UI.TOOLTIPS.HELP_BUILDLOCATION_OCCUPIED;
@@ -339,7 +360,7 @@ public class BuildingDef : Def
 				}
 				if (this.BuildLocationRule == BuildLocationRule.Tile)
 				{
-					if (!this.IsValidTileLocation(source_go, num, ref fail_reason))
+					if (!this.IsValidTileLocation(source_go, num, replace_tile, ref fail_reason))
 					{
 						flag = false;
 						break;
@@ -358,12 +379,26 @@ public class BuildingDef : Def
 		{
 			return false;
 		}
-		switch (this.BuildLocationRule)
+		if (layer == ObjectLayer.LiquidConduit)
+		{
+			GameObject gameObject4 = Grid.Objects[cell, 19];
+			if (gameObject4 != null)
+			{
+				Building component2 = gameObject4.GetComponent<Building>();
+				if (component2 != null && component2.Def.BuildLocationRule == BuildLocationRule.NoLiquidConduitAtOrigin && component2.GetCell() == cell)
+				{
+					fail_reason = UI.TOOLTIPS.HELP_BUILDLOCATION_LIQUID_CONDUIT_FORBIDDEN;
+					return false;
+				}
+			}
+		}
+		BuildLocationRule buildLocationRule = this.BuildLocationRule;
+		switch (buildLocationRule)
 		{
 		case BuildLocationRule.NotInTiles:
 		{
-			GameObject gameObject3 = Grid.Objects[cell, 9];
-			if (gameObject3 != null && gameObject3 != source_go)
+			GameObject gameObject5 = Grid.Objects[cell, 9];
+			if (!replace_tile && gameObject5 != null && gameObject5 != source_go)
 			{
 				flag = false;
 			}
@@ -373,20 +408,20 @@ public class BuildingDef : Def
 			}
 			else
 			{
-				GameObject gameObject4 = Grid.Objects[cell, (int)this.ObjectLayer];
-				if (gameObject4 != null)
+				GameObject gameObject6 = Grid.Objects[cell, (int)this.ObjectLayer];
+				if (gameObject6 != null)
 				{
 					if (this.ReplacementLayer == ObjectLayer.NumLayers)
 					{
-						if (gameObject4 != source_go)
+						if (gameObject6 != source_go)
 						{
 							flag = false;
 						}
 					}
 					else
 					{
-						Building component2 = gameObject4.GetComponent<Building>();
-						if (component2 != null && component2.Def.ReplacementLayer != this.ReplacementLayer)
+						Building component3 = gameObject6.GetComponent<Building>();
+						if (component3 != null && component3.Def.ReplacementLayer != this.ReplacementLayer)
 						{
 							flag = false;
 						}
@@ -399,10 +434,13 @@ public class BuildingDef : Def
 			}
 			break;
 		}
+		case BuildLocationRule.Conduit:
+		case BuildLocationRule.LogicBridge:
+			break;
 		case BuildLocationRule.WireBridge:
 			return this.IsValidWireBridgeLocation(source_go, cell, orientation, out fail_reason);
 		case BuildLocationRule.HighWattBridgeTile:
-			flag = this.IsValidTileLocation(source_go, cell, ref fail_reason) && this.IsValidHighWattBridgeLocation(source_go, cell, orientation, out fail_reason);
+			flag = this.IsValidTileLocation(source_go, cell, replace_tile, ref fail_reason) && this.IsValidHighWattBridgeLocation(source_go, cell, orientation, out fail_reason);
 			break;
 		case BuildLocationRule.BuildingAttachPoint:
 		{
@@ -426,13 +464,19 @@ public class BuildingDef : Def
 			}
 			break;
 		}
+		default:
+			if (buildLocationRule == BuildLocationRule.NoLiquidConduitAtOrigin)
+			{
+				flag = Grid.Objects[cell, 16] == null;
+			}
+			break;
 		}
 		flag = flag && this.ArePowerPortsInValidPositions(source_go, cell, orientation, out fail_reason);
 		flag = flag && this.AreConduitPortsInValidPositions(source_go, cell, orientation, out fail_reason);
 		return flag && this.AreLogicPortsInValidPositions(source_go, cell, out fail_reason);
 	}
 
-	private bool IsValidTileLocation(GameObject source_go, int cell, ref string fail_reason)
+	private bool IsValidTileLocation(GameObject source_go, int cell, bool replacement_tile, ref string fail_reason)
 	{
 		GameObject gameObject = Grid.Objects[cell, 27];
 		if (gameObject != null && gameObject != source_go && gameObject.GetComponent<Building>().Def.BuildLocationRule == BuildLocationRule.NotInTiles)
@@ -450,7 +494,7 @@ public class BuildingDef : Def
 		if (gameObject != null && gameObject != source_go)
 		{
 			Building component = gameObject.GetComponent<Building>();
-			if (component != null && component.Def.BuildLocationRule == BuildLocationRule.NotInTiles)
+			if (!replacement_tile && component != null && component.Def.BuildLocationRule == BuildLocationRule.NotInTiles)
 			{
 				fail_reason = UI.TOOLTIPS.HELP_BUILDLOCATION_BACK_WALL;
 				return false;
@@ -810,19 +854,19 @@ public class BuildingDef : Def
 		return flag;
 	}
 
-	public bool IsValidBuildLocation(GameObject source_go, Vector3 pos, Orientation orientation)
+	public bool IsValidBuildLocation(GameObject source_go, Vector3 pos, Orientation orientation, bool replace_tile = false)
 	{
 		string text = "";
-		return this.IsValidBuildLocation(source_go, pos, orientation, out text);
+		return this.IsValidBuildLocation(source_go, pos, orientation, out text, replace_tile);
 	}
 
-	public bool IsValidBuildLocation(GameObject source_go, Vector3 pos, Orientation orientation, out string reason)
+	public bool IsValidBuildLocation(GameObject source_go, Vector3 pos, Orientation orientation, out string reason, bool replace_tile = false)
 	{
 		int num = Grid.PosToCell(pos);
-		return this.IsValidBuildLocation(source_go, num, orientation, out reason);
+		return this.IsValidBuildLocation(source_go, num, orientation, replace_tile, out reason);
 	}
 
-	public bool IsValidBuildLocation(GameObject source_go, int cell, Orientation orientation, out string fail_reason)
+	public bool IsValidBuildLocation(GameObject source_go, int cell, Orientation orientation, bool replace_tile, out string fail_reason)
 	{
 		if (!Grid.IsValidBuildingCell(cell))
 		{
@@ -895,7 +939,7 @@ public class BuildingDef : Def
 				Building component2 = gameObject.GetComponent<Building>();
 				if (component2 != null && component2.Def.BuildLocationRule == BuildLocationRule.NotInTiles)
 				{
-					flag = false;
+					flag = replace_tile;
 				}
 			}
 			break;
@@ -903,7 +947,7 @@ public class BuildingDef : Def
 		case BuildLocationRule.NotInTiles:
 		{
 			GameObject gameObject2 = Grid.Objects[cell, 9];
-			flag = gameObject2 == null || gameObject2 == source_go;
+			flag = replace_tile || gameObject2 == null || gameObject2 == source_go;
 			flag = flag && !Grid.HasDoor[cell];
 			if (flag)
 			{
@@ -1468,6 +1512,18 @@ public class BuildingDef : Def
 		return this.UseHighEnergyParticleOutputPort;
 	}
 
+	public void AddFacade(string db_facade_id)
+	{
+		if (this.AvailableFacades == null)
+		{
+			this.AvailableFacades = new List<string>();
+		}
+		if (!this.AvailableFacades.Contains(db_facade_id))
+		{
+			this.AvailableFacades.Add(db_facade_id);
+		}
+	}
+
 	public string[] RequiredDlcIds;
 
 	public float EnergyConsumptionWhenActive;
@@ -1699,6 +1755,8 @@ public class BuildingDef : Def
 	public int BaseNoisePollution;
 
 	public int BaseNoisePollutionRadius;
+
+	public List<string> AvailableFacades = new List<string>();
 
 	private static Dictionary<CellOffset, CellOffset[]> placementOffsetsCache = new Dictionary<CellOffset, CellOffset[]>();
 }

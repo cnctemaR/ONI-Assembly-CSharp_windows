@@ -199,7 +199,7 @@ public class MegaBrainTank : StateMachineComponent<MegaBrainTank.StatesInstance>
 				smi.ElementConverter.SetConsumedElementActive(DreamJournalConfig.ID, true);
 				RequireInputs component = smi.GetComponent<RequireInputs>();
 				component.requireConduitHasMass = true;
-				component.visualizeRequirements = true;
+				component.visualizeRequirements = RequireInputs.Requirements.All;
 			}
 
 			public override void OnUpdate(MegaBrainTank.StatesInstance smi, float dt)
@@ -581,8 +581,7 @@ public class MegaBrainTank : StateMachineComponent<MegaBrainTank.StatesInstance>
 			{
 				return;
 			}
-			this.SyncTransition();
-			this.BrainController.Queue(this.CurrentActivationAnim, KAnim.PlayMode.Once, 1f, 0f);
+			this.BrainController.QueueAndSyncTransition(this.CurrentActivationAnim, KAnim.PlayMode.Once, 1f, 0f);
 			if (this.nextActiveBrain > 0)
 			{
 				this.BrainSounds.StartSound(this.brainHum);
@@ -602,14 +601,6 @@ public class MegaBrainTank : StateMachineComponent<MegaBrainTank.StatesInstance>
 				this.Operational.SetFlag(base.sm.activationCost, true);
 				this.CompleteEvent();
 			}
-		}
-
-		private void SyncTransition()
-		{
-			KAnim.Anim currentAnim = this.BrainController.GetCurrentAnim();
-			float elapsedTime = this.BrainController.GetElapsedTime();
-			float num = (float)currentAnim.numFrames / currentAnim.frameRate;
-			this.BrainController.SetElapsedTime(elapsedTime % num);
 		}
 
 		public void Digest(float dt)
@@ -639,8 +630,7 @@ public class MegaBrainTank : StateMachineComponent<MegaBrainTank.StatesInstance>
 			if (flag)
 			{
 				this.nextActiveBrain = 5;
-				this.SyncTransition();
-				this.BrainController.Queue(MegaBrainTankConfig.ACTIVATE_ALL, KAnim.PlayMode.Once, 1f, 0f);
+				this.BrainController.QueueAndSyncTransition(MegaBrainTankConfig.ACTIVATE_ALL, KAnim.PlayMode.Once, 1f, 0f);
 				this.BrainSounds.StartSound(this.brainHum);
 				this.BrainSounds.SetParameter(this.brainHum, "BrainTankProgress", (float)this.nextActiveBrain);
 				return;
@@ -652,8 +642,7 @@ public class MegaBrainTank : StateMachineComponent<MegaBrainTank.StatesInstance>
 				this.meterFill = 0f;
 				this.meter.SetPositionPercent(this.meterFill);
 			}
-			this.SyncTransition();
-			this.BrainController.Queue(MegaBrainTankConfig.DEACTIVATE_ALL, KAnim.PlayMode.Once, 1f, 0f);
+			this.BrainController.QueueAndSyncTransition(MegaBrainTankConfig.DEACTIVATE_ALL, KAnim.PlayMode.Once, 1f, 0f);
 			this.BrainSounds.StopSound(this.brainHum);
 		}
 
@@ -675,20 +664,15 @@ public class MegaBrainTank : StateMachineComponent<MegaBrainTank.StatesInstance>
 		public void CompleteEvent()
 		{
 			this.Selectable.RemoveStatusItem(Db.Get().BuildingStatusItems.MegaBrainTankActivationProgress, false);
-			base.smi.Selectable.AddStatusItem(Db.Get().BuildingStatusItems.MegaBrainTankComplete, base.smi);
+			this.Selectable.AddStatusItem(Db.Get().BuildingStatusItems.MegaBrainTankComplete, base.smi);
 			StoryInstance storyInstance = StoryManager.Instance.GetStoryInstance(Db.Get().Stories.MegaBrainTank.HashId);
 			if (storyInstance == null || (base.sm.activeParam.Get(this) && storyInstance.CurrentState == StoryInstance.State.COMPLETE))
 			{
 				return;
 			}
-			storyInstance.completionData = new StoryCompleteData
-			{
-				KeepSakeSpawnOffset = new CellOffset(0, 2),
-				CameraTargetOffset = new CellOffset(0, 3)
-			};
-			storyInstance.eventInfo = EventInfoDataHelper.GenerateStoryTraitData(CODEX.STORY_TRAITS.MEGA_BRAIN_TANK.END_POPUP.NAME, CODEX.STORY_TRAITS.MEGA_BRAIN_TANK.END_POPUP.DESCRIPTION, CODEX.STORY_TRAITS.MEGA_BRAIN_TANK.END_POPUP.BUTTON, "braintankcomplete_kanim", EventInfoDataHelper.PopupType.COMPLETE, null, null, new global::System.Action(this.OnCompleteStorySequence));
+			this.eventInfo = EventInfoDataHelper.GenerateStoryTraitData(CODEX.STORY_TRAITS.MEGA_BRAIN_TANK.END_POPUP.NAME, CODEX.STORY_TRAITS.MEGA_BRAIN_TANK.END_POPUP.DESCRIPTION, CODEX.STORY_TRAITS.MEGA_BRAIN_TANK.END_POPUP.BUTTON, "braintankcomplete_kanim", EventInfoDataHelper.PopupType.COMPLETE, null, null, null);
 			base.smi.Selectable.AddStatusItem(Db.Get().MiscStatusItems.AttentionRequired, base.smi);
-			this.eventComplete = EventInfoScreen.CreateNotification(storyInstance.eventInfo, new Notification.ClickCallback(this.ShowEventCompleteUI));
+			this.eventComplete = EventInfoScreen.CreateNotification(this.eventInfo, new Notification.ClickCallback(this.ShowEventCompleteUI));
 			this.notifier.Add(this.eventComplete, "");
 		}
 
@@ -702,14 +686,24 @@ public class MegaBrainTank : StateMachineComponent<MegaBrainTank.StatesInstance>
 			this.notifier.Remove(this.eventComplete);
 			this.eventComplete = null;
 			Game.Instance.unlocks.Unlock("story_trait_mega_brain_tank_competed", true);
-			StoryManager.Instance.CompleteStoryEvent(Db.Get().Stories.MegaBrainTank, base.master);
+			Vector3 vector = Grid.CellToPosCCC(Grid.OffsetCell(Grid.PosToCell(base.master), new CellOffset(0, 3)), Grid.SceneLayer.Ore);
+			StoryManager.Instance.CompleteStoryEvent(Db.Get().Stories.MegaBrainTank, base.master, new FocusTargetSequence.Data
+			{
+				WorldId = base.master.GetMyWorldId(),
+				OrthographicSize = 6f,
+				TargetSize = 6f,
+				Target = vector,
+				PopupData = this.eventInfo,
+				CompleteCB = new global::System.Action(this.OnCompleteStorySequence),
+				CanCompleteCB = null
+			});
 		}
 
 		private void OnCompleteStorySequence()
 		{
-			StoryInstance storyInstance = StoryManager.Instance.GetStoryInstance(Db.Get().Stories.MegaBrainTank.HashId);
-			storyInstance.sequenceCompleteCallback = null;
-			storyInstance.eventInfo = null;
+			Vector3 vector = Grid.CellToPosCCC(Grid.OffsetCell(Grid.PosToCell(base.master), new CellOffset(0, 2)), Grid.SceneLayer.Ore);
+			StoryManager.Instance.CompleteStoryEvent(Db.Get().Stories.MegaBrainTank, vector);
+			this.eventInfo = null;
 			base.sm.dormantParam.Set(base.smi.IsHungry, base.smi, false);
 			base.sm.activeParam.Set(true, this, false);
 		}
@@ -741,6 +735,8 @@ public class MegaBrainTank : StateMachineComponent<MegaBrainTank.StatesInstance>
 		private KAnimLink fxLink;
 
 		private MeterController meter;
+
+		private EventInfoData eventInfo;
 
 		private Notification eventComplete;
 

@@ -158,7 +158,7 @@ public class LaunchableRocket : StateMachineComponent<LaunchableRocket.StatesIns
 				{
 					gameObject6.Trigger(-1358394196, null);
 				}
-				Game.Instance.Trigger(-1277991738, this);
+				Game.Instance.Trigger(-1277991738, smi.gameObject);
 				foreach (GameObject gameObject7 in smi.master.parts)
 				{
 					if (!(gameObject7 == null))
@@ -204,7 +204,10 @@ public class LaunchableRocket : StateMachineComponent<LaunchableRocket.StatesIns
 				{
 					smi.GoTo(this.not_grounded.space);
 				}
-			}, UpdateRate.SIM_33ms, false);
+			}, UpdateRate.SIM_33ms, false).Exit(delegate(LaunchableRocket.StatesInstance smi)
+			{
+				smi.gameObject.GetMyWorld().RevealSurface();
+			});
 			this.not_grounded.space.Enter(delegate(LaunchableRocket.StatesInstance smi)
 			{
 				smi.master.rocketSpeed = 0f;
@@ -294,6 +297,7 @@ public class LaunchableRocket : StateMachineComponent<LaunchableRocket.StatesIns
 				if (num5 <= 0.0025f && dt != 0f)
 				{
 					smi.master.GetComponent<KSelectable>().IsSelectable = true;
+					Game.Instance.Trigger(-887025858, smi.gameObject);
 					foreach (GameObject gameObject12 in smi.master.parts)
 					{
 						if (!(gameObject12 == null))

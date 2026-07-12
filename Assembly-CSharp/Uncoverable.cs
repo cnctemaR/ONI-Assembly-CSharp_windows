@@ -7,6 +7,14 @@ using UnityEngine;
 [AddComponentMenu("KMonoBehaviour/scripts/Uncoverable")]
 public class Uncoverable : KMonoBehaviour
 {
+	public bool IsUncovered
+	{
+		get
+		{
+			return this.hasBeenUncovered;
+		}
+	}
+
 	private bool IsAnyCellShowing()
 	{
 		int num = Grid.PosToCell(this);
@@ -45,7 +53,7 @@ public class Uncoverable : KMonoBehaviour
 			GameScenePartitioner.Instance.Free(ref this.partitionerEntry);
 			this.hasBeenUncovered = true;
 			base.GetComponent<KSelectable>().IsSelectable = true;
-			Notification notification = new Notification(MISC.STATUSITEMS.BURIEDITEM.NOTIFICATION, NotificationType.Good, new Func<List<Notification>, object, string>(Uncoverable.OnNotificationToolTip), this, true, 0f, null, null, null, true, false);
+			Notification notification = new Notification(MISC.STATUSITEMS.BURIEDITEM.NOTIFICATION, NotificationType.Good, new Func<List<Notification>, object, string>(Uncoverable.OnNotificationToolTip), this, true, 0f, null, null, null, true, false, false);
 			base.gameObject.AddOrGet<Notifier>().Add(notification, "");
 		}
 	}

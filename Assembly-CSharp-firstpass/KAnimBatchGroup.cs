@@ -12,24 +12,27 @@ public class KAnimBatchGroup
 
 	private Material CreateMaterial(KAnimBatchGroup.MaterialType material_type)
 	{
-		Material material;
+		Material material = null;
 		switch (material_type)
 		{
 		case KAnimBatchGroup.MaterialType.Simple:
 			material = new Material(Shader.Find("Klei/AnimationSimple"));
-			goto IL_0064;
+			goto IL_0074;
 		case KAnimBatchGroup.MaterialType.UI:
 			material = new Material(Shader.Find("Klei/BatchedAnimationUI"));
-			goto IL_0064;
+			goto IL_0074;
 		case KAnimBatchGroup.MaterialType.Overlay:
-			material = new Material(Shader.Find("Klei/AnimationOverlay"));
-			goto IL_0064;
+			global::Debug.LogError("MaterialType.Overlay no longer supported.");
+			goto IL_0074;
+		case KAnimBatchGroup.MaterialType.Human:
+			material = new Material(Shader.Find("Klei/BatchedAnimationHuman"));
+			goto IL_0074;
 		}
 		material = new Material(Shader.Find("Klei/BatchedAnimation"));
-		IL_0064:
+		IL_0074:
 		material.name = "Material:" + this.batchID.ToString();
 		material.SetFloat(KAnimBatchGroup.ShaderProperty_SYMBOLS_PER_BUILD, (float)this.data.maxSymbolsPerBuild);
-		material.SetFloat(KAnimBatchGroup.ShaderProperty_ANIM_TEXTURE_START_OFFSET, (float)this.data.animDataStartOffset);
+		material.SetFloat(KAnimBatchGroup.ShaderProperty_ANIM_TEXTURE_START_OFFSET, (float)(this.data.animDataStartOffset / 4));
 		material.SetFloat(KAnimBatchGroup.ShaderProperty_SYMBOL_OVERRIDES_PER_BUILD, (float)this.data.symbolFrameInstances.Count);
 		return material;
 	}
@@ -56,7 +59,7 @@ public class KAnimBatchGroup
 	public KAnimBatchGroup(HashedString id)
 	{
 		this.data = KAnimBatchManager.Instance().GetBatchGroupData(id);
-		this.materials = new Material[5];
+		this.materials = new Material[6];
 		this.batchID = id;
 		KAnimGroupFile.Group group = KAnimGroupFile.GetGroup(id);
 		if (group == null)
@@ -76,7 +79,7 @@ public class KAnimBatchGroup
 	{
 		get
 		{
-			return this.float4sPerSide > 0;
+			return this.size.x > 0;
 		}
 	}
 
@@ -87,7 +90,7 @@ public class KAnimBatchGroup
 			KAnimBatchGroup.cache.Free(this.buildAndAnimTex);
 			this.buildAndAnimTex = null;
 		}
-		for (int i = 0; i < 5; i++)
+		for (int i = 0; i < 6; i++)
 		{
 			if (this.materials[i] != null)
 			{
@@ -107,11 +110,13 @@ public class KAnimBatchGroup
 		this.data = null;
 	}
 
-	public static int GetBestTextureSize(float cost)
+	public static Vector2I GetBestTextureSize(int cost)
 	{
-		float num = (float)Mathf.CeilToInt(Mathf.Sqrt(cost));
-		int num2 = 32;
-		return Mathf.CeilToInt(num / (float)num2) * num2;
+		int num = MathUtil.RoundToNextPowerOfTwo(Mathf.CeilToInt(Mathf.Sqrt((float)cost)));
+		int num2 = (cost - 1) / num + 1;
+		int num3 = 16;
+		num2 = Mathf.CeilToInt((float)num2 / (float)num3) * num3;
+		return new Vector2I(num, num2);
 	}
 
 	private void SetupMeshData()
@@ -119,16 +124,16 @@ public class KAnimBatchGroup
 		global::Debug.Assert(this.maxGroupSize > 0, "Group size must be >0");
 		this.maxGroupSize = Mathf.Min(this.maxGroupSize, 30);
 		this.mesh = this.BuildMesh(this.maxGroupSize * this.data.maxVisibleSymbols);
-		float num = (float)(this.maxGroupSize * 28) / 4f;
-		this.float4sPerSide = KAnimBatchGroup.GetBestTextureSize(num);
+		int num = Mathf.CeilToInt((float)(this.maxGroupSize * 28) / 4f);
+		this.size = KAnimBatchGroup.GetBestTextureSize(num);
 	}
 
-	private float GetBuildDataSize()
+	private int GetBuildDataSize()
 	{
-		return (float)(this.data.GetBuildSymbolFrameCount() * 16) / 4f;
+		return Mathf.CeilToInt((float)(this.data.GetBuildSymbolFrameCount() * 16) / 4f);
 	}
 
-	private float GetAnimDataSize()
+	private int GetAnimDataSize()
 	{
 		int num = 4;
 		List<KAnim.Anim.Frame> animFrames = this.data.GetAnimFrames();
@@ -143,16 +148,16 @@ public class KAnimBatchGroup
 			List<KAnim.Anim.FrameElement> animFrameElements = this.data.GetAnimFrameElements();
 			num += animFrameElements.Count * 12;
 		}
-		return (float)num / 4f;
+		return Mathf.CeilToInt((float)num / 4f);
 	}
 
 	public void InitBuildAndAnimTex()
 	{
-		float num = this.GetBuildDataSize() + this.GetAnimDataSize();
-		int bestTextureSize = KAnimBatchGroup.GetBestTextureSize(num);
-		this.buildAndAnimTex = KAnimBatchGroup.cache.Get(bestTextureSize, KAnimBatchGroup.ShaderProperty_buildAndAnimTex, KAnimBatchGroup.ShaderProperty_BUILD_AND_ANIM_TEXTURE_SIZE);
+		int num = this.GetBuildDataSize() + this.GetAnimDataSize();
+		Vector2I bestTextureSize = KAnimBatchGroup.GetBestTextureSize(num);
+		this.buildAndAnimTex = KAnimBatchGroup.cache.Get(bestTextureSize.x, bestTextureSize.y, KAnimBatchGroup.ShaderProperty_buildAndAnimTex, KAnimBatchGroup.ShaderProperty_BUILD_AND_ANIM_TEXTURE_SIZE);
 		this.buildAndAnimTex.name = "BuildAndAnimData:" + this.batchID.ToString();
-		if (num > (float)(this.buildAndAnimTex.width * this.buildAndAnimTex.height))
+		if (num > this.buildAndAnimTex.width * this.buildAndAnimTex.height)
 		{
 			global::Debug.LogErrorFormat("Texture is the wrong size! {0} <= {1}", new object[]
 			{
@@ -205,21 +210,21 @@ public class KAnimBatchGroup
 		return mesh;
 	}
 
-	public KAnimBatchGroup.KAnimBatchTextureCache.Entry CreateTexture(string name, int size_in_floats, int texture_property_id, int texture_size_property_id)
+	public KAnimBatchGroup.KAnimBatchTextureCache.Entry CreateTexture(string name, int width, int height, int texture_property_id, int texture_size_property_id)
 	{
-		DebugUtil.Assert(size_in_floats > 0);
-		KAnimBatchGroup.KAnimBatchTextureCache.Entry entry = KAnimBatchGroup.cache.Get(size_in_floats, texture_property_id, texture_size_property_id);
+		DebugUtil.Assert(width > 0 && height > 0);
+		KAnimBatchGroup.KAnimBatchTextureCache.Entry entry = KAnimBatchGroup.cache.Get(width, height, texture_property_id, texture_size_property_id);
 		entry.name = name;
 		return entry;
 	}
 
 	public KAnimBatchGroup.KAnimBatchTextureCache.Entry CreateTexture()
 	{
-		if (this.float4sPerSide <= 0)
+		if (this.size.x <= 0)
 		{
 			global::Debug.LogErrorFormat("Need to init AnimBatchGroup [{0}] first!", new object[] { this.batchID });
 		}
-		return this.CreateTexture("InstanceData:" + this.batchID.ToString(), this.float4sPerSide, KAnimBatchGroup.ShaderProperty_instanceTex, KAnimBatchGroup.ShaderProperty_INSTANCE_TEXTURE_SIZE);
+		return this.CreateTexture("InstanceData:" + this.batchID.ToString(), this.size.x, this.size.y, KAnimBatchGroup.ShaderProperty_instanceTex, KAnimBatchGroup.ShaderProperty_INSTANCE_TEXTURE_SIZE);
 	}
 
 	public void FreeTexture(KAnimBatchGroup.KAnimBatchTextureCache.Entry entry)
@@ -233,7 +238,7 @@ public class KAnimBatchGroup
 		{
 			this.buildAndAnimTex.SetTextureAndSize(matProperties);
 		}
-		matProperties.SetFloat(KAnimBatchGroup.ShaderProperty_ANIM_TEXTURE_START_OFFSET, (float)this.data.animDataStartOffset);
+		matProperties.SetFloat(KAnimBatchGroup.ShaderProperty_ANIM_TEXTURE_START_OFFSET, (float)(this.data.animDataStartOffset / 4));
 		for (int i = 0; i < this.data.textures.Count; i++)
 		{
 			atlases.Add(this.data.textures[i]);
@@ -252,7 +257,7 @@ public class KAnimBatchGroup
 
 	public int batchCount;
 
-	private int float4sPerSide;
+	private Vector2I size = new Vector2I(0, 0);
 
 	private static int ShaderProperty_BUILD_AND_ANIM_TEXTURE_SIZE = Shader.PropertyToID("BUILD_AND_ANIM_TEXTURE_SIZE");
 
@@ -266,13 +271,14 @@ public class KAnimBatchGroup
 
 	public class KAnimBatchTextureCache
 	{
-		public KAnimBatchGroup.KAnimBatchTextureCache.Entry Get(int float4s_per_side, int texture_property_id, int texture_size_property_id)
+		public KAnimBatchGroup.KAnimBatchTextureCache.Entry Get(int float4s_width, int float4s_height, int texture_property_id, int texture_size_property_id)
 		{
+			Vector2I vector2I = new Vector2I(float4s_width, float4s_height);
 			List<KAnimBatchGroup.KAnimBatchTextureCache.Entry> list = null;
-			if (!this.unused.TryGetValue(float4s_per_side, out list))
+			if (!this.unused.TryGetValue(vector2I, out list))
 			{
 				list = new List<KAnimBatchGroup.KAnimBatchTextureCache.Entry>();
-				this.unused.Add(float4s_per_side, list);
+				this.unused.Add(vector2I, list);
 			}
 			KAnimBatchGroup.KAnimBatchTextureCache.Entry entry;
 			if (list.Count > 0)
@@ -283,15 +289,15 @@ public class KAnimBatchGroup
 			}
 			else
 			{
-				entry = new KAnimBatchGroup.KAnimBatchTextureCache.Entry(float4s_per_side);
+				entry = new KAnimBatchGroup.KAnimBatchTextureCache.Entry(float4s_width, float4s_height);
 			}
 			entry.texturePropertyId = texture_property_id;
 			entry.textureSizePropertyId = texture_size_property_id;
 			List<KAnimBatchGroup.KAnimBatchTextureCache.Entry> list2 = null;
-			if (!this.inuse.TryGetValue(float4s_per_side, out list2))
+			if (!this.inuse.TryGetValue(vector2I, out list2))
 			{
 				list2 = new List<KAnimBatchGroup.KAnimBatchTextureCache.Entry>();
-				this.inuse.Add(float4s_per_side, list2);
+				this.inuse.Add(vector2I, list2);
 			}
 			list2.Add(entry);
 			entry.cacheIndex = list2.Count - 1;
@@ -300,11 +306,11 @@ public class KAnimBatchGroup
 
 		public void Free(KAnimBatchGroup.KAnimBatchTextureCache.Entry entry)
 		{
-			int width = entry.texture.width;
+			Vector2I vector2I = new Vector2I(entry.texture.width, entry.texture.height);
 			int cacheIndex = entry.cacheIndex;
 			entry.cacheIndex = -1;
 			List<KAnimBatchGroup.KAnimBatchTextureCache.Entry> list = null;
-			if (this.inuse.TryGetValue(width, out list))
+			if (this.inuse.TryGetValue(vector2I, out list))
 			{
 				int num = list.Count - 1;
 				if (num != cacheIndex)
@@ -317,7 +323,7 @@ public class KAnimBatchGroup
 				}
 			}
 			List<KAnimBatchGroup.KAnimBatchTextureCache.Entry> list2 = null;
-			if (this.unused.TryGetValue(width, out list2))
+			if (this.unused.TryGetValue(vector2I, out list2))
 			{
 				list2.Add(entry);
 			}
@@ -325,7 +331,7 @@ public class KAnimBatchGroup
 
 		public void Finalise()
 		{
-			foreach (KeyValuePair<int, List<KAnimBatchGroup.KAnimBatchTextureCache.Entry>> keyValuePair in this.inuse)
+			foreach (KeyValuePair<Vector2I, List<KAnimBatchGroup.KAnimBatchTextureCache.Entry>> keyValuePair in this.inuse)
 			{
 				for (int i = 0; i < keyValuePair.Value.Count; i++)
 				{
@@ -333,7 +339,7 @@ public class KAnimBatchGroup
 				}
 			}
 			this.inuse.Clear();
-			foreach (KeyValuePair<int, List<KAnimBatchGroup.KAnimBatchTextureCache.Entry>> keyValuePair2 in this.unused)
+			foreach (KeyValuePair<Vector2I, List<KAnimBatchGroup.KAnimBatchTextureCache.Entry>> keyValuePair2 in this.unused)
 			{
 				for (int j = 0; j < keyValuePair2.Value.Count; j++)
 				{
@@ -343,21 +349,22 @@ public class KAnimBatchGroup
 			this.unused.Clear();
 		}
 
-		private Dictionary<int, List<KAnimBatchGroup.KAnimBatchTextureCache.Entry>> unused = new Dictionary<int, List<KAnimBatchGroup.KAnimBatchTextureCache.Entry>>();
+		private Dictionary<Vector2I, List<KAnimBatchGroup.KAnimBatchTextureCache.Entry>> unused = new Dictionary<Vector2I, List<KAnimBatchGroup.KAnimBatchTextureCache.Entry>>();
 
-		private Dictionary<int, List<KAnimBatchGroup.KAnimBatchTextureCache.Entry>> inuse = new Dictionary<int, List<KAnimBatchGroup.KAnimBatchTextureCache.Entry>>();
+		private Dictionary<Vector2I, List<KAnimBatchGroup.KAnimBatchTextureCache.Entry>> inuse = new Dictionary<Vector2I, List<KAnimBatchGroup.KAnimBatchTextureCache.Entry>>();
 
 		public class Entry
 		{
 			public Texture2D texture { get; private set; }
 
-			public Entry(int float4s_per_side)
+			public Entry(int float4s_width, int float4s_height)
 			{
-				this.texture = new Texture2D(float4s_per_side, float4s_per_side, TextureFormat.RGBAFloat, false);
+				DebugUtil.DevAssert(float4s_width > 0 && MathUtil.IsPowerOfTwo(float4s_width), string.Format("Width ({0}) must be a power of two in order for fast indexing of the texture to work!", float4s_width), null);
+				this.texture = new Texture2D(float4s_width, float4s_height, TextureFormat.RGBAFloat, false);
 				this.texture.wrapMode = TextureWrapMode.Clamp;
 				this.texture.filterMode = FilterMode.Point;
 				this.texture.anisoLevel = 0;
-				int num = float4s_per_side * float4s_per_side;
+				int num = float4s_width * float4s_height;
 				NativeArray<Color> rawTextureData = this.texture.GetRawTextureData<Color>();
 				for (int i = 0; i < num; i++)
 				{
@@ -368,8 +375,10 @@ public class KAnimBatchGroup
 
 			public void SetTextureAndSize(MaterialPropertyBlock property_block)
 			{
+				DebugUtil.DevAssert(this.width > 0 && MathUtil.IsPowerOfTwo(this.width), string.Format("Width ({0}) must be a power of two in order for fast indexing of the texture to work!", this.width), null);
+				Vector2I vector2I = MathUtil.PowerOfTwoToMaskAndShift(this.width);
 				property_block.SetTexture(this.texturePropertyId, this.texture);
-				property_block.SetVector(this.textureSizePropertyId, new Vector4(this.texelSize.x, this.texelSize.y, (float)this.width, (float)this.height));
+				property_block.SetVector(this.textureSizePropertyId, new Vector4(this.texelSize.x, this.texelSize.y, (float)vector2I.x, (float)vector2I.y));
 			}
 
 			public NativeArray<byte> GetDataPointer()
@@ -447,6 +456,7 @@ public class KAnimBatchGroup
 		Placer,
 		UI,
 		Overlay,
+		Human,
 		NumMaterials
 	}
 }

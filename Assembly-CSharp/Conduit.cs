@@ -42,7 +42,7 @@ public class Conduit : KMonoBehaviour, IFirstFrameCallback, IHaveUtilityNetworkM
 		base.Subscribe<Conduit>(-1735440190, Conduit.OnBuildingFullyRepairedDelegate);
 	}
 
-	private void OnStructureTemperatureRegistered(object data)
+	protected virtual void OnStructureTemperatureRegistered(object data)
 	{
 		int num = Grid.PosToCell(this);
 		this.GetNetworkManager().AddToNetworks(num, this, false);
@@ -75,7 +75,7 @@ public class Conduit : KMonoBehaviour, IFirstFrameCallback, IHaveUtilityNetworkM
 		base.OnCleanUp();
 	}
 
-	private ConduitFlowVisualizer GetFlowVisualizer()
+	protected ConduitFlowVisualizer GetFlowVisualizer()
 	{
 		if (this.type != ConduitType.Gas)
 		{
@@ -120,7 +120,7 @@ public class Conduit : KMonoBehaviour, IFirstFrameCallback, IHaveUtilityNetworkM
 		return Game.Instance.gasConduitSystem;
 	}
 
-	public void AddNetworks(ICollection<UtilityNetwork> networks)
+	public virtual void AddNetworks(ICollection<UtilityNetwork> networks)
 	{
 		UtilityNetwork networkForCell = this.GetNetworkManager().GetNetworkForCell(Grid.PosToCell(this));
 		if (networkForCell != null)
@@ -129,13 +129,13 @@ public class Conduit : KMonoBehaviour, IFirstFrameCallback, IHaveUtilityNetworkM
 		}
 	}
 
-	public bool IsConnectedToNetworks(ICollection<UtilityNetwork> networks)
+	public virtual bool IsConnectedToNetworks(ICollection<UtilityNetwork> networks)
 	{
 		UtilityNetwork networkForCell = this.GetNetworkManager().GetNetworkForCell(Grid.PosToCell(this));
 		return networks.Contains(networkForCell);
 	}
 
-	public int GetNetworkCell()
+	public virtual int GetNetworkCell()
 	{
 		return Grid.PosToCell(this);
 	}
@@ -253,32 +253,32 @@ public class Conduit : KMonoBehaviour, IFirstFrameCallback, IHaveUtilityNetworkM
 
 	private global::System.Action firstFrameCallback;
 
-	private static readonly EventSystem.IntraObjectHandler<Conduit> OnHighlightedDelegate = new EventSystem.IntraObjectHandler<Conduit>(delegate(Conduit component, object data)
+	protected static readonly EventSystem.IntraObjectHandler<Conduit> OnHighlightedDelegate = new EventSystem.IntraObjectHandler<Conduit>(delegate(Conduit component, object data)
 	{
 		component.OnHighlighted(data);
 	});
 
-	private static readonly EventSystem.IntraObjectHandler<Conduit> OnConduitFrozenDelegate = new EventSystem.IntraObjectHandler<Conduit>(delegate(Conduit component, object data)
+	protected static readonly EventSystem.IntraObjectHandler<Conduit> OnConduitFrozenDelegate = new EventSystem.IntraObjectHandler<Conduit>(delegate(Conduit component, object data)
 	{
 		component.OnConduitFrozen(data);
 	});
 
-	private static readonly EventSystem.IntraObjectHandler<Conduit> OnConduitBoilingDelegate = new EventSystem.IntraObjectHandler<Conduit>(delegate(Conduit component, object data)
+	protected static readonly EventSystem.IntraObjectHandler<Conduit> OnConduitBoilingDelegate = new EventSystem.IntraObjectHandler<Conduit>(delegate(Conduit component, object data)
 	{
 		component.OnConduitBoiling(data);
 	});
 
-	private static readonly EventSystem.IntraObjectHandler<Conduit> OnStructureTemperatureRegisteredDelegate = new EventSystem.IntraObjectHandler<Conduit>(delegate(Conduit component, object data)
+	protected static readonly EventSystem.IntraObjectHandler<Conduit> OnStructureTemperatureRegisteredDelegate = new EventSystem.IntraObjectHandler<Conduit>(delegate(Conduit component, object data)
 	{
 		component.OnStructureTemperatureRegistered(data);
 	});
 
-	private static readonly EventSystem.IntraObjectHandler<Conduit> OnBuildingBrokenDelegate = new EventSystem.IntraObjectHandler<Conduit>(delegate(Conduit component, object data)
+	protected static readonly EventSystem.IntraObjectHandler<Conduit> OnBuildingBrokenDelegate = new EventSystem.IntraObjectHandler<Conduit>(delegate(Conduit component, object data)
 	{
 		component.OnBuildingBroken(data);
 	});
 
-	private static readonly EventSystem.IntraObjectHandler<Conduit> OnBuildingFullyRepairedDelegate = new EventSystem.IntraObjectHandler<Conduit>(delegate(Conduit component, object data)
+	protected static readonly EventSystem.IntraObjectHandler<Conduit> OnBuildingFullyRepairedDelegate = new EventSystem.IntraObjectHandler<Conduit>(delegate(Conduit component, object data)
 	{
 		component.OnBuildingFullyRepaired(data);
 	});

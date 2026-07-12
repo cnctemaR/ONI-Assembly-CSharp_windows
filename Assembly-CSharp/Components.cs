@@ -154,6 +154,14 @@ public class Components
 
 	public static Components.Cmps<Telephone> Telephones = new Components.Cmps<Telephone>();
 
+	public static Components.Cmps<MissionControlWorkable> MissionControlWorkables = new Components.Cmps<MissionControlWorkable>();
+
+	public static Components.Cmps<MissionControlClusterWorkable> MissionControlClusterWorkables = new Components.Cmps<MissionControlClusterWorkable>();
+
+	public static Components.CmpsByWorld<Geyser> Geysers = new Components.CmpsByWorld<Geyser>();
+
+	public static Components.CmpsByWorld<GeoTuner.Instance> GeoTuners = new Components.CmpsByWorld<GeoTuner.Instance>();
+
 	public static Components.Cmps<IncubationMonitor.Instance> IncubationMonitors = new Components.Cmps<IncubationMonitor.Instance>();
 
 	public static Components.Cmps<FixedCapturableMonitor.Instance> FixedCapturableMonitors = new Components.Cmps<FixedCapturableMonitor.Instance>();
@@ -325,6 +333,7 @@ public class Components
 
 		public void Add(int worldId, T cmp)
 		{
+			DebugUtil.DevAssertArgs(worldId != -1, new object[] { "CmpsByWorld tried to add a component to an invalid world. Did you call this during a state machine's constructor instead of StartSM? ", cmp });
 			this.CreateOrGetCmps(worldId).Add(cmp);
 		}
 
@@ -351,6 +360,17 @@ public class Components
 		public IEnumerator GetWorldEnumerator(int worldId)
 		{
 			return this.CreateOrGetCmps(worldId).GetEnumerator();
+		}
+
+		public int[] GetWorldsIDs()
+		{
+			int[] array = new int[this.m_CmpsByWorld.Keys.Count];
+			int num = 0;
+			foreach (int num2 in this.m_CmpsByWorld.Keys)
+			{
+				array[num++] = num2;
+			}
+			return array;
 		}
 
 		public int GlobalCount

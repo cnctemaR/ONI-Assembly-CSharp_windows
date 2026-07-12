@@ -29,27 +29,27 @@ public class ReceptacleSideScreen : SideScreenContent, IRender1000ms
 			global::UnityEngine.Object.Destroy(rbi.gameObject);
 		});
 		this.entityToggles.Clear();
-		foreach (Tag tag in target.possibleDepositObjectTags)
+		foreach (Tag tag in this.targetReceptacle.possibleDepositObjectTags)
 		{
 			List<GameObject> prefabsWithTag = Assets.GetPrefabsWithTag(tag);
-			if (this.targetReceptacle.rotatable == null)
-			{
-				prefabsWithTag.RemoveAll(delegate(GameObject go)
-				{
-					IReceptacleDirection component3 = go.GetComponent<IReceptacleDirection>();
-					return component3 != null && component3.Direction != this.targetReceptacle.Direction;
-				});
-			}
+			int num = prefabsWithTag.Count;
 			List<IHasSortOrder> list = new List<IHasSortOrder>();
 			foreach (GameObject gameObject in prefabsWithTag)
 			{
-				IHasSortOrder component = gameObject.GetComponent<IHasSortOrder>();
-				if (component != null)
+				if (!this.targetReceptacle.IsValidEntity(gameObject))
 				{
-					list.Add(component);
+					num--;
+				}
+				else
+				{
+					IHasSortOrder component = gameObject.GetComponent<IHasSortOrder>();
+					if (component != null)
+					{
+						list.Add(component);
+					}
 				}
 			}
-			global::Debug.Assert(list.Count == prefabsWithTag.Count, "Not all entities in this receptacle implement IHasSortOrder!");
+			global::Debug.Assert(list.Count == num, "Not all entities in this receptacle implement IHasSortOrder!");
 			list.Sort((IHasSortOrder a, IHasSortOrder b) => a.sortOrder - b.sortOrder);
 			foreach (IHasSortOrder hasSortOrder in list)
 			{
@@ -89,8 +89,8 @@ public class ReceptacleSideScreen : SideScreenContent, IRender1000ms
 		{
 			if (this.entityPreviousSelectionMap.ContainsKey(this.targetReceptacle))
 			{
-				int num = this.entityPreviousSelectionMap[this.targetReceptacle];
-				this.ToggleClicked(this.entityToggles[num]);
+				int num2 = this.entityPreviousSelectionMap[this.targetReceptacle];
+				this.ToggleClicked(this.entityToggles[num2]);
 			}
 			else
 			{
@@ -284,7 +284,8 @@ public class ReceptacleSideScreen : SideScreenContent, IRender1000ms
 
 	public override bool IsValidForTarget(GameObject target)
 	{
-		return target.GetComponent<SingleEntityReceptacle>() != null && target.GetComponent<PlantablePlot>() == null && target.GetComponent<EggIncubator>() == null;
+		SingleEntityReceptacle component = target.GetComponent<SingleEntityReceptacle>();
+		return component != null && component.enabled && target.GetComponent<PlantablePlot>() == null && target.GetComponent<EggIncubator>() == null;
 	}
 
 	public override void SetTarget(GameObject target)

@@ -11,7 +11,19 @@ public class JoyBehaviourMonitor : GameStateMachine<JoyBehaviourMonitor, JoyBeha
 		default_state = this.neutral;
 		base.serializable = StateMachine.SerializeType.Both_DEPRECATED;
 		this.root.TagTransition(GameTags.Dead, null, false);
-		this.neutral.EventHandler(GameHashes.SleepFinished, delegate(JoyBehaviourMonitor.Instance smi)
+		this.neutral.EventHandler(GameHashes.TagsChanged, delegate(JoyBehaviourMonitor.Instance smi, object data)
+		{
+			TagChangedEventData tagChangedEventData = (TagChangedEventData)data;
+			if (!tagChangedEventData.added)
+			{
+				return;
+			}
+			if (tagChangedEventData.tag == GameTags.PleasantConversation && global::UnityEngine.Random.Range(0f, 100f) <= 1f)
+			{
+				smi.GoToOverjoyed();
+			}
+			smi.GetComponent<KPrefabID>().RemoveTag(GameTags.PleasantConversation);
+		}).EventHandler(GameHashes.SleepFinished, delegate(JoyBehaviourMonitor.Instance smi)
 		{
 			if (smi.ShouldBeOverjoyed())
 			{
@@ -21,6 +33,10 @@ public class JoyBehaviourMonitor : GameStateMachine<JoyBehaviourMonitor, JoyBeha
 		this.overjoyed.Transition(this.neutral, (JoyBehaviourMonitor.Instance smi) => GameClock.Instance.GetTime() >= smi.transitionTime, UpdateRate.SIM_200ms).ToggleExpression((JoyBehaviourMonitor.Instance smi) => smi.happyExpression).ToggleAnims((JoyBehaviourMonitor.Instance smi) => smi.happyLocoAnim)
 			.ToggleAnims((JoyBehaviourMonitor.Instance smi) => smi.happyLocoWalkAnim)
 			.ToggleTag(GameTags.Overjoyed)
+			.Exit(delegate(JoyBehaviourMonitor.Instance smi)
+			{
+				smi.GetComponent<KPrefabID>().RemoveTag(GameTags.PleasantConversation);
+			})
 			.OnSignal(this.exitEarly, this.neutral);
 	}
 

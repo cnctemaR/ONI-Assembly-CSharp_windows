@@ -609,7 +609,7 @@ public class StarmapScreen : KModalScreen
 				}
 				BreakdownListRow breakdownListRow = component.AddRow();
 				string text = UI.STARMAP.MISSION_STATUS.GROUNDED;
-				global::Tuple<string, BreakdownListRow.Status> textForState = StarmapScreen.GetTextForState(CS$<>8__locals1.rocket.state);
+				global::Tuple<string, BreakdownListRow.Status> textForState = StarmapScreen.GetTextForState(CS$<>8__locals1.rocket.state, CS$<>8__locals1.rocket);
 				text = textForState.first;
 				BreakdownListRow.Status second = textForState.second;
 				breakdownListRow.ShowStatusData(UI.STARMAP.ROCKETSTATUS.STATUS, text, second);
@@ -664,7 +664,7 @@ public class StarmapScreen : KModalScreen
 					float duration = CS$<>8__locals1.rocket.GetDuration();
 					float timeLeft = CS$<>8__locals1.rocket.GetTimeLeft();
 					float num = ((duration == 0f) ? 0f : (1f - timeLeft / duration));
-					component.AddRow().ShowData(UI.STARMAP.ROCKETSTATUS.TIMEREMAINING, global::Util.FormatOneDecimalPlace(timeLeft / 600f) + " / " + GameUtil.GetFormattedCycles(duration, "F1", false));
+					component.AddRow().ShowData(UI.STARMAP.ROCKETSTATUS.TIMEREMAINING, ((CS$<>8__locals1.rocket.controlStationBuffTimeRemaining <= 0f) ? "" : UI.STARMAP.ROCKETSTATUS.BOOSTED_TIME_MODIFIER.text) + global::Util.FormatOneDecimalPlace(timeLeft / 600f) + " / " + GameUtil.GetFormattedCycles(duration, "F1", false));
 					component6.gameObject.SetActive(true);
 					RectTransform reference = component6.GetReference<RectTransform>("ProgressImage");
 					TMP_Text component9 = component6.GetReference<RectTransform>("ProgressText").GetComponent<LocText>();
@@ -679,7 +679,7 @@ public class StarmapScreen : KModalScreen
 		this.UpdateRocketRowsTravelAbility();
 	}
 
-	public static global::Tuple<string, BreakdownListRow.Status> GetTextForState(Spacecraft.MissionState state)
+	public static global::Tuple<string, BreakdownListRow.Status> GetTextForState(Spacecraft.MissionState state, Spacecraft spacecraft)
 	{
 		switch (state)
 		{
@@ -688,7 +688,7 @@ public class StarmapScreen : KModalScreen
 		case Spacecraft.MissionState.Launching:
 			return new global::Tuple<string, BreakdownListRow.Status>(UI.STARMAP.MISSION_STATUS.LAUNCHING, BreakdownListRow.Status.Yellow);
 		case Spacecraft.MissionState.Underway:
-			return new global::Tuple<string, BreakdownListRow.Status>(UI.STARMAP.MISSION_STATUS.UNDERWAY, BreakdownListRow.Status.Red);
+			return new global::Tuple<string, BreakdownListRow.Status>((spacecraft.controlStationBuffTimeRemaining <= 0f) ? UI.STARMAP.MISSION_STATUS.UNDERWAY.text : UI.STARMAP.MISSION_STATUS.UNDERWAY_BOOSTED.text, BreakdownListRow.Status.Red);
 		case Spacecraft.MissionState.WaitingToLand:
 			return new global::Tuple<string, BreakdownListRow.Status>(UI.STARMAP.MISSION_STATUS.WAITING_TO_LAND, BreakdownListRow.Status.Yellow);
 		case Spacecraft.MissionState.Landing:
@@ -1263,7 +1263,7 @@ public class StarmapScreen : KModalScreen
 				{
 					vector5 = new Vector2(Mathf.Lerp(vector.x, vector3.x, num * 2f), Mathf.Lerp(vector.y, vector3.y, num * 2f));
 				}
-				this.visualizeRocketLabel.text = StarmapScreen.GetTextForState(spacecraft.state).first;
+				this.visualizeRocketLabel.text = StarmapScreen.GetTextForState(spacecraft.state, spacecraft).first;
 				this.visualizeRocketProgress.text = GameUtil.GetFormattedPercent(num * 100f, GameUtil.TimeSlice.None);
 				this.visualizeRocketTrajectory.transform.SetLocalPosition(vector);
 				this.visualizeRocketTrajectory.rectTransform.sizeDelta = new Vector2(num2, this.visualizeRocketTrajectory.rectTransform.sizeDelta.y);

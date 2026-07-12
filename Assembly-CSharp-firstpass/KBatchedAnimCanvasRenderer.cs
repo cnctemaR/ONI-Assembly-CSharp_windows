@@ -38,17 +38,97 @@ public class KBatchedAnimCanvasRenderer : MonoBehaviour, IMaskable
 			{
 				if (this.uiMat != null)
 				{
-					this.uiMat.SetInt("_StencilOp", (int)this._op);
+					this.uiMat.SetInt("_StencilOp", (int)value);
 				}
 				this._op = value;
 			}
 		}
 	}
 
+	public int writeMask
+	{
+		get
+		{
+			return this._writeMask;
+		}
+		set
+		{
+			if (this._writeMask != value)
+			{
+				if (this.uiMat != null)
+				{
+					this.uiMat.SetInt("_StencilWriteMask", value);
+				}
+				this._writeMask = value;
+			}
+		}
+	}
+
+	public int colorMask
+	{
+		get
+		{
+			return this._colorMask;
+		}
+		set
+		{
+			if (this._colorMask != value)
+			{
+				if (this.uiMat != null)
+				{
+					this.uiMat.SetInt("_ColorMask", value);
+				}
+				this._colorMask = value;
+			}
+		}
+	}
+
 	void IMaskable.RecalculateMasking()
 	{
-		Mask componentInParent = base.GetComponentInParent<Mask>();
-		if (componentInParent != null && componentInParent.enabled)
+		Mask[] componentsInParent = base.GetComponentsInParent<Mask>();
+		bool flag = false;
+		bool flag2 = false;
+		bool flag3 = false;
+		if (componentsInParent != null && componentsInParent.Length != 0)
+		{
+			for (int i = 0; i < componentsInParent.Length; i++)
+			{
+				if (componentsInParent[i].enabled)
+				{
+					if (componentsInParent[i].gameObject == base.gameObject)
+					{
+						flag = true;
+						flag2 = !componentsInParent[i].showMaskGraphic;
+					}
+					else
+					{
+						flag3 = true;
+					}
+				}
+			}
+		}
+		if (flag)
+		{
+			if (flag3)
+			{
+				this.compare = CompareFunction.Equal;
+			}
+			else
+			{
+				this.compare = CompareFunction.Always;
+			}
+			if (flag2)
+			{
+				this.colorMask = 0;
+			}
+			else
+			{
+				this.colorMask = this._originalColorMask;
+			}
+			this.writeMask = 1;
+			this.stencilOp = StencilOp.Replace;
+		}
+		else if (flag3)
 		{
 			this.compare = CompareFunction.Equal;
 			this.stencilOp = StencilOp.Keep;
@@ -104,6 +184,9 @@ public class KBatchedAnimCanvasRenderer : MonoBehaviour, IMaskable
 			}
 			Material material = this.batch.group.GetMaterial(this.batch.materialType);
 			this.uiMat = new Material(material);
+			this._originalColorMask = this.uiMat.GetInt("_ColorMask");
+			this._colorMask = this._originalColorMask;
+			this._writeMask = this.uiMat.GetInt("_StencilWriteMask");
 			((IMaskable)this).RecalculateMasking();
 		}
 	}
@@ -149,12 +232,12 @@ public class KBatchedAnimCanvasRenderer : MonoBehaviour, IMaskable
 			this.uiMat.SetTexture(textureToCopyEntry.textureId, this.batch.matProperties.GetTexture(textureToCopyEntry.textureId));
 			this.uiMat.SetVector(textureToCopyEntry.sizeId, this.batch.matProperties.GetVector(textureToCopyEntry.sizeId));
 		}
-		for (int j = 0; j < KAnimBatchManager.instance.atlasNames.Length; j++)
+		for (int j = 0; j < KAnimBatchManager.AtlasNames.Length; j++)
 		{
-			Texture texture = this.batch.matProperties.GetTexture(KAnimBatchManager.instance.atlasNames[j]);
+			Texture texture = this.batch.matProperties.GetTexture(KAnimBatchManager.AtlasNames[j]);
 			if (texture != null)
 			{
-				this.uiMat.SetTexture(KAnimBatchManager.instance.atlasNames[j], texture);
+				this.uiMat.SetTexture(KAnimBatchManager.AtlasNames[j], texture);
 			}
 		}
 		foreach (KBatchedAnimCanvasRenderer.TextureToCopyEntry textureToCopyEntry2 in KBatchedAnimCanvasRenderer.texturesToCopy)
@@ -162,12 +245,12 @@ public class KBatchedAnimCanvasRenderer : MonoBehaviour, IMaskable
 			this.uiMat.SetTexture(textureToCopyEntry2.textureId, this.batch.matProperties.GetTexture(textureToCopyEntry2.textureId));
 			this.uiMat.SetVector(textureToCopyEntry2.sizeId, this.batch.matProperties.GetVector(textureToCopyEntry2.sizeId));
 		}
-		for (int k = 0; k < KAnimBatchManager.instance.atlasNames.Length; k++)
+		for (int k = 0; k < KAnimBatchManager.AtlasNames.Length; k++)
 		{
-			Texture texture2 = this.batch.matProperties.GetTexture(KAnimBatchManager.instance.atlasNames[k]);
+			Texture texture2 = this.batch.matProperties.GetTexture(KAnimBatchManager.AtlasNames[k]);
 			if (texture2 != null)
 			{
-				this.uiMat.SetTexture(KAnimBatchManager.instance.atlasNames[k], texture2);
+				this.uiMat.SetTexture(KAnimBatchManager.AtlasNames[k], texture2);
 			}
 		}
 		this.uiMat.SetFloat(KAnimBatch.ShaderProperty_SUPPORTS_SYMBOL_OVERRIDING, this.batch.matProperties.GetFloat(KAnimBatch.ShaderProperty_SUPPORTS_SYMBOL_OVERRIDING));
@@ -203,6 +286,12 @@ public class KBatchedAnimCanvasRenderer : MonoBehaviour, IMaskable
 	private CompareFunction _cmp = CompareFunction.Never;
 
 	private StencilOp _op = StencilOp.Zero;
+
+	private int _writeMask;
+
+	private int _colorMask;
+
+	private int _originalColorMask;
 
 	private static KBatchedAnimCanvasRenderer.TextureToCopyEntry[] texturesToCopy;
 

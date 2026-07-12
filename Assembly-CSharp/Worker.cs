@@ -319,7 +319,7 @@ public class Worker : KMonoBehaviour
 				Vector3 workOffset = this.workable.GetWorkOffset();
 				this.workAnimOffset = workOffset;
 				component.Offset += workOffset;
-				if (this.usesMultiTool && this.animInfo.smi == null && workAnims != null && this.resume != null)
+				if (this.usesMultiTool && this.animInfo.smi == null && workAnims != null && workAnims.Length != 0 && this.resume != null)
 				{
 					if (this.workable.synchronizeAnims)
 					{

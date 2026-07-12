@@ -268,7 +268,7 @@ public class InputBindingsScreen : KModalScreen
 	private void OnReset()
 	{
 		GameInputMapping.KeyBindings = (BindingEntry[])GameInputMapping.DefaultBindings.Clone();
-		Global.Instance.GetInputManager().RebindControls();
+		Global.GetInputManager().RebindControls();
 		this.BuildDisplay();
 	}
 
@@ -320,7 +320,7 @@ public class InputBindingsScreen : KModalScreen
 					this.confirmDialog.PopupConfirmDialog(text2, null, null, null, null, null, null, null, null);
 					this.confirmDialog.gameObject.SetActive(true);
 				}
-				Global.Instance.GetInputManager().RebindControls();
+				Global.GetInputManager().RebindControls();
 				this.waitingForKeyPress = false;
 				this.actionToRebind = global::Action.NumActions;
 				this.activeButton = null;

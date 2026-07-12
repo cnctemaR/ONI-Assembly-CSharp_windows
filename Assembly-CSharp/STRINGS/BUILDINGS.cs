@@ -1214,7 +1214,7 @@ namespace STRINGS
 
 			public class ROCKETWALLTILE
 			{
-				public static LocString NAME = UI.FormatAsLink("Rocket", "ROCKETENVELOPETILE");
+				public static LocString NAME = UI.FormatAsLink("Rocket Wall", "ROCKETENVELOPETILE");
 
 				public static LocString DESC = "Keeps the space out.";
 
@@ -1359,6 +1359,51 @@ namespace STRINGS
 				public static LocString DESC = "Duplicants prefer comfy beds to cots and gain more stamina from sleeping in them.";
 
 				public static LocString EFFECT = "Provides a sleeping area for one Duplicant and restores additional " + UI.FormatAsLink("Stamina", "STAMINA") + ".\n\nDuplicants will automatically sleep in their assigned beds at night.";
+
+				public class FACADES
+				{
+					public class DEFAULT_LUXURYBED
+					{
+						public static LocString NAME = UI.FormatAsLink("Comfy Bed", "LUXURYBED");
+
+						public static LocString DESC = "Much comfier than a cot.";
+					}
+
+					public class GRANDPRIX
+					{
+						public static LocString NAME = UI.FormatAsLink("Grand Prix Bed", "LUXURYBED");
+
+						public static LocString DESC = "Where every Duplicant wakes up a winner.";
+					}
+
+					public class BOAT
+					{
+						public static LocString NAME = UI.FormatAsLink("Dreamboat Bed", "LUXURYBED");
+
+						public static LocString DESC = "Ahoy! Set sail for zzzzz's.";
+					}
+
+					public class ROCKET_BED
+					{
+						public static LocString NAME = UI.FormatAsLink("S.S. Napmaster Bed", "LUXURYBED");
+
+						public static LocString DESC = "Launches sleepy Duplicants into a deep-space slumber.";
+					}
+
+					public class BOUNCY_BED
+					{
+						public static LocString NAME = UI.FormatAsLink("Bouncy Castle Bed", "LUXURYBED");
+
+						public static LocString DESC = "An inflatable party prop makes a surprisingly good bed.";
+					}
+
+					public class PUFT_BED
+					{
+						public static LocString NAME = UI.FormatAsLink("Puft Bed", "LUXURYBED");
+
+						public static LocString DESC = "A comfy, if somewhat 'fragrant', place to sleep.";
+					}
+				}
 			}
 
 			public class LADDERBED
@@ -1431,6 +1476,10 @@ namespace STRINGS
 					UI.FormatAsLink("Powered", "POWER"),
 					".\n\nIncreases Duplicant workspeed within light radius."
 				});
+
+				public class FACADES
+				{
+				}
 			}
 
 			public class AIRFILTER
@@ -1484,6 +1533,86 @@ namespace STRINGS
 				public static LocString AVERAGEQUALITYNAME = "Mediocre Painting";
 
 				public static LocString EXCELLENTQUALITYNAME = "Masterpiece";
+
+				public class FACADES
+				{
+					public class ART_A
+					{
+						public static LocString NAME = UI.FormatAsLink("Doodle Dee Duplicant", "ART_A");
+
+						public static LocString DESC = "";
+					}
+
+					public class ART_B
+					{
+						public static LocString NAME = UI.FormatAsLink("Midnight Meal", "ART_B");
+
+						public static LocString DESC = "";
+					}
+
+					public class ART_C
+					{
+						public static LocString NAME = UI.FormatAsLink("Dupa Leesa", "ART_C");
+
+						public static LocString DESC = "";
+					}
+
+					public class ART_D
+					{
+						public static LocString NAME = UI.FormatAsLink("The Screech", "ART_D");
+
+						public static LocString DESC = "";
+					}
+
+					public class ART_E
+					{
+						public static LocString NAME = UI.FormatAsLink("Fridup Kallo", "ART_E");
+
+						public static LocString DESC = "";
+					}
+
+					public class ART_F
+					{
+						public static LocString NAME = UI.FormatAsLink("Moopoleon Bonafarte", "ART_F");
+
+						public static LocString DESC = "";
+					}
+
+					public class ART_G
+					{
+						public static LocString NAME = UI.FormatAsLink("Expressive Genius", "ART_G");
+
+						public static LocString DESC = "";
+					}
+
+					public class ART_H
+					{
+						public static LocString NAME = UI.FormatAsLink("The Smooch", "ART_H");
+
+						public static LocString DESC = "";
+					}
+
+					public class ART_I
+					{
+						public static LocString NAME = UI.FormatAsLink("Self-Self-Self Portrait", "ART_I");
+
+						public static LocString DESC = "A multi-layered exploration of the artist as a subject.";
+					}
+
+					public class ART_J
+					{
+						public static LocString NAME = UI.FormatAsLink("Nikola Devouring His Mush Bar", "ART_J");
+
+						public static LocString DESC = "A painting that captures the true nature of hunger.";
+					}
+
+					public class ART_K
+					{
+						public static LocString NAME = UI.FormatAsLink("Sketchy Fungi", "ART_K");
+
+						public static LocString DESC = "The perfect painting for dark, dank spaces.";
+					}
+				}
 			}
 
 			public class CANVASWIDE
@@ -1506,6 +1635,72 @@ namespace STRINGS
 				public static LocString AVERAGEQUALITYNAME = "Mediocre Painting";
 
 				public static LocString EXCELLENTQUALITYNAME = "Masterpiece";
+
+				public class FACADES
+				{
+					public class ART_WIDE_A
+					{
+						public static LocString NAME = UI.FormatAsLink("The Twins", "ART_WIDE_A");
+
+						public static LocString DESC = "";
+					}
+
+					public class ART_WIDE_B
+					{
+						public static LocString NAME = UI.FormatAsLink("Ground Zero", "ART_WIDE_B");
+
+						public static LocString DESC = "";
+					}
+
+					public class ART_WIDE_C
+					{
+						public static LocString NAME = UI.FormatAsLink("Still Life with Barbeque and Frost Bun", "ART_WIDE_C");
+
+						public static LocString DESC = "";
+					}
+
+					public class ART_WIDE_D
+					{
+						public static LocString NAME = UI.FormatAsLink("Composition with Three Colors", "ART_WIDE_D");
+
+						public static LocString DESC = "";
+					}
+
+					public class ART_WIDE_E
+					{
+						public static LocString NAME = UI.FormatAsLink("Behold, A Fork", "ART_WIDE_E");
+
+						public static LocString DESC = "";
+					}
+
+					public class ART_WIDE_F
+					{
+						public static LocString NAME = UI.FormatAsLink("The Astronomer at Home", "ART_WIDE_F");
+
+						public static LocString DESC = "";
+					}
+
+					public class ART_WIDE_G
+					{
+						public static LocString NAME = UI.FormatAsLink("Iconic Iteration", "ART_WIDE_G");
+
+						public static LocString DESC = "For the art collector who doesn't mind a bit of repetition.";
+					}
+
+					public class ART_WIDE_H
+					{
+						public static LocString NAME = UI.FormatAsLink("La Belle Meep", "ART_WIDE_H");
+
+						public static LocString DESC = "A daring piece, guaranteed to cause a stir.";
+					}
+
+					public class ART_WIDE_I
+					{
+						public static LocString NAME = UI.FormatAsLink("Glorious Vole", "ART_WIDE_I");
+
+						public static LocString DESC = "A moody study of the renowned tunneler.";
+					}
+				}
 			}
 
 			public class CANVASTALL
@@ -1528,6 +1723,72 @@ namespace STRINGS
 				public static LocString AVERAGEQUALITYNAME = "Mediocre Painting";
 
 				public static LocString EXCELLENTQUALITYNAME = "Masterpiece";
+
+				public class FACADES
+				{
+					public class ART_TALL_A
+					{
+						public static LocString NAME = UI.FormatAsLink("Ode to O2", "ART_TALL_A");
+
+						public static LocString DESC = "";
+					}
+
+					public class ART_TALL_B
+					{
+						public static LocString NAME = UI.FormatAsLink("A Cool Wheeze", "ART_TALL_B");
+
+						public static LocString DESC = "";
+					}
+
+					public class ART_TALL_C
+					{
+						public static LocString NAME = UI.FormatAsLink("Luxe Splatter", "ART_TALL_C");
+
+						public static LocString DESC = "";
+					}
+
+					public class ART_TALL_D
+					{
+						public static LocString NAME = UI.FormatAsLink("Pickled Meal Lice II", "ART_TALL_D");
+
+						public static LocString DESC = "";
+					}
+
+					public class ART_TALL_E
+					{
+						public static LocString NAME = UI.FormatAsLink("Fruit Face", "ART_TALL_E");
+
+						public static LocString DESC = "";
+					}
+
+					public class ART_TALL_F
+					{
+						public static LocString NAME = UI.FormatAsLink("Girl with the Blue Scarf", "ART_TALL_F");
+
+						public static LocString DESC = "";
+					}
+
+					public class ART_TALL_G
+					{
+						public static LocString NAME = UI.FormatAsLink("A Farewell at Sunrise", "ART_TALL_G");
+
+						public static LocString DESC = "A poetic ink painting depicting the beginning of an end.";
+					}
+
+					public class ART_TALL_H
+					{
+						public static LocString NAME = UI.FormatAsLink("Conqueror of Clusters", "ART_TALL_H");
+
+						public static LocString DESC = "The type of painting that ambitious Duplicants gravitate to.";
+					}
+
+					public class ART_TALL_I
+					{
+						public static LocString NAME = UI.FormatAsLink("Pei Phone", "ART_TALL_I");
+
+						public static LocString DESC = "When the future calls, Duplicants answer.";
+					}
+				}
 			}
 
 			public class CO2SCRUBBER
@@ -1766,6 +2027,10 @@ namespace STRINGS
 					UI.FormatAsLink("Powered", "POWER"),
 					".\n\nIncreases Duplicant workspeed within light radius."
 				});
+
+				public class FACADES
+				{
+				}
 			}
 
 			public class FLOWERVASE
@@ -1786,6 +2051,51 @@ namespace STRINGS
 					UI.FormatAsLink("Morale", "MORALE"),
 					"."
 				});
+
+				public class FACADES
+				{
+					public class DEFAULT_FLOWERVASE
+					{
+						public static LocString NAME = UI.FormatAsLink("Flower Pot", "FLOWERVASE");
+
+						public static LocString DESC = "The original container for plants on the move.";
+					}
+
+					public class RETRO_SUNNY
+					{
+						public static LocString NAME = UI.FormatAsLink("Sunny Retro Flower Pot", "FLOWERVASE");
+
+						public static LocString DESC = "A funky yellow flower pot for plants on the move.";
+					}
+
+					public class RETRO_BOLD
+					{
+						public static LocString NAME = UI.FormatAsLink("Bold Retro Flower Pot", "FLOWERVASE");
+
+						public static LocString DESC = "A funky red flower pot for plants on the move.";
+					}
+
+					public class RETRO_BRIGHT
+					{
+						public static LocString NAME = UI.FormatAsLink("Bold Retro Flower Pot", "FLOWERVASE");
+
+						public static LocString DESC = "A funky green flower pot for plants on the move.";
+					}
+
+					public class RETRO_DREAMY
+					{
+						public static LocString NAME = UI.FormatAsLink("Dreamy Retro Flower Pot", "FLOWERVASE");
+
+						public static LocString DESC = "A funky blue flower pot for plants on the move.";
+					}
+
+					public class RETRO_ELEGANT
+					{
+						public static LocString NAME = UI.FormatAsLink("Elegant Retro Flower Pot", "FLOWERVASE");
+
+						public static LocString DESC = "A funky white flower pot for plants on the move.";
+					}
+				}
 			}
 
 			public class FLOWERVASEWALL
@@ -1846,6 +2156,10 @@ namespace STRINGS
 					UI.FormatAsLink("Morale", "MORALE"),
 					".\n\nMust be hung from a ceiling."
 				});
+
+				public class FACADES
+				{
+				}
 			}
 
 			public class FLUSHTOILET
@@ -2305,6 +2619,30 @@ namespace STRINGS
 				public static LocString EFFECT = "Converts " + UI.FormatAsLink("Raw Mineral", "RAWMINERAL") + " into unique materials and objects.";
 			}
 
+			public class GEOTUNER
+			{
+				public static LocString NAME = UI.FormatAsLink("Geotuner", "GEOTUNER");
+
+				public static LocString DESC = "The targeted geyser receives stored amplification data when it is erupting.";
+
+				public static LocString EFFECT = string.Concat(new string[]
+				{
+					"Increases the ",
+					UI.FormatAsLink("Temperature", "HEAT"),
+					" and output of an analyzed ",
+					UI.FormatAsLink("Geyser", "GEYSERS"),
+					".\n\nMultiple Geotuners can be directed at a single ",
+					UI.FormatAsLink("Geyser", "GEYSERS"),
+					" anywhere on an asteroid."
+				});
+
+				public static LocString LOGIC_PORT = "Geyser Eruption Monitor";
+
+				public static LocString LOGIC_PORT_ACTIVE = "Sends a " + UI.FormatAsAutomationState("Green Signal", UI.AutomationState.Active) + " when geyser is erupting";
+
+				public static LocString LOGIC_PORT_INACTIVE = "Otherwise, sends a " + UI.FormatAsAutomationState("Red Signal", UI.AutomationState.Standby);
+			}
+
 			public class GRAVE
 			{
 				public static LocString NAME = UI.FormatAsLink("Tasteful Memorial", "GRAVE");
@@ -2507,6 +2845,22 @@ namespace STRINGS
 				});
 			}
 
+			public class CONTACTCONDUCTIVEPIPEBRIDGE
+			{
+				public static LocString NAME = "Conduction Panel";
+
+				public static LocString DESC = "It can transfer heat effectively even if no liquid is passing through.";
+
+				public static LocString EFFECT = string.Concat(new string[]
+				{
+					"Carries ",
+					UI.FormatAsLink("Liquid", "ELEMENTS_LIQUID"),
+					", allowing extreme ",
+					UI.FormatAsLink("Temperature", "HEAT"),
+					" exchange with overlapping buildings.\n\nCan function in a vacuum.\n\nCan be run through wall and floor tiles."
+				});
+			}
+
 			public class INSULATEDWIRE
 			{
 				public static LocString NAME = UI.FormatAsLink("Insulated Wire", "INSULATEDWIRE");
@@ -2546,6 +2900,128 @@ namespace STRINGS
 					UI.FormatAsLink("Liquid", "ELEMENTS_LIQUID"),
 					" loss in space.\n\nBuilds an insulating backwall behind buildings."
 				});
+
+				public class FACADES
+				{
+					public class DEFAULT_EXTERIORWALL
+					{
+						public static LocString NAME = UI.FormatAsLink("Drywall", "EXTERIORWALL");
+
+						public static LocString DESC = "It gets the job done.";
+					}
+
+					public class BALM_LILY
+					{
+						public static LocString NAME = UI.FormatAsLink("Balm Lily Print", "EXTERIORWALL");
+
+						public static LocString DESC = "A mellow floral wallpaper.";
+					}
+
+					public class CLOUDS
+					{
+						public static LocString NAME = UI.FormatAsLink("Cloud Print", "EXTERIORWALL");
+
+						public static LocString DESC = "A soft, fluffy wallpaper.";
+					}
+
+					public class MUSHBAR
+					{
+						public static LocString NAME = UI.FormatAsLink("Mush Bar Print", "EXTERIORWALL");
+
+						public static LocString DESC = "A gag-inducing wallpaper.";
+					}
+
+					public class PLAID
+					{
+						public static LocString NAME = UI.FormatAsLink("Aqua Plaid Print", "EXTERIORWALL");
+
+						public static LocString DESC = "A cozy flannel wallpaper.";
+					}
+
+					public class RAIN
+					{
+						public static LocString NAME = UI.FormatAsLink("Rainy Print", "EXTERIORWALL");
+
+						public static LocString DESC = "A precipitation-themed wallpaper.";
+					}
+
+					public class AQUATICMOSAIC
+					{
+						public static LocString NAME = UI.FormatAsLink("Aquatic Mosaic", "EXTERIORWALL");
+
+						public static LocString DESC = "A multi-hued blue wallpaper.";
+					}
+
+					public class RAINBOW
+					{
+						public static LocString NAME = UI.FormatAsLink("Rainbow Stripe", "EXTERIORWALL");
+
+						public static LocString DESC = "A wallpaper with <i>all</i> the colors.";
+					}
+
+					public class SNOW
+					{
+						public static LocString NAME = UI.FormatAsLink("Snowflake Print", "EXTERIORWALL");
+
+						public static LocString DESC = "A wallpaper as unique as my colony.";
+					}
+
+					public class SUN
+					{
+						public static LocString NAME = UI.FormatAsLink("Sunshine Print", "EXTERIORWALL");
+
+						public static LocString DESC = "A UV-free wallpaper.";
+					}
+
+					public class COFFEE
+					{
+						public static LocString NAME = UI.FormatAsLink("Cafe Print", "EXTERIORWALL");
+
+						public static LocString DESC = "A caffeine-themed wallpaper.";
+					}
+
+					public class PASTELPOLKA
+					{
+						public static LocString NAME = UI.FormatAsLink("Pastel Polka Print", "EXTERIORWALL");
+
+						public static LocString DESC = "A soothing, dotted wallpaper.";
+					}
+
+					public class PASTELBLUE
+					{
+						public static LocString NAME = UI.FormatAsLink("Pastel Blue", "EXTERIORWALL");
+
+						public static LocString DESC = "A soothing blue wallpaper.";
+					}
+
+					public class PASTELGREEN
+					{
+						public static LocString NAME = UI.FormatAsLink("Pastel Green", "EXTERIORWALL");
+
+						public static LocString DESC = "A soothing green wallpaper.";
+					}
+
+					public class PASTELPINK
+					{
+						public static LocString NAME = UI.FormatAsLink("Pastel Pink", "EXTERIORWALL");
+
+						public static LocString DESC = "A soothing pink wallpaper.";
+					}
+
+					public class PASTELPURPLE
+					{
+						public static LocString NAME = UI.FormatAsLink("Pastel Purple", "EXTERIORWALL");
+
+						public static LocString DESC = "A soothing purple wallpaper.";
+					}
+
+					public class PASTELYELLOW
+					{
+						public static LocString NAME = UI.FormatAsLink("Pastel Yellow", "EXTERIORWALL");
+
+						public static LocString DESC = "A soothing yellow wallpaper.";
+					}
+				}
 			}
 
 			public class FARMTILE
@@ -3361,6 +3837,24 @@ namespace STRINGS
 				public static LocString REQUIREMENT_TOOLTIP = "A steady {0} supply is required to sustain working Duplicants.";
 			}
 
+			public class MISSIONCONTROL
+			{
+				public static LocString NAME = UI.FormatAsLink("Mission Control Station", "MISSIONCONTROL");
+
+				public static LocString DESC = "Like a backseat driver who actually does know better.";
+
+				public static LocString EFFECT = "Provides guidance data to rocket pilots, to improve rocket speed.\n\nMust be operated by a Duplicant with the " + UI.FormatAsLink("Astronomy", "ASTRONOMY") + " skill.\n\nRequires a clear line of sight to space in order to function.";
+			}
+
+			public class MISSIONCONTROLCLUSTER
+			{
+				public static LocString NAME = UI.FormatAsLink("Mission Control Station", "MISSIONCONTROL");
+
+				public static LocString DESC = "Like a backseat driver who actually does know better.";
+
+				public static LocString EFFECT = "Provides guidance data to rocket pilots within range, to improve rocket speed.\n\nMust be operated by a Duplicant with the " + UI.FormatAsLink("Astronomy", "ASTRONOMY") + " skill.\n\nRequires a clear line of sight to space in order to function.";
+			}
+
 			public class SCULPTURE
 			{
 				public static LocString NAME = UI.FormatAsLink("Large Sculpting Block", "SCULPTURE");
@@ -3381,6 +3875,51 @@ namespace STRINGS
 				public static LocString AVERAGEQUALITYNAME = "Mediocre Sculpture";
 
 				public static LocString EXCELLENTQUALITYNAME = "Genius Sculpture";
+
+				public class FACADES
+				{
+					public class SCULPTURE_GOOD_1
+					{
+						public static LocString NAME = UI.FormatAsLink("O Cupid, My Cupid", "SCULPTURE_GOOD_1");
+
+						public static LocString DESC = "Ode to the bow and arrow, love's equivalent to a mining gun...but for hearts.";
+					}
+
+					public class SCULPTURE_CRAP_1
+					{
+						public static LocString NAME = UI.FormatAsLink("Inexplicable", "SCULPTURE_CRAP_1");
+
+						public static LocString DESC = "A valiant attempt at art.";
+					}
+
+					public class SCULPTURE_AMAZING_2
+					{
+						public static LocString NAME = UI.FormatAsLink("Plate Chucker", "SCULPTURE_AMAZING_2");
+
+						public static LocString DESC = "A masterful portrayal of an athlete who's been banned from the communal kitchen.";
+					}
+
+					public class SCULPTURE_AMAZING_3
+					{
+						public static LocString NAME = UI.FormatAsLink("Before Battle", "SCULPTURE_AMAZING_3");
+
+						public static LocString DESC = "A masterful portrayal of a slingshot-wielding hero.";
+					}
+
+					public class SCULPTURE_AMAZING_4
+					{
+						public static LocString NAME = UI.FormatAsLink("Grandiose Grub-Grub", "SCULPTURE_AMAZING_4");
+
+						public static LocString DESC = "A masterful portrayal of a gentle, plant-tending critter.";
+					}
+
+					public class SCULPTURE_AMAZING_1
+					{
+						public static LocString NAME = UI.FormatAsLink("The Hypothesizer", "SCULPTURE_AMAZING_1");
+
+						public static LocString DESC = "A masterful portrayal of a scientist lost in thought.";
+					}
+				}
 			}
 
 			public class ICESCULPTURE
@@ -3403,6 +3942,30 @@ namespace STRINGS
 				public static LocString AVERAGEQUALITYNAME = "Mediocre Ice Sculpture";
 
 				public static LocString EXCELLENTQUALITYNAME = "Genius Ice Sculpture";
+
+				public class FACADES
+				{
+					public class ICESCULPTURE_CRAP
+					{
+						public static LocString NAME = UI.FormatAsLink("Cubi I", "ICESCULPTURE_CRAP");
+
+						public static LocString DESC = "";
+					}
+
+					public class ICESCULPTURE_AMAZING_1
+					{
+						public static LocString NAME = UI.FormatAsLink("Exquisite Chompers", "ICESCULPTURE_AMAZING_1");
+
+						public static LocString DESC = "";
+					}
+
+					public class ICESCULPTURE_AMAZING_2
+					{
+						public static LocString NAME = UI.FormatAsLink("Frosty Crustacean", "ICESCULPTURE_AMAZING_2");
+
+						public static LocString DESC = "A masterful depiction of the mighty Pokeshell in mid-rampage.";
+					}
+				}
 			}
 
 			public class MARBLESCULPTURE
@@ -3425,6 +3988,58 @@ namespace STRINGS
 				public static LocString AVERAGEQUALITYNAME = "Mediocre Marble Sculpture";
 
 				public static LocString EXCELLENTQUALITYNAME = "Genius Marble Sculpture";
+
+				public class FACADES
+				{
+					public class SCULPTURE_MARBLE_CRAP_1
+					{
+						public static LocString NAME = UI.FormatAsLink("Lumpy Fungus", "SCULPTURE_MARBLE_CRAP_1");
+
+						public static LocString DESC = "";
+					}
+
+					public class SCULPTURE_MARBLE_GOOD_1
+					{
+						public static LocString NAME = UI.FormatAsLink("Unicorn Bust", "SCULPTURE_MARBLE_GOOD_1");
+
+						public static LocString DESC = "";
+					}
+
+					public class SCULPTURE_MARBLE_AMAZING_1
+					{
+						public static LocString NAME = UI.FormatAsLink("The Large-ish Mermaid", "SCULPTURE_MARBLE_AMAZING_1");
+
+						public static LocString DESC = "";
+					}
+
+					public class SCULPTURE_MARBLE_AMAZING_2
+					{
+						public static LocString NAME = UI.FormatAsLink("Grouchy Beast", "SCULPTURE_MARBLE_AMAZING_2");
+
+						public static LocString DESC = "";
+					}
+
+					public class SCULPTURE_MARBLE_AMAZING_3
+					{
+						public static LocString NAME = UI.FormatAsLink("The Guardian", "SCULPTURE_MARBLE_AMAZING_3");
+
+						public static LocString DESC = "";
+					}
+
+					public class SCULPTURE_MARBLE_AMAZING_4
+					{
+						public static LocString NAME = UI.FormatAsLink("Truly A-Moo-Zing", "SCULPTURE_MARBLE_AMAZING_4");
+
+						public static LocString DESC = "A masterful celebration of one of the universe's most mysterious - and flatulent - organisms.";
+					}
+
+					public class SCULPTURE_MARBLE_AMAZING_5
+					{
+						public static LocString NAME = UI.FormatAsLink("Green Goddess", "SCULPTURE_MARBLE_AMAZING_5");
+
+						public static LocString DESC = "A masterful celebration of the deep bond between a horticulturalist and her prize Bristle Blossom.";
+					}
+				}
 			}
 
 			public class METALSCULPTURE
@@ -3447,6 +4062,51 @@ namespace STRINGS
 				public static LocString AVERAGEQUALITYNAME = "Mediocre Metal Sculpture";
 
 				public static LocString EXCELLENTQUALITYNAME = "Genius Metal Sculpture";
+
+				public class FACADES
+				{
+					public class SCULPTURE_METAL_CRAP_1
+					{
+						public static LocString NAME = UI.FormatAsLink("Unnatural Beauty", "SCULPTURE_METAL_CRAP_1");
+
+						public static LocString DESC = "";
+					}
+
+					public class SCULPTURE_METAL_GOOD_1
+					{
+						public static LocString NAME = UI.FormatAsLink("Beautiful Biohazard", "SCULPTURE_METAL_GOOD_1");
+
+						public static LocString DESC = "";
+					}
+
+					public class SCULPTURE_METAL_AMAZING_1
+					{
+						public static LocString NAME = UI.FormatAsLink("Insatiable Appetite", "SCULPTURE_METAL_AMAZING_1");
+
+						public static LocString DESC = "";
+					}
+
+					public class SCULPTURE_METAL_AMAZING_2
+					{
+						public static LocString NAME = UI.FormatAsLink("Mouth Breather", "SCULPTURE_METAL_AMAZING_2");
+
+						public static LocString DESC = "";
+					}
+
+					public class SCULPTURE_METAL_AMAZING_3
+					{
+						public static LocString NAME = UI.FormatAsLink("Friendly Flier", "SCULPTURE_METAL_AMAZING_3");
+
+						public static LocString DESC = "";
+					}
+
+					public class SCULPTURE_METAL_AMAZING_4
+					{
+						public static LocString NAME = UI.FormatAsLink("Whatta Pip", "SCULPTURE_METAL_AMAZING_4");
+
+						public static LocString DESC = "A masterful likeness of the mischievous critter that Duplicants love to love.";
+					}
+				}
 			}
 
 			public class SMALLSCULPTURE
@@ -3469,6 +4129,51 @@ namespace STRINGS
 				public static LocString AVERAGEQUALITYNAME = "Mediocre Sculpture";
 
 				public static LocString EXCELLENTQUALITYNAME = "Genius Sculpture";
+
+				public class FACADES
+				{
+					public class SCULPTURE_1x2_GOOD
+					{
+						public static LocString NAME = UI.FormatAsLink("Lunar Slice", "SCULPTURE_1x2_GOOD");
+
+						public static LocString DESC = "";
+					}
+
+					public class SCULPTURE_1x2_CRAP
+					{
+						public static LocString NAME = UI.FormatAsLink("Unrequited", "SCULPTURE_1x2_CRAP");
+
+						public static LocString DESC = "";
+					}
+
+					public class SCULPTURE_1x2_AMAZING_1
+					{
+						public static LocString NAME = UI.FormatAsLink("Not a Funnel", "SCULPTURE_1x2_AMAZING_1");
+
+						public static LocString DESC = "";
+					}
+
+					public class SCULPTURE_1x2_AMAZING_2
+					{
+						public static LocString NAME = UI.FormatAsLink("Equilibrium", "SCULPTURE_1x2_AMAZING_2");
+
+						public static LocString DESC = "";
+					}
+
+					public class SCULPTURE_1x2_AMAZING_3
+					{
+						public static LocString NAME = UI.FormatAsLink("Opaque Orb", "SCULPTURE_1x2_AMAZING_3");
+
+						public static LocString DESC = "";
+					}
+
+					public class SCULPTURE_1x2_AMAZING_4
+					{
+						public static LocString NAME = UI.FormatAsLink("Employee of the Month", "SCULPTURE_1x2_AMAZING_4");
+
+						public static LocString DESC = "A masterful celebration of the Sweepy's unbeatable work ethic and cheerful, can-clean attitude.";
+					}
+				}
 			}
 
 			public class SHEARINGSTATION
@@ -5932,6 +6637,10 @@ namespace STRINGS
 					UI.FormatAsLink("Morale", "MORALE"),
 					"."
 				});
+
+				public class FACADES
+				{
+				}
 			}
 
 			public class CORNERMOULDING
@@ -5948,6 +6657,10 @@ namespace STRINGS
 					UI.FormatAsLink("Morale", "MORALE"),
 					"."
 				});
+
+				public class FACADES
+				{
+				}
 			}
 
 			public class EGGINCUBATOR
@@ -6957,6 +7670,33 @@ namespace STRINGS
 
 					public static LocString TOOLTIP = "The big red button.";
 				}
+			}
+
+			public class LONELYMINIONHOUSE
+			{
+				public static LocString NAME = UI.FormatAsLink("Gravitas Shipping Container", "LONELYMINIONHOUSE");
+
+				public static LocString DESC = "Its occupant has been alone for so long, he's forgotten what friendship feels like.";
+
+				public static LocString EFFECT = "A large transport unit from the facility's sub-sub-basement.\n\nIt has been modified into a crude yet functional temporary shelter.";
+			}
+
+			public class LONELYMINIONHOUSE_COMPLETE
+			{
+				public static LocString NAME = UI.FormatAsLink("Gravitas Shipping Container", "LONELYMINIONHOUSE_COMPLETE");
+
+				public static LocString DESC = "Someone lived inside it for a while.";
+
+				public static LocString EFFECT = "A super-spacious container for the " + UI.FormatAsLink("Solid Materials", "ELEMENTS_SOLID") + " of your choosing.";
+			}
+
+			public class LONELYMAILBOX
+			{
+				public static LocString NAME = UI.FormatAsLink("Mailbox", "LONELYMAILBOX");
+
+				public static LocString DESC = "There's nothing quite like receiving homemade gifts in the mail.";
+
+				public static LocString EFFECT = "Displays a single edible object.";
 			}
 		}
 

@@ -124,6 +124,8 @@ public class DupeGreetingManager : KMonoBehaviour, ISim200ms
 				if (greetingSetup.B.minion != null)
 				{
 					vector = greetingSetup.B.minion.transform.GetPosition();
+					greetingSetup.A.minion.Trigger(-594200555, greetingSetup.B.minion);
+					greetingSetup.B.minion.Trigger(-594200555, greetingSetup.A.minion);
 					break;
 				}
 				break;

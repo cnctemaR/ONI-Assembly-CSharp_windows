@@ -7,21 +7,21 @@ using UnityEngine;
 public class DevToolCommandPalette : DevTool
 {
 	public DevToolCommandPalette()
+		: this(null)
 	{
-		base.OnShow += delegate
+	}
+
+	public DevToolCommandPalette(List<DevToolCommandPalette.Command> commands = null)
+	{
+		this.drawFlags |= ImGuiWindowFlags.NoResize;
+		this.drawFlags |= ImGuiWindowFlags.NoScrollbar;
+		this.drawFlags |= ImGuiWindowFlags.NoScrollWithMouse;
+		if (commands == null)
 		{
-			this.m_filter = "";
-			this.m_should_focus_search = true;
-			this.m_selected_index = 0;
-			if (this.m_all_commands == null)
-			{
-				this.m_all_commands = DevToolCommandPaletteUtil.GenerateDefaultCommandPalette();
-			}
-		};
-		base.OnHide += delegate
-		{
-			this.m_all_commands = null;
-		};
+			this.commands.allValues = DevToolCommandPaletteUtil.GenerateDefaultCommandPalette();
+			return;
+		}
+		this.commands.allValues = commands;
 	}
 
 	public static void Init()
@@ -29,169 +29,148 @@ public class DevToolCommandPalette : DevTool
 		DevToolCommandPalette.InitWithCommands(DevToolCommandPaletteUtil.GenerateDefaultCommandPalette());
 	}
 
-	public static void InitWithCommands(IList<DevToolCommandPalette.Command> commands)
+	public static void InitWithCommands(List<DevToolCommandPalette.Command> commands)
 	{
-		DevToolCommandPalette devTool = DevToolManager.Instance.GetDevTool<DevToolCommandPalette>();
-		float num = 800f;
-		float num2 = 400f;
-		Rect rect = new Rect(0f, 0f, (float)Screen.width, (float)Screen.height);
-		Rect our_window_rect = new Rect
-		{
-			x = rect.x + rect.width / 2f - num / 2f,
-			y = rect.y + rect.height / 2f - num2 / 2f,
-			width = num,
-			height = num2
-		};
-		devTool.m_all_commands = commands;
-		devTool.OnNextPreDraw += delegate
-		{
-			ImGui.SetNextWindowPos(our_window_rect.position);
-			ImGui.SetNextWindowSize(our_window_rect.size);
-		};
-		devTool.Show();
+		DevToolManager.Instance.panels.AddPanelFor(new DevToolCommandPalette(commands));
 	}
 
-	protected override void Render()
+	protected override void RenderTo(DevPanel panel)
 	{
-		if (this.m_all_commands == null)
+		DevToolCommandPalette.Resize(panel);
+		if (this.commands.allValues == null)
 		{
 			ImGui.Text("No commands list given");
 			return;
 		}
-		if (this.m_all_commands.Count == 0)
+		if (this.commands.allValues.Count == 0)
 		{
 			ImGui.Text("Given command list is empty, no results to show.");
 			return;
 		}
 		if (Input.GetKeyDown(KeyCode.Escape))
 		{
-			base.Hide();
+			panel.Close();
 			return;
 		}
 		if (!ImGui.IsWindowFocused(ImGuiFocusedFlags.ChildWindows))
 		{
-			base.Hide();
+			panel.Close();
 			return;
 		}
 		if (Input.GetKeyDown(KeyCode.UpArrow))
 		{
 			this.m_selected_index--;
+			this.shouldScrollToSelectedCommandFlag = true;
 		}
 		if (Input.GetKeyDown(KeyCode.DownArrow))
 		{
 			this.m_selected_index++;
+			this.shouldScrollToSelectedCommandFlag = true;
 		}
-		if (this.m_cached_commands.Count > 0)
+		if (this.commands.filteredValues.Count > 0)
 		{
 			while (this.m_selected_index < 0)
 			{
-				this.m_selected_index += this.m_cached_commands.Count;
+				this.m_selected_index += this.commands.filteredValues.Count;
 			}
-			this.m_selected_index %= this.m_cached_commands.Count;
+			this.m_selected_index %= this.commands.filteredValues.Count;
 		}
 		else
 		{
 			this.m_selected_index = 0;
 		}
-		if ((Input.GetKeyUp(KeyCode.Return) || Input.GetKeyUp(KeyCode.KeypadEnter)) && this.m_cached_commands.Count > 0)
+		if ((Input.GetKeyUp(KeyCode.Return) || Input.GetKeyUp(KeyCode.KeypadEnter)) && this.commands.filteredValues.Count > 0)
 		{
-			this.SelectCommand(this.m_cached_commands[this.m_selected_index]);
+			this.SelectCommand(this.commands.filteredValues[this.m_selected_index], panel);
 			return;
 		}
 		if (this.m_should_focus_search)
 		{
 			ImGui.SetKeyboardFocusHere();
 		}
-		if (ImGui.InputText("Filter", ref this.m_filter, 30U) || this.m_should_focus_search)
+		if (ImGui.InputText("Filter", ref this.commands.filter, 30U) || this.m_should_focus_search)
 		{
-			this.UpdateCachedCommands();
+			this.commands.Refilter();
 		}
 		this.m_should_focus_search = false;
 		ImGui.Separator();
-		string text = "Up arrow & down arrow to navigate. Enter to select.";
-		if (this.m_cached_commands.Count > 0 && DevToolCommandPalette.ShouldUseFilter(this.m_filter))
+		string text = "Up arrow & down arrow to navigate. Enter to select. ";
+		if (this.commands.filteredValues.Count > 0 && this.commands.didUseFilter)
 		{
-			text += string.Format(" Found {0} Results", this.m_cached_commands.Count);
+			text += string.Format("Found {0} Results", this.commands.filteredValues.Count);
 		}
 		ImGui.Text(text);
 		ImGui.Separator();
-		if (this.m_cached_commands.Count <= 0)
+		if (ImGui.BeginChild("ID_scroll_region"))
 		{
-			ImGui.Text("Couldn't find anything that matches \"" + this.m_filter + "\", maybe it hasn't been added yet?");
-			return;
-		}
-		for (int i = 0; i < this.m_cached_commands.Count; i++)
-		{
-			DevToolCommandPalette.Command command = this.m_cached_commands[i];
-			bool flag = i == this.m_selected_index;
-			ImGui.PushID(i);
-			bool flag2;
-			if (flag)
+			if (this.commands.filteredValues.Count <= 0)
 			{
-				flag2 = ImGui.Selectable("> " + command.display_name);
+				ImGui.Text("Couldn't find anything that matches \"" + this.commands.filter + "\", maybe it hasn't been added yet?");
 			}
 			else
 			{
-				flag2 = ImGui.Selectable("  " + command.display_name);
-			}
-			ImGui.PopID();
-			if (flag2)
-			{
-				this.SelectCommand(command);
-				return;
-			}
-		}
-	}
-
-	private void SelectCommand(DevToolCommandPalette.Command command)
-	{
-		command.Internal_Select();
-		base.Hide();
-	}
-
-	private void UpdateCachedCommands()
-	{
-		if (DevToolCommandPalette.ShouldUseFilter(this.m_filter))
-		{
-			this.m_cached_commands.Clear();
-			this.m_selected_index = 0;
-			using (IEnumerator<DevToolCommandPalette.Command> enumerator = this.m_all_commands.GetEnumerator())
-			{
-				while (enumerator.MoveNext())
+				for (int i = 0; i < this.commands.filteredValues.Count; i++)
 				{
-					DevToolCommandPalette.Command command = enumerator.Current;
-					if (command.Contains(this.m_filter))
+					DevToolCommandPalette.Command command = this.commands.filteredValues[i];
+					bool flag = i == this.m_selected_index;
+					ImGui.PushID(i);
+					bool flag2;
+					if (flag)
 					{
-						this.m_cached_commands.Add(command);
+						flag2 = ImGui.Selectable("> " + command.display_name);
+					}
+					else
+					{
+						flag2 = ImGui.Selectable("  " + command.display_name);
+					}
+					ImGui.PopID();
+					if (this.shouldScrollToSelectedCommandFlag && flag)
+					{
+						ImGui.SetScrollHereY(0.5f);
+					}
+					if (flag2)
+					{
+						this.SelectCommand(command, panel);
+						return;
 					}
 				}
-				return;
 			}
-		}
-		if (this.m_cached_commands.Count != this.m_all_commands.Count)
-		{
-			this.m_cached_commands.Clear();
-			this.m_selected_index = 0;
-			this.m_cached_commands.AddRange(this.m_all_commands);
+			ImGui.EndChild();
 		}
 	}
 
-	private static bool ShouldUseFilter(string filter)
+	private void SelectCommand(DevToolCommandPalette.Command command, DevPanel panel)
 	{
-		return !string.IsNullOrWhiteSpace(filter);
+		command.Internal_Select();
+		panel.Close();
+	}
+
+	private static void Resize(DevPanel devToolPanel)
+	{
+		float num = 800f;
+		float num2 = 400f;
+		Rect rect = new Rect(0f, 0f, (float)Screen.width, (float)Screen.height);
+		Rect rect2 = new Rect
+		{
+			x = rect.x + rect.width / 2f - num / 2f,
+			y = rect.y + rect.height / 2f - num2 / 2f,
+			width = num,
+			height = num2
+		};
+		devToolPanel.SetPosition(rect2.position, ImGuiCond.None);
+		devToolPanel.SetSize(rect2.size, ImGuiCond.None);
 	}
 
 	private int m_selected_index;
 
-	private List<DevToolCommandPalette.Command> m_cached_commands = new List<DevToolCommandPalette.Command>();
+	private StringSearchableList<DevToolCommandPalette.Command> commands = new StringSearchableList<DevToolCommandPalette.Command>(delegate(DevToolCommandPalette.Command command, in string filter)
+	{
+		return !StringSearchableListUtil.DoAnyTagsMatchFilter(command.tags, in filter);
+	});
 
-	private IList<DevToolCommandPalette.Command> m_all_commands;
+	private bool m_should_focus_search = true;
 
-	private IList<DevToolCommandPalette.Command> m_commands_to_use_on_open;
-
-	private string m_filter;
-
-	private bool m_should_focus_search;
+	private bool shouldScrollToSelectedCommandFlag;
 
 	public class Command
 	{
@@ -240,32 +219,6 @@ public class DevToolCommandPalette : DevTool
 			this.display_name = tags[0];
 			this.tags = tags.Select<string, string>((string t) => t.ToLowerInvariant()).ToArray<string>();
 			this.m_on_select = on_select;
-		}
-
-		public bool Contains(string filter)
-		{
-			filter = filter.Trim();
-			string text = filter.ToLowerInvariant();
-			string[] array = text.Split(new char[] { ' ' });
-			string[] array2 = this.tags;
-			for (int i = 0; i < array2.Length; i++)
-			{
-				string tag = array2[i];
-				if (DevToolCommandPalette.Command.DoesTagContainFilter(tag, text))
-				{
-					return true;
-				}
-				if (array.Select<string, bool>((string f) => DevToolCommandPalette.Command.DoesTagContainFilter(tag, f)).All<bool>((bool result) => result))
-				{
-					return true;
-				}
-			}
-			return false;
-		}
-
-		private static bool DoesTagContainFilter(string tag, string filter)
-		{
-			return !string.IsNullOrWhiteSpace(filter) && tag.Contains(filter);
 		}
 
 		public void Internal_Select()

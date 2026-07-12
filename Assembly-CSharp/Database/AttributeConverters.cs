@@ -43,6 +43,7 @@ namespace Database
 			this.TemperatureInsulation = this.Create("TemperatureInsulation", "Temperature Insulation", DUPLICANTS.ATTRIBUTES.INSULATION.SPEEDMODIFIER, Db.Get().Attributes.Insulation, 0.1f, 0f, toPercentAttributeFormatter, DlcManager.AVAILABLE_ALL_VERSIONS);
 			this.SeedHarvestChance = this.Create("SeedHarvestChance", "Seed Harvest Chance", DUPLICANTS.ATTRIBUTES.BOTANIST.BONUS_SEEDS, Db.Get().Attributes.Botanist, 0.033f, 0f, toPercentAttributeFormatter, DlcManager.AVAILABLE_ALL_VERSIONS);
 			this.CapturableSpeed = this.Create("CapturableSpeed", "Capturable Speed", DUPLICANTS.ATTRIBUTES.RANCHING.CAPTURABLESPEED, Db.Get().Attributes.Ranching, 0.05f, 0f, toPercentAttributeFormatter, DlcManager.AVAILABLE_ALL_VERSIONS);
+			this.GeotuningSpeed = this.Create("GeotuningSpeed", "Geotuning Speed", DUPLICANTS.ATTRIBUTES.LEARNING.GEOTUNER_SPEED_MODIFIER, Db.Get().Attributes.Learning, 0.05f, 0f, toPercentAttributeFormatter, DlcManager.AVAILABLE_ALL_VERSIONS);
 			this.RanchingEffectDuration = this.Create("RanchingEffectDuration", "Ranching Effect Duration", DUPLICANTS.ATTRIBUTES.RANCHING.EFFECTMODIFIER, Db.Get().Attributes.Ranching, 0.1f, 0f, toPercentAttributeFormatter, DlcManager.AVAILABLE_ALL_VERSIONS);
 			this.FarmedEffectDuration = this.Create("FarmedEffectDuration", "Farmer's Touch Duration", DUPLICANTS.ATTRIBUTES.BOTANIST.TINKER_EFFECT_MODIFIER, Db.Get().Attributes.Botanist, 0.1f, 0f, toPercentAttributeFormatter, DlcManager.AVAILABLE_ALL_VERSIONS);
 			this.PowerTinkerEffectDuration = this.Create("PowerTinkerEffectDuration", "Engie's Tune-Up Effect Duration", DUPLICANTS.ATTRIBUTES.MACHINERY.TINKER_EFFECT_MODIFIER, Db.Get().Attributes.Machinery, 0.025f, 0f, toPercentAttributeFormatter, DlcManager.AVAILABLE_ALL_VERSIONS);
@@ -108,5 +109,7 @@ namespace Database
 		public AttributeConverter PowerTinkerEffectDuration;
 
 		public AttributeConverter CapturableSpeed;
+
+		public AttributeConverter GeotuningSpeed;
 	}
 }

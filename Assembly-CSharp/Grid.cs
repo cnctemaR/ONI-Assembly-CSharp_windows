@@ -691,11 +691,11 @@ public class Grid
 		return val;
 	}
 
-	public static void Reveal(int cell, byte visibility = 255)
+	public static void Reveal(int cell, byte visibility = 255, bool forceReveal = false)
 	{
 		bool flag = Grid.Spawnable[cell] == 0 && visibility > 0;
 		Grid.Spawnable[cell] = Math.Max(visibility, Grid.Visible[cell]);
-		if (!Grid.PreventFogOfWarReveal[cell])
+		if (forceReveal || !Grid.PreventFogOfWarReveal[cell])
 		{
 			Grid.Visible[cell] = Math.Max(visibility, Grid.Visible[cell]);
 		}
@@ -892,6 +892,33 @@ public class Grid
 				outputCells.Add(num3);
 			}
 		}
+	}
+
+	public static bool IsRangeExposedToSunlight(int cell, int scanRadius, CellOffset scanShape, out int cellsClear, int clearThreshold = 1)
+	{
+		cellsClear = 0;
+		if (Grid.IsValidCell(cell) && (int)Grid.ExposedToSunlight[cell] >= clearThreshold)
+		{
+			cellsClear++;
+		}
+		bool flag = true;
+		bool flag2 = true;
+		int num = 1;
+		while (num <= scanRadius && (flag || flag2))
+		{
+			int num2 = Grid.OffsetCell(cell, scanShape.x * num, scanShape.y * num);
+			int num3 = Grid.OffsetCell(cell, -scanShape.x * num, scanShape.y * num);
+			if (Grid.IsValidCell(num2) && (int)Grid.ExposedToSunlight[num2] >= clearThreshold)
+			{
+				cellsClear++;
+			}
+			if (Grid.IsValidCell(num3) && (int)Grid.ExposedToSunlight[num3] >= clearThreshold)
+			{
+				cellsClear++;
+			}
+			num++;
+		}
+		return cellsClear > 0;
 	}
 
 	public static bool TestLineOfSight(int x, int y, int x2, int y2, Func<int, bool> blocking_cb, bool blocking_tile_visible = false)

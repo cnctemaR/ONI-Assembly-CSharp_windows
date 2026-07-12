@@ -35,7 +35,7 @@ public class EnergyConsumer : KMonoBehaviour, ISaveLoadable, IEnergyConsumer, IC
 		{
 			return this.operational.GetFlag(EnergyConsumer.PoweredFlag);
 		}
-		private set
+		protected set
 		{
 			this.operational.SetFlag(EnergyConsumer.PoweredFlag, value);
 		}

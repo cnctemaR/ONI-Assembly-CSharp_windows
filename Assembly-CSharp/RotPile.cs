@@ -59,7 +59,7 @@ public class RotPile : StateMachineComponent<RotPile.StatesInstance>
 		WorldContainer myWorld = base.smi.master.GetMyWorld();
 		if (myWorld != null && myWorld.worldInventory.IsReachable(base.smi.master.gameObject.GetComponent<Pickupable>()))
 		{
-			this.notification = new Notification(MISC.NOTIFICATIONS.FOODROT.NAME, NotificationType.BadMinor, new Func<List<Notification>, object, string>(RotPile.OnRottenTooltip), null, true, 0f, null, null, null, true, false);
+			this.notification = new Notification(MISC.NOTIFICATIONS.FOODROT.NAME, NotificationType.BadMinor, new Func<List<Notification>, object, string>(RotPile.OnRottenTooltip), null, true, 0f, null, null, null, true, false, false);
 			this.notification.tooltipData = base.smi.master.gameObject.GetProperName();
 			base.gameObject.AddOrGet<Notifier>().Add(this.notification, "");
 		}

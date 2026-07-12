@@ -74,6 +74,14 @@ public class WorldContainer : KMonoBehaviour
 		}
 	}
 
+	public bool IsSurfaceRevealed
+	{
+		get
+		{
+			return this.isSurfaceRevealed;
+		}
+	}
+
 	public Dictionary<string, int> SunlightFixedTraits
 	{
 		get
@@ -150,6 +158,59 @@ public class WorldContainer : KMonoBehaviour
 	}
 
 	public int ParentWorldId { get; private set; }
+
+	public Quadrant[] GetQuadrantOfCell(int cell, int depth = 1)
+	{
+		Vector2 vector = new Vector2((float)this.WorldSize.x * Grid.CellSizeInMeters, (float)this.worldSize.y * Grid.CellSizeInMeters);
+		Vector2 vector2 = Grid.CellToPos2D(Grid.XYToCell(this.WorldOffset.x, this.WorldOffset.y));
+		Vector2 vector3 = Grid.CellToPos2D(cell);
+		Quadrant[] array = new Quadrant[depth];
+		Vector2 vector4 = new Vector2(vector2.x, (float)this.worldOffset.y + vector.y);
+		Vector2 vector5 = new Vector2(vector2.x + vector.x, (float)this.worldOffset.y);
+		for (int i = 0; i < depth; i++)
+		{
+			float num = vector5.x - vector4.x;
+			float num2 = vector4.y - vector5.y;
+			float num3 = num * 0.5f;
+			float num4 = num2 * 0.5f;
+			if (vector3.x >= vector4.x + num3 && vector3.y >= vector5.y + num4)
+			{
+				array[i] = Quadrant.NE;
+			}
+			if (vector3.x >= vector4.x + num3 && vector3.y < vector5.y + num4)
+			{
+				array[i] = Quadrant.SE;
+			}
+			if (vector3.x < vector4.x + num3 && vector3.y < vector5.y + num4)
+			{
+				array[i] = Quadrant.SW;
+			}
+			if (vector3.x < vector4.x + num3 && vector3.y >= vector5.y + num4)
+			{
+				array[i] = Quadrant.NW;
+			}
+			switch (array[i])
+			{
+			case Quadrant.NE:
+				vector4.x += num3;
+				vector5.y += num4;
+				break;
+			case Quadrant.NW:
+				vector5.x -= num3;
+				vector5.y += num4;
+				break;
+			case Quadrant.SW:
+				vector4.y -= num4;
+				vector5.x -= num3;
+				break;
+			case Quadrant.SE:
+				vector4.x += num3;
+				vector4.y -= num4;
+				break;
+			}
+		}
+		return array;
+	}
 
 	[OnDeserialized]
 	private void OnDeserialized()
@@ -613,8 +674,13 @@ public class WorldContainer : KMonoBehaviour
 		}
 	}
 
-	private void RevealSurface()
+	public void RevealSurface()
 	{
+		if (this.isSurfaceRevealed)
+		{
+			return;
+		}
+		this.isSurfaceRevealed = true;
 		for (int i = 0; i < this.worldSize.x; i++)
 		{
 			for (int j = this.worldSize.y - 1; j >= 0; j--)
@@ -909,7 +975,7 @@ public class WorldContainer : KMonoBehaviour
 
 	public void CancelChores()
 	{
-		for (int i = 0; i < 43; i++)
+		for (int i = 0; i < 44; i++)
 		{
 			int num = (int)this.minimumBounds.x;
 			while ((float)num <= this.maximumBounds.x)
@@ -1058,6 +1124,9 @@ public class WorldContainer : KMonoBehaviour
 
 	[Serialize]
 	private bool isRoverVisited;
+
+	[Serialize]
+	private bool isSurfaceRevealed;
 
 	[Serialize]
 	public string worldName;

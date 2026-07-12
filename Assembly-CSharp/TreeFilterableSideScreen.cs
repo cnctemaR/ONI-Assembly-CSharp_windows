@@ -17,6 +17,15 @@ public class TreeFilterableSideScreen : SideScreenContent
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
+		this.Initialize();
+	}
+
+	private void Initialize()
+	{
+		if (this.initialized)
+		{
+			return;
+		}
 		this.rowPool = new UIPool<TreeFilterableSideScreenRow>(this.rowPrefab);
 		this.elementPool = new UIPool<TreeFilterableSideScreenElement>(this.elementPrefab);
 		MultiToggle multiToggle = this.allCheckBox;
@@ -38,6 +47,7 @@ public class TreeFilterableSideScreen : SideScreenContent
 		}));
 		this.onlyAllowTransportItemsCheckBox.onClick = new global::System.Action(this.OnlyAllowTransportItemsClicked);
 		this.onlyAllowSpicedItemsCheckBox.onClick = new global::System.Action(this.OnlyAllowSpicedItemsClicked);
+		this.initialized = true;
 	}
 
 	protected override void OnSpawn()
@@ -170,11 +180,14 @@ public class TreeFilterableSideScreen : SideScreenContent
 
 	public override bool IsValidForTarget(GameObject target)
 	{
-		return target.GetComponent<TreeFilterable>() != null && target.GetComponent<FlatTagFilterable>() == null;
+		TreeFilterable component = target.GetComponent<TreeFilterable>();
+		Storage component2 = target.GetComponent<Storage>();
+		return component != null && target.GetComponent<FlatTagFilterable>() == null && component.showUserMenu && (component2 == null || component2.showInUI);
 	}
 
 	public override void SetTarget(GameObject target)
 	{
+		this.Initialize();
 		this.target = target;
 		if (target == null)
 		{
@@ -185,16 +198,6 @@ public class TreeFilterableSideScreen : SideScreenContent
 		if (this.targetFilterable == null)
 		{
 			global::Debug.LogError("The target provided does not have a Tree Filterable component");
-			return;
-		}
-		if (!this.targetFilterable.showUserMenu)
-		{
-			DetailsScreen.Instance.DeactivateSideContent();
-			return;
-		}
-		if (this.IsStorage && !this.storage.showInUI)
-		{
-			DetailsScreen.Instance.DeactivateSideContent();
 			return;
 		}
 		this.contentMask.GetComponent<LayoutElement>().minHeight = (float)((this.targetFilterable.uiHeight == TreeFilterable.UISideScreenHeight.Tall) ? 380 : 256);
@@ -275,6 +278,10 @@ public class TreeFilterableSideScreen : SideScreenContent
 
 	private TreeFilterableSideScreenRow AddRow(Tag rowTag)
 	{
+		if (this.tagRowMap.ContainsKey(rowTag))
+		{
+			return this.tagRowMap[rowTag];
+		}
 		TreeFilterableSideScreenRow freeElement = this.rowPool.GetFreeElement(this.rowGroup, true);
 		freeElement.Parent = this;
 		this.tagRowMap.Add(rowTag, freeElement);
@@ -362,6 +369,8 @@ public class TreeFilterableSideScreen : SideScreenContent
 	private GameObject target;
 
 	private bool visualDirty;
+
+	private bool initialized;
 
 	private KImage onlyAllowTransportItemsImg;
 

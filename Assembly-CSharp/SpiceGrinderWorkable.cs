@@ -32,7 +32,7 @@ public class SpiceGrinderWorkable : Workable, IConfigurableConsumer
 			global::Debug.LogWarning("SpiceGrider attempted to start spicing with no food");
 			base.StopWork(worker, true);
 		}
-		this.Grinder.SetFoodSymbol();
+		this.Grinder.UpdateFoodSymbol();
 	}
 
 	protected override void OnAbortWork(Worker worker)
@@ -41,7 +41,7 @@ public class SpiceGrinderWorkable : Workable, IConfigurableConsumer
 		{
 			return;
 		}
-		this.Grinder.SetFoodSymbol();
+		this.Grinder.UpdateFoodSymbol();
 	}
 
 	protected override void OnCompleteWork(Worker worker)

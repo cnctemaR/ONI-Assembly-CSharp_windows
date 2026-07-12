@@ -16,7 +16,7 @@ public class ColonyDestinationSelectScreen : NewGameFlowScreen
 		this.launchButton.onClick += this.LaunchClicked;
 		this.shuffleButton.onClick += this.ShuffleClicked;
 		this.storyTraitShuffleButton.onClick += this.StoryTraitShuffleClicked;
-		this.storyTraitShuffleButton.gameObject.SetActive(Db.Get().Stories.Count > 2);
+		this.storyTraitShuffleButton.gameObject.SetActive(Db.Get().Stories.Count > 3);
 		this.destinationMapPanel.OnAsteroidClicked += this.OnAsteroidClicked;
 		KInputTextField kinputTextField = this.coordinate;
 		kinputTextField.onFocus = (global::System.Action)Delegate.Combine(kinputTextField.onFocus, new global::System.Action(this.CoordinateEditStarted));
@@ -52,7 +52,7 @@ public class ColonyDestinationSelectScreen : NewGameFlowScreen
 		}
 		this.ResizeLayout();
 		this.storyContentPanel.Init();
-		this.storyContentPanel.SelectRandomStories(2, 2, true);
+		this.storyContentPanel.SelectRandomStories(3, 3, true);
 		this.storyContentPanel.SelectDefault();
 		this.RefreshStoryLabel();
 		this.RefreshRowsAndDescriptions();
@@ -178,7 +178,7 @@ public class ColonyDestinationSelectScreen : NewGameFlowScreen
 
 	private void StoryTraitShuffleClicked()
 	{
-		this.storyContentPanel.SelectRandomStories(2, 2, false);
+		this.storyContentPanel.SelectRandomStories(3, 3, false);
 	}
 
 	private void CoordinateChanged(string text)

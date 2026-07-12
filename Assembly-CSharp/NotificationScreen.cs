@@ -145,7 +145,7 @@ public class NotificationScreen : KScreen
 			return;
 		}
 		this.notifications.Add(notification);
-		NotificationScreen.Entry entry = null;
+		NotificationScreen.Entry entry;
 		this.entriesByMessage.TryGetValue(notification.titleText, out entry);
 		if (entry == null)
 		{
@@ -158,52 +158,31 @@ public class NotificationScreen : KScreen
 			{
 				hierarchyReferences = global::Util.KInstantiateUI<HierarchyReferences>(this.LabelPrefab, this.LabelsFolder, false);
 			}
-			hierarchyReferences.GetReference<NotificationAnimator>("Animator").Begin(true);
-			hierarchyReferences.gameObject.SetActive(true);
-			Button reference = hierarchyReferences.GetReference<Button>("MainButton");
-			ColorBlock colors = reference.colors;
-			if (notification.Type == NotificationType.Bad || notification.Type == NotificationType.DuplicantThreatening)
+			Button reference = hierarchyReferences.GetReference<Button>("DismissButton");
+			reference.gameObject.SetActive(notification.showDismissButton);
+			if (notification.showDismissButton)
 			{
-				colors.normalColor = this.badColorBG;
-			}
-			else if (notification.Type == NotificationType.Messages)
-			{
-				colors.normalColor = this.messageColorBG;
-				global::Debug.Assert(notification.GetType() == typeof(MessageNotification), string.Format("Notification: \"{0}\" is not of type MessageNotification", notification.titleText));
-				Predicate<Notification> <>9__2;
-				hierarchyReferences.GetReference<Button>("DismissButton").onClick.AddListener(delegate
+				reference.onClick.AddListener(delegate
 				{
-					List<Notification> list = this.notifications;
-					Predicate<Notification> predicate;
-					if ((predicate = <>9__2) == null)
+					NotificationScreen.Entry entry2;
+					if (!this.entriesByMessage.TryGetValue(notification.titleText, out entry2))
 					{
-						predicate = (<>9__2 = (Notification n) => n.titleText == notification.titleText);
+						return;
 					}
-					foreach (Notification notification2 in list.FindAll(predicate))
+					for (int i = entry2.notifications.Count - 1; i >= 0; i--)
 					{
-						MessageNotification messageNotification2 = (MessageNotification)notification2;
-						Messenger.Instance.RemoveMessage(messageNotification2.message);
-						messageNotification2.Clear();
+						Notification notification2 = entry2.notifications[i];
+						MessageNotification messageNotification2 = notification2 as MessageNotification;
+						if (messageNotification2 != null)
+						{
+							Messenger.Instance.RemoveMessage(messageNotification2.message);
+						}
+						notification2.Clear();
 					}
 				});
 			}
-			else if (notification.Type == NotificationType.Tutorial)
-			{
-				colors.normalColor = this.warningColorBG;
-			}
-			else if (notification.Type == NotificationType.Event)
-			{
-				colors.normalColor = this.eventColorBG;
-			}
-			else
-			{
-				colors.normalColor = this.normalColorBG;
-			}
-			reference.colors = colors;
-			reference.onClick.AddListener(delegate
-			{
-				this.OnClick(entry);
-			});
+			hierarchyReferences.GetReference<NotificationAnimator>("Animator").Begin(true);
+			hierarchyReferences.gameObject.SetActive(true);
 			if (notification.ToolTip != null)
 			{
 				ToolTip tooltip = hierarchyReferences.GetReference<ToolTip>("ToolTip");
@@ -214,51 +193,61 @@ public class NotificationScreen : KScreen
 					return "";
 				};
 			}
-			entry = new NotificationScreen.Entry(hierarchyReferences.gameObject);
-			this.entriesByMessage[notification.titleText] = entry;
-			this.entries.Add(entry);
 			KImage reference2 = hierarchyReferences.GetReference<KImage>("Icon");
 			LocText reference3 = hierarchyReferences.GetReference<LocText>("Text");
+			Button reference4 = hierarchyReferences.GetReference<Button>("MainButton");
+			ColorBlock colors = reference4.colors;
 			switch (notification.Type)
 			{
 			case NotificationType.Bad:
+			case NotificationType.DuplicantThreatening:
+				colors.normalColor = this.badColorBG;
 				reference3.color = this.badColor;
-				reference2.sprite = this.icon_bad;
-				goto IL_0384;
+				reference2.color = this.badColor;
+				reference2.sprite = ((notification.Type == NotificationType.Bad) ? this.icon_bad : this.icon_threatening);
+				goto IL_0300;
 			case NotificationType.Tutorial:
+				colors.normalColor = this.warningColorBG;
 				reference3.color = this.warningColor;
+				reference2.color = this.warningColor;
 				reference2.sprite = this.icon_warning;
-				goto IL_0384;
+				goto IL_0300;
 			case NotificationType.Messages:
 			{
+				colors.normalColor = this.messageColorBG;
 				reference3.color = this.messageColor;
+				reference2.color = this.messageColor;
 				reference2.sprite = this.icon_message;
 				MessageNotification messageNotification = notification as MessageNotification;
 				if (messageNotification == null)
 				{
-					goto IL_0384;
+					goto IL_0300;
 				}
 				TutorialMessage tutorialMessage = messageNotification.message as TutorialMessage;
 				if (tutorialMessage != null && !string.IsNullOrEmpty(tutorialMessage.videoClipId))
 				{
 					reference2.sprite = this.icon_video;
-					goto IL_0384;
+					goto IL_0300;
 				}
-				goto IL_0384;
+				goto IL_0300;
 			}
-			case NotificationType.DuplicantThreatening:
-				reference3.color = this.badColor;
-				reference2.sprite = this.icon_threatening;
-				goto IL_0384;
 			case NotificationType.Event:
+				colors.normalColor = this.eventColorBG;
 				reference3.color = this.eventColor;
+				reference2.color = this.eventColor;
 				reference2.sprite = this.icon_event;
-				goto IL_0384;
+				goto IL_0300;
 			}
+			colors.normalColor = this.normalColorBG;
 			reference3.color = this.normalColor;
+			reference2.color = this.normalColor;
 			reference2.sprite = this.icon_normal;
-			IL_0384:
-			reference2.color = reference3.color;
+			IL_0300:
+			reference4.colors = colors;
+			reference4.onClick.AddListener(delegate
+			{
+				this.OnClick(entry);
+			});
 			string text = "";
 			if (KTime.Instance.UnscaledGameTime - this.initTime > 5f && notification.playSound)
 			{
@@ -272,9 +261,11 @@ public class NotificationScreen : KScreen
 			{
 				global::Debug.Log("Notification(" + notification.titleText + "):" + text);
 			}
+			entry = new NotificationScreen.Entry(hierarchyReferences.gameObject);
+			this.entriesByMessage[notification.titleText] = entry;
+			this.entries.Add(entry);
 		}
 		entry.Add(notification);
-		entry.UpdateMessage(notification, true);
 		this.dirty = true;
 		this.SortNotifications();
 	}

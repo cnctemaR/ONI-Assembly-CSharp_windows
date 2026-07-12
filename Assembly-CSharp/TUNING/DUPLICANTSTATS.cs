@@ -612,6 +612,20 @@ namespace TUNING
 					"CantResearch", "CantBuild", "CantCook", "CantDig", "Hemophobia", "ScaredyCat", "Anemic", "SlowLearner", "NoodleArms", "ConstructionDown",
 					"RanchingDown", "DiggingDown", "MachineryDown", "CookingDown", "ArtDown", "CaringDown", "BotanistDown"
 				}
+			},
+			new DUPLICANTSTATS.TraitVal
+			{
+				id = "Chatty",
+				rarity = DUPLICANTSTATS.RARITY_LEGENDARY,
+				dlcId = "",
+				doNotGenerateTrait = true
+			},
+			new DUPLICANTSTATS.TraitVal
+			{
+				id = "CustomOutfit",
+				rarity = DUPLICANTSTATS.RARITY_LEGENDARY,
+				dlcId = "",
+				doNotGenerateTrait = true
 			}
 		};
 
@@ -1106,7 +1120,7 @@ namespace TUNING
 
 			public const int LUX_PLEASANT_LIGHT = 40000;
 
-			public static float LIGHT_WORK_EFFICIENCY_BONUS = 0.15f;
+			public const float LIGHT_WORK_EFFICIENCY_BONUS = 0.15f;
 
 			public const int NO_LIGHT = 0;
 
@@ -1293,6 +1307,11 @@ namespace TUNING
 			public static float PART_DAY_EXPERIENCE = DUPLICANTSTATS.ATTRIBUTE_LEVELING.FULL_EXPERIENCE / 0.25f;
 
 			public static float BARELY_EVER_EXPERIENCE = DUPLICANTSTATS.ATTRIBUTE_LEVELING.FULL_EXPERIENCE / 0.1f;
+		}
+
+		public class ROOM
+		{
+			public const float LABORATORY_RESEARCH_EFFICIENCY_BONUS = 0.1f;
 		}
 	}
 }

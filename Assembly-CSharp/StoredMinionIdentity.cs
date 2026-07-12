@@ -17,6 +17,9 @@ public class StoredMinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableId
 	[Serialize]
 	public string nameStringKey { get; set; }
 
+	[Serialize]
+	public HashedString personalityResourceId { get; set; }
+
 	[OnDeserialized]
 	[Obsolete]
 	private void OnDeserializedMethod()
@@ -41,6 +44,10 @@ public class StoredMinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableId
 		{
 			this.forbiddenTagSet = new HashSet<Tag>(this.forbiddenTags);
 			this.forbiddenTags = null;
+		}
+		if (SaveLoader.Instance.GameInfo.IsVersionOlderThan(7, 30))
+		{
+			this.bodyData = Accessorizer.UpdateAccessorySlots(this.nameStringKey, ref this.accessories);
 		}
 		this.OnDeserializeModifiers();
 	}

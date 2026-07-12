@@ -7,18 +7,20 @@ using UnityEngine;
 
 public class MinionStartingStats : ITelepadDeliverable
 {
-	public MinionStartingStats(bool is_starter_minion, string guaranteedAptitudeID = null, string guaranteedTraitID = null)
+	public MinionStartingStats(Personality personality, string guaranteedAptitudeID = null, string guaranteedTraitID = null, bool isDebugMinion = false)
 	{
-		if (is_starter_minion)
-		{
-			int num = global::UnityEngine.Random.Range(0, Db.Get().Personalities.GetStartingPersonalities().Count);
-			this.personality = Db.Get().Personalities.GetStartingPersonalities()[num];
-		}
-		else
-		{
-			int num2 = global::UnityEngine.Random.Range(0, Db.Get().Personalities.Count);
-			this.personality = Db.Get().Personalities[num2];
-		}
+		this.personality = personality;
+		this.GenerateStats(guaranteedAptitudeID, guaranteedTraitID, isDebugMinion, false);
+	}
+
+	public MinionStartingStats(bool is_starter_minion, string guaranteedAptitudeID = null, string guaranteedTraitID = null, bool isDebugMinion = false)
+	{
+		this.personality = Db.Get().Personalities.GetRandom(true, is_starter_minion);
+		this.GenerateStats(guaranteedAptitudeID, guaranteedTraitID, isDebugMinion, is_starter_minion);
+	}
+
+	private void GenerateStats(string guaranteedAptitudeID = null, string guaranteedTraitID = null, bool isDebugMinion = false, bool is_starter_minion = false)
+	{
 		this.voiceIdx = global::UnityEngine.Random.Range(0, 4);
 		this.Name = this.personality.Name;
 		this.NameStringKey = this.personality.nameStringKey;
@@ -26,8 +28,8 @@ public class MinionStartingStats : ITelepadDeliverable
 		this.Traits.Add(Db.Get().traits.Get(MinionConfig.MINION_BASE_TRAIT_ID));
 		List<ChoreGroup> list = new List<ChoreGroup>();
 		this.GenerateAptitudes(guaranteedAptitudeID);
-		int num3 = this.GenerateTraits(is_starter_minion, list, guaranteedAptitudeID, guaranteedTraitID);
-		this.GenerateAttributes(num3, list);
+		int num = this.GenerateTraits(is_starter_minion, list, guaranteedAptitudeID, guaranteedTraitID, isDebugMinion);
+		this.GenerateAttributes(num, list);
 		KCompBuilder.BodyData bodyData = MinionStartingStats.CreateBodyData(this.personality);
 		foreach (AccessorySlot accessorySlot in Db.Get().AccessorySlots.resources)
 		{
@@ -66,7 +68,7 @@ public class MinionStartingStats : ITelepadDeliverable
 						this.personality.hair = 0;
 					}
 				}
-				else if (accessorySlot == Db.Get().AccessorySlots.HatHair || accessorySlot == Db.Get().AccessorySlots.HairAlways || accessorySlot == Db.Get().AccessorySlots.Hat)
+				else if (accessorySlot == Db.Get().AccessorySlots.HatHair)
 				{
 					accessory = accessorySlot.accessories[0];
 				}
@@ -82,16 +84,80 @@ public class MinionStartingStats : ITelepadDeliverable
 				{
 					accessory = accessorySlot.Lookup(bodyData.arms);
 				}
-				if (accessory == null)
+				else if (accessorySlot == Db.Get().AccessorySlots.ArmLower)
 				{
-					accessory = accessorySlot.accessories[0];
+					accessory = accessorySlot.Lookup(bodyData.armslower);
+				}
+				else if (accessorySlot == Db.Get().AccessorySlots.ArmLowerSkin)
+				{
+					accessory = accessorySlot.Lookup(bodyData.armLowerSkin);
+				}
+				else if (accessorySlot == Db.Get().AccessorySlots.ArmUpperSkin)
+				{
+					accessory = accessorySlot.Lookup(bodyData.armUpperSkin);
+				}
+				else if (accessorySlot == Db.Get().AccessorySlots.LegSkin)
+				{
+					accessory = accessorySlot.Lookup(bodyData.legSkin);
+				}
+				else if (accessorySlot == Db.Get().AccessorySlots.Leg)
+				{
+					accessory = accessorySlot.Lookup(bodyData.legs);
+				}
+				else if (accessorySlot == Db.Get().AccessorySlots.Belt)
+				{
+					accessory = accessorySlot.Lookup(bodyData.belt);
+					if (accessory == null)
+					{
+						accessory = accessorySlot.accessories[0];
+					}
+				}
+				else if (accessorySlot == Db.Get().AccessorySlots.Neck)
+				{
+					accessory = accessorySlot.Lookup(bodyData.neck);
+				}
+				else if (accessorySlot == Db.Get().AccessorySlots.Pelvis)
+				{
+					accessory = accessorySlot.Lookup(bodyData.pelvis);
+				}
+				else if (accessorySlot == Db.Get().AccessorySlots.Foot)
+				{
+					accessory = accessorySlot.Lookup(bodyData.foot);
+					if (accessory == null)
+					{
+						accessory = accessorySlot.accessories[0];
+					}
+				}
+				else if (accessorySlot == Db.Get().AccessorySlots.Skirt)
+				{
+					accessory = accessorySlot.Lookup(bodyData.skirt);
+				}
+				else if (accessorySlot == Db.Get().AccessorySlots.Necklace)
+				{
+					accessory = accessorySlot.Lookup(bodyData.necklace);
+				}
+				else if (accessorySlot == Db.Get().AccessorySlots.Cuff)
+				{
+					accessory = accessorySlot.Lookup(bodyData.cuff);
+					if (accessory == null)
+					{
+						accessory = accessorySlot.accessories[0];
+					}
+				}
+				else if (accessorySlot == Db.Get().AccessorySlots.Hand)
+				{
+					accessory = accessorySlot.Lookup(bodyData.hand);
+					if (accessory == null)
+					{
+						accessory = accessorySlot.accessories[0];
+					}
 				}
 				this.accessories.Add(accessory);
 			}
 		}
 	}
 
-	private int GenerateTraits(bool is_starter_minion, List<ChoreGroup> disabled_chore_groups, string guaranteedAptitudeID = null, string guaranteedTraitID = null)
+	private int GenerateTraits(bool is_starter_minion, List<ChoreGroup> disabled_chore_groups, string guaranteedAptitudeID = null, string guaranteedTraitID = null, bool isDebugMinion = false)
 	{
 		int statDelta = 0;
 		List<string> selectedTraits = new List<string>();
@@ -183,40 +249,43 @@ public class MinionStartingStats : ITelepadDeliverable
 						global::Debug.LogWarning("Trying to add nonexistent trait: " + traitVal2.id);
 						num6--;
 					}
-					else if (is_starter_minion && !trait5.ValidStarterTrait)
+					else if (!isDebugMinion || trait5.disabledChoreGroups == null || trait5.disabledChoreGroups.Length == 0)
 					{
-						num6--;
-					}
-					else if (traitVal2.doNotGenerateTrait)
-					{
-						num6--;
-					}
-					else if (this.AreTraitAndAptitudesExclusive(traitVal2, this.skillAptitudes))
-					{
-						num6--;
-					}
-					else if (is_starter_minion && guaranteedAptitudeID != null && this.AreTraitAndArchetypeExclusive(traitVal2, guaranteedAptitudeID))
-					{
-						num6--;
-					}
-					else
-					{
-						if (!this.AreTraitsMutuallyExclusive(traitVal2, selectedTraits))
+						if (is_starter_minion && !trait5.ValidStarterTrait)
 						{
-							selectedTraits.Add(traitVal2.id);
-							statDelta += traitVal2.statBonus;
-							this.rarityBalance += (positiveTrait ? (-traitVal2.rarity) : traitVal2.rarity);
-							this.Traits.Add(trait5);
-							if (trait5.disabledChoreGroups != null)
-							{
-								for (int k = 0; k < trait5.disabledChoreGroups.Length; k++)
-								{
-									disabled_chore_groups.Add(trait5.disabledChoreGroups[k]);
-								}
-							}
-							return true;
+							num6--;
 						}
-						num6--;
+						else if (traitVal2.doNotGenerateTrait)
+						{
+							num6--;
+						}
+						else if (this.AreTraitAndAptitudesExclusive(traitVal2, this.skillAptitudes))
+						{
+							num6--;
+						}
+						else if (is_starter_minion && guaranteedAptitudeID != null && this.AreTraitAndArchetypeExclusive(traitVal2, guaranteedAptitudeID))
+						{
+							num6--;
+						}
+						else
+						{
+							if (!this.AreTraitsMutuallyExclusive(traitVal2, selectedTraits))
+							{
+								selectedTraits.Add(traitVal2.id);
+								statDelta += traitVal2.statBonus;
+								this.rarityBalance += (positiveTrait ? (-traitVal2.rarity) : traitVal2.rarity);
+								this.Traits.Add(trait5);
+								if (trait5.disabledChoreGroups != null)
+								{
+									for (int k = 0; k < trait5.disabledChoreGroups.Length; k++)
+									{
+										disabled_chore_groups.Add(trait5.disabledChoreGroups[k]);
+									}
+								}
+								return true;
+							}
+							num6--;
+						}
 					}
 				}
 			}
@@ -393,11 +462,13 @@ public class MinionStartingStats : ITelepadDeliverable
 		component.SetName(this.Name);
 		component.nameStringKey = this.NameStringKey;
 		component.genderStringKey = this.GenderStringKey;
+		component.personalityResourceId = this.personality.IdHash;
 		this.ApplyTraits(go);
 		this.ApplyRace(go);
 		this.ApplyAptitudes(go);
 		this.ApplyAccessories(go);
 		this.ApplyExperience(go);
+		this.ApplyOutfit(this.personality, go);
 	}
 
 	public void ApplyExperience(GameObject go)
@@ -411,9 +482,19 @@ public class MinionStartingStats : ITelepadDeliverable
 	public void ApplyAccessories(GameObject go)
 	{
 		Accessorizer component = go.GetComponent<Accessorizer>();
-		foreach (Accessory accessory in this.accessories)
+		component.ApplyMinionPersonality(this.personality);
+		component.UpdateHairBasedOnHat();
+	}
+
+	public void ApplyOutfit(Personality personality, GameObject go)
+	{
+		if (personality.outfitIds.ContainsKey(ClothingOutfitUtility.OutfitType.Clothing))
 		{
-			component.AddAccessory(accessory);
+			Option<ClothingOutfitTarget> option = ClothingOutfitTarget.TryFromId(personality.outfitIds[ClothingOutfitUtility.OutfitType.Clothing]);
+			if (option.HasValue)
+			{
+				go.GetComponent<Accessorizer>().ApplyClothingItems(option.Value.ReadItemValues(), true);
+			}
 		}
 	}
 
@@ -430,11 +511,21 @@ public class MinionStartingStats : ITelepadDeliverable
 			hair = HashCache.Get().Add(string.Format("hair_{0:000}", p.hair)),
 			headShape = HashCache.Get().Add(string.Format("headshape_{0:000}", p.headShape)),
 			mouth = HashCache.Get().Add(string.Format("mouth_{0:000}", p.mouth)),
-			neck = HashCache.Get().Add(string.Format("neck_{0:000}", p.neck)),
-			arms = HashCache.Get().Add(string.Format("arm_{0:000}", p.body)),
-			body = HashCache.Get().Add(string.Format("body_{0:000}", p.body)),
+			neck = HashCache.Get().Add("neck"),
+			arms = HashCache.Get().Add(string.Format("arm_sleeve_{0:000}", p.body)),
+			armslower = HashCache.Get().Add(string.Format("arm_lower_sleeve_{0:000}", p.body)),
+			body = HashCache.Get().Add(string.Format("torso_{0:000}", p.body)),
 			hat = HashedString.Invalid,
-			faceFX = HashedString.Invalid
+			faceFX = HashedString.Invalid,
+			legs = HashCache.Get().Add("leg"),
+			armLowerSkin = HashCache.Get().Add(string.Format("arm_lower_{0:000}", p.headShape)),
+			armUpperSkin = HashCache.Get().Add(string.Format("arm_upper_{0:000}", p.headShape)),
+			legSkin = HashCache.Get().Add(string.Format("leg_skin_{0:000}", p.headShape)),
+			belt = HashCache.Get().Add("belt"),
+			pelvis = HashCache.Get().Add("pelvis"),
+			foot = HashCache.Get().Add("foot"),
+			hand = HashCache.Get().Add("hand_paint"),
+			cuff = HashCache.Get().Add("cuff")
 		};
 	}
 
@@ -462,7 +553,9 @@ public class MinionStartingStats : ITelepadDeliverable
 		}
 		component.Add(this.joyTrait);
 		go.GetComponent<MinionIdentity>().SetStickerType(this.stickerType);
-		go.GetComponent<MinionIdentity>().SetName(this.Name);
+		MinionIdentity component2 = go.GetComponent<MinionIdentity>();
+		component2.SetName(this.Name);
+		component2.nameStringKey = this.NameStringKey;
 		go.GetComponent<MinionIdentity>().SetGender(this.GenderStringKey);
 	}
 

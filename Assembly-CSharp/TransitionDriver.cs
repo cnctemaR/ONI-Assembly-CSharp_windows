@@ -26,10 +26,10 @@ public class TransitionDriver
 
 	private void BeginTransition(Navigator navigator, Navigator.ActiveTransition transition)
 	{
-		int count = this.interruptOverrideStack.Count;
+		bool flag = this.interruptOverrideStack.Count != 0;
 		foreach (TransitionDriver.OverrideLayer overrideLayer in this.overrideLayers)
 		{
-			if (count == 0 || !(overrideLayer is TransitionDriver.InterruptOverrideLayer))
+			if (!flag || !(overrideLayer is TransitionDriver.InterruptOverrideLayer))
 			{
 				overrideLayer.BeginTransition(navigator, transition);
 			}
@@ -58,14 +58,14 @@ public class TransitionDriver
 		{
 			KAnimControllerBase component2 = navigator.GetComponent<KAnimControllerBase>();
 			component2.PlaySpeedMultiplier = transition.animSpeed;
-			bool flag = transition.preAnim != "";
-			bool flag2 = component2.CurrentAnim != null && component2.CurrentAnim.name == transition.anim;
-			if (flag && component2.CurrentAnim != null && component2.CurrentAnim.name == transition.preAnim)
+			bool flag2 = transition.preAnim != "";
+			bool flag3 = component2.CurrentAnim != null && component2.CurrentAnim.name == transition.anim;
+			if (flag2 && component2.CurrentAnim != null && component2.CurrentAnim.name == transition.preAnim)
 			{
 				component2.ClearQueue();
 				component2.Queue(transition.anim, KAnim.PlayMode.Loop, 1f, 0f);
 			}
-			else if (flag2)
+			else if (flag3)
 			{
 				if (component2.PlayMode != KAnim.PlayMode.Loop)
 				{
@@ -73,7 +73,7 @@ public class TransitionDriver
 					component2.Queue(transition.anim, KAnim.PlayMode.Loop, 1f, 0f);
 				}
 			}
-			else if (flag)
+			else if (flag2)
 			{
 				component2.Play(transition.preAnim, KAnim.PlayMode.Once, 1f, 0f);
 				component2.Queue(transition.anim, KAnim.PlayMode.Loop, 1f, 0f);
@@ -123,9 +123,9 @@ public class TransitionDriver
 		}
 		foreach (TransitionDriver.OverrideLayer overrideLayer in this.overrideLayers)
 		{
-			int count = this.interruptOverrideStack.Count;
-			bool flag = overrideLayer is TransitionDriver.InterruptOverrideLayer;
-			if (count == 0 || !flag || this.interruptOverrideStack.Peek() == overrideLayer)
+			bool flag = this.interruptOverrideStack.Count != 0;
+			bool flag2 = overrideLayer is TransitionDriver.InterruptOverrideLayer;
+			if (!flag || !flag2 || this.interruptOverrideStack.Peek() == overrideLayer)
 			{
 				overrideLayer.UpdateTransition(this.navigator, this.transition);
 			}
@@ -136,7 +136,7 @@ public class TransitionDriver
 		}
 		if (this.brain != null)
 		{
-			bool flag2 = this.isComplete;
+			bool flag3 = this.isComplete;
 		}
 		if (this.transition.isLooping)
 		{

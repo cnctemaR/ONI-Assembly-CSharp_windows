@@ -36,6 +36,7 @@ public class GeneticAnalysisStationConfig : IBuildingConfig
 
 	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
+		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.ScienceBuilding, false);
 		go.AddOrGet<BuildingComplete>().isManuallyOperated = true;
 		go.AddOrGetDef<GeneticAnalysisStation.Def>();
 		go.AddOrGet<GeneticAnalysisStationWorkable>().finishedSeedDropOffset = new Vector3(-3f, 1.5f, 0f);

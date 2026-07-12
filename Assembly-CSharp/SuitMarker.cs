@@ -55,7 +55,8 @@ public class SuitMarker : KMonoBehaviour
 		base.Subscribe<SuitMarker>(-592767678, SuitMarker.OnOperationalChangedDelegate);
 		this.isRotated = base.GetComponent<Rotatable>().IsRotated;
 		base.Subscribe<SuitMarker>(-1643076535, SuitMarker.OnRotatedDelegate);
-		this.CreateNewReactable();
+		this.CreateNewEquipReactable();
+		this.CreateNewUnequipReactable();
 		this.cell = Grid.PosToCell(this);
 		Grid.RegisterSuitMarker(this.cell);
 		base.GetComponent<KAnimControllerBase>().Play("no_suit", KAnim.PlayMode.Once, 1f, 0f);
@@ -64,9 +65,14 @@ public class SuitMarker : KMonoBehaviour
 		SuitLocker.UpdateSuitMarkerStates(Grid.PosToCell(base.transform.position), base.gameObject);
 	}
 
-	private void CreateNewReactable()
+	private void CreateNewEquipReactable()
 	{
-		this.reactable = new SuitMarker.SuitMarkerReactable(this);
+		this.equipReactable = new SuitMarker.EquipSuitReactable(this);
+	}
+
+	private void CreateNewUnequipReactable()
+	{
+		this.unequipReactable = new SuitMarker.UnequipSuitReactable(this);
 	}
 
 	public void GetAttachedLockers(List<SuitLocker> suit_lockers)
@@ -197,14 +203,13 @@ public class SuitMarker : KMonoBehaviour
 		{
 			Grid.UnregisterSuitMarker(this.cell);
 		}
-		if (this.partitionerEntry != null)
+		if (this.equipReactable != null)
 		{
-			this.partitionerEntry.Release();
-			this.partitionerEntry = null;
+			this.equipReactable.Cleanup();
 		}
-		if (this.reactable != null)
+		if (this.unequipReactable != null)
 		{
-			this.reactable.Cleanup();
+			this.unequipReactable.Cleanup();
 		}
 		SuitLocker.UpdateSuitMarkerStates(Grid.PosToCell(base.transform.position), null);
 	}
@@ -212,9 +217,9 @@ public class SuitMarker : KMonoBehaviour
 	[MyCmpGet]
 	private Building building;
 
-	private ScenePartitionerEntry partitionerEntry;
+	private SuitMarker.SuitMarkerReactable equipReactable;
 
-	private SuitMarker.SuitMarkerReactable reactable;
+	private SuitMarker.SuitMarkerReactable unequipReactable;
 
 	private bool hasAvailableSuit;
 
@@ -246,10 +251,123 @@ public class SuitMarker : KMonoBehaviour
 		component.isRotated = ((Rotatable)data).IsRotated;
 	});
 
-	private class SuitMarkerReactable : Reactable
+	private class EquipSuitReactable : SuitMarker.SuitMarkerReactable
 	{
-		public SuitMarkerReactable(SuitMarker suit_marker)
-			: base(suit_marker.gameObject, "SuitMarkerReactable", Db.Get().ChoreTypes.SuitMarker, 1, 1, false, 0f, 0f, float.PositiveInfinity, 0f, ObjectLayer.NumLayers)
+		public EquipSuitReactable(SuitMarker marker)
+			: base("EquipSuitReactable", marker)
+		{
+		}
+
+		public override bool InternalCanBegin(GameObject newReactor, Navigator.ActiveTransition transition)
+		{
+			return !newReactor.GetComponent<MinionIdentity>().GetEquipment().IsSlotOccupied(Db.Get().AssignableSlots.Suit) && base.InternalCanBegin(newReactor, transition) && Grid.HasSuit(Grid.PosToCell(this.suitMarker), newReactor.GetComponent<KPrefabID>().InstanceID);
+		}
+
+		protected override void InternalBegin()
+		{
+			base.InternalBegin();
+			this.suitMarker.CreateNewEquipReactable();
+		}
+
+		protected override bool MovingTheRightWay(GameObject newReactor, Navigator.ActiveTransition transition)
+		{
+			bool flag = transition.navGridTransition.x < 0;
+			return this.IsRocketDoorExitEquip(newReactor, transition) || flag == this.suitMarker.isRotated;
+		}
+
+		private bool IsRocketDoorExitEquip(GameObject new_reactor, Navigator.ActiveTransition transition)
+		{
+			bool flag = transition.end != NavType.Teleport && transition.start != NavType.Teleport;
+			return transition.navGridTransition.x == 0 && new_reactor.GetMyWorld().IsModuleInterior && !flag;
+		}
+
+		protected override void Run()
+		{
+			ListPool<SuitLocker, SuitMarker>.PooledList pooledList = ListPool<SuitLocker, SuitMarker>.Allocate();
+			this.suitMarker.GetAttachedLockers(pooledList);
+			SuitLocker suitLocker = null;
+			for (int i = 0; i < pooledList.Count; i++)
+			{
+				float suitScore = pooledList[i].GetSuitScore();
+				if (suitScore >= 1f)
+				{
+					suitLocker = pooledList[i];
+					break;
+				}
+				if (suitLocker == null || suitScore > suitLocker.GetSuitScore())
+				{
+					suitLocker = pooledList[i];
+				}
+			}
+			pooledList.Recycle();
+			if (suitLocker != null)
+			{
+				Equipment equipment = this.reactor.GetComponent<MinionIdentity>().GetEquipment();
+				suitLocker.EquipTo(equipment);
+			}
+		}
+	}
+
+	private class UnequipSuitReactable : SuitMarker.SuitMarkerReactable
+	{
+		public UnequipSuitReactable(SuitMarker marker)
+			: base("UnequipSuitReactable", marker)
+		{
+		}
+
+		public override bool InternalCanBegin(GameObject newReactor, Navigator.ActiveTransition transition)
+		{
+			return newReactor.GetComponent<MinionIdentity>().GetEquipment().IsSlotOccupied(Db.Get().AssignableSlots.Suit) && base.InternalCanBegin(newReactor, transition);
+		}
+
+		protected override void InternalBegin()
+		{
+			base.InternalBegin();
+			this.suitMarker.CreateNewUnequipReactable();
+		}
+
+		protected override bool MovingTheRightWay(GameObject newReactor, Navigator.ActiveTransition transition)
+		{
+			bool flag = transition.navGridTransition.x < 0;
+			return transition.navGridTransition.x != 0 && flag != this.suitMarker.isRotated;
+		}
+
+		protected override void Run()
+		{
+			Navigator component = this.reactor.GetComponent<Navigator>();
+			Equipment equipment = this.reactor.GetComponent<MinionIdentity>().GetEquipment();
+			if (component != null && (component.flags & this.suitMarker.PathFlag) > PathFinder.PotentialPath.Flags.None)
+			{
+				ListPool<SuitLocker, SuitMarker>.PooledList pooledList = ListPool<SuitLocker, SuitMarker>.Allocate();
+				this.suitMarker.GetAttachedLockers(pooledList);
+				SuitLocker suitLocker = null;
+				int num = 0;
+				while (suitLocker == null && num < pooledList.Count)
+				{
+					if (pooledList[num].CanDropOffSuit())
+					{
+						suitLocker = pooledList[num];
+					}
+					num++;
+				}
+				pooledList.Recycle();
+				if (suitLocker != null)
+				{
+					suitLocker.UnequipFrom(equipment);
+					return;
+				}
+			}
+			Assignable assignable = equipment.GetAssignable(Db.Get().AssignableSlots.Suit);
+			assignable.Unassign();
+			Notification notification = new Notification(MISC.NOTIFICATIONS.SUIT_DROPPED.NAME, NotificationType.BadMinor, (List<Notification> notificationList, object data) => MISC.NOTIFICATIONS.SUIT_DROPPED.TOOLTIP, null, true, 0f, null, null, null, true, false, false);
+			assignable.GetComponent<Notifier>().Add(notification, "");
+		}
+	}
+
+	private abstract class SuitMarkerReactable : Reactable
+	{
+		public SuitMarkerReactable(HashedString id, SuitMarker suit_marker)
+			: base(suit_marker.gameObject, id, Db.Get().ChoreTypes.SuitMarker, 1, 1, false, 0f, 0f, float.PositiveInfinity, 0f, ObjectLayer.NumLayers)
 		{
 			this.suitMarker = suit_marker;
 		}
@@ -265,25 +383,7 @@ public class SuitMarker : KMonoBehaviour
 				base.Cleanup();
 				return false;
 			}
-			if (!this.suitMarker.isOperational)
-			{
-				return false;
-			}
-			int x = transition.navGridTransition.x;
-			if (x == 0)
-			{
-				return this.IsRocketDoorExitEquip(new_reactor, transition);
-			}
-			if (new_reactor.GetComponent<MinionIdentity>().GetEquipment().IsSlotOccupied(Db.Get().AssignableSlots.Suit))
-			{
-				return (x >= 0 || !this.suitMarker.isRotated) && (x <= 0 || this.suitMarker.isRotated);
-			}
-			return (x <= 0 || !this.suitMarker.isRotated) && (x >= 0 || this.suitMarker.isRotated) && Grid.HasSuit(Grid.PosToCell(this.suitMarker), new_reactor.GetComponent<KPrefabID>().InstanceID);
-		}
-
-		private bool IsRocketDoorExitEquip(GameObject new_reactor, Navigator.ActiveTransition transition)
-		{
-			return new_reactor.GetMyWorld().IsModuleInterior && !new_reactor.GetComponent<MinionIdentity>().GetEquipment().IsSlotOccupied(Db.Get().AssignableSlots.Suit) && (transition.end == NavType.Teleport || transition.start == NavType.Teleport) && Grid.HasSuit(Grid.PosToCell(this.suitMarker), new_reactor.GetComponent<KPrefabID>().InstanceID);
+			return this.suitMarker.isOperational && this.MovingTheRightWay(new_reactor, transition);
 		}
 
 		protected override void InternalBegin()
@@ -301,7 +401,6 @@ public class SuitMarker : KMonoBehaviour
 				component2.Queue("working_loop", KAnim.PlayMode.Once, 1f, 0f);
 				component2.Queue("working_pst", KAnim.PlayMode.Once, 1f, 0f);
 			}
-			this.suitMarker.CreateNewReactable();
 		}
 
 		public override void Update(float dt)
@@ -313,73 +412,12 @@ public class SuitMarker : KMonoBehaviour
 			}
 			if (Time.time - this.startTime > 2.8f)
 			{
-				this.Run();
+				if (this.reactor != null && this.suitMarker != null)
+				{
+					this.reactor.GetComponent<KBatchedAnimController>().RemoveAnimOverrides(this.suitMarker.interactAnim);
+					this.Run();
+				}
 				base.Cleanup();
-			}
-		}
-
-		private void Run()
-		{
-			if (this.reactor == null)
-			{
-				return;
-			}
-			if (this.suitMarker == null)
-			{
-				return;
-			}
-			GameObject reactor = this.reactor;
-			Equipment equipment = reactor.GetComponent<MinionIdentity>().GetEquipment();
-			bool flag = !equipment.IsSlotOccupied(Db.Get().AssignableSlots.Suit);
-			reactor.GetComponent<KBatchedAnimController>().RemoveAnimOverrides(this.suitMarker.interactAnim);
-			bool flag2 = false;
-			Navigator component = reactor.GetComponent<Navigator>();
-			bool flag3 = component != null && (component.flags & this.suitMarker.PathFlag) > PathFinder.PotentialPath.Flags.None;
-			if (flag || flag3)
-			{
-				ListPool<SuitLocker, SuitMarker>.PooledList pooledList = ListPool<SuitLocker, SuitMarker>.Allocate();
-				this.suitMarker.GetAttachedLockers(pooledList);
-				foreach (SuitLocker suitLocker in pooledList)
-				{
-					if (suitLocker.GetFullyChargedOutfit() != null && flag)
-					{
-						suitLocker.EquipTo(equipment);
-						flag2 = true;
-						break;
-					}
-					if (!flag && suitLocker.CanDropOffSuit())
-					{
-						suitLocker.UnequipFrom(equipment);
-						flag2 = true;
-						break;
-					}
-				}
-				if (flag && !flag2)
-				{
-					SuitLocker suitLocker2 = null;
-					float num = 0f;
-					foreach (SuitLocker suitLocker3 in pooledList)
-					{
-						if (suitLocker3.GetSuitScore() > num)
-						{
-							suitLocker2 = suitLocker3;
-							num = suitLocker3.GetSuitScore();
-						}
-					}
-					if (suitLocker2 != null)
-					{
-						suitLocker2.EquipTo(equipment);
-						flag2 = true;
-					}
-				}
-				pooledList.Recycle();
-			}
-			if (!flag2 && !flag)
-			{
-				Assignable assignable = equipment.GetAssignable(Db.Get().AssignableSlots.Suit);
-				assignable.Unassign();
-				Notification notification = new Notification(MISC.NOTIFICATIONS.SUIT_DROPPED.NAME, NotificationType.BadMinor, (List<Notification> notificationList, object data) => MISC.NOTIFICATIONS.SUIT_DROPPED.TOOLTIP, null, true, 0f, null, null, null, true, false);
-				assignable.GetComponent<Notifier>().Add(notification, "");
 			}
 		}
 
@@ -395,8 +433,12 @@ public class SuitMarker : KMonoBehaviour
 		{
 		}
 
-		private SuitMarker suitMarker;
+		protected abstract bool MovingTheRightWay(GameObject reactor, Navigator.ActiveTransition transition);
 
-		private float startTime;
+		protected abstract void Run();
+
+		protected SuitMarker suitMarker;
+
+		protected float startTime;
 	}
 }

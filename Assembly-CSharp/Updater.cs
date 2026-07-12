@@ -116,21 +116,29 @@ public readonly struct Updater : IEnumerator
 
 	public static Updater GenericEase<T>(Action<T> useFn, Func<T, T, float, T> interpolateFn, Easing.EasingFn easingFn, T from, T to, float duration)
 	{
-		if (easingFn == null)
+		Updater.<>c__DisplayClass17_0<T> CS$<>8__locals1 = new Updater.<>c__DisplayClass17_0<T>();
+		CS$<>8__locals1.useFn = useFn;
+		CS$<>8__locals1.interpolateFn = interpolateFn;
+		CS$<>8__locals1.from = from;
+		CS$<>8__locals1.to = to;
+		CS$<>8__locals1.easingFn = easingFn;
+		CS$<>8__locals1.duration = duration;
+		if (CS$<>8__locals1.easingFn == null)
 		{
-			easingFn = Easing.SmoothStep;
+			CS$<>8__locals1.easingFn = Easing.SmoothStep;
 		}
-		float currentSeconds = 0f;
+		CS$<>8__locals1.currentSeconds = 0f;
+		CS$<>8__locals1.<GenericEase>g__UseKeyframeAt|0(0f);
 		return new Updater(delegate(float dt)
 		{
-			float num = currentSeconds / duration;
-			useFn(interpolateFn(from, to, easingFn(num)));
-			if (num >= 1f)
+			CS$<>8__locals1.currentSeconds += dt;
+			if (CS$<>8__locals1.currentSeconds < CS$<>8__locals1.duration)
 			{
-				return UpdaterResult.Complete;
+				base.<GenericEase>g__UseKeyframeAt|0(CS$<>8__locals1.currentSeconds / CS$<>8__locals1.duration);
+				return UpdaterResult.NotComplete;
 			}
-			currentSeconds += dt;
-			return UpdaterResult.NotComplete;
+			base.<GenericEase>g__UseKeyframeAt|0(1f);
+			return UpdaterResult.Complete;
 		});
 	}
 

@@ -66,9 +66,9 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Low Battery";
 
-				public static LocString DESC = "{0}'s battery is low\n\nThe internal battery can not be recharged and this robot will cease functioning after it is depleted.";
+				public static LocString DESC = "{0}'s battery is low\n\nThe internal battery cannot be recharged and this robot will cease functioning after it is depleted.";
 
-				public static LocString TOOLTIP = "{0}'s battery is low\n\nThe internal battery can not be recharged and this robot will cease functioning after it is depleted.";
+				public static LocString TOOLTIP = "{0}'s battery is low\n\nThe internal battery cannot be recharged and this robot will cease functioning after it is depleted.";
 			}
 
 			public class DEADBATTERY

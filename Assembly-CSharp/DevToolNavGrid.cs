@@ -24,7 +24,7 @@ public class DevToolNavGrid : DevTool
 		return true;
 	}
 
-	protected override void Render()
+	protected override void RenderTo(DevPanel panel)
 	{
 		if (this.Init())
 		{

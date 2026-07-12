@@ -137,7 +137,14 @@ namespace ProcGenGame
 							placedPOIBounds.RemoveAll((RectInt bound) => bound.center == partialTemplate.Key);
 						}
 					}
-					DebugUtil.LogArgs(new object[] { string.Concat(new string[] { "Cannot place story trait '", worldTrait.filePath, "' error='", text, "'" }) });
+					if (DlcManager.FeatureClusterSpaceEnabled())
+					{
+						DebugUtil.LogArgs(new object[] { string.Concat(new string[] { "Cannot place story trait on '", worldTrait.filePath, "' and will try another world. error='", text, "'." }) });
+					}
+					else
+					{
+						DebugUtil.LogArgs(new object[] { string.Concat(new string[] { "Cannot place story trait '", worldTrait.filePath, "' error='", text, "'" }) });
+					}
 				}
 			}
 		}

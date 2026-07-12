@@ -51,12 +51,14 @@ public class BuildingTemplates
 		def.ReplacementCandidateLayers = new List<ObjectLayer>
 		{
 			ObjectLayer.FoundationTile,
-			ObjectLayer.LadderTile
+			ObjectLayer.LadderTile,
+			ObjectLayer.Backwall
 		};
 		def.ReplacementTags = new List<Tag>
 		{
 			GameTags.FloorTiles,
-			GameTags.Ladders
+			GameTags.Ladders,
+			GameTags.Backwall
 		};
 		def.EquivalentReplacementLayers = new List<ObjectLayer> { ObjectLayer.ReplacementLadder };
 	}

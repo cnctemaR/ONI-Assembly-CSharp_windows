@@ -29,6 +29,10 @@ public class MinionTodoSideScreen : SideScreenContent
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
+		if (this.priorityGroups.Count != 0)
+		{
+			return;
+		}
 		foreach (JobsTableScreen.PriorityInfo priorityInfo in MinionTodoSideScreen.priorityInfo)
 		{
 			PriorityScreen.PriorityClass priority = (PriorityScreen.PriorityClass)priorityInfo.priority;
@@ -71,6 +75,10 @@ public class MinionTodoSideScreen : SideScreenContent
 	public override void SetTarget(GameObject target)
 	{
 		this.refreshHandle.ClearScheduler();
+		if (this.priorityGroups.Count == 0)
+		{
+			this.OnPrefabInit();
+		}
 		base.SetTarget(target);
 	}
 
@@ -150,12 +158,19 @@ public class MinionTodoSideScreen : SideScreenContent
 				else
 				{
 					HierarchyReferences hierarchyReferences = this.PriorityGroupForPriority(this.choreConsumer, pooledList[i].chore);
-					MinionTodoChoreEntry choreEntry = this.GetChoreEntry(hierarchyReferences.GetReference<RectTransform>("EntriesContainer"));
-					choreEntry.Apply(pooledList[i]);
-					minionTodoChoreEntry = choreEntry;
-					context = pooledList[i];
-					num = 0;
-					flag = false;
+					if (hierarchyReferences == null)
+					{
+						DebugUtil.DevLogError(string.Format("Priority group was null for {0} with priority class {1} and personaly priority {2}", pooledList[i].chore.GetReportName(null), pooledList[i].chore.masterPriority.priority_class, this.choreConsumer.GetPersonalPriority(pooledList[i].chore.choreType)));
+					}
+					else
+					{
+						MinionTodoChoreEntry choreEntry = this.GetChoreEntry(hierarchyReferences.GetReference<RectTransform>("EntriesContainer"));
+						choreEntry.Apply(pooledList[i]);
+						minionTodoChoreEntry = choreEntry;
+						context = pooledList[i];
+						num = 0;
+						flag = false;
+					}
 				}
 			}
 		}

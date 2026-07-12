@@ -11,7 +11,7 @@ public class DevToolBatchedAnimDebug : DevTool
 		this.drawFlags = ImGuiWindowFlags.MenuBar;
 	}
 
-	protected override void Render()
+	protected override void RenderTo(DevPanel panel)
 	{
 		if (ImGui.BeginMenuBar())
 		{
@@ -46,6 +46,7 @@ public class DevToolBatchedAnimDebug : DevTool
 		}
 		KBatchGroupData batchGroupData = KAnimBatchManager.Instance().GetBatchGroupData(component.batchGroupID);
 		SymbolOverrideController component2 = this.Selection.GetComponent<SymbolOverrideController>();
+		ImGui.Text("Group: " + component.GetBatch().group.batchID.ToString() + ", Build: " + component.curBuild.name);
 		if (ImGui.BeginTabBar("##tabs", ImGuiTabBarFlags.None))
 		{
 			if (ImGui.BeginTabItem("BatchGroup"))
@@ -87,20 +88,49 @@ public class DevToolBatchedAnimDebug : DevTool
 				ImGui.EndChild();
 				ImGui.EndTabItem();
 			}
+			if (ImGui.BeginTabItem("Build Symbols"))
+			{
+				ImGui.InputText("Symbol Filter", ref this.Filter, 128U);
+				int num2 = Hash.SDBMLower(this.Filter);
+				ImGui.LabelText("Filter Hash", "0x" + num2.ToString("X"));
+				ImGui.BeginChild("ScrollRegion", new Vector2(0f, 0f), true, ImGuiWindowFlags.None);
+				KBatchGroupData data = component.GetBatch().group.data;
+				for (int j = 0; j < data.GetSymbolCount(); j++)
+				{
+					KAnim.Build.Symbol symbol2 = data.GetSymbol(j);
+					if (symbol2.hash.HashValue == num2 || this.StringContains(symbol2.hash.ToString(), this.Filter))
+					{
+						ImGui.Text(string.Format("[{0}]: {1}", symbol2.symbolIndexInSourceBuild, symbol2.hash));
+					}
+				}
+				ImGui.EndChild();
+				ImGui.EndTabItem();
+			}
+			if (ImGui.BeginTabItem("Anim Frame Data"))
+			{
+				ImGui.Text("Current frame: " + component.GetCurrentFrameIndex().ToString());
+				ImGuiEx.InputIntRange("Frame Index", ref this.FrameIndex, 0, batchGroupData.GetAnimFrames().Count);
+				KAnim.Anim.Frame frame = batchGroupData.GetFrame(this.FrameIndex);
+				ImGui.Text(string.Format("Frame [{0}]: firstElementIdx= {1} numElements= {2}", this.FrameIndex, frame.firstElementIdx, frame.numElements));
+				ImGuiEx.InputIntRange("Frame Element Index", ref this.FrameElementIndex, 0, frame.numElements);
+				KAnim.Anim.FrameElement frameElement = batchGroupData.GetFrameElement(frame.firstElementIdx + this.FrameElementIndex);
+				ImGui.Text(string.Format("FrameElement [{0}]: symbolIdx= {1} symbol= {2}", frame.firstElementIdx + this.FrameElementIndex, frameElement.symbolIdx, frameElement.symbol));
+				ImGui.EndTabItem();
+			}
 			if (ImGui.BeginTabItem("Texture atlases"))
 			{
 				ImGui.BeginChild("ScrollRegion", new Vector2(0f, 0f), true, ImGuiWindowFlags.None);
 				List<Texture2D> list = new List<Texture2D>(component.GetBatch().atlases.GetTextures());
-				int num2 = list.Count<Texture2D>();
+				int num3 = list.Count<Texture2D>();
 				if (component2 != null)
 				{
 					list.AddRange(component2.GetAtlasList().GetTextures());
 				}
-				for (int j = 0; j < list.Count; j++)
+				for (int k = 0; k < list.Count; k++)
 				{
-					Texture2D texture2D = list[j];
-					string text = ((j >= num2) ? "symbol override" : "base");
-					ImGui.Text(string.Format("[{0}]: {1}, [{2},{3}] ({4})", new object[] { j, texture2D.name, texture2D.width, texture2D.height, text }));
+					Texture2D texture2D = list[k];
+					string text = ((k >= num3) ? "symbol override" : "base");
+					ImGui.Text(string.Format("[{0}]: {1}, [{2},{3}] ({4})", new object[] { k, texture2D.name, texture2D.width, texture2D.height, text }));
 					if (ImGui.IsItemHovered())
 					{
 						ImGui.BeginTooltip();
@@ -125,4 +155,8 @@ public class DevToolBatchedAnimDebug : DevTool
 	private bool LockSelection;
 
 	private string Filter = "";
+
+	private int FrameIndex;
+
+	private int FrameElementIndex;
 }

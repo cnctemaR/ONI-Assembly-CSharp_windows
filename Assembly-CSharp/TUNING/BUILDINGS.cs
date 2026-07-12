@@ -157,6 +157,7 @@ namespace TUNING
 			{ "InsulatedLiquidConduit", "pipes" },
 			{ "LiquidConduitRadiant", "pipes" },
 			{ "LiquidConduitBridge", "pipes" },
+			{ "ContactConductivePipeBridge", "pipes" },
 			{ "LiquidVent", "pipes" },
 			{ "LiquidPump", "pumps" },
 			{ "LiquidMiniPump", "pumps" },
@@ -293,6 +294,7 @@ namespace TUNING
 			{ "MonumentTop", "monument" },
 			{ "ResearchCenter", "research" },
 			{ "AdvancedResearchCenter", "research" },
+			{ "GeoTuner", "research" },
 			{ "NuclearResearchCenter", "research" },
 			{ "OrbitalResearchCenter", "research" },
 			{ "CosmicResearchCenter", "research" },
@@ -506,8 +508,8 @@ namespace TUNING
 			new PlanScreen.PlanInfo(new HashedString("Base"), false, new List<string>
 			{
 				"Ladder", "FirePole", "LadderFast", "Tile", "GasPermeableMembrane", "MeshTile", "InsulationTile", "PlasticTile", "MetalTile", "GlassTile",
-				"BunkerTile", "CarpetTile", "ExobaseHeadquarters", "Door", "ManualPressureDoor", "PressureDoor", "BunkerDoor", "StorageLocker", "StorageLockerSmart", "LiquidReservoir",
-				"GasReservoir", "ObjectDispenser", "TravelTube", "TravelTubeEntrance", "TravelTubeWallBridge"
+				"BunkerTile", "CarpetTile", "ExteriorWall", "ExobaseHeadquarters", "Door", "ManualPressureDoor", "PressureDoor", "BunkerDoor", "StorageLocker", "StorageLockerSmart",
+				"LiquidReservoir", "GasReservoir", "ObjectDispenser", "TravelTube", "TravelTubeEntrance", "TravelTubeWallBridge"
 			}, ""),
 			new PlanScreen.PlanInfo(new HashedString("Oxygen"), false, new List<string> { "MineralDeoxidizer", "SublimationStation", "AlgaeHabitat", "AirFilter", "CO2Scrubber", "Electrolyzer", "RustDeoxidizer" }, ""),
 			new PlanScreen.PlanInfo(new HashedString("Power"), false, new List<string>
@@ -572,7 +574,8 @@ namespace TUNING
 				LiquidConduitDiseaseSensorConfig.ID,
 				LiquidConduitTemperatureSensorConfig.ID,
 				"ModularLaunchpadPortLiquid",
-				"ModularLaunchpadPortLiquidUnloader"
+				"ModularLaunchpadPortLiquidUnloader",
+				"ContactConductivePipeBridge"
 			}, ""),
 			new PlanScreen.PlanInfo(new HashedString("HVAC"), false, new List<string>
 			{
@@ -653,14 +656,14 @@ namespace TUNING
 			}, ""),
 			new PlanScreen.PlanInfo(new HashedString("Equipment"), false, new List<string>
 			{
-				"ResearchCenter", "AdvancedResearchCenter", "NuclearResearchCenter", "OrbitalResearchCenter", "CosmicResearchCenter", "DLC1CosmicResearchCenter", "Telescope", "PowerControlStation", "FarmStation", "GeneticAnalysisStation",
-				"RanchStation", "ShearingStation", "RoleStation", "ResetSkillsStation", "ArtifactAnalysisStation", "CraftingTable", "ClothingFabricator", "ClothingAlterationStation", "SuitFabricator", "OxygenMaskMarker",
-				"OxygenMaskLocker", "SuitMarker", "SuitLocker", "JetSuitMarker", "JetSuitLocker", "LeadSuitMarker", "LeadSuitLocker", "AstronautTrainingCenter"
+				"ResearchCenter", "AdvancedResearchCenter", "NuclearResearchCenter", "OrbitalResearchCenter", "CosmicResearchCenter", "DLC1CosmicResearchCenter", "Telescope", "GeoTuner", "PowerControlStation", "FarmStation",
+				"GeneticAnalysisStation", "RanchStation", "ShearingStation", "RoleStation", "ResetSkillsStation", "ArtifactAnalysisStation", "CraftingTable", "ClothingFabricator", "ClothingAlterationStation", "SuitFabricator",
+				"OxygenMaskMarker", "OxygenMaskLocker", "SuitMarker", "SuitLocker", "JetSuitMarker", "JetSuitLocker", "LeadSuitMarker", "LeadSuitLocker", "AstronautTrainingCenter"
 			}, ""),
 			new PlanScreen.PlanInfo(new HashedString("Utilities"), true, new List<string>
 			{
 				"SpaceHeater", "LiquidHeater", "LiquidCooledFan", "IceCooledFan", "IceMachine", "AirConditioner", "LiquidConditioner", "OreScrubber", "OilWellCap", "ThermalBlock",
-				"ExteriorWall", "SweepBotStation"
+				"SweepBotStation"
 			}, ""),
 			new PlanScreen.PlanInfo(new HashedString("Automation"), true, new List<string>
 			{
@@ -724,6 +727,8 @@ namespace TUNING
 			{
 				"ClusterTelescope",
 				"ClusterTelescopeEnclosed",
+				"MissionControl",
+				"MissionControlCluster",
 				"LaunchPad",
 				"Gantry",
 				"SteamEngine",

@@ -34,7 +34,7 @@ public class DevToolSceneBrowser : DevTool
 		this.StackIndex++;
 	}
 
-	protected override void Render()
+	protected override void RenderTo(DevPanel panel)
 	{
 		for (int i = this.Stack.Count - 1; i > 0; i--)
 		{
@@ -108,7 +108,7 @@ public class DevToolSceneBrowser : DevTool
 			ImGui.SameLine();
 			if (ImGui.Button("Inspect"))
 			{
-				DevToolManager.Instance.GetDevTool<DevToolSceneInspector>().PushObject(stackItem2.Root);
+				DevToolSceneInspector.Inspect(stackItem2.Root);
 			}
 		}
 		List<GameObject> list;
@@ -159,7 +159,7 @@ public class DevToolSceneBrowser : DevTool
 		{
 			if (ImGui.MenuItem("Inspect"))
 			{
-				DevToolManager.Instance.GetDevTool<DevToolSceneInspector>().PushObject(list[DevToolSceneBrowser.SelectedIndex]);
+				DevToolSceneInspector.Inspect(list[DevToolSceneBrowser.SelectedIndex]);
 				DevToolSceneBrowser.SelectedIndex = -1;
 			}
 			ImGui.EndPopup();
@@ -208,7 +208,7 @@ public class DevToolSceneBrowser : DevTool
 			ImGui.SameLine();
 			if (ImGui.Button("Inspect") && DevToolSceneBrowser.SearchSelectedIndex >= 0)
 			{
-				DevToolManager.Instance.GetDevTool<DevToolSceneInspector>().PushObject(DevToolSceneBrowser.SearchResults[DevToolSceneBrowser.SearchSelectedIndex]);
+				DevToolSceneInspector.Inspect(DevToolSceneBrowser.SearchResults[DevToolSceneBrowser.SearchSelectedIndex]);
 				flag2 = true;
 			}
 			ImGui.SameLine();

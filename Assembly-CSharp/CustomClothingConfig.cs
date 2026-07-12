@@ -35,7 +35,7 @@ public class CustomClothingConfig : IEquipmentConfig
 		{
 			if (!(equippableFacadeResource.DefID != "CustomClothing"))
 			{
-				TagManager.Create(equippableFacadeResource.Name, EquippableFacade.GetNameOverride("CustomClothing", equippableFacadeResource.Name));
+				TagManager.Create(equippableFacadeResource.Id, EquippableFacade.GetNameOverride("CustomClothing", equippableFacadeResource.Id));
 			}
 		}
 		return equipmentDef;

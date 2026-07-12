@@ -35,19 +35,29 @@ public class Db : EntityModifierSet
 		return Db._Instance;
 	}
 
+	public static BuildingFacades GetBuildingFacades()
+	{
+		return Db.Get().Permits.BuildingFacades;
+	}
+
 	public static ArtableStages GetArtableStages()
 	{
-		return Db.Get().ArtableStages;
+		return Db.Get().Permits.ArtableStages;
 	}
 
 	public static EquippableFacades GetEquippableFacades()
 	{
-		return Db.Get().EquippableFacades;
+		return Db.Get().Permits.EquippableFacades;
 	}
 
 	public static StickerBombs GetStickerBombs()
 	{
-		return Db.Get().StickerBombs;
+		return Db.Get().Permits.StickerBombs;
+	}
+
+	public static MonumentParts GetMonumentParts()
+	{
+		return Db.Get().Permits.MonumentParts;
 	}
 
 	public override void Initialize()
@@ -91,6 +101,7 @@ public class Db : EntityModifierSet
 		this.BuildingStatusItems = new BuildingStatusItems(this.Root);
 		this.RobotStatusItems = new RobotStatusItems(this.Root);
 		this.ChoreTypes = new ChoreTypes(this.Root);
+		this.Quests = new Quests(this.Root);
 		this.GameplayEvents = new GameplayEvents(this.Root);
 		this.GameplaySeasons = new GameplaySeasons(this.Root);
 		this.Stories = new Stories(this.Root);
@@ -100,9 +111,7 @@ public class Db : EntityModifierSet
 		}
 		this.OrbitalTypeCategories = new OrbitalTypeCategories(this.Root);
 		this.ArtableStatuses = new ArtableStatuses(this.Root);
-		this.EquippableFacades = new EquippableFacades(this.Root);
-		this.ArtableStages = new ArtableStages(this.Root);
-		this.StickerBombs = new StickerBombs(this.Root);
+		this.Permits = new PermitResources(this.Root);
 		Effect effect = new Effect("CenterOfAttention", DUPLICANTS.MODIFIERS.CENTEROFATTENTION.NAME, DUPLICANTS.MODIFIERS.CENTEROFATTENTION.TOOLTIP, 0f, true, true, false, null, -1f, 0f, null, "");
 		effect.Add(new AttributeModifier("StressDelta", -0.008333334f, DUPLICANTS.MODIFIERS.CENTEROFATTENTION.NAME, false, false, true));
 		this.effects.Add(effect);
@@ -113,6 +122,7 @@ public class Db : EntityModifierSet
 	public void PostProcess()
 	{
 		this.Techs.PostProcess();
+		this.Permits.PostProcess();
 	}
 
 	private void CollectResources(Resource resource, List<Resource> resource_table)
@@ -156,6 +166,11 @@ public class Db : EntityModifierSet
 			return default(ResourceType);
 		}
 		return resourceType;
+	}
+
+	public void ResetProblematicDbs()
+	{
+		this.Emotes.ResetProblematicReferences();
 	}
 
 	private static Db _Instance;
@@ -228,6 +243,8 @@ public class Db : EntityModifierSet
 
 	public ColonyAchievements ColonyAchievements;
 
+	public Quests Quests;
+
 	public GameplayEvents GameplayEvents;
 
 	public GameplaySeasons GameplaySeasons;
@@ -242,11 +259,7 @@ public class Db : EntityModifierSet
 
 	public OrbitalTypeCategories OrbitalTypeCategories;
 
-	public EquippableFacades EquippableFacades;
-
-	public ArtableStages ArtableStages;
-
-	public StickerBombs StickerBombs;
+	public PermitResources Permits;
 
 	public ArtableStatuses ArtableStatuses;
 

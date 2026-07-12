@@ -15,6 +15,18 @@ public class GlobalChoreProvider : ChoreProvider, IRender200ms
 		this.clearableManager = new ClearableManager();
 	}
 
+	protected override void OnWorldRemoved(object data)
+	{
+		int num = (int)data;
+		int parentWorldId = ClusterManager.Instance.GetWorld(num).ParentWorldId;
+		List<FetchChore> list;
+		if (this.fetchMap.TryGetValue(parentWorldId, out list))
+		{
+			base.ClearWorldChores<FetchChore>(list, num);
+		}
+		base.OnWorldRemoved(data);
+	}
+
 	protected override void OnWorldParentChanged(object data)
 	{
 		WorldParentChangedEventArgs e = data as WorldParentChangedEventArgs;
@@ -81,25 +93,34 @@ public class GlobalChoreProvider : ChoreProvider, IRender200ms
 		}
 		this.fetches.Clear();
 		Navigator component = path_prober.GetComponent<Navigator>();
-		for (int i = 0; i < list.Count; i++)
+		for (int i = list.Count - 1; i >= 0; i--)
 		{
 			FetchChore fetchChore = list[i];
 			if (!(fetchChore.driver != null) && (!(fetchChore.automatable != null) || !fetchChore.automatable.GetAutomationOnly()))
 			{
-				Storage destination = fetchChore.destination;
-				if (!(destination == null))
+				if (fetchChore.provider == null)
 				{
-					int navigationCost = component.GetNavigationCost(destination);
-					if (navigationCost != -1)
+					fetchChore.Cancel("no provider");
+					list[i] = list[list.Count - 1];
+					list.RemoveAt(list.Count - 1);
+				}
+				else
+				{
+					Storage destination = fetchChore.destination;
+					if (!(destination == null))
 					{
-						this.fetches.Add(new GlobalChoreProvider.Fetch
+						int navigationCost = component.GetNavigationCost(destination);
+						if (navigationCost != -1)
 						{
-							chore = fetchChore,
-							idsHash = fetchChore.tagsHash,
-							cost = navigationCost,
-							priority = fetchChore.masterPriority,
-							category = destination.fetchCategory
-						});
+							this.fetches.Add(new GlobalChoreProvider.Fetch
+							{
+								chore = fetchChore,
+								idsHash = fetchChore.tagsHash,
+								cost = navigationCost,
+								priority = fetchChore.masterPriority,
+								category = destination.fetchCategory
+							});
+						}
 					}
 				}
 			}

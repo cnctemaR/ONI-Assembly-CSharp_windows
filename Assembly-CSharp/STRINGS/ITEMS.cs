@@ -113,7 +113,7 @@ namespace STRINGS
 					". ",
 					ITEMS.PILLS.ADVANCEDCURE.NAME,
 					" is very effective against ",
-					UI.FormatAsLink("Slimelung", "SLIMESICKNESS"),
+					UI.FormatAsLink("Zombie Spores", "ZOMBIESPORES"),
 					".\n\nMust be administered by a Duplicant with the ",
 					DUPLICANTS.ROLES.SENIOR_MEDIC.NAME,
 					" Skill."
@@ -1070,7 +1070,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = UI.FormatAsLink("Freshener Spice", "PRESERVING_SPICE");
 
-				public static LocString DESC = "Slows the rate of food decomposition.";
+				public static LocString DESC = "Slows the decomposition of perishable foods.";
 			}
 
 			public class STRENGTH_SPICE

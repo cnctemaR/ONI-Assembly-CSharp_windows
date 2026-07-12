@@ -3,76 +3,43 @@ using ImGuiNET;
 
 public abstract class DevTool
 {
-	public event global::System.Action OnNextPreDraw;
-
-	public event global::System.Action OnShow;
-
-	public event global::System.Action OnHide;
+	public event global::System.Action OnUninit;
 
 	public DevTool()
 	{
+		this.Name = DevToolUtil.GenerateDevToolName(this);
 	}
 
-	public void DoImGui()
+	public void DoImGui(DevPanel panel)
 	{
-		if (this.OnNextPreDraw != null)
+		if (this.RequiresGameRunning && Game.Instance == null)
 		{
-			this.OnNextPreDraw();
-			this.OnNextPreDraw = null;
+			ImGui.Text("Game not loaded");
+			return;
 		}
-		if (ImGui.Begin(this.Name, ref this.Enabled, this.drawFlags))
+		this.RenderTo(panel);
+	}
+
+	public void ClosePanel()
+	{
+		this.isRequestingToClosePanel = true;
+	}
+
+	protected abstract void RenderTo(DevPanel panel);
+
+	public void Internal_Uninit()
+	{
+		if (this.OnUninit != null)
 		{
-			if (!this.RequiresGameRunning || Game.Instance != null)
-			{
-				if (!this.m_was_enabled && this.Enabled)
-				{
-					global::System.Action onShow = this.OnShow;
-					if (onShow != null)
-					{
-						onShow();
-					}
-					this.m_was_enabled = this.Enabled;
-				}
-				this.Render();
-				if (!this.Enabled && this.m_was_enabled)
-				{
-					global::System.Action onHide = this.OnHide;
-					if (onHide != null)
-					{
-						onHide();
-					}
-				}
-				this.m_was_enabled = this.Enabled;
-			}
-			else
-			{
-				ImGui.Text("Game not loaded");
-			}
+			this.OnUninit();
 		}
-		ImGui.End();
 	}
-
-	public void Show()
-	{
-		this.Enabled = true;
-	}
-
-	public void Hide()
-	{
-		this.Enabled = false;
-	}
-
-	protected abstract void Render();
-
-	public bool Enabled;
 
 	public string Name;
 
-	public string FullPath;
-
 	public bool RequiresGameRunning;
 
-	public ImGuiWindowFlags drawFlags;
+	public bool isRequestingToClosePanel;
 
-	private bool m_was_enabled;
+	public ImGuiWindowFlags drawFlags;
 }

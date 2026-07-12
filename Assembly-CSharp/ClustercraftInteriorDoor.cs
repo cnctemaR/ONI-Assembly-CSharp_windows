@@ -51,4 +51,9 @@ public class ClustercraftInteriorDoor : KMonoBehaviour, ISidescreenButtonControl
 	{
 		return 20;
 	}
+
+	public void SetButtonTextOverride(ButtonMenuTextOverride text)
+	{
+		throw new NotImplementedException();
+	}
 }

@@ -163,6 +163,7 @@ public class ChoreTable
 
 		public Instance(ChoreTable chore_table, KPrefabID prefab_id)
 		{
+			this.prefabId = prefab_id;
 			this.entries = ListPool<ChoreTable.Instance.Entry, ChoreTable.Instance>.Allocate();
 			for (int i = 0; i < chore_table.entries.Length; i++)
 			{
@@ -170,8 +171,17 @@ public class ChoreTable
 			}
 		}
 
+		~Instance()
+		{
+			this.OnCleanUp(this.prefabId);
+		}
+
 		public void OnCleanUp(KPrefabID prefab_id)
 		{
+			if (this.entries == null)
+			{
+				return;
+			}
 			for (int i = 0; i < this.entries.Count; i++)
 			{
 				this.entries[i].OnCleanUp(prefab_id);
@@ -181,6 +191,8 @@ public class ChoreTable
 		}
 
 		private static object[] parameters = new object[3];
+
+		private KPrefabID prefabId;
 
 		private ListPool<ChoreTable.Instance.Entry, ChoreTable.Instance>.PooledList entries;
 
@@ -192,6 +204,9 @@ public class ChoreTable
 				ChoreTable.Instance.parameters[1] = chore_table_entry.choreType;
 				ChoreTable.Instance.parameters[2] = prefab_id;
 				this.chore = (Chore)Activator.CreateInstance(chore_table_entry.choreClassType, ChoreTable.Instance.parameters);
+				ChoreTable.Instance.parameters[0] = null;
+				ChoreTable.Instance.parameters[1] = null;
+				ChoreTable.Instance.parameters[2] = null;
 			}
 
 			public void OnCleanUp(KPrefabID prefab_id)

@@ -482,6 +482,15 @@ namespace STRINGS
 			Standby
 		}
 
+		public class FACADE_COLOURS
+		{
+			public static string BASIC_PINK_ORCHID = "bubblegum";
+
+			public static string BASIC_BLUE_MIDDLE = "aqua";
+
+			public static string BASIC_YELLOW = "yellow";
+		}
+
 		public class VANILLA
 		{
 			public static LocString NAME = "base game";
@@ -2181,6 +2190,13 @@ namespace STRINGS
 
 				public static LocString DESCRIPTION = "A treasured souvenir that was once a common accompaniment to children's meals during commercial flights. There's a hole in the bottom from when Dr. Holland had it mounted on a stand.";
 			}
+
+			public class LONELY_MINION
+			{
+				public static LocString NAME = "Rusty Toolbox";
+
+				public static LocString DESCRIPTION = "On the inside of the lid, someone used a screwdriver to carve a drawing of a group of smiling Duplicants gathered around a massive crater.";
+			}
 		}
 
 		public class SANDBOXTOOLS
@@ -3095,6 +3111,10 @@ namespace STRINGS
 
 				public static LocString RETIREDCOLONIES = "COLONY SUMMARIES";
 
+				public static LocString KLEIINVENTORY = "KLEI INVENTORY";
+
+				public static LocString LOCKERMENU = "SUPPLY CLOSET";
+
 				public static LocString SCENARIOS = "SCENARIOS";
 
 				public static LocString TRANSLATIONS = "TRANSLATIONS";
@@ -3126,6 +3146,8 @@ namespace STRINGS
 					public static LocString DEACTIVATE_EXPANSION1_DESC = "The game will need to restart in order to activate the <i>Oxygen Not Included</i> base game.";
 
 					public static LocString DEACTIVATE_EXPANSION1_RAIL_DESC = "<i>Spaced Out!</i> will be deactivated the next time you launch the game. The game will now close.";
+
+					public static LocString AD_DLC1 = "Spaced Out! DLC";
 				}
 			}
 
@@ -3244,13 +3266,13 @@ namespace STRINGS
 
 			public class MOTD
 			{
-				public static LocString IMAGE_HEADER = "SWEET DREAMS";
+				public static LocString IMAGE_HEADER = "HOT SHOTS";
 
 				public static LocString NEWS_HEADER = "JOIN THE DISCUSSION";
 
 				public static LocString NEWS_BODY = "Stay up to date by joining our mailing list, or head on over to the forums and join the discussion.";
 
-				public static LocString PATCH_NOTES_SUMMARY = "This update includes:\n\n•<indent=20px>New Story Trait system and two story traits: Somnium Synthesizer and Critter Flux-O-Matic.</indent>\n•<indent=20px>New Kitchen room and Spice Grinder building.</indent>\n•<indent=20px>Two new Plug Slug morphs, and tuning for base morph.</indent>\n•<indent=20px>Numerous crash and bug fixes.</indent>\n\n   Check out the full patch notes for more details!";
+				public static LocString PATCH_NOTES_SUMMARY = "This update includes:\n\n•<indent=20px>The \"Mysterious Hermit\" Story Trait. </indent>\n•<indent=20px>New Buildings:</indent>\n<indent=40px>•    The geyser manipulating \"Geotuner\".</indent>\n<indent=40px>•    The rocket boosting \"Mission Control Station\".</indent>\n<indent=40px>•    The liquid cooled \"Conduction Panel\".</indent>\n•<indent=20px>Two new room types: \"Laboratory\", and a new kind of \"Private Bedroom\".</indent>\n•<indent=20px>Introduction of the \"Supply Closet\" for managing cosmetic items.</indent>\n•<indent=20px>Tuning changes, bugs fixes, and quality of Life improvements.</indent>\n\n   Check out the full patch notes for more details!";
 
 				public static LocString UPDATE_TEXT = "LAUNCHED!";
 
@@ -3790,6 +3812,8 @@ namespace STRINGS
 
 				public static LocString COLONY_SUMMARY = "Colony Summary";
 
+				public static LocString LOCKERMENU = "Supply Closet";
+
 				public static LocString LOAD = "Load";
 
 				public static LocString QUIT = "Main Menu";
@@ -3819,7 +3843,7 @@ namespace STRINGS
 
 				public static LocString UNITS = "Temperature Units";
 
-				public static LocString METRICS = "Data Collection";
+				public static LocString METRICS = "Data Communication";
 
 				public static LocString LANGUAGE = "Change Language";
 
@@ -3997,11 +4021,13 @@ namespace STRINGS
 				public static LocString TEMPERATURE_UNITS = "TEMPERATURE UNITS";
 
 				public static LocString SAVE_OPTIONS = "SAVE";
+
+				public static LocString CAMERA_SPEED_LABEL = "Camera Pan Speed: {0}%";
 			}
 
 			public class METRIC_OPTIONS_SCREEN
 			{
-				public static LocString TITLE = "DATA COLLECTION";
+				public static LocString TITLE = "DATA COMMUNICATION";
 
 				public static LocString HEADER_METRICS = "USER DATA";
 			}
@@ -4061,15 +4087,19 @@ namespace STRINGS
 
 			public class METRICS_OPTIONS_SCREEN
 			{
-				public static LocString TITLE = "DATA COLLECTION OPTIONS";
+				public static LocString TITLE = "DATA COMMUNICATION OPTIONS";
 
-				public static LocString ENABLE_BUTTON = "Enable Data Collection";
+				public static LocString ENABLE_BUTTON = "Enable Data Communication";
 
-				public static LocString DESCRIPTION = "Collecting user data helps us improve the game.\nPlayers who opt out of data collection will no longer send crash reports and play data to the game team.\n\nFor more details on our privacy policy and how we use the data we collect, please visit our <color=#ECA6C9><u><b>privacy center</b></u></color>.";
+				public static LocString DESCRIPTION = "Collecting user data helps us improve the game.\nPlayers who opt out of data communication will no longer send crash reports and play data to the game team. They will also no longer be able to unlock items.\n\nFor more details on our privacy policy and how we use the data we collect, please visit our <color=#ECA6C9><u><b>privacy center</b></u></color>.";
 
 				public static LocString DONE_BUTTON = "Done";
 
-				public static LocString TOOLTIP = "Uncheck to disable data collection";
+				public static LocString RESTART_BUTTON = "Restart Game";
+
+				public static LocString TOOLTIP = "Uncheck to disable data communication";
+
+				public static LocString RESTART_WARNING = "A game restart is required to apply settings.";
 			}
 
 			public class UNIT_OPTIONS_SCREEN
@@ -4322,6 +4352,332 @@ namespace STRINGS
 			}
 		}
 
+		public class KLEI_INVENTORY_SCREEN
+		{
+			public static LocString OPEN_INVENTORY_BUTTON = "Open Klei Inventory";
+
+			public static LocString ITEM_FACADE_FOR = "This blueprint works with any {ConfigProperName}.";
+
+			public static LocString ARTABLE_ITEM_FACADE_FOR = "This blueprint works with any {ConfigProperName} of {ArtableQuality} quality.";
+
+			public static LocString CLOTHING_ITEM_FACADE_FOR = "This blueprint can be used in any outfit.";
+
+			public static LocString ITEM_RARITY_DETAILS = "{RarityName} quality.";
+
+			public static LocString ITEM_PLAYER_OWNED_AMOUNT = "My colony has {OwnedCount} of these blueprints.";
+
+			public static LocString ITEM_PLAYER_OWN_NONE = "My colony doesn't have any of these yet.";
+
+			public static LocString ITEM_PLAYER_OWNED_AMOUNT_ICON = "x{OwnedCount}";
+
+			public static LocString ITEM_PLAYER_UNLOCKED_BUT_UNOWNABLE = "This blueprint is part of my colony's permanent collection.";
+
+			public static LocString ITEM_UNKNOWN_NAME = "Uh oh!";
+
+			public static LocString ITEM_UNKNOWN_DESCRIPTION = "Hmm. Looks like this blueprint is missing from the supply closet. Perhaps due to a temporal anomaly...";
+
+			public static class CATEGORIES
+			{
+				public static LocString EQUIPMENT = "Equipment";
+
+				public static LocString DUPE_TOPS = "Tops & Onesies";
+
+				public static LocString DUPE_BOTTOMS = "Bottoms";
+
+				public static LocString DUPE_GLOVES = "Gloves";
+
+				public static LocString DUPE_SHOES = "Footwear";
+
+				public static LocString DUPE_HATS = "Headgear";
+
+				public static LocString DUPE_ACCESSORIES = "Accessories";
+
+				public static LocString PRIMOGARB = "Primo Garb";
+
+				public static LocString ATMOSUITS = "Atmo Suits";
+
+				public static LocString BUILDINGS = "Buildings";
+
+				public static LocString CRITTERS = "Critters";
+
+				public static LocString SWEEPYS = "Sweepys";
+
+				public static LocString DUPLICANTS = "Duplicants";
+
+				public static LocString ARTWORKS = "Artwork";
+
+				public static LocString MONUMENTPARTS = "Monuments";
+			}
+
+			public static class COLUMN_HEADERS
+			{
+				public static LocString CATEGORY_HEADER = "BLUEPRINTS";
+
+				public static LocString ITEMS_HEADER = "Items";
+
+				public static LocString DETAILS_HEADER = "Details";
+			}
+		}
+
+		public class ITEM_DROP_SCREEN
+		{
+			public static LocString THANKS_FOR_PLAYING = "Thanks for keeping this colony alive!";
+
+			public static class ACTIONS
+			{
+				public static LocString ACCEPT_ITEM = "Print Gift";
+			}
+		}
+
+		public class OUTFIT_BROWSER_SCREEN
+		{
+			public static LocString BUTTON_ADD_OUTFIT = "New Outfit";
+
+			public static LocString BUTTON_PICK_OUTFIT = "Assign Outfit";
+
+			public static LocString TOOLTIP_PICK_OUTFIT_ERROR_LOCKED = "Cannot assign this outfit to {MinionName} because my colony doesn't have all of these blueprints yet";
+
+			public static LocString BUTTON_EDIT_OUTFIT = "Restyle Outfit";
+
+			public static LocString BUTTON_COPY_OUTFIT = "Copy Outfit";
+
+			public static LocString TOOLTIP_DELETE_OUTFIT = "Delete Outfit";
+
+			public static LocString TOOLTIP_DELETE_OUTFIT_ERROR_READONLY = "This outfit cannot be deleted";
+
+			public static LocString TOOLTIP_RENAME_OUTFIT = "Rename Outfit";
+
+			public static LocString TOOLTIP_RENAME_OUTFIT_ERROR_READONLY = "This outfit cannot be renamed";
+
+			public static class COLUMN_HEADERS
+			{
+				public static LocString GALLERY_HEADER = "OUTFITS";
+
+				public static LocString MINION_GALLERY_HEADER = "WARDROBE";
+
+				public static LocString DETAILS_HEADER = "Preview";
+			}
+
+			public class DELETE_WARNING_POPUP
+			{
+				public static LocString HEADER = "Delete \"{OutfitName}\"?";
+
+				public static LocString BODY = "Are you sure you want to delete \"{OutfitName}\"?\n\nAny Duplicants assigned to wear this outfit on spawn will be printed wearing their default outfit instead. Existing Duplicants in saved games won't be affected.\n\nThis <b>cannot</b> be undone.";
+
+				public static LocString BUTTON_YES_DELETE = "Yes, delete outfit";
+
+				public static LocString BUTTON_DONT_DELETE = "Cancel";
+			}
+
+			public class RENAME_POPUP
+			{
+				public static LocString HEADER = "RENAME OUTFIT";
+			}
+		}
+
+		public class LOCKER_MENU
+		{
+			public static LocString TITLE = "SUPPLY CLOSET";
+
+			public static LocString BUTTON_INVENTORY = "All";
+
+			public static LocString BUTTON_INVENTORY_DESCRIPTION = "View all of my colony's blueprints";
+
+			public static LocString BUTTON_DUPLICANTS = "Duplicants";
+
+			public static LocString BUTTON_DUPLICANTS_DESCRIPTION = "Manage individual Duplicants' outfits";
+
+			public static LocString BUTTON_OUTFITS = "Wardrobe";
+
+			public static LocString BUTTON_OUTFITS_DESCRIPTION = "Manage my colony's collection of outfits";
+
+			public static LocString DEFAULT_DESCRIPTION = "Select a screen";
+
+			public static LocString BUTTON_CLAIM = "Check Shipments";
+
+			public static LocString BUTTON_CLAIM_DESCRIPTION = "Check for available blueprints on the Klei Rewards webpage";
+
+			public static LocString UNOPENED_ITEMS_TOOLTIP = "You may have items available for you to claim on the Klei Rewards webpage";
+		}
+
+		public class LOCKER_NAVIGATOR
+		{
+			public static LocString BUTTON_BACK = "BACK";
+
+			public static LocString BUTTON_CLOSE = "CLOSE";
+
+			public class DATA_COLLECTION_WARNING_POPUP
+			{
+				public static LocString HEADER = "Data Communication is Disabled";
+
+				public static LocString BODY = "Data Communication must be enabled to recieve any newly unlocked items. This setting can be found in the Options menu.\n\nExisting item unlocks can still be used while Data Communication is disabled.";
+
+				public static LocString BUTTON_OK = "Continue";
+
+				public static LocString BUTTON_OPEN_SETTINGS = "Open Options";
+			}
+		}
+
+		public class OUTFIT_DESIGNER_SCREEN
+		{
+			public static LocString CATEGORY_HEADER = "CLOTHING";
+
+			public class MINION_INSTANCE
+			{
+				public static LocString BUTTON_APPLY_TO_MINION = "Assign to {MinionName}";
+
+				public static LocString BUTTON_APPLY_TO_TEMPLATE = "Apply to Template";
+
+				public class APPLY_TEMPLATE_POPUP
+				{
+					public static LocString HEADER = "SAVE AS TEMPLATE";
+
+					public static LocString DESC_SAVE_EXISTING = "\"{OutfitName}\" will be updated and applied to {MinionName} on save.";
+
+					public static LocString DESC_SAVE_NEW = "A new outfit named \"{OutfitName}\" will be created and assigned to {MinionName} on save.";
+
+					public static LocString BUTTON_SAVE_EXISTING = "Update Outfit";
+
+					public static LocString BUTTON_SAVE_NEW = "Save New Outfit";
+				}
+			}
+
+			public class OUTFIT_TEMPLATE
+			{
+				public static LocString BUTTON_SAVE = "Save Template";
+
+				public static LocString BUTTON_COPY = "Save a Copy";
+
+				public static LocString TOOLTIP_SAVE_ERROR_LOCKED = "Cannot save this outfit because my colony doesn't have all of its blueprints yet";
+
+				public static LocString TOOLTIP_SAVE_ERROR_READONLY = "This wardrobe staple cannot be altered\n\nMake a copy to save your changes";
+			}
+
+			public class CHANGES_NOT_SAVED_WARNING_POPUP
+			{
+				public static LocString HEADER = "Discard changes to \"{OutfitName}\"?";
+
+				public static LocString BODY = "There are unsaved changes which will be lost if you exit now.\n\nAre you sure you want to discard your changes?";
+
+				public static LocString BUTTON_DISCARD = "Yes, discard changes";
+
+				public static LocString BUTTON_RETURN = "Cancel";
+			}
+
+			public class COPY_POPUP
+			{
+				public static LocString HEADER = "RENAME COPY";
+			}
+		}
+
+		public class OUTFIT_NAME
+		{
+			public static LocString NEW = "Custom Outfit";
+
+			public static LocString COPY_OF = "Copy of {OutfitName}";
+
+			public static LocString RESOLVE_CONFLICT = "{OutfitName} ({ConflictNumber})";
+
+			public static LocString ERROR_NAME_EXISTS = "There's already an outfit named \"{OutfitName}\"";
+
+			public static LocString MINIONS_OUTFIT = "{MinionName}'s Current Outfit";
+
+			public static LocString NONE = "Default Outfit";
+		}
+
+		public class OUTFIT_DESCRIPTION
+		{
+			public static LocString CONTAINS_NON_OWNED_ITEMS = "This outfit cannot be worn because my colony doesn't have all of its blueprints yet.";
+
+			public static LocString NO_DUPE_TOPS = "Default Top";
+
+			public static LocString NO_DUPE_BOTTOMS = "Default Bottom";
+
+			public static LocString NO_DUPE_GLOVES = "Default Gloves";
+
+			public static LocString NO_DUPE_SHOES = "Default Footwear";
+
+			public static LocString NO_DUPE_HATS = "Default Headgear";
+
+			public static LocString NO_DUPE_ACCESSORIES = "Default Accessory";
+		}
+
+		public class MINION_BROWSER_SCREEN
+		{
+			public static LocString CATEGORY_HEADER = "DUPLICANTS";
+
+			public static LocString BUTTON_CHANGE_OUTFIT = "Open Wardrobe";
+
+			public static LocString BUTTON_EDIT_OUTFIT_ITEMS = "Restyle Outfit";
+
+			public static LocString OUTFIT_TYPE_CLOTHING = "CLOTHING";
+		}
+
+		public class PERMIT_RARITY
+		{
+			public static readonly LocString UNKNOWN = "Unknown";
+
+			public static readonly LocString UNIVERSAL = "Universal";
+
+			public static readonly LocString LOYALTY = "Loyalty";
+
+			public static readonly LocString COMMON = "Common";
+
+			public static readonly LocString DECENT = "Decent";
+
+			public static readonly LocString NIFTY = "Nifty";
+
+			public static readonly LocString SPLENDID = "Splendid";
+		}
+
+		public class OUTFITS
+		{
+			public class BASIC_BLACK
+			{
+				public static LocString NAME = "Basic Black Outfit";
+			}
+
+			public class BASIC_WHITE
+			{
+				public static LocString NAME = "Basic White Outfit";
+			}
+
+			public class BASIC_RED
+			{
+				public static LocString NAME = "Basic Red Outfit";
+			}
+
+			public class BASIC_ORANGE
+			{
+				public static LocString NAME = "Basic Orange Outfit";
+			}
+
+			public class BASIC_YELLOW
+			{
+				public static LocString NAME = "Basic Yellow Outfit";
+			}
+
+			public class BASIC_GREEN
+			{
+				public static LocString NAME = "Basic Green Outfit";
+			}
+
+			public class BASIC_AQUA
+			{
+				public static LocString NAME = "Basic Aqua Outfit";
+			}
+
+			public class BASIC_PURPLE
+			{
+				public static LocString NAME = "Basic Purple Outfit";
+			}
+
+			public class BASIC_PINK_ORCHID
+			{
+				public static LocString NAME = "Basic Bubblegum Outfit";
+			}
+		}
+
 		public class ROLES_SCREEN
 		{
 			public static LocString MANAGEMENT_BUTTON = "JOBS";
@@ -4566,6 +4922,11 @@ namespace STRINGS
 					public static LocString DESCRIPTION = BUILDINGS.PREFABS.DLC1COSMICRESEARCHCENTER.NAME + " Usage";
 				}
 
+				public class GEYSER_TUNING
+				{
+					public static LocString DESCRIPTION = BUILDINGS.PREFABS.GEOTUNER.NAME + " Usage";
+				}
+
 				public class CAN_CLOTHING_ALTERATION
 				{
 					public static LocString DESCRIPTION = BUILDINGS.PREFABS.CLOTHINGALTERATIONSTATION.NAME + " Usage";
@@ -4614,6 +4975,11 @@ namespace STRINGS
 				public class CAN_DO_ASTRONAUT_TRAINING
 				{
 					public static LocString DESCRIPTION = BUILDINGS.PREFABS.ASTRONAUTTRAININGCENTER.NAME + " Usage";
+				}
+
+				public class CAN_MISSION_CONTROL
+				{
+					public static LocString DESCRIPTION = BUILDINGS.PREFABS.MISSIONCONTROL.NAME + " Usage";
 				}
 
 				public class CAN_PILOT_ROCKET
@@ -5258,6 +5624,8 @@ namespace STRINGS
 
 			public static LocString NO_CODEX_ENTRY = "No database entry available";
 
+			public static LocString CHANGE_OUTFIT = "Change this Duplicant's ouitfit";
+
 			public static LocString METERSCREEN_AVGSTRESS = "Highest Stress: {0}";
 
 			public static LocString METERSCREEN_MEALHISTORY = "Calories Available: {0}";
@@ -5353,7 +5721,9 @@ namespace STRINGS
 
 			public static LocString HELP_BUILDLOCATION_BELOWROCKETCEILING = "Must be placed further from the edge of space";
 
-			public static LocString HELP_BUILDLOCATION_ONROCKETENVELOPE = "Must be built on the floor of a rocket interior";
+			public static LocString HELP_BUILDLOCATION_ONROCKETENVELOPE = "Must be built on the interior wall of a rocket";
+
+			public static LocString HELP_BUILDLOCATION_LIQUID_CONDUIT_FORBIDDEN = "Obstructed by a building";
 
 			public static LocString HELP_BUILDLOCATION_NOT_IN_TILES = "Cannot be built inside tile";
 
@@ -5899,6 +6269,8 @@ namespace STRINGS
 				public static LocString LANDING = "Landing";
 
 				public static LocString UNDERWAY = "Underway";
+
+				public static LocString UNDERWAY_BOOSTED = "Underway <color=#5FDB37FF>(Boosted)</color>";
 
 				public static LocString DESTROYED = "Destroyed";
 
@@ -6459,6 +6831,8 @@ namespace STRINGS
 				public static LocString WEIGHTPENALTY = "Weight Penalty";
 
 				public static LocString TIMEREMAINING = "Time Remaining";
+
+				public static LocString BOOSTED_TIME_MODIFIER = "Less Than ";
 			}
 
 			public class ROCKETSTATS
@@ -8208,9 +8582,9 @@ namespace STRINGS
 
 		public class FACADE_SELECTION_PANEL
 		{
-			public static LocString HEADER = "Select Facade";
+			public static LocString HEADER = "Select Blueprint";
 
-			public static LocString STORE_BUTTON_TOOLTIP = "More Facades";
+			public static LocString STORE_BUTTON_TOOLTIP = "More Blueprints";
 		}
 
 		public class FILE_NAME_DIALOG
@@ -8231,6 +8605,17 @@ namespace STRINGS
 
 		public class UISIDESCREENS
 		{
+			public class ARTABLESELECTIONSIDESCREEN
+			{
+				public static LocString TITLE = "Style Selection";
+
+				public static LocString BUTTON = "Repaint";
+
+				public static LocString BUTTON_TOOLTIP = "Clears current artwork\n\nCreates errand for a skilled Duplicant to paint selected style";
+
+				public static LocString CLEAR_BUTTON_TOOLTIP = "Clears current artwork\n\nAllows a skilled Duplicant to create artwork of their choice";
+			}
+
 			public class ARTIFACTANALYSISSIDESCREEN
 			{
 				public static LocString NO_ARTIFACTS_DISCOVERED = "No artifacts analyzed";
@@ -8709,6 +9094,12 @@ namespace STRINGS
 
 				public class RECIPE_CATEGORIES
 				{
+					public static LocString ATMO_SUIT_FACADES = "Atmo Suit Styles";
+
+					public static LocString JET_SUIT_FACADES = "Jet Suit Styles";
+
+					public static LocString LEAD_SUIT_FACADES = "Lead Suit Styles";
+
 					public static LocString PRIMO_GARB_FACADES = "Primo Garb Styles";
 				}
 			}
@@ -8809,6 +9200,11 @@ namespace STRINGS
 					public class MINION
 					{
 						public static LocString TOOLTIP = "Spawn a Duplicant in front of the building";
+					}
+
+					public class FACADE
+					{
+						public static LocString TOOLTIP = "Toggle the building blueprint";
 					}
 				}
 			}
@@ -9299,9 +9695,43 @@ namespace STRINGS
 				public static LocString DUPEMADE = "Dupe-made Ballistics";
 			}
 
+			public class GEOTUNERSIDESCREEN
+			{
+				public static LocString TITLE = "Select Geyser";
+
+				public static LocString DESCRIPTION = "Select an analyzed geyser to transmit amplification data to.";
+
+				public static LocString NOTHING = "No geyser selected";
+
+				public static LocString UNSTUDIED_TOOLTIP = "This geyser must be analyzed before it can be selected\n\nDouble-click to view this geyser";
+
+				public static LocString STUDIED_TOOLTIP = string.Concat(new string[]
+				{
+					"Increase this geyser's ",
+					UI.PRE_KEYWORD,
+					"Temperature",
+					UI.PST_KEYWORD,
+					" and output"
+				});
+
+				public static LocString GEOTUNER_LIMIT_TOOLTIP = "This geyser cannot be targeted by more Geotuners.";
+
+				public static LocString STUDIED_TOOLTIP_MATERIAL = "Required resource: {MATERIAL}";
+
+				public static LocString STUDIED_TOOLTIP_POTENTIAL_OUTPUT = "Potential Output {POTENTIAL_OUTPUT}";
+
+				public static LocString STUDIED_TOOLTIP_BASE_TEMP = "Base  {BASE}";
+
+				public static LocString STUDIED_TOOLTIP_VISIT_GEYSER = "Double-click to view this geyser";
+
+				public static LocString STUDIED_TOOLTIP_GEOTUNER_MODIFIER_ROW_TITLE = "Geotuned ";
+
+				public static LocString STUDIED_TOOLTIP_NUMBER_HOVERED = "This geyser is targeted by {0} Geotuners";
+			}
+
 			public class COMMAND_MODULE_SIDE_SCREEN
 			{
-				public static LocString TITLE = "Launch Conditiothisns";
+				public static LocString TITLE = "Launch Conditions";
 
 				public static LocString DESTINATION_BUTTON = "Show Starmap";
 
@@ -12207,6 +12637,10 @@ namespace STRINGS
 
 			public static LocString GEYSER_YEAR_NEXT_DORMANT = "Next Dormancy: {0}";
 
+			public static LocString GEYSER_YEAR_AVR_OUTPUT_UNSTUDIED = "Average Output: (Requires Analysis)";
+
+			public static LocString GEYSER_YEAR_AVR_OUTPUT = "Average Output: {0}";
+
 			public static LocString CAPTURE_METHOD_WRANGLE = "Capture Method: Wrangling";
 
 			public static LocString CAPTURE_METHOD_LURE = "Capture Method: Lures";
@@ -12909,6 +13343,27 @@ namespace STRINGS
 					" of <b>{2}</b>"
 				});
 
+				public static LocString GEYSER_PRODUCTION_GEOTUNED = string.Concat(new string[]
+				{
+					"While erupting, this geyser will produce ",
+					UI.PRE_KEYWORD,
+					"{0}",
+					UI.PST_KEYWORD,
+					" at a rate of ",
+					UI.FormatAsPositiveRate("{1}"),
+					", and at a ",
+					UI.PRE_KEYWORD,
+					"Temperature",
+					UI.PST_KEYWORD,
+					" of <b>{2}</b>"
+				});
+
+				public static LocString GEYSER_PRODUCTION_GEOTUNED_COUNT = "<b>{0}</b> of <b>{1}</b> Geotuners targeting this geyser are amplifying it";
+
+				public static LocString GEYSER_PRODUCTION_GEOTUNED_TOTAL = "Total geotuning: {0} {1}";
+
+				public static LocString GEYSER_PRODUCTION_GEOTUNED_TOTAL_ROW_TITLE = "Geotuned ";
+
 				public static LocString GEYSER_DISEASE = UI.PRE_KEYWORD + "{0}" + UI.PST_KEYWORD + " germs are present in the output of this geyser";
 
 				public static LocString GEYSER_PERIOD = "This geyser will produce for <b>{0}</b> of every <b>{1}</b>";
@@ -12920,6 +13375,14 @@ namespace STRINGS
 				public static LocString GEYSER_YEAR_NEXT_ACTIVE = "This geyser will become active in <b>{0}</b>";
 
 				public static LocString GEYSER_YEAR_NEXT_DORMANT = "This geyser will become dormant in <b>{0}</b>";
+
+				public static LocString GEYSER_YEAR_AVR_OUTPUT_UNSTUDIED = "A researcher must analyze this geyser to determine its average output rate";
+
+				public static LocString GEYSER_YEAR_AVR_OUTPUT = "This geyser emits an average of {average} of {element} during its lifetime\n\nThis includes its dormant period";
+
+				public static LocString GEYSER_YEAR_AVR_OUTPUT_BREAKDOWN_TITLE = "Total Geotuning ";
+
+				public static LocString GEYSER_YEAR_AVR_OUTPUT_BREAKDOWN_ROW = "Geotuned ";
 
 				public static LocString CAPTURE_METHOD_WRANGLE = string.Concat(new string[]
 				{

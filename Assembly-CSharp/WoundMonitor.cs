@@ -5,7 +5,7 @@ public class WoundMonitor : GameStateMachine<WoundMonitor, WoundMonitor.Instance
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
 		default_state = this.healthy;
-		this.root.ToggleAnims("anim_hits_kanim", 0f, "").ToggleAnims("anim_impact_kanim", 0f, "EXPANSION1_ID").EventHandler(GameHashes.HealthChanged, delegate(WoundMonitor.Instance smi, object data)
+		this.root.ToggleAnims("anim_hits_kanim", 0f, "").EventHandler(GameHashes.HealthChanged, delegate(WoundMonitor.Instance smi, object data)
 		{
 			smi.OnHealthChanged(data);
 		});

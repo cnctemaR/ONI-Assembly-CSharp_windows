@@ -130,6 +130,10 @@ public abstract class KAnimControllerBase : MonoBehaviour
 	{
 		get
 		{
+			if (this.curAnim == null)
+			{
+				return default(HashedString);
+			}
 			return this.curAnim.hash;
 		}
 	}
@@ -436,10 +440,7 @@ public abstract class KAnimControllerBase : MonoBehaviour
 
 	private void Awake()
 	{
-		if (Global.Instance != null)
-		{
-			this.aem = Global.Instance.GetAnimEventManager();
-		}
+		this.aem = Singleton<AnimEventManager>.Instance;
 		this.debugName = base.name;
 		this.SetFGLayer(this.fgLayer);
 		this.OnAwake();
@@ -520,6 +521,17 @@ public abstract class KAnimControllerBase : MonoBehaviour
 		{
 			this.StartQueuedAnim();
 		}
+	}
+
+	public void QueueAndSyncTransition(HashedString anim_name, KAnim.PlayMode mode = KAnim.PlayMode.Once, float speed = 1f, float time_offset = 0f)
+	{
+		this.SyncTransition();
+		this.Queue(anim_name, mode, speed, time_offset);
+	}
+
+	public void SyncTransition()
+	{
+		this.elapsedTime %= Mathf.Max(float.Epsilon, this.GetDuration());
 	}
 
 	public void ClearQueue()
@@ -862,6 +874,14 @@ public abstract class KAnimControllerBase : MonoBehaviour
 			{
 				this.animFiles[j] = value[j];
 			}
+		}
+	}
+
+	public IReadOnlyList<KAnimControllerBase.OverrideAnimFileData> OverrideAnimFiles
+	{
+		get
+		{
+			return this.overrideAnimFiles;
 		}
 	}
 

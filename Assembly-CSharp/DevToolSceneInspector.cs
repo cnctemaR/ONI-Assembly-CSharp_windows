@@ -29,6 +29,11 @@ public class DevToolSceneInspector : DevTool
 		};
 	}
 
+	public static void Inspect(object obj)
+	{
+		DevToolManager.Instance.panels.AddOrGetDevTool<DevToolSceneInspector>().PushObject(obj);
+	}
+
 	public void PushObject(object obj)
 	{
 		if (obj == null)
@@ -39,7 +44,6 @@ public class DevToolSceneInspector : DevTool
 		{
 			return;
 		}
-		this.Enabled = true;
 		if (this.Stack.Count > this.StackIndex + 1)
 		{
 			this.Stack.RemoveRange(this.StackIndex + 1, this.Stack.Count - (this.StackIndex + 1));
@@ -51,7 +55,7 @@ public class DevToolSceneInspector : DevTool
 		this.StackIndex++;
 	}
 
-	protected override void Render()
+	protected override void RenderTo(DevPanel panel)
 	{
 		for (int i = this.Stack.Count - 1; i >= 0; i--)
 		{

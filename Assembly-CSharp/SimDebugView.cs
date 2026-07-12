@@ -128,7 +128,7 @@ public class SimDebugView : KMonoBehaviour
 		}
 		bool flag = this.mode != global::OverlayModes.None.ID;
 		this.plane.SetActive(flag);
-		SimDebugViewCompositor.Instance.Toggle(this.mode != global::OverlayModes.None.ID && !GameUtil.IsCapturingTimeLapse());
+		SimDebugViewCompositor.Instance.Toggle(flag && !GameUtil.IsCapturingTimeLapse());
 		SimDebugViewCompositor.Instance.material.SetVector("_Thresholds0", new Vector4(0.1f, 0.2f, 0.3f, 0.4f));
 		SimDebugViewCompositor.Instance.material.SetVector("_Thresholds1", new Vector4(0.5f, 0.6f, 0.7f, 0.8f));
 		float num = 0f;

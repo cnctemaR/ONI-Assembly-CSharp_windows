@@ -29,6 +29,7 @@ public class EventInfoDataHelper
 
 	public enum PopupType
 	{
+		NONE = -1,
 		BEGIN,
 		NORMAL,
 		COMPLETE

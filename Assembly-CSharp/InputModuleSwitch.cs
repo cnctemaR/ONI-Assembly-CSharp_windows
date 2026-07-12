@@ -37,23 +37,24 @@ public class InputModuleSwitch : MonoBehaviour
 
 	private void ChangeInputHandler()
 	{
-		for (int i = 0; i < Global.Instance.GetInputManager().usedMenus.Count; i++)
+		GameInputManager inputManager = Global.GetInputManager();
+		for (int i = 0; i < inputManager.usedMenus.Count; i++)
 		{
-			if (Global.Instance.GetInputManager().usedMenus[i].Equals(null))
+			if (inputManager.usedMenus[i].Equals(null))
 			{
-				Global.Instance.GetInputManager().usedMenus.RemoveAt(i);
+				inputManager.usedMenus.RemoveAt(i);
 			}
 		}
-		if (Global.Instance.GetInputManager().GetControllerCount() > 1)
+		if (inputManager.GetControllerCount() > 1)
 		{
 			if (KInputManager.currentControllerIsGamepad)
 			{
 				Cursor.visible = false;
-				Global.Instance.GetInputManager().GetController(1).inputHandler.TransferHandles(Global.Instance.GetInputManager().GetController(0).inputHandler);
+				inputManager.GetController(1).inputHandler.TransferHandles(inputManager.GetController(0).inputHandler);
 				return;
 			}
 			Cursor.visible = true;
-			Global.Instance.GetInputManager().GetController(0).inputHandler.TransferHandles(Global.Instance.GetInputManager().GetController(1).inputHandler);
+			inputManager.GetController(0).inputHandler.TransferHandles(inputManager.GetController(1).inputHandler);
 		}
 	}
 

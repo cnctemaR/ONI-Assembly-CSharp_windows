@@ -158,6 +158,7 @@ namespace Database
 				}
 				return str;
 			};
+			this.MissionControlling = this.CreateStatusItem("MissionControlling", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 2);
 			this.Tinkering = this.CreateStatusItem("Tinkering", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 2);
 			this.Tinkering.resolveStringCallback = delegate(string str, object data)
 			{
@@ -372,8 +373,14 @@ namespace Database
 			this.LightWorkEfficiencyBonus = this.CreateStatusItem("LightWorkEfficiencyBonus", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.Good, false, OverlayModes.None.ID, true, 2);
 			this.LightWorkEfficiencyBonus.resolveStringCallback = delegate(string str, object data)
 			{
-				string text4 = string.Format(DUPLICANTS.STATUSITEMS.LIGHTWORKEFFICIENCYBONUS.NO_BUILDING_WORK_ATTRIBUTE, GameUtil.AddPositiveSign(GameUtil.GetFormattedPercent(DUPLICANTSTATS.LIGHT.LIGHT_WORK_EFFICIENCY_BONUS * 100f, GameUtil.TimeSlice.None), true));
+				string text4 = string.Format(DUPLICANTS.STATUSITEMS.LIGHTWORKEFFICIENCYBONUS.NO_BUILDING_WORK_ATTRIBUTE, GameUtil.AddPositiveSign(GameUtil.GetFormattedPercent(15.000001f, GameUtil.TimeSlice.None), true));
 				return string.Format(str, text4);
+			};
+			this.LaboratoryWorkEfficiencyBonus = this.CreateStatusItem("LaboratoryWorkEfficiencyBonus", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.Good, false, OverlayModes.None.ID, true, 2);
+			this.LaboratoryWorkEfficiencyBonus.resolveStringCallback = delegate(string str, object data)
+			{
+				string text5 = string.Format(DUPLICANTS.STATUSITEMS.LABORATORYWORKEFFICIENCYBONUS.NO_BUILDING_WORK_ATTRIBUTE, GameUtil.AddPositiveSign(GameUtil.GetFormattedPercent(10f, GameUtil.TimeSlice.None), true));
+				return string.Format(str, text5);
 			};
 			this.BeingProductive = this.CreateStatusItem("BeingProductive", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 2);
 			this.BalloonArtistPlanning = this.CreateStatusItem("BalloonArtistPlanning", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 2);
@@ -384,30 +391,30 @@ namespace Database
 			this.GasLiquidIrritation.resolveTooltipCallback = delegate(string str, object data)
 			{
 				GasLiquidExposureMonitor.Instance instance2 = (GasLiquidExposureMonitor.Instance)data;
-				string text5 = DUPLICANTS.STATUSITEMS.GASLIQUIDEXPOSURE.TOOLTIP;
-				string text6 = "";
+				string text6 = DUPLICANTS.STATUSITEMS.GASLIQUIDEXPOSURE.TOOLTIP;
+				string text7 = "";
 				Effect appliedEffect = instance2.sm.GetAppliedEffect(instance2);
 				if (appliedEffect != null)
 				{
-					text6 = Effect.CreateTooltip(appliedEffect, false, "\n    • ", true);
+					text7 = Effect.CreateTooltip(appliedEffect, false, "\n    • ", true);
 				}
-				string text7 = DUPLICANTS.STATUSITEMS.GASLIQUIDEXPOSURE.TOOLTIP_EXPOSED.Replace("{element}", instance2.CurrentlyExposedToElement().name);
+				string text8 = DUPLICANTS.STATUSITEMS.GASLIQUIDEXPOSURE.TOOLTIP_EXPOSED.Replace("{element}", instance2.CurrentlyExposedToElement().name);
 				float currentExposure = instance2.sm.GetCurrentExposure(instance2);
 				if (currentExposure < 0f)
 				{
-					text7 = text7.Replace("{rate}", DUPLICANTS.STATUSITEMS.GASLIQUIDEXPOSURE.TOOLTIP_RATE_DECREASE);
+					text8 = text8.Replace("{rate}", DUPLICANTS.STATUSITEMS.GASLIQUIDEXPOSURE.TOOLTIP_RATE_DECREASE);
 				}
 				else if (currentExposure > 0f)
 				{
-					text7 = text7.Replace("{rate}", DUPLICANTS.STATUSITEMS.GASLIQUIDEXPOSURE.TOOLTIP_RATE_INCREASE);
+					text8 = text8.Replace("{rate}", DUPLICANTS.STATUSITEMS.GASLIQUIDEXPOSURE.TOOLTIP_RATE_INCREASE);
 				}
 				else
 				{
-					text7 = text7.Replace("{rate}", DUPLICANTS.STATUSITEMS.GASLIQUIDEXPOSURE.TOOLTIP_RATE_STAYS);
+					text8 = text8.Replace("{rate}", DUPLICANTS.STATUSITEMS.GASLIQUIDEXPOSURE.TOOLTIP_RATE_STAYS);
 				}
 				float num7 = (instance2.exposure - instance2.minorIrritationThreshold) / Math.Abs(instance2.exposureRate);
-				string text8 = DUPLICANTS.STATUSITEMS.GASLIQUIDEXPOSURE.TOOLTIP_EXPOSURE_LEVEL.Replace("{time}", GameUtil.GetFormattedTime(num7, "F0"));
-				return string.Concat(new string[] { text5, "\n\n", text6, "\n\n", text7, "\n\n", text8 });
+				string text9 = DUPLICANTS.STATUSITEMS.GASLIQUIDEXPOSURE.TOOLTIP_EXPOSURE_LEVEL.Replace("{time}", GameUtil.GetFormattedTime(num7, "F0"));
+				return string.Concat(new string[] { text6, "\n\n", text7, "\n\n", text8, "\n\n", text9 });
 			};
 			this.ExpellingRads = this.CreateStatusItem("ExpellingRads", "DUPLICANTS", "", StatusItem.IconType.Exclamation, NotificationType.Neutral, false, OverlayModes.None.ID, true, 2);
 			this.AnalyzingGenes = this.CreateStatusItem("AnalyzingGenes", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.Good, false, OverlayModes.None.ID, true, 2);
@@ -416,18 +423,18 @@ namespace Database
 			this.MegaBrainTank_Pajamas_Wearing.resolveTooltipCallback_shouldStillCallIfDataIsNull = true;
 			this.MegaBrainTank_Pajamas_Wearing.resolveTooltipCallback = delegate(string str, object data)
 			{
-				string text9 = DUPLICANTS.STATUSITEMS.WEARING_PAJAMAS.TOOLTIP;
+				string text10 = DUPLICANTS.STATUSITEMS.WEARING_PAJAMAS.TOOLTIP;
 				Effect effect = Db.Get().effects.Get("SleepClinic");
-				string text10;
+				string text11;
 				if (effect != null)
 				{
-					text10 = Effect.CreateTooltip(effect, false, "\n    • ", true);
+					text11 = Effect.CreateTooltip(effect, false, "\n    • ", true);
 				}
 				else
 				{
-					text10 = "";
+					text11 = "";
 				}
-				return text9 + "\n\n" + text10;
+				return text10 + "\n\n" + text11;
 			};
 			this.MegaBrainTank_Pajamas_Sleeping = this.CreateStatusItem("MegaBrainTank_Pajamas_Sleeping", DUPLICANTS.STATUSITEMS.DREAMING.NAME, DUPLICANTS.STATUSITEMS.DREAMING.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Good, false, OverlayModes.None.ID, 2);
 			this.MegaBrainTank_Pajamas_Sleeping.resolveTooltipCallback = delegate(string str, object data)
@@ -543,6 +550,8 @@ namespace Database
 
 		public StatusItem Researching;
 
+		public StatusItem MissionControlling;
+
 		public StatusItem Tinkering;
 
 		public StatusItem Storing;
@@ -624,6 +633,8 @@ namespace Database
 		public StatusItem ExposedToGerms;
 
 		public StatusItem LightWorkEfficiencyBonus;
+
+		public StatusItem LaboratoryWorkEfficiencyBonus;
 
 		public StatusItem BeingProductive;
 

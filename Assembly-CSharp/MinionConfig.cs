@@ -277,7 +277,7 @@ public class MinionConfig : IEntityConfig
 		this.SetupLaserEffects(gameObject);
 		this.SetupDreams(gameObject);
 		SymbolOverrideControllerUtil.AddToPrefab(gameObject).applySymbolOverridesEveryFrame = true;
-		MinionConfig.ConfigureSymbols(gameObject);
+		MinionConfig.ConfigureSymbols(gameObject, false);
 		return gameObject;
 	}
 
@@ -561,7 +561,7 @@ public class MinionConfig : IEntityConfig
 		modifiers.initialTraits.Add(MinionConfig.MINION_BASE_TRAIT_ID);
 	}
 
-	public static void ConfigureSymbols(GameObject go)
+	public static void ConfigureSymbols(GameObject go, bool show_defaults = false)
 	{
 		KBatchedAnimController component = go.GetComponent<KBatchedAnimController>();
 		component.SetSymbolVisiblity("snapto_hat", false);
@@ -572,6 +572,16 @@ public class MinionConfig : IEntityConfig
 		component.SetSymbolVisiblity("snapto_goggles", false);
 		component.SetSymbolVisiblity("snapto_pivot", false);
 		component.SetSymbolVisiblity("snapTo_rgtHand", false);
+		component.SetSymbolVisiblity("neck", show_defaults);
+		component.SetSymbolVisiblity("belt", show_defaults);
+		component.SetSymbolVisiblity("pelvis", show_defaults);
+		component.SetSymbolVisiblity("foot", show_defaults);
+		component.SetSymbolVisiblity("leg", show_defaults);
+		component.SetSymbolVisiblity("cuff", show_defaults);
+		component.SetSymbolVisiblity("arm_sleeve", show_defaults);
+		component.SetSymbolVisiblity("arm_lower_sleeve", show_defaults);
+		component.SetSymbolVisiblity("necklace", false);
+		component.SetSymbolVisiblity("skirt", false);
 	}
 
 	public static string ID = "Minion";

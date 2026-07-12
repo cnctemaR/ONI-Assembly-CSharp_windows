@@ -830,8 +830,8 @@ public class LoadScreen : KModalScreen
 					save.FileName,
 					save.FileHeader.buildVersion,
 					save.FileInfo.saveMinorVersion,
-					531669U,
-					29
+					535720U,
+					31
 				});
 			}
 			return false;
@@ -846,7 +846,7 @@ public class LoadScreen : KModalScreen
 					save.FileInfo.saveMajorVersion,
 					save.FileInfo.saveMinorVersion,
 					7,
-					29
+					31
 				});
 			}
 			return false;
@@ -858,7 +858,7 @@ public class LoadScreen : KModalScreen
 	{
 		HierarchyReferences component = this.colonyViewRoot.GetComponent<HierarchyReferences>();
 		component.GetReference<RectTransform>("Title").GetComponent<LocText>().text = save.BaseName;
-		component.GetReference<RectTransform>("Date").GetComponent<LocText>().text = string.Format("{0:H:mm:ss} - " + Localization.GetFileDateFormat(0), save.FileDate);
+		component.GetReference<RectTransform>("Date").GetComponent<LocText>().text = string.Format("{0:H:mm:ss} - " + Localization.GetFileDateFormat(0), save.FileDate.ToLocalTime());
 		string text = save.FileInfo.clusterId;
 		if (text != null && !SettingsCache.clusterLayouts.clusterCache.ContainsKey(text))
 		{
@@ -953,7 +953,7 @@ public class LoadScreen : KModalScreen
 			rectTransform.gameObject.SetActive(true);
 			component3.GetReference<RectTransform>("AutoLabel").gameObject.SetActive(save.FileInfo.isAutoSave);
 			component3.GetReference<RectTransform>("SaveText").GetComponent<LocText>().text = global::System.IO.Path.GetFileNameWithoutExtension(save.FileName);
-			component3.GetReference<RectTransform>("DateText").GetComponent<LocText>().text = string.Format("{0:H:mm:ss} - " + Localization.GetFileDateFormat(0), save.FileDate);
+			component3.GetReference<RectTransform>("DateText").GetComponent<LocText>().text = string.Format("{0:H:mm:ss} - " + Localization.GetFileDateFormat(0), save.FileDate.ToLocalTime());
 			component3.GetReference<RectTransform>("NewestLabel").gameObject.SetActive(j == 0);
 			bool flag = this.CheckSave(save, null);
 			KButton button = rectTransform.GetComponent<KButton>();
@@ -1011,7 +1011,7 @@ public class LoadScreen : KModalScreen
 		int item2 = savesSizeAndCounts.Item2;
 		string formattedBytes = GameUtil.GetFormattedBytes(savesSizeAndCounts.Item3);
 		freeElement.GetReference<RectTransform>("HeaderTitle").GetComponent<LocText>().text = colonyName;
-		freeElement.GetReference<RectTransform>("HeaderDate").GetComponent<LocText>().text = string.Format("{0:H:mm:ss} - " + Localization.GetFileDateFormat(0), firstSave.FileDate);
+		freeElement.GetReference<RectTransform>("HeaderDate").GetComponent<LocText>().text = string.Format("{0:H:mm:ss} - " + Localization.GetFileDateFormat(0), firstSave.FileDate.ToLocalTime());
 		freeElement.GetReference<RectTransform>("SaveTitle").GetComponent<LocText>().text = string.Format(UI.FRONTEND.LOADSCREEN.SAVE_INFO, item, item2, formattedBytes);
 		Image component = freeElement.GetReference<RectTransform>("Preview").GetComponent<Image>();
 		this.SetPreview(firstSave.FileName, colonyName, component, true);
@@ -1146,7 +1146,7 @@ public class LoadScreen : KModalScreen
 
 	private static bool IsSaveFileFromUnsupportedFutureBuild(SaveGame.Header header, SaveGame.GameInfo gameInfo)
 	{
-		return gameInfo.saveMajorVersion > 7 || (gameInfo.saveMajorVersion == 7 && gameInfo.saveMinorVersion > 29) || header.buildVersion > 531669U;
+		return gameInfo.saveMajorVersion > 7 || (gameInfo.saveMajorVersion == 7 && gameInfo.saveMinorVersion > 31) || header.buildVersion > 535720U;
 	}
 
 	private static bool IsSaveFromCurrentDLC(SaveGame.GameInfo gameInfo, out string saveDlcName)
@@ -1225,15 +1225,15 @@ public class LoadScreen : KModalScreen
 		SaveGame.GameInfo gameInfo = SaveLoader.LoadHeader(filename, out header);
 		string text = null;
 		string text2 = null;
-		if (header.buildVersion > 531669U)
+		if (header.buildVersion > 535720U)
 		{
 			text = header.buildVersion.ToString();
-			text2 = 531669U.ToString();
+			text2 = 535720U.ToString();
 		}
 		else if (gameInfo.saveMajorVersion < 7)
 		{
 			text = string.Format("v{0}.{1}", gameInfo.saveMajorVersion, gameInfo.saveMinorVersion);
-			text2 = string.Format("v{0}.{1}", 7, 29);
+			text2 = string.Format("v{0}.{1}", 7, 31);
 		}
 		if (!flag)
 		{

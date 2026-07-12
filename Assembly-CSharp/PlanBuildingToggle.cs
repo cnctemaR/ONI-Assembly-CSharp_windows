@@ -15,7 +15,7 @@ public class PlanBuildingToggle : KToggle
 		this.sprite = def.GetUISprite("ui", false);
 		base.onClick += delegate
 		{
-			PlanScreen.Instance.OnSelectBuilding(this.gameObject, def);
+			PlanScreen.Instance.OnSelectBuilding(this.gameObject, def, null);
 		};
 		this.CheckResearch(null);
 		this.Refresh();

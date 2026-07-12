@@ -107,6 +107,8 @@ public class AudioMixerSnapshots : ScriptableObject
 
 	public EventReference TechFilterRadiationOn;
 
+	public EventReference FrontEndSupplyClosetSnapshot;
+
 	[SerializeField]
 	private EventReference[] snapshots;
 

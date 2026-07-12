@@ -116,14 +116,16 @@ public class MaterialSelectionPanel : KScreen
 
 	public bool AllSelectorsSelected()
 	{
+		bool flag = false;
 		foreach (MaterialSelector materialSelector in this.MaterialSelectors)
 		{
+			flag = flag || materialSelector.gameObject.activeInHierarchy;
 			if (materialSelector.gameObject.activeInHierarchy && materialSelector.CurrentSelectedElement == null)
 			{
 				return false;
 			}
 		}
-		return true;
+		return flag;
 	}
 
 	public void RefreshSelectors()

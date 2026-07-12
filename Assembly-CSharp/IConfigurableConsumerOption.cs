@@ -7,7 +7,11 @@ public interface IConfigurableConsumerOption
 
 	string GetName();
 
+	string GetDetailedDescription();
+
 	string GetDescription();
 
 	Sprite GetIcon();
+
+	IConfigurableConsumerIngredient[] GetIngredients();
 }

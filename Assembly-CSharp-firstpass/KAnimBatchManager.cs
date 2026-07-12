@@ -227,6 +227,8 @@ public class KAnimBatchManager
 
 	public static HashedString IGNORE = new HashedString("IGNORE");
 
+	public static HashedString BATCH_HUMAN = "human";
+
 	public static Vector2 GROUP_SIZE = new Vector2(32f, 32f);
 
 	private bool ready;
@@ -243,7 +245,7 @@ public class KAnimBatchManager
 
 	private List<BatchSet> activeBatchSets = new List<BatchSet>();
 
-	public int[] atlasNames = new int[]
+	public static int[] AtlasNames = new int[]
 	{
 		Shader.PropertyToID("atlas0"),
 		Shader.PropertyToID("atlas1"),
@@ -256,8 +258,14 @@ public class KAnimBatchManager
 		Shader.PropertyToID("atlas8"),
 		Shader.PropertyToID("atlas9"),
 		Shader.PropertyToID("atlas10"),
-		Shader.PropertyToID("atlas11")
+		Shader.PropertyToID("atlas11"),
+		Shader.PropertyToID("atlas12"),
+		Shader.PropertyToID("atlas13"),
+		Shader.PropertyToID("atlas14"),
+		Shader.PropertyToID("atlas15")
 	};
+
+	public static int[] MaxAtlasesByMaterialType = new int[] { 12, 12, 12, 16, 12, 13 };
 
 	private struct BatchSetInfo
 	{

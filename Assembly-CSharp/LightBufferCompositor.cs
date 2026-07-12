@@ -54,19 +54,22 @@ public class LightBufferCompositor : MonoBehaviour
 
 	private void OnRenderImage(RenderTexture src, RenderTexture dest)
 	{
-		if (PropertyTextures.instance == null)
+		RenderTexture renderTexture = null;
+		if (PropertyTextures.instance != null)
 		{
-			return;
+			Texture texture = PropertyTextures.instance.GetTexture(PropertyTextures.Property.Temperature);
+			texture.name = "temperature_tex";
+			renderTexture = RenderTexture.GetTemporary(Screen.width / 8, Screen.height / 8);
+			renderTexture.filterMode = FilterMode.Bilinear;
+			Graphics.Blit(texture, renderTexture, this.blurMaterial);
+			Shader.SetGlobalTexture("_BlurredTemperature", renderTexture);
 		}
-		Texture texture = PropertyTextures.instance.GetTexture(PropertyTextures.Property.Temperature);
-		texture.name = "temperature_tex";
-		RenderTexture temporary = RenderTexture.GetTemporary(Screen.width / 8, Screen.height / 8);
-		temporary.filterMode = FilterMode.Bilinear;
-		Graphics.Blit(texture, temporary, this.blurMaterial);
-		Shader.SetGlobalTexture("_BlurredTemperature", temporary);
 		this.material.SetTexture("_LightBufferTex", LightBuffer.Instance.Texture);
 		Graphics.Blit(src, dest, this.material);
-		RenderTexture.ReleaseTemporary(temporary);
+		if (renderTexture != null)
+		{
+			RenderTexture.ReleaseTemporary(renderTexture);
+		}
 	}
 
 	private void OnShadersReloaded()

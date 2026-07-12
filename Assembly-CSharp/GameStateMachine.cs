@@ -2412,6 +2412,11 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 			return this.EventTransition(GameHashes.AnimQueueComplete, state, null);
 		}
 
+		internal void EventHandler()
+		{
+			throw new NotImplementedException();
+		}
+
 		[StateMachine.DoNotAutoCreate]
 		private StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.TargetParameter stateTarget;
 

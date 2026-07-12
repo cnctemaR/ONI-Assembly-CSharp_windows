@@ -1396,9 +1396,9 @@ public class Storage : Workable, ISaveLoadableDetails, IGameObjectEffectDescript
 		}
 	}
 
-	public bool ignoreSourcePriority;
-
 	public bool allowItemRemoval;
+
+	public bool ignoreSourcePriority;
 
 	public bool onlyTransferFromLowerPriority;
 

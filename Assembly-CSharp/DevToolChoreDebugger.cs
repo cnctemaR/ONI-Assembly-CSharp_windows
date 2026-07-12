@@ -6,7 +6,7 @@ using UnityEngine;
 
 public class DevToolChoreDebugger : DevTool
 {
-	protected override void Render()
+	protected override void RenderTo(DevPanel panel)
 	{
 		this.Update();
 	}

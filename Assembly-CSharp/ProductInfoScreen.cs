@@ -7,6 +7,14 @@ using UnityEngine.EventSystems;
 
 public class ProductInfoScreen : KScreen
 {
+	public FacadeSelectionPanel FacadeSelectionPanel
+	{
+		get
+		{
+			return this.facadeSelectionPanel;
+		}
+	}
+
 	private void RefreshScreen()
 	{
 		if (this.currentDef != null)
@@ -40,6 +48,9 @@ public class ProductInfoScreen : KScreen
 	public new void Awake()
 	{
 		base.Awake();
+		this.facadeSelectionPanel = Util.KInstantiateUI<FacadeSelectionPanel>(this.facadeSelectionPanelPrefab.gameObject, base.gameObject, false);
+		FacadeSelectionPanel facadeSelectionPanel = this.facadeSelectionPanel;
+		facadeSelectionPanel.OnFacadeSelectionChanged = (global::System.Action)Delegate.Combine(facadeSelectionPanel.OnFacadeSelectionChanged, new global::System.Action(this.OnFacadeSelectionChanged));
 		this.materialSelectionPanel = Util.KInstantiateUI<MaterialSelectionPanel>(this.materialSelectionPanelPrefab.gameObject, base.gameObject, false);
 	}
 
@@ -86,11 +97,25 @@ public class ProductInfoScreen : KScreen
 
 	public void ConfigureScreen(BuildingDef def)
 	{
+		this.ConfigureScreen(def, this.FacadeSelectionPanel.SelectedFacade);
+	}
+
+	public void ConfigureScreen(BuildingDef def, string facadeID)
+	{
 		this.configuring = true;
 		this.currentDef = def;
 		this.SetTitle(def);
 		this.SetDescription(def);
 		this.SetEffects(def);
+		this.facadeSelectionPanel.SetBuildingDef(def.PrefabID);
+		if (facadeID != null && facadeID != "DEFAULT_FACADE" && Db.GetBuildingFacades().Get(facadeID).PrefabID == def.PrefabID)
+		{
+			this.facadeSelectionPanel.SelectedFacade = facadeID;
+		}
+		else
+		{
+			this.facadeSelectionPanel.SelectedFacade = "DEFAULT_FACADE";
+		}
 		this.SetMaterials(def);
 		this.configuring = false;
 	}
@@ -320,6 +345,15 @@ public class ProductInfoScreen : KScreen
 		this.ActivateAppropriateTool(def);
 	}
 
+	private void OnFacadeSelectionChanged()
+	{
+		if (this.currentDef == null)
+		{
+			return;
+		}
+		this.ActivateAppropriateTool(this.currentDef);
+	}
+
 	private void onMenuMaterialChanged()
 	{
 		if (this.currentDef == null)
@@ -333,7 +367,7 @@ public class ProductInfoScreen : KScreen
 	private void ActivateAppropriateTool(BuildingDef def)
 	{
 		global::Debug.Assert(def != null, "def was null");
-		if (((PlanScreen.Instance != null) ? PlanScreen.Instance.IsDefBuildable(def) : (BuildMenu.Instance != null && BuildMenu.Instance.BuildableState(def) == PlanScreen.RequirementsState.Complete)) && this.materialSelectionPanel.AllSelectorsSelected())
+		if (((PlanScreen.Instance != null) ? PlanScreen.Instance.IsDefBuildable(def) : (BuildMenu.Instance != null && BuildMenu.Instance.BuildableState(def) == PlanScreen.RequirementsState.Complete)) && this.materialSelectionPanel.AllSelectorsSelected() && this.facadeSelectionPanel.SelectedFacade != null)
 		{
 			this.onElementsFullySelected.Signal();
 			return;
@@ -400,12 +434,17 @@ public class ProductInfoScreen : KScreen
 
 	public MaterialSelectionPanel materialSelectionPanelPrefab;
 
+	public FacadeSelectionPanel facadeSelectionPanelPrefab;
+
 	private Dictionary<string, GameObject> descLabels = new Dictionary<string, GameObject>();
 
 	public MultiToggle sandboxInstantBuildToggle;
 
 	[NonSerialized]
 	public MaterialSelectionPanel materialSelectionPanel;
+
+	[SerializeField]
+	private FacadeSelectionPanel facadeSelectionPanel;
 
 	[NonSerialized]
 	public BuildingDef currentDef;

@@ -174,7 +174,7 @@ public class PlanScreen : KIconToggleMenu
 		}
 		if (this.lastSelectedBuildingDef != null)
 		{
-			PlanScreen.Instance.CopyBuildingOrder(this.lastSelectedBuildingDef);
+			PlanScreen.Instance.CopyBuildingOrder(this.lastSelectedBuildingDef, this.LastSelectedBuildingFacade);
 		}
 	}
 
@@ -190,7 +190,23 @@ public class PlanScreen : KIconToggleMenu
 			if (this.lastSelectedBuilding != null)
 			{
 				this.lastSelectedBuildingDef = this.lastSelectedBuilding.Def;
+				if (this.lastSelectedBuilding.gameObject.activeInHierarchy)
+				{
+					this.LastSelectedBuildingFacade = this.lastSelectedBuilding.GetComponent<BuildingFacade>().CurrentFacade;
+				}
 			}
+		}
+	}
+
+	public string LastSelectedBuildingFacade
+	{
+		get
+		{
+			return this.lastSelectedBuildingFacade;
+		}
+		set
+		{
+			this.lastSelectedBuildingFacade = value;
 		}
 	}
 
@@ -209,8 +225,12 @@ public class PlanScreen : KIconToggleMenu
 		if (this.lastSelectedBuildingDef != null)
 		{
 			component.gameObject.SetActive(PlanScreen.Instance.gameObject.activeInHierarchy);
-			Sprite uisprite = this.lastSelectedBuildingDef.GetUISprite("ui", false);
-			component.transform.Find("FG").GetComponent<Image>().sprite = uisprite;
+			Sprite sprite = this.lastSelectedBuildingDef.GetUISprite("ui", false);
+			if (this.LastSelectedBuildingFacade != null && this.LastSelectedBuildingFacade != "DEFAULT_FACADE")
+			{
+				sprite = Def.GetFacadeUISprite(this.LastSelectedBuildingFacade);
+			}
+			component.transform.Find("FG").GetComponent<Image>().sprite = sprite;
 			component.transform.Find("FG").GetComponent<Image>().color = Color.white;
 			component.ChangeState(1);
 			return;
@@ -302,7 +322,7 @@ public class PlanScreen : KIconToggleMenu
 		this.forceUpdateAllCategoryToggles = true;
 	}
 
-	public void CopyBuildingOrder(BuildingDef buildingDef)
+	public void CopyBuildingOrder(BuildingDef buildingDef, string facadeID)
 	{
 		foreach (PlanScreen.PlanInfo planInfo in global::TUNING.BUILDINGS.PLANORDER)
 		{
@@ -311,7 +331,7 @@ public class PlanScreen : KIconToggleMenu
 				if (buildingDef.PrefabID == keyValuePair.Key)
 				{
 					this.OpenCategoryByName(HashCache.Get().Get(planInfo.category));
-					this.OnSelectBuilding(this.ActiveCategoryBuildingToggles[buildingDef].gameObject, buildingDef);
+					this.OnSelectBuilding(this.ActiveCategoryBuildingToggles[buildingDef].gameObject, buildingDef, facadeID);
 					break;
 				}
 			}
@@ -320,7 +340,7 @@ public class PlanScreen : KIconToggleMenu
 
 	public void CopyBuildingOrder(Building building)
 	{
-		this.CopyBuildingOrder(building.Def);
+		this.CopyBuildingOrder(building.Def, building.GetComponent<BuildingFacade>().CurrentFacade);
 		if (this.ProductInfoScreen.materialSelectionPanel == null)
 		{
 			DebugUtil.DevLogError(building.Def.name + " def likely needs to be marked def.ShowInBuildMenu = false");
@@ -378,7 +398,7 @@ public class PlanScreen : KIconToggleMenu
 		this.copyBuildingButton.GetComponent<MultiToggle>().ChangeState(0);
 	}
 
-	public void OnSelectBuilding(GameObject button_go, BuildingDef def)
+	public void OnSelectBuilding(GameObject button_go, BuildingDef def, string facadeID = null)
 	{
 		if (button_go == null)
 		{
@@ -411,7 +431,7 @@ public class PlanScreen : KIconToggleMenu
 		this.LastSelectedBuilding = def.BuildingComplete.GetComponent<Building>();
 		this.RefreshCopyBuildingButton(null);
 		this.ProductInfoScreen.Show(true);
-		this.ProductInfoScreen.ConfigureScreen(def);
+		this.ProductInfoScreen.ConfigureScreen(def, facadeID);
 		this.ignoreToolChangeMessages--;
 	}
 
@@ -1066,7 +1086,7 @@ public class PlanScreen : KIconToggleMenu
 				((buildingDef.BuildingComplete.GetComponent<Wire>() != null) ? WireBuildTool.Instance : UtilityBuildTool.Instance).Activate(buildingDef, getSelectedElementAsList);
 				return;
 			}
-			BuildTool.Instance.Activate(buildingDef, this.ProductInfoScreen.materialSelectionPanel.GetSelectedElementAsList);
+			BuildTool.Instance.Activate(buildingDef, this.ProductInfoScreen.materialSelectionPanel.GetSelectedElementAsList, this.ProductInfoScreen.FacadeSelectionPanel.SelectedFacade);
 		}
 	}
 
@@ -1287,6 +1307,8 @@ public class PlanScreen : KIconToggleMenu
 	private BuildingDef lastSelectedBuildingDef;
 
 	private Building lastSelectedBuilding;
+
+	private string lastSelectedBuildingFacade = "DEFAULT_FACADE";
 
 	private int buildable_state_update_idx;
 

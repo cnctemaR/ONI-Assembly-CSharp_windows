@@ -154,25 +154,33 @@ public class StampTool : InterfaceTool
 				this.childCellPlacers.Add(instance);
 			}
 		}
-		for (int j = 0; j < this.stampTemplate.buildings.Count; j++)
+		if (this.stampTemplate.buildings != null)
 		{
-			Prefab prefab = this.stampTemplate.buildings[j];
-			Building instance2 = StampTool.previewPool.GetInstance(prefab.id);
-			Rotatable component = instance2.GetComponent<Rotatable>();
+			yield return this.InitializeBuildingPlacementVisuals();
+		}
+		yield break;
+	}
+
+	private IEnumerator InitializeBuildingPlacementVisuals()
+	{
+		foreach (Prefab prefab in this.stampTemplate.buildings)
+		{
+			Building instance = StampTool.previewPool.GetInstance(prefab.id);
+			Rotatable component = instance.GetComponent<Rotatable>();
 			if (component != null)
 			{
 				component.SetOrientation(prefab.rotationOrientation);
 			}
-			instance2.transform.SetParent(this.rootCellPlacer.transform);
-			instance2.transform.SetLocalPosition(new Vector2((float)prefab.location_x, (float)prefab.location_y));
-			instance2.gameObject.SetActive(true);
-			this.buildingPreviews.Add(instance2);
+			instance.transform.SetParent(this.rootCellPlacer.transform);
+			instance.transform.SetLocalPosition(new Vector2((float)prefab.location_x, (float)prefab.location_y));
+			instance.gameObject.SetActive(true);
+			this.buildingPreviews.Add(instance);
 		}
 		yield return null;
-		for (int k = 0; k < this.stampTemplate.buildings.Count; k++)
+		for (int i = 0; i < this.stampTemplate.buildings.Count; i++)
 		{
-			Prefab prefab2 = this.stampTemplate.buildings[k];
-			Building building = this.buildingPreviews[k];
+			Prefab prefab2 = this.stampTemplate.buildings[i];
+			Building building = this.buildingPreviews[i];
 			string text = "";
 			if ((prefab2.connections & 1) != 0)
 			{

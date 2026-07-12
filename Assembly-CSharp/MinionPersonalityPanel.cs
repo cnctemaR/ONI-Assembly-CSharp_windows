@@ -150,7 +150,10 @@ public class MinionPersonalityPanel : TargetScreen
 		this.traitsDrawer.BeginDrawing();
 		foreach (Trait trait in this.selectedTarget.GetComponent<Traits>().TraitList)
 		{
-			this.traitsDrawer.NewLabel(trait.Name).Tooltip(trait.GetTooltip());
+			if (!string.IsNullOrEmpty(trait.Name))
+			{
+				this.traitsDrawer.NewLabel(trait.Name).Tooltip(trait.GetTooltip());
+			}
 		}
 		this.traitsDrawer.EndDrawing();
 	}

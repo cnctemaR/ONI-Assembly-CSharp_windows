@@ -43,8 +43,18 @@ namespace Database
 
 		public readonly float TotalKG;
 
-		public class Ingredient
+		public class Ingredient : IConfigurableConsumerIngredient
 		{
+			public float GetAmount()
+			{
+				return this.AmountKG;
+			}
+
+			public Tag[] GetIDSets()
+			{
+				return this.IngredientSet;
+			}
+
 			public Tag[] IngredientSet;
 
 			public float AmountKG;

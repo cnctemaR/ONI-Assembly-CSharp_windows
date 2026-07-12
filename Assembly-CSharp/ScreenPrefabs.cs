@@ -110,6 +110,13 @@ public class ScreenPrefabs : KMonoBehaviour
 
 	public GameObject OldVersionWarningScreen;
 
+	[Header("Klei Items")]
+	public GameObject KleiItemDropScreen;
+
+	public GameObject LockerMenuScreen;
+
+	public GameObject LockerNavigator;
+
 	[Header("Main Menu")]
 	public GameObject MainMenuForVanilla;
 

@@ -145,6 +145,11 @@ public class Def : ScriptableObject
 		return Def.GetUISprite(prefabID, "ui", false);
 	}
 
+	public static Sprite GetFacadeUISprite(string facadeID)
+	{
+		return Def.GetUISpriteFromMultiObjectAnim(Assets.GetAnim(Db.GetBuildingFacades().Get(facadeID).AnimFile), "ui", false, "");
+	}
+
 	public static Sprite GetUISpriteFromMultiObjectAnim(KAnimFile animFile, string animName = "ui", bool centered = false, string symbolName = "")
 	{
 		global::Tuple<KAnimFile, string, bool> tuple = new global::Tuple<KAnimFile, string, bool>(animFile, animName, centered);
@@ -241,5 +246,5 @@ public class Def : ScriptableObject
 
 	private static Dictionary<global::Tuple<KAnimFile, string, bool>, Sprite> knownUISprites = new Dictionary<global::Tuple<KAnimFile, string, bool>, Sprite>();
 
-	private const string DEFAULT_SPRITE = "unknown";
+	public const string DEFAULT_SPRITE = "unknown";
 }

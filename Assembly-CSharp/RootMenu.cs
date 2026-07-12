@@ -78,6 +78,7 @@ public class RootMenu : KScreen
 	private void OnSelectObject(object data)
 	{
 		GameObject gameObject = (GameObject)data;
+		bool flag = false;
 		if (gameObject != null)
 		{
 			KPrefabID component = gameObject.GetComponent<KPrefabID>();
@@ -85,22 +86,31 @@ public class RootMenu : KScreen
 			{
 				return;
 			}
+			flag = component != null || CellSelectionObject.IsSelectionObject(gameObject);
 		}
 		if (gameObject != this.selectedGO)
 		{
-			this.selectedGO = gameObject;
+			this.selectedGO = null;
 			this.CloseSubMenus();
-			if (this.selectedGO != null && (this.selectedGO.GetComponent<KPrefabID>() != null || CellSelectionObject.IsSelectionObject(this.selectedGO)))
+			if (flag)
 			{
+				this.selectedGO = gameObject;
 				this.AddSubMenu(this.detailsScreen);
-				this.detailsScreen.Refresh(this.selectedGO);
 				this.AddSubMenu(this.userMenu);
-				this.userMenu.SetSelected(this.selectedGO);
-				this.userMenu.Refresh(this.selectedGO);
-				return;
 			}
-			this.userMenu.SetSelected(null);
+			this.userMenu.SetSelected(this.selectedGO);
 		}
+		this.Refresh();
+	}
+
+	public void Refresh()
+	{
+		if (this.selectedGO == null)
+		{
+			return;
+		}
+		this.detailsScreen.Refresh(this.selectedGO);
+		this.userMenu.Refresh(this.selectedGO);
 	}
 
 	private void OnBuildingStatechanged(object data)

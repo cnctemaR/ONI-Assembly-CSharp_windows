@@ -6,6 +6,67 @@ namespace STRINGS
 	{
 		public class STATUSITEMS
 		{
+			public class GEOTUNER_NEEDGEYSER
+			{
+				public static LocString NAME = "No Geyser Selected";
+
+				public static LocString TOOLTIP = "Select an analyzed geyser to increase its output";
+			}
+
+			public class GEOTUNER_CHARGE_REQUIRED
+			{
+				public static LocString NAME = "Experimentation Needed";
+
+				public static LocString TOOLTIP = "This building requires a Duplicant to produce amplification data through experimentation";
+			}
+
+			public class GEOTUNER_CHARGING
+			{
+				public static LocString NAME = "Compiling Data";
+
+				public static LocString TOOLTIP = "Compiling amplification data through experimentation";
+			}
+
+			public class GEOTUNER_CHARGED
+			{
+				public static LocString NAME = "Data Remaining: {0}";
+
+				public static LocString TOOLTIP = "This building consumes amplification data while boosting a geyser\n\nTime remaining: {0} ({1} data per second)";
+			}
+
+			public class GEOTUNER_GEYSER_STATUS
+			{
+				public static LocString NAME = "";
+
+				public static LocString NAME_ERUPTING = "Target is Erupting";
+
+				public static LocString NAME_DORMANT = "Target is Not Erupting";
+
+				public static LocString NAME_IDLE = "Target is Not Erupting";
+
+				public static LocString TOOLTIP = "";
+
+				public static LocString TOOLTIP_ERUPTING = "The selected geyser is erupting and will receive stored amplification data";
+
+				public static LocString TOOLTIP_DORMANT = "The selected geyser is not erupting\n\nIt will not receive stored amplification data in this state";
+
+				public static LocString TOOLTIP_IDLE = "The selected geyser is not erupting\n\nIt will not receive stored amplification data in this state";
+			}
+
+			public class GEYSER_GEOTUNED
+			{
+				public static LocString NAME = "Geotuned ({0}/{1})";
+
+				public static LocString TOOLTIP = "This geyser is being boosted by {0} out {1} of " + UI.PRE_KEYWORD + "Geotuners" + UI.PST_KEYWORD;
+			}
+
+			public class RADIATOR_ENERGY_CURRENT_EMISSION_RATE
+			{
+				public static LocString NAME = "Currently Emitting: {ENERGY_RATE}";
+
+				public static LocString TOOLTIP = "Currently Emitting: {ENERGY_RATE}";
+			}
+
 			public class NOTLINKEDTOHEAD
 			{
 				public static LocString NAME = "Not Linked";
@@ -3178,6 +3239,34 @@ namespace STRINGS
 				public static LocString NAME = "Ready To Unpack";
 
 				public static LocString TOOLTIP = "This payload has reached its destination and is ready to be unloaded\n\nIt can be marked for unpacking manually, or automatically unpacked on arrival using a " + BUILDINGS.PREFABS.RAILGUNPAYLOADOPENER.NAME;
+			}
+
+			public class MISSIONCONTROLASSISTINGROCKET
+			{
+				public static LocString NAME = "Guidance Signal: {0}";
+
+				public static LocString TOOLTIP = "Once transmission is complete, Mission Control will boost targeted rocket's speed";
+			}
+
+			public class MISSIONCONTROLBOOSTED
+			{
+				public static LocString NAME = "Mission Control Speed Boost: {0}";
+
+				public static LocString TOOLTIP = "Mission Control has given this rocket a {0} speed boost\n\n{1} remaining";
+			}
+
+			public class NOROCKETSTOMISSIONCONTROLBOOST
+			{
+				public static LocString NAME = "No Eligible Rockets in Range";
+
+				public static LocString TOOLTIP = "Rockets must be mid-flight and not targeted by another Mission Control Station, or already boosted";
+			}
+
+			public class NOROCKETSTOMISSIONCONTROLCLUSTERBOOST
+			{
+				public static LocString NAME = "No Eligible Rockets in Range";
+
+				public static LocString TOOLTIP = "Rockets must be mid-flight, within {0} tiles, and not targeted by another Mission Control Station or already boosted";
 			}
 
 			public class AWAITINGEMPTYBUILDING

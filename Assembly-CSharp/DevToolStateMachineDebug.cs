@@ -54,7 +54,7 @@ public class DevToolStateMachineDebug : DevTool
 		ImGui.PopID();
 	}
 
-	protected override void Render()
+	protected override void RenderTo(DevPanel panel)
 	{
 		this.Update();
 		ImGui.InputText("Filter:", ref this.stateMachineFilter, 256U);

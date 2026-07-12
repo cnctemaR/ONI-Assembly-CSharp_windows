@@ -1134,5 +1134,10 @@ namespace STRINGS
 				public static LocString GENERICLIST = "oni\nini\nani\nona\nina\nino\nano\nalin\nelin\nolin\nial\niol\niel\nila\nola\nera\nora\nato\nito\nilios\nista\nazon\nibo\n";
 			}
 		}
+
+		public class GEYSER_IDS
+		{
+			public static LocString IDs = "\nHW\nGQ\nNA\nTH\nZL\nEV\nSK\nFP\nNJ\nRA\nUO\nXE";
+		}
 	}
 }

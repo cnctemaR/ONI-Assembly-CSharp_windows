@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using Klei.AI;
 using KSerialization;
 using STRINGS;
-using TUNING;
 using UnityEngine;
 
 [AddComponentMenu("KMonoBehaviour/Workable/Edible")]
@@ -72,7 +71,6 @@ public class Edible : Workable, IGameObjectEffectDescriptor, ISaveLoadable, IExt
 			}
 			this.foodInfo = EdiblesManager.GetFoodInfo(this.FoodID);
 		}
-		base.GetComponent<KPrefabID>().AddTag(GameTags.Edible, false);
 		base.Subscribe<Edible>(748399584, Edible.OnCraftDelegate);
 		base.Subscribe<Edible>(1272413801, Edible.OnCraftDelegate);
 		this.workerStatusItem = Db.Get().DuplicantStatusItems.Eating;
@@ -378,7 +376,7 @@ public class Edible : Workable, IGameObjectEffectDescriptor, ISaveLoadable, IExt
 	public void OnSplitTick(Pickupable thePieceTaken)
 	{
 		Edible component = thePieceTaken.GetComponent<Edible>();
-		if (this.spices != null)
+		if (this.spices != null && component != null)
 		{
 			for (int i = 0; i < this.spices.Count; i++)
 			{
@@ -409,7 +407,7 @@ public class Edible : Workable, IGameObjectEffectDescriptor, ISaveLoadable, IExt
 
 	private AttributeModifier caloriesModifier = new AttributeModifier("CaloriesDelta", 50000f, DUPLICANTS.MODIFIERS.EATINGCALORIES.NAME, false, true, true);
 
-	private AttributeModifier caloriesLitSpaceModifier = new AttributeModifier("CaloriesDelta", (1f + DUPLICANTSTATS.LIGHT.LIGHT_WORK_EFFICIENCY_BONUS) / 2E-05f, DUPLICANTS.MODIFIERS.EATINGCALORIES.NAME, false, true, true);
+	private AttributeModifier caloriesLitSpaceModifier = new AttributeModifier("CaloriesDelta", 57500f, DUPLICANTS.MODIFIERS.EATINGCALORIES.NAME, false, true, true);
 
 	private AttributeModifier currentModifier;
 

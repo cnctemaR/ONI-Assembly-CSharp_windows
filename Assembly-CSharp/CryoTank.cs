@@ -41,6 +41,11 @@ public class CryoTank : StateMachineComponent<CryoTank.StatesInstance>, ISidescr
 		return 20;
 	}
 
+	public void SetButtonTextOverride(ButtonMenuTextOverride text)
+	{
+		throw new NotImplementedException();
+	}
+
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
@@ -65,7 +70,7 @@ public class CryoTank : StateMachineComponent<CryoTank.StatesInstance>, ISidescr
 		Vector3 vector = Grid.CellToPosCBC(Grid.OffsetCell(Grid.PosToCell(base.transform.position), this.dropOffset), Grid.SceneLayer.Move);
 		gameObject.transform.SetLocalPosition(vector);
 		gameObject.SetActive(true);
-		new MinionStartingStats(false, null, "AncientKnowledge").Apply(gameObject);
+		new MinionStartingStats(false, null, "AncientKnowledge", false).Apply(gameObject);
 		gameObject.GetComponent<MinionIdentity>().arrivalTime = (float)global::UnityEngine.Random.Range(-2000, -1000);
 		MinionResume component = gameObject.GetComponent<MinionResume>();
 		int num = 3;

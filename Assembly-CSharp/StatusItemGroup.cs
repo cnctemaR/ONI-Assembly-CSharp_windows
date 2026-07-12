@@ -124,7 +124,7 @@ public class StatusItemGroup
 		StatusItemGroup.Entry entry = new StatusItemGroup.Entry(item, category, data);
 		if (item.shouldNotify)
 		{
-			entry.notification = new Notification(item.notificationText, item.notificationType, new Func<List<Notification>, object, string>(StatusItemGroup.OnToolTip), item, false, 0f, item.notificationClickCallback, data, null, true, false);
+			entry.notification = new Notification(item.notificationText, item.notificationType, new Func<List<Notification>, object, string>(StatusItemGroup.OnToolTip), item, false, 0f, item.notificationClickCallback, data, null, true, false, false);
 			this.gameObject.AddOrGet<Notifier>().Add(entry.notification, "");
 		}
 		if (item.ShouldShowIcon())

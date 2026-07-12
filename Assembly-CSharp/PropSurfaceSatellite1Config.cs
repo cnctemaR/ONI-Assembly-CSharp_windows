@@ -31,7 +31,7 @@ public class PropSurfaceSatellite1Config : IEntityConfig
 		setLocker.dropOffset = new Vector2I(0, 1);
 		setLocker.numDataBanks = new int[] { 4, 9 };
 		gameObject.AddOrGet<Demolishable>();
-		gameObject.AddOrGet<LoreBearer>();
+		LoreBearerUtil.AddLoreTo(gameObject);
 		return gameObject;
 	}
 

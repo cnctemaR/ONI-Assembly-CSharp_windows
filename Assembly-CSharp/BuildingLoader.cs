@@ -98,6 +98,7 @@ public class BuildingLoader : KMonoBehaviour
 						initialAnimState = "closed";
 					}
 					kbatchedAnimController.initialAnim = ((initialAnimState != null) ? initialAnimState : def.DefaultAnimState);
+					kbatchedAnimController.defaultAnim = kbatchedAnimController.initialAnim;
 				}
 				kbatchedAnimController.SetFGLayer(def.ForegroundLayer);
 				kbatchedAnimController.materialType = KAnimBatchGroup.MaterialType.Default;
@@ -161,6 +162,7 @@ public class BuildingLoader : KMonoBehaviour
 		{
 			gameObject.AddOrGet<Cancellable>();
 		}
+		gameObject.AddComponent<BuildingFacade>();
 		Rotatable rotatable = BuildingLoader.UpdateComponentRequirement<Rotatable>(gameObject, def.PermittedRotations > PermittedRotations.Unrotatable);
 		if (rotatable)
 		{
@@ -216,6 +218,7 @@ public class BuildingLoader : KMonoBehaviour
 		{
 			global::Debug.Log(def.Name + " is not yet a 2d building!");
 		}
+		go.AddOrGet<BuildingFacade>();
 		BuildingLoader.UpdateComponentRequirement<EnergyConsumer>(go, def.RequiresPowerInput);
 		Rotatable rotatable = BuildingLoader.UpdateComponentRequirement<Rotatable>(go, def.PermittedRotations > PermittedRotations.Unrotatable);
 		if (rotatable)
@@ -295,6 +298,7 @@ public class BuildingLoader : KMonoBehaviour
 		{
 			component.fgLayer = Grid.SceneLayer.NoLayer;
 		}
+		gameObject.AddComponent<BuildingFacade>();
 		Rotatable rotatable = BuildingLoader.UpdateComponentRequirement<Rotatable>(gameObject, def.PermittedRotations > PermittedRotations.Unrotatable);
 		if (rotatable)
 		{

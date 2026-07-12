@@ -39,12 +39,9 @@ public static class SymbolOverrideControllerUtil
 		}
 	}
 
-	public static void TryRemoveSymbolOverride(this SymbolOverrideController symbol_override_controller, HashedString target_symbol, int priority = 0)
+	public static bool TryRemoveSymbolOverride(this SymbolOverrideController symbol_override_controller, HashedString target_symbol, int priority = 0)
 	{
-		if (symbol_override_controller.GetSymbolOverrideIdx(target_symbol, priority) >= 0)
-		{
-			symbol_override_controller.RemoveSymbolOverride(target_symbol, priority);
-		}
+		return symbol_override_controller.GetSymbolOverrideIdx(target_symbol, priority) >= 0 && symbol_override_controller.RemoveSymbolOverride(target_symbol, priority);
 	}
 
 	public static void ApplySymbolOverridesByAffix(this SymbolOverrideController symbol_override_controller, KAnimFile anim_file, string prefix = null, string postfix = null, int priority = 0)

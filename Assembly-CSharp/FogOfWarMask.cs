@@ -60,7 +60,7 @@ public class FogOfWarMask : KMonoBehaviour
 		if (flag)
 		{
 			Grid.PreventFogOfWarReveal[cell] = false;
-			Grid.Reveal(cell, byte.MaxValue);
+			Grid.Reveal(cell, byte.MaxValue, false);
 		}
 		return flag;
 	}

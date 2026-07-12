@@ -148,6 +148,13 @@ public class SuitTank : KMonoBehaviour, IGameObjectEffectDescriptor, OxygenBreat
 		this.storage.ConsumeIgnoringDisease(this.elementTag, this.GetTankAmount());
 	}
 
+	[ContextMenu("Fill Tank")]
+	public void FillTank()
+	{
+		this.Empty();
+		this.storage.AddGasChunk(SimHashes.Oxygen, this.capacity, 15f, 0, 0, false, false);
+	}
+
 	[Serialize]
 	public string element;
 

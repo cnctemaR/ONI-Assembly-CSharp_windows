@@ -27,7 +27,7 @@ public class GeneShufflerConfig : IEntityConfig
 		gameObject.AddOrGet<Operational>();
 		gameObject.AddOrGet<Notifier>();
 		gameObject.AddOrGet<GeneShuffler>();
-		gameObject.AddOrGet<LoreBearer>();
+		LoreBearerUtil.AddLoreTo(gameObject, new LoreBearerAction(LoreBearerUtil.NerualVacillator));
 		gameObject.AddOrGet<LoopingSounds>();
 		gameObject.AddOrGet<Ownable>();
 		gameObject.AddOrGet<Prioritizable>();

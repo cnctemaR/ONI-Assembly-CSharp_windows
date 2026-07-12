@@ -35,17 +35,27 @@ namespace ProcGenGame
 			DebugUtil.Assert(!string.IsNullOrEmpty(name), "Cluster file is missing");
 			this.seed = seed;
 			WorldGen.LoadSettings(false);
-			this.chosenStoryTraitIds = chosenStoryTraitIds;
+			this.clusterLayout = SettingsCache.clusterLayouts.clusterCache[name];
 			this.unplacedStoryTraits = new List<WorldTrait>();
-			foreach (string text in chosenStoryTraitIds)
+			if (!this.clusterLayout.disableStoryTraits)
 			{
-				WorldTrait cachedStoryTrait = SettingsCache.GetCachedStoryTrait(text, assertMissingTraits);
-				if (cachedStoryTrait != null)
+				this.chosenStoryTraitIds = chosenStoryTraitIds;
+				using (List<string>.Enumerator enumerator = chosenStoryTraitIds.GetEnumerator())
 				{
-					this.unplacedStoryTraits.Add(cachedStoryTrait);
+					while (enumerator.MoveNext())
+					{
+						string text = enumerator.Current;
+						WorldTrait cachedStoryTrait = SettingsCache.GetCachedStoryTrait(text, assertMissingTraits);
+						if (cachedStoryTrait != null)
+						{
+							this.unplacedStoryTraits.Add(cachedStoryTrait);
+						}
+					}
+					goto IL_00D5;
 				}
 			}
-			this.clusterLayout = SettingsCache.clusterLayouts.clusterCache[name];
+			this.chosenStoryTraitIds = new List<string>();
+			IL_00D5:
 			this.Id = name;
 			bool flag = seed > 0 && !skipWorldTraits;
 			for (int i = 0; i < this.clusterLayout.worldPlacements.Count; i++)

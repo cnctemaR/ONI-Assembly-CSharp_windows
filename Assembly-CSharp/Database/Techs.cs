@@ -233,7 +233,7 @@ namespace Database
 			new Tech("ImprovedCombustion", new List<string> { "MethaneGenerator", "OilRefinery", "PetroleumGenerator" }, this, null);
 			new Tech("InteriorDecor", new List<string> { "FlowerVase", "FloorLamp", "CeilingLight" }, this, null);
 			new Tech("Artistry", new List<string> { "FlowerVaseWall", "FlowerVaseHanging", "CornerMoulding", "CrownMoulding", "ItemPedestal", "SmallSculpture", "IceSculpture" }, this, null);
-			new Tech("Clothing", new List<string> { "ClothingFabricator", "CarpetTile" }, this, null);
+			new Tech("Clothing", new List<string> { "ClothingFabricator", "CarpetTile", "ExteriorWall" }, this, null);
 			new Tech("Acoustics", new List<string> { "BatterySmart", "Phonobox", "PowerControlStation" }, this, null);
 			new Tech("SpacePower", new List<string> { "BatteryModule", "SolarPanelModule", "RocketInteriorPowerPlug" }, this, null);
 			new Tech("NuclearRefinement", new List<string> { "NuclearReactor", "UraniumCentrifuge", "HEPBridgeTile" }, this, null);
@@ -252,10 +252,10 @@ namespace Database
 			new Tech("RenaissanceArt", new List<string> { "CanvasTall", "MarbleSculpture" }, this, null);
 			new Tech("Plastics", new List<string> { "Polymerizer", "OilWellCap" }, this, null);
 			new Tech("ValveMiniaturization", new List<string> { "LiquidMiniPump", "GasMiniPump" }, this, null);
-			new Tech("HydrocarbonPropulsion", new List<string> { "KeroseneEngineClusterSmall" }, this, null);
+			new Tech("HydrocarbonPropulsion", new List<string> { "KeroseneEngineClusterSmall", "MissionControlCluster" }, this, null);
 			new Tech("BetterHydroCarbonPropulsion", new List<string> { "KeroseneEngineCluster" }, this, null);
 			new Tech("CryoFuelPropulsion", new List<string> { "HydrogenEngineCluster", "OxidizerTankLiquidCluster" }, this, null);
-			new Tech("Suits", new List<string> { "SuitsOverlay", "AtmoSuit", "SuitFabricator", "ExteriorWall", "SuitMarker", "SuitLocker" }, this, null);
+			new Tech("Suits", new List<string> { "SuitsOverlay", "AtmoSuit", "SuitFabricator", "SuitMarker", "SuitLocker" }, this, null);
 			new Tech("Jobs", new List<string> { "WaterCooler", "CraftingTable" }, this, null);
 			new Tech("AdvancedResearch", new List<string> { "BetaResearchPoint", "AdvancedResearchCenter", "ResetSkillsStation", "ClusterTelescope", "ExobaseHeadquarters" }, this, null);
 			new Tech("SpaceProgram", new List<string>
@@ -286,7 +286,7 @@ namespace Database
 				LadderBedConfig.ID
 			}, this, null);
 			new Tech("Smelting", new List<string> { "MetalRefinery", "MetalTile" }, this, null);
-			new Tech("HighTempForging", new List<string> { "GlassForge", "BunkerTile", "BunkerDoor" }, this, null);
+			new Tech("HighTempForging", new List<string> { "GlassForge", "BunkerTile", "BunkerDoor", "GeoTuner" }, this, null);
 			new Tech("HighPressureForging", new List<string> { "DiamondPress" }, this, null);
 			new Tech("RadiationProtection", new List<string>
 			{
@@ -313,7 +313,8 @@ namespace Database
 				LiquidConduitTemperatureSensorConfig.ID,
 				LiquidConduitElementSensorConfig.ID,
 				"LiquidHeater",
-				"LiquidLimitValve"
+				"LiquidLimitValve",
+				"ContactConductivePipeBridge"
 			}, this, null);
 			new Tech("LogicControl", new List<string>
 			{
@@ -373,7 +374,7 @@ namespace Database
 			new Tech("CargoI", new List<string> { "CargoBay" }, this, null);
 			new Tech("CargoII", new List<string> { "LiquidCargoBay", "GasCargoBay" }, this, null);
 			new Tech("CargoIII", new List<string> { "TouristModule", "SpecialCargoBay" }, this, null);
-			new Tech("EnginesI", new List<string> { "SolidBooster" }, this, null);
+			new Tech("EnginesI", new List<string> { "SolidBooster", "MissionControl" }, this, null);
 			new Tech("EnginesII", new List<string> { "KeroseneEngine", "LiquidFuelTank", "OxidizerTank" }, this, null);
 			new Tech("EnginesIII", new List<string> { "OxidizerTankLiquid", "OxidizerTankCluster", "HydrogenEngine" }, this, null);
 			new Tech("Jetpacks", new List<string> { "JetSuit", "JetSuitMarker", "JetSuitLocker", "LiquidCargoBayCluster" }, this, null);

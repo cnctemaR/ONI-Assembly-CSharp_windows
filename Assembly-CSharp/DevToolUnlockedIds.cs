@@ -11,7 +11,7 @@ public class DevToolUnlockedIds : DevTool
 		this.RequiresGameRunning = true;
 	}
 
-	protected override void Render()
+	protected override void RenderTo(DevPanel panel)
 	{
 		bool flag;
 		DevToolUnlockedIds.UnlocksWrapper unlocksWrapper;

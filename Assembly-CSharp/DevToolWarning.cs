@@ -3,32 +3,56 @@ using ImGuiNET;
 using STRINGS;
 using UnityEngine;
 
-public class DevToolWarning : DevTool
+public class DevToolWarning
 {
 	public DevToolWarning()
 	{
 		this.Name = UI.FRONTEND.DEVTOOLS.TITLE;
 	}
 
-	protected override void Render()
+	public void DrawMenuBar()
 	{
-		ImGui.SetWindowSize(new Vector2(500f, 250f));
-		ImGui.TextWrapped(UI.FRONTEND.DEVTOOLS.WARNING);
-		ImGui.Spacing();
-		ImGui.Spacing();
-		ImGui.Spacing();
-		ImGui.Spacing();
-		ImGui.Checkbox(UI.FRONTEND.DEVTOOLS.DONTSHOW, ref this.showAgain);
-		if (ImGui.Button(UI.FRONTEND.DEVTOOLS.BUTTON))
+		if (ImGui.BeginMainMenuBar())
 		{
-			if (this.showAgain)
+			ImGui.Checkbox(this.Name, ref this.ShouldDrawWindow);
+			ImGui.EndMainMenuBar();
+		}
+	}
+
+	public void DrawWindow(out bool isOpen)
+	{
+		ImGuiWindowFlags imGuiWindowFlags = ImGuiWindowFlags.None;
+		isOpen = true;
+		if (ImGui.Begin(this.Name + "###ID_DevToolWarning", ref isOpen, imGuiWindowFlags))
+		{
+			if (!isOpen)
 			{
-				KPlayerPrefs.SetInt("ShowDevtools", 1);
+				ImGui.End();
+				return;
 			}
-			DevToolManager.Instance.UserAcceptedWarning = true;
-			base.Hide();
+			ImGui.SetWindowSize(new Vector2(500f, 250f));
+			ImGui.TextWrapped(UI.FRONTEND.DEVTOOLS.WARNING);
+			ImGui.Spacing();
+			ImGui.Spacing();
+			ImGui.Spacing();
+			ImGui.Spacing();
+			ImGui.Checkbox(UI.FRONTEND.DEVTOOLS.DONTSHOW, ref this.showAgain);
+			if (ImGui.Button(UI.FRONTEND.DEVTOOLS.BUTTON))
+			{
+				if (this.showAgain)
+				{
+					KPlayerPrefs.SetInt("ShowDevtools", 1);
+				}
+				DevToolManager.Instance.UserAcceptedWarning = true;
+				isOpen = false;
+			}
+			ImGui.End();
 		}
 	}
 
 	private bool showAgain;
+
+	public string Name;
+
+	public bool ShouldDrawWindow;
 }

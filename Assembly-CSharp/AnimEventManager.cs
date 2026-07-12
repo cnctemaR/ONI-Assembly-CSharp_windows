@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using UnityEngine;
 
-public class AnimEventManager
+public class AnimEventManager : Singleton<AnimEventManager>
 {
 	public void FreeResources()
 	{
@@ -156,6 +156,11 @@ public class AnimEventManager
 		}
 	}
 
+	public AnimEventManager.DevTools_DebugInfo DevTools_GetDebugInfo()
+	{
+		return new AnimEventManager.DevTools_DebugInfo(this, this.animData, this.eventData, this.uiAnimData, this.uiEventData);
+	}
+
 	private static readonly List<AnimEvent> emptyEventList = new List<AnimEvent>();
 
 	private const int INITIAL_VECTOR_SIZE = 256;
@@ -172,7 +177,7 @@ public class AnimEventManager
 
 	private List<KBatchedAnimController> finishedCalls = new List<KBatchedAnimController>();
 
-	private struct AnimData
+	public struct AnimData
 	{
 		public float frameRate;
 
@@ -269,5 +274,27 @@ public class AnimEventManager
 		public HandleVector<int>.Handle animDataHandle;
 
 		public HandleVector<int>.Handle eventDataHandle;
+	}
+
+	public readonly struct DevTools_DebugInfo
+	{
+		public DevTools_DebugInfo(AnimEventManager eventManager, KCompactedVector<AnimEventManager.AnimData> animData, KCompactedVector<AnimEventManager.EventPlayerData> eventData, KCompactedVector<AnimEventManager.AnimData> uiAnimData, KCompactedVector<AnimEventManager.EventPlayerData> uiEventData)
+		{
+			this.eventManager = eventManager;
+			this.animData = animData;
+			this.eventData = eventData;
+			this.uiAnimData = uiAnimData;
+			this.uiEventData = uiEventData;
+		}
+
+		public readonly AnimEventManager eventManager;
+
+		public readonly KCompactedVector<AnimEventManager.AnimData> animData;
+
+		public readonly KCompactedVector<AnimEventManager.EventPlayerData> eventData;
+
+		public readonly KCompactedVector<AnimEventManager.AnimData> uiAnimData;
+
+		public readonly KCompactedVector<AnimEventManager.EventPlayerData> uiEventData;
 	}
 }

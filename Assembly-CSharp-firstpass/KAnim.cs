@@ -44,7 +44,7 @@ public class KAnim
 			this.index = idx;
 		}
 
-		public int GetFrameIdx(KAnim.PlayMode mode, float t)
+		public int GetFrameIdx(KAnim.PlayMode mode, float elapsedSeconds)
 		{
 			if (this.numFrames <= 0)
 			{
@@ -59,11 +59,11 @@ public class KAnim
 			}
 			else
 			{
-				t %= this.totalTime;
+				elapsedSeconds %= this.totalTime;
 			}
-			if (t > 0f)
+			if (elapsedSeconds > 0f)
 			{
-				float num2 = t * this.frameRate + 0.49999997f;
+				float num2 = elapsedSeconds * this.frameRate + 0.49999997f;
 				num = Math.Min(this.numFrames - 1, (int)num2);
 			}
 			return num;
@@ -422,8 +422,6 @@ public class KAnim
 			public int numLookupFrames;
 
 			public int[] frameLookup;
-
-			public int index;
 
 			public int symbolIndexInSourceBuild;
 		}

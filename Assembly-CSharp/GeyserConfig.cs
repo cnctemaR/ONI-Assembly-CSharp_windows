@@ -24,6 +24,7 @@ public class GeyserConfig : IEntityConfig
 		component.SetElement(SimHashes.IgneousRock, true);
 		component.Temperature = 372.15f;
 		gameObject.AddOrGet<Geyser>().outputOffset = new Vector2I(0, 1);
+		gameObject.AddOrGet<UserNameable>();
 		GeyserConfigurator geyserConfigurator = gameObject.AddOrGet<GeyserConfigurator>();
 		geyserConfigurator.presetType = "steam";
 		geyserConfigurator.presetMin = 0.5f;
@@ -43,5 +44,15 @@ public class GeyserConfig : IEntityConfig
 
 	public void OnSpawn(GameObject inst)
 	{
+	}
+
+	public const int GEOTUNERS_REQUIRED_FOR_MAJOR_TRACKER_ANIMATION = 5;
+
+	public enum TrackerMeterAnimNames
+	{
+		tracker,
+		geotracker,
+		geotracker_minor,
+		geotracker_major
 	}
 }

@@ -61,6 +61,18 @@ namespace Klei.AI
 			return null;
 		}
 
+		public EffectInstance Get(HashedString effect_id)
+		{
+			foreach (EffectInstance effectInstance in this.effects)
+			{
+				if (effectInstance.effect.IdHash == effect_id)
+				{
+					return effectInstance;
+				}
+			}
+			return null;
+		}
+
 		public EffectInstance Get(Effect effect)
 		{
 			foreach (EffectInstance effectInstance in this.effects)
@@ -71,12 +83,6 @@ namespace Klei.AI
 				}
 			}
 			return null;
-		}
-
-		public EffectInstance Add(string effect_id, bool should_save)
-		{
-			Effect effect = Db.Get().effects.Get(effect_id);
-			return this.Add(effect, should_save);
 		}
 
 		public bool HasImmunityTo(Effect effect)
@@ -92,6 +98,18 @@ namespace Klei.AI
 				}
 			}
 			return false;
+		}
+
+		public EffectInstance Add(string effect_id, bool should_save)
+		{
+			Effect effect = Db.Get().effects.Get(effect_id);
+			return this.Add(effect, should_save);
+		}
+
+		public EffectInstance Add(HashedString effect_id, bool should_save)
+		{
+			Effect effect = Db.Get().effects.Get(effect_id);
+			return this.Add(effect, should_save);
 		}
 
 		public EffectInstance Add(Effect effect, bool should_save)
@@ -143,7 +161,47 @@ namespace Klei.AI
 
 		public void Remove(Effect effect)
 		{
-			this.Remove(effect.Id);
+			this.Remove(effect.IdHash);
+		}
+
+		public void Remove(HashedString effect_id)
+		{
+			int i = 0;
+			while (i < this.effectsThatExpire.Count)
+			{
+				if (this.effectsThatExpire[i].effect.IdHash == effect_id)
+				{
+					int num = this.effectsThatExpire.Count - 1;
+					this.effectsThatExpire[i] = this.effectsThatExpire[num];
+					this.effectsThatExpire.RemoveAt(num);
+					if (this.effectsThatExpire.Count == 0)
+					{
+						SimAndRenderScheduler.instance.Remove(this);
+						break;
+					}
+					break;
+				}
+				else
+				{
+					i++;
+				}
+			}
+			for (int j = 0; j < this.effects.Count; j++)
+			{
+				if (this.effects[j].effect.IdHash == effect_id)
+				{
+					Attributes attributes = this.GetAttributes();
+					EffectInstance effectInstance = this.effects[j];
+					effectInstance.OnCleanUp();
+					Effect effect = effectInstance.effect;
+					effect.RemoveFrom(attributes);
+					int num2 = this.effects.Count - 1;
+					this.effects[j] = this.effects[num2];
+					this.effects.RemoveAt(num2);
+					base.Trigger(-1157678353, effect);
+					return;
+				}
+			}
 		}
 
 		public void Remove(string effect_id)
@@ -184,6 +242,21 @@ namespace Klei.AI
 					return;
 				}
 			}
+		}
+
+		public bool HasEffect(HashedString effect_id)
+		{
+			using (List<EffectInstance>.Enumerator enumerator = this.effects.GetEnumerator())
+			{
+				while (enumerator.MoveNext())
+				{
+					if (enumerator.Current.effect.IdHash == effect_id)
+					{
+						return true;
+					}
+				}
+			}
+			return false;
 		}
 
 		public bool HasEffect(string effect_id)

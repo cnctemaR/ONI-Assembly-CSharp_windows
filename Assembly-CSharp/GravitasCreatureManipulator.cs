@@ -361,7 +361,7 @@ public class GravitasCreatureManipulator : GameStateMachine<GravitasCreatureMani
 
 		public void ShowCritterScannedNotification(Tag species)
 		{
-			GravitasCreatureManipulator.Instance.<>c__DisplayClass28_0 CS$<>8__locals1 = new GravitasCreatureManipulator.Instance.<>c__DisplayClass28_0();
+			GravitasCreatureManipulator.Instance.<>c__DisplayClass29_0 CS$<>8__locals1 = new GravitasCreatureManipulator.Instance.<>c__DisplayClass29_0();
 			CS$<>8__locals1.species = species;
 			CS$<>8__locals1.<>4__this = this;
 			string text = GravitasCreatureManipulatorConfig.CRITTER_LORE_UNLOCK_ID.For(CS$<>8__locals1.species);
@@ -379,7 +379,7 @@ public class GravitasCreatureManipulator : GameStateMachine<GravitasCreatureMani
 			Option<string> bodyContentForSpeciesTag = GravitasCreatureManipulatorConfig.GetBodyContentForSpeciesTag(species);
 			if (flag && bodyContentForSpeciesTag.HasValue)
 			{
-				infoDialogScreen.AddPlainText(bodyContentForSpeciesTag.Value).AddOption(CODEX.STORY_TRAITS.CRITTER_MANIPULATOR.UNLOCK_SPECIES_POPUP.VIEW_IN_CODEX, LoreBearer.OpenCodexByEntryID("STORYTRAITCRITTERMANIPULATOR"), false);
+				infoDialogScreen.AddPlainText(bodyContentForSpeciesTag.Value).AddOption(CODEX.STORY_TRAITS.CRITTER_MANIPULATOR.UNLOCK_SPECIES_POPUP.VIEW_IN_CODEX, LoreBearerUtil.OpenCodexByEntryID("STORYTRAITCRITTERMANIPULATOR"), false);
 				return;
 			}
 			infoDialogScreen.AddPlainText(GravitasCreatureManipulatorConfig.GetBodyContentForUnknownSpecies());
@@ -395,15 +395,8 @@ public class GravitasCreatureManipulator : GameStateMachine<GravitasCreatureMani
 			{
 				return;
 			}
-			StoryInstance storyInstance = StoryManager.Instance.GetStoryInstance(Db.Get().Stories.CreatureManipulator.HashId);
-			storyInstance.sequenceCompleteCallback = new Action<StoryInstance>(this.OnStorySequenceComplete);
-			storyInstance.eventInfo = EventInfoDataHelper.GenerateStoryTraitData(CODEX.STORY_TRAITS.CRITTER_MANIPULATOR.END_POPUP.NAME, CODEX.STORY_TRAITS.CRITTER_MANIPULATOR.END_POPUP.DESCRIPTION, CODEX.STORY_TRAITS.CRITTER_MANIPULATOR.END_POPUP.BUTTON, "crittermanipulatormorphmode_kanim", EventInfoDataHelper.PopupType.COMPLETE, null, null, null);
-			storyInstance.completionData = new StoryCompleteData
-			{
-				KeepSakeSpawnOffset = new CellOffset(-1, 1),
-				CameraTargetOffset = new CellOffset(0, 2)
-			};
-			this.m_endNotification = EventInfoScreen.CreateNotification(storyInstance.eventInfo, new Notification.ClickCallback(this.UnlockMorphMode));
+			this.eventInfo = EventInfoDataHelper.GenerateStoryTraitData(CODEX.STORY_TRAITS.CRITTER_MANIPULATOR.END_POPUP.NAME, CODEX.STORY_TRAITS.CRITTER_MANIPULATOR.END_POPUP.DESCRIPTION, CODEX.STORY_TRAITS.CRITTER_MANIPULATOR.END_POPUP.BUTTON, "crittermanipulatormorphmode_kanim", EventInfoDataHelper.PopupType.COMPLETE, null, null, null);
+			this.m_endNotification = EventInfoScreen.CreateNotification(this.eventInfo, new Notification.ClickCallback(this.UnlockMorphMode));
 			base.gameObject.AddOrGet<Notifier>().Add(this.m_endNotification, "");
 			base.gameObject.GetComponent<KSelectable>().AddStatusItem(Db.Get().MiscStatusItems.AttentionRequired, base.smi);
 		}
@@ -432,13 +425,24 @@ public class GravitasCreatureManipulator : GameStateMachine<GravitasCreatureMani
 			this.m_morphModeUnlocked = true;
 			this.UpdateStatusItems();
 			this.ClearEndNotification();
-			StoryManager.Instance.CompleteStoryEvent(Db.Get().Stories.CreatureManipulator, base.gameObject.GetComponent<MonoBehaviour>());
+			Vector3 vector = Grid.CellToPosCCC(Grid.OffsetCell(Grid.PosToCell(base.smi), new CellOffset(0, 2)), Grid.SceneLayer.Ore);
+			StoryManager.Instance.CompleteStoryEvent(Db.Get().Stories.CreatureManipulator, base.gameObject.GetComponent<MonoBehaviour>(), new FocusTargetSequence.Data
+			{
+				WorldId = base.smi.GetMyWorldId(),
+				OrthographicSize = 6f,
+				TargetSize = 6f,
+				Target = vector,
+				PopupData = this.eventInfo,
+				CompleteCB = new global::System.Action(this.OnStorySequenceComplete),
+				CanCompleteCB = null
+			});
 		}
 
-		private void OnStorySequenceComplete(StoryInstance story)
+		private void OnStorySequenceComplete()
 		{
-			story.sequenceCompleteCallback = null;
-			story.eventInfo = null;
+			Vector3 vector = Grid.CellToPosCCC(Grid.OffsetCell(Grid.PosToCell(base.smi), new CellOffset(-1, 1)), Grid.SceneLayer.Ore);
+			StoryManager.Instance.CompleteStoryEvent(Db.Get().Stories.CreatureManipulator, vector);
+			this.eventInfo = null;
 		}
 
 		protected override void OnCleanUp()
@@ -464,6 +468,8 @@ public class GravitasCreatureManipulator : GameStateMachine<GravitasCreatureMani
 
 		[Serialize]
 		private bool m_morphModeUnlocked;
+
+		private EventInfoData eventInfo;
 
 		private Notification m_endNotification;
 

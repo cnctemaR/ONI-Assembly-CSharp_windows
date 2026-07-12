@@ -22,6 +22,11 @@ public class AttackTool : DragTool
 					if (FactionManager.Instance.GetDisposition(FactionManager.FactionID.Duplicant, factionAlignment.Alignment) != FactionManager.Disposition.Assist)
 					{
 						factionAlignment.SetPlayerTargeted(true);
+						Prioritizable component = factionAlignment.GetComponent<Prioritizable>();
+						if (component != null)
+						{
+							component.SetMasterPriority(ToolMenu.Instance.PriorityScreen.GetLastSelectedPriority());
+						}
 					}
 				}
 				else

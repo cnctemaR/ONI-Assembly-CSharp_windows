@@ -43,8 +43,9 @@ public class GameScenePartitioner : KMonoBehaviour
 		this.industrialBuildings = this.partitioner.CreateMask("IndustrialBuildings");
 		this.completeBuildings = this.partitioner.CreateMask("CompleteBuildings");
 		this.prioritizableObjects = this.partitioner.CreateMask("PrioritizableObjects");
-		this.objectLayers = new ScenePartitionerLayer[43];
-		for (int i = 0; i < 43; i++)
+		this.contactConductiveLayer = this.partitioner.CreateMask("ContactConductiveLayer");
+		this.objectLayers = new ScenePartitionerLayer[44];
+		for (int i = 0; i < 44; i++)
 		{
 			ObjectLayer objectLayer = (ObjectLayer)i;
 			this.objectLayers[i] = this.partitioner.CreateMask(objectLayer.ToString());
@@ -74,6 +75,7 @@ public class GameScenePartitioner : KMonoBehaviour
 		this.trapsLayer = null;
 		this.floorSwitchActivatorLayer = null;
 		this.floorSwitchActivatorChangedLayer = null;
+		this.contactConductiveLayer = null;
 		this.objectLayers = null;
 	}
 
@@ -299,6 +301,8 @@ public class GameScenePartitioner : KMonoBehaviour
 	public ScenePartitionerLayer completeBuildings;
 
 	public ScenePartitionerLayer prioritizableObjects;
+
+	public ScenePartitionerLayer contactConductiveLayer;
 
 	private ScenePartitioner partitioner;
 

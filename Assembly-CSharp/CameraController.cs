@@ -56,12 +56,12 @@ public class CameraController : KMonoBehaviour, IInputHandler
 
 	protected override void OnForcedCleanUp()
 	{
-		Global instance = Global.Instance;
-		if (instance == null)
+		GameInputManager inputManager = Global.GetInputManager();
+		if (inputManager == null)
 		{
 			return;
 		}
-		instance.GetInputManager().usedMenus.Remove(this);
+		inputManager.usedMenus.Remove(this);
 	}
 
 	public int cameraActiveCluster
@@ -151,12 +151,15 @@ public class CameraController : KMonoBehaviour, IInputHandler
 		this.infraredCamera.depth = this.baseCamera.depth - 1f;
 		this.infraredCamera.transform.parent = base.transform;
 		this.infraredCamera.gameObject.AddComponent<Infrared>();
-		this.simOverlayCamera = this.CopyCamera(this.baseCamera, "SimOverlayCamera");
-		this.simOverlayCamera.cullingMask = LayerMask.GetMask(new string[] { "SimDebugView" });
-		this.simOverlayCamera.clearFlags = CameraClearFlags.Color;
-		this.simOverlayCamera.depth = this.baseCamera.depth + 1f;
-		this.simOverlayCamera.transform.parent = base.transform;
-		this.simOverlayCamera.gameObject.AddComponent<CameraRenderTexture>().TextureName = "_SimDebugViewTex";
+		if (SimDebugView.Instance != null)
+		{
+			this.simOverlayCamera = this.CopyCamera(this.baseCamera, "SimOverlayCamera");
+			this.simOverlayCamera.cullingMask = LayerMask.GetMask(new string[] { "SimDebugView" });
+			this.simOverlayCamera.clearFlags = CameraClearFlags.Color;
+			this.simOverlayCamera.depth = this.baseCamera.depth + 1f;
+			this.simOverlayCamera.transform.parent = base.transform;
+			this.simOverlayCamera.gameObject.AddComponent<CameraRenderTexture>().TextureName = "_SimDebugViewTex";
+		}
 		this.overlayCamera = Camera.main;
 		this.overlayCamera.name = "Overlay";
 		this.overlayCamera.cullingMask = mask | mask2;
@@ -200,12 +203,12 @@ public class CameraController : KMonoBehaviour, IInputHandler
 		this.uiCamera.transform.parent = base.transform;
 		this.uiCamera.transform.SetLocalPosition(Vector3.zero);
 		this.uiCamera.depth = this.baseCamera.depth + 5f;
-		this.timelapseFreezeCamera = this.CopyCamera(this.uiCamera, "timelapseFreezeCamera");
-		this.timelapseFreezeCamera.depth = this.uiCamera.depth + 3f;
-		this.timelapseFreezeCamera.gameObject.AddComponent<FillRenderTargetEffect>();
-		this.timelapseFreezeCamera.enabled = false;
 		if (Game.Instance != null)
 		{
+			this.timelapseFreezeCamera = this.CopyCamera(this.uiCamera, "timelapseFreezeCamera");
+			this.timelapseFreezeCamera.depth = this.uiCamera.depth + 3f;
+			this.timelapseFreezeCamera.gameObject.AddComponent<FillRenderTargetEffect>();
+			this.timelapseFreezeCamera.enabled = false;
 			Camera camera = CameraController.CloneCamera(this.overlayCamera, "timelapseCamera");
 			Timelapser timelapser = camera.gameObject.AddComponent<Timelapser>();
 			camera.transparencySortMode = TransparencySortMode.Orthographic;
@@ -220,6 +223,17 @@ public class CameraController : KMonoBehaviour, IInputHandler
 			}
 			this.infoText = GameScreenManager.Instance.screenshotModeCanvas.GetComponentInChildren<LocText>();
 		}
+		if (!KPlayerPrefs.HasKey("CameraSpeed"))
+		{
+			CameraController.SetDefaultCameraSpeed();
+		}
+		this.SetSpeedFromPrefs(null);
+		Game.Instance.Subscribe(75424175, new Action<object>(this.SetSpeedFromPrefs));
+	}
+
+	private void SetSpeedFromPrefs(object data = null)
+	{
+		this.keyPanningSpeed = Mathf.Clamp(0.1f, KPlayerPrefs.GetFloat("CameraSpeed"), 2f);
 	}
 
 	public int GetCursorCell()
@@ -251,6 +265,11 @@ public class CameraController : KMonoBehaviour, IInputHandler
 	{
 		base.OnSpawn();
 		this.Restore();
+	}
+
+	public static void SetDefaultCameraSpeed()
+	{
+		KPlayerPrefs.SetFloat("CameraSpeed", 1f);
 	}
 
 	public Coroutine activeFadeRoutine { get; private set; }
@@ -777,6 +796,21 @@ public class CameraController : KMonoBehaviour, IInputHandler
 		base.transform.SetPosition(pos);
 	}
 
+	public IEnumerator DoCinematicZoom(float targetOrthographicSize)
+	{
+		this.cinemaCamEnabled = true;
+		this.FreeCameraEnabled = true;
+		this.targetOrthographicSize = targetOrthographicSize;
+		while (targetOrthographicSize - this.OrthographicSize >= 0.001f)
+		{
+			yield return SequenceUtil.WaitForEndOfFrame;
+		}
+		this.OrthographicSize = targetOrthographicSize;
+		this.FreeCameraEnabled = false;
+		this.cinemaCamEnabled = false;
+		yield break;
+	}
+
 	private Vector3 PointUnderCursor(Vector3 mousePos, Camera cam)
 	{
 		Ray ray = cam.ScreenPointToRay(mousePos);
@@ -1053,7 +1087,7 @@ public class CameraController : KMonoBehaviour, IInputHandler
 
 	private void Update()
 	{
-		if (Game.Instance != null && !Game.Instance.timelapser.CapturingTimelapseScreenshot)
+		if (Game.Instance == null || !Game.Instance.timelapser.CapturingTimelapseScreenshot)
 		{
 			if (this.FreeCameraEnabled && this.cinemaCamEnabled)
 			{

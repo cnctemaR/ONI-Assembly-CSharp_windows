@@ -39,7 +39,11 @@ public class MainMenu : KScreen
 		this.MakeButton(new MainMenu.ButtonInfo(UI.FRONTEND.MAINMENU.LOADGAME, new global::System.Action(this.LoadGame), 22, this.normalButtonStyle));
 		this.MakeButton(new MainMenu.ButtonInfo(UI.FRONTEND.MAINMENU.RETIREDCOLONIES, delegate
 		{
-			MainMenu.ActivateRetiredColoniesScreen(base.transform.gameObject, "");
+			MainMenu.ActivateRetiredColoniesScreen(this.transform.gameObject, "");
+		}, 14, this.normalButtonStyle));
+		this.MakeButton(new MainMenu.ButtonInfo(UI.FRONTEND.MAINMENU.LOCKERMENU, delegate
+		{
+			MainMenu.ActivateLockerMenu();
 		}, 14, this.normalButtonStyle));
 		if (DistributionPlatform.Initialized)
 		{
@@ -61,9 +65,13 @@ public class MainMenu : KScreen
 		this.topLeftAlphaMessage.gameObject.SetActive(false);
 		this.MOTDContainer.SetActive(false);
 		this.buttonContainer.SetActive(false);
+		this.nextUpdateTimer.gameObject.SetActive(true);
 		bool flag = DistributionPlatform.Inst.IsDLCPurchased("EXPANSION1_ID");
-		this.nextUpdateTimer.gameObject.SetActive(flag);
 		this.expansion1Toggle.gameObject.SetActive(flag);
+		if (this.expansion1Ad != null)
+		{
+			this.expansion1Ad.gameObject.SetActive(!flag);
+		}
 		this.m_motdServerClient = new MotdServerClient();
 		this.m_motdServerClient.GetMotd(delegate(MotdServerClient.MotdResponse response, string error)
 		{
@@ -121,6 +129,39 @@ public class MainMenu : KScreen
 		if (DistributionPlatform.Initialized && DistributionPlatform.Inst.IsPreviousVersionBranch)
 		{
 			global::UnityEngine.Object.Instantiate<GameObject>(ScreenPrefabs.Instance.OldVersionWarningScreen, this.uiCanvas.transform);
+		}
+		string targetExpansion1AdURL = "";
+		Sprite sprite = Assets.GetSprite("expansionPromo_en");
+		if (DistributionPlatform.Initialized && this.expansion1Ad != null)
+		{
+			string name = DistributionPlatform.Inst.Name;
+			if (name != null)
+			{
+				if (!(name == "Steam"))
+				{
+					if (!(name == "Epic"))
+					{
+						if (name == "Rail")
+						{
+							targetExpansion1AdURL = "https://www.wegame.com.cn/store/2001539/";
+							sprite = Assets.GetSprite("expansionPromo_cn");
+						}
+					}
+					else
+					{
+						targetExpansion1AdURL = "https://store.epicgames.com/en-US/p/oxygen-not-included--spaced-out";
+					}
+				}
+				else
+				{
+					targetExpansion1AdURL = "https://store.steampowered.com/app/1452490/Oxygen_Not_Included__Spaced_Out/";
+				}
+			}
+			this.expansion1Ad.GetComponentInChildren<KButton>().onClick += delegate
+			{
+				App.OpenWebURL(targetExpansion1AdURL);
+			};
+			this.expansion1Ad.GetComponent<HierarchyReferences>().GetReference<Image>("Image").sprite = sprite;
 		}
 		this.activateOnSpawn = true;
 	}
@@ -383,6 +424,16 @@ public class MainMenu : KScreen
 		RetiredColonyInfoScreen.Instance.LoadColony(data);
 	}
 
+	public static void ActivateInventoyScreen()
+	{
+		LockerNavigator.Instance.PushScreen(LockerNavigator.Instance.kleiInventoryScreen);
+	}
+
+	public static void ActivateLockerMenu()
+	{
+		LockerMenuScreen.Instance.Show(true);
+	}
+
 	private void SpawnVideoScreen()
 	{
 		VideoScreen.Instance = global::Util.KInstantiateUI(ScreenPrefabs.Instance.VideoScreen.gameObject, base.gameObject, false).GetComponent<VideoScreen>();
@@ -424,7 +475,7 @@ public class MainMenu : KScreen
 					header = saveFileEntry.header;
 					gameInfo = saveFileEntry.headerData;
 				}
-				if (header.buildVersion > 531669U || gameInfo.saveMajorVersion != 7 || gameInfo.saveMinorVersion > 29)
+				if (header.buildVersion > 535720U || gameInfo.saveMajorVersion != 7 || gameInfo.saveMinorVersion > 31)
 				{
 					flag = false;
 				}
@@ -662,6 +713,9 @@ public class MainMenu : KScreen
 
 	[SerializeField]
 	private DLCToggle expansion1Toggle;
+
+	[SerializeField]
+	private GameObject expansion1Ad;
 
 	[SerializeField]
 	private BuildWatermark buildWatermark;

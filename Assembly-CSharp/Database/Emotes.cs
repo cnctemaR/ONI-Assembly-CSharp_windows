@@ -12,6 +12,26 @@ namespace Database
 			this.Critter = new Emotes.CritterEmotes(this);
 		}
 
+		public void ResetProblematicReferences()
+		{
+			for (int i = 0; i < this.Minion.resources.Count; i++)
+			{
+				Emote emote = this.Minion.resources[i];
+				for (int j = 0; j < emote.StepCount; j++)
+				{
+					emote[j].UnregisterAllCallbacks();
+				}
+			}
+			for (int k = 0; k < this.Critter.resources.Count; k++)
+			{
+				Emote emote2 = this.Critter.resources[k];
+				for (int l = 0; l < emote2.StepCount; l++)
+				{
+					emote2[l].UnregisterAllCallbacks();
+				}
+			}
+		}
+
 		public Emotes.MinionEmotes Minion;
 
 		public Emotes.CritterEmotes Critter;

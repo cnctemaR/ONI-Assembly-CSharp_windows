@@ -23,7 +23,7 @@ public class PropGravitasRoboticTableConfig : IEntityConfig
 		PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
 		component.SetElement(SimHashes.Granite, true);
 		component.Temperature = 294.15f;
-		gameObject.AddOrGet<LoreBearer>();
+		LoreBearerUtil.AddLoreTo(gameObject);
 		gameObject.AddOrGet<Demolishable>();
 		return gameObject;
 	}

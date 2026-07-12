@@ -238,6 +238,8 @@ namespace STRINGS
 
 			public static LocString NONCRUSHABLE = "Uncrushable";
 
+			public static LocString STORYTRAITRESOURCE = "Story Trait";
+
 			public static LocString COMMAND_MODULE = "Command Module";
 
 			public static LocString HABITAT_MODULE = "Habitat Module";

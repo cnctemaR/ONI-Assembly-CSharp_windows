@@ -1,30 +1,43 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
+using UnityEngine;
 
 [Serializable]
 public class LocString
 {
-	public string text { get; private set; }
+	public string text
+	{
+		get
+		{
+			return this._text;
+		}
+	}
 
-	public StringKey key { get; private set; }
+	public StringKey key
+	{
+		get
+		{
+			return this._key;
+		}
+	}
 
 	public LocString(string text)
 	{
-		this.text = text;
-		this.key = default(StringKey);
+		this._text = text;
+		this._key = default(StringKey);
 	}
 
 	public LocString(string text, string keystring)
 	{
-		this.text = text;
-		this.key = new StringKey(keystring);
+		this._text = text;
+		this._key = new StringKey(keystring);
 	}
 
 	public LocString(string text, bool isLocalized)
 	{
-		this.text = text;
-		this.key = default(StringKey);
+		this._text = text;
+		this._key = default(StringKey);
 	}
 
 	public static implicit operator LocString(string text)
@@ -44,12 +57,12 @@ public class LocString
 
 	public void SetKey(string key_name)
 	{
-		this.key = new StringKey(key_name);
+		this._key = new StringKey(key_name);
 	}
 
 	public void SetKey(StringKey key)
 	{
-		this.key = key;
+		this._key = key;
 	}
 
 	public string Replace(string search, string replacement)
@@ -96,6 +109,12 @@ public class LocString
 		}
 		return list.ToArray();
 	}
+
+	[SerializeField]
+	private string _text;
+
+	[SerializeField]
+	private StringKey _key;
 
 	public const BindingFlags data_member_fields = BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy;
 }

@@ -376,7 +376,7 @@ public class BaseUtilityBuildTool : DragTool
 					pathNode2.Play(this.conduitMgr.GetVisualizerString(pathNode2.cell));
 				}
 				string text2;
-				component.TintColour = (this.def.IsValidBuildLocation(null, pathNode2.cell, Orientation.Neutral, out text2) ? Color.white : Color.red);
+				component.TintColour = (this.def.IsValidBuildLocation(null, pathNode2.cell, Orientation.Neutral, false, out text2) ? Color.white : Color.red);
 				TileVisualizer.RefreshCell(pathNode2.cell, this.def.TileLayer, this.def.ReplacementLayer);
 			}
 			this.conduitMgr.UnstashVisualGrids();
@@ -400,7 +400,7 @@ public class BaseUtilityBuildTool : DragTool
 			{
 				utilityConnections = this.conduitMgr.GetConnections(pathNode.cell, false);
 				string text;
-				if ((DebugHandler.InstantBuildMode || (Game.Instance.SandboxModeActive && SandboxToolParameterMenu.instance.settings.InstantBuild)) && this.def.IsValidBuildLocation(this.visualizer, vector, Orientation.Neutral) && this.def.IsValidPlaceLocation(this.visualizer, vector, Orientation.Neutral, out text))
+				if ((DebugHandler.InstantBuildMode || (Game.Instance.SandboxModeActive && SandboxToolParameterMenu.instance.settings.InstantBuild)) && this.def.IsValidBuildLocation(this.visualizer, vector, Orientation.Neutral, false) && this.def.IsValidPlaceLocation(this.visualizer, vector, Orientation.Neutral, out text))
 				{
 					gameObject = this.def.Build(pathNode.cell, Orientation.Neutral, null, this.selectedElements, 293.15f, true, GameClock.Instance.GetTime());
 				}
@@ -435,7 +435,7 @@ public class BaseUtilityBuildTool : DragTool
 					component2.UpdateConnections(utilityConnections);
 				}
 			}
-			if (this.def.ReplacementLayer != ObjectLayer.NumLayers && !DebugHandler.InstantBuildMode && (!Game.Instance.SandboxModeActive || !SandboxToolParameterMenu.instance.settings.InstantBuild) && this.def.IsValidBuildLocation(null, vector, Orientation.Neutral))
+			if (this.def.ReplacementLayer != ObjectLayer.NumLayers && !DebugHandler.InstantBuildMode && (!Game.Instance.SandboxModeActive || !SandboxToolParameterMenu.instance.settings.InstantBuild) && this.def.IsValidBuildLocation(null, vector, Orientation.Neutral, false))
 			{
 				GameObject gameObject2 = Grid.Objects[pathNode.cell, (int)this.def.TileLayer];
 				GameObject gameObject3 = Grid.Objects[pathNode.cell, (int)this.def.ReplacementLayer];

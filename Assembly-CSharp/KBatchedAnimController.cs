@@ -150,6 +150,10 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 		{
 			global::Debug.LogError("Batch is not ready: " + base.name);
 		}
+		if (this.materialType == KAnimBatchGroup.MaterialType.Default && this.batchGroupID == KAnimBatchManager.BATCH_HUMAN)
+		{
+			this.materialType = KAnimBatchGroup.MaterialType.Human;
+		}
 	}
 
 	public void LoadAnims()
@@ -296,9 +300,10 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 
 	public override void UpdateHidden()
 	{
-		for (int i = 0; i < base.curBuild.symbols.Length; i++)
+		KBatchGroupData batchGroupData = KAnimBatchManager.instance.GetBatchGroupData(this.batchGroupID);
+		for (int i = 0; i < batchGroupData.frameElementSymbols.Count; i++)
 		{
-			KAnim.Build.Symbol symbol = base.curBuild.symbols[i];
+			KAnim.Build.Symbol symbol = batchGroupData.frameElementSymbols[i];
 			bool flag = !this.hiddenSymbols.Contains(symbol.hash);
 			base.symbolInstanceGpuData.SetVisible(i, flag);
 		}
@@ -518,6 +523,10 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 		{
 			this.visibilityType = ((this.materialType == KAnimBatchGroup.MaterialType.UI) ? KAnimControllerBase.VisibilityType.Always : this.visibilityType);
 		}
+		if (this.materialType == KAnimBatchGroup.MaterialType.Default && this.batchGroupID == KAnimBatchManager.BATCH_HUMAN)
+		{
+			this.materialType = KAnimBatchGroup.MaterialType.Human;
+		}
 		this.symbolOverrideController = base.GetComponent<SymbolOverrideController>();
 		this.UpdateHidden();
 		this.hasEnableRun = false;
@@ -634,6 +643,7 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 
 	public bool ApplySymbolOverrides()
 	{
+		this.batch.atlases.Apply(this.batch.matProperties);
 		if (this.symbolOverrideController != null)
 		{
 			if (this.symbolOverrideControllerVersion != this.symbolOverrideController.version || this.symbolOverrideController.applySymbolOverridesEveryFrame)

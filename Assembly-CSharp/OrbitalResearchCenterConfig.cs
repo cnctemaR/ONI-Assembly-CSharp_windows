@@ -37,6 +37,7 @@ public class OrbitalResearchCenterConfig : IBuildingConfig
 
 	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
+		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.ScienceBuilding, false);
 		go.GetComponent<KPrefabID>().AddTag(GameTags.RocketInteriorBuilding, false);
 		go.AddOrGet<InOrbitRequired>();
 		go.AddOrGet<DropAllWorkable>();

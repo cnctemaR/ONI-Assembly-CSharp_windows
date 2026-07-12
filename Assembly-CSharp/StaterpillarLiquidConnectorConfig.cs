@@ -30,7 +30,7 @@ public class StaterpillarLiquidConnectorConfig : IBuildingConfig
 		buildingDef.PermittedRotations = PermittedRotations.FlipV;
 		buildingDef.ViewMode = OverlayModes.GasConduits.ID;
 		buildingDef.AudioCategory = "Plastic";
-		buildingDef.OutputConduitType = ConduitType.Gas;
+		buildingDef.OutputConduitType = ConduitType.Liquid;
 		buildingDef.UtilityOutputOffset = new CellOffset(0, 1);
 		buildingDef.PlayConstructionSounds = false;
 		return buildingDef;

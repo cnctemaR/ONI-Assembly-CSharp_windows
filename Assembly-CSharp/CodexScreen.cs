@@ -148,6 +148,7 @@ public class CodexScreen : KScreen
 		this.ContentPrefabs[typeof(CodexVideo)] = this.prefabVideoWidget;
 		this.ContentPrefabs[typeof(CodexIndentedLabelWithIcon)] = this.prefabIndentedLabelWithIcon;
 		this.ContentPrefabs[typeof(CodexRecipePanel)] = this.prefabRecipePanel;
+		this.ContentPrefabs[typeof(CodexConfigurableConsumerRecipePanel)] = this.PrefabConfigurableConsumerRecipePanel;
 		this.ContentPrefabs[typeof(CodexConversionPanel)] = this.prefabConversionPanel;
 		this.ContentPrefabs[typeof(CodexCollapsibleHeader)] = this.prefabCollapsibleHeader;
 	}
@@ -638,6 +639,7 @@ public class CodexScreen : KScreen
 	{
 		yield return 0;
 		this.displayScrollRect.content.SetLocalPosition(Vector3.down * (this.displayScrollRect.content.InverseTransformPoint(targetWidgetTransform.GetPosition()).y + 12f));
+		this.scrollToTargetRoutine = null;
 		yield break;
 	}
 
@@ -645,7 +647,26 @@ public class CodexScreen : KScreen
 	{
 		yield return 0;
 		this.displayScrollRect.content.SetLocalPosition(position);
+		this.scrollToTargetRoutine = null;
 		yield break;
+	}
+
+	public void FocusContainer(ContentContainer target)
+	{
+		if (target == null || target.go == null)
+		{
+			return;
+		}
+		RectTransform rectTransform = target.go.transform.GetChild(0) as RectTransform;
+		if (rectTransform == null)
+		{
+			return;
+		}
+		if (this.scrollToTargetRoutine != null)
+		{
+			base.StopCoroutine(this.scrollToTargetRoutine);
+		}
+		this.scrollToTargetRoutine = base.StartCoroutine(this.ScrollToTarget(rectTransform));
 	}
 
 	private void ConfigureContentContainer(ContentContainer container, GameObject containerGameObject, bool bgColor = false)
@@ -807,6 +828,9 @@ public class CodexScreen : KScreen
 
 	[SerializeField]
 	private GameObject prefabRecipePanel;
+
+	[SerializeField]
+	private GameObject PrefabConfigurableConsumerRecipePanel;
 
 	[SerializeField]
 	private GameObject prefabConversionPanel;

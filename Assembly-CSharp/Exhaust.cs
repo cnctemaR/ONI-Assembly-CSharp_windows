@@ -10,7 +10,7 @@ public class Exhaust : KMonoBehaviour, ISim200ms
 		base.OnPrefabInit();
 		base.Subscribe<Exhaust>(-592767678, Exhaust.OnConduitStateChangedDelegate);
 		base.Subscribe<Exhaust>(-111137758, Exhaust.OnConduitStateChangedDelegate);
-		base.GetComponent<RequireInputs>().visualizeRequirements = false;
+		base.GetComponent<RequireInputs>().visualizeRequirements = RequireInputs.Requirements.NoWire;
 		this.simRenderLoadBalance = true;
 	}
 

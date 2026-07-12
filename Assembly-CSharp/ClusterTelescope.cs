@@ -95,22 +95,10 @@ public class ClusterTelescope : GameStateMachine<ClusterTelescope, ClusterTelesc
 		public bool HasSkyVisibility()
 		{
 			Extents extents = base.GetComponent<Building>().GetExtents();
-			int num = Mathf.Max(0, extents.x - base.def.clearScanCellRadius);
-			int num2 = Mathf.Min(new int[] { extents.x + base.def.clearScanCellRadius });
-			int num3 = extents.y + extents.height - 3;
-			int num4 = num2 - num + 1;
-			int num5 = Grid.XYToCell(num, num3);
-			int num6 = Grid.XYToCell(num2, num3);
-			int num7 = 0;
-			for (int i = num5; i <= num6; i++)
-			{
-				if (Grid.ExposedToSunlight[i] >= 253)
-				{
-					num7++;
-				}
-			}
-			this.m_percentClear = (float)num7 / (float)num4;
-			return this.m_percentClear > 0f;
+			int num;
+			bool flag = Grid.IsRangeExposedToSunlight(Grid.XYToCell(extents.x, extents.y), base.def.clearScanCellRadius, new CellOffset(1, 0), out num, 1);
+			this.m_percentClear = (float)num / (float)(base.def.clearScanCellRadius * 2 + 1);
+			return flag;
 		}
 
 		private float m_percentClear;

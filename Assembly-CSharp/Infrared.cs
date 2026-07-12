@@ -64,8 +64,8 @@ public class Infrared : MonoBehaviour
 
 	private void UpdateState()
 	{
-		base.enabled = this.mode > Infrared.Mode.Disabled;
-		if (base.enabled)
+		base.gameObject.SetActive(this.mode > Infrared.Mode.Disabled);
+		if (base.gameObject.activeSelf)
 		{
 			this.Update();
 		}

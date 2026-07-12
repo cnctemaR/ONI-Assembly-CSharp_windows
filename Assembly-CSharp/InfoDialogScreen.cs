@@ -2,9 +2,35 @@
 using System.Collections.Generic;
 using STRINGS;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class InfoDialogScreen : KModalScreen
 {
+	public InfoScreenPlainText GetSubHeaderPrefab()
+	{
+		return this.subHeaderTemplate;
+	}
+
+	public InfoScreenPlainText GetPlainTextPrefab()
+	{
+		return this.plainTextTemplate;
+	}
+
+	public InfoScreenLineItem GetLineItemPrefab()
+	{
+		return this.lineItemTemplate;
+	}
+
+	public GameObject GetPrimaryButtonPrefab()
+	{
+		return this.leftButtonPrefab;
+	}
+
+	public GameObject GetSecondaryButtonPrefab()
+	{
+		return this.rightButtonPrefab;
+	}
+
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
@@ -34,6 +60,15 @@ public class InfoDialogScreen : KModalScreen
 			return;
 		}
 		base.OnKeyDown(e);
+	}
+
+	protected override void OnShow(bool show)
+	{
+		base.OnShow(show);
+		if (!show && this.onDeactivateFn != null)
+		{
+			this.onDeactivateFn();
+		}
 	}
 
 	public InfoDialogScreen AddDefaultOK(bool escapeCloses = false)
@@ -67,6 +102,14 @@ public class InfoDialogScreen : KModalScreen
 		return this;
 	}
 
+	public InfoDialogScreen AddOption(bool rightSide, out KButton button, out LocText buttonText)
+	{
+		GameObject gameObject = Util.KInstantiateUI(rightSide ? this.rightButtonPrefab : this.leftButtonPrefab, rightSide ? this.rightButtonPanel : this.leftButtonPanel, true);
+		button = gameObject.GetComponent<KButton>();
+		buttonText = gameObject.GetComponentInChildren<LocText>();
+		return this;
+	}
+
 	public InfoDialogScreen SetHeader(string header)
 	{
 		this.header.text = header;
@@ -96,6 +139,25 @@ public class InfoDialogScreen : KModalScreen
 	public InfoDialogScreen AddSubHeader(string text)
 	{
 		Util.KInstantiateUI<InfoScreenPlainText>(this.subHeaderTemplate.gameObject, this.contentContainer, false).SetText(text);
+		return this;
+	}
+
+	public InfoDialogScreen AddSpacer(float height)
+	{
+		GameObject gameObject = new GameObject("spacer");
+		gameObject.SetActive(false);
+		gameObject.transform.SetParent(this.contentContainer.transform, false);
+		LayoutElement layoutElement = gameObject.AddComponent<LayoutElement>();
+		layoutElement.minHeight = height;
+		layoutElement.preferredHeight = height;
+		layoutElement.flexibleHeight = 0f;
+		gameObject.SetActive(true);
+		return this;
+	}
+
+	public InfoDialogScreen AddUI<T>(T prefab, out T spawn) where T : MonoBehaviour
+	{
+		spawn = Util.KInstantiateUI<T>(prefab.gameObject, this.contentContainer, true);
 		return this;
 	}
 
@@ -140,4 +202,6 @@ public class InfoDialogScreen : KModalScreen
 	private GameObject rightButtonPanel;
 
 	private bool escapeCloses;
+
+	public global::System.Action onDeactivateFn;
 }

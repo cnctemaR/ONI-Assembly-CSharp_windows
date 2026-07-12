@@ -57,7 +57,16 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 		Workable.AnimInfo animInfo = default(Workable.AnimInfo);
 		if (this.overrideAnims != null && this.overrideAnims.Length != 0)
 		{
-			animInfo.overrideAnims = this.overrideAnims;
+			BuildingFacade buildingFacade = this.GetBuildingFacade();
+			bool flag = false;
+			if (buildingFacade != null && !buildingFacade.IsOriginal)
+			{
+				flag = buildingFacade.interactAnims.TryGetValue(base.name, out animInfo.overrideAnims);
+			}
+			if (!flag)
+			{
+				animInfo.overrideAnims = this.overrideAnims;
+			}
 		}
 		if (this.multitoolContext.IsValid && this.multitoolHitEffectTag.IsValid)
 		{
@@ -117,9 +126,50 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 		}
 		this.minionUpdateHandle = Game.Instance.Subscribe(586301400, new Action<object>(this.UpdateStatusItem));
 		base.GetComponent<KPrefabID>().AddTag(GameTags.HasChores, false);
-		this.lightEfficiencyBonusStatusItem = Db.Get().DuplicantStatusItems.LightWorkEfficiencyBonus;
+		if (base.gameObject.HasTag(this.laboratoryEfficiencyBonusTagRequired))
+		{
+			this.useLaboratoryEfficiencyBonus = true;
+			base.Subscribe<Workable>(144050788, Workable.OnUpdateRoomDelegate);
+		}
 		this.ShowProgressBar(this.alwaysShowProgressBar && this.workTimeRemaining < this.GetWorkTime());
 		this.UpdateStatusItem(null);
+	}
+
+	private void RefreshRoom()
+	{
+		CavityInfo cavityForCell = Game.Instance.roomProber.GetCavityForCell(Grid.PosToCell(base.gameObject));
+		if (cavityForCell != null && cavityForCell.room != null)
+		{
+			this.OnUpdateRoom(cavityForCell.room);
+			return;
+		}
+		this.OnUpdateRoom(null);
+	}
+
+	private void OnUpdateRoom(object data)
+	{
+		if (this.worker == null)
+		{
+			return;
+		}
+		Room room = (Room)data;
+		if (room != null && room.roomType == Db.Get().RoomTypes.Laboratory)
+		{
+			this.currentlyInLaboratory = true;
+			if (this.laboratoryEfficiencyBonusStatusItemHandle == Guid.Empty)
+			{
+				this.laboratoryEfficiencyBonusStatusItemHandle = this.worker.GetComponent<KSelectable>().AddStatusItem(Db.Get().DuplicantStatusItems.LaboratoryWorkEfficiencyBonus, this);
+				return;
+			}
+		}
+		else
+		{
+			this.currentlyInLaboratory = false;
+			if (this.laboratoryEfficiencyBonusStatusItemHandle != Guid.Empty)
+			{
+				this.laboratoryEfficiencyBonusStatusItemHandle = this.worker.GetComponent<KSelectable>().RemoveStatusItem(this.laboratoryEfficiencyBonusStatusItemHandle, false);
+			}
+		}
 	}
 
 	protected virtual void UpdateStatusItem(object data = null)
@@ -174,6 +224,10 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 		if (this.showProgressBar)
 		{
 			this.ShowProgressBar(true);
+		}
+		if (this.useLaboratoryEfficiencyBonus)
+		{
+			this.RefreshRoom();
 		}
 		this.OnStartWork(this.worker);
 		if (this.worker != null)
@@ -230,7 +284,7 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 				if (Grid.LightIntensity[num2] > 0)
 				{
 					this.currentlyLit = true;
-					num += DUPLICANTSTATS.LIGHT.LIGHT_WORK_EFFICIENCY_BONUS;
+					num += 0.15f;
 					if (this.lightEfficiencyBonusStatusItemHandle == Guid.Empty)
 					{
 						this.lightEfficiencyBonusStatusItemHandle = worker.GetComponent<KSelectable>().AddStatusItem(Db.Get().DuplicantStatusItems.LightWorkEfficiencyBonus, this);
@@ -245,6 +299,10 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 					}
 				}
 			}
+		}
+		if (this.useLaboratoryEfficiencyBonus && this.currentlyInLaboratory)
+		{
+			num += 0.1f;
 		}
 		return Mathf.Max(num, this.minimumAttributeMultiplier);
 	}
@@ -311,6 +369,10 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 		if (this.lightEfficiencyBonusStatusItemHandle != Guid.Empty)
 		{
 			this.lightEfficiencyBonusStatusItemHandle = workerToStop.GetComponent<KSelectable>().RemoveStatusItem(this.lightEfficiencyBonusStatusItemHandle, false);
+		}
+		if (this.laboratoryEfficiencyBonusStatusItemHandle != Guid.Empty)
+		{
+			this.laboratoryEfficiencyBonusStatusItemHandle = this.worker.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().DuplicantStatusItems.LaboratoryWorkEfficiencyBonus, false);
 		}
 		if (base.gameObject.GetComponent<KSelectable>() != null && !base.gameObject.GetComponent<KSelectable>().IsSelected && base.gameObject.GetComponent<LoopingSounds>() != null)
 		{
@@ -556,6 +618,11 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 		return list;
 	}
 
+	public virtual BuildingFacade GetBuildingFacade()
+	{
+		return base.GetComponent<BuildingFacade>();
+	}
+
 	[ContextMenu("Refresh Reachability")]
 	public void RefreshReachability()
 	{
@@ -575,11 +642,17 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 
 	protected bool lightEfficiencyBonus = true;
 
-	protected StatusItem lightEfficiencyBonusStatusItem;
-
 	protected Guid lightEfficiencyBonusStatusItemHandle;
 
 	public bool currentlyLit;
+
+	public Tag laboratoryEfficiencyBonusTagRequired = RoomConstraints.ConstraintTags.ScienceBuilding;
+
+	private bool useLaboratoryEfficiencyBonus;
+
+	protected Guid laboratoryEfficiencyBonusStatusItemHandle;
+
+	private bool currentlyInLaboratory;
 
 	protected StatusItem workerStatusItem;
 
@@ -666,6 +739,11 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 	public KAnim.PlayMode workAnimPlayMode;
 
 	public bool faceTargetWhenWorking;
+
+	private static readonly EventSystem.IntraObjectHandler<Workable> OnUpdateRoomDelegate = new EventSystem.IntraObjectHandler<Workable>(delegate(Workable component, object data)
+	{
+		component.OnUpdateRoom(data);
+	});
 
 	protected ProgressBar progressBar;
 

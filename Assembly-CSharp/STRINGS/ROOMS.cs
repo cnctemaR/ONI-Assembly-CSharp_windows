@@ -4,6 +4,59 @@ namespace STRINGS
 {
 	public class ROOMS
 	{
+		public class CATEGORY
+		{
+			public class NONE
+			{
+				public static LocString NAME = "None";
+			}
+
+			public class FOOD
+			{
+				public static LocString NAME = "Dining";
+			}
+
+			public class SLEEP
+			{
+				public static LocString NAME = "Sleep";
+			}
+
+			public class RECREATION
+			{
+				public static LocString NAME = "Recreation";
+			}
+
+			public class BATHROOM
+			{
+				public static LocString NAME = "Washroom";
+			}
+
+			public class HOSPITAL
+			{
+				public static LocString NAME = "Medical";
+			}
+
+			public class INDUSTRIAL
+			{
+				public static LocString NAME = "Industrial";
+			}
+
+			public class AGRICULTURAL
+			{
+				public static LocString NAME = "Agriculture";
+			}
+
+			public class PARK
+			{
+				public static LocString NAME = "Parks";
+			}
+
+			public class SCIENCE
+			{
+				public static LocString NAME = "Science";
+			}
+		}
+
 		public class TYPES
 		{
 			public static LocString CONFLICTED = "Conflicted Room";
@@ -54,13 +107,24 @@ namespace STRINGS
 
 			public class BEDROOM
 			{
-				public static LocString NAME = "Bedroom";
+				public static LocString NAME = "Luxury Barracks";
 
-				public static LocString DESCRIPTION = "A room full of things that greatly enhance quality of sleep for occupants.\n\nSleeping in a Bedroom will improve Duplicants' Morale.";
+				public static LocString DESCRIPTION = "An upscale communal sleeping area full of things that greatly enhance quality of rest for occupants.\n\nSleeping in a Luxury Barracks will improve Duplicants' Morale.";
 
 				public static LocString EFFECT = "- Morale bonus";
 
-				public static LocString TOOLTIP = "Sleeping in a Bedroom will improve Duplicants' Morale";
+				public static LocString TOOLTIP = "Sleeping in a Luxury Barracks will improve Duplicants' Morale";
+			}
+
+			public class PRIVATE_BEDROOM
+			{
+				public static LocString NAME = "Private Bedroom";
+
+				public static LocString DESCRIPTION = "A comfortable, roommate-free retreat where tired Duplicants can get uninterrupted rest.\n\nSleeping in a Private Bedroom will greatly improve Duplicants' Morale.";
+
+				public static LocString EFFECT = "- Morale bonus";
+
+				public static LocString TOOLTIP = "Sleeping in a Private Bedroom will greatly improve Duplicants' Morale";
 			}
 
 			public class MESSHALL
@@ -78,7 +142,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Kitchen";
 
-				public static LocString DESCRIPTION = "A cooking area equipped to take meals to the next level.\n\nAdding ingredients from a spice grinder to foods cooked on an electric grill or gas range provides a variety of positive benefits.";
+				public static LocString DESCRIPTION = "A cooking area equipped to take meals to the next level.\n\nAdding ingredients from a Spice Grinder to foods cooked on an Electric Grill or Gas Range provides a variety of positive benefits.";
 
 				public static LocString EFFECT = "- Enables Spice Grinder use";
 
@@ -89,7 +153,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Great Hall";
 
-				public static LocString DESCRIPTION = "A great place to eat, with great decor and great company.\n\nEating in a Great Hall will significantly improve Duplicants' Morale.";
+				public static LocString DESCRIPTION = "A great place to eat, with great decor and great company. Great!\n\nEating in a Great Hall will significantly improve Duplicants' Morale.";
 
 				public static LocString EFFECT = "- Morale bonus";
 
@@ -195,22 +259,22 @@ namespace STRINGS
 				public static LocString TOOLTIP = "A Nature Reserve will grant higher Morale bonuses to Duplicants than a Park";
 			}
 
-			public class PRIVATE_BEDROOM
+			public class LABORATORY
 			{
-				public static LocString NAME = "Private Bedroom";
+				public static LocString NAME = "Laboratory";
 
-				public static LocString DESCRIPTION = "A comfortable, roommate-free retreat where tired Duplicants can get uninterrupted rest.\n\nDuplicants recover even more stamina while sleeping in a Private Bedroom than in Barracks.";
+				public static LocString DESCRIPTION = "Where wild hypotheses meet rigorous scientific experimentation.\n\nScience stations built in a Laboratory function more efficiently.\n\nA Laboratory enables the use of the Geotuner and the Mission Control Station.";
 
-				public static LocString EFFECT = "- Stamina recovery bonus";
+				public static LocString EFFECT = "- Efficiency bonus";
 
-				public static LocString TOOLTIP = "Duplicants recover even more stamina while sleeping in a Private Bedroom than in Barracks";
+				public static LocString TOOLTIP = "Science buildings built in a Laboratory function more efficiently\n\nA Laboratory enables Geotuner and Mission Control Station use";
 			}
 
 			public class PRIVATE_BATHROOM
 			{
 				public static LocString NAME = "Private Bathroom";
 
-				public static LocString DESCRIPTION = "Finally, a place to truly be alone with one's thoughts.\n\nDuplicants relieve even more stress when using the toilet in a Private Bathroom than in a Latrine.";
+				public static LocString DESCRIPTION = "Finally, a place to truly be alone with one's thoughts.\n\nDuplicants relieve even more Stress when using the toilet in a Private Bathroom than in a Latrine.";
 
 				public static LocString EFFECT = "- Stress relief bonus";
 
@@ -227,6 +291,8 @@ namespace STRINGS
 			public static LocString POSSIBLE_TYPES_HEADER = "Possible Room Types";
 
 			public static LocString NO_TYPE_CONFLICTS = "Remove conflicting buildings";
+
+			public static LocString DECOR_ITEM_CLASS = "Decor Item";
 
 			public class CRITERIA_FAILED
 			{
@@ -256,18 +322,39 @@ namespace STRINGS
 				public static LocString DESCRIPTION = "Must have an area no larger than {0} tiles";
 			}
 
-			public class BED_SINGLE
+			public class HAS_BED
 			{
-				public static LocString NAME = "Single bed";
+				public static LocString NAME = "One or more beds";
 
-				public static LocString DESCRIPTION = "Requires one Cot or Comfy Bed";
+				public static LocString DESCRIPTION = "Requires at least one Cot or Comfy Bed";
+			}
+
+			public class HAS_LUXURY_BED
+			{
+				public static LocString NAME = "One or more Comfy Beds";
+
+				public static LocString DESCRIPTION = "Requires at least one Comfy Bed";
 			}
 
 			public class LUXURY_BED_SINGLE
 			{
 				public static LocString NAME = "Single Comfy Bed";
 
-				public static LocString DESCRIPTION = "Requires a Comfy Bed";
+				public static LocString DESCRIPTION = "Must have no more than one Comfy Bed";
+			}
+
+			public class BED_SINGLE
+			{
+				public static LocString NAME = "Single bed";
+
+				public static LocString DESCRIPTION = "Must have no more than one Cot or Comfy Bed";
+			}
+
+			public class IS_BACKWALLED
+			{
+				public static LocString NAME = "Has backwall tiles";
+
+				public static LocString DESCRIPTION = "Must be covered in backwall tiles";
 			}
 
 			public class NO_COTS
@@ -275,6 +362,13 @@ namespace STRINGS
 				public static LocString NAME = "No Cots";
 
 				public static LocString DESCRIPTION = "Room cannot contain a Cot";
+			}
+
+			public class NO_LUXURY_BEDS
+			{
+				public static LocString NAME = "No Comfy Beds";
+
+				public static LocString DESCRIPTION = "Room cannot contain a Comfy Bed";
 			}
 
 			public class BED_MULTIPLE
@@ -293,9 +387,9 @@ namespace STRINGS
 
 			public class DECORATIVE_ITEM
 			{
-				public static LocString NAME = "Decor item";
+				public static LocString NAME = "Decor item ({0})";
 
-				public static LocString DESCRIPTION = "Requires one or more Paintings, Sculptures, or Vases";
+				public static LocString DESCRIPTION = "Requires {0} or more Decor items";
 			}
 
 			public class DECORATIVE_ITEM_N
@@ -513,6 +607,20 @@ namespace STRINGS
 				public static LocString NAME = "Four wild plants";
 
 				public static LocString DESCRIPTION = "Requires four or more wild plants";
+			}
+
+			public class SCIENCE_BUILDING
+			{
+				public static LocString NAME = "Science building";
+
+				public static LocString DESCRIPTION = "Requires one or more science buildings";
+			}
+
+			public class SCIENCE_BUILDINGS
+			{
+				public static LocString NAME = "Two science buildings";
+
+				public static LocString DESCRIPTION = "Requires two or more science buildings";
 			}
 		}
 

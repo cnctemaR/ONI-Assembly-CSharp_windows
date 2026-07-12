@@ -5,13 +5,13 @@ using UnityEngine;
 
 public class DevTool_StoryTraits_Reveal : DevTool
 {
-	protected override void Render()
+	protected override void RenderTo(DevPanel panel)
 	{
-		Option<int> cellIndexForExisting = this.GetCellIndexForExisting("Headquarters");
-		bool hasValue = cellIndexForExisting.HasValue;
+		Option<int> cellIndexForUniqueBuilding = DevToolUtil.GetCellIndexForUniqueBuilding("Headquarters");
+		bool hasValue = cellIndexForUniqueBuilding.HasValue;
 		if (ImGuiEx.Button("Focus on headquaters", hasValue))
 		{
-			this.FocusCameraOnCell(cellIndexForExisting);
+			DevToolUtil.FocusCameraOnCell(cellIndexForUniqueBuilding);
 		}
 		if (!hasValue)
 		{
@@ -32,7 +32,7 @@ public class DevTool_StoryTraits_Reveal : DevTool
 				bool hasValue2 = cellIndexForSpawnable.HasValue;
 				if (ImGuiEx.Button("Reveal and focus on " + text2, hasValue2))
 				{
-					this.RevealAndFocusAt(cellIndexForSpawnable.Value);
+					DevToolUtil.RevealAndFocusAt(cellIndexForSpawnable.Value);
 				}
 				if (!hasValue2)
 				{
@@ -47,35 +47,6 @@ public class DevTool_StoryTraits_Reveal : DevTool
 		yield return "MegaBrainTank";
 		yield return "GravitasCreatureManipulator";
 		yield break;
-	}
-
-	public void RevealAndFocusAt(int cellIndex)
-	{
-		int num;
-		int num2;
-		Grid.CellToXY(cellIndex, out num, out num2);
-		GridVisibility.Reveal(num + 2, num2 + 2, 10, 10f);
-		this.FocusCameraOnCell(cellIndex);
-		Option<int> cellIndexForExisting = this.GetCellIndexForExisting("Headquarters");
-		if (cellIndexForExisting.HasValue)
-		{
-			Vector3 vector = Grid.CellToPos2D(cellIndex);
-			Vector3 vector2 = Grid.CellToPos2D(cellIndexForExisting);
-			float num3 = 2f / Vector3.Distance(vector, vector2);
-			for (float num4 = 0f; num4 < 1f; num4 += num3)
-			{
-				int num5;
-				int num6;
-				Grid.PosToXY(Vector3.Lerp(vector, vector2, num4), out num5, out num6);
-				GridVisibility.Reveal(num5 + 2, num6 + 2, 4, 4f);
-			}
-		}
-	}
-
-	public void FocusCameraOnCell(int cellIndex)
-	{
-		Vector3 vector = Grid.CellToPos2D(cellIndex);
-		CameraController.Instance.SetPosition(vector);
 	}
 
 	private Option<ClusterManager> GetClusterManager()
@@ -112,22 +83,5 @@ public class DevTool_StoryTraits_Reveal : DevTool
 			return Option.None;
 		}
 		return Option.Some<IReadOnlyList<WorldGenSpawner.Spawnable>>(spawnables);
-	}
-
-	private Option<int> GetCellIndexForExisting(string prefabId)
-	{
-		BuildingComplete[] array = global::UnityEngine.Object.FindObjectsOfType<BuildingComplete>(true);
-		if (array == null)
-		{
-			return Option.None;
-		}
-		foreach (BuildingComplete buildingComplete in array)
-		{
-			if (prefabId == buildingComplete.Def.PrefabID)
-			{
-				return buildingComplete.GetCell();
-			}
-		}
-		return Option.None;
 	}
 }

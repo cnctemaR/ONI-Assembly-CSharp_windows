@@ -122,7 +122,7 @@ public class CharacterContainer : KScreen, ITelepadDeliverableContainer
 		int num = 0;
 		do
 		{
-			this.stats = new MinionStartingStats(is_starter, guaranteedAptitudeID, null);
+			this.stats = new MinionStartingStats(is_starter, guaranteedAptitudeID, null, false);
 			num++;
 		}
 		while (this.IsCharacterRedundant() && num < 20);
@@ -156,6 +156,7 @@ public class CharacterContainer : KScreen, ITelepadDeliverableContainer
 		this.stats.ApplyTraits(this.animController.gameObject);
 		this.stats.ApplyRace(this.animController.gameObject);
 		this.stats.ApplyAccessories(this.animController.gameObject);
+		this.stats.ApplyOutfit(this.stats.personality, this.animController.gameObject);
 		this.stats.ApplyExperience(this.animController.gameObject);
 		HashedString idleAnim = this.GetIdleAnim(this.stats);
 		this.idle_anim = Assets.GetAnim(idleAnim);

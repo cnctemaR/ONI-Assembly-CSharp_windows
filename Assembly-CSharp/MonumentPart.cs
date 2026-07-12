@@ -1,5 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Runtime.Serialization;
+using Database;
 using KSerialization;
 using TUNING;
 using UnityEngine;
@@ -18,6 +19,31 @@ public class MonumentPart : KMonoBehaviour
 		this.UpdateMonumentDecor();
 	}
 
+	[OnDeserialized]
+	private void OnDeserializedMethod()
+	{
+		if (Db.GetMonumentParts().TryGet(this.chosenState) == null)
+		{
+			string text = "";
+			if (this.part == MonumentPartResource.Part.Bottom)
+			{
+				text = "bottom_" + this.chosenState;
+			}
+			else if (this.part == MonumentPartResource.Part.Middle)
+			{
+				text = "mid_" + this.chosenState;
+			}
+			else if (this.part == MonumentPartResource.Part.Top)
+			{
+				text = "top_" + this.chosenState;
+			}
+			if (Db.GetMonumentParts().TryGet(text) != null)
+			{
+				this.chosenState = text;
+			}
+		}
+	}
+
 	protected override void OnCleanUp()
 	{
 		Components.MonumentParts.Remove(this);
@@ -27,21 +53,24 @@ public class MonumentPart : KMonoBehaviour
 
 	public void SetState(string state)
 	{
-		base.GetComponent<KBatchedAnimController>().Play(state, KAnim.PlayMode.Once, 1f, 0f);
+		MonumentPartResource monumentPartResource = Db.GetMonumentParts().Get(state);
+		KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
+		component.SwapAnims(new KAnimFile[] { monumentPartResource.AnimFile });
+		component.Play(monumentPartResource.State, KAnim.PlayMode.Once, 1f, 0f);
 		this.chosenState = state;
 	}
 
 	public bool IsMonumentCompleted()
 	{
-		bool flag = this.GetMonumentPart(MonumentPart.Part.Top) != null;
-		bool flag2 = this.GetMonumentPart(MonumentPart.Part.Middle) != null;
-		bool flag3 = this.GetMonumentPart(MonumentPart.Part.Bottom) != null;
+		bool flag = this.GetMonumentPart(MonumentPartResource.Part.Top) != null;
+		bool flag2 = this.GetMonumentPart(MonumentPartResource.Part.Middle) != null;
+		bool flag3 = this.GetMonumentPart(MonumentPartResource.Part.Bottom) != null;
 		return flag && flag3 && flag2;
 	}
 
 	public void UpdateMonumentDecor()
 	{
-		GameObject monumentPart = this.GetMonumentPart(MonumentPart.Part.Middle);
+		GameObject monumentPart = this.GetMonumentPart(MonumentPartResource.Part.Middle);
 		if (this.IsMonumentCompleted())
 		{
 			monumentPart.GetComponent<DecorProvider>().SetValues(BUILDINGS.DECOR.BONUS.MONUMENT.COMPLETE);
@@ -69,7 +98,7 @@ public class MonumentPart : KMonoBehaviour
 		}
 	}
 
-	private GameObject GetMonumentPart(MonumentPart.Part requestPart)
+	private GameObject GetMonumentPart(MonumentPartResource.Part requestPart)
 	{
 		foreach (GameObject gameObject in AttachableBuilding.GetAttachedNetwork(base.GetComponent<AttachableBuilding>()))
 		{
@@ -82,19 +111,10 @@ public class MonumentPart : KMonoBehaviour
 		return null;
 	}
 
-	public MonumentPart.Part part;
-
-	public List<global::Tuple<string, string>> selectableStatesAndSymbols = new List<global::Tuple<string, string>>();
+	public MonumentPartResource.Part part;
 
 	public string stateUISymbol;
 
 	[Serialize]
 	private string chosenState;
-
-	public enum Part
-	{
-		Bottom,
-		Middle,
-		Top
-	}
 }

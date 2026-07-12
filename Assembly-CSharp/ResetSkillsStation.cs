@@ -54,7 +54,7 @@ public class ResetSkillsStation : Workable
 			component.ResetSkillLevels(true);
 			component.SetHats(component.CurrentHat, null);
 			component.ApplyTargetHat();
-			this.notification = new Notification(MISC.NOTIFICATIONS.RESETSKILL.NAME, NotificationType.Good, (List<Notification> notificationList, object data) => MISC.NOTIFICATIONS.RESETSKILL.TOOLTIP + notificationList.ReduceMessages(false), null, true, 0f, null, null, null, true, false);
+			this.notification = new Notification(MISC.NOTIFICATIONS.RESETSKILL.NAME, NotificationType.Good, (List<Notification> notificationList, object data) => MISC.NOTIFICATIONS.RESETSKILL.TOOLTIP + notificationList.ReduceMessages(false), null, true, 0f, null, null, null, true, false, false);
 			worker.GetComponent<Notifier>().Add(this.notification, "");
 		}
 	}

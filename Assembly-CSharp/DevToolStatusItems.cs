@@ -31,8 +31,13 @@ public class DevToolStatusItems : DevTool
 		this.RequiresGameRunning = true;
 	}
 
-	protected override void Render()
+	protected override void RenderTo(DevPanel panel)
 	{
+		if (SelectTool.Instance == null)
+		{
+			ImGui.Text("no select tool instance");
+			return;
+		}
 		KSelectable selected = SelectTool.Instance.selected;
 		if (selected == null || !selected)
 		{
@@ -48,7 +53,7 @@ public class DevToolStatusItems : DevTool
 		DevToolStatusItems.DrawTable<StatusItemGroup.Entry>("status_items", this.columns, statusItemGroup.GetEnumerator());
 	}
 
-	private static void DrawTable<T>(string string_id, [TupleElementNames(new string[] { "header", "draw" })] ValueTuple<string, Action<T>>[] columns, IEnumerator<T> data)
+	public static void DrawTable<T>(string string_id, [TupleElementNames(new string[] { "header", "draw" })] ValueTuple<string, Action<T>>[] columns, IEnumerator<T> data)
 	{
 		ImGuiTableFlags imGuiTableFlags = ImGuiTableFlags.Resizable | ImGuiTableFlags.RowBg | ImGuiTableFlags.BordersInnerH | ImGuiTableFlags.BordersOuterH | ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.BordersOuterV | ImGuiTableFlags.SizingFixedFit | ImGuiTableFlags.ScrollX | ImGuiTableFlags.ScrollY;
 		if (ImGui.BeginTable(string_id, columns.Length, imGuiTableFlags))

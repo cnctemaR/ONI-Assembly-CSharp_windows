@@ -78,7 +78,13 @@ public class NuclearResearchCenter : StateMachineComponent<NuclearResearchCenter
 			this.inoperational.PlayAnim("off").TagTransition(GameTags.Operational, this.requirements, false);
 			this.requirements.PlayAnim("on").TagTransition(GameTags.Operational, this.inoperational, true).DefaultState(this.requirements.highEnergyParticlesNeeded);
 			this.requirements.highEnergyParticlesNeeded.ToggleMainStatusItem(Db.Get().BuildingStatusItems.WaitingForHighEnergyParticles, null).EventTransition(GameHashes.OnParticleStorageChanged, this.requirements.noResearchSelected, new StateMachine<NuclearResearchCenter.States, NuclearResearchCenter.StatesInstance, NuclearResearchCenter, object>.Transition.ConditionCallback(this.IsReady));
-			this.requirements.noResearchSelected.ToggleMainStatusItem(Db.Get().BuildingStatusItems.NoResearchSelected, null).EventTransition(GameHashes.ActiveResearchChanged, this.requirements.noApplicableResearch, new StateMachine<NuclearResearchCenter.States, NuclearResearchCenter.StatesInstance, NuclearResearchCenter, object>.Transition.ConditionCallback(this.IsResearchSelected));
+			this.requirements.noResearchSelected.Enter(delegate(NuclearResearchCenter.StatesInstance smi)
+			{
+				this.UpdateNoResearchSelectedStatusItem(smi, true);
+			}).Exit(delegate(NuclearResearchCenter.StatesInstance smi)
+			{
+				this.UpdateNoResearchSelectedStatusItem(smi, false);
+			}).EventTransition(GameHashes.ActiveResearchChanged, this.requirements.noApplicableResearch, new StateMachine<NuclearResearchCenter.States, NuclearResearchCenter.StatesInstance, NuclearResearchCenter, object>.Transition.ConditionCallback(this.IsResearchSelected));
 			this.requirements.noApplicableResearch.EventTransition(GameHashes.ActiveResearchChanged, this.ready, new StateMachine<NuclearResearchCenter.States, NuclearResearchCenter.StatesInstance, NuclearResearchCenter, object>.Transition.ConditionCallback(this.IsResearchApplicable)).EventTransition(GameHashes.ActiveResearchChanged, this.requirements, GameStateMachine<NuclearResearchCenter.States, NuclearResearchCenter.StatesInstance, NuclearResearchCenter, object>.Not(new StateMachine<NuclearResearchCenter.States, NuclearResearchCenter.StatesInstance, NuclearResearchCenter, object>.Transition.ConditionCallback(this.IsResearchSelected)));
 			this.ready.Enter(delegate(NuclearResearchCenter.StatesInstance smi)
 			{
@@ -101,6 +107,33 @@ public class NuclearResearchCenter : StateMachineComponent<NuclearResearchCenter
 				smi.master.operational.SetActive(false, false);
 			}).WorkableStopTransition((NuclearResearchCenter.StatesInstance smi) => smi.master.GetComponent<NuclearResearchCenterWorkable>(), this.ready.idle)
 				.WorkableCompleteTransition((NuclearResearchCenter.StatesInstance smi) => smi.master.GetComponent<NuclearResearchCenterWorkable>(), this.ready.idle);
+		}
+
+		protected bool IsAllResearchComplete()
+		{
+			using (List<Tech>.Enumerator enumerator = Db.Get().Techs.resources.GetEnumerator())
+			{
+				while (enumerator.MoveNext())
+				{
+					if (!enumerator.Current.IsComplete())
+					{
+						return false;
+					}
+				}
+			}
+			return true;
+		}
+
+		private void UpdateNoResearchSelectedStatusItem(NuclearResearchCenter.StatesInstance smi, bool entering)
+		{
+			bool flag = entering && !this.IsResearchSelected(smi) && !this.IsAllResearchComplete();
+			KSelectable component = smi.GetComponent<KSelectable>();
+			if (flag)
+			{
+				component.SetStatusItem(Db.Get().StatusItemCategories.Main, Db.Get().BuildingStatusItems.NoResearchSelected, null);
+				return;
+			}
+			component.RemoveStatusItem(Db.Get().BuildingStatusItems.NoResearchSelected, false);
 		}
 
 		private bool IsReady(NuclearResearchCenter.StatesInstance smi)

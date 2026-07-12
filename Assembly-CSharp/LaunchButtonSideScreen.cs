@@ -23,6 +23,7 @@ public class LaunchButtonSideScreen : SideScreenContent
 
 	public override void SetTarget(GameObject target)
 	{
+		this.selectedPad = null;
 		this.rocketModule = target.GetComponent<RocketModuleCluster>();
 		if (this.rocketModule == null)
 		{

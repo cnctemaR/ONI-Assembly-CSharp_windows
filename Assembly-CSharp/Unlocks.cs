@@ -284,7 +284,7 @@ public class Unlocks : KMonoBehaviour
 
 	private void OnNewDupe(MinionIdentity minion_identity)
 	{
-		if (Components.LiveMinionIdentities.Count >= Db.Get().Personalities.Count)
+		if (Components.LiveMinionIdentities.Count >= Db.Get().Personalities.GetAll(true, false).Count)
 		{
 			this.Unlock("fulldupecolony", true);
 		}

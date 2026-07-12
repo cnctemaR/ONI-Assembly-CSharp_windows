@@ -34,7 +34,7 @@ public static class LightGridManager
 		LightGridManager.previewLightCells.Clear();
 		ListPool<int, LightGridManager.LightGridEmitter>.PooledList pooledList = ListPool<int, LightGridManager.LightGridEmitter>.Allocate();
 		pooledList.Add(origin_cell);
-		DiscreteShadowCaster.GetVisibleCells(origin_cell, pooledList, (int)radius, shape);
+		DiscreteShadowCaster.GetVisibleCells(origin_cell, pooledList, (int)radius, shape, true);
 		foreach (int num in pooledList)
 		{
 			if (Grid.IsValidCell(num))
@@ -57,7 +57,7 @@ public static class LightGridManager
 	{
 		public void UpdateLitCells()
 		{
-			DiscreteShadowCaster.GetVisibleCells(this.state.origin, this.litCells, (int)this.state.radius, this.state.shape);
+			DiscreteShadowCaster.GetVisibleCells(this.state.origin, this.litCells, (int)this.state.radius, this.state.shape, true);
 		}
 
 		public void AddToGrid(bool update_lit_cells)

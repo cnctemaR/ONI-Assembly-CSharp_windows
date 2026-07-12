@@ -40,6 +40,28 @@ namespace Database
 			return this.resources.FindAll((Personality x) => x.startingMinion);
 		}
 
+		public List<Personality> GetAll(bool onlyEnabledMinions, bool onlyStartingMinions)
+		{
+			return this.resources.FindAll((Personality x) => (!onlyStartingMinions || x.startingMinion) && (!onlyEnabledMinions || !x.Disabled));
+		}
+
+		public Personality GetRandom(bool onlyEnabledMinions, bool onlyStartingMinions)
+		{
+			return this.GetAll(onlyEnabledMinions, onlyStartingMinions).GetRandom<Personality>();
+		}
+
+		public Personality GetPersonalityFromNameStringKey(string name_string_key)
+		{
+			foreach (Personality personality in Db.Get().Personalities.resources)
+			{
+				if (personality.nameStringKey.Equals(name_string_key, StringComparison.CurrentCultureIgnoreCase))
+				{
+					return personality;
+				}
+			}
+			return null;
+		}
+
 		public class PersonalityLoader : AsyncCsvLoader<Personalities.PersonalityLoader, Personalities.PersonalityInfo>
 		{
 			public PersonalityLoader()

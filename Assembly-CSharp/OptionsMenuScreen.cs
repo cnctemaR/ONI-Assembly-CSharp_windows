@@ -68,6 +68,11 @@ public class OptionsMenuScreen : KModalButtonMenu
 		base.ActivateChildScreen(this.metricsScreenPrefab.gameObject);
 	}
 
+	public void ShowMetricsScreen()
+	{
+		base.ActivateChildScreen(this.metricsScreenPrefab.gameObject);
+	}
+
 	private void OnFeedback()
 	{
 		base.ActivateChildScreen(this.feedbackScreenPrefab.gameObject);

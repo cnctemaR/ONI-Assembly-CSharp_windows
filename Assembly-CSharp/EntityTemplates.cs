@@ -531,6 +531,7 @@ public class EntityTemplates
 		component.AddTag(GameTags.PedestalDisplayable, false);
 		if (foodInfo.CaloriesPerUnit > 0f)
 		{
+			component.AddTag(GameTags.Edible, false);
 			template.AddOrGet<Edible>().FoodInfo = foodInfo;
 			component.instantiateFn += delegate(GameObject go)
 			{

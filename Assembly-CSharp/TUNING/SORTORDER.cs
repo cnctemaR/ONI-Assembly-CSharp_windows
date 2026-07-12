@@ -4,6 +4,10 @@ namespace TUNING
 {
 	public class SORTORDER
 	{
+		public static int ARTIFACTS = -2;
+
+		public static int KEEPSAKES = -1;
+
 		public static int ELEMENT = 0;
 
 		public static int FOOD = 200;

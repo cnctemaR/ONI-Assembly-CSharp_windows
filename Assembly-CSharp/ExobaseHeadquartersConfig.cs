@@ -38,7 +38,7 @@ public class ExobaseHeadquartersConfig : IBuildingConfig
 
 	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
-		go.AddOrGet<LoreBearer>();
+		LoreBearerUtil.AddLoreTo(go);
 		Telepad telepad = go.AddOrGet<Telepad>();
 		go.GetComponent<KPrefabID>().AddTag(GameTags.Telepad, false);
 		telepad.startingSkillPoints = 1f;

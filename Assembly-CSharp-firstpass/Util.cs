@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 using KSerialization;
@@ -14,6 +16,13 @@ public static class Util
 		T t = a;
 		a = b;
 		b = t;
+	}
+
+	public static void Swap(IList list_or_array, in int index_a, in int index_b)
+	{
+		object obj = list_or_array[index_a];
+		list_or_array[index_a] = list_or_array[index_b];
+		list_or_array[index_b] = obj;
 	}
 
 	public static void InitializeComponent(Component cmp)
@@ -589,6 +598,11 @@ public static class Util
 		return "RetiredColonies";
 	}
 
+	public static string GetKleiItemUserDataFolderName()
+	{
+		return "KleiItemData";
+	}
+
 	public static string RootFolder()
 	{
 		if (Application.platform == RuntimePlatform.WindowsPlayer || Application.platform == RuntimePlatform.WindowsEditor)
@@ -659,6 +673,74 @@ public static class Util
 	public static T GetRandom<T>(this List<T> tList)
 	{
 		return tList[global::UnityEngine.Random.Range(0, tList.Count)];
+	}
+
+	public static T GetRandom<T>(this IEnumerable<T> tEnumerable)
+	{
+		return tEnumerable.Shuffle<T>().First<T>();
+	}
+
+	public static void ShuffleList(IList list_or_array, global::System.Random random)
+	{
+		for (int i = list_or_array.Count - 1; i > 0; i--)
+		{
+			int num = random.Next(i + 1);
+			Util.Swap(list_or_array, in i, in num);
+		}
+	}
+
+	public static void ShiftLeft<T>(this T[] array, T new_ending_value = default(T))
+	{
+		Array.Copy(array, 1, array, 0, array.Length - 1);
+		array[array.Length - 1] = new_ending_value;
+	}
+
+	public static void ShiftRight<T>(this T[] array, T new_starting_value = default(T))
+	{
+		Array.Copy(array, 0, array, 1, array.Length - 1);
+		array[0] = new_starting_value;
+	}
+
+	public static IEnumerable<T> Shuffle<T>(this IEnumerable<T> enumerable, global::System.Random random)
+	{
+		List<T> list = enumerable.ToList<T>();
+		Util.ShuffleList(list, random);
+		return list;
+	}
+
+	public static IEnumerable<T> Shuffle<T>(this IEnumerable<T> enumerable)
+	{
+		return enumerable.Shuffle<T>(new global::System.Random());
+	}
+
+	public static IOrderedEnumerable<T> StableSort<T>(this IEnumerable<T> enumerable)
+	{
+		return enumerable.OrderBy<T, T>((T t) => t);
+	}
+
+	public static IOrderedEnumerable<T> StableSort<T>(this IEnumerable<T> enumerable, Comparer<T> comparer)
+	{
+		return enumerable.OrderBy<T, T>((T t) => t, comparer);
+	}
+
+	public static IOrderedEnumerable<T> StableSort<T>(this IEnumerable<T> enumerable, Comparison<T> comparer)
+	{
+		return enumerable.OrderBy<T, T>((T t) => t, Comparer<T>.Create(comparer));
+	}
+
+	public static IOrderedEnumerable<T> StableSort<T, TKey>(this IEnumerable<T> enumerable, Func<T, TKey> key_selector)
+	{
+		return enumerable.OrderBy<T, TKey>(key_selector);
+	}
+
+	public static IOrderedEnumerable<T> StableSort<T, TKey>(this IEnumerable<T> enumerable, Func<T, TKey> key_selector, Comparer<TKey> comparer)
+	{
+		return enumerable.OrderBy<T, TKey>(key_selector, comparer);
+	}
+
+	public static IOrderedEnumerable<T> StableSort<T, TKey>(this IEnumerable<T> enumerable, Func<T, TKey> key_selector, Comparison<TKey> comparer)
+	{
+		return enumerable.OrderBy<T, TKey>(key_selector, Comparer<TKey>.Create(comparer));
 	}
 
 	public static float RandomVariance(float center, float plusminus)

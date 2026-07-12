@@ -488,13 +488,14 @@ public class ManagementMenu : KIconToggleMenu
 		this.ToggleScreen(this.ScreenInfoMatch[ManagementMenu.Instance.codexInfo]);
 	}
 
-	public void OpenCodexToEntry(string id)
+	public void OpenCodexToEntry(string id, ContentContainer targetContainer = null)
 	{
 		if (!this.codexScreen.gameObject.activeInHierarchy)
 		{
 			this.ToggleCodex();
 		}
 		this.codexScreen.ChangeArticle(id, false, default(Vector3), CodexScreen.HistoryDirection.NewArticle);
+		this.codexScreen.FocusContainer(targetContainer);
 	}
 
 	public void ToggleSkills()

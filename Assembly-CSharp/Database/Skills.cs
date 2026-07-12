@@ -58,7 +58,8 @@ namespace Database
 			this.Researching2 = this.AddSkill(new Skill("Researching2", DUPLICANTS.ROLES.RESEARCHER.NAME, DUPLICANTS.ROLES.RESEARCHER.DESCRIPTION, "", 1, "hat_role_research2", "skillbadge_role_research2", Db.Get().SkillGroups.Research.Id, new List<SkillPerk>
 			{
 				Db.Get().SkillPerks.IncreaseLearningMedium,
-				Db.Get().SkillPerks.CanStudyWorldObjects
+				Db.Get().SkillPerks.CanStudyWorldObjects,
+				Db.Get().SkillPerks.AllowGeyserTuning
 			}, new List<string> { this.Researching1.Id }));
 			this.AtomicResearch = this.AddSkill(new Skill("AtomicResearch", DUPLICANTS.ROLES.NUCLEAR_RESEARCHER.NAME, DUPLICANTS.ROLES.NUCLEAR_RESEARCHER.DESCRIPTION, "EXPANSION1_ID", 2, "hat_role_research5", "skillbadge_role_research3", Db.Get().SkillGroups.Research.Id, new List<SkillPerk>
 			{
@@ -74,10 +75,15 @@ namespace Database
 			this.Researching3 = this.AddSkill(new Skill("Researching3", DUPLICANTS.ROLES.SENIOR_RESEARCHER.NAME, DUPLICANTS.ROLES.SENIOR_RESEARCHER.DESCRIPTION, "", 2, "hat_role_research3", "skillbadge_role_research3", Db.Get().SkillGroups.Research.Id, new List<SkillPerk>
 			{
 				Db.Get().SkillPerks.IncreaseLearningLarge,
-				Db.Get().SkillPerks.AllowInterstellarResearch
+				Db.Get().SkillPerks.AllowInterstellarResearch,
+				Db.Get().SkillPerks.CanMissionControl
 			}, new List<string> { this.Researching2.Id }));
 			this.Researching3.deprecated = DlcManager.IsExpansion1Active();
-			this.Astronomy = this.AddSkill(new Skill("Astronomy", DUPLICANTS.ROLES.SENIOR_RESEARCHER.NAME, DUPLICANTS.ROLES.SENIOR_RESEARCHER.DESCRIPTION, "EXPANSION1_ID", 1, "hat_role_research3", "skillbadge_role_research2", Db.Get().SkillGroups.Research.Id, new List<SkillPerk> { Db.Get().SkillPerks.CanUseClusterTelescope }, new List<string> { this.Researching1.Id }));
+			this.Astronomy = this.AddSkill(new Skill("Astronomy", DUPLICANTS.ROLES.SENIOR_RESEARCHER.NAME, DUPLICANTS.ROLES.SENIOR_RESEARCHER.DESCRIPTION, "EXPANSION1_ID", 1, "hat_role_research3", "skillbadge_role_research2", Db.Get().SkillGroups.Research.Id, new List<SkillPerk>
+			{
+				Db.Get().SkillPerks.CanUseClusterTelescope,
+				Db.Get().SkillPerks.CanMissionControl
+			}, new List<string> { this.Researching1.Id }));
 			this.SpaceResearch = this.AddSkill(new Skill("SpaceResearch", DUPLICANTS.ROLES.SPACE_RESEARCHER.NAME, DUPLICANTS.ROLES.SPACE_RESEARCHER.DESCRIPTION, "EXPANSION1_ID", 2, "hat_role_research4", "skillbadge_role_research3", Db.Get().SkillGroups.Research.Id, new List<SkillPerk>
 			{
 				Db.Get().SkillPerks.IncreaseLearningLargeSpace,

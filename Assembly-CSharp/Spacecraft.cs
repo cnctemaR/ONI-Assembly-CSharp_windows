@@ -109,6 +109,15 @@ public class Spacecraft
 		if (this.state == Spacecraft.MissionState.Underway)
 		{
 			this.missionElapsed += deltaTime;
+			if (this.controlStationBuffTimeRemaining > 0f)
+			{
+				this.missionElapsed += deltaTime * 0.20000005f;
+				this.controlStationBuffTimeRemaining -= deltaTime;
+			}
+			else
+			{
+				this.controlStationBuffTimeRemaining = 0f;
+			}
 			if (this.missionElapsed > this.missionDuration)
 			{
 				this.CompleteMission();
@@ -179,6 +188,9 @@ public class Spacecraft
 
 	[Serialize]
 	public string rocketName = UI.STARMAP.DEFAULT_NAME;
+
+	[Serialize]
+	public float controlStationBuffTimeRemaining;
 
 	[Serialize]
 	public Ref<LaunchConditionManager> refLaunchConditions = new Ref<LaunchConditionManager>();

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using STRINGS;
 using UnityEngine;
 
@@ -929,6 +930,35 @@ namespace Database
 				return str.Replace("{Distance}", clusterTraveler2.RemainingTravelNodes().ToString() + " " + UI.CLUSTERMAP.TILES);
 			};
 			this.RocketStranded = this.CreateStatusItem("RocketStranded", "BUILDING", "", StatusItem.IconType.Info, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 129022);
+			this.MissionControlAssistingRocket = this.CreateStatusItem("MissionControlAssistingRocket", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
+			this.MissionControlAssistingRocket.resolveStringCallback = delegate(string str, object data)
+			{
+				Spacecraft spacecraft = data as Spacecraft;
+				Clustercraft clustercraft = data as Clustercraft;
+				return str.Replace("{0}", (spacecraft != null) ? spacecraft.rocketName : clustercraft.Name);
+			};
+			this.NoRocketsToMissionControlBoost = this.CreateStatusItem("NoRocketsToMissionControlClusterBoost", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
+			this.NoRocketsToMissionControlClusterBoost = this.CreateStatusItem("NoRocketsToMissionControlClusterBoost", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
+			this.NoRocketsToMissionControlClusterBoost.resolveStringCallback = delegate(string str, object data)
+			{
+				if (str.Contains("{0}"))
+				{
+					str = str.Replace("{0}", 2.ToString());
+				}
+				return str;
+			};
+			this.MissionControlBoosted = this.CreateStatusItem("MissionControlBoosted", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
+			this.MissionControlBoosted.resolveStringCallback = delegate(string str, object data)
+			{
+				Spacecraft spacecraft2 = data as Spacecraft;
+				Clustercraft clustercraft2 = data as Clustercraft;
+				str = str.Replace("{0}", GameUtil.GetFormattedPercent(20.000004f, GameUtil.TimeSlice.None));
+				if (str.Contains("{1}"))
+				{
+					str = str.Replace("{1}", GameUtil.GetFormattedTime((spacecraft2 != null) ? spacecraft2.controlStationBuffTimeRemaining : clustercraft2.controlStationBuffTimeRemaining, "F0"));
+				}
+				return str;
+			};
 			this.RailgunpayloadNeedsEmptying = this.CreateStatusItem("RailgunpayloadNeedsEmptying", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
 			this.AwaitingEmptyBuilding = this.CreateStatusItem("AwaitingEmptyBuilding", "BUILDING", "action_empty_contents", StatusItem.IconType.Custom, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
 			this.DuplicantActivationRequired = this.CreateStatusItem("DuplicantActivationRequired", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
@@ -1036,23 +1066,102 @@ namespace Database
 			this.LosingRadbolts = new StatusItem("LOSINGRADBOLTS", "BUILDING", "status_item_exclamation", StatusItem.IconType.Custom, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 129022, null);
 			this.FabricatorAcceptsMutantSeeds = new StatusItem("FABRICATORACCEPTSMUTANTSEEDS", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, false, 129022, null);
 			this.NoSpiceSelected = new StatusItem("SPICEGRINDERNOSPICE", "BUILDING", "status_item_no_filter_set", StatusItem.IconType.Custom, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 129022, null);
+			this.GeoTunerNoGeyserSelected = new StatusItem("GEOTUNER_NEEDGEYSER", "BUILDING", "status_item_fabricator_select", StatusItem.IconType.Custom, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 129022, null);
+			this.GeoTunerResearchNeeded = new StatusItem("GEOTUNER_CHARGE_REQUIRED", "BUILDING", "", StatusItem.IconType.Info, NotificationType.BadMinor, false, OverlayModes.None.ID, false, 129022, null);
+			this.GeoTunerResearchInProgress = new StatusItem("GEOTUNER_CHARGING", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, false, 129022, null);
+			this.GeoTunerBroadcasting = new StatusItem("GEOTUNER_CHARGED", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, false, 129022, null);
+			this.GeoTunerBroadcasting.resolveStringCallback = delegate(string str, object data)
+			{
+				GeoTuner.Instance instance = (GeoTuner.Instance)data;
+				str = str.Replace("{0}", ((float)Mathf.CeilToInt(instance.sm.expirationTimer.Get(instance) / instance.enhancementDuration * 100f)).ToString() + "%");
+				return str;
+			};
+			this.GeoTunerBroadcasting.resolveTooltipCallback = delegate(string str, object data)
+			{
+				GeoTuner.Instance instance2 = (GeoTuner.Instance)data;
+				float num13 = instance2.sm.expirationTimer.Get(instance2);
+				float num14 = 100f / instance2.enhancementDuration;
+				str = str.Replace("{0}", GameUtil.GetFormattedTime(num13, "F0"));
+				str = str.Replace("{1}", "-" + num14.ToString("0.00") + "%");
+				return str;
+			};
+			this.GeoTunerGeyserStatus = new StatusItem("GEOTUNER_GEYSER_STATUS", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, false, 129022, null);
+			this.GeoTunerGeyserStatus.resolveStringCallback = delegate(string str, object data)
+			{
+				Geyser assignedGeyser = ((GeoTuner.Instance)data).GetAssignedGeyser();
+				bool flag5 = assignedGeyser != null && assignedGeyser.smi.GetCurrentState() != null && assignedGeyser.smi.GetCurrentState().parent == assignedGeyser.smi.sm.erupt;
+				bool flag6 = assignedGeyser != null && assignedGeyser.smi.GetCurrentState() == assignedGeyser.smi.sm.dormant;
+				if (!flag6)
+				{
+					bool flag7 = !flag5;
+				}
+				return flag5 ? BUILDING.STATUSITEMS.GEOTUNER_GEYSER_STATUS.NAME_ERUPTING : (flag6 ? BUILDING.STATUSITEMS.GEOTUNER_GEYSER_STATUS.NAME_DORMANT : BUILDING.STATUSITEMS.GEOTUNER_GEYSER_STATUS.NAME_IDLE);
+			};
+			this.GeoTunerGeyserStatus.resolveTooltipCallback = delegate(string str, object data)
+			{
+				Geyser assignedGeyser2 = ((GeoTuner.Instance)data).GetAssignedGeyser();
+				if (assignedGeyser2 != null)
+				{
+					assignedGeyser2.gameObject.GetProperName();
+				}
+				bool flag8 = assignedGeyser2 != null && assignedGeyser2.smi.GetCurrentState() != null && assignedGeyser2.smi.GetCurrentState().parent == assignedGeyser2.smi.sm.erupt;
+				bool flag9 = assignedGeyser2 != null && assignedGeyser2.smi.GetCurrentState() == assignedGeyser2.smi.sm.dormant;
+				if (!flag9)
+				{
+					bool flag10 = !flag8;
+				}
+				return flag8 ? BUILDING.STATUSITEMS.GEOTUNER_GEYSER_STATUS.TOOLTIP_ERUPTING : (flag9 ? BUILDING.STATUSITEMS.GEOTUNER_GEYSER_STATUS.TOOLTIP_DORMANT : BUILDING.STATUSITEMS.GEOTUNER_GEYSER_STATUS.TOOLTIP_IDLE);
+			};
+			this.GeyserGeotuned = new StatusItem("GEYSER_GEOTUNED", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, false, 129022, null);
+			this.GeyserGeotuned.resolveStringCallback = delegate(string str, object data)
+			{
+				Geyser geyser = (Geyser)data;
+				int num15 = 0;
+				int num16 = Components.GeoTuners.GetItems(geyser.GetMyWorldId()).Count<GeoTuner.Instance>((GeoTuner.Instance x) => x.GetAssignedGeyser() == geyser);
+				for (int k = 0; k < geyser.modifications.Count; k++)
+				{
+					if (geyser.modifications[k].originID.Contains("GeoTuner"))
+					{
+						num15++;
+					}
+				}
+				str = str.Replace("{0}", num15.ToString());
+				str = str.Replace("{1}", num16.ToString());
+				return str;
+			};
+			this.GeyserGeotuned.resolveTooltipCallback = delegate(string str, object data)
+			{
+				Geyser geyser = (Geyser)data;
+				int num17 = 0;
+				int num18 = Components.GeoTuners.GetItems(geyser.GetMyWorldId()).Count<GeoTuner.Instance>((GeoTuner.Instance x) => x.GetAssignedGeyser() == geyser);
+				for (int l = 0; l < geyser.modifications.Count; l++)
+				{
+					if (geyser.modifications[l].originID.Contains("GeoTuner"))
+					{
+						num17++;
+					}
+				}
+				str = str.Replace("{0}", num17.ToString());
+				str = str.Replace("{1}", num18.ToString());
+				return str;
+			};
 			this.CreatureManipulatorWaiting = this.CreateStatusItem("CreatureManipulatorWaiting", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
 			this.CreatureManipulatorProgress = this.CreateStatusItem("CreatureManipulatorProgress", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
 			this.CreatureManipulatorProgress.resolveStringCallback = delegate(string str, object data)
 			{
-				GravitasCreatureManipulator.Instance instance = (GravitasCreatureManipulator.Instance)data;
-				return string.Format(str, instance.ScannedSpecies.Count, instance.def.numSpeciesToUnlockMorphMode);
+				GravitasCreatureManipulator.Instance instance3 = (GravitasCreatureManipulator.Instance)data;
+				return string.Format(str, instance3.ScannedSpecies.Count, instance3.def.numSpeciesToUnlockMorphMode);
 			};
 			this.CreatureManipulatorProgress.resolveTooltipCallback = delegate(string str, object data)
 			{
-				GravitasCreatureManipulator.Instance instance2 = (GravitasCreatureManipulator.Instance)data;
-				if (instance2.ScannedSpecies.Count == 0)
+				GravitasCreatureManipulator.Instance instance4 = (GravitasCreatureManipulator.Instance)data;
+				if (instance4.ScannedSpecies.Count == 0)
 				{
 					str = str + "\n • " + BUILDING.STATUSITEMS.CREATUREMANIPULATORPROGRESS.NO_DATA;
 				}
 				else
 				{
-					foreach (Tag tag in instance2.ScannedSpecies)
+					foreach (Tag tag in instance4.ScannedSpecies)
 					{
 						str = str + "\n • " + Strings.Get("STRINGS.CREATURES.FAMILY_PLURAL." + tag.ToString().ToUpper());
 					}
@@ -1586,6 +1695,26 @@ namespace Database
 		public StatusItem FabricatorAcceptsMutantSeeds;
 
 		public StatusItem NoSpiceSelected;
+
+		public StatusItem MissionControlAssistingRocket;
+
+		public StatusItem NoRocketsToMissionControlBoost;
+
+		public StatusItem NoRocketsToMissionControlClusterBoost;
+
+		public StatusItem MissionControlBoosted;
+
+		public StatusItem GeoTunerNoGeyserSelected;
+
+		public StatusItem GeoTunerResearchNeeded;
+
+		public StatusItem GeoTunerResearchInProgress;
+
+		public StatusItem GeoTunerBroadcasting;
+
+		public StatusItem GeoTunerGeyserStatus;
+
+		public StatusItem GeyserGeotuned;
 
 		public StatusItem CreatureManipulatorWaiting;
 

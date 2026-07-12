@@ -168,6 +168,7 @@ public class LaunchableRocketCluster : StateMachineComponent<LaunchableRocketClu
 					Game.Instance.Trigger(586301400, e);
 				}
 			}
+			Game.Instance.Trigger(-1277991738, base.gameObject);
 			this.constantVelocityPhase_maxSpeed = 0f;
 		}
 
@@ -367,7 +368,11 @@ public class LaunchableRocketCluster : StateMachineComponent<LaunchableRocketClu
 				smi.LaunchLoop(dt);
 			}, UpdateRate.SIM_EVERY_TICK, false)
 				.ParamTransition<float>(this.distanceAboveGround, this.not_grounded.space, (LaunchableRocketCluster.StatesInstance smi, float p) => p >= this.distanceToSpace.Get(smi))
-				.TriggerOnEnter(GameHashes.StartRocketLaunch, null);
+				.TriggerOnEnter(GameHashes.StartRocketLaunch, null)
+				.Exit(delegate(LaunchableRocketCluster.StatesInstance smi)
+				{
+					smi.gameObject.GetMyWorld().RevealSurface();
+				});
 			this.not_grounded.space.EnterTransition(this.not_grounded.landing_setup, (LaunchableRocketCluster.StatesInstance smi) => smi.IsNotSpaceBound()).EventTransition(GameHashes.DoReturnRocket, this.not_grounded.landing_setup, null).Enter(delegate(LaunchableRocketCluster.StatesInstance smi)
 			{
 				smi.FinalizeLaunch();
@@ -411,6 +416,7 @@ public class LaunchableRocketCluster : StateMachineComponent<LaunchableRocketClu
 						Game.Instance.Trigger(586301400, e);
 					}
 				}
+				Game.Instance.Trigger(-887025858, smi.gameObject);
 				smi.GoTo(this.grounded);
 			});
 		}

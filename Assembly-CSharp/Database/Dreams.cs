@@ -7,9 +7,9 @@ namespace Database
 		public Dreams(ResourceSet parent)
 			: base("Dreams", parent)
 		{
-			this.ExplorerDream = new Dream("ExplorerDream", this, "dream_tear_swirly_kanim", new string[0]);
+			this.CommonDream = new Dream("CommonDream", this, "dream_tear_swirly_kanim", new string[] { "dreamIcon_journal" });
 		}
 
-		public Dream ExplorerDream;
+		public Dream CommonDream;
 	}
 }

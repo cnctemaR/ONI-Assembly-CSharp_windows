@@ -74,6 +74,7 @@ public class KAnimBatch
 		this.batchGroup = group.batchID;
 		this.materialType = material_type;
 		this.matProperties = new MaterialPropertyBlock();
+		this.atlases = new KAnimBatch.AtlasList(0, KAnimBatchManager.MaxAtlasesByMaterialType[(int)this.materialType]);
 		this.position = new Vector3(0f, 0f, z);
 		this.symbolInstanceSlots = new KAnimBatch.SymbolInstanceSlot[group.maxGroupSize];
 		this.symbolOverrideInfoSlots = new KAnimBatch.SymbolOverrideInfoSlot[group.maxGroupSize];
@@ -106,8 +107,8 @@ public class KAnimBatch
 		{
 			global::Debug.LogErrorFormat("Got null data texture from AnimBatchGroup [{0}]", new object[] { this.batchGroup });
 		}
-		int bestTextureSize = KAnimBatchGroup.GetBestTextureSize((float)(this.group.data.maxSymbolsPerBuild * this.group.maxGroupSize * 8));
-		this.symbolInstanceTex = this.group.CreateTexture("SymbolInstanceTex", bestTextureSize, KAnimBatch.ShaderProperty_symbolInstanceTex, KAnimBatch.ShaderProperty_SYMBOL_INSTANCE_TEXTURE_SIZE);
+		Vector2I bestTextureSize = KAnimBatchGroup.GetBestTextureSize(this.group.data.maxSymbolsPerBuild * this.group.maxGroupSize * 8);
+		this.symbolInstanceTex = this.group.CreateTexture("SymbolInstanceTex", bestTextureSize.x, bestTextureSize.y, KAnimBatch.ShaderProperty_symbolInstanceTex, KAnimBatch.ShaderProperty_SYMBOL_INSTANCE_TEXTURE_SIZE);
 		int width = this.dataTex.width;
 		if (width == 0)
 		{
@@ -339,8 +340,8 @@ public class KAnimBatch
 					{
 						if (this.symbolOverrideInfoTex == null)
 						{
-							int bestTextureSize = KAnimBatchGroup.GetBestTextureSize((float)(this.group.data.maxSymbolFrameInstancesPerbuild * this.group.maxGroupSize * 12));
-							this.symbolOverrideInfoTex = this.group.CreateTexture("SymbolOverrideInfoTex", bestTextureSize, KAnimBatch.ShaderProperty_symbolOverrideInfoTex, KAnimBatch.ShaderProperty_SYMBOL_OVERRIDE_INFO_TEXTURE_SIZE);
+							Vector2I bestTextureSize = KAnimBatchGroup.GetBestTextureSize(this.group.data.maxSymbolFrameInstancesPerbuild * this.group.maxGroupSize * 12);
+							this.symbolOverrideInfoTex = this.group.CreateTexture("SymbolOverrideInfoTex", bestTextureSize.x, bestTextureSize.y, KAnimBatch.ShaderProperty_symbolOverrideInfoTex, KAnimBatch.ShaderProperty_SYMBOL_OVERRIDE_INFO_TEXTURE_SIZE);
 							this.symbolOverrideInfoTex.SetTextureAndSize(this.matProperties);
 							this.matProperties.SetFloat(KAnimBatch.ShaderProperty_SUPPORTS_SYMBOL_OVERRIDING, 1f);
 						}
@@ -399,7 +400,7 @@ public class KAnimBatch
 
 	private KAnimBatch.SymbolOverrideInfoSlot[] symbolOverrideInfoSlots;
 
-	public KAnimBatch.AtlasList atlases = new KAnimBatch.AtlasList(0);
+	public KAnimBatch.AtlasList atlases;
 
 	private bool needsWrite;
 
@@ -419,15 +420,16 @@ public class KAnimBatch
 
 	public class AtlasList
 	{
-		public AtlasList(int start_idx)
+		public AtlasList(int start_idx, int max)
 		{
 			this.startIdx = start_idx;
+			this.maxAtlases = max;
 		}
 
 		public int Add(Texture2D atlas)
 		{
 			DebugUtil.Assert(atlas != null, "KAnimBatch Atlas is null");
-			DebugUtil.Assert(this.atlases.Count < KAnimBatchManager.instance.atlasNames.Length);
+			DebugUtil.Assert(this.atlases.Count < this.maxAtlases);
 			int num = this.atlases.IndexOf(atlas);
 			if (num == -1)
 			{
@@ -443,27 +445,29 @@ public class KAnimBatch
 			for (int i = 0; i < this.atlases.Count; i++)
 			{
 				int num = this.startIdx + i;
-				if (num >= KAnimBatchManager.instance.atlasNames.Length)
+				if (num >= this.maxAtlases)
 				{
 					flag = true;
 				}
 				else
 				{
-					material_property_block.SetTexture(KAnimBatchManager.instance.atlasNames[num], this.atlases[i]);
+					Texture2D texture2D = this.atlases[i];
+					Texture2D texture = StreamedTextures.GetTexture(texture2D.name);
+					material_property_block.SetTexture(KAnimBatchManager.AtlasNames[num], (texture != null) ? texture : texture2D);
 				}
 			}
 			if (flag && !KAnimBatch.AtlasList.reported_overflow)
 			{
 				string text = "Atlas overflow: (startIndex=" + this.startIdx.ToString() + ")\n";
 				int num2 = 0;
-				foreach (Texture2D texture2D in this.atlases)
+				foreach (Texture2D texture2D2 in this.atlases)
 				{
 					text = string.Concat(new string[]
 					{
 						text,
 						(this.startIdx + num2).ToString(),
 						": ",
-						texture2D.name,
+						texture2D2.name,
 						"\n"
 					});
 					num2++;
@@ -507,6 +511,8 @@ public class KAnimBatch
 		private List<Texture2D> atlases = new List<Texture2D>();
 
 		private int startIdx;
+
+		private int maxAtlases;
 
 		private static bool reported_overflow;
 	}

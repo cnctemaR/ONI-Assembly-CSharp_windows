@@ -203,6 +203,11 @@ public class BuildingInternalConstructor : GameStateMachine<BuildingInternalCons
 			}
 		}
 
+		public void SetButtonTextOverride(ButtonMenuTextOverride text)
+		{
+			throw new NotImplementedException();
+		}
+
 		public bool SidescreenEnabled()
 		{
 			return true;

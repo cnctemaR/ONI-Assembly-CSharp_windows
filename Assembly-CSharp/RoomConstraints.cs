@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Database;
 using STRINGS;
 
 public static class RoomConstraints
@@ -26,61 +27,62 @@ public static class RoomConstraints
 					}
 				}
 			}
+			return text;
 		}
-		else
+		RoomTypes.RoomTypeQueryResult[] possibleRoomTypes = Db.Get().RoomTypes.GetPossibleRoomTypes(room);
+		text += ((possibleRoomTypes.Length > 1) ? ("<b>" + ROOMS.CRITERIA.POSSIBLE_TYPES_HEADER + "</b>") : "");
+		foreach (RoomTypes.RoomTypeQueryResult roomTypeQueryResult in possibleRoomTypes)
 		{
-			RoomType[] possibleRoomTypes = Db.Get().RoomTypes.GetPossibleRoomTypes(room);
-			text += ((possibleRoomTypes.Length > 1) ? ("<b>" + ROOMS.CRITERIA.POSSIBLE_TYPES_HEADER + "</b>") : "");
-			foreach (RoomType roomType2 in possibleRoomTypes)
+			RoomType type = roomTypeQueryResult.Type;
+			if (type != Db.Get().RoomTypes.Neutral)
 			{
-				if (roomType2 != Db.Get().RoomTypes.Neutral)
+				if (text != "")
 				{
-					if (text != "")
-					{
-						text += "\n";
-					}
-					text = string.Concat(new string[]
-					{
-						text,
-						"<b><color=#BCBCBC>    • ",
-						roomType2.Name,
-						"</b> (",
-						roomType2.primary_constraint.name,
-						")</color>"
-					});
+					text += "\n";
+				}
+				text = string.Concat(new string[]
+				{
+					text,
+					"<b><color=#BCBCBC>    • ",
+					type.Name,
+					"</b> (",
+					type.primary_constraint.name,
+					")</color>"
+				});
+				if (roomTypeQueryResult.SatisfactionRating == RoomType.RoomIdentificationResult.all_satisfied)
+				{
 					bool flag = false;
-					if (roomType2.additional_constraints != null)
+					RoomTypes.RoomTypeQueryResult[] array3 = possibleRoomTypes;
+					for (int j = 0; j < array3.Length; j++)
 					{
-						foreach (RoomConstraints.Constraint constraint2 in roomType2.additional_constraints)
+						RoomType type2 = array3[j].Type;
+						if (type2 != type && type2 != Db.Get().RoomTypes.Neutral && Db.Get().RoomTypes.HasAmbiguousRoomType(room, type, type2))
 						{
-							if (!constraint2.isSatisfied(room))
-							{
-								flag = true;
-								if (constraint2.building_criteria != null)
-								{
-									text = text + "\n<color=#F44A47FF>        • " + string.Format(ROOMS.CRITERIA.CRITERIA_FAILED.MISSING_BUILDING, constraint2.name) + "</color>";
-								}
-								else
-								{
-									text = text + "\n<color=#F44A47FF>        • " + string.Format(ROOMS.CRITERIA.CRITERIA_FAILED.FAILED, constraint2.name) + "</color>";
-								}
-							}
+							flag = true;
+							break;
 						}
 					}
-					if (!flag)
+					if (flag)
 					{
-						bool flag2 = false;
-						foreach (RoomType roomType3 in Db.Get().RoomTypes.resources)
+						text += string.Format("\n<color=#F44A47FF>{0}{1}{2}</color>", "    ", "    • ", ROOMS.CRITERIA.NO_TYPE_CONFLICTS);
+					}
+				}
+				else
+				{
+					foreach (RoomConstraints.Constraint constraint2 in type.additional_constraints)
+					{
+						if (!constraint2.isSatisfied(room))
 						{
-							if (roomType3 != roomType2 && roomType3 != Db.Get().RoomTypes.Neutral && Db.Get().RoomTypes.HasAmbiguousRoomType(room, roomType2, roomType3))
+							string text2 = string.Empty;
+							if (constraint2.building_criteria != null)
 							{
-								flag2 = true;
-								break;
+								text2 = string.Format(ROOMS.CRITERIA.CRITERIA_FAILED.MISSING_BUILDING, constraint2.name);
 							}
-						}
-						if (flag2)
-						{
-							text = text + "\n<color=#F44A47FF>        • " + ROOMS.CRITERIA.NO_TYPE_CONFLICTS + "</color>";
+							else
+							{
+								text2 = string.Format(ROOMS.CRITERIA.CRITERIA_FAILED.FAILED, constraint2.name);
+							}
+							text = text + "\n<color=#F44A47FF>        • " + text2 + "</color>";
 						}
 					}
 				}
@@ -94,6 +96,8 @@ public static class RoomConstraints
 	public static RoomConstraints.Constraint CEILING_HEIGHT_6 = new RoomConstraints.Constraint(null, (Room room) => 1 + room.cavity.maxY - room.cavity.minY >= 6, 1, string.Format(ROOMS.CRITERIA.CEILING_HEIGHT.NAME, "6"), string.Format(ROOMS.CRITERIA.CEILING_HEIGHT.DESCRIPTION, "6"), null);
 
 	public static RoomConstraints.Constraint MINIMUM_SIZE_12 = new RoomConstraints.Constraint(null, (Room room) => room.cavity.numCells >= 12, 1, string.Format(ROOMS.CRITERIA.MINIMUM_SIZE.NAME, "12"), string.Format(ROOMS.CRITERIA.MINIMUM_SIZE.DESCRIPTION, "12"), null);
+
+	public static RoomConstraints.Constraint MINIMUM_SIZE_24 = new RoomConstraints.Constraint(null, (Room room) => room.cavity.numCells >= 24, 1, string.Format(ROOMS.CRITERIA.MINIMUM_SIZE.NAME, "24"), string.Format(ROOMS.CRITERIA.MINIMUM_SIZE.DESCRIPTION, "24"), null);
 
 	public static RoomConstraints.Constraint MINIMUM_SIZE_32 = new RoomConstraints.Constraint(null, (Room room) => room.cavity.numCells >= 32, 1, string.Format(ROOMS.CRITERIA.MINIMUM_SIZE.NAME, "32"), string.Format(ROOMS.CRITERIA.MINIMUM_SIZE.DESCRIPTION, "32"), null);
 
@@ -130,6 +134,21 @@ public static class RoomConstraints
 		return true;
 	}, 1, ROOMS.CRITERIA.NO_COTS.NAME, ROOMS.CRITERIA.NO_COTS.DESCRIPTION, null);
 
+	public static RoomConstraints.Constraint NO_LUXURY_BEDS = new RoomConstraints.Constraint(null, delegate(Room room)
+	{
+		using (List<KPrefabID>.Enumerator enumerator3 = room.buildings.GetEnumerator())
+		{
+			while (enumerator3.MoveNext())
+			{
+				if (enumerator3.Current.HasTag(RoomConstraints.ConstraintTags.LuxuryBedType))
+				{
+					return false;
+				}
+			}
+		}
+		return true;
+	}, 1, ROOMS.CRITERIA.NO_COTS.NAME, ROOMS.CRITERIA.NO_COTS.DESCRIPTION, null);
+
 	public static RoomConstraints.Constraint NO_OUTHOUSES = new RoomConstraints.Constraint(null, delegate(Room room)
 	{
 		foreach (KPrefabID kprefabID2 in room.buildings)
@@ -154,9 +173,41 @@ public static class RoomConstraints
 		return !flag;
 	}, 1, ROOMS.CRITERIA.NO_MESS_STATION.NAME, ROOMS.CRITERIA.NO_MESS_STATION.DESCRIPTION, null);
 
-	public static RoomConstraints.Constraint LUXURY_BED_SINGLE = new RoomConstraints.Constraint((KPrefabID bc) => bc.HasTag(RoomConstraints.ConstraintTags.LuxuryBedType), null, 1, ROOMS.CRITERIA.LUXURY_BED_SINGLE.NAME, ROOMS.CRITERIA.LUXURY_BED_SINGLE.DESCRIPTION, null);
+	public static RoomConstraints.Constraint HAS_LUXURY_BED = new RoomConstraints.Constraint((KPrefabID bc) => bc.HasTag(RoomConstraints.ConstraintTags.LuxuryBedType), null, 1, ROOMS.CRITERIA.HAS_LUXURY_BED.NAME, ROOMS.CRITERIA.HAS_LUXURY_BED.DESCRIPTION, null);
 
-	public static RoomConstraints.Constraint BED_SINGLE = new RoomConstraints.Constraint((KPrefabID bc) => bc.HasTag(RoomConstraints.ConstraintTags.BedType) && !bc.HasTag(RoomConstraints.ConstraintTags.Clinic), null, 1, ROOMS.CRITERIA.BED_SINGLE.NAME, ROOMS.CRITERIA.BED_SINGLE.DESCRIPTION, null);
+	public static RoomConstraints.Constraint HAS_BED = new RoomConstraints.Constraint((KPrefabID bc) => bc.HasTag(RoomConstraints.ConstraintTags.BedType) && !bc.HasTag(RoomConstraints.ConstraintTags.Clinic), null, 1, ROOMS.CRITERIA.HAS_BED.NAME, ROOMS.CRITERIA.HAS_BED.DESCRIPTION, null);
+
+	public static RoomConstraints.Constraint SCIENCE_BUILDINGS = new RoomConstraints.Constraint((KPrefabID bc) => bc.HasTag(RoomConstraints.ConstraintTags.ScienceBuilding), null, 2, ROOMS.CRITERIA.SCIENCE_BUILDINGS.NAME, ROOMS.CRITERIA.SCIENCE_BUILDINGS.DESCRIPTION, null);
+
+	public static RoomConstraints.Constraint BED_SINGLE = new RoomConstraints.Constraint((KPrefabID bc) => bc.HasTag(RoomConstraints.ConstraintTags.BedType) && !bc.HasTag(RoomConstraints.ConstraintTags.Clinic), delegate(Room room)
+	{
+		short num2 = 0;
+		int num3 = 0;
+		while (num2 < 2 && num3 < room.buildings.Count)
+		{
+			if (room.buildings[num3].HasTag(RoomConstraints.ConstraintTags.BedType))
+			{
+				num2 += 1;
+			}
+			num3++;
+		}
+		return num2 == 1;
+	}, 1, ROOMS.CRITERIA.BED_SINGLE.NAME, ROOMS.CRITERIA.BED_SINGLE.DESCRIPTION, null);
+
+	public static RoomConstraints.Constraint LUXURY_BED_SINGLE = new RoomConstraints.Constraint((KPrefabID bc) => bc.HasTag(RoomConstraints.ConstraintTags.LuxuryBedType), delegate(Room room)
+	{
+		short num4 = 0;
+		int num5 = 0;
+		while (num4 <= 2 && num5 < room.buildings.Count)
+		{
+			if (room.buildings[num5].HasTag(RoomConstraints.ConstraintTags.LuxuryBedType))
+			{
+				num4 += 1;
+			}
+			num5++;
+		}
+		return num4 == 1;
+	}, 1, ROOMS.CRITERIA.LUXURY_BED_SINGLE.NAME, ROOMS.CRITERIA.LUXURY_BED_SINGLE.DESCRIPTION, null);
 
 	public static RoomConstraints.Constraint BUILDING_DECOR_POSITIVE = new RoomConstraints.Constraint(delegate(KPrefabID bc)
 	{
@@ -164,9 +215,11 @@ public static class RoomConstraints
 		return component != null && component.baseDecor > 0f;
 	}, null, 1, ROOMS.CRITERIA.BUILDING_DECOR_POSITIVE.NAME, ROOMS.CRITERIA.BUILDING_DECOR_POSITIVE.DESCRIPTION, null);
 
-	public static RoomConstraints.Constraint DECORATIVE_ITEM = new RoomConstraints.Constraint((KPrefabID bc) => bc.HasTag(GameTags.Decoration), null, 1, ROOMS.CRITERIA.DECORATIVE_ITEM.NAME, ROOMS.CRITERIA.DECORATIVE_ITEM.DESCRIPTION, null);
+	public static RoomConstraints.Constraint DECORATIVE_ITEM = new RoomConstraints.Constraint((KPrefabID bc) => bc.HasTag(GameTags.Decoration), null, 1, string.Format(ROOMS.CRITERIA.DECORATIVE_ITEM.NAME, 1), string.Format(ROOMS.CRITERIA.DECORATIVE_ITEM.DESCRIPTION, 1), null);
 
-	public static RoomConstraints.Constraint DECORATIVE_ITEM_20 = new RoomConstraints.Constraint((KPrefabID bc) => bc.HasTag(GameTags.Decoration) && bc.HasTag(RoomConstraints.ConstraintTags.Decor20), null, 1, string.Format(ROOMS.CRITERIA.DECORATIVE_ITEM_N.NAME, "20"), string.Format(ROOMS.CRITERIA.DECORATIVE_ITEM_N.DESCRIPTION, "20"), null);
+	public static RoomConstraints.Constraint DECORATIVE_ITEM_2 = new RoomConstraints.Constraint((KPrefabID bc) => bc.HasTag(GameTags.Decoration), null, 2, string.Format(ROOMS.CRITERIA.DECORATIVE_ITEM.NAME, 2), string.Format(ROOMS.CRITERIA.DECORATIVE_ITEM.DESCRIPTION, 2), null);
+
+	public static RoomConstraints.Constraint DECORATIVE_ITEM_SCORE_20 = new RoomConstraints.Constraint((KPrefabID bc) => bc.HasTag(GameTags.Decoration) && bc.HasTag(RoomConstraints.ConstraintTags.Decor20), null, 1, string.Format(ROOMS.CRITERIA.DECORATIVE_ITEM_N.NAME, "20"), string.Format(ROOMS.CRITERIA.DECORATIVE_ITEM_N.DESCRIPTION, "20"), null);
 
 	public static RoomConstraints.Constraint POWER_STATION = new RoomConstraints.Constraint((KPrefabID bc) => bc.HasTag(RoomConstraints.ConstraintTags.PowerStation), null, 1, ROOMS.CRITERIA.POWER_STATION.NAME, ROOMS.CRITERIA.POWER_STATION.DESCRIPTION, null);
 
@@ -233,27 +286,56 @@ public static class RoomConstraints
 
 	public static RoomConstraints.Constraint ORIGINALTILES = new RoomConstraints.Constraint(null, (Room room) => 1 + room.cavity.maxY - room.cavity.minY >= 4, 1, "", "", null);
 
+	public static RoomConstraints.Constraint IS_BACKWALLED = new RoomConstraints.Constraint(null, delegate(Room room)
+	{
+		bool flag2 = true;
+		int num6 = (room.cavity.maxX - room.cavity.minX + 1) / 2 + 1;
+		int num7 = 0;
+		while (flag2 && num7 < num6)
+		{
+			int num8 = room.cavity.minX + num7;
+			int num9 = room.cavity.maxX - num7;
+			int num10 = room.cavity.minY;
+			while (flag2 && num10 <= room.cavity.maxY)
+			{
+				int num11 = Grid.XYToCell(num8, num10);
+				int num12 = Grid.XYToCell(num9, num10);
+				if (Game.Instance.roomProber.GetCavityForCell(num11) == room.cavity)
+				{
+					flag2 &= Grid.Objects[num11, 2] != null;
+				}
+				if (Game.Instance.roomProber.GetCavityForCell(num12) == room.cavity)
+				{
+					flag2 &= Grid.Objects[num12, 2] != null;
+				}
+				num10++;
+			}
+			num7++;
+		}
+		return flag2;
+	}, 1, ROOMS.CRITERIA.IS_BACKWALLED.NAME, ROOMS.CRITERIA.IS_BACKWALLED.DESCRIPTION, null);
+
 	public static RoomConstraints.Constraint WILDANIMAL = new RoomConstraints.Constraint(null, (Room room) => room.cavity.creatures.Count + room.cavity.eggs.Count > 0, 1, ROOMS.CRITERIA.WILDANIMAL.NAME, ROOMS.CRITERIA.WILDANIMAL.DESCRIPTION, null);
 
 	public static RoomConstraints.Constraint WILDANIMALS = new RoomConstraints.Constraint(null, delegate(Room room)
 	{
-		int num2 = 0;
-		using (List<KPrefabID>.Enumerator enumerator5 = room.cavity.creatures.GetEnumerator())
+		int num13 = 0;
+		using (List<KPrefabID>.Enumerator enumerator6 = room.cavity.creatures.GetEnumerator())
 		{
-			while (enumerator5.MoveNext())
+			while (enumerator6.MoveNext())
 			{
-				if (enumerator5.Current.HasTag(GameTags.Creatures.Wild))
+				if (enumerator6.Current.HasTag(GameTags.Creatures.Wild))
 				{
-					num2++;
+					num13++;
 				}
 			}
 		}
-		return num2 >= 2;
+		return num13 >= 2;
 	}, 1, ROOMS.CRITERIA.WILDANIMALS.NAME, ROOMS.CRITERIA.WILDANIMALS.DESCRIPTION, null);
 
 	public static RoomConstraints.Constraint WILDPLANT = new RoomConstraints.Constraint(null, delegate(Room room)
 	{
-		int num3 = 0;
+		int num14 = 0;
 		foreach (KPrefabID kprefabID5 in room.cavity.plants)
 		{
 			if (kprefabID5 != null)
@@ -262,20 +344,20 @@ public static class RoomConstraints
 				ReceptacleMonitor component5 = kprefabID5.GetComponent<ReceptacleMonitor>();
 				if (component5 != null && !component5.Replanted)
 				{
-					num3++;
+					num14++;
 				}
 				else if (component4 != null)
 				{
-					num3++;
+					num14++;
 				}
 			}
 		}
-		return num3 >= 2;
+		return num14 >= 2;
 	}, 1, ROOMS.CRITERIA.WILDPLANT.NAME, ROOMS.CRITERIA.WILDPLANT.DESCRIPTION, null);
 
 	public static RoomConstraints.Constraint WILDPLANTS = new RoomConstraints.Constraint(null, delegate(Room room)
 	{
-		int num4 = 0;
+		int num15 = 0;
 		foreach (KPrefabID kprefabID6 in room.cavity.plants)
 		{
 			if (kprefabID6 != null)
@@ -284,15 +366,15 @@ public static class RoomConstraints
 				ReceptacleMonitor component7 = kprefabID6.GetComponent<ReceptacleMonitor>();
 				if (component7 != null && !component7.Replanted)
 				{
-					num4++;
+					num15++;
 				}
 				else if (component6 != null)
 				{
-					num4++;
+					num15++;
 				}
 			}
 		}
-		return num4 >= 4;
+		return num15 >= 4;
 	}, 1, ROOMS.CRITERIA.WILDPLANTS.NAME, ROOMS.CRITERIA.WILDPLANTS.DESCRIPTION, null);
 
 	public static class ConstraintTags
@@ -313,7 +395,7 @@ public static class RoomConstraints
 
 		public static Tag AdvancedWashStation = "AdvancedWashStation".ToTag();
 
-		public static Tag ResearchStation = "ResearchStation".ToTag();
+		public static Tag ScienceBuilding = "ScienceBuilding".ToTag();
 
 		public static Tag LightSource = "LightSource".ToTag();
 
@@ -365,28 +447,35 @@ public static class RoomConstraints
 		public bool isSatisfied(Room room)
 		{
 			int num = 0;
-			if (this.room_criteria != null && this.room_criteria(room))
+			if (this.room_criteria != null && !this.room_criteria(room))
 			{
-				num++;
+				return false;
 			}
 			if (this.building_criteria != null)
 			{
-				foreach (KPrefabID kprefabID in room.buildings)
+				int num2 = 0;
+				while (num < this.times_required && num2 < room.buildings.Count)
 				{
+					KPrefabID kprefabID = room.buildings[num2];
 					if (!(kprefabID == null) && this.building_criteria(kprefabID))
 					{
 						num++;
 					}
+					num2++;
 				}
-				foreach (KPrefabID kprefabID2 in room.plants)
+				int num3 = 0;
+				while (num < this.times_required && num3 < room.plants.Count)
 				{
+					KPrefabID kprefabID2 = room.plants[num3];
 					if (!(kprefabID2 == null) && this.building_criteria(kprefabID2))
 					{
 						num++;
 					}
+					num3++;
 				}
+				return num >= this.times_required;
 			}
-			return num >= this.times_required;
+			return true;
 		}
 
 		public string name;

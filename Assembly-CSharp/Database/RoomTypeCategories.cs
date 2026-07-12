@@ -1,4 +1,5 @@
 ﻿using System;
+using STRINGS;
 
 namespace Database
 {
@@ -15,15 +16,16 @@ namespace Database
 			: base("RoomTypeCategories", parent)
 		{
 			base.Initialize();
-			this.None = this.Add("None", "", "roomNone", "unknown");
-			this.Food = this.Add("Food", "", "roomFood", "ui_room_food");
-			this.Sleep = this.Add("Sleep", "", "roomSleep", "ui_room_sleep");
-			this.Recreation = this.Add("Recreation", "", "roomRecreation", "ui_room_recreational");
-			this.Bathroom = this.Add("Bathroom", "", "roomBathroom", "ui_room_bathroom");
-			this.Hospital = this.Add("Hospital", "", "roomHospital", "ui_room_hospital");
-			this.Industrial = this.Add("Industrial", "", "roomIndustrial", "ui_room_industrial");
-			this.Agricultural = this.Add("Agricultural", "", "roomAgricultural", "ui_room_agricultural");
-			this.Park = this.Add("Park", "", "roomPark", "ui_room_park");
+			this.None = this.Add("None", ROOMS.CATEGORY.NONE.NAME, "roomNone", "unknown");
+			this.Food = this.Add("Food", ROOMS.CATEGORY.FOOD.NAME, "roomFood", "ui_room_food");
+			this.Sleep = this.Add("Sleep", ROOMS.CATEGORY.SLEEP.NAME, "roomSleep", "ui_room_sleep");
+			this.Recreation = this.Add("Recreation", ROOMS.CATEGORY.RECREATION.NAME, "roomRecreation", "ui_room_recreational");
+			this.Bathroom = this.Add("Bathroom", ROOMS.CATEGORY.BATHROOM.NAME, "roomBathroom", "ui_room_bathroom");
+			this.Hospital = this.Add("Hospital", ROOMS.CATEGORY.HOSPITAL.NAME, "roomHospital", "ui_room_hospital");
+			this.Industrial = this.Add("Industrial", ROOMS.CATEGORY.INDUSTRIAL.NAME, "roomIndustrial", "ui_room_industrial");
+			this.Agricultural = this.Add("Agricultural", ROOMS.CATEGORY.AGRICULTURAL.NAME, "roomAgricultural", "ui_room_agricultural");
+			this.Park = this.Add("Park", ROOMS.CATEGORY.PARK.NAME, "roomPark", "ui_room_park");
+			this.Science = this.Add("Science", ROOMS.CATEGORY.SCIENCE.NAME, "roomScience", "ui_room_science");
 		}
 
 		public RoomTypeCategory None;
@@ -43,5 +45,7 @@ namespace Database
 		public RoomTypeCategory Agricultural;
 
 		public RoomTypeCategory Park;
+
+		public RoomTypeCategory Science;
 	}
 }

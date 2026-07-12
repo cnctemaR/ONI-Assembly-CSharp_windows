@@ -51,6 +51,10 @@ public class PlayerController : KMonoBehaviour, IInputHandler
 
 	protected override void OnSpawn()
 	{
+		if (this.tools.Length == 0)
+		{
+			return;
+		}
 		this.ActivateTool(this.tools[0]);
 	}
 
@@ -119,7 +123,7 @@ public class PlayerController : KMonoBehaviour, IInputHandler
 
 	private void OnCleanup()
 	{
-		Global.Instance.GetInputManager().usedMenus.Remove(this);
+		Global.GetInputManager().usedMenus.Remove(this);
 	}
 
 	private void LateUpdate()
@@ -174,7 +178,7 @@ public class PlayerController : KMonoBehaviour, IInputHandler
 
 	public bool IsUsingDefaultTool()
 	{
-		return this.activeTool == this.tools[0];
+		return this.tools.Length != 0 && this.activeTool == this.tools[0];
 	}
 
 	private void StartDrag(global::Action action)
@@ -191,7 +195,7 @@ public class PlayerController : KMonoBehaviour, IInputHandler
 	{
 		this.dragDelta = Vector2.zero;
 		Vector3 mousePos = KInputManager.GetMousePos();
-		if (!this.dragging && this.CanDrag() && ((mousePos - this.startDragPos).magnitude > 6f || Time.unscaledTime - this.startDragTime > 0.3f))
+		if (!this.dragging && this.CanDrag() && ((mousePos - this.startDragPos).sqrMagnitude > 36f || Time.unscaledTime - this.startDragTime > 0.3f))
 		{
 			this.dragging = true;
 		}
@@ -414,7 +418,7 @@ public class PlayerController : KMonoBehaviour, IInputHandler
 
 	private Vector3 prevMousePos = new Vector3(float.PositiveInfinity, 0f, 0f);
 
-	private const float MIN_DRAG_DIST = 6f;
+	private const float MIN_DRAG_DIST_SQR = 36f;
 
 	private const float MIN_DRAG_TIME = 0.3f;
 

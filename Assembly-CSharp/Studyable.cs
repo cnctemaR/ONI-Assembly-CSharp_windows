@@ -79,6 +79,11 @@ public class Studyable : Workable, ISidescreenButtonControl
 		}
 	}
 
+	public void SetButtonTextOverride(ButtonMenuTextOverride text)
+	{
+		throw new NotImplementedException();
+	}
+
 	public bool SidescreenEnabled()
 	{
 		return true;
@@ -109,6 +114,7 @@ public class Studyable : Workable, ISidescreenButtonControl
 	{
 		base.OnSpawn();
 		this.studiedIndicator = new MeterController(base.GetComponent<KBatchedAnimController>(), this.meterTrackerSymbol, this.meterAnim, Meter.Offset.Infront, Grid.SceneLayer.NoLayer, new string[] { this.meterTrackerSymbol });
+		this.studiedIndicator.meterController.gameObject.AddComponent<LoopingSounds>();
 		this.Refresh();
 	}
 
@@ -225,5 +231,5 @@ public class Studyable : Workable, ISidescreenButtonControl
 
 	private Guid additionalStatusItemGuid;
 
-	private MeterController studiedIndicator;
+	public MeterController studiedIndicator;
 }

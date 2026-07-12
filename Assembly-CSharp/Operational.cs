@@ -275,6 +275,19 @@ public class Operational : KMonoBehaviour
 			this.FlagType = type;
 		}
 
+		public static Operational.Flag.Type GetFlagType(Operational.State operationalState)
+		{
+			switch (operationalState)
+			{
+			case Operational.State.Operational:
+			case Operational.State.Active:
+				return Operational.Flag.Type.Requirement;
+			case Operational.State.Functional:
+				return Operational.Flag.Type.Functional;
+			}
+			throw new InvalidOperationException("Can not convert NONE state to an Operational Flag Type");
+		}
+
 		public string Name;
 
 		public Operational.Flag.Type FlagType;

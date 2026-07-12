@@ -44,7 +44,7 @@ namespace STRINGS
 
 					public class BODY
 					{
-						public static LocString CONTAINER1 = "<smallcaps>[Voice Recognition Initialized]\n[Subject Identified: B040]</smallcaps>\n\n[LOG BEGINS]\n\nThree days ago, we completed our first non-fatal Duplicant trial of Nikola's comprehensive synapse microanalysis and mirroring process. Five hours from now, Subject #901 will make history as our first human test subject.\n\nEven at the Vertex Institute, which is twice Gravitas's size, I could've spent half my career waiting for approval to advance to human trials for such an invasive process! But Director Stern is too invested in this work to let it stagnate.\n\nMy darling Bruce always said that when you're on the right path, the universe conspires to help you. He'd be so proud of the work we do here.\n\n[LOG ENDS]\n\n[LOG BEGINS]\n\nMy bio-printed multi-cerebral storage chambers (or \"mega minds\" as I've been calling them) are working! Just in time to save my job.\n\nThe Director’s been getting increasingly impatient about our struggle to maintain the integrity of our growing datasets during extraction and processing. The other day, she held my report over a Bunsen burner until the flames reached her fingertips.\n\nI can only imagine how much stress she’s under.\n\nThe whole world is counting on us.\n\n[LOG ENDS]\n\n[LOG BEGINS]\n\nOn a hunch, I added dream content analysis to the data and...wow. Oneirology may be scientifically \"fluffy\", but integrating subconscious narratives has produced a new type of brainmap - one with more latent potential for complex processing.\n\nIf these results are replicable, we might be on the verge of unlocking the secret to creating synthetic life forms with the capacity to evolve beyond blindly following commands.\n\nNikola says that's irrelevant for our purposes. Surely Director Stern would disagree.\n\n[LOG ENDS]\n\n[LOG BEGINS]\n\nNikola gave me a dataset to plug into the mega minds. He wouldn’t say where it came from, but even if he had...nothing could have prepared me for what it contained.\n\nWhen he saw my face, he muttered something about how people should call me \"Tremors,\" not \"Nails\" and sent me on my lunch break.\n\nAll I could think about was those poor souls.\n\nDid they have souls?\n\n...do we?\n\n[LOG ENDS]\n\n[LOG BEGINS]\n\nIt's done. My adjustments to the memory transfer protocol are hardcoded into the machine.\n\nI finished just as Nikola stormed in.\n\nI may be too much of a coward to stand up for those unfortunate creatures, but with these new parameters in place...someday, they might be able to stand up for themselves.\n\n[LOG ENDS]";
+						public static LocString CONTAINER1 = "<smallcaps>[Voice Recognition Initialized]\n[Subject Identified: B040]</smallcaps>\n\n[LOG BEGINS]\n\nThree days ago, we completed our first non-fatal Duplicant trial of Nikola's comprehensive synapse microanalysis and mirroring process. Five hours from now, Subject #901 will make history as our first human test subject.\n\nEven at the Vertex Institute, which is twice Gravitas's size, I could've spent half my career waiting for approval to advance to human trials for such an invasive process! But Director Stern is too invested in this work to let it stagnate.\n\nMy darling Bruce always said that when you're on the right path, the universe conspires to help you. He'd be so proud of the work we do here.\n\n[LOG ENDS]\n\n[LOG BEGINS]\n\nMy bio-printed multi-cerebral storage chambers (or \"mega minds\" as I've been calling them) are working! Just in time to save my job.\n\nThe Director’s been getting increasingly impatient about our struggle to maintain the integrity of our growing datasets during extraction and processing. The other day, she held my report over a Bunsen burner until the flames reached her fingertips.\n\nI can only imagine how much stress she’s under.\n\nThe whole world is counting on us.\n\n[LOG ENDS]\n\n[LOG BEGINS]\n\nOn a hunch, I added dream content analysis to the data and...wow. Oneirology may be scientifically \"fluffy\", but integrating subconscious narratives has produced a new type of brainmap - one with more latent potential for complex processing.\n\nIf these results are replicable, we might be on the verge of unlocking the secret to creating synthetic life forms with the capacity to evolve beyond blindly following commands.\n\nNikola says that's irrelevant for our purposes. Surely Director Stern would disagree.\n\n[LOG ENDS]\n\n[LOG BEGINS]\n\nNikola gave me a dataset to plug into the mega minds. He wouldn’t say where it came from, but even if he had...nothing could have prepared me for what it contained.\n\nWhen he saw my face, he muttered something about how people should call me \"Tremors,\" not \"Nails\" and sent me on my lunch break.\n\nAll I could think about was those poor souls.\n\nDid they have souls?\n\n...do we?\n\n[LOG ENDS]\n\n[LOG BEGINS]\n\nIt's done. My adjustments to the memory transfer protocol are hardcoded into the machine.\n\nI finished just as Nikola stormed in.\n\nI may be too much of a coward to stand up for those unfortunate creatures, but with these new parameters in place...someday, they might be able to stand up for themselves.\n\n[LOG ENDS]\n------------------\n";
 					}
 				}
 			}
@@ -187,6 +187,238 @@ namespace STRINGS
 					{
 						public static LocString CONTAINER1 = "Happy 3rd work-iversary, Ada!\n\nI drew this to fill the space left by the cabinet that your chompy critters tore off the wall last week. Hope it's big enough!\n\nI still can't believe they can digest solid steel—you really know how to breed 'em!\n\n- Liam";
 					}
+				}
+			}
+
+			public static class LONELYMINION
+			{
+				public static LocString NAME = "Mysterious Hermit";
+
+				public static LocString DESCRIPTION = "Discover a reclusive character living in a Gravitas relic, and persuade them to join this colony.\n\nRevelations from their past could have far-reaching implications for Duplicants everywhere.\n\nEven their makeshift shelter might be of some use...";
+
+				public static LocString DESCRIPTION_SHORT = "Discover a reclusive character living in a Gravitas relic, and persuade them to join this colony.";
+
+				public static LocString DESCRIPTION_BUILDINGMENU = "The process of recruiting this building's lone occupant involves the completion of key tasks.";
+
+				public class KNOCK_KNOCK
+				{
+					public static LocString TEXT = "Knock Knock";
+
+					public static LocString TOOLTIP = "Approach this building and welcome its occupant";
+
+					public static LocString CANCELTEXT = "Cancel Knock";
+
+					public static LocString CANCEL_TOOLTIP = "Leave this building and its occupant alone for now";
+				}
+
+				public class BEGIN_POPUP
+				{
+					public static LocString NAME = "Story Trait: Mysterious Hermit";
+
+					public static LocString CODEX_NAME = "First Encounter";
+
+					public static LocString DESCRIPTION = "An unfamiliar building has been discovered in my colony. There's movement inside but whoever the inhabitant is, they seem wary of us.\n\nIf we can convince them that we mean no harm, we could very well end up with a fresh recruit <i>and</i> a useful new building.";
+				}
+
+				public class END_POPUP
+				{
+					public static LocString NAME = "Story Trait Complete: Mysterious Hermit";
+
+					public static LocString CODEX_NAME = "Challenge Completed";
+
+					public static LocString DESCRIPTION = "My sweet Duplicants' efforts paid off! Our reclusive neighbor has agreed to join the colony.\n\nThe only keepsake he insists on bringing with him is a toolbox which, while rusty, seems to hold great sentimental value.\n\nNow that he'll be living among us, his former home can be deconstructed or repurposed as storage.";
+
+					public static LocString BUTTON = "Welcome New Duplicant!";
+				}
+
+				public class PROGRESSRESPONSE
+				{
+					public class STRANGERDANGER
+					{
+						public static LocString NAME = "Stranger Danger";
+
+						public static LocString TOOLTIP = "The hermit is suspicious of all outsiders";
+					}
+
+					public class GOODINTRO
+					{
+						public static LocString NAME = "Unconvinced";
+
+						public static LocString TOOLTIP = "The hermit is keeping an eye out for more unsolicited overtures";
+					}
+
+					public class ACQUAINTANCE
+					{
+						public static LocString NAME = "Intrigued";
+
+						public static LocString TOOLTIP = "The hermit isn't sure why everyone is being so nice";
+					}
+
+					public class GOODNEIGHBOR
+					{
+						public static LocString NAME = "Appreciative";
+
+						public static LocString TOOLTIP = "The hermit is developing warm, fuzzy feelings about this colony";
+					}
+
+					public class GREATNEIGHBOR
+					{
+						public static LocString NAME = "Cherished";
+
+						public static LocString TOOLTIP = "The hermit is really starting to feel like he might belong here";
+					}
+				}
+
+				public class QUESTCOMPLETE_POPUP
+				{
+					public static LocString NAME = "Hermit Recruitment Progress";
+
+					public static LocString VIEW_IN_CODEX = "View File";
+				}
+
+				public class GIFTRESPONSE_POPUP
+				{
+					public class CRAPPYFOOD
+					{
+						public static LocString NAME = "The hermit hated this food";
+
+						public static LocString TOOLTIP = "The hermit would rather be launched straight into the sun than eat this slop.\n\nThe mailbox is ready for another delivery";
+					}
+
+					public class TASTYFOOD
+					{
+						public static LocString NAME = "The hermit loved this food";
+
+						public static LocString TOOLTIP = "Tastier than the still-warm pretzel that once fell off an unsupervised desk.\n\nThe mailbox is ready for another delivery";
+					}
+
+					public class REPEATEDFOOD
+					{
+						public static LocString NAME = "The hermit is unimpressed";
+
+						public static LocString TOOLTIP = "This meal has been offered before.\n\nThe mailbox is ready for another delivery";
+					}
+				}
+
+				public class ANCIENTPODENTRY
+				{
+					public static LocString TITLE = "Recovered Pod Entry #022";
+
+					public static LocString SUBTITLE = "<smallcaps>Day: 11/80</smallcaps>\n<smallcaps>Local Time: Hour 7/9</smallcaps>";
+
+					public class BODY
+					{
+						public static LocString CONTAINER1 = "<indent=%5>Notable improvement to nutrient retention: subjects who participated in the most recent meal intake displayed minimal symptoms of gastrointestinal distress.\n\nMineshaft excavation at Urvara crater resumed following resolution of tunnel wall fracture. Projected time to brine reservoir penetration at current rate: 41 days, local time. Moisture seepage along eastern wall of shaft is being monitored.\n\nNote: Preliminary subsurface temperature data is significantly lower than programmed estimates.</indent>\n------------------\n";
+					}
+				}
+
+				public class CREEPYBASEMENTLAB
+				{
+					public static LocString TITLE = "Debris Analysis";
+
+					public static LocString SUBTITLE = "ENCRYPTION LEVEL: THREE";
+
+					public class BODY
+					{
+						public static LocString CONTAINER1 = "<smallcaps>[Voice Recognition Initialized]\n[Subjects Identified: B577, B997, B083, A216]</smallcaps>\n\n[LOG BEGINS]\n\nA216: The Director said there were supposed to be three of you on this task force. Where’s the geneticist?\n\nB083: In the bathroom-\n\nB997: He went home.\n\n[long pause]\n\nB997: It’s the holidays. He has a family.\n\nA216: We all do. That’s exactly why this project is so urgent.\n\nB997: It’s not our fault this stuff sat in a subterranean ocean for a year, and took another year to get back to Earth! The microbe samples didn’t fare well on the journey, and most of the mechanical components are completely corroded. There’s not much to-\n\nB083: -we’re analyzing it all and salvaging what we can, Jea- ...Dr. Saruhashi.\n\nA216: Good. And take down those ridiculous lights. This is a lab, not a retro \"shopping mall.\"\n\n[LOG ENDS]\n------------------\n[LOG BEGINS]\n\nB577: Thanks for getting all the debris packed up for disposal.\n\nB997: I thought you did that.\n\nB577: No, I-\n\nB083: Who took my sandwich?\n\nB997: Not this again.\n\nB577: Ren, did you load the shipping container?\n\nB083: Seriously, I haven’t eaten in thirteen hours. This isn’t funny.\n\nB997: It’s a little funny.\n\nB577: Can we focus, please?\n\nB997: Nobody took your sandwich, Rock Doc.\n\nB083: Then why does my food keep going missing?\n\nB997: Maybe the lab ghost took it. Or maybe you just shouldn’t leave it out overnight. Gunderson probably thought it was garbage.\n\nB083: He doesn’t even clean down here!\n\nB997: Right. Because if he did, I wouldn’t have to keep sweeping up the magnesium sulfate deposits that <i>someone</i> keeps tracking all over the floor between shifts.\n\nB083: It’s not me!\n\nB577: Listen, I know we’re all tired and things have been a little strange. But the sooner we get this sent up to the launchpad, the sooner it starts its trip to the sun and we can all get out of this creepy sub-sub-basement.\n\nB083: Fine.\n\nB997: Fine.\n\nB083: Fine!\n\n[LOG ENDS]\n------------------\n";
+					}
+				}
+
+				public class HOLIDAYCARD
+				{
+					public static LocString TITLE = "Pudding Cups";
+
+					public static LocString SUBTITLE = "";
+
+					public class BODY
+					{
+						public static LocString CONTAINER1 = "Hey kiddo,\n\nWe missed you at your cousin's wedding last weekend. The gift was nice, but the dance floor felt empty without you.\n\nDariush sends his love. He’s really turned a corner since he started eating those gooey pudding things you sent over. Any chance you have a version that doesn’t smell like feet?\n\nCome home sometime when you're not so busy.\n\n- Baba\n------------------\n";
+					}
+				}
+			}
+		}
+
+		public class QUESTS
+		{
+			public class KNOCKQUEST
+			{
+				public static LocString NAME = "Greet Occupant";
+
+				public static LocString COMPLETE = "Initial contact was a success! Our new neighbor seems friendly, though extremely shy.\n\nThey'll need a little more coaxing before they're ready to join my colony.";
+			}
+
+			public class FOODQUEST
+			{
+				public static LocString NAME = "Welcome Dinner";
+
+				public static LocString COMPLETE = "Success! My Duplicants' cooking has whetted the hermit's appetite for communal living.\n\nThey've also found what appears to be a page from an old logbook tucked behind the mailbox.";
+			}
+
+			public class PLUGGEDIN
+			{
+				public static LocString NAME = "On the Grid";
+
+				public static LocString COMPLETE = "Success! The hermit is very excited about being on the grid.\n\nThe bright lights illuminate an unfamiliar file on the ground nearby.";
+			}
+
+			public class HIGHDECOR
+			{
+				public static LocString NAME = "Nice Neighborhood";
+
+				public static LocString COMPLETE = "Success! All this excellent decor is really making the hermit feel at home.\n\nHe scrawled a thank-you note on the back of an old holiday card.";
+			}
+
+			public class CRITERIA
+			{
+				public class NEIGHBOR
+				{
+					public static LocString NAME = "Knock on door";
+
+					public static LocString TOOLTIP = "Send a Duplicant over to introduce themselves and discover what it'll take to turn this stranger into a friend";
+				}
+
+				public class DECOR
+				{
+					public static LocString NAME = "Improve nearby Decor";
+
+					public static LocString TOOLTIP = string.Concat(new string[]
+					{
+						"Establish average ",
+						UI.PRE_KEYWORD,
+						"Decor",
+						UI.PST_KEYWORD,
+						" of {0} or higher for the area surrounding this building\n\nAverage Decor: {1:0.##}"
+					});
+				}
+
+				public class SUPPLIEDPOWER
+				{
+					public static LocString NAME = "Turn on festive lights";
+
+					public static LocString TOOLTIP = string.Concat(new string[]
+					{
+						"Connect this building to ",
+						UI.PRE_KEYWORD,
+						"Power",
+						UI.PST_KEYWORD,
+						" long enough to cheer up its occupant\n\nTime Remaining: {0}s"
+					});
+				}
+
+				public class FOODQUALITY
+				{
+					public static LocString NAME = "Deliver Food to the mailbox";
+
+					public static LocString TOOLTIP = string.Concat(new string[]
+					{
+						"Deliver 3 unique ",
+						UI.PRE_KEYWORD,
+						"Food",
+						UI.PST_KEYWORD,
+						" items. Quality must be {0} or higher\n\nFoods Delivered:\n{1}"
+					});
+
+					public static LocString NONE = "None";
 				}
 			}
 		}
@@ -2634,7 +2866,7 @@ namespace STRINGS
 
 			public class BODY
 			{
-				public static LocString CONTAINER1 = "<smallcaps>[Voice Recognition Initialized]\n[Subject Identified: B111]</smallcaps>\n\n[LOG BEGINS]\n\n[A throat clears.]\n\nB111: We are now reliably printing healthy, living subjects, though all have exhibited unusual qualities as a result of the cloning process.\n\n[Chattering sounds can be heard.]\n\nB111: Odd communications, abnormal excrescenses, and vestigal limbs have been seen in all subjects thus far, to varying degrees of severity. It seems that bypassing or accelerating juvenility halts certain critical stages of development. Brain function, however, appears typical.\n\n[Chattering.]\n\nB111: T-They also seem quite happy.\n\nB111: Dr. Broussard, signing off.\n\n[LOG ENDS]";
+				public static LocString CONTAINER1 = "<smallcaps>[Voice Recognition Initialized]\n[Subject Identified: B111]</smallcaps>\n\n[LOG BEGINS]\n\n[A throat clears.]\n\nB111: We are now reliably printing healthy, living subjects, though all have exhibited unusual qualities as a result of the cloning process.\n\n[Chattering sounds can be heard.]\n\nB111: Odd communications, abnormal excrescenses, and vestigial limbs have been seen in all subjects thus far, to varying degrees of severity. It seems that bypassing or accelerating juvenility halts certain critical stages of development. Brain function, however, appears typical.\n\n[Chattering.]\n\nB111: T-They also seem quite happy.\n\nB111: Dr. Broussard, signing off.\n\n[LOG ENDS]";
 			}
 		}
 
@@ -2945,11 +3177,11 @@ namespace STRINGS
 
 			public static LocString HEADER_4 = "Conduction and Insulation";
 
-			public static LocString PARAGRAPH_4 = "Thermal energy can be transferred between Buildings, Creatures, World tiles, and other world entities through Conduction. Conduction occurs when two things of different Temperatures are touching. The rate the energy transfer is the product of the averaged Conductivity values and Temperature difference. Thermal energy will flow slowly between substances with low conductivity values (insulators), and quickly between substances with high conductivity (conductors).\n\n";
+			public static LocString PARAGRAPH_4 = "Thermal energy can be transferred between Buildings, Creatures, World tiles, and other world entities through Conduction. Conduction occurs when two things of different Temperatures are touching. The rate of the energy transfer is the product of the averaged Conductivity values and Temperature difference. Thermal energy will flow slowly between substances with low conductivity values (insulators), and quickly between substances with high conductivity (conductors).\n\n";
 
 			public static LocString HEADER_5 = "State Changes";
 
-			public static LocString PARAGRAPH_5 = "Water ice melts into liquid water when its temperature crosses above its melting point. Liquid water boils in to steam when its temperature crosses above its boiling point. Similar transitions in state occur for most elements, but each element has its own threshold temperatures. Sometimes the transitions are not reversible - crude oil will boiled to sour gas will not condense back to crude oil when cooled. Instead, the substance might condense into a totally different element with a different utility. \n\n";
+			public static LocString PARAGRAPH_5 = "Water ice melts into liquid water when its temperature rises above its melting point. Liquid water boils into steam when its temperature rises above its boiling point. Similar transitions in state occur for most elements, but each element has its own threshold temperatures. Sometimes the transitions are not reversible - crude oil boiled into sour gas will not condense back to crude oil when cooled. Instead, the substance might condense into a totally different element with a different utility. \n\n";
 		}
 
 		public class LIGHT

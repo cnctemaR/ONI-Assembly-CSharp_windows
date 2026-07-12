@@ -41,7 +41,7 @@ public class Notification
 		}
 	}
 
-	public Notification(string title, NotificationType type, Func<List<Notification>, object, string> tooltip = null, object tooltip_data = null, bool expires = true, float delay = 0f, Notification.ClickCallback custom_click_callback = null, object custom_click_data = null, Transform click_focus = null, bool volume_attenuation = true, bool clear_on_click = false)
+	public Notification(string title, NotificationType type, Func<List<Notification>, object, string> tooltip = null, object tooltip_data = null, bool expires = true, float delay = 0f, Notification.ClickCallback custom_click_callback = null, object custom_click_data = null, Transform click_focus = null, bool volume_attenuation = true, bool clear_on_click = false, bool show_dismiss_button = false)
 	{
 		this.titleText = title;
 		this.Type = type;
@@ -54,6 +54,7 @@ public class Notification
 		this.clickFocus = click_focus;
 		this.volume_attenuation = volume_attenuation;
 		this.clearOnClick = clear_on_click;
+		this.showDismissButton = show_dismiss_button;
 		int num = this.notificationIncrement;
 		this.notificationIncrement = num + 1;
 		this.Idx = num;
@@ -122,6 +123,8 @@ public class Notification
 	public Notification.ClickCallback customClickCallback;
 
 	public bool clearOnClick;
+
+	public bool showDismissButton;
 
 	public object customClickData;
 

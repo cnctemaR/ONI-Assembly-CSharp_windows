@@ -23,7 +23,7 @@ public class ArtifactPOIConfig : IMultiEntityConfig
 		artifactPOIClusterGridEntity.m_name = name;
 		artifactPOIClusterGridEntity.m_Anim = anim;
 		gameObject.AddOrGetDef<ArtifactPOIStates.Def>();
-		gameObject.AddOrGet<LoreBearer>();
+		LoreBearerUtil.AddLoreTo(gameObject, new LoreBearerAction(LoreBearerUtil.UnlockNextSpaceEntry));
 		return gameObject;
 	}
 

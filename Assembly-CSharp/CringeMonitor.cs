@@ -19,8 +19,6 @@ public class CringeMonitor : GameStateMachine<CringeMonitor, CringeMonitor.Insta
 		smi.GoTo(this.cringe);
 	}
 
-	private static readonly HashedString[] CringeAnims = new HashedString[] { "cringe_pre", "cringe_loop", "cringe_pst" };
-
 	public GameStateMachine<CringeMonitor, CringeMonitor.Instance, IStateMachineTarget, object>.State idle;
 
 	public GameStateMachine<CringeMonitor, CringeMonitor.Instance, IStateMachineTarget, object>.State cringe;

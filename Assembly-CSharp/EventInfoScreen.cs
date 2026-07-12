@@ -207,7 +207,7 @@ public class EventInfoScreen : KModalScreen
 					component2.AddSymbolOverride(symbolEntry.targetSymbol, symbolEntry.sourceSymbol, symbolEntry.priority);
 				}
 			}
-			MinionConfig.ConfigureSymbols(gameObject);
+			MinionConfig.ConfigureSymbols(gameObject, true);
 		}
 		if (artifact != null)
 		{
@@ -260,7 +260,7 @@ public class EventInfoScreen : KModalScreen
 			return null;
 		}
 		eventInfoData.FinalizeText();
-		Notification notification = new Notification(eventInfoData.title, NotificationType.Event, null, null, false, 0f, null, null, eventInfoData.clickFocus, true, false);
+		Notification notification = new Notification(eventInfoData.title, NotificationType.Event, null, null, false, 0f, null, null, eventInfoData.clickFocus, true, false, false);
 		if (clickCallback == null)
 		{
 			notification.customClickCallback = delegate(object data)
@@ -320,7 +320,7 @@ public class EventInfoScreen : KModalScreen
 	private LocText eventDescriptionLabel;
 
 	[SerializeField]
-	private bool loadMinionFromPersonalities;
+	private bool loadMinionFromPersonalities = true;
 
 	[SerializeField]
 	private LocText chainCount;

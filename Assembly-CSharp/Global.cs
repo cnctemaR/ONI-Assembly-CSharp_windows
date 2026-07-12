@@ -317,12 +317,9 @@ public class Global : MonoBehaviour
 		this.modManager.Load(Content.DLL);
 		this.modManager.Load(Content.Strings);
 		global::KSerialization.Manager.Initialize();
-		this.mInputManager = new GameInputManager(Global.GenerateDefaultBindings(true));
-		Audio.Get();
-		KAnimBatchManager.CreateInstance();
-		Singleton<SoundEventVolumeCache>.CreateInstance();
-		this.mAnimEventManager = new AnimEventManager();
-		Singleton<KBatchedAnimUpdater>.CreateInstance();
+		Global.InitializeGlobalInput();
+		Global.InitializeGlobalSound();
+		Global.InitializeGlobalAnimation();
 		Localization.Initialize();
 		this.modManager.Load(Content.Translation);
 		this.modManager.distribution_platforms.Add(new Local("Local", Label.DistributionPlatform.Local, false));
@@ -356,9 +353,32 @@ public class Global : MonoBehaviour
 			global::Debug.LogWarning("Can't init " + DistributionPlatform.Inst.Name + " distribution platform...");
 			this.OnGetUserIdKey();
 		}
+		ThreadedHttps<KleiItems>.Instance.LoadInventoryCache();
 		this.modManager.Load(Content.LayerableFiles);
 		WorldGen.LoadSettings(true);
 		GlobalResources.Instance();
+	}
+
+	private static void InitializeGlobalInput()
+	{
+		if (Game.IsQuitting())
+		{
+			return;
+		}
+		Global.mInputManager = new GameInputManager(Global.GenerateDefaultBindings(true));
+	}
+
+	private static void InitializeGlobalSound()
+	{
+		Audio.Get();
+		Singleton<SoundEventVolumeCache>.CreateInstance();
+	}
+
+	private static void InitializeGlobalAnimation()
+	{
+		KAnimBatchManager.CreateInstance();
+		Singleton<AnimEventManager>.CreateInstance();
+		Singleton<KBatchedAnimUpdater>.CreateInstance();
 	}
 
 	private void OnExitRequest()
@@ -542,25 +562,20 @@ public class Global : MonoBehaviour
 		}
 	}
 
-	public GameInputManager GetInputManager()
+	public static GameInputManager GetInputManager()
 	{
-		return this.mInputManager;
-	}
-
-	public AnimEventManager GetAnimEventManager()
-	{
-		if (App.IsExiting)
+		if (Global.mInputManager == null)
 		{
-			return null;
+			Global.InitializeGlobalInput();
 		}
-		return this.mAnimEventManager;
+		return Global.mInputManager;
 	}
 
 	private void OnApplicationFocus(bool focus)
 	{
-		if (this.mInputManager != null)
+		if (Global.mInputManager != null)
 		{
-			this.mInputManager.OnApplicationFocus(focus);
+			Global.mInputManager.OnApplicationFocus(focus);
 		}
 	}
 
@@ -582,10 +597,10 @@ public class Global : MonoBehaviour
 			}
 			this.DevTools.UpdateTools();
 		}
-		this.mInputManager.Update();
-		if (this.mAnimEventManager != null)
+		Global.mInputManager.Update();
+		if (Singleton<AnimEventManager>.Instance != null)
 		{
-			this.mAnimEventManager.Update();
+			Singleton<AnimEventManager>.Instance.Update();
 		}
 		if (DistributionPlatform.Initialized && !this.updated_with_initialized_distribution_platform)
 		{
@@ -601,15 +616,20 @@ public class Global : MonoBehaviour
 			this.gotKleiUserID = false;
 			ThreadedHttps<KleiMetrics>.Instance.SetCallBacks(new global::System.Action(this.SetONIStaticSessionVariables), new Action<Dictionary<string, object>>(this.SetONIDynamicSessionVariables));
 			ThreadedHttps<KleiMetrics>.Instance.StartSession();
+			KleiItems.AddRequestInventoryRefresh();
 		}
 		ThreadedHttps<KleiMetrics>.Instance.SetLastUserAction(KInputManager.lastUserActionTicks);
 		Localization.VerifyTranslationModSubscription(this.globalCanvas);
+		if (DistributionPlatform.Initialized)
+		{
+			ThreadedHttps<KleiItems>.Instance.Update();
+		}
 	}
 
 	private void SetONIStaticSessionVariables()
 	{
 		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Branch", "release");
-		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Build", 531669U);
+		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Build", 535720U);
 		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("SaveFolderWriteTest", Global.saveFolderTestResult);
 		if (KPlayerPrefs.HasKey(UnitConfigurationScreen.MassUnitKey))
 		{
@@ -631,7 +651,7 @@ public class Global : MonoBehaviour
 	{
 		if (Game.Instance != null && GameClock.Instance != null)
 		{
-			data.Add("GameTimeSeconds", (int)GameClock.Instance.GetTime());
+			data.Add("GameTimeSeconds", (uint)GameClock.Instance.GetTime());
 			data.Add("WasDebugEverUsed", Game.Instance.debugWasUsed);
 			data.Add("IsSandboxEnabled", SaveGame.Instance.sandboxEnabled);
 		}
@@ -639,6 +659,7 @@ public class Global : MonoBehaviour
 
 	private void LateUpdate()
 	{
+		StreamedTextures.UpdateRequests();
 		Singleton<KBatchedAnimUpdater>.Instance.LateUpdate();
 		if (this.DevTools.Show)
 		{
@@ -658,9 +679,9 @@ public class Global : MonoBehaviour
 			this.modManager.Shutdown();
 		}
 		Global.Instance = null;
-		if (this.mAnimEventManager != null)
+		if (Singleton<AnimEventManager>.Instance != null)
 		{
-			this.mAnimEventManager.FreeResources();
+			Singleton<AnimEventManager>.Instance.FreeResources();
 		}
 		Singleton<KBatchedAnimUpdater>.DestroyInstance();
 	}
@@ -714,9 +735,7 @@ public class Global : MonoBehaviour
 
 	public GameObject globalCanvas;
 
-	private GameInputManager mInputManager;
-
-	private AnimEventManager mAnimEventManager;
+	private static GameInputManager mInputManager;
 
 	private DevToolManager DevTools = new DevToolManager();
 

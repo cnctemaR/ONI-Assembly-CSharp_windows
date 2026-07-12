@@ -7,7 +7,7 @@ public class TubeTransitionLayer : TransitionDriver.OverrideLayer
 		: base(navigator)
 	{
 		this.tube_traveller = navigator.GetSMI<TubeTraveller.Instance>();
-		if (navigator.CurrentNavType == NavType.Tube && !this.tube_traveller.inTube)
+		if (this.tube_traveller != null && navigator.CurrentNavType == NavType.Tube && !this.tube_traveller.inTube)
 		{
 			this.tube_traveller.OnTubeTransition(true);
 		}

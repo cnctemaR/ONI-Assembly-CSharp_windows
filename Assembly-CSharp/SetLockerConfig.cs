@@ -30,7 +30,7 @@ public class SetLockerConfig : IEntityConfig
 		setLocker.overrideAnim = "anim_interacts_clothingfactory_kanim";
 		setLocker.dropOffset = new Vector2I(0, 1);
 		setLocker.numDataBanks = new int[] { 1, 4 };
-		gameObject.AddOrGet<LoreBearer>();
+		LoreBearerUtil.AddLoreTo(gameObject);
 		gameObject.AddOrGet<OccupyArea>().objectLayers = new ObjectLayer[] { ObjectLayer.Building };
 		gameObject.AddOrGet<Demolishable>();
 		return gameObject;

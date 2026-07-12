@@ -387,7 +387,7 @@ public class SpacecraftManager : KMonoBehaviour, ISim1000ms
 				text = text + "\n" + (string)notification2.tooltipData;
 			}
 			return text;
-		}, "• " + spacecraft.rocketName, true, 0f, null, null, null, true, false);
+		}, "• " + spacecraft.rocketName, true, 0f, null, null, null, true, false, false);
 		spacecraft.launchConditions.gameObject.AddOrGet<Notifier>().Add(notification, "");
 	}
 

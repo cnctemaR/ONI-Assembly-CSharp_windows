@@ -905,6 +905,8 @@ public static class Sim
 	{
 		public float buildingTemperatureScale;
 
+		public float buildingToBuildingTemperatureScale;
+
 		public float contaminatedOxygenEmitProbability;
 
 		public float contaminatedOxygenConversionPercent;

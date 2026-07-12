@@ -139,16 +139,17 @@ namespace UnityEngine.EventSystems
 
 		public override void UpdateModule()
 		{
-			if (Global.Instance.GetInputManager().GetControllerCount() <= 1)
+			GameInputManager inputManager = Global.GetInputManager();
+			if (inputManager.GetControllerCount() <= 1)
 			{
 				return;
 			}
-			if (this.inputHandler == null || !this.inputHandler.UsesController(this, Global.Instance.GetInputManager().GetController(1)))
+			if (this.inputHandler == null || !this.inputHandler.UsesController(this, inputManager.GetController(1)))
 			{
-				KInputHandler.Add(Global.Instance.GetInputManager().GetController(1), this, int.MaxValue);
-				if (!Global.Instance.GetInputManager().usedMenus.Contains(this))
+				KInputHandler.Add(inputManager.GetController(1), this, int.MaxValue);
+				if (!inputManager.usedMenus.Contains(this))
 				{
-					Global.Instance.GetInputManager().usedMenus.Add(this);
+					inputManager.usedMenus.Add(this);
 				}
 				this.debugName = SceneManager.GetActiveScene().name + "-VirtualInputModule";
 			}

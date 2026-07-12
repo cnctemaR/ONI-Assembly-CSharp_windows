@@ -49,7 +49,7 @@ public class GridVisibility : KMonoBehaviour
 					{
 						Vector2 vector = new Vector2((float)j, (float)i);
 						float num5 = Mathf.Lerp(1f, 0f, (vector.magnitude - innerRadius) / ((float)radius - innerRadius));
-						Grid.Reveal(num4, (byte)(255f * num5));
+						Grid.Reveal(num4, (byte)(255f * num5), false);
 					}
 				}
 			}

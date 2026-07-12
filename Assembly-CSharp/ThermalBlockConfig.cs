@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using TUNING;
 using UnityEngine;
 
@@ -26,6 +27,17 @@ public class ThermalBlockConfig : IBuildingConfig
 		buildingDef.DefaultAnimState = "off";
 		buildingDef.ObjectLayer = ObjectLayer.Backwall;
 		buildingDef.SceneLayer = Grid.SceneLayer.Backwall;
+		buildingDef.ReplacementLayer = ObjectLayer.ReplacementBackwall;
+		buildingDef.ReplacementCandidateLayers = new List<ObjectLayer>
+		{
+			ObjectLayer.FoundationTile,
+			ObjectLayer.Backwall
+		};
+		buildingDef.ReplacementTags = new List<Tag>
+		{
+			GameTags.FloorTiles,
+			GameTags.Backwall
+		};
 		return buildingDef;
 	}
 
@@ -38,7 +50,9 @@ public class ThermalBlockConfig : IBuildingConfig
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
-		go.GetComponent<KPrefabID>().prefabSpawnFn += delegate(GameObject game_object)
+		KPrefabID component = go.GetComponent<KPrefabID>();
+		component.AddTag(GameTags.Backwall, false);
+		component.prefabSpawnFn += delegate(GameObject game_object)
 		{
 			HandleVector<int>.Handle handle = GameComps.StructureTemperatures.GetHandle(game_object);
 			StructureTemperaturePayload payload = GameComps.StructureTemperatures.GetPayload(handle);

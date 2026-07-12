@@ -3,36 +3,36 @@ using System.Collections.Generic;
 
 public static class DiscreteShadowCaster
 {
-	public static void GetVisibleCells(int cell, List<int> visiblePoints, int range, LightShape shape)
+	public static void GetVisibleCells(int cell, List<int> visiblePoints, int range, LightShape shape, bool canSeeThroughTransparent = true)
 	{
 		visiblePoints.Add(cell);
 		Vector2I vector2I = Grid.CellToXY(cell);
 		if (shape == LightShape.Circle)
 		{
-			DiscreteShadowCaster.ScanOctant(vector2I, range, 1, DiscreteShadowCaster.Octant.N_NW, 1.0, 0.0, visiblePoints);
-			DiscreteShadowCaster.ScanOctant(vector2I, range, 1, DiscreteShadowCaster.Octant.N_NE, 1.0, 0.0, visiblePoints);
-			DiscreteShadowCaster.ScanOctant(vector2I, range, 1, DiscreteShadowCaster.Octant.E_NE, 1.0, 0.0, visiblePoints);
-			DiscreteShadowCaster.ScanOctant(vector2I, range, 1, DiscreteShadowCaster.Octant.E_SE, 1.0, 0.0, visiblePoints);
-			DiscreteShadowCaster.ScanOctant(vector2I, range, 1, DiscreteShadowCaster.Octant.S_SE, 1.0, 0.0, visiblePoints);
-			DiscreteShadowCaster.ScanOctant(vector2I, range, 1, DiscreteShadowCaster.Octant.S_SW, 1.0, 0.0, visiblePoints);
-			DiscreteShadowCaster.ScanOctant(vector2I, range, 1, DiscreteShadowCaster.Octant.W_SW, 1.0, 0.0, visiblePoints);
-			DiscreteShadowCaster.ScanOctant(vector2I, range, 1, DiscreteShadowCaster.Octant.W_NW, 1.0, 0.0, visiblePoints);
+			DiscreteShadowCaster.ScanOctant(vector2I, range, 1, DiscreteShadowCaster.Octant.N_NW, 1.0, 0.0, visiblePoints, canSeeThroughTransparent);
+			DiscreteShadowCaster.ScanOctant(vector2I, range, 1, DiscreteShadowCaster.Octant.N_NE, 1.0, 0.0, visiblePoints, canSeeThroughTransparent);
+			DiscreteShadowCaster.ScanOctant(vector2I, range, 1, DiscreteShadowCaster.Octant.E_NE, 1.0, 0.0, visiblePoints, canSeeThroughTransparent);
+			DiscreteShadowCaster.ScanOctant(vector2I, range, 1, DiscreteShadowCaster.Octant.E_SE, 1.0, 0.0, visiblePoints, canSeeThroughTransparent);
+			DiscreteShadowCaster.ScanOctant(vector2I, range, 1, DiscreteShadowCaster.Octant.S_SE, 1.0, 0.0, visiblePoints, canSeeThroughTransparent);
+			DiscreteShadowCaster.ScanOctant(vector2I, range, 1, DiscreteShadowCaster.Octant.S_SW, 1.0, 0.0, visiblePoints, canSeeThroughTransparent);
+			DiscreteShadowCaster.ScanOctant(vector2I, range, 1, DiscreteShadowCaster.Octant.W_SW, 1.0, 0.0, visiblePoints, canSeeThroughTransparent);
+			DiscreteShadowCaster.ScanOctant(vector2I, range, 1, DiscreteShadowCaster.Octant.W_NW, 1.0, 0.0, visiblePoints, canSeeThroughTransparent);
 			return;
 		}
 		if (shape == LightShape.Cone)
 		{
-			DiscreteShadowCaster.ScanOctant(vector2I, range, 1, DiscreteShadowCaster.Octant.S_SE, 1.0, 0.0, visiblePoints);
-			DiscreteShadowCaster.ScanOctant(vector2I, range, 1, DiscreteShadowCaster.Octant.S_SW, 1.0, 0.0, visiblePoints);
+			DiscreteShadowCaster.ScanOctant(vector2I, range, 1, DiscreteShadowCaster.Octant.S_SE, 1.0, 0.0, visiblePoints, canSeeThroughTransparent);
+			DiscreteShadowCaster.ScanOctant(vector2I, range, 1, DiscreteShadowCaster.Octant.S_SW, 1.0, 0.0, visiblePoints, canSeeThroughTransparent);
 		}
 	}
 
-	private static bool DoesOcclude(int x, int y)
+	private static bool DoesOcclude(int x, int y, bool canSeeThroughTransparent = false)
 	{
 		int num = Grid.XYToCell(x, y);
-		return Grid.IsValidCell(num) && !Grid.Transparent[num] && Grid.Solid[num];
+		return Grid.IsValidCell(num) && (!canSeeThroughTransparent || !Grid.Transparent[num]) && Grid.Solid[num];
 	}
 
-	private static void ScanOctant(Vector2I cellPos, int range, int depth, DiscreteShadowCaster.Octant octant, double startSlope, double endSlope, List<int> visiblePoints)
+	private static void ScanOctant(Vector2I cellPos, int range, int depth, DiscreteShadowCaster.Octant octant, double startSlope, double endSlope, List<int> visiblePoints, bool canSeeThroughTransparent = true)
 	{
 		int num = range * range;
 		int num2 = 0;
@@ -54,20 +54,20 @@ public static class DiscreteShadowCaster
 			{
 				if (DiscreteShadowCaster.GetVisDistance(num2, num3, cellPos.x, cellPos.y) <= num)
 				{
-					if (DiscreteShadowCaster.DoesOcclude(num2, num3))
+					if (DiscreteShadowCaster.DoesOcclude(num2, num3, canSeeThroughTransparent))
 					{
-						if (num2 - 1 >= 0 && !DiscreteShadowCaster.DoesOcclude(num2 - 1, num3) && !DiscreteShadowCaster.DoesOcclude(num2 - 1, num3 - 1))
+						if (num2 - 1 >= 0 && !DiscreteShadowCaster.DoesOcclude(num2 - 1, num3, canSeeThroughTransparent) && !DiscreteShadowCaster.DoesOcclude(num2 - 1, num3 - 1, canSeeThroughTransparent))
 						{
-							DiscreteShadowCaster.ScanOctant(cellPos, range, depth + 1, octant, startSlope, DiscreteShadowCaster.GetSlope((double)num2 - 0.5, (double)num3 - 0.5, (double)cellPos.x, (double)cellPos.y, false), visiblePoints);
+							DiscreteShadowCaster.ScanOctant(cellPos, range, depth + 1, octant, startSlope, DiscreteShadowCaster.GetSlope((double)num2 - 0.5, (double)num3 - 0.5, (double)cellPos.x, (double)cellPos.y, false), visiblePoints, canSeeThroughTransparent);
 						}
 					}
 					else
 					{
-						if (num2 - 1 >= 0 && DiscreteShadowCaster.DoesOcclude(num2 - 1, num3))
+						if (num2 - 1 >= 0 && DiscreteShadowCaster.DoesOcclude(num2 - 1, num3, canSeeThroughTransparent))
 						{
 							startSlope = -DiscreteShadowCaster.GetSlope((double)num2 - 0.5, (double)num3 + 0.5, (double)cellPos.x, (double)cellPos.y, false);
 						}
-						if (!DiscreteShadowCaster.DoesOcclude(num2, num3 - 1) && !visiblePoints.Contains(Grid.XYToCell(num2, num3)))
+						if (!DiscreteShadowCaster.DoesOcclude(num2, num3 - 1, canSeeThroughTransparent) && !visiblePoints.Contains(Grid.XYToCell(num2, num3)))
 						{
 							visiblePoints.Add(Grid.XYToCell(num2, num3));
 						}
@@ -92,21 +92,21 @@ public static class DiscreteShadowCaster
 			{
 				if (DiscreteShadowCaster.GetVisDistance(num2, num3, cellPos.x, cellPos.y) <= num)
 				{
-					if (DiscreteShadowCaster.DoesOcclude(num2, num3))
+					if (DiscreteShadowCaster.DoesOcclude(num2, num3, canSeeThroughTransparent))
 					{
-						if (num2 + 1 < Grid.HeightInCells && !DiscreteShadowCaster.DoesOcclude(num2 + 1, num3) && !DiscreteShadowCaster.DoesOcclude(num2 + 1, num3 - 1))
+						if (num2 + 1 < Grid.HeightInCells && !DiscreteShadowCaster.DoesOcclude(num2 + 1, num3, canSeeThroughTransparent) && !DiscreteShadowCaster.DoesOcclude(num2 + 1, num3 - 1, canSeeThroughTransparent))
 						{
 							double slope = DiscreteShadowCaster.GetSlope((double)num2 + 0.5, (double)num3 - 0.5, (double)cellPos.x, (double)cellPos.y, false);
-							DiscreteShadowCaster.ScanOctant(cellPos, range, depth + 1, octant, startSlope, slope, visiblePoints);
+							DiscreteShadowCaster.ScanOctant(cellPos, range, depth + 1, octant, startSlope, slope, visiblePoints, canSeeThroughTransparent);
 						}
 					}
 					else
 					{
-						if (num2 + 1 < Grid.HeightInCells && DiscreteShadowCaster.DoesOcclude(num2 + 1, num3))
+						if (num2 + 1 < Grid.HeightInCells && DiscreteShadowCaster.DoesOcclude(num2 + 1, num3, canSeeThroughTransparent))
 						{
 							startSlope = DiscreteShadowCaster.GetSlope((double)num2 + 0.5, (double)num3 + 0.5, (double)cellPos.x, (double)cellPos.y, false);
 						}
-						if (!DiscreteShadowCaster.DoesOcclude(num2, num3 - 1) && !visiblePoints.Contains(Grid.XYToCell(num2, num3)))
+						if (!DiscreteShadowCaster.DoesOcclude(num2, num3 - 1, canSeeThroughTransparent) && !visiblePoints.Contains(Grid.XYToCell(num2, num3)))
 						{
 							visiblePoints.Add(Grid.XYToCell(num2, num3));
 						}
@@ -131,20 +131,20 @@ public static class DiscreteShadowCaster
 			{
 				if (DiscreteShadowCaster.GetVisDistance(num2, num3, cellPos.x, cellPos.y) <= num)
 				{
-					if (DiscreteShadowCaster.DoesOcclude(num2, num3))
+					if (DiscreteShadowCaster.DoesOcclude(num2, num3, canSeeThroughTransparent))
 					{
-						if (num3 + 1 < Grid.HeightInCells && !DiscreteShadowCaster.DoesOcclude(num2, num3 + 1) && !DiscreteShadowCaster.DoesOcclude(num2 - 1, num3 + 1))
+						if (num3 + 1 < Grid.HeightInCells && !DiscreteShadowCaster.DoesOcclude(num2, num3 + 1, canSeeThroughTransparent) && !DiscreteShadowCaster.DoesOcclude(num2 - 1, num3 + 1, canSeeThroughTransparent))
 						{
-							DiscreteShadowCaster.ScanOctant(cellPos, range, depth + 1, octant, startSlope, DiscreteShadowCaster.GetSlope((double)num2 - 0.5, (double)num3 + 0.5, (double)cellPos.x, (double)cellPos.y, true), visiblePoints);
+							DiscreteShadowCaster.ScanOctant(cellPos, range, depth + 1, octant, startSlope, DiscreteShadowCaster.GetSlope((double)num2 - 0.5, (double)num3 + 0.5, (double)cellPos.x, (double)cellPos.y, true), visiblePoints, canSeeThroughTransparent);
 						}
 					}
 					else
 					{
-						if (num3 + 1 < Grid.HeightInCells && DiscreteShadowCaster.DoesOcclude(num2, num3 + 1))
+						if (num3 + 1 < Grid.HeightInCells && DiscreteShadowCaster.DoesOcclude(num2, num3 + 1, canSeeThroughTransparent))
 						{
 							startSlope = DiscreteShadowCaster.GetSlope((double)num2 + 0.5, (double)num3 + 0.5, (double)cellPos.x, (double)cellPos.y, true);
 						}
-						if (!DiscreteShadowCaster.DoesOcclude(num2 - 1, num3) && !visiblePoints.Contains(Grid.XYToCell(num2, num3)))
+						if (!DiscreteShadowCaster.DoesOcclude(num2 - 1, num3, canSeeThroughTransparent) && !visiblePoints.Contains(Grid.XYToCell(num2, num3)))
 						{
 							visiblePoints.Add(Grid.XYToCell(num2, num3));
 						}
@@ -169,20 +169,20 @@ public static class DiscreteShadowCaster
 			{
 				if (DiscreteShadowCaster.GetVisDistance(num2, num3, cellPos.x, cellPos.y) <= num)
 				{
-					if (DiscreteShadowCaster.DoesOcclude(num2, num3))
+					if (DiscreteShadowCaster.DoesOcclude(num2, num3, canSeeThroughTransparent))
 					{
-						if (num3 - 1 >= 0 && !DiscreteShadowCaster.DoesOcclude(num2, num3 - 1) && !DiscreteShadowCaster.DoesOcclude(num2 - 1, num3 - 1))
+						if (num3 - 1 >= 0 && !DiscreteShadowCaster.DoesOcclude(num2, num3 - 1, canSeeThroughTransparent) && !DiscreteShadowCaster.DoesOcclude(num2 - 1, num3 - 1, canSeeThroughTransparent))
 						{
-							DiscreteShadowCaster.ScanOctant(cellPos, range, depth + 1, octant, startSlope, DiscreteShadowCaster.GetSlope((double)num2 - 0.5, (double)num3 - 0.5, (double)cellPos.x, (double)cellPos.y, true), visiblePoints);
+							DiscreteShadowCaster.ScanOctant(cellPos, range, depth + 1, octant, startSlope, DiscreteShadowCaster.GetSlope((double)num2 - 0.5, (double)num3 - 0.5, (double)cellPos.x, (double)cellPos.y, true), visiblePoints, canSeeThroughTransparent);
 						}
 					}
 					else
 					{
-						if (num3 - 1 >= 0 && DiscreteShadowCaster.DoesOcclude(num2, num3 - 1))
+						if (num3 - 1 >= 0 && DiscreteShadowCaster.DoesOcclude(num2, num3 - 1, canSeeThroughTransparent))
 						{
 							startSlope = -DiscreteShadowCaster.GetSlope((double)num2 + 0.5, (double)num3 - 0.5, (double)cellPos.x, (double)cellPos.y, true);
 						}
-						if (!DiscreteShadowCaster.DoesOcclude(num2 - 1, num3) && !visiblePoints.Contains(Grid.XYToCell(num2, num3)))
+						if (!DiscreteShadowCaster.DoesOcclude(num2 - 1, num3, canSeeThroughTransparent) && !visiblePoints.Contains(Grid.XYToCell(num2, num3)))
 						{
 							visiblePoints.Add(Grid.XYToCell(num2, num3));
 						}
@@ -207,21 +207,21 @@ public static class DiscreteShadowCaster
 			{
 				if (DiscreteShadowCaster.GetVisDistance(num2, num3, cellPos.x, cellPos.y) <= num)
 				{
-					if (DiscreteShadowCaster.DoesOcclude(num2, num3))
+					if (DiscreteShadowCaster.DoesOcclude(num2, num3, canSeeThroughTransparent))
 					{
-						if (num2 + 1 < Grid.WidthInCells && !DiscreteShadowCaster.DoesOcclude(num2 + 1, num3) && !DiscreteShadowCaster.DoesOcclude(num2 + 1, num3 + 1))
+						if (num2 + 1 < Grid.WidthInCells && !DiscreteShadowCaster.DoesOcclude(num2 + 1, num3, canSeeThroughTransparent) && !DiscreteShadowCaster.DoesOcclude(num2 + 1, num3 + 1, canSeeThroughTransparent))
 						{
 							double slope2 = DiscreteShadowCaster.GetSlope((double)num2 + 0.5, (double)num3 + 0.5, (double)cellPos.x, (double)cellPos.y, false);
-							DiscreteShadowCaster.ScanOctant(cellPos, range, depth + 1, octant, startSlope, slope2, visiblePoints);
+							DiscreteShadowCaster.ScanOctant(cellPos, range, depth + 1, octant, startSlope, slope2, visiblePoints, canSeeThroughTransparent);
 						}
 					}
 					else
 					{
-						if (num2 + 1 < Grid.WidthInCells && DiscreteShadowCaster.DoesOcclude(num2 + 1, num3))
+						if (num2 + 1 < Grid.WidthInCells && DiscreteShadowCaster.DoesOcclude(num2 + 1, num3, canSeeThroughTransparent))
 						{
 							startSlope = -DiscreteShadowCaster.GetSlope((double)num2 + 0.5, (double)num3 - 0.5, (double)cellPos.x, (double)cellPos.y, false);
 						}
-						if (!DiscreteShadowCaster.DoesOcclude(num2, num3 + 1) && !visiblePoints.Contains(Grid.XYToCell(num2, num3)))
+						if (!DiscreteShadowCaster.DoesOcclude(num2, num3 + 1, canSeeThroughTransparent) && !visiblePoints.Contains(Grid.XYToCell(num2, num3)))
 						{
 							visiblePoints.Add(Grid.XYToCell(num2, num3));
 						}
@@ -246,21 +246,21 @@ public static class DiscreteShadowCaster
 			{
 				if (DiscreteShadowCaster.GetVisDistance(num2, num3, cellPos.x, cellPos.y) <= num)
 				{
-					if (DiscreteShadowCaster.DoesOcclude(num2, num3))
+					if (DiscreteShadowCaster.DoesOcclude(num2, num3, canSeeThroughTransparent))
 					{
-						if (num2 - 1 >= 0 && !DiscreteShadowCaster.DoesOcclude(num2 - 1, num3) && !DiscreteShadowCaster.DoesOcclude(num2 - 1, num3 + 1))
+						if (num2 - 1 >= 0 && !DiscreteShadowCaster.DoesOcclude(num2 - 1, num3, canSeeThroughTransparent) && !DiscreteShadowCaster.DoesOcclude(num2 - 1, num3 + 1, canSeeThroughTransparent))
 						{
 							double slope3 = DiscreteShadowCaster.GetSlope((double)num2 - 0.5, (double)num3 + 0.5, (double)cellPos.x, (double)cellPos.y, false);
-							DiscreteShadowCaster.ScanOctant(cellPos, range, depth + 1, octant, startSlope, slope3, visiblePoints);
+							DiscreteShadowCaster.ScanOctant(cellPos, range, depth + 1, octant, startSlope, slope3, visiblePoints, canSeeThroughTransparent);
 						}
 					}
 					else
 					{
-						if (num2 - 1 >= 0 && DiscreteShadowCaster.DoesOcclude(num2 - 1, num3))
+						if (num2 - 1 >= 0 && DiscreteShadowCaster.DoesOcclude(num2 - 1, num3, canSeeThroughTransparent))
 						{
 							startSlope = DiscreteShadowCaster.GetSlope((double)num2 - 0.5, (double)num3 - 0.5, (double)cellPos.x, (double)cellPos.y, false);
 						}
-						if (!DiscreteShadowCaster.DoesOcclude(num2, num3 + 1) && !visiblePoints.Contains(Grid.XYToCell(num2, num3)))
+						if (!DiscreteShadowCaster.DoesOcclude(num2, num3 + 1, canSeeThroughTransparent) && !visiblePoints.Contains(Grid.XYToCell(num2, num3)))
 						{
 							visiblePoints.Add(Grid.XYToCell(num2, num3));
 						}
@@ -285,20 +285,20 @@ public static class DiscreteShadowCaster
 			{
 				if (DiscreteShadowCaster.GetVisDistance(num2, num3, cellPos.x, cellPos.y) <= num)
 				{
-					if (DiscreteShadowCaster.DoesOcclude(num2, num3))
+					if (DiscreteShadowCaster.DoesOcclude(num2, num3, canSeeThroughTransparent))
 					{
-						if (num3 - 1 >= 0 && !DiscreteShadowCaster.DoesOcclude(num2, num3 - 1) && !DiscreteShadowCaster.DoesOcclude(num2 + 1, num3 - 1))
+						if (num3 - 1 >= 0 && !DiscreteShadowCaster.DoesOcclude(num2, num3 - 1, canSeeThroughTransparent) && !DiscreteShadowCaster.DoesOcclude(num2 + 1, num3 - 1, canSeeThroughTransparent))
 						{
-							DiscreteShadowCaster.ScanOctant(cellPos, range, depth + 1, octant, startSlope, DiscreteShadowCaster.GetSlope((double)num2 + 0.5, (double)num3 - 0.5, (double)cellPos.x, (double)cellPos.y, true), visiblePoints);
+							DiscreteShadowCaster.ScanOctant(cellPos, range, depth + 1, octant, startSlope, DiscreteShadowCaster.GetSlope((double)num2 + 0.5, (double)num3 - 0.5, (double)cellPos.x, (double)cellPos.y, true), visiblePoints, canSeeThroughTransparent);
 						}
 					}
 					else
 					{
-						if (num3 - 1 >= 0 && DiscreteShadowCaster.DoesOcclude(num2, num3 - 1))
+						if (num3 - 1 >= 0 && DiscreteShadowCaster.DoesOcclude(num2, num3 - 1, canSeeThroughTransparent))
 						{
 							startSlope = DiscreteShadowCaster.GetSlope((double)num2 - 0.5, (double)num3 - 0.5, (double)cellPos.x, (double)cellPos.y, true);
 						}
-						if (!DiscreteShadowCaster.DoesOcclude(num2 + 1, num3) && !visiblePoints.Contains(Grid.XYToCell(num2, num3)))
+						if (!DiscreteShadowCaster.DoesOcclude(num2 + 1, num3, canSeeThroughTransparent) && !visiblePoints.Contains(Grid.XYToCell(num2, num3)))
 						{
 							visiblePoints.Add(Grid.XYToCell(num2, num3));
 						}
@@ -323,20 +323,20 @@ public static class DiscreteShadowCaster
 			{
 				if (DiscreteShadowCaster.GetVisDistance(num2, num3, cellPos.x, cellPos.y) <= num)
 				{
-					if (DiscreteShadowCaster.DoesOcclude(num2, num3))
+					if (DiscreteShadowCaster.DoesOcclude(num2, num3, canSeeThroughTransparent))
 					{
-						if (num3 + 1 < Grid.HeightInCells && !DiscreteShadowCaster.DoesOcclude(num2, num3 + 1) && !DiscreteShadowCaster.DoesOcclude(num2 + 1, num3 + 1))
+						if (num3 + 1 < Grid.HeightInCells && !DiscreteShadowCaster.DoesOcclude(num2, num3 + 1, canSeeThroughTransparent) && !DiscreteShadowCaster.DoesOcclude(num2 + 1, num3 + 1, canSeeThroughTransparent))
 						{
-							DiscreteShadowCaster.ScanOctant(cellPos, range, depth + 1, octant, startSlope, DiscreteShadowCaster.GetSlope((double)num2 + 0.5, (double)num3 + 0.5, (double)cellPos.x, (double)cellPos.y, true), visiblePoints);
+							DiscreteShadowCaster.ScanOctant(cellPos, range, depth + 1, octant, startSlope, DiscreteShadowCaster.GetSlope((double)num2 + 0.5, (double)num3 + 0.5, (double)cellPos.x, (double)cellPos.y, true), visiblePoints, canSeeThroughTransparent);
 						}
 					}
 					else
 					{
-						if (num3 + 1 < Grid.HeightInCells && DiscreteShadowCaster.DoesOcclude(num2, num3 + 1))
+						if (num3 + 1 < Grid.HeightInCells && DiscreteShadowCaster.DoesOcclude(num2, num3 + 1, canSeeThroughTransparent))
 						{
 							startSlope = -DiscreteShadowCaster.GetSlope((double)num2 - 0.5, (double)num3 + 0.5, (double)cellPos.x, (double)cellPos.y, true);
 						}
-						if (!DiscreteShadowCaster.DoesOcclude(num2 + 1, num3) && !visiblePoints.Contains(Grid.XYToCell(num2, num3)))
+						if (!DiscreteShadowCaster.DoesOcclude(num2 + 1, num3, canSeeThroughTransparent) && !visiblePoints.Contains(Grid.XYToCell(num2, num3)))
 						{
 							visiblePoints.Add(Grid.XYToCell(num2, num3));
 						}
@@ -363,9 +363,9 @@ public static class DiscreteShadowCaster
 		{
 			num3 = Grid.HeightInCells - 1;
 		}
-		if ((depth < range) & !DiscreteShadowCaster.DoesOcclude(num2, num3))
+		if ((depth < range) & !DiscreteShadowCaster.DoesOcclude(num2, num3, canSeeThroughTransparent))
 		{
-			DiscreteShadowCaster.ScanOctant(cellPos, range, depth + 1, octant, startSlope, endSlope, visiblePoints);
+			DiscreteShadowCaster.ScanOctant(cellPos, range, depth + 1, octant, startSlope, endSlope, visiblePoints, canSeeThroughTransparent);
 		}
 	}
 

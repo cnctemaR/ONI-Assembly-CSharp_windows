@@ -6,7 +6,7 @@ using UnityEngine.EventSystems;
 
 public class DevToolUI : DevTool
 {
-	protected override void Render()
+	protected override void RenderTo(DevPanel panel)
 	{
 		this.RepopulateRaycastHits();
 		this.DrawPingObject();
@@ -24,7 +24,7 @@ public class DevToolUI : DevTool
 				ImGui.SameLine();
 				if (ImGui.Button("Inspect"))
 				{
-					DevToolManager.Instance.GetDevTool<DevToolSceneInspector>().PushObject(gameObject);
+					DevToolSceneInspector.Inspect(gameObject);
 				}
 				ImGui.Spacing();
 				ImGui.Spacing();
@@ -35,13 +35,30 @@ public class DevToolUI : DevTool
 			}
 		}
 		ImGui.Text("Press \",\" to ping the top hovered ui object");
-		if (this.m_raycast_hits.Count > 0 && Input.GetKeyDown(KeyCode.Comma))
+		ImGui.Spacing();
+		ImGui.Spacing();
+	}
+
+	private void Internal_Ping(RaycastResult raycastResult)
+	{
+		GameObject gameObject = raycastResult.gameObject;
+		this.m_last_pinged_hit = new RaycastResult?(raycastResult);
+	}
+
+	public static void PingHoveredObject()
+	{
+		using (ListPool<RaycastResult, DevToolUI>.PooledList pooledList = PoolsFor<DevToolUI>.AllocateList<RaycastResult>())
 		{
-			GameObject gameObject2 = this.m_raycast_hits[0].gameObject;
-			this.m_last_pinged_hit = new RaycastResult?(this.m_raycast_hits[0]);
+			global::UnityEngine.EventSystems.EventSystem current = global::UnityEngine.EventSystems.EventSystem.current;
+			if (!(current == null) && current)
+			{
+				current.RaycastAll(new PointerEventData(current)
+				{
+					position = Input.mousePosition
+				}, pooledList);
+				DevToolManager.Instance.panels.AddOrGetDevTool<DevToolUI>().Internal_Ping(pooledList[0]);
+			}
 		}
-		ImGui.Spacing();
-		ImGui.Spacing();
 	}
 
 	private void DrawRaycastHits()

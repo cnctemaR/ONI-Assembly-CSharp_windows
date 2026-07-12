@@ -212,7 +212,7 @@ public class ClusterTraveler : KMonoBehaviour, ISim200ms
 			{
 				this.m_destinationSelector.SetDestination(this.m_destinationSelector.GetMyWorldLocation());
 				string message = MISC.NOTIFICATIONS.BADROCKETPATH.TOOLTIP;
-				Notification notification = new Notification(MISC.NOTIFICATIONS.BADROCKETPATH.NAME, NotificationType.BadMinor, (List<Notification> notificationList, object data) => message + notificationList.ReduceMessages(false) + "\n\n" + reason, null, true, 0f, null, null, null, true, false);
+				Notification notification = new Notification(MISC.NOTIFICATIONS.BADROCKETPATH.NAME, NotificationType.BadMinor, (List<Notification> notificationList, object data) => message + notificationList.ReduceMessages(false) + "\n\n" + reason, null, true, 0f, null, null, null, true, false, false);
 				base.GetComponent<Notifier>().Add(notification, "");
 				return;
 			}

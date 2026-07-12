@@ -7,10 +7,10 @@ namespace Database
 		public ArtableStatuses(ResourceSet parent)
 			: base("ArtableStatuses", parent)
 		{
-			this.Ready = this.Add("AwaitingArting", ArtableStatuses.ArtableStatusType.AwaitingArting);
-			this.Ugly = this.Add("LookingUgly", ArtableStatuses.ArtableStatusType.LookingUgly);
-			this.Okay = this.Add("LookingOkay", ArtableStatuses.ArtableStatusType.LookingOkay);
-			this.Great = this.Add("LookingGreat", ArtableStatuses.ArtableStatusType.LookingGreat);
+			this.AwaitingArting = this.Add("AwaitingArting", ArtableStatuses.ArtableStatusType.AwaitingArting);
+			this.LookingUgly = this.Add("LookingUgly", ArtableStatuses.ArtableStatusType.LookingUgly);
+			this.LookingOkay = this.Add("LookingOkay", ArtableStatuses.ArtableStatusType.LookingOkay);
+			this.LookingGreat = this.Add("LookingGreat", ArtableStatuses.ArtableStatusType.LookingGreat);
 		}
 
 		public ArtableStatusItem Add(string id, ArtableStatuses.ArtableStatusType statusType)
@@ -20,13 +20,13 @@ namespace Database
 			return artableStatusItem;
 		}
 
-		public ArtableStatusItem Ready;
+		public ArtableStatusItem AwaitingArting;
 
-		public ArtableStatusItem Ugly;
+		public ArtableStatusItem LookingUgly;
 
-		public ArtableStatusItem Okay;
+		public ArtableStatusItem LookingOkay;
 
-		public ArtableStatusItem Great;
+		public ArtableStatusItem LookingGreat;
 
 		public enum ArtableStatusType
 		{

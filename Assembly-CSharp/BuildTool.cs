@@ -40,6 +40,10 @@ public class BuildTool : DragTool
 			component.Offset = this.def.GetVisualizerOffset();
 			component.name = component.GetComponent<KPrefabID>().GetDebugName() + "_visualizer";
 		}
+		if (!this.facadeID.IsNullOrWhiteSpace() && this.facadeID != "DEFAULT_FACADE")
+		{
+			this.visualizer.GetComponent<BuildingFacade>().ApplyBuildingFacade(Db.GetBuildingFacades().Get(this.facadeID));
+		}
 		Rotatable component2 = this.visualizer.GetComponent<Rotatable>();
 		if (component2 != null)
 		{
@@ -92,11 +96,18 @@ public class BuildTool : DragTool
 		this.OnActivateTool();
 	}
 
+	public void Activate(BuildingDef def, IList<Tag> selected_elements, string facadeID)
+	{
+		this.facadeID = facadeID;
+		this.Activate(def, selected_elements);
+	}
+
 	public void Deactivate()
 	{
 		this.selectedElements = null;
 		SelectTool.Instance.Activate();
 		this.def = null;
+		this.facadeID = null;
 		ResourceRemainingDisplayScreen.instance.DeactivateDisplay();
 	}
 
@@ -298,77 +309,106 @@ public class BuildTool : DragTool
 		this.ClearTilePreview();
 		Vector3 vector = Grid.CellToPosCBC(cell, Grid.SceneLayer.Building);
 		GameObject gameObject = null;
-		if (DebugHandler.InstantBuildMode || (Game.Instance.SandboxModeActive && SandboxToolParameterMenu.instance.settings.InstantBuild))
+		PlanScreen.Instance.LastSelectedBuildingFacade = this.facadeID;
+		bool flag = DebugHandler.InstantBuildMode || (Game.Instance.SandboxModeActive && SandboxToolParameterMenu.instance.settings.InstantBuild);
+		string text;
+		if (!flag)
 		{
-			string text;
-			if (this.def.IsValidBuildLocation(this.visualizer, vector, this.buildingOrientation) && this.def.IsValidPlaceLocation(this.visualizer, vector, this.buildingOrientation, out text))
-			{
-				gameObject = this.def.Build(cell, this.buildingOrientation, null, this.selectedElements, 293.15f, false, GameClock.Instance.GetTime());
-			}
+			gameObject = this.def.TryPlace(this.visualizer, vector, this.buildingOrientation, this.selectedElements, this.facadeID, 0);
 		}
-		else
+		else if (this.def.IsValidBuildLocation(this.visualizer, vector, this.buildingOrientation, false) && this.def.IsValidPlaceLocation(this.visualizer, vector, this.buildingOrientation, out text))
 		{
-			gameObject = this.def.TryPlace(this.visualizer, vector, this.buildingOrientation, this.selectedElements, 0);
-			if (gameObject == null && this.def.ReplacementLayer != ObjectLayer.NumLayers)
+			gameObject = this.def.Build(cell, this.buildingOrientation, null, this.selectedElements, 293.15f, this.facadeID, false, GameClock.Instance.GetTime());
+		}
+		if (gameObject == null && this.def.ReplacementLayer != ObjectLayer.NumLayers)
+		{
+			GameObject replacementCandidate = this.def.GetReplacementCandidate(cell);
+			if (replacementCandidate != null && !this.def.IsReplacementLayerOccupied(cell))
 			{
-				GameObject replacementCandidate = this.def.GetReplacementCandidate(cell);
-				if (replacementCandidate != null && !this.def.IsReplacementLayerOccupied(cell))
+				BuildingComplete component = replacementCandidate.GetComponent<BuildingComplete>();
+				if (component != null && component.Def.Replaceable && this.def.CanReplace(replacementCandidate) && (component.Def != this.def || this.selectedElements[0] != replacementCandidate.GetComponent<PrimaryElement>().Element.tag))
 				{
-					BuildingComplete component = replacementCandidate.GetComponent<BuildingComplete>();
-					if (component != null && component.Def.Replaceable && this.def.CanReplace(replacementCandidate) && (component.Def != this.def || this.selectedElements[0] != replacementCandidate.GetComponent<PrimaryElement>().Element.tag))
+					string text2;
+					if (!flag)
 					{
 						gameObject = this.def.TryReplaceTile(this.visualizer, vector, this.buildingOrientation, this.selectedElements, 0);
 						Grid.Objects[cell, (int)this.def.ReplacementLayer] = gameObject;
 					}
-				}
-			}
-			if (gameObject != null)
-			{
-				Prioritizable component2 = gameObject.GetComponent<Prioritizable>();
-				if (component2 != null)
-				{
-					if (BuildMenu.Instance != null)
+					else if (this.def.IsValidBuildLocation(this.visualizer, vector, this.buildingOrientation, true) && this.def.IsValidPlaceLocation(this.visualizer, vector, this.buildingOrientation, true, out text2))
 					{
-						component2.SetMasterPriority(BuildMenu.Instance.GetBuildingPriority());
-					}
-					if (PlanScreen.Instance != null)
-					{
-						component2.SetMasterPriority(PlanScreen.Instance.GetBuildingPriority());
+						gameObject = this.InstantBuildReplace(cell, vector, replacementCandidate);
 					}
 				}
 			}
 		}
-		if (gameObject != null)
+		this.PostProcessBuild(flag, vector, gameObject);
+	}
+
+	private GameObject InstantBuildReplace(int cell, Vector3 pos, GameObject tile)
+	{
+		if (tile.GetComponent<SimCellOccupier>() == null)
 		{
-			if (this.def.MaterialsAvailable(this.selectedElements, ClusterManager.Instance.activeWorld) || DebugHandler.InstantBuildMode)
+			global::UnityEngine.Object.Destroy(tile);
+			return this.def.Build(cell, this.buildingOrientation, null, this.selectedElements, 293.15f, this.facadeID, false, GameClock.Instance.GetTime());
+		}
+		tile.GetComponent<SimCellOccupier>().DestroySelf(delegate
+		{
+			global::UnityEngine.Object.Destroy(tile);
+			GameObject gameObject = this.def.Build(cell, this.buildingOrientation, null, this.selectedElements, 293.15f, this.facadeID, false, GameClock.Instance.GetTime());
+			this.PostProcessBuild(true, pos, gameObject);
+		});
+		return null;
+	}
+
+	private void PostProcessBuild(bool instantBuild, Vector3 pos, GameObject builtItem)
+	{
+		if (builtItem == null)
+		{
+			return;
+		}
+		if (!instantBuild)
+		{
+			Prioritizable component = builtItem.GetComponent<Prioritizable>();
+			if (component != null)
 			{
-				this.placeSound = GlobalAssets.GetSound("Place_Building_" + this.def.AudioSize, false);
-				if (this.placeSound != null)
+				if (BuildMenu.Instance != null)
 				{
-					this.buildingCount = this.buildingCount % 14 + 1;
-					Vector3 vector2 = vector;
-					vector2.z = 0f;
-					EventInstance eventInstance = SoundEvent.BeginOneShot(this.placeSound, vector2, 1f, false);
-					if (this.def.AudioSize == "small")
-					{
-						eventInstance.setParameterByName("tileCount", (float)this.buildingCount, false);
-					}
-					SoundEvent.EndOneShot(eventInstance);
+					component.SetMasterPriority(BuildMenu.Instance.GetBuildingPriority());
+				}
+				if (PlanScreen.Instance != null)
+				{
+					component.SetMasterPriority(PlanScreen.Instance.GetBuildingPriority());
 				}
 			}
-			else
+		}
+		if (this.def.MaterialsAvailable(this.selectedElements, ClusterManager.Instance.activeWorld) || DebugHandler.InstantBuildMode)
+		{
+			this.placeSound = GlobalAssets.GetSound("Place_Building_" + this.def.AudioSize, false);
+			if (this.placeSound != null)
 			{
-				PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Resource, UI.TOOLTIPS.NOMATERIAL, null, vector, 1.5f, false, false);
+				this.buildingCount = this.buildingCount % 14 + 1;
+				Vector3 vector = pos;
+				vector.z = 0f;
+				EventInstance eventInstance = SoundEvent.BeginOneShot(this.placeSound, vector, 1f, false);
+				if (this.def.AudioSize == "small")
+				{
+					eventInstance.setParameterByName("tileCount", (float)this.buildingCount, false);
+				}
+				SoundEvent.EndOneShot(eventInstance);
 			}
-			Rotatable component3 = gameObject.GetComponent<Rotatable>();
-			if (component3 != null)
-			{
-				component3.SetOrientation(this.buildingOrientation);
-			}
-			if (this.def.OnePerWorld)
-			{
-				PlayerController.Instance.ActivateTool(SelectTool.Instance);
-			}
+		}
+		else
+		{
+			PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Resource, UI.TOOLTIPS.NOMATERIAL, null, pos, 1.5f, false, false);
+		}
+		Rotatable component2 = builtItem.GetComponent<Rotatable>();
+		if (component2 != null)
+		{
+			component2.SetOrientation(this.buildingOrientation);
+		}
+		if (this.def.OnePerWorld)
+		{
+			PlayerController.Instance.ActivateTool(SelectTool.Instance);
 		}
 	}
 
@@ -459,6 +499,8 @@ public class BuildTool : DragTool
 	private BuildingDef def;
 
 	private Orientation buildingOrientation;
+
+	private string facadeID;
 
 	private ToolTip tooltip;
 

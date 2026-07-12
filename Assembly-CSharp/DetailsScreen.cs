@@ -37,6 +37,7 @@ public class DetailsScreen : KTabMenu
 	{
 		base.OnSpawn();
 		this.CodexEntryButton.onClick += this.OpenCodexEntry;
+		this.ChangeOutfitButton.onClick += this.OnClickChangeOutfit;
 		this.CloseButton.onClick += this.DeselectAndClose;
 		this.TabTitle.OnNameChanged += this.OnNameChanged;
 		this.TabTitle.OnStartedEditing += this.OnStartedEditing;
@@ -82,6 +83,11 @@ public class DetailsScreen : KTabMenu
 
 	protected override void OnDeactivate()
 	{
+		if (this.target != null && this.setRocketTitleHandle != -1)
+		{
+			this.target.Unsubscribe(this.setRocketTitleHandle);
+		}
+		this.setRocketTitleHandle = -1;
 		this.DeactivateSideContent();
 		base.OnDeactivate();
 	}
@@ -155,6 +161,11 @@ public class DetailsScreen : KTabMenu
 		this.CodexEntryButton.GetComponent<ToolTip>().SetSimpleTooltip(this.CodexEntryButton.isInteractable ? UI.TOOLTIPS.OPEN_CODEX_ENTRY : UI.TOOLTIPS.NO_CODEX_ENTRY);
 	}
 
+	private void UpdateOutfitButton()
+	{
+		this.ChangeOutfitButton.gameObject.SetActive(this.target.GetComponent<MinionIdentity>());
+	}
+
 	public void OnRefreshData(object obj)
 	{
 		this.SetTitle(base.PreviousActiveTab);
@@ -173,8 +184,9 @@ public class DetailsScreen : KTabMenu
 		{
 			return;
 		}
-		if (this.target != go)
+		if (this.target != go && this.setRocketTitleHandle != -1)
 		{
+			this.target.Unsubscribe(this.setRocketTitleHandle);
 			this.setRocketTitleHandle = -1;
 		}
 		this.target = go;
@@ -236,6 +248,7 @@ public class DetailsScreen : KTabMenu
 		this.tabHeaderContainer.gameObject.SetActive(base.CountTabs() > 1);
 		if (this.sideScreens != null && this.sideScreens.Count > 0)
 		{
+			bool areAnyValid = false;
 			this.sideScreens.ForEach(delegate(DetailsScreen.SideScreenRef scn)
 			{
 				if (!scn.screenPrefab.IsValidForTarget(this.target))
@@ -246,11 +259,12 @@ public class DetailsScreen : KTabMenu
 					}
 					return;
 				}
+				areAnyValid = true;
 				if (scn.screenInstance == null)
 				{
 					scn.screenInstance = global::Util.KInstantiateUI<SideScreenContent>(scn.screenPrefab.gameObject, this.sideScreenContentBody, false);
 				}
-				if (!this.sideScreen.activeInHierarchy)
+				if (!this.sideScreen.activeSelf)
 				{
 					this.sideScreen.SetActive(true);
 				}
@@ -264,6 +278,10 @@ public class DetailsScreen : KTabMenu
 				}
 				this.RefreshTitle();
 			});
+			if (!areAnyValid)
+			{
+				this.sideScreen.SetActive(false);
+			}
 		}
 		this.sortedSideScreens.Sort(delegate(KeyValuePair<GameObject, int> x, KeyValuePair<GameObject, int> y)
 		{
@@ -416,8 +434,14 @@ public class DetailsScreen : KTabMenu
 		string selectedObjectCodexID = this.GetSelectedObjectCodexID();
 		if (selectedObjectCodexID != "")
 		{
-			ManagementMenu.Instance.OpenCodexToEntry(selectedObjectCodexID);
+			ManagementMenu.Instance.OpenCodexToEntry(selectedObjectCodexID, null);
 		}
+	}
+
+	public void OnClickChangeOutfit()
+	{
+		LockerNavigator.Instance.PushScreen(LockerNavigator.Instance.outfitBrowserScreen);
+		LockerNavigator.Instance.outfitBrowserScreen.GetComponent<OutfitBrowserScreen>().Configure(OutfitBrowserScreenConfig.Minion(this.target));
 	}
 
 	public void DeselectAndClose()
@@ -500,6 +524,7 @@ public class DetailsScreen : KTabMenu
 	public void SetTitle(int selectedTabIndex)
 	{
 		this.UpdateCodexButton();
+		this.UpdateOutfitButton();
 		if (this.TabTitle != null)
 		{
 			this.TabTitle.SetTitle(this.target.GetProperName());
@@ -546,11 +571,8 @@ public class DetailsScreen : KTabMenu
 		if (clusterCraftDoor.HasTargetWorld())
 		{
 			WorldContainer targetWorld = clusterCraftDoor.GetTargetWorld();
-			if (targetWorld != null)
-			{
-				this.TabTitle.SetTitle(targetWorld.GetComponent<ClusterGridEntity>().Name);
-				this.TabTitle.SetUserEditable(true);
-			}
+			this.TabTitle.SetTitle(targetWorld.GetComponent<ClusterGridEntity>().Name);
+			this.TabTitle.SetUserEditable(true);
 			this.TabTitle.SetSubText(this.target.GetProperName(), "");
 			this.setRocketTitleHandle = -1;
 			return;
@@ -594,6 +616,9 @@ public class DetailsScreen : KTabMenu
 
 	[SerializeField]
 	private KButton CodexEntryButton;
+
+	[SerializeField]
+	private KButton ChangeOutfitButton;
 
 	[Header("Panels")]
 	public Transform UserMenuPanel;

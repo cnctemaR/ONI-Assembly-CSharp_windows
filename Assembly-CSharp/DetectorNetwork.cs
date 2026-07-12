@@ -109,7 +109,7 @@ public class DetectorNetwork : GameStateMachine<DetectorNetwork, DetectorNetwork
 				int num3 = Grid.OffsetCell(start_cell, num2 * x_offset, num2 * y_offset);
 				if (Grid.IsValidCell(num3))
 				{
-					if (Grid.ExposedToSunlight[num3] < 253)
+					if (Grid.ExposedToSunlight[num3] <= 0)
 					{
 						break;
 					}

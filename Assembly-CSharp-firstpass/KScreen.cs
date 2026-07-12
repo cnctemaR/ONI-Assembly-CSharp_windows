@@ -322,6 +322,10 @@ public class KScreen : KMonoBehaviour, IInputHandler, IPointerEnterHandler, IEve
 
 	public const float EDITING_SCREEN_SORT_KEY = 50f;
 
+	public const float LOCKER_SORT_KEY = 40f;
+
+	public const float PAUSE_MENU_SORT_KEY = 30f;
+
 	public const float FULLSCREEN_SCREEN_SORT_KEY = 20f;
 
 	private Canvas _canvas;

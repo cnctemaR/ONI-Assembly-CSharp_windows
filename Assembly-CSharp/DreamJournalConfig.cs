@@ -21,7 +21,7 @@ public class DreamJournalConfig : IEntityConfig
 	public GameObject CreatePrefab()
 	{
 		KAnimFile anim = Assets.GetAnim("dream_journal_kanim");
-		GameObject gameObject = EntityTemplates.CreateLooseEntity(DreamJournalConfig.ID.Name, ITEMS.DREAMJOURNAL.NAME, ITEMS.DREAMJOURNAL.DESC, 1f, true, anim, "object", Grid.SceneLayer.BuildingFront, EntityTemplates.CollisionShape.RECTANGLE, 1f, 1f, true, 0, SimHashes.Creature, new List<Tag> { GameTags.IgnoreMaterialCategory });
+		GameObject gameObject = EntityTemplates.CreateLooseEntity(DreamJournalConfig.ID.Name, ITEMS.DREAMJOURNAL.NAME, ITEMS.DREAMJOURNAL.DESC, 1f, true, anim, "object", Grid.SceneLayer.BuildingFront, EntityTemplates.CollisionShape.RECTANGLE, 1f, 1f, true, 0, SimHashes.Creature, new List<Tag> { GameTags.StoryTraitResource });
 		gameObject.AddOrGet<EntitySplitter>().maxStackSize = 25f;
 		return gameObject;
 	}

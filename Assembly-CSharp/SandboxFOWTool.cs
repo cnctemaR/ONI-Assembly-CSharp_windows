@@ -63,7 +63,7 @@ public class SandboxFOWTool : BrushTool
 	protected override void OnPaintCell(int cell, int distFromOrigin)
 	{
 		base.OnPaintCell(cell, distFromOrigin);
-		Grid.Reveal(cell, byte.MaxValue);
+		Grid.Reveal(cell, byte.MaxValue, false);
 	}
 
 	public static SandboxFOWTool instance;

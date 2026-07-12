@@ -145,7 +145,7 @@ public class Constructable : Workable, ISaveLoadable
 		Orientation orientation = ((component != null) ? component.GetOrientation() : Orientation.Neutral);
 		int num = Grid.PosToCell(base.transform.GetLocalPosition());
 		this.UnmarkArea();
-		GameObject gameObject = this.building.Def.Build(num, orientation, this.storage, this.selectedElementsTags, this.initialTemperature, true, GameClock.Instance.GetTime());
+		GameObject gameObject = this.building.Def.Build(num, orientation, this.storage, this.selectedElementsTags, this.initialTemperature, base.GetComponent<BuildingFacade>().CurrentFacade, true, GameClock.Instance.GetTime());
 		BonusEvent.GameplayEventData gameplayEventData = new BonusEvent.GameplayEventData();
 		gameplayEventData.building = gameObject.GetComponent<BuildingComplete>();
 		gameplayEventData.workable = this;
@@ -182,7 +182,7 @@ public class Constructable : Workable, ISaveLoadable
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		this.invalidLocation = new Notification(MISC.NOTIFICATIONS.INVALIDCONSTRUCTIONLOCATION.NAME, NotificationType.BadMinor, (List<Notification> notificationList, object data) => MISC.NOTIFICATIONS.INVALIDCONSTRUCTIONLOCATION.TOOLTIP + notificationList.ReduceMessages(false), null, true, 0f, null, null, null, true, false);
+		this.invalidLocation = new Notification(MISC.NOTIFICATIONS.INVALIDCONSTRUCTIONLOCATION.NAME, NotificationType.BadMinor, (List<Notification> notificationList, object data) => MISC.NOTIFICATIONS.INVALIDCONSTRUCTIONLOCATION.TOOLTIP + notificationList.ReduceMessages(false), null, true, 0f, null, null, null, true, false, false);
 		this.faceTargetWhenWorking = true;
 		base.Subscribe<Constructable>(-1432940121, Constructable.OnReachableChangedDelegate);
 		if (this.rotatable == null)
@@ -534,7 +534,7 @@ public class Constructable : Workable, ISaveLoadable
 			});
 			this.OnDiggableReachabilityChanged(null);
 		}
-		bool flag = this.building.Def.IsValidBuildLocation(base.gameObject, base.transform.GetPosition(), this.building.Orientation);
+		bool flag = this.building.Def.IsValidBuildLocation(base.gameObject, base.transform.GetPosition(), this.building.Orientation, false);
 		if (flag)
 		{
 			this.notifier.Remove(this.invalidLocation);

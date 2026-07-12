@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class LightBuffer : MonoBehaviour
@@ -53,7 +54,16 @@ public class LightBuffer : MonoBehaviour
 		this.Material.SetTexture("_PropertyWorldLight", this.WorldLight);
 		this.CircleMaterial.SetTexture("_PropertyWorldLight", this.WorldLight);
 		this.ConeMaterial.SetTexture("_PropertyWorldLight", this.WorldLight);
-		foreach (Light2D light2D in Components.Light2Ds.GetWorldItems(ClusterManager.Instance.activeWorldId, false))
+		List<Light2D> list = Components.Light2Ds.Items;
+		if (ClusterManager.Instance != null)
+		{
+			list = Components.Light2Ds.GetWorldItems(ClusterManager.Instance.activeWorldId, false);
+		}
+		if (list == null)
+		{
+			return;
+		}
+		foreach (Light2D light2D in list)
 		{
 			if (!(light2D == null) && light2D.enabled)
 			{

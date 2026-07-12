@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Database;
 using KSerialization;
 
@@ -13,8 +14,18 @@ public class StoryInstance : ISaveLoadable
 		}
 		set
 		{
+			if (this.state == value)
+			{
+				return;
+			}
 			this.state = value;
 			this.Telemetry.LogStateChange(this.state, GameClock.Instance.GetTimeInCycles());
+			Action<StoryInstance.State> storyStateChanged = this.StoryStateChanged;
+			if (storyStateChanged == null)
+			{
+				return;
+			}
+			storyStateChanged(this.state);
 		}
 	}
 
@@ -30,6 +41,12 @@ public class StoryInstance : ISaveLoadable
 		}
 	}
 
+	public EventInfoData EventInfo { get; private set; }
+
+	public Notification Notification { get; private set; }
+
+	public EventInfoDataHelper.PopupType PendingType { get; private set; } = EventInfoDataHelper.PopupType.NONE;
+
 	public Story GetStory()
 	{
 		if (this._story == null)
@@ -39,12 +56,47 @@ public class StoryInstance : ISaveLoadable
 		return this._story;
 	}
 
+	public StoryInstance()
+	{
+	}
+
 	public StoryInstance(Story story, int worldId)
 	{
 		this._story = story;
 		this.storyId = story.Id;
 		this.worldId = worldId;
 	}
+
+	public bool HasDisplayedPopup(EventInfoDataHelper.PopupType type)
+	{
+		return this.popupDisplayedStates != null && this.popupDisplayedStates.Contains(type);
+	}
+
+	public void SetPopupData(StoryManager.PopupInfo info, EventInfoData eventInfo, Notification notification = null)
+	{
+		this.EventInfo = eventInfo;
+		this.Notification = notification;
+		this.PendingType = info.PopupType;
+		eventInfo.showCallback = (global::System.Action)Delegate.Combine(eventInfo.showCallback, new global::System.Action(this.OnPopupDisplayed));
+		if (info.DisplayImmediate)
+		{
+			EventInfoScreen.ShowPopup(eventInfo);
+		}
+	}
+
+	private void OnPopupDisplayed()
+	{
+		if (this.popupDisplayedStates == null)
+		{
+			this.popupDisplayedStates = new HashSet<EventInfoDataHelper.PopupType>();
+		}
+		this.popupDisplayedStates.Add(this.PendingType);
+		this.EventInfo = null;
+		this.Notification = null;
+		this.PendingType = EventInfoDataHelper.PopupType.NONE;
+	}
+
+	public Action<StoryInstance.State> StoryStateChanged;
 
 	[Serialize]
 	public readonly string storyId;
@@ -58,11 +110,8 @@ public class StoryInstance : ISaveLoadable
 	[Serialize]
 	private StoryManager.StoryTelemetry telemetry;
 
-	public EventInfoData eventInfo;
-
-	public StoryCompleteData completionData;
-
-	public Action<StoryInstance> sequenceCompleteCallback;
+	[Serialize]
+	private HashSet<EventInfoDataHelper.PopupType> popupDisplayedStates = new HashSet<EventInfoDataHelper.PopupType>();
 
 	private Story _story;
 

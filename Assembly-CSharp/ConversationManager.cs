@@ -153,6 +153,11 @@ public class ConversationManager : KMonoBehaviour, ISim200ms
 		return true;
 	}
 
+	public bool TryGetConversation(MinionIdentity minion, out Conversation conversation)
+	{
+		return this.setupsByMinion.TryGetValue(minion, out conversation);
+	}
+
 	private Vector3 GetCentroid(Conversation setup)
 	{
 		Vector3 vector = Vector3.zero;

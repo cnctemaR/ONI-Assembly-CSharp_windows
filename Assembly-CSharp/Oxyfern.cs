@@ -13,7 +13,6 @@ public class Oxyfern : StateMachineComponent<Oxyfern.StatesInstance>
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		base.Subscribe<Oxyfern>(-216549700, Oxyfern.OnUprootedDelegate);
 		base.smi.StartSM();
 	}
 
@@ -30,15 +29,6 @@ public class Oxyfern : StateMachineComponent<Oxyfern.StatesInstance>
 	{
 		base.Subscribe<Oxyfern>(1309017699, Oxyfern.OnReplantedDelegate);
 		base.OnPrefabInit();
-	}
-
-	private void OnUprooted(object data = null)
-	{
-		GameUtil.KInstantiate(Assets.GetPrefab(EffectConfigs.PlantDeathId), base.gameObject.transform.GetPosition(), Grid.SceneLayer.FXFront, null, 0).SetActive(true);
-		base.gameObject.Trigger(1623392196, null);
-		base.gameObject.GetComponent<KBatchedAnimController>().StopAndClear();
-		Util.KDestroyGameObject(base.gameObject);
-		base.Unsubscribe<Oxyfern>(-216549700, Oxyfern.OnUprootedDelegate, false);
 	}
 
 	private void OnReplanted(object data = null)
@@ -71,11 +61,6 @@ public class Oxyfern : StateMachineComponent<Oxyfern.StatesInstance>
 
 	[MyCmpReq]
 	private ReceptacleMonitor receptacleMonitor;
-
-	private static readonly EventSystem.IntraObjectHandler<Oxyfern> OnUprootedDelegate = new EventSystem.IntraObjectHandler<Oxyfern>(delegate(Oxyfern component, object data)
-	{
-		component.OnUprooted(data);
-	});
 
 	private static readonly EventSystem.IntraObjectHandler<Oxyfern> OnReplantedDelegate = new EventSystem.IntraObjectHandler<Oxyfern>(delegate(Oxyfern component, object data)
 	{
@@ -133,8 +118,6 @@ public class Oxyfern : StateMachineComponent<Oxyfern.StatesInstance>
 		public Oxyfern.States.AliveStates alive;
 
 		public GameStateMachine<Oxyfern.States, Oxyfern.StatesInstance, Oxyfern, object>.State dead;
-
-		private StatusItem statusItemCooling;
 
 		public class AliveStates : GameStateMachine<Oxyfern.States, Oxyfern.StatesInstance, Oxyfern, object>.PlantAliveSubState
 		{

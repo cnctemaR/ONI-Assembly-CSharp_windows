@@ -40,7 +40,7 @@ public class TravelTubeEntranceConfig : IBuildingConfig
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
-		go.GetComponent<RequireInputs>().visualizeRequirements = false;
+		go.GetComponent<RequireInputs>().visualizeRequirements = RequireInputs.Requirements.NoWire;
 	}
 
 	public const string ID = "TravelTubeEntrance";

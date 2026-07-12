@@ -82,7 +82,7 @@ public class Reactor : StateMachineComponent<Reactor.StatesInstance>, IGameObjec
 	public Notification CreateMeltdownNotification()
 	{
 		KSelectable component = base.GetComponent<KSelectable>();
-		return new Notification(MISC.NOTIFICATIONS.REACTORMELTDOWN.NAME, NotificationType.Bad, (List<Notification> notificationList, object data) => MISC.NOTIFICATIONS.REACTORMELTDOWN.TOOLTIP + notificationList.ReduceMessages(false), "/t• " + component.GetProperName(), false, 0f, null, null, null, true, false);
+		return new Notification(MISC.NOTIFICATIONS.REACTORMELTDOWN.NAME, NotificationType.Bad, (List<Notification> notificationList, object data) => MISC.NOTIFICATIONS.REACTORMELTDOWN.TOOLTIP + notificationList.ReduceMessages(false), "/t• " + component.GetProperName(), false, 0f, null, null, null, true, false, false);
 	}
 
 	public void SetStorages(Storage supply, Storage reaction, Storage waste)

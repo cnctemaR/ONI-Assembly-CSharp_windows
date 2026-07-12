@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Klei;
+using STRINGS;
 
 namespace Database
 {
@@ -12,18 +13,10 @@ namespace Database
 			: base("EquippableFacades", parent)
 		{
 			base.Initialize();
-			this.Add("clubshirt", "CustomClothing", "body_shirt_clubshirt_kanim", "shirt_clubshirt_kanim");
-			this.Add("cummerbund", "CustomClothing", "body_shirt_cummerbund_kanim", "shirt_cummerbund_kanim");
-			this.Add("decor_02", "CustomClothing", "body_shirt_decor02_kanim", "shirt_decor02_kanim");
-			this.Add("decor_03", "CustomClothing", "body_shirt_decor03_kanim", "shirt_decor03_kanim");
-			this.Add("decor_04", "CustomClothing", "body_shirt_decor04_kanim", "shirt_decor04_kanim");
-			this.Add("decor_05", "CustomClothing", "body_shirt_decor05_kanim", "shirt_decor05_kanim");
-			this.Add("gaudysweater", "CustomClothing", "body_shirt_gaudysweater_kanim", "shirt_gaudysweater_kanim");
-			this.Add("limone", "CustomClothing", "body_suit_limone_kanim", "suit_limone_kanim");
-			this.Add("mondrian", "CustomClothing", "body_shirt_mondrian_kanim", "shirt_mondrian_kanim");
-			this.Add("overalls", "CustomClothing", "body_suit_overalls_kanim", "suit_overalls_kanim");
-			this.Add("triangles", "CustomClothing", "body_shirt_triangles_kanim", "shirt_triangles_kanim");
-			this.Add("workout", "CustomClothing", "body_suit_workout_kanim", "suit_workout_kanim");
+			foreach (EquippableFacades.Info info in EquippableFacades.Infos)
+			{
+				this.Add(info.id, info.name, info.defID, info.buildOverride, info.animFile);
+			}
 			this.Load();
 		}
 
@@ -53,7 +46,7 @@ namespace Database
 						DebugUtil.DevAssert(string.Equals(directoryInfo2.Name, equippableFacadeInfo.defID, StringComparison.OrdinalIgnoreCase), "DefID mismatch!", null);
 						if (equippableFacadeInfo.defID != null)
 						{
-							this.resources.Add(new EquippableFacadeResource(equippableFacadeInfo.name, equippableFacadeInfo.buildoverride, equippableFacadeInfo.defID, equippableFacadeInfo.animfile));
+							this.resources.Add(new EquippableFacadeResource(equippableFacadeInfo.id, equippableFacadeInfo.name, equippableFacadeInfo.buildoverride, equippableFacadeInfo.defID, equippableFacadeInfo.animfile));
 						}
 					}
 				}
@@ -62,10 +55,48 @@ namespace Database
 			errors.Recycle();
 		}
 
-		public void Add(string id, string defID, string buildOverride, string animFile)
+		public void Add(string id, string name, string defID, string buildOverride, string animFile)
 		{
-			EquippableFacadeResource equippableFacadeResource = new EquippableFacadeResource(id, buildOverride, defID, animFile);
+			EquippableFacadeResource equippableFacadeResource = new EquippableFacadeResource(id, name, buildOverride, defID, animFile);
 			this.resources.Add(equippableFacadeResource);
+		}
+
+		public static EquippableFacades.Info[] Infos = new EquippableFacades.Info[]
+		{
+			new EquippableFacades.Info("clubshirt", EQUIPMENT.PREFABS.CUSTOMCLOTHING.FACADES.CLUBSHIRT, "CustomClothing", "body_shirt_clubshirt_kanim", "shirt_clubshirt_kanim"),
+			new EquippableFacades.Info("cummerbund", EQUIPMENT.PREFABS.CUSTOMCLOTHING.FACADES.CUMMERBUND, "CustomClothing", "body_shirt_cummerbund_kanim", "shirt_cummerbund_kanim"),
+			new EquippableFacades.Info("decor_02", EQUIPMENT.PREFABS.CUSTOMCLOTHING.FACADES.DECOR_02, "CustomClothing", "body_shirt_decor02_kanim", "shirt_decor02_kanim"),
+			new EquippableFacades.Info("decor_03", EQUIPMENT.PREFABS.CUSTOMCLOTHING.FACADES.DECOR_03, "CustomClothing", "body_shirt_decor03_kanim", "shirt_decor03_kanim"),
+			new EquippableFacades.Info("decor_04", EQUIPMENT.PREFABS.CUSTOMCLOTHING.FACADES.DECOR_04, "CustomClothing", "body_shirt_decor04_kanim", "shirt_decor04_kanim"),
+			new EquippableFacades.Info("decor_05", EQUIPMENT.PREFABS.CUSTOMCLOTHING.FACADES.DECOR_05, "CustomClothing", "body_shirt_decor05_kanim", "shirt_decor05_kanim"),
+			new EquippableFacades.Info("gaudysweater", EQUIPMENT.PREFABS.CUSTOMCLOTHING.FACADES.GAUDYSWEATER, "CustomClothing", "body_shirt_gaudysweater_kanim", "shirt_gaudysweater_kanim"),
+			new EquippableFacades.Info("limone", EQUIPMENT.PREFABS.CUSTOMCLOTHING.FACADES.LIMONE, "CustomClothing", "body_suit_limone_kanim", "suit_limone_kanim"),
+			new EquippableFacades.Info("mondrian", EQUIPMENT.PREFABS.CUSTOMCLOTHING.FACADES.MONDRIAN, "CustomClothing", "body_shirt_mondrian_kanim", "shirt_mondrian_kanim"),
+			new EquippableFacades.Info("overalls", EQUIPMENT.PREFABS.CUSTOMCLOTHING.FACADES.OVERALLS, "CustomClothing", "body_suit_overalls_kanim", "suit_overalls_kanim"),
+			new EquippableFacades.Info("triangles", EQUIPMENT.PREFABS.CUSTOMCLOTHING.FACADES.TRIANGLES, "CustomClothing", "body_shirt_triangles_kanim", "shirt_triangles_kanim"),
+			new EquippableFacades.Info("workout", EQUIPMENT.PREFABS.CUSTOMCLOTHING.FACADES.WORKOUT, "CustomClothing", "body_suit_workout_kanim", "suit_workout_kanim")
+		};
+
+		public struct Info
+		{
+			public Info(string id, string name, string defID, string buildOverride, string animFile)
+			{
+				this.id = id;
+				this.name = name;
+				this.defID = defID;
+				this.buildOverride = buildOverride;
+				this.animFile = animFile;
+			}
+
+			public string id;
+
+			public string name;
+
+			public string buildOverride;
+
+			public string defID;
+
+			public string animFile;
 		}
 	}
 }

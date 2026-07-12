@@ -136,15 +136,7 @@ public class GroundRenderer : KMonoBehaviour
 	{
 		GroundMasks.BiomeMaskData biomeMaskData = null;
 		string text = zone_type.ToString().ToLower();
-		foreach (KeyValuePair<string, GroundMasks.BiomeMaskData> keyValuePair in this.masks.biomeMasks)
-		{
-			string key = keyValuePair.Key;
-			if (text == key)
-			{
-				biomeMaskData = keyValuePair.Value;
-				break;
-			}
-		}
+		this.masks.biomeMasks.TryGetValue(text, out biomeMaskData);
 		return biomeMaskData;
 	}
 
@@ -590,7 +582,12 @@ public class GroundRenderer : KMonoBehaviour
 			{
 				return 0;
 			}
-			return (int)global::World.Instance.zoneRenderData.GetSubWorldZoneType(cell);
+			int num = 3;
+			if (global::World.Instance != null && global::World.Instance.zoneRenderData != null)
+			{
+				global::World.Instance.zoneRenderData.GetSubWorldZoneType(cell);
+			}
+			return num;
 		}
 
 		private static float GetStaticRandom(int x, int y)

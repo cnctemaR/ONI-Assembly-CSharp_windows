@@ -12,11 +12,6 @@ public class SimpleInfoScreen : TargetScreen, ISim4000ms, ISim1000ms
 {
 	public GameObject StoragePanel { get; private set; }
 
-	public SimpleInfoScreen()
-	{
-		this.onStorageChangeDelegate = new Action<object>(this.OnStorageChange);
-	}
-
 	public override bool IsValidForTarget(GameObject target)
 	{
 		return true;
@@ -24,6 +19,7 @@ public class SimpleInfoScreen : TargetScreen, ISim4000ms, ISim1000ms
 
 	protected override void OnPrefabInit()
 	{
+		this.onStorageChangeDelegate = new Action<object>(this.OnStorageChange);
 		base.OnPrefabInit();
 		this.processConditionContainer = global::Util.KInstantiateUI(ScreenPrefabs.Instance.CollapsableContentPanel, base.gameObject, false);
 		this.processConditionContainer.GetComponent<CollapsibleDetailContentPanel>().HeaderLabel.text = UI.DETAILTABS.PROCESS_CONDITIONS.NAME;

@@ -86,7 +86,7 @@ public class MegaBrainTankConfig : IBuildingConfig
 		conduitConsumer.OperatingRequirement = Operational.State.Functional;
 		RequireInputs requireInputs = go.AddOrGet<RequireInputs>();
 		requireInputs.requireConduitHasMass = false;
-		requireInputs.visualizeRequirements = false;
+		requireInputs.visualizeRequirements = RequireInputs.Requirements.NoWire;
 		ElementConverter elementConverter = go.AddOrGet<ElementConverter>();
 		elementConverter.consumedElements = new ElementConverter.ConsumedElement[]
 		{
@@ -182,8 +182,6 @@ public class MegaBrainTankConfig : IBuildingConfig
 	public const string INITIAL_LORE_UNLOCK_ID = "story_trait_mega_brain_tank_initial";
 
 	public const string COMPLETED_LORE_UNLOCK_ID = "story_trait_mega_brain_tank_competed";
-
-	public const float REVEAL_PERCENT_TO_UNLOCK = 0.75f;
 
 	public const string ACTIVE_EFFECT_ID = "MegaBrainTankBonus";
 

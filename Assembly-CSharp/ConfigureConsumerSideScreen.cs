@@ -80,7 +80,7 @@ public class ConfigureConsumerSideScreen : SideScreenContent
 		IConfigurableConsumerOption selectedOption = this.targetProducer.GetSelectedOption();
 		if (selectedOption != null)
 		{
-			this.descriptor.text = selectedOption.GetDescription();
+			this.descriptor.text = selectedOption.GetDetailedDescription();
 			this.selectedOptionNameLabel.text = "<b>" + selectedOption.GetName() + "</b>";
 			this.descriptor.gameObject.SetActive(true);
 		}

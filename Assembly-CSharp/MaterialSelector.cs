@@ -138,8 +138,10 @@ public class MaterialSelector : KScreen
 				list.Add(keyValuePair.Key);
 			}
 			list.Sort(new Comparison<Tag>(this.ElementSorter));
-			float num = (float)list.IndexOf(elem) / (float)(list.Count - 1);
-			this.ScrollRect.normalizedPosition = new Vector2(num, 0f);
+			float num = (float)list.IndexOf(elem);
+			int constraintCount = this.LayoutContainer.GetComponent<GridLayoutGroup>().constraintCount;
+			float num2 = num / (float)constraintCount / (float)Math.Max((list.Count - 1) / constraintCount, 1);
+			this.ScrollRect.normalizedPosition = new Vector2(0f, 1f - num2);
 		}
 		this.RefreshToggleContents();
 	}
@@ -297,6 +299,7 @@ public class MaterialSelector : KScreen
 		{
 			this.Scrollbar.SetActive(num > 5);
 		}
+		this.ScrollRect.GetComponent<LayoutElement>().minHeight = (float)(74 * ((num <= 5) ? 1 : 2));
 	}
 
 	private void UpdateHeader()

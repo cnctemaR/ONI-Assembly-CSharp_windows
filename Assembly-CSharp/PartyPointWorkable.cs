@@ -97,7 +97,11 @@ public class PartyPointWorkable : Workable, IWorkerPrioritizable
 
 	private void OnStartedTalking(object data)
 	{
-		ConversationManager.StartedTalkingEvent startedTalkingEvent = (ConversationManager.StartedTalkingEvent)data;
+		ConversationManager.StartedTalkingEvent startedTalkingEvent = data as ConversationManager.StartedTalkingEvent;
+		if (startedTalkingEvent == null)
+		{
+			return;
+		}
 		GameObject talker = startedTalkingEvent.talker;
 		if (talker == base.worker.gameObject)
 		{

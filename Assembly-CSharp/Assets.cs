@@ -49,6 +49,12 @@ public class Assets : KMonoBehaviour, ISerializationCallbackReceiver
 		AsyncLoadManager<IGlobalAsyncLoader>.Run();
 		GameAudioSheets.Get().Initialize();
 		this.SubstanceListHookup();
+		this.CreatePrefabs();
+	}
+
+	private void CreatePrefabs()
+	{
+		Db.Get();
 		Assets.BuildingDefs = new List<BuildingDef>();
 		foreach (KPrefabID kprefabID in this.PrefabAssets)
 		{
@@ -58,12 +64,6 @@ public class Assets : KMonoBehaviour, ISerializationCallbackReceiver
 				Assets.AddPrefab(kprefabID);
 			}
 		}
-		this.CreatePrefabs();
-	}
-
-	private void CreatePrefabs()
-	{
-		Db.Get();
 		LegacyModMain.Load();
 		Db.Get().PostProcess();
 	}

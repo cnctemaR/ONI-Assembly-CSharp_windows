@@ -9,6 +9,11 @@ public class StoryManager : KMonoBehaviour
 {
 	public static StoryManager Instance { get; private set; }
 
+	public static IReadOnlyList<StoryManager.StoryTelemetry> GetTelemetry()
+	{
+		return StoryManager.storyTelemetry;
+	}
+
 	protected override void OnPrefabInit()
 	{
 		StoryManager.Instance = this;
@@ -106,14 +111,13 @@ public class StoryManager : KMonoBehaviour
 		storyInstance.CurrentState = StoryInstance.State.IN_PROGRESS;
 	}
 
-	public void CompleteStoryEvent(Story story, MonoBehaviour keepsakeSpawnTarget)
+	public void CompleteStoryEvent(Story story, MonoBehaviour keepsakeSpawnTarget, FocusTargetSequence.Data sequenceData)
 	{
-		StoryInstance storyInstance = this.GetStoryInstance(story.HashId);
-		if (storyInstance == null || this.CheckState(StoryInstance.State.COMPLETE, story))
+		if (this.GetStoryInstance(story.HashId) == null || this.CheckState(StoryInstance.State.COMPLETE, story))
 		{
 			return;
 		}
-		StoryCompleteSequence.Start(storyInstance, keepsakeSpawnTarget);
+		FocusTargetSequence.Start(keepsakeSpawnTarget, sequenceData);
 	}
 
 	public void CompleteStoryEvent(Story story, Vector3 keepsakeSpawnPosition)
@@ -151,6 +155,29 @@ public class StoryManager : KMonoBehaviour
 		return Game.Instance.unlocks.IsUnlocked(this.GetCompleteUnlockId(story.Id));
 	}
 
+	public StoryInstance DisplayPopup(Story story, StoryManager.PopupInfo info, global::System.Action popupCB = null, Notification.ClickCallback notificationCB = null)
+	{
+		StoryInstance storyInstance = this.GetStoryInstance(story.HashId);
+		if (storyInstance == null || storyInstance.HasDisplayedPopup(info.PopupType))
+		{
+			return null;
+		}
+		EventInfoData eventInfoData = EventInfoDataHelper.GenerateStoryTraitData(info.Title, info.Description, info.CloseButtonText, info.TextureName, info.PopupType, info.CloseButtonToolTip, info.Minions, popupCB);
+		Notification notification = null;
+		if (!info.DisplayImmediate)
+		{
+			notification = EventInfoScreen.CreateNotification(eventInfoData, notificationCB);
+		}
+		storyInstance.SetPopupData(info, eventInfoData, notification);
+		return storyInstance;
+	}
+
+	public bool HasDisplayedPopup(Story story, EventInfoDataHelper.PopupType type)
+	{
+		StoryInstance storyInstance = this.GetStoryInstance(story.HashId);
+		return storyInstance != null && storyInstance.HasDisplayedPopup(type);
+	}
+
 	private void LogInitialSaveSetup()
 	{
 		int num = 0;
@@ -175,8 +202,13 @@ public class StoryManager : KMonoBehaviour
 
 	private static void InitTelemetry(StoryInstance story)
 	{
+		WorldContainer world = ClusterManager.Instance.GetWorld(story.worldId);
+		if (world == null)
+		{
+			return;
+		}
 		story.Telemetry.StoryId = story.storyId;
-		story.Telemetry.WorldId = ClusterManager.Instance.GetWorld(story.worldId).worldName;
+		story.Telemetry.WorldId = world.worldName;
 		StoryManager.storyTelemetry.Add(story.Telemetry);
 	}
 
@@ -210,6 +242,25 @@ public class StoryManager : KMonoBehaviour
 	private const string STORY_CREATION_KEY = "StoryTraitsCreation";
 
 	private const string STORY_COORDINATE_KEY = "SavedHighestStoryCoordinate";
+
+	public struct PopupInfo
+	{
+		public string Title;
+
+		public string Description;
+
+		public string CloseButtonText;
+
+		public string CloseButtonToolTip;
+
+		public string TextureName;
+
+		public GameObject[] Minions;
+
+		public bool DisplayImmediate;
+
+		public EventInfoDataHelper.PopupType PopupType;
+	}
 
 	[SerializationConfig(MemberSerialization.OptIn)]
 	public class StoryTelemetry : ISaveLoadable

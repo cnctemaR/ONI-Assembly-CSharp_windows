@@ -12,7 +12,7 @@ namespace Database
 				if (painting != null)
 				{
 					ArtableStage artableStage = Db.GetArtableStages().TryGet(painting.CurrentStage);
-					if (artableStage != null && artableStage.statusItem == Db.Get().ArtableStatuses.Great)
+					if (artableStage != null && artableStage.statusItem == Db.Get().ArtableStatuses.LookingGreat)
 					{
 						return true;
 					}

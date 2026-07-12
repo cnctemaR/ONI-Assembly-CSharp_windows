@@ -16,6 +16,7 @@ public class SimDebugViewCompositor : MonoBehaviour
 	private void Start()
 	{
 		this.material = new Material(Shader.Find("Klei/PostFX/SimDebugViewCompositor"));
+		this.Toggle(false);
 	}
 
 	private void OnRenderImage(RenderTexture src, RenderTexture dest)

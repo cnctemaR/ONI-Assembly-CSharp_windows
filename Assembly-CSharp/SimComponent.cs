@@ -4,6 +4,14 @@ using UnityEngine;
 
 public abstract class SimComponent : KMonoBehaviour, ISim200ms
 {
+	public bool IsSimActive
+	{
+		get
+		{
+			return this.simActive;
+		}
+	}
+
 	protected virtual void OnSimRegister(HandleVector<Game.ComplexCallbackInfo<int>>.Handle cb_handle)
 	{
 	}

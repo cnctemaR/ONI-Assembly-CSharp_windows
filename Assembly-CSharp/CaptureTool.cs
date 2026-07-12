@@ -21,7 +21,7 @@ public class CaptureTool : DragTool
 				if (capturable.allowCapture)
 				{
 					PrioritySetting lastSelectedPriority = ToolMenu.Instance.PriorityScreen.GetLastSelectedPriority();
-					capturable.MarkForCapture(mark, lastSelectedPriority);
+					capturable.MarkForCapture(mark, lastSelectedPriority, true);
 				}
 				else if (mark)
 				{

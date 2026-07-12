@@ -23,7 +23,7 @@ public class PropFacilityDisplay : IEntityConfig
 		PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
 		component.SetElement(SimHashes.Steel, true);
 		component.Temperature = 294.15f;
-		gameObject.AddOrGet<LoreBearer>();
+		LoreBearerUtil.AddLoreTo(gameObject, LoreBearerUtil.UnlockSpecificEntry("display_prop1", UI.USERMENUACTIONS.READLORE.SEARCH_DISPLAY));
 		gameObject.AddOrGet<Demolishable>();
 		return gameObject;
 	}

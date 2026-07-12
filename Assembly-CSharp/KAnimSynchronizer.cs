@@ -10,7 +10,7 @@ public class KAnimSynchronizer
 
 	private void Clear(KAnimControllerBase controller)
 	{
-		controller.Play("idle_default", KAnim.PlayMode.Loop, 1f, 0f);
+		controller.Play(controller.defaultAnim, KAnim.PlayMode.Loop, 1f, 0f);
 	}
 
 	public void Add(KAnimControllerBase controller)
@@ -26,7 +26,7 @@ public class KAnimSynchronizer
 
 	private void Clear(KAnimSynchronizedController controller)
 	{
-		controller.Play("idle_default" + controller.Postfix, KAnim.PlayMode.Loop, 1f, 0f);
+		controller.Play(controller.synchronizedController.defaultAnim, KAnim.PlayMode.Loop, 1f, 0f);
 	}
 
 	public void Add(KAnimSynchronizedController controller)
@@ -44,12 +44,18 @@ public class KAnimSynchronizer
 	{
 		foreach (KAnimControllerBase kanimControllerBase in this.Targets)
 		{
-			this.Clear(kanimControllerBase);
+			if (!(kanimControllerBase == null) && kanimControllerBase.AnimFiles != null)
+			{
+				this.Clear(kanimControllerBase);
+			}
 		}
 		this.Targets.Clear();
 		foreach (KAnimSynchronizedController kanimSynchronizedController in this.SyncedControllers)
 		{
-			this.Clear(kanimSynchronizedController);
+			if (!(kanimSynchronizedController.synchronizedController == null) && kanimSynchronizedController.synchronizedController.AnimFiles != null)
+			{
+				this.Clear(kanimSynchronizedController);
+			}
 		}
 		this.SyncedControllers.Clear();
 	}

@@ -25,6 +25,7 @@ public class KAnimSynchronizedController
 		this.synchronizedController.AnimFiles = controller.AnimFiles;
 		gameObject.SetActive(true);
 		this.synchronizedController.initialAnim = controller.initialAnim + postfix;
+		this.synchronizedController.defaultAnim = this.synchronizedController.initialAnim;
 		Vector3 vector = new Vector3(0f, 0f, Grid.GetLayerZ(layer) - 0.1f);
 		gameObject.transform.SetLocalPosition(vector);
 		this.link = new KAnimLink(controller, this.synchronizedController);

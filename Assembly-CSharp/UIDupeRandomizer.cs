@@ -17,11 +17,10 @@ public class UIDupeRandomizer : MonoBehaviour
 
 	protected void GetNewBody(int minion_idx)
 	{
-		int num = global::UnityEngine.Random.Range(0, Db.Get().Personalities.Count);
-		Personality personality = Db.Get().Personalities[num];
+		Personality random = Db.Get().Personalities.GetRandom(true, false);
 		foreach (KBatchedAnimController kbatchedAnimController in this.anims[minion_idx].minions)
 		{
-			this.Apply(kbatchedAnimController, personality);
+			this.Apply(kbatchedAnimController, random);
 		}
 	}
 
@@ -37,10 +36,13 @@ public class UIDupeRandomizer : MonoBehaviour
 		UIDupeRandomizer.AddAccessory(dupe, this.slots.Mouth.Lookup(bodyData.mouth));
 		UIDupeRandomizer.AddAccessory(dupe, this.slots.Body.Lookup(bodyData.body));
 		UIDupeRandomizer.AddAccessory(dupe, this.slots.Arm.Lookup(bodyData.arms));
+		UIDupeRandomizer.AddAccessory(dupe, this.slots.ArmLower.Lookup(bodyData.armslower));
+		UIDupeRandomizer.AddAccessory(dupe, this.slots.Belt.Lookup(bodyData.belt));
 		if (this.applySuit && global::UnityEngine.Random.value < 0.15f)
 		{
 			component.AddBuildOverride(Assets.GetAnim("body_oxygen_kanim").GetData(), 6);
 			dupe.SetSymbolVisiblity("snapto_neck", true);
+			dupe.SetSymbolVisiblity("belt", false);
 		}
 		else
 		{
@@ -57,11 +59,15 @@ public class UIDupeRandomizer : MonoBehaviour
 			UIDupeRandomizer.AddAccessory(dupe, this.slots.Hat.Lookup(text));
 			dupe.SetSymbolVisiblity(Db.Get().AccessorySlots.Hair.targetSymbolId, false);
 			dupe.SetSymbolVisiblity(Db.Get().AccessorySlots.HatHair.targetSymbolId, true);
-			return;
 		}
-		dupe.SetSymbolVisiblity(Db.Get().AccessorySlots.Hair.targetSymbolId, true);
-		dupe.SetSymbolVisiblity(Db.Get().AccessorySlots.HatHair.targetSymbolId, false);
-		dupe.SetSymbolVisiblity(Db.Get().AccessorySlots.Hat.targetSymbolId, false);
+		else
+		{
+			dupe.SetSymbolVisiblity(Db.Get().AccessorySlots.Hair.targetSymbolId, true);
+			dupe.SetSymbolVisiblity(Db.Get().AccessorySlots.HatHair.targetSymbolId, false);
+			dupe.SetSymbolVisiblity(Db.Get().AccessorySlots.Hat.targetSymbolId, false);
+		}
+		dupe.SetSymbolVisiblity(Db.Get().AccessorySlots.Skirt.targetSymbolId, false);
+		dupe.SetSymbolVisiblity(Db.Get().AccessorySlots.Necklace.targetSymbolId, false);
 	}
 
 	public static KAnimHashedString AddAccessory(KBatchedAnimController minion, Accessory accessory)
@@ -84,12 +90,26 @@ public class UIDupeRandomizer : MonoBehaviour
 		return UIDupeRandomizer.AddAccessory(minion, accessory);
 	}
 
+	public void Randomize()
+	{
+		if (this.slots == null)
+		{
+			return;
+		}
+		for (int i = 0; i < this.anims.Length; i++)
+		{
+			this.GetNewBody(i);
+		}
+	}
+
 	protected virtual void Update()
 	{
 	}
 
+	[Tooltip("Enable this to allow for a chance for skill hats to appear")]
 	public bool applyHat = true;
 
+	[Tooltip("Enable this to allow for a chance for suit helmets to appear (ie. atmosuit and leadsuit)")]
 	public bool applySuit = true;
 
 	public UIDupeRandomizer.AnimChoice[] anims;

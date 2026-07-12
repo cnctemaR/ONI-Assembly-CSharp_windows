@@ -50,7 +50,7 @@ public class EquippableBalloonConfig : IEquipmentConfig
 				return;
 			}
 			MinionAssignablesProxy component = soleOwner.GetComponent<MinionAssignablesProxy>();
-			if (component.target != null)
+			if (!component.target.IsNullOrDestroyed())
 			{
 				Effects component2 = (component.target as KMonoBehaviour).GetComponent<Effects>();
 				if (component2 != null)

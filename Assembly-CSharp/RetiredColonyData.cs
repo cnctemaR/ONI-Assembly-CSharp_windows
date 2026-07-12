@@ -37,18 +37,19 @@ public class RetiredColonyData
 							this.Duplicants[i].accessories.Add(resourceRef.Get().slot.Id, resourceRef.Get().Id);
 						}
 					}
-					goto IL_0368;
+					goto IL_03AF;
 				}
 				goto IL_014E;
 			}
 			goto IL_014E;
-			IL_0368:
+			IL_03AF:
 			i++;
 			continue;
 			IL_014E:
 			StoredMinionIdentity component = minions[i].GetTargetGameObject().GetComponent<StoredMinionIdentity>();
 			this.Duplicants[i].accessories.Add(Db.Get().AccessorySlots.Eyes.Id, Db.Get().Accessories.Get(component.bodyData.eyes).Id);
 			this.Duplicants[i].accessories.Add(Db.Get().AccessorySlots.Arm.Id, Db.Get().Accessories.Get(component.bodyData.arms).Id);
+			this.Duplicants[i].accessories.Add(Db.Get().AccessorySlots.ArmLower.Id, Db.Get().Accessories.Get(component.bodyData.armslower).Id);
 			this.Duplicants[i].accessories.Add(Db.Get().AccessorySlots.Body.Id, Db.Get().Accessories.Get(component.bodyData.body).Id);
 			this.Duplicants[i].accessories.Add(Db.Get().AccessorySlots.Hair.Id, Db.Get().Accessories.Get(component.bodyData.hair).Id);
 			if (component.bodyData.hat != HashedString.Invalid)
@@ -57,7 +58,7 @@ public class RetiredColonyData
 			}
 			this.Duplicants[i].accessories.Add(Db.Get().AccessorySlots.HeadShape.Id, Db.Get().Accessories.Get(component.bodyData.headShape).Id);
 			this.Duplicants[i].accessories.Add(Db.Get().AccessorySlots.Mouth.Id, Db.Get().Accessories.Get(component.bodyData.mouth).Id);
-			goto IL_0368;
+			goto IL_03AF;
 		}
 		Dictionary<Tag, int> dictionary = new Dictionary<Tag, int>();
 		if (buildingCompletes != null)

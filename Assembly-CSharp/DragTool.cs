@@ -246,7 +246,7 @@ public class DragTool : InterfaceTool
 		cursorPos = this.ClampPositionToWorld(cursorPos, ClusterManager.Instance.activeWorld);
 		if (this.dragging)
 		{
-			if (Input.GetKey((KeyCode)Global.Instance.GetInputManager().GetDefaultController().GetInputForAction(global::Action.DragStraight)))
+			if (Input.GetKey((KeyCode)Global.GetInputManager().GetDefaultController().GetInputForAction(global::Action.DragStraight)))
 			{
 				Vector3 vector = cursorPos - this.downPos;
 				if ((this.canChangeDragAxis || this.dragAxis == DragTool.DragAxis.Invalid) && vector.sqrMagnitude > 0.707f)

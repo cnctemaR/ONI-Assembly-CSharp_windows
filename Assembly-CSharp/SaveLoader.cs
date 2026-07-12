@@ -427,11 +427,11 @@ public class SaveLoader : KMonoBehaviour
 			{
 				try
 				{
-					global::System.DateTime lastWriteTime = File.GetLastWriteTime(text);
+					global::System.DateTime lastWriteTimeUtc = File.GetLastWriteTimeUtc(text);
 					SaveLoader.SaveFileEntry saveFileEntry = new SaveLoader.SaveFileEntry
 					{
 						path = text,
-						timeStamp = lastWriteTime
+						timeStamp = lastWriteTimeUtc
 					};
 					list.Add(saveFileEntry);
 				}

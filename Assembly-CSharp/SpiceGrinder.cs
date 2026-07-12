@@ -71,7 +71,7 @@ public class SpiceGrinder : GameStateMachine<SpiceGrinder, SpiceGrinder.StatesIn
 		}
 		bool flag = smi.AvailableFood > 0f && smi.CanSpice(smi.CurrentFood.Calories);
 		smi.sm.isReady.Set(flag, smi, false);
-		smi.SetFoodSymbol();
+		smi.UpdateFoodSymbol();
 	}
 
 	private Chore CreateChore(SpiceGrinder.StatesInstance smi)
@@ -145,13 +145,30 @@ public class SpiceGrinder : GameStateMachine<SpiceGrinder, SpiceGrinder.StatesIn
 			return this.name;
 		}
 
-		public string GetDescription()
+		public string GetDetailedDescription()
 		{
 			if (string.IsNullOrEmpty(this.fullDescription))
 			{
 				this.CreateDescription();
 			}
 			return this.fullDescription;
+		}
+
+		public string GetDescription()
+		{
+			if (!string.IsNullOrEmpty(this.spiceDescription))
+			{
+				return this.spiceDescription;
+			}
+			string text = "STRINGS.ITEMS.SPICES." + this.Spice.Id.ToUpper() + ".DESC";
+			StringEntry stringEntry;
+			Strings.TryGet(text, out stringEntry);
+			this.spiceDescription = "MISSING " + text;
+			if (stringEntry != null)
+			{
+				this.spiceDescription = stringEntry.String;
+			}
+			return this.spiceDescription;
 		}
 
 		private void CreateDescription()
@@ -183,6 +200,11 @@ public class SpiceGrinder : GameStateMachine<SpiceGrinder, SpiceGrinder.StatesIn
 		public Sprite GetIcon()
 		{
 			return Assets.GetSprite(this.Spice.Image);
+		}
+
+		public IConfigurableConsumerIngredient[] GetIngredients()
+		{
+			return this.Spice.Ingredients;
 		}
 
 		public readonly Tag Id;
@@ -273,9 +295,8 @@ public class SpiceGrinder : GameStateMachine<SpiceGrinder, SpiceGrinder.StatesIn
 			this.foodStorageFilter = new FilteredStorage(base.GetComponent<KPrefabID>(), this.foodFilter, null, false, Db.Get().ChoreTypes.CookFetch);
 			this.foodStorageFilter.SetHasMeter(false);
 			this.meter = new MeterController(this.kbac, "meter_target", "meter", Meter.Offset.Infront, Grid.SceneLayer.NoLayer, new string[] { "meter_frame", "meter_level" });
-			this.kbac.SetSymbolVisiblity(SpiceGrinder.StatesInstance.HASH_FOOD, false);
-			this.foodSymbol = this.kbac.AnimFiles[0].GetData().build.GetSymbol(SpiceGrinder.StatesInstance.HASH_FOOD);
-			this.SetFoodSymbol();
+			this.SetupFoodSymbol();
+			this.UpdateFoodSymbol();
 			base.Subscribe(-905833192, new Action<object>(this.OnCopySettings));
 		}
 
@@ -300,22 +321,29 @@ public class SpiceGrinder : GameStateMachine<SpiceGrinder, SpiceGrinder.StatesIn
 			}
 		}
 
-		public void SetFoodSymbol()
+		public void SetupFoodSymbol()
+		{
+			GameObject gameObject = new GameObject();
+			gameObject.name = "foodSymbol";
+			gameObject.SetActive(false);
+			bool flag;
+			Vector3 vector = this.kbac.GetSymbolTransform(SpiceGrinder.StatesInstance.HASH_FOOD, out flag).GetColumn(3);
+			vector.z = Grid.GetLayerZ(Grid.SceneLayer.Building);
+			gameObject.transform.SetPosition(vector);
+			this.foodKBAC = gameObject.AddComponent<KBatchedAnimController>();
+			this.foodKBAC.AnimFiles = new KAnimFile[] { Assets.GetAnim("mushbar_kanim") };
+			this.foodKBAC.initialAnim = "object";
+			this.kbac.SetSymbolVisiblity(SpiceGrinder.StatesInstance.HASH_FOOD, false);
+		}
+
+		public void UpdateFoodSymbol()
 		{
 			bool flag = this.AvailableFood > 0f && this.CurrentFood != null;
-			this.kbac.SetSymbolVisiblity(SpiceGrinder.StatesInstance.HASH_FOOD, flag);
+			this.foodKBAC.gameObject.SetActive(flag);
 			if (flag)
 			{
-				KAnim.Build build = this.CurrentFood.GetComponent<KBatchedAnimController>().AnimFiles[0].GetData().build;
-				this.foodSymbol = build.GetSymbol("object");
-				if (this.foodSymbol == null)
-				{
-					this.foodSymbol = build.GetSymbol(build.name);
-				}
-				if (this.foodSymbol != null)
-				{
-					this.kbac.GetComponent<SymbolOverrideController>().AddSymbolOverride(SpiceGrinder.StatesInstance.HASH_FOOD, this.foodSymbol, 0);
-				}
+				this.foodKBAC.SwapAnims(this.CurrentFood.GetComponent<KBatchedAnimController>().AnimFiles);
+				this.foodKBAC.Play("object", KAnim.PlayMode.Loop, 1f, 0f);
 			}
 		}
 
@@ -345,7 +373,7 @@ public class SpiceGrinder : GameStateMachine<SpiceGrinder, SpiceGrinder.StatesIn
 			this.CurrentFood.SpiceEdible(this.currentSpice, SpiceGrinderConfig.SpicedStatus);
 			this.foodStorage.Drop(this.CurrentFood.gameObject, true);
 			this.currentFood = null;
-			this.SetFoodSymbol();
+			this.UpdateFoodSymbol();
 			base.sm.isReady.Set(false, this, false);
 		}
 
@@ -424,7 +452,7 @@ public class SpiceGrinder : GameStateMachine<SpiceGrinder, SpiceGrinder.StatesIn
 
 		private KBatchedAnimController kbac;
 
-		private KAnim.Build.Symbol foodSymbol;
+		private KBatchedAnimController foodKBAC;
 
 		[MyCmpReq]
 		public SpiceGrinderWorkable workable;

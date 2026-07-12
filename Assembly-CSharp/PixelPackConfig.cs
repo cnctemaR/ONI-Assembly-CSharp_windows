@@ -27,6 +27,7 @@ public class PixelPackConfig : IBuildingConfig
 		buildingDef.Overheatable = false;
 		buildingDef.Floodable = false;
 		buildingDef.Entombable = false;
+		buildingDef.Replaceable = false;
 		buildingDef.PermittedRotations = PermittedRotations.R360;
 		buildingDef.RequiresPowerInput = true;
 		buildingDef.PowerInputOffset = new CellOffset(1, 0);
@@ -51,6 +52,7 @@ public class PixelPackConfig : IBuildingConfig
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
+		go.GetComponent<KPrefabID>().AddTag(GameTags.Backwall, false);
 		go.AddOrGet<PixelPack>();
 		go.GetComponent<KPrefabID>().AddTag(GameTags.OverlayBehindConduits, false);
 	}

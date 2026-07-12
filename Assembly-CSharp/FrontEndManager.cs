@@ -36,7 +36,12 @@ public class FrontEndManager : KMonoBehaviour
 		{
 			Util.KInstantiateUI(array[i], gameObject, true);
 		}
-		CS$<>8__locals1.screensPrefabsToSpawn = new GameObject[0];
+		CS$<>8__locals1.screensPrefabsToSpawn = new GameObject[]
+		{
+			ScreenPrefabs.Instance.KleiItemDropScreen,
+			ScreenPrefabs.Instance.LockerMenuScreen,
+			ScreenPrefabs.Instance.LockerNavigator
+		};
 		CS$<>8__locals1.gameObjectsToDestroyOnNextCreate = new List<GameObject>();
 		FrontEndManager.<>c__DisplayClass2_1 CS$<>8__locals2 = new FrontEndManager.<>c__DisplayClass2_1();
 		CS$<>8__locals2.CS$<>8__locals1 = CS$<>8__locals1;

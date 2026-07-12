@@ -56,6 +56,19 @@ public class SingleEntityReceptacle : Workable, IRender1000ms
 		return this.possibleDepositTagsList.Contains(tag);
 	}
 
+	public bool IsValidEntity(GameObject candidate)
+	{
+		IReceptacleDirection component = candidate.GetComponent<IReceptacleDirection>();
+		bool flag = this.rotatable != null || component == null || component.Direction == this.Direction;
+		int num = 0;
+		while (flag && num < this.additionalCriteria.Count)
+		{
+			flag = this.additionalCriteria[num](candidate);
+			num++;
+		}
+		return flag;
+	}
+
 	public SingleEntityReceptacle.ReceptacleDirection Direction
 	{
 		get
@@ -92,6 +105,11 @@ public class SingleEntityReceptacle : Workable, IRender1000ms
 	public void AddDepositTag(Tag t)
 	{
 		this.possibleDepositTagsList.Add(t);
+	}
+
+	public void AddAdditionalCriteria(Func<GameObject, bool> criteria)
+	{
+		this.additionalCriteria.Add(criteria);
 	}
 
 	public void SetReceptacleDirection(SingleEntityReceptacle.ReceptacleDirection d)
@@ -372,6 +390,9 @@ public class SingleEntityReceptacle : Workable, IRender1000ms
 
 	[SerializeField]
 	private List<Tag> possibleDepositTagsList = new List<Tag>();
+
+	[SerializeField]
+	private List<Func<GameObject, bool>> additionalCriteria = new List<Func<GameObject, bool>>();
 
 	[SerializeField]
 	protected bool destroyEntityOnDeposit;

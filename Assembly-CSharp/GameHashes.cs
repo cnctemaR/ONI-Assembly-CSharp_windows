@@ -110,6 +110,8 @@ public enum GameHashes
 	NearMelting = -2009062694,
 	MeltDown = 1930836866,
 	Landed = 1188683690,
+	GeotunerChange = 1763323737,
+	GeyserEruption = -593169791,
 	Pacified = -1427155335,
 	Rescued = -638309935,
 	Released = 501672573,

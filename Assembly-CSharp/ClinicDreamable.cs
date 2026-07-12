@@ -98,6 +98,7 @@ public class ClinicDreamable : Workable
 		this.selectable.RemoveStatusItem(Db.Get().DuplicantStatusItems.MegaBrainTank_Pajamas_Wearing, false);
 		this.selectable.RemoveStatusItem(Db.Get().DuplicantStatusItems.MegaBrainTank_Pajamas_Sleeping, false);
 		this.effects.Remove(ClinicDreamable.sleepClinic.Id);
+		this.StopDreamingThought();
 		this.dreamer = null;
 		this.selectable = null;
 		this.effects = null;
@@ -168,7 +169,7 @@ public class ClinicDreamable : Workable
 	{
 		if (this.dreamer != null && !this.HasStartedThoughts_Dreaming)
 		{
-			this.dreamer.GetSMI<Dreamer.Instance>().SetDream(Db.Get().Dreams.ExplorerDream);
+			this.dreamer.GetSMI<Dreamer.Instance>().SetDream(Db.Get().Dreams.CommonDream);
 			this.dreamer.GetSMI<Dreamer.Instance>().StartDreaming();
 			this.HasStartedThoughts_Dreaming = true;
 		}

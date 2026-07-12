@@ -59,7 +59,7 @@ public class DevToolSimDebug : DevTool
 		this.gameGridModes = Enum.GetNames(typeof(SimDebugView.GameGridMode));
 	}
 
-	protected override void Render()
+	protected override void RenderTo(DevPanel panel)
 	{
 		if (Game.Instance == null)
 		{
@@ -202,7 +202,7 @@ public class DevToolSimDebug : DevTool
 			if (this.showGridContents)
 			{
 				ImGui.Indent();
-				for (int i = 0; i < 43; i++)
+				for (int i = 0; i < 44; i++)
 				{
 					GameObject gameObject = Grid.Objects[num3, i];
 					ImGui.Text(Enum.GetName(typeof(ObjectLayer), i) + ": " + ((gameObject != null) ? gameObject.name : "None"));

@@ -164,7 +164,7 @@ public class Game : KMonoBehaviour
 		Singleton<CellChangeMonitor>.Instance.SetGridSize(Grid.WidthInCells, Grid.HeightInCells);
 		this.unlocks = base.GetComponent<Unlocks>();
 		this.changelistsPlayedOn = new List<uint>();
-		this.changelistsPlayedOn.Add(531669U);
+		this.changelistsPlayedOn.Add(535720U);
 		this.dateGenerated = global::System.DateTime.UtcNow.ToString("U", CultureInfo.InvariantCulture);
 	}
 
@@ -336,9 +336,9 @@ public class Game : KMonoBehaviour
 		}
 		else
 		{
-			KInputHandler.Add(Global.Instance.GetInputManager().GetDefaultController(), this.cameraController, 1);
+			KInputHandler.Add(Global.GetInputManager().GetDefaultController(), this.cameraController, 1);
 		}
-		Global.Instance.GetInputManager().usedMenus.Add(this.cameraController);
+		Global.GetInputManager().usedMenus.Add(this.cameraController);
 		this.playerController = component.GetComponent<PlayerController>();
 		if (KInputManager.currentController != null)
 		{
@@ -346,9 +346,9 @@ public class Game : KMonoBehaviour
 		}
 		else
 		{
-			KInputHandler.Add(Global.Instance.GetInputManager().GetDefaultController(), this.playerController, 20);
+			KInputHandler.Add(Global.GetInputManager().GetDefaultController(), this.playerController, 20);
 		}
-		Global.Instance.GetInputManager().usedMenus.Add(this.playerController);
+		Global.GetInputManager().usedMenus.Add(this.playerController);
 		return component;
 	}
 
@@ -594,6 +594,7 @@ public class Game : KMonoBehaviour
 				}
 				Sim.DebugProperties debugProperties;
 				debugProperties.buildingTemperatureScale = 100f;
+				debugProperties.buildingToBuildingTemperatureScale = 0.001f;
 				debugProperties.contaminatedOxygenEmitProbability = 0.001f;
 				debugProperties.contaminatedOxygenConversionPercent = 0.001f;
 				debugProperties.biomeTemperatureLerpRate = 0.001f;
@@ -913,7 +914,7 @@ public class Game : KMonoBehaviour
 		{
 			return;
 		}
-		uint num = 531669U;
+		uint num = 535720U;
 		string text = global::System.DateTime.Now.ToShortDateString();
 		string text2 = global::System.DateTime.Now.ToShortTimeString();
 		string fileName = Path.GetFileName(GenericGameSettings.instance.performanceCapture.saveGame);
@@ -1130,9 +1131,9 @@ public class Game : KMonoBehaviour
 		gameSaveData.savedInfo = this.savedInfo;
 		global::Debug.Assert(gameSaveData.worldDetail != null, "World detail null");
 		gameSaveData.dateGenerated = this.dateGenerated;
-		if (!this.changelistsPlayedOn.Contains(531669U))
+		if (!this.changelistsPlayedOn.Contains(535720U))
 		{
-			this.changelistsPlayedOn.Add(531669U);
+			this.changelistsPlayedOn.Add(535720U);
 		}
 		gameSaveData.changelistsPlayedOn = this.changelistsPlayedOn;
 		if (this.OnSave != null)
@@ -1212,7 +1213,7 @@ public class Game : KMonoBehaviour
 			}
 			for (int num2 = 0; num2 != Grid.WidthInCells * Grid.HeightInCells; num2++)
 			{
-				Grid.Reveal(num2, byte.MaxValue);
+				Grid.Reveal(num2, byte.MaxValue, false);
 			}
 			GenericGameSettings.instance.devAutoWorldGenActive = false;
 		}
@@ -1364,8 +1365,8 @@ public class Game : KMonoBehaviour
 		StructureTemperatureComponents.ClearInstanceMap();
 		ElementConsumer.ClearInstanceMap();
 		KComponentSpawn.instance.comps.Clear();
-		KInputHandler.Remove(Global.Instance.GetInputManager().GetDefaultController(), this.cameraController);
-		KInputHandler.Remove(Global.Instance.GetInputManager().GetDefaultController(), this.playerController);
+		KInputHandler.Remove(Global.GetInputManager().GetDefaultController(), this.cameraController);
+		KInputHandler.Remove(Global.GetInputManager().GetDefaultController(), this.playerController);
 		Sim.Shutdown();
 		SimAndRenderScheduler.instance.Reset();
 		Resources.UnloadUnusedAssets();
@@ -1429,6 +1430,7 @@ public class Game : KMonoBehaviour
 	{
 		KMonoBehaviour.lastGameObject = null;
 		KMonoBehaviour.lastObj = null;
+		Db.Get().ResetProblematicDbs();
 		GridSettings.ClearGrid();
 		StateMachineManager.ResetParameters();
 		ChoreTable.Instance.ResetParameters();

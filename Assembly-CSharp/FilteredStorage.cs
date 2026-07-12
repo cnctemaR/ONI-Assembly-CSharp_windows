@@ -50,6 +50,13 @@ public class FilteredStorage
 		this.logicMeter = new MeterController(this.root.GetComponent<KBatchedAnimController>(), "logicmeter_target", "logicmeter", Meter.Offset.Infront, Grid.SceneLayer.NoLayer, Array.Empty<string>());
 	}
 
+	public void SetMeter(MeterController meter)
+	{
+		this.hasMeter = true;
+		this.meter = meter;
+		this.UpdateMeter();
+	}
+
 	public void CleanUp()
 	{
 		if (this.filterable != null)

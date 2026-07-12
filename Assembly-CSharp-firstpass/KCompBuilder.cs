@@ -20,8 +20,32 @@ public class KCompBuilder : MonoBehaviour
 
 		public HashedString arms;
 
+		public HashedString armslower;
+
+		public HashedString legs;
+
 		public HashedString hat;
 
+		public HashedString armLowerSkin;
+
+		public HashedString armUpperSkin;
+
+		public HashedString legSkin;
+
 		public HashedString faceFX;
+
+		public HashedString belt;
+
+		public HashedString pelvis;
+
+		public HashedString foot;
+
+		public HashedString skirt;
+
+		public HashedString necklace;
+
+		public HashedString cuff;
+
+		public HashedString hand;
 	}
 }

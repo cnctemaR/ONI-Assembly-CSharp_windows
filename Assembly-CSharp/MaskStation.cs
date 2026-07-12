@@ -322,7 +322,7 @@ public class MaskStation : StateMachineComponent<MaskStation.SMInstance>, IBasic
 				assignable.Unassign();
 				if (!flag2)
 				{
-					Notification notification = new Notification(MISC.NOTIFICATIONS.SUIT_DROPPED.NAME, NotificationType.BadMinor, (List<Notification> notificationList, object data) => MISC.NOTIFICATIONS.SUIT_DROPPED.TOOLTIP, null, true, 0f, null, null, null, true, false);
+					Notification notification = new Notification(MISC.NOTIFICATIONS.SUIT_DROPPED.NAME, NotificationType.BadMinor, (List<Notification> notificationList, object data) => MISC.NOTIFICATIONS.SUIT_DROPPED.TOOLTIP, null, true, 0f, null, null, null, true, false, false);
 					assignable.GetComponent<Notifier>().Add(notification, "");
 				}
 			}

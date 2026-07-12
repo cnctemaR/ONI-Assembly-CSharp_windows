@@ -105,6 +105,8 @@ public class GameTags
 
 	public static readonly Tag Robot = TagManager.Create("Robot");
 
+	public static readonly Tag StoryTraitResource = TagManager.Create("StoryTraitResource");
+
 	public static readonly Tag Incapacitated = TagManager.Create("Incapacitated");
 
 	public static readonly Tag CaloriesDepleted = TagManager.Create("CaloriesDepleted");
@@ -279,6 +281,8 @@ public class GameTags
 
 	public static readonly Tag TravelTubeBridges = TagManager.Create("TravelTubeBridges");
 
+	public static readonly Tag Backwall = TagManager.Create("Backwall");
+
 	public static readonly Tag MISSING_TAG = TagManager.Create("MISSING_TAG");
 
 	public static readonly Tag PlantRenderer = TagManager.Create("PlantRenderer");
@@ -400,6 +404,8 @@ public class GameTags
 
 	public static readonly Tag Overjoyed = TagManager.Create("Overjoyed");
 
+	public static readonly Tag PleasantConversation = TagManager.Create("PleasantConversation");
+
 	public static readonly Tag HasSuitTank = TagManager.Create("HasSuitTank");
 
 	public static readonly Tag NoCreatureIdling = TagManager.Create("NoCreatureIdling");
@@ -433,6 +439,8 @@ public class GameTags
 	public static readonly Tag Telepad = TagManager.Create("Telepad");
 
 	public static readonly Tag InTransitTube = TagManager.Create("InTransitTube");
+
+	public static readonly Tag GeyserFeature = TagManager.Create("GeyserFeature");
 
 	public static readonly Tag Rocket = TagManager.Create("Rocket");
 
@@ -537,7 +545,8 @@ public class GameTags
 		GameTags.Clothes,
 		GameTags.IndustrialIngredient,
 		GameTags.Compostable,
-		GameTags.HighEnergyParticle
+		GameTags.HighEnergyParticle,
+		GameTags.StoryTraitResource
 	};
 
 	public static TagSet IgnoredMaterialCategories = new TagSet

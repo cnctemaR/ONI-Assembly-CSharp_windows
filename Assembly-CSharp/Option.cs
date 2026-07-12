@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using KSerialization;
 
-[DebuggerDisplay("has_value={has_value} {value}")]
+[DebuggerDisplay("has_value={hasValue} {value}")]
 [Serializable]
-public readonly struct Option<T> : IEquatable<Option<T>>
+public readonly struct Option<T> : IEquatable<Option<T>>, IEquatable<T>
 {
 	public bool HasValue
 	{
@@ -113,6 +113,31 @@ public readonly struct Option<T> : IEquatable<Option<T>>
 			return Option.None;
 		}
 		return fn(this.Value);
+	}
+
+	public static bool operator ==(Option<T> lhs, T rhs)
+	{
+		return lhs.Equals(rhs);
+	}
+
+	public static bool operator !=(Option<T> lhs, T rhs)
+	{
+		return !(lhs == rhs);
+	}
+
+	public static bool operator ==(T lhs, Option<T> rhs)
+	{
+		return lhs.Equals(rhs);
+	}
+
+	public static bool operator !=(T lhs, Option<T> rhs)
+	{
+		return !(lhs == rhs);
+	}
+
+	public bool Equals(T other)
+	{
+		return this.HasValue && EqualityComparer<T>.Default.Equals(this.value, other);
 	}
 
 	[Serialize]

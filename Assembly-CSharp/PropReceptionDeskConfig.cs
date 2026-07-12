@@ -23,7 +23,7 @@ public class PropReceptionDeskConfig : IEntityConfig
 		PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
 		component.SetElement(SimHashes.Steel, true);
 		component.Temperature = 294.15f;
-		gameObject.AddOrGet<LoreBearer>();
+		LoreBearerUtil.AddLoreTo(gameObject, LoreBearerUtil.UnlockSpecificEntry("email_pens", UI.USERMENUACTIONS.READLORE.SEARCH_ELLIESDESK));
 		gameObject.AddOrGet<Demolishable>();
 		return gameObject;
 	}

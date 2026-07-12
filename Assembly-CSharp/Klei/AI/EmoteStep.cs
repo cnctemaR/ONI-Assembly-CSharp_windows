@@ -32,6 +32,11 @@ namespace Klei.AI
 			this.callbacks.Release(callbackHandle);
 		}
 
+		public void UnregisterAllCallbacks()
+		{
+			this.callbacks = new HandleVector<EmoteStep.Callbacks>(64);
+		}
+
 		public void OnStepStarted(HandleVector<EmoteStep.Callbacks>.Handle callbackHandle, GameObject parameter)
 		{
 			if (callbackHandle == HandleVector<EmoteStep.Callbacks>.Handle.InvalidHandle)

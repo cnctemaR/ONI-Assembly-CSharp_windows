@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Klei.AI;
+using UnityEngine;
 
 public class Personality : Resource
 {
@@ -19,7 +20,7 @@ public class Personality : Resource
 	}
 
 	public Personality(string name_string_key, string name, string Gender, string PersonalityType, string StressTrait, string JoyTrait, string StickerType, string CongenitalTrait, int headShape, int mouth, int neck, int eyes, int hair, int body, string description, bool isStartingMinion)
-		: base(name, name)
+		: base(name_string_key, name)
 	{
 		this.nameStringKey = name_string_key;
 		this.genderStringKey = Gender;
@@ -36,6 +37,7 @@ public class Personality : Resource
 		this.hair = hair;
 		this.body = body;
 		this.startingMinion = isStartingMinion;
+		this.outfitIds = new Dictionary<ClothingOutfitUtility.OutfitType, string>();
 	}
 
 	public string GetDescription()
@@ -55,6 +57,43 @@ public class Personality : Resource
 		this.traits.Add(trait);
 	}
 
+	public void SetOutfit(ClothingOutfitUtility.OutfitType outfitType, Option<string> outfit)
+	{
+		if (outfit.HasValue)
+		{
+			this.outfitIds[outfitType] = outfit;
+			return;
+		}
+		this.outfitIds.Remove(outfitType);
+	}
+
+	public string GetOutfit(ClothingOutfitUtility.OutfitType outfitType)
+	{
+		if (this.outfitIds.ContainsKey(outfitType))
+		{
+			return this.outfitIds[outfitType];
+		}
+		return null;
+	}
+
+	public Sprite GetMiniIcon()
+	{
+		if (string.IsNullOrWhiteSpace(this.nameStringKey))
+		{
+			return Assets.GetSprite("unknown");
+		}
+		string text;
+		if (this.nameStringKey == "MIMA")
+		{
+			text = "Mi-Ma";
+		}
+		else
+		{
+			text = this.nameStringKey[0].ToString() + this.nameStringKey.Substring(1).ToLower();
+		}
+		return Assets.GetSprite("dreamIcon_" + text);
+	}
+
 	public List<Personality.StartingAttribute> attributes = new List<Personality.StartingAttribute>();
 
 	public List<Trait> traits = new List<Trait>();
@@ -70,6 +109,8 @@ public class Personality : Resource
 	public int hair;
 
 	public int body;
+
+	public Dictionary<ClothingOutfitUtility.OutfitType, string> outfitIds;
 
 	public string nameStringKey;
 

@@ -5,7 +5,7 @@ using STRINGS;
 
 public class DevTool_StoryTrait_CritterManipulator : DevTool
 {
-	protected override void Render()
+	protected override void RenderTo(DevPanel panel)
 	{
 		if (ImGui.CollapsingHeader("Debug species lore unlock popup", ImGuiTreeNodeFlags.DefaultOpen))
 		{

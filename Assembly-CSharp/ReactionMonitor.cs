@@ -9,6 +9,13 @@ public class ReactionMonitor : GameStateMachine<ReactionMonitor, ReactionMonitor
 	{
 		default_state = this.idle;
 		base.serializable = StateMachine.SerializeType.Never;
+		this.root.EventHandler(GameHashes.DestinationReached, delegate(ReactionMonitor.Instance smi)
+		{
+			smi.ClearLastReaction();
+		}).EventHandler(GameHashes.NavigationFailed, delegate(ReactionMonitor.Instance smi)
+		{
+			smi.ClearLastReaction();
+		});
 		this.idle.Enter("ClearReactable", delegate(ReactionMonitor.Instance smi)
 		{
 			this.reactable.Set(null, smi, false);
@@ -92,7 +99,8 @@ public class ReactionMonitor : GameStateMachine<ReactionMonitor, ReactionMonitor
 			{
 				return false;
 			}
-			if (this.lastReactTimes.ContainsKey(reactable.id) && clockTime - this.lastReactTimes[reactable.id] < reactable.localCooldown)
+			float num;
+			if ((this.lastReactTimes.TryGetValue(reactable.id, out num) && num == this.lastReaction) || clockTime - num < reactable.localCooldown)
 			{
 				return false;
 			}
@@ -125,16 +133,24 @@ public class ReactionMonitor : GameStateMachine<ReactionMonitor, ReactionMonitor
 			ScenePartitionerLayer scenePartitionerLayer = GameScenePartitioner.Instance.objectLayers[(int)base.def.ReactionLayer];
 			ListPool<ScenePartitionerEntry, ReactionMonitor>.PooledList pooledList = ListPool<ScenePartitionerEntry, ReactionMonitor>.Allocate();
 			GameScenePartitioner.Instance.GatherEntries(vector2I.x, vector2I.y, 1, 1, scenePartitionerLayer, pooledList);
+			float num = float.NaN;
 			float time = GameClock.Instance.GetTime();
 			for (int j = 0; j < pooledList.Count; j++)
 			{
 				Reactable reactable2 = pooledList[j].obj as Reactable;
 				if (this.TryReact(reactable2, time, transition))
 				{
+					num = time;
 					break;
 				}
 			}
+			this.lastReaction = num;
 			pooledList.Recycle();
+		}
+
+		public void ClearLastReaction()
+		{
+			this.lastReaction = float.NaN;
 		}
 
 		public void StopReaction()
@@ -226,6 +242,8 @@ public class ReactionMonitor : GameStateMachine<ReactionMonitor, ReactionMonitor
 		}
 
 		private KBatchedAnimController animController;
+
+		private float lastReaction = float.NaN;
 
 		private Dictionary<HashedString, float> lastReactTimes;
 

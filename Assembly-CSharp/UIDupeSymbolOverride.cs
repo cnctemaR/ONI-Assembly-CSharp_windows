@@ -19,25 +19,25 @@ public class UIDupeSymbolOverride : MonoBehaviour
 		{
 			this.animController = base.GetComponent<KBatchedAnimController>();
 		}
-		Personality personality = null;
-		foreach (Personality personality2 in Db.Get().Personalities.resources)
-		{
-			if (personality2.Name.ToUpper() == minionIdentity.nameStringKey)
-			{
-				personality = personality2;
-				break;
-			}
-		}
-		DebugUtil.DevAssert(personality != null, "Personality is not found", null);
-		KCompBuilder.BodyData bodyData = MinionStartingStats.CreateBodyData(personality);
+		Personality personalityFromNameStringKey = Db.Get().Personalities.GetPersonalityFromNameStringKey(minionIdentity.nameStringKey);
+		DebugUtil.DevAssert(personalityFromNameStringKey != null, "Personality is not found", null);
+		KCompBuilder.BodyData bodyData = MinionStartingStats.CreateBodyData(personalityFromNameStringKey);
 		this.symbolOverrideController.RemoveAllSymbolOverrides(0);
 		this.SetAccessory(this.animController, this.slots.Hair.Lookup(bodyData.hair));
 		this.SetAccessory(this.animController, this.slots.HatHair.Lookup("hat_" + HashCache.Get().Get(bodyData.hair)));
 		this.SetAccessory(this.animController, this.slots.Eyes.Lookup(bodyData.eyes));
 		this.SetAccessory(this.animController, this.slots.HeadShape.Lookup(bodyData.headShape));
 		this.SetAccessory(this.animController, this.slots.Mouth.Lookup(bodyData.mouth));
+		this.SetAccessory(this.animController, this.slots.Neck.Lookup(bodyData.neck));
 		this.SetAccessory(this.animController, this.slots.Body.Lookup(bodyData.body));
+		this.SetAccessory(this.animController, this.slots.Leg.Lookup(bodyData.legs));
 		this.SetAccessory(this.animController, this.slots.Arm.Lookup(bodyData.arms));
+		this.SetAccessory(this.animController, this.slots.ArmLower.Lookup(bodyData.armslower));
+		this.SetAccessory(this.animController, this.slots.Pelvis.Lookup(bodyData.pelvis));
+		this.SetAccessory(this.animController, this.slots.Belt.Lookup(bodyData.belt));
+		this.SetAccessory(this.animController, this.slots.Foot.Lookup(bodyData.foot));
+		this.SetAccessory(this.animController, this.slots.Cuff.Lookup(bodyData.cuff));
+		this.SetAccessory(this.animController, this.slots.Hand.Lookup(bodyData.hand));
 	}
 
 	private KAnimHashedString SetAccessory(KBatchedAnimController minion, Accessory accessory)

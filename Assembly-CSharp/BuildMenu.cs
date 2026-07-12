@@ -596,7 +596,8 @@ public class BuildMenu : KScreen
 				new BuildMenu.BuildingInfo("GlassTile", global::Action.BuildMenuKeyW),
 				new BuildMenu.BuildingInfo("BunkerTile", global::Action.BuildMenuKeyB),
 				new BuildMenu.BuildingInfo("CarpetTile", global::Action.BuildMenuKeyL),
-				new BuildMenu.BuildingInfo("ExobaseHeadquarters", global::Action.BuildMenuKeyP)
+				new BuildMenu.BuildingInfo("ExteriorWall", global::Action.BuildMenuKeyD),
+				new BuildMenu.BuildingInfo("ExobaseHeadquarters", global::Action.BuildMenuKeyH)
 			}),
 			new BuildMenu.DisplayInfo(BuildMenu.CacheHashString("Ladders"), "icon_category_base", global::Action.BuildCategoryLadders, KKeyCode.A, new List<BuildMenu.BuildingInfo>
 			{
@@ -774,7 +775,8 @@ public class BuildMenu : KScreen
 				new BuildMenu.BuildingInfo("GasConduit", global::Action.BuildMenuKeyG),
 				new BuildMenu.BuildingInfo("GasConduitBridge", global::Action.BuildMenuKeyF),
 				new BuildMenu.BuildingInfo("InsulatedGasConduit", global::Action.BuildMenuKeyD),
-				new BuildMenu.BuildingInfo("GasConduitRadiant", global::Action.BuildMenuKeyR)
+				new BuildMenu.BuildingInfo("GasConduitRadiant", global::Action.BuildMenuKeyR),
+				new BuildMenu.BuildingInfo("ContactConductivePipeBridge", global::Action.BuildMenuKeyA)
 			}),
 			new BuildMenu.DisplayInfo(BuildMenu.CacheHashString("Plumbing Structures"), "icon_category_plumbing", global::Action.BuildCategoryPlumbingStructures, KKeyCode.B, new List<BuildMenu.BuildingInfo>
 			{
@@ -832,7 +834,6 @@ public class BuildMenu : KScreen
 				new BuildMenu.BuildingInfo("LiquidConditioner", global::Action.BuildMenuKeyA),
 				new BuildMenu.BuildingInfo("OreScrubber", global::Action.BuildMenuKeyC),
 				new BuildMenu.BuildingInfo("ThermalBlock", global::Action.BuildMenuKeyF),
-				new BuildMenu.BuildingInfo("ExteriorWall", global::Action.BuildMenuKeyD),
 				new BuildMenu.BuildingInfo("HighEnergyParticleRedirector", global::Action.BuildMenuKeyP)
 			}),
 			new BuildMenu.DisplayInfo(BuildMenu.CacheHashString("Refining"), "icon_category_refinery", global::Action.BuildCategoryRefining, KKeyCode.R, new List<BuildMenu.BuildingInfo>

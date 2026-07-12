@@ -76,12 +76,87 @@ public class TemplateSelectionInfoPanel : KMonoBehaviour, IRender1000ms
 
 	private static string TotalJoules(List<int> cells)
 	{
+		List<GameObject> list = new List<GameObject>();
 		float num = 0f;
 		foreach (int num2 in cells)
 		{
 			num += Grid.Element[num2].specificHeatCapacity * Grid.Temperature[num2] * (Grid.Mass[num2] * 1000f);
+			num += TemplateSelectionInfoPanel.GetCellEntityEnergy(num2, ref list);
 		}
-		return string.Format(UI.DEBUG_TOOLS.SAVE_BASE_TEMPLATE.SELECTION_INFO_PANEL.TOTAL_JOULES, GameUtil.GetFormattedJoules(num, "F1", GameUtil.TimeSlice.None));
+		return string.Format(UI.DEBUG_TOOLS.SAVE_BASE_TEMPLATE.SELECTION_INFO_PANEL.TOTAL_JOULES, GameUtil.GetFormattedJoules(num, "F5", GameUtil.TimeSlice.None));
+	}
+
+	private static float GetCellEntityEnergy(int cell, ref List<GameObject> ignoreObjects)
+	{
+		float num = 0f;
+		for (int i = 0; i < 44; i++)
+		{
+			GameObject gameObject = Grid.Objects[cell, i];
+			if (!(gameObject == null) && !ignoreObjects.Contains(gameObject))
+			{
+				ignoreObjects.Add(gameObject);
+				PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
+				if (!(component == null))
+				{
+					float num2 = component.Mass;
+					Building component2 = gameObject.GetComponent<Building>();
+					if (component2 != null)
+					{
+						num2 = component2.Def.MassForTemperatureModification;
+					}
+					float num3 = num2 * 1000f * component.Element.specificHeatCapacity * component.Temperature;
+					num += num3;
+					Storage[] components = gameObject.GetComponents<Storage>();
+					if (components != null)
+					{
+						float num4 = 0f;
+						Storage[] array = components;
+						for (int j = 0; j < array.Length; j++)
+						{
+							foreach (GameObject gameObject2 in array[j].items)
+							{
+								PrimaryElement component3 = gameObject2.GetComponent<PrimaryElement>();
+								if (!(component3 == null))
+								{
+									num4 += component3.Mass * 1000f * component3.Element.specificHeatCapacity * component3.Temperature;
+								}
+							}
+						}
+						num += num4;
+					}
+					Conduit component4 = gameObject.GetComponent<Conduit>();
+					if (component4 != null)
+					{
+						ConduitFlow.ConduitContents contents = component4.GetFlowManager().GetContents(cell);
+						if (contents.mass > 0f)
+						{
+							Element element = ElementLoader.FindElementByHash(contents.element);
+							float num5 = contents.mass * 1000f * element.specificHeatCapacity * contents.temperature;
+							num += num5;
+						}
+					}
+					if (gameObject.GetComponent<SolidConduit>() != null)
+					{
+						SolidConduitFlow solidConduitFlow = Game.Instance.solidConduitFlow;
+						SolidConduitFlow.ConduitContents contents2 = solidConduitFlow.GetContents(cell);
+						if (contents2.pickupableHandle.IsValid())
+						{
+							Pickupable pickupable = solidConduitFlow.GetPickupable(contents2.pickupableHandle);
+							if (pickupable)
+							{
+								PrimaryElement component5 = pickupable.GetComponent<PrimaryElement>();
+								if (component5.Mass > 0f)
+								{
+									float num6 = component5.Mass * 1000f * component5.Element.specificHeatCapacity * component5.Temperature;
+									num += num6;
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		return num;
 	}
 
 	private static string JoulesPerKilogram(List<int> cells)

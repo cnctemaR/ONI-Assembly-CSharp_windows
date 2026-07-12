@@ -1273,9 +1273,9 @@ namespace STRINGS
 
 		public class PHOSPHORUS
 		{
-			public static LocString NAME = UI.FormatAsLink("Phosphorus", "PHOSPHORUS");
+			public static LocString NAME = UI.FormatAsLink("Refined Phosphorus", "PHOSPHORUS");
 
-			public static LocString DESC = "(P) Phosphorus is a chemical element in its " + UI.FormatAsLink("Solid", "ELEMENTS_SOLID") + " state.";
+			public static LocString DESC = "(P) Refined Phosphorus is a chemical element in its " + UI.FormatAsLink("Solid", "ELEMENTS_SOLID") + " state.";
 		}
 
 		public class PHOSPHORUSGAS

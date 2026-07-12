@@ -79,7 +79,7 @@ public class PrioritizeTool : FilteredDragTool
 	{
 		PrioritySetting lastSelectedPriority = ToolMenu.Instance.PriorityScreen.GetLastSelectedPriority();
 		int num = 0;
-		for (int i = 0; i < 43; i++)
+		for (int i = 0; i < 44; i++)
 		{
 			GameObject gameObject = Grid.Objects[cell, i];
 			if (gameObject != null)

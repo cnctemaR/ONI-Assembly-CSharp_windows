@@ -443,7 +443,9 @@ public class StructureTemperatureComponents : KGameObjectSplitComponentManager<S
 			structureTemperatureHeader.simHandle = sim_handle;
 			structureTemperaturePayload.simHandleCopy = sim_handle;
 			GameComps.StructureTemperatures.SetData(handle, structureTemperatureHeader, ref structureTemperaturePayload);
-			structureTemperaturePayload.primaryElement.Trigger(-1555603773, null);
+			structureTemperaturePayload.primaryElement.Trigger(-1555603773, sim_handle);
+			int num = Grid.PosToCell(structureTemperaturePayload.building.transform.GetPosition());
+			GameScenePartitioner.Instance.TriggerEvent(num, GameScenePartitioner.Instance.contactConductiveLayer, new StructureToStructureTemperature.BuildingChangedObj(StructureToStructureTemperature.BuildingChangeType.Created, structureTemperaturePayload.building, sim_handle));
 			return;
 		}
 		SimMessages.RemoveBuildingHeatExchange(sim_handle, -1);
@@ -465,6 +467,8 @@ public class StructureTemperatureComponents : KGameObjectSplitComponentManager<S
 		GameComps.StructureTemperatures.GetData(handle, out structureTemperatureHeader, out structureTemperaturePayload);
 		if (structureTemperaturePayload.simHandleCopy != -1)
 		{
+			int num = Grid.PosToCell(structureTemperaturePayload.building);
+			GameScenePartitioner.Instance.TriggerEvent(num, GameScenePartitioner.Instance.contactConductiveLayer, new StructureToStructureTemperature.BuildingChangedObj(StructureToStructureTemperature.BuildingChangeType.Destroyed, structureTemperaturePayload.building, structureTemperaturePayload.simHandleCopy));
 			if (Sim.IsValidHandle(structureTemperaturePayload.simHandleCopy))
 			{
 				int handleIndex = Sim.GetHandleIndex(structureTemperaturePayload.simHandleCopy);

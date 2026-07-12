@@ -9,7 +9,6 @@ public class FilterSideScreen : SideScreenContent
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		this.filterRowMap.Clear();
 	}
 
 	public override bool IsValidForTarget(GameObject target)

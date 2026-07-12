@@ -8,7 +8,7 @@ using STRINGS;
 using TUNING;
 using UnityEngine;
 
-public class Clustercraft : ClusterGridEntity, IClusterRange, ISim4000ms
+public class Clustercraft : ClusterGridEntity, IClusterRange, ISim4000ms, ISim1000ms
 {
 	public override string Name
 	{
@@ -89,7 +89,13 @@ public class Clustercraft : ClusterGridEntity, IClusterRange, ISim4000ms
 	{
 		get
 		{
-			return this.EnginePower / this.TotalBurden * this.AutoPilotMultiplier * this.PilotSkillMultiplier;
+			float num = this.EnginePower / this.TotalBurden;
+			float num2 = num * this.AutoPilotMultiplier * this.PilotSkillMultiplier;
+			if (this.controlStationBuffTimeRemaining > 0f)
+			{
+				num2 += num * 0.20000005f;
+			}
+			return num2;
 		}
 	}
 
@@ -189,6 +195,18 @@ public class Clustercraft : ClusterGridEntity, IClusterRange, ISim4000ms
 		base.Subscribe<Clustercraft>(1102426921, Clustercraft.NameChangedHandler);
 		this.SetRocketName(this.m_name);
 		this.UpdateStatusItem();
+	}
+
+	public void Sim1000ms(float dt)
+	{
+		this.controlStationBuffTimeRemaining = Mathf.Max(this.controlStationBuffTimeRemaining - dt, 0f);
+		if (this.controlStationBuffTimeRemaining > 0f)
+		{
+			this.missionControlStatusHandle = this.selectable.AddStatusItem(Db.Get().BuildingStatusItems.MissionControlBoosted, this);
+			return;
+		}
+		this.selectable.RemoveStatusItem(Db.Get().BuildingStatusItems.MissionControlBoosted, false);
+		this.missionControlStatusHandle = Guid.Empty;
 	}
 
 	public void Sim4000ms(float dt)
@@ -692,10 +710,9 @@ public class Clustercraft : ClusterGridEntity, IClusterRange, ISim4000ms
 		{
 			return;
 		}
-		KSelectable component = base.GetComponent<KSelectable>();
 		if (this.mainStatusHandle != Guid.Empty)
 		{
-			component.RemoveStatusItem(this.mainStatusHandle, false);
+			this.selectable.RemoveStatusItem(this.mainStatusHandle, false);
 		}
 		ClusterGridEntity visibleEntityOfLayerAtCell = ClusterGrid.Instance.GetVisibleEntityOfLayerAtCell(this.m_location, EntityLayer.Asteroid);
 		ClusterGridEntity orbitAsteroid = this.GetOrbitAsteroid();
@@ -717,28 +734,28 @@ public class Clustercraft : ClusterGridEntity, IClusterRange, ISim4000ms
 		bool flag2 = false;
 		if (visibleEntityOfLayerAtCell != null)
 		{
-			this.mainStatusHandle = component.SetStatusItem(Db.Get().StatusItemCategories.Main, Db.Get().BuildingStatusItems.InFlight, this.m_clusterTraveler);
+			this.mainStatusHandle = this.selectable.SetStatusItem(Db.Get().StatusItemCategories.Main, Db.Get().BuildingStatusItems.InFlight, this.m_clusterTraveler);
 		}
 		else if (!this.HasResourcesToMove(1, Clustercraft.CombustionResource.All) && !flag)
 		{
 			flag2 = true;
-			this.mainStatusHandle = component.SetStatusItem(Db.Get().StatusItemCategories.Main, Db.Get().BuildingStatusItems.RocketStranded, orbitAsteroid);
+			this.mainStatusHandle = this.selectable.SetStatusItem(Db.Get().StatusItemCategories.Main, Db.Get().BuildingStatusItems.RocketStranded, orbitAsteroid);
 		}
 		else if (!this.m_moduleInterface.GetClusterDestinationSelector().IsAtDestination() && !this.CheckDesinationInRange())
 		{
-			this.mainStatusHandle = component.SetStatusItem(Db.Get().StatusItemCategories.Main, Db.Get().BuildingStatusItems.DestinationOutOfRange, this.m_clusterTraveler);
+			this.mainStatusHandle = this.selectable.SetStatusItem(Db.Get().StatusItemCategories.Main, Db.Get().BuildingStatusItems.DestinationOutOfRange, this.m_clusterTraveler);
 		}
 		else if (this.IsFlightInProgress() || this.Status == Clustercraft.CraftStatus.Launching)
 		{
-			this.mainStatusHandle = component.SetStatusItem(Db.Get().StatusItemCategories.Main, Db.Get().BuildingStatusItems.InFlight, this.m_clusterTraveler);
+			this.mainStatusHandle = this.selectable.SetStatusItem(Db.Get().StatusItemCategories.Main, Db.Get().BuildingStatusItems.InFlight, this.m_clusterTraveler);
 		}
 		else if (orbitAsteroid != null)
 		{
-			this.mainStatusHandle = component.SetStatusItem(Db.Get().StatusItemCategories.Main, Db.Get().BuildingStatusItems.InOrbit, orbitAsteroid);
+			this.mainStatusHandle = this.selectable.SetStatusItem(Db.Get().StatusItemCategories.Main, Db.Get().BuildingStatusItems.InOrbit, orbitAsteroid);
 		}
 		else
 		{
-			this.mainStatusHandle = component.SetStatusItem(Db.Get().StatusItemCategories.Main, Db.Get().BuildingStatusItems.Normal, null);
+			this.mainStatusHandle = this.selectable.SetStatusItem(Db.Get().StatusItemCategories.Main, Db.Get().BuildingStatusItems.Normal, null);
 		}
 		base.GetComponent<KPrefabID>().SetTag(GameTags.RocketStranded, flag2);
 		float num = 0f;
@@ -750,24 +767,24 @@ public class Clustercraft : ClusterGridEntity, IClusterRange, ISim4000ms
 		}
 		if (this.Status == Clustercraft.CraftStatus.Grounded || num <= 0f)
 		{
-			component.RemoveStatusItem(Db.Get().BuildingStatusItems.FlightCargoRemaining, false);
-			component.RemoveStatusItem(Db.Get().BuildingStatusItems.FlightAllCargoFull, false);
+			this.selectable.RemoveStatusItem(Db.Get().BuildingStatusItems.FlightCargoRemaining, false);
+			this.selectable.RemoveStatusItem(Db.Get().BuildingStatusItems.FlightAllCargoFull, false);
 			return;
 		}
 		if (num2 == 0f)
 		{
-			component.AddStatusItem(Db.Get().BuildingStatusItems.FlightAllCargoFull, null);
-			component.RemoveStatusItem(Db.Get().BuildingStatusItems.FlightCargoRemaining, false);
+			this.selectable.AddStatusItem(Db.Get().BuildingStatusItems.FlightAllCargoFull, null);
+			this.selectable.RemoveStatusItem(Db.Get().BuildingStatusItems.FlightCargoRemaining, false);
 			return;
 		}
-		component.RemoveStatusItem(Db.Get().BuildingStatusItems.FlightAllCargoFull, false);
+		this.selectable.RemoveStatusItem(Db.Get().BuildingStatusItems.FlightAllCargoFull, false);
 		if (this.cargoStatusHandle == Guid.Empty)
 		{
-			this.cargoStatusHandle = component.AddStatusItem(Db.Get().BuildingStatusItems.FlightCargoRemaining, num2);
+			this.cargoStatusHandle = this.selectable.AddStatusItem(Db.Get().BuildingStatusItems.FlightCargoRemaining, num2);
 			return;
 		}
-		component.RemoveStatusItem(Db.Get().BuildingStatusItems.FlightCargoRemaining, true);
-		this.cargoStatusHandle = component.AddStatusItem(Db.Get().BuildingStatusItems.FlightCargoRemaining, num2);
+		this.selectable.RemoveStatusItem(Db.Get().BuildingStatusItems.FlightCargoRemaining, true);
+		this.cargoStatusHandle = this.selectable.AddStatusItem(Db.Get().BuildingStatusItems.FlightCargoRemaining, num2);
 	}
 
 	private void UpdateGroundTags()
@@ -879,6 +896,8 @@ public class Clustercraft : ClusterGridEntity, IClusterRange, ISim4000ms
 
 	private Guid cargoStatusHandle;
 
+	private Guid missionControlStatusHandle = Guid.Empty;
+
 	public static Dictionary<Tag, float> dlc1OxidizerEfficiencies = new Dictionary<Tag, float>
 	{
 		{
@@ -904,10 +923,16 @@ public class Clustercraft : ClusterGridEntity, IClusterRange, ISim4000ms
 	public float PilotSkillMultiplier = 1f;
 
 	[Serialize]
+	public float controlStationBuffTimeRemaining;
+
+	[Serialize]
 	private bool m_launchRequested;
 
 	[Serialize]
 	private Clustercraft.CraftStatus status;
+
+	[MyCmpGet]
+	private KSelectable selectable;
 
 	private static EventSystem.IntraObjectHandler<Clustercraft> RocketModuleChangedHandler = new EventSystem.IntraObjectHandler<Clustercraft>(delegate(Clustercraft cmp, object data)
 	{

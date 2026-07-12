@@ -31,7 +31,7 @@ public static class Option
 		return true;
 	}
 
-	public readonly ref struct Value_None
+	public readonly struct Value_None
 	{
 	}
 

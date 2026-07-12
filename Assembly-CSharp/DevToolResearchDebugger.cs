@@ -10,7 +10,7 @@ public class DevToolResearchDebugger : DevTool
 		this.RequiresGameRunning = true;
 	}
 
-	protected override void Render()
+	protected override void RenderTo(DevPanel panel)
 	{
 		TechInstance activeResearch = Research.Instance.GetActiveResearch();
 		if (activeResearch == null)

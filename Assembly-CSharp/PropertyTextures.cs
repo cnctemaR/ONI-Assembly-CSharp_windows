@@ -158,7 +158,7 @@ public class PropertyTextures : KMonoBehaviour, ISim200ms
 
 	private void UpdateProperty(ref PropertyTextures.TextureProperties p, int x0, int y0, int x1, int y1)
 	{
-		if (Game.Instance.IsLoading())
+		if (Game.Instance == null || Game.Instance.IsLoading())
 		{
 			return;
 		}
@@ -234,43 +234,52 @@ public class PropertyTextures : KMonoBehaviour, ISim200ms
 			return;
 		}
 		Shader.SetGlobalVector(this.WorldSizeID, new Vector4((float)Grid.WidthInCells, (float)Grid.HeightInCells, 1f / (float)Grid.WidthInCells, 1f / (float)Grid.HeightInCells));
-		WorldContainer activeWorld = ClusterManager.Instance.activeWorld;
-		Vector2I worldOffset = activeWorld.WorldOffset;
-		Vector2I worldSize = activeWorld.WorldSize;
-		if (DlcManager.IsPureVanilla() || (CameraController.Instance != null && CameraController.Instance.ignoreClusterFX))
+		int num = 0;
+		Vector4 vector = new Vector4((float)Grid.WidthInCells, (float)Grid.HeightInCells, 0f, 0f);
+		if (ClusterManager.Instance != null)
 		{
-			Shader.SetGlobalVector(this.ClusterWorldSizeID, new Vector4((float)Grid.WidthInCells, (float)Grid.HeightInCells, 0f, 0f));
+			WorldContainer activeWorld = ClusterManager.Instance.activeWorld;
+			if (DlcManager.IsPureVanilla() || (CameraController.Instance != null && CameraController.Instance.ignoreClusterFX))
+			{
+				Vector2I worldOffset = activeWorld.WorldOffset;
+				Vector2I worldSize = activeWorld.WorldSize;
+				vector.x = (float)worldSize.x;
+				vector.y = (float)worldSize.y;
+				vector.z = 1f / (float)(worldSize.x + worldOffset.x);
+				vector.w = 1f / (float)(worldSize.y + worldOffset.y);
+			}
+			if (activeWorld.FullyEnclosedBorder)
+			{
+				num = Grid.TopBorderHeight;
+			}
 		}
-		else
-		{
-			Shader.SetGlobalVector(this.ClusterWorldSizeID, new Vector4((float)worldSize.x, (float)worldSize.y, 1f / (float)(worldSize.x + worldOffset.x), 1f / (float)(worldSize.y + worldOffset.y)));
-		}
+		Shader.SetGlobalVector(this.ClusterWorldSizeID, vector);
 		Shader.SetGlobalVector(this.PropTexWsToCsID, new Vector4(0f, 0f, 1f, 1f));
 		Shader.SetGlobalVector(this.PropTexCsToWsID, new Vector4(0f, 0f, 1f, 1f));
-		Shader.SetGlobalFloat(this.TopBorderHeightID, ClusterManager.Instance.activeWorld.FullyEnclosedBorder ? 0f : ((float)Grid.TopBorderHeight));
-		int num;
+		Shader.SetGlobalFloat(this.TopBorderHeightID, (float)num);
 		int num2;
 		int num3;
 		int num4;
-		this.GetVisibleCellRange(out num, out num2, out num3, out num4);
+		int num5;
+		this.GetVisibleCellRange(out num2, out num3, out num4, out num5);
 		Shader.SetGlobalFloat(this.FogOfWarScaleID, PropertyTextures.FogOfWarScale);
-		int num5 = this.NextPropertyIdx;
-		this.NextPropertyIdx = num5 + 1;
-		int num6 = num5 % this.allTextureProperties.Count;
-		PropertyTextures.TextureProperties textureProperties = this.allTextureProperties[num6];
+		int num6 = this.NextPropertyIdx;
+		this.NextPropertyIdx = num6 + 1;
+		int num7 = num6 % this.allTextureProperties.Count;
+		PropertyTextures.TextureProperties textureProperties = this.allTextureProperties[num7];
 		while (textureProperties.updateEveryFrame)
 		{
-			num5 = this.NextPropertyIdx;
-			this.NextPropertyIdx = num5 + 1;
-			num6 = num5 % this.allTextureProperties.Count;
-			textureProperties = this.allTextureProperties[num6];
+			num6 = this.NextPropertyIdx;
+			this.NextPropertyIdx = num6 + 1;
+			num7 = num6 % this.allTextureProperties.Count;
+			textureProperties = this.allTextureProperties[num7];
 		}
 		for (int i = 0; i < this.allTextureProperties.Count; i++)
 		{
 			PropertyTextures.TextureProperties textureProperties2 = this.allTextureProperties[i];
-			if (num6 == i || textureProperties2.updateEveryFrame || GameUtil.IsCapturingTimeLapse())
+			if (num7 == i || textureProperties2.updateEveryFrame || GameUtil.IsCapturingTimeLapse())
 			{
-				this.UpdateProperty(ref textureProperties2, num, num2, num3, num4);
+				this.UpdateProperty(ref textureProperties2, num2, num3, num4, num5);
 			}
 		}
 		for (int j = 0; j < 14; j++)
@@ -310,8 +319,12 @@ public class PropertyTextures : KMonoBehaviour, ISim200ms
 	private static void UpdateFogOfWar(TextureRegion region, int x0, int y0, int x1, int y1)
 	{
 		byte[] visible = Grid.Visible;
-		WorldContainer worldContainer = ((ClusterManager.Instance != null) ? ClusterManager.Instance.activeWorld : null);
-		int num = ((worldContainer != null) ? (worldContainer.WorldSize.y + worldContainer.WorldOffset.y - 1) : Grid.HeightInCells);
+		int num = Grid.HeightInCells;
+		if (ClusterManager.Instance != null)
+		{
+			WorldContainer activeWorld = ClusterManager.Instance.activeWorld;
+			num = activeWorld.WorldSize.y + activeWorld.WorldOffset.y - 1;
+		}
 		for (int i = y0; i <= y1; i++)
 		{
 			for (int j = x0; j <= x1; j++)

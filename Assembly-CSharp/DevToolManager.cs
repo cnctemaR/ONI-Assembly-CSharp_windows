@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using ImGuiNET;
+using STRINGS;
 using UnityEngine;
 
 public class DevToolManager
@@ -18,26 +20,30 @@ public class DevToolManager
 	public DevToolManager()
 	{
 		DevToolManager.Instance = this;
-		this.rootMenuNode = new DevToolManager.DevToolMenuNode("root");
-		this.RegisterDevTool(new DevToolSimDebug(), "Debuggers/Sim Debug");
-		this.RegisterDevTool(new DevToolStateMachineDebug(), "Debuggers/State Machine");
-		this.RegisterDevTool(new DevToolSaveGameInfo(), "Debuggers/Save Game Info");
-		this.RegisterDevTool(new DevToolPrintingPodDebug(), "Debuggers/Printing Pod Debug");
-		this.RegisterDevTool(new DevToolBigBaseMutations(), "Debuggers/Big Base Mutation Utilities");
-		this.RegisterDevTool(new DevToolNavGrid(), "Debuggers/Nav Grid");
-		this.RegisterDevTool(new DevToolResearchDebugger(), "Debuggers/Research");
-		this.RegisterDevTool(new DevToolStatusItems(), "Debuggers/StatusItems");
-		this.RegisterDevTool(new DevToolUI(), "Debuggers/UI");
-		this.RegisterDevTool(new DevToolUnlockedIds(), "Debuggers/UnlockedIds List");
-		this.RegisterDevTool(new DevToolStringsTable(), "Debuggers/StringsTable");
-		this.RegisterDevTool(new DevToolChoreDebugger(), "Debuggers/Chore");
-		this.RegisterDevTool(new DevToolBatchedAnimDebug(), "Debuggers/Batched Anim");
-		this.RegisterDevTool(new DevTool_StoryTraits_Reveal(), "Debuggers/Story Traits Reveal");
-		this.RegisterDevTool(new DevTool_StoryTrait_CritterManipulator(), "Debuggers/Story Trait - Critter Manipulator");
-		this.RegisterDevTool(new DevToolSceneBrowser(), "Scene/Browser");
-		this.RegisterDevTool(new DevToolSceneInspector(), "Scene/Inspector");
-		this.RegisterDevTool(this.warning, "Help/" + this.warning.Name);
-		this.RegisterDevTool(new DevToolCommandPalette(), "Help/Command Palette");
+		this.RegisterDevTool<DevToolSimDebug>("Debuggers/Sim Debug");
+		this.RegisterDevTool<DevToolStateMachineDebug>("Debuggers/State Machine");
+		this.RegisterDevTool<DevToolSaveGameInfo>("Debuggers/Save Game Info");
+		this.RegisterDevTool<DevToolPrintingPodDebug>("Debuggers/Printing Pod Debug");
+		this.RegisterDevTool<DevToolBigBaseMutations>("Debuggers/Big Base Mutation Utilities");
+		this.RegisterDevTool<DevToolNavGrid>("Debuggers/Nav Grid");
+		this.RegisterDevTool<DevToolResearchDebugger>("Debuggers/Research");
+		this.RegisterDevTool<DevToolStatusItems>("Debuggers/StatusItems");
+		this.RegisterDevTool<DevToolUI>("Debuggers/UI");
+		this.RegisterDevTool<DevToolUnlockedIds>("Debuggers/UnlockedIds List");
+		this.RegisterDevTool<DevToolStringsTable>("Debuggers/StringsTable");
+		this.RegisterDevTool<DevToolChoreDebugger>("Debuggers/Chore");
+		this.RegisterDevTool<DevToolBatchedAnimDebug>("Debuggers/Batched Anim");
+		this.RegisterDevTool<DevTool_StoryTraits_Reveal>("Debuggers/Story Traits Reveal");
+		this.RegisterDevTool<DevTool_StoryTrait_CritterManipulator>("Debuggers/Story Trait - Critter Manipulator");
+		this.RegisterDevTool<DevToolAnimEventManager>("Debuggers/Anim Event Manager");
+		this.RegisterDevTool<DevToolSceneBrowser>("Scene/Browser");
+		this.RegisterDevTool<DevToolSceneInspector>("Scene/Inspector");
+		this.menuNodes.AddAction("Help/" + UI.FRONTEND.DEVTOOLS.TITLE.text, delegate
+		{
+			this.warning.ShouldDrawWindow = true;
+		});
+		this.RegisterDevTool<DevToolCommandPalette>("Help/Command Palette");
+		this.RegisterAdditionalDevToolsByReflection();
 	}
 
 	public void Init()
@@ -45,53 +51,32 @@ public class DevToolManager
 		this.UserAcceptedWarning = KPlayerPrefs.GetInt("ShowDevtools", 0) == 1;
 	}
 
-	private void RegisterDevTool(DevTool tool, string location)
+	private void RegisterDevTool<T>(string location) where T : DevTool, new()
 	{
-		string fileName = Path.GetFileName(location);
-		string directoryName = Path.GetDirectoryName(location);
-		tool.Name = fileName;
-		tool.FullPath = location;
-		this.tools.Add(tool);
-		DevToolManager.DevToolMenuNode devToolMenuNode = this.AddOrGetDevToolNode(directoryName);
-		if (devToolMenuNode.Nodes == null)
+		this.menuNodes.AddAction(location, delegate
 		{
-			devToolMenuNode.Nodes = new List<DevToolManager.DevToolMenuNode>();
-		}
-		DebugUtil.Assert(devToolMenuNode.Tool == null, "DevToolMenuNode cannot contain both a tool and list of nodes");
-		devToolMenuNode.Nodes.Add(new DevToolManager.DevToolMenuNode(fileName, tool));
+			this.panels.AddPanelFor<T>();
+		});
+		this.dontAutomaticallyRegisterTypes.Add(typeof(T));
+		this.devToolNameDict[typeof(T)] = Path.GetFileName(location);
 	}
 
-	private DevToolManager.DevToolMenuNode AddOrGetDevToolNode(string path)
+	private void RegisterAdditionalDevToolsByReflection()
 	{
-		string[] array = path.Split(new char[] { '/' });
-		DevToolManager.DevToolMenuNode devToolMenuNode = this.rootMenuNode;
-		string[] array2 = array;
-		for (int i = 0; i < array2.Length; i++)
+		using (List<Type>.Enumerator enumerator = ReflectionUtil.CollectTypesThatInheritOrImplement<DevTool>(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy).GetEnumerator())
 		{
-			string split = array2[i];
-			if (devToolMenuNode.Nodes == null)
+			while (enumerator.MoveNext())
 			{
-				devToolMenuNode.Nodes = new List<DevToolManager.DevToolMenuNode>();
+				Type type = enumerator.Current;
+				if (!type.IsAbstract && !this.dontAutomaticallyRegisterTypes.Contains(type) && ReflectionUtil.HasDefaultConstructor(type))
+				{
+					this.menuNodes.AddAction("Debuggers/" + DevToolUtil.GenerateDevToolName(type), delegate
+					{
+						this.panels.AddPanelFor((DevTool)Activator.CreateInstance(type));
+					});
+				}
 			}
-			DevToolManager.DevToolMenuNode devToolMenuNode2 = devToolMenuNode.Nodes.Find((DevToolManager.DevToolMenuNode x) => x.Name == split);
-			if (devToolMenuNode2 == null)
-			{
-				devToolMenuNode2 = new DevToolManager.DevToolMenuNode(split);
-				devToolMenuNode.Nodes.Add(devToolMenuNode2);
-			}
-			devToolMenuNode = devToolMenuNode2;
 		}
-		return devToolMenuNode;
-	}
-
-	public T GetDevTool<T>() where T : DevTool
-	{
-		return (T)((object)this.tools.Find((DevTool x) => x is T));
-	}
-
-	public IReadOnlyList<DevTool> GetDevTools()
-	{
-		return this.tools;
 	}
 
 	public void UpdateShouldShowTools()
@@ -117,33 +102,43 @@ public class DevToolManager
 		}
 		if (this.showImGui)
 		{
-			this.DrawMenu();
-			if ((Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl)) && Input.GetKeyDown(KeyCode.Space))
+			if (this.warning.ShouldDrawWindow)
 			{
-				DevToolCommandPalette.Init();
+				this.warning.DrawWindow(out this.warning.ShouldDrawWindow);
 			}
-			foreach (DevTool devTool in this.tools)
+			if (!this.UserAcceptedWarning)
 			{
-				if (devTool.Enabled)
+				this.warning.DrawMenuBar();
+			}
+			else
+			{
+				this.DrawMenu();
+				this.panels.Render();
+				if (this.showImguiState)
 				{
-					devTool.DoImGui();
+					if (ImGui.Begin("ImGui state", ref this.showImguiState))
+					{
+						ImGui.Checkbox("ImGui.GetIO().WantCaptureMouse", ImGui.GetIO().WantCaptureMouse);
+						ImGui.Checkbox("ImGui.GetIO().WantCaptureKeyboard", ImGui.GetIO().WantCaptureKeyboard);
+					}
+					ImGui.End();
 				}
-			}
-			if (this.showImguiState)
-			{
-				if (ImGui.Begin("ImGui state", ref this.showImguiState))
+				if (this.showImguiDemo)
 				{
-					ImGui.Checkbox("ImGui.GetIO().WantCaptureMouse", ImGui.GetIO().WantCaptureMouse);
-					ImGui.Checkbox("ImGui.GetIO().WantCaptureKeyboard", ImGui.GetIO().WantCaptureKeyboard);
+					ImGui.ShowDemoWindow(ref this.showImguiDemo);
 				}
-				ImGui.End();
-			}
-			if (this.showImguiDemo)
-			{
-				ImGui.ShowDemoWindow(ref this.showImguiDemo);
 			}
 		}
 		this.UpdateConsumingGameInputs();
+		this.UpdateShortcuts();
+	}
+
+	private void UpdateShortcuts()
+	{
+		if (this.showImGui && this.UserAcceptedWarning)
+		{
+			this.<UpdateShortcuts>g__DoUpdate|24_0();
+		}
 	}
 
 	private void DrawMenu()
@@ -151,51 +146,15 @@ public class DevToolManager
 		this.menuFontSize.InitializeIfNeeded();
 		if (ImGui.BeginMainMenuBar())
 		{
-			if (!this.UserAcceptedWarning)
+			this.menuNodes.Draw();
+			this.menuFontSize.DrawMenu();
+			if (ImGui.BeginMenu("IMGUI"))
 			{
-				ImGui.Checkbox(this.warning.Name, ref this.warning.Enabled);
-			}
-			else
-			{
-				this.DrawMenuNodes(this.rootMenuNode);
-				this.menuFontSize.DrawMenu();
-				if (ImGui.BeginMenu("IMGUI"))
-				{
-					ImGui.Checkbox("ImGui state", ref this.showImguiState);
-					ImGui.Checkbox("ImGui Demo", ref this.showImguiDemo);
-					ImGui.EndMenu();
-				}
+				ImGui.Checkbox("ImGui state", ref this.showImguiState);
+				ImGui.Checkbox("ImGui Demo", ref this.showImguiDemo);
+				ImGui.EndMenu();
 			}
 			ImGui.EndMainMenuBar();
-		}
-	}
-
-	private void DrawMenuNodes(DevToolManager.DevToolMenuNode node)
-	{
-		if (node.IsTool)
-		{
-			ImGui.Checkbox(node.Name, ref node.Tool.Enabled);
-			return;
-		}
-		if (node.Name == "root")
-		{
-			using (List<DevToolManager.DevToolMenuNode>.Enumerator enumerator = node.Nodes.GetEnumerator())
-			{
-				while (enumerator.MoveNext())
-				{
-					DevToolManager.DevToolMenuNode devToolMenuNode = enumerator.Current;
-					this.DrawMenuNodes(devToolMenuNode);
-				}
-				return;
-			}
-		}
-		if (ImGui.BeginMenu(node.Name))
-		{
-			foreach (DevToolManager.DevToolMenuNode devToolMenuNode2 in node.Nodes)
-			{
-				this.DrawMenuNodes(devToolMenuNode2);
-			}
-			ImGui.EndMenu();
 		}
 	}
 
@@ -207,16 +166,16 @@ public class DevToolManager
 			this.doesImGuiWantInput = *ImGui.GetIO().WantCaptureMouse || *ImGui.GetIO().WantCaptureKeyboard;
 			if (!this.prevDoesImGuiWantInput && this.doesImGuiWantInput)
 			{
-				DevToolManager.<UpdateConsumingGameInputs>g__OnInputEnterImGui|27_0();
+				DevToolManager.<UpdateConsumingGameInputs>g__OnInputEnterImGui|26_0();
 			}
 			if (this.prevDoesImGuiWantInput && !this.doesImGuiWantInput)
 			{
-				DevToolManager.<UpdateConsumingGameInputs>g__OnInputExitImGui|27_1();
+				DevToolManager.<UpdateConsumingGameInputs>g__OnInputExitImGui|26_1();
 			}
 		}
 		if (this.prevShowImGui && this.prevDoesImGuiWantInput && !this.showImGui)
 		{
-			DevToolManager.<UpdateConsumingGameInputs>g__OnInputExitImGui|27_1();
+			DevToolManager.<UpdateConsumingGameInputs>g__OnInputExitImGui|26_1();
 		}
 		this.prevShowImGui = this.showImGui;
 		this.prevDoesImGuiWantInput = this.doesImGuiWantInput;
@@ -224,10 +183,25 @@ public class DevToolManager
 	}
 
 	[CompilerGenerated]
-	internal static void <UpdateConsumingGameInputs>g__OnInputEnterImGui|27_0()
+	private void <UpdateShortcuts>g__DoUpdate|24_0()
+	{
+		if ((Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl)) && Input.GetKeyDown(KeyCode.Space))
+		{
+			DevToolCommandPalette.Init();
+			this.showImGui = true;
+		}
+		if (Input.GetKeyDown(KeyCode.Comma))
+		{
+			DevToolUI.PingHoveredObject();
+			this.showImGui = true;
+		}
+	}
+
+	[CompilerGenerated]
+	internal static void <UpdateConsumingGameInputs>g__OnInputEnterImGui|26_0()
 	{
 		UnityMouseCatcherUI.SetEnabled(true);
-		GameInputManager inputManager = Global.Instance.GetInputManager();
+		GameInputManager inputManager = Global.GetInputManager();
 		for (int i = 0; i < inputManager.GetControllerCount(); i++)
 		{
 			inputManager.GetController(i).HandleCancelInput();
@@ -235,7 +209,7 @@ public class DevToolManager
 	}
 
 	[CompilerGenerated]
-	internal static void <UpdateConsumingGameInputs>g__OnInputExitImGui|27_1()
+	internal static void <UpdateConsumingGameInputs>g__OnInputExitImGui|26_1()
 	{
 		UnityMouseCatcherUI.SetEnabled(false);
 	}
@@ -262,37 +236,13 @@ public class DevToolManager
 
 	private DevToolWarning warning = new DevToolWarning();
 
-	private List<DevTool> tools = new List<DevTool>();
-
-	private DevToolManager.DevToolMenuNode rootMenuNode;
-
 	private DevToolMenuFontSize menuFontSize = new DevToolMenuFontSize();
 
-	public class DevToolMenuNode
-	{
-		public DevToolMenuNode(string name)
-		{
-			this.Name = name;
-		}
+	public DevPanelList panels = new DevPanelList();
 
-		public DevToolMenuNode(string name, DevTool tool)
-		{
-			this.Name = name;
-			this.Tool = tool;
-		}
+	public DevToolMenuNodeList menuNodes = new DevToolMenuNodeList();
 
-		public bool IsTool
-		{
-			get
-			{
-				return this.Tool != null;
-			}
-		}
+	public Dictionary<Type, string> devToolNameDict = new Dictionary<Type, string>();
 
-		public string Name;
-
-		public DevTool Tool;
-
-		public List<DevToolManager.DevToolMenuNode> Nodes;
-	}
+	private HashSet<Type> dontAutomaticallyRegisterTypes = new HashSet<Type>();
 }

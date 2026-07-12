@@ -26,7 +26,7 @@ public class SymbolOverrideController : KMonoBehaviour
 			symbolEntry.sourceSymbol = KAnimBatchManager.Instance().GetBatchGroupData(symbolEntry.sourceSymbolBatchTag).GetSymbol(symbolEntry.sourceSymbolId);
 			this.symbolOverrides[i] = symbolEntry;
 		}
-		this.atlases = new KAnimBatch.AtlasList(0);
+		this.atlases = new KAnimBatch.AtlasList(0, KAnimBatchManager.MaxAtlasesByMaterialType[(int)this.animController.materialType]);
 		this.faceGraph = base.GetComponent<FaceGraph>();
 	}
 
@@ -58,7 +58,7 @@ public class SymbolOverrideController : KMonoBehaviour
 		return num;
 	}
 
-	public void RemoveSymbolOverride(HashedString target_symbol, int priority = 0)
+	public bool RemoveSymbolOverride(HashedString target_symbol, int priority = 0)
 	{
 		for (int i = 0; i < this.symbolOverrides.Count; i++)
 		{
@@ -66,10 +66,11 @@ public class SymbolOverrideController : KMonoBehaviour
 			if (symbolEntry.targetSymbol == target_symbol && symbolEntry.priority == priority)
 			{
 				this.symbolOverrides.RemoveAt(i);
-				break;
+				return true;
 			}
 		}
 		this.MarkDirty();
+		return false;
 	}
 
 	public void RemoveAllSymbolOverrides(int priority = 0)

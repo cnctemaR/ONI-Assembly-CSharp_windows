@@ -28,9 +28,9 @@ public class WarpReceiverConfig : IEntityConfig
 		gameObject.AddOrGet<Operational>();
 		gameObject.AddOrGet<Notifier>();
 		gameObject.AddOrGet<WarpReceiver>();
-		gameObject.AddOrGet<LoreBearer>();
 		gameObject.AddOrGet<LoopingSounds>();
 		gameObject.AddOrGet<Prioritizable>();
+		LoreBearerUtil.AddLoreTo(gameObject, LoreBearerUtil.UnlockSpecificEntry("notes_AI", UI.USERMENUACTIONS.READLORE.SEARCH_TELEPORTER_RECEIVER));
 		KBatchedAnimController kbatchedAnimController = gameObject.AddOrGet<KBatchedAnimController>();
 		kbatchedAnimController.sceneLayer = Grid.SceneLayer.BuildingBack;
 		kbatchedAnimController.fgLayer = Grid.SceneLayer.BuildingFront;

@@ -120,7 +120,7 @@ public class StoryContentPanel : KMonoBehaviour
 		CustomGameSettings.Instance.SetStorySetting(settingConfig, this.storyStates[storyId] == StoryContentPanel.StoryState.Guaranteed);
 	}
 
-	public void SelectRandomStories(int min = 2, int max = 2, bool useBias = false)
+	public void SelectRandomStories(int min = 3, int max = 3, bool useBias = false)
 	{
 		int num = global::UnityEngine.Random.Range(min, max);
 		List<Story> list = new List<Story>(Db.Get().Stories.resources);
@@ -202,7 +202,7 @@ public class StoryContentPanel : KMonoBehaviour
 	public string GetTraitsString(bool tooltip = false)
 	{
 		int num = 0;
-		int num2 = 2;
+		int num2 = 3;
 		foreach (KeyValuePair<string, StoryContentPanel.StoryState> keyValuePair in this.storyStates)
 		{
 			if (keyValuePair.Value == StoryContentPanel.StoryState.Guaranteed)
@@ -265,7 +265,7 @@ public class StoryContentPanel : KMonoBehaviour
 
 	private Dictionary<string, GameObject> storyRows = new Dictionary<string, GameObject>();
 
-	public const int DEFAULT_RANDOMIZE_STORY_COUNT = 2;
+	public const int DEFAULT_RANDOMIZE_STORY_COUNT = 3;
 
 	private Dictionary<string, StoryContentPanel.StoryState> storyStates = new Dictionary<string, StoryContentPanel.StoryState>();
 

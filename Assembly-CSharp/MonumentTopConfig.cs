@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
+using Database;
 using TUNING;
 using UnityEngine;
 
@@ -10,7 +10,7 @@ public class MonumentTopConfig : IBuildingConfig
 		string text = "MonumentTop";
 		int num = 5;
 		int num2 = 5;
-		string text2 = "victory_monument_upper_kanim";
+		string text2 = "monument_upper_a_kanim";
 		int num3 = 1000;
 		float num4 = 60f;
 		float[] array = new float[] { 2500f, 2500f, 5000f };
@@ -41,7 +41,7 @@ public class MonumentTopConfig : IBuildingConfig
 	{
 		BuildingConfigManager.Instance.IgnoreDefaultKComponent(typeof(RequiresFoundation), prefab_tag);
 		go.AddOrGet<LoopingSounds>();
-		go.AddOrGet<MonumentPart>().part = MonumentPart.Part.Top;
+		go.AddOrGet<MonumentPart>().part = MonumentPartResource.Part.Top;
 	}
 
 	public override void DoPostConfigurePreview(BuildingDef def, GameObject go)
@@ -58,38 +58,8 @@ public class MonumentTopConfig : IBuildingConfig
 		go.GetComponent<KPrefabID>().prefabSpawnFn += delegate(GameObject game_object)
 		{
 			MonumentPart monumentPart = game_object.AddOrGet<MonumentPart>();
-			monumentPart.part = MonumentPart.Part.Top;
-			monumentPart.selectableStatesAndSymbols = new List<global::Tuple<string, string>>();
+			monumentPart.part = MonumentPartResource.Part.Top;
 			monumentPart.stateUISymbol = "upper";
-			monumentPart.selectableStatesAndSymbols.Add(new global::Tuple<string, string>("option_a", "leira"));
-			monumentPart.selectableStatesAndSymbols.Add(new global::Tuple<string, string>("option_b", "mae"));
-			monumentPart.selectableStatesAndSymbols.Add(new global::Tuple<string, string>("option_c", "puft"));
-			monumentPart.selectableStatesAndSymbols.Add(new global::Tuple<string, string>("option_d", "nikola"));
-			monumentPart.selectableStatesAndSymbols.Add(new global::Tuple<string, string>("option_e", "burt"));
-			monumentPart.selectableStatesAndSymbols.Add(new global::Tuple<string, string>("option_f", "rowan"));
-			monumentPart.selectableStatesAndSymbols.Add(new global::Tuple<string, string>("option_g", "nisbet"));
-			monumentPart.selectableStatesAndSymbols.Add(new global::Tuple<string, string>("option_h", "joshua"));
-			monumentPart.selectableStatesAndSymbols.Add(new global::Tuple<string, string>("option_i", "ren"));
-			monumentPart.selectableStatesAndSymbols.Add(new global::Tuple<string, string>("option_j", "hatch"));
-			monumentPart.selectableStatesAndSymbols.Add(new global::Tuple<string, string>("option_k", "drecko"));
-			monumentPart.selectableStatesAndSymbols.Add(new global::Tuple<string, string>("option_l", "driller"));
-			monumentPart.selectableStatesAndSymbols.Add(new global::Tuple<string, string>("option_m", "gassymoo"));
-			monumentPart.selectableStatesAndSymbols.Add(new global::Tuple<string, string>("option_n", "glom"));
-			monumentPart.selectableStatesAndSymbols.Add(new global::Tuple<string, string>("option_o", "lightbug"));
-			monumentPart.selectableStatesAndSymbols.Add(new global::Tuple<string, string>("option_p", "slickster"));
-			monumentPart.selectableStatesAndSymbols.Add(new global::Tuple<string, string>("option_q", "pacu"));
-			if (DlcManager.IsExpansion1Active())
-			{
-				monumentPart.selectableStatesAndSymbols.Add(new global::Tuple<string, string>("option_r", "bee"));
-				monumentPart.selectableStatesAndSymbols.Add(new global::Tuple<string, string>("option_s", "critter"));
-				monumentPart.selectableStatesAndSymbols.Add(new global::Tuple<string, string>("option_t", "caterpillar"));
-				monumentPart.selectableStatesAndSymbols.Add(new global::Tuple<string, string>("option_u", "worm"));
-				monumentPart.selectableStatesAndSymbols.Add(new global::Tuple<string, string>("option_v", "scout_bot"));
-				monumentPart.selectableStatesAndSymbols.Add(new global::Tuple<string, string>("option_w", "MiMa"));
-				monumentPart.selectableStatesAndSymbols.Add(new global::Tuple<string, string>("option_x", "Stinky"));
-				monumentPart.selectableStatesAndSymbols.Add(new global::Tuple<string, string>("option_y", "Harold"));
-				monumentPart.selectableStatesAndSymbols.Add(new global::Tuple<string, string>("option_z", "Nails"));
-			}
 		};
 	}
 

@@ -1,6 +1,6 @@
 ﻿using System;
 
-public struct ClusterLocationChangedEvent
+public class ClusterLocationChangedEvent
 {
 	public ClusterGridEntity entity;
 

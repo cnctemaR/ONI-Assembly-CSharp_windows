@@ -6,6 +6,23 @@ using UnityEngine;
 
 public static class ImGuiEx
 {
+	public static bool InputIntRange(string label, ref int v, int v_min, int v_max)
+	{
+		bool flag = ImGui.InputInt(label, ref v);
+		if (flag)
+		{
+			if (v < v_min)
+			{
+				v = v_min;
+			}
+			if (v > v_max)
+			{
+				v = v_max;
+			}
+		}
+		return flag;
+	}
+
 	public static void Image(Texture2D tex, Vector2 size)
 	{
 		ImGui.Image(ImGuiEx.GetTextureId(tex), size);
@@ -66,8 +83,27 @@ public static class ImGuiEx
 		return ImGui.Button(txt);
 	}
 
+	public static bool MenuItem(string txt, bool enabled)
+	{
+		if (!enabled)
+		{
+			ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(0.6f, 0.6f, 0.6f, 1f));
+			ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(0.2f, 0.2f, 0.2f, 1f));
+			ImGui.PushStyleColor(ImGuiCol.ButtonHovered, new Vector4(0.2f, 0.2f, 0.2f, 1f));
+			ImGui.PushStyleColor(ImGuiCol.ButtonActive, new Vector4(0.2f, 0.2f, 0.2f, 1f));
+			ImGui.MenuItem(txt);
+			ImGui.PopStyleColor(4);
+			return false;
+		}
+		return ImGui.MenuItem(txt);
+	}
+
 	private static string GetDefaultDebugDrawObjectName(object obj)
 	{
+		if (obj == null)
+		{
+			return "Debugging a null value";
+		}
 		return string.Format("Debugging a value of type {0}", obj.GetType());
 	}
 
@@ -83,7 +119,7 @@ public static class ImGuiEx
 			context = new MemberDrawContext?(new MemberDrawContext(false, true));
 		}
 		MemberDrawContext value = context.Value;
-		MemberDetails memberDetails = new MemberDetails(name, obj.GetType(), obj);
+		MemberDetails memberDetails = new MemberDetails(name, (obj == null) ? typeof(object) : obj.GetType(), obj);
 		ImGuiEx.Internal_DrawMember(in value, in memberDetails, 0);
 	}
 
@@ -106,5 +142,29 @@ public static class ImGuiEx
 		ImGui.Text(string.Format("{0,-26} {1}", field_name + ":", field_value));
 	}
 
+	public static void DrawObjectTable<T>(string tableId, IEnumerable<T> objList, ImGuiTableFlags? overrideFlags = null)
+	{
+		ImGuiEx.DrawObjectTable<T>(tableId, objList.GetEnumerator(), overrideFlags);
+	}
+
+	public static void DrawObjectTable<T>(string tableId, IEnumerator<T> objListIterator, ImGuiTableFlags? overrideFlags = null)
+	{
+		ImGuiTableFlags imGuiTableFlags;
+		if (overrideFlags != null)
+		{
+			imGuiTableFlags = overrideFlags.Value;
+		}
+		else
+		{
+			imGuiTableFlags = ImGuiTableFlags.Reorderable | ImGuiTableFlags.RowBg | ImGuiTableFlags.BordersInnerH | ImGuiTableFlags.BordersOuterH | ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.BordersOuterV | ImGuiTableFlags.SizingFixedFit | ImGuiTableFlags.ScrollY;
+		}
+		ImGuiObjectTableDrawer<T>.New().Id(tableId).ColumnsFromType()
+			.Flags(imGuiTableFlags)
+			.Build()
+			.Draw(objListIterator);
+	}
+
 	private static Dictionary<Texture2D, IntPtr> ImguiTextureIds = new Dictionary<Texture2D, IntPtr>();
+
+	public const ImGuiTableFlags DEFAULT_TABLE_FLAGS = ImGuiTableFlags.Reorderable | ImGuiTableFlags.RowBg | ImGuiTableFlags.BordersInnerH | ImGuiTableFlags.BordersOuterH | ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.BordersOuterV | ImGuiTableFlags.SizingFixedFit | ImGuiTableFlags.ScrollY;
 }

@@ -109,6 +109,47 @@ public static class MathUtil
 		return Vector2.Distance(segment.First + (segment.Second - segment.First) * closest_point, point);
 	}
 
+	public static bool IsPowerOfTwo(int x)
+	{
+		DebugUtil.DevAssert(x > 0, "Invalid input", null);
+		return (x & (x - 1)) == 0;
+	}
+
+	public static int RoundToNextPowerOfTwo(int x)
+	{
+		if (MathUtil.IsPowerOfTwo(x))
+		{
+			return x;
+		}
+		int num = 0;
+		for (int i = 0; i < 32; i++)
+		{
+			if ((x & (1 << i)) != 0)
+			{
+				num = i;
+			}
+		}
+		return 1 << num + 1;
+	}
+
+	public static Vector2I PowerOfTwoToMaskAndShift(int x)
+	{
+		DebugUtil.DevAssert(x > 0 && MathUtil.IsPowerOfTwo(x), "Invalid input", null);
+		int num = 0;
+		for (int i = 0; i < 32; i++)
+		{
+			if ((x & (1 << i)) != 0)
+			{
+				num = i;
+				break;
+			}
+		}
+		Vector2I vector2I;
+		vector2I.x = x - 1;
+		vector2I.y = num;
+		return vector2I;
+	}
+
 	public struct MinMax
 	{
 		public float min { readonly get; private set; }

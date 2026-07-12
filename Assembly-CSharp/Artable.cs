@@ -47,13 +47,6 @@ public class Artable : Workable
 			this.SetStage(this.currentStage, true);
 		}
 		this.shouldShowSkillPerkStatusItem = false;
-		if (this.currentStage == this.defaultArtworkId)
-		{
-			this.shouldShowSkillPerkStatusItem = true;
-			Prioritizable.AddRef(base.gameObject);
-			this.chore = new WorkChore<Artable>(Db.Get().ChoreTypes.Art, this, null, true, null, null, null, true, null, false, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 5, false, true);
-			this.chore.AddPrecondition(ChorePreconditions.instance.HasSkillPerk, this.requiredSkillPerk);
-		}
 		base.OnSpawn();
 	}
 
@@ -74,35 +67,44 @@ public class Artable : Workable
 
 	protected override void OnCompleteWork(Worker worker)
 	{
-		Db db = Db.Get();
-		Tag tag = base.GetComponent<KPrefabID>().PrefabID();
-		List<ArtableStage> prefabStages = Db.GetArtableStages().GetPrefabStages(tag);
-		ArtableStatusItem artist_skill = db.ArtableStatuses.Ugly;
-		MinionResume component = worker.GetComponent<MinionResume>();
-		if (component != null)
+		if (string.IsNullOrEmpty(this.userChosenTargetStage))
 		{
-			if (component.HasPerk(db.SkillPerks.CanArtGreat.Id))
+			Db db = Db.Get();
+			Tag tag = base.GetComponent<KPrefabID>().PrefabID();
+			List<ArtableStage> prefabStages = Db.GetArtableStages().GetPrefabStages(tag);
+			ArtableStatusItem artist_skill = db.ArtableStatuses.LookingUgly;
+			MinionResume component = worker.GetComponent<MinionResume>();
+			if (component != null)
 			{
-				artist_skill = db.ArtableStatuses.Great;
+				if (component.HasPerk(db.SkillPerks.CanArtGreat.Id))
+				{
+					artist_skill = db.ArtableStatuses.LookingGreat;
+				}
+				else if (component.HasPerk(db.SkillPerks.CanArtOkay.Id))
+				{
+					artist_skill = db.ArtableStatuses.LookingOkay;
+				}
 			}
-			else if (component.HasPerk(db.SkillPerks.CanArtOkay.Id))
+			prefabStages.RemoveAll((ArtableStage stage) => stage.statusItem.StatusType > artist_skill.StatusType || stage.statusItem.StatusType == ArtableStatuses.ArtableStatusType.AwaitingArting);
+			prefabStages.Sort((ArtableStage x, ArtableStage y) => y.statusItem.StatusType.CompareTo(x.statusItem.StatusType));
+			ArtableStatuses.ArtableStatusType highest_type = prefabStages[0].statusItem.StatusType;
+			prefabStages.RemoveAll((ArtableStage stage) => stage.statusItem.StatusType < highest_type);
+			prefabStages.RemoveAll((ArtableStage stage) => !stage.IsUnlocked());
+			prefabStages.Shuffle<ArtableStage>();
+			this.SetStage(prefabStages[0].id, false);
+			if (prefabStages[0].cheerOnComplete)
 			{
-				artist_skill = db.ArtableStatuses.Okay;
+				new EmoteChore(worker.GetComponent<ChoreProvider>(), db.ChoreTypes.EmoteHighPriority, db.Emotes.Minion.Cheer, 1, null);
 			}
-		}
-		prefabStages.RemoveAll((ArtableStage stage) => stage.statusItem.StatusType > artist_skill.StatusType || stage.statusItem.StatusType == ArtableStatuses.ArtableStatusType.AwaitingArting);
-		prefabStages.Sort((ArtableStage x, ArtableStage y) => y.statusItem.StatusType.CompareTo(x.statusItem.StatusType));
-		ArtableStatuses.ArtableStatusType highest_type = prefabStages[0].statusItem.StatusType;
-		prefabStages.RemoveAll((ArtableStage stage) => stage.statusItem.StatusType < highest_type);
-		prefabStages.Shuffle<ArtableStage>();
-		this.SetStage(prefabStages[0].id, false);
-		if (prefabStages[0].cheerOnComplete)
-		{
-			new EmoteChore(worker.GetComponent<ChoreProvider>(), db.ChoreTypes.EmoteHighPriority, db.Emotes.Minion.Cheer, 1, null);
+			else
+			{
+				new EmoteChore(worker.GetComponent<ChoreProvider>(), db.ChoreTypes.EmoteHighPriority, db.Emotes.Minion.Disappointed, 1, null);
+			}
 		}
 		else
 		{
-			new EmoteChore(worker.GetComponent<ChoreProvider>(), db.ChoreTypes.EmoteHighPriority, db.Emotes.Minion.Disappointed, 1, null);
+			this.SetStage(this.userChosenTargetStage, false);
+			this.userChosenTargetStage = null;
 		}
 		this.shouldShowSkillPerkStatusItem = false;
 		this.UpdateStatusItem(null);
@@ -112,13 +114,21 @@ public class Artable : Workable
 	public void SetDefault()
 	{
 		this.currentStage = this.defaultArtworkId;
+		base.GetComponent<KBatchedAnimController>().SwapAnims(base.GetComponent<Building>().Def.AnimFiles);
 		base.GetComponent<KAnimControllerBase>().Play(this.defaultAnimName, KAnim.PlayMode.Once, 1f, 0f);
 		KSelectable component = base.GetComponent<KSelectable>();
 		BuildingDef def = base.GetComponent<Building>().Def;
 		component.SetName(def.Name);
-		component.SetStatusItem(Db.Get().StatusItemCategories.Main, Db.Get().ArtableStatuses.Ready, this);
+		component.SetStatusItem(Db.Get().StatusItemCategories.Main, Db.Get().ArtableStatuses.AwaitingArting, this);
 		this.shouldShowSkillPerkStatusItem = false;
 		this.UpdateStatusItem(null);
+		if (this.currentStage == this.defaultArtworkId)
+		{
+			this.shouldShowSkillPerkStatusItem = true;
+			Prioritizable.AddRef(base.gameObject);
+			this.chore = new WorkChore<Artable>(Db.Get().ChoreTypes.Art, this, null, true, null, null, null, true, null, false, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 5, false, true);
+			this.chore.AddPrecondition(ChorePreconditions.instance.HasSkillPerk, this.requiredSkillPerk);
+		}
 	}
 
 	public virtual void SetStage(string stage_id, bool skip_effect)
@@ -138,14 +148,23 @@ public class Artable : Workable
 			this.GetAttributes().Add(attributeModifier);
 		}
 		KSelectable component = base.GetComponent<KSelectable>();
-		component.SetName(artableStage.name);
+		component.SetName(artableStage.Name);
 		component.SetStatusItem(Db.Get().StatusItemCategories.Main, artableStage.statusItem, this);
 		this.shouldShowSkillPerkStatusItem = false;
 		this.UpdateStatusItem(null);
 	}
 
+	public void SetUserChosenTargetState(string stageID)
+	{
+		this.SetDefault();
+		this.userChosenTargetStage = stageID;
+	}
+
 	[Serialize]
 	private string currentStage;
+
+	[Serialize]
+	private string userChosenTargetStage;
 
 	private string defaultArtworkId = "Default";
 

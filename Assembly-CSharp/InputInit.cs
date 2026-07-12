@@ -5,7 +5,7 @@ internal class InputInit : MonoBehaviour
 {
 	private void Awake()
 	{
-		GameInputManager inputManager = Global.Instance.GetInputManager();
+		GameInputManager inputManager = Global.GetInputManager();
 		for (int i = 0; i < inputManager.GetControllerCount(); i++)
 		{
 			KInputController controller = inputManager.GetController(i);
@@ -18,7 +18,7 @@ internal class InputInit : MonoBehaviour
 					if (inputHandler != null)
 					{
 						KInputHandler.Add(controller, inputHandler, 0);
-						Global.Instance.GetInputManager().usedMenus.Add(inputHandler);
+						inputManager.usedMenus.Add(inputHandler);
 					}
 				}
 			}
@@ -31,7 +31,7 @@ internal class InputInit : MonoBehaviour
 		{
 			KInputHandler.Add(inputManager.GetDefaultController(), KScreenManager.Instance, 10);
 		}
-		Global.Instance.GetInputManager().usedMenus.Add(KScreenManager.Instance);
+		inputManager.usedMenus.Add(KScreenManager.Instance);
 		DebugHandler debugHandler = new DebugHandler();
 		if (KInputManager.currentController != null)
 		{
@@ -41,6 +41,6 @@ internal class InputInit : MonoBehaviour
 		{
 			KInputHandler.Add(inputManager.GetDefaultController(), debugHandler, -1);
 		}
-		Global.Instance.GetInputManager().usedMenus.Add(debugHandler);
+		inputManager.usedMenus.Add(debugHandler);
 	}
 }

@@ -46,6 +46,14 @@ public class GameOptionsScreen : KModalButtonMenu
 		{
 			this.cloudSavesPanel.SetActive(SaveLoader.GetCloudSavesAvailable());
 		}
+		this.cameraSpeedSlider.minValue = 1f;
+		this.cameraSpeedSlider.maxValue = 20f;
+		this.cameraSpeedSlider.onValueChanged.AddListener(delegate(float val)
+		{
+			this.OnCameraSpeedValueChanged(Mathf.FloorToInt(val));
+		});
+		this.cameraSpeedSlider.value = this.CameraSpeedToSlider(KPlayerPrefs.GetFloat("CameraSpeed"));
+		this.RefreshCameraSliderLabel();
 	}
 
 	protected override void OnShow(bool show)
@@ -56,9 +64,35 @@ public class GameOptionsScreen : KModalButtonMenu
 			this.savePanel.SetActive(true);
 			this.saveConfiguration.Show(show);
 			this.SetSandboxModeActive(SaveGame.Instance.sandboxEnabled);
-			return;
 		}
-		this.savePanel.SetActive(false);
+		else
+		{
+			this.savePanel.SetActive(false);
+		}
+		if (!KPlayerPrefs.HasKey("CameraSpeed"))
+		{
+			CameraController.SetDefaultCameraSpeed();
+		}
+	}
+
+	private float CameraSpeedToSlider(float prefsValue)
+	{
+		return prefsValue * 10f;
+	}
+
+	private void OnCameraSpeedValueChanged(int sliderValue)
+	{
+		KPlayerPrefs.SetFloat("CameraSpeed", (float)sliderValue / 10f);
+		this.RefreshCameraSliderLabel();
+		if (Game.Instance != null)
+		{
+			Game.Instance.Trigger(75424175, null);
+		}
+	}
+
+	private void RefreshCameraSliderLabel()
+	{
+		this.cameraSpeedSliderLabel.text = string.Format(UI.FRONTEND.GAME_OPTIONS_SCREEN.CAMERA_SPEED_LABEL, (KPlayerPrefs.GetFloat("CameraSpeed") * 10f * 10f).ToString());
 	}
 
 	private void OnDefaultToCloudSaveToggle()
@@ -170,4 +204,14 @@ public class GameOptionsScreen : KModalButtonMenu
 
 	[SerializeField]
 	private InputBindingsScreen inputBindingsScreenPrefab;
+
+	[SerializeField]
+	private KSlider cameraSpeedSlider;
+
+	[SerializeField]
+	private LocText cameraSpeedSliderLabel;
+
+	private const int cameraSliderNotchScale = 10;
+
+	public const string PREFS_KEY_CAMERA_SPEED = "CameraSpeed";
 }

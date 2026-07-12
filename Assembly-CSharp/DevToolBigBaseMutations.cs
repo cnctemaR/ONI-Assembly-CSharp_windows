@@ -3,7 +3,7 @@ using ImGuiNET;
 
 public class DevToolBigBaseMutations : DevTool
 {
-	protected override void Render()
+	protected override void RenderTo(DevPanel panel)
 	{
 		if (Game.Instance != null)
 		{

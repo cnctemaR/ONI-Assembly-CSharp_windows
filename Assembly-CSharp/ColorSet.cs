@@ -122,6 +122,8 @@ public class ColorSet : ScriptableObject
 
 	public Color32 roomAgricultural;
 
+	public Color32 roomScience;
+
 	public Color32 roomPark;
 
 	[Header("Power Overlay")]

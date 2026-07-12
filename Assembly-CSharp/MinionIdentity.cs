@@ -17,6 +17,9 @@ public class MinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableIdentity
 	[Serialize]
 	public string nameStringKey { get; set; }
 
+	[Serialize]
+	public HashedString personalityResourceId { get; set; }
+
 	public static void DestroyStatics()
 	{
 		MinionIdentity.maleNameList = null;
@@ -64,6 +67,14 @@ public class MinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableIdentity
 		{
 			this.genderStringKey = "NB";
 		}
+		if (this.personalityResourceId == HashedString.Invalid)
+		{
+			Personality personalityFromNameStringKey = Db.Get().Personalities.GetPersonalityFromNameStringKey(this.nameStringKey);
+			if (personalityFromNameStringKey != null)
+			{
+				this.personalityResourceId = personalityFromNameStringKey.Id;
+			}
+		}
 		if (this.addToIdentityList)
 		{
 			Components.MinionIdentities.Add(this);
@@ -79,16 +90,13 @@ public class MinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableIdentity
 			Accessorizer component3 = base.gameObject.GetComponent<Accessorizer>();
 			if (component3 != null)
 			{
-				this.bodyData = default(KCompBuilder.BodyData);
-				component3.GetBodySlots(ref this.bodyData);
 				string text = HashCache.Get().Get(component3.GetAccessory(Db.Get().AccessorySlots.HeadShape).symbol.hash).Replace("headshape", "cheek");
 				component2.AddSymbolOverride("snapto_cheek", Assets.GetAnim("head_swap_kanim").GetData().build.GetSymbol(text), 1);
-				component2.AddSymbolOverride(Db.Get().AccessorySlots.HairAlways.targetSymbolId, component3.GetAccessory(Db.Get().AccessorySlots.Hair).symbol, 1);
+				component2.AddSymbolOverride("snapto_hair_always", component3.GetAccessory(Db.Get().AccessorySlots.Hair).symbol, 1);
 				component2.AddSymbolOverride(Db.Get().AccessorySlots.HatHair.targetSymbolId, Db.Get().AccessorySlots.HatHair.Lookup("hat_" + HashCache.Get().Get(component3.GetAccessory(Db.Get().AccessorySlots.Hair).symbol.hash)).symbol, 1);
 			}
 		}
-		this.voiceId = "0";
-		this.voiceId += (this.voiceIdx + 1).ToString();
+		this.voiceId = (this.voiceIdx + 1).ToString("D2");
 		Prioritizable component4 = base.GetComponent<Prioritizable>();
 		if (component4 != null)
 		{
@@ -334,6 +342,8 @@ public class MinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableIdentity
 		}
 	}
 
+	public const string HairAlwaysSymbol = "snapto_hair_always";
+
 	[MyCmpReq]
 	private KSelectable selectable;
 
@@ -356,9 +366,6 @@ public class MinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableIdentity
 
 	[Serialize]
 	public int voiceIdx;
-
-	[Serialize]
-	public KCompBuilder.BodyData bodyData;
 
 	[Serialize]
 	public Ref<MinionAssignablesProxy> assignableProxy;

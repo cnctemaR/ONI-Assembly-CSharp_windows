@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{A0B1AC21-83DB-4F74-BAAA-1083447032AE}</ProjectGuid>
+    <ProjectGuid>{F1DD01B3-F605-413E-B133-CA653E7C4C81}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>ImGuiObjectDrawer</RootNamespace>
     <AssemblyName>ImGui</AssemblyName>
@@ -17,6 +17,7 @@
     <Compile Include="DrawerUtil.cs" />
     <Compile Include="IMemberDrawerProvider.cs" />
     <Compile Include="ImGuiEx.cs" />
+    <Compile Include="ImGuiObjectTableDrawer.cs" />
     <Compile Include="ImGuiRenderer.cs" />
     <Compile Include="ImGuiTest.cs" />
     <Compile Include="KImGuiUtil.cs" />
@@ -30,23 +31,23 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ImGui.NET\ImGui.NET.csproj">
-      <Project>{A0B1AC21-83DB-4F74-BAAA-1083447032AF}</Project>
+      <Project>{F1DD01B3-F605-413E-B133-CA653E7C4C82}</Project>
       <Name>ImGui.NET</Name>
     </ProjectReference>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{A0B1AC21-83DB-4F74-BAAA-1083447032B4}</Project>
+      <Project>{F1DD01B3-F605-413E-B133-CA653E7C4C87}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
-      <Project>{A0B1AC21-83DB-4F74-BAAA-1083447032CF}</Project>
+      <Project>{F1DD01B3-F605-413E-B133-CA653E7C4CA2}</Project>
       <Name>UnityEngine.CoreModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.InputLegacyModule\UnityEngine.InputLegacyModule.csproj">
-      <Project>{A0B1AC21-83DB-4F74-BAAA-1083447032DA}</Project>
+      <Project>{F1DD01B3-F605-413E-B133-CA653E7C4CAD}</Project>
       <Name>UnityEngine.InputLegacyModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.UI\UnityEngine.UI.csproj">
-      <Project>{A0B1AC21-83DB-4F74-BAAA-1083447032F1}</Project>
+      <Project>{F1DD01B3-F605-413E-B133-CA653E7C4CC4}</Project>
       <Name>UnityEngine.UI</Name>
     </ProjectReference>
   </ItemGroup>

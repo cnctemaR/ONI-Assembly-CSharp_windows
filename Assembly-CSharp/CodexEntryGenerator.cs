@@ -71,6 +71,7 @@ public static class CodexEntryGenerator
 		CodexEntryGenerator.GenerateBuildingDescriptionContainers(def, list);
 		CodexEntryGenerator.GenerateFabricatorContainers(def.BuildingComplete, list);
 		CodexEntryGenerator.GenerateReceptacleContainers(def.BuildingComplete, list);
+		CodexEntryGenerator.GenerateConfigurableConsumerContainers(def.BuildingComplete, list);
 		CodexEntry codexEntry = new CodexEntry(categoryEntryID, list, Strings.Get("STRINGS.BUILDINGS.PREFABS." + def.PrefabID.ToUpper() + ".NAME"));
 		codexEntry.icon = def.GetUISprite("ui", false);
 		codexEntry.parentId = categoryEntryID;
@@ -216,7 +217,7 @@ public static class CodexEntryGenerator
 		{
 			bool flag = false;
 			List<ContentContainer> list = new List<ContentContainer>();
-			CodexEntry codexEntry = new CodexEntry(parentCategoryName, list, roomCategory.Id);
+			CodexEntry codexEntry = new CodexEntry(parentCategoryName, list, roomCategory.Name);
 			for (int i = 0; i < roomTypesData.Count; i++)
 			{
 				RoomType roomType = roomTypesData[i];
@@ -226,8 +227,14 @@ public static class CodexEntryGenerator
 					{
 						flag = true;
 						codexEntry.parentId = parentCategoryName;
+						codexEntry.name = roomCategory.Name;
 						CodexCache.AddEntry(parentCategoryName + roomCategory.Id, codexEntry, null);
 						result.Add(parentCategoryName + roomType.category.Id, codexEntry);
+						ContentContainer contentContainer = new ContentContainer(new List<ICodexWidget>
+						{
+							new CodexImage(312, 312, Assets.GetSprite(roomCategory.icon))
+						}, ContentContainer.ContentLayout.Vertical);
+						codexEntry.AddContentContainer(contentContainer);
 					}
 					List<ContentContainer> list2 = new List<ContentContainer>();
 					CodexEntryGenerator.GenerateTitleContainers(roomType.Name, list2);
@@ -248,6 +255,7 @@ public static class CodexEntryGenerator
 		action(Db.Get().RoomTypeCategories.Park);
 		action(Db.Get().RoomTypeCategories.Recreation);
 		action(Db.Get().RoomTypeCategories.Sleep);
+		action(Db.Get().RoomTypeCategories.Science);
 		return result;
 	}
 
@@ -2106,6 +2114,27 @@ public static class CodexEntryGenerator
 		containers.Add(new ContentContainer(list, ContentContainer.ContentLayout.Vertical));
 	}
 
+	private static void GenerateConfigurableConsumerContainers(GameObject buildingComplete, List<ContentContainer> containers)
+	{
+		IConfigurableConsumer component = buildingComplete.GetComponent<IConfigurableConsumer>();
+		if (component == null)
+		{
+			return;
+		}
+		containers.Add(new ContentContainer(new List<ICodexWidget>
+		{
+			new CodexSpacer(),
+			new CodexText(Strings.Get("STRINGS.CODEX.HEADERS.FABRICATIONS"), CodexTextStyle.Subtitle, null),
+			new CodexDividerLine()
+		}, ContentContainer.ContentLayout.Vertical));
+		List<ICodexWidget> list = new List<ICodexWidget>();
+		foreach (IConfigurableConsumerOption configurableConsumerOption in component.GetSettingOptions())
+		{
+			list.Add(new CodexConfigurableConsumerRecipePanel(configurableConsumerOption));
+		}
+		containers.Add(new ContentContainer(list, ContentContainer.ContentLayout.Vertical));
+	}
+
 	private static void GenerateReceptacleContainers(GameObject entity, List<ContentContainer> containers)
 	{
 		SingleEntityReceptacle plot = entity.GetComponent<SingleEntityReceptacle>();
@@ -2165,8 +2194,10 @@ public static class CodexEntryGenerator
 		dictionary[toiletType] = ROOMS.CRITERIA.TOILET.NAME;
 		Tag flushToiletType = RoomConstraints.ConstraintTags.FlushToiletType;
 		dictionary[flushToiletType] = ROOMS.CRITERIA.FLUSH_TOILET.NAME;
+		Tag scienceBuilding = RoomConstraints.ConstraintTags.ScienceBuilding;
+		dictionary[scienceBuilding] = ROOMS.CRITERIA.SCIENCE_BUILDING.NAME;
 		Tag decoration = GameTags.Decoration;
-		dictionary[decoration] = ROOMS.CRITERIA.DECORATIVE_ITEM.NAME;
+		dictionary[decoration] = ROOMS.CRITERIA.DECOR_ITEM_CLASS;
 		CodexEntryGenerator.room_constraint_to_building_label_dict = dictionary;
 	}
 

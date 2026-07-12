@@ -319,14 +319,19 @@ public class KBatchedAnimUpdater : Singleton<KBatchedAnimUpdater>
 						chunkXY = KBatchedAnimUpdater.PosToChunkXY(registrationInfo.controller.PositionIncludingOffset)
 					};
 					this.controllerChunkInfos[instanceID] = controllerChunkInfo;
-					Singleton<CellChangeMonitor>.Instance.RegisterMovementStateChanged(registrationInfo.controller.transform, new Action<Transform, bool>(this.OnMovementStateChanged));
+					bool flag = false;
+					if (Singleton<CellChangeMonitor>.Instance != null)
+					{
+						flag = Singleton<CellChangeMonitor>.Instance.IsMoving(registrationInfo.controller.transform);
+						Singleton<CellChangeMonitor>.Instance.RegisterMovementStateChanged(registrationInfo.controller.transform, new Action<Transform, bool>(this.OnMovementStateChanged));
+					}
 					Dictionary<int, KBatchedAnimController> controllerMap = this.GetControllerMap(controllerChunkInfo.chunkXY);
 					if (controllerMap != null)
 					{
 						DebugUtil.Assert(!controllerMap.ContainsKey(instanceID));
 						controllerMap.Add(instanceID, registrationInfo.controller);
 					}
-					if (Singleton<CellChangeMonitor>.Instance.IsMoving(registrationInfo.controller.transform))
+					if (flag)
 					{
 						DebugUtil.DevAssertArgs(!this.movingControllerInfos.ContainsKey(instanceID), new object[]
 						{

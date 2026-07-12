@@ -6,6 +6,8 @@ public interface ISidescreenButtonControl
 
 	string SidescreenButtonTooltip { get; }
 
+	void SetButtonTextOverride(ButtonMenuTextOverride textOverride);
+
 	bool SidescreenEnabled();
 
 	bool SidescreenButtonInteractable();

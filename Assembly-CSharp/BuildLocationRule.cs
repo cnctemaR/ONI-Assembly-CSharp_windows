@@ -19,5 +19,6 @@ public enum BuildLocationRule
 	OnFoundationRotatable,
 	BelowRocketCeiling,
 	OnRocketEnvelope,
-	WallFloor
+	WallFloor,
+	NoLiquidConduitAtOrigin
 }

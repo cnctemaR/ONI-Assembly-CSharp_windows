@@ -30,7 +30,7 @@ public class PropSurfaceSatellite2Config : IEntityConfig
 		setLocker.overrideAnim = "anim_interacts_clothingfactory_kanim";
 		setLocker.dropOffset = new Vector2I(0, 1);
 		setLocker.numDataBanks = new int[] { 4, 9 };
-		gameObject.AddOrGet<LoreBearer>();
+		LoreBearerUtil.AddLoreTo(gameObject);
 		gameObject.AddOrGet<Demolishable>();
 		return gameObject;
 	}

@@ -47,10 +47,6 @@ public class Activatable : Workable, ISidescreenButtonControl
 		base.GetComponent<Operational>().SetFlag(this.activatedFlag, this.activated);
 		base.GetComponent<KSelectable>().ToggleStatusItem(Db.Get().BuildingStatusItems.DuplicantActivationRequired, !this.activated, null);
 		base.Trigger(-1909216579, this.IsActivated);
-		if (this.IsActivated && base.GetComponent<KSelectable>().IsSelected)
-		{
-			DetailsScreen.Instance.DeactivateSideContent();
-		}
 	}
 
 	private void CreateChore()
@@ -83,7 +79,11 @@ public class Activatable : Workable, ISidescreenButtonControl
 	{
 		get
 		{
-			return (this.activateChore == null) ? UI.USERMENUACTIONS.ACTIVATEBUILDING.ACTIVATE : UI.USERMENUACTIONS.ACTIVATEBUILDING.ACTIVATE_CANCEL;
+			if (this.activateChore != null)
+			{
+				return this.textOverride.IsValid ? this.textOverride.CancelText : UI.USERMENUACTIONS.ACTIVATEBUILDING.ACTIVATE_CANCEL;
+			}
+			return this.textOverride.IsValid ? this.textOverride.Text : UI.USERMENUACTIONS.ACTIVATEBUILDING.ACTIVATE;
 		}
 	}
 
@@ -91,13 +91,22 @@ public class Activatable : Workable, ISidescreenButtonControl
 	{
 		get
 		{
-			return (this.activateChore == null) ? UI.USERMENUACTIONS.ACTIVATEBUILDING.TOOLTIP_ACTIVATE : UI.USERMENUACTIONS.ACTIVATEBUILDING.TOOLTIP_CANCEL;
+			if (this.activateChore != null)
+			{
+				return this.textOverride.IsValid ? this.textOverride.CancelToolTip : UI.USERMENUACTIONS.ACTIVATEBUILDING.TOOLTIP_CANCEL;
+			}
+			return this.textOverride.IsValid ? this.textOverride.ToolTip : UI.USERMENUACTIONS.ACTIVATEBUILDING.TOOLTIP_ACTIVATE;
 		}
 	}
 
 	public bool SidescreenEnabled()
 	{
 		return !this.activated;
+	}
+
+	public void SetButtonTextOverride(ButtonMenuTextOverride text)
+	{
+		this.textOverride = text;
 	}
 
 	public void OnSidescreenButtonPressed()
@@ -138,4 +147,7 @@ public class Activatable : Workable, ISidescreenButtonControl
 	private Chore activateChore;
 
 	public global::System.Action onActivate;
+
+	[SerializeField]
+	private ButtonMenuTextOverride textOverride;
 }

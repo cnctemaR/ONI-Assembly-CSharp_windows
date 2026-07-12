@@ -37,11 +37,12 @@ public class MinionStorage : KMonoBehaviour
 	{
 		dest_id.storedName = src_id.name;
 		dest_id.nameStringKey = src_id.nameStringKey;
+		dest_id.personalityResourceId = src_id.personalityResourceId;
 		dest_id.gender = src_id.gender;
 		dest_id.genderStringKey = src_id.genderStringKey;
 		dest_id.arrivalTime = src_id.arrivalTime;
 		dest_id.voiceIdx = src_id.voiceIdx;
-		dest_id.bodyData = src_id.bodyData;
+		dest_id.bodyData = src_id.GetComponent<Accessorizer>().bodyData;
 		Traits component = src_id.GetComponent<Traits>();
 		dest_id.traitIDs = new List<string>(component.GetTraitIds());
 		dest_id.assignableProxy.Set(src_id.assignableProxy.Get());
@@ -98,11 +99,12 @@ public class MinionStorage : KMonoBehaviour
 	{
 		dest_id.SetName(src_id.storedName);
 		dest_id.nameStringKey = src_id.nameStringKey;
+		dest_id.personalityResourceId = src_id.personalityResourceId;
 		dest_id.gender = src_id.gender;
 		dest_id.genderStringKey = src_id.genderStringKey;
 		dest_id.arrivalTime = src_id.arrivalTime;
 		dest_id.voiceIdx = src_id.voiceIdx;
-		dest_id.bodyData = src_id.bodyData;
+		dest_id.GetComponent<Accessorizer>().bodyData = src_id.bodyData;
 		if (src_id.traitIDs != null)
 		{
 			dest_id.GetComponent<Traits>().SetTraitIds(src_id.traitIDs);

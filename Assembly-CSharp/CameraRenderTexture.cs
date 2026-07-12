@@ -10,8 +10,11 @@ public class CameraRenderTexture : MonoBehaviour
 
 	private void Start()
 	{
-		ScreenResize instance = ScreenResize.Instance;
-		instance.OnResize = (global::System.Action)Delegate.Combine(instance.OnResize, new global::System.Action(this.OnResize));
+		if (ScreenResize.Instance != null)
+		{
+			ScreenResize instance = ScreenResize.Instance;
+			instance.OnResize = (global::System.Action)Delegate.Combine(instance.OnResize, new global::System.Action(this.OnResize));
+		}
 		this.OnResize();
 	}
 

@@ -17,6 +17,10 @@ public class ChoreProvider : KMonoBehaviour
 
 	protected override void OnSpawn()
 	{
+		if (ClusterManager.Instance != null)
+		{
+			ClusterManager.Instance.Subscribe(-1078710002, new Action<object>(this.OnWorldRemoved));
+		}
 		base.OnSpawn();
 		this.Name = base.name;
 	}
@@ -26,6 +30,21 @@ public class ChoreProvider : KMonoBehaviour
 		base.OnCleanUp();
 		Game.Instance.Unsubscribe(880851192, new Action<object>(this.OnWorldParentChanged));
 		Game.Instance.Unsubscribe(586301400, new Action<object>(this.OnMinionMigrated));
+		if (ClusterManager.Instance != null)
+		{
+			ClusterManager.Instance.Unsubscribe(-1078710002, new Action<object>(this.OnWorldRemoved));
+		}
+	}
+
+	protected virtual void OnWorldRemoved(object data)
+	{
+		int num = (int)data;
+		int parentWorldId = ClusterManager.Instance.GetWorld(num).ParentWorldId;
+		List<Chore> list;
+		if (this.choreWorldMap.TryGetValue(parentWorldId, out list))
+		{
+			this.ClearWorldChores<Chore>(list, num);
+		}
 	}
 
 	protected virtual void OnWorldParentChanged(object data)
@@ -86,6 +105,19 @@ public class ChoreProvider : KMonoBehaviour
 		}
 	}
 
+	protected void ClearWorldChores<T>(List<T> chores, int worldId) where T : Chore
+	{
+		int num = chores.Count - 1;
+		for (int i = num; i >= 0; i--)
+		{
+			if (chores[i].gameObject.GetMyWorldId() == worldId)
+			{
+				chores[i] = chores[num];
+				chores.RemoveAt(num--);
+			}
+		}
+	}
+
 	public virtual void AddChore(Chore chore)
 	{
 		chore.provider = this;
@@ -121,9 +153,19 @@ public class ChoreProvider : KMonoBehaviour
 		{
 			return;
 		}
-		for (int i = 0; i < list.Count; i++)
+		for (int i = list.Count - 1; i >= 0; i--)
 		{
-			list[i].CollectChores(consumer_state, succeeded, failed_contexts, false);
+			Chore chore = list[i];
+			if (chore.provider == null)
+			{
+				chore.Cancel("no provider");
+				list[i] = list[list.Count - 1];
+				list.RemoveAt(list.Count - 1);
+			}
+			else
+			{
+				chore.CollectChores(consumer_state, succeeded, failed_contexts, false);
+			}
 		}
 	}
 

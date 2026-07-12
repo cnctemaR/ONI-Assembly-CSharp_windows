@@ -44,36 +44,15 @@ public class Telescope : Workable, OxygenBreather.IGasProvider, IGameObjectEffec
 	public void Sim200ms(float dt)
 	{
 		Extents extents = base.GetComponent<Building>().GetExtents();
-		int num = Mathf.Max(0, extents.x - this.clearScanCellRadius);
-		int num2 = Mathf.Min(new int[] { extents.x + this.clearScanCellRadius });
-		int num3 = extents.y + extents.height - 3;
-		int num4 = num2 - num + 1;
-		int num5 = Grid.XYToCell(num, num3);
-		int num6 = Grid.XYToCell(num2, num3);
-		int num7 = 0;
-		for (int i = num5; i <= num6; i++)
-		{
-			if (Grid.ExposedToSunlight[i] >= 253)
-			{
-				num7++;
-			}
-		}
-		Operational component = base.GetComponent<Operational>();
-		component.SetFlag(Telescope.visibleSkyFlag, num7 > 0);
-		bool flag = num7 < num4;
-		KSelectable component2 = base.GetComponent<KSelectable>();
-		if (num7 > 0)
-		{
-			component2.ToggleStatusItem(Telescope.noVisibilityStatusItem, false, null);
-			component2.ToggleStatusItem(Telescope.reducedVisibilityStatusItem, flag, this);
-		}
-		else
-		{
-			component2.ToggleStatusItem(Telescope.noVisibilityStatusItem, true, this);
-			component2.ToggleStatusItem(Telescope.reducedVisibilityStatusItem, false, null);
-		}
-		this.percentClear = (float)num7 / (float)num4;
-		if (!component.IsActive && component.IsOperational && this.chore == null)
+		int num;
+		bool flag = Grid.IsRangeExposedToSunlight(Grid.XYToCell(extents.x, extents.y), this.clearScanCellRadius, new CellOffset(1, 0), out num, 1);
+		this.percentClear = (float)num / (float)(this.clearScanCellRadius * 2 + 1);
+		KSelectable component = base.GetComponent<KSelectable>();
+		Operational component2 = base.GetComponent<Operational>();
+		component.ToggleStatusItem(Telescope.noVisibilityStatusItem, !flag, this);
+		component.ToggleStatusItem(Telescope.reducedVisibilityStatusItem, flag && this.percentClear < 1f, this);
+		component2.SetFlag(Telescope.visibleSkyFlag, flag);
+		if (!component2.IsActive && component2.IsOperational && this.chore == null)
 		{
 			this.chore = this.CreateChore();
 			base.SetWorkTime(float.PositiveInfinity);

@@ -30,7 +30,7 @@ public class VendingMachineConfig : IEntityConfig
 		setLocker.machineSound = "VendingMachine_LP";
 		setLocker.overrideAnim = "anim_break_kanim";
 		setLocker.dropOffset = new Vector2I(1, 1);
-		gameObject.AddOrGet<LoreBearer>();
+		LoreBearerUtil.AddLoreTo(gameObject);
 		gameObject.AddOrGet<LoopingSounds>();
 		gameObject.AddOrGet<OccupyArea>().objectLayers = new ObjectLayer[] { ObjectLayer.Building };
 		gameObject.AddOrGet<Demolishable>();

@@ -66,7 +66,7 @@ public class HighEnergyParticleSpawner : StateMachineComponent<HighEnergyParticl
 		this.Direction = this.Direction;
 		this.particleController = new MeterController(base.GetComponent<KBatchedAnimController>(), "orb_target", "orb_off", Meter.Offset.NoChange, Grid.SceneLayer.NoLayer, Array.Empty<string>());
 		this.particleController.gameObject.AddOrGet<LoopingSounds>();
-		this.progressMeterController = new MeterController(base.GetComponent<KBatchedAnimController>(), "meter_target", "meter", Meter.Offset.NoChange, Grid.SceneLayer.NoLayer, Array.Empty<string>());
+		this.progressMeterController = new MeterController(base.GetComponent<KBatchedAnimController>(), "meter_target", "meter", Meter.Offset.Infront, Grid.SceneLayer.NoLayer, Array.Empty<string>());
 	}
 
 	public float GetProgressBarMaxValue()

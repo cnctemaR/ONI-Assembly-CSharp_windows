@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using FMOD.Studio;
+using STRINGS;
 using UnityEngine;
 
 public class ClusterMapScreen : KScreen
@@ -109,6 +110,7 @@ public class ClusterMapScreen : KScreen
 			float num = Input.mouseScrollDelta.y * 25f;
 			this.m_targetZoomScale = Mathf.Clamp(this.m_targetZoomScale + num, 50f, 150f);
 		}
+		CameraController.Instance.ChangeWorldInput(e);
 		base.OnKeyDown(e);
 	}
 
@@ -590,39 +592,48 @@ public class ClusterMapScreen : KScreen
 
 	private void UpdatePaths()
 	{
-		if (this.m_selectedEntity != null)
+		ClusterDestinationSelector clusterDestinationSelector = ((this.m_selectedEntity != null) ? this.m_selectedEntity.GetComponent<ClusterDestinationSelector>() : null);
+		if (this.m_mode != ClusterMapScreen.Mode.SelectDestination || !(this.m_hoveredHex != null))
 		{
-			this.m_selectedEntity.GetComponent<ClusterDestinationSelector>();
-		}
-		if (this.m_mode == ClusterMapScreen.Mode.SelectDestination && this.m_hoveredHex != null)
-		{
-			global::Debug.Assert(this.m_destinationSelector != null, "In SelectDestination mode without a destination selector");
-			AxialI myWorldLocation = this.m_destinationSelector.GetMyWorldLocation();
-			string text;
-			List<AxialI> path = ClusterGrid.Instance.GetPath(myWorldLocation, this.m_hoveredHex.location, this.m_destinationSelector, out text);
-			if (path != null)
-			{
-				if (this.m_previewMapPath == null)
-				{
-					this.m_previewMapPath = this.pathDrawer.AddPath();
-				}
-				ClusterMapVisualizer clusterMapVisualizer = this.m_gridEntityVis[this.GetSelectorGridEntity(this.m_destinationSelector)];
-				this.m_previewMapPath.SetPoints(ClusterMapPathDrawer.GetDrawPathList(clusterMapVisualizer.transform.localPosition, path));
-				this.m_previewMapPath.SetColor(this.rocketPreviewPathColor);
-			}
-			else if (this.m_previewMapPath != null)
+			if (this.m_previewMapPath != null)
 			{
 				global::Util.KDestroyGameObject(this.m_previewMapPath);
 				this.m_previewMapPath = null;
 			}
-			this.m_hoveredHex.SetDestinationStatus(text);
 			return;
 		}
-		if (this.m_previewMapPath != null)
+		global::Debug.Assert(this.m_destinationSelector != null, "In SelectDestination mode without a destination selector");
+		AxialI myWorldLocation = this.m_destinationSelector.GetMyWorldLocation();
+		string text;
+		List<AxialI> path = ClusterGrid.Instance.GetPath(myWorldLocation, this.m_hoveredHex.location, this.m_destinationSelector, out text);
+		if (path != null)
+		{
+			if (this.m_previewMapPath == null)
+			{
+				this.m_previewMapPath = this.pathDrawer.AddPath();
+			}
+			ClusterMapVisualizer clusterMapVisualizer = this.m_gridEntityVis[this.GetSelectorGridEntity(this.m_destinationSelector)];
+			this.m_previewMapPath.SetPoints(ClusterMapPathDrawer.GetDrawPathList(clusterMapVisualizer.transform.localPosition, path));
+			this.m_previewMapPath.SetColor(this.rocketPreviewPathColor);
+		}
+		else if (this.m_previewMapPath != null)
 		{
 			global::Util.KDestroyGameObject(this.m_previewMapPath);
 			this.m_previewMapPath = null;
 		}
+		int num = ((path != null) ? path.Count : (-1));
+		if (this.m_selectedEntity != null)
+		{
+			float range = this.m_selectedEntity.GetComponent<IClusterRange>().GetRange();
+			if ((float)num > range / 600f && string.IsNullOrEmpty(text))
+			{
+				text = string.Format(UI.CLUSTERMAP.TOOLTIP_INVALID_DESTINATION_OUT_OF_RANGE, range / 600f);
+			}
+			bool repeat = clusterDestinationSelector.GetComponent<RocketClusterDestinationSelector>().Repeat;
+			this.m_hoveredHex.SetDestinationStatus(text, num, (int)range, repeat);
+			return;
+		}
+		this.m_hoveredHex.SetDestinationStatus(text);
 	}
 
 	private ClusterGridEntity GetSelectorGridEntity(ClusterDestinationSelector selector)

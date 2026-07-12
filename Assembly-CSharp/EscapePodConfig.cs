@@ -32,7 +32,6 @@ public class EscapePodConfig : IEntityConfig
 		BallisticClusterGridEntity ballisticClusterGridEntity = gameObject.AddOrGet<BallisticClusterGridEntity>();
 		ballisticClusterGridEntity.clusterAnimName = "escape_pod01_kanim";
 		ballisticClusterGridEntity.isWorldEntity = true;
-		ballisticClusterGridEntity.NoWaitInOrbit = true;
 		ballisticClusterGridEntity.nameKey = new StringKey("STRINGS.BUILDINGS.PREFABS.ESCAPEPOD.NAME");
 		ClusterDestinationSelector clusterDestinationSelector = gameObject.AddOrGet<ClusterDestinationSelector>();
 		clusterDestinationSelector.assignable = false;

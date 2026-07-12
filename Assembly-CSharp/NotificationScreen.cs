@@ -394,14 +394,14 @@ public class NotificationScreen : KScreen
 			{
 				CameraController.Instance.ActiveWorldStarWipe(myWorldId, position, 10f, null);
 			}
-			else if (component != null && component.IsVisible)
+			else if (DlcManager.FeatureClusterSpaceEnabled() && component != null && component.IsVisible)
 			{
 				ManagementMenu.Instance.OpenClusterMap();
 				ClusterMapScreen.Instance.SetTargetFocusPosition(component.Location, 0.5f);
 			}
 			if (component2 != null)
 			{
-				if (component != null && component.IsVisible)
+				if (DlcManager.FeatureClusterSpaceEnabled() && component != null && component.IsVisible)
 				{
 					ClusterMapSelectTool.Instance.Select(component2, false);
 				}

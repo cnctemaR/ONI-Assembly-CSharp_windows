@@ -15,6 +15,7 @@ public class RailGunPayload : GameStateMachine<RailGunPayload, RailGunPayload.St
 			this.onSurface.Set(true, smi);
 		}).ToggleMainStatusItem(Db.Get().BuildingStatusItems.RailgunpayloadNeedsEmptying, null)
 			.ToggleTag(GameTags.RailGunPayloadEmptyable)
+			.ToggleTag(GameTags.ClusterEntityGrounded)
 			.EventHandler(GameHashes.DroppedAll, delegate(RailGunPayload.StatesInstance smi)
 			{
 				smi.OnDroppedAll();

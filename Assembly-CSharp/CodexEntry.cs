@@ -190,10 +190,39 @@ public class CodexEntry
 	{
 		if (this._dlcIds == null)
 		{
-			DebugUtil.DevAssert(this._dlcIds != null, "Codex entry " + this.id + " has null dlcIds. Assigning to ALL", null);
 			this._dlcIds = DlcManager.AVAILABLE_ALL_VERSIONS;
 		}
 		return this._dlcIds;
+	}
+
+	public string[] forbiddenDLCIds
+	{
+		get
+		{
+			return this._forbiddenDLCIds;
+		}
+		set
+		{
+			this._forbiddenDLCIds = value;
+			string text = "";
+			for (int i = 0; i < value.Length; i++)
+			{
+				text += value[i];
+				if (i != value.Length - 1)
+				{
+					text += "\n";
+				}
+			}
+		}
+	}
+
+	public string[] GetForbiddenDLCs()
+	{
+		if (this._forbiddenDLCIds == null)
+		{
+			this._forbiddenDLCIds = this.NONE;
+		}
+		return this._forbiddenDLCIds;
 	}
 
 	public string id
@@ -381,6 +410,10 @@ public class CodexEntry
 	private List<ContentContainer> _contentContainers = new List<ContentContainer>();
 
 	private string[] _dlcIds;
+
+	private string[] _forbiddenDLCIds;
+
+	private string[] NONE = new string[0];
 
 	private string _id;
 

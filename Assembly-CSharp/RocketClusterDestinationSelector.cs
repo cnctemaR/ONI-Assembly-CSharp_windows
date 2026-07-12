@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using KSerialization;
 
 public class RocketClusterDestinationSelector : ClusterDestinationSelector
@@ -19,6 +20,14 @@ public class RocketClusterDestinationSelector : ClusterDestinationSelector
 	{
 		base.OnPrefabInit();
 		base.Subscribe<RocketClusterDestinationSelector>(-1277991738, this.OnLaunchDelegate);
+	}
+
+	protected override void OnSpawn()
+	{
+		if (this.isHarvesting)
+		{
+			this.WaitForPOIHarvest();
+		}
 	}
 
 	public LaunchPad GetDestinationPad()
@@ -51,11 +60,85 @@ public class RocketClusterDestinationSelector : ClusterDestinationSelector
 			base.GetComponent<CraftModuleInterface>().TriggerEventOnCraftAndRocket(GameHashes.ClusterDestinationReached, null);
 			if (this.m_repeat)
 			{
-				this.m_launchPad.Set(this.m_prevLaunchPad.Get());
-				this.m_destination = this.m_prevDestination;
-				this.m_prevDestination = clusterLocationChangedEvent.newLocation;
-				CraftModuleInterface component = base.GetComponent<CraftModuleInterface>();
-				this.m_prevLaunchPad.Set(component.CurrentPad);
+				if (ClusterGrid.Instance.GetVisibleEntityOfLayerAtCell(clusterLocationChangedEvent.newLocation, EntityLayer.POI) != null && this.CanRocketHarvest())
+				{
+					this.WaitForPOIHarvest();
+					return;
+				}
+				this.SetUpReturnTrip();
+			}
+		}
+	}
+
+	private void SetUpReturnTrip()
+	{
+		this.m_launchPad.Set(this.m_prevLaunchPad.Get());
+		this.m_destination = this.m_prevDestination;
+		this.m_prevDestination = base.GetComponent<Clustercraft>().Location;
+		this.m_prevLaunchPad.Set(base.GetComponent<CraftModuleInterface>().CurrentPad);
+	}
+
+	private bool CanRocketHarvest()
+	{
+		bool flag = false;
+		List<ResourceHarvestModule.StatesInstance> allResourceHarvestModules = base.GetComponent<Clustercraft>().GetAllResourceHarvestModules();
+		if (allResourceHarvestModules.Count > 0)
+		{
+			using (List<ResourceHarvestModule.StatesInstance>.Enumerator enumerator = allResourceHarvestModules.GetEnumerator())
+			{
+				while (enumerator.MoveNext())
+				{
+					if (enumerator.Current.CheckIfCanHarvest())
+					{
+						flag = true;
+					}
+				}
+			}
+		}
+		if (!flag)
+		{
+			List<ArtifactHarvestModule.StatesInstance> allArtifactHarvestModules = base.GetComponent<Clustercraft>().GetAllArtifactHarvestModules();
+			if (allArtifactHarvestModules.Count > 0)
+			{
+				using (List<ArtifactHarvestModule.StatesInstance>.Enumerator enumerator2 = allArtifactHarvestModules.GetEnumerator())
+				{
+					while (enumerator2.MoveNext())
+					{
+						if (enumerator2.Current.CheckIfCanHarvest())
+						{
+							flag = true;
+						}
+					}
+				}
+			}
+		}
+		return flag;
+	}
+
+	private void OnStorageChange(object data)
+	{
+		if (!this.CanRocketHarvest())
+		{
+			this.isHarvesting = false;
+			foreach (Ref<RocketModuleCluster> @ref in base.GetComponent<Clustercraft>().ModuleInterface.ClusterModules)
+			{
+				if (@ref.Get().GetComponent<Storage>())
+				{
+					base.Unsubscribe(@ref.Get().gameObject, -1697596308, new Action<object>(this.OnStorageChange));
+				}
+			}
+			this.SetUpReturnTrip();
+		}
+	}
+
+	private void WaitForPOIHarvest()
+	{
+		this.isHarvesting = true;
+		foreach (Ref<RocketModuleCluster> @ref in base.GetComponent<Clustercraft>().ModuleInterface.ClusterModules)
+		{
+			if (@ref.Get().GetComponent<Storage>())
+			{
+				base.Subscribe(@ref.Get().gameObject, -1697596308, new Action<object>(this.OnStorageChange));
 			}
 		}
 	}
@@ -79,6 +162,9 @@ public class RocketClusterDestinationSelector : ClusterDestinationSelector
 
 	[Serialize]
 	private Ref<LaunchPad> m_prevLaunchPad = new Ref<LaunchPad>();
+
+	[Serialize]
+	private bool isHarvesting;
 
 	private EventSystem.IntraObjectHandler<RocketClusterDestinationSelector> OnLaunchDelegate = new EventSystem.IntraObjectHandler<RocketClusterDestinationSelector>(delegate(RocketClusterDestinationSelector cmp, object data)
 	{

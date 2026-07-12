@@ -55,9 +55,16 @@ public class SubEntry
 
 	public string[] dlcIds { get; set; }
 
+	public string[] forbiddenDLCIds { get; set; }
+
 	public string[] GetDlcIds()
 	{
 		return this.dlcIds;
+	}
+
+	public string[] GetForbiddenDlCIds()
+	{
+		return this.forbiddenDLCIds;
 	}
 
 	public string sortString { get; set; }

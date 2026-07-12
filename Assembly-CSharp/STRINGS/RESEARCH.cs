@@ -430,14 +430,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = UI.FormatAsLink("Liquid-Based Refinement Processes", "LIQUIDFILTERING");
 
-				public static LocString DESC = string.Concat(new string[]
-				{
-					"Use pumped liquids to remove ",
-					UI.FormatAsLink("Salt", "SALT"),
-					" from ",
-					UI.FormatAsLink("Brine", "BRINE"),
-					"."
-				});
+				public static LocString DESC = "Use pumped " + UI.FormatAsLink("Liquids", "ELEMENTS_LIQUID") + " to filter out unwanted elements.";
 			}
 
 			public class LIQUIDPIPING
@@ -752,7 +745,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = UI.FormatAsLink("Hydrocarbon Propulsion", "HYDROCARBONPROPULSION");
 
-				public static LocString DESC = "Mid-range rocket engines with lots of smoke.";
+				public static LocString DESC = "Low-range rocket engines with lots of smoke.";
 			}
 
 			public class BETTERHYDROCARBONPROPULSION

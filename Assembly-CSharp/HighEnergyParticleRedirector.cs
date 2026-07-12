@@ -81,6 +81,7 @@ public class HighEnergyParticleRedirector : StateMachineComponent<HighEnergyPart
 			HighEnergyParticle component = gameObject.GetComponent<HighEnergyParticle>();
 			component.payload = base.smi.master.storage.ConsumeAll();
 			component.payload -= 1f;
+			component.capturedBy = this.port;
 			component.SetDirection(this.Direction);
 			this.directionController.PlayAnim("redirector_send", KAnim.PlayMode.Once);
 			this.directionController.controller.Queue("redirector", KAnim.PlayMode.Once, 1f, 0f);
@@ -174,7 +175,12 @@ public class HighEnergyParticleRedirector : StateMachineComponent<HighEnergyPart
 	[MyCmpReq]
 	private HighEnergyParticleStorage storage;
 
+	[MyCmpGet]
+	private HighEnergyParticlePort port;
+
 	public float directorDelay;
+
+	public bool directionControllable = true;
 
 	[Serialize]
 	private EightDirection _direction;

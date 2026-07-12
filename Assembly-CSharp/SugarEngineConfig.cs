@@ -64,7 +64,7 @@ public class SugarEngineConfig : IBuildingConfig
 	{
 		RocketEngineCluster rocketEngineCluster = go.AddOrGet<RocketEngineCluster>();
 		rocketEngineCluster.maxModules = 5;
-		rocketEngineCluster.maxHeight = 16;
+		rocketEngineCluster.maxHeight = ROCKETRY.ROCKET_HEIGHT.SHORT;
 		rocketEngineCluster.fuelTag = SimHashes.Sucrose.CreateTag();
 		rocketEngineCluster.efficiency = ROCKETRY.ENGINE_EFFICIENCY.STRONG;
 		rocketEngineCluster.explosionEffectHash = SpawnFXHashes.MeteorImpactDust;
@@ -93,7 +93,7 @@ public class SugarEngineConfig : IBuildingConfig
 		manualDeliveryKG.capacity = storage.capacityKg;
 		manualDeliveryKG.operationalRequirement = FetchOrder2.OperationalRequirement.None;
 		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.MachineFetch.IdHash;
-		BuildingTemplates.ExtendBuildingToRocketModuleCluster(go, null, ROCKETRY.BURDEN.MINOR_PLUS, (float)ROCKETRY.ENGINE_POWER.EARLY_WEAK, SugarEngineConfig.FUEL_EFFICIENCY);
+		BuildingTemplates.ExtendBuildingToRocketModuleCluster(go, null, ROCKETRY.BURDEN.INSIGNIFICANT, (float)ROCKETRY.ENGINE_POWER.EARLY_WEAK, SugarEngineConfig.FUEL_EFFICIENCY);
 		go.GetComponent<KPrefabID>().prefabInitFn += delegate(GameObject inst)
 		{
 		};
@@ -105,5 +105,5 @@ public class SugarEngineConfig : IBuildingConfig
 
 	public const float FUEL_CAPACITY = 450f;
 
-	public static float FUEL_EFFICIENCY = 0.1875f;
+	public static float FUEL_EFFICIENCY = 0.125f;
 }

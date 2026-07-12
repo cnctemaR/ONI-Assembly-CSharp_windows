@@ -400,13 +400,17 @@ public class SelectModuleSideScreen : KScreen
 		string text = "";
 		for (int i = 0; i < buildConditions.Count; i++)
 		{
-			if ((!buildConditions[i].IgnoreInSanboxMode() || (!DebugHandler.InstantBuildMode && !Game.Instance.SandboxModeActive)) && !buildConditions[i].EvaluateCondition((this.module == null) ? this.launchPad.gameObject : this.module.gameObject, def, selectionContext))
+			if (!buildConditions[i].IgnoreInSanboxMode() || (!DebugHandler.InstantBuildMode && !Game.Instance.SandboxModeActive))
 			{
-				if (!string.IsNullOrEmpty(text))
+				GameObject gameObject = ((this.module == null) ? this.launchPad.gameObject : this.module.gameObject);
+				if (!buildConditions[i].EvaluateCondition(gameObject, def, selectionContext))
 				{
-					text += "\n";
+					if (!string.IsNullOrEmpty(text))
+					{
+						text += "\n";
+					}
+					text += buildConditions[i].GetStatusTooltip(false, gameObject, def);
 				}
-				text += buildConditions[i].GetStatusTooltip(false, def);
 			}
 		}
 		return text;

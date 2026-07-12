@@ -29,7 +29,6 @@ public class FarmTileConfig : IBuildingConfig
 		buildingDef.SceneLayer = Grid.SceneLayer.TileMain;
 		buildingDef.ConstructionOffsetFilter = BuildingDef.ConstructionOffsetFilter_OneDown;
 		buildingDef.PermittedRotations = PermittedRotations.FlipV;
-		buildingDef.isSolidTile = false;
 		buildingDef.DragBuild = true;
 		return buildingDef;
 	}

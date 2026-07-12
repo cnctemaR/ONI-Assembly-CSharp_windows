@@ -36,7 +36,6 @@ public class RailGunPayloadConfig : IEntityConfig
 		BallisticClusterGridEntity ballisticClusterGridEntity = gameObject.AddOrGet<BallisticClusterGridEntity>();
 		ballisticClusterGridEntity.clusterAnimName = "payload01_kanim";
 		ballisticClusterGridEntity.isWorldEntity = true;
-		ballisticClusterGridEntity.NoWaitInOrbit = true;
 		ballisticClusterGridEntity.nameKey = new StringKey("STRINGS.ITEMS.RAILGUNPAYLOAD.NAME");
 		gameObject.AddOrGet<ClusterTraveler>();
 		return gameObject;

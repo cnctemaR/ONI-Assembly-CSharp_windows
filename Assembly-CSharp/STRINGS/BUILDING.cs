@@ -374,7 +374,14 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Output Blocked";
 
-				public static LocString TOOLTIP = "Output is blocked";
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"Output ",
+					UI.PRE_KEYWORD,
+					"Pipe",
+					UI.PST_KEYWORD,
+					" is blocked"
+				});
 			}
 
 			public class CONDUITBLOCKEDMULTIPLES
@@ -2913,6 +2920,13 @@ namespace STRINGS
 				public static LocString TOOLTIP = "This building is not controlled by a " + BUILDINGS.PREFABS.ROCKETCONTROLSTATION.NAME;
 			}
 
+			public class BROADCASTEROUTOFRANGE
+			{
+				public static LocString NAME = "Broadcaster Out of Range";
+
+				public static LocString TOOLTIP = "This receiver is too far from the selected broadcaster to get signal updates";
+			}
+
 			public class TOP_PRIORITY_CHORE
 			{
 				public static LocString NAME = "Top Priority";
@@ -3344,7 +3358,7 @@ namespace STRINGS
 				public static LocString TOOLTIP = "This building automatically performs routine maintenance every {x} launches";
 			}
 
-			public class FRIDGECOOLING
+			public class FRIDGECOOLINGn
 			{
 				public static LocString NAME = "Cooling Contents: {UsedPower}";
 

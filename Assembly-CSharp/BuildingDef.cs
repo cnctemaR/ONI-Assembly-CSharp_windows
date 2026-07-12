@@ -776,7 +776,7 @@ public class BuildingDef : Def
 				return false;
 			}
 		}
-		else if (this.BuildLocationRule == BuildLocationRule.InCornerFloor)
+		else if (this.BuildLocationRule == BuildLocationRule.WallFloor)
 		{
 			if (!BuildingDef.CheckFoundation(cell, orientation, this.BuildLocationRule, this.WidthInCells, this.HeightInCells, default(Tag)))
 			{
@@ -961,7 +961,7 @@ public class BuildingDef : Def
 				fail_reason = UI.TOOLTIPS.HELP_BUILDLOCATION_ONROCKETENVELOPE;
 			}
 			break;
-		case BuildLocationRule.InCornerFloor:
+		case BuildLocationRule.WallFloor:
 			if (!BuildingDef.CheckFoundation(cell, orientation, this.BuildLocationRule, this.WidthInCells, this.HeightInCells, default(Tag)))
 			{
 				flag = false;
@@ -1282,7 +1282,7 @@ public class BuildingDef : Def
 		{
 			return BuildingDef.CheckBaseFoundation(cell, orientation, BuildLocationRule.OnCeiling, width, height, optionalFoundationRequiredTag) && BuildingDef.CheckWallFoundation(cell, width, height, orientation != Orientation.FlipH);
 		}
-		if (location_rule == BuildLocationRule.InCornerFloor)
+		if (location_rule == BuildLocationRule.WallFloor)
 		{
 			return BuildingDef.CheckBaseFoundation(cell, orientation, BuildLocationRule.OnFloor, width, height, optionalFoundationRequiredTag) && BuildingDef.CheckWallFoundation(cell, width, height, orientation != Orientation.FlipH);
 		}
@@ -1315,7 +1315,17 @@ public class BuildingDef : Def
 		{
 			CellOffset cellOffset = new CellOffset(leftWall ? (-(width - 1) / 2 - 1) : (width / 2 + 1), i);
 			int num = Grid.OffsetCell(cell, cellOffset);
-			if (!Grid.IsValidBuildingCell(num) || !Grid.Solid[num])
+			GameObject gameObject = Grid.Objects[num, 1];
+			bool flag = false;
+			if (gameObject != null)
+			{
+				BuildingUnderConstruction component = gameObject.GetComponent<BuildingUnderConstruction>();
+				if (component != null && component.Def.IsFoundation)
+				{
+					flag = true;
+				}
+			}
+			if (!Grid.IsValidBuildingCell(num) || (!Grid.Solid[num] && !flag))
 			{
 				return false;
 			}
@@ -1646,8 +1656,6 @@ public class BuildingDef : Def
 	public bool isKAnimTile;
 
 	public bool isUtility;
-
-	public bool isSolidTile;
 
 	public KAnimFile[] AnimFiles;
 

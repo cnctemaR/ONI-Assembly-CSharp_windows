@@ -6,6 +6,14 @@ using UnityEngine;
 [AddComponentMenu("KMonoBehaviour/scripts/Rotatable")]
 public class Rotatable : KMonoBehaviour, ISaveLoadable
 {
+	public Orientation Orientation
+	{
+		get
+		{
+			return this.orientation;
+		}
+	}
+
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();

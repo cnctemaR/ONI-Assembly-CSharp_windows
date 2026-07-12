@@ -284,7 +284,7 @@ namespace Database
 			new Tech("Smelting", new List<string> { "MetalRefinery", "MetalTile" }, this, null);
 			new Tech("HighTempForging", new List<string> { "GlassForge", "BunkerTile", "BunkerDoor" }, this, null);
 			new Tech("HighPressureForging", new List<string> { "DiamondPress" }, this, null);
-			new Tech("RadiationProtection", new List<string> { "LeadSuit", "LeadSuitMarker", "LeadSuitLocker" }, this, null);
+			new Tech("RadiationProtection", new List<string> { "HEPBridgeTile", "LeadSuit", "LeadSuitMarker", "LeadSuitLocker" }, this, null);
 			new Tech("TemperatureModulation", new List<string> { "LiquidCooledFan", "IceCooledFan", "IceMachine", "InsulationTile", "SpaceHeater" }, this, null);
 			new Tech("HVAC", new List<string>
 			{
@@ -385,7 +385,7 @@ namespace Database
 			new Tech("SpaceCombustion", new List<string> { "SugarEngine", "SmallOxidizerTank" }, this, null);
 			new Tech("HighVelocityDestruction", new List<string> { "NoseconeHarvest" }, this, null);
 			new Tech("GasDistribution", new List<string> { "RocketInteriorGasInput", "RocketInteriorGasOutput", "OxidizerTankCluster" }, this, null);
-			new Tech("AdvancedScanners", new List<string> { "ScannerModule" }, this, null);
+			new Tech("AdvancedScanners", new List<string> { "ScannerModule", "LogicInterasteroidSender", "LogicInterasteroidReceiver" }, this, null);
 		}
 
 		public void PostProcess()

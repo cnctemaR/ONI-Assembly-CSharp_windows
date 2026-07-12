@@ -28,7 +28,6 @@ public class BunkerTileConfig : IBuildingConfig
 		buildingDef.BaseTimeUntilRepair = -1f;
 		buildingDef.SceneLayer = Grid.SceneLayer.TileMain;
 		buildingDef.isKAnimTile = true;
-		buildingDef.isSolidTile = true;
 		buildingDef.BlockTileAtlas = Assets.GetTextureAtlas("tiles_bunker");
 		buildingDef.BlockTilePlaceAtlas = Assets.GetTextureAtlas("tiles_bunker_place");
 		buildingDef.BlockTileMaterial = Assets.GetMaterial("tiles_solid");

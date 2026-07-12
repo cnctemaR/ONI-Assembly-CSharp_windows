@@ -96,6 +96,8 @@ public class RailGunConfig : IBuildingConfig
 
 	public const string ID = "RailGun";
 
+	public const int RANGE = 20;
+
 	public const float BASE_PARTICLE_COST = 10f;
 
 	public const float HEX_PARTICLE_COST = 10f;

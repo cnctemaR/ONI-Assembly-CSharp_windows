@@ -41,6 +41,11 @@ public class ClusterMapVisualizer : KMonoBehaviour
 				new ClusterMapRocketAnimator.StatesInstance(this, this.entity).StartSM();
 				return;
 			}
+			if (this.entity is BallisticClusterGridEntity)
+			{
+				new ClusterMapBallisticAnimator.StatesInstance(this, this.entity).StartSM();
+				return;
+			}
 			if (this.entity.Layer == EntityLayer.FX)
 			{
 				new ClusterMapFXAnimator.StatesInstance(this, this.entity).StartSM();

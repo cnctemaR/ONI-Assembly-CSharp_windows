@@ -7,12 +7,12 @@ public class HighEnergyParticlePort : KMonoBehaviour, IGameObjectEffectDescripto
 {
 	public int GetHighEnergyParticleInputPortPosition()
 	{
-		return Grid.OffsetCell(Grid.PosToCell(this), this.particleInputOffset);
+		return this.m_building.GetHighEnergyParticleInputCell();
 	}
 
 	public int GetHighEnergyParticleOutputPortPosition()
 	{
-		return Grid.OffsetCell(Grid.PosToCell(this), this.particleInputOffset);
+		return this.m_building.GetHighEnergyParticleOutputCell();
 	}
 
 	protected override void OnPrefabInit()
@@ -74,6 +74,9 @@ public class HighEnergyParticlePort : KMonoBehaviour, IGameObjectEffectDescripto
 		}
 		return list;
 	}
+
+	[MyCmpGet]
+	private Building m_building;
 
 	public HighEnergyParticlePort.OnParticleCapture onParticleCapture;
 

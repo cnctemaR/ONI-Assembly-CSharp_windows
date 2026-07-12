@@ -41,7 +41,6 @@ public class LadderBedConfig : IBuildingConfig
 			new BuildingAttachPoint.HardPoint(new CellOffset(0, 2), GameTags.LadderBed, null)
 		};
 		go.AddOrGet<AnimTileable>();
-		go.AddOrGet<LoopingSounds>();
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)

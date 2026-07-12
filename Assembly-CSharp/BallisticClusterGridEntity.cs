@@ -41,7 +41,7 @@ public class BallisticClusterGridEntity : ClusterGridEntity
 	{
 		get
 		{
-			return this.m_clusterTraveler.IsTraveling();
+			return !base.gameObject.HasTag(GameTags.ClusterEntityGrounded);
 		}
 	}
 
@@ -118,6 +118,4 @@ public class BallisticClusterGridEntity : ClusterGridEntity
 	private string clusterAnimSymbolSwapTarget;
 
 	private string clusterAnimSymbolSwapSymbol;
-
-	public bool NoWaitInOrbit;
 }

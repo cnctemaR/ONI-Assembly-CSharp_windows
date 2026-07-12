@@ -2,12 +2,13 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 using KSerialization;
 using STRINGS;
 using TUNING;
 using UnityEngine;
 
-public class Clustercraft : ClusterGridEntity
+public class Clustercraft : ClusterGridEntity, IClusterRange
 {
 	public override string Name
 	{
@@ -401,6 +402,34 @@ public class Clustercraft : ClusterGridEntity
 		}
 	}
 
+	public List<ResourceHarvestModule.StatesInstance> GetAllResourceHarvestModules()
+	{
+		List<ResourceHarvestModule.StatesInstance> list = new List<ResourceHarvestModule.StatesInstance>();
+		foreach (Ref<RocketModuleCluster> @ref in this.m_moduleInterface.ClusterModules)
+		{
+			ResourceHarvestModule.StatesInstance smi = @ref.Get().GetSMI<ResourceHarvestModule.StatesInstance>();
+			if (smi != null)
+			{
+				list.Add(smi);
+			}
+		}
+		return list;
+	}
+
+	public List<ArtifactHarvestModule.StatesInstance> GetAllArtifactHarvestModules()
+	{
+		List<ArtifactHarvestModule.StatesInstance> list = new List<ArtifactHarvestModule.StatesInstance>();
+		foreach (Ref<RocketModuleCluster> @ref in this.m_moduleInterface.ClusterModules)
+		{
+			ArtifactHarvestModule.StatesInstance smi = @ref.Get().GetSMI<ArtifactHarvestModule.StatesInstance>();
+			if (smi != null)
+			{
+				list.Add(smi);
+			}
+		}
+		return list;
+	}
+
 	public List<CargoBayCluster> GetAllCargoBays()
 	{
 		List<CargoBayCluster> list = new List<CargoBayCluster>();
@@ -504,6 +533,7 @@ public class Clustercraft : ClusterGridEntity
 		this.LaunchRequested = false;
 		this.SetCraftStatus(Clustercraft.CraftStatus.Launching);
 		this.m_moduleInterface.DoLaunch();
+		this.BurnFuelForTravel();
 		this.m_clusterTraveler.AdvancePathOneStep();
 		this.UpdateStatusItem();
 	}
@@ -606,6 +636,7 @@ public class Clustercraft : ClusterGridEntity
 		{
 			return;
 		}
+		this.BurnFuelForTravel();
 		this.m_location = pad.GetMyWorldLocation();
 		this.SetCraftStatus(forceGrounded ? Clustercraft.CraftStatus.Grounded : Clustercraft.CraftStatus.Landing);
 		this.m_moduleInterface.DoLand(pad);
@@ -755,6 +786,47 @@ public class Clustercraft : ClusterGridEntity
 	public override float GetProgress()
 	{
 		return this.m_clusterTraveler.GetMoveProgress();
+	}
+
+	[OnDeserialized]
+	private void OnDeserialized()
+	{
+		if (this.Status != Clustercraft.CraftStatus.Grounded && SaveLoader.Instance.GameInfo.IsVersionOlderThan(7, 27))
+		{
+			UIScheduler.Instance.ScheduleNextFrame("Check Fuel Costs", delegate(object o)
+			{
+				foreach (Ref<RocketModuleCluster> @ref in this.ModuleInterface.ClusterModules)
+				{
+					RocketModuleCluster rocketModuleCluster = @ref.Get();
+					IFuelTank component = rocketModuleCluster.GetComponent<IFuelTank>();
+					if (component != null && !component.Storage.IsEmpty())
+					{
+						component.DEBUG_FillTank();
+					}
+					OxidizerTank component2 = rocketModuleCluster.GetComponent<OxidizerTank>();
+					if (component2 != null)
+					{
+						Dictionary<Tag, float> oxidizersAvailable = component2.GetOxidizersAvailable();
+						if (oxidizersAvailable.Count > 0)
+						{
+							foreach (KeyValuePair<Tag, float> keyValuePair in oxidizersAvailable)
+							{
+								if (keyValuePair.Value > 0f)
+								{
+									component2.DEBUG_FillTank(ElementLoader.GetElementID(keyValuePair.Key));
+									break;
+								}
+							}
+						}
+					}
+				}
+			}, null, null);
+		}
+	}
+
+	public float GetRange()
+	{
+		return this.ModuleInterface.Range;
 	}
 
 	[Serialize]

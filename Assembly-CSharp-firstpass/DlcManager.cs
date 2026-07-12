@@ -205,11 +205,13 @@ public class DlcManager
 		KPlayerPrefs.SetInt(dlcId + ".ENABLED", enabled ? 1 : 0);
 		if (enabled && !DlcManager.CheckPlatformSubscription(dlcId))
 		{
+			global::Debug.Log("ToggleDLCSubscription");
 			DistributionPlatform.Inst.ToggleDLCSubscription(dlcId);
 			return;
 		}
 		if (App.instance)
 		{
+			global::Debug.Log("Restart");
 			App.instance.Restart();
 		}
 	}

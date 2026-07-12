@@ -6,18 +6,17 @@ public class ClusterMapRocketAnimator : GameStateMachine<ClusterMapRocketAnimato
 	public override void InitializeStates(out StateMachine.BaseState defaultState)
 	{
 		defaultState = this.idle;
-		this.root.OnTargetLost(this.entityTarget, null);
+		this.root.OnTargetLost(this.entityTarget, null).Target(this.entityTarget).EventHandlerTransition(GameHashes.RocketSelfDestructRequested, this.exploding, (ClusterMapRocketAnimator.StatesInstance smi, object data) => true)
+			.EventHandlerTransition(GameHashes.StartMining, this.utility.mining, (ClusterMapRocketAnimator.StatesInstance smi, object data) => true)
+			.EventHandlerTransition(GameHashes.RocketLaunched, this.moving.takeoff, (ClusterMapRocketAnimator.StatesInstance smi, object data) => true);
 		this.idle.Target(this.masterTarget).Enter(delegate(ClusterMapRocketAnimator.StatesInstance smi)
 		{
 			smi.PlayVisAnim("idle_loop", KAnim.PlayMode.Loop);
 		}).Target(this.entityTarget)
-			.EventTransition(GameHashes.ClusterDestinationChanged, this.moving.traveling, new StateMachine<ClusterMapRocketAnimator, ClusterMapRocketAnimator.StatesInstance, ClusterMapVisualizer, object>.Transition.ConditionCallback(this.IsTraveling))
-			.EventTransition(GameHashes.StartMining, this.utility.mining, null)
-			.EventTransition(GameHashes.RocketLaunched, this.moving.takeoff, null)
-			.EventTransition(GameHashes.RocketSelfDestructRequested, this.exploding, null)
 			.Transition(this.moving.traveling, new StateMachine<ClusterMapRocketAnimator, ClusterMapRocketAnimator.StatesInstance, ClusterMapVisualizer, object>.Transition.ConditionCallback(this.IsTraveling), UpdateRate.SIM_200ms)
 			.Transition(this.grounded, new StateMachine<ClusterMapRocketAnimator, ClusterMapRocketAnimator.StatesInstance, ClusterMapVisualizer, object>.Transition.ConditionCallback(this.IsGrounded), UpdateRate.SIM_200ms)
-			.Transition(this.moving.landing, new StateMachine<ClusterMapRocketAnimator, ClusterMapRocketAnimator.StatesInstance, ClusterMapVisualizer, object>.Transition.ConditionCallback(this.IsLanding), UpdateRate.SIM_200ms);
+			.Transition(this.moving.landing, new StateMachine<ClusterMapRocketAnimator, ClusterMapRocketAnimator.StatesInstance, ClusterMapVisualizer, object>.Transition.ConditionCallback(this.IsLanding), UpdateRate.SIM_200ms)
+			.Transition(this.utility.mining, new StateMachine<ClusterMapRocketAnimator, ClusterMapRocketAnimator.StatesInstance, ClusterMapVisualizer, object>.Transition.ConditionCallback(this.IsMining), UpdateRate.SIM_200ms);
 		this.grounded.Enter(delegate(ClusterMapRocketAnimator.StatesInstance smi)
 		{
 			this.ToggleSelectable(false, smi);
@@ -49,7 +48,7 @@ public class ClusterMapRocketAnimator : GameStateMachine<ClusterMapRocketAnimato
 			{
 				smi.PlayVisAnim("inflight_loop", KAnim.PlayMode.Loop);
 			});
-		this.utility.Target(this.masterTarget).EventHandlerTransition(GameHashes.ClusterLocationChanged, (ClusterMapRocketAnimator.StatesInstance smi) => Game.Instance, this.idle, new Func<ClusterMapRocketAnimator.StatesInstance, object, bool>(this.ClusterChangedAtMyLocation)).EventTransition(GameHashes.ClusterDestinationChanged, this.idle, new StateMachine<ClusterMapRocketAnimator, ClusterMapRocketAnimator.StatesInstance, ClusterMapVisualizer, object>.Transition.ConditionCallback(this.IsTraveling));
+		this.utility.Target(this.masterTarget).EventTransition(GameHashes.ClusterDestinationChanged, this.idle, new StateMachine<ClusterMapRocketAnimator, ClusterMapRocketAnimator.StatesInstance, ClusterMapVisualizer, object>.Transition.ConditionCallback(this.IsTraveling));
 		this.utility.mining.DefaultState(this.utility.mining.pre).Target(this.entityTarget).EventTransition(GameHashes.StopMining, this.utility.mining.pst, null);
 		this.utility.mining.pre.Enter(delegate(ClusterMapRocketAnimator.StatesInstance smi)
 		{
@@ -106,6 +105,11 @@ public class ClusterMapRocketAnimator : GameStateMachine<ClusterMapRocketAnimato
 	private bool IsLanding(ClusterMapRocketAnimator.StatesInstance smi)
 	{
 		return ((Clustercraft)smi.entity).Status == Clustercraft.CraftStatus.Landing;
+	}
+
+	private bool IsMining(ClusterMapRocketAnimator.StatesInstance smi)
+	{
+		return ((Clustercraft)smi.entity).HasTag(GameTags.POIHarvesting);
 	}
 
 	private bool IsSurfaceTransitioning(ClusterMapRocketAnimator.StatesInstance smi)

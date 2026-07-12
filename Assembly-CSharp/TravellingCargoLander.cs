@@ -48,10 +48,11 @@ public class TravellingCargoLander : GameStateMachine<TravellingCargoLander, Tra
 				smi.MoveToWorld();
 			});
 		this.landing.impact.PlayAnim("grounded_pre").OnAnimQueueComplete(this.grounded);
-		this.grounded.DefaultState(this.grounded.loaded).ToggleOperationalFlag(RocketModule.landedFlag).Enter(delegate(TravellingCargoLander.StatesInstance smi)
-		{
-			smi.CheckIfLoaded();
-		})
+		this.grounded.DefaultState(this.grounded.loaded).ToggleTag(GameTags.ClusterEntityGrounded).ToggleOperationalFlag(RocketModule.landedFlag)
+			.Enter(delegate(TravellingCargoLander.StatesInstance smi)
+			{
+				smi.CheckIfLoaded();
+			})
 			.Enter(delegate(TravellingCargoLander.StatesInstance smi)
 			{
 				this.isLanded.Set(true, smi);

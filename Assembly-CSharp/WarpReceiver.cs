@@ -27,7 +27,7 @@ public class WarpReceiver : Workable
 		this.chore = new WorkChore<Workable>(migrate, this, dupe.GetComponent<ChoreProvider>(), true, delegate(Chore o)
 		{
 			this.CompleteChore();
-		}, null, null, true, null, false, true, kanimFile, false, true, false, PriorityScreen.PriorityClass.high, 5, false, true);
+		}, null, null, true, null, true, true, kanimFile, false, true, false, PriorityScreen.PriorityClass.compulsory, 5, false, true);
 		Workable component = base.GetComponent<Workable>();
 		component.workLayer = Grid.SceneLayer.Building;
 		component.workAnims = new HashedString[] { "printing_pre", "printing_loop" };

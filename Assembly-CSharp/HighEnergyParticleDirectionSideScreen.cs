@@ -42,7 +42,12 @@ public class HighEnergyParticleDirectionSideScreen : SideScreenContent
 
 	public override bool IsValidForTarget(GameObject target)
 	{
-		bool flag = target.GetComponent<HighEnergyParticleRedirector>() != null;
+		HighEnergyParticleRedirector component = target.GetComponent<HighEnergyParticleRedirector>();
+		bool flag = component != null;
+		if (flag)
+		{
+			flag = flag && component.directionControllable;
+		}
 		bool flag2 = target.GetComponent<HighEnergyParticleSpawner>() != null;
 		return (flag || flag2) && target.GetComponent<IHighEnergyParticleDirection>() != null;
 	}

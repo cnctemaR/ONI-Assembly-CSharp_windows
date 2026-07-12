@@ -143,7 +143,7 @@ public class SpaceDestination
 		return 0f;
 	}
 
-	public Dictionary<SimHashes, float> GetMissionResourceResult(float totalCargoSpace, bool solids = true, bool liquids = true, bool gasses = true)
+	public Dictionary<SimHashes, float> GetMissionResourceResult(float totalCargoSpace, float reservedMass, bool solids = true, bool liquids = true, bool gasses = true)
 	{
 		Dictionary<SimHashes, float> dictionary = new Dictionary<SimHashes, float>();
 		float num = 0f;
@@ -154,7 +154,7 @@ public class SpaceDestination
 				num += this.GetResourceValue(keyValuePair.Key, keyValuePair.Value);
 			}
 		}
-		float num2 = Mathf.Min(this.CurrentMass - (float)this.GetDestinationType().minimumMass, totalCargoSpace);
+		float num2 = Mathf.Min(this.CurrentMass + reservedMass - (float)this.GetDestinationType().minimumMass, totalCargoSpace);
 		foreach (KeyValuePair<SimHashes, float> keyValuePair2 in this.recoverableElements)
 		{
 			if ((ElementLoader.FindElementByHash(keyValuePair2.Key).IsSolid && solids) || (ElementLoader.FindElementByHash(keyValuePair2.Key).IsLiquid && liquids) || (ElementLoader.FindElementByHash(keyValuePair2.Key).IsGas && gasses))
@@ -185,20 +185,23 @@ public class SpaceDestination
 		return this.GetRecoverableEntities();
 	}
 
-	public void UpdateRemainingResources(CargoBay bay)
+	public float ReserveResources(CargoBay bay)
 	{
+		float num = 0f;
 		if (bay != null)
 		{
+			Storage component = bay.GetComponent<Storage>();
 			foreach (KeyValuePair<SimHashes, float> keyValuePair in this.recoverableElements)
 			{
 				if (this.HasElementType(bay.storageType))
 				{
-					Storage component = bay.GetComponent<Storage>();
+					num += component.capacityKg;
 					this.availableMass = Mathf.Max(0f, this.availableMass - component.capacityKg);
 					break;
 				}
 			}
 		}
+		return num;
 	}
 
 	public bool HasElementType(CargoBay.CargoType type)

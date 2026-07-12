@@ -43,7 +43,6 @@ public class DebrisPayloadConfig : IEntityConfig
 		BallisticClusterGridEntity ballisticClusterGridEntity = gameObject.AddOrGet<BallisticClusterGridEntity>();
 		ballisticClusterGridEntity.clusterAnimName = "rocket_debris_kanim";
 		ballisticClusterGridEntity.isWorldEntity = true;
-		ballisticClusterGridEntity.NoWaitInOrbit = true;
 		ballisticClusterGridEntity.nameKey = new StringKey("STRINGS.ITEMS.DEBRISPAYLOAD.NAME");
 		gameObject.AddOrGet<ClusterTraveler>();
 		return gameObject;

@@ -425,7 +425,11 @@ namespace STRINGS
 
 				public static LocString DESC = string.Concat(new string[]
 				{
-					"Dreckos are nonhostile critters that graze only on live ",
+					"Dreckos are nonhostile critters that graze on ",
+					UI.FormatAsLink("Pincha Pepperplants", "SPICE_VINE"),
+					", ",
+					UI.FormatAsLink("Balm Lily", "SWAMPLILY"),
+					" or ",
 					UI.FormatAsLink("Mealwood Plants", "BASICSINGLEHARVESTPLANT"),
 					".\n\nTheir backsides are covered in thick woolly fibers that only grow in ",
 					UI.FormatAsLink("Hydrogen", "HYDROGEN"),

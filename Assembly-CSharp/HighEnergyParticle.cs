@@ -203,7 +203,11 @@ public class HighEnergyParticle : StateMachineComponent<HighEnergyParticle.State
 		}
 		if (Grid.IsSolidCell(num))
 		{
-			this.Collide(HighEnergyParticle.CollisionType.Solid);
+			GameObject gameObject5 = Grid.Objects[num, 9];
+			if (gameObject5 == null || !gameObject5.HasTag(GameTags.HEPPassThrough) || this.capturedBy == null || this.capturedBy.gameObject != gameObject5)
+			{
+				this.Collide(HighEnergyParticle.CollisionType.Solid);
+			}
 			return;
 		}
 	}

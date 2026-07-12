@@ -33,7 +33,6 @@ public class TilePOIConfig : IBuildingConfig
 		buildingDef.SceneLayer = Grid.SceneLayer.TileMain;
 		buildingDef.ConstructionOffsetFilter = BuildingDef.ConstructionOffsetFilter_OneDown;
 		buildingDef.isKAnimTile = true;
-		buildingDef.isSolidTile = true;
 		buildingDef.DebugOnly = true;
 		buildingDef.BlockTileAtlas = Assets.GetTextureAtlas("tiles_POI");
 		buildingDef.BlockTilePlaceAtlas = Assets.GetTextureAtlas("tiles_POI");

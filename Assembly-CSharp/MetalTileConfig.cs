@@ -28,7 +28,6 @@ public class MetalTileConfig : IBuildingConfig
 		buildingDef.BaseTimeUntilRepair = -1f;
 		buildingDef.SceneLayer = Grid.SceneLayer.TileMain;
 		buildingDef.isKAnimTile = true;
-		buildingDef.isSolidTile = true;
 		buildingDef.BlockTileMaterial = Assets.GetMaterial("tiles_solid");
 		buildingDef.BlockTileAtlas = Assets.GetTextureAtlas("tiles_metal");
 		buildingDef.BlockTilePlaceAtlas = Assets.GetTextureAtlas("tiles_metal_place");

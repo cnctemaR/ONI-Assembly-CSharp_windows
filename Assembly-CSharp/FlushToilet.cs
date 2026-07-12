@@ -278,7 +278,7 @@ public class FlushToilet : StateMachineComponent<FlushToilet.SMInstance>, IUsabl
 			this.flushing.Enter(delegate(FlushToilet.SMInstance smi)
 			{
 				smi.Flush();
-			}).GoTo(this.flushed);
+			}).PlayAnim("flush").OnAnimQueueComplete(this.flushed);
 			this.flushed.EventTransition(GameHashes.OnStorageChange, this.fillingInactive, (FlushToilet.SMInstance smi) => !smi.HasContaminatedMass()).ParamTransition<bool>(this.outputBlocked, this.backedup, GameStateMachine<FlushToilet.States, FlushToilet.SMInstance, FlushToilet, object>.IsTrue);
 		}
 

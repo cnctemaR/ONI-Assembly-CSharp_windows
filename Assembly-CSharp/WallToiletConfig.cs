@@ -20,7 +20,7 @@ public class WallToiletConfig : IBuildingConfig
 		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER2;
 		string[] plastics = MATERIALS.PLASTICS;
 		float num5 = 800f;
-		BuildLocationRule buildLocationRule = BuildLocationRule.InCornerFloor;
+		BuildLocationRule buildLocationRule = BuildLocationRule.WallFloor;
 		EffectorValues none = NOISE_POLLUTION.NONE;
 		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, plastics, num5, buildLocationRule, BUILDINGS.DECOR.PENALTY.TIER1, none, 0.2f);
 		buildingDef.Overheatable = false;
@@ -29,6 +29,7 @@ public class WallToiletConfig : IBuildingConfig
 		buildingDef.InputConduitType = ConduitType.Liquid;
 		buildingDef.ViewMode = OverlayModes.LiquidConduits.ID;
 		buildingDef.DiseaseCellVisName = "FoodPoisoning";
+		buildingDef.UtilityOutputOffset = new CellOffset(-2, 0);
 		buildingDef.AudioCategory = "Metal";
 		buildingDef.UtilityInputOffset = new CellOffset(0, 0);
 		buildingDef.PermittedRotations = PermittedRotations.FlipH;
@@ -52,7 +53,7 @@ public class WallToiletConfig : IBuildingConfig
 		KAnimFile[] array = new KAnimFile[] { Assets.GetAnim("anim_interacts_toilet_wall_kanim") };
 		ToiletWorkableUse toiletWorkableUse = go.AddOrGet<ToiletWorkableUse>();
 		toiletWorkableUse.overrideAnims = array;
-		toiletWorkableUse.workLayer = Grid.SceneLayer.Building;
+		toiletWorkableUse.workLayer = Grid.SceneLayer.BuildingUse;
 		toiletWorkableUse.resetProgressOnStop = true;
 		ConduitConsumer conduitConsumer = go.AddOrGet<ConduitConsumer>();
 		conduitConsumer.conduitType = ConduitType.Liquid;
@@ -64,6 +65,22 @@ public class WallToiletConfig : IBuildingConfig
 		def.elementFilter = new SimHashes[] { SimHashes.Water };
 		def.invertElementFilter = true;
 		def.blockedBySubstantialLiquid = true;
+		def.fxOffset = new Vector3(0.5f, 0f, 0f);
+		def.leftFx = new AutoStorageDropper.DropperFxConfig
+		{
+			animFile = "liquidleak_kanim",
+			animName = "side",
+			flipX = true,
+			layer = Grid.SceneLayer.BuildingBack
+		};
+		def.rightFx = new AutoStorageDropper.DropperFxConfig
+		{
+			animFile = "liquidleak_kanim",
+			animName = "side",
+			flipX = false,
+			layer = Grid.SceneLayer.BuildingBack
+		};
+		def.delay = 0f;
 		Storage storage = go.AddOrGet<Storage>();
 		storage.capacityKg = 12.5f;
 		storage.SetDefaultStoredItemModifiers(Storage.StandardSealedStorage);

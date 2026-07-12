@@ -29,29 +29,34 @@ public class RequiresFoundation : KGameObjectComponentManager<RequiresFoundation
 			Orientation orientation = ((component != null) ? component.GetOrientation() : Orientation.Neutral);
 			int num2 = -(def.WidthInCells - 1) / 2;
 			int num3 = def.WidthInCells / 2;
-			List<int> list = new List<int>();
-			for (int i = num2; i <= num3; i++)
+			CellOffset cellOffset = new CellOffset(num2, -1);
+			CellOffset cellOffset2 = new CellOffset(num3, -1);
+			if (def.BuildLocationRule == BuildLocationRule.OnCeiling || def.BuildLocationRule == BuildLocationRule.InCorner)
 			{
-				CellOffset cellOffset = new CellOffset(i, -1);
-				if (def.BuildLocationRule == BuildLocationRule.OnWall)
-				{
-					cellOffset = new CellOffset(i - 1, 0);
-				}
-				else if (def.BuildLocationRule == BuildLocationRule.OnCeiling || def.BuildLocationRule == BuildLocationRule.InCorner)
-				{
-					cellOffset = new CellOffset(i, def.HeightInCells);
-				}
-				CellOffset rotatedCellOffset = Rotatable.GetRotatedCellOffset(cellOffset, orientation);
-				int num4 = Grid.OffsetCell(num, rotatedCellOffset);
-				list.Add(num4);
+				cellOffset.y = def.HeightInCells;
+				cellOffset2.y = def.HeightInCells;
 			}
-			Vector2I vector2I = Grid.CellToXY(list[0]);
-			Vector2I vector2I2 = Grid.CellToXY(list[list.Count - 1]);
-			float num5 = (float)((vector2I.x > vector2I2.x) ? vector2I2.x : vector2I.x);
-			float num6 = (float)((vector2I.x < vector2I2.x) ? vector2I2.x : vector2I.x);
-			float num7 = (float)((vector2I.y > vector2I2.y) ? vector2I2.y : vector2I.y);
-			float num8 = (float)((vector2I.y < vector2I2.y) ? vector2I2.y : vector2I.y);
-			Rect rect = Rect.MinMaxRect(num5, num7, num6, num8);
+			else if (def.BuildLocationRule == BuildLocationRule.OnWall)
+			{
+				cellOffset = new CellOffset(num2 - 1, 0);
+				cellOffset2 = new CellOffset(num2 - 1, def.HeightInCells);
+			}
+			else if (def.BuildLocationRule == BuildLocationRule.WallFloor)
+			{
+				cellOffset = new CellOffset(num2 - 1, -1);
+				cellOffset2 = new CellOffset(num3, def.HeightInCells - 1);
+			}
+			CellOffset rotatedCellOffset = Rotatable.GetRotatedCellOffset(cellOffset, orientation);
+			CellOffset rotatedCellOffset2 = Rotatable.GetRotatedCellOffset(cellOffset2, orientation);
+			int num4 = Grid.OffsetCell(num, rotatedCellOffset);
+			int num5 = Grid.OffsetCell(num, rotatedCellOffset2);
+			Vector2I vector2I = Grid.CellToXY(num4);
+			Vector2I vector2I2 = Grid.CellToXY(num5);
+			float num6 = (float)Mathf.Min(vector2I.x, vector2I2.x);
+			float num7 = (float)Mathf.Max(vector2I.x, vector2I2.x);
+			float num8 = (float)Mathf.Min(vector2I.y, vector2I2.y);
+			float num9 = (float)Mathf.Max(vector2I.y, vector2I2.y);
+			Rect rect = Rect.MinMaxRect(num6, num8, num7, num9);
 			data.solidPartitionerEntry = GameScenePartitioner.Instance.Add("RequiresFoundation.Add", go, (int)rect.x, (int)rect.y, (int)rect.width + 1, (int)rect.height + 1, GameScenePartitioner.Instance.solidChangedLayer, data.changeCallback);
 			data.buildingPartitionerEntry = GameScenePartitioner.Instance.Add("RequiresFoundation.Add", go, (int)rect.x, (int)rect.y, (int)rect.width + 1, (int)rect.height + 1, GameScenePartitioner.Instance.objectLayers[1], data.changeCallback);
 			if (def.BuildLocationRule == BuildLocationRule.BuildingAttachPoint || def.BuildLocationRule == BuildLocationRule.OnFloorOrBuildingAttachPoint)

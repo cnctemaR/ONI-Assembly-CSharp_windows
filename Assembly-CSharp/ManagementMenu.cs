@@ -497,6 +497,14 @@ public class ManagementMenu : KIconToggleMenu
 		}
 	}
 
+	public void CloseClusterMap()
+	{
+		if (this.activeScreen == this.ScreenInfoMatch[ManagementMenu.Instance.clusterMapInfo])
+		{
+			this.ToggleScreen(this.ScreenInfoMatch[ManagementMenu.Instance.clusterMapInfo]);
+		}
+	}
+
 	public void OpenSkills(MinionIdentity minionIdentity)
 	{
 		this.skillsScreen.CurrentlySelectedMinion = minionIdentity;

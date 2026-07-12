@@ -56,6 +56,26 @@ public class ClusterMapHex : MultiToggle, ICanvasRaycastFilter
 		}
 	}
 
+	public void SetDestinationStatus(string fail_reason, int pathLength, int rocketRange, bool repeat)
+	{
+		this.m_tooltip.ClearMultiStringTooltip();
+		if (pathLength > 0)
+		{
+			string text = (repeat ? UI.CLUSTERMAP.TOOLTIP_PATH_LENGTH_RETURN : UI.CLUSTERMAP.TOOLTIP_PATH_LENGTH);
+			if (repeat)
+			{
+				pathLength *= 2;
+			}
+			text = string.Format(text, pathLength, GameUtil.GetFormattedRocketRange((float)rocketRange, GameUtil.TimeSlice.None, true));
+			this.m_tooltip.AddMultiStringTooltip(text, this.informationTooltipStyle);
+		}
+		this.UpdateHoverColors(string.IsNullOrEmpty(fail_reason));
+		if (!string.IsNullOrEmpty(fail_reason))
+		{
+			this.m_tooltip.AddMultiStringTooltip(fail_reason, this.invalidDestinationTooltipStyle);
+		}
+	}
+
 	public void UpdateToggleState(ClusterMapHex.ToggleState state)
 	{
 		int num = -1;

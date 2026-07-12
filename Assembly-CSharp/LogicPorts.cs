@@ -332,12 +332,12 @@ public class LogicPorts : KMonoBehaviour, IGameObjectEffectDescriptor, IRenderEv
 
 	public int GetInputValue(HashedString port_id)
 	{
-		int i = 0;
-		while (i < this.inputPortInfo.Length)
+		int num = 0;
+		while (num < this.inputPortInfo.Length && this.inputPorts != null)
 		{
-			if (this.inputPortInfo[i].id == port_id)
+			if (this.inputPortInfo[num].id == port_id)
 			{
-				LogicEventHandler logicEventHandler = this.inputPorts[i] as LogicEventHandler;
+				LogicEventHandler logicEventHandler = this.inputPorts[num] as LogicEventHandler;
 				if (logicEventHandler == null)
 				{
 					return 0;
@@ -346,7 +346,7 @@ public class LogicPorts : KMonoBehaviour, IGameObjectEffectDescriptor, IRenderEv
 			}
 			else
 			{
-				i++;
+				num++;
 			}
 		}
 		return 0;

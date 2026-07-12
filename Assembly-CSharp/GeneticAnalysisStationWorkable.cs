@@ -19,6 +19,18 @@ public class GeneticAnalysisStationWorkable : Workable
 		this.lightEfficiencyBonus = true;
 	}
 
+	protected override void OnStartWork(Worker worker)
+	{
+		base.OnStartWork(worker);
+		base.GetComponent<KSelectable>().AddStatusItem(Db.Get().BuildingStatusItems.ComplexFabricatorResearching, this.storage.FindFirst(GameTags.UnidentifiedSeed));
+	}
+
+	protected override void OnStopWork(Worker worker)
+	{
+		base.OnStopWork(worker);
+		base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().BuildingStatusItems.ComplexFabricatorResearching, false);
+	}
+
 	protected override void OnCompleteWork(Worker worker)
 	{
 		base.OnCompleteWork(worker);

@@ -4,6 +4,189 @@ namespace STRINGS
 {
 	public class CODEX
 	{
+		public class CRITTERSTATUS
+		{
+			public static LocString CRITTERSTATUS_TITLE = "Field Guide";
+
+			public class METABOLISM
+			{
+				public static LocString TITLE = "Metabolism";
+
+				public class BODY
+				{
+					public static LocString CONTAINER1 = "A critter's metabolic rate is a measure of their appetite and the materials that they excrete as a result.\n\nCritters with higher metabolism get hungry more often. Those with lower metabolism will consume less food, but this reduced caloric intake results in fewer resources being produced.\n\nThe digestive process is influenced by conditions such as domestication, mood, and whether the critter in question is a juvenile (baby) or an adult.";
+				}
+
+				public class HUNGRY
+				{
+					public static LocString TITLE = "Hungry";
+
+					public static LocString CONTAINER1 = "Tame critters have significantly faster metabolism than wild ones, and get hungry sooner. This makes them more valuable in terms of resource production, as long as the colony is equipped to meet their dietary needs.\n\nCritters' stomachs vary in size, but they are capable of storing at least five cycles' worth of food. Their bellies begin to rumble when those internal caches drop below 90 percent. The critter will then seek out food, and will continue to eat until they feel completely full again.\n\nJuvenile critters have the slowest metabolism, although glum tame critters are a close second.";
+				}
+
+				public class STARVING
+				{
+					public static LocString TITLE = "Starving";
+
+					public static LocString CONTAINER1_VANILLA = "With the exception of Morbs—which require zero calories to survive—tame critters will die after {0} cycles of consistent starvation. Wild critters do not starve to death.";
+
+					public static LocString CONTAINER1_DLC1 = "With the exception of Morbs and Beetas—which require zero calories to survive—tame critters will die after {0} cycles of consistent starvation. Wild critters do not starve to death.";
+				}
+			}
+
+			public class MOOD
+			{
+				public static LocString TITLE = "Mood";
+
+				public class BODY
+				{
+					public static LocString CONTAINER1 = "As with many living things, critters are susceptible to fluctuations in mood. While they are incapable of articulating their feelings verbally, these variations have observable effects on productivity and reproduction.\n\nFactors that influence a critter's mood include: grooming, wildness/tameness, habitat, overcrowding, confinement, and Brackene consumption.";
+				}
+
+				public class HAPPY
+				{
+					public static LocString TITLE = "Happy";
+
+					public static LocString CONTAINER1 = "Happy, tame critters produce more usable materials and tend to lay eggs at a higher rate than glum or wild critters. Domesticated critters are less resilient than wild ones—they require more care from the colony in order to maintain a positive disposition.\n\nBabies have a higher baseline of natural joy, but produce neither resources nor eggs.\n\nDuplicants with the Critter Ranching skill have the expertise needed to domesticate and care for critters, and can also boost a critter's mood by bonding with them at a Grooming Station.\n\nCritters who drink at the Critter Fountain also enjoy a mood boost, despite the lack of nutrients available in the Brackene dispensed.\n\nBeing confined or overcrowded undermines a critter's happiness.";
+
+					public static LocString SUBTITLE = "Effects";
+
+					public static LocString HAPPY_METABOLISM = "    • Indirectly improves egg-laying rates";
+				}
+
+				public class GLUM
+				{
+					public static LocString TITLE = "Glum";
+
+					public static LocString CONTAINER1 = "Critters can survive in subpar environments, but it takes a toll on their mood and impacts metabolism and productivity. When their happiness levels dip below zero, they become glum.\n\nWild critters are less sensitive to the effects of glumness than their tamed brethren, though they are still negatively affected by overcrowded or confined living conditions.";
+
+					public static LocString SUBTITLE = "Effects";
+
+					public static LocString GLUMWILD_METABOLISM = "    • Critter Metabolism\n";
+				}
+
+				public class HOSTILE
+				{
+					public static LocString TITLE = "Hostile";
+
+					public static LocString CONTAINER1_VANILLA = "Most critters are non-hostile. They may attempt to defend themselves when attacked by Duplicants, though their natural passivity limits the damage caused in these instances.\n\nSome critters, however, have exceptionally strong self-preservation instincts and must be approached with extreme caution.\n\nPokeshells, for example, are not naturally hostile but are fiercely protective of their young and will attack if a Duplicant or critter wanders too close to their eggs.";
+
+					public static LocString CONTAINER1_DLC1 = "Most critters are non-hostile. They may attempt to defend themselves when attacked by Duplicants, though their natural passivity limits the damage caused in these instances.\n\nSome critters, however, have exceptionally strong self-preservation instincts and must be approached with extreme caution. Pokeshells, for example, are not naturally hostile but are fiercely protective of their young and will attack if a Duplicant or critter wanders too close to their eggs.\n\nThe Beeta, on the other hand, is both hostile and radioactive. While it cannot be tamed, it can be subdued through the use of CO2.";
+				}
+
+				public class CONFINED
+				{
+					public static LocString TITLE = "Confined";
+
+					public static LocString CONTAINER1 = "Each species has its own space requirements. Critters who find themselves in a room that they consider too small will feel confined. They will feel the same way if they become stuck in a door or tile. Critters will not reproduce while they are in this state.\n\nShove Voles are the exception to this rule: their tunneling instincts make them quite comfortable in snug spaces, and they never feel confined.";
+
+					public static LocString SUBTITLE = "Effects";
+
+					public static LocString CONFINED_FERTILITY = "    • Reproduction\n";
+
+					public static LocString CONFINED_HAPPINESS = "    • Happiness";
+				}
+
+				public class OVERCROWDED
+				{
+					public static LocString TITLE = "Overcrowded";
+
+					public static LocString CONTAINER1 = "Overcrowding occurs when a critter is in a room that's appropriately sized for its needs but feels that there are too many other critters sharing the same space. Because each species has its own space requirements, this state can vary among occupants of the same room.\n\nThis emotional state intensifies in response to the number of excess critters: adding new critters to an already overcrowded room will undermine a critter's happiness even further.";
+
+					public static LocString SUBTITLE = "Effects";
+
+					public static LocString OVERCROWDED_HAPPY1 = "    • Happiness\n";
+				}
+
+				public class CRAMPED
+				{
+					public static LocString TITLE = "Cramped";
+
+					public static LocString CONTAINER1 = "If a critter is overcrowded—or will become overcrowded once all of the eggs in the room have hatched—they begin to feel cramped.\n\nThis causes the critter's reproductive system to pause temporarily. It will resume once all eggs have hatched or been removed from the room.";
+
+					public static LocString SUBTITLE = "Effects";
+
+					public static LocString CRAMPED_FERTILITY = "    • Reproduction";
+				}
+			}
+
+			public class FERTILITY
+			{
+				public static LocString TITLE = "Reproduction";
+
+				public class BODY
+				{
+					public static LocString CONTAINER1 = "Reproductive rates and methods vary among species. The majority lay eggs that must be incubated in order to hatch the next generation of critters.\n\nFactors that influence the rate of reproduction include egg care, happiness, living conditions and domestication.";
+				}
+
+				public class FERTILITYRATE
+				{
+					public static LocString TITLE = "Reproduction Rate";
+
+					public static LocString CONTAINER1 = "Each time a critter completes their reproduction cycle (i.e. at 100 percent), it lays an egg and restarts its cycle.\n\nA critter's environment greatly impacts its base reproduction rate. When a critter is feeling cramped, it will wait until all eggs in the room have hatched or been removed before laying any of its own.\n\nCritters will also stop reproducing when they feel confined, which happens when their space is too small or they are stuck in a door or tile.\n\nMood and domestication also impact reproduction: happy critters reproduce more regularly, and happy tame critters reproduce the fastest.";
+				}
+
+				public class EGGCHANCES
+				{
+					public static LocString TITLE = "Egg Chances";
+
+					public static LocString CONTAINER1 = "In most cases, an egg will hatch into the same critter variant as its parent. Genetic volatility, however, means that there is a chance that it may hatch into another variant from that species.\n\nThere are many things that can alter the likelihood of a critter laying a particular type of egg.\n\nEgg chances are impacted by:\n    • Diet\n    • Body temperature\n    • Ambient gasses and elements\n    • Plants in the critters' care\n    • Variants that share the enclosure\n\nWhen a tame critter lays an egg, the resulting offspring will be born tame.";
+				}
+
+				public class INCUBATION
+				{
+					public static LocString TITLE = "Incubation";
+
+					public static LocString CONTAINER1 = "A critter's incubation time is one-fifth of their total lifetime: for example, if a critter's maximum age is 100 cycles, its egg will take 20 cycles to hatch.\n\nIncubation rates can be accelerated through tender intervention by a Critter Rancher. Lullabied eggs—that is, those that have been sung to—will incubate faster and hatch sooner than eggs that have not received such tender care. Being cuddled by a Cuddle Pip also accelerates the rate of incubation.\n\nEggs can be cuddled anywhere, but can only be lullabied when placed inside an Incubator. The effects of lullabies and cuddles are cumulative.";
+				}
+
+				public class MAXAGE
+				{
+					public static LocString TITLE = "Max Age";
+
+					public static LocString CONTAINER1_VANILLA = "With the exception of the Morb—which can live indefinitely if left to its own devices—critters have a fixed life expectancy. The maximum age indicates the highest number of cycles that critters will live, barring starvation or other unnatural causes of death.\n\nBabyhood, the period before a critter is mature enough to reproduce, is marked by a slower metabolism and the easy happiness of youth.\n\nMost species live for 75 to 100 cycles on average.";
+
+					public static LocString CONTAINER1_DLC1 = "With the exception of the Beeta Hive and the Morb—which can live indefinitely if left to their own devices—critters have a fixed life expectancy. The maximum age indicates the highest number of cycles that critters will live, barring starvation or other unnatural causes of death.\n\nBabyhood, the period before a critter is mature enough to reproduce, is marked by a slower metabolism and the easy happiness of youth.\n\nMost species live for 75 to 100 cycles on average. The shortest-lived critter is the Beeta, whose lifespan is only five cycles long.";
+				}
+			}
+
+			public class DOMESTICATION
+			{
+				public static LocString TITLE = "Domestication";
+
+				public class BODY
+				{
+					public static LocString CONTAINER1 = "All critters are wild when first encountered, with the exception of babies hatched from eggs laid by domesticated adults—those will be born tame.\n\nDuring the domestication process, the critter becomes less self-reliant and develops a higher baseline of expectations regarding its environment and care. Its metabolism accelerates, resulting in an increased level of required calories.\n\nCritters can be domesticated by Duplicants with the Critter Ranching skill at the Grooming Station, and get excited when it's their turn to be fussed over.";
+				}
+
+				public class WILD
+				{
+					public static LocString TITLE = "Wild";
+
+					public static LocString CONTAINER1 = "Wild critters do not require feeding by the colony's Critter Ranchers, thanks to their slower metabolism. They do, however, produce fewer materials than domesticated critters.\n\nApproaching a wild critter to trap or wrangle it is quite safe, provided that it is a non-hostile species. Attacking a critter will typically provoke a combat response.";
+
+					public static LocString SUBTITLE = "Effects";
+
+					public static LocString WILD_METABOLISM = "    • Critter Metabolism\n";
+
+					public static LocString WILD_POOP = "    • Resource Production\n";
+				}
+
+				public class TAME
+				{
+					public static LocString TITLE = "Tame";
+
+					public static LocString CONTAINER1 = "Domesticated critters produce far more resources and lay eggs at a higher frequency than wild ones. They require additional care in order to maintain the levels of happiness that maximize their utility in the colony. (Happy critters are also generally more pleasant to be around.)\n\nOnce tame, critters can access the Critter Feeder, which is unavailable to wild critters.";
+
+					public static LocString SUBTITLE = "Effects";
+
+					public static LocString TAME_HAPPINESS = "    • Happiness\n";
+
+					public static LocString TAME_METABOLISM = "    • Critter Metabolism";
+				}
+			}
+		}
+
 		public class STORY_TRAITS
 		{
 			public static LocString CLOSE_BUTTON = "Close";
@@ -753,6 +936,10 @@ namespace STRINGS
 
 			public static LocString BUILDINGREQUIREMENTS = "Requirements";
 
+			public static LocString BUILDINGCONSTRUCTIONPROPS = "Construction Properties";
+
+			public static LocString BUILDINGCONSTRUCTIONMATERIALS = "Materials: ";
+
 			public static LocString BUILDINGTYPE = "Room Requirements Class";
 
 			public static LocString SUBENTRIES = "Entries ({0}/{1})";
@@ -761,9 +948,15 @@ namespace STRINGS
 
 			public static LocString ELEMENTTRANSITIONS = "Additional States";
 
-			public static LocString ELEMENTCONSUMEDBY = "Consumed By";
+			public static LocString ELEMENTTRANSITIONSTO = "Transitions To";
+
+			public static LocString ELEMENTTRANSITIONSFROM = "Transitions From";
+
+			public static LocString ELEMENTCONSUMEDBY = "Applications";
 
 			public static LocString ELEMENTPRODUCEDBY = "Produced By";
+
+			public static LocString MATERIALUSEDTOCONSTRUCT = "Construction Uses";
 
 			public static LocString SECTION_UNLOCKABLES = "Undiscovered Data";
 
@@ -775,6 +968,10 @@ namespace STRINGS
 
 			public static LocString INTERNALSTORAGE = "Storage";
 
+			public static LocString CRITTERMAXAGE = "Life Span";
+
+			public static LocString CRITTEROVERCROWDING = "Space Required";
+
 			public static LocString CRITTERDROPS = "Drops";
 
 			public static LocString FOODEFFECTS = "Nutritional Effects";
@@ -782,8 +979,33 @@ namespace STRINGS
 			public static LocString FOODSWITHEFFECT = "Foods with this effect";
 		}
 
+		public class FORMAT_STRINGS
+		{
+			public static LocString TEMPERATURE_OVER = "Temperature over {0}";
+
+			public static LocString TEMPERATURE_UNDER = "Temperature under {0}";
+
+			public static LocString CONSTRUCTION_TIME = "Build Time: {0} seconds";
+
+			public static LocString BUILDING_SIZE = "Building Size: {0} wide x {1} high";
+
+			public static LocString MATERIAL_MASS = "{0} {1}";
+
+			public static LocString TRANSITION_LABEL_TO_ONE_ELEMENT = "{0} to {1}";
+
+			public static LocString TRANSITION_LABEL_TO_TWO_ELEMENTS = "{0} to {1} and {2}";
+		}
+
 		public class CREATURE_DESCRIPTORS
 		{
+			public static LocString MAXAGE = "This critter's typical " + UI.FormatAsLink("Life Span", "CREATURES::GUIDE::FERTILITY") + " is <b>{0}</b>.";
+
+			public static LocString OVERCROWDING = UI.FormatAsLink("Overcrowded", "CREATURES::GUIDE::MOOD") + " when a room has less than <b>{0} cells</b> of space for each critter.";
+
+			public static LocString CONFINED = UI.FormatAsLink("Confined", "CREATURES::GUIDE::MOOD") + " when a room is smaller than <b>{0} cells</b>.";
+
+			public static LocString NON_LETHAL_RANGE = "Livable range: <b>{0}</b> to <b>{1}</b>";
+
 			public class TEMPERATURE
 			{
 				public static LocString COMFORT_RANGE = "Comfort range: <b>{0}</b> to <b>{1}</b>";
@@ -830,7 +1052,7 @@ namespace STRINGS
 				public static LocString CONTAINER1 = string.Concat(new string[]
 				{
 					"Beetas are insectoid creatures that enjoy a symbiotic relationship with the radioactive environment they thrive in.\n\nMuch like the honey bee gathers nectar and processes it to honey, the Beeta turns ",
-					UI.FormatAsLink("Uranium", "URANIUMORE"),
+					UI.FormatAsLink("Uranium Ore", "URANIUMORE"),
 					" into ",
 					UI.FormatAsLink("Enriched Uranium", "ENRICHEDURANIUM"),
 					" through a complex process of isotope separation inside the Beeta Hive.\n\nWhen first observing the Beeta's enrichment process, many scientists note with surprise just how much more efficient the cooperative combination of insect and hive is when compared to even the most advanced industrial processes."
@@ -1076,7 +1298,7 @@ namespace STRINGS
 		{
 			public static LocString TITLE = "Plug Slug";
 
-			public static LocString SUBTITLE = "Domesticatable Critter";
+			public static LocString SUBTITLE = "Domesticable Critter";
 
 			public class BODY
 			{
@@ -2836,7 +3058,7 @@ namespace STRINGS
 
 			public class BODY
 			{
-				public static LocString CONTAINER1 = "Much remains a mystery about the biology of Gas Grass, a plant-like lifeform only recently recovered from missions into outer space.\n\nHowever, it appears to use ambient radiation from space as an energy source, growing rapidly when given a suitable " + UI.FormatAsLink("Chlorine", "CHLORINE") + "-laden environment.";
+				public static LocString CONTAINER1 = "Much remains a mystery about the biology of Gas Grass, a plant-like lifeform only recently recovered from missions into outer space.\n\nHowever, it appears to use ambient radiation from space as an energy source, growing rapidly when given a suitable " + UI.FormatAsLink("Liquid Chlorine", "CHLORINE") + "-laden environment.";
 
 				public static LocString CONTAINER2 = "Initially there was worry that transplanting a Gas Grass specimen on planet or gravity-laden terrestrial body would collapse its internal structures. Luckily, Gas Grass has evolved sturdy tubules to prevent structural damage in the event of pressure changes between its internally transported chlorine and its external environment.";
 			}
@@ -3615,7 +3837,7 @@ namespace STRINGS
 			public static LocString PARAGRAPH_1 = string.Concat(new string[]
 			{
 				"When transporting radioactive materials such as ",
-				UI.FormatAsLink("Uranium", "URANIUMORE"),
+				UI.FormatAsLink("Uranium Ore", "URANIUMORE"),
 				", care must be taken to avoid exposing outside objects to ",
 				UI.FormatAsLink("Radioactive Contaminants", "RADIATIONSICKNESS"),
 				".\n\nUsing proper transportation vessels, such as those which are lined with ",

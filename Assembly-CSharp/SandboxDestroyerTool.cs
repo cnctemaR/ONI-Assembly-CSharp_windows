@@ -24,6 +24,11 @@ public class SandboxDestroyerTool : BrushTool
 		this.affectFoundation = true;
 	}
 
+	protected override string GetDragSound()
+	{
+		return "SandboxTool_Delete_Add";
+	}
+
 	public void Activate()
 	{
 		PlayerController.Instance.ActivateTool(this);
@@ -54,6 +59,12 @@ public class SandboxDestroyerTool : BrushTool
 		{
 			colors.Add(new ToolMenu.CellColorData(num2, this.radiusIndicatorColor));
 		}
+	}
+
+	public override void OnLeftClickDown(Vector3 cursor_pos)
+	{
+		base.OnLeftClickDown(cursor_pos);
+		KFMOD.PlayUISound(GlobalAssets.GetSound("SandboxTool_Delete", false));
 	}
 
 	public override void OnMouseMove(Vector3 cursorPos)

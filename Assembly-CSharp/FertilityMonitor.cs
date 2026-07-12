@@ -20,7 +20,7 @@ public class FertilityMonitor : GameStateMachine<FertilityMonitor, FertilityMoni
 
 	public static bool IsFertile(FertilityMonitor.Instance smi)
 	{
-		return !smi.HasTag(GameTags.Creatures.Confined) && !smi.HasTag(GameTags.Creatures.Expecting);
+		return !smi.HasTag(GameTags.Creatures.PausedReproduction) && !smi.HasTag(GameTags.Creatures.Confined) && !smi.HasTag(GameTags.Creatures.Expecting);
 	}
 
 	public static Tag EggBreedingRoll(List<FertilityMonitor.BreedingChance> breedingChances, bool excludeOriginalCreature = false)

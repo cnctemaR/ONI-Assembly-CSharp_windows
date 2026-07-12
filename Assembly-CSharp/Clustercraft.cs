@@ -499,6 +499,11 @@ public class Clustercraft : ClusterGridEntity, IClusterRange, ISim4000ms, ISim10
 
 	public void DestroyCraftAndModules()
 	{
+		WorldContainer interiorWorld = this.m_moduleInterface.GetInteriorWorld();
+		if (interiorWorld != null)
+		{
+			NameDisplayScreen.Instance.RemoveWorldEntries(interiorWorld.id);
+		}
 		List<RocketModuleCluster> list = this.m_moduleInterface.ClusterModules.Select<Ref<RocketModuleCluster>, RocketModuleCluster>((Ref<RocketModuleCluster> x) => x.Get()).ToList<RocketModuleCluster>();
 		for (int i = list.Count - 1; i >= 0; i--)
 		{

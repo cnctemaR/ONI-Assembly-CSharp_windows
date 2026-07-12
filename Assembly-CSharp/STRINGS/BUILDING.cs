@@ -6,6 +6,13 @@ namespace STRINGS
 	{
 		public class STATUSITEMS
 		{
+			public class SPECIALCARGOBAYCLUSTERCRITTERSTORED
+			{
+				public static LocString NAME = "Contents: {0}";
+
+				public static LocString TOOLTIP = "";
+			}
+
 			public class GEOTUNER_NEEDGEYSER
 			{
 				public static LocString NAME = "No Geyser Selected";
@@ -3683,6 +3690,58 @@ namespace STRINGS
 				public static LocString NAME = "Limited Line of Sight";
 
 				public static LocString TOOLTIP = "This building has a partially obstructed view of space\n\nTo properly function, this building requires an unblocked view of space";
+			}
+
+			public class COMPLEXFABRICATOR
+			{
+				public class COOKING
+				{
+					public static LocString NAME = "Cooking {Item}";
+
+					public static LocString TOOLTIP = "This building is currently whipping up a batch of {Item}";
+				}
+
+				public class PRODUCING
+				{
+					public static LocString NAME = "Producing {Item}";
+
+					public static LocString TOOLTIP = "This building is carrying out its current production orders";
+				}
+
+				public class RESEARCHING
+				{
+					public static LocString NAME = "Researching {Item}";
+
+					public static LocString TOOLTIP = "This building is currently conducting important research";
+				}
+
+				public class ANALYZYINGn
+				{
+					public static LocString NAME = "Analyzing {Item}";
+
+					public static LocString TOOLTIP = "This building is currently analyzing a fascinating artifact";
+				}
+
+				public class UNTRAINING
+				{
+					public static LocString NAME = "Untraining {Duplicant}";
+
+					public static LocString TOOLTIP = "Restoring {Duplicant} to a blissfully ignorant state";
+				}
+
+				public class TELESCOPE
+				{
+					public static LocString NAME = "Studying Space";
+
+					public static LocString TOOLTIP = "This building is currently investigating the mysteries of space";
+				}
+
+				public class CLUSTERTELESCOPEMETEOR
+				{
+					public static LocString NAME = "Studying Meteor";
+
+					public static LocString TOOLTIP = "This building is currently studying a meteor";
+				}
 			}
 		}
 

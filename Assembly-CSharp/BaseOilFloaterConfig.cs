@@ -16,13 +16,16 @@ public static class BaseOilFloaterConfig
 		{
 			gameObject.AddOrGet<SymbolOverrideController>().ApplySymbolOverridesByAffix(Assets.GetAnim(anim_file), symbolOverridePrefix, null, 0);
 		}
+		Pickupable pickupable = gameObject.AddOrGet<Pickupable>();
+		int num2 = CREATURES.SORTING.CRITTER_ORDER["Oilfloater"];
+		pickupable.sortOrder = num2;
 		gameObject.AddOrGet<Trappable>();
 		gameObject.AddOrGet<LoopingSounds>();
 		gameObject.AddOrGetDef<ThreatMonitor.Def>();
 		gameObject.AddOrGetDef<SubmergedMonitor.Def>();
 		gameObject.AddOrGetDef<CreatureFallMonitor.Def>().canSwim = true;
 		gameObject.AddWeapon(1f, 1f, AttackProperties.DamageType.Standard, AttackProperties.TargetType.Single, 1, 0f);
-		EntityTemplates.CreateAndRegisterBaggedCreature(gameObject, true, false, false);
+		EntityTemplates.CreateAndRegisterBaggedCreature(gameObject, true, true, false);
 		string text = "OilFloater_intake_air";
 		if (is_baby)
 		{

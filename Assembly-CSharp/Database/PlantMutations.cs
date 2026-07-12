@@ -59,7 +59,6 @@ namespace Database
 				.BonusCrop(RotPileConfig.ID, 4f)
 				.AddDiseaseToHarvest(Db.Get().Diseases.GetIndex(Db.Get().Diseases.FoodGerms.Id), 10000)
 				.ForcePrefersDarkness()
-				.RestrictPrefabID("GasGrassSeed")
 				.VisualFGFX("mutate_stink_fx_kanim")
 				.VisualSymbolTint("swap_crop01", -0.2f, -0.1f, -0.5f)
 				.VisualSymbolTint("swap_crop02", -0.2f, -0.1f, -0.5f);

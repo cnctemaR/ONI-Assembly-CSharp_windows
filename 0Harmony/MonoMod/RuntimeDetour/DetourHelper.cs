@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.Linq.Expressions;
 using System.Reflection;
 using Mono.Cecil;
@@ -26,13 +27,18 @@ namespace MonoMod.RuntimeDetour
 					{
 						detourRuntimePlatform = DetourHelper._Runtime;
 					}
+					else if (DetourHelper._RuntimeInit)
+					{
+						detourRuntimePlatform = null;
+					}
 					else
 					{
-						if (Type.GetType("Mono.Runtime") != null)
+						DetourHelper._RuntimeInit = true;
+						if (ReflectionHelper.IsMono)
 						{
 							DetourHelper._Runtime = new DetourRuntimeMonoPlatform();
 						}
-						else if (typeof(object).Assembly.GetName().Name == "System.Private.CoreLib")
+						else if (ReflectionHelper.IsCore)
 						{
 							DetourHelper._Runtime = DetourRuntimeNETCorePlatform.Create();
 						}
@@ -67,8 +73,13 @@ namespace MonoMod.RuntimeDetour
 					{
 						detourNativePlatform = DetourHelper._Native;
 					}
+					else if (DetourHelper._NativeInit)
+					{
+						detourNativePlatform = null;
+					}
 					else
 					{
+						DetourHelper._NativeInit = true;
 						IDetourNativePlatform detourNativePlatform2;
 						if (PlatformHelper.Is(Platform.ARM))
 						{
@@ -84,7 +95,7 @@ namespace MonoMod.RuntimeDetour
 						}
 						else
 						{
-							if (Type.GetType("Mono.Runtime") != null)
+							if (ReflectionHelper.IsMono)
 							{
 								try
 								{
@@ -94,12 +105,16 @@ namespace MonoMod.RuntimeDetour
 								{
 								}
 							}
-							try
+							string environmentVariable = Environment.GetEnvironmentVariable("MONOMOD_RUNTIMEDETOUR_MONOPOSIXHELPER");
+							if ((ReflectionHelper.IsMono && environmentVariable != "0") || environmentVariable == "1")
 							{
-								return DetourHelper._Native = new DetourNativeMonoPosixPlatform(detourNativePlatform2);
-							}
-							catch
-							{
+								try
+								{
+									return DetourHelper._Native = new DetourNativeMonoPosixPlatform(detourNativePlatform2);
+								}
+								catch
+								{
+								}
 							}
 							try
 							{
@@ -159,6 +174,11 @@ namespace MonoMod.RuntimeDetour
 			offs += 8;
 		}
 
+		public static MethodBase GetIdentifiable(this MethodBase method)
+		{
+			return DetourHelper.Runtime.GetIdentifiable(method);
+		}
+
 		public static IntPtr GetNativeStart(this MethodBase method)
 		{
 			return DetourHelper.Runtime.GetNativeStart(method);
@@ -207,7 +227,7 @@ namespace MonoMod.RuntimeDetour
 				array[i] = parameters[i].ParameterType;
 			}
 			MethodInfo methodInfo2;
-			using (DynamicMethodDefinition dynamicMethodDefinition = new DynamicMethodDefinition("Native<" + ((long)target).ToString("X16") + ">", type, array))
+			using (DynamicMethodDefinition dynamicMethodDefinition = new DynamicMethodDefinition("Native<" + ((long)target).ToString("X16", CultureInfo.InvariantCulture) + ">", type, array))
 			{
 				methodInfo2 = dynamicMethodDefinition.StubCriticalDetour().Generate().Pin<MethodInfo>();
 			}
@@ -278,9 +298,13 @@ namespace MonoMod.RuntimeDetour
 
 		private static readonly object _RuntimeLock = new object();
 
+		private static bool _RuntimeInit = false;
+
 		private static IDetourRuntimePlatform _Runtime;
 
 		private static readonly object _NativeLock = new object();
+
+		private static bool _NativeInit = false;
 
 		private static IDetourNativePlatform _Native;
 

@@ -235,9 +235,11 @@ public class Grid
 		HashSet<int> minionIDsWithSuitReservations = suitMarker.minionIDsWithSuitReservations;
 		if (!reserve)
 		{
-			return minionIDsWithSuitReservations.Remove(minionInstanceID);
+			bool flag = minionIDsWithSuitReservations.Remove(minionInstanceID);
+			DebugUtil.Assert(flag);
+			return flag;
 		}
-		if (minionIDsWithSuitReservations.Count == suitMarker.suitCount)
+		if (minionIDsWithSuitReservations.Count >= suitMarker.suitCount)
 		{
 			return false;
 		}
@@ -252,9 +254,11 @@ public class Grid
 		HashSet<int> minionIDsWithEmptyLockerReservations = suitMarker.minionIDsWithEmptyLockerReservations;
 		if (!reserve)
 		{
-			return minionIDsWithEmptyLockerReservations.Remove(minionInstanceID);
+			bool flag = minionIDsWithEmptyLockerReservations.Remove(minionInstanceID);
+			DebugUtil.Assert(flag);
+			return flag;
 		}
-		if (minionIDsWithEmptyLockerReservations.Count == suitMarker.emptyLockerCount)
+		if (minionIDsWithEmptyLockerReservations.Count >= suitMarker.emptyLockerCount)
 		{
 			return false;
 		}

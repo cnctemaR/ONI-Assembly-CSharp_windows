@@ -52,6 +52,11 @@ public class SteamTurbineConfig2 : IBuildingConfig
 		SteamTurbineConfig2.AddVisualizer(go);
 	}
 
+	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
+	{
+		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.IndustrialMachinery, false);
+	}
+
 	public override void DoPostConfigureComplete(GameObject go)
 	{
 		Storage storage = go.AddComponent<Storage>();

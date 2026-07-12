@@ -1191,6 +1191,8 @@ public class ComplexFabricator : KMonoBehaviour, ISim200ms, ISim1000ms
 
 	public Tag keepAdditionalTag = Tag.Invalid;
 
+	public StatusItem workingStatusItem = Db.Get().BuildingStatusItems.ComplexFabricatorProducing;
+
 	public static int MAX_QUEUE_SIZE = 99;
 
 	public static int QUEUE_INFINITE = -1;

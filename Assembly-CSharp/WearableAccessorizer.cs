@@ -248,7 +248,32 @@ public class WearableAccessorizer : KMonoBehaviour
 		this.animController.SetSymbolVisiblity(Db.Get().AccessorySlots.Arm.targetSymbolId, flag6);
 		this.animController.SetSymbolVisiblity(Db.Get().AccessorySlots.Leg.targetSymbolId, flag7 && !flag3);
 		this.animController.SetSymbolVisiblity(Db.Get().AccessorySlots.Skirt.targetSymbolId, flag3);
+		if (flag3)
+		{
+			this.SkirtHACK(wearableType);
+		}
 		WearableAccessorizer.UpdateHairBasedOnHat(this.animController, flag2);
+	}
+
+	private void SkirtHACK(WearableAccessorizer.WearableType wearable_type)
+	{
+		if (this.wearables.ContainsKey(wearable_type))
+		{
+			SymbolOverrideController component = base.GetComponent<SymbolOverrideController>();
+			WearableAccessorizer.Wearable wearable = this.wearables[wearable_type];
+			int buildOverridePriority = wearable.buildOverridePriority;
+			foreach (KAnimFile kanimFile in wearable.BuildAnims)
+			{
+				foreach (KAnim.Build.Symbol symbol in kanimFile.GetData().build.symbols)
+				{
+					if (HashCache.Get().Get(symbol.hash).EndsWith(WearableAccessorizer.cropped))
+					{
+						component.AddSymbolOverride(WearableAccessorizer.torso, symbol, buildOverridePriority);
+						break;
+					}
+				}
+			}
+		}
 	}
 
 	public static void UpdateHairBasedOnHat(KAnimControllerBase kbac, bool hasHat)
@@ -381,6 +406,10 @@ public class WearableAccessorizer : KMonoBehaviour
 		if (!this.wearables.ContainsKey(wearableType))
 		{
 			int num = ((wearableType == WearableAccessorizer.WearableType.CustomClothing) ? 4 : 6);
+			if (clothingItem.Category == PermitCategory.DupeBottoms && clothingItem.AnimFile.name.Contains("skirt"))
+			{
+				num--;
+			}
 			this.wearables[wearableType] = new WearableAccessorizer.Wearable(new List<KAnimFile>(), num);
 		}
 		this.wearables[wearableType].AddAnim(clothingItem.AnimFile);
@@ -527,6 +556,10 @@ public class WearableAccessorizer : KMonoBehaviour
 
 	[Serialize]
 	private Dictionary<WearableAccessorizer.WearableType, WearableAccessorizer.Wearable> wearables = new Dictionary<WearableAccessorizer.WearableType, WearableAccessorizer.Wearable>();
+
+	private static string torso = "torso";
+
+	private static string cropped = "_cropped";
 
 	public enum WearableType
 	{

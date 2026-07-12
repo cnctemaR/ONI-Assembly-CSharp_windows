@@ -12,9 +12,10 @@ public class CodexRecipePanel : CodexWidget<CodexRecipePanel>
 	{
 	}
 
-	public CodexRecipePanel(ComplexRecipe recipe)
+	public CodexRecipePanel(ComplexRecipe recipe, bool shouldUseFabricatorForTitle = false)
 	{
 		this.complexRecipe = recipe;
+		this.useFabricatorForTitle = shouldUseFabricatorForTitle;
 	}
 
 	public CodexRecipePanel(Recipe rec)
@@ -81,7 +82,6 @@ public class CodexRecipePanel : CodexWidget<CodexRecipePanel>
 
 	private void ConfigureComplexRecipe()
 	{
-		this.title.text = this.complexRecipe.results[0].material.ProperName();
 		ComplexRecipe.RecipeElement[] array = this.complexRecipe.ingredients;
 		for (int i = 0; i < array.Length; i++)
 		{
@@ -139,6 +139,12 @@ public class CodexRecipePanel : CodexWidget<CodexRecipePanel>
 		{
 			ManagementMenu.Instance.codexScreen.ChangeArticle(UI.ExtractLinkID(fabricator.GetProperName()), false, default(Vector3), CodexScreen.HistoryDirection.NewArticle);
 		};
+		if (this.useFabricatorForTitle)
+		{
+			this.title.text = fabricator.GetProperName();
+			return;
+		}
+		this.title.text = this.complexRecipe.results[0].material.ProperName();
 	}
 
 	private void ClearPanel()
@@ -172,4 +178,6 @@ public class CodexRecipePanel : CodexWidget<CodexRecipePanel>
 	private ComplexRecipe complexRecipe;
 
 	private Recipe recipe;
+
+	private bool useFabricatorForTitle;
 }

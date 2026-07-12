@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using KMod;
 using STRINGS;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class ReportErrorDialog : MonoBehaviour
 {
@@ -28,6 +29,8 @@ public class ReportErrorDialog : MonoBehaviour
 		this.continueGameButton.onClick += this.OnSelect_CONTINUE;
 		this.quitButton.onClick += this.OnSelect_QUIT;
 		this.messageInputField.text = UI.CRASHSCREEN.BODY;
+		KCrashReporter.onCrashReported += this.OpenRefMessage;
+		KCrashReporter.onCrashUploadProgress += this.UpdateProgressBar;
 	}
 
 	private void BuildModsList()
@@ -76,6 +79,8 @@ public class ReportErrorDialog : MonoBehaviour
 		{
 			KScreenManager.Instance.DisableInput(false);
 		}
+		KCrashReporter.onCrashReported -= this.OpenRefMessage;
+		KCrashReporter.onCrashUploadProgress -= this.UpdateProgressBar;
 	}
 
 	public void OnKeyDown(KButtonEvent e)
@@ -143,10 +148,30 @@ public class ReportErrorDialog : MonoBehaviour
 		}
 	}
 
-	public void OpenRefMessage()
+	public void OpenRefMessage(bool success)
 	{
 		this.submitButton.gameObject.SetActive(false);
+		this.uploadInProgress.SetActive(false);
 		this.referenceMessage.SetActive(true);
+		this.messageText.text = (success ? UI.CRASHSCREEN.THANKYOU : UI.CRASHSCREEN.UPLOAD_FAILED);
+		this.m_crashSubmitted = success;
+	}
+
+	public void OpenUploadingMessagee()
+	{
+		this.submitButton.gameObject.SetActive(false);
+		this.uploadInProgress.SetActive(true);
+		this.referenceMessage.SetActive(false);
+		this.progressBar.fillAmount = 0f;
+		this.progressText.text = UI.CRASHSCREEN.UPLOADINPROGRESS.Replace("{0}", GameUtil.GetFormattedPercent(0f, GameUtil.TimeSlice.None));
+	}
+
+	public void OnSelect_MESSAGE()
+	{
+		if (!this.m_crashSubmitted)
+		{
+			Application.OpenURL("https://forums.kleientertainment.com/klei-bug-tracker/oni/");
+		}
 	}
 
 	public string UserMessage()
@@ -157,7 +182,13 @@ public class ReportErrorDialog : MonoBehaviour
 	private void Submit()
 	{
 		this.submitAction();
-		this.OpenRefMessage();
+		this.OpenUploadingMessagee();
+	}
+
+	public void UpdateProgressBar(float progress)
+	{
+		this.progressBar.fillAmount = progress;
+		this.progressText.text = UI.CRASHSCREEN.UPLOADINPROGRESS.Replace("{0}", GameUtil.GetFormattedPercent(progress * 100f, GameUtil.TimeSlice.None));
 	}
 
 	private global::System.Action submitAction;
@@ -168,9 +199,21 @@ public class ReportErrorDialog : MonoBehaviour
 
 	public KInputTextField messageInputField;
 
+	[Header("Message")]
 	public GameObject referenceMessage;
 
+	public LocText messageText;
+
+	[Header("Upload Progress")]
+	public GameObject uploadInProgress;
+
+	public Image progressBar;
+
+	public LocText progressText;
+
 	private string m_stackTrace;
+
+	private bool m_crashSubmitted;
 
 	[SerializeField]
 	private KButton submitButton;

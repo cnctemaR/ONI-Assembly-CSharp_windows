@@ -80,6 +80,23 @@ public class Butcherable : Workable, ISaveLoadable
 		this.OnButcherComplete();
 	}
 
+	public GameObject[] CreateDrops()
+	{
+		GameObject[] array = new GameObject[this.drops.Length];
+		for (int i = 0; i < this.drops.Length; i++)
+		{
+			GameObject gameObject = Scenario.SpawnPrefab(this.GetDropSpawnLocation(), 0, 0, this.drops[i], Grid.SceneLayer.Ore);
+			gameObject.SetActive(true);
+			Edible component = gameObject.GetComponent<Edible>();
+			if (component)
+			{
+				ReportManager.Instance.ReportValue(ReportManager.ReportType.CaloriesCreated, component.Calories, StringFormatter.Replace(UI.ENDOFDAYREPORT.NOTES.BUTCHERED, "{0}", gameObject.GetProperName()), UI.ENDOFDAYREPORT.NOTES.BUTCHERED_CONTEXT);
+			}
+			array[i] = gameObject;
+		}
+		return array;
+	}
+
 	public void OnButcherComplete()
 	{
 		if (this.butchered)
@@ -91,21 +108,24 @@ public class Butcherable : Workable, ISaveLoadable
 		{
 			SelectTool.Instance.Select(null, false);
 		}
-		for (int i = 0; i < this.drops.Length; i++)
+		Pickupable component2 = base.GetComponent<Pickupable>();
+		Storage storage = ((component2 != null) ? component2.storage : null);
+		GameObject[] array = this.CreateDrops();
+		if (array != null)
 		{
-			GameObject gameObject = Scenario.SpawnPrefab(this.GetDropSpawnLocation(), 0, 0, this.drops[i], Grid.SceneLayer.Ore);
-			gameObject.SetActive(true);
-			Edible component2 = gameObject.GetComponent<Edible>();
-			if (component2)
+			for (int i = 0; i < array.Length; i++)
 			{
-				ReportManager.Instance.ReportValue(ReportManager.ReportType.CaloriesCreated, component2.Calories, StringFormatter.Replace(UI.ENDOFDAYREPORT.NOTES.BUTCHERED, "{0}", gameObject.GetProperName()), UI.ENDOFDAYREPORT.NOTES.BUTCHERED_CONTEXT);
+				if (storage != null && storage.storeDropsFromButcherables)
+				{
+					storage.Store(array[i], false, false, true, false);
+				}
 			}
 		}
 		this.chore = null;
 		this.butchered = true;
 		this.readyToButcher = false;
 		Game.Instance.userMenu.Refresh(base.gameObject);
-		base.Trigger(395373363, null);
+		base.Trigger(395373363, array);
 	}
 
 	private int GetDropSpawnLocation()

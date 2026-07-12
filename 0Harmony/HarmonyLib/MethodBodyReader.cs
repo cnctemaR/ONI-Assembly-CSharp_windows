@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using MonoMod.Utils;
 using MonoMod.Utils.Cil;
 
@@ -20,7 +21,7 @@ namespace HarmonyLib
 			}
 			MethodBodyReader methodBodyReader = new MethodBodyReader(method, generator);
 			methodBodyReader.DeclareVariables(null);
-			methodBodyReader.ReadInstructions();
+			methodBodyReader.GenerateInstructions();
 			return methodBodyReader.ilInstructions;
 		}
 
@@ -108,7 +109,7 @@ namespace HarmonyLib
 			this.argumentShift = argumentShift;
 		}
 
-		internal void ReadInstructions()
+		internal void GenerateInstructions()
 		{
 			while (this.ilBytes.position < this.ilBytes.buffer.Length)
 			{
@@ -120,8 +121,46 @@ namespace HarmonyLib
 				this.ReadOperand(ilinstruction);
 				this.ilInstructions.Add(ilinstruction);
 			}
+			this.HandleNativeMethod();
 			this.ResolveBranches();
 			this.ParseExceptions();
+		}
+
+		internal void HandleNativeMethod()
+		{
+			MethodInfo methodInfo = this.method as MethodInfo;
+			if (methodInfo == null)
+			{
+				return;
+			}
+			DllImportAttribute dllImportAttribute = methodInfo.GetCustomAttributes(false).OfType<DllImportAttribute>().FirstOrDefault<DllImportAttribute>();
+			if (dllImportAttribute == null)
+			{
+				return;
+			}
+			Type declaringType = methodInfo.DeclaringType;
+			AssemblyName assemblyName = new AssemblyName((((declaringType != null) ? declaringType.FullName : null) ?? "").Replace(".", "_") + "_" + methodInfo.Name);
+			TypeBuilder typeBuilder = AssemblyBuilder.DefineDynamicAssembly(assemblyName, AssemblyBuilderAccess.Run).DefineDynamicModule(assemblyName.Name).DefineType("NativeMethodHolder", TypeAttributes.Public | TypeAttributes.UnicodeClass);
+			MethodBuilder methodBuilder = typeBuilder.DefinePInvokeMethod(methodInfo.Name, dllImportAttribute.Value, MethodAttributes.FamANDAssem | MethodAttributes.Family | MethodAttributes.Static | MethodAttributes.PinvokeImpl, CallingConventions.Standard, methodInfo.ReturnType, (from x in methodInfo.GetParameters()
+				select x.ParameterType).ToArray<Type>(), dllImportAttribute.CallingConvention, dllImportAttribute.CharSet);
+			methodBuilder.SetImplementationFlags(methodBuilder.GetMethodImplementationFlags() | MethodImplAttributes.PreserveSig);
+			MethodInfo methodInfo2 = typeBuilder.CreateType().GetMethod(methodInfo.Name);
+			int num = this.method.GetParameters().Length;
+			for (int i = 0; i < num; i++)
+			{
+				this.ilInstructions.Add(new ILInstruction(OpCodes.Ldarg, i)
+				{
+					offset = 0
+				});
+			}
+			this.ilInstructions.Add(new ILInstruction(OpCodes.Call, methodInfo2)
+			{
+				offset = num
+			});
+			this.ilInstructions.Add(new ILInstruction(OpCodes.Ret, null)
+			{
+				offset = num + 5
+			});
 		}
 
 		internal void DeclareVariables(LocalBuilder[] existingVariables)
@@ -415,6 +454,11 @@ namespace HarmonyLib
 			{
 				int num2 = this.ilBytes.ReadInt32();
 				instruction.operand = this.module.ResolveField(num2, this.typeArguments, this.methodArguments);
+				Type declaringType = ((MemberInfo)instruction.operand).DeclaringType;
+				if (declaringType != null)
+				{
+					declaringType.FixReflectionCacheAuto();
+				}
 				instruction.argument = (FieldInfo)instruction.operand;
 				return;
 			}
@@ -436,6 +480,11 @@ namespace HarmonyLib
 			{
 				int num5 = this.ilBytes.ReadInt32();
 				instruction.operand = this.module.ResolveMethod(num5, this.typeArguments, this.methodArguments);
+				Type declaringType2 = ((MemberInfo)instruction.operand).DeclaringType;
+				if (declaringType2 != null)
+				{
+					declaringType2.FixReflectionCacheAuto();
+				}
 				if (instruction.operand is ConstructorInfo)
 				{
 					instruction.argument = (ConstructorInfo)instruction.operand;
@@ -490,6 +539,11 @@ namespace HarmonyLib
 			{
 				int num11 = this.ilBytes.ReadInt32();
 				instruction.operand = this.module.ResolveMember(num11, this.typeArguments, this.methodArguments);
+				Type declaringType3 = ((MemberInfo)instruction.operand).DeclaringType;
+				if (declaringType3 != null)
+				{
+					declaringType3.FixReflectionCacheAuto();
+				}
 				MethodBodyReader.GetMemberInfoValue((MemberInfo)instruction.operand, out instruction.argument);
 				return;
 			}
@@ -497,6 +551,7 @@ namespace HarmonyLib
 			{
 				int num12 = this.ilBytes.ReadInt32();
 				instruction.operand = this.module.ResolveType(num12, this.typeArguments, this.methodArguments);
+				((Type)instruction.operand).FixReflectionCacheAuto();
 				instruction.argument = (Type)instruction.operand;
 				return;
 			}
@@ -573,17 +628,22 @@ namespace HarmonyLib
 
 		private ILInstruction GetInstruction(int offset, bool isEndOfInstruction)
 		{
-			int num = this.ilInstructions.Count - 1;
-			if (offset < 0 || offset > this.ilInstructions[num].offset)
+			if (offset < 0)
 			{
-				throw new Exception(string.Format("Instruction offset {0} is outside valid range 0 - {1}", offset, this.ilInstructions[num].offset));
+				throw new ArgumentOutOfRangeException("offset", offset, string.Format("Instruction offset {0} is less than 0", offset));
+			}
+			int num = this.ilInstructions.Count - 1;
+			ILInstruction ilinstruction = this.ilInstructions[num];
+			if (offset > ilinstruction.offset + ilinstruction.GetSize() - 1)
+			{
+				throw new ArgumentOutOfRangeException("offset", offset, string.Format("Instruction offset {0} is outside valid range 0 - {1}", offset, ilinstruction.offset + ilinstruction.GetSize() - 1));
 			}
 			int i = 0;
 			int num2 = num;
 			while (i <= num2)
 			{
 				int num3 = i + (num2 - i) / 2;
-				ILInstruction ilinstruction = this.ilInstructions[num3];
+				ilinstruction = this.ilInstructions[num3];
 				if (isEndOfInstruction)
 				{
 					if (offset == ilinstruction.offset + ilinstruction.GetSize() - 1)

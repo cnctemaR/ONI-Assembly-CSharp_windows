@@ -68,7 +68,7 @@ namespace Klei.AI
 			return attribute.formatter.GetTooltip(attribute, this.GetPreModifiers(attribute), null);
 		}
 
-		private List<AttributeModifier> GetPreModifiers(Attribute attribute)
+		public List<AttributeModifier> GetPreModifiers(Attribute attribute)
 		{
 			List<AttributeModifier> list = new List<AttributeModifier>();
 			foreach (string text in this.initialTraits)

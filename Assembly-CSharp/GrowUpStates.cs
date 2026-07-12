@@ -7,7 +7,10 @@ public class GrowUpStates : GameStateMachine<GrowUpStates, GrowUpStates.Instance
 	{
 		default_state = this.grow_up_pre;
 		this.root.ToggleStatusItem(CREATURES.STATUSITEMS.GROWINGUP.NAME, CREATURES.STATUSITEMS.GROWINGUP.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 129022, null, null, Db.Get().StatusItemCategories.Main);
-		this.grow_up_pre.QueueAnim("growup_pre", false, null).OnAnimQueueComplete(this.spawn_adult);
+		this.grow_up_pre.Enter(delegate(GrowUpStates.Instance smi)
+		{
+			smi.PlayPreGrowAnimation();
+		}).OnAnimQueueComplete(this.spawn_adult).ScheduleGoTo(4f, this.spawn_adult);
 		this.spawn_adult.Enter(new StateMachine<GrowUpStates, GrowUpStates.Instance, IStateMachineTarget, GrowUpStates.Def>.State.Callback(GrowUpStates.SpawnAdult));
 	}
 
@@ -15,6 +18,8 @@ public class GrowUpStates : GameStateMachine<GrowUpStates, GrowUpStates.Instance
 	{
 		smi.GetSMI<BabyMonitor.Instance>().SpawnAdult();
 	}
+
+	public const float GROW_PRE_TIMEOUT = 4f;
 
 	public GameStateMachine<GrowUpStates, GrowUpStates.Instance, IStateMachineTarget, GrowUpStates.Def>.State grow_up_pre;
 
@@ -30,6 +35,19 @@ public class GrowUpStates : GameStateMachine<GrowUpStates, GrowUpStates.Instance
 			: base(chore, def)
 		{
 			chore.AddPrecondition(ChorePreconditions.instance.CheckBehaviourPrecondition, GameTags.Creatures.Behaviours.GrowUpBehaviour);
+		}
+
+		public void PlayPreGrowAnimation()
+		{
+			if (base.gameObject.HasTag(GameTags.Creatures.PreventGrowAnimation))
+			{
+				return;
+			}
+			KAnimControllerBase component = base.gameObject.GetComponent<KAnimControllerBase>();
+			if (component != null)
+			{
+				component.Play("growup_pre", KAnim.PlayMode.Once, 1f, 0f);
+			}
 		}
 	}
 }

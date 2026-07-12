@@ -29,7 +29,7 @@ namespace MonoMod.Utils
 			{
 				return null;
 			}
-			if (DynamicMethodDefinition._IsMono && !(mi is DynamicMethod) && mi.DeclaringType != null)
+			if (ReflectionHelper.IsMono && !(mi is DynamicMethod) && mi.DeclaringType != null)
 			{
 				Module module = ((mi != null) ? mi.Module : null);
 				if (module == null)

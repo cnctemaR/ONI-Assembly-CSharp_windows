@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Reflection;
+using System.Runtime.InteropServices;
 
 namespace MonoMod.Utils
 {
@@ -20,7 +22,7 @@ namespace MonoMod.Utils
 			{
 				text = Environment.OSVersion.Platform.ToString();
 			}
-			text = text.ToLowerInvariant();
+			text = text.ToLower(CultureInfo.InvariantCulture);
 			if (text.Contains("win"))
 			{
 				PlatformHelper._current = Platform.Windows;
@@ -33,13 +35,20 @@ namespace MonoMod.Utils
 			{
 				PlatformHelper._current = Platform.Linux;
 			}
-			if (PlatformHelper.Is(Platform.Linux) && Directory.Exists("/data") && File.Exists("/system/build.prop"))
+			if (PlatformHelper._current != Platform.Unknown)
 			{
-				PlatformHelper._current = Platform.Android;
-			}
-			else if (PlatformHelper.Is(Platform.Unix) && Directory.Exists("/Applications") && Directory.Exists("/System"))
-			{
-				PlatformHelper._current = Platform.iOS;
+				if (PlatformHelper.Is(Platform.Linux) && Directory.Exists("/data") && File.Exists("/system/build.prop"))
+				{
+					PlatformHelper._current = Platform.Android;
+				}
+				else if (PlatformHelper.Is(Platform.Unix) && Directory.Exists("/Applications") && Directory.Exists("/System") && Directory.Exists("/User") && !Directory.Exists("/Users"))
+				{
+					PlatformHelper._current = Platform.iOS;
+				}
+				else if (PlatformHelper.Is(Platform.Windows) && PlatformHelper.CheckWine())
+				{
+					PlatformHelper._current |= Platform.Wine;
+				}
 			}
 			PropertyInfo property2 = typeof(Environment).GetProperty("Is64BitOperatingSystem");
 			MethodInfo methodInfo = ((property2 != null) ? property2.GetGetMethod() : null);
@@ -51,7 +60,7 @@ namespace MonoMod.Utils
 			{
 				PlatformHelper._current |= ((IntPtr.Size >= 8) ? Platform.Bits64 : ((Platform)0));
 			}
-			if ((PlatformHelper.Is(Platform.Unix) || PlatformHelper.Is(Platform.Unknown)) && Type.GetType("Mono.Runtime") != null)
+			if (PlatformHelper._current != Platform.Unknown && (PlatformHelper.Is(Platform.Unix) || PlatformHelper.Is(Platform.Unknown)) && ReflectionHelper.IsMono)
 			{
 				try
 				{
@@ -64,7 +73,7 @@ namespace MonoMod.Utils
 					{
 						text2 = process.StandardOutput.ReadLine().Trim();
 					}
-					if (text2.StartsWith("aarch") || text2.StartsWith("arm"))
+					if (text2.StartsWith("aarch", StringComparison.Ordinal) || text2.StartsWith("arm", StringComparison.Ordinal))
 					{
 						PlatformHelper._current |= Platform.ARM;
 					}
@@ -124,6 +133,37 @@ namespace MonoMod.Utils
 		{
 			return (PlatformHelper.Current & platform) == platform;
 		}
+
+		private static bool CheckWine()
+		{
+			string text = Environment.GetEnvironmentVariable("MONOMOD_WINE");
+			if (text == "1")
+			{
+				return true;
+			}
+			if (text == "0")
+			{
+				return false;
+			}
+			string environmentVariable = Environment.GetEnvironmentVariable("XL_WINEONLINUX");
+			text = ((environmentVariable != null) ? environmentVariable.ToLower(CultureInfo.InvariantCulture) : null);
+			if (text == "true")
+			{
+				return true;
+			}
+			if (text == "false")
+			{
+				return false;
+			}
+			IntPtr moduleHandle = PlatformHelper.GetModuleHandle("ntdll.dll");
+			return moduleHandle != IntPtr.Zero && PlatformHelper.GetProcAddress(moduleHandle, "wine_get_version") != IntPtr.Zero;
+		}
+
+		[DllImport("kernel32", SetLastError = true)]
+		private static extern IntPtr GetModuleHandle(string lpModuleName);
+
+		[DllImport("kernel32", CharSet = CharSet.Ansi, ExactSpelling = true, SetLastError = true)]
+		private static extern IntPtr GetProcAddress(IntPtr hModule, string procName);
 
 		private static Platform _current = Platform.Unknown;
 

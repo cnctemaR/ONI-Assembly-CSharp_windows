@@ -16,7 +16,7 @@ public class OxidizerTankClusterConfig : IBuildingConfig
 		string text = "OxidizerTankCluster";
 		int num = 5;
 		int num2 = 5;
-		string text2 = "rocket_oxidizer_tank_kanim";
+		string text2 = "rocket_cluster_oxidizer_tank_kanim";
 		int num3 = 1000;
 		float num4 = 60f;
 		float[] fuel_TANK_DRY_MASS = global::TUNING.BUILDINGS.ROCKETRY_MASS_KG.FUEL_TANK_DRY_MASS;

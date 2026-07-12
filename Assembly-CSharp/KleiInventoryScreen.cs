@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using Database;
 using STRINGS;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -54,28 +55,103 @@ public class KleiInventoryScreen : KModalScreen
 		base.OnShow(show);
 		if (show)
 		{
-			this.galleryGridLayouter.RequestGridResize();
-			this.categoryListContent.GetComponent<RectTransform>().offsetMax = new Vector2(0f, 0f);
-			this.PopulateCategories();
-			this.PopulateGallery();
-			this.SelectCategory("BUILDINGS");
+			this.InitConfig();
+			this.ToggleDoublesOnly(0);
+			this.ClearSearch();
 		}
+	}
+
+	private void ToggleDoublesOnly(int newState)
+	{
+		this.showFilterState = newState;
+		this.doublesOnlyToggle.ChangeState(this.showFilterState);
+		this.doublesOnlyToggle.GetComponentInChildren<LocText>().text = this.showFilterState.ToString() + "+";
+		string text = "";
+		switch (this.showFilterState)
+		{
+		case 0:
+			text = UI.KLEI_INVENTORY_SCREEN.TOOLTIP_VIEW_ALL_ITEMS;
+			break;
+		case 1:
+			text = UI.KLEI_INVENTORY_SCREEN.TOOLTIP_VIEW_OWNED_ONLY;
+			break;
+		case 2:
+			text = UI.KLEI_INVENTORY_SCREEN.TOOLTIP_VIEW_DOUBLES_ONLY;
+			break;
+		}
+		ToolTip component = this.doublesOnlyToggle.GetComponent<ToolTip>();
+		component.SetSimpleTooltip(text);
+		component.refreshWhileHovering = true;
+		component.forceRefresh = true;
+		this.RefreshGallery();
+	}
+
+	private void InitConfig()
+	{
+		if (this.initConfigComplete)
+		{
+			return;
+		}
+		this.initConfigComplete = true;
+		this.galleryGridLayouter.RequestGridResize();
+		this.categoryListContent.GetComponent<RectTransform>().offsetMax = new Vector2(0f, 0f);
+		this.PopulateCategories();
+		this.PopulateGallery();
+		this.SelectCategory("BUILDINGS");
+		this.searchField.onValueChanged.RemoveAllListeners();
+		this.searchField.onValueChanged.AddListener(delegate(string value)
+		{
+			this.RefreshGallery();
+		});
+		this.clearSearchButton.ClearOnClick();
+		this.clearSearchButton.onClick += this.ClearSearch;
+		MultiToggle multiToggle = this.doublesOnlyToggle;
+		multiToggle.onClick = (global::System.Action)Delegate.Combine(multiToggle.onClick, new global::System.Action(delegate
+		{
+			int num = (this.showFilterState + 1) % 3;
+			this.ToggleDoublesOnly(num);
+		}));
 	}
 
 	protected override void OnCmpEnable()
 	{
 		base.OnCmpEnable();
+		this.ToggleDoublesOnly(0);
+		this.ClearSearch();
+		if (!this.initConfigComplete)
+		{
+			this.InitConfig();
+		}
+		this.RefreshUI();
 		KleiItemsStatusRefresher.AddOrGetListener(this).OnRefreshUI(delegate
 		{
-			this.RefreshCategories();
-			this.RefreshGallery();
-			this.RefreshDetails();
+			this.RefreshUI();
 		});
+	}
+
+	private void ClearSearch()
+	{
+		this.searchField.text = "";
+		this.searchField.placeholder.GetComponent<TextMeshProUGUI>().text = UI.KLEI_INVENTORY_SCREEN.SEARCH_PLACEHOLDER;
+		this.RefreshGallery();
 	}
 
 	private void Update()
 	{
 		this.galleryGridLayouter.CheckIfShouldResizeGrid();
+	}
+
+	private void RefreshUI()
+	{
+		this.IS_ONLINE = ThreadedHttps<KleiAccount>.Instance.HasValidTicket();
+		this.RefreshCategories();
+		this.RefreshGallery();
+		if (this.SelectedCategoryId.IsNullOrWhiteSpace())
+		{
+			this.SelectCategory("BUILDINGS");
+		}
+		this.RefreshDetails();
+		this.RefreshBarterPanel();
 	}
 
 	private GameObject GetAvailableGridButton()
@@ -253,10 +329,12 @@ public class KleiInventoryScreen : KModalScreen
 		this.SelectedPermit = permit;
 		this.RefreshGallery();
 		this.RefreshDetails();
+		this.RefreshBarterPanel();
 	}
 
 	private void RefreshGallery()
 	{
+		string text = this.searchField.text.ToUpper();
 		foreach (KeyValuePair<PermitResource, MultiToggle> keyValuePair in this.galleryGridButtons)
 		{
 			PermitResource permitResource;
@@ -266,10 +344,7 @@ public class KleiInventoryScreen : KModalScreen
 			MultiToggle multiToggle2 = multiToggle;
 			string permitSubcategory = InventoryOrganization.GetPermitSubcategory(permitResource2);
 			bool flag = permitSubcategory == "UNCATEGORIZED" || InventoryOrganization.categoryIdToSubcategoryIdsMap[this.SelectedCategoryId].Contains(permitSubcategory);
-			if (multiToggle2.gameObject.activeSelf != flag)
-			{
-				multiToggle2.gameObject.SetActive(flag);
-			}
+			flag = flag && (permitResource2.Name.ToUpper().Contains(text) || permitResource2.Id.ToUpper().Contains(text) || permitResource2.Description.ToUpper().Contains(text));
 			multiToggle2.ChangeState((permitResource2 == this.SelectedPermit) ? 1 : 0);
 			HierarchyReferences component = multiToggle2.gameObject.GetComponent<HierarchyReferences>();
 			LocText reference = component.GetReference<LocText>("OwnedCountLabel");
@@ -280,11 +355,27 @@ public class KleiInventoryScreen : KModalScreen
 				reference.text = UI.KLEI_INVENTORY_SCREEN.ITEM_PLAYER_OWNED_AMOUNT_ICON.Replace("{OwnedCount}", ownedCount.ToString());
 				reference.gameObject.SetActive(ownedCount > 0);
 				reference2.gameObject.SetActive(ownedCount <= 0);
+				if (this.showFilterState == 2 && ownedCount < 2)
+				{
+					flag = false;
+				}
+				else if (this.showFilterState == 1 && ownedCount == 0)
+				{
+					flag = false;
+				}
 			}
 			else
 			{
 				reference.gameObject.SetActive(false);
 				reference2.gameObject.SetActive(false);
+				if (this.showFilterState == 2)
+				{
+					flag = false;
+				}
+			}
+			if (multiToggle2.gameObject.activeSelf != flag)
+			{
+				multiToggle2.gameObject.SetActive(flag);
 			}
 		}
 		foreach (KleiInventoryUISubcategory kleiInventoryUISubcategory in this.subcategories)
@@ -345,6 +436,69 @@ public class KleiInventoryScreen : KModalScreen
 			return;
 		}
 		this.selectionOwnedCount.SetText(KleiItemsUI.WrapWithColor(UI.KLEI_INVENTORY_SCREEN.ITEM_PLAYER_OWN_NONE, KleiItemsUI.TEXT_COLOR__PERMIT_NOT_OWNED));
+	}
+
+	private void RefreshBarterPanel()
+	{
+		this.barterBuyButton.ClearOnClick();
+		this.barterSellButton.ClearOnClick();
+		this.barterBuyButton.isInteractable = this.IS_ONLINE;
+		this.barterSellButton.isInteractable = this.IS_ONLINE;
+		HierarchyReferences component = this.barterBuyButton.GetComponent<HierarchyReferences>();
+		HierarchyReferences component2 = this.barterSellButton.GetComponent<HierarchyReferences>();
+		this.barterPanelBG.color = (this.IS_ONLINE ? Util.ColorFromHex("575D6F") : Util.ColorFromHex("6F6F6F"));
+		this.filamentWalletSection.gameObject.SetActive(this.IS_ONLINE);
+		this.barterOfflineLabel.gameObject.SetActive(!this.IS_ONLINE);
+		ulong filamentAmount = KleiItems.GetFilamentAmount();
+		this.filamentWalletSection.GetComponent<ToolTip>().SetSimpleTooltip((filamentAmount > 1UL) ? string.Format(UI.KLEI_INVENTORY_SCREEN.BARTERING.WALLET_PLURAL_TOOLTIP, filamentAmount) : string.Format(UI.KLEI_INVENTORY_SCREEN.BARTERING.WALLET_TOOLTIP, filamentAmount));
+		if (!this.IS_ONLINE)
+		{
+			component.GetReference<LocText>("CostLabel").SetText("");
+			component2.GetReference<LocText>("CostLabel").SetText("");
+			this.barterBuyButton.GetComponent<ToolTip>().SetSimpleTooltip(UI.KLEI_INVENTORY_SCREEN.BARTERING.TOOLTIP_ACTION_INVALID_OFFLINE);
+			this.barterSellButton.GetComponent<ToolTip>().SetSimpleTooltip(UI.KLEI_INVENTORY_SCREEN.BARTERING.TOOLTIP_ACTION_INVALID_OFFLINE);
+			return;
+		}
+		ulong num;
+		ulong num2;
+		PermitItems.TryGetBarterPrice(this.SelectedPermit.Id, out num, out num2);
+		this.filamentWalletSection.GetComponentInChildren<LocText>().SetText(KleiItems.GetFilamentAmount().ToString());
+		if (num == 0UL)
+		{
+			this.barterBuyButton.isInteractable = false;
+			this.barterBuyButton.GetComponent<ToolTip>().SetSimpleTooltip(UI.KLEI_INVENTORY_SCREEN.BARTERING.TOOLTIP_UNBUYABLE);
+			component.GetReference<LocText>("CostLabel").SetText("");
+		}
+		else
+		{
+			bool flag = KleiItems.GetFilamentAmount() >= num;
+			this.barterBuyButton.isInteractable = flag;
+			this.barterBuyButton.GetComponent<ToolTip>().SetSimpleTooltip(flag ? string.Format(UI.KLEI_INVENTORY_SCREEN.BARTERING.TOOLTIP_BUY_ACTIVE, num.ToString()) : UI.KLEI_INVENTORY_SCREEN.BARTERING.TOOLTIP_BUY_CANT_AFFORD.text);
+			component.GetReference<LocText>("CostLabel").SetText("-" + num.ToString());
+			this.barterBuyButton.onClick += delegate
+			{
+				GameObject gameObject = Util.KInstantiateUI(this.barterConfirmationScreenPrefab, LockerNavigator.Instance.gameObject, false);
+				gameObject.rectTransform().sizeDelta = Vector2.zero;
+				gameObject.GetComponent<BarterConfirmationScreen>().Present(this.SelectedPermit, true);
+			};
+		}
+		if (num2 == 0UL)
+		{
+			this.barterSellButton.isInteractable = false;
+			this.barterSellButton.GetComponent<ToolTip>().SetSimpleTooltip(UI.KLEI_INVENTORY_SCREEN.BARTERING.TOOLTIP_UNSELLABLE);
+			component2.GetReference<LocText>("CostLabel").SetText("");
+			return;
+		}
+		bool flag2 = PermitItems.GetOwnedCount(this.SelectedPermit) > 0;
+		this.barterSellButton.isInteractable = flag2;
+		this.barterSellButton.GetComponent<ToolTip>().SetSimpleTooltip(flag2 ? string.Format(UI.KLEI_INVENTORY_SCREEN.BARTERING.TOOLTIP_SELL_ACTIVE, num2.ToString()) : UI.KLEI_INVENTORY_SCREEN.BARTERING.TOOLTIP_NONE_TO_SELL.text);
+		component2.GetReference<LocText>("CostLabel").SetText(flag2 ? (UIConstants.ColorPrefixGreen + "+" + num2.ToString() + UIConstants.ColorSuffix) : ("+" + num2.ToString()));
+		this.barterSellButton.onClick += delegate
+		{
+			GameObject gameObject2 = Util.KInstantiateUI(this.barterConfirmationScreenPrefab, LockerNavigator.Instance.gameObject, false);
+			gameObject2.rectTransform().sizeDelta = Vector2.zero;
+			gameObject2.GetComponent<BarterConfirmationScreen>().Present(this.SelectedPermit, false);
+		};
 	}
 
 	private void SetCatogoryClickUISound(string categoryID, MultiToggle toggle)
@@ -416,26 +570,34 @@ public class KleiInventoryScreen : KModalScreen
 			if (prefabID != null)
 			{
 				uint num = <PrivateImplementationDetails>.ComputeStringHash(prefabID);
-				if (num <= 2028863301U)
+				if (num <= 2076384603U)
 				{
-					if (num <= 595816591U)
+					if (num <= 1633134164U)
 					{
 						if (num != 228062815U)
 						{
 							if (num != 595816591U)
 							{
-								goto IL_022B;
+								if (num != 1633134164U)
+								{
+									goto IL_038E;
+								}
+								if (!(prefabID == "CeilingLight"))
+								{
+									goto IL_038E;
+								}
+								return "ceilingLight";
 							}
-							if (!(prefabID == "FlowerVase"))
+							else if (!(prefabID == "FlowerVase"))
 							{
-								goto IL_022B;
+								goto IL_038E;
 							}
 						}
 						else
 						{
 							if (!(prefabID == "LuxuryBed"))
 							{
-								goto IL_022B;
+								goto IL_038E;
 							}
 							string id = permit.Id;
 							if (id != null)
@@ -452,37 +614,80 @@ public class KleiInventoryScreen : KModalScreen
 							return "elegantbed";
 						}
 					}
-					else if (num != 1633134164U)
+					else if (num <= 1943253450U)
 					{
-						if (num != 2028863301U)
+						if (num != 1734850496U)
 						{
-							goto IL_022B;
+							if (num != 1943253450U)
+							{
+								goto IL_038E;
+							}
+							if (!(prefabID == "WaterCooler"))
+							{
+								goto IL_038E;
+							}
+							return "watercooler";
 						}
-						if (!(prefabID == "FlowerVaseHanging"))
+						else
 						{
-							goto IL_022B;
+							if (!(prefabID == "RockCrusher"))
+							{
+								goto IL_038E;
+							}
+							return "rockrefinery";
 						}
 					}
-					else
+					else if (num != 2028863301U)
 					{
-						if (!(prefabID == "CeilingLight"))
+						if (num != 2076384603U)
 						{
-							goto IL_022B;
+							goto IL_038E;
 						}
-						return "ceilingLight";
+						if (!(prefabID == "GasReservoir"))
+						{
+							goto IL_038E;
+						}
+						return "gasstorage";
+					}
+					else if (!(prefabID == "FlowerVaseHanging"))
+					{
+						goto IL_038E;
 					}
 				}
 				else if (num <= 3048425356U)
 				{
-					if (num != 2899744071U)
+					if (num <= 2722382738U)
+					{
+						if (num != 2402859370U)
+						{
+							if (num != 2722382738U)
+							{
+								goto IL_038E;
+							}
+							if (!(prefabID == "PlanterBox"))
+							{
+								goto IL_038E;
+							}
+							return "planterbox";
+						}
+						else
+						{
+							if (!(prefabID == "StorageLocker"))
+							{
+								goto IL_038E;
+							}
+							return "storagelocker";
+						}
+					}
+					else if (num != 2899744071U)
 					{
 						if (num != 3048425356U)
 						{
-							goto IL_022B;
+							goto IL_038E;
 						}
 						if (!(prefabID == "Bed"))
 						{
-							goto IL_022B;
+							goto IL_038E;
 						}
 						return "bed";
 					}
@@ -490,30 +695,53 @@ public class KleiInventoryScreen : KModalScreen
 					{
 						if (!(prefabID == "ExteriorWall"))
 						{
-							goto IL_022B;
+							goto IL_038E;
 						}
 						return "wall";
 					}
 				}
-				else if (num != 3132083755U)
+				else if (num <= 3534553076U)
+				{
+					if (num != 3132083755U)
+					{
+						if (num != 3534553076U)
+						{
+							goto IL_038E;
+						}
+						if (!(prefabID == "MassageTable"))
+						{
+							goto IL_038E;
+						}
+						return "massagetable";
+					}
+					else if (!(prefabID == "FlowerVaseWall"))
+					{
+						goto IL_038E;
+					}
+				}
+				else if (num != 3903452895U)
 				{
 					if (num != 3958671086U)
 					{
-						goto IL_022B;
+						goto IL_038E;
 					}
 					if (!(prefabID == "FlowerVaseHangingFancy"))
 					{
-						goto IL_022B;
+						goto IL_038E;
 					}
 				}
-				else if (!(prefabID == "FlowerVaseWall"))
+				else
 				{
-					goto IL_022B;
+					if (!(prefabID == "EggCracker"))
+					{
+						goto IL_038E;
+					}
+					return "eggcracker";
 				}
 				return "flowervase";
 			}
 		}
-		IL_022B:
+		IL_038E:
 		if (permit.Category == PermitCategory.Artwork)
 		{
 			bool flag;
@@ -526,7 +754,7 @@ public class KleiInventoryScreen : KModalScreen
 				return "HUD";
 			}
 			ArtableStage artableStage = (ArtableStage)permit;
-			if (KleiInventoryScreen.<GetFacadeItemSoundName>g__Has|53_0<Sculpture>(buildingDef3))
+			if (KleiInventoryScreen.<GetFacadeItemSoundName>g__Has|70_0<Sculpture>(buildingDef3))
 			{
 				if (buildingDef3.PrefabID == "IceSculpture")
 				{
@@ -534,7 +762,7 @@ public class KleiInventoryScreen : KModalScreen
 				}
 				return "sculpture";
 			}
-			else if (KleiInventoryScreen.<GetFacadeItemSoundName>g__Has|53_0<Painting>(buildingDef3))
+			else if (KleiInventoryScreen.<GetFacadeItemSoundName>g__Has|70_0<Painting>(buildingDef3))
 			{
 				return "painting";
 			}
@@ -552,7 +780,7 @@ public class KleiInventoryScreen : KModalScreen
 	}
 
 	[CompilerGenerated]
-	internal static bool <GetFacadeItemSoundName>g__Has|53_0<T>(BuildingDef buildingDef) where T : Component
+	internal static bool <GetFacadeItemSoundName>g__Has|70_0<T>(BuildingDef buildingDef) where T : Component
 	{
 		return !buildingDef.BuildingComplete.GetComponent<T>().IsNullOrDestroyed();
 	}
@@ -585,6 +813,37 @@ public class KleiInventoryScreen : KModalScreen
 
 	[SerializeField]
 	private GameObject itemDummyPrefab;
+
+	[Header("GalleryFilters")]
+	[SerializeField]
+	private KInputTextField searchField;
+
+	[SerializeField]
+	private KButton clearSearchButton;
+
+	[SerializeField]
+	private MultiToggle doublesOnlyToggle;
+
+	private int showFilterState;
+
+	[Header("BarterSection")]
+	[SerializeField]
+	private Image barterPanelBG;
+
+	[SerializeField]
+	private KButton barterBuyButton;
+
+	[SerializeField]
+	private KButton barterSellButton;
+
+	[SerializeField]
+	private GameObject barterConfirmationScreenPrefab;
+
+	[SerializeField]
+	private GameObject filamentWalletSection;
+
+	[SerializeField]
+	private GameObject barterOfflineLabel;
 
 	private Dictionary<PermitResource, MultiToggle> galleryGridButtons = new Dictionary<PermitResource, MultiToggle>();
 
@@ -621,6 +880,10 @@ public class KleiInventoryScreen : KModalScreen
 
 	[SerializeField]
 	private LocText selectionOwnedCount;
+
+	private bool IS_ONLINE;
+
+	private bool initConfigComplete;
 
 	private enum MultiToggleState
 	{

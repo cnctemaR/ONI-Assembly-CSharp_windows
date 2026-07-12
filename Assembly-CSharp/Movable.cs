@@ -37,20 +37,26 @@ public class Movable : Workable
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		if (this.isMarkedForMove && this.StorageProxy != null)
+		if (this.isMarkedForMove)
 		{
-			if (this.reachableChangedHandle < 0)
+			if (this.StorageProxy != null)
 			{
-				this.reachableChangedHandle = base.Subscribe(-1432940121, new Action<object>(this.OnReachableChanged));
+				if (this.reachableChangedHandle < 0)
+				{
+					this.reachableChangedHandle = base.Subscribe(-1432940121, new Action<object>(this.OnReachableChanged));
+				}
+				if (this.storageReachableChangedHandle < 0)
+				{
+					this.storageReachableChangedHandle = this.StorageProxy.Subscribe(-1432940121, new Action<object>(this.OnReachableChanged));
+				}
+				if (this.cancelHandle < 0)
+				{
+					this.cancelHandle = base.Subscribe(2127324410, new Action<object>(this.CleanupMove));
+				}
+				base.gameObject.AddTag(GameTags.MarkedForMove);
+				return;
 			}
-			if (this.storageReachableChangedHandle < 0)
-			{
-				this.storageReachableChangedHandle = this.StorageProxy.Subscribe(-1432940121, new Action<object>(this.OnReachableChanged));
-			}
-			if (this.cancelHandle < 0)
-			{
-				this.cancelHandle = base.Subscribe(2127324410, new Action<object>(this.CleanupMove));
-			}
+			this.isMarkedForMove = false;
 		}
 	}
 
@@ -58,10 +64,19 @@ public class Movable : Workable
 	{
 		if (this.isMarkedForMove)
 		{
-			bool flag = MinionGroupProber.Get().IsReachable(Grid.PosToCell(this.pickupable), OffsetGroups.Standard) && MinionGroupProber.Get().IsReachable(Grid.PosToCell(this.StorageProxy), OffsetGroups.Standard);
-			KSelectable component = base.GetComponent<KSelectable>();
-			this.pendingMoveGuid = component.ToggleStatusItem(Db.Get().MiscStatusItems.MarkedForMove, this.pendingMoveGuid, flag, this);
-			this.storageUnreachableGuid = component.ToggleStatusItem(Db.Get().MiscStatusItems.MoveStorageUnreachable, this.storageUnreachableGuid, !flag, this);
+			int num = Grid.PosToCell(this.pickupable);
+			int num2 = Grid.PosToCell(this.StorageProxy);
+			if (num != num2)
+			{
+				bool flag = MinionGroupProber.Get().IsReachable(num, OffsetGroups.Standard) && MinionGroupProber.Get().IsReachable(num2, OffsetGroups.Standard);
+				if (this.pickupable.HasTag(GameTags.Creatures.Confined))
+				{
+					flag = false;
+				}
+				KSelectable component = base.GetComponent<KSelectable>();
+				this.pendingMoveGuid = component.ToggleStatusItem(Db.Get().MiscStatusItems.MarkedForMove, this.pendingMoveGuid, flag, this);
+				this.storageUnreachableGuid = component.ToggleStatusItem(Db.Get().MiscStatusItems.MoveStorageUnreachable, this.storageUnreachableGuid, !flag, this);
+			}
 		}
 	}
 
@@ -171,7 +186,7 @@ public class Movable : Workable
 
 	public bool CanMoveTo(int cell)
 	{
-		return !Grid.IsSolidCell(cell) && base.gameObject.IsMyParentWorld(cell);
+		return !Grid.IsSolidCell(cell) && Grid.IsWorldValidCell(cell) && base.gameObject.IsMyParentWorld(cell);
 	}
 
 	private void CreateStorageProxy(int cell)

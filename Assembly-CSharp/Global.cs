@@ -7,7 +7,6 @@ using System.Threading;
 using Klei;
 using KMod;
 using KSerialization;
-using Newtonsoft.Json;
 using ProcGenGame;
 using STRINGS;
 using UnityEngine;
@@ -326,8 +325,6 @@ public class Global : MonoBehaviour
 		this.modManager.Load(Content.Translation);
 		this.modManager.distribution_platforms.Add(new Local("Local", Label.DistributionPlatform.Local, false));
 		this.modManager.distribution_platforms.Add(new Local("Dev", Label.DistributionPlatform.Dev, true));
-		this.mainThread = Thread.CurrentThread;
-		KCrashReporter.onCrashReported += this.OnCrashReported;
 		KProfiler.main_thread = Thread.CurrentThread;
 		this.RestoreLegacyMetricsSetting();
 		this.TestDataLocations();
@@ -623,6 +620,7 @@ public class Global : MonoBehaviour
 			ThreadedHttps<KleiMetrics>.Instance.SetCallBacks(new global::System.Action(this.SetONIStaticSessionVariables), new Action<Dictionary<string, object>>(this.SetONIDynamicSessionVariables));
 			ThreadedHttps<KleiMetrics>.Instance.StartSession();
 			KleiItems.AddRequestInventoryRefresh(null);
+			KleiItems.AddRequestGetPricingInfo(null);
 		}
 		ThreadedHttps<KleiMetrics>.Instance.SetLastUserAction(KInputManager.lastUserActionTicks);
 		Localization.VerifyTranslationModSubscription(this.globalCanvas);
@@ -635,7 +633,7 @@ public class Global : MonoBehaviour
 	private void SetONIStaticSessionVariables()
 	{
 		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Branch", "release");
-		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Build", 568201U);
+		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Build", 575720U);
 		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("SaveFolderWriteTest", Global.saveFolderTestResult);
 		if (KPlayerPrefs.HasKey(UnitConfigurationScreen.MassUnitKey))
 		{
@@ -698,21 +696,6 @@ public class Global : MonoBehaviour
 		ThreadedHttps<KleiMetrics>.Instance.EndSession(false);
 	}
 
-	private void OnCrashReported(string json_response)
-	{
-		if (Thread.CurrentThread != this.mainThread)
-		{
-			return;
-		}
-		if (!string.IsNullOrEmpty(json_response))
-		{
-			Dictionary<string, string> dictionary = JsonConvert.DeserializeObject<Dictionary<string, string>>(json_response);
-			global::Debug.Log("devhash: " + dictionary["CrashHash"]);
-			return;
-		}
-		global::Debug.Log("Empty json response");
-	}
-
 	private void OutputSystemInfo()
 	{
 		try
@@ -748,8 +731,6 @@ public class Global : MonoBehaviour
 	public global::KMod.Manager modManager;
 
 	private bool gotKleiUserID;
-
-	public Thread mainThread;
 
 	private static string saveFolderTestResult = "unknown";
 

@@ -11,7 +11,6 @@ public class StaterpillarGasConfig : IEntityConfig
 	{
 		InhaleStates.Def def = new InhaleStates.Def
 		{
-			inhaleSound = "gas_Staterpillar_intake",
 			behaviourTag = GameTags.Creatures.WantsToStore,
 			inhaleAnimPre = "gas_consume_pre",
 			inhaleAnimLoop = "gas_consume_loop",
@@ -42,7 +41,9 @@ public class StaterpillarGasConfig : IEntityConfig
 		list.AddRange(BaseStaterpillarConfig.RawMetalDiet(SimHashes.Hydrogen.CreateTag(), StaterpillarGasConfig.CALORIES_PER_KG_OF_ORE, StaterpillarTuning.POOP_CONVERSTION_RATE, null, 0f));
 		list.AddRange(BaseStaterpillarConfig.RefinedMetalDiet(SimHashes.Hydrogen.CreateTag(), StaterpillarGasConfig.CALORIES_PER_KG_OF_ORE, StaterpillarTuning.POOP_CONVERSTION_RATE, null, 0f));
 		gameObject = BaseStaterpillarConfig.SetupDiet(gameObject, list);
-		gameObject.AddComponent<Storage>().capacityKg = StaterpillarGasConfig.STORAGE_CAPACITY;
+		Storage storage = gameObject.AddComponent<Storage>();
+		storage.capacityKg = StaterpillarGasConfig.STORAGE_CAPACITY;
+		storage.SetDefaultStoredItemModifiers(Storage.StandardInsulatedStorage);
 		return gameObject;
 	}
 

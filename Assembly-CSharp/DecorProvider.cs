@@ -39,12 +39,7 @@ public class DecorProvider : KMonoBehaviour, IGameObjectEffectDescriptor
 		{
 			num2 = (int)this.decorRadius.GetTotalValue();
 		}
-		Orientation orientation = Orientation.Neutral;
-		if (this.rotatable)
-		{
-			orientation = this.rotatable.GetOrientation();
-		}
-		Extents extents = this.occupyArea.GetExtents(orientation);
+		Extents extents = this.occupyArea.GetExtents();
 		extents.x = Mathf.Max(extents.x - num2, 0);
 		extents.y = Mathf.Max(extents.y - num2, 0);
 		extents.width = Mathf.Min(extents.width + num2 * 2, Grid.WidthInCells - 1);
@@ -301,9 +296,6 @@ public class DecorProvider : KMonoBehaviour, IGameObjectEffectDescriptor
 
 	[MyCmpReq]
 	public OccupyArea occupyArea;
-
-	[MyCmpGet]
-	public Rotatable rotatable;
 
 	[MyCmpGet]
 	public SimCellOccupier simCellOccupier;

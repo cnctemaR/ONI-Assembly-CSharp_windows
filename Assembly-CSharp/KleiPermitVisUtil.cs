@@ -95,7 +95,12 @@ public static class KleiPermitVisUtil
 		BuildingFacadeResource buildingFacadeResource = permit as BuildingFacadeResource;
 		if (buildingFacadeResource != null)
 		{
-			BuildingComplete component = Assets.GetPrefab(buildingFacadeResource.PrefabID).GetComponent<BuildingComplete>();
+			GameObject prefab = Assets.GetPrefab(buildingFacadeResource.PrefabID);
+			if (prefab == null)
+			{
+				return Option.None;
+			}
+			BuildingComplete component = prefab.GetComponent<BuildingComplete>();
 			if (component == null || !component)
 			{
 				return Option.None;

@@ -37,6 +37,7 @@ public class GourmetCookingStation : ComplexFabricator, IGameObjectEffectDescrip
 		}));
 		this.smi = new GourmetCookingStation.StatesInstance(this);
 		this.smi.StartSM();
+		base.GetComponent<ComplexFabricator>().workingStatusItem = Db.Get().BuildingStatusItems.ComplexFabricatorCooking;
 	}
 
 	public float GetAvailableFuel()

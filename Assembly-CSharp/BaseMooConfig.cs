@@ -17,6 +17,9 @@ public static class BaseMooConfig
 		{
 			gameObject.AddOrGet<SymbolOverrideController>().ApplySymbolOverridesByAffix(Assets.GetAnim(anim_file), symbol_override_prefix, null, 0);
 		}
+		Pickupable pickupable = gameObject.AddOrGet<Pickupable>();
+		int num2 = global::TUNING.CREATURES.SORTING.CRITTER_ORDER["Moo"];
+		pickupable.sortOrder = num2;
 		KPrefabID component = gameObject.GetComponent<KPrefabID>();
 		component.AddTag(GameTags.Creatures.Flyer, false);
 		component.prefabInitFn += delegate(GameObject inst)
@@ -33,7 +36,7 @@ public static class BaseMooConfig
 		};
 		gameObject.AddOrGetDef<ThreatMonitor.Def>();
 		gameObject.AddOrGetDef<SubmergedMonitor.Def>();
-		EntityTemplates.CreateAndRegisterBaggedCreature(gameObject, true, false, false);
+		EntityTemplates.CreateAndRegisterBaggedCreature(gameObject, true, true, false);
 		gameObject.AddOrGetDef<RanchableMonitor.Def>();
 		gameObject.AddOrGetDef<FixedCapturableMonitor.Def>();
 		MilkProductionMonitor.Def def = gameObject.AddOrGetDef<MilkProductionMonitor.Def>();

@@ -350,7 +350,7 @@ namespace Database
 				float contractionChance = GermExposureMonitor.GetContractionChance(resistanceToExposureType);
 				float exposureTier = smi.GetExposureTier(exposureStatusData3.exposure_type.germ_id);
 				float num6 = GERM_EXPOSURE.EXPOSURE_TIER_RESISTANCE_BONUSES[(int)exposureTier - 1] - GERM_EXPOSURE.EXPOSURE_TIER_RESISTANCE_BONUSES[0];
-				str = str.Replace("{Severity}", DUPLICANTS.STATUSITEMS.EXPOSEDTOGERMS.EXPOSURE_TIERS[(int)exposureTier - 1]);
+				str = str.Replace("{Severity}", DUPLICANTS.STATUSITEMS.EXPOSEDTOGERMS.EXPOSURE_TIERS[(int)exposureTier - 1].ToString());
 				str = str.Replace("{Sickness}", name2);
 				str = str.Replace("{Source}", lastDiseaseSource);
 				str = str.Replace("{Base}", GameUtil.GetFormattedSimple(num5, GameUtil.TimeSlice.None, null));
@@ -462,6 +462,7 @@ namespace Database
 				InspirationEffectMonitor.Instance instance3 = (InspirationEffectMonitor.Instance)data;
 				return str + "\n\n" + DUPLICANTS.MODIFIERS.TIME_REMAINING.Replace("{0}", GameUtil.GetFormattedCycles(instance3.sm.inspirationTimeRemaining.Get(instance3), "F1", false));
 			};
+			this.JoyResponse_StickerBombing = this.CreateStatusItem("JoyResponse_StickerBombing", DUPLICANTS.MODIFIERS.ISSTICKERBOMBING.NAME, DUPLICANTS.MODIFIERS.ISSTICKERBOMBING.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Good, false, OverlayModes.None.ID, 2);
 			this.Meteorphile = this.CreateStatusItem("Meteorphile", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 2);
 		}
 
@@ -680,6 +681,8 @@ namespace Database
 		public StatusItem JoyResponse_HasBalloon;
 
 		public StatusItem JoyResponse_HeardJoySinger;
+
+		public StatusItem JoyResponse_StickerBombing;
 
 		public StatusItem Meteorphile;
 

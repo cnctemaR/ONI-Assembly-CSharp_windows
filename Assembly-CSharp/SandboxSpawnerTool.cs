@@ -42,7 +42,8 @@ public class SandboxSpawnerTool : InterfaceTool
 		{
 			GameUtil.KInstantiate(prefab, Grid.CellToPosCBC(this.currentCell, Grid.SceneLayer.Creatures), Grid.SceneLayer.Creatures, null, 0).SetActive(true);
 		}
-		UISounds.PlaySound(UISounds.Sound.ClickObject);
+		GameUtil.KInstantiate(this.fxPrefab, Grid.CellToPosCCC(this.currentCell, Grid.SceneLayer.FXFront), Grid.SceneLayer.FXFront, null, 0).GetComponent<KAnimControllerBase>().Play("placer", KAnim.PlayMode.Once, 1f, 0f);
+		KFMOD.PlayUISound(this.soundPath);
 	}
 
 	protected override void OnActivateTool()
@@ -103,4 +104,9 @@ public class SandboxSpawnerTool : InterfaceTool
 	protected Color radiusIndicatorColor = new Color(0.5f, 0.7f, 0.5f, 0.2f);
 
 	private int currentCell;
+
+	private string soundPath = GlobalAssets.GetSound("SandboxTool_Spawner", false);
+
+	[SerializeField]
+	private GameObject fxPrefab;
 }

@@ -50,7 +50,7 @@ public class LockerMenuScreen : KModalScreen
 
 	private void ConfigureHoverForButton(MultiToggle toggle, string desc, bool useHoverColor = true)
 	{
-		LockerMenuScreen.<>c__DisplayClass14_0 CS$<>8__locals1 = new LockerMenuScreen.<>c__DisplayClass14_0();
+		LockerMenuScreen.<>c__DisplayClass16_0 CS$<>8__locals1 = new LockerMenuScreen.<>c__DisplayClass16_0();
 		CS$<>8__locals1.useHoverColor = useHoverColor;
 		CS$<>8__locals1.<>4__this = this;
 		CS$<>8__locals1.defaultColor = new Color(0.30980393f, 0.34117648f, 0.38431373f, 1f);
@@ -69,6 +69,7 @@ public class LockerMenuScreen : KModalScreen
 			AudioMixer.instance.Start(AudioMixerSnapshots.Get().FrontEndSupplyClosetSnapshot);
 			MusicManager.instance.OnSupplyClosetMenu(true, 0.5f);
 			MusicManager.instance.PlaySong("Music_SupplyCloset", false);
+			ThreadedHttps<KleiAccount>.Instance.AuthenticateUser(new KleiAccount.GetUserIDdelegate(this.TriggerShouldRefreshClaimItems), false);
 		}
 		else
 		{
@@ -80,6 +81,11 @@ public class LockerMenuScreen : KModalScreen
 			}
 		}
 		this.RefreshClaimItemsButton();
+	}
+
+	private void TriggerShouldRefreshClaimItems()
+	{
+		this.refreshRequested = true;
 	}
 
 	protected override void OnSpawn()
@@ -94,6 +100,8 @@ public class LockerMenuScreen : KModalScreen
 
 	private void RefreshClaimItemsButton()
 	{
+		this.noConnectionIcon.SetActive(!ThreadedHttps<KleiAccount>.Instance.HasValidTicket());
+		this.refreshRequested = false;
 		bool hasClaimable = PermitItems.HasUnopenedItem();
 		this.dropsAvailableNotification.SetActive(hasClaimable);
 		this.buttonClaimItems.ChangeState(hasClaimable ? 0 : 1);
@@ -127,6 +135,14 @@ public class LockerMenuScreen : KModalScreen
 		base.OnKeyDown(e);
 	}
 
+	private void Update()
+	{
+		if (this.refreshRequested)
+		{
+			this.RefreshClaimItemsButton();
+		}
+	}
+
 	public static LockerMenuScreen Instance;
 
 	[SerializeField]
@@ -150,10 +166,15 @@ public class LockerMenuScreen : KModalScreen
 	[SerializeField]
 	private GameObject dropsAvailableNotification;
 
+	[SerializeField]
+	private GameObject noConnectionIcon;
+
 	private const string LOCKER_MENU_MUSIC = "Music_SupplyCloset";
 
 	private const string MUSIC_PARAMETER = "SupplyClosetView";
 
 	[SerializeField]
 	private Material desatUIMaterial;
+
+	private bool refreshRequested;
 }

@@ -44,6 +44,10 @@ namespace Mono.Cecil
 			}
 			case MetadataScopeType.ModuleReference:
 			{
+				if (type.Module.Assembly == null)
+				{
+					return null;
+				}
 				Collection<ModuleDefinition> modules = type.Module.Assembly.Modules;
 				ModuleReference moduleReference = (ModuleReference)scope;
 				for (int i = 0; i < modules.Count; i++)

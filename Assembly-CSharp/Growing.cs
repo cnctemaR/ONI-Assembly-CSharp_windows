@@ -133,6 +133,14 @@ public class Growing : StateMachineComponent<Growing.StatesInstance>, IGameObjec
 		base.gameObject.Trigger(-1793167409, null);
 	}
 
+	public void ConsumeGrowthUnits(float units_to_consume, float unit_maturity_ratio)
+	{
+		float num = units_to_consume / unit_maturity_ratio;
+		global::Debug.Assert(num <= this.maturity.value);
+		this.maturity.value -= num;
+		base.gameObject.Trigger(-1793167409, null);
+	}
+
 	public bool shouldGrowOld = true;
 
 	public float maxAge = 2400f;

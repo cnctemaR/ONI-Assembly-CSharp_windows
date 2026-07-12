@@ -15,6 +15,11 @@ public class SandboxCritterTool : BrushTool
 		SandboxCritterTool.instance = this;
 	}
 
+	protected override string GetDragSound()
+	{
+		return "";
+	}
+
 	public void Activate()
 	{
 		PlayerController.Instance.ActivateTool(this);
@@ -48,6 +53,12 @@ public class SandboxCritterTool : BrushTool
 		base.OnMouseMove(cursorPos);
 	}
 
+	public override void OnLeftClickDown(Vector3 cursor_pos)
+	{
+		base.OnLeftClickDown(cursor_pos);
+		KFMOD.PlayUISound(GlobalAssets.GetSound("SandboxTool_Click", false));
+	}
+
 	protected override void OnPaintCell(int cell, int distFromOrigin)
 	{
 		base.OnPaintCell(cell, distFromOrigin);
@@ -61,10 +72,13 @@ public class SandboxCritterTool : BrushTool
 		}
 		foreach (GameObject gameObject in pooledHashSet)
 		{
+			KFMOD.PlayOneShot(this.soundPath, gameObject.gameObject.transform.GetPosition(), 1f);
 			Util.KDestroyGameObject(gameObject);
 		}
 		pooledHashSet.Recycle();
 	}
 
 	public static SandboxCritterTool instance;
+
+	private string soundPath = GlobalAssets.GetSound("SandboxTool_ClearFloor", false);
 }

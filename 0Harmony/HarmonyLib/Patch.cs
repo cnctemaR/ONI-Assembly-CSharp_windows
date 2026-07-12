@@ -49,6 +49,18 @@ namespace HarmonyLib
 		{
 		}
 
+		internal Patch(int index, string owner, int priority, string[] before, string[] after, bool debug, int methodToken, string moduleGUID)
+		{
+			this.index = index;
+			this.owner = owner;
+			this.priority = ((priority == -1) ? 400 : priority);
+			this.before = before ?? new string[0];
+			this.after = after ?? new string[0];
+			this.debug = debug;
+			this.methodToken = methodToken;
+			this.moduleGUID = moduleGUID;
+		}
+
 		public MethodInfo GetMethod(MethodBase original)
 		{
 			MethodInfo methodInfo = this.PatchMethod;

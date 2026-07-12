@@ -226,6 +226,7 @@ public class ResearchScreenSideBar : KScreen
 			{
 				this.researchScreen.TurnEverythingOff();
 				this.researchScreen.GetEntry(tech).OnHover(true, tech);
+				this.soundPlayer.Play(1);
 			}));
 			MultiToggle component2 = gameObject2.GetComponent<MultiToggle>();
 			component2.onExit = (global::System.Action)Delegate.Combine(component2.onExit, new global::System.Action(delegate
@@ -580,6 +581,8 @@ public class ResearchScreenSideBar : KScreen
 	private List<GameObject> QueuedActivations = new List<GameObject>();
 
 	private List<GameObject> QueuedDeactivations = new List<GameObject>();
+
+	public ButtonSoundPlayer soundPlayer;
 
 	[SerializeField]
 	private int activationPerFrame = 5;

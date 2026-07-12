@@ -70,7 +70,8 @@ public class MoleConfig : IEntityConfig
 	{
 		int num = Grid.PosToCell(inst);
 		Navigator component = inst.GetComponent<Navigator>();
-		if (component != null)
+		Pickupable component2 = inst.GetComponent<Pickupable>();
+		if (component != null && (component2 == null || component2.storage == null))
 		{
 			if (Grid.IsSolidCell(num))
 			{

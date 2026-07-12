@@ -40,5 +40,7 @@ public class InfoDescription : KMonoBehaviour
 
 	public string description;
 
+	public string effect = "";
+
 	public string displayName;
 }

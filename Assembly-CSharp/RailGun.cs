@@ -198,11 +198,13 @@ public class RailGun : StateMachineComponent<RailGun.StatesInstance>, ISim200ms,
 		vector2I.y += extents.height + 1;
 		int num = Grid.XYToCell(vector2I.x, vector2I.y);
 		GameObject gameObject = Util.KInstantiate(Assets.GetPrefab("RailGunPayload"), Grid.CellToPosCBC(num, Grid.SceneLayer.Front));
+		Storage component = gameObject.GetComponent<Storage>();
 		float num2 = 0f;
 		while (num2 < this.launchMass && this.resourceStorage.MassStored() > 0f)
 		{
-			num2 += this.resourceStorage.Transfer(gameObject.GetComponent<Storage>(), GameTags.Stored, this.launchMass - num2, false, true);
+			num2 += this.resourceStorage.Transfer(component, GameTags.Stored, this.launchMass - num2, false, true);
 		}
+		component.SetContentsDeleteOffGrid(false);
 		this.particleStorage.ConsumeAndGet(base.smi.EnergyCost());
 		gameObject.SetActive(true);
 		if (this.destinationSelector.GetDestinationWorld() >= 0)
@@ -405,6 +407,7 @@ public class RailGun : StateMachineComponent<RailGun.StatesInstance>, ISim200ms,
 			this.on.power_off.PlayAnim("power_off").OnAnimQueueComplete(this.off);
 			this.on.wait_for_storage.PlayAnim("on", KAnim.PlayMode.Loop).EventTransition(GameHashes.ClusterDestinationChanged, this.on.power_off, (RailGun.StatesInstance smi) => !smi.HasEnergy()).EventTransition(GameHashes.OnStorageChange, this.on.working, (RailGun.StatesInstance smi) => smi.HasResources() && smi.sm.cooldownTimer.Get(smi) <= 0f)
 				.EventTransition(GameHashes.OperationalChanged, this.on.working, (RailGun.StatesInstance smi) => smi.HasResources() && smi.sm.cooldownTimer.Get(smi) <= 0f)
+				.EventTransition(GameHashes.RailGunLaunchMassChanged, this.on.working, (RailGun.StatesInstance smi) => smi.HasResources() && smi.sm.cooldownTimer.Get(smi) <= 0f)
 				.ParamTransition<float>(this.cooldownTimer, this.on.cooldown, (RailGun.StatesInstance smi, float p) => p > 0f);
 			this.on.working.DefaultState(this.on.working.pre).Enter(delegate(RailGun.StatesInstance smi)
 			{

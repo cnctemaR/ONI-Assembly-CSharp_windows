@@ -82,7 +82,7 @@ public class ConduitTemperatureSensor : ConduitThresholdSensor, IThresholdSwitch
 	{
 		get
 		{
-			return UI.UISIDESCREENS.THRESHOLD_SWITCH_SIDESCREEN.TEMPERATURE;
+			return UI.UISIDESCREENS.THRESHOLD_SWITCH_SIDESCREEN.CONTENT_TEMPERATURE;
 		}
 	}
 
@@ -90,7 +90,7 @@ public class ConduitTemperatureSensor : ConduitThresholdSensor, IThresholdSwitch
 	{
 		get
 		{
-			return UI.UISIDESCREENS.THRESHOLD_SWITCH_SIDESCREEN.TEMPERATURE_TOOLTIP_ABOVE;
+			return UI.UISIDESCREENS.THRESHOLD_SWITCH_SIDESCREEN.CONTENT_TEMPERATURE_TOOLTIP_ABOVE;
 		}
 	}
 
@@ -98,7 +98,7 @@ public class ConduitTemperatureSensor : ConduitThresholdSensor, IThresholdSwitch
 	{
 		get
 		{
-			return UI.UISIDESCREENS.THRESHOLD_SWITCH_SIDESCREEN.TEMPERATURE_TOOLTIP_BELOW;
+			return UI.UISIDESCREENS.THRESHOLD_SWITCH_SIDESCREEN.CONTENT_TEMPERATURE_TOOLTIP_BELOW;
 		}
 	}
 

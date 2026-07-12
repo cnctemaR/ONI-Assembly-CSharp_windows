@@ -280,7 +280,9 @@ public class SegmentedCreature : GameStateMachine<SegmentedCreature, SegmentedCr
 
 		public int animFrameOffset;
 
-		public HashSet<HashedString> retractWhenStartingAnimNames = new HashSet<HashedString> { "trapped", "trussed", "escape", "drown_pre", "drown_loop", "drown_pst" };
+		public HashSet<HashedString> hideBoddyWhenStartingAnimNames = new HashSet<HashedString> { "rocket_biological" };
+
+		public HashSet<HashedString> retractWhenStartingAnimNames = new HashSet<HashedString> { "trapped", "trussed", "escape", "drown_pre", "drown_loop", "drown_pst", "rocket_biological" };
 
 		public HashSet<HashedString> retractWhenEndingAnimNames = new HashSet<HashedString> { "floor_floor_2_0", "grooming_pst", "fall" };
 	}
@@ -316,9 +318,9 @@ public class SegmentedCreature : GameStateMachine<SegmentedCreature, SegmentedCr
 
 		private void CreateSegments()
 		{
-			float num = Grid.GetLayerZ(Grid.SceneLayer.Creatures) + (float)SegmentedCreature.Instance.creatureBatchSlot * 0.01f;
+			float num = (float)SegmentedCreature.Instance.creatureBatchSlot * 0.01f;
 			SegmentedCreature.Instance.creatureBatchSlot = (SegmentedCreature.Instance.creatureBatchSlot + 1) % 10;
-			SegmentedCreature.CreatureSegment value = this.segments.AddFirst(new SegmentedCreature.CreatureSegment(base.gameObject, num, base.smi.def.headOffset, Vector3.zero)).Value;
+			SegmentedCreature.CreatureSegment value = this.segments.AddFirst(new SegmentedCreature.CreatureSegment(base.GetComponent<KBatchedAnimController>(), base.gameObject, num, base.smi.def.headOffset, Vector3.zero)).Value;
 			base.gameObject.SetActive(false);
 			value.animController = base.GetComponent<KBatchedAnimController>();
 			value.animController.SetSymbolVisiblity(base.smi.def.segmentTrackerSymbol, false);
@@ -346,7 +348,7 @@ public class SegmentedCreature : GameStateMachine<SegmentedCreature, SegmentedCr
 				kbatchedAnimController.isMovable = true;
 				kbatchedAnimController.SetSymbolVisiblity(base.smi.def.segmentTrackerSymbol, false);
 				kbatchedAnimController.sceneLayer = value.animController.sceneLayer;
-				SegmentedCreature.CreatureSegment creatureSegment = new SegmentedCreature.CreatureSegment(gameObject, num + (float)(i + 1) * 0.0001f, Vector3.zero, vector);
+				SegmentedCreature.CreatureSegment creatureSegment = new SegmentedCreature.CreatureSegment(value.animController, gameObject, num + (float)(i + 1) * 0.0001f, Vector3.zero, vector);
 				creatureSegment.animController = kbatchedAnimController;
 				creatureSegment.symbol = base.smi.def.segmentTrackerSymbol;
 				creatureSegment.distanceToPreviousSegment = base.smi.def.minSegmentSpacing;
@@ -365,9 +367,25 @@ public class SegmentedCreature : GameStateMachine<SegmentedCreature, SegmentedCr
 			if (base.smi.def.retractWhenStartingAnimNames.Contains(name))
 			{
 				base.smi.sm.isRetracted.Set(true, base.smi, false);
+			}
+			else
+			{
+				base.smi.sm.isRetracted.Set(false, base.smi, false);
+			}
+			if (base.smi.def.hideBoddyWhenStartingAnimNames.Contains(name))
+			{
+				this.SetBodySegmentsVisibility(false);
 				return;
 			}
-			base.smi.sm.isRetracted.Set(false, base.smi, false);
+			this.SetBodySegmentsVisibility(true);
+		}
+
+		public void SetBodySegmentsVisibility(bool visible)
+		{
+			for (LinkedListNode<SegmentedCreature.CreatureSegment> linkedListNode = base.smi.GetFirstBodySegmentNode(); linkedListNode != null; linkedListNode = linkedListNode.Next)
+			{
+				linkedListNode.Value.animController.SetVisiblity(visible);
+			}
 		}
 
 		public void AnimComplete(HashedString name)
@@ -450,8 +468,17 @@ public class SegmentedCreature : GameStateMachine<SegmentedCreature, SegmentedCr
 
 	public class CreatureSegment
 	{
-		public CreatureSegment(GameObject go, float zRelativeOffset, Vector3 offset, Vector3 pivot)
+		public float ZOffset
 		{
+			get
+			{
+				return Grid.GetLayerZ(this.head.sceneLayer) + this.zRelativeOffset;
+			}
+		}
+
+		public CreatureSegment(KBatchedAnimController head, GameObject go, float zRelativeOffset, Vector3 offset, Vector3 pivot)
+		{
+			this.head = head;
 			this.m_transform = go.transform;
 			this.zRelativeOffset = zRelativeOffset;
 			this.offset = offset;
@@ -473,7 +500,7 @@ public class SegmentedCreature : GameStateMachine<SegmentedCreature, SegmentedCr
 				{
 					bool flag;
 					Vector3 vector2 = this.animController.GetSymbolTransform(this.symbol, out flag).GetColumn(3);
-					vector2.z = this.zRelativeOffset;
+					vector2.z = this.ZOffset;
 					return vector2 + vector;
 				}
 				return this.m_transform.position + vector;
@@ -482,8 +509,19 @@ public class SegmentedCreature : GameStateMachine<SegmentedCreature, SegmentedCr
 
 		public void SetPosition(Vector3 value)
 		{
-			value.z = this.zRelativeOffset;
+			bool flag = false;
+			if (this.animController != null && this.animController.sceneLayer != this.head.sceneLayer)
+			{
+				this.animController.SetSceneLayer(this.head.sceneLayer);
+				flag = true;
+			}
+			value.z = this.ZOffset;
 			this.m_transform.position = value;
+			if (flag)
+			{
+				this.animController.enabled = false;
+				this.animController.enabled = true;
+			}
 		}
 
 		public void SetRotation(Quaternion rotation)
@@ -542,7 +580,9 @@ public class SegmentedCreature : GameStateMachine<SegmentedCreature, SegmentedCr
 
 		public Vector3 pivot;
 
-		public float zRelativeOffset;
+		public KBatchedAnimController head;
+
+		private float zRelativeOffset;
 
 		private Transform m_transform;
 	}

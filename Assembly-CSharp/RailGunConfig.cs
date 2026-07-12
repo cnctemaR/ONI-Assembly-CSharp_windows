@@ -53,6 +53,7 @@ public class RailGunConfig : IBuildingConfig
 	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
 		RailGun railGun = go.AddOrGet<RailGun>();
+		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.IndustrialMachinery, false);
 		go.AddOrGet<LoopingSounds>();
 		ClusterDestinationSelector clusterDestinationSelector = go.AddOrGet<ClusterDestinationSelector>();
 		clusterDestinationSelector.assignable = true;
@@ -81,6 +82,7 @@ public class RailGunConfig : IBuildingConfig
 		storage.allowSettingOnlyFetchMarkedItems = false;
 		storage.fetchCategory = Storage.FetchCategory.GeneralStorage;
 		storage.capacityKg = 1200f;
+		go.GetComponent<HighEnergyParticlePort>().requireOperational = false;
 		RailGunConfig.AddVisualizer(go);
 	}
 

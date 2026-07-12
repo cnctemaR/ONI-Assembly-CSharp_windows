@@ -21,6 +21,7 @@ public class AutoMinerConfig : IBuildingConfig
 
 	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
+		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.IndustrialMachinery, false);
 		go.AddOrGet<Operational>();
 		go.AddOrGet<LoopingSounds>();
 		go.AddOrGet<MiningSounds>();

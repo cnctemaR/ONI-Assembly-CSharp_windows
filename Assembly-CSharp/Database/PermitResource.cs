@@ -7,8 +7,8 @@ namespace Database
 		public PermitResource(string id, string Name, string Desc, PermitCategory permitCategory, PermitRarity rarity)
 			: base(id, Name)
 		{
-			DebugUtil.DevAssert(Name != null, "Name must be provided.", null);
-			DebugUtil.DevAssert(Desc != null, "Description must be provided.", null);
+			DebugUtil.DevAssert(Name != null, "Name must be provided for permit with id \"" + id + "\" of type " + base.GetType().Name, null);
+			DebugUtil.DevAssert(Desc != null, "Description must be provided for permit with id \"" + id + "\" of type " + base.GetType().Name, null);
 			this.Description = Desc;
 			this.Category = permitCategory;
 			this.Rarity = rarity;

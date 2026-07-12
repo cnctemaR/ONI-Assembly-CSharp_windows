@@ -82,6 +82,22 @@ public class KleiItems : ThreadedHttps<KleiItems>
 		return false;
 	}
 
+	public static ulong GetItemInstanceID(string itemType)
+	{
+		if (KleiItems.InventoryData.ItemsByType == null)
+		{
+			global::Debug.LogError("Tried to get item from null inventory");
+			return 0UL;
+		}
+		List<KleiItems.Item> list;
+		if (KleiItems.InventoryData.ItemsByType.TryGetValue(itemType, out list))
+		{
+			return list[0].ItemId;
+		}
+		global::Debug.LogError("No instance of requested itemType found in inventory: " + itemType);
+		return 0UL;
+	}
+
 	public static int GetOwnedItemCount(string itemType)
 	{
 		if (KleiItems.InventoryData.ItemsByType == null)
@@ -98,6 +114,28 @@ public class KleiItems : ThreadedHttps<KleiItems>
 			return 0;
 		}
 		return list.Count<KleiItems.Item>((KleiItems.Item x) => x.IsOpened);
+	}
+
+	public static ulong GetFilamentAmount()
+	{
+		return KleiItems.InventoryData.Filament;
+	}
+
+	public static bool TryGetBarterPrice(string itemType, out ulong buyPrice, out ulong sellPrice)
+	{
+		buyPrice = (sellPrice = 0UL);
+		if (KleiItems.InventoryData.BarterPrices == null || KleiItems.InventoryData.BarterPrices.Count<KeyValuePair<string, Pair<ulong, ulong>>>() == 0)
+		{
+			return false;
+		}
+		Pair<ulong, ulong> pair;
+		if (KleiItems.InventoryData.BarterPrices.TryGetValue(itemType, out pair))
+		{
+			buyPrice = pair.first;
+			sellPrice = pair.second;
+			return true;
+		}
+		return false;
 	}
 
 	public static float SecondsToNextTick()
@@ -135,6 +173,21 @@ public class KleiItems : ThreadedHttps<KleiItems>
 		ThreadedHttps<KleiItems>.Instance.InventoryRefreshCbs.Remove(cb);
 	}
 
+	public static void AddRequestGetPricingInfo(KleiItems.ResponseCallback cb = null)
+	{
+		ThreadedHttps<KleiItems>.Instance.AddRequest(KleiItems.Request.RequestType.GetPricingInfo, null, cb);
+	}
+
+	public static void AddRequestBarterGainItem(string itemType, KleiItems.ResponseCallback cb = null)
+	{
+		ThreadedHttps<KleiItems>.Instance.AddRequest(KleiItems.Request.RequestType.BarterGainItem, itemType, cb);
+	}
+
+	public static void AddRequestBarterLoseItem(ulong itemId, KleiItems.ResponseCallback cb = null)
+	{
+		ThreadedHttps<KleiItems>.Instance.AddRequest(KleiItems.Request.RequestType.BarterLoseItem, itemId, cb);
+	}
+
 	public void Update()
 	{
 		if (this.RequestCompleted)
@@ -157,6 +210,18 @@ public class KleiItems : ThreadedHttps<KleiItems>
 				else if (activeRequest.Type == KleiItems.Request.RequestType.Tick)
 				{
 					this.OnTickReply(this.Response);
+				}
+				else if (activeRequest.Type == KleiItems.Request.RequestType.GetPricingInfo)
+				{
+					this.OnGetPricingInfoReply(this.Response);
+				}
+				else if (activeRequest.Type == KleiItems.Request.RequestType.BarterGainItem)
+				{
+					this.OnBarterGainItemReply(this.Response);
+				}
+				else if (activeRequest.Type == KleiItems.Request.RequestType.BarterLoseItem)
+				{
+					this.OnBarterLoseItemReply(this.Response);
 				}
 			}
 			else
@@ -193,6 +258,18 @@ public class KleiItems : ThreadedHttps<KleiItems>
 			{
 				flag = this.RequestTick();
 			}
+			else if (request.Type == KleiItems.Request.RequestType.GetPricingInfo)
+			{
+				flag = this.RequestGetPricingInfo();
+			}
+			else if (request.Type == KleiItems.Request.RequestType.BarterGainItem)
+			{
+				flag = this.RequestBarterGainItem((string)request.Data);
+			}
+			else if (request.Type == KleiItems.Request.RequestType.BarterLoseItem)
+			{
+				flag = this.RequestBarterLoseItem((ulong)request.Data);
+			}
 			if (flag)
 			{
 				this.RequestStarted = true;
@@ -213,6 +290,8 @@ public class KleiItems : ThreadedHttps<KleiItems>
 		this.TimeToNextTick = 360f;
 		KleiItems.InventoryData.AllItems = new List<KleiItems.Item>();
 		KleiItems.InventoryData.ItemsByType = new Dictionary<string, List<KleiItems.Item>>();
+		KleiItems.InventoryData.Filament = 0UL;
+		KleiItems.InventoryData.BarterPrices = new Dictionary<string, Pair<ulong, ulong>>();
 		this.RetryCount = 0;
 	}
 
@@ -327,6 +406,10 @@ public class KleiItems : ThreadedHttps<KleiItems>
 					}
 				}
 			}
+			if (inventoryReply.CurrencyMap != null)
+			{
+				inventoryReply.CurrencyMap.TryGetValue("FILAMENT", out KleiItems.InventoryData.Filament);
+			}
 			this.SaveInventoryCache();
 			foreach (KleiItems.InventoryRefreshCallback inventoryRefreshCallback in this.InventoryRefreshCbs)
 			{
@@ -426,6 +509,160 @@ public class KleiItems : ThreadedHttps<KleiItems>
 		this.HandleSuccess(this.ActiveRequest);
 	}
 
+	private bool RequestGetPricingInfo()
+	{
+		string kleiToken = KleiAccount.KleiToken;
+		if (string.IsNullOrEmpty(kleiToken))
+		{
+			return false;
+		}
+		this.StartHttpsRequest(KleiItemsConfig.SERVER_URL + "iap/ONI/GetPricingInfo");
+		string text = JsonConvert.SerializeObject(new Dictionary<string, object>
+		{
+			{ "ClientToken", kleiToken },
+			{ "PricingHash", 0 }
+		});
+		byte[] bytes = Encoding.UTF8.GetBytes(text);
+		base.PutPacket(bytes, false);
+		return true;
+	}
+
+	private void OnGetPricingInfoReply(string response)
+	{
+		KleiItems.GetPricingInfoReply getPricingInfoReply = JsonConvert.DeserializeObject<KleiItems.GetPricingInfoReply>(response);
+		if (!getPricingInfoReply.Error)
+		{
+			KleiItems.InventoryData.BarterPrices.Clear();
+			using (Dictionary<string, KleiItems.GetPricingInfoReply.BarterDef>.Enumerator enumerator = getPricingInfoReply.BarterDefs.GetEnumerator())
+			{
+				while (enumerator.MoveNext())
+				{
+					KeyValuePair<string, KleiItems.GetPricingInfoReply.BarterDef> keyValuePair = enumerator.Current;
+					string key = keyValuePair.Key;
+					KleiItems.GetPricingInfoReply.BarterDef value = keyValuePair.Value;
+					if (value.Currency == "FILAMENT")
+					{
+						KleiItems.InventoryData.BarterPrices[key] = new Pair<ulong, ulong>(value.Buy, value.Sell);
+					}
+				}
+				return;
+			}
+		}
+		this.HandleError(this.ActiveRequest, getPricingInfoReply.ErrorCode);
+	}
+
+	private bool RequestBarterGainItem(string item_type)
+	{
+		string kleiToken = KleiAccount.KleiToken;
+		if (string.IsNullOrEmpty(kleiToken))
+		{
+			return false;
+		}
+		ulong first = KleiItems.InventoryData.BarterPrices[item_type].first;
+		if (first > KleiItems.InventoryData.Filament)
+		{
+			return false;
+		}
+		this.StartHttpsRequest(KleiItemsConfig.SERVER_URL + "iap/ONI/BarterGainItem");
+		string text = JsonConvert.SerializeObject(new Dictionary<string, object>
+		{
+			{ "ClientToken", kleiToken },
+			{ "ItemType", item_type },
+			{ "ExpectedPrice", first },
+			{
+				"ExpectedBalance",
+				KleiItems.InventoryData.Filament
+			},
+			{ "CurrencyName", "FILAMENT" },
+			{
+				"TransID",
+				global::UnityEngine.Random.Range(1, int.MaxValue).ToString()
+			}
+		});
+		byte[] bytes = Encoding.UTF8.GetBytes(text);
+		base.PutPacket(bytes, false);
+		return true;
+	}
+
+	private void OnBarterGainItemReply(string response)
+	{
+		KleiItems.BarterGainItemReply barterGainItemReply = JsonConvert.DeserializeObject<KleiItems.BarterGainItemReply>(response);
+		if (!barterGainItemReply.Error)
+		{
+			if (this.ActiveRequest.Cb != null)
+			{
+				KleiItems.Result result;
+				result.Success = true;
+				this.ActiveRequest.Cb(result);
+			}
+			KleiItems.AddRequestInventoryRefresh(null);
+			return;
+		}
+		this.HandleError(this.ActiveRequest, barterGainItemReply.ErrorCode);
+	}
+
+	private bool RequestBarterLoseItem(ulong item_id)
+	{
+		string kleiToken = KleiAccount.KleiToken;
+		if (string.IsNullOrEmpty(kleiToken))
+		{
+			return false;
+		}
+		string text = null;
+		foreach (KleiItems.Item item in KleiItems.InventoryData.AllItems)
+		{
+			if (item.ItemId == item_id)
+			{
+				text = item.ItemType;
+			}
+		}
+		if (text == null)
+		{
+			return false;
+		}
+		if (!KleiItems.InventoryData.BarterPrices.ContainsKey(text))
+		{
+			return false;
+		}
+		ulong second = KleiItems.InventoryData.BarterPrices[text].second;
+		this.StartHttpsRequest(KleiItemsConfig.SERVER_URL + "iap/ONI/BarterLoseItem");
+		string text2 = JsonConvert.SerializeObject(new Dictionary<string, object>
+		{
+			{ "ClientToken", kleiToken },
+			{ "ItemID", item_id },
+			{ "ExpectedPrice", second },
+			{
+				"ExpectedBalance",
+				KleiItems.InventoryData.Filament
+			},
+			{ "CurrencyName", "FILAMENT" },
+			{
+				"TransID",
+				global::UnityEngine.Random.Range(1, int.MaxValue).ToString()
+			}
+		});
+		byte[] bytes = Encoding.UTF8.GetBytes(text2);
+		base.PutPacket(bytes, false);
+		return true;
+	}
+
+	private void OnBarterLoseItemReply(string response)
+	{
+		KleiItems.BarterLoseItemReply barterLoseItemReply = JsonConvert.DeserializeObject<KleiItems.BarterLoseItemReply>(response);
+		if (!barterLoseItemReply.Error)
+		{
+			if (this.ActiveRequest.Cb != null)
+			{
+				KleiItems.Result result;
+				result.Success = true;
+				this.ActiveRequest.Cb(result);
+			}
+			KleiItems.AddRequestInventoryRefresh(null);
+			return;
+		}
+		this.HandleError(this.ActiveRequest, barterLoseItemReply.ErrorCode);
+	}
+
 	private static uint hash(string s, uint seed = 0U)
 	{
 		uint num = seed;
@@ -500,6 +737,7 @@ public class KleiItems : ThreadedHttps<KleiItems>
 			{
 				KleiItems.InventoryData.AllItems.Clear();
 				KleiItems.InventoryData.ItemsByType.Clear();
+				KleiItems.InventoryData.Filament = 0UL;
 				string text = File.ReadAllText(file_path);
 				KleiItems.InventoryCache inventoryCache;
 				try
@@ -592,6 +830,10 @@ public class KleiItems : ThreadedHttps<KleiItems>
 		public List<KleiItems.Item> AllItems;
 
 		public Dictionary<string, List<KleiItems.Item>> ItemsByType;
+
+		public ulong Filament;
+
+		public Dictionary<string, Pair<ulong, ulong>> BarterPrices;
 	}
 
 	private struct Request
@@ -607,7 +849,10 @@ public class KleiItems : ThreadedHttps<KleiItems>
 			GetAllItems,
 			SetItemOpened,
 			OpenMysteryBox,
-			Tick
+			Tick,
+			GetPricingInfo,
+			BarterLoseItem,
+			BarterGainItem
 		}
 	}
 
@@ -618,6 +863,8 @@ public class KleiItems : ThreadedHttps<KleiItems>
 		public string ErrorCode;
 
 		public KleiItems.InventoryReply.Item[] Items;
+
+		public Dictionary<string, ulong> CurrencyMap;
 
 		public struct Item
 		{
@@ -661,6 +908,50 @@ public class KleiItems : ThreadedHttps<KleiItems>
 		public string ErrorCode;
 
 		public bool GiftReceived;
+	}
+
+	private struct GetPricingInfoReply
+	{
+		public bool Error;
+
+		public string ErrorCode;
+
+		public Dictionary<string, KleiItems.GetPricingInfoReply.BarterDef> BarterDefs;
+
+		public struct BarterDef
+		{
+			public string Currency;
+
+			public ulong Buy;
+
+			public ulong Sell;
+		}
+	}
+
+	private struct BarterGainItemReply
+	{
+		public bool Error;
+
+		public string ErrorCode;
+
+		public ulong ItemID;
+
+		public string ItemType;
+
+		public ulong NewCurrency;
+
+		public string CurrencyName;
+	}
+
+	private struct BarterLoseItemReply
+	{
+		public bool Error;
+
+		public string ErrorCode;
+
+		public ulong NewCurrency;
+
+		public string CurrencyName;
 	}
 
 	private struct InventoryCache

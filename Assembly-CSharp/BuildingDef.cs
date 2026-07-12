@@ -150,7 +150,7 @@ public class BuildingDef : Def
 		string[] materialCategory = this.MaterialCategory;
 		for (int i = 0; i < materialCategory.Length; i++)
 		{
-			List<Tag> validMaterials = MaterialSelector.GetValidMaterials(materialCategory[i]);
+			List<Tag> validMaterials = MaterialSelector.GetValidMaterials(materialCategory[i], false);
 			if (validMaterials.Count != 0)
 			{
 				list.Add(validMaterials[0]);

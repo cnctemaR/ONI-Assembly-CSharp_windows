@@ -54,7 +54,7 @@ namespace KMod
 						global::Debug.LogFormat("Latent reinstall of mod {0}", new object[] { mod2.title });
 						if (!string.IsNullOrEmpty(mod2.reinstall_path) && File.Exists(mod2.reinstall_path))
 						{
-							mod2.IsEnabledForActiveDlc();
+							bool flag2 = mod2.IsEnabledForActiveDlc();
 							mod2.file_source = new ZipFile(mod2.reinstall_path);
 							mod2.SetEnabledForActiveDlc(false);
 							if (mod2.Uninstall())
@@ -62,7 +62,7 @@ namespace KMod
 								mod2.Install();
 								if (mod2.status == Mod.Status.Installed)
 								{
-									mod2.SetEnabledForActiveDlc(true);
+									mod2.SetEnabledForActiveDlc(flag2);
 								}
 							}
 							flag = true;
@@ -293,6 +293,7 @@ namespace KMod
 					mod.file_source = mod2.file_source;
 				}
 			}
+			mod.file_source.Dispose();
 			this.dirty = true;
 			this.Update(caller);
 		}
@@ -332,6 +333,7 @@ namespace KMod
 				this.Uninstall(mod);
 				this.Install(mod);
 			}
+			mod.file_source.Dispose();
 			this.dirty = true;
 			this.Update(caller);
 		}
@@ -614,8 +616,13 @@ namespace KMod
 
 		private static string MakeEventList(List<Event> events)
 		{
+			return Manager.MakeEventList(events, "\n");
+		}
+
+		private static string MakeEventList(List<Event> events, string prefix)
+		{
 			StringBuilder stringBuilder = new StringBuilder();
-			stringBuilder.AppendLine();
+			stringBuilder.Append(prefix);
 			string text = null;
 			string text2 = null;
 			int num = 30;
@@ -639,8 +646,13 @@ namespace KMod
 
 		private static string MakeModList(List<Event> events)
 		{
+			return Manager.MakeModList(events, "\n");
+		}
+
+		private static string MakeModList(List<Event> events, string prefix)
+		{
 			StringBuilder stringBuilder = new StringBuilder();
-			stringBuilder.AppendLine();
+			stringBuilder.Append(prefix);
 			HashSetPool<string, Manager>.PooledHashSet pooledHashSet = HashSetPool<string, Manager>.Allocate();
 			int num = 30;
 			foreach (Event @event in events)
@@ -729,7 +741,7 @@ namespace KMod
 			{
 				return;
 			}
-			string text = string.Format(message_format, with_details ? Manager.MakeEventList(this.events) : Manager.MakeModList(this.events));
+			string text = string.Format(message_format, with_details ? Manager.MakeEventList(this.events, null) : Manager.MakeModList(this.events, null));
 			string text2 = UI.FRONTEND.MOD_DIALOGS.RESTART.OK;
 			string text3 = cancel_text ?? UI.FRONTEND.MOD_DIALOGS.RESTART.CANCEL;
 			Manager.Dialog(parent, title, text, text2, new global::System.Action(App.instance.Restart), text3, on_cancel, null, null, null);

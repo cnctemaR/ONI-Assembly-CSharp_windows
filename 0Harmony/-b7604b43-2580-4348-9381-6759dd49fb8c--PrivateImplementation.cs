@@ -3,7 +3,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 [CompilerGenerated]
-internal sealed class <da122c35-67ce-44e0-9391-60ea466f92d7><PrivateImplementationDetails>
+internal sealed class <b7604b43-2580-4348-9381-6759dd49fb8c><PrivateImplementationDetails>
 {
 	internal static uint ComputeStringHash(string s)
 	{
@@ -23,16 +23,16 @@ internal sealed class <da122c35-67ce-44e0-9391-60ea466f92d7><PrivateImplementati
 	internal static readonly long 1B960802B155541DF3837ADE50790DA7E91762D14B8E011FA8223424FF75ACDB;
 
 	// Note: this field is marked with 'hasfieldrva'.
-	internal static readonly <da122c35-67ce-44e0-9391-60ea466f92d7><PrivateImplementationDetails>.__StaticArrayInitTypeSize=1790 2EF0065A03764C27AE8D5DC3002E10F0426E43BDFA7D8ECFFF633E45DD32376B;
+	internal static readonly <b7604b43-2580-4348-9381-6759dd49fb8c><PrivateImplementationDetails>.__StaticArrayInitTypeSize=1790 2EF0065A03764C27AE8D5DC3002E10F0426E43BDFA7D8ECFFF633E45DD32376B;
 
 	// Note: this field is marked with 'hasfieldrva'.
-	internal static readonly <da122c35-67ce-44e0-9391-60ea466f92d7><PrivateImplementationDetails>.__StaticArrayInitTypeSize=160 933598639CBAA1DE502F80D2FD1DB78F13C8D7BB64A5FDC1BC73AC0B5CE4F5CA;
+	internal static readonly <b7604b43-2580-4348-9381-6759dd49fb8c><PrivateImplementationDetails>.__StaticArrayInitTypeSize=160 933598639CBAA1DE502F80D2FD1DB78F13C8D7BB64A5FDC1BC73AC0B5CE4F5CA;
 
 	// Note: this field is marked with 'hasfieldrva' and has an initial value of '4182389475095035824'.
 	internal static readonly long 971150DD73DC318E68A98CCE9B91AC7DEA2D43C562B4F5A9A2F4272C7E29477E;
 
 	// Note: this field is marked with 'hasfieldrva'.
-	internal static readonly <da122c35-67ce-44e0-9391-60ea466f92d7><PrivateImplementationDetails>.__StaticArrayInitTypeSize=128 BFDF5E72651B4EC588BD5FC6A9F17E9E0972248146BBACC10478F48D72F29B81;
+	internal static readonly <b7604b43-2580-4348-9381-6759dd49fb8c><PrivateImplementationDetails>.__StaticArrayInitTypeSize=128 BFDF5E72651B4EC588BD5FC6A9F17E9E0972248146BBACC10478F48D72F29B81;
 
 	[StructLayout(LayoutKind.Explicit, Pack = 1, Size = 128)]
 	private struct __StaticArrayInitTypeSize=128

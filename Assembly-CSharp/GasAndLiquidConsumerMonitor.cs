@@ -67,6 +67,11 @@ public class GasAndLiquidConsumerMonitor : GameStateMachine<GasAndLiquidConsumer
 			this.FindTargetCell();
 		}
 
+		public Element GetTargetElement()
+		{
+			return this.targetElement;
+		}
+
 		public bool IsConsumableCell(int cell, out Element element)
 		{
 			element = Grid.Element[cell];

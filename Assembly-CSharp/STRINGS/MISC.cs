@@ -52,9 +52,13 @@ namespace STRINGS
 
 			public static LocString BUILDABLERAW = "Raw Mineral";
 
+			public static LocString BUILDABLERAW_DESC = "";
+
 			public static LocString BUILDABLEPROCESSED = "Refined Mineral";
 
-			public static LocString BUILDABLEANY = "Generic Buildable";
+			public static LocString BUILDABLEANY = "General Buildable";
+
+			public static LocString BUILDABLEANY_DESC = "";
 
 			public static LocString REFINEDMETAL = UI.FormatAsLink("Refined Metal", "REFINEDMETAL");
 
@@ -69,17 +73,25 @@ namespace STRINGS
 
 			public static LocString METAL = "Metal Ore";
 
+			public static LocString METAL_DESC = "";
+
 			public static LocString PRECIOUSMETAL = "Precious Metal";
 
 			public static LocString RAWPRECIOUSMETAL = "Precious Metal Ore";
 
 			public static LocString PRECIOUSROCK = "Precious Rock";
 
+			public static LocString PRECIOUSROCK_DESC = "";
+
 			public static LocString ALLOY = "Alloy";
 
 			public static LocString BUILDINGFIBER = "Fiber";
 
+			public static LocString BUILDINGFIBER_DESC = "";
+
 			public static LocString BUILDINGWOOD = "Wood";
+
+			public static LocString BUILDINGWOOD_DESC = "";
 
 			public static LocString CRUSHABLE = "Crushable";
 
@@ -98,6 +110,8 @@ namespace STRINGS
 			public static LocString SPECIAL = "Special";
 
 			public static LocString FARMABLE = "Cultivable Soil";
+
+			public static LocString FARMABLE_DESC = "";
 
 			public static LocString AGRICULTURE = "Agriculture";
 
@@ -159,6 +173,8 @@ namespace STRINGS
 
 			public static LocString PLUMBABLE = "Plumbable";
 
+			public static LocString PLUMBABLE_DESC = "";
+
 			public static LocString COMPOSTABLE = UI.FormatAsLink("Compostable", "COMPOSTABLE");
 
 			public static LocString COMPOSTABLE_DESC = string.Concat(new string[]
@@ -196,7 +212,9 @@ namespace STRINGS
 
 			public static LocString PICKLED = "Pickled";
 
-			public static LocString PLASTIC = "Plastic";
+			public static LocString PLASTIC = "Plastics";
+
+			public static LocString PLASTIC_DESC = "";
 
 			public static LocString TOILET = "Toilet";
 
@@ -228,11 +246,15 @@ namespace STRINGS
 
 			public static LocString TRANSPARENT = "Transparent";
 
+			public static LocString TRANSPARENT_DESC = "";
+
 			public static LocString RAREMATERIALS = "Rare Resource";
 
 			public static LocString FARMINGMATERIAL = "Fertilizer";
 
 			public static LocString INSULATOR = "Insulator";
+
+			public static LocString INSULATOR_DESC = "";
 
 			public static LocString RAILGUNPAYLOADEMPTYABLE = "Payload";
 

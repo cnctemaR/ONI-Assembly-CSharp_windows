@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using FMOD.Studio;
 using UnityEngine;
 
 public class BrushTool : InterfaceTool
@@ -10,6 +11,15 @@ public class BrushTool : InterfaceTool
 		{
 			return this.dragging;
 		}
+	}
+
+	protected virtual void PlaySound()
+	{
+	}
+
+	protected virtual void clearVisitedCells()
+	{
+		this.visitedCells.Clear();
 	}
 
 	protected override void OnActivateTool()
@@ -63,11 +73,11 @@ public class BrushTool : InterfaceTool
 		base.OnPrefabInit();
 		if (this.visualizer != null)
 		{
-			this.visualizer = Util.KInstantiate(this.visualizer, null, null);
+			this.visualizer = global::Util.KInstantiate(this.visualizer, null, null);
 		}
 		if (this.areaVisualizer != null)
 		{
-			this.areaVisualizer = Util.KInstantiate(this.areaVisualizer, null, null);
+			this.areaVisualizer = global::Util.KInstantiate(this.areaVisualizer, null, null);
 			this.areaVisualizer.SetActive(false);
 			this.areaVisualizer.GetComponent<RectTransform>().SetParent(base.transform);
 			this.areaVisualizer.GetComponent<Renderer>().material.color = this.areaColour;
@@ -160,11 +170,38 @@ public class BrushTool : InterfaceTool
 
 	private void Paint()
 	{
+		int count = this.visitedCells.Count;
 		foreach (int num in this.cellsInRadius)
 		{
 			if (Grid.IsValidCell(num) && (int)Grid.WorldIdx[num] == ClusterManager.Instance.activeWorldId && (!Grid.Foundation[num] || this.affectFoundation))
 			{
 				this.OnPaintCell(num, Grid.GetCellDistance(this.currentCell, num));
+			}
+		}
+		if (this.lastCell != this.currentCell)
+		{
+			this.PlayDragSound();
+		}
+		if (count < this.visitedCells.Count)
+		{
+			this.PlaySound();
+		}
+	}
+
+	protected virtual void PlayDragSound()
+	{
+		string dragSound = this.GetDragSound();
+		if (!string.IsNullOrEmpty(dragSound))
+		{
+			string sound = GlobalAssets.GetSound(dragSound, false);
+			if (sound != null)
+			{
+				Vector3 vector = Grid.CellToPos(this.currentCell);
+				vector.z = 0f;
+				int cellDistance = Grid.GetCellDistance(Grid.PosToCell(this.downPos), this.currentCell);
+				EventInstance eventInstance = SoundEvent.BeginOneShot(sound, vector, 1f, false);
+				eventInstance.setParameterByName("tileCount", (float)cellDistance, false);
+				SoundEvent.EndOneShot(eventInstance);
 			}
 		}
 	}
@@ -188,10 +225,15 @@ public class BrushTool : InterfaceTool
 			return;
 		}
 		this.Paint();
+		this.lastCell = this.currentCell;
 	}
 
 	protected virtual void OnPaintCell(int cell, int distFromOrigin)
 	{
+		if (!this.visitedCells.Contains(cell))
+		{
+			this.visitedCells.Add(cell);
+		}
 	}
 
 	public override void OnKeyDown(KButtonEvent e)
@@ -304,6 +346,10 @@ public class BrushTool : InterfaceTool
 	protected Vector3 downPos;
 
 	protected int currentCell;
+
+	protected int lastCell;
+
+	protected List<int> visitedCells = new List<int>();
 
 	protected HashSet<int> cellsInRadius = new HashSet<int>();
 

@@ -26,7 +26,6 @@ public class ChlorinatorConfig : IBuildingConfig
 		buildingDef.ExhaustKilowattsWhenActive = 1f;
 		buildingDef.SelfHeatKilowattsWhenActive = 2f;
 		buildingDef.AudioCategory = "Metal";
-		buildingDef.ViewMode = OverlayModes.LiquidConduits.ID;
 		buildingDef.PermittedRotations = PermittedRotations.FlipH;
 		buildingDef.LogicInputPorts = LogicOperationalController.CreateSingleInputPortList(new CellOffset(0, 1));
 		return buildingDef;

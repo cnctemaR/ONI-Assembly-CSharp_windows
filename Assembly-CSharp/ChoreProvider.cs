@@ -13,6 +13,7 @@ public class ChoreProvider : KMonoBehaviour
 		base.OnPrefabInit();
 		Game.Instance.Subscribe(880851192, new Action<object>(this.OnWorldParentChanged));
 		Game.Instance.Subscribe(586301400, new Action<object>(this.OnMinionMigrated));
+		Game.Instance.Subscribe(1142724171, new Action<object>(this.OnEntityMigrated));
 	}
 
 	protected override void OnSpawn()
@@ -30,6 +31,7 @@ public class ChoreProvider : KMonoBehaviour
 		base.OnCleanUp();
 		Game.Instance.Unsubscribe(880851192, new Action<object>(this.OnWorldParentChanged));
 		Game.Instance.Unsubscribe(586301400, new Action<object>(this.OnMinionMigrated));
+		Game.Instance.Unsubscribe(1142724171, new Action<object>(this.OnEntityMigrated));
 		if (ClusterManager.Instance != null)
 		{
 			ClusterManager.Instance.Unsubscribe(-1078710002, new Action<object>(this.OnWorldRemoved));
@@ -61,6 +63,22 @@ public class ChoreProvider : KMonoBehaviour
 			list2 = (this.choreWorldMap[e.world.ParentWorldId] = new List<Chore>());
 		}
 		this.TransferChores<Chore>(list, list2, e.world.ParentWorldId);
+	}
+
+	protected virtual void OnEntityMigrated(object data)
+	{
+		MigrationEventArgs e = data as MigrationEventArgs;
+		List<Chore> list;
+		if (e == null || !(e.entity == base.gameObject) || e.prevWorldId == e.targetWorldId || !this.choreWorldMap.TryGetValue(e.prevWorldId, out list))
+		{
+			return;
+		}
+		List<Chore> list2;
+		if (!this.choreWorldMap.TryGetValue(e.targetWorldId, out list2))
+		{
+			list2 = (this.choreWorldMap[e.targetWorldId] = new List<Chore>());
+		}
+		this.TransferChores<Chore>(list, list2, e.targetWorldId);
 	}
 
 	protected virtual void OnMinionMigrated(object data)

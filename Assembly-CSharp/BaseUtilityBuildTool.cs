@@ -36,6 +36,10 @@ public class BaseUtilityBuildTool : DragTool
 		ResourceRemainingDisplayScreen.instance.ActivateDisplay(this.visualizer);
 		IHaveUtilityNetworkMgr component2 = this.def.BuildingComplete.GetComponent<IHaveUtilityNetworkMgr>();
 		this.conduitMgr = component2.GetNetworkManager();
+		if (!this.facadeID.IsNullOrWhiteSpace() && this.facadeID != "DEFAULT_FACADE")
+		{
+			this.visualizer.GetComponent<BuildingFacade>().ApplyBuildingFacade(Db.GetBuildingFacades().Get(this.facadeID));
+		}
 	}
 
 	protected override void OnDeactivateTool(InterfaceTool new_tool)
@@ -47,6 +51,7 @@ public class BaseUtilityBuildTool : DragTool
 			global::UnityEngine.Object.Destroy(this.visualizer);
 		}
 		base.OnDeactivateTool(new_tool);
+		this.facadeID = null;
 	}
 
 	public void Activate(BuildingDef def, IList<Tag> selected_elements)
@@ -56,6 +61,12 @@ public class BaseUtilityBuildTool : DragTool
 		this.viewMode = def.ViewMode;
 		PlayerController.Instance.ActivateTool(this);
 		ResourceRemainingDisplayScreen.instance.SetResources(selected_elements, def.CraftRecipe);
+	}
+
+	public void Activate(BuildingDef def, IList<Tag> selected_elements, string facadeID)
+	{
+		this.facadeID = facadeID;
+		this.Activate(def, selected_elements);
 	}
 
 	protected override void OnDragTool(int cell, int distFromOrigin)
@@ -402,11 +413,18 @@ public class BaseUtilityBuildTool : DragTool
 				string text;
 				if ((DebugHandler.InstantBuildMode || (Game.Instance.SandboxModeActive && SandboxToolParameterMenu.instance.settings.InstantBuild)) && this.def.IsValidBuildLocation(this.visualizer, vector, Orientation.Neutral, false) && this.def.IsValidPlaceLocation(this.visualizer, vector, Orientation.Neutral, out text))
 				{
-					gameObject = this.def.Build(pathNode.cell, Orientation.Neutral, null, this.selectedElements, 293.15f, true, GameClock.Instance.GetTime());
+					BuildingDef buildingDef = this.def;
+					int cell = pathNode.cell;
+					Orientation orientation = Orientation.Neutral;
+					Storage storage = null;
+					IList<Tag> list = this.selectedElements;
+					float num2 = 293.15f;
+					float time = GameClock.Instance.GetTime();
+					gameObject = buildingDef.Build(cell, orientation, storage, list, num2, this.facadeID, true, time);
 				}
 				else
 				{
-					gameObject = this.def.TryPlace(null, vector, Orientation.Neutral, this.selectedElements, 0);
+					gameObject = this.def.TryPlace(null, vector, Orientation.Neutral, this.selectedElements, this.facadeID, 0);
 					if (gameObject != null)
 					{
 						if (!this.def.MaterialsAvailable(this.selectedElements, ClusterManager.Instance.activeWorld) && !DebugHandler.InstantBuildMode)
@@ -536,6 +554,8 @@ public class BaseUtilityBuildTool : DragTool
 	protected List<BaseUtilityBuildTool.PathNode> path = new List<BaseUtilityBuildTool.PathNode>();
 
 	protected IUtilityNetworkMgr conduitMgr;
+
+	private string facadeID;
 
 	private Coroutine visUpdater;
 

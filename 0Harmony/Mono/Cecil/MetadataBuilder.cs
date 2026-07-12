@@ -154,7 +154,7 @@ namespace Mono.Cecil
 			table.row.Col1 = this.GetStringIndex(this.module.Name);
 			table.row.Col2 = this.GetGuidIndex(this.module.Mvid);
 			AssemblyDefinition assembly = this.module.Assembly;
-			if (assembly != null)
+			if (this.module.kind != ModuleKind.NetModule && assembly != null)
 			{
 				this.BuildAssembly();
 			}
@@ -175,7 +175,7 @@ namespace Mono.Cecil
 				this.AddExportedTypes();
 			}
 			this.BuildTypes();
-			if (assembly != null)
+			if (this.module.kind != ModuleKind.NetModule && assembly != null)
 			{
 				if (assembly.HasCustomAttributes)
 				{
@@ -541,7 +541,10 @@ namespace Mono.Cecil
 			{
 				this.AddInterfaces(type);
 			}
-			this.AddLayoutInfo(type);
+			if (type.HasLayoutInfo)
+			{
+				this.AddLayoutInfo(type);
+			}
 			if (type.HasFields)
 			{
 				this.AddFields(type);
@@ -639,32 +642,7 @@ namespace Mono.Cecil
 
 		private void AddLayoutInfo(TypeDefinition type)
 		{
-			if (type.HasLayoutInfo)
-			{
-				this.GetTable<ClassLayoutTable>(Table.ClassLayout).AddRow(new Row<ushort, uint, uint>((ushort)type.PackingSize, (uint)type.ClassSize, type.token.RID));
-				return;
-			}
-			if (type.IsValueType && MetadataBuilder.HasNoInstanceField(type))
-			{
-				this.GetTable<ClassLayoutTable>(Table.ClassLayout).AddRow(new Row<ushort, uint, uint>(0, 1U, type.token.RID));
-			}
-		}
-
-		private static bool HasNoInstanceField(TypeDefinition type)
-		{
-			if (!type.HasFields)
-			{
-				return true;
-			}
-			Collection<FieldDefinition> fields = type.Fields;
-			for (int i = 0; i < fields.Count; i++)
-			{
-				if (!fields[i].IsStatic)
-				{
-					return false;
-				}
-			}
-			return true;
+			this.GetTable<ClassLayoutTable>(Table.ClassLayout).AddRow(new Row<ushort, uint, uint>((ushort)type.PackingSize, (uint)type.ClassSize, type.token.RID));
 		}
 
 		private void AddNestedTypes(TypeDefinition type)
@@ -1547,6 +1525,12 @@ namespace Mono.Cecil
 		private void AddEmbeddedSourceDebugInformation(ICustomDebugInformationProvider provider, EmbeddedSourceDebugInformation embedded_source)
 		{
 			SignatureWriter signatureWriter = this.CreateSignatureWriter();
+			if (!embedded_source.resolved)
+			{
+				signatureWriter.WriteBytes(embedded_source.ReadRawEmbeddedSourceDebugInformation());
+				this.AddCustomDebugInformation(provider, embedded_source, signatureWriter);
+				return;
+			}
 			byte[] array = embedded_source.content ?? Empty<byte>.Array;
 			if (embedded_source.compress)
 			{

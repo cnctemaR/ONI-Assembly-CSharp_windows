@@ -127,6 +127,7 @@ namespace Mono.Cecil
 			set
 			{
 				this.initial_value = value;
+				this.HasFieldRVA = !this.initial_value.IsNullOrEmpty<byte>();
 				this.rva = 0;
 			}
 		}
@@ -396,6 +397,18 @@ namespace Mono.Cecil
 			set
 			{
 				this.attributes = this.attributes.SetAttributes(32768, value);
+			}
+		}
+
+		public bool HasFieldRVA
+		{
+			get
+			{
+				return this.attributes.GetAttributes(256);
+			}
+			set
+			{
+				this.attributes = this.attributes.SetAttributes(256, value);
 			}
 		}
 

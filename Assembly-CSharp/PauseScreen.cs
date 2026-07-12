@@ -167,7 +167,7 @@ public class PauseScreen : KModalButtonMenu
 				this.Deactivate();
 			}, null, UI.FRONTEND.SAVESCREEN.REPORT_BUG, delegate
 			{
-				KCrashReporter.ReportError(e.Message, e.StackTrace.ToString(), null, null, null, "");
+				KCrashReporter.ReportError(e.Message, e.StackTrace.ToString(), null, null, null, true, null, null);
 			}, null, null, null, null);
 		}
 	}

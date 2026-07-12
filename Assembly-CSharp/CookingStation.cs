@@ -34,6 +34,7 @@ public class CookingStation : ComplexFabricator, IGameObjectEffectDescriptor
 				component.ModifyDiseaseCount(-num, "CookingStation");
 			}
 		}));
+		base.GetComponent<ComplexFabricator>().workingStatusItem = Db.Get().BuildingStatusItems.ComplexFabricatorCooking;
 	}
 
 	protected override List<GameObject> SpawnOrderProduct(ComplexRecipe recipe)

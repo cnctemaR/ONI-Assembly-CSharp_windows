@@ -46,7 +46,7 @@ namespace Mono.Cecil
 			}
 			this.ReadCustomAttributes(module);
 			AssemblyDefinition assembly = module.Assembly;
-			if (assembly == null)
+			if (module.kind == ModuleKind.NetModule || assembly == null)
 			{
 				return;
 			}
@@ -302,7 +302,7 @@ namespace Mono.Cecil
 			for (int i = 0; i < methods.Count; i++)
 			{
 				MethodDefinition methodDefinition = methods[i];
-				if (methodDefinition.HasBody && methodDefinition.token.RID != 0U && (methodDefinition.debug_info == null || !methodDefinition.debug_info.HasSequencePoints))
+				if (methodDefinition.HasBody && methodDefinition.token.RID != 0U && methodDefinition.debug_info == null)
 				{
 					methodDefinition.debug_info = symbol_reader.Read(methodDefinition);
 				}

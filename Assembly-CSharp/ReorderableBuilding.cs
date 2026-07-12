@@ -284,6 +284,7 @@ public class ReorderableBuilding : KMonoBehaviour
 		this.loopingSounds.StartSound(GlobalAssets.GetSound(this.reorderSound, false));
 		this.reorderingAnimUnderway = true;
 		this.reorderArmController.onAnimComplete -= this.StartReorderingAnim;
+		base.gameObject.Trigger(-1447108533, null);
 	}
 
 	public void SwapWithBelow(bool selectOnComplete = true)

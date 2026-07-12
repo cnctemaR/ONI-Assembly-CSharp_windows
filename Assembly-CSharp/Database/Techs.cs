@@ -262,7 +262,7 @@ namespace Database
 				RocketControlStationConfig.ID
 			}, this, null);
 			new Tech("CrashPlan", new List<string> { "OrbitalResearchPoint", "PioneerModule", "OrbitalResearchCenter", "DLC1CosmicResearchCenter" }, this, null);
-			new Tech("DurableLifeSupport", new List<string> { "NoseconeBasic", "HabitatModuleMedium", "ArtifactAnalysisStation", "ArtifactCargoBay" }, this, null);
+			new Tech("DurableLifeSupport", new List<string> { "NoseconeBasic", "HabitatModuleMedium", "ArtifactAnalysisStation", "ArtifactCargoBay", "SpecialCargoBayCluster" }, this, null);
 			new Tech("NuclearResearch", new List<string> { "DeltaResearchPoint", "NuclearResearchCenter", "ManualHighEnergyParticleSpawner" }, this, null);
 			new Tech("AdvancedNuclearResearch", new List<string> { "HighEnergyParticleSpawner", "HighEnergyParticleRedirector" }, this, null);
 			new Tech("NuclearStorage", new List<string> { "HEPBattery" }, this, null);
@@ -328,6 +328,7 @@ namespace Database
 				"LogicGateNOT",
 				LogicTimeOfDaySensorConfig.ID,
 				LogicTimerSensorConfig.ID,
+				LogicLightSensorConfig.ID,
 				LogicClusterLocationSensorConfig.ID
 			}, this, null);
 			new Tech("LogicCircuits", new List<string> { "LogicGateAND", "LogicGateOR", "LogicGateBUFFER", "LogicGateFILTER" }, this, null);

@@ -46,6 +46,10 @@ public class EntitySplitter : KMonoBehaviour
 		{
 			return false;
 		}
+		if (component.HasTag(GameTags.MarkedForMove) || component2.HasTag(GameTags.MarkedForMove))
+		{
+			return false;
+		}
 		if (pickupable.PrimaryElement.Mass + other.PrimaryElement.Mass > maxStackSize)
 		{
 			return false;

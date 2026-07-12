@@ -32,6 +32,32 @@ namespace MonoMod.RuntimeDetour.Platforms
 				DetourRuntimeILPlatform.GlueThiscallStructRetPtrOrder* ptr2 = ptr;
 				((Func<IntPtr, IntPtr, IntPtr, DetourRuntimeILPlatform._SelftestStruct>)Delegate.CreateDelegate(typeof(Func<IntPtr, IntPtr, IntPtr, DetourRuntimeILPlatform._SelftestStruct>), this, method3))((IntPtr)((void*)ptr2), (IntPtr)((void*)ptr2), intPtr);
 			}
+			MethodInfo method5 = typeof(DetourRuntimeILPlatform._SelftestStruct).GetMethod("_SelftestGetInStruct", BindingFlags.Instance | BindingFlags.Public);
+			MethodInfo method6 = typeof(DetourRuntimeILPlatform).GetMethod("_SelftestGetInStructHook", BindingFlags.Static | BindingFlags.NonPublic);
+			this._HookSelftest(method5, method6);
+			fixed (DetourRuntimeILPlatform.GlueThiscallStructRetPtrOrder* ptr = &this.GlueThiscallInStructRetPtr)
+			{
+				DetourRuntimeILPlatform.GlueThiscallStructRetPtrOrder* ptr3 = ptr;
+				object obj = default(DetourRuntimeILPlatform._SelftestStruct);
+				*ptr3 = (DetourRuntimeILPlatform.GlueThiscallStructRetPtrOrder)((Func<short>)Delegate.CreateDelegate(typeof(Func<short>), obj, method5))();
+				if (*ptr3 == (DetourRuntimeILPlatform.GlueThiscallStructRetPtrOrder)(-1))
+				{
+					throw new Exception("_SelftestGetInStruct failed!");
+				}
+			}
+			this.Pin(method);
+			this.ReferenceNonDynamicPoolPtr = this.GetNativeStart(method);
+			if (DynamicMethodDefinition.IsDynamicILAvailable)
+			{
+				MethodBase methodBase;
+				using (DynamicMethodDefinition dynamicMethodDefinition = new DynamicMethodDefinition(DetourRuntimeILPlatform._MemAllocScratchDummy))
+				{
+					dynamicMethodDefinition.Name = "MemAllocScratch<Reference>";
+					methodBase = DMDGenerator<DMDEmitDynamicMethodGenerator>.Generate(dynamicMethodDefinition, null);
+				}
+				this.Pin(methodBase);
+				this.ReferenceDynamicPoolPtr = this.GetNativeStart(methodBase);
+			}
 		}
 
 		private void _HookSelftest(MethodInfo from, MethodInfo to)
@@ -62,7 +88,7 @@ namespace MonoMod.RuntimeDetour.Platforms
 		private DetourRuntimeILPlatform._SelftestStruct _SelftestGetStruct(IntPtr x, IntPtr y, IntPtr thisPtr)
 		{
 			Console.Error.WriteLine("If you're reading this, the MonoMod.RuntimeDetour selftest failed.");
-			throw new Exception("This method should've been detoured!");
+			throw new Exception("_SelftestGetStruct failed!");
 		}
 
 		private unsafe static void _SelftestGetStructHook(IntPtr a, IntPtr b, IntPtr c, IntPtr d, IntPtr e)
@@ -78,6 +104,12 @@ namespace MonoMod.RuntimeDetour.Platforms
 				return;
 			}
 			*(int*)(void*)c = 1;
+		}
+
+		private unsafe static short _SelftestGetInStructHook(IntPtr a)
+		{
+			*(short*)(void*)a = 2;
+			return 0;
 		}
 
 		protected virtual IntPtr GetFunctionPointer(MethodBase method, RuntimeMethodHandle handle)
@@ -97,6 +129,16 @@ namespace MonoMod.RuntimeDetour.Platforms
 
 		protected virtual void DisableInlining(MethodBase method, RuntimeMethodHandle handle)
 		{
+		}
+
+		public virtual MethodBase GetIdentifiable(MethodBase method)
+		{
+			DetourRuntimeILPlatform.PrivateMethodPin privateMethodPin;
+			if (!this.PinnedHandles.TryGetValue(this.GetMethodHandle(method), out privateMethodPin))
+			{
+				return method;
+			}
+			return privateMethodPin.Pin.Method;
 		}
 
 		public virtual DetourRuntimeILPlatform.MethodPinInfo GetPin(MethodBase method)
@@ -127,6 +169,7 @@ namespace MonoMod.RuntimeDetour.Platforms
 
 		public virtual IntPtr GetNativeStart(MethodBase method)
 		{
+			method = this.GetIdentifiable(method);
 			DetourRuntimeILPlatform.PrivateMethodPin privateMethodPin;
 			if (this.PinnedMethods.TryGetValue(method, out privateMethodPin))
 			{
@@ -137,6 +180,7 @@ namespace MonoMod.RuntimeDetour.Platforms
 
 		public virtual void Pin(MethodBase method)
 		{
+			method = this.GetIdentifiable(method);
 			Interlocked.Increment(ref this.PinnedMethods.GetOrAdd(method, delegate(MethodBase m)
 			{
 				DetourRuntimeILPlatform.PrivateMethodPin privateMethodPin = new DetourRuntimeILPlatform.PrivateMethodPin();
@@ -160,6 +204,7 @@ namespace MonoMod.RuntimeDetour.Platforms
 
 		public virtual void Unpin(MethodBase method)
 		{
+			method = this.GetIdentifiable(method);
 			DetourRuntimeILPlatform.PrivateMethodPin privateMethodPin;
 			if (!this.PinnedMethods.TryGetValue(method, out privateMethodPin))
 			{
@@ -175,6 +220,7 @@ namespace MonoMod.RuntimeDetour.Platforms
 
 		public MethodInfo CreateCopy(MethodBase method)
 		{
+			method = this.GetIdentifiable(method);
 			if (method == null || (method.GetMethodImplementationFlags() & MethodImplAttributes.CodeTypeMask) != MethodImplAttributes.IL)
 			{
 				throw new InvalidOperationException("Uncopyable method: " + (((method != null) ? method.ToString() : null) ?? "NULL"));
@@ -189,6 +235,7 @@ namespace MonoMod.RuntimeDetour.Platforms
 
 		public bool TryCreateCopy(MethodBase method, out MethodInfo dm)
 		{
+			method = this.GetIdentifiable(method);
 			if (method == null || (method.GetMethodImplementationFlags() & MethodImplAttributes.CodeTypeMask) != MethodImplAttributes.IL)
 			{
 				dm = null;
@@ -210,24 +257,26 @@ namespace MonoMod.RuntimeDetour.Platforms
 
 		public MethodBase GetDetourTarget(MethodBase from, MethodBase to)
 		{
-			Type declaringType = to.DeclaringType;
+			to = this.GetIdentifiable(to);
 			MethodInfo methodInfo = null;
-			if (this.GlueThiscallStructRetPtr != DetourRuntimeILPlatform.GlueThiscallStructRetPtrOrder.Original)
+			MethodInfo methodInfo2 = from as MethodInfo;
+			if (methodInfo2 != null && !from.IsStatic)
 			{
-				MethodInfo methodInfo2 = from as MethodInfo;
-				if (methodInfo2 != null && !from.IsStatic)
+				MethodInfo methodInfo3 = to as MethodInfo;
+				if (methodInfo3 != null && to.IsStatic && methodInfo2.ReturnType == methodInfo3.ReturnType && methodInfo2.ReturnType.IsValueType)
 				{
-					MethodInfo methodInfo3 = to as MethodInfo;
-					if (methodInfo3 != null && to.IsStatic && methodInfo2.ReturnType == methodInfo3.ReturnType && methodInfo2.ReturnType.IsValueType)
+					Type declaringType = from.DeclaringType;
+					DetourRuntimeILPlatform.GlueThiscallStructRetPtrOrder glueThiscallStructRetPtrOrder;
+					if ((glueThiscallStructRetPtrOrder = ((declaringType != null && declaringType.IsValueType) ? this.GlueThiscallInStructRetPtr : this.GlueThiscallStructRetPtr)) != DetourRuntimeILPlatform.GlueThiscallStructRetPtrOrder.Original)
 					{
 						int managedSize = methodInfo2.ReturnType.GetManagedSize();
-						if (managedSize == 3 || managedSize == 5 || managedSize == 6 || managedSize == 7 || managedSize >= 9)
+						if (managedSize == 3 || managedSize == 5 || managedSize == 6 || managedSize == 7 || managedSize > IntPtr.Size)
 						{
 							Type thisParamType = from.GetThisParamType();
 							Type type = methodInfo2.ReturnType.MakeByRefType();
 							int num = 0;
 							int num2 = 1;
-							if (this.GlueThiscallStructRetPtr == DetourRuntimeILPlatform.GlueThiscallStructRetPtrOrder.RetThisArgs)
+							if (glueThiscallStructRetPtrOrder == DetourRuntimeILPlatform.GlueThiscallStructRetPtrOrder.RetThisArgs)
 							{
 								num = 1;
 								num2 = 0;
@@ -264,19 +313,80 @@ namespace MonoMod.RuntimeDetour.Platforms
 			return methodInfo ?? to;
 		}
 
-		private readonly DetourRuntimeILPlatform.GlueThiscallStructRetPtrOrder GlueThiscallStructRetPtr;
+		public uint TryMemAllocScratchCloseTo(IntPtr target, out IntPtr ptr, int size)
+		{
+			if (size == 0 || (long)size > (long)((ulong)DetourRuntimeILPlatform._MemAllocScratchDummySafeSize))
+			{
+				ptr = IntPtr.Zero;
+				return 0U;
+			}
+			bool flag = Math.Abs((long)target - (long)this.ReferenceNonDynamicPoolPtr) < 1073741824L;
+			bool flag2 = DynamicMethodDefinition.IsDynamicILAvailable && Math.Abs((long)target - (long)this.ReferenceDynamicPoolPtr) < 1073741824L;
+			if (!flag && !flag2)
+			{
+				ptr = IntPtr.Zero;
+				return 0U;
+			}
+			MethodBase methodBase;
+			using (DynamicMethodDefinition dynamicMethodDefinition = new DynamicMethodDefinition(DetourRuntimeILPlatform._MemAllocScratchDummy))
+			{
+				dynamicMethodDefinition.Name = string.Format("MemAllocScratch<{0:X16}>", (long)target);
+				if (flag2)
+				{
+					methodBase = DMDGenerator<DMDEmitDynamicMethodGenerator>.Generate(dynamicMethodDefinition, null);
+				}
+				else
+				{
+					methodBase = DMDGenerator<DMDCecilGenerator>.Generate(dynamicMethodDefinition, null);
+				}
+			}
+			this.Pin(methodBase);
+			ptr = this.GetNativeStart(methodBase);
+			DetourHelper.Native.MakeReadWriteExecutable(ptr, DetourRuntimeILPlatform._MemAllocScratchDummySafeSize);
+			return DetourRuntimeILPlatform._MemAllocScratchDummySafeSize;
+		}
+
+		public static int MemAllocScratchDummy(int a, int b)
+		{
+			if (a >= 1024 && b >= 1024)
+			{
+				return a + b;
+			}
+			return DetourRuntimeILPlatform.MemAllocScratchDummy(a + b, b + 1);
+		}
+
+		protected DetourRuntimeILPlatform.GlueThiscallStructRetPtrOrder GlueThiscallStructRetPtr;
+
+		protected DetourRuntimeILPlatform.GlueThiscallStructRetPtrOrder GlueThiscallInStructRetPtr;
 
 		protected ConcurrentDictionary<MethodBase, DetourRuntimeILPlatform.PrivateMethodPin> PinnedMethods = new ConcurrentDictionary<MethodBase, DetourRuntimeILPlatform.PrivateMethodPin>();
 
 		protected ConcurrentDictionary<RuntimeMethodHandle, DetourRuntimeILPlatform.PrivateMethodPin> PinnedHandles = new ConcurrentDictionary<RuntimeMethodHandle, DetourRuntimeILPlatform.PrivateMethodPin>();
 
+		private IntPtr ReferenceNonDynamicPoolPtr;
+
+		private IntPtr ReferenceDynamicPoolPtr;
+
+		protected static readonly uint _MemAllocScratchDummySafeSize = 16U;
+
+		protected static readonly MethodInfo _MemAllocScratchDummy = typeof(DetourRuntimeILPlatform).GetMethod("MemAllocScratchDummy", BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
+
 		private struct _SelftestStruct
 		{
-			private readonly byte A;
+			[MethodImpl(MethodImplOptions.NoInlining)]
+			public short _SelftestGetInStruct()
+			{
+				Console.Error.WriteLine("If you're reading this, the MonoMod.RuntimeDetour selftest failed.");
+				return -1;
+			}
 
-			private readonly byte B;
+			private readonly short Value;
 
-			private readonly byte C;
+			private readonly byte E1;
+
+			private readonly byte E2;
+
+			private readonly byte E3;
 		}
 
 		protected class PrivateMethodPin
@@ -298,7 +408,7 @@ namespace MonoMod.RuntimeDetour.Platforms
 			public RuntimeMethodHandle Handle;
 		}
 
-		private enum GlueThiscallStructRetPtrOrder
+		protected enum GlueThiscallStructRetPtrOrder
 		{
 			Original,
 			ThisRetArgs,

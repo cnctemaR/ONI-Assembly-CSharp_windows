@@ -33,6 +33,9 @@ public static class BaseBeeConfig
 		{
 			gameObject.AddOrGet<SymbolOverrideController>().ApplySymbolOverridesByAffix(Assets.GetAnim(anim_file), symbolOverridePrefix, null, 0);
 		}
+		Pickupable pickupable = gameObject.AddOrGet<Pickupable>();
+		int num5 = CREATURES.SORTING.CRITTER_ORDER["Bee"];
+		pickupable.sortOrder = num5;
 		KPrefabID component = gameObject.GetComponent<KPrefabID>();
 		component.prefabInitFn += delegate(GameObject inst)
 		{

@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using FMOD;
+using FMOD.Studio;
+using FMODUnity;
 using Klei.AI;
 using UnityEngine;
 
@@ -77,6 +80,7 @@ public class SandboxFloodTool : FloodTool
 	{
 		base.OnDeactivateTool(new_tool);
 		SandboxToolParameterMenu.instance.gameObject.SetActive(false);
+		this.ev.release();
 	}
 
 	public override void GetOverlayColorData(out HashSet<ToolMenu.CellColorData> colors)
@@ -96,6 +100,39 @@ public class SandboxFloodTool : FloodTool
 	{
 		base.OnMouseMove(cursorPos);
 		this.cellsToAffect = base.Flood(Grid.PosToCell(cursorPos));
+	}
+
+	public override void OnLeftClickDown(Vector3 cursor_pos)
+	{
+		base.OnLeftClickDown(cursor_pos);
+		Element element = ElementLoader.elements[this.settings.GetIntSetting("SandboxTools.SelectedElement")];
+		string text;
+		if (element.IsSolid)
+		{
+			text = GlobalAssets.GetSound("Break_" + element.substance.GetMiningBreakSound(), false);
+			if (text == null)
+			{
+				text = GlobalAssets.GetSound("Break_Rock", false);
+			}
+		}
+		else if (element.IsGas)
+		{
+			text = GlobalAssets.GetSound("SandboxTool_Bucket_Gas", false);
+		}
+		else if (element.IsLiquid)
+		{
+			text = GlobalAssets.GetSound("SandboxTool_Bucket_Liquid", false);
+		}
+		else
+		{
+			text = GlobalAssets.GetSound("Break_Rock", false);
+		}
+		this.ev = KFMOD.CreateInstance(text);
+		ATTRIBUTES_3D attributes_3D = SoundListenerController.Instance.transform.GetPosition().To3DAttributes();
+		this.ev.set3DAttributes(attributes_3D);
+		this.ev.setParameterByName("SandboxToggle", 1f, false);
+		this.ev.start();
+		KFMOD.PlayUISound(GlobalAssets.GetSound("SandboxTool_Bucket", false));
 	}
 
 	public override void OnKeyDown(KButtonEvent e)
@@ -121,4 +158,6 @@ public class SandboxFloodTool : FloodTool
 	protected HashSet<int> cellsToAffect = new HashSet<int>();
 
 	protected Color recentlyAffectedCellColor = new Color(1f, 1f, 1f, 0.1f);
+
+	private EventInstance ev;
 }

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
-using System.Reflection.Emit;
 using Mono.Cecil;
 
 namespace MonoMod.Utils
@@ -109,14 +108,22 @@ namespace MonoMod.Utils
 			return typeRef;
 		}
 
+		[Obsolete("Please use the Assembly overload instead.")]
 		public AssemblyNameReference ImportReference(AssemblyName asm)
+		{
+			return this.Default.ImportReference(asm);
+		}
+
+		public AssemblyNameReference ImportReference(Assembly asm)
 		{
 			AssemblyNameReference assemblyNameReference;
 			if (this.CachedAsms.TryGetValue(asm, out assemblyNameReference))
 			{
 				return assemblyNameReference;
 			}
-			return this.CachedAsms[asm] = this.Default.ImportReference(asm);
+			assemblyNameReference = this.Default.ImportReference(asm.GetName());
+			assemblyNameReference.ApplyRuntimeHash(asm);
+			return this.CachedAsms[asm] = assemblyNameReference;
 		}
 
 		public TypeReference ImportModuleType(Module module, IGenericParameterProvider context)
@@ -126,7 +133,7 @@ namespace MonoMod.Utils
 			{
 				return typeReference;
 			}
-			return this.CachedModuleTypes[module] = new TypeReference(string.Empty, "<Module>", this.Module, this.ImportReference(module.Assembly.GetName()));
+			return this.CachedModuleTypes[module] = new TypeReference(string.Empty, "<Module>", this.Module, this.ImportReference(module.Assembly));
 		}
 
 		public TypeReference ImportReference(Type type, IGenericParameterProvider context)
@@ -201,7 +208,7 @@ namespace MonoMod.Utils
 				{
 					return this.SetCachedType(type, typeReference, importKind);
 				}
-				typeReference = new TypeReference(string.Empty, type.Name, this.Module, this.ImportReference(type.Assembly.GetName()), type.IsValueType);
+				typeReference = new TypeReference(string.Empty, type.Name, this.Module, this.ImportReference(type.Assembly), type.IsValueType);
 				if (type.IsNested)
 				{
 					typeReference.DeclaringType = this._ImportReference(type.DeclaringType, context, importKind);
@@ -290,10 +297,10 @@ namespace MonoMod.Utils
 			{
 				return methodReference;
 			}
-			DynamicMethod dynamicMethod = method as DynamicMethod;
-			if (dynamicMethod != null)
+			MethodInfo methodInfo = method as MethodInfo;
+			if (methodInfo != null && methodInfo.IsDynamicMethod())
 			{
-				return new DynamicMethodReference(this.Module, dynamicMethod);
+				return new DynamicMethodReference(this.Module, methodInfo);
 			}
 			if (this.UseDefault)
 			{
@@ -329,8 +336,8 @@ namespace MonoMod.Utils
 				}
 			}
 			MethodReference methodReference2 = methodReference;
-			MethodInfo methodInfo = method as MethodInfo;
-			methodReference2.ReturnType = this._ImportReference(((methodInfo != null) ? methodInfo.ReturnType : null) ?? typeof(void), methodReference, MMReflectionImporter.GenericImportKind.Open);
+			MethodInfo methodInfo2 = method as MethodInfo;
+			methodReference2.ReturnType = this._ImportReference(((methodInfo2 != null) ? methodInfo2.ReturnType : null) ?? typeof(void), methodReference, MMReflectionImporter.GenericImportKind.Open);
 			foreach (ParameterInfo parameterInfo in method.GetParameters())
 			{
 				methodReference.Parameters.Add(new ParameterDefinition(parameterInfo.Name, (Mono.Cecil.ParameterAttributes)parameterInfo.Attributes, this._ImportReference(parameterInfo.ParameterType, methodReference, MMReflectionImporter.GenericImportKind.Open)));
@@ -349,7 +356,7 @@ namespace MonoMod.Utils
 
 		private readonly DefaultReflectionImporter Default;
 
-		private readonly Dictionary<AssemblyName, AssemblyNameReference> CachedAsms = new Dictionary<AssemblyName, AssemblyNameReference>();
+		private readonly Dictionary<Assembly, AssemblyNameReference> CachedAsms = new Dictionary<Assembly, AssemblyNameReference>();
 
 		private readonly Dictionary<Module, TypeReference> CachedModuleTypes = new Dictionary<Module, TypeReference>();
 

@@ -35,12 +35,12 @@ public class MaterialSelector : KScreen
 		this.ElementToggles.Clear();
 	}
 
-	public static List<Tag> GetValidMaterials(Tag materialTypeTag)
+	public static List<Tag> GetValidMaterials(Tag materialTypeTag, bool omitDisabledElements = false)
 	{
 		List<Tag> list = new List<Tag>();
 		foreach (Element element in ElementLoader.elements)
 		{
-			if (element.IsSolid && (element.tag == materialTypeTag || element.HasTag(materialTypeTag)))
+			if ((!element.disabled || !omitDisabledElements) && element.IsSolid && (element.tag == materialTypeTag || element.HasTag(materialTypeTag)))
 			{
 				list.Add(element.tag);
 			}
@@ -68,7 +68,7 @@ public class MaterialSelector : KScreen
 		this.activeIngredient = ingredient;
 		this.activeRecipe = recipe;
 		this.activeMass = ingredient.amount;
-		foreach (Tag tag in MaterialSelector.GetValidMaterials(ingredient.tag))
+		foreach (Tag tag in MaterialSelector.GetValidMaterials(ingredient.tag, false))
 		{
 			if (!this.ElementToggles.ContainsKey(tag))
 			{

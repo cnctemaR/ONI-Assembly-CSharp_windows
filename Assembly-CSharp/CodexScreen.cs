@@ -149,8 +149,10 @@ public class CodexScreen : KScreen
 		this.ContentPrefabs[typeof(CodexIndentedLabelWithIcon)] = this.prefabIndentedLabelWithIcon;
 		this.ContentPrefabs[typeof(CodexRecipePanel)] = this.prefabRecipePanel;
 		this.ContentPrefabs[typeof(CodexConfigurableConsumerRecipePanel)] = this.PrefabConfigurableConsumerRecipePanel;
+		this.ContentPrefabs[typeof(CodexTemperatureTransitionPanel)] = this.PrefabTemperatureTransitionPanel;
 		this.ContentPrefabs[typeof(CodexConversionPanel)] = this.prefabConversionPanel;
 		this.ContentPrefabs[typeof(CodexCollapsibleHeader)] = this.prefabCollapsibleHeader;
+		this.ContentPrefabs[typeof(CodexCritterLifecycleWidget)] = this.prefabCritterLifecycleWidget;
 	}
 
 	private List<CodexEntry> FilterSearch(string input)
@@ -376,6 +378,7 @@ public class CodexScreen : KScreen
 		CodexScreen.SetupCategory(dictionary, "EMAILS");
 		CodexScreen.SetupCategory(dictionary, "INVESTIGATIONS");
 		CodexScreen.SetupCategory(dictionary, "MYLOG");
+		CodexScreen.SetupCategory(dictionary, "CREATURES::GeneralInfo");
 		CodexScreen.SetupCategory(dictionary, "LESSONS");
 		CodexScreen.SetupCategory(dictionary, "Root");
 	}
@@ -833,10 +836,16 @@ public class CodexScreen : KScreen
 	private GameObject PrefabConfigurableConsumerRecipePanel;
 
 	[SerializeField]
+	private GameObject PrefabTemperatureTransitionPanel;
+
+	[SerializeField]
 	private GameObject prefabConversionPanel;
 
 	[SerializeField]
 	private GameObject prefabCollapsibleHeader;
+
+	[SerializeField]
+	private GameObject prefabCritterLifecycleWidget;
 
 	[Header("Text Styles")]
 	[SerializeField]

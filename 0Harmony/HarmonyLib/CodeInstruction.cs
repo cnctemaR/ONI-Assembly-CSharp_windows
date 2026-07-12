@@ -4,6 +4,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Reflection.Emit;
+using MonoMod.Utils;
 
 namespace HarmonyLib
 {
@@ -104,6 +105,60 @@ namespace HarmonyLib
 			return new CodeInstruction(OpCodes.Call, SymbolExtensions.GetMethodInfo(expression));
 		}
 
+		public static CodeInstruction CallClosure<T>(T closure) where T : Delegate
+		{
+			if (closure.Method.IsStatic && closure.Target == null)
+			{
+				return new CodeInstruction(OpCodes.Call, closure.Method);
+			}
+			Type[] array = (from x in closure.Method.GetParameters()
+				select x.ParameterType).ToArray<Type>();
+			DynamicMethodDefinition dynamicMethodDefinition = new DynamicMethodDefinition(closure.Method.Name, closure.Method.ReturnType, array);
+			ILGenerator ilgenerator = dynamicMethodDefinition.GetILGenerator();
+			Type type = closure.Target.GetType();
+			bool flag;
+			if (closure.Target != null)
+			{
+				flag = type.GetFields().Any<FieldInfo>((FieldInfo x) => !x.IsStatic);
+			}
+			else
+			{
+				flag = false;
+			}
+			if (flag)
+			{
+				int count = CodeInstruction.State.closureCache.Count;
+				CodeInstruction.State.closureCache[count] = closure;
+				ilgenerator.Emit(OpCodes.Ldsfld, AccessTools.Field(typeof(Transpilers), "closureCache"));
+				ilgenerator.Emit(OpCodes.Ldc_I4, count);
+				ilgenerator.Emit(OpCodes.Callvirt, AccessTools.PropertyGetter(typeof(Dictionary<int, Delegate>), "Item"));
+			}
+			else
+			{
+				if (closure.Target == null)
+				{
+					ilgenerator.Emit(OpCodes.Ldnull);
+				}
+				else
+				{
+					ilgenerator.Emit(OpCodes.Newobj, AccessTools.FirstConstructor(type, (ConstructorInfo x) => !x.IsStatic && x.GetParameters().Length == 0));
+				}
+				ilgenerator.Emit(OpCodes.Ldftn, closure.Method);
+				ilgenerator.Emit(OpCodes.Newobj, AccessTools.Constructor(typeof(T), new Type[]
+				{
+					typeof(object),
+					typeof(IntPtr)
+				}, false));
+			}
+			for (int i = 0; i < array.Length; i++)
+			{
+				ilgenerator.Emit(OpCodes.Ldarg, i);
+			}
+			ilgenerator.Emit(OpCodes.Callvirt, AccessTools.Method(typeof(T), "Invoke", null, null));
+			ilgenerator.Emit(OpCodes.Ret);
+			return new CodeInstruction(OpCodes.Call, dynamicMethodDefinition.Generate());
+		}
+
 		public static CodeInstruction LoadField(Type type, string name, bool useAddress = false)
 		{
 			FieldInfo fieldInfo = AccessTools.Field(type, name);
@@ -152,5 +207,10 @@ namespace HarmonyLib
 		public List<Label> labels = new List<Label>();
 
 		public List<ExceptionBlock> blocks = new List<ExceptionBlock>();
+
+		internal static class State
+		{
+			internal static readonly Dictionary<int, Delegate> closureCache = new Dictionary<int, Delegate>();
+		}
 	}
 }

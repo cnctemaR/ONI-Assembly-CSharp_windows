@@ -39,6 +39,11 @@ namespace MonoMod.RuntimeDetour.Platforms
 			this.SetMemPerms(src, (ulong)size, DetourNativeLibcPlatform.MmapProts.PROT_READ | DetourNativeLibcPlatform.MmapProts.PROT_WRITE | DetourNativeLibcPlatform.MmapProts.PROT_EXEC);
 		}
 
+		public void MakeReadWriteExecutable(IntPtr src, uint size)
+		{
+			this.SetMemPerms(src, (ulong)size, DetourNativeLibcPlatform.MmapProts.PROT_READ | DetourNativeLibcPlatform.MmapProts.PROT_WRITE | DetourNativeLibcPlatform.MmapProts.PROT_EXEC);
+		}
+
 		public void FlushICache(IntPtr src, uint size)
 		{
 			this.Inner.FlushICache(src, size);

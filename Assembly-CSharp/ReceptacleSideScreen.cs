@@ -285,7 +285,7 @@ public class ReceptacleSideScreen : SideScreenContent, IRender1000ms
 	public override bool IsValidForTarget(GameObject target)
 	{
 		SingleEntityReceptacle component = target.GetComponent<SingleEntityReceptacle>();
-		return component != null && component.enabled && target.GetComponent<PlantablePlot>() == null && target.GetComponent<EggIncubator>() == null;
+		return component != null && component.enabled && target.GetComponent<PlantablePlot>() == null && target.GetComponent<EggIncubator>() == null && target.GetComponent<SpecialCargoBayClusterReceptacle>() == null;
 	}
 
 	public override void SetTarget(GameObject target)
@@ -413,6 +413,16 @@ public class ReceptacleSideScreen : SideScreenContent, IRender1000ms
 
 	private float GetAvailableAmount(Tag tag)
 	{
+		if (this.ALLOW_ORDER_IGNORING_WOLRD_NEED)
+		{
+			IEnumerable<Pickupable> pickupables = this.targetReceptacle.GetMyWorld().worldInventory.GetPickupables(tag, true);
+			float num = 0f;
+			foreach (Pickupable pickupable in pickupables)
+			{
+				num += (float)Mathf.CeilToInt(pickupable.TotalAmount);
+			}
+			return num;
+		}
 		return this.targetReceptacle.GetMyWorld().worldInventory.GetAmount(tag, true);
 	}
 
@@ -487,6 +497,8 @@ public class ReceptacleSideScreen : SideScreenContent, IRender1000ms
 			this.descriptorPanels[i].gameObject.SetActive(false);
 		}
 	}
+
+	protected bool ALLOW_ORDER_IGNORING_WOLRD_NEED = true;
 
 	[SerializeField]
 	protected KButton requestSelectedEntityBtn;

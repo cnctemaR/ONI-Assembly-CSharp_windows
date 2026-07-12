@@ -244,7 +244,7 @@ namespace MonoMod.Utils
 		public static Mono.Cecil.Cil.OpCode ToLongOp(this Mono.Cecil.Cil.OpCode op)
 		{
 			string name = Enum.GetName(Extensions.t_Code, op.Code);
-			if (!name.EndsWith("_S"))
+			if (!name.EndsWith("_S", StringComparison.Ordinal))
 			{
 				return op;
 			}
@@ -271,7 +271,7 @@ namespace MonoMod.Utils
 		public static Mono.Cecil.Cil.OpCode ToShortOp(this Mono.Cecil.Cil.OpCode op)
 		{
 			string name = Enum.GetName(Extensions.t_Code, op.Code);
-			if (name.EndsWith("_S"))
+			if (name.EndsWith("_S", StringComparison.Ordinal))
 			{
 				return op;
 			}
@@ -489,7 +489,7 @@ namespace MonoMod.Utils
 						{
 							return mref.Name == type3.Name;
 						}
-						return mref.FullName == type3.FullName.Replace("+", "/");
+						return mref.FullName == type3.FullName.Replace("+", "/", StringComparison.Ordinal);
 					}
 				}
 				else
@@ -659,7 +659,7 @@ namespace MonoMod.Utils
 
 		private static bool _IsCompatible(this Type type, Type other)
 		{
-			return type == other || type.IsAssignableFrom(other) || (other.IsEnum && type.IsCompatible(Enum.GetUnderlyingType(other)));
+			return type == other || type.IsAssignableFrom(other) || (other.IsEnum && type.IsCompatible(Enum.GetUnderlyingType(other))) || ((other.IsPointer || other.IsByRef) && type == typeof(IntPtr));
 		}
 
 		public static T GetDeclaredMember<T>(this T member) where T : MemberInfo
@@ -681,7 +681,7 @@ namespace MonoMod.Utils
 
 		public unsafe static void SetMonoCorlibInternal(this Assembly asm, bool value)
 		{
-			if (Type.GetType("Mono.Runtime") == null)
+			if (!ReflectionHelper.IsMono)
 			{
 				return;
 			}
@@ -705,11 +705,13 @@ namespace MonoMod.Utils
 				return;
 			}
 			AssemblyName assemblyName = new AssemblyName(asm.FullName);
-			Dictionary<string, Assembly> assemblyCache = ReflectionHelper.AssemblyCache;
+			Dictionary<string, WeakReference> assemblyCache = ReflectionHelper.AssemblyCache;
 			lock (assemblyCache)
 			{
-				ReflectionHelper.AssemblyCache[assemblyName.FullName] = asm;
-				ReflectionHelper.AssemblyCache[assemblyName.Name] = asm;
+				WeakReference weakReference = new WeakReference(asm);
+				ReflectionHelper.AssemblyCache[asm.GetRuntimeHashedFullName()] = weakReference;
+				ReflectionHelper.AssemblyCache[assemblyName.FullName] = weakReference;
+				ReflectionHelper.AssemblyCache[assemblyName.Name] = weakReference;
 			}
 			long num = 0L;
 			object value2 = fieldInfo.GetValue(asm);
@@ -723,9 +725,61 @@ namespace MonoMod.Utils
 				UIntPtr uintPtr = (UIntPtr)value2;
 				num = (long)(ulong)uintPtr;
 			}
-			int num2 = IntPtr.Size + IntPtr.Size + IntPtr.Size + IntPtr.Size + IntPtr.Size + IntPtr.Size + 20 + 4 + 4 + 4 + ((!Extensions._MonoAssemblyNameHasArch) ? ((typeof(object).Assembly.GetName().Name == "System.Private.CoreLib") ? 16 : 8) : ((typeof(object).Assembly.GetName().Name == "System.Private.CoreLib") ? ((IntPtr.Size == 4) ? 20 : 24) : ((IntPtr.Size == 4) ? 12 : 16))) + IntPtr.Size + IntPtr.Size + 1 + 1 + 1;
+			int num2 = IntPtr.Size + IntPtr.Size + IntPtr.Size + IntPtr.Size + IntPtr.Size + IntPtr.Size + 20 + 4 + 4 + 4 + ((!Extensions._MonoAssemblyNameHasArch) ? (ReflectionHelper.IsCore ? 16 : 8) : (ReflectionHelper.IsCore ? ((IntPtr.Size == 4) ? 20 : 24) : ((IntPtr.Size == 4) ? 12 : 16))) + IntPtr.Size + IntPtr.Size + 1 + 1 + 1;
 			byte* ptr = num + num2;
 			*ptr = (value ? 1 : 0);
+		}
+
+		public static bool IsDynamicMethod(this MethodBase method)
+		{
+			if (Extensions._RTDynamicMethod != null)
+			{
+				return method is DynamicMethod || method.GetType() == Extensions._RTDynamicMethod;
+			}
+			if (method is DynamicMethod)
+			{
+				return true;
+			}
+			if (method.MetadataToken != 0 || !method.IsStatic || !method.IsPublic || (method.Attributes & global::System.Reflection.MethodAttributes.PrivateScope) != global::System.Reflection.MethodAttributes.PrivateScope)
+			{
+				return false;
+			}
+			foreach (MethodInfo methodInfo in method.DeclaringType.GetMethods(BindingFlags.Static | BindingFlags.Public))
+			{
+				if (method == methodInfo)
+				{
+					return false;
+				}
+			}
+			return true;
+		}
+
+		public static object SafeGetTarget(this WeakReference weak)
+		{
+			object obj;
+			try
+			{
+				obj = weak.Target;
+			}
+			catch (InvalidOperationException)
+			{
+				obj = null;
+			}
+			return obj;
+		}
+
+		public static bool SafeGetIsAlive(this WeakReference weak)
+		{
+			bool flag;
+			try
+			{
+				flag = weak.IsAlive;
+			}
+			catch (InvalidOperationException)
+			{
+				flag = false;
+			}
+			return flag;
 		}
 
 		public static T CreateDelegate<T>(this MethodBase method) where T : Delegate
@@ -762,7 +816,7 @@ namespace MonoMod.Utils
 
 		public static MethodDefinition FindMethod(this TypeDefinition type, string id, bool simple = true)
 		{
-			if (simple && !id.Contains(" "))
+			if (simple && !id.Contains(" ", StringComparison.Ordinal))
 			{
 				foreach (MethodDefinition methodDefinition in type.Methods)
 				{
@@ -819,7 +873,7 @@ namespace MonoMod.Utils
 		public static MethodInfo FindMethod(this Type type, string id, bool simple = true)
 		{
 			MethodInfo[] methods = type.GetMethods(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
-			if (simple && !id.Contains(" "))
+			if (simple && !id.Contains(" ", StringComparison.Ordinal))
 			{
 				foreach (MethodInfo methodInfo in methods)
 				{
@@ -1090,7 +1144,7 @@ namespace MonoMod.Utils
 			stringBuilder2.Append(text ?? "System.Void").Append(" ");
 			if (withType && (type != null || method.DeclaringType != null))
 			{
-				stringBuilder.Append(type ?? method.DeclaringType.FullName.Replace("+", "/")).Append("::");
+				stringBuilder.Append(type ?? method.DeclaringType.FullName.Replace("+", "/", StringComparison.Ordinal)).Append("::");
 			}
 			stringBuilder.Append(name ?? method.Name);
 			if (method.ContainsGenericParameters)
@@ -1116,16 +1170,16 @@ namespace MonoMod.Utils
 				{
 					stringBuilder.Append(",");
 				}
-				object[] array;
+				bool flag;
 				try
 				{
-					array = parameterInfo.GetCustomAttributes(Extensions.t_ParamArrayAttribute, false);
+					flag = parameterInfo.GetCustomAttributes(Extensions.t_ParamArrayAttribute, false).Length != 0;
 				}
-				catch
+				catch (NotSupportedException)
 				{
-					array = null;
+					flag = false;
 				}
-				if (array != null && array.Length != 0)
+				if (flag)
 				{
 					stringBuilder.Append("...,");
 				}
@@ -1162,7 +1216,7 @@ namespace MonoMod.Utils
 				return text;
 			}
 			text = ((MemberReference)cap).Name;
-			if (!text.StartsWith("patch_"))
+			if (!text.StartsWith("patch_", StringComparison.Ordinal))
 			{
 				return text;
 			}
@@ -1183,13 +1237,13 @@ namespace MonoMod.Utils
 				else
 				{
 					text = ((MemberReference)cap).Name;
-					text = (text.StartsWith("patch_") ? text.Substring(6) : text);
+					text = (text.StartsWith("patch_", StringComparison.Ordinal) ? text.Substring(6) : text);
 				}
-				if (text.StartsWith("global::"))
+				if (text.StartsWith("global::", StringComparison.Ordinal))
 				{
 					text = text.Substring(8);
 				}
-				else if (!text.Contains(".") && !text.Contains("/"))
+				else if (!text.Contains(".", StringComparison.Ordinal) && !text.Contains("/", StringComparison.Ordinal))
 				{
 					if (!string.IsNullOrEmpty(typeReference.Namespace))
 					{
@@ -1333,7 +1387,9 @@ namespace MonoMod.Utils
 			c.ReturnType = o.ReturnType;
 			c.DeclaringType = o.DeclaringType;
 			c.MetadataToken = c.MetadataToken;
-			c.Body = o.Body.Clone(c);
+			MethodDefinition methodDefinition = c;
+			Mono.Cecil.Cil.MethodBody body = o.Body;
+			methodDefinition.Body = ((body != null) ? body.Clone(c) : null);
 			c.Attributes = o.Attributes;
 			c.ImplAttributes = o.ImplAttributes;
 			c.PInvokeInfo = o.PInvokeInfo;
@@ -1345,7 +1401,7 @@ namespace MonoMod.Utils
 			}
 			foreach (ParameterDefinition parameterDefinition in o.Parameters)
 			{
-				c.Parameters.Add(parameterDefinition);
+				c.Parameters.Add(parameterDefinition.Clone());
 			}
 			foreach (CustomAttribute customAttribute in o.CustomAttributes)
 			{
@@ -1354,6 +1410,26 @@ namespace MonoMod.Utils
 			foreach (MethodReference methodReference in o.Overrides)
 			{
 				c.Overrides.Add(methodReference);
+			}
+			if (c.Body != null)
+			{
+				foreach (Instruction instruction in c.Body.Instructions)
+				{
+					GenericParameter genericParameter2 = instruction.Operand as GenericParameter;
+					int num;
+					if (genericParameter2 != null && (num = o.GenericParameters.IndexOf(genericParameter2)) != -1)
+					{
+						instruction.Operand = c.GenericParameters[num];
+					}
+					else
+					{
+						ParameterDefinition parameterDefinition2 = instruction.Operand as ParameterDefinition;
+						if (parameterDefinition2 != null && (num = o.Parameters.IndexOf(parameterDefinition2)) != -1)
+						{
+							instruction.Operand = c.Parameters[num];
+						}
+					}
+				}
 			}
 			return c;
 		}
@@ -1448,7 +1524,7 @@ namespace MonoMod.Utils
 				{
 					return provider.GenericParameters[position];
 				}
-				return new GenericParameter(orig.Name, provider).Update(position, GenericParameterType.Method);
+				return orig.Clone().Update(position, GenericParameterType.Method);
 			}
 			else
 			{
@@ -1476,7 +1552,7 @@ namespace MonoMod.Utils
 				{
 					return provider.GenericParameters[position];
 				}
-				return new GenericParameter(orig.Name, provider).Update(position, GenericParameterType.Type);
+				return orig.Clone().Update(position, GenericParameterType.Type);
 			}
 			GenericParameter genericParameter3;
 			return genericParameter3;
@@ -1629,15 +1705,7 @@ namespace MonoMod.Utils
 			methodReference.HasThis = method.HasThis;
 			foreach (GenericParameter genericParameter in method.GenericParameters)
 			{
-				GenericParameter genericParameter2 = new GenericParameter(genericParameter.Name, genericParameter.Owner)
-				{
-					Attributes = genericParameter.Attributes
-				}.Update(genericParameter.Position, genericParameter.Type);
-				methodReference.GenericParameters.Add(genericParameter2);
-				foreach (GenericParameterConstraint genericParameterConstraint in genericParameter.Constraints)
-				{
-					genericParameter2.Constraints.Add(genericParameterConstraint.Relink(relinker, methodReference));
-				}
+				methodReference.GenericParameters.Add(genericParameter.Relink(relinker, context));
 			}
 			MethodReference methodReference2 = methodReference;
 			TypeReference returnType = methodReference.ReturnType;
@@ -1757,6 +1825,10 @@ namespace MonoMod.Utils
 			{
 				Attributes = param.Attributes
 			}.Update(param.Position, param.Type);
+			foreach (CustomAttribute customAttribute in param.CustomAttributes)
+			{
+				genericParameter.CustomAttributes.Add(customAttribute.Relink(relinker, context));
+			}
 			foreach (GenericParameterConstraint genericParameterConstraint in param.Constraints)
 			{
 				genericParameter.Constraints.Add(genericParameterConstraint.Relink(relinker, context));
@@ -1770,6 +1842,10 @@ namespace MonoMod.Utils
 			{
 				Attributes = param.Attributes
 			}.Update(param.Position, param.Type);
+			foreach (CustomAttribute customAttribute in param.CustomAttributes)
+			{
+				genericParameter.CustomAttributes.Add(customAttribute.Clone());
+			}
 			foreach (GenericParameterConstraint genericParameterConstraint in param.Constraints)
 			{
 				genericParameter.Constraints.Add(genericParameterConstraint);
@@ -1862,6 +1938,8 @@ namespace MonoMod.Utils
 		private static readonly Dictionary<Type, FieldInfo> fmap_mono_assembly = new Dictionary<Type, FieldInfo>();
 
 		private static readonly bool _MonoAssemblyNameHasArch = new AssemblyName("Dummy, ProcessorArchitecture=MSIL").ProcessorArchitecture == ProcessorArchitecture.MSIL;
+
+		private static readonly Type _RTDynamicMethod = typeof(DynamicMethod).GetNestedType("RTDynamicMethod", BindingFlags.Public | BindingFlags.NonPublic);
 
 		private static readonly Type t_ParamArrayAttribute = typeof(ParamArrayAttribute);
 

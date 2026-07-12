@@ -2,6 +2,7 @@
 using STRINGS;
 using UnityEngine;
 
+[EntityConfigOrder(2)]
 public class BabyStaterpillarConfig : IEntityConfig
 {
 	public string[] GetDlcIds()

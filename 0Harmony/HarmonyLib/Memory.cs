@@ -56,7 +56,7 @@ namespace HarmonyLib
 
 		internal static void PadShortMethods(MethodBase method)
 		{
-			if (Memory.isWindows)
+			if (Tools.isWindows)
 			{
 				return;
 			}
@@ -83,8 +83,7 @@ namespace HarmonyLib
 			}
 			DynamicMethodDefinition dynamicMethodDefinition = new DynamicMethodDefinition(string.Format("PadMethod-{0}", Guid.NewGuid()), typeof(void), new Type[0]);
 			dynamicMethodDefinition.GetILGenerator().Emit(OpCodes.Ret);
-			Exception ex;
-			Memory.GetMethodStart(dynamicMethodDefinition.Generate(), out ex);
+			dynamicMethodDefinition.Generate().Invoke(null, null);
 		}
 
 		public static string WriteJump(long memory, long destination)
@@ -113,7 +112,5 @@ namespace HarmonyLib
 			}
 			return num;
 		}
-
-		private static readonly bool isWindows = Environment.OSVersion.Platform.Equals(PlatformID.Win32NT);
 	}
 }

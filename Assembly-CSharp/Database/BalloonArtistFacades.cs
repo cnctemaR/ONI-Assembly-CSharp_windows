@@ -41,7 +41,8 @@ namespace Database
 			new BalloonArtistFacades.Info("BalloonCandyLime", EQUIPMENT.PREFABS.EQUIPPABLEBALLOON.FACADES.CANDY_LIME.NAME, EQUIPMENT.PREFABS.EQUIPPABLEBALLOON.FACADES.CANDY_LIME.DESC, PermitRarity.Decent, "balloon_candy_lime_kanim", BalloonArtistFacadeType.ThreeSet),
 			new BalloonArtistFacades.Info("BalloonCandyOrange", EQUIPMENT.PREFABS.EQUIPPABLEBALLOON.FACADES.CANDY_ORANGE.NAME, EQUIPMENT.PREFABS.EQUIPPABLEBALLOON.FACADES.CANDY_ORANGE.DESC, PermitRarity.Decent, "balloon_candy_orange_kanim", BalloonArtistFacadeType.ThreeSet),
 			new BalloonArtistFacades.Info("BalloonCandyStrawberry", EQUIPMENT.PREFABS.EQUIPPABLEBALLOON.FACADES.CANDY_STRAWBERRY.NAME, EQUIPMENT.PREFABS.EQUIPPABLEBALLOON.FACADES.CANDY_STRAWBERRY.DESC, PermitRarity.Decent, "balloon_candy_strawberry_kanim", BalloonArtistFacadeType.ThreeSet),
-			new BalloonArtistFacades.Info("BalloonCandyWatermelon", EQUIPMENT.PREFABS.EQUIPPABLEBALLOON.FACADES.CANDY_WATERMELON.NAME, EQUIPMENT.PREFABS.EQUIPPABLEBALLOON.FACADES.CANDY_WATERMELON.DESC, PermitRarity.Decent, "balloon_candy_watermelon_kanim", BalloonArtistFacadeType.ThreeSet)
+			new BalloonArtistFacades.Info("BalloonCandyWatermelon", EQUIPMENT.PREFABS.EQUIPPABLEBALLOON.FACADES.CANDY_WATERMELON.NAME, EQUIPMENT.PREFABS.EQUIPPABLEBALLOON.FACADES.CANDY_WATERMELON.DESC, PermitRarity.Decent, "balloon_candy_watermelon_kanim", BalloonArtistFacadeType.ThreeSet),
+			new BalloonArtistFacades.Info("BalloonHandGold", EQUIPMENT.PREFABS.EQUIPPABLEBALLOON.FACADES.HAND_GOLD.NAME, EQUIPMENT.PREFABS.EQUIPPABLEBALLOON.FACADES.HAND_GOLD.DESC, PermitRarity.Decent, "balloon_hand_gold_kanim", BalloonArtistFacadeType.ThreeSet)
 		};
 
 		public static BalloonArtistFacades.Info[] Infos_All = BalloonArtistFacades.Infos_Skins;

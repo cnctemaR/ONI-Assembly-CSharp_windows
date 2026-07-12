@@ -265,7 +265,7 @@ namespace MonoMod.Utils.Cil
 				this._EmitInlineVar(this._(opcode), arg);
 				return;
 			}
-			if (opcode.Name.EndsWith(".s"))
+			if (opcode.Name.EndsWith(".s", StringComparison.Ordinal))
 			{
 				this.Emit(this.IL.Create(this._(opcode), (sbyte)arg));
 				return;

@@ -2,7 +2,7 @@
 using STRINGS;
 using UnityEngine;
 
-[EntityConfigOrder(1)]
+[EntityConfigOrder(2)]
 public class BabyPacuCleanerConfig : IEntityConfig
 {
 	public string[] GetDlcIds()

@@ -118,6 +118,13 @@ namespace HarmonyLib
 			this.ParseSpecialArguments(argumentTypes, argumentVariations);
 		}
 
+		public HarmonyPatch(string typeName, string methodName, MethodType methodType = MethodType.Normal)
+		{
+			this.info.declaringType = AccessTools.TypeByName(typeName);
+			this.info.methodName = methodName;
+			this.info.methodType = new MethodType?(methodType);
+		}
+
 		private void ParseSpecialArguments(Type[] argumentTypes, ArgumentType[] argumentVariations)
 		{
 			if (argumentVariations == null || argumentVariations.Length == 0)

@@ -21,6 +21,7 @@ public class SkillMinionWidget : KMonoBehaviour, IPointerEnterHandler, IEventSys
 	public void OnPointerEnter(PointerEventData eventData)
 	{
 		this.ToggleHover(true);
+		this.soundPlayer.Play(1);
 	}
 
 	public void OnPointerExit(PointerEventData eventData)
@@ -235,4 +236,6 @@ public class SkillMinionWidget : KMonoBehaviour, IPointerEnterHandler, IEventSys
 
 	[SerializeField]
 	private TextStyleSetting TooltipTextStyle_AbilityNegativeModifier;
+
+	public ButtonSoundPlayer soundPlayer;
 }

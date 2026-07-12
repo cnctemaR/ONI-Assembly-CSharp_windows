@@ -3658,11 +3658,19 @@ public abstract class OverlayModes
 					ToolParameterMenu.ToggleState.Off
 				},
 				{
+					ToolParameterMenu.FILTERLAYERS.LIQUIFIABLE,
+					ToolParameterMenu.ToggleState.Off
+				},
+				{
 					ToolParameterMenu.FILTERLAYERS.GAS,
 					ToolParameterMenu.ToggleState.Off
 				},
 				{
 					ToolParameterMenu.FILTERLAYERS.LIQUID,
+					ToolParameterMenu.ToggleState.Off
+				},
+				{
+					ToolParameterMenu.FILTERLAYERS.MISC,
 					ToolParameterMenu.ToggleState.Off
 				}
 			};
@@ -3710,6 +3718,10 @@ public abstract class OverlayModes
 			{
 				Game.Instance.tileOverlayFilters.Add(GameTags.Breathable);
 				Game.Instance.tileOverlayFilters.Add(GameTags.Unbreathable);
+			}
+			if (base.InFilter(ToolParameterMenu.FILTERLAYERS.MISC, this.legendFilters))
+			{
+				Game.Instance.tileOverlayFilters.Add(GameTags.Other);
 			}
 			base.DisableHighlightTypeOverlay<PrimaryElement>(this.layerTargets);
 			this.layerTargets.Clear();

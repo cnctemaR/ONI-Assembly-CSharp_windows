@@ -1,17 +1,17 @@
 ﻿using System;
-using System.Reflection.Emit;
+using System.Reflection;
 using Mono.Cecil;
 
 namespace MonoMod.Utils
 {
 	internal class DynamicMethodReference : MethodReference
 	{
-		public DynamicMethodReference(ModuleDefinition module, DynamicMethod dm)
+		public DynamicMethodReference(ModuleDefinition module, MethodInfo dm)
 			: base("", module.TypeSystem.Void)
 		{
 			this.DynamicMethod = dm;
 		}
 
-		public DynamicMethod DynamicMethod;
+		public MethodInfo DynamicMethod;
 	}
 }

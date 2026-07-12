@@ -156,6 +156,11 @@ namespace KMod
 			return string.Empty;
 		}
 
+		public void Dispose()
+		{
+			this.zipfile.Dispose();
+		}
+
 		private string filename;
 
 		private ZipFile zipfile;

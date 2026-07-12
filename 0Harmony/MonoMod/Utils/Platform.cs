@@ -10,6 +10,7 @@ namespace MonoMod.Utils
 		NT = 4,
 		Unix = 8,
 		ARM = 65536,
+		Wine = 131072,
 		Unknown = 17,
 		Windows = 37,
 		MacOS = 73,

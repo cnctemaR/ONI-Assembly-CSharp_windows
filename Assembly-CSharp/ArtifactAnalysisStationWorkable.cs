@@ -59,6 +59,7 @@ public class ArtifactAnalysisStationWorkable : Workable
 		component.enabled = false;
 		component.enabled = true;
 		this.PositionArtifact();
+		base.GetComponent<KSelectable>().AddStatusItem(Db.Get().BuildingStatusItems.ArtifactAnalysisAnalyzing, gameObject);
 	}
 
 	private void ReleaseStoredArtifact()
@@ -70,6 +71,7 @@ public class ArtifactAnalysisStationWorkable : Workable
 		component2.enabled = false;
 		component2.enabled = true;
 		component.Drop(gameObject, true);
+		base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().BuildingStatusItems.ArtifactAnalysisAnalyzing, gameObject);
 	}
 
 	private void PositionArtifact()

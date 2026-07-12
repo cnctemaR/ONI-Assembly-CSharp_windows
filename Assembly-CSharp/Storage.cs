@@ -931,7 +931,7 @@ public class Storage : Workable, ISaveLoadableDetails, IGameObjectEffectDescript
 		return this.endOfLife;
 	}
 
-	public float MassStored()
+	public float ExactMassStored()
 	{
 		float num = 0f;
 		for (int i = 0; i < this.items.Count; i++)
@@ -945,7 +945,12 @@ public class Storage : Workable, ISaveLoadableDetails, IGameObjectEffectDescript
 				}
 			}
 		}
-		return (float)Mathf.RoundToInt(num * 1000f) / 1000f;
+		return num;
+	}
+
+	public float MassStored()
+	{
+		return (float)Mathf.RoundToInt(this.ExactMassStored() * 1000f) / 1000f;
 	}
 
 	public float UnitsStored()
@@ -1275,6 +1280,23 @@ public class Storage : Workable, ISaveLoadableDetails, IGameObjectEffectDescript
 		component.AddStatusItem(Db.Get().BuildingStatusItems.StorageUnreachable, this);
 	}
 
+	public void SetContentsDeleteOffGrid(bool delete_off_grid)
+	{
+		for (int i = 0; i < this.items.Count; i++)
+		{
+			Pickupable component = this.items[i].GetComponent<Pickupable>();
+			if (component != null)
+			{
+				component.deleteOffGrid = delete_off_grid;
+			}
+			Storage component2 = this.items[i].GetComponent<Storage>();
+			if (component2 != null)
+			{
+				component2.SetContentsDeleteOffGrid(delete_off_grid);
+			}
+		}
+	}
+
 	private bool ShouldSaveItem(GameObject go)
 	{
 		bool flag = false;
@@ -1419,6 +1441,8 @@ public class Storage : Workable, ISaveLoadableDetails, IGameObjectEffectDescript
 	public bool sendOnStoreOnSpawn;
 
 	public bool showInUI = true;
+
+	public bool storeDropsFromButcherables;
 
 	public bool allowClearable;
 

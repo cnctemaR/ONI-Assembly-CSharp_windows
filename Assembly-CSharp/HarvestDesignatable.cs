@@ -59,6 +59,7 @@ public class HarvestDesignatable : KMonoBehaviour
 		Game.Instance.Subscribe(1248612973, this.onEnableOverlayDelegate);
 		Game.Instance.Subscribe(1798162660, this.onEnableOverlayDelegate);
 		Game.Instance.Subscribe(2015652040, new Action<object>(this.OnDisableOverlay));
+		Game.Instance.Subscribe(1983128072, new Action<object>(this.RefreshOverlayIcon));
 		this.area = base.GetComponent<OccupyArea>();
 	}
 
@@ -70,6 +71,7 @@ public class HarvestDesignatable : KMonoBehaviour
 		Game.Instance.Unsubscribe(1248612973, this.onEnableOverlayDelegate);
 		Game.Instance.Unsubscribe(2015652040, new Action<object>(this.OnDisableOverlay));
 		Game.Instance.Unsubscribe(1798162660, this.onEnableOverlayDelegate);
+		Game.Instance.Unsubscribe(1983128072, new Action<object>(this.RefreshOverlayIcon));
 	}
 
 	private void DestroyOverlayIcon()
@@ -124,7 +126,7 @@ public class HarvestDesignatable : KMonoBehaviour
 	{
 		if (this.HarvestWhenReadyOverlayIcon != null)
 		{
-			if (Grid.IsVisible(Grid.PosToCell(base.gameObject)) || (CameraController.Instance != null && CameraController.Instance.FreeCameraEnabled))
+			if ((Grid.IsVisible(Grid.PosToCell(base.gameObject)) && base.gameObject.GetMyWorldId() == ClusterManager.Instance.activeWorldId) || (CameraController.Instance != null && CameraController.Instance.FreeCameraEnabled))
 			{
 				if (!this.HarvestWhenReadyOverlayIcon.gameObject.activeSelf)
 				{

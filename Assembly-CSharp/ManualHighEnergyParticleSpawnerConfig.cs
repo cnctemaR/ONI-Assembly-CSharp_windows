@@ -31,6 +31,7 @@ public class ManualHighEnergyParticleSpawnerConfig : IBuildingConfig
 		buildingDef.ViewMode = OverlayModes.Radiation.ID;
 		buildingDef.UseHighEnergyParticleOutputPort = true;
 		buildingDef.HighEnergyParticleOutputOffset = new CellOffset(0, 2);
+		buildingDef.LogicInputPorts = LogicOperationalController.CreateSingleInputPortList(new CellOffset(0, 0));
 		GeneratedBuildings.RegisterWithOverlay(OverlayScreen.RadiationIDs, "ManualHighEnergyParticleSpawner");
 		buildingDef.Deprecated = !Sim.IsRadiationEnabled();
 		return buildingDef;
@@ -38,6 +39,7 @@ public class ManualHighEnergyParticleSpawnerConfig : IBuildingConfig
 
 	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
+		go.AddOrGet<LogicOperationalController>();
 		go.AddOrGet<DropAllWorkable>();
 		go.AddOrGet<BuildingComplete>().isManuallyOperated = true;
 		Prioritizable.AddRef(go);

@@ -68,6 +68,7 @@ public class Telescope : Workable, OxygenBreather.IGasProvider, IGameObjectEffec
 		}
 		OxygenBreather component = worker.GetComponent<OxygenBreather>();
 		KPrefabID component2 = worker.GetComponent<KPrefabID>();
+		KSelectable component3 = base.GetComponent<KSelectable>();
 		if (ev == Workable.WorkableEvent.WorkStarted)
 		{
 			base.ShowProgressBar(true);
@@ -83,6 +84,7 @@ public class Telescope : Workable, OxygenBreather.IGasProvider, IGameObjectEffec
 			component.SetGasProvider(this);
 			component.GetComponent<CreatureSimTemperatureTransfer>().enabled = false;
 			component2.AddTag(GameTags.Shaded, false);
+			component3.AddStatusItem(Db.Get().BuildingStatusItems.TelescopeWorking, this);
 			return;
 		}
 		if (ev != Workable.WorkableEvent.WorkStopped)
@@ -93,6 +95,7 @@ public class Telescope : Workable, OxygenBreather.IGasProvider, IGameObjectEffec
 		component.GetComponent<CreatureSimTemperatureTransfer>().enabled = true;
 		base.ShowProgressBar(false);
 		component2.RemoveTag(GameTags.Shaded);
+		component3.AddStatusItem(Db.Get().BuildingStatusItems.TelescopeWorking, this);
 	}
 
 	public override float GetEfficiencyMultiplier(Worker worker)

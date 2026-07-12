@@ -219,6 +219,23 @@ public class LiquidPumpingStation : Workable, ISim200ms
 		base.OnStopWork(worker);
 		if (this.session != null)
 		{
+			Storage component = worker.GetComponent<Storage>();
+			float consumedAmount = this.session.GetConsumedAmount();
+			if (consumedAmount > 0f)
+			{
+				SubstanceChunk source = this.session.GetSource();
+				SimUtil.DiseaseInfo diseaseInfo = ((this.session != null) ? this.session.GetDiseaseInfo() : SimUtil.DiseaseInfo.Invalid);
+				PrimaryElement component2 = source.GetComponent<PrimaryElement>();
+				Pickupable component3 = LiquidSourceManager.Instance.CreateChunk(component2.Element, consumedAmount, this.session.GetTemperature(), diseaseInfo.idx, diseaseInfo.count, base.transform.GetPosition()).GetComponent<Pickupable>();
+				component3.TotalAmount = consumedAmount;
+				component3.Trigger(1335436905, source.GetComponent<Pickupable>());
+				worker.workCompleteData = component3;
+				this.Sim200ms(0f);
+				if (component3 != null)
+				{
+					component.Store(component3.gameObject, false, false, true, false);
+				}
+			}
 			this.session.Cleanup();
 			this.session = null;
 		}
@@ -246,33 +263,6 @@ public class LiquidPumpingStation : Workable, ISim200ms
 					smi.SetForceUnfetchable(flag);
 				}
 			}
-		}
-	}
-
-	protected override void OnCompleteWork(Worker worker)
-	{
-		base.OnCompleteWork(worker);
-		if (this.session != null)
-		{
-			Storage component = worker.GetComponent<Storage>();
-			float consumedAmount = this.session.GetConsumedAmount();
-			if (consumedAmount > 0f)
-			{
-				SubstanceChunk source = this.session.GetSource();
-				SimUtil.DiseaseInfo diseaseInfo = ((this.session != null) ? this.session.GetDiseaseInfo() : SimUtil.DiseaseInfo.Invalid);
-				PrimaryElement component2 = source.GetComponent<PrimaryElement>();
-				Pickupable component3 = LiquidSourceManager.Instance.CreateChunk(component2.Element, consumedAmount, this.session.GetTemperature(), diseaseInfo.idx, diseaseInfo.count, base.transform.GetPosition()).GetComponent<Pickupable>();
-				component3.TotalAmount = consumedAmount;
-				component3.Trigger(1335436905, source.GetComponent<Pickupable>());
-				worker.workCompleteData = component3;
-				this.Sim200ms(0f);
-				if (component3 != null)
-				{
-					component.Store(component3.gameObject, false, false, true, false);
-				}
-			}
-			this.session.Cleanup();
-			this.session = null;
 		}
 	}
 

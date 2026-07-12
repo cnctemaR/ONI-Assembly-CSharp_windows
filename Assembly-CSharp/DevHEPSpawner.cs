@@ -124,7 +124,7 @@ public class DevHEPSpawner : StateMachineComponent<DevHEPSpawner.StatesInstance>
 		return "";
 	}
 
-	string ISliderControl.GetSliderTooltip()
+	string ISliderControl.GetSliderTooltip(int index)
 	{
 		return "";
 	}

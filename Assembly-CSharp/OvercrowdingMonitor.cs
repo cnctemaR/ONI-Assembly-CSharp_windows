@@ -85,7 +85,8 @@ public class OvercrowdingMonitor : GameStateMachine<OvercrowdingMonitor, Overcro
 		{
 			return smi2.cellCount / fishCount < smi.def.spaceRequiredPerCreature;
 		}
-		return !Grid.IsLiquid(Grid.PosToCell(smi));
+		int num = Grid.PosToCell(smi);
+		return Grid.IsValidCell(num) && !Grid.IsLiquid(num);
 	}
 
 	private static void UpdateState(OvercrowdingMonitor.Instance smi, float dt)
@@ -183,6 +184,7 @@ public class OvercrowdingMonitor : GameStateMachine<OvercrowdingMonitor, Overcro
 			this.fishOvercrowdedEffect.Add(this.fishOvercrowdedModifier);
 			this.stuckEffect = new Effect("Confined", CREATURES.MODIFIERS.CONFINED.NAME, CREATURES.MODIFIERS.CONFINED.TOOLTIP, 0f, true, false, true, null, -1f, 0f, null, "");
 			this.stuckEffect.Add(new AttributeModifier(Db.Get().CritterAttributes.Happiness.Id, -10f, CREATURES.MODIFIERS.CONFINED.NAME, false, false, true));
+			this.stuckEffect.Add(new AttributeModifier(Db.Get().Amounts.Fertility.deltaAttribute.Id, -1f, CREATURES.MODIFIERS.CONFINED.NAME, true, false, true));
 			OvercrowdingMonitor.UpdateState(this, 0f);
 		}
 

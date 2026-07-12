@@ -46,6 +46,7 @@ public class SweepBotConfig : IEntityConfig
 		gameObject.AddOrGetDef<SweepBotReactMonitor.Def>();
 		gameObject.AddOrGetDef<CreatureFallMonitor.Def>();
 		gameObject.AddOrGetDef<SweepBotTrappedMonitor.Def>();
+		gameObject.AddOrGetDef<DrinkMilkMonitor.Def>().consumesMilk = false;
 		gameObject.AddOrGet<AnimEventHandler>();
 		gameObject.AddOrGet<SnapOn>().snapPoints = new List<SnapOn.SnapPoint>(new SnapOn.SnapPoint[]
 		{
@@ -79,6 +80,12 @@ public class SweepBotConfig : IEntityConfig
 		ChoreTable.Builder builder = new ChoreTable.Builder().Add(new FallStates.Def(), true, -1).Add(new AnimInterruptStates.Def(), true, -1).Add(new SweepBotTrappedStates.Def(), true, -1)
 			.Add(new DeliverToSweepLockerStates.Def(), true, -1)
 			.Add(new ReturnToChargeStationStates.Def(), true, -1)
+			.PushInterruptGroup()
+			.Add(new DrinkMilkStates.Def
+			{
+				shouldBeBehindMilkTank = true
+			}, true, -1)
+			.PopInterruptGroup()
 			.Add(new SweepStates.Def(), true, -1)
 			.Add(new IdleStates.Def(), true, -1);
 		gameObject.AddOrGet<LoopingSounds>();

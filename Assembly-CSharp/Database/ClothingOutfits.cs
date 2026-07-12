@@ -53,6 +53,8 @@ namespace Database
 			this.Add("UndiesBuzzword", new string[] { "TopUndershirtBuzzword", "BottomBriefsBuzzword" }, UI.OUTFITS.GONCHIES_GRAPE.NAME, ClothingOutfitUtility.OutfitType.Clothing);
 			this.Add("UndiesSynergy", new string[] { "TopUndershirtSynergy", "BottomBriefsSynergy" }, UI.OUTFITS.GONCHIES_WATERMELON.NAME, ClothingOutfitUtility.OutfitType.Clothing);
 			this.Add("RebelGiOutfit", new string[] { "TopRebelGi", "PantsRebelGi", "GlovesCufflessBlack" }, UI.OUTFITS.REBELGI.NAME, ClothingOutfitUtility.OutfitType.Clothing);
+			this.Add("AtmoPinkPurple", new string[] { "AtmoBeltBasicNeonPink", "AtmoGlovesStripesLavender", "AtmoHelmetWorkoutLavender", "AtmoSuitBasicNeonPink", "AtmoShoesBasicLavender" }, UI.OUTFITS.ATMOSUIT_PINK_PURPLE.NAME, ClothingOutfitUtility.OutfitType.AtmoSuit);
+			this.Add("AtmoRedGrey", new string[] { "AtmoBeltBasicGrey", "AtmoGlovesWhite", "AtmoHelmetCummerbundRed", "AtmoSuitMultiRedBlack" }, UI.OUTFITS.ATMOSUIT_RED_GREY.NAME, ClothingOutfitUtility.OutfitType.AtmoSuit);
 			ClothingOutfitUtility.LoadClothingOutfitData(this);
 		}
 

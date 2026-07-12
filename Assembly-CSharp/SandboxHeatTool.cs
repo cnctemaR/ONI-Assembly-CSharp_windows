@@ -24,6 +24,11 @@ public class SandboxHeatTool : BrushTool
 		this.viewMode = OverlayModes.Temperature.ID;
 	}
 
+	protected override string GetDragSound()
+	{
+		return "";
+	}
+
 	public void Activate()
 	{
 		PlayerController.Instance.ActivateTool(this);
@@ -97,6 +102,8 @@ public class SandboxHeatTool : BrushTool
 		float num3 = num;
 		int num4 = index;
 		SimMessages.ReplaceElement(cell2, id, sandBoxTool, num2, num3, Grid.DiseaseIdx[cell], Grid.DiseaseCount[cell], num4);
+		float currentValue = SandboxToolParameterMenu.instance.temperatureAdditiveSlider.inputField.currentValue;
+		KFMOD.PlayUISoundWithLabeledParameter(GlobalAssets.GetSound("SandboxTool_HeatGun", false), "TemperatureSetting", (currentValue <= 0f) ? "Cooling" : "Heating");
 	}
 
 	public static SandboxHeatTool instance;

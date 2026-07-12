@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{48E248DD-BC28-4A9A-BD04-0BF6145AA8F1}</ProjectGuid>
+    <ProjectGuid>{B6A8B87A-8ED2-4A36-836D-C5601AAFC46A}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>0Harmony</RootNamespace>
     <AssemblyName>0Harmony</AssemblyName>
@@ -14,17 +14,20 @@
   </PropertyGroup>
   <PropertyGroup />
   <ItemGroup>
-    <Compile Include="-7d606232-a2fd-45f2-b0e5-2df71b5e7369--PrivateImplementation.cs" />
-    <Compile Include="-bcd785a6-4dec-4132-ab5d-092fd8fa506c--PrivateImplementation.cs" />
-    <Compile Include="-da122c35-67ce-44e0-9391-60ea466f92d7--PrivateImplementation.cs" />
+    <Compile Include="-b7604b43-2580-4348-9381-6759dd49fb8c--PrivateImplementation.cs" />
+    <Compile Include="-cb02ca0b-c9a6-48c2-8634-aa168a0dc27b--PrivateImplementation.cs" />
+    <Compile Include="-e89db601-23e7-4b18-9f6d-d0d5e5c95442--PrivateImplementation.cs" />
     <Compile Include="Consts.cs" />
     <Compile Include="HarmonyLib\AccessCache.cs" />
     <Compile Include="HarmonyLib\AccessTools.cs" />
     <Compile Include="HarmonyLib\ArgumentType.cs" />
     <Compile Include="HarmonyLib\AttributePatch.cs" />
     <Compile Include="HarmonyLib\ByteBuffer.cs" />
+    <Compile Include="HarmonyLib\Code.cs" />
     <Compile Include="HarmonyLib\CodeInstruction.cs" />
     <Compile Include="HarmonyLib\CodeInstructionExtensions.cs" />
+    <Compile Include="HarmonyLib\CodeMatch.cs" />
+    <Compile Include="HarmonyLib\CodeMatcher.cs" />
     <Compile Include="HarmonyLib\CodeTranspiler.cs" />
     <Compile Include="HarmonyLib\CollectionExtensions.cs" />
     <Compile Include="HarmonyLib\DelegateTypeFactory.cs" />
@@ -91,6 +94,7 @@
     <Compile Include="HarmonyLib\SetterHandler.cs" />
     <Compile Include="HarmonyLib\StructReturnBuffer.cs" />
     <Compile Include="HarmonyLib\SymbolExtensions.cs" />
+    <Compile Include="HarmonyLib\Tools.cs" />
     <Compile Include="HarmonyLib\Transpilers.cs" />
     <Compile Include="HarmonyLib\Traverse.2.cs" />
     <Compile Include="HarmonyLib\Traverse.cs" />
@@ -325,6 +329,7 @@
     <Compile Include="MonoMod\RuntimeDetour\Platforms\DetourRuntimeILPlatform.cs" />
     <Compile Include="MonoMod\RuntimeDetour\Platforms\DetourRuntimeMonoPlatform.cs" />
     <Compile Include="MonoMod\RuntimeDetour\Platforms\DetourRuntimeNET50Platform.cs" />
+    <Compile Include="MonoMod\RuntimeDetour\Platforms\DetourRuntimeNET60Platform.cs" />
     <Compile Include="MonoMod\RuntimeDetour\Platforms\DetourRuntimeNETCore30Platform.cs" />
     <Compile Include="MonoMod\RuntimeDetour\Platforms\DetourRuntimeNETCorePlatform.cs" />
     <Compile Include="MonoMod\RuntimeDetour\Platforms\DetourRuntimeNETPlatform.cs" />
@@ -342,6 +347,7 @@
     <Compile Include="MonoMod\Utils\DynDllImportAttribute.cs" />
     <Compile Include="MonoMod\Utils\DynDllMapping.cs" />
     <Compile Include="MonoMod\Utils\Extensions.cs" />
+    <Compile Include="MonoMod\Utils\GCListener.cs" />
     <Compile Include="MonoMod\Utils\ICallSiteGenerator.cs" />
     <Compile Include="MonoMod\Utils\MMReflectionImporter.cs" />
     <Compile Include="MonoMod\Utils\Platform.cs" />
@@ -350,6 +356,7 @@
     <Compile Include="MonoMod\Utils\Relinker.cs" />
     <Compile Include="MonoMod\Utils\RelinkFailedException.cs" />
     <Compile Include="MonoMod\Utils\RelinkTargetNotFoundException.cs" />
+    <Compile Include="MonoMod\Utils\WeakReferenceComparer.cs" />
     <Compile Include="MonoMod\Utils\_DMDEmit.cs" />
     <Compile Include="MonoMod\Utils\_IDMDGenerator.cs" />
     <Compile Include="Mono\ArgumentNullOrEmptyException.cs" />
@@ -731,15 +738,15 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{48E248DD-BC28-4A9A-BD04-0BF6145AA900}</Project>
+      <Project>{B6A8B87A-8ED2-4A36-836D-C5601AAFC479}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Core\System.Core.csproj">
-      <Project>{48E248DD-BC28-4A9A-BD04-0BF6145AA903}</Project>
+      <Project>{B6A8B87A-8ED2-4A36-836D-C5601AAFC47C}</Project>
       <Name>System.Core</Name>
     </ProjectReference>
     <ProjectReference Include="..\System\System.csproj">
-      <Project>{48E248DD-BC28-4A9A-BD04-0BF6145AA905}</Project>
+      <Project>{B6A8B87A-8ED2-4A36-836D-C5601AAFC47E}</Project>
       <Name>System</Name>
     </ProjectReference>
   </ItemGroup>

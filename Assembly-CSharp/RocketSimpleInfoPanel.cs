@@ -79,7 +79,7 @@ public class RocketSimpleInfoPanel : SimpleInfoPanel
 					ArtifactModule component = @ref.Get().GetComponent<ArtifactModule>();
 					if (component != null)
 					{
-						GameObject gameObject = this.simpleInfoRoot.AddOrGetStorageLabel(this.artifactModuleLabels, rocketStatusContainer.gameObject, "artifactModule_" + num.ToString());
+						GameObject gameObject = this.simpleInfoRoot.AddOrGetStorageLabel(this.artifactModuleLabels, rocketStatusContainer, "artifactModule_" + num.ToString());
 						num++;
 						string text6;
 						if (component.Occupant != null)
@@ -106,7 +106,7 @@ public class RocketSimpleInfoPanel : SimpleInfoPanel
 					foreach (CargoBayCluster cargoBayCluster in allCargoBays)
 					{
 						pooledList.Clear();
-						GameObject gameObject2 = this.simpleInfoRoot.AddOrGetStorageLabel(this.cargoBayLabels, rocketStatusContainer.gameObject, "cargoBay_" + num2.ToString());
+						GameObject gameObject2 = this.simpleInfoRoot.AddOrGetStorageLabel(this.cargoBayLabels, rocketStatusContainer, "cargoBay_" + num2.ToString());
 						Storage storage = cargoBayCluster.storage;
 						string text7 = string.Format("{0}: {1}/{2}", cargoBayCluster.GetComponent<KPrefabID>().GetProperName(), GameUtil.GetFormattedMass(storage.MassStored(), GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"), GameUtil.GetFormattedMass(storage.capacityKg, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"));
 						foreach (GameObject gameObject3 in storage.GetItems())

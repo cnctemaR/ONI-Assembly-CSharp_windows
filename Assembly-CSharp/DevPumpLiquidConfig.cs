@@ -44,7 +44,9 @@ public class DevPumpLiquidConfig : IBuildingConfig
 		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.IndustrialMachinery, false);
 		go.AddOrGet<LoopingSounds>();
 		go.AddOrGet<DevPump>().elementState = Filterable.ElementState.Liquid;
-		go.AddOrGet<Storage>().capacityKg = 20f;
+		Storage storage = go.AddOrGet<Storage>();
+		storage.capacityKg = 20f;
+		storage.SetDefaultStoredItemModifiers(Storage.StandardInsulatedStorage);
 		go.AddTag(GameTags.CorrosionProof);
 		ConduitDispenser conduitDispenser = go.AddOrGet<ConduitDispenser>();
 		conduitDispenser.conduitType = ConduitType.Liquid;

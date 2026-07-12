@@ -23,7 +23,8 @@ public class TrappedStates : GameStateMachine<TrappedStates, TrappedStates.Insta
 	{
 		string text = "trapped";
 		int num = Grid.PosToCell(smi.transform.GetPosition());
-		GameObject gameObject = Grid.Objects[num, 1];
+		Pickupable component = smi.gameObject.GetComponent<Pickupable>();
+		GameObject gameObject = ((component != null) ? component.storage.gameObject : Grid.Objects[num, 1]);
 		if (gameObject != null)
 		{
 			if (gameObject.GetComponent<TrappedStates.ITrapStateAnimationInstructions>() != null)
@@ -43,8 +44,8 @@ public class TrappedStates : GameStateMachine<TrappedStates, TrappedStates.Insta
 				}
 			}
 		}
-		Trappable component = smi.gameObject.GetComponent<Trappable>();
-		if (component != null && component.HasTag(GameTags.Creatures.Swimmer) && Grid.IsValidCell(num) && !Grid.IsLiquid(num))
+		Trappable component2 = smi.gameObject.GetComponent<Trappable>();
+		if (component2 != null && component2.HasTag(GameTags.Creatures.Swimmer) && Grid.IsValidCell(num) && !Grid.IsLiquid(num))
 		{
 			text = "trapped_onLand";
 		}

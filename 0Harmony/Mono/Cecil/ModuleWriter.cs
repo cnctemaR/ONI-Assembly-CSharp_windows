@@ -32,7 +32,7 @@ namespace Mono.Cecil
 			{
 				module.symbol_reader.Dispose();
 			}
-			AssemblyNameDefinition assemblyNameDefinition = ((module.assembly != null) ? module.assembly.Name : null);
+			AssemblyNameDefinition assemblyNameDefinition = ((module.assembly != null && module.kind != ModuleKind.NetModule) ? module.assembly.Name : null);
 			string fileName = stream.value.GetFileName();
 			uint num = parameters.Timestamp ?? module.timestamp;
 			ISymbolWriterProvider symbolWriterProvider = parameters.SymbolWriterProvider;

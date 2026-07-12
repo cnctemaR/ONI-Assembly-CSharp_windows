@@ -19,5 +19,7 @@ namespace KMod
 		void CopyTo(string path, List<string> extensions = null);
 
 		string Read(string relative_path);
+
+		void Dispose();
 	}
 }

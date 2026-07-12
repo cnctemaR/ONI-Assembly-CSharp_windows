@@ -1,6 +1,6 @@
 ﻿using System;
 
-internal class EntityConfigOrder : Attribute
+public class EntityConfigOrder : Attribute
 {
 	public EntityConfigOrder(int sort_order)
 	{

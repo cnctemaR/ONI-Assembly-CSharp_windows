@@ -18,5 +18,5 @@ public interface ISliderControl
 
 	string GetSliderTooltipKey(int index);
 
-	string GetSliderTooltip();
+	string GetSliderTooltip(int index);
 }

@@ -10,6 +10,94 @@ namespace MonoMod.Utils
 {
 	internal static class DynDll
 	{
+		public static T AsDelegate<T>(this IntPtr s) where T : class
+		{
+			return Marshal.GetDelegateForFunctionPointer(s, typeof(T)) as T;
+		}
+
+		public static void ResolveDynDllImports(this Type type, Dictionary<string, List<DynDllMapping>> mappings = null)
+		{
+			DynDll.InternalResolveDynDllImports(type, null, mappings);
+		}
+
+		public static void ResolveDynDllImports(object instance, Dictionary<string, List<DynDllMapping>> mappings = null)
+		{
+			DynDll.InternalResolveDynDllImports(instance.GetType(), instance, mappings);
+		}
+
+		private static void InternalResolveDynDllImports(Type type, object instance, Dictionary<string, List<DynDllMapping>> mappings)
+		{
+			BindingFlags bindingFlags = BindingFlags.Public | BindingFlags.NonPublic;
+			if (instance == null)
+			{
+				bindingFlags |= BindingFlags.Static;
+			}
+			else
+			{
+				bindingFlags |= BindingFlags.Instance;
+			}
+			foreach (FieldInfo fieldInfo in type.GetFields(bindingFlags))
+			{
+				bool flag = true;
+				object[] customAttributes = fieldInfo.GetCustomAttributes(typeof(DynDllImportAttribute), true);
+				int j = 0;
+				while (j < customAttributes.Length)
+				{
+					DynDllImportAttribute dynDllImportAttribute = (DynDllImportAttribute)customAttributes[j];
+					flag = false;
+					IntPtr zero = IntPtr.Zero;
+					List<DynDllMapping> list;
+					if (mappings != null && mappings.TryGetValue(dynDllImportAttribute.LibraryName, out list))
+					{
+						bool flag2 = false;
+						foreach (DynDllMapping dynDllMapping in list)
+						{
+							if (DynDll.TryOpenLibrary(dynDllMapping.LibraryName, out zero, true, dynDllMapping.Flags))
+							{
+								flag2 = true;
+								break;
+							}
+						}
+						if (flag2)
+						{
+							goto IL_00DC;
+						}
+					}
+					else if (DynDll.TryOpenLibrary(dynDllImportAttribute.LibraryName, out zero, false, null))
+					{
+						goto IL_00DC;
+					}
+					IL_0158:
+					j++;
+					continue;
+					IL_00DC:
+					foreach (string text in dynDllImportAttribute.EntryPoints.Concat<string>(new string[]
+					{
+						fieldInfo.Name,
+						fieldInfo.FieldType.Name
+					}))
+					{
+						IntPtr intPtr;
+						if (zero.TryGetFunction(text, out intPtr))
+						{
+							fieldInfo.SetValue(instance, Marshal.GetDelegateForFunctionPointer(intPtr, fieldInfo.FieldType));
+							flag = true;
+							break;
+						}
+					}
+					if (!flag)
+					{
+						goto IL_0158;
+					}
+					break;
+				}
+				if (!flag)
+				{
+					throw new EntryPointNotFoundException("No matching entry point found for " + fieldInfo.Name + " in " + fieldInfo.DeclaringType.FullName);
+				}
+			}
+		}
+
 		[DllImport("kernel32", SetLastError = true)]
 		private static extern IntPtr GetModuleHandle(string lpModuleName);
 
@@ -281,94 +369,6 @@ namespace MonoMod.Utils
 			}
 			functionPtr = (PlatformHelper.Is(Platform.Windows) ? DynDll.GetProcAddress(libraryPtr, name) : DynDll.dlsym(libraryPtr, name));
 			return functionPtr != IntPtr.Zero;
-		}
-
-		public static T AsDelegate<T>(this IntPtr s) where T : class
-		{
-			return Marshal.GetDelegateForFunctionPointer(s, typeof(T)) as T;
-		}
-
-		public static void ResolveDynDllImports(this Type type, Dictionary<string, List<DynDllMapping>> mappings = null)
-		{
-			DynDll.InternalResolveDynDllImports(type, null, mappings);
-		}
-
-		public static void ResolveDynDllImports(object instance, Dictionary<string, List<DynDllMapping>> mappings = null)
-		{
-			DynDll.InternalResolveDynDllImports(instance.GetType(), instance, mappings);
-		}
-
-		private static void InternalResolveDynDllImports(Type type, object instance, Dictionary<string, List<DynDllMapping>> mappings)
-		{
-			BindingFlags bindingFlags = BindingFlags.Public | BindingFlags.NonPublic;
-			if (instance == null)
-			{
-				bindingFlags |= BindingFlags.Static;
-			}
-			else
-			{
-				bindingFlags |= BindingFlags.Instance;
-			}
-			foreach (FieldInfo fieldInfo in type.GetFields(bindingFlags))
-			{
-				bool flag = true;
-				object[] customAttributes = fieldInfo.GetCustomAttributes(typeof(DynDllImportAttribute), true);
-				int j = 0;
-				while (j < customAttributes.Length)
-				{
-					DynDllImportAttribute dynDllImportAttribute = (DynDllImportAttribute)customAttributes[j];
-					flag = false;
-					IntPtr zero = IntPtr.Zero;
-					List<DynDllMapping> list;
-					if (mappings != null && mappings.TryGetValue(dynDllImportAttribute.LibraryName, out list))
-					{
-						bool flag2 = false;
-						foreach (DynDllMapping dynDllMapping in list)
-						{
-							if (DynDll.TryOpenLibrary(dynDllMapping.LibraryName, out zero, true, dynDllMapping.Flags))
-							{
-								flag2 = true;
-								break;
-							}
-						}
-						if (flag2)
-						{
-							goto IL_00DC;
-						}
-					}
-					else if (DynDll.TryOpenLibrary(dynDllImportAttribute.LibraryName, out zero, false, null))
-					{
-						goto IL_00DC;
-					}
-					IL_0158:
-					j++;
-					continue;
-					IL_00DC:
-					foreach (string text in dynDllImportAttribute.EntryPoints.Concat<string>(new string[]
-					{
-						fieldInfo.Name,
-						fieldInfo.FieldType.Name
-					}))
-					{
-						IntPtr intPtr;
-						if (zero.TryGetFunction(text, out intPtr))
-						{
-							fieldInfo.SetValue(instance, Marshal.GetDelegateForFunctionPointer(intPtr, fieldInfo.FieldType));
-							flag = true;
-							break;
-						}
-					}
-					if (!flag)
-					{
-						goto IL_0158;
-					}
-					break;
-				}
-				if (!flag)
-				{
-					throw new EntryPointNotFoundException("No matching entry point found for " + fieldInfo.Name + " in " + fieldInfo.DeclaringType.FullName);
-				}
-			}
 		}
 
 		public static Dictionary<string, List<DynDllMapping>> Mappings = new Dictionary<string, List<DynDllMapping>>();

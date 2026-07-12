@@ -16,6 +16,9 @@ public static class BaseMoleConfig
 		{
 			gameObject.AddOrGet<SymbolOverrideController>().ApplySymbolOverridesByAffix(Assets.GetAnim(anim_file), symbolOverridePrefix, null, 0);
 		}
+		Pickupable pickupable = gameObject.AddOrGet<Pickupable>();
+		int num2 = global::TUNING.CREATURES.SORTING.CRITTER_ORDER["Mole"];
+		pickupable.sortOrder = num2;
 		gameObject.AddOrGetDef<CreatureFallMonitor.Def>();
 		gameObject.AddOrGet<Trappable>();
 		gameObject.AddOrGetDef<DiggerMonitor.Def>().depthToDig = MoleTuning.DEPTH_TO_HIDE;

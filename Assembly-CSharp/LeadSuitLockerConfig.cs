@@ -18,16 +18,12 @@ public class LeadSuitLockerConfig : IBuildingConfig
 		int num3 = 30;
 		float num4 = 30f;
 		string[] refined_METALS = MATERIALS.REFINED_METALS;
-		float[] array = new float[]
-		{
-			BUILDINGS.CONSTRUCTION_MASS_KG.TIER2[0],
-			BUILDINGS.CONSTRUCTION_MASS_KG.TIER1[0]
-		};
-		string[] array2 = refined_METALS;
+		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER2;
+		string[] array = refined_METALS;
 		float num5 = 1600f;
 		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloor;
 		EffectorValues none = NOISE_POLLUTION.NONE;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, array, array2, num5, buildLocationRule, BUILDINGS.DECOR.BONUS.TIER1, none, 0.2f);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, array, num5, buildLocationRule, BUILDINGS.DECOR.BONUS.TIER1, none, 0.2f);
 		buildingDef.RequiresPowerInput = true;
 		buildingDef.EnergyConsumptionWhenActive = 120f;
 		buildingDef.PreventIdleTraversalPastBuilding = true;

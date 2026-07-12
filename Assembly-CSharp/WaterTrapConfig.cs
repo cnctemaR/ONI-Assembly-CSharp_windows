@@ -9,6 +9,7 @@ public class WaterTrapConfig : IBuildingConfig
 	public override BuildingDef CreateBuildingDef()
 	{
 		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("WaterTrap", 1, 2, "critter_trap_water_kanim", 10, 10f, global::TUNING.BUILDINGS.CONSTRUCTION_MASS_KG.TIER3, MATERIALS.RAW_METALS, 1600f, BuildLocationRule.Anywhere, global::TUNING.BUILDINGS.DECOR.PENALTY.TIER2, NOISE_POLLUTION.NOISY.TIER0, 0.2f);
+		buildingDef.LogicInputPorts = new List<LogicPorts.Port> { LogicPorts.Port.InputPort("TRAP_ACTIVATION_INPUT_PORT", new CellOffset(0, 0), global::STRINGS.BUILDINGS.PREFABS.REUSABLETRAP.INPUT_LOGIC_PORT, global::STRINGS.BUILDINGS.PREFABS.REUSABLETRAP.INPUT_LOGIC_PORT_ACTIVE, global::STRINGS.BUILDINGS.PREFABS.REUSABLETRAP.INPUT_LOGIC_PORT_INACTIVE, false, false) };
 		buildingDef.LogicOutputPorts = new List<LogicPorts.Port> { LogicPorts.Port.OutputPort("TRAP_HAS_PREY_STATUS_PORT", new CellOffset(0, 1), global::STRINGS.BUILDINGS.PREFABS.REUSABLETRAP.LOGIC_PORT, global::STRINGS.BUILDINGS.PREFABS.REUSABLETRAP.LOGIC_PORT_ACTIVE, global::STRINGS.BUILDINGS.PREFABS.REUSABLETRAP.LOGIC_PORT_INACTIVE, false, false) };
 		buildingDef.AudioCategory = "Metal";
 		buildingDef.Floodable = false;
@@ -44,9 +45,7 @@ public class WaterTrapConfig : IBuildingConfig
 		def.lures = new Tag[] { GameTags.Creatures.FishTrapLure };
 		def.usingSymbolChaseCapturingAnimations = true;
 		def.getTrappedAnimationNameCallback = () => "trapped";
-		LogicPorts logicPorts = go.AddOrGet<LogicPorts>();
-		logicPorts.inputPortInfo = LogicOperationalController.CreateSingleInputPortList(new CellOffset(0, 0)).ToArray();
-		logicPorts.outputPortInfo = null;
+		go.AddOrGet<LogicPorts>();
 		go.AddOrGet<LogicOperationalController>();
 	}
 
@@ -83,6 +82,8 @@ public class WaterTrapConfig : IBuildingConfig
 	}
 
 	public const string ID = "WaterTrap";
+
+	public const string INPUT_LOGIC_PORT_ID = "TRAP_ACTIVATION_INPUT_PORT";
 
 	public const string OUTPUT_LOGIC_PORT_ID = "TRAP_HAS_PREY_STATUS_PORT";
 

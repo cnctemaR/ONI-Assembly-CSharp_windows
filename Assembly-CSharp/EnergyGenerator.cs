@@ -49,7 +49,7 @@ public class EnergyGenerator : Generator, IGameObjectEffectDescriptor, ISingleSl
 		this.batteryRefillPercent = value / 100f;
 	}
 
-	string ISliderControl.GetSliderTooltip()
+	string ISliderControl.GetSliderTooltip(int index)
 	{
 		ManualDeliveryKG component = base.GetComponent<ManualDeliveryKG>();
 		return string.Format(Strings.Get("STRINGS.UI.UISIDESCREENS.MANUALDELIVERYGENERATORSIDESCREEN.TOOLTIP"), component.RequestedItemTag.ProperName(), this.batteryRefillPercent * 100f);

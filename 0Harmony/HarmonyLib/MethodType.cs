@@ -8,6 +8,7 @@ namespace HarmonyLib
 		Getter,
 		Setter,
 		Constructor,
-		StaticConstructor
+		StaticConstructor,
+		Enumerator
 	}
 }

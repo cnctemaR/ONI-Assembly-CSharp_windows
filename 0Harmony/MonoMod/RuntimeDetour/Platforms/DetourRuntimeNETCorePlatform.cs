@@ -10,11 +10,16 @@ namespace MonoMod.RuntimeDetour.Platforms
 {
 	public class DetourRuntimeNETCorePlatform : DetourRuntimeNETPlatform
 	{
+		public DetourRuntimeNETCorePlatform()
+		{
+			this.GlueThiscallInStructRetPtr = this.GlueThiscallStructRetPtr;
+		}
+
 		protected static IntPtr GetJitObject()
 		{
 			if (DetourRuntimeNETCorePlatform.getJit == null)
 			{
-				ProcessModule processModule = Process.GetCurrentProcess().Modules.Cast<ProcessModule>().FirstOrDefault<ProcessModule>((ProcessModule m) => Path.GetFileNameWithoutExtension(m.FileName).EndsWith("clrjit"));
+				ProcessModule processModule = Process.GetCurrentProcess().Modules.Cast<ProcessModule>().FirstOrDefault<ProcessModule>((ProcessModule m) => Path.GetFileNameWithoutExtension(m.FileName).EndsWith("clrjit", StringComparison.Ordinal));
 				if (processModule == null)
 				{
 					throw new PlatformNotSupportedException();
@@ -130,7 +135,11 @@ namespace MonoMod.RuntimeDetour.Platforms
 				IntPtr jitObject = DetourRuntimeNETCorePlatform.GetJitObject();
 				Guid jitGuid = DetourRuntimeNETCorePlatform.GetJitGuid(jitObject);
 				DetourRuntimeNETCorePlatform detourRuntimeNETCorePlatform = null;
-				if (jitGuid == DetourRuntimeNET50Platform.JitVersionGuid)
+				if (jitGuid == DetourRuntimeNET60Platform.JitVersionGuid)
+				{
+					detourRuntimeNETCorePlatform = new DetourRuntimeNET60Platform();
+				}
+				else if (jitGuid == DetourRuntimeNET50Platform.JitVersionGuid)
 				{
 					detourRuntimeNETCorePlatform = new DetourRuntimeNET50Platform();
 				}

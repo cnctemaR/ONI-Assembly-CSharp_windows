@@ -307,6 +307,7 @@ public class ClusterTelescope : GameStateMachine<ClusterTelescope, ClusterTelesc
 			KPrefabID component = worker.GetComponent<KPrefabID>();
 			OxygenBreather component2 = worker.GetComponent<OxygenBreather>();
 			Klei.AI.Attributes attributes = worker.GetAttributes();
+			KSelectable component3 = base.GetComponent<KSelectable>();
 			if (ev == Workable.WorkableEvent.WorkStarted)
 			{
 				base.ShowProgressBar(true);
@@ -329,6 +330,7 @@ public class ClusterTelescope : GameStateMachine<ClusterTelescope, ClusterTelesc
 				}
 				base.GetComponent<Operational>().SetActive(true, false);
 				this.checkMarkerFrequency = global::UnityEngine.Random.Range(2f, 5f);
+				component3.AddStatusItem(Db.Get().BuildingStatusItems.TelescopeWorking, this);
 				return;
 			}
 			if (ev != Workable.WorkableEvent.WorkStopped)
@@ -348,6 +350,7 @@ public class ClusterTelescope : GameStateMachine<ClusterTelescope, ClusterTelesc
 				Util.KDestroyGameObject(this.telescopeTargetMarker);
 			}
 			base.ShowProgressBar(false);
+			component3.RemoveStatusItem(Db.Get().BuildingStatusItems.TelescopeWorking, this);
 		}
 
 		public override List<Descriptor> GetDescriptors(GameObject go)
@@ -503,6 +506,7 @@ public class ClusterTelescope : GameStateMachine<ClusterTelescope, ClusterTelesc
 			KPrefabID component = worker.GetComponent<KPrefabID>();
 			OxygenBreather component2 = worker.GetComponent<OxygenBreather>();
 			Klei.AI.Attributes attributes = worker.GetAttributes();
+			KSelectable component3 = base.GetComponent<KSelectable>();
 			if (ev == Workable.WorkableEvent.WorkStarted)
 			{
 				base.ShowProgressBar(true);
@@ -520,9 +524,9 @@ public class ClusterTelescope : GameStateMachine<ClusterTelescope, ClusterTelesc
 				{
 					this.telescopeTargetMarker = GameUtil.KInstantiate(Assets.GetPrefab("TelescopeTarget"), Grid.SceneLayer.Background, null, 0);
 					this.telescopeTargetMarker.SetActive(true);
-					TelescopeTarget component3 = this.telescopeTargetMarker.GetComponent<TelescopeTarget>();
-					component3.Init(axialI);
-					component3.SetTargetMeteorShower(this.currentTarget);
+					TelescopeTarget component4 = this.telescopeTargetMarker.GetComponent<TelescopeTarget>();
+					component4.Init(axialI);
+					component4.SetTargetMeteorShower(this.currentTarget);
 				}
 				if (this.m_telescope.providesOxygen)
 				{
@@ -534,6 +538,7 @@ public class ClusterTelescope : GameStateMachine<ClusterTelescope, ClusterTelesc
 				}
 				base.GetComponent<Operational>().SetActive(true, false);
 				this.checkMarkerFrequency = global::UnityEngine.Random.Range(2f, 5f);
+				component3.AddStatusItem(Db.Get().BuildingStatusItems.ClusterTelescopeMeteorWorking, this);
 				return;
 			}
 			if (ev != Workable.WorkableEvent.WorkStopped)
@@ -553,6 +558,7 @@ public class ClusterTelescope : GameStateMachine<ClusterTelescope, ClusterTelesc
 				Util.KDestroyGameObject(this.telescopeTargetMarker);
 			}
 			base.ShowProgressBar(false);
+			component3.RemoveStatusItem(Db.Get().BuildingStatusItems.ClusterTelescopeMeteorWorking, this);
 		}
 
 		public override List<Descriptor> GetDescriptors(GameObject go)

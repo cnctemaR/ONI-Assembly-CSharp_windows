@@ -325,6 +325,9 @@ public class EntityTemplates
 		prefab.AddOrGetDef<CreatureSleepMonitor.Def>();
 		prefab.AddOrGetDef<CallAdultMonitor.Def>();
 		prefab.AddOrGetDef<AgeMonitor.Def>().maxAgePercentOnSpawn = 0.01f;
+		Pickupable pickupable = prefab.AddOrGet<Pickupable>();
+		int num = Assets.GetPrefab(adult_prefab_id).GetComponent<Pickupable>().sortOrder + 1;
+		pickupable.sortOrder = num;
 		return prefab;
 	}
 
@@ -339,7 +342,14 @@ public class EntityTemplates
 		}
 		modifiers.initialAmounts.Add(Db.Get().Amounts.HitPoints.Id);
 		template.AddOrGet<KBatchedAnimController>().SetSymbolVisiblity("snapto_pivot", false);
-		template.AddOrGet<Pickupable>();
+		Pickupable pickupable = template.AddOrGet<Pickupable>();
+		int num = -1;
+		string name = template.PrefabID().Name;
+		if (global::TUNING.CREATURES.SORTING.CRITTER_ORDER.ContainsKey(name))
+		{
+			num = global::TUNING.CREATURES.SORTING.CRITTER_ORDER[name];
+		}
+		pickupable.sortOrder = num;
 		template.AddOrGet<Clearable>().isClearable = false;
 		template.AddOrGet<Traits>();
 		template.AddOrGet<Health>();
@@ -419,6 +429,10 @@ public class EntityTemplates
 		baggable.mustStandOntopOfTrapForPickup = must_stand_on_top_for_pickup;
 		baggable.useGunForPickup = use_gun_for_pickup;
 		creature.AddOrGet<Capturable>().allowCapture = allow_mark_for_capture;
+		if (allow_mark_for_capture)
+		{
+			creature.AddComponent<Movable>();
+		}
 		creature_prefab_id.prefabSpawnFn += delegate(GameObject inst)
 		{
 			DiscoveredResources.Instance.Discover(creature_prefab_id.PrefabTag, DiscoveredResources.GetCategoryForTags(creature_prefab_id.Tags));

@@ -59,6 +59,7 @@ public class OuthouseConfig : IBuildingConfig
 		manualDeliveryKG.MinimumMass = 200f;
 		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.FetchCritical.IdHash;
 		manualDeliveryKG.operationalRequirement = Operational.State.Functional;
+		manualDeliveryKG.FillToCapacity = true;
 		Ownable ownable = go.AddOrGet<Ownable>();
 		ownable.slotID = Db.Get().AssignableSlots.Toilet.Id;
 		ownable.canBePublic = true;

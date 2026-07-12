@@ -78,8 +78,8 @@ public class TopLeftControlScreen : KScreen
 		}
 		else
 		{
-			KMonoBehaviour.PlaySound(GlobalAssets.GetSound("HUD_Click", false));
 			Game.Instance.SandboxModeActive = !Game.Instance.SandboxModeActive;
+			KMonoBehaviour.PlaySound(Game.Instance.SandboxModeActive ? GlobalAssets.GetSound("SandboxTool_Toggle_On", false) : GlobalAssets.GetSound("SandboxTool_Toggle_Off", false));
 		}
 		this.UpdateSandboxToggleState();
 	}

@@ -85,6 +85,12 @@ namespace HarmonyLib
 						return (from c in AccessTools.GetDeclaredConstructors(attr.declaringType, null)
 							where c.IsStatic
 							select c).FirstOrDefault<ConstructorInfo>();
+					case MethodType.Enumerator:
+						if (attr.methodName == null)
+						{
+							return null;
+						}
+						return AccessTools.EnumeratorMoveNext(AccessTools.DeclaredMethod(attr.declaringType, attr.methodName, attr.argumentTypes, null));
 					}
 				}
 			}

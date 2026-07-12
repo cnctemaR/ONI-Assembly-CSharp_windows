@@ -90,6 +90,7 @@ public class ResearchCenter : Workable, IGameObjectEffectDescriptor, ISim200ms, 
 	protected override void OnStartWork(Worker worker)
 	{
 		base.OnStartWork(worker);
+		base.GetComponent<KSelectable>().AddStatusItem(Db.Get().BuildingStatusItems.ComplexFabricatorResearching, this);
 		this.operational.SetActive(true, false);
 	}
 
@@ -109,6 +110,7 @@ public class ResearchCenter : Workable, IGameObjectEffectDescriptor, ISim200ms, 
 	{
 		base.OnStopWork(worker);
 		base.ShowProgressBar(false);
+		base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().BuildingStatusItems.ComplexFabricatorResearching, this);
 		this.operational.SetActive(false, false);
 	}
 

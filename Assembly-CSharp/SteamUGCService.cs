@@ -220,6 +220,14 @@ public class SteamUGCService : MonoBehaviour
 			}
 		}
 		pooledList2.Recycle();
+		foreach (PublishedFileId_t publishedFileId_t2 in pooledList3)
+		{
+			if ((SteamUGC.GetItemState(publishedFileId_t2) & 4U) != 0U)
+			{
+				string text = string.Format("Mod Steam PublishedFileId_t {0}", publishedFileId_t2.m_PublishedFileId);
+				KCrashReporter.ReportDevNotification("SteamUGCService updated Mod has not finished updating!", Environment.StackTrace, text, false);
+			}
+		}
 		pooledList3.Recycle();
 		loaded_previews.Recycle();
 		if (flag)
@@ -234,12 +242,12 @@ public class SteamUGCService : MonoBehaviour
 			}
 			this.removals.Clear();
 		}
-		foreach (PublishedFileId_t publishedFileId_t2 in this.downloads)
+		foreach (PublishedFileId_t publishedFileId_t3 in this.downloads)
 		{
-			EItemState itemState = (EItemState)SteamUGC.GetItemState(publishedFileId_t2);
+			EItemState itemState = (EItemState)SteamUGC.GetItemState(publishedFileId_t3);
 			if (((itemState & EItemState.k_EItemStateInstalled) == EItemState.k_EItemStateNone || (itemState & EItemState.k_EItemStateNeedsUpdate) != EItemState.k_EItemStateNone) && (itemState & (EItemState.k_EItemStateDownloading | EItemState.k_EItemStateDownloadPending)) == EItemState.k_EItemStateNone)
 			{
-				SteamUGC.DownloadItem(publishedFileId_t2, false);
+				SteamUGC.DownloadItem(publishedFileId_t3, false);
 			}
 		}
 		if (this.details_query == UGCQueryHandle_t.Invalid)
@@ -298,13 +306,19 @@ public class SteamUGCService : MonoBehaviour
 			for (uint num3 = 0U; num3 < pCallback.m_unNumResultsReturned; num3 += 1U)
 			{
 				SteamUGCDetails_t steamUGCDetails_t = default(SteamUGCDetails_t);
-				SteamUGC.GetQueryUGCResult(this.details_query, num3, out steamUGCDetails_t);
-				if (!this.removals.Contains(steamUGCDetails_t.m_nPublishedFileId))
+				if (SteamUGC.GetQueryUGCResult(this.details_query, num3, out steamUGCDetails_t))
 				{
-					this.publishes.Add(steamUGCDetails_t);
-					this.retry_counts[steamUGCDetails_t.m_nPublishedFileId] = 0;
+					if (!this.removals.Contains(steamUGCDetails_t.m_nPublishedFileId))
+					{
+						this.publishes.Add(steamUGCDetails_t);
+						this.retry_counts[steamUGCDetails_t.m_nPublishedFileId] = 0;
+					}
+					this.queries.Remove(steamUGCDetails_t.m_nPublishedFileId);
 				}
-				this.queries.Remove(steamUGCDetails_t.m_nPublishedFileId);
+				else
+				{
+					KCrashReporter.ReportDevNotification("SteamUGCService.GetQueryUGCResult details_query is an invalid handle!", Environment.StackTrace, "", false);
+				}
 			}
 		}
 		SteamUGC.ReleaseQueryUGCRequest(this.details_query);

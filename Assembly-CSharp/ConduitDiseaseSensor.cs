@@ -112,7 +112,7 @@ public class ConduitDiseaseSensor : ConduitThresholdSensor, IThresholdSwitch
 	{
 		get
 		{
-			return UI.UISIDESCREENS.THRESHOLD_SWITCH_SIDESCREEN.DISEASE;
+			return UI.UISIDESCREENS.THRESHOLD_SWITCH_SIDESCREEN.CONTENT_DISEASE;
 		}
 	}
 

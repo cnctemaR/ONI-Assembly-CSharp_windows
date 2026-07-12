@@ -180,7 +180,7 @@ public class FilteredStorage
 			num = Mathf.Max(0f, this.GetMaxCapacity() - amountStored);
 			this.fetchList = new FetchList2(this.storage, this.choreType);
 			this.fetchList.ShowStatusItem = false;
-			this.fetchList.Add(tags, this.forbiddenTags, num, Operational.State.Functional);
+			this.fetchList.Add(tags, this.requiredTag, this.forbiddenTags, num, Operational.State.Functional);
 			this.fetchList.Submit(new global::System.Action(this.OnFetchComplete), false);
 		}
 	}
@@ -190,6 +190,15 @@ public class FilteredStorage
 		if (this.logicMeter != null)
 		{
 			this.logicMeter.SetPositionPercent(on ? 1f : 0f);
+		}
+	}
+
+	public void SetRequiredTag(Tag tag)
+	{
+		if (this.requiredTag != tag)
+		{
+			this.requiredTag = tag;
+			this.OnFilterChanged(this.filterable.GetTags());
 		}
 	}
 
@@ -232,6 +241,8 @@ public class FilteredStorage
 	private MeterController meter;
 
 	private MeterController logicMeter;
+
+	private Tag requiredTag = Tag.Invalid;
 
 	private Tag[] forbiddenTags;
 

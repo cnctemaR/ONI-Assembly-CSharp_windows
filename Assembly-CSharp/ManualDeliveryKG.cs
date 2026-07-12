@@ -157,21 +157,38 @@ public class ManualDeliveryKG : KMonoBehaviour, ISim1000ms
 		float massStoredPerUnit = this.MassStoredPerUnit;
 		if (massStoredPerUnit < this.capacity)
 		{
-			float num = this.capacity - massStoredPerUnit;
-			num = Mathf.Max(PICKUPABLETUNING.MINIMUM_PICKABLE_AMOUNT, num);
-			if (this.RoundFetchAmountToInt)
+			this.CreateFetchChore(massStoredPerUnit);
+		}
+	}
+
+	private void CreateFetchChore(float stored_mass)
+	{
+		float num = this.capacity - stored_mass;
+		num = Mathf.Max(PICKUPABLETUNING.MINIMUM_PICKABLE_AMOUNT, num);
+		if (this.RoundFetchAmountToInt)
+		{
+			num = (float)((int)num);
+		}
+		ChoreType byHash = Db.Get().ChoreTypes.GetByHash(this.choreTypeIDHash);
+		this.fetchList = new FetchList2(this.storage, byHash);
+		this.fetchList.ShowStatusItem = this.ShowStatusItem;
+		this.fetchList.MinimumAmount[this.requestedItemTag] = Mathf.Max(PICKUPABLETUNING.MINIMUM_PICKABLE_AMOUNT, this.MinimumMass);
+		FetchList2 fetchList = this.fetchList;
+		Tag tag = this.requestedItemTag;
+		float num2 = num;
+		fetchList.Add(tag, this.forbiddenTags, num2, Operational.State.None);
+		this.fetchList.Submit(new global::System.Action(this.OnFetchComplete), false);
+	}
+
+	private void OnFetchComplete()
+	{
+		if (this.FillToCapacity && this.storage != null)
+		{
+			float amountAvailable = this.storage.GetAmountAvailable(this.requestedItemTag);
+			if (amountAvailable < this.capacity)
 			{
-				num = (float)((int)num);
+				this.CreateFetchChore(amountAvailable);
 			}
-			ChoreType byHash = Db.Get().ChoreTypes.GetByHash(this.choreTypeIDHash);
-			this.fetchList = new FetchList2(this.storage, byHash);
-			this.fetchList.ShowStatusItem = this.ShowStatusItem;
-			this.fetchList.MinimumAmount[this.requestedItemTag] = Mathf.Max(PICKUPABLETUNING.MINIMUM_PICKABLE_AMOUNT, this.MinimumMass);
-			FetchList2 fetchList = this.fetchList;
-			Tag tag = this.requestedItemTag;
-			float num2 = num;
-			fetchList.Add(tag, this.forbiddenTags, num2, Operational.State.None);
-			this.fetchList.Submit(null, false);
 		}
 	}
 
@@ -267,6 +284,9 @@ public class ManualDeliveryKG : KMonoBehaviour, ISim1000ms
 
 	[SerializeField]
 	public float MassPerUnit = 1f;
+
+	[SerializeField]
+	public bool FillToCapacity;
 
 	[SerializeField]
 	public Operational.State operationalRequirement;

@@ -65,7 +65,7 @@ public class KleiAccount : ThreadedHttps<KleiAccount>
 
 	public void AuthenticateUser(KleiAccount.GetUserIDdelegate cb, bool force = false)
 	{
-		if (KleiAccount.KleiUserID == null || force)
+		if (!KPrivacyPrefs.instance.disableDataCollection && (KleiAccount.KleiUserID == null || force))
 		{
 			Debug.Log("[Account] Requesting auth ticket from " + DistributionPlatform.Inst.Name);
 			this.gotUserID = cb;
@@ -100,6 +100,12 @@ public class KleiAccount : ThreadedHttps<KleiAccount>
 			return;
 		}
 		this.gotUserID();
+	}
+
+	public bool HasValidTicket()
+	{
+		byte[] array = this.AuthTicket();
+		return KleiAccount.KleiToken != null && array != null && array.Length != 0;
 	}
 
 	public byte[] AuthTicket()

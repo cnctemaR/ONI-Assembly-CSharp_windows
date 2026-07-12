@@ -352,6 +352,19 @@ public class ClusterManager : KMonoBehaviour, ISaveLoadable
 		this.MigrateMinion(minion, targetID, minion.GetMyWorldId());
 	}
 
+	public void MigrateCritter(GameObject critter, int targetID)
+	{
+		this.MigrateCritter(critter, targetID, critter.GetMyWorldId());
+	}
+
+	public void MigrateCritter(GameObject critter, int targetID, int prevID)
+	{
+		this.critterMigrationEvArg.entity = critter;
+		this.critterMigrationEvArg.prevWorldId = prevID;
+		this.critterMigrationEvArg.targetWorldId = targetID;
+		Game.Instance.Trigger(1142724171, this.critterMigrationEvArg);
+	}
+
 	public void MigrateMinion(MinionIdentity minion, int targetID, int prevID)
 	{
 		if (!ClusterManager.Instance.GetWorld(targetID).IsDiscovered)
@@ -485,7 +498,7 @@ public class ClusterManager : KMonoBehaviour, ISaveLoadable
 	{
 		if (this.activeWorld != null && !CameraController.Instance.ignoreClusterFX)
 		{
-			Vector2 vector = this.activeWorld.maximumBounds * Grid.CellSizeInMeters;
+			Vector2 vector = this.activeWorld.maximumBounds * Grid.CellSizeInMeters + new Vector2(1f, 1f);
 			Vector2 vector2 = this.activeWorld.minimumBounds * Grid.CellSizeInMeters;
 			if (pos.x < vector2.x || pos.x > vector.x || pos.y < vector2.y || pos.y > vector.y)
 			{
@@ -657,6 +670,8 @@ public class ClusterManager : KMonoBehaviour, ISaveLoadable
 	private Dictionary<int, List<IAssignableIdentity>> minionsByWorld = new Dictionary<int, List<IAssignableIdentity>>();
 
 	private MinionMigrationEventArgs migrationEvArg = new MinionMigrationEventArgs();
+
+	private MigrationEventArgs critterMigrationEvArg = new MigrationEventArgs();
 
 	private List<int> _worldIDs = new List<int>();
 }

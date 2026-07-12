@@ -54,6 +54,13 @@ public class PermitItems
 		return false;
 	}
 
+	public static bool TryGetBarterPrice(string permit_id, out ulong buy_price, out ulong sell_price)
+	{
+		buy_price = (sell_price = 0UL);
+		PermitItems.ItemInfo itemInfo;
+		return PermitItems.Mappings.TryGetValue(permit_id, out itemInfo) && KleiItems.TryGetBarterPrice(itemInfo.ItemType, out buy_price, out sell_price);
+	}
+
 	public static void QueueRequestOpenOrUnboxItem(KleiItems.ItemData item, KleiItems.ResponseCallback cb)
 	{
 		DebugUtil.DevAssert(!item.IsOpened, "Can't open already opened item.", null);
@@ -67,6 +74,19 @@ public class PermitItems
 			return;
 		}
 		KleiItems.AddRequestItemOpened(item.ItemId, cb);
+	}
+
+	public static string GetServerTypeFromPermit(PermitResource resource)
+	{
+		foreach (PermitItems.ItemInfo itemInfo in PermitItems.ItemInfos)
+		{
+			if (itemInfo.PermitId == resource.Id)
+			{
+				return itemInfo.ItemType;
+			}
+		}
+		Debug.LogError("No matching server ItemType for requested PermitResource " + resource.Id);
+		return null;
 	}
 
 	private static PermitItems.ItemInfo[] ItemInfos = new PermitItems.ItemInfo[]
@@ -363,7 +383,67 @@ public class PermitItems
 		new PermitItems.ItemInfo("small_sculpture_good_5", 302U, "SmallSculpture_Good5"),
 		new PermitItems.ItemInfo("small_sculpture_good_6", 303U, "SmallSculpture_Good6"),
 		new PermitItems.ItemInfo("metal_sculpture_good_5", 304U, "MetalSculpture_Good5"),
-		new PermitItems.ItemInfo("ice_sculpture_average_3", 305U, "IceSculpture_Average3")
+		new PermitItems.ItemInfo("ice_sculpture_average_3", 305U, "IceSculpture_Average3"),
+		new PermitItems.ItemInfo("skirt_basic_blue_middle", 306U, "SkirtBasicBlueMiddle"),
+		new PermitItems.ItemInfo("skirt_basic_purple", 307U, "SkirtBasicPurple"),
+		new PermitItems.ItemInfo("skirt_basic_green", 308U, "SkirtBasicGreen"),
+		new PermitItems.ItemInfo("skirt_basic_orange", 309U, "SkirtBasicOrange"),
+		new PermitItems.ItemInfo("skirt_basic_pink_orchid", 310U, "SkirtBasicPinkOrchid"),
+		new PermitItems.ItemInfo("skirt_basic_red", 311U, "SkirtBasicRed"),
+		new PermitItems.ItemInfo("skirt_basic_yellow", 312U, "SkirtBasicYellow"),
+		new PermitItems.ItemInfo("skirt_basic_polkadot", 313U, "SkirtBasicPolkadot"),
+		new PermitItems.ItemInfo("skirt_basic_watermelon", 314U, "SkirtBasicWatermelon"),
+		new PermitItems.ItemInfo("skirt_denim_blue", 315U, "SkirtDenimBlue"),
+		new PermitItems.ItemInfo("skirt_leopard_print_blue_pink", 316U, "SkirtLeopardPrintBluePink"),
+		new PermitItems.ItemInfo("skirt_sparkle_blue", 317U, "SkirtSparkleBlue"),
+		new PermitItems.ItemInfo("atmo_belt_basic_grey", 318U, "AtmoBeltBasicGrey"),
+		new PermitItems.ItemInfo("atmo_belt_basic_neon_pink", 319U, "AtmoBeltBasicNeonPink"),
+		new PermitItems.ItemInfo("atmo_gloves_white", 320U, "AtmoGlovesWhite"),
+		new PermitItems.ItemInfo("atmo_gloves_stripes_lavender", 321U, "AtmoGlovesStripesLavender"),
+		new PermitItems.ItemInfo("atmo_helmet_cummerbund_red", 322U, "AtmoHelmetCummerbundRed"),
+		new PermitItems.ItemInfo("atmo_helmet_workout_lavender", 323U, "AtmoHelmetWorkoutLavender"),
+		new PermitItems.ItemInfo("atmo_shoes_basic_lavender", 324U, "AtmoShoesBasicLavender"),
+		new PermitItems.ItemInfo("atmosuit_basic_neon_pink", 325U, "AtmoSuitBasicNeonPink"),
+		new PermitItems.ItemInfo("atmosuit_multi_red_black", 326U, "AtmoSuitMultiRedBlack"),
+		new PermitItems.ItemInfo("egg_cracker_beaker", 327U, "EggCracker_beaker"),
+		new PermitItems.ItemInfo("egg_cracker_flower", 328U, "EggCracker_flower"),
+		new PermitItems.ItemInfo("egg_cracker_hands", 329U, "EggCracker_hands"),
+		new PermitItems.ItemInfo("ceilinglight_rubiks", 330U, "CeilingLight_rubiks"),
+		new PermitItems.ItemInfo("flowervase_hanging_beaker", 331U, "FlowerVaseHanging_beaker"),
+		new PermitItems.ItemInfo("flowervase_hanging_rubiks", 332U, "FlowerVaseHanging_rubiks"),
+		new PermitItems.ItemInfo("elegantbed_hand", 333U, "LuxuryBed_hand"),
+		new PermitItems.ItemInfo("elegantbed_rubiks", 334U, "LuxuryBed_rubiks"),
+		new PermitItems.ItemInfo("rock_crusher_roundstamp", 335U, "RockCrusher_roundstamp"),
+		new PermitItems.ItemInfo("rock_crusher_spikebeds", 336U, "RockCrusher_spikebeds"),
+		new PermitItems.ItemInfo("storagelocker_green_mush", 337U, "StorageLocker_green_mush"),
+		new PermitItems.ItemInfo("storagelocker_red_rose", 338U, "StorageLocker_red_rose"),
+		new PermitItems.ItemInfo("storagelocker_blue_babytears", 339U, "StorageLocker_blue_babytears"),
+		new PermitItems.ItemInfo("storagelocker_purple_brainfat", 340U, "StorageLocker_purple_brainfat"),
+		new PermitItems.ItemInfo("storagelocker_yellow_tartar", 341U, "StorageLocker_yellow_tartar"),
+		new PermitItems.ItemInfo("planterbox_mealwood", 342U, "PlanterBox_mealwood"),
+		new PermitItems.ItemInfo("planterbox_bristleblossom", 343U, "PlanterBox_bristleblossom"),
+		new PermitItems.ItemInfo("planterbox_wheezewort", 344U, "PlanterBox_wheezewort"),
+		new PermitItems.ItemInfo("planterbox_sleetwheat", 345U, "PlanterBox_sleetwheat"),
+		new PermitItems.ItemInfo("planterbox_salmon_pink", 346U, "PlanterBox_salmon_pink"),
+		new PermitItems.ItemInfo("gasstorage_lightgold", 347U, "GasReservoir_lightgold"),
+		new PermitItems.ItemInfo("gasstorage_peagreen", 348U, "GasReservoir_peagreen"),
+		new PermitItems.ItemInfo("gasstorage_lightcobalt", 349U, "GasReservoir_lightcobalt"),
+		new PermitItems.ItemInfo("gasstorage_polka_darkpurpleresin", 350U, "GasReservoir_polka_darkpurpleresin"),
+		new PermitItems.ItemInfo("gasstorage_polka_darknavynookgreen", 351U, "GasReservoir_polka_darknavynookgreen"),
+		new PermitItems.ItemInfo("walls_kitchen_retro1", 352U, "ExteriorWall_kitchen_retro1"),
+		new PermitItems.ItemInfo("walls_plus_red_deep_white", 353U, "ExteriorWall_plus_red_deep_white"),
+		new PermitItems.ItemInfo("walls_plus_orange_satsuma_white", 354U, "ExteriorWall_plus_orange_satsuma_white"),
+		new PermitItems.ItemInfo("walls_plus_yellow_lemon_white", 355U, "ExteriorWall_plus_yellow_lemon_white"),
+		new PermitItems.ItemInfo("walls_plus_green_kelly_white", 356U, "ExteriorWall_plus_green_kelly_white"),
+		new PermitItems.ItemInfo("walls_plus_blue_cobalt_white", 357U, "ExteriorWall_plus_blue_cobalt_white"),
+		new PermitItems.ItemInfo("walls_plus_pink_flamingo_white", 358U, "ExteriorWall_plus_pink_flamingo_white"),
+		new PermitItems.ItemInfo("walls_plus_grey_charcoal_white", 359U, "ExteriorWall_plus_grey_charcoal_white"),
+		new PermitItems.ItemInfo("painting_art_n", 360U, "Canvas_Good12"),
+		new PermitItems.ItemInfo("painting_art_p", 361U, "Canvas_Good14"),
+		new PermitItems.ItemInfo("painting_wide_art_m", 362U, "CanvasWide_Good11"),
+		new PermitItems.ItemInfo("painting_tall_art_l", 363U, "CanvasTall_Good10"),
+		new PermitItems.ItemInfo("sculpture_amazing_6", 364U, "Sculpture_Good6"),
+		new PermitItems.ItemInfo("balloon_hand_gold", 365U, "BalloonHandGold")
 	};
 
 	private static Dictionary<string, PermitItems.ItemInfo> Mappings = PermitItems.ItemInfos.ToDictionary<PermitItems.ItemInfo, string>((PermitItems.ItemInfo x) => x.PermitId);

@@ -32,6 +32,8 @@ namespace TUNING
 
 		public static float GAS_CARGO_BAY_CLUSTER_CAPACITY = 1100f;
 
+		public const float ENTITIES_CARGO_BAY_CLUSTER_CAPACITY = 100f;
+
 		public static Vector2I ROCKET_INTERIOR_SIZE = new Vector2I(32, 32);
 
 		public class DESTINATION_RESEARCH

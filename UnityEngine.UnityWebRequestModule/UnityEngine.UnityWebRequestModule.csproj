@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{48E248DD-BC28-4A9A-BD04-0BF6145AA94A}</ProjectGuid>
+    <ProjectGuid>{B6A8B87A-8ED2-4A36-836D-C5601AAFC4C4}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>UnityEngine.UnityWebRequestModule</RootNamespace>
     <AssemblyName>UnityEngine.UnityWebRequestModule</AssemblyName>
@@ -34,11 +34,11 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
-      <Project>{48E248DD-BC28-4A9A-BD04-0BF6145AA91C}</Project>
+      <Project>{B6A8B87A-8ED2-4A36-836D-C5601AAFC496}</Project>
       <Name>UnityEngine.CoreModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
-      <Project>{48E248DD-BC28-4A9A-BD04-0BF6145AA932}</Project>
+      <Project>{B6A8B87A-8ED2-4A36-836D-C5601AAFC4AC}</Project>
       <Name>UnityEngine.SharedInternalsModule</Name>
     </ProjectReference>
   </ItemGroup>

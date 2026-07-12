@@ -174,11 +174,23 @@ public class BuddingTrunk : KMonoBehaviour, ISim4000ms
 			Vector3 budPosition = this.GetBudPosition(num3);
 			GameObject gameObject = Util.KInstantiate(Assets.GetPrefab(this.budPrefabID), budPosition);
 			gameObject.SetActive(true);
+			MutantPlant component = base.GetComponent<MutantPlant>();
+			if (component != null)
+			{
+				MutantPlant component2 = gameObject.GetComponent<MutantPlant>();
+				if (component2 != null)
+				{
+					component.CopyMutationsTo(component2);
+					PlantSubSpeciesCatalog.SubSpeciesInfo subSpeciesInfo = component2.GetSubSpeciesInfo();
+					PlantSubSpeciesCatalog.Instance.DiscoverSubSpecies(subSpeciesInfo, component2);
+					PlantSubSpeciesCatalog.Instance.IdentifySubSpecies(subSpeciesInfo.ID);
+				}
+			}
 			gameObject.GetComponent<Growing>().OverrideMaturityLevel(growth_percentage);
 			gameObject.GetComponent<TreeBud>().SetTrunkPosition(this, num3);
-			HarvestDesignatable component = gameObject.GetComponent<HarvestDesignatable>();
-			this.buds[num3] = new Ref<HarvestDesignatable>(component);
-			this.UpdateBudHarvestState(component);
+			HarvestDesignatable component3 = gameObject.GetComponent<HarvestDesignatable>();
+			this.buds[num3] = new Ref<HarvestDesignatable>(component3);
+			this.UpdateBudHarvestState(component3);
 			this.TryRollNewSeed();
 		}
 	}

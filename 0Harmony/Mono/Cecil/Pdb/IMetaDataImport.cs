@@ -28,7 +28,8 @@ namespace Mono.Cecil.Pdb
 
 		uint GetModuleFromScope();
 
-		uint GetTypeDefProps(uint td, IntPtr szTypeDef, uint cchTypeDef, out uint pchTypeDef, IntPtr pdwTypeDefFlags);
+		[PreserveSig]
+		unsafe uint GetTypeDefProps(uint td, char* szTypeDef, uint cchTypeDef, uint* pchTypeDef, uint* pdwTypeDefFlags, uint* ptkExtends);
 
 		uint GetInterfaceImplProps(uint iiImpl, out uint pClass);
 
@@ -64,7 +65,8 @@ namespace Mono.Cecil.Pdb
 
 		uint FindMemberRef(uint td, string szName, [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 3)] byte[] pvSigBlob, uint cbSigBlob);
 
-		uint GetMethodProps(uint mb, out uint pClass, IntPtr szMethod, uint cchMethod, out uint pchMethod, IntPtr pdwAttr, IntPtr ppvSigBlob, IntPtr pcbSigBlob, IntPtr pulCodeRVA);
+		[PreserveSig]
+		unsafe uint GetMethodProps(uint mb, uint* pClass, char* szMethod, uint cchMethod, uint* pchMethod, uint* pdwAttr, IntPtr ppvSigBlob, IntPtr pcbSigBlob, uint* pulCodeRVA, uint* pdwImplFlags);
 
 		uint GetMemberRefProps(uint mr, ref uint ptk, StringBuilder szMember, uint cchMember, out uint pchMember, out IntPtr ppvSigBlob);
 
@@ -131,7 +133,8 @@ namespace Mono.Cecil.Pdb
 		[return: MarshalAs(UnmanagedType.Bool)]
 		bool IsValidToken(uint tk);
 
-		uint GetNestedClassProps(uint tdNestedClass);
+		[PreserveSig]
+		unsafe uint GetNestedClassProps(uint tdNestedClass, uint* ptdEnclosingClass);
 
 		uint GetNativeCallConvFromSig(IntPtr pvSig, uint cbSig);
 

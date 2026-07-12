@@ -135,7 +135,7 @@ public class SingleEntityReceptacle : Workable, IRender1000ms
 		this.UpdateStatusItem();
 	}
 
-	protected void UpdateStatusItem()
+	protected virtual void UpdateStatusItem()
 	{
 		KSelectable component = base.GetComponent<KSelectable>();
 		if (this.Occupant != null)
@@ -335,7 +335,7 @@ public class SingleEntityReceptacle : Workable, IRender1000ms
 		component.enabled = true;
 	}
 
-	private void UpdateActive()
+	protected void UpdateActive()
 	{
 		if (this.Equals(null) || this == null || base.gameObject.Equals(null) || base.gameObject == null)
 		{

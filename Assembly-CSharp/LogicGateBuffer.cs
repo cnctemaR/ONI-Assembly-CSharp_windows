@@ -77,7 +77,7 @@ public class LogicGateBuffer : LogicGate, ISingleSliderControl, ISliderControl
 		return "STRINGS.UI.UISIDESCREENS.LOGIC_BUFFER_SIDE_SCREEN.TOOLTIP";
 	}
 
-	string ISliderControl.GetSliderTooltip()
+	string ISliderControl.GetSliderTooltip(int index)
 	{
 		return string.Format(Strings.Get("STRINGS.UI.UISIDESCREENS.LOGIC_BUFFER_SIDE_SCREEN.TOOLTIP"), this.DelayAmount);
 	}

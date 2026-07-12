@@ -54,7 +54,8 @@ namespace KMod
 				SteamUGCService.Mod mod = SteamUGCService.Instance.FindMod(publishedFileId_t);
 				if (mod == null)
 				{
-					DebugUtil.DevAssert(false, "SteamUGCService just told us this id was valid!", null);
+					string text = string.Format("Mod Steam PublishedFileId_t {0}", publishedFileId_t);
+					KCrashReporter.ReportDevNotification(string.Format("SteamUGCService just told us ADDED id {0} was valid!", publishedFileId_t), Environment.StackTrace, text, false);
 				}
 				else
 				{
@@ -70,7 +71,8 @@ namespace KMod
 				SteamUGCService.Mod mod3 = SteamUGCService.Instance.FindMod(publishedFileId_t2);
 				if (mod3 == null)
 				{
-					DebugUtil.DevAssert(false, "SteamUGCService just told us this id was valid!", null);
+					string text2 = string.Format("Mod Steam PublishedFileId_t {0}", publishedFileId_t2.m_PublishedFileId);
+					KCrashReporter.ReportDevNotification("SteamUGCService just told us UPDATED id was valid!", Environment.StackTrace, text2, false);
 				}
 				else
 				{

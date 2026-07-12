@@ -9,6 +9,9 @@ public class SuitWearer : GameStateMachine<SuitWearer, SuitWearer.Instance>
 		this.root.EventHandler(GameHashes.PathAdvanced, delegate(SuitWearer.Instance smi, object data)
 		{
 			smi.OnPathAdvanced(data);
+		}).EventHandler(GameHashes.Died, delegate(SuitWearer.Instance smi, object data)
+		{
+			smi.UnreserveSuits();
 		}).DoNothing();
 		this.suit.DoNothing();
 		this.nosuit.DoNothing();
@@ -65,24 +68,29 @@ public class SuitWearer : GameStateMachine<SuitWearer, SuitWearer.Instance>
 					bool flag11 = SuitMarker.DoesTraversalDirectionRequireSuit(cell, path.nodes[i + 1].cell, flags);
 					if (flag11 && !flag9)
 					{
-						Grid.ReserveSuit(cell, this.prefabInstanceID, true);
-						this.suitReservations.Add(cell);
-						if (flag5)
+						if (Grid.ReserveSuit(cell, this.prefabInstanceID, true))
 						{
-							flag = true;
-						}
-						if (flag6)
-						{
-							flag2 = true;
-						}
-						if (flag7)
-						{
-							flag3 = true;
+							this.suitReservations.Add(cell);
+							if (flag5)
+							{
+								flag = true;
+							}
+							if (flag6)
+							{
+								flag2 = true;
+							}
+							if (flag7)
+							{
+								flag3 = true;
+							}
+							if (flag8)
+							{
+								flag4 = true;
+							}
 						}
 					}
-					else if (!flag11 && flag10 && Grid.HasEmptyLocker(cell, this.prefabInstanceID))
+					else if (!flag11 && flag10 && Grid.HasEmptyLocker(cell, this.prefabInstanceID) && Grid.ReserveEmptyLocker(cell, this.prefabInstanceID, true))
 					{
-						Grid.ReserveEmptyLocker(cell, this.prefabInstanceID, true);
 						this.emptyLockerReservations.Add(cell);
 						if (flag5)
 						{
@@ -95,6 +103,10 @@ public class SuitWearer : GameStateMachine<SuitWearer, SuitWearer.Instance>
 						if (flag7)
 						{
 							flag3 = false;
+						}
+						if (flag8)
+						{
+							flag4 = false;
 						}
 					}
 				}
@@ -119,6 +131,11 @@ public class SuitWearer : GameStateMachine<SuitWearer, SuitWearer.Instance>
 				}
 			}
 			this.emptyLockerReservations.Clear();
+		}
+
+		protected override void OnCleanUp()
+		{
+			this.UnreserveSuits();
 		}
 
 		private List<int> suitReservations = new List<int>();

@@ -26,6 +26,23 @@ namespace HarmonyLib
 			MethodCallExpression methodCallExpression = expression.Body as MethodCallExpression;
 			if (methodCallExpression == null)
 			{
+				UnaryExpression unaryExpression = expression.Body as UnaryExpression;
+				if (unaryExpression != null)
+				{
+					MethodCallExpression methodCallExpression2 = unaryExpression.Operand as MethodCallExpression;
+					if (methodCallExpression2 != null)
+					{
+						ConstantExpression constantExpression = methodCallExpression2.Object as ConstantExpression;
+						if (constantExpression != null)
+						{
+							MethodInfo methodInfo = constantExpression.Value as MethodInfo;
+							if (methodInfo != null)
+							{
+								return methodInfo;
+							}
+						}
+					}
+				}
 				throw new ArgumentException("Invalid Expression. Expression should consist of a Method call only.");
 			}
 			MethodInfo method = methodCallExpression.Method;

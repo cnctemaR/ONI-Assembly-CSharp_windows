@@ -194,12 +194,7 @@ public class Toilet : StateMachineComponent<Toilet.StatesInstance>, ISaveLoadabl
 
 		public bool RequiresDirtDelivery()
 		{
-			if (base.master.storage.IsEmpty())
-			{
-				return true;
-			}
-			Tag tag = ElementLoader.FindElementByHash(SimHashes.Dirt).tag;
-			return !base.master.storage.Has(tag) || (base.master.storage.GetAmountAvailable(tag) < base.master.manualdeliverykg.capacity && !this.IsSoiled);
+			return base.master.storage.IsEmpty() || !base.master.storage.Has(GameTags.Dirt) || (base.master.storage.GetAmountAvailable(GameTags.Dirt) < base.master.manualdeliverykg.capacity && !this.IsSoiled);
 		}
 
 		public float MassPerFlush()

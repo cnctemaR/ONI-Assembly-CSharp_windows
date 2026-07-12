@@ -63,7 +63,10 @@ public class BabyMonitor : GameStateMachine<BabyMonitor, BabyMonitor.Instance, I
 			position.z = Grid.GetLayerZ(Grid.SceneLayer.Creatures);
 			GameObject gameObject = Util.KInstantiate(Assets.GetPrefab(base.smi.def.adultPrefab), position);
 			gameObject.SetActive(true);
-			gameObject.GetSMI<AnimInterruptMonitor.Instance>().PlayAnim("growup_pst");
+			if (!base.smi.gameObject.HasTag(GameTags.Creatures.PreventGrowAnimation))
+			{
+				gameObject.GetSMI<AnimInterruptMonitor.Instance>().PlayAnim("growup_pst");
+			}
 			if (base.smi.def.onGrowDropID != null)
 			{
 				Util.KInstantiate(Assets.GetPrefab(base.smi.def.onGrowDropID), position).SetActive(true);
@@ -88,6 +91,7 @@ public class BabyMonitor : GameStateMachine<BabyMonitor, BabyMonitor.Instance, I
 			{
 				SelectTool.Instance.Select(gameObject.GetComponent<KSelectable>(), false);
 			}
+			base.smi.gameObject.Trigger(663420073, gameObject);
 			base.smi.gameObject.DeleteObject();
 		}
 	}

@@ -14,7 +14,7 @@ namespace MonoMod.Utils
 {
 	internal static class _DMDEmit
 	{
-		private static MethodBuilder _CreateMethodProxy(MethodBuilder context, DynamicMethod target)
+		private static MethodBuilder _CreateMethodProxy(MethodBuilder context, MethodInfo target)
 		{
 			TypeBuilder typeBuilder = (TypeBuilder)context.DeclaringType;
 			string text = string.Format(".dmdproxy<{0}>?{1}", target.Name.Replace('.', '_'), target.GetHashCode());
@@ -219,13 +219,13 @@ namespace MonoMod.Utils
 							{
 								if (instruction4.OpCode == Mono.Cecil.Cil.OpCodes.Endfinally)
 								{
-									goto IL_085F;
+									goto IL_0881;
 								}
 							}
 						}
 						else if (instruction4.OpCode == Mono.Cecil.Cil.OpCodes.Endfilter)
 						{
-							goto IL_085F;
+							goto IL_0881;
 						}
 					}
 				}
@@ -275,12 +275,16 @@ namespace MonoMod.Utils
 									MemberReference memberReference = obj as MemberReference;
 									if (memberReference != null)
 									{
-										MemberInfo memberInfo = memberReference.ResolveReflection();
+										MemberInfo memberInfo = ((memberReference == definition) ? _mb : memberReference.ResolveReflection());
 										obj = memberInfo;
 										if (mb != null && memberInfo != null)
 										{
-											Module module = memberInfo.Module;
-											Assembly assembly = ((module != null) ? module.Assembly : null);
+											Module module = ((memberInfo != null) ? memberInfo.Module : null);
+											if (module == null)
+											{
+												continue;
+											}
+											Assembly assembly = module.Assembly;
 											if (assembly != null && !hashSet.Contains(assembly))
 											{
 												assemblyBuilder.SetCustomAttribute(new CustomAttributeBuilder(DynamicMethodDefinition.c_IgnoresAccessChecksToAttribute, new object[] { assembly.GetName().Name }));
@@ -314,10 +318,10 @@ namespace MonoMod.Utils
 							{
 								throw new NotSupportedException("Unsupported global method operand on opcode " + instruction4.OpCode.Name);
 							}
-							DynamicMethod dynamicMethod2 = obj as DynamicMethod;
-							if (dynamicMethod2 != null)
+							MethodInfo methodInfo = methodBase as MethodInfo;
+							if (methodInfo != null && methodInfo.IsDynamicMethod())
 							{
-								obj = _DMDEmit._CreateMethodProxy(mb, dynamicMethod2);
+								obj = _DMDEmit._CreateMethodProxy(mb, methodInfo);
 							}
 							else
 							{
@@ -357,7 +361,7 @@ namespace MonoMod.Utils
 				}
 				flag = false;
 				continue;
-				IL_085F:
+				IL_0881:
 				flag = true;
 			}
 		}
@@ -413,7 +417,7 @@ namespace MonoMod.Utils
 			_DMDEmit.<>c__DisplayClass17_0 CS$<>8__locals1;
 			CS$<>8__locals1._tokens = null;
 			CS$<>8__locals1._info = null;
-			if (DynamicMethodDefinition._IsMono)
+			if (ReflectionHelper.IsMono)
 			{
 				CS$<>8__locals1._info = dm.GetDynamicILInfo();
 			}
@@ -604,7 +608,7 @@ namespace MonoMod.Utils
 		}
 
 		[CompilerGenerated]
-		internal static byte[] <_EmitCallSite>g__ExpandArray|17_6(byte[] inArray, int requiredLength)
+		internal static byte[] <_EmitCallSite>g__ExpandArray|17_6(byte[] inArray, int requiredLength = -1)
 		{
 			if (requiredLength < inArray.Length)
 			{

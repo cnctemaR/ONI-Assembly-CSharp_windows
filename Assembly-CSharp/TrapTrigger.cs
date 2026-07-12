@@ -28,6 +28,10 @@ public class TrapTrigger : KMonoBehaviour
 
 	public void SetStoredPosition(GameObject go)
 	{
+		if (go == null)
+		{
+			return;
+		}
 		KBatchedAnimController component = go.GetComponent<KBatchedAnimController>();
 		Vector3 vector = Grid.CellToPosCBC(Grid.PosToCell(base.transform.GetPosition()), Grid.SceneLayer.BuildingBack);
 		if (this.addTrappedAnimationOffset)

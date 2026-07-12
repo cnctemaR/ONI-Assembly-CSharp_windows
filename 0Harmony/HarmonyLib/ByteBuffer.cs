@@ -84,7 +84,7 @@ namespace HarmonyLib
 		{
 			if (this.position + count > this.buffer.Length)
 			{
-				throw new ArgumentOutOfRangeException();
+				throw new ArgumentOutOfRangeException("count", string.Format("position({0}) + count({1}) > buffer.Length({2})", this.position, count, this.buffer.Length));
 			}
 		}
 

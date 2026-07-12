@@ -22,6 +22,9 @@ public static class BaseSquirrelConfig
 		{
 			gameObject.AddOrGet<SymbolOverrideController>().ApplySymbolOverridesByAffix(Assets.GetAnim(anim_file), symbolOverridePrefix, null, 0);
 		}
+		Pickupable pickupable = gameObject.AddOrGet<Pickupable>();
+		int num2 = global::TUNING.CREATURES.SORTING.CRITTER_ORDER["Squirrel"];
+		pickupable.sortOrder = num2;
 		gameObject.AddComponent<Storage>();
 		if (!is_baby)
 		{

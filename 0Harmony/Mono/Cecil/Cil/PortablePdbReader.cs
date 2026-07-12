@@ -1,4 +1,5 @@
 ﻿using System;
+using Mono.Cecil.Metadata;
 using Mono.Cecil.PE;
 
 namespace Mono.Cecil.Cil
@@ -32,12 +33,24 @@ namespace Mono.Cecil.Cil
 			{
 				return true;
 			}
-			ImageDebugHeaderEntry codeViewEntry = header.GetCodeViewEntry();
-			if (codeViewEntry == null)
+			foreach (ImageDebugHeaderEntry imageDebugHeaderEntry in header.Entries)
+			{
+				if (PortablePdbReader.IsMatchingEntry(this.image.PdbHeap, imageDebugHeaderEntry))
+				{
+					this.ReadModule();
+					return true;
+				}
+			}
+			return false;
+		}
+
+		private static bool IsMatchingEntry(PdbHeap heap, ImageDebugHeaderEntry entry)
+		{
+			if (entry.Directory.Type != ImageDebugType.CodeView)
 			{
 				return false;
 			}
-			byte[] data = codeViewEntry.Data;
+			byte[] data = entry.Data;
 			if (data.Length < 24)
 			{
 				return false;
@@ -49,14 +62,9 @@ namespace Mono.Cecil.Cil
 			byte[] array = new byte[16];
 			Buffer.BlockCopy(data, 4, array, 0, 16);
 			Guid guid = new Guid(array);
-			Buffer.BlockCopy(this.image.PdbHeap.Id, 0, array, 0, 16);
+			Buffer.BlockCopy(heap.Id, 0, array, 0, 16);
 			Guid guid2 = new Guid(array);
-			if (guid != guid2)
-			{
-				return false;
-			}
-			this.ReadModule();
-			return true;
+			return guid == guid2;
 		}
 
 		private static int ReadInt32(byte[] bytes, int start)

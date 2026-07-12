@@ -9,17 +9,35 @@ namespace HarmonyLib
 {
 	public static class FileLog
 	{
-		static FileLog()
+		public static StreamWriter LogWriter { get; set; }
+
+		public static string LogPath
 		{
-			string environmentVariable = Environment.GetEnvironmentVariable("HARMONY_LOG_FILE");
-			if (!string.IsNullOrEmpty(environmentVariable))
+			get
 			{
-				FileLog.logPath = environmentVariable;
-				return;
+				object obj = FileLog.fileLock;
+				string logPath;
+				lock (obj)
+				{
+					if (!FileLog._logPathInited)
+					{
+						FileLog._logPathInited = true;
+						if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("HARMONY_NO_LOG")))
+						{
+							return null;
+						}
+						FileLog._logPath = Environment.GetEnvironmentVariable("HARMONY_LOG_FILE");
+						if (string.IsNullOrEmpty(FileLog._logPath))
+						{
+							string folderPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+							Directory.CreateDirectory(folderPath);
+							FileLog._logPath = Path.Combine(folderPath, "harmony.log.txt");
+						}
+					}
+					logPath = FileLog._logPath;
+				}
+				return logPath;
 			}
-			string folderPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-			Directory.CreateDirectory(folderPath);
-			FileLog.logPath = Path.Combine(folderPath, "harmony.log.txt");
 		}
 
 		private static string IndentString()
@@ -81,32 +99,62 @@ namespace HarmonyLib
 
 		public static void FlushBuffer()
 		{
+			if (FileLog.LogWriter != null)
+			{
+				foreach (string text in FileLog.buffer)
+				{
+					FileLog.LogWriter.WriteLine(text);
+				}
+				FileLog.buffer.Clear();
+				return;
+			}
+			if (FileLog.LogPath == null)
+			{
+				return;
+			}
 			object obj = FileLog.fileLock;
 			lock (obj)
 			{
 				if (FileLog.buffer.Count > 0)
 				{
-					using (StreamWriter streamWriter = File.AppendText(FileLog.logPath))
+					using (StreamWriter streamWriter = File.AppendText(FileLog.LogPath))
 					{
-						foreach (string text in FileLog.buffer)
+						foreach (string text2 in FileLog.buffer)
 						{
-							streamWriter.WriteLine(text);
+							streamWriter.WriteLine(text2);
 						}
+						FileLog.buffer.Clear();
 					}
-					FileLog.buffer.Clear();
 				}
 			}
 		}
 
 		public static void Log(string str)
 		{
+			if (FileLog.LogWriter != null)
+			{
+				FileLog.LogWriter.WriteLine(FileLog.IndentString() + str);
+				return;
+			}
+			if (FileLog.LogPath == null)
+			{
+				return;
+			}
 			object obj = FileLog.fileLock;
 			lock (obj)
 			{
-				using (StreamWriter streamWriter = File.AppendText(FileLog.logPath))
+				using (StreamWriter streamWriter = File.AppendText(FileLog.LogPath))
 				{
 					streamWriter.WriteLine(FileLog.IndentString() + str);
 				}
+			}
+		}
+
+		public static void Debug(string str)
+		{
+			if (Harmony.DEBUG)
+			{
+				FileLog.Log(str);
 			}
 		}
 
@@ -161,7 +209,9 @@ namespace HarmonyLib
 
 		private static readonly object fileLock = new object();
 
-		public static string logPath;
+		private static bool _logPathInited;
+
+		private static string _logPath;
 
 		public static char indentChar = '\t';
 

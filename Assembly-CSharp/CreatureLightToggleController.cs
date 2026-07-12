@@ -6,12 +6,12 @@ public class CreatureLightToggleController : GameStateMachine<CreatureLightToggl
 {
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
-		default_state = this.light_on;
+		default_state = this.light_off;
 		base.serializable = StateMachine.SerializeType.Both_DEPRECATED;
 		this.light_off.Enter(delegate(CreatureLightToggleController.Instance smi)
 		{
 			smi.SwitchLight(false);
-		}).TagTransition(GameTags.Creatures.Overcrowded, this.turning_on, true);
+		}).EventHandlerTransition(GameHashes.TagsChanged, this.turning_on, new Func<CreatureLightToggleController.Instance, object, bool>(CreatureLightToggleController.ShouldProduceLight));
 		this.turning_off.BatchUpdate(delegate(List<UpdateBucketWithUpdater<CreatureLightToggleController.Instance>.Entry> instances, float time_delta)
 		{
 			CreatureLightToggleController.Instance.ModifyBrightness(instances, CreatureLightToggleController.Instance.dim, time_delta);
@@ -19,7 +19,7 @@ public class CreatureLightToggleController : GameStateMachine<CreatureLightToggl
 		this.light_on.Enter(delegate(CreatureLightToggleController.Instance smi)
 		{
 			smi.SwitchLight(true);
-		}).TagTransition(GameTags.Creatures.Overcrowded, this.turning_off, false);
+		}).EventHandlerTransition(GameHashes.TagsChanged, this.turning_off, (CreatureLightToggleController.Instance smi, object obj) => !CreatureLightToggleController.ShouldProduceLight(smi, obj));
 		this.turning_on.Enter(delegate(CreatureLightToggleController.Instance smi)
 		{
 			smi.SwitchLight(true);
@@ -27,6 +27,11 @@ public class CreatureLightToggleController : GameStateMachine<CreatureLightToggl
 		{
 			CreatureLightToggleController.Instance.ModifyBrightness(instances, CreatureLightToggleController.Instance.brighten, time_delta);
 		}, UpdateRate.SIM_200ms).Transition(this.light_on, (CreatureLightToggleController.Instance smi) => smi.IsOn(), UpdateRate.SIM_200ms);
+	}
+
+	public static bool ShouldProduceLight(CreatureLightToggleController.Instance smi, object obj)
+	{
+		return !smi.prefabID.HasTag(GameTags.Creatures.Overcrowded) && !smi.prefabID.HasTag(GameTags.Creatures.TrappedInCargoBay);
 	}
 
 	private GameStateMachine<CreatureLightToggleController, CreatureLightToggleController.Instance, IStateMachineTarget, CreatureLightToggleController.Def>.State light_off;
@@ -46,6 +51,7 @@ public class CreatureLightToggleController : GameStateMachine<CreatureLightToggl
 		public Instance(IStateMachineTarget master, CreatureLightToggleController.Def def)
 			: base(master, def)
 		{
+			this.prefabID = base.gameObject.GetComponent<KPrefabID>();
 			this.light = master.GetComponent<Light2D>();
 			this.originalLux = this.light.Lux;
 			this.originalRange = this.light.Range;
@@ -100,6 +106,8 @@ public class CreatureLightToggleController : GameStateMachine<CreatureLightToggl
 		private float originalRange;
 
 		private Light2D light;
+
+		public KPrefabID prefabID;
 
 		private static WorkItemCollection<CreatureLightToggleController.Instance.ModifyBrightnessTask, object> modify_brightness_job = new WorkItemCollection<CreatureLightToggleController.Instance.ModifyBrightnessTask, object>();
 

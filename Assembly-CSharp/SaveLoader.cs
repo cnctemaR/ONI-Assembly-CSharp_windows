@@ -283,7 +283,7 @@ public class SaveLoader : KMonoBehaviour
 
 	private void LogActiveMods()
 	{
-		string text = string.Format("Active Mods ({0}):", Global.Instance.modManager.mods.Count);
+		string text = string.Format("Active Mods ({0}:", Global.Instance.modManager.mods.Count<Mod>((Mod x) => x.IsEnabledForActiveDlc()));
 		foreach (Mod mod in Global.Instance.modManager.mods)
 		{
 			if (mod.IsEnabledForActiveDlc())

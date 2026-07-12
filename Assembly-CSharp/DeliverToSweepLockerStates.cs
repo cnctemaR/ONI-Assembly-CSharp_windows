@@ -24,7 +24,7 @@ public class DeliverToSweepLockerStates : GameStateMachine<DeliverToSweepLockerS
 				return;
 			}
 			Storage storage = smi.master.gameObject.GetComponents<Storage>()[1];
-			float num = Mathf.Max(0f, Mathf.Min(storage.MassStored(), sweepLocker.RemainingCapacity()));
+			float num = Mathf.Max(0f, Mathf.Min(storage.ExactMassStored(), sweepLocker.RemainingCapacity()));
 			for (int i = storage.items.Count - 1; i >= 0; i--)
 			{
 				GameObject gameObject = storage.items[i];

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using KSerialization;
 using UnityEngine;
 
 public class PajamaDispenser : Workable, IDispenser
@@ -39,7 +40,7 @@ public class PajamaDispenser : Workable, IDispenser
 		Vector3 targetPoint = this.GetTargetPoint();
 		targetPoint.z = Grid.GetLayerZ(Grid.SceneLayer.BuildingFront);
 		Util.KInstantiate(PajamaDispenser.pajamaPrefab, targetPoint, Quaternion.identity, null, null, true, 0).SetActive(true);
-		this.didCompleteChore = true;
+		this.hasDispenseChore = false;
 	}
 
 	protected override void OnStopWork(Worker worker)
@@ -50,11 +51,10 @@ public class PajamaDispenser : Workable, IDispenser
 			this.Chore.Cancel("work interrupted");
 		}
 		this.Chore = null;
-		if (!this.didCompleteChore)
+		if (this.hasDispenseChore)
 		{
 			this.FetchPajamas();
 		}
-		this.didCompleteChore = false;
 		if (this.OnStopWorkEvent != null)
 		{
 			this.OnStopWorkEvent();
@@ -68,7 +68,7 @@ public class PajamaDispenser : Workable, IDispenser
 		{
 			return;
 		}
-		this.didCompleteChore = false;
+		this.hasDispenseChore = true;
 		this.Chore = new WorkChore<PajamaDispenser>(Db.Get().ChoreTypes.EquipmentFetch, this, null, true, null, null, null, true, null, false, false, null, false, true, true, PriorityScreen.PriorityClass.basic, 5, false, false);
 	}
 
@@ -80,8 +80,17 @@ public class PajamaDispenser : Workable, IDispenser
 		}
 		this.Chore.Cancel("User Cancelled");
 		this.Chore = null;
-		this.didCompleteChore = false;
+		this.hasDispenseChore = false;
 		base.gameObject.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().BuildingStatusItems.DispenseRequested, false);
+	}
+
+	protected override void OnSpawn()
+	{
+		base.OnSpawn();
+		if (this.hasDispenseChore)
+		{
+			this.FetchPajamas();
+		}
 	}
 
 	public List<Tag> DispensedItems()
@@ -113,9 +122,10 @@ public class PajamaDispenser : Workable, IDispenser
 		return this.Chore != null;
 	}
 
-	private static GameObject pajamaPrefab = null;
+	[Serialize]
+	private bool hasDispenseChore;
 
-	public bool didCompleteChore;
+	private static GameObject pajamaPrefab = null;
 
 	private WorkChore<PajamaDispenser> chore;
 

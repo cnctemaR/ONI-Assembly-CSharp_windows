@@ -143,6 +143,10 @@ namespace KMod
 			return num;
 		}
 
+		public void Dispose()
+		{
+		}
+
 		private AliasDirectory file_system;
 
 		private string root;

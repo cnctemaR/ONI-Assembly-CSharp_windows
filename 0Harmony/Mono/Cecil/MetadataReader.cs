@@ -226,7 +226,9 @@ namespace Mono.Cecil
 						SymbolReaderProvider = this.module.SymbolReaderProvider,
 						AssemblyResolver = this.module.AssemblyResolver
 					};
-					collection.Add(ModuleDefinition.ReadModule(this.GetModuleFileName(text), readerParameters));
+					ModuleDefinition moduleDefinition = ModuleDefinition.ReadModule(this.GetModuleFileName(text), readerParameters);
+					moduleDefinition.assembly = this.module.assembly;
+					collection.Add(moduleDefinition);
 				}
 				num2 += 1U;
 			}
@@ -2587,7 +2589,7 @@ namespace Mono.Cecil
 			object obj;
 			if (typeReference.etype == ElementType.String)
 			{
-				if (signatureReader.buffer[signatureReader.position] != 255)
+				if (signatureReader.CanReadMore() && signatureReader.buffer[signatureReader.position] != 255)
 				{
 					byte[] array = signatureReader.ReadBytes((int)((ulong)signatureReader.sig_length - (ulong)((long)signatureReader.position - (long)((ulong)signatureReader.start))));
 					obj = Encoding.Unicode.GetString(array, 0, array.Length);
@@ -2606,7 +2608,7 @@ namespace Mono.Cecil
 			{
 				obj = new DateTime(signatureReader.ReadInt64());
 			}
-			else if (typeReference.etype == ElementType.Object || typeReference.etype == ElementType.None || typeReference.etype == ElementType.Class || typeReference.etype == ElementType.Array)
+			else if (typeReference.etype == ElementType.Object || typeReference.etype == ElementType.None || typeReference.etype == ElementType.Class || typeReference.etype == ElementType.Array || typeReference.etype == ElementType.GenericInst)
 			{
 				obj = null;
 			}
@@ -2823,30 +2825,7 @@ namespace Mono.Cecil
 				}
 				else if (array[i].Col1 == EmbeddedSourceDebugInformation.KindIdentifier)
 				{
-					SignatureReader signatureReader3 = this.ReadSignature(array[i].Col2);
-					int num4 = signatureReader3.ReadInt32();
-					uint num5 = signatureReader3.sig_length - 4U;
-					CustomDebugInformation customDebugInformation = null;
-					if (num4 == 0)
-					{
-						customDebugInformation = new EmbeddedSourceDebugInformation(signatureReader3.ReadBytes((int)num5), false);
-					}
-					else if (num4 > 0)
-					{
-						Stream stream = new MemoryStream(signatureReader3.ReadBytes((int)num5));
-						byte[] array2 = new byte[num4];
-						MemoryStream memoryStream = new MemoryStream(array2);
-						using (DeflateStream deflateStream = new DeflateStream(stream, CompressionMode.Decompress, true))
-						{
-							deflateStream.CopyTo(memoryStream);
-						}
-						customDebugInformation = new EmbeddedSourceDebugInformation(array2, true);
-					}
-					else if (num4 < 0)
-					{
-						customDebugInformation = new BinaryCustomDebugInformation(array[i].Col1, this.ReadBlob(array[i].Col2));
-					}
-					collection.Add(customDebugInformation);
+					collection.Add(new EmbeddedSourceDebugInformation(array[i].Col2, this));
 				}
 				else if (array[i].Col1 == SourceLinkDebugInformation.KindIdentifier)
 				{
@@ -2859,6 +2838,35 @@ namespace Mono.Cecil
 				collection[i].token = new MetadataToken(TokenType.CustomDebugInformation, array[i].Col3);
 			}
 			return collection;
+		}
+
+		public byte[] ReadRawEmbeddedSourceDebugInformation(uint index)
+		{
+			SignatureReader signatureReader = this.ReadSignature(index);
+			return signatureReader.ReadBytes((int)signatureReader.sig_length);
+		}
+
+		public Row<byte[], bool> ReadEmbeddedSourceDebugInformation(uint index)
+		{
+			SignatureReader signatureReader = this.ReadSignature(index);
+			int num = signatureReader.ReadInt32();
+			uint num2 = signatureReader.sig_length - 4U;
+			if (num == 0)
+			{
+				return new Row<byte[], bool>(signatureReader.ReadBytes((int)num2), false);
+			}
+			if (num > 0)
+			{
+				Stream stream = new MemoryStream(signatureReader.ReadBytes((int)num2));
+				byte[] array = new byte[num];
+				MemoryStream memoryStream = new MemoryStream(array);
+				using (DeflateStream deflateStream = new DeflateStream(stream, CompressionMode.Decompress, true))
+				{
+					deflateStream.CopyTo(memoryStream);
+				}
+				return new Row<byte[], bool>(array, true);
+			}
+			throw new NotSupportedException();
 		}
 
 		internal readonly Image image;

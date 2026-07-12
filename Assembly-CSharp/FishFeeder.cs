@@ -106,6 +106,22 @@ public class FishFeeder : GameStateMachine<FishFeeder, FishFeeder.Instance, ISta
 			: base(master, def)
 		{
 			this.mutantSeedStatusItem = new StatusItem("FISHFEEDERACCEPTSMUTANTSEEDS", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, false, 129022, null);
+			base.Subscribe(-905833192, new Action<object>(this.OnCopySettingsDelegate));
+		}
+
+		private void OnCopySettingsDelegate(object data)
+		{
+			GameObject gameObject = (GameObject)data;
+			if (gameObject == null)
+			{
+				return;
+			}
+			FishFeeder.Instance smi = gameObject.GetSMI<FishFeeder.Instance>();
+			if (smi == null)
+			{
+				return;
+			}
+			this.ForbidMutantSeeds = smi.ForbidMutantSeeds;
 		}
 
 		public void UpdateMutantSeedStatusItem()

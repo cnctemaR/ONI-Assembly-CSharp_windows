@@ -34,7 +34,7 @@ public class DualSliderSideScreen : SideScreenContent
 		this.titleKey = this.target.SliderTitleKey;
 		for (int i = 0; i < this.sliderSets.Count; i++)
 		{
-			this.sliderSets[i].SetTarget(this.target);
+			this.sliderSets[i].SetTarget(this.target, i);
 		}
 	}
 

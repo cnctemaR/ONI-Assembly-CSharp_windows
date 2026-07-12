@@ -197,9 +197,11 @@ public class SolidConsumerMonitor : GameStateMachine<SolidConsumerMonitor, Solid
 				}
 				else
 				{
-					float value = Db.Get().Amounts.Maturity.Lookup(component2.gameObject).value;
-					num2 = Mathf.Min(num2, value);
-					component2.ConsumeMass(num2);
+					AmountInstance amountInstance2 = Db.Get().Amounts.Maturity.Lookup(component2.gameObject);
+					float growthUnitToMaturityRatio = this.GetGrowthUnitToMaturityRatio(amountInstance2.GetMax(), kprefabID);
+					float num3 = amountInstance2.value * growthUnitToMaturityRatio;
+					num2 = Mathf.Min(num2, num3);
+					component2.ConsumeGrowthUnits(num2, growthUnitToMaturityRatio);
 				}
 			}
 			else
@@ -213,14 +215,30 @@ public class SolidConsumerMonitor : GameStateMachine<SolidConsumerMonitor, Solid
 					component4.storage.Trigger(-1697596308, base.gameObject);
 				}
 			}
-			float num3 = dietInfo.ConvertConsumptionMassToCalories(num2);
+			float num4 = dietInfo.ConvertConsumptionMassToCalories(num2);
 			CreatureCalorieMonitor.CaloriesConsumedEvent caloriesConsumedEvent = new CreatureCalorieMonitor.CaloriesConsumedEvent
 			{
 				tag = kprefabID.PrefabTag,
-				calories = num3
+				calories = num4
 			};
 			base.Trigger(-2038961714, caloriesConsumedEvent);
 			this.targetEdible = null;
+		}
+
+		private float GetGrowthUnitToMaturityRatio(float maturityMax, KPrefabID prefab_id)
+		{
+			ResourceSet<Trait> traits = Db.Get().traits;
+			Tag prefabTag = prefab_id.PrefabTag;
+			Trait trait = traits.Get(prefabTag.ToString() + "Original");
+			if (trait != null)
+			{
+				AttributeModifier attributeModifier = trait.SelfModifiers.Find((AttributeModifier match) => match.AttributeId == "MaturityMax");
+				if (attributeModifier != null)
+				{
+					return attributeModifier.Value / maturityMax;
+				}
+			}
+			return 1f;
 		}
 
 		public GameObject targetEdible;

@@ -12,7 +12,7 @@ namespace HarmonyLib
 			byte[] buffer;
 			using (MemoryStream memoryStream = new MemoryStream())
 			{
-				new BinaryFormatter().Serialize(memoryStream, patchInfo);
+				PatchInfoSerialization.binaryFormatter.Serialize(memoryStream, patchInfo);
 				buffer = memoryStream.GetBuffer();
 			}
 			return buffer;
@@ -20,10 +20,12 @@ namespace HarmonyLib
 
 		internal static PatchInfo Deserialize(byte[] bytes)
 		{
-			BinaryFormatter binaryFormatter = new BinaryFormatter();
-			binaryFormatter.Binder = new PatchInfoSerialization.Binder();
-			MemoryStream memoryStream = new MemoryStream(bytes);
-			return (PatchInfo)binaryFormatter.Deserialize(memoryStream);
+			PatchInfo patchInfo;
+			using (MemoryStream memoryStream = new MemoryStream(bytes))
+			{
+				patchInfo = (PatchInfo)PatchInfoSerialization.binaryFormatter.Deserialize(memoryStream);
+			}
+			return patchInfo;
 		}
 
 		internal static int PriorityComparer(object obj, int index, int priority)
@@ -37,6 +39,11 @@ namespace HarmonyLib
 			}
 			return index.CompareTo(value2);
 		}
+
+		internal static readonly BinaryFormatter binaryFormatter = new BinaryFormatter
+		{
+			Binder = new PatchInfoSerialization.Binder()
+		};
 
 		private class Binder : SerializationBinder
 		{

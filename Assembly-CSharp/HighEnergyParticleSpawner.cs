@@ -189,7 +189,7 @@ public class HighEnergyParticleSpawner : StateMachineComponent<HighEnergyParticl
 		return "STRINGS.UI.UISIDESCREENS.RADBOLTTHRESHOLDSIDESCREEN.TOOLTIP";
 	}
 
-	string ISliderControl.GetSliderTooltip()
+	string ISliderControl.GetSliderTooltip(int index)
 	{
 		return string.Format(Strings.Get("STRINGS.UI.UISIDESCREENS.RADBOLTTHRESHOLDSIDESCREEN.TOOLTIP"), this.particleThreshold);
 	}

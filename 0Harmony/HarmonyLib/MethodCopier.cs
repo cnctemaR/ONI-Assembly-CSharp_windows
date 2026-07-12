@@ -16,7 +16,7 @@ namespace HarmonyLib
 			}
 			this.reader = new MethodBodyReader(fromMethod, toILGenerator);
 			this.reader.DeclareVariables(existingVariables);
-			this.reader.ReadInstructions();
+			this.reader.GenerateInstructions();
 		}
 
 		internal void SetDebugging(bool debug)

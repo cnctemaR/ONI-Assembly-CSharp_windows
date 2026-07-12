@@ -50,47 +50,59 @@ namespace HarmonyLib
 		{
 			LocalBuilder[] array = MethodPatcher.DeclareLocalVariables(this.il, this.source ?? this.original);
 			Dictionary<string, LocalBuilder> privateVars = new Dictionary<string, LocalBuilder>();
+			List<MethodInfo> list = this.prefixes.Union<MethodInfo>(this.postfixes).Union<MethodInfo>(this.finalizers).ToList<MethodInfo>();
 			LocalBuilder localBuilder = null;
 			if (this.idx > 0)
 			{
 				localBuilder = this.DeclareLocalVariable(this.returnType, true);
 				privateVars["__result"] = localBuilder;
 			}
-			Label? label = null;
-			LocalBuilder localBuilder2 = null;
-			if (this.prefixes.Any<MethodInfo>((MethodInfo fix) => MethodPatcher.PrefixAffectsOriginal(fix)))
+			if (list.Any<MethodInfo>((MethodInfo fix) => fix.GetParameters().Any<ParameterInfo>((ParameterInfo p) => p.Name == "__args")))
 			{
-				localBuilder2 = this.DeclareLocalVariable(typeof(bool), false);
-				this.emitter.Emit(OpCodes.Ldc_I4_1);
+				this.PrepareArgumentArray();
+				LocalBuilder localBuilder2 = this.il.DeclareLocal(typeof(object[]));
 				this.emitter.Emit(OpCodes.Stloc, localBuilder2);
-				label = new Label?(this.il.DefineLabel());
+				privateVars["__args"] = localBuilder2;
 			}
-			this.prefixes.Union<MethodInfo>(this.postfixes).Union<MethodInfo>(this.finalizers).ToList<MethodInfo>()
-				.ForEach(delegate(MethodInfo fix)
-				{
-					if (fix.DeclaringType != null && !privateVars.ContainsKey(fix.DeclaringType.FullName))
-					{
-						(from patchParam in fix.GetParameters()
-							where patchParam.Name == "__state"
-							select patchParam).Do<ParameterInfo>(delegate(ParameterInfo patchParam)
-						{
-							LocalBuilder localBuilder5 = this.DeclareLocalVariable(patchParam.ParameterType, false);
-							privateVars[fix.DeclaringType.FullName] = localBuilder5;
-						});
-					}
-				});
+			Label? label = null;
 			LocalBuilder localBuilder3 = null;
-			if (this.finalizers.Any<MethodInfo>())
+			bool flag = this.prefixes.Any<MethodInfo>((MethodInfo fix) => MethodPatcher.PrefixAffectsOriginal(fix));
+			bool flag2 = list.Any<MethodInfo>((MethodInfo fix) => fix.GetParameters().Any<ParameterInfo>((ParameterInfo p) => p.Name == "__runOriginal"));
+			if (flag || flag2)
 			{
 				localBuilder3 = this.DeclareLocalVariable(typeof(bool), false);
+				this.emitter.Emit(OpCodes.Ldc_I4_1);
+				this.emitter.Emit(OpCodes.Stloc, localBuilder3);
+				if (flag)
+				{
+					label = new Label?(this.il.DefineLabel());
+				}
+			}
+			list.ForEach(delegate(MethodInfo fix)
+			{
+				if (fix.DeclaringType != null && !privateVars.ContainsKey(fix.DeclaringType.AssemblyQualifiedName))
+				{
+					(from patchParam in fix.GetParameters()
+						where patchParam.Name == "__state"
+						select patchParam).Do<ParameterInfo>(delegate(ParameterInfo patchParam)
+					{
+						LocalBuilder localBuilder6 = this.DeclareLocalVariable(patchParam.ParameterType, false);
+						privateVars[fix.DeclaringType.AssemblyQualifiedName] = localBuilder6;
+					});
+				}
+			});
+			LocalBuilder localBuilder4 = null;
+			if (this.finalizers.Any<MethodInfo>())
+			{
+				localBuilder4 = this.DeclareLocalVariable(typeof(bool), false);
 				privateVars["__exception"] = this.DeclareLocalVariable(typeof(Exception), false);
 				Label? label2;
 				this.emitter.MarkBlockBefore(new ExceptionBlock(ExceptionBlockType.BeginExceptionBlock, null), out label2);
 			}
-			this.AddPrefixes(privateVars, localBuilder2);
+			this.AddPrefixes(privateVars, localBuilder3);
 			if (label != null)
 			{
-				this.emitter.Emit(OpCodes.Ldloc, localBuilder2);
+				this.emitter.Emit(OpCodes.Ldloc, localBuilder3);
 				this.emitter.Emit(OpCodes.Brfalse, label.Value);
 			}
 			MethodCopier methodCopier = new MethodCopier(this.source ?? this.original, this.il, array);
@@ -100,14 +112,14 @@ namespace HarmonyLib
 			{
 				methodCopier.AddTranspiler(methodInfo);
 			}
-			List<Label> list = new List<Label>();
-			bool flag;
-			methodCopier.Finalize(this.emitter, list, out flag);
-			foreach (Label label3 in list)
+			List<Label> list2 = new List<Label>();
+			bool flag3;
+			methodCopier.Finalize(this.emitter, list2, out flag3);
+			foreach (Label label3 in list2)
 			{
 				this.emitter.MarkLabel(label3);
 			}
-			if (localBuilder != null)
+			if (localBuilder != null && flag3)
 			{
 				this.emitter.Emit(OpCodes.Stloc, localBuilder);
 			}
@@ -115,23 +127,23 @@ namespace HarmonyLib
 			{
 				this.emitter.MarkLabel(label.Value);
 			}
-			this.AddPostfixes(privateVars, false);
-			if (localBuilder != null)
+			this.AddPostfixes(privateVars, localBuilder3, false);
+			if (localBuilder != null && flag3)
 			{
 				this.emitter.Emit(OpCodes.Ldloc, localBuilder);
 			}
-			bool flag2 = this.AddPostfixes(privateVars, true);
-			bool flag3 = this.finalizers.Any<MethodInfo>();
-			if (flag3)
+			bool flag4 = this.AddPostfixes(privateVars, localBuilder3, true);
+			bool flag5 = this.finalizers.Any<MethodInfo>();
+			if (flag5)
 			{
-				if (flag2)
+				if (flag4)
 				{
 					this.emitter.Emit(OpCodes.Stloc, localBuilder);
 					this.emitter.Emit(OpCodes.Ldloc, localBuilder);
 				}
-				this.AddFinalizers(privateVars, false);
+				this.AddFinalizers(privateVars, localBuilder3, false);
 				this.emitter.Emit(OpCodes.Ldc_I4_1);
-				this.emitter.Emit(OpCodes.Stloc, localBuilder3);
+				this.emitter.Emit(OpCodes.Stloc, localBuilder4);
 				Label label4 = this.il.DefineLabel();
 				this.emitter.Emit(OpCodes.Ldloc, privateVars["__exception"]);
 				this.emitter.Emit(OpCodes.Brfalse, label4);
@@ -141,15 +153,15 @@ namespace HarmonyLib
 				Label? label5;
 				this.emitter.MarkBlockBefore(new ExceptionBlock(ExceptionBlockType.BeginCatchBlock, null), out label5);
 				this.emitter.Emit(OpCodes.Stloc, privateVars["__exception"]);
-				this.emitter.Emit(OpCodes.Ldloc, localBuilder3);
+				this.emitter.Emit(OpCodes.Ldloc, localBuilder4);
 				Label label6 = this.il.DefineLabel();
 				this.emitter.Emit(OpCodes.Brtrue, label6);
-				bool flag4 = this.AddFinalizers(privateVars, true);
+				bool flag6 = this.AddFinalizers(privateVars, localBuilder3, true);
 				this.emitter.MarkLabel(label6);
 				Label label7 = this.il.DefineLabel();
 				this.emitter.Emit(OpCodes.Ldloc, privateVars["__exception"]);
 				this.emitter.Emit(OpCodes.Brfalse, label7);
-				if (flag4)
+				if (flag6)
 				{
 					this.emitter.Emit(OpCodes.Rethrow);
 				}
@@ -167,13 +179,13 @@ namespace HarmonyLib
 			}
 			if (this.useStructReturnBuffer)
 			{
-				LocalBuilder localBuilder4 = this.DeclareLocalVariable(this.returnType, false);
-				this.emitter.Emit(OpCodes.Stloc, localBuilder4);
+				LocalBuilder localBuilder5 = this.DeclareLocalVariable(this.returnType, false);
+				this.emitter.Emit(OpCodes.Stloc, localBuilder5);
 				this.emitter.Emit(this.original.IsStatic ? OpCodes.Ldarg_0 : OpCodes.Ldarg_1);
-				this.emitter.Emit(OpCodes.Ldloc, localBuilder4);
+				this.emitter.Emit(OpCodes.Ldloc, localBuilder5);
 				this.emitter.Emit(OpCodes.Stobj, this.returnType);
 			}
-			if (flag3 || flag)
+			if (flag5 || flag3)
 			{
 				this.emitter.Emit(OpCodes.Ret);
 			}
@@ -195,7 +207,7 @@ namespace HarmonyLib
 			}
 			bool flag = StructReturnBuffer.NeedsFix(original);
 			Type declaringType = original.DeclaringType;
-			string text = ((declaringType != null) ? declaringType.FullName : null) + "." + original.Name + suffix;
+			string text = (((declaringType != null) ? declaringType.FullName : null) ?? "GLOBALTYPE") + "." + original.Name + suffix;
 			text = text.Replace("<>", "");
 			ParameterInfo[] parameters = original.GetParameters();
 			List<Type> list = new List<Type>();
@@ -247,18 +259,19 @@ namespace HarmonyLib
 						list3[num2] = list3[num2] + " " + dynamicMethodDefinition.Definition.Parameters[j].Name;
 					}
 				}
-				FileLog.Log(string.Concat(new string[]
-				{
-					"### Replacement: static ",
-					type.FullDescription(),
-					" ",
-					original.DeclaringType.FullName,
-					"::",
-					text,
-					"(",
-					list2.Join<string>(null, ", "),
-					")"
-				}));
+				string[] array = new string[9];
+				array[0] = "### Replacement: static ";
+				array[1] = type.FullDescription();
+				array[2] = " ";
+				int num3 = 3;
+				Type declaringType2 = original.DeclaringType;
+				array[num3] = ((declaringType2 != null) ? declaringType2.FullName : null) ?? "GLOBALTYPE";
+				array[4] = "::";
+				array[5] = text;
+				array[6] = "(";
+				array[7] = list2.Join<string>(null, ", ");
+				array[8] = ")";
+				FileLog.Log(string.Concat(array));
 			}
 			return dynamicMethodDefinition;
 		}
@@ -372,6 +385,95 @@ namespace HarmonyLib
 			return OpCodes.Ldind_Ref;
 		}
 
+		private static OpCode StoreIndOpCodeFor(Type type)
+		{
+			if (type.IsEnum)
+			{
+				return OpCodes.Stind_I4;
+			}
+			if (type == typeof(float))
+			{
+				return OpCodes.Stind_R4;
+			}
+			if (type == typeof(double))
+			{
+				return OpCodes.Stind_R8;
+			}
+			if (type == typeof(byte))
+			{
+				return OpCodes.Stind_I1;
+			}
+			if (type == typeof(ushort))
+			{
+				return OpCodes.Stind_I2;
+			}
+			if (type == typeof(uint))
+			{
+				return OpCodes.Stind_I4;
+			}
+			if (type == typeof(ulong))
+			{
+				return OpCodes.Stind_I8;
+			}
+			if (type == typeof(sbyte))
+			{
+				return OpCodes.Stind_I1;
+			}
+			if (type == typeof(short))
+			{
+				return OpCodes.Stind_I2;
+			}
+			if (type == typeof(int))
+			{
+				return OpCodes.Stind_I4;
+			}
+			if (type == typeof(long))
+			{
+				return OpCodes.Stind_I8;
+			}
+			return OpCodes.Stind_Ref;
+		}
+
+		private void InitializeOutParameter(int argIndex, Type type)
+		{
+			if (type.IsByRef)
+			{
+				type = type.GetElementType();
+			}
+			this.emitter.Emit(OpCodes.Ldarg, argIndex);
+			if (AccessTools.IsStruct(type))
+			{
+				this.emitter.Emit(OpCodes.Initobj, type);
+				return;
+			}
+			if (!AccessTools.IsValue(type))
+			{
+				this.emitter.Emit(OpCodes.Ldnull);
+				this.emitter.Emit(OpCodes.Stind_Ref);
+				return;
+			}
+			if (type == typeof(float))
+			{
+				this.emitter.Emit(OpCodes.Ldc_R4, 0f);
+				this.emitter.Emit(OpCodes.Stind_R4);
+				return;
+			}
+			if (type == typeof(double))
+			{
+				this.emitter.Emit(OpCodes.Ldc_R8, 0.0);
+				this.emitter.Emit(OpCodes.Stind_R8);
+				return;
+			}
+			if (type == typeof(long))
+			{
+				this.emitter.Emit(OpCodes.Ldc_I8, 0L);
+				this.emitter.Emit(OpCodes.Stind_I8);
+				return;
+			}
+			this.emitter.Emit(OpCodes.Ldc_I4, 0);
+			this.emitter.Emit(OpCodes.Stind_I4);
+		}
+
 		private bool EmitOriginalBaseMethod()
 		{
 			MethodInfo methodInfo = this.original as MethodInfo;
@@ -397,7 +499,7 @@ namespace HarmonyLib
 			return true;
 		}
 
-		private void EmitCallParameter(MethodInfo patch, Dictionary<string, LocalBuilder> variables, bool allowFirsParamPassthrough, out LocalBuilder tmpObjectVar, List<KeyValuePair<LocalBuilder, Type>> tmpBoxVars)
+		private void EmitCallParameter(MethodInfo patch, Dictionary<string, LocalBuilder> variables, LocalBuilder runOriginalVariable, bool allowFirsParamPassthrough, out LocalBuilder tmpObjectVar, List<KeyValuePair<LocalBuilder, Type>> tmpBoxVars)
 		{
 			tmpObjectVar = null;
 			bool flag = !this.original.IsStatic;
@@ -410,12 +512,23 @@ namespace HarmonyLib
 			}
 			foreach (ParameterInfo parameterInfo in list)
 			{
-				LocalBuilder localBuilder2;
+				LocalBuilder localBuilder3;
 				if (parameterInfo.Name == "__originalMethod")
 				{
 					if (!this.EmitOriginalBaseMethod())
 					{
 						this.emitter.Emit(OpCodes.Ldnull);
+					}
+				}
+				else if (parameterInfo.Name == "__runOriginal")
+				{
+					if (runOriginalVariable != null)
+					{
+						this.emitter.Emit(OpCodes.Ldloc, runOriginalVariable);
+					}
+					else
+					{
+						this.emitter.Emit(OpCodes.Ldc_I4_0);
 					}
 				}
 				else if (parameterInfo.Name == "__instance")
@@ -444,6 +557,18 @@ namespace HarmonyLib
 						}
 					}
 				}
+				else if (parameterInfo.Name == "__args")
+				{
+					LocalBuilder localBuilder;
+					if (variables.TryGetValue("__args", out localBuilder))
+					{
+						this.emitter.Emit(OpCodes.Ldloc, localBuilder);
+					}
+					else
+					{
+						this.emitter.Emit(OpCodes.Ldnull);
+					}
+				}
 				else if (parameterInfo.Name.StartsWith("___", StringComparison.Ordinal))
 				{
 					string text = parameterInfo.Name.Substring("___".Length);
@@ -453,7 +578,9 @@ namespace HarmonyLib
 						fieldInfo = AccessTools.DeclaredField(this.original.DeclaringType, int.Parse(text));
 						if (fieldInfo == null)
 						{
-							throw new ArgumentException("No field found at given index in class " + this.original.DeclaringType.FullName, text);
+							string text2 = "No field found at given index in class ";
+							Type declaringType = this.original.DeclaringType;
+							throw new ArgumentException(text2 + (((declaringType != null) ? declaringType.AssemblyQualifiedName : null) ?? "null"), text);
 						}
 					}
 					else
@@ -461,7 +588,9 @@ namespace HarmonyLib
 						fieldInfo = AccessTools.Field(this.original.DeclaringType, text);
 						if (fieldInfo == null)
 						{
-							throw new ArgumentException("No such field defined in class " + this.original.DeclaringType.FullName, text);
+							string text3 = "No such field defined in class ";
+							Type declaringType2 = this.original.DeclaringType;
+							throw new ArgumentException(text3 + (((declaringType2 != null) ? declaringType2.AssemblyQualifiedName : null) ?? "null"), text);
 						}
 					}
 					if (fieldInfo.IsStatic)
@@ -477,10 +606,11 @@ namespace HarmonyLib
 				else if (parameterInfo.Name == "__state")
 				{
 					OpCode opCode = (parameterInfo.ParameterType.IsByRef ? OpCodes.Ldloca : OpCodes.Ldloc);
-					LocalBuilder localBuilder;
-					if (variables.TryGetValue(patch.DeclaringType.FullName, out localBuilder))
+					Type declaringType3 = patch.DeclaringType;
+					LocalBuilder localBuilder2;
+					if (variables.TryGetValue(((declaringType3 != null) ? declaringType3.AssemblyQualifiedName : null) ?? "null", out localBuilder2))
 					{
-						this.emitter.Emit(opCode, localBuilder);
+						this.emitter.Emit(opCode, localBuilder2);
 					}
 					else
 					{
@@ -532,10 +662,10 @@ namespace HarmonyLib
 						}
 					}
 				}
-				else if (variables.TryGetValue(parameterInfo.Name, out localBuilder2))
+				else if (variables.TryGetValue(parameterInfo.Name, out localBuilder3))
 				{
 					OpCode opCode3 = (parameterInfo.ParameterType.IsByRef ? OpCodes.Ldloca : OpCodes.Ldloc);
-					this.emitter.Emit(opCode3, localBuilder2);
+					this.emitter.Emit(opCode3, localBuilder3);
 				}
 				else
 				{
@@ -572,7 +702,7 @@ namespace HarmonyLib
 								});
 								if (constructor != null)
 								{
-									Type declaringType = this.original.DeclaringType;
+									Type declaringType4 = this.original.DeclaringType;
 									if (methodInfo.IsStatic)
 									{
 										this.emitter.Emit(OpCodes.Ldnull);
@@ -580,10 +710,10 @@ namespace HarmonyLib
 									else
 									{
 										this.emitter.Emit(OpCodes.Ldarg_0);
-										if (declaringType.IsValueType)
+										if (declaringType4 != null && declaringType4.IsValueType)
 										{
-											this.emitter.Emit(OpCodes.Ldobj, declaringType);
-											this.emitter.Emit(OpCodes.Box, declaringType);
+											this.emitter.Emit(OpCodes.Ldobj, declaringType4);
+											this.emitter.Emit(OpCodes.Box, declaringType4);
 										}
 									}
 									if (!methodInfo.IsStatic && !mergedFromType.nonVirtualDelegate)
@@ -623,10 +753,10 @@ namespace HarmonyLib
 							{
 								this.emitter.Emit(OpCodes.Ldobj, type2);
 								this.emitter.Emit(OpCodes.Box, type2);
-								LocalBuilder localBuilder3 = this.il.DeclareLocal(type3);
-								this.emitter.Emit(OpCodes.Stloc, localBuilder3);
-								this.emitter.Emit(OpCodes.Ldloca_S, localBuilder3);
-								tmpBoxVars.Add(new KeyValuePair<LocalBuilder, Type>(localBuilder3, type2));
+								LocalBuilder localBuilder4 = this.il.DeclareLocal(type3);
+								this.emitter.Emit(OpCodes.Stloc, localBuilder4);
+								this.emitter.Emit(OpCodes.Ldloca_S, localBuilder4);
+								tmpBoxVars.Add(new KeyValuePair<LocalBuilder, Type>(localBuilder4, type2));
 							}
 						}
 					}
@@ -636,9 +766,9 @@ namespace HarmonyLib
 						{
 							this.emitter.Emit(OpCodes.Ldarg, num);
 							this.emitter.Emit(OpCodes.Box, type2);
-							LocalBuilder localBuilder4 = this.il.DeclareLocal(type3);
-							this.emitter.Emit(OpCodes.Stloc, localBuilder4);
-							this.emitter.Emit(OpCodes.Ldloca_S, localBuilder4);
+							LocalBuilder localBuilder5 = this.il.DeclareLocal(type3);
+							this.emitter.Emit(OpCodes.Stloc, localBuilder5);
+							this.emitter.Emit(OpCodes.Ldloca_S, localBuilder5);
 						}
 						else
 						{
@@ -676,19 +806,15 @@ namespace HarmonyLib
 			{
 				string name = p.Name;
 				Type parameterType = p.ParameterType;
-				return !(name == "__instance") && !(name == "__originalMethod") && !(name == "__state") && (p.IsOut || parameterType.IsByRef || (!AccessTools.IsValue(parameterType) && !AccessTools.IsStruct(parameterType)));
+				return !(name == "__instance") && !(name == "__originalMethod") && !(name == "__state") && (p.IsOut || p.IsRetval || parameterType.IsByRef || (!AccessTools.IsValue(parameterType) && !AccessTools.IsStruct(parameterType)));
 			});
 		}
 
 		private void AddPrefixes(Dictionary<string, LocalBuilder> variables, LocalBuilder runOriginalVariable)
 		{
-			Action<KeyValuePair<LocalBuilder, Type>> <>9__1;
+			Action<KeyValuePair<LocalBuilder, Type>> <>9__2;
 			this.prefixes.Do<MethodInfo>(delegate(MethodInfo fix)
 			{
-				if (!this.original.HasMethodBody())
-				{
-					throw new Exception("Methods without body cannot have prefixes. Use a transpiler instead.");
-				}
 				Label? label = (MethodPatcher.PrefixAffectsOriginal(fix) ? new Label?(this.il.DefineLabel()) : null);
 				if (label != null)
 				{
@@ -697,8 +823,12 @@ namespace HarmonyLib
 				}
 				List<KeyValuePair<LocalBuilder, Type>> list = new List<KeyValuePair<LocalBuilder, Type>>();
 				LocalBuilder localBuilder;
-				this.EmitCallParameter(fix, variables, false, out localBuilder, list);
+				this.EmitCallParameter(fix, variables, runOriginalVariable, false, out localBuilder, list);
 				this.emitter.Emit(OpCodes.Call, fix);
+				if (fix.GetParameters().Any<ParameterInfo>((ParameterInfo p) => p.Name == "__args"))
+				{
+					this.RestoreArgumentArray(variables);
+				}
 				if (localBuilder != null)
 				{
 					this.emitter.Emit(OpCodes.Ldloc, localBuilder);
@@ -707,9 +837,9 @@ namespace HarmonyLib
 				}
 				IEnumerable<KeyValuePair<LocalBuilder, Type>> enumerable = list;
 				Action<KeyValuePair<LocalBuilder, Type>> action;
-				if ((action = <>9__1) == null)
+				if ((action = <>9__2) == null)
 				{
-					action = (<>9__1 = delegate(KeyValuePair<LocalBuilder, Type> tmpBoxVar)
+					action = (<>9__2 = delegate(KeyValuePair<LocalBuilder, Type> tmpBoxVar)
 					{
 						this.emitter.Emit(this.original.IsStatic ? OpCodes.Ldarg_0 : OpCodes.Ldarg_1);
 						this.emitter.Emit(OpCodes.Ldloc, tmpBoxVar.Key);
@@ -735,20 +865,20 @@ namespace HarmonyLib
 			});
 		}
 
-		private bool AddPostfixes(Dictionary<string, LocalBuilder> variables, bool passthroughPatches)
+		private bool AddPostfixes(Dictionary<string, LocalBuilder> variables, LocalBuilder runOriginalVariable, bool passthroughPatches)
 		{
 			bool result = false;
-			Action<KeyValuePair<LocalBuilder, Type>> <>9__2;
+			Action<KeyValuePair<LocalBuilder, Type>> <>9__3;
 			this.postfixes.Where<MethodInfo>((MethodInfo fix) => passthroughPatches == (fix.ReturnType != typeof(void))).Do<MethodInfo>(delegate(MethodInfo fix)
 			{
-				if (!this.original.HasMethodBody())
-				{
-					throw new Exception("Methods without body cannot have postfixes. Use a transpiler instead.");
-				}
 				List<KeyValuePair<LocalBuilder, Type>> list = new List<KeyValuePair<LocalBuilder, Type>>();
 				LocalBuilder localBuilder;
-				this.EmitCallParameter(fix, variables, true, out localBuilder, list);
+				this.EmitCallParameter(fix, variables, runOriginalVariable, true, out localBuilder, list);
 				this.emitter.Emit(OpCodes.Call, fix);
+				if (fix.GetParameters().Any<ParameterInfo>((ParameterInfo p) => p.Name == "__args"))
+				{
+					this.RestoreArgumentArray(variables);
+				}
 				if (localBuilder != null)
 				{
 					this.emitter.Emit(OpCodes.Ldloc, localBuilder);
@@ -757,9 +887,9 @@ namespace HarmonyLib
 				}
 				IEnumerable<KeyValuePair<LocalBuilder, Type>> enumerable = list;
 				Action<KeyValuePair<LocalBuilder, Type>> action;
-				if ((action = <>9__2) == null)
+				if ((action = <>9__3) == null)
 				{
-					action = (<>9__2 = delegate(KeyValuePair<LocalBuilder, Type> tmpBoxVar)
+					action = (<>9__3 = delegate(KeyValuePair<LocalBuilder, Type> tmpBoxVar)
 					{
 						this.emitter.Emit(this.original.IsStatic ? OpCodes.Ldarg_0 : OpCodes.Ldarg_1);
 						this.emitter.Emit(OpCodes.Ldloc, tmpBoxVar.Key);
@@ -787,16 +917,12 @@ namespace HarmonyLib
 			return result;
 		}
 
-		private bool AddFinalizers(Dictionary<string, LocalBuilder> variables, bool catchExceptions)
+		private bool AddFinalizers(Dictionary<string, LocalBuilder> variables, LocalBuilder runOriginalVariable, bool catchExceptions)
 		{
 			bool rethrowPossible = true;
-			Action<KeyValuePair<LocalBuilder, Type>> <>9__1;
+			Action<KeyValuePair<LocalBuilder, Type>> <>9__2;
 			this.finalizers.Do<MethodInfo>(delegate(MethodInfo fix)
 			{
-				if (!this.original.HasMethodBody())
-				{
-					throw new Exception("Methods without body cannot have finalizers. Use a transpiler instead.");
-				}
 				if (catchExceptions)
 				{
 					Label? label;
@@ -804,8 +930,12 @@ namespace HarmonyLib
 				}
 				List<KeyValuePair<LocalBuilder, Type>> list = new List<KeyValuePair<LocalBuilder, Type>>();
 				LocalBuilder localBuilder;
-				this.EmitCallParameter(fix, variables, false, out localBuilder, list);
+				this.EmitCallParameter(fix, variables, runOriginalVariable, false, out localBuilder, list);
 				this.emitter.Emit(OpCodes.Call, fix);
+				if (fix.GetParameters().Any<ParameterInfo>((ParameterInfo p) => p.Name == "__args"))
+				{
+					this.RestoreArgumentArray(variables);
+				}
 				if (localBuilder != null)
 				{
 					this.emitter.Emit(OpCodes.Ldloc, localBuilder);
@@ -814,9 +944,9 @@ namespace HarmonyLib
 				}
 				IEnumerable<KeyValuePair<LocalBuilder, Type>> enumerable = list;
 				Action<KeyValuePair<LocalBuilder, Type>> action;
-				if ((action = <>9__1) == null)
+				if ((action = <>9__2) == null)
 				{
-					action = (<>9__1 = delegate(KeyValuePair<LocalBuilder, Type> tmpBoxVar)
+					action = (<>9__2 = delegate(KeyValuePair<LocalBuilder, Type> tmpBoxVar)
 					{
 						this.emitter.Emit(this.original.IsStatic ? OpCodes.Ldarg_0 : OpCodes.Ldarg_1);
 						this.emitter.Emit(OpCodes.Ldloc, tmpBoxVar.Key);
@@ -841,15 +971,104 @@ namespace HarmonyLib
 			return rethrowPossible;
 		}
 
+		private void PrepareArgumentArray()
+		{
+			ParameterInfo[] parameters = this.original.GetParameters();
+			int num = 0;
+			foreach (ParameterInfo parameterInfo in parameters)
+			{
+				int num2 = num++ + (this.original.IsStatic ? 0 : 1);
+				if (parameterInfo.IsOut || parameterInfo.IsRetval)
+				{
+					this.InitializeOutParameter(num2, parameterInfo.ParameterType);
+				}
+			}
+			this.emitter.Emit(OpCodes.Ldc_I4, parameters.Length);
+			this.emitter.Emit(OpCodes.Newarr, typeof(object));
+			num = 0;
+			int num3 = 0;
+			foreach (ParameterInfo parameterInfo2 in parameters)
+			{
+				int num4 = num++ + (this.original.IsStatic ? 0 : 1);
+				Type type = parameterInfo2.ParameterType;
+				bool isByRef = type.IsByRef;
+				if (isByRef)
+				{
+					type = type.GetElementType();
+				}
+				this.emitter.Emit(OpCodes.Dup);
+				this.emitter.Emit(OpCodes.Ldc_I4, num3++);
+				this.emitter.Emit(OpCodes.Ldarg, num4);
+				if (isByRef)
+				{
+					if (AccessTools.IsStruct(type))
+					{
+						this.emitter.Emit(OpCodes.Ldobj, type);
+					}
+					else
+					{
+						this.emitter.Emit(MethodPatcher.LoadIndOpCodeFor(type));
+					}
+				}
+				if (type.IsValueType)
+				{
+					this.emitter.Emit(OpCodes.Box, type);
+				}
+				this.emitter.Emit(OpCodes.Stelem_Ref);
+			}
+		}
+
+		private void RestoreArgumentArray(Dictionary<string, LocalBuilder> variables)
+		{
+			ParameterInfo[] parameters = this.original.GetParameters();
+			int num = 0;
+			int num2 = 0;
+			foreach (ParameterInfo parameterInfo in parameters)
+			{
+				int num3 = num++ + (this.original.IsStatic ? 0 : 1);
+				Type type = parameterInfo.ParameterType;
+				if (type.IsByRef)
+				{
+					type = type.GetElementType();
+					this.emitter.Emit(OpCodes.Ldarg, num3);
+					this.emitter.Emit(OpCodes.Ldloc, variables["__args"]);
+					this.emitter.Emit(OpCodes.Ldc_I4, num2);
+					this.emitter.Emit(OpCodes.Ldelem_Ref);
+					if (type.IsValueType)
+					{
+						this.emitter.Emit(OpCodes.Unbox_Any, type);
+						if (AccessTools.IsStruct(type))
+						{
+							this.emitter.Emit(OpCodes.Stobj, type);
+						}
+						else
+						{
+							this.emitter.Emit(MethodPatcher.StoreIndOpCodeFor(type));
+						}
+					}
+					else
+					{
+						this.emitter.Emit(OpCodes.Castclass, type);
+						this.emitter.Emit(OpCodes.Stind_Ref);
+					}
+				}
+				num2++;
+			}
+		}
+
 		private const string INSTANCE_PARAM = "__instance";
 
 		private const string ORIGINAL_METHOD_PARAM = "__originalMethod";
+
+		private const string ARGS_ARRAY_VAR = "__args";
 
 		private const string RESULT_VAR = "__result";
 
 		private const string STATE_VAR = "__state";
 
 		private const string EXCEPTION_VAR = "__exception";
+
+		private const string RUN_ORIGINAL_VAR = "__runOriginal";
 
 		private const string PARAM_INDEX_PREFIX = "__";
 

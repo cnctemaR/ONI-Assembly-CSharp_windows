@@ -78,6 +78,18 @@ public class Light2D : KMonoBehaviour, IGameObjectEffectDescriptor
 		}
 	}
 
+	public float FalloffRate
+	{
+		get
+		{
+			return this.pending_emitter_state.falloffRate;
+		}
+		set
+		{
+			this.pending_emitter_state.falloffRate = this.MaybeDirty<float>(this.pending_emitter_state.falloffRate, value, ref this.dirty_falloff);
+		}
+	}
+
 	public float IntensityAnimation { get; set; }
 
 	public Vector2 Offset
@@ -199,6 +211,11 @@ public class Light2D : KMonoBehaviour, IGameObjectEffectDescriptor
 		GameScenePartitioner.Instance.UpdatePosition(this.liquidPartitionerEntry, this.ComputeExtents());
 	}
 
+	private void EmitterRefresh()
+	{
+		this.emitter.Refresh(this.pending_emitter_state, true);
+	}
+
 	[ContextMenu("Refresh")]
 	public void FullRefresh()
 	{
@@ -208,7 +225,7 @@ public class Light2D : KMonoBehaviour, IGameObjectEffectDescriptor
 		}
 		DebugUtil.DevAssert(this.isRegistered, "shouldn't be refreshing if we aren't spawned and enabled", null);
 		this.RefreshShapeAndPosition();
-		this.emitter.Refresh(this.pending_emitter_state, true);
+		this.EmitterRefresh();
 	}
 
 	public void FullRemove()
@@ -244,8 +261,13 @@ public class Light2D : KMonoBehaviour, IGameObjectEffectDescriptor
 		{
 			this.MoveInScenePartitioner();
 		}
+		if (this.dirty_falloff)
+		{
+			this.EmitterRefresh();
+		}
 		this.dirty_shape = false;
 		this.dirty_position = false;
+		this.dirty_falloff = false;
 		return Light2D.RefreshResult.Updated;
 	}
 
@@ -266,6 +288,8 @@ public class Light2D : KMonoBehaviour, IGameObjectEffectDescriptor
 	private bool dirty_shape;
 
 	private bool dirty_position;
+
+	private bool dirty_falloff;
 
 	[SerializeField]
 	private LightGridManager.LightGridEmitter.State pending_emitter_state = LightGridManager.LightGridEmitter.State.DEFAULT;

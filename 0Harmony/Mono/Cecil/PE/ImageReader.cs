@@ -48,8 +48,9 @@ namespace Mono.Cecil.PE
 			this.ReadCLIHeader();
 			this.ReadMetadata();
 			this.ReadDebugHeader();
+			this.image.Characteristics = (uint)num2;
 			this.image.Kind = ImageReader.GetModuleKind(num2, num3);
-			this.image.Characteristics = (ModuleCharacteristics)num4;
+			this.image.DllCharacteristics = (ModuleCharacteristics)num4;
 		}
 
 		private TargetArchitecture ReadArchitecture()
@@ -236,7 +237,7 @@ namespace Mono.Cecil.PE
 			uint num2 = this.ReadUInt32();
 			byte[] array = this.ReadHeapData(num, num2);
 			string text = this.ReadAlignedString(16);
-			uint num3 = <da122c35-67ce-44e0-9391-60ea466f92d7><PrivateImplementationDetails>.ComputeStringHash(text);
+			uint num3 = <b7604b43-2580-4348-9381-6759dd49fb8c><PrivateImplementationDetails>.ComputeStringHash(text);
 			if (num3 <= 617129517U)
 			{
 				if (num3 != 368124450U)

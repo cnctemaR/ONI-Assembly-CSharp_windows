@@ -294,21 +294,21 @@ public class WorldInventory : KMonoBehaviour, ISaveLoadable
 	private void OnAddedFetchable(object data)
 	{
 		GameObject gameObject = (GameObject)data;
-		if (gameObject.GetComponent<Navigator>() != null)
+		KPrefabID component = gameObject.GetComponent<KPrefabID>();
+		if (component.HasAnyTags(WorldInventory.NonCritterEntitiesTags))
 		{
 			return;
 		}
-		Pickupable component = gameObject.GetComponent<Pickupable>();
-		if (component.GetMyWorldId() != this.worldId)
+		Pickupable component2 = gameObject.GetComponent<Pickupable>();
+		if (component2.GetMyWorldId() != this.worldId)
 		{
 			return;
 		}
-		KPrefabID component2 = component.GetComponent<KPrefabID>();
-		Tag tag = component2.PrefabID();
+		Tag tag = component.PrefabID();
 		if (!this.Inventory.ContainsKey(tag))
 		{
-			Tag categoryForEntity = DiscoveredResources.GetCategoryForEntity(component2);
-			DebugUtil.DevAssertArgs(categoryForEntity.IsValid, new object[] { component.name, "was found by worldinventory but doesn't have a category! Add it to the element definition." });
+			Tag categoryForEntity = DiscoveredResources.GetCategoryForEntity(component);
+			DebugUtil.DevAssertArgs(categoryForEntity.IsValid, new object[] { component2.name, "was found by worldinventory but doesn't have a category! Add it to the element definition." });
 			DiscoveredResources.Instance.Discover(tag, categoryForEntity);
 		}
 		HashSet<Pickupable> hashSet;
@@ -317,15 +317,15 @@ public class WorldInventory : KMonoBehaviour, ISaveLoadable
 			hashSet = new HashSet<Pickupable>();
 			this.Inventory[tag] = hashSet;
 		}
-		hashSet.Add(component);
-		foreach (Tag tag2 in component2.Tags)
+		hashSet.Add(component2);
+		foreach (Tag tag2 in component.Tags)
 		{
 			if (!this.Inventory.TryGetValue(tag2, out hashSet))
 			{
 				hashSet = new HashSet<Pickupable>();
 				this.Inventory[tag2] = hashSet;
 			}
-			hashSet.Add(component);
+			hashSet.Add(component2);
 		}
 	}
 
@@ -376,4 +376,10 @@ public class WorldInventory : KMonoBehaviour, ISaveLoadable
 	private int accessibleUpdateIndex;
 
 	private bool firstUpdate = true;
+
+	private static Tag[] NonCritterEntitiesTags = new Tag[]
+	{
+		GameTags.DupeBrain,
+		GameTags.Robot
+	};
 }

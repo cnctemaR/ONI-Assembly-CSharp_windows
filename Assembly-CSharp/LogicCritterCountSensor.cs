@@ -84,7 +84,12 @@ public class LogicCritterCountSensor : Switch, ISaveLoadable, IThresholdSwitch, 
 			this.wasOn = this.switchedOn;
 			KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
 			component.Play(this.switchedOn ? "on_pre" : "on_pst", KAnim.PlayMode.Once, 1f, 0f);
-			component.Queue(this.switchedOn ? "on" : "off", KAnim.PlayMode.Once, 1f, 0f);
+			if (this.switchedOn)
+			{
+				component.Queue("on", KAnim.PlayMode.Loop, 1f, 0f);
+				return;
+			}
+			component.Queue("off", KAnim.PlayMode.Once, 1f, 0f);
 		}
 	}
 

@@ -256,6 +256,7 @@ namespace TUNING
 			{ "FloorLamp", "lights" },
 			{ "CeilingLight", "lights" },
 			{ "SunLamp", "lights" },
+			{ "DevLightGenerator", "lights" },
 			{ "DiningTable", "dining" },
 			{ "WaterCooler", "recreation" },
 			{ "Phonobox", "recreation" },
@@ -357,6 +358,10 @@ namespace TUNING
 			},
 			{
 				LogicTemperatureSensorConfig.ID,
+				"sensors"
+			},
+			{
+				LogicLightSensorConfig.ID,
 				"sensors"
 			},
 			{
@@ -624,6 +629,7 @@ namespace TUNING
 				"FloorLamp",
 				"CeilingLight",
 				"SunLamp",
+				"DevLightGenerator",
 				"DiningTable",
 				"WaterCooler",
 				"Phonobox",
@@ -681,6 +687,7 @@ namespace TUNING
 				LogicPressureSensorGasConfig.ID,
 				LogicPressureSensorLiquidConfig.ID,
 				LogicTemperatureSensorConfig.ID,
+				LogicLightSensorConfig.ID,
 				LogicWattageSensorConfig.ID,
 				LogicTimeOfDaySensorConfig.ID,
 				LogicTimerSensorConfig.ID,
@@ -979,9 +986,9 @@ namespace TUNING
 		{
 			public static float[] COMMAND_MODULE_MASS = new float[] { 200f };
 
-			public static float[] CARGO_MASS = new float[] { 1000f, 1000f };
+			public static float[] CARGO_MASS = new float[] { 1000f };
 
-			public static float[] CARGO_MASS_SMALL = new float[] { 400f, 400f };
+			public static float[] CARGO_MASS_SMALL = new float[] { 400f };
 
 			public static float[] FUEL_TANK_DRY_MASS = new float[] { 100f };
 
@@ -999,11 +1006,15 @@ namespace TUNING
 
 			public static float[] ENGINE_MASS_LARGE = new float[] { 500f };
 
-			public static float[] HOLLOW_TIER1 = new float[] { 200f, 100f };
+			public static float[] NOSE_CONE_TIER1 = new float[] { 200f, 100f };
 
-			public static float[] HOLLOW_TIER2 = new float[] { 400f, 200f };
+			public static float[] NOSE_CONE_TIER2 = new float[] { 400f, 200f };
 
-			public static float[] HOLLOW_TIER3 = new float[] { 800f, 400f };
+			public static float[] HOLLOW_TIER1 = new float[] { 200f };
+
+			public static float[] HOLLOW_TIER2 = new float[] { 400f };
+
+			public static float[] HOLLOW_TIER3 = new float[] { 800f };
 
 			public static float[] DENSE_TIER0 = new float[] { 200f };
 

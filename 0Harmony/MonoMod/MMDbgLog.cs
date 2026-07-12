@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Text;
 using System.Threading;
@@ -21,8 +22,8 @@ namespace MonoMod
 				}
 				else
 				{
-					string text = environmentVariable.ToLowerInvariant();
-					flag = ((text != null) ? new bool?(text.Contains(MMDbgLog.Tag.ToLowerInvariant())) : null);
+					string text = environmentVariable.ToLower(CultureInfo.InvariantCulture);
+					flag = ((text != null) ? new bool?(text.Contains(MMDbgLog.Tag.ToLower(CultureInfo.InvariantCulture), StringComparison.Ordinal)) : null);
 				}
 				bool? flag2 = flag;
 				flag3 = flag2.GetValueOrDefault();
@@ -107,7 +108,7 @@ namespace MonoMod
 			{
 				return value;
 			}
-			writer.WriteLine(string.Format(str, value));
+			writer.WriteLine(string.Format(CultureInfo.InvariantCulture, str, new object[] { value }));
 			writer.Flush();
 			return value;
 		}

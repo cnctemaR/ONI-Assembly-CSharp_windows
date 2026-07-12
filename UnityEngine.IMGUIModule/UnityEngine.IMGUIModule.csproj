@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{48E248DD-BC28-4A9A-BD04-0BF6145AA926}</ProjectGuid>
+    <ProjectGuid>{B6A8B87A-8ED2-4A36-836D-C5601AAFC4A0}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>UnityEngine.IMGUIModule</RootNamespace>
     <AssemblyName>UnityEngine.IMGUIModule</AssemblyName>
@@ -60,19 +60,19 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
-      <Project>{48E248DD-BC28-4A9A-BD04-0BF6145AA91C}</Project>
+      <Project>{B6A8B87A-8ED2-4A36-836D-C5601AAFC496}</Project>
       <Name>UnityEngine.CoreModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.InputLegacyModule\UnityEngine.InputLegacyModule.csproj">
-      <Project>{48E248DD-BC28-4A9A-BD04-0BF6145AA927}</Project>
+      <Project>{B6A8B87A-8ED2-4A36-836D-C5601AAFC4A1}</Project>
       <Name>UnityEngine.InputLegacyModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
-      <Project>{48E248DD-BC28-4A9A-BD04-0BF6145AA932}</Project>
+      <Project>{B6A8B87A-8ED2-4A36-836D-C5601AAFC4AC}</Project>
       <Name>UnityEngine.SharedInternalsModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.TextRenderingModule\UnityEngine.TextRenderingModule.csproj">
-      <Project>{48E248DD-BC28-4A9A-BD04-0BF6145AA93B}</Project>
+      <Project>{B6A8B87A-8ED2-4A36-836D-C5601AAFC4B5}</Project>
       <Name>UnityEngine.TextRenderingModule</Name>
     </ProjectReference>
   </ItemGroup>

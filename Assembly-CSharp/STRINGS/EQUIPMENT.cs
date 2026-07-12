@@ -12,7 +12,7 @@ namespace STRINGS
 
 				public static LocString DESC = "Ensures my Duplicants can breathe easy... for a little while, anyways.";
 
-				public static LocString EFFECT = "Supplies Duplicants with <style=\"oxygen\">Oxygen</style> in toxic and low breathability environments.\n\nMust be refilled with oxygen at an " + UI.FormatAsLink("Atmo Suit Dock", "SUITLOCKER") + " when depleted.";
+				public static LocString EFFECT = "Supplies Duplicants with <style=\"oxygen\">Oxygen</style> in toxic and low breathability environments.\n\nMust be refilled with oxygen at an " + UI.FormatAsLink("Oxygen Mask Dock", "OXYGENMASKLOCKER") + " when depleted.";
 
 				public static LocString RECIPE_DESC = "Supplies Duplicants with <style=\"oxygen\">Oxygen</style> in toxic and low breathability environments.";
 
@@ -131,6 +131,20 @@ namespace STRINGS
 
 						public static LocString DESC = "Doubles as a party hat.";
 					}
+
+					public class CUMMERBUND_RED
+					{
+						public static LocString NAME = "Blastoff Atmo Helmet";
+
+						public static LocString DESC = "Red means go!";
+					}
+
+					public class WORKOUT_LAVENDER
+					{
+						public static LocString NAME = "Pink Punch Atmo Helmet";
+
+						public static LocString DESC = "Unapologetically ostentatious.";
+					}
 				}
 			}
 
@@ -196,6 +210,20 @@ namespace STRINGS
 						public static LocString NAME = "Confetti Atmo Suit";
 
 						public static LocString DESC = "It puts the \"fun\" in \"perfunctory nods to personnel individuality\"!";
+					}
+
+					public class BASIC_NEON_PINK
+					{
+						public static LocString NAME = "Crisp Neon Pink Atmo Suit";
+
+						public static LocString DESC = "The neck is a little snug.";
+					}
+
+					public class MULTI_RED_BLACK
+					{
+						public static LocString NAME = "Red-bellied Atmo Suit";
+
+						public static LocString DESC = "It really highlights the midsection.";
 					}
 				}
 			}
@@ -263,6 +291,20 @@ namespace STRINGS
 
 						public static LocString DESC = "Fab purple gloves for hostile environments.";
 					}
+
+					public class WHITE
+					{
+						public static LocString NAME = "White Atmo Gloves";
+
+						public static LocString DESC = "For the Duplicant who never gets their hands dirty.";
+					}
+
+					public class STRIPES_LAVENDER
+					{
+						public static LocString NAME = "Wildberry Atmo Gloves";
+
+						public static LocString DESC = "Functional finger-protectors with fruity flair.";
+					}
 				}
 			}
 
@@ -329,6 +371,20 @@ namespace STRINGS
 
 						public static LocString DESC = "Better to be overdressed than underdressed.";
 					}
+
+					public class BASIC_GREY
+					{
+						public static LocString NAME = "Slate Atmo Belt";
+
+						public static LocString DESC = "Slick and understated space style.";
+					}
+
+					public class BASIC_NEON_PINK
+					{
+						public static LocString NAME = "Neon Pink Atmo Belt";
+
+						public static LocString DESC = "Visible from several planetoids away.";
+					}
 				}
 			}
 
@@ -373,6 +429,13 @@ namespace STRINGS
 						public static LocString NAME = "Eggplant Atmo Boots";
 
 						public static LocString DESC = "Purple boots for stomping around in hostile environments.";
+					}
+
+					public class BASIC_LAVENDER
+					{
+						public static LocString NAME = "Lavender Atmo Boots";
+
+						public static LocString DESC = "Soothing space booties for tired feet.";
 					}
 				}
 			}
@@ -571,7 +634,7 @@ namespace STRINGS
 
 				public class FACADES
 				{
-					public static LocString CLUBSHIRT = UI.FormatAsLink("Purple Polyester", "CUSTOMCLOTHING");
+					public static LocString CLUBSHIRT = UI.FormatAsLink("Purple Polyester Suit", "CUSTOMCLOTHING");
 
 					public static LocString CUMMERBUND = UI.FormatAsLink("Classic Cummerbund", "CUSTOMCLOTHING");
 
@@ -583,11 +646,11 @@ namespace STRINGS
 
 					public static LocString DECOR_05 = UI.FormatAsLink("Snazzier Violet Suit", "CUSTOMCLOTHING");
 
-					public static LocString GAUDYSWEATER = UI.FormatAsLink("Pompom Knit", "CUSTOMCLOTHING");
+					public static LocString GAUDYSWEATER = UI.FormatAsLink("Pompom Knit Suit", "CUSTOMCLOTHING");
 
-					public static LocString LIMONE = UI.FormatAsLink("Citrus Spandex", "CUSTOMCLOTHING");
+					public static LocString LIMONE = UI.FormatAsLink("Citrus Spandex Suit", "CUSTOMCLOTHING");
 
-					public static LocString MONDRIAN = UI.FormatAsLink("Cubist Knit", "CUSTOMCLOTHING");
+					public static LocString MONDRIAN = UI.FormatAsLink("Cubist Knit Suit", "CUSTOMCLOTHING");
 
 					public static LocString OVERALLS = UI.FormatAsLink("Spiffy Overalls", "CUSTOMCLOTHING");
 
@@ -1296,6 +1359,90 @@ namespace STRINGS
 
 						public static LocString DESC = "The pockets are full of illegible notes that didn't quite survive the wash.";
 					}
+
+					public class SKIRT_BASIC_BLUE_MIDDLE
+					{
+						public static LocString NAME = "Aqua Rayon Skirt";
+
+						public static LocString DESC = "The tag says \"Dry Clean Only.\" There are no dry cleaners in space.";
+					}
+
+					public class SKIRT_BASIC_PURPLE
+					{
+						public static LocString NAME = "Purple Rayon Skirt";
+
+						public static LocString DESC = "It's not the most breathable fabric, but it <i>is</i> a lovely shade of purple.";
+					}
+
+					public class SKIRT_BASIC_GREEN
+					{
+						public static LocString NAME = "Olive Rayon Skirt";
+
+						public static LocString DESC = "Designed not to get snagged on ladders.";
+					}
+
+					public class SKIRT_BASIC_ORANGE
+					{
+						public static LocString NAME = "Apricot Rayon Skirt";
+
+						public static LocString DESC = "Ready for spontaneous workplace twirling.";
+					}
+
+					public class SKIRT_BASIC_PINK_ORCHID
+					{
+						public static LocString NAME = "Bubblegum Rayon Skirt";
+
+						public static LocString DESC = "The bubblegum scent lasts 100 washes!";
+					}
+
+					public class SKIRT_BASIC_RED
+					{
+						public static LocString NAME = "Garnet Rayon Skirt";
+
+						public static LocString DESC = "It's business time.";
+					}
+
+					public class SKIRT_BASIC_YELLOW
+					{
+						public static LocString NAME = "Yellow Rayon Skirt";
+
+						public static LocString DESC = "A formerly white skirt that has not aged well.";
+					}
+
+					public class SKIRT_BASIC_POLKADOT
+					{
+						public static LocString NAME = "Polka Dot Skirt";
+
+						public static LocString DESC = "Polka dots are a way to infinity.";
+					}
+
+					public class SKIRT_BASIC_WATERMELON
+					{
+						public static LocString NAME = "Picnic Skirt";
+
+						public static LocString DESC = "The seeds are spittable, but will bear no fruit.";
+					}
+
+					public class SKIRT_DENIM_BLUE
+					{
+						public static LocString NAME = "Denim Tux Skirt";
+
+						public static LocString DESC = "Designed for the casual red carpet.";
+					}
+
+					public class SKIRT_LEOPARD_PRINT_BLUE_PINK
+					{
+						public static LocString NAME = "Disco Leopard Skirt";
+
+						public static LocString DESC = "A faux-fur party staple.";
+					}
+
+					public class SKIRT_SPARKLE_BLUE
+					{
+						public static LocString NAME = "Blue Tinsel Skirt";
+
+						public static LocString DESC = "The tinsel is scratchy, but look how shiny!";
+					}
 				}
 			}
 
@@ -1705,6 +1852,13 @@ namespace STRINGS
 						public static LocString NAME = UI.FormatAsLink("Candied Watermelon", "EQUIPPABLEBALLOON");
 
 						public static LocString DESC = "A juicy watermelon-scented bunch of balloons.";
+					}
+
+					public class HAND_GOLD
+					{
+						public static LocString NAME = UI.FormatAsLink("Gold Fingers", "EQUIPPABLEBALLOON");
+
+						public static LocString DESC = "Inflatable gestures of encouragement.";
 					}
 				}
 			}

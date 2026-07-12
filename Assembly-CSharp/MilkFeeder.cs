@@ -36,10 +36,15 @@ public class MilkFeeder : GameStateMachine<MilkFeeder, MilkFeeder.Instance, ISta
 			this.isReadyToStartFeeding.Set(false, smi, false);
 		})
 			.ParamTransition<DrinkMilkStates.Instance>(this.currentFeedingCritter, this.on.working.emptying, (MilkFeeder.Instance smi, DrinkMilkStates.Instance val) => val != null);
-		this.on.working.emptying.PlayAnim("emptying").OnAnimQueueComplete(this.on.working.empty).Exit(delegate(MilkFeeder.Instance smi)
+		this.on.working.emptying.EnterTransition(this.on.working.full, delegate(MilkFeeder.Instance smi)
 		{
-			smi.StopFeeding();
-		});
+			DrinkMilkMonitor.Instance smi2 = this.currentFeedingCritter.Get(smi).GetSMI<DrinkMilkMonitor.Instance>();
+			return smi2 != null && !smi2.def.consumesMilk;
+		}).PlayAnim("emptying").OnAnimQueueComplete(this.on.working.empty)
+			.Exit(delegate(MilkFeeder.Instance smi)
+			{
+				smi.StopFeeding();
+			});
 		this.on.pst.PlayAnim("working_pst").OnAnimQueueComplete(this.off);
 	}
 

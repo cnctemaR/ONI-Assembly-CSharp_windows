@@ -1,20 +1,27 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Net;
+using System.IO.Compression;
+using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using Klei;
+using KMod;
 using Newtonsoft.Json;
+using Steamworks;
 using STRINGS;
 using UnityEngine;
+using UnityEngine.Networking;
 using UnityEngine.UI;
 
 public class KCrashReporter : MonoBehaviour
 {
-	public static event Action<string> onCrashReported;
+	public static event Action<bool> onCrashReported;
+
+	public static event Action<float> onCrashUploadProgress;
 
 	public static bool hasReportedError { get; private set; }
 
@@ -183,12 +190,7 @@ public class KCrashReporter : MonoBehaviour
 		{
 			errorDialog.PopupSubmitErrorDialog(text, delegate
 			{
-				string text2 = null;
-				if (KCrashReporter.MOST_RECENT_SAVEFILE != null)
-				{
-					text2 = KCrashReporter.UploadSaveFile(KCrashReporter.MOST_RECENT_SAVEFILE, stack_trace, null);
-				}
-				KCrashReporter.ReportError(error, stack_trace, text2, this.confirmDialogPrefab, this.errorScreen, errorDialog.UserMessage());
+				KCrashReporter.ReportError(error, stack_trace, this.confirmDialogPrefab, this.errorScreen, errorDialog.UserMessage(), true, null, null);
 			}, new global::System.Action(this.OnQuitToDesktop), KCrashReporter.terminateOnError ? null : new global::System.Action(this.OnCloseErrorDialog));
 		}
 		return true;
@@ -210,58 +212,6 @@ public class KCrashReporter : MonoBehaviour
 		App.Quit();
 	}
 
-	private static string UploadSaveFile(string save_file, string stack_trace, Dictionary<string, string> metadata = null)
-	{
-		global::Debug.Log(string.Format("Save_file: {0}", save_file));
-		if (KPrivacyPrefs.instance.disableDataCollection)
-		{
-			return "";
-		}
-		if (save_file != null && File.Exists(save_file))
-		{
-			using (WebClient webClient = new WebClient())
-			{
-				Encoding utf = Encoding.UTF8;
-				webClient.Encoding = utf;
-				byte[] array = File.ReadAllBytes(save_file);
-				string text = "----" + global::System.DateTime.Now.Ticks.ToString("x");
-				webClient.Headers.Add("Content-Type", "multipart/form-data; boundary=" + text);
-				string text2 = "";
-				string text3;
-				using (SHA1CryptoServiceProvider sha1CryptoServiceProvider = new SHA1CryptoServiceProvider())
-				{
-					text3 = BitConverter.ToString(sha1CryptoServiceProvider.ComputeHash(array)).Replace("-", "");
-				}
-				text2 += string.Format("--{0}\r\nContent-Disposition: form-data; name=\"{1}\"\r\n\r\n{2}\r\n", text, "hash", text3);
-				if (metadata != null)
-				{
-					string text4 = JsonConvert.SerializeObject(metadata);
-					text2 += string.Format("--{0}\r\nContent-Disposition: form-data; name=\"{1}\"\r\n\r\n{2}\r\n", text, "metadata", text4);
-				}
-				text2 += string.Format("--{0}\r\nContent-Disposition: form-data; name=\"save\"; filename=\"{1}\"\r\nContent-Type: {2}\r\n\r\n", new object[] { text, save_file, "application/x-spss-sav" });
-				byte[] bytes = utf.GetBytes(text2);
-				string text5 = string.Format("\r\n--{0}--\r\n", text);
-				byte[] bytes2 = utf.GetBytes(text5);
-				byte[] array2 = new byte[bytes.Length + array.Length + bytes2.Length];
-				Buffer.BlockCopy(bytes, 0, array2, 0, bytes.Length);
-				Buffer.BlockCopy(array, 0, array2, bytes.Length, array.Length);
-				Buffer.BlockCopy(bytes2, 0, array2, bytes.Length + array.Length, bytes2.Length);
-				Uri uri = new Uri("http://crashes.klei.ca/submitSave");
-				try
-				{
-					webClient.UploadData(uri, "POST", array2);
-					return text3;
-				}
-				catch (Exception ex)
-				{
-					global::Debug.Log(ex);
-					return "";
-				}
-			}
-		}
-		return "";
-	}
-
 	private static string GetUserID()
 	{
 		if (DistributionPlatform.Initialized)
@@ -276,7 +226,7 @@ public class KCrashReporter : MonoBehaviour
 			array[num] = ((id != null) ? id.ToString() : null);
 			return string.Concat(array);
 		}
-		return "LocalUser";
+		return "LocalUser_" + Environment.UserName;
 	}
 
 	private static string GetLogContents()
@@ -295,26 +245,30 @@ public class KCrashReporter : MonoBehaviour
 		return "";
 	}
 
-	public static void ReportErrorDevNotification(string notification_name, string stack_trace, string details = "")
+	public static void ReportDevNotification(string notification_name, string stack_trace, string details = "", bool includeSaveFile = false)
 	{
 		if (KCrashReporter.previouslyReportedDevNotifications == null)
 		{
 			KCrashReporter.previouslyReportedDevNotifications = new HashSet<int>();
 		}
-		details = "DevNotification: " + notification_name + " - " + details;
+		details = notification_name + " - " + details;
 		global::Debug.Log(details);
 		int hashValue = new HashedString(notification_name).HashValue;
 		bool hasReportedError = KCrashReporter.hasReportedError;
 		if (!KCrashReporter.previouslyReportedDevNotifications.Contains(hashValue))
 		{
 			KCrashReporter.previouslyReportedDevNotifications.Add(hashValue);
-			KCrashReporter.ReportError("DevNotification: " + notification_name, stack_trace, null, null, null, details);
+			KCrashReporter.ReportError("DevNotification: " + notification_name, stack_trace, null, null, details, includeSaveFile, new string[] { KCrashReporter.Error.CATEGORIES.DEVNOTIFICATION }, null);
 		}
 		KCrashReporter.hasReportedError = hasReportedError;
 	}
 
-	public static void ReportError(string msg, string stack_trace, string save_file_hash, ConfirmDialogScreen confirm_prefab, GameObject confirm_parent, string userMessage = "")
+	public static void ReportError(string msg, string stack_trace, ConfirmDialogScreen confirm_prefab, GameObject confirm_parent, string userMessage = "", bool includeSaveFile = true, string[] extraCategories = null, string[] extraFiles = null)
 	{
+		if (KPrivacyPrefs.instance.disableDataCollection)
+		{
+			return;
+		}
 		if (KCrashReporter.ignoreAll)
 		{
 			return;
@@ -329,130 +283,165 @@ public class KCrashReporter : MonoBehaviour
 			global::Debug.Log(stack_trace);
 		}
 		KCrashReporter.hasReportedError = true;
-		if (KPrivacyPrefs.instance.disableDataCollection)
+		if (string.IsNullOrEmpty(msg))
 		{
-			return;
+			msg = "No message";
 		}
-		string text7;
-		using (WebClient webClient = new WebClient())
+		Match match = KCrashReporter.failedToLoadModuleRegEx.Match(msg);
+		if (match.Success)
 		{
-			webClient.Encoding = Encoding.UTF8;
-			if (string.IsNullOrEmpty(msg))
+			string text = match.Groups[1].ToString();
+			string text2 = match.Groups[2].ToString();
+			string fileName = Path.GetFileName(text);
+			msg = string.Concat(new string[] { "Failed to load '", fileName, "' with error '", text2, "'." });
+		}
+		if (string.IsNullOrEmpty(stack_trace))
+		{
+			string buildText = BuildWatermark.GetBuildText();
+			stack_trace = string.Format("No stack trace {0}\n\n{1}", buildText, msg);
+		}
+		List<string> list = new List<string>();
+		if (KCrashReporter.debugWasUsed)
+		{
+			list.Add("(Debug Used)");
+		}
+		if (KCrashReporter.haveActiveMods)
+		{
+			list.Add("(Mods Active)");
+		}
+		list.Add(msg);
+		string[] array = new string[] { "Debug:LogError", "UnityEngine.Debug", "Output:LogError", "DebugUtil:Assert", "System.Array", "System.Collections", "KCrashReporter.Assert", "No stack trace." };
+		foreach (string text3 in stack_trace.Split(new char[] { '\n' }))
+		{
+			if (list.Count >= 5)
 			{
-				msg = "No message";
+				break;
 			}
-			Match match = KCrashReporter.failedToLoadModuleRegEx.Match(msg);
-			if (match.Success)
+			if (!string.IsNullOrEmpty(text3))
 			{
-				string text = match.Groups[1].ToString();
-				string text2 = match.Groups[2].ToString();
-				string fileName = Path.GetFileName(text);
-				msg = string.Concat(new string[] { "Failed to load '", fileName, "' with error '", text2, "'." });
-			}
-			if (string.IsNullOrEmpty(stack_trace))
-			{
-				string buildText = BuildWatermark.GetBuildText();
-				stack_trace = string.Format("No stack trace {0}\n\n{1}", buildText, msg);
-			}
-			List<string> list = new List<string>();
-			if (KCrashReporter.debugWasUsed)
-			{
-				list.Add("(Debug Used)");
-			}
-			if (KCrashReporter.haveActiveMods)
-			{
-				list.Add("(Mods Active)");
-			}
-			list.Add(msg);
-			string[] array = new string[] { "Debug:LogError", "UnityEngine.Debug", "Output:LogError", "DebugUtil:Assert", "System.Array", "System.Collections", "KCrashReporter.Assert", "No stack trace." };
-			foreach (string text3 in stack_trace.Split(new char[] { '\n' }))
-			{
-				if (list.Count >= 5)
+				bool flag = false;
+				foreach (string text4 in array)
 				{
-					break;
-				}
-				if (!string.IsNullOrEmpty(text3))
-				{
-					bool flag = false;
-					foreach (string text4 in array)
+					if (text3.StartsWith(text4))
 					{
-						if (text3.StartsWith(text4))
-						{
-							flag = true;
-							break;
-						}
-					}
-					if (!flag)
-					{
-						list.Add(text3);
+						flag = true;
+						break;
 					}
 				}
+				if (!flag)
+				{
+					list.Add(text3);
+				}
 			}
-			if (userMessage == UI.CRASHSCREEN.BODY.text || userMessage.IsNullOrWhiteSpace())
+		}
+		if (userMessage == UI.CRASHSCREEN.BODY.text || userMessage.IsNullOrWhiteSpace())
+		{
+			userMessage = "";
+		}
+		else
+		{
+			userMessage = "[" + BuildWatermark.GetBuildText() + "]" + userMessage;
+		}
+		userMessage = userMessage.Replace(stack_trace, "");
+		KCrashReporter.Error error = new KCrashReporter.Error();
+		if (extraCategories != null)
+		{
+			error.categories.AddRange(extraCategories);
+		}
+		error.callstack = stack_trace;
+		if (KCrashReporter.disableDeduping)
+		{
+			error.callstack = error.callstack + "\n" + Guid.NewGuid().ToString();
+		}
+		error.fullstack = string.Format("{0}\n\n{1}", msg, stack_trace);
+		error.summaryline = string.Join("\n", list.ToArray());
+		error.userMessage = userMessage;
+		List<string> list2 = new List<string>();
+		if (includeSaveFile && KCrashReporter.MOST_RECENT_SAVEFILE != null)
+		{
+			list2.Add(KCrashReporter.MOST_RECENT_SAVEFILE);
+			error.saveFilename = Path.GetFileName(KCrashReporter.MOST_RECENT_SAVEFILE);
+		}
+		if (extraFiles != null)
+		{
+			foreach (string text5 in extraFiles)
 			{
-				userMessage = "";
+				list2.Add(text5);
+				error.extraFilenames.Add(Path.GetFileName(text5));
+			}
+		}
+		string text6 = JsonConvert.SerializeObject(error);
+		byte[] array4 = KCrashReporter.CreateArchiveZip(KCrashReporter.GetLogContents(), list2);
+		global::Debug.Log("Submitting crash...");
+		global::System.Action action = delegate
+		{
+			if (confirm_prefab != null && confirm_parent != null)
+			{
+				((ConfirmDialogScreen)KScreenManager.Instance.StartScreen(confirm_prefab.gameObject, confirm_parent)).PopupConfirmDialog(UI.CRASHSCREEN.REPORTEDERROR_SUCCESS, null, null, null, null, null, null, null, null);
+			}
+		};
+		global::System.Action action2 = delegate
+		{
+			if (confirm_prefab != null && confirm_parent != null)
+			{
+				((ConfirmDialogScreen)KScreenManager.Instance.StartScreen(confirm_prefab.gameObject, confirm_parent)).PopupConfirmDialog(UI.CRASHSCREEN.REPORTEDERROR_FAILURE, null, null, null, null, null, null, null, null);
+			}
+		};
+		Global.Instance.StartCoroutine(KCrashReporter.SubmitCrashAsync(text6, array4, action, action2));
+	}
+
+	private static IEnumerator SubmitCrashAsync(string jsonString, byte[] archiveData, global::System.Action successCallback, global::System.Action failureCallback)
+	{
+		bool success = false;
+		Uri uri = new Uri("https://games-feedback.klei.com/submit");
+		WWWForm wwwform = new WWWForm();
+		wwwform.AddField("metadata", jsonString);
+		if (KleiAccount.KleiToken != null)
+		{
+			wwwform.AddField("loginToken", KleiAccount.KleiToken);
+		}
+		wwwform.AddBinaryData("archiveFile", archiveData, "Archive.zip", "application/octet-stream");
+		using (UnityWebRequest w = UnityWebRequest.Post(uri, wwwform))
+		{
+			w.SendWebRequest();
+			while (!w.isDone)
+			{
+				yield return null;
+				if (KCrashReporter.onCrashUploadProgress != null)
+				{
+					KCrashReporter.onCrashUploadProgress(w.uploadProgress);
+				}
+			}
+			if (w.result == UnityWebRequest.Result.Success)
+			{
+				if (successCallback != null)
+				{
+					successCallback();
+				}
+				success = true;
 			}
 			else
 			{
-				userMessage = "[" + BuildWatermark.GetBuildText() + "]" + userMessage;
-				if (!string.IsNullOrEmpty(save_file_hash))
+				global::UnityEngine.Debug.Log("CrashReporter: Could not submit crash " + w.result.ToString());
+				if (failureCallback != null)
 				{
-					userMessage = userMessage + "\nsave_hash: " + save_file_hash;
+					failureCallback();
 				}
 			}
-			KCrashReporter.Error error = new KCrashReporter.Error();
-			error.user = KCrashReporter.GetUserID();
-			error.callstack = stack_trace;
-			if (KCrashReporter.disableDeduping)
-			{
-				error.callstack = error.callstack + "\n" + Guid.NewGuid().ToString();
-			}
-			error.fullstack = string.Format("{0}\n\n{1}", msg, stack_trace);
-			error.build = 568201;
-			error.log = KCrashReporter.GetLogContents();
-			error.summaryline = string.Join("\n", list.ToArray());
-			error.user_message = userMessage;
-			if (!string.IsNullOrEmpty(save_file_hash))
-			{
-				error.save_hash = save_file_hash;
-			}
-			if (DistributionPlatform.Initialized)
-			{
-				error.steam64_verified = DistributionPlatform.Inst.LocalUser.Id.ToInt64();
-			}
-			string text5 = JsonConvert.SerializeObject(error);
-			string text6 = "";
-			Uri uri = new Uri("http://crashes.klei.ca/submitCrash");
-			global::Debug.Log("Submitting crash:");
-			try
-			{
-				webClient.UploadStringAsync(uri, text5);
-			}
-			catch (Exception ex)
-			{
-				global::Debug.Log(ex);
-			}
-			if (confirm_prefab != null && confirm_parent != null)
-			{
-				((ConfirmDialogScreen)KScreenManager.Instance.StartScreen(confirm_prefab.gameObject, confirm_parent)).PopupConfirmDialog(UI.CRASHSCREEN.REPORTEDERROR, null, null, null, null, null, null, null, null);
-			}
-			text7 = text6;
 		}
+		UnityWebRequest w = null;
 		if (KCrashReporter.onCrashReported != null)
 		{
-			KCrashReporter.onCrashReported(text7);
+			KCrashReporter.onCrashReported(success);
 		}
+		yield break;
+		yield break;
 	}
 
-	public static void ReportBug(string msg, string save_file, GameObject confirmParent)
+	public static void ReportBug(string msg, GameObject confirmParent)
 	{
 		string text = "Bug Report From: " + KCrashReporter.GetUserID() + " at " + global::System.DateTime.Now.ToString();
-		string text2 = KCrashReporter.UploadSaveFile(save_file, text, new Dictionary<string, string> { 
-		{
-			"user",
-			KCrashReporter.GetUserID()
-		} });
-		KCrashReporter.ReportError(msg, text, text2, ScreenPrefabs.Instance.ConfirmDialogScreen, confirmParent, "");
+		KCrashReporter.ReportError(msg, text, ScreenPrefabs.Instance.ConfirmDialogScreen, confirmParent, "", true, null, null);
 	}
 
 	public static void Assert(bool condition, string message)
@@ -460,7 +449,7 @@ public class KCrashReporter : MonoBehaviour
 		if (!condition && !KCrashReporter.hasReportedError)
 		{
 			StackTrace stackTrace = new StackTrace(1, true);
-			KCrashReporter.ReportError("ASSERT: " + message, stackTrace.ToString(), null, null, null, "");
+			KCrashReporter.ReportError("ASSERT: " + message, stackTrace.ToString(), null, null, null, true, null, null);
 		}
 	}
 
@@ -470,31 +459,59 @@ public class KCrashReporter : MonoBehaviour
 		{
 			return;
 		}
-		string text = null;
-		string text2 = null;
-		string text3 = null;
-		if (dmp_filename != null)
+		KCrashReporter.ReportError(msg, stack_trace, null, null, "", true, new string[] { KCrashReporter.Error.CATEGORIES.SIM }, new string[] { dmp_filename });
+	}
+
+	private static byte[] CreateArchiveZip(string log, List<string> files)
+	{
+		byte[] array2;
+		using (MemoryStream memoryStream = new MemoryStream())
 		{
-			string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(dmp_filename);
-			text2 = Path.Combine(Path.GetDirectoryName(KCrashReporter.dataRoot), dmp_filename);
-			text3 = Path.Combine(Path.GetDirectoryName(KCrashReporter.dataRoot), fileNameWithoutExtension + ".sav");
-			File.Move(text2, text3);
-			text = KCrashReporter.UploadSaveFile(text3, stack_trace, new Dictionary<string, string> { 
+			using (ZipArchive zipArchive = new ZipArchive(memoryStream, ZipArchiveMode.Create, true))
 			{
-				"user",
-				KCrashReporter.GetUserID()
-			} });
+				if (files != null)
+				{
+					using (Stream stream = zipArchive.CreateEntry("Player.log", global::System.IO.Compression.CompressionLevel.Fastest).Open())
+					{
+						byte[] bytes = Encoding.UTF8.GetBytes(log);
+						stream.Write(bytes, 0, bytes.Length);
+					}
+					foreach (string text in files)
+					{
+						try
+						{
+							if (!File.Exists(text))
+							{
+								global::UnityEngine.Debug.Log("CrashReporter: file does not exist to include: " + text);
+							}
+							else
+							{
+								using (Stream stream2 = zipArchive.CreateEntry(Path.GetFileName(text), global::System.IO.Compression.CompressionLevel.Fastest).Open())
+								{
+									byte[] array = File.ReadAllBytes(text);
+									stream2.Write(array, 0, array.Length);
+								}
+							}
+						}
+						catch (Exception ex)
+						{
+							string text2 = "CrashReporter: Could not add file '";
+							string text3 = text;
+							string text4 = "' to archive: ";
+							Exception ex2 = ex;
+							global::UnityEngine.Debug.Log(text2 + text3 + text4 + ((ex2 != null) ? ex2.ToString() : null));
+						}
+					}
+				}
+			}
+			array2 = memoryStream.ToArray();
 		}
-		KCrashReporter.ReportError(msg, stack_trace, text, null, null, "");
-		if (dmp_filename != null)
-		{
-			File.Move(text3, text2);
-		}
+		return array2;
 	}
 
 	public static string MOST_RECENT_SAVEFILE = null;
 
-	public const string CRASH_REPORTER_SERVER = "http://crashes.klei.ca";
+	public const string CRASH_REPORTER_SERVER = "https://games-feedback.klei.com";
 
 	public const uint MAX_LOGS = 10000000U;
 
@@ -508,7 +525,7 @@ public class KCrashReporter : MonoBehaviour
 
 	public static string error_canvas_name = "ErrorCanvas";
 
-	private static bool disableDeduping = false;
+	public static bool disableDeduping = false;
 
 	public static bool hasCrash = false;
 
@@ -535,30 +552,156 @@ public class KCrashReporter : MonoBehaviour
 
 	private class Error
 	{
-		public string game = "simgame";
+		public Error()
+		{
+			this.userName = KCrashReporter.GetUserID();
+			this.InitDefaultCategories();
+			this.InitSku();
+			this.InitSlackSummary();
+			if (DistributionPlatform.Inst.Initialized)
+			{
+				string text;
+				bool currentBetaName = SteamApps.GetCurrentBetaName(out text, 100);
+				this.branch = text;
+				if (currentBetaName || (text == "public_testing" && !global::UnityEngine.Debug.isDebugBuild))
+				{
+					this.branch = "default";
+				}
+			}
+		}
 
-		public int build = -1;
+		private void InitDefaultCategories()
+		{
+			if (DlcManager.IsPureVanilla())
+			{
+				this.categories.Add(KCrashReporter.Error.CATEGORIES.VANILLA);
+			}
+			if (DlcManager.IsExpansion1Active())
+			{
+				this.categories.Add(KCrashReporter.Error.CATEGORIES.SPACEDOUT);
+			}
+			if (KCrashReporter.debugWasUsed)
+			{
+				this.categories.Add(KCrashReporter.Error.CATEGORIES.DEBUGUSED);
+			}
+			if (KCrashReporter.haveActiveMods)
+			{
+				this.categories.Add(KCrashReporter.Error.CATEGORIES.MODDED);
+			}
+			if (SaveGame.Instance != null && SaveGame.Instance.sandboxEnabled)
+			{
+				this.categories.Add(KCrashReporter.Error.CATEGORIES.SANDBOX);
+			}
+			if (DistributionPlatform.Inst.Initialized && SteamUtils.IsSteamRunningOnSteamDeck())
+			{
+				this.categories.Add(KCrashReporter.Error.CATEGORIES.STEAMDECK);
+			}
+		}
 
-		public string platform = Environment.OSVersion.ToString();
+		private void InitSku()
+		{
+			this.sku = "steam";
+			if (DistributionPlatform.Inst.Initialized)
+			{
+				string text;
+				bool flag = !SteamApps.GetCurrentBetaName(out text, 100);
+				if (text == "public_testing" || text == "preview")
+				{
+					if (global::UnityEngine.Debug.isDebugBuild)
+					{
+						this.sku = "steam-public-testing";
+					}
+					else
+					{
+						this.sku = "steam-release";
+					}
+				}
+				if (flag || text == "release")
+				{
+					this.sku = "steam-release";
+				}
+			}
+		}
 
-		public string user = "unknown";
+		private void InitSlackSummary()
+		{
+			string buildText = BuildWatermark.GetBuildText();
+			string text = ((GameClock.Instance != null) ? string.Format(" - Cycle {0}", GameClock.Instance.GetCycle() + 1) : "");
+			int num;
+			if (!(Global.Instance != null) || Global.Instance.modManager == null)
+			{
+				num = 0;
+			}
+			else
+			{
+				num = Global.Instance.modManager.mods.Count<Mod>((Mod x) => x.IsEnabledForActiveDlc());
+			}
+			int num2 = num;
+			string text2 = ((num2 > 0) ? string.Format(" - {0} active mods", num2) : "");
+			this.slackSummary = string.Concat(new string[] { buildText, " ", this.platform, text, text2 });
+		}
 
-		public ulong steam64_verified;
+		public string game = "ONI";
+
+		public string userName;
+
+		public string platform = SystemInfo.operatingSystem;
+
+		public string version = LaunchInitializer.BuildPrefix();
+
+		public string branch = "default";
+
+		public string sku = "";
+
+		public int build = 575720;
 
 		public string callstack = "";
 
 		public string fullstack = "";
 
-		public string log = "";
-
 		public string summaryline = "";
 
-		public string user_message = "";
+		public string userMessage = "";
 
-		public bool is_server;
+		public List<string> categories = new List<string>();
 
-		public bool is_dedicated;
+		public string slackSummary;
 
-		public string save_hash = "";
+		public string logFilename = "Player.log";
+
+		public string saveFilename = "";
+
+		public string screenshotFilename = "";
+
+		public List<string> extraFilenames = new List<string>();
+
+		public string title = "";
+
+		public bool isServer;
+
+		public bool isDedicated;
+
+		public bool isError = true;
+
+		public string emote = "";
+
+		public class CATEGORIES
+		{
+			public static string DEVNOTIFICATION = "DevNotification";
+
+			public static string VANILLA = "Vanilla";
+
+			public static string SPACEDOUT = "SpacedOut";
+
+			public static string MODDED = "Modded";
+
+			public static string DEBUGUSED = "DebugUsed";
+
+			public static string SANDBOX = "Sandbox";
+
+			public static string STEAMDECK = "SteamDeck";
+
+			public static string SIM = "SimDll";
+		}
 	}
 }

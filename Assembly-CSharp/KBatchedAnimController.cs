@@ -217,6 +217,10 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 		}
 		base.AnimFiles = anims;
 		this.LoadAnims();
+		if (base.curBuild != null)
+		{
+			this.UpdateHiddenSymbolSet(this.hiddenSymbolsSet);
+		}
 		this.Register();
 	}
 
@@ -456,6 +460,70 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 		Vector3 vector = base.PositionIncludingOffset;
 		vector.z = 0f;
 		Vector2 vector2 = new Vector2(this.animScale * this.animWidth, -this.animScale * this.animHeight);
+		if (this.materialType == KAnimBatchGroup.MaterialType.UI)
+		{
+			this.rt = base.GetComponent<RectTransform>();
+			if (this.rootCanvas == null)
+			{
+				this.rootCanvas = this.GetRootCanvas();
+			}
+			if (this.scaler == null && this.rootCanvas != null)
+			{
+				this.scaler = this.rootCanvas.GetComponent<CanvasScaler>();
+			}
+			if (this.rootCanvas == null)
+			{
+				this.screenOffset.x = (float)(Screen.width / 2);
+				this.screenOffset.y = (float)(Screen.height / 2);
+			}
+			else
+			{
+				this.screenOffset.x = ((this.rootCanvas.renderMode == RenderMode.WorldSpace) ? 0f : (this.rootCanvas.rectTransform().rect.width / 2f));
+				this.screenOffset.y = ((this.rootCanvas.renderMode == RenderMode.WorldSpace) ? 0f : (this.rootCanvas.rectTransform().rect.height / 2f));
+			}
+			float num = 1f;
+			if (this.scaler != null)
+			{
+				num = 1f / this.scaler.scaleFactor;
+			}
+			vector = (this.rt.localToWorldMatrix.MultiplyPoint(this.rt.pivot) + this.offset) * num - this.screenOffset;
+			float num2 = this.animWidth * this.animScale;
+			float num3 = this.animHeight * this.animScale;
+			if (this.setScaleFromAnim && this.curAnim != null)
+			{
+				num2 *= this.rt.rect.size.x / this.curAnim.unScaledSize.x;
+				num3 *= this.rt.rect.size.y / this.curAnim.unScaledSize.y;
+			}
+			else
+			{
+				num2 *= this.rt.rect.size.x / this.animOverrideSize.x;
+				num3 *= this.rt.rect.size.y / this.animOverrideSize.y;
+			}
+			vector2 = new Vector3(this.rt.lossyScale.x * num2 * num, -this.rt.lossyScale.y * num3 * num, this.rt.lossyScale.z * num);
+			this.pivot = this.rt.pivot;
+		}
+		Matrix2x3 matrix2x = Matrix2x3.Scale(vector2);
+		Matrix2x3 matrix2x2 = Matrix2x3.Scale(new Vector2(this.flipX ? (-1f) : 1f, this.flipY ? (-1f) : 1f));
+		Matrix2x3 matrix2x6;
+		if (this.rotation != 0f)
+		{
+			Matrix2x3 matrix2x3 = Matrix2x3.Translate(-this.pivot);
+			Matrix2x3 matrix2x4 = Matrix2x3.Rotate(this.rotation * 0.017453292f);
+			Matrix2x3 matrix2x5 = Matrix2x3.Translate(this.pivot) * matrix2x4 * matrix2x3;
+			matrix2x6 = Matrix2x3.TRS(vector, base.transform.rotation, base.transform.localScale) * matrix2x5 * matrix2x * this.navMatrix * matrix2x2;
+		}
+		else
+		{
+			matrix2x6 = Matrix2x3.TRS(vector, base.transform.rotation, base.transform.localScale) * matrix2x * this.navMatrix * matrix2x2;
+		}
+		return matrix2x6;
+	}
+
+	public Matrix2x3 GetTransformMatrix(Vector2 customScale)
+	{
+		Vector3 vector = base.PositionIncludingOffset;
+		vector.z = 0f;
+		Vector2 vector2 = customScale;
 		if (this.materialType == KAnimBatchGroup.MaterialType.UI)
 		{
 			this.rt = base.GetComponent<RectTransform>();

@@ -55,7 +55,7 @@ public class ManualGenerator : Workable, ISingleSliderControl, ISliderControl
 		return "STRINGS.UI.UISIDESCREENS.MANUALGENERATORSIDESCREEN.TOOLTIP";
 	}
 
-	string ISliderControl.GetSliderTooltip()
+	string ISliderControl.GetSliderTooltip(int index)
 	{
 		return string.Format(Strings.Get("STRINGS.UI.UISIDESCREENS.MANUALGENERATORSIDESCREEN.TOOLTIP"), this.batteryRefillPercent * 100f);
 	}

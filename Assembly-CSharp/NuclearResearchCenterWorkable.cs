@@ -44,6 +44,12 @@ public class NuclearResearchCenterWorkable : Workable
 		return this.radiationStorage.IsEmpty() || activeResearch == null || activeResearch.PercentageCompleteResearchType("nuclear") >= 1f;
 	}
 
+	protected override void OnStartWork(Worker worker)
+	{
+		base.OnStartWork(worker);
+		base.GetComponent<KSelectable>().AddStatusItem(Db.Get().BuildingStatusItems.ComplexFabricatorResearching, this.nrc);
+	}
+
 	protected override void OnAbortWork(Worker worker)
 	{
 		base.OnAbortWork(worker);
@@ -52,6 +58,7 @@ public class NuclearResearchCenterWorkable : Workable
 	protected override void OnStopWork(Worker worker)
 	{
 		base.OnStopWork(worker);
+		base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().BuildingStatusItems.ComplexFabricatorResearching, this.nrc);
 	}
 
 	public override float GetPercentComplete()

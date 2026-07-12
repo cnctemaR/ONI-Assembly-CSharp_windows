@@ -1,11 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
 using STRINGS;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class TreeFilterableSideScreen : SideScreenContent
 {
+	private bool InputFieldEmpty
+	{
+		get
+		{
+			return this.inputField.text == "";
+		}
+	}
+
 	public bool IsStorage
 	{
 		get
@@ -56,6 +65,47 @@ public class TreeFilterableSideScreen : SideScreenContent
 		this.allCheckBox.transform.parent.parent.GetComponent<ToolTip>().SetSimpleTooltip(UI.UISIDESCREENS.TREEFILTERABLESIDESCREEN.ALLBUTTONTOOLTIP);
 		this.onlyAllowTransportItemsCheckBox.transform.parent.GetComponent<ToolTip>().SetSimpleTooltip(UI.UISIDESCREENS.TREEFILTERABLESIDESCREEN.ONLYALLOWTRANSPORTITEMSBUTTONTOOLTIP);
 		this.onlyAllowSpicedItemsCheckBox.transform.parent.GetComponent<ToolTip>().SetSimpleTooltip(UI.UISIDESCREENS.TREEFILTERABLESIDESCREEN.ONLYALLOWSPICEDITEMSBUTTONTOOLTIP);
+		this.inputField.ActivateInputField();
+		this.inputField.placeholder.GetComponent<TextMeshProUGUI>().text = UI.UISIDESCREENS.TREEFILTERABLESIDESCREEN.SEARCH_PLACEHOLDER;
+		this.InitSearch();
+	}
+
+	public override float GetSortKey()
+	{
+		if (base.isEditing)
+		{
+			return 50f;
+		}
+		return base.GetSortKey();
+	}
+
+	public override void OnKeyDown(KButtonEvent e)
+	{
+		if (e.Consumed)
+		{
+			return;
+		}
+		if (base.isEditing)
+		{
+			e.Consumed = true;
+		}
+	}
+
+	public override void OnKeyUp(KButtonEvent e)
+	{
+		if (e.Consumed)
+		{
+			return;
+		}
+		if (base.isEditing)
+		{
+			e.Consumed = true;
+		}
+	}
+
+	public override int GetSideScreenSortOrder()
+	{
+		return 1;
 	}
 
 	private void UpdateAllCheckBoxVisualState()
@@ -213,6 +263,11 @@ public class TreeFilterableSideScreen : SideScreenContent
 			this.titlebar.SetActive(true);
 			this.titlebar.GetComponentInChildren<LocText>().SetText(this.storage.GetProperName());
 		}
+		if (!this.InputFieldEmpty)
+		{
+			this.ClearSearch();
+		}
+		this.ToggleSearchConfiguration(!this.InputFieldEmpty);
 	}
 
 	private void OnOnlyFetchMarkedItemsSettingChanged(object data)
@@ -336,6 +391,96 @@ public class TreeFilterableSideScreen : SideScreenContent
 		this.tagRowMap.Clear();
 	}
 
+	private void RecordRowExpandedStatus()
+	{
+		this.rowExpandedStatusMemory.Clear();
+		foreach (KeyValuePair<Tag, TreeFilterableSideScreenRow> keyValuePair in this.tagRowMap)
+		{
+			this.rowExpandedStatusMemory.Add(keyValuePair.Key, keyValuePair.Value.ArrowExpanded);
+		}
+	}
+
+	private void RestoreRowExpandedStatus()
+	{
+		foreach (KeyValuePair<Tag, TreeFilterableSideScreenRow> keyValuePair in this.tagRowMap)
+		{
+			if (this.rowExpandedStatusMemory.ContainsKey(keyValuePair.Key))
+			{
+				keyValuePair.Value.SetArrowToggleState(this.rowExpandedStatusMemory[keyValuePair.Key]);
+			}
+		}
+	}
+
+	private void InitSearch()
+	{
+		KInputTextField kinputTextField = this.inputField;
+		kinputTextField.onFocus = (global::System.Action)Delegate.Combine(kinputTextField.onFocus, new global::System.Action(delegate
+		{
+			base.isEditing = true;
+			KScreenManager.Instance.RefreshStack();
+			UISounds.PlaySound(UISounds.Sound.ClickHUD);
+			this.RecordRowExpandedStatus();
+		}));
+		this.inputField.onEndEdit.AddListener(delegate(string value)
+		{
+			base.isEditing = false;
+			KScreenManager.Instance.RefreshStack();
+		});
+		this.inputField.onValueChanged.AddListener(delegate(string value)
+		{
+			if (this.InputFieldEmpty)
+			{
+				this.RestoreRowExpandedStatus();
+			}
+			this.ToggleSearchConfiguration(!this.InputFieldEmpty);
+			this.UpdateSearchFilter();
+		});
+		this.inputField.placeholder.GetComponent<TextMeshProUGUI>().text = UI.UISIDESCREENS.TREEFILTERABLESIDESCREEN.SEARCH_PLACEHOLDER;
+		this.clearButton.onClick += delegate
+		{
+			if (!this.InputFieldEmpty)
+			{
+				this.ClearSearch();
+			}
+		};
+	}
+
+	private void ToggleSearchConfiguration(bool searching)
+	{
+		this.configurationRowsContainer.gameObject.SetActive(!searching);
+		foreach (KeyValuePair<Tag, TreeFilterableSideScreenRow> keyValuePair in this.tagRowMap)
+		{
+			keyValuePair.Value.ShowToggleBox(!searching);
+		}
+	}
+
+	private void ClearSearch()
+	{
+		this.inputField.text = "";
+		this.RestoreRowExpandedStatus();
+		this.ToggleSearchConfiguration(false);
+	}
+
+	public string CurrentSearchValue
+	{
+		get
+		{
+			if (this.inputField.text == null)
+			{
+				return "";
+			}
+			return this.inputField.text;
+		}
+	}
+
+	private void UpdateSearchFilter()
+	{
+		foreach (KeyValuePair<Tag, TreeFilterableSideScreenRow> keyValuePair in this.tagRowMap)
+		{
+			keyValuePair.Value.FilterAgainstSearch(keyValuePair.Key, this.CurrentSearchValue);
+		}
+	}
+
 	[SerializeField]
 	private MultiToggle allCheckBox;
 
@@ -366,6 +511,15 @@ public class TreeFilterableSideScreen : SideScreenContent
 	[SerializeField]
 	private GameObject contentMask;
 
+	[SerializeField]
+	private KInputTextField inputField;
+
+	[SerializeField]
+	private KButton clearButton;
+
+	[SerializeField]
+	private GameObject configurationRowsContainer;
+
 	private GameObject target;
 
 	private bool visualDirty;
@@ -381,6 +535,8 @@ public class TreeFilterableSideScreen : SideScreenContent
 	private TreeFilterable targetFilterable;
 
 	private Dictionary<Tag, TreeFilterableSideScreenRow> tagRowMap = new Dictionary<Tag, TreeFilterableSideScreenRow>();
+
+	private Dictionary<Tag, bool> rowExpandedStatusMemory = new Dictionary<Tag, bool>();
 
 	private Storage storage;
 

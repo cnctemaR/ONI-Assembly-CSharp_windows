@@ -38,7 +38,7 @@ public class DevRadiationEmitter : KMonoBehaviour, ISingleSliderControl, ISlider
 		return 0f;
 	}
 
-	public string GetSliderTooltip()
+	public string GetSliderTooltip(int index)
 	{
 		return "";
 	}

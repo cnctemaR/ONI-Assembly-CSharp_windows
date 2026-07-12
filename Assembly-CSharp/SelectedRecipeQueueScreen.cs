@@ -84,7 +84,11 @@ public class SelectedRecipeQueueScreen : KScreen
 			this.recipeIcon.sprite = tuple.first;
 			this.recipeIcon.color = tuple.second;
 		}
+		string text = (recipe.time.ToString() + " " + UI.UNITSUFFIXES.SECONDS).ToLower();
 		this.recipeMainDescription.SetText(recipe.description);
+		this.recipeDuration.SetText(text);
+		string text2 = string.Format(UI.UISIDESCREENS.FABRICATORSIDESCREEN.TOOLTIPS.RECIPE_WORKTIME, text);
+		this.recipeDurationTooltip.SetSimpleTooltip(text2);
 		this.RefreshIngredientDescriptors();
 		this.RefreshResultDescriptors();
 		this.RefreshQueueCountDisplay();
@@ -272,6 +276,10 @@ public class SelectedRecipeQueueScreen : KScreen
 	public LocText recipeName;
 
 	public LocText recipeMainDescription;
+
+	public LocText recipeDuration;
+
+	public ToolTip recipeDurationTooltip;
 
 	public GameObject IngredientsDescriptorPanel;
 

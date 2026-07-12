@@ -16,6 +16,9 @@ public static class BasePuftConfig
 		{
 			gameObject.AddOrGet<SymbolOverrideController>().ApplySymbolOverridesByAffix(Assets.GetAnim(anim_file), symbol_override_prefix, null, 0);
 		}
+		Pickupable pickupable = gameObject.AddOrGet<Pickupable>();
+		int num2 = CREATURES.SORTING.CRITTER_ORDER["Puft"];
+		pickupable.sortOrder = num2;
 		KPrefabID component = gameObject.GetComponent<KPrefabID>();
 		component.AddTag(GameTags.Creatures.Flyer, false);
 		component.prefabInitFn += delegate(GameObject inst)
@@ -37,7 +40,7 @@ public static class BasePuftConfig
 		SoundEventVolumeCache.instance.AddVolume("puft_kanim", "Puft_air_inflated", NOISE_POLLUTION.CREATURES.TIER5);
 		SoundEventVolumeCache.instance.AddVolume("puft_kanim", "Puft_voice_die", NOISE_POLLUTION.CREATURES.TIER5);
 		SoundEventVolumeCache.instance.AddVolume("puft_kanim", "Puft_voice_hurt", NOISE_POLLUTION.CREATURES.TIER5);
-		EntityTemplates.CreateAndRegisterBaggedCreature(gameObject, true, false, false);
+		EntityTemplates.CreateAndRegisterBaggedCreature(gameObject, true, true, false);
 		string text = "Puft_air_intake";
 		if (is_baby)
 		{

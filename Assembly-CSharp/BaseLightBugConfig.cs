@@ -25,6 +25,9 @@ public static class BaseLightBugConfig
 		{
 			gameObject.AddOrGet<SymbolOverrideController>().ApplySymbolOverridesByAffix(Assets.GetAnim(anim_file), symbolOverridePrefix, null, 0);
 		}
+		Pickupable pickupable = gameObject.AddOrGet<Pickupable>();
+		int num4 = CREATURES.SORTING.CRITTER_ORDER["LightBug"];
+		pickupable.sortOrder = num4;
 		KPrefabID component = gameObject.GetComponent<KPrefabID>();
 		component.AddTag(GameTags.Creatures.Flyer, false);
 		component.prefabInitFn += delegate(GameObject inst)
@@ -40,7 +43,7 @@ public static class BaseLightBugConfig
 		};
 		gameObject.AddOrGetDef<ThreatMonitor.Def>();
 		gameObject.AddOrGetDef<SubmergedMonitor.Def>();
-		EntityTemplates.CreateAndRegisterBaggedCreature(gameObject, true, false, false);
+		EntityTemplates.CreateAndRegisterBaggedCreature(gameObject, true, true, false);
 		if (DlcManager.FeatureRadiationEnabled())
 		{
 			RadiationEmitter radiationEmitter = gameObject.AddOrGet<RadiationEmitter>();

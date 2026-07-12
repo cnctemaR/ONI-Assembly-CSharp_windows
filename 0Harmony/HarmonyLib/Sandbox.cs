@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace HarmonyLib
 {
@@ -7,6 +8,12 @@ namespace HarmonyLib
 	{
 		[MethodImpl(MethodImplOptions.NoInlining)]
 		internal Sandbox.SomeStruct_Net GetStruct_Net(IntPtr x, IntPtr y)
+		{
+			throw new Exception("This method should've been detoured!");
+		}
+
+		[MethodImpl(MethodImplOptions.NoInlining)]
+		internal Sandbox.SomeStruct_NetLinux GetStruct_NetLinux(IntPtr x, IntPtr y)
 		{
 			throw new Exception("This method should've been detoured!");
 		}
@@ -40,6 +47,20 @@ namespace HarmonyLib
 			private readonly byte b2;
 
 			private readonly byte b3;
+		}
+
+		internal struct SomeStruct_NetLinux
+		{
+			[FixedBuffer(typeof(byte), 17)]
+			public Sandbox.SomeStruct_NetLinux.<headerBytes>e__FixedBuffer headerBytes;
+
+			[CompilerGenerated]
+			[UnsafeValueType]
+			[StructLayout(LayoutKind.Sequential, Size = 17)]
+			public struct <headerBytes>e__FixedBuffer
+			{
+				public byte FixedElementField;
+			}
 		}
 
 		internal struct SomeStruct_Mono

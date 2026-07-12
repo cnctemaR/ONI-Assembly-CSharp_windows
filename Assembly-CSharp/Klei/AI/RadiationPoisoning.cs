@@ -6,7 +6,7 @@ namespace Klei.AI
 	public class RadiationPoisoning : Disease
 	{
 		public RadiationPoisoning(bool statsOnly)
-			: base("RadiationSickness", 100, Disease.RangeInfo.Idempotent(), Disease.RangeInfo.Idempotent(), Disease.RangeInfo.Idempotent(), Disease.RangeInfo.Idempotent(), 0f, statsOnly)
+			: base("RadiationSickness", 100f, Disease.RangeInfo.Idempotent(), Disease.RangeInfo.Idempotent(), Disease.RangeInfo.Idempotent(), Disease.RangeInfo.Idempotent(), 0f, statsOnly)
 		{
 		}
 

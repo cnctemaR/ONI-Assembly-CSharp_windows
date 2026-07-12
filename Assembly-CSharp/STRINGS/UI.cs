@@ -1341,7 +1341,7 @@ namespace STRINGS
 						", ",
 						UI.FormatAsLink("Oxygen", "OXYGEN"),
 						" and ",
-						UI.FormatAsLink("Methane", "METHANE"),
+						UI.FormatAsLink("Natural Gas", "METHANE"),
 						".\n\nHarvesting resources requires a rocket equipped with a ",
 						UI.FormatAsLink("Drillcone", "NOSECONEHARVEST"),
 						"."
@@ -1377,7 +1377,7 @@ namespace STRINGS
 					public static LocString DESC = string.Concat(new string[]
 					{
 						"A cloud of harvestable debris containing ",
-						UI.FormatAsLink("Chlorine", "CHLORINEGAS"),
+						UI.FormatAsLink("Chlorine Gas", "CHLORINEGAS"),
 						" and ",
 						UI.FormatAsLink("Bleach Stone", "BLEACHSTONE"),
 						".\n\nHarvesting resources requires a rocket equipped with a ",
@@ -1429,7 +1429,7 @@ namespace STRINGS
 						"A cloud of resources containing ",
 						UI.FormatAsLink("Water", "WATER"),
 						" and ",
-						UI.FormatAsLink("Hydrogen", "HYDROGEN"),
+						UI.FormatAsLink("Hydrogen Gas", "HYDROGEN"),
 						".\n\nHarvesting resources requires a rocket equipped with a ",
 						UI.FormatAsLink("Drillcone", "NOSECONEHARVEST"),
 						"."
@@ -1443,7 +1443,7 @@ namespace STRINGS
 					public static LocString DESC = string.Concat(new string[]
 					{
 						"An asteroid field containing ",
-						UI.FormatAsLink("Methane", "SOLIDMETHANE"),
+						UI.FormatAsLink("Solid Methane", "SOLIDMETHANE"),
 						", ",
 						UI.FormatAsLink("Carbon Dioxide", "CARBONDIOXIDE"),
 						" and ",
@@ -1571,7 +1571,7 @@ namespace STRINGS
 					public static LocString DESC = string.Concat(new string[]
 					{
 						"A cloud of resources containing ",
-						UI.FormatAsLink("Chlorine", "CHLORINEGAS"),
+						UI.FormatAsLink("Chlorine Gas", "CHLORINEGAS"),
 						", ",
 						UI.FormatAsLink("Uranium Ore", "URANIUMORE"),
 						" and ",
@@ -1991,7 +1991,7 @@ namespace STRINGS
 				{
 					public static LocString NAME = "Gas Giant";
 
-					public static LocString DESCRIPTION = "A massive volume of " + UI.FormatAsLink("Hydrogen", "HYDROGEN") + " formed around a small solid center.";
+					public static LocString DESCRIPTION = "A massive volume of " + UI.FormatAsLink("Hydrogen Gas", "HYDROGEN") + " formed around a small solid center.";
 				}
 
 				public class ICEGIANT
@@ -3482,13 +3482,13 @@ namespace STRINGS
 
 			public class MOTD
 			{
-				public static LocString IMAGE_HEADER = "SONG OF THE MOO";
+				public static LocString IMAGE_HEADER = "OCTOBER 2023 QOL UPDATE";
 
 				public static LocString NEWS_HEADER = "JOIN THE DISCUSSION";
 
 				public static LocString NEWS_BODY = "Stay up to date by joining our mailing list, or head on over to the forums and join the discussion.";
 
-				public static LocString PATCH_NOTES_SUMMARY = "This update includes:\n\n•<indent=20px>Gassy Moos can be milked for a substance called Brackene.</indent>\n•<indent=20px>Several new Brackene related buildings.</indent>\n•<indent=20px>New Egg recipes and food tuning.</indent>\n•<indent=20px>A high temperature plastic called Plastium is craftable at the Molecular Forge.</indent>\n•<indent=20px>New cosmetic skins.</indent>\n•<indent=20px>Bug fixes and more.</indent>\n\n   Check out the full patch notes for more details!";
+				public static LocString PATCH_NOTES_SUMMARY = "This update includes:\n\n•<indent=20px>Critters can be moved with Move To tool.</indent>\n•<indent=20px>Blueprints in a colony's collection are recyclable.</indent>\n•<indent=20px>Added searchable element filter and other improvements to UI.</indent>\n•<indent=20px>Revised Industrial Machinery categorization for buildings.</indent>\n•<indent=20px>Bug fixes and more.</indent>\n\n   Check out the full patch notes for more details!";
 
 				public static LocString UPDATE_TEXT = "LAUNCHED!";
 
@@ -3865,9 +3865,9 @@ namespace STRINGS
 
 				public static LocString ACTIVE_DURING_CRASH = "ACTIVE DURING CRASH";
 
-				public static LocString EXPECTED_ENABLED = "NOT ENABLED";
+				public static LocString EXPECTED_ENABLED = "NEWLY DISABLED";
 
-				public static LocString EXPECTED_DISABLED = "NOT DISABLED";
+				public static LocString EXPECTED_DISABLED = "NEWLY ENABLED";
 
 				public static LocString VERSION_UPDATE = "VERSION UPDATE";
 
@@ -3971,7 +3971,7 @@ namespace STRINGS
 				{
 					public static LocString TITLE = "LOAD FAILURE";
 
-					public static LocString MESSAGE = "Failed to load one or more mods:\n{0}\nThey will be re-installed when the game is restarted.\nGame may be unstable until then.";
+					public static LocString MESSAGE = "Failed to load one or more mods:\n{0}\nThey will be re-installed when the game is restarted.\nGame may be unstable until restarted.";
 				}
 
 				public class SAVE_GAME_MODS_DIFFER
@@ -3994,7 +3994,7 @@ namespace STRINGS
 				{
 					public static LocString TITLE = "MODS CHANGED";
 
-					public static LocString MESSAGE = "Previous config:\n{0}\nRestart required to reload mods.\nGame may be unstable until then.";
+					public static LocString MESSAGE = "{0}\nRestart required to reload mods.\nGame may be unstable until restarted.";
 				}
 
 				public class MOD_EVENTS
@@ -4014,7 +4014,7 @@ namespace STRINGS
 
 					public static LocString MESSAGE = "{0}\nRestart required.";
 
-					public static LocString DEV_MESSAGE = "{0}\nRestart required.\nGame may be unstable until then.";
+					public static LocString DEV_MESSAGE = "{0}\nRestart required.\nGame may be unstable until restarted.";
 				}
 			}
 
@@ -4610,6 +4610,67 @@ namespace STRINGS
 
 			public static LocString ITEM_UNKNOWN_DESCRIPTION = "Hmm. Looks like this blueprint is missing from the supply closet. Perhaps due to a temporal anomaly...";
 
+			public static LocString SEARCH_PLACEHOLDER = "Search";
+
+			public static LocString CLEAR_SEARCH_BUTTON_TOOLTIP = "Clear search";
+
+			public static LocString TOOLTIP_VIEW_ALL_ITEMS = "Filter: Showing all items\n\n" + UI.CLICK(UI.ClickType.Click) + " to toggle";
+
+			public static LocString TOOLTIP_VIEW_OWNED_ONLY = "Filter: Showing owned items Only\n\n" + UI.CLICK(UI.ClickType.Click) + " to toggle";
+
+			public static LocString TOOLTIP_VIEW_DOUBLES_ONLY = "Filter: Showing multiples owned only\n\n" + UI.CLICK(UI.ClickType.Click) + " to toggle";
+
+			public static class BARTERING
+			{
+				public static LocString TOOLTIP_ACTION_INVALID_OFFLINE = "Currently unavailable";
+
+				public static LocString BUY = "PRINT";
+
+				public static LocString TOOLTIP_BUY_ACTIVE = "This item requires {0} spools of Filament to print";
+
+				public static LocString TOOLTIP_UNBUYABLE = "This item is unprintable";
+
+				public static LocString TOOLTIP_UNBUYABLE_BETA = "This item will be printable after the public testing period";
+
+				public static LocString TOOLTIP_BUY_CANT_AFFORD = "Filament supply is too low";
+
+				public static LocString SELL = "RECYCLE";
+
+				public static LocString TOOLTIP_SELL_ACTIVE = "Recycle this blueprint for {0} spools of Filament";
+
+				public static LocString TOOLTIP_UNSELLABLE = "This item is non-recyclable";
+
+				public static LocString TOOLTIP_NONE_TO_SELL = "My colony does not own any of these blueprints";
+
+				public static LocString CANCEL = "CANCEL";
+
+				public static LocString CONFIRM_RECYCLE_HEADER = "RECYCLE INTO FILAMENT?";
+
+				public static LocString CONFIRM_PRINT_HEADER = "PRINT ITEM?";
+
+				public static LocString OFFLINE_LABEL = "Not connected to Klei server";
+
+				public static LocString LOADING = "Connecting to server...";
+
+				public static LocString TRANSACTION_ERROR = "Whoops! Something's gone wrong.";
+
+				public static LocString ACTION_DESCRIPTION_RECYCLE = "Recycling this blueprint will recover Filament that my colony can use to print other items.\n\nOne copy of this blueprint will be removed from my colony's supply closet.";
+
+				public static LocString ACTION_DESCRIPTION_PRINT = "Producing this blueprint requires Filament from my colony's supply.\n\nOne copy of this blueprint will be extruded at a time.";
+
+				public static LocString WALLET_TOOLTIP = "{0} spool of Filament available";
+
+				public static LocString WALLET_PLURAL_TOOLTIP = "{0} spools of Filament available";
+
+				public static LocString TRANSACTION_COMPLETE_HEADER = "SUCCESS!";
+
+				public static LocString TRANSACTION_INCOMPLETE_HEADER = "ERROR";
+
+				public static LocString PURCHASE_SUCCESS = "One copy of this blueprint has been added to my colony's supply closet.";
+
+				public static LocString SELL_SUCCESS = "The Filament recovered from recycling this item can now be used to print other items.";
+			}
+
 			public static class CATEGORIES
 			{
 				public static LocString EQUIPMENT = "Equipment";
@@ -4713,6 +4774,8 @@ namespace STRINGS
 
 				public static LocString CLOTHING_BOTTOMS_SHORTS = "Shorts";
 
+				public static LocString CLOTHING_BOTTOMS_SKIRTS = "Skirts";
+
 				public static LocString CLOTHING_BOTTOMS_UNDERWEAR = "Underwear";
 
 				public static LocString CLOTHING_GLOVES_BASIC = "Basic Gloves";
@@ -4761,7 +4824,7 @@ namespace STRINGS
 
 				public static LocString MONUMENT_PARTS = "Monuments";
 
-				public static LocString BUILDINGS_FLOWER_VASE = "Flower Pots";
+				public static LocString BUILDINGS_FLOWER_VASE = "Pots and Planters";
 
 				public static LocString BUILDINGS_BED_COT = "Cots";
 
@@ -4769,7 +4832,11 @@ namespace STRINGS
 
 				public static LocString BUILDING_CEILING_LIGHT = "Lights";
 
+				public static LocString BUILDINGS_STORAGE = "Storage";
+
 				public static LocString BUILDINGS_INDUSTRIAL = "Industrial";
+
+				public static LocString BUILDINGS_FOOD = "Culinary";
 
 				public static LocString BUILDINGS_RECREATION = "Recreation and Decor";
 			}
@@ -4885,6 +4952,8 @@ namespace STRINGS
 			public static LocString UNOPENED_ITEMS_TOOLTIP = "New blueprints available";
 
 			public static LocString UNOPENED_ITEMS_NONE_TOOLTIP = "All available blueprints claimed";
+
+			public static LocString OFFLINE_ICON_TOOLTIP = "Not connected to Klei server";
 		}
 
 		public class LOCKER_NAVIGATOR
@@ -5202,6 +5271,16 @@ namespace STRINGS
 			public class ATMOSUIT_BASIC_PURPLE
 			{
 				public static LocString NAME = "Eggplant Atmo Outfit";
+			}
+
+			public class ATMOSUIT_PINK_PURPLE
+			{
+				public static LocString NAME = "Pink Punch Atmo Outfit";
+			}
+
+			public class ATMOSUIT_RED_GREY
+			{
+				public static LocString NAME = "Blastoff Atmo Outfit";
 			}
 
 			public class CANUXTUX
@@ -7616,7 +7695,7 @@ namespace STRINGS
 
 				public static LocString ELEMENTSOTHER = UI.FormatAsLink("Other", "ELEMENTS_OTHER");
 
-				public static LocString ELEMENTSCLASSES = UI.FormatAsLink("Classes", "ELEMENTS_CLASSES");
+				public static LocString BUILDINGMATERIALCLASSES = UI.FormatAsLink("Building Materials", "BUILDING_MATERIAL_CLASSES");
 
 				public static LocString INDUSTRIALINGREDIENTS = UI.FormatAsLink("Industrial Ingredients", "INDUSTRIALINGREDIENTS");
 
@@ -7736,6 +7815,8 @@ namespace STRINGS
 			public static LocString GERMS = "Germs";
 
 			public static LocString ROCKET_MISSIONS = "Missions";
+
+			public static LocString TILES = "Tiles";
 
 			public class MASS
 			{
@@ -9007,6 +9088,8 @@ namespace STRINGS
 
 			public static LocString THANKYOU = "Thank you!\n\nYou're making our game better, one crash at a time.";
 
+			public static LocString UPLOAD_FAILED = "There was an issue in reporting this crash.\n\nPlease submit a bug report at:\n<u>https://forums.kleientertainment.com/klei-bug-tracker/oni/</u>";
+
 			public static LocString UPLOADINFO = "UPLOAD ADDITIONAL INFO ({0})";
 
 			public static LocString REPORTBUTTON = "REPORT CRASH";
@@ -9025,7 +9108,11 @@ namespace STRINGS
 
 			public static LocString LOADFAILED = "Load Failed: {0}\nSave Version: {1}\nExpected: {2}";
 
-			public static LocString REPORTEDERROR = "Reported Error";
+			public static LocString REPORTEDERROR_SUCCESS = "Reported Error";
+
+			public static LocString REPORTEDERROR_FAILURE = "Unable to report error. Please contact us using the bug tracker.";
+
+			public static LocString UPLOADINPROGRESS = "Submitting {0}";
 		}
 
 		public class DEMOOVERSCREEN
@@ -9198,9 +9285,9 @@ namespace STRINGS
 			{
 				public static LocString TITLE = "Style Selection";
 
-				public static LocString BUTTON = "Repaint";
+				public static LocString BUTTON = "Redecorate";
 
-				public static LocString BUTTON_TOOLTIP = "Clears current artwork\n\nCreates errand for a skilled Duplicant to paint selected style";
+				public static LocString BUTTON_TOOLTIP = "Clears current artwork\n\nCreates errand for a skilled Duplicant to create selected style";
 
 				public static LocString CLEAR_BUTTON_TOOLTIP = "Clears current artwork\n\nAllows a skilled Duplicant to create artwork of their choice";
 			}
@@ -9253,6 +9340,8 @@ namespace STRINGS
 				public static LocString ONLYALLOWSPICEDITEMSBUTTON = "Spiced Food Only";
 
 				public static LocString ONLYALLOWSPICEDITEMSBUTTONTOOLTIP = "Only store foods that have been spiced at the " + UI.PRE_KEYWORD + "Spice Grinder" + UI.PST_KEYWORD;
+
+				public static LocString SEARCH_PLACEHOLDER = "Search";
 			}
 
 			public class TELESCOPESIDESCREEN
@@ -9680,6 +9769,8 @@ namespace STRINGS
 
 				public class TOOLTIPS
 				{
+					public static LocString RECIPE_WORKTIME = "This recipe takes {0} to complete";
+
 					public static LocString RECIPERQUIREMENT_SUFFICIENT = "This recipe consumes {1} of an available {2} of {0}";
 
 					public static LocString RECIPERQUIREMENT_INSUFFICIENT = "This recipe requires {1} {0}\nAvailable: {2}";
@@ -10142,6 +10233,31 @@ namespace STRINGS
 				public static LocString SELECT_TITLE = "SELECT OBJECT";
 
 				public static LocString SELECT_DESC = "Select an object to display here.";
+			}
+
+			public class SPECIALCARGOBAYCLUSTER
+			{
+				public static LocString TITLE = "Target Critter";
+
+				public static LocString AWAITINGREQUEST = "SELECT: {0}";
+
+				public static LocString AWAITINGDELIVERY = "AWAITING DELIVERY: {0}";
+
+				public static LocString AWAITINGREMOVAL = "AWAITING REMOVAL: {0}";
+
+				public static LocString ENTITYDEPOSITED = "CONTENTS: {0}";
+
+				public static LocString DEPOSIT = "Select";
+
+				public static LocString CANCELDEPOSIT = "Cancel";
+
+				public static LocString REMOVE = "Remove";
+
+				public static LocString CANCELREMOVAL = "Cancel";
+
+				public static LocString SELECT_TITLE = "SELECT CRITTER";
+
+				public static LocString SELECT_DESC = "Select a critter to store in this module.";
 			}
 
 			public class LURE
@@ -10800,6 +10916,19 @@ namespace STRINGS
 				public static LocString WARMER_BUTTON = "Above";
 			}
 
+			public class BRIGHTNESSSWITCHSIDESCREEN
+			{
+				public static LocString TITLE = "Brightness Threshold";
+
+				public static LocString CURRENT_TEMPERATURE = "Current Brightness:\n{0}";
+
+				public static LocString ACTIVATE_IF = "Send " + UI.FormatAsAutomationState("Green Signal", UI.AutomationState.Active) + " if:";
+
+				public static LocString COLDER_BUTTON = "Below";
+
+				public static LocString WARMER_BUTTON = "Above";
+			}
+
 			public class RADIATIONSWITCHSIDESCREEN
 			{
 				public static LocString TITLE = "Radiation Threshold";
@@ -10897,6 +11026,54 @@ namespace STRINGS
 					" is below <b>{0}</b>"
 				});
 
+				public static LocString CONTENT_TEMPERATURE = "Internal Temperature";
+
+				public static LocString CONTENT_TEMPERATURE_TOOLTIP_ABOVE = string.Concat(new string[]
+				{
+					"Will send a ",
+					UI.FormatAsAutomationState("Green Signal", UI.AutomationState.Active),
+					" if the ",
+					UI.PRE_KEYWORD,
+					"Temperature",
+					UI.PST_KEYWORD,
+					" of its contents is above <b>{0}</b>"
+				});
+
+				public static LocString CONTENT_TEMPERATURE_TOOLTIP_BELOW = string.Concat(new string[]
+				{
+					"Will send a ",
+					UI.FormatAsAutomationState("Green Signal", UI.AutomationState.Active),
+					" if the ",
+					UI.PRE_KEYWORD,
+					"Temperature",
+					UI.PST_KEYWORD,
+					" of its contents is below <b>{0}</b>"
+				});
+
+				public static LocString BRIGHTNESS = "Ambient Brightness";
+
+				public static LocString BRIGHTNESS_TOOLTIP_ABOVE = string.Concat(new string[]
+				{
+					"Will send a ",
+					UI.FormatAsAutomationState("Green Signal", UI.AutomationState.Active),
+					" if the ambient ",
+					UI.PRE_KEYWORD,
+					"Brightness",
+					UI.PST_KEYWORD,
+					" is above <b>{0}</b>"
+				});
+
+				public static LocString BRIGHTNESS_TOOLTIP_BELOW = string.Concat(new string[]
+				{
+					"Will send a ",
+					UI.FormatAsAutomationState("Green Signal", UI.AutomationState.Active),
+					" if the ambient ",
+					UI.PRE_KEYWORD,
+					"Brightness",
+					UI.PST_KEYWORD,
+					" is below <b>{0}</b>"
+				});
+
 				public static LocString WATTAGE = "Wattage Reading";
 
 				public static LocString WATTAGE_TOOLTIP_ABOVE = string.Concat(new string[]
@@ -10948,6 +11125,8 @@ namespace STRINGS
 				});
 
 				public static LocString DISEASE_UNITS = "";
+
+				public static LocString CONTENT_DISEASE = "Germ Count";
 
 				public static LocString RADIATION = "Ambient Radiation";
 
@@ -12972,6 +13151,8 @@ namespace STRINGS
 
 				public static LocString AGRICULTURE = "Agriculture";
 
+				public static LocString MISC = "Other";
+
 				public static LocString ABSOLUTETEMPERATURE = "Temperature";
 
 				public static LocString ADAPTIVETEMPERATURE = "Adapt. Temperature";
@@ -13020,6 +13201,8 @@ namespace STRINGS
 				public static LocString GROUPNAME_CONDITION = "CONDITION";
 
 				public static LocString GROUPNAME_REQUIREMENTS = "REQUIREMENTS";
+
+				public static LocString GROUPNAME_EFFECTS = "EFFECTS";
 
 				public static LocString GROUPNAME_RESEARCH = "RESEARCH";
 

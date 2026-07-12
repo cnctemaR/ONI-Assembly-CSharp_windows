@@ -71,7 +71,7 @@ namespace STRINGS
 					" nest made by ",
 					UI.FormatAsLink("Beetas", "BEE"),
 					".\n\nConverts ",
-					UI.FormatAsLink("Uranium", "URANIUMORE"),
+					UI.FormatAsLink("Uranium Ore", "URANIUMORE"),
 					" into ",
 					UI.FormatAsLink("Enriched Uranium", "ENRICHEDURANIUM"),
 					" when worked by a Beeta.\nWill not function if ground below has been destroyed."
@@ -96,7 +96,7 @@ namespace STRINGS
 				public static LocString EFFECT = string.Concat(new string[]
 				{
 					"Refines ",
-					ITEMS.INDUSTRIAL_PRODUCTS.WOOD.NAME,
+					UI.FormatAsLink("Lumber", "WOOD"),
 					" into ",
 					UI.FormatAsLink("Ethanol", "ETHANOL"),
 					"."
@@ -220,6 +220,12 @@ namespace STRINGS
 				public static LocString LOGIC_PORT_ACTIVE = "Sends a " + UI.FormatAsAutomationState("Green Signal", UI.AutomationState.Active) + " when a critter has been trapped";
 
 				public static LocString LOGIC_PORT_INACTIVE = "Otherwise, sends a " + UI.FormatAsAutomationState("Red Signal", UI.AutomationState.Standby);
+
+				public static LocString INPUT_LOGIC_PORT = "Trap Setter";
+
+				public static LocString INPUT_LOGIC_PORT_ACTIVE = UI.FormatAsAutomationState("Green Signal", UI.AutomationState.Active) + ": Set trap";
+
+				public static LocString INPUT_LOGIC_PORT_INACTIVE = UI.FormatAsAutomationState("Red Signal", UI.AutomationState.Standby) + ": Disarm and empty trap";
 			}
 
 			public class CREATUREAIRTRAP
@@ -419,6 +425,26 @@ namespace STRINGS
 				public static LocString DESC = "Biological cargo bays allow Duplicants to retrieve alien plants and wildlife from space.";
 
 				public static LocString EFFECT = "Allows Duplicants to store unusual or organic resources found during space missions.\n\nStored resources become available to the colony upon the rocket's return.";
+			}
+
+			public class SPECIALCARGOBAYCLUSTER
+			{
+				public static LocString NAME = UI.FormatAsLink("Critter Cargo Bay", "SPECIALCARGOBAY");
+
+				public static LocString DESC = "Critters do not require feeding during transit.";
+
+				public static LocString EFFECT = string.Concat(new string[]
+				{
+					"Allows Duplicants to transport ",
+					UI.CODEX.CATEGORYNAMES.CREATURES,
+					" through space.\n\nSpecimens can be released into the colony upon the rocket's return.\n\nMust be built via ",
+					BUILDINGS.PREFABS.LAUNCHPAD.NAME,
+					"."
+				});
+
+				public static LocString RELEASE_BTN = "Release Critter";
+
+				public static LocString RELEASE_BTN_TOOLTIP = "Release the critter stored inside";
 			}
 
 			public class COMMANDMODULE
@@ -937,9 +963,9 @@ namespace STRINGS
 
 				public class OPTION_TOOLTIPS
 				{
-					public static LocString WATER = ELEMENTS.WATER.NAME + "\nPlain water just gives Duplicants an excuse to socialize.";
+					public static LocString WATER = ELEMENTS.WATER.NAME + "\nPlain potable water";
 
-					public static LocString MILK = ELEMENTS.MILK.NAME + "\nProvides Duplicants with a stress reduction and morale boost.";
+					public static LocString MILK = ELEMENTS.MILK.NAME + "\nA salty, green-hued beverage";
 				}
 
 				public class FACADES
@@ -948,7 +974,7 @@ namespace STRINGS
 					{
 						public static LocString NAME = UI.FormatAsLink("Water Cooler", "WATERCOOLER");
 
-						public static LocString DESC = "Chatting with friends improves Duplicants' moods and reduces their stress.";
+						public static LocString DESC = "Where Duplicants sip and socialize.";
 					}
 
 					public class ROUND_BODY
@@ -1506,6 +1532,20 @@ namespace STRINGS
 
 						public static LocString DESC = "A comfy, if somewhat 'fragrant', place to sleep.";
 					}
+
+					public class HAND
+					{
+						public static LocString NAME = UI.FormatAsLink("Cradled Bed", "LUXURYBED");
+
+						public static LocString DESC = "It's so nice to be held.";
+					}
+
+					public class RUBIKS
+					{
+						public static LocString NAME = UI.FormatAsLink("Puzzle Cube Bed", "LUXURYBED");
+
+						public static LocString DESC = "A little pattern recognition at bedtime soothes the mind.";
+					}
 				}
 			}
 
@@ -1639,6 +1679,13 @@ namespace STRINGS
 						public static LocString NAME = UI.FormatAsLink("Polka Dot Ceiling Light", "CEILINGLIGHT");
 
 						public static LocString DESC = "A fun lampshade for fun spaces.";
+					}
+
+					public class RUBIKS
+					{
+						public static LocString NAME = UI.FormatAsLink("Puzzle Cube Ceiling Light", "CEILINGLIGHT");
+
+						public static LocString DESC = "The initials E.R. are sewn into the lampshade.";
 					}
 				}
 			}
@@ -1794,6 +1841,20 @@ namespace STRINGS
 
 						public static LocString DESC = "It's all about cooperation, really.";
 					}
+
+					public class ART_N
+					{
+						public static LocString NAME = UI.FormatAsLink("Always Hope", "ART_N");
+
+						public static LocString DESC = "Most Duplicants believe that the balloon in this image is about to be caught.";
+					}
+
+					public class ART_P
+					{
+						public static LocString NAME = UI.FormatAsLink("Pour Soul", "ART_P");
+
+						public static LocString DESC = "It is a cruel guest who does not RSVP.";
+					}
 				}
 			}
 
@@ -1903,6 +1964,13 @@ namespace STRINGS
 
 						public static LocString DESC = "A dreamy abundance of swirls, whirls and whorls.";
 					}
+
+					public class ART_WIDE_M
+					{
+						public static LocString NAME = UI.FormatAsLink("Hot Afternoon", "ART_WIDE_M");
+
+						public static LocString DESC = "Things get a bit melty if they're forgotten in the sun.";
+					}
 				}
 			}
 
@@ -2011,6 +2079,13 @@ namespace STRINGS
 						public static LocString NAME = UI.FormatAsLink("Do Not Disturb", "ART_TALL_M");
 
 						public static LocString DESC = "No one likes being interrupted when they're waiting for inspiration to strike.";
+					}
+
+					public class ART_TALL_L
+					{
+						public static LocString NAME = UI.FormatAsLink("Mirror Ball", "ART_TALL_L");
+
+						public static LocString DESC = "Nearby, a companion animal waited for the object to be thrown.";
 					}
 				}
 			}
@@ -2158,7 +2233,7 @@ namespace STRINGS
 					" into ",
 					UI.FormatAsLink("Oxygen", "OXYGEN"),
 					" and ",
-					UI.FormatAsLink("Hydrogen", "HYDROGEN"),
+					UI.FormatAsLink("Hydrogen Gas", "HYDROGEN"),
 					".\n\nBecomes idle when the area reaches maximum pressure capacity."
 				});
 			}
@@ -2176,7 +2251,7 @@ namespace STRINGS
 					" into ",
 					UI.FormatAsLink("Oxygen", "OXYGEN"),
 					" and ",
-					UI.FormatAsLink("Chlorine", "CHLORINE"),
+					UI.FormatAsLink("Liquid Chlorine", "CHLORINE"),
 					".\n\nBecomes idle when the area reaches maximum pressure capacity."
 				});
 			}
@@ -2441,6 +2516,20 @@ namespace STRINGS
 						public static LocString NAME = UI.FormatAsLink("Elegant Hanging Pot", "FLOWERVASEHANGING");
 
 						public static LocString DESC = "Suspended vessels really elevate a plant display.";
+					}
+
+					public class BEAKER
+					{
+						public static LocString NAME = UI.FormatAsLink("Beaker Hanging Pot", "FLOWERVASEHANGING");
+
+						public static LocString DESC = "A measured approach to indoor plant decor.";
+					}
+
+					public class RUBIKS
+					{
+						public static LocString NAME = UI.FormatAsLink("Puzzle Cube Hanging Pot", "FLOWERVASEHANGING");
+
+						public static LocString DESC = "The real puzzle is how to keep indoor plants alive.";
 					}
 				}
 			}
@@ -2926,6 +3015,21 @@ namespace STRINGS
 				public static LocString EFFECT = "Generates warm, oxygen-rich air.";
 			}
 
+			public class DEVLIGHTGENERATOR
+			{
+				public static LocString NAME = "Dev Light Source";
+
+				public static LocString DESC = "Brightens up a dev's darkest hours.";
+
+				public static LocString EFFECT = "Generates dimmable light on demand.";
+
+				public static LocString FALLOFF_LABEL = "Falloff Rate";
+
+				public static LocString BRIGHTNESS_LABEL = "Brightness";
+
+				public static LocString RANGE_LABEL = "Range";
+			}
+
 			public class DEVRADIATIONGENERATOR
 			{
 				public static LocString NAME = "Dev Radiation Emitter";
@@ -2995,7 +3099,7 @@ namespace STRINGS
 				public static LocString EFFECT = string.Concat(new string[]
 				{
 					"Converts ",
-					UI.FormatAsLink("Hydrogen", "HYDROGEN"),
+					UI.FormatAsLink("Hydrogen Gas", "HYDROGEN"),
 					" into electrical ",
 					UI.FormatAsLink("Power", "POWER"),
 					"."
@@ -3573,72 +3677,128 @@ namespace STRINGS
 
 					public class STRIPES_BLUE
 					{
-						public static LocString NAME = "Blue Awning Stripe";
+						public static LocString NAME = UI.FormatAsLink("Blue Awning Stripe", "EXTERIORWALL");
 
 						public static LocString DESC = "Thick stripes in alternating shades of blue.";
 					}
 
 					public class STRIPES_DIAGONAL_BLUE
 					{
-						public static LocString NAME = "Blue Regimental Stripe";
+						public static LocString NAME = UI.FormatAsLink("Blue Regimental Stripe", "EXTERIORWALL");
 
 						public static LocString DESC = "Inspired by the ties worn during intraoffice sports.";
 					}
 
 					public class STRIPES_CIRCLE_BLUE
 					{
-						public static LocString NAME = "Blue Circle Stripe";
+						public static LocString NAME = UI.FormatAsLink("Blue Circle Stripe", "EXTERIORWALL");
 
 						public static LocString DESC = "A stripe that curves to the right.";
 					}
 
 					public class SQUARES_RED_DEEP_WHITE
 					{
-						public static LocString NAME = "Magma Checkers";
+						public static LocString NAME = UI.FormatAsLink("Magma Checkers", "EXTERIORWALL");
 
 						public static LocString DESC = "They're so hot right now!";
 					}
 
 					public class SQUARES_ORANGE_SATSUMA_WHITE
 					{
-						public static LocString NAME = "Bright Checkers";
+						public static LocString NAME = UI.FormatAsLink("Bright Checkers", "EXTERIORWALL");
 
 						public static LocString DESC = "Every tile feels like four tiles!";
 					}
 
 					public class SQUARES_YELLOW_LEMON_WHITE
 					{
-						public static LocString NAME = "Yellowcake Checkers";
+						public static LocString NAME = UI.FormatAsLink("Yellowcake Checkers", "EXTERIORWALL");
 
 						public static LocString DESC = "Any brighter, and they'd be radioactive!";
 					}
 
 					public class SQUARES_GREEN_KELLY_WHITE
 					{
-						public static LocString NAME = "Algae Checkers";
+						public static LocString NAME = UI.FormatAsLink("Algae Checkers", "EXTERIORWALL");
 
 						public static LocString DESC = "Now with real simulated algae color!";
 					}
 
 					public class SQUARES_BLUE_COBALT_WHITE
 					{
-						public static LocString NAME = "H2O Checkers";
+						public static LocString NAME = UI.FormatAsLink("H2O Checkers", "EXTERIORWALL");
 
 						public static LocString DESC = "Drink it all in!";
 					}
 
 					public class SQUARES_PINK_FLAMINGO_WHITE
 					{
-						public static LocString NAME = "Petal Checkers";
+						public static LocString NAME = UI.FormatAsLink("Petal Checkers", "EXTERIORWALL");
 
 						public static LocString DESC = "Fiercely fluorescent floral-inspired pink!";
 					}
 
 					public class SQUARES_GREY_CHARCOAL_WHITE
 					{
-						public static LocString NAME = "Charcoal Checkers";
+						public static LocString NAME = UI.FormatAsLink("Charcoal Checkers", "EXTERIORWALL");
 
 						public static LocString DESC = "So retro!";
+					}
+
+					public class KITCHEN_RETRO1
+					{
+						public static LocString NAME = UI.FormatAsLink("Cafeteria Kitsch", "EXTERIORWALL");
+
+						public static LocString DESC = "Some diners find it nostalgic.";
+					}
+
+					public class PLUS_RED_DEEP_WHITE
+					{
+						public static LocString NAME = UI.FormatAsLink("Digital Chili", "EXTERIORWALL");
+
+						public static LocString DESC = "A pixelated red-and-white print.";
+					}
+
+					public class PLUS_ORANGE_SATSUMA_WHITE
+					{
+						public static LocString NAME = UI.FormatAsLink("Digital Satsuma", "EXTERIORWALL");
+
+						public static LocString DESC = "A pixelated orange-and-white print.";
+					}
+
+					public class PLUS_YELLOW_LEMON_WHITE
+					{
+						public static LocString NAME = UI.FormatAsLink("Digital Lemon", "EXTERIORWALL");
+
+						public static LocString DESC = "A pixelated yellow-and-white print.";
+					}
+
+					public class PLUS_GREEN_KELLY_WHITE
+					{
+						public static LocString NAME = UI.FormatAsLink("Digital Lawn", "EXTERIORWALL");
+
+						public static LocString DESC = "A pixelated green-and-white print.";
+					}
+
+					public class PLUS_BLUE_COBALT_WHITE
+					{
+						public static LocString NAME = UI.FormatAsLink("Digital Cobalt", "EXTERIORWALL");
+
+						public static LocString DESC = "A pixelated blue-and-white print.";
+					}
+
+					public class PLUS_PINK_FLAMINGO_WHITE
+					{
+						public static LocString NAME = UI.FormatAsLink("Digital Pink", "EXTERIORWALL");
+
+						public static LocString DESC = "A pixelated pink-and-white print.";
+					}
+
+					public class PLUS_GREY_CHARCOAL_WHITE
+					{
+						public static LocString NAME = UI.FormatAsLink("Digital Charcoal", "EXTERIORWALL");
+
+						public static LocString DESC = "It's futuristic, so it must be good.";
 					}
 				}
 			}
@@ -4208,6 +4368,51 @@ namespace STRINGS
 					UI.FormatAsLink("Seed", "PLANTS"),
 					"."
 				});
+
+				public class FACADES
+				{
+					public class DEFAULT_PLANTERBOX
+					{
+						public static LocString NAME = UI.FormatAsLink("Planter Box", "PLANTERBOX");
+
+						public static LocString DESC = "Domestically grown seeds mature more quickly than wild plants.";
+					}
+
+					public class MEALWOOD
+					{
+						public static LocString NAME = UI.FormatAsLink("Mealy Teal Planter Box", "PLANTERBOX");
+
+						public static LocString DESC = "Inspired by genetically modified nature.";
+					}
+
+					public class BRISTLEBLOSSOM
+					{
+						public static LocString NAME = UI.FormatAsLink("Bristly Green Planter Box", "PLANTERBOX");
+
+						public static LocString DESC = "The interior is lined with tiny barbs.";
+					}
+
+					public class WHEEZEWORT
+					{
+						public static LocString NAME = UI.FormatAsLink("Wheezy Whorl Planter Box", "PLANTERBOX");
+
+						public static LocString DESC = "For the dreamy agriculturalist.";
+					}
+
+					public class SLEETWHEAT
+					{
+						public static LocString NAME = UI.FormatAsLink("Sleet Blue Planter Box", "PLANTERBOX");
+
+						public static LocString DESC = "The thick paint drips are invisible from a distance.";
+					}
+
+					public class SALMON_PINK
+					{
+						public static LocString NAME = UI.FormatAsLink("Flashy Planter Box", "PLANTERBOX");
+
+						public static LocString DESC = "It's not exactly a subtle color.";
+					}
+				}
 			}
 
 			public class PRESSUREDOOR
@@ -4560,6 +4765,13 @@ namespace STRINGS
 						public static LocString NAME = UI.FormatAsLink("Vertical Cosmos", "SCULPTURE_AMAZING_5");
 
 						public static LocString DESC = "It contains multitudes.";
+					}
+
+					public class SCULPTURE_AMAZING_6
+					{
+						public static LocString NAME = UI.FormatAsLink("Into the Voids", "SCULPTURE_AMAZING_6");
+
+						public static LocString DESC = "No amount of material success will ever fill the void within.";
 					}
 				}
 			}
@@ -5102,7 +5314,7 @@ namespace STRINGS
 				public static LocString EFFECT = string.Concat(new string[]
 				{
 					"Burns ",
-					UI.FormatAsLink("Refined Iron", "IRON"),
+					UI.FormatAsLink("Iron", "IRON"),
 					" and ",
 					UI.FormatAsLink("Oxylite", "OXYROCK"),
 					" to increase rocket exploration distance."
@@ -5136,6 +5348,51 @@ namespace STRINGS
 				public static LocString DESC = "Resources left on the floor become \"debris\" and lower decor when not put away.";
 
 				public static LocString EFFECT = "Stores the " + UI.FormatAsLink("Solid Materials", "ELEMENTS_SOLID") + " of your choosing.";
+
+				public class FACADES
+				{
+					public class DEFAULT_STORAGELOCKER
+					{
+						public static LocString NAME = UI.FormatAsLink("Storage Bin", "STORAGELOCKER");
+
+						public static LocString DESC = "Resources left on the floor become \"debris\" and lower decor when not put away.";
+					}
+
+					public class GREEN_MUSH
+					{
+						public static LocString NAME = UI.FormatAsLink("Mush Green Storage Bin", "STORAGELOCKER");
+
+						public static LocString DESC = "Color-coded storage makes things easier to find.";
+					}
+
+					public class RED_ROSE
+					{
+						public static LocString NAME = UI.FormatAsLink("Puce Pink Storage Bin", "STORAGELOCKER");
+
+						public static LocString DESC = "Color-coded storage makes things easier to find.";
+					}
+
+					public class BLUE_BABYTEARS
+					{
+						public static LocString NAME = UI.FormatAsLink("Weepy Blue Storage Bin", "STORAGELOCKER");
+
+						public static LocString DESC = "Color-coded storage makes things easier to find.";
+					}
+
+					public class PURPLE_BRAINFAT
+					{
+						public static LocString NAME = UI.FormatAsLink("Faint Purple Storage Bin", "STORAGELOCKER");
+
+						public static LocString DESC = "Color-coded storage makes things easier to find.";
+					}
+
+					public class YELLOW_TARTAR
+					{
+						public static LocString NAME = UI.FormatAsLink("Ick Yellow Storage Bin", "STORAGELOCKER");
+
+						public static LocString DESC = "Color-coded storage makes things easier to find.";
+					}
+				}
 			}
 
 			public class STORAGELOCKERSMART
@@ -5198,6 +5455,51 @@ namespace STRINGS
 				public static LocString DESC = "Reservoirs cannot receive manually delivered resources.";
 
 				public static LocString EFFECT = "Stores any " + UI.FormatAsLink("Gas", "ELEMENTS_GAS") + " resources piped into it.";
+
+				public class FACADES
+				{
+					public class DEFAULT_GASRESERVOIR
+					{
+						public static LocString NAME = UI.FormatAsLink("Gas Reservoir", "GASRESERVOIR");
+
+						public static LocString DESC = "Reservoirs cannot receive manually delivered resources.";
+					}
+
+					public class LIGHTGOLD
+					{
+						public static LocString NAME = UI.FormatAsLink("Golden Gas Reservoir", "GASRESERVOIR");
+
+						public static LocString DESC = "A colorful reservoir keeps gases neatly organized.";
+					}
+
+					public class PEAGREEN
+					{
+						public static LocString NAME = UI.FormatAsLink("Greenpea Gas Reservoir", "GASRESERVOIR");
+
+						public static LocString DESC = "A colorful reservoir keeps gases neatly organized.";
+					}
+
+					public class LIGHTCOBALT
+					{
+						public static LocString NAME = UI.FormatAsLink("Bluemoon Gas Reservoir", "GASRESERVOIR");
+
+						public static LocString DESC = "A colorful reservoir keeps gases neatly organized.";
+					}
+
+					public class POLKA_DARKPURPLERESIN
+					{
+						public static LocString NAME = UI.FormatAsLink("Mod Dot Gas Reservoir", "GASRESERVOIR");
+
+						public static LocString DESC = "It sports the cheeriest of paint jobs. What a gas!";
+					}
+
+					public class POLKA_DARKNAVYNOOKGREEN
+					{
+						public static LocString NAME = UI.FormatAsLink("Party Dot Gas Reservoir", "GASRESERVOIR");
+
+						public static LocString DESC = "Safe gas storage doesn't have to be dull.";
+					}
+				}
 			}
 
 			public class SMARTRESERVOIR
@@ -5852,6 +6154,20 @@ namespace STRINGS
 
 						public static LocString DESC = "Not designed to handle overcooked food waste.";
 					}
+
+					public class ROUNDSTAMP
+					{
+						public static LocString NAME = UI.FormatAsLink("Smooth Rock Crusher", "ROCKCRUSHER");
+
+						public static LocString DESC = "Inspired by the traditional mortar and pestle.";
+					}
+
+					public class SPIKEBEDS
+					{
+						public static LocString NAME = UI.FormatAsLink("Spiked Rock Crusher", "ROCKCRUSHER");
+
+						public static LocString DESC = "Mashes rocks into oblivion.";
+					}
 				}
 			}
 
@@ -5874,7 +6190,7 @@ namespace STRINGS
 
 				public static LocString EFFECT = "Processes " + UI.FormatAsLink("Rare Materials", "RAREMATERIALS") + " into advanced industrial goods.\n\nRare materials can be retrieved from space missions.\n\nDuplicants will not fabricate items unless recipes are queued.";
 
-				public static LocString SUPERCOOLANT_RECIPE_DESCRIPTION = "Super Coolant is an industrial grade " + UI.FormatAsLink("Fullerene", "FULLERENE") + " coolant.";
+				public static LocString SUPERCOOLANT_RECIPE_DESCRIPTION = "Super Coolant is an industrial-grade " + UI.FormatAsLink("Fullerene", "FULLERENE") + " coolant.";
 
 				public static LocString SUPERINSULATOR_RECIPE_DESCRIPTION = string.Concat(new string[]
 				{
@@ -5887,7 +6203,7 @@ namespace STRINGS
 
 				public static LocString TEMPCONDUCTORSOLID_RECIPE_DESCRIPTION = "Thermium is an industrial metal alloy formulated to maximize " + UI.FormatAsLink("Heat Transfer", "HEAT") + " and thermal dispersion.";
 
-				public static LocString VISCOGEL_RECIPE_DESCRIPTION = "Visco-Gel is a " + UI.FormatAsLink("Liquid", "ELEMENTS_LIQUID") + " polymer with high surface tension.";
+				public static LocString VISCOGEL_RECIPE_DESCRIPTION = "Visco-Gel Fluid is a " + UI.FormatAsLink("Liquid", "ELEMENTS_LIQUID") + " polymer with high surface tension.";
 
 				public static LocString YELLOWCAKE_RECIPE_DESCRIPTION = "Yellowcake is a " + UI.FormatAsLink("Solid Material", "ELEMENTS_SOLID") + " used in uranium enrichment.";
 
@@ -6438,6 +6754,37 @@ namespace STRINGS
 				public static LocString LOGIC_PORT_INACTIVE = "Otherwise, sends a " + UI.FormatAsAutomationState("Red Signal", UI.AutomationState.Standby);
 			}
 
+			public class LOGICLIGHTSENSOR
+			{
+				public static LocString NAME = UI.FormatAsLink("Light Sensor", "LOGICLIGHTSENSOR");
+
+				public static LocString DESC = "Light sensors can tell surface bunker doors above solar panels to open or close based on solar light levels.";
+
+				public static LocString EFFECT = string.Concat(new string[]
+				{
+					"Sends a ",
+					UI.FormatAsAutomationState("Green Signal", UI.AutomationState.Active),
+					" or a ",
+					UI.FormatAsAutomationState("Red Signal", UI.AutomationState.Standby),
+					" when ambient ",
+					UI.FormatAsLink("Brightness", "LIGHT"),
+					" enters the chosen range."
+				});
+
+				public static LocString LOGIC_PORT = "Ambient " + UI.FormatAsLink("Brightness", "LIGHT");
+
+				public static LocString LOGIC_PORT_ACTIVE = string.Concat(new string[]
+				{
+					"Sends a ",
+					UI.FormatAsAutomationState("Green Signal", UI.AutomationState.Active),
+					" if ambient ",
+					UI.FormatAsLink("Brightness", "LIGHT"),
+					" is within the selected range"
+				});
+
+				public static LocString LOGIC_PORT_INACTIVE = "Otherwise, sends a " + UI.FormatAsAutomationState("Red Signal", UI.AutomationState.Standby);
+			}
+
 			public class LOGICWATTAGESENSOR
 			{
 				public static LocString NAME = UI.FormatAsLink("Wattage Sensor", "LOGICWATTSENSOR");
@@ -6917,7 +7264,7 @@ namespace STRINGS
 					" range."
 				});
 
-				public static LocString LOGIC_PORT = "Internal item " + UI.FormatAsLink("Temperature", "HEAT");
+				public static LocString LOGIC_PORT = "Internal Item " + UI.FormatAsLink("Temperature", "HEAT");
 
 				public static LocString LOGIC_PORT_ACTIVE = "Sends a " + UI.FormatAsAutomationState("Green Signal", UI.AutomationState.Active) + " if the contained item is within the selected Temperature range";
 
@@ -7438,6 +7785,37 @@ namespace STRINGS
 				public static LocString RECIPE_DESCRIPTION = "Turns {0} into {1}.";
 
 				public static LocString RESULT_DESCRIPTION = "Cracked {0}";
+
+				public class FACADES
+				{
+					public class DEFAULT_EGGCRACKER
+					{
+						public static LocString NAME = UI.FormatAsLink("Egg Cracker", "EGGCRACKER");
+
+						public static LocString DESC = "It cracks eggs.";
+					}
+
+					public class BEAKER
+					{
+						public static LocString NAME = UI.FormatAsLink("Beaker Cracker", "EGGCRACKER");
+
+						public static LocString DESC = "A practical exercise in physics.";
+					}
+
+					public class FLOWER
+					{
+						public static LocString NAME = UI.FormatAsLink("Blossom Cracker", "EGGCRACKER");
+
+						public static LocString DESC = "Now with EZ-clean petals.";
+					}
+
+					public class HANDS
+					{
+						public static LocString NAME = UI.FormatAsLink("Handy Cracker", "EGGCRACKER");
+
+						public static LocString DESC = "Just like Mi-Ma used to have.";
+					}
+				}
 			}
 
 			public class URANIUMCENTRIFUGE
@@ -8016,7 +8394,7 @@ namespace STRINGS
 					".\n\nAbsorbs and neutralizes ",
 					UI.FormatAsLink("Heat", "HEAT"),
 					" energy when provided with piped ",
-					UI.FormatAsLink("Hydrogen", "HYDROGEN"),
+					UI.FormatAsLink("Hydrogen Gas", "HYDROGEN"),
 					"."
 				});
 			}

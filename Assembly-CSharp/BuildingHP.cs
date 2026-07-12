@@ -275,7 +275,7 @@ public class BuildingHP : Workable
 				vector += Vector3.left * (1f + 0.5f * (float)(base.smi.master.building.Def.WidthInCells % 2));
 			}
 			this.progressBar.transform.SetPosition(vector);
-			this.progressBar.gameObject.SetActive(true);
+			this.progressBar.SetVisibility(true);
 		}
 
 		private static string ToolTipResolver(List<Notification> notificationList, object data)

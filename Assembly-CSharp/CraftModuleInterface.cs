@@ -676,42 +676,61 @@ public class CraftModuleInterface : KMonoBehaviour, ISim4000ms
 			list.Add(@ref.Get());
 		}
 		List<GameObject> list2 = new List<GameObject>();
+		List<GameObject> list3 = new List<GameObject>();
 		foreach (RocketModule rocketModule in list)
 		{
 			Storage[] components = rocketModule.GetComponents<Storage>();
 			for (int i = 0; i < components.Length; i++)
 			{
-				components[i].DropAll(false, false, default(Vector3), true, list2);
-			}
-			Deconstructable component = rocketModule.GetComponent<Deconstructable>();
-			list2.AddRange(component.ForceDestroyAndGetMaterials());
-		}
-		List<Storage> list3 = new List<Storage>();
-		foreach (GameObject gameObject in list2)
-		{
-			Pickupable component2 = gameObject.GetComponent<Pickupable>();
-			if (component2 != null)
-			{
-				component2.PrimaryElement.Units = (float)Mathf.Max(1, Mathf.RoundToInt(component2.PrimaryElement.Units * 0.5f));
-				if ((list3.Count == 0 || list3[list3.Count - 1].RemainingCapacity() == 0f) && component2.PrimaryElement.Mass > 0f)
+				components[i].DropAll(false, false, default(Vector3), true, list3);
+				foreach (GameObject gameObject in list3)
 				{
-					list3.Add(CraftModuleInterface.SpawnRocketDebris(" from CMI", elementID));
+					if (gameObject.HasTag(GameTags.Creature))
+					{
+						Butcherable component = gameObject.GetComponent<Butcherable>();
+						if (component != null && component.drops != null && component.drops.Length != 0)
+						{
+							GameObject[] array = component.CreateDrops();
+							list2.AddRange(array);
+						}
+						gameObject.DeleteObject();
+					}
+					else
+					{
+						list2.Add(gameObject);
+					}
 				}
-				Storage storage = list3[list3.Count - 1];
-				while (component2.PrimaryElement.Mass > storage.RemainingCapacity())
+				list3.Clear();
+			}
+			Deconstructable component2 = rocketModule.GetComponent<Deconstructable>();
+			list2.AddRange(component2.ForceDestroyAndGetMaterials());
+		}
+		List<Storage> list4 = new List<Storage>();
+		foreach (GameObject gameObject2 in list2)
+		{
+			Pickupable component3 = gameObject2.GetComponent<Pickupable>();
+			if (component3 != null)
+			{
+				component3.PrimaryElement.Units = (float)Mathf.Max(1, Mathf.RoundToInt(component3.PrimaryElement.Units * 0.5f));
+				if ((list4.Count == 0 || list4[list4.Count - 1].RemainingCapacity() == 0f) && component3.PrimaryElement.Mass > 0f)
 				{
-					Pickupable pickupable = component2.Take(storage.RemainingCapacity());
+					list4.Add(CraftModuleInterface.SpawnRocketDebris(" from CMI", elementID));
+				}
+				Storage storage = list4[list4.Count - 1];
+				while (component3.PrimaryElement.Mass > storage.RemainingCapacity())
+				{
+					Pickupable pickupable = component3.Take(storage.RemainingCapacity());
 					storage.Store(pickupable.gameObject, false, false, true, false);
 					storage = CraftModuleInterface.SpawnRocketDebris(" from CMI", elementID);
-					list3.Add(storage);
+					list4.Add(storage);
 				}
-				if (component2.PrimaryElement.Mass > 0f)
+				if (component3.PrimaryElement.Mass > 0f)
 				{
-					storage.Store(component2.gameObject, false, false, true, false);
+					storage.Store(component3.gameObject, false, false, true, false);
 				}
 			}
 		}
-		foreach (Storage storage2 in list3)
+		foreach (Storage storage2 in list4)
 		{
 			RailGunPayload.StatesInstance smi = storage2.GetSMI<RailGunPayload.StatesInstance>();
 			smi.StartSM();

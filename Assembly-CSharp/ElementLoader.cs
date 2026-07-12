@@ -166,14 +166,7 @@ public class ElementLoader
 		}
 		string text = UI.StripLinkFormatting(elem.name);
 		elem.substance.name = text;
-		if (Array.IndexOf<SimHashes>((SimHashes[])Enum.GetValues(typeof(SimHashes)), elem.id) >= 0)
-		{
-			elem.substance.nameTag = GameTagExtensions.Create(elem.id);
-		}
-		else
-		{
-			elem.substance.nameTag = ((text != null) ? TagManager.Create(text) : Tag.Invalid);
-		}
+		elem.substance.nameTag = elem.tag;
 		elem.substance.audioConfig = ElementsAudio.Instance.GetConfigForElement(elem.id);
 		substanceList.Add(elem.id, elem.substance);
 		return true;

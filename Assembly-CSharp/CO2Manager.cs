@@ -48,8 +48,7 @@ public class CO2Manager : KMonoBehaviour, ISim33ms
 			co.transform.SetPosition(co.transform.GetPosition() + co.velocity * dt);
 			Grid.PosToXY(co.transform.GetPosition(), out vector2I2);
 			int num2 = Grid.XYToCell(vector2I.x, vector2I.y);
-			int j = vector2I.y;
-			while (j >= vector2I2.y)
+			for (int j = vector2I.y; j >= vector2I2.y; j--)
 			{
 				int num3 = Grid.XYToCell(vector2I.x, j);
 				bool flag = !Grid.IsValidCell(num3) || co.lifetimeRemaining <= 0f;
@@ -104,22 +103,17 @@ public class CO2Manager : KMonoBehaviour, ISim33ms
 							}
 						}
 					}
-					co.TriggerDestroy();
 					if (flag2)
 					{
+						co.TriggerDestroy();
 						SimMessages.ModifyMass(num4, co.mass, byte.MaxValue, 0, CellEventLogger.Instance.CO2ManagerFixedUpdate, co.temperature, SimHashes.CarbonDioxide);
 						num--;
 						this.co2Items[i] = this.co2Items[num];
 						this.co2Items.RemoveAt(num);
 						break;
 					}
-					break;
 				}
-				else
-				{
-					num2 = num3;
-					j--;
-				}
+				num2 = num3;
 			}
 		}
 	}

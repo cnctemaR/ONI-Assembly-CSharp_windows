@@ -6,6 +6,8 @@ using UnityEngine;
 [AddComponentMenu("KMonoBehaviour/scripts/TreeFilterableSideScreenRow")]
 public class TreeFilterableSideScreenRow : KMonoBehaviour
 {
+	public bool ArrowExpanded { get; private set; }
+
 	public TreeFilterableSideScreen Parent
 	{
 		get
@@ -58,18 +60,21 @@ public class TreeFilterableSideScreenRow : KMonoBehaviour
 		MultiToggle multiToggle = this.checkBoxToggle;
 		multiToggle.onClick = (global::System.Action)Delegate.Combine(multiToggle.onClick, new global::System.Action(delegate
 		{
-			TreeFilterableSideScreenRow.State state = this.GetState();
-			if (state > TreeFilterableSideScreenRow.State.Mixed)
+			if (this.parent.CurrentSearchValue == "")
 			{
-				if (state == TreeFilterableSideScreenRow.State.On)
+				TreeFilterableSideScreenRow.State state = this.GetState();
+				if (state > TreeFilterableSideScreenRow.State.Mixed)
 				{
-					this.ChangeCheckBoxState(TreeFilterableSideScreenRow.State.Off);
-					return;
+					if (state == TreeFilterableSideScreenRow.State.On)
+					{
+						this.ChangeCheckBoxState(TreeFilterableSideScreenRow.State.Off);
+						return;
+					}
 				}
-			}
-			else
-			{
-				this.ChangeCheckBoxState(TreeFilterableSideScreenRow.State.On);
+				else
+				{
+					this.ChangeCheckBoxState(TreeFilterableSideScreenRow.State.On);
+				}
 			}
 		}));
 	}
@@ -106,43 +111,52 @@ public class TreeFilterableSideScreenRow : KMonoBehaviour
 		switch (newState)
 		{
 		case TreeFilterableSideScreenRow.State.Off:
-			this.rowElements.ForEach(delegate(TreeFilterableSideScreenElement re)
+		{
+			for (int i = 0; i < this.rowElements.Count; i++)
 			{
-				re.SetCheckBox(false);
-			});
+				this.rowElements[i].SetCheckBox(false);
+			}
 			break;
+		}
 		case TreeFilterableSideScreenRow.State.On:
-			this.rowElements.ForEach(delegate(TreeFilterableSideScreenElement re)
+		{
+			for (int j = 0; j < this.rowElements.Count; j++)
 			{
-				re.SetCheckBox(true);
-			});
+				this.rowElements[j].SetCheckBox(true);
+			}
 			break;
+		}
 		}
 		this.visualDirty = true;
 	}
 
 	private void ArrowToggleClicked()
 	{
-		this.SetArrowToggleState(this.arrowToggle.CurrentState != 1);
-		this.UpdateArrowToggleState();
+		this.SetArrowToggleState(!this.ArrowExpanded);
+		this.RefreshArrowToggleState();
 	}
 
-	private void SetArrowToggleState(bool state)
+	public void SetArrowToggleState(bool state)
 	{
-		this.arrowToggle.ChangeState(state ? 1 : 0);
-		this.UpdateArrowToggleState();
+		this.ArrowExpanded = state;
+		this.RefreshArrowToggleState();
 	}
 
-	private void UpdateArrowToggleState()
+	private void RefreshArrowToggleState()
 	{
-		bool currentState = this.arrowToggle.CurrentState != 0;
-		this.elementGroup.SetActive(currentState);
-		this.bgImg.enabled = currentState;
+		this.arrowToggle.ChangeState(this.ArrowExpanded ? 1 : 0);
+		this.elementGroup.SetActive(this.ArrowExpanded);
+		this.bgImg.enabled = this.ArrowExpanded;
 	}
 
 	private void ArrowToggleDisabledClick()
 	{
 		KMonoBehaviour.PlaySound(GlobalAssets.GetSound("Negative", false));
+	}
+
+	public void ShowToggleBox(bool show)
+	{
+		this.checkBoxToggle.gameObject.SetActive(show);
 	}
 
 	private void OnElementSelectionChanged(Tag t, bool state)
@@ -192,6 +206,25 @@ public class TreeFilterableSideScreenRow : KMonoBehaviour
 			}
 		}
 		this.UpdateCheckBoxVisualState();
+	}
+
+	public void FilterAgainstSearch(Tag thisCategoryTag, string search)
+	{
+		bool flag = false;
+		bool flag2 = thisCategoryTag.ProperNameStripLink().ToUpper().Contains(search.ToUpper());
+		search = search.ToUpper();
+		foreach (TreeFilterableSideScreenElement treeFilterableSideScreenElement in this.rowElements)
+		{
+			bool flag3 = flag2 || treeFilterableSideScreenElement.GetElementTag().ProperNameStripLink().ToUpper()
+				.Contains(search.ToUpper());
+			treeFilterableSideScreenElement.gameObject.SetActive(flag3);
+			flag = flag || flag3;
+		}
+		base.gameObject.SetActive(flag);
+		if (search != "" && flag && this.arrowToggle.CurrentState == 0)
+		{
+			this.SetArrowToggleState(true);
+		}
 	}
 
 	public bool visualDirty;

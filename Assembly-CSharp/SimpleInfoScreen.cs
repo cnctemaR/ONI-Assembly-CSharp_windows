@@ -10,9 +10,7 @@ using UnityEngine.UI;
 
 public class SimpleInfoScreen : TargetScreen, ISim4000ms, ISim1000ms
 {
-	public GameObject StoragePanel { get; private set; }
-
-	public GameObject MovePanel { get; private set; }
+	public CollapsibleDetailContentPanel StoragePanel { get; private set; }
 
 	public override bool IsValidForTarget(GameObject target)
 	{
@@ -23,46 +21,44 @@ public class SimpleInfoScreen : TargetScreen, ISim4000ms, ISim1000ms
 	{
 		this.onStorageChangeDelegate = new Action<object>(this.OnStorageChange);
 		base.OnPrefabInit();
-		this.processConditionContainer = global::Util.KInstantiateUI(ScreenPrefabs.Instance.CollapsableContentPanel, base.gameObject, false);
-		this.processConditionContainer.GetComponent<CollapsibleDetailContentPanel>().HeaderLabel.text = UI.DETAILTABS.PROCESS_CONDITIONS.NAME;
-		this.statusItemPanel = global::Util.KInstantiateUI<CollapsibleDetailContentPanel>(ScreenPrefabs.Instance.CollapsableContentPanel, base.gameObject, false);
+		this.processConditionContainer = this.CreateCollapsableSection(UI.DETAILTABS.PROCESS_CONDITIONS.NAME);
+		this.statusItemPanel = this.CreateCollapsableSection(UI.DETAILTABS.SIMPLEINFO.GROUPNAME_STATUS);
 		this.statusItemPanel.Content.GetComponent<VerticalLayoutGroup>().padding.bottom = 10;
-		this.statusItemPanel.HeaderLabel.text = UI.DETAILTABS.SIMPLEINFO.GROUPNAME_STATUS;
 		this.statusItemPanel.scalerMask.hoverLock = true;
 		this.statusItemsFolder = this.statusItemPanel.Content.gameObject;
 		this.spaceSimpleInfoPOIPanel = new SpacePOISimpleInfoPanel(this);
-		this.spacePOIPanel = global::Util.KInstantiateUI<CollapsibleDetailContentPanel>(ScreenPrefabs.Instance.CollapsableContentPanel, base.gameObject, false);
+		this.spacePOIPanel = this.CreateCollapsableSection(null);
 		this.rocketSimpleInfoPanel = new RocketSimpleInfoPanel(this);
-		this.rocketStatusContainer = global::Util.KInstantiateUI<CollapsibleDetailContentPanel>(ScreenPrefabs.Instance.CollapsableContentPanel, base.gameObject, false);
-		this.rocketStatusContainer.SetTitle(UI.DETAILTABS.SIMPLEINFO.GROUPNAME_ROCKET);
-		this.vitalsPanel = global::Util.KInstantiateUI<CollapsibleDetailContentPanel>(ScreenPrefabs.Instance.CollapsableContentPanel, base.gameObject, false);
-		this.vitalsPanel.SetTitle(UI.DETAILTABS.SIMPLEINFO.GROUPNAME_CONDITION);
+		this.rocketStatusContainer = this.CreateCollapsableSection(UI.DETAILTABS.SIMPLEINFO.GROUPNAME_ROCKET);
+		this.vitalsPanel = this.CreateCollapsableSection(UI.DETAILTABS.SIMPLEINFO.GROUPNAME_CONDITION);
 		this.vitalsContainer = global::Util.KInstantiateUI(this.VitalsPanelTemplate, this.vitalsPanel.Content.gameObject, false).GetComponent<MinionVitalsPanel>();
-		this.fertilityPanel = global::Util.KInstantiateUI<CollapsibleDetailContentPanel>(ScreenPrefabs.Instance.CollapsableContentPanel, base.gameObject, false);
-		this.fertilityPanel.SetTitle(UI.DETAILTABS.SIMPLEINFO.GROUPNAME_FERTILITY);
-		this.infoPanel = global::Util.KInstantiateUI(ScreenPrefabs.Instance.CollapsableContentPanel, base.gameObject, false);
-		this.infoPanel.GetComponent<CollapsibleDetailContentPanel>().HeaderLabel.text = UI.DETAILTABS.SIMPLEINFO.GROUPNAME_DESCRIPTION;
-		GameObject gameObject = this.infoPanel.GetComponent<CollapsibleDetailContentPanel>().Content.gameObject;
-		this.descriptionContainer = global::Util.KInstantiateUI<DescriptionContainer>(this.DescriptionContainerTemplate, gameObject, false);
-		this.worldLifePanel = global::Util.KInstantiateUI<CollapsibleDetailContentPanel>(ScreenPrefabs.Instance.CollapsableContentPanel, base.gameObject, false);
-		this.worldLifePanel.SetTitle(UI.DETAILTABS.SIMPLEINFO.GROUPNAME_LIFE);
-		this.worldTraitsPanel = global::Util.KInstantiateUI<CollapsibleDetailContentPanel>(ScreenPrefabs.Instance.CollapsableContentPanel, base.gameObject, false);
-		this.worldTraitsPanel.GetComponent<CollapsibleDetailContentPanel>().HeaderLabel.text = UI.DETAILTABS.SIMPLEINFO.GROUPNAME_WORLDTRAITS;
-		this.worldElementsPanel = global::Util.KInstantiateUI<CollapsibleDetailContentPanel>(ScreenPrefabs.Instance.CollapsableContentPanel, base.gameObject, false);
-		this.worldElementsPanel.SetTitle(UI.DETAILTABS.SIMPLEINFO.GROUPNAME_ELEMENTS);
-		this.worldGeysersPanel = global::Util.KInstantiateUI<CollapsibleDetailContentPanel>(ScreenPrefabs.Instance.CollapsableContentPanel, base.gameObject, false);
-		this.worldGeysersPanel.SetTitle(UI.DETAILTABS.SIMPLEINFO.GROUPNAME_GEYSERS);
-		this.worldMeteorShowersPanel = global::Util.KInstantiateUI<CollapsibleDetailContentPanel>(ScreenPrefabs.Instance.CollapsableContentPanel, base.gameObject, false);
-		this.worldMeteorShowersPanel.SetTitle(UI.DETAILTABS.SIMPLEINFO.GROUPNAME_METEORSHOWERS);
-		this.worldBiomesPanel = global::Util.KInstantiateUI<CollapsibleDetailContentPanel>(ScreenPrefabs.Instance.CollapsableContentPanel, base.gameObject, false);
-		this.worldBiomesPanel.SetTitle(UI.DETAILTABS.SIMPLEINFO.GROUPNAME_BIOMES);
-		this.StoragePanel = global::Util.KInstantiateUI(ScreenPrefabs.Instance.CollapsableContentPanel, base.gameObject, false);
-		this.stressPanel = global::Util.KInstantiateUI(ScreenPrefabs.Instance.CollapsableContentPanel, base.gameObject, false);
-		this.stressDrawer = new DetailsPanelDrawer(this.attributesLabelTemplate, this.stressPanel.GetComponent<CollapsibleDetailContentPanel>().Content.gameObject);
-		this.MovePanel = global::Util.KInstantiateUI(ScreenPrefabs.Instance.CollapsableContentPanel, base.gameObject, false);
-		this.MovePanel.GetComponent<CollapsibleDetailContentPanel>().SetTitle(UI.DETAILTABS.SIMPLEINFO.GROUPNAME_MOVABLE);
-		this.stampContainer = global::Util.KInstantiateUI(this.StampContainerTemplate, gameObject, false);
+		this.fertilityPanel = this.CreateCollapsableSection(UI.DETAILTABS.SIMPLEINFO.GROUPNAME_FERTILITY);
+		this.infoPanel = this.CreateCollapsableSection(UI.DETAILTABS.SIMPLEINFO.GROUPNAME_DESCRIPTION);
+		this.requirementsPanel = this.CreateCollapsableSection(UI.DETAILTABS.SIMPLEINFO.GROUPNAME_REQUIREMENTS);
+		this.requirementContent = global::Util.KInstantiateUI<DescriptorPanel>(this.DescriptorContentPrefab.gameObject, this.requirementsPanel.Content.gameObject, false);
+		this.effectsPanel = this.CreateCollapsableSection(UI.DETAILTABS.SIMPLEINFO.GROUPNAME_EFFECTS);
+		this.effectsContent = global::Util.KInstantiateUI<DescriptorPanel>(this.DescriptorContentPrefab.gameObject, this.effectsPanel.Content.gameObject, false);
+		this.worldMeteorShowersPanel = this.CreateCollapsableSection(UI.DETAILTABS.SIMPLEINFO.GROUPNAME_METEORSHOWERS);
+		this.worldElementsPanel = this.CreateCollapsableSection(UI.DETAILTABS.SIMPLEINFO.GROUPNAME_ELEMENTS);
+		this.worldGeysersPanel = this.CreateCollapsableSection(UI.DETAILTABS.SIMPLEINFO.GROUPNAME_GEYSERS);
+		this.worldTraitsPanel = this.CreateCollapsableSection(UI.DETAILTABS.SIMPLEINFO.GROUPNAME_WORLDTRAITS);
+		this.worldBiomesPanel = this.CreateCollapsableSection(UI.DETAILTABS.SIMPLEINFO.GROUPNAME_BIOMES);
+		this.worldLifePanel = this.CreateCollapsableSection(UI.DETAILTABS.SIMPLEINFO.GROUPNAME_LIFE);
+		this.StoragePanel = this.CreateCollapsableSection(null);
+		this.stressPanel = this.CreateCollapsableSection(null);
+		this.stressDrawer = new DetailsPanelDrawer(this.attributesLabelTemplate, this.stressPanel.Content.gameObject);
+		this.movePanel = this.CreateCollapsableSection(UI.DETAILTABS.SIMPLEINFO.GROUPNAME_MOVABLE);
 		base.Subscribe<SimpleInfoScreen>(-1514841199, SimpleInfoScreen.OnRefreshDataDelegate);
+	}
+
+	private CollapsibleDetailContentPanel CreateCollapsableSection(string title = null)
+	{
+		CollapsibleDetailContentPanel collapsibleDetailContentPanel = global::Util.KInstantiateUI<CollapsibleDetailContentPanel>(ScreenPrefabs.Instance.CollapsableContentPanel, base.gameObject, false);
+		if (!string.IsNullOrEmpty(title))
+		{
+			collapsibleDetailContentPanel.SetTitle(title);
+		}
+		return collapsibleDetailContentPanel;
 	}
 
 	public override void OnSelectTarget(GameObject target)
@@ -239,7 +235,6 @@ public class SimpleInfoScreen : TargetScreen, ISim4000ms, ISim1000ms
 			if (this.selectedTarget != null)
 			{
 				this.SetPanels(this.selectedTarget);
-				this.SetStamps(this.selectedTarget);
 			}
 		}
 		int count = this.statusItems.Count;
@@ -292,12 +287,12 @@ public class SimpleInfoScreen : TargetScreen, ISim4000ms, ISim1000ms
 		}
 		if (component8)
 		{
-			this.processConditionContainer.SetActive(true);
+			this.processConditionContainer.gameObject.SetActive(true);
 			this.RefreshProcessConditions();
 		}
 		else
 		{
-			this.processConditionContainer.SetActive(false);
+			this.processConditionContainer.gameObject.SetActive(false);
 		}
 		if (component)
 		{
@@ -306,6 +301,7 @@ public class SimpleInfoScreen : TargetScreen, ISim4000ms, ISim1000ms
 		else if (component6)
 		{
 			text = component6.description;
+			text2 = component6.effect;
 		}
 		else if (component3 != null)
 		{
@@ -331,24 +327,50 @@ public class SimpleInfoScreen : TargetScreen, ISim4000ms, ISim1000ms
 			Element element = ElementLoader.FindElementByHash(component2.ElementID);
 			text = ((element != null) ? element.FullDescription(false) : "");
 		}
-		List<Descriptor> gameObjectEffects = GameUtil.GetGameObjectEffects(target, true);
-		bool flag = gameObjectEffects.Count > 0;
-		this.descriptionContainer.gameObject.SetActive(flag);
-		this.descriptionContainer.descriptors.gameObject.SetActive(flag);
-		if (flag)
-		{
-			this.descriptionContainer.descriptors.SetDescriptors(gameObjectEffects);
-		}
-		this.descriptionContainer.description.text = text;
-		this.descriptionContainer.flavour.text = text2;
-		bool flag2 = text.IsNullOrWhiteSpace() && text2.IsNullOrWhiteSpace() && !flag;
-		this.infoPanel.gameObject.SetActive(component == null && !flag2);
-		this.descriptionContainer.gameObject.SetActive(this.infoPanel.activeSelf);
-		this.descriptionContainer.flavour.gameObject.SetActive(text2 != "" && text2 != "\n");
 		if (this.vitalsPanel.gameObject.activeSelf && amounts.Count == 0)
 		{
 			this.vitalsPanel.gameObject.SetActive(false);
 		}
+		List<Descriptor> allDescriptors = GameUtil.GetAllDescriptors(target, true);
+		List<Descriptor> gameObjectEffects = GameUtil.GetGameObjectEffects(target, true);
+		List<Descriptor> requirementDescriptors = GameUtil.GetRequirementDescriptors(allDescriptors, false);
+		bool flag = gameObjectEffects.Count > 0;
+		this.effectsContent.gameObject.SetActive(flag);
+		if (flag)
+		{
+			this.effectsContent.SetDescriptors(gameObjectEffects);
+		}
+		this.effectsPanel.gameObject.SetActive(component == null && flag);
+		this.effectsContent.gameObject.SetActive(this.effectsPanel.gameObject.activeSelf);
+		bool flag2 = requirementDescriptors.Count > 0 && !this.vitalsPanel.gameObject.activeSelf;
+		this.requirementContent.gameObject.SetActive(flag2);
+		if (flag2)
+		{
+			this.requirementContent.SetDescriptors(requirementDescriptors);
+		}
+		this.requirementsPanel.gameObject.SetActive(component == null && flag2);
+		this.requirementContent.gameObject.SetActive(this.requirementsPanel.gameObject.activeSelf);
+		this.infoPanel.SetLabel("Description", text, "");
+		bool flag3 = !string.IsNullOrEmpty(text2) && text2 != "\n";
+		string text3 = "\n" + text2;
+		if (flag3)
+		{
+			this.infoPanel.SetLabel("Flavour", text3, "");
+		}
+		string[] roomClassForObject = CodexEntryGenerator.GetRoomClassForObject(target);
+		bool flag4 = roomClassForObject != null;
+		if (flag4)
+		{
+			string text4 = "\n" + CODEX.HEADERS.BUILDINGTYPE + ":";
+			foreach (string text5 in roomClassForObject)
+			{
+				text4 = text4 + "\n    • " + text5;
+			}
+			this.infoPanel.SetLabel("RoomClass", text4, "");
+		}
+		bool flag5 = text.IsNullOrWhiteSpace() && text2.IsNullOrWhiteSpace() && !flag4;
+		this.infoPanel.Commit();
+		this.infoPanel.gameObject.SetActive(component == null && !flag5);
 	}
 
 	private void RefreshBreedingChance()
@@ -404,9 +426,9 @@ public class SimpleInfoScreen : TargetScreen, ISim4000ms, ISim1000ms
 			this.StoragePanel.gameObject.SetActive(false);
 			return;
 		}
-		this.StoragePanel.gameObject.SetActive(true);
 		string text = ((this.selectedTarget.GetComponent<MinionIdentity>() != null) ? UI.DETAILTABS.DETAILS.GROUPNAME_MINION_CONTENTS : UI.DETAILTABS.DETAILS.GROUPNAME_CONTENTS);
-		this.StoragePanel.GetComponent<CollapsibleDetailContentPanel>().HeaderLabel.text = text;
+		this.StoragePanel.gameObject.SetActive(true);
+		this.StoragePanel.SetTitle(text);
 		foreach (KeyValuePair<string, GameObject> keyValuePair in this.storageLabels)
 		{
 			keyValuePair.Value.SetActive(false);
@@ -497,17 +519,17 @@ public class SimpleInfoScreen : TargetScreen, ISim4000ms, ISim1000ms
 	{
 		if (this.selectedTarget == null)
 		{
-			this.MovePanel.gameObject.SetActive(false);
+			this.movePanel.gameObject.SetActive(false);
 			return;
 		}
 		CancellableMove component = this.selectedTarget.GetComponent<CancellableMove>();
 		Movable component2 = this.selectedTarget.GetComponent<Movable>();
 		if (component == null && (component2 == null || !component2.IsMarkedForMove))
 		{
-			this.MovePanel.gameObject.SetActive(false);
+			this.movePanel.gameObject.SetActive(false);
 			return;
 		}
-		this.MovePanel.gameObject.SetActive(true);
+		this.movePanel.gameObject.SetActive(true);
 		foreach (KeyValuePair<string, GameObject> keyValuePair in this.storageLabels)
 		{
 			keyValuePair.Value.SetActive(false);
@@ -559,7 +581,7 @@ public class SimpleInfoScreen : TargetScreen, ISim4000ms, ISim1000ms
 								string formattedDisease = GameUtil.GetFormattedDisease(component3.DiseaseIdx, component3.DiseaseCount, true);
 								pooledList.Add(new global::Tuple<string, TextStyleSetting>(formattedDisease, PluginAssets.Instance.defaultTextStyleSetting));
 							}
-							GameObject gameObject2 = this.AddOrGetStorageLabel(this.storageLabels, this.MovePanel, "storage_" + num.ToString());
+							GameObject gameObject2 = this.AddOrGetStorageLabel(this.storageLabels, this.movePanel, "storage_" + num.ToString());
 							num++;
 							gameObject2.GetComponentInChildren<LocText>().text = text;
 							gameObject2.GetComponentInChildren<ToolTip>().ClearMultiStringTooltip();
@@ -582,7 +604,7 @@ public class SimpleInfoScreen : TargetScreen, ISim4000ms, ISim1000ms
 		}
 		if (component2 != null && component2.IsMarkedForMove)
 		{
-			GameObject gameObject3 = this.AddOrGetStorageLabel(this.storageLabels, this.MovePanel, "moveplacer");
+			GameObject gameObject3 = this.AddOrGetStorageLabel(this.storageLabels, this.movePanel, "moveplacer");
 			gameObject3.GetComponentInChildren<LocText>().text = MISC.PLACERS.MOVEPICKUPABLEPLACER.PLACER_STATUS;
 			gameObject3.GetComponentInChildren<ToolTip>().ClearMultiStringTooltip();
 			gameObject3.GetComponentInChildren<ToolTip>().SetSimpleTooltip(MISC.PLACERS.MOVEPICKUPABLEPLACER.PLACER_STATUS_TOOLTIP);
@@ -849,7 +871,7 @@ public class SimpleInfoScreen : TargetScreen, ISim4000ms, ISim1000ms
 		{
 			return;
 		}
-		HierarchyReferences hierarchyReferences = global::Util.KInstantiateUI<HierarchyReferences>(this.processConditionHeader.gameObject, this.processConditionContainer.GetComponent<CollapsibleDetailContentPanel>().Content.gameObject, true);
+		HierarchyReferences hierarchyReferences = global::Util.KInstantiateUI<HierarchyReferences>(this.processConditionHeader.gameObject, this.processConditionContainer.Content.gameObject, true);
 		hierarchyReferences.GetReference<LocText>("Label").text = Strings.Get("STRINGS.UI.DETAILTABS.PROCESS_CONDITIONS." + conditionType.ToString().ToUpper());
 		hierarchyReferences.GetComponent<ToolTip>().toolTip = Strings.Get("STRINGS.UI.DETAILTABS.PROCESS_CONDITIONS." + conditionType.ToString().ToUpper() + "_TOOLTIP");
 		this.processConditionRows.Add(hierarchyReferences.gameObject);
@@ -862,7 +884,7 @@ public class SimpleInfoScreen : TargetScreen, ISim4000ms, ISim1000ms
 				if (condition.ShowInUI() && (condition.GetType() == typeof(RequireAttachedComponent) || list.Find((ProcessCondition match) => match.GetType() == condition.GetType()) == null))
 				{
 					list.Add(condition);
-					GameObject gameObject = global::Util.KInstantiateUI(this.processConditionRow, this.processConditionContainer.GetComponent<CollapsibleDetailContentPanel>().Content.gameObject, true);
+					GameObject gameObject = global::Util.KInstantiateUI(this.processConditionRow, this.processConditionContainer.Content.gameObject, true);
 					this.processConditionRows.Add(gameObject);
 					ConditionListSideScreen.SetRowState(gameObject, condition);
 				}
@@ -870,7 +892,7 @@ public class SimpleInfoScreen : TargetScreen, ISim4000ms, ISim1000ms
 		}
 	}
 
-	public GameObject AddOrGetStorageLabel(Dictionary<string, GameObject> labels, GameObject panel, string id)
+	public GameObject AddOrGetStorageLabel(Dictionary<string, GameObject> labels, CollapsibleDetailContentPanel panel, string id)
 	{
 		GameObject gameObject;
 		if (labels.ContainsKey(id))
@@ -888,7 +910,7 @@ public class SimpleInfoScreen : TargetScreen, ISim4000ms, ISim1000ms
 		}
 		else
 		{
-			gameObject = global::Util.KInstantiate(this.attributesLabelButtonTemplate, panel.GetComponent<CollapsibleDetailContentPanel>().Content.gameObject, null);
+			gameObject = global::Util.KInstantiate(this.attributesLabelButtonTemplate, panel.Content.gameObject, null);
 			gameObject.transform.localScale = new Vector3(1f, 1f, 1f);
 			labels[id] = gameObject;
 		}
@@ -901,12 +923,12 @@ public class SimpleInfoScreen : TargetScreen, ISim4000ms, ISim1000ms
 		MinionIdentity identity = ((this.selectedTarget != null) ? this.selectedTarget.GetComponent<MinionIdentity>() : null);
 		if (identity == null)
 		{
-			this.stressPanel.SetActive(false);
+			this.stressPanel.gameObject.SetActive(false);
 			return;
 		}
 		List<ReportManager.ReportEntry.Note> stressNotes = new List<ReportManager.ReportEntry.Note>();
-		this.stressPanel.SetActive(true);
-		this.stressPanel.GetComponent<CollapsibleDetailContentPanel>().HeaderLabel.text = UI.DETAILTABS.STATS.GROUPNAME_STRESS;
+		this.stressPanel.gameObject.SetActive(true);
+		this.stressPanel.SetTitle(UI.DETAILTABS.STATS.GROUPNAME_STRESS);
 		ReportManager.ReportEntry reportEntry = ReportManager.Instance.TodaysReport.reportEntries.Find((ReportManager.ReportEntry entry) => entry.reportType == ReportManager.ReportType.StressDelta);
 		this.stressDrawer.BeginDrawing();
 		float num = 0f;
@@ -922,51 +944,22 @@ public class SimpleInfoScreen : TargetScreen, ISim4000ms, ISim1000ms
 			stressNotes.Sort((ReportManager.ReportEntry.Note a, ReportManager.ReportEntry.Note b) => a.value.CompareTo(b.value));
 			for (int i = 0; i < stressNotes.Count; i++)
 			{
+				string text = (float.IsNegativeInfinity(stressNotes[i].value) ? UI.NEG_INFINITY.ToString() : global::Util.FormatTwoDecimalPlace(stressNotes[i].value));
 				this.stressDrawer.NewLabel(string.Concat(new string[]
 				{
 					(stressNotes[i].value > 0f) ? UIConstants.ColorPrefixRed : "",
 					stressNotes[i].note,
 					": ",
-					global::Util.FormatTwoDecimalPlace(stressNotes[i].value),
+					text,
 					"%",
 					(stressNotes[i].value > 0f) ? UIConstants.ColorSuffix : ""
 				}));
 				num += stressNotes[i].value;
 			}
 		}
-		this.stressDrawer.NewLabel(((num > 0f) ? UIConstants.ColorPrefixRed : "") + string.Format(UI.DETAILTABS.DETAILS.NET_STRESS, global::Util.FormatTwoDecimalPlace(num)) + ((num > 0f) ? UIConstants.ColorSuffix : ""));
+		string text2 = (float.IsNegativeInfinity(num) ? UI.NEG_INFINITY.ToString() : global::Util.FormatTwoDecimalPlace(num));
+		this.stressDrawer.NewLabel(((num > 0f) ? UIConstants.ColorPrefixRed : "") + string.Format(UI.DETAILTABS.DETAILS.NET_STRESS, text2) + ((num > 0f) ? UIConstants.ColorSuffix : ""));
 		this.stressDrawer.EndDrawing();
-	}
-
-	private void ShowAttributes(GameObject target)
-	{
-		Attributes attributes = target.GetAttributes();
-		if (attributes == null)
-		{
-			return;
-		}
-		List<AttributeInstance> list = attributes.AttributeTable.FindAll((AttributeInstance a) => a.Attribute.ShowInUI == Klei.AI.Attribute.Display.General);
-		if (list.Count > 0)
-		{
-			this.descriptionContainer.descriptors.gameObject.SetActive(true);
-			List<Descriptor> list2 = new List<Descriptor>();
-			foreach (AttributeInstance attributeInstance in list)
-			{
-				Descriptor descriptor = new Descriptor(string.Format("{0}: {1}", attributeInstance.Name, attributeInstance.GetFormattedValue()), attributeInstance.GetAttributeValueTooltip(), Descriptor.DescriptorType.Effect, false);
-				descriptor.IncreaseIndent();
-				list2.Add(descriptor);
-			}
-			this.descriptionContainer.descriptors.SetDescriptors(list2);
-		}
-	}
-
-	private void SetStamps(GameObject target)
-	{
-		for (int i = 0; i < this.stampContainer.transform.childCount; i++)
-		{
-			global::UnityEngine.Object.Destroy(this.stampContainer.transform.GetChild(i).gameObject);
-		}
-		target.GetComponent<BuildingComplete>() != null;
 	}
 
 	public void Sim1000ms(float dt)
@@ -983,37 +976,54 @@ public class SimpleInfoScreen : TargetScreen, ISim4000ms, ISim1000ms
 		this.spaceSimpleInfoPOIPanel.Refresh(this.spacePOIPanel, this.selectedTarget);
 	}
 
-	public GameObject attributesLabelTemplate;
+	public GameObject iconLabelRow;
 
-	public GameObject attributesLabelButtonTemplate;
+	public GameObject spacerRow;
 
-	public GameObject DescriptionContainerTemplate;
+	[SerializeField]
+	private GameObject attributesLabelTemplate;
 
-	private DescriptionContainer descriptionContainer;
+	[SerializeField]
+	private GameObject attributesLabelButtonTemplate;
 
-	public GameObject StampContainerTemplate;
+	[SerializeField]
+	private DescriptorPanel DescriptorContentPrefab;
 
-	public GameObject StampPrefab;
+	[SerializeField]
+	private GameObject VitalsPanelTemplate;
 
-	public GameObject VitalsPanelTemplate;
+	[SerializeField]
+	private GameObject StatusItemPrefab;
 
-	public Sprite DefaultPortraitIcon;
-
-	public Text StatusPanelCurrentActionLabel;
-
-	public GameObject StatusItemPrefab;
-
-	public Sprite statusWarningIcon;
-
-	private RocketSimpleInfoPanel rocketSimpleInfoPanel;
-
-	private SpacePOISimpleInfoPanel spaceSimpleInfoPOIPanel;
+	[SerializeField]
+	private Sprite statusWarningIcon;
 
 	[SerializeField]
 	private HierarchyReferences processConditionHeader;
 
 	[SerializeField]
 	private GameObject processConditionRow;
+
+	[SerializeField]
+	private Text StatusPanelCurrentActionLabel;
+
+	[SerializeField]
+	private GameObject bigIconLabelRow;
+
+	[SerializeField]
+	private TextStyleSetting ToolTipStyle_Property;
+
+	[SerializeField]
+	private TextStyleSetting StatusItemStyle_Main;
+
+	[SerializeField]
+	private TextStyleSetting StatusItemStyle_Other;
+
+	[SerializeField]
+	private Color statusItemTextColor_regular = Color.black;
+
+	[SerializeField]
+	private Color statusItemTextColor_old = new Color(0.8235294f, 0.8235294f, 0.8235294f);
 
 	private CollapsibleDetailContentPanel statusItemPanel;
 
@@ -1037,11 +1047,37 @@ public class SimpleInfoScreen : TargetScreen, ISim4000ms, ISim1000ms
 
 	private CollapsibleDetailContentPanel worldTraitsPanel;
 
-	[SerializeField]
-	public GameObject iconLabelRow;
+	private CollapsibleDetailContentPanel processConditionContainer;
 
-	[SerializeField]
-	public GameObject bigIconLabelRow;
+	private CollapsibleDetailContentPanel requirementsPanel;
+
+	private CollapsibleDetailContentPanel effectsPanel;
+
+	private CollapsibleDetailContentPanel stressPanel;
+
+	private CollapsibleDetailContentPanel infoPanel;
+
+	private CollapsibleDetailContentPanel movePanel;
+
+	private DescriptorPanel effectsContent;
+
+	private DescriptorPanel requirementContent;
+
+	private RocketSimpleInfoPanel rocketSimpleInfoPanel;
+
+	private SpacePOISimpleInfoPanel spaceSimpleInfoPOIPanel;
+
+	private MinionVitalsPanel vitalsContainer;
+
+	private DetailsPanelDrawer stressDrawer;
+
+	private bool TargetIsMinion;
+
+	private GameObject lastTarget;
+
+	private GameObject statusItemsFolder;
+
+	private Dictionary<string, GameObject> storageLabels = new Dictionary<string, GameObject>();
 
 	private Dictionary<Tag, GameObject> lifeformRows = new Dictionary<Tag, GameObject>();
 
@@ -1054,43 +1090,6 @@ public class SimpleInfoScreen : TargetScreen, ISim4000ms, ISim1000ms
 	private List<GameObject> worldTraitRows = new List<GameObject>();
 
 	private List<GameObject> surfaceConditionRows = new List<GameObject>();
-
-	[SerializeField]
-	public GameObject spacerRow;
-
-	private GameObject infoPanel;
-
-	private GameObject stampContainer;
-
-	private MinionVitalsPanel vitalsContainer;
-
-	private GameObject InfoFolder;
-
-	private GameObject statusItemsFolder;
-
-	public GameObject TextContainerPrefab;
-
-	private GameObject processConditionContainer;
-
-	private GameObject stressPanel;
-
-	private DetailsPanelDrawer stressDrawer;
-
-	private Dictionary<string, GameObject> storageLabels = new Dictionary<string, GameObject>();
-
-	public TextStyleSetting ToolTipStyle_Property;
-
-	public TextStyleSetting StatusItemStyle_Main;
-
-	public TextStyleSetting StatusItemStyle_Other;
-
-	public Color statusItemTextColor_regular = Color.black;
-
-	public Color statusItemTextColor_old = new Color(0.8235294f, 0.8235294f, 0.8235294f);
-
-	private GameObject lastTarget;
-
-	private bool TargetIsMinion;
 
 	private List<SimpleInfoScreen.StatusItemEntry> statusItems = new List<SimpleInfoScreen.StatusItemEntry>();
 
@@ -1257,6 +1256,12 @@ public class SimpleInfoScreen : TargetScreen, ISim4000ms, ISim1000ms
 
 		public StatusItemCategory category;
 
+		public Color color;
+
+		public TextStyleSetting style;
+
+		public Action<SimpleInfoScreen.StatusItemEntry> onDestroy;
+
 		private LayoutElement spacerLayout;
 
 		private GameObject widget;
@@ -1265,17 +1270,11 @@ public class SimpleInfoScreen : TargetScreen, ISim4000ms, ISim1000ms
 
 		private TextStyleSetting tooltipStyle;
 
-		public Action<SimpleInfoScreen.StatusItemEntry> onDestroy;
-
 		private Image image;
 
 		private LocText text;
 
 		private KButton button;
-
-		public Color color;
-
-		public TextStyleSetting style;
 
 		private SimpleInfoScreen.StatusItemEntry.FadeStage fadeStage;
 

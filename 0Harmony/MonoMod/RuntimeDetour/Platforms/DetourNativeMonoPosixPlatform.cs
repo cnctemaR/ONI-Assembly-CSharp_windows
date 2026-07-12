@@ -43,6 +43,11 @@ namespace MonoMod.RuntimeDetour.Platforms
 			this.SetMemPerms(src, (ulong)size, DetourNativeMonoPosixPlatform.MmapProts.PROT_READ | DetourNativeMonoPosixPlatform.MmapProts.PROT_WRITE | DetourNativeMonoPosixPlatform.MmapProts.PROT_EXEC);
 		}
 
+		public void MakeReadWriteExecutable(IntPtr src, uint size)
+		{
+			this.SetMemPerms(src, (ulong)size, DetourNativeMonoPosixPlatform.MmapProts.PROT_READ | DetourNativeMonoPosixPlatform.MmapProts.PROT_WRITE | DetourNativeMonoPosixPlatform.MmapProts.PROT_EXEC);
+		}
+
 		public void FlushICache(IntPtr src, uint size)
 		{
 			this.Inner.FlushICache(src, size);

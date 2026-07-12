@@ -5269,6 +5269,13 @@ namespace STRINGS
 				public static LocString TOOLTIP = "Someone saw how hard this Duplicant was working and gave them a compliment\n\nThis Duplicant feels great about themselves now!";
 			}
 
+			public class ISSTICKERBOMBING
+			{
+				public static LocString NAME = "Sticker Bombing";
+
+				public static LocString TOOLTIP = "This Duplicant is slapping stickers onto everything!\n\nEveryone's gonna love these";
+			}
+
 			public class ISSPARKLESTREAKER
 			{
 				public static LocString NAME = "Sparkle Streaking";
@@ -5287,7 +5294,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Yodeling";
 
-				public static LocString TOOLTIP = "This Duplicant is currently Yodeling!";
+				public static LocString TOOLTIP = "This Duplicant is currently Yodeling!\n\nHow melodious!";
 			}
 
 			public class HEARDJOYSINGER

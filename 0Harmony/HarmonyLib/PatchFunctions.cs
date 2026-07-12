@@ -65,7 +65,7 @@ namespace HarmonyLib
 			}
 			if (standin.method == null)
 			{
-				throw new ArgumentNullException("standin.method");
+				throw new ArgumentNullException("standin", "standin.method is NULL");
 			}
 			bool flag = standin.debug.GetValueOrDefault() || Harmony.DEBUG;
 			List<MethodInfo> list = new List<MethodInfo>();

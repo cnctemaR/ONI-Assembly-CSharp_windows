@@ -77,6 +77,12 @@ public class GameTags
 
 	public static readonly Tag BuildingFiber = TagManager.Create("BuildingFiber");
 
+	public static readonly Tag Transparent = TagManager.Create("Transparent");
+
+	public static readonly Tag Insulator = TagManager.Create("Insulator");
+
+	public static readonly Tag Plumbable = TagManager.Create("Plumbable");
+
 	public static readonly Tag BuildingWood = TagManager.Create("BuildingWood");
 
 	public static readonly Tag PreciousRock = TagManager.Create("PreciousRock");
@@ -110,6 +116,8 @@ public class GameTags
 	public static readonly Tag DevBuilding = TagManager.Create("DevBuilding");
 
 	public static readonly Tag MarkedForMove = TagManager.Create("MarkedForMove");
+
+	public static readonly Tag HideHealthBar = TagManager.Create("HideHealthBar");
 
 	public static readonly Tag Incapacitated = TagManager.Create("Incapacitated");
 
@@ -371,6 +379,8 @@ public class GameTags
 	public static readonly Tag Dying = TagManager.Create("Dying");
 
 	public static readonly Tag Dead = TagManager.Create("Dead");
+
+	public static readonly Tag PreventDeadAnimation = TagManager.Create("PreventDeadAnimation");
 
 	public static readonly Tag Reachable = TagManager.Create("Reachable");
 
@@ -642,6 +652,14 @@ public class GameTags
 	public static class Creatures
 	{
 		public static readonly Tag ReservedByCreature = TagManager.Create("ReservedByCreature");
+
+		public static readonly Tag PreventGrowAnimation = TagManager.Create("PreventGrowAnimation");
+
+		public static readonly Tag TrappedInCargoBay = TagManager.Create("TrappedInCargoBay");
+
+		public static readonly Tag PausedHunger = TagManager.Create("PausedHunger");
+
+		public static readonly Tag PausedReproduction = TagManager.Create("PausedReproduction");
 
 		public static readonly Tag Bagged = TagManager.Create("Bagged");
 

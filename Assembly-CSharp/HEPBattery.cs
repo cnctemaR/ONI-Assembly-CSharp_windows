@@ -211,7 +211,7 @@ public class HEPBattery : GameStateMachine<HEPBattery, HEPBattery.Instance, ISta
 			return "STRINGS.UI.UISIDESCREENS.RADBOLTTHRESHOLDSIDESCREEN.TOOLTIP";
 		}
 
-		string ISliderControl.GetSliderTooltip()
+		string ISliderControl.GetSliderTooltip(int index)
 		{
 			return string.Format(Strings.Get("STRINGS.UI.UISIDESCREENS.RADBOLTTHRESHOLDSIDESCREEN.TOOLTIP"), this.particleThreshold);
 		}

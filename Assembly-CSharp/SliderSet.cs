@@ -30,29 +30,34 @@ public class SliderSet
 		};
 	}
 
-	public void SetTarget(ISliderControl target)
+	public void SetTarget(ISliderControl target, int index)
 	{
+		this.index = index;
 		this.target = target;
 		ToolTip component = this.valueSlider.handleRect.GetComponent<ToolTip>();
 		if (component != null)
 		{
-			component.SetSimpleTooltip(target.GetSliderTooltip());
+			component.SetSimpleTooltip(target.GetSliderTooltip(index));
+		}
+		if (this.targetLabel != null)
+		{
+			this.targetLabel.text = ((target.SliderTitleKey != null) ? Strings.Get(target.SliderTitleKey) : "");
 		}
 		this.unitsLabel.text = target.SliderUnits;
-		this.minLabel.text = target.GetSliderMin(this.index).ToString() + target.SliderUnits;
-		this.maxLabel.text = target.GetSliderMax(this.index).ToString() + target.SliderUnits;
-		this.numberInput.minValue = target.GetSliderMin(this.index);
-		this.numberInput.maxValue = target.GetSliderMax(this.index);
-		this.numberInput.decimalPlaces = target.SliderDecimalPlaces(this.index);
+		this.minLabel.text = target.GetSliderMin(index).ToString() + target.SliderUnits;
+		this.maxLabel.text = target.GetSliderMax(index).ToString() + target.SliderUnits;
+		this.numberInput.minValue = target.GetSliderMin(index);
+		this.numberInput.maxValue = target.GetSliderMax(index);
+		this.numberInput.decimalPlaces = target.SliderDecimalPlaces(index);
 		this.numberInput.field.characterLimit = Mathf.FloorToInt(1f + Mathf.Log10(this.numberInput.maxValue + (float)this.numberInput.decimalPlaces));
 		Vector2 sizeDelta = this.numberInput.GetComponent<RectTransform>().sizeDelta;
 		sizeDelta.x = (float)((this.numberInput.field.characterLimit + 1) * 10);
 		this.numberInput.GetComponent<RectTransform>().sizeDelta = sizeDelta;
-		this.valueSlider.minValue = target.GetSliderMin(this.index);
-		this.valueSlider.maxValue = target.GetSliderMax(this.index);
-		this.valueSlider.value = target.GetSliderValue(this.index);
-		this.SetValue(target.GetSliderValue(this.index));
-		if (this.index == 0)
+		this.valueSlider.minValue = target.GetSliderMin(index);
+		this.valueSlider.maxValue = target.GetSliderMax(index);
+		this.valueSlider.value = target.GetSliderValue(index);
+		this.SetValue(target.GetSliderValue(index));
+		if (index == 0)
 		{
 			this.numberInput.Activate();
 		}
@@ -97,7 +102,7 @@ public class SliderSet
 		ToolTip component = this.valueSlider.handleRect.GetComponent<ToolTip>();
 		if (component != null)
 		{
-			component.SetSimpleTooltip(this.target.GetSliderTooltip());
+			component.SetSimpleTooltip(this.target.GetSliderTooltip(this.index));
 		}
 	}
 
@@ -110,6 +115,8 @@ public class SliderSet
 	public KSlider valueSlider;
 
 	public KNumberInputField numberInput;
+
+	public LocText targetLabel;
 
 	public LocText unitsLabel;
 

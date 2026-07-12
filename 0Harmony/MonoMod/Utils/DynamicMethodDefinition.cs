@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -130,9 +131,9 @@ namespace MonoMod.Utils
 		static DynamicMethodDefinition()
 		{
 			bool flag;
-			if (!DynamicMethodDefinition._IsMono || DynamicMethodDefinition._IsNewMonoSRE || DynamicMethodDefinition._IsOldMonoSRE)
+			if (!ReflectionHelper.IsMono || DynamicMethodDefinition._IsNewMonoSRE || DynamicMethodDefinition._IsOldMonoSRE)
 			{
-				if (!DynamicMethodDefinition._IsMono)
+				if (!ReflectionHelper.IsMono)
 				{
 					Type type = typeof(ILGenerator).Assembly.GetType("System.Reflection.Emit.DynamicILGenerator");
 					flag = ((type != null) ? type.GetField("m_scope", BindingFlags.Instance | BindingFlags.NonPublic) : null) == null;
@@ -153,6 +154,14 @@ namespace MonoMod.Utils
 			DynamicMethodDefinition.t__IDMDGenerator = typeof(_IDMDGenerator);
 			DynamicMethodDefinition._DMDGeneratorCache = new Dictionary<string, _IDMDGenerator>();
 			DynamicMethodDefinition._InitCopier();
+		}
+
+		public static bool IsDynamicILAvailable
+		{
+			get
+			{
+				return !DynamicMethodDefinition._PreferCecil;
+			}
 		}
 
 		[Obsolete("Use OriginalMethod instead.")]
@@ -302,7 +311,7 @@ namespace MonoMod.Utils
 		public MethodInfo Generate(object context)
 		{
 			string environmentVariable = Environment.GetEnvironmentVariable("MONOMOD_DMD_TYPE");
-			string text = ((environmentVariable != null) ? environmentVariable.ToLowerInvariant() : null);
+			string text = ((environmentVariable != null) ? environmentVariable.ToLower(CultureInfo.InvariantCulture) : null);
 			if (text == "dynamicmethod" || text == "dm")
 			{
 				return DMDGenerator<DMDEmitDynamicMethodGenerator>.Generate(this, context);
@@ -366,11 +375,9 @@ namespace MonoMod.Utils
 
 		private static Mono.Cecil.Cil.OpCode[] _CecilOpCodes2X;
 
-		internal static readonly bool _IsMono = Type.GetType("Mono.Runtime") != null;
+		internal static readonly bool _IsNewMonoSRE = ReflectionHelper.IsMono && typeof(DynamicMethod).GetField("il_info", BindingFlags.Instance | BindingFlags.NonPublic) != null;
 
-		internal static readonly bool _IsNewMonoSRE = DynamicMethodDefinition._IsMono && typeof(DynamicMethod).GetField("il_info", BindingFlags.Instance | BindingFlags.NonPublic) != null;
-
-		internal static readonly bool _IsOldMonoSRE = DynamicMethodDefinition._IsMono && !DynamicMethodDefinition._IsNewMonoSRE && typeof(DynamicMethod).GetField("ilgen", BindingFlags.Instance | BindingFlags.NonPublic) != null;
+		internal static readonly bool _IsOldMonoSRE = ReflectionHelper.IsMono && !DynamicMethodDefinition._IsNewMonoSRE && typeof(DynamicMethod).GetField("ilgen", BindingFlags.Instance | BindingFlags.NonPublic) != null;
 
 		private static bool _PreferCecil;
 

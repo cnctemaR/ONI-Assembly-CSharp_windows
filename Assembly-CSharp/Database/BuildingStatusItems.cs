@@ -973,6 +973,16 @@ namespace Database
 				str = str.Replace("{1}", travelTubeEntrance.WaxLaunchesAvailable.ToString());
 				return str;
 			};
+			this.SpecialCargoBayClusterCritterStored = this.CreateStatusItem("SpecialCargoBayClusterCritterStored", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
+			this.SpecialCargoBayClusterCritterStored.resolveStringCallback = delegate(string str, object data)
+			{
+				SpecialCargoBayClusterReceptacle specialCargoBayClusterReceptacle = data as SpecialCargoBayClusterReceptacle;
+				if (specialCargoBayClusterReceptacle.Occupant != null)
+				{
+					str = str.Replace("{0}", specialCargoBayClusterReceptacle.Occupant.GetProperName());
+				}
+				return str;
+			};
 			this.RailgunpayloadNeedsEmptying = this.CreateStatusItem("RailgunpayloadNeedsEmptying", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
 			this.AwaitingEmptyBuilding = this.CreateStatusItem("AwaitingEmptyBuilding", "BUILDING", "action_empty_contents", StatusItem.IconType.Custom, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
 			this.DuplicantActivationRequired = this.CreateStatusItem("DuplicantActivationRequired", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
@@ -1172,8 +1182,8 @@ namespace Database
 				str = str.Replace("{1}", num18.ToString());
 				return str;
 			};
-			this.SkyVisNone = new StatusItem("SkyVisNone", BUILDING.STATUSITEMS.SPACE_VISIBILITY_NONE.NAME, BUILDING.STATUSITEMS.SPACE_VISIBILITY_NONE.TOOLTIP, "status_item_no_sky", StatusItem.IconType.Custom, NotificationType.Bad, false, OverlayModes.None.ID, 129022, true, new Func<string, object, string>(BuildingStatusItems.<CreateStatusItems>g__SkyVisResolveStringCallback|273_96));
-			this.SkyVisLimited = new StatusItem("SkyVisLimited", BUILDING.STATUSITEMS.SPACE_VISIBILITY_REDUCED.NAME, BUILDING.STATUSITEMS.SPACE_VISIBILITY_REDUCED.TOOLTIP, "status_item_no_sky", StatusItem.IconType.Info, NotificationType.BadMinor, false, OverlayModes.None.ID, 129022, false, new Func<string, object, string>(BuildingStatusItems.<CreateStatusItems>g__SkyVisResolveStringCallback|273_96));
+			this.SkyVisNone = new StatusItem("SkyVisNone", BUILDING.STATUSITEMS.SPACE_VISIBILITY_NONE.NAME, BUILDING.STATUSITEMS.SPACE_VISIBILITY_NONE.TOOLTIP, "status_item_no_sky", StatusItem.IconType.Custom, NotificationType.Bad, false, OverlayModes.None.ID, 129022, true, new Func<string, object, string>(BuildingStatusItems.<CreateStatusItems>g__SkyVisResolveStringCallback|281_97));
+			this.SkyVisLimited = new StatusItem("SkyVisLimited", BUILDING.STATUSITEMS.SPACE_VISIBILITY_REDUCED.NAME, BUILDING.STATUSITEMS.SPACE_VISIBILITY_REDUCED.TOOLTIP, "status_item_no_sky", StatusItem.IconType.Info, NotificationType.BadMinor, false, OverlayModes.None.ID, 129022, false, new Func<string, object, string>(BuildingStatusItems.<CreateStatusItems>g__SkyVisResolveStringCallback|281_97));
 			this.CreatureManipulatorWaiting = this.CreateStatusItem("CreatureManipulatorWaiting", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
 			this.CreatureManipulatorProgress = this.CreateStatusItem("CreatureManipulatorProgress", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
 			this.CreatureManipulatorProgress.resolveStringCallback = delegate(string str, object data)
@@ -1216,6 +1226,72 @@ namespace Database
 			this.MegaBrainTankComplete = this.CreateStatusItem("MegaBrainTankComplete", BUILDING.STATUSITEMS.MEGABRAINTANK.COMPLETE.NAME, BUILDING.STATUSITEMS.MEGABRAINTANK.COMPLETE.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Good, false, OverlayModes.None.ID, 129022);
 			this.FossilHuntExcavationOrdered = this.CreateStatusItem("FossilHuntExcavationOrdered", BUILDING.STATUSITEMS.FOSSILHUNT.PENDING_EXCAVATION.NAME, BUILDING.STATUSITEMS.FOSSILHUNT.PENDING_EXCAVATION.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Good, false, OverlayModes.None.ID, 129022);
 			this.FossilHuntExcavationInProgress = this.CreateStatusItem("FossilHuntExcavationInProgress", BUILDING.STATUSITEMS.FOSSILHUNT.EXCAVATING.NAME, BUILDING.STATUSITEMS.FOSSILHUNT.EXCAVATING.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Good, false, OverlayModes.None.ID, 129022);
+			this.ComplexFabricatorCooking = this.CreateStatusItem("COMPLEXFABRICATOR.COOKING", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
+			this.ComplexFabricatorCooking.resolveStringCallback = delegate(string str, object data)
+			{
+				ComplexFabricator complexFabricator2 = data as ComplexFabricator;
+				if (complexFabricator2 != null && complexFabricator2.CurrentWorkingOrder != null)
+				{
+					str = str.Replace("{Item}", complexFabricator2.CurrentWorkingOrder.FirstResult.ProperName());
+				}
+				return str;
+			};
+			this.ComplexFabricatorProducing = this.CreateStatusItem("COMPLEXFABRICATOR.PRODUCING", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
+			this.ComplexFabricatorProducing.resolveStringCallback = delegate(string str, object data)
+			{
+				ComplexFabricator complexFabricator3 = data as ComplexFabricator;
+				if (complexFabricator3 != null)
+				{
+					if (complexFabricator3.CurrentWorkingOrder != null)
+					{
+						string text28 = (complexFabricator3.CurrentWorkingOrder.results[0].facadeID.IsNullOrWhiteSpace() ? complexFabricator3.CurrentWorkingOrder.FirstResult.ProperName() : complexFabricator3.CurrentWorkingOrder.results[0].facadeID.ProperName());
+						str = str.Replace("{Item}", text28);
+					}
+					return str;
+				}
+				TinkerStation tinkerStation = data as TinkerStation;
+				if (tinkerStation != null)
+				{
+					str = str.Replace("{Item}", tinkerStation.outputPrefab.ProperName());
+				}
+				return str;
+			};
+			this.ComplexFabricatorResearching = this.CreateStatusItem("COMPLEXFABRICATOR.RESEARCHING", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
+			this.ComplexFabricatorResearching.resolveStringCallback = delegate(string str, object data)
+			{
+				if (data is IResearchCenter)
+				{
+					TechInstance activeResearch = Research.Instance.GetActiveResearch();
+					if (activeResearch != null)
+					{
+						str = str.Replace("{Item}", activeResearch.tech.Name);
+						return str;
+					}
+				}
+				str = str.Replace("{Item}", (data as GameObject).GetProperName());
+				return str;
+			};
+			this.ArtifactAnalysisAnalyzing = this.CreateStatusItem("COMPLEXFABRICATOR.ANALYZYING", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
+			this.ArtifactAnalysisAnalyzing.resolveStringCallback = delegate(string str, object data)
+			{
+				if (data as GameObject != null)
+				{
+					str = str.Replace("{Item}", (data as GameObject).GetProperName());
+				}
+				return str;
+			};
+			this.ComplexFabricatorTraining = this.CreateStatusItem("COMPLEXFABRICATOR.UNTRAINING", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
+			this.ComplexFabricatorTraining.resolveStringCallback = delegate(string str, object data)
+			{
+				ResetSkillsStation resetSkillsStation = data as ResetSkillsStation;
+				if (resetSkillsStation != null && resetSkillsStation.assignable.assignee != null)
+				{
+					str = str.Replace("{Duplicant}", resetSkillsStation.assignable.assignee.GetProperName());
+				}
+				return str;
+			};
+			this.TelescopeWorking = this.CreateStatusItem("COMPLEXFABRICATOR.TELESCOPE", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
+			this.ClusterTelescopeMeteorWorking = this.CreateStatusItem("COMPLEXFABRICATOR.CLUSTERTELESCOPEMETEOR", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
 		}
 
 		private static bool ShowInUtilityOverlay(HashedString mode, object data)
@@ -1256,7 +1332,7 @@ namespace Database
 		}
 
 		[CompilerGenerated]
-		internal static string <CreateStatusItems>g__SkyVisResolveStringCallback|273_96(string str, object data)
+		internal static string <CreateStatusItems>g__SkyVisResolveStringCallback|281_97(string str, object data)
 		{
 			BuildingStatusItems.ISkyVisInfo skyVisInfo = (BuildingStatusItems.ISkyVisInfo)data;
 			return str.Replace("{VISIBILITY}", GameUtil.GetFormattedPercent(skyVisInfo.GetPercentVisible01() * 100f, GameUtil.TimeSlice.None));
@@ -1759,6 +1835,22 @@ namespace Database
 		public StatusItem MissionControlBoosted;
 
 		public StatusItem TransitTubeEntranceWaxReady;
+
+		public StatusItem SpecialCargoBayClusterCritterStored;
+
+		public StatusItem ComplexFabricatorCooking;
+
+		public StatusItem ComplexFabricatorProducing;
+
+		public StatusItem ComplexFabricatorTraining;
+
+		public StatusItem ComplexFabricatorResearching;
+
+		public StatusItem ArtifactAnalysisAnalyzing;
+
+		public StatusItem TelescopeWorking;
+
+		public StatusItem ClusterTelescopeMeteorWorking;
 
 		public StatusItem GeoTunerNoGeyserSelected;
 

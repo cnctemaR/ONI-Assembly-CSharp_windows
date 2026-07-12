@@ -24,6 +24,11 @@ public class SandboxClearFloorTool : BrushTool
 		SandboxClearFloorTool.instance = this;
 	}
 
+	protected override string GetDragSound()
+	{
+		return "";
+	}
+
 	public void Activate()
 	{
 		PlayerController.Instance.ActivateTool(this);
@@ -58,6 +63,12 @@ public class SandboxClearFloorTool : BrushTool
 		base.OnMouseMove(cursorPos);
 	}
 
+	public override void OnLeftClickDown(Vector3 cursor_pos)
+	{
+		base.OnLeftClickDown(cursor_pos);
+		KFMOD.PlayUISound(GlobalAssets.GetSound("SandboxTool_Click", false));
+	}
+
 	protected override void OnPaintCell(int cell, int distFromOrigin)
 	{
 		base.OnPaintCell(cell, distFromOrigin);
@@ -71,7 +82,7 @@ public class SandboxClearFloorTool : BrushTool
 				{
 					if (!flag)
 					{
-						UISounds.PlaySound(UISounds.Sound.Negative);
+						KFMOD.PlayOneShot(this.soundPath, pickup.gameObject.transform.GetPosition(), 1f);
 						PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Negative, UI.SANDBOXTOOLS.CLEARFLOOR.DELETED, pickup.transform, 1.5f, false);
 						flag = true;
 					}
@@ -82,4 +93,6 @@ public class SandboxClearFloorTool : BrushTool
 	}
 
 	public static SandboxClearFloorTool instance;
+
+	private string soundPath = GlobalAssets.GetSound("SandboxTool_ClearFloor", false);
 }

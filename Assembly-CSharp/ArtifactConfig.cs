@@ -111,7 +111,7 @@ public class ArtifactConfig : IMultiEntityConfig
 		gameObject.AddOrGet<OccupyArea>().SetCellOffsets(EntityTemplates.GenerateOffsets(1, 1));
 		DecorProvider decorProvider = gameObject.AddOrGet<DecorProvider>();
 		decorProvider.SetValues(artifact_tier.decorValues);
-		decorProvider.overrideName = gameObject.name;
+		decorProvider.overrideName = gameObject.GetProperName();
 		SpaceArtifact spaceArtifact = gameObject.AddOrGet<SpaceArtifact>();
 		spaceArtifact.SetUIAnim(ui_anim);
 		spaceArtifact.SetArtifactTier(artifact_tier);

@@ -27,7 +27,8 @@ public class DrinkMilkStates : GameStateMachine<DrinkMilkStates, DrinkMilkStates
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
 		default_state = this.goingToDrink;
-		this.root.Enter(new StateMachine<DrinkMilkStates, DrinkMilkStates.Instance, IStateMachineTarget, DrinkMilkStates.Def>.State.Callback(DrinkMilkStates.SetTarget)).Enter(new StateMachine<DrinkMilkStates, DrinkMilkStates.Instance, IStateMachineTarget, DrinkMilkStates.Def>.State.Callback(DrinkMilkStates.ReserveMilkFeeder)).Exit(new StateMachine<DrinkMilkStates, DrinkMilkStates.Instance, IStateMachineTarget, DrinkMilkStates.Def>.State.Callback(DrinkMilkStates.UnreserveMilkFeeder))
+		this.root.Enter(new StateMachine<DrinkMilkStates, DrinkMilkStates.Instance, IStateMachineTarget, DrinkMilkStates.Def>.State.Callback(DrinkMilkStates.SetTarget)).Enter(new StateMachine<DrinkMilkStates, DrinkMilkStates.Instance, IStateMachineTarget, DrinkMilkStates.Def>.State.Callback(DrinkMilkStates.CheckIfCramped)).Enter(new StateMachine<DrinkMilkStates, DrinkMilkStates.Instance, IStateMachineTarget, DrinkMilkStates.Def>.State.Callback(DrinkMilkStates.ReserveMilkFeeder))
+			.Exit(new StateMachine<DrinkMilkStates, DrinkMilkStates.Instance, IStateMachineTarget, DrinkMilkStates.Def>.State.Callback(DrinkMilkStates.UnreserveMilkFeeder))
 			.Transition(this.behaviourComplete, delegate(DrinkMilkStates.Instance smi)
 			{
 				MilkFeeder.Instance instance = DrinkMilkStates.GetTargetMilkFeeder(smi);
@@ -48,8 +49,8 @@ public class DrinkMilkStates : GameStateMachine<DrinkMilkStates, DrinkMilkStates
 			{
 				DrinkMilkStates.SetSceneLayer(smi, Grid.SceneLayer.Creatures);
 			});
-		this.drink.pre.QueueAnim((DrinkMilkStates.Instance smi) => smi.GetSMI<DrinkMilkMonitor.Instance>().GetAnimDrinkPre(), false, null).OnAnimQueueComplete(this.drink.loop);
-		this.drink.loop.QueueAnim((DrinkMilkStates.Instance smi) => smi.GetSMI<DrinkMilkMonitor.Instance>().GetAnimDrinkLoop(), true, null).Enter(delegate(DrinkMilkStates.Instance smi)
+		this.drink.pre.QueueAnim(new Func<DrinkMilkStates.Instance, string>(DrinkMilkStates.GetAnimDrinkPre), false, null).OnAnimQueueComplete(this.drink.loop);
+		this.drink.loop.QueueAnim(new Func<DrinkMilkStates.Instance, string>(DrinkMilkStates.GetAnimDrinkLoop), true, null).Enter(delegate(DrinkMilkStates.Instance smi)
 		{
 			MilkFeeder.Instance instance2 = DrinkMilkStates.GetTargetMilkFeeder(smi);
 			if (instance2 != null)
@@ -59,7 +60,7 @@ public class DrinkMilkStates : GameStateMachine<DrinkMilkStates, DrinkMilkStates
 			}
 			smi.GoTo(this.drink.pst);
 		}).OnSignal(this.requestedToStopFeeding, this.drink.pst);
-		this.drink.pst.QueueAnim((DrinkMilkStates.Instance smi) => smi.GetSMI<DrinkMilkMonitor.Instance>().GetAnimDrinkPst(), false, null).Enter(new StateMachine<DrinkMilkStates, DrinkMilkStates.Instance, IStateMachineTarget, DrinkMilkStates.Def>.State.Callback(DrinkMilkStates.DrinkMilkComplete)).OnAnimQueueComplete(this.behaviourComplete);
+		this.drink.pst.QueueAnim(new Func<DrinkMilkStates.Instance, string>(DrinkMilkStates.GetAnimDrinkPst), false, null).Enter(new StateMachine<DrinkMilkStates, DrinkMilkStates.Instance, IStateMachineTarget, DrinkMilkStates.Def>.State.Callback(DrinkMilkStates.DrinkMilkComplete)).OnAnimQueueComplete(this.behaviourComplete);
 		this.behaviourComplete.QueueAnim("idle_loop", true, null).BehaviourComplete(GameTags.Creatures.Behaviour_TryToDrinkMilkFromFeeder, false);
 	}
 
@@ -85,6 +86,11 @@ public class DrinkMilkStates : GameStateMachine<DrinkMilkStates, DrinkMilkStates
 	private static void SetTarget(DrinkMilkStates.Instance smi)
 	{
 		smi.sm.targetMilkFeeder.Set(smi.GetSMI<DrinkMilkMonitor.Instance>().targetMilkFeeder.gameObject, smi, false);
+	}
+
+	private static void CheckIfCramped(DrinkMilkStates.Instance smi)
+	{
+		smi.isGassyMooCramped = smi.GetSMI<DrinkMilkMonitor.Instance>().doesTargetMilkFeederHaveSpaceForGassyMoo;
 	}
 
 	private static void ReserveMilkFeeder(DrinkMilkStates.Instance smi)
@@ -124,7 +130,34 @@ public class DrinkMilkStates : GameStateMachine<DrinkMilkStates, DrinkMilkStates
 		{
 			return Grid.InvalidCell;
 		}
-		return smi.GetSMI<DrinkMilkMonitor.Instance>().GetDrinkCellOf(instance, null);
+		return smi.GetSMI<DrinkMilkMonitor.Instance>().GetDrinkCellOf(instance, smi.isGassyMooCramped);
+	}
+
+	private static string GetAnimDrinkPre(DrinkMilkStates.Instance smi)
+	{
+		if (smi.isGassyMooCramped)
+		{
+			return "drink_cramped_pre";
+		}
+		return "drink_pre";
+	}
+
+	private static string GetAnimDrinkLoop(DrinkMilkStates.Instance smi)
+	{
+		if (smi.isGassyMooCramped)
+		{
+			return "drink_cramped_loop";
+		}
+		return "drink_loop";
+	}
+
+	private static string GetAnimDrinkPst(DrinkMilkStates.Instance smi)
+	{
+		if (smi.isGassyMooCramped)
+		{
+			return "drink_cramped_pst";
+		}
+		return "drink_pst";
 	}
 
 	private static void FaceMilkFeeder(DrinkMilkStates.Instance smi)
@@ -137,9 +170,8 @@ public class DrinkMilkStates : GameStateMachine<DrinkMilkStates, DrinkMilkStates
 		float num;
 		if (smi.def.isGassyMoo)
 		{
-			bool isGassyMooCramped = smi.GetSMI<DrinkMilkMonitor.Instance>().isGassyMooCramped;
 			bool isRotated = instance.GetComponent<Rotatable>().IsRotated;
-			if (isGassyMooCramped)
+			if (smi.isGassyMooCramped)
 			{
 				if (isRotated)
 				{
@@ -201,6 +233,8 @@ public class DrinkMilkStates : GameStateMachine<DrinkMilkStates, DrinkMilkStates
 		{
 			base.sm.requestedToStopFeeding.Trigger(base.smi);
 		}
+
+		public bool isGassyMooCramped;
 	}
 
 	public class EatingState : GameStateMachine<DrinkMilkStates, DrinkMilkStates.Instance, IStateMachineTarget, DrinkMilkStates.Def>.State

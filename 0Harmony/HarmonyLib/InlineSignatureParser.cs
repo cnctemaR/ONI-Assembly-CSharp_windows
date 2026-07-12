@@ -90,15 +90,23 @@ namespace HarmonyLib
 				return num2;
 			}
 			int num3 = (int)(b & 192);
-			if (num3 == 0 || num3 == 64)
+			int num4;
+			if (num3 != 0 && num3 != 64)
 			{
-				return num2 - 64;
+				if (num3 != 128)
+				{
+					num4 = num2 - 268435456;
+				}
+				else
+				{
+					num4 = num2 - 8192;
+				}
 			}
-			if (num3 != 128)
+			else
 			{
-				return num2 - 268435456;
+				num4 = num2 - 64;
 			}
-			return num2 - 8192;
+			return num4;
 		}
 
 		[CompilerGenerated]

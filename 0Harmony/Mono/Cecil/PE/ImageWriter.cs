@@ -155,6 +155,10 @@ namespace Mono.Cecil.PE
 			{
 				num |= 8192;
 			}
+			if (this.module.Image != null && (this.module.Image.Characteristics & 32U) != 0U)
+			{
+				num |= 32;
+			}
 			base.WriteUInt16(num);
 		}
 
@@ -674,7 +678,7 @@ namespace Mono.Cecil.PE
 
 		private int GetStrongNameLength()
 		{
-			if (this.module.Assembly == null)
+			if (this.module.kind == ModuleKind.NetModule || this.module.Assembly == null)
 			{
 				return 0;
 			}

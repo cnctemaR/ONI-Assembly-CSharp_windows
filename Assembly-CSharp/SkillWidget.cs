@@ -312,6 +312,7 @@ public class SkillWidget : KMonoBehaviour, IPointerEnterHandler, IEventSystemHan
 	{
 		this.ToggleBorderHighlight(true);
 		this.skillsScreen.HoverSkill(this.skillID);
+		this.soundPlayer.Play(1);
 	}
 
 	public void OnPointerExit(PointerEventData eventData)
@@ -430,4 +431,6 @@ public class SkillWidget : KMonoBehaviour, IPointerEnterHandler, IEventSystemHan
 	public Material defaultMaterial;
 
 	public Material desaturatedMaterial;
+
+	public ButtonSoundPlayer soundPlayer;
 }

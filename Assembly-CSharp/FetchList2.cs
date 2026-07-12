@@ -67,6 +67,19 @@ public class FetchList2 : IFetchList
 		}
 	}
 
+	public void Add(HashSet<Tag> tags, Tag requiredTag, Tag[] forbidden_tags = null, float amount = 1f, Operational.State operationalRequirementDEPRECATED = Operational.State.None)
+	{
+		foreach (Tag tag in tags)
+		{
+			if (!this.MinimumAmount.ContainsKey(tag))
+			{
+				this.MinimumAmount[tag] = amount;
+			}
+		}
+		FetchOrder2 fetchOrder = new FetchOrder2(this.choreType, tags, FetchChore.MatchCriteria.MatchID, requiredTag, forbidden_tags, this.Destination, amount, operationalRequirementDEPRECATED, this.PriorityMod);
+		this.FetchOrders.Add(fetchOrder);
+	}
+
 	public void Add(HashSet<Tag> tags, Tag[] forbidden_tags = null, float amount = 1f, Operational.State operationalRequirementDEPRECATED = Operational.State.None)
 	{
 		foreach (Tag tag in tags)

@@ -85,6 +85,25 @@ public class Baggable : KMonoBehaviour
 		}
 	}
 
+	public static string GetBaggedAnimName(GameObject baggableObject)
+	{
+		string text = "trussed";
+		Pickupable pickupable = baggableObject.AddOrGet<Pickupable>();
+		if (pickupable != null && pickupable.storage != null)
+		{
+			IBaggedStateAnimationInstructions component = pickupable.storage.GetComponent<IBaggedStateAnimationInstructions>();
+			if (component != null)
+			{
+				string baggedAnimationName = component.GetBaggedAnimationName();
+				if (baggedAnimationName != null)
+				{
+					text = baggedAnimationName;
+				}
+			}
+		}
+		return text;
+	}
+
 	public void SetWrangled()
 	{
 		this.wrangled = true;
@@ -94,7 +113,7 @@ public class Baggable : KMonoBehaviour
 			component.SetCurrentNavType(NavType.Floor);
 		}
 		base.gameObject.AddTag(GameTags.Creatures.Bagged);
-		base.GetComponent<KAnimControllerBase>().Play("trussed", KAnim.PlayMode.Loop, 1f, 0f);
+		base.GetComponent<KAnimControllerBase>().Play(Baggable.GetBaggedAnimName(base.gameObject), KAnim.PlayMode.Loop, 1f, 0f);
 	}
 
 	public void Free()
@@ -121,4 +140,6 @@ public class Baggable : KMonoBehaviour
 	{
 		component.OnStore(data);
 	});
+
+	public const string DEFAULT_BAGGED_ANIM_NAME = "trussed";
 }

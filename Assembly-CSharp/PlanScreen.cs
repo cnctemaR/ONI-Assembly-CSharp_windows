@@ -381,6 +381,7 @@ public class PlanScreen : KIconToggleMenu
 				{
 					this.OpenCategoryByName(HashCache.Get().Get(planInfo.category));
 					this.OnSelectBuilding(this.activeCategoryBuildingToggles[buildingDef].gameObject, buildingDef, facadeID);
+					this.ProductInfoScreen.ToggleExpandedInfo(true);
 					break;
 				}
 			}
@@ -1245,7 +1246,7 @@ public class PlanScreen : KIconToggleMenu
 			if (buildingDef.isKAnimTile && buildingDef.isUtility)
 			{
 				IList<Tag> getSelectedElementAsList = this.ProductInfoScreen.materialSelectionPanel.GetSelectedElementAsList;
-				((buildingDef.BuildingComplete.GetComponent<Wire>() != null) ? WireBuildTool.Instance : UtilityBuildTool.Instance).Activate(buildingDef, getSelectedElementAsList);
+				((buildingDef.BuildingComplete.GetComponent<Wire>() != null) ? WireBuildTool.Instance : UtilityBuildTool.Instance).Activate(buildingDef, getSelectedElementAsList, this.ProductInfoScreen.FacadeSelectionPanel.SelectedFacade);
 				return;
 			}
 			BuildTool.Instance.Activate(buildingDef, this.ProductInfoScreen.materialSelectionPanel.GetSelectedElementAsList, this.ProductInfoScreen.FacadeSelectionPanel.SelectedFacade);

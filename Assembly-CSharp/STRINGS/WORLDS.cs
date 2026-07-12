@@ -292,7 +292,7 @@ namespace STRINGS
 		{
 			public static LocString NAME = "Superconductive Asteroid";
 
-			public static LocString DESCRIPTION = "A small location with an abundance of Niobium.\n\n<smallcaps>Superconductive Asteroids offer rich veins of Niobium to Duplicants that can withstand its molten rivers of magma.</smallcaps>";
+			public static LocString DESCRIPTION = "A small location with an abundance of solid Niobium.\n\n<smallcaps>Superconductive Asteroids offer rich veins of Niobium to Duplicants that can withstand its molten rivers of magma.</smallcaps>";
 		}
 
 		public class OILYMOONLET

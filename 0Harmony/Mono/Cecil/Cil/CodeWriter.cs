@@ -426,7 +426,7 @@ namespace Mono.Cecil.Cil
 		private static void ComputeStackSize(Instruction instruction, ref int stack_size)
 		{
 			FlowControl flowControl = instruction.opcode.FlowControl;
-			if (flowControl <= FlowControl.Break || flowControl - FlowControl.Return <= 1)
+			if (flowControl == FlowControl.Branch || flowControl - FlowControl.Return <= 1)
 			{
 				stack_size = 0;
 			}

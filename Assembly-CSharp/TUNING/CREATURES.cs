@@ -419,5 +419,26 @@ namespace TUNING
 				CREATURES.EGG_CHANCE_MODIFIERS.CreateElementCreatureModifier("StaterpillarLiquid", "StaterpillarLiquidEgg".ToTag(), GameTags.Liquid, 0.00025f, true, false, CREATURES.FERTILITY_MODIFIERS.LIVING_IN_ELEMENT.LIQUID)
 			};
 		}
+
+		public class SORTING
+		{
+			public static Dictionary<string, int> CRITTER_ORDER = new Dictionary<string, int>
+			{
+				{ "Hatch", 10 },
+				{ "Puft", 20 },
+				{ "Drecko", 30 },
+				{ "Squirrel", 40 },
+				{ "Pacu", 50 },
+				{ "Oilfloater", 60 },
+				{ "LightBug", 70 },
+				{ "Crab", 80 },
+				{ "DivergentBeetle", 90 },
+				{ "Staterpillar", 100 },
+				{ "Mole", 110 },
+				{ "Bee", 120 },
+				{ "Moo", 130 },
+				{ "Glom", 140 }
+			};
+		}
 	}
 }

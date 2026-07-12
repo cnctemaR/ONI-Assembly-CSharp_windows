@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using FMOD;
+using FMOD.Studio;
+using FMODUnity;
 using Klei.AI;
 using UnityEngine;
 
@@ -40,12 +43,15 @@ public class SandboxBrushTool : BrushTool
 		SandboxToolParameterMenu.instance.elementSelector.row.SetActive(true);
 		SandboxToolParameterMenu.instance.diseaseSelector.row.SetActive(true);
 		SandboxToolParameterMenu.instance.diseaseCountSlider.row.SetActive(true);
+		SandboxToolParameterMenu.SelectorValue elementSelector = SandboxToolParameterMenu.instance.elementSelector;
+		elementSelector.onValueChanged = (Action<object>)Delegate.Combine(elementSelector.onValueChanged, new Action<object>(this.OnElementChanged));
 	}
 
 	protected override void OnDeactivateTool(InterfaceTool new_tool)
 	{
 		base.OnDeactivateTool(new_tool);
 		SandboxToolParameterMenu.instance.gameObject.SetActive(false);
+		this.audioEvent.release();
 	}
 
 	public override void GetOverlayColorData(out HashSet<ToolMenu.CellColorData> colors)
@@ -128,9 +134,73 @@ public class SandboxBrushTool : BrushTool
 		}
 	}
 
+	public override void OnLeftClickDown(Vector3 cursor_pos)
+	{
+		base.OnLeftClickDown(cursor_pos);
+		KFMOD.PlayUISound(GlobalAssets.GetSound("SandboxTool_Click", false));
+	}
+
+	public override void OnLeftClickUp(Vector3 cursor_pos)
+	{
+		base.OnLeftClickUp(cursor_pos);
+		this.StopSound();
+	}
+
+	private void OnElementChanged(object new_element)
+	{
+		this.clearVisitedCells();
+	}
+
+	protected override string GetDragSound()
+	{
+		string text = (ElementLoader.elements[this.settings.GetIntSetting("SandboxTools.SelectedElement")].state & Element.State.Solid).ToString();
+		return "SandboxTool_Brush_" + text + "_Add";
+	}
+
+	protected override void PlaySound()
+	{
+		base.PlaySound();
+		Element element = ElementLoader.elements[this.settings.GetIntSetting("SandboxTools.SelectedElement")];
+		string text;
+		switch (element.state & Element.State.Solid)
+		{
+		case Element.State.Vacuum:
+			text = GlobalAssets.GetSound("SandboxTool_Brush_Gas", false);
+			break;
+		case Element.State.Gas:
+			text = GlobalAssets.GetSound("SandboxTool_Brush_Gas", false);
+			break;
+		case Element.State.Liquid:
+			text = GlobalAssets.GetSound("SandboxTool_Brush_Liquid", false);
+			break;
+		case Element.State.Solid:
+			text = GlobalAssets.GetSound("Brush_" + element.substance.GetOreBumpSound(), false);
+			if (text == null)
+			{
+				text = GlobalAssets.GetSound("Brush_Rock", false);
+			}
+			break;
+		default:
+			text = GlobalAssets.GetSound("Brush_Rock", false);
+			break;
+		}
+		this.audioEvent = KFMOD.CreateInstance(text);
+		ATTRIBUTES_3D attributes_3D = SoundListenerController.Instance.transform.GetPosition().To3DAttributes();
+		this.audioEvent.set3DAttributes(attributes_3D);
+		this.audioEvent.start();
+	}
+
+	private void StopSound()
+	{
+		this.audioEvent.stop(global::FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
+		this.audioEvent.release();
+	}
+
 	public static SandboxBrushTool instance;
 
 	protected HashSet<int> recentlyAffectedCells = new HashSet<int>();
 
 	private Dictionary<int, Color> recentAffectedCellColor = new Dictionary<int, Color>();
+
+	private EventInstance audioEvent;
 }

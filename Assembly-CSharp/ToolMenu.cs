@@ -544,6 +544,7 @@ public class ToolMenu : KScreen
 				if (SaveGame.Instance.sandboxEnabled)
 				{
 					Game.Instance.SandboxModeActive = !Game.Instance.SandboxModeActive;
+					KMonoBehaviour.PlaySound(Game.Instance.SandboxModeActive ? GlobalAssets.GetSound("SandboxTool_Toggle_On", false) : GlobalAssets.GetSound("SandboxTool_Toggle_Off", false));
 				}
 			}
 			foreach (List<ToolMenu.ToolCollection> list in this.rows)

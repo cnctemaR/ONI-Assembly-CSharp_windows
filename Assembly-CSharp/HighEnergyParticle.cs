@@ -234,7 +234,10 @@ public class HighEnergyParticle : StateMachineComponent<HighEnergyParticle.State
 			this.payload -= 0.1f;
 			byte index = Db.Get().Diseases.GetIndex(Db.Get().Diseases.RadiationPoisoning.Id);
 			int num3 = Mathf.FloorToInt(5f);
-			SimMessages.ModifyDiseaseOnCell(num2, index, num3);
+			if (!Grid.Element[num2].IsVacuum)
+			{
+				SimMessages.ModifyDiseaseOnCell(num2, index, num3);
+			}
 		}
 		if (this.payload <= 0f)
 		{

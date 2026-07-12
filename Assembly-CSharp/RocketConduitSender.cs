@@ -186,14 +186,20 @@ public class RocketConduitSender : StateMachineComponent<RocketConduitSender.Sta
 			});
 			this.on.working.ground.Enter(delegate(RocketConduitSender.StatesInstance smi)
 			{
-				smi.master.partnerReceiver.conduitPort.conduitDispenser.alwaysDispense = true;
+				if (smi.master.partnerReceiver != null)
+				{
+					smi.master.partnerReceiver.conduitPort.conduitDispenser.alwaysDispense = true;
+				}
 			}).UpdateTransition(this.on.working.notOnGround, delegate(RocketConduitSender.StatesInstance smi, float f)
 			{
 				WorldContainer myWorld2 = smi.master.GetMyWorld();
 				return myWorld2 && myWorld2.IsModuleInterior && myWorld2.GetComponent<Clustercraft>().ModuleInterface.GetPassengerModule().HasTag(GameTags.RocketNotOnGround);
 			}, UpdateRate.SIM_200ms, false).Exit(delegate(RocketConduitSender.StatesInstance smi)
 			{
-				smi.master.partnerReceiver.conduitPort.conduitDispenser.alwaysDispense = false;
+				if (smi.master.partnerReceiver != null)
+				{
+					smi.master.partnerReceiver.conduitPort.conduitDispenser.alwaysDispense = false;
+				}
 			});
 		}
 

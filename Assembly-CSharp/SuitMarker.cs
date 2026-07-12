@@ -304,7 +304,10 @@ public class SuitMarker : KMonoBehaviour
 			if (suitLocker != null)
 			{
 				Equipment equipment = this.reactor.GetComponent<MinionIdentity>().GetEquipment();
+				SuitWearer.Instance smi = this.reactor.GetSMI<SuitWearer.Instance>();
 				suitLocker.EquipTo(equipment);
+				smi.UnreserveSuits();
+				this.suitMarker.Update();
 			}
 		}
 	}
@@ -356,6 +359,8 @@ public class SuitMarker : KMonoBehaviour
 				if (suitLocker != null)
 				{
 					suitLocker.UnequipFrom(equipment);
+					component.GetSMI<SuitWearer.Instance>().UnreserveSuits();
+					this.suitMarker.Update();
 					return;
 				}
 			}

@@ -5,6 +5,8 @@ namespace MonoMod.RuntimeDetour
 {
 	internal interface IDetourRuntimePlatform
 	{
+		MethodBase GetIdentifiable(MethodBase method);
+
 		IntPtr GetNativeStart(MethodBase method);
 
 		MethodInfo CreateCopy(MethodBase method);
@@ -16,6 +18,8 @@ namespace MonoMod.RuntimeDetour
 		void Unpin(MethodBase method);
 
 		MethodBase GetDetourTarget(MethodBase from, MethodBase to);
+
+		uint TryMemAllocScratchCloseTo(IntPtr target, out IntPtr ptr, int size);
 
 		bool OnMethodCompiledWillBeCalled { get; }
 

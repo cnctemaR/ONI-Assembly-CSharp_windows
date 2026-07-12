@@ -22,18 +22,19 @@ public class CancellableMove : Cancellable
 		{
 			component.AddRef();
 		}
-		if (this.movables.Count <= 0)
+		if (this.fetchChore == null)
 		{
-			global::Debug.LogWarning("MovePickupable spawned with no objects to move. Destroying placer.");
-			Util.KDestroyGameObject(base.gameObject);
-			return;
+			GameObject nextTarget = this.GetNextTarget();
+			if (!(nextTarget != null) || nextTarget.IsNullOrDestroyed())
+			{
+				global::Debug.LogWarning("MovePickupable spawned with no objects to move. Destroying placer.");
+				Util.KDestroyGameObject(base.gameObject);
+				return;
+			}
+			this.fetchChore = new MovePickupableChore(this, nextTarget, new Action<Chore>(this.OnChoreEnd));
 		}
 		base.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
 		base.Subscribe(2127324410, new Action<object>(this.OnCancel));
-		if (this.fetchChore == null && this.movables[0].Get() != null && !this.movables[0].Get().gameObject.IsNullOrDestroyed())
-		{
-			this.fetchChore = new MovePickupableChore(this, this.movables[0].Get().gameObject, new Action<Chore>(this.OnChoreEnd));
-		}
 		base.GetComponent<KPrefabID>().AddTag(GameTags.HasChores, false);
 		int num = Grid.PosToCell(this);
 		Grid.Objects[num, 44] = base.gameObject;
@@ -101,12 +102,13 @@ public class CancellableMove : Cancellable
 
 	public void OnChoreEnd(Chore chore)
 	{
-		if (this.IsDeliveryComplete())
+		GameObject nextTarget = this.GetNextTarget();
+		if (nextTarget == null)
 		{
 			Util.KDestroyGameObject(base.gameObject);
 			return;
 		}
-		this.fetchChore = new MovePickupableChore(this, this.movables[0].Get().gameObject, new Action<Chore>(this.OnChoreEnd));
+		this.fetchChore = new MovePickupableChore(this, nextTarget, new Action<Chore>(this.OnChoreEnd));
 	}
 
 	public bool IsDeliveryComplete()
@@ -125,14 +127,14 @@ public class CancellableMove : Cancellable
 		}
 		if (this.movables.Count <= 0)
 		{
-			global::Debug.LogWarning("Pickupable " + moved.name + " has been destroyed and there are no more pickups to move. Cancel the chore");
 			this.OnCancel(null);
 		}
 	}
 
 	public GameObject GetNextTarget()
 	{
-		if (this.movables.Count >= 0)
+		this.movables.RemoveAll((Ref<Movable> movable) => movable.Get() == null || Grid.PosToCell(movable.Get()) == Grid.PosToCell(this));
+		if (this.movables.Count > 0)
 		{
 			return this.movables[0].Get().gameObject;
 		}

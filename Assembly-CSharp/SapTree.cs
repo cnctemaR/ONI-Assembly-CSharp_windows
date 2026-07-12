@@ -167,10 +167,12 @@ public class SapTree : GameStateMachine<SapTree, SapTree.StatesInstance, IStateM
 				if (pickupable.GetComponent<Edible>() != null)
 				{
 					base.sm.foodItem.Set(pickupable.gameObject, this, false);
+					pooledList.Recycle();
 					return;
 				}
 			}
 			base.sm.foodItem.Set(null, this);
+			pooledList.Recycle();
 		}
 
 		public bool DoAttack()

@@ -843,6 +843,14 @@ public static class GameUtil
 		{
 			return UI.CALCULATING;
 		}
+		if (float.IsPositiveInfinity(mass))
+		{
+			return UI.POS_INFINITY + UI.UNITSUFFIXES.MASS.TONNE;
+		}
+		if (float.IsNegativeInfinity(mass))
+		{
+			return UI.NEG_INFINITY + UI.UNITSUFFIXES.MASS.TONNE;
+		}
 		mass = GameUtil.ApplyTimeSlice(mass, timeSlice);
 		string text;
 		if (GameUtil.massUnit == GameUtil.MassUnit.Kilograms)
@@ -1911,6 +1919,11 @@ public static class GameUtil
 
 	public static List<Descriptor> GetRequirementDescriptors(List<Descriptor> descriptors)
 	{
+		return GameUtil.GetRequirementDescriptors(descriptors, true);
+	}
+
+	public static List<Descriptor> GetRequirementDescriptors(List<Descriptor> descriptors, bool indent)
+	{
 		List<Descriptor> list = new List<Descriptor>();
 		foreach (Descriptor descriptor in descriptors)
 		{
@@ -1919,7 +1932,10 @@ public static class GameUtil
 				list.Add(descriptor);
 			}
 		}
-		GameUtil.IndentListOfDescriptors(list, 1);
+		if (indent)
+		{
+			GameUtil.IndentListOfDescriptors(list, 1);
+		}
 		return list;
 	}
 

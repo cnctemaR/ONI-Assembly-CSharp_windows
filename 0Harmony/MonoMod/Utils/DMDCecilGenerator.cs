@@ -12,7 +12,7 @@ namespace MonoMod.Utils
 	{
 		protected override MethodInfo _Generate(DynamicMethodDefinition dmd, object context)
 		{
-			MethodDefinition definition = dmd.Definition;
+			MethodDefinition def = dmd.Definition;
 			TypeDefinition typeDefinition = context as TypeDefinition;
 			bool flag = false;
 			ModuleDefinition module = ((typeDefinition != null) ? typeDefinition.Module : null);
@@ -56,33 +56,41 @@ namespace MonoMod.Utils
 			MethodInfo method;
 			try
 			{
+				MethodDefinition clone = null;
 				TypeReference typeReference = new TypeReference("System.Runtime.CompilerServices", "IsVolatile", module, module.TypeSystem.CoreLibrary);
-				Relinker relinker = (IMetadataTokenProvider mtp, IGenericParameterProvider ctx) => module.ImportReference(mtp);
-				MethodDefinition methodDefinition = new MethodDefinition(dmd.Name ?? ("_" + definition.Name.Replace('.', '_')), definition.Attributes, module.TypeSystem.Void)
+				Relinker relinker = delegate(IMetadataTokenProvider mtp, IGenericParameterProvider ctx)
 				{
-					MethodReturnType = definition.MethodReturnType,
+					if (mtp == def)
+					{
+						return clone;
+					}
+					return module.ImportReference(mtp);
+				};
+				clone = new MethodDefinition(dmd.Name ?? ("_" + def.Name.Replace('.', '_')), def.Attributes, module.TypeSystem.Void)
+				{
+					MethodReturnType = def.MethodReturnType,
 					Attributes = (Mono.Cecil.MethodAttributes.FamANDAssem | Mono.Cecil.MethodAttributes.Family | Mono.Cecil.MethodAttributes.Static | Mono.Cecil.MethodAttributes.HideBySig),
 					ImplAttributes = Mono.Cecil.MethodImplAttributes.IL,
 					DeclaringType = typeDefinition,
 					NoInlining = true
 				};
-				foreach (ParameterDefinition parameterDefinition in definition.Parameters)
+				foreach (ParameterDefinition parameterDefinition in def.Parameters)
 				{
-					methodDefinition.Parameters.Add(parameterDefinition.Clone().Relink(relinker, methodDefinition));
+					clone.Parameters.Add(parameterDefinition.Clone().Relink(relinker, clone));
 				}
-				methodDefinition.ReturnType = definition.ReturnType.Relink(relinker, methodDefinition);
-				typeDefinition.Methods.Add(methodDefinition);
-				methodDefinition.HasThis = definition.HasThis;
-				Mono.Cecil.Cil.MethodBody methodBody = (methodDefinition.Body = definition.Body.Clone(methodDefinition));
-				foreach (VariableDefinition variableDefinition in methodDefinition.Body.Variables)
+				clone.ReturnType = def.ReturnType.Relink(relinker, clone);
+				typeDefinition.Methods.Add(clone);
+				clone.HasThis = def.HasThis;
+				Mono.Cecil.Cil.MethodBody methodBody = (clone.Body = def.Body.Clone(clone));
+				foreach (VariableDefinition variableDefinition in clone.Body.Variables)
 				{
-					variableDefinition.VariableType = variableDefinition.VariableType.Relink(relinker, methodDefinition);
+					variableDefinition.VariableType = variableDefinition.VariableType.Relink(relinker, clone);
 				}
-				foreach (ExceptionHandler exceptionHandler in methodDefinition.Body.ExceptionHandlers)
+				foreach (ExceptionHandler exceptionHandler in clone.Body.ExceptionHandlers)
 				{
 					if (exceptionHandler.CatchType != null)
 					{
-						exceptionHandler.CatchType = exceptionHandler.CatchType.Relink(relinker, methodDefinition);
+						exceptionHandler.CatchType = exceptionHandler.CatchType.Relink(relinker, clone);
 					}
 				}
 				for (int i = 0; i < methodBody.Instructions.Count; i++)
@@ -92,14 +100,14 @@ namespace MonoMod.Utils
 					ParameterDefinition parameterDefinition2 = obj2 as ParameterDefinition;
 					if (parameterDefinition2 != null)
 					{
-						obj2 = methodDefinition.Parameters[parameterDefinition2.Index];
+						obj2 = clone.Parameters[parameterDefinition2.Index];
 					}
 					else
 					{
 						IMetadataTokenProvider metadataTokenProvider = obj2 as IMetadataTokenProvider;
 						if (metadataTokenProvider != null)
 						{
-							obj2 = metadataTokenProvider.Relink(relinker, methodDefinition);
+							obj2 = metadataTokenProvider.Relink(relinker, clone);
 						}
 					}
 					Instruction previous = instruction.Previous;
@@ -136,15 +144,15 @@ namespace MonoMod.Utils
 					}
 					instruction.Operand = obj2;
 				}
-				methodDefinition.HasThis = false;
-				if (definition.HasThis)
+				clone.HasThis = false;
+				if (def.HasThis)
 				{
-					TypeReference typeReference3 = definition.DeclaringType;
+					TypeReference typeReference3 = def.DeclaringType;
 					if (typeReference3.IsValueType)
 					{
 						typeReference3 = new ByReferenceType(typeReference3);
 					}
-					methodDefinition.Parameters.Insert(0, new ParameterDefinition("<>_this", Mono.Cecil.ParameterAttributes.None, typeReference3.Relink(relinker, methodDefinition)));
+					clone.Parameters.Insert(0, new ParameterDefinition("<>_this", Mono.Cecil.ParameterAttributes.None, typeReference3.Relink(relinker, clone)));
 				}
 				if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MONOMOD_DMD_DUMP")))
 				{
@@ -165,7 +173,7 @@ namespace MonoMod.Utils
 						module.Write(stream);
 					}
 				}
-				method = ReflectionHelper.Load(module).GetType(typeDefinition.FullName.Replace("+", "\\+"), false, false).GetMethod(methodDefinition.Name, BindingFlags.DeclaredOnly | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
+				method = ReflectionHelper.Load(module).GetType(typeDefinition.FullName.Replace("+", "\\+", StringComparison.Ordinal), false, false).GetMethod(clone.Name, BindingFlags.DeclaredOnly | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
 			}
 			finally
 			{

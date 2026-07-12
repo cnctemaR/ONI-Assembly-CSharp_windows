@@ -20,6 +20,7 @@ namespace HarmonyLib
 			{
 				throw new NullReferenceException("Null method for " + this.instance.Id);
 			}
+			this.standin.reversePatchType = new HarmonyReversePatchType?(type);
 			MethodInfo transpiler = ReversePatcher.GetTranspiler(this.standin.method);
 			return PatchFunctions.ReversePatch(this.standin, this.original, transpiler);
 		}

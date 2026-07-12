@@ -428,19 +428,25 @@ namespace Mono.Cecil
 		{
 			get
 			{
-				if (this.entry_point != null)
+				if (this.entry_point_set)
 				{
 					return this.entry_point;
 				}
 				if (this.HasImage)
 				{
-					return this.Read<ModuleDefinition, MethodDefinition>(ref this.entry_point, this, (ModuleDefinition _, MetadataReader reader) => reader.ReadEntryPoint());
+					this.Read<ModuleDefinition, MethodDefinition>(ref this.entry_point, this, (ModuleDefinition _, MetadataReader reader) => reader.ReadEntryPoint());
 				}
-				return this.entry_point = null;
+				else
+				{
+					this.entry_point = null;
+				}
+				this.entry_point_set = true;
+				return this.entry_point;
 			}
 			set
 			{
 				this.entry_point = value;
+				this.entry_point_set = true;
 			}
 		}
 
@@ -478,7 +484,7 @@ namespace Mono.Cecil
 			this.RuntimeVersion = image.RuntimeVersion;
 			this.architecture = image.Architecture;
 			this.attributes = image.Attributes;
-			this.characteristics = image.Characteristics;
+			this.characteristics = image.DllCharacteristics;
 			this.linker_version = image.LinkerVersion;
 			this.subsystem_major = image.SubSystemMajor;
 			this.subsystem_minor = image.SubSystemMinor;
@@ -829,6 +835,16 @@ namespace Mono.Cecil
 			return this.Read<MetadataToken, IMetadataTokenProvider>(token, (MetadataToken t, MetadataReader reader) => reader.LookupToken(t));
 		}
 
+		public void ImmediateRead()
+		{
+			if (!this.HasImage)
+			{
+				return;
+			}
+			this.ReadingMode = ReadingMode.Immediate;
+			new ImmediateModuleReader(this.Image).ReadModule(this, true);
+		}
+
 		internal object SyncRoot
 		{
 			get
@@ -1141,6 +1157,8 @@ namespace Mono.Cecil
 		internal AssemblyDefinition assembly;
 
 		private MethodDefinition entry_point;
+
+		private bool entry_point_set;
 
 		internal IReflectionImporter reflection_importer;
 

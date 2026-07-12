@@ -339,11 +339,13 @@ public enum GameHashes
 	StartRocketLaunch = 546421097,
 	RocketTouchDown = -735346771,
 	RocketCreated = 374403796,
+	ReorderableBuildingChanged = -1447108533,
 	RocketRestrictionChanged = 1861523068,
 	StoragePriorityChanged = -1626373771,
 	StorageCapacityChanged = -945020481,
 	AttachmentNetworkChanged = 486707561,
 	LaunchConditionChanged = 1655598572,
+	BabyToAdult = 663420073,
 	ChoreInterrupt = 1485595942,
 	Flush = -350347868,
 	WorkerPlayPostAnim = -1142962013,
@@ -393,6 +395,7 @@ public enum GameHashes
 	WorldRemoved = -1078710002,
 	WorldParentChanged = 880851192,
 	WorldRenamed = 1943181844,
+	EntityMigration = 1142724171,
 	MinionMigration = 586301400,
 	MinionStorageChanged = -392340561,
 	NewWorldVisited = -434755240,
@@ -431,5 +434,6 @@ public enum GameHashes
 	MegaBrainTankCandidateDupesChanged = 374655100,
 	DreamsOn = -1768884913,
 	DreamsOff = 49503455,
-	MarkForMove = 1122777325
+	MarkForMove = 1122777325,
+	RailGunLaunchMassChanged = 161772031
 }

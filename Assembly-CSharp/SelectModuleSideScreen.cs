@@ -152,6 +152,16 @@ public class SelectModuleSideScreen : KScreen
 		this.materialSelectionPanel.AutoSelectAvailableMaterial();
 	}
 
+	private void ConfigureFacadeSelector()
+	{
+		if (this.facadeSelectionPanel == null)
+		{
+			this.facadeSelectionPanel = Util.KInstantiateUI<FacadeSelectionPanel>(this.facadeSelectionPanelPrefab, base.gameObject, true);
+			this.facadeSelectionPanel.transform.SetSiblingIndex(this.materialSelectionPanel.transform.GetSiblingIndex());
+		}
+		this.facadeSelectionPanel.SetBuildingDef(this.selectedModuleDef.PrefabID);
+	}
+
 	private bool IsDefBuildable(BuildingDef def)
 	{
 		return this.moduleBuildableState.ContainsKey(def) && this.moduleBuildableState[def];
@@ -253,7 +263,7 @@ public class SelectModuleSideScreen : KScreen
 		{
 			while (enumerator.MoveNext())
 			{
-				SelectModuleSideScreen.<>c__DisplayClass39_0 CS$<>8__locals1 = new SelectModuleSideScreen.<>c__DisplayClass39_0();
+				SelectModuleSideScreen.<>c__DisplayClass42_0 CS$<>8__locals1 = new SelectModuleSideScreen.<>c__DisplayClass42_0();
 				CS$<>8__locals1.<>4__this = this;
 				CS$<>8__locals1.id = enumerator.Current;
 				GameObject part = prefabsWithComponent.Find((GameObject p) => p.PrefabID().Name == CS$<>8__locals1.id);
@@ -439,6 +449,7 @@ public class SelectModuleSideScreen : KScreen
 	{
 		this.selectedModuleDef = def;
 		this.ConfigureMaterialSelector();
+		this.ConfigureFacadeSelector();
 		this.SetButtonColors();
 		this.UpdateBuildButton();
 		this.AddErrorTooltips(this.buildSelectedModuleButton.GetComponent<ToolTip>(), this.selectedModuleDef, true);
@@ -467,6 +478,10 @@ public class SelectModuleSideScreen : KScreen
 		if (gameObject2 != null)
 		{
 			Vector2 anchoredPosition = this.mainContents.GetComponent<KScrollRect>().content.anchoredPosition;
+			if (this.facadeSelectionPanel.SelectedFacade != null && this.facadeSelectionPanel.SelectedFacade != "DEFAULT_FACADE")
+			{
+				gameObject2.GetComponent<BuildingFacade>().ApplyBuildingFacade(Db.GetBuildingFacades().Get(this.facadeSelectionPanel.SelectedFacade));
+			}
 			SelectTool.Instance.StartCoroutine(this.SelectNextFrame(gameObject2.GetComponent<KSelectable>(), buildingDef, anchoredPosition.y));
 		}
 	}
@@ -508,6 +523,10 @@ public class SelectModuleSideScreen : KScreen
 
 	private MaterialSelectionPanel materialSelectionPanel;
 
+	public GameObject facadeSelectionPanelPrefab;
+
+	private FacadeSelectionPanel facadeSelectionPanel;
+
 	public KButton buildSelectedModuleButton;
 
 	public ColorStyleSetting colorStyleButton;
@@ -524,6 +543,6 @@ public class SelectModuleSideScreen : KScreen
 	{
 		"CO2Engine", "SugarEngine", "SteamEngineCluster", "KeroseneEngineClusterSmall", "KeroseneEngineCluster", "HEPEngine", "HydrogenEngineCluster", "HabitatModuleSmall", "HabitatModuleMedium", "NoseconeBasic",
 		"NoseconeHarvest", "OrbitalCargoModule", "ScoutModule", "PioneerModule", "LiquidFuelTankCluster", "SmallOxidizerTank", "OxidizerTankCluster", "OxidizerTankLiquidCluster", "SolidCargoBaySmall", "LiquidCargoBaySmall",
-		"GasCargoBaySmall", "CargoBayCluster", "LiquidCargoBayCluster", "GasCargoBayCluster", "BatteryModule", "SolarPanelModule", "ArtifactCargoBay", "ScannerModule"
+		"GasCargoBaySmall", "CargoBayCluster", "LiquidCargoBayCluster", "GasCargoBayCluster", "SpecialCargoBayCluster", "BatteryModule", "SolarPanelModule", "ArtifactCargoBay", "ScannerModule"
 	};
 }

@@ -178,7 +178,12 @@ namespace Mono.Cecil.Cil
 			{
 				cache.Index = j;
 				cache.Offset = num2;
-				cache.Instruction = this.items[j];
+				Instruction instruction = this.items[j];
+				if (instruction == null)
+				{
+					break;
+				}
+				cache.Instruction = instruction;
 				if (cache.Offset == offset)
 				{
 					return new InstructionOffset(cache.Instruction);
@@ -187,7 +192,7 @@ namespace Mono.Cecil.Cil
 				{
 					return new InstructionOffset(this.items[j - 1]);
 				}
-				num2 += this.items[j].GetSize();
+				num2 += instruction.GetSize();
 			}
 			return default(InstructionOffset);
 		}

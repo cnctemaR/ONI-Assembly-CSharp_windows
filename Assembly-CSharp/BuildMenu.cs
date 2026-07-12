@@ -882,6 +882,7 @@ public class BuildMenu : KScreen
 				new BuildMenu.BuildingInfo("GasCargoBay", global::Action.BuildMenuKeyG),
 				new BuildMenu.BuildingInfo("LiquidCargoBay", global::Action.BuildMenuKeyQ),
 				new BuildMenu.BuildingInfo("SpecialCargoBay", global::Action.BuildMenuKeyA),
+				new BuildMenu.BuildingInfo("SpecialCargoBayCluster", global::Action.BuildMenuKeyA),
 				new BuildMenu.BuildingInfo("CommandModule", global::Action.BuildMenuKeyC),
 				new BuildMenu.BuildingInfo("TouristModule", global::Action.BuildMenuKeyY),
 				new BuildMenu.BuildingInfo("ResearchModule", global::Action.BuildMenuKeyR),

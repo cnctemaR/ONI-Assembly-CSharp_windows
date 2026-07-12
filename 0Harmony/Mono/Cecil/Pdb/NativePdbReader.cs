@@ -25,16 +25,31 @@ namespace Mono.Cecil.Pdb
 			{
 				return false;
 			}
-			ImageDebugHeaderEntry codeViewEntry = header.GetCodeViewEntry();
-			if (codeViewEntry == null)
+			using (this.pdb_file)
+			{
+				PdbInfo pdbInfo = PdbFile.LoadFunctions(this.pdb_file.value);
+				foreach (ImageDebugHeaderEntry imageDebugHeaderEntry in header.Entries)
+				{
+					if (NativePdbReader.IsMatchingEntry(pdbInfo, imageDebugHeaderEntry))
+					{
+						foreach (PdbFunction pdbFunction in pdbInfo.Functions)
+						{
+							this.functions.Add(pdbFunction.token, pdbFunction);
+						}
+						return true;
+					}
+				}
+			}
+			return false;
+		}
+
+		private static bool IsMatchingEntry(PdbInfo info, ImageDebugHeaderEntry entry)
+		{
+			if (entry.Directory.Type != ImageDebugType.CodeView)
 			{
 				return false;
 			}
-			if (codeViewEntry.Directory.Type != ImageDebugType.CodeView)
-			{
-				return false;
-			}
-			byte[] data = codeViewEntry.Data;
+			byte[] data = entry.Data;
 			if (data.Length < 24)
 			{
 				return false;
@@ -45,31 +60,12 @@ namespace Mono.Cecil.Pdb
 			}
 			byte[] array = new byte[16];
 			Buffer.BlockCopy(data, 4, array, 0, 16);
-			this.guid = new Guid(array);
-			this.age = NativePdbReader.ReadInt32(data, 20);
-			return this.PopulateFunctions();
+			return info.Guid == new Guid(array);
 		}
 
 		private static int ReadInt32(byte[] bytes, int start)
 		{
 			return (int)bytes[start] | ((int)bytes[start + 1] << 8) | ((int)bytes[start + 2] << 16) | ((int)bytes[start + 3] << 24);
-		}
-
-		private bool PopulateFunctions()
-		{
-			using (this.pdb_file)
-			{
-				PdbInfo pdbInfo = PdbFile.LoadFunctions(this.pdb_file.value);
-				if (this.guid != pdbInfo.Guid)
-				{
-					return false;
-				}
-				foreach (PdbFunction pdbFunction in pdbInfo.Functions)
-				{
-					this.functions.Add(pdbFunction.token, pdbFunction);
-				}
-			}
-			return true;
 		}
 
 		public MethodDebugInformation Read(MethodDefinition method)
@@ -409,10 +405,6 @@ namespace Mono.Cecil.Pdb
 		{
 			this.pdb_file.Dispose();
 		}
-
-		private int age;
-
-		private Guid guid;
 
 		private readonly Disposable<Stream> pdb_file;
 

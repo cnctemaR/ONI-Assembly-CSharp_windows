@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using MonoMod.Utils;
 
 namespace HarmonyLib
 {
@@ -39,7 +40,9 @@ namespace HarmonyLib
 				{
 					text2 = new Uri(assembly.CodeBase).LocalPath;
 				}
-				FileLog.Log(string.Format("### Harmony id={0}, version={1}, location={2}, env/clr={3}, platform={4}", new object[] { id, version, text2, text3, text4 }));
+				int size = IntPtr.Size;
+				Platform platform = PlatformHelper.Current;
+				FileLog.Log(string.Format("### Harmony id={0}, version={1}, location={2}, env/clr={3}, platform={4}, ptrsize:runtime/env={5}/{6}", new object[] { id, version, text2, text3, text4, size, platform }));
 				MethodBase outsideCaller = AccessTools.GetOutsideCaller();
 				if (outsideCaller.DeclaringType != null)
 				{
@@ -138,7 +141,7 @@ namespace HarmonyLib
 			}
 		}
 
-		public void Unpatch(MethodBase original, HarmonyPatchType type, string harmonyID = null)
+		public void Unpatch(MethodBase original, HarmonyPatchType type, string harmonyID = "*")
 		{
 			this.CreateProcessor(original).Unpatch(type, harmonyID);
 		}
@@ -186,12 +189,18 @@ namespace HarmonyLib
 			{
 				throw new ArgumentNullException("frame");
 			}
-			MethodBase method = frame.GetMethod();
-			if (method != null)
+			return HarmonySharedState.FindReplacement(frame) ?? frame.GetMethod();
+		}
+
+		public static MethodBase GetOriginalMethodFromStackframe(StackFrame frame)
+		{
+			MethodBase methodBase = Harmony.GetMethodFromStackframe(frame);
+			MethodInfo methodInfo = methodBase as MethodInfo;
+			if (methodInfo != null)
 			{
-				return method;
+				methodBase = Harmony.GetOriginalMethod(methodInfo) ?? methodBase;
 			}
-			return HarmonySharedState.FindReplacement(frame);
+			return methodBase;
 		}
 
 		public static Dictionary<string, Version> VersionInfo(out Version currentVersion)

@@ -19,11 +19,14 @@ public class BaseStaterpillarConfig
 			text = "DreckoNavGrid";
 			gameObject.AddOrGetDef<ConduitSleepMonitor.Def>().conduitLayer = conduitLayer;
 		}
+		EntityTemplates.ExtendEntityToBasicCreature(gameObject, FactionManager.FactionID.Pest, trait_id, text, NavType.Floor, 32, 1f, "Meat", 2, false, false, warningLowTemperature, warningHighTemperature, lethalLowTemperature, lethalHighTemperature);
 		if (symbolOverridePrefix != null)
 		{
 			gameObject.AddOrGet<SymbolOverrideController>().ApplySymbolOverridesByAffix(Assets.GetAnim(anim_file), symbolOverridePrefix, null, 0);
 		}
-		EntityTemplates.ExtendEntityToBasicCreature(gameObject, FactionManager.FactionID.Pest, trait_id, text, NavType.Floor, 32, 1f, "Meat", 2, false, false, warningLowTemperature, warningHighTemperature, lethalLowTemperature, lethalHighTemperature);
+		Pickupable pickupable = gameObject.AddOrGet<Pickupable>();
+		int num2 = global::TUNING.CREATURES.SORTING.CRITTER_ORDER["Staterpillar"];
+		pickupable.sortOrder = num2;
 		gameObject.AddOrGet<Trappable>();
 		gameObject.AddOrGetDef<CreatureFallMonitor.Def>();
 		gameObject.AddOrGet<LoopingSounds>();

@@ -70,6 +70,11 @@ public class NameDisplayScreen : KScreen
 		}
 	}
 
+	public void RemoveWorldEntries(int worldId)
+	{
+		this.entries.RemoveAll((NameDisplayScreen.Entry entry) => entry.world_go.GetMyWorldId() == worldId);
+	}
+
 	private void OnOverlayChanged(HashedString new_mode)
 	{
 		HashedString hashedString = this.lastKnownOverlayID;
@@ -528,7 +533,7 @@ public class NameDisplayScreen : KScreen
 			return;
 		}
 		entry.breathBar.SetUpdateFunc(updatePercentFull);
-		entry.breathBar.gameObject.SetActive(bVisible);
+		entry.breathBar.SetVisibility(bVisible);
 	}
 
 	public void SetHealthDisplay(GameObject minion_go, Func<float> updatePercentFull, bool bVisible)
@@ -542,7 +547,7 @@ public class NameDisplayScreen : KScreen
 		entry.healthBar.SetUpdateFunc(updatePercentFull);
 		if (entry.healthBar.gameObject.activeSelf != bVisible)
 		{
-			entry.healthBar.gameObject.SetActive(bVisible);
+			entry.healthBar.SetVisibility(bVisible);
 		}
 	}
 
@@ -554,7 +559,7 @@ public class NameDisplayScreen : KScreen
 			return;
 		}
 		entry.suitBar.SetUpdateFunc(updatePercentFull);
-		entry.suitBar.gameObject.SetActive(bVisible);
+		entry.suitBar.SetVisibility(bVisible);
 	}
 
 	public void SetSuitFuelDisplay(GameObject minion_go, Func<float> updatePercentFull, bool bVisible)
@@ -565,7 +570,7 @@ public class NameDisplayScreen : KScreen
 			return;
 		}
 		entry.suitFuelBar.SetUpdateFunc(updatePercentFull);
-		entry.suitFuelBar.gameObject.SetActive(bVisible);
+		entry.suitFuelBar.SetVisibility(bVisible);
 	}
 
 	public void SetSuitBatteryDisplay(GameObject minion_go, Func<float> updatePercentFull, bool bVisible)
@@ -576,7 +581,7 @@ public class NameDisplayScreen : KScreen
 			return;
 		}
 		entry.suitBatteryBar.SetUpdateFunc(updatePercentFull);
-		entry.suitBatteryBar.gameObject.SetActive(bVisible);
+		entry.suitBatteryBar.SetVisibility(bVisible);
 	}
 
 	private NameDisplayScreen.Entry GetEntry(GameObject worldObject)

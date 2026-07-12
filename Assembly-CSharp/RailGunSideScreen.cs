@@ -113,6 +113,7 @@ public class RailGunSideScreen : SideScreenContent
 		this.selectedGun.launchMass = newValue;
 		this.slider.value = newValue;
 		this.UpdateMaxCapacityLabel();
+		this.selectedGun.Trigger(161772031, null);
 	}
 
 	private void UpdateMaxCapacityLabel()

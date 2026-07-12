@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Text;
 using Mono.Cecil;
 using Mono.Collections.Generic;
 
@@ -21,10 +22,10 @@ namespace MonoMod.Utils
 			}
 			if (cacheKey != null && value != null)
 			{
-				Dictionary<string, MemberInfo> resolveReflectionCache = ReflectionHelper.ResolveReflectionCache;
+				Dictionary<string, WeakReference> resolveReflectionCache = ReflectionHelper.ResolveReflectionCache;
 				lock (resolveReflectionCache)
 				{
-					ReflectionHelper.ResolveReflectionCache[cacheKey] = value;
+					ReflectionHelper.ResolveReflectionCache[cacheKey] = new WeakReference(value);
 				}
 			}
 			return value;
@@ -98,6 +99,41 @@ namespace MonoMod.Utils
 			return null;
 		}
 
+		public static void ApplyRuntimeHash(this AssemblyNameReference asmRef, Assembly asm)
+		{
+			byte[] array = new byte[ReflectionHelper.AssemblyHashPrefix.Length + 4];
+			Array.Copy(ReflectionHelper.AssemblyHashPrefix, 0, array, 0, ReflectionHelper.AssemblyHashPrefix.Length);
+			Array.Copy(BitConverter.GetBytes(asm.GetHashCode()), 0, array, ReflectionHelper.AssemblyHashPrefix.Length, 4);
+			asmRef.HashAlgorithm = (AssemblyHashAlgorithm)4294967295U;
+			asmRef.Hash = array;
+		}
+
+		public static string GetRuntimeHashedFullName(this Assembly asm)
+		{
+			return string.Format("{0}{1}{2}", asm.FullName, ReflectionHelper.AssemblyHashNameTag, asm.GetHashCode());
+		}
+
+		public static string GetRuntimeHashedFullName(this AssemblyNameReference asm)
+		{
+			if (asm.HashAlgorithm != (AssemblyHashAlgorithm)4294967295U)
+			{
+				return asm.FullName;
+			}
+			byte[] hash = asm.Hash;
+			if (hash.Length != ReflectionHelper.AssemblyHashPrefix.Length + 4)
+			{
+				return asm.FullName;
+			}
+			for (int i = 0; i < ReflectionHelper.AssemblyHashPrefix.Length; i++)
+			{
+				if (hash[i] != ReflectionHelper.AssemblyHashPrefix[i])
+				{
+					return asm.FullName;
+				}
+			}
+			return string.Format("{0}{1}{2}", asm.FullName, ReflectionHelper.AssemblyHashNameTag, BitConverter.ToInt32(hash, ReflectionHelper.AssemblyHashPrefix.Length));
+		}
+
 		public static Type ResolveReflection(this TypeReference mref)
 		{
 			return ReflectionHelper._ResolveReflection(mref, null) as Type;
@@ -166,19 +202,19 @@ namespace MonoMod.Utils
 					}
 					else
 					{
-						asmName = typeReference2.Module.Assembly.FullName;
+						asmName = typeReference2.Module.Assembly.Name.GetRuntimeHashedFullName();
 						moduleName = typeReference2.Module.Name;
 					}
 				}
 				else
 				{
-					asmName = moduleDefinition.Assembly.FullName;
+					asmName = moduleDefinition.Assembly.Name.GetRuntimeHashedFullName();
 					moduleName = moduleDefinition.Name;
 				}
 			}
 			else
 			{
-				asmName = assemblyNameReference.FullName;
+				asmName = assemblyNameReference.GetRuntimeHashedFullName();
 				moduleName = null;
 			}
 			text = string.Concat(new string[]
@@ -189,13 +225,17 @@ namespace MonoMod.Utils
 				", ",
 				moduleName ?? "NOMODULE"
 			});
-			Dictionary<string, MemberInfo> resolveReflectionCache = ReflectionHelper.ResolveReflectionCache;
-			lock (resolveReflectionCache)
+			Dictionary<string, WeakReference> dictionary = ReflectionHelper.ResolveReflectionCache;
+			lock (dictionary)
 			{
-				MemberInfo memberInfo;
-				if (ReflectionHelper.ResolveReflectionCache.TryGetValue(text, out memberInfo) && memberInfo != null)
+				WeakReference weakReference;
+				if (ReflectionHelper.ResolveReflectionCache.TryGetValue(text, out weakReference) && weakReference != null)
 				{
-					return memberInfo;
+					MemberInfo memberInfo = weakReference.SafeGetTarget() as MemberInfo;
+					if (memberInfo != null)
+					{
+						return memberInfo;
+					}
 				}
 			}
 			if (mref is GenericParameter)
@@ -226,9 +266,9 @@ namespace MonoMod.Utils
 			bool flag2 = true;
 			bool flag3 = false;
 			bool flag4 = false;
-			Func<Type, bool> <>9__15;
-			Func<MethodInfo, bool> <>9__16;
-			Func<FieldInfo, bool> <>9__17;
+			Func<Type, bool> <>9__20;
+			Func<MethodInfo, bool> <>9__21;
+			Func<FieldInfo, bool> <>9__22;
 			TypeSpecification typeSpecification;
 			MemberInfo memberInfo2;
 			for (;;)
@@ -248,33 +288,61 @@ namespace MonoMod.Utils
 					}
 					if (flag2)
 					{
-						Dictionary<string, Assembly> assemblyCache = ReflectionHelper.AssemblyCache;
-						lock (assemblyCache)
+						dictionary = ReflectionHelper.AssemblyCache;
+						lock (dictionary)
 						{
-							Assembly assembly;
-							if (ReflectionHelper.AssemblyCache.TryGetValue(asmName, out assembly))
+							WeakReference weakReference2;
+							if (ReflectionHelper.AssemblyCache.TryGetValue(asmName, out weakReference2))
 							{
-								array = new Assembly[] { assembly };
+								Assembly assembly = weakReference2.SafeGetTarget() as Assembly;
+								if (assembly != null)
+								{
+									array = new Assembly[] { assembly };
+								}
+							}
+						}
+					}
+					if (array == null && !flag3)
+					{
+						Dictionary<string, WeakReference[]> dictionary2 = ReflectionHelper.AssembliesCache;
+						lock (dictionary2)
+						{
+							WeakReference[] array2;
+							if (ReflectionHelper.AssembliesCache.TryGetValue(asmName, out array2))
+							{
+								array = (from asmRef in array2
+									select asmRef.SafeGetTarget() as Assembly into asm
+									where asm != null
+									select asm).ToArray<Assembly>();
 							}
 						}
 					}
 					if (array == null)
 					{
-						if (!flag3)
+						int num = asmName.IndexOf(ReflectionHelper.AssemblyHashNameTag, StringComparison.Ordinal);
+						int hash;
+						if (num != -1 && int.TryParse(asmName.Substring(num + 2), out hash))
 						{
-							Dictionary<string, Assembly[]> dictionary = ReflectionHelper.AssembliesCache;
-							lock (dictionary)
+							array = (from other in AppDomain.CurrentDomain.GetAssemblies()
+								where other.GetHashCode() == hash
+								select other).ToArray<Assembly>();
+							if (array.Length == 0)
 							{
-								ReflectionHelper.AssembliesCache.TryGetValue(asmName, out array);
+								array = null;
 							}
+							asmName = asmName.Substring(0, num);
 						}
 						if (array == null)
 						{
-							array = AppDomain.CurrentDomain.GetAssemblies().Where<Assembly>(delegate(Assembly other)
+							array = (from other in AppDomain.CurrentDomain.GetAssemblies()
+								where other.GetName().FullName == asmName
+								select other).ToArray<Assembly>();
+							if (array.Length == 0)
 							{
-								AssemblyName name = other.GetName();
-								return name.Name == asmName || name.FullName == asmName;
-							}).ToArray<Assembly>();
+								array = (from other in AppDomain.CurrentDomain.GetAssemblies()
+									where other.GetName().Name == asmName
+									select other).ToArray<Assembly>();
+							}
 							if (array.Length == 0)
 							{
 								Assembly assembly2 = Assembly.Load(new AssemblyName(asmName));
@@ -283,13 +351,13 @@ namespace MonoMod.Utils
 									array = new Assembly[] { assembly2 };
 								}
 							}
-							if (array.Length != 0)
+						}
+						if (array.Length != 0)
+						{
+							Dictionary<string, WeakReference[]> dictionary2 = ReflectionHelper.AssembliesCache;
+							lock (dictionary2)
 							{
-								Dictionary<string, Assembly[]> dictionary = ReflectionHelper.AssembliesCache;
-								lock (dictionary)
-								{
-									ReflectionHelper.AssembliesCache[asmName] = array;
-								}
+								ReflectionHelper.AssembliesCache[asmName] = array.Select<Assembly, WeakReference>((Assembly asm) => new WeakReference(asm)).ToArray<WeakReference>();
 							}
 						}
 					}
@@ -313,30 +381,30 @@ namespace MonoMod.Utils
 				{
 					if (typeReference3.FullName == "<Module>")
 					{
-						goto Block_40;
+						goto Block_45;
 					}
 					typeSpecification = mref as TypeSpecification;
 					if (typeSpecification != null)
 					{
-						goto Block_41;
+						goto Block_46;
 					}
-					type = modules.Select<Module, Type>((Module module) => module.GetType(mref.FullName.Replace("/", "+"), false, false)).FirstOrDefault<Type>((Type m) => m != null);
+					type = modules.Select<Module, Type>((Module module) => module.GetType(mref.FullName.Replace("/", "+", StringComparison.Ordinal), false, false)).FirstOrDefault<Type>((Type m) => m != null);
 					if (type == null)
 					{
 						type = modules.Select<Module, Type>(delegate(Module module)
 						{
 							IEnumerable<Type> types = module.GetTypes();
 							Func<Type, bool> func;
-							if ((func = <>9__15) == null)
+							if ((func = <>9__20) == null)
 							{
-								func = (<>9__15 = (Type m) => mref.Is(m));
+								func = (<>9__20 = (Type m) => mref.Is(m));
 							}
 							return types.FirstOrDefault<Type>(func);
 						}).FirstOrDefault<Type>((Type m) => m != null);
 					}
 					if (!(type == null) || flag3)
 					{
-						goto IL_0613;
+						goto IL_075F;
 					}
 				}
 				else
@@ -366,9 +434,9 @@ namespace MonoMod.Utils
 							{
 								IEnumerable<MethodInfo> methods = module.GetMethods((BindingFlags)(-1));
 								Func<MethodInfo, bool> func2;
-								if ((func2 = <>9__16) == null)
+								if ((func2 = <>9__21) == null)
 								{
-									func2 = (<>9__16 = (MethodInfo m) => mref.Is(m));
+									func2 = (<>9__21 = (MethodInfo m) => mref.Is(m));
 								}
 								return methods.FirstOrDefault<MethodInfo>(func2);
 							}).FirstOrDefault<MethodInfo>((MethodInfo m) => m != null);
@@ -377,15 +445,15 @@ namespace MonoMod.Utils
 						{
 							if (!(mref is FieldReference))
 							{
-								goto IL_073D;
+								goto IL_0889;
 							}
 							memberInfo2 = modules.Select<Module, FieldInfo>(delegate(Module module)
 							{
 								IEnumerable<FieldInfo> fields = module.GetFields((BindingFlags)(-1));
 								Func<FieldInfo, bool> func3;
-								if ((func3 = <>9__17) == null)
+								if ((func3 = <>9__22) == null)
 								{
-									func3 = (<>9__17 = (FieldInfo m) => mref.Is(m));
+									func3 = (<>9__22 = (FieldInfo m) => mref.Is(m));
 								}
 								return fields.FirstOrDefault<FieldInfo>(func3);
 							}).FirstOrDefault<FieldInfo>((FieldInfo m) => m != null);
@@ -410,15 +478,15 @@ namespace MonoMod.Utils
 					}
 					if (!(memberInfo2 == null) || flag3)
 					{
-						goto IL_0807;
+						goto IL_0953;
 					}
 				}
 				flag3 = true;
 			}
 			throw new Exception("Cannot resolve assembly / module " + asmName + " / " + moduleName);
-			Block_40:
+			Block_45:
 			throw new ArgumentException("Type <Module> cannot be resolved to a runtime reflection type");
-			Block_41:
+			Block_46:
 			type = ReflectionHelper._ResolveReflection(typeSpecification.ElementType, null) as Type;
 			if (type == null)
 			{
@@ -440,11 +508,11 @@ namespace MonoMod.Utils
 			{
 				return ReflectionHelper._Cache(text, type.MakeGenericType((typeSpecification as GenericInstanceType).GenericArguments.Select<TypeReference, Type>((TypeReference arg) => ReflectionHelper._ResolveReflection(arg, null) as Type).ToArray<Type>()));
 			}
-			IL_0613:
+			IL_075F:
 			return ReflectionHelper._Cache(text, type);
-			IL_073D:
+			IL_0889:
 			throw new NotSupportedException("Unsupported <Module> member type " + mref.GetType().FullName);
-			IL_0807:
+			IL_0953:
 			return ReflectionHelper._Cache(text, memberInfo2);
 		}
 
@@ -541,6 +609,181 @@ namespace MonoMod.Utils
 			return signatureHelper;
 		}
 
+		static ReflectionHelper()
+		{
+			object[] array = new object[2];
+			array[0] = 0;
+			ReflectionHelper._CacheGetterArgs = array;
+			ReflectionHelper.t_RuntimeType = typeof(Type).Assembly.GetType("System.RuntimeType");
+			Type type = ReflectionHelper.t_RuntimeType;
+			ReflectionHelper.t_RuntimeTypeCache = ((type != null) ? type.GetNestedType("RuntimeTypeCache", BindingFlags.Public | BindingFlags.NonPublic) : null);
+			PropertyInfo propertyInfo;
+			if (!(ReflectionHelper.t_RuntimeTypeCache == null))
+			{
+				Type type2 = ReflectionHelper.t_RuntimeType;
+				propertyInfo = ((type2 != null) ? type2.GetProperty("Cache", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, null, ReflectionHelper.t_RuntimeTypeCache, Type.EmptyTypes, null) : null);
+			}
+			else
+			{
+				propertyInfo = null;
+			}
+			ReflectionHelper.p_RuntimeType_Cache = propertyInfo;
+			Type type3 = ReflectionHelper.t_RuntimeTypeCache;
+			ReflectionHelper.m_RuntimeTypeCache_GetFieldList = ((type3 != null) ? type3.GetMethod("GetFieldList", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic) : null);
+			Type type4 = ReflectionHelper.t_RuntimeTypeCache;
+			ReflectionHelper.m_RuntimeTypeCache_GetPropertyList = ((type4 != null) ? type4.GetMethod("GetPropertyList", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic) : null);
+			ReflectionHelper.fmap_CerArrayList_array = new Dictionary<Type, FieldInfo>();
+			ReflectionHelper._CacheFixed = new ConditionalWeakTable<Type, ReflectionHelper.CacheFixEntry>();
+			ReflectionHelper.t_RuntimeModule = typeof(Module).Assembly.GetType("System.Reflection.RuntimeModule");
+			Type type5 = typeof(Module).Assembly.GetType("System.Reflection.RuntimeModule");
+			ReflectionHelper.p_RuntimeModule_RuntimeType = ((type5 != null) ? type5.GetProperty("RuntimeType", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic) : null);
+			Type type6 = typeof(Module).Assembly.GetType("System.Reflection.RuntimeModule");
+			ReflectionHelper.f_RuntimeModule__impl = ((type6 != null) ? type6.GetField("_impl", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic) : null);
+			Type type7 = typeof(Module).Assembly.GetType("System.Reflection.RuntimeModule");
+			ReflectionHelper.m_RuntimeModule_GetGlobalType = ((type7 != null) ? type7.GetMethod("GetGlobalType", BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic) : null);
+			ReflectionHelper.f_SignatureHelper_module = typeof(SignatureHelper).GetField("m_module", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic) ?? typeof(SignatureHelper).GetField("module", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+		}
+
+		public static void FixReflectionCacheAuto(this Type type)
+		{
+			type.FixReflectionCache();
+		}
+
+		public static void FixReflectionCache(this Type type)
+		{
+			if (ReflectionHelper.t_RuntimeType == null || ReflectionHelper.p_RuntimeType_Cache == null || ReflectionHelper.m_RuntimeTypeCache_GetFieldList == null || ReflectionHelper.m_RuntimeTypeCache_GetPropertyList == null)
+			{
+				return;
+			}
+			while (type != null)
+			{
+				if (ReflectionHelper.t_RuntimeType.IsInstanceOfType(type))
+				{
+					ReflectionHelper.CacheFixEntry value = ReflectionHelper._CacheFixed.GetValue(type, delegate(Type rt)
+					{
+						ReflectionHelper.CacheFixEntry cacheFixEntry2 = new ReflectionHelper.CacheFixEntry();
+						object obj = (cacheFixEntry2.Cache = ReflectionHelper.p_RuntimeType_Cache.GetValue(rt, ReflectionHelper._NoArgs));
+						Array array = (cacheFixEntry2.Properties = ReflectionHelper._GetArray(obj, ReflectionHelper.m_RuntimeTypeCache_GetPropertyList));
+						Array array2 = (cacheFixEntry2.Fields = ReflectionHelper._GetArray(obj, ReflectionHelper.m_RuntimeTypeCache_GetFieldList));
+						ReflectionHelper._FixReflectionCacheOrder<PropertyInfo>(array);
+						ReflectionHelper._FixReflectionCacheOrder<FieldInfo>(array2);
+						cacheFixEntry2.NeedsVerify = false;
+						return cacheFixEntry2;
+					});
+					if (value.NeedsVerify && !ReflectionHelper._Verify(value, type))
+					{
+						ReflectionHelper.CacheFixEntry cacheFixEntry = value;
+						lock (cacheFixEntry)
+						{
+							ReflectionHelper._FixReflectionCacheOrder<PropertyInfo>(value.Properties);
+							ReflectionHelper._FixReflectionCacheOrder<FieldInfo>(value.Fields);
+						}
+					}
+					value.NeedsVerify = true;
+				}
+				type = type.DeclaringType;
+			}
+		}
+
+		private static bool _Verify(ReflectionHelper.CacheFixEntry entry, Type type)
+		{
+			object value;
+			if (entry.Cache != (value = ReflectionHelper.p_RuntimeType_Cache.GetValue(type, ReflectionHelper._NoArgs)))
+			{
+				entry.Cache = value;
+				entry.Properties = ReflectionHelper._GetArray(value, ReflectionHelper.m_RuntimeTypeCache_GetPropertyList);
+				entry.Fields = ReflectionHelper._GetArray(value, ReflectionHelper.m_RuntimeTypeCache_GetFieldList);
+				return false;
+			}
+			Array array;
+			if (entry.Properties != (array = ReflectionHelper._GetArray(value, ReflectionHelper.m_RuntimeTypeCache_GetPropertyList)))
+			{
+				entry.Properties = array;
+				entry.Fields = ReflectionHelper._GetArray(value, ReflectionHelper.m_RuntimeTypeCache_GetFieldList);
+				return false;
+			}
+			Array array2;
+			if (entry.Fields != (array2 = ReflectionHelper._GetArray(value, ReflectionHelper.m_RuntimeTypeCache_GetFieldList)))
+			{
+				entry.Fields = array2;
+				return false;
+			}
+			return true;
+		}
+
+		private static Array _GetArray(object cache, MethodInfo getter)
+		{
+			getter.Invoke(cache, ReflectionHelper._CacheGetterArgs);
+			object obj = getter.Invoke(cache, ReflectionHelper._CacheGetterArgs);
+			Array array = obj as Array;
+			if (array != null)
+			{
+				return array;
+			}
+			Type type = obj.GetType();
+			if (type.IsGenericType && !type.IsGenericTypeDefinition && type.GetGenericTypeDefinition().FullName == "System.Reflection.CerArrayList`1")
+			{
+				FieldInfo fieldInfo;
+				if (!ReflectionHelper.fmap_CerArrayList_array.TryGetValue(type, out fieldInfo))
+				{
+					fieldInfo = (ReflectionHelper.fmap_CerArrayList_array[type] = type.GetField("m_array", BindingFlags.Instance | BindingFlags.NonPublic));
+				}
+				return (Array)fieldInfo.GetValue(obj);
+			}
+			throw new NotSupportedException("Unsupported reflection cache array type: " + (((obj != null) ? obj.GetType().FullName : null) ?? "null"));
+		}
+
+		private static void _FixReflectionCacheOrder<T>(Array orig) where T : MemberInfo
+		{
+			List<T> list = new List<T>(orig.Length);
+			for (int i = 0; i < orig.Length; i++)
+			{
+				object value = orig.GetValue(i);
+				if (value == null)
+				{
+					break;
+				}
+				list.Add((T)((object)value));
+			}
+			list.Sort((T a, T b) => a.MetadataToken - b.MetadataToken);
+			for (int j = list.Count - 1; j >= 0; j--)
+			{
+				orig.SetValue(list[j], j);
+			}
+		}
+
+		public static Type GetModuleType(this Module module)
+		{
+			if (module == null || ReflectionHelper.t_RuntimeModule == null || !ReflectionHelper.t_RuntimeModule.IsInstanceOfType(module))
+			{
+				return null;
+			}
+			if (ReflectionHelper.p_RuntimeModule_RuntimeType != null)
+			{
+				return (Type)ReflectionHelper.p_RuntimeModule_RuntimeType.GetValue(module, ReflectionHelper._NoArgs);
+			}
+			if (ReflectionHelper.f_RuntimeModule__impl != null && ReflectionHelper.m_RuntimeModule_GetGlobalType != null)
+			{
+				return (Type)ReflectionHelper.m_RuntimeModule_GetGlobalType.Invoke(null, new object[] { ReflectionHelper.f_RuntimeModule__impl.GetValue(module) });
+			}
+			return null;
+		}
+
+		public static Type GetRealDeclaringType(this MemberInfo member)
+		{
+			Type type;
+			if ((type = member.DeclaringType) == null)
+			{
+				Module module = member.Module;
+				if (module == null)
+				{
+					return null;
+				}
+				type = module.GetModuleType();
+			}
+			return type;
+		}
+
 		public static Mono.Cecil.CallSite ImportCallSite(this ModuleDefinition moduleTo, ICallSiteGenerator signature)
 		{
 			return signature.ToCallSite(moduleTo);
@@ -558,18 +801,18 @@ namespace MonoMod.Utils
 
 		public static Mono.Cecil.CallSite ImportCallSite(this ModuleDefinition moduleTo, Module moduleFrom, byte[] data)
 		{
-			ReflectionHelper.<>c__DisplayClass21_0 CS$<>8__locals1;
+			ReflectionHelper.<>c__DisplayClass50_0 CS$<>8__locals1;
 			CS$<>8__locals1.moduleTo = moduleTo;
 			CS$<>8__locals1.moduleFrom = moduleFrom;
 			Mono.Cecil.CallSite callSite = new Mono.Cecil.CallSite(CS$<>8__locals1.moduleTo.TypeSystem.Void);
 			Mono.Cecil.CallSite callSite2;
 			using (MemoryStream memoryStream = new MemoryStream(data, false))
 			{
-				ReflectionHelper.<>c__DisplayClass21_1 CS$<>8__locals2;
+				ReflectionHelper.<>c__DisplayClass50_1 CS$<>8__locals2;
 				CS$<>8__locals2.reader = new BinaryReader(memoryStream);
 				try
 				{
-					ReflectionHelper.<ImportCallSite>g__ReadMethodSignature|21_0(callSite, ref CS$<>8__locals1, ref CS$<>8__locals2);
+					ReflectionHelper.<ImportCallSite>g__ReadMethodSignature|50_0(callSite, ref CS$<>8__locals1, ref CS$<>8__locals2);
 					callSite2 = callSite;
 				}
 				finally
@@ -584,7 +827,7 @@ namespace MonoMod.Utils
 		}
 
 		[CompilerGenerated]
-		internal static void <ImportCallSite>g__ReadMethodSignature|21_0(IMethodSignature method, ref ReflectionHelper.<>c__DisplayClass21_0 A_1, ref ReflectionHelper.<>c__DisplayClass21_1 A_2)
+		internal static void <ImportCallSite>g__ReadMethodSignature|50_0(IMethodSignature method, ref ReflectionHelper.<>c__DisplayClass50_0 A_1, ref ReflectionHelper.<>c__DisplayClass50_1 A_2)
 		{
 			byte b = A_2.reader.ReadByte();
 			if ((b & 32) != 0)
@@ -600,20 +843,20 @@ namespace MonoMod.Utils
 			method.CallingConvention = (MethodCallingConvention)b;
 			if ((b & 16) != 0)
 			{
-				ReflectionHelper.<ImportCallSite>g__ReadCompressedUInt32|21_1(ref A_2);
+				ReflectionHelper.<ImportCallSite>g__ReadCompressedUInt32|50_1(ref A_2);
 			}
-			uint num = ReflectionHelper.<ImportCallSite>g__ReadCompressedUInt32|21_1(ref A_2);
-			method.MethodReturnType.ReturnType = ReflectionHelper.<ImportCallSite>g__ReadTypeSignature|21_4(ref A_1, ref A_2);
+			uint num = ReflectionHelper.<ImportCallSite>g__ReadCompressedUInt32|50_1(ref A_2);
+			method.MethodReturnType.ReturnType = ReflectionHelper.<ImportCallSite>g__ReadTypeSignature|50_4(ref A_1, ref A_2);
 			int num2 = 0;
 			while ((long)num2 < (long)((ulong)num))
 			{
-				method.Parameters.Add(new ParameterDefinition(ReflectionHelper.<ImportCallSite>g__ReadTypeSignature|21_4(ref A_1, ref A_2)));
+				method.Parameters.Add(new ParameterDefinition(ReflectionHelper.<ImportCallSite>g__ReadTypeSignature|50_4(ref A_1, ref A_2)));
 				num2++;
 			}
 		}
 
 		[CompilerGenerated]
-		internal static uint <ImportCallSite>g__ReadCompressedUInt32|21_1(ref ReflectionHelper.<>c__DisplayClass21_1 A_0)
+		internal static uint <ImportCallSite>g__ReadCompressedUInt32|50_1(ref ReflectionHelper.<>c__DisplayClass50_1 A_0)
 		{
 			byte b = A_0.reader.ReadByte();
 			if ((b & 128) == 0)
@@ -628,11 +871,11 @@ namespace MonoMod.Utils
 		}
 
 		[CompilerGenerated]
-		internal static int <ImportCallSite>g__ReadCompressedInt32|21_2(ref ReflectionHelper.<>c__DisplayClass21_1 A_0)
+		internal static int <ImportCallSite>g__ReadCompressedInt32|50_2(ref ReflectionHelper.<>c__DisplayClass50_1 A_0)
 		{
 			byte b = A_0.reader.ReadByte();
 			A_0.reader.BaseStream.Seek(-1L, SeekOrigin.Current);
-			uint num = ReflectionHelper.<ImportCallSite>g__ReadCompressedUInt32|21_1(ref A_0);
+			uint num = ReflectionHelper.<ImportCallSite>g__ReadCompressedUInt32|50_1(ref A_0);
 			int num2 = (int)num >> 1;
 			if ((num & 1U) == 0U)
 			{
@@ -651,9 +894,9 @@ namespace MonoMod.Utils
 		}
 
 		[CompilerGenerated]
-		internal static TypeReference <ImportCallSite>g__GetTypeDefOrRef|21_3(ref ReflectionHelper.<>c__DisplayClass21_0 A_0, ref ReflectionHelper.<>c__DisplayClass21_1 A_1)
+		internal static TypeReference <ImportCallSite>g__GetTypeDefOrRef|50_3(ref ReflectionHelper.<>c__DisplayClass50_0 A_0, ref ReflectionHelper.<>c__DisplayClass50_1 A_1)
 		{
-			uint num = ReflectionHelper.<ImportCallSite>g__ReadCompressedUInt32|21_1(ref A_1);
+			uint num = ReflectionHelper.<ImportCallSite>g__ReadCompressedUInt32|50_1(ref A_1);
 			uint num2 = num >> 2;
 			uint num3;
 			switch (num & 3U)
@@ -675,7 +918,7 @@ namespace MonoMod.Utils
 		}
 
 		[CompilerGenerated]
-		internal static TypeReference <ImportCallSite>g__ReadTypeSignature|21_4(ref ReflectionHelper.<>c__DisplayClass21_0 A_0, ref ReflectionHelper.<>c__DisplayClass21_1 A_1)
+		internal static TypeReference <ImportCallSite>g__ReadTypeSignature|50_4(ref ReflectionHelper.<>c__DisplayClass50_0 A_0, ref ReflectionHelper.<>c__DisplayClass50_1 A_1)
 		{
 			MetadataType metadataType = (MetadataType)A_1.reader.ReadByte();
 			switch (metadataType)
@@ -709,29 +952,29 @@ namespace MonoMod.Utils
 			case MetadataType.String:
 				return A_0.moduleTo.TypeSystem.String;
 			case MetadataType.Pointer:
-				return new PointerType(ReflectionHelper.<ImportCallSite>g__ReadTypeSignature|21_4(ref A_0, ref A_1));
+				return new PointerType(ReflectionHelper.<ImportCallSite>g__ReadTypeSignature|50_4(ref A_0, ref A_1));
 			case MetadataType.ByReference:
-				return new ByReferenceType(ReflectionHelper.<ImportCallSite>g__ReadTypeSignature|21_4(ref A_0, ref A_1));
+				return new ByReferenceType(ReflectionHelper.<ImportCallSite>g__ReadTypeSignature|50_4(ref A_0, ref A_1));
 			case MetadataType.ValueType:
 			case MetadataType.Class:
-				return ReflectionHelper.<ImportCallSite>g__GetTypeDefOrRef|21_3(ref A_0, ref A_1);
+				return ReflectionHelper.<ImportCallSite>g__GetTypeDefOrRef|50_3(ref A_0, ref A_1);
 			case MetadataType.Var:
 			case MetadataType.GenericInstance:
 			case MetadataType.MVar:
 				throw new NotSupportedException(string.Format("Unsupported generic callsite element: {0}", metadataType));
 			case MetadataType.Array:
 			{
-				ArrayType arrayType = new ArrayType(ReflectionHelper.<ImportCallSite>g__ReadTypeSignature|21_4(ref A_0, ref A_1));
-				uint num = ReflectionHelper.<ImportCallSite>g__ReadCompressedUInt32|21_1(ref A_1);
-				uint[] array = new uint[ReflectionHelper.<ImportCallSite>g__ReadCompressedUInt32|21_1(ref A_1)];
+				ArrayType arrayType = new ArrayType(ReflectionHelper.<ImportCallSite>g__ReadTypeSignature|50_4(ref A_0, ref A_1));
+				uint num = ReflectionHelper.<ImportCallSite>g__ReadCompressedUInt32|50_1(ref A_1);
+				uint[] array = new uint[ReflectionHelper.<ImportCallSite>g__ReadCompressedUInt32|50_1(ref A_1)];
 				for (int i = 0; i < array.Length; i++)
 				{
-					array[i] = ReflectionHelper.<ImportCallSite>g__ReadCompressedUInt32|21_1(ref A_1);
+					array[i] = ReflectionHelper.<ImportCallSite>g__ReadCompressedUInt32|50_1(ref A_1);
 				}
-				int[] array2 = new int[ReflectionHelper.<ImportCallSite>g__ReadCompressedUInt32|21_1(ref A_1)];
+				int[] array2 = new int[ReflectionHelper.<ImportCallSite>g__ReadCompressedUInt32|50_1(ref A_1)];
 				for (int j = 0; j < array2.Length; j++)
 				{
-					array2[j] = ReflectionHelper.<ImportCallSite>g__ReadCompressedInt32|21_2(ref A_1);
+					array2[j] = ReflectionHelper.<ImportCallSite>g__ReadCompressedInt32|50_2(ref A_1);
 				}
 				arrayType.Dimensions.Clear();
 				int num2 = 0;
@@ -766,39 +1009,84 @@ namespace MonoMod.Utils
 			case MetadataType.FunctionPointer:
 			{
 				FunctionPointerType functionPointerType = new FunctionPointerType();
-				ReflectionHelper.<ImportCallSite>g__ReadMethodSignature|21_0(functionPointerType, ref A_0, ref A_1);
+				ReflectionHelper.<ImportCallSite>g__ReadMethodSignature|50_0(functionPointerType, ref A_0, ref A_1);
 				return functionPointerType;
 			}
 			case MetadataType.Object:
 				return A_0.moduleTo.TypeSystem.Object;
 			case (MetadataType)29:
-				return new ArrayType(ReflectionHelper.<ImportCallSite>g__ReadTypeSignature|21_4(ref A_0, ref A_1));
+				return new ArrayType(ReflectionHelper.<ImportCallSite>g__ReadTypeSignature|50_4(ref A_0, ref A_1));
 			case MetadataType.RequiredModifier:
-				return new RequiredModifierType(ReflectionHelper.<ImportCallSite>g__GetTypeDefOrRef|21_3(ref A_0, ref A_1), ReflectionHelper.<ImportCallSite>g__ReadTypeSignature|21_4(ref A_0, ref A_1));
+				return new RequiredModifierType(ReflectionHelper.<ImportCallSite>g__GetTypeDefOrRef|50_3(ref A_0, ref A_1), ReflectionHelper.<ImportCallSite>g__ReadTypeSignature|50_4(ref A_0, ref A_1));
 			case MetadataType.OptionalModifier:
-				return new OptionalModifierType(ReflectionHelper.<ImportCallSite>g__GetTypeDefOrRef|21_3(ref A_0, ref A_1), ReflectionHelper.<ImportCallSite>g__ReadTypeSignature|21_4(ref A_0, ref A_1));
+				return new OptionalModifierType(ReflectionHelper.<ImportCallSite>g__GetTypeDefOrRef|50_3(ref A_0, ref A_1), ReflectionHelper.<ImportCallSite>g__ReadTypeSignature|50_4(ref A_0, ref A_1));
 			default:
 				if (metadataType == MetadataType.Sentinel)
 				{
-					return new SentinelType(ReflectionHelper.<ImportCallSite>g__ReadTypeSignature|21_4(ref A_0, ref A_1));
+					return new SentinelType(ReflectionHelper.<ImportCallSite>g__ReadTypeSignature|50_4(ref A_0, ref A_1));
 				}
 				if (metadataType == MetadataType.Pinned)
 				{
-					return new PinnedType(ReflectionHelper.<ImportCallSite>g__ReadTypeSignature|21_4(ref A_0, ref A_1));
+					return new PinnedType(ReflectionHelper.<ImportCallSite>g__ReadTypeSignature|50_4(ref A_0, ref A_1));
 				}
 				break;
 			}
 			throw new NotSupportedException(string.Format("Unsupported callsite element: {0}", metadataType));
 		}
 
-		internal static readonly Dictionary<string, Assembly> AssemblyCache = new Dictionary<string, Assembly>();
+		public static readonly bool IsMono = Type.GetType("Mono.Runtime") != null || Type.GetType("Mono.RuntimeStructs") != null;
 
-		internal static readonly Dictionary<string, Assembly[]> AssembliesCache = new Dictionary<string, Assembly[]>();
+		public static readonly bool IsCore = typeof(object).Assembly.GetName().Name == "System.Private.CoreLib";
 
-		internal static readonly Dictionary<string, MemberInfo> ResolveReflectionCache = new Dictionary<string, MemberInfo>();
+		private static readonly object[] _NoArgs = new object[0];
+
+		internal static readonly Dictionary<string, WeakReference> AssemblyCache = new Dictionary<string, WeakReference>();
+
+		internal static readonly Dictionary<string, WeakReference[]> AssembliesCache = new Dictionary<string, WeakReference[]>();
+
+		internal static readonly Dictionary<string, WeakReference> ResolveReflectionCache = new Dictionary<string, WeakReference>();
+
+		public static readonly byte[] AssemblyHashPrefix = new UTF8Encoding(false).GetBytes("MonoModRefl").Concat<byte>(new byte[1]).ToArray<byte>();
+
+		public static readonly string AssemblyHashNameTag = "@#";
 
 		private const BindingFlags _BindingFlagsAll = (BindingFlags)(-1);
 
-		private static readonly FieldInfo f_SignatureHelper_module = typeof(SignatureHelper).GetField("m_module", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic) ?? typeof(SignatureHelper).GetField("module", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+		private static readonly object[] _CacheGetterArgs;
+
+		private static Type t_RuntimeType;
+
+		private static Type t_RuntimeTypeCache;
+
+		private static PropertyInfo p_RuntimeType_Cache;
+
+		private static MethodInfo m_RuntimeTypeCache_GetFieldList;
+
+		private static MethodInfo m_RuntimeTypeCache_GetPropertyList;
+
+		private static Dictionary<Type, FieldInfo> fmap_CerArrayList_array;
+
+		private static readonly ConditionalWeakTable<Type, ReflectionHelper.CacheFixEntry> _CacheFixed;
+
+		private static Type t_RuntimeModule;
+
+		private static PropertyInfo p_RuntimeModule_RuntimeType;
+
+		private static FieldInfo f_RuntimeModule__impl;
+
+		private static MethodInfo m_RuntimeModule_GetGlobalType;
+
+		private static readonly FieldInfo f_SignatureHelper_module;
+
+		private class CacheFixEntry
+		{
+			public object Cache;
+
+			public Array Properties;
+
+			public Array Fields;
+
+			public bool NeedsVerify;
+		}
 	}
 }

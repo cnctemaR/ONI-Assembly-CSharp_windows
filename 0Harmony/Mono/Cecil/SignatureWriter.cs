@@ -358,12 +358,33 @@ namespace Mono.Cecil
 			{
 				if (type.IsTypeOf("System", "Type"))
 				{
-					this.WriteTypeReference((TypeReference)value);
+					this.WriteCustomAttributeTypeValue((TypeReference)value);
 					return;
 				}
 				this.WriteCustomAttributeEnumValue(type, value);
 				return;
 			}
+		}
+
+		private void WriteCustomAttributeTypeValue(TypeReference value)
+		{
+			TypeDefinition typeDefinition = value as TypeDefinition;
+			if (typeDefinition != null)
+			{
+				TypeDefinition typeDefinition2 = typeDefinition;
+				while (typeDefinition2.DeclaringType != null)
+				{
+					typeDefinition2 = typeDefinition2.DeclaringType;
+				}
+				if (WindowsRuntimeProjections.IsClrImplementationType(typeDefinition2))
+				{
+					WindowsRuntimeProjections.Project(typeDefinition2);
+					this.WriteTypeReference(value);
+					WindowsRuntimeProjections.RemoveProjection(typeDefinition2);
+					return;
+				}
+			}
+			this.WriteTypeReference(value);
 		}
 
 		private void WritePrimitiveValue(object value)

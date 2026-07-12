@@ -54,7 +54,7 @@ public class ElementSplitterComponents : KGameObjectComponentManager<ElementSpli
 		}
 		ElementSplitter data = GameComps.ElementSplitters.GetData(first);
 		ElementSplitter data2 = GameComps.ElementSplitters.GetData(second);
-		return data.primaryElement.ElementID == data2.primaryElement.ElementID && data.primaryElement.Units + data2.primaryElement.Units < 25000f;
+		return data.primaryElement.ElementID == data2.primaryElement.ElementID && data.primaryElement.Units + data2.primaryElement.Units < 25000f && !data.kPrefabID.HasTag(GameTags.MarkedForMove) && !data2.kPrefabID.HasTag(GameTags.MarkedForMove);
 	}
 
 	private static Pickupable OnTake(HandleVector<int>.Handle handle, float amount)

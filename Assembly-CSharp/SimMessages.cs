@@ -989,7 +989,7 @@ public static class SimMessages
 		{
 			Pair<Vector2I, Vector2I> region = simActiveRegion.region;
 			region.first = new Vector2I(MathUtil.Clamp(0, Grid.WidthInCells - 1, simActiveRegion.region.first.x), MathUtil.Clamp(0, Grid.HeightInCells - 1, simActiveRegion.region.first.y));
-			region.second = new Vector2I(MathUtil.Clamp(0, Grid.WidthInCells - 1, simActiveRegion.region.second.x), MathUtil.Clamp(0, Grid.HeightInCells - 1, simActiveRegion.region.second.y));
+			region.second = new Vector2I(MathUtil.Clamp(0, Grid.WidthInCells, simActiveRegion.region.second.x), MathUtil.Clamp(0, Grid.HeightInCells - 1, simActiveRegion.region.second.y));
 			ptr2->elapsedSeconds = elapsed_seconds;
 			ptr2->minX = region.first.x;
 			ptr2->minY = region.first.y;

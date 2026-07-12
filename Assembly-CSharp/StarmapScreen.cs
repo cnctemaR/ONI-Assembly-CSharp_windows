@@ -1144,16 +1144,16 @@ public class StarmapScreen : KModalScreen
 					GameObject prefab = Assets.GetPrefab(keyValuePair2.Key);
 					global::Tuple<Sprite, Color> uisprite2 = Def.GetUISprite(prefab, "ui", false);
 					breakdownListRow7.ShowIconData(prefab.GetProperName(), "", uisprite2.first, uisprite2.second);
-					string properName4 = Assets.GetPrefab("SpecialCargoBay".ToTag()).GetProperName();
+					string text2 = (DlcManager.IsPureVanilla() ? Assets.GetPrefab("SpecialCargoBay".ToTag()).GetProperName() : Assets.GetPrefab("SpecialCargoBayCluster".ToTag()).GetProperName());
 					if (this.currentRocketHasEntitiesContainer)
 					{
 						breakdownListRow7.SetHighlighted(true);
-						breakdownListRow7.AddTooltip(string.Format(UI.STARMAP.CAN_CARRY_ELEMENT, prefab.GetProperName(), properName4));
+						breakdownListRow7.AddTooltip(string.Format(UI.STARMAP.CAN_CARRY_ELEMENT, prefab.GetProperName(), text2));
 					}
 					else
 					{
 						breakdownListRow7.SetDisabled(true);
-						breakdownListRow7.AddTooltip(string.Format(UI.STARMAP.CANT_CARRY_ELEMENT, properName4, prefab.GetProperName()));
+						breakdownListRow7.AddTooltip(string.Format(UI.STARMAP.CANT_CARRY_ELEMENT, text2, prefab.GetProperName()));
 					}
 				}
 			}

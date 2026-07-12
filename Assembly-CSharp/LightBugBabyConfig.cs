@@ -2,6 +2,7 @@
 using STRINGS;
 using UnityEngine;
 
+[EntityConfigOrder(2)]
 public class LightBugBabyConfig : IEntityConfig
 {
 	public string[] GetDlcIds()

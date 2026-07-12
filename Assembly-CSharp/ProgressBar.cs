@@ -29,9 +29,29 @@ public class ProgressBar : KMonoBehaviour
 		}
 	}
 
+	public void SetVisibility(bool visible)
+	{
+		this.lastVisibilityValue = visible;
+		this.RefreshVisibility();
+	}
+
+	private void RefreshVisibility()
+	{
+		int myWorldId = base.gameObject.GetMyWorldId();
+		bool flag = this.lastVisibilityValue;
+		flag &= !this.hasBeenInitialize || myWorldId == ClusterManager.Instance.activeWorldId;
+		flag &= !this.autoHide || OverlayScreen.Instance == null || OverlayScreen.Instance.GetMode() == OverlayModes.None.ID;
+		base.gameObject.SetActive(flag);
+		if (this.updatePercentFull == null || this.updatePercentFull.Target.IsNullOrDestroyed())
+		{
+			base.gameObject.SetActive(false);
+		}
+	}
+
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
+		this.hasBeenInitialize = true;
 		if (this.autoHide)
 		{
 			this.overlayUpdateHandle = Game.Instance.Subscribe(1798162660, new Action<object>(this.OnOverlayChanged));
@@ -43,6 +63,7 @@ public class ProgressBar : KMonoBehaviour
 		Game.Instance.Subscribe(1983128072, new Action<object>(this.OnActiveWorldChanged));
 		this.SetWorldActive(ClusterManager.Instance.activeWorldId);
 		base.enabled = this.updatePercentFull != null;
+		this.RefreshVisibility();
 	}
 
 	private void OnActiveWorldChanged(object data)
@@ -53,11 +74,7 @@ public class ProgressBar : KMonoBehaviour
 
 	private void SetWorldActive(int worldId)
 	{
-		base.gameObject.SetActive(this.GetMyWorldId() == worldId);
-		if (this.updatePercentFull == null || this.updatePercentFull.Target.IsNullOrDestroyed())
-		{
-			base.gameObject.SetActive(false);
-		}
+		this.RefreshVisibility();
 	}
 
 	public void SetUpdateFunc(Func<float> func)
@@ -76,22 +93,7 @@ public class ProgressBar : KMonoBehaviour
 
 	public virtual void OnOverlayChanged(object data = null)
 	{
-		if (!this.autoHide)
-		{
-			return;
-		}
-		if ((HashedString)data == OverlayModes.None.ID)
-		{
-			if (!base.gameObject.activeSelf)
-			{
-				base.gameObject.SetActive(true);
-				return;
-			}
-		}
-		else if (base.gameObject.activeSelf)
-		{
-			base.gameObject.SetActive(false);
-		}
+		this.RefreshVisibility();
 	}
 
 	public void Retarget(GameObject entity)
@@ -148,4 +150,8 @@ public class ProgressBar : KMonoBehaviour
 	private int overlayUpdateHandle = -1;
 
 	public bool autoHide = true;
+
+	private bool lastVisibilityValue = true;
+
+	private bool hasBeenInitialize;
 }

@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using FMOD;
+using FMOD.Studio;
+using FMODUnity;
 using Klei.AI;
 using STRINGS;
 using UnityEngine;
@@ -33,6 +36,11 @@ public class SandboxStressTool : BrushTool
 		SandboxStressTool.instance = this;
 	}
 
+	protected override string GetDragSound()
+	{
+		return "";
+	}
+
 	public void Activate()
 	{
 		PlayerController.Instance.ActivateTool(this);
@@ -57,6 +65,7 @@ public class SandboxStressTool : BrushTool
 	{
 		base.OnDeactivateTool(new_tool);
 		SandboxToolParameterMenu.instance.gameObject.SetActive(false);
+		this.StopSound();
 	}
 
 	public override void GetOverlayColorData(out HashSet<ToolMenu.CellColorData> colors)
@@ -77,6 +86,12 @@ public class SandboxStressTool : BrushTool
 		base.OnMouseMove(cursorPos);
 	}
 
+	public override void OnLeftClickDown(Vector3 cursor_pos)
+	{
+		base.OnLeftClickDown(cursor_pos);
+		KFMOD.PlayUISound(GlobalAssets.GetSound("SandboxTool_Click", false));
+	}
+
 	protected override void OnPaintCell(int cell, int distFromOrigin)
 	{
 		base.OnPaintCell(cell, distFromOrigin);
@@ -87,7 +102,15 @@ public class SandboxStressTool : BrushTool
 			{
 				float num = -1f * SandboxToolParameterMenu.instance.settings.GetFloatSetting("SandbosTools.StressAdditive");
 				Db.Get().Amounts.Stress.Lookup(Components.LiveMinionIdentities[i].gameObject).ApplyDelta(num);
-				PopFXManager.Instance.SpawnFX((num >= 0f) ? Assets.GetSprite("crew_state_angry") : Assets.GetSprite("crew_state_happy"), GameUtil.GetFormattedPercent(num, GameUtil.TimeSlice.None), gameObject.transform, 1.5f, false);
+				if (num >= 0f)
+				{
+					PopFXManager.Instance.SpawnFX(Assets.GetSprite("crew_state_angry"), GameUtil.GetFormattedPercent(num, GameUtil.TimeSlice.None), gameObject.transform, 1.5f, false);
+				}
+				else
+				{
+					PopFXManager.Instance.SpawnFX(Assets.GetSprite("crew_state_happy"), GameUtil.GetFormattedPercent(num, GameUtil.TimeSlice.None), gameObject.transform, 1.5f, false);
+				}
+				this.PlaySound(num, gameObject.transform.GetPosition());
 				int intSetting = SandboxToolParameterMenu.instance.settings.GetIntSetting("SandbosTools.MoraleAdjustment");
 				AttributeInstance attributeInstance = gameObject.GetAttributes().Get(Db.Get().Attributes.QualityOfLife);
 				MinionIdentity component = gameObject.GetComponent<MinionIdentity>();
@@ -107,11 +130,30 @@ public class SandboxStressTool : BrushTool
 		}
 	}
 
+	private void PlaySound(float sliderValue, Vector3 position)
+	{
+		this.ev = KFMOD.CreateInstance(this.UISoundPath);
+		ATTRIBUTES_3D attributes_3D = position.To3DAttributes();
+		this.ev.set3DAttributes(attributes_3D);
+		this.ev.setParameterByNameWithLabel("SanboxTool_Effect", (sliderValue >= 0f) ? "Decrease" : "Increase", false);
+		this.ev.start();
+	}
+
+	private void StopSound()
+	{
+		this.ev.stop(global::FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
+		this.ev.release();
+	}
+
 	public static SandboxStressTool instance;
 
 	protected HashSet<int> recentlyAffectedCells = new HashSet<int>();
 
 	protected Color recentlyAffectedCellColor = new Color(1f, 1f, 1f, 0.1f);
+
+	private string UISoundPath = GlobalAssets.GetSound("SandboxTool_Happy", false);
+
+	private EventInstance ev;
 
 	private Dictionary<MinionIdentity, AttributeModifier> moraleAdjustments = new Dictionary<MinionIdentity, AttributeModifier>();
 }

@@ -42,6 +42,7 @@ public class ResetSkillsStation : Workable
 	{
 		base.OnStartWork(worker);
 		base.GetComponent<Operational>().SetActive(true, false);
+		base.GetComponent<KSelectable>().AddStatusItem(Db.Get().BuildingStatusItems.ComplexFabricatorTraining, this);
 	}
 
 	protected override void OnCompleteWork(Worker worker)
@@ -63,6 +64,7 @@ public class ResetSkillsStation : Workable
 	{
 		base.OnStopWork(worker);
 		base.GetComponent<Operational>().SetActive(false, false);
+		base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().BuildingStatusItems.ComplexFabricatorTraining, this);
 		this.chore = null;
 	}
 

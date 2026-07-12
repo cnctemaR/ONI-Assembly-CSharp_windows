@@ -97,6 +97,7 @@ public class TinkerStation : Workable, IGameObjectEffectDescriptor, ISim1000ms
 		{
 			return;
 		}
+		base.GetComponent<KSelectable>().AddStatusItem(Db.Get().BuildingStatusItems.ComplexFabricatorProducing, this);
 		this.operational.SetActive(true, false);
 	}
 
@@ -104,6 +105,7 @@ public class TinkerStation : Workable, IGameObjectEffectDescriptor, ISim1000ms
 	{
 		base.OnStopWork(worker);
 		base.ShowProgressBar(false);
+		base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().BuildingStatusItems.ComplexFabricatorProducing, this);
 		this.operational.SetActive(false, false);
 	}
 

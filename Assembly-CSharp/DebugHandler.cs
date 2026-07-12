@@ -240,7 +240,7 @@ public class DebugHandler : IInputHandler
 			{
 				if (!(DiscoveredResources.Instance != null))
 				{
-					goto IL_0B5F;
+					goto IL_0B62;
 				}
 				using (List<Element>.Enumerator enumerator = ElementLoader.elements.GetEnumerator())
 				{
@@ -249,7 +249,7 @@ public class DebugHandler : IInputHandler
 						Element element = enumerator.Current;
 						DiscoveredResources.Instance.Discover(element.tag, element.GetMaterialCategoryTag());
 					}
-					goto IL_0B5F;
+					goto IL_0B62;
 				}
 			}
 			if (e.TryConsume(global::Action.DebugToggleUI))
@@ -355,7 +355,7 @@ public class DebugHandler : IInputHandler
 								smi2.GoToCursor();
 							}
 						}
-						goto IL_0B5F;
+						goto IL_0B62;
 					}
 				}
 				if (e.TryConsume(global::Action.DebugTeleport))
@@ -444,12 +444,11 @@ public class DebugHandler : IInputHandler
 									}
 									num++;
 								}
-								string text = "No save file (front end)";
 								if (SaveLoader.Instance != null)
 								{
-									text = SaveLoader.Instance.Save(validSaveFilename, false, false);
+									SaveLoader.Instance.Save(validSaveFilename, false, false);
 								}
-								KCrashReporter.ReportBug("Bug Report", text, GameObject.Find("ScreenSpaceOverlayCanvas"));
+								KCrashReporter.ReportBug("Bug Report", GameObject.Find("ScreenSpaceOverlayCanvas"));
 							}
 							else
 							{
@@ -465,8 +464,10 @@ public class DebugHandler : IInputHandler
 						}
 						else if (e.TryConsume(global::Action.DebugTriggerError))
 						{
+							global::UnityEngine.Debug.Log("trigger error");
 							if (GenericGameSettings.instance.developerDebugEnable)
 							{
+								KCrashReporter.disableDeduping = true;
 								global::Debug.LogError("Oooops! Testing error!");
 							}
 						}
@@ -514,7 +515,7 @@ public class DebugHandler : IInputHandler
 				}
 			}
 		}
-		IL_0B5F:
+		IL_0B62:
 		if (e.Consumed && Game.Instance != null)
 		{
 			Game.Instance.debugWasUsed = true;

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
 using System.Text;
 
 namespace Mono.Cecil.Pdb
@@ -339,46 +338,23 @@ namespace Mono.Cecil.Pdb
 			throw new NotImplementedException();
 		}
 
-		public uint GetTypeDefProps(uint td, IntPtr szTypeDef, uint cchTypeDef, out uint pchTypeDef, IntPtr pdwTypeDefFlags)
+		public unsafe uint GetTypeDefProps(uint td, char* szTypeDef, uint cchTypeDef, uint* pchTypeDef, uint* pdwTypeDefFlags, uint* ptkExtends)
 		{
 			TypeDefinition typeDefinition;
 			if (!this.TryGetType(td, out typeDefinition))
 			{
-				Marshal.WriteInt16(szTypeDef, 0);
-				pchTypeDef = 1U;
-				return 0U;
+				return 2147500037U;
 			}
-			ModuleMetadata.WriteString(typeDefinition.IsNested ? typeDefinition.Name : typeDefinition.FullName, szTypeDef, cchTypeDef, out pchTypeDef);
-			ModuleMetadata.WriteIntPtr(pdwTypeDefFlags, (uint)typeDefinition.Attributes);
-			if (typeDefinition.BaseType == null)
+			ModuleMetadata.WriteNameBuffer(typeDefinition.IsNested ? typeDefinition.Name : typeDefinition.FullName, szTypeDef, cchTypeDef, pchTypeDef);
+			if (pdwTypeDefFlags != null)
 			{
-				return 0U;
+				*pdwTypeDefFlags = (uint)typeDefinition.Attributes;
 			}
-			return typeDefinition.BaseType.MetadataToken.ToUInt32();
-		}
-
-		private static void WriteIntPtr(IntPtr ptr, uint value)
-		{
-			if (ptr == IntPtr.Zero)
+			if (ptkExtends != null)
 			{
-				return;
+				*ptkExtends = ((typeDefinition.BaseType != null) ? typeDefinition.BaseType.MetadataToken.ToUInt32() : 0U);
 			}
-			Marshal.WriteInt32(ptr, (int)value);
-		}
-
-		private static void WriteString(string str, IntPtr buffer, uint bufferSize, out uint chars)
-		{
-			uint num = (((long)(str.Length + 1) >= (long)((ulong)bufferSize)) ? (bufferSize - 1U) : ((uint)str.Length));
-			chars = num + 1U;
-			int num2 = 0;
-			int num3 = 0;
-			while ((long)num3 < (long)((ulong)num))
-			{
-				Marshal.WriteInt16(buffer, num2, str[num3]);
-				num2 += 2;
-				num3++;
-			}
-			Marshal.WriteInt16(buffer, num2, 0);
+			return 0U;
 		}
 
 		public uint GetInterfaceImplProps(uint iiImpl, out uint pClass)
@@ -466,21 +442,50 @@ namespace Mono.Cecil.Pdb
 			throw new NotImplementedException();
 		}
 
-		public uint GetMethodProps(uint mb, out uint pClass, IntPtr szMethod, uint cchMethod, out uint pchMethod, IntPtr pdwAttr, IntPtr ppvSigBlob, IntPtr pcbSigBlob, IntPtr pulCodeRVA)
+		public unsafe uint GetMethodProps(uint mb, uint* pClass, char* szMethod, uint cchMethod, uint* pchMethod, uint* pdwAttr, IntPtr ppvSigBlob, IntPtr pcbSigBlob, uint* pulCodeRVA, uint* pdwImplFlags)
 		{
 			MethodDefinition methodDefinition;
 			if (!this.TryGetMethod(mb, out methodDefinition))
 			{
-				Marshal.WriteInt16(szMethod, 0);
-				pchMethod = 1U;
-				pClass = 0U;
-				return 0U;
+				return 2147500037U;
 			}
-			pClass = methodDefinition.DeclaringType.MetadataToken.ToUInt32();
-			ModuleMetadata.WriteString(methodDefinition.Name, szMethod, cchMethod, out pchMethod);
-			ModuleMetadata.WriteIntPtr(pdwAttr, (uint)methodDefinition.Attributes);
-			ModuleMetadata.WriteIntPtr(pulCodeRVA, (uint)methodDefinition.RVA);
-			return (uint)methodDefinition.ImplAttributes;
+			if (pClass != null)
+			{
+				*pClass = methodDefinition.DeclaringType.MetadataToken.ToUInt32();
+			}
+			ModuleMetadata.WriteNameBuffer(methodDefinition.Name, szMethod, cchMethod, pchMethod);
+			if (pdwAttr != null)
+			{
+				*pdwAttr = (uint)methodDefinition.Attributes;
+			}
+			if (pulCodeRVA != null)
+			{
+				*pulCodeRVA = (uint)methodDefinition.RVA;
+			}
+			if (pdwImplFlags != null)
+			{
+				*pdwImplFlags = (uint)methodDefinition.ImplAttributes;
+			}
+			return 0U;
+		}
+
+		private unsafe static void WriteNameBuffer(string name, char* buffer, uint bufferLength, uint* actualLength)
+		{
+			long num = Math.Min((long)name.Length, (long)((ulong)(bufferLength - 1U)));
+			if (actualLength != null)
+			{
+				*actualLength = (uint)num;
+			}
+			if (buffer != null && bufferLength > 0U)
+			{
+				int num2 = 0;
+				while ((long)num2 < num)
+				{
+					buffer[num2] = name[num2];
+					num2++;
+				}
+				buffer[(num + 1L) * 2L / 2L] = '\0';
+			}
 		}
 
 		public uint GetMemberRefProps(uint mr, ref uint ptk, StringBuilder szMember, uint cchMember, out uint pchMember, out IntPtr ppvSigBlob)
@@ -638,18 +643,18 @@ namespace Mono.Cecil.Pdb
 			throw new NotImplementedException();
 		}
 
-		public uint GetNestedClassProps(uint tdNestedClass)
+		public unsafe uint GetNestedClassProps(uint tdNestedClass, uint* ptdEnclosingClass)
 		{
 			TypeDefinition typeDefinition;
 			if (!this.TryGetType(tdNestedClass, out typeDefinition))
 			{
-				return 0U;
+				return 2147500037U;
 			}
-			if (!typeDefinition.IsNested)
+			if (ptdEnclosingClass != null)
 			{
-				return 0U;
+				*ptdEnclosingClass = (typeDefinition.IsNested ? typeDefinition.DeclaringType.MetadataToken.ToUInt32() : 0U);
 			}
-			return typeDefinition.DeclaringType.MetadataToken.ToUInt32();
+			return 0U;
 		}
 
 		public uint GetNativeCallConvFromSig(IntPtr pvSig, uint cbSig)
@@ -667,5 +672,9 @@ namespace Mono.Cecil.Pdb
 		private Dictionary<uint, TypeDefinition> types;
 
 		private Dictionary<uint, MethodDefinition> methods;
+
+		private const uint S_OK = 0U;
+
+		private const uint E_FAIL = 2147500037U;
 	}
 }

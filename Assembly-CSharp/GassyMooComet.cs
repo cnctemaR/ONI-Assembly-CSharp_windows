@@ -40,25 +40,31 @@ public class GassyMooComet : Comet
 		{
 			if (this.craterPrefabs != null && this.craterPrefabs.Length != 0)
 			{
+				byte b = Grid.WorldIdx[Grid.PosToCell(this.gameObject.transform.position)];
 				float num = 0f;
 				int num2 = Grid.PosToCell(this.transform.GetPosition());
 				int num3 = Grid.OffsetCell(num2, 0, 1);
-				if (Grid.IsValidCell(num3))
+				int num4 = Grid.OffsetCell(num2, 0, -1);
+				if (Grid.IsValidCellInWorld(num3, (int)b))
 				{
 					num2 = num3;
+				}
+				else
+				{
+					num2 = num4;
 				}
 				if (Grid.Solid[num2])
 				{
 					bool flipX = animController.FlipX;
-					int num4 = Grid.OffsetCell(num2, -1, 0);
-					int num5 = Grid.OffsetCell(num2, 2, 0);
-					if (!flipX && Grid.IsValidCell(num4) && !Grid.Solid[num4])
-					{
-						num2 = num4;
-					}
-					else if (flipX && Grid.IsValidCell(num5) && !Grid.Solid[num5])
+					int num5 = Grid.OffsetCell(num2, -1, 0);
+					int num6 = Grid.OffsetCell(num2, 2, 0);
+					if (!flipX && Grid.IsValidCell(num5) && !Grid.Solid[num5])
 					{
 						num2 = num5;
+					}
+					else if (flipX && Grid.IsValidCell(num6) && !Grid.Solid[num6])
+					{
+						num2 = num6;
 					}
 				}
 				else

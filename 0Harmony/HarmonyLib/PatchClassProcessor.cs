@@ -66,8 +66,12 @@ namespace HarmonyLib
 			MethodBase methodBase = null;
 			try
 			{
-				this.ReversePatch(ref methodBase);
 				List<MethodBase> bulkMethods = this.GetBulkMethods();
+				if (bulkMethods.Count == 1)
+				{
+					methodBase = bulkMethods[0];
+				}
+				this.ReversePatch(ref methodBase);
 				list = ((bulkMethods.Count > 0) ? this.BulkPatch(bulkMethods, ref methodBase) : this.PatchWithAttributes(ref methodBase));
 			}
 			catch (Exception ex)
@@ -87,7 +91,11 @@ namespace HarmonyLib
 				HarmonyPatchType harmonyPatchType = HarmonyPatchType.ReversePatch;
 				if ((type.GetValueOrDefault() == harmonyPatchType) & (type != null))
 				{
-					lastOriginal = attributePatch.info.GetOriginalMethod();
+					MethodBase originalMethod = attributePatch.info.GetOriginalMethod();
+					if (originalMethod != null)
+					{
+						lastOriginal = originalMethod;
+					}
 					ReversePatcher reversePatcher = this.instance.CreateReversePatcher(lastOriginal, attributePatch.info);
 					object locker = PatchProcessor.locker;
 					lock (locker)
@@ -107,12 +115,8 @@ namespace HarmonyLib
 				PatchJobs<MethodInfo>.Job job = patchJobs.GetJob(lastOriginal);
 				foreach (AttributePatch attributePatch in this.patchMethods)
 				{
-					string text = "You cannot combine TargetMethod, TargetMethods or PatchAll with individual annotations";
+					string text = "You cannot combine TargetMethod, TargetMethods or [HarmonyPatchAll] with individual annotations";
 					HarmonyMethod info = attributePatch.info;
-					if (info.declaringType != null)
-					{
-						throw new ArgumentException(text + " [" + info.declaringType.FullDescription() + "]");
-					}
 					if (info.methodName != null)
 					{
 						throw new ArgumentException(text + " [" + info.methodName + "]");

@@ -151,13 +151,32 @@ public class Capturable : Workable, IGameObjectEffectDescriptor
 	{
 		if (this.markedForCapture && this.chore == null)
 		{
-			this.chore = new WorkChore<Capturable>(Db.Get().ChoreTypes.Capture, this, null, true, null, null, null, true, null, false, true, null, true, true, true, PriorityScreen.PriorityClass.basic, 5, false, true);
+			this.chore = new WorkChore<Capturable>(Db.Get().ChoreTypes.Capture, this, null, true, null, new Action<Chore>(this.OnChoreBegins), new Action<Chore>(this.OnChoreEnds), true, null, false, true, null, true, true, true, PriorityScreen.PriorityClass.basic, 5, false, true);
 			return;
 		}
 		if (!this.markedForCapture && this.chore != null)
 		{
 			this.chore.Cancel("not marked for capture");
 			this.chore = null;
+		}
+	}
+
+	private void OnChoreBegins(Chore chore)
+	{
+		IdleStates.Instance smi = base.gameObject.GetSMI<IdleStates.Instance>();
+		if (smi != null)
+		{
+			smi.GoTo(smi.sm.root);
+			smi.GetComponent<Navigator>().Stop(false, true);
+		}
+	}
+
+	private void OnChoreEnds(Chore chore)
+	{
+		IdleStates.Instance smi = base.gameObject.GetSMI<IdleStates.Instance>();
+		if (smi != null)
+		{
+			smi.GoTo(smi.sm.GetDefaultState());
 		}
 	}
 

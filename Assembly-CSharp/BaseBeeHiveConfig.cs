@@ -15,6 +15,7 @@ public class BaseBeeHiveConfig : IEntityConfig
 	public GameObject CreatePrefab()
 	{
 		GameObject gameObject = EntityTemplates.CreatePlacedEntity("BeeHive", global::STRINGS.BUILDINGS.PREFABS.BEEHIVE.NAME, global::STRINGS.BUILDINGS.PREFABS.BEEHIVE.DESC, 100f, Assets.GetAnim("beehive_kanim"), "grow_pre", Grid.SceneLayer.Creatures, 2, 3, global::TUNING.BUILDINGS.DECOR.BONUS.TIER0, NOISE_POLLUTION.NOISY.TIER0, SimHashes.Creature, null, global::TUNING.CREATURES.TEMPERATURE.FREEZING_3);
+		gameObject.GetComponent<InfoDescription>().effect = global::STRINGS.BUILDINGS.PREFABS.BEEHIVE.EFFECT;
 		KPrefabID kprefabID = gameObject.AddOrGet<KPrefabID>();
 		kprefabID.AddTag(GameTags.Experimental, false);
 		kprefabID.AddTag(GameTags.Creature, false);

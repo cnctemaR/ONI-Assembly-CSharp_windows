@@ -55,7 +55,12 @@ namespace Mono.Cecil.Cil
 			byteBuffer.WriteUInt32(1396986706U);
 			byteBuffer.WriteBytes(this.module.Mvid.ToByteArray());
 			byteBuffer.WriteUInt32(1U);
-			byteBuffer.WriteBytes(Encoding.UTF8.GetBytes(this.writer.BaseStream.GetFileName()));
+			string text = this.writer.BaseStream.GetFileName();
+			if (string.IsNullOrEmpty(text))
+			{
+				text = this.module.Assembly.Name.Name + ".pdb";
+			}
+			byteBuffer.WriteBytes(Encoding.UTF8.GetBytes(text));
 			byteBuffer.WriteByte(0);
 			byte[] array = new byte[byteBuffer.length];
 			Buffer.BlockCopy(byteBuffer.buffer, 0, array, 0, byteBuffer.length);

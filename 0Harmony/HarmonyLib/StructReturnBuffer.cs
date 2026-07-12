@@ -41,7 +41,7 @@ namespace HarmonyLib
 				return false;
 			}
 			int num = StructReturnBuffer.SizeOf(returnedType);
-			return !StructReturnBuffer.specialSizes.Contains(num) && StructReturnBuffer.HasStructReturnBuffer();
+			return (Tools.isWindows || num > 16) && !StructReturnBuffer.specialSizes.Contains(num) && StructReturnBuffer.HasStructReturnBuffer();
 		}
 
 		private static bool HasStructReturnBuffer()
@@ -55,7 +55,6 @@ namespace HarmonyLib
 					if (!StructReturnBuffer.hasTestResult_Mono)
 					{
 						Sandbox.hasStructReturnBuffer_Mono = false;
-						new StructReturnBuffer();
 						MethodBase methodBase = AccessTools.DeclaredMethod(typeof(Sandbox), "GetStruct_Mono", null, null);
 						MethodInfo methodInfo = AccessTools.DeclaredMethod(typeof(Sandbox), "GetStructReplacement_Mono", null, null);
 						Memory.DetourMethod(methodBase, methodInfo);
@@ -71,11 +70,17 @@ namespace HarmonyLib
 				if (!StructReturnBuffer.hasTestResult_Net)
 				{
 					Sandbox.hasStructReturnBuffer_Net = false;
-					new StructReturnBuffer();
-					MethodBase methodBase2 = AccessTools.DeclaredMethod(typeof(Sandbox), "GetStruct_Net", null, null);
+					MethodBase methodBase2 = AccessTools.DeclaredMethod(typeof(Sandbox), Tools.isWindows ? "GetStruct_Net" : "GetStruct_NetLinux", null, null);
 					MethodInfo methodInfo2 = AccessTools.DeclaredMethod(typeof(Sandbox), "GetStructReplacement_Net", null, null);
 					Memory.DetourMethod(methodBase2, methodInfo2);
-					new Sandbox().GetStruct_Net(Sandbox.magicValue, Sandbox.magicValue);
+					if (Tools.isWindows)
+					{
+						new Sandbox().GetStruct_Net(Sandbox.magicValue, Sandbox.magicValue);
+					}
+					else
+					{
+						new Sandbox().GetStruct_NetLinux(Sandbox.magicValue, Sandbox.magicValue);
+					}
 					StructReturnBuffer.hasTestResult_Net = true;
 				}
 			}

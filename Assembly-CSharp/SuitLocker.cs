@@ -225,12 +225,13 @@ public class SuitLocker : StateMachineComponent<SuitLocker.StatesInstance>
 	{
 		Assignable assignable = equipment.GetAssignable(Db.Get().AssignableSlots.Suit);
 		assignable.Unassign();
-		base.GetComponent<Storage>().Store(assignable.gameObject, false, false, true, false);
 		Durability component = assignable.GetComponent<Durability>();
 		if (component != null && component.IsWornOut())
 		{
 			this.ConfigRequestSuit();
+			return;
 		}
+		base.GetComponent<Storage>().Store(assignable.gameObject, false, false, true, false);
 	}
 
 	public void ConfigRequestSuit()

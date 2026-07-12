@@ -499,7 +499,7 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 			{
 				this.progressBar = ProgressBar.CreateProgressBar(base.gameObject, new Func<float>(this.GetPercentComplete));
 			}
-			this.progressBar.gameObject.SetActive(true);
+			this.progressBar.SetVisibility(true);
 			return;
 		}
 		if (this.progressBar != null)

@@ -47,7 +47,7 @@ public class BalloonStandConfig : IEntityConfig
 	{
 		Chore.Precondition precondition = default(Chore.Precondition);
 		precondition.id = "HasNoBalloon";
-		precondition.description = "Duplicant doesn't have a balloon already";
+		precondition.description = "__ Duplicant doesn't have a balloon already";
 		precondition.fn = delegate(ref Chore.Precondition.Context context, object data)
 		{
 			return !(context.consumerState.consumer == null) && !context.consumerState.gameObject.GetComponent<Effects>().HasEffect("HasBalloon");

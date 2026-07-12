@@ -397,6 +397,10 @@ public class DevToolSimDebug : DevTool
 		{
 			ImGui.Text("High Temperature: " + element.highTemp.ToString());
 			ImGui.Text("HighTemp Temperature Transition: " + element.highTempTransitionTarget.ToString());
+			if (element.highTempTransitionOreID != (SimHashes)0)
+			{
+				ImGui.Text("HighTemp Temperature Transition: " + element.highTempTransitionOreID.ToString());
+			}
 		}
 		ImGui.Text("Light Absorption Factor: " + element.lightAbsorptionFactor.ToString());
 		ImGui.Text("Radiation Absorption Factor: " + element.radiationAbsorptionFactor.ToString());

@@ -8,6 +8,11 @@ namespace HarmonyLib
 {
 	public static class CodeInstructionExtensions
 	{
+		public static bool IsValid(this OpCode code)
+		{
+			return code.Size > 0;
+		}
+
 		public static bool OperandIs(this CodeInstruction code, object value)
 		{
 			if (value == null)
@@ -116,6 +121,11 @@ namespace HarmonyLib
 		public static bool LoadsConstant(this CodeInstruction code, Enum e)
 		{
 			return code.LoadsConstant(Convert.ToInt64(e));
+		}
+
+		public static bool LoadsConstant(this CodeInstruction code, string str)
+		{
+			return !(code.opcode != OpCodes.Ldstr) && Convert.ToString(code.operand) == str;
 		}
 
 		public static bool LoadsField(this CodeInstruction code, FieldInfo field, bool byAddress = false)

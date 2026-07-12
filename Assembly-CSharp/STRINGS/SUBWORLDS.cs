@@ -109,9 +109,9 @@ namespace STRINGS
 			public static LocString DESC = string.Concat(new string[]
 			{
 				"Initial investigations of the Jungle Biome reveal an ecosystem filled with unique flora but centered around ",
-				UI.FormatAsLink("Chlorine", "CHLORINE"),
+				UI.FormatAsLink("Liquid Chlorine", "CHLORINE"),
 				" and ",
-				UI.FormatAsLink("Hydrogen", "HYDROGEN"),
+				UI.FormatAsLink("Hydrogen Gas", "HYDROGEN"),
 				" gas, toxic to Duplicants. When exploring here, it is worth setting up a good system."
 			});
 
@@ -204,9 +204,9 @@ namespace STRINGS
 				" are in abundant supply throughout this entire biome. Refining these metals with a ",
 				UI.FormatAsLink("Metal Refinery", "METALREFINERY"),
 				" will make them available for building advanced technologies.\n\nThough ",
-				UI.FormatAsLink("Chlorine", "CHLORINEGAS"),
+				UI.FormatAsLink("Chlorine Gas", "CHLORINEGAS"),
 				" and ",
-				UI.FormatAsLink("Hydrogen", "HYDROGEN"),
+				UI.FormatAsLink("Hydrogen Gas", "HYDROGEN"),
 				" are the prevailing gasses in this biome, ",
 				UI.FormatAsLink("Oxylite", "OXYROCK"),
 				" exists in rock form and can provide ",
@@ -274,7 +274,7 @@ namespace STRINGS
 				UI.FormatAsLink("Crude Oil", "CRUDEOIL"),
 				" pepper the ",
 				UI.FormatAsLink("Carbon Dioxide", "CARBONDIOXIDE"),
-				" rich environment of the Oil Biome."
+				"-rich environment of the Oil Biome."
 			});
 
 			public static LocString UTILITY = string.Concat(new string[]
@@ -315,7 +315,7 @@ namespace STRINGS
 				" pose a double threat as they are both highly radioactive and very aggressive. If they can be domesticated, however, ",
 				UI.FormatAsLink("Beeta Hives", "BEEHIVE"),
 				", provide a great service turning ",
-				UI.FormatAsLink("Uranium", "URANIUMORE"),
+				UI.FormatAsLink("Uranium Ore", "URANIUMORE"),
 				" into ",
 				UI.FormatAsLink("Enriched Uranium", "ENRICHEDURANIUM"),
 				".\n\nWhile the Radioactive Biome, and the Beetas contained within it, should be avoided at all costs if my Duplicants do not have the correct protection, my colony will need to trek into this dangerous biome if we are going to build any higher tier nuclear technologies."
@@ -399,7 +399,7 @@ namespace STRINGS
 				UI.FormatAsLink("Igneous Rock", "IGNEOUSROCK"),
 				" and its ",
 				UI.FormatAsLink("Iron", "IRON"),
-				" rich counterpart ",
+				"-rich counterpart ",
 				UI.FormatAsLink("Mafic Rock", "MAFICROCK"),
 				", make this a fruitful biome to explore for construction material. ",
 				UI.FormatAsLink("Sand", "SAND"),

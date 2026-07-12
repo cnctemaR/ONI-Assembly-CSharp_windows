@@ -197,7 +197,7 @@ public class RanchStation : GameStateMachine<RanchStation, RanchStation.Instance
 			{
 				int num = Grid.PosToCell(ranchable.transform.GetPosition());
 				CavityInfo cavityForCell = Game.Instance.roomProber.GetCavityForCell(num);
-				if (cavityForCell == null || cavityForCell != this.ranch.cavity)
+				if (cavityForCell == null || this.ranch == null || cavityForCell != this.ranch.cavity)
 				{
 					flag = false;
 				}
@@ -222,13 +222,9 @@ public class RanchStation : GameStateMachine<RanchStation, RanchStation.Instance
 			}
 			foreach (RanchableMonitor.Instance instance in this.targetRanchables.ToArray())
 			{
-				if (instance.States == null)
+				if (instance.States == null || !this.CanRanchableBeRanchedAtRanchStation(instance))
 				{
 					this.Abandon(instance);
-				}
-				else if (!this.CanRanchableBeRanchedAtRanchStation(instance))
-				{
-					instance.States.AbandonRanchStation();
 				}
 			}
 		}
@@ -298,10 +294,10 @@ public class RanchStation : GameStateMachine<RanchStation, RanchStation.Instance
 				RanchableMonitor.Instance instance = this.targetRanchables[i];
 				if (!instance.IsNullOrStopped() && !instance.States.IsNullOrStopped())
 				{
+					this.targetRanchables.Remove(instance);
 					instance.Trigger(1689625967, null);
 				}
 			}
-			this.targetRanchables.Clear();
 			base.sm.RancherIsReady.Set(false, this, false);
 		}
 
@@ -323,21 +319,29 @@ public class RanchStation : GameStateMachine<RanchStation, RanchStation.Instance
 
 		public void Abandon(RanchableMonitor.Instance critter)
 		{
-			this.targetRanchables.Remove(critter);
-			if (critter.States == null)
+			if (critter == null)
 			{
+				global::Debug.LogWarning("Null critter trying to abandon ranch station");
+				this.targetRanchables.Remove(critter);
 				return;
 			}
-			bool flag = !this.isCritterAvailableForRanching;
-			if (critter.States == this.activeRanchable)
-			{
-				flag = true;
-				this.activeRanchable = null;
-			}
 			critter.TargetRanchStation = null;
-			if (flag)
+			if (this.targetRanchables.Remove(critter))
 			{
-				this.TryNotifyEmptyRanch();
+				if (critter.States == null)
+				{
+					return;
+				}
+				bool flag = !this.isCritterAvailableForRanching;
+				if (critter.States == this.activeRanchable)
+				{
+					flag = true;
+					this.activeRanchable = null;
+				}
+				if (flag)
+				{
+					this.TryNotifyEmptyRanch();
+				}
 			}
 		}
 
@@ -348,6 +352,11 @@ public class RanchStation : GameStateMachine<RanchStation, RanchStation.Instance
 				return;
 			}
 			this.rancher.Trigger(-364750427, null);
+		}
+
+		public bool IsCritterInQueue(RanchableMonitor.Instance critter)
+		{
+			return this.targetRanchables.Contains(critter);
 		}
 
 		public List<RanchableMonitor.Instance> DEBUG_GetTargetRanchables()

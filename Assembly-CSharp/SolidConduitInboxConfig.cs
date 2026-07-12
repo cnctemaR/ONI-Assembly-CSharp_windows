@@ -44,7 +44,6 @@ public class SolidConduitInboxConfig : IBuildingConfig
 	{
 		go.AddOrGet<LogicOperationalController>();
 		Prioritizable.AddRef(go);
-		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.IndustrialMachinery, false);
 		go.AddOrGet<EnergyConsumer>();
 		go.AddOrGet<Automatable>();
 		List<Tag> list = new List<Tag>();

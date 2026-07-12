@@ -144,6 +144,10 @@ namespace MonoMod.RuntimeDetour.Platforms
 		{
 		}
 
+		public void MakeReadWriteExecutable(IntPtr src, uint size)
+		{
+		}
+
 		public unsafe void FlushICache(IntPtr src, uint size)
 		{
 			if (!this.ShouldFlushICache)

@@ -9,15 +9,29 @@ public class KleiPermitDioramaVis : KMonoBehaviour
 {
 	protected override void OnPrefabInit()
 	{
+		this.Init();
+	}
+
+	private void Init()
+	{
+		if (this.initComplete)
+		{
+			return;
+		}
 		this.allVisList = ReflectionUtil.For<KleiPermitDioramaVis>(this).CollectValuesForFieldsThatInheritOrImplement<IKleiPermitDioramaVisTarget>(BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
 		foreach (IKleiPermitDioramaVisTarget kleiPermitDioramaVisTarget in this.allVisList)
 		{
 			kleiPermitDioramaVisTarget.ConfigureSetup();
 		}
+		this.initComplete = true;
 	}
 
 	public void ConfigureWith(PermitResource permit)
 	{
+		if (!this.initComplete)
+		{
+			this.Init();
+		}
 		foreach (IKleiPermitDioramaVisTarget kleiPermitDioramaVisTarget in this.allVisList)
 		{
 			kleiPermitDioramaVisTarget.GetGameObject().SetActive(false);
@@ -83,11 +97,11 @@ public class KleiPermitDioramaVis : KMonoBehaviour
 				return this.fallbackVis.WithError("Couldn't find building def for Artable " + permit.Id);
 			}
 			ArtableStage artableStage = (ArtableStage)permit;
-			if (KleiPermitDioramaVis.<GetPermitVisTarget>g__Has|14_0<Sculpture>(buildingDef2))
+			if (KleiPermitDioramaVis.<GetPermitVisTarget>g__Has|16_0<Sculpture>(buildingDef2))
 			{
 				return this.artableSculptureVis;
 			}
-			if (KleiPermitDioramaVis.<GetPermitVisTarget>g__Has|14_0<Painting>(buildingDef2))
+			if (KleiPermitDioramaVis.<GetPermitVisTarget>g__Has|16_0<Painting>(buildingDef2))
 			{
 				return this.artablePaintingVis;
 			}
@@ -150,7 +164,7 @@ public class KleiPermitDioramaVis : KMonoBehaviour
 	}
 
 	[CompilerGenerated]
-	internal static bool <GetPermitVisTarget>g__Has|14_0<T>(BuildingDef buildingDef) where T : Component
+	internal static bool <GetPermitVisTarget>g__Has|16_0<T>(BuildingDef buildingDef) where T : Component
 	{
 		return !buildingDef.BuildingComplete.GetComponent<T>().IsNullOrDestroyed();
 	}
@@ -184,6 +198,8 @@ public class KleiPermitDioramaVis : KMonoBehaviour
 
 	[SerializeField]
 	private KleiPermitDioramaVis_JoyResponseBalloon joyResponseBalloonVis;
+
+	private bool initComplete;
 
 	private IReadOnlyList<IKleiPermitDioramaVisTarget> allVisList;
 

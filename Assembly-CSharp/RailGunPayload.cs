@@ -263,6 +263,11 @@ public class RailGunPayload : GameStateMachine<RailGunPayload, RailGunPayload.St
 			{
 				component.deleteOffGrid = true;
 			}
+			Storage component2 = base.GetComponent<Storage>();
+			if (component2 != null)
+			{
+				component2.SetContentsDeleteOffGrid(true);
+			}
 		}
 
 		[Serialize]

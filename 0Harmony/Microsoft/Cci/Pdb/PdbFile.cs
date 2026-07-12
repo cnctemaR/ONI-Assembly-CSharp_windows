@@ -116,9 +116,12 @@ namespace Microsoft.Cci.Pdb
 
 		private static int FindFunction(PdbFunction[] funcs, ushort sec, uint off)
 		{
-			PdbFile.match.segment = (uint)sec;
-			PdbFile.match.address = off;
-			return Array.BinarySearch(funcs, PdbFile.match, PdbFunction.byAddress);
+			PdbFunction pdbFunction = new PdbFunction
+			{
+				segment = (uint)sec,
+				address = off
+			};
+			return Array.BinarySearch(funcs, pdbFunction, PdbFunction.byAddress);
 		}
 
 		private static void LoadManagedLines(PdbFunction[] funcs, IntHashTable names, BitAccess bits, MsfDirectory dir, Dictionary<string, int> nameIndex, PdbReader reader, uint limit, Dictionary<string, PdbSource> sourceCache)
@@ -501,8 +504,6 @@ namespace Microsoft.Cci.Pdb
 		}
 
 		private static readonly Guid BasicLanguageGuid = new Guid(974311608, -15764, 4560, 180, 66, 0, 160, 36, 74, 29, 210);
-
-		private static PdbFunction match = new PdbFunction();
 
 		public static readonly Guid SymDocumentType_Text = new Guid(1518771467, 26129, 4563, 189, 42, 0, 0, 248, 8, 73, 189);
 	}

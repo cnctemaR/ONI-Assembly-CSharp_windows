@@ -670,12 +670,12 @@ public class GameNavGrids
 			}, new NavOffset[0], new NavOffset[0], true, 1f),
 			new NavGrid.Transition(NavType.Floor, NavType.Floor, 1, -1, NavAxis.NA, false, false, true, 1, "", new CellOffset[]
 			{
+				new CellOffset(1, 0),
 				new CellOffset(2, 0),
 				new CellOffset(2, -1)
 			}, new CellOffset[]
 			{
-				new CellOffset(1, -1),
-				new CellOffset(2, -1)
+				new CellOffset(2, -2)
 			}, new NavOffset[0], new NavOffset[0], true, 1f)
 		};
 		NavGrid.Transition[] array2 = this.MirrorTransitions(array);

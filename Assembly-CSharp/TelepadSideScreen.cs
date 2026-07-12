@@ -93,7 +93,7 @@ public class TelepadSideScreen : SideScreenContent
 	{
 		foreach (ColonyAchievement colonyAchievement in Db.Get().ColonyAchievements.resources)
 		{
-			if (colonyAchievement.isVictoryCondition && !colonyAchievement.Disabled)
+			if (colonyAchievement.isVictoryCondition && !colonyAchievement.Disabled && colonyAchievement.IsValidForSave())
 			{
 				Dictionary<ColonyAchievementRequirement, GameObject> dictionary = new Dictionary<ColonyAchievementRequirement, GameObject>();
 				this.victoryAchievementWidgets.Add(colonyAchievement, dictionary);
@@ -123,7 +123,7 @@ public class TelepadSideScreen : SideScreenContent
 	{
 		foreach (ColonyAchievement colonyAchievement in Db.Get().ColonyAchievements.resources)
 		{
-			if (colonyAchievement.isVictoryCondition && !colonyAchievement.Disabled)
+			if (colonyAchievement.isVictoryCondition && !colonyAchievement.Disabled && colonyAchievement.IsValidForSave())
 			{
 				foreach (ColonyAchievementRequirement colonyAchievementRequirement in colonyAchievement.requirementChecklist)
 				{

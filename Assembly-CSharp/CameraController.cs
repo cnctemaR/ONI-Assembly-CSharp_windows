@@ -314,7 +314,10 @@ public class CameraController : KMonoBehaviour, IInputHandler
 		}
 		if (ClusterManager.Instance.activeWorldId != id)
 		{
-			DetailsScreen.Instance.DeselectAndClose();
+			if (DetailsScreen.Instance != null)
+			{
+				DetailsScreen.Instance.DeselectAndClose();
+			}
 			this.activeFadeRoutine = base.StartCoroutine(this.SwapToWorldFade(id, useForcePosition, forcePosition, forceOrthgraphicSize, callback));
 			return;
 		}

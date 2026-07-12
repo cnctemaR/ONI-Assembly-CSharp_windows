@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{C87D3592-D97D-4169-854D-D0529554B8D2}</ProjectGuid>
+    <ProjectGuid>{94F2BC21-F5F4-4571-96E5-42EFE08DF548}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>FMODUnity</RootNamespace>
     <AssemblyName>FMODUnity</AssemblyName>
@@ -314,39 +314,39 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{C87D3592-D97D-4169-854D-D0529554B8DC}</Project>
+      <Project>{94F2BC21-F5F4-4571-96E5-42EFE08DF552}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Core\System.Core.csproj">
-      <Project>{C87D3592-D97D-4169-854D-D0529554B8DF}</Project>
+      <Project>{94F2BC21-F5F4-4571-96E5-42EFE08DF555}</Project>
       <Name>System.Core</Name>
     </ProjectReference>
     <ProjectReference Include="..\System\System.csproj">
-      <Project>{C87D3592-D97D-4169-854D-D0529554B8E1}</Project>
+      <Project>{94F2BC21-F5F4-4571-96E5-42EFE08DF557}</Project>
       <Name>System</Name>
     </ProjectReference>
     <ProjectReference Include="..\Unity.Timeline\Unity.Timeline.csproj">
-      <Project>{C87D3592-D97D-4169-854D-D0529554B8EE}</Project>
+      <Project>{94F2BC21-F5F4-4571-96E5-42EFE08DF564}</Project>
       <Name>Unity.Timeline</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
-      <Project>{C87D3592-D97D-4169-854D-D0529554B8F9}</Project>
+      <Project>{94F2BC21-F5F4-4571-96E5-42EFE08DF56F}</Project>
       <Name>UnityEngine.CoreModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.DirectorModule\UnityEngine.DirectorModule.csproj">
-      <Project>{C87D3592-D97D-4169-854D-D0529554B8FB}</Project>
+      <Project>{94F2BC21-F5F4-4571-96E5-42EFE08DF571}</Project>
       <Name>UnityEngine.DirectorModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.IMGUIModule\UnityEngine.IMGUIModule.csproj">
-      <Project>{C87D3592-D97D-4169-854D-D0529554B903}</Project>
+      <Project>{94F2BC21-F5F4-4571-96E5-42EFE08DF579}</Project>
       <Name>UnityEngine.IMGUIModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.Physics2DModule\UnityEngine.Physics2DModule.csproj">
-      <Project>{C87D3592-D97D-4169-854D-D0529554B90A}</Project>
+      <Project>{94F2BC21-F5F4-4571-96E5-42EFE08DF580}</Project>
       <Name>UnityEngine.Physics2DModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.PhysicsModule\UnityEngine.PhysicsModule.csproj">
-      <Project>{C87D3592-D97D-4169-854D-D0529554B90B}</Project>
+      <Project>{94F2BC21-F5F4-4571-96E5-42EFE08DF581}</Project>
       <Name>UnityEngine.PhysicsModule</Name>
     </ProjectReference>
   </ItemGroup>

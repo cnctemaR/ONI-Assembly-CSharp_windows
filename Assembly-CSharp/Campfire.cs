@@ -1,5 +1,4 @@
 ﻿using System;
-using TUNING;
 
 public class Campfire : GameStateMachine<Campfire, Campfire.Instance, IStateMachineTarget, Campfire.Def>
 {
@@ -81,7 +80,8 @@ public class Campfire : GameStateMachine<Campfire, Campfire.Instance, IStateMach
 			this.operational.SetActive(true, false);
 			this.light.enabled = true;
 			this.heater.EnableEmission = true;
-			this.decorProvider.SetValues(DECOR.BONUS.TIER2);
+			this.decorProvider.SetValues(CampfireConfig.DECOR_ON);
+			this.decorProvider.Refresh();
 		}
 
 		public void DisableHeatEmission()
@@ -89,7 +89,8 @@ public class Campfire : GameStateMachine<Campfire, Campfire.Instance, IStateMach
 			this.operational.SetActive(false, false);
 			this.light.enabled = false;
 			this.heater.EnableEmission = false;
-			this.decorProvider.SetValues(DECOR.NONE);
+			this.decorProvider.SetValues(CampfireConfig.DECOR_OFF);
+			this.decorProvider.Refresh();
 		}
 
 		[MyCmpGet]

@@ -36,9 +36,16 @@ namespace STRINGS
 
 			public class SET_OBJECT
 			{
-				public static LocString HEADER = "REMINDER TO STAFF";
+				public static LocString TITLE = "Reminder to Staff";
 
-				public static LocString ENTRY = "TO: ALL\nFROM: ADMIN @GRAVITASFACILITY.NOVA\nSUBJECT: IMPORTANT\n\nREMINDER TO ALL PERSONNEL\nThe Gravitas Facility does not officially host a \"Bring Your Child To Work Day\" office event. We ask that personnel please do not bring children into top secret research departments, and especially that they do not let said children play with the high velocity particle accelerators.\n\nWe thank you for your understanding.\n-The Gravitas Facility";
+				public static LocString SUBTITLE = "SUBJECT: IMPORTANT";
+
+				public class BODY
+				{
+					public static LocString CONTAINER1 = "<smallcaps><b>Reminder to All Personnel!</b>\nFrom: <b>Admin</b><alpha=#AA><admin@gravitas.nova></color>\nTO: <b>All</b></smallcaps>\n------------------\n<indent=5%>\nTo all employees;\n\nThe Gravitas Facility does not officially host a \"Bring Your Child To Work Day\" office event. We ask that personnel please do not bring children into top secret research departments, and especially that they do not let said children play with the high velocity particle accelerators.\n\nWe thank you for your understanding.</indent>";
+
+					public static LocString SIGNATURE1 = "\n-Admin\n<size=11>The Gravitas Facility</size>\n------------------\n";
+				}
 			}
 
 			public class VendingMachine

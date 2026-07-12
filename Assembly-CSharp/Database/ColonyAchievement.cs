@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using FMODUnity;
+using ProcGen;
 
 namespace Database
 {
@@ -31,6 +32,17 @@ namespace Database
 				this.dlcIds = DlcManager.AVAILABLE_ALL_VERSIONS;
 			}
 			this.dlcIdFrom = dlcIdFrom;
+		}
+
+		public bool IsValidForSave()
+		{
+			if (this.clusterTag.IsNullOrWhiteSpace())
+			{
+				return true;
+			}
+			DebugUtil.Assert(CustomGameSettings.Instance != null, "IsValidForSave called when CustomGamesSettings is not initialized.");
+			ClusterLayout currentClusterLayout = CustomGameSettings.Instance.GetCurrentClusterLayout();
+			return currentClusterLayout != null && currentClusterLayout.clusterTags.Contains(this.clusterTag);
 		}
 
 		public string description;

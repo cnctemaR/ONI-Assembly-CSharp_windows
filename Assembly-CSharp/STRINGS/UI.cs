@@ -3577,7 +3577,7 @@ namespace STRINGS
 
 					public static LocString CONTENT_NOTOWNED_LABEL = "Available Now";
 
-					public static LocString CONTENT_NOTOWNED_TOOLTIP = "This DLC is available now!\n\n<color=#ffff00ff><b>Click to view store page</b></color>";
+					public static LocString CONTENT_NOTOWNED_TOOLTIP = "This DLC is available now!";
 				}
 			}
 

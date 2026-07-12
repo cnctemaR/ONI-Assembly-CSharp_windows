@@ -104,26 +104,24 @@ public class CreatureCalorieMonitor : GameStateMachine<CreatureCalorieMonitor, C
 		{
 			List<Descriptor> list = new List<Descriptor>();
 			list.Add(new Descriptor(UI.BUILDINGEFFECTS.DIET_HEADER, UI.BUILDINGEFFECTS.TOOLTIPS.DIET_HEADER, Descriptor.DescriptorType.Effect, false));
-			float dailyPlantGrowthConsumption = 1f;
 			CreatureCalorieMonitor.Stomach stomach = obj.GetSMI<CreatureCalorieMonitor.Instance>().stomach;
+			float calorie_loss_per_second = 0f;
+			foreach (AttributeModifier attributeModifier in Db.Get().traits.Get(obj.GetComponent<Modifiers>().initialTraits[0]).SelfModifiers)
+			{
+				if (attributeModifier.AttributeId == Db.Get().Amounts.Calories.deltaAttribute.Id)
+				{
+					calorie_loss_per_second = attributeModifier.Value;
+				}
+			}
 			if (stomach.diet.consumedTags.Count > 0)
 			{
-				float calorie_loss_per_second = 0f;
-				foreach (AttributeModifier attributeModifier in Db.Get().traits.Get(obj.GetComponent<Modifiers>().initialTraits[0]).SelfModifiers)
-				{
-					if (attributeModifier.AttributeId == Db.Get().Amounts.Calories.deltaAttribute.Id)
-					{
-						calorie_loss_per_second = attributeModifier.Value;
-					}
-				}
 				string text = string.Join(", ", stomach.diet.consumedTags.Select<KeyValuePair<Tag, float>, string>((KeyValuePair<Tag, float> t) => t.Key.ProperName()).ToArray<string>());
 				string text2 = "";
 				if (stomach.diet.CanEatAnyPlantDirectly)
 				{
 					text2 = string.Join("\n", stomach.diet.consumedTags.Select<KeyValuePair<Tag, float>, string>(delegate(KeyValuePair<Tag, float> t)
 					{
-						float num = -calorie_loss_per_second / t.Value;
-						dailyPlantGrowthConsumption = num;
+						float num3 = -calorie_loss_per_second / t.Value;
 						GameObject prefab = Assets.GetPrefab(t.Key.ToString());
 						IPlantConsumptionInstructions plantConsumptionInstructions = prefab.GetComponent<IPlantConsumptionInstructions>();
 						plantConsumptionInstructions = ((plantConsumptionInstructions != null) ? plantConsumptionInstructions : prefab.GetSMI<IPlantConsumptionInstructions>());
@@ -131,12 +129,13 @@ public class CreatureCalorieMonitor : GameStateMachine<CreatureCalorieMonitor, C
 						{
 							return "";
 						}
-						return UI.BUILDINGEFFECTS.DIET_CONSUMED_ITEM.text.Replace("{Food}", t.Key.ProperName()).Replace("{Amount}", plantConsumptionInstructions.GetFormattedConsumptionPerCycle(num));
+						return UI.BUILDINGEFFECTS.DIET_CONSUMED_ITEM.text.Replace("{Food}", t.Key.ProperName()).Replace("{Amount}", plantConsumptionInstructions.GetFormattedConsumptionPerCycle(num3));
 					}).ToArray<string>());
 					text2 += "\n";
 				}
 				if (this.diet.CanEatAnyNonDirectlyEdiblePlant)
 				{
+					Diet.Info info;
 					text2 += string.Join("\n", (from t in stomach.diet.consumedTags.FindAll((KeyValuePair<Tag, float> t) => this.diet.directlyEatenPlantInfos.FirstOrDefault<Diet.Info>((Diet.Info info) => info.consumedTags.Contains(t.Key)) == null)
 						select UI.BUILDINGEFFECTS.DIET_CONSUMED_ITEM.text.Replace("{Food}", t.Key.ProperName()).Replace("{Amount}", GameUtil.GetFormattedMass(-calorie_loss_per_second / t.Value, GameUtil.TimeSlice.PerCycle, GameUtil.MetricMassFormat.Kilogram, true, "{0:0.#}"))).ToArray<string>());
 				}
@@ -148,14 +147,36 @@ public class CreatureCalorieMonitor : GameStateMachine<CreatureCalorieMonitor, C
 				string text4 = "";
 				if (stomach.diet.CanEatAnyPlantDirectly)
 				{
-					text4 = string.Join("\n", (from t in stomach.diet.producedTags.FindAll((KeyValuePair<Tag, float> t) => this.diet.directlyEatenPlantInfos.FirstOrDefault<Diet.Info>((Diet.Info info) => info.consumedTags.Contains(t.Key)) != null)
-						select UI.BUILDINGEFFECTS.DIET_PRODUCED_ITEM_FROM_PLANT.text.Replace("{Item}", t.Key.ProperName()).Replace("{Amount}", GameUtil.GetFormattedMass(t.Value * dailyPlantGrowthConsumption, GameUtil.TimeSlice.PerCycle, GameUtil.MetricMassFormat.Kilogram, true, "{0:0.#}"))).ToArray<string>());
+					List<KeyValuePair<Tag, float>> list2 = new List<KeyValuePair<Tag, float>>();
+					foreach (KeyValuePair<Tag, float> keyValuePair in stomach.diet.producedTags)
+					{
+						foreach (Diet.Info info in this.diet.directlyEatenPlantInfos)
+						{
+							if (info.producedElement == keyValuePair.Key)
+							{
+								float num = -calorie_loss_per_second / info.caloriesPerKg * 600f;
+								float num2 = info.ConvertConsumptionMassToProducedMass(num);
+								list2.Add(new KeyValuePair<Tag, float>(keyValuePair.Key, num2 / 600f));
+							}
+						}
+					}
+					text4 = string.Join("\n", list2.Select<KeyValuePair<Tag, float>, string>((KeyValuePair<Tag, float> t) => UI.BUILDINGEFFECTS.DIET_PRODUCED_ITEM_FROM_PLANT.text.Replace("{Item}", t.Key.ProperName()).Replace("{Amount}", GameUtil.GetFormattedMass(t.Value, GameUtil.TimeSlice.PerCycle, GameUtil.MetricMassFormat.Kilogram, true, "{0:0.#}"))).ToArray<string>());
 					text4 += "\n";
 				}
-				if (stomach.diet.CanEatAnyNonDirectlyEdiblePlant)
+				else if (stomach.diet.CanEatAnyNonDirectlyEdiblePlant)
 				{
-					text4 += string.Join("\n", (from t in stomach.diet.producedTags.FindAll((KeyValuePair<Tag, float> t) => this.diet.directlyEatenPlantInfos.FirstOrDefault<Diet.Info>((Diet.Info info) => info.consumedTags.Contains(t.Key)) == null)
-						select UI.BUILDINGEFFECTS.DIET_PRODUCED_ITEM.text.Replace("{Item}", t.Key.ProperName()).Replace("{Percent}", GameUtil.GetFormattedPercent(t.Value * 100f, GameUtil.TimeSlice.None))).ToArray<string>());
+					List<KeyValuePair<Tag, float>> list3 = new List<KeyValuePair<Tag, float>>();
+					foreach (KeyValuePair<Tag, float> keyValuePair2 in stomach.diet.producedTags)
+					{
+						foreach (Diet.Info info2 in this.diet.noPlantInfos)
+						{
+							if (info2.producedElement == keyValuePair2.Key)
+							{
+								list3.Add(new KeyValuePair<Tag, float>(info2.producedElement, info2.producedConversionRate));
+							}
+						}
+					}
+					text4 += string.Join("\n", list3.Select<KeyValuePair<Tag, float>, string>((KeyValuePair<Tag, float> t) => UI.BUILDINGEFFECTS.DIET_PRODUCED_ITEM.text.Replace("{Item}", t.Key.ProperName()).Replace("{Percent}", GameUtil.GetFormattedPercent(t.Value * 100f, GameUtil.TimeSlice.None))).ToArray<string>());
 				}
 				list.Add(new Descriptor(UI.BUILDINGEFFECTS.DIET_PRODUCED.text.Replace("{Items}", text3), UI.BUILDINGEFFECTS.TOOLTIPS.DIET_PRODUCED.text.Replace("{Items}", text4), Descriptor.DescriptorType.Effect, false));
 			}

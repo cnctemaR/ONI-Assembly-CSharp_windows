@@ -491,8 +491,8 @@ public class Unlocks : KMonoBehaviour
 			new string[]
 			{
 				"notes_clonedrats", "misc_dishbot", "notes_agriculture1", "notes_husbandry1", "notes_hibiscus3", "misc_newsecurity", "notes_husbandry2", "notes_agriculture2", "notes_geneticooze", "notes_agriculture3",
-				"notes_husbandry3", "misc_casualfriday", "notes_memoryimplantation", "notes_husbandry4", "notes_agriculture4", "notes_neutronium", "misc_mailroometiquette", "notes_firstsuccess", "notes_neutroniumapplications", "notes_teleportation",
-				"notes_AI", "misc_politerequest", "cryotank_warning", "misc_unattendedcultures"
+				"notes_husbandry3", "misc_casualfriday", "notes_memoryimplantation", "notes_husbandry4", "notes_agriculture4", "notes_neutronium", "misc_mailroometiquette", "notes_firstsuccess", "misc_reminder", "notes_neutroniumapplications",
+				"notes_teleportation", "notes_AI", "misc_politerequest", "cryotank_warning", "misc_unattendedcultures"
 			}
 		},
 		{

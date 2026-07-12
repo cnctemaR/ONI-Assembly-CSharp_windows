@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Klei;
 using ObjectCloner;
 using ProcGen.Noise;
@@ -419,12 +420,13 @@ namespace ProcGen
 			SettingsCache.dlcMixingSettings[dlcIdFromContentDirectory] = dlcMixingSettings;
 		}
 
-		public static void LoadWorldMixingSettings(string path, string prefix, List<YamlIO.Error> errors)
+		public static List<string> LoadWorldMixingSettings(string path, string prefix, List<YamlIO.Error> errors)
 		{
-			List<FileHandle> list = new List<FileHandle>();
-			FileSystem.GetFiles(FileSystem.Normalize(Path.Combine(path, "worldMixing")), "*.yaml", list);
+			List<string> list = new List<string>();
+			List<FileHandle> list2 = new List<FileHandle>();
+			FileSystem.GetFiles(FileSystem.Normalize(Path.Combine(path, "worldMixing")), "*.yaml", list2);
 			YamlIO.ErrorHandler <>9__0;
-			foreach (FileHandle fileHandle in list)
+			foreach (FileHandle fileHandle in list2)
 			{
 				FileHandle fileHandle2 = fileHandle;
 				YamlIO.ErrorHandler errorHandler;
@@ -438,9 +440,11 @@ namespace ProcGen
 				WorldMixingSettings worldMixingSettings = YamlIO.LoadFile<WorldMixingSettings>(fileHandle2, errorHandler, null);
 				worldMixingSettings.isModded = fileHandle.source.IsModded();
 				string text = SettingsCache.FileHandleToScopedPath(fileHandle, path, prefix);
+				list.Add(worldMixingSettings.world);
 				DebugUtil.DevAssert(!SettingsCache.worldMixingSettings.ContainsKey(text), "Overwriting worldMixing " + text + " already exists", null);
 				SettingsCache.worldMixingSettings[text] = worldMixingSettings;
 			}
+			return list;
 		}
 
 		public static void LoadSubworldMixingSettings(string path, string prefix, List<YamlIO.Error> errors)
@@ -605,7 +609,13 @@ namespace ProcGen
 		private static bool LoadFiles(string worldgenFolderPath, string addPrefix, List<YamlIO.Error> errors)
 		{
 			SettingsCache.clusterLayouts.LoadFiles(worldgenFolderPath, addPrefix, errors);
-			SettingsCache.worlds.LoadFiles(worldgenFolderPath, addPrefix, errors);
+			HashSet<string> hashSet = new HashSet<string>(from worldPlacment in SettingsCache.clusterLayouts.clusterCache.Values.SelectMany<ClusterLayout, WorldPlacement>((ClusterLayout clusterLayout) => clusterLayout.worldPlacements)
+				select worldPlacment.world);
+			foreach (string text in SettingsCache.LoadWorldMixingSettings(worldgenFolderPath, addPrefix, errors))
+			{
+				hashSet.Add(text);
+			}
+			SettingsCache.worlds.LoadReferencedWorlds(hashSet, errors);
 			SettingsCache.LoadWorldTraits(worldgenFolderPath, addPrefix, errors);
 			SettingsCache.LoadStoryTraits(worldgenFolderPath, addPrefix, errors);
 			foreach (KeyValuePair<string, World> keyValuePair in SettingsCache.worlds.worldCache)
@@ -639,7 +649,6 @@ namespace ProcGen
 				keyValuePair5.Value.name = keyValuePair5.Key;
 			}
 			SettingsCache.LoadDlcMixingSettings(worldgenFolderPath + "mixing.yaml", addPrefix, errors);
-			SettingsCache.LoadWorldMixingSettings(worldgenFolderPath, addPrefix, errors);
 			SettingsCache.LoadSubworldMixingSettings(worldgenFolderPath, addPrefix, errors);
 			return true;
 		}

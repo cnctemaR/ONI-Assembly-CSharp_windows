@@ -22,7 +22,7 @@ public class CampfireConfig : IBuildingConfig
 		float num5 = 9999f;
 		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloor;
 		EffectorValues none = NOISE_POLLUTION.NONE;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, raw_METALS, num5, buildLocationRule, BUILDINGS.DECOR.BONUS.TIER2, none, 0.1f);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, raw_METALS, num5, buildLocationRule, CampfireConfig.DECOR_ON, none, 0.1f);
 		buildingDef.Floodable = true;
 		buildingDef.Entombable = true;
 		buildingDef.ExhaustKilowattsWhenActive = 0f;
@@ -44,7 +44,9 @@ public class CampfireConfig : IBuildingConfig
 	{
 		go.AddOrGet<LoopingSounds>();
 		go.AddOrGet<BuildingComplete>().isManuallyOperated = true;
-		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.WarmingStation, false);
+		KPrefabID component = go.GetComponent<KPrefabID>();
+		component.AddTag(RoomConstraints.ConstraintTags.WarmingStation, false);
+		component.AddTag(RoomConstraints.ConstraintTags.Decoration, false);
 		Storage storage = go.AddOrGet<Storage>();
 		storage.capacityKg = 45f;
 		storage.showInUI = true;
@@ -140,4 +142,8 @@ public class CampfireConfig : IBuildingConfig
 	public const SimHashes EXHAUST_TAG = SimHashes.CarbonDioxide;
 
 	private const float EXHAUST_TEMPERATURE = 303.15f;
+
+	public static readonly EffectorValues DECOR_ON = BUILDINGS.DECOR.BONUS.TIER3;
+
+	public static readonly EffectorValues DECOR_OFF = BUILDINGS.DECOR.NONE;
 }

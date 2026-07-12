@@ -165,7 +165,7 @@ public class Game : KMonoBehaviour
 		Singleton<CellChangeMonitor>.Instance.SetGridSize(Grid.WidthInCells, Grid.HeightInCells);
 		this.unlocks = base.GetComponent<Unlocks>();
 		this.changelistsPlayedOn = new List<uint>();
-		this.changelistsPlayedOn.Add(623230U);
+		this.changelistsPlayedOn.Add(623711U);
 		this.dateGenerated = global::System.DateTime.UtcNow.ToString("U", CultureInfo.InvariantCulture);
 	}
 
@@ -919,7 +919,7 @@ public class Game : KMonoBehaviour
 		{
 			return;
 		}
-		uint num = 623230U;
+		uint num = 623711U;
 		string text = global::System.DateTime.Now.ToShortDateString();
 		string text2 = global::System.DateTime.Now.ToShortTimeString();
 		string fileName = Path.GetFileName(GenericGameSettings.instance.performanceCapture.saveGame);
@@ -1143,9 +1143,9 @@ public class Game : KMonoBehaviour
 		gameSaveData.savedInfo = this.savedInfo;
 		global::Debug.Assert(gameSaveData.worldDetail != null, "World detail null");
 		gameSaveData.dateGenerated = this.dateGenerated;
-		if (!this.changelistsPlayedOn.Contains(623230U))
+		if (!this.changelistsPlayedOn.Contains(623711U))
 		{
-			this.changelistsPlayedOn.Add(623230U);
+			this.changelistsPlayedOn.Add(623711U);
 		}
 		gameSaveData.changelistsPlayedOn = this.changelistsPlayedOn;
 		if (this.OnSave != null)

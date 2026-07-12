@@ -50,10 +50,10 @@ public class DirectlyEdiblePlant_Growth : KMonoBehaviour, IPlantConsumptionInstr
 		return 1f;
 	}
 
-	public string GetFormattedConsumptionPerCycle(float consumer_caloriesLossPerCaloriesPerKG)
+	public string GetFormattedConsumptionPerCycle(float consumer_KGWorthOfCaloriesLostPerSecond)
 	{
 		float num = this.PlantProductGrowthPerCycle();
-		return GameUtil.GetFormattedPlantGrowth(consumer_caloriesLossPerCaloriesPerKG * num * 100f, GameUtil.TimeSlice.PerCycle);
+		return GameUtil.GetFormattedPlantGrowth(consumer_KGWorthOfCaloriesLostPerSecond * num * 100f, GameUtil.TimeSlice.PerCycle);
 	}
 
 	public CellOffset[] GetAllowedOffsets()

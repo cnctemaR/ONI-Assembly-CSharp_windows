@@ -585,6 +585,20 @@ public static class Util
 		return array2;
 	}
 
+	public static T[] Append<T>(this T[] array, T[] items)
+	{
+		T[] array2 = new T[array.Length + items.Length];
+		for (int i = 0; i < array.Length; i++)
+		{
+			array2[i] = array[i];
+		}
+		for (int j = 0; j < items.Length; j++)
+		{
+			array2[array.Length + j] = items[j];
+		}
+		return array2;
+	}
+
 	public static T[] Concat<T>(this T[] a1, T[] a2)
 	{
 		T[] array = new T[a1.Length + a2.Length];

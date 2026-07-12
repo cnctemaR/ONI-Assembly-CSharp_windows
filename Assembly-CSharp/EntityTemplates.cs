@@ -258,11 +258,10 @@ public class EntityTemplates
 		WildnessMonitor.Def def = prefab.AddOrGetDef<WildnessMonitor.Def>();
 		def.wildEffect = new Effect("Wild" + prefabTag.Name, global::STRINGS.CREATURES.MODIFIERS.WILD.NAME, global::STRINGS.CREATURES.MODIFIERS.WILD.TOOLTIP, 0f, true, true, false, null, -1f, 0f, null, "");
 		def.wildEffect.Add(new AttributeModifier(Db.Get().Amounts.Wildness.deltaAttribute.Id, 0.008333334f, global::STRINGS.CREATURES.MODIFIERS.WILD.NAME, false, false, true));
-		def.wildEffect.Add(new AttributeModifier(Db.Get().CritterAttributes.Metabolism.Id, 25f, global::STRINGS.CREATURES.MODIFIERS.WILD.NAME, false, false, true));
+		def.wildEffect.Add(new AttributeModifier(Db.Get().CritterAttributes.Metabolism.Id, -75f, global::STRINGS.CREATURES.MODIFIERS.WILD.NAME, false, false, true));
 		def.wildEffect.Add(new AttributeModifier(Db.Get().Amounts.ScaleGrowth.deltaAttribute.Id, -0.75f, global::STRINGS.CREATURES.MODIFIERS.WILD.NAME, true, false, true));
 		def.tameEffect = new Effect("Tame" + prefabTag.Name, global::STRINGS.CREATURES.MODIFIERS.TAME.NAME, global::STRINGS.CREATURES.MODIFIERS.TAME.TOOLTIP, 0f, true, true, false, null, -1f, 0f, null, "");
 		def.tameEffect.Add(new AttributeModifier(Db.Get().CritterAttributes.Happiness.Id, -1f, global::STRINGS.CREATURES.MODIFIERS.TAME.NAME, false, false, true));
-		def.tameEffect.Add(new AttributeModifier(Db.Get().CritterAttributes.Metabolism.Id, 100f, global::STRINGS.CREATURES.MODIFIERS.TAME.NAME, false, false, true));
 		prefab.AddOrGetDef<OvercrowdingMonitor.Def>().spaceRequiredPerCreature = space_required_per_creature;
 		return prefab;
 	}
@@ -396,6 +395,14 @@ public class EntityTemplates
 		CreatureBrain creatureBrain = prefab.AddOrGet<CreatureBrain>();
 		creatureBrain.species = species;
 		creatureBrain.symbolPrefix = symbol_prefix;
+		if (chore_table.HasChoreType(typeof(CritterCondoStates.Def)))
+		{
+			prefab.AddOrGetDef<CritterCondoInteractMontior.Def>();
+		}
+		if (chore_table.HasChoreType(typeof(DrinkMilkStates.Def)))
+		{
+			prefab.AddOrGetDef<DrinkMilkMonitor.Def>();
+		}
 		ChoreConsumer chore_consumer = prefab.AddOrGet<ChoreConsumer>();
 		chore_consumer.choreTable = chore_table.CreateTable();
 		KPrefabID kprefabID = prefab.AddOrGet<KPrefabID>();
@@ -546,7 +553,15 @@ public class EntityTemplates
 
 	public static GameObject ExtendEntityToFood(GameObject template, EdiblesManager.FoodInfo foodInfo)
 	{
-		template.AddOrGet<EntitySplitter>();
+		return EntityTemplates.ExtendEntityToFood(template, foodInfo, true);
+	}
+
+	public static GameObject ExtendEntityToFood(GameObject template, EdiblesManager.FoodInfo foodInfo, bool splittable)
+	{
+		if (splittable)
+		{
+			template.AddOrGet<EntitySplitter>();
+		}
 		if (foodInfo.CanRot)
 		{
 			Rottable.Def def = template.AddOrGetDef<Rottable.Def>();
@@ -573,6 +588,24 @@ public class EntityTemplates
 			component.AddTag(GameTags.CookingIngredient, false);
 			template.AddOrGet<HasSortOrder>();
 		}
+		return template;
+	}
+
+	public static GameObject ExtendEntityToDehydratedFoodPackage(GameObject template, EdiblesManager.FoodInfo foodInfo)
+	{
+		KPrefabID component = template.GetComponent<KPrefabID>();
+		component.AddTag(GameTags.Dehydrated, false);
+		component.AddTag(GameTags.PickupableStorage, false);
+		Storage storage = template.AddComponent<Storage>();
+		storage.allowItemRemoval = false;
+		storage.capacityKg = 1f;
+		storage.showInUI = false;
+		storage.storageFilters = new List<Tag> { foodInfo.Id };
+		DehydratedFoodPackage dehydratedFoodPackage = template.AddOrGet<DehydratedFoodPackage>();
+		dehydratedFoodPackage.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_rehydrator_kanim") };
+		dehydratedFoodPackage.workTime = 5f;
+		dehydratedFoodPackage.workLayer = Grid.SceneLayer.Front;
+		dehydratedFoodPackage.FoodTag = foodInfo.Id;
 		return template;
 	}
 

@@ -283,6 +283,7 @@ public class ClusterManager : KMonoBehaviour, ISaveLoadable
 		{
 			this.activeWorldIdx = worldIdx;
 			Game.Instance.Trigger(1983128072, new global::Tuple<int, int>(this.activeWorldIdx, num));
+			this.UpdateRocketInteriorAudio();
 		}
 	}
 
@@ -610,13 +611,46 @@ public class ClusterManager : KMonoBehaviour, ISaveLoadable
 
 	public void UpdateWorldReverbSnapshot(int worldId)
 	{
-		AudioMixer.instance.Stop(AudioMixerSnapshots.Get().SmallRocketInteriorReverbSnapshot, STOP_MODE.ALLOWFADEOUT);
-		AudioMixer.instance.Stop(AudioMixerSnapshots.Get().MediumRocketInteriorReverbSnapshot, STOP_MODE.ALLOWFADEOUT);
+		if (!DlcManager.IsPureVanilla())
+		{
+			AudioMixer.instance.Stop(AudioMixerSnapshots.Get().SmallRocketInteriorReverbSnapshot, STOP_MODE.ALLOWFADEOUT);
+			AudioMixer.instance.Stop(AudioMixerSnapshots.Get().MediumRocketInteriorReverbSnapshot, STOP_MODE.ALLOWFADEOUT);
+		}
+		AudioMixer.instance.PauseSpaceVisibleSnapshot(false);
 		WorldContainer world = this.GetWorld(worldId);
 		if (world.IsModuleInterior)
 		{
 			PassengerRocketModule passengerModule = world.GetComponent<Clustercraft>().ModuleInterface.GetPassengerModule();
 			AudioMixer.instance.Start(passengerModule.interiorReverbSnapshot);
+			AudioMixer.instance.PauseSpaceVisibleSnapshot(true);
+			this.UpdateRocketInteriorAudio();
+		}
+	}
+
+	public void UpdateRocketInteriorAudio()
+	{
+		WorldContainer activeWorld = this.activeWorld;
+		if (activeWorld != null && activeWorld.IsModuleInterior)
+		{
+			activeWorld.minimumBounds + new Vector2((float)activeWorld.Width * Grid.CellSizeInMeters, (float)activeWorld.Height * Grid.CellSizeInMeters) / 2f;
+			Clustercraft component = activeWorld.GetComponent<Clustercraft>();
+			ClusterManager.RocketStatesForAudio rocketStatesForAudio = ClusterManager.RocketStatesForAudio.Grounded;
+			switch (component.Status)
+			{
+			case Clustercraft.CraftStatus.Grounded:
+				rocketStatesForAudio = (component.LaunchRequested ? ClusterManager.RocketStatesForAudio.ReadyForLaunch : ClusterManager.RocketStatesForAudio.Grounded);
+				break;
+			case Clustercraft.CraftStatus.Launching:
+				rocketStatesForAudio = ClusterManager.RocketStatesForAudio.Launching;
+				break;
+			case Clustercraft.CraftStatus.InFlight:
+				rocketStatesForAudio = ClusterManager.RocketStatesForAudio.InSpace;
+				break;
+			case Clustercraft.CraftStatus.Landing:
+				rocketStatesForAudio = ClusterManager.RocketStatesForAudio.Landing;
+				break;
+			}
+			ClusterManager.RocketInteriorState = rocketStatesForAudio;
 		}
 	}
 
@@ -639,6 +673,8 @@ public class ClusterManager : KMonoBehaviour, ISaveLoadable
 	}
 
 	public static int MAX_ROCKET_INTERIOR_COUNT = 16;
+
+	public static ClusterManager.RocketStatesForAudio RocketInteriorState = ClusterManager.RocketStatesForAudio.Grounded;
 
 	public static ClusterManager Instance;
 
@@ -674,4 +710,13 @@ public class ClusterManager : KMonoBehaviour, ISaveLoadable
 	private MigrationEventArgs critterMigrationEvArg = new MigrationEventArgs();
 
 	private List<int> _worldIDs = new List<int>();
+
+	public enum RocketStatesForAudio
+	{
+		Grounded,
+		ReadyForLaunch,
+		Launching,
+		InSpace,
+		Landing
+	}
 }

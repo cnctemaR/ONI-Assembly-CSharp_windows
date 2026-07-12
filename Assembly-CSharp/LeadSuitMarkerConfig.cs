@@ -27,6 +27,7 @@ public class LeadSuitMarkerConfig : IBuildingConfig
 		buildingDef.PermittedRotations = PermittedRotations.FlipH;
 		buildingDef.PreventIdleTraversalPastBuilding = true;
 		buildingDef.Deprecated = !Sim.IsRadiationEnabled();
+		buildingDef.LogicInputPorts = LogicOperationalController.CreateSingleInputPortList(new CellOffset(0, 0));
 		GeneratedBuildings.RegisterWithOverlay(OverlayScreen.SuitIDs, "LeadSuitMarker");
 		return buildingDef;
 	}
@@ -49,6 +50,7 @@ public class LeadSuitMarkerConfig : IBuildingConfig
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
+		go.AddOrGet<LogicOperationalController>();
 	}
 
 	public const string ID = "LeadSuitMarker";

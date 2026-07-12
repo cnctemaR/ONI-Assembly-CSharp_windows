@@ -12,7 +12,39 @@ public class OvercrowdingMonitor : GameStateMachine<OvercrowdingMonitor, Overcro
 
 	private static bool IsConfined(OvercrowdingMonitor.Instance smi)
 	{
-		return !smi.HasTag(GameTags.Creatures.Burrowed) && !smi.HasTag(GameTags.Creatures.Digger) && (smi.cavity == null || smi.cavity.numCells < smi.def.spaceRequiredPerCreature);
+		if (smi.HasTag(GameTags.Creatures.Burrowed))
+		{
+			return false;
+		}
+		if (smi.HasTag(GameTags.Creatures.Digger))
+		{
+			return false;
+		}
+		if (smi.isFish)
+		{
+			int num = Grid.PosToCell(smi);
+			if (Grid.IsValidCell(num) && !Grid.IsLiquid(num))
+			{
+				return true;
+			}
+			FishOvercrowdingMonitor.Instance smi2 = smi.GetSMI<FishOvercrowdingMonitor.Instance>();
+			if (smi2 != null && smi2.cellCount < smi.def.spaceRequiredPerCreature)
+			{
+				return true;
+			}
+		}
+		else
+		{
+			if (smi.cavity == null)
+			{
+				return true;
+			}
+			if (smi.cavity.numCells < smi.def.spaceRequiredPerCreature)
+			{
+				return true;
+			}
+		}
+		return false;
 	}
 
 	private static bool IsFutureOvercrowded(OvercrowdingMonitor.Instance smi)
@@ -48,9 +80,9 @@ public class OvercrowdingMonitor : GameStateMachine<OvercrowdingMonitor, Overcro
 				return 0;
 			}
 			int num = smi2.cellCount / smi.def.spaceRequiredPerCreature;
-			if (num < smi.cavity.creatures.Count)
+			if (num < smi2.fishCount)
 			{
-				return -5 - (fishCount - (num + 1));
+				return -(fishCount - num);
 			}
 			return 0;
 		}
@@ -63,7 +95,7 @@ public class OvercrowdingMonitor : GameStateMachine<OvercrowdingMonitor, Overcro
 			int num2 = smi.cavity.numCells / smi.def.spaceRequiredPerCreature;
 			if (num2 < smi.cavity.creatures.Count)
 			{
-				return -5 - (smi.cavity.creatures.Count - (num2 + 1));
+				return -(smi.cavity.creatures.Count - num2);
 			}
 			return 0;
 		}
@@ -177,7 +209,7 @@ public class OvercrowdingMonitor : GameStateMachine<OvercrowdingMonitor, Overcro
 			this.futureOvercrowdedEffect = new Effect("FutureOvercrowded", CREATURES.MODIFIERS.FUTURE_OVERCROWDED.NAME, CREATURES.MODIFIERS.FUTURE_OVERCROWDED.TOOLTIP, 0f, true, false, true, null, -1f, 0f, null, "");
 			this.futureOvercrowdedEffect.Add(new AttributeModifier(Db.Get().Amounts.Fertility.deltaAttribute.Id, -1f, CREATURES.MODIFIERS.FUTURE_OVERCROWDED.NAME, true, false, true));
 			this.overcrowdedEffect = new Effect("Overcrowded", CREATURES.MODIFIERS.OVERCROWDED.NAME, CREATURES.MODIFIERS.OVERCROWDED.TOOLTIP, 0f, true, false, true, null, -1f, 0f, null, "");
-			this.overcrowdedModifier = new AttributeModifier(Db.Get().CritterAttributes.Happiness.Id, -5f, CREATURES.MODIFIERS.OVERCROWDED.NAME, false, false, false);
+			this.overcrowdedModifier = new AttributeModifier(Db.Get().CritterAttributes.Happiness.Id, 0f, CREATURES.MODIFIERS.OVERCROWDED.NAME, false, false, false);
 			this.overcrowdedEffect.Add(this.overcrowdedModifier);
 			this.fishOvercrowdedEffect = new Effect("Overcrowded", CREATURES.MODIFIERS.OVERCROWDED.NAME, CREATURES.MODIFIERS.OVERCROWDED.FISHTOOLTIP, 0f, true, false, true, null, -1f, 0f, null, "");
 			this.fishOvercrowdedModifier = new AttributeModifier(Db.Get().CritterAttributes.Happiness.Id, -5f, CREATURES.MODIFIERS.OVERCROWDED.NAME, false, false, false);

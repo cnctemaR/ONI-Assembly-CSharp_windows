@@ -25,10 +25,6 @@ public class AutoPlumberSideScreen : SideScreenContent
 		{
 			this.SpawnMinion();
 		};
-		this.applyTestFacade.onClick += delegate
-		{
-			this.CycleAvailableFacades();
-		};
 	}
 
 	private void SpawnMinion()
@@ -55,27 +51,10 @@ public class AutoPlumberSideScreen : SideScreenContent
 	public override void SetTarget(GameObject target)
 	{
 		this.building = target.GetComponent<Building>();
-		this.Refresh();
 	}
 
 	public override void ClearTarget()
 	{
-	}
-
-	private void Refresh()
-	{
-		bool flag = this.building != null && this.building.Def.AvailableFacades.Count > 0;
-		this.applyTestFacade.gameObject.SetActive(flag);
-	}
-
-	private void CycleAvailableFacades()
-	{
-		BuildingFacade component = this.building.GetComponent<BuildingFacade>();
-		if (component != null)
-		{
-			string nextFacade = component.GetNextFacade();
-			component.ApplyBuildingFacade(Db.GetBuildingFacades().TryGet(nextFacade));
-		}
 	}
 
 	public KButton activateButton;
@@ -87,8 +66,6 @@ public class AutoPlumberSideScreen : SideScreenContent
 	public KButton solidsButton;
 
 	public KButton minionButton;
-
-	public KButton applyTestFacade;
 
 	private Building building;
 }

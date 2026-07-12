@@ -17,14 +17,23 @@ public class LockerMenuScreen : KModalScreen
 		return 40f;
 	}
 
+	public void ShowInventoryScreen()
+	{
+		if (!base.isActiveAndEnabled)
+		{
+			this.Show(true);
+		}
+		LockerNavigator.Instance.PushScreen(LockerNavigator.Instance.kleiInventoryScreen, null);
+		MusicManager.instance.SetSongParameter("Music_SupplyCloset", "SupplyClosetView", "inventory", true);
+	}
+
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
 		MultiToggle multiToggle = this.buttonInventory;
 		multiToggle.onClick = (global::System.Action)Delegate.Combine(multiToggle.onClick, new global::System.Action(delegate
 		{
-			LockerNavigator.Instance.PushScreen(LockerNavigator.Instance.kleiInventoryScreen, null);
-			MusicManager.instance.SetSongParameter("Music_SupplyCloset", "SupplyClosetView", "inventory", true);
+			this.ShowInventoryScreen();
 		}));
 		MultiToggle multiToggle2 = this.buttonDuplicants;
 		multiToggle2.onClick = (global::System.Action)Delegate.Combine(multiToggle2.onClick, new global::System.Action(delegate
@@ -50,7 +59,7 @@ public class LockerMenuScreen : KModalScreen
 
 	private void ConfigureHoverForButton(MultiToggle toggle, string desc, bool useHoverColor = true)
 	{
-		LockerMenuScreen.<>c__DisplayClass16_0 CS$<>8__locals1 = new LockerMenuScreen.<>c__DisplayClass16_0();
+		LockerMenuScreen.<>c__DisplayClass17_0 CS$<>8__locals1 = new LockerMenuScreen.<>c__DisplayClass17_0();
 		CS$<>8__locals1.useHoverColor = useHoverColor;
 		CS$<>8__locals1.<>4__this = this;
 		CS$<>8__locals1.defaultColor = new Color(0.30980393f, 0.34117648f, 0.38431373f, 1f);

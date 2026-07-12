@@ -149,7 +149,7 @@ namespace Database
 			new Tech("FarmingTech", new List<string> { "AlgaeHabitat", "PlanterBox", "RationBox", "Compost" }, this, null);
 			new Tech("FineDining", new List<string> { "CookingStation", "EggCracker", "DiningTable", "FarmTile" }, this, null);
 			new Tech("FoodRepurposing", new List<string> { "Juicer", "SpiceGrinder", "MilkPress" }, this, null);
-			new Tech("FinerDining", new List<string> { "GourmetCookingStation" }, this, null);
+			new Tech("FinerDining", new List<string> { "GourmetCookingStation", "FoodDehydrator", "FoodRehydrator" }, this, null);
 			new Tech("Agriculture", new List<string> { "FarmStation", "FertilizerMaker", "Refrigerator", "HydroponicFarm", "ParkSign", "RadiationLight" }, this, null);
 			new Tech("Ranching", new List<string> { "RanchStation", "CreatureDeliveryPoint", "ShearingStation", "CreatureFeeder", "FishDeliveryPoint", "FishFeeder" }, this, null);
 			new Tech("AnimalControl", new List<string>
@@ -160,6 +160,7 @@ namespace Database
 				"EggIncubator",
 				LogicCritterCountSensorConfig.ID
 			}, this, null);
+			new Tech("AnimalComfort", new List<string> { "CritterCondo", "UnderwaterCritterCondo" }, this, null);
 			new Tech("DairyOperation", new List<string> { "MilkFeeder", "MilkFatSeparator", "MilkingStation" }, this, null);
 			new Tech("ImprovedOxygen", new List<string> { "Electrolyzer", "RustDeoxidizer" }, this, null);
 			new Tech("GasPiping", new List<string> { "GasConduit", "GasConduitBridge", "GasPump", "GasVent" }, this, null);
@@ -279,7 +280,8 @@ namespace Database
 			{
 				"FirePole",
 				"ThermalBlock",
-				LadderBedConfig.ID
+				LadderBedConfig.ID,
+				"ModularLaunchpadPortBridge"
 			}, this, null);
 			new Tech("Smelting", new List<string> { "MetalRefinery", "MetalTile" }, this, null);
 			new Tech("HighTempForging", new List<string> { "GlassForge", "BunkerTile", "BunkerDoor", "GeoTuner" }, this, null);
@@ -364,6 +366,7 @@ namespace Database
 				SolidConduitTemperatureSensorConfig.ID,
 				SolidConduitElementSensorConfig.ID,
 				SolidConduitDiseaseSensorConfig.ID,
+				"StorageTile",
 				"CargoBayCluster"
 			}, this, null);
 			new Tech("HighVelocityTransport", new List<string> { "RailGun", "LandingBeacon" }, this, null);

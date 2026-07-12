@@ -54,6 +54,7 @@ public class HabitatModuleSmallConfig : IBuildingConfig
 		go.AddOrGet<LaunchableRocketCluster>();
 		go.AddOrGet<RocketCommandConditions>();
 		go.AddOrGet<RocketProcessConditionDisplayTarget>();
+		go.AddOrGet<RocketLaunchConditionVisualizer>();
 		go.AddOrGet<CharacterOverlay>().shouldShowName = true;
 		Storage storage = go.AddComponent<Storage>();
 		storage.showInUI = false;

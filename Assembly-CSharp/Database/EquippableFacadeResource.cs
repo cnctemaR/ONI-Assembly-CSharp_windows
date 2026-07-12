@@ -12,7 +12,7 @@ namespace Database
 		public KAnimFile AnimFile { get; private set; }
 
 		public EquippableFacadeResource(string id, string name, string buildOverride, string defID, string animFile)
-			: base(id, name, "n/a", PermitCategory.Equipment, PermitRarity.Unknown)
+			: base(id, name, "n/a", PermitCategory.Equipment, PermitRarity.Unknown, DlcManager.AVAILABLE_ALL_VERSIONS)
 		{
 			this.DefID = defID;
 			this.BuildOverride = buildOverride;

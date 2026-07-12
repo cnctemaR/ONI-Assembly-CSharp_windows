@@ -6,6 +6,11 @@ using UnityEngine;
 [AddComponentMenu("KMonoBehaviour/scripts/EntitySplitter")]
 public class EntitySplitter : KMonoBehaviour
 {
+	protected static Pickupable OnTakeBehavior(Pickupable p, float a)
+	{
+		return EntitySplitter.Split(p, a, null);
+	}
+
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
@@ -15,14 +20,25 @@ public class EntitySplitter : KMonoBehaviour
 			global::Debug.LogError(base.name + " does not have a pickupable component!");
 		}
 		Pickupable pickupable2 = pickupable;
-		pickupable2.OnTake = (Func<float, Pickupable>)Delegate.Combine(pickupable2.OnTake, new Func<float, Pickupable>((float amount) => EntitySplitter.Split(pickupable, amount, null)));
+		pickupable2.OnTake = (Func<Pickupable, float, Pickupable>)Delegate.Combine(pickupable2.OnTake, new Func<Pickupable, float, Pickupable>(EntitySplitter.OnTakeBehavior));
 		Rottable.Instance rottable = base.gameObject.GetSMI<Rottable.Instance>();
 		pickupable.absorbable = true;
 		pickupable.CanAbsorb = (Pickupable other) => EntitySplitter.CanFirstAbsorbSecond(pickupable, rottable, other, this.maxStackSize);
 		base.Subscribe<EntitySplitter>(-2064133523, EntitySplitter.OnAbsorbDelegate);
 	}
 
-	private static bool CanFirstAbsorbSecond(Pickupable pickupable, Rottable.Instance rottable, Pickupable other, float maxStackSize)
+	protected override void OnCleanUp()
+	{
+		base.OnCleanUp();
+		Pickupable component = base.GetComponent<Pickupable>();
+		if (component != null)
+		{
+			Pickupable pickupable = component;
+			pickupable.OnTake = (Func<Pickupable, float, Pickupable>)Delegate.Remove(pickupable.OnTake, new Func<Pickupable, float, Pickupable>(EntitySplitter.OnTakeBehavior));
+		}
+	}
+
+	public static bool CanFirstAbsorbSecond(Pickupable pickupable, Rottable.Instance rottable, Pickupable other, float maxStackSize)
 	{
 		if (other == null)
 		{
@@ -72,7 +88,7 @@ public class EntitySplitter : KMonoBehaviour
 			return false;
 		}
 		Edible component3 = component.GetComponent<Edible>();
-		Edible component4 = component.GetComponent<Edible>();
+		Edible component4 = component2.GetComponent<Edible>();
 		if (flag && !component3.CanAbsorb(component4))
 		{
 			return false;

@@ -88,10 +88,6 @@ public class TreeFilterableSideScreenRow : KMonoBehaviour
 	protected override void OnCmpDisable()
 	{
 		this.SetArrowToggleState(false);
-		this.rowElements.ForEach(delegate(TreeFilterableSideScreenElement row)
-		{
-			row.OnSelectionChanged -= this.OnElementSelectionChanged;
-		});
 		base.OnCmpDisable();
 	}
 
@@ -199,13 +195,21 @@ public class TreeFilterableSideScreenRow : KMonoBehaviour
 				freeElement.Parent = this.parent;
 				freeElement.SetTag(keyValuePair.Key);
 				freeElement.SetCheckBox(keyValuePair.Value);
-				freeElement.OnSelectionChanged += this.OnElementSelectionChanged;
+				freeElement.OnSelectionChanged = new Action<Tag, bool>(this.OnElementSelectionChanged);
 				freeElement.SetCheckBox(this.parent.IsTagAllowed(keyValuePair.Key));
 				this.rowElements.Add(freeElement);
 				this.subTags.Add(keyValuePair.Key);
 			}
 		}
 		this.UpdateCheckBoxVisualState();
+	}
+
+	public void RefreshRowElements()
+	{
+		foreach (TreeFilterableSideScreenElement treeFilterableSideScreenElement in this.rowElements)
+		{
+			treeFilterableSideScreenElement.SetCheckBox(this.parent.IsTagAllowed(treeFilterableSideScreenElement.GetElementTag()));
+		}
 	}
 
 	public void FilterAgainstSearch(Tag thisCategoryTag, string search)

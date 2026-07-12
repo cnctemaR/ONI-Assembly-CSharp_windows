@@ -3,14 +3,21 @@ using System.Collections.Generic;
 using Unity.Collections;
 using UnityEngine;
 
-public class ScannerNetworkVisualizerEffect : MonoBehaviour
+public class ScannerNetworkVisualizerEffect : VisualizerEffect
 {
-	private void Start()
+	protected override void SetupMaterial()
 	{
 		this.material = new Material(Shader.Find("Klei/PostFX/ScannerNetwork"));
 	}
 
-	private void OnPostRender()
+	protected override void SetupOcclusionTex()
+	{
+		this.OcclusionTex = new Texture2D(512, 1, TextureFormat.RGFloat, false);
+		this.OcclusionTex.filterMode = FilterMode.Point;
+		this.OcclusionTex.wrapMode = TextureWrapMode.Clamp;
+	}
+
+	protected override void OnPostRender()
 	{
 		ScannerNetworkVisualizer scannerNetworkVisualizer = null;
 		if (SelectTool.Instance.selected != null)
@@ -23,12 +30,6 @@ public class ScannerNetworkVisualizerEffect : MonoBehaviour
 		}
 		if (scannerNetworkVisualizer != null)
 		{
-			if (this.OcclusionTex == null)
-			{
-				this.OcclusionTex = new Texture2D(512, 1, TextureFormat.RGFloat, false);
-				this.OcclusionTex.filterMode = FilterMode.Point;
-				this.OcclusionTex.wrapMode = TextureWrapMode.Clamp;
-			}
 			Vector2I vector2I;
 			Vector2I vector2I2;
 			ScannerNetworkVisualizerEffect.FindWorldBounds(out vector2I, out vector2I2);
@@ -192,15 +193,9 @@ public class ScannerNetworkVisualizerEffect : MonoBehaviour
 		return Grid.ExposedToSunlight[cell] >= 1;
 	}
 
-	private Material material;
-
-	private Camera myCamera;
-
 	public Color highlightColor = new Color(0f, 1f, 0.8f, 1f);
 
 	public Color highlightColor2 = new Color(1f, 0.32f, 0f, 1f);
-
-	private Texture2D OcclusionTex;
 
 	private int LastVisibleColumnCount;
 }

@@ -55,6 +55,14 @@ public class Edible : Workable, IGameObjectEffectDescriptor, ISaveLoadable, IExt
 
 	public bool isBeingConsumed { get; private set; }
 
+	public List<SpiceInstance> Spices
+	{
+		get
+		{
+			return this.spices;
+		}
+	}
+
 	protected override void OnPrefabInit()
 	{
 		this.primaryElement = base.GetComponent<PrimaryElement>();
@@ -88,6 +96,10 @@ public class Edible : Workable, IGameObjectEffectDescriptor, ISaveLoadable, IExt
 			{
 				this.ApplySpiceEffects(this.spices[i], SpiceGrinderConfig.SpicedStatus);
 			}
+		}
+		if (base.GetComponent<KPrefabID>().HasTag(GameTags.Rehydrated))
+		{
+			base.GetComponent<KSelectable>().AddStatusItem(Db.Get().MiscStatusItems.RehydratedFood, null);
 		}
 		base.GetComponent<KSelectable>().SetStatusItem(Db.Get().StatusItemCategories.Main, Db.Get().MiscStatusItems.Edible, this);
 	}
@@ -267,6 +279,8 @@ public class Edible : Workable, IGameObjectEffectDescriptor, ISaveLoadable, IExt
 	public bool CanAbsorb(Edible other)
 	{
 		bool flag = this.spices.Count == other.spices.Count;
+		flag &= base.gameObject.HasTag(GameTags.Rehydrated) == other.gameObject.HasTag(GameTags.Rehydrated);
+		flag &= !base.gameObject.HasTag(GameTags.Dehydrated) && !other.gameObject.HasTag(GameTags.Dehydrated);
 		int num = 0;
 		while (flag && num < this.spices.Count)
 		{
@@ -336,6 +350,10 @@ public class Edible : Workable, IGameObjectEffectDescriptor, ISaveLoadable, IExt
 				statBonus.duration = duration;
 			}
 		}
+		if (base.gameObject.HasTag(GameTags.Rehydrated))
+		{
+			component.Add(FoodRehydratorConfig.RehydrationEffect, true);
+		}
 	}
 
 	protected override void OnCleanUp()
@@ -389,16 +407,24 @@ public class Edible : Workable, IGameObjectEffectDescriptor, ISaveLoadable, IExt
 		return list;
 	}
 
-	public void OnSplitTick(Pickupable thePieceTaken)
+	public void ApplySpicesToOtherEdible(Edible other)
 	{
-		Edible component = thePieceTaken.GetComponent<Edible>();
-		if (this.spices != null && component != null)
+		if (this.spices != null && other != null)
 		{
 			for (int i = 0; i < this.spices.Count; i++)
 			{
-				SpiceInstance spiceInstance = this.spices[i];
-				component.SpiceEdible(spiceInstance, SpiceGrinderConfig.SpicedStatus);
+				other.SpiceEdible(this.spices[i], SpiceGrinderConfig.SpicedStatus);
 			}
+		}
+	}
+
+	public void OnSplitTick(Pickupable thePieceTaken)
+	{
+		Edible component = thePieceTaken.GetComponent<Edible>();
+		this.ApplySpicesToOtherEdible(component);
+		if (base.GetComponent<KPrefabID>().HasTag(GameTags.Rehydrated))
+		{
+			component.AddTag(GameTags.Rehydrated);
 		}
 	}
 

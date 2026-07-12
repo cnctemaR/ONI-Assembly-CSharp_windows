@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Database;
 using Klei.AI;
 using STRINGS;
 using UnityEngine;
@@ -83,10 +84,23 @@ public class SandboxToolParameterMenu : KScreen
 			this.diseaseCountSlider.SetValue((float)this.settings.GetIntSetting("SandboxTools.DiseaseCount"), false);
 		}));
 		SandboxSettings sandboxSettings5 = this.settings;
-		sandboxSettings5.OnChangeEntity = (global::System.Action)Delegate.Combine(sandboxSettings5.OnChangeEntity, new global::System.Action(delegate
+		sandboxSettings5.OnChangeStory = (global::System.Action)Delegate.Combine(sandboxSettings5.OnChangeStory, new global::System.Action(delegate
 		{
-			string stringSetting = SandboxToolParameterMenu.instance.settings.GetStringSetting("SandboxTools.SelectedEntity");
-			GameObject gameObject = Assets.TryGetPrefab(stringSetting);
+			string stringSetting = SandboxToolParameterMenu.instance.settings.GetStringSetting("SandboxTools.SelectedStory");
+			Story story = Db.Get().Stories.Get(stringSetting);
+			if (story == null)
+			{
+				this.settings.ForceDefaultStringSetting("SandboxTools.SelectedStory");
+				return;
+			}
+			this.storySelector.button.GetComponentInChildren<LocText>().text = Strings.Get(story.StoryTrait.name);
+			this.storySelector.button.GetComponentsInChildren<Image>()[1].sprite = Assets.GetSprite(story.StoryTrait.icon);
+		}));
+		SandboxSettings sandboxSettings6 = this.settings;
+		sandboxSettings6.OnChangeEntity = (global::System.Action)Delegate.Combine(sandboxSettings6.OnChangeEntity, new global::System.Action(delegate
+		{
+			string stringSetting2 = SandboxToolParameterMenu.instance.settings.GetStringSetting("SandboxTools.SelectedEntity");
+			GameObject gameObject = Assets.TryGetPrefab(stringSetting2);
 			if (gameObject == null)
 			{
 				this.settings.ForceDefaultStringSetting("SandboxTools.SelectedEntity");
@@ -94,13 +108,13 @@ public class SandboxToolParameterMenu : KScreen
 			}
 			this.entitySelector.button.GetComponentInChildren<LocText>().text = gameObject.GetProperName();
 			global::Tuple<Sprite, Color> tuple;
-			if (stringSetting == MinionConfig.ID)
+			if (stringSetting2 == MinionConfig.ID)
 			{
 				tuple = new global::Tuple<Sprite, Color>(Assets.GetSprite("ui_duplicant_portrait_placeholder"), Color.white);
 			}
 			else
 			{
-				tuple = Def.GetUISprite(stringSetting, "ui", false);
+				tuple = Def.GetUISprite(stringSetting2, "ui", false);
 			}
 			if (tuple != null)
 			{
@@ -108,24 +122,16 @@ public class SandboxToolParameterMenu : KScreen
 				this.entitySelector.button.GetComponentsInChildren<Image>()[1].color = tuple.second;
 			}
 		}));
-		SandboxSettings sandboxSettings6 = this.settings;
-		sandboxSettings6.OnChangeBrushSize = (global::System.Action)Delegate.Combine(sandboxSettings6.OnChangeBrushSize, new global::System.Action(delegate
+		SandboxSettings sandboxSettings7 = this.settings;
+		sandboxSettings7.OnChangeBrushSize = (global::System.Action)Delegate.Combine(sandboxSettings7.OnChangeBrushSize, new global::System.Action(delegate
 		{
 			if (PlayerController.Instance.ActiveTool is BrushTool)
 			{
 				(PlayerController.Instance.ActiveTool as BrushTool).SetBrushSize(this.settings.GetIntSetting("SandboxTools.BrushSize"));
 			}
 		}));
-		SandboxSettings sandboxSettings7 = this.settings;
-		sandboxSettings7.OnChangeNoiseScale = (global::System.Action)Delegate.Combine(sandboxSettings7.OnChangeNoiseScale, new global::System.Action(delegate
-		{
-			if (PlayerController.Instance.ActiveTool is SandboxSprinkleTool)
-			{
-				(PlayerController.Instance.ActiveTool as SandboxSprinkleTool).SetBrushSize(this.settings.GetIntSetting("SandboxTools.BrushSize"));
-			}
-		}));
 		SandboxSettings sandboxSettings8 = this.settings;
-		sandboxSettings8.OnChangeNoiseDensity = (global::System.Action)Delegate.Combine(sandboxSettings8.OnChangeNoiseDensity, new global::System.Action(delegate
+		sandboxSettings8.OnChangeNoiseScale = (global::System.Action)Delegate.Combine(sandboxSettings8.OnChangeNoiseScale, new global::System.Action(delegate
 		{
 			if (PlayerController.Instance.ActiveTool is SandboxSprinkleTool)
 			{
@@ -133,23 +139,31 @@ public class SandboxToolParameterMenu : KScreen
 			}
 		}));
 		SandboxSettings sandboxSettings9 = this.settings;
-		sandboxSettings9.OnChangeTemperature = (global::System.Action)Delegate.Combine(sandboxSettings9.OnChangeTemperature, new global::System.Action(delegate
+		sandboxSettings9.OnChangeNoiseDensity = (global::System.Action)Delegate.Combine(sandboxSettings9.OnChangeNoiseDensity, new global::System.Action(delegate
+		{
+			if (PlayerController.Instance.ActiveTool is SandboxSprinkleTool)
+			{
+				(PlayerController.Instance.ActiveTool as SandboxSprinkleTool).SetBrushSize(this.settings.GetIntSetting("SandboxTools.BrushSize"));
+			}
+		}));
+		SandboxSettings sandboxSettings10 = this.settings;
+		sandboxSettings10.OnChangeTemperature = (global::System.Action)Delegate.Combine(sandboxSettings10.OnChangeTemperature, new global::System.Action(delegate
 		{
 			this.temperatureSlider.SetValue(GameUtil.GetConvertedTemperature(this.settings.GetFloatSetting("SandbosTools.Temperature"), false), false);
 		}));
-		SandboxSettings sandboxSettings10 = this.settings;
-		sandboxSettings10.OnChangeAdditiveTemperature = (global::System.Action)Delegate.Combine(sandboxSettings10.OnChangeAdditiveTemperature, new global::System.Action(delegate
+		SandboxSettings sandboxSettings11 = this.settings;
+		sandboxSettings11.OnChangeAdditiveTemperature = (global::System.Action)Delegate.Combine(sandboxSettings11.OnChangeAdditiveTemperature, new global::System.Action(delegate
 		{
 			this.temperatureAdditiveSlider.SetValue(GameUtil.GetConvertedTemperature(this.settings.GetFloatSetting("SandbosTools.TemperatureAdditive"), true), false);
 		}));
 		Game.Instance.Subscribe(999382396, new Action<object>(this.OnTemperatureUnitChanged));
-		SandboxSettings sandboxSettings11 = this.settings;
-		sandboxSettings11.OnChangeAdditiveStress = (global::System.Action)Delegate.Combine(sandboxSettings11.OnChangeAdditiveStress, new global::System.Action(delegate
+		SandboxSettings sandboxSettings12 = this.settings;
+		sandboxSettings12.OnChangeAdditiveStress = (global::System.Action)Delegate.Combine(sandboxSettings12.OnChangeAdditiveStress, new global::System.Action(delegate
 		{
 			this.stressAdditiveSlider.SetValue(this.settings.GetFloatSetting("SandbosTools.StressAdditive"), false);
 		}));
-		SandboxSettings sandboxSettings12 = this.settings;
-		sandboxSettings12.OnChangeMoraleAdjustment = (global::System.Action)Delegate.Combine(sandboxSettings12.OnChangeMoraleAdjustment, new global::System.Action(delegate
+		SandboxSettings sandboxSettings13 = this.settings;
+		sandboxSettings13.OnChangeMoraleAdjustment = (global::System.Action)Delegate.Combine(sandboxSettings13.OnChangeMoraleAdjustment, new global::System.Action(delegate
 		{
 			this.moraleSlider.SetValue((float)this.settings.GetIntSetting("SandbosTools.MoraleAdjustment"), false);
 		}));
@@ -169,6 +183,7 @@ public class SandboxToolParameterMenu : KScreen
 		this.diseaseSelector.row.SetActive(false);
 		this.stressAdditiveSlider.row.SetActive(false);
 		this.moraleSlider.row.SetActive(false);
+		this.storySelector.row.SetActive(false);
 	}
 
 	protected override void OnSpawn()
@@ -177,8 +192,10 @@ public class SandboxToolParameterMenu : KScreen
 		this.ConfigureElementSelector();
 		this.ConfigureDiseaseSelector();
 		this.ConfigureEntitySelector();
+		this.ConfigureStoryTraitSelector();
 		this.SpawnSelector(this.entitySelector);
 		this.SpawnSelector(this.elementSelector);
+		this.SpawnSelector(this.storySelector);
 		this.SpawnSlider(this.brushRadiusSlider);
 		this.SpawnSlider(this.noiseScaleSlider);
 		this.SpawnSlider(this.noiseDensitySlider);
@@ -244,8 +261,9 @@ public class SandboxToolParameterMenu : KScreen
 		List<SandboxToolParameterMenu.SelectorValue.SearchFilter> list = new List<SandboxToolParameterMenu.SelectorValue.SearchFilter>();
 		SandboxToolParameterMenu.SelectorValue.SearchFilter searchFilter = new SandboxToolParameterMenu.SelectorValue.SearchFilter(UI.SANDBOXTOOLS.FILTERS.ENTITIES.FOOD, delegate(object entity)
 		{
-			string idString = (entity as KPrefabID).PrefabID().ToString();
-			return !(entity as KPrefabID).HasTag(GameTags.Egg) && EdiblesManager.GetAllFoodTypes().Find((EdiblesManager.FoodInfo match) => match.Id == idString) != null;
+			KPrefabID kprefabID2 = entity as KPrefabID;
+			string idString = kprefabID2.PrefabID().ToString();
+			return (!kprefabID2.HasTag(GameTags.Egg) && EdiblesManager.GetAllFoodTypes().Find((EdiblesManager.FoodInfo match) => match.Id == idString) != null) || kprefabID2.HasTag(GameTags.Dehydrated);
 		}, null, Def.GetUISprite(Assets.GetPrefab("MushBar"), "ui", false));
 		list.Add(searchFilter);
 		SandboxToolParameterMenu.SelectorValue.SearchFilter searchFilter2 = new SandboxToolParameterMenu.SelectorValue.SearchFilter(UI.SANDBOXTOOLS.FILTERS.ENTITIES.COMETS, (object entity) => (entity as KPrefabID).HasTag(GameTags.Comet), null, Def.GetUISprite(Assets.GetPrefab(CopperCometConfig.ID), "ui", false));
@@ -349,6 +367,15 @@ public class SandboxToolParameterMenu : KScreen
 			}
 			return null;
 		}, UI.SANDBOXTOOLS.SETTINGS.SPAWN_ENTITY.NAME, list.ToArray());
+	}
+
+	private void ConfigureStoryTraitSelector()
+	{
+		object[] array = Db.Get().Stories.resources.ToArray();
+		this.storySelector = new SandboxToolParameterMenu.SelectorValue(array, delegate(object story)
+		{
+			this.settings.SetStringSetting("SandboxTools.SelectedStory", ((Story)story).Id);
+		}, (object story) => Strings.Get((story as Story).StoryTrait.name), null, (object story) => new global::Tuple<Sprite, Color>(Assets.GetSprite(((Story)story).StoryTrait.icon), Color.white), UI.SANDBOXTOOLS.SETTINGS.SPAWN_STORY_TRAIT.NAME, null);
 	}
 
 	private void ConfigureDiseaseSelector()
@@ -729,8 +756,6 @@ public class SandboxToolParameterMenu : KScreen
 
 	private List<GameObject> inputFields = new List<GameObject>();
 
-	private Dictionary<Tag, List<KPrefabID>> items;
-
 	public SandboxToolParameterMenu.SelectorValue elementSelector;
 
 	public SandboxToolParameterMenu.SliderValue brushRadiusSlider = new SandboxToolParameterMenu.SliderValue(1f, 10f, "dash", "circle_hard", "", UI.SANDBOXTOOLS.SETTINGS.BRUSH_SIZE.TOOLTIP, UI.SANDBOXTOOLS.SETTINGS.BRUSH_SIZE.NAME, delegate(float value)
@@ -781,6 +806,8 @@ public class SandboxToolParameterMenu : KScreen
 	}, 0);
 
 	public SandboxToolParameterMenu.SelectorValue entitySelector;
+
+	public SandboxToolParameterMenu.SelectorValue storySelector;
 
 	public class SelectorValue
 	{

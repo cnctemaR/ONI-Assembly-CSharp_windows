@@ -114,7 +114,6 @@ public class JettisonableCargoModule : GameStateMachine<JettisonableCargoModule,
 			this.ChosenDuplicant.GetSMI<RocketPassengerMonitor.Instance>().SetModuleDeployChore(this.landerPlacementCell, delegate(Chore obj)
 			{
 				Game.Instance.assignmentManager.RemoveFromWorld(this.ChosenDuplicant.assignableProxy.Get(), craft.ModuleInterface.GetInteriorWorld().id);
-				craft.ModuleInterface.GetPassengerModule().RemoveRocketPassenger(this.ChosenDuplicant);
 				storage.SerializeMinion(this.ChosenDuplicant.gameObject);
 				this.EnableTeleport(false);
 			});

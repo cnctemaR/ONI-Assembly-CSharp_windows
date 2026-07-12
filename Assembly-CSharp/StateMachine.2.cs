@@ -1063,6 +1063,58 @@ public class StateMachine<StateMachineType, StateMachineInstanceType, MasterType
 		}
 	}
 
+	public class LongParameter : StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.Parameter<long>
+	{
+		public LongParameter()
+		{
+		}
+
+		public LongParameter(long default_value)
+			: base(default_value)
+		{
+		}
+
+		public long Delta(long delta_value, StateMachineInstanceType smi)
+		{
+			long num = base.Get(smi);
+			num += delta_value;
+			base.Set(num, smi, false);
+			return num;
+		}
+
+		public override StateMachine.Parameter.Context CreateContext()
+		{
+			return new StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.LongParameter.Context(this, this.defaultValue);
+		}
+
+		public new class Context : StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.Parameter<long>.Context
+		{
+			public Context(StateMachine.Parameter parameter, long default_value)
+				: base(parameter, default_value)
+			{
+			}
+
+			public override void Serialize(BinaryWriter writer)
+			{
+				writer.Write(this.value);
+			}
+
+			public override void Deserialize(IReader reader, StateMachine.Instance smi)
+			{
+				this.value = reader.ReadInt64();
+			}
+
+			public override void ShowEditor(StateMachine.Instance base_smi)
+			{
+			}
+
+			public override void ShowDevTool(StateMachine.Instance base_smi)
+			{
+				long value = this.value;
+			}
+		}
+	}
+
 	public class ResourceParameter<ResourceType> : StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.Parameter<ResourceType> where ResourceType : Resource
 	{
 		public ResourceParameter()

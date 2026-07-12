@@ -47,4 +47,6 @@ public class EvilFlowerConfig : IEntityConfig
 	public readonly EffectorValues POSITIVE_DECOR_EFFECT = DECOR.BONUS.TIER7;
 
 	public readonly EffectorValues NEGATIVE_DECOR_EFFECT = DECOR.PENALTY.TIER5;
+
+	public const int GERMS_PER_SECOND = 1000;
 }

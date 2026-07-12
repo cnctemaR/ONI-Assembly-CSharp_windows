@@ -657,6 +657,7 @@ public class SpiceGrinder : GameStateMachine<SpiceGrinder, SpiceGrinder.StatesIn
 					if (this.SpiceFetches[i] != null)
 					{
 						this.SpiceFetches[i].Cancel(reason);
+						this.SpiceFetches[i] = null;
 					}
 				}
 			}

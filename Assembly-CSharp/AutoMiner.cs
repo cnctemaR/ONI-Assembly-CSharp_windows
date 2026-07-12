@@ -130,7 +130,7 @@ public class AutoMiner : StateMachineComponent<AutoMiner.Instance>, ISim1000ms
 		{
 			return;
 		}
-		Diggable.DoDigTick(this.dig_cell, dt);
+		Diggable.DoDigTick(this.dig_cell, dt, WorldDamage.DamageType.NoBuildingDamage);
 		float num = Grid.Damage[this.dig_cell];
 		this.mining_sounds.SetPercentComplete(num);
 		Vector3 vector = Grid.CellToPosCCC(this.dig_cell, Grid.SceneLayer.FXFront2);
@@ -236,12 +236,24 @@ public class AutoMiner : StateMachineComponent<AutoMiner.Instance>, ISim1000ms
 
 	private static bool ValidDigCell(int cell)
 	{
-		return Grid.Solid[cell] && !Grid.Foundation[cell] && Grid.Element[cell].hardness < 150;
+		bool flag = Grid.HasDoor[cell] && Grid.Foundation[cell] && Grid.ObjectLayers[9].ContainsKey(cell);
+		if (flag)
+		{
+			Door component = Grid.ObjectLayers[9][cell].GetComponent<Door>();
+			flag = component != null && component.IsOpen();
+		}
+		return Grid.Solid[cell] && (!Grid.Foundation[cell] || flag) && Grid.Element[cell].hardness < 150;
 	}
 
 	public static bool DigBlockingCB(int cell)
 	{
-		return (Grid.Foundation[cell] && Grid.Solid[cell]) || Grid.Element[cell].hardness >= 150;
+		bool flag = Grid.HasDoor[cell] && Grid.Foundation[cell] && Grid.ObjectLayers[9].ContainsKey(cell);
+		if (flag)
+		{
+			Door component = Grid.ObjectLayers[9][cell].GetComponent<Door>();
+			flag = component != null && component.IsOpen();
+		}
+		return (Grid.Foundation[cell] && Grid.Solid[cell] && !flag) || Grid.Element[cell].hardness >= 150;
 	}
 
 	private void RotateArm(Vector3 target_dir, bool warp, float dt)

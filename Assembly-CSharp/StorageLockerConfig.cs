@@ -32,7 +32,7 @@ public class StorageLockerConfig : IBuildingConfig
 		storage.showInUI = true;
 		storage.allowItemRemoval = true;
 		storage.showDescriptor = true;
-		storage.storageFilters = STORAGEFILTERS.NOT_EDIBLE_SOLIDS;
+		storage.storageFilters = STORAGEFILTERS.STORAGE_LOCKERS_STANDARD;
 		storage.storageFullMargin = STORAGE.STORAGE_LOCKER_FILLED_MARGIN;
 		storage.fetchCategory = Storage.FetchCategory.GeneralStorage;
 		storage.showCapacityStatusItem = true;

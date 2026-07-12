@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using STRINGS;
 using UnityEngine;
 
@@ -6,7 +7,11 @@ public class ConditionFlightPathIsClear : ProcessCondition
 {
 	public ConditionFlightPathIsClear(GameObject module, int bufferWidth)
 	{
-		this.module = module;
+		this.module = module.GetComponent<RocketModule>();
+		if (this.module is RocketModuleCluster)
+		{
+			this.moduleInterface = (this.module as RocketModuleCluster).CraftInterface;
+		}
 		this.bufferWidth = bufferWidth;
 	}
 
@@ -64,22 +69,73 @@ public class ConditionFlightPathIsClear : ProcessCondition
 
 	public void Update()
 	{
-		Extents extents = this.module.GetComponent<Building>().GetExtents();
-		int num = extents.x - this.bufferWidth;
-		int num2 = extents.x + extents.width - 1 + this.bufferWidth;
-		int y = extents.y;
-		int num3 = Grid.XYToCell(num, y);
-		int num4 = Grid.XYToCell(num2, y);
-		this.hasClearSky = true;
-		this.obstructedTile = -1;
-		for (int i = num3; i <= num4; i++)
+		List<Building> list = new List<Building>();
+		if (this.moduleInterface != null)
 		{
-			if (!ConditionFlightPathIsClear.CanReachSpace(i, out this.obstructedTile))
+			using (List<Ref<RocketModuleCluster>>.Enumerator enumerator = new List<Ref<RocketModuleCluster>>(this.moduleInterface.ClusterModules).GetEnumerator())
 			{
-				this.hasClearSky = false;
-				return;
+				while (enumerator.MoveNext())
+				{
+					Ref<RocketModuleCluster> @ref = enumerator.Current;
+					list.Add(@ref.Get().GetComponent<Building>());
+				}
+				goto IL_00A6;
 			}
 		}
+		foreach (RocketModule rocketModule in this.module.FindLaunchConditionManager().rocketModules)
+		{
+			list.Add(rocketModule.GetComponent<Building>());
+		}
+		IL_00A6:
+		list.Sort(delegate(Building a, Building b)
+		{
+			int y = Grid.PosToXY(a.transform.GetPosition()).y;
+			int y2 = Grid.PosToXY(b.transform.GetPosition()).y;
+			return y.CompareTo(y2);
+		});
+		if (this.moduleInterface != null && this.moduleInterface.CurrentPad == null)
+		{
+			this.hasClearSky = false;
+			return;
+		}
+		this.hasClearSky = true;
+		int num = -1;
+		int num2 = 0;
+		while (this.hasClearSky && num2 < list.Count)
+		{
+			Building building = list[num2];
+			this.hasClearSky = ConditionFlightPathIsClear.HasModuleAccessToSpace(building, out num);
+			num2++;
+		}
+	}
+
+	public static bool HasModuleAccessToSpace(Building module, out int obstructionCell)
+	{
+		WorldContainer myWorld = module.GetMyWorld();
+		obstructionCell = -1;
+		if (myWorld.id == 255)
+		{
+			return false;
+		}
+		int num = (int)myWorld.maximumBounds.y;
+		Extents extents = module.GetExtents();
+		int num2 = Grid.XYToCell(extents.x, extents.y);
+		bool flag = true;
+		for (int i = 0; i < extents.width; i++)
+		{
+			int num3 = Grid.OffsetCell(num2, new CellOffset(i, 0));
+			while (!Grid.IsSolidCell(num3) && Grid.CellToXY(num3).y < num)
+			{
+				num3 = Grid.CellAbove(num3);
+			}
+			if (Grid.IsSolidCell(num3) || Grid.CellToXY(num3).y != num)
+			{
+				obstructionCell = num3;
+				flag = false;
+				break;
+			}
+		}
+		return flag;
 	}
 
 	public static int PadTopEdgeDistanceToOutOfScreenEdge(GameObject launchpad)
@@ -131,10 +187,11 @@ public class ConditionFlightPathIsClear : ProcessCondition
 		return true;
 	}
 
-	private static bool CanReachSpace(int startCell, out int obstruction)
+	private static bool CanReachSpace(int startCell, out int obstruction, out int highestCellInSky)
 	{
 		WorldContainer worldContainer = ((startCell >= 0) ? ClusterManager.Instance.GetWorld((int)Grid.WorldIdx[startCell]) : null);
 		int num = ((worldContainer == null) ? Grid.HeightInCells : ((int)worldContainer.maximumBounds.y));
+		highestCellInSky = num;
 		obstruction = -1;
 		int num2 = startCell;
 		while (Grid.CellRow(num2) < num)
@@ -162,7 +219,9 @@ public class ConditionFlightPathIsClear : ProcessCondition
 		return string.Format(BUILDING.STATUSITEMS.PATH_NOT_CLEAR.TILE_FORMAT, Grid.Element[this.obstructedTile].tag.ProperName());
 	}
 
-	private GameObject module;
+	private CraftModuleInterface moduleInterface;
+
+	private RocketModule module;
 
 	private int bufferWidth;
 

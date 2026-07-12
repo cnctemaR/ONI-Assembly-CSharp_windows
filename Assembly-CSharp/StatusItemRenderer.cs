@@ -298,19 +298,33 @@ public class StatusItemRenderer
 			if (this.dirty)
 			{
 				int num2 = 0;
+				StatusItemRenderer.Entry.spritesListedToRender.Clear();
+				StatusItemRenderer.Entry.statusItemsToRender_Index.Clear();
+				int num3 = -1;
 				foreach (StatusItem statusItem2 in this.statusItems)
 				{
+					num3++;
 					if (statusItem2.UseConditionalCallback(overlay, this.transform) || !(overlay != OverlayModes.None.ID) || !(statusItem2.render_overlay != overlay))
 					{
+						Sprite sprite = statusItem2.sprite.sprite;
+						if (!statusItem2.unique)
+						{
+							if (StatusItemRenderer.Entry.spritesListedToRender.Contains(sprite) || StatusItemRenderer.Entry.spritesListedToRender.Count >= StatusItemRenderer.Entry.spritesListedToRender.Capacity)
+							{
+								continue;
+							}
+							StatusItemRenderer.Entry.spritesListedToRender.Add(sprite);
+						}
+						StatusItemRenderer.Entry.statusItemsToRender_Index.Add(num3);
 						num2++;
 					}
 				}
 				this.hasVisibleStatusItems = num2 != 0;
 				StatusItemRenderer.Entry.MeshBuilder meshBuilder = new StatusItemRenderer.Entry.MeshBuilder(num2 + 6, this.material);
-				float num3 = 0.25f;
-				float num4 = -5f;
+				float num4 = 0.25f;
+				float num5 = -5f;
 				Vector2 vector2 = new Vector2(0.05f, -0.05f);
-				float num5 = 0.02f;
+				float num6 = 0.02f;
 				Color32 color = new Color32(0, 0, 0, byte.MaxValue);
 				Color32 color2 = new Color32(0, 0, 0, 75);
 				Color32 color3 = renderer.neutralColor;
@@ -329,37 +343,25 @@ public class StatusItemRenderer
 						}
 					}
 				}
-				meshBuilder.AddQuad(new Vector2(0f, 0.29f) + vector2, new Vector2(0.05f, 0.05f), num4, renderer.arrowSprite, color2);
-				meshBuilder.AddQuad(new Vector2(0f, 0f) + vector2, new Vector2(num3 * (float)num2, num3), num4, renderer.backgroundSprite, color2);
-				meshBuilder.AddQuad(new Vector2(0f, 0f), new Vector2(num3 * (float)num2 + num5, num3 + num5), num4, renderer.backgroundSprite, color);
-				meshBuilder.AddQuad(new Vector2(0f, 0f), new Vector2(num3 * (float)num2, num3), num4, renderer.backgroundSprite, color3);
-				int num6 = 0;
-				for (int j = 0; j < this.statusItems.Count; j++)
+				meshBuilder.AddQuad(new Vector2(0f, 0.29f) + vector2, new Vector2(0.05f, 0.05f), num5, renderer.arrowSprite, color2);
+				meshBuilder.AddQuad(new Vector2(0f, 0f) + vector2, new Vector2(num4 * (float)num2, num4), num5, renderer.backgroundSprite, color2);
+				meshBuilder.AddQuad(new Vector2(0f, 0f), new Vector2(num4 * (float)num2 + num6, num4 + num6), num5, renderer.backgroundSprite, color);
+				meshBuilder.AddQuad(new Vector2(0f, 0f), new Vector2(num4 * (float)num2, num4), num5, renderer.backgroundSprite, color3);
+				for (int j = 0; j < StatusItemRenderer.Entry.statusItemsToRender_Index.Count; j++)
 				{
-					StatusItem statusItem3 = this.statusItems[j];
-					if (statusItem3.UseConditionalCallback(overlay, this.transform) || !(overlay != OverlayModes.None.ID) || !(statusItem3.render_overlay != overlay))
+					StatusItem statusItem3 = this.statusItems[StatusItemRenderer.Entry.statusItemsToRender_Index[j]];
+					float num7 = (float)j * num4 * 2f - num4 * (float)(num2 - 1);
+					if (statusItem3.sprite == null)
 					{
-						float num7 = (float)num6 * num3 * 2f - num3 * (float)(num2 - 1);
-						if (this.statusItems[j].sprite == null)
-						{
-							DebugUtil.DevLogError(string.Concat(new string[]
-							{
-								"Status Item ",
-								this.statusItems[j].Id,
-								" has null sprite for icon '",
-								this.statusItems[j].iconName,
-								"', you need to add the sprite to the TintedSprites list in the GameAssets prefab manually."
-							}));
-							this.statusItems[j].iconName = "status_item_exclamation";
-							this.statusItems[j].sprite = Assets.GetTintedSprite("status_item_exclamation");
-						}
-						Sprite sprite = this.statusItems[j].sprite.sprite;
-						meshBuilder.AddQuad(new Vector2(num7, 0f), new Vector2(num3, num3), num4, sprite, color);
-						num6++;
+						DebugUtil.DevLogError(string.Concat(new string[] { "Status Item ", statusItem3.Id, " has null sprite for icon '", statusItem3.iconName, "', you need to add the sprite to the TintedSprites list in the GameAssets prefab manually." }));
+						statusItem3.iconName = "status_item_exclamation";
+						statusItem3.sprite = Assets.GetTintedSprite("status_item_exclamation");
 					}
+					Sprite sprite2 = statusItem3.sprite.sprite;
+					meshBuilder.AddQuad(new Vector2(num7, 0f), new Vector2(num4, num4), num5, sprite2, color);
 				}
-				meshBuilder.AddQuad(new Vector2(0f, 0.29f + num5), new Vector2(0.05f + num5, 0.05f + num5), num4, renderer.arrowSprite, color);
-				meshBuilder.AddQuad(new Vector2(0f, 0.29f), new Vector2(0.05f, 0.05f), num4, renderer.arrowSprite, color3);
+				meshBuilder.AddQuad(new Vector2(0f, 0.29f + num6), new Vector2(0.05f + num6, 0.05f + num6), num5, renderer.arrowSprite, color);
+				meshBuilder.AddQuad(new Vector2(0f, 0.29f), new Vector2(0.05f, 0.05f), num5, renderer.arrowSprite, color3);
 				meshBuilder.End(this.mesh);
 				this.dirty = false;
 			}
@@ -481,6 +483,12 @@ public class StatusItemRenderer
 		public bool hasVisibleStatusItems;
 
 		public bool isBuilding;
+
+		private const int STATUS_ICONS_LIMIT = 12;
+
+		public static List<Sprite> spritesListedToRender = new List<Sprite>(12);
+
+		public static List<int> statusItemsToRender_Index = new List<int>(12);
 
 		private struct MeshBuilder
 		{

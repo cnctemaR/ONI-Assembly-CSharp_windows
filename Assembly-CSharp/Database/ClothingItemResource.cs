@@ -12,7 +12,7 @@ namespace Database
 		public ClothingOutfitUtility.OutfitType outfitType { get; private set; }
 
 		public ClothingItemResource(string id, string name, string desc, ClothingOutfitUtility.OutfitType outfitType, PermitCategory category, PermitRarity rarity, string animFile)
-			: base(id, name, desc, category, rarity)
+			: base(id, name, desc, category, rarity, DlcManager.AVAILABLE_ALL_VERSIONS)
 		{
 			this.AnimFile = Assets.GetAnim(animFile);
 			this.animFilename = animFile;

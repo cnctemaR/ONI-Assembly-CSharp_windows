@@ -283,9 +283,14 @@ public class Diggable : Workable
 
 	public static void DoDigTick(int cell, float dt)
 	{
+		Diggable.DoDigTick(cell, dt, WorldDamage.DamageType.Absolute);
+	}
+
+	public static void DoDigTick(int cell, float dt, WorldDamage.DamageType damageType)
+	{
 		float approximateDigTime = Diggable.GetApproximateDigTime(cell);
 		float num = dt / approximateDigTime;
-		WorldDamage.Instance.ApplyDamage(cell, num, -1, null, null);
+		WorldDamage.Instance.ApplyDamage(cell, num, -1, damageType, null, null);
 	}
 
 	public static float GetApproximateDigTime(int cell)

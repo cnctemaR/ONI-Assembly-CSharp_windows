@@ -57,7 +57,7 @@ public class RailGunPayloadOpenerConfig : IBuildingConfig
 		railGunPayloadOpener.resourceStorage = go.AddComponent<Storage>();
 		railGunPayloadOpener.resourceStorage.showInUI = true;
 		railGunPayloadOpener.resourceStorage.SetDefaultStoredItemModifiers(Storage.StandardSealedStorage);
-		List<Tag> list = STORAGEFILTERS.NOT_EDIBLE_SOLIDS.Concat<Tag>(STORAGEFILTERS.GASES).ToList<Tag>();
+		List<Tag> list = STORAGEFILTERS.STORAGE_LOCKERS_STANDARD.Concat<Tag>(STORAGEFILTERS.GASES).ToList<Tag>();
 		list = list.Concat<Tag>(STORAGEFILTERS.LIQUIDS).ToList<Tag>();
 		railGunPayloadOpener.resourceStorage.storageFilters = list;
 		railGunPayloadOpener.resourceStorage.capacityKg = 20000f;

@@ -63,6 +63,7 @@ namespace TUNING
 			{ "PlasticTile", "tiles" },
 			{ "MetalTile", "tiles" },
 			{ "GlassTile", "tiles" },
+			{ "StorageTile", "tiles" },
 			{ "BunkerTile", "tiles" },
 			{ "ExteriorWall", "tiles" },
 			{ "CarpetTile", "tiles" },
@@ -133,6 +134,8 @@ namespace TUNING
 			{ "CookingStation", "cooking" },
 			{ "GourmetCookingStation", "cooking" },
 			{ "SpiceGrinder", "cooking" },
+			{ "FoodDehydrator", "cooking" },
+			{ "FoodRehydrator", "cooking" },
 			{ "PlanterBox", "farming" },
 			{ "FarmTile", "farming" },
 			{ "HydroponicFarm", "farming" },
@@ -148,6 +151,8 @@ namespace TUNING
 			{ "CreatureGroundTrap", "ranching" },
 			{ "CreatureAirTrap", "ranching" },
 			{ "WaterTrap", "ranching" },
+			{ "CritterCondo", "ranching" },
+			{ "UnderwaterCritterCondo", "ranching" },
 			{ "Outhouse", "washroom" },
 			{ "FlushToilet", "washroom" },
 			{ "WallToilet", "washroom" },
@@ -466,6 +471,7 @@ namespace TUNING
 			{ "ClusterTelescopeEnclosed", "telescopes" },
 			{ "LaunchPad", "rocketstructures" },
 			{ "Gantry", "rocketstructures" },
+			{ "ModularLaunchpadPortBridge", "rocketstructures" },
 			{ "RailGun", "fittings" },
 			{ "RailGunPayloadOpener", "fittings" },
 			{ "LandingBeacon", "rocketnav" },
@@ -517,8 +523,8 @@ namespace TUNING
 			new PlanScreen.PlanInfo(new HashedString("Base"), false, new List<string>
 			{
 				"Ladder", "FirePole", "LadderFast", "Tile", "GasPermeableMembrane", "MeshTile", "InsulationTile", "PlasticTile", "MetalTile", "GlassTile",
-				"BunkerTile", "CarpetTile", "ExteriorWall", "ExobaseHeadquarters", "Door", "ManualPressureDoor", "PressureDoor", "BunkerDoor", "StorageLocker", "StorageLockerSmart",
-				"LiquidReservoir", "GasReservoir", "ObjectDispenser", "TravelTube", "TravelTubeEntrance", "TravelTubeWallBridge"
+				"StorageTile", "BunkerTile", "CarpetTile", "ExteriorWall", "ExobaseHeadquarters", "Door", "ManualPressureDoor", "PressureDoor", "BunkerDoor", "StorageLocker",
+				"StorageLockerSmart", "LiquidReservoir", "GasReservoir", "ObjectDispenser", "TravelTube", "TravelTubeEntrance", "TravelTubeWallBridge"
 			}, ""),
 			new PlanScreen.PlanInfo(new HashedString("Oxygen"), false, new List<string> { "MineralDeoxidizer", "SublimationStation", "AlgaeHabitat", "AirFilter", "CO2Scrubber", "Electrolyzer", "RustDeoxidizer" }, ""),
 			new PlanScreen.PlanInfo(new HashedString("Power"), false, new List<string>
@@ -554,8 +560,9 @@ namespace TUNING
 			}, ""),
 			new PlanScreen.PlanInfo(new HashedString("Food"), false, new List<string>
 			{
-				"MicrobeMusher", "CookingStation", "GourmetCookingStation", "SpiceGrinder", "PlanterBox", "FarmTile", "HydroponicFarm", "RationBox", "Refrigerator", "CreatureDeliveryPoint",
-				"FishDeliveryPoint", "CreatureFeeder", "FishFeeder", "MilkFeeder", "EggIncubator", "EggCracker", "CreatureGroundTrap", "WaterTrap", "CreatureAirTrap"
+				"MicrobeMusher", "CookingStation", "GourmetCookingStation", "SpiceGrinder", "FoodDehydrator", "FoodRehydrator", "PlanterBox", "FarmTile", "HydroponicFarm", "RationBox",
+				"Refrigerator", "CreatureDeliveryPoint", "FishDeliveryPoint", "CreatureFeeder", "FishFeeder", "MilkFeeder", "EggIncubator", "EggCracker", "CreatureGroundTrap", "WaterTrap",
+				"CreatureAirTrap", "CritterCondo", "UnderwaterCritterCondo"
 			}, ""),
 			new PlanScreen.PlanInfo(new HashedString("Plumbing"), false, new List<string>
 			{
@@ -770,7 +777,8 @@ namespace TUNING
 				"RailGun",
 				"RailGunPayloadOpener",
 				"LandingBeacon",
-				"MissileLauncher"
+				"MissileLauncher",
+				"ModularLaunchpadPortBridge"
 			}, ""),
 			new PlanScreen.PlanInfo(new HashedString("HEP"), true, new List<string> { "RadiationLight", "ManualHighEnergyParticleSpawner", "NuclearReactor", "UraniumCentrifuge", "HighEnergyParticleSpawner", "DevHEPSpawner", "HighEnergyParticleRedirector", "HEPBattery", "HEPBridgeTile", "DevRadiationGenerator" }, "EXPANSION1_ID")
 		};

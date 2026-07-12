@@ -14,6 +14,8 @@ public class RangeVisualizer : KMonoBehaviour
 
 	public bool BlockingTileVisible;
 
+	public Func<int, bool> BlockingVisibleCb;
+
 	public Func<int, bool> BlockingCb = new Func<int, bool>(Grid.IsSolidCell);
 
 	public bool AllowLineOfSightInvalidCells;

@@ -8,46 +8,46 @@ public class LogicGate : LogicGateBase, ILogicEventSender, ILogicNetworkConnecti
 {
 	protected override void OnSpawn()
 	{
-		this.inputOne = new LogicEventHandler(base.InputCellOne, new Action<int>(this.UpdateState), null, LogicPortSpriteType.Input);
+		this.inputOne = new LogicEventHandler(base.InputCellOne, new Action<int, int>(this.UpdateState), null, LogicPortSpriteType.Input);
 		if (base.RequiresTwoInputs)
 		{
-			this.inputTwo = new LogicEventHandler(base.InputCellTwo, new Action<int>(this.UpdateState), null, LogicPortSpriteType.Input);
+			this.inputTwo = new LogicEventHandler(base.InputCellTwo, new Action<int, int>(this.UpdateState), null, LogicPortSpriteType.Input);
 		}
 		else if (base.RequiresFourInputs)
 		{
-			this.inputTwo = new LogicEventHandler(base.InputCellTwo, new Action<int>(this.UpdateState), null, LogicPortSpriteType.Input);
-			this.inputThree = new LogicEventHandler(base.InputCellThree, new Action<int>(this.UpdateState), null, LogicPortSpriteType.Input);
-			this.inputFour = new LogicEventHandler(base.InputCellFour, new Action<int>(this.UpdateState), null, LogicPortSpriteType.Input);
+			this.inputTwo = new LogicEventHandler(base.InputCellTwo, new Action<int, int>(this.UpdateState), null, LogicPortSpriteType.Input);
+			this.inputThree = new LogicEventHandler(base.InputCellThree, new Action<int, int>(this.UpdateState), null, LogicPortSpriteType.Input);
+			this.inputFour = new LogicEventHandler(base.InputCellFour, new Action<int, int>(this.UpdateState), null, LogicPortSpriteType.Input);
 		}
 		if (base.RequiresControlInputs)
 		{
-			this.controlOne = new LogicEventHandler(base.ControlCellOne, new Action<int>(this.UpdateState), null, LogicPortSpriteType.ControlInput);
-			this.controlTwo = new LogicEventHandler(base.ControlCellTwo, new Action<int>(this.UpdateState), null, LogicPortSpriteType.ControlInput);
+			this.controlOne = new LogicEventHandler(base.ControlCellOne, new Action<int, int>(this.UpdateState), null, LogicPortSpriteType.ControlInput);
+			this.controlTwo = new LogicEventHandler(base.ControlCellTwo, new Action<int, int>(this.UpdateState), null, LogicPortSpriteType.ControlInput);
 		}
 		if (base.RequiresFourOutputs)
 		{
 			this.outputTwo = new LogicPortVisualizer(base.OutputCellTwo, LogicPortSpriteType.Output);
 			this.outputThree = new LogicPortVisualizer(base.OutputCellThree, LogicPortSpriteType.Output);
 			this.outputFour = new LogicPortVisualizer(base.OutputCellFour, LogicPortSpriteType.Output);
-			this.outputTwoSender = new LogicEventSender(LogicGateBase.OUTPUT_TWO_PORT_ID, base.OutputCellTwo, delegate(int new_value)
+			this.outputTwoSender = new LogicEventSender(LogicGateBase.OUTPUT_TWO_PORT_ID, base.OutputCellTwo, delegate(int new_value, int prev_value)
 			{
 				if (this != null)
 				{
-					this.OnAdditionalOutputsLogicValueChanged(LogicGateBase.OUTPUT_TWO_PORT_ID, new_value);
+					this.OnAdditionalOutputsLogicValueChanged(LogicGateBase.OUTPUT_TWO_PORT_ID, new_value, prev_value);
 				}
 			}, null, LogicPortSpriteType.Output);
-			this.outputThreeSender = new LogicEventSender(LogicGateBase.OUTPUT_THREE_PORT_ID, base.OutputCellThree, delegate(int new_value)
+			this.outputThreeSender = new LogicEventSender(LogicGateBase.OUTPUT_THREE_PORT_ID, base.OutputCellThree, delegate(int new_value, int prev_value)
 			{
 				if (this != null)
 				{
-					this.OnAdditionalOutputsLogicValueChanged(LogicGateBase.OUTPUT_THREE_PORT_ID, new_value);
+					this.OnAdditionalOutputsLogicValueChanged(LogicGateBase.OUTPUT_THREE_PORT_ID, new_value, prev_value);
 				}
 			}, null, LogicPortSpriteType.Output);
-			this.outputFourSender = new LogicEventSender(LogicGateBase.OUTPUT_FOUR_PORT_ID, base.OutputCellFour, delegate(int new_value)
+			this.outputFourSender = new LogicEventSender(LogicGateBase.OUTPUT_FOUR_PORT_ID, base.OutputCellFour, delegate(int new_value, int prev_value)
 			{
 				if (this != null)
 				{
-					this.OnAdditionalOutputsLogicValueChanged(LogicGateBase.OUTPUT_FOUR_PORT_ID, new_value);
+					this.OnAdditionalOutputsLogicValueChanged(LogicGateBase.OUTPUT_FOUR_PORT_ID, new_value, prev_value);
 				}
 			}, null, LogicPortSpriteType.Output);
 		}
@@ -190,7 +190,7 @@ public class LogicGate : LogicGateBase, ILogicEventSender, ILogicNetworkConnecti
 		}
 	}
 
-	private void UpdateState(int new_value)
+	private void UpdateState(int new_value, int prev_value)
 	{
 		if (this.cleaningUp)
 		{
@@ -307,14 +307,15 @@ public class LogicGate : LogicGateBase, ILogicEventSender, ILogicNetworkConnecti
 		this.RefreshAnimation();
 	}
 
-	private void OnAdditionalOutputsLogicValueChanged(HashedString port_id, int new_value)
+	private void OnAdditionalOutputsLogicValueChanged(HashedString port_id, int new_value, int prev_value)
 	{
 		if (base.gameObject != null)
 		{
 			base.gameObject.Trigger(-801688580, new LogicValueChanged
 			{
 				portID = port_id,
-				newValue = new_value
+				newValue = new_value,
+				prevValue = prev_value
 			});
 		}
 	}

@@ -35,7 +35,7 @@ public class TilePOIConfig : IBuildingConfig
 		buildingDef.isKAnimTile = true;
 		buildingDef.DebugOnly = true;
 		buildingDef.BlockTileAtlas = Assets.GetTextureAtlas("tiles_POI");
-		buildingDef.BlockTilePlaceAtlas = Assets.GetTextureAtlas("tiles_POI");
+		buildingDef.BlockTilePlaceAtlas = Assets.GetTextureAtlas("tiles_POI_place");
 		buildingDef.BlockTileMaterial = Assets.GetMaterial("tiles_solid");
 		buildingDef.DecorBlockTileInfo = Assets.GetBlockTileDecorInfo("tiles_POI_tops_decor_info");
 		buildingDef.DecorPlaceBlockTileInfo = Assets.GetBlockTileDecorInfo("tiles_POI_tops_decor_info");

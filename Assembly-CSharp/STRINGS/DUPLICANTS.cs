@@ -2625,6 +2625,24 @@ namespace STRINGS
 				});
 			}
 
+			public class IDLEINROCKETS
+			{
+				public static LocString NAME = "Idle";
+
+				public static LocString TOOLTIP = "This Duplicant cannot reach any pending errands";
+
+				public static LocString NOTIFICATION_NAME = "Idle";
+
+				public static LocString NOTIFICATION_TOOLTIP = string.Concat(new string[]
+				{
+					"These Duplicants cannot reach any pending ",
+					UI.PRE_KEYWORD,
+					"Errands",
+					UI.PST_KEYWORD,
+					":"
+				});
+			}
+
 			public class FIGHTING
 			{
 				public static LocString NAME = "In combat";

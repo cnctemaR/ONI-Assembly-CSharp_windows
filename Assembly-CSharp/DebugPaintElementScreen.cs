@@ -34,6 +34,18 @@ public class DebugPaintElementScreen : KScreen
 				base.isEditing = false;
 			});
 		}
+		this.temperatureInput.onEndEdit.AddListener(delegate(string value)
+		{
+			this.OnChangeTemperature();
+		});
+		this.massPressureInput.onEndEdit.AddListener(delegate(string value)
+		{
+			this.OnChangeMassPressure();
+		});
+		this.diseaseCountInput.onEndEdit.AddListener(delegate(string value)
+		{
+			this.OnDiseaseCountChange();
+		});
 		base.gameObject.SetActive(false);
 		this.activateOnSpawn = true;
 		base.ConsumeMouseScroll = true;
@@ -272,6 +284,11 @@ public class DebugPaintElementScreen : KScreen
 		{
 			num = -1f;
 		}
+		if (num <= 0f)
+		{
+			num = 1f;
+			this.massPressureInput.text = "1";
+		}
 		this.mass = num;
 	}
 
@@ -286,6 +303,11 @@ public class DebugPaintElementScreen : KScreen
 		{
 			num = -1f;
 		}
+		if (num <= 0f)
+		{
+			num = 1f;
+			this.temperatureInput.text = "1";
+		}
 		this.temperature = num;
 	}
 
@@ -293,6 +315,11 @@ public class DebugPaintElementScreen : KScreen
 	{
 		int num;
 		int.TryParse(this.diseaseCountInput.text, out num);
+		if (num < 0)
+		{
+			num = 0;
+			this.diseaseCountInput.text = "0";
+		}
 		this.diseaseCount = num;
 	}
 

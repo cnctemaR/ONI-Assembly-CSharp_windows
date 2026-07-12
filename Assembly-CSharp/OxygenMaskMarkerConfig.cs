@@ -26,6 +26,7 @@ public class OxygenMaskMarkerConfig : IBuildingConfig
 		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, array, num5, buildLocationRule, BUILDINGS.DECOR.BONUS.TIER1, none, 0.2f);
 		buildingDef.PermittedRotations = PermittedRotations.FlipH;
 		buildingDef.PreventIdleTraversalPastBuilding = true;
+		buildingDef.LogicInputPorts = LogicOperationalController.CreateSingleInputPortList(new CellOffset(0, 0));
 		GeneratedBuildings.RegisterWithOverlay(OverlayScreen.SuitIDs, "OxygenMaskMarker");
 		return buildingDef;
 	}
@@ -48,6 +49,7 @@ public class OxygenMaskMarkerConfig : IBuildingConfig
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
+		go.AddOrGet<LogicOperationalController>();
 	}
 
 	public const string ID = "OxygenMaskMarker";

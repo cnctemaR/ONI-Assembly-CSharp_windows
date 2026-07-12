@@ -72,7 +72,7 @@ public class RailGunConfig : IBuildingConfig
 	public override void DoPostConfigureComplete(GameObject go)
 	{
 		List<Tag> list = new List<Tag>();
-		list.AddRange(STORAGEFILTERS.NOT_EDIBLE_SOLIDS);
+		list.AddRange(STORAGEFILTERS.STORAGE_LOCKERS_STANDARD);
 		list.AddRange(STORAGEFILTERS.GASES);
 		list.AddRange(STORAGEFILTERS.FOOD);
 		Storage storage = BuildingTemplates.CreateDefaultStorage(go, false);

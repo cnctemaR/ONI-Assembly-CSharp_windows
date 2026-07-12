@@ -81,7 +81,7 @@ public class BaseModularLaunchpadPortConfig
 			}
 			else
 			{
-				storage.storageFilters = STORAGEFILTERS.NOT_EDIBLE_SOLIDS;
+				storage.storageFilters = STORAGEFILTERS.STORAGE_LOCKERS_STANDARD;
 			}
 			TreeFilterable treeFilterable = go.AddOrGet<TreeFilterable>();
 			treeFilterable.dropIncorrectOnFilterChange = false;

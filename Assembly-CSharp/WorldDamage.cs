@@ -33,7 +33,7 @@ public class WorldDamage : KMonoBehaviour
 		return this.ApplyDamage(damage_info.gameCell, this.damageAmount, damage_info.damageSourceOffset, BUILDINGS.DAMAGESOURCES.LIQUID_PRESSURE, UI.GAMEOBJECTEFFECTS.DAMAGE_POPS.LIQUID_PRESSURE);
 	}
 
-	public float ApplyDamage(int cell, float amount, int src_cell, string source_name = null, string pop_text = null)
+	public float ApplyDamage(int cell, float amount, int src_cell, WorldDamage.DamageType damageType, string source_name = null, string pop_text = null)
 	{
 		float num = 0f;
 		if (Grid.Solid[cell])
@@ -42,7 +42,7 @@ public class WorldDamage : KMonoBehaviour
 			num = Mathf.Min(amount, 1f - num2);
 			num2 += amount;
 			bool flag = num2 > 0.15f;
-			if (flag)
+			if (flag && damageType != WorldDamage.DamageType.NoBuildingDamage)
 			{
 				GameObject gameObject = Grid.Objects[cell, 9];
 				if (gameObject != null)
@@ -97,6 +97,11 @@ public class WorldDamage : KMonoBehaviour
 			}
 		}
 		return num;
+	}
+
+	public float ApplyDamage(int cell, float amount, int src_cell, string source_name = null, string pop_text = null)
+	{
+		return this.ApplyDamage(cell, amount, src_cell, WorldDamage.DamageType.Absolute, source_name, pop_text);
 	}
 
 	private void ReleaseGO(GameObject go)
@@ -246,4 +251,10 @@ public class WorldDamage : KMonoBehaviour
 	private Dictionary<int, float> spawnTimes = new Dictionary<int, float>();
 
 	private List<int> expiredCells = new List<int>();
+
+	public enum DamageType
+	{
+		Absolute,
+		NoBuildingDamage
+	}
 }

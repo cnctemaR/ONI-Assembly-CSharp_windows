@@ -78,7 +78,8 @@ public class BuildingComplete : Building
 
 	private void OnObjectReplaced(object data)
 	{
-		this.replacingTileLayer = (ObjectLayer)data;
+		Constructable.ReplaceCallbackParameters replaceCallbackParameters = (Constructable.ReplaceCallbackParameters)data;
+		this.replacingTileLayer = replaceCallbackParameters.TileLayer;
 	}
 
 	protected override void OnSpawn()

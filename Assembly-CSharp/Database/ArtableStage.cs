@@ -6,7 +6,7 @@ namespace Database
 	public class ArtableStage : PermitResource
 	{
 		public ArtableStage(string id, string name, string desc, PermitRarity rarity, string animFile, string anim, int decor_value, bool cheer_on_complete, ArtableStatusItem status_item, string prefabId, string symbolName = "")
-			: base(id, name, desc, PermitCategory.Artwork, rarity)
+			: base(id, name, desc, PermitCategory.Artwork, rarity, DlcManager.AVAILABLE_ALL_VERSIONS)
 		{
 			this.id = id;
 			this.animFile = animFile;

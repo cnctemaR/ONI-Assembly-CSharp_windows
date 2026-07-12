@@ -36,6 +36,7 @@ public class LaunchableRocket : StateMachineComponent<LaunchableRocket.StatesIns
 			Spacecraft spacecraft = new Spacecraft(base.GetComponent<LaunchConditionManager>());
 			spacecraft.GenerateName();
 			SpacecraftManager.instance.RegisterSpacecraft(spacecraft);
+			base.gameObject.AddOrGet<RocketLaunchConditionVisualizerEffect>();
 		}
 		base.smi.StartSM();
 	}

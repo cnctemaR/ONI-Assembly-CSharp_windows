@@ -59,6 +59,11 @@ public class Deconstructable : Workable
 		this.multitoolHitEffectTag = EffectConfigs.BuildSplashId;
 		this.workingPstComplete = null;
 		this.workingPstFailed = null;
+		if (this.customWorkTime > 0f)
+		{
+			base.SetWorkTime(this.customWorkTime);
+			return;
+		}
 		Building component = base.GetComponent<Building>();
 		if (component != null && component.Def.IsTilePiece)
 		{
@@ -92,7 +97,7 @@ public class Deconstructable : Workable
 		}
 		if (this.isMarkedForDeconstruction)
 		{
-			this.QueueDeconstruction();
+			this.QueueDeconstruction(false);
 		}
 	}
 
@@ -182,9 +187,9 @@ public class Deconstructable : Workable
 		return this.TriggerDestroy(temperature, disease_idx, disease_count, base.worker);
 	}
 
-	private void QueueDeconstruction()
+	public void QueueDeconstruction(bool userTriggered)
 	{
-		if (DebugHandler.InstantBuildMode)
+		if (userTriggered && DebugHandler.InstantBuildMode)
 		{
 			this.OnCompleteWork(null);
 			return;
@@ -206,6 +211,11 @@ public class Deconstructable : Workable
 			this.isMarkedForDeconstruction = true;
 			base.Trigger(2108245096, "Deconstruct");
 		}
+	}
+
+	private void QueueDeconstruction()
+	{
+		this.QueueDeconstruction(true);
 	}
 
 	private void OnDeconstruct()
@@ -366,6 +376,8 @@ public class Deconstructable : Workable
 	public bool allowDeconstruction = true;
 
 	public string audioSize;
+
+	public float customWorkTime = -1f;
 
 	[Serialize]
 	private bool isMarkedForDeconstruction;

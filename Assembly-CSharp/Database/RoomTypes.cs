@@ -19,7 +19,7 @@ namespace Database
 			}, 0, null, false, false, null, 0));
 			this.PlumbedBathroom = base.Add(new RoomType("PlumbedBathroom", ROOMS.TYPES.PLUMBEDBATHROOM.NAME, ROOMS.TYPES.PLUMBEDBATHROOM.DESCRIPTION, ROOMS.TYPES.PLUMBEDBATHROOM.TOOLTIP, ROOMS.TYPES.PLUMBEDBATHROOM.EFFECT, Db.Get().RoomTypeCategories.Bathroom, RoomConstraints.FLUSH_TOILET, new RoomConstraints.Constraint[]
 			{
-				RoomConstraints.ADVANCED_WASH_STATION,
+				RoomConstraints.ADVANCEDWASHSTATION,
 				RoomConstraints.NO_OUTHOUSES,
 				RoomConstraints.NO_INDUSTRIAL_MACHINERY,
 				RoomConstraints.MINIMUM_SIZE_12,

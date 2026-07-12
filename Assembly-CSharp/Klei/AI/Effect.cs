@@ -63,7 +63,9 @@ namespace Klei.AI
 
 		public static string CreateTooltip(Effect effect, bool showDuration, string linePrefix = "\n    • ", bool showHeader = true)
 		{
-			string text = (showHeader ? DUPLICANTS.MODIFIERS.EFFECT_HEADER.text : "");
+			StringEntry stringEntry;
+			Strings.TryGet("STRINGS.DUPLICANTS.MODIFIERS." + effect.Id.ToUpper() + ".ADDITIONAL_EFFECTS", out stringEntry);
+			string text = ((showHeader && (effect.SelfModifiers.Count > 0 || stringEntry != null)) ? DUPLICANTS.MODIFIERS.EFFECT_HEADER.text : "");
 			foreach (AttributeModifier attributeModifier in effect.SelfModifiers)
 			{
 				Attribute attribute = Db.Get().Attributes.TryGet(attributeModifier.AttributeId);
@@ -76,8 +78,7 @@ namespace Klei.AI
 					text = text + linePrefix + string.Format(DUPLICANTS.MODIFIERS.MODIFIER_FORMAT, attribute.Name, attributeModifier.GetFormattedString());
 				}
 			}
-			StringEntry stringEntry;
-			if (Strings.TryGet("STRINGS.DUPLICANTS.MODIFIERS." + effect.Id.ToUpper() + ".ADDITIONAL_EFFECTS", out stringEntry))
+			if (stringEntry != null)
 			{
 				text = text + linePrefix + stringEntry;
 			}

@@ -34,6 +34,10 @@ public class TreeFilterable : KMonoBehaviour, ISaveLoadable
 
 	private void OnDiscover(Tag category_tag, Tag tag)
 	{
+		if (this.preventAutoAddOnDiscovery)
+		{
+			return;
+		}
 		if (this.storage.storageFilters.Contains(category_tag))
 		{
 			bool flag = false;
@@ -128,10 +132,13 @@ public class TreeFilterable : KMonoBehaviour, ISaveLoadable
 
 	private void OnCopySettings(object data)
 	{
-		TreeFilterable component = ((GameObject)data).GetComponent<TreeFilterable>();
-		if (component != null)
+		if (this.copySettingsEnabled)
 		{
-			this.UpdateFilters(component.GetTags());
+			TreeFilterable component = ((GameObject)data).GetComponent<TreeFilterable>();
+			if (component != null)
+			{
+				this.UpdateFilters(component.GetTags());
+			}
 		}
 	}
 
@@ -258,6 +265,10 @@ public class TreeFilterable : KMonoBehaviour, ISaveLoadable
 	public bool autoSelectStoredOnLoad = true;
 
 	public bool showUserMenu = true;
+
+	public bool copySettingsEnabled = true;
+
+	public bool preventAutoAddOnDiscovery;
 
 	public bool filterAllStoragesOnBuilding;
 

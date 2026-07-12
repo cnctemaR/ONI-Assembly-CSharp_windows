@@ -17,6 +17,8 @@ namespace Database
 
 		public List<FacadeInfo.workable> workables { get; set; }
 
+		public string[] DLCIds { get; set; }
+
 		public class workable
 		{
 			public string workableName { get; set; }

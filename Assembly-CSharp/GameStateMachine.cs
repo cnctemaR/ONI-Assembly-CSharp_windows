@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using FoodRehydrator;
 using Klei.AI;
 using UnityEngine;
 
@@ -1549,6 +1550,36 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 			return this;
 		}
 
+		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State ToggleComponentIfFound<ComponentType>(bool disable = false) where ComponentType : MonoBehaviour
+		{
+			StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.TargetParameter state_target = this.GetStateTarget();
+			this.Enter("EnableComponent(" + typeof(ComponentType).Name + ")", delegate(StateMachineInstanceType smi)
+			{
+				GameObject gameObject = state_target.Get(smi);
+				if (gameObject != null)
+				{
+					ComponentType component = gameObject.GetComponent<ComponentType>();
+					if (component != null)
+					{
+						component.enabled = !disable;
+					}
+				}
+			});
+			this.Exit("DisableComponent(" + typeof(ComponentType).Name + ")", delegate(StateMachineInstanceType smi)
+			{
+				GameObject gameObject2 = state_target.Get(smi);
+				if (gameObject2 != null)
+				{
+					ComponentType component2 = gameObject2.GetComponent<ComponentType>();
+					if (component2 != null)
+					{
+						component2.enabled = disable;
+					}
+				}
+			});
+			return this;
+		}
+
 		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State ToggleComponent<ComponentType>(bool disable = false) where ComponentType : MonoBehaviour
 		{
 			StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.TargetParameter state_target = this.GetStateTarget();
@@ -1619,6 +1650,14 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 				}
 				actual_amount.Set(num3, smi, false);
 				int num4 = pickupable.Reserve("ToggleReserve", gameObject, num3);
+				if (pickupable.storage != null && pickupable.storage.GetComponent<DehydratedFoodPackage>() != null)
+				{
+					AccessabilityManager component = pickupable.storage.GetComponent<Pickupable>().storage.GetComponent<AccessabilityManager>();
+					if (component != null)
+					{
+						component.Reserve(gameObject);
+					}
+				}
 				smi.dataTable[data_idx] = num4;
 			});
 			this.Exit(string.Concat(new string[] { "Unreserve(", pickup_target.name, ", ", requested_amount.name, ")" }), delegate(StateMachineInstanceType smi)
@@ -2564,7 +2603,7 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 			base.Target(fetcher);
 			base.root.DefaultState(this.approach).ToggleReserve(fetcher, pickup_source, requested_amount, actual_amount);
 			this.approach.InitializeStates(fetcher, pickup_source, this.pickup, null, null, NavigationTactics.ReduceTravelDistance).OnTargetLost(pickup_source, failure_state);
-			this.pickup.DoPickup(pickup_source, pickup_chunk, actual_amount, success_state, failure_state);
+			this.pickup.DoPickup(pickup_source, pickup_chunk, actual_amount, success_state, failure_state).EventTransition(GameHashes.AbortWork, failure_state, null);
 			return this;
 		}
 

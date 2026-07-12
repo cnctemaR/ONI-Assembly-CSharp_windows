@@ -127,9 +127,21 @@ public class ColonyDiagnosticUtility : KMonoBehaviour, ISim1000ms
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		foreach (int num in ClusterManager.Instance.GetWorldIDsSorted())
+		if (SaveLoader.Instance.GameInfo.IsVersionOlderThan(7, 33))
 		{
-			this.AddWorld(num);
+			string text = "IdleDiagnostic";
+			foreach (int num in this.diagnosticDisplaySettings.Keys)
+			{
+				WorldContainer world = ClusterManager.Instance.GetWorld(num);
+				if (this.diagnosticDisplaySettings[num].ContainsKey(text) && this.diagnosticDisplaySettings[num][text] != ColonyDiagnosticUtility.DisplaySetting.Always)
+				{
+					this.diagnosticDisplaySettings[num][text] = (world.IsModuleInterior ? ColonyDiagnosticUtility.DisplaySetting.Never : ColonyDiagnosticUtility.DisplaySetting.AlertOnly);
+				}
+			}
+		}
+		foreach (int num2 in ClusterManager.Instance.GetWorldIDsSorted())
+		{
+			this.AddWorld(num2);
 		}
 		ClusterManager.Instance.Subscribe(-1280433810, new Action<object>(this.Refresh));
 		ClusterManager.Instance.Subscribe(-1078710002, new Action<object>(this.RemoveWorld));
@@ -221,6 +233,7 @@ public class ColonyDiagnosticUtility : KMonoBehaviour, ISim1000ms
 		this.TryAddDiagnosticToWorldCollection(ref list, new StressDiagnostic(worldID));
 		this.TryAddDiagnosticToWorldCollection(ref list, new RadiationDiagnostic(worldID));
 		this.TryAddDiagnosticToWorldCollection(ref list, new ReactorDiagnostic(worldID));
+		this.TryAddDiagnosticToWorldCollection(ref list, new IdleDiagnostic(worldID));
 		if (ClusterManager.Instance.GetWorld(worldID).IsModuleInterior)
 		{
 			this.TryAddDiagnosticToWorldCollection(ref list, new FloatingRocketDiagnostic(worldID));
@@ -233,7 +246,6 @@ public class ColonyDiagnosticUtility : KMonoBehaviour, ISim1000ms
 			this.TryAddDiagnosticToWorldCollection(ref list, new ToiletDiagnostic(worldID));
 			this.TryAddDiagnosticToWorldCollection(ref list, new PowerUseDiagnostic(worldID));
 			this.TryAddDiagnosticToWorldCollection(ref list, new BatteryDiagnostic(worldID));
-			this.TryAddDiagnosticToWorldCollection(ref list, new IdleDiagnostic(worldID));
 			this.TryAddDiagnosticToWorldCollection(ref list, new TrappedDuplicantDiagnostic(worldID));
 			this.TryAddDiagnosticToWorldCollection(ref list, new FarmDiagnostic(worldID));
 			this.TryAddDiagnosticToWorldCollection(ref list, new EntombedDiagnostic(worldID));
@@ -254,16 +266,18 @@ public class ColonyDiagnosticUtility : KMonoBehaviour, ISim1000ms
 		}
 		if (flag)
 		{
-			this.diagnosticDisplaySettings[worldID][typeof(BreathabilityDiagnostic).Name] = ColonyDiagnosticUtility.DisplaySetting.Always;
-			this.diagnosticDisplaySettings[worldID][typeof(FoodDiagnostic).Name] = ColonyDiagnosticUtility.DisplaySetting.Always;
-			this.diagnosticDisplaySettings[worldID][typeof(StressDiagnostic).Name] = ColonyDiagnosticUtility.DisplaySetting.Always;
-			this.diagnosticDisplaySettings[worldID][typeof(IdleDiagnostic).Name] = ColonyDiagnosticUtility.DisplaySetting.Never;
+			this.diagnosticDisplaySettings[worldID]["BreathabilityDiagnostic"] = ColonyDiagnosticUtility.DisplaySetting.Always;
+			this.diagnosticDisplaySettings[worldID]["FoodDiagnostic"] = ColonyDiagnosticUtility.DisplaySetting.Always;
+			this.diagnosticDisplaySettings[worldID]["StressDiagnostic"] = ColonyDiagnosticUtility.DisplaySetting.Always;
 			if (ClusterManager.Instance.GetWorld(worldID).IsModuleInterior)
 			{
-				this.diagnosticDisplaySettings[worldID][typeof(FloatingRocketDiagnostic).Name] = ColonyDiagnosticUtility.DisplaySetting.Always;
-				this.diagnosticDisplaySettings[worldID][typeof(RocketFuelDiagnostic).Name] = ColonyDiagnosticUtility.DisplaySetting.Always;
-				this.diagnosticDisplaySettings[worldID][typeof(RocketOxidizerDiagnostic).Name] = ColonyDiagnosticUtility.DisplaySetting.Always;
+				this.diagnosticDisplaySettings[worldID]["FloatingRocketDiagnostic"] = ColonyDiagnosticUtility.DisplaySetting.Always;
+				this.diagnosticDisplaySettings[worldID]["RocketFuelDiagnostic"] = ColonyDiagnosticUtility.DisplaySetting.Always;
+				this.diagnosticDisplaySettings[worldID]["RocketOxidizerDiagnostic"] = ColonyDiagnosticUtility.DisplaySetting.Always;
+				this.diagnosticDisplaySettings[worldID]["IdleDiagnostic"] = ColonyDiagnosticUtility.DisplaySetting.Never;
+				return;
 			}
+			this.diagnosticDisplaySettings[worldID]["IdleDiagnostic"] = ColonyDiagnosticUtility.DisplaySetting.AlertOnly;
 		}
 	}
 
@@ -320,38 +334,15 @@ public class ColonyDiagnosticUtility : KMonoBehaviour, ISim1000ms
 	[Serialize]
 	private Dictionary<string, float> diagnosticTutorialStatus = new Dictionary<string, float>
 	{
-		{
-			typeof(ToiletDiagnostic).Name,
-			450f
-		},
-		{
-			typeof(BedDiagnostic).Name,
-			900f
-		},
-		{
-			typeof(BreathabilityDiagnostic).Name,
-			1800f
-		},
-		{
-			typeof(FoodDiagnostic).Name,
-			3000f
-		},
-		{
-			typeof(FarmDiagnostic).Name,
-			6000f
-		},
-		{
-			typeof(StressDiagnostic).Name,
-			9000f
-		},
-		{
-			typeof(PowerUseDiagnostic).Name,
-			12000f
-		},
-		{
-			typeof(BatteryDiagnostic).Name,
-			12000f
-		}
+		{ "ToiletDiagnostic", 450f },
+		{ "BedDiagnostic", 900f },
+		{ "BreathabilityDiagnostic", 1800f },
+		{ "FoodDiagnostic", 3000f },
+		{ "FarmDiagnostic", 6000f },
+		{ "StressDiagnostic", 9000f },
+		{ "PowerUseDiagnostic", 12000f },
+		{ "BatteryDiagnostic", 12000f },
+		{ "IdleDiagnostic", 600f }
 	};
 
 	public static bool IgnoreFirstUpdate = true;

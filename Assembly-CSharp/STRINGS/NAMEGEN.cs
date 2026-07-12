@@ -1090,6 +1090,8 @@ namespace STRINGS
 
 		public class WORLD
 		{
+			public static LocString UNKNOWN_WORLD = "Unknown";
+
 			public static LocString PLANETOID_PREFIX = UI.CLUSTERMAP.PLANETOID + ": ";
 
 			public static LocString SPACECRAFT_PREFIX = "Spacecraft: ";

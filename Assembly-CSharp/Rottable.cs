@@ -210,6 +210,7 @@ public class Rottable : GameStateMachine<Rottable, Rottable.Instance, IStateMach
 	private static readonly Tag[] PRESERVED_TAGS = new Tag[]
 	{
 		GameTags.Preserved,
+		GameTags.Dehydrated,
 		GameTags.Entombed
 	};
 

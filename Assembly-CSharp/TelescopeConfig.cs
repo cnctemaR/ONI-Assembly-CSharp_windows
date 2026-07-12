@@ -41,7 +41,6 @@ public class TelescopeConfig : IBuildingConfig
 		go.AddOrGet<BuildingComplete>().isManuallyOperated = true;
 		Prioritizable.AddRef(go);
 		Telescope telescope = go.AddOrGet<Telescope>();
-		telescope.clearScanCellRadius = 4;
 		telescope.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_telescope_kanim") };
 		telescope.requiredSkillPerk = Db.Get().SkillPerks.CanStudyWorldObjects.Id;
 		telescope.workLayer = Grid.SceneLayer.BuildingFront;

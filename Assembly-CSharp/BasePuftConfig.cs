@@ -74,7 +74,6 @@ public static class BasePuftConfig
 			{
 				customIdleAnim = new IdleStates.Def.IdleAnimCallback(BasePuftConfig.CustomIdleAnim)
 			}, true, -1);
-		gameObject.AddOrGetDef<DrinkMilkMonitor.Def>();
 		EntityTemplates.AddCreatureBrain(gameObject, builder, GameTags.Creatures.Species.PuftSpecies, symbol_override_prefix);
 		return gameObject;
 	}

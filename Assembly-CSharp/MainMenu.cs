@@ -62,70 +62,13 @@ public class MainMenu : KScreen
 			global::Util.KInstantiateUI(this.patchNotesScreenPrefab.gameObject, FrontEndManager.Instance.gameObject, true);
 		}
 		this.CheckDoubleBoundKeys();
-		this.topLeftAlphaMessage.gameObject.SetActive(false);
-		this.MOTDContainer.SetActive(false);
-		this.buttonContainer.SetActive(false);
-		this.nextUpdateTimer.gameObject.SetActive(true);
 		bool flag = DistributionPlatform.Inst.IsDLCPurchased("EXPANSION1_ID");
 		this.expansion1Toggle.gameObject.SetActive(flag);
 		if (this.expansion1Ad != null)
 		{
 			this.expansion1Ad.gameObject.SetActive(!flag);
 		}
-		this.m_motdServerClient = new MotdServerClient();
-		this.m_motdServerClient.GetMotd(delegate(MotdServerClient.MotdResponse response, string error)
-		{
-			if (error == null)
-			{
-				if (DlcManager.IsExpansion1Active())
-				{
-					this.nextUpdateTimer.UpdateReleaseTimes(response.expansion1_update_data.last_update_time, response.expansion1_update_data.next_update_time, response.expansion1_update_data.update_text_override);
-				}
-				else
-				{
-					this.nextUpdateTimer.UpdateReleaseTimes(response.vanilla_update_data.last_update_time, response.vanilla_update_data.next_update_time, response.vanilla_update_data.update_text_override);
-				}
-				this.topLeftAlphaMessage.gameObject.SetActive(true);
-				this.MOTDContainer.SetActive(true);
-				this.buttonContainer.SetActive(true);
-				this.motdImageHeader.text = response.image_header_text;
-				this.motdNewsHeader.text = response.news_header_text;
-				this.motdNewsBody.text = response.news_body_text;
-				PatchNotesScreen.UpdatePatchNotes(response.patch_notes_summary, response.patch_notes_link_url);
-				if (response.image_texture != null)
-				{
-					this.motdImage.sprite = Sprite.Create(response.image_texture, new Rect(0f, 0f, (float)response.image_texture.width, (float)response.image_texture.height), Vector2.zero);
-				}
-				else
-				{
-					global::Debug.LogWarning("GetMotd failed to return an image texture");
-				}
-				if (this.motdImage.sprite != null && this.motdImage.sprite.rect.height != 0f)
-				{
-					AspectRatioFitter component = this.motdImage.gameObject.GetComponent<AspectRatioFitter>();
-					if (component != null)
-					{
-						float num = this.motdImage.sprite.rect.width / this.motdImage.sprite.rect.height;
-						component.aspectRatio = num;
-					}
-					else
-					{
-						global::Debug.LogWarning("Missing AspectRatioFitter on MainMenu motd image.");
-					}
-				}
-				else
-				{
-					global::Debug.LogWarning("Cannot resize motd image, missing sprite");
-				}
-				this.motdImageButton.ClearOnClick();
-				this.motdImageButton.onClick += delegate
-				{
-					App.OpenWebURL(response.image_link_url);
-				};
-				return;
-			}
-			global::Debug.LogWarning("Motd Request error: " + error);
-		});
+		this.motd.Setup();
 		if (DistributionPlatform.Initialized && DistributionPlatform.Inst.IsPreviousVersionBranch)
 		{
 			global::UnityEngine.Object.Instantiate<GameObject>(ScreenPrefabs.Instance.OldVersionWarningScreen, this.uiCanvas.transform);
@@ -307,15 +250,6 @@ public class MainMenu : KScreen
 		this.lockerButton.GetComponent<HierarchyReferences>().GetReference<RectTransform>("AttentionIcon").gameObject.SetActive(flag);
 	}
 
-	private void UnregisterMotdRequest()
-	{
-		if (this.m_motdServerClient != null)
-		{
-			this.m_motdServerClient.UnregisterCallback();
-			this.m_motdServerClient = null;
-		}
-	}
-
 	protected override void OnActivate()
 	{
 		if (!this.ambientLoopEventName.IsNullOrWhiteSpace())
@@ -331,7 +265,7 @@ public class MainMenu : KScreen
 	protected override void OnDeactivate()
 	{
 		base.OnDeactivate();
-		this.UnregisterMotdRequest();
+		this.motd.CleanUp();
 	}
 
 	public override void ScreenUpdate(bool topLevel)
@@ -348,7 +282,7 @@ public class MainMenu : KScreen
 	{
 		base.OnLoadLevel();
 		this.StopAmbience();
-		this.UnregisterMotdRequest();
+		this.motd.CleanUp();
 	}
 
 	private void ShowLanguageConfirmation()
@@ -492,7 +426,7 @@ public class MainMenu : KScreen
 					header = saveFileEntry.header;
 					gameInfo = saveFileEntry.headerData;
 				}
-				if (header.buildVersion > 577063U || gameInfo.saveMajorVersion != 7 || gameInfo.saveMinorVersion > 32)
+				if (header.buildVersion > 581698U || gameInfo.saveMajorVersion != 7 || gameInfo.saveMinorVersion > 33)
 				{
 					flag = false;
 				}
@@ -670,10 +604,6 @@ public class MainMenu : KScreen
 
 	private KButton Button_NewGame;
 
-	public GameObject topLeftAlphaMessage;
-
-	private MotdServerClient m_motdServerClient;
-
 	private GameObject GameSettingsScreen;
 
 	private bool m_screenshotMode;
@@ -702,25 +632,7 @@ public class MainMenu : KScreen
 	private EventInstance ambientLoop;
 
 	[SerializeField]
-	private GameObject MOTDContainer;
-
-	[SerializeField]
-	private GameObject buttonContainer;
-
-	[SerializeField]
-	private LocText motdImageHeader;
-
-	[SerializeField]
-	private KButton motdImageButton;
-
-	[SerializeField]
-	private Image motdImage;
-
-	[SerializeField]
-	private LocText motdNewsHeader;
-
-	[SerializeField]
-	private LocText motdNewsBody;
+	private MainMenu_Motd motd;
 
 	[SerializeField]
 	private PatchNotesScreen patchNotesScreenPrefab;

@@ -22,5 +22,6 @@ public enum SpawnFXHashes
 	MeteorImpactUranium = 2023312677,
 	ContaminatedOxygenBubbleWater = 328361878,
 	NuclearWasteDrip = -1160340439,
-	MissileExplosion = -1228570257
+	MissileExplosion = -1228570257,
+	MinionOutfitChanged = 1047510235
 }

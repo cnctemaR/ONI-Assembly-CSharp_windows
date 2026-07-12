@@ -28,7 +28,7 @@ public class CapacityControlSideScreen : SideScreenContent
 
 	public override bool IsValidForTarget(GameObject target)
 	{
-		return !target.GetComponent<IUserControlledCapacity>().IsNullOrDestroyed();
+		return !target.GetComponent<IUserControlledCapacity>().IsNullOrDestroyed() || target.GetSMI<IUserControlledCapacity>() != null;
 	}
 
 	public override void SetTarget(GameObject new_target)
@@ -39,6 +39,10 @@ public class CapacityControlSideScreen : SideScreenContent
 			return;
 		}
 		this.target = new_target.GetComponent<IUserControlledCapacity>();
+		if (this.target == null)
+		{
+			this.target = new_target.GetSMI<IUserControlledCapacity>();
+		}
 		if (this.target == null)
 		{
 			global::Debug.LogError("The gameObject received does not contain a IThresholdSwitch component");

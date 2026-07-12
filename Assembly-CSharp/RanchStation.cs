@@ -292,12 +292,18 @@ public class RanchStation : GameStateMachine<RanchStation, RanchStation.Instance
 			for (int i = this.targetRanchables.Count - 1; i >= 0; i--)
 			{
 				RanchableMonitor.Instance instance = this.targetRanchables[i];
-				if (!instance.IsNullOrStopped() && !instance.States.IsNullOrStopped())
+				if (instance.IsNullOrStopped() || instance.States.IsNullOrStopped())
+				{
+					this.targetRanchables.RemoveAt(i);
+				}
+				else
 				{
 					this.targetRanchables.Remove(instance);
 					instance.Trigger(1689625967, null);
 				}
 			}
+			global::Debug.Assert(this.targetRanchables.Count == 0, "targetRanchables is not empty");
+			this.activeRanchable = null;
 			base.sm.RancherIsReady.Set(false, this, false);
 		}
 

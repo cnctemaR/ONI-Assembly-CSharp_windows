@@ -295,6 +295,13 @@ namespace STRINGS
 				public static LocString DESC = "Useful techniques to manage critter populations in the colony.";
 			}
 
+			public class ANIMALCOMFORT
+			{
+				public static LocString NAME = UI.FormatAsLink("Creature Comforts", "ANIMALCOMFORT");
+
+				public static LocString DESC = "Strategies for maximizing critters' quality of life.";
+			}
+
 			public class DAIRYOPERATION
 			{
 				public static LocString NAME = UI.FormatAsLink("Brackene Flow", "DAIRYOPERATION");

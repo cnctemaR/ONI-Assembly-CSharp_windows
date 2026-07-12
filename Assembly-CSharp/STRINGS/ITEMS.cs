@@ -173,6 +173,20 @@ namespace STRINGS
 					UI.FormatAsLink("Frost Bun", "COLDWHEATBREAD"),
 					"."
 				});
+
+				public class DEHYDRATED
+				{
+					public static LocString NAME = "Dried Frost Burger";
+
+					public static LocString DESC = string.Concat(new string[]
+					{
+						"A dehydrated ",
+						UI.FormatAsLink("Frost Burger", "BURGER"),
+						" ration. It must be rehydrated in order to be considered ",
+						UI.FormatAsLink("Food", "FOOD"),
+						".\n\nDry rations have no expiry date."
+					});
+				}
 			}
 
 			public class FIELDRATION
@@ -212,6 +226,20 @@ namespace STRINGS
 					UI.FormatAsLink("Lettuce", "LETTUCE"),
 					"."
 				});
+
+				public class DEHYDRATED
+				{
+					public static LocString NAME = "Dried Mushroom Wrap";
+
+					public static LocString DESC = string.Concat(new string[]
+					{
+						"A dehydrated ",
+						UI.FormatAsLink("Mushroom Wrap", "MUSHROOMWRAP"),
+						" ration. It must be rehydrated in order to be considered ",
+						UI.FormatAsLink("Food", "FOOD"),
+						".\n\nDry rations have no expiry date."
+					});
+				}
 			}
 
 			public class MICROWAVEDLETTUCE
@@ -591,6 +619,20 @@ namespace STRINGS
 					UI.FormatAsLink("Gristle Berries", "PRICKLEFRUIT"),
 					"."
 				});
+
+				public class DEHYDRATED
+				{
+					public static LocString NAME = "Dried Berry Pie";
+
+					public static LocString DESC = string.Concat(new string[]
+					{
+						"A dehydrated ",
+						UI.FormatAsLink("Mixed Berry Pie", "BERRYPIE"),
+						" ration. It must be rehydrated in order to be considered ",
+						UI.FormatAsLink("Food", "FOOD"),
+						".\n\nDry rations have no expiry date."
+					});
+				}
 			}
 
 			public class COLDWHEATBREAD
@@ -623,6 +665,20 @@ namespace STRINGS
 				public static LocString DESC = "A loaf of bread, lightly spiced with " + UI.FormatAsLink("Pincha Peppernut", "SPICENUT") + " for a mild bite.\n\nThere's a simple joy to be had in pulling it apart in one's fingers.";
 
 				public static LocString RECIPEDESC = "A loaf of bread, lightly spiced with " + UI.FormatAsLink("Pincha Peppernut", "SPICENUT") + " for a mild bite.";
+
+				public class DEHYDRATED
+				{
+					public static LocString NAME = "Dried Pepper Bread";
+
+					public static LocString DESC = string.Concat(new string[]
+					{
+						"A dehydrated ",
+						UI.FormatAsLink("Pepper Bread", "SPICEBREAD"),
+						" ration. It must be rehydrated in order to be considered ",
+						UI.FormatAsLink("Food", "FOOD"),
+						".\n\nDry rations have no expiry date."
+					});
+				}
 			}
 
 			public class SURFANDTURF
@@ -646,6 +702,20 @@ namespace STRINGS
 					UI.FormatAsLink("Cooked Seafood", "COOKEDFISH"),
 					" from the sea."
 				});
+
+				public class DEHYDRATED
+				{
+					public static LocString NAME = "Dried Surf'n'Turf";
+
+					public static LocString DESC = string.Concat(new string[]
+					{
+						"A dehydrated ",
+						UI.FormatAsLink("Surf'n'Turf", "SURFANDTURF"),
+						" ration. It must be rehydrated in order to be considered ",
+						UI.FormatAsLink("Food", "FOOD"),
+						".\n\nDry rations have no expiry date."
+					});
+				}
 			}
 
 			public class TOFU
@@ -664,6 +734,20 @@ namespace STRINGS
 				public static LocString DESC = ITEMS.FOOD.TOFU.NAME + " marinated in a flavorful " + UI.FormatAsLink("Pincha Peppernut", "SPICENUT") + " sauce.\n\nIt packs a delightful punch.";
 
 				public static LocString RECIPEDESC = ITEMS.FOOD.TOFU.NAME + " marinated in a flavorful " + UI.FormatAsLink("Pincha Peppernut", "SPICENUT") + " sauce.";
+
+				public class DEHYDRATED
+				{
+					public static LocString NAME = "Dried Spicy Tofu";
+
+					public static LocString DESC = string.Concat(new string[]
+					{
+						"A dehydrated ",
+						UI.FormatAsLink("Spicy Tofu", "SPICYTOFU"),
+						" ration. It must be rehydrated in order to be considered ",
+						UI.FormatAsLink("Food", "FOOD"),
+						".\n\nDry rations have no expiry date."
+					});
+				}
 			}
 
 			public class CURRY
@@ -687,6 +771,20 @@ namespace STRINGS
 					ITEMS.INGREDIENTS.GINGER.NAME,
 					"."
 				});
+
+				public class DEHYDRATED
+				{
+					public static LocString NAME = "Dried Curried Beans";
+
+					public static LocString DESC = string.Concat(new string[]
+					{
+						"A dehydrated ",
+						UI.FormatAsLink("Curried Beans", "CURRY"),
+						" ration. It must be rehydrated in order to be considered ",
+						UI.FormatAsLink("Food", "FOOD"),
+						".\n\nDry rations have no expiry date."
+					});
+				}
 			}
 
 			public class SALSA
@@ -696,6 +794,20 @@ namespace STRINGS
 				public static LocString DESC = "A baked " + UI.FormatAsLink("Bristle Berry", "PRICKLEFRUIT") + " stuffed with delectable spices and vibrantly flavored.";
 
 				public static LocString RECIPEDESC = "A baked " + UI.FormatAsLink("Bristle Berry", "PRICKLEFRUIT") + " stuffed with delectable spices and vibrantly flavored.";
+
+				public class DEHYDRATED
+				{
+					public static LocString NAME = "Dried Stuffed Berry";
+
+					public static LocString DESC = string.Concat(new string[]
+					{
+						"A dehydrated ",
+						UI.FormatAsLink("Stuffed Berry", "SALSA"),
+						" ration. It must be rehydrated in order to be considered ",
+						UI.FormatAsLink("Food", "FOOD"),
+						".\n\nDry rations have no expiry date."
+					});
+				}
 			}
 
 			public class BASICPLANTFOOD
@@ -786,6 +898,20 @@ namespace STRINGS
 					UI.FormatAsLink("Lettuce", "LETTUCE"),
 					" piled onto a yummy crust."
 				});
+
+				public class DEHYDRATED
+				{
+					public static LocString NAME = "Dried Mushroom Quiche";
+
+					public static LocString DESC = string.Concat(new string[]
+					{
+						"A dehydrated ",
+						UI.FormatAsLink("Mushroom Quiche", "QUICHE"),
+						" ration. It must be rehydrated in order to be considered ",
+						UI.FormatAsLink("Food", "FOOD"),
+						".\n\nDry rations have no expiry date."
+					});
+				}
 			}
 		}
 
@@ -1112,6 +1238,17 @@ namespace STRINGS
 				UI.FormatAsLink("Somnium Synthesizer", "MEGABRAINTANK"),
 				"."
 			});
+		}
+
+		public class DEHYDRATEDFOODPACKAGE
+		{
+			public static LocString NAME = "Dry Ration";
+
+			public static LocString DESC = "A package of non-perishable dehydrated food.\n\nIt requires no refrigeration, but must be rehydrated before consumption.";
+
+			public static LocString CONSUMED = "Ate Rehydrated Food";
+
+			public static LocString CONTENTS = "Dried {0}";
 		}
 
 		public class SPICES

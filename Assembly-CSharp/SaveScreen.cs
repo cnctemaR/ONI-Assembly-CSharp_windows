@@ -84,7 +84,7 @@ public class SaveScreen : KModalScreen
 				this.Deactivate();
 			}, null, UI.FRONTEND.SAVESCREEN.REPORT_BUG, delegate
 			{
-				KCrashReporter.ReportError(e.Message, e.StackTrace.ToString(), null, null, null, true, null, null);
+				KCrashReporter.ReportError(e.Message, e.StackTrace.ToString(), null, null, null, true, new string[] { KCrashReporter.CRASH_CATEGORY.FILEIO }, null);
 			}, null, null, null, null);
 		}
 	}

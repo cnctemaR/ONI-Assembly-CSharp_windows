@@ -15,7 +15,13 @@ public class RobotAi : GameStateMachine<RobotAi, RobotAi.Instance>
 			}
 			smi.GoTo(this.alive);
 		});
-		this.alive.DefaultState(this.alive.normal).TagTransition(GameTags.Dead, this.dead, false);
+		this.alive.DefaultState(this.alive.normal).TagTransition(GameTags.Dead, this.dead, false).Toggle("Toggle Component Registration", delegate(RobotAi.Instance smi)
+		{
+			RobotAi.ToggleRegistration(smi, true);
+		}, delegate(RobotAi.Instance smi)
+		{
+			RobotAi.ToggleRegistration(smi, false);
+		});
 		this.alive.normal.TagTransition(GameTags.Stored, this.alive.stored, false).ToggleStateMachine((RobotAi.Instance smi) => new FallMonitor.Instance(smi.master, false, null));
 		this.alive.stored.PlayAnim("in_storage").TagTransition(GameTags.Stored, this.alive.normal, true).ToggleBrain("stored")
 			.Enter(delegate(RobotAi.Instance smi)
@@ -26,7 +32,7 @@ public class RobotAi : GameStateMachine<RobotAi, RobotAi.Instance>
 			{
 				smi.GetComponent<Navigator>().Unpause("unstored");
 			});
-		this.dead.ToggleBrain("dead").ToggleComponent<Deconstructable>(false).ToggleStateMachine((RobotAi.Instance smi) => new FallWhenDeadMonitor.Instance(smi.master))
+		this.dead.ToggleBrain("dead").ToggleComponentIfFound<Deconstructable>(false).ToggleStateMachine((RobotAi.Instance smi) => new FallWhenDeadMonitor.Instance(smi.master))
 			.Enter("RefreshUserMenu", delegate(RobotAi.Instance smi)
 			{
 				smi.RefreshUserMenu();
@@ -34,7 +40,26 @@ public class RobotAi : GameStateMachine<RobotAi, RobotAi.Instance>
 			.Enter("DropStorage", delegate(RobotAi.Instance smi)
 			{
 				smi.GetComponent<Storage>().DropAll(false, false, default(Vector3), true, null);
-			});
+			})
+			.Enter("Delete", new StateMachine<RobotAi, RobotAi.Instance, IStateMachineTarget, object>.State.Callback(RobotAi.DeleteOnDeath));
+	}
+
+	public static void DeleteOnDeath(RobotAi.Instance smi)
+	{
+		if (((RobotAi.Def)smi.def).DeleteOnDead)
+		{
+			smi.gameObject.DeleteObject();
+		}
+	}
+
+	private static void ToggleRegistration(RobotAi.Instance smi, bool register)
+	{
+		if (register)
+		{
+			Components.LiveRobotsIdentities.Add(smi);
+			return;
+		}
+		Components.LiveRobotsIdentities.Remove(smi);
 	}
 
 	public RobotAi.AliveStates alive;
@@ -43,6 +68,7 @@ public class RobotAi : GameStateMachine<RobotAi, RobotAi.Instance>
 
 	public class Def : StateMachine.BaseDef
 	{
+		public bool DeleteOnDead;
 	}
 
 	public class AliveStates : GameStateMachine<RobotAi, RobotAi.Instance, IStateMachineTarget, object>.State

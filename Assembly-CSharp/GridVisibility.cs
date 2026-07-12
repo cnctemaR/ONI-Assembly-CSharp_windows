@@ -8,7 +8,11 @@ public class GridVisibility : KMonoBehaviour
 	{
 		Singleton<CellChangeMonitor>.Instance.RegisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChange), "GridVisibility.OnSpawn");
 		this.OnCellChange();
-		base.gameObject.GetMyWorld().SetDiscovered(false);
+		WorldContainer myWorld = base.gameObject.GetMyWorld();
+		if (myWorld != null)
+		{
+			myWorld.SetDiscovered(false);
+		}
 	}
 
 	private void OnCellChange()

@@ -933,7 +933,7 @@ public class Grid
 		return cellsClear > 0;
 	}
 
-	public static bool TestLineOfSight(int x, int y, int x2, int y2, Func<int, bool> blocking_cb, bool blocking_tile_visible = false, bool allow_invalid_cells = false)
+	public static bool TestLineOfSight(int x, int y, int x2, int y2, Func<int, bool> blocking_cb, Func<int, bool> blocking_tile_visible_cb, bool allow_invalid_cells = false)
 	{
 		int num = x;
 		int num2 = y;
@@ -994,7 +994,7 @@ public class Grid
 			bool flag = blocking_cb(num12);
 			if ((x != num || y != num2) && flag)
 			{
-				return blocking_tile_visible && x == x2 && y == y2;
+				return blocking_tile_visible_cb(num12) && x == x2 && y == y2;
 			}
 			num11 += num10;
 			if (num11 >= num9)
@@ -1010,6 +1010,11 @@ public class Grid
 			}
 		}
 		return true;
+	}
+
+	public static bool TestLineOfSight(int x, int y, int x2, int y2, Func<int, bool> blocking_cb, bool blocking_tile_visible = false, bool allow_invalid_cells = false)
+	{
+		return Grid.TestLineOfSight(x, y, x2, y2, blocking_cb, (int c) => blocking_tile_visible, allow_invalid_cells);
 	}
 
 	public static bool GetFreeGridSpace(Vector2I size, out Vector2I offset)

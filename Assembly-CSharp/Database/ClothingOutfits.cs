@@ -55,6 +55,17 @@ namespace Database
 			this.Add("RebelGiOutfit", new string[] { "TopRebelGi", "PantsRebelGi", "GlovesCufflessBlack" }, UI.OUTFITS.REBELGI.NAME, ClothingOutfitUtility.OutfitType.Clothing);
 			this.Add("AtmoPinkPurple", new string[] { "AtmoBeltBasicNeonPink", "AtmoGlovesStripesLavender", "AtmoHelmetWorkoutLavender", "AtmoSuitBasicNeonPink", "AtmoShoesBasicLavender" }, UI.OUTFITS.ATMOSUIT_PINK_PURPLE.NAME, ClothingOutfitUtility.OutfitType.AtmoSuit);
 			this.Add("AtmoRedGrey", new string[] { "AtmoBeltBasicGrey", "AtmoGlovesWhite", "AtmoHelmetCummerbundRed", "AtmoSuitMultiRedBlack" }, UI.OUTFITS.ATMOSUIT_RED_GREY.NAME, ClothingOutfitUtility.OutfitType.AtmoSuit);
+			this.Add("Donor", new string[] { "TopJacketSmokingBurgundy", "BottomBasicBlack", "GlovesBasicBlack" }, UI.OUTFITS.DONOR.NAME, ClothingOutfitUtility.OutfitType.Clothing);
+			this.Add("EngineerCoveralls", new string[] { "TopMechanic", "PantsBasicRedOrange", "GlovesBasicGrey", "ShoesBasicBlack" }, UI.OUTFITS.MECHANIC.NAME, ClothingOutfitUtility.OutfitType.Clothing);
+			this.Add("PhdVelour", new string[] { "TopVelourBlack", "PantsVelourBlack", "GlovesBasicWhite", "ShoesVelourBlack" }, UI.OUTFITS.VELOUR_BLACK.NAME, ClothingOutfitUtility.OutfitType.Clothing);
+			this.Add("PhdDress", new string[] { "DressSleevelessBowBw", "GlovesLongWhite", "ShoesMaryjaneSocksBw" }, UI.OUTFITS.SLEEVELESS_BOW_BW.NAME, ClothingOutfitUtility.OutfitType.Clothing);
+			this.Add("ShortwaveVelour", new string[] { "TopVelourBlue", "PantsVelourBlue", "GlovesBasicWhite", "ShoesVelourBlue" }, UI.OUTFITS.VELOUR_BLUE.NAME, ClothingOutfitUtility.OutfitType.Clothing);
+			this.Add("GammaVelour", new string[] { "TopVelourPink", "PantsVelourPink", "GlovesBasicPinksalmon", "ShoesVelourPink" }, UI.OUTFITS.VELOUR_PINK.NAME, ClothingOutfitUtility.OutfitType.Clothing);
+			this.Add("HvacCoveralls", new string[] { "TopWater", "PantsBasicLightBrown", "GlovesBasicTan", "ShoesBasicTan" }, UI.OUTFITS.WATER.NAME, ClothingOutfitUtility.OutfitType.Clothing);
+			this.Add("NobelPinstripe", new string[] { "TopWaistcoatPinstripeSlate", "PantsPinstripeSlate" }, UI.OUTFITS.WAISTCOAT_PINSTRIPE_SLATE.NAME, ClothingOutfitUtility.OutfitType.Clothing);
+			this.Add("PowerBrunch", new string[] { "TopTweedPinkOrchid", "SkirtTweedPinkOrchid", "Gloves2ToneCreamCharcoal", "ShoesClassicFlatsCreamCharcoal" }, UI.OUTFITS.TWEED_PINK_ORCHID.NAME, ClothingOutfitUtility.OutfitType.Clothing);
+			this.Add("Ballet", new string[] { "BodysuitBallerinaPink", "SkirtBallerinaPink", "GlovesBallerinaPink", "ShoesBallerinaPink" }, UI.OUTFITS.BALLET.NAME, ClothingOutfitUtility.OutfitType.Clothing);
+			this.Add("AtmoRocketmelon", new string[] { "AtmoHelmetRocketmelon", "AtmoSuitRocketmelon", "AtmoGlovesRocketmelon", "AtmoBeltRocketmelon", "AtmoBootsRocketmelon" }, UI.OUTFITS.ATMOSUIT_CANTALOUPE.NAME, ClothingOutfitUtility.OutfitType.AtmoSuit);
 			ClothingOutfitUtility.LoadClothingOutfitData(this);
 		}
 

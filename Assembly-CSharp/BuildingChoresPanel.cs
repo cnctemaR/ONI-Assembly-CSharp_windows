@@ -84,12 +84,21 @@ public class BuildingChoresPanel : TargetScreen
 		HierarchyReferences choreEntry = this.GetChoreEntry(GameUtil.GetChoreName(chore, null), chore.choreType, this.choreGroup.GetReference<RectTransform>("EntriesContainer"));
 		FetchChore fetchChore = chore as FetchChore;
 		ListPool<Chore.Precondition.Context, BuildingChoresPanel>.PooledList pooledList = ListPool<Chore.Precondition.Context, BuildingChoresPanel>.Allocate();
-		foreach (Component component in Components.LiveMinionIdentities.Items)
+		List<GameObject> list = new List<GameObject>();
+		foreach (MinionIdentity minionIdentity in Components.LiveMinionIdentities.Items)
+		{
+			list.Add(minionIdentity.gameObject);
+		}
+		foreach (RobotAi.Instance instance in Components.LiveRobotsIdentities.Items)
+		{
+			list.Add(instance.gameObject);
+		}
+		foreach (GameObject gameObject in list)
 		{
 			pooledList.Clear();
-			ChoreConsumer component2 = component.GetComponent<ChoreConsumer>();
+			ChoreConsumer component = gameObject.GetComponent<ChoreConsumer>();
 			Chore.Precondition.Context context = default(Chore.Precondition.Context);
-			ChoreConsumer.PreconditionSnapshot lastPreconditionSnapshot = component2.GetLastPreconditionSnapshot();
+			ChoreConsumer.PreconditionSnapshot lastPreconditionSnapshot = component.GetLastPreconditionSnapshot();
 			if (lastPreconditionSnapshot.doFailedContextsNeedSorting)
 			{
 				lastPreconditionSnapshot.failedContexts.Sort();
@@ -101,7 +110,7 @@ public class BuildingChoresPanel : TargetScreen
 			int num2 = 0;
 			for (int i = pooledList.Count - 1; i >= 0; i--)
 			{
-				if (!(pooledList[i].chore.driver != null) || !(pooledList[i].chore.driver != component2.choreDriver))
+				if (!(pooledList[i].chore.driver != null) || !(pooledList[i].chore.driver != component.choreDriver))
 				{
 					bool flag = pooledList[i].IsPotentialSuccess();
 					if (flag)
@@ -121,9 +130,9 @@ public class BuildingChoresPanel : TargetScreen
 			{
 				this.DupeEntryDatas.Add(new BuildingChoresPanel.DupeEntryData
 				{
-					consumer = component2,
+					consumer = component,
 					context = context,
-					personalPriority = component2.GetPersonalPriority(chore.choreType),
+					personalPriority = component.GetPersonalPriority(chore.choreType),
 					rank = num
 				});
 			}

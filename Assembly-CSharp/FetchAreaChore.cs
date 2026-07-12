@@ -84,7 +84,7 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 			global::Debug.Log(string.Format("Pickupable {0} is marked for move.", pickupable));
 			return false;
 		}
-		return true;
+		return pickupable.isChoreAllowedToPickup(chore.choreType);
 	}
 
 	public static void GatherNearbyFetchChores(FetchChore root_chore, Chore.Precondition.Context context, int x, int y, int radius, List<Chore.Precondition.Context> succeeded_contexts, List<Chore.Precondition.Context> failed_contexts)
@@ -400,7 +400,7 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 				if (!(gameObject == null))
 				{
 					KPrefabID component = gameObject.GetComponent<KPrefabID>();
-					if (!(component == null))
+					if (!(component == null) && !component.HasTag(GameTags.MarkedForMove))
 					{
 						Pickupable component2 = component.GetComponent<Pickupable>();
 						if (component2 != null)

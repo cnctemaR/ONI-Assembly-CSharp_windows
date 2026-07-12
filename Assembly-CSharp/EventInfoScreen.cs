@@ -27,6 +27,7 @@ public class EventInfoScreen : KModalScreen
 		{
 			data.AddDefaultOption(null);
 		}
+		this.artSection.gameObject.SetActive(data.animFileName != HashedString.Invalid);
 		this.SetEventDataOptions(data);
 		this.SetEventDataVisuals(data);
 	}
@@ -294,6 +295,9 @@ public class EventInfoScreen : KModalScreen
 	private GameObject optionTextPrefab;
 
 	[Header("Groups")]
+	[SerializeField]
+	private Transform artSection;
+
 	[SerializeField]
 	private Transform midgroundGroup;
 

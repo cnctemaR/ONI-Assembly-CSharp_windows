@@ -156,6 +156,12 @@ public static class DebugUtil
 		});
 	}
 
+	public static void LogExceptionCallstack(global::UnityEngine.Object context, string msg, string callstack, Exception e)
+	{
+		DebugUtil.s_lastExceptionLogged = e;
+		DebugUtil.LogErrorArgs(context, new object[] { DebugUtil.START_CALLSTACK + callstack + DebugUtil.END_CALLSTACK + msg });
+	}
+
 	public static Exception RetrieveLastExceptionLogged()
 	{
 		Exception ex = DebugUtil.s_lastExceptionLogged;
@@ -224,6 +230,10 @@ public static class DebugUtil
 	private static Exception s_lastExceptionLogged;
 
 	public static string LINE = "-----------------------------------------------------------";
+
+	public static string START_CALLSTACK = "~~~!";
+
+	public static string END_CALLSTACK = "!~~~";
 
 	private static StringBuilder fullNameBuilder = new StringBuilder();
 }

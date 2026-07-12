@@ -46,7 +46,8 @@ namespace Database
 						DebugUtil.DevAssert(string.Equals(directoryInfo2.Name, equippableFacadeInfo.defID, StringComparison.OrdinalIgnoreCase), "DefID mismatch!", null);
 						if (equippableFacadeInfo.defID != null)
 						{
-							this.resources.Add(new EquippableFacadeResource(equippableFacadeInfo.id, equippableFacadeInfo.name, equippableFacadeInfo.buildoverride, equippableFacadeInfo.defID, equippableFacadeInfo.animfile));
+							string text = ((equippableFacadeInfo.name != null) ? Strings.Get(equippableFacadeInfo.name) : "NAME NOT POPULATED (DbEquippableFacades)");
+							this.resources.Add(new EquippableFacadeResource(equippableFacadeInfo.id, text, equippableFacadeInfo.buildoverride, equippableFacadeInfo.defID, equippableFacadeInfo.animfile));
 							InventoryOrganization.subcategoryIdToPermitIdsMap["YAML"].Add(equippableFacadeInfo.id);
 						}
 					}

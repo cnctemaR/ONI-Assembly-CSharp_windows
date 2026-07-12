@@ -119,7 +119,7 @@ public class ReorderableBuilding : KMonoBehaviour
 	{
 		BuildingAttachPoint component = base.GetComponent<BuildingAttachPoint>();
 		AttachableBuilding attachableBuilding = null;
-		if (component != null)
+		if (component != null && component.points[0].attachedBuilding != null && component.points[0].attachedBuilding.HasTag(GameTags.RocketModule))
 		{
 			attachableBuilding = component.points[0].attachedBuilding;
 		}
@@ -311,7 +311,7 @@ public class ReorderableBuilding : KMonoBehaviour
 		AttachableBuilding component2 = base.GetComponent<AttachableBuilding>();
 		if (moveAmount > 0)
 		{
-			if (component != null && component.points[0].attachedBuilding != null && component.points[0].attachedBuilding.gameObject != ignoreBuilding && !component.points[0].attachedBuilding.GetComponent<ReorderableBuilding>().CanMoveVertically(moveAmount, null))
+			if (component != null && component.points[0].attachedBuilding != null && component.points[0].attachedBuilding.gameObject != ignoreBuilding && component.points[0].attachedBuilding.HasTag(GameTags.RocketModule) && !component.points[0].attachedBuilding.GetComponent<ReorderableBuilding>().CanMoveVertically(moveAmount, null))
 			{
 				return false;
 			}

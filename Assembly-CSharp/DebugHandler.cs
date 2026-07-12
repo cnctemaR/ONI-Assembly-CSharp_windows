@@ -240,7 +240,7 @@ public class DebugHandler : IInputHandler
 			{
 				if (!(DiscoveredResources.Instance != null))
 				{
-					goto IL_0B62;
+					goto IL_0B80;
 				}
 				using (List<Element>.Enumerator enumerator = ElementLoader.elements.GetEnumerator())
 				{
@@ -249,7 +249,7 @@ public class DebugHandler : IInputHandler
 						Element element = enumerator.Current;
 						DiscoveredResources.Instance.Discover(element.tag, element.GetMaterialCategoryTag());
 					}
-					goto IL_0B62;
+					goto IL_0B80;
 				}
 			}
 			if (e.TryConsume(global::Action.DebugToggleUI))
@@ -355,7 +355,7 @@ public class DebugHandler : IInputHandler
 								smi2.GoToCursor();
 							}
 						}
-						goto IL_0B62;
+						goto IL_0B80;
 					}
 				}
 				if (e.TryConsume(global::Action.DebugTeleport))
@@ -464,20 +464,26 @@ public class DebugHandler : IInputHandler
 						}
 						else if (e.TryConsume(global::Action.DebugTriggerError))
 						{
-							global::UnityEngine.Debug.Log("trigger error");
 							if (GenericGameSettings.instance.developerDebugEnable)
 							{
+								global::UnityEngine.Debug.Log("trigger error");
 								KCrashReporter.disableDeduping = true;
 								global::Debug.LogError("Oooops! Testing error!");
 							}
 						}
 						else if (e.TryConsume(global::Action.DebugDumpGCRoots))
 						{
-							GarbageProfiler.DebugDumpRootItems();
+							if (GenericGameSettings.instance.developerDebugEnable)
+							{
+								GarbageProfiler.DebugDumpRootItems();
+							}
 						}
 						else if (e.TryConsume(global::Action.DebugDumpGarbageReferences))
 						{
-							GarbageProfiler.DebugDumpGarbageStats();
+							if (GenericGameSettings.instance.developerDebugEnable)
+							{
+								GarbageProfiler.DebugDumpGarbageStats();
+							}
 						}
 						else if (e.TryConsume(global::Action.DebugDumpEventData))
 						{
@@ -515,7 +521,7 @@ public class DebugHandler : IInputHandler
 				}
 			}
 		}
-		IL_0B62:
+		IL_0B80:
 		if (e.Consumed && Game.Instance != null)
 		{
 			Game.Instance.debugWasUsed = true;

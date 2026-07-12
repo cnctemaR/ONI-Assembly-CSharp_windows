@@ -23,6 +23,7 @@ public class JetSuitMarkerConfig : IBuildingConfig
 		buildingDef.PreventIdleTraversalPastBuilding = true;
 		buildingDef.SceneLayer = Grid.SceneLayer.BuildingUse;
 		buildingDef.ForegroundLayer = Grid.SceneLayer.TileMain;
+		buildingDef.LogicInputPorts = LogicOperationalController.CreateSingleInputPortList(new CellOffset(0, 0));
 		GeneratedBuildings.RegisterWithOverlay(OverlayScreen.SuitIDs, "JetSuitMarker");
 		return buildingDef;
 	}
@@ -46,6 +47,7 @@ public class JetSuitMarkerConfig : IBuildingConfig
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
+		go.AddOrGet<LogicOperationalController>();
 	}
 
 	public const string ID = "JetSuitMarker";

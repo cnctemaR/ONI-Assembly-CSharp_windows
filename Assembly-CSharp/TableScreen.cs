@@ -187,6 +187,7 @@ public class TableScreen : ShowOptimizedKScreen
 		{
 			this.AddWorldDivider(num);
 		}
+		this.AddWorldDivider(255);
 		foreach (KeyValuePair<int, bool> keyValuePair in this.obsoleteWorldDividerStatus)
 		{
 			if (keyValuePair.Value)
@@ -202,14 +203,28 @@ public class TableScreen : ShowOptimizedKScreen
 			foreach (object obj in Components.MinionAssignablesProxy)
 			{
 				MinionAssignablesProxy minionAssignablesProxy = (MinionAssignablesProxy)obj;
-				if (minionAssignablesProxy != null && minionAssignablesProxy.GetTargetGameObject() != null && minionAssignablesProxy.GetTargetGameObject().GetMyWorld().id == keyValuePair2.Key)
+				if (minionAssignablesProxy != null && minionAssignablesProxy.GetTargetGameObject() != null)
 				{
-					flag = false;
-					break;
+					WorldContainer myWorld = minionAssignablesProxy.GetTargetGameObject().GetMyWorld();
+					if (myWorld != null && myWorld.id == keyValuePair2.Key)
+					{
+						flag = false;
+						break;
+					}
+					if (myWorld == null && keyValuePair2.Key == 255)
+					{
+						flag = false;
+						break;
+					}
 				}
 			}
 			reference.gameObject.SetActive(flag);
-			bool flag2 = ClusterManager.Instance.GetWorld(keyValuePair2.Key).IsDiscovered && DlcManager.FeatureClusterSpaceEnabled();
+			WorldContainer world = ClusterManager.Instance.GetWorld(keyValuePair2.Key);
+			bool flag2 = DlcManager.FeatureClusterSpaceEnabled() && (world == null || ClusterManager.Instance.GetWorld(keyValuePair2.Key).IsDiscovered);
+			if (world == null && flag)
+			{
+				flag2 = false;
+			}
 			if (keyValuePair2.Value.activeSelf != flag2)
 			{
 				keyValuePair2.Value.SetActive(flag2);
@@ -289,24 +304,28 @@ public class TableScreen : ShowOptimizedKScreen
 		Dictionary<int, List<IAssignableIdentity>> dictionary2 = new Dictionary<int, List<IAssignableIdentity>>();
 		foreach (KeyValuePair<IAssignableIdentity, TableRow> keyValuePair in dictionary)
 		{
-			int id = keyValuePair.Key.GetSoleOwner().GetComponent<MinionAssignablesProxy>().GetTargetGameObject()
+			WorldContainer myWorld = keyValuePair.Key.GetSoleOwner().GetComponent<MinionAssignablesProxy>().GetTargetGameObject()
 				.GetComponent<KMonoBehaviour>()
-				.GetMyWorld()
-				.id;
-			if (!dictionary2.ContainsKey(id))
+				.GetMyWorld();
+			int num = 255;
+			if (myWorld != null)
 			{
-				dictionary2.Add(id, new List<IAssignableIdentity>());
+				num = myWorld.id;
 			}
-			dictionary2[id].Add(keyValuePair.Key);
+			if (!dictionary2.ContainsKey(num))
+			{
+				dictionary2.Add(num, new List<IAssignableIdentity>());
+			}
+			dictionary2[num].Add(keyValuePair.Key);
 		}
 		this.all_sortable_rows.Clear();
 		Dictionary<int, int> dictionary3 = new Dictionary<int, int>();
-		int num = 0;
 		int num2 = 0;
+		int num3 = 0;
 		foreach (KeyValuePair<int, List<IAssignableIdentity>> keyValuePair2 in dictionary2)
 		{
-			dictionary3.Add(keyValuePair2.Key, num);
-			num++;
+			dictionary3.Add(keyValuePair2.Key, num2);
+			num2++;
 			List<IAssignableIdentity> list = new List<IAssignableIdentity>();
 			foreach (IAssignableIdentity assignableIdentity in keyValuePair2.Value)
 			{
@@ -320,8 +339,8 @@ public class TableScreen : ShowOptimizedKScreen
 					list.Reverse();
 				}
 			}
-			num += list.Count;
 			num2 += list.Count;
+			num3 += list.Count;
 			for (int i = 0; i < list.Count; i++)
 			{
 				this.all_sortable_rows.Add(dictionary[list[i]]);
@@ -433,11 +452,21 @@ public class TableScreen : ShowOptimizedKScreen
 		gameObject.GetComponentInChildren<Image>().color = ClusterManager.worldColors[worldId % ClusterManager.worldColors.Length];
 		RectTransform component = gameObject.GetComponentInChildren<LocText>().GetComponent<RectTransform>();
 		component.sizeDelta = new Vector2(150f, component.sizeDelta.y);
-		ClusterGridEntity component2 = ClusterManager.Instance.GetWorld(worldId).GetComponent<ClusterGridEntity>();
-		string text = ((component2 is Clustercraft) ? NAMEGEN.WORLD.SPACECRAFT_PREFIX : NAMEGEN.WORLD.PLANETOID_PREFIX);
-		gameObject.GetComponentInChildren<LocText>().SetText(text + component2.Name);
-		gameObject.GetComponentInChildren<ToolTip>().SetSimpleTooltip(string.Format(NAMEGEN.WORLD.WORLDDIVIDER_TOOLTIP, component2.Name));
-		gameObject.GetComponent<HierarchyReferences>().GetReference<Image>("Icon").sprite = component2.GetUISprite();
+		WorldContainer world = ClusterManager.Instance.GetWorld(worldId);
+		if (world != null)
+		{
+			ClusterGridEntity component2 = world.GetComponent<ClusterGridEntity>();
+			string text = ((component2 is Clustercraft) ? NAMEGEN.WORLD.SPACECRAFT_PREFIX : NAMEGEN.WORLD.PLANETOID_PREFIX);
+			gameObject.GetComponentInChildren<LocText>().SetText(text + component2.Name);
+			gameObject.GetComponentInChildren<ToolTip>().SetSimpleTooltip(string.Format(NAMEGEN.WORLD.WORLDDIVIDER_TOOLTIP, component2.Name));
+			gameObject.GetComponent<HierarchyReferences>().GetReference<Image>("Icon").sprite = component2.GetUISprite();
+		}
+		else
+		{
+			gameObject.GetComponentInChildren<LocText>().SetText(NAMEGEN.WORLD.UNKNOWN_WORLD);
+			gameObject.GetComponentInChildren<ToolTip>().SetSimpleTooltip("");
+			gameObject.GetComponent<HierarchyReferences>().GetReference<Image>("Icon").sprite = Assets.GetSprite("hex_unknown");
+		}
 		this.worldDividers.Add(worldId, gameObject);
 		gameObject.GetComponent<TableRow>().ConfigureAsWorldDivider(this.columns, this);
 	}

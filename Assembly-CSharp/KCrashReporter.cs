@@ -102,6 +102,12 @@ public class KCrashReporter : MonoBehaviour
 		{
 			return;
 		}
+		if (msg != null && msg.StartsWith(DebugUtil.START_CALLSTACK))
+		{
+			string text = msg;
+			msg = text.Substring(text.IndexOf(DebugUtil.END_CALLSTACK, StringComparison.Ordinal) + DebugUtil.END_CALLSTACK.Length);
+			stack_trace = text.Substring(DebugUtil.START_CALLSTACK.Length, text.IndexOf(DebugUtil.END_CALLSTACK, StringComparison.Ordinal) - DebugUtil.START_CALLSTACK.Length);
+		}
 		if (Array.IndexOf<string>(KCrashReporter.IgnoreStrings, msg) != -1)
 		{
 			return;
@@ -132,10 +138,11 @@ public class KCrashReporter : MonoBehaviour
 			{
 				SpeedControlScreen.Instance.Pause(true, true);
 			}
-			string text = stack_trace;
-			if (string.IsNullOrEmpty(text))
+			string text2 = msg;
+			string text3 = stack_trace;
+			if (string.IsNullOrEmpty(text3))
 			{
-				text = new StackTrace(5, true).ToString();
+				text3 = new StackTrace(5, true).ToString();
 			}
 			if (App.isLoading)
 			{
@@ -143,15 +150,15 @@ public class KCrashReporter : MonoBehaviour
 				{
 					SceneInitializerLoader.deferred_error = new SceneInitializerLoader.DeferredError
 					{
-						msg = msg,
-						stack_trace = text
+						msg = text2,
+						stack_trace = text3
 					};
 					return;
 				}
 			}
 			else
 			{
-				this.ShowDialog(msg, text);
+				this.ShowDialog(text2, text3);
 			}
 		}
 	}
@@ -258,7 +265,7 @@ public class KCrashReporter : MonoBehaviour
 		if (!KCrashReporter.previouslyReportedDevNotifications.Contains(hashValue))
 		{
 			KCrashReporter.previouslyReportedDevNotifications.Add(hashValue);
-			KCrashReporter.ReportError("DevNotification: " + notification_name, stack_trace, null, null, details, includeSaveFile, new string[] { KCrashReporter.Error.CATEGORIES.DEVNOTIFICATION }, null);
+			KCrashReporter.ReportError("DevNotification: " + notification_name, stack_trace, null, null, details, includeSaveFile, new string[] { KCrashReporter.CRASH_CATEGORY.DEVNOTIFICATION }, null);
 		}
 		KCrashReporter.hasReportedError = hasReportedError;
 	}
@@ -380,17 +387,18 @@ public class KCrashReporter : MonoBehaviour
 				((ConfirmDialogScreen)KScreenManager.Instance.StartScreen(confirm_prefab.gameObject, confirm_parent)).PopupConfirmDialog(UI.CRASHSCREEN.REPORTEDERROR_SUCCESS, null, null, null, null, null, null, null, null);
 			}
 		};
-		global::System.Action action2 = delegate
+		Action<long> action2 = delegate(long errorCode)
 		{
 			if (confirm_prefab != null && confirm_parent != null)
 			{
-				((ConfirmDialogScreen)KScreenManager.Instance.StartScreen(confirm_prefab.gameObject, confirm_parent)).PopupConfirmDialog(UI.CRASHSCREEN.REPORTEDERROR_FAILURE, null, null, null, null, null, null, null, null);
+				string text7 = ((errorCode == 413L) ? UI.CRASHSCREEN.REPORTEDERROR_FAILURE_TOO_LARGE : UI.CRASHSCREEN.REPORTEDERROR_FAILURE);
+				((ConfirmDialogScreen)KScreenManager.Instance.StartScreen(confirm_prefab.gameObject, confirm_parent)).PopupConfirmDialog(text7, null, null, null, null, null, null, null, null);
 			}
 		};
 		Global.Instance.StartCoroutine(KCrashReporter.SubmitCrashAsync(text6, array4, action, action2));
 	}
 
-	private static IEnumerator SubmitCrashAsync(string jsonString, byte[] archiveData, global::System.Action successCallback, global::System.Action failureCallback)
+	private static IEnumerator SubmitCrashAsync(string jsonString, byte[] archiveData, global::System.Action successCallback, Action<long> failureCallback)
 	{
 		bool success = false;
 		Uri uri = new Uri("https://games-feedback.klei.com/submit");
@@ -414,6 +422,7 @@ public class KCrashReporter : MonoBehaviour
 			}
 			if (w.result == UnityWebRequest.Result.Success)
 			{
+				global::UnityEngine.Debug.Log("Submitted crash!");
 				if (successCallback != null)
 				{
 					successCallback();
@@ -425,7 +434,7 @@ public class KCrashReporter : MonoBehaviour
 				global::UnityEngine.Debug.Log("CrashReporter: Could not submit crash " + w.result.ToString());
 				if (failureCallback != null)
 				{
-					failureCallback();
+					failureCallback(w.responseCode);
 				}
 			}
 		}
@@ -459,7 +468,7 @@ public class KCrashReporter : MonoBehaviour
 		{
 			return;
 		}
-		KCrashReporter.ReportError(msg, stack_trace, null, null, "", true, new string[] { KCrashReporter.Error.CATEGORIES.SIM }, new string[] { dmp_filename });
+		KCrashReporter.ReportError(msg, stack_trace, null, null, "", true, new string[] { KCrashReporter.CRASH_CATEGORY.SIM }, new string[] { dmp_filename });
 	}
 
 	private static byte[] CreateArchiveZip(string log, List<string> files)
@@ -471,11 +480,6 @@ public class KCrashReporter : MonoBehaviour
 			{
 				if (files != null)
 				{
-					using (Stream stream = zipArchive.CreateEntry("Player.log", global::System.IO.Compression.CompressionLevel.Fastest).Open())
-					{
-						byte[] bytes = Encoding.UTF8.GetBytes(log);
-						stream.Write(bytes, 0, bytes.Length);
-					}
 					foreach (string text in files)
 					{
 						try
@@ -486,10 +490,10 @@ public class KCrashReporter : MonoBehaviour
 							}
 							else
 							{
-								using (Stream stream2 = zipArchive.CreateEntry(Path.GetFileName(text), global::System.IO.Compression.CompressionLevel.Fastest).Open())
+								using (Stream stream = zipArchive.CreateEntry(Path.GetFileName(text), global::System.IO.Compression.CompressionLevel.Fastest).Open())
 								{
 									byte[] array = File.ReadAllBytes(text);
-									stream2.Write(array, 0, array.Length);
+									stream.Write(array, 0, array.Length);
 								}
 							}
 						}
@@ -501,6 +505,11 @@ public class KCrashReporter : MonoBehaviour
 							Exception ex2 = ex;
 							global::UnityEngine.Debug.Log(text2 + text3 + text4 + ((ex2 != null) ? ex2.ToString() : null));
 						}
+					}
+					using (Stream stream2 = zipArchive.CreateEntry("Player.log", global::System.IO.Compression.CompressionLevel.Fastest).Open())
+					{
+						byte[] bytes = Encoding.UTF8.GetBytes(log);
+						stream2.Write(bytes, 0, bytes.Length);
 					}
 				}
 			}
@@ -550,6 +559,27 @@ public class KCrashReporter : MonoBehaviour
 
 	private static HashSet<int> previouslyReportedDevNotifications;
 
+	public class CRASH_CATEGORY
+	{
+		public static string DEVNOTIFICATION = "DevNotification";
+
+		public static string VANILLA = "Vanilla";
+
+		public static string SPACEDOUT = "SpacedOut";
+
+		public static string MODDED = "Modded";
+
+		public static string DEBUGUSED = "DebugUsed";
+
+		public static string SANDBOX = "Sandbox";
+
+		public static string STEAMDECK = "SteamDeck";
+
+		public static string SIM = "SimDll";
+
+		public static string FILEIO = "FileIO";
+	}
+
 	private class Error
 	{
 		public Error()
@@ -574,27 +604,27 @@ public class KCrashReporter : MonoBehaviour
 		{
 			if (DlcManager.IsPureVanilla())
 			{
-				this.categories.Add(KCrashReporter.Error.CATEGORIES.VANILLA);
+				this.categories.Add(KCrashReporter.CRASH_CATEGORY.VANILLA);
 			}
 			if (DlcManager.IsExpansion1Active())
 			{
-				this.categories.Add(KCrashReporter.Error.CATEGORIES.SPACEDOUT);
+				this.categories.Add(KCrashReporter.CRASH_CATEGORY.SPACEDOUT);
 			}
 			if (KCrashReporter.debugWasUsed)
 			{
-				this.categories.Add(KCrashReporter.Error.CATEGORIES.DEBUGUSED);
+				this.categories.Add(KCrashReporter.CRASH_CATEGORY.DEBUGUSED);
 			}
 			if (KCrashReporter.haveActiveMods)
 			{
-				this.categories.Add(KCrashReporter.Error.CATEGORIES.MODDED);
+				this.categories.Add(KCrashReporter.CRASH_CATEGORY.MODDED);
 			}
 			if (SaveGame.Instance != null && SaveGame.Instance.sandboxEnabled)
 			{
-				this.categories.Add(KCrashReporter.Error.CATEGORIES.SANDBOX);
+				this.categories.Add(KCrashReporter.CRASH_CATEGORY.SANDBOX);
 			}
 			if (DistributionPlatform.Inst.Initialized && SteamUtils.IsSteamRunningOnSteamDeck())
 			{
-				this.categories.Add(KCrashReporter.Error.CATEGORIES.STEAMDECK);
+				this.categories.Add(KCrashReporter.CRASH_CATEGORY.STEAMDECK);
 			}
 		}
 
@@ -653,7 +683,7 @@ public class KCrashReporter : MonoBehaviour
 
 		public string sku = "";
 
-		public int build = 577063;
+		public int build = 581698;
 
 		public string callstack = "";
 
@@ -684,24 +714,5 @@ public class KCrashReporter : MonoBehaviour
 		public bool isError = true;
 
 		public string emote = "";
-
-		public class CATEGORIES
-		{
-			public static string DEVNOTIFICATION = "DevNotification";
-
-			public static string VANILLA = "Vanilla";
-
-			public static string SPACEDOUT = "SpacedOut";
-
-			public static string MODDED = "Modded";
-
-			public static string DEBUGUSED = "DebugUsed";
-
-			public static string SANDBOX = "Sandbox";
-
-			public static string STEAMDECK = "SteamDeck";
-
-			public static string SIM = "SimDll";
-		}
 	}
 }

@@ -47,12 +47,12 @@ public static class BaseMoleConfig
 			}, true, -1)
 			.Add(new NestingPoopState.Def(is_baby ? Tag.Invalid : SimHashes.Regolith.CreateTag()), true, -1)
 			.Add(new PlayAnimsStates.Def(GameTags.Creatures.Poop, false, "poop", global::STRINGS.CREATURES.STATUSITEMS.EXPELLING_SOLID.NAME, global::STRINGS.CREATURES.STATUSITEMS.EXPELLING_SOLID.TOOLTIP), true, -1)
+			.Add(new CritterCondoStates.Def(), !is_baby, -1)
 			.PopInterruptGroup()
 			.Add(new IdleStates.Def
 			{
 				customIdleAnim = new IdleStates.Def.IdleAnimCallback(BaseMoleConfig.CustomIdleAnim)
 			}, true, -1);
-		gameObject.AddOrGetDef<DrinkMilkMonitor.Def>();
 		EntityTemplates.AddCreatureBrain(gameObject, builder, GameTags.Creatures.Species.MoleSpecies, symbolOverridePrefix);
 		return gameObject;
 	}

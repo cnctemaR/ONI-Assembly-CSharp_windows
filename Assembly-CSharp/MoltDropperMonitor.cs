@@ -56,7 +56,7 @@ public class MoltDropperMonitor : GameStateMachine<MoltDropperMonitor, MoltDropp
 
 		public bool ShouldDropElement()
 		{
-			return this.IsValidTimeToDrop() && !base.smi.HasTag(GameTags.Creatures.Hungry) && !base.smi.HasTag(GameTags.Creatures.Unhappy) && this.IsValidDropCell();
+			return this.IsValidTimeToDrop() && !base.smi.HasTag(GameTags.Creatures.Hungry) && base.smi.HasTag(GameTags.Creatures.Happy) && this.IsValidDropCell();
 		}
 
 		public void Drop()

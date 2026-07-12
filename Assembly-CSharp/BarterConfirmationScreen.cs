@@ -187,6 +187,9 @@ public class BarterConfirmationScreen : KModalScreen
 	private LocText largeCostLabel;
 
 	[SerializeField]
+	private LocText largeQuantityLabel;
+
+	[SerializeField]
 	private LocText itemLabel;
 
 	[SerializeField]

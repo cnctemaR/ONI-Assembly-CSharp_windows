@@ -19,6 +19,7 @@ public class PassengerRocketModule : KMonoBehaviour
 		base.OnSpawn();
 		Game.Instance.Subscribe(-1123234494, new Action<object>(this.OnAssignmentGroupChanged));
 		GameUtil.SubscribeToTags<PassengerRocketModule>(this, PassengerRocketModule.OnRocketOnGroundTagDelegate, false);
+		base.Subscribe<PassengerRocketModule>(-1547247383, PassengerRocketModule.OnClustercraftStateChanged);
 		base.Subscribe<PassengerRocketModule>(1655598572, PassengerRocketModule.RefreshDelegate);
 		base.Subscribe<PassengerRocketModule>(191901966, PassengerRocketModule.RefreshDelegate);
 		base.Subscribe<PassengerRocketModule>(-71801987, PassengerRocketModule.RefreshDelegate);
@@ -36,6 +37,23 @@ public class PassengerRocketModule : KMonoBehaviour
 	private void OnAssignmentGroupChanged(object data)
 	{
 		this.RefreshOrders();
+	}
+
+	private void RefreshClusterStateForAudio()
+	{
+		if (ClusterManager.Instance != null)
+		{
+			WorldContainer activeWorld = ClusterManager.Instance.activeWorld;
+			if (activeWorld != null && activeWorld.IsModuleInterior)
+			{
+				global::UnityEngine.Object craftInterface = base.GetComponent<RocketModuleCluster>().CraftInterface;
+				Clustercraft component = activeWorld.GetComponent<Clustercraft>();
+				if (craftInterface == component.ModuleInterface)
+				{
+					ClusterManager.Instance.UpdateRocketInteriorAudio();
+				}
+			}
+		}
 	}
 
 	private void OnReachableChanged(object data)
@@ -232,9 +250,10 @@ public class PassengerRocketModule : KMonoBehaviour
 		{
 			byte b = Grid.WorldIdx[component.TargetCell()];
 			List<MinionIdentity> worldItems = Components.LiveMinionIdentities.GetWorldItems((int)b, false);
+			string assignmentGroupID = base.GetComponent<AssignmentGroupController>().AssignmentGroupID;
 			for (int i = 0; i < worldItems.Count; i++)
 			{
-				if (!Game.Instance.assignmentManager.assignment_groups[base.GetComponent<AssignmentGroupController>().AssignmentGroupID].HasMember(worldItems[i].assignableProxy.Get()))
+				if (!Game.Instance.assignmentManager.assignment_groups[assignmentGroupID].HasMember(worldItems[i].assignableProxy.Get()))
 				{
 					return true;
 				}
@@ -257,6 +276,24 @@ public class PassengerRocketModule : KMonoBehaviour
 		}
 	}
 
+	public void RemovePassengersOnOtherWorlds()
+	{
+		ClustercraftExteriorDoor component = base.GetComponent<ClustercraftExteriorDoor>();
+		if (component.HasTargetWorld())
+		{
+			int myWorldId = component.GetMyWorldId();
+			string assignmentGroupID = base.GetComponent<AssignmentGroupController>().AssignmentGroupID;
+			foreach (MinionIdentity minionIdentity in Components.LiveMinionIdentities.Items)
+			{
+				MinionAssignablesProxy minionAssignablesProxy = minionIdentity.assignableProxy.Get();
+				if (Game.Instance.assignmentManager.assignment_groups[assignmentGroupID].HasMember(minionAssignablesProxy) && minionIdentity.GetMyParentWorldId() != myWorldId)
+				{
+					Game.Instance.assignmentManager.assignment_groups[assignmentGroupID].RemoveMember(minionAssignablesProxy);
+				}
+			}
+		}
+	}
+
 	public void ClearMinionAssignments(object data)
 	{
 		string assignmentGroupID = base.GetComponent<AssignmentGroupController>().AssignmentGroupID;
@@ -276,9 +313,15 @@ public class PassengerRocketModule : KMonoBehaviour
 		component.RequestCrewBoard(PassengerRocketModule.RequestCrewState.Release);
 	});
 
+	private static readonly EventSystem.IntraObjectHandler<PassengerRocketModule> OnClustercraftStateChanged = new EventSystem.IntraObjectHandler<PassengerRocketModule>(delegate(PassengerRocketModule cmp, object data)
+	{
+		cmp.RefreshClusterStateForAudio();
+	});
+
 	private static EventSystem.IntraObjectHandler<PassengerRocketModule> RefreshDelegate = new EventSystem.IntraObjectHandler<PassengerRocketModule>(delegate(PassengerRocketModule cmp, object data)
 	{
 		cmp.RefreshOrders();
+		cmp.RefreshClusterStateForAudio();
 	});
 
 	private static EventSystem.IntraObjectHandler<PassengerRocketModule> OnLaunchDelegate = new EventSystem.IntraObjectHandler<PassengerRocketModule>(delegate(PassengerRocketModule component, object data)

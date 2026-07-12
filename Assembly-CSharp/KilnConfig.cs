@@ -37,6 +37,7 @@ public class KilnConfig : IBuildingConfig
 		ComplexFabricator complexFabricator = go.AddOrGet<ComplexFabricator>();
 		complexFabricator.heatedTemperature = 353.15f;
 		complexFabricator.duplicantOperated = false;
+		complexFabricator.showProgressBar = true;
 		complexFabricator.sideScreenStyle = ComplexFabricatorSideScreen.StyleSetting.ListQueueHybrid;
 		go.AddOrGet<FabricatorIngredientStatusManager>();
 		go.AddOrGet<CopyBuildingSettings>();

@@ -25,6 +25,7 @@ public class MinionVitalsPanel : KMonoBehaviour
 		this.AddAmountLine(Db.Get().Amounts.Bladder, null);
 		this.AddAmountLine(Db.Get().Amounts.Breath, null);
 		this.AddAmountLine(Db.Get().Amounts.Stamina, null);
+		this.AddAttributeLine(Db.Get().CritterAttributes.Metabolism, null);
 		this.AddAmountLine(Db.Get().Amounts.Calories, null);
 		this.AddAmountLine(Db.Get().Amounts.ScaleGrowth, null);
 		this.AddAmountLine(Db.Get().Amounts.MilkProduction, null);
@@ -33,6 +34,7 @@ public class MinionVitalsPanel : KMonoBehaviour
 		this.AddAmountLine(Db.Get().Amounts.Decor, null);
 		this.AddAmountLine(Db.Get().Amounts.InternalBattery, null);
 		this.AddAmountLine(Db.Get().Amounts.InternalChemicalBattery, null);
+		this.AddAmountLine(Db.Get().Amounts.InternalBioBattery, null);
 		if (DlcManager.FeatureRadiationEnabled())
 		{
 			this.AddAmountLine(Db.Get().Amounts.RadiationBalance, null);

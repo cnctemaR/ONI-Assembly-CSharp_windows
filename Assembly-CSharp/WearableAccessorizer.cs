@@ -349,20 +349,25 @@ public class WearableAccessorizer : KMonoBehaviour
 		if (outfitType == ClothingOutfitUtility.OutfitType.Clothing)
 		{
 			this.ApplyClothingItems(outfitType, items);
-			return;
-		}
-		if (this.IsWearingSuitType(outfitType))
-		{
-			this.ApplyClothingItems(outfitType, items);
-			Equippable suitEquippable = this.GetSuitEquippable();
-			if (suitEquippable != null)
+			if (this.GetSuitEquippable() == null)
 			{
-				this.ApplyEquipment(suitEquippable, suitEquippable.GetBuildOverride());
+				this.QueueOutfitChangedFX();
 				return;
 			}
 		}
 		else
 		{
+			if (this.IsWearingSuitType(outfitType))
+			{
+				this.ApplyClothingItems(outfitType, items);
+				Equippable suitEquippable = this.GetSuitEquippable();
+				if (suitEquippable != null)
+				{
+					this.ApplyEquipment(suitEquippable, suitEquippable.GetBuildOverride());
+				}
+				this.QueueOutfitChangedFX();
+				return;
+			}
 			if (!this.customOutfitItems.ContainsKey(outfitType))
 			{
 				this.customOutfitItems.Add(outfitType, new List<ResourceRef<ClothingItemResource>>());
@@ -541,6 +546,22 @@ public class WearableAccessorizer : KMonoBehaviour
 		return flag;
 	}
 
+	private void QueueOutfitChangedFX()
+	{
+		this.waitingForOutfitChangeFX = true;
+	}
+
+	private void Update()
+	{
+		if (this.waitingForOutfitChangeFX && !LockerNavigator.Instance.gameObject.activeInHierarchy)
+		{
+			Game.Instance.SpawnFX(SpawnFXHashes.MinionOutfitChanged, new Vector3(base.transform.position.x, base.transform.position.y, Grid.GetLayerZ(Grid.SceneLayer.FXFront)), 0f);
+			PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Plus, "Changed Clothes", base.transform, new Vector3(0f, 0.5f, 0f), 1.5f, false, false);
+			KFMOD.PlayOneShot(GlobalAssets.GetSound("SupplyCloset_Dupe_Clothing_Change", false), base.transform.position, 1f);
+			this.waitingForOutfitChangeFX = false;
+		}
+	}
+
 	[MyCmpReq]
 	private KAnimControllerBase animController;
 
@@ -553,6 +574,8 @@ public class WearableAccessorizer : KMonoBehaviour
 
 	[Serialize]
 	private Dictionary<ClothingOutfitUtility.OutfitType, List<ResourceRef<ClothingItemResource>>> customOutfitItems = new Dictionary<ClothingOutfitUtility.OutfitType, List<ResourceRef<ClothingItemResource>>>();
+
+	private bool waitingForOutfitChangeFX;
 
 	[Serialize]
 	private Dictionary<WearableAccessorizer.WearableType, WearableAccessorizer.Wearable> wearables = new Dictionary<WearableAccessorizer.WearableType, WearableAccessorizer.Wearable>();

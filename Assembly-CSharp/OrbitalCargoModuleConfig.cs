@@ -44,7 +44,7 @@ public class OrbitalCargoModuleConfig : IBuildingConfig
 		go.AddOrGet<LoopingSounds>();
 		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.IndustrialMachinery, false);
 		List<Tag> list = new List<Tag>();
-		list.AddRange(STORAGEFILTERS.NOT_EDIBLE_SOLIDS);
+		list.AddRange(STORAGEFILTERS.STORAGE_LOCKERS_STANDARD);
 		list.AddRange(STORAGEFILTERS.FOOD);
 		Storage storage = go.AddComponent<Storage>();
 		storage.showInUI = true;

@@ -40,6 +40,11 @@ public class Pickupable : Workable, IHasSortOrder
 		}
 	}
 
+	public bool isChoreAllowedToPickup(ChoreType choreType)
+	{
+		return this.allowedChoreTypes == null || this.allowedChoreTypes.Contains(choreType);
+	}
+
 	public bool prevent_absorb_until_stored { get; set; }
 
 	public bool isKinematic { get; set; }
@@ -167,7 +172,7 @@ public class Pickupable : Workable, IHasSortOrder
 		this.RefreshReservedAmount();
 		if (this.OnReservationsChanged != null)
 		{
-			this.OnReservationsChanged();
+			this.OnReservationsChanged(this, true, reservation);
 		}
 		return num2;
 	}
@@ -179,11 +184,12 @@ public class Pickupable : Workable, IHasSortOrder
 		{
 			if (this.reservations[i].ticket == ticket)
 			{
+				Pickupable.Reservation reservation = this.reservations[i];
 				this.reservations.RemoveAt(i);
 				this.RefreshReservedAmount();
 				if (this.OnReservationsChanged != null)
 				{
-					this.OnReservationsChanged();
+					this.OnReservationsChanged(this, false, reservation);
 					return;
 				}
 				break;
@@ -564,10 +570,14 @@ public class Pickupable : Workable, IHasSortOrder
 		Components.Pickupables.Remove(this);
 		if (this.reservations.Count > 0)
 		{
+			Pickupable.Reservation[] array = this.reservations.ToArray();
 			this.reservations.Clear();
 			if (this.OnReservationsChanged != null)
 			{
-				this.OnReservationsChanged();
+				foreach (Pickupable.Reservation reservation in array)
+				{
+					this.OnReservationsChanged(this, false, reservation);
+				}
 			}
 		}
 		if (Grid.IsValidCell(this.cachedCell))
@@ -600,7 +610,7 @@ public class Pickupable : Workable, IHasSortOrder
 		{
 			return null;
 		}
-		return this.OnTake(num);
+		return this.OnTake(this, num);
 	}
 
 	private void Absorb(Pickupable pickupable)
@@ -712,6 +722,10 @@ public class Pickupable : Workable, IHasSortOrder
 	{
 		this.cachedCell = cell;
 		this.GetOffsets(this.cachedCell);
+		if (this.KPrefabID.HasTag(GameTags.PickupableStorage))
+		{
+			base.GetComponent<Storage>().UpdateStoredItemCachedCells();
+		}
 	}
 
 	public override Workable.AnimInfo GetAnim(Worker worker)
@@ -940,13 +954,16 @@ public class Pickupable : Workable, IHasSortOrder
 	[NonSerialized]
 	public Prioritizable prioritizable;
 
+	[SerializeField]
+	public List<ChoreType> allowedChoreTypes;
+
 	public bool absorbable;
 
 	public Func<Pickupable, bool> CanAbsorb = (Pickupable other) => false;
 
-	public Func<float, Pickupable> OnTake;
+	public Func<Pickupable, float, Pickupable> OnTake;
 
-	public global::System.Action OnReservationsChanged;
+	public Action<Pickupable, bool, Pickupable.Reservation> OnReservationsChanged;
 
 	public ObjectLayerListItem objectLayerListItem;
 
@@ -1028,7 +1045,7 @@ public class Pickupable : Workable, IHasSortOrder
 
 	private int entombedCell = -1;
 
-	private struct Reservation
+	public struct Reservation
 	{
 		public Reservation(GameObject reserver, float amount, int ticket)
 		{

@@ -438,6 +438,37 @@ public class KleiInventoryScreen : KModalScreen
 		this.selectionOwnedCount.SetText(KleiItemsUI.WrapWithColor(UI.KLEI_INVENTORY_SCREEN.ITEM_PLAYER_OWN_NONE, KleiItemsUI.TEXT_COLOR__PERMIT_NOT_OWNED));
 	}
 
+	private KleiInventoryScreen.PermitPrintabilityState GetPermitPrintabilityState(PermitResource permit)
+	{
+		if (!this.IS_ONLINE)
+		{
+			return KleiInventoryScreen.PermitPrintabilityState.UserOffline;
+		}
+		ulong num;
+		ulong num2;
+		PermitItems.TryGetBarterPrice(this.SelectedPermit.Id, out num, out num2);
+		if (num == 0UL)
+		{
+			if (permit.Rarity == PermitRarity.Universal || permit.Rarity == PermitRarity.Loyalty || permit.Rarity == PermitRarity.Unknown)
+			{
+				return KleiInventoryScreen.PermitPrintabilityState.NotForSale;
+			}
+			return KleiInventoryScreen.PermitPrintabilityState.NotForSaleYet;
+		}
+		else
+		{
+			if (PermitItems.GetOwnedCount(permit) > 0)
+			{
+				return KleiInventoryScreen.PermitPrintabilityState.AlreadyOwned;
+			}
+			if (KleiItems.GetFilamentAmount() < num)
+			{
+				return KleiInventoryScreen.PermitPrintabilityState.TooExpensive;
+			}
+			return KleiInventoryScreen.PermitPrintabilityState.Printable;
+		}
+	}
+
 	private void RefreshBarterPanel()
 	{
 		this.barterBuyButton.ClearOnClick();
@@ -446,15 +477,21 @@ public class KleiInventoryScreen : KModalScreen
 		this.barterSellButton.isInteractable = this.IS_ONLINE;
 		HierarchyReferences component = this.barterBuyButton.GetComponent<HierarchyReferences>();
 		HierarchyReferences component2 = this.barterSellButton.GetComponent<HierarchyReferences>();
+		new Color(1f, 0.69411767f, 0.69411767f);
+		Color color = new Color(0.6f, 0.9529412f, 0.5019608f);
+		LocText reference = component.GetReference<LocText>("CostLabel");
+		LocText reference2 = component2.GetReference<LocText>("CostLabel");
 		this.barterPanelBG.color = (this.IS_ONLINE ? Util.ColorFromHex("575D6F") : Util.ColorFromHex("6F6F6F"));
 		this.filamentWalletSection.gameObject.SetActive(this.IS_ONLINE);
 		this.barterOfflineLabel.gameObject.SetActive(!this.IS_ONLINE);
 		ulong filamentAmount = KleiItems.GetFilamentAmount();
 		this.filamentWalletSection.GetComponent<ToolTip>().SetSimpleTooltip((filamentAmount > 1UL) ? string.Format(UI.KLEI_INVENTORY_SCREEN.BARTERING.WALLET_PLURAL_TOOLTIP, filamentAmount) : string.Format(UI.KLEI_INVENTORY_SCREEN.BARTERING.WALLET_TOOLTIP, filamentAmount));
+		KleiInventoryScreen.PermitPrintabilityState permitPrintabilityState = this.GetPermitPrintabilityState(this.SelectedPermit);
 		if (!this.IS_ONLINE)
 		{
 			component.GetReference<LocText>("CostLabel").SetText("");
-			component2.GetReference<LocText>("CostLabel").SetText("");
+			reference2.SetText("");
+			reference2.color = Color.white;
 			this.barterBuyButton.GetComponent<ToolTip>().SetSimpleTooltip(UI.KLEI_INVENTORY_SCREEN.BARTERING.TOOLTIP_ACTION_INVALID_OFFLINE);
 			this.barterSellButton.GetComponent<ToolTip>().SetSimpleTooltip(UI.KLEI_INVENTORY_SCREEN.BARTERING.TOOLTIP_ACTION_INVALID_OFFLINE);
 			return;
@@ -463,36 +500,61 @@ public class KleiInventoryScreen : KModalScreen
 		ulong num2;
 		PermitItems.TryGetBarterPrice(this.SelectedPermit.Id, out num, out num2);
 		this.filamentWalletSection.GetComponentInChildren<LocText>().SetText(KleiItems.GetFilamentAmount().ToString());
-		if (num == 0UL)
+		switch (permitPrintabilityState)
 		{
-			this.barterBuyButton.isInteractable = false;
-			this.barterBuyButton.GetComponent<ToolTip>().SetSimpleTooltip(UI.KLEI_INVENTORY_SCREEN.BARTERING.TOOLTIP_UNBUYABLE);
-			component.GetReference<LocText>("CostLabel").SetText("");
-		}
-		else
-		{
-			bool flag = KleiItems.GetFilamentAmount() >= num;
-			this.barterBuyButton.isInteractable = flag;
-			this.barterBuyButton.GetComponent<ToolTip>().SetSimpleTooltip(flag ? string.Format(UI.KLEI_INVENTORY_SCREEN.BARTERING.TOOLTIP_BUY_ACTIVE, num.ToString()) : UI.KLEI_INVENTORY_SCREEN.BARTERING.TOOLTIP_BUY_CANT_AFFORD.text);
-			component.GetReference<LocText>("CostLabel").SetText("-" + num.ToString());
+		case KleiInventoryScreen.PermitPrintabilityState.Printable:
+			this.barterBuyButton.isInteractable = true;
+			this.barterBuyButton.GetComponent<ToolTip>().SetSimpleTooltip(string.Format(UI.KLEI_INVENTORY_SCREEN.BARTERING.TOOLTIP_BUY_ACTIVE, num.ToString()));
+			reference.SetText("-" + num.ToString());
 			this.barterBuyButton.onClick += delegate
 			{
 				GameObject gameObject = Util.KInstantiateUI(this.barterConfirmationScreenPrefab, LockerNavigator.Instance.gameObject, false);
 				gameObject.rectTransform().sizeDelta = Vector2.zero;
 				gameObject.GetComponent<BarterConfirmationScreen>().Present(this.SelectedPermit, true);
 			};
+			break;
+		case KleiInventoryScreen.PermitPrintabilityState.AlreadyOwned:
+			this.barterBuyButton.isInteractable = false;
+			this.barterBuyButton.GetComponent<ToolTip>().SetSimpleTooltip(UI.KLEI_INVENTORY_SCREEN.BARTERING.TOOLTIP_UNBUYABLE_ALREADY_OWNED);
+			reference.SetText("-" + num.ToString());
+			break;
+		case KleiInventoryScreen.PermitPrintabilityState.TooExpensive:
+			this.barterBuyButton.isInteractable = false;
+			this.barterBuyButton.GetComponent<ToolTip>().SetSimpleTooltip(UI.KLEI_INVENTORY_SCREEN.BARTERING.TOOLTIP_BUY_CANT_AFFORD.text);
+			reference.SetText("-" + num.ToString());
+			break;
+		case KleiInventoryScreen.PermitPrintabilityState.NotForSale:
+			this.barterBuyButton.isInteractable = false;
+			this.barterBuyButton.GetComponent<ToolTip>().SetSimpleTooltip(UI.KLEI_INVENTORY_SCREEN.BARTERING.TOOLTIP_UNBUYABLE);
+			reference.SetText("");
+			break;
+		case KleiInventoryScreen.PermitPrintabilityState.NotForSaleYet:
+			this.barterBuyButton.isInteractable = false;
+			this.barterBuyButton.GetComponent<ToolTip>().SetSimpleTooltip(UI.KLEI_INVENTORY_SCREEN.BARTERING.TOOLTIP_UNBUYABLE_BETA);
+			reference.SetText("");
+			break;
 		}
 		if (num2 == 0UL)
 		{
 			this.barterSellButton.isInteractable = false;
 			this.barterSellButton.GetComponent<ToolTip>().SetSimpleTooltip(UI.KLEI_INVENTORY_SCREEN.BARTERING.TOOLTIP_UNSELLABLE);
-			component2.GetReference<LocText>("CostLabel").SetText("");
+			reference2.SetText("");
+			reference2.color = Color.white;
 			return;
 		}
-		bool flag2 = PermitItems.GetOwnedCount(this.SelectedPermit) > 0;
-		this.barterSellButton.isInteractable = flag2;
-		this.barterSellButton.GetComponent<ToolTip>().SetSimpleTooltip(flag2 ? string.Format(UI.KLEI_INVENTORY_SCREEN.BARTERING.TOOLTIP_SELL_ACTIVE, num2.ToString()) : UI.KLEI_INVENTORY_SCREEN.BARTERING.TOOLTIP_NONE_TO_SELL.text);
-		component2.GetReference<LocText>("CostLabel").SetText(flag2 ? (UIConstants.ColorPrefixGreen + "+" + num2.ToString() + UIConstants.ColorSuffix) : ("+" + num2.ToString()));
+		bool flag = PermitItems.GetOwnedCount(this.SelectedPermit) > 0;
+		this.barterSellButton.isInteractable = flag;
+		this.barterSellButton.GetComponent<ToolTip>().SetSimpleTooltip(flag ? string.Format(UI.KLEI_INVENTORY_SCREEN.BARTERING.TOOLTIP_SELL_ACTIVE, num2.ToString()) : UI.KLEI_INVENTORY_SCREEN.BARTERING.TOOLTIP_NONE_TO_SELL.text);
+		if (flag)
+		{
+			reference2.color = color;
+			reference2.SetText("+" + num2.ToString());
+		}
+		else
+		{
+			reference2.color = Color.white;
+			reference2.SetText("+" + num2.ToString());
+		}
 		this.barterSellButton.onClick += delegate
 		{
 			GameObject gameObject2 = Util.KInstantiateUI(this.barterConfirmationScreenPrefab, LockerNavigator.Instance.gameObject, false);
@@ -754,7 +816,7 @@ public class KleiInventoryScreen : KModalScreen
 				return "HUD";
 			}
 			ArtableStage artableStage = (ArtableStage)permit;
-			if (KleiInventoryScreen.<GetFacadeItemSoundName>g__Has|70_0<Sculpture>(buildingDef3))
+			if (KleiInventoryScreen.<GetFacadeItemSoundName>g__Has|72_0<Sculpture>(buildingDef3))
 			{
 				if (buildingDef3.PrefabID == "IceSculpture")
 				{
@@ -762,7 +824,7 @@ public class KleiInventoryScreen : KModalScreen
 				}
 				return "sculpture";
 			}
-			else if (KleiInventoryScreen.<GetFacadeItemSoundName>g__Has|70_0<Painting>(buildingDef3))
+			else if (KleiInventoryScreen.<GetFacadeItemSoundName>g__Has|72_0<Painting>(buildingDef3))
 			{
 				return "painting";
 			}
@@ -780,7 +842,7 @@ public class KleiInventoryScreen : KModalScreen
 	}
 
 	[CompilerGenerated]
-	internal static bool <GetFacadeItemSoundName>g__Has|70_0<T>(BuildingDef buildingDef) where T : Component
+	internal static bool <GetFacadeItemSoundName>g__Has|72_0<T>(BuildingDef buildingDef) where T : Component
 	{
 		return !buildingDef.BuildingComplete.GetComponent<T>().IsNullOrDestroyed();
 	}
@@ -884,6 +946,16 @@ public class KleiInventoryScreen : KModalScreen
 	private bool IS_ONLINE;
 
 	private bool initConfigComplete;
+
+	private enum PermitPrintabilityState
+	{
+		Printable,
+		AlreadyOwned,
+		TooExpensive,
+		NotForSale,
+		NotForSaleYet,
+		UserOffline
+	}
 
 	private enum MultiToggleState
 	{

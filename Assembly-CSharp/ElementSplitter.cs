@@ -13,7 +13,7 @@ public struct ElementSplitter
 
 	public PrimaryElement primaryElement;
 
-	public Func<float, Pickupable> onTakeCB;
+	public Func<Pickupable, float, Pickupable> onTakeCB;
 
 	public Func<Pickupable, bool> canAbsorbCB;
 

@@ -3,7 +3,7 @@ using UnityEngine;
 
 internal class LogicEventSender : ILogicEventSender, ILogicNetworkConnection, ILogicUIElement, IUniformGridObject
 {
-	public LogicEventSender(HashedString id, int cell, Action<int> on_value_changed, Action<int, bool> on_connection_changed, LogicPortSpriteType sprite_type)
+	public LogicEventSender(HashedString id, int cell, Action<int, int> on_value_changed, Action<int, bool> on_connection_changed, LogicPortSpriteType sprite_type)
 	{
 		this.id = id;
 		this.cell = cell;
@@ -52,8 +52,9 @@ internal class LogicEventSender : ILogicEventSender, ILogicNetworkConnection, IL
 
 	public void SetValue(int value)
 	{
+		int num = this.logicValue;
 		this.logicValue = value;
-		this.onValueChanged(value);
+		this.onValueChanged(value, num);
 	}
 
 	public void LogicTick()
@@ -72,9 +73,9 @@ internal class LogicEventSender : ILogicEventSender, ILogicNetworkConnection, IL
 
 	private int cell;
 
-	private int logicValue;
+	private int logicValue = -1;
 
-	private Action<int> onValueChanged;
+	private Action<int, int> onValueChanged;
 
 	private Action<int, bool> onConnectionChanged;
 

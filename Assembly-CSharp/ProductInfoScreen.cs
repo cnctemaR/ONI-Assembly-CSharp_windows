@@ -147,6 +147,10 @@ public class ProductInfoScreen : KScreen
 		{
 			this.ProductRequirementsPane.gameObject.SetActive(this.expandedInfo && this.ProductRequirementsPane.HasDescriptors());
 		}
+		if (this.RoomConstrainsPanel != null)
+		{
+			this.RoomConstrainsPanel.gameObject.SetActive(this.expandedInfo && this.RoomConstrainsPanel.HasDescriptors());
+		}
 		if (this.ProductEffectsPane != null)
 		{
 			this.ProductEffectsPane.gameObject.SetActive(this.expandedInfo && this.ProductEffectsPane.HasDescriptors());
@@ -193,20 +197,6 @@ public class ProductInfoScreen : KScreen
 			return;
 		}
 		string text = "";
-		KPrefabID component = def.BuildingComplete.GetComponent<KPrefabID>();
-		string text2 = "";
-		foreach (Tag tag in component.Tags)
-		{
-			string text3;
-			if (CodexEntryGenerator.room_constraint_to_building_label_dict.TryGetValue(tag, out text3))
-			{
-				text2 = text2 + "\n    • " + text3;
-			}
-		}
-		if (!string.IsNullOrWhiteSpace(text2))
-		{
-			text += string.Format("<b>{0}</b>: {1}\n\n", CODEX.HEADERS.BUILDINGTYPE, text2);
-		}
 		text += def.Desc;
 		Dictionary<Klei.AI.Attribute, float> dictionary = new Dictionary<Klei.AI.Attribute, float>();
 		Dictionary<Klei.AI.Attribute, float> dictionary2 = new Dictionary<Klei.AI.Attribute, float>();
@@ -230,24 +220,24 @@ public class ProductInfoScreen : KScreen
 			Element element = ElementLoader.GetElement(this.materialSelectionPanel.CurrentSelectedElement);
 			if (element != null)
 			{
-				using (List<AttributeModifier>.Enumerator enumerator3 = element.attributeModifiers.GetEnumerator())
+				using (List<AttributeModifier>.Enumerator enumerator2 = element.attributeModifiers.GetEnumerator())
 				{
-					while (enumerator3.MoveNext())
+					while (enumerator2.MoveNext())
 					{
-						AttributeModifier attributeModifier2 = enumerator3.Current;
+						AttributeModifier attributeModifier2 = enumerator2.Current;
 						float num2 = 0f;
 						Klei.AI.Attribute attribute3 = Db.Get().BuildingAttributes.Get(attributeModifier2.AttributeId);
 						dictionary2.TryGetValue(attribute3, out num2);
 						num2 += attributeModifier2.Value;
 						dictionary2[attribute3] = num2;
 					}
-					goto IL_02A8;
+					goto IL_0229;
 				}
 			}
-			PrefabAttributeModifiers component2 = Assets.TryGetPrefab(this.materialSelectionPanel.CurrentSelectedElement).GetComponent<PrefabAttributeModifiers>();
-			if (component2 != null)
+			PrefabAttributeModifiers component = Assets.TryGetPrefab(this.materialSelectionPanel.CurrentSelectedElement).GetComponent<PrefabAttributeModifiers>();
+			if (component != null)
 			{
-				foreach (AttributeModifier attributeModifier3 in component2.descriptors)
+				foreach (AttributeModifier attributeModifier3 in component.descriptors)
 				{
 					float num3 = 0f;
 					Klei.AI.Attribute attribute4 = Db.Get().BuildingAttributes.Get(attributeModifier3.AttributeId);
@@ -257,7 +247,7 @@ public class ProductInfoScreen : KScreen
 				}
 			}
 		}
-		IL_02A8:
+		IL_0229:
 		if (dictionary.Count > 0)
 		{
 			text += "\n\n";
@@ -266,11 +256,11 @@ public class ProductInfoScreen : KScreen
 				float num4 = 0f;
 				dictionary.TryGetValue(keyValuePair.Key, out num4);
 				float num5 = 0f;
-				string text4 = "";
+				string text2 = "";
 				if (dictionary2.TryGetValue(keyValuePair.Key, out num5))
 				{
 					num5 = Mathf.Abs(num4 * num5);
-					text4 = "(+" + num5.ToString() + ")";
+					text2 = "(+" + num5.ToString() + ")";
 				}
 				text = string.Concat(new string[]
 				{
@@ -279,7 +269,7 @@ public class ProductInfoScreen : KScreen
 					keyValuePair.Key.Name,
 					": ",
 					(num4 + num5).ToString(),
-					text4
+					text2
 				});
 			}
 		}
@@ -294,6 +284,7 @@ public class ProductInfoScreen : KScreen
 		}
 		List<Descriptor> allDescriptors = GameUtil.GetAllDescriptors(def.BuildingComplete, false);
 		List<Descriptor> requirementDescriptors = GameUtil.GetRequirementDescriptors(allDescriptors);
+		List<Descriptor> list = new List<Descriptor>();
 		if (requirementDescriptors.Count > 0)
 		{
 			Descriptor descriptor = default(Descriptor);
@@ -319,6 +310,28 @@ public class ProductInfoScreen : KScreen
 			this.ProductEffectsPane.gameObject.SetActive(false);
 		}
 		this.ProductEffectsPane.SetDescriptors(effectDescriptors);
+		foreach (Tag tag in def.BuildingComplete.GetComponent<KPrefabID>().Tags)
+		{
+			if (RoomConstraints.ConstraintTags.AllTags.Contains(tag))
+			{
+				Descriptor descriptor3 = default(Descriptor);
+				descriptor3.SetupDescriptor(RoomConstraints.ConstraintTags.GetRoomConstraintLabelText(tag), null, Descriptor.DescriptorType.Effect);
+				list.Add(descriptor3);
+			}
+		}
+		if (list.Count > 0)
+		{
+			list = GameUtil.GetEffectDescriptors(list);
+			Descriptor descriptor4 = default(Descriptor);
+			descriptor4.SetupDescriptor(CODEX.HEADERS.BUILDINGTYPE, UI.BUILDINGEFFECTS.TOOLTIPS.BUILDINGROOMREQUIREMENTCLASS, Descriptor.DescriptorType.Effect);
+			list.Insert(0, descriptor4);
+			this.RoomConstrainsPanel.gameObject.SetActive(true);
+		}
+		else
+		{
+			this.RoomConstrainsPanel.gameObject.SetActive(false);
+		}
+		this.RoomConstrainsPanel.SetDescriptors(list);
 	}
 
 	public void ClearLabels()
@@ -431,6 +444,8 @@ public class ProductInfoScreen : KScreen
 	public DescriptorPanel ProductRequirementsPane;
 
 	public DescriptorPanel ProductEffectsPane;
+
+	public DescriptorPanel RoomConstrainsPanel;
 
 	public GameObject ProductFlavourPane;
 

@@ -11,7 +11,7 @@ public class PlaceSpaceAvailable : SelectModuleCondition
 		{
 		case SelectModuleCondition.SelectionContext.AddModuleAbove:
 		{
-			if (component != null && component.points[0].attachedBuilding != null && !component.points[0].attachedBuilding.GetComponent<ReorderableBuilding>().CanMoveVertically(selectedPart.HeightInCells, null))
+			if (component != null && component.points[0].attachedBuilding != null && component.points[0].attachedBuilding.HasTag(GameTags.RocketModule) && !component.points[0].attachedBuilding.GetComponent<ReorderableBuilding>().CanMoveVertically(selectedPart.HeightInCells, null))
 			{
 				return false;
 			}
@@ -44,7 +44,7 @@ public class PlaceSpaceAvailable : SelectModuleCondition
 		case SelectModuleCondition.SelectionContext.ReplaceModule:
 		{
 			int num3 = selectedPart.HeightInCells - existingModule.GetComponent<Building>().Def.HeightInCells;
-			if (component != null && component.points[0].attachedBuilding != null)
+			if (component != null && component.points[0].attachedBuilding != null && component.points[0].attachedBuilding.HasTag(GameTags.RocketModule))
 			{
 				ReorderableBuilding component2 = existingModule.GetComponent<ReorderableBuilding>();
 				if (!component.points[0].attachedBuilding.GetComponent<ReorderableBuilding>().CanMoveVertically(num3, component2.gameObject))

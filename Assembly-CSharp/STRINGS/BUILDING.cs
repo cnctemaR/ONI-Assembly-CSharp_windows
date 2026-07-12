@@ -257,6 +257,15 @@ namespace STRINGS
 				public static LocString TOOLTIP = "This building received damage from <b>{DamageInfo}</b>\n\nIt will not function until it receives repairs";
 			}
 
+			public class CHANGESTORAGETILETARGET
+			{
+				public static LocString NAME = "Set Storage: {TargetName}";
+
+				public static LocString TOOLTIP = "Waiting for a Duplicant to reassign this storage to {TargetName}";
+
+				public static LocString EMPTY = "Empty";
+			}
+
 			public class CHANGEDOORCONTROLSTATE
 			{
 				public static LocString NAME = "Pending Door State Change: {ControlState}";
@@ -690,6 +699,13 @@ namespace STRINGS
 				public static LocString NOTIFICATION_NAME = "Flooding";
 
 				public static LocString NOTIFICATION_TOOLTIP = "These buildings are flooded:";
+			}
+
+			public class NOTSUBMERGED
+			{
+				public static LocString NAME = "Building Not Submerged";
+
+				public static LocString TOOLTIP = "Building cannot function unless submerged in liquid";
 			}
 
 			public class GASVENTOBSTRUCTED

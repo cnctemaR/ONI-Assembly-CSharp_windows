@@ -530,7 +530,7 @@ public class SimpleInfoScreen : TargetScreen, ISim4000ms, ISim1000ms
 			return;
 		}
 		this.movePanel.gameObject.SetActive(true);
-		foreach (KeyValuePair<string, GameObject> keyValuePair in this.storageLabels)
+		foreach (KeyValuePair<string, GameObject> keyValuePair in this.moveToLabels)
 		{
 			keyValuePair.Value.SetActive(false);
 		}
@@ -546,7 +546,7 @@ public class SimpleInfoScreen : TargetScreen, ISim4000ms, ISim1000ms
 					ListPool<global::Tuple<string, TextStyleSetting>, SimpleInfoScreen>.PooledList pooledList = ListPool<global::Tuple<string, TextStyleSetting>, SimpleInfoScreen>.Allocate();
 					Movable movable = @ref.Get();
 					GameObject gameObject = ((movable != null) ? movable.gameObject : null);
-					if (!(gameObject == null) && !gameObject.HasTag(GameTags.Stored))
+					if (!(gameObject == null))
 					{
 						PrimaryElement component3 = gameObject.GetComponent<PrimaryElement>();
 						if (!(component3 != null) || component3.Mass != 0f)
@@ -581,7 +581,7 @@ public class SimpleInfoScreen : TargetScreen, ISim4000ms, ISim1000ms
 								string formattedDisease = GameUtil.GetFormattedDisease(component3.DiseaseIdx, component3.DiseaseCount, true);
 								pooledList.Add(new global::Tuple<string, TextStyleSetting>(formattedDisease, PluginAssets.Instance.defaultTextStyleSetting));
 							}
-							GameObject gameObject2 = this.AddOrGetStorageLabel(this.storageLabels, this.movePanel, "storage_" + num.ToString());
+							GameObject gameObject2 = this.AddOrGetStorageLabel(this.moveToLabels, this.movePanel, "move_" + num.ToString());
 							num++;
 							gameObject2.GetComponentInChildren<LocText>().text = text;
 							gameObject2.GetComponentInChildren<ToolTip>().ClearMultiStringTooltip();
@@ -604,7 +604,7 @@ public class SimpleInfoScreen : TargetScreen, ISim4000ms, ISim1000ms
 		}
 		if (component2 != null && component2.IsMarkedForMove)
 		{
-			GameObject gameObject3 = this.AddOrGetStorageLabel(this.storageLabels, this.movePanel, "moveplacer");
+			GameObject gameObject3 = this.AddOrGetStorageLabel(this.moveToLabels, this.movePanel, "moveplacer");
 			gameObject3.GetComponentInChildren<LocText>().text = MISC.PLACERS.MOVEPICKUPABLEPLACER.PLACER_STATUS;
 			gameObject3.GetComponentInChildren<ToolTip>().ClearMultiStringTooltip();
 			gameObject3.GetComponentInChildren<ToolTip>().SetSimpleTooltip(MISC.PLACERS.MOVEPICKUPABLEPLACER.PLACER_STATUS_TOOLTIP);
@@ -1078,6 +1078,8 @@ public class SimpleInfoScreen : TargetScreen, ISim4000ms, ISim1000ms
 	private GameObject statusItemsFolder;
 
 	private Dictionary<string, GameObject> storageLabels = new Dictionary<string, GameObject>();
+
+	private Dictionary<string, GameObject> moveToLabels = new Dictionary<string, GameObject>();
 
 	private Dictionary<Tag, GameObject> lifeformRows = new Dictionary<Tag, GameObject>();
 

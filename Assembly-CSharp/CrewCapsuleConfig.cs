@@ -36,6 +36,7 @@ public class CrewCapsuleConfig : IBuildingConfig
 		go.AddOrGet<LoopingSounds>();
 		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.IndustrialMachinery, false);
 		go.AddOrGet<LaunchConditionManager>();
+		go.AddOrGet<RocketLaunchConditionVisualizer>();
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)

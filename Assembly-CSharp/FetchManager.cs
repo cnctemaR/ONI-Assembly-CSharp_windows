@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using FoodRehydrator;
 using UnityEngine;
 
 [AddComponentMenu("KMonoBehaviour/scripts/FetchManager")]
@@ -113,6 +114,10 @@ public class FetchManager : KMonoBehaviour, ISim1000ms
 		{
 			return false;
 		}
+		if (!pickup.isChoreAllowedToPickup(chore.choreType))
+		{
+			return false;
+		}
 		if (chore.criteria == FetchChore.MatchCriteria.MatchID && !chore.tags.Contains(kprefabID.PrefabTag))
 		{
 			return false;
@@ -214,7 +219,21 @@ public class FetchManager : KMonoBehaviour, ISim1000ms
 		foreach (FetchManager.Pickup pickup2 in this.pickups)
 		{
 			Pickupable pickupable = pickup2.pickupable;
-			if (FetchManager.IsFetchablePickup_Exclude(pickupable.KPrefabID, pickupable.storage, pickupable.UnreservedAmount, exclude_tags, required_tag, destination))
+			bool flag = FetchManager.IsFetchablePickup_Exclude(pickupable.KPrefabID, pickupable.storage, pickupable.UnreservedAmount, exclude_tags, required_tag, destination);
+			if (pickupable.storage != null)
+			{
+				DehydratedFoodPackage component = pickupable.storage.GetComponent<DehydratedFoodPackage>();
+				if (component != null)
+				{
+					Storage storage = component.GetComponent<Pickupable>().storage;
+					if (storage != null)
+					{
+						AccessabilityManager component2 = storage.GetComponent<AccessabilityManager>();
+						flag = component2 != null && component2.CanAccess(destination.gameObject);
+					}
+				}
+			}
+			if (flag)
 			{
 				int num2 = (int)pickup2.PathCost + (5 - pickup2.foodQuality) * 50;
 				if (num2 < num)

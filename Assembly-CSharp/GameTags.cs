@@ -19,6 +19,10 @@ public class GameTags
 
 	public static readonly Tag Seed = TagManager.Create("Seed");
 
+	public static readonly Tag Dehydrated = TagManager.Create("Dehydrated");
+
+	public static readonly Tag Rehydrated = TagManager.Create("Rehydrated");
+
 	public static readonly Tag Edible = TagManager.Create("Edible");
 
 	public static readonly Tag CookingIngredient = TagManager.Create("CookingIngredient");
@@ -512,6 +516,8 @@ public class GameTags
 
 	public static readonly Tag CorrosionProof = TagManager.Create("CorrosionProof");
 
+	public static readonly Tag PickupableStorage = TagManager.Create("PickupableStorage");
+
 	public static readonly Tag UnidentifiedSeed = TagManager.Create("UnidentifiedSeed");
 
 	public static readonly Tag CropSeed = TagManager.Create("CropSeed");
@@ -550,7 +556,11 @@ public class GameTags
 
 	public static TagSet GasElements = new TagSet();
 
-	public static TagSet CalorieCategories = new TagSet { GameTags.Edible };
+	public static TagSet CalorieCategories = new TagSet
+	{
+		GameTags.Edible,
+		GameTags.Dehydrated
+	};
 
 	public static TagSet UnitCategories = new TagSet
 	{
@@ -683,6 +693,8 @@ public class GameTags
 
 		public static readonly Tag Behaviour_TryToDrinkMilkFromFeeder = TagManager.Create("Behaviour_TryToDrinkMilkFromFeeder");
 
+		public static readonly Tag Behaviour_InteractWithCritterCondo = TagManager.Create("Behaviour_InteractWithCritterCondo");
+
 		public static readonly Tag WantsToGetRanched = TagManager.Create("WantsToGetRanched");
 
 		public static readonly Tag WantsToGetCaptured = TagManager.Create("WantsToGetCaptured");
@@ -779,6 +791,8 @@ public class GameTags
 
 		public static readonly Tag Cleaning = TagManager.Create("Cleaning");
 
+		public static readonly Tag Happy = TagManager.Create("Happy");
+
 		public static readonly Tag Unhappy = TagManager.Create("Unhappy");
 
 		public static readonly Tag RequiresMilking = TagManager.Create("RequiresMilking");
@@ -839,6 +853,8 @@ public class GameTags
 			public static readonly Tag SweepBot = TagManager.Create("SweepBot");
 
 			public static readonly Tag ScoutRover = TagManager.Create("ScoutRover");
+
+			public static readonly Tag MorbRover = TagManager.Create("MorbRover");
 		}
 
 		public static class Behaviours

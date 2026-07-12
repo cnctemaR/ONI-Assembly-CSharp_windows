@@ -70,7 +70,7 @@ namespace Klei.AI
 				{
 				case StoryInstance.State.RETROFITTED:
 				case StoryInstance.State.NOT_STARTED:
-					break;
+					return;
 				case StoryInstance.State.DISCOVERED:
 					StoryManager.Instance.DiscoverStoryEvent(base.def.Story);
 					return;
@@ -81,10 +81,10 @@ namespace Klei.AI
 				{
 					Vector3 vector = Grid.CellToPosCCC(Grid.OffsetCell(Grid.PosToCell(base.master), base.def.CompletionData.KeepSakeSpawnOffset), Grid.SceneLayer.Ore);
 					StoryManager.Instance.CompleteStoryEvent(base.def.Story, vector);
-					break;
+					return;
 				}
 				default:
-					return;
+					throw new NotImplementedException(storyEvent.ToString());
 				}
 			}
 
@@ -158,6 +158,11 @@ namespace Klei.AI
 					this.ShowEventCompleteUI();
 					return;
 				}
+				if (storyInstance.PendingType == EventInfoDataHelper.PopupType.NORMAL)
+				{
+					this.ShowEventNormalUI();
+					return;
+				}
 				this.ShowEventBeginUI();
 			}
 
@@ -177,6 +182,10 @@ namespace Klei.AI
 			}
 
 			protected virtual void ShowEventBeginUI()
+			{
+			}
+
+			protected virtual void ShowEventNormalUI()
 			{
 			}
 

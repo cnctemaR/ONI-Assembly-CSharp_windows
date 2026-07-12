@@ -213,7 +213,7 @@ public class SelectModuleSideScreen : KScreen
 		if (selectionContext == SelectModuleCondition.SelectionContext.AddModuleAbove && this.module != null)
 		{
 			BuildingAttachPoint component = this.module.GetComponent<BuildingAttachPoint>();
-			if (component != null && component.points[0].attachedBuilding != null && !component.points[0].attachedBuilding.GetComponent<ReorderableBuilding>().CanMoveVertically(def.HeightInCells, null))
+			if (component != null && component.points[0].attachedBuilding != null && component.points[0].attachedBuilding.HasTag(GameTags.RocketModule) && !component.points[0].attachedBuilding.GetComponent<ReorderableBuilding>().CanMoveVertically(def.HeightInCells, null))
 			{
 				return false;
 			}

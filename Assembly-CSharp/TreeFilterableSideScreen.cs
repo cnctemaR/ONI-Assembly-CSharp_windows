@@ -114,15 +114,16 @@ public class TreeFilterableSideScreen : SideScreenContent
 		{
 		case TreeFilterableSideScreenRow.State.Off:
 			this.allCheckBox.ChangeState(0);
-			break;
+			return;
 		case TreeFilterableSideScreenRow.State.Mixed:
 			this.allCheckBox.ChangeState(1);
-			break;
+			return;
 		case TreeFilterableSideScreenRow.State.On:
 			this.allCheckBox.ChangeState(2);
-			break;
+			return;
+		default:
+			return;
 		}
-		this.visualDirty = false;
 	}
 
 	public void Update()
@@ -131,13 +132,19 @@ public class TreeFilterableSideScreen : SideScreenContent
 		{
 			if (keyValuePair.Value.visualDirty)
 			{
-				keyValuePair.Value.UpdateCheckBoxVisualState();
 				this.visualDirty = true;
+				break;
 			}
 		}
 		if (this.visualDirty)
 		{
+			foreach (KeyValuePair<Tag, TreeFilterableSideScreenRow> keyValuePair2 in this.tagRowMap)
+			{
+				keyValuePair2.Value.RefreshRowElements();
+				keyValuePair2.Value.UpdateCheckBoxVisualState();
+			}
 			this.UpdateAllCheckBoxVisualState();
+			this.visualDirty = false;
 		}
 	}
 
@@ -232,7 +239,7 @@ public class TreeFilterableSideScreen : SideScreenContent
 	{
 		TreeFilterable component = target.GetComponent<TreeFilterable>();
 		Storage component2 = target.GetComponent<Storage>();
-		return component != null && target.GetComponent<FlatTagFilterable>() == null && component.showUserMenu && (component2 == null || component2.showInUI);
+		return component != null && target.GetComponent<FlatTagFilterable>() == null && component.showUserMenu && (component2 == null || component2.showInUI) && target.GetSMI<StorageTile.Instance>() == null;
 	}
 
 	public override void SetTarget(GameObject target)

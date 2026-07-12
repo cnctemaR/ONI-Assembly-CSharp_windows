@@ -23,14 +23,14 @@ public class FileErrorReporter : KMonoBehaviour
 		switch (FileUtil.errorType)
 		{
 		case FileUtil.ErrorType.UnauthorizedAccess:
-			text = string.Format(UI.FRONTEND.SUPPORTWARNINGS.IO_UNAUTHORIZED, FileUtil.errorSubject);
-			goto IL_0065;
+			text = string.Format(FileUtil.errorSubject.Contains("OneDrive") ? UI.FRONTEND.SUPPORTWARNINGS.IO_UNAUTHORIZED_ONEDRIVE : UI.FRONTEND.SUPPORTWARNINGS.IO_UNAUTHORIZED, FileUtil.errorSubject);
+			goto IL_007D;
 		case FileUtil.ErrorType.IOError:
 			text = string.Format(UI.FRONTEND.SUPPORTWARNINGS.IO_SUFFICIENT_SPACE, FileUtil.errorSubject);
-			goto IL_0065;
+			goto IL_007D;
 		}
 		text = string.Format(UI.FRONTEND.SUPPORTWARNINGS.IO_UNKNOWN, FileUtil.errorSubject);
-		IL_0065:
+		IL_007D:
 		GameObject gameObject;
 		if (FrontEndManager.Instance != null)
 		{
@@ -53,7 +53,7 @@ public class FileErrorReporter : KMonoBehaviour
 		}
 		if ((FileUtil.exceptionMessage != null || FileUtil.exceptionStackTrace != null) && !KCrashReporter.hasReportedError)
 		{
-			KCrashReporter.ReportError(FileUtil.exceptionMessage, FileUtil.exceptionStackTrace, null, null, null, true, null, null);
+			KCrashReporter.ReportError(FileUtil.exceptionMessage, FileUtil.exceptionStackTrace, null, null, null, true, new string[] { KCrashReporter.CRASH_CATEGORY.FILEIO }, null);
 		}
 		ConfirmDialogScreen component = Util.KInstantiateUI(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, gameObject, true).GetComponent<ConfirmDialogScreen>();
 		component.PopupConfirmDialog(text, null, null, null, null, null, null, null, null);

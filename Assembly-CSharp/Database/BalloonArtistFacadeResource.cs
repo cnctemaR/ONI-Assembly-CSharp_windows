@@ -10,7 +10,7 @@ namespace Database
 		public KAnimFile AnimFile { get; private set; }
 
 		public BalloonArtistFacadeResource(string id, string name, string desc, PermitRarity rarity, string animFile, BalloonArtistFacadeType balloonFacadeType)
-			: base(id, name, desc, PermitCategory.JoyResponse, rarity)
+			: base(id, name, desc, PermitCategory.JoyResponse, rarity, DlcManager.AVAILABLE_ALL_VERSIONS)
 		{
 			this.AnimFile = Assets.GetAnim(animFile);
 			this.animFilename = animFile;

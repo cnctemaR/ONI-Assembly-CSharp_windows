@@ -17,8 +17,6 @@ public class TreeFilterableSideScreenElement : KMonoBehaviour
 		}
 	}
 
-	public event Action<Tag, bool> OnSelectionChanged;
-
 	public MultiToggle GetCheckboxToggle()
 	{
 		return this.checkBox;
@@ -117,6 +115,8 @@ public class TreeFilterableSideScreenElement : KMonoBehaviour
 	private KImage checkBoxImg;
 
 	private Tag elementTag;
+
+	public Action<Tag, bool> OnSelectionChanged;
 
 	private TreeFilterableSideScreen parent;
 

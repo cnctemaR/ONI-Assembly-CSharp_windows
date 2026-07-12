@@ -213,6 +213,8 @@ public class StatusItem : Resource
 
 	public string iconName;
 
+	public bool unique;
+
 	public TintedSprite sprite;
 
 	public bool shouldNotify;

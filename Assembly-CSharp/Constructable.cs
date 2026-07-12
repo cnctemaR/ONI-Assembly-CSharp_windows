@@ -128,7 +128,12 @@ public class Constructable : Workable, ISaveLoadable
 				{
 					component7.SpawnItemsFromConstruction(worker);
 				}
-				replacementCandidate.Trigger(1606648047, this.building.Def.TileLayer);
+				Constructable.ReplaceCallbackParameters replaceCallbackParameters = new Constructable.ReplaceCallbackParameters
+				{
+					TileLayer = this.building.Def.TileLayer,
+					Worker = worker
+				};
+				replacementCandidate.Trigger(1606648047, replaceCallbackParameters);
 				replacementCandidate.DeleteObject();
 			}
 		}
@@ -737,4 +742,11 @@ public class Constructable : Workable, ISaveLoadable
 	{
 		component.OnRefreshUserMenu(data);
 	});
+
+	public struct ReplaceCallbackParameters
+	{
+		public ObjectLayer TileLayer;
+
+		public Worker Worker;
+	}
 }

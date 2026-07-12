@@ -46,11 +46,11 @@ public class Sleepable : Workable
 	protected override void OnStartWork(Worker worker)
 	{
 		base.OnStartWork(worker);
-		KAnimControllerBase component = base.GetComponent<KAnimControllerBase>();
-		if (component != null)
+		KAnimControllerBase animController = this.GetAnimController();
+		if (animController != null)
 		{
-			component.Play("working_pre", KAnim.PlayMode.Once, 1f, 0f);
-			component.Queue("working_loop", KAnim.PlayMode.Loop, 1f, 0f);
+			animController.Play("working_pre", KAnim.PlayMode.Once, 1f, 0f);
+			animController.Queue("working_loop", KAnim.PlayMode.Loop, 1f, 0f);
 		}
 		base.Subscribe(worker.gameObject, -1142962013, new Action<object>(this.PlayPstAnim));
 		if (this.operational != null)

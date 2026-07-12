@@ -75,7 +75,6 @@ public class BaseBeeHiveConfig : IEntityConfig
 			trait.Add(new AttributeModifier(Db.Get().Amounts.Calories.maxAttribute.Id, BeeHiveTuning.STANDARD_STOMACH_SIZE, global::STRINGS.BUILDINGS.PREFABS.BEEHIVE.NAME, false, false, true));
 			trait.Add(new AttributeModifier(Db.Get().Amounts.Calories.deltaAttribute.Id, -BeeHiveTuning.STANDARD_CALORIES_PER_CYCLE / 600f, global::STRINGS.BUILDINGS.PREFABS.BEEHIVE.NAME, false, false, true));
 			trait.Add(new AttributeModifier(Db.Get().Amounts.HitPoints.maxAttribute.Id, 25f, global::STRINGS.BUILDINGS.PREFABS.BEEHIVE.NAME, false, false, true));
-			trait.Add(new AttributeModifier(Db.Get().CritterAttributes.Metabolism.Id, 100f, global::STRINGS.BUILDINGS.PREFABS.BEEHIVE.DESC, false, false, true));
 			Modifiers modifiers = gameObject.AddOrGet<Modifiers>();
 			modifiers.initialTraits.Add("BeeHiveBaseTrait");
 			modifiers.initialAmounts.Add(Db.Get().Amounts.HitPoints.Id);

@@ -37,6 +37,18 @@ public class Storage : Workable, ISaveLoadableDetails, IGameObjectEffectDescript
 		}
 	}
 
+	public bool ShouldSaveItems
+	{
+		get
+		{
+			return this.shouldSaveItems;
+		}
+		set
+		{
+			this.shouldSaveItems = value;
+		}
+	}
+
 	public bool ShouldShowInUI()
 	{
 		return this.showInUI;
@@ -622,8 +634,9 @@ public class Storage : Workable, ISaveLoadableDetails, IGameObjectEffectDescript
 		}
 	}
 
-	public void DropUnlessHasTag(Tag tag)
+	public GameObject[] DropUnlessHasTag(Tag tag)
 	{
+		List<GameObject> list = new List<GameObject>();
 		for (int i = 0; i < this.items.Count; i++)
 		{
 			if (!(this.items[i] == null) && !this.items[i].GetComponent<KPrefabID>().HasTag(tag))
@@ -638,8 +651,33 @@ public class Storage : Workable, ISaveLoadableDetails, IGameObjectEffectDescript
 				{
 					component.Dump(base.transform.GetPosition());
 				}
+				list.Add(gameObject);
 			}
 		}
+		return list.ToArray();
+	}
+
+	public GameObject[] DropHasTags(Tag[] tag)
+	{
+		List<GameObject> list = new List<GameObject>();
+		for (int i = 0; i < this.items.Count; i++)
+		{
+			if (!(this.items[i] == null) && this.items[i].GetComponent<KPrefabID>().HasAllTags(tag))
+			{
+				GameObject gameObject = this.items[i];
+				this.items.RemoveAt(i);
+				i--;
+				this.TransferDiseaseWithObject(gameObject);
+				this.MakeWorldActive(gameObject);
+				Dumpable component = gameObject.GetComponent<Dumpable>();
+				if (component != null)
+				{
+					component.Dump(base.transform.GetPosition());
+				}
+				list.Add(gameObject);
+			}
+		}
+		return list.ToArray();
 	}
 
 	public GameObject Drop(GameObject go, bool do_disease_transfer = true)
@@ -1299,6 +1337,10 @@ public class Storage : Workable, ISaveLoadableDetails, IGameObjectEffectDescript
 
 	private bool ShouldSaveItem(GameObject go)
 	{
+		if (!this.shouldSaveItems)
+		{
+			return false;
+		}
 		bool flag = false;
 		if (go != null && go.GetComponent<SaveLoadRoot>() != null && go.GetComponent<PrimaryElement>().Mass > 0f)
 		{
@@ -1499,6 +1541,9 @@ public class Storage : Workable, ISaveLoadableDetails, IGameObjectEffectDescript
 
 	[Serialize]
 	private bool onlyFetchMarkedItems;
+
+	[Serialize]
+	private bool shouldSaveItems = true;
 
 	public float storageWorkTime = 1.5f;
 

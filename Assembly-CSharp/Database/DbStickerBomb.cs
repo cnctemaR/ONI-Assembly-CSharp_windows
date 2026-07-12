@@ -5,7 +5,7 @@ namespace Database
 	public class DbStickerBomb : PermitResource
 	{
 		public DbStickerBomb(string id, string stickerName, PermitRarity rarity, string animfilename, string sticker)
-			: base(id, stickerName, "TODO:DbStickers", PermitCategory.Artwork, rarity)
+			: base(id, stickerName, "TODO:DbStickers", PermitCategory.Artwork, rarity, DlcManager.AVAILABLE_ALL_VERSIONS)
 		{
 			this.id = id;
 			this.sticker = sticker;

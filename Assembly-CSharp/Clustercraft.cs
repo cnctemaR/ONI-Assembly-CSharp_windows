@@ -164,6 +164,7 @@ public class Clustercraft : ClusterGridEntity, IClusterRange, ISim4000ms, ISim10
 	{
 		this.status = craft_status;
 		this.UpdateGroundTags();
+		this.m_moduleInterface.TriggerEventOnCraftAndRocket(GameHashes.ClustercraftStateChanged, craft_status);
 	}
 
 	public void SetExploding()

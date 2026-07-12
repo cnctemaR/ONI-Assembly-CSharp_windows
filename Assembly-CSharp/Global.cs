@@ -479,7 +479,7 @@ public class Global : MonoBehaviour
 					catch (Exception ex)
 					{
 						array2[i] = false;
-						KCrashReporter.Assert(false, "Test Data Locations / failed to write " + array[i] + ": " + ex.Message);
+						DebugUtil.LogWarningArgs(new object[] { "Test Data Locations / failed to write " + array[i] + ": " + ex.Message });
 					}
 					try
 					{
@@ -497,14 +497,14 @@ public class Global : MonoBehaviour
 								else
 								{
 									array3[i] = false;
-									KCrashReporter.Assert(false, string.Concat(new string[]
+									DebugUtil.LogWarningArgs(new object[] { string.Concat(new string[]
 									{
 										"Test Data Locations / failed to validate contents ",
 										array[i],
 										", got: `",
 										@string,
 										"`"
-									}));
+									}) });
 								}
 							}
 						}
@@ -512,7 +512,7 @@ public class Global : MonoBehaviour
 					catch (Exception ex2)
 					{
 						array3[i] = false;
-						KCrashReporter.Assert(false, "Test Data Locations / failed to read " + array[i] + ": " + ex2.Message);
+						DebugUtil.LogWarningArgs(new object[] { "Test Data Locations / failed to read " + array[i] + ": " + ex2.Message });
 					}
 					try
 					{
@@ -522,7 +522,7 @@ public class Global : MonoBehaviour
 					catch (Exception ex3)
 					{
 						array4[i] = false;
-						KCrashReporter.Assert(false, "Test Data Locations / failed to remove " + array[i] + ": " + ex3.Message);
+						DebugUtil.LogWarningArgs(new object[] { "Test Data Locations / failed to remove " + array[i] + ": " + ex3.Message });
 					}
 				}
 				for (int j = 0; j < array.Length; j++)
@@ -633,7 +633,7 @@ public class Global : MonoBehaviour
 	private void SetONIStaticSessionVariables()
 	{
 		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Branch", "release");
-		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Build", 577063U);
+		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Build", 581698U);
 		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("SaveFolderWriteTest", Global.saveFolderTestResult);
 		if (KPlayerPrefs.HasKey(UnitConfigurationScreen.MassUnitKey))
 		{

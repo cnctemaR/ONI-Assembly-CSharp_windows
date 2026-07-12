@@ -5,7 +5,7 @@ using UnityEngine;
 
 internal class LogicEventHandler : ILogicEventReceiver, ILogicNetworkConnection, ILogicUIElement, IUniformGridObject
 {
-	public LogicEventHandler(int cell, Action<int> on_value_changed, Action<int, bool> on_connection_changed, LogicPortSpriteType sprite_type)
+	public LogicEventHandler(int cell, Action<int, int> on_value_changed, Action<int, bool> on_connection_changed, LogicPortSpriteType sprite_type)
 	{
 		this.cell = cell;
 		this.onValueChanged = on_value_changed;
@@ -16,8 +16,9 @@ internal class LogicEventHandler : ILogicEventReceiver, ILogicNetworkConnection,
 	public void ReceiveLogicEvent(int value)
 	{
 		this.TriggerAudio(value);
+		int num = this.value;
 		this.value = value;
-		this.onValueChanged(value);
+		this.onValueChanged(value, num);
 	}
 
 	public int Value
@@ -110,7 +111,7 @@ internal class LogicEventHandler : ILogicEventReceiver, ILogicNetworkConnection,
 
 	private int value;
 
-	private Action<int> onValueChanged;
+	private Action<int, int> onValueChanged;
 
 	private Action<int, bool> onConnectionChanged;
 

@@ -36,7 +36,7 @@ public class SweepBotStationConfig : IBuildingConfig
 		storage.allowItemRemoval = false;
 		storage.ignoreSourcePriority = true;
 		storage.showDescriptor = false;
-		storage.storageFilters = STORAGEFILTERS.NOT_EDIBLE_SOLIDS;
+		storage.storageFilters = STORAGEFILTERS.STORAGE_LOCKERS_STANDARD;
 		storage.storageFullMargin = STORAGE.STORAGE_LOCKER_FILLED_MARGIN;
 		storage.fetchCategory = Storage.FetchCategory.Building;
 		storage.capacityKg = 25f;
@@ -46,7 +46,7 @@ public class SweepBotStationConfig : IBuildingConfig
 		storage2.allowItemRemoval = true;
 		storage2.ignoreSourcePriority = true;
 		storage2.showDescriptor = true;
-		storage2.storageFilters = STORAGEFILTERS.NOT_EDIBLE_SOLIDS;
+		storage2.storageFilters = STORAGEFILTERS.STORAGE_LOCKERS_STANDARD;
 		storage2.storageFullMargin = STORAGE.STORAGE_LOCKER_FILLED_MARGIN;
 		storage2.fetchCategory = Storage.FetchCategory.StorageSweepOnly;
 		storage2.capacityKg = 1000f;

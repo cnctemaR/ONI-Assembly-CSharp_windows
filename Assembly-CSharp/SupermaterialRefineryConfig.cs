@@ -39,9 +39,8 @@ public class SupermaterialRefineryConfig : IBuildingConfig
 		complexFabricator.duplicantOperated = true;
 		go.AddOrGet<FabricatorIngredientStatusManager>();
 		go.AddOrGet<CopyBuildingSettings>();
-		Workable workable = go.AddOrGet<ComplexFabricatorWorkable>();
+		go.AddOrGet<ComplexFabricatorWorkable>();
 		BuildingTemplates.CreateComplexFabricatorStorage(go, complexFabricator);
-		workable.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_supermaterial_refinery_kanim") };
 		Prioritizable.AddRef(go);
 		float num = 0.01f;
 		float num2 = (1f - num) * 0.5f;
@@ -158,6 +157,31 @@ public class SupermaterialRefineryConfig : IBuildingConfig
 			component.AttributeExperienceMultiplier = DUPLICANTSTATS.ATTRIBUTE_LEVELING.PART_DAY_EXPERIENCE;
 			component.SkillExperienceSkillGroup = Db.Get().SkillGroups.Technicals.Id;
 			component.SkillExperienceMultiplier = SKILLS.PART_DAY_EXPERIENCE;
+			KAnimFile anim = Assets.GetAnim("anim_interacts_supermaterial_refinery_kanim");
+			KAnimFile[] array = new KAnimFile[] { anim };
+			component.overrideAnims = array;
+			component.workAnims = new HashedString[] { "working_pre", "working_loop" };
+			component.synchronizeAnims = false;
+			KAnimFileData data = anim.GetData();
+			int animCount = data.animCount;
+			this.dupeInteractAnims = new HashedString[animCount - 2];
+			int i = 0;
+			int num = 0;
+			while (i < animCount)
+			{
+				HashedString hashedString = data.GetAnim(i).name;
+				if (hashedString != "working_pre" && hashedString != "working_pst")
+				{
+					this.dupeInteractAnims[num] = hashedString;
+					num++;
+				}
+				i++;
+			}
+			component.GetDupeInteract = () => new HashedString[]
+			{
+				"working_loop",
+				this.dupeInteractAnims.GetRandom<HashedString>()
+			};
 		};
 	}
 
@@ -168,4 +192,6 @@ public class SupermaterialRefineryConfig : IBuildingConfig
 	private const float OUTPUT_KG = 100f;
 
 	private const float OUTPUT_TEMPERATURE = 313.15f;
+
+	private HashedString[] dupeInteractAnims;
 }

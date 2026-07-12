@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Runtime.Serialization;
 using FMOD.Studio;
 using KSerialization;
@@ -8,6 +9,36 @@ using UnityEngine;
 [AddComponentMenu("KMonoBehaviour/scripts/TimeOfDay")]
 public class TimeOfDay : KMonoBehaviour, ISaveLoadable
 {
+	public static bool IsMilestoneApproaching
+	{
+		get
+		{
+			if (TimeOfDay.Instance != null && GameClock.Instance != null)
+			{
+				int currentTimeRegion = (int)TimeOfDay.Instance.GetCurrentTimeRegion();
+				int cycle = GameClock.Instance.GetCycle();
+				return currentTimeRegion == 2 && TimeOfDay.MILESTONE_CYCLES != null && TimeOfDay.MILESTONE_CYCLES.Contains(cycle + 1);
+			}
+			return false;
+		}
+	}
+
+	public static bool IsMilestoneDay
+	{
+		get
+		{
+			if (TimeOfDay.Instance != null && GameClock.Instance != null)
+			{
+				int currentTimeRegion = (int)TimeOfDay.Instance.GetCurrentTimeRegion();
+				int cycle = GameClock.Instance.GetCycle();
+				return currentTimeRegion == 1 && TimeOfDay.MILESTONE_CYCLES != null && TimeOfDay.MILESTONE_CYCLES.Contains(cycle);
+			}
+			return false;
+		}
+	}
+
+	public TimeOfDay.TimeRegion timeRegion { get; private set; }
+
 	public static void DestroyInstance()
 	{
 		TimeOfDay.Instance = null;
@@ -50,7 +81,22 @@ public class TimeOfDay : KMonoBehaviour, ISaveLoadable
 	private void Update()
 	{
 		this.UpdateVisuals();
-		this.UpdateAudio();
+		TimeOfDay.TimeRegion currentTimeRegion = this.GetCurrentTimeRegion();
+		int cycle = GameClock.Instance.GetCycle();
+		if (currentTimeRegion != this.timeRegion)
+		{
+			if (TimeOfDay.IsMilestoneApproaching)
+			{
+				Game.Instance.Trigger(-720092972, cycle);
+			}
+			if (TimeOfDay.IsMilestoneDay)
+			{
+				Game.Instance.Trigger(2070437606, cycle);
+			}
+			this.TriggerSoundChange(currentTimeRegion, TimeOfDay.IsMilestoneDay);
+			this.timeRegion = currentTimeRegion;
+			base.Trigger(1791086652, null);
+		}
 	}
 
 	private void UpdateVisuals()
@@ -66,17 +112,6 @@ public class TimeOfDay : KMonoBehaviour, ISaveLoadable
 		this.scale = Mathf.Lerp(this.scale, num4, Time.deltaTime * num2);
 		float num5 = this.UpdateSunlightIntensity();
 		Shader.SetGlobalVector("_TimeOfDay", new Vector4(this.scale, num5, 0f, 0f));
-	}
-
-	private void UpdateAudio()
-	{
-		TimeOfDay.TimeRegion currentTimeRegion = this.GetCurrentTimeRegion();
-		if (currentTimeRegion != this.timeRegion)
-		{
-			this.TriggerSoundChange(currentTimeRegion);
-			this.timeRegion = currentTimeRegion;
-			base.Trigger(1791086652, null);
-		}
 	}
 
 	public void Sim4000ms(float dt)
@@ -107,7 +142,7 @@ public class TimeOfDay : KMonoBehaviour, ISaveLoadable
 		return num2;
 	}
 
-	private void TriggerSoundChange(TimeOfDay.TimeRegion new_region)
+	private void TriggerSoundChange(TimeOfDay.TimeRegion new_region, bool milestoneReached)
 	{
 		if (new_region == TimeOfDay.TimeRegion.Day)
 		{
@@ -116,7 +151,14 @@ public class TimeOfDay : KMonoBehaviour, ISaveLoadable
 			{
 				MusicManager.instance.StopSong("Stinger_Loop_Night", true, STOP_MODE.ALLOWFADEOUT);
 			}
-			MusicManager.instance.PlaySong("Stinger_Day", false);
+			if (milestoneReached)
+			{
+				MusicManager.instance.PlaySong("Stinger_Day_Celebrate", false);
+			}
+			else
+			{
+				MusicManager.instance.PlaySong("Stinger_Day", false);
+			}
 			MusicManager.instance.PlayDynamicMusic();
 			return;
 		}
@@ -133,10 +175,12 @@ public class TimeOfDay : KMonoBehaviour, ISaveLoadable
 		this.scale = new_scale;
 	}
 
+	private const string MILESTONE_CYCLE_REACHED_AUDIO_NAME = "Stinger_Day_Celebrate";
+
+	public static List<int> MILESTONE_CYCLES = new List<int>(2) { 99, 999 };
+
 	[Serialize]
 	private float scale;
-
-	private TimeOfDay.TimeRegion timeRegion;
 
 	private EventInstance nightLPEvent;
 

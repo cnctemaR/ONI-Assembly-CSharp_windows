@@ -216,6 +216,13 @@ public class ComplexRecipe
 			this.facadeID = facadeID;
 		}
 
+		public RecipeElement(EdiblesManager.FoodInfo foodInfo, float amount)
+		{
+			this.material = foodInfo.Id;
+			this.amount = amount;
+			this.Edible = true;
+		}
+
 		public float amount { get; private set; }
 
 		public Tag material;
@@ -228,11 +235,14 @@ public class ComplexRecipe
 
 		public string facadeID;
 
+		public bool Edible;
+
 		public enum TemperatureOperation
 		{
 			AverageTemperature,
 			Heated,
-			Melted
+			Melted,
+			Dehydrated
 		}
 	}
 }

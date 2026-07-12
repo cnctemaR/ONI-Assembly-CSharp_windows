@@ -47,7 +47,7 @@ public class SolidConduitInboxConfig : IBuildingConfig
 		go.AddOrGet<EnergyConsumer>();
 		go.AddOrGet<Automatable>();
 		List<Tag> list = new List<Tag>();
-		list.AddRange(STORAGEFILTERS.NOT_EDIBLE_SOLIDS);
+		list.AddRange(STORAGEFILTERS.STORAGE_LOCKERS_STANDARD);
 		list.AddRange(STORAGEFILTERS.FOOD);
 		Storage storage = go.AddOrGet<Storage>();
 		storage.capacityKg = 1000f;

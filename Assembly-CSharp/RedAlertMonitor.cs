@@ -6,8 +6,16 @@ public class RedAlertMonitor : GameStateMachine<RedAlertMonitor, RedAlertMonitor
 	{
 		default_state = this.off;
 		base.serializable = StateMachine.SerializeType.Both_DEPRECATED;
-		this.off.EventTransition(GameHashes.EnteredRedAlert, (RedAlertMonitor.Instance smi) => Game.Instance, this.on, (RedAlertMonitor.Instance smi) => smi.master.gameObject.GetMyWorld().AlertManager.IsRedAlert());
-		this.on.EventTransition(GameHashes.ExitedRedAlert, (RedAlertMonitor.Instance smi) => Game.Instance, this.off, (RedAlertMonitor.Instance smi) => !smi.master.gameObject.GetMyWorld().AlertManager.IsRedAlert()).Enter("EnableRedAlert", delegate(RedAlertMonitor.Instance smi)
+		this.off.EventTransition(GameHashes.EnteredRedAlert, (RedAlertMonitor.Instance smi) => Game.Instance, this.on, delegate(RedAlertMonitor.Instance smi)
+		{
+			WorldContainer myWorld = smi.master.gameObject.GetMyWorld();
+			return !(myWorld == null) && myWorld.AlertManager.IsRedAlert();
+		});
+		this.on.EventTransition(GameHashes.ExitedRedAlert, (RedAlertMonitor.Instance smi) => Game.Instance, this.off, delegate(RedAlertMonitor.Instance smi)
+		{
+			WorldContainer myWorld2 = smi.master.gameObject.GetMyWorld();
+			return !(myWorld2 == null) && !myWorld2.AlertManager.IsRedAlert();
+		}).Enter("EnableRedAlert", delegate(RedAlertMonitor.Instance smi)
 		{
 			smi.EnableRedAlert();
 		}).ToggleEffect("RedAlert")

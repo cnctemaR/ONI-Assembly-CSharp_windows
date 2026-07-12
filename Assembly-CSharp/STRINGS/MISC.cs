@@ -60,6 +60,8 @@ namespace STRINGS
 
 			public static LocString BUILDABLEANY_DESC = "";
 
+			public static LocString DEHYDRATED = "Dehydrated";
+
 			public static LocString REFINEDMETAL = UI.FormatAsLink("Refined Metal", "REFINEDMETAL");
 
 			public static LocString REFINEDMETAL_DESC = string.Concat(new string[]
@@ -380,6 +382,13 @@ namespace STRINGS
 				public static LocString NAME = "Rations: {0}";
 
 				public static LocString TOOLTIP = "Can provide " + UI.FormatAsLink("{0}", "KCAL") + " of energy to Duplicants";
+			}
+
+			public class REHYDRATEDFOOD
+			{
+				public static LocString NAME = "Rehydrated food";
+
+				public static LocString TOOLTIP = string.Format("Not quite as good as fresh, causes a {0} to {1}", -1f, UI.FormatAsLink(DUPLICANTS.ATTRIBUTES.QUALITYOFLIFE.NAME, DUPLICANTS.ATTRIBUTES.QUALITYOFLIFE.NAME));
 			}
 
 			public class MARKEDFORDISINFECTION

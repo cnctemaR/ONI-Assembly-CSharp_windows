@@ -2233,13 +2233,6 @@ namespace STRINGS
 				public static LocString TOOLTIP = "This critter's respiration is having a cooling effect on the area";
 			}
 
-			public class LOOKINGFORFOOD
-			{
-				public static LocString NAME = "Foraging";
-
-				public static LocString TOOLTIP = "This critter is hungry and looking for " + UI.PRE_KEYWORD + "Food" + UI.PST_KEYWORD;
-			}
-
 			public class LOOKINGFORLIQUID
 			{
 				public static LocString NAME = "Parched";
@@ -3157,9 +3150,16 @@ namespace STRINGS
 
 			public class HUNGRY
 			{
-				public static LocString NAME = "Hungry";
+				public static LocString NAME = "Looking for Food";
 
-				public static LocString TOOLTIP = "This critter's tummy is rumbling";
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"This critter is hungry\n\nIt will keep seeking ",
+					UI.PRE_KEYWORD,
+					"Food",
+					UI.PST_KEYWORD,
+					" until its tummy is full\n"
+				});
 			}
 
 			public class HIVEHUNGRY
@@ -3206,10 +3206,6 @@ namespace STRINGS
 				public static LocString NAME = "Nowhere To Sleep";
 
 				public static LocString TOOLTIP = "This critter wants to sleep but can't find a good spot to snuggle up!";
-			}
-
-			public class PILOTNEEDED
-			{
 			}
 
 			public class ORIGINALPLANTMUTATION
@@ -3271,7 +3267,7 @@ namespace STRINGS
 					UI.PRE_KEYWORD,
 					"Quill Growth",
 					UI.PST_KEYWORD,
-					" rate is optimal\n\nPreferred food temperature range: {templo}-{temphi}"
+					" rate is optimal\n\nPreferred food temperature range: {templo} - {temphi}"
 				});
 
 				public static LocString PREFERRED_TEMP = "Last eaten: {element} at {temperature}";
@@ -3291,7 +3287,7 @@ namespace STRINGS
 					UI.PRE_KEYWORD,
 					"Quill Growth",
 					UI.PST_KEYWORD,
-					" rate has slowed because they ate food outside their preferred temperature range\n\nPreferred food temperature range: {templo}-{temphi}"
+					" rate has slowed because they ate food outside their preferred temperature range\n\nPreferred food temperature range: {templo} - {temphi}"
 				});
 			}
 
@@ -3305,7 +3301,7 @@ namespace STRINGS
 					UI.PRE_KEYWORD,
 					"Quill Growth",
 					UI.PST_KEYWORD,
-					" is halted because they are hungry\n\nPreferred food temperature range: {templo}-{temphi}"
+					" is halted because they are hungry\n\nPreferred food temperature range: {templo} - {temphi}"
 				});
 			}
 
@@ -3319,7 +3315,7 @@ namespace STRINGS
 					UI.PRE_KEYWORD,
 					"Tonic Root",
 					UI.PST_KEYWORD,
-					" quills are fully grown\n\nPreferred food temperature range: {templo}-{temphi}"
+					" quills are fully grown\n\nPreferred food temperature range: {templo} - {temphi}"
 				});
 			}
 
@@ -3363,6 +3359,40 @@ namespace STRINGS
 					UI.PST_KEYWORD,
 					" and ready to be milked"
 				});
+			}
+
+			public class CRITTERCONDO
+			{
+				public class MOVINGTO
+				{
+					public static LocString NAME = "Heading for Critter Condo";
+
+					public static LocString TOOLTIP = "This critter is making its way to an unoccupied critter condo";
+				}
+
+				public class INTERACTING
+				{
+					public static LocString NAME = "Getting Cozy";
+
+					public static LocString TOOLTIP = "This critter is relaxing in a critter condo\n\nIt's like a mini vacation!";
+				}
+			}
+
+			public class UNDERWATERCRITTERCONDO
+			{
+				public class MOVINGTO
+				{
+					public static LocString NAME = "Heading for Water Fort";
+
+					public static LocString TOOLTIP = "This critter is making its way to an unoccupied water fort";
+				}
+
+				public class INTERACTING
+				{
+					public static LocString NAME = "Getting Cozy";
+
+					public static LocString TOOLTIP = "This critter is relaxing in a water fort\n\nIt's like a mini vacation!";
+				}
 			}
 		}
 
@@ -3872,18 +3902,39 @@ namespace STRINGS
 				});
 			}
 
-			public class HAPPY
+			public class HAPPY_WILD
 			{
-				public static LocString NAME = "Happy";
+				public static LocString NAME = "Mood: Happy";
 
-				public static LocString TOOLTIP = "This critter's in high spirits because its needs are being adequately met\n\nIt will produce more materials as a result";
+				public static LocString TOOLTIP = "This critter's in high spirits because its needs are being exceeded";
 			}
 
-			public class UNHAPPY
+			public class HAPPY_TAME
 			{
-				public static LocString NAME = "Glum";
+				public static LocString NAME = "Mood: Happy";
+
+				public static LocString TOOLTIP = "This critter's in high spirits because its needs are being exceeded\n\nIt will lay more eggs as a result";
+			}
+
+			public class NEUTRAL
+			{
+				public static LocString NAME = "Mood: Satisfied";
+
+				public static LocString TOOLTIP = "This critter's needs are being adequately met\n\nIt will produce its default amount of materials";
+			}
+
+			public class GLUM
+			{
+				public static LocString NAME = "Mood: Glum";
 
 				public static LocString TOOLTIP = "This critter's feeling down because its needs aren't being met\n\nIt will produce less materials as a result";
+			}
+
+			public class MISERABLE
+			{
+				public static LocString NAME = "Mood: Miserable";
+
+				public static LocString TOOLTIP = "This critter's wallowing in despair because its needs aren't being met\n\nIt will produce less materials as a result, and will not lay eggs";
 			}
 
 			public class ATE_FROM_FEEDER
@@ -3945,7 +3996,7 @@ namespace STRINGS
 					UI.PRE_KEYWORD,
 					"Room",
 					UI.PST_KEYWORD,
-					" will become overcrowded once all nearby ",
+					" will become too crowded once all nearby ",
 					UI.PRE_KEYWORD,
 					"Eggs",
 					UI.PST_KEYWORD,
@@ -3959,7 +4010,7 @@ namespace STRINGS
 
 			public class OVERCROWDED
 			{
-				public static LocString NAME = "Overcrowded";
+				public static LocString NAME = "Crowded";
 
 				public static LocString TOOLTIP = string.Concat(new string[]
 				{
@@ -4024,6 +4075,20 @@ namespace STRINGS
 					UI.PST_KEYWORD,
 					" supply and making them wish all their friends were here\n\nThey're thinking about calling a new Gassy Moo to this asteroid"
 				});
+			}
+
+			public class CRITTERCONDOINTERACTEFFECT
+			{
+				public static LocString NAME = "Cozy";
+
+				public static LocString TOOLTIP = "This critter recently enjoyed a visit to a critter condo";
+			}
+
+			public class UNDERWATERCRITTERCONDOINTERACTEFFECT
+			{
+				public static LocString NAME = "Cozy";
+
+				public static LocString TOOLTIP = "This critter recently enjoyed a visit to a water fort";
 			}
 		}
 

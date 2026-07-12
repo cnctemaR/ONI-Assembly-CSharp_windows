@@ -17,7 +17,7 @@ public static class BasePacuConfig
 		component.AddTag(GameTags.Creatures.Swimmer, false);
 		Trait trait = Db.Get().CreateTrait(base_trait_id, name, name, null, false, null, true, true);
 		trait.Add(new AttributeModifier(Db.Get().Amounts.Calories.maxAttribute.Id, PacuTuning.STANDARD_STOMACH_SIZE, name, false, false, true));
-		trait.Add(new AttributeModifier(Db.Get().Amounts.Calories.deltaAttribute.Id, -PacuTuning.STANDARD_CALORIES_PER_CYCLE / 600f, name, false, false, true));
+		trait.Add(new AttributeModifier(Db.Get().Amounts.Calories.deltaAttribute.Id, -PacuTuning.STANDARD_CALORIES_PER_CYCLE / 600f, UI.TOOLTIPS.BASE_VALUE, false, false, true));
 		trait.Add(new AttributeModifier(Db.Get().Amounts.HitPoints.maxAttribute.Id, 25f, name, false, false, true));
 		trait.Add(new AttributeModifier(Db.Get().Amounts.Age.maxAttribute.Id, 25f, name, false, false, true));
 		EntityTemplates.CreateAndRegisterBaggedCreature(gameObject, false, false, true);
@@ -45,6 +45,7 @@ public static class BasePacuConfig
 			.Add(new EatStates.Def(), true, -1)
 			.Add(new PlayAnimsStates.Def(GameTags.Creatures.Poop, false, "lay_egg_pre", global::STRINGS.CREATURES.STATUSITEMS.EXPELLING_SOLID.NAME, global::STRINGS.CREATURES.STATUSITEMS.EXPELLING_SOLID.TOOLTIP), true, -1)
 			.Add(new MoveToLureStates.Def(), true, -1)
+			.Add(new CritterCondoStates.Def(), !is_baby, -1)
 			.PopInterruptGroup()
 			.Add(new IdleStates.Def(), true, -1);
 		CreatureFallMonitor.Def def = gameObject.AddOrGetDef<CreatureFallMonitor.Def>();
@@ -55,12 +56,13 @@ public static class BasePacuConfig
 		gameObject.AddOrGet<Trappable>();
 		gameObject.AddOrGet<LoopingSounds>();
 		EntityTemplates.AddCreatureBrain(gameObject, builder, GameTags.Creatures.Species.PacuSpecies, symbol_prefix);
+		gameObject.AddOrGetDef<CritterCondoInteractMontior.Def>().useunderWaterCondos = true;
 		Tag tag = SimHashes.ToxicSand.CreateTag();
 		HashSet<Tag> hashSet = new HashSet<Tag>();
 		hashSet.Add(SimHashes.Algae.CreateTag());
 		List<Diet.Info> list = new List<Diet.Info>();
 		list.Add(new Diet.Info(hashSet, tag, BasePacuConfig.CALORIES_PER_KG_OF_ORE, global::TUNING.CREATURES.CONVERSION_EFFICIENCY.NORMAL, null, 0f, false, false));
-		list.AddRange(BasePacuConfig.SeedDiet(tag, BasePacuConfig.CALORIES_PER_KG_OF_ORE * BasePacuConfig.KG_ORE_EATEN_PER_CYCLE * 4f, global::TUNING.CREATURES.CONVERSION_EFFICIENCY.NORMAL));
+		list.AddRange(BasePacuConfig.SeedDiet(tag, PacuTuning.STANDARD_CALORIES_PER_CYCLE, global::TUNING.CREATURES.CONVERSION_EFFICIENCY.NORMAL));
 		Diet diet = new Diet(list.ToArray());
 		CreatureCalorieMonitor.Def def2 = gameObject.AddOrGetDef<CreatureCalorieMonitor.Def>();
 		def2.diet = diet;
@@ -86,10 +88,18 @@ public static class BasePacuConfig
 		List<Diet.Info> list = new List<Diet.Info>();
 		foreach (GameObject gameObject in Assets.GetPrefabsWithTag(GameTags.Seed))
 		{
-			list.Add(new Diet.Info(new HashSet<Tag>
+			GameObject prefab = Assets.GetPrefab(gameObject.GetComponent<PlantableSeed>().PlantID);
+			if (!prefab.HasTag(GameTags.DeprecatedContent))
 			{
-				new Tag(gameObject.GetComponent<KPrefabID>().PrefabID())
-			}, poopTag, caloriesPerSeed, producedConversionRate, null, 0f, false, false));
+				SeedProducer component = prefab.GetComponent<SeedProducer>();
+				if (component == null || component.seedInfo.productionType == SeedProducer.ProductionType.Harvest)
+				{
+					list.Add(new Diet.Info(new HashSet<Tag>
+					{
+						new Tag(gameObject.GetComponent<KPrefabID>().PrefabID())
+					}, poopTag, caloriesPerSeed, producedConversionRate, null, 0f, false, false));
+				}
+			}
 		}
 		return list;
 	}
@@ -103,7 +113,7 @@ public static class BasePacuConfig
 		return "flop_loop";
 	}
 
-	private static float KG_ORE_EATEN_PER_CYCLE = 140f;
+	private static float KG_ORE_EATEN_PER_CYCLE = 7.5f;
 
 	private static float CALORIES_PER_KG_OF_ORE = PacuTuning.STANDARD_CALORIES_PER_CYCLE / BasePacuConfig.KG_ORE_EATEN_PER_CYCLE;
 

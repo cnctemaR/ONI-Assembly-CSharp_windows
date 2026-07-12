@@ -60,9 +60,10 @@ public class KMonoBehaviour : MonoBehaviour, IStateMachineTarget, ISaveLoadable,
 					base.name,
 					".",
 					base.GetType().Name,
-					".OnPrefabInit"
+					".OnPrefabInit at ",
+					this.transform.position.ToString()
 				});
-				DebugUtil.LogException(this, text, ex);
+				DebugUtil.LogExceptionCallstack(this, text, ex.ToString(), ex);
 			}
 		}
 	}
@@ -148,9 +149,10 @@ public class KMonoBehaviour : MonoBehaviour, IStateMachineTarget, ISaveLoadable,
 				base.name,
 				".",
 				base.GetType().Name,
-				".OnSpawn"
+				".OnSpawn at ",
+				this.transform.position.ToString()
 			});
-			DebugUtil.LogException(this, text, ex);
+			DebugUtil.LogExceptionCallstack(this, text, ex.ToString(), ex);
 		}
 	}
 

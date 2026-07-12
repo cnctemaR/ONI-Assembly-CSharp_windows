@@ -146,7 +146,7 @@ public class LiquidPumpingStation : Workable, ISim200ms
 					});
 					component.targetWorkable = this;
 					Pickupable pickupable = component;
-					pickupable.OnReservationsChanged = (global::System.Action)Delegate.Combine(pickupable.OnReservationsChanged, new global::System.Action(this.OnReservationsChanged));
+					pickupable.OnReservationsChanged = (Action<Pickupable, bool, Pickupable.Reservation>)Delegate.Combine(pickupable.OnReservationsChanged, new Action<Pickupable, bool, Pickupable.Reservation>(this.OnReservationsChanged));
 				}
 				liquidInfo.source.GetComponent<Pickupable>().TotalAmount = liquidInfo.amount;
 				this.infos[l] = liquidInfo;
@@ -242,7 +242,7 @@ public class LiquidPumpingStation : Workable, ISim200ms
 		base.GetComponent<KAnimControllerBase>().Play("on", KAnim.PlayMode.Once, 1f, 0f);
 	}
 
-	private void OnReservationsChanged()
+	private void OnReservationsChanged(Pickupable _ignore, bool _ignore2, Pickupable.Reservation _ignore3)
 	{
 		bool flag = false;
 		for (int i = 0; i < this.infoCount; i++)

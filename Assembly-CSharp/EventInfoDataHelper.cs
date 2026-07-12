@@ -7,14 +7,14 @@ public class EventInfoDataHelper
 	{
 		EventInfoData eventInfoData = new EventInfoData(titleText, descriptionText, animFileName);
 		eventInfoData.minions = minions;
-		if (popupType == EventInfoDataHelper.PopupType.BEGIN)
+		if (popupType <= EventInfoDataHelper.PopupType.NORMAL || popupType != EventInfoDataHelper.PopupType.COMPLETE)
 		{
 			eventInfoData.showCallback = delegate
 			{
 				KFMOD.PlayUISound(GlobalAssets.GetSound("StoryTrait_Activation_Popup", false));
 			};
 		}
-		if (popupType == EventInfoDataHelper.PopupType.COMPLETE)
+		else
 		{
 			eventInfoData.showCallback = delegate
 			{

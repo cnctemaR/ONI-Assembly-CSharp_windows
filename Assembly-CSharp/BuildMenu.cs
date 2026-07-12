@@ -874,6 +874,7 @@ public class BuildMenu : KScreen
 			new BuildMenu.DisplayInfo(BuildMenu.CacheHashString("Rocketry"), "icon_category_rocketry", global::Action.BuildCategoryRocketry, KKeyCode.C, new List<BuildMenu.BuildingInfo>
 			{
 				new BuildMenu.BuildingInfo("Gantry", global::Action.BuildMenuKeyT),
+				new BuildMenu.BuildingInfo("ModularLaunchpadPortBridge", global::Action.BuildMenuKeyU),
 				new BuildMenu.BuildingInfo("KeroseneEngine", global::Action.BuildMenuKeyE),
 				new BuildMenu.BuildingInfo("SolidBooster", global::Action.BuildMenuKeyB),
 				new BuildMenu.BuildingInfo("SteamEngine", global::Action.BuildMenuKeyS),

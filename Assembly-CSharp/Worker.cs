@@ -168,10 +168,10 @@ public class Worker : KMonoBehaviour
 			{
 				if (this.workable != null && this.workable.synchronizeAnims)
 				{
-					KAnimControllerBase component2 = this.workable.GetComponent<KAnimControllerBase>();
-					if (component2 != null)
+					KAnimControllerBase animController = this.workable.GetAnimController();
+					if (animController != null)
 					{
-						component2.Play(workPstAnims, KAnim.PlayMode.Once);
+						animController.Play(workPstAnims, KAnim.PlayMode.Once);
 					}
 				}
 				else
@@ -248,17 +248,18 @@ public class Worker : KMonoBehaviour
 			{
 				if (this.workable != null && this.workable.synchronizeAnims)
 				{
-					KBatchedAnimController component = this.workable.GetComponent<KBatchedAnimController>();
-					if (component != null)
+					KAnimControllerBase animController = this.workable.GetAnimController();
+					if (animController != null)
 					{
 						HashedString[] workPstAnims = this.workable.GetWorkPstAnims(this, false);
 						if (workPstAnims != null && workPstAnims.Length != 0)
 						{
-							component.Play(workPstAnims, KAnim.PlayMode.Once);
-							component.SetPositionPercent(1f);
+							animController.Play(workPstAnims, KAnim.PlayMode.Once);
+							animController.SetPositionPercent(1f);
 						}
 					}
 				}
+				base.Trigger(-993481695, this);
 				this.InternalStopWork(this.workable, true);
 			}
 			return;
@@ -269,6 +270,7 @@ public class Worker : KMonoBehaviour
 			this.CompleteWork();
 			return;
 		}
+		base.Trigger(-993481695, this);
 		this.InternalStopWork(this.workable, true);
 	}
 
@@ -323,16 +325,16 @@ public class Worker : KMonoBehaviour
 				{
 					if (this.workable.synchronizeAnims)
 					{
-						KAnimControllerBase component2 = this.workable.GetComponent<KAnimControllerBase>();
-						if (component2 != null)
+						KAnimControllerBase animController = this.workable.GetAnimController();
+						if (animController != null)
 						{
-							this.kanimSynchronizer = component2.GetSynchronizer();
+							this.kanimSynchronizer = animController.GetSynchronizer();
 							if (this.kanimSynchronizer != null)
 							{
 								this.kanimSynchronizer.Add(component);
 							}
 						}
-						component2.Play(workAnims, workAnimPlayMode);
+						animController.Play(workAnims, workAnimPlayMode);
 					}
 					else
 					{
@@ -352,9 +354,9 @@ public class Worker : KMonoBehaviour
 				{
 					this.CreatePasserbyReactable();
 				}
-				KSelectable component3 = base.GetComponent<KSelectable>();
-				this.previousStatusItem = component3.GetStatusItem(Db.Get().StatusItemCategories.Main);
-				component3.SetStatusItem(Db.Get().StatusItemCategories.Main, this.workable.GetWorkerStatusItem(), this.workable);
+				KSelectable component2 = base.GetComponent<KSelectable>();
+				this.previousStatusItem = component2.GetStatusItem(Db.Get().StatusItemCategories.Main);
+				component2.SetStatusItem(Db.Get().StatusItemCategories.Main, this.workable.GetWorkerStatusItem(), this.workable);
 			}
 		}
 		catch (Exception ex)

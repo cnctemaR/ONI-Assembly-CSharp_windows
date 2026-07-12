@@ -124,8 +124,21 @@ public class GameInputMapping
 		{
 			return;
 		}
-		string text = File.ReadAllText(GameInputMapping.BindingsFilename);
-		if (text == null || text == "")
+		string text = "";
+		try
+		{
+			text = File.ReadAllText(GameInputMapping.BindingsFilename);
+		}
+		catch
+		{
+			DebugUtil.LogErrorArgs(new object[]
+			{
+				"Error parsing",
+				GameInputMapping.BindingsFilename
+			});
+			return;
+		}
+		if (text == "")
 		{
 			return;
 		}

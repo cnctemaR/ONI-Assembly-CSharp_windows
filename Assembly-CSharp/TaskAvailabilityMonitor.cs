@@ -28,7 +28,14 @@ public class TaskAvailabilityMonitor : GameStateMachine<TaskAvailabilityMonitor,
 
 		public void RefreshStatusItem()
 		{
-			base.GetComponent<KSelectable>().SetStatusItem(Db.Get().StatusItemCategories.Main, Db.Get().DuplicantStatusItems.Idle, null);
+			KSelectable component = base.GetComponent<KSelectable>();
+			WorldContainer myWorld = base.gameObject.GetMyWorld();
+			if (myWorld != null && myWorld.IsModuleInterior && myWorld.ParentWorldId == myWorld.id)
+			{
+				component.SetStatusItem(Db.Get().StatusItemCategories.Main, Db.Get().DuplicantStatusItems.IdleInRockets, null);
+				return;
+			}
+			component.SetStatusItem(Db.Get().StatusItemCategories.Main, Db.Get().DuplicantStatusItems.Idle, null);
 		}
 	}
 }

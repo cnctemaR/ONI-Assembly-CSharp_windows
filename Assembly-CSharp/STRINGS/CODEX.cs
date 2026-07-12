@@ -21,7 +21,7 @@ namespace STRINGS
 				{
 					public static LocString TITLE = "Hungry";
 
-					public static LocString CONTAINER1 = "Tame critters have significantly faster metabolism than wild ones, and get hungry sooner. This makes them more valuable in terms of resource production, as long as the colony is equipped to meet their dietary needs.\n\nCritters' stomachs vary in size, but they are capable of storing at least five cycles' worth of food. Their bellies begin to rumble when those internal caches drop below 90 percent. The critter will then seek out food, and will continue to eat until they feel completely full again.\n\nJuvenile critters have the slowest metabolism, although glum tame critters are a close second.";
+					public static LocString CONTAINER1 = "Tame critters have significantly faster metabolism than wild ones, and get hungry sooner. This makes them more valuable in terms of resource production, as long as the colony is equipped to meet their dietary needs.\n\nCritters' stomachs vary in size, but they are capable of storing at least five cycles' worth of food. Their bellies begin to rumble when those internal caches drop below 90 percent. The critter will then seek out food, and will continue to eat until they feel completely full again.\n\nJuvenile critters have the slowest metabolism, although glum tame critters are not far behind.";
 				}
 
 				public class STARVING
@@ -47,22 +47,42 @@ namespace STRINGS
 				{
 					public static LocString TITLE = "Happy";
 
-					public static LocString CONTAINER1 = "Happy, tame critters produce more usable materials and tend to lay eggs at a higher rate than glum or wild critters. Domesticated critters are less resilient than wild ones—they require more care from the colony in order to maintain a positive disposition.\n\nBabies have a higher baseline of natural joy, but produce neither resources nor eggs.\n\nDuplicants with the Critter Ranching skill have the expertise needed to domesticate and care for critters, and can also boost a critter's mood by bonding with them at a Grooming Station.\n\nCritters who drink at the Critter Fountain also enjoy a mood boost, despite the lack of nutrients available in the Brackene dispensed.\n\nBeing confined or overcrowded undermines a critter's happiness.";
+					public static LocString CONTAINER1 = "Happy, tame critters produce more usable materials and tend to lay eggs at a higher rate than glum or wild critters. Domesticated critters are less resilient than wild ones—they require more care from the colony in order to maintain a positive disposition.\n\nBabies have a higher baseline of natural joy, but produce neither resources nor eggs.\n\nDuplicants with the Critter Ranching skill have the expertise needed to domesticate and care for critters, and can also boost a critter's mood by bonding with them at a Grooming Station.\n\nCritters who drink at the Critter Fountain also enjoy a mood boost, despite the lack of nutrients available in the Brackene dispensed.\n\nBeing confined or feeling crowded undermines a critter's happiness.";
 
-					public static LocString SUBTITLE = "Effects";
+					public static LocString SUBTITLE = "<b>Effects</b>";
 
 					public static LocString HAPPY_METABOLISM = "    • Indirectly improves egg-laying rates";
+				}
+
+				public class NEUTRAL
+				{
+					public static LocString TITLE = "Satisfied";
+
+					public static LocString CONTAINER1 = "When a critter has no reason to object to anything in its environment or diet, it will feel quite content with its lot in life. Satisfied critters have the default metabolism, fertility and life span expected of their species.";
 				}
 
 				public class GLUM
 				{
 					public static LocString TITLE = "Glum";
 
-					public static LocString CONTAINER1 = "Critters can survive in subpar environments, but it takes a toll on their mood and impacts metabolism and productivity. When their happiness levels dip below zero, they become glum.\n\nWild critters are less sensitive to the effects of glumness than their tamed brethren, though they are still negatively affected by overcrowded or confined living conditions.";
+					public static LocString CONTAINER1 = "Critters can survive in subpar environments, but it takes a toll on their mood and impacts metabolism and productivity. When their happiness levels dip below zero, they become glum.\n\nWild critters are less sensitive to the effects of glumness than their tamed brethren, though they are still negatively affected by crowded or confined living conditions.";
 
-					public static LocString SUBTITLE = "Effects";
+					public static LocString SUBTITLE = "<b>Effects</b>";
 
 					public static LocString GLUMWILD_METABOLISM = "    • Critter Metabolism\n";
+				}
+
+				public class MISERABLE
+				{
+					public static LocString TITLE = "Miserable";
+
+					public static LocString CONTAINER1 = "When too many unpleasant conditions add up, critters become utterly miserable. This level of unhappiness seriously undermines their ability to contribute to the colony. Miserable critters have lower metabolism and will not lay eggs.";
+
+					public static LocString SUBTITLE = "<b>Effects</b>";
+
+					public static LocString MISERABLEWILD_METABOLISM = "    • Critter Metabolism";
+
+					public static LocString MISERABLEWILD_FERTILITY = "    • Reproduction";
 				}
 
 				public class HOSTILE
@@ -80,7 +100,7 @@ namespace STRINGS
 
 					public static LocString CONTAINER1 = "Each species has its own space requirements. Critters who find themselves in a room that they consider too small will feel confined. They will feel the same way if they become stuck in a door or tile. Critters will not reproduce while they are in this state.\n\nShove Voles are the exception to this rule: their tunneling instincts make them quite comfortable in snug spaces, and they never feel confined.";
 
-					public static LocString SUBTITLE = "Effects";
+					public static LocString SUBTITLE = "<b>Effects</b>";
 
 					public static LocString CONFINED_FERTILITY = "    • Reproduction\n";
 
@@ -89,24 +109,13 @@ namespace STRINGS
 
 				public class OVERCROWDED
 				{
-					public static LocString TITLE = "Overcrowded";
+					public static LocString TITLE = "Crowded";
 
-					public static LocString CONTAINER1 = "Overcrowding occurs when a critter is in a room that's appropriately sized for its needs but feels that there are too many other critters sharing the same space. Because each species has its own space requirements, this state can vary among occupants of the same room.\n\nThis emotional state intensifies in response to the number of excess critters: adding new critters to an already overcrowded room will undermine a critter's happiness even further.";
+					public static LocString CONTAINER1 = "This occurs when a critter is in a room that's appropriately sized for its needs but feels that there are too many other critters sharing the same space. Because each species has its own space requirements, this state can vary among occupants of the same room.\n\nThis emotional state intensifies in response to the number of excess critters: adding new critters to an already crowded room will undermine a critter's happiness even further.";
 
-					public static LocString SUBTITLE = "Effects";
+					public static LocString SUBTITLE = "<b>Effects</b>";
 
 					public static LocString OVERCROWDED_HAPPY1 = "    • Happiness\n";
-				}
-
-				public class CRAMPED
-				{
-					public static LocString TITLE = "Cramped";
-
-					public static LocString CONTAINER1 = "If a critter is overcrowded—or will become overcrowded once all of the eggs in the room have hatched—they begin to feel cramped.\n\nThis causes the critter's reproductive system to pause temporarily. It will resume once all eggs have hatched or been removed from the room.";
-
-					public static LocString SUBTITLE = "Effects";
-
-					public static LocString CRAMPED_FERTILITY = "    • Reproduction";
 				}
 			}
 
@@ -131,6 +140,17 @@ namespace STRINGS
 					public static LocString TITLE = "Egg Chances";
 
 					public static LocString CONTAINER1 = "In most cases, an egg will hatch into the same critter variant as its parent. Genetic volatility, however, means that there is a chance that it may hatch into another variant from that species.\n\nThere are many things that can alter the likelihood of a critter laying a particular type of egg.\n\nEgg chances are impacted by:\n    • Diet\n    • Body temperature\n    • Ambient gasses and elements\n    • Plants in the critters' care\n    • Variants that share the enclosure\n\nWhen a tame critter lays an egg, the resulting offspring will be born tame.";
+				}
+
+				public class FUTURE_OVERCROWDED
+				{
+					public static LocString TITLE = "Cramped";
+
+					public static LocString CONTAINER1 = "Crowded critters—or critters who know they'll start feeling crowded once all of the eggs in the room have hatched—will temporarily stop laying eggs. Their reproductive system will resume function once all eggs have hatched or been removed from the room.";
+
+					public static LocString SUBTITLE = "<b>Effects</b>";
+
+					public static LocString CRAMPED_FERTILITY = "    • Reproduction";
 				}
 
 				public class INCUBATION
@@ -165,7 +185,7 @@ namespace STRINGS
 
 					public static LocString CONTAINER1 = "Wild critters do not require feeding by the colony's Critter Ranchers, thanks to their slower metabolism. They do, however, produce fewer materials than domesticated critters.\n\nApproaching a wild critter to trap or wrangle it is quite safe, provided that it is a non-hostile species. Attacking a critter will typically provoke a combat response.";
 
-					public static LocString SUBTITLE = "Effects";
+					public static LocString SUBTITLE = "<b>Effects</b>";
 
 					public static LocString WILD_METABOLISM = "    • Critter Metabolism\n";
 
@@ -178,7 +198,7 @@ namespace STRINGS
 
 					public static LocString CONTAINER1 = "Domesticated critters produce far more resources and lay eggs at a higher frequency than wild ones. They require additional care in order to maintain the levels of happiness that maximize their utility in the colony. (Happy critters are also generally more pleasant to be around.)\n\nOnce tame, critters can access the Critter Feeder, which is unavailable to wild critters.";
 
-					public static LocString SUBTITLE = "Effects";
+					public static LocString SUBTITLE = "<b>Effects</b>";
 
 					public static LocString TAME_HAPPINESS = "    • Happiness\n";
 
@@ -751,6 +771,165 @@ namespace STRINGS
 					}
 				}
 			}
+
+			public static class MORB_ROVER_MAKER
+			{
+				public static LocString NAME = "Biobot Builder";
+
+				public static LocString DESCRIPTION = "Reboot an ambitious collaborative project spearheaded by Gravitas's bioengineering and robotics departments.\n\nIf correctly rebuilt, it could save Duplicant lives.";
+
+				public class UI_SIDESCREENS
+				{
+					public static LocString REVEAL_BTN = "Restore Building";
+
+					public static LocString REVEAL_BTN_TOOLTIP = "Assign a Duplicant to restore this building's functionality";
+
+					public static LocString CANCEL_REVEAL_BTN = "Cancel";
+
+					public static LocString CANCEL_REVEAL_BTN_TOOLTIP = "Cancel building restoration";
+				}
+
+				public class POPUPS
+				{
+					public class BEGIN
+					{
+						public static LocString NAME = "Story Trait: Biobot Builder";
+
+						public static LocString CODEX_NAME = "First Encounter";
+
+						public static LocString DESCRIPTION = "My Duplicants have discovered a laboratory full of dusty machinery. The vestiges of another colony's experiments, perhaps?\n\nIt is unclear whether the apparatus is intended for biological experimentation or advanced mechatronics...or both.";
+
+						public static LocString BUTTON = "Close";
+					}
+
+					public class REVEAL
+					{
+						public static LocString NAME = "Story Trait: Biobot Builder";
+
+						public static LocString CODEX_NAME = "Meet P.E.G.G.Y.";
+
+						public static LocString DESCRIPTION = "Our restoration work is complete!\n\nA small plaque on this building's mechanical assembly tank reads: \"Pathogen-Fueled Extravehicular Geo-Exploratory Guidebot (Y).\"\n\nThe adjacent tank contains the floating shape of a half-formed organism. Its vivid coloring reminds me of the poisonous amphibians that were eradicated from our home planet's jungles.\n\nA tattered transcript print-out was recovered from the mess.";
+
+						public static LocString BUTTON_CLOSE = "Close";
+
+						public static LocString BUTTON_READLORE = "Read Transcript";
+					}
+
+					public class LOCKER
+					{
+						public static LocString DESCRIPTION = "A hermetically sealed glass cabinet.\n\nIt contains two " + UI.FormatAsLink("Sporechid", "EVILFLOWER") + " seeds and a carefully penned note.";
+					}
+
+					public class END
+					{
+						public static LocString NAME = "Story Trait Complete: Biobot Builder";
+
+						public static LocString CODEX_NAME = "Challenge Completed";
+
+						public static LocString DESCRIPTION = "Success! My Duplicants' efforts to get the Biobot Builder up and running have finally paid off!\n\nOur first fully assembled P.E.G.G.Y. biobot is ready to perform tasks in hazardous environments, which means less exposure to danger for my Duplicants. There seems to be no limit to the number of biobots that we could produce.\n\nA small toy bot was found discarded behind the Sporb tank. It occasionally plays a deteriorated laugh track.";
+
+						public static LocString BUTTON = "Close";
+
+						public static LocString BUTTON_READLORE = "Inspect Toy";
+					}
+				}
+
+				public class ENVELOPE
+				{
+					public static LocString TITLE = "With Regrets";
+
+					public class BODY
+					{
+						public static LocString CONTAINER1 = "Dr. Seyed Ali,\n\nYou were right to be angry with me. I <i>am</i> the reason that the driverless workbot project was reassigned. Director Stern called me in to discuss your concerns regarding the Sporb mucin cross-contamination, and I...\n\nShe said the supplemental testing on model X posed a threat to the Ceres mission.\n\nAfter what happened to that poor lab tech, I should have said more, but...\n\nIt was already too late for him.\n\nIt may be too late for all of us.\n\nYou should know that the Director received a video call from someone at the Vertex Institute as I left... I lingered outside her door and heard her address them as the head of transnational security! The way they were talking about the biobot...\n\nIt's not safe to write more here. I'll wait for you at the rocket hangar after your shift tonight.\n\nI hope you'll come. I understand if you don't.\n\nI am so, so sorry.\n\n - Dr. Saruhashi";
+					}
+				}
+
+				public class VALENTINESDAY
+				{
+					public static LocString TITLE = "Anonymous Admirer";
+
+					public class BODY
+					{
+						public static LocString CONTAINER1 = "I am\n   a subatomic particle\nsmaller than a speck of dust\n  flushed from your gaze\n\n     at the eyewash station  \n\n   My love is like plutonium\n gray and dull and\nunbearably heavy\n  until    I am near you\n\n with every breath \n      I burn, with\n    yearning\n              unseen\n\nPS: I made Steve let me in so I could leave you this, hope that's okay.";
+					}
+				}
+
+				public class UNSAFETRANSFER
+				{
+					public static LocString TITLE = "ENCRYPTION LEVEL: THREE";
+
+					public class BODY
+					{
+						public static LocString CONTAINER1 = "<smallcaps>[Log Fragmentation Detected]\n[Voice Recognition Unavailable]</smallcaps>\n\n[LOG BEGINS]\n\n...and then the Printing Pod says \"Knock knock, goo's there!\"\n\nUgh. They'll never laugh at <i>that</i> stinker.\n\nWhat if-\n\n(sound of a ding)\n\nHey hey, squishy little buddy! Look who's all grown up. You ready for a big robot ride? Dr. Seyed Ali should be back from his meeting any minute. He'll be so happy to see you.\n\n(sound of a wet slap on glass)\n\nAww yeah, I'd be impatient too.\n\nYou know what, why don't I go ahead and get you into your new home? I've helped him do this more than a dozen times.\n\n\"See one, do one, teach one,\" right?\n\n[LOG ENDS]";
+					}
+				}
+
+				public class STATUSITEMS
+				{
+					public class DUSTY
+					{
+						public static LocString NAME = "Decommissioned";
+
+						public static LocString TOOLTIP = "This building must be restored before it can be used";
+					}
+
+					public class BUILDING_BEING_REVEALED
+					{
+						public static LocString NAME = "Being Restored";
+
+						public static LocString TOOLTIP = "This building is being restored to its former glory";
+					}
+
+					public class BUILDING_REVEALING
+					{
+						public static LocString NAME = "Restoring Equipment";
+
+						public static LocString TOOLTIP = "This Duplicant is carefully restoring the Biobot Builder";
+					}
+
+					public class GERM_COLLECTION_PROGRESS
+					{
+						public static LocString NAME = "Incubating Sporb: {0}";
+
+						public static LocString TOOLTIP = "At 100% incubation, the Sporb begins to convert absorbed {GERM_NAME} into photosynthetic bacteria that can be used as biofuel\n\nIt is then ready to be assessed and transferred into a completed Biobot frame\n\nConsumption Rate: {0} [{GERM_NAME}]\n\nCurrent Total: {1} / {2} [{GERM_NAME}]";
+					}
+
+					public class NOGERMSCONSUMEDALERT
+					{
+						public static LocString NAME = "Insufficient Resources: {0}";
+
+						public static LocString TOOLTIP = "This building requires additional {0} in order to function\n\n{0} can be delivered via " + BUILDINGS.PREFABS.GASCONDUIT.NAME + " ";
+					}
+
+					public class CRAFTING_ROBOT_BODY
+					{
+						public static LocString NAME = "Crafting Biobot";
+
+						public static LocString TOOLTIP = "This building is using " + UI.FormatAsLink("Steel", "STEEL") + " to craft a Biobot frame";
+					}
+
+					public class DOCTOR_READY
+					{
+						public static LocString NAME = "Awaiting Doctor";
+
+						public static LocString TOOLTIP = "This building is waiting for a skilled Duplicant to perform an occupational health and safety check";
+					}
+
+					public class BUILDING_BEING_WORKED_BY_DOCTOR
+					{
+						public static LocString NAME = "Preparing Biobot";
+
+						public static LocString TOOLTIP = "This building is being operated by a skilled Duplicant";
+					}
+
+					public class DOCTOR_WORKING_BUILDING
+					{
+						public static LocString NAME = "Assessing Sporb";
+
+						public static LocString TOOLTIP = "This Duplicant is assessing the Sporb's readiness for Biobot assembly";
+					}
+				}
+			}
 		}
 
 		public class QUESTS
@@ -940,7 +1119,7 @@ namespace STRINGS
 
 			public static LocString BUILDINGCONSTRUCTIONMATERIALS = "Materials: ";
 
-			public static LocString BUILDINGTYPE = "Room Requirements Class";
+			public static LocString BUILDINGTYPE = "<b>Category</b>";
 
 			public static LocString SUBENTRIES = "Entries ({0}/{1})";
 
@@ -1000,7 +1179,7 @@ namespace STRINGS
 		{
 			public static LocString MAXAGE = "This critter's typical " + UI.FormatAsLink("Life Span", "CREATURES::GUIDE::FERTILITY") + " is <b>{0} cycles</b>.";
 
-			public static LocString OVERCROWDING = UI.FormatAsLink("Overcrowded", "CREATURES::GUIDE::MOOD") + " when a room has less than <b>{0} cells</b> of space for each critter.";
+			public static LocString OVERCROWDING = UI.FormatAsLink("Crowded", "CREATURES::GUIDE::MOOD") + " when a room has less than <b>{0} cells</b> of space for each critter.";
 
 			public static LocString CONFINED = UI.FormatAsLink("Confined", "CREATURES::GUIDE::MOOD") + " when a room is smaller than <b>{0} cells</b>.";
 
@@ -1036,9 +1215,126 @@ namespace STRINGS
 			public static LocString BODY = "";
 		}
 
-		public class BUILDING_TYPE
+		public class ROOM_REQUIREMENT_CLASS
 		{
-			public static LocString INDUSTRIAL_MACHINERY = "Industrial Machinery";
+			public static LocString NAME = "Category";
+
+			public class SHARED
+			{
+				public static LocString BUILDINGS_LIST_TITLE = "Buildings in this category:";
+
+				public static LocString ROOMS_REQUIRED_LIST_TITLE = "Required in:";
+
+				public static LocString ROOMS_CONFLICT_LIST_TITLE = "Conflicts with:";
+			}
+
+			public class INDUSTRIALMACHINERY
+			{
+				public static LocString TITLE = "Industrial Machinery";
+
+				public static LocString DESCRIPTION = "Buildings that generate power, manufacture equipment, refine resources, and provide other fundamental colony requirements.";
+
+				public static LocString FLAVOUR = "";
+			}
+
+			public class RECBUILDING
+			{
+				public static LocString TITLE = "Recreational Buildings";
+
+				public static LocString DESCRIPTION = "Buildings that provide essential support for fragile Duplicant " + UI.FormatAsLink("Morale", "MORALE") + ".";
+
+				public static LocString FLAVOUR = "";
+			}
+
+			public class CLINIC
+			{
+				public static LocString TITLE = "Medical Equipment";
+
+				public static LocString DESCRIPTION = "Buildings designed to help sick Duplicants heal and minimize the spread of " + UI.FormatAsLink("Disease", "DISEASE") + ".";
+
+				public static LocString FLAVOUR = "";
+			}
+
+			public class WASHSTATION
+			{
+				public static LocString TITLE = "Wash Stations";
+
+				public static LocString DESCRIPTION = "Buildings that remove " + UI.FormatAsLink("disease", "DISEASE") + "-spreading germs from Duplicant bodies. Not all wash stations require plumbing.";
+
+				public static LocString FLAVOUR = "";
+			}
+
+			public class ADVANCEDWASHSTATION
+			{
+				public static LocString TITLE = "Plumbed Wash Stations";
+
+				public static LocString DESCRIPTION = "Buildings that require plumbing in order to remove " + UI.FormatAsLink("disease", "DISEASE") + "-spreading germs from Duplicant bodies.";
+
+				public static LocString FLAVOUR = "";
+			}
+
+			public class TOILETTYPE
+			{
+				public static LocString TITLE = "Toilets";
+
+				public static LocString DESCRIPTION = "Buildings that give Duplicants a sanitary and dignified place to conduct essential \"business.\"";
+
+				public static LocString FLAVOUR = "";
+			}
+
+			public class FLUSHTOILETTYPE
+			{
+				public static LocString TITLE = "Flush Toilets";
+
+				public static LocString DESCRIPTION = "Buildings that give Duplicants a sanitary and dignified place to conduct essential \"business\"...and then flush away the evidence.";
+
+				public static LocString FLAVOUR = "";
+			}
+
+			public class SCIENCEBUILDING
+			{
+				public static LocString TITLE = "Science Buildings";
+
+				public static LocString DESCRIPTION = "Buildings that allow Duplicants to learn about the world around them, and beyond.";
+
+				public static LocString FLAVOUR = "";
+			}
+
+			public class DECORATION
+			{
+				public static LocString TITLE = "Decor Items";
+
+				public static LocString DESCRIPTION = "Buildings that give the colony a valuable aesthetic boost, and allow Duplicants to express themselves creatively.";
+
+				public static LocString FLAVOUR = "";
+			}
+
+			public class RANCHSTATIONTYPE
+			{
+				public static LocString TITLE = "Ranching Buildings";
+
+				public static LocString DESCRIPTION = "Buildings dedicated to critter husbandry.";
+
+				public static LocString FLAVOUR = "";
+			}
+
+			public class BEDTYPE
+			{
+				public static LocString TITLE = "Beds";
+
+				public static LocString DESCRIPTION = "Buildings that allow Duplicants to get much-needed rest. If a Duplicant is not assigned one, they will sleep on the floor.";
+
+				public static LocString FLAVOUR = "";
+			}
+
+			public class LIGHTSOURCE
+			{
+				public static LocString TITLE = "Light Sources";
+
+				public static LocString DESCRIPTION = "Buildings that produce light, either by design or as a result of their primary operations.";
+
+				public static LocString FLAVOUR = "";
+			}
 		}
 
 		public class BEETA

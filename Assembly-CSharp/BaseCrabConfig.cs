@@ -66,11 +66,15 @@ public static class BaseCrabConfig
 			}, true, -1)
 			.Add(new PlayAnimsStates.Def(GameTags.Creatures.Poop, false, "poop", global::STRINGS.CREATURES.STATUSITEMS.EXPELLING_SOLID.NAME, global::STRINGS.CREATURES.STATUSITEMS.EXPELLING_SOLID.TOOLTIP), true, -1)
 			.Add(new CallAdultStates.Def(), is_baby, -1)
+			.Add(new CritterCondoStates.Def
+			{
+				entersBuilding = false
+			}, !is_baby, -1)
 			.PopInterruptGroup()
 			.Add(new CreatureDiseaseCleaner.Def(30f), true, -1)
 			.Add(new IdleStates.Def(), true, -1);
-		gameObject.AddOrGetDef<DrinkMilkMonitor.Def>();
 		EntityTemplates.AddCreatureBrain(gameObject, builder, GameTags.Creatures.Species.CrabSpecies, symbolOverridePrefix);
+		gameObject.AddOrGetDef<CritterCondoInteractMontior.Def>().useunderWaterCondos = true;
 		gameObject.AddTag(GameTags.Amphibious);
 		return gameObject;
 	}

@@ -86,7 +86,7 @@ public class LaunchPadConfig : IBuildingConfig
 
 	public const string ID = "LaunchPad";
 
-	private const int WIDTH = 7;
+	public const int WIDTH = 7;
 
 	private const string TRIGGER_LAUNCH_PORT_ID = "TriggerLaunch";
 

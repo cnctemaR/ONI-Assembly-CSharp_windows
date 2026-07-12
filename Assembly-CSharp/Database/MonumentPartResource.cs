@@ -12,7 +12,7 @@ namespace Database
 		public string State { get; private set; }
 
 		public MonumentPartResource(string id, string animFilename, string state, string symbolName, MonumentPartResource.Part part)
-			: base(id, "TODO:DbMonumentParts", "TODO:DbMonumentParts", PermitCategory.Artwork, PermitRarity.Unknown)
+			: base(id, "TODO:DbMonumentParts", "TODO:DbMonumentParts", PermitCategory.Artwork, PermitRarity.Unknown, DlcManager.AVAILABLE_ALL_VERSIONS)
 		{
 			this.AnimFile = Assets.GetAnim(animFilename);
 			this.SymbolName = symbolName;

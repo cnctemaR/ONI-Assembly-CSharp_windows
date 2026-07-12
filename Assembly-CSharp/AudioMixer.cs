@@ -232,6 +232,12 @@ public class AudioMixer
 		this.spaceVisibleInst.setParameterByName("spaceVisible", percent, false);
 	}
 
+	public void PauseSpaceVisibleSnapshot(bool pause)
+	{
+		this.spaceVisibleInst.setParameterByName("spaceVisible", 0f, true);
+		this.spaceVisibleInst.setPaused(pause);
+	}
+
 	public void UpdateFacilityVisibleSnapshot(float percent)
 	{
 		this.facilityVisibleInst.setParameterByName("facilityVisible", percent, false);

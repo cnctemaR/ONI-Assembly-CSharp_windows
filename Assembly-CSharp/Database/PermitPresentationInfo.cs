@@ -20,6 +20,11 @@ namespace Database
 
 		public void SetFacadeForPrefabID(string prefabId)
 		{
+			if (Assets.TryGetPrefab(prefabId) == null)
+			{
+				this.facadeFor = UI.KLEI_INVENTORY_SCREEN.ITEM_DLC_REQUIRED;
+				return;
+			}
 			this.facadeFor = UI.KLEI_INVENTORY_SCREEN.ITEM_FACADE_FOR.Replace("{ConfigProperName}", Assets.GetPrefab(prefabId).GetProperName());
 		}
 

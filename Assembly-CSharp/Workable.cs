@@ -623,6 +623,11 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 		return base.GetComponent<BuildingFacade>();
 	}
 
+	public virtual KAnimControllerBase GetAnimController()
+	{
+		return base.GetComponent<KAnimControllerBase>();
+	}
+
 	[ContextMenu("Refresh Reachability")]
 	public void RefreshReachability()
 	{

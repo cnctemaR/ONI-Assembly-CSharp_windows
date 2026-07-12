@@ -46,7 +46,7 @@ public class HugMinionReactable : Reactable
 			}
 			else
 			{
-				DebugUtil.DevLogError("HugMinionReactable finishing without adding a Hugged effect.");
+				DebugUtil.LogWarningArgs(new object[] { "HugMinionReactable finishing without adding a Hugged effect." });
 			}
 			base.End();
 		}

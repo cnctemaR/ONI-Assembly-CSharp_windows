@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using Database;
@@ -59,31 +60,35 @@ public class KleiPermitDioramaVis : KMonoBehaviour
 			KleiPermitVisUtil.GetBuildLocationRule(permit).Deconstruct(out flag, out buildLocationRule);
 			bool flag2 = flag;
 			BuildLocationRule buildLocationRule2 = buildLocationRule;
-			if (!flag2)
+			if (flag2)
 			{
-				return this.fallbackVis.WithError("Couldn't get BuildLocationRule on permit with id \"" + permit.Id + "\"");
-			}
-			switch (buildLocationRule2)
-			{
-			case BuildLocationRule.OnFloor:
-				return this.buildingOnFloorVis;
-			case BuildLocationRule.OnCeiling:
-			{
-				string prefabID = KleiPermitVisUtil.GetBuildingDef(permit).Value.PrefabID;
-				if (prefabID == "FlowerVaseHanging" || prefabID == "FlowerVaseHangingFancy")
+				switch (buildLocationRule2)
 				{
-					return this.buildingHangingHookVis;
+				case BuildLocationRule.OnFloor:
+					return this.buildingOnFloorVis;
+				case BuildLocationRule.OnCeiling:
+				{
+					string prefabID = KleiPermitVisUtil.GetBuildingDef(permit).Value.PrefabID;
+					if (prefabID == "FlowerVaseHanging" || prefabID == "FlowerVaseHangingFancy")
+					{
+						return this.buildingHangingHookVis;
+					}
+					return this.buildingPresentationStandVis.WithAlignment(Alignment.Top());
 				}
-				return this.buildingPresentationStandVis.WithAlignment(Alignment.Top());
+				case BuildLocationRule.OnWall:
+					return this.buildingPresentationStandVis.WithAlignment(Alignment.Left());
+				case BuildLocationRule.InCorner:
+					return this.buildingPresentationStandVis.WithAlignment(Alignment.TopLeft());
+				case BuildLocationRule.NotInTiles:
+					return this.pedestalAndItemVis;
+				}
+				return this.fallbackVis.WithError(string.Format("No visualization available for building with BuildLocationRule of {0}", buildLocationRule2));
 			}
-			case BuildLocationRule.OnWall:
-				return this.buildingPresentationStandVis.WithAlignment(Alignment.Left());
-			case BuildLocationRule.InCorner:
-				return this.buildingPresentationStandVis.WithAlignment(Alignment.TopLeft());
-			case BuildLocationRule.NotInTiles:
-				return this.pedestalAndItemVis;
+			if (permit.DlcIds.SequenceEqual<string>(DlcManager.AVAILABLE_EXPANSION1_ONLY))
+			{
+				return this.buildingOnFloorVis;
 			}
-			return this.fallbackVis.WithError(string.Format("No visualization available for building with BuildLocationRule of {0}", buildLocationRule2));
+			return this.fallbackVis.WithError("Couldn't get BuildLocationRule on permit with id \"" + permit.Id + "\"");
 		}
 		else if (permit.Category == PermitCategory.Artwork)
 		{

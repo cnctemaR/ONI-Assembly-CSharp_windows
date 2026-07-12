@@ -100,7 +100,6 @@ public static class BaseLightBugConfig
 			.Add(new CallAdultStates.Def(), is_baby, -1)
 			.PopInterruptGroup()
 			.Add(new IdleStates.Def(), true, -1);
-		gameObject.AddOrGetDef<DrinkMilkMonitor.Def>();
 		EntityTemplates.AddCreatureBrain(gameObject, builder, GameTags.Creatures.Species.LightBugSpecies, symbolOverridePrefix);
 		return gameObject;
 	}

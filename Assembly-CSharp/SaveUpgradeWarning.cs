@@ -31,7 +31,8 @@ public class SaveUpgradeWarning : KMonoBehaviour
 			new SaveUpgradeWarning.Upgrade(7, 5, new global::System.Action(this.SuddenMoraleHelper)),
 			new SaveUpgradeWarning.Upgrade(7, 13, new global::System.Action(this.BedAndBathHelper)),
 			new SaveUpgradeWarning.Upgrade(7, 16, new global::System.Action(this.NewAutomationWarning)),
-			new SaveUpgradeWarning.Upgrade(7, 32, new global::System.Action(this.SpaceScannersAndTelescopeUpdateWarning))
+			new SaveUpgradeWarning.Upgrade(7, 32, new global::System.Action(this.SpaceScannersAndTelescopeUpdateWarning)),
+			new SaveUpgradeWarning.Upgrade(7, 33, new global::System.Action(this.U50CritterWarning))
 		};
 		if (DlcManager.IsPureVanilla())
 		{
@@ -188,6 +189,19 @@ public class SaveUpgradeWarning : KMonoBehaviour
 		screen.AddListRow(Assets.GetSprite("telescope_range"), UI.FRONTEND.SAVEUPGRADEWARNINGS.SPACESCANNERANDTELESCOPECHANGES_TELESCOPES, 150f, 120f);
 		screen.PopupConfirmDialog(UI.FRONTEND.SAVEUPGRADEWARNINGS.SPACESCANNERANDTELESCOPECHANGES_SUMMARY + "\n\n" + UI.FRONTEND.SAVEUPGRADEWARNINGS.SPACESCANNERANDTELESCOPECHANGES_WARNING, UI.FRONTEND.SAVEUPGRADEWARNINGS.SPACESCANNERANDTELESCOPECHANGES_TITLE);
 		base.StartCoroutine(this.TemporaryDisableMeteorShowers(20f));
+	}
+
+	private void U50CritterWarning()
+	{
+		SpriteListDialogScreen screen = Util.KInstantiateUI<SpriteListDialogScreen>(ScreenPrefabs.Instance.SpriteListDialogScreen.gameObject, GameScreenManager.Instance.ssOverlayCanvas.gameObject, true);
+		screen.AddOption(UI.CONFIRMDIALOG.OK, delegate
+		{
+			screen.Deactivate();
+		});
+		screen.AddListRow(Assets.GetSprite("u50_critter_moods"), UI.FRONTEND.SAVEUPGRADEWARNINGS.U50_CHANGES_MOOD, 150f, 120f);
+		screen.AddListRow(Assets.GetSprite("u50_pacu"), UI.FRONTEND.SAVEUPGRADEWARNINGS.U50_CHANGES_PACU, 150f, 120f);
+		screen.AddListRow(Assets.GetSprite("u50_suit_checkpoints"), UI.FRONTEND.SAVEUPGRADEWARNINGS.U50_CHANGES_SUITCHECKPOINTS, 150f, 120f);
+		screen.PopupConfirmDialog(UI.FRONTEND.SAVEUPGRADEWARNINGS.U50_CHANGES_SUMMARY, UI.FRONTEND.SAVEUPGRADEWARNINGS.U50_CHANGES_TITLE);
 	}
 
 	private void MergedownWarning()

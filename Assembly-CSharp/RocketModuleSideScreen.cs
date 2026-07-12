@@ -193,12 +193,14 @@ public class RocketModuleSideScreen : SideScreenContent
 			if (myWorld.id != 255)
 			{
 				AudioMixer.instance.Stop(component2.interiorReverbSnapshot, STOP_MODE.ALLOWFADEOUT);
+				AudioMixer.instance.PauseSpaceVisibleSnapshot(false);
 				ClusterManager.Instance.SetActiveWorld(myWorld.id);
 			}
 		}
 		else
 		{
 			AudioMixer.instance.Start(component2.interiorReverbSnapshot);
+			AudioMixer.instance.PauseSpaceVisibleSnapshot(true);
 			ClusterManager.Instance.SetActiveWorld(targetWorld.id);
 		}
 		DetailsScreen.Instance.ClearSecondarySideScreen();

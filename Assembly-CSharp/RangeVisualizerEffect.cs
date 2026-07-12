@@ -54,16 +54,40 @@ public class RangeVisualizerEffect : MonoBehaviour
 			int num = 0;
 			if (rangeVisualizer.TestLineOfSight)
 			{
-				for (int i = 0; i <= rangeMax.y - rangeMin.y; i++)
+				Func<int, bool> <>9__0;
+				for (int m = 0; m <= rangeMax.y - rangeMin.y; m++)
 				{
-					int num2 = vector2I5.y + rangeMin.y + i;
+					int num2 = vector2I5.y + rangeMin.y + m;
 					for (int j = 0; j <= rangeMax.x - rangeMin.x; j++)
 					{
 						int num3 = vector2I5.x + rangeMin.x + j;
 						Grid.XYToCell(num3, num2);
-						bool flag = num3 > vector2I2.x && num3 < vector2I3.x && num2 > vector2I2.y && (num2 < vector2I3.y || rangeVisualizer.AllowLineOfSightInvalidCells) && Grid.TestLineOfSight(vector2I5.x, vector2I5.y, num3, num2, rangeVisualizer.BlockingCb, rangeVisualizer.BlockingTileVisible, rangeVisualizer.AllowLineOfSightInvalidCells);
-						pixelData[i * width + j] = (flag ? byte.MaxValue : 0);
-						if (flag)
+						bool flag;
+						if (num3 > vector2I2.x && num3 < vector2I3.x && num2 > vector2I2.y && (num2 < vector2I3.y || rangeVisualizer.AllowLineOfSightInvalidCells))
+						{
+							int x = vector2I5.x;
+							int y = vector2I5.y;
+							int num4 = num3;
+							int num5 = num2;
+							Func<int, bool> blockingCb = rangeVisualizer.BlockingCb;
+							Func<int, bool> func;
+							if (rangeVisualizer.BlockingVisibleCb != null)
+							{
+								func = rangeVisualizer.BlockingVisibleCb;
+							}
+							else if ((func = <>9__0) == null)
+							{
+								func = (<>9__0 = (int i) => rangeVisualizer.BlockingTileVisible);
+							}
+							flag = Grid.TestLineOfSight(x, y, num4, num5, blockingCb, func, rangeVisualizer.AllowLineOfSightInvalidCells);
+						}
+						else
+						{
+							flag = false;
+						}
+						bool flag2 = flag;
+						pixelData[m * width + j] = (flag2 ? byte.MaxValue : 0);
+						if (flag2)
 						{
 							num++;
 						}
@@ -74,14 +98,14 @@ public class RangeVisualizerEffect : MonoBehaviour
 			{
 				for (int k = 0; k <= rangeMax.y - rangeMin.y; k++)
 				{
-					int num4 = vector2I5.y + rangeMin.y + k;
+					int num6 = vector2I5.y + rangeMin.y + k;
 					for (int l = 0; l <= rangeMax.x - rangeMin.x; l++)
 					{
-						int num5 = vector2I5.x + rangeMin.x + l;
-						int num6 = Grid.XYToCell(num5, num4);
-						bool flag2 = num5 > vector2I2.x && num5 < vector2I3.x && num4 > vector2I2.y && num4 < vector2I3.y && rangeVisualizer.BlockingCb(num6);
-						pixelData[k * width + l] = (flag2 ? 0 : byte.MaxValue);
-						if (!flag2)
+						int num7 = vector2I5.x + rangeMin.x + l;
+						int num8 = Grid.XYToCell(num7, num6);
+						bool flag3 = num7 > vector2I2.x && num7 < vector2I3.x && num6 > vector2I2.y && num6 < vector2I3.y && rangeVisualizer.BlockingCb(num8);
+						pixelData[k * width + l] = (flag3 ? 0 : byte.MaxValue);
+						if (!flag3)
 						{
 							num++;
 						}
@@ -100,14 +124,14 @@ public class RangeVisualizerEffect : MonoBehaviour
 				}
 			}
 			Ray ray = this.myCamera.ViewportPointToRay(Vector3.zero);
-			float num7 = Mathf.Abs(ray.origin.z / ray.direction.z);
-			Vector3 vector = ray.GetPoint(num7);
+			float num9 = Mathf.Abs(ray.origin.z / ray.direction.z);
+			Vector3 vector = ray.GetPoint(num9);
 			Vector4 vector2;
 			vector2.x = vector.x;
 			vector2.y = vector.y;
 			ray = this.myCamera.ViewportPointToRay(Vector3.one);
-			num7 = Mathf.Abs(ray.origin.z / ray.direction.z);
-			vector = ray.GetPoint(num7);
+			num9 = Mathf.Abs(ray.origin.z / ray.direction.z);
+			vector = ray.GetPoint(num9);
 			vector2.z = vector.x - vector2.x;
 			vector2.w = vector.y - vector2.y;
 			this.material.SetVector("_UVOffsetScale", vector2);

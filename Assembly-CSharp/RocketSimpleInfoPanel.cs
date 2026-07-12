@@ -95,12 +95,13 @@ public class RocketSimpleInfoPanel : SimpleInfoPanel
 					}
 				}
 				List<CargoBayCluster> allCargoBays = clustercraft.GetAllCargoBays();
-				if (allCargoBays != null && allCargoBays.Count > 0)
+				bool flag = allCargoBays != null && allCargoBays.Count > 0;
+				foreach (KeyValuePair<string, GameObject> keyValuePair2 in this.cargoBayLabels)
 				{
-					foreach (KeyValuePair<string, GameObject> keyValuePair2 in this.cargoBayLabels)
-					{
-						keyValuePair2.Value.SetActive(false);
-					}
+					keyValuePair2.Value.SetActive(false);
+				}
+				if (flag)
+				{
 					ListPool<global::Tuple<string, TextStyleSetting>, SimpleInfoScreen>.PooledList pooledList = ListPool<global::Tuple<string, TextStyleSetting>, SimpleInfoScreen>.Allocate();
 					int num2 = 0;
 					foreach (CargoBayCluster cargoBayCluster in allCargoBays)

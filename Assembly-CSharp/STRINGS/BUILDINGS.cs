@@ -199,7 +199,7 @@ namespace STRINGS
 
 			public class WATERTRAP
 			{
-				public static LocString NAME = "Fish Trap";
+				public static LocString NAME = UI.FormatAsLink("Fish Trap", "WATERTRAP");
 
 				public static LocString DESC = "Trapped fish will automatically be bagged for transport.";
 
@@ -677,7 +677,7 @@ namespace STRINGS
 
 			public class HYDROGENENGINECLUSTER
 			{
-				public static LocString NAME = UI.FormatAsLink("Hydrogen Engine", "HYDROGENENGINE");
+				public static LocString NAME = UI.FormatAsLink("Hydrogen Engine", "HYDROGENENGINECLUSTER");
 
 				public static LocString DESC = "Hydrogen engines can propel rockets further than steam or petroleum engines.";
 
@@ -982,6 +982,13 @@ namespace STRINGS
 						public static LocString NAME = UI.FormatAsLink("Elegant Water Cooler", "WATERCOOLER");
 
 						public static LocString DESC = "It really classes up a breakroom.";
+					}
+
+					public class BALLOON
+					{
+						public static LocString NAME = UI.FormatAsLink("Inflatable Water Cooler", "WATERCOOLER");
+
+						public static LocString DESC = "There's a funny aftertaste.";
 					}
 				}
 			}
@@ -1401,7 +1408,7 @@ namespace STRINGS
 
 			public class OXIDIZERTANKLIQUID
 			{
-				public static LocString NAME = UI.FormatAsLink("Liquid Oxidizer Tank", "LIQUIDOXIDIZERTANK");
+				public static LocString NAME = UI.FormatAsLink("Liquid Oxidizer Tank", "OXIDIZERTANKLIQUID");
 
 				public static LocString DESC = "Liquid oxygen improves the thrust-to-mass ratio of rocket fuels.";
 
@@ -1410,7 +1417,7 @@ namespace STRINGS
 
 			public class OXIDIZERTANKLIQUIDCLUSTER
 			{
-				public static LocString NAME = UI.FormatAsLink("Liquid Oxidizer Tank", "LIQUIDOXIDIZERTANKCLUSTER");
+				public static LocString NAME = UI.FormatAsLink("Liquid Oxidizer Tank", "OXIDIZERTANKLIQUIDCLUSTER");
 
 				public static LocString DESC = "Liquid oxygen improves the thrust-to-mass ratio of rocket fuels.";
 
@@ -1618,6 +1625,13 @@ namespace STRINGS
 						public static LocString NAME = UI.FormatAsLink("Shiatsu Table", "MASSAGETABLE");
 
 						public static LocString DESC = "Deep pressure for deep-seated stress.";
+					}
+
+					public class MASSEUR_BALLOON
+					{
+						public static LocString NAME = UI.FormatAsLink("Inflatable Massage Table", "MASSAGETABLE");
+
+						public static LocString DESC = "Inflates well-being, deflates stress.";
 					}
 				}
 			}
@@ -2251,7 +2265,7 @@ namespace STRINGS
 					" into ",
 					UI.FormatAsLink("Oxygen", "OXYGEN"),
 					" and ",
-					UI.FormatAsLink("Liquid Chlorine", "CHLORINE"),
+					UI.FormatAsLink("Chlorine Gas", "CHLORINE"),
 					".\n\nBecomes idle when the area reaches maximum pressure capacity."
 				});
 			}
@@ -2591,6 +2605,24 @@ namespace STRINGS
 
 					public static LocString TOOLTIP = "Awaiting a " + UI.FormatAsLink("Plumber", "PLUMBER") + " to clear this pipe";
 				}
+			}
+
+			public class MORBROVERMAKER
+			{
+				public static LocString NAME = "Biobot Builder";
+
+				public static LocString DESC = "Allows a skilled Duplicant to manufacture a steady supply of icky yet effective bots.";
+
+				public static LocString EFFECT = string.Concat(new string[]
+				{
+					"Uses ",
+					UI.FormatAsLink("Zombie Spores", "ZOMBIESPORES"),
+					" and ",
+					UI.FormatAsLink("Steel", "STEEL"),
+					" to craft biofueled machines that can be sent into hostile environments.\n\nDefunct Biobots drop harvestable ",
+					UI.FormatAsLink("Steel", "STEEL"),
+					"."
+				});
 			}
 
 			public class FOSSILDIG
@@ -4186,6 +4218,15 @@ namespace STRINGS
 				public static LocString EFFECT = "Used to build the walls and floors of rooms.\n\nCan withstand extreme pressures and impacts.";
 			}
 
+			public class STORAGETILE
+			{
+				public static LocString NAME = UI.FormatAsLink("Storage Tile", "STORAGETILE");
+
+				public static LocString DESC = "Storage tiles keep selected non-edible solids out of the way.";
+
+				public static LocString EFFECT = "Used to build the walls and floors of rooms.\n\nProvides built-in storage for small spaces.";
+			}
+
 			public class CARPETTILE
 			{
 				public static LocString NAME = UI.FormatAsLink("Carpeted Tile", "CARPETTILE");
@@ -4610,8 +4651,6 @@ namespace STRINGS
 					"Conducts ",
 					UI.FormatAsLink("Interstellar Research", "RESEARCH"),
 					" to unlock new technologies.\n\nConsumes data from ",
-					UI.FormatAsLink("Telescopes", "TELESCOPE"),
-					" and ",
 					UI.FormatAsLink("Research Modules", "RESEARCHMODULE"),
 					".\n\nAssigned Duplicants must possess the ",
 					UI.FormatAsLink("Astronomy", "ASTRONOMY"),
@@ -4688,7 +4727,7 @@ namespace STRINGS
 
 			public class MISSIONCONTROLCLUSTER
 			{
-				public static LocString NAME = UI.FormatAsLink("Mission Control Station", "MISSIONCONTROL");
+				public static LocString NAME = UI.FormatAsLink("Mission Control Station", "MISSIONCONTROLCLUSTER");
 
 				public static LocString DESC = "Like a backseat driver who actually does know better.";
 
@@ -5392,6 +5431,20 @@ namespace STRINGS
 
 						public static LocString DESC = "Color-coded storage makes things easier to find.";
 					}
+
+					public class POLKA_DARKNAVYNOOKGREEN
+					{
+						public static LocString NAME = UI.FormatAsLink("Party Dot Storage Bin", "STORAGELOCKER");
+
+						public static LocString DESC = "A fun storage solution for fun-damental materials.";
+					}
+
+					public class POLKA_DARKPURPLERESIN
+					{
+						public static LocString NAME = UI.FormatAsLink("Mod Dot Storage Bin", "STORAGELOCKER");
+
+						public static LocString DESC = "Groovy storage, because messy colonies are such a drag.";
+					}
 				}
 			}
 
@@ -5498,6 +5551,41 @@ namespace STRINGS
 						public static LocString NAME = UI.FormatAsLink("Party Dot Gas Reservoir", "GASRESERVOIR");
 
 						public static LocString DESC = "Safe gas storage doesn't have to be dull.";
+					}
+
+					public class BLUE_BABYTEARS
+					{
+						public static LocString NAME = UI.FormatAsLink("Weepy Blue Gas Reservoir", "GASRESERVOIR");
+
+						public static LocString DESC = "A colorful reservoir keeps gases neatly organized.";
+					}
+
+					public class YELLOW_TARTAR
+					{
+						public static LocString NAME = UI.FormatAsLink("Ick Yellow Gas Reservoir", "GASRESERVOIR");
+
+						public static LocString DESC = "A colorful reservoir keeps gases neatly organized.";
+					}
+
+					public class GREEN_MUSH
+					{
+						public static LocString NAME = UI.FormatAsLink("Mush Green Gas Reservoir", "GASRESERVOIR");
+
+						public static LocString DESC = "A colorful reservoir keeps gases neatly organized.";
+					}
+
+					public class RED_ROSE
+					{
+						public static LocString NAME = UI.FormatAsLink("Puce Pink Gas Reservoir", "GASRESERVOIR");
+
+						public static LocString DESC = "A colorful reservoir keeps gases neatly organized.";
+					}
+
+					public class PURPLE_BRAINFAT
+					{
+						public static LocString NAME = UI.FormatAsLink("Faint Purple Gas Reservoir", "GASRESERVOIR");
+
+						public static LocString DESC = "A colorful reservoir keeps gases neatly organized.";
 					}
 				}
 			}
@@ -6168,6 +6256,27 @@ namespace STRINGS
 
 						public static LocString DESC = "Mashes rocks into oblivion.";
 					}
+
+					public class CHOMP
+					{
+						public static LocString NAME = UI.FormatAsLink("Mani Rock Crusher", "ROCKCRUSHER");
+
+						public static LocString DESC = "Buffs rough ore into smooth little nuggets.";
+					}
+
+					public class GEARS
+					{
+						public static LocString NAME = UI.FormatAsLink("Super-Mech Rock Crusher", "ROCKCRUSHER");
+
+						public static LocString DESC = "Uncrushed ore really grinds its gears.";
+					}
+
+					public class BALLOON
+					{
+						public static LocString NAME = UI.FormatAsLink("Pop-A-Rocks-E", "ROCKCRUSHER");
+
+						public static LocString DESC = "Wherever there's raw ore, there's a rock crusher lurking nearby.";
+					}
 				}
 			}
 
@@ -6305,7 +6414,7 @@ namespace STRINGS
 					UI.FormatAsLink("Critters", "CREATURES"),
 					".\n\nAssigned Duplicants must possess the ",
 					UI.FormatAsLink("Critter Ranching", "RANCHING1"),
-					" skill.\n\nThis building is a necessary component of the Stable room."
+					" skill."
 				});
 			}
 
@@ -8085,6 +8194,22 @@ namespace STRINGS
 				});
 			}
 
+			public class MODULARLAUNCHPADPORTBRIDGE
+			{
+				public static LocString NAME = UI.FormatAsLink("Rocket Port Extension", "MODULARLAUNCHPADPORTBRIDGE");
+
+				public static LocString DESC = "Allows rocket platforms to be built farther apart.";
+
+				public static LocString EFFECT = string.Concat(new string[]
+				{
+					"Automatically links when built to the side of a ",
+					BUILDINGS.PREFABS.LAUNCHPAD.NAME,
+					" or any ",
+					BUILDINGS.PREFABS.MODULARLAUNCHPADPORT.NAME,
+					"."
+				});
+			}
+
 			public class MODULARLAUNCHPADPORTLIQUID
 			{
 				public static LocString NAME = UI.FormatAsLink("Liquid Rocket Port Loader", "MODULARLAUNCHPADPORTLIQUID");
@@ -8367,7 +8492,7 @@ namespace STRINGS
 
 			public class MISSILELAUNCHER
 			{
-				public static LocString NAME = "Meteor Blaster";
+				public static LocString NAME = UI.FormatAsLink("Meteor Blaster", "MISSILELAUNCHER");
 
 				public static LocString DESC = "Some meteors drop harvestable resources when they're blown to smithereens.";
 
@@ -8379,6 +8504,31 @@ namespace STRINGS
 				{
 					public static LocString CONTAINER1 = "Fires " + UI.FormatAsLink("Blastshot", "MISSILELAUNCHER") + " shells at meteor showers to defend the colony from impact-related damage.\n\nRange: 16 tiles horizontally, 32 tiles vertically.\n\nMeteors that have been blown to smithereens leave behind no harvestable resources.";
 				}
+			}
+
+			public class CRITTERCONDO
+			{
+				public static LocString NAME = UI.FormatAsLink("Critter Condo", "CRITTERCONDO");
+
+				public static LocString DESC = "It's nice to have nice things.";
+
+				public static LocString EFFECT = "Provides a comfortable lounge area that boosts " + UI.FormatAsLink("Critter", "CREATURES") + " happiness.";
+			}
+
+			public class UNDERWATERCRITTERCONDO
+			{
+				public static LocString NAME = UI.FormatAsLink("Water Fort", "UNDERWATERCRITTERCONDO");
+
+				public static LocString DESC = "Even wild critters are happier after they've had a little R&R.";
+
+				public static LocString EFFECT = string.Concat(new string[]
+				{
+					"A fancy respite area for adult ",
+					UI.FormatAsLink("Pokeshells", "CRABSPECIES"),
+					" and ",
+					UI.FormatAsLink("Pacu", "PACUSPECIES"),
+					"."
+				});
 			}
 
 			public class MASSIVEHEATSINK
@@ -8614,6 +8764,13 @@ namespace STRINGS
 				public static LocString NAME = "Locker";
 
 				public static LocString DESC = "A basic metal locker.\n\nIt contains an assortment of personal effects.";
+			}
+
+			public class PROPGRAVITASSMALLSEEDLOCKER
+			{
+				public static LocString NAME = "Wall Cabinet";
+
+				public static LocString DESC = "A small glass cabinet.\n\nThere's a biohazard symbol on it.";
 			}
 
 			public class PROPLIGHT
@@ -8958,6 +9115,35 @@ namespace STRINGS
 				public static LocString WHEAT_MILK_RECIPE_DESCRIPTION = "Converts {0} to {1}";
 
 				public static LocString NUT_MILK_RECIPE_DESCRIPTION = "Converts {0} to {1}";
+			}
+
+			public class FOODDEHYDRATOR
+			{
+				public static LocString NAME = UI.FormatAsLink("Dehydrator", "FOODDEHYDRATOR");
+
+				public static LocString DESC = "Some of the eliminated liquid inevitably ends up on the floor.";
+
+				public static LocString EFFECT = string.Concat(new string[]
+				{
+					"Uses low, even heat to eliminate moisture from eligible ",
+					UI.FormatAsLink("Foods", "FOOD"),
+					" and render them shelf-stable.\n\nDehydrated meals must be processed at the ",
+					UI.FormatAsLink("Rehydrator", "FOODREHYDRATOR"),
+					" before they can be eaten."
+				});
+
+				public static LocString RECIPE_NAME = "Dried {0}";
+
+				public static LocString RESULT_DESCRIPTION = "Dehydrated portions of {0} do not require refrigeration.";
+			}
+
+			public class FOODREHYDRATOR
+			{
+				public static LocString NAME = "Rehydrator";
+
+				public static LocString DESC = "Rehydrated food is nutritious and only slightly less delicious.";
+
+				public static LocString EFFECT = "Restores moisture to convert shelf-stable packaged meals into edible " + UI.FormatAsLink("Food", "FOOD") + ".";
 			}
 		}
 

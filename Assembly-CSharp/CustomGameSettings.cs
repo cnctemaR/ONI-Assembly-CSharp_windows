@@ -540,27 +540,34 @@ public class CustomGameSettings : KMonoBehaviour
 		Dictionary<SettingConfig, string> dictionary = new Dictionary<SettingConfig, string>();
 		foreach (KeyValuePair<string, string> keyValuePair in this.CurrentQualityLevelsBySetting)
 		{
-			SettingConfig settingConfig = this.QualitySettings[keyValuePair.Key];
-			if (settingConfig.coordinate_dimension >= 0L && settingConfig.coordinate_dimension_width >= 0L)
+			if (!this.QualitySettings.ContainsKey(keyValuePair.Key))
 			{
-				long num2 = 0L;
-				long num3 = settingConfig.coordinate_dimension * settingConfig.coordinate_dimension_width;
-				long num4 = num;
-				if (num4 >= num3)
+				KCrashReporter.ReportDevNotification("QualitySettings missing key " + keyValuePair.Key, Environment.StackTrace, "", false);
+			}
+			else
+			{
+				SettingConfig settingConfig = this.QualitySettings[keyValuePair.Key];
+				if (settingConfig.coordinate_dimension >= 0L && settingConfig.coordinate_dimension_width >= 0L)
 				{
-					long num5 = num4 / num3 * num3;
-					num4 -= num5;
-				}
-				if (num4 >= settingConfig.coordinate_dimension)
-				{
-					num2 = num4 / settingConfig.coordinate_dimension;
-				}
-				foreach (SettingLevel settingLevel in settingConfig.GetLevels())
-				{
-					if (settingLevel.coordinate_offset == num2)
+					long num2 = 0L;
+					long num3 = settingConfig.coordinate_dimension * settingConfig.coordinate_dimension_width;
+					long num4 = num;
+					if (num4 >= num3)
 					{
-						dictionary[settingConfig] = settingLevel.id;
-						break;
+						long num5 = num4 / num3 * num3;
+						num4 -= num5;
+					}
+					if (num4 >= settingConfig.coordinate_dimension)
+					{
+						num2 = num4 / settingConfig.coordinate_dimension;
+					}
+					foreach (SettingLevel settingLevel in settingConfig.GetLevels())
+					{
+						if (settingLevel.coordinate_offset == num2)
+						{
+							dictionary[settingConfig] = settingLevel.id;
+							break;
+						}
 					}
 				}
 			}

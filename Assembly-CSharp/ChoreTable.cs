@@ -70,6 +70,11 @@ public class ChoreTable
 			return this;
 		}
 
+		public bool HasChoreType(Type choreType)
+		{
+			return this.infos.Exists((ChoreTable.Builder.Info info) => info.def.GetType() == choreType);
+		}
+
 		public ChoreTable CreateTable()
 		{
 			DebugUtil.Assert(this.interruptGroupId == 0);

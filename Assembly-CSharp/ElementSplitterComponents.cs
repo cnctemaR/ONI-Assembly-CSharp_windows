@@ -12,8 +12,8 @@ public class ElementSplitterComponents : KGameObjectComponentManager<ElementSpli
 	{
 		ElementSplitter data = base.GetData(handle);
 		Pickupable component = data.primaryElement.GetComponent<Pickupable>();
-		Func<float, Pickupable> func = (float amount) => ElementSplitterComponents.OnTake(handle, amount);
-		component.OnTake = (Func<float, Pickupable>)Delegate.Combine(component.OnTake, func);
+		Func<Pickupable, float, Pickupable> func = (Pickupable obj, float amount) => ElementSplitterComponents.OnTake(obj, handle, amount);
+		component.OnTake = (Func<Pickupable, float, Pickupable>)Delegate.Combine(component.OnTake, func);
 		Func<Pickupable, bool> func2 = delegate(Pickupable other)
 		{
 			HandleVector<int>.Handle handle2 = this.GetHandle(other.gameObject);
@@ -39,7 +39,7 @@ public class ElementSplitterComponents : KGameObjectComponentManager<ElementSpli
 			if (component != null)
 			{
 				Pickupable pickupable = component;
-				pickupable.OnTake = (Func<float, Pickupable>)Delegate.Remove(pickupable.OnTake, data.onTakeCB);
+				pickupable.OnTake = (Func<Pickupable, float, Pickupable>)Delegate.Remove(pickupable.OnTake, data.onTakeCB);
 				Pickupable pickupable2 = component;
 				pickupable2.CanAbsorb = (Func<Pickupable, bool>)Delegate.Remove(pickupable2.CanAbsorb, data.canAbsorbCB);
 			}
@@ -57,22 +57,21 @@ public class ElementSplitterComponents : KGameObjectComponentManager<ElementSpli
 		return data.primaryElement.ElementID == data2.primaryElement.ElementID && data.primaryElement.Units + data2.primaryElement.Units < 25000f && !data.kPrefabID.HasTag(GameTags.MarkedForMove) && !data2.kPrefabID.HasTag(GameTags.MarkedForMove);
 	}
 
-	private static Pickupable OnTake(HandleVector<int>.Handle handle, float amount)
+	private static Pickupable OnTake(Pickupable pickupable, HandleVector<int>.Handle handle, float amount)
 	{
 		ElementSplitter data = GameComps.ElementSplitters.GetData(handle);
-		Pickupable component = data.primaryElement.GetComponent<Pickupable>();
-		Storage storage = component.storage;
-		PrimaryElement component2 = component.GetComponent<PrimaryElement>();
-		Pickupable component3 = component2.Element.substance.SpawnResource(component.transform.GetPosition(), amount, component2.Temperature, byte.MaxValue, 0, true, false, false).GetComponent<Pickupable>();
-		component.TotalAmount -= amount;
-		component3.Trigger(1335436905, component);
-		ElementSplitterComponents.CopyRenderSettings(component.GetComponent<KBatchedAnimController>(), component3.GetComponent<KBatchedAnimController>());
+		Storage storage = pickupable.storage;
+		PrimaryElement component = pickupable.GetComponent<PrimaryElement>();
+		Pickupable component2 = component.Element.substance.SpawnResource(pickupable.transform.GetPosition(), amount, component.Temperature, byte.MaxValue, 0, true, false, false).GetComponent<Pickupable>();
+		pickupable.TotalAmount -= amount;
+		component2.Trigger(1335436905, pickupable);
+		ElementSplitterComponents.CopyRenderSettings(pickupable.GetComponent<KBatchedAnimController>(), component2.GetComponent<KBatchedAnimController>());
 		if (storage != null)
 		{
 			storage.Trigger(-1697596308, data.primaryElement.gameObject);
 			storage.Trigger(-778359855, storage);
 		}
-		return component3;
+		return component2;
 	}
 
 	private static void CopyRenderSettings(KBatchedAnimController src, KBatchedAnimController dest)

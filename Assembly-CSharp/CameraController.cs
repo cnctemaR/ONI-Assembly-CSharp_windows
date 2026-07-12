@@ -200,6 +200,7 @@ public class CameraController : KMonoBehaviour, IInputHandler
 		this.overlayNoDepthCamera.gameObject.AddComponent<RangeVisualizerEffect>();
 		this.overlayNoDepthCamera.gameObject.AddComponent<SkyVisibilityVisualizerEffect>();
 		this.overlayNoDepthCamera.gameObject.AddComponent<ScannerNetworkVisualizerEffect>();
+		this.overlayNoDepthCamera.gameObject.AddComponent<RocketLaunchConditionVisualizerEffect>();
 		this.uiCamera = this.CopyCamera(this.overlayCamera, "uiCamera");
 		this.uiCamera.clearFlags = CameraClearFlags.Depth;
 		this.uiCamera.cullingMask = LayerMask.GetMask(new string[] { "UI" });

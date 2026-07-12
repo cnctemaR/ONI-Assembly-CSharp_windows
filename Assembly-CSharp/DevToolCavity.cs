@@ -89,6 +89,7 @@ public class DevToolCavity : DevTool
 
 	public static void DrawKPrefabIdCollection(string name, IEnumerable<KPrefabID> kprefabIds)
 	{
+		name += (kprefabIds.IsNullOrDestroyed() ? " (0)" : string.Format(" ({0})", kprefabIds.Count<KPrefabID>()));
 		if (ImGui.CollapsingHeader(name))
 		{
 			if (kprefabIds.IsNullOrDestroyed())

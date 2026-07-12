@@ -19,7 +19,11 @@ public class FoodStorage : KMonoBehaviour
 			if (this.onlyStoreSpicedFood)
 			{
 				this.FilteredStorage.AddForbiddenTag(GameTags.UnspicedFood);
-				this.storage.DropUnlessHasTag(GameTags.SpicedFood);
+				this.storage.DropHasTags(new Tag[]
+				{
+					GameTags.Edible,
+					GameTags.UnspicedFood
+				});
 				return;
 			}
 			this.FilteredStorage.RemoveForbiddenTag(GameTags.UnspicedFood);

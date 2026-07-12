@@ -58,13 +58,13 @@ public class BaseStaterpillarConfig
 			.Add(inhaleDef, inhaleTag != Tag.Invalid, -1)
 			.Add(new ConduitSleepStates.Def(), true, -1)
 			.Add(new CallAdultStates.Def(), is_baby, -1)
+			.Add(new CritterCondoStates.Def(), !is_baby, -1)
 			.PopInterruptGroup()
 			.Add(new CreatureSleepStates.Def(), true, -1)
 			.Add(new IdleStates.Def
 			{
 				customIdleAnim = new IdleStates.Def.IdleAnimCallback(BaseStaterpillarConfig.CustomIdleAnim)
 			}, true, -1);
-		gameObject.AddOrGetDef<DrinkMilkMonitor.Def>();
 		EntityTemplates.AddCreatureBrain(gameObject, builder, GameTags.Creatures.Species.StaterpillarSpecies, symbolOverridePrefix);
 		return gameObject;
 	}

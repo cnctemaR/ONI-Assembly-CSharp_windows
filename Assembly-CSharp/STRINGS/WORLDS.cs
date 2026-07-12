@@ -400,6 +400,13 @@ namespace STRINGS
 			public static LocString DESCRIPTION = "A fun-sized 'fixer upper', perfect for Game Devs.";
 		}
 
+		public class BIGEMPTY
+		{
+			public static LocString NAME = "Big Empty FOR DEVS";
+
+			public static LocString DESCRIPTION = "A base game sized asteroid without biomes, perfect for Game Devs.";
+		}
+
 		public class TINYSURFACE
 		{
 			public static LocString NAME = "Tiny Surface FOR DEVS";

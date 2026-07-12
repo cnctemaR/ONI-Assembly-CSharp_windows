@@ -152,6 +152,11 @@ public class SandboxSettings
 			KPlayerPrefs.SetInt("SandboxTools.DiseaseCount", val);
 			this.OnChangeDiseaseCount();
 		}, 0);
+		this.AddStringSetting("SandboxTools.SelectedStory", delegate(string data)
+		{
+			KPlayerPrefs.SetString("SandboxTools.SelectedStory", data);
+			this.OnChangeStory();
+		}, Db.Get().Stories.resources[Db.Get().Stories.resources.Count - 1].Id);
 		this.AddIntSetting("SandboxTools.BrushSize", delegate(int val)
 		{
 			KPlayerPrefs.SetInt("SandboxTools.BrushSize", val);
@@ -228,6 +233,8 @@ public class SandboxSettings
 
 	public global::System.Action OnChangeDiseaseCount;
 
+	public global::System.Action OnChangeStory;
+
 	public global::System.Action OnChangeEntity;
 
 	public global::System.Action OnChangeBrushSize;
@@ -251,6 +258,8 @@ public class SandboxSettings
 	public const string KEY_SELECTED_DISEASE = "SandboxTools.SelectedDisease";
 
 	public const string KEY_DISEASE_COUNT = "SandboxTools.DiseaseCount";
+
+	public const string KEY_SELECTED_STORY = "SandboxTools.SelectedStory";
 
 	public const string KEY_BRUSH_SIZE = "SandboxTools.BrushSize";
 

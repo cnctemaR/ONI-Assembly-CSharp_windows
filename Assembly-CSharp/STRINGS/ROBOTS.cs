@@ -21,6 +21,13 @@ namespace STRINGS
 
 				public static LocString TOOLTIP = "This bot will shut down permanently when its battery runs out";
 			}
+
+			public class INTERNALBIOBATTERY
+			{
+				public static LocString NAME = "Biofuel";
+
+				public static LocString TOOLTIP = "This bot will shut down permanently when its biofuel runs out";
+			}
 		}
 
 		public class ATTRIBUTES
@@ -137,6 +144,15 @@ namespace STRINGS
 
 		public class MODELS
 		{
+			public class MORB
+			{
+				public static LocString NAME = "Biobot";
+
+				public static LocString DESC = "A Pathogen-Fueled Extravehicular Geo-Exploratory Guidebot (model Y), aka \"P.E.G.G.Y.\"\n\nIt can be assigned basic building tasks and digging duties in hazardous environments.";
+
+				public static LocString CODEX_DESC = "The pathogen-fueled guidebot is designed to maximize a colony's chances of surviving in hostile environments by meeting three core outcomes:\n\n1. Filtration and removal of toxins from environment;\n2. Safe disposal of filtered toxins through conversion into usable biofuel;\n3. Creation of geo-exploration equipment for colony expansion with minimal colonist endangerment.\n\nThe elements aggregated during this process may result in the unintentional spread of contaminants. Specialized training required for safe handling.";
+			}
+
 			public class SCOUT
 			{
 				public static LocString NAME = "Rover";

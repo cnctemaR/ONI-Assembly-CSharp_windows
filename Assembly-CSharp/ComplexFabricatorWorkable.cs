@@ -100,6 +100,7 @@ public class ComplexFabricatorWorkable : Workable
 		if (this.fabricator.CurrentWorkingOrder != null)
 		{
 			this.InstantiateVisualizer(this.fabricator.CurrentWorkingOrder);
+			this.QueueWorkingAnimations();
 			return;
 		}
 		DebugUtil.DevAssertArgs(false, new object[] { "ComplexFabricatorWorkable.OnStartWork called but CurrentMachineOrder is null", base.gameObject });
@@ -113,6 +114,15 @@ public class ComplexFabricatorWorkable : Workable
 		}
 		this.UpdateOrderProgress(worker, dt);
 		return base.OnWorkTick(worker, dt);
+	}
+
+	protected override void OnStopWork(Worker worker)
+	{
+		base.OnStopWork(worker);
+		if (worker != null && this.GetDupeInteract != null)
+		{
+			worker.GetComponent<KBatchedAnimController>().onAnimComplete -= this.PlayNextWorkingAnim;
+		}
 	}
 
 	public override float GetWorkTime()
@@ -138,6 +148,7 @@ public class ComplexFabricatorWorkable : Workable
 		base.OnCompleteWork(worker);
 		this.fabricator.CompleteWorkingOrder();
 		this.DestroyVisualizer();
+		base.OnStopWork(worker);
 	}
 
 	private void InstantiateVisualizer(ComplexRecipe recipe)
@@ -192,6 +203,34 @@ public class ComplexFabricatorWorkable : Workable
 		}
 	}
 
+	public void QueueWorkingAnimations()
+	{
+		KBatchedAnimController component = base.worker.GetComponent<KBatchedAnimController>();
+		if (this.GetDupeInteract != null)
+		{
+			component.Queue("working_loop", KAnim.PlayMode.Once, 1f, 0f);
+			component.onAnimComplete += this.PlayNextWorkingAnim;
+		}
+	}
+
+	private void PlayNextWorkingAnim(HashedString anim)
+	{
+		if (base.worker == null)
+		{
+			return;
+		}
+		if (this.GetDupeInteract != null)
+		{
+			KBatchedAnimController component = base.worker.GetComponent<KBatchedAnimController>();
+			if (base.worker.state == Worker.State.Working)
+			{
+				component.Play(this.GetDupeInteract(), KAnim.PlayMode.Once);
+				return;
+			}
+			component.onAnimComplete -= this.PlayNextWorkingAnim;
+		}
+	}
+
 	[MyCmpReq]
 	private Operational operational;
 
@@ -205,4 +244,6 @@ public class ComplexFabricatorWorkable : Workable
 	protected GameObject visualizer;
 
 	protected KAnimLink visualizerLink;
+
+	public Func<HashedString[]> GetDupeInteract;
 }

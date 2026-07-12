@@ -210,6 +210,52 @@ public class Def : ScriptableObject
 		return sprite;
 	}
 
+	public static KAnimFile GetAnimFileFromPrefabWithTag(GameObject prefab, string desiredAnimName, out string animName)
+	{
+		animName = desiredAnimName;
+		if (prefab == null)
+		{
+			return null;
+		}
+		CreatureBrain creatureBrain = prefab.GetComponent<CreatureBrain>();
+		if (creatureBrain != null)
+		{
+			animName = creatureBrain.symbolPrefix + animName;
+		}
+		SpaceArtifact component = prefab.GetComponent<SpaceArtifact>();
+		if (component != null)
+		{
+			animName = component.GetUIAnim();
+		}
+		if (prefab.HasTag(GameTags.Egg))
+		{
+			IncubationMonitor.Def def = prefab.GetDef<IncubationMonitor.Def>();
+			if (def != null)
+			{
+				GameObject prefab2 = Assets.GetPrefab(def.spawnedCreature);
+				if (prefab2)
+				{
+					creatureBrain = prefab2.GetComponent<CreatureBrain>();
+					if (creatureBrain && !string.IsNullOrEmpty(creatureBrain.symbolPrefix))
+					{
+						animName = creatureBrain.symbolPrefix + animName;
+					}
+				}
+			}
+		}
+		if (prefab.HasTag(GameTags.MoltShell))
+		{
+			SimpleMassStatusItem component2 = prefab.GetComponent<SimpleMassStatusItem>();
+			animName = component2.symbolPrefix + animName;
+		}
+		return prefab.GetComponent<KBatchedAnimController>().AnimFiles[0];
+	}
+
+	public static KAnimFile GetAnimFileFromPrefabWithTag(Tag prefabID, string desiredAnimName, out string animName)
+	{
+		return Def.GetAnimFileFromPrefabWithTag(Assets.GetPrefab(prefabID), desiredAnimName, out animName);
+	}
+
 	public string PrefabID;
 
 	public Tag Tag;

@@ -23,6 +23,7 @@ public static class CodexEntryGenerator
 		{
 			CodexEntryGenerator.GenerateDLC1RocketryEntries();
 		}
+		CodexEntryGenerator.GenerateBuildingRequirementClassCategoryEntry(CodexEntryGenerator.categoryPrefx, ref dictionary);
 		CodexEntryGenerator.PopulateCategoryEntries(dictionary);
 		return dictionary;
 	}
@@ -49,6 +50,110 @@ public static class CodexEntryGenerator
 		categoryEntry.category = "BUILDINGS";
 		categoryEntry.icon = Assets.GetSprite(PlanScreen.IconNameMap[text]);
 		categoryEntries.Add(text2, categoryEntry);
+	}
+
+	private static void GenerateBuildingRequirementClassCategoryEntry(string categoryPrefix, ref Dictionary<string, CodexEntry> categoryEntries)
+	{
+		string text = "REQUIREMENTCLASS";
+		string text2 = CodexCache.FormatLinkID(categoryPrefix + text);
+		Dictionary<string, CodexEntry> dictionary = new Dictionary<string, CodexEntry>();
+		foreach (Tag tag in RoomConstraints.ConstraintTags.AllTags)
+		{
+			if (!CodexEntryGenerator.HiddenRoomConstrainTags.Contains(tag))
+			{
+				CodexEntry codexEntry = CodexEntryGenerator.GenerateEntryForSpecificBuildingRequirementClass(tag, text2);
+				dictionary.Add(codexEntry.id, codexEntry);
+			}
+		}
+		CategoryEntry categoryEntry = CodexEntryGenerator.GenerateCategoryEntry(CodexCache.FormatLinkID(text2), CODEX.ROOM_REQUIREMENT_CLASS.NAME, dictionary, null, true, true, null);
+		categoryEntry.parentId = "BUILDINGS";
+		categoryEntry.category = "BUILDINGS";
+		categoryEntry.icon = Assets.GetSprite("icon_categories_placeholder");
+		categoryEntries.Add(text2, categoryEntry);
+	}
+
+	private static CodexEntry GenerateEntryForSpecificBuildingRequirementClass(Tag requirementClassTag, string categoryEntryID)
+	{
+		string text = "STRINGS.CODEX.ROOM_REQUIREMENT_CLASS." + requirementClassTag.ToString().ToUpper();
+		List<ContentContainer> list = new List<ContentContainer>();
+		List<ICodexWidget> list2 = new List<ICodexWidget>();
+		ICodexWidget codexWidget = new CodexText(Strings.Get(text + ".TITLE"), CodexTextStyle.Title, null);
+		list2.Add(codexWidget);
+		list2.Add(new CodexDividerLine());
+		list.Add(new ContentContainer(list2, ContentContainer.ContentLayout.Vertical));
+		List<ICodexWidget> list3 = new List<ICodexWidget>();
+		ICodexWidget codexWidget2 = new CodexText(Strings.Get(text + ".DESCRIPTION"), CodexTextStyle.Body, null);
+		list3.Add(codexWidget2);
+		list3.Add(new CodexSpacer());
+		list3.Reverse();
+		list.Add(new ContentContainer(list3, ContentContainer.ContentLayout.Vertical));
+		List<ICodexWidget> list4 = new List<ICodexWidget>();
+		List<ICodexWidget> list5 = new List<ICodexWidget>();
+		foreach (PlanScreen.PlanInfo planInfo in global::TUNING.BUILDINGS.PLANORDER)
+		{
+			foreach (KeyValuePair<string, string> keyValuePair in planInfo.buildingAndSubcategoryData)
+			{
+				BuildingDef buildingDef = Assets.GetBuildingDef(keyValuePair.Key);
+				if (!buildingDef.DebugOnly && !buildingDef.Deprecated)
+				{
+					KPrefabID component = buildingDef.BuildingComplete.GetComponent<KPrefabID>();
+					if (component != null && component.Tags.Contains(requirementClassTag))
+					{
+						ICodexWidget codexWidget3 = new CodexText("    • " + Strings.Get("STRINGS.BUILDINGS.PREFABS." + buildingDef.PrefabID.ToUpper() + ".NAME"), CodexTextStyle.Body, null);
+						list5.Add(codexWidget3);
+					}
+				}
+			}
+		}
+		if (list5.Count > 0)
+		{
+			ContentContainer contentContainer = new ContentContainer(list5, ContentContainer.ContentLayout.Vertical);
+			CodexCollapsibleHeader codexCollapsibleHeader = new CodexCollapsibleHeader(CODEX.ROOM_REQUIREMENT_CLASS.SHARED.BUILDINGS_LIST_TITLE, contentContainer);
+			list4.Add(codexCollapsibleHeader);
+			list4.Add(new CodexSpacer());
+			list4.Add(new CodexSpacer());
+			list4.Reverse();
+			list.Add(new ContentContainer(list4, ContentContainer.ContentLayout.Vertical));
+			list.Add(contentContainer);
+		}
+		StringEntry stringEntry;
+		if (Strings.TryGet(new StringKey(text + ".ROOMSREQUIRING"), out stringEntry))
+		{
+			List<ICodexWidget> list6 = new List<ICodexWidget>();
+			ICodexWidget codexWidget4 = new CodexText(stringEntry.String, CodexTextStyle.Body, null);
+			ContentContainer contentContainer2 = new ContentContainer(new List<ICodexWidget> { codexWidget4 }, ContentContainer.ContentLayout.Vertical);
+			CodexCollapsibleHeader codexCollapsibleHeader2 = new CodexCollapsibleHeader(CODEX.ROOM_REQUIREMENT_CLASS.SHARED.ROOMS_REQUIRED_LIST_TITLE, contentContainer2);
+			list6.Add(codexCollapsibleHeader2);
+			list6.Add(new CodexSpacer());
+			list6.Add(new CodexSpacer());
+			list.Add(new ContentContainer(list6, ContentContainer.ContentLayout.Vertical));
+			list.Add(contentContainer2);
+		}
+		StringEntry stringEntry2;
+		if (Strings.TryGet(new StringKey(text + ".CONFLICTINGROOMS"), out stringEntry2))
+		{
+			List<ICodexWidget> list7 = new List<ICodexWidget>();
+			ICodexWidget codexWidget5 = new CodexText(stringEntry2.String, CodexTextStyle.Body, null);
+			ContentContainer contentContainer3 = new ContentContainer(new List<ICodexWidget> { codexWidget5 }, ContentContainer.ContentLayout.Vertical);
+			CodexCollapsibleHeader codexCollapsibleHeader3 = new CodexCollapsibleHeader(CODEX.ROOM_REQUIREMENT_CLASS.SHARED.ROOMS_CONFLICT_LIST_TITLE, contentContainer3);
+			list7.Add(codexCollapsibleHeader3);
+			list7.Add(new CodexSpacer());
+			list7.Add(new CodexSpacer());
+			list7.Reverse();
+			list.Add(new ContentContainer(list7, ContentContainer.ContentLayout.Vertical));
+			list.Add(contentContainer3);
+		}
+		List<ICodexWidget> list8 = new List<ICodexWidget>();
+		ICodexWidget codexWidget6 = new CodexText(Strings.Get(text + ".FLAVOUR"), CodexTextStyle.Body, null);
+		list8.Add(codexWidget6);
+		list.Add(new ContentContainer(list8, ContentContainer.ContentLayout.Vertical));
+		CodexEntry codexEntry = new CodexEntry(categoryEntryID, list, RoomConstraints.ConstraintTags.GetRoomConstraintLabelText(requirementClassTag));
+		Tag tag;
+		codexEntry.icon = (CodexEntryGenerator.RoomConstrainTagIcons.TryGetValue(requirementClassTag, out tag) ? Def.GetUISprite(tag, "ui", false).first : null);
+		codexEntry.parentId = categoryEntryID;
+		Tag tag2 = requirementClassTag;
+		CodexCache.AddEntry(CodexCache.FormatLinkID(categoryEntryID + tag2.ToString()), codexEntry, null);
+		return codexEntry;
 	}
 
 	private static CodexEntry GenerateSingleBuildingEntry(BuildingDef def, string categoryEntryID)
@@ -1531,38 +1636,52 @@ public static class CodexEntryGenerator
 
 	private static void GenerateUsedInRecipeContainers(Tag prefabID, List<ContentContainer> containers)
 	{
-		List<Recipe> list = new List<Recipe>();
-		foreach (Recipe recipe in RecipeManager.Get().recipes)
+		List<ICodexWidget> list = new List<ICodexWidget>();
+		List<ICodexWidget> list2 = new List<ICodexWidget>();
+		Func<ComplexRecipe.RecipeElement, bool> <>9__0;
+		Func<ComplexRecipe.RecipeElement, bool> <>9__1;
+		foreach (ComplexRecipe complexRecipe in ComplexRecipeManager.Get().recipes)
 		{
-			using (List<Recipe.Ingredient>.Enumerator enumerator2 = recipe.Ingredients.GetEnumerator())
+			IEnumerable<ComplexRecipe.RecipeElement> ingredients = complexRecipe.ingredients;
+			Func<ComplexRecipe.RecipeElement, bool> func;
+			if ((func = <>9__0) == null)
 			{
-				while (enumerator2.MoveNext())
-				{
-					if (enumerator2.Current.tag == prefabID)
-					{
-						list.Add(recipe);
-					}
-				}
+				func = (<>9__0 = (ComplexRecipe.RecipeElement i) => i.material == prefabID);
+			}
+			if (ingredients.Any<ComplexRecipe.RecipeElement>(func))
+			{
+				list.Add(new CodexRecipePanel(complexRecipe, false));
+			}
+			IEnumerable<ComplexRecipe.RecipeElement> results = complexRecipe.results;
+			Func<ComplexRecipe.RecipeElement, bool> func2;
+			if ((func2 = <>9__1) == null)
+			{
+				func2 = (<>9__1 = (ComplexRecipe.RecipeElement i) => i.material == prefabID);
+			}
+			if (results.Any<ComplexRecipe.RecipeElement>(func2))
+			{
+				list2.Add(new CodexRecipePanel(complexRecipe, true));
 			}
 		}
-		if (list.Count == 0)
+		ContentContainer contentContainer = new ContentContainer(list, ContentContainer.ContentLayout.Vertical);
+		ContentContainer contentContainer2 = new ContentContainer(list2, ContentContainer.ContentLayout.Vertical);
+		if (list.Count > 0)
 		{
-			return;
-		}
-		containers.Add(new ContentContainer(new List<ICodexWidget>
-		{
-			new CodexText(CODEX.HEADERS.USED_IN_RECIPES, CodexTextStyle.Subtitle, null),
-			new CodexSpacer(),
-			new CodexDividerLine()
-		}, ContentContainer.ContentLayout.Vertical));
-		foreach (Recipe recipe2 in list)
-		{
-			GameObject prefab = Assets.GetPrefab(recipe2.Result);
 			containers.Add(new ContentContainer(new List<ICodexWidget>
 			{
-				new CodexImage(64, 64, Def.GetUISprite(prefab, "ui", false)),
-				new CodexText(prefab.GetProperName(), CodexTextStyle.Body, null)
-			}, ContentContainer.ContentLayout.Horizontal));
+				new CodexSpacer(),
+				new CodexCollapsibleHeader(CODEX.HEADERS.USED_IN_RECIPES, contentContainer)
+			}, ContentContainer.ContentLayout.Vertical));
+			containers.Add(contentContainer);
+		}
+		if (list2.Count > 0)
+		{
+			containers.Add(new ContentContainer(new List<ICodexWidget>
+			{
+				new CodexSpacer(),
+				new CodexCollapsibleHeader(CODEX.HEADERS.ELEMENTPRODUCEDBY, contentContainer2)
+			}, ContentContainer.ContentLayout.Vertical));
+			containers.Add(contentContainer2);
 		}
 	}
 
@@ -1816,9 +1935,9 @@ public static class CodexEntryGenerator
 		{
 			foreach (Tag tag in component.Tags)
 			{
-				if (CodexEntryGenerator.room_constraint_to_building_label_dict.ContainsKey(tag))
+				if (RoomConstraints.ConstraintTags.AllTags.Contains(tag))
 				{
-					list.Add(CodexEntryGenerator.room_constraint_to_building_label_dict[tag]);
+					list.Add(RoomConstraints.ConstraintTags.GetRoomConstraintLabelText(tag));
 				}
 			}
 		}
@@ -1963,26 +2082,32 @@ public static class CodexEntryGenerator
 	// Note: this type is marked as 'beforefieldinit'.
 	static CodexEntryGenerator()
 	{
-		Dictionary<Tag, string> dictionary = new Dictionary<Tag, string>();
+		Dictionary<Tag, Tag> dictionary = new Dictionary<Tag, Tag>();
 		Tag industrialMachinery = RoomConstraints.ConstraintTags.IndustrialMachinery;
-		dictionary[industrialMachinery] = CODEX.BUILDING_TYPE.INDUSTRIAL_MACHINERY;
+		dictionary[industrialMachinery] = "ManualGenerator";
 		Tag recBuilding = RoomConstraints.ConstraintTags.RecBuilding;
-		dictionary[recBuilding] = ROOMS.CRITERIA.REC_BUILDING.NAME;
+		dictionary[recBuilding] = "ArcadeMachine";
 		Tag clinic = RoomConstraints.ConstraintTags.Clinic;
-		dictionary[clinic] = ROOMS.CRITERIA.CLINIC.NAME;
+		dictionary[clinic] = "MedicalCot";
 		Tag washStation = RoomConstraints.ConstraintTags.WashStation;
-		dictionary[washStation] = ROOMS.CRITERIA.WASH_STATION.NAME;
+		dictionary[washStation] = "WashBasin";
 		Tag advancedWashStation = RoomConstraints.ConstraintTags.AdvancedWashStation;
-		dictionary[advancedWashStation] = ROOMS.CRITERIA.ADVANCED_WASH_STATION.NAME;
+		dictionary[advancedWashStation] = ShowerConfig.ID;
 		Tag toiletType = RoomConstraints.ConstraintTags.ToiletType;
-		dictionary[toiletType] = ROOMS.CRITERIA.TOILET.NAME;
+		dictionary[toiletType] = "Outhouse";
 		Tag flushToiletType = RoomConstraints.ConstraintTags.FlushToiletType;
-		dictionary[flushToiletType] = ROOMS.CRITERIA.FLUSH_TOILET.NAME;
+		dictionary[flushToiletType] = "FlushToilet";
 		Tag scienceBuilding = RoomConstraints.ConstraintTags.ScienceBuilding;
-		dictionary[scienceBuilding] = ROOMS.CRITERIA.SCIENCE_BUILDING.NAME;
+		dictionary[scienceBuilding] = "ResearchCenter";
 		Tag decoration = GameTags.Decoration;
-		dictionary[decoration] = ROOMS.CRITERIA.DECOR_ITEM_CLASS;
-		CodexEntryGenerator.room_constraint_to_building_label_dict = dictionary;
+		dictionary[decoration] = "FlowerVase";
+		Tag ranchStationType = RoomConstraints.ConstraintTags.RanchStationType;
+		dictionary[ranchStationType] = "RanchStation";
+		Tag bedType = RoomConstraints.ConstraintTags.BedType;
+		dictionary[bedType] = "Bed";
+		Tag lightSource = RoomConstraints.ConstraintTags.LightSource;
+		dictionary[lightSource] = "FloorLamp";
+		CodexEntryGenerator.RoomConstrainTagIcons = dictionary;
 	}
 
 	private static string categoryPrefx = "BUILD_CATEGORY_";
@@ -1995,7 +2120,26 @@ public static class CodexEntryGenerator
 
 	public static readonly string MINION_MODIFIERS_CATEGORY_ID = CodexCache.FormatLinkID("MINION_MODIFIERS");
 
-	public static Dictionary<Tag, string> room_constraint_to_building_label_dict;
+	public static Tag[] HiddenRoomConstrainTags = new Tag[]
+	{
+		RoomConstraints.ConstraintTags.Refrigerator,
+		RoomConstraints.ConstraintTags.FarmStationType,
+		RoomConstraints.ConstraintTags.LuxuryBedType,
+		RoomConstraints.ConstraintTags.DeStressingBuilding,
+		RoomConstraints.ConstraintTags.MassageTable,
+		RoomConstraints.ConstraintTags.MessTable,
+		RoomConstraints.ConstraintTags.NatureReserve,
+		RoomConstraints.ConstraintTags.Park,
+		RoomConstraints.ConstraintTags.PowerStation,
+		RoomConstraints.ConstraintTags.RocketInterior,
+		RoomConstraints.ConstraintTags.SpiceStation,
+		RoomConstraints.ConstraintTags.Decor20,
+		RoomConstraints.ConstraintTags.MachineShopType,
+		RoomConstraints.ConstraintTags.CookTop,
+		RoomConstraints.ConstraintTags.CreatureRelocator
+	};
+
+	public static Dictionary<Tag, Tag> RoomConstrainTagIcons;
 
 	private class ConversionEntry
 	{

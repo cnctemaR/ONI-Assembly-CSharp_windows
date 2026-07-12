@@ -26,15 +26,17 @@ namespace Database
 			this.displayOrder = displayOrder;
 			this.kleiUseOnlyCoordinateOffset = -1;
 			this.updateNumber = -1;
+			this.sandboxStampTemplateId = null;
 			this.HashId = Hash.SDBMLower(id);
 		}
 
-		public Story(string id, string worldgenStoryTraitKey, int displayOrder, int kleiUseOnlyCoordinateOffset, int updateNumber)
+		public Story(string id, string worldgenStoryTraitKey, int displayOrder, int kleiUseOnlyCoordinateOffset, int updateNumber, string sandboxStampTemplateId)
 		{
 			this.Id = id;
 			this.worldgenStoryTraitKey = worldgenStoryTraitKey;
 			this.displayOrder = displayOrder;
 			this.updateNumber = updateNumber;
+			this.sandboxStampTemplateId = sandboxStampTemplateId;
 			DebugUtil.Assert(kleiUseOnlyCoordinateOffset < 20, "More than 19 stories is unsupported!");
 			this.kleiUseOnlyCoordinateOffset = kleiUseOnlyCoordinateOffset;
 			this.HashId = Hash.SDBMLower(id);
@@ -75,6 +77,8 @@ namespace Database
 		private readonly int displayOrder;
 
 		private readonly int updateNumber;
+
+		public string sandboxStampTemplateId;
 
 		private WorldTrait _cachedStoryTrait;
 	}

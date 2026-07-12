@@ -145,6 +145,13 @@ namespace STRINGS
 
 						public static LocString DESC = "Unapologetically ostentatious.";
 					}
+
+					public class CANTALOUPE
+					{
+						public static LocString NAME = "Rocketmelon Atmo Helmet";
+
+						public static LocString DESC = "A melon for your melon.";
+					}
 				}
 			}
 
@@ -224,6 +231,13 @@ namespace STRINGS
 						public static LocString NAME = "Red-bellied Atmo Suit";
 
 						public static LocString DESC = "It really highlights the midsection.";
+					}
+
+					public class CANTALOUPE
+					{
+						public static LocString NAME = "Rocketmelon Atmo Suit";
+
+						public static LocString DESC = "It starts to smell ripe pretty quickly.";
 					}
 				}
 			}
@@ -305,6 +319,13 @@ namespace STRINGS
 
 						public static LocString DESC = "Functional finger-protectors with fruity flair.";
 					}
+
+					public class CANTALOUPE
+					{
+						public static LocString NAME = "Rocketmelon Atmo Gloves";
+
+						public static LocString DESC = "It takes eighteen melon rinds to make a single glove.";
+					}
 				}
 			}
 
@@ -385,6 +406,13 @@ namespace STRINGS
 
 						public static LocString DESC = "Visible from several planetoids away.";
 					}
+
+					public class CANTALOUPE
+					{
+						public static LocString NAME = "Rocketmelon Atmo Belt";
+
+						public static LocString DESC = "A tribute to the <i>cucumis melo cantalupensis</i>.";
+					}
 				}
 			}
 
@@ -436,6 +464,13 @@ namespace STRINGS
 						public static LocString NAME = "Lavender Atmo Boots";
 
 						public static LocString DESC = "Soothing space booties for tired feet.";
+					}
+
+					public class CANTALOUPE
+					{
+						public static LocString NAME = "Rocketmelon Atmo Boots";
+
+						public static LocString DESC = "Keeps feet safe (and juicy) in hostile environments.";
 					}
 				}
 			}
@@ -870,6 +905,55 @@ namespace STRINGS
 
 						public static LocString DESC = "They're not great for dexterity.";
 					}
+
+					public class BASIC_GREY
+					{
+						public static LocString NAME = "Basic Gray Gloves";
+
+						public static LocString DESC = "A good, solid pair of gray gloves that go with everything.";
+					}
+
+					public class BASIC_PINKSALMON
+					{
+						public static LocString NAME = "Basic Coral Gloves";
+
+						public static LocString DESC = "A good, solid pair of bright pink gloves that go with everything.";
+					}
+
+					public class BASIC_TAN
+					{
+						public static LocString NAME = "Basic Tan Gloves";
+
+						public static LocString DESC = "A good, solid pair of tan gloves that go with everything.";
+					}
+
+					public class BALLERINA_PINK
+					{
+						public static LocString NAME = "Ballet Gloves";
+
+						public static LocString DESC = "Wrist ruffles highlight the poetic movements of the phalanges.";
+					}
+
+					public class FORMAL_WHITE
+					{
+						public static LocString NAME = "White Silk Gloves";
+
+						public static LocString DESC = "They're as soft as...well, silk.";
+					}
+
+					public class LONG_WHITE
+					{
+						public static LocString NAME = "White Evening Gloves";
+
+						public static LocString DESC = "Super-long gloves for super-formal occasions.";
+					}
+
+					public class TWOTONE_CREAM_CHARCOAL
+					{
+						public static LocString NAME = "Contrast Cuff Gloves";
+
+						public static LocString DESC = "For elegance so understated, it may go completely unnoticed.";
+					}
 				}
 			}
 
@@ -1138,6 +1222,76 @@ namespace STRINGS
 						public static LocString NAME = "Rebel Gi Jacket";
 
 						public static LocString DESC = "The contrasting trim hides stains from messy post-sparring snacks.";
+					}
+
+					public class JACKET_SMOKING_BURGUNDY
+					{
+						public static LocString NAME = "Donor Jacket";
+
+						public static LocString DESC = "Crafted from the softest, most philanthropic fibers.";
+					}
+
+					public class MECHANIC
+					{
+						public static LocString NAME = "Engineer Jacket";
+
+						public static LocString DESC = "Designed to withstand the rigors of applied science.";
+					}
+
+					public class VELOUR_BLACK
+					{
+						public static LocString NAME = "PhD Velour Jacket";
+
+						public static LocString DESC = "A formal jacket for those who are \"not that kind of doctor.\"";
+					}
+
+					public class VELOUR_BLUE
+					{
+						public static LocString NAME = "Shortwave Velour Jacket";
+
+						public static LocString DESC = "A luxe, pettable jacket paired with a clip-on tie.";
+					}
+
+					public class VELOUR_PINK
+					{
+						public static LocString NAME = "Gamma Velour Jacket";
+
+						public static LocString DESC = "Some scientists are less shy than others.";
+					}
+
+					public class WAISTCOAT_PINSTRIPE_SLATE
+					{
+						public static LocString NAME = "Nobel Pinstripe Waistcoat";
+
+						public static LocString DESC = "One must dress for the prize that one wishes to win.";
+					}
+
+					public class WATER
+					{
+						public static LocString NAME = "HVAC Khaki Shirt";
+
+						public static LocString DESC = "Designed to regulate temperature and humidity.";
+					}
+
+					public class TWEED_PINK_ORCHID
+					{
+						public static LocString NAME = "Power Brunch Blazer";
+
+						public static LocString DESC = "Winners never quit, quitters never win.";
+					}
+
+					public class DRESS_SLEEVELESS_BOW_BW
+					{
+						public static LocString NAME = "PhD Dress";
+
+						public static LocString DESC = "Ready for a post-thesis-defense party.";
+					}
+
+					public class BODYSUIT_BALLERINA_PINK
+					{
+						public static LocString NAME = "Ballet Leotard";
+
+						public static LocString DESC = "Lab-crafted fabric with a level of stretchiness that defies the laws of physics.";
 					}
 				}
 			}
@@ -1443,6 +1597,55 @@ namespace STRINGS
 
 						public static LocString DESC = "The tinsel is scratchy, but look how shiny!";
 					}
+
+					public class BASIC_ORANGE_SATSUMA
+					{
+						public static LocString NAME = "Hi-Vis Pants";
+
+						public static LocString DESC = "They make the wearer feel truly seen.";
+					}
+
+					public class PINSTRIPE_SLATE
+					{
+						public static LocString NAME = "Nobel Pinstripe Trousers";
+
+						public static LocString DESC = "There's a waterproof pocket to keep acceptance speeches smudge-free.";
+					}
+
+					public class VELOUR_BLACK
+					{
+						public static LocString NAME = "Black Velour Trousers";
+
+						public static LocString DESC = "Fuzzy, formal and finely cut.";
+					}
+
+					public class VELOUR_BLUE
+					{
+						public static LocString NAME = "Shortwave Velour Pants";
+
+						public static LocString DESC = "Formal wear with a sensory side.";
+					}
+
+					public class VELOUR_PINK
+					{
+						public static LocString NAME = "Gamma Velour Pants";
+
+						public static LocString DESC = "They're stretchy <i>and</i> flame retardant.";
+					}
+
+					public class SKIRT_BALLERINA_PINK
+					{
+						public static LocString NAME = "Ballet Tutu";
+
+						public static LocString DESC = "A tulle skirt spun and assembled by an army of patent-pending nanobots.";
+					}
+
+					public class SKIRT_TWEED_PINK_ORCHID
+					{
+						public static LocString NAME = "Power Brunch Skirt";
+
+						public static LocString DESC = "It has pockets!";
+					}
 				}
 			}
 
@@ -1633,7 +1836,7 @@ namespace STRINGS
 					{
 						public static LocString NAME = "Slouchy Grape Socks";
 
-						public static LocString DESC = "These fabulous knitted that don't stay up. are really raisin the bar.";
+						public static LocString DESC = "These fabulous knitted socks that don't stay up are really raisin the bar.";
 					}
 
 					public class LEGWARMERS_WATERMELON
@@ -1641,6 +1844,48 @@ namespace STRINGS
 						public static LocString NAME = "Slouchy Watermelon Socks";
 
 						public static LocString DESC = "Summery knitted socks that don't stay up.";
+					}
+
+					public class BALLERINA_PINK
+					{
+						public static LocString NAME = "Ballet Shoes";
+
+						public static LocString DESC = "There's no \"pointe\" in aiming for anything less than perfection.";
+					}
+
+					public class MARYJANE_SOCKS_BW
+					{
+						public static LocString NAME = "Frilly Sock Shoes";
+
+						public static LocString DESC = "They add a little <i>je ne sais quoi</i> to everyday lab wear.";
+					}
+
+					public class CLASSICFLATS_CREAM_CHARCOAL
+					{
+						public static LocString NAME = "Dressy Shoes";
+
+						public static LocString DESC = "An enduring style, for enduring endless small talk.";
+					}
+
+					public class VELOUR_BLUE
+					{
+						public static LocString NAME = "Shortwave Velour Shoes";
+
+						public static LocString DESC = "Not the easiest to keep clean.";
+					}
+
+					public class VELOUR_PINK
+					{
+						public static LocString NAME = "Gamma Velour Shoes";
+
+						public static LocString DESC = "Finally, a pair of work-appropriate fuzzy shoes.";
+					}
+
+					public class VELOUR_BLACK
+					{
+						public static LocString NAME = "Black Velour Shoes";
+
+						public static LocString DESC = "Matching velour lining gently tickles feet with every step.";
 					}
 				}
 			}

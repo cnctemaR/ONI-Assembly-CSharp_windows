@@ -129,9 +129,26 @@ public class AmbienceManager : KMonoBehaviour
 			this.soundEvent.setParameterByName("tilePercentage", this.tilePercentage, false);
 		}
 
+		public void SetCustomParameter(string parameterName, float value)
+		{
+			this.soundEvent.setParameterByName(parameterName, value, false);
+		}
+
 		public int CompareTo(AmbienceManager.Layer layer)
 		{
 			return layer.tileCount - this.tileCount;
+		}
+
+		public void SetVolume(float volume)
+		{
+			if (this.volume != volume)
+			{
+				this.volume = volume;
+				if (this.soundEvent.isValid())
+				{
+					this.soundEvent.setVolume(volume);
+				}
+			}
 		}
 
 		public void Stop()
@@ -217,6 +234,8 @@ public class AmbienceManager : KMonoBehaviour
 
 		public EventReference spaceSound;
 
+		public EventReference rocketInteriorSound;
+
 		public EventReference facilitySound;
 
 		public EventReference radiationSound;
@@ -233,6 +252,12 @@ public class AmbienceManager : KMonoBehaviour
 			this.spaceLayer = new AmbienceManager.Layer(def.spaceSound, default(EventReference));
 			this.allLayers.Add(this.spaceLayer);
 			this.loopingLayers.Add(this.spaceLayer);
+			this.m_isClusterSpaceEnabled = DlcManager.FeatureClusterSpaceEnabled();
+			if (this.m_isClusterSpaceEnabled)
+			{
+				this.rocketInteriorLayer = new AmbienceManager.Layer(def.rocketInteriorSound, default(EventReference));
+				this.allLayers.Add(this.rocketInteriorLayer);
+			}
 			this.facilityLayer = new AmbienceManager.Layer(def.facilitySound, default(EventReference));
 			this.allLayers.Add(this.facilityLayer);
 			this.loopingLayers.Add(this.facilityLayer);
@@ -391,6 +416,17 @@ public class AmbienceManager : KMonoBehaviour
 					layer.Stop();
 				}
 			}
+			if (this.m_isClusterSpaceEnabled)
+			{
+				float num3 = 0f;
+				if (ClusterManager.Instance != null && ClusterManager.Instance.activeWorld != null && ClusterManager.Instance.activeWorld.IsModuleInterior)
+				{
+					num3 = 1f;
+				}
+				this.rocketInteriorLayer.Start(emitter_position);
+				this.rocketInteriorLayer.SetCustomParameter("RocketState", (float)ClusterManager.RocketInteriorState);
+				this.rocketInteriorLayer.SetVolume(num3);
+			}
 			if (this.m_isRadiationEnabled)
 			{
 				this.radiationLayer.Start(emitter_position);
@@ -424,6 +460,8 @@ public class AmbienceManager : KMonoBehaviour
 
 		public AmbienceManager.Layer spaceLayer;
 
+		public AmbienceManager.Layer rocketInteriorLayer;
+
 		public AmbienceManager.Layer facilityLayer;
 
 		public AmbienceManager.Layer radiationLayer;
@@ -443,6 +481,10 @@ public class AmbienceManager : KMonoBehaviour
 		public int totalTileCount;
 
 		private bool m_isRadiationEnabled;
+
+		private bool m_isClusterSpaceEnabled;
+
+		private const string ROCKET_STATE_FOR_AMBIENCE = "RocketState";
 
 		private AmbienceManager.Quadrant.SolidTimer[] solidTimers;
 

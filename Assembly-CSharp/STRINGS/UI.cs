@@ -2356,6 +2356,13 @@ namespace STRINGS
 
 				public static LocString DESCRIPTION = "The tag reads \"Molly\".\n\nOn the reverse is \"Designed by B363\" stamped above what appears to be an unusually shaped pawprint.";
 			}
+
+			public class MORB_ROVER_MAKER
+			{
+				public static LocString NAME = "Toy Bot";
+
+				public static LocString DESCRIPTION = "A custom-made robot programmed to deliver puns in a variety of celebrity voices.\n\nIt is also a paper shredder.";
+			}
 		}
 
 		public class SANDBOXTOOLS
@@ -2546,7 +2553,14 @@ namespace STRINGS
 				{
 					public static LocString NAME = "Critter Removal";
 
-					public static LocString TOOLTIP = "Remove Critters! {Hotkey}";
+					public static LocString TOOLTIP = "Remove critters! {Hotkey}";
+				}
+
+				public class SPAWN_STORY_TRAIT
+				{
+					public static LocString NAME = "Story Traits";
+
+					public static LocString TOOLTIP = "Spawn story traits {Hotkey}";
 				}
 			}
 
@@ -3478,21 +3492,6 @@ namespace STRINGS
 				public static LocString OK_BUTTON = "OK";
 
 				public static LocString FULLPATCHNOTES_TOOLTIP = "View the full patch notes online";
-			}
-
-			public class MOTD
-			{
-				public static LocString IMAGE_HEADER = "OCTOBER 2023 QOL UPDATE";
-
-				public static LocString NEWS_HEADER = "JOIN THE DISCUSSION";
-
-				public static LocString NEWS_BODY = "Stay up to date by joining our mailing list, or head on over to the forums and join the discussion.";
-
-				public static LocString PATCH_NOTES_SUMMARY = "This update includes:\n\n•<indent=20px>Critters can be moved with Move To tool.</indent>\n•<indent=20px>Blueprints in a colony's collection are recyclable.</indent>\n•<indent=20px>Added searchable element filter and other improvements to UI.</indent>\n•<indent=20px>Revised Industrial Machinery categorization for buildings.</indent>\n•<indent=20px>Bug fixes and more.</indent>\n\n   Check out the full patch notes for more details!";
-
-				public static LocString UPDATE_TEXT = "LAUNCHED!";
-
-				public static LocString UPDATE_TEXT_EXPANSION1 = "LAUNCHED!";
 			}
 
 			public class LOADSCREEN
@@ -4439,7 +4438,9 @@ namespace STRINGS
 
 				public static LocString PLAYER_PREFS_CORRUPTED = "A problem occurred while loading your game options.\nThey have been reset to their default settings.\n\n";
 
-				public static LocString IO_UNAUTHORIZED = "An Unauthorized Access Error occurred when trying to write to disk.\nPlease check that you have permissions to write to:\n{0}\n\nThis may prevent the game from saving.";
+				public static LocString IO_UNAUTHORIZED = "An Unauthorized Access Error occurred when trying to write to disk.\n\nPlease check that you have permissions to write to:\n{0}\n\nThis may prevent the game from saving.";
+
+				public static LocString IO_UNAUTHORIZED_ONEDRIVE = "An Unauthorized Access Error occurred when trying to write to disk.\n\nOneDrive may be interfering with the game.\n\nPlease check that you have permissions to write to:\n{0}\n\nThis may prevent the game from saving.";
 
 				public static LocString IO_SUFFICIENT_SPACE = "An Insufficient Space Error occurred when trying to write to disk. \n\nPlease free up some space.\n{0}";
 
@@ -4483,6 +4484,18 @@ namespace STRINGS
 				public static LocString SPACESCANNERANDTELESCOPECHANGES_SPACESCANNERS = "•<indent=20px>Automation is synced between all Space Scanners targeting the same object.</indent>\n•<indent=20px>Network quality based on the total percentage of sky covered.</indent>\n•<indent=20px>Industrial machinery no longer impacts network quality.</indent>";
 
 				public static LocString SPACESCANNERANDTELESCOPECHANGES_TELESCOPES = "•<indent=20px>Telescopes have a symmetrical scanning range.</indent>\n•<indent=20px>Obstructions block visibility from the blocked tile out toward the outer edge of scanning range.</indent>";
+
+				public static LocString U50_CHANGES_TITLE = "IMPORTANT CHANGES";
+
+				public static LocString U50_CHANGES_SUMMARY = "There have been significant changes to critters since this save file was created! Please check on your ranches.";
+
+				public static LocString U50_CHANGES_MOOD = "•<indent=20px>Critter moods have been expanded to include miserable and satisfied states: Miserable stops reproduction. Satisfied gives full metabolism and default reproduction.</indent>";
+
+				public static LocString U50_CHANGES_PACU = "•<indent=20px>Pacus have received a number of bug fixes and changes affecting their reproduction: Now correctly Confined when flopping or in less than 8 tiles of liquid. Easier to feed due to a rebalanced diet.</indent>";
+
+				public static LocString U50_CHANGES_SUITCHECKPOINTS = "•<indent=20px>Suit checkpoints now have an automation port to disable them so Duplicants can pass through. Some checkpoints may now be unintentionally connected to existing " + BUILDINGS.PREFABS.LOGICWIRE.NAME + "s.";
+
+				public static LocString U50_CHANGES_METER_VALVES = "•<indent=20px>Meter valves no longer continuously reset when receiving a green signal.</indent>";
 			}
 		}
 
@@ -4606,6 +4619,8 @@ namespace STRINGS
 
 			public static LocString ITEM_PLAYER_UNLOCKED_BUT_UNOWNABLE = "This blueprint is part of my colony's permanent collection.";
 
+			public static LocString ITEM_DLC_REQUIRED = "This blueprint is designed for the <i>Spaced Out!</i> DLC.";
+
 			public static LocString ITEM_UNKNOWN_NAME = "Uh oh!";
 
 			public static LocString ITEM_UNKNOWN_DESCRIPTION = "Hmm. Looks like this blueprint is missing from the supply closet. Perhaps due to a temporal anomaly...";
@@ -4616,7 +4631,7 @@ namespace STRINGS
 
 			public static LocString TOOLTIP_VIEW_ALL_ITEMS = "Filter: Showing all items\n\n" + UI.CLICK(UI.ClickType.Click) + " to toggle";
 
-			public static LocString TOOLTIP_VIEW_OWNED_ONLY = "Filter: Showing owned items Only\n\n" + UI.CLICK(UI.ClickType.Click) + " to toggle";
+			public static LocString TOOLTIP_VIEW_OWNED_ONLY = "Filter: Showing owned items only\n\n" + UI.CLICK(UI.ClickType.Click) + " to toggle";
 
 			public static LocString TOOLTIP_VIEW_DOUBLES_ONLY = "Filter: Showing multiples owned only\n\n" + UI.CLICK(UI.ClickType.Click) + " to toggle";
 
@@ -4630,7 +4645,9 @@ namespace STRINGS
 
 				public static LocString TOOLTIP_UNBUYABLE = "This item is unprintable";
 
-				public static LocString TOOLTIP_UNBUYABLE_BETA = "This item will be printable after the public testing period";
+				public static LocString TOOLTIP_UNBUYABLE_BETA = "This item may be printable after the public testing period";
+
+				public static LocString TOOLTIP_UNBUYABLE_ALREADY_OWNED = "My colony already owns one of these blueprints";
 
 				public static LocString TOOLTIP_BUY_CANT_AFFORD = "Filament supply is too low";
 
@@ -4760,7 +4777,7 @@ namespace STRINGS
 
 				public static LocString PRIMO_GARB = "Primo Garb";
 
-				public static LocString CLOTHING_TOPS_BASIC = "Basic Shirts";
+				public static LocString CLOTHING_TOPS_BASIC = "Standard Shirts";
 
 				public static LocString CLOTHING_TOPS_TSHIRT = "Tees";
 
@@ -4768,7 +4785,9 @@ namespace STRINGS
 
 				public static LocString CLOTHING_TOPS_UNDERSHIRT = "Undershirts";
 
-				public static LocString CLOTHING_BOTTOMS_BASIC = "Basic Pants";
+				public static LocString CLOTHING_TOPS_DRESS = "Dresses and Bodysuits";
+
+				public static LocString CLOTHING_BOTTOMS_BASIC = "Standard Pants";
 
 				public static LocString CLOTHING_BOTTOMS_FANCY = "Fancy Pants";
 
@@ -4778,15 +4797,17 @@ namespace STRINGS
 
 				public static LocString CLOTHING_BOTTOMS_UNDERWEAR = "Underwear";
 
-				public static LocString CLOTHING_GLOVES_BASIC = "Basic Gloves";
+				public static LocString CLOTHING_GLOVES_BASIC = "Standard Gloves";
 
 				public static LocString CLOTHING_GLOVES_SHORT = "Short Gloves";
 
 				public static LocString CLOTHING_GLOVES_PRINTS = "Specialty Gloves";
 
-				public static LocString CLOTHING_SHOES_BASIC = "Basic Shoes";
+				public static LocString CLOTHING_SHOES_BASIC = "Standard Shoes";
 
 				public static LocString CLOTHING_SHOE_SOCKS = "Socks";
+
+				public static LocString CLOTHING_SHOES_FANCY = "Fancy Shoes";
 
 				public static LocString ATMOSUIT_HELMETS_BASIC = "Atmo Helmets";
 
@@ -5331,6 +5352,61 @@ namespace STRINGS
 			public class REBELGI
 			{
 				public static LocString NAME = "Rebel Gi Outfit";
+			}
+
+			public class DONOR
+			{
+				public static LocString NAME = "Donor Outfit";
+			}
+
+			public class MECHANIC
+			{
+				public static LocString NAME = "Engineer Coveralls";
+			}
+
+			public class VELOUR_BLACK
+			{
+				public static LocString NAME = "PhD Velour Outfit";
+			}
+
+			public class SLEEVELESS_BOW_BW
+			{
+				public static LocString NAME = "PhD Dress Outfit";
+			}
+
+			public class VELOUR_BLUE
+			{
+				public static LocString NAME = "Shortwave Velour Outfit";
+			}
+
+			public class VELOUR_PINK
+			{
+				public static LocString NAME = "Gamma Velour Outfit";
+			}
+
+			public class WATER
+			{
+				public static LocString NAME = "HVAC Coveralls";
+			}
+
+			public class WAISTCOAT_PINSTRIPE_SLATE
+			{
+				public static LocString NAME = "Nobel Pinstripe Outfit";
+			}
+
+			public class TWEED_PINK_ORCHID
+			{
+				public static LocString NAME = "Power Brunch Outfit";
+			}
+
+			public class BALLET
+			{
+				public static LocString NAME = "Ballet Outfit";
+			}
+
+			public class ATMOSUIT_CANTALOUPE
+			{
+				public static LocString NAME = "Rocketmelon Atmo Outfit";
 			}
 		}
 
@@ -7233,6 +7309,27 @@ namespace STRINGS
 					}
 				}
 
+				public class HAS_CARGO_BAY_FOR_NOSECONE_HARVEST
+				{
+					public class STATUS
+					{
+						public static LocString READY = "Drillcone Cargo Bay";
+
+						public static LocString FAILURE = "Drillcone Cargo Bay";
+
+						public static LocString WARNING = "Drillcone Cargo Bay";
+					}
+
+					public class TOOLTIP
+					{
+						public static LocString READY = "A suitable cargo bay has been installed";
+
+						public static LocString FAILURE = "No cargo bay installed\n\nThis rocket has a " + UI.FormatAsLink("Drillcone", "NOSECONEHARVEST") + " installed but nowhere to store the materials";
+
+						public static LocString WARNING = "No cargo bay installed\n\nThis rocket has a " + UI.FormatAsLink("Drillcone", "NOSECONEHARVEST") + " installed but nowhere to store the materials";
+					}
+				}
+
 				public class HAS_CONTROLSTATION
 				{
 					public class STATUS
@@ -9110,6 +9207,8 @@ namespace STRINGS
 
 			public static LocString REPORTEDERROR_SUCCESS = "Reported Error";
 
+			public static LocString REPORTEDERROR_FAILURE_TOO_LARGE = "Unable to report error. Save file is too large. Please contact us using the bug tracker.";
+
 			public static LocString REPORTEDERROR_FAILURE = "Unable to report error. Please contact us using the bug tracker.";
 
 			public static LocString UPLOADINPROGRESS = "Submitting {0}";
@@ -9681,6 +9780,24 @@ namespace STRINGS
 					public static LocString LIQUID = "Filtered Liquid Output:\n{0}";
 
 					public static LocString SOLID = "Filtered Solid Output:\n{0}";
+				}
+			}
+
+			public class SINGLEITEMSELECTIONSIDESCREEN
+			{
+				public static LocString TITLE = "Element Filter";
+
+				public static LocString LIST_TITLE = "Options";
+
+				public static LocString NO_SELECTION = "None";
+
+				public class CURRENT_ITEM_SELECTED_SECTION
+				{
+					public static LocString TITLE = "Current Selection";
+
+					public static LocString NO_ITEM_TITLE = "No Item Selected";
+
+					public static LocString NO_ITEM_MESSAGE = "Select an item for storage below.";
 				}
 			}
 
@@ -11824,6 +11941,17 @@ namespace STRINGS
 				public static LocString TOOLTIP_OFF = "Cancel this empty order";
 			}
 
+			public class CLOSESTORAGE
+			{
+				public static LocString NAME = "Close Storage";
+
+				public static LocString TOOLTIP = "Prevent this container from receiving resources for storage";
+
+				public static LocString NAME_OFF = "Cancel Close";
+
+				public static LocString TOOLTIP_OFF = "Cancel this close order";
+			}
+
 			public class COPY_BUILDING_SETTINGS
 			{
 				public static LocString NAME = "Copy Settings";
@@ -12890,6 +13018,25 @@ namespace STRINGS
 
 					public static LocString HOVERACTION = "DELETE CRITTERS";
 				}
+
+				public class SPAWN_STORY_TRAIT
+				{
+					public static LocString NAME = "Story Trait";
+
+					public static LocString HOVERACTION = "PLACE";
+
+					public static LocString ERROR_ALREADY_EXISTS = "{StoryName} already exists in this save";
+
+					public static LocString ERROR_INVALID_LOCATION = "Invalid location";
+
+					public static LocString ERROR_DUPE_HAZARD = "One or more Duplicants are in the way";
+
+					public static LocString ERROR_ROBOT_HAZARD = "One or more robots are in the way";
+
+					public static LocString ERROR_CREATURE_HAZARD = "One or more critters are in the way";
+
+					public static LocString ERROR_BUILDING_HAZARD = "One or more buildings are in the way";
+				}
 			}
 
 			public class GENERIC
@@ -13859,7 +14006,7 @@ namespace STRINGS
 
 			public static LocString SCALE_GROWTH_ATMO = "Shearable {Item}: {Amount} per {Time} ({Atmosphere})";
 
-			public static LocString SCALE_GROWTH_TEMP = "Shearable {Item}: {Amount} per {Time} ({TempMin}-{TempMax})";
+			public static LocString SCALE_GROWTH_TEMP = "Shearable {Item}: {Amount} per {Time} ({TempMin} - {TempMax})";
 
 			public static LocString ACCESS_CONTROL = "Duplicant Access Permissions";
 
@@ -13880,6 +14027,8 @@ namespace STRINGS
 			public static LocString PARTICLE_PORT_OUTPUT = "Radbolt Output Port";
 
 			public static LocString IN_ORBIT_REQUIRED = "Active In Space";
+
+			public static LocString FOOD_DEHYDRATOR_WATER_OUTPUT = "Wet Floor";
 
 			public class TOOLTIPS
 			{
@@ -14032,6 +14181,8 @@ namespace STRINGS
 				});
 
 				public static LocString ASSIGNEDDUPLICANT = "This amenity may only be used by the Duplicant it is assigned to";
+
+				public static LocString BUILDINGROOMREQUIREMENTCLASS = "This category of building may be required or prohibited in certain " + UI.PRE_KEYWORD + "Rooms" + UI.PST_KEYWORD;
 
 				public static LocString OPERATIONEFFECTS = "The building will produce these effects when its requirements are met";
 
@@ -14652,7 +14803,7 @@ namespace STRINGS
 					UI.PRE_KEYWORD,
 					"{Item}",
 					UI.PST_KEYWORD,
-					"\n\nIt must eat food between {TempMin}-{TempMax} to regrow sheared ",
+					"\n\nIt must eat food between {TempMin} - {TempMax} to regrow sheared ",
 					UI.PRE_KEYWORD,
 					"{Item}",
 					UI.PST_KEYWORD
@@ -14729,6 +14880,8 @@ namespace STRINGS
 				});
 
 				public static LocString IN_ORBIT_REQUIRED = "This building is only operational while its parent rocket is in flight";
+
+				public static LocString FOOD_DEHYDRATOR_WATER_OUTPUT = "This building dumps " + UI.FormatAsLink("Water", "WATER") + " on the floor while in use";
 			}
 		}
 
@@ -15124,6 +15277,10 @@ namespace STRINGS
 			public static LocString TIME_PLAYED = "Time Played: {0} hours";
 
 			public static LocString SCHEDULE_BUTTON_TOOLTIP = "Manage Schedule";
+
+			public static LocString MILESTONE_TITLE = "Approaching Milestone";
+
+			public static LocString MILESTONE_DESCRIPTION = "This colony is about to hit Cycle {0}!";
 		}
 
 		public class ENDOFDAYREPORT

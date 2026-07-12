@@ -11,7 +11,7 @@ public class Bee : KMonoBehaviour
 		base.Subscribe<Bee>(-1283701846, Bee.OnSleepDelegate);
 		base.Subscribe<Bee>(-2090444759, Bee.OnWakeUpDelegate);
 		base.Subscribe<Bee>(1623392196, Bee.OnDeathDelegate);
-		base.Subscribe<Bee>(1890751808, Bee.OnHappyDelegate);
+		base.Subscribe<Bee>(49018834, Bee.OnSatisfiedDelegate);
 		base.Subscribe<Bee>(-647798969, Bee.OnUnhappyDelegate);
 		base.GetComponent<KBatchedAnimController>().SetSymbolVisiblity("tag", false);
 		base.GetComponent<KBatchedAnimController>().SetSymbolVisiblity("snapto_tag", false);
@@ -129,13 +129,13 @@ public class Bee : KMonoBehaviour
 		component.OnDeath(data);
 	});
 
-	private static readonly EventSystem.IntraObjectHandler<Bee> OnHappyDelegate = new EventSystem.IntraObjectHandler<Bee>(delegate(Bee component, object data)
-	{
-		component.RemoveRadiationMod(component.unhappyRadiationModKey);
-	});
-
 	private static readonly EventSystem.IntraObjectHandler<Bee> OnUnhappyDelegate = new EventSystem.IntraObjectHandler<Bee>(delegate(Bee component, object data)
 	{
 		component.AddRadiationModifier(component.unhappyRadiationModKey, component.unhappyRadiationMod);
+	});
+
+	private static readonly EventSystem.IntraObjectHandler<Bee> OnSatisfiedDelegate = new EventSystem.IntraObjectHandler<Bee>(delegate(Bee component, object data)
+	{
+		component.RemoveRadiationMod(component.unhappyRadiationModKey);
 	});
 }

@@ -4,6 +4,8 @@ using System.Collections.Generic;
 
 public class Components
 {
+	public static Components.Cmps<RobotAi.Instance> LiveRobotsIdentities = new Components.Cmps<RobotAi.Instance>();
+
 	public static Components.Cmps<MinionIdentity> LiveMinionIdentities = new Components.Cmps<MinionIdentity>();
 
 	public static Components.Cmps<MinionIdentity> MinionIdentities = new Components.Cmps<MinionIdentity>();
@@ -163,6 +165,8 @@ public class Components
 	public static Components.CmpsByWorld<Geyser> Geysers = new Components.CmpsByWorld<Geyser>();
 
 	public static Components.CmpsByWorld<GeoTuner.Instance> GeoTuners = new Components.CmpsByWorld<GeoTuner.Instance>();
+
+	public static Components.CmpsByWorld<CritterCondo.Instance> CritterCondos = new Components.CmpsByWorld<CritterCondo.Instance>();
 
 	public static Components.CmpsByWorld<Comet> Meteors = new Components.CmpsByWorld<Comet>();
 

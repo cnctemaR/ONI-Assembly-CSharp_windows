@@ -219,11 +219,11 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Stable";
 
-				public static LocString DESCRIPTION = "Critters don't mind it here, as long as things don't get too overcrowded.\n\nStabled critters can be tended at a Grooming Station to hasten their domestication and increase their production.";
+				public static LocString DESCRIPTION = "Critters don't mind it here, as long as things don't get too crowded.\n\nStabled critters can be tended to in order to improve their happiness, hasten their domestication and increase their production.\n\nEnables the use of Grooming Stations, Shearing Stations, Critter Condos, Critter Fountains and Milking Stations.";
 
-				public static LocString EFFECT = "- Enables Grooming Station use";
+				public static LocString EFFECT = "- Critter taming and mood bonus";
 
-				public static LocString TOOLTIP = "Stabled critters can be tended at a Grooming Station to hasten their domestication and increase their production";
+				public static LocString TOOLTIP = "A stable enables Grooming Station, Critter Condo, Critter Fountain, Shearing Station and Milking Station use";
 			}
 
 			public class REC_ROOM
@@ -292,13 +292,18 @@ namespace STRINGS
 
 			public static LocString NO_TYPE_CONFLICTS = "Remove conflicting buildings";
 
-			public static LocString DECOR_ITEM_CLASS = "Decor Item";
+			public static LocString IN_CODE_ERROR = "String Key Not Found: {0}";
 
 			public class CRITERIA_FAILED
 			{
 				public static LocString MISSING_BUILDING = "Missing {0}";
 
 				public static LocString FAILED = "{0}";
+			}
+
+			public static class DECORATION
+			{
+				public static LocString NAME = "Decor Item";
 			}
 
 			public class CEILING_HEIGHT
@@ -322,6 +327,11 @@ namespace STRINGS
 				public static LocString DESCRIPTION = "Must have an area no larger than {0} tiles";
 			}
 
+			public class INDUSTRIALMACHINERY
+			{
+				public static LocString NAME = "Industrial Machinery";
+			}
+
 			public class HAS_BED
 			{
 				public static LocString NAME = "One or more beds";
@@ -336,7 +346,7 @@ namespace STRINGS
 				public static LocString DESCRIPTION = "Requires at least one Comfy Bed";
 			}
 
-			public class LUXURY_BED_SINGLE
+			public class LUXURYBEDTYPE
 			{
 				public static LocString NAME = "Single Comfy Bed";
 
@@ -371,7 +381,7 @@ namespace STRINGS
 				public static LocString DESCRIPTION = "Room cannot contain a Comfy Bed";
 			}
 
-			public class BED_MULTIPLE
+			public class BEDTYPE
 			{
 				public static LocString NAME = "Beds";
 
@@ -392,7 +402,7 @@ namespace STRINGS
 				public static LocString DESCRIPTION = "Requires {0} or more Decor items";
 			}
 
-			public class DECORATIVE_ITEM_N
+			public class DECOR20
 			{
 				public static LocString NAME = "Decor item: +{0} Decor";
 
@@ -406,21 +416,21 @@ namespace STRINGS
 				public static LocString DESCRIPTION = "Requires one or more Sick Bays or Disease Clinics";
 			}
 
-			public class POWER_STATION
+			public class POWERSTATION
 			{
 				public static LocString NAME = "Power Control Station";
 
 				public static LocString DESCRIPTION = "Requires a single Power Control Station";
 			}
 
-			public class FARM_STATION
+			public class FARMSTATIONTYPE
 			{
 				public static LocString NAME = "Farm Station";
 
 				public static LocString DESCRIPTION = "Requires a single Farm Station";
 			}
 
-			public class CREATURE_RELOCATOR
+			public class CREATURERELOCATOR
 			{
 				public static LocString NAME = "Critter Relocator";
 
@@ -434,21 +444,21 @@ namespace STRINGS
 				public static LocString DESCRIPTION = "Requires a single Critter Feeder";
 			}
 
-			public class RANCH_STATION
+			public class RANCHSTATIONTYPE
 			{
-				public static LocString NAME = "Grooming Station";
+				public static LocString NAME = "Ranching building";
 
-				public static LocString DESCRIPTION = "Requires a single Grooming Station";
+				public static LocString DESCRIPTION = "Requires a single Grooming Station, Critter Condo, Critter Fountain, or Milking Station";
 			}
 
-			public class SPICE_STATION
+			public class SPICESTATION
 			{
 				public static LocString NAME = "Spice Grinder";
 
 				public static LocString DESCRIPTION = "Requires a single Spice Grinder";
 			}
 
-			public class COOK_TOP
+			public class COOKTOP
 			{
 				public static LocString NAME = "Electric Grill or Gas Range";
 
@@ -462,21 +472,21 @@ namespace STRINGS
 				public static LocString DESCRIPTION = "Requires a single Refrigerator";
 			}
 
-			public class REC_BUILDING
+			public class RECBUILDING
 			{
 				public static LocString NAME = "Recreational building";
 
 				public static LocString DESCRIPTION = "Requires one or more recreational buildings";
 			}
 
-			public class PARK_BUILDING
+			public class PARK
 			{
 				public static LocString NAME = "Park Sign";
 
 				public static LocString DESCRIPTION = "Requires one or more Park Signs";
 			}
 
-			public class MACHINE_SHOP
+			public class MACHINESHOPTYPE
 			{
 				public static LocString NAME = "Mechanics Station";
 
@@ -490,14 +500,14 @@ namespace STRINGS
 				public static LocString DESCRIPTION = "Requires one or more Ration Boxes or Refrigerators";
 			}
 
-			public class LIGHT
+			public class LIGHTSOURCE
 			{
 				public static LocString NAME = "Light source";
 
 				public static LocString DESCRIPTION = "Requires one or more light sources";
 			}
 
-			public class DESTRESSING_BUILDING
+			public class DESTRESSINGBUILDING
 			{
 				public static LocString NAME = "De-Stressing Building";
 
@@ -511,7 +521,7 @@ namespace STRINGS
 				public static LocString DESCRIPTION = "Requires one or more Massage Tables";
 			}
 
-			public class MESS_STATION_SINGLE
+			public class MESSTABLE
 			{
 				public static LocString NAME = "Mess Table";
 
@@ -539,14 +549,14 @@ namespace STRINGS
 				public static LocString DESCRIPTION = "Requires one or more Research Stations or Super Computers";
 			}
 
-			public class TOILET
+			public class TOILETTYPE
 			{
 				public static LocString NAME = "Toilet";
 
 				public static LocString DESCRIPTION = "Requires one or more Outhouses or Lavatories";
 			}
 
-			public class FLUSH_TOILET
+			public class FLUSHTOILETTYPE
 			{
 				public static LocString NAME = "Flush Toilet";
 
@@ -560,14 +570,14 @@ namespace STRINGS
 				public static LocString DESCRIPTION = "Cannot contain basic Outhouses";
 			}
 
-			public class WASH_STATION
+			public class WASHSTATION
 			{
 				public static LocString NAME = "Wash station";
 
 				public static LocString DESCRIPTION = "Requires one or more Wash Basins, Sinks, Hand Sanitizers, or Showers";
 			}
 
-			public class ADVANCED_WASH_STATION
+			public class ADVANCEDWASHSTATION
 			{
 				public static LocString NAME = "Plumbed wash station";
 
@@ -609,7 +619,7 @@ namespace STRINGS
 				public static LocString DESCRIPTION = "Requires four or more wild plants";
 			}
 
-			public class SCIENCE_BUILDING
+			public class SCIENCEBUILDING
 			{
 				public static LocString NAME = "Science building";
 
@@ -621,6 +631,13 @@ namespace STRINGS
 				public static LocString NAME = "Two science buildings";
 
 				public static LocString DESCRIPTION = "Requires two or more science buildings";
+			}
+
+			public class ROCKETINTERIOR
+			{
+				public static LocString NAME = "Rocket Interior";
+
+				public static LocString DESCRIPTION = "Requires to be built inside a rocket";
 			}
 		}
 

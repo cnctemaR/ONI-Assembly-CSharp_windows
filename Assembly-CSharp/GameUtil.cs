@@ -2539,6 +2539,12 @@ public static class GameUtil
 		return GameUtil.AddTimeSliceText(units.ToString("#,##0") + UI.UNITSUFFIXES.DISEASE.UNITS, timeSlice);
 	}
 
+	public static string GetFormattedDiseaseAmount(long units, GameUtil.TimeSlice timeSlice = GameUtil.TimeSlice.None)
+	{
+		GameUtil.ApplyTimeSlice((float)units, timeSlice);
+		return GameUtil.AddTimeSliceText(units.ToString("#,##0") + UI.UNITSUFFIXES.DISEASE.UNITS, timeSlice);
+	}
+
 	public static string ColourizeString(Color32 colour, string str)
 	{
 		return string.Format("<color=#{0}>{1}</color>", GameUtil.ColourToHex(colour), str);

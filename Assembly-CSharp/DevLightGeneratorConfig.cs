@@ -24,6 +24,8 @@ public class DevLightGeneratorConfig : IBuildingConfig
 		buildingDef.AudioSize = "large";
 		buildingDef.Floodable = false;
 		buildingDef.DebugOnly = true;
+		SoundEventVolumeCache.instance.AddVolume("dev_lightgenerator_kanim", "PowerSwitch_on", NOISE_POLLUTION.NOISY.TIER3);
+		SoundEventVolumeCache.instance.AddVolume("dev_lightgenerator_kanim", "PowerSwitch_off", NOISE_POLLUTION.NOISY.TIER3);
 		return buildingDef;
 	}
 

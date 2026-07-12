@@ -6,6 +6,8 @@ namespace TUNING
 {
 	public class STORAGEFILTERS
 	{
+		public static List<Tag> DEHYDRATED = new List<Tag> { GameTags.Dehydrated };
+
 		public static List<Tag> FOOD = new List<Tag>
 		{
 			GameTags.Edible,
@@ -40,8 +42,11 @@ namespace TUNING
 			GameTags.Egg,
 			GameTags.RareMaterials,
 			GameTags.Other,
-			GameTags.StoryTraitResource
+			GameTags.StoryTraitResource,
+			GameTags.Dehydrated
 		};
+
+		public static List<Tag> STORAGE_LOCKERS_STANDARD = STORAGEFILTERS.NOT_EDIBLE_SOLIDS.Union<Tag>(new List<Tag> { GameTags.Medicine }).ToList<Tag>();
 
 		public static List<Tag> LIQUIDS = new List<Tag> { GameTags.Liquid };
 
@@ -57,6 +62,6 @@ namespace TUNING
 		{
 			GameTags.Seed,
 			GameTags.CropSeed
-		}.Concat<Tag>(STORAGEFILTERS.NOT_EDIBLE_SOLIDS.Concat<Tag>(STORAGEFILTERS.FOOD).Concat<Tag>(STORAGEFILTERS.PAYLOADS)).ToArray<Tag>();
+		}.Concat<Tag>(STORAGEFILTERS.STORAGE_LOCKERS_STANDARD.Concat<Tag>(STORAGEFILTERS.FOOD).Concat<Tag>(STORAGEFILTERS.PAYLOADS)).ToArray<Tag>();
 	}
 }

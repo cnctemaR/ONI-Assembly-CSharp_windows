@@ -17,7 +17,23 @@ public class URLOpenFunction : MonoBehaviour
 
 	public void OpenUrl(string url)
 	{
-		App.OpenWebURL(url);
+		if (url == "blueprints")
+		{
+			if (LockerMenuScreen.Instance != null)
+			{
+				LockerMenuScreen.Instance.ShowInventoryScreen();
+				return;
+			}
+		}
+		else
+		{
+			App.OpenWebURL(url);
+		}
+	}
+
+	public void SetURL(string url)
+	{
+		this.fixedURL = url;
 	}
 
 	[SerializeField]

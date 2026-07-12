@@ -62,6 +62,11 @@ public class StoryManager : KMonoBehaviour
 		return storyInstance;
 	}
 
+	public StoryInstance GetStoryInstance(Story story)
+	{
+		return this.GetStoryInstance(story.HashId);
+	}
+
 	public StoryInstance GetStoryInstance(int hash)
 	{
 		StoryInstance storyInstance;
@@ -164,6 +169,13 @@ public class StoryManager : KMonoBehaviour
 			return null;
 		}
 		EventInfoData eventInfoData = EventInfoDataHelper.GenerateStoryTraitData(info.Title, info.Description, info.CloseButtonText, info.TextureName, info.PopupType, info.CloseButtonToolTip, info.Minions, popupCB);
+		if (info.extraButtons != null && info.extraButtons.Length != 0)
+		{
+			foreach (StoryManager.ExtraButtonInfo extraButtonInfo in info.extraButtons)
+			{
+				eventInfoData.SimpleOption(extraButtonInfo.ButtonText, extraButtonInfo.OnButtonClick).tooltip = extraButtonInfo.ButtonToolTip;
+			}
+		}
 		Notification notification = null;
 		if (!info.DisplayImmediate)
 		{
@@ -253,6 +265,15 @@ public class StoryManager : KMonoBehaviour
 
 	private const string STORY_COORDINATE_KEY = "SavedHighestStoryCoordinate";
 
+	public struct ExtraButtonInfo
+	{
+		public string ButtonText;
+
+		public string ButtonToolTip;
+
+		public global::System.Action OnButtonClick;
+	}
+
 	public struct PopupInfo
 	{
 		public string Title;
@@ -262,6 +283,8 @@ public class StoryManager : KMonoBehaviour
 		public string CloseButtonText;
 
 		public string CloseButtonToolTip;
+
+		public StoryManager.ExtraButtonInfo[] extraButtons;
 
 		public string TextureName;
 

@@ -136,11 +136,11 @@ public class LogicPorts : KMonoBehaviour, IGameObjectEffectDescriptor, IRenderEv
 			for (int i = 0; i < this.outputPortInfo.Length; i++)
 			{
 				LogicPorts.Port info2 = this.outputPortInfo[i];
-				LogicEventSender logicEventSender = new LogicEventSender(info2.id, this.GetActualCell(info2.cellOffset), delegate(int new_value)
+				LogicEventSender logicEventSender = new LogicEventSender(info2.id, this.GetActualCell(info2.cellOffset), delegate(int new_value, int prev_value)
 				{
 					if (this != null)
 					{
-						this.OnLogicValueChanged(info2.id, new_value);
+						this.OnLogicValueChanged(info2.id, new_value, prev_value);
 					}
 				}, new Action<int, bool>(this.OnLogicNetworkConnectionChanged), info2.spriteType);
 				this.outputPorts.Add(logicEventSender);
@@ -162,11 +162,11 @@ public class LogicPorts : KMonoBehaviour, IGameObjectEffectDescriptor, IRenderEv
 			for (int k = 0; k < this.inputPortInfo.Length; k++)
 			{
 				LogicPorts.Port info = this.inputPortInfo[k];
-				LogicEventHandler logicEventHandler = new LogicEventHandler(this.GetActualCell(info.cellOffset), delegate(int new_value)
+				LogicEventHandler logicEventHandler = new LogicEventHandler(this.GetActualCell(info.cellOffset), delegate(int new_value, int prev_value)
 				{
 					if (this != null)
 					{
-						this.OnLogicValueChanged(info.id, new_value);
+						this.OnLogicValueChanged(info.id, new_value, prev_value);
 					}
 				}, new Action<int, bool>(this.OnLogicNetworkConnectionChanged), info.spriteType);
 				this.inputPorts.Add(logicEventHandler);
@@ -251,14 +251,15 @@ public class LogicPorts : KMonoBehaviour, IGameObjectEffectDescriptor, IRenderEv
 		}
 	}
 
-	private void OnLogicValueChanged(HashedString port_id, int new_value)
+	private void OnLogicValueChanged(HashedString port_id, int new_value, int prev_value)
 	{
 		if (base.gameObject != null)
 		{
 			base.gameObject.Trigger(-801688580, new LogicValueChanged
 			{
 				portID = port_id,
-				newValue = new_value
+				newValue = new_value,
+				prevValue = prev_value
 			});
 		}
 	}

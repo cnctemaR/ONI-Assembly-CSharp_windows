@@ -49,6 +49,11 @@ public class WildnessMonitor : GameStateMachine<WildnessMonitor, WildnessMonitor
 		{
 			attributeInstance.hide = flag;
 		}
+		AttributeInstance attributeInstance2 = Db.Get().CritterAttributes.Metabolism.Lookup(smi.gameObject);
+		if (attributeInstance2 != null)
+		{
+			attributeInstance2.hide = flag;
+		}
 		AmountInstance amountInstance = Db.Get().Amounts.Calories.Lookup(smi.gameObject);
 		if (amountInstance != null)
 		{

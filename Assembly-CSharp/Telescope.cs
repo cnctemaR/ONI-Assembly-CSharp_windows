@@ -198,8 +198,6 @@ public class Telescope : Workable, OxygenBreather.IGasProvider, IGameObjectEffec
 		return primaryElement == null || primaryElement.Mass == 0f;
 	}
 
-	public int clearScanCellRadius = 15;
-
 	private OxygenBreather.IGasProvider workerGasProvider;
 
 	private Operational operational;

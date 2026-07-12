@@ -76,6 +76,8 @@ public class ScreenPrefabs : KMonoBehaviour
 
 	public ModsScreen modsMenu;
 
+	public RailModUploadScreen RailModUploadMenu;
+
 	public GameObject GameOverScreen;
 
 	public GameObject VictoryScreen;

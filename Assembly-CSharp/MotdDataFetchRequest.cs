@@ -24,6 +24,16 @@ public class MotdDataFetchRequest : IDisposable
 			}
 			MotdDataFetchRequest.FetchWebMotdImagesFor(webMotd, delegate(bool isOk)
 			{
+				using (List<MotdData_Box>.Enumerator enumerator = webMotd.boxesLive.GetEnumerator())
+				{
+					while (enumerator.MoveNext())
+					{
+						if (enumerator.Current.resolvedImage.IsNullOrDestroyed())
+						{
+							isOk = false;
+						}
+					}
+				}
 				if (!isOk)
 				{
 					global::Debug.LogWarning("MOTD Error: couldn't fetch all web motd images");

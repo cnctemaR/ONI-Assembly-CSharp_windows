@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{DBB3AB6E-1D8D-4424-8E66-6431932B1F8C}</ProjectGuid>
+    <ProjectGuid>{A0B1AC21-83DB-4F74-BAAA-1083447032A9}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>Steamworks</RootNamespace>
     <AssemblyName>com.rlabrecque.steamworks.net</AssemblyName>
@@ -470,15 +470,15 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{DBB3AB6E-1D8D-4424-8E66-6431932B1F97}</Project>
+      <Project>{A0B1AC21-83DB-4F74-BAAA-1083447032B4}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
     <ProjectReference Include="..\System\System.csproj">
-      <Project>{DBB3AB6E-1D8D-4424-8E66-6431932B1F9C}</Project>
+      <Project>{A0B1AC21-83DB-4F74-BAAA-1083447032B9}</Project>
       <Name>System</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
-      <Project>{DBB3AB6E-1D8D-4424-8E66-6431932B1FB2}</Project>
+      <Project>{A0B1AC21-83DB-4F74-BAAA-1083447032CF}</Project>
       <Name>UnityEngine.CoreModule</Name>
     </ProjectReference>
   </ItemGroup>

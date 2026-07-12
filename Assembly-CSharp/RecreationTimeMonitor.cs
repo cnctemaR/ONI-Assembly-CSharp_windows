@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Klei.AI;
 using KSerialization;
+using STRINGS;
 using UnityEngine;
 
 public class RecreationTimeMonitor : GameStateMachine<RecreationTimeMonitor, RecreationTimeMonitor.Instance, IStateMachineTarget, RecreationTimeMonitor.Def>
@@ -26,6 +27,8 @@ public class RecreationTimeMonitor : GameStateMachine<RecreationTimeMonitor, Rec
 		}, UpdateRate.SIM_200ms, false);
 	}
 
+	public const int MAX_BONUS = 5;
+
 	public GameStateMachine<RecreationTimeMonitor, RecreationTimeMonitor.Instance, IStateMachineTarget, RecreationTimeMonitor.Def>.State idle;
 
 	public GameStateMachine<RecreationTimeMonitor, RecreationTimeMonitor.Instance, IStateMachineTarget, RecreationTimeMonitor.Def>.State bonusActive;
@@ -40,12 +43,24 @@ public class RecreationTimeMonitor : GameStateMachine<RecreationTimeMonitor, Rec
 			: base(master, def)
 		{
 			this.schedulable = master.GetComponent<Schedulable>();
-			this.moraleModifier = new AttributeModifier(Db.Get().Attributes.QualityOfLife.Id, 0f, () => Strings.Get("STRINGS.DUPLICANTS.MODIFIERS.BREAK" + this.moraleAddedTimes.Count.ToString() + ".NAME"), false, false);
+			this.moraleModifier = new AttributeModifier(Db.Get().Attributes.QualityOfLife.Id, 0f, delegate
+			{
+				if (Mathf.Clamp(this.moraleAddedTimes.Count - 1, 0, 5) == 5)
+				{
+					return DUPLICANTS.MODIFIERS.BREAK_BONUS.MAX_NAME;
+				}
+				return DUPLICANTS.MODIFIERS.BREAK_BONUS.NAME;
+			}, false, false);
 			this.moraleEffect.Add(this.moraleModifier);
 			if ((SaveLoader.Instance.GameInfo.saveMajorVersion != 0 || SaveLoader.Instance.GameInfo.saveMinorVersion != 0) && SaveLoader.Instance.GameInfo.IsVersionOlderThan(7, 35))
 			{
 				this.RestoreFromSchedule();
 			}
+		}
+
+		public override void StartSM()
+		{
+			base.StartSM();
 			this.RefreshTimes();
 		}
 
@@ -58,10 +73,9 @@ public class RecreationTimeMonitor : GameStateMachine<RecreationTimeMonitor, Rec
 					this.moraleAddedTimes.RemoveAt(i);
 				}
 			}
-			int num = 5;
-			int num2 = Math.Clamp(this.moraleAddedTimes.Count - 1, 0, num);
-			this.moraleModifier.SetValue((float)num2);
-			if (num2 > 0)
+			int num = Math.Clamp(this.moraleAddedTimes.Count - 1, 0, 5);
+			this.moraleModifier.SetValue((float)num);
+			if (num > 0)
 			{
 				if (base.smi.GetCurrentState() != base.smi.sm.bonusActive)
 				{

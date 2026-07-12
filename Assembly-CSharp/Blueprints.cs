@@ -26,7 +26,8 @@ public class Blueprints
 	public BlueprintProvider[] skinsReleaseProviders = new BlueprintProvider[]
 	{
 		new Blueprints_U51AndBefore(),
-		new Blueprints_DlcPack2()
+		new Blueprints_DlcPack2(),
+		new Blueprints_U53()
 	};
 
 	private static Blueprints instance;

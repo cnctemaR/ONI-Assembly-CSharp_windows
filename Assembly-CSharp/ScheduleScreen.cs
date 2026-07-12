@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 public class ScheduleScreen : KScreen
 {
@@ -47,7 +48,13 @@ public class ScheduleScreen : KScreen
 		if (show)
 		{
 			base.Activate();
+			this.SetScreenHeight();
 		}
+	}
+
+	private void SetScreenHeight()
+	{
+		base.GetComponent<LayoutElement>().preferredHeight = (float)((ScheduleManager.Instance.GetSchedules().Count == 1) ? 374 : 710);
 	}
 
 	public void RefreshAllPaintButtons()
@@ -68,6 +75,7 @@ public class ScheduleScreen : KScreen
 		ScheduleScreenEntry scheduleScreenEntry = Util.KInstantiateUI<ScheduleScreenEntry>(this.scheduleEntryPrefab.gameObject, this.scheduleEntryContainer, true);
 		scheduleScreenEntry.Setup(schedule);
 		this.scheduleEntries.Add(scheduleScreenEntry);
+		this.SetScreenHeight();
 	}
 
 	private void OnSchedulesChanged(List<Schedule> schedules)
@@ -81,6 +89,7 @@ public class ScheduleScreen : KScreen
 		{
 			this.AddScheduleEntry(schedule);
 		}
+		this.SetScreenHeight();
 	}
 
 	private void RefreshWidgetWorldData(object data = null)

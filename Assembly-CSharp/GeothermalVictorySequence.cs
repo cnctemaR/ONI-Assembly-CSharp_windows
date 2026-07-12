@@ -14,7 +14,12 @@ public static class GeothermalVictorySequence
 	{
 		if (GeothermalVictorySequence.VictoryVent == null)
 		{
-			DebugUtil.DevLogError("No vent set, something went wrong");
+			StoryMessageScreen.HideInterface(false);
+			CameraController.Instance.FadeIn(0f, 1f, null);
+			CameraController.Instance.SetWorldInteractive(true);
+			CameraController.Instance.SetOverrideZoomSpeed(1f);
+			CameraController.Instance.DisableUserCameraControl = false;
+			RootMenu.Instance.canTogglePauseScreen = true;
 			yield break;
 		}
 		if (!SpeedControlScreen.Instance.IsPaused)
@@ -59,8 +64,8 @@ public static class GeothermalVictorySequence
 			SpeedControlScreen.Instance.Pause(false, false);
 		}
 		VideoScreen component = GameScreenManager.Instance.StartScreen(ScreenPrefabs.Instance.VideoScreen.gameObject, null, GameScreenManager.UIRenderTarget.ScreenSpaceOverlay).GetComponent<VideoScreen>();
-		component.PlayVideo(Assets.GetVideo(Db.Get().ColonyAchievements.ActivateGeothermalPlant.shortVideoName), true, AudioMixerSnapshots.Get().VictoryCinematicSnapshot, false);
-		component.QueueVictoryVideoLoop(true, Db.Get().ColonyAchievements.ActivateGeothermalPlant.messageBody, Db.Get().ColonyAchievements.ActivateGeothermalPlant.Id, Db.Get().ColonyAchievements.ActivateGeothermalPlant.loopVideoName);
+		component.PlayVideo(Assets.GetVideo(Db.Get().ColonyAchievements.ActivateGeothermalPlant.shortVideoName), true, AudioMixerSnapshots.Get().VictoryCinematicSnapshot, false, true);
+		component.QueueVictoryVideoLoop(true, Db.Get().ColonyAchievements.ActivateGeothermalPlant.messageBody, Db.Get().ColonyAchievements.ActivateGeothermalPlant.Id, Db.Get().ColonyAchievements.ActivateGeothermalPlant.loopVideoName, Db.Get().ColonyAchievements.ActivateGeothermalPlant.IsValidForSave(), false);
 		component.OnStop = (global::System.Action)Delegate.Combine(component.OnStop, new global::System.Action(delegate
 		{
 			StoryMessageScreen.HideInterface(false);

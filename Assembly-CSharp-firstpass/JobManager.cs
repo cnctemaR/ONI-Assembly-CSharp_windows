@@ -40,7 +40,11 @@ public class JobManager
 
 	public void Run(IWorkItemCollection work_items)
 	{
-		if (this.semaphore == null)
+		if (CPUBudget.coreCount <= 1 || JobManager.runSingleThreaded)
+		{
+			JobManager.runSingleThreaded = true;
+		}
+		else if (this.semaphore == null)
 		{
 			this.Initialize();
 		}

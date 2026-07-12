@@ -4776,6 +4776,13 @@ namespace STRINGS
 
 			public static LocString EFFECT_HEADER = UI.PRE_POS_MODIFIER + "Effects:" + UI.PST_POS_MODIFIER;
 
+			public class BREAK_BONUS
+			{
+				public static LocString NAME = "Downtime Bonus";
+
+				public static LocString MAX_NAME = "Max Downtime Bonus";
+			}
+
 			public class SKILLLEVEL
 			{
 				public static LocString NAME = "Skill Level";

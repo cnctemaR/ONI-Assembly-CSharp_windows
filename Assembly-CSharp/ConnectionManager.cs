@@ -13,7 +13,10 @@ public class ConnectionManager : KMonoBehaviour, ISaveLoadable, IToggleHandler
 		set
 		{
 			this.connected = value;
-			this.connectedMeter.SetPositionPercent(value ? 1f : 0f);
+			if (this.connectedMeter != null)
+			{
+				this.connectedMeter.SetPositionPercent(value ? 1f : 0f);
+			}
 		}
 	}
 

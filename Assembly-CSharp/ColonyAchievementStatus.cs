@@ -20,11 +20,6 @@ public class ColonyAchievementStatus
 		if (this.m_achievement == null)
 		{
 			this.m_achievement = new ColonyAchievement();
-			return;
-		}
-		if (!this.m_achievement.IsValidForSave())
-		{
-			this.m_achievement.Disabled = true;
 		}
 	}
 

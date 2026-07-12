@@ -461,55 +461,58 @@ public class RetiredColonyInfoScreen : KModalScreen
 			{
 				keyValuePair.Value.SetActive(true);
 			}
-			if (!flag && data == null && this.retiredColonyData != null)
+			if (colonyAchievement.IsValidForSave())
 			{
-				RetiredColonyData[] array2 = this.retiredColonyData;
-				for (int i = 0; i < array2.Length; i++)
+				if (!flag && data == null && this.retiredColonyData != null)
 				{
-					string[] array = array2[i].achievements;
-					for (int j = 0; j < array.Length; j++)
+					RetiredColonyData[] array2 = this.retiredColonyData;
+					for (int i = 0; i < array2.Length; i++)
 					{
-						if (array[j] == keyValuePair.Key)
+						string[] array = array2[i].achievements;
+						for (int j = 0; j < array.Length; j++)
 						{
-							flag2 = true;
+							if (array[j] == keyValuePair.Key)
+							{
+								flag2 = true;
+							}
 						}
 					}
 				}
-			}
-			bool flag3 = false;
-			if (newlyAchieved != null)
-			{
-				for (int k = 0; k < newlyAchieved.Length; k++)
+				bool flag3 = false;
+				if (newlyAchieved != null)
 				{
-					if (newlyAchieved[k] == keyValuePair.Key)
+					for (int k = 0; k < newlyAchieved.Length; k++)
 					{
-						flag3 = true;
+						if (newlyAchieved[k] == keyValuePair.Key)
+						{
+							flag3 = true;
+						}
 					}
 				}
-			}
-			if (flag || flag3)
-			{
-				if (flag3)
+				if (flag || flag3)
 				{
-					keyValuePair.Value.GetComponent<AchievementWidget>().ActivateNewlyAchievedFlourish(num3 + (float)num * num2);
-					num++;
+					if (flag3)
+					{
+						keyValuePair.Value.GetComponent<AchievementWidget>().ActivateNewlyAchievedFlourish(num3 + (float)num * num2);
+						num++;
+					}
+					else
+					{
+						keyValuePair.Value.GetComponent<AchievementWidget>().SetAchievedNow();
+					}
+				}
+				else if (flag2)
+				{
+					keyValuePair.Value.GetComponent<AchievementWidget>().SetAchievedBefore();
+				}
+				else if (data == null)
+				{
+					keyValuePair.Value.GetComponent<AchievementWidget>().SetNeverAchieved();
 				}
 				else
 				{
-					keyValuePair.Value.GetComponent<AchievementWidget>().SetAchievedNow();
+					keyValuePair.Value.GetComponent<AchievementWidget>().SetNotAchieved();
 				}
-			}
-			else if (flag2)
-			{
-				keyValuePair.Value.GetComponent<AchievementWidget>().SetAchievedBefore();
-			}
-			else if (data == null)
-			{
-				keyValuePair.Value.GetComponent<AchievementWidget>().SetNeverAchieved();
-			}
-			else
-			{
-				keyValuePair.Value.GetComponent<AchievementWidget>().SetNotAchieved();
 			}
 		}
 		if (newlyAchieved != null && newlyAchieved.Length != 0)

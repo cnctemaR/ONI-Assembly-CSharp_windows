@@ -99,7 +99,7 @@ public class VideoScreen : KModalScreen
 		base.OnKeyDown(e);
 	}
 
-	public void PlayVideo(VideoClip clip, bool unskippable = false, EventReference overrideAudioSnapshot = default(EventReference), bool showProceedButton = false)
+	public void PlayVideo(VideoClip clip, bool unskippable = false, EventReference overrideAudioSnapshot = default(EventReference), bool showProceedButton = false, bool syncAudio = true)
 	{
 		global::Debug.Assert(clip != null);
 		for (int i = 0; i < this.overlayContainer.childCount; i++)
@@ -117,7 +117,7 @@ public class VideoScreen : KModalScreen
 		this.videoPlayer.targetTexture = this.renderTexture;
 		this.videoPlayer.audioOutputMode = VideoAudioOutputMode.None;
 		this.videoPlayer.clip = clip;
-		this.videoPlayer.timeReference = VideoTimeReference.ExternalTime;
+		this.videoPlayer.timeReference = (syncAudio ? VideoTimeReference.ExternalTime : VideoTimeReference.Freerun);
 		this.videoPlayer.Play();
 		if (this.audioHandle.isValid())
 		{
@@ -131,15 +131,19 @@ public class VideoScreen : KModalScreen
 		this.proceedButton.gameObject.SetActive(showProceedButton && this.videoSkippable);
 	}
 
-	public void QueueVictoryVideoLoop(bool queue, string message = "", string victoryAchievement = "", string loopVideo = "")
+	public void QueueVictoryVideoLoop(bool queue, string message = "", string victoryAchievement = "", string loopVideo = "", bool showAchievements = true, bool syncAudio = false)
 	{
 		this.victoryLoopQueued = queue;
 		this.victoryLoopMessage = message;
 		this.victoryLoopClip = loopVideo;
+		this.victoryLoopSyncAudio = syncAudio;
 		this.OnStop = (global::System.Action)Delegate.Combine(this.OnStop, new global::System.Action(delegate
 		{
-			RetireColonyUtility.SaveColonySummaryData();
-			MainMenu.ActivateRetiredColoniesScreenFromData(base.transform.parent.gameObject, RetireColonyUtility.GetCurrentColonyRetiredColonyData());
+			if (showAchievements)
+			{
+				RetireColonyUtility.SaveColonySummaryData();
+				MainMenu.ActivateRetiredColoniesScreenFromData(this.transform.parent.gameObject, RetireColonyUtility.GetCurrentColonyRetiredColonyData());
+			}
 		}));
 	}
 
@@ -178,6 +182,7 @@ public class VideoScreen : KModalScreen
 		this.videoPlayer.isLooping = true;
 		this.videoPlayer.Play();
 		this.proceedButton.gameObject.SetActive(true);
+		this.videoPlayer.timeReference = (this.victoryLoopSyncAudio ? VideoTimeReference.ExternalTime : VideoTimeReference.Freerun);
 		yield return SequenceUtil.WaitForSecondsRealtime(1f);
 		for (float i = 1f; i >= 0f; i -= Time.unscaledDeltaTime)
 		{
@@ -252,6 +257,8 @@ public class VideoScreen : KModalScreen
 	private string victoryLoopMessage = "";
 
 	private string victoryLoopClip = "";
+
+	private bool victoryLoopSyncAudio;
 
 	private bool videoSkippable = true;
 

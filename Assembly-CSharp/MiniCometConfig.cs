@@ -11,7 +11,7 @@ public class MiniCometConfig : IEntityConfig
 
 	public GameObject CreatePrefab()
 	{
-		GameObject gameObject = EntityTemplates.CreateEntity(MiniCometConfig.ID, UI.SPACEDESTINATIONS.COMETS.ROCKCOMET.NAME, true);
+		GameObject gameObject = EntityTemplates.CreateEntity(MiniCometConfig.ID, UI.SPACEDESTINATIONS.COMETS.MINICOMET.NAME, true);
 		gameObject.AddOrGet<SaveLoadRoot>();
 		gameObject.AddOrGet<LoopingSounds>();
 		MiniComet miniComet = gameObject.AddOrGet<MiniComet>();
@@ -27,6 +27,7 @@ public class MiniCometConfig : IEntityConfig
 		kbatchedAnimController.initialMode = KAnim.PlayMode.Loop;
 		gameObject.AddOrGet<KCircleCollider2D>().radius = 0.5f;
 		gameObject.AddTag(GameTags.Comet);
+		gameObject.AddTag(GameTags.HideFromSpawnTool);
 		gameObject.transform.localScale = new Vector3(0.3f, 0.3f, 1f);
 		return gameObject;
 	}

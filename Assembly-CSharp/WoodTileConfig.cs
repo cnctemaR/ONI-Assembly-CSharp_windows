@@ -71,5 +71,5 @@ public class WoodTileConfig : IBuildingConfig
 
 	public const string ID = "WoodTile";
 
-	public static readonly int BlockTileConnectorID = Hash.SDBMLower("tiles_solid_tops");
+	public static readonly int BlockTileConnectorID = Hash.SDBMLower("tiles_wood_tops");
 }

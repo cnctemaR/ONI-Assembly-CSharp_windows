@@ -123,20 +123,20 @@ public class SelectToolHoverTextCard : HoverTextConfiguration
 				float thermalComfort = GameUtil.GetThermalComfort(num, 0f);
 				float thermalComfort2 = GameUtil.GetThermalComfort(num, -0.08368001f);
 				float num2 = 0f;
+				float num3 = 1f * thermalComfort;
+				text = text + " (" + GameUtil.GetFormattedHeatEnergyRate(num3, GameUtil.HeatEnergyFormatterUnit.Automatic) + ")";
 				if (thermalComfort2 * 0.001f > -0.11157334f - num2 && thermalComfort2 * 0.001f < 0.11157334f + num2)
 				{
-					text = UI.OVERLAYS.HEATFLOW.NEUTRAL;
+					text = string.Format(UI.OVERLAYS.HEATFLOW.NEUTRAL_DUPE, text);
 				}
 				else if (thermalComfort2 <= ExternalTemperatureMonitor.GetExternalColdThreshold(null))
 				{
-					text = UI.OVERLAYS.HEATFLOW.COOLING;
+					text = string.Format(UI.OVERLAYS.HEATFLOW.COOLING_DUPE, text);
 				}
 				else if (thermalComfort2 >= ExternalTemperatureMonitor.GetExternalWarmThreshold(null))
 				{
-					text = UI.OVERLAYS.HEATFLOW.HEATING;
+					text = string.Format(UI.OVERLAYS.HEATFLOW.HEATING_DUPE, text);
 				}
-				float num3 = 1f * thermalComfort;
-				text = text + " (" + GameUtil.GetFormattedHeatEnergyRate(num3, GameUtil.HeatEnergyFormatterUnit.Automatic) + ")";
 				hoverTextDrawer.BeginShadowBar(false);
 				hoverTextDrawer.DrawText(UI.OVERLAYS.HEATFLOW.HOVERTITLE, this.Styles_Title.Standard);
 				hoverTextDrawer.NewLine(26);

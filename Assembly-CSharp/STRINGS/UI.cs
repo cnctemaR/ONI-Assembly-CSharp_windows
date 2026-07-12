@@ -160,6 +160,7 @@ namespace STRINGS
 						}
 						else
 						{
+							text2 = text2.Remove(num2, "<link=".Length);
 							Debug.LogWarningFormat("String has no open link closure: {0}", new object[] { text });
 						}
 					}
@@ -1963,6 +1964,11 @@ namespace STRINGS
 				public class BLEACHSTONECOMET
 				{
 					public static LocString NAME = "Bleach Stone Meteor";
+				}
+
+				public class MINICOMET
+				{
+					public static LocString NAME = "Debris Meteor";
 				}
 			}
 
@@ -3770,7 +3776,7 @@ namespace STRINGS
 
 				public static LocString MORE_INFO = "More Info";
 
-				public static LocString NEWEST_SAVE = "Newest Save";
+				public static LocString NEWEST_SAVE = "NEWEST";
 
 				public static LocString BASE_NAME = "Base Name";
 
@@ -8672,13 +8678,19 @@ namespace STRINGS
 
 				public static LocString HEATING = "Body Heat Retention";
 
+				public static LocString COOLING_DUPE = "Body Heat Loss {0}\n\nUncomfortably chilly surroundings";
+
+				public static LocString NEUTRAL_DUPE = "Comfort Zone {0}";
+
+				public static LocString HEATING_DUPE = "Body Heat Loss {0}\n\nUncomfortably toasty surroundings";
+
 				public class TOOLTIPS
 				{
-					public static LocString COOLING = "<b>Body Heat Loss</b>\nUncomfortably cold\n\nDuplicants lose more heat in these areas than they can absorb\n* Warm Coats help Duplicants retain body heat";
+					public static LocString COOLING = "<b>Body Heat Loss</b>\nUncomfortably cold\n\nDuplicants lose more heat in chilly surroundings than they can absorb\n    • Warm Coats help Duplicants retain body heat";
 
 					public static LocString NEUTRAL = "<b>Comfort Zone</b>\nComfortable area\n\nDuplicants can regulate their internal temperatures in these areas";
 
-					public static LocString HEATING = "<b>Body Heat Retention</b>\nUncomfortably warm\n\nDuplicants absorb more heat in these areas than they can release";
+					public static LocString HEATING = "<b>Body Heat Retention</b>\nUncomfortably warm\n\nDuplicants absorb more heat in toasty surroundings than they can release";
 				}
 			}
 

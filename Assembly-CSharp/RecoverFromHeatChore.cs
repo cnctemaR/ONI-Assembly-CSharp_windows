@@ -10,6 +10,7 @@ public class RecoverFromHeatChore : Chore<RecoverFromHeatChore.Instance>
 		HeatImmunityMonitor.Instance chillyBones = target.gameObject.GetSMI<HeatImmunityMonitor.Instance>();
 		Func<int> func = () => chillyBones.ShelterCell;
 		base.AddPrecondition(ChorePreconditions.instance.CanMoveToDynamicCell, func);
+		base.AddPrecondition(ChorePreconditions.instance.IsNotRedAlert, null);
 	}
 
 	public class States : GameStateMachine<RecoverFromHeatChore.States, RecoverFromHeatChore.Instance, RecoverFromHeatChore>

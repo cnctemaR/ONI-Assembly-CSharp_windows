@@ -10121,7 +10121,7 @@ namespace STRINGS
 
 				public static LocString BLOCKED_DESC = string.Concat(new string[]
 				{
-					"Blocked geo vents can be cleared using ",
+					"Blocked geo vents can be cleared by pumping in ",
 					UI.FormatAsLink("liquids", "ELEMENTS_LIQUID"),
 					" that are hot enough to melt ",
 					UI.FormatAsLink("Lead", "LEAD"),

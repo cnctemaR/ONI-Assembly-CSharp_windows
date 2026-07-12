@@ -988,7 +988,7 @@ public class CustomGameSettings : KMonoBehaviour
 	{
 		foreach (string text in requiredContent)
 		{
-			if (!A_1.availableDlcs.Contains(text))
+			if (!(text == "") && !A_1.availableDlcs.Contains(text))
 			{
 				return false;
 			}

@@ -87,16 +87,16 @@ public class DlcManager
 
 	public static string GetDlcSmallLogo(string dlcId)
 	{
+		string text = "";
 		if (dlcId == "EXPANSION1_ID")
 		{
-			return "SpacedOut_mini_logo";
+			text = "SpacedOut_mini_logo";
 		}
 		if (DlcManager.DLC_PACKS.ContainsKey(dlcId))
 		{
-			return DlcManager.DLC_PACKS[dlcId].smallLogo;
+			text = DlcManager.DLC_PACKS[dlcId].smallLogo;
 		}
-		DebugUtil.DevLogError("No bundle exists for " + dlcId);
-		return "unknown";
+		return text;
 	}
 
 	public static string GetDlcBanner(string dlcId)
@@ -137,7 +137,6 @@ public class DlcManager
 		{
 			return DlcManager.DLC_PACKS[dlcId].bannerColor;
 		}
-		DebugUtil.DevLogError("No bundle exists for " + dlcId);
 		return Color.magenta;
 	}
 

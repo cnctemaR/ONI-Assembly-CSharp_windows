@@ -834,7 +834,7 @@ public class LoadScreen : KModalScreen
 		this.selectedSave = null;
 	}
 
-	private bool CheckSave(LoadScreen.SaveGameFileDetails save, LocText display)
+	private bool CheckSaveVersion(LoadScreen.SaveGameFileDetails save, LocText display)
 	{
 		if (LoadScreen.IsSaveFileFromUnsupportedFutureBuild(save.FileHeader, save.FileInfo))
 		{
@@ -845,7 +845,7 @@ public class LoadScreen : KModalScreen
 					save.FileName,
 					save.FileHeader.buildVersion,
 					save.FileInfo.saveMinorVersion,
-					623711U,
+					626616U,
 					34
 				});
 			}
@@ -867,6 +867,37 @@ public class LoadScreen : KModalScreen
 			return false;
 		}
 		return true;
+	}
+
+	private bool CheckSaveDLCsCompatable(LoadScreen.SaveGameFileDetails save)
+	{
+		HashSet<string> hashSet;
+		HashSet<string> hashSet2;
+		return save.FileInfo.IsCompatableWithCurrentDlcConfiguration(out hashSet, out hashSet2);
+	}
+
+	private string GetSaveDLCIncompatabilityTooltip(LoadScreen.SaveGameFileDetails save)
+	{
+		string text = "";
+		HashSet<string> hashSet;
+		HashSet<string> hashSet2;
+		if (save.FileInfo.IsCompatableWithCurrentDlcConfiguration(out hashSet, out hashSet2))
+		{
+			text = null;
+		}
+		else
+		{
+			text = UI.FRONTEND.LOADSCREEN.TOOLTIP_SAVE_INCOMPATABLE_DLC_CONFIGURATION;
+			foreach (string text2 in hashSet)
+			{
+				text = text + "\n" + string.Format(UI.FRONTEND.LOADSCREEN.TOOLTIP_SAVE_INCOMPATABLE_DLC_CONFIGURATION_ASK_TO_ENABLE, DlcManager.GetDlcTitle(text2));
+			}
+			foreach (string text3 in hashSet2)
+			{
+				text = text + "\n" + string.Format(UI.FRONTEND.LOADSCREEN.TOOLTIP_SAVE_INCOMPATABLE_DLC_CONFIGURATION_ASK_TO_DISABLE, DlcManager.GetDlcTitle(text3));
+			}
+		}
+		return text;
 	}
 
 	private void ShowColonySave(LoadScreen.SaveGameFileDetails save)
@@ -899,7 +930,7 @@ public class LoadScreen : KModalScreen
 		component2.text = string.Format(UI.FRONTEND.LOADSCREEN.COLONY_FILE_SIZE, formattedBytes);
 		component.GetReference<RectTransform>("Filename").GetComponent<LocText>().text = string.Format(UI.FRONTEND.LOADSCREEN.COLONY_FILE_NAME, global::System.IO.Path.GetFileName(save.FileName));
 		LocText component3 = component.GetReference<RectTransform>("AutoInfo").GetComponent<LocText>();
-		component3.gameObject.SetActive(!this.CheckSave(save, component3));
+		component3.gameObject.SetActive(!this.CheckSaveVersion(save, component3));
 		Image component4 = component.GetReference<RectTransform>("Preview").GetComponent<Image>();
 		this.SetPreview(save.FileName, save.BaseName, component4, false);
 		KButton component5 = component.GetReference<RectTransform>("DeleteButton").GetComponent<KButton>();
@@ -970,7 +1001,14 @@ public class LoadScreen : KModalScreen
 			component3.GetReference<RectTransform>("SaveText").GetComponent<LocText>().text = global::System.IO.Path.GetFileNameWithoutExtension(save.FileName);
 			component3.GetReference<RectTransform>("DateText").GetComponent<LocText>().text = string.Format("{0:H:mm:ss} - " + Localization.GetFileDateFormat(0), save.FileDate.ToLocalTime());
 			component3.GetReference<RectTransform>("NewestLabel").gameObject.SetActive(j == 0);
-			bool flag = this.CheckSave(save, null);
+			RectTransform reference2 = component3.GetReference<RectTransform>("DLCIconPrefab");
+			foreach (string text in save.FileInfo.dlcIds)
+			{
+				GameObject gameObject3 = global::Util.KInstantiateUI(reference2.gameObject, reference2.transform.parent.gameObject, true);
+				gameObject3.GetComponent<Image>().sprite = Assets.GetSprite(DlcManager.GetDlcSmallLogo(text));
+				gameObject3.GetComponent<ToolTip>().SetSimpleTooltip(string.Format(UI.FRONTEND.LOADSCREEN.TOOLTIP_SAVE_USES_DLC, DlcManager.GetDlcTitle(text)));
+			}
+			object obj = this.CheckSaveVersion(save, null) && this.CheckSaveDLCsCompatable(save);
 			KButton button = rectTransform.GetComponent<KButton>();
 			button.ClearOnClick();
 			button.onClick += delegate
@@ -978,7 +1016,8 @@ public class LoadScreen : KModalScreen
 				this.UpdateSelected(button, save.FileName, save.FileInfo.dlcIds);
 				this.ShowColonySave(save);
 			};
-			if (flag)
+			object obj2 = obj;
+			if (obj2 != null)
 			{
 				button.onDoubleClick += delegate
 				{
@@ -988,10 +1027,11 @@ public class LoadScreen : KModalScreen
 			}
 			KButton component4 = component3.GetReference<RectTransform>("LoadButton").GetComponent<KButton>();
 			component4.ClearOnClick();
-			if (!flag)
+			if (obj2 == null)
 			{
 				component4.isInteractable = false;
 				component4.GetComponent<ImageToggleState>().SetState(ImageToggleState.State.Disabled);
+				component4.GetComponent<ToolTip>().SetSimpleTooltip(this.GetSaveDLCIncompatabilityTooltip(save));
 			}
 			else
 			{
@@ -1028,20 +1068,16 @@ public class LoadScreen : KModalScreen
 		freeElement.GetReference<RectTransform>("SaveTitle").GetComponent<LocText>().text = string.Format(UI.FRONTEND.LOADSCREEN.SAVE_INFO, item, item2, formattedBytes);
 		Image component = freeElement.GetReference<RectTransform>("Preview").GetComponent<Image>();
 		this.SetPreview(saveGameFileDetails.FileName, colonyName, component, true);
-		List<ValueTuple<Sprite, Material, string>> list = new List<ValueTuple<Sprite, Material, string>>();
-		if (!saveGameFileDetails.FileInfo.dlcIds.Contains("EXPANSION1_ID"))
+		List<ValueTuple<Sprite, string>> list = new List<ValueTuple<Sprite, string>>();
+		if (saveGameFileDetails.FileInfo.dlcIds.Contains("EXPANSION1_ID"))
 		{
-			list.Add(new ValueTuple<Sprite, Material, string>(Assets.GetSprite("ONI_mini_logo"), (!DlcManager.IsExpansion1Active()) ? this.materialUiNormal : this.materialUiDesaturated, string.Format(UI.FRONTEND.LOADSCREEN.TOOLTIP_SAVE_USES_DLC, UI.VANILLA.NAME)));
-		}
-		else
-		{
-			list.Add(new ValueTuple<Sprite, Material, string>(Assets.GetSprite(DlcManager.GetDlcSmallLogo("EXPANSION1_ID")), DlcManager.IsExpansion1Active() ? this.materialUiNormal : this.materialUiDesaturated, string.Format(UI.FRONTEND.LOADSCREEN.TOOLTIP_SAVE_USES_DLC, DlcManager.GetDlcTitle("EXPANSION1_ID"))));
+			list.Add(new ValueTuple<Sprite, string>(Assets.GetSprite(DlcManager.GetDlcSmallLogo("EXPANSION1_ID")), string.Format(UI.FRONTEND.LOADSCREEN.TOOLTIP_SAVE_USES_DLC, DlcManager.GetDlcTitle("EXPANSION1_ID"))));
 		}
 		foreach (string text in saveGameFileDetails.FileInfo.dlcIds)
 		{
 			if (DlcManager.IsDlcId(text) && !(text == "EXPANSION1_ID"))
 			{
-				list.Add(new ValueTuple<Sprite, Material, string>(Assets.GetSprite(DlcManager.GetDlcSmallLogo(text)), DlcManager.IsContentSubscribed(text) ? this.materialUiNormal : this.materialUiDesaturated, string.Format(UI.FRONTEND.LOADSCREEN.TOOLTIP_SAVE_USES_DLC, DlcManager.GetDlcTitle(text))));
+				list.Add(new ValueTuple<Sprite, string>(Assets.GetSprite(DlcManager.GetDlcSmallLogo(text)), string.Format(UI.FRONTEND.LOADSCREEN.TOOLTIP_SAVE_USES_DLC, DlcManager.GetDlcTitle(text))));
 			}
 		}
 		GameObject gameObject = freeElement.transform.Find("Header").Find("DlcIcons").Find("Prefab_DlcIcon")
@@ -1055,14 +1091,13 @@ public class LoadScreen : KModalScreen
 				global::UnityEngine.Object.Destroy(gameObject2);
 			}
 		}
-		foreach (ValueTuple<Sprite, Material, string> valueTuple in list)
+		foreach (ValueTuple<Sprite, string> valueTuple in list)
 		{
 			GameObject gameObject3 = global::Util.KInstantiateUI(gameObject, gameObject.transform.parent.gameObject, true);
 			Image component2 = gameObject3.GetComponent<Image>();
 			ToolTip component3 = gameObject3.GetComponent<ToolTip>();
 			component2.sprite = valueTuple.Item1;
-			component2.material = valueTuple.Item2;
-			component3.SetSimpleTooltip(valueTuple.Item3);
+			component3.SetSimpleTooltip(valueTuple.Item2);
 		}
 		Component reference = freeElement.GetReference<RectTransform>("LocationIcons");
 		bool flag = this.CloudSavesVisible();
@@ -1079,12 +1114,12 @@ public class LoadScreen : KModalScreen
 			global::System.Action <>9__4;
 			cloudButton.onClick += delegate
 			{
-				string text5 = string.Format("{0}\n", UI.FRONTEND.LOADSCREEN.CONVERT_TO_LOCAL_DETAILS);
+				string text2 = string.Format("{0}\n", UI.FRONTEND.LOADSCREEN.CONVERT_TO_LOCAL_DETAILS);
 				LoadScreen <>4__this = this;
-				string text6 = text5;
-				string text7 = UI.FRONTEND.LOADSCREEN.CONVERT_TO_LOCAL;
-				string text8 = UI.FRONTEND.LOADSCREEN.CONVERT_COLONY;
-				string text9 = null;
+				string text3 = text2;
+				string text4 = UI.FRONTEND.LOADSCREEN.CONVERT_TO_LOCAL;
+				string text5 = UI.FRONTEND.LOADSCREEN.CONVERT_COLONY;
+				string text6 = null;
 				global::System.Action action;
 				if ((action = <>9__4) == null)
 				{
@@ -1098,19 +1133,19 @@ public class LoadScreen : KModalScreen
 						MainMenu.Instance.RefreshResumeButton(false);
 					});
 				}
-				<>4__this.ConfirmCloudSaveMigrations(text6, text7, text8, text9, action, null, this.cloudToLocalSprite);
+				<>4__this.ConfirmCloudSaveMigrations(text3, text4, text5, text6, action, null, this.cloudToLocalSprite);
 			};
 			localButton.gameObject.SetActive(isLocal);
 			localButton.ClearOnClick();
 			global::System.Action <>9__5;
 			localButton.onClick += delegate
 			{
-				string text10 = string.Format("{0}\n", UI.FRONTEND.LOADSCREEN.CONVERT_TO_CLOUD_DETAILS);
+				string text7 = string.Format("{0}\n", UI.FRONTEND.LOADSCREEN.CONVERT_TO_CLOUD_DETAILS);
 				LoadScreen <>4__this2 = this;
-				string text11 = text10;
-				string text12 = UI.FRONTEND.LOADSCREEN.CONVERT_TO_CLOUD;
-				string text13 = UI.FRONTEND.LOADSCREEN.CONVERT_COLONY;
-				string text14 = null;
+				string text8 = text7;
+				string text9 = UI.FRONTEND.LOADSCREEN.CONVERT_TO_CLOUD;
+				string text10 = UI.FRONTEND.LOADSCREEN.CONVERT_COLONY;
+				string text11 = null;
 				global::System.Action action2;
 				if ((action2 = <>9__5) == null)
 				{
@@ -1124,46 +1159,14 @@ public class LoadScreen : KModalScreen
 						MainMenu.Instance.RefreshResumeButton(false);
 					});
 				}
-				<>4__this2.ConfirmCloudSaveMigrations(text11, text12, text13, text14, action2, null, this.localToCloudSprite);
+				<>4__this2.ConfirmCloudSaveMigrations(text8, text9, text10, text11, action2, null, this.localToCloudSprite);
 			};
 		}
-		HashSet<string> hashSet;
-		HashSet<string> hashSet2;
-		string text2;
-		if (saveGameFileDetails.FileInfo.IsCompatableWithCurrentDlcConfiguration(out hashSet, out hashSet2))
+		this.GetSaveDLCIncompatabilityTooltip(saveGameFileDetails);
+		freeElement.GetReference<RectTransform>("Button").GetComponent<KButton>().onClick += delegate
 		{
-			text2 = null;
-		}
-		else
-		{
-			text2 = UI.FRONTEND.LOADSCREEN.TOOLTIP_SAVE_INCOMPATABLE_DLC_CONFIGURATION;
-			foreach (string text3 in hashSet)
-			{
-				text2 = text2 + "\n" + string.Format(UI.FRONTEND.LOADSCREEN.TOOLTIP_SAVE_INCOMPATABLE_DLC_CONFIGURATION_ASK_TO_ENABLE, DlcManager.GetDlcTitle(text3));
-			}
-			foreach (string text4 in hashSet2)
-			{
-				text2 = text2 + "\n" + string.Format(UI.FRONTEND.LOADSCREEN.TOOLTIP_SAVE_INCOMPATABLE_DLC_CONFIGURATION_ASK_TO_DISABLE, DlcManager.GetDlcTitle(text4));
-			}
-		}
-		KButton component4 = freeElement.GetReference<RectTransform>("Button").GetComponent<KButton>();
-		ToolTip component5 = freeElement.GetComponent<ToolTip>();
-		if (string.IsNullOrEmpty(text2))
-		{
-			component5.ClearMultiStringTooltip();
-			component4.isInteractable = true;
-			component4.ClearOnClick();
-			component4.onClick += delegate
-			{
-				this.ShowColony(saves, -1);
-			};
-		}
-		else
-		{
-			component5.SetSimpleTooltip(text2);
-			component4.isInteractable = false;
-			component4.ClearOnClick();
-		}
+			this.ShowColony(saves, -1);
+		};
 		freeElement.transform.SetAsLastSibling();
 	}
 
@@ -1208,7 +1211,7 @@ public class LoadScreen : KModalScreen
 
 	private static bool IsSaveFileFromUnsupportedFutureBuild(SaveGame.Header header, SaveGame.GameInfo gameInfo)
 	{
-		return gameInfo.saveMajorVersion > 7 || (gameInfo.saveMajorVersion == 7 && gameInfo.saveMinorVersion > 34) || header.buildVersion > 623711U;
+		return gameInfo.saveMajorVersion > 7 || (gameInfo.saveMajorVersion == 7 && gameInfo.saveMinorVersion > 34) || header.buildVersion > 626616U;
 	}
 
 	private void UpdateSelected(KButton button, string filename, List<string> dlcIds)
@@ -1263,10 +1266,10 @@ public class LoadScreen : KModalScreen
 		SaveGame.GameInfo gameInfo = SaveLoader.LoadHeader(filename, out header);
 		string text = null;
 		string text2 = null;
-		if (header.buildVersion > 623711U)
+		if (header.buildVersion > 626616U)
 		{
 			text = header.buildVersion.ToString();
-			text2 = 623711U.ToString();
+			text2 = 626616U.ToString();
 		}
 		else if (gameInfo.saveMajorVersion < 7)
 		{
@@ -1435,13 +1438,6 @@ public class LoadScreen : KModalScreen
 
 	[SerializeField]
 	private Bouncer cloudTutorialBouncer;
-
-	[Space]
-	[SerializeField]
-	private Material materialUiNormal;
-
-	[SerializeField]
-	private Material materialUiDesaturated;
 
 	public bool requireConfirmation = true;
 

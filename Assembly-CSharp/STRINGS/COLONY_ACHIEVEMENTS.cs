@@ -32,7 +32,7 @@ namespace STRINGS
 
 			public static LocString WINCONDITION_ARTIFACTS = "Cosmic Archaeology";
 
-			public static LocString WINCONDITION_ARTIFACTS_DESCRIPTION = "Uncover the past to secure your future by fullfilling the requirements of the Exploration Imperative.";
+			public static LocString WINCONDITION_ARTIFACTS_DESCRIPTION = "Uncover the past to secure your future by fulfilling the requirements of the Exploration Imperative.";
 
 			public static LocString WINCONDITION_GEOTHERMAL = "Full Steam Ahead";
 

@@ -4419,6 +4419,20 @@ namespace STRINGS
 				});
 			}
 
+			public class CRITTER_TEMPERATURE_UNCOMFORTABLE
+			{
+				public static LocString NAME = "Uncomfortable Body Temperature";
+
+				public static LocString TOOLTIP = "";
+			}
+
+			public class CRITTER_TEMPERATURE_DEADLY
+			{
+				public static LocString NAME = "Deadly Temperature";
+
+				public static LocString TOOLTIP = "";
+			}
+
 			public class WILD
 			{
 				public static LocString NAME = "Wild";

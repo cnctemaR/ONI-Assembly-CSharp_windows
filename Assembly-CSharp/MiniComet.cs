@@ -114,22 +114,25 @@ public class MiniComet : KMonoBehaviour, ISim33ms
 		{
 			Game.Instance.SpawnFX(this.explosionEffectHash, vector, 0f);
 		}
-		Substance substance = element.substance;
-		int randomNumOres = this.GetRandomNumOres();
-		Vector2 vector2 = -this.velocity.normalized;
-		Vector2 vector3 = new Vector2(vector2.y, -vector2.x);
-		float num = ((randomNumOres > 0) ? (this.pe.Mass / (float)randomNumOres) : 1f);
-		for (int i = 0; i < randomNumOres; i++)
+		if (element != null)
 		{
-			Vector2 normalized = (vector2 + vector3 * global::UnityEngine.Random.Range(-1f, 1f)).normalized;
-			Vector3 vector4 = normalized * global::UnityEngine.Random.Range(this.explosionSpeedRange.x, this.explosionSpeedRange.y);
-			Vector3 vector5 = vector + normalized.normalized * 1.25f;
-			GameObject gameObject = substance.SpawnResource(vector5, num, this.pe.Temperature, this.pe.DiseaseIdx, this.pe.DiseaseCount / randomNumOres, false, false, false);
-			if (GameComps.Fallers.Has(gameObject))
+			Substance substance = element.substance;
+			int randomNumOres = this.GetRandomNumOres();
+			Vector2 vector2 = -this.velocity.normalized;
+			Vector2 vector3 = new Vector2(vector2.y, -vector2.x);
+			float num = ((randomNumOres > 0) ? (this.pe.Mass / (float)randomNumOres) : 1f);
+			for (int i = 0; i < randomNumOres; i++)
 			{
-				GameComps.Fallers.Remove(gameObject);
+				Vector2 normalized = (vector2 + vector3 * global::UnityEngine.Random.Range(-1f, 1f)).normalized;
+				Vector3 vector4 = normalized * global::UnityEngine.Random.Range(this.explosionSpeedRange.x, this.explosionSpeedRange.y);
+				Vector3 vector5 = vector + normalized.normalized * 1.25f;
+				GameObject gameObject = substance.SpawnResource(vector5, num, this.pe.Temperature, this.pe.DiseaseIdx, this.pe.DiseaseCount / randomNumOres, false, false, false);
+				if (GameComps.Fallers.Has(gameObject))
+				{
+					GameComps.Fallers.Remove(gameObject);
+				}
+				GameComps.Fallers.Add(gameObject, vector4);
 			}
-			GameComps.Fallers.Add(gameObject, vector4);
 		}
 		if (this.OnImpact != null)
 		{

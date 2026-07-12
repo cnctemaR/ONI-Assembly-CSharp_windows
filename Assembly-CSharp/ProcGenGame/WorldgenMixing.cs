@@ -11,13 +11,17 @@ namespace ProcGenGame
 {
 	public class WorldgenMixing
 	{
-		public static void RefreshWorldMixing(MutatedClusterLayout mutatedLayout, int seed, bool isRunningWorldgenDebug, bool muteErrors)
+		public static bool RefreshWorldMixing(MutatedClusterLayout mutatedLayout, int seed, bool isRunningWorldgenDebug, bool muteErrors)
 		{
+			if (mutatedLayout == null)
+			{
+				return false;
+			}
 			foreach (WorldPlacement worldPlacement in mutatedLayout.layout.worldPlacements)
 			{
 				worldPlacement.UndoWorldMixing();
 			}
-			WorldgenMixing.DoWorldMixingInternal(mutatedLayout, seed, isRunningWorldgenDebug, muteErrors);
+			return WorldgenMixing.DoWorldMixingInternal(mutatedLayout, seed, isRunningWorldgenDebug, muteErrors) != null;
 		}
 
 		public static MutatedClusterLayout DoWorldMixing(ClusterLayout layout, int seed, bool isRunningWorldgenDebug, bool muteErrors)

@@ -10,6 +10,7 @@ public class RecoverFromColdChore : Chore<RecoverFromColdChore.Instance>
 		ColdImmunityMonitor.Instance coldImmunityMonitor = target.gameObject.GetSMI<ColdImmunityMonitor.Instance>();
 		Func<int> func = () => coldImmunityMonitor.WarmUpCell;
 		base.AddPrecondition(ChorePreconditions.instance.CanMoveToDynamicCell, func);
+		base.AddPrecondition(ChorePreconditions.instance.IsNotRedAlert, null);
 	}
 
 	public class States : GameStateMachine<RecoverFromColdChore.States, RecoverFromColdChore.Instance, RecoverFromColdChore>

@@ -137,7 +137,7 @@ public class MainMenu : KScreen
 					else
 					{
 						DLC1_STORE_URL = "https://store.epicgames.com/en-US/p/oxygen-not-included--spaced-out";
-						DLC2_STORE_URL = "";
+						DLC2_STORE_URL = "https://store.epicgames.com/p/oxygen-not-included-oxygen-not-included-the-frosty-planet-pack-915ba1";
 					}
 				}
 				else
@@ -156,10 +156,10 @@ public class MainMenu : KScreen
 				}
 				App.OpenWebURL(DLC1_STORE_URL);
 			}));
-			string text;
+			string text = this.GetDLCStatusString("EXPANSION1_ID", true);
 			if (!DlcManager.IsContentOwned("EXPANSION1_ID"))
 			{
-				text = UI.FRONTEND.MAINMENU.WISHLIST_AD_TOOLTIP;
+				text = text + "\n\n" + UI.FRONTEND.MAINMENU.WISHLIST_AD_TOOLTIP;
 			}
 			else
 			{
@@ -509,7 +509,7 @@ public class MainMenu : KScreen
 					header = saveFileEntry.header;
 					gameInfo = saveFileEntry.headerData;
 				}
-				if (header.buildVersion > 623711U || gameInfo.saveMajorVersion != 7 || gameInfo.saveMinorVersion > 34)
+				if (header.buildVersion > 626616U || gameInfo.saveMajorVersion != 7 || gameInfo.saveMinorVersion > 34)
 				{
 					flag = false;
 				}

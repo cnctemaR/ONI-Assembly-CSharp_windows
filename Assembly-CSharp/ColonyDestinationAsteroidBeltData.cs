@@ -119,7 +119,11 @@ public class ColonyDestinationAsteroidBeltData
 
 	public void RemixClusterLayout()
 	{
-		WorldgenMixing.RefreshWorldMixing(this.mutatedClusterLayout, this.seed, true, true);
+		if (!WorldgenMixing.RefreshWorldMixing(this.mutatedClusterLayout, this.seed, true, true))
+		{
+			DebugUtil.LogWarningArgs(new object[] { "World remix failed, using default cluster instead." });
+			this.mutatedClusterLayout = new MutatedClusterLayout(this.clusterLayout);
+		}
 		this.worlds.Clear();
 		for (int i = 0; i < this.Layout.worldPlacements.Count; i++)
 		{

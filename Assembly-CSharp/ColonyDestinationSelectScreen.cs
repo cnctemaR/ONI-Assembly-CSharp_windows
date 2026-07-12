@@ -58,6 +58,7 @@ public class ColonyDestinationSelectScreen : NewGameFlowScreen
 		CustomGameSettings.Instance.OnQualitySettingChanged += this.QualitySettingChanged;
 		CustomGameSettings.Instance.OnStorySettingChanged += this.QualitySettingChanged;
 		CustomGameSettings.Instance.OnMixingSettingChanged += this.QualitySettingChanged;
+		this.coordinate.text = CustomGameSettings.Instance.GetSettingsCoordinate();
 	}
 
 	private void ResizeLayout()

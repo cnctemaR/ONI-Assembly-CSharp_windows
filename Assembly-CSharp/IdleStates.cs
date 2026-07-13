@@ -92,6 +92,8 @@ public class IdleStates : GameStateMachine<IdleStates, IdleStates.Instance, ISta
 	{
 		public IdleStates.Def.IdleAnimCallback customIdleAnim;
 
+		public PriorityScreen.PriorityClass priorityClass;
+
 		public delegate HashedString IdleAnimCallback(IdleStates.Instance smi, ref HashedString pre_anim);
 	}
 
@@ -100,6 +102,7 @@ public class IdleStates : GameStateMachine<IdleStates, IdleStates.Instance, ISta
 		public Instance(Chore<IdleStates.Instance> chore, IdleStates.Def def)
 			: base(chore, def)
 		{
+			chore.masterPriority.priority_class = def.priorityClass;
 		}
 	}
 

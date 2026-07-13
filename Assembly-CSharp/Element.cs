@@ -3,11 +3,19 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using Klei.AI;
 using STRINGS;
+using UnityEngine;
 
 [DebuggerDisplay("{name}")]
 [Serializable]
 public class Element : IComparable<Element>
 {
+	public float GetRelativeHeatLevel(float currentTemperature)
+	{
+		float num = this.lowTemp - 3f;
+		float num2 = this.highTemp + 3f;
+		return Mathf.Clamp01((currentTemperature - num) / (num2 - num));
+	}
+
 	public float PressureToMass(float pressure)
 	{
 		return pressure / this.defaultValues.pressure;

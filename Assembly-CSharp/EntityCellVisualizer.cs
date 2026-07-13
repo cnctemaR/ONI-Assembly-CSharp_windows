@@ -328,7 +328,7 @@ public class EntityCellVisualizer : KMonoBehaviour
 				bool flag3 = base.GetComponent<Building>() as BuildingPreview != null;
 				BuildingEnabledButton component = base.GetComponent<BuildingEnabledButton>();
 				flag2 = !flag3 && Game.Instance.circuitManager.GetCircuitID(num) != ushort.MaxValue;
-				flag = flag3 || (component != null && component.IsEnabled);
+				flag = flag3 || component == null || component.IsEnabled;
 			}
 		}
 		else if (type <= EntityCellVisualizer.Ports.LiquidOut)

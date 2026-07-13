@@ -7,11 +7,6 @@ using UnityEngine;
 
 public class SleepClinicPajamas : IEquipmentConfig
 {
-	public string[] GetDlcIds()
-	{
-		return DlcManager.AVAILABLE_ALL_VERSIONS;
-	}
-
 	public EquipmentDef CreateEquipmentDef()
 	{
 		ClothingWearer.ClothingInfo clothingInfo = ClothingWearer.ClothingInfo.FANCY_CLOTHING;

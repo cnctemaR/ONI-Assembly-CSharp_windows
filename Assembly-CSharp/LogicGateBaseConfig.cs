@@ -1,4 +1,5 @@
 ﻿using System;
+using STRINGS;
 using TUNING;
 using UnityEngine;
 
@@ -8,12 +9,12 @@ public abstract class LogicGateBaseConfig : IBuildingConfig
 	{
 		int num = 10;
 		float num2 = 3f;
-		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER0;
+		float[] tier = global::TUNING.BUILDINGS.CONSTRUCTION_MASS_KG.TIER0;
 		string[] refined_METALS = MATERIALS.REFINED_METALS;
 		float num3 = 1600f;
 		BuildLocationRule buildLocationRule = BuildLocationRule.Anywhere;
 		EffectorValues none = NOISE_POLLUTION.NONE;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(ID, width, height, anim, num, num2, tier, refined_METALS, num3, buildLocationRule, BUILDINGS.DECOR.PENALTY.TIER0, none, 0.2f);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(ID, width, height, anim, num, num2, tier, refined_METALS, num3, buildLocationRule, global::TUNING.BUILDINGS.DECOR.PENALTY.TIER0, none, 0.2f);
 		buildingDef.ViewMode = OverlayModes.Logic.ID;
 		buildingDef.ObjectLayer = ObjectLayer.LogicGate;
 		buildingDef.SceneLayer = Grid.SceneLayer.LogicGates;
@@ -26,6 +27,7 @@ public abstract class LogicGateBaseConfig : IBuildingConfig
 		buildingDef.BaseTimeUntilRepair = -1f;
 		buildingDef.PermittedRotations = PermittedRotations.R360;
 		buildingDef.DragBuild = true;
+		buildingDef.AddSearchTerms(SEARCH_TERMS.AUTOMATION);
 		LogicGateBase.uiSrcData = Assets.instance.logicModeUIData;
 		GeneratedBuildings.RegisterWithOverlay(OverlayModes.Logic.HighlightItemIDs, ID);
 		return buildingDef;

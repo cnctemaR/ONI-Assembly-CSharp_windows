@@ -54,7 +54,8 @@ public class KCanvasScaler : KMonoBehaviour
 			camera = global::UnityEngine.Object.FindObjectOfType<Camera>();
 		}
 		camera != null;
-		if ((float)Screen.height <= this.scaleSteps[0].maxRes_y || (float)Screen.width / (float)Screen.height < 1.6777778f)
+		float num = (float)Screen.width / (float)Screen.height;
+		if ((float)Screen.height <= this.scaleSteps[0].maxRes_y || num < 1.6f)
 		{
 			return this.scaleSteps[0].scale;
 		}
@@ -66,8 +67,8 @@ public class KCanvasScaler : KMonoBehaviour
 		{
 			if ((float)Screen.height > this.scaleSteps[i].maxRes_y && (float)Screen.height <= this.scaleSteps[i + 1].maxRes_y)
 			{
-				float num = ((float)Screen.height - this.scaleSteps[i].maxRes_y) / (this.scaleSteps[i + 1].maxRes_y - this.scaleSteps[i].maxRes_y);
-				return Mathf.Lerp(this.scaleSteps[i].scale, this.scaleSteps[i + 1].scale, num);
+				float num2 = ((float)Screen.height - this.scaleSteps[i].maxRes_y) / (this.scaleSteps[i + 1].maxRes_y - this.scaleSteps[i].maxRes_y);
+				return Mathf.Lerp(this.scaleSteps[i].scale, this.scaleSteps[i + 1].scale, num2);
 			}
 		}
 		return 1f;

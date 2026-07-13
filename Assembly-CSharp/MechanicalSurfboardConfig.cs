@@ -1,4 +1,5 @@
 ﻿using System;
+using STRINGS;
 using TUNING;
 using UnityEngine;
 
@@ -12,12 +13,12 @@ public class MechanicalSurfboardConfig : IBuildingConfig
 		string text2 = "mechanical_surfboard_kanim";
 		int num3 = 30;
 		float num4 = 60f;
-		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER4;
+		float[] tier = global::TUNING.BUILDINGS.CONSTRUCTION_MASS_KG.TIER4;
 		string[] raw_METALS = MATERIALS.RAW_METALS;
 		float num5 = 1600f;
 		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloor;
 		EffectorValues none = NOISE_POLLUTION.NONE;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, raw_METALS, num5, buildLocationRule, BUILDINGS.DECOR.BONUS.TIER1, none, 0.2f);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, raw_METALS, num5, buildLocationRule, global::TUNING.BUILDINGS.DECOR.BONUS.TIER1, none, 0.2f);
 		buildingDef.ViewMode = OverlayModes.LiquidConduits.ID;
 		buildingDef.Floodable = false;
 		buildingDef.AudioCategory = "Metal";
@@ -28,6 +29,7 @@ public class MechanicalSurfboardConfig : IBuildingConfig
 		buildingDef.PowerInputOffset = new CellOffset(0, 0);
 		buildingDef.EnergyConsumptionWhenActive = 480f;
 		buildingDef.SelfHeatKilowattsWhenActive = 1f;
+		buildingDef.AddSearchTerms(SEARCH_TERMS.MORALE);
 		return buildingDef;
 	}
 

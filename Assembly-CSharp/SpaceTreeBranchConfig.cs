@@ -5,11 +5,16 @@ using STRINGS;
 using TUNING;
 using UnityEngine;
 
-public class SpaceTreeBranchConfig : IEntityConfig
+public class SpaceTreeBranchConfig : IEntityConfig, IHasDlcRestrictions
 {
-	public string[] GetDlcIds()
+	public string[] GetRequiredDlcIds()
 	{
-		return DlcManager.AVAILABLE_DLC_2;
+		return DlcManager.DLC2;
+	}
+
+	public string[] GetForbiddenDlcIds()
+	{
+		return null;
 	}
 
 	public GameObject CreatePrefab()

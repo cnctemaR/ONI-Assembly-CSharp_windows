@@ -580,7 +580,7 @@ public class CharacterContainer : KScreen, ITelepadDeliverableContainer
 	{
 		this.reshuffleButton.gameObject.SetActive(enable);
 		this.archetypeDropDown.gameObject.SetActive(enable);
-		this.modelDropDown.transform.parent.gameObject.SetActive(enable && SaveLoader.Instance.IsDLCActiveForCurrentSave("DLC3_ID"));
+		this.modelDropDown.transform.parent.gameObject.SetActive(enable && Game.IsDlcActiveForCurrentSave("DLC3_ID"));
 	}
 
 	public void Reshuffle(bool is_starter)
@@ -622,7 +622,7 @@ public class CharacterContainer : KScreen, ITelepadDeliverableContainer
 
 	private bool IsCharacterInvalid()
 	{
-		return CharacterContainer.containers.Find((CharacterContainer container) => container != null && container.stats != null && container != this && container.stats.personality.Id == this.stats.personality.Id && container.stats.IsValid) != null || (SaveLoader.Instance != null && DlcManager.IsDlcId(this.stats.personality.requiredDlcId) && !SaveLoader.Instance.GameInfo.dlcIds.Contains(this.stats.personality.requiredDlcId)) || (this.stats.personality.model != GameTags.Minions.Models.Bionic && Components.LiveMinionIdentities.Items.Any<MinionIdentity>((MinionIdentity id) => id.personalityResourceId == this.stats.personality.Id));
+		return CharacterContainer.containers.Find((CharacterContainer container) => container != null && container.stats != null && container != this && container.stats.personality.Id == this.stats.personality.Id && container.stats.IsValid) != null || (Game.Instance != null && !Game.IsDlcActiveForCurrentSave(this.stats.personality.requiredDlcId)) || (this.stats.personality.model != GameTags.Minions.Models.Bionic && Components.LiveMinionIdentities.Items.Any<MinionIdentity>((MinionIdentity id) => id.personalityResourceId == this.stats.personality.Id));
 	}
 
 	public string GetValueColor(bool isPositive)

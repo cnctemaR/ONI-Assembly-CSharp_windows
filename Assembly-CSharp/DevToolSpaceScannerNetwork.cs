@@ -45,7 +45,7 @@ public class DevToolSpaceScannerNetwork : DevTool
 		{
 			yield return new DevToolSpaceScannerNetwork.Entry(worldContainer.id, Game.Instance.spaceScannerNetworkManager.GetQualityForWorld(worldContainer.id), DevToolSpaceScannerNetwork.GetTargetsString(worldContainer));
 		}
-		IEnumerator<WorldContainer> enumerator = null;
+		List<WorldContainer>.Enumerator enumerator = default(List<WorldContainer>.Enumerator);
 		yield break;
 		yield break;
 	}

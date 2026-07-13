@@ -193,7 +193,7 @@ public class ComplexFabricator : RemoteDockWorkTargetComponent, ISim200ms, ISim1
 
 	private void OnRefreshUserMenu(object data)
 	{
-		if (SaveLoader.Instance.IsDLCActiveForCurrentSave("EXPANSION1_ID") && this.HasRecipiesWithSeeds())
+		if (Game.IsDlcActiveForCurrentSave("EXPANSION1_ID") && this.HasRecipiesWithSeeds())
 		{
 			Game.Instance.userMenu.AddButton(base.gameObject, new KIconButtonMenu.ButtonInfo("action_switch_toggle", this.ForbidMutantSeeds ? UI.USERMENUACTIONS.ACCEPT_MUTANT_SEEDS.ACCEPT : UI.USERMENUACTIONS.ACCEPT_MUTANT_SEEDS.REJECT, delegate
 			{
@@ -225,7 +225,7 @@ public class ComplexFabricator : RemoteDockWorkTargetComponent, ISim200ms, ISim1
 
 	private void UpdateMutantSeedStatusItem()
 	{
-		base.gameObject.GetComponent<KSelectable>().ToggleStatusItem(Db.Get().BuildingStatusItems.FabricatorAcceptsMutantSeeds, SaveLoader.Instance.IsDLCActiveForCurrentSave("EXPANSION1_ID") && this.HasRecipiesWithSeeds() && !this.forbidMutantSeeds, null);
+		base.gameObject.GetComponent<KSelectable>().ToggleStatusItem(Db.Get().BuildingStatusItems.FabricatorAcceptsMutantSeeds, Game.IsDlcActiveForCurrentSave("EXPANSION1_ID") && this.HasRecipiesWithSeeds() && !this.forbidMutantSeeds, null);
 	}
 
 	private void OnOperationalChanged(object data)
@@ -678,7 +678,7 @@ public class ComplexFabricator : RemoteDockWorkTargetComponent, ISim200ms, ISim1
 				{
 					while (enumerator2.MoveNext())
 					{
-						if (enumerator2.Current == prefabTag && SaveLoader.Instance.IsDlcListActiveForCurrentSave(complexRecipe.GetDlcIds()))
+						if (enumerator2.Current == prefabTag && Game.IsCorrectDlcActiveForCurrentSave(complexRecipe))
 						{
 							list.Add(complexRecipe);
 						}
@@ -1019,6 +1019,7 @@ public class ComplexFabricator : RemoteDockWorkTargetComponent, ISim200ms, ISim1
 			num2 += recipeElement.amount;
 		}
 		ComplexRecipe.RecipeElement recipeElement2 = null;
+		Element element = null;
 		foreach (ComplexRecipe.RecipeElement recipeElement3 in recipe.ingredients)
 		{
 			float num3 = recipeElement3.amount / num2;
@@ -1033,6 +1034,7 @@ public class ComplexFabricator : RemoteDockWorkTargetComponent, ISim200ms, ISim1
 			if (recipeElement3.inheritElement || recipeElement3.Edible)
 			{
 				recipeElement2 = recipeElement3;
+				element = this.buildStorage.FindFirst(recipeElement3.material).GetComponent<PrimaryElement>().Element;
 			}
 			if (recipeElement3.Edible)
 			{
@@ -1077,13 +1079,9 @@ public class ComplexFabricator : RemoteDockWorkTargetComponent, ISim200ms, ISim1
 				PrimaryElement component3 = gameObject2.GetComponent<PrimaryElement>();
 				component3.Units = recipeElement4.amount;
 				component3.Temperature = ((recipeElement4.temperatureOperation == ComplexRecipe.RecipeElement.TemperatureOperation.AverageTemperature) ? num : this.heatedTemperature);
-				if (recipeElement2 != null)
+				if (element != null)
 				{
-					Element element = ElementLoader.GetElement(recipeElement2.material);
-					if (element != null)
-					{
-						component3.SetElement(element.id, false);
-					}
+					component3.SetElement(element.id, false);
 				}
 				if (recipe.ProductHasFacade && !text.IsNullOrWhiteSpace())
 				{

@@ -5,7 +5,7 @@ using STRINGS;
 using TUNING;
 using UnityEngine;
 
-public class StaterpillarGasConfig : IEntityConfig
+public class StaterpillarGasConfig : IEntityConfig, IHasDlcRestrictions
 {
 	public static GameObject CreateStaterpillarGas(string id, string name, string desc, string anim_file, bool is_baby)
 	{
@@ -47,14 +47,19 @@ public class StaterpillarGasConfig : IEntityConfig
 		return gameObject;
 	}
 
-	public string[] GetDlcIds()
+	public string[] GetRequiredDlcIds()
 	{
-		return DlcManager.AVAILABLE_EXPANSION1_ONLY;
+		return DlcManager.EXPANSION1;
+	}
+
+	public string[] GetForbiddenDlcIds()
+	{
+		return null;
 	}
 
 	public virtual GameObject CreatePrefab()
 	{
-		return EntityTemplates.ExtendEntityToFertileCreature(StaterpillarGasConfig.CreateStaterpillarGas("StaterpillarGas", global::STRINGS.CREATURES.SPECIES.STATERPILLAR.VARIANT_GAS.NAME, global::STRINGS.CREATURES.SPECIES.STATERPILLAR.VARIANT_GAS.DESC, "caterpillar_kanim", false), "StaterpillarGasEgg", global::STRINGS.CREATURES.SPECIES.STATERPILLAR.VARIANT_GAS.EGG_NAME, global::STRINGS.CREATURES.SPECIES.STATERPILLAR.VARIANT_GAS.DESC, "egg_caterpillar_kanim", StaterpillarTuning.EGG_MASS, "StaterpillarGasBaby", 60.000004f, 20f, StaterpillarTuning.EGG_CHANCES_GAS, this.GetDlcIds(), 1, true, false, true, 1f, false);
+		return EntityTemplates.ExtendEntityToFertileCreature(StaterpillarGasConfig.CreateStaterpillarGas("StaterpillarGas", global::STRINGS.CREATURES.SPECIES.STATERPILLAR.VARIANT_GAS.NAME, global::STRINGS.CREATURES.SPECIES.STATERPILLAR.VARIANT_GAS.DESC, "caterpillar_kanim", false), this, "StaterpillarGasEgg", global::STRINGS.CREATURES.SPECIES.STATERPILLAR.VARIANT_GAS.EGG_NAME, global::STRINGS.CREATURES.SPECIES.STATERPILLAR.VARIANT_GAS.DESC, "egg_caterpillar_kanim", StaterpillarTuning.EGG_MASS, "StaterpillarGasBaby", 60.000004f, 20f, StaterpillarTuning.EGG_CHANCES_GAS, 1, true, false, 1f, false);
 	}
 
 	public void OnPrefabInit(GameObject prefab)

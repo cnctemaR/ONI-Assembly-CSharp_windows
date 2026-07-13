@@ -1,4 +1,5 @@
 ﻿using System;
+using STRINGS;
 using TUNING;
 using UnityEngine;
 
@@ -13,15 +14,16 @@ public class OreScrubberConfig : IBuildingConfig
 		int num3 = 30;
 		float num4 = 30f;
 		string[] array = new string[] { "Metal" };
-		float[] array2 = new float[] { BUILDINGS.CONSTRUCTION_MASS_KG.TIER3[0] };
+		float[] array2 = new float[] { global::TUNING.BUILDINGS.CONSTRUCTION_MASS_KG.TIER3[0] };
 		string[] array3 = array;
 		float num5 = 1600f;
 		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloor;
 		EffectorValues none = NOISE_POLLUTION.NONE;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, array2, array3, num5, buildLocationRule, BUILDINGS.DECOR.BONUS.TIER1, none, 0.2f);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, array2, array3, num5, buildLocationRule, global::TUNING.BUILDINGS.DECOR.BONUS.TIER1, none, 0.2f);
 		buildingDef.UtilityInputOffset = new CellOffset(1, 1);
 		buildingDef.ForegroundLayer = Grid.SceneLayer.BuildingFront;
 		buildingDef.InputConduitType = ConduitType.Gas;
+		buildingDef.AddSearchTerms(SEARCH_TERMS.FILTER);
 		return buildingDef;
 	}
 

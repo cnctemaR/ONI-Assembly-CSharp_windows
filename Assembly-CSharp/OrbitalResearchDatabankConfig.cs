@@ -4,11 +4,16 @@ using STRINGS;
 using TUNING;
 using UnityEngine;
 
-public class OrbitalResearchDatabankConfig : IEntityConfig
+public class OrbitalResearchDatabankConfig : IEntityConfig, IHasDlcRestrictions
 {
-	public string[] GetDlcIds()
+	public string[] GetRequiredDlcIds()
 	{
-		return DlcManager.AVAILABLE_EXPANSION1_ONLY;
+		return DlcManager.EXPANSION1;
+	}
+
+	public string[] GetForbiddenDlcIds()
+	{
+		return null;
 	}
 
 	public GameObject CreatePrefab()
@@ -28,7 +33,7 @@ public class OrbitalResearchDatabankConfig : IEntityConfig
 
 	public void OnSpawn(GameObject inst)
 	{
-		if (SaveLoader.Instance.IsDLCActiveForCurrentSave("DLC2_ID") && SaveLoader.Instance.ClusterLayout != null && SaveLoader.Instance.ClusterLayout.clusterTags.Contains("CeresCluster"))
+		if (Game.IsDlcActiveForCurrentSave("DLC2_ID") && SaveLoader.Instance.ClusterLayout != null && SaveLoader.Instance.ClusterLayout.clusterTags.Contains("CeresCluster"))
 		{
 			inst.AddOrGet<KBatchedAnimController>().SwapAnims(new KAnimFile[] { Assets.GetAnim("floppy_disc_ceres_kanim") });
 		}

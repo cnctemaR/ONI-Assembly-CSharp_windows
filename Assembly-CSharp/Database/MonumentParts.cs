@@ -11,13 +11,13 @@ namespace Database
 			base.Initialize();
 			foreach (MonumentPartInfo monumentPartInfo in Blueprints.Get().all.monumentParts)
 			{
-				this.Add(monumentPartInfo.id, monumentPartInfo.name, monumentPartInfo.desc, monumentPartInfo.rarity, monumentPartInfo.animFile, monumentPartInfo.state, monumentPartInfo.symbolName, monumentPartInfo.part, monumentPartInfo.dlcIds);
+				this.Add(monumentPartInfo.id, monumentPartInfo.name, monumentPartInfo.desc, monumentPartInfo.rarity, monumentPartInfo.animFile, monumentPartInfo.state, monumentPartInfo.symbolName, monumentPartInfo.part, monumentPartInfo.requiredDlcIds, monumentPartInfo.forbiddenDlcIds);
 			}
 		}
 
-		public void Add(string id, string name, string desc, PermitRarity rarity, string animFilename, string state, string symbolName, MonumentPartResource.Part part, string[] dlcIds)
+		public void Add(string id, string name, string desc, PermitRarity rarity, string animFilename, string state, string symbolName, MonumentPartResource.Part part, string[] requiredDlcIds, string[] forbiddenDlcIds)
 		{
-			MonumentPartResource monumentPartResource = new MonumentPartResource(id, name, desc, rarity, animFilename, state, symbolName, part, dlcIds);
+			MonumentPartResource monumentPartResource = new MonumentPartResource(id, name, desc, rarity, animFilename, state, symbolName, part, requiredDlcIds, forbiddenDlcIds);
 			this.resources.Add(monumentPartResource);
 		}
 

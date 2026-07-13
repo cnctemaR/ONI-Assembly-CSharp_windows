@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 
 public class AssignmentGroup : IAssignableIdentity
 {
@@ -53,9 +52,9 @@ public class AssignmentGroup : IAssignableIdentity
 		return false;
 	}
 
-	public ReadOnlyCollection<IAssignableIdentity> GetMembers()
+	public List<IAssignableIdentity> GetMembers()
 	{
-		return this.members.AsReadOnly();
+		return this.members;
 	}
 
 	public List<Ownables> GetOwners()

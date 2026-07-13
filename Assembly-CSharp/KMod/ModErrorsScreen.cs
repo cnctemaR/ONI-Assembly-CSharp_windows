@@ -46,7 +46,15 @@ namespace KMod
 				{
 					if (component != null && !string.IsNullOrEmpty(mod2.description))
 					{
-						component.toolTip = mod2.description;
+						StringEntry stringEntry;
+						if (Strings.TryGet(mod2.description, out stringEntry))
+						{
+							component.toolTip = stringEntry;
+						}
+						else
+						{
+							component.toolTip = mod2.description;
+						}
 					}
 					if (mod2.on_managed != null)
 					{

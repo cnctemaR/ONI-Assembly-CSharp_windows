@@ -1,4 +1,5 @@
 ﻿using System;
+using STRINGS;
 using TUNING;
 using UnityEngine;
 
@@ -12,12 +13,12 @@ public class ApothecaryConfig : IBuildingConfig
 		string text2 = "apothecary_kanim";
 		int num3 = 30;
 		float num4 = 120f;
-		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER4;
+		float[] tier = global::TUNING.BUILDINGS.CONSTRUCTION_MASS_KG.TIER4;
 		string[] all_METALS = MATERIALS.ALL_METALS;
 		float num5 = 800f;
 		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloor;
 		EffectorValues none = NOISE_POLLUTION.NONE;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, all_METALS, num5, buildLocationRule, BUILDINGS.DECOR.NONE, none, 0.2f);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, all_METALS, num5, buildLocationRule, global::TUNING.BUILDINGS.DECOR.NONE, none, 0.2f);
 		buildingDef.RequiresPowerInput = false;
 		buildingDef.EnergyConsumptionWhenActive = 0f;
 		buildingDef.ExhaustKilowattsWhenActive = 0.125f;
@@ -25,6 +26,8 @@ public class ApothecaryConfig : IBuildingConfig
 		buildingDef.LogicInputPorts = LogicOperationalController.CreateSingleInputPortList(default(CellOffset));
 		buildingDef.AudioCategory = "Glass";
 		buildingDef.AudioSize = "large";
+		buildingDef.RequiredSkillPerkID = Db.Get().SkillPerks.CanCompound.Id;
+		buildingDef.AddSearchTerms(SEARCH_TERMS.MEDICINE);
 		return buildingDef;
 	}
 

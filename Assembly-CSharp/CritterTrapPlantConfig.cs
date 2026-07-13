@@ -4,11 +4,16 @@ using STRINGS;
 using TUNING;
 using UnityEngine;
 
-public class CritterTrapPlantConfig : IEntityConfig
+public class CritterTrapPlantConfig : IEntityConfig, IHasDlcRestrictions
 {
-	public string[] GetDlcIds()
+	public string[] GetRequiredDlcIds()
 	{
-		return DlcManager.AVAILABLE_EXPANSION1_ONLY;
+		return DlcManager.EXPANSION1;
+	}
+
+	public string[] GetForbiddenDlcIds()
+	{
+		return null;
 	}
 
 	public GameObject CreatePrefab()
@@ -63,8 +68,7 @@ public class CritterTrapPlantConfig : IEntityConfig
 		list.Add(GameTags.CropSeed);
 		SingleEntityReceptacle.ReceptacleDirection receptacleDirection = SingleEntityReceptacle.ReceptacleDirection.Top;
 		string text9 = global::STRINGS.CREATURES.SPECIES.CRITTERTRAPPLANT.DOMESTICATEDDESC;
-		string[] dlcIds = this.GetDlcIds();
-		EntityTemplates.CreateAndRegisterPreviewForPlant(EntityTemplates.CreateAndRegisterSeedForPlant(gameObject2, productionType, text5, text6, text7, anim2, text8, num4, list, receptacleDirection, default(Tag), 21, text9, EntityTemplates.CollisionShape.CIRCLE, 0.3f, 0.3f, null, "", false, dlcIds), "CritterTrapPlant_preview", Assets.GetAnim("venus_critter_trap_kanim"), "place", 1, 2);
+		EntityTemplates.CreateAndRegisterPreviewForPlant(EntityTemplates.CreateAndRegisterSeedForPlant(gameObject2, this, productionType, text5, text6, text7, anim2, text8, num4, list, receptacleDirection, default(Tag), 21, text9, EntityTemplates.CollisionShape.CIRCLE, 0.3f, 0.3f, null, "", false), "CritterTrapPlant_preview", Assets.GetAnim("venus_critter_trap_kanim"), "place", 1, 2);
 		return gameObject;
 	}
 

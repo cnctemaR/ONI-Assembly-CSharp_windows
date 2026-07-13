@@ -23,7 +23,7 @@ public static class CodexEntryGenerator
 		{
 			CodexEntryGenerator.GenerateDLC1RocketryEntries();
 		}
-		CodexEntryGenerator.GenerateBuildingRequirementClassCategoryEntry(CodexEntryGenerator.categoryPrefx, ref dictionary);
+		CodexEntryGenerator.GenerateBuildingCategoriesEntry(CodexEntryGenerator.categoryPrefx, ref dictionary);
 		CodexEntryGenerator.PopulateCategoryEntries(dictionary);
 		return dictionary;
 	}
@@ -36,7 +36,7 @@ public static class CodexEntryGenerator
 		foreach (KeyValuePair<string, string> keyValuePair in category.buildingAndSubcategoryData)
 		{
 			BuildingDef buildingDef = Assets.GetBuildingDef(keyValuePair.Key);
-			if (buildingDef.IsValidDLC())
+			if (Game.IsCorrectDlcActiveForCurrentSave(buildingDef))
 			{
 				CodexEntry codexEntry = CodexEntryGenerator.GenerateSingleBuildingEntry(buildingDef, text2);
 				if (buildingDef.ExtendCodexEntry != null)
@@ -60,27 +60,55 @@ public static class CodexEntryGenerator
 		categoryEntries.Add(text2, categoryEntry);
 	}
 
-	private static void GenerateBuildingRequirementClassCategoryEntry(string categoryPrefix, ref Dictionary<string, CodexEntry> categoryEntries)
+	private static void GenerateBuildingCategoriesEntry(string categoryPrefix, ref Dictionary<string, CodexEntry> categoryEntries)
 	{
-		string text = "REQUIREMENTCLASS";
-		string text2 = CodexCache.FormatLinkID(categoryPrefix + text);
-		Dictionary<string, CodexEntry> dictionary = new Dictionary<string, CodexEntry>();
-		foreach (Tag tag in RoomConstraints.ConstraintTags.AllTags)
+		string text = "CATEGORY";
+		string text2 = CodexCache.FormatLinkID(CodexEntryGenerator.categoryPrefx + text);
+		IDictionary<string, CodexEntry> dictionary = CodexEntryGenerator.GenerateBuildingRequirementClassCategoryEntry(text2);
+		Dictionary<string, CodexEntry> dictionary2 = CodexEntryGenerator.GenerateBuildingCategoryGroupEntry(text2);
+		Dictionary<string, CodexEntry> dictionary3 = new Dictionary<string, CodexEntry>(dictionary);
+		foreach (string text3 in dictionary2.Keys)
 		{
-			if (!CodexEntryGenerator.HiddenRoomConstrainTags.Contains(tag) && (DlcManager.FeatureClusterSpaceEnabled() || !(tag == RoomConstraints.ConstraintTags.RocketInterior)) && (!(tag == RoomConstraints.ConstraintTags.BionicUpkeepType) || SaveLoader.Instance.IsDLCActiveForCurrentSave("DLC3_ID")))
-			{
-				CodexEntry codexEntry = CodexEntryGenerator.GenerateEntryForSpecificBuildingRequirementClass(tag, text2);
-				dictionary.Add(codexEntry.id, codexEntry);
-			}
+			dictionary3.Add(text3, dictionary2[text3]);
 		}
-		CategoryEntry categoryEntry = CodexEntryGenerator.GenerateCategoryEntry(CodexCache.FormatLinkID(text2), CODEX.ROOM_REQUIREMENT_CLASS.NAME, dictionary, null, true, true, null);
+		CategoryEntry categoryEntry = CodexEntryGenerator.GenerateCategoryEntry(CodexCache.FormatLinkID(text2), CODEX.ROOM_REQUIREMENT_CLASS.NAME, dictionary3, null, true, true, null);
 		categoryEntry.parentId = "BUILDINGS";
 		categoryEntry.category = "BUILDINGS";
 		categoryEntry.icon = Assets.GetSprite("icon_categories_placeholder");
 		categoryEntries.Add(text2, categoryEntry);
 	}
 
-	private static CodexEntry GenerateEntryForSpecificBuildingRequirementClass(Tag requirementClassTag, string categoryEntryID)
+	private static Dictionary<string, CodexEntry> GenerateBuildingRequirementClassCategoryEntry(string categoryParentName)
+	{
+		string text = "REQUIREMENTCLASS";
+		Dictionary<string, CodexEntry> dictionary = new Dictionary<string, CodexEntry>();
+		foreach (Tag tag in RoomConstraints.ConstraintTags.AllTags)
+		{
+			if (!CodexEntryGenerator.HiddenRoomConstrainTags.Contains(tag) && (DlcManager.FeatureClusterSpaceEnabled() || !(tag == RoomConstraints.ConstraintTags.RocketInterior)) && (!(tag == RoomConstraints.ConstraintTags.BionicUpkeepType) || Game.IsDlcActiveForCurrentSave("DLC3_ID")))
+			{
+				CodexEntry codexEntry = CodexEntryGenerator.GenerateEntryForSpecificBuildingRequirementClass(tag, categoryParentName, text);
+				dictionary.Add(codexEntry.id, codexEntry);
+			}
+		}
+		return dictionary;
+	}
+
+	private static Dictionary<string, CodexEntry> GenerateBuildingCategoryGroupEntry(string parentCategory)
+	{
+		string text = "GROUP";
+		Dictionary<string, CodexEntry> dictionary = new Dictionary<string, CodexEntry>();
+		foreach (Tag tag in GameTags.CodexCategories.AllTags)
+		{
+			if (!CodexEntryGenerator.HiddenRoomConstrainTags.Contains(tag))
+			{
+				CodexEntry codexEntry = CodexEntryGenerator.GenerateEntryForSpecificBuildingCategoryGroup(tag, parentCategory, text);
+				dictionary.Add(codexEntry.id, codexEntry);
+			}
+		}
+		return dictionary;
+	}
+
+	private static CodexEntry GenerateEntryForSpecificBuildingRequirementClass(Tag requirementClassTag, string category_parentName, string id_prefix)
 	{
 		string text = "STRINGS.CODEX.ROOM_REQUIREMENT_CLASS." + requirementClassTag.ToString().ToUpper();
 		List<ContentContainer> list = new List<ContentContainer>();
@@ -107,7 +135,7 @@ public static class CodexEntryGenerator
 					KPrefabID component = buildingDef.BuildingComplete.GetComponent<KPrefabID>();
 					if (component != null && component.Tags.Contains(requirementClassTag))
 					{
-						ICodexWidget codexWidget3 = new CodexText("    • " + Strings.Get("STRINGS.BUILDINGS.PREFABS." + buildingDef.PrefabID.ToUpper() + ".NAME"), CodexTextStyle.Body, null);
+						ICodexWidget codexWidget3 = new CodexIndentedLabelWithIcon("    • " + Strings.Get("STRINGS.BUILDINGS.PREFABS." + buildingDef.PrefabID.ToUpper() + ".NAME"), CodexTextStyle.Body, Def.GetUISprite(component.gameObject, "ui", false));
 						list5.Add(codexWidget3);
 					}
 				}
@@ -169,12 +197,69 @@ public static class CodexEntryGenerator
 		ICodexWidget codexWidget6 = new CodexText(Strings.Get(text + ".FLAVOUR"), CodexTextStyle.Body, null);
 		list10.Add(codexWidget6);
 		list.Add(new ContentContainer(list10, ContentContainer.ContentLayout.Vertical));
-		CodexEntry codexEntry = new CodexEntry(categoryEntryID, list, RoomConstraints.ConstraintTags.GetRoomConstraintLabelText(requirementClassTag));
+		CodexEntry codexEntry = new CodexEntry(category_parentName, list, RoomConstraints.ConstraintTags.GetRoomConstraintLabelText(requirementClassTag));
 		Tag tag;
 		codexEntry.icon = (CodexEntryGenerator.RoomConstrainTagIcons.TryGetValue(requirementClassTag, out tag) ? Def.GetUISprite(tag, "ui", false).first : null);
-		codexEntry.parentId = categoryEntryID;
+		codexEntry.parentId = category_parentName;
 		Tag tag2 = requirementClassTag;
-		CodexCache.AddEntry(CodexCache.FormatLinkID(categoryEntryID + tag2.ToString()), codexEntry, null);
+		CodexCache.AddEntry(CodexCache.FormatLinkID(id_prefix + tag2.ToString()), codexEntry, null);
+		return codexEntry;
+	}
+
+	private static CodexEntry GenerateEntryForSpecificBuildingCategoryGroup(Tag categoryGroupTag, string category_parentName, string id_prefix)
+	{
+		string text = "STRINGS.CODEX.CATEGORIES." + categoryGroupTag.ToString().ToUpper();
+		List<ContentContainer> list = new List<ContentContainer>();
+		List<ICodexWidget> list2 = new List<ICodexWidget>();
+		ICodexWidget codexWidget = new CodexText(Strings.Get(text + ".TITLE"), CodexTextStyle.Title, null);
+		list2.Add(codexWidget);
+		list2.Add(new CodexDividerLine());
+		list.Add(new ContentContainer(list2, ContentContainer.ContentLayout.Vertical));
+		List<ICodexWidget> list3 = new List<ICodexWidget>();
+		ICodexWidget codexWidget2 = new CodexText(Strings.Get(text + ".DESCRIPTION"), CodexTextStyle.Body, null);
+		list3.Add(codexWidget2);
+		list3.Add(new CodexSpacer());
+		list3.Reverse();
+		list.Add(new ContentContainer(list3, ContentContainer.ContentLayout.Vertical));
+		List<ICodexWidget> list4 = new List<ICodexWidget>();
+		List<ICodexWidget> list5 = new List<ICodexWidget>();
+		foreach (PlanScreen.PlanInfo planInfo in global::TUNING.BUILDINGS.PLANORDER)
+		{
+			foreach (KeyValuePair<string, string> keyValuePair in planInfo.buildingAndSubcategoryData)
+			{
+				BuildingDef buildingDef = Assets.GetBuildingDef(keyValuePair.Key);
+				if (!buildingDef.DebugOnly && !buildingDef.Deprecated)
+				{
+					KPrefabID component = buildingDef.BuildingComplete.GetComponent<KPrefabID>();
+					if (component != null && component.Tags.Contains(categoryGroupTag))
+					{
+						ICodexWidget codexWidget3 = new CodexIndentedLabelWithIcon("    • " + Strings.Get("STRINGS.BUILDINGS.PREFABS." + buildingDef.PrefabID.ToUpper() + ".NAME"), CodexTextStyle.Body, Def.GetUISprite(component.gameObject, "ui", false));
+						list5.Add(codexWidget3);
+					}
+				}
+			}
+		}
+		if (list5.Count > 0)
+		{
+			ContentContainer contentContainer = new ContentContainer(list5, ContentContainer.ContentLayout.Vertical);
+			CodexCollapsibleHeader codexCollapsibleHeader = new CodexCollapsibleHeader(CODEX.CATEGORIES.SHARED.BUILDINGS_LIST_TITLE, contentContainer);
+			list4.Add(codexCollapsibleHeader);
+			list4.Add(new CodexSpacer());
+			list4.Add(new CodexSpacer());
+			list4.Reverse();
+			list.Add(new ContentContainer(list4, ContentContainer.ContentLayout.Vertical));
+			list.Add(contentContainer);
+		}
+		List<ICodexWidget> list6 = new List<ICodexWidget>();
+		ICodexWidget codexWidget4 = new CodexText(Strings.Get(text + ".FLAVOUR"), CodexTextStyle.Body, null);
+		list6.Add(codexWidget4);
+		list.Add(new ContentContainer(list6, ContentContainer.ContentLayout.Vertical));
+		CodexEntry codexEntry = new CodexEntry(category_parentName, list, GameTags.CodexCategories.GetCategoryLabelText(categoryGroupTag));
+		Tag tag;
+		codexEntry.icon = (CodexEntryGenerator.BuildingsCategoriesTagIcons.TryGetValue(categoryGroupTag, out tag) ? Def.GetUISprite(tag, "ui", false).first : null);
+		codexEntry.parentId = category_parentName;
+		Tag tag2 = categoryGroupTag;
+		CodexCache.AddEntry(CodexCache.FormatLinkID(id_prefix + tag2.ToString()), codexEntry, null);
 		return codexEntry;
 	}
 
@@ -306,7 +391,7 @@ public static class CodexEntryGenerator
 		};
 		action(Db.Get().RoomTypeCategories.Agricultural);
 		action(Db.Get().RoomTypeCategories.Bathroom);
-		if (SaveLoader.Instance.IsDLCActiveForCurrentSave("DLC3_ID"))
+		if (Game.IsDlcActiveForCurrentSave("DLC3_ID"))
 		{
 			action(Db.Get().RoomTypeCategories.Bionic);
 		}
@@ -328,7 +413,7 @@ public static class CodexEntryGenerator
 		foreach (GameObject gameObject in prefabsWithComponent)
 		{
 			KPrefabID component = gameObject.GetComponent<KPrefabID>();
-			if (!dictionary.ContainsKey(component.PrefabID().ToString()) && SaveLoader.Instance.IsDlcListActiveForCurrentSave(component.requiredDlcIds) && !(gameObject.GetComponent<BudUprootedMonitor>() != null))
+			if (!dictionary.ContainsKey(component.PrefabID().ToString()) && Game.IsCorrectDlcActiveForCurrentSave(component) && !(gameObject.GetComponent<BudUprootedMonitor>() != null))
 			{
 				List<ContentContainer> list = new List<ContentContainer>();
 				Sprite first = Def.GetUISprite(gameObject, "ui", false).first;
@@ -434,6 +519,55 @@ public static class CodexEntryGenerator
 		return codexEntry;
 	}
 
+	public static Dictionary<string, CodexEntry> GenerateDuplicantEntries()
+	{
+		string text = "DUPLICANTS";
+		CodexEntry codexEntry = new CodexEntry("DUPLICANTSCATEGORY", new List<ContentContainer>(), CODEX.DUPLICANT.SPECIES_TITLE);
+		codexEntry.icon = Assets.GetSprite("codexIconDupes");
+		codexEntry.parentId = "DUPLICANTSCATEGORY";
+		CodexCache.AddEntry(text, codexEntry, null);
+		Dictionary<string, CodexEntry> dictionary = new Dictionary<string, CodexEntry>();
+		dictionary.Add(text, codexEntry);
+		List<ContentContainer> list = new List<ContentContainer>
+		{
+			new ContentContainer(new List<ICodexWidget>
+			{
+				new CodexText(CODEX.STANDARD.TITLE, CodexTextStyle.Title, null),
+				new CodexText(CODEX.STANDARD.SUBTITLE, CodexTextStyle.Subtitle, null),
+				new CodexDividerLine()
+			}, ContentContainer.ContentLayout.Vertical),
+			new ContentContainer(new List<ICodexWidget>
+			{
+				new CodexText(CODEX.STANDARD.HEADER_1, CodexTextStyle.Subtitle, null),
+				new CodexText(CODEX.STANDARD.PARAGRAPH_1.Replace("{time}", GameUtil.GetFormattedCycles(100f / DUPLICANTSTATS.STANDARD.BaseStats.BLADDER_INCREASE_PER_SECOND, "F1", false)).Replace("{O2gperSec}", GameUtil.GetFormattedMass(DUPLICANTSTATS.STANDARD.BaseStats.OXYGEN_USED_PER_SECOND, GameUtil.TimeSlice.PerSecond, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}")).Replace("{CO2gperSec}", GameUtil.GetFormattedMass(DUPLICANTSTATS.STANDARD.BaseStats.OXYGEN_USED_PER_SECOND * DUPLICANTSTATS.STANDARD.BaseStats.OXYGEN_TO_CO2_CONVERSION, GameUtil.TimeSlice.PerSecond, GameUtil.MetricMassFormat.Gram, true, "{0:0.#}"))
+					.Replace("{caloriesrequired}", GameUtil.GetFormattedCalories(DUPLICANTSTATS.STANDARD.BaseStats.CALORIES_BURNED_PER_CYCLE * -1f, GameUtil.TimeSlice.None, true)), CodexTextStyle.Body, null),
+				new CodexText(CODEX.STANDARD.HEADER_2, CodexTextStyle.Subtitle, null),
+				new CodexText(CODEX.STANDARD.PARAGRAPH_2, CodexTextStyle.Body, null)
+			}, ContentContainer.ContentLayout.Vertical)
+		};
+		SubEntry subEntry = new SubEntry("DuplicantStandard", text, list, CODEX.STANDARD.TITLE);
+		CodexCache.FindEntry(text).subEntries.Add(subEntry);
+		List<ContentContainer> list2 = new List<ContentContainer>
+		{
+			new ContentContainer(new List<ICodexWidget>
+			{
+				new CodexText(CODEX.BIONIC.TITLE, CodexTextStyle.Title, null),
+				new CodexText(CODEX.BIONIC.SUBTITLE, CodexTextStyle.Subtitle, null),
+				new CodexDividerLine()
+			}, ContentContainer.ContentLayout.Vertical),
+			new ContentContainer(new List<ICodexWidget>
+			{
+				new CodexText(CODEX.BIONIC.HEADER_1, CodexTextStyle.Subtitle, null),
+				new CodexText(CODEX.BIONIC.PARAGRAPH_1.Replace("{time}", GameUtil.GetFormattedCycles(GunkMonitor.GUNK_CAPACITY / 0.033333335f, "F1", false)).Replace("{number}", GameUtil.GetFormattedCycles(BionicOxygenTankMonitor.OXYGEN_TANK_CAPACITY_KG / DUPLICANTSTATS.BIONICS.BaseStats.OXYGEN_USED_PER_SECOND, "F1", false)), CodexTextStyle.Body, null),
+				new CodexText(CODEX.BIONIC.HEADER_2, CodexTextStyle.Subtitle, null),
+				new CodexText(CODEX.BIONIC.PARAGRAPH_2, CodexTextStyle.Body, null)
+			}, ContentContainer.ContentLayout.Vertical)
+		};
+		SubEntry subEntry2 = new SubEntry("DuplicantBionic", text, list2, CODEX.BIONIC.TITLE);
+		CodexCache.FindEntry(text).subEntries.Add(subEntry2);
+		return dictionary;
+	}
+
 	private static CodexEntry GenerateTabelSaltEntry()
 	{
 		LocString name = global::STRINGS.ITEMS.INDUSTRIAL_PRODUCTS.TABLE_SALT.NAME;
@@ -517,7 +651,7 @@ public static class CodexEntryGenerator
 		Dictionary<string, CodexEntry> dictionary = new Dictionary<string, CodexEntry>();
 		foreach (Skill skill in Db.Get().Skills.resources)
 		{
-			if (!skill.deprecated && SaveLoader.Instance.IsDLCActiveForCurrentSave(skill.dlcId))
+			if (!skill.deprecated && Game.IsCorrectDlcActiveForCurrentSave(skill))
 			{
 				List<ContentContainer> list = new List<ContentContainer>();
 				Sprite sprite = Assets.GetSprite(skill.hat);
@@ -545,7 +679,7 @@ public static class CodexEntryGenerator
 			foreach (GameObject gameObject in prefabsWithComponent)
 			{
 				KPrefabID component = gameObject.GetComponent<KPrefabID>();
-				if (!component.HasTag(GameTags.DeprecatedContent) && SaveLoader.Instance.IsDlcListActiveForCurrentSave(component.requiredDlcIds))
+				if (!component.HasTag(GameTags.DeprecatedContent) && Game.IsCorrectDlcActiveForCurrentSave(component))
 				{
 					List<ContentContainer> list = new List<ContentContainer>();
 					CodexEntryGenerator.GenerateTitleContainers(gameObject.GetProperName(), list);
@@ -581,7 +715,7 @@ public static class CodexEntryGenerator
 		{
 			foreach (GameObject gameObject in prefabsWithComponent)
 			{
-				if (SaveLoader.Instance.IsDlcListActiveForCurrentSave(gameObject.GetComponent<KPrefabID>().requiredDlcIds))
+				if (Game.IsCorrectDlcActiveForCurrentSave(gameObject.GetComponent<KPrefabID>()))
 				{
 					bool flag = false;
 					Equippable component = gameObject.GetComponent<Equippable>();
@@ -968,7 +1102,7 @@ public static class CodexEntryGenerator
 		Dictionary<Tag, List<BuildingDef>> dictionary2 = new Dictionary<Tag, List<BuildingDef>>();
 		foreach (BuildingDef buildingDef in Assets.BuildingDefs)
 		{
-			if (!buildingDef.Deprecated && !buildingDef.DebugOnly && buildingDef.IsValidDLC() && (buildingDef.ShowInBuildMenu || buildingDef.BuildingComplete.HasTag(GameTags.RocketModule)))
+			if (!buildingDef.Deprecated && !buildingDef.DebugOnly && Game.IsCorrectDlcActiveForCurrentSave(buildingDef) && (buildingDef.ShowInBuildMenu || buildingDef.BuildingComplete.HasTag(GameTags.RocketModule)))
 			{
 				string[] materialCategory = buildingDef.MaterialCategory;
 				for (int i = 0; i < materialCategory.Length; i++)
@@ -1090,7 +1224,7 @@ public static class CodexEntryGenerator
 		for (int i = 0; i < 24; i++)
 		{
 			TutorialMessage tutorialMessage = (TutorialMessage)Tutorial.Instance.TutorialMessage((Tutorial.TutorialMessages)i, false);
-			if (tutorialMessage != null && DlcManager.IsDlcListValidForCurrentContent(tutorialMessage.DLCIDs))
+			if (tutorialMessage != null && Game.IsCorrectDlcActiveForCurrentSave(tutorialMessage))
 			{
 				if (!string.IsNullOrEmpty(tutorialMessage.videoClipId))
 				{
@@ -1251,7 +1385,7 @@ public static class CodexEntryGenerator
 		List<ICodexWidget> list = new List<ICodexWidget>();
 		string text = CODEX.HEADERS.ROLE_PERKS;
 		string text2 = CODEX.HEADERS.ROLE_PERKS_DESC;
-		if (skill.dlcId == "DLC3_ID")
+		if (DlcManager.DlcListContains(skill.GetRequiredDlcIds(), "DLC3_ID"))
 		{
 			text = CODEX.HEADERS.ROLE_PERKS_BIONIC;
 			text2 = CODEX.HEADERS.ROLE_PERKS_BIONIC_DESC;
@@ -1264,9 +1398,9 @@ public static class CodexEntryGenerator
 		list.Add(new CodexSpacer());
 		foreach (SkillPerk skillPerk in skill.perks)
 		{
-			if (SaveLoader.Instance.IsAllDlcActiveForCurrentSave(skillPerk.requiredDlcIds))
+			if (Game.IsCorrectDlcActiveForCurrentSave(skillPerk))
 			{
-				CodexText codexText3 = new CodexText(skillPerk.Name, CodexTextStyle.Body, null);
+				CodexText codexText3 = new CodexText(SkillPerk.GetDescription(skillPerk.Id), CodexTextStyle.Body, null);
 				list.Add(codexText3);
 			}
 		}
@@ -1297,7 +1431,7 @@ public static class CodexEntryGenerator
 		List<ICodexWidget> list2 = new List<ICodexWidget>();
 		string text2 = CODEX.HEADERS.UNLOCK_ROLES;
 		string text3 = CODEX.HEADERS.UNLOCK_ROLES_DESC;
-		if (skill.dlcId == "DLC3_ID")
+		if (DlcManager.DlcListContains(skill.GetRequiredDlcIds(), "DLC3_ID"))
 		{
 			text2 = CODEX.HEADERS.UNLOCK_ROLES_BIONIC;
 			text3 = CODEX.HEADERS.UNLOCK_ROLES_BIONIC_DESC;
@@ -1384,7 +1518,12 @@ public static class CodexEntryGenerator
 					list.Add(new ContentContainer(new List<ICodexWidget>
 					{
 						new CodexImage(64, 64, Def.GetUISprite(prefab, "ui", false)),
-						new CodexText(string.Format(UI.CODEX.RECIPE_ITEM, Assets.GetPrefab(ingredient.tag).GetProperName(), ingredient.amount, (ElementLoader.GetElement(ingredient.tag) == null) ? "" : UI.UNITSUFFIXES.MASS.KILOGRAM.text), CodexTextStyle.Body, null)
+						new CodexText(GameUtil.SafeStringFormat(UI.CODEX.RECIPE_ITEM, new object[]
+						{
+							Assets.GetPrefab(ingredient.tag).GetProperName(),
+							ingredient.amount,
+							(ElementLoader.GetElement(ingredient.tag) == null) ? "" : UI.UNITSUFFIXES.MASS.KILOGRAM.text
+						}), CodexTextStyle.Body, null)
 					}, ContentContainer.ContentLayout.Horizontal));
 				}
 			}
@@ -1534,10 +1673,15 @@ public static class CodexEntryGenerator
 		{
 			new CodexText(food.Description, CodexTextStyle.Body, null),
 			new CodexSpacer(),
-			new CodexText(string.Format(UI.CODEX.FOOD.QUALITY, GameUtil.GetFormattedFoodQuality(food.Quality)), CodexTextStyle.Body, null),
-			new CodexText(string.Format(UI.CODEX.FOOD.CALORIES, GameUtil.GetFormattedCalories(food.CaloriesPerUnit, GameUtil.TimeSlice.None, true)), CodexTextStyle.Body, null),
+			new CodexText(GameUtil.SafeStringFormat(UI.CODEX.FOOD.QUALITY, new object[] { GameUtil.GetFormattedFoodQuality(food.Quality) }), CodexTextStyle.Body, null),
+			new CodexText(GameUtil.SafeStringFormat(UI.CODEX.FOOD.CALORIES, new object[] { GameUtil.GetFormattedCalories(food.CaloriesPerUnit, GameUtil.TimeSlice.None, true) }), CodexTextStyle.Body, null),
 			new CodexSpacer(),
-			new CodexText(food.CanRot ? string.Format(UI.CODEX.FOOD.SPOILPROPERTIES, GameUtil.GetFormattedTemperature(food.RotTemperature, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false), GameUtil.GetFormattedTemperature(food.PreserveTemperature, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false), GameUtil.GetFormattedCycles(food.SpoilTime, "F1", false)) : UI.CODEX.FOOD.NON_PERISHABLE.ToString(), CodexTextStyle.Body, null),
+			new CodexText(food.CanRot ? GameUtil.SafeStringFormat(UI.CODEX.FOOD.SPOILPROPERTIES, new object[]
+			{
+				GameUtil.GetFormattedTemperature(food.RotTemperature, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false),
+				GameUtil.GetFormattedTemperature(food.PreserveTemperature, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false),
+				GameUtil.GetFormattedCycles(food.SpoilTime, "F1", false)
+			}) : UI.CODEX.FOOD.NON_PERISHABLE.ToString(), CodexTextStyle.Body, null),
 			new CodexSpacer()
 		};
 		if (food.Effects.Count > 0)
@@ -1636,17 +1780,53 @@ public static class CodexEntryGenerator
 			list.Add(new CodexSpacer());
 		}
 		string[] roomClassForObject = CodexEntryGenerator.GetRoomClassForObject(def.BuildingComplete);
-		if (roomClassForObject != null)
+		string[] categoriesForObject = CodexEntryGenerator.GetCategoriesForObject(def.BuildingComplete);
+		bool flag = roomClassForObject != null || categoriesForObject != null;
+		if (flag)
 		{
 			list.Add(new CodexText(CODEX.HEADERS.BUILDINGTYPE, CodexTextStyle.Subtitle, null));
+		}
+		if (roomClassForObject != null)
+		{
 			foreach (string text in roomClassForObject)
 			{
 				list.Add(new CodexText("    " + text, CodexTextStyle.Body, null));
 			}
+		}
+		if (categoriesForObject != null)
+		{
+			foreach (string text2 in categoriesForObject)
+			{
+				list.Add(new CodexText("    " + text2, CodexTextStyle.Body, null));
+			}
+		}
+		if (flag)
+		{
 			list.Add(new CodexSpacer());
 		}
 		list.Add(new CodexText("<i>" + Strings.Get("STRINGS.BUILDINGS.PREFABS." + def.PrefabID.ToUpper() + ".DESC") + "</i>", CodexTextStyle.Body, null));
 		containers.Add(new ContentContainer(list, ContentContainer.ContentLayout.Vertical));
+	}
+
+	public static string[] GetCategoriesForObject(GameObject obj)
+	{
+		List<string> list = new List<string>();
+		KPrefabID component = obj.GetComponent<KPrefabID>();
+		if (component != null)
+		{
+			foreach (Tag tag in component.Tags)
+			{
+				if (GameTags.CodexCategories.AllTags.Contains(tag))
+				{
+					list.Add(GameTags.CodexCategories.GetCategoryLabelText(tag));
+				}
+			}
+		}
+		if (list.Count <= 0)
+		{
+			return null;
+		}
+		return list.ToArray();
 	}
 
 	public static string[] GetRoomClassForObject(GameObject obj)
@@ -1833,13 +2013,21 @@ public static class CodexEntryGenerator
 		dictionary[lightSource] = "FloorLamp";
 		Tag rocketInterior = RoomConstraints.ConstraintTags.RocketInterior;
 		dictionary[rocketInterior] = RocketControlStationConfig.ID;
-		Tag creatureRelocator = RoomConstraints.ConstraintTags.CreatureRelocator;
-		dictionary[creatureRelocator] = "CreatureDeliveryPoint";
 		Tag cookTop = RoomConstraints.ConstraintTags.CookTop;
 		dictionary[cookTop] = "CookingStation";
 		Tag warmingStation = RoomConstraints.ConstraintTags.WarmingStation;
 		dictionary[warmingStation] = "SpaceHeater";
+		Tag tag = RoomConstraints.ConstraintTags.BionicUpkeepType;
+		dictionary[tag] = "OilChanger";
+		Tag tag2 = RoomConstraints.ConstraintTags.PowerBuilding;
+		dictionary[tag2] = "Battery";
 		CodexEntryGenerator.RoomConstrainTagIcons = dictionary;
+		Dictionary<Tag, Tag> dictionary2 = new Dictionary<Tag, Tag>();
+		tag2 = GameTags.CodexCategories.CreatureRelocator;
+		dictionary2[tag2] = "CreatureDeliveryPoint";
+		tag = GameTags.CodexCategories.FarmBuilding;
+		dictionary2[tag] = "FarmTile";
+		CodexEntryGenerator.BuildingsCategoriesTagIcons = dictionary2;
 	}
 
 	private static string categoryPrefx = "BUILD_CATEGORY_";
@@ -1870,4 +2058,6 @@ public static class CodexEntryGenerator
 	};
 
 	public static Dictionary<Tag, Tag> RoomConstrainTagIcons;
+
+	public static Dictionary<Tag, Tag> BuildingsCategoriesTagIcons;
 }

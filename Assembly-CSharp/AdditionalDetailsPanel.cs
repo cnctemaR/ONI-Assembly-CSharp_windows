@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Runtime.CompilerServices;
 using Klei.AI;
 using Klei.AI.DiseaseGrowthRules;
@@ -200,7 +199,7 @@ public class AdditionalDetailsPanel : DetailScreenTab
 			for (int i = 0; i < attributes.Count; i++)
 			{
 				AttributeInstance attributeInstance = attributes.AttributeTable[i];
-				if (DlcManager.IsDlcListValidForCurrentContent(attributeInstance.Attribute.DLCIds) && (attributeInstance.Attribute.ShowInUI == Klei.AI.Attribute.Display.Details || attributeInstance.Attribute.ShowInUI == Klei.AI.Attribute.Display.Expectation))
+				if (DlcManager.IsCorrectDlcSubscribed(attributeInstance.Attribute) && (attributeInstance.Attribute.ShowInUI == Klei.AI.Attribute.Display.Details || attributeInstance.Attribute.ShowInUI == Klei.AI.Attribute.Display.Expectation))
 				{
 					targetPanel.SetLabel(attributeInstance.modifier.Id, attributeInstance.modifier.Name + ": " + attributeInstance.GetFormattedValue(), attributeInstance.GetAttributeValueTooltip());
 				}
@@ -586,10 +585,10 @@ public class AdditionalDetailsPanel : DetailScreenTab
 			return;
 		}
 		targetPanel.SetActive(true);
-		ReadOnlyCollection<Generator> generatorsOnCircuit = Game.Instance.circuitManager.GetGeneratorsOnCircuit(selectedTargetCircuitID);
+		List<Generator> generatorsOnCircuit = Game.Instance.circuitManager.GetGeneratorsOnCircuit(selectedTargetCircuitID);
 		if (generatorsOnCircuit.Count > 0)
 		{
-			using (IEnumerator<Generator> enumerator = generatorsOnCircuit.GetEnumerator())
+			using (List<Generator>.Enumerator enumerator = generatorsOnCircuit.GetEnumerator())
 			{
 				while (enumerator.MoveNext())
 				{
@@ -609,11 +608,11 @@ public class AdditionalDetailsPanel : DetailScreenTab
 						targetPanel.SetLabel(generator.gameObject.GetInstanceID().ToString(), text, "");
 					}
 				}
-				goto IL_0151;
+				goto IL_0157;
 			}
 		}
 		targetPanel.SetLabel("nogenerators", UI.DETAILTABS.ENERGYGENERATOR.NOGENERATORS, "");
-		IL_0151:
+		IL_0157:
 		targetPanel.Commit();
 	}
 
@@ -633,26 +632,26 @@ public class AdditionalDetailsPanel : DetailScreenTab
 			return;
 		}
 		CS$<>8__locals1.targetPanel.SetActive(true);
-		ReadOnlyCollection<IEnergyConsumer> consumersOnCircuit = Game.Instance.circuitManager.GetConsumersOnCircuit(selectedTargetCircuitID);
-		ReadOnlyCollection<Battery> transformersOnCircuit = Game.Instance.circuitManager.GetTransformersOnCircuit(selectedTargetCircuitID);
+		List<IEnergyConsumer> consumersOnCircuit = Game.Instance.circuitManager.GetConsumersOnCircuit(selectedTargetCircuitID);
+		List<Battery> transformersOnCircuit = Game.Instance.circuitManager.GetTransformersOnCircuit(selectedTargetCircuitID);
 		if (consumersOnCircuit.Count > 0 || transformersOnCircuit.Count > 0)
 		{
 			foreach (IEnergyConsumer energyConsumer in consumersOnCircuit)
 			{
 				AdditionalDetailsPanel.<RefreshEnergyConsumerPanel>g__AddConsumerInfo|27_0(energyConsumer, ref CS$<>8__locals1);
 			}
-			using (IEnumerator<Battery> enumerator2 = transformersOnCircuit.GetEnumerator())
+			using (List<Battery>.Enumerator enumerator2 = transformersOnCircuit.GetEnumerator())
 			{
 				while (enumerator2.MoveNext())
 				{
 					Battery battery = enumerator2.Current;
 					AdditionalDetailsPanel.<RefreshEnergyConsumerPanel>g__AddConsumerInfo|27_0(battery, ref CS$<>8__locals1);
 				}
-				goto IL_00FD;
+				goto IL_0101;
 			}
 		}
 		CS$<>8__locals1.targetPanel.SetLabel("noconsumers", UI.DETAILTABS.ENERGYGENERATOR.NOCONSUMERS, "");
-		IL_00FD:
+		IL_0101:
 		CS$<>8__locals1.targetPanel.Commit();
 	}
 

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using UnityEngine;
 
 [AddComponentMenu("KMonoBehaviour/scripts/EntityConfigManager")]
@@ -49,18 +50,74 @@ public class EntityConfigManager : KMonoBehaviour
 		foreach (EntityConfigManager.ConfigEntry configEntry2 in list)
 		{
 			object obj = Activator.CreateInstance(configEntry2.type);
-			if (obj is IEntityConfig && DlcManager.IsDlcListValidForCurrentContent((obj as IEntityConfig).GetDlcIds()))
+			if (obj is IEntityConfig)
 			{
-				this.RegisterEntity(obj as IEntityConfig);
+				IEntityConfig entityConfig = obj as IEntityConfig;
+				string[] array = null;
+				string[] array2 = null;
+				if (entityConfig.GetDlcIds() != null)
+				{
+					DlcManager.ConvertAvailableToRequireAndForbidden(entityConfig.GetDlcIds(), out array, out array2);
+					DebugUtil.DevLogError(string.Format("{0} implements GetDlcIds, which is obsolete.", configEntry2.type));
+				}
+				else
+				{
+					IHasDlcRestrictions hasDlcRestrictions = obj as IHasDlcRestrictions;
+					if (hasDlcRestrictions != null)
+					{
+						array = hasDlcRestrictions.GetRequiredDlcIds();
+						array2 = hasDlcRestrictions.GetForbiddenDlcIds();
+					}
+				}
+				if (DlcManager.IsCorrectDlcSubscribed(array, array2))
+				{
+					this.RegisterEntity(entityConfig, array, array2);
+				}
 			}
-			if (obj is IMultiEntityConfig)
+			IMultiEntityConfig multiEntityConfig = obj as IMultiEntityConfig;
+			if (multiEntityConfig != null)
 			{
-				this.RegisterEntities(obj as IMultiEntityConfig);
+				DebugUtil.Assert(!(obj is IHasDlcRestrictions), "IMultiEntityConfig cannot implement IHasDlcRestrictions, wrap the individual config instead.");
+				this.RegisterEntities(multiEntityConfig);
 			}
 		}
 	}
 
-	public void RegisterEntity(IEntityConfig config)
+	[Conditional("UNITY_EDITOR")]
+	private void ValidateEntityConfig(IEntityConfig entityConfig)
+	{
+		if (entityConfig == null)
+		{
+			throw new ArgumentNullException("entityConfig");
+		}
+		Type type = entityConfig.GetType();
+		Type typeFromHandle = typeof(IHasDlcRestrictions);
+		bool flag = type.GetMethod("GetRequiredDlcIds", Type.EmptyTypes) != null;
+		bool flag2 = type.GetMethod("GetForbiddenDlcIds", Type.EmptyTypes) != null;
+		bool flag3 = typeFromHandle.IsAssignableFrom(type);
+		if ((flag || flag2) && !flag3)
+		{
+			DebugUtil.LogErrorArgs(new object[] { type.Name + " is an IEntityConfig and has GetRequiredDlcIds or GetForbiddenDlcIds but does not implement IHasDlcRestrictions." });
+		}
+	}
+
+	[Conditional("UNITY_EDITOR")]
+	private void ValidateMultiEntityConfig(IMultiEntityConfig entityConfig)
+	{
+		if (entityConfig == null)
+		{
+			throw new ArgumentNullException("entityConfig");
+		}
+		Type type = entityConfig.GetType();
+		bool flag = type.GetMethod("GetRequiredDlcIds", Type.EmptyTypes) != null;
+		bool flag2 = type.GetMethod("GetForbiddenDlcIds", Type.EmptyTypes) != null;
+		if (flag || flag2)
+		{
+			DebugUtil.LogErrorArgs(new object[] { type.Name + " is an IMultiEntityConfig and you shouldn't be specifying GetRequiredDlcIds or GetForbiddenDlcIds. Wrap each config in a DLC check instead." });
+		}
+	}
+
+	public void RegisterEntity(IEntityConfig config, string[] requiredDlcIds = null, string[] forbiddenDlcIds = null)
 	{
 		GameObject gameObject = config.CreatePrefab();
 		if (gameObject == null)
@@ -68,7 +125,8 @@ public class EntityConfigManager : KMonoBehaviour
 			return;
 		}
 		KPrefabID component = gameObject.GetComponent<KPrefabID>();
-		component.requiredDlcIds = config.GetDlcIds();
+		component.requiredDlcIds = requiredDlcIds;
+		component.forbiddenDlcIds = forbiddenDlcIds;
 		component.prefabInitFn += config.OnPrefabInit;
 		component.prefabSpawnFn += config.OnSpawn;
 		Assets.AddPrefab(component);

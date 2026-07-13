@@ -3,7 +3,7 @@ using Database;
 
 public class Blueprints_DlcPack3 : BlueprintProvider
 {
-	public override string[] GetDlcIds()
+	public override string[] GetRequiredDlcIds()
 	{
 		return DlcManager.DLC3;
 	}

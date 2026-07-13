@@ -6,11 +6,6 @@ using UnityEngine;
 
 public class OxyfernConfig : IEntityConfig
 {
-	public string[] GetDlcIds()
-	{
-		return DlcManager.AVAILABLE_ALL_VERSIONS;
-	}
-
 	public GameObject CreatePrefab()
 	{
 		string text = "Oxyfern";
@@ -63,6 +58,7 @@ public class OxyfernConfig : IEntityConfig
 			new ElementConverter.OutputElement(0.031250004f, SimHashes.Oxygen, 0f, true, false, 0f, 1f, 0.75f, byte.MaxValue, 0, true)
 		};
 		GameObject gameObject2 = gameObject;
+		IHasDlcRestrictions hasDlcRestrictions = this as IHasDlcRestrictions;
 		SeedProducer.ProductionType productionType = SeedProducer.ProductionType.Hidden;
 		string text4 = "OxyfernSeed";
 		string text5 = global::STRINGS.CREATURES.SPECIES.SEEDS.OXYFERN.NAME;
@@ -74,7 +70,7 @@ public class OxyfernConfig : IEntityConfig
 		list.Add(GameTags.CropSeed);
 		SingleEntityReceptacle.ReceptacleDirection receptacleDirection = SingleEntityReceptacle.ReceptacleDirection.Top;
 		string text8 = global::STRINGS.CREATURES.SPECIES.OXYFERN.DOMESTICATEDDESC;
-		EntityTemplates.CreateAndRegisterPreviewForPlant(EntityTemplates.CreateAndRegisterSeedForPlant(gameObject2, productionType, text4, text5, text6, anim, text7, num2, list, receptacleDirection, default(Tag), 20, text8, EntityTemplates.CollisionShape.CIRCLE, 0.3f, 0.3f, null, "", false, null), "Oxyfern_preview", Assets.GetAnim("oxy_fern_kanim"), "place", 1, 2);
+		EntityTemplates.CreateAndRegisterPreviewForPlant(EntityTemplates.CreateAndRegisterSeedForPlant(gameObject2, hasDlcRestrictions, productionType, text4, text5, text6, anim, text7, num2, list, receptacleDirection, default(Tag), 20, text8, EntityTemplates.CollisionShape.CIRCLE, 0.3f, 0.3f, null, "", false), "Oxyfern_preview", Assets.GetAnim("oxy_fern_kanim"), "place", 1, 2);
 		SoundEventVolumeCache.instance.AddVolume("oxy_fern_kanim", "MealLice_harvest", NOISE_POLLUTION.CREATURES.TIER3);
 		SoundEventVolumeCache.instance.AddVolume("oxy_fern_kanim", "MealLice_LP", NOISE_POLLUTION.CREATURES.TIER4);
 		return gameObject;

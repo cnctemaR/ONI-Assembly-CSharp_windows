@@ -8,7 +8,7 @@ public class NoFreeRocketInterior : SelectModuleCondition
 	public override bool EvaluateCondition(GameObject existingModule, BuildingDef selectedPart, SelectModuleCondition.SelectionContext selectionContext)
 	{
 		int num = 0;
-		using (IEnumerator<WorldContainer> enumerator = ClusterManager.Instance.WorldContainers.GetEnumerator())
+		using (List<WorldContainer>.Enumerator enumerator = ClusterManager.Instance.WorldContainers.GetEnumerator())
 		{
 			while (enumerator.MoveNext())
 			{

@@ -29,25 +29,10 @@ public class LightBugPurpleConfig : IEntityConfig
 		return BaseLightBugConfig.SetupDiet(gameObject, hashSet, Tag.Invalid, LightBugPurpleConfig.CALORIES_PER_KG_OF_ORE);
 	}
 
-	public string[] GetDlcIds()
-	{
-		return DlcManager.AVAILABLE_ALL_VERSIONS;
-	}
-
 	public GameObject CreatePrefab()
 	{
 		GameObject gameObject = LightBugPurpleConfig.CreateLightBug("LightBugPurple", global::STRINGS.CREATURES.SPECIES.LIGHTBUG.VARIANT_PURPLE.NAME, global::STRINGS.CREATURES.SPECIES.LIGHTBUG.VARIANT_PURPLE.DESC, "lightbug_kanim", false);
-		string text = "LightBugPurpleEgg";
-		string text2 = global::STRINGS.CREATURES.SPECIES.LIGHTBUG.VARIANT_PURPLE.EGG_NAME;
-		string text3 = global::STRINGS.CREATURES.SPECIES.LIGHTBUG.VARIANT_PURPLE.DESC;
-		string text4 = "egg_lightbug_kanim";
-		float egg_MASS = LightBugTuning.EGG_MASS;
-		string text5 = "LightBugPurpleBaby";
-		float num = 15.000001f;
-		float num2 = 5f;
-		List<FertilityMonitor.BreedingChance> egg_CHANCES_PURPLE = LightBugTuning.EGG_CHANCES_PURPLE;
-		int egg_SORT_ORDER = LightBugPurpleConfig.EGG_SORT_ORDER;
-		EntityTemplates.ExtendEntityToFertileCreature(gameObject, text, text2, text3, text4, egg_MASS, text5, num, num2, egg_CHANCES_PURPLE, this.GetDlcIds(), egg_SORT_ORDER, true, false, true, 1f, false);
+		EntityTemplates.ExtendEntityToFertileCreature(gameObject, this as IHasDlcRestrictions, "LightBugPurpleEgg", global::STRINGS.CREATURES.SPECIES.LIGHTBUG.VARIANT_PURPLE.EGG_NAME, global::STRINGS.CREATURES.SPECIES.LIGHTBUG.VARIANT_PURPLE.DESC, "egg_lightbug_kanim", LightBugTuning.EGG_MASS, "LightBugPurpleBaby", 15.000001f, 5f, LightBugTuning.EGG_CHANCES_PURPLE, LightBugPurpleConfig.EGG_SORT_ORDER, true, false, 1f, false);
 		return gameObject;
 	}
 

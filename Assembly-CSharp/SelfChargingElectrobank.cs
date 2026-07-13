@@ -18,6 +18,7 @@ public class SelfChargingElectrobank : Electrobank
 		this.selectable = base.GetComponent<KSelectable>();
 		this.selectable.AddStatusItem(Db.Get().MiscStatusItems.ElectrobankSelfCharging, 60f);
 		this.lifetimeStatus = this.selectable.AddStatusItem(Db.Get().MiscStatusItems.ElectrobankLifetimeRemaining, this);
+		Components.SelfChargingElectrobanks.Add(base.gameObject.GetMyWorldId(), this);
 		if (this.lifetimeRemaining <= 0f)
 		{
 			this.Delete();
@@ -63,6 +64,12 @@ public class SelfChargingElectrobank : Electrobank
 		{
 			base.gameObject.DeleteObject();
 		}
+	}
+
+	protected override void OnCleanUp()
+	{
+		base.OnCleanUp();
+		Components.SelfChargingElectrobanks.Remove(base.gameObject.GetMyWorldId(), this);
 	}
 
 	[Serialize]

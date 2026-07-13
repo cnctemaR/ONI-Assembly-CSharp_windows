@@ -158,13 +158,13 @@ namespace TUNING
 		private static void OnAddDataRainer(GameObject go)
 		{
 			new DataRainer.Instance(go.GetComponent<KMonoBehaviour>()).StartSM();
-			new JoyBehaviourMonitor.Instance(go.GetComponent<KMonoBehaviour>(), "anim_loco_productive_kanim", "anim_loco_walk_productive_kanim", Db.Get().Expressions.Productive).StartSM();
+			new JoyBehaviourMonitor.Instance(go.GetComponent<KMonoBehaviour>(), "anim_loco_productive_kanim", "anim_loco_walk_productive_kanim", Db.Get().Expressions.Happy).StartSM();
 		}
 
 		private static void OnAddRoboDancer(GameObject go)
 		{
 			new RoboDancer.Instance(go.GetComponent<KMonoBehaviour>()).StartSM();
-			new JoyBehaviourMonitor.Instance(go.GetComponent<KMonoBehaviour>(), null, "anim_loco_walk_robotdance_kanim", Db.Get().Expressions.Music).StartSM();
+			new JoyBehaviourMonitor.Instance(go.GetComponent<KMonoBehaviour>(), "anim_loco_run_robotdance_kanim", "anim_loco_walk_robotdance_kanim", Db.Get().Expressions.Happy).StartSM();
 		}
 
 		public static float EARLYBIRD_MODIFIER = 2f;

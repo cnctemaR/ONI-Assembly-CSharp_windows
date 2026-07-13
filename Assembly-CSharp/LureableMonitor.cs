@@ -52,25 +52,29 @@ public class LureableMonitor : GameStateMachine<LureableMonitor, LureableMonitor
 		{
 		}
 
+		private static bool FindLureCounter(object obj, LureableMonitor.Instance.FindLureCounterContext context)
+		{
+			Lure.Instance instance = obj as Lure.Instance;
+			if (instance == null || !instance.IsActive() || !instance.HasAnyLure(context.inst.def.lures))
+			{
+				return true;
+			}
+			int navigationCost = context.inst.navigator.GetNavigationCost(Grid.PosToCell(instance.transform.GetPosition()), instance.LurePoints);
+			if (navigationCost != -1 && (context.cost == -1 || navigationCost < context.cost))
+			{
+				context.cost = navigationCost;
+				context.result = instance.gameObject;
+			}
+			return true;
+		}
+
 		public void FindLure()
 		{
-			int num = -1;
-			GameObject gameObject = null;
-			foreach (object obj in GameScenePartitioner.Instance.AsyncSafeEnumerate(Grid.PosToCell(base.smi.transform.GetPosition()), 1, GameScenePartitioner.Instance.lure))
-			{
-				Lure.Instance instance = obj as Lure.Instance;
-				if (instance == null || !instance.IsActive() || !instance.HasAnyLure(base.def.lures))
-				{
-					return;
-				}
-				int navigationCost = this.navigator.GetNavigationCost(Grid.PosToCell(instance.transform.GetPosition()), instance.LurePoints);
-				if (navigationCost != -1 && (num == -1 || navigationCost < num))
-				{
-					num = navigationCost;
-					gameObject = instance.gameObject;
-				}
-			}
-			base.sm.targetLure.Set(gameObject, this, false);
+			LureableMonitor.Instance.context.inst = this;
+			LureableMonitor.Instance.context.cost = -1;
+			LureableMonitor.Instance.context.result = null;
+			GameScenePartitioner.Instance.AsyncSafeVisit<LureableMonitor.Instance.FindLureCounterContext>(Grid.PosToCell(base.smi.transform.GetPosition()), 1, GameScenePartitioner.Instance.lure, new Func<object, LureableMonitor.Instance.FindLureCounterContext, bool>(LureableMonitor.Instance.FindLureCounter), LureableMonitor.Instance.context);
+			base.sm.targetLure.Set(LureableMonitor.Instance.context.result, this, false);
 		}
 
 		public bool HasLure()
@@ -85,5 +89,16 @@ public class LureableMonitor : GameStateMachine<LureableMonitor, LureableMonitor
 
 		[MyCmpReq]
 		private Navigator navigator;
+
+		private static LureableMonitor.Instance.FindLureCounterContext context = new LureableMonitor.Instance.FindLureCounterContext();
+
+		private class FindLureCounterContext
+		{
+			public LureableMonitor.Instance inst;
+
+			public int cost;
+
+			public GameObject result;
+		}
 	}
 }

@@ -107,7 +107,7 @@ public class BionicUpgrade_SkilledWorker : BionicUpgrade_SM<BionicUpgrade_Skille
 				for (int i = 0; i < this.SkillPerksIds.Length; i++)
 				{
 					text += "\n";
-					text += this.SkillPerksIds[i].Name;
+					text += SkillPerk.GetDescription(this.SkillPerksIds[i].Id);
 				}
 				if (this.modifiers.Length != 0)
 				{

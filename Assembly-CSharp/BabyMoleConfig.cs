@@ -5,11 +5,6 @@ using UnityEngine;
 [EntityConfigOrder(2)]
 public class BabyMoleConfig : IEntityConfig
 {
-	public string[] GetDlcIds()
-	{
-		return DlcManager.AVAILABLE_ALL_VERSIONS;
-	}
-
 	public GameObject CreatePrefab()
 	{
 		GameObject gameObject = MoleConfig.CreateMole("MoleBaby", CREATURES.SPECIES.MOLE.BABY.NAME, CREATURES.SPECIES.MOLE.BABY.DESC, "baby_driller_kanim", true);

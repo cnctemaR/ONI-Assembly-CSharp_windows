@@ -1,7 +1,7 @@
 ﻿using System;
 using Database;
 
-public class ClothingItemInfo : IBlueprintInfo, IBlueprintDlcInfo
+public class ClothingItemInfo : IBlueprintInfo, IHasDlcRestrictions
 {
 	public string id { get; set; }
 
@@ -13,9 +13,7 @@ public class ClothingItemInfo : IBlueprintInfo, IBlueprintDlcInfo
 
 	public string animFile { get; set; }
 
-	public string[] dlcIds { get; set; }
-
-	public ClothingItemInfo(string id, string name, string desc, PermitCategory category, PermitRarity rarity, string animFile)
+	public ClothingItemInfo(string id, string name, string desc, PermitCategory category, PermitRarity rarity, string animFile, string[] requiredDlcIds = null, string[] forbiddenDlcIds = null)
 	{
 		Option<ClothingOutfitUtility.OutfitType> outfitTypeFor = PermitCategories.GetOutfitTypeFor(category);
 		if (outfitTypeFor.IsNone())
@@ -29,10 +27,25 @@ public class ClothingItemInfo : IBlueprintInfo, IBlueprintDlcInfo
 		this.category = category;
 		this.rarity = rarity;
 		this.animFile = animFile;
-		this.dlcIds = DlcManager.AVAILABLE_ALL_VERSIONS;
+		this.requiredDlcIds = requiredDlcIds;
+		this.forbiddenDlcIds = forbiddenDlcIds;
+	}
+
+	public string[] GetRequiredDlcIds()
+	{
+		return this.requiredDlcIds;
+	}
+
+	public string[] GetForbiddenDlcIds()
+	{
+		return this.forbiddenDlcIds;
 	}
 
 	public ClothingOutfitUtility.OutfitType outfitType;
 
 	public PermitCategory category;
+
+	private string[] requiredDlcIds;
+
+	private string[] forbiddenDlcIds;
 }

@@ -4,7 +4,7 @@ using STRINGS;
 using TUNING;
 using UnityEngine;
 
-public class GeothermalControllerConfig : IEntityConfig
+public class GeothermalControllerConfig : IEntityConfig, IHasDlcRestrictions
 {
 	public static List<GeothermalVent.ElementInfo> GetClearingEntombedVentReward()
 	{
@@ -163,9 +163,14 @@ public class GeothermalControllerConfig : IEntityConfig
 		return Math.Max(1650f, inputTemperature - 150f);
 	}
 
-	public string[] GetDlcIds()
+	public string[] GetRequiredDlcIds()
 	{
-		return DlcManager.AVAILABLE_DLC_2;
+		return DlcManager.DLC2;
+	}
+
+	public string[] GetForbiddenDlcIds()
+	{
+		return null;
 	}
 
 	GameObject IEntityConfig.CreatePrefab()

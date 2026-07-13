@@ -5,11 +5,6 @@ using UnityEngine;
 [EntityConfigOrder(2)]
 public class BabyHatchVeggieConfig : IEntityConfig
 {
-	public string[] GetDlcIds()
-	{
-		return DlcManager.AVAILABLE_ALL_VERSIONS;
-	}
-
 	public GameObject CreatePrefab()
 	{
 		GameObject gameObject = HatchVeggieConfig.CreateHatch("HatchVeggieBaby", CREATURES.SPECIES.HATCH.VARIANT_VEGGIE.BABY.NAME, CREATURES.SPECIES.HATCH.VARIANT_VEGGIE.BABY.DESC, "baby_hatch_kanim", true);

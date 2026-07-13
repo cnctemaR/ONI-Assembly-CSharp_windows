@@ -7,11 +7,6 @@ using UnityEngine;
 
 public class PrickleFlowerConfig : IEntityConfig
 {
-	public string[] GetDlcIds()
-	{
-		return DlcManager.AVAILABLE_ALL_VERSIONS;
-	}
-
 	public GameObject CreatePrefab()
 	{
 		string text = "PrickleFlower";
@@ -46,6 +41,7 @@ public class PrickleFlowerConfig : IEntityConfig
 		gameObject.AddOrGet<IlluminationVulnerable>().SetPrefersDarkness(false);
 		gameObject.AddOrGet<BlightVulnerable>();
 		GameObject gameObject2 = gameObject;
+		IHasDlcRestrictions hasDlcRestrictions = this as IHasDlcRestrictions;
 		SeedProducer.ProductionType productionType = SeedProducer.ProductionType.Harvest;
 		string text4 = "PrickleFlowerSeed";
 		string text5 = global::STRINGS.CREATURES.SPECIES.SEEDS.PRICKLEFLOWER.NAME;
@@ -57,7 +53,7 @@ public class PrickleFlowerConfig : IEntityConfig
 		list.Add(GameTags.CropSeed);
 		SingleEntityReceptacle.ReceptacleDirection receptacleDirection = SingleEntityReceptacle.ReceptacleDirection.Top;
 		string text8 = global::STRINGS.CREATURES.SPECIES.PRICKLEFLOWER.DOMESTICATEDDESC;
-		EntityTemplates.CreateAndRegisterPreviewForPlant(EntityTemplates.CreateAndRegisterSeedForPlant(gameObject2, productionType, text4, text5, text6, anim, text7, num2, list, receptacleDirection, default(Tag), 2, text8, EntityTemplates.CollisionShape.CIRCLE, 0.25f, 0.25f, null, "", false, null), "PrickleFlower_preview", Assets.GetAnim("bristleblossom_kanim"), "place", 1, 2);
+		EntityTemplates.CreateAndRegisterPreviewForPlant(EntityTemplates.CreateAndRegisterSeedForPlant(gameObject2, hasDlcRestrictions, productionType, text4, text5, text6, anim, text7, num2, list, receptacleDirection, default(Tag), 2, text8, EntityTemplates.CollisionShape.CIRCLE, 0.25f, 0.25f, null, "", false), "PrickleFlower_preview", Assets.GetAnim("bristleblossom_kanim"), "place", 1, 2);
 		SoundEventVolumeCache.instance.AddVolume("bristleblossom_kanim", "PrickleFlower_harvest", NOISE_POLLUTION.CREATURES.TIER3);
 		SoundEventVolumeCache.instance.AddVolume("bristleblossom_kanim", "PrickleFlower_grow", NOISE_POLLUTION.CREATURES.TIER3);
 		return gameObject;

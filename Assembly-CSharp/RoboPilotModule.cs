@@ -61,6 +61,7 @@ public class RoboPilotModule : KMonoBehaviour
 	{
 		base.Unsubscribe(-1697596308, new Action<object>(this.UpdateMeter));
 		base.Unsubscribe(-887025858, new Action<object>(this.OnRocketLanded));
+		base.Unsubscribe(-778359855, new Action<object>(this.PlayDeliveryAnimation));
 		RocketModuleCluster component = base.GetComponent<RocketModuleCluster>();
 		if (component != null)
 		{

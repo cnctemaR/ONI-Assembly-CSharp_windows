@@ -4,11 +4,16 @@ using STRINGS;
 using TUNING;
 using UnityEngine;
 
-public class PropHumanChesterfieldSofaConfig : IEntityConfig
+public class PropHumanChesterfieldSofaConfig : IEntityConfig, IHasDlcRestrictions
 {
-	public string[] GetDlcIds()
+	public string[] GetRequiredDlcIds()
 	{
-		return DlcManager.AVAILABLE_DLC_2;
+		return DlcManager.DLC2;
+	}
+
+	public string[] GetForbiddenDlcIds()
+	{
+		return null;
 	}
 
 	public GameObject CreatePrefab()

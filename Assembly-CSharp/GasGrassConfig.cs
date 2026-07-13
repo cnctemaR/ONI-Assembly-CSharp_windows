@@ -7,11 +7,6 @@ using UnityEngine;
 
 public class GasGrassConfig : IEntityConfig
 {
-	public string[] GetDlcIds()
-	{
-		return DlcManager.AVAILABLE_ALL_VERSIONS;
-	}
-
 	public GameObject CreatePrefab()
 	{
 		string text = "GasGrass";
@@ -45,6 +40,7 @@ public class GasGrassConfig : IEntityConfig
 		component.initialAttributes.Add(Db.Get().PlantAttributes.MinLightLux.Id);
 		gameObject.AddOrGet<IlluminationVulnerable>().SetPrefersDarkness(false);
 		GameObject gameObject2 = gameObject;
+		IHasDlcRestrictions hasDlcRestrictions = this as IHasDlcRestrictions;
 		SeedProducer.ProductionType productionType = (DlcManager.FeaturePlantMutationsEnabled() ? SeedProducer.ProductionType.Harvest : SeedProducer.ProductionType.Hidden);
 		string text4 = "GasGrassSeed";
 		string text5 = global::STRINGS.CREATURES.SPECIES.SEEDS.GASGRASS.NAME;
@@ -56,7 +52,7 @@ public class GasGrassConfig : IEntityConfig
 		list.Add(GameTags.CropSeed);
 		SingleEntityReceptacle.ReceptacleDirection receptacleDirection = SingleEntityReceptacle.ReceptacleDirection.Top;
 		string text8 = global::STRINGS.CREATURES.SPECIES.GASGRASS.DOMESTICATEDDESC;
-		EntityTemplates.CreateAndRegisterPreviewForPlant(EntityTemplates.CreateAndRegisterSeedForPlant(gameObject2, productionType, text4, text5, text6, anim, text7, num2, list, receptacleDirection, default(Tag), 22, text8, EntityTemplates.CollisionShape.CIRCLE, 0.2f, 0.2f, null, "", false, null), "GasGrass_preview", Assets.GetAnim("gassygrass_kanim"), "place", 1, 1);
+		EntityTemplates.CreateAndRegisterPreviewForPlant(EntityTemplates.CreateAndRegisterSeedForPlant(gameObject2, hasDlcRestrictions, productionType, text4, text5, text6, anim, text7, num2, list, receptacleDirection, default(Tag), 22, text8, EntityTemplates.CollisionShape.CIRCLE, 0.2f, 0.2f, null, "", false), "GasGrass_preview", Assets.GetAnim("gassygrass_kanim"), "place", 1, 1);
 		SoundEventVolumeCache.instance.AddVolume("gassygrass_kanim", "GasGrass_grow", NOISE_POLLUTION.CREATURES.TIER3);
 		SoundEventVolumeCache.instance.AddVolume("gassygrass_kanim", "GasGrass_harvest", NOISE_POLLUTION.CREATURES.TIER3);
 		return gameObject;

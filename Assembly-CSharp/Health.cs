@@ -7,6 +7,12 @@ using UnityEngine;
 [AddComponentMenu("KMonoBehaviour/scripts/Health")]
 public class Health : KMonoBehaviour, ISaveLoadable
 {
+	[Serialize]
+	public Health.HealthState State { get; private set; }
+
+	[Serialize]
+	public Tag CauseOfIncapacitation { get; private set; }
+
 	public AmountInstance GetAmountInstance
 	{
 		get
@@ -55,7 +61,7 @@ public class Health : KMonoBehaviour, ISaveLoadable
 		base.OnSpawn();
 		if (this.State == Health.HealthState.Incapacitated || this.hitPoints == 0f)
 		{
-			if (this.CanBeIncapacitated)
+			if (this.canBeIncapacitated)
 			{
 				this.Incapacitate(GameTags.HitPointsDepleted);
 			}
@@ -89,7 +95,7 @@ public class Health : KMonoBehaviour, ISaveLoadable
 		NameDisplayScreen.Instance.SetHealthDisplay(base.gameObject, new Func<float>(this.percent), !flag);
 	}
 
-	private void Recover()
+	private void OnRecover()
 	{
 		base.GetComponent<KPrefabID>().RemoveTag(GameTags.HitPointsDepleted);
 	}
@@ -101,7 +107,7 @@ public class Health : KMonoBehaviour, ISaveLoadable
 		{
 			if (this.hitPoints == 0f && !this.IsDefeated())
 			{
-				if (this.CanBeIncapacitated)
+				if (this.canBeIncapacitated)
 				{
 					this.Incapacitate(GameTags.HitPointsDepleted);
 				}
@@ -252,7 +258,7 @@ public class Health : KMonoBehaviour, ISaveLoadable
 		{
 			if (this.State == Health.HealthState.Incapacitated && healthState != Health.HealthState.Dead)
 			{
-				this.Recover();
+				this.OnRecover();
 			}
 			if (healthState == Health.HealthState.Perfect)
 			{
@@ -281,9 +287,10 @@ public class Health : KMonoBehaviour, ISaveLoadable
 
 	public void Incapacitate(Tag cause)
 	{
+		this.CauseOfIncapacitation = cause;
 		this.State = Health.HealthState.Incapacitated;
-		base.GetComponent<KPrefabID>().AddTag(cause, false);
 		this.Damage(this.hitPoints);
+		base.gameObject.Trigger(-1506500077, null);
 	}
 
 	private void Kill()
@@ -295,13 +302,7 @@ public class Health : KMonoBehaviour, ISaveLoadable
 	}
 
 	[Serialize]
-	public bool CanBeIncapacitated;
-
-	[Serialize]
-	public Health.HealthState State;
-
-	[Serialize]
-	private Death source_of_death;
+	public bool canBeIncapacitated;
 
 	public HealthBar healthBar;
 

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using Klei.AI;
 using STRINGS;
 using TUNING;
@@ -354,18 +353,8 @@ namespace Database
 			this.BionicRequiresSkillPerk = this.CreateStatusItem("BionicRequiresSkillPerk", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 2);
 			this.BionicRequiresSkillPerk.resolveStringCallback = delegate(string str, object data)
 			{
-				string text4 = (string)data;
-				SkillPerk skillPerk = Db.Get().SkillPerks.Get(text4);
-				List<Skill> skillsWithPerk = Db.Get().Skills.GetSkillsWithPerk(skillPerk);
-				List<string> list = new List<string>();
-				foreach (Skill skill in skillsWithPerk)
-				{
-					if (!skill.deprecated)
-					{
-						list.Add(skill.Name);
-					}
-				}
-				str = str.Replace("{Skills}", string.Join(", ", list.ToArray()));
+				str = str.Replace("{Skills}", GameUtil.NamesOfSkillsWithSkillPerk((string)data));
+				str = str.Replace("{Boosters}", GameUtil.NamesOfBoostersWithSkillPerk((string)data));
 				return str;
 			};
 			this.Incapacitated = this.CreateStatusItem("Incapacitated", "DUPLICANTS", "status_item_broken", StatusItem.IconType.Custom, NotificationType.DuplicantThreatening, false, OverlayModes.None.ID, true, 2);
@@ -453,14 +442,14 @@ namespace Database
 			this.LightWorkEfficiencyBonus = this.CreateStatusItem("LightWorkEfficiencyBonus", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.Good, false, OverlayModes.None.ID, true, 2);
 			this.LightWorkEfficiencyBonus.resolveStringCallback = delegate(string str, object data)
 			{
-				string text5 = string.Format(DUPLICANTS.STATUSITEMS.LIGHTWORKEFFICIENCYBONUS.NO_BUILDING_WORK_ATTRIBUTE, GameUtil.AddPositiveSign(GameUtil.GetFormattedPercent(DUPLICANTSTATS.STANDARD.Light.LIGHT_WORK_EFFICIENCY_BONUS * 100f, GameUtil.TimeSlice.None), true));
-				return string.Format(str, text5);
+				string text4 = string.Format(DUPLICANTS.STATUSITEMS.LIGHTWORKEFFICIENCYBONUS.NO_BUILDING_WORK_ATTRIBUTE, GameUtil.AddPositiveSign(GameUtil.GetFormattedPercent(DUPLICANTSTATS.STANDARD.Light.LIGHT_WORK_EFFICIENCY_BONUS * 100f, GameUtil.TimeSlice.None), true));
+				return string.Format(str, text4);
 			};
 			this.LaboratoryWorkEfficiencyBonus = this.CreateStatusItem("LaboratoryWorkEfficiencyBonus", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.Good, false, OverlayModes.None.ID, true, 2);
 			this.LaboratoryWorkEfficiencyBonus.resolveStringCallback = delegate(string str, object data)
 			{
-				string text6 = string.Format(DUPLICANTS.STATUSITEMS.LABORATORYWORKEFFICIENCYBONUS.NO_BUILDING_WORK_ATTRIBUTE, GameUtil.AddPositiveSign(GameUtil.GetFormattedPercent(10f, GameUtil.TimeSlice.None), true));
-				return string.Format(str, text6);
+				string text5 = string.Format(DUPLICANTS.STATUSITEMS.LABORATORYWORKEFFICIENCYBONUS.NO_BUILDING_WORK_ATTRIBUTE, GameUtil.AddPositiveSign(GameUtil.GetFormattedPercent(10f, GameUtil.TimeSlice.None), true));
+				return string.Format(str, text5);
 			};
 			this.BeingProductive = this.CreateStatusItem("BeingProductive", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 2);
 			this.BalloonArtistPlanning = this.CreateStatusItem("BalloonArtistPlanning", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 2);
@@ -476,30 +465,30 @@ namespace Database
 			this.GasLiquidIrritation.resolveTooltipCallback = delegate(string str, object data)
 			{
 				GasLiquidExposureMonitor.Instance instance6 = (GasLiquidExposureMonitor.Instance)data;
-				string text7 = DUPLICANTS.STATUSITEMS.GASLIQUIDEXPOSURE.TOOLTIP;
-				string text8 = "";
+				string text6 = DUPLICANTS.STATUSITEMS.GASLIQUIDEXPOSURE.TOOLTIP;
+				string text7 = "";
 				Effect appliedEffect = instance6.sm.GetAppliedEffect(instance6);
 				if (appliedEffect != null)
 				{
-					text8 = Effect.CreateTooltip(appliedEffect, false, "\n    • ", true);
+					text7 = Effect.CreateTooltip(appliedEffect, false, "\n    • ", true);
 				}
-				string text9 = DUPLICANTS.STATUSITEMS.GASLIQUIDEXPOSURE.TOOLTIP_EXPOSED.Replace("{element}", instance6.CurrentlyExposedToElement().name);
+				string text8 = DUPLICANTS.STATUSITEMS.GASLIQUIDEXPOSURE.TOOLTIP_EXPOSED.Replace("{element}", instance6.CurrentlyExposedToElement().name);
 				float currentExposure = instance6.sm.GetCurrentExposure(instance6);
 				if (currentExposure < 0f)
 				{
-					text9 = text9.Replace("{rate}", DUPLICANTS.STATUSITEMS.GASLIQUIDEXPOSURE.TOOLTIP_RATE_DECREASE);
+					text8 = text8.Replace("{rate}", DUPLICANTS.STATUSITEMS.GASLIQUIDEXPOSURE.TOOLTIP_RATE_DECREASE);
 				}
 				else if (currentExposure > 0f)
 				{
-					text9 = text9.Replace("{rate}", DUPLICANTS.STATUSITEMS.GASLIQUIDEXPOSURE.TOOLTIP_RATE_INCREASE);
+					text8 = text8.Replace("{rate}", DUPLICANTS.STATUSITEMS.GASLIQUIDEXPOSURE.TOOLTIP_RATE_INCREASE);
 				}
 				else
 				{
-					text9 = text9.Replace("{rate}", DUPLICANTS.STATUSITEMS.GASLIQUIDEXPOSURE.TOOLTIP_RATE_STAYS);
+					text8 = text8.Replace("{rate}", DUPLICANTS.STATUSITEMS.GASLIQUIDEXPOSURE.TOOLTIP_RATE_STAYS);
 				}
 				float num11 = (instance6.exposure - instance6.minorIrritationThreshold) / Math.Abs(instance6.exposureRate);
-				string text10 = DUPLICANTS.STATUSITEMS.GASLIQUIDEXPOSURE.TOOLTIP_EXPOSURE_LEVEL.Replace("{time}", GameUtil.GetFormattedTime(num11, "F0"));
-				return string.Concat(new string[] { text7, "\n\n", text8, "\n\n", text9, "\n\n", text10 });
+				string text9 = DUPLICANTS.STATUSITEMS.GASLIQUIDEXPOSURE.TOOLTIP_EXPOSURE_LEVEL.Replace("{time}", GameUtil.GetFormattedTime(num11, "F0"));
+				return string.Concat(new string[] { text6, "\n\n", text7, "\n\n", text8, "\n\n", text9 });
 			};
 			this.ExpellingRads = this.CreateStatusItem("ExpellingRads", "DUPLICANTS", "", StatusItem.IconType.Exclamation, NotificationType.Neutral, false, OverlayModes.None.ID, true, 2);
 			this.AnalyzingGenes = this.CreateStatusItem("AnalyzingGenes", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.Good, false, OverlayModes.None.ID, true, 2);
@@ -508,18 +497,18 @@ namespace Database
 			this.MegaBrainTank_Pajamas_Wearing.resolveTooltipCallback_shouldStillCallIfDataIsNull = true;
 			this.MegaBrainTank_Pajamas_Wearing.resolveTooltipCallback = delegate(string str, object data)
 			{
-				string text11 = DUPLICANTS.STATUSITEMS.WEARING_PAJAMAS.TOOLTIP;
+				string text10 = DUPLICANTS.STATUSITEMS.WEARING_PAJAMAS.TOOLTIP;
 				Effect effect = Db.Get().effects.Get("SleepClinic");
-				string text12;
+				string text11;
 				if (effect != null)
 				{
-					text12 = Effect.CreateTooltip(effect, false, "\n    • ", true);
+					text11 = Effect.CreateTooltip(effect, false, "\n    • ", true);
 				}
 				else
 				{
-					text12 = "";
+					text11 = "";
 				}
-				return text11 + "\n\n" + text12;
+				return text10 + "\n\n" + text11;
 			};
 			this.MegaBrainTank_Pajamas_Sleeping = this.CreateStatusItem("MegaBrainTank_Pajamas_Sleeping", DUPLICANTS.STATUSITEMS.DREAMING.NAME, DUPLICANTS.STATUSITEMS.DREAMING.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Good, false, OverlayModes.None.ID, 2);
 			this.MegaBrainTank_Pajamas_Sleeping.resolveTooltipCallback = delegate(string str, object data)

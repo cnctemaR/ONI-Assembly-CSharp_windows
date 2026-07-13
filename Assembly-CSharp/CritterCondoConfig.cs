@@ -22,6 +22,8 @@ public class CritterCondoConfig : IBuildingConfig
 		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, array, array2, num5, buildLocationRule, global::TUNING.BUILDINGS.DECOR.BONUS.TIER3, none, 0.2f);
 		buildingDef.AudioCategory = "Metal";
 		buildingDef.PermittedRotations = PermittedRotations.FlipH;
+		buildingDef.AddSearchTerms(SEARCH_TERMS.CRITTER);
+		buildingDef.AddSearchTerms(SEARCH_TERMS.RANCHING);
 		return buildingDef;
 	}
 

@@ -4,11 +4,16 @@ using STRINGS;
 using TUNING;
 using UnityEngine;
 
-public class FilterPlantConfig : IEntityConfig
+public class FilterPlantConfig : IEntityConfig, IHasDlcRestrictions
 {
-	public string[] GetDlcIds()
+	public string[] GetRequiredDlcIds()
 	{
-		return DlcManager.AVAILABLE_EXPANSION1_ONLY;
+		return DlcManager.EXPANSION1;
+	}
+
+	public string[] GetForbiddenDlcIds()
+	{
+		return null;
 	}
 
 	public GameObject CreatePrefab()
@@ -66,8 +71,7 @@ public class FilterPlantConfig : IEntityConfig
 		list.Add(GameTags.CropSeed);
 		SingleEntityReceptacle.ReceptacleDirection receptacleDirection = SingleEntityReceptacle.ReceptacleDirection.Top;
 		text5 = global::STRINGS.CREATURES.SPECIES.FILTERPLANT.DOMESTICATEDDESC;
-		string[] dlcIds = this.GetDlcIds();
-		EntityTemplates.CreateAndRegisterPreviewForPlant(EntityTemplates.CreateAndRegisterSeedForPlant(gameObject3, productionType, text6, text7, text8, anim, text9, num6, list, receptacleDirection, default(Tag), 21, text5, EntityTemplates.CollisionShape.CIRCLE, 0.35f, 0.35f, null, "", false, dlcIds), "FilterPlant_preview", Assets.GetAnim("cactus_kanim"), "place", 1, 2);
+		EntityTemplates.CreateAndRegisterPreviewForPlant(EntityTemplates.CreateAndRegisterSeedForPlant(gameObject3, this, productionType, text6, text7, text8, anim, text9, num6, list, receptacleDirection, default(Tag), 21, text5, EntityTemplates.CollisionShape.CIRCLE, 0.35f, 0.35f, null, "", false), "FilterPlant_preview", Assets.GetAnim("cactus_kanim"), "place", 1, 2);
 		gameObject.AddTag(GameTags.DeprecatedContent);
 		return gameObject;
 	}

@@ -107,16 +107,20 @@ public class JettisonableCargoModule : GameStateMachine<JettisonableCargoModule,
 
 		private void OpenMoveChoreForChosenDuplicant()
 		{
-			RocketModuleCluster component = base.master.GetComponent<RocketModuleCluster>();
-			Clustercraft craft = component.CraftInterface.GetComponent<Clustercraft>();
-			MinionStorage storage = this.landerContainer.FindFirst(base.def.landerPrefabID).GetComponent<MinionStorage>();
-			this.EnableTeleport(true);
-			this.ChosenDuplicant.GetSMI<RocketPassengerMonitor.Instance>().SetModuleDeployChore(this.landerPlacementCell, delegate(Chore obj)
+			RocketPassengerMonitor.Instance smi = this.ChosenDuplicant.GetSMI<RocketPassengerMonitor.Instance>();
+			if (smi != null)
 			{
-				Game.Instance.assignmentManager.RemoveFromWorld(this.ChosenDuplicant.assignableProxy.Get(), craft.ModuleInterface.GetInteriorWorld().id);
-				storage.SerializeMinion(this.ChosenDuplicant.gameObject);
-				this.EnableTeleport(false);
-			});
+				RocketModuleCluster component = base.master.GetComponent<RocketModuleCluster>();
+				Clustercraft craft = component.CraftInterface.GetComponent<Clustercraft>();
+				MinionStorage storage = this.landerContainer.FindFirst(base.def.landerPrefabID).GetComponent<MinionStorage>();
+				this.EnableTeleport(true);
+				smi.SetModuleDeployChore(this.landerPlacementCell, delegate(Chore obj)
+				{
+					Game.Instance.assignmentManager.RemoveFromWorld(this.ChosenDuplicant.assignableProxy.Get(), craft.ModuleInterface.GetInteriorWorld().id);
+					storage.SerializeMinion(this.ChosenDuplicant.gameObject);
+					this.EnableTeleport(false);
+				});
+			}
 		}
 
 		private void EnableTeleport(bool enable)
@@ -253,7 +257,7 @@ public class JettisonableCargoModule : GameStateMachine<JettisonableCargoModule,
 
 		public bool CanEmptyCargo()
 		{
-			return base.sm.hasCargo.Get(base.smi) && this.IsValidDropLocation() && (!this.ChooseDuplicant || this.ChosenDuplicant != null) && !this.landerPlaced;
+			return base.sm.hasCargo.Get(base.smi) && this.IsValidDropLocation() && (!this.ChooseDuplicant || (this.ChosenDuplicant != null && !this.ChosenDuplicant.HasTag(GameTags.Dead))) && !this.landerPlaced;
 		}
 
 		public bool ChooseDuplicant

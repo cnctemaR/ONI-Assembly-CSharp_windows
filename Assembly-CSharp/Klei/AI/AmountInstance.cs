@@ -117,20 +117,10 @@ namespace Klei.AI
 				return;
 			}
 			AmountInstance.BatchUpdateContext batchUpdateContext = new AmountInstance.BatchUpdateContext(amount_instances, time_delta);
-			AmountInstance.batch_update_job.Reset(batchUpdateContext);
-			int num = 512;
-			for (int i = 0; i < amount_instances.Count; i += num)
-			{
-				int num2 = i + num;
-				if (amount_instances.Count < num2)
-				{
-					num2 = amount_instances.Count;
-				}
-				AmountInstance.batch_update_job.Add(new AmountInstance.BatchUpdateTask(i, num2));
-			}
-			GlobalJobManager.Run(AmountInstance.batch_update_job);
-			batchUpdateContext.Finish();
-			AmountInstance.batch_update_job.Reset(null);
+			AmountInstance.AmmountInstanceBatchUpdateDispatcher.Instance.Reset(batchUpdateContext);
+			GlobalJobManager.Run(AmountInstance.AmmountInstanceBatchUpdateDispatcher.Instance);
+			AmountInstance.AmmountInstanceBatchUpdateDispatcher.Instance.Finish();
+			AmountInstance.AmmountInstanceBatchUpdateDispatcher.Instance.Reset(AmountInstance.BatchUpdateContext.EmptyContext);
 		}
 
 		public void Deactivate()
@@ -155,44 +145,19 @@ namespace Klei.AI
 
 		private bool _paused;
 
-		private static WorkItemCollection<AmountInstance.BatchUpdateTask, AmountInstance.BatchUpdateContext> batch_update_job = new WorkItemCollection<AmountInstance.BatchUpdateTask, AmountInstance.BatchUpdateContext>();
-
-		private class BatchUpdateContext
+		private struct BatchUpdateContext
 		{
 			public BatchUpdateContext(List<UpdateBucketWithUpdater<ISim200ms>.Entry> amount_instances, float time_delta)
 			{
-				for (int num = 0; num != amount_instances.Count; num++)
-				{
-					UpdateBucketWithUpdater<ISim200ms>.Entry entry = amount_instances[num];
-					entry.lastUpdateTime = 0f;
-					amount_instances[num] = entry;
-				}
 				this.amount_instances = amount_instances;
 				this.time_delta = time_delta;
-				this.results = new ListPool<AmountInstance.BatchUpdateContext.Result, AmountInstance.BatchUpdateContext>.PooledList[GlobalJobManager.ThreadCount];
-				for (int i = 0; i < GlobalJobManager.ThreadCount; i++)
-				{
-					this.results[i] = ListPool<AmountInstance.BatchUpdateContext.Result, AmountInstance.BatchUpdateContext>.Allocate();
-				}
-			}
-
-			public void Finish()
-			{
-				for (int i = 0; i < GlobalJobManager.ThreadCount; i++)
-				{
-					foreach (AmountInstance.BatchUpdateContext.Result result in this.results[i])
-					{
-						result.amount_instance.Publish(result.delta, result.previous);
-					}
-					this.results[i].Recycle();
-				}
 			}
 
 			public List<UpdateBucketWithUpdater<ISim200ms>.Entry> amount_instances;
 
 			public float time_delta;
 
-			public ListPool<AmountInstance.BatchUpdateContext.Result, AmountInstance.BatchUpdateContext>.PooledList[] results;
+			public static AmountInstance.BatchUpdateContext EmptyContext = new AmountInstance.BatchUpdateContext(null, 0f);
 
 			public struct Result
 			{
@@ -204,36 +169,76 @@ namespace Klei.AI
 			}
 		}
 
-		private struct BatchUpdateTask : IWorkItem<AmountInstance.BatchUpdateContext>
+		private class AmmountInstanceBatchUpdateDispatcher : WorkItemCollectionWithThreadContex<AmountInstance.BatchUpdateContext, List<AmountInstance.BatchUpdateContext.Result>>
 		{
-			public BatchUpdateTask(int start, int end)
+			public static AmountInstance.AmmountInstanceBatchUpdateDispatcher Instance
 			{
-				this.start = start;
-				this.end = end;
+				get
+				{
+					if (AmountInstance.AmmountInstanceBatchUpdateDispatcher.instance == null || AmountInstance.AmmountInstanceBatchUpdateDispatcher.instance.threadContexts.Count != GlobalJobManager.ThreadCount)
+					{
+						AmountInstance.AmmountInstanceBatchUpdateDispatcher.instance = new AmountInstance.AmmountInstanceBatchUpdateDispatcher();
+					}
+					return AmountInstance.AmmountInstanceBatchUpdateDispatcher.instance;
+				}
 			}
 
-			public void Run(AmountInstance.BatchUpdateContext context, int threadIndex)
+			public AmmountInstanceBatchUpdateDispatcher()
 			{
-				for (int num = this.start; num != this.end; num++)
+				this.threadContexts = new List<List<AmountInstance.BatchUpdateContext.Result>>(GlobalJobManager.ThreadCount);
+				for (int i = 0; i < GlobalJobManager.ThreadCount; i++)
 				{
-					AmountInstance amountInstance = (AmountInstance)context.amount_instances[num].data;
-					float num2 = amountInstance.GetDelta() * context.time_delta;
-					if (num2 != 0f)
+					this.threadContexts.Add(new List<AmountInstance.BatchUpdateContext.Result>());
+				}
+			}
+
+			public void Reset(AmountInstance.BatchUpdateContext context)
+			{
+				this.sharedData = context;
+				if (context.amount_instances == null)
+				{
+					this.count = 0;
+					return;
+				}
+				this.count = (context.amount_instances.Count + 512 - 1) / 512;
+			}
+
+			public override void RunItem(int item, ref AmountInstance.BatchUpdateContext shared_data, List<AmountInstance.BatchUpdateContext.Result> thread_context, int threadIndex)
+			{
+				int num = item * 512;
+				int num2 = Mathf.Min(num + 512, shared_data.amount_instances.Count);
+				for (int i = num; i < num2; i++)
+				{
+					AmountInstance amountInstance = (AmountInstance)shared_data.amount_instances[i].data;
+					float num3 = amountInstance.GetDelta() * shared_data.time_delta;
+					if (num3 != 0f)
 					{
-						context.results[threadIndex].Add(new AmountInstance.BatchUpdateContext.Result
+						thread_context.Add(new AmountInstance.BatchUpdateContext.Result
 						{
 							amount_instance = amountInstance,
 							previous = amountInstance.value,
-							delta = num2
+							delta = num3
 						});
-						amountInstance.SetValue(amountInstance.value + num2);
+						amountInstance.SetValue(amountInstance.value + num3);
 					}
 				}
 			}
 
-			private int start;
+			public void Finish()
+			{
+				foreach (List<AmountInstance.BatchUpdateContext.Result> list in this.threadContexts)
+				{
+					foreach (AmountInstance.BatchUpdateContext.Result result in list)
+					{
+						result.amount_instance.Publish(result.delta, result.previous);
+					}
+					list.Clear();
+				}
+			}
 
-			private int end;
+			private const int kBatchSize = 512;
+
+			private static AmountInstance.AmmountInstanceBatchUpdateDispatcher instance;
 		}
 	}
 }

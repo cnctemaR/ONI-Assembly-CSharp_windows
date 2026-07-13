@@ -6,7 +6,7 @@ using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
 [AddComponentMenu("KMonoBehaviour/Plugins/KPrefabID")]
-public class KPrefabID : KMonoBehaviour, ISaveLoadable
+public class KPrefabID : KMonoBehaviour, ISaveLoadable, IHasDlcRestrictions
 {
 	public static int NextUniqueID
 	{
@@ -29,6 +29,22 @@ public class KPrefabID : KMonoBehaviour, ISaveLoadable
 	public bool pendingDestruction { get; private set; }
 
 	public bool conflicted { get; private set; }
+
+	public string[] GetRequiredDlcIds()
+	{
+		return this.requiredDlcIds;
+	}
+
+	public string[] GetForbiddenDlcIds()
+	{
+		return this.forbiddenDlcIds;
+	}
+
+	public void SetDlcRestrictions(IHasDlcRestrictions restrictions)
+	{
+		this.requiredDlcIds = restrictions.GetRequiredDlcIds();
+		this.forbiddenDlcIds = restrictions.GetForbiddenDlcIds();
+	}
 
 	public HashSet<Tag> Tags
 	{
@@ -337,7 +353,11 @@ public class KPrefabID : KMonoBehaviour, ISaveLoadable
 	[Serialize]
 	private HashSet<Tag> serializedTags = new HashSet<Tag>();
 
+	[HideInInspector]
 	public string[] requiredDlcIds;
+
+	[HideInInspector]
+	public string[] forbiddenDlcIds;
 
 	private HashSet<Tag> tags = new HashSet<Tag>();
 

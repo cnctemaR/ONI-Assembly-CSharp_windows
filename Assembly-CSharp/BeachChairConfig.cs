@@ -1,4 +1,5 @@
 ﻿using System;
+using STRINGS;
 using TUNING;
 using UnityEngine;
 
@@ -17,10 +18,11 @@ public class BeachChairConfig : IBuildingConfig
 		float num5 = 1600f;
 		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloor;
 		EffectorValues none = NOISE_POLLUTION.NONE;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, array, array2, num5, buildLocationRule, BUILDINGS.DECOR.BONUS.TIER4, none, 0.2f);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, array, array2, num5, buildLocationRule, global::TUNING.BUILDINGS.DECOR.BONUS.TIER4, none, 0.2f);
 		buildingDef.Floodable = true;
 		buildingDef.AudioCategory = "Metal";
 		buildingDef.Overheatable = true;
+		buildingDef.AddSearchTerms(SEARCH_TERMS.MORALE);
 		return buildingDef;
 	}
 

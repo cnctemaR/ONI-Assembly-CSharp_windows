@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using UnityEngine;
 
 [AddComponentMenu("KMonoBehaviour/scripts/EquipmentConfigManager")]
@@ -18,7 +19,23 @@ public class EquipmentConfigManager : KMonoBehaviour
 
 	public void RegisterEquipment(IEquipmentConfig config)
 	{
-		if (!DlcManager.IsDlcListValidForCurrentContent(config.GetDlcIds()))
+		string[] array = null;
+		string[] array2 = null;
+		if (config.GetDlcIds() != null)
+		{
+			DlcManager.ConvertAvailableToRequireAndForbidden(config.GetDlcIds(), out array, out array2);
+			DebugUtil.DevLogError(string.Format("{0} implements GetDlcIds, which is obsolete.", config.GetType()));
+		}
+		else
+		{
+			IHasDlcRestrictions hasDlcRestrictions = config as IHasDlcRestrictions;
+			if (hasDlcRestrictions != null)
+			{
+				array = hasDlcRestrictions.GetRequiredDlcIds();
+				array2 = hasDlcRestrictions.GetForbiddenDlcIds();
+			}
+		}
+		if (!DlcManager.IsCorrectDlcSubscribed(array, array2))
 		{
 			return;
 		}
@@ -54,6 +71,24 @@ public class EquipmentConfigManager : KMonoBehaviour
 		foreach (KeyValuePair<string, float> keyValuePair in def.InputElementMassMap)
 		{
 			recipe.AddIngredient(new Recipe.Ingredient(keyValuePair.Key, keyValuePair.Value));
+		}
+	}
+
+	[Conditional("UNITY_EDITOR")]
+	private void ValidateEquipmentConfig(IEquipmentConfig equipmentConfig)
+	{
+		if (equipmentConfig == null)
+		{
+			throw new ArgumentNullException("equipmentConfig");
+		}
+		Type type = equipmentConfig.GetType();
+		Type typeFromHandle = typeof(IHasDlcRestrictions);
+		bool flag = type.GetMethod("GetRequiredDlcIds", Type.EmptyTypes) != null;
+		bool flag2 = type.GetMethod("GetForbiddenDlcIds", Type.EmptyTypes) != null;
+		bool flag3 = typeFromHandle.IsAssignableFrom(type);
+		if ((flag || flag2) && !flag3)
+		{
+			DebugUtil.LogErrorArgs(new object[] { type.Name + " is an IEquipmentConfig and has GetRequiredDlcIds or GetForbiddenDlcIds but does not implement IHasDlcRestrictions." });
 		}
 	}
 

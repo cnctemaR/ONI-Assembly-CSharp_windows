@@ -629,9 +629,13 @@ public class MusicManager : KMonoBehaviour, ISerializationCallbackReceiver
 
 	private static bool IsValidForDLCContext(string dlcid)
 	{
+		if (dlcid == "")
+		{
+			return true;
+		}
 		if (SaveLoader.Instance != null)
 		{
-			return SaveLoader.Instance.IsDLCActiveForCurrentSave(dlcid);
+			return Game.IsDlcActiveForCurrentSave(dlcid);
 		}
 		return DlcManager.IsContentSubscribed(dlcid);
 	}
@@ -822,7 +826,7 @@ public class MusicManager : KMonoBehaviour, ISerializationCallbackReceiver
 		public bool dynamic;
 
 		[NonSerialized]
-		public string requiredDlcId = "";
+		public string requiredDlcId;
 
 		[NonSerialized]
 		public bool useTimeOfDay;
@@ -869,7 +873,7 @@ public class MusicManager : KMonoBehaviour, ISerializationCallbackReceiver
 
 		[Tooltip("Should playback of this song be limited to an active DLC?")]
 		[SerializeField]
-		public string requiredDlcId = "";
+		public string requiredDlcId;
 	}
 
 	[DebuggerDisplay("{fmodEvent}")]
@@ -880,7 +884,7 @@ public class MusicManager : KMonoBehaviour, ISerializationCallbackReceiver
 
 		[Tooltip("Should playback of this song be limited to an active DLC?")]
 		[SerializeField]
-		public string requiredDlcId = "";
+		public string requiredDlcId;
 	}
 
 	[DebuggerDisplay("{fmodEvent}")]
@@ -891,7 +895,7 @@ public class MusicManager : KMonoBehaviour, ISerializationCallbackReceiver
 
 		[Tooltip("Should playback of this song be limited to an active DLC?")]
 		[SerializeField]
-		public string requiredDlcId = "";
+		public string requiredDlcId;
 	}
 
 	[DebuggerDisplay("{fmodEvent}")]
@@ -906,7 +910,7 @@ public class MusicManager : KMonoBehaviour, ISerializationCallbackReceiver
 
 		[Tooltip("Should playback of this song be limited to an active DLC?")]
 		[SerializeField]
-		public string requiredDlcId = "";
+		public string requiredDlcId;
 	}
 
 	public enum TypeOfMusic

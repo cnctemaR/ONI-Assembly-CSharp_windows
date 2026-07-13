@@ -9,12 +9,11 @@ public static class KProfiler
 {
 	public static bool IsEnabled()
 	{
-		return KProfiler.enabled;
+		return false;
 	}
 
 	public static void Enable()
 	{
-		KProfiler.enabled = true;
 	}
 
 	public static void Disable()
@@ -25,11 +24,7 @@ public static class KProfiler
 	{
 	}
 
-	public static void BeginFrame()
-	{
-	}
-
-	public static void EndFrame()
+	public static void NextFrame()
 	{
 	}
 
@@ -52,7 +47,7 @@ public static class KProfiler
 	}
 
 	[Conditional("ENABLE_KPROFILER")]
-	public static void Ping(string display, string group, double value)
+	public static void Ping(string display, double value)
 	{
 	}
 
@@ -142,8 +137,6 @@ public static class KProfiler
 	public static void EndThreadProfiling()
 	{
 	}
-
-	private static bool enabled = false;
 
 	public static int counter = 0;
 

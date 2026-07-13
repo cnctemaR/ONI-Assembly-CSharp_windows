@@ -1,4 +1,5 @@
 ﻿using System;
+using STRINGS;
 using TUNING;
 using UnityEngine;
 
@@ -12,12 +13,12 @@ public class LiquidMiniPumpConfig : IBuildingConfig
 		string text2 = "miniwaterpump_kanim";
 		int num3 = 100;
 		float num4 = 60f;
-		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER2;
+		float[] tier = global::TUNING.BUILDINGS.CONSTRUCTION_MASS_KG.TIER2;
 		string[] plastics = MATERIALS.PLASTICS;
 		float num5 = 1600f;
 		BuildLocationRule buildLocationRule = BuildLocationRule.Anywhere;
 		EffectorValues none = NOISE_POLLUTION.NONE;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, plastics, num5, buildLocationRule, BUILDINGS.DECOR.PENALTY.TIER1, none, 0.2f);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, plastics, num5, buildLocationRule, global::TUNING.BUILDINGS.DECOR.PENALTY.TIER1, none, 0.2f);
 		buildingDef.PermittedRotations = PermittedRotations.R360;
 		buildingDef.RequiresPowerInput = true;
 		buildingDef.EnergyConsumptionWhenActive = 60f;
@@ -31,6 +32,7 @@ public class LiquidMiniPumpConfig : IBuildingConfig
 		buildingDef.UtilityOutputOffset = new CellOffset(0, 1);
 		buildingDef.LogicInputPorts = LogicOperationalController.CreateSingleInputPortList(new CellOffset(0, 1));
 		GeneratedBuildings.RegisterWithOverlay(OverlayScreen.LiquidVentIDs, "LiquidMiniPump");
+		buildingDef.AddSearchTerms(SEARCH_TERMS.WATER);
 		return buildingDef;
 	}
 

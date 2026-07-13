@@ -29,6 +29,8 @@ public class MissileFabricatorConfig : IBuildingConfig
 		buildingDef.PowerInputOffset = new CellOffset(1, 0);
 		buildingDef.InputConduitType = ConduitType.Liquid;
 		buildingDef.UtilityInputOffset = new CellOffset(-1, 1);
+		buildingDef.RequiredSkillPerkID = Db.Get().SkillPerks.CanMakeMissiles.Id;
+		buildingDef.AddSearchTerms(SEARCH_TERMS.MISSILE);
 		return buildingDef;
 	}
 

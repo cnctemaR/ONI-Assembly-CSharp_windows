@@ -1,4 +1,5 @@
 ﻿using System;
+using STRINGS;
 using TUNING;
 using UnityEngine;
 
@@ -13,8 +14,10 @@ public class WireRefinedBridgeConfig : WireBridgeConfig
 	{
 		BuildingDef buildingDef = base.CreateBuildingDef();
 		buildingDef.AnimFiles = new KAnimFile[] { Assets.GetAnim("utilityelectricbridgeconductive_kanim") };
-		buildingDef.Mass = BUILDINGS.CONSTRUCTION_MASS_KG.TIER0;
+		buildingDef.Mass = global::TUNING.BUILDINGS.CONSTRUCTION_MASS_KG.TIER0;
 		buildingDef.MaterialCategory = MATERIALS.REFINED_METALS;
+		buildingDef.AddSearchTerms(SEARCH_TERMS.POWER);
+		buildingDef.AddSearchTerms(SEARCH_TERMS.WIRE);
 		GeneratedBuildings.RegisterWithOverlay(OverlayScreen.WireIDs, "WireRefinedBridge");
 		return buildingDef;
 	}

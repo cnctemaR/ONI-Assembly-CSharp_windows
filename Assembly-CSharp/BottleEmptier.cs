@@ -156,7 +156,7 @@ public class BottleEmptier : StateMachineComponent<BottleEmptier.StatesInstance>
 		private void OnStorageChange(object data)
 		{
 			this.meter.SetPositionPercent(Mathf.Clamp01(this.storage.RemainingCapacity() / this.storage.capacityKg));
-			this.meter.meterController.enabled = this.storage.MassStored() > 0f;
+			this.meter.meterController.enabled = this.storage.ExactMassStored() > 0f;
 		}
 
 		private void OnOnlyFetchMarkedItemsSettingChanged(object data)
@@ -296,7 +296,7 @@ public class BottleEmptier : StateMachineComponent<BottleEmptier.StatesInstance>
 			};
 			this.root.ToggleStatusItem(this.statusItem, (BottleEmptier.StatesInstance smi) => smi.master);
 			this.unoperational.TagTransition(GameTags.Operational, this.waitingfordelivery, false).PlayAnim("off");
-			this.waitingfordelivery.TagTransition(GameTags.Operational, this.unoperational, true).EventTransition(GameHashes.OnStorageChange, this.emptying, (BottleEmptier.StatesInstance smi) => smi.GetComponent<Storage>().MassStored() > 0f).Enter("CreateChore", delegate(BottleEmptier.StatesInstance smi)
+			this.waitingfordelivery.TagTransition(GameTags.Operational, this.unoperational, true).EventTransition(GameHashes.OnStorageChange, this.emptying, (BottleEmptier.StatesInstance smi) => smi.GetComponent<Storage>().ExactMassStored() > 0f).Enter("CreateChore", delegate(BottleEmptier.StatesInstance smi)
 			{
 				smi.CreateChore();
 			})
@@ -305,7 +305,7 @@ public class BottleEmptier : StateMachineComponent<BottleEmptier.StatesInstance>
 					smi.CancelChore();
 				})
 				.PlayAnim("on");
-			this.emptying.TagTransition(GameTags.Operational, this.unoperational, true).EventTransition(GameHashes.OnStorageChange, this.waitingfordelivery, (BottleEmptier.StatesInstance smi) => smi.GetComponent<Storage>().MassStored() == 0f).Enter("StartMeter", delegate(BottleEmptier.StatesInstance smi)
+			this.emptying.TagTransition(GameTags.Operational, this.unoperational, true).EventTransition(GameHashes.OnStorageChange, this.waitingfordelivery, (BottleEmptier.StatesInstance smi) => smi.GetComponent<Storage>().ExactMassStored() == 0f).Enter("StartMeter", delegate(BottleEmptier.StatesInstance smi)
 			{
 				smi.StartMeter();
 			})

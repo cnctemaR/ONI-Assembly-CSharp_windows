@@ -13,6 +13,8 @@ public class GroundTrapConfig : IBuildingConfig
 		buildingDef.LogicOutputPorts = new List<LogicPorts.Port> { LogicPorts.Port.OutputPort("TRAP_HAS_PREY_STATUS_PORT", new CellOffset(1, 0), global::STRINGS.BUILDINGS.PREFABS.REUSABLETRAP.LOGIC_PORT, global::STRINGS.BUILDINGS.PREFABS.REUSABLETRAP.LOGIC_PORT_ACTIVE, global::STRINGS.BUILDINGS.PREFABS.REUSABLETRAP.LOGIC_PORT_INACTIVE, false, false) };
 		buildingDef.AudioCategory = "Metal";
 		buildingDef.Floodable = false;
+		buildingDef.AddSearchTerms(SEARCH_TERMS.RANCHING);
+		buildingDef.AddSearchTerms(SEARCH_TERMS.CRITTER);
 		return buildingDef;
 	}
 

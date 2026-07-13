@@ -1,4 +1,5 @@
 ﻿using System;
+using STRINGS;
 using TUNING;
 using UnityEngine;
 
@@ -12,12 +13,12 @@ public class HydroponicFarmConfig : IBuildingConfig
 		string text2 = "farmtilehydroponicrotating_kanim";
 		int num3 = 100;
 		float num4 = 30f;
-		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER2;
+		float[] tier = global::TUNING.BUILDINGS.CONSTRUCTION_MASS_KG.TIER2;
 		string[] all_METALS = MATERIALS.ALL_METALS;
 		float num5 = 1600f;
 		BuildLocationRule buildLocationRule = BuildLocationRule.Tile;
 		EffectorValues none = NOISE_POLLUTION.NONE;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, all_METALS, num5, buildLocationRule, BUILDINGS.DECOR.PENALTY.TIER0, none, 0.2f);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, all_METALS, num5, buildLocationRule, global::TUNING.BUILDINGS.DECOR.PENALTY.TIER0, none, 0.2f);
 		BuildingTemplates.CreateFoundationTileDef(buildingDef);
 		buildingDef.Floodable = false;
 		buildingDef.Entombable = false;
@@ -31,6 +32,8 @@ public class HydroponicFarmConfig : IBuildingConfig
 		buildingDef.PermittedRotations = PermittedRotations.FlipV;
 		buildingDef.InputConduitType = ConduitType.Liquid;
 		buildingDef.UtilityInputOffset = new CellOffset(0, 0);
+		buildingDef.AddSearchTerms(SEARCH_TERMS.FARM);
+		buildingDef.AddSearchTerms(SEARCH_TERMS.FOOD);
 		return buildingDef;
 	}
 

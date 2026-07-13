@@ -1,4 +1,5 @@
 ﻿using System;
+using STRINGS;
 using TUNING;
 using UnityEngine;
 
@@ -12,12 +13,12 @@ public class CO2ScrubberConfig : IBuildingConfig
 		string text2 = "co2scrubber_kanim";
 		int num3 = 30;
 		float num4 = 30f;
-		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER2;
+		float[] tier = global::TUNING.BUILDINGS.CONSTRUCTION_MASS_KG.TIER2;
 		string[] raw_METALS = MATERIALS.RAW_METALS;
 		float num5 = 800f;
 		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloor;
 		EffectorValues tier2 = NOISE_POLLUTION.NOISY.TIER3;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, raw_METALS, num5, buildLocationRule, BUILDINGS.DECOR.PENALTY.TIER1, tier2, 0.2f);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, raw_METALS, num5, buildLocationRule, global::TUNING.BUILDINGS.DECOR.PENALTY.TIER1, tier2, 0.2f);
 		buildingDef.RequiresPowerInput = true;
 		buildingDef.EnergyConsumptionWhenActive = 120f;
 		buildingDef.SelfHeatKilowattsWhenActive = 1f;
@@ -30,6 +31,8 @@ public class CO2ScrubberConfig : IBuildingConfig
 		buildingDef.UtilityOutputOffset = new CellOffset(1, 1);
 		buildingDef.PermittedRotations = PermittedRotations.FlipH;
 		buildingDef.LogicInputPorts = LogicOperationalController.CreateSingleInputPortList(new CellOffset(1, 0));
+		buildingDef.AddSearchTerms(SEARCH_TERMS.CO2);
+		buildingDef.AddSearchTerms(SEARCH_TERMS.FILTER);
 		return buildingDef;
 	}
 

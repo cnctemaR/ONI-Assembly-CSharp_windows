@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Database;
 using Klei.AI;
 using STRINGS;
@@ -17,6 +18,14 @@ public class BionicUpgradeComponentConfig : IMultiEntityConfig
 			text = text + "\n" + component.description;
 		}
 		return text + "\n\n" + BionicUpgradeComponentConfig.UpgradesData[booster.PrefabID()].stateMachineDescription;
+	}
+
+	public static Tag[] GetBoostersWithSkillPerk(string perkID)
+	{
+		return (from data in BionicUpgradeComponentConfig.UpgradesData
+			where data.Value.skillPerks.Contains(perkID)
+			select data into kvp
+			select kvp.Key).ToArray<Tag>();
 	}
 
 	public AttributeModifier[] CreateBoosterModifiers(string name, Dictionary<string, float> attributes)
@@ -40,7 +49,7 @@ public class BionicUpgradeComponentConfig : IMultiEntityConfig
 		{
 			return list;
 		}
-		BionicUpgradeComponentConfig.<>c__DisplayClass26_0 CS$<>8__locals1 = new BionicUpgradeComponentConfig.<>c__DisplayClass26_0();
+		BionicUpgradeComponentConfig.<>c__DisplayClass27_0 CS$<>8__locals1 = new BionicUpgradeComponentConfig.<>c__DisplayClass27_0();
 		string text = "Booster_Dig1";
 		AttributeModifier[] array = this.CreateBoosterModifiers(text, new Dictionary<string, float>
 		{
@@ -53,14 +62,15 @@ public class BionicUpgradeComponentConfig : IMultiEntityConfig
 				2f
 			}
 		});
-		BionicUpgradeComponentConfig.<>c__DisplayClass26_0 CS$<>8__locals2 = CS$<>8__locals1;
+		SkillPerk[] array2 = new SkillPerk[] { Db.Get().SkillPerks.CanDigVeryFirm };
+		BionicUpgradeComponentConfig.<>c__DisplayClass27_0 CS$<>8__locals2 = CS$<>8__locals1;
 		string text2 = text;
-		AttributeModifier[] array2 = array;
-		CS$<>8__locals2.skill_worker_def = new BionicUpgrade_SkilledWorker.Def(text2, Db.Get().Attributes.Digging.Id, array2, new SkillPerk[] { Db.Get().SkillPerks.CanDigVeryFirm }, new string[] { "hat_role_mining1", "hat_role_mining2" });
-		list.Add(BionicUpgradeComponentConfig.CreateNewUpgradeComponent(text, null, null, 0f, (StateMachine.Instance smi) => new BionicUpgrade_SkilledWorker.Instance(smi.GetMaster(), CS$<>8__locals1.skill_worker_def), CS$<>8__locals1.skill_worker_def.GetDescription() + "\n\n" + string.Format(global::STRINGS.ITEMS.BIONIC_BOOSTERS.FABRICATION_SOURCE, global::STRINGS.BUILDINGS.PREFABS.CRAFTINGTABLE.NAME), DlcManager.DLC3, "upgrade_disc_kanim", "basic_excavation_0", SimHashes.Creature, null, BionicUpgradeComponentConfig.BoosterType.Basic, true, true));
-		BionicUpgradeComponentConfig.<>c__DisplayClass26_1 CS$<>8__locals3 = new BionicUpgradeComponentConfig.<>c__DisplayClass26_1();
+		AttributeModifier[] array3 = array;
+		CS$<>8__locals2.skill_worker_def = new BionicUpgrade_SkilledWorker.Def(text2, Db.Get().Attributes.Digging.Id, array3, array2, new string[] { "hat_role_mining1", "hat_role_mining2" });
+		list.Add(BionicUpgradeComponentConfig.CreateNewUpgradeComponent(text, null, null, 0f, (StateMachine.Instance smi) => new BionicUpgrade_SkilledWorker.Instance(smi.GetMaster(), CS$<>8__locals1.skill_worker_def), CS$<>8__locals1.skill_worker_def.GetDescription() + "\n\n" + string.Format(global::STRINGS.ITEMS.BIONIC_BOOSTERS.FABRICATION_SOURCE, global::STRINGS.BUILDINGS.PREFABS.CRAFTINGTABLE.NAME), DlcManager.DLC3, "upgrade_disc_kanim", "basic_excavation_0", SimHashes.Creature, null, BionicUpgradeComponentConfig.BoosterType.Basic, true, true, array2));
+		BionicUpgradeComponentConfig.<>c__DisplayClass27_1 CS$<>8__locals3 = new BionicUpgradeComponentConfig.<>c__DisplayClass27_1();
 		string text3 = "Booster_Construct1";
-		AttributeModifier[] array3 = this.CreateBoosterModifiers(text3, new Dictionary<string, float>
+		AttributeModifier[] array4 = this.CreateBoosterModifiers(text3, new Dictionary<string, float>
 		{
 			{
 				Db.Get().Attributes.Construction.Id,
@@ -71,14 +81,15 @@ public class BionicUpgradeComponentConfig : IMultiEntityConfig
 				2f
 			}
 		});
-		BionicUpgradeComponentConfig.<>c__DisplayClass26_1 CS$<>8__locals4 = CS$<>8__locals3;
+		SkillPerk[] array5 = new SkillPerk[] { Db.Get().SkillPerks.CanDemolish };
+		BionicUpgradeComponentConfig.<>c__DisplayClass27_1 CS$<>8__locals4 = CS$<>8__locals3;
 		string text4 = text3;
-		array2 = array3;
-		CS$<>8__locals4.skill_worker_def = new BionicUpgrade_SkilledWorker.Def(text4, Db.Get().Attributes.Construction.Id, array2, new SkillPerk[] { Db.Get().SkillPerks.CanDemolish }, new string[] { "hat_role_building1", "hat_role_building2", "hat_role_building3" });
-		list.Add(BionicUpgradeComponentConfig.CreateNewUpgradeComponent(text3, null, null, 0f, (StateMachine.Instance smi) => new BionicUpgrade_SkilledWorker.Instance(smi.GetMaster(), CS$<>8__locals3.skill_worker_def), CS$<>8__locals3.skill_worker_def.GetDescription() + "\n\n" + string.Format(global::STRINGS.ITEMS.BIONIC_BOOSTERS.FABRICATION_SOURCE, global::STRINGS.BUILDINGS.PREFABS.CRAFTINGTABLE.NAME), DlcManager.DLC3, "upgrade_disc_kanim", "basic_construction_0", SimHashes.Creature, null, BionicUpgradeComponentConfig.BoosterType.Basic, true, true));
-		BionicUpgradeComponentConfig.<>c__DisplayClass26_2 CS$<>8__locals5 = new BionicUpgradeComponentConfig.<>c__DisplayClass26_2();
+		array3 = array4;
+		CS$<>8__locals4.skill_worker_def = new BionicUpgrade_SkilledWorker.Def(text4, Db.Get().Attributes.Construction.Id, array3, array5, new string[] { "hat_role_building1", "hat_role_building2", "hat_role_building3" });
+		list.Add(BionicUpgradeComponentConfig.CreateNewUpgradeComponent(text3, null, null, 0f, (StateMachine.Instance smi) => new BionicUpgrade_SkilledWorker.Instance(smi.GetMaster(), CS$<>8__locals3.skill_worker_def), CS$<>8__locals3.skill_worker_def.GetDescription() + "\n\n" + string.Format(global::STRINGS.ITEMS.BIONIC_BOOSTERS.FABRICATION_SOURCE, global::STRINGS.BUILDINGS.PREFABS.CRAFTINGTABLE.NAME), DlcManager.DLC3, "upgrade_disc_kanim", "basic_construction_0", SimHashes.Creature, null, BionicUpgradeComponentConfig.BoosterType.Basic, true, true, array5));
+		BionicUpgradeComponentConfig.<>c__DisplayClass27_2 CS$<>8__locals5 = new BionicUpgradeComponentConfig.<>c__DisplayClass27_2();
 		string text5 = "Booster_Carry1";
-		AttributeModifier[] array4 = this.CreateBoosterModifiers(text5, new Dictionary<string, float>
+		AttributeModifier[] array6 = this.CreateBoosterModifiers(text5, new Dictionary<string, float>
 		{
 			{
 				Db.Get().Attributes.Strength.Id,
@@ -89,14 +100,15 @@ public class BionicUpgradeComponentConfig : IMultiEntityConfig
 				2f
 			}
 		});
-		BionicUpgradeComponentConfig.<>c__DisplayClass26_2 CS$<>8__locals6 = CS$<>8__locals5;
+		SkillPerk[] array7 = new SkillPerk[] { Db.Get().SkillPerks.IncreasedCarryBionics };
+		BionicUpgradeComponentConfig.<>c__DisplayClass27_2 CS$<>8__locals6 = CS$<>8__locals5;
 		string text6 = text5;
-		array2 = array4;
-		CS$<>8__locals6.skill_worker_def = new BionicUpgrade_SkilledWorker.Def(text6, Db.Get().Attributes.Athletics.Id, array2, new SkillPerk[] { Db.Get().SkillPerks.IncreasedCarryBionics }, new string[] { "hat_role_hauling1", "hat_role_hauling2" });
-		list.Add(BionicUpgradeComponentConfig.CreateNewUpgradeComponent(text5, null, null, 0f, (StateMachine.Instance smi) => new BionicUpgrade_SkilledWorker.Instance(smi.GetMaster(), CS$<>8__locals5.skill_worker_def), CS$<>8__locals5.skill_worker_def.GetDescription() + "\n\n" + string.Format(global::STRINGS.ITEMS.BIONIC_BOOSTERS.FABRICATION_SOURCE, global::STRINGS.BUILDINGS.PREFABS.CRAFTINGTABLE.NAME), DlcManager.DLC3, "upgrade_disc_kanim", "basic_strength_0", SimHashes.Creature, null, BionicUpgradeComponentConfig.BoosterType.Basic, false, true));
-		BionicUpgradeComponentConfig.<>c__DisplayClass26_3 CS$<>8__locals7 = new BionicUpgradeComponentConfig.<>c__DisplayClass26_3();
+		array3 = array6;
+		CS$<>8__locals6.skill_worker_def = new BionicUpgrade_SkilledWorker.Def(text6, Db.Get().Attributes.Athletics.Id, array3, array7, new string[] { "hat_role_hauling1", "hat_role_hauling2" });
+		list.Add(BionicUpgradeComponentConfig.CreateNewUpgradeComponent(text5, null, null, 0f, (StateMachine.Instance smi) => new BionicUpgrade_SkilledWorker.Instance(smi.GetMaster(), CS$<>8__locals5.skill_worker_def), CS$<>8__locals5.skill_worker_def.GetDescription() + "\n\n" + string.Format(global::STRINGS.ITEMS.BIONIC_BOOSTERS.FABRICATION_SOURCE, global::STRINGS.BUILDINGS.PREFABS.CRAFTINGTABLE.NAME), DlcManager.DLC3, "upgrade_disc_kanim", "basic_strength_0", SimHashes.Creature, null, BionicUpgradeComponentConfig.BoosterType.Basic, false, true, array7));
+		BionicUpgradeComponentConfig.<>c__DisplayClass27_3 CS$<>8__locals7 = new BionicUpgradeComponentConfig.<>c__DisplayClass27_3();
 		string text7 = "Booster_Research1";
-		AttributeModifier[] array5 = this.CreateBoosterModifiers(text7, new Dictionary<string, float>
+		AttributeModifier[] array8 = this.CreateBoosterModifiers(text7, new Dictionary<string, float>
 		{
 			{
 				Db.Get().Attributes.Learning.Id,
@@ -107,19 +119,20 @@ public class BionicUpgradeComponentConfig : IMultiEntityConfig
 				2f
 			}
 		});
-		BionicUpgradeComponentConfig.<>c__DisplayClass26_3 CS$<>8__locals8 = CS$<>8__locals7;
-		string text8 = text7;
-		array2 = array5;
-		CS$<>8__locals8.skill_worker_def = new BionicUpgrade_SkilledWorker.Def(text8, Db.Get().Attributes.Learning.Id, array2, new SkillPerk[]
+		SkillPerk[] array9 = new SkillPerk[]
 		{
 			Db.Get().SkillPerks.AllowAdvancedResearch,
 			Db.Get().SkillPerks.CanStudyWorldObjects,
 			Db.Get().SkillPerks.AllowGeyserTuning
-		}, new string[] { "hat_role_research1", "hat_role_research2" });
-		list.Add(BionicUpgradeComponentConfig.CreateNewUpgradeComponent(text7, null, null, 0f, (StateMachine.Instance smi) => new BionicUpgrade_SkilledWorker.Instance(smi.GetMaster(), CS$<>8__locals7.skill_worker_def), CS$<>8__locals7.skill_worker_def.GetDescription() + "\n\n" + string.Format(global::STRINGS.ITEMS.BIONIC_BOOSTERS.FABRICATION_SOURCE, global::STRINGS.BUILDINGS.PREFABS.CRAFTINGTABLE.NAME), DlcManager.DLC3, "upgrade_disc_kanim", "science_4", SimHashes.Creature, null, BionicUpgradeComponentConfig.BoosterType.Basic, false, true));
-		BionicUpgradeComponentConfig.<>c__DisplayClass26_4 CS$<>8__locals9 = new BionicUpgradeComponentConfig.<>c__DisplayClass26_4();
+		};
+		BionicUpgradeComponentConfig.<>c__DisplayClass27_3 CS$<>8__locals8 = CS$<>8__locals7;
+		string text8 = text7;
+		array3 = array8;
+		CS$<>8__locals8.skill_worker_def = new BionicUpgrade_SkilledWorker.Def(text8, Db.Get().Attributes.Learning.Id, array3, array9, new string[] { "hat_role_research1", "hat_role_research2" });
+		list.Add(BionicUpgradeComponentConfig.CreateNewUpgradeComponent(text7, null, null, 0f, (StateMachine.Instance smi) => new BionicUpgrade_SkilledWorker.Instance(smi.GetMaster(), CS$<>8__locals7.skill_worker_def), CS$<>8__locals7.skill_worker_def.GetDescription() + "\n\n" + string.Format(global::STRINGS.ITEMS.BIONIC_BOOSTERS.FABRICATION_SOURCE, global::STRINGS.BUILDINGS.PREFABS.CRAFTINGTABLE.NAME), DlcManager.DLC3, "upgrade_disc_kanim", "science_4", SimHashes.Creature, null, BionicUpgradeComponentConfig.BoosterType.Basic, false, true, array9));
+		BionicUpgradeComponentConfig.<>c__DisplayClass27_4 CS$<>8__locals9 = new BionicUpgradeComponentConfig.<>c__DisplayClass27_4();
 		string text9 = "Booster_Medicine1";
-		AttributeModifier[] array6 = this.CreateBoosterModifiers(text9, new Dictionary<string, float>
+		AttributeModifier[] array10 = this.CreateBoosterModifiers(text9, new Dictionary<string, float>
 		{
 			{
 				Db.Get().Attributes.Caring.Id,
@@ -130,36 +143,37 @@ public class BionicUpgradeComponentConfig : IMultiEntityConfig
 				2f
 			}
 		});
-		BionicUpgradeComponentConfig.<>c__DisplayClass26_4 CS$<>8__locals10 = CS$<>8__locals9;
-		string text10 = text9;
-		array2 = array6;
-		CS$<>8__locals10.skill_worker_def = new BionicUpgrade_SkilledWorker.Def(text10, Db.Get().Attributes.DoctoredLevel.Id, array2, new SkillPerk[]
+		SkillPerk[] array11 = new SkillPerk[]
 		{
 			Db.Get().SkillPerks.CanCompound,
 			Db.Get().SkillPerks.CanDoctor,
 			Db.Get().SkillPerks.CanAdvancedMedicine
-		}, new string[] { "hat_role_medicalaid1", "hat_role_medicalaid2", "hat_role_medicalaid3" });
-		list.Add(BionicUpgradeComponentConfig.CreateNewUpgradeComponent(text9, null, null, 0f, (StateMachine.Instance smi) => new BionicUpgrade_SkilledWorker.Instance(smi.GetMaster(), CS$<>8__locals9.skill_worker_def), CS$<>8__locals9.skill_worker_def.GetDescription() + "\n\n" + string.Format(global::STRINGS.ITEMS.BIONIC_BOOSTERS.FABRICATION_SOURCE, global::STRINGS.BUILDINGS.PREFABS.CRAFTINGTABLE.NAME), DlcManager.DLC3, "upgrade_disc_kanim", "medicine_0", SimHashes.Creature, null, BionicUpgradeComponentConfig.BoosterType.Basic, true, true));
-		BionicUpgradeComponentConfig.<>c__DisplayClass26_5 CS$<>8__locals11 = new BionicUpgradeComponentConfig.<>c__DisplayClass26_5();
+		};
+		BionicUpgradeComponentConfig.<>c__DisplayClass27_4 CS$<>8__locals10 = CS$<>8__locals9;
+		string text10 = text9;
+		array3 = array10;
+		CS$<>8__locals10.skill_worker_def = new BionicUpgrade_SkilledWorker.Def(text10, Db.Get().Attributes.DoctoredLevel.Id, array3, array11, new string[] { "hat_role_medicalaid1", "hat_role_medicalaid2", "hat_role_medicalaid3" });
+		list.Add(BionicUpgradeComponentConfig.CreateNewUpgradeComponent(text9, null, null, 0f, (StateMachine.Instance smi) => new BionicUpgrade_SkilledWorker.Instance(smi.GetMaster(), CS$<>8__locals9.skill_worker_def), CS$<>8__locals9.skill_worker_def.GetDescription() + "\n\n" + string.Format(global::STRINGS.ITEMS.BIONIC_BOOSTERS.FABRICATION_SOURCE, global::STRINGS.BUILDINGS.PREFABS.CRAFTINGTABLE.NAME), DlcManager.DLC3, "upgrade_disc_kanim", "medicine_0", SimHashes.Creature, null, BionicUpgradeComponentConfig.BoosterType.Basic, true, true, array11));
+		BionicUpgradeComponentConfig.<>c__DisplayClass27_5 CS$<>8__locals11 = new BionicUpgradeComponentConfig.<>c__DisplayClass27_5();
 		string text11 = "Booster_Dig2";
-		SkillPerk[] array8;
+		SkillPerk[] array13;
 		if (!DlcManager.IsExpansion1Active())
 		{
-			SkillPerk[] array7 = new SkillPerk[2];
-			array7[0] = Db.Get().SkillPerks.CanDigNearlyImpenetrable;
-			array8 = array7;
-			array7[1] = Db.Get().SkillPerks.CanDigSuperDuperHard;
+			SkillPerk[] array12 = new SkillPerk[2];
+			array12[0] = Db.Get().SkillPerks.CanDigNearlyImpenetrable;
+			array13 = array12;
+			array12[1] = Db.Get().SkillPerks.CanDigSuperDuperHard;
 		}
 		else
 		{
-			SkillPerk[] array9 = new SkillPerk[3];
-			array9[0] = Db.Get().SkillPerks.CanDigNearlyImpenetrable;
-			array9[1] = Db.Get().SkillPerks.CanDigSuperDuperHard;
-			array8 = array9;
-			array9[2] = Db.Get().SkillPerks.CanDigRadioactiveMaterials;
+			SkillPerk[] array14 = new SkillPerk[3];
+			array14[0] = Db.Get().SkillPerks.CanDigNearlyImpenetrable;
+			array14[1] = Db.Get().SkillPerks.CanDigSuperDuperHard;
+			array13 = array14;
+			array14[2] = Db.Get().SkillPerks.CanDigRadioactiveMaterials;
 		}
-		SkillPerk[] array10 = array8;
-		AttributeModifier[] array11 = this.CreateBoosterModifiers(text11, new Dictionary<string, float>
+		SkillPerk[] array15 = array13;
+		AttributeModifier[] array16 = this.CreateBoosterModifiers(text11, new Dictionary<string, float>
 		{
 			{
 				Db.Get().Attributes.Digging.Id,
@@ -170,32 +184,36 @@ public class BionicUpgradeComponentConfig : IMultiEntityConfig
 				2f
 			}
 		});
-		string[] array12;
+		string[] array17;
 		if (!DlcManager.IsExpansion1Active())
 		{
-			(array12 = new string[1])[0] = "hat_role_mining3";
+			(array17 = new string[1])[0] = "hat_role_mining3";
 		}
 		else
 		{
-			string[] array13 = new string[2];
-			array13[0] = "hat_role_mining3";
-			array12 = array13;
-			array13[1] = "hat_role_mining4";
+			string[] array18 = new string[2];
+			array18[0] = "hat_role_mining3";
+			array17 = array18;
+			array18[1] = "hat_role_mining4";
 		}
-		string[] array14 = array12;
-		BionicUpgradeComponentConfig.<>c__DisplayClass26_5 CS$<>8__locals12 = CS$<>8__locals11;
+		string[] array19 = array17;
+		BionicUpgradeComponentConfig.<>c__DisplayClass27_5 CS$<>8__locals12 = CS$<>8__locals11;
 		string text12 = text11;
-		array2 = array11;
-		CS$<>8__locals12.skill_worker_def = new BionicUpgrade_SkilledWorker.Def(text12, Db.Get().Attributes.Digging.Id, array2, array10, array14);
-		list.Add(BionicUpgradeComponentConfig.CreateNewUpgradeComponent(text11, null, null, 0f, (StateMachine.Instance smi) => new BionicUpgrade_SkilledWorker.Instance(smi.GetMaster(), CS$<>8__locals11.skill_worker_def), CS$<>8__locals11.skill_worker_def.GetDescription() + "\n\n" + string.Format(global::STRINGS.ITEMS.BIONIC_BOOSTERS.FABRICATION_SOURCE, global::STRINGS.BUILDINGS.PREFABS.ADVANCEDCRAFTINGTABLE.NAME), DlcManager.DLC3, "upgrade_disc_kanim", "excavation_1", SimHashes.Creature, null, BionicUpgradeComponentConfig.BoosterType.Intermediate, true, true));
-		BionicUpgradeComponentConfig.<>c__DisplayClass26_6 CS$<>8__locals13 = new BionicUpgradeComponentConfig.<>c__DisplayClass26_6();
+		array3 = array16;
+		CS$<>8__locals12.skill_worker_def = new BionicUpgrade_SkilledWorker.Def(text12, Db.Get().Attributes.Digging.Id, array3, array15, array19);
+		list.Add(BionicUpgradeComponentConfig.CreateNewUpgradeComponent(text11, null, null, 0f, (StateMachine.Instance smi) => new BionicUpgrade_SkilledWorker.Instance(smi.GetMaster(), CS$<>8__locals11.skill_worker_def), CS$<>8__locals11.skill_worker_def.GetDescription() + "\n\n" + string.Format(global::STRINGS.ITEMS.BIONIC_BOOSTERS.FABRICATION_SOURCE, global::STRINGS.BUILDINGS.PREFABS.ADVANCEDCRAFTINGTABLE.NAME), DlcManager.DLC3, "upgrade_disc_kanim", "excavation_1", SimHashes.Creature, null, BionicUpgradeComponentConfig.BoosterType.Intermediate, true, true, array15));
+		BionicUpgradeComponentConfig.<>c__DisplayClass27_6 CS$<>8__locals13 = new BionicUpgradeComponentConfig.<>c__DisplayClass27_6();
 		string text13 = "Booster_Farm1";
-		List<SkillPerk> list2 = new List<SkillPerk> { Db.Get().SkillPerks.CanFarmTinker };
+		List<SkillPerk> list2 = new List<SkillPerk>
+		{
+			Db.Get().SkillPerks.CanFarmTinker,
+			Db.Get().SkillPerks.CanFarmStation
+		};
 		if (DlcManager.IsExpansion1Active())
 		{
 			list2.Add(Db.Get().SkillPerks.CanIdentifyMutantSeeds);
 		}
-		AttributeModifier[] array15 = this.CreateBoosterModifiers(text13, new Dictionary<string, float>
+		AttributeModifier[] array20 = this.CreateBoosterModifiers(text13, new Dictionary<string, float>
 		{
 			{
 				Db.Get().Attributes.Botanist.Id,
@@ -206,14 +224,14 @@ public class BionicUpgradeComponentConfig : IMultiEntityConfig
 				2f
 			}
 		});
-		BionicUpgradeComponentConfig.<>c__DisplayClass26_6 CS$<>8__locals14 = CS$<>8__locals13;
+		BionicUpgradeComponentConfig.<>c__DisplayClass27_6 CS$<>8__locals14 = CS$<>8__locals13;
 		string text14 = text13;
-		array2 = array15;
-		CS$<>8__locals14.skill_worker_def = new BionicUpgrade_SkilledWorker.Def(text14, Db.Get().Attributes.Botanist.Id, array2, list2.ToArray(), new string[] { "hat_role_farming1", "hat_role_farming2", "hat_role_farming3" });
-		list.Add(BionicUpgradeComponentConfig.CreateNewUpgradeComponent(text13, null, null, 0f, (StateMachine.Instance smi) => new BionicUpgrade_SkilledWorker.Instance(smi.GetMaster(), CS$<>8__locals13.skill_worker_def), CS$<>8__locals13.skill_worker_def.GetDescription() + "\n\n" + string.Format(global::STRINGS.ITEMS.BIONIC_BOOSTERS.FABRICATION_SOURCE, global::STRINGS.BUILDINGS.PREFABS.ADVANCEDCRAFTINGTABLE.NAME), DlcManager.DLC3, "upgrade_disc_kanim", "agriculture_0", SimHashes.Creature, null, BionicUpgradeComponentConfig.BoosterType.Intermediate, true, false));
-		BionicUpgradeComponentConfig.<>c__DisplayClass26_7 CS$<>8__locals15 = new BionicUpgradeComponentConfig.<>c__DisplayClass26_7();
+		array3 = array20;
+		CS$<>8__locals14.skill_worker_def = new BionicUpgrade_SkilledWorker.Def(text14, Db.Get().Attributes.Botanist.Id, array3, list2.ToArray(), new string[] { "hat_role_farming1", "hat_role_farming2", "hat_role_farming3" });
+		list.Add(BionicUpgradeComponentConfig.CreateNewUpgradeComponent(text13, null, null, 0f, (StateMachine.Instance smi) => new BionicUpgrade_SkilledWorker.Instance(smi.GetMaster(), CS$<>8__locals13.skill_worker_def), CS$<>8__locals13.skill_worker_def.GetDescription() + "\n\n" + string.Format(global::STRINGS.ITEMS.BIONIC_BOOSTERS.FABRICATION_SOURCE, global::STRINGS.BUILDINGS.PREFABS.ADVANCEDCRAFTINGTABLE.NAME), DlcManager.DLC3, "upgrade_disc_kanim", "agriculture_0", SimHashes.Creature, null, BionicUpgradeComponentConfig.BoosterType.Intermediate, true, false, list2.ToArray()));
+		BionicUpgradeComponentConfig.<>c__DisplayClass27_7 CS$<>8__locals15 = new BionicUpgradeComponentConfig.<>c__DisplayClass27_7();
 		string text15 = "Booster_Ranch1";
-		AttributeModifier[] array16 = this.CreateBoosterModifiers(text15, new Dictionary<string, float>
+		AttributeModifier[] array21 = this.CreateBoosterModifiers(text15, new Dictionary<string, float>
 		{
 			{
 				Db.Get().Attributes.Ranching.Id,
@@ -224,19 +242,20 @@ public class BionicUpgradeComponentConfig : IMultiEntityConfig
 				2f
 			}
 		});
-		BionicUpgradeComponentConfig.<>c__DisplayClass26_7 CS$<>8__locals16 = CS$<>8__locals15;
-		string text16 = text15;
-		array2 = array16;
-		CS$<>8__locals16.skill_worker_def = new BionicUpgrade_SkilledWorker.Def(text16, Db.Get().Attributes.Ranching.Id, array2, new SkillPerk[]
+		SkillPerk[] array22 = new SkillPerk[]
 		{
 			Db.Get().SkillPerks.CanWrangleCreatures,
 			Db.Get().SkillPerks.CanUseRanchStation,
 			Db.Get().SkillPerks.CanUseMilkingStation
-		}, new string[] { "hat_role_rancher1", "hat_role_rancher2" });
-		list.Add(BionicUpgradeComponentConfig.CreateNewUpgradeComponent(text15, null, null, 0f, (StateMachine.Instance smi) => new BionicUpgrade_SkilledWorker.Instance(smi.GetMaster(), CS$<>8__locals15.skill_worker_def), CS$<>8__locals15.skill_worker_def.GetDescription() + "\n\n" + string.Format(global::STRINGS.ITEMS.BIONIC_BOOSTERS.FABRICATION_SOURCE, global::STRINGS.BUILDINGS.PREFABS.ADVANCEDCRAFTINGTABLE.NAME), DlcManager.DLC3, "upgrade_disc_kanim", "ranching_0", SimHashes.Creature, null, BionicUpgradeComponentConfig.BoosterType.Intermediate, true, false));
-		BionicUpgradeComponentConfig.<>c__DisplayClass26_8 CS$<>8__locals17 = new BionicUpgradeComponentConfig.<>c__DisplayClass26_8();
+		};
+		BionicUpgradeComponentConfig.<>c__DisplayClass27_7 CS$<>8__locals16 = CS$<>8__locals15;
+		string text16 = text15;
+		array3 = array21;
+		CS$<>8__locals16.skill_worker_def = new BionicUpgrade_SkilledWorker.Def(text16, Db.Get().Attributes.Ranching.Id, array3, array22, new string[] { "hat_role_rancher1", "hat_role_rancher2" });
+		list.Add(BionicUpgradeComponentConfig.CreateNewUpgradeComponent(text15, null, null, 0f, (StateMachine.Instance smi) => new BionicUpgrade_SkilledWorker.Instance(smi.GetMaster(), CS$<>8__locals15.skill_worker_def), CS$<>8__locals15.skill_worker_def.GetDescription() + "\n\n" + string.Format(global::STRINGS.ITEMS.BIONIC_BOOSTERS.FABRICATION_SOURCE, global::STRINGS.BUILDINGS.PREFABS.ADVANCEDCRAFTINGTABLE.NAME), DlcManager.DLC3, "upgrade_disc_kanim", "ranching_0", SimHashes.Creature, null, BionicUpgradeComponentConfig.BoosterType.Intermediate, true, false, array22));
+		BionicUpgradeComponentConfig.<>c__DisplayClass27_8 CS$<>8__locals17 = new BionicUpgradeComponentConfig.<>c__DisplayClass27_8();
 		string text17 = "Booster_Cook1";
-		AttributeModifier[] array17 = this.CreateBoosterModifiers(text17, new Dictionary<string, float>
+		AttributeModifier[] array23 = this.CreateBoosterModifiers(text17, new Dictionary<string, float>
 		{
 			{
 				Db.Get().Attributes.Cooking.Id,
@@ -247,16 +266,19 @@ public class BionicUpgradeComponentConfig : IMultiEntityConfig
 				2f
 			}
 		});
-		BionicUpgradeComponentConfig.<>c__DisplayClass26_8 CS$<>8__locals18 = CS$<>8__locals17;
-		string text18 = text17;
-		array2 = array17;
-		CS$<>8__locals18.skill_worker_def = new BionicUpgrade_SkilledWorker.Def(text18, Db.Get().Attributes.Cooking.Id, array2, new SkillPerk[]
+		SkillPerk[] array24 = new SkillPerk[]
 		{
 			Db.Get().SkillPerks.CanElectricGrill,
+			Db.Get().SkillPerks.CanDeepFry,
+			Db.Get().SkillPerks.CanGasRange,
 			Db.Get().SkillPerks.CanSpiceGrinder
-		}, new string[] { "hat_role_cooking1", "hat_role_cooking2" });
-		list.Add(BionicUpgradeComponentConfig.CreateNewUpgradeComponent(text17, null, null, 0f, (StateMachine.Instance smi) => new BionicUpgrade_SkilledWorker.Instance(smi.GetMaster(), CS$<>8__locals17.skill_worker_def), CS$<>8__locals17.skill_worker_def.GetDescription() + "\n\n" + string.Format(global::STRINGS.ITEMS.BIONIC_BOOSTERS.FABRICATION_SOURCE, global::STRINGS.BUILDINGS.PREFABS.ADVANCEDCRAFTINGTABLE.NAME), DlcManager.DLC3, "upgrade_disc_kanim", "cooking_0", SimHashes.Creature, null, BionicUpgradeComponentConfig.BoosterType.Intermediate, true, true));
-		BionicUpgradeComponentConfig.<>c__DisplayClass26_9 CS$<>8__locals19 = new BionicUpgradeComponentConfig.<>c__DisplayClass26_9();
+		};
+		BionicUpgradeComponentConfig.<>c__DisplayClass27_8 CS$<>8__locals18 = CS$<>8__locals17;
+		string text18 = text17;
+		array3 = array23;
+		CS$<>8__locals18.skill_worker_def = new BionicUpgrade_SkilledWorker.Def(text18, Db.Get().Attributes.Cooking.Id, array3, array24, new string[] { "hat_role_cooking1", "hat_role_cooking2" });
+		list.Add(BionicUpgradeComponentConfig.CreateNewUpgradeComponent(text17, null, null, 0f, (StateMachine.Instance smi) => new BionicUpgrade_SkilledWorker.Instance(smi.GetMaster(), CS$<>8__locals17.skill_worker_def), CS$<>8__locals17.skill_worker_def.GetDescription() + "\n\n" + string.Format(global::STRINGS.ITEMS.BIONIC_BOOSTERS.FABRICATION_SOURCE, global::STRINGS.BUILDINGS.PREFABS.ADVANCEDCRAFTINGTABLE.NAME), DlcManager.DLC3, "upgrade_disc_kanim", "cooking_0", SimHashes.Creature, null, BionicUpgradeComponentConfig.BoosterType.Intermediate, true, true, array24));
+		BionicUpgradeComponentConfig.<>c__DisplayClass27_9 CS$<>8__locals19 = new BionicUpgradeComponentConfig.<>c__DisplayClass27_9();
 		string text19 = "Booster_Art1";
 		List<SkillPerk> list3 = new List<SkillPerk>
 		{
@@ -268,7 +290,7 @@ public class BionicUpgradeComponentConfig : IMultiEntityConfig
 		{
 			list3.Add(Db.Get().SkillPerks.CanStudyArtifact);
 		}
-		AttributeModifier[] array18 = this.CreateBoosterModifiers(text19, new Dictionary<string, float>
+		AttributeModifier[] array25 = this.CreateBoosterModifiers(text19, new Dictionary<string, float>
 		{
 			{
 				Db.Get().Attributes.Art.Id,
@@ -279,12 +301,12 @@ public class BionicUpgradeComponentConfig : IMultiEntityConfig
 				2f
 			}
 		});
-		BionicUpgradeComponentConfig.<>c__DisplayClass26_9 CS$<>8__locals20 = CS$<>8__locals19;
+		BionicUpgradeComponentConfig.<>c__DisplayClass27_9 CS$<>8__locals20 = CS$<>8__locals19;
 		string text20 = text19;
-		array2 = array18;
-		CS$<>8__locals20.skill_worker_def = new BionicUpgrade_SkilledWorker.Def(text20, Db.Get().Attributes.Art.Id, array2, list3.ToArray(), new string[] { "hat_role_art1", "hat_role_art2", "hat_role_art3" });
-		list.Add(BionicUpgradeComponentConfig.CreateNewUpgradeComponent(text19, null, null, 0f, (StateMachine.Instance smi) => new BionicUpgrade_SkilledWorker.Instance(smi.GetMaster(), CS$<>8__locals19.skill_worker_def), CS$<>8__locals19.skill_worker_def.GetDescription() + "\n\n" + string.Format(global::STRINGS.ITEMS.BIONIC_BOOSTERS.FABRICATION_SOURCE, global::STRINGS.BUILDINGS.PREFABS.ADVANCEDCRAFTINGTABLE.NAME), DlcManager.DLC3, "upgrade_disc_kanim", "creativity_0", SimHashes.Creature, null, BionicUpgradeComponentConfig.BoosterType.Intermediate, true, false));
-		BionicUpgradeComponentConfig.<>c__DisplayClass26_10 CS$<>8__locals21 = new BionicUpgradeComponentConfig.<>c__DisplayClass26_10();
+		array3 = array25;
+		CS$<>8__locals20.skill_worker_def = new BionicUpgrade_SkilledWorker.Def(text20, Db.Get().Attributes.Art.Id, array3, list3.ToArray(), new string[] { "hat_role_art1", "hat_role_art2", "hat_role_art3" });
+		list.Add(BionicUpgradeComponentConfig.CreateNewUpgradeComponent(text19, null, null, 0f, (StateMachine.Instance smi) => new BionicUpgrade_SkilledWorker.Instance(smi.GetMaster(), CS$<>8__locals19.skill_worker_def), CS$<>8__locals19.skill_worker_def.GetDescription() + "\n\n" + string.Format(global::STRINGS.ITEMS.BIONIC_BOOSTERS.FABRICATION_SOURCE, global::STRINGS.BUILDINGS.PREFABS.ADVANCEDCRAFTINGTABLE.NAME), DlcManager.DLC3, "upgrade_disc_kanim", "creativity_0", SimHashes.Creature, null, BionicUpgradeComponentConfig.BoosterType.Intermediate, true, false, list3.ToArray()));
+		BionicUpgradeComponentConfig.<>c__DisplayClass27_10 CS$<>8__locals21 = new BionicUpgradeComponentConfig.<>c__DisplayClass27_10();
 		string text21 = "Booster_Research2";
 		List<SkillPerk> list4 = new List<SkillPerk> { Db.Get().SkillPerks.CanMissionControl };
 		if (DlcManager.FeatureClusterSpaceEnabled())
@@ -296,20 +318,20 @@ public class BionicUpgradeComponentConfig : IMultiEntityConfig
 		{
 			list4.Add(Db.Get().SkillPerks.AllowInterstellarResearch);
 		}
-		string[] array19;
+		string[] array26;
 		if (!DlcManager.IsExpansion1Active())
 		{
-			(array19 = new string[1])[0] = "hat_role_research3";
+			(array26 = new string[1])[0] = "hat_role_research3";
 		}
 		else
 		{
-			string[] array20 = new string[2];
-			array20[0] = "hat_role_research3";
-			array19 = array20;
-			array20[1] = "hat_role_research4";
+			string[] array27 = new string[2];
+			array27[0] = "hat_role_research3";
+			array26 = array27;
+			array27[1] = "hat_role_research4";
 		}
-		string[] array21 = array19;
-		AttributeModifier[] array22 = this.CreateBoosterModifiers(text21, new Dictionary<string, float>
+		string[] array28 = array26;
+		AttributeModifier[] array29 = this.CreateBoosterModifiers(text21, new Dictionary<string, float>
 		{
 			{
 				Db.Get().Attributes.Learning.Id,
@@ -320,16 +342,16 @@ public class BionicUpgradeComponentConfig : IMultiEntityConfig
 				2f
 			}
 		});
-		BionicUpgradeComponentConfig.<>c__DisplayClass26_10 CS$<>8__locals22 = CS$<>8__locals21;
+		BionicUpgradeComponentConfig.<>c__DisplayClass27_10 CS$<>8__locals22 = CS$<>8__locals21;
 		string text22 = text21;
-		array2 = array22;
-		CS$<>8__locals22.skill_worker_def = new BionicUpgrade_SkilledWorker.Def(text22, Db.Get().Attributes.Learning.Id, array2, list4.ToArray(), array21);
-		list.Add(BionicUpgradeComponentConfig.CreateNewUpgradeComponent(text21, null, null, 0f, (StateMachine.Instance smi) => new BionicUpgrade_SkilledWorker.Instance(smi.GetMaster(), CS$<>8__locals21.skill_worker_def), CS$<>8__locals21.skill_worker_def.GetDescription() + "\n\n" + string.Format(global::STRINGS.ITEMS.BIONIC_BOOSTERS.FABRICATION_SOURCE, global::STRINGS.BUILDINGS.PREFABS.ADVANCEDCRAFTINGTABLE.NAME), DlcManager.DLC3, "upgrade_disc_kanim", "science_2", SimHashes.Creature, null, BionicUpgradeComponentConfig.BoosterType.Intermediate, false, false));
+		array3 = array29;
+		CS$<>8__locals22.skill_worker_def = new BionicUpgrade_SkilledWorker.Def(text22, Db.Get().Attributes.Learning.Id, array3, list4.ToArray(), array28);
+		list.Add(BionicUpgradeComponentConfig.CreateNewUpgradeComponent(text21, null, null, 0f, (StateMachine.Instance smi) => new BionicUpgrade_SkilledWorker.Instance(smi.GetMaster(), CS$<>8__locals21.skill_worker_def), CS$<>8__locals21.skill_worker_def.GetDescription() + "\n\n" + string.Format(global::STRINGS.ITEMS.BIONIC_BOOSTERS.FABRICATION_SOURCE, global::STRINGS.BUILDINGS.PREFABS.ADVANCEDCRAFTINGTABLE.NAME), DlcManager.DLC3, "upgrade_disc_kanim", "science_2", SimHashes.Creature, null, BionicUpgradeComponentConfig.BoosterType.Intermediate, false, false, list4.ToArray()));
 		if (DlcManager.IsExpansion1Active())
 		{
-			BionicUpgradeComponentConfig.<>c__DisplayClass26_11 CS$<>8__locals23 = new BionicUpgradeComponentConfig.<>c__DisplayClass26_11();
+			BionicUpgradeComponentConfig.<>c__DisplayClass27_11 CS$<>8__locals23 = new BionicUpgradeComponentConfig.<>c__DisplayClass27_11();
 			string text23 = "Booster_Research3";
-			AttributeModifier[] array23 = this.CreateBoosterModifiers(text23, new Dictionary<string, float>
+			AttributeModifier[] array30 = this.CreateBoosterModifiers(text23, new Dictionary<string, float>
 			{
 				{
 					Db.Get().Attributes.Learning.Id,
@@ -340,17 +362,18 @@ public class BionicUpgradeComponentConfig : IMultiEntityConfig
 					2f
 				}
 			});
-			BionicUpgradeComponentConfig.<>c__DisplayClass26_11 CS$<>8__locals24 = CS$<>8__locals23;
+			SkillPerk[] array31 = new SkillPerk[] { Db.Get().SkillPerks.AllowNuclearResearch };
+			BionicUpgradeComponentConfig.<>c__DisplayClass27_11 CS$<>8__locals24 = CS$<>8__locals23;
 			string text24 = text23;
-			array2 = array23;
-			CS$<>8__locals24.skill_worker_def = new BionicUpgrade_SkilledWorker.Def(text24, Db.Get().Attributes.Learning.Id, array2, new SkillPerk[] { Db.Get().SkillPerks.AllowNuclearResearch }, new string[] { "hat_role_research5" });
-			list.Add(BionicUpgradeComponentConfig.CreateNewUpgradeComponent(text23, null, null, 0f, (StateMachine.Instance smi) => new BionicUpgrade_SkilledWorker.Instance(smi.GetMaster(), CS$<>8__locals23.skill_worker_def), CS$<>8__locals23.skill_worker_def.GetDescription() + "\n\n" + string.Format(global::STRINGS.ITEMS.BIONIC_BOOSTERS.FABRICATION_SOURCE, global::STRINGS.BUILDINGS.PREFABS.ADVANCEDCRAFTINGTABLE.NAME), DlcManager.DLC3, "upgrade_disc_kanim", "science_3", SimHashes.Creature, null, BionicUpgradeComponentConfig.BoosterType.Intermediate, false, false));
+			array3 = array30;
+			CS$<>8__locals24.skill_worker_def = new BionicUpgrade_SkilledWorker.Def(text24, Db.Get().Attributes.Learning.Id, array3, array31, new string[] { "hat_role_research5" });
+			list.Add(BionicUpgradeComponentConfig.CreateNewUpgradeComponent(text23, null, null, 0f, (StateMachine.Instance smi) => new BionicUpgrade_SkilledWorker.Instance(smi.GetMaster(), CS$<>8__locals23.skill_worker_def), CS$<>8__locals23.skill_worker_def.GetDescription() + "\n\n" + string.Format(global::STRINGS.ITEMS.BIONIC_BOOSTERS.FABRICATION_SOURCE, global::STRINGS.BUILDINGS.PREFABS.ADVANCEDCRAFTINGTABLE.NAME), DlcManager.DLC3, "upgrade_disc_kanim", "science_3", SimHashes.Creature, null, BionicUpgradeComponentConfig.BoosterType.Intermediate, false, false, array31));
 		}
 		if (DlcManager.IsExpansion1Active())
 		{
-			BionicUpgradeComponentConfig.<>c__DisplayClass26_12 CS$<>8__locals25 = new BionicUpgradeComponentConfig.<>c__DisplayClass26_12();
+			BionicUpgradeComponentConfig.<>c__DisplayClass27_12 CS$<>8__locals25 = new BionicUpgradeComponentConfig.<>c__DisplayClass27_12();
 			string text25 = "Booster_Pilot1";
-			AttributeModifier[] array24 = this.CreateBoosterModifiers(text25, new Dictionary<string, float>
+			AttributeModifier[] array32 = this.CreateBoosterModifiers(text25, new Dictionary<string, float>
 			{
 				{
 					Db.Get().Attributes.SpaceNavigation.Id,
@@ -361,42 +384,45 @@ public class BionicUpgradeComponentConfig : IMultiEntityConfig
 					2f
 				}
 			});
-			BionicUpgradeComponentConfig.<>c__DisplayClass26_12 CS$<>8__locals26 = CS$<>8__locals25;
+			SkillPerk[] array33 = new SkillPerk[] { Db.Get().SkillPerks.CanUseRocketControlStation };
+			BionicUpgradeComponentConfig.<>c__DisplayClass27_12 CS$<>8__locals26 = CS$<>8__locals25;
 			string text26 = text25;
-			array2 = array24;
-			CS$<>8__locals26.skill_worker_def = new BionicUpgrade_SkilledWorker.Def(text26, Db.Get().Attributes.SpaceNavigation.Id, array2, new SkillPerk[] { Db.Get().SkillPerks.CanUseRocketControlStation }, new string[] { "hat_role_astronaut1", "hat_role_astronaut2" });
-			list.Add(BionicUpgradeComponentConfig.CreateNewUpgradeComponent(text25, null, null, 0f, (StateMachine.Instance smi) => new BionicUpgrade_SkilledWorker.Instance(smi.GetMaster(), CS$<>8__locals25.skill_worker_def), CS$<>8__locals25.skill_worker_def.GetDescription() + "\n\n" + string.Format(global::STRINGS.ITEMS.BIONIC_BOOSTERS.FABRICATION_SOURCE, global::STRINGS.BUILDINGS.PREFABS.ADVANCEDCRAFTINGTABLE.NAME), DlcManager.DLC3, "upgrade_disc_kanim", "piloting_0", SimHashes.Creature, null, BionicUpgradeComponentConfig.BoosterType.Intermediate, false, false));
+			array3 = array32;
+			CS$<>8__locals26.skill_worker_def = new BionicUpgrade_SkilledWorker.Def(text26, Db.Get().Attributes.SpaceNavigation.Id, array3, array33, new string[] { "hat_role_astronaut1", "hat_role_astronaut2" });
+			list.Add(BionicUpgradeComponentConfig.CreateNewUpgradeComponent(text25, null, null, 0f, (StateMachine.Instance smi) => new BionicUpgrade_SkilledWorker.Instance(smi.GetMaster(), CS$<>8__locals25.skill_worker_def), CS$<>8__locals25.skill_worker_def.GetDescription() + "\n\n" + string.Format(global::STRINGS.ITEMS.BIONIC_BOOSTERS.FABRICATION_SOURCE, global::STRINGS.BUILDINGS.PREFABS.ADVANCEDCRAFTINGTABLE.NAME), DlcManager.DLC3, "upgrade_disc_kanim", "piloting_0", SimHashes.Creature, null, BionicUpgradeComponentConfig.BoosterType.Intermediate, false, false, array33));
 		}
 		if (DlcManager.IsPureVanilla())
 		{
 			string text27 = "Booster_PilotVanilla1";
-			AttributeModifier[] array25 = this.CreateBoosterModifiers(text27, new Dictionary<string, float> { 
+			AttributeModifier[] array34 = this.CreateBoosterModifiers(text27, new Dictionary<string, float> { 
 			{
 				Db.Get().Attributes.Athletics.Id,
 				3f
 			} });
-			BionicUpgrade_SkilledWorker.Def skill_worker_def = new BionicUpgrade_SkilledWorker.Def(text27, null, array25, new SkillPerk[] { Db.Get().SkillPerks.CanUseRockets }, new string[] { "hat_role_astronaut1", "hat_role_astronaut2" });
-			list.Add(BionicUpgradeComponentConfig.CreateNewUpgradeComponent(text27, null, null, 0f, (StateMachine.Instance smi) => new BionicUpgrade_SkilledWorker.Instance(smi.GetMaster(), skill_worker_def), skill_worker_def.GetDescription() + "\n\n" + string.Format(global::STRINGS.ITEMS.BIONIC_BOOSTERS.FABRICATION_SOURCE, global::STRINGS.BUILDINGS.PREFABS.ADVANCEDCRAFTINGTABLE.NAME), DlcManager.DLC3, "upgrade_disc_kanim", "piloting_vanilla_0", SimHashes.Creature, null, BionicUpgradeComponentConfig.BoosterType.Intermediate, false, false));
+			SkillPerk[] array35 = new SkillPerk[] { Db.Get().SkillPerks.CanUseRockets };
+			BionicUpgrade_SkilledWorker.Def skill_worker_def = new BionicUpgrade_SkilledWorker.Def(text27, null, array34, array35, new string[] { "hat_role_astronaut1", "hat_role_astronaut2" });
+			list.Add(BionicUpgradeComponentConfig.CreateNewUpgradeComponent(text27, null, null, 0f, (StateMachine.Instance smi) => new BionicUpgrade_SkilledWorker.Instance(smi.GetMaster(), skill_worker_def), skill_worker_def.GetDescription() + "\n\n" + string.Format(global::STRINGS.ITEMS.BIONIC_BOOSTERS.FABRICATION_SOURCE, global::STRINGS.BUILDINGS.PREFABS.ADVANCEDCRAFTINGTABLE.NAME), DlcManager.DLC3, "upgrade_disc_kanim", "piloting_vanilla_0", SimHashes.Creature, null, BionicUpgradeComponentConfig.BoosterType.Intermediate, false, false, array35));
 		}
-		BionicUpgradeComponentConfig.<>c__DisplayClass26_14 CS$<>8__locals28 = new BionicUpgradeComponentConfig.<>c__DisplayClass26_14();
+		BionicUpgradeComponentConfig.<>c__DisplayClass27_14 CS$<>8__locals28 = new BionicUpgradeComponentConfig.<>c__DisplayClass27_14();
 		string text28 = "Booster_Suits1";
-		AttributeModifier[] array26 = this.CreateBoosterModifiers(text28, new Dictionary<string, float> { 
+		AttributeModifier[] array36 = this.CreateBoosterModifiers(text28, new Dictionary<string, float> { 
 		{
 			Db.Get().Attributes.Athletics.Id,
 			5f
 		} });
-		BionicUpgradeComponentConfig.<>c__DisplayClass26_14 CS$<>8__locals29 = CS$<>8__locals28;
-		string text29 = text28;
-		array2 = array26;
-		CS$<>8__locals29.skill_worker_def = new BionicUpgrade_SkilledWorker.Def(text29, Db.Get().Attributes.Athletics.Id, array2, new SkillPerk[]
+		SkillPerk[] array37 = new SkillPerk[]
 		{
 			Db.Get().SkillPerks.ExosuitDurability,
 			Db.Get().SkillPerks.ExosuitExpertise
-		}, new string[] { "hat_role_suits1", "hat_role_suits2" });
-		list.Add(BionicUpgradeComponentConfig.CreateNewUpgradeComponent(text28, null, null, 0f, (StateMachine.Instance smi) => new BionicUpgrade_SkilledWorker.Instance(smi.GetMaster(), CS$<>8__locals28.skill_worker_def), CS$<>8__locals28.skill_worker_def.GetDescription() + "\n\n" + string.Format(global::STRINGS.ITEMS.BIONIC_BOOSTERS.FABRICATION_SOURCE, global::STRINGS.BUILDINGS.PREFABS.ADVANCEDCRAFTINGTABLE.NAME), DlcManager.DLC3, "upgrade_disc_kanim", "suits_0", SimHashes.Creature, null, BionicUpgradeComponentConfig.BoosterType.Intermediate, true, false));
-		BionicUpgradeComponentConfig.<>c__DisplayClass26_15 CS$<>8__locals30 = new BionicUpgradeComponentConfig.<>c__DisplayClass26_15();
+		};
+		BionicUpgradeComponentConfig.<>c__DisplayClass27_14 CS$<>8__locals29 = CS$<>8__locals28;
+		string text29 = text28;
+		array3 = array36;
+		CS$<>8__locals29.skill_worker_def = new BionicUpgrade_SkilledWorker.Def(text29, Db.Get().Attributes.Athletics.Id, array3, array37, new string[] { "hat_role_suits1", "hat_role_suits2" });
+		list.Add(BionicUpgradeComponentConfig.CreateNewUpgradeComponent(text28, null, null, 0f, (StateMachine.Instance smi) => new BionicUpgrade_SkilledWorker.Instance(smi.GetMaster(), CS$<>8__locals28.skill_worker_def), CS$<>8__locals28.skill_worker_def.GetDescription() + "\n\n" + string.Format(global::STRINGS.ITEMS.BIONIC_BOOSTERS.FABRICATION_SOURCE, global::STRINGS.BUILDINGS.PREFABS.ADVANCEDCRAFTINGTABLE.NAME), DlcManager.DLC3, "upgrade_disc_kanim", "suits_0", SimHashes.Creature, null, BionicUpgradeComponentConfig.BoosterType.Intermediate, true, false, array37));
+		BionicUpgradeComponentConfig.<>c__DisplayClass27_15 CS$<>8__locals30 = new BionicUpgradeComponentConfig.<>c__DisplayClass27_15();
 		string text30 = "Booster_Tidy1";
-		AttributeModifier[] array27 = this.CreateBoosterModifiers(text30, new Dictionary<string, float>
+		AttributeModifier[] array38 = this.CreateBoosterModifiers(text30, new Dictionary<string, float>
 		{
 			{
 				Db.Get().Attributes.Strength.Id,
@@ -407,18 +433,19 @@ public class BionicUpgradeComponentConfig : IMultiEntityConfig
 				2f
 			}
 		});
-		BionicUpgradeComponentConfig.<>c__DisplayClass26_15 CS$<>8__locals31 = CS$<>8__locals30;
-		string text31 = text30;
-		array2 = array27;
-		CS$<>8__locals31.skill_worker_def = new BionicUpgrade_SkilledWorker.Def(text31, Db.Get().Attributes.Strength.Id, array2, new SkillPerk[]
+		SkillPerk[] array39 = new SkillPerk[]
 		{
 			Db.Get().SkillPerks.CanDoPlumbing,
 			Db.Get().SkillPerks.CanMakeMissiles
-		}, new string[] { "hat_role_basekeeping1", "hat_role_basekeeping2", "hat_role_pyrotechnics" });
-		list.Add(BionicUpgradeComponentConfig.CreateNewUpgradeComponent(text30, null, null, 0f, (StateMachine.Instance smi) => new BionicUpgrade_SkilledWorker.Instance(smi.GetMaster(), CS$<>8__locals30.skill_worker_def), CS$<>8__locals30.skill_worker_def.GetDescription() + "\n\n" + string.Format(global::STRINGS.ITEMS.BIONIC_BOOSTERS.FABRICATION_SOURCE, global::STRINGS.BUILDINGS.PREFABS.ADVANCEDCRAFTINGTABLE.NAME), DlcManager.DLC3, "upgrade_disc_kanim", "tidy_0", SimHashes.Creature, null, BionicUpgradeComponentConfig.BoosterType.Intermediate, false, false));
-		BionicUpgradeComponentConfig.<>c__DisplayClass26_16 CS$<>8__locals32 = new BionicUpgradeComponentConfig.<>c__DisplayClass26_16();
+		};
+		BionicUpgradeComponentConfig.<>c__DisplayClass27_15 CS$<>8__locals31 = CS$<>8__locals30;
+		string text31 = text30;
+		array3 = array38;
+		CS$<>8__locals31.skill_worker_def = new BionicUpgrade_SkilledWorker.Def(text31, Db.Get().Attributes.Strength.Id, array3, array39, new string[] { "hat_role_basekeeping1", "hat_role_basekeeping2", "hat_role_pyrotechnics" });
+		list.Add(BionicUpgradeComponentConfig.CreateNewUpgradeComponent(text30, null, null, 0f, (StateMachine.Instance smi) => new BionicUpgrade_SkilledWorker.Instance(smi.GetMaster(), CS$<>8__locals30.skill_worker_def), CS$<>8__locals30.skill_worker_def.GetDescription() + "\n\n" + string.Format(global::STRINGS.ITEMS.BIONIC_BOOSTERS.FABRICATION_SOURCE, global::STRINGS.BUILDINGS.PREFABS.ADVANCEDCRAFTINGTABLE.NAME), DlcManager.DLC3, "upgrade_disc_kanim", "tidy_0", SimHashes.Creature, null, BionicUpgradeComponentConfig.BoosterType.Intermediate, false, false, array39));
+		BionicUpgradeComponentConfig.<>c__DisplayClass27_16 CS$<>8__locals32 = new BionicUpgradeComponentConfig.<>c__DisplayClass27_16();
 		string text32 = "Booster_Op1";
-		AttributeModifier[] array28 = this.CreateBoosterModifiers(text32, new Dictionary<string, float>
+		AttributeModifier[] array40 = this.CreateBoosterModifiers(text32, new Dictionary<string, float>
 		{
 			{
 				Db.Get().Attributes.Machinery.Id,
@@ -429,18 +456,19 @@ public class BionicUpgradeComponentConfig : IMultiEntityConfig
 				2f
 			}
 		});
-		BionicUpgradeComponentConfig.<>c__DisplayClass26_16 CS$<>8__locals33 = CS$<>8__locals32;
-		string text33 = text32;
-		array2 = array28;
-		CS$<>8__locals33.skill_worker_def = new BionicUpgrade_SkilledWorker.Def(text33, Db.Get().Attributes.Machinery.Id, array2, new SkillPerk[]
+		SkillPerk[] array41 = new SkillPerk[]
 		{
 			Db.Get().SkillPerks.CanPowerTinker,
 			Db.Get().SkillPerks.CanCraftElectronics
-		}, new string[] { "hat_role_technicals1", "hat_role_technicals2" });
-		list.Add(BionicUpgradeComponentConfig.CreateNewUpgradeComponent(text32, null, null, 0f, (StateMachine.Instance smi) => new BionicUpgrade_SkilledWorker.Instance(smi.GetMaster(), CS$<>8__locals32.skill_worker_def), CS$<>8__locals32.skill_worker_def.GetDescription() + "\n\n" + string.Format(global::STRINGS.ITEMS.BIONIC_BOOSTERS.FABRICATION_SOURCE, global::STRINGS.BUILDINGS.PREFABS.ADVANCEDCRAFTINGTABLE.NAME), DlcManager.DLC3, "upgrade_disc_kanim", "machinery_0", SimHashes.Creature, null, BionicUpgradeComponentConfig.BoosterType.Intermediate, true, false));
-		BionicUpgradeComponentConfig.<>c__DisplayClass26_17 CS$<>8__locals34 = new BionicUpgradeComponentConfig.<>c__DisplayClass26_17();
+		};
+		BionicUpgradeComponentConfig.<>c__DisplayClass27_16 CS$<>8__locals33 = CS$<>8__locals32;
+		string text33 = text32;
+		array3 = array40;
+		CS$<>8__locals33.skill_worker_def = new BionicUpgrade_SkilledWorker.Def(text33, Db.Get().Attributes.Machinery.Id, array3, array41, new string[] { "hat_role_technicals1", "hat_role_technicals2" });
+		list.Add(BionicUpgradeComponentConfig.CreateNewUpgradeComponent(text32, null, null, 0f, (StateMachine.Instance smi) => new BionicUpgrade_SkilledWorker.Instance(smi.GetMaster(), CS$<>8__locals32.skill_worker_def), CS$<>8__locals32.skill_worker_def.GetDescription() + "\n\n" + string.Format(global::STRINGS.ITEMS.BIONIC_BOOSTERS.FABRICATION_SOURCE, global::STRINGS.BUILDINGS.PREFABS.ADVANCEDCRAFTINGTABLE.NAME), DlcManager.DLC3, "upgrade_disc_kanim", "machinery_0", SimHashes.Creature, null, BionicUpgradeComponentConfig.BoosterType.Intermediate, true, false, array41));
+		BionicUpgradeComponentConfig.<>c__DisplayClass27_17 CS$<>8__locals34 = new BionicUpgradeComponentConfig.<>c__DisplayClass27_17();
 		string text34 = "Booster_Op2";
-		AttributeModifier[] array29 = this.CreateBoosterModifiers(text34, new Dictionary<string, float>
+		AttributeModifier[] array42 = this.CreateBoosterModifiers(text34, new Dictionary<string, float>
 		{
 			{
 				Db.Get().Attributes.Machinery.Id,
@@ -451,11 +479,12 @@ public class BionicUpgradeComponentConfig : IMultiEntityConfig
 				2f
 			}
 		});
-		BionicUpgradeComponentConfig.<>c__DisplayClass26_17 CS$<>8__locals35 = CS$<>8__locals34;
+		SkillPerk[] array43 = new SkillPerk[] { Db.Get().SkillPerks.ConveyorBuild };
+		BionicUpgradeComponentConfig.<>c__DisplayClass27_17 CS$<>8__locals35 = CS$<>8__locals34;
 		string text35 = text34;
-		array2 = array29;
-		CS$<>8__locals35.skill_worker_def = new BionicUpgrade_SkilledWorker.Def(text35, Db.Get().Attributes.Machinery.Id, array2, new SkillPerk[] { Db.Get().SkillPerks.ConveyorBuild }, new string[] { "hat_role_engineering1" });
-		list.Add(BionicUpgradeComponentConfig.CreateNewUpgradeComponent(text34, null, null, 0f, (StateMachine.Instance smi) => new BionicUpgrade_SkilledWorker.Instance(smi.GetMaster(), CS$<>8__locals34.skill_worker_def), CS$<>8__locals34.skill_worker_def.GetDescription() + "\n\n" + string.Format(global::STRINGS.ITEMS.BIONIC_BOOSTERS.FABRICATION_SOURCE, global::STRINGS.BUILDINGS.PREFABS.ADVANCEDCRAFTINGTABLE.NAME), DlcManager.DLC3, "upgrade_disc_kanim", "machinery_1", SimHashes.Creature, null, BionicUpgradeComponentConfig.BoosterType.Advanced, false, false));
+		array3 = array42;
+		CS$<>8__locals35.skill_worker_def = new BionicUpgrade_SkilledWorker.Def(text35, Db.Get().Attributes.Machinery.Id, array3, array43, new string[] { "hat_role_engineering1" });
+		list.Add(BionicUpgradeComponentConfig.CreateNewUpgradeComponent(text34, null, null, 0f, (StateMachine.Instance smi) => new BionicUpgrade_SkilledWorker.Instance(smi.GetMaster(), CS$<>8__locals34.skill_worker_def), CS$<>8__locals34.skill_worker_def.GetDescription() + "\n\n" + string.Format(global::STRINGS.ITEMS.BIONIC_BOOSTERS.FABRICATION_SOURCE, global::STRINGS.BUILDINGS.PREFABS.ADVANCEDCRAFTINGTABLE.NAME), DlcManager.DLC3, "upgrade_disc_kanim", "machinery_1", SimHashes.Creature, null, BionicUpgradeComponentConfig.BoosterType.Advanced, false, false, array43));
 		list.RemoveAll((GameObject t) => t == null);
 		return list;
 	}
@@ -481,7 +510,7 @@ public class BionicUpgradeComponentConfig : IMultiEntityConfig
 		return Tag.Invalid;
 	}
 
-	public static GameObject CreateNewUpgradeComponent(string id, string name = null, string desc = null, float wattageCost = 0f, Func<StateMachine.Instance, StateMachine.Instance> stateMachine = null, string sm_description = "", string[] dlcIDs = null, string animFile = "upgrade_disc_kanim", string animStateName = "object", SimHashes element = SimHashes.Creature, string craftTechUnlockID = null, BionicUpgradeComponentConfig.BoosterType booster = BionicUpgradeComponentConfig.BoosterType.Basic, bool isStartingBooster = false, bool isCarePackage = false)
+	public static GameObject CreateNewUpgradeComponent(string id, string name = null, string desc = null, float wattageCost = 0f, Func<StateMachine.Instance, StateMachine.Instance> stateMachine = null, string sm_description = "", string[] dlcIDs = null, string animFile = "upgrade_disc_kanim", string animStateName = "object", SimHashes element = SimHashes.Creature, string craftTechUnlockID = null, BionicUpgradeComponentConfig.BoosterType booster = BionicUpgradeComponentConfig.BoosterType.Basic, bool isStartingBooster = false, bool isCarePackage = false, SkillPerk[] skillPerks = null)
 	{
 		if (!DlcManager.IsAllContentSubscribed(dlcIDs))
 		{
@@ -524,11 +553,11 @@ public class BionicUpgradeComponentConfig : IMultiEntityConfig
 			DUPLICANTSTATS.BIONICUPGRADETRAITS.Add(new DUPLICANTSTATS.TraitVal
 			{
 				id = text,
-				dlcId = "DLC3_ID"
+				requiredDlcIds = DlcManager.DLC3
 			});
 			TraitUtil.CreateBionicUpgradeTrait(text, sm_description)();
 		}
-		BionicUpgradeComponentConfig.UpgradesData.Add(component.PrefabTag, new BionicUpgradeComponentConfig.BionicUpgradeData(wattageCost, animStateName, text, booster, stateMachine, sm_description, isCarePackage));
+		BionicUpgradeComponentConfig.UpgradesData.Add(component.PrefabTag, new BionicUpgradeComponentConfig.BionicUpgradeData(wattageCost, animStateName, text, booster, stateMachine, sm_description, isCarePackage, skillPerks.Select<SkillPerk, string>((SkillPerk perk) => perk.Id).ToArray<string>()));
 		if (!BionicUpgradeComponentConfig.BASIC_BOOSTERS.Contains(ID))
 		{
 			ComplexRecipe.RecipeElement[] array = new ComplexRecipe.RecipeElement[]
@@ -675,7 +704,7 @@ public class BionicUpgradeComponentConfig : IMultiEntityConfig
 
 		public bool isCarePackage { get; private set; }
 
-		public BionicUpgradeData(float cost, string animStateName, string relatedTrait, BionicUpgradeComponentConfig.BoosterType booster, Func<StateMachine.Instance, StateMachine.Instance> smi, string stateMachineDescription, bool isCarePackage)
+		public BionicUpgradeData(float cost, string animStateName, string relatedTrait, BionicUpgradeComponentConfig.BoosterType booster, Func<StateMachine.Instance, StateMachine.Instance> smi, string stateMachineDescription, bool isCarePackage, string[] skillPerkIds = null)
 		{
 			this.WattageCost = cost;
 			this.stateMachine = smi;
@@ -684,6 +713,7 @@ public class BionicUpgradeComponentConfig : IMultiEntityConfig
 			this.relatedTrait = relatedTrait;
 			this.Booster = booster;
 			this.isCarePackage = isCarePackage;
+			this.skillPerks = skillPerkIds;
 		}
 
 		private const string DEFAULT_ANIM_STATE_NAME = "object";
@@ -691,5 +721,7 @@ public class BionicUpgradeComponentConfig : IMultiEntityConfig
 		public string stateMachineDescription;
 
 		public string animStateName = "object";
+
+		public string[] skillPerks = new string[0];
 	}
 }

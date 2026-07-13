@@ -36,8 +36,10 @@ public static class CodexCache
 				new global::Tuple<string, Type>("!CodexElementCategoryList", typeof(CodexElementCategoryList))
 			};
 		}
-		string text = CodexCache.FormatLinkID("LESSONS");
-		dictionary.Add(text, CodexEntryGenerator.GenerateCategoryEntry(text, UI.CODEX.CATEGORYNAMES.TIPS, CodexEntryGenerator.GenerateTutorialNotificationEntries(), Assets.GetSprite("codexIconLessons"), true, false, UI.CODEX.CATEGORYNAMES.VIDEOS));
+		string text = CodexCache.FormatLinkID("DUPLICANTSCATEGORY");
+		dictionary.Add(text, CodexEntryGenerator.GenerateCategoryEntry(text, UI.CODEX.CATEGORYNAMES.DUPLICANTS, CodexEntryGenerator.GenerateDuplicantEntries(), Assets.GetSprite("codexIconDupes"), true, false, UI.CODEX.CATEGORYNAMES.DUPLICANTS));
+		text = CodexCache.FormatLinkID("LESSONS");
+		dictionary.Add(text, CodexEntryGenerator.GenerateCategoryEntry(text, UI.CODEX.CATEGORYNAMES.TIPS, CodexEntryGenerator.GenerateTutorialNotificationEntries(), Assets.GetSprite("codexIconLessons"), true, true, UI.CODEX.CATEGORYNAMES.VIDEOS));
 		text = CodexCache.FormatLinkID("creatures");
 		dictionary.Add(text, CodexEntryGenerator.GenerateCategoryEntry(text, UI.CODEX.CATEGORYNAMES.CREATURES, CodexEntryGenerator_Creatures.GenerateEntries(), Assets.GetSprite("codexIconCritters"), true, false, null));
 		DebugUtil.DevAssert(text == "CREATURES", string.Empty, null);
@@ -67,7 +69,7 @@ public static class CodexCache
 		dictionary.Add(text, CodexEntryGenerator.GenerateCategoryEntry(text, UI.CODEX.CATEGORYNAMES.ROOMS, CodexEntryGenerator.GenerateRoomsEntries(), Assets.GetSprite("codexIconRooms"), true, true, null));
 		text = CodexCache.FormatLinkID("STORYTRAITS");
 		dictionary.Add(text, CodexEntryGenerator.GenerateCategoryEntry(text, UI.CODEX.CATEGORYNAMES.STORYTRAITS, new Dictionary<string, CodexEntry>(), Assets.GetSprite("codexIconStoryTraits"), true, true, null));
-		if (SaveLoader.Instance.IsDLCActiveForCurrentSave("DLC3_ID"))
+		if (Game.IsDlcActiveForCurrentSave("DLC3_ID"))
 		{
 			CodexEntryGenerator.GenerateBionicUpgradeEntries();
 			CodexEntryGenerator.GenerateElectrobankEntries();
@@ -131,7 +133,7 @@ public static class CodexCache
 						}
 						else
 						{
-							string text2 = UI.StripLinkFormatting(subEntry2.name);
+							string text2 = UI.StripLinkFormatting((subEntry2.name == null) ? Strings.Get(subEntry2.title) : subEntry2.name);
 							text2 = UI.FormatAsLink(text2, subEntry2.id);
 							list3.Add(new CodexText(text2, CodexTextStyle.Body, null));
 						}
@@ -209,7 +211,7 @@ public static class CodexCache
 		CodexCache.baseEntryPath = Application.streamingAssetsPath + "/codex";
 		foreach (CodexEntry codexEntry in CodexCache.CollectEntries(""))
 		{
-			if (codexEntry != null && codexEntry.id != null && codexEntry.contentContainers != null && SaveLoader.Instance.IsCorrectDlcActiveForCurrentSave(codexEntry.dlcIds, codexEntry.forbiddenDLCIds))
+			if (codexEntry != null && codexEntry.id != null && codexEntry.contentContainers != null && Game.IsCorrectDlcActiveForCurrentSave(codexEntry))
 			{
 				if (CodexCache.entries.ContainsKey(CodexCache.FormatLinkID(codexEntry.id)))
 				{
@@ -218,6 +220,7 @@ public static class CodexCache
 				else
 				{
 					CodexCache.AddEntry(codexEntry.id, codexEntry, categories);
+					codexEntry.customContentLength = codexEntry.contentContainers.Count;
 				}
 			}
 		}
@@ -226,7 +229,7 @@ public static class CodexCache
 		{
 			foreach (CodexEntry codexEntry2 in CodexCache.CollectEntries(Path.GetFileNameWithoutExtension(directories[i])))
 			{
-				if (codexEntry2 != null && codexEntry2.id != null && codexEntry2.contentContainers != null && SaveLoader.Instance.IsCorrectDlcActiveForCurrentSave(codexEntry2.dlcIds, codexEntry2.forbiddenDLCIds))
+				if (codexEntry2 != null && codexEntry2.id != null && codexEntry2.contentContainers != null && Game.IsCorrectDlcActiveForCurrentSave(codexEntry2))
 				{
 					if (CodexCache.entries.ContainsKey(CodexCache.FormatLinkID(codexEntry2.id)))
 					{
@@ -235,6 +238,7 @@ public static class CodexCache
 					else
 					{
 						CodexCache.AddEntry(codexEntry2.id, codexEntry2, categories);
+						codexEntry2.customContentLength = codexEntry2.contentContainers.Count;
 					}
 				}
 			}
@@ -249,7 +253,7 @@ public static class CodexCache
 			while (enumerator.MoveNext())
 			{
 				SubEntry v = enumerator.Current;
-				if (v.parentEntryID != null && v.id != null && SaveLoader.Instance.IsAllDlcActiveForCurrentSave(v.dlcIds))
+				if (v.parentEntryID != null && v.id != null && Game.IsCorrectDlcActiveForCurrentSave(v))
 				{
 					if (CodexCache.entries.ContainsKey(v.parentEntryID.ToUpper()))
 					{
@@ -273,18 +277,21 @@ public static class CodexCache
 							}
 							for (int i = 0; i < v.contentContainers.Count; i++)
 							{
-								if (!string.IsNullOrEmpty(v.contentContainers[i].lockID))
+								if (Game.IsCorrectDlcActiveForCurrentSave(v.contentContainers[i]))
 								{
-									int num = subEntry.contentContainers.IndexOf(subEntry.lockedContentContainer);
-									subEntry.contentContainers.Insert(num + 1, v.contentContainers[i]);
-								}
-								else if (v.contentContainers[i].showBeforeGeneratedContent)
-								{
-									subEntry.contentContainers.Insert(0, v.contentContainers[i]);
-								}
-								else
-								{
-									subEntry.contentContainers.Add(v.contentContainers[i]);
+									if (!string.IsNullOrEmpty(v.contentContainers[i].lockID))
+									{
+										int num = subEntry.contentContainers.IndexOf(subEntry.lockedContentContainer);
+										subEntry.contentContainers.Insert(num + 1, v.contentContainers[i]);
+									}
+									else if (v.contentContainers[i].showBeforeGeneratedContent)
+									{
+										subEntry.contentContainers.Insert(0, v.contentContainers[i]);
+									}
+									else
+									{
+										subEntry.contentContainers.Add(v.contentContainers[i]);
+									}
 								}
 							}
 							subEntry.contentContainers.Add(new ContentContainer(new List<ICodexWidget>
@@ -391,6 +398,7 @@ public static class CodexCache
 				CodexCache.AddLockLookup(contentContainer.lockID, entry.id);
 			}
 		}
+		entry.contentContainers.RemoveAll((ContentContainer x) => !Game.IsCorrectDlcActiveForCurrentSave(x));
 	}
 
 	public static void AddSubEntry(string id, SubEntry entry)
@@ -406,7 +414,22 @@ public static class CodexCache
 		id = CodexCache.FormatLinkID(entry.id);
 		entry.id = id;
 		CodexEntry codexEntry = CodexCache.entries[id];
-		codexEntry.dlcIds = entry.dlcIds;
+		if (codexEntry.GetRequiredDlcIds() != null && entry.GetForbiddenDlcIds() != null)
+		{
+			DebugUtil.DevLogError("Codex Entry with id=" + id + " defines requiredDlcIds but the existing entry also specifies requiredDlcIds. This is currently not handled, please investigate.");
+		}
+		if (codexEntry.GetRequiredDlcIds() != null && entry.GetForbiddenDlcIds() != null)
+		{
+			DebugUtil.DevLogError("Codex Entry with id=" + id + " defines forbiddenDlcIds but the existing entry also specifies forbiddenDlcIds. This is currently not handled, please investigate.");
+		}
+		if (entry.requiredDlcIds != null)
+		{
+			codexEntry.requiredDlcIds = entry.requiredDlcIds;
+		}
+		if (entry.forbiddenDlcIds != null)
+		{
+			codexEntry.forbiddenDlcIds = entry.forbiddenDlcIds;
+		}
 		for (int i = 0; i < entry.log.modificationRecords.Count; i++)
 		{
 		}

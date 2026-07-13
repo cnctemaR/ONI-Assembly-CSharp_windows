@@ -130,6 +130,10 @@ public class ModuleFlightUtilitySideScreen : SideScreenContent
 		WorldContainer component = (module as StateMachine.Instance).GetMaster().GetComponent<RocketModuleCluster>().CraftInterface.GetComponent<WorldContainer>();
 		if (component != null && module.ChooseDuplicant)
 		{
+			if (module.ChosenDuplicant != null && module.ChosenDuplicant.HasTag(GameTags.Dead))
+			{
+				module.ChosenDuplicant = null;
+			}
 			int id = component.id;
 			reference3.gameObject.SetActive(true);
 			reference3.Initialize(Components.LiveMinionIdentities.GetWorldItems(id, false), new Action<IListableOption, object>(this.OnDuplicantEntryClick), null, new Action<DropDownEntry, object>(this.DropDownEntryRefreshAction), true, module);

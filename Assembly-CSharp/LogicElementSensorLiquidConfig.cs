@@ -30,6 +30,7 @@ public class LogicElementSensorLiquidConfig : IBuildingConfig
 		SoundEventVolumeCache.instance.AddVolume("world_liquid_sensor_kanim", "PowerSwitch_on", NOISE_POLLUTION.NOISY.TIER3);
 		SoundEventVolumeCache.instance.AddVolume("world_liquid_sensor_kanim", "PowerSwitch_off", NOISE_POLLUTION.NOISY.TIER3);
 		GeneratedBuildings.RegisterWithOverlay(OverlayModes.Logic.HighlightItemIDs, LogicElementSensorLiquidConfig.ID);
+		buildingDef.AddSearchTerms(SEARCH_TERMS.AUTOMATION);
 		return buildingDef;
 	}
 

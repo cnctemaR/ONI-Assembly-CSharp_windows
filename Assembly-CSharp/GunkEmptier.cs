@@ -1,4 +1,7 @@
 ﻿using System;
+using STRINGS;
+using TUNING;
+using UnityEngine;
 
 public class GunkEmptier : GameStateMachine<GunkEmptier, GunkEmptier.Instance, IStateMachineTarget, GunkEmptier.Def>
 {
@@ -28,6 +31,10 @@ public class GunkEmptier : GameStateMachine<GunkEmptier, GunkEmptier.Instance, I
 		workChore.AddPrecondition(ChorePreconditions.instance.IsPreferredAssignableOrUrgentBladder, smi.master.GetComponent<Assignable>());
 		return workChore;
 	}
+
+	private static string DISEASE_ID = DUPLICANTSTATS.BIONICS.Secretions.PEE_DISEASE;
+
+	private static int DISEASE_ON_DUPE_COUNT_PER_USE = DUPLICANTSTATS.BIONICS.Secretions.DISEASE_PER_PEE / 20;
 
 	public GameStateMachine<GunkEmptier, GunkEmptier.Instance, IStateMachineTarget, GunkEmptier.Def>.State noOperational;
 
@@ -66,6 +73,8 @@ public class GunkEmptier : GameStateMachine<GunkEmptier, GunkEmptier.Instance, I
 			: base(master, def)
 		{
 			GunkEmptierWorkable component = base.GetComponent<GunkEmptierWorkable>();
+			GunkEmptierWorkable gunkEmptierWorkable = component;
+			gunkEmptierWorkable.OnWorkableEventCB = (Action<Workable, Workable.WorkableEvent>)Delegate.Combine(gunkEmptierWorkable.OnWorkableEventCB, new Action<Workable, Workable.WorkableEvent>(this.OnGunkEmptierUsed));
 			Components.GunkExtractors.Add(component);
 			this.storage = base.GetComponent<Storage>();
 			this.operational = base.GetComponent<Operational>();
@@ -75,6 +84,8 @@ public class GunkEmptier : GameStateMachine<GunkEmptier, GunkEmptier.Instance, I
 		protected override void OnCleanUp()
 		{
 			GunkEmptierWorkable component = base.GetComponent<GunkEmptierWorkable>();
+			GunkEmptierWorkable gunkEmptierWorkable = component;
+			gunkEmptierWorkable.OnWorkableEventCB = (Action<Workable, Workable.WorkableEvent>)Delegate.Remove(gunkEmptierWorkable.OnWorkableEventCB, new Action<Workable, Workable.WorkableEvent>(this.OnGunkEmptierUsed));
 			Components.GunkExtractors.Remove(component);
 			base.OnCleanUp();
 		}
@@ -82,6 +93,27 @@ public class GunkEmptier : GameStateMachine<GunkEmptier, GunkEmptier.Instance, I
 		private bool AssignablePrecondition_OnlyOnBionics(MinionAssignablesProxy worker)
 		{
 			return worker.GetMinionModel() == BionicMinionConfig.MODEL;
+		}
+
+		public void OnGunkEmptierUsed(Workable workable, Workable.WorkableEvent ev)
+		{
+			if (ev == Workable.WorkableEvent.WorkCompleted)
+			{
+				this.AddDisseaseToWorker(workable.worker);
+			}
+		}
+
+		public void AddDisseaseToWorker(WorkerBase worker)
+		{
+			if (worker != null)
+			{
+				byte index = Db.Get().Diseases.GetIndex(GunkEmptier.DISEASE_ID);
+				worker.GetComponent<PrimaryElement>().AddDisease(index, GunkEmptier.DISEASE_ON_DUPE_COUNT_PER_USE, "GunkEmptier.Flush");
+				PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Resource, string.Format(DUPLICANTS.DISEASES.ADDED_POPFX, Db.Get().Diseases[(int)index].Name, GunkEmptier.DISEASE_ON_DUPE_COUNT_PER_USE), base.transform, Vector3.up, 1.5f, false, false);
+				Tutorial.Instance.TutorialMessage(Tutorial.TutorialMessages.TM_LotsOfGerms, true);
+				return;
+			}
+			DebugUtil.LogWarningArgs(new object[] { "Tried to add disease on gunk emptier use but worker was null" });
 		}
 
 		private Operational operational;

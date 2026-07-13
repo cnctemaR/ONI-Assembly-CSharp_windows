@@ -25,6 +25,8 @@ public class FishFeederConfig : IBuildingConfig
 		buildingDef.Entombable = true;
 		buildingDef.Floodable = true;
 		buildingDef.ForegroundLayer = Grid.SceneLayer.TileMain;
+		buildingDef.AddSearchTerms(SEARCH_TERMS.RANCHING);
+		buildingDef.AddSearchTerms(SEARCH_TERMS.CRITTER);
 		return buildingDef;
 	}
 
@@ -44,12 +46,14 @@ public class FishFeederConfig : IBuildingConfig
 		storage.showCapacityStatusItem = true;
 		storage.showCapacityAsMainStatus = true;
 		storage.dropOffset = Vector2.up * 1f;
+		storage.storageID = new Tag("FishFeederTop");
 		Storage storage2 = go.AddComponent<Storage>();
 		storage2.capacityKg = 200f;
 		storage2.showInUI = true;
 		storage2.showDescriptor = true;
 		storage2.allowItemRemoval = false;
 		storage2.dropOffset = Vector2.up * 3.5f;
+		storage2.storageID = new Tag("FishFeederBot");
 		go.AddOrGet<StorageLocker>().choreTypeID = Db.Get().ChoreTypes.RanchingFetch.Id;
 		go.AddOrGet<UserNameable>();
 		Effect effect = new Effect("AteFromFeeder", global::STRINGS.CREATURES.MODIFIERS.ATE_FROM_FEEDER.NAME, global::STRINGS.CREATURES.MODIFIERS.ATE_FROM_FEEDER.TOOLTIP, 1200f, true, false, false, null, -1f, 0f, null, "");

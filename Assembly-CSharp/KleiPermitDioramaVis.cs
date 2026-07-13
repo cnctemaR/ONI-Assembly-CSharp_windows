@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using Database;
@@ -66,80 +65,69 @@ public class KleiPermitDioramaVis : KMonoBehaviour
 		if (permit.Category == PermitCategory.Building)
 		{
 			BuildLocationRule? buildLocationRule = KleiPermitVisUtil.GetBuildLocationRule(permit);
-			if (buildLocationRule == null)
+			BuildingDef buildingDef = KleiPermitVisUtil.GetBuildingDef(permit);
+			if (!buildingDef.BuildingComplete.GetComponent<Bed>().IsNullOrDestroyed())
 			{
-				if (permit.DlcIds.SequenceEqual<string>(DlcManager.AVAILABLE_EXPANSION1_ONLY))
-				{
-					return this.buildingOnFloorVis;
-				}
-				return this.fallbackVis.WithError("Couldn't get BuildLocationRule on permit with id \"" + permit.Id + "\"");
+				return this.buildingOnFloorVis;
 			}
-			else
+			BuildingFacadeResource buildingFacadeResource = permit as BuildingFacadeResource;
+			if (buildingFacadeResource != null)
 			{
-				BuildingDef buildingDef = KleiPermitVisUtil.GetBuildingDef(permit);
-				if (!buildingDef.BuildingComplete.GetComponent<Bed>().IsNullOrDestroyed())
+				if (buildingFacadeResource.PrefabID.Contains("Wire") || buildingFacadeResource.PrefabID.Contains("Ribbon"))
 				{
-					return this.buildingOnFloorVis;
+					return this.buildingWiresAndAutomationVis;
 				}
-				BuildingFacadeResource buildingFacadeResource = permit as BuildingFacadeResource;
-				if (buildingFacadeResource != null)
+				if (buildingFacadeResource.PrefabID.Contains("Logic"))
 				{
-					if (buildingFacadeResource.PrefabID.Contains("Wire") || buildingFacadeResource.PrefabID.Contains("Ribbon"))
-					{
-						return this.buildingWiresAndAutomationVis;
-					}
-					if (buildingFacadeResource.PrefabID.Contains("Logic"))
-					{
-						return this.buildingAutomationGatesVis;
-					}
+					return this.buildingAutomationGatesVis;
 				}
-				if (buildingDef.PrefabID == "RockCrusher" || buildingDef.PrefabID == "GasReservoir" || buildingDef.PrefabID == "ArcadeMachine" || buildingDef.PrefabID == "MicrobeMusher" || buildingDef.PrefabID == "FlushToilet" || buildingDef.PrefabID == "WashSink" || buildingDef.PrefabID == "Headquarters" || buildingDef.PrefabID == "GourmetCookingStation")
-				{
-					return this.buildingOnFloorBigVis;
-				}
-				if (!buildingDef.BuildingComplete.GetComponent<RocketModule>().IsNullOrDestroyed() || !buildingDef.BuildingComplete.GetComponent<RocketEngine>().IsNullOrDestroyed())
-				{
-					return this.buildingRocketVis;
-				}
-				if (buildingDef.PrefabID == "PlanterBox" || buildingDef.PrefabID == "FlowerVase")
-				{
-					return this.buildingOnFloorBotanicalVis;
-				}
-				if (buildingDef.PrefabID == "ExteriorWall")
-				{
-					return this.wallpaperVis;
-				}
-				if (buildingDef.PrefabID == "FlowerVaseHanging" || buildingDef.PrefabID == "FlowerVaseHangingFancy")
-				{
-					return this.buildingHangingHookBotanicalVis;
-				}
-				if (buildLocationRule != null)
-				{
-					BuildLocationRule valueOrDefault = buildLocationRule.GetValueOrDefault();
-					switch (valueOrDefault)
-					{
-					case BuildLocationRule.OnFloor:
-						break;
-					case BuildLocationRule.OnFloorOverSpace:
-						goto IL_02FC;
-					case BuildLocationRule.OnCeiling:
-						return this.buildingOnCeilingVis.WithAlignment(Alignment.Top());
-					case BuildLocationRule.OnWall:
-						return this.buildingOnWallVis.WithAlignment(Alignment.Left());
-					case BuildLocationRule.InCorner:
-						return this.buildingInCeilingCornerVis.WithAlignment(Alignment.TopLeft());
-					default:
-						if (valueOrDefault != BuildLocationRule.OnFoundationRotatable)
-						{
-							goto IL_02FC;
-						}
-						break;
-					}
-					return this.buildingOnFloorVis;
-				}
-				IL_02FC:
-				return this.fallbackVis.WithError(string.Format("No visualization available for building with BuildLocationRule of {0}", buildLocationRule));
 			}
+			if (buildingDef.PrefabID == "RockCrusher" || buildingDef.PrefabID == "GasReservoir" || buildingDef.PrefabID == "ArcadeMachine" || buildingDef.PrefabID == "MicrobeMusher" || buildingDef.PrefabID == "FlushToilet" || buildingDef.PrefabID == "WashSink" || buildingDef.PrefabID == "Headquarters" || buildingDef.PrefabID == "GourmetCookingStation")
+			{
+				return this.buildingOnFloorBigVis;
+			}
+			if (!buildingDef.BuildingComplete.GetComponent<RocketModule>().IsNullOrDestroyed() || !buildingDef.BuildingComplete.GetComponent<RocketEngine>().IsNullOrDestroyed())
+			{
+				return this.buildingRocketVis;
+			}
+			if (buildingDef.PrefabID == "PlanterBox" || buildingDef.PrefabID == "FlowerVase")
+			{
+				return this.buildingOnFloorBotanicalVis;
+			}
+			if (buildingDef.PrefabID == "ExteriorWall")
+			{
+				return this.wallpaperVis;
+			}
+			if (buildingDef.PrefabID == "FlowerVaseHanging" || buildingDef.PrefabID == "FlowerVaseHangingFancy")
+			{
+				return this.buildingHangingHookBotanicalVis;
+			}
+			if (buildLocationRule != null)
+			{
+				BuildLocationRule valueOrDefault = buildLocationRule.GetValueOrDefault();
+				switch (valueOrDefault)
+				{
+				case BuildLocationRule.OnFloor:
+					break;
+				case BuildLocationRule.OnFloorOverSpace:
+					goto IL_02B9;
+				case BuildLocationRule.OnCeiling:
+					return this.buildingOnCeilingVis.WithAlignment(Alignment.Top());
+				case BuildLocationRule.OnWall:
+					return this.buildingOnWallVis.WithAlignment(Alignment.Left());
+				case BuildLocationRule.InCorner:
+					return this.buildingInCeilingCornerVis.WithAlignment(Alignment.TopLeft());
+				default:
+					if (valueOrDefault != BuildLocationRule.OnFoundationRotatable)
+					{
+						goto IL_02B9;
+					}
+					break;
+				}
+				return this.buildingOnFloorVis;
+			}
+			IL_02B9:
+			return this.fallbackVis.WithError(string.Format("No visualization available for building with BuildLocationRule of {0}", buildLocationRule));
 		}
 		else if (permit.Category == PermitCategory.Artwork)
 		{

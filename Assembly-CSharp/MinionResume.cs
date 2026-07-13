@@ -134,7 +134,7 @@ public class MinionResume : IExperienceRecipient, ISaveLoadable, ISim200ms
 				Skill skill = Db.Get().Skills.Get(keyValuePair2.Key);
 				foreach (SkillPerk skillPerk in skill.perks)
 				{
-					if (SaveLoader.Instance.IsAllDlcActiveForCurrentSave(skillPerk.requiredDlcIds))
+					if (Game.IsCorrectDlcActiveForCurrentSave(skillPerk))
 					{
 						if (skillPerk.OnRemove != null)
 						{
@@ -292,7 +292,7 @@ public class MinionResume : IExperienceRecipient, ISaveLoadable, ISim200ms
 	{
 		foreach (SkillPerk skillPerk in perks)
 		{
-			if (SaveLoader.Instance.IsAllDlcActiveForCurrentSave(skillPerk.requiredDlcIds))
+			if (Game.IsCorrectDlcActiveForCurrentSave(skillPerk))
 			{
 				this.AdditionalGrantedSkillPerkIDs.Add(skillPerk.IdHash);
 				if (skillPerk.OnApply != null)
@@ -308,7 +308,7 @@ public class MinionResume : IExperienceRecipient, ISaveLoadable, ISim200ms
 	{
 		foreach (SkillPerk skillPerk in perks)
 		{
-			if (SaveLoader.Instance.IsAllDlcActiveForCurrentSave(skillPerk.requiredDlcIds))
+			if (Game.IsCorrectDlcActiveForCurrentSave(skillPerk))
 			{
 				this.AdditionalGrantedSkillPerkIDs.Remove(skillPerk.IdHash);
 				if (skillPerk.OnRemove != null)
@@ -323,7 +323,7 @@ public class MinionResume : IExperienceRecipient, ISaveLoadable, ISim200ms
 	{
 		foreach (SkillPerk skillPerk in Db.Get().Skills.Get(skillId).perks)
 		{
-			if (SaveLoader.Instance.IsAllDlcActiveForCurrentSave(skillPerk.requiredDlcIds) && skillPerk.OnApply != null)
+			if (Game.IsCorrectDlcActiveForCurrentSave(skillPerk) && skillPerk.OnApply != null)
 			{
 				skillPerk.OnApply(this);
 			}
@@ -334,7 +334,7 @@ public class MinionResume : IExperienceRecipient, ISaveLoadable, ISim200ms
 	{
 		foreach (SkillPerk skillPerk in Db.Get().Skills.Get(skillId).perks)
 		{
-			if (SaveLoader.Instance.IsAllDlcActiveForCurrentSave(skillPerk.requiredDlcIds) && skillPerk.OnRemove != null)
+			if (Game.IsCorrectDlcActiveForCurrentSave(skillPerk) && skillPerk.OnRemove != null)
 			{
 				skillPerk.OnRemove(this);
 			}

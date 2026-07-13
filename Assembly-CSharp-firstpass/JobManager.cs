@@ -15,6 +15,14 @@ public class JobManager
 
 	public bool isShuttingDown { get; private set; }
 
+	public JobManager()
+	{
+		if (!JobManager.runSingleThreaded)
+		{
+			this.Initialize();
+		}
+	}
+
 	private void Initialize()
 	{
 		this.semaphore = new Semaphore(0, CPUBudget.coreCount - 1);
@@ -38,7 +46,10 @@ public class JobManager
 	public void Cleanup()
 	{
 		this.isShuttingDown = true;
-		this.semaphore.Release(this.threads.Count);
+		if (this.semaphore != null)
+		{
+			this.semaphore.Release(this.threads.Count);
+		}
 		foreach (JobManager.WorkerThread workerThread in this.threads)
 		{
 			workerThread.Cleanup();

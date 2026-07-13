@@ -422,7 +422,7 @@ public class ClusterTelescope : GameStateMachine<ClusterTelescope, ClusterTelesc
 			return false;
 		}
 
-		public bool ConsumeGas(OxygenBreather oxygen_breather, float amount, Action<SimHashes, float, float, byte, int> onConsumptionCompletedCallback)
+		public bool ConsumeGas(OxygenBreather oxygen_breather, float amount)
 		{
 			if (this.storage.items.Count <= 0)
 			{
@@ -440,10 +440,7 @@ public class ClusterTelescope : GameStateMachine<ClusterTelescope, ClusterTelesc
 			SimUtil.DiseaseInfo diseaseInfo;
 			this.storage.ConsumeAndGetDisease(GameTags.Breathable, amount, out num, out diseaseInfo, out num2, out simHashes);
 			bool flag = num >= amount;
-			if (onConsumptionCompletedCallback != null)
-			{
-				onConsumptionCompletedCallback(simHashes, num, num2, diseaseInfo.idx, diseaseInfo.count);
-			}
+			OxygenBreather.BreathableGasConsumed(oxygen_breather, simHashes, num, num2, diseaseInfo.idx, diseaseInfo.count);
 			return flag;
 		}
 
@@ -648,7 +645,7 @@ public class ClusterTelescope : GameStateMachine<ClusterTelescope, ClusterTelesc
 			return false;
 		}
 
-		public bool ConsumeGas(OxygenBreather oxygen_breather, float amount, Action<SimHashes, float, float, byte, int> onConsumptionCompletedCallback)
+		public bool ConsumeGas(OxygenBreather oxygen_breather, float amount)
 		{
 			if (this.storage.items.Count <= 0)
 			{
@@ -666,10 +663,7 @@ public class ClusterTelescope : GameStateMachine<ClusterTelescope, ClusterTelesc
 			SimUtil.DiseaseInfo diseaseInfo;
 			this.storage.ConsumeAndGetDisease(GameTags.Breathable, amount, out num, out diseaseInfo, out num2, out simHashes);
 			bool flag = num >= amount;
-			if (onConsumptionCompletedCallback != null)
-			{
-				onConsumptionCompletedCallback(simHashes, num, num2, diseaseInfo.idx, diseaseInfo.count);
-			}
+			OxygenBreather.BreathableGasConsumed(oxygen_breather, simHashes, num, num2, diseaseInfo.idx, diseaseInfo.count);
 			return flag;
 		}
 

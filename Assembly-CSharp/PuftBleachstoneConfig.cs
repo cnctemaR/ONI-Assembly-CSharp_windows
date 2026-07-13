@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using Klei.AI;
 using STRINGS;
 using TUNING;
@@ -25,25 +24,9 @@ public class PuftBleachstoneConfig : IEntityConfig
 		return gameObject;
 	}
 
-	public string[] GetDlcIds()
-	{
-		return DlcManager.AVAILABLE_ALL_VERSIONS;
-	}
-
 	public GameObject CreatePrefab()
 	{
-		GameObject gameObject = PuftBleachstoneConfig.CreatePuftBleachstone("PuftBleachstone", global::STRINGS.CREATURES.SPECIES.PUFT.VARIANT_BLEACHSTONE.NAME, global::STRINGS.CREATURES.SPECIES.PUFT.VARIANT_BLEACHSTONE.DESC, "puft_kanim", false);
-		string text = "PuftBleachstoneEgg";
-		string text2 = global::STRINGS.CREATURES.SPECIES.PUFT.VARIANT_BLEACHSTONE.EGG_NAME;
-		string text3 = global::STRINGS.CREATURES.SPECIES.PUFT.VARIANT_BLEACHSTONE.DESC;
-		string text4 = "egg_puft_kanim";
-		float egg_MASS = PuftTuning.EGG_MASS;
-		string text5 = "PuftBleachstoneBaby";
-		float num = 45f;
-		float num2 = 15f;
-		List<FertilityMonitor.BreedingChance> egg_CHANCES_BLEACHSTONE = PuftTuning.EGG_CHANCES_BLEACHSTONE;
-		int egg_SORT_ORDER = PuftBleachstoneConfig.EGG_SORT_ORDER;
-		return EntityTemplates.ExtendEntityToFertileCreature(gameObject, text, text2, text3, text4, egg_MASS, text5, num, num2, egg_CHANCES_BLEACHSTONE, this.GetDlcIds(), egg_SORT_ORDER, true, false, true, 1f, false);
+		return EntityTemplates.ExtendEntityToFertileCreature(PuftBleachstoneConfig.CreatePuftBleachstone("PuftBleachstone", global::STRINGS.CREATURES.SPECIES.PUFT.VARIANT_BLEACHSTONE.NAME, global::STRINGS.CREATURES.SPECIES.PUFT.VARIANT_BLEACHSTONE.DESC, "puft_kanim", false), this as IHasDlcRestrictions, "PuftBleachstoneEgg", global::STRINGS.CREATURES.SPECIES.PUFT.VARIANT_BLEACHSTONE.EGG_NAME, global::STRINGS.CREATURES.SPECIES.PUFT.VARIANT_BLEACHSTONE.DESC, "egg_puft_kanim", PuftTuning.EGG_MASS, "PuftBleachstoneBaby", 45f, 15f, PuftTuning.EGG_CHANCES_BLEACHSTONE, PuftBleachstoneConfig.EGG_SORT_ORDER, true, false, 1f, false);
 	}
 
 	public void OnPrefabInit(GameObject inst)

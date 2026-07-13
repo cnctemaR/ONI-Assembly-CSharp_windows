@@ -23,25 +23,12 @@ public class DlcManager
 	{
 		DlcManager.dlcPurchasedCache = new Dictionary<string, bool>();
 		DlcManager.dlcSubscribedCache = new Dictionary<string, bool>();
+		DlcManager.dlcAssetsCache = new Dictionary<string, bool>();
 	}
 
 	public static bool IsVanillaId(string dlcId)
 	{
 		return dlcId == null || dlcId == "";
-	}
-
-	public static string GetContentBundleName(string dlcId)
-	{
-		if (dlcId == "EXPANSION1_ID")
-		{
-			return "expansion1_bundle";
-		}
-		if (DlcManager.DLC_PACKS.ContainsKey(dlcId))
-		{
-			return DlcManager.DLC_PACKS[dlcId].bundleName;
-		}
-		DebugUtil.DevLogError("No bundle exists for " + dlcId);
-		return dlcId;
 	}
 
 	public static bool IsDlcId(string dlcId)
@@ -56,9 +43,10 @@ public class DlcManager
 		{
 			dlcTitle = new StringKey("STRINGS.UI.DLC1.NAME");
 		}
-		if (DlcManager.DLC_PACKS.ContainsKey(dlcId))
+		DlcManager.DlcInfo dlcInfo;
+		if (DlcManager.DLC_PACKS.TryGetValue(dlcId, out dlcInfo))
 		{
-			dlcTitle = DlcManager.DLC_PACKS[dlcId].dlcTitle;
+			dlcTitle = dlcInfo.dlcTitle;
 		}
 		return string.Concat(new string[]
 		{
@@ -70,6 +58,21 @@ public class DlcManager
 		});
 	}
 
+	public static string GetDlcTitleNoFormatting(string dlcId)
+	{
+		StringKey dlcTitle = new StringKey(dlcId);
+		if (dlcId == "EXPANSION1_ID")
+		{
+			dlcTitle = new StringKey("STRINGS.UI.DLC1.NAME");
+		}
+		DlcManager.DlcInfo dlcInfo;
+		if (DlcManager.DLC_PACKS.TryGetValue(dlcId, out dlcInfo))
+		{
+			dlcTitle = dlcInfo.dlcTitle;
+		}
+		return Strings.Get(dlcTitle);
+	}
+
 	public static string GetDlcSmallLogo(string dlcId)
 	{
 		string text = "";
@@ -77,9 +80,10 @@ public class DlcManager
 		{
 			text = "SpacedOut_mini_logo";
 		}
-		if (DlcManager.DLC_PACKS.ContainsKey(dlcId))
+		DlcManager.DlcInfo dlcInfo;
+		if (DlcManager.DLC_PACKS.TryGetValue(dlcId, out dlcInfo))
 		{
-			text = DlcManager.DLC_PACKS[dlcId].smallLogo;
+			text = dlcInfo.smallLogo;
 		}
 		return text;
 	}
@@ -90,9 +94,10 @@ public class DlcManager
 		{
 			return "expansion1_banner";
 		}
-		if (DlcManager.DLC_PACKS.ContainsKey(dlcId))
+		DlcManager.DlcInfo dlcInfo;
+		if (DlcManager.DLC_PACKS.TryGetValue(dlcId, out dlcInfo))
 		{
-			return DlcManager.DLC_PACKS[dlcId].banner;
+			return dlcInfo.banner;
 		}
 		DebugUtil.DevLogError("No bundle exists for " + dlcId);
 		return "unknown";
@@ -104,9 +109,10 @@ public class DlcManager
 		{
 			return "SpacedOut_logo_crop";
 		}
-		if (DlcManager.DLC_PACKS.ContainsKey(dlcId))
+		DlcManager.DlcInfo dlcInfo;
+		if (DlcManager.DLC_PACKS.TryGetValue(dlcId, out dlcInfo))
 		{
-			return DlcManager.DLC_PACKS[dlcId].largeLogo;
+			return dlcInfo.largeLogo;
 		}
 		DebugUtil.DevLogError("No bundle exists for " + dlcId);
 		return "unknown";
@@ -118,11 +124,31 @@ public class DlcManager
 		{
 			return new Color(1f, 0.79607844f, 0.003921569f);
 		}
-		if (DlcManager.DLC_PACKS.ContainsKey(dlcId))
+		DlcManager.DlcInfo dlcInfo;
+		if (DlcManager.DLC_PACKS.TryGetValue(dlcId, out dlcInfo))
 		{
-			return DlcManager.DLC_PACKS[dlcId].bannerColor;
+			return dlcInfo.bannerColor;
 		}
 		return Color.magenta;
+	}
+
+	public static string GetMostSignificantDlc(string[] requiredDlcIds)
+	{
+		if (requiredDlcIds == null || requiredDlcIds.Length == 0)
+		{
+			return null;
+		}
+		return requiredDlcIds[requiredDlcIds.Length - 1];
+	}
+
+	public static bool DlcListContains(string[] list, string dlcId)
+	{
+		return list != null && list.Contains(dlcId);
+	}
+
+	public static string GetMostSignificantDlc(IHasDlcRestrictions restrictions)
+	{
+		return DlcManager.GetMostSignificantDlc(restrictions.GetRequiredDlcIds());
 	}
 
 	public static string GetContentDirectoryName(string dlcId)
@@ -232,35 +258,29 @@ public class DlcManager
 		return false;
 	}
 
-	public static bool IsDlcListValidForCurrentContent(string[] dlcIds)
-	{
-		if (dlcIds == null || dlcIds.Length == 0)
-		{
-			return true;
-		}
-		if (DlcManager.GetHighestActiveDlcId() == "" && dlcIds.Contains(""))
-		{
-			return true;
-		}
-		foreach (string text in dlcIds)
-		{
-			if (!(text == "") && DlcManager.IsContentSubscribed(text))
-			{
-				return true;
-			}
-		}
-		return false;
-	}
-
 	public static bool IsCorrectDlcSubscribed(string[] required, string[] forbidden)
 	{
 		return DlcManager.IsAllContentSubscribed(required) && !DlcManager.IsAnyContentSubscribed(forbidden);
+	}
+
+	public static bool IsCorrectDlcSubscribed(IHasDlcRestrictions restrictions)
+	{
+		return DlcManager.IsAllContentSubscribed(restrictions.GetRequiredDlcIds()) && !DlcManager.IsAnyContentSubscribed(restrictions.GetForbiddenDlcIds());
 	}
 
 	public static void ConvertAvailableToRequireAndForbidden(string[] dlcIds, out string[] requiredDlcIds, out string[] forbiddenDlcIds)
 	{
 		requiredDlcIds = null;
 		forbiddenDlcIds = null;
+		if (dlcIds == null)
+		{
+			return;
+		}
+		if (dlcIds.SequenceEqual<string>(DlcManager.AVAILABLE_DLC_3))
+		{
+			requiredDlcIds = DlcManager.DLC3;
+			return;
+		}
 		if (dlcIds.SequenceEqual<string>(DlcManager.AVAILABLE_EXPANSION1_ONLY))
 		{
 			requiredDlcIds = DlcManager.EXPANSION1;
@@ -282,25 +302,12 @@ public class DlcManager
 			forbiddenDlcIds = null;
 			return;
 		}
-		DebugUtil.DevLogError("ConvertAvailableToRequireAndForbidden received a list it did not recognize: " + (',' + dlcIds));
-	}
-
-	public static string GetHighestActiveDlcId()
-	{
-		for (int i = DlcManager.RELEASE_ORDER.Count - 1; i >= 0; i--)
-		{
-			string text = DlcManager.RELEASE_ORDER[i];
-			if (DlcManager.CheckPlatformSubscription(text) && DlcManager.IsContentSettingEnabled(text))
-			{
-				return text;
-			}
-		}
-		return "";
+		DebugUtil.DevLogError("ConvertAvailableToRequireAndForbidden received a list it did not recognize. dlcIds='" + (',' + dlcIds) + "'");
 	}
 
 	private static bool CheckPlatformSubscription(string dlcId)
 	{
-		if (dlcId == null || dlcId == "")
+		if (DlcManager.IsVanillaId(dlcId))
 		{
 			return true;
 		}
@@ -340,7 +347,7 @@ public class DlcManager
 		{
 			return flag;
 		}
-		if (dlcId == "")
+		if (DlcManager.IsVanillaId(dlcId))
 		{
 			flag = true;
 		}
@@ -367,7 +374,7 @@ public class DlcManager
 
 	private static bool IsContentSettingEnabled(string dlcId)
 	{
-		return dlcId == null || dlcId == "" || (DlcManager.CheckPlatformSubscription(dlcId) && KPlayerPrefs.GetInt(dlcId + ".ENABLED", 1) == 1);
+		return DlcManager.IsVanillaId(dlcId) || (DlcManager.CheckPlatformSubscription(dlcId) && KPlayerPrefs.GetInt(dlcId + ".ENABLED", 1) == 1);
 	}
 
 	public static bool IsContentOwned(string dlcId)
@@ -500,6 +507,36 @@ public class DlcManager
 		}
 	}
 
+	private static bool AreDlcListsIdentical(string[] list1, string[] list2)
+	{
+		bool flag = list1 == null || list1.Length == 0;
+		bool flag2 = list2 == null || list2.Length == 0;
+		return (flag && flag2) || (!flag && !flag2 && list1.SequenceEqual<string>(list2));
+	}
+
+	public static bool AreRestrictionsIdentical(IHasDlcRestrictions a, IHasDlcRestrictions b)
+	{
+		if (a.IsNullOrDestroyed() || b.IsNullOrDestroyed())
+		{
+			DebugUtil.LogErrorArgs(new object[] { "Trying to compare restrictions on null objects" });
+		}
+		return DlcManager.AreDlcListsIdentical(a.GetRequiredDlcIds(), b.GetRequiredDlcIds()) && DlcManager.AreDlcListsIdentical(a.GetForbiddenDlcIds(), b.GetForbiddenDlcIds());
+	}
+
+	public static string GetContentBundleName(string dlcId)
+	{
+		if (dlcId == "EXPANSION1_ID")
+		{
+			return "expansion1_bundle";
+		}
+		if (DlcManager.DLC_PACKS.ContainsKey(dlcId))
+		{
+			return DlcManager.DLC_PACKS[dlcId].bundleName;
+		}
+		DebugUtil.DevLogError("No bundle exists for " + dlcId);
+		return dlcId;
+	}
+
 	public static bool IsPureVanilla()
 	{
 		return !DlcManager.IsExpansion1Active();
@@ -523,6 +560,27 @@ public class DlcManager
 	public static bool FeatureClusterSpaceEnabled()
 	{
 		return DlcManager.IsExpansion1Active();
+	}
+
+	[Obsolete("Use IsCorrectDlcSubscribed instead")]
+	public static bool IsDlcListValidForCurrentContent(string[] dlcIds)
+	{
+		if (dlcIds == null || dlcIds.Length == 0)
+		{
+			return true;
+		}
+		if (DlcManager.GetHighestActiveDlcId() == "" && dlcIds.Contains(""))
+		{
+			return true;
+		}
+		foreach (string text in dlcIds)
+		{
+			if (!(text == "") && DlcManager.IsContentSubscribed(text))
+			{
+				return true;
+			}
+		}
+		return false;
 	}
 
 	[Obsolete("Use DlcManager.IsContentSubscribed to check if content is loaded or SaveLoader.Instance.IsDLCActiveForCurrentSave to check if the content is available in a save. This method will be removed in the future.")]
@@ -589,8 +647,22 @@ public class DlcManager
 		return DlcManager.IsAnyContentSubscribed(dlcIds);
 	}
 
+	[Obsolete("This should no longer be used.")]
+	public static string GetHighestActiveDlcId()
+	{
+		for (int i = DlcManager.RELEASE_ORDER.Count - 1; i >= 0; i--)
+		{
+			string text = DlcManager.RELEASE_ORDER[i];
+			if (DlcManager.CheckPlatformSubscription(text) && DlcManager.IsContentSettingEnabled(text))
+			{
+				return text;
+			}
+		}
+		return "";
+	}
+
 	[ThreadStatic]
-	public static readonly bool IsMainThread = true;
+	private static readonly bool IsMainThread = true;
 
 	public const string VANILLA_ID = "";
 
@@ -611,14 +683,6 @@ public class DlcManager
 	public const string VANILLA_DIRECTORY = "";
 
 	public const string EXPANSION1_DIRECTORY = "expansion1";
-
-	public static readonly string[] AVAILABLE_VANILLA_ONLY = new string[] { "" };
-
-	public static readonly string[] AVAILABLE_EXPANSION1_ONLY = new string[] { "EXPANSION1_ID" };
-
-	public static readonly string[] AVAILABLE_DLC_2 = new string[] { "DLC2_ID" };
-
-	public static readonly string[] AVAILABLE_ALL_VERSIONS = new string[] { "", "EXPANSION1_ID" };
 
 	public static List<string> RELEASE_ORDER = new List<string> { "", "EXPANSION1_ID" };
 
@@ -641,6 +705,21 @@ public class DlcManager
 	private static Dictionary<string, bool> dlcSubscribedCache = new Dictionary<string, bool>();
 
 	private static Dictionary<string, bool> dlcAssetsCache = new Dictionary<string, bool>();
+
+	[Obsolete("Use required forbidden instead of available")]
+	public static readonly string[] AVAILABLE_VANILLA_ONLY = new string[] { "" };
+
+	[Obsolete("Use required forbidden instead of available")]
+	public static readonly string[] AVAILABLE_EXPANSION1_ONLY = new string[] { "EXPANSION1_ID" };
+
+	[Obsolete("Use required forbidden instead of available")]
+	public static readonly string[] AVAILABLE_DLC_2 = new string[] { "DLC2_ID" };
+
+	[Obsolete("Use required forbidden instead of available")]
+	public static readonly string[] AVAILABLE_DLC_3 = new string[] { "DLC3_ID" };
+
+	[Obsolete("Use required forbidden instead of available")]
+	public static readonly string[] AVAILABLE_ALL_VERSIONS = new string[] { "", "EXPANSION1_ID" };
 
 	public struct DlcInfo
 	{

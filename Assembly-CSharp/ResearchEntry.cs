@@ -93,7 +93,7 @@ public class ResearchEntry : KMonoBehaviour
 		string text = "";
 		foreach (TechItem techItem in this.targetTech.unlockedItems)
 		{
-			if (SaveLoader.Instance.IsCorrectDlcActiveForCurrentSave(techItem.requiredDlcIds, techItem.forbiddenDlcIds))
+			if (Game.IsCorrectDlcActiveForCurrentSave(techItem))
 			{
 				HierarchyReferences component2 = this.GetFreeIcon().GetComponent<HierarchyReferences>();
 				if (text != "")

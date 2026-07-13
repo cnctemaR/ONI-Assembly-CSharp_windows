@@ -156,6 +156,7 @@ public class BuildingLoader : KMonoBehaviour
 		}
 		KPrefabID kprefabID = BuildingLoader.AddID(gameObject, def.PrefabID + "UnderConstruction");
 		kprefabID.AddTag(GameTags.UnderConstruction, false);
+		kprefabID.SetDlcRestrictions(def);
 		BuildingLoader.UpdateComponentRequirement<BuildingCellVisualizer>(gameObject, def.CheckRequiresBuildingCellVisualizer());
 		gameObject.GetComponent<Constructable>().SetWorkTime(def.ConstructionTime);
 		if (def.Cancellable)
@@ -304,7 +305,9 @@ public class BuildingLoader : KMonoBehaviour
 		{
 			rotatable.permittedRotations = def.PermittedRotations;
 		}
-		BuildingLoader.AddID(gameObject, def.PrefabID + "Preview").defaultLayer = num;
+		KPrefabID kprefabID = BuildingLoader.AddID(gameObject, def.PrefabID + "Preview");
+		kprefabID.defaultLayer = num;
+		kprefabID.SetDlcRestrictions(def);
 		gameObject.GetComponent<KSelectable>().SetName(def.Name);
 		BuildingLoader.UpdateComponentRequirement<BuildingCellVisualizer>(gameObject, def.CheckRequiresBuildingCellVisualizer());
 		KAnimGraphTileVisualizer component2 = gameObject.GetComponent<KAnimGraphTileVisualizer>();

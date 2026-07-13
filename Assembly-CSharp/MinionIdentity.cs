@@ -43,6 +43,7 @@ public class MinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableIdentity
 			kanimControllerBase.OnUpdateBounds = (Action<Bounds>)Delegate.Combine(kanimControllerBase.OnUpdateBounds, new Action<Bounds>(this.OnUpdateBounds));
 		}
 		GameUtil.SubscribeToTags<MinionIdentity>(this, MinionIdentity.OnDeadTagAddedDelegate, true);
+		base.Subscribe<MinionIdentity>(1502190696, MinionIdentity.OnQueueDestroyObjectDelegate);
 	}
 
 	protected override void OnSpawn()
@@ -212,16 +213,13 @@ public class MinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableIdentity
 		return MinionIdentity.femaleNameList.Next();
 	}
 
-	protected override void OnCleanUp()
+	private void OnQueueDestroyObject()
 	{
-		if (this.assignableProxy != null)
-		{
-			MinionAssignablesProxy minionAssignablesProxy = this.assignableProxy.Get();
-			if (minionAssignablesProxy && minionAssignablesProxy.target == this)
-			{
-				Util.KDestroyGameObject(minionAssignablesProxy.gameObject);
-			}
-		}
+		this.RemoveFromComponentsLists();
+	}
+
+	private void RemoveFromComponentsLists()
+	{
 		Components.MinionIdentities.Remove(this);
 		if (Components.MinionIdentitiesByModel.ContainsKey(this.model))
 		{
@@ -232,6 +230,19 @@ public class MinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableIdentity
 		{
 			Components.LiveMinionIdentitiesByModel[this.model].Remove(this);
 		}
+	}
+
+	protected override void OnCleanUp()
+	{
+		if (this.assignableProxy != null)
+		{
+			MinionAssignablesProxy minionAssignablesProxy = this.assignableProxy.Get();
+			if (minionAssignablesProxy && minionAssignablesProxy.target == this)
+			{
+				Util.KDestroyGameObject(minionAssignablesProxy.gameObject);
+			}
+		}
+		this.RemoveFromComponentsLists();
 		Game.Instance.Trigger(2144209314, this);
 	}
 
@@ -451,6 +462,11 @@ public class MinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableIdentity
 	private static readonly EventSystem.IntraObjectHandler<MinionIdentity> OnDeadTagAddedDelegate = GameUtil.CreateHasTagHandler<MinionIdentity>(GameTags.Dead, delegate(MinionIdentity component, object data)
 	{
 		component.OnDied(data);
+	});
+
+	private static readonly EventSystem.IntraObjectHandler<MinionIdentity> OnQueueDestroyObjectDelegate = new EventSystem.IntraObjectHandler<MinionIdentity>(delegate(MinionIdentity component, object data)
+	{
+		component.OnQueueDestroyObject();
 	});
 
 	private class NameList

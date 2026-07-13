@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using KSerialization.Converters;
 using UnityEngine;
 
-public class ContentContainer
+public class ContentContainer : IHasDlcRestrictions
 {
 	public ContentContainer()
 	{
@@ -20,10 +20,24 @@ public class ContentContainer
 
 	public string lockID { get; set; }
 
+	public string[] requiredDlcIds { get; set; }
+
+	public string[] forbiddenDlcIds { get; set; }
+
 	[StringEnumConverter]
 	public ContentContainer.ContentLayout contentLayout { get; set; }
 
 	public bool showBeforeGeneratedContent { get; set; }
+
+	public string[] GetRequiredDlcIds()
+	{
+		return this.requiredDlcIds;
+	}
+
+	public string[] GetForbiddenDlcIds()
+	{
+		return this.forbiddenDlcIds;
+	}
 
 	public GameObject go;
 

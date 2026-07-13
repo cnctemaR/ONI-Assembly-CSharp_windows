@@ -35,13 +35,12 @@ namespace Klei
 			{
 				return;
 			}
-			string[] files = Directory.GetFiles(path);
-			for (int i = 0; i < files.Length; i++)
+			foreach (string text in Directory.GetFiles(path))
 			{
-				string text = FileSystem.Normalize(files[i]);
-				if (re.IsMatch(text))
+				string text2 = FileSystem.Normalize(text);
+				if (re.IsMatch(text2) && !Path.GetFileName(text).StartsWith("._"))
 				{
-					result.Add(text);
+					result.Add(text2);
 				}
 			}
 		}

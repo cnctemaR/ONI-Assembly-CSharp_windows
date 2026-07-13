@@ -4,8 +4,18 @@ using STRINGS;
 using TUNING;
 using UnityEngine;
 
-public class ScoutRoverConfig : IEntityConfig
+public class ScoutRoverConfig : IEntityConfig, IHasDlcRestrictions
 {
+	public string[] GetRequiredDlcIds()
+	{
+		return DlcManager.EXPANSION1;
+	}
+
+	public string[] GetForbiddenDlcIds()
+	{
+		return null;
+	}
+
 	public GameObject CreatePrefab()
 	{
 		return BaseRoverConfig.BaseRover("ScoutRover", global::STRINGS.ROBOTS.MODELS.SCOUT.NAME, GameTags.Robots.Models.ScoutRover, global::STRINGS.ROBOTS.MODELS.SCOUT.DESC, "scout_bot_kanim", 100f, 1f, 2f, global::TUNING.ROBOTS.SCOUTBOT.CARRY_CAPACITY, global::TUNING.ROBOTS.SCOUTBOT.DIGGING, global::TUNING.ROBOTS.SCOUTBOT.CONSTRUCTION, global::TUNING.ROBOTS.SCOUTBOT.ATHLETICS, global::TUNING.ROBOTS.SCOUTBOT.HIT_POINTS, global::TUNING.ROBOTS.SCOUTBOT.BATTERY_CAPACITY, global::TUNING.ROBOTS.SCOUTBOT.BATTERY_DEPLETION_RATE, Db.Get().Amounts.InternalChemicalBattery, false);
@@ -46,11 +56,6 @@ public class ScoutRoverConfig : IEntityConfig
 				effects.Add("ScoutBotCharging", false);
 			}
 		});
-	}
-
-	public string[] GetDlcIds()
-	{
-		return DlcManager.AVAILABLE_EXPANSION1_ONLY;
 	}
 
 	public const string ID = "ScoutRover";

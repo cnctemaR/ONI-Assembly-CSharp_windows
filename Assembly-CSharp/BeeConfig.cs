@@ -4,7 +4,7 @@ using STRINGS;
 using TUNING;
 using UnityEngine;
 
-public class BeeConfig : IEntityConfig
+public class BeeConfig : IEntityConfig, IHasDlcRestrictions
 {
 	public static GameObject CreateBee(string id, string name, string desc, string anim_file, bool is_baby)
 	{
@@ -16,9 +16,14 @@ public class BeeConfig : IEntityConfig
 		return gameObject;
 	}
 
-	public string[] GetDlcIds()
+	public string[] GetRequiredDlcIds()
 	{
-		return DlcManager.AVAILABLE_EXPANSION1_ONLY;
+		return DlcManager.EXPANSION1;
+	}
+
+	public string[] GetForbiddenDlcIds()
+	{
+		return null;
 	}
 
 	public GameObject CreatePrefab()

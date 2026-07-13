@@ -33,8 +33,12 @@ public class LogicWattageSensor : Switch, ISaveLoadable, IThresholdSwitch, ISim2
 
 	public void Sim200ms(float dt)
 	{
-		this.currentWattage = Game.Instance.circuitManager.GetWattsUsedByCircuit(Game.Instance.circuitManager.GetCircuitID(Grid.PosToCell(this)));
-		this.currentWattage = Mathf.Max(0f, this.currentWattage);
+		float wattsUsedByCircuit = Game.Instance.circuitManager.GetWattsUsedByCircuit(Game.Instance.circuitManager.GetCircuitID(Grid.PosToCell(this)));
+		if (wattsUsedByCircuit < 0f)
+		{
+			return;
+		}
+		this.currentWattage = wattsUsedByCircuit;
 		if (this.activateOnHigherThan)
 		{
 			if ((this.currentWattage > this.thresholdWattage && !base.IsSwitchedOn) || (this.currentWattage <= this.thresholdWattage && base.IsSwitchedOn))

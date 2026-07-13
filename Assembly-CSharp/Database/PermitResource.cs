@@ -2,9 +2,9 @@
 
 namespace Database
 {
-	public abstract class PermitResource : Resource
+	public abstract class PermitResource : Resource, IHasDlcRestrictions
 	{
-		public PermitResource(string id, string Name, string Desc, PermitCategory permitCategory, PermitRarity rarity, string[] DLCIds)
+		public PermitResource(string id, string Name, string Desc, PermitCategory permitCategory, PermitRarity rarity, string[] requiredDlcIds, string[] forbiddenDlcIds)
 			: base(id, Name)
 		{
 			DebugUtil.DevAssert(Name != null, "Name must be provided for permit with id \"" + id + "\" of type " + base.GetType().Name, null);
@@ -12,7 +12,8 @@ namespace Database
 			this.Description = Desc;
 			this.Category = permitCategory;
 			this.Rarity = rarity;
-			this.DlcIds = DLCIds;
+			this.requiredDlcIds = requiredDlcIds;
+			this.forbiddenDlcIds = forbiddenDlcIds;
 		}
 
 		public abstract PermitPresentationInfo GetPermitPresentationInfo();
@@ -29,15 +30,17 @@ namespace Database
 
 		public string GetDlcIdFrom()
 		{
-			if (this.DlcIds == DlcManager.AVAILABLE_ALL_VERSIONS || this.DlcIds == DlcManager.AVAILABLE_VANILLA_ONLY)
-			{
-				return null;
-			}
-			if (this.DlcIds.Length == 0)
-			{
-				return null;
-			}
-			return this.DlcIds[0];
+			return DlcManager.GetMostSignificantDlc(this);
+		}
+
+		public string[] GetRequiredDlcIds()
+		{
+			return this.requiredDlcIds;
+		}
+
+		public string[] GetForbiddenDlcIds()
+		{
+			return this.forbiddenDlcIds;
 		}
 
 		public string Description;
@@ -46,6 +49,8 @@ namespace Database
 
 		public PermitRarity Rarity;
 
-		public string[] DlcIds;
+		public string[] requiredDlcIds;
+
+		public string[] forbiddenDlcIds;
 	}
 }

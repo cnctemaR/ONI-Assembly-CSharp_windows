@@ -1,4 +1,5 @@
 ﻿using System;
+using STRINGS;
 using TUNING;
 using UnityEngine;
 
@@ -12,14 +13,16 @@ public class DoctorStationConfig : IBuildingConfig
 		string text2 = "treatment_chair_kanim";
 		int num3 = 10;
 		float num4 = 10f;
-		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER3;
+		float[] tier = global::TUNING.BUILDINGS.CONSTRUCTION_MASS_KG.TIER3;
 		string[] raw_MINERALS = MATERIALS.RAW_MINERALS;
 		float num5 = 1600f;
 		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloor;
 		EffectorValues none = NOISE_POLLUTION.NONE;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, raw_MINERALS, num5, buildLocationRule, BUILDINGS.DECOR.NONE, none, 0.2f);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, raw_MINERALS, num5, buildLocationRule, global::TUNING.BUILDINGS.DECOR.NONE, none, 0.2f);
 		buildingDef.Overheatable = false;
 		buildingDef.AudioCategory = "Metal";
+		buildingDef.RequiredSkillPerkID = Db.Get().SkillPerks.CanDoctor.Id;
+		buildingDef.AddSearchTerms(SEARCH_TERMS.MEDICINE);
 		return buildingDef;
 	}
 

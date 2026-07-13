@@ -9,7 +9,7 @@ public class BlueprintCollection
 	public void AddBlueprintsFrom<T>(T provider) where T : BlueprintProvider
 	{
 		provider.blueprintCollection = this;
-		provider.Interal_PreSetupBlueprints();
+		provider.Internal_PreSetupBlueprints();
 		provider.SetupBlueprints();
 	}
 
@@ -41,9 +41,9 @@ public class BlueprintCollection
 	}
 
 	[CompilerGenerated]
-	internal static bool <PostProcess>g__ShouldExcludeBlueprint|10_0(IBlueprintDlcInfo blueprintDlcInfo)
+	internal static bool <PostProcess>g__ShouldExcludeBlueprint|10_0(IHasDlcRestrictions blueprintDlcInfo)
 	{
-		if (!DlcManager.IsAnyContentSubscribed(blueprintDlcInfo.dlcIds))
+		if (!DlcManager.IsCorrectDlcSubscribed(blueprintDlcInfo))
 		{
 			return true;
 		}

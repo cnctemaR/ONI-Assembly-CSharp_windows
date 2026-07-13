@@ -1013,7 +1013,7 @@ internal class UnitySourceGeneratedAssemblyMonoScriptTypes_v1
 			46, 99, 115, 0, 0, 0, 3, 0, 0, 0,
 			49, 92, 65, 115, 115, 101, 116, 115, 92, 115,
 			99, 114, 105, 112, 116, 115, 92, 77, 111, 100,
-			115, 92, 70, 97, 117, 110, 97, 92, 67, "Not showing all elements because this array is too big (185237 elements)"
+			115, 92, 70, 97, 117, 110, 97, 92, 67, "Not showing all elements because this array is too big (185577 elements)"
 		};
 		monoScriptData.TypesData = new byte[]
 		{
@@ -2016,10 +2016,10 @@ internal class UnitySourceGeneratedAssemblyMonoScriptTypes_v1
 			43, 70, 65, 67, 65, 68, 69, 83, 124, 65,
 			82, 84, 95, 75, 0, 0, 0, 0, 46, 83,
 			84, 82, 73, 78, 71, 83, 46, 66, 85, 73,
-			76, 68, 73, 78, 71, 83, 43, 80, 82, "Not showing all elements because this array is too big (498626 elements)"
+			76, 68, 73, 78, 71, 83, 43, 80, 82, "Not showing all elements because this array is too big (499911 elements)"
 		};
-		monoScriptData.TotalFiles = 3344;
-		monoScriptData.TotalTypes = 13186;
+		monoScriptData.TotalFiles = 3350;
+		monoScriptData.TotalTypes = 13223;
 		monoScriptData.IsEditorOnly = false;
 		return monoScriptData;
 	}

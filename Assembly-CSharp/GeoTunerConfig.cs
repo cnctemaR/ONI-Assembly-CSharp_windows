@@ -35,6 +35,7 @@ public class GeoTunerConfig : IBuildingConfig
 		buildingDef.EnergyConsumptionWhenActive = 120f;
 		buildingDef.ExhaustKilowattsWhenActive = 0.5f;
 		buildingDef.SelfHeatKilowattsWhenActive = 4f;
+		buildingDef.RequiredSkillPerkID = Db.Get().SkillPerks.AllowGeyserTuning.Id;
 		return buildingDef;
 	}
 

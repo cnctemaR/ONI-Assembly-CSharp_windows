@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections.ObjectModel;
+using System.Collections.Generic;
 using System.Runtime.Serialization;
 using KSerialization;
 
@@ -121,7 +121,7 @@ public class AssignmentGroupController : KMonoBehaviour
 	private void OnSerialize()
 	{
 		Debug.Assert(!string.IsNullOrEmpty(this.AssignmentGroupID), "Assignment group on " + base.gameObject.name + " has null or empty ID");
-		ReadOnlyCollection<IAssignableIdentity> members = Game.Instance.assignmentManager.assignment_groups[this.AssignmentGroupID].GetMembers();
+		List<IAssignableIdentity> members = Game.Instance.assignmentManager.assignment_groups[this.AssignmentGroupID].GetMembers();
 		this.minionsInGroupAtLoad = new Ref<MinionAssignablesProxy>[members.Count];
 		for (int i = 0; i < members.Count; i++)
 		{
@@ -129,7 +129,7 @@ public class AssignmentGroupController : KMonoBehaviour
 		}
 	}
 
-	public ReadOnlyCollection<IAssignableIdentity> GetMembers()
+	public List<IAssignableIdentity> GetMembers()
 	{
 		return Game.Instance.assignmentManager.assignment_groups[this.AssignmentGroupID].GetMembers();
 	}

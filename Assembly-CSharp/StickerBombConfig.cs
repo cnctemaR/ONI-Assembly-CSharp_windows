@@ -6,11 +6,6 @@ using UnityEngine;
 
 public class StickerBombConfig : IEntityConfig
 {
-	public string[] GetDlcIds()
-	{
-		return DlcManager.AVAILABLE_ALL_VERSIONS;
-	}
-
 	public GameObject CreatePrefab()
 	{
 		GameObject gameObject = EntityTemplates.CreateBasicEntity("StickerBomb", global::STRINGS.BUILDINGS.PREFABS.STICKERBOMB.NAME, global::STRINGS.BUILDINGS.PREFABS.STICKERBOMB.DESC, 1f, true, Assets.GetAnim("sticker_a_kanim"), "off", Grid.SceneLayer.Backwall, SimHashes.Creature, null, 293f);

@@ -31,7 +31,7 @@ public class SlipperyMonitor : GameStateMachine<SlipperyMonitor, SlipperyMonitor
 	{
 		int num = Grid.PosToCell(smi);
 		int num2 = Grid.OffsetCell(num, 0, -1);
-		return (Grid.IsValidCell(num) && Grid.Element[num].IsSlippery) || (Grid.IsValidCell(num2) && Grid.Element[num2].IsSlippery);
+		return (Grid.IsValidCell(num) && Grid.Element[num].IsSlippery) || (Grid.IsValidCell(num2) && Grid.Element[num2].IsSolid && Grid.Element[num2].IsSlippery);
 	}
 
 	private static bool RollDTwenty(SlipperyMonitor.Instance smi, object o)

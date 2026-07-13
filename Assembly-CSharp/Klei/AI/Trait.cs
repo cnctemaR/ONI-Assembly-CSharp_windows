@@ -5,8 +5,18 @@ using UnityEngine;
 
 namespace Klei.AI
 {
-	public class Trait : Modifier
+	public class Trait : Modifier, IHasDlcRestrictions
 	{
+		public string[] GetRequiredDlcIds()
+		{
+			return this.requiredDlcIds;
+		}
+
+		public string[] GetForbiddenDlcIds()
+		{
+			return this.forbiddenDlcIds;
+		}
+
 		public Trait(string id, string name, string description, float rating, bool should_save, ChoreGroup[] disallowed_chore_groups, bool positive_trait, bool is_valid_starter_trait)
 			: base(id, name, description)
 		{

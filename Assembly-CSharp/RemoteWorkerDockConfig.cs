@@ -1,4 +1,5 @@
 ﻿using System;
+using STRINGS;
 using TUNING;
 using UnityEngine;
 
@@ -12,12 +13,12 @@ public class RemoteWorkerDockConfig : IBuildingConfig
 		string text = "remote_work_dock_kanim";
 		int num3 = 100;
 		float num4 = 60f;
-		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER4;
+		float[] tier = global::TUNING.BUILDINGS.CONSTRUCTION_MASS_KG.TIER4;
 		string[] plastics = MATERIALS.PLASTICS;
 		float num5 = 1600f;
 		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloor;
 		EffectorValues none = NOISE_POLLUTION.NONE;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(id, num, num2, text, num3, num4, tier, plastics, num5, buildLocationRule, BUILDINGS.DECOR.PENALTY.TIER1, none, 0.2f);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(id, num, num2, text, num3, num4, tier, plastics, num5, buildLocationRule, global::TUNING.BUILDINGS.DECOR.PENALTY.TIER1, none, 0.2f);
 		buildingDef.Overheatable = false;
 		buildingDef.AudioCategory = "Plastic";
 		buildingDef.InputConduitType = ConduitType.Liquid;
@@ -30,6 +31,7 @@ public class RemoteWorkerDockConfig : IBuildingConfig
 		buildingDef.EnergyConsumptionWhenActive = 120f;
 		buildingDef.SelfHeatKilowattsWhenActive = 2f;
 		buildingDef.ExhaustKilowattsWhenActive = 0f;
+		buildingDef.AddSearchTerms(SEARCH_TERMS.ROBOT);
 		return buildingDef;
 	}
 

@@ -1,4 +1,5 @@
 ﻿using System;
+using STRINGS;
 using TUNING;
 using UnityEngine;
 
@@ -12,12 +13,12 @@ public class LiquidPumpingStationConfig : IBuildingConfig
 		string text2 = "waterpump_kanim";
 		int num3 = 100;
 		float num4 = 10f;
-		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER4;
+		float[] tier = global::TUNING.BUILDINGS.CONSTRUCTION_MASS_KG.TIER4;
 		string[] raw_MINERALS = MATERIALS.RAW_MINERALS;
 		float num5 = 1600f;
 		BuildLocationRule buildLocationRule = BuildLocationRule.Anywhere;
 		EffectorValues none = NOISE_POLLUTION.NONE;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, raw_MINERALS, num5, buildLocationRule, BUILDINGS.DECOR.NONE, none, 0.2f);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, raw_MINERALS, num5, buildLocationRule, global::TUNING.BUILDINGS.DECOR.NONE, none, 0.2f);
 		buildingDef.Floodable = false;
 		buildingDef.Entombable = true;
 		buildingDef.AudioCategory = "Metal";
@@ -26,6 +27,7 @@ public class LiquidPumpingStationConfig : IBuildingConfig
 		buildingDef.UtilityOutputOffset = new CellOffset(0, 0);
 		buildingDef.DefaultAnimState = "on";
 		buildingDef.ShowInBuildMenu = true;
+		buildingDef.AddSearchTerms(SEARCH_TERMS.WATER);
 		return buildingDef;
 	}
 

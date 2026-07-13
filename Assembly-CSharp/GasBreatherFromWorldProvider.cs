@@ -96,7 +96,7 @@ public class GasBreatherFromWorldProvider : OxygenBreather.IGasProvider
 		return this.oxygenBreather.HasTag(GameTags.HasSuitTank);
 	}
 
-	public bool ConsumeGas(OxygenBreather oxygen_breather, float mass_to_consume, Action<SimHashes, float, float, byte, int> onConsumptionCompletedCallback)
+	public bool ConsumeGas(OxygenBreather oxygen_breather, float mass_to_consume)
 	{
 		if (this.nav.CurrentNavType != NavType.Tube)
 		{
@@ -106,7 +106,7 @@ public class GasBreatherFromWorldProvider : OxygenBreather.IGasProvider
 				return false;
 			}
 			SimHashes elementID = bestBreathableCellAtCurrentLocation.ElementID;
-			HandleVector<Game.ComplexCallbackInfo<Sim.MassConsumedCallback>>.Handle handle = Game.Instance.massConsumedCallbackManager.Add(new Action<Sim.MassConsumedCallback, object>(GasBreatherFromWorldProvider.OnSimConsumeCallback), onConsumptionCompletedCallback, "GasBreatherFromWorldProvider");
+			HandleVector<Game.ComplexCallbackInfo<Sim.MassConsumedCallback>>.Handle handle = Game.Instance.massConsumedCallbackManager.Add(new Action<Sim.MassConsumedCallback, object>(GasBreatherFromWorldProvider.OnSimConsumeCallback), oxygen_breather, "GasBreatherFromWorldProvider");
 			SimMessages.ConsumeMass(bestBreathableCellAtCurrentLocation.Cell, elementID, mass_to_consume, 3, handle.index);
 		}
 		return true;
@@ -114,13 +114,8 @@ public class GasBreatherFromWorldProvider : OxygenBreather.IGasProvider
 
 	private static void OnSimConsumeCallback(Sim.MassConsumedCallback mass_cb_info, object data)
 	{
-		Action<SimHashes, float, float, byte, int> action = (Action<SimHashes, float, float, byte, int>)data;
 		SimHashes id = ElementLoader.elements[(int)mass_cb_info.elemIdx].id;
-		if (action == null)
-		{
-			return;
-		}
-		action(id, mass_cb_info.mass, mass_cb_info.temperature, mass_cb_info.diseaseIdx, mass_cb_info.diseaseCount);
+		OxygenBreather.BreathableGasConsumed(data as OxygenBreather, id, mass_cb_info.mass, mass_cb_info.temperature, mass_cb_info.diseaseIdx, mass_cb_info.diseaseCount);
 	}
 
 	public static CellOffset[] DEFAULT_BREATHABLE_OFFSETS = new CellOffset[]

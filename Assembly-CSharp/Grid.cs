@@ -787,6 +787,16 @@ public class Grid
 		return Grid.CellToPos(cell, Grid.CellSizeInMeters - 0.01f, Grid.HalfCellSizeInMeters, Grid.GetLayerZ(layer));
 	}
 
+	public static Vector3 CellToPosRBC(int cell, Grid.SceneLayer layer)
+	{
+		return Grid.CellToPos(cell, Grid.CellSizeInMeters - 0.01f, 0.01f, Grid.GetLayerZ(layer));
+	}
+
+	public static Vector3 CellToPosLBC(int cell, Grid.SceneLayer layer)
+	{
+		return Grid.CellToPos(cell, 0.01f, 0.01f, Grid.GetLayerZ(layer));
+	}
+
 	public static Vector3 CellToPosCTC(int cell, Grid.SceneLayer layer)
 	{
 		return Grid.CellToPos(cell, Grid.HalfCellSizeInMeters, Grid.CellSizeInMeters - 0.01f, Grid.GetLayerZ(layer));
@@ -1366,6 +1376,8 @@ public class Grid
 
 	public static Grid.PressureIndexer Pressure;
 
+	public static Grid.LiquidImpermeableIndexer LiquidImpermeable;
+
 	public static Grid.TransparentIndexer Transparent;
 
 	public static Grid.ElementIdxIndexer ElementIdx;
@@ -1861,6 +1873,17 @@ public class Grid
 			get
 			{
 				return Grid.mass[i] * 101.3f;
+			}
+		}
+	}
+
+	public struct LiquidImpermeableIndexer
+	{
+		public unsafe bool this[int i]
+		{
+			get
+			{
+				return (Grid.properties[i] & 2) > 0;
 			}
 		}
 	}

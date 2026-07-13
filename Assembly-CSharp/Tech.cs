@@ -137,6 +137,11 @@ public class Tech : Resource
 		return true;
 	}
 
+	public void AddSearchTerms(string newSearchTerms)
+	{
+		SearchUtil.AddCommaDelimitedSearchTerms(newSearchTerms, this.searchTerms);
+	}
+
 	public List<Tech> requiredTech = new List<Tech>();
 
 	public List<Tech> unlockedTech = new List<Tech>();
@@ -153,7 +158,7 @@ public class Tech : Resource
 
 	public string category;
 
-	public Tag[] tags;
+	public List<string> searchTerms = new List<string>();
 
 	private ResourceTreeNode node;
 }

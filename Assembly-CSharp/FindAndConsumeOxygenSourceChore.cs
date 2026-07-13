@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Klei;
 using STRINGS;
 using UnityEngine;
 
@@ -66,12 +67,19 @@ public class FindAndConsumeOxygenSourceChore : Chore<FindAndConsumeOxygenSourceC
 				{
 					List<GameObject> list = new List<GameObject>();
 					components[i].Find(GameTags.Breathable, list);
-					foreach (GameObject gameObject2 in list)
+					using (List<GameObject>.Enumerator enumerator = list.GetEnumerator())
 					{
-						if (gameObject2 != null)
+						while (enumerator.MoveNext())
 						{
-							components[i].Transfer(gameObject2, smi.oxygenTankMonitor.storage, false, false);
-							break;
+							if (enumerator.Current != null)
+							{
+								float num;
+								SimUtil.DiseaseInfo diseaseInfo;
+								float num2;
+								components[i].ConsumeAndGetDisease(component.Element.tag, component.Mass, out num, out diseaseInfo, out num2);
+								smi.oxygenTankMonitor.storage.AddGasChunk(component.Element.id, num, num2, diseaseInfo.idx, diseaseInfo.count, false, true);
+								break;
+							}
 						}
 					}
 				}

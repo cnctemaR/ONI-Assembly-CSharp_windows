@@ -310,16 +310,16 @@ public class RetiredColonyInfoScreen : KModalScreen
 		this.UpdateAchievementData(null, null);
 	}
 
-	private bool IsAchievementValidForDLCContext(string[] dlcid, string clusterTag)
+	private bool IsAchievementValidForDLCContext(IHasDlcRestrictions restrictions, string clusterTag)
 	{
-		return DlcManager.IsAnyContentSubscribed(dlcid) && (!(SaveLoader.Instance != null) || ((clusterTag == null || CustomGameSettings.Instance.GetCurrentClusterLayout().clusterTags.Contains(clusterTag)) && SaveLoader.Instance.IsDlcListActiveForCurrentSave(dlcid)));
+		return DlcManager.IsCorrectDlcSubscribed(restrictions) && (!(SaveLoader.Instance != null) || ((clusterTag == null || CustomGameSettings.Instance.GetCurrentClusterLayout().clusterTags.Contains(clusterTag)) && Game.IsCorrectDlcActiveForCurrentSave(restrictions)));
 	}
 
 	private void PopulateAchievements()
 	{
 		foreach (ColonyAchievement colonyAchievement in Db.Get().ColonyAchievements.resources)
 		{
-			if (this.IsAchievementValidForDLCContext(colonyAchievement.dlcIds, null))
+			if (this.IsAchievementValidForDLCContext(colonyAchievement, null))
 			{
 				GameObject gameObject = global::Util.KInstantiateUI(colonyAchievement.isVictoryCondition ? this.victoryAchievementsPrefab : this.achievementsPrefab, this.achievementsContainer, true);
 				HierarchyReferences component = gameObject.GetComponent<HierarchyReferences>();
@@ -453,7 +453,7 @@ public class RetiredColonyInfoScreen : KModalScreen
 				}
 			}
 			ColonyAchievement colonyAchievement = Db.Get().ColonyAchievements.TryGet(keyValuePair.Key);
-			if (colonyAchievement != null && !this.IsAchievementValidForDLCContext(colonyAchievement.dlcIds, colonyAchievement.clusterTag))
+			if (colonyAchievement != null && !this.IsAchievementValidForDLCContext(colonyAchievement, colonyAchievement.clusterTag))
 			{
 				keyValuePair.Value.SetActive(false);
 			}

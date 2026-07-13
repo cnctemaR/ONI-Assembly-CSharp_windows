@@ -26,6 +26,8 @@ public class CookingStationConfig : IBuildingConfig
 		buildingDef.EnergyConsumptionWhenActive = 60f;
 		buildingDef.ExhaustKilowattsWhenActive = 0.5f;
 		buildingDef.SelfHeatKilowattsWhenActive = 4f;
+		buildingDef.RequiredSkillPerkID = Db.Get().SkillPerks.CanElectricGrill.Id;
+		buildingDef.AddSearchTerms(SEARCH_TERMS.FOOD);
 		return buildingDef;
 	}
 
@@ -275,7 +277,7 @@ public class CookingStationConfig : IBuildingConfig
 		{
 			new ComplexRecipe.RecipeElement("CookedPikeapple", 1f, ComplexRecipe.RecipeElement.TemperatureOperation.Heated, false)
 		};
-		CookedPikeappleConfig.recipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("CookingStation", array27, array28), array27, array28, DlcManager.AVAILABLE_DLC_2)
+		CookedPikeappleConfig.recipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("CookingStation", array27, array28), array27, array28, DlcManager.DLC2)
 		{
 			time = FOOD.RECIPES.STANDARD_COOK_TIME,
 			description = global::STRINGS.ITEMS.FOOD.COOKEDPIKEAPPLE.RECIPEDESC,

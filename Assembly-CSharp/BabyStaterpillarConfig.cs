@@ -3,11 +3,16 @@ using STRINGS;
 using UnityEngine;
 
 [EntityConfigOrder(2)]
-public class BabyStaterpillarConfig : IEntityConfig
+public class BabyStaterpillarConfig : IEntityConfig, IHasDlcRestrictions
 {
-	public string[] GetDlcIds()
+	public string[] GetRequiredDlcIds()
 	{
-		return DlcManager.AVAILABLE_EXPANSION1_ONLY;
+		return DlcManager.EXPANSION1;
+	}
+
+	public string[] GetForbiddenDlcIds()
+	{
+		return null;
 	}
 
 	public GameObject CreatePrefab()

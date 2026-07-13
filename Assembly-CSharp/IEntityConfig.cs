@@ -9,5 +9,9 @@ public interface IEntityConfig
 
 	void OnSpawn(GameObject inst);
 
-	string[] GetDlcIds();
+	[Obsolete("Use IHasDlcRestrictions instead")]
+	string[] GetDlcIds()
+	{
+		return null;
+	}
 }

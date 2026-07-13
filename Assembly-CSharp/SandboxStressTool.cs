@@ -14,14 +14,6 @@ public class SandboxStressTool : BrushTool
 		SandboxStressTool.instance = null;
 	}
 
-	public override string[] DlcIDs
-	{
-		get
-		{
-			return DlcManager.AVAILABLE_ALL_VERSIONS;
-		}
-	}
-
 	private SandboxSettings settings
 	{
 		get

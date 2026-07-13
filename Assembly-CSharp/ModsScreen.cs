@@ -96,61 +96,133 @@ public class ModsScreen : KModalScreen
 				hierarchyReferences.GetComponent<DragMe>().listener = modOrderingDragListener;
 				LocText reference = hierarchyReferences.GetReference<LocText>("Title");
 				string text = mod.title;
+				StringEntry stringEntry;
+				if (Strings.TryGet(mod.title, out stringEntry))
+				{
+					text = stringEntry;
+				}
 				hierarchyReferences.name = mod.title;
+				ToolTip reference2 = hierarchyReferences.GetReference<ToolTip>("Description");
 				if (mod.available_content == (Content)0)
 				{
 					switch (mod.contentCompatability)
 					{
 					case ModContentCompatability.NoContent:
 						text += UI.FRONTEND.MODS.CONTENT_FAILURE.NO_CONTENT;
-						goto IL_01AD;
+						reference2.toolTip = UI.FRONTEND.MODS.CONTENT_FAILURE.NO_CONTENT_TOOLTIP;
+						goto IL_039F;
 					case ModContentCompatability.OldAPI:
 						text += UI.FRONTEND.MODS.CONTENT_FAILURE.OLD_API;
-						goto IL_01AD;
+						reference2.toolTip = UI.FRONTEND.MODS.CONTENT_FAILURE.OLD_API_TOOLTIP;
+						goto IL_039F;
 					}
-					text += UI.FRONTEND.MODS.CONTENT_FAILURE.DISABLED_CONTENT.Replace("{Content}", ModsScreen.GetDlcName(DlcManager.GetHighestActiveDlcId()));
+					string text2 = GlobalAssets.Instance.colorSet.GetColorByName("statusItemBad").ToHexString();
+					string text3 = UI.FRONTEND.MODS.CONTENT_FAILURE.DISABLED_CONTENT_TOOLTIP + "\n\n";
+					if (mod.GetRequiredDlcIds() != null)
+					{
+						text3 += UI.FRONTEND.MODS.CONTENT_FAILURE.DISABLED_CONTENT_TOOLTIP_REQUIRED;
+						foreach (string text4 in mod.GetRequiredDlcIds())
+						{
+							if (DlcManager.IsContentSubscribed(text4))
+							{
+								text3 = text3 + "\n     •  <i>" + DlcManager.GetDlcTitleNoFormatting(text4) + "</i>";
+							}
+							else
+							{
+								text3 = string.Concat(new string[]
+								{
+									text3,
+									"\n     •  <i><color=#",
+									text2,
+									">",
+									DlcManager.GetDlcTitleNoFormatting(text4),
+									"</color></i>"
+								});
+							}
+						}
+						if (mod.GetForbiddenDlcIds() != null)
+						{
+							text3 += "\n\n";
+						}
+					}
+					if (mod.GetForbiddenDlcIds() != null)
+					{
+						text3 += UI.FRONTEND.MODS.CONTENT_FAILURE.DISABLED_CONTENT_TOOLTIP_FORBIDDEN_DLC;
+						foreach (string text5 in mod.GetForbiddenDlcIds())
+						{
+							if (!DlcManager.IsContentSubscribed(text5))
+							{
+								text3 = text3 + "\n     •  <i>" + DlcManager.GetDlcTitleNoFormatting(text5) + "</i>";
+							}
+							else
+							{
+								text3 = string.Concat(new string[]
+								{
+									text3,
+									"\n     •  <i><color=#",
+									text2,
+									">",
+									DlcManager.GetDlcTitleNoFormatting(text5),
+									"</color></i>"
+								});
+							}
+						}
+					}
+					reference2.toolTip = text3;
+					text += UI.FRONTEND.MODS.CONTENT_FAILURE.DISABLED_CONTENT;
 				}
-				IL_01AD:
+				IL_039F:
 				reference.text = text;
-				LocText reference2 = hierarchyReferences.GetReference<LocText>("Version");
+				LocText reference3 = hierarchyReferences.GetReference<LocText>("Version");
 				if (mod.packagedModInfo != null && mod.packagedModInfo.version != null && mod.packagedModInfo.version.Length > 0)
 				{
-					string text2 = mod.packagedModInfo.version;
-					if (text2.StartsWith("V"))
+					string text6 = mod.packagedModInfo.version;
+					if (text6.StartsWith("V"))
 					{
-						text2 = "v" + text2.Substring(1, text2.Length - 1);
+						text6 = "v" + text6.Substring(1, text6.Length - 1);
 					}
-					else if (!text2.StartsWith("v"))
+					else if (!text6.StartsWith("v"))
 					{
-						text2 = "v" + text2;
+						text6 = "v" + text6;
 					}
-					reference2.text = text2;
-					reference2.gameObject.SetActive(true);
+					reference3.text = text6;
+					reference3.gameObject.SetActive(true);
 				}
 				else
 				{
-					reference2.gameObject.SetActive(false);
+					reference3.gameObject.SetActive(false);
 				}
-				hierarchyReferences.GetReference<ToolTip>("Description").toolTip = mod.description;
+				if (mod.available_content > (Content)0)
+				{
+					StringEntry stringEntry2;
+					if (Strings.TryGet(mod.description, out stringEntry2))
+					{
+						reference2.toolTip = stringEntry2;
+					}
+					else
+					{
+						reference2.toolTip = mod.description;
+					}
+				}
 				if (mod.crash_count != 0)
 				{
 					reference.color = Color.Lerp(Color.white, Color.red, (float)mod.crash_count / 3f);
 				}
-				KButton reference3 = hierarchyReferences.GetReference<KButton>("ManageButton");
-				reference3.GetComponentInChildren<LocText>().text = (mod.IsLocal ? UI.FRONTEND.MODS.MANAGE_LOCAL : UI.FRONTEND.MODS.MANAGE);
-				reference3.isInteractable = mod.is_managed;
-				if (reference3.isInteractable)
+				KButton reference4 = hierarchyReferences.GetReference<KButton>("ManageButton");
+				reference4.GetComponentInChildren<LocText>().text = (mod.IsLocal ? UI.FRONTEND.MODS.MANAGE_LOCAL : UI.FRONTEND.MODS.MANAGE);
+				reference4.isInteractable = mod.is_managed;
+				if (reference4.isInteractable)
 				{
-					reference3.GetComponent<ToolTip>().toolTip = mod.manage_tooltip;
-					reference3.onClick += mod.on_managed;
+					reference4.GetComponent<ToolTip>().toolTip = mod.manage_tooltip;
+					reference4.onClick += mod.on_managed;
 				}
-				KImage reference4 = hierarchyReferences.GetReference<KImage>("BG");
+				KImage reference5 = hierarchyReferences.GetReference<KImage>("BG");
 				MultiToggle toggle = hierarchyReferences.GetReference<MultiToggle>("EnabledToggle");
 				toggle.ChangeState(mod.IsEnabledForActiveDlc() ? 1 : 0);
 				if (mod.available_content != (Content)0)
 				{
-					reference4.defaultState = KImage.ColorSelector.Inactive;
-					reference4.ColorState = KImage.ColorSelector.Inactive;
+					reference5.defaultState = KImage.ColorSelector.Inactive;
+					reference5.ColorState = KImage.ColorSelector.Inactive;
 					MultiToggle toggle2 = toggle;
 					toggle2.onClick = (global::System.Action)Delegate.Combine(toggle2.onClick, new global::System.Action(delegate
 					{
@@ -160,8 +232,8 @@ public class ModsScreen : KModalScreen
 				}
 				else
 				{
-					reference4.defaultState = KImage.ColorSelector.Disabled;
-					reference4.ColorState = KImage.ColorSelector.Disabled;
+					reference5.defaultState = KImage.ColorSelector.Disabled;
+					reference5.ColorState = KImage.ColorSelector.Disabled;
 				}
 				hierarchyReferences.gameObject.SetActive(true);
 			}
@@ -171,18 +243,6 @@ public class ModsScreen : KModalScreen
 			displayedMod2.rect_transform.gameObject.SetActive(true);
 		}
 		int count = this.displayedMods.Count;
-	}
-
-	private static string GetDlcName(string dlcId)
-	{
-		if (!(dlcId == "EXPANSION1_ID"))
-		{
-			if ((dlcId == null || dlcId.Length != 0) && dlcId != null)
-			{
-			}
-			return UI.VANILLA.NAME_ITAL;
-		}
-		return UI.DLC1.NAME_ITAL;
 	}
 
 	private void OnToggleClicked(MultiToggle toggle, Label mod)

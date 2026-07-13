@@ -267,6 +267,18 @@ namespace KMod
 				int num = this.mods.IndexOf(mod2);
 				this.mods.RemoveAt(num);
 				this.mods.Insert(num, mod);
+				if (!mod2.description.IsNullOrWhiteSpace())
+				{
+					mod.description = mod2.description;
+				}
+				else
+				{
+					mod.description = UI.FRONTEND.MODS.NO_DESCRIPTION;
+				}
+				if (!mod2.title.IsNullOrWhiteSpace())
+				{
+					mod.title = mod2.title;
+				}
 				if (flag3 || mod.status == Mod.Status.NotInstalled)
 				{
 					if (mod.IsEnabledForActiveDlc())

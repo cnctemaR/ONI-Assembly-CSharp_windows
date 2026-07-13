@@ -36,6 +36,7 @@ namespace Database
 			this.Sparkle = new Expression("Sticker", this, faces.Sparkle);
 			this.Music = new Expression("Music", this, faces.Music);
 			this.Tickled = new Expression("Tickled", this, faces.Tickled);
+			this.BionicJoy = new Expression("Robodancer", this, faces.Robodancer);
 			this.Happy = new Expression("Happy", this, faces.Happy);
 			this.Relief = new Expression("Relief", this, faces.Happy);
 			this.Neutral = new Expression("Neutral", this, faces.Neutral);
@@ -106,5 +107,7 @@ namespace Database
 		public Expression Radiation3;
 
 		public Expression Radiation4;
+
+		public Expression BionicJoy;
 	}
 }

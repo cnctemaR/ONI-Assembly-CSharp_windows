@@ -1,8 +1,19 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
-public class TechItem : Resource
+public class TechItem : Resource, IHasDlcRestrictions
 {
+	public string[] GetRequiredDlcIds()
+	{
+		return this.requiredDlcIds;
+	}
+
+	public string[] GetForbiddenDlcIds()
+	{
+		return this.forbiddenDlcIds;
+	}
+
 	[Obsolete("Use constructor with requiredDlcIds and forbiddenDlcIds")]
 	public TechItem(string id, ResourceSet parent, string name, string description, Func<string, bool, Sprite> getUISprite, string parentTechId, string[] dlcIds, bool isPOIUnlock = false)
 		: base(id, parent, name)
@@ -65,6 +76,19 @@ public class TechItem : Resource
 		}
 	}
 
+	public void AddSearchTerms(List<string> newSearchTerms)
+	{
+		foreach (string text in newSearchTerms)
+		{
+			this.searchTerms.Add(text);
+		}
+	}
+
+	public void AddSearchTerms(string newSearchTerms)
+	{
+		SearchUtil.AddCommaDelimitedSearchTerms(newSearchTerms, this.searchTerms);
+	}
+
 	public string description;
 
 	public Func<string, bool, Sprite> getUISprite;
@@ -79,4 +103,6 @@ public class TechItem : Resource
 	public string[] requiredDlcIds;
 
 	public string[] forbiddenDlcIds;
+
+	public List<string> searchTerms = new List<string>();
 }

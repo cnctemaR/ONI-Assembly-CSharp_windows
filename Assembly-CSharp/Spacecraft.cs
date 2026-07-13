@@ -91,7 +91,7 @@ public class Spacecraft
 			{
 				foreach (SkillPerk skillPerk in Db.Get().Skills.Get(keyValuePair.Key).perks)
 				{
-					if (SaveLoader.Instance.IsAllDlcActiveForCurrentSave(skillPerk.requiredDlcIds))
+					if (Game.IsCorrectDlcActiveForCurrentSave(skillPerk))
 					{
 						SkillAttributePerk skillAttributePerk = skillPerk as SkillAttributePerk;
 						if (skillAttributePerk != null && skillAttributePerk.modifier.AttributeId == text)

@@ -125,6 +125,22 @@ public class DevToolNavGrid : DevTool
 					ImGui.GetBackgroundDrawList().AddCircleFilled(positionFor, 10f, ImGui.GetColorU32(Color.green));
 					Vector2 screenPosition = DevToolEntity.GetScreenPosition(component.GetComponent<KBatchedAnimController>().GetPivotSymbolPosition());
 					ImGui.GetBackgroundDrawList().AddCircleFilled(screenPosition, 10f, ImGui.GetColorU32(Color.blue));
+					TransitionDriver transitionDriver = component.transitionDriver;
+					if (transitionDriver.GetTransition != null)
+					{
+						Vector3 position = component.transform.GetPosition();
+						Vector2 vector = gameObject.GetComponent<KBoxCollider2D>().size / 2f;
+						if (transitionDriver.GetTransition.x > 0)
+						{
+							position.x += vector.x;
+						}
+						else if (transitionDriver.GetTransition.x < 0)
+						{
+							position.x -= vector.x;
+						}
+						Vector2 screenPosition2 = DevToolEntity.GetScreenPosition(position);
+						ImGui.GetBackgroundDrawList().AddCircleFilled(screenPosition2, 10f, ImGui.GetColorU32(Color.magenta));
+					}
 				}
 			}
 		}

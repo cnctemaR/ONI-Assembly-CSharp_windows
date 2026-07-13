@@ -16,7 +16,7 @@ public class SpiceGrinder : GameStateMachine<SpiceGrinder, SpiceGrinder.StatesIn
 		for (int i = 0; i < spices.Count; i++)
 		{
 			Spice spice = spices[i];
-			if (DlcManager.IsDlcListValidForCurrentContent(spice.DlcIds))
+			if (DlcManager.IsCorrectDlcSubscribed(spice))
 			{
 				SpiceGrinder.SettingOptions.Add(spice.Id, new SpiceGrinder.Option(spice));
 			}

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using STRINGS;
 using UnityEngine;
 
-public class CodexEntry
+public class CodexEntry : IHasDlcRestrictions
 {
 	public CodexEntry()
 	{
@@ -162,51 +162,18 @@ public class CodexEntry
 		return null;
 	}
 
-	public string[] dlcIds
+	public string[] requiredDlcIds { get; set; }
+
+	public string[] forbiddenDlcIds { get; set; }
+
+	public string[] GetRequiredDlcIds()
 	{
-		get
-		{
-			return this._dlcIds;
-		}
-		set
-		{
-			this._dlcIds = value;
-		}
+		return this.requiredDlcIds;
 	}
 
-	public string[] GetDlcIds()
+	public string[] GetForbiddenDlcIds()
 	{
-		return this._dlcIds;
-	}
-
-	public string[] forbiddenDLCIds
-	{
-		get
-		{
-			return this._forbiddenDLCIds;
-		}
-		set
-		{
-			this._forbiddenDLCIds = value;
-			string text = "";
-			for (int i = 0; i < value.Length; i++)
-			{
-				text += value[i];
-				if (i != value.Length - 1)
-				{
-					text += "\n";
-				}
-			}
-		}
-	}
-
-	public string[] GetForbiddenDLCs()
-	{
-		if (this._forbiddenDLCIds == null)
-		{
-			this._forbiddenDLCIds = this.NONE;
-		}
-		return this._forbiddenDLCIds;
+		return this.forbiddenDlcIds;
 	}
 
 	public string id
@@ -428,12 +395,6 @@ public class CodexEntry
 	public EntryDevLog log = new EntryDevLog();
 
 	private List<ContentContainer> _contentContainers = new List<ContentContainer>();
-
-	private string[] _dlcIds;
-
-	private string[] _forbiddenDLCIds;
-
-	private string[] NONE = new string[0];
 
 	private string _id;
 

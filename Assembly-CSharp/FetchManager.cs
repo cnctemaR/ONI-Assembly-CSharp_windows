@@ -89,7 +89,7 @@ public class FetchManager : KMonoBehaviour, ISim1000ms
 				fetchablesByPrefabId = value,
 				pathProber = path_prober,
 				navigator = component,
-				worker = worker.gameObject
+				worker = worker.GetComponent<KPrefabID>().InstanceID
 			});
 		}
 		GlobalJobManager.Run(this.updateOffsetTables);
@@ -105,7 +105,7 @@ public class FetchManager : KMonoBehaviour, ISim1000ms
 		{
 			this.pickups.AddRange(keyValuePair2.Value.finalPickups);
 		}
-		this.pickups.Sort(FetchManager.ComparerNoPriority);
+		this.pickups.Sort(FetchManager.PickupComparerNoPriority.CompareInst);
 	}
 
 	public static bool IsFetchablePickup(Pickupable pickup, FetchChore chore, Storage destination)
@@ -285,10 +285,6 @@ public class FetchManager : KMonoBehaviour, ISim1000ms
 		return pickup.pickupable;
 	}
 
-	private static readonly FetchManager.PickupComparerIncludingPriority ComparerIncludingPriority = new FetchManager.PickupComparerIncludingPriority();
-
-	private static readonly FetchManager.PickupComparerNoPriority ComparerNoPriority = new FetchManager.PickupComparerNoPriority();
-
 	private List<FetchManager.Pickup> pickups = new List<FetchManager.Pickup>();
 
 	public Dictionary<Tag, FetchManager.FetchablesByPrefabId> prefabIdToFetchables = new Dictionary<Tag, FetchManager.FetchablesByPrefabId>();
@@ -326,9 +322,9 @@ public class FetchManager : KMonoBehaviour, ISim1000ms
 		public int foodQuality;
 	}
 
-	private class PickupComparerIncludingPriority : IComparer<FetchManager.Pickup>
+	private static class PickupComparerIncludingPriority
 	{
-		public int Compare(FetchManager.Pickup a, FetchManager.Pickup b)
+		private static int Compare(FetchManager.Pickup a, FetchManager.Pickup b)
 		{
 			int num = a.tagBitsHash.CompareTo(b.tagBitsHash);
 			if (num != 0)
@@ -352,11 +348,13 @@ public class FetchManager : KMonoBehaviour, ISim1000ms
 			}
 			return b.freshness.CompareTo(a.freshness);
 		}
+
+		public static Comparison<FetchManager.Pickup> CompareInst = new Comparison<FetchManager.Pickup>(FetchManager.PickupComparerIncludingPriority.Compare);
 	}
 
-	private class PickupComparerNoPriority : IComparer<FetchManager.Pickup>
+	private static class PickupComparerNoPriority
 	{
-		public int Compare(FetchManager.Pickup a, FetchManager.Pickup b)
+		public static int Compare(FetchManager.Pickup a, FetchManager.Pickup b)
 		{
 			int num = a.PathCost.CompareTo(b.PathCost);
 			if (num != 0)
@@ -370,6 +368,8 @@ public class FetchManager : KMonoBehaviour, ISim1000ms
 			}
 			return b.freshness.CompareTo(a.freshness);
 		}
+
+		public static Comparison<FetchManager.Pickup> CompareInst = new Comparison<FetchManager.Pickup>(FetchManager.PickupComparerNoPriority.Compare);
 	}
 
 	public class FetchablesByPrefabId
@@ -429,11 +429,11 @@ public class FetchManager : KMonoBehaviour, ISim1000ms
 			this.rotUpdaters.Remove(fetchable_handle);
 		}
 
-		public void UpdatePickups(PathProber path_prober, Navigator worker_navigator, GameObject worker_go)
+		public void UpdatePickups(PathProber path_prober, Navigator worker_navigator, int worker)
 		{
-			this.GatherPickupablesWhichCanBePickedUp(worker_go);
+			this.GatherPickupablesWhichCanBePickedUp(worker);
 			this.GatherReachablePickups(worker_navigator);
-			this.finalPickups.Sort(FetchManager.ComparerIncludingPriority);
+			this.finalPickups.Sort(FetchManager.PickupComparerIncludingPriority.CompareInst);
 			if (this.finalPickups.Count > 0)
 			{
 				FetchManager.Pickup pickup = this.finalPickups[0];
@@ -468,13 +468,13 @@ public class FetchManager : KMonoBehaviour, ISim1000ms
 			}
 		}
 
-		private void GatherPickupablesWhichCanBePickedUp(GameObject worker_go)
+		private void GatherPickupablesWhichCanBePickedUp(int worker)
 		{
 			this.pickupsWhichCanBePickedUp.Clear();
 			foreach (FetchManager.Fetchable fetchable in this.fetchables.GetDataList())
 			{
 				Pickupable pickupable = fetchable.pickupable;
-				if (pickupable.CouldBePickedUpByMinion(worker_go))
+				if (pickupable.CouldBePickedUpByMinion(worker))
 				{
 					this.pickupsWhichCanBePickedUp.Add(new FetchManager.Pickup
 					{
@@ -623,6 +623,6 @@ public class FetchManager : KMonoBehaviour, ISim1000ms
 
 		public Navigator navigator;
 
-		public GameObject worker;
+		public int worker;
 	}
 }

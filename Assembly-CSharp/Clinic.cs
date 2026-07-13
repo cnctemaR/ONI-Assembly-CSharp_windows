@@ -58,6 +58,19 @@ public class Clinic : Workable, IGameObjectEffectDescriptor, ISingleSliderContro
 	{
 		base.OnStartWork(worker);
 		worker.GetComponent<Effects>().Add("Sleep", false);
+		this.InstantExtremeRadiationRecovery();
+	}
+
+	private void InstantExtremeRadiationRecovery()
+	{
+		if (Game.IsDlcActiveForCurrentSave("EXPANSION1_ID"))
+		{
+			RadiationMonitor.Instance smi = base.worker.GetSMI<RadiationMonitor.Instance>();
+			if (smi.sm.radiationExposure.Get(smi) >= 900f * smi.difficultySettingMod)
+			{
+				smi.master.gameObject.GetAmounts().Get(Db.Get().Amounts.RadiationBalance).SetValue(600f * smi.difficultySettingMod);
+			}
+		}
 	}
 
 	protected override bool OnWorkTick(WorkerBase worker, float dt)

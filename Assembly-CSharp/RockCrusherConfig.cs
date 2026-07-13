@@ -26,6 +26,7 @@ public class RockCrusherConfig : IBuildingConfig
 		buildingDef.ViewMode = OverlayModes.Power.ID;
 		buildingDef.AudioCategory = "HollowMetal";
 		buildingDef.AudioSize = "large";
+		buildingDef.AddSearchTerms(SEARCH_TERMS.METAL);
 		return buildingDef;
 	}
 
@@ -216,7 +217,7 @@ public class RockCrusherConfig : IBuildingConfig
 				new ComplexRecipe.RecipeElement(SimHashes.Graphite.CreateTag(), 100f * num3, ComplexRecipe.RecipeElement.TemperatureOperation.AverageTemperature, false),
 				new ComplexRecipe.RecipeElement(SimHashes.Sand.CreateTag(), 100f * (1f - num3), ComplexRecipe.RecipeElement.TemperatureOperation.AverageTemperature, false)
 			};
-			ComplexRecipe complexRecipe11 = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("RockCrusher", array21, array22), array21, array22, DlcManager.AVAILABLE_EXPANSION1_ONLY);
+			ComplexRecipe complexRecipe11 = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("RockCrusher", array21, array22), array21, array22, DlcManager.EXPANSION1);
 			complexRecipe11.time = 40f;
 			complexRecipe11.description = string.Format(global::STRINGS.BUILDINGS.PREFABS.ROCKCRUSHER.RECIPE_DESCRIPTION, SimHashes.Fullerene.CreateTag().ProperName(), SimHashes.Graphite.CreateTag().ProperName());
 			complexRecipe11.nameDisplay = ComplexRecipe.RecipeNameDisplay.IngredientToResult;
@@ -233,7 +234,7 @@ public class RockCrusherConfig : IBuildingConfig
 			new ComplexRecipe.RecipeElement(SimHashes.Phosphorite.CreateTag(), num5, ComplexRecipe.RecipeElement.TemperatureOperation.AverageTemperature, false),
 			new ComplexRecipe.RecipeElement(SimHashes.Clay.CreateTag(), num4 - num5, ComplexRecipe.RecipeElement.TemperatureOperation.AverageTemperature, false)
 		};
-		ComplexRecipe complexRecipe12 = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("RockCrusher", array23, array24), array23, array24, DlcManager.AVAILABLE_DLC_2);
+		ComplexRecipe complexRecipe12 = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("RockCrusher", array23, array24), array23, array24, DlcManager.DLC2);
 		complexRecipe12.time = 40f;
 		complexRecipe12.description = string.Format(global::STRINGS.BUILDINGS.PREFABS.ROCKCRUSHER.RECIPE_DESCRIPTION_TWO_OUTPUT, global::STRINGS.ITEMS.INDUSTRIAL_PRODUCTS.ICE_BELLY_POOP.NAME, SimHashes.Phosphorite.CreateTag().ProperName(), SimHashes.Clay.CreateTag().ProperName());
 		complexRecipe12.nameDisplay = ComplexRecipe.RecipeNameDisplay.Ingredient;
@@ -246,7 +247,7 @@ public class RockCrusherConfig : IBuildingConfig
 		{
 			new ComplexRecipe.RecipeElement(ElementLoader.FindElementByHash(SimHashes.GoldAmalgam).tag, GoldBellyConfig.GOLD_PER_CYCLE * GoldBellyConfig.SCALE_GROWTH_TIME_IN_CYCLES, ComplexRecipe.RecipeElement.TemperatureOperation.AverageTemperature, false)
 		};
-		ComplexRecipe complexRecipe13 = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("RockCrusher", array25, array26), array25, array26, DlcManager.AVAILABLE_DLC_2);
+		ComplexRecipe complexRecipe13 = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("RockCrusher", array25, array26), array25, array26, DlcManager.DLC2);
 		complexRecipe13.time = 40f;
 		complexRecipe13.description = string.Format(global::STRINGS.BUILDINGS.PREFABS.ROCKCRUSHER.RECIPE_DESCRIPTION, global::STRINGS.ITEMS.INDUSTRIAL_PRODUCTS.GOLD_BELLY_CROWN.NAME, SimHashes.GoldAmalgam.CreateTag().ProperName());
 		complexRecipe13.nameDisplay = ComplexRecipe.RecipeNameDisplay.Ingredient;

@@ -228,7 +228,7 @@ public class SymbolOverrideController : KMonoBehaviour
 		public int atlasIdx;
 	}
 
-	private class BatchGroupInfo
+	private struct BatchGroupInfo
 	{
 		public KAnim.Build build;
 

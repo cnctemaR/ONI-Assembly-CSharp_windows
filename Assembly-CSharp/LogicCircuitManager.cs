@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using UnityEngine;
 
 public class LogicCircuitManager
@@ -93,9 +92,9 @@ public class LogicCircuitManager
 		this.uiVisElements.Remove(elem);
 	}
 
-	public ReadOnlyCollection<ILogicUIElement> GetVisElements()
+	public List<ILogicUIElement> GetVisElements()
 	{
-		return this.uiVisElements.AsReadOnly();
+		return this.uiVisElements;
 	}
 
 	public static void ToggleNoWireConnected(bool show_missing_wire, GameObject go)

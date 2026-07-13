@@ -36,11 +36,6 @@ public class ConduitFlow : IConduitFlow
 		}
 	}
 
-	private static ConduitFlow.FlowDirections ComputeFlowDirection(int index)
-	{
-		return (ConduitFlow.FlowDirections)(1 << index);
-	}
-
 	private static ConduitFlow.FlowDirections ComputeNextFlowDirection(ConduitFlow.FlowDirections current)
 	{
 		switch (current)
@@ -56,7 +51,7 @@ public class ConduitFlow : IConduitFlow
 			return ConduitFlow.FlowDirections.Up;
 		}
 		global::Debug.Assert(false, "multiple bits are set in 'FlowDirections'...can't compute next direction");
-		return ConduitFlow.FlowDirections.Down;
+		return ConduitFlow.FlowDirections.None;
 	}
 
 	public static ConduitFlow.FlowDirections Invert(ConduitFlow.FlowDirections directions)
@@ -931,13 +926,13 @@ public class ConduitFlow : IConduitFlow
 			switch (direction)
 			{
 			case ConduitFlow.FlowDirections.Down:
-				if (conduitConnections.down == -1)
+				if (conduitConnections.down == Grid.InvalidCell)
 				{
 					return ConduitFlow.Conduit.Invalid;
 				}
 				return this.conduits[conduitConnections.down];
 			case ConduitFlow.FlowDirections.Left:
-				if (conduitConnections.left == -1)
+				if (conduitConnections.left == Grid.InvalidCell)
 				{
 					return ConduitFlow.Conduit.Invalid;
 				}
@@ -945,7 +940,7 @@ public class ConduitFlow : IConduitFlow
 			case ConduitFlow.FlowDirections.Down | ConduitFlow.FlowDirections.Left:
 				break;
 			case ConduitFlow.FlowDirections.Right:
-				if (conduitConnections.right == -1)
+				if (conduitConnections.right == Grid.InvalidCell)
 				{
 					return ConduitFlow.Conduit.Invalid;
 				}
@@ -953,7 +948,7 @@ public class ConduitFlow : IConduitFlow
 			default:
 				if (direction == ConduitFlow.FlowDirections.Up)
 				{
-					if (conduitConnections.up == -1)
+					if (conduitConnections.up == Grid.InvalidCell)
 					{
 						return ConduitFlow.Conduit.Invalid;
 					}
@@ -1408,6 +1403,28 @@ public class ConduitFlow : IConduitFlow
 	[DebuggerDisplay("conduits l:{left}, r:{right}, u:{up}, d:{down}")]
 	public struct ConduitConnections
 	{
+		public int GetConnection(ConduitFlow.FlowDirections dir)
+		{
+			switch (dir)
+			{
+			case ConduitFlow.FlowDirections.Down:
+				return this.down;
+			case ConduitFlow.FlowDirections.Left:
+				return this.left;
+			case ConduitFlow.FlowDirections.Down | ConduitFlow.FlowDirections.Left:
+				break;
+			case ConduitFlow.FlowDirections.Right:
+				return this.right;
+			default:
+				if (dir == ConduitFlow.FlowDirections.Up)
+				{
+					return this.up;
+				}
+				break;
+			}
+			return -1;
+		}
+
 		public int left;
 
 		public int right;
@@ -1620,10 +1637,9 @@ public class ConduitFlow : IConduitFlow
 		public BuildNetworkTask(ConduitFlow.Network network, int conduit_count)
 		{
 			this.network = network;
-			this.distance_nodes = QueuePool<ConduitFlow.BuildNetworkTask.DistanceNode, ConduitFlow>.Allocate();
-			this.distances_via_sources = DictionaryPool<int, int, ConduitFlow>.Allocate();
+			this.order_dfs_stack = StackPool<ConduitFlow.BuildNetworkTask.OrderNode, ConduitFlow>.Allocate();
+			this.visited = HashSetPool<int, ConduitFlow>.Allocate();
 			this.from_sources = ListPool<KeyValuePair<int, int>, ConduitFlow>.Allocate();
-			this.distances_via_sinks = DictionaryPool<int, int, ConduitFlow>.Allocate();
 			this.from_sinks = ListPool<KeyValuePair<int, int>, ConduitFlow>.Allocate();
 			this.from_sources_graph = new ConduitFlow.BuildNetworkTask.Graph(network.network);
 			this.from_sinks_graph = new ConduitFlow.BuildNetworkTask.Graph(network.network);
@@ -1631,9 +1647,8 @@ public class ConduitFlow : IConduitFlow
 
 		public void Finish()
 		{
-			this.distances_via_sinks.Recycle();
-			this.distances_via_sources.Recycle();
-			this.distance_nodes.Recycle();
+			this.order_dfs_stack.Recycle();
+			this.visited.Recycle();
 			this.from_sources.Recycle();
 			this.from_sinks.Recycle();
 			this.from_sources_graph.Recycle();
@@ -1650,159 +1665,106 @@ public class ConduitFlow : IConduitFlow
 			this.from_sinks_graph.WriteFlow(true);
 		}
 
-		private void ComputeOrder(ConduitFlow outer)
+		private void ReverseTopologicalOrderingPush(ConduitFlow outer, List<int> result, int start_cell)
 		{
-			foreach (int num in this.from_sources_graph.sources)
+			global::Debug.Assert(this.order_dfs_stack.Count == 0);
+			ConduitFlow.BuildNetworkTask.OrderNode orderNode = default(ConduitFlow.BuildNetworkTask.OrderNode);
+			orderNode.idx = outer.grid[start_cell].conduitIdx;
+			orderNode.direction = ConduitFlow.FlowDirections.Down;
+			orderNode.permited = outer.soaInfo.GetPermittedFlowDirections(orderNode.idx);
+			if (orderNode.idx == -1 || !this.visited.Add(orderNode.idx))
 			{
-				this.distance_nodes.Enqueue(new ConduitFlow.BuildNetworkTask.DistanceNode
-				{
-					cell = num,
-					distance = 0
-				});
-			}
-			using (HashSet<int>.Enumerator enumerator = this.from_sources_graph.dead_ends.GetEnumerator())
-			{
-				while (enumerator.MoveNext())
-				{
-					int num2 = enumerator.Current;
-					this.distance_nodes.Enqueue(new ConduitFlow.BuildNetworkTask.DistanceNode
-					{
-						cell = num2,
-						distance = 0
-					});
-				}
-				goto IL_021D;
-			}
-			IL_00B3:
-			ConduitFlow.BuildNetworkTask.DistanceNode distanceNode = this.distance_nodes.Dequeue();
-			int conduitIdx = outer.grid[distanceNode.cell].conduitIdx;
-			if (conduitIdx != -1)
-			{
-				this.distances_via_sources[distanceNode.cell] = distanceNode.distance;
-				ConduitFlow.ConduitConnections conduitConnections = outer.soaInfo.GetConduitConnections(conduitIdx);
-				ConduitFlow.FlowDirections permittedFlowDirections = outer.soaInfo.GetPermittedFlowDirections(conduitIdx);
-				if ((permittedFlowDirections & ConduitFlow.FlowDirections.Up) != ConduitFlow.FlowDirections.None)
-				{
-					this.distance_nodes.Enqueue(new ConduitFlow.BuildNetworkTask.DistanceNode
-					{
-						cell = outer.soaInfo.GetCell(conduitConnections.up),
-						distance = distanceNode.distance + 1
-					});
-				}
-				if ((permittedFlowDirections & ConduitFlow.FlowDirections.Down) != ConduitFlow.FlowDirections.None)
-				{
-					this.distance_nodes.Enqueue(new ConduitFlow.BuildNetworkTask.DistanceNode
-					{
-						cell = outer.soaInfo.GetCell(conduitConnections.down),
-						distance = distanceNode.distance + 1
-					});
-				}
-				if ((permittedFlowDirections & ConduitFlow.FlowDirections.Left) != ConduitFlow.FlowDirections.None)
-				{
-					this.distance_nodes.Enqueue(new ConduitFlow.BuildNetworkTask.DistanceNode
-					{
-						cell = outer.soaInfo.GetCell(conduitConnections.left),
-						distance = distanceNode.distance + 1
-					});
-				}
-				if ((permittedFlowDirections & ConduitFlow.FlowDirections.Right) != ConduitFlow.FlowDirections.None)
-				{
-					this.distance_nodes.Enqueue(new ConduitFlow.BuildNetworkTask.DistanceNode
-					{
-						cell = outer.soaInfo.GetCell(conduitConnections.right),
-						distance = distanceNode.distance + 1
-					});
-				}
-			}
-			IL_021D:
-			if (this.distance_nodes.Count != 0)
-			{
-				goto IL_00B3;
-			}
-			this.from_sources.AddRange(this.distances_via_sources);
-			this.from_sources.Sort((KeyValuePair<int, int> a, KeyValuePair<int, int> b) => b.Value - a.Value);
-			this.distance_nodes.Clear();
-			foreach (int num3 in this.from_sinks_graph.sources)
-			{
-				this.distance_nodes.Enqueue(new ConduitFlow.BuildNetworkTask.DistanceNode
-				{
-					cell = num3,
-					distance = 0
-				});
-			}
-			using (HashSet<int>.Enumerator enumerator = this.from_sinks_graph.dead_ends.GetEnumerator())
-			{
-				while (enumerator.MoveNext())
-				{
-					int num4 = enumerator.Current;
-					this.distance_nodes.Enqueue(new ConduitFlow.BuildNetworkTask.DistanceNode
-					{
-						cell = num4,
-						distance = 0
-					});
-				}
-				goto IL_0508;
-			}
-			IL_032A:
-			ConduitFlow.BuildNetworkTask.DistanceNode distanceNode2 = this.distance_nodes.Dequeue();
-			int conduitIdx2 = outer.grid[distanceNode2.cell].conduitIdx;
-			if (conduitIdx2 != -1)
-			{
-				if (!this.distances_via_sources.ContainsKey(distanceNode2.cell))
-				{
-					this.distances_via_sinks[distanceNode2.cell] = distanceNode2.distance;
-				}
-				ConduitFlow.ConduitConnections conduitConnections2 = outer.soaInfo.GetConduitConnections(conduitIdx2);
-				if (conduitConnections2.up != -1 && (outer.soaInfo.GetPermittedFlowDirections(conduitConnections2.up) & ConduitFlow.FlowDirections.Down) != ConduitFlow.FlowDirections.None)
-				{
-					this.distance_nodes.Enqueue(new ConduitFlow.BuildNetworkTask.DistanceNode
-					{
-						cell = outer.soaInfo.GetCell(conduitConnections2.up),
-						distance = distanceNode2.distance + 1
-					});
-				}
-				if (conduitConnections2.down != -1 && (outer.soaInfo.GetPermittedFlowDirections(conduitConnections2.down) & ConduitFlow.FlowDirections.Up) != ConduitFlow.FlowDirections.None)
-				{
-					this.distance_nodes.Enqueue(new ConduitFlow.BuildNetworkTask.DistanceNode
-					{
-						cell = outer.soaInfo.GetCell(conduitConnections2.down),
-						distance = distanceNode2.distance + 1
-					});
-				}
-				if (conduitConnections2.left != -1 && (outer.soaInfo.GetPermittedFlowDirections(conduitConnections2.left) & ConduitFlow.FlowDirections.Right) != ConduitFlow.FlowDirections.None)
-				{
-					this.distance_nodes.Enqueue(new ConduitFlow.BuildNetworkTask.DistanceNode
-					{
-						cell = outer.soaInfo.GetCell(conduitConnections2.left),
-						distance = distanceNode2.distance + 1
-					});
-				}
-				if (conduitConnections2.right != -1 && (outer.soaInfo.GetPermittedFlowDirections(conduitConnections2.right) & ConduitFlow.FlowDirections.Left) != ConduitFlow.FlowDirections.None)
-				{
-					this.distance_nodes.Enqueue(new ConduitFlow.BuildNetworkTask.DistanceNode
-					{
-						cell = outer.soaInfo.GetCell(conduitConnections2.right),
-						distance = distanceNode2.distance + 1
-					});
-				}
-			}
-			IL_0508:
-			if (this.distance_nodes.Count == 0)
-			{
-				this.from_sinks.AddRange(this.distances_via_sinks);
-				this.from_sinks.Sort((KeyValuePair<int, int> a, KeyValuePair<int, int> b) => a.Value - b.Value);
-				this.network.cells.Capacity = Mathf.Max(this.network.cells.Capacity, this.from_sources.Count + this.from_sinks.Count);
-				foreach (KeyValuePair<int, int> keyValuePair in this.from_sources)
-				{
-					this.network.cells.Add(keyValuePair.Key);
-				}
-				foreach (KeyValuePair<int, int> keyValuePair2 in this.from_sinks)
-				{
-					this.network.cells.Add(keyValuePair2.Key);
-				}
 				return;
 			}
-			goto IL_032A;
+			this.order_dfs_stack.Push(orderNode);
+			while (this.order_dfs_stack.Count > 0)
+			{
+				ConduitFlow.BuildNetworkTask.OrderNode orderNode2 = this.order_dfs_stack.Pop();
+				if ((orderNode2.direction & ConduitFlow.FlowDirections.All) != ConduitFlow.FlowDirections.None)
+				{
+					ConduitFlow.FlowDirections direction = orderNode2.direction;
+					orderNode2.direction = direction << 1;
+					this.order_dfs_stack.Push(orderNode2);
+					if ((orderNode2.permited & direction) != ConduitFlow.FlowDirections.None)
+					{
+						orderNode.idx = outer.soaInfo.GetConduitConnections(orderNode2.idx).GetConnection(direction);
+						orderNode.direction = ConduitFlow.FlowDirections.Down;
+						orderNode.permited = outer.soaInfo.GetPermittedFlowDirections(orderNode.idx);
+						if (orderNode.idx != -1 && this.visited.Add(orderNode.idx))
+						{
+							this.order_dfs_stack.Push(orderNode);
+						}
+					}
+				}
+				else
+				{
+					result.Add(outer.soaInfo.GetCell(orderNode2.idx));
+				}
+			}
+		}
+
+		private void ReverseTopologicalOrderingPull(ConduitFlow outer, List<int> result, int start_cell)
+		{
+			global::Debug.Assert(this.order_dfs_stack.Count == 0);
+			ConduitFlow.BuildNetworkTask.OrderNode orderNode = default(ConduitFlow.BuildNetworkTask.OrderNode);
+			orderNode.idx = outer.grid[start_cell].conduitIdx;
+			orderNode.direction = ConduitFlow.FlowDirections.Down;
+			orderNode.permited = outer.soaInfo.GetPermittedFlowDirections(orderNode.idx);
+			if (orderNode.idx == -1 || !this.visited.Add(orderNode.idx))
+			{
+				return;
+			}
+			this.order_dfs_stack.Push(orderNode);
+			while (this.order_dfs_stack.Count > 0)
+			{
+				ConduitFlow.BuildNetworkTask.OrderNode orderNode2 = this.order_dfs_stack.Pop();
+				if ((orderNode2.direction & ConduitFlow.FlowDirections.All) != ConduitFlow.FlowDirections.None)
+				{
+					ConduitFlow.FlowDirections direction = orderNode2.direction;
+					orderNode2.direction = direction << 1;
+					this.order_dfs_stack.Push(orderNode2);
+					orderNode.idx = outer.soaInfo.GetConduitConnections(orderNode2.idx).GetConnection(ConduitFlow.Opposite(direction));
+					if (orderNode.idx != -1)
+					{
+						orderNode.direction = ConduitFlow.FlowDirections.Down;
+						orderNode.permited = outer.soaInfo.GetPermittedFlowDirections(orderNode.idx);
+						if ((orderNode.permited & direction) != ConduitFlow.FlowDirections.None && this.visited.Add(orderNode.idx))
+						{
+							this.order_dfs_stack.Push(orderNode);
+						}
+					}
+				}
+				else
+				{
+					result.Add(outer.soaInfo.GetCell(orderNode2.idx));
+				}
+			}
+		}
+
+		private void ComputeOrder(ConduitFlow outer)
+		{
+			this.network.cells.Capacity = Math.Max(this.network.cells.Capacity, outer.soaInfo.NumEntries);
+			foreach (int num in this.from_sources_graph.sources)
+			{
+				this.ReverseTopologicalOrderingPush(outer, this.network.cells, num);
+			}
+			foreach (int num2 in this.from_sources_graph.dead_ends)
+			{
+				this.ReverseTopologicalOrderingPush(outer, this.network.cells, num2);
+			}
+			int count = this.network.cells.Count;
+			foreach (int num3 in this.from_sinks_graph.sources)
+			{
+				this.ReverseTopologicalOrderingPull(outer, this.network.cells, num3);
+			}
+			foreach (int num4 in this.from_sinks_graph.dead_ends)
+			{
+				this.ReverseTopologicalOrderingPull(outer, this.network.cells, num4);
+			}
+			if (count != this.network.cells.Count)
+			{
+				this.network.cells.Reverse(count, this.network.cells.Count - count);
+			}
 		}
 
 		public void Run(ConduitFlow outer, int threadIndex)
@@ -1813,13 +1775,11 @@ public class ConduitFlow : IConduitFlow
 
 		private ConduitFlow.Network network;
 
-		private QueuePool<ConduitFlow.BuildNetworkTask.DistanceNode, ConduitFlow>.PooledQueue distance_nodes;
+		private StackPool<ConduitFlow.BuildNetworkTask.OrderNode, ConduitFlow>.PooledStack order_dfs_stack;
 
-		private DictionaryPool<int, int, ConduitFlow>.PooledDictionary distances_via_sources;
+		private HashSetPool<int, ConduitFlow>.PooledHashSet visited;
 
 		private ListPool<KeyValuePair<int, int>, ConduitFlow>.PooledList from_sources;
-
-		private DictionaryPool<int, int, ConduitFlow>.PooledDictionary distances_via_sinks;
 
 		private ListPool<KeyValuePair<int, int>, ConduitFlow>.PooledList from_sinks;
 
@@ -1828,11 +1788,13 @@ public class ConduitFlow : IConduitFlow
 		private ConduitFlow.BuildNetworkTask.Graph from_sinks_graph;
 
 		[DebuggerDisplay("cell {cell}:{distance}")]
-		private struct DistanceNode
+		private struct OrderNode
 		{
-			public int cell;
+			public int idx;
 
-			public int distance;
+			public ConduitFlow.FlowDirections direction;
+
+			public ConduitFlow.FlowDirections permited;
 		}
 
 		[DebuggerDisplay("vertices:{vertex_cells.Count}, edges:{edges.Count}")]
@@ -2038,12 +2000,12 @@ public class ConduitFlow : IConduitFlow
 				Block_4:
 				if (are_dead_ends_pseudo_sources)
 				{
+					this.dead_ends.Add(cell);
 					this.pseudo_sources.Add(new ConduitFlow.BuildNetworkTask.Graph.Vertex
 					{
 						cell = cell,
 						direction = ConduitFlow.ComputeNextFlowDirection(direction)
 					});
-					this.dead_ends.Add(cell);
 					return ConduitFlow.BuildNetworkTask.Graph.Vertex.INVALID;
 				}
 				ConduitFlow.BuildNetworkTask.Graph.Vertex vertex = default(ConduitFlow.BuildNetworkTask.Graph.Vertex);
@@ -2420,22 +2382,22 @@ public class ConduitFlow : IConduitFlow
 					if (connections != (UtilityConnections)0)
 					{
 						ConduitFlow.ConduitConnections @default = ConduitFlow.ConduitConnections.DEFAULT;
-						int num3 = num2 - 1;
+						int num3 = Grid.CellLeft(num2);
 						if (Grid.IsValidCell(num3) && (connections & UtilityConnections.Left) != (UtilityConnections)0)
 						{
 							@default.left = context.outer.grid[num3].conduitIdx;
 						}
-						num3 = num2 + 1;
+						num3 = Grid.CellRight(num2);
 						if (Grid.IsValidCell(num3) && (connections & UtilityConnections.Right) != (UtilityConnections)0)
 						{
 							@default.right = context.outer.grid[num3].conduitIdx;
 						}
-						num3 = num2 - Grid.WidthInCells;
+						num3 = Grid.CellBelow(num2);
 						if (Grid.IsValidCell(num3) && (connections & UtilityConnections.Down) != (UtilityConnections)0)
 						{
 							@default.down = context.outer.grid[num3].conduitIdx;
 						}
-						num3 = num2 + Grid.WidthInCells;
+						num3 = Grid.CellAbove(num2);
 						if (Grid.IsValidCell(num3) && (connections & UtilityConnections.Up) != (UtilityConnections)0)
 						{
 							@default.up = context.outer.grid[num3].conduitIdx;
@@ -2451,9 +2413,9 @@ public class ConduitFlow : IConduitFlow
 		private int end;
 	}
 
-	private class UpdateNetworkTask : IWorkItem<ConduitFlow>
+	private struct UpdateNetworkTask : IWorkItem<ConduitFlow>
 	{
-		public bool continue_updating { get; private set; }
+		public bool continue_updating { readonly get; private set; }
 
 		public UpdateNetworkTask(ConduitFlow.Network network)
 		{

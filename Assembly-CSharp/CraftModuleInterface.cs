@@ -10,7 +10,7 @@ public class CraftModuleInterface : KMonoBehaviour, ISim4000ms
 	{
 		get
 		{
-			return this.clusterModules.AsReadOnly();
+			return this.clusterModules;
 		}
 	}
 

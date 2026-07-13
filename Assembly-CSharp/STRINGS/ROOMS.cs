@@ -331,7 +331,7 @@ namespace STRINGS
 
 			public static class DECORATION
 			{
-				public static LocString NAME = UI.FormatAsLink("Decor item", "BUILDCATEGORYREQUIREMENTCLASSDECORATION");
+				public static LocString NAME = UI.FormatAsLink("Decor item", "REQUIREMENTCLASSDECORATION");
 
 				public static LocString CONFLICT_DESCRIPTION = ROOMS.CRITERIA.DECORATION.NAME;
 			}
@@ -365,14 +365,14 @@ namespace STRINGS
 
 			public class INDUSTRIALMACHINERY
 			{
-				public static LocString NAME = UI.FormatAsLink("Industrial machinery", "BUILDCATEGORYREQUIREMENTCLASSINDUSTRIALMACHINERY");
+				public static LocString NAME = UI.FormatAsLink("Industrial machinery", "REQUIREMENTCLASSINDUSTRIALMACHINERY");
 
 				public static LocString CONFLICT_DESCRIPTION = ROOMS.CRITERIA.INDUSTRIALMACHINERY.NAME;
 			}
 
 			public class HAS_BED
 			{
-				public static LocString NAME = "One or more " + UI.FormatAsLink("beds", "BUILDCATEGORYREQUIREMENTCLASSBEDTYPE");
+				public static LocString NAME = "One or more " + UI.FormatAsLink("beds", "REQUIREMENTCLASSBEDTYPE");
 
 				public static LocString DESCRIPTION = "Requires at least one Cot or Comfy Bed";
 
@@ -399,7 +399,7 @@ namespace STRINGS
 
 			public class BED_SINGLE
 			{
-				public static LocString NAME = "Single " + UI.FormatAsLink("beds", "BUILDCATEGORYREQUIREMENTCLASSBEDTYPE");
+				public static LocString NAME = "Single " + UI.FormatAsLink("beds", "REQUIREMENTCLASSBEDTYPE");
 
 				public static LocString DESCRIPTION = "Must have no more than one Cot or Comfy Bed";
 
@@ -435,7 +435,7 @@ namespace STRINGS
 
 			public class BEDTYPE
 			{
-				public static LocString NAME = UI.FormatAsLink("Beds", "BUILDCATEGORYREQUIREMENTCLASSBEDTYPE");
+				public static LocString NAME = UI.FormatAsLink("Beds", "REQUIREMENTCLASSBEDTYPE");
 
 				public static LocString DESCRIPTION = "Requires two or more Cots or Comfy Beds";
 
@@ -444,7 +444,7 @@ namespace STRINGS
 
 			public class BUILDING_DECOR_POSITIVE
 			{
-				public static LocString NAME = "Positive " + UI.FormatAsLink("decor", "BUILDCATEGORYREQUIREMENTCLASSDECORATION");
+				public static LocString NAME = "Positive " + UI.FormatAsLink("decor", "REQUIREMENTCLASSDECORATION");
 
 				public static LocString DESCRIPTION = "Requires at least one building with positive decor";
 
@@ -453,7 +453,7 @@ namespace STRINGS
 
 			public class DECORATIVE_ITEM
 			{
-				public static LocString NAME = UI.FormatAsLink("Decor item", "BUILDCATEGORYREQUIREMENTCLASSDECORATION") + " ({0})";
+				public static LocString NAME = UI.FormatAsLink("Decor item", "REQUIREMENTCLASSDECORATION") + " ({0})";
 
 				public static LocString DESCRIPTION = "Requires {0} or more Decor items";
 
@@ -471,7 +471,7 @@ namespace STRINGS
 					ROOMS.CRITERIA.DECOR20.CONFLICT_DESCRIPTION = ROOMS.CRITERIA.DECOR20.NAME;
 				}
 
-				public static LocString NAME = UI.FormatAsLink("Fancy decor item", "BUILDCATEGORYREQUIREMENTCLASSDECORATION");
+				public static LocString NAME = UI.FormatAsLink("Fancy decor item", "REQUIREMENTCLASSDECORATION");
 
 				public static LocString DESCRIPTION;
 
@@ -480,7 +480,7 @@ namespace STRINGS
 
 			public class CLINIC
 			{
-				public static LocString NAME = UI.FormatAsLink("Medical equipment", "BUILDCATEGORYREQUIREMENTCLASSCLINIC");
+				public static LocString NAME = UI.FormatAsLink("Medical equipment", "REQUIREMENTCLASSCLINIC");
 
 				public static LocString DESCRIPTION = "Requires one or more Sick Bays or Disease Clinics";
 
@@ -489,7 +489,7 @@ namespace STRINGS
 
 			public class POWERPLANT
 			{
-				public static LocString NAME = UI.FormatAsLink("Heavy-Duty Generator", "BUILDCATEGORYREQUIREMENTCLASSGENERATORTYPE") + "\n    • Two or more " + UI.FormatAsLink("Power Buildings", "BUILDCATEGORYREQUIREMENTCLASSPOWERBUILDING");
+				public static LocString NAME = UI.FormatAsLink("Heavy-Duty Generator", "REQUIREMENTCLASSGENERATORTYPE") + "\n    • Two or more " + UI.FormatAsLink("Power Buildings", "REQUIREMENTCLASSPOWERBUILDING");
 
 				public static LocString DESCRIPTION = "Requires a Heavy-Duty Generator and two or more Power Buildings";
 
@@ -505,13 +505,13 @@ namespace STRINGS
 				public static LocString CONFLICT_DESCRIPTION = ROOMS.CRITERIA.FARMSTATIONTYPE.NAME;
 			}
 
-			public class CREATURERELOCATOR
+			public class FARMBUILDING
 			{
-				public static LocString NAME = UI.FormatAsLink("Critter relocator", "BUILDCATEGORYREQUIREMENTCLASSCREATURERELOCATOR");
+				public static LocString NAME = UI.FormatAsLink("Farm Building", "FARMBUILDING");
 
-				public static LocString DESCRIPTION = "Requires a single Critter Drop-Off or Fish Release";
+				public static LocString DESCRIPTION = "";
 
-				public static LocString CONFLICT_DESCRIPTION = ROOMS.CRITERIA.CREATURERELOCATOR.NAME;
+				public static LocString CONFLICT_DESCRIPTION = ROOMS.CRITERIA.FARMBUILDING.NAME;
 			}
 
 			public class CREATURE_FEEDER
@@ -525,7 +525,7 @@ namespace STRINGS
 
 			public class RANCHSTATIONTYPE
 			{
-				public static LocString NAME = UI.FormatAsLink("Ranching building", "BUILDCATEGORYREQUIREMENTCLASSRANCHSTATIONTYPE");
+				public static LocString NAME = UI.FormatAsLink("Ranching building", "REQUIREMENTCLASSRANCHSTATIONTYPE");
 
 				public static LocString DESCRIPTION = "Requires a single Grooming Station, Critter Condo, Critter Fountain, Shearing Station or Milking Station";
 
@@ -543,7 +543,7 @@ namespace STRINGS
 
 			public class COOKTOP
 			{
-				public static LocString NAME = UI.FormatAsLink("Cooking station", "BUILDCATEGORYREQUIREMENTCLASSCOOKTOP");
+				public static LocString NAME = UI.FormatAsLink("Cooking station", "REQUIREMENTCLASSCOOKTOP");
 
 				public static LocString DESCRIPTION = "Requires a single Electric Grill or Gas Range";
 
@@ -561,7 +561,7 @@ namespace STRINGS
 
 			public class RECBUILDING
 			{
-				public static LocString NAME = UI.FormatAsLink("Recreational building", "BUILDCATEGORYREQUIREMENTCLASSRECBUILDING");
+				public static LocString NAME = UI.FormatAsLink("Recreational building", "REQUIREMENTCLASSRECBUILDING");
 
 				public static LocString DESCRIPTION = "Requires one or more recreational buildings";
 
@@ -597,7 +597,7 @@ namespace STRINGS
 
 			public class LIGHTSOURCE
 			{
-				public static LocString NAME = UI.FormatAsLink("Light source", "BUILDCATEGORYREQUIREMENTCLASSLIGHTSOURCE");
+				public static LocString NAME = UI.FormatAsLink("Light source", "REQUIREMENTCLASSLIGHTSOURCE");
 
 				public static LocString DESCRIPTION = "Requires one or more light sources";
 
@@ -651,7 +651,7 @@ namespace STRINGS
 
 			public class RESEARCH_STATION
 			{
-				public static LocString NAME = UI.FormatAsLink("Research station", "BUILDCATEGORYREQUIREMENTCLASSRESEARCH_STATION");
+				public static LocString NAME = UI.FormatAsLink("Research station", "REQUIREMENTCLASSRESEARCH_STATION");
 
 				public static LocString DESCRIPTION = "Requires one or more Research Stations or Super Computers";
 
@@ -660,7 +660,7 @@ namespace STRINGS
 
 			public class BIONICUPKEEP
 			{
-				public static LocString NAME = UI.FormatAsLink("Bionic service station", "BUILDCATEGORYREQUIREMENTCLASSBIONICUPKEEP");
+				public static LocString NAME = UI.FormatAsLink("Bionic service station", "REQUIREMENTCLASSBIONICUPKEEP");
 
 				public static LocString DESCRIPTION = "Requires at least one Lubrication Station and one Gunk Extractor";
 
@@ -669,7 +669,7 @@ namespace STRINGS
 
 			public class BIONIC_GUNKEMPTIER
 			{
-				public static LocString NAME = UI.FormatAsLink("Gunk Extractor", "BUILDCATEGORYREQUIREMENTCLASSBIONIC_GUNKEMPTIER");
+				public static LocString NAME = UI.FormatAsLink("Gunk Extractor", "REQUIREMENTCLASSBIONIC_GUNKEMPTIER");
 
 				public static LocString DESCRIPTION = "Requires one or more Gunk Extractors";
 
@@ -678,7 +678,7 @@ namespace STRINGS
 
 			public class BIONIC_LUBRICATION
 			{
-				public static LocString NAME = UI.FormatAsLink("Lubrication Station", "BUILDCATEGORYREQUIREMENTCLASSBIONIC_LUBRICATION");
+				public static LocString NAME = UI.FormatAsLink("Lubrication Station", "REQUIREMENTCLASSBIONIC_LUBRICATION");
 
 				public static LocString DESCRIPTION = "Requires one or more Lubrication Stations";
 
@@ -687,7 +687,7 @@ namespace STRINGS
 
 			public class TOILETTYPE
 			{
-				public static LocString NAME = UI.FormatAsLink("Toilet", "BUILDCATEGORYREQUIREMENTCLASSTOILETTYPE");
+				public static LocString NAME = UI.FormatAsLink("Toilet", "REQUIREMENTCLASSTOILETTYPE");
 
 				public static LocString DESCRIPTION = "Requires one or more Outhouses or Lavatories";
 
@@ -696,7 +696,7 @@ namespace STRINGS
 
 			public class FLUSHTOILETTYPE
 			{
-				public static LocString NAME = UI.FormatAsLink("Flush Toilet", "BUILDCATEGORYREQUIREMENTCLASSFLUSHTOILETTYPE");
+				public static LocString NAME = UI.FormatAsLink("Flush Toilet", "REQUIREMENTCLASSFLUSHTOILETTYPE");
 
 				public static LocString DESCRIPTION = "Requires one or more Lavatories";
 
@@ -714,7 +714,7 @@ namespace STRINGS
 
 			public class WASHSTATION
 			{
-				public static LocString NAME = UI.FormatAsLink("Wash station", "BUILDCATEGORYREQUIREMENTCLASSWASHSTATION");
+				public static LocString NAME = UI.FormatAsLink("Wash station", "REQUIREMENTCLASSWASHSTATION");
 
 				public static LocString DESCRIPTION = "Requires one or more Wash Basins, Sinks, Hand Sanitizers, or Showers";
 
@@ -723,7 +723,7 @@ namespace STRINGS
 
 			public class ADVANCEDWASHSTATION
 			{
-				public static LocString NAME = UI.FormatAsLink("Plumbed wash station", "BUILDCATEGORYREQUIREMENTCLASSWASHSTATION");
+				public static LocString NAME = UI.FormatAsLink("Plumbed wash station", "REQUIREMENTCLASSWASHSTATION");
 
 				public static LocString DESCRIPTION = "Requires one or more Sinks, Hand Sanitizers, or Showers";
 
@@ -732,7 +732,7 @@ namespace STRINGS
 
 			public class NO_INDUSTRIAL_MACHINERY
 			{
-				public static LocString NAME = "No " + UI.FormatAsLink("industrial machinery", "BUILDCATEGORYREQUIREMENTCLASSINDUSTRIALMACHINERY");
+				public static LocString NAME = "No " + UI.FormatAsLink("industrial machinery", "REQUIREMENTCLASSINDUSTRIALMACHINERY");
 
 				public static LocString DESCRIPTION = "Cannot contain any building labeled Industrial Machinery";
 
@@ -777,7 +777,7 @@ namespace STRINGS
 
 			public class SCIENCEBUILDING
 			{
-				public static LocString NAME = UI.FormatAsLink("Science building", "BUILDCATEGORYREQUIREMENTCLASSSCIENCEBUILDING");
+				public static LocString NAME = UI.FormatAsLink("Science building", "REQUIREMENTCLASSSCIENCEBUILDING");
 
 				public static LocString DESCRIPTION = "Requires one or more science buildings";
 
@@ -786,7 +786,7 @@ namespace STRINGS
 
 			public class SCIENCE_BUILDINGS
 			{
-				public static LocString NAME = "Two " + UI.FormatAsLink("science buildings", "BUILDCATEGORYREQUIREMENTCLASSSCIENCEBUILDING");
+				public static LocString NAME = "Two " + UI.FormatAsLink("science buildings", "REQUIREMENTCLASSSCIENCEBUILDING");
 
 				public static LocString DESCRIPTION = "Requires two or more science buildings";
 
@@ -795,7 +795,7 @@ namespace STRINGS
 
 			public class ROCKETINTERIOR
 			{
-				public static LocString NAME = UI.FormatAsLink("Rocket interior", "BUILDCATEGORYREQUIREMENTCLASSROCKETINTERIOR");
+				public static LocString NAME = UI.FormatAsLink("Rocket interior", "REQUIREMENTCLASSROCKETINTERIOR");
 
 				public static LocString DESCRIPTION = "Must be built inside a rocket";
 
@@ -804,7 +804,7 @@ namespace STRINGS
 
 			public class WARMINGSTATION
 			{
-				public static LocString NAME = UI.FormatAsLink("Warming station", "BUILDCATEGORYREQUIREMENTCLASSWARMINGSTATION");
+				public static LocString NAME = UI.FormatAsLink("Warming station", "REQUIREMENTCLASSWARMINGSTATION");
 
 				public static LocString DESCRIPTION = "Raises the ambient temperature";
 
@@ -813,7 +813,7 @@ namespace STRINGS
 
 			public class GENERATORTYPE
 			{
-				public static LocString NAME = UI.FormatAsLink("Generator", "BUILDCATEGORYREQUIREMENTCLASSGENERATORTYPE");
+				public static LocString NAME = UI.FormatAsLink("Generator", "REQUIREMENTCLASSGENERATORTYPE");
 
 				public static LocString DESCRIPTION = "Generates electrical power";
 
@@ -822,7 +822,7 @@ namespace STRINGS
 
 			public class HEAVYDUTYGENERATORTYPE
 			{
-				public static LocString NAME = UI.FormatAsLink("Heavy-duty generator", "BUILDCATEGORYREQUIREMENTCLASSGENERATORTYPE");
+				public static LocString NAME = UI.FormatAsLink("Heavy-duty generator", "REQUIREMENTCLASSGENERATORTYPE");
 
 				public static LocString DESCRIPTION = "For big power needs";
 
@@ -831,7 +831,7 @@ namespace STRINGS
 
 			public class LIGHTDUTYGENERATORTYPE
 			{
-				public static LocString NAME = UI.FormatAsLink("Basic generator", "BUILDCATEGORYREQUIREMENTCLASSGENERATORTYPE");
+				public static LocString NAME = UI.FormatAsLink("Basic generator", "REQUIREMENTCLASSGENERATORTYPE");
 
 				public static LocString DESCRIPTION = "For basic power needs";
 
@@ -840,7 +840,7 @@ namespace STRINGS
 
 			public class POWERBUILDING
 			{
-				public static LocString NAME = UI.FormatAsLink("Power building", "BUILDCATEGORYREQUIREMENTCLASSPOWERBUILDING");
+				public static LocString NAME = UI.FormatAsLink("Power building", "REQUIREMENTCLASSPOWERBUILDING");
 
 				public static LocString DESCRIPTION = "Buildings that generate, store, or manage power";
 

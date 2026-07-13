@@ -1,4 +1,5 @@
 ﻿using System;
+using STRINGS;
 using TUNING;
 using UnityEngine;
 
@@ -30,6 +31,9 @@ public class CanvasConfig : IBuildingConfig
 		buildingDef.ViewMode = OverlayModes.Decor.ID;
 		buildingDef.DefaultAnimState = "off";
 		buildingDef.PermittedRotations = PermittedRotations.FlipH;
+		buildingDef.RequiredSkillPerkID = Db.Get().SkillPerks.CanArt.Id;
+		buildingDef.AddSearchTerms(SEARCH_TERMS.MORALE);
+		buildingDef.AddSearchTerms(SEARCH_TERMS.ARTWORK);
 		return buildingDef;
 	}
 

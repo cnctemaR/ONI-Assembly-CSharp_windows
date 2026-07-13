@@ -9,14 +9,8 @@ namespace Database
 
 		public KAnimFile AnimFile { get; private set; }
 
-		[Obsolete("Please use constructor with dlcIds parameter")]
-		public BalloonArtistFacadeResource(string id, string name, string desc, PermitRarity rarity, string animFile, BalloonArtistFacadeType balloonFacadeType)
-			: this(id, name, desc, rarity, animFile, balloonFacadeType, DlcManager.AVAILABLE_ALL_VERSIONS)
-		{
-		}
-
-		public BalloonArtistFacadeResource(string id, string name, string desc, PermitRarity rarity, string animFile, BalloonArtistFacadeType balloonFacadeType, string[] dlcIds)
-			: base(id, name, desc, PermitCategory.JoyResponse, rarity, dlcIds)
+		public BalloonArtistFacadeResource(string id, string name, string desc, PermitRarity rarity, string animFile, BalloonArtistFacadeType balloonFacadeType, string[] requiredDlcIds = null, string[] forbiddenDlcIds = null)
+			: base(id, name, desc, PermitCategory.JoyResponse, rarity, requiredDlcIds, forbiddenDlcIds)
 		{
 			this.AnimFile = Assets.GetAnim(animFile);
 			this.animFilename = animFile;

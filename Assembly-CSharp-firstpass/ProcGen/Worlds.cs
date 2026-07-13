@@ -118,7 +118,7 @@ namespace ProcGen
 					{
 						DebugUtil.LogWarningArgs(new object[] { "Failed to load world: ", world_file.full_path });
 					}
-					else if (world.skip != World.Skip.Always && (world.skip != World.Skip.EditorOnly || Application.isEditor) && (world.requiredDlcIds == null || DlcManager.IsAllContentSubscribed(world.requiredDlcIds)) && (world.forbiddenDlcIds == null || !DlcManager.IsAnyContentSubscribed(world.forbiddenDlcIds)))
+					else if (world.skip != World.Skip.Always && (world.skip != World.Skip.EditorOnly || Application.isEditor) && DlcManager.IsCorrectDlcSubscribed(world))
 					{
 						string name = Worlds.GetName(world_file.full_path, prefix);
 						world.filePath = name;

@@ -32,6 +32,7 @@ public class TelescopeConfig : IBuildingConfig
 		buildingDef.ViewMode = OverlayModes.Power.ID;
 		buildingDef.AudioCategory = "Metal";
 		buildingDef.AudioSize = "large";
+		buildingDef.RequiredSkillPerkID = Db.Get().SkillPerks.CanStudyWorldObjects.Id;
 		return buildingDef;
 	}
 

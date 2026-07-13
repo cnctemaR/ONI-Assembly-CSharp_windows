@@ -40,25 +40,9 @@ public class HatchMetalConfig : IEntityConfig
 		return BaseHatchConfig.SetupDiet(gameObject, list, HatchMetalConfig.CALORIES_PER_KG_OF_ORE, HatchMetalConfig.MIN_POOP_SIZE_IN_KG);
 	}
 
-	public string[] GetDlcIds()
-	{
-		return DlcManager.AVAILABLE_ALL_VERSIONS;
-	}
-
 	public GameObject CreatePrefab()
 	{
-		GameObject gameObject = HatchMetalConfig.CreateHatch("HatchMetal", global::STRINGS.CREATURES.SPECIES.HATCH.VARIANT_METAL.NAME, global::STRINGS.CREATURES.SPECIES.HATCH.VARIANT_METAL.DESC, "hatch_kanim", false);
-		string text = "HatchMetalEgg";
-		string text2 = global::STRINGS.CREATURES.SPECIES.HATCH.VARIANT_METAL.EGG_NAME;
-		string text3 = global::STRINGS.CREATURES.SPECIES.HATCH.VARIANT_METAL.DESC;
-		string text4 = "egg_hatch_kanim";
-		float egg_MASS = HatchTuning.EGG_MASS;
-		string text5 = "HatchMetalBaby";
-		float num = 60.000004f;
-		float num2 = 20f;
-		List<FertilityMonitor.BreedingChance> egg_CHANCES_METAL = HatchTuning.EGG_CHANCES_METAL;
-		int egg_SORT_ORDER = HatchMetalConfig.EGG_SORT_ORDER;
-		return EntityTemplates.ExtendEntityToFertileCreature(gameObject, text, text2, text3, text4, egg_MASS, text5, num, num2, egg_CHANCES_METAL, this.GetDlcIds(), egg_SORT_ORDER, true, false, true, 1f, false);
+		return EntityTemplates.ExtendEntityToFertileCreature(HatchMetalConfig.CreateHatch("HatchMetal", global::STRINGS.CREATURES.SPECIES.HATCH.VARIANT_METAL.NAME, global::STRINGS.CREATURES.SPECIES.HATCH.VARIANT_METAL.DESC, "hatch_kanim", false), this as IHasDlcRestrictions, "HatchMetalEgg", global::STRINGS.CREATURES.SPECIES.HATCH.VARIANT_METAL.EGG_NAME, global::STRINGS.CREATURES.SPECIES.HATCH.VARIANT_METAL.DESC, "egg_hatch_kanim", HatchTuning.EGG_MASS, "HatchMetalBaby", 60.000004f, 20f, HatchTuning.EGG_CHANCES_METAL, HatchMetalConfig.EGG_SORT_ORDER, true, false, 1f, false);
 	}
 
 	public void OnPrefabInit(GameObject prefab)

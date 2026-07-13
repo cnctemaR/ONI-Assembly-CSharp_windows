@@ -29,6 +29,8 @@ public class GourmetCookingStationConfig : IBuildingConfig
 		buildingDef.InputConduitType = ConduitType.Gas;
 		buildingDef.UtilityInputOffset = new CellOffset(-1, 0);
 		buildingDef.PowerInputOffset = new CellOffset(1, 0);
+		buildingDef.RequiredSkillPerkID = Db.Get().SkillPerks.CanGasRange.Id;
+		buildingDef.AddSearchTerms(SEARCH_TERMS.FOOD);
 		return buildingDef;
 	}
 

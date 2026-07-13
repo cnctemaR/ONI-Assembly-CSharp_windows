@@ -28,6 +28,8 @@ public abstract class BaseWireConfig : IBuildingConfig
 		buildingDef3.isKAnimTile = true;
 		buildingDef3.isUtility = true;
 		buildingDef3.DragBuild = true;
+		buildingDef3.AddSearchTerms(SEARCH_TERMS.POWER);
+		buildingDef3.AddSearchTerms(SEARCH_TERMS.WIRE);
 		GeneratedBuildings.RegisterWithOverlay(OverlayScreen.WireIDs, id);
 		return buildingDef3;
 	}

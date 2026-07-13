@@ -1,4 +1,5 @@
 ﻿using System;
+using STRINGS;
 using TUNING;
 using UnityEngine;
 
@@ -17,18 +18,19 @@ public class LadderBedConfig : IBuildingConfig
 		string text = "ladder_bed_kanim";
 		int num3 = 10;
 		float num4 = 10f;
-		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER3;
+		float[] tier = global::TUNING.BUILDINGS.CONSTRUCTION_MASS_KG.TIER3;
 		string[] refined_METALS = MATERIALS.REFINED_METALS;
 		float num5 = 1600f;
 		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloorOrBuildingAttachPoint;
 		EffectorValues none = NOISE_POLLUTION.NONE;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(id, num, num2, text, num3, num4, tier, refined_METALS, num5, buildLocationRule, BUILDINGS.DECOR.NONE, none, 0.2f);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(id, num, num2, text, num3, num4, tier, refined_METALS, num5, buildLocationRule, global::TUNING.BUILDINGS.DECOR.NONE, none, 0.2f);
 		buildingDef.Overheatable = false;
 		buildingDef.AudioCategory = "Metal";
 		buildingDef.PermittedRotations = PermittedRotations.FlipH;
 		buildingDef.attachablePosition = new CellOffset(0, 0);
 		buildingDef.AttachmentSlotTag = GameTags.LadderBed;
 		buildingDef.ObjectLayer = ObjectLayer.Building;
+		buildingDef.AddSearchTerms(SEARCH_TERMS.BED);
 		return buildingDef;
 	}
 

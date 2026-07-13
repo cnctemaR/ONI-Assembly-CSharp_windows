@@ -32,6 +32,7 @@ public class LogicTemperatureSensorConfig : IBuildingConfig
 		SoundEventVolumeCache.instance.AddVolume("switchthermal_kanim", "PowerSwitch_on", NOISE_POLLUTION.NOISY.TIER3);
 		SoundEventVolumeCache.instance.AddVolume("switchthermal_kanim", "PowerSwitch_off", NOISE_POLLUTION.NOISY.TIER3);
 		GeneratedBuildings.RegisterWithOverlay(OverlayModes.Logic.HighlightItemIDs, LogicTemperatureSensorConfig.ID);
+		buildingDef.AddSearchTerms(SEARCH_TERMS.AUTOMATION);
 		return buildingDef;
 	}
 

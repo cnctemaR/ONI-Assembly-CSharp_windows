@@ -7,5 +7,9 @@ public interface IEquipmentConfig
 
 	void DoPostConfigure(GameObject go);
 
-	string[] GetDlcIds();
+	[Obsolete("Use IHasDlcRestrictions instead")]
+	string[] GetDlcIds()
+	{
+		return null;
+	}
 }

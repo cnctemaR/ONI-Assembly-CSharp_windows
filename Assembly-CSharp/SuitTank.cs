@@ -106,7 +106,7 @@ public class SuitTank : KMonoBehaviour, IGameObjectEffectDescriptor, OxygenBreat
 	{
 	}
 
-	public bool ConsumeGas(OxygenBreather oxygen_breather, float amount, Action<SimHashes, float, float, byte, int> onConsumptionCompletedCallback)
+	public bool ConsumeGas(OxygenBreather oxygen_breather, float amount)
 	{
 		if (this.IsEmpty())
 		{
@@ -117,10 +117,7 @@ public class SuitTank : KMonoBehaviour, IGameObjectEffectDescriptor, OxygenBreat
 		float num2;
 		SimUtil.DiseaseInfo diseaseInfo;
 		this.storage.ConsumeAndGetDisease(this.elementTag, amount, out num2, out diseaseInfo, out num, out simHashes);
-		if (onConsumptionCompletedCallback != null)
-		{
-			onConsumptionCompletedCallback(simHashes, num2, num, diseaseInfo.idx, diseaseInfo.count);
-		}
+		OxygenBreather.BreathableGasConsumed(oxygen_breather, simHashes, num2, num, diseaseInfo.idx, diseaseInfo.count);
 		base.Trigger(608245985, base.gameObject);
 		return true;
 	}

@@ -48,7 +48,9 @@ public class ArtifactFinder : KMonoBehaviour
 		{
 			foreach (string text in keyValuePair.Value)
 			{
-				if (Assets.GetPrefab(text.ToTag()).GetComponent<SpaceArtifact>().GetArtifactTier() == tier)
+				GameObject prefab = Assets.GetPrefab(text.ToTag());
+				ArtifactTier artifactTier = prefab.GetComponent<SpaceArtifact>().GetArtifactTier();
+				if (Game.IsCorrectDlcActiveForCurrentSave(prefab.GetComponent<KPrefabID>()) && artifactTier == tier)
 				{
 					list.Add(text);
 				}

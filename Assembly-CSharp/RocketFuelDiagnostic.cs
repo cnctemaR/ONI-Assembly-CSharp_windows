@@ -10,9 +10,9 @@ public class RocketFuelDiagnostic : ColonyDiagnostic
 		this.icon = "rocket_fuel";
 	}
 
-	public override string[] GetDlcIds()
+	public override string[] GetRequiredDlcIds()
 	{
-		return DlcManager.AVAILABLE_EXPANSION1_ONLY;
+		return DlcManager.EXPANSION1;
 	}
 
 	public override ColonyDiagnostic.DiagnosticResult Evaluate()

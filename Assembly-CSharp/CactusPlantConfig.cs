@@ -6,11 +6,6 @@ using UnityEngine;
 
 public class CactusPlantConfig : IEntityConfig
 {
-	public string[] GetDlcIds()
-	{
-		return DlcManager.AVAILABLE_ALL_VERSIONS;
-	}
-
 	public GameObject CreatePrefab()
 	{
 		string text = "CactusPlant";
@@ -29,6 +24,7 @@ public class CactusPlantConfig : IEntityConfig
 		prickleGrass.positive_decor_effect = this.POSITIVE_DECOR_EFFECT;
 		prickleGrass.negative_decor_effect = this.NEGATIVE_DECOR_EFFECT;
 		GameObject gameObject2 = gameObject;
+		IHasDlcRestrictions hasDlcRestrictions = this as IHasDlcRestrictions;
 		SeedProducer.ProductionType productionType = SeedProducer.ProductionType.Hidden;
 		string text4 = "CactusPlantSeed";
 		string text5 = global::STRINGS.CREATURES.SPECIES.SEEDS.CACTUSPLANT.NAME;
@@ -40,7 +36,7 @@ public class CactusPlantConfig : IEntityConfig
 		list.Add(GameTags.DecorSeed);
 		SingleEntityReceptacle.ReceptacleDirection receptacleDirection = SingleEntityReceptacle.ReceptacleDirection.Top;
 		string text8 = global::STRINGS.CREATURES.SPECIES.CACTUSPLANT.DOMESTICATEDDESC;
-		EntityTemplates.CreateAndRegisterPreviewForPlant(EntityTemplates.CreateAndRegisterSeedForPlant(gameObject2, productionType, text4, text5, text6, anim, text7, num2, list, receptacleDirection, default(Tag), 13, text8, EntityTemplates.CollisionShape.CIRCLE, 0.25f, 0.25f, null, "", false, null), "CactusPlant_preview", Assets.GetAnim("potted_cactus_kanim"), "place", 1, 1);
+		EntityTemplates.CreateAndRegisterPreviewForPlant(EntityTemplates.CreateAndRegisterSeedForPlant(gameObject2, hasDlcRestrictions, productionType, text4, text5, text6, anim, text7, num2, list, receptacleDirection, default(Tag), 13, text8, EntityTemplates.CollisionShape.CIRCLE, 0.25f, 0.25f, null, "", false), "CactusPlant_preview", Assets.GetAnim("potted_cactus_kanim"), "place", 1, 1);
 		return gameObject;
 	}
 

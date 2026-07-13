@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using Klei;
 using Newtonsoft.Json;
 using UnityEngine;
@@ -11,7 +12,7 @@ namespace KMod
 {
 	[JsonObject(MemberSerialization.OptIn)]
 	[DebuggerDisplay("{title}")]
-	public class Mod
+	public class Mod : IHasDlcRestrictions
 	{
 		public Content available_content { get; private set; }
 
@@ -36,9 +37,13 @@ namespace KMod
 			{
 				return this.label.title;
 			}
+			set
+			{
+				this.label.title = value;
+			}
 		}
 
-		public string description { get; private set; }
+		public string description { get; set; }
 
 		public Content loaded_content { get; private set; }
 
@@ -59,6 +64,16 @@ namespace KMod
 		}
 
 		public bool DevModCrashTriggered { get; private set; }
+
+		public string[] GetRequiredDlcIds()
+		{
+			return this.requiredDlcIds;
+		}
+
+		public string[] GetForbiddenDlcIds()
+		{
+			return this.forbiddenDlcIds;
+		}
 
 		[JsonConstructor]
 		public Mod()
@@ -209,33 +224,23 @@ namespace KMod
 
 		private Mod.ArchivedVersion GetMostSuitableArchive()
 		{
-			Mod.PackagedModInfo packagedModInfo = this.GetModInfoForFolder("");
-			if (packagedModInfo == null)
+			Mod.PackagedModInfo modInfoForFolder = this.GetModInfoForFolder("");
+			if (modInfoForFolder == null)
 			{
-				packagedModInfo = new Mod.PackagedModInfo
-				{
-					supportedContent = "vanilla_id",
-					minimumSupportedBuild = 0
-				};
-				if (this.ScanContentFromSourceForTranslationsOnly(""))
-				{
-					this.ModDevLogWarning(string.Format("{0}: No mod_info.yaml found, but since it contains a translation, default its supported content to 'ALL'", this.label));
-					packagedModInfo.supportedContent = "all";
-				}
-				else
-				{
-					this.ModDevLogWarning(string.Format("{0}: No mod_info.yaml found, default its supported content to 'VANILLA_ID'", this.label));
-				}
+				global::Debug.Log(string.Format("{0}: Is missing a mod_info.yaml file and will not be loaded, which is required. See the stickied post in the Mods and Tools section on the Klei forums.", this.label));
+				return null;
 			}
+			this.requiredDlcIds = modInfoForFolder.requiredDlcIds;
+			this.forbiddenDlcIds = modInfoForFolder.forbiddenDlcIds;
 			Mod.ArchivedVersion archivedVersion = new Mod.ArchivedVersion
 			{
 				relativePath = "",
-				info = packagedModInfo
+				info = modInfoForFolder
 			};
 			if (!this.file_source.Exists("archived_versions"))
 			{
 				this.ModDevLog(string.Format("\t{0}: No archived_versions for this mod, using root version directly.", this.label));
-				if (!this.DoesModSupportCurrentContent(packagedModInfo))
+				if (!DlcManager.IsCorrectDlcSubscribed(modInfoForFolder))
 				{
 					return null;
 				}
@@ -248,7 +253,7 @@ namespace KMod
 				if (list.Count == 0)
 				{
 					this.ModDevLog(string.Format("\t{0}: No archived_versions for this mod, using root version directly.", this.label));
-					if (!this.DoesModSupportCurrentContent(packagedModInfo))
+					if (!DlcManager.IsCorrectDlcSubscribed(modInfoForFolder))
 					{
 						return null;
 					}
@@ -263,23 +268,28 @@ namespace KMod
 						if (fileSystemItem.type != FileSystemItem.ItemType.File)
 						{
 							string text = Path.Combine("archived_versions", fileSystemItem.name);
-							Mod.PackagedModInfo modInfoForFolder = this.GetModInfoForFolder(text);
-							if (modInfoForFolder != null)
+							Mod.PackagedModInfo modInfoForFolder2 = this.GetModInfoForFolder(text);
+							if (modInfoForFolder2 != null)
 							{
 								list2.Add(new Mod.ArchivedVersion
 								{
 									relativePath = text,
-									info = modInfoForFolder
+									info = modInfoForFolder2
 								});
 							}
 						}
 					}
-					list2 = list2.Where<Mod.ArchivedVersion>((Mod.ArchivedVersion v) => this.DoesModSupportCurrentContent(v.info)).ToList<Mod.ArchivedVersion>();
+					list2 = list2.Where<Mod.ArchivedVersion>((Mod.ArchivedVersion v) => DlcManager.IsCorrectDlcSubscribed(v.info)).ToList<Mod.ArchivedVersion>();
 					list2 = list2.Where<Mod.ArchivedVersion>((Mod.ArchivedVersion v) => v.info.APIVersion == 2 || v.info.APIVersion == 0).ToList<Mod.ArchivedVersion>();
 					Mod.ArchivedVersion archivedVersion2 = (from v in list2
-						where (long)v.info.minimumSupportedBuild <= 652372L
+						where (long)v.info.minimumSupportedBuild <= 659901L
 						orderby v.info.minimumSupportedBuild descending
 						select v).FirstOrDefault<Mod.ArchivedVersion>();
+					if (archivedVersion2 != null)
+					{
+						this.requiredDlcIds = archivedVersion2.info.requiredDlcIds;
+						this.forbiddenDlcIds = archivedVersion2.info.forbiddenDlcIds;
+					}
 					if (archivedVersion2 == null)
 					{
 						return null;
@@ -324,10 +334,80 @@ namespace KMod
 				this.ModDevLogError(string.Format("\t{0}: Failed to parse {1} in folder '{2}', text is {3}", new object[] { this.label, "mod_info.yaml", text, text2 }));
 				return null;
 			}
-			if (packagedModInfo.supportedContent == null)
+			if (packagedModInfo.supportedContent != null && packagedModInfo.requiredDlcIds == null && packagedModInfo.forbiddenDlcIds == null)
 			{
-				this.ModDevLogError(string.Format("\t{0}: {1} in folder '{2}' does not specify supportedContent. Make sure you spelled it correctly in your mod_info!", this.label, "mod_info.yaml", text));
-				return null;
+				packagedModInfo.supportedContent = packagedModInfo.supportedContent.ToUpperInvariant();
+				this.ModDevLogWarning(string.Format("\t{0}: {1} in folder '{2}' is using supportedContent which has been deprecated. See stickied post on the Klei forums.", this.label, "mod_info.yaml", text));
+				bool flag2 = packagedModInfo.supportedContent.Contains("ALL");
+				bool flag3 = packagedModInfo.supportedContent.Contains("VANILLA_ID");
+				bool flag4 = packagedModInfo.supportedContent.Contains("EXPANSION1_ID");
+				if (flag2)
+				{
+					packagedModInfo.requiredDlcIds = null;
+					packagedModInfo.forbiddenDlcIds = null;
+				}
+				else
+				{
+					string text3 = "\\b\\w+_ID\\b";
+					List<string> list2 = new List<string>();
+					foreach (object obj in Regex.Matches(packagedModInfo.supportedContent, text3))
+					{
+						Match match = (Match)obj;
+						if (!(match.Value == "VANILLA_ID") && (!(match.Value == "EXPANSION1_ID") || !flag3))
+						{
+							if (match.Value != "EXPANSION1_ID")
+							{
+								this.ModDevLogWarning(string.Format("\t{0}: {1} in folder '{2}' found a DLC '{3}' it didn't recognize, ignoring.", new object[] { this.label, "mod_info.yaml", text, match.Value }));
+							}
+							else
+							{
+								list2.Add(match.Value);
+							}
+						}
+					}
+					if (list2.Count > 0)
+					{
+						packagedModInfo.requiredDlcIds = list2.ToArray();
+					}
+					if (!flag4)
+					{
+						packagedModInfo.forbiddenDlcIds = DlcManager.EXPANSION1;
+					}
+				}
+			}
+			if (packagedModInfo.requiredDlcIds != null)
+			{
+				for (int i = 0; i < packagedModInfo.requiredDlcIds.Length; i++)
+				{
+					packagedModInfo.requiredDlcIds[i] = packagedModInfo.requiredDlcIds[i].ToUpperInvariant();
+					if (!DlcManager.IsDlcId(packagedModInfo.requiredDlcIds[i]))
+					{
+						this.ModDevLogWarning(string.Format("\t{0}: {1} in folder '{2}' is using an unrecognized DLC in requiredDlcIds '{3}'", new object[]
+						{
+							this.label,
+							"mod_info.yaml",
+							text,
+							packagedModInfo.requiredDlcIds[i]
+						}));
+					}
+				}
+			}
+			if (packagedModInfo.forbiddenDlcIds != null)
+			{
+				for (int j = 0; j < packagedModInfo.forbiddenDlcIds.Length; j++)
+				{
+					packagedModInfo.forbiddenDlcIds[j] = packagedModInfo.forbiddenDlcIds[j].ToUpperInvariant();
+					if (!DlcManager.IsDlcId(packagedModInfo.forbiddenDlcIds[j]))
+					{
+						this.ModDevLogWarning(string.Format("\t{0}: {1} in folder '{2}' is using an unrecognized DLC in forbiddenDlcIds '{3}'", new object[]
+						{
+							this.label,
+							"mod_info.yaml",
+							text,
+							packagedModInfo.forbiddenDlcIds[j]
+						}));
+					}
+				}
 			}
 			if (packagedModInfo.lastWorkingBuild != 0)
 			{
@@ -337,35 +417,15 @@ namespace KMod
 					packagedModInfo.minimumSupportedBuild = packagedModInfo.lastWorkingBuild;
 				}
 			}
-			this.ModDevLog(string.Format("\t{0}: Found valid mod_info.yaml in folder '{1}': {2} at {3}", new object[] { this.label, text, packagedModInfo.supportedContent, packagedModInfo.minimumSupportedBuild }));
+			this.ModDevLog(string.Format("\t{0}: Found valid mod_info.yaml in folder '{1}': requiredDlcIds='{2}', forbiddenDlcIds='{3}' at {4}", new object[]
+			{
+				this.label,
+				text,
+				packagedModInfo.requiredDlcIds.DebugToCommaSeparatedList(),
+				packagedModInfo.requiredDlcIds.DebugToCommaSeparatedList(),
+				packagedModInfo.minimumSupportedBuild
+			}));
 			return packagedModInfo;
-		}
-
-		private bool DoesModSupportCurrentContent(Mod.PackagedModInfo mod_info)
-		{
-			string text = DlcManager.GetHighestActiveDlcId();
-			if (text == "")
-			{
-				text = "vanilla_id";
-			}
-			text = text.ToLower();
-			string text2 = mod_info.supportedContent.ToLower();
-			return text2.Contains(text) || text2.Contains("all");
-		}
-
-		private bool ScanContentFromSourceForTranslationsOnly(string relativeRoot)
-		{
-			this.available_content = (Content)0;
-			List<FileSystemItem> list = new List<FileSystemItem>();
-			this.file_source.GetTopLevelItems(list, relativeRoot);
-			foreach (FileSystemItem fileSystemItem in list)
-			{
-				if (fileSystemItem.type == FileSystemItem.ItemType.File && fileSystemItem.name.ToLower().EndsWith(".po"))
-				{
-					this.available_content |= Content.Translation;
-				}
-			}
-			return this.available_content > (Content)0;
 		}
 
 		private bool ScanContentFromSource(string relativeRoot, out Content available)
@@ -850,15 +910,19 @@ namespace KMod
 
 		public bool is_subscribed;
 
-		private const string VANILLA_ID = "vanilla_id";
+		private const string VANILLA_ID = "VANILLA_ID";
 
-		private const string ALL_ID = "all";
+		private const string ALL_ID = "ALL";
 
 		private const string ARCHIVED_VERSIONS_FOLDER = "archived_versions";
 
 		private const string MOD_INFO_FILENAME = "mod_info.yaml";
 
 		public ModContentCompatability contentCompatability;
+
+		public string[] requiredDlcIds;
+
+		public string[] forbiddenDlcIds;
 
 		public const int MAX_CRASH_COUNT = 3;
 
@@ -879,9 +943,14 @@ namespace KMod
 			public Mod.PackagedModInfo info;
 		}
 
-		public class PackagedModInfo
+		public class PackagedModInfo : IHasDlcRestrictions
 		{
+			[Obsolete("Use IHasDlcRestrictions interface instead")]
 			public string supportedContent { get; set; }
+
+			public string[] requiredDlcIds { get; set; }
+
+			public string[] forbiddenDlcIds { get; set; }
 
 			[Obsolete("Use minimumSupportedBuild instead!")]
 			public int lastWorkingBuild { get; set; }
@@ -891,6 +960,16 @@ namespace KMod
 			public int APIVersion { get; set; }
 
 			public string version { get; set; }
+
+			public string[] GetRequiredDlcIds()
+			{
+				return this.requiredDlcIds;
+			}
+
+			public string[] GetForbiddenDlcIds()
+			{
+				return this.forbiddenDlcIds;
+			}
 		}
 	}
 }

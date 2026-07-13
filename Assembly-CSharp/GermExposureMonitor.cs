@@ -66,12 +66,19 @@ public class GermExposureMonitor : GameStateMachine<GermExposureMonitor, GermExp
 			this.lastExposureTime = new Dictionary<HashedString, float>();
 			this.inhaleExposureTick = new Dictionary<HashedString, GermExposureMonitor.Instance.InhaleTickInfo>();
 			GameClock.Instance.Subscribe(-722330267, new Action<object>(this.OnNightTime));
+			base.gameObject.Subscribe(-1582839653, new Action<object>(this.OnBionicTagsChanged));
 			OxygenBreather component = base.GetComponent<OxygenBreather>();
 			if (component != null)
 			{
 				OxygenBreather oxygenBreather = component;
 				oxygenBreather.onBreathableGasConsumed = (Action<SimHashes, float, float, byte, int>)Delegate.Combine(oxygenBreather.onBreathableGasConsumed, new Action<SimHashes, float, float, byte, int>(this.OnAirConsumed));
 			}
+		}
+
+		protected override void OnCleanUp()
+		{
+			base.gameObject.Unsubscribe(-1582839653, new Action<object>(this.OnBionicTagsChanged));
+			base.OnCleanUp();
 		}
 
 		public override void StartSM()
@@ -439,6 +446,19 @@ public class GermExposureMonitor : GameStateMachine<GermExposureMonitor, GermExp
 				string lastDiseaseSource = this.GetLastDiseaseSource(exposure_type.germ_id);
 				SicknessExposureInfo sicknessExposureInfo = new SicknessExposureInfo(exposure_type.sickness_id, lastDiseaseSource);
 				this.sicknesses.Infect(sicknessExposureInfo);
+			}
+		}
+
+		private void OnBionicTagsChanged(object o)
+		{
+			if (o == null)
+			{
+				return;
+			}
+			TagChangedEventData tagChangedEventData = (TagChangedEventData)o;
+			if (tagChangedEventData.tag == GameTags.BionicBedTime && !tagChangedEventData.added)
+			{
+				this.OnSleepFinished();
 			}
 		}
 

@@ -45,7 +45,7 @@ namespace STRINGS
 					" when depleted."
 				});
 
-				public static LocString RECIPE_DESC = "Supplies Duplicants with " + UI.FormatAsLink("Oxygen", "OXYGEN") + "  in toxic and low breathability environments.";
+				public static LocString RECIPE_DESC = "Supplies Duplicants with " + UI.FormatAsLink("Oxygen", "OXYGEN") + " in toxic and low breathability environments.";
 
 				public static LocString GENERICNAME = "Suit";
 
@@ -2592,14 +2592,7 @@ namespace STRINGS
 
 				public static LocString DESC = "A soft, fleecy ticket to dreamland.";
 
-				public static LocString EFFECT = string.Concat(new string[]
-				{
-					"Helps Duplicants fall asleep by reducing ",
-					UI.FormatAsLink("Stamina", "STAMINA"),
-					".\n\nEnables the wearer to dream and produce ",
-					UI.FormatAsLink("Dream Journals", "DREAMJOURNAL"),
-					"."
-				});
+				public static LocString EFFECT = "Helps Duplicants fall asleep by reducing " + UI.FormatAsLink("Stamina", "HEALTH") + ".\n\nEnables the wearer to dream and produce Dream Journals.";
 
 				public static LocString DESTROY_TOAST = "Ripped Pajamas";
 			}

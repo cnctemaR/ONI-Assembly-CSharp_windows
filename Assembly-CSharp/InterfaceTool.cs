@@ -66,14 +66,6 @@ public class InterfaceTool : KMonoBehaviour
 		}
 	}
 
-	public virtual string[] DlcIDs
-	{
-		get
-		{
-			return DlcManager.AVAILABLE_ALL_VERSIONS;
-		}
-	}
-
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();

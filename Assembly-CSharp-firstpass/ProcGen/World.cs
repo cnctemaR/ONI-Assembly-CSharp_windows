@@ -8,7 +8,7 @@ namespace ProcGen
 {
 	[DebuggerDisplay("{name} - worldSize = {worldsize}")]
 	[Serializable]
-	public class World
+	public class World : IHasDlcRestrictions
 	{
 		public string GetProperName()
 		{
@@ -214,6 +214,16 @@ namespace ProcGen
 				}
 			}
 			return false;
+		}
+
+		public string[] GetRequiredDlcIds()
+		{
+			return this.requiredDlcIds;
+		}
+
+		public string[] GetForbiddenDlcIds()
+		{
+			return this.forbiddenDlcIds;
 		}
 
 		public string filePath;

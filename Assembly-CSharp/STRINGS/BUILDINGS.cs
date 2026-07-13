@@ -6584,7 +6584,7 @@ namespace STRINGS
 					"Mass-produces ",
 					UI.FormatAsLink(DatabankHelper.NAME_PLURAL, "Databank"),
 					" that can be processed into ",
-					UI.FormatAsLink(DatabankHelper.RESEARCH_NAME, "RESEARCH"),
+					UI.FormatAsLink(DatabankHelper.RESEARCH_NAME, DatabankHelper.RESEARCH_CODEXID),
 					" points.\n\nDuplicants will not fabricate items unless recipes are queued."
 				});
 
@@ -7717,7 +7717,7 @@ namespace STRINGS
 					UI.FormatAsLink("Power", "POWER"),
 					" output of generators.\n\nAssigned Duplicants must possess the ",
 					UI.FormatAsLink("Tune Up", "TECHNICALS2"),
-					" trait.\n\nThis building is a necessary component of the Power Plant room."
+					" trait."
 				});
 			}
 

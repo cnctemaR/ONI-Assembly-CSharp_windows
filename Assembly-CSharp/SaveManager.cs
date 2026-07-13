@@ -103,17 +103,43 @@ public class SaveManager : KMonoBehaviour
 		return null;
 	}
 
+	private void SortAssociatedObjects(ref List<Tag> objectTags, List<Tag> associatedTags)
+	{
+		int num = objectTags.FindIndex((Tag t) => associatedTags.Contains(t));
+		if (num >= 0)
+		{
+			Tag tag = objectTags[num];
+			foreach (Tag tag2 in associatedTags)
+			{
+				if (tag2 != tag && objectTags.Contains(tag2))
+				{
+					objectTags.Remove(tag2);
+					objectTags.Insert(num + 1, tag2);
+				}
+			}
+		}
+	}
+
 	public void Save(BinaryWriter writer)
 	{
 		writer.Write(SaveManager.SAVE_HEADER);
 		writer.Write(7);
 		writer.Write(35);
 		int num = 0;
+		Dictionary<Tag, List<Tag>> dictionary = new Dictionary<Tag, List<Tag>>();
 		foreach (KeyValuePair<Tag, List<SaveLoadRoot>> keyValuePair in this.sceneObjects)
 		{
 			if (keyValuePair.Value.Count > 0)
 			{
 				num++;
+				if (keyValuePair.Value[0].associatedTag != Tag.Invalid)
+				{
+					if (!dictionary.ContainsKey(keyValuePair.Value[0].associatedTag))
+					{
+						dictionary.Add(keyValuePair.Value[0].associatedTag, new List<Tag>());
+					}
+					dictionary[keyValuePair.Value[0].associatedTag].Add(keyValuePair.Key);
+				}
 			}
 		}
 		writer.Write(num);
@@ -122,6 +148,10 @@ public class SaveManager : KMonoBehaviour
 		this.orderedKeys.Remove(SaveGame.Instance.PrefabID());
 		this.orderedKeys = this.orderedKeys.OrderBy<Tag, bool>((Tag a) => a.Name == "StickerBomb").ToList<Tag>();
 		this.orderedKeys = this.orderedKeys.OrderBy<Tag, bool>((Tag a) => a.Name.Contains("UnderConstruction")).ToList<Tag>();
+		foreach (KeyValuePair<Tag, List<Tag>> keyValuePair2 in dictionary)
+		{
+			this.SortAssociatedObjects(ref this.orderedKeys, keyValuePair2.Value);
+		}
 		this.Write(SaveGame.Instance.PrefabID(), new List<SaveLoadRoot>(new SaveLoadRoot[] { SaveGame.Instance.GetComponent<SaveLoadRoot>() }), writer);
 		foreach (Tag tag in this.orderedKeys)
 		{

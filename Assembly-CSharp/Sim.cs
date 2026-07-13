@@ -145,6 +145,7 @@ public static class Sim
 		Grid.AccumulatedFlowValues = ptr->accumulatedFlow;
 		PropertyTextures.externalFlowTex = ptr->propertyTextureFlow;
 		PropertyTextures.externalLiquidTex = ptr->propertyTextureLiquid;
+		PropertyTextures.externalLiquidDataTex = ptr->propertyTextureLiquidData;
 		PropertyTextures.externalExposedToSunlight = ptr->propertyTextureExposedToSunlight;
 		Grid.InitializeCells();
 	}
@@ -734,6 +735,8 @@ public static class Sim
 		public IntPtr propertyTextureFlow;
 
 		public IntPtr propertyTextureLiquid;
+
+		public IntPtr propertyTextureLiquidData;
 
 		public IntPtr propertyTextureExposedToSunlight;
 	}

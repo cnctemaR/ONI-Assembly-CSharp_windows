@@ -86,7 +86,7 @@ public class Global : MonoBehaviour
 			new BindingEntry("Root", GamepadButton.NumButtons, KKeyCode.F1, Modifier.Shift, global::Action.Overlay12, true, false),
 			new BindingEntry("Root", GamepadButton.NumButtons, KKeyCode.F2, Modifier.Shift, global::Action.Overlay13, true, false),
 			new BindingEntry("Root", GamepadButton.NumButtons, KKeyCode.F3, Modifier.Shift, global::Action.Overlay14, true, false),
-			new BindingEntry("Root", GamepadButton.NumButtons, KKeyCode.F4, Modifier.Shift, global::Action.Overlay15, DlcManager.AVAILABLE_EXPANSION1_ONLY),
+			new BindingEntry("Root", GamepadButton.NumButtons, KKeyCode.F4, Modifier.Shift, global::Action.Overlay15, DlcManager.EXPANSION1),
 			new BindingEntry("Root", GamepadButton.NumButtons, KKeyCode.KeypadPlus, Modifier.None, global::Action.SpeedUp, true, false),
 			new BindingEntry("Root", GamepadButton.NumButtons, KKeyCode.KeypadMinus, Modifier.None, global::Action.SlowDown, true, false),
 			new BindingEntry("Root", GamepadButton.Back, KKeyCode.Space, Modifier.None, global::Action.TogglePause, true, false),
@@ -143,7 +143,7 @@ public class Global : MonoBehaviour
 			new BindingEntry("Debug", GamepadButton.NumButtons, KKeyCode.Q, Modifier.Ctrl, global::Action.DebugGotoTarget, true, false),
 			new BindingEntry("Debug", GamepadButton.NumButtons, KKeyCode.S, Modifier.Ctrl, global::Action.DebugSelectMaterial, true, false),
 			new BindingEntry("Debug", GamepadButton.NumButtons, KKeyCode.M, Modifier.Ctrl, global::Action.DebugToggleMusic, true, false),
-			new BindingEntry("Debug", GamepadButton.NumButtons, KKeyCode.F, Modifier.Ctrl, global::Action.DebugToggleClusterFX, DlcManager.AVAILABLE_EXPANSION1_ONLY),
+			new BindingEntry("Debug", GamepadButton.NumButtons, KKeyCode.F, Modifier.Ctrl, global::Action.DebugToggleClusterFX, DlcManager.EXPANSION1),
 			new BindingEntry("Debug", GamepadButton.NumButtons, KKeyCode.Backspace, Modifier.None, global::Action.DebugToggle, true, false),
 			new BindingEntry("Debug", GamepadButton.NumButtons, KKeyCode.Backspace, Modifier.Ctrl, global::Action.DebugToggleFastWorkers, true, false),
 			new BindingEntry("Debug", GamepadButton.NumButtons, KKeyCode.Q, Modifier.Alt, global::Action.DebugTeleport, true, false),
@@ -222,16 +222,16 @@ public class Global : MonoBehaviour
 			new BindingEntry("Sandbox", GamepadButton.NumButtons, KKeyCode.Z, Modifier.Shift, global::Action.SandboxCritterTool, true, false),
 			new BindingEntry("Sandbox", GamepadButton.NumButtons, KKeyCode.T, Modifier.Shift, global::Action.SandboxStoryTraitTool, true, false),
 			new BindingEntry("Sandbox", GamepadButton.NumButtons, KKeyCode.Mouse0, Modifier.Ctrl, global::Action.SandboxCopyElement, true, false),
-			new BindingEntry("SwitchActiveWorld", GamepadButton.NumButtons, KKeyCode.Alpha1, Modifier.Backtick, global::Action.SwitchActiveWorld1, true, false, DlcManager.AVAILABLE_EXPANSION1_ONLY),
-			new BindingEntry("SwitchActiveWorld", GamepadButton.NumButtons, KKeyCode.Alpha2, Modifier.Backtick, global::Action.SwitchActiveWorld2, true, false, DlcManager.AVAILABLE_EXPANSION1_ONLY),
-			new BindingEntry("SwitchActiveWorld", GamepadButton.NumButtons, KKeyCode.Alpha3, Modifier.Backtick, global::Action.SwitchActiveWorld3, true, false, DlcManager.AVAILABLE_EXPANSION1_ONLY),
-			new BindingEntry("SwitchActiveWorld", GamepadButton.NumButtons, KKeyCode.Alpha4, Modifier.Backtick, global::Action.SwitchActiveWorld4, true, false, DlcManager.AVAILABLE_EXPANSION1_ONLY),
-			new BindingEntry("SwitchActiveWorld", GamepadButton.NumButtons, KKeyCode.Alpha5, Modifier.Backtick, global::Action.SwitchActiveWorld5, true, false, DlcManager.AVAILABLE_EXPANSION1_ONLY),
-			new BindingEntry("SwitchActiveWorld", GamepadButton.NumButtons, KKeyCode.Alpha6, Modifier.Backtick, global::Action.SwitchActiveWorld6, true, false, DlcManager.AVAILABLE_EXPANSION1_ONLY),
-			new BindingEntry("SwitchActiveWorld", GamepadButton.NumButtons, KKeyCode.Alpha7, Modifier.Backtick, global::Action.SwitchActiveWorld7, true, false, DlcManager.AVAILABLE_EXPANSION1_ONLY),
-			new BindingEntry("SwitchActiveWorld", GamepadButton.NumButtons, KKeyCode.Alpha8, Modifier.Backtick, global::Action.SwitchActiveWorld8, true, false, DlcManager.AVAILABLE_EXPANSION1_ONLY),
-			new BindingEntry("SwitchActiveWorld", GamepadButton.NumButtons, KKeyCode.Alpha9, Modifier.Backtick, global::Action.SwitchActiveWorld9, true, false, DlcManager.AVAILABLE_EXPANSION1_ONLY),
-			new BindingEntry("SwitchActiveWorld", GamepadButton.NumButtons, KKeyCode.Alpha0, Modifier.Backtick, global::Action.SwitchActiveWorld10, true, false, DlcManager.AVAILABLE_EXPANSION1_ONLY)
+			new BindingEntry("SwitchActiveWorld", GamepadButton.NumButtons, KKeyCode.Alpha1, Modifier.Backtick, global::Action.SwitchActiveWorld1, true, false, DlcManager.EXPANSION1),
+			new BindingEntry("SwitchActiveWorld", GamepadButton.NumButtons, KKeyCode.Alpha2, Modifier.Backtick, global::Action.SwitchActiveWorld2, true, false, DlcManager.EXPANSION1),
+			new BindingEntry("SwitchActiveWorld", GamepadButton.NumButtons, KKeyCode.Alpha3, Modifier.Backtick, global::Action.SwitchActiveWorld3, true, false, DlcManager.EXPANSION1),
+			new BindingEntry("SwitchActiveWorld", GamepadButton.NumButtons, KKeyCode.Alpha4, Modifier.Backtick, global::Action.SwitchActiveWorld4, true, false, DlcManager.EXPANSION1),
+			new BindingEntry("SwitchActiveWorld", GamepadButton.NumButtons, KKeyCode.Alpha5, Modifier.Backtick, global::Action.SwitchActiveWorld5, true, false, DlcManager.EXPANSION1),
+			new BindingEntry("SwitchActiveWorld", GamepadButton.NumButtons, KKeyCode.Alpha6, Modifier.Backtick, global::Action.SwitchActiveWorld6, true, false, DlcManager.EXPANSION1),
+			new BindingEntry("SwitchActiveWorld", GamepadButton.NumButtons, KKeyCode.Alpha7, Modifier.Backtick, global::Action.SwitchActiveWorld7, true, false, DlcManager.EXPANSION1),
+			new BindingEntry("SwitchActiveWorld", GamepadButton.NumButtons, KKeyCode.Alpha8, Modifier.Backtick, global::Action.SwitchActiveWorld8, true, false, DlcManager.EXPANSION1),
+			new BindingEntry("SwitchActiveWorld", GamepadButton.NumButtons, KKeyCode.Alpha9, Modifier.Backtick, global::Action.SwitchActiveWorld9, true, false, DlcManager.EXPANSION1),
+			new BindingEntry("SwitchActiveWorld", GamepadButton.NumButtons, KKeyCode.Alpha0, Modifier.Backtick, global::Action.SwitchActiveWorld10, true, false, DlcManager.EXPANSION1)
 		};
 		IList<BuildMenu.DisplayInfo> list2 = (IList<BuildMenu.DisplayInfo>)BuildMenu.OrderedBuildings.data;
 		if (BuildMenu.UseHotkeyBuildMenu() && hotKeyBuildMenuPermitted)
@@ -638,7 +638,7 @@ public class Global : MonoBehaviour
 	private void SetONIStaticSessionVariables()
 	{
 		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Branch", "release");
-		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Build", 652372U);
+		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Build", 659901U);
 		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("SaveFolderWriteTest", Global.saveFolderTestResult);
 		if (KPlayerPrefs.HasKey(UnitConfigurationScreen.MassUnitKey))
 		{

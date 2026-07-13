@@ -3,11 +3,16 @@ using System.Collections.Generic;
 using STRINGS;
 using UnityEngine;
 
-public class RailGunPayloadConfig : IEntityConfig
+public class RailGunPayloadConfig : IEntityConfig, IHasDlcRestrictions
 {
-	public string[] GetDlcIds()
+	public string[] GetRequiredDlcIds()
 	{
-		return DlcManager.AVAILABLE_EXPANSION1_ONLY;
+		return DlcManager.EXPANSION1;
+	}
+
+	public string[] GetForbiddenDlcIds()
+	{
+		return null;
 	}
 
 	public GameObject CreatePrefab()

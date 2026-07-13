@@ -23,6 +23,7 @@ public class BatterySmartConfig : BaseBatteryConfig
 		BuildingDef buildingDef = base.CreateBuildingDef(text, num, num2, num3, text2, num4, tier, refined_METALS, num5, num6, num7, global::TUNING.BUILDINGS.DECOR.PENALTY.TIER2, tier2);
 		SoundEventVolumeCache.instance.AddVolume("batterymed_kanim", "Battery_med_rattle", NOISE_POLLUTION.NOISY.TIER2);
 		buildingDef.LogicOutputPorts = new List<LogicPorts.Port> { LogicPorts.Port.OutputPort(BatterySmart.PORT_ID, new CellOffset(0, 0), global::STRINGS.BUILDINGS.PREFABS.BATTERYSMART.LOGIC_PORT, global::STRINGS.BUILDINGS.PREFABS.BATTERYSMART.LOGIC_PORT_ACTIVE, global::STRINGS.BUILDINGS.PREFABS.BATTERYSMART.LOGIC_PORT_INACTIVE, true, false) };
+		buildingDef.AddSearchTerms(SEARCH_TERMS.POWER);
 		return buildingDef;
 	}
 

@@ -39,7 +39,7 @@ public class ConsumablesTableScreen : TableScreen
 				DebugUtil.DevLogErrorFormat("Prefab tagged Medicine does not have MedicinalPill component: {0}", new object[] { prefabsWithTag[j] });
 			}
 		}
-		if (SaveLoader.Instance.IsDLCActiveForCurrentSave("DLC3_ID"))
+		if (Game.IsDlcActiveForCurrentSave("DLC3_ID"))
 		{
 			Tag[] array = new Tag[GameTags.BionicIncompatibleBatteries.Count];
 			GameTags.BionicIncompatibleBatteries.CopyTo(array, 0);
@@ -61,7 +61,7 @@ public class ConsumablesTableScreen : TableScreen
 						}
 						if (flag)
 						{
-							goto IL_024B;
+							goto IL_0246;
 						}
 					}
 					Electrobank component2 = prefabsWithTag2[k].GetComponent<Electrobank>();
@@ -74,7 +74,7 @@ public class ConsumablesTableScreen : TableScreen
 						DebugUtil.DevLogErrorFormat("Prefab tagged ChargedPortableBattery does not have Electrobank component: {0}", new object[] { prefabsWithTag2[k] });
 					}
 				}
-				IL_024B:;
+				IL_0246:;
 			}
 			SymbolicConsumableItem symbolicConsumableItem = new SymbolicConsumableItem(ConsumerManager.OXYGEN_TANK_ID, MISC.TAGS.OXYGENCANISTER, 1, 1, true, "ui_sprite_oxygen_canister", delegate
 			{

@@ -34,6 +34,7 @@ public class LargeElectrobankDischargerConfig : IBuildingConfig
 		buildingDef.AudioCategory = "HollowMetal";
 		buildingDef.AudioSize = "large";
 		buildingDef.LogicInputPorts = LogicOperationalController.CreateSingleInputPortList(new CellOffset(0, 0));
+		buildingDef.AddSearchTerms(SEARCH_TERMS.BATTERY);
 		return buildingDef;
 	}
 

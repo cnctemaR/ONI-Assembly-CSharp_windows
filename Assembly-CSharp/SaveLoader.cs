@@ -1149,11 +1149,13 @@ public class SaveLoader : KMonoBehaviour
 		return list;
 	}
 
+	[Obsolete("Use Game.IsDlcActiveForCurrentSave instead")]
 	public bool IsDLCActiveForCurrentSave(string dlcid)
 	{
 		return DlcManager.IsContentSubscribed(dlcid) && (dlcid == "" || dlcid == "" || this.GameInfo.dlcIds.Contains(dlcid));
 	}
 
+	[Obsolete("Use Game methods instead")]
 	public bool IsDlcListActiveForCurrentSave(string[] dlcIds)
 	{
 		if (dlcIds == null || dlcIds.Length == 0)
@@ -1166,7 +1168,7 @@ public class SaveLoader : KMonoBehaviour
 			{
 				return true;
 			}
-			if (this.IsDLCActiveForCurrentSave(text))
+			if (Game.IsDlcActiveForCurrentSave(text))
 			{
 				return true;
 			}
@@ -1174,6 +1176,7 @@ public class SaveLoader : KMonoBehaviour
 		return false;
 	}
 
+	[Obsolete("Use Game methods instead")]
 	public bool IsAllDlcActiveForCurrentSave(string[] dlcIds)
 	{
 		if (dlcIds == null || dlcIds.Length == 0)
@@ -1182,7 +1185,7 @@ public class SaveLoader : KMonoBehaviour
 		}
 		foreach (string text in dlcIds)
 		{
-			if (!(text == "") && !this.IsDLCActiveForCurrentSave(text))
+			if (!(text == "") && !Game.IsDlcActiveForCurrentSave(text))
 			{
 				return false;
 			}
@@ -1190,6 +1193,7 @@ public class SaveLoader : KMonoBehaviour
 		return true;
 	}
 
+	[Obsolete("Use Game methods instead")]
 	public bool IsAnyDlcActiveForCurrentSave(string[] dlcIds)
 	{
 		if (dlcIds == null || dlcIds.Length == 0)
@@ -1198,7 +1202,7 @@ public class SaveLoader : KMonoBehaviour
 		}
 		foreach (string text in dlcIds)
 		{
-			if (!(text == "") && this.IsDLCActiveForCurrentSave(text))
+			if (!(text == "") && Game.IsDlcActiveForCurrentSave(text))
 			{
 				return true;
 			}
@@ -1206,6 +1210,7 @@ public class SaveLoader : KMonoBehaviour
 		return false;
 	}
 
+	[Obsolete("Use Game's version")]
 	public bool IsCorrectDlcActiveForCurrentSave(string[] required, string[] forbidden)
 	{
 		return this.IsAllDlcActiveForCurrentSave(required) && !this.IsAnyDlcActiveForCurrentSave(forbidden);

@@ -12,6 +12,7 @@ public class PropertyTextures : KMonoBehaviour, ISim200ms
 		ShaderReloader.Unregister(new global::System.Action(PropertyTextures.instance.OnShadersReloaded));
 		PropertyTextures.externalFlowTex = IntPtr.Zero;
 		PropertyTextures.externalLiquidTex = IntPtr.Zero;
+		PropertyTextures.externalLiquidDataTex = IntPtr.Zero;
 		PropertyTextures.externalExposedToSunlight = IntPtr.Zero;
 		PropertyTextures.externalSolidDigAmountTex = IntPtr.Zero;
 		PropertyTextures.instance = null;
@@ -59,11 +60,11 @@ public class PropertyTextures : KMonoBehaviour, ISim200ms
 
 	public void OnReset(object data = null)
 	{
-		this.lerpers = new TextureLerper[14];
+		this.lerpers = new TextureLerper[15];
 		this.texturePagePool = new TexturePagePool();
-		this.textureBuffers = new TextureBuffer[14];
-		this.externallyUpdatedTextures = new Texture2D[14];
-		for (int i = 0; i < 14; i++)
+		this.textureBuffers = new TextureBuffer[15];
+		this.externallyUpdatedTextures = new Texture2D[15];
+		for (int i = 0; i < 15; i++)
 		{
 			PropertyTextures.TextureProperties textureProperties = new PropertyTextures.TextureProperties
 			{
@@ -119,7 +120,7 @@ public class PropertyTextures : KMonoBehaviour, ISim200ms
 
 	private void OnShadersReloaded()
 	{
-		for (int i = 0; i < 14; i++)
+		for (int i = 0; i < 15; i++)
 		{
 			TextureLerper textureLerper = this.lerpers[i];
 			if (textureLerper != null)
@@ -207,23 +208,30 @@ public class PropertyTextures : KMonoBehaviour, ISim200ms
 			return;
 		}
 		PropertyTextures.Property simProperty2 = p.simProperty;
-		if (simProperty2 != PropertyTextures.Property.Flow)
+		if (simProperty2 <= PropertyTextures.Property.Liquid)
 		{
-			if (simProperty2 != PropertyTextures.Property.Liquid)
+			if (simProperty2 != PropertyTextures.Property.Flow)
 			{
-				if (simProperty2 == PropertyTextures.Property.ExposedToSunlight)
+				if (simProperty2 == PropertyTextures.Property.Liquid)
 				{
-					this.externallyUpdatedTextures[simProperty].LoadRawTextureData(PropertyTextures.externalExposedToSunlight, Grid.WidthInCells * Grid.HeightInCells);
+					this.externallyUpdatedTextures[simProperty].LoadRawTextureData(PropertyTextures.externalLiquidTex, 4 * Grid.WidthInCells * Grid.HeightInCells);
 				}
 			}
 			else
 			{
-				this.externallyUpdatedTextures[simProperty].LoadRawTextureData(PropertyTextures.externalLiquidTex, 4 * Grid.WidthInCells * Grid.HeightInCells);
+				this.externallyUpdatedTextures[simProperty].LoadRawTextureData(PropertyTextures.externalFlowTex, 8 * Grid.WidthInCells * Grid.HeightInCells);
+			}
+		}
+		else if (simProperty2 != PropertyTextures.Property.ExposedToSunlight)
+		{
+			if (simProperty2 == PropertyTextures.Property.LiquidData)
+			{
+				this.externallyUpdatedTextures[simProperty].LoadRawTextureData(PropertyTextures.externalLiquidDataTex, 4 * Grid.WidthInCells * Grid.HeightInCells);
 			}
 		}
 		else
 		{
-			this.externallyUpdatedTextures[simProperty].LoadRawTextureData(PropertyTextures.externalFlowTex, 8 * Grid.WidthInCells * Grid.HeightInCells);
+			this.externallyUpdatedTextures[simProperty].LoadRawTextureData(PropertyTextures.externalExposedToSunlight, Grid.WidthInCells * Grid.HeightInCells);
 		}
 		this.externallyUpdatedTextures[simProperty].Apply();
 	}
@@ -284,7 +292,7 @@ public class PropertyTextures : KMonoBehaviour, ISim200ms
 				this.UpdateProperty(ref textureProperties2, num2, num3, num4, num5);
 			}
 		}
-		for (int j = 0; j < 14; j++)
+		for (int j = 0; j < 15; j++)
 		{
 			TextureLerper textureLerper = this.lerpers[j];
 			if (textureLerper != null)
@@ -596,9 +604,16 @@ public class PropertyTextures : KMonoBehaviour, ISim200ms
 					byte b = 0;
 					byte b2 = 0;
 					byte b3 = 0;
-					if (element.IsSolid)
+					if (element.IsSolid || Grid.LiquidImpermeable[num])
 					{
-						b = byte.MaxValue;
+						if (element.IsSolid)
+						{
+							b = byte.MaxValue;
+						}
+						else
+						{
+							b = 200;
+						}
 					}
 					else if (element.IsLiquid)
 					{
@@ -733,6 +748,8 @@ public class PropertyTextures : KMonoBehaviour, ISim200ms
 
 	public static IntPtr externalLiquidTex;
 
+	public static IntPtr externalLiquidDataTex;
+
 	public static IntPtr externalExposedToSunlight;
 
 	public static IntPtr externalSolidDigAmountTex;
@@ -785,6 +802,16 @@ public class PropertyTextures : KMonoBehaviour, ISim200ms
 		new PropertyTextures.TextureProperties
 		{
 			simProperty = PropertyTextures.Property.Liquid,
+			textureFormat = TextureFormat.RGBA32,
+			filterMode = FilterMode.Point,
+			updateEveryFrame = true,
+			updatedExternally = true,
+			blend = true,
+			blendSpeed = 1f
+		},
+		new PropertyTextures.TextureProperties
+		{
+			simProperty = PropertyTextures.Property.LiquidData,
 			textureFormat = TextureFormat.RGBA32,
 			filterMode = FilterMode.Point,
 			updateEveryFrame = true,
@@ -934,6 +961,7 @@ public class PropertyTextures : KMonoBehaviour, ISim200ms
 		ExposedToSunlight,
 		FallingSolid,
 		Radiation,
+		LiquidData,
 		Num
 	}
 

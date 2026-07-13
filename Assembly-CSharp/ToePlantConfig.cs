@@ -4,11 +4,16 @@ using STRINGS;
 using TUNING;
 using UnityEngine;
 
-public class ToePlantConfig : IEntityConfig
+public class ToePlantConfig : IEntityConfig, IHasDlcRestrictions
 {
-	public string[] GetDlcIds()
+	public string[] GetRequiredDlcIds()
 	{
-		return DlcManager.AVAILABLE_EXPANSION1_ONLY;
+		return DlcManager.EXPANSION1;
+	}
+
+	public string[] GetForbiddenDlcIds()
+	{
+		return null;
 	}
 
 	public GameObject CreatePrefab()
@@ -49,8 +54,7 @@ public class ToePlantConfig : IEntityConfig
 		list.Add(GameTags.DecorSeed);
 		SingleEntityReceptacle.ReceptacleDirection receptacleDirection = SingleEntityReceptacle.ReceptacleDirection.Top;
 		string text9 = global::STRINGS.CREATURES.SPECIES.TOEPLANT.DOMESTICATEDDESC;
-		string[] dlcIds = this.GetDlcIds();
-		EntityTemplates.CreateAndRegisterPreviewForPlant(EntityTemplates.CreateAndRegisterSeedForPlant(gameObject3, productionType, text5, text6, text7, anim2, text8, num4, list, receptacleDirection, default(Tag), 12, text9, EntityTemplates.CollisionShape.CIRCLE, 0.25f, 0.25f, null, "", false, dlcIds), "ToePlant_preview", Assets.GetAnim("potted_toes_kanim"), "place", 1, 1);
+		EntityTemplates.CreateAndRegisterPreviewForPlant(EntityTemplates.CreateAndRegisterSeedForPlant(gameObject3, this, productionType, text5, text6, text7, anim2, text8, num4, list, receptacleDirection, default(Tag), 12, text9, EntityTemplates.CollisionShape.CIRCLE, 0.25f, 0.25f, null, "", false), "ToePlant_preview", Assets.GetAnim("potted_toes_kanim"), "place", 1, 1);
 		return gameObject;
 	}
 

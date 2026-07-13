@@ -30,6 +30,8 @@ public class AdvancedCraftingTableConfig : IBuildingConfig
 		buildingDef.ViewMode = OverlayModes.Power.ID;
 		buildingDef.AudioCategory = "Metal";
 		buildingDef.PowerInputOffset = new CellOffset(0, 0);
+		buildingDef.RequiredSkillPerkID = Db.Get().SkillPerks.CanCraftElectronics.Id;
+		buildingDef.AddSearchTerms(SEARCH_TERMS.ROBOT);
 		return buildingDef;
 	}
 
@@ -42,6 +44,7 @@ public class AdvancedCraftingTableConfig : IBuildingConfig
 		complexFabricator.sideScreenStyle = ComplexFabricatorSideScreen.StyleSetting.ListQueueHybrid;
 		go.AddOrGet<FabricatorIngredientStatusManager>();
 		go.AddOrGet<CopyBuildingSettings>();
+		go.AddOrGet<BuildingComplete>().isManuallyOperated = true;
 		go.AddOrGet<ComplexFabricatorWorkable>().overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_advanced_crafting_table_kanim") };
 		Prioritizable.AddRef(go);
 		BuildingTemplates.CreateComplexFabricatorStorage(go, complexFabricator);

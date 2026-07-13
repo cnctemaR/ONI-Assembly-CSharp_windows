@@ -88,7 +88,10 @@ public static class BaseRoverConfig
 		deconstructable.looseEntityDeconstructable = true;
 		gameObject.AddOrGetDef<RobotAi.Def>().DeleteOnDead = deleteOnDeath;
 		ChoreTable.Builder builder = new ChoreTable.Builder().Add(new RobotDeathStates.Def(), true, Db.Get().ChoreTypes.Die.priority).Add(new FallStates.Def(), true, -1).Add(new DebugGoToStates.Def(), true, -1)
-			.Add(new IdleStates.Def(), true, Db.Get().ChoreTypes.Idle.priority);
+			.Add(new IdleStates.Def
+			{
+				priorityClass = PriorityScreen.PriorityClass.idle
+			}, true, Db.Get().ChoreTypes.Idle.priority);
 		EntityTemplates.AddCreatureBrain(gameObject, builder, model, null);
 		KPrefabID kprefabID = gameObject.AddOrGet<KPrefabID>();
 		kprefabID.RemoveTag(GameTags.CreatureBrain);

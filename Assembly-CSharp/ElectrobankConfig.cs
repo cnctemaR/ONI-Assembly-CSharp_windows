@@ -4,8 +4,18 @@ using STRINGS;
 using TUNING;
 using UnityEngine;
 
-public class ElectrobankConfig : IEntityConfig
+public class ElectrobankConfig : IEntityConfig, IHasDlcRestrictions
 {
+	public string[] GetRequiredDlcIds()
+	{
+		return DlcManager.DLC3;
+	}
+
+	public string[] GetForbiddenDlcIds()
+	{
+		return null;
+	}
+
 	public GameObject CreatePrefab()
 	{
 		GameObject gameObject = EntityTemplates.CreateLooseEntity("Electrobank", global::STRINGS.ITEMS.INDUSTRIAL_PRODUCTS.ELECTROBANK.NAME, global::STRINGS.ITEMS.INDUSTRIAL_PRODUCTS.ELECTROBANK.DESC, 20f, true, Assets.GetAnim("electrobank_large_kanim"), "idle1", Grid.SceneLayer.Ore, EntityTemplates.CollisionShape.RECTANGLE, 0.5f, 0.8f, true, 0, SimHashes.Katairite, new List<Tag>
@@ -23,11 +33,6 @@ public class ElectrobankConfig : IEntityConfig
 		gameObject.AddOrGet<OccupyArea>().SetCellOffsets(EntityTemplates.GenerateOffsets(1, 1));
 		gameObject.AddOrGet<DecorProvider>().SetValues(DECOR.PENALTY.TIER0);
 		return gameObject;
-	}
-
-	public string[] GetDlcIds()
-	{
-		return DlcManager.DLC3;
 	}
 
 	public void OnPrefabInit(GameObject inst)

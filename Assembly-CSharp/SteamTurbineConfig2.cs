@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using STRINGS;
 using TUNING;
 using UnityEngine;
 
@@ -16,14 +17,14 @@ public class SteamTurbineConfig2 : IBuildingConfig
 		string[] array = new string[] { "RefinedMetal", "Plastic" };
 		float[] array2 = new float[]
 		{
-			BUILDINGS.CONSTRUCTION_MASS_KG.TIER5[0],
-			BUILDINGS.CONSTRUCTION_MASS_KG.TIER3[0]
+			global::TUNING.BUILDINGS.CONSTRUCTION_MASS_KG.TIER5[0],
+			global::TUNING.BUILDINGS.CONSTRUCTION_MASS_KG.TIER3[0]
 		};
 		string[] array3 = array;
 		float num5 = 1600f;
 		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloor;
 		EffectorValues none = NOISE_POLLUTION.NONE;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, array2, array3, num5, buildLocationRule, BUILDINGS.DECOR.NONE, none, 1f);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, array2, array3, num5, buildLocationRule, global::TUNING.BUILDINGS.DECOR.NONE, none, 1f);
 		buildingDef.OutputConduitType = ConduitType.Liquid;
 		buildingDef.UtilityOutputOffset = new CellOffset(2, 2);
 		buildingDef.GeneratorWattageRating = SteamTurbineConfig2.MAX_WATTAGE;
@@ -38,6 +39,7 @@ public class SteamTurbineConfig2 : IBuildingConfig
 		buildingDef.OverheatTemperature = 1273.15f;
 		buildingDef.SelfHeatKilowattsWhenActive = 4f;
 		buildingDef.LogicInputPorts = LogicOperationalController.CreateSingleInputPortList(new CellOffset(0, 0));
+		buildingDef.AddSearchTerms(SEARCH_TERMS.POWER);
 		return buildingDef;
 	}
 

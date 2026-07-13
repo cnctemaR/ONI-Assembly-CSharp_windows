@@ -12,16 +12,21 @@ public class DragMe : MonoBehaviour, IBeginDragHandler, IEventSystemHandler, IDr
 		{
 			return;
 		}
-		this.m_DraggingIcon = global::UnityEngine.Object.Instantiate<GameObject>(base.gameObject);
+		this.m_DraggingIcon = global::UnityEngine.Object.Instantiate<GameObject>(base.gameObject, canvas.transform, false);
 		GraphicRaycaster component = this.m_DraggingIcon.GetComponent<GraphicRaycaster>();
 		if (component != null)
 		{
 			component.enabled = false;
 		}
 		this.m_DraggingIcon.name = "dragObj";
-		this.m_DraggingIcon.transform.SetParent(canvas.transform, false);
 		this.m_DraggingIcon.transform.SetAsLastSibling();
-		this.m_DraggingIcon.GetComponent<RectTransform>().pivot = Vector2.zero;
+		RectTransform component2 = this.m_DraggingIcon.GetComponent<RectTransform>();
+		component2.pivot = Vector2.zero;
+		component2.sizeDelta = base.GetComponent<RectTransform>().rect.size;
+		this.x = this.m_DraggingIcon.transform.position.x;
+		Canvas component3 = this.m_DraggingIcon.GetComponent<Canvas>();
+		component3.overrideSorting = true;
+		component3.sortingOrder = 99;
 		if (this.dragOnSurfaces)
 		{
 			this.m_DraggingPlane = base.transform as RectTransform;
@@ -52,6 +57,8 @@ public class DragMe : MonoBehaviour, IBeginDragHandler, IEventSystemHandler, IDr
 		Vector3 vector;
 		if (RectTransformUtility.ScreenPointToWorldPointInRectangle(this.m_DraggingPlane, data.position, data.pressEventCamera, out vector))
 		{
+			vector.x = this.x + 5f;
+			vector.y -= component.sizeDelta.y / 2f;
 			component.position = vector;
 			component.rotation = this.m_DraggingPlane.rotation;
 		}
@@ -87,6 +94,8 @@ public class DragMe : MonoBehaviour, IBeginDragHandler, IEventSystemHandler, IDr
 	private GameObject m_DraggingIcon;
 
 	private RectTransform m_DraggingPlane;
+
+	private float x;
 
 	public DragMe.IDragListener listener;
 

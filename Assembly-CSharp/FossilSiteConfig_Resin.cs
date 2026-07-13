@@ -6,11 +6,6 @@ using UnityEngine;
 
 public class FossilSiteConfig_Resin : IEntityConfig
 {
-	public string[] GetDlcIds()
-	{
-		return DlcManager.AVAILABLE_ALL_VERSIONS;
-	}
-
 	public GameObject CreatePrefab()
 	{
 		string text = "FossilResin";

@@ -134,23 +134,26 @@ namespace STRINGS
 			return text2;
 		}
 
-		public static string StripLinkFormatting(string text)
+		public static string StripTagFormatting(string text, string tag)
 		{
 			string text2 = text;
 			try
 			{
-				while (text2.Contains("<link="))
+				string text3 = string.Format("<{0}=", tag);
+				string text4 = string.Format("</{0}>", tag);
+				int length = text4.Length;
+				while (text2.Contains(text3))
 				{
-					int num = text2.IndexOf("</link>");
+					int num = text2.IndexOf(text4);
 					if (num > -1)
 					{
-						text2 = text2.Remove(num, 7);
+						text2 = text2.Remove(num, length);
 					}
 					else
 					{
-						Debug.LogWarningFormat("String has no closing link tag: {0}", new object[] { text });
+						Debug.LogWarningFormat("String has no closing {0} tag: {1}", new object[] { tag, text });
 					}
-					int num2 = text2.IndexOf("<link=");
+					int num2 = text2.IndexOf(text3);
 					if (num2 != -1)
 					{
 						int num3 = text2.IndexOf("\">", num2);
@@ -160,22 +163,32 @@ namespace STRINGS
 						}
 						else
 						{
-							text2 = text2.Remove(num2, "<link=".Length);
-							Debug.LogWarningFormat("String has no open link closure: {0}", new object[] { text });
+							text2 = text2.Remove(num2, text3.Length);
+							Debug.LogWarningFormat("String has no open {0} closure: {1}", new object[] { tag, text });
 						}
 					}
 					else
 					{
-						Debug.LogWarningFormat("String has no open link tag: {0}", new object[] { text });
+						Debug.LogWarningFormat("String has no open {0} tag: {1}", new object[] { tag, text });
 					}
 				}
 			}
 			catch
 			{
-				Debug.Log("STRIP LINK FORMATTING FAILED ON: " + text);
+				Debug.LogFormat("STRIP TAG FORMATTING FOR {0} FAILED ON: {1}", new object[] { tag, text });
 				text2 = text;
 			}
 			return text2;
+		}
+
+		public static string StripLinkFormatting(string text)
+		{
+			return UI.StripTagFormatting(UI.StripTagFormatting(text, "link"), "LINK");
+		}
+
+		public static string StripStyleFormatting(string text)
+		{
+			return UI.StripTagFormatting(UI.StripTagFormatting(text, "style"), "STYLE");
 		}
 
 		public static string PRE_KEYWORD = "<style=\"KKeyword\">";
@@ -196,7 +209,7 @@ namespace STRINGS
 
 		public static string PST_RATE = "</style>";
 
-		public static string CODEXLINK = "BUILDCATEGORYREQUIREMENTCLASS";
+		public static string CODEXLINK = "REQUIREMENTCLASS";
 
 		public static string PRE_AUTOMATION_ACTIVE = "<b><style=\"logic_on\">";
 
@@ -365,6 +378,10 @@ namespace STRINGS
 		public static LocString BUILD_REQUIRES_SKILL = "Skill: {Skill}";
 
 		public static LocString BUILD_REQUIRES_SKILL_TOOLTIP = "At least one Duplicant must have the {Skill} Skill to construct this building";
+
+		public static LocString OPERATION_REQUIRES_SKILL = "Skilled Operator: {Skill}";
+
+		public static LocString OPERATION_REQUIRES_SKILL_TOOLTIP = "Only a Duplicant with the {Skill} Skill can operate this building";
 
 		public static LocString VITALSSCREEN_NAME = "Name";
 
@@ -4180,13 +4197,25 @@ namespace STRINGS
 
 				public static LocString DB_CORRUPT = "An error occurred trying to load the Mod Database.\n\n{0}";
 
+				public static LocString NO_DESCRIPTION = "No description found in mod.yaml";
+
 				public class CONTENT_FAILURE
 				{
-					public static LocString DISABLED_CONTENT = " - <b>Not compatible with <i>{Content}</i></b>";
+					public static LocString DISABLED_CONTENT = " - <b>Incompatible DLC configuration</b>";
+
+					public static LocString DISABLED_CONTENT_TOOLTIP = "The current configuration of enabled/disabled DLCs does not match this mod's specifications.";
+
+					public static LocString DISABLED_CONTENT_TOOLTIP_REQUIRED = "<b>Required DLCs:</b>";
+
+					public static LocString DISABLED_CONTENT_TOOLTIP_FORBIDDEN_DLC = "<b>Forbidden DLCs:</b>";
 
 					public static LocString NO_CONTENT = " - <b>No compatible mod found</b>";
 
+					public static LocString NO_CONTENT_TOOLTIP = "No content was found to load.";
+
 					public static LocString OLD_API = " - <b>Mod out-of-date</b>";
+
+					public static LocString OLD_API_TOOLTIP = "This mod is outdated.";
 				}
 
 				public class TOOLTIPS
@@ -4951,7 +4980,19 @@ namespace STRINGS
 
 			public static LocString NOT_AVAILABLE = "Not available";
 
-			public static LocString ASSIGNED_BOOSTERS_HEADER = "{0}'s Assigned Boosters";
+			public static LocString ASSIGNED_BOOSTERS_HEADER = "{0}'s Boosters";
+
+			public static LocString ASSIGNED_BOOSTERS_COUNT_LABEL = "{0}/{1} boosters assigned";
+
+			public static LocString AVAILABLE_BOOSTERS_LABEL = "{0} available";
+
+			public static LocString ASSIGNED_BOOSTERS_LABEL = "{0} assigned";
+
+			public static LocString BIONIC_UPGRADE_SLOT_LOCKED = "This booster slot is unavailable\n\nBooster slots can be unlocked using " + UI.PRE_KEYWORD + "Skill Points" + UI.PST_KEYWORD;
+
+			public static LocString BIONIC_UPGRADE_SLOT_AVAILABLE = "No booster installed\n\nAssign a booster from the menu below or craft new boosters at the " + UI.FormatAsLink("Crafting Station", "CRAFTINGTABLE");
+
+			public static LocString BIONIC_UPGRADE_SLOT_UNASSIGN = UI.CLICK(UI.ClickType.click) + " to unassign";
 
 			public class ASSIGNMENT_REQUIREMENTS
 			{
@@ -6182,7 +6223,22 @@ namespace STRINGS
 
 				public class CAN_ART
 				{
-					public static LocString DESCRIPTION = "Can produce artwork using " + BUILDINGS.PREFABS.CANVAS.NAME + " and " + BUILDINGS.PREFABS.SCULPTURE.NAME;
+					public static LocString DESCRIPTION = string.Concat(new string[]
+					{
+						"Can produce artwork using:\n<indent=20px>• ",
+						BUILDINGS.PREFABS.CANVAS.NAME,
+						"\n• ",
+						BUILDINGS.PREFABS.SMALLSCULPTURE.NAME,
+						"\n• ",
+						BUILDINGS.PREFABS.SCULPTURE.NAME,
+						"\n• ",
+						BUILDINGS.PREFABS.ICESCULPTURE.NAME,
+						"\n• ",
+						BUILDINGS.PREFABS.METALSCULPTURE.NAME,
+						"\n• ",
+						BUILDINGS.PREFABS.WOODSCULPTURE.NAME,
+						"</indent>"
+					});
 				}
 
 				public class CAN_ART_UGLY
@@ -6202,7 +6258,7 @@ namespace STRINGS
 
 				public class CAN_FARM_TINKER
 				{
-					public static LocString DESCRIPTION = UI.FormatAsLink("Crop Tending", "PLANTS") + " and " + ITEMS.INDUSTRIAL_PRODUCTS.FARM_STATION_TOOLS.NAME + " Crafting";
+					public static LocString DESCRIPTION = UI.FormatAsLink("Crop Tending", "PLANTS");
 				}
 
 				public class CAN_IDENTIFY_MUTANT_SEEDS
@@ -6218,9 +6274,27 @@ namespace STRINGS
 					});
 				}
 
+				public class CAN_FARM_STATION
+				{
+					public static LocString DESCRIPTION = string.Concat(new string[]
+					{
+						"Can craft ",
+						UI.PRE_KEYWORD,
+						"Micronutrient Fertilizer",
+						UI.PST_KEYWORD,
+						" at the ",
+						BUILDINGS.PREFABS.FARMSTATION.NAME
+					});
+				}
+
 				public class CAN_WRANGLE_CREATURES
 				{
 					public static LocString DESCRIPTION = "Critter Wrangling";
+				}
+
+				public class CAN_USE_BUILDING
+				{
+					public static LocString DESCRIPTION = "{0} Usage";
 				}
 
 				public class CAN_USE_RANCH_STATION
@@ -6241,6 +6315,16 @@ namespace STRINGS
 				public class CAN_ELECTRIC_GRILL
 				{
 					public static LocString DESCRIPTION = BUILDINGS.PREFABS.COOKINGSTATION.NAME + " Usage";
+				}
+
+				public class CAN_GAS_RANGE
+				{
+					public static LocString DESCRIPTION = BUILDINGS.PREFABS.GOURMETCOOKINGSTATION.NAME + " Usage";
+				}
+
+				public class CAN_DEEP_FRYER
+				{
+					public static LocString DESCRIPTION = BUILDINGS.PREFABS.DEEPFRYER.NAME + " Usage";
 				}
 
 				public class CAN_SPICE_GRINDER
@@ -6295,12 +6379,17 @@ namespace STRINGS
 
 				public class CAN_STUDY_ARTIFACTS
 				{
-					public static LocString DESCRIPTION = "Artifact Analysis";
+					public static LocString DESCRIPTION = BUILDINGS.PREFABS.ARTIFACTANALYSISSTATION.NAME + " Usage";
 				}
 
 				public class CAN_USE_CLUSTER_TELESCOPE
 				{
 					public static LocString DESCRIPTION = BUILDINGS.PREFABS.CLUSTERTELESCOPE.NAME + " Usage";
+				}
+
+				public class CAN_CLUSTERTELESCOPEENCLOSED
+				{
+					public static LocString DESCRIPTION = BUILDINGS.PREFABS.CLUSTERTELESCOPEENCLOSED.NAME + " Usage";
 				}
 
 				public class EXOSUIT_EXPERTISE
@@ -8498,6 +8587,8 @@ namespace STRINGS
 
 		public class RESEARCHSCREEN
 		{
+			public static LocString SEARCH_RESULTS_CATEGORY = "Search Results";
+
 			public class FILTER_BUTTONS
 			{
 				public static LocString HEADER = "Preset Filters";
@@ -8520,9 +8611,9 @@ namespace STRINGS
 
 				public static LocString RANCHING = "Ranching";
 
-				public static LocString FILTER = "Filters";
+				public static LocString FILTER = "Filter";
 
-				public static LocString TILE = "Tiles";
+				public static LocString TILE = "Tile";
 
 				public static LocString TRANSPORT = "Transport";
 
@@ -8530,7 +8621,7 @@ namespace STRINGS
 
 				public static LocString MEDICINE = "Medicine";
 
-				public static LocString ROCKET = "Rockets";
+				public static LocString ROCKET = "Rocket";
 
 				public static LocString RADIATION = "Radiation";
 			}
@@ -8613,6 +8704,8 @@ namespace STRINGS
 
 				public static LocString CREATURES = UI.FormatAsLink("Critters", "CREATURES");
 
+				public static LocString DUPLICANTS = UI.FormatAsLink("Duplicants", "DUPLICANTS");
+
 				public static LocString EMAILS = UI.FormatAsLink("E-mail", "EMAILS");
 
 				public static LocString JOURNALS = UI.FormatAsLink("Journals", "JOURNALS");
@@ -8662,6 +8755,8 @@ namespace STRINGS
 				public static LocString BUILDINGMATERIALCLASSES = UI.FormatAsLink("Building Materials", "BUILDING_MATERIAL_CLASSES");
 
 				public static LocString INDUSTRIALINGREDIENTS = UI.FormatAsLink("Industrial Ingredients", "INDUSTRIALINGREDIENTS");
+
+				public static LocString DUPLICANTSCATEGORY = UI.FormatAsLink("Duplicants", "DUPLICANTS");
 
 				public static LocString GEYSERS = UI.FormatAsLink("Geysers", "GEYSERS");
 
@@ -15265,7 +15360,11 @@ namespace STRINGS
 
 			public static LocString REQUIRESMANUALOPERATION = "Duplicant operation";
 
-			public static LocString REQUIRESCREATIVITY = "Duplicant " + UI.FormatAsLink("Creativity", "ARTIST");
+			public static LocString REQUIRESSKILLEDOPERATION = "Skilled Duplicant operation";
+
+			public static LocString REQUIRESSKILLEDOPERATION_DLC3 = "Skilled Duplicant operation";
+
+			public static LocString REQUIRESCREATIVITY = "Duplicant " + UI.FormatAsLink("Creativity", "ARTING1");
 
 			public static LocString REQUIRESPOWERGENERATOR = UI.FormatAsLink("Power", "POWER") + " generator";
 
@@ -15566,7 +15665,11 @@ namespace STRINGS
 
 				public static LocString REQUIRESMANUALOPERATION = "A Duplicant must be present to run this building";
 
-				public static LocString REQUIRESCREATIVITY = "A Duplicant must work on this object to create " + UI.PRE_KEYWORD + "Art" + UI.PST_KEYWORD;
+				public static LocString REQUIRESSKILLEDOPERATION = "Only a Duplicant with the {Skill} skill can use this building";
+
+				public static LocString REQUIRESSKILLEDOPERATION_DLC3 = "Only a Duplicant with the {Skill} skill or {Booster} can use this building";
+
+				public static LocString REQUIRESCREATIVITY = "An expressive Duplicant must work on this object to create " + UI.PRE_KEYWORD + "Art" + UI.PST_KEYWORD;
 
 				public static LocString REQUIRESPOWERGENERATOR = string.Concat(new string[]
 				{

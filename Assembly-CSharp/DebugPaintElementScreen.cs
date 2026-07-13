@@ -19,7 +19,7 @@ public class DebugPaintElementScreen : KScreen
 		base.OnPrefabInit();
 		DebugPaintElementScreen.Instance = this;
 		this.SetupLocText();
-		this.inputFields.Add(this.massPressureInput);
+		this.inputFields.Add(this.massInput);
 		this.inputFields.Add(this.temperatureInput);
 		this.inputFields.Add(this.diseaseCountInput);
 		this.inputFields.Add(this.filterInput);
@@ -38,9 +38,9 @@ public class DebugPaintElementScreen : KScreen
 		{
 			this.OnChangeTemperature();
 		});
-		this.massPressureInput.onEndEdit.AddListener(delegate(string value)
+		this.massInput.onEndEdit.AddListener(delegate(string value)
 		{
-			this.OnChangeMassPressure();
+			this.OnChangeMass();
 		});
 		this.diseaseCountInput.onEndEdit.AddListener(delegate(string value)
 		{
@@ -190,7 +190,7 @@ public class DebugPaintElementScreen : KScreen
 
 	private void OnClickPaint()
 	{
-		this.OnChangeMassPressure();
+		this.OnChangeMass();
 		this.OnChangeTemperature();
 		this.OnDiseaseCountChange();
 		this.OnChangeFOWReveal();
@@ -199,7 +199,7 @@ public class DebugPaintElementScreen : KScreen
 
 	private void OnClickStore()
 	{
-		this.OnChangeMassPressure();
+		this.OnChangeMass();
 		this.OnChangeTemperature();
 		this.OnDiseaseCountChange();
 		this.OnChangeFOWReveal();
@@ -208,7 +208,7 @@ public class DebugPaintElementScreen : KScreen
 
 	private void OnClickSample()
 	{
-		this.OnChangeMassPressure();
+		this.OnChangeMass();
 		this.OnChangeTemperature();
 		this.OnDiseaseCountChange();
 		this.OnChangeFOWReveal();
@@ -217,7 +217,7 @@ public class DebugPaintElementScreen : KScreen
 
 	private void OnClickFill()
 	{
-		this.OnChangeMassPressure();
+		this.OnChangeMass();
 		this.OnChangeTemperature();
 		this.OnDiseaseCountChange();
 		DebugTool.Instance.Activate(DebugTool.Type.FillReplaceSubstance);
@@ -273,12 +273,12 @@ public class DebugPaintElementScreen : KScreen
 		this.set_allow_fow_reveal = this.paintAllowFOWReveal.isOn;
 	}
 
-	public void OnChangeMassPressure()
+	public void OnChangeMass()
 	{
 		float num;
 		try
 		{
-			num = Convert.ToSingle(this.massPressureInput.text);
+			num = Convert.ToSingle(this.massInput.text);
 		}
 		catch
 		{
@@ -287,7 +287,7 @@ public class DebugPaintElementScreen : KScreen
 		if (num <= 0f)
 		{
 			num = 1f;
-			this.massPressureInput.text = "1";
+			this.massInput.text = "1";
 		}
 		this.mass = num;
 	}
@@ -331,10 +331,10 @@ public class DebugPaintElementScreen : KScreen
 
 	public void SampleCell(int cell)
 	{
-		this.massPressureInput.text = (Grid.Pressure[cell] * 0.010000001f).ToString();
+		this.massInput.text = Grid.Mass[cell].ToString();
 		this.temperatureInput.text = Grid.Temperature[cell].ToString();
 		this.OnSelectElement(ElementLoader.GetElementID(Grid.Element[cell].tag));
-		this.OnChangeMassPressure();
+		this.OnChangeMass();
 		this.OnChangeTemperature();
 	}
 
@@ -374,7 +374,7 @@ public class DebugPaintElementScreen : KScreen
 
 	[Header("Value Inputs")]
 	[SerializeField]
-	private KInputTextField massPressureInput;
+	private KInputTextField massInput;
 
 	[SerializeField]
 	private KInputTextField temperatureInput;

@@ -44,7 +44,7 @@ public class BuildingConfigManager : KMonoBehaviour
 		{
 			DlcManager.ConvertAvailableToRequireAndForbidden(config.GetDlcIds(), out requiredDlcIds, out forbiddenDlcIds);
 		}
-		if (!DlcManager.IsCorrectDlcSubscribed(requiredDlcIds, forbiddenDlcIds))
+		if (!DlcManager.IsCorrectDlcSubscribed(config))
 		{
 			return;
 		}
@@ -54,7 +54,9 @@ public class BuildingConfigManager : KMonoBehaviour
 		this.configTable[config] = buildingDef;
 		GameObject gameObject = global::UnityEngine.Object.Instantiate<GameObject>(this.baseTemplate);
 		global::UnityEngine.Object.DontDestroyOnLoad(gameObject);
-		gameObject.GetComponent<KPrefabID>().PrefabTag = buildingDef.Tag;
+		KPrefabID component = gameObject.GetComponent<KPrefabID>();
+		component.PrefabTag = buildingDef.Tag;
+		component.SetDlcRestrictions(buildingDef);
 		gameObject.name = buildingDef.PrefabID + "Template";
 		gameObject.GetComponent<Building>().Def = buildingDef;
 		gameObject.GetComponent<OccupyArea>().SetCellOffsets(buildingDef.PlacementOffsets);

@@ -7,11 +7,6 @@ using UnityEngine;
 
 public class SweepBotConfig : IEntityConfig
 {
-	public string[] GetDlcIds()
-	{
-		return DlcManager.AVAILABLE_ALL_VERSIONS;
-	}
-
 	public GameObject CreatePrefab()
 	{
 		string text = "SweepBot";

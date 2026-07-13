@@ -556,8 +556,8 @@ namespace TUNING
 				"Ladder", "FirePole", "LadderFast", "Tile", "SnowTile", "WoodTile", "GasPermeableMembrane", "MeshTile", "InsulationTile", "PlasticTile",
 				"MetalTile", "GlassTile", "StorageTile", "BunkerTile", "CarpetTile", "ExteriorWall", "ExobaseHeadquarters", "Door", "ManualPressureDoor", "PressureDoor",
 				"BunkerDoor", "StorageLocker", "StorageLockerSmart", "LiquidReservoir", "GasReservoir", "ObjectDispenser", "TravelTube", "TravelTubeEntrance", "TravelTubeWallBridge"
-			}, ""),
-			new PlanScreen.PlanInfo(new HashedString("Oxygen"), false, new List<string> { "MineralDeoxidizer", "SublimationStation", "Oxysconce", "AlgaeHabitat", "AirFilter", "CO2Scrubber", "Electrolyzer", "RustDeoxidizer" }, ""),
+			}, null, null),
+			new PlanScreen.PlanInfo(new HashedString("Oxygen"), false, new List<string> { "MineralDeoxidizer", "SublimationStation", "Oxysconce", "AlgaeHabitat", "AirFilter", "CO2Scrubber", "Electrolyzer", "RustDeoxidizer" }, null, null),
 			new PlanScreen.PlanInfo(new HashedString("Power"), false, new List<string>
 			{
 				"DevGenerator",
@@ -591,13 +591,13 @@ namespace TUNING
 				TemperatureControlledSwitchConfig.ID,
 				PressureSwitchLiquidConfig.ID,
 				PressureSwitchGasConfig.ID
-			}, ""),
+			}, null, null),
 			new PlanScreen.PlanInfo(new HashedString("Food"), false, new List<string>
 			{
 				"MicrobeMusher", "CookingStation", "Deepfryer", "GourmetCookingStation", "SpiceGrinder", "FoodDehydrator", "FoodRehydrator", "PlanterBox", "FarmTile", "HydroponicFarm",
 				"RationBox", "Refrigerator", "CreatureDeliveryPoint", "CritterPickUp", "CritterDropOff", "FishDeliveryPoint", "CreatureFeeder", "FishFeeder", "MilkFeeder", "EggIncubator",
 				"EggCracker", "CreatureGroundTrap", "WaterTrap", "CreatureAirTrap", "CritterCondo", "UnderwaterCritterCondo", "AirBorneCritterCondo"
-			}, ""),
+			}, null, null),
 			new PlanScreen.PlanInfo(new HashedString("Plumbing"), false, new List<string>
 			{
 				"DevPumpLiquid",
@@ -629,7 +629,7 @@ namespace TUNING
 				"ModularLaunchpadPortLiquid",
 				"ModularLaunchpadPortLiquidUnloader",
 				"ContactConductivePipeBridge"
-			}, ""),
+			}, null, null),
 			new PlanScreen.PlanInfo(new HashedString("HVAC"), false, new List<string>
 			{
 				"DevPumpGas",
@@ -655,17 +655,17 @@ namespace TUNING
 				GasConduitElementSensorConfig.ID,
 				GasConduitDiseaseSensorConfig.ID,
 				GasConduitTemperatureSensorConfig.ID
-			}, ""),
+			}, null, null),
 			new PlanScreen.PlanInfo(new HashedString("Refining"), false, new List<string>
 			{
 				"Compost", "WaterPurifier", "Desalinator", "FertilizerMaker", "AlgaeDistillery", "EthanolDistillery", "RockCrusher", "Kiln", "SludgePress", "MetalRefinery",
 				"GlassForge", "OilRefinery", "Polymerizer", "OxyliteRefinery", "Chlorinator", "SupermaterialRefinery", "DiamondPress", "MilkFatSeparator", "MilkPress"
-			}, ""),
+			}, null, null),
 			new PlanScreen.PlanInfo(new HashedString("Medical"), false, new List<string>
 			{
 				"DevLifeSupport", "WashBasin", "WashSink", "HandSanitizer", "DecontaminationShower", "OilChanger", "Apothecary", "DoctorStation", "AdvancedDoctorStation", "MedicalCot",
 				"MassageTable", "Grave"
-			}, ""),
+			}, null, null),
 			new PlanScreen.PlanInfo(new HashedString("Furniture"), false, new List<string>
 			{
 				"Bed",
@@ -710,7 +710,7 @@ namespace TUNING
 				"MonumentMiddle",
 				"MonumentTop",
 				"ParkSign"
-			}, ""),
+			}, null, null),
 			new PlanScreen.PlanInfo(new HashedString("Equipment"), false, new List<string>
 			{
 				"ResearchCenter",
@@ -748,12 +748,12 @@ namespace TUNING
 				"LeadSuitMarker",
 				"LeadSuitLocker",
 				"AstronautTrainingCenter"
-			}, ""),
+			}, null, null),
 			new PlanScreen.PlanInfo(new HashedString("Utilities"), true, new List<string>
 			{
 				"Campfire", "DevHeater", "IceKettle", "SpaceHeater", "LiquidHeater", "LiquidCooledFan", "IceCooledFan", "IceMachine", "AirConditioner", "LiquidConditioner",
 				"OreScrubber", "OilWellCap", "ThermalBlock", "SweepBotStation"
-			}, ""),
+			}, null, null),
 			new PlanScreen.PlanInfo(new HashedString("Automation"), true, new List<string>
 			{
 				"LogicWire",
@@ -794,7 +794,7 @@ namespace TUNING
 				LogicMemoryConfig.ID,
 				"LogicGateMultiplexer",
 				"LogicGateDemultiplexer"
-			}, ""),
+			}, null, null),
 			new PlanScreen.PlanInfo(new HashedString("Conveyance"), true, new List<string>
 			{
 				"DevPumpSolid",
@@ -813,7 +813,7 @@ namespace TUNING
 				"AutoMiner",
 				"ModularLaunchpadPortSolid",
 				"ModularLaunchpadPortSolidUnloader"
-			}, ""),
+			}, null, null),
 			new PlanScreen.PlanInfo(new HashedString("Rocketry"), true, new List<string>
 			{
 				"ClusterTelescope",
@@ -851,8 +851,8 @@ namespace TUNING
 				"LandingBeacon",
 				"MissileLauncher",
 				"ModularLaunchpadPortBridge"
-			}, ""),
-			new PlanScreen.PlanInfo(new HashedString("HEP"), true, new List<string> { "RadiationLight", "ManualHighEnergyParticleSpawner", "NuclearReactor", "UraniumCentrifuge", "HighEnergyParticleSpawner", "DevHEPSpawner", "HighEnergyParticleRedirector", "HEPBattery", "HEPBridgeTile", "DevRadiationGenerator" }, "EXPANSION1_ID")
+			}, null, null),
+			new PlanScreen.PlanInfo(new HashedString("HEP"), true, new List<string> { "RadiationLight", "ManualHighEnergyParticleSpawner", "NuclearReactor", "UraniumCentrifuge", "HighEnergyParticleSpawner", "DevHEPSpawner", "HighEnergyParticleRedirector", "HEPBattery", "HEPBridgeTile", "DevRadiationGenerator" }, DlcManager.EXPANSION1, null)
 		};
 
 		public static List<Type> COMPONENT_DESCRIPTION_ORDER = new List<Type>

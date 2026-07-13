@@ -451,7 +451,7 @@ public class BionicUpgradesMonitor : GameStateMachine<BionicUpgradesMonitor, Bio
 		public bool IsBionicUpgradeComponentObjectAbleToBePickedUp(BionicUpgradeComponent upgradecComponent)
 		{
 			Pickupable component = upgradecComponent.GetComponent<Pickupable>();
-			return !(component == null) && !component.KPrefabID.HasTag(GameTags.StoredPrivate) && component.CouldBePickedUpByMinion(base.gameObject) && this.navigator.CanReach(component);
+			return !(component == null) && !component.KPrefabID.HasTag(GameTags.StoredPrivate) && component.CouldBePickedUpByMinion(base.GetComponent<KPrefabID>().InstanceID) && this.navigator.CanReach(component);
 		}
 
 		private BionicUpgradesMonitor.UpgradeComponentSlot GetAnyInstalledUpgradeSlot()

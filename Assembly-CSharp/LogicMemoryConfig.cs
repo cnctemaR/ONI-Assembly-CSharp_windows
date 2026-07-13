@@ -43,6 +43,7 @@ public class LogicMemoryConfig : IBuildingConfig
 		SoundEventVolumeCache.instance.AddVolume("logic_memory_kanim", "PowerMemory_on", NOISE_POLLUTION.NOISY.TIER3);
 		SoundEventVolumeCache.instance.AddVolume("logic_memory_kanim", "PowerMemory_off", NOISE_POLLUTION.NOISY.TIER3);
 		GeneratedBuildings.RegisterWithOverlay(OverlayModes.Logic.HighlightItemIDs, LogicMemoryConfig.ID);
+		buildingDef.AddSearchTerms(SEARCH_TERMS.AUTOMATION);
 		return buildingDef;
 	}
 

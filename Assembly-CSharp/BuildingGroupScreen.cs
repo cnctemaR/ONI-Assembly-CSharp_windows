@@ -42,10 +42,11 @@ public class BuildingGroupScreen : KScreen
 		{
 			base.isEditing = false;
 		});
-		this.inputField.onValueChanged.AddListener(delegate(string value)
+		this.inputField.OnValueChangesPaused = delegate
 		{
 			PlanScreen.Instance.RefreshCategoryPanelTitle();
-		});
+			PlanScreen.Instance.RefreshSearch();
+		};
 		this.inputField.placeholder.GetComponent<TextMeshProUGUI>().text = UI.BUILDMENU.SEARCH_TEXT_PLACEHOLDER;
 		this.clearButton.onClick += this.ClearSearch;
 	}
@@ -59,6 +60,7 @@ public class BuildingGroupScreen : KScreen
 	public void ClearSearch()
 	{
 		this.inputField.text = "";
+		this.inputField.ForceChangeValueRefresh();
 	}
 
 	private void ConfigurePlanScreenForSearch()

@@ -1,4 +1,5 @@
 ﻿using System;
+using STRINGS;
 using TUNING;
 using UnityEngine;
 
@@ -12,7 +13,7 @@ public class CornerMouldingConfig : IBuildingConfig
 		string text2 = "corner_tile_kanim";
 		int num3 = 10;
 		float num4 = 30f;
-		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER2;
+		float[] tier = global::TUNING.BUILDINGS.CONSTRUCTION_MASS_KG.TIER2;
 		string[] raw_MINERALS = MATERIALS.RAW_MINERALS;
 		float num5 = 800f;
 		BuildLocationRule buildLocationRule = BuildLocationRule.InCorner;
@@ -29,6 +30,7 @@ public class CornerMouldingConfig : IBuildingConfig
 		buildingDef.AudioCategory = "Metal";
 		buildingDef.AudioSize = "small";
 		buildingDef.PermittedRotations = PermittedRotations.FlipH;
+		buildingDef.AddSearchTerms(SEARCH_TERMS.MORALE);
 		return buildingDef;
 	}
 

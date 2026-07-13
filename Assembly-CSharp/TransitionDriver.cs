@@ -52,7 +52,7 @@ public class TransitionDriver
 			navigator.animController.SetSceneLayer(sceneLayer);
 		}
 		int num = Grid.OffsetCell(Grid.PosToCell(navigator), transition.x, transition.y);
-		this.targetPos = Grid.CellToPosCBC(num, sceneLayer);
+		this.targetPos = this.GetTargetPosition(transition.navGridTransition, num, sceneLayer);
 		if (transition.isLooping)
 		{
 			KAnimControllerBase animController = navigator.animController;
@@ -112,6 +112,22 @@ public class TransitionDriver
 			}
 		}
 		this.brain = navigator.GetComponent<Brain>();
+	}
+
+	private Vector3 GetTargetPosition(NavGrid.Transition trans, int target_cell, Grid.SceneLayer layer)
+	{
+		if (trans.useXOffset)
+		{
+			if (trans.x < 0)
+			{
+				return Grid.CellToPosRBC(target_cell, layer);
+			}
+			if (trans.x > 0)
+			{
+				return Grid.CellToPosLBC(target_cell, layer);
+			}
+		}
+		return Grid.CellToPosCBC(target_cell, layer);
 	}
 
 	public void UpdateTransition(float dt)

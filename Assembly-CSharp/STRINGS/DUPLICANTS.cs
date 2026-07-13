@@ -3657,7 +3657,7 @@ namespace STRINGS
 
 				public static LocString STATUS = "Watching Flash Mobber";
 
-				public static LocString TOOLTIP = "This Duplicant is enjoying the show.";
+				public static LocString TOOLTIP = "This Duplicant is blown away by their friend's dance moves!";
 			}
 
 			public class WARMUPDELIVERSTATUS
@@ -10237,7 +10237,15 @@ namespace STRINGS
 			{
 				public static LocString NAME = UI.FormatAsLink("Grilling", "COOKING1");
 
-				public static LocString DESCRIPTION = "Allows Duplicants to cook using the " + BUILDINGS.PREFABS.COOKINGSTATION.NAME;
+				public static LocString DESCRIPTION = string.Concat(new string[]
+				{
+					"Allows Duplicants to cook using the ",
+					BUILDINGS.PREFABS.COOKINGSTATION.NAME,
+					", ",
+					BUILDINGS.PREFABS.GOURMETCOOKINGSTATION.NAME,
+					", and ",
+					BUILDINGS.PREFABS.DEEPFRYER.NAME
+				});
 			}
 
 			public class COOK

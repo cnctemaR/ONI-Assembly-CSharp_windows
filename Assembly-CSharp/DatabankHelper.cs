@@ -40,6 +40,18 @@ public abstract class DatabankHelper
 		}
 	}
 
+	public static string RESEARCH_CODEXID
+	{
+		get
+		{
+			if (DlcManager.IsExpansion1Active())
+			{
+				return "RESEARCHDLC1";
+			}
+			return "RESEARCH";
+		}
+	}
+
 	public static string NAME
 	{
 		get

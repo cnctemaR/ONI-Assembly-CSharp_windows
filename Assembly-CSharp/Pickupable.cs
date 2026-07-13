@@ -78,26 +78,50 @@ public class Pickupable : Workable, IHasSortOrder
 		}
 	}
 
+	[Obsolete("Use Instance ID")]
 	private bool CouldBePickedUpCommon(GameObject carrier)
 	{
-		return this.UnreservedAmount >= this.MinTakeAmount && (this.UnreservedAmount > 0f || this.FindReservedAmount(carrier) > 0f);
+		return this.CouldBePickedUpCommon(carrier.GetComponent<KPrefabID>().InstanceID);
 	}
 
+	private bool CouldBePickedUpCommon(int carrierID)
+	{
+		return this.UnreservedAmount >= this.MinTakeAmount && (this.UnreservedAmount > 0f || this.FindReservedAmount(carrierID) > 0f);
+	}
+
+	[Obsolete("Use Instance ID")]
 	public bool CouldBePickedUpByMinion(GameObject carrier)
 	{
-		return this.CouldBePickedUpCommon(carrier) && (this.storage == null || !this.storage.automatable || !this.storage.automatable.GetAutomationOnly());
+		return this.CouldBePickedUpByMinion(carrier.GetComponent<KPrefabID>().InstanceID);
 	}
 
+	public bool CouldBePickedUpByMinion(int carrierID)
+	{
+		return this.CouldBePickedUpCommon(carrierID) && (this.storage == null || !this.storage.automatable || !this.storage.automatable.GetAutomationOnly());
+	}
+
+	[Obsolete("Use Instance ID")]
 	public bool CouldBePickedUpByTransferArm(GameObject carrier)
 	{
-		return this.CouldBePickedUpCommon(carrier) && (this.fetchable_monitor == null || this.fetchable_monitor.IsFetchable());
+		return this.CouldBePickedUpByTransferArm(carrier.GetComponent<KPrefabID>().InstanceID);
 	}
 
+	public bool CouldBePickedUpByTransferArm(int carrierID)
+	{
+		return this.CouldBePickedUpCommon(carrierID) && (this.fetchable_monitor == null || this.fetchable_monitor.IsFetchable());
+	}
+
+	[Obsolete("Use Instance ID")]
 	public float FindReservedAmount(GameObject reserver)
+	{
+		return this.FindReservedAmount(reserver.GetComponent<KPrefabID>().InstanceID);
+	}
+
+	public float FindReservedAmount(int reserverID)
 	{
 		for (int i = 0; i < this.reservations.Count; i++)
 		{
-			if (this.reservations[i].reserver == reserver)
+			if (this.reservations[i].reserverID == reserverID)
 			{
 				return this.reservations[i].amount;
 			}
@@ -162,12 +186,12 @@ public class Pickupable : Workable, IHasSortOrder
 		}
 	}
 
-	public int Reserve(string context, GameObject reserver, float amount)
+	public int Reserve(string context, int reserverID, float amount)
 	{
 		int num = this.nextTicketNumber;
 		this.nextTicketNumber = num + 1;
 		int num2 = num;
-		Pickupable.Reservation reservation = new Pickupable.Reservation(reserver, amount, num2);
+		Pickupable.Reservation reservation = new Pickupable.Reservation(reserverID, amount, num2);
 		this.reservations.Add(reservation);
 		this.RefreshReservedAmount();
 		if (this.OnReservationsChanged != null)
@@ -1107,9 +1131,9 @@ public class Pickupable : Workable, IHasSortOrder
 
 	public struct Reservation
 	{
-		public Reservation(GameObject reserver, float amount, int ticket)
+		public Reservation(int reserverID, float amount, int ticket)
 		{
-			this.reserver = reserver;
+			this.reserverID = reserverID;
 			this.amount = amount;
 			this.ticket = ticket;
 		}
@@ -1118,7 +1142,7 @@ public class Pickupable : Workable, IHasSortOrder
 		{
 			return string.Concat(new string[]
 			{
-				this.reserver.name,
+				this.reserverID.ToString(),
 				", ",
 				this.amount.ToString(),
 				", ",
@@ -1126,7 +1150,7 @@ public class Pickupable : Workable, IHasSortOrder
 			});
 		}
 
-		public GameObject reserver;
+		public int reserverID;
 
 		public float amount;
 

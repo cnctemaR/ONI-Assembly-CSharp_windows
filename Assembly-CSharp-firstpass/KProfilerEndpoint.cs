@@ -14,12 +14,12 @@ public class KProfilerEndpoint
 	}
 
 	[Conditional("ENABLE_KPROFILER")]
-	public virtual void BeginFrame()
+	public virtual void NextFrame()
 	{
 	}
 
 	[Conditional("ENABLE_KPROFILER")]
-	public virtual void Ping(string display, string group, double value)
+	public virtual void Ping(string display, double value)
 	{
 	}
 
@@ -30,11 +30,6 @@ public class KProfilerEndpoint
 
 	[Conditional("ENABLE_KPROFILER")]
 	public virtual void EndAsync(string display)
-	{
-	}
-
-	[Conditional("ENABLE_KPROFILER")]
-	public virtual void EndFrame()
 	{
 	}
 }

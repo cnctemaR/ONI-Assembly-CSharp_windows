@@ -6,11 +6,6 @@ using UnityEngine;
 
 public class FoodSplatConfig : IEntityConfig
 {
-	public string[] GetDlcIds()
-	{
-		return DlcManager.AVAILABLE_ALL_VERSIONS;
-	}
-
 	public GameObject CreatePrefab()
 	{
 		return EntityTemplates.CreateBasicEntity("FoodSplat", global::STRINGS.ITEMS.FOOD.FOODSPLAT.NAME, global::STRINGS.ITEMS.FOOD.FOODSPLAT.DESC, 1f, true, Assets.GetAnim("sticker_a_kanim"), "idle_sticker_a", Grid.SceneLayer.Backwall, SimHashes.Creature, null, 293f);

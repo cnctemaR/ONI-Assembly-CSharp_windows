@@ -300,6 +300,8 @@ public class SaveLoadRoot : KMonoBehaviour
 		}
 	}
 
+	public Tag associatedTag;
+
 	private bool hasOnSpawnRun;
 
 	private bool registered = true;

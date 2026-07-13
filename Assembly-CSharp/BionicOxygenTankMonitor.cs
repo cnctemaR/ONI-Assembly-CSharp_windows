@@ -398,7 +398,7 @@ public class BionicOxygenTankMonitor : GameStateMachine<BionicOxygenTankMonitor,
 			}
 		}
 
-		public bool ConsumeGas(OxygenBreather oxygen_breather, float amount, Action<SimHashes, float, float, byte, int> onConsumptionCompletedCallback)
+		public bool ConsumeGas(OxygenBreather oxygen_breather, float amount)
 		{
 			if (this.IsEmpty)
 			{
@@ -409,10 +409,7 @@ public class BionicOxygenTankMonitor : GameStateMachine<BionicOxygenTankMonitor,
 			float num2;
 			SimUtil.DiseaseInfo diseaseInfo;
 			this.storage.ConsumeAndGetDisease(GameTags.Breathable, amount, out num2, out diseaseInfo, out num, out simHashes);
-			if (onConsumptionCompletedCallback != null)
-			{
-				onConsumptionCompletedCallback(simHashes, amount, num, diseaseInfo.idx, diseaseInfo.count);
-			}
+			OxygenBreather.BreathableGasConsumed(oxygen_breather, simHashes, amount, num, diseaseInfo.idx, diseaseInfo.count);
 			return true;
 		}
 

@@ -61,7 +61,7 @@ namespace Klei
 		{
 			foreach (string text in this.dataMap.Keys)
 			{
-				if (re.IsMatch(text))
+				if (re.IsMatch(text) && !Path.GetFileName(text).StartsWith("._"))
 				{
 					result.Add(text);
 				}

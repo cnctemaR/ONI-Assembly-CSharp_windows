@@ -12,12 +12,14 @@ public class CritterPickUpConfig : IBuildingConfig
 		buildingDef.AudioCategory = "Metal";
 		buildingDef.ViewMode = OverlayModes.Rooms.ID;
 		buildingDef.LogicInputPorts = new List<LogicPorts.Port> { LogicPorts.Port.InputPort("CritterPickUpInput", new CellOffset(0, 0), global::STRINGS.BUILDINGS.PREFABS.CRITTERPICKUP.LOGIC_INPUT.DESC, global::STRINGS.BUILDINGS.PREFABS.CRITTERPICKUP.LOGIC_INPUT.LOGIC_PORT_ACTIVE, global::STRINGS.BUILDINGS.PREFABS.CRITTERPICKUP.LOGIC_INPUT.LOGIC_PORT_INACTIVE, false, false) };
+		buildingDef.AddSearchTerms(SEARCH_TERMS.CRITTER);
+		buildingDef.AddSearchTerms(SEARCH_TERMS.RANCHING);
 		return buildingDef;
 	}
 
 	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
-		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.CreatureRelocator, false);
+		go.GetComponent<KPrefabID>().AddTag(GameTags.CodexCategories.CreatureRelocator, false);
 		Storage storage = go.AddOrGet<Storage>();
 		storage.allowItemRemoval = false;
 		storage.showDescriptor = true;

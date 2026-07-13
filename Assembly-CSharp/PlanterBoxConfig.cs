@@ -1,4 +1,5 @@
 ﻿using System;
+using STRINGS;
 using TUNING;
 using UnityEngine;
 
@@ -12,17 +13,19 @@ public class PlanterBoxConfig : IBuildingConfig
 		string text2 = "planterbox_kanim";
 		int num3 = 10;
 		float num4 = 3f;
-		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER2;
+		float[] tier = global::TUNING.BUILDINGS.CONSTRUCTION_MASS_KG.TIER2;
 		string[] farmable = MATERIALS.FARMABLE;
 		float num5 = 800f;
 		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloor;
 		EffectorValues none = NOISE_POLLUTION.NONE;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, farmable, num5, buildLocationRule, BUILDINGS.DECOR.PENALTY.TIER1, none, 0.2f);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, farmable, num5, buildLocationRule, global::TUNING.BUILDINGS.DECOR.PENALTY.TIER1, none, 0.2f);
 		buildingDef.ForegroundLayer = Grid.SceneLayer.BuildingBack;
 		buildingDef.Overheatable = false;
 		buildingDef.Floodable = false;
 		buildingDef.AudioCategory = "Glass";
 		buildingDef.AudioSize = "large";
+		buildingDef.AddSearchTerms(SEARCH_TERMS.FOOD);
+		buildingDef.AddSearchTerms(SEARCH_TERMS.FARM);
 		return buildingDef;
 	}
 

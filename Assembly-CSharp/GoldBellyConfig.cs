@@ -4,7 +4,7 @@ using STRINGS;
 using UnityEngine;
 
 [EntityConfigOrder(1)]
-public class GoldBellyConfig : IEntityConfig
+public class GoldBellyConfig : IEntityConfig, IHasDlcRestrictions
 {
 	public static GameObject CreateGoldBelly(string id, string name, string desc, string anim_file, bool is_baby)
 	{
@@ -31,14 +31,19 @@ public class GoldBellyConfig : IEntityConfig
 		return gameObject2;
 	}
 
-	public string[] GetDlcIds()
+	public string[] GetRequiredDlcIds()
 	{
-		return DlcManager.AVAILABLE_DLC_2;
+		return DlcManager.DLC2;
+	}
+
+	public string[] GetForbiddenDlcIds()
+	{
+		return null;
 	}
 
 	public GameObject CreatePrefab()
 	{
-		GameObject gameObject = EntityTemplates.ExtendEntityToFertileCreature(GoldBellyConfig.CreateGoldBelly("GoldBelly", CREATURES.SPECIES.ICEBELLY.VARIANT_GOLD.NAME, CREATURES.SPECIES.ICEBELLY.VARIANT_GOLD.DESC, "ice_belly_kanim", false), "GoldBellyEgg", CREATURES.SPECIES.ICEBELLY.VARIANT_GOLD.EGG_NAME, CREATURES.SPECIES.ICEBELLY.VARIANT_GOLD.DESC, "egg_icebelly_kanim", 8f, "GoldBellyBaby", 120.00001f, 40f, BellyTuning.EGG_CHANCES_GOLD, this.GetDlcIds(), GoldBellyConfig.EGG_SORT_ORDER, true, false, true, 1f, false);
+		GameObject gameObject = EntityTemplates.ExtendEntityToFertileCreature(GoldBellyConfig.CreateGoldBelly("GoldBelly", CREATURES.SPECIES.ICEBELLY.VARIANT_GOLD.NAME, CREATURES.SPECIES.ICEBELLY.VARIANT_GOLD.DESC, "ice_belly_kanim", false), this, "GoldBellyEgg", CREATURES.SPECIES.ICEBELLY.VARIANT_GOLD.EGG_NAME, CREATURES.SPECIES.ICEBELLY.VARIANT_GOLD.DESC, "egg_icebelly_kanim", 8f, "GoldBellyBaby", 120.00001f, 40f, BellyTuning.EGG_CHANCES_GOLD, GoldBellyConfig.EGG_SORT_ORDER, true, false, 1f, false);
 		gameObject.AddOrGetDef<OvercrowdingMonitor.Def>();
 		gameObject.AddTag(GameTags.LargeCreature);
 		return gameObject;

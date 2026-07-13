@@ -102,7 +102,7 @@ public class MinionSelectScreen : CharacterSelectionController
 		{
 			this.OnProceedEvent();
 		}
-		if (SaveLoader.Instance.IsDLCActiveForCurrentSave("DLC3_ID") && Components.RoleStations.Count > 0)
+		if (Game.IsDlcActiveForCurrentSave("DLC3_ID") && Components.RoleStations.Count > 0)
 		{
 			BuildingFacade component = Components.RoleStations[0].GetComponent<BuildingFacade>();
 			bool flag = !component.IsOriginal;

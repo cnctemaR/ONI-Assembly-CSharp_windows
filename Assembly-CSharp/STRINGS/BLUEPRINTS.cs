@@ -638,65 +638,65 @@ namespace STRINGS
 
 		public class PERMIT_MONUMENT_BASE_A_FROSTY
 		{
-			public static LocString NAME = "Patty Pose";
-
-			public static LocString DESC = "Looks and smells just like Bammoth \"business.\"";
-		}
-
-		public class PERMIT_MONUMENT_BASE_B_FROSTY
-		{
 			public static LocString NAME = "Squash Stand";
 
 			public static LocString DESC = "The plume curls upward to enable cleaners to sweep the floor around it.";
 		}
 
-		public class PERMIT_MONUMENT_BASE_C_FROSTY
+		public class PERMIT_MONUMENT_BASE_B_FROSTY
 		{
 			public static LocString NAME = "Lumen Landing";
 
 			public static LocString DESC = "It's radiant, though it emits no actual light.";
 		}
 
-		public class PERMIT_MONUMENT_MID_A_FROSTY
+		public class PERMIT_MONUMENT_BASE_C_FROSTY
 		{
-			public static LocString NAME = "Recoiling";
+			public static LocString NAME = "Patty Pose";
 
-			public static LocString DESC = "It's trying to get away from something.";
+			public static LocString DESC = "Looks and smells just like Bammoth \"business.\"";
 		}
 
-		public class PERMIT_MONUMENT_MID_B_FROSTY
+		public class PERMIT_MONUMENT_MID_A_FROSTY
 		{
 			public static LocString NAME = "Berry Bounty Trunk";
 
 			public static LocString DESC = "Carved sherberries are just about as palatable as real ones.";
 		}
 
-		public class PERMIT_MONUMENT_MID_C_FROSTY
+		public class PERMIT_MONUMENT_MID_B_FROSTY
 		{
 			public static LocString NAME = "Seal Snuggles";
 
 			public static LocString DESC = "Never, <i>ever</i> run while holding spigot seals.";
 		}
 
-		public class PERMIT_MONUMENT_UPPER_A_FROSTY
+		public class PERMIT_MONUMENT_MID_C_FROSTY
 		{
-			public static LocString NAME = "Liam Noggin";
+			public static LocString NAME = "Recoiling";
 
-			public static LocString DESC = "A giant Resting Ewwww Face topper.";
+			public static LocString DESC = "It's trying to get away from something.";
 		}
 
-		public class PERMIT_MONUMENT_UPPER_B_FROSTY
+		public class PERMIT_MONUMENT_UPPER_A_FROSTY
 		{
 			public static LocString NAME = "Freyja Noggin";
 
 			public static LocString DESC = "A cooler-than-cool topper.";
 		}
 
-		public class PERMIT_MONUMENT_UPPER_C_FROSTY
+		public class PERMIT_MONUMENT_UPPER_B_FROSTY
 		{
 			public static LocString NAME = "Pei Noggin";
 
 			public static LocString DESC = "Everyone loves Pei Day!";
+		}
+
+		public class PERMIT_MONUMENT_UPPER_C_FROSTY
+		{
+			public static LocString NAME = "Liam Noggin";
+
+			public static LocString DESC = "A giant Resting Ewwww Face topper.";
 		}
 
 		public class PERMIT_ATMO_BELT_3TONE_PURPLE

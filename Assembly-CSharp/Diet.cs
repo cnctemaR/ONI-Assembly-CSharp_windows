@@ -162,8 +162,7 @@ public class Diet
 			List<Tag> list = new List<Tag>();
 			foreach (Tag tag in info.consumedTags)
 			{
-				GameObject prefab = Assets.GetPrefab(tag);
-				if (!SaveLoader.Instance.IsDlcListActiveForCurrentSave(prefab.GetComponent<KPrefabID>().requiredDlcIds))
+				if (!Game.IsCorrectDlcActiveForCurrentSave(Assets.GetPrefab(tag).GetComponent<KPrefabID>()))
 				{
 					list.Add(tag);
 				}
@@ -179,7 +178,7 @@ public class Diet
 				}
 			}
 			GameObject gameObject = ((info.producedElement != Tag.Invalid) ? Assets.GetPrefab(info.producedElement) : null);
-			if (gameObject != null && !SaveLoader.Instance.IsDlcListActiveForCurrentSave(gameObject.GetComponent<KPrefabID>().requiredDlcIds))
+			if (gameObject != null && !Game.IsCorrectDlcActiveForCurrentSave(gameObject.GetComponent<KPrefabID>()))
 			{
 				info.consumedTags.Clear();
 			}

@@ -1825,7 +1825,7 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 					}));
 				}
 				actual_amount.Set(num3, smi, false);
-				int num4 = pickupable.Reserve("ToggleReserve", gameObject, num3);
+				int num4 = pickupable.Reserve("ToggleReserve", gameObject.GetComponent<KPrefabID>().InstanceID, num3);
 				smi.dataTable[data_idx] = num4;
 			});
 			this.Exit(string.Concat(new string[] { "Unreserve(", pickup_target.name, ", ", requested_amount.name, ")" }), delegate(StateMachineInstanceType smi)

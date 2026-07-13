@@ -6,11 +6,6 @@ using UnityEngine;
 
 public class PropSurfaceSatellite2Config : IEntityConfig
 {
-	public string[] GetDlcIds()
-	{
-		return DlcManager.AVAILABLE_ALL_VERSIONS;
-	}
-
 	public GameObject CreatePrefab()
 	{
 		string id = PropSurfaceSatellite2Config.ID;

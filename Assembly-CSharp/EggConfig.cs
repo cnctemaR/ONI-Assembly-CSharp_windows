@@ -7,13 +7,22 @@ using UnityEngine;
 
 public class EggConfig
 {
-	[Obsolete("Mod compatibility: Use CreateEgg with dlcIds")]
+	[Obsolete("Mod compatibility: Use CreateEgg with requiredDlcIds and forbiddenDlcIds")]
 	public static GameObject CreateEgg(string id, string name, string desc, Tag creature_id, string anim, float mass, int egg_sort_order, float base_incubation_rate)
 	{
-		return EggConfig.CreateEgg(id, name, desc, creature_id, anim, mass, egg_sort_order, base_incubation_rate, DlcManager.AVAILABLE_ALL_VERSIONS);
+		return EggConfig.CreateEgg(id, name, desc, creature_id, anim, mass, egg_sort_order, base_incubation_rate, null, null);
 	}
 
+	[Obsolete("Mod compatibility: Use CreateEgg with requiredDlcIds and forbiddenDlcIds")]
 	public static GameObject CreateEgg(string id, string name, string desc, Tag creature_id, string anim, float mass, int egg_sort_order, float base_incubation_rate, string[] dlcIds)
+	{
+		string[] array;
+		string[] array2;
+		DlcManager.ConvertAvailableToRequireAndForbidden(dlcIds, out array, out array2);
+		return EggConfig.CreateEgg(id, name, desc, creature_id, anim, mass, egg_sort_order, base_incubation_rate, array, array2);
+	}
+
+	public static GameObject CreateEgg(string id, string name, string desc, Tag creature_id, string anim, float mass, int egg_sort_order, float base_incubation_rate, string[] requiredDlcIds, string[] forbiddenDlcIds)
 	{
 		GameObject gameObject = EntityTemplates.CreateLooseEntity(id, name, desc, mass, true, Assets.GetAnim(anim), "idle", Grid.SceneLayer.Ore, EntityTemplates.CollisionShape.RECTANGLE, 0.8f, 0.8f, true, 0, SimHashes.Creature, null);
 		gameObject.AddOrGet<KBoxCollider2D>().offset = new Vector2f(0f, 0.36f);
@@ -23,7 +32,8 @@ public class EggConfig
 		kprefabID.AddTag(GameTags.Egg, false);
 		kprefabID.AddTag(GameTags.IncubatableEgg, false);
 		kprefabID.AddTag(GameTags.PedestalDisplayable, false);
-		kprefabID.requiredDlcIds = dlcIds;
+		kprefabID.requiredDlcIds = requiredDlcIds;
+		kprefabID.forbiddenDlcIds = forbiddenDlcIds;
 		IncubationMonitor.Def def = gameObject.AddOrGetDef<IncubationMonitor.Def>();
 		def.spawnedCreature = creature_id;
 		def.baseIncubationRate = base_incubation_rate;
@@ -42,7 +52,7 @@ public class EggConfig
 		};
 		string text2 = ComplexRecipeManager.MakeObsoleteRecipeID(id, "RawEgg");
 		string text3 = ComplexRecipeManager.MakeRecipeID("EggCracker", array, array2);
-		ComplexRecipe complexRecipe = new ComplexRecipe(text3, array, array2, dlcIds);
+		ComplexRecipe complexRecipe = new ComplexRecipe(text3, array, array2, requiredDlcIds, forbiddenDlcIds);
 		complexRecipe.description = string.Format(global::STRINGS.BUILDINGS.PREFABS.EGGCRACKER.RECIPE_DESCRIPTION, name, text);
 		complexRecipe.fabricators = new List<Tag> { "EggCracker" };
 		complexRecipe.time = 5f;

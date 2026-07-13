@@ -115,6 +115,7 @@ public class Game : KMonoBehaviour
 
 	protected override void OnPrefabInit()
 	{
+		global::UnityEngine.Debug.unityLogger.logHandler = new LogCatcher(global::UnityEngine.Debug.unityLogger.logHandler);
 		DebugUtil.LogArgs(new object[]
 		{
 			Time.realtimeSinceStartup,
@@ -179,7 +180,7 @@ public class Game : KMonoBehaviour
 		Singleton<CellChangeMonitor>.Instance.SetGridSize(Grid.WidthInCells, Grid.HeightInCells);
 		this.unlocks = base.GetComponent<Unlocks>();
 		this.changelistsPlayedOn = new List<uint>();
-		this.changelistsPlayedOn.Add(652372U);
+		this.changelistsPlayedOn.Add(659901U);
 		this.dateGenerated = global::System.DateTime.UtcNow.ToString("U", CultureInfo.InvariantCulture);
 	}
 
@@ -410,6 +411,7 @@ public class Game : KMonoBehaviour
 				Grid.exposedToSunlight = (byte*)(void*)ptr2->propertyTextureExposedToSunlight;
 				PropertyTextures.externalFlowTex = ptr2->propertyTextureFlow;
 				PropertyTextures.externalLiquidTex = ptr2->propertyTextureLiquid;
+				PropertyTextures.externalLiquidDataTex = ptr2->propertyTextureLiquidData;
 				PropertyTextures.externalExposedToSunlight = ptr2->propertyTextureExposedToSunlight;
 				List<Element> elements = ElementLoader.elements;
 				this.simData.emittedMassEntries = ptr2->emittedMassEntries;
@@ -933,7 +935,7 @@ public class Game : KMonoBehaviour
 		{
 			return;
 		}
-		uint num = 652372U;
+		uint num = 659901U;
 		string text = global::System.DateTime.Now.ToShortDateString();
 		string text2 = global::System.DateTime.Now.ToShortTimeString();
 		string fileName = Path.GetFileName(GenericGameSettings.instance.performanceCapture.saveGame);
@@ -1157,9 +1159,9 @@ public class Game : KMonoBehaviour
 		gameSaveData.savedInfo = this.savedInfo;
 		global::Debug.Assert(gameSaveData.worldDetail != null, "World detail null");
 		gameSaveData.dateGenerated = this.dateGenerated;
-		if (!this.changelistsPlayedOn.Contains(652372U))
+		if (!this.changelistsPlayedOn.Contains(659901U))
 		{
-			this.changelistsPlayedOn.Add(652372U);
+			this.changelistsPlayedOn.Add(659901U);
 		}
 		gameSaveData.changelistsPlayedOn = this.changelistsPlayedOn;
 		if (this.OnSave != null)
@@ -1611,6 +1613,58 @@ public class Game : KMonoBehaviour
 		KMonoBehaviour.lastGameObject = null;
 		KMonoBehaviour.lastObj = null;
 		(KComponentSpawn.instance.comps as GameComps).Clear();
+	}
+
+	public static bool IsDlcActiveForCurrentSave(string dlcId)
+	{
+		if (Game.Instance == null)
+		{
+			DebugUtil.DevLogError("Game.IsDlcActiveForCurrentSave can only be called when the game is running");
+			return false;
+		}
+		return dlcId == "" || dlcId == null || SaveLoader.Instance.GameInfo.dlcIds.Contains(dlcId);
+	}
+
+	public static bool IsCorrectDlcActiveForCurrentSave(IHasDlcRestrictions restrictions)
+	{
+		if (Game.Instance == null)
+		{
+			DebugUtil.DevLogError("Game.IsCorrectDlcActiveForCurrentSave can only be called when the game is running");
+			return false;
+		}
+		return Game.IsAllDlcActiveForCurrentSave(restrictions.GetRequiredDlcIds()) && !Game.IsAnyDlcActiveForCurrentSave(restrictions.GetForbiddenDlcIds());
+	}
+
+	private static bool IsAllDlcActiveForCurrentSave(string[] dlcIds)
+	{
+		if (dlcIds == null || dlcIds.Length == 0)
+		{
+			return true;
+		}
+		foreach (string text in dlcIds)
+		{
+			if (!(text == "") && !Game.IsDlcActiveForCurrentSave(text))
+			{
+				return false;
+			}
+		}
+		return true;
+	}
+
+	private static bool IsAnyDlcActiveForCurrentSave(string[] dlcIds)
+	{
+		if (dlcIds == null || dlcIds.Length == 0)
+		{
+			return false;
+		}
+		foreach (string text in dlcIds)
+		{
+			if (!(text == "") && Game.IsDlcActiveForCurrentSave(text))
+			{
+				return true;
+			}
+		}
+		return false;
 	}
 
 	private static readonly Thread MainThread = Thread.CurrentThread;

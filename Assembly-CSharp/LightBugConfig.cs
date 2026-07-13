@@ -30,15 +30,10 @@ public class LightBugConfig : IEntityConfig
 		return gameObject2;
 	}
 
-	public string[] GetDlcIds()
-	{
-		return DlcManager.AVAILABLE_ALL_VERSIONS;
-	}
-
 	public GameObject CreatePrefab()
 	{
 		GameObject gameObject = LightBugConfig.CreateLightBug("LightBug", global::STRINGS.CREATURES.SPECIES.LIGHTBUG.NAME, global::STRINGS.CREATURES.SPECIES.LIGHTBUG.DESC, "lightbug_kanim", false);
-		EntityTemplates.ExtendEntityToFertileCreature(gameObject, "LightBugEgg", global::STRINGS.CREATURES.SPECIES.LIGHTBUG.EGG_NAME, global::STRINGS.CREATURES.SPECIES.LIGHTBUG.DESC, "egg_lightbug_kanim", LightBugTuning.EGG_MASS, "LightBugBaby", 15.000001f, 5f, LightBugTuning.EGG_CHANCES_BASE, this.GetDlcIds(), LightBugConfig.EGG_SORT_ORDER, true, false, true, 1f, false);
+		EntityTemplates.ExtendEntityToFertileCreature(gameObject, this as IHasDlcRestrictions, "LightBugEgg", global::STRINGS.CREATURES.SPECIES.LIGHTBUG.EGG_NAME, global::STRINGS.CREATURES.SPECIES.LIGHTBUG.DESC, "egg_lightbug_kanim", LightBugTuning.EGG_MASS, "LightBugBaby", 15.000001f, 5f, LightBugTuning.EGG_CHANCES_BASE, LightBugConfig.EGG_SORT_ORDER, true, false, 1f, false);
 		gameObject.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.LightSource, false);
 		return gameObject;
 	}

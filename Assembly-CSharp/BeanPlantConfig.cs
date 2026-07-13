@@ -6,11 +6,6 @@ using UnityEngine;
 
 public class BeanPlantConfig : IEntityConfig
 {
-	public string[] GetDlcIds()
-	{
-		return DlcManager.AVAILABLE_ALL_VERSIONS;
-	}
-
 	public GameObject CreatePrefab()
 	{
 		string text = "BeanPlant";
@@ -45,6 +40,7 @@ public class BeanPlantConfig : IEntityConfig
 		gameObject.AddOrGet<StandardCropPlant>();
 		gameObject.AddOrGet<DirectlyEdiblePlant_Growth>();
 		GameObject gameObject3 = gameObject;
+		IHasDlcRestrictions hasDlcRestrictions = this as IHasDlcRestrictions;
 		SeedProducer.ProductionType productionType = SeedProducer.ProductionType.Crop;
 		string text5 = "BeanPlantSeed";
 		string text6 = global::STRINGS.CREATURES.SPECIES.SEEDS.BEAN_PLANT.NAME;
@@ -56,7 +52,7 @@ public class BeanPlantConfig : IEntityConfig
 		list.Add(GameTags.CropSeed);
 		SingleEntityReceptacle.ReceptacleDirection receptacleDirection = SingleEntityReceptacle.ReceptacleDirection.Top;
 		text4 = global::STRINGS.CREATURES.SPECIES.BEAN_PLANT.DOMESTICATEDDESC;
-		GameObject gameObject4 = EntityTemplates.CreateAndRegisterSeedForPlant(gameObject3, productionType, text5, text6, text7, anim, text8, num6, list, receptacleDirection, default(Tag), 3, text4, EntityTemplates.CollisionShape.RECTANGLE, 0.6f, 0.3f, null, "", true, null);
+		GameObject gameObject4 = EntityTemplates.CreateAndRegisterSeedForPlant(gameObject3, hasDlcRestrictions, productionType, text5, text6, text7, anim, text8, num6, list, receptacleDirection, default(Tag), 3, text4, EntityTemplates.CollisionShape.RECTANGLE, 0.6f, 0.3f, null, "", true);
 		EntityTemplates.ExtendEntityToFood(gameObject4, FOOD.FOOD_TYPES.BEAN);
 		EntityTemplates.CreateAndRegisterPreviewForPlant(gameObject4, "BeanPlant_preview", Assets.GetAnim("beanplant_kanim"), "place", 1, 2);
 		return gameObject;

@@ -171,7 +171,7 @@ public class FetchChore : Chore<FetchChore.StatesInstance>
 		this.AddPrecondition(ChorePreconditions.instance.IsScheduledTime, Db.Get().ScheduleBlockTypes.Work);
 		this.AddPrecondition(ChorePreconditions.instance.CanMoveTo, destination);
 		this.AddPrecondition(FetchChore.IsFetchTargetAvailable, null);
-		this.AddPrecondition(FetchChore.CanFetchDroneComplete, destination);
+		this.AddPrecondition(FetchChore.CanFetchDroneComplete, destination.gameObject);
 		Deconstructable component = this.target.GetComponent<Deconstructable>();
 		if (component != null)
 		{
@@ -250,10 +250,10 @@ public class FetchChore : Chore<FetchChore.StatesInstance>
 
 	public static int ComputeHashCodeForTags(IEnumerable<Tag> tags)
 	{
-		int num = 123137;
-		foreach (Tag tag in new SortedSet<Tag>(tags))
+		int num = 0;
+		foreach (Tag tag in tags)
 		{
-			num = ((num << 5) + num) ^ tag.GetHash();
+			num ^= tag.GetHash();
 		}
 		return num;
 	}
@@ -336,13 +336,19 @@ public class FetchChore : Chore<FetchChore.StatesInstance>
 			{
 				return true;
 			}
+			FetchChore fetchChore2 = (FetchChore)context.chore;
 			Pickupable pickupable2 = (Pickupable)context.data;
+			bool flag2;
 			if (pickupable2 == null)
 			{
-				return false;
+				pickupable2 = fetchChore2.FindFetchTarget(context.consumerState);
+				flag2 = pickupable2 != null;
 			}
-			KMonoBehaviour kmonoBehaviour = (KMonoBehaviour)data;
-			return !(kmonoBehaviour == null) && !(kmonoBehaviour.gameObject == context.consumerState.gameObject) && ((pickupable2.targetWorkable == null || pickupable2.targetWorkable as Pickupable != null) && context.consumerState.consumer.navigator.CanReach(pickupable2.cachedCell, context.consumerState.worker.GetFetchCellOffsets()));
+			else
+			{
+				flag2 = FetchManager.IsFetchablePickup(pickupable2, fetchChore2, context.consumerState.storage);
+			}
+			return flag2 && !((GameObject)data == context.consumerState.gameObject) && ((pickupable2.targetWorkable == null || pickupable2.targetWorkable as Pickupable != null) && context.consumerState.consumer.navigator.CanReach(pickupable2.cachedCell, context.consumerState.worker.GetFetchCellOffsets()));
 		}
 	};
 

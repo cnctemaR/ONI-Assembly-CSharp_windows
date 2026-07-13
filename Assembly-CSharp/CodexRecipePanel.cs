@@ -38,7 +38,7 @@ public class CodexRecipePanel : CodexWidget<CodexRecipePanel>
 			this.ConfigureRecipe();
 			return;
 		}
-		if (this.complexRecipe != null && SaveLoader.Instance.IsDlcListActiveForCurrentSave(this.complexRecipe.GetDlcIds()))
+		if (this.complexRecipe != null && Game.IsCorrectDlcActiveForCurrentSave(this.complexRecipe))
 		{
 			this.ConfigureComplexRecipe();
 		}

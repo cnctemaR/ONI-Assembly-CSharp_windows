@@ -1,4 +1,5 @@
 ﻿using System;
+using STRINGS;
 using TUNING;
 using UnityEngine;
 
@@ -12,7 +13,7 @@ public class SmallSculptureConfig : IBuildingConfig
 		string text2 = "sculpture_1x2_kanim";
 		int num3 = 10;
 		float num4 = 60f;
-		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER3;
+		float[] tier = global::TUNING.BUILDINGS.CONSTRUCTION_MASS_KG.TIER3;
 		string[] raw_MINERALS = MATERIALS.RAW_MINERALS;
 		float num5 = 1600f;
 		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloor;
@@ -29,6 +30,10 @@ public class SmallSculptureConfig : IBuildingConfig
 		buildingDef.ViewMode = OverlayModes.Decor.ID;
 		buildingDef.DefaultAnimState = "slab";
 		buildingDef.PermittedRotations = PermittedRotations.FlipH;
+		buildingDef.RequiredSkillPerkID = Db.Get().SkillPerks.CanArt.Id;
+		buildingDef.AddSearchTerms(SEARCH_TERMS.STATUE);
+		buildingDef.AddSearchTerms(SEARCH_TERMS.ARTWORK);
+		buildingDef.AddSearchTerms(SEARCH_TERMS.MORALE);
 		return buildingDef;
 	}
 

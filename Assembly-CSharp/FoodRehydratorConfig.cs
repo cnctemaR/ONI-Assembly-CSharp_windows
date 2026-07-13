@@ -42,6 +42,7 @@ public class FoodRehydratorConfig : IBuildingConfig
 		buildingDef.EnergyConsumptionWhenActive = 60f;
 		buildingDef.SelfHeatKilowattsWhenActive = 0.5f;
 		buildingDef.ViewMode = OverlayModes.Power.ID;
+		buildingDef.AddSearchTerms(SEARCH_TERMS.FOOD);
 		return buildingDef;
 	}
 

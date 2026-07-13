@@ -155,7 +155,7 @@ public class SupermaterialRefineryConfig : IBuildingConfig
 			{
 				new ComplexRecipe.RecipeElement("SelfChargingElectrobank", 1f, ComplexRecipe.RecipeElement.TemperatureOperation.AverageTemperature, false)
 			};
-			ComplexRecipe complexRecipe7 = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("SupermaterialRefinery", array13, array14), array13, array14, new string[] { "DLC3_ID" });
+			ComplexRecipe complexRecipe7 = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("SupermaterialRefinery", array13, array14), array13, array14, DlcManager.EXPANSION1.Append<string>(DlcManager.DLC3));
 			complexRecipe7.time = 80f;
 			complexRecipe7.description = global::STRINGS.BUILDINGS.PREFABS.SUPERMATERIALREFINERY.SELF_CHARGING_POWERBANK_RECIPE_DESCRIPTION;
 			complexRecipe7.nameDisplay = ComplexRecipe.RecipeNameDisplay.Result;

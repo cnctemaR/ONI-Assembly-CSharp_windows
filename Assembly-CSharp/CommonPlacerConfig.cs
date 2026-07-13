@@ -4,11 +4,6 @@ using UnityEngine.Rendering;
 
 public class CommonPlacerConfig
 {
-	public string[] GetDlcIds()
-	{
-		return DlcManager.AVAILABLE_ALL_VERSIONS;
-	}
-
 	public GameObject CreatePrefab(string id, string name, Material default_material)
 	{
 		GameObject gameObject = EntityTemplates.CreateEntity(id, name, true);

@@ -36,24 +36,9 @@ public class DreckoPlasticConfig : IEntityConfig
 		return gameObject;
 	}
 
-	public string[] GetDlcIds()
-	{
-		return DlcManager.AVAILABLE_ALL_VERSIONS;
-	}
-
 	public virtual GameObject CreatePrefab()
 	{
-		GameObject gameObject = DreckoPlasticConfig.CreateDrecko("DreckoPlastic", CREATURES.SPECIES.DRECKO.VARIANT_PLASTIC.NAME, CREATURES.SPECIES.DRECKO.VARIANT_PLASTIC.DESC, "drecko_kanim", false);
-		string text = "DreckoPlasticEgg";
-		string text2 = CREATURES.SPECIES.DRECKO.VARIANT_PLASTIC.EGG_NAME;
-		string text3 = CREATURES.SPECIES.DRECKO.VARIANT_PLASTIC.DESC;
-		string text4 = "egg_drecko_kanim";
-		float egg_MASS = DreckoTuning.EGG_MASS;
-		string text5 = "DreckoPlasticBaby";
-		float num = 90f;
-		float num2 = 30f;
-		int egg_SORT_ORDER = DreckoPlasticConfig.EGG_SORT_ORDER;
-		return EntityTemplates.ExtendEntityToFertileCreature(gameObject, text, text2, text3, text4, egg_MASS, text5, num, num2, DreckoTuning.EGG_CHANCES_PLASTIC, this.GetDlcIds(), egg_SORT_ORDER, true, false, true, 1f, false);
+		return EntityTemplates.ExtendEntityToFertileCreature(DreckoPlasticConfig.CreateDrecko("DreckoPlastic", CREATURES.SPECIES.DRECKO.VARIANT_PLASTIC.NAME, CREATURES.SPECIES.DRECKO.VARIANT_PLASTIC.DESC, "drecko_kanim", false), this as IHasDlcRestrictions, "DreckoPlasticEgg", CREATURES.SPECIES.DRECKO.VARIANT_PLASTIC.EGG_NAME, CREATURES.SPECIES.DRECKO.VARIANT_PLASTIC.DESC, "egg_drecko_kanim", DreckoTuning.EGG_MASS, "DreckoPlasticBaby", 90f, 30f, DreckoTuning.EGG_CHANCES_PLASTIC, DreckoPlasticConfig.EGG_SORT_ORDER, true, false, 1f, false);
 	}
 
 	public void OnPrefabInit(GameObject prefab)

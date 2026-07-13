@@ -164,7 +164,12 @@ public class ChorePreconditions
 				return true;
 			}
 			PeeChoreMonitor.Instance smi = context.consumerState.gameObject.GetSMI<PeeChoreMonitor.Instance>();
-			return smi != null && smi.IsInsideState(smi.sm.critical);
+			if (smi != null)
+			{
+				return smi.IsInsideState(smi.sm.critical);
+			}
+			GunkMonitor.Instance smi2 = context.consumerState.gameObject.GetSMI<GunkMonitor.Instance>();
+			return smi2 != null && GunkMonitor.IsGunkLevelsOverCriticalUrgeThreshold(smi2);
 		};
 		precondition.canExecuteOnAnyThread = false;
 		this.IsPreferredAssignableOrUrgentBladder = precondition;
@@ -264,7 +269,7 @@ public class ChorePreconditions
 			{
 				return true;
 			}
-			if (!context.consumerState.selectable.IsSelected)
+			if (!context.consumerState.selectable.IsSelected && !context.skipMoreSatisfyingEarlyPrecondition)
 			{
 				return true;
 			}
@@ -440,7 +445,7 @@ public class ChorePreconditions
 		precondition.fn = delegate(ref Chore.Precondition.Context context, object data)
 		{
 			Pickupable pickupable = (Pickupable)data;
-			return !(pickupable == null) && !(context.consumerState.consumer == null) && !pickupable.KPrefabID.HasTag(GameTags.StoredPrivate) && pickupable.CouldBePickedUpByMinion(context.consumerState.gameObject) && context.consumerState.consumer.CanReach(pickupable);
+			return !(pickupable == null) && !(context.consumerState.consumer == null) && !pickupable.KPrefabID.HasTag(GameTags.StoredPrivate) && pickupable.CouldBePickedUpByMinion(context.consumerState.prefabid.InstanceID) && context.consumerState.consumer.CanReach(pickupable);
 		};
 		precondition.canExecuteOnAnyThread = false;
 		this.CanPickup = precondition;
@@ -453,8 +458,8 @@ public class ChorePreconditions
 			{
 				return false;
 			}
-			StaminaMonitor.Instance smi2 = context.consumerState.consumer.GetSMI<StaminaMonitor.Instance>();
-			return smi2 == null || !smi2.IsInsideState(smi2.sm.sleepy.sleeping);
+			StaminaMonitor.Instance smi3 = context.consumerState.consumer.GetSMI<StaminaMonitor.Instance>();
+			return smi3 == null || !smi3.IsInsideState(smi3.sm.sleepy.sleeping);
 		};
 		precondition.canExecuteOnAnyThread = false;
 		this.IsAwake = precondition;
@@ -643,13 +648,13 @@ public class ChorePreconditions
 		precondition.description = DUPLICANTS.CHORES.PRECONDITIONS.BLADDER_FULL;
 		precondition.fn = delegate(ref Chore.Precondition.Context context, object data)
 		{
-			BladderMonitor.Instance smi3 = context.consumerState.gameObject.GetSMI<BladderMonitor.Instance>();
-			if (smi3 != null && smi3.NeedsToPee())
+			BladderMonitor.Instance smi4 = context.consumerState.gameObject.GetSMI<BladderMonitor.Instance>();
+			if (smi4 != null && smi4.NeedsToPee())
 			{
 				return true;
 			}
-			GunkMonitor.Instance smi4 = context.consumerState.gameObject.GetSMI<GunkMonitor.Instance>();
-			return smi4 != null && GunkMonitor.IsGunkLevelsOverCriticalUrgeThreshold(smi4);
+			GunkMonitor.Instance smi5 = context.consumerState.gameObject.GetSMI<GunkMonitor.Instance>();
+			return smi5 != null && GunkMonitor.IsGunkLevelsOverCriticalUrgeThreshold(smi5);
 		};
 		precondition.canExecuteOnAnyThread = false;
 		this.IsBladderFull = precondition;
@@ -658,13 +663,13 @@ public class ChorePreconditions
 		precondition.description = DUPLICANTS.CHORES.PRECONDITIONS.BLADDER_NOT_FULL;
 		precondition.fn = delegate(ref Chore.Precondition.Context context, object data)
 		{
-			BladderMonitor.Instance smi5 = context.consumerState.gameObject.GetSMI<BladderMonitor.Instance>();
-			if (smi5 != null && smi5.NeedsToPee())
+			BladderMonitor.Instance smi6 = context.consumerState.gameObject.GetSMI<BladderMonitor.Instance>();
+			if (smi6 != null && smi6.NeedsToPee())
 			{
 				return false;
 			}
-			GunkMonitor.Instance smi6 = context.consumerState.gameObject.GetSMI<GunkMonitor.Instance>();
-			return smi6 == null || !GunkMonitor.IsGunkLevelsOverCriticalUrgeThreshold(smi6);
+			GunkMonitor.Instance smi7 = context.consumerState.gameObject.GetSMI<GunkMonitor.Instance>();
+			return smi7 == null || !GunkMonitor.IsGunkLevelsOverCriticalUrgeThreshold(smi7);
 		};
 		precondition.canExecuteOnAnyThread = false;
 		this.IsBladderNotFull = precondition;

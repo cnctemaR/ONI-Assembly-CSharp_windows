@@ -20,15 +20,10 @@ public class CrabWoodConfig : IEntityConfig
 		return BaseCrabConfig.SetupDiet(gameObject, list, CrabWoodConfig.CALORIES_PER_KG_OF_ORE, CrabWoodConfig.MIN_POOP_SIZE_IN_KG);
 	}
 
-	public string[] GetDlcIds()
-	{
-		return DlcManager.AVAILABLE_ALL_VERSIONS;
-	}
-
 	public GameObject CreatePrefab()
 	{
 		GameObject gameObject = CrabWoodConfig.CreateCrabWood("CrabWood", global::STRINGS.CREATURES.SPECIES.CRAB.VARIANT_WOOD.NAME, global::STRINGS.CREATURES.SPECIES.CRAB.VARIANT_WOOD.DESC, "pincher_kanim", false, "CrabWoodShell");
-		gameObject = EntityTemplates.ExtendEntityToFertileCreature(gameObject, "CrabWoodEgg", global::STRINGS.CREATURES.SPECIES.CRAB.VARIANT_WOOD.EGG_NAME, global::STRINGS.CREATURES.SPECIES.CRAB.VARIANT_WOOD.DESC, "egg_pincher_kanim", CrabTuning.EGG_MASS, "CrabWoodBaby", 60.000004f, 20f, CrabTuning.EGG_CHANCES_WOOD, this.GetDlcIds(), CrabWoodConfig.EGG_SORT_ORDER, true, false, true, 1f, false);
+		gameObject = EntityTemplates.ExtendEntityToFertileCreature(gameObject, this as IHasDlcRestrictions, "CrabWoodEgg", global::STRINGS.CREATURES.SPECIES.CRAB.VARIANT_WOOD.EGG_NAME, global::STRINGS.CREATURES.SPECIES.CRAB.VARIANT_WOOD.DESC, "egg_pincher_kanim", CrabTuning.EGG_MASS, "CrabWoodBaby", 60.000004f, 20f, CrabTuning.EGG_CHANCES_WOOD, CrabWoodConfig.EGG_SORT_ORDER, true, false, 1f, false);
 		EggProtectionMonitor.Def def = gameObject.AddOrGetDef<EggProtectionMonitor.Def>();
 		def.allyTags = new Tag[] { GameTags.Creatures.CrabFriend };
 		def.animPrefix = CrabWoodConfig.animPrefix;

@@ -3,7 +3,7 @@ using Database;
 
 public class Blueprints_DlcPack2 : BlueprintProvider
 {
-	public override string[] GetDlcIds()
+	public override string[] GetRequiredDlcIds()
 	{
 		return DlcManager.DLC2;
 	}
@@ -102,5 +102,14 @@ public class Blueprints_DlcPack2 : BlueprintProvider
 		base.AddOutfit(BlueprintProvider.OutfitType.Clothing, "outfit_top_hockey_10", new string[] { "permit_gloves_hockey_10", "permit_top_jersey_10" });
 		base.AddOutfit(BlueprintProvider.OutfitType.Clothing, "outfit_top_hockey_11", new string[] { "permit_gloves_hockey_11", "permit_top_jersey_11" });
 		base.AddOutfit(BlueprintProvider.OutfitType.Clothing, "outfit_top_hockey_12", new string[] { "permit_gloves_hockey_12", "permit_top_jersey_12" });
+		base.AddMonumentPart(BlueprintProvider.MonumentPart.Bottom, PermitRarity.Universal, "permit_monument_base_a_frosty", "monument_base_a_frosty_kanim");
+		base.AddMonumentPart(BlueprintProvider.MonumentPart.Bottom, PermitRarity.Universal, "permit_monument_base_b_frosty", "monument_base_b_frosty_kanim");
+		base.AddMonumentPart(BlueprintProvider.MonumentPart.Bottom, PermitRarity.Universal, "permit_monument_base_c_frosty", "monument_base_c_frosty_kanim");
+		base.AddMonumentPart(BlueprintProvider.MonumentPart.Middle, PermitRarity.Universal, "permit_monument_mid_a_frosty", "monument_mid_a_frosty_kanim");
+		base.AddMonumentPart(BlueprintProvider.MonumentPart.Middle, PermitRarity.Universal, "permit_monument_mid_b_frosty", "monument_mid_b_frosty_kanim");
+		base.AddMonumentPart(BlueprintProvider.MonumentPart.Middle, PermitRarity.Universal, "permit_monument_mid_c_frosty", "monument_mid_c_frosty_kanim");
+		base.AddMonumentPart(BlueprintProvider.MonumentPart.Top, PermitRarity.Universal, "permit_monument_upper_a_frosty", "monument_upper_a_frosty_kanim");
+		base.AddMonumentPart(BlueprintProvider.MonumentPart.Top, PermitRarity.Universal, "permit_monument_upper_b_frosty", "monument_upper_b_frosty_kanim");
+		base.AddMonumentPart(BlueprintProvider.MonumentPart.Top, PermitRarity.Universal, "permit_monument_upper_c_frosty", "monument_upper_c_frosty_kanim");
 	}
 }

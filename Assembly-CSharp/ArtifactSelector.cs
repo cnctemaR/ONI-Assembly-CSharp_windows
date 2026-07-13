@@ -90,7 +90,7 @@ public class ArtifactSelector : KMonoBehaviour
 		List<string> list = new List<string>();
 		foreach (string text in ArtifactConfig.artifactItems[artifactType])
 		{
-			if (!this.placedArtifacts[artifactType].Contains(text))
+			if (!this.placedArtifacts[artifactType].Contains(text) && Game.IsCorrectDlcActiveForCurrentSave(Assets.GetPrefab(text.ToTag()).GetComponent<KPrefabID>()))
 			{
 				list.Add(text);
 			}
@@ -100,7 +100,7 @@ public class ArtifactSelector : KMonoBehaviour
 		{
 			foreach (string text3 in ArtifactConfig.artifactItems[ArtifactType.Any])
 			{
-				if (!this.placedArtifacts[ArtifactType.Any].Contains(text3))
+				if (!this.placedArtifacts[ArtifactType.Any].Contains(text3) && Game.IsCorrectDlcActiveForCurrentSave(Assets.GetPrefab(text3.ToTag()).GetComponent<KPrefabID>()))
 				{
 					list.Add(text3);
 					artifactType = ArtifactType.Any;

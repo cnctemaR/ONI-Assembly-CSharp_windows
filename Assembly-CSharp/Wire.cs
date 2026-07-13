@@ -137,14 +137,8 @@ public class Wire : KMonoBehaviour, IDisconnectable, IFirstFrameCallback, IWatta
 				float maxWattageAsFloat = Wire.GetMaxWattageAsFloat(wire.MaxWattageRating);
 				float wattsNeededWhenActive = circuitManager.GetWattsNeededWhenActive(circuitID);
 				string wireLoadColor = GameUtil.GetWireLoadColor(wattsUsedByCircuit, maxWattageAsFloat, wattsNeededWhenActive);
-				str = str.Replace("{CurrentLoadAndColor}", (wireLoadColor == Color.white.ToHexString()) ? GameUtil.GetFormattedWattage(wattsUsedByCircuit, wattageFormatterUnit, true) : string.Concat(new string[]
-				{
-					"<color=#",
-					wireLoadColor,
-					">",
-					GameUtil.GetFormattedWattage(wattsUsedByCircuit, wattageFormatterUnit, true),
-					"</color>"
-				}));
+				string text = ((wattsUsedByCircuit < 0f) ? "?" : GameUtil.GetFormattedWattage(wattsUsedByCircuit, wattageFormatterUnit, true));
+				str = str.Replace("{CurrentLoadAndColor}", (wireLoadColor == Color.white.ToHexString()) ? text : string.Concat(new string[] { "<color=#", wireLoadColor, ">", text, "</color>" }));
 				str = str.Replace("{MaxLoad}", GameUtil.GetFormattedWattage(maxWattageAsFloat, wattageFormatterUnit, true));
 				str = str.Replace("{WireType}", this.GetProperName());
 				return str;

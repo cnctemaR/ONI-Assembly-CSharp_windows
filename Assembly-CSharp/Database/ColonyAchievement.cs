@@ -5,9 +5,19 @@ using ProcGen;
 
 namespace Database
 {
-	public class ColonyAchievement : Resource
+	public class ColonyAchievement : Resource, IHasDlcRestrictions
 	{
 		public EventReference victoryNISSnapshot { get; private set; }
+
+		public string[] GetRequiredDlcIds()
+		{
+			return this.requiredDlcIds;
+		}
+
+		public string[] GetForbiddenDlcIds()
+		{
+			return this.forbiddenDlcIds;
+		}
 
 		public ColonyAchievement()
 		{
@@ -27,7 +37,7 @@ namespace Database
 			this.Disabled = true;
 		}
 
-		public ColonyAchievement(string Id, string platformAchievementId, string Name, string description, bool isVictoryCondition, List<ColonyAchievementRequirement> requirementChecklist, string messageTitle = "", string messageBody = "", string videoDataName = "", string victoryLoopVideo = "", Action<KMonoBehaviour> VictorySequence = null, EventReference victorySnapshot = default(EventReference), string icon = "", string[] dlcIds = null, string dlcIdFrom = null, string clusterTag = null)
+		public ColonyAchievement(string Id, string platformAchievementId, string Name, string description, bool isVictoryCondition, List<ColonyAchievementRequirement> requirementChecklist, string messageTitle = "", string messageBody = "", string videoDataName = "", string victoryLoopVideo = "", Action<KMonoBehaviour> VictorySequence = null, EventReference victorySnapshot = default(EventReference), string icon = "", string[] requiredDlcIds = null, string[] forbiddenDlcIds = null, string dlcIdFrom = null, string clusterTag = null)
 			: base(Id, Name)
 		{
 			this.Id = Id;
@@ -44,11 +54,8 @@ namespace Database
 			this.victoryNISSnapshot = (victorySnapshot.IsNull ? AudioMixerSnapshots.Get().VictoryNISGenericSnapshot : victorySnapshot);
 			this.icon = icon;
 			this.clusterTag = clusterTag;
-			this.dlcIds = dlcIds;
-			if (this.dlcIds == null)
-			{
-				this.dlcIds = DlcManager.AVAILABLE_ALL_VERSIONS;
-			}
+			this.requiredDlcIds = requiredDlcIds;
+			this.forbiddenDlcIds = forbiddenDlcIds;
 			this.dlcIdFrom = dlcIdFrom;
 		}
 
@@ -85,7 +92,9 @@ namespace Database
 
 		public Action<KMonoBehaviour> victorySequence;
 
-		public string[] dlcIds;
+		public string[] requiredDlcIds;
+
+		public string[] forbiddenDlcIds;
 
 		public string dlcIdFrom;
 	}

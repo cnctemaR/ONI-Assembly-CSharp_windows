@@ -1,4 +1,5 @@
 ﻿using System;
+using STRINGS;
 using TUNING;
 using UnityEngine;
 
@@ -12,14 +13,16 @@ public class LuxuryBedConfig : IBuildingConfig
 		string text2 = "elegantbed_kanim";
 		int num3 = 10;
 		float num4 = 10f;
-		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER3;
+		float[] tier = global::TUNING.BUILDINGS.CONSTRUCTION_MASS_KG.TIER3;
 		string[] plastics = MATERIALS.PLASTICS;
 		float num5 = 1600f;
 		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloor;
 		EffectorValues none = NOISE_POLLUTION.NONE;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, plastics, num5, buildLocationRule, BUILDINGS.DECOR.BONUS.TIER2, none, 0.2f);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, plastics, num5, buildLocationRule, global::TUNING.BUILDINGS.DECOR.BONUS.TIER2, none, 0.2f);
 		buildingDef.Overheatable = false;
 		buildingDef.AudioCategory = "Metal";
+		buildingDef.AddSearchTerms(SEARCH_TERMS.BED);
+		buildingDef.AddSearchTerms(SEARCH_TERMS.MORALE);
 		return buildingDef;
 	}
 
@@ -39,9 +42,12 @@ public class LuxuryBedConfig : IBuildingConfig
 		Sleepable sleepable = go.AddOrGet<Sleepable>();
 		sleepable.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_sleep_bed_kanim") };
 		sleepable.workLayer = Grid.SceneLayer.BuildingFront;
-		DefragmentationZone defragmentationZone = go.AddOrGet<DefragmentationZone>();
-		defragmentationZone.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_bionic_kanim") };
-		defragmentationZone.workLayer = Grid.SceneLayer.BuildingFront;
+		if (DlcManager.IsContentSubscribed("DLC3_ID"))
+		{
+			DefragmentationZone defragmentationZone = go.AddOrGet<DefragmentationZone>();
+			defragmentationZone.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_bionic_kanim") };
+			defragmentationZone.workLayer = Grid.SceneLayer.BuildingFront;
+		}
 		go.AddOrGet<Ownable>().slotID = Db.Get().AssignableSlots.Bed.Id;
 		go.AddOrGetDef<RocketUsageRestriction.Def>();
 	}

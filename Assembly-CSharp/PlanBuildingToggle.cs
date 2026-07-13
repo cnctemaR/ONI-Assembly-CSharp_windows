@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using STRINGS;
 using TUNING;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class PlanBuildingToggle : KToggle
 {
-	public void Config(BuildingDef def, PlanScreen planScreen, HashedString buildingCategory)
+	public void Config(BuildingDef def, PlanScreen planScreen, HashedString buildingCategory, bool? passesSearchFilter)
 	{
 		this.def = def;
 		this.planScreen = planScreen;
@@ -22,16 +21,16 @@ public class PlanBuildingToggle : KToggle
 			PlanScreen.Instance.OnSelectBuilding(this.gameObject, def, null);
 			this.RefreshDisplay();
 		};
-		if (global::TUNING.BUILDINGS.PLANSUBCATEGORYSORTING.ContainsKey(def.PrefabID))
+		if (BUILDINGS.PLANSUBCATEGORYSORTING.ContainsKey(def.PrefabID))
 		{
-			Strings.TryGet("STRINGS.UI.NEWBUILDCATEGORIES." + global::TUNING.BUILDINGS.PLANSUBCATEGORYSORTING[def.PrefabID].ToUpper() + ".NAME", out this.subcategoryName);
+			Strings.TryGet("STRINGS.UI.NEWBUILDCATEGORIES." + BUILDINGS.PLANSUBCATEGORYSORTING[def.PrefabID].ToUpper() + ".NAME", out this.subcategoryName);
 		}
 		else
 		{
 			global::Debug.LogWarning("Building " + def.PrefabID + " has not been added to plan screen subcategory organization in BuildingTuning.cs");
 		}
 		this.CheckResearch(null);
-		this.Refresh();
+		this.Refresh(passesSearchFilter);
 	}
 
 	protected override void OnDestroy()
@@ -52,47 +51,25 @@ public class PlanBuildingToggle : KToggle
 		this.researchComplete = PlanScreen.TechRequirementsMet(this.techItem);
 	}
 
-	public bool CheckBuildingPassesSearchFilter(Def building)
-	{
-		if (BuildingGroupScreen.SearchIsEmpty)
-		{
-			return this.StandardDisplayFilter();
-		}
-		string text = BuildingGroupScreen.Instance.inputField.text;
-		string text2 = UI.StripLinkFormatting(building.Name).ToLower();
-		text = text.ToUpper();
-		return text2.ToUpper().Contains(text) || (this.subcategoryName != null && this.subcategoryName.String.ToUpper().Contains(text));
-	}
-
 	private bool StandardDisplayFilter()
 	{
 		return (this.researchComplete || DebugHandler.InstantBuildMode || Game.Instance.SandboxModeActive) && (this.planScreen.ActiveCategoryToggleInfo == null || this.buildingCategory == (HashedString)this.planScreen.ActiveCategoryToggleInfo.userData);
 	}
 
-	public bool Refresh()
+	public bool Refresh(bool? passesSearchFilter)
 	{
-		bool flag;
-		if (BuildingGroupScreen.SearchIsEmpty)
-		{
-			flag = this.StandardDisplayFilter();
-		}
-		else
-		{
-			flag = this.CheckBuildingPassesSearchFilter(this.def);
-		}
-		bool flag2 = false;
-		if (base.gameObject.activeSelf != flag)
+		bool flag = passesSearchFilter ?? this.StandardDisplayFilter();
+		bool flag2 = base.gameObject.activeSelf != flag;
+		if (flag2)
 		{
 			base.gameObject.SetActive(flag);
-			flag2 = true;
 		}
-		if (!base.gameObject.activeSelf)
+		if (base.gameObject.activeSelf)
 		{
-			return flag2;
+			this.PositionTooltip();
+			this.RefreshLabel();
+			this.RefreshDisplay();
 		}
-		this.PositionTooltip();
-		this.RefreshLabel();
-		this.RefreshDisplay();
 		return flag2;
 	}
 

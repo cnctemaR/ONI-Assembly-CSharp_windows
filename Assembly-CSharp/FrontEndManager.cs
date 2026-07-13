@@ -13,15 +13,7 @@ public class FrontEndManager : KMonoBehaviour
 		base.OnPrefabInit();
 		FrontEndManager.Instance = this;
 		GameObject gameObject = base.gameObject;
-		string highestActiveDlcId = DlcManager.GetHighestActiveDlcId();
-		if ((highestActiveDlcId != null && highestActiveDlcId.Length == 0) || !(highestActiveDlcId == "EXPANSION1_ID"))
-		{
-			Util.KInstantiateUI(ScreenPrefabs.Instance.MainMenuForVanilla, gameObject, true);
-		}
-		else
-		{
-			Util.KInstantiateUI(ScreenPrefabs.Instance.MainMenuForSpacedOut, gameObject, true);
-		}
+		Util.KInstantiateUI(DlcManager.IsExpansion1Active() ? ScreenPrefabs.Instance.MainMenuForSpacedOut : ScreenPrefabs.Instance.MainMenuForVanilla, gameObject, true);
 		if (!FrontEndManager.firstInit)
 		{
 			return;

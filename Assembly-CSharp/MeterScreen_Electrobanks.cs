@@ -63,7 +63,7 @@ public class MeterScreen_Electrobanks : MeterScreen_ValueTrackerDisplayer
 
 	protected override void InternalRefresh()
 	{
-		if (!SaveLoader.Instance.IsDLCActiveForCurrentSave("DLC3_ID"))
+		if (!Game.IsDlcActiveForCurrentSave("DLC3_ID"))
 		{
 			return;
 		}

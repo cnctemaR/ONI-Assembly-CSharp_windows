@@ -63,11 +63,6 @@ public class MinionConfig : IEntityConfig
 		go.Trigger(1589886948, go);
 	}
 
-	public string[] GetDlcIds()
-	{
-		return DlcManager.AVAILABLE_ALL_VERSIONS;
-	}
-
 	public MinionConfig()
 	{
 		Func<RationalAi.Instance, StateMachine.Instance>[] array = BaseMinionConfig.BaseRationalAiStateMachines();

@@ -38,24 +38,9 @@ public class DreckoConfig : IEntityConfig
 		return gameObject;
 	}
 
-	public string[] GetDlcIds()
-	{
-		return DlcManager.AVAILABLE_ALL_VERSIONS;
-	}
-
 	public virtual GameObject CreatePrefab()
 	{
-		GameObject gameObject = DreckoConfig.CreateDrecko("Drecko", CREATURES.SPECIES.DRECKO.NAME, CREATURES.SPECIES.DRECKO.DESC, "drecko_kanim", false);
-		string text = "DreckoEgg";
-		string text2 = CREATURES.SPECIES.DRECKO.EGG_NAME;
-		string text3 = CREATURES.SPECIES.DRECKO.DESC;
-		string text4 = "egg_drecko_kanim";
-		float egg_MASS = DreckoTuning.EGG_MASS;
-		string text5 = "DreckoBaby";
-		float num = 90f;
-		float num2 = 30f;
-		int egg_SORT_ORDER = DreckoConfig.EGG_SORT_ORDER;
-		return EntityTemplates.ExtendEntityToFertileCreature(gameObject, text, text2, text3, text4, egg_MASS, text5, num, num2, DreckoTuning.EGG_CHANCES_BASE, this.GetDlcIds(), egg_SORT_ORDER, true, false, true, 1f, false);
+		return EntityTemplates.ExtendEntityToFertileCreature(DreckoConfig.CreateDrecko("Drecko", CREATURES.SPECIES.DRECKO.NAME, CREATURES.SPECIES.DRECKO.DESC, "drecko_kanim", false), this as IHasDlcRestrictions, "DreckoEgg", CREATURES.SPECIES.DRECKO.EGG_NAME, CREATURES.SPECIES.DRECKO.DESC, "egg_drecko_kanim", DreckoTuning.EGG_MASS, "DreckoBaby", 90f, 30f, DreckoTuning.EGG_CHANCES_BASE, DreckoConfig.EGG_SORT_ORDER, true, false, 1f, false);
 	}
 
 	public void OnPrefabInit(GameObject prefab)

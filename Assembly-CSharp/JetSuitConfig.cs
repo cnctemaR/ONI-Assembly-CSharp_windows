@@ -7,11 +7,6 @@ using UnityEngine;
 
 public class JetSuitConfig : IEquipmentConfig
 {
-	public string[] GetDlcIds()
-	{
-		return DlcManager.AVAILABLE_ALL_VERSIONS;
-	}
-
 	public EquipmentDef CreateEquipmentDef()
 	{
 		Dictionary<string, float> dictionary = new Dictionary<string, float>();

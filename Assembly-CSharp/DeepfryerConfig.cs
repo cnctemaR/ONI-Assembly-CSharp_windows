@@ -32,6 +32,8 @@ public class DeepfryerConfig : IBuildingConfig
 		buildingDef.EnergyConsumptionWhenActive = 480f;
 		buildingDef.ExhaustKilowattsWhenActive = 2f;
 		buildingDef.SelfHeatKilowattsWhenActive = 8f;
+		buildingDef.RequiredSkillPerkID = Db.Get().SkillPerks.CanDeepFry.Id;
+		buildingDef.AddSearchTerms(SEARCH_TERMS.FOOD);
 		return buildingDef;
 	}
 

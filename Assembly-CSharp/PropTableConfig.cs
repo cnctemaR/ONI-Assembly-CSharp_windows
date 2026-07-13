@@ -6,11 +6,6 @@ using UnityEngine;
 
 public class PropTableConfig : IEntityConfig
 {
-	public string[] GetDlcIds()
-	{
-		return DlcManager.AVAILABLE_ALL_VERSIONS;
-	}
-
 	public GameObject CreatePrefab()
 	{
 		string text = "PropTable";

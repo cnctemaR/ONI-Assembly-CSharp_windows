@@ -3,11 +3,16 @@ using System.Collections.Generic;
 using STRINGS;
 using UnityEngine;
 
-public class ComplexRecipe
+public class ComplexRecipe : IHasDlcRestrictions
 {
-	public string[] GetDlcIds()
+	public string[] GetRequiredDlcIds()
 	{
-		return this.dlcIds;
+		return this.requiredDlcIds;
+	}
+
+	public string[] GetForbiddenDlcIds()
+	{
+		return this.forbiddenDlcIds;
 	}
 
 	public bool ProductHasFacade { get; set; }
@@ -42,16 +47,28 @@ public class ComplexRecipe
 	{
 	}
 
-	public ComplexRecipe(string id, ComplexRecipe.RecipeElement[] ingredients, ComplexRecipe.RecipeElement[] results, string[] dlcIds)
-		: this(id, ingredients, results)
+	public ComplexRecipe(string id, ComplexRecipe.RecipeElement[] ingredients, ComplexRecipe.RecipeElement[] results, string[] requiredDlcIds)
+		: this(id, ingredients, results, requiredDlcIds, null)
 	{
-		this.dlcIds = dlcIds;
 	}
 
-	public ComplexRecipe(string id, ComplexRecipe.RecipeElement[] ingredients, ComplexRecipe.RecipeElement[] results, int consumedHEP, int producedHEP, string[] dlcIds)
+	public ComplexRecipe(string id, ComplexRecipe.RecipeElement[] ingredients, ComplexRecipe.RecipeElement[] results, string[] requiredDlcIds, string[] forbiddenDlcIds)
+		: this(id, ingredients, results)
+	{
+		this.requiredDlcIds = requiredDlcIds;
+		this.forbiddenDlcIds = forbiddenDlcIds;
+	}
+
+	public ComplexRecipe(string id, ComplexRecipe.RecipeElement[] ingredients, ComplexRecipe.RecipeElement[] results, int consumedHEP, int producedHEP, string[] requiredDlcIds)
+		: this(id, ingredients, results, consumedHEP, producedHEP, requiredDlcIds, null)
+	{
+	}
+
+	public ComplexRecipe(string id, ComplexRecipe.RecipeElement[] ingredients, ComplexRecipe.RecipeElement[] results, int consumedHEP, int producedHEP, string[] requiredDlcIds, string[] forbiddenDlcIds)
 		: this(id, ingredients, results, consumedHEP, producedHEP)
 	{
-		this.dlcIds = dlcIds;
+		this.requiredDlcIds = requiredDlcIds;
+		this.forbiddenDlcIds = forbiddenDlcIds;
 	}
 
 	public float TotalResultUnits()
@@ -183,7 +200,9 @@ public class ComplexRecipe
 
 	public string recipeCategoryID = "";
 
-	private string[] dlcIds = DlcManager.AVAILABLE_ALL_VERSIONS;
+	private string[] requiredDlcIds;
+
+	private string[] forbiddenDlcIds;
 
 	public ComplexRecipe.RecipeNameDisplay nameDisplay;
 

@@ -24,6 +24,7 @@ public class LogicInterasteroidReceiverConfig : IBuildingConfig
 		buildingDef.AlwaysOperational = false;
 		buildingDef.LogicOutputPorts = new List<LogicPorts.Port> { LogicPorts.Port.OutputPort("OutputPort", new CellOffset(0, 0), global::STRINGS.BUILDINGS.PREFABS.LOGICINTERASTEROIDRECEIVER.LOGIC_PORT, global::STRINGS.BUILDINGS.PREFABS.LOGICINTERASTEROIDRECEIVER.LOGIC_PORT_ACTIVE, global::STRINGS.BUILDINGS.PREFABS.LOGICINTERASTEROIDRECEIVER.LOGIC_PORT_INACTIVE, true, false) };
 		GeneratedBuildings.RegisterWithOverlay(OverlayModes.Logic.HighlightItemIDs, "LogicInterasteroidReceiver");
+		buildingDef.AddSearchTerms(SEARCH_TERMS.AUTOMATION);
 		return buildingDef;
 	}
 

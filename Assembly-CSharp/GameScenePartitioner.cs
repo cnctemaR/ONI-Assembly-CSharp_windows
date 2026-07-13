@@ -178,12 +178,25 @@ public class GameScenePartitioner : KMonoBehaviour
 		return this.partitioner.AsyncSafeEnumerate(x, y, width, height, layer);
 	}
 
+	public void AsyncSafeVisit<ContextType>(int x, int y, int width, int height, ScenePartitionerLayer layer, Func<object, ContextType, bool> visitor, ContextType context)
+	{
+		this.partitioner.AsyncSafeVisit<ContextType>(x, y, width, height, layer, visitor, context);
+	}
+
 	public IEnumerable<object> AsyncSafeEnumerate(int cell, int radius, ScenePartitionerLayer layer)
 	{
 		int num = 0;
 		int num2 = 0;
 		Grid.CellToXY(cell, out num, out num2);
 		return this.AsyncSafeEnumerate(num - radius, num2 - radius, radius * 2, radius * 2, layer);
+	}
+
+	public void AsyncSafeVisit<ContextType>(int cell, int radius, ScenePartitionerLayer layer, Func<object, ContextType, bool> visitor, ContextType context)
+	{
+		int num = 0;
+		int num2 = 0;
+		Grid.CellToXY(cell, out num, out num2);
+		this.AsyncSafeVisit<ContextType>(num - radius, num2 - radius, radius * 2, radius * 2, layer, visitor, context);
 	}
 
 	private void OnValidNavCellChanged(int cell, NavType nav_type)

@@ -66,7 +66,7 @@ namespace Klei
 				if (!zipEntry.IsDirectory)
 				{
 					string text = FileSystem.Normalize(Path.Combine(this.mountPoint, zipEntry.FileName));
-					if (re.IsMatch(text))
+					if (re.IsMatch(text) && !Path.GetFileName(text).StartsWith("._"))
 					{
 						result.Add(text);
 					}

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using STRINGS;
 using UnityEngine;
 
-public abstract class ColonyDiagnostic : ISim4000ms
+public abstract class ColonyDiagnostic : ISim4000ms, IHasDlcRestrictions
 {
 	public GameObject GetNextClickThroughObject()
 	{
@@ -36,11 +36,6 @@ public abstract class ColonyDiagnostic : ISim4000ms
 	public int worldID { get; protected set; }
 
 	public bool IsWorldModuleInterior { get; private set; }
-
-	public virtual string[] GetDlcIds()
-	{
-		return DlcManager.AVAILABLE_ALL_VERSIONS;
-	}
 
 	public void OnCleanUp()
 	{
@@ -141,6 +136,16 @@ public abstract class ColonyDiagnostic : ISim4000ms
 		{
 			return this.IsWorldModuleInterior ? UI.COLONY_DIAGNOSTICS.NO_MINIONS_ROCKET : UI.COLONY_DIAGNOSTICS.NO_MINIONS_PLANETOID;
 		}
+	}
+
+	public virtual string[] GetRequiredDlcIds()
+	{
+		return null;
+	}
+
+	public virtual string[] GetForbiddenDlcIds()
+	{
+		return null;
 	}
 
 	private int clickThroughIndex;

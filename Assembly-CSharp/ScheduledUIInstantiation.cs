@@ -25,7 +25,7 @@ public class ScheduledUIInstantiation : KMonoBehaviour
 		this.completed = true;
 		foreach (ScheduledUIInstantiation.Instantiation instantiation in this.UIElements)
 		{
-			if (SaveLoader.Instance.IsDLCActiveForCurrentSave(instantiation.RequiredDlcId))
+			if (instantiation.RequiredDlcId.IsNullOrWhiteSpace() || Game.IsDlcActiveForCurrentSave(instantiation.RequiredDlcId))
 			{
 				foreach (GameObject gameObject in instantiation.prefabs)
 				{

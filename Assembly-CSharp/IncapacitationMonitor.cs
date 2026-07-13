@@ -7,24 +7,13 @@ public class IncapacitationMonitor : GameStateMachine<IncapacitationMonitor, Inc
 	{
 		default_state = this.healthy;
 		base.serializable = StateMachine.SerializeType.Both_DEPRECATED;
-		this.healthy.TagTransition(GameTags.CaloriesDepleted, this.incapacitated, false).TagTransition(GameTags.HitPointsDepleted, this.incapacitated, false).TagTransition(GameTags.HitByHighEnergyParticle, this.incapacitated, false)
-			.TagTransition(GameTags.RadiationSicknessIncapacitation, this.incapacitated, false)
-			.Update(delegate(IncapacitationMonitor.Instance smi, float dt)
-			{
-				smi.RecoverStamina(dt, smi);
-			}, UpdateRate.SIM_200ms, false);
-		this.start_recovery.TagTransition(new Tag[]
+		this.healthy.Update(delegate(IncapacitationMonitor.Instance smi, float dt)
 		{
-			GameTags.CaloriesDepleted,
-			GameTags.HitPointsDepleted
-		}, this.healthy, true);
-		this.incapacitated.EventTransition(GameHashes.IncapacitationRecovery, this.start_recovery, null).ToggleTag(GameTags.Incapacitated).ToggleRecurringChore((IncapacitationMonitor.Instance smi) => new BeIncapacitatedChore(smi.master), null)
+			smi.RecoverBleedOutStamina(dt, smi);
+		}, UpdateRate.SIM_200ms, false).EventTransition(GameHashes.BecameIncapacitated, this.incapacitated, null);
+		this.incapacitated.EventTransition(GameHashes.IncapacitationRecovery, this.healthy, null).ToggleTag(GameTags.Incapacitated).ToggleRecurringChore((IncapacitationMonitor.Instance smi) => new BeIncapacitatedChore(smi.master), null)
 			.ParamTransition<float>(this.bleedOutStamina, this.die, GameStateMachine<IncapacitationMonitor, IncapacitationMonitor.Instance, IStateMachineTarget, object>.IsLTEZero)
 			.ToggleUrge(Db.Get().Urges.BeIncapacitated)
-			.Enter(delegate(IncapacitationMonitor.Instance smi)
-			{
-				smi.master.Trigger(-1506500077, null);
-			})
 			.Update(delegate(IncapacitationMonitor.Instance smi, float dt)
 			{
 				smi.Bleed(dt, smi);
@@ -59,7 +48,7 @@ public class IncapacitationMonitor : GameStateMachine<IncapacitationMonitor, Inc
 			Health component = master.GetComponent<Health>();
 			if (component)
 			{
-				component.CanBeIncapacitated = true;
+				component.canBeIncapacitated = true;
 			}
 		}
 
@@ -68,7 +57,7 @@ public class IncapacitationMonitor : GameStateMachine<IncapacitationMonitor, Inc
 			smi.sm.bleedOutStamina.Delta(dt * -smi.sm.baseBleedOutSpeed.Get(smi), smi);
 		}
 
-		public void RecoverStamina(float dt, IncapacitationMonitor.Instance smi)
+		public void RecoverBleedOutStamina(float dt, IncapacitationMonitor.Instance smi)
 		{
 			smi.sm.bleedOutStamina.Delta(Mathf.Min(dt * smi.sm.baseStaminaRecoverSpeed.Get(smi), smi.sm.maxBleedOutStamina.Get(smi) - smi.sm.bleedOutStamina.Get(smi)), smi);
 		}
@@ -80,20 +69,12 @@ public class IncapacitationMonitor : GameStateMachine<IncapacitationMonitor, Inc
 
 		public Death GetCauseOfIncapacitation()
 		{
-			KPrefabID component = base.GetComponent<KPrefabID>();
-			if (component.HasTag(GameTags.HitByHighEnergyParticle))
-			{
-				return Db.Get().Deaths.HitByHighEnergyParticle;
-			}
-			if (component.HasTag(GameTags.RadiationSicknessIncapacitation))
+			Health component = base.GetComponent<Health>();
+			if (component.CauseOfIncapacitation == GameTags.RadiationSicknessIncapacitation)
 			{
 				return Db.Get().Deaths.Radiation;
 			}
-			if (component.HasTag(GameTags.CaloriesDepleted))
-			{
-				return Db.Get().Deaths.Starvation;
-			}
-			if (component.HasTag(GameTags.HitPointsDepleted))
+			if (component.CauseOfIncapacitation == GameTags.HitPointsDepleted)
 			{
 				return Db.Get().Deaths.Slain;
 			}

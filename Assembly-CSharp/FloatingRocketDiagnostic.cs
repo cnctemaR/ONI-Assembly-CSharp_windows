@@ -9,9 +9,9 @@ public class FloatingRocketDiagnostic : ColonyDiagnostic
 		this.icon = "icon_errand_rocketry";
 	}
 
-	public override string[] GetDlcIds()
+	public override string[] GetRequiredDlcIds()
 	{
-		return DlcManager.AVAILABLE_EXPANSION1_ONLY;
+		return DlcManager.EXPANSION1;
 	}
 
 	public override ColonyDiagnostic.DiagnosticResult Evaluate()

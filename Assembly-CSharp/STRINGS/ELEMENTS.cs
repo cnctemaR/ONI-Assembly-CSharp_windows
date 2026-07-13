@@ -494,7 +494,7 @@ namespace STRINGS
 			{
 				"Frozen Phyto Oil is thick, slippery ",
 				UI.FormatAsLink("Slime", "SLIME"),
-				" puree extract frozen into a ",
+				" extract, frozen into a ",
 				UI.FormatAsLink("Solid", "ELEMENTS_SOLID"),
 				" state."
 			});
@@ -631,11 +631,11 @@ namespace STRINGS
 
 			public static LocString DESC = string.Concat(new string[]
 			{
-				"(U) Enriched Uranium is a highly ",
-				UI.FormatAsLink("Radioactive", "RADIATION"),
-				", refined substance.\n\nIt is primarily used to ",
+				"(U) Enriched Uranium is a refined substance primarily used to ",
 				UI.FormatAsLink("Power", "POWER"),
-				" potent research reactors."
+				" potent research reactors.\n\nIt becomes highly ",
+				UI.FormatAsLink("Radioactive", "RADIATION"),
+				" when consumed."
 			});
 		}
 

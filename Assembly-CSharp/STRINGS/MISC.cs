@@ -1398,7 +1398,7 @@ namespace STRINGS
 					"Bionic Duplicants can dump built-up ",
 					UI.FormatAsLink("Gunk", "LIQUIDGUNK"),
 					" into ",
-					UI.FormatAsLink("Toilets", "BUILDCATEGORYREQUIREMENTCLASSTOILETTYPE"),
+					UI.FormatAsLink("Toilets", "REQUIREMENTCLASSTOILETTYPE"),
 					" if no other options are available. This invariably clogs the plumbing, however, and must be removed before facilities can be used by other Duplicants.\n\nBuilding a ",
 					UI.FormatAsLink("Gunk Extractor", "GUNKEMPTIER"),
 					" from the ",
@@ -1420,7 +1420,7 @@ namespace STRINGS
 					" and potential injury by using the ",
 					UI.FormatAsTool("Mop Tool", global::Action.Mop),
 					" to clean up spills. Building ",
-					UI.FormatAsLink("Toilets", "BUILDCATEGORYREQUIREMENTCLASSTOILETTYPE"),
+					UI.FormatAsLink("Toilets", "REQUIREMENTCLASSTOILETTYPE"),
 					" and ",
 					UI.FormatAsLink("Gunk Extractors", "GUNKEMPTIER"),
 					" can help minimize the incidence of spills."

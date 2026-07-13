@@ -1,19 +1,20 @@
 ﻿using System;
+using System.Linq;
 using UnityEngine;
 
 namespace Database
 {
-	public class ClothingOutfitResource : Resource, IBlueprintDlcInfo
+	public class ClothingOutfitResource : Resource, IHasDlcRestrictions
 	{
 		public string[] itemsInOutfit { get; private set; }
 
-		public string[] dlcIds { get; set; } = DlcManager.AVAILABLE_ALL_VERSIONS;
-
-		public ClothingOutfitResource(string id, string[] items_in_outfit, string name, ClothingOutfitUtility.OutfitType outfitType)
+		public ClothingOutfitResource(string id, string[] items_in_outfit, string name, ClothingOutfitUtility.OutfitType outfitType, string[] requiredDlcIds = null, string[] forbiddenDlcIds = null)
 			: base(id, name)
 		{
 			this.itemsInOutfit = items_in_outfit;
 			this.outfitType = outfitType;
+			this.requiredDlcIds = requiredDlcIds;
+			this.forbiddenDlcIds = forbiddenDlcIds;
 		}
 
 		public global::Tuple<Sprite, Color> GetUISprite()
@@ -24,17 +25,27 @@ namespace Database
 
 		public string GetDlcIdFrom()
 		{
-			if (this.dlcIds == DlcManager.AVAILABLE_ALL_VERSIONS || this.dlcIds == DlcManager.AVAILABLE_VANILLA_ONLY)
+			if (this.requiredDlcIds == null)
 			{
 				return null;
 			}
-			if (this.dlcIds.Length == 0)
-			{
-				return null;
-			}
-			return this.dlcIds[0];
+			return this.requiredDlcIds.Last<string>();
+		}
+
+		public string[] GetRequiredDlcIds()
+		{
+			return this.requiredDlcIds;
+		}
+
+		public string[] GetForbiddenDlcIds()
+		{
+			return this.forbiddenDlcIds;
 		}
 
 		public ClothingOutfitUtility.OutfitType outfitType;
+
+		public string[] requiredDlcIds;
+
+		public string[] forbiddenDlcIds;
 	}
 }

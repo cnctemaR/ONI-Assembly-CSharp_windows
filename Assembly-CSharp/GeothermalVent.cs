@@ -312,7 +312,7 @@ public class GeothermalVent : StateMachineComponent<GeothermalVent.StatesInstanc
 		int num5 = (int)((float)elementInfo2.diseaseCount * num4 / elementInfo2.mass);
 		Vector3 vector = Grid.CellToPos(this.emitterInfo.cell, CellAlignment.Top, Grid.SceneLayer.BuildingFront);
 		Game.Instance.SpawnFX(SpawnFXHashes.MeteorImpactDust, vector, 0f);
-		GameObject gameObject = Util.KInstantiate(Assets.GetPrefab("MiniComet"), vector);
+		GameObject gameObject = Util.KInstantiate(Assets.GetPrefab(MiniCometConfig.ID), vector);
 		PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
 		component.SetElement(ElementLoader.elements[(int)elementInfo2.elementIdx].id, true);
 		component.Mass = num4;

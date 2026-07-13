@@ -261,7 +261,7 @@ public class MinionStartingStats : ITelepadDeliverable
 			foreach (DUPLICANTSTATS.TraitVal traitVal4 in list2)
 			{
 				global::Debug.Assert(SaveLoader.Instance != null, "IsDLCActiveForCurrentSave should not be called from the front end");
-				if (!SaveLoader.Instance.IsDLCActiveForCurrentSave(traitVal4.dlcId))
+				if (!Game.IsCorrectDlcActiveForCurrentSave(traitVal4))
 				{
 					num6--;
 				}

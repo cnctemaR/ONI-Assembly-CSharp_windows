@@ -22,15 +22,10 @@ public class CrabConfig : IEntityConfig
 		return gameObject2;
 	}
 
-	public string[] GetDlcIds()
-	{
-		return DlcManager.AVAILABLE_ALL_VERSIONS;
-	}
-
 	public GameObject CreatePrefab()
 	{
 		GameObject gameObject = CrabConfig.CreateCrab("Crab", global::STRINGS.CREATURES.SPECIES.CRAB.NAME, global::STRINGS.CREATURES.SPECIES.CRAB.DESC, "pincher_kanim", false, "CrabShell");
-		gameObject = EntityTemplates.ExtendEntityToFertileCreature(gameObject, "CrabEgg", global::STRINGS.CREATURES.SPECIES.CRAB.EGG_NAME, global::STRINGS.CREATURES.SPECIES.CRAB.DESC, "egg_pincher_kanim", CrabTuning.EGG_MASS, "CrabBaby", 60.000004f, 20f, CrabTuning.EGG_CHANCES_BASE, this.GetDlcIds(), CrabConfig.EGG_SORT_ORDER, true, false, true, 1f, false);
+		gameObject = EntityTemplates.ExtendEntityToFertileCreature(gameObject, this as IHasDlcRestrictions, "CrabEgg", global::STRINGS.CREATURES.SPECIES.CRAB.EGG_NAME, global::STRINGS.CREATURES.SPECIES.CRAB.DESC, "egg_pincher_kanim", CrabTuning.EGG_MASS, "CrabBaby", 60.000004f, 20f, CrabTuning.EGG_CHANCES_BASE, CrabConfig.EGG_SORT_ORDER, true, false, 1f, false);
 		gameObject.AddOrGetDef<EggProtectionMonitor.Def>().allyTags = new Tag[] { GameTags.Creatures.CrabFriend };
 		return gameObject;
 	}

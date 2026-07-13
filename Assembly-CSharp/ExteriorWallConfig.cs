@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using STRINGS;
 using TUNING;
 using UnityEngine;
 
@@ -13,7 +14,7 @@ public class ExteriorWallConfig : IBuildingConfig
 		string text2 = "walls_kanim";
 		int num3 = 30;
 		float num4 = 3f;
-		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER2;
+		float[] tier = global::TUNING.BUILDINGS.CONSTRUCTION_MASS_KG.TIER2;
 		string[] raw_MINERALS_OR_WOOD = MATERIALS.RAW_MINERALS_OR_WOOD;
 		float num5 = 1600f;
 		BuildLocationRule buildLocationRule = BuildLocationRule.NotInTiles;
@@ -44,6 +45,7 @@ public class ExteriorWallConfig : IBuildingConfig
 			GameTags.FloorTiles,
 			GameTags.Backwall
 		};
+		buildingDef.AddSearchTerms(SEARCH_TERMS.TILE);
 		return buildingDef;
 	}
 

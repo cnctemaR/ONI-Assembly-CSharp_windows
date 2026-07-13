@@ -88,7 +88,7 @@ public class CustomGameSettings : KMonoBehaviour
 		foreach (KeyValuePair<string, SettingConfig> keyValuePair in this.QualitySettings)
 		{
 			SettingConfig value = keyValuePair.Value;
-			if (SaveLoader.Instance.IsAllDlcActiveForCurrentSave(value.required_content) && !this.CurrentQualityLevelsBySetting.ContainsKey(value.id))
+			if (Game.IsCorrectDlcActiveForCurrentSave(value) && !this.CurrentQualityLevelsBySetting.ContainsKey(value.id))
 			{
 				if (value.missing_content_default != "")
 				{

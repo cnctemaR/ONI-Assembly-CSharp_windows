@@ -51,9 +51,19 @@ public class HarvestablePOIConfigurator : KMonoBehaviour
 
 	public float presetMax = 1f;
 
-	public class HarvestablePOIType
+	public class HarvestablePOIType : IHasDlcRestrictions
 	{
-		public HarvestablePOIType(string id, Dictionary<SimHashes, float> harvestableElements, float poiCapacityMin = 54000f, float poiCapacityMax = 81000f, float poiRechargeMin = 30000f, float poiRechargeMax = 60000f, bool canProvideArtifacts = true, List<string> orbitalObject = null, int maxNumOrbitingObjects = 20, string dlcID = "EXPANSION1_ID")
+		public string[] GetRequiredDlcIds()
+		{
+			return this.requiredDlcIds;
+		}
+
+		public string[] GetForbiddenDlcIds()
+		{
+			return this.forbiddenDlcIds;
+		}
+
+		public HarvestablePOIType(string id, Dictionary<SimHashes, float> harvestableElements, float poiCapacityMin = 54000f, float poiCapacityMax = 81000f, float poiRechargeMin = 30000f, float poiRechargeMax = 60000f, bool canProvideArtifacts = true, List<string> orbitalObject = null, int maxNumOrbitingObjects = 20, string[] requiredDlcIds = null, string[] forbiddenDlcIds = null)
 		{
 			this.id = id;
 			this.idHash = id;
@@ -65,12 +75,20 @@ public class HarvestablePOIConfigurator : KMonoBehaviour
 			this.canProvideArtifacts = canProvideArtifacts;
 			this.orbitalObject = orbitalObject;
 			this.maxNumOrbitingObjects = maxNumOrbitingObjects;
-			this.dlcID = dlcID;
+			this.requiredDlcIds = requiredDlcIds;
+			this.forbiddenDlcIds = forbiddenDlcIds;
 			if (HarvestablePOIConfigurator._poiTypes == null)
 			{
 				HarvestablePOIConfigurator._poiTypes = new List<HarvestablePOIConfigurator.HarvestablePOIType>();
 			}
 			HarvestablePOIConfigurator._poiTypes.Add(this);
+		}
+
+		[Obsolete]
+		public HarvestablePOIType(string id, Dictionary<SimHashes, float> harvestableElements, float poiCapacityMin = 54000f, float poiCapacityMax = 81000f, float poiRechargeMin = 30000f, float poiRechargeMax = 60000f, bool canProvideArtifacts = true, List<string> orbitalObject = null, int maxNumOrbitingObjects = 20, string dlcID = "EXPANSION1_ID")
+			: this(id, harvestableElements, poiCapacityMin, poiCapacityMax, poiRechargeMin, poiRechargeMax, canProvideArtifacts, orbitalObject, maxNumOrbitingObjects, null, null)
+		{
+			this.requiredDlcIds = DlcManager.EXPANSION1;
 		}
 
 		public string id;
@@ -89,7 +107,12 @@ public class HarvestablePOIConfigurator : KMonoBehaviour
 
 		public bool canProvideArtifacts;
 
+		[Obsolete]
 		public string dlcID;
+
+		public string[] requiredDlcIds;
+
+		public string[] forbiddenDlcIds;
 
 		public List<string> orbitalObject;
 

@@ -6,11 +6,6 @@ using UnityEngine;
 
 public class SaltPlantConfig : IEntityConfig
 {
-	public string[] GetDlcIds()
-	{
-		return DlcManager.AVAILABLE_ALL_VERSIONS;
-	}
-
 	public GameObject CreatePrefab()
 	{
 		string text = "SaltPlant";
@@ -62,6 +57,7 @@ public class SaltPlantConfig : IEntityConfig
 		};
 		gameObject.AddOrGet<StandardCropPlant>();
 		GameObject gameObject3 = gameObject;
+		IHasDlcRestrictions hasDlcRestrictions = this as IHasDlcRestrictions;
 		SeedProducer.ProductionType productionType = SeedProducer.ProductionType.Harvest;
 		string text7 = "SaltPlantSeed";
 		string text8 = global::STRINGS.CREATURES.SPECIES.SEEDS.SALTPLANT.NAME;
@@ -73,7 +69,7 @@ public class SaltPlantConfig : IEntityConfig
 		list2.Add(GameTags.CropSeed);
 		SingleEntityReceptacle.ReceptacleDirection receptacleDirection = SingleEntityReceptacle.ReceptacleDirection.Bottom;
 		text6 = global::STRINGS.CREATURES.SPECIES.SALTPLANT.DOMESTICATEDDESC;
-		EntityTemplates.MakeHangingOffsets(EntityTemplates.CreateAndRegisterPreviewForPlant(EntityTemplates.CreateAndRegisterSeedForPlant(gameObject3, productionType, text7, text8, text9, anim2, text10, num8, list2, receptacleDirection, default(Tag), 5, text6, EntityTemplates.CollisionShape.CIRCLE, 0.35f, 0.35f, null, "", false, null), "SaltPlant_preview", Assets.GetAnim("saltplant_kanim"), "place", 1, 2), 1, 2);
+		EntityTemplates.MakeHangingOffsets(EntityTemplates.CreateAndRegisterPreviewForPlant(EntityTemplates.CreateAndRegisterSeedForPlant(gameObject3, hasDlcRestrictions, productionType, text7, text8, text9, anim2, text10, num8, list2, receptacleDirection, default(Tag), 5, text6, EntityTemplates.CollisionShape.CIRCLE, 0.35f, 0.35f, null, "", false), "SaltPlant_preview", Assets.GetAnim("saltplant_kanim"), "place", 1, 2), 1, 2);
 		return gameObject;
 	}
 

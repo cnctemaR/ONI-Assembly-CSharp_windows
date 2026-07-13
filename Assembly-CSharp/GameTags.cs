@@ -142,8 +142,6 @@ public class GameTags
 
 	public static readonly Tag HitPointsDepleted = TagManager.Create("HitPointsDepleted");
 
-	public static readonly Tag HitByHighEnergyParticle = TagManager.Create("HitByHighEnergyParticle");
-
 	public static readonly Tag RadiationSicknessIncapacitation = TagManager.Create("RadiationSickness");
 
 	public static readonly Tag Wilting = TagManager.Create("Wilting");
@@ -962,6 +960,26 @@ public class GameTags
 		}
 	}
 
+	public static class CodexCategories
+	{
+		public static string GetCategoryLabelText(Tag tag)
+		{
+			StringEntry stringEntry = null;
+			string text = "STRINGS.CODEX.CATEGORIES." + tag.ToString().ToUpper() + ".NAME";
+			if (!Strings.TryGet(new StringKey(text), out stringEntry))
+			{
+				return ROOMS.CRITERIA.IN_CODE_ERROR.text.Replace("{0}", text);
+			}
+			return stringEntry;
+		}
+
+		public static List<Tag> AllTags = new List<Tag>();
+
+		public static Tag CreatureRelocator = GameTags.CodexCategories.AllTags.AddAndReturn(TagManager.Create("CreatureRelocator"));
+
+		public static Tag FarmBuilding = GameTags.CodexCategories.AllTags.AddAndReturn("FarmBuilding".ToTag());
+	}
+
 	public static class Robots
 	{
 		public static class Models
@@ -989,5 +1007,22 @@ public class GameTags
 
 			public static readonly Tag NoElectroBank = TagManager.Create("NoElectroBank");
 		}
+	}
+
+	public class Search
+	{
+		public static readonly Tag Tile = TagManager.Create("Tile");
+
+		public static readonly Tag Ladder = TagManager.Create("Ladder");
+
+		public static readonly Tag Powered = TagManager.Create("Powered");
+
+		public static readonly Tag Rocket = TagManager.Create("Rocket");
+
+		public static readonly Tag Monument = TagManager.Create("Monument");
+
+		public static readonly Tag Farming = TagManager.Create("Farming");
+
+		public static readonly Tag Cooking = TagManager.Create("Cooking");
 	}
 }

@@ -32,6 +32,8 @@ public class OrbitalResearchCenterConfig : IBuildingConfig
 		buildingDef.ViewMode = OverlayModes.Power.ID;
 		buildingDef.AudioCategory = "Metal";
 		buildingDef.AudioSize = "large";
+		buildingDef.RequiredSkillPerkID = Db.Get().SkillPerks.CanMissionControl.Id;
+		buildingDef.AddSearchTerms(SEARCH_TERMS.RESEARCH);
 		return buildingDef;
 	}
 

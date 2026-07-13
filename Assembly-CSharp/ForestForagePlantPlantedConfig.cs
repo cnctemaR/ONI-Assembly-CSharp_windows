@@ -5,11 +5,6 @@ using UnityEngine;
 
 public class ForestForagePlantPlantedConfig : IEntityConfig
 {
-	public string[] GetDlcIds()
-	{
-		return DlcManager.AVAILABLE_ALL_VERSIONS;
-	}
-
 	public GameObject CreatePrefab()
 	{
 		string text = "ForestForagePlantPlanted";

@@ -95,25 +95,37 @@ public class SolidConduitDispenser : KMonoBehaviour, ISaveLoadable, IConduitDisp
 	private bool isSolid(GameObject o)
 	{
 		PrimaryElement component = o.GetComponent<PrimaryElement>();
-		return component == null || component.Element.IsLiquid || component.Element.IsGas;
+		return component != null && component.Element.IsSolid;
 	}
 
 	private Pickupable FindSuitableItem()
 	{
-		List<GameObject> list = this.storage.items;
-		if (this.solidOnly)
-		{
-			List<GameObject> list2 = new List<GameObject>(list);
-			list2.RemoveAll(new Predicate<GameObject>(this.isSolid));
-			list = list2;
-		}
-		if (list.Count < 1)
+		List<GameObject> items = this.storage.items;
+		if (items.Count < 1)
 		{
 			return null;
 		}
-		this.round_robin_index %= list.Count;
-		GameObject gameObject = list[this.round_robin_index];
+		this.round_robin_index %= items.Count;
+		GameObject gameObject = items[this.round_robin_index];
 		this.round_robin_index++;
+		if (this.solidOnly && !this.isSolid(gameObject))
+		{
+			bool flag = false;
+			int num = 0;
+			while (!flag && num < items.Count)
+			{
+				gameObject = items[(this.round_robin_index + num) % items.Count];
+				if (this.isSolid(gameObject))
+				{
+					flag = true;
+				}
+				num++;
+			}
+			if (!flag)
+			{
+				return null;
+			}
+		}
 		if (!gameObject)
 		{
 			return null;

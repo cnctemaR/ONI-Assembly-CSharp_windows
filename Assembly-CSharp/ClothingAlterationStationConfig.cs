@@ -26,6 +26,7 @@ public class ClothingAlterationStationConfig : IBuildingConfig
 		buildingDef.ViewMode = OverlayModes.Power.ID;
 		buildingDef.AudioCategory = "Metal";
 		buildingDef.PowerInputOffset = new CellOffset(0, 0);
+		buildingDef.RequiredSkillPerkID = Db.Get().SkillPerks.CanClothingAlteration.Id;
 		return buildingDef;
 	}
 

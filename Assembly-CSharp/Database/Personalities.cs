@@ -47,7 +47,7 @@ namespace Database
 
 		public List<Personality> GetAll(bool onlyEnabledMinions, bool onlyStartingMinions)
 		{
-			return this.resources.FindAll((Personality personality) => (!onlyStartingMinions || personality.startingMinion) && (!onlyEnabledMinions || !personality.Disabled) && (!(SaveLoader.Instance != null) || !DlcManager.IsDlcId(personality.requiredDlcId) || SaveLoader.Instance.GameInfo.dlcIds.Contains(personality.requiredDlcId)));
+			return this.resources.FindAll((Personality personality) => (!onlyStartingMinions || personality.startingMinion) && (!onlyEnabledMinions || !personality.Disabled) && (!(Game.Instance != null) || Game.IsDlcActiveForCurrentSave(personality.requiredDlcId)));
 		}
 
 		public Personality GetRandom(bool onlyEnabledMinions, bool onlyStartingMinions)

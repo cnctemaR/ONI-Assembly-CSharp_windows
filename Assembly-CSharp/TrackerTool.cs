@@ -65,7 +65,7 @@ public class TrackerTool : KMonoBehaviour
 		this.worldTrackers.Add(new CropTracker(worldID));
 		this.worldTrackers.Add(new WorkingToiletTracker(worldID));
 		this.worldTrackers.Add(new RadiationTracker(worldID));
-		if (SaveLoader.Instance.IsDLCActiveForCurrentSave("DLC3_ID"))
+		if (Game.IsDlcActiveForCurrentSave("DLC3_ID"))
 		{
 			this.worldTrackers.Add(new ElectrobankJoulesTracker(worldID));
 		}

@@ -39,13 +39,10 @@ public class PlayerController : KMonoBehaviour, IInputHandler
 		this.vim = global::UnityEngine.Object.FindObjectOfType<VirtualInputModule>(true);
 		for (int i = 0; i < this.tools.Length; i++)
 		{
-			if (DlcManager.IsDlcListValidForCurrentContent(this.tools[i].DlcIDs))
-			{
-				GameObject gameObject = Util.KInstantiate(this.tools[i].gameObject, base.gameObject, null);
-				this.tools[i] = gameObject.GetComponent<InterfaceTool>();
-				this.tools[i].gameObject.SetActive(true);
-				this.tools[i].gameObject.SetActive(false);
-			}
+			GameObject gameObject = Util.KInstantiate(this.tools[i].gameObject, base.gameObject, null);
+			this.tools[i] = gameObject.GetComponent<InterfaceTool>();
+			this.tools[i].gameObject.SetActive(true);
+			this.tools[i].gameObject.SetActive(false);
 		}
 	}
 

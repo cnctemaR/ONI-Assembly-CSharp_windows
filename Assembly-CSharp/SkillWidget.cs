@@ -193,13 +193,14 @@ public class SkillWidget : KMonoBehaviour, IPointerEnterHandler, IEventSystemHan
 		string text = "";
 		foreach (SkillPerk skillPerk in skill.perks)
 		{
-			if (SaveLoader.Instance.IsAllDlcActiveForCurrentSave(skillPerk.requiredDlcIds))
+			if (Game.IsCorrectDlcActiveForCurrentSave(skillPerk))
 			{
+				string text2 = GameUtil.NamesOfBuildingsRequiringSkillPerk(skillPerk.Id);
 				if (!string.IsNullOrEmpty(text))
 				{
 					text += "\n";
 				}
-				text = text + "• " + skillPerk.Name;
+				text += ((text2 != null) ? text2 : ("• " + skillPerk.Name));
 			}
 		}
 		return text;

@@ -125,7 +125,7 @@ public class FishFeeder : GameStateMachine<FishFeeder, FishFeeder.Instance, ISta
 
 		public void UpdateMutantSeedStatusItem()
 		{
-			base.gameObject.GetComponent<KSelectable>().ToggleStatusItem(this.mutantSeedStatusItem, SaveLoader.Instance.IsDLCActiveForCurrentSave("EXPANSION1_ID") && !this.forbidMutantSeeds, null);
+			base.gameObject.GetComponent<KSelectable>().ToggleStatusItem(this.mutantSeedStatusItem, Game.IsDlcActiveForCurrentSave("EXPANSION1_ID") && !this.forbidMutantSeeds, null);
 		}
 
 		private StatusItem mutantSeedStatusItem;
@@ -170,12 +170,13 @@ public class FishFeeder : GameStateMachine<FishFeeder, FishFeeder.Instance, ISta
 				}
 			}
 			this.targetMass = num;
+			this.timeSinceLastBallAppeared = 0f;
 		}
 
 		public void RenderEveryTick(float dt)
 		{
 			this.timeSinceLastBallAppeared += dt;
-			if (this.targetMass > this.mass && this.timeSinceLastBallAppeared > 0.025f)
+			if (Mathf.Abs(this.targetMass - this.mass) > 1f && this.timeSinceLastBallAppeared > 0.025f)
 			{
 				float num = Mathf.Min(this.massPerBall, this.targetMass - this.mass);
 				this.mass += num;
@@ -227,9 +228,17 @@ public class FishFeeder : GameStateMachine<FishFeeder, FishFeeder.Instance, ISta
 			{
 				this.anim.SetSymbolVisiblity(hashedString, false);
 			}
-			Storage[] components = smi.gameObject.GetComponents<Storage>();
-			this.topStorage = components[0];
-			this.botStorage = components[1];
+			foreach (Storage storage in smi.gameObject.GetComponents<Storage>())
+			{
+				if (storage.storageID == "FishFeederBot")
+				{
+					this.botStorage = storage;
+				}
+				else if (storage.storageID == "FishFeederTop")
+				{
+					this.topStorage = storage;
+				}
+			}
 			if (!this.botStorage.IsEmpty())
 			{
 				this.SetBallSymbol(this.botStorage.items[0].gameObject);
@@ -265,9 +274,9 @@ public class FishFeeder : GameStateMachine<FishFeeder, FishFeeder.Instance, ISta
 				if (num2 > 0f)
 				{
 					Pickupable pickupable = this.topStorage.items[0].GetComponent<Pickupable>().Take(this.massPerBall);
+					this.botStorage.Store(pickupable.gameObject, false, false, true, false);
 					this.SetBallSymbol(pickupable.gameObject);
 					this.anim.Play("ball", KAnim.PlayMode.Once, 1f, 0f);
-					this.botStorage.Store(pickupable.gameObject, false, false, true, false);
 				}
 				else
 				{

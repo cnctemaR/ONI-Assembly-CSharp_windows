@@ -1,7 +1,7 @@
 ﻿using System;
 using Database;
 
-public class MonumentPartInfo : IBlueprintInfo, IBlueprintDlcInfo
+public class MonumentPartInfo : IBlueprintInfo, IHasDlcRestrictions
 {
 	public string id { get; set; }
 
@@ -13,9 +13,7 @@ public class MonumentPartInfo : IBlueprintInfo, IBlueprintDlcInfo
 
 	public string animFile { get; set; }
 
-	public string[] dlcIds { get; set; }
-
-	public MonumentPartInfo(string id, string name, string desc, PermitRarity rarity, string animFilename, string state, string symbolName, MonumentPartResource.Part part, string[] dlcIds)
+	public MonumentPartInfo(string id, string name, string desc, PermitRarity rarity, string animFilename, string state, string symbolName, MonumentPartResource.Part part, string[] requiredDlcIds = null, string[] forbiddenDlcIds = null)
 	{
 		this.id = id;
 		this.name = name;
@@ -25,7 +23,18 @@ public class MonumentPartInfo : IBlueprintInfo, IBlueprintDlcInfo
 		this.state = state;
 		this.symbolName = symbolName;
 		this.part = part;
-		this.dlcIds = dlcIds;
+		this.requiredDlcIds = requiredDlcIds;
+		this.forbiddenDlcIds = forbiddenDlcIds;
+	}
+
+	public string[] GetRequiredDlcIds()
+	{
+		return this.requiredDlcIds;
+	}
+
+	public string[] GetForbiddenDlcIds()
+	{
+		return this.forbiddenDlcIds;
 	}
 
 	public string state;
@@ -33,4 +42,8 @@ public class MonumentPartInfo : IBlueprintInfo, IBlueprintDlcInfo
 	public string symbolName;
 
 	public MonumentPartResource.Part part;
+
+	public string[] requiredDlcIds;
+
+	public string[] forbiddenDlcIds;
 }

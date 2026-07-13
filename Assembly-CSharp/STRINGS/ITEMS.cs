@@ -1341,14 +1341,14 @@ namespace STRINGS
 
 			public class POWER_STATION_TOOLS
 			{
-				public static LocString NAME = "Microchip";
+				public static LocString NAME = UI.FormatAsLink("Microchip", "POWER_STATION_TOOLS");
 
 				public static LocString DESC = string.Concat(new string[]
 				{
 					"A specialized ",
 					ITEMS.INDUSTRIAL_PRODUCTS.POWER_STATION_TOOLS.NAME,
 					" created by a professional engineer.\n\nTunes up ",
-					UI.FormatAsLink("Generators", "BUILDCATEGORYREQUIREMENTCLASSGENERATORTYPE"),
+					UI.FormatAsLink("Generators", "REQUIREMENTCLASSGENERATORTYPE"),
 					" to increase their ",
 					UI.FormatAsLink("Power", "POWER"),
 					" output.\n\nAlso used in the production of ",
@@ -1443,20 +1443,20 @@ namespace STRINGS
 
 			public class RESEARCH_DATABANK
 			{
-				public static LocString NAME = UI.FormatAsLink("Data Bank", "RESEARCH_DATABANK");
+				public static LocString NAME = UI.FormatAsLink("Data Bank", "DATABANK");
 
-				public static LocString NAME_PLURAL = UI.FormatAsLink("Data Banks", "RESEARCH_DATABANK");
+				public static LocString NAME_PLURAL = UI.FormatAsLink("Data Banks", "DATABANK");
 
 				public static LocString DESC = "Raw data that can be processed into " + UI.FormatAsLink("Interstellar Research", "RESEARCH") + " points.";
 			}
 
 			public class ORBITAL_RESEARCH_DATABANK
 			{
-				public static LocString NAME = UI.FormatAsLink("Data Bank", "ORBITAL_RESEARCH_DATABANK");
+				public static LocString NAME = UI.FormatAsLink("Data Bank", "DATABANK");
 
-				public static LocString NAME_PLURAL = UI.FormatAsLink("Data Banks", "ORBITAL_RESEARCH_DATABANK");
+				public static LocString NAME_PLURAL = UI.FormatAsLink("Data Banks", "DATABANK");
 
-				public static LocString DESC = "Raw Data that can be processed into " + UI.FormatAsLink("Data Analysis Research", "RESEARCH") + " points.";
+				public static LocString DESC = "Raw Data that can be processed into " + UI.FormatAsLink("Data Analysis Research", "RESEARCHDLC1") + " points.";
 
 				public static LocString RECIPE_DESC = string.Concat(new string[]
 				{

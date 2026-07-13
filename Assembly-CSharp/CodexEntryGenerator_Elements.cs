@@ -180,7 +180,7 @@ public class CodexEntryGenerator_Elements
 		Func<ComplexRecipe.RecipeElement, bool> <>9__1;
 		foreach (ComplexRecipe complexRecipe in ComplexRecipeManager.Get().recipes)
 		{
-			if (SaveLoader.Instance.IsAnyDlcActiveForCurrentSave(complexRecipe.GetDlcIds()))
+			if (Game.IsCorrectDlcActiveForCurrentSave(complexRecipe))
 			{
 				IEnumerable<ComplexRecipe.RecipeElement> ingredients = complexRecipe.ingredients;
 				Func<ComplexRecipe.RecipeElement, bool> func;

@@ -10,23 +10,19 @@ public class KProfilerPluginEndpoint : KProfilerEndpoint
 	{
 	}
 
-	public override void Ping(string display, string group, double value)
+	public override void Ping(string name, double value)
 	{
 	}
 
-	public override void BeginAsync(string display, string group)
+	public override void BeginAsync(string name, string group)
 	{
 	}
 
-	public override void EndAsync(string display)
+	public override void EndAsync(string name)
 	{
 	}
 
-	public override void BeginFrame()
-	{
-	}
-
-	public override void EndFrame()
+	public override void NextFrame()
 	{
 	}
 }

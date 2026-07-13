@@ -2,11 +2,16 @@
 using STRINGS;
 using UnityEngine;
 
-public class SpaceTreeSeedCometConfig : IEntityConfig
+public class SpaceTreeSeedCometConfig : IEntityConfig, IHasDlcRestrictions
 {
-	public string[] GetDlcIds()
+	public string[] GetRequiredDlcIds()
 	{
-		return DlcManager.AVAILABLE_DLC_2;
+		return DlcManager.DLC2;
+	}
+
+	public string[] GetForbiddenDlcIds()
+	{
+		return null;
 	}
 
 	public GameObject CreatePrefab()

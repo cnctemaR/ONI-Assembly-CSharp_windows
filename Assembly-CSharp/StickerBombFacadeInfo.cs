@@ -1,7 +1,7 @@
 ﻿using System;
 using Database;
 
-public class StickerBombFacadeInfo : IBlueprintInfo, IBlueprintDlcInfo
+public class StickerBombFacadeInfo : IBlueprintInfo, IHasDlcRestrictions
 {
 	public string id { get; set; }
 
@@ -13,9 +13,7 @@ public class StickerBombFacadeInfo : IBlueprintInfo, IBlueprintDlcInfo
 
 	public string animFile { get; set; }
 
-	public string[] dlcIds { get; set; }
-
-	public StickerBombFacadeInfo(string id, string name, string desc, PermitRarity rarity, string animFile, string sticker)
+	public StickerBombFacadeInfo(string id, string name, string desc, PermitRarity rarity, string animFile, string sticker, string[] requiredDlcIds = null, string[] forbiddenDlcIds = null)
 	{
 		this.id = id;
 		this.name = name;
@@ -23,8 +21,23 @@ public class StickerBombFacadeInfo : IBlueprintInfo, IBlueprintDlcInfo
 		this.rarity = rarity;
 		this.animFile = animFile;
 		this.sticker = sticker;
-		this.dlcIds = DlcManager.AVAILABLE_ALL_VERSIONS;
+		this.requiredDlcIds = requiredDlcIds;
+		this.forbiddenDlcIds = forbiddenDlcIds;
+	}
+
+	public string[] GetRequiredDlcIds()
+	{
+		return this.requiredDlcIds;
+	}
+
+	public string[] GetForbiddenDlcIds()
+	{
+		return this.forbiddenDlcIds;
 	}
 
 	public string sticker;
+
+	public string[] requiredDlcIds;
+
+	public string[] forbiddenDlcIds;
 }

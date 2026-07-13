@@ -29,6 +29,7 @@ public class ArtifactAnalysisStationConfig : IBuildingConfig
 		buildingDef.ViewMode = OverlayModes.Power.ID;
 		buildingDef.AudioCategory = "HollowMetal";
 		buildingDef.AudioSize = "large";
+		buildingDef.RequiredSkillPerkID = Db.Get().SkillPerks.CanStudyArtifact.Id;
 		return buildingDef;
 	}
 

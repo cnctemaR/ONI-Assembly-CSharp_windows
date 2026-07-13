@@ -1,7 +1,7 @@
 ﻿using System;
 using Database;
 
-public interface IBlueprintInfo : IBlueprintDlcInfo
+public interface IBlueprintInfo : IHasDlcRestrictions
 {
 	string id { get; set; }
 

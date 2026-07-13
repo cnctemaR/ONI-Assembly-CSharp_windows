@@ -372,7 +372,6 @@ namespace TUNING
 				id = "CantResearch",
 				statBonus = DUPLICANTSTATS.NO_STATPOINT_BONUS,
 				rarity = DUPLICANTSTATS.RARITY_COMMON,
-				dlcId = "",
 				mutuallyExclusiveAptitudes = new List<HashedString> { "Research" }
 			},
 			new DUPLICANTSTATS.TraitVal
@@ -380,7 +379,6 @@ namespace TUNING
 				id = "CantDig",
 				statBonus = DUPLICANTSTATS.LARGE_STATPOINT_BONUS,
 				rarity = DUPLICANTSTATS.RARITY_EPIC,
-				dlcId = "",
 				mutuallyExclusiveAptitudes = new List<HashedString> { "Mining" }
 			},
 			new DUPLICANTSTATS.TraitVal
@@ -388,7 +386,6 @@ namespace TUNING
 				id = "CantCook",
 				statBonus = DUPLICANTSTATS.NO_STATPOINT_BONUS,
 				rarity = DUPLICANTSTATS.RARITY_UNCOMMON,
-				dlcId = "",
 				mutuallyExclusiveAptitudes = new List<HashedString> { "Cooking" }
 			},
 			new DUPLICANTSTATS.TraitVal
@@ -396,7 +393,6 @@ namespace TUNING
 				id = "CantBuild",
 				statBonus = DUPLICANTSTATS.LARGE_STATPOINT_BONUS,
 				rarity = DUPLICANTSTATS.RARITY_EPIC,
-				dlcId = "",
 				mutuallyExclusiveAptitudes = new List<HashedString> { "Building" },
 				mutuallyExclusiveTraits = new List<string> { "GrantSkill_Engineering1" }
 			},
@@ -405,7 +401,6 @@ namespace TUNING
 				id = "Hemophobia",
 				statBonus = DUPLICANTSTATS.NO_STATPOINT_BONUS,
 				rarity = DUPLICANTSTATS.RARITY_UNCOMMON,
-				dlcId = "",
 				mutuallyExclusiveAptitudes = new List<HashedString> { "MedicalAid" }
 			},
 			new DUPLICANTSTATS.TraitVal
@@ -413,7 +408,6 @@ namespace TUNING
 				id = "ScaredyCat",
 				statBonus = DUPLICANTSTATS.NO_STATPOINT_BONUS,
 				rarity = DUPLICANTSTATS.RARITY_UNCOMMON,
-				dlcId = "",
 				mutuallyExclusiveAptitudes = new List<HashedString> { "Mining" }
 			},
 			new DUPLICANTSTATS.TraitVal
@@ -421,7 +415,6 @@ namespace TUNING
 				id = "ConstructionDown",
 				statBonus = DUPLICANTSTATS.MEDIUM_STATPOINT_BONUS,
 				rarity = DUPLICANTSTATS.RARITY_UNCOMMON,
-				dlcId = "",
 				mutuallyExclusiveTraits = new List<string> { "ConstructionUp", "CantBuild" }
 			},
 			new DUPLICANTSTATS.TraitVal
@@ -429,7 +422,6 @@ namespace TUNING
 				id = "RanchingDown",
 				statBonus = DUPLICANTSTATS.SMALL_STATPOINT_BONUS,
 				rarity = DUPLICANTSTATS.RARITY_COMMON,
-				dlcId = "",
 				mutuallyExclusiveTraits = new List<string> { "RanchingUp" }
 			},
 			new DUPLICANTSTATS.TraitVal
@@ -437,44 +429,38 @@ namespace TUNING
 				id = "CaringDown",
 				statBonus = DUPLICANTSTATS.SMALL_STATPOINT_BONUS,
 				rarity = DUPLICANTSTATS.RARITY_COMMON,
-				dlcId = "",
 				mutuallyExclusiveTraits = new List<string> { "Hemophobia" }
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
 				id = "BotanistDown",
 				statBonus = DUPLICANTSTATS.SMALL_STATPOINT_BONUS,
-				rarity = DUPLICANTSTATS.RARITY_COMMON,
-				dlcId = ""
+				rarity = DUPLICANTSTATS.RARITY_COMMON
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
 				id = "ArtDown",
 				statBonus = DUPLICANTSTATS.SMALL_STATPOINT_BONUS,
-				rarity = DUPLICANTSTATS.RARITY_COMMON,
-				dlcId = ""
+				rarity = DUPLICANTSTATS.RARITY_COMMON
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
 				id = "CookingDown",
 				statBonus = DUPLICANTSTATS.SMALL_STATPOINT_BONUS,
 				rarity = DUPLICANTSTATS.RARITY_COMMON,
-				dlcId = "",
 				mutuallyExclusiveTraits = new List<string> { "Foodie", "CantCook" }
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
 				id = "MachineryDown",
 				statBonus = DUPLICANTSTATS.SMALL_STATPOINT_BONUS,
-				rarity = DUPLICANTSTATS.RARITY_COMMON,
-				dlcId = ""
+				rarity = DUPLICANTSTATS.RARITY_COMMON
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
 				id = "DiggingDown",
 				statBonus = DUPLICANTSTATS.MEDIUM_STATPOINT_BONUS,
 				rarity = DUPLICANTSTATS.RARITY_RARE,
-				dlcId = "",
 				mutuallyExclusiveTraits = new List<string> { "MoleHands", "CantDig" }
 			},
 			new DUPLICANTSTATS.TraitVal
@@ -482,99 +468,85 @@ namespace TUNING
 				id = "SlowLearner",
 				statBonus = DUPLICANTSTATS.MEDIUM_STATPOINT_BONUS,
 				rarity = DUPLICANTSTATS.RARITY_RARE,
-				dlcId = "",
 				mutuallyExclusiveTraits = new List<string> { "FastLearner", "CantResearch" }
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
 				id = "NoodleArms",
 				statBonus = DUPLICANTSTATS.MEDIUM_STATPOINT_BONUS,
-				rarity = DUPLICANTSTATS.RARITY_RARE,
-				dlcId = ""
+				rarity = DUPLICANTSTATS.RARITY_RARE
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
 				id = "DecorDown",
 				statBonus = DUPLICANTSTATS.TINY_STATPOINT_BONUS,
-				rarity = DUPLICANTSTATS.RARITY_COMMON,
-				dlcId = ""
+				rarity = DUPLICANTSTATS.RARITY_COMMON
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
 				id = "Anemic",
 				statBonus = DUPLICANTSTATS.HUGE_STATPOINT_BONUS,
-				rarity = DUPLICANTSTATS.RARITY_LEGENDARY,
-				dlcId = ""
+				rarity = DUPLICANTSTATS.RARITY_LEGENDARY
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
 				id = "Flatulence",
 				statBonus = DUPLICANTSTATS.MEDIUM_STATPOINT_BONUS,
-				rarity = DUPLICANTSTATS.RARITY_RARE,
-				dlcId = ""
+				rarity = DUPLICANTSTATS.RARITY_RARE
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
 				id = "IrritableBowel",
 				statBonus = DUPLICANTSTATS.TINY_STATPOINT_BONUS,
-				rarity = DUPLICANTSTATS.RARITY_UNCOMMON,
-				dlcId = ""
+				rarity = DUPLICANTSTATS.RARITY_UNCOMMON
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
 				id = "Snorer",
 				statBonus = DUPLICANTSTATS.TINY_STATPOINT_BONUS,
-				rarity = DUPLICANTSTATS.RARITY_RARE,
-				dlcId = ""
+				rarity = DUPLICANTSTATS.RARITY_RARE
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
 				id = "MouthBreather",
 				statBonus = DUPLICANTSTATS.HUGE_STATPOINT_BONUS,
-				rarity = DUPLICANTSTATS.RARITY_LEGENDARY,
-				dlcId = ""
+				rarity = DUPLICANTSTATS.RARITY_LEGENDARY
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
 				id = "SmallBladder",
 				statBonus = DUPLICANTSTATS.TINY_STATPOINT_BONUS,
-				rarity = DUPLICANTSTATS.RARITY_UNCOMMON,
-				dlcId = ""
+				rarity = DUPLICANTSTATS.RARITY_UNCOMMON
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
 				id = "CalorieBurner",
 				statBonus = DUPLICANTSTATS.LARGE_STATPOINT_BONUS,
-				rarity = DUPLICANTSTATS.RARITY_EPIC,
-				dlcId = ""
+				rarity = DUPLICANTSTATS.RARITY_EPIC
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
 				id = "WeakImmuneSystem",
 				statBonus = DUPLICANTSTATS.SMALL_STATPOINT_BONUS,
-				rarity = DUPLICANTSTATS.RARITY_UNCOMMON,
-				dlcId = ""
+				rarity = DUPLICANTSTATS.RARITY_UNCOMMON
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
 				id = "Allergies",
 				statBonus = DUPLICANTSTATS.SMALL_STATPOINT_BONUS,
-				rarity = DUPLICANTSTATS.RARITY_RARE,
-				dlcId = ""
+				rarity = DUPLICANTSTATS.RARITY_RARE
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
 				id = "NightLight",
 				statBonus = DUPLICANTSTATS.SMALL_STATPOINT_BONUS,
-				rarity = DUPLICANTSTATS.RARITY_RARE,
-				dlcId = ""
+				rarity = DUPLICANTSTATS.RARITY_RARE
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
 				id = "Narcolepsy",
 				statBonus = DUPLICANTSTATS.HUGE_STATPOINT_BONUS,
-				rarity = DUPLICANTSTATS.RARITY_RARE,
-				dlcId = ""
+				rarity = DUPLICANTSTATS.RARITY_RARE
 			}
 		};
 
@@ -582,28 +554,23 @@ namespace TUNING
 		{
 			new DUPLICANTSTATS.TraitVal
 			{
-				id = "Aggressive",
-				dlcId = ""
+				id = "Aggressive"
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
-				id = "StressVomiter",
-				dlcId = ""
+				id = "StressVomiter"
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
-				id = "UglyCrier",
-				dlcId = ""
+				id = "UglyCrier"
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
-				id = "BingeEater",
-				dlcId = ""
+				id = "BingeEater"
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
-				id = "Banshee",
-				dlcId = ""
+				id = "Banshee"
 			}
 		};
 
@@ -611,38 +578,33 @@ namespace TUNING
 		{
 			new DUPLICANTSTATS.TraitVal
 			{
-				id = "BalloonArtist",
-				dlcId = ""
+				id = "BalloonArtist"
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
-				id = "SparkleStreaker",
-				dlcId = ""
+				id = "SparkleStreaker"
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
-				id = "StickerBomber",
-				dlcId = ""
+				id = "StickerBomber"
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
-				id = "SuperProductive",
-				dlcId = ""
+				id = "SuperProductive"
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
-				id = "HappySinger",
-				dlcId = ""
+				id = "HappySinger"
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
 				id = "DataRainer",
-				dlcId = "DLC3_ID"
+				requiredDlcIds = DlcManager.DLC3
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
 				id = "RoboDancer",
-				dlcId = "DLC3_ID"
+				requiredDlcIds = DlcManager.DLC3
 			}
 		};
 
@@ -650,23 +612,19 @@ namespace TUNING
 		{
 			new DUPLICANTSTATS.TraitVal
 			{
-				id = "Regeneration",
-				dlcId = ""
+				id = "Regeneration"
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
-				id = "DeeperDiversLungs",
-				dlcId = ""
+				id = "DeeperDiversLungs"
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
-				id = "SunnyDisposition",
-				dlcId = ""
+				id = "SunnyDisposition"
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
-				id = "RockCrusher",
-				dlcId = ""
+				id = "RockCrusher"
 			}
 		};
 
@@ -675,37 +633,37 @@ namespace TUNING
 			new DUPLICANTSTATS.TraitVal
 			{
 				id = "BionicBug1",
-				dlcId = "DLC3_ID"
+				requiredDlcIds = DlcManager.DLC3
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
 				id = "BionicBug2",
-				dlcId = "DLC3_ID"
+				requiredDlcIds = DlcManager.DLC3
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
 				id = "BionicBug3",
-				dlcId = "DLC3_ID"
+				requiredDlcIds = DlcManager.DLC3
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
 				id = "BionicBug4",
-				dlcId = "DLC3_ID"
+				requiredDlcIds = DlcManager.DLC3
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
 				id = "BionicBug5",
-				dlcId = "DLC3_ID"
+				requiredDlcIds = DlcManager.DLC3
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
 				id = "BionicBug6",
-				dlcId = "DLC3_ID"
+				requiredDlcIds = DlcManager.DLC3
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
 				id = "BionicBug7",
-				dlcId = "DLC3_ID"
+				requiredDlcIds = DlcManager.DLC3
 			}
 		};
 
@@ -717,7 +675,7 @@ namespace TUNING
 			{
 				id = "AncientKnowledge",
 				rarity = DUPLICANTSTATS.RARITY_LEGENDARY,
-				dlcId = "EXPANSION1_ID",
+				requiredDlcIds = DlcManager.EXPANSION1,
 				doNotGenerateTrait = true,
 				mutuallyExclusiveTraits = new List<string>
 				{
@@ -729,7 +687,6 @@ namespace TUNING
 			{
 				id = "Chatty",
 				rarity = DUPLICANTSTATS.RARITY_LEGENDARY,
-				dlcId = "",
 				doNotGenerateTrait = true
 			}
 		};
@@ -740,89 +697,76 @@ namespace TUNING
 			{
 				id = "Twinkletoes",
 				rarity = DUPLICANTSTATS.RARITY_EPIC,
-				dlcId = "",
 				mutuallyExclusiveTraits = new List<string> { "Anemic" }
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
 				id = "StrongArm",
 				rarity = DUPLICANTSTATS.RARITY_RARE,
-				dlcId = "",
 				mutuallyExclusiveTraits = new List<string> { "NoodleArms" }
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
 				id = "Greasemonkey",
 				rarity = DUPLICANTSTATS.RARITY_UNCOMMON,
-				dlcId = "",
 				mutuallyExclusiveTraits = new List<string> { "MachineryDown" }
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
 				id = "DiversLung",
 				rarity = DUPLICANTSTATS.RARITY_EPIC,
-				dlcId = "",
 				mutuallyExclusiveTraits = new List<string> { "MouthBreather" }
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
 				id = "IronGut",
-				rarity = DUPLICANTSTATS.RARITY_COMMON,
-				dlcId = ""
+				rarity = DUPLICANTSTATS.RARITY_COMMON
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
 				id = "StrongImmuneSystem",
 				rarity = DUPLICANTSTATS.RARITY_COMMON,
-				dlcId = "",
 				mutuallyExclusiveTraits = new List<string> { "WeakImmuneSystem" }
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
 				id = "EarlyBird",
 				rarity = DUPLICANTSTATS.RARITY_RARE,
-				dlcId = "",
 				mutuallyExclusiveTraits = new List<string> { "NightOwl" }
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
 				id = "NightOwl",
 				rarity = DUPLICANTSTATS.RARITY_RARE,
-				dlcId = "",
 				mutuallyExclusiveTraits = new List<string> { "EarlyBird" }
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
 				id = "Meteorphile",
-				rarity = DUPLICANTSTATS.RARITY_RARE,
-				dlcId = ""
+				rarity = DUPLICANTSTATS.RARITY_RARE
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
 				id = "MoleHands",
 				rarity = DUPLICANTSTATS.RARITY_RARE,
-				dlcId = "",
 				mutuallyExclusiveTraits = new List<string> { "CantDig", "DiggingDown" }
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
 				id = "FastLearner",
 				rarity = DUPLICANTSTATS.RARITY_RARE,
-				dlcId = "",
 				mutuallyExclusiveTraits = new List<string> { "SlowLearner", "CantResearch" }
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
 				id = "InteriorDecorator",
 				rarity = DUPLICANTSTATS.RARITY_COMMON,
-				dlcId = "",
 				mutuallyExclusiveTraits = new List<string> { "Uncultured", "ArtDown" }
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
 				id = "Uncultured",
 				rarity = DUPLICANTSTATS.RARITY_COMMON,
-				dlcId = "",
 				mutuallyExclusiveTraits = new List<string> { "InteriorDecorator" },
 				mutuallyExclusiveAptitudes = new List<HashedString> { "Art" }
 			},
@@ -830,14 +774,12 @@ namespace TUNING
 			{
 				id = "SimpleTastes",
 				rarity = DUPLICANTSTATS.RARITY_UNCOMMON,
-				dlcId = "",
 				mutuallyExclusiveTraits = new List<string> { "Foodie" }
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
 				id = "Foodie",
 				rarity = DUPLICANTSTATS.RARITY_COMMON,
-				dlcId = "",
 				mutuallyExclusiveTraits = new List<string> { "SimpleTastes", "CantCook", "CookingDown" },
 				mutuallyExclusiveAptitudes = new List<HashedString> { "Cooking" }
 			},
@@ -845,79 +787,72 @@ namespace TUNING
 			{
 				id = "BedsideManner",
 				rarity = DUPLICANTSTATS.RARITY_COMMON,
-				dlcId = "",
 				mutuallyExclusiveTraits = new List<string> { "Hemophobia", "CaringDown" }
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
 				id = "DecorUp",
 				rarity = DUPLICANTSTATS.RARITY_UNCOMMON,
-				dlcId = "",
 				mutuallyExclusiveTraits = new List<string> { "DecorDown" }
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
 				id = "Thriver",
-				rarity = DUPLICANTSTATS.RARITY_EPIC,
-				dlcId = ""
+				rarity = DUPLICANTSTATS.RARITY_EPIC
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
 				id = "GreenThumb",
 				rarity = DUPLICANTSTATS.RARITY_COMMON,
-				dlcId = "",
 				mutuallyExclusiveTraits = new List<string> { "BotanistDown" }
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
 				id = "ConstructionUp",
 				rarity = DUPLICANTSTATS.RARITY_UNCOMMON,
-				dlcId = "",
 				mutuallyExclusiveTraits = new List<string> { "ConstructionDown", "CantBuild" }
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
 				id = "RanchingUp",
 				rarity = DUPLICANTSTATS.RARITY_UNCOMMON,
-				dlcId = "",
 				mutuallyExclusiveTraits = new List<string> { "RanchingDown" }
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
 				id = "Loner",
 				rarity = DUPLICANTSTATS.RARITY_EPIC,
-				dlcId = "EXPANSION1_ID"
+				requiredDlcIds = DlcManager.EXPANSION1
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
 				id = "StarryEyed",
 				rarity = DUPLICANTSTATS.RARITY_RARE,
-				dlcId = "EXPANSION1_ID"
+				requiredDlcIds = DlcManager.EXPANSION1
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
 				id = "GlowStick",
 				rarity = DUPLICANTSTATS.RARITY_EPIC,
-				dlcId = "EXPANSION1_ID"
+				requiredDlcIds = DlcManager.EXPANSION1
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
 				id = "RadiationEater",
 				rarity = DUPLICANTSTATS.RARITY_EPIC,
-				dlcId = "EXPANSION1_ID"
+				requiredDlcIds = DlcManager.EXPANSION1
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
 				id = "FrostProof",
 				rarity = DUPLICANTSTATS.RARITY_COMMON,
-				dlcId = "DLC2_ID"
+				requiredDlcIds = DlcManager.DLC2
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
 				id = "GrantSkill_Mining1",
 				statBonus = -DUPLICANTSTATS.LARGE_STATPOINT_BONUS,
 				rarity = DUPLICANTSTATS.RARITY_LEGENDARY,
-				dlcId = "",
 				mutuallyExclusiveTraits = new List<string> { "CantDig" }
 			},
 			new DUPLICANTSTATS.TraitVal
@@ -925,7 +860,6 @@ namespace TUNING
 				id = "GrantSkill_Mining2",
 				statBonus = -DUPLICANTSTATS.LARGE_STATPOINT_BONUS,
 				rarity = DUPLICANTSTATS.RARITY_LEGENDARY,
-				dlcId = "",
 				mutuallyExclusiveTraits = new List<string> { "CantDig" }
 			},
 			new DUPLICANTSTATS.TraitVal
@@ -933,29 +867,25 @@ namespace TUNING
 				id = "GrantSkill_Mining3",
 				statBonus = -DUPLICANTSTATS.LARGE_STATPOINT_BONUS,
 				rarity = DUPLICANTSTATS.RARITY_LEGENDARY,
-				dlcId = "",
 				mutuallyExclusiveTraits = new List<string> { "CantDig" }
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
 				id = "GrantSkill_Farming2",
 				statBonus = -DUPLICANTSTATS.LARGE_STATPOINT_BONUS,
-				rarity = DUPLICANTSTATS.RARITY_EPIC,
-				dlcId = ""
+				rarity = DUPLICANTSTATS.RARITY_EPIC
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
 				id = "GrantSkill_Ranching1",
 				statBonus = -DUPLICANTSTATS.LARGE_STATPOINT_BONUS,
-				rarity = DUPLICANTSTATS.RARITY_EPIC,
-				dlcId = ""
+				rarity = DUPLICANTSTATS.RARITY_EPIC
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
 				id = "GrantSkill_Cooking1",
 				statBonus = -DUPLICANTSTATS.LARGE_STATPOINT_BONUS,
 				rarity = DUPLICANTSTATS.RARITY_EPIC,
-				dlcId = "",
 				mutuallyExclusiveTraits = new List<string> { "CantCook" }
 			},
 			new DUPLICANTSTATS.TraitVal
@@ -963,7 +893,6 @@ namespace TUNING
 				id = "GrantSkill_Arting1",
 				statBonus = -DUPLICANTSTATS.LARGE_STATPOINT_BONUS,
 				rarity = DUPLICANTSTATS.RARITY_EPIC,
-				dlcId = "",
 				mutuallyExclusiveTraits = new List<string> { "Uncultured" }
 			},
 			new DUPLICANTSTATS.TraitVal
@@ -971,7 +900,6 @@ namespace TUNING
 				id = "GrantSkill_Arting2",
 				statBonus = -DUPLICANTSTATS.LARGE_STATPOINT_BONUS,
 				rarity = DUPLICANTSTATS.RARITY_EPIC,
-				dlcId = "",
 				mutuallyExclusiveTraits = new List<string> { "Uncultured" }
 			},
 			new DUPLICANTSTATS.TraitVal
@@ -979,36 +907,31 @@ namespace TUNING
 				id = "GrantSkill_Arting3",
 				statBonus = -DUPLICANTSTATS.LARGE_STATPOINT_BONUS,
 				rarity = DUPLICANTSTATS.RARITY_EPIC,
-				dlcId = "",
 				mutuallyExclusiveTraits = new List<string> { "Uncultured" }
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
 				id = "GrantSkill_Suits1",
 				statBonus = -DUPLICANTSTATS.LARGE_STATPOINT_BONUS,
-				rarity = DUPLICANTSTATS.RARITY_EPIC,
-				dlcId = ""
+				rarity = DUPLICANTSTATS.RARITY_EPIC
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
 				id = "GrantSkill_Technicals2",
 				statBonus = -DUPLICANTSTATS.LARGE_STATPOINT_BONUS,
-				rarity = DUPLICANTSTATS.RARITY_EPIC,
-				dlcId = ""
+				rarity = DUPLICANTSTATS.RARITY_EPIC
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
 				id = "GrantSkill_Engineering1",
 				statBonus = -DUPLICANTSTATS.LARGE_STATPOINT_BONUS,
-				rarity = DUPLICANTSTATS.RARITY_EPIC,
-				dlcId = ""
+				rarity = DUPLICANTSTATS.RARITY_EPIC
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
 				id = "GrantSkill_Basekeeping2",
 				statBonus = -DUPLICANTSTATS.LARGE_STATPOINT_BONUS,
 				rarity = DUPLICANTSTATS.RARITY_EPIC,
-				dlcId = "",
 				mutuallyExclusiveTraits = new List<string> { "Anemic" }
 			},
 			new DUPLICANTSTATS.TraitVal
@@ -1016,7 +939,6 @@ namespace TUNING
 				id = "GrantSkill_Medicine2",
 				statBonus = -DUPLICANTSTATS.LARGE_STATPOINT_BONUS,
 				rarity = DUPLICANTSTATS.RARITY_EPIC,
-				dlcId = "",
 				mutuallyExclusiveTraits = new List<string> { "Hemophobia" }
 			}
 		};
@@ -1026,46 +948,39 @@ namespace TUNING
 			new DUPLICANTSTATS.TraitVal
 			{
 				id = "Claustrophobic",
-				rarity = DUPLICANTSTATS.RARITY_COMMON,
-				dlcId = ""
+				rarity = DUPLICANTSTATS.RARITY_COMMON
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
 				id = "PrefersWarmer",
 				rarity = DUPLICANTSTATS.RARITY_COMMON,
-				dlcId = "",
 				mutuallyExclusiveTraits = new List<string> { "PrefersColder" }
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
 				id = "PrefersColder",
 				rarity = DUPLICANTSTATS.RARITY_COMMON,
-				dlcId = "",
 				mutuallyExclusiveTraits = new List<string> { "PrefersWarmer" }
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
 				id = "SensitiveFeet",
-				rarity = DUPLICANTSTATS.RARITY_COMMON,
-				dlcId = ""
+				rarity = DUPLICANTSTATS.RARITY_COMMON
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
 				id = "Fashionable",
-				rarity = DUPLICANTSTATS.RARITY_COMMON,
-				dlcId = ""
+				rarity = DUPLICANTSTATS.RARITY_COMMON
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
 				id = "Climacophobic",
-				rarity = DUPLICANTSTATS.RARITY_COMMON,
-				dlcId = ""
+				rarity = DUPLICANTSTATS.RARITY_COMMON
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
 				id = "SolitarySleeper",
-				rarity = DUPLICANTSTATS.RARITY_COMMON,
-				dlcId = ""
+				rarity = DUPLICANTSTATS.RARITY_COMMON
 			}
 		};
 
@@ -1261,8 +1176,18 @@ namespace TUNING
 			};
 		}
 
-		public struct TraitVal
+		public struct TraitVal : IHasDlcRestrictions
 		{
+			public string[] GetRequiredDlcIds()
+			{
+				return this.requiredDlcIds;
+			}
+
+			public string[] GetForbiddenDlcIds()
+			{
+				return this.forbiddenDlcIds;
+			}
+
 			public string id;
 
 			public int statBonus;
@@ -1271,13 +1196,15 @@ namespace TUNING
 
 			public int rarity;
 
-			public string dlcId;
-
 			public List<string> mutuallyExclusiveTraits;
 
 			public List<HashedString> mutuallyExclusiveAptitudes;
 
 			public bool doNotGenerateTrait;
+
+			public string[] requiredDlcIds;
+
+			public string[] forbiddenDlcIds;
 		}
 
 		public class ATTRIBUTE_LEVELING

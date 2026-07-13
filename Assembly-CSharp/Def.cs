@@ -167,51 +167,63 @@ public class Def : ScriptableObject
 			DebugUtil.LogWarningArgs(new object[] { animName, "missing Anim File" });
 			return Assets.GetSprite("unknown");
 		}
-		KAnimFileData data = animFile.GetData();
-		if (data == null)
+		Sprite spriteFromKAnimFile = Def.GetSpriteFromKAnimFile(animFile, null, null, null, animName, centered, symbolName);
+		if (spriteFromKAnimFile == null)
 		{
-			DebugUtil.LogWarningArgs(new object[] { animName, "KAnimFileData is null" });
 			return Assets.GetSprite("unknown");
 		}
-		if (data.build == null)
+		spriteFromKAnimFile.name = string.Format("{0}:{1}:{2}", spriteFromKAnimFile.texture.name, animName, centered);
+		Def.knownUISprites[tuple] = spriteFromKAnimFile;
+		return spriteFromKAnimFile;
+	}
+
+	public static Sprite GetSpriteFromKAnimFile(KAnimFile animFile, KAnimFileData kafd, KAnim.Build build, KBatchGroupData batchGroupData, string animName = "ui", bool centered = false, string symbolName = "")
+	{
+		kafd = ((kafd == null) ? animFile.GetData() : kafd);
+		if (kafd == null)
 		{
-			return Assets.GetSprite("unknown");
+			DebugUtil.LogWarningArgs(new object[] { animName, "KAnimFileData is null" });
+			return null;
+		}
+		build = ((build == null) ? kafd.build : build);
+		if (build == null)
+		{
+			return null;
 		}
 		if (string.IsNullOrEmpty(symbolName))
 		{
 			symbolName = animName;
 		}
 		KAnimHashedString kanimHashedString = new KAnimHashedString(symbolName);
-		KAnim.Build.Symbol symbol = data.build.GetSymbol(kanimHashedString);
+		KAnim.Build.Symbol symbol = build.GetSymbol(kanimHashedString);
 		if (symbol == null)
 		{
 			DebugUtil.LogWarningArgs(new object[] { animFile.name, animName, "placeSymbol [", symbolName, "] is missing" });
-			return Assets.GetSprite("unknown");
+			return null;
 		}
 		int num = 0;
-		KAnim.Build.SymbolFrameInstance frame = symbol.GetFrame(num);
-		Texture2D texture = data.build.GetTexture(0);
-		global::Debug.Assert(texture != null, "Invalid texture on " + animFile.name);
-		float x = frame.uvMin.x;
-		float x2 = frame.uvMax.x;
-		float y = frame.uvMax.y;
-		float y2 = frame.uvMin.y;
-		int num2 = (int)((float)texture.width * Mathf.Abs(x2 - x));
-		int num3 = (int)((float)texture.height * Mathf.Abs(y2 - y));
-		float num4 = Mathf.Abs(frame.bboxMax.x - frame.bboxMin.x);
+		KAnim.Build.SymbolFrameInstance symbolFrameInstance = ((batchGroupData == null) ? symbol.GetFrame(num) : symbol.GetFrame(num, batchGroupData));
+		Texture2D texture2D = ((batchGroupData == null) ? build.GetTexture(0) : build.GetTexture(0, batchGroupData));
+		global::Debug.Assert(texture2D != null, "Invalid texture on " + animFile.name);
+		float x = symbolFrameInstance.uvMin.x;
+		float x2 = symbolFrameInstance.uvMax.x;
+		float y = symbolFrameInstance.uvMax.y;
+		float y2 = symbolFrameInstance.uvMin.y;
+		int num2 = (int)((float)texture2D.width * Mathf.Abs(x2 - x));
+		int num3 = (int)((float)texture2D.height * Mathf.Abs(y2 - y));
+		float num4 = Mathf.Abs(symbolFrameInstance.bboxMax.x - symbolFrameInstance.bboxMin.x);
 		Rect rect = default(Rect);
 		rect.width = (float)num2;
 		rect.height = (float)num3;
-		rect.x = (float)((int)((float)texture.width * x));
-		rect.y = (float)((int)((float)texture.height * y));
+		rect.x = (float)((int)((float)texture2D.width * x));
+		rect.y = (float)((int)((float)texture2D.height * y));
 		float num5 = 100f;
 		if (num2 != 0)
 		{
 			num5 = 100f / (num4 / (float)num2);
 		}
-		Sprite sprite = Sprite.Create(texture, rect, centered ? new Vector2(0.5f, 0.5f) : Vector2.zero, num5, 0U, SpriteMeshType.FullRect);
-		sprite.name = string.Format("{0}:{1}:{2}", texture.name, animName, centered);
-		Def.knownUISprites[tuple] = sprite;
+		Sprite sprite = Sprite.Create(texture2D, rect, centered ? new Vector2(0.5f, 0.5f) : Vector2.zero, num5, 0U, SpriteMeshType.FullRect);
+		sprite.name = string.Format("{0}:{1}:{2}", texture2D.name, animName, centered);
 		return sprite;
 	}
 

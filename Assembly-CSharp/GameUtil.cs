@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
+using Database;
 using Klei;
 using Klei.AI;
 using STRINGS;
@@ -1061,6 +1063,23 @@ public static class GameUtil
 	public static string GetElementNameByElementHash(SimHashes elementHash)
 	{
 		return ElementLoader.FindElementByHash(elementHash).tag.ProperName();
+	}
+
+	public static string SafeStringFormat(string source, params object[] args)
+	{
+		for (int i = 0; i < args.Length; i++)
+		{
+			string text = "{" + i.ToString() + "}";
+			if (!source.Contains(text))
+			{
+				KCrashReporter.ReportDevNotification(string.Format("Format error in string: \"{0}\". Source is missing the {{{1}}} format marker for argument \"{2}\" insertion.", source, i, args[i]), Environment.StackTrace, "", false, null);
+			}
+			else
+			{
+				source = source.Replace(text, args[i].ToString());
+			}
+		}
+		return source;
 	}
 
 	public static bool HasTrait(GameObject go, string traitName)
@@ -2927,6 +2946,37 @@ public static class GameUtil
 			text += choreType.groups[i].Name;
 		}
 		return text;
+	}
+
+	public static List<BuildingDef> GetBuildingsRequiringSkillPerk(string perkID)
+	{
+		return Assets.BuildingDefs.Where<BuildingDef>((BuildingDef building) => building.RequiredSkillPerkID == perkID).ToList<BuildingDef>();
+	}
+
+	public static string NamesOfBuildingsRequiringSkillPerk(string perkID)
+	{
+		List<string> list = (from building in GameUtil.GetBuildingsRequiringSkillPerk(perkID)
+			select GameUtil.SafeStringFormat(UI.ROLES_SCREEN.PERKS.CAN_USE_BUILDING.DESCRIPTION, new object[] { building.Name })).ToList<string>();
+		if (list == null || list.Count == 0)
+		{
+			return null;
+		}
+		return string.Join("\n", list);
+	}
+
+	public static string NamesOfBoostersWithSkillPerk(string perkID)
+	{
+		List<string> list = (from tag in BionicUpgradeComponentConfig.GetBoostersWithSkillPerk(perkID)
+			select Strings.Get(string.Format("STRINGS.ITEMS.BIONIC_BOOSTERS.{0}.NAME", tag.ToString().ToUpper())).String).ToList<string>();
+		return string.Join("\n", list);
+	}
+
+	public static string NamesOfSkillsWithSkillPerk(string perkID)
+	{
+		List<string> list = (from match in Db.Get().Skills.resources
+			where !match.deprecated && match.GivesPerk(perkID)
+			select match.Name).ToList<string>();
+		return string.Join("\n", list.ToArray());
 	}
 
 	public static bool IsCapturingTimeLapse()

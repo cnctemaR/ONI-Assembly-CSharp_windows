@@ -11,8 +11,8 @@ namespace Database
 
 		public string State { get; private set; }
 
-		public MonumentPartResource(string id, string name, string desc, PermitRarity rarity, string animFilename, string state, string symbolName, MonumentPartResource.Part part, string[] dlcIds)
-			: base(id, name, desc, PermitCategory.Artwork, rarity, dlcIds)
+		public MonumentPartResource(string id, string name, string desc, PermitRarity rarity, string animFilename, string state, string symbolName, MonumentPartResource.Part part, string[] requiredDlcIds, string[] forbiddenDlcIds)
+			: base(id, name, desc, PermitCategory.Artwork, rarity, requiredDlcIds, forbiddenDlcIds)
 		{
 			this.AnimFile = Assets.GetAnim(animFilename);
 			this.SymbolName = symbolName;

@@ -34,6 +34,7 @@ namespace Database
 			this.Radiation2 = base.Add(new Face("Radiation2", "headfx_radiation2"));
 			this.Radiation3 = base.Add(new Face("Radiation3", "headfx_radiation3"));
 			this.Radiation4 = base.Add(new Face("Radiation4", "headfx_radiation4"));
+			this.Robodancer = base.Add(new Face("robotdance", null));
 		}
 
 		public Face Neutral;
@@ -91,5 +92,7 @@ namespace Database
 		public Face Radiation3;
 
 		public Face Radiation4;
+
+		public Face Robodancer;
 	}
 }

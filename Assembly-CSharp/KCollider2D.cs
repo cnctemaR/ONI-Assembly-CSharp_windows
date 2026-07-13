@@ -52,7 +52,7 @@ public abstract class KCollider2D : KMonoBehaviour, IRenderEveryTick
 		GameScenePartitioner.Instance.Free(ref this.partitionerEntry);
 		if (flag)
 		{
-			this.partitionerEntry = GameScenePartitioner.Instance.Add(base.name, this, this.cachedExtents, GameScenePartitioner.Instance.collisionLayer, null);
+			this.partitionerEntry = GameScenePartitioner.Instance.Add(null, this, this.cachedExtents, GameScenePartitioner.Instance.collisionLayer, null);
 		}
 	}
 

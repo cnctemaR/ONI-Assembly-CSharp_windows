@@ -35,6 +35,7 @@ public class Electrobank : KMonoBehaviour, ISim1000ms, ISim200ms, IConsumableUII
 	{
 		base.OnSpawn();
 		base.Subscribe(856640610, new Action<object>(this.ClearHealthBar));
+		Components.Electrobanks.Add(base.gameObject.GetMyWorldId(), this);
 		this.radiationEmitter = base.GetComponent<RadiationEmitter>();
 		this.UpdateRadiationEmitter();
 	}
@@ -62,6 +63,10 @@ public class Electrobank : KMonoBehaviour, ISim1000ms, ISim200ms, IConsumableUII
 		gameObject.GetComponent<PrimaryElement>().SetElement(EmptyElectrobank.GetComponent<PrimaryElement>().Element.id, true);
 		gameObject.SetActive(true);
 		Storage storage = EmptyElectrobank.GetComponent<Pickupable>().storage;
+		if (storage != null)
+		{
+			storage.Remove(EmptyElectrobank, true);
+		}
 		EmptyElectrobank.DeleteObject();
 		if (storage != null && !dropFromStorage)
 		{
@@ -77,6 +82,10 @@ public class Electrobank : KMonoBehaviour, ISim1000ms, ISim200ms, IConsumableUII
 		gameObject.GetComponent<PrimaryElement>().SetElement(ChargedElectrobank.GetComponent<PrimaryElement>().Element.id, true);
 		gameObject.SetActive(true);
 		Storage storage = ChargedElectrobank.GetComponent<Pickupable>().storage;
+		if (storage != null)
+		{
+			storage.Remove(ChargedElectrobank, true);
+		}
 		ChargedElectrobank.DeleteObject();
 		if (storage != null && !dropFromStorage)
 		{
@@ -92,6 +101,10 @@ public class Electrobank : KMonoBehaviour, ISim1000ms, ISim200ms, IConsumableUII
 		gameObject.GetComponent<PrimaryElement>().SetElement(ChargedElectrobank.GetComponent<PrimaryElement>().Element.id, true);
 		gameObject.SetActive(true);
 		Storage storage = ChargedElectrobank.GetComponent<Pickupable>().storage;
+		if (storage != null)
+		{
+			storage.Remove(ChargedElectrobank, true);
+		}
 		ChargedElectrobank.DeleteObject();
 		if (storage != null && !dropFromStorage)
 		{
@@ -135,6 +148,10 @@ public class Electrobank : KMonoBehaviour, ISim1000ms, ISim200ms, IConsumableUII
 		}
 		if (!this.keepEmpty)
 		{
+			if (this.pickupable.storage != null)
+			{
+				this.pickupable.storage.Remove(base.gameObject, true);
+			}
 			Util.KDestroyGameObject(base.gameObject);
 		}
 	}
@@ -234,6 +251,7 @@ public class Electrobank : KMonoBehaviour, ISim1000ms, ISim200ms, IConsumableUII
 	protected override void OnCleanUp()
 	{
 		this.ClearHealthBar(null);
+		Components.Electrobanks.Remove(base.gameObject.GetMyWorldId(), this);
 		base.OnCleanUp();
 	}
 

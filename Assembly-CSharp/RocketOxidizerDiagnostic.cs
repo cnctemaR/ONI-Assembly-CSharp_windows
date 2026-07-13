@@ -10,9 +10,9 @@ public class RocketOxidizerDiagnostic : ColonyDiagnostic
 		this.icon = "rocket_oxidizer";
 	}
 
-	public override string[] GetDlcIds()
+	public override string[] GetRequiredDlcIds()
 	{
-		return DlcManager.AVAILABLE_EXPANSION1_ONLY;
+		return DlcManager.EXPANSION1;
 	}
 
 	public override ColonyDiagnostic.DiagnosticResult Evaluate()

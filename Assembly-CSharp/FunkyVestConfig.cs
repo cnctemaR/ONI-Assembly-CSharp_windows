@@ -7,11 +7,6 @@ using UnityEngine;
 
 public class FunkyVestConfig : IEquipmentConfig
 {
-	public string[] GetDlcIds()
-	{
-		return DlcManager.AVAILABLE_ALL_VERSIONS;
-	}
-
 	public EquipmentDef CreateEquipmentDef()
 	{
 		new Dictionary<string, float>().Add("BasicFabric", (float)global::TUNING.EQUIPMENT.VESTS.FUNKY_VEST_MASS);

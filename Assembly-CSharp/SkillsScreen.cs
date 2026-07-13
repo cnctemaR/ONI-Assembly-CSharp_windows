@@ -446,6 +446,7 @@ public class SkillsScreen : KModalScreen
 	{
 		foreach (GameObject gameObject in Assets.GetPrefabsWithTag(GameTags.BionicUpgrade))
 		{
+			Tag id = gameObject.GetComponent<KPrefabID>().PrefabID();
 			GameObject gameObject2 = Util.KInstantiate(this.boosterPrefab, this.boosterContentGrid, gameObject.name);
 			gameObject2.transform.localScale = Vector3.one;
 			gameObject2.SetActive(true);
@@ -453,65 +454,241 @@ public class SkillsScreen : KModalScreen
 			this.boosterWidgets.Add(gameObject.PrefabID(), component);
 			component.GetReference<Image>("Icon").sprite = Def.GetUISprite(gameObject, "ui", false).first;
 			gameObject2.GetComponentInChildren<LocText>().SetText(gameObject.GetProperName());
+			KButton reference = component.GetReference<KButton>("AssignmentIncrementButton");
+			reference.ClearOnClick();
+			reference.onClick += delegate
+			{
+				this.IncrementBoosterAssignment(id);
+			};
+			KButton reference2 = component.GetReference<KButton>("AssignmentDecrementButton");
+			reference2.ClearOnClick();
+			reference2.onClick += delegate
+			{
+				this.DecrementBoosterAssignment(id);
+			};
+			foreach (GameObject gameObject3 in this.boosterSlotIcons)
+			{
+				Util.KDestroyGameObject(gameObject3);
+			}
+			this.boosterSlotIcons.Clear();
+			for (int i = 0; i < 8; i++)
+			{
+				GameObject gameObject4 = Util.KInstantiateUI(this.boosterSlotIconPrefab, this.boosterSlotIconPrefab.transform.parent.gameObject, false);
+				this.boosterSlotIcons.Add(gameObject4);
+				int slotIdx = i;
+				gameObject4.transform.GetChild(0).GetComponent<MultiToggle>().onClick = delegate
+				{
+					MinionIdentity minionIdentity;
+					StoredMinionIdentity storedMinionIdentity;
+					this.GetMinionIdentity(this.currentlySelectedMinion, out minionIdentity, out storedMinionIdentity);
+					if (minionIdentity == null)
+					{
+						return;
+					}
+					minionIdentity.GetSMI<BionicUpgradesMonitor.Instance>().upgradeComponentSlots[slotIdx].GetAssignableSlotInstance().Unassign(true);
+					this.RefreshBoosters();
+				};
+			}
 		}
 	}
 
-	private void RefreshBoosters()
+	private void IncrementBoosterAssignment(Tag boosterType)
 	{
-		bool flag = this.SelectedMinionModel() == GameTags.Minions.Models.Bionic;
+		BionicUpgradeComponent bionicUpgradeComponent = this.FindAvailableBoosterOfType(boosterType);
+		if (bionicUpgradeComponent != null)
+		{
+			bionicUpgradeComponent.Assign(this.CurrentlySelectedMinion);
+		}
+		this.RefreshBoosters();
+	}
+
+	private void DecrementBoosterAssignment(Tag boosterType)
+	{
+		MinionIdentity minionIdentity;
+		StoredMinionIdentity storedMinionIdentity;
+		this.GetMinionIdentity(this.currentlySelectedMinion, out minionIdentity, out storedMinionIdentity);
+		BionicUpgradesMonitor.Instance smi = minionIdentity.GetSMI<BionicUpgradesMonitor.Instance>();
+		if (smi == null)
+		{
+			bool flag = false;
+			for (int i = smi.upgradeComponentSlots.Length - 1; i >= 0; i--)
+			{
+				BionicUpgradesMonitor.UpgradeComponentSlot upgradeComponentSlot = smi.upgradeComponentSlots[i];
+				if (upgradeComponentSlot.assignedUpgradeComponent != null && upgradeComponentSlot.assignedUpgradeComponent.PrefabID() == boosterType && upgradeComponentSlot.HasUpgradeInstalled && upgradeComponentSlot.AssignedUpgradeMatchesInstalledUpgrade)
+				{
+					upgradeComponentSlot.GetAssignableSlotInstance().Unassign(true);
+					flag = true;
+					break;
+				}
+			}
+			if (!flag)
+			{
+				for (int j = smi.upgradeComponentSlots.Length - 1; j >= 0; j--)
+				{
+					BionicUpgradesMonitor.UpgradeComponentSlot upgradeComponentSlot2 = smi.upgradeComponentSlots[j];
+					if (upgradeComponentSlot2.assignedUpgradeComponent != null && upgradeComponentSlot2.assignedUpgradeComponent.PrefabID() == boosterType)
+					{
+						upgradeComponentSlot2.GetAssignableSlotInstance().Unassign(true);
+						break;
+					}
+				}
+			}
+		}
+		this.RefreshBoosters();
+	}
+
+	private BionicUpgradeComponent FindAvailableBoosterOfType(Tag boosterType)
+	{
 		MinionIdentity minionIdentity;
 		StoredMinionIdentity storedMinionIdentity;
 		this.GetMinionIdentity(this.currentlySelectedMinion, out minionIdentity, out storedMinionIdentity);
 		if (minionIdentity == null)
 		{
-			flag = false;
+			return null;
+		}
+		List<Pickupable> list = ClusterManager.Instance.GetWorld(minionIdentity.GetMyWorldId()).worldInventory.CreatePickupablesList(boosterType);
+		if (list == null || list.Count == 0)
+		{
+			return null;
+		}
+		list = list.FindAll((Pickupable match) => match.GetComponent<BionicUpgradeComponent>().assignee == null);
+		if (list == null || list.Count == 0)
+		{
+			return null;
+		}
+		using (List<Pickupable>.Enumerator enumerator = list.GetEnumerator())
+		{
+			if (enumerator.MoveNext())
+			{
+				return enumerator.Current.GetComponent<BionicUpgradeComponent>();
+			}
+		}
+		return null;
+	}
+
+	private void RefreshBoosters()
+	{
+		BionicUpgradesMonitor.Instance instance = null;
+		MinionIdentity minionIdentity;
+		StoredMinionIdentity storedMinionIdentity;
+		this.GetMinionIdentity(this.currentlySelectedMinion, out minionIdentity, out storedMinionIdentity);
+		bool flag = this.SelectedMinionModel() == GameTags.Minions.Models.Bionic && minionIdentity != null;
+		if (flag)
+		{
+			instance = minionIdentity.GetSMI<BionicUpgradesMonitor.Instance>();
+			if (instance == null)
+			{
+				flag = false;
+			}
 		}
 		if (flag)
 		{
-			this.equippedBoostersHeaderLabel.SetText(string.Format(UI.SKILLS_SCREEN.ASSIGNED_BOOSTERS_HEADER, this.CurrentlySelectedMinion.GetProperName()));
+			this.equippedBoostersHeaderLabel.SetText(GameUtil.SafeStringFormat(UI.SKILLS_SCREEN.ASSIGNED_BOOSTERS_HEADER, new object[] { this.CurrentlySelectedMinion.GetProperName() }));
+			this.assignedBoostersCountLabel.SetText(GameUtil.SafeStringFormat(UI.SKILLS_SCREEN.ASSIGNED_BOOSTERS_COUNT_LABEL, new object[] { instance.AssignedSlotCount, instance.UnlockedSlotCount }));
 			this.boosterPanel.SetActive(true);
-			this.skillsContainer.rectTransform().sizeDelta = new Vector2(0f, -576f);
-			BionicUpgradesMonitor.Instance smi = minionIdentity.GetSMI<BionicUpgradesMonitor.Instance>();
+			this.boosterHeader.SetActive(true);
+			float canvasScale = GameScreenManager.Instance.ssOverlayCanvas.GetComponent<KCanvasScaler>().GetCanvasScale();
+			float num = (float)Screen.height / canvasScale * 0.4f;
+			float num2 = 96f;
+			this.skillsContainer.rectTransform().sizeDelta = new Vector2(0f, -1f * (num + num2));
+			this.boosterPanel.rectTransform().sizeDelta = new Vector2(0f, num);
+			this.boosterHeader.rectTransform().anchoredPosition = new Vector2(0f, num);
+			for (int i = 0; i < this.boosterSlotIcons.Count; i++)
+			{
+				BionicUpgradesMonitor.UpgradeComponentSlot upgradeComponentSlot = instance.upgradeComponentSlots[7 - i];
+				this.boosterSlotIcons[i].SetActive(true);
+				if (i >= instance.upgradeComponentSlots.Length || instance.upgradeComponentSlots[i].IsLocked)
+				{
+					this.boosterSlotIcons[i].GetComponent<Image>().sprite = Assets.GetSprite("bionicUpgradeSlotLocked");
+					this.boosterSlotIcons[i].GetComponent<Image>().color = new Color(0.5f, 0.5f, 0.5f);
+					this.boosterSlotIcons[i].GetComponent<ToolTip>().SetSimpleTooltip(UI.SKILLS_SCREEN.BIONIC_UPGRADE_SLOT_LOCKED);
+					this.boosterSlotIcons[i].transform.GetChild(0).gameObject.SetActive(false);
+				}
+				else if (instance.upgradeComponentSlots[i].assignedUpgradeComponent != null)
+				{
+					this.boosterSlotIcons[i].GetComponent<Image>().sprite = Def.GetUISprite(instance.upgradeComponentSlots[i].assignedUpgradeComponent.PrefabID(), "ui", false).first;
+					this.boosterSlotIcons[i].GetComponent<ToolTip>().SetSimpleTooltip(instance.upgradeComponentSlots[i].assignedUpgradeComponent.GetProperName() + "\n\n" + UI.SKILLS_SCREEN.BIONIC_UPGRADE_SLOT_UNASSIGN);
+					this.boosterSlotIcons[i].GetComponent<Image>().color = Color.white;
+					this.boosterSlotIcons[i].transform.GetChild(0).gameObject.SetActive(true);
+				}
+				else
+				{
+					this.boosterSlotIcons[i].GetComponent<Image>().sprite = Assets.GetSprite("bionicUpgradeSlot");
+					this.boosterSlotIcons[i].GetComponent<ToolTip>().SetSimpleTooltip(UI.SKILLS_SCREEN.BIONIC_UPGRADE_SLOT_AVAILABLE);
+					this.boosterSlotIcons[i].GetComponent<Image>().color = Color.white;
+					this.boosterSlotIcons[i].transform.GetChild(0).gameObject.SetActive(false);
+				}
+			}
 			using (Dictionary<Tag, HierarchyReferences>.Enumerator enumerator = this.boosterWidgets.GetEnumerator())
 			{
 				while (enumerator.MoveNext())
 				{
-					KeyValuePair<Tag, HierarchyReferences> keyValuePair = enumerator.Current;
-					int num = 0;
-					keyValuePair.Value.GetReference<Image>("Icon").material = GlobalResources.Instance().AnimMaterialUIDesaturated;
-					if (smi != null && smi.upgradeComponentSlots != null)
+					KeyValuePair<Tag, HierarchyReferences> widget = enumerator.Current;
+					int num3 = 0;
+					if (instance != null && instance.upgradeComponentSlots != null)
 					{
-						foreach (BionicUpgradesMonitor.UpgradeComponentSlot upgradeComponentSlot in smi.upgradeComponentSlots)
+						foreach (BionicUpgradesMonitor.UpgradeComponentSlot upgradeComponentSlot2 in instance.upgradeComponentSlots)
 						{
-							if (upgradeComponentSlot.assignedUpgradeComponent != null && upgradeComponentSlot.assignedUpgradeComponent.PrefabID() == keyValuePair.Key)
+							if (upgradeComponentSlot2.assignedUpgradeComponent != null && upgradeComponentSlot2.assignedUpgradeComponent.PrefabID() == widget.Key)
 							{
-								num++;
-								keyValuePair.Value.GetReference<Image>("Icon").material = GlobalResources.Instance().AnimUIMaterial;
+								num3++;
 							}
 						}
 					}
-					GameObject prefab = Assets.GetPrefab(keyValuePair.Key);
-					TMP_Text reference = keyValuePair.Value.GetReference<LocText>("Label");
-					string text = prefab.GetProperName();
-					if (num > 0)
+					GameObject prefab = Assets.GetPrefab(widget.Key);
+					TMP_Text reference = widget.Value.GetReference<LocText>("Label");
+					string properName = prefab.GetProperName();
+					reference.SetText(properName);
+					float num4 = 0f;
+					List<Pickupable> list = ClusterManager.Instance.GetWorld(minionIdentity.GetMyWorldId()).worldInventory.CreatePickupablesList(widget.Key);
+					if (list != null && list.Count > 0)
 					{
-						text = text + " x " + num.ToString();
+						list = list.FindAll((Pickupable match) => match.GetComponent<Assignable>().assignee == null);
+						num4 = (float)list.Count;
 					}
-					reference.SetText(text);
-					keyValuePair.Value.GetReference<ToolTip>("Tooltip").SetSimpleTooltip(string.Concat(new string[]
+					if (num4 > 0f)
+					{
+						widget.Value.GetReference<Image>("Icon").material = GlobalResources.Instance().AnimUIMaterial;
+						widget.Value.GetReference<Image>("Icon").color = new Color(1f, 1f, 1f, 1f);
+					}
+					else
+					{
+						widget.Value.GetReference<Image>("Icon").material = GlobalResources.Instance().AnimMaterialUIDesaturated;
+						widget.Value.GetReference<Image>("Icon").color = new Color(1f, 1f, 1f, 0.5f);
+					}
+					string text = GameUtil.SafeStringFormat(UI.SKILLS_SCREEN.AVAILABLE_BOOSTERS_LABEL, new object[] { num4.ToString() });
+					LocText reference2 = widget.Value.GetReference<LocText>("AvailableLabel");
+					reference2.SetText(text);
+					reference2.color = ((num4 > 0f) ? new Color(0.53f, 0.83f, 0.53f) : new Color(0.65f, 0.65f, 0.65f));
+					string text2 = GameUtil.SafeStringFormat(UI.SKILLS_SCREEN.ASSIGNED_BOOSTERS_LABEL, new object[] { num3 });
+					widget.Value.GetReference<LocText>("EquipCountLabel").SetText(text2);
+					widget.Value.GetReference<ToolTip>("Tooltip").SetSimpleTooltip(string.Concat(new string[]
 					{
 						"<b>",
 						prefab.GetProperName(),
 						"</b>\n\n",
-						BionicUpgradeComponentConfig.UpgradesData[keyValuePair.Key].stateMachineDescription,
+						BionicUpgradeComponentConfig.UpgradesData[widget.Key].stateMachineDescription,
 						"\n\n",
-						BionicUpgradeComponentConfig.GetColonyBoosterAssignmentString(keyValuePair.Key.Name)
+						BionicUpgradeComponentConfig.GetColonyBoosterAssignmentString(widget.Key.Name)
 					}));
+					bool flag2 = instance.AssignedSlotCount < instance.UnlockedSlotCount;
+					bool flag3 = num4 > 0f;
+					MultiToggle component = widget.Value.gameObject.GetComponent<MultiToggle>();
+					component.onClick = null;
+					if (flag3 && flag2)
+					{
+						MultiToggle multiToggle = component;
+						multiToggle.onClick = (global::System.Action)Delegate.Combine(multiToggle.onClick, new global::System.Action(delegate
+						{
+							this.IncrementBoosterAssignment(widget.Key);
+						}));
+					}
 				}
 				return;
 			}
 		}
 		this.boosterPanel.SetActive(false);
+		this.boosterHeader.SetActive(false);
 		this.skillsContainer.rectTransform().sizeDelta = new Vector2(0f, 0f);
 	}
 
@@ -527,7 +704,7 @@ public class SkillsScreen : KModalScreen
 				for (int i = 0; i < skillsBySkillGroup.Count; i++)
 				{
 					Skill skill = skillsBySkillGroup[i];
-					if (!skill.deprecated && SaveLoader.Instance.IsDLCActiveForCurrentSave(skill.dlcId))
+					if (!skill.deprecated && Game.IsCorrectDlcActiveForCurrentSave(skill))
 					{
 						if (!this.skillWidgets.ContainsKey(skill.Id))
 						{
@@ -949,6 +1126,9 @@ public class SkillsScreen : KModalScreen
 	private GameObject boosterPanel;
 
 	[SerializeField]
+	private GameObject boosterHeader;
+
+	[SerializeField]
 	private GameObject boosterContentGrid;
 
 	[SerializeField]
@@ -958,6 +1138,14 @@ public class SkillsScreen : KModalScreen
 
 	[SerializeField]
 	private LocText equippedBoostersHeaderLabel;
+
+	[SerializeField]
+	private LocText assignedBoostersCountLabel;
+
+	[SerializeField]
+	private GameObject boosterSlotIconPrefab;
+
+	private List<GameObject> boosterSlotIcons = new List<GameObject>();
 
 	private IAssignableIdentity currentlySelectedMinion;
 

@@ -9,19 +9,13 @@ namespace Database
 		{
 			foreach (StickerBombFacadeInfo stickerBombFacadeInfo in Blueprints.Get().all.stickerBombFacades)
 			{
-				this.Add(stickerBombFacadeInfo.id, stickerBombFacadeInfo.name, stickerBombFacadeInfo.desc, stickerBombFacadeInfo.rarity, stickerBombFacadeInfo.animFile, stickerBombFacadeInfo.sticker, stickerBombFacadeInfo.dlcIds);
+				this.Add(stickerBombFacadeInfo.id, stickerBombFacadeInfo.name, stickerBombFacadeInfo.desc, stickerBombFacadeInfo.rarity, stickerBombFacadeInfo.animFile, stickerBombFacadeInfo.sticker, stickerBombFacadeInfo.requiredDlcIds, stickerBombFacadeInfo.GetForbiddenDlcIds());
 			}
 		}
 
-		[Obsolete("Please use Add(...) with dlcIds parameter")]
-		private DbStickerBomb Add(string id, string name, string desc, PermitRarity rarity, string animfilename, string symbolName)
+		private DbStickerBomb Add(string id, string name, string desc, PermitRarity rarity, string animfilename, string symbolName, string[] requiredDlcIds, string[] forbiddenDlcIds)
 		{
-			return this.Add(id, name, desc, rarity, animfilename, symbolName, DlcManager.AVAILABLE_ALL_VERSIONS);
-		}
-
-		private DbStickerBomb Add(string id, string name, string desc, PermitRarity rarity, string animfilename, string symbolName, string[] dlcIds)
-		{
-			DbStickerBomb dbStickerBomb = new DbStickerBomb(id, name, desc, rarity, animfilename, symbolName, dlcIds);
+			DbStickerBomb dbStickerBomb = new DbStickerBomb(id, name, desc, rarity, animfilename, symbolName, requiredDlcIds, forbiddenDlcIds);
 			this.resources.Add(dbStickerBomb);
 			return dbStickerBomb;
 		}

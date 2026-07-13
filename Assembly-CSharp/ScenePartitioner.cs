@@ -15,7 +15,8 @@ public class ScenePartitioner : ISim1000ms
 			{
 				for (int k = 0; k < this.nodes.GetLength(2); k++)
 				{
-					this.nodes[i, j, k].entries = new HashSet<ScenePartitionerEntry>();
+					this.nodes[i, j, k].entries = new List<ScenePartitionerEntry>();
+					this.nodes[i, j, k].entries_set = new HashSet<ScenePartitionerEntry>();
 				}
 			}
 		}
@@ -38,7 +39,16 @@ public class ScenePartitioner : ISim1000ms
 							scenePartitionerEntry.obj = null;
 						}
 					}
+					foreach (ScenePartitionerEntry scenePartitionerEntry2 in this.nodes[i, j, k].entries_set)
+					{
+						if (scenePartitionerEntry2 != null)
+						{
+							scenePartitionerEntry2.partitioner = null;
+							scenePartitionerEntry2.obj = null;
+						}
+					}
 					this.nodes[i, j, k].entries.Clear();
+					this.nodes[i, j, k].entries_set.Clear();
 				}
 			}
 		}
@@ -151,7 +161,10 @@ public class ScenePartitioner : ISim1000ms
 						y = i
 					});
 				}
-				this.nodes[layer, i, j].entries.Add(entry);
+				if (this.nodes[layer, i, j].entries_set.Add(entry))
+				{
+					this.nodes[layer, i, j].entries.Add(entry);
+				}
 			}
 		}
 	}
@@ -188,15 +201,19 @@ public class ScenePartitioner : ISim1000ms
 		{
 			for (int j = nodeExtents.x; j < nodeExtents.x + nodeExtents.width; j++)
 			{
-				if (this.nodes[layer, i, j].entries.Remove(entry) && !this.nodes[layer, i, j].dirty)
+				if (this.nodes[layer, i, j].entries_set.Remove(entry))
 				{
-					this.nodes[layer, i, j].dirty = true;
-					this.dirtyNodes.Add(new ScenePartitioner.DirtyNode
+					this.nodes[layer, i, j].entries.Remove(entry);
+					if (!this.nodes[layer, i, j].dirty)
 					{
-						layer = layer,
-						x = j,
-						y = i
-					});
+						this.nodes[layer, i, j].dirty = true;
+						this.dirtyNodes.Add(new ScenePartitioner.DirtyNode
+						{
+							layer = layer,
+							x = j,
+							y = i
+						});
+					}
 				}
 			}
 		}
@@ -277,7 +294,15 @@ public class ScenePartitioner : ISim1000ms
 	{
 		foreach (ScenePartitioner.DirtyNode dirtyNode in this.dirtyNodes)
 		{
-			this.nodes[dirtyNode.layer, dirtyNode.y, dirtyNode.x].entries.RemoveWhere(ScenePartitioner.removeCallback);
+			this.nodes[dirtyNode.layer, dirtyNode.y, dirtyNode.x].entries_set.RemoveWhere(ScenePartitioner.removeCallback);
+			List<ScenePartitionerEntry> entries = this.nodes[dirtyNode.layer, dirtyNode.y, dirtyNode.x].entries;
+			for (int i = entries.Count - 1; i >= 0; i--)
+			{
+				if (ScenePartitioner.removeCallback(entries[i]))
+				{
+					entries.RemoveAt(i);
+				}
+			}
 			this.nodes[dirtyNode.layer, dirtyNode.y, dirtyNode.x].dirty = false;
 		}
 		this.dirtyNodes.Clear();
@@ -384,7 +409,12 @@ public class ScenePartitioner : ISim1000ms
 						}
 					}
 				}
-				this.nodes[layer2, i, j].entries.ExceptWith(pooledList);
+				this.nodes[layer2, i, j].entries_set.ExceptWith(pooledList);
+				List<ScenePartitionerEntry> entries = this.nodes[layer2, i, j].entries;
+				foreach (ScenePartitionerEntry scenePartitionerEntry2 in pooledList)
+				{
+					entries.Remove(scenePartitionerEntry2);
+				}
 				pooledList.Recycle();
 			}
 		}
@@ -410,13 +440,36 @@ public class ScenePartitioner : ISim1000ms
 						yield return scenePartitionerEntry.obj;
 					}
 				}
-				HashSet<ScenePartitionerEntry>.Enumerator enumerator = default(HashSet<ScenePartitionerEntry>.Enumerator);
+				List<ScenePartitionerEntry>.Enumerator enumerator = default(List<ScenePartitionerEntry>.Enumerator);
 				num2 = node_x + 1;
 			}
 			num2 = node_y + 1;
 		}
 		yield break;
 		yield break;
+	}
+
+	public void AsyncSafeVisit<ContextType>(int x, int y, int width, int height, ScenePartitionerLayer layer, Func<object, ContextType, bool> visitor, ContextType context)
+	{
+		Extents nodeExtents = this.GetNodeExtents(x, y, width, height);
+		int num = Math.Min(nodeExtents.y + nodeExtents.height, this.nodes.GetLength(1));
+		int num2 = Math.Max(nodeExtents.y, 0);
+		int num3 = Math.Max(nodeExtents.x, 0);
+		int num4 = Math.Min(nodeExtents.x + nodeExtents.width, this.nodes.GetLength(2));
+		int layer2 = layer.layer;
+		for (int i = num2; i < num; i++)
+		{
+			for (int j = num3; j < num4; j++)
+			{
+				foreach (ScenePartitionerEntry scenePartitionerEntry in this.nodes[layer2, i, j].entries)
+				{
+					if (scenePartitionerEntry != null && scenePartitionerEntry.obj != null && x + width - 1 >= scenePartitionerEntry.x && x <= scenePartitionerEntry.x + scenePartitionerEntry.width - 1 && y + height - 1 >= scenePartitionerEntry.y && y <= scenePartitionerEntry.y + scenePartitionerEntry.height - 1 && !visitor(scenePartitionerEntry.obj, context))
+					{
+						return;
+					}
+				}
+			}
+		}
 	}
 
 	public void Cleanup()
@@ -458,7 +511,9 @@ public class ScenePartitioner : ISim1000ms
 
 	private struct ScenePartitionerNode
 	{
-		public HashSet<ScenePartitionerEntry> entries;
+		public List<ScenePartitionerEntry> entries;
+
+		public HashSet<ScenePartitionerEntry> entries_set;
 
 		public bool dirty;
 	}

@@ -42,7 +42,7 @@ public class PasteBaseTemplateScreen : KScreen
 				while (enumerator2.MoveNext())
 				{
 					string dlcId = enumerator2.Current;
-					if (SaveLoader.Instance.IsDLCActiveForCurrentSave(dlcId))
+					if (Game.IsDlcActiveForCurrentSave(dlcId))
 					{
 						GameObject gameObject2 = global::Util.KInstantiateUI(this.prefab_directory_button, this.button_list_container, true);
 						gameObject2.GetComponent<KButton>().onClick += delegate

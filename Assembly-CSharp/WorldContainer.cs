@@ -620,7 +620,7 @@ public class WorldContainer : KMonoBehaviour
 				}
 				else
 				{
-					SimMessages.ModifyCellWorldZone(num4, 7);
+					SimMessages.ModifyCellWorldZone(num4, byte.MaxValue);
 					global::World.Instance.zoneRenderData.worldZoneTypes[num4] = SubWorld.ZoneType.Space;
 				}
 			}
@@ -1024,7 +1024,8 @@ public class WorldContainer : KMonoBehaviour
 						Storage storage = debrisObjects[debrisObjects.Count - 1];
 						while (pickupable.PrimaryElement.Mass > storage.RemainingCapacity())
 						{
-							Pickupable pickupable2 = pickupable.Take(storage.RemainingCapacity() / pickupable.PrimaryElement.MassPerUnit);
+							int num = Mathf.Max(1, Mathf.RoundToInt(storage.RemainingCapacity() / pickupable.PrimaryElement.MassPerUnit));
+							Pickupable pickupable2 = pickupable.Take((float)num);
 							storage.Store(pickupable2.gameObject, false, false, true, false);
 							storage = CraftModuleInterface.SpawnRocketDebris(" from World Objects", debrisContainerElement);
 							debrisObjects.Add(storage);

@@ -6,7 +6,7 @@ using TUNING;
 using UnityEngine;
 
 [EntityConfigOrder(1)]
-public class DivergentBeetleConfig : IEntityConfig
+public class DivergentBeetleConfig : IEntityConfig, IHasDlcRestrictions
 {
 	public static GameObject CreateDivergentBeetle(string id, string name, string desc, string anim_file, bool is_baby)
 	{
@@ -22,14 +22,19 @@ public class DivergentBeetleConfig : IEntityConfig
 		return gameObject2;
 	}
 
-	public string[] GetDlcIds()
+	public string[] GetRequiredDlcIds()
 	{
-		return DlcManager.AVAILABLE_EXPANSION1_ONLY;
+		return DlcManager.EXPANSION1;
+	}
+
+	public string[] GetForbiddenDlcIds()
+	{
+		return null;
 	}
 
 	public GameObject CreatePrefab()
 	{
-		return EntityTemplates.ExtendEntityToFertileCreature(DivergentBeetleConfig.CreateDivergentBeetle("DivergentBeetle", global::STRINGS.CREATURES.SPECIES.DIVERGENT.VARIANT_BEETLE.NAME, global::STRINGS.CREATURES.SPECIES.DIVERGENT.VARIANT_BEETLE.DESC, "critter_kanim", false), "DivergentBeetleEgg", global::STRINGS.CREATURES.SPECIES.DIVERGENT.VARIANT_BEETLE.EGG_NAME, global::STRINGS.CREATURES.SPECIES.DIVERGENT.VARIANT_BEETLE.DESC, "egg_critter_kanim", DivergentTuning.EGG_MASS, "DivergentBeetleBaby", 45f, 15f, DivergentTuning.EGG_CHANCES_BEETLE, this.GetDlcIds(), DivergentBeetleConfig.EGG_SORT_ORDER, true, false, true, 1f, false);
+		return EntityTemplates.ExtendEntityToFertileCreature(DivergentBeetleConfig.CreateDivergentBeetle("DivergentBeetle", global::STRINGS.CREATURES.SPECIES.DIVERGENT.VARIANT_BEETLE.NAME, global::STRINGS.CREATURES.SPECIES.DIVERGENT.VARIANT_BEETLE.DESC, "critter_kanim", false), this, "DivergentBeetleEgg", global::STRINGS.CREATURES.SPECIES.DIVERGENT.VARIANT_BEETLE.EGG_NAME, global::STRINGS.CREATURES.SPECIES.DIVERGENT.VARIANT_BEETLE.DESC, "egg_critter_kanim", DivergentTuning.EGG_MASS, "DivergentBeetleBaby", 45f, 15f, DivergentTuning.EGG_CHANCES_BEETLE, DivergentBeetleConfig.EGG_SORT_ORDER, true, false, 1f, false);
 	}
 
 	public void OnPrefabInit(GameObject prefab)

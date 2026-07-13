@@ -7,8 +7,11 @@ public class KProfilerEnd : MonoBehaviour
 	{
 	}
 
+	private void Update()
+	{
+	}
+
 	private void LateUpdate()
 	{
-		KProfiler.EndFrame();
 	}
 }

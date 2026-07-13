@@ -6,7 +6,7 @@ using TUNING;
 using UnityEngine;
 
 [EntityConfigOrder(1)]
-public class DivergentWormConfig : IEntityConfig
+public class DivergentWormConfig : IEntityConfig, IHasDlcRestrictions
 {
 	public static GameObject CreateWorm(string id, string name, string desc, string anim_file, bool is_baby)
 	{
@@ -37,14 +37,19 @@ public class DivergentWormConfig : IEntityConfig
 		return gameObject2;
 	}
 
-	public string[] GetDlcIds()
+	public string[] GetRequiredDlcIds()
 	{
-		return DlcManager.AVAILABLE_EXPANSION1_ONLY;
+		return DlcManager.EXPANSION1;
+	}
+
+	public string[] GetForbiddenDlcIds()
+	{
+		return null;
 	}
 
 	public GameObject CreatePrefab()
 	{
-		return EntityTemplates.ExtendEntityToFertileCreature(DivergentWormConfig.CreateWorm("DivergentWorm", global::STRINGS.CREATURES.SPECIES.DIVERGENT.VARIANT_WORM.NAME, global::STRINGS.CREATURES.SPECIES.DIVERGENT.VARIANT_WORM.DESC, "worm_head_kanim", false), "DivergentWormEgg", global::STRINGS.CREATURES.SPECIES.DIVERGENT.VARIANT_WORM.EGG_NAME, global::STRINGS.CREATURES.SPECIES.DIVERGENT.VARIANT_WORM.DESC, "egg_worm_kanim", DivergentTuning.EGG_MASS, "DivergentWormBaby", 90f, 30f, DivergentTuning.EGG_CHANCES_WORM, this.GetDlcIds(), DivergentWormConfig.EGG_SORT_ORDER, true, false, true, 1f, false);
+		return EntityTemplates.ExtendEntityToFertileCreature(DivergentWormConfig.CreateWorm("DivergentWorm", global::STRINGS.CREATURES.SPECIES.DIVERGENT.VARIANT_WORM.NAME, global::STRINGS.CREATURES.SPECIES.DIVERGENT.VARIANT_WORM.DESC, "worm_head_kanim", false), this, "DivergentWormEgg", global::STRINGS.CREATURES.SPECIES.DIVERGENT.VARIANT_WORM.EGG_NAME, global::STRINGS.CREATURES.SPECIES.DIVERGENT.VARIANT_WORM.DESC, "egg_worm_kanim", DivergentTuning.EGG_MASS, "DivergentWormBaby", 90f, 30f, DivergentTuning.EGG_CHANCES_WORM, DivergentWormConfig.EGG_SORT_ORDER, true, false, 1f, false);
 	}
 
 	public void OnPrefabInit(GameObject prefab)

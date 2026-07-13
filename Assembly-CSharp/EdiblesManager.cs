@@ -8,13 +8,13 @@ public class EdiblesManager : KMonoBehaviour
 {
 	public static List<EdiblesManager.FoodInfo> GetAllLoadedFoodTypes()
 	{
-		return EdiblesManager.s_allFoodTypes.Where<EdiblesManager.FoodInfo>((EdiblesManager.FoodInfo x) => DlcManager.IsContentSubscribed(x.DlcId)).ToList<EdiblesManager.FoodInfo>();
+		return EdiblesManager.s_allFoodTypes.Where<EdiblesManager.FoodInfo>(new Func<EdiblesManager.FoodInfo, bool>(DlcManager.IsCorrectDlcSubscribed)).ToList<EdiblesManager.FoodInfo>();
 	}
 
 	public static List<EdiblesManager.FoodInfo> GetAllFoodTypes()
 	{
 		global::Debug.Assert(SaveLoader.Instance != null, "Call GetAllLoadedFoodTypes from the frontend");
-		return EdiblesManager.s_allFoodTypes.Where<EdiblesManager.FoodInfo>((EdiblesManager.FoodInfo x) => SaveLoader.Instance.IsDLCActiveForCurrentSave(x.DlcId)).ToList<EdiblesManager.FoodInfo>();
+		return EdiblesManager.s_allFoodTypes.Where<EdiblesManager.FoodInfo>(new Func<EdiblesManager.FoodInfo, bool>(Game.IsCorrectDlcActiveForCurrentSave)).ToList<EdiblesManager.FoodInfo>();
 	}
 
 	public static EdiblesManager.FoodInfo GetFoodInfo(string foodID)
@@ -40,12 +40,33 @@ public class EdiblesManager : KMonoBehaviour
 
 	private static Dictionary<string, EdiblesManager.FoodInfo> s_allFoodMap = new Dictionary<string, EdiblesManager.FoodInfo>();
 
-	public class FoodInfo : IConsumableUIItem
+	public class FoodInfo : IConsumableUIItem, IHasDlcRestrictions
 	{
+		public string[] GetRequiredDlcIds()
+		{
+			return this.requiredDlcIds;
+		}
+
+		public string[] GetForbiddenDlcIds()
+		{
+			return this.forbiddenDlcIds;
+		}
+
+		[Obsolete("Use constructor with required/forbidden instead")]
 		public FoodInfo(string id, string dlcId, float caloriesPerUnit, int quality, float preserveTemperatue, float rotTemperature, float spoilTime, bool can_rot)
+			: this(id, caloriesPerUnit, quality, preserveTemperatue, rotTemperature, spoilTime, can_rot, null, null)
+		{
+			if (dlcId != "")
+			{
+				this.requiredDlcIds = new string[] { dlcId };
+			}
+		}
+
+		public FoodInfo(string id, float caloriesPerUnit, int quality, float preserveTemperatue, float rotTemperature, float spoilTime, bool can_rot, string[] requiredDlcIds = null, string[] forbiddenDlcIds = null)
 		{
 			this.Id = id;
-			this.DlcId = dlcId;
+			this.requiredDlcIds = requiredDlcIds;
+			this.forbiddenDlcIds = forbiddenDlcIds;
 			this.CaloriesPerUnit = caloriesPerUnit;
 			this.Quality = quality;
 			this.PreserveTemperature = preserveTemperatue;
@@ -60,9 +81,9 @@ public class EdiblesManager : KMonoBehaviour
 			EdiblesManager.s_allFoodMap[this.Id] = this;
 		}
 
-		public EdiblesManager.FoodInfo AddEffects(List<string> effects, string[] dlcIds)
+		public EdiblesManager.FoodInfo AddEffects(List<string> effects, string[] requiredDlcIds = null, string[] forbiddenDlcIds = null)
 		{
-			if (DlcManager.IsDlcListValidForCurrentContent(dlcIds))
+			if (DlcManager.IsCorrectDlcSubscribed(requiredDlcIds, forbiddenDlcIds))
 			{
 				this.Effects.AddRange(effects);
 			}
@@ -111,8 +132,6 @@ public class EdiblesManager : KMonoBehaviour
 
 		public string Id;
 
-		public string DlcId;
-
 		public string Name;
 
 		public string Description;
@@ -132,5 +151,9 @@ public class EdiblesManager : KMonoBehaviour
 		public int Quality;
 
 		public List<string> Effects;
+
+		private string[] requiredDlcIds;
+
+		private string[] forbiddenDlcIds;
 	}
 }

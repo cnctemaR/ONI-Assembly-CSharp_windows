@@ -23,6 +23,8 @@ public class AirBorneCritterCondoConfig : IBuildingConfig
 		buildingDef.AudioCategory = "Metal";
 		buildingDef.AudioSize = "small";
 		buildingDef.PermittedRotations = PermittedRotations.FlipH;
+		buildingDef.AddSearchTerms(SEARCH_TERMS.CRITTER);
+		buildingDef.AddSearchTerms(SEARCH_TERMS.RANCHING);
 		return buildingDef;
 	}
 

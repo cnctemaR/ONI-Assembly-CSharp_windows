@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using Klei;
 using Klei.AI;
 using ProcGen;
@@ -9,8 +8,16 @@ using TUNING;
 using UnityEngine;
 
 [Serializable]
-public class BuildingDef : Def
+public class BuildingDef : Def, IHasDlcRestrictions
 {
+	public IReadOnlyList<string> SearchTerms
+	{
+		get
+		{
+			return this.searchTerms;
+		}
+	}
+
 	public override string Name
 	{
 		get
@@ -1299,7 +1306,7 @@ public class BuildingDef : Def
 		{
 			return true;
 		}
-		ReadOnlyCollection<ILogicUIElement> visElements = Game.Instance.logicCircuitManager.GetVisElements();
+		List<ILogicUIElement> visElements = Game.Instance.logicCircuitManager.GetVisElements();
 		LogicPorts component = source_go.GetComponent<LogicPorts>();
 		if (component != null)
 		{
@@ -1537,7 +1544,11 @@ public class BuildingDef : Def
 		}
 		if (!this.Deprecated)
 		{
-			Db.Get().TechItems.AddTechItem(this.PrefabID, this.Name, this.Effect, new Func<string, bool, Sprite>(this.GetUISprite), this.RequiredDlcIds, this.ForbiddenDlcIds, this.POIUnlockable);
+			TechItem techItem = Db.Get().TechItems.AddTechItem(this.PrefabID, this.Name, this.Effect, new Func<string, bool, Sprite>(this.GetUISprite), this.RequiredDlcIds, this.ForbiddenDlcIds, this.POIUnlockable);
+			if (techItem != null)
+			{
+				techItem.AddSearchTerms(this.searchTerms);
+			}
 		}
 	}
 
@@ -1622,9 +1633,36 @@ public class BuildingDef : Def
 		}
 	}
 
+	[Obsolete]
 	public bool IsValidDLC()
 	{
-		return SaveLoader.Instance.IsCorrectDlcActiveForCurrentSave(this.RequiredDlcIds, this.ForbiddenDlcIds);
+		return Game.IsCorrectDlcActiveForCurrentSave(this);
+	}
+
+	public void AddSearchTerms(string newSearchTerms)
+	{
+		SearchUtil.AddCommaDelimitedSearchTerms(newSearchTerms, this.searchTerms);
+	}
+
+	public static void CollectFabricationRecipes(Tag fabricatorId, List<ComplexRecipe> recipes)
+	{
+		foreach (ComplexRecipe complexRecipe in ComplexRecipeManager.Get().recipes)
+		{
+			if (complexRecipe.fabricators.Contains(fabricatorId))
+			{
+				recipes.Add(complexRecipe);
+			}
+		}
+	}
+
+	public string[] GetRequiredDlcIds()
+	{
+		return this.RequiredDlcIds;
+	}
+
+	public string[] GetForbiddenDlcIds()
+	{
+		return this.ForbiddenDlcIds;
 	}
 
 	public string[] RequiredDlcIds;
@@ -1723,6 +1761,8 @@ public class BuildingDef : Def
 	public bool POIUnlockable;
 
 	public List<Tag> ReplacementTags;
+
+	private readonly List<string> searchTerms = new List<string>();
 
 	public List<ObjectLayer> ReplacementCandidateLayers;
 
@@ -1868,6 +1908,8 @@ public class BuildingDef : Def
 	public int BaseNoisePollutionRadius;
 
 	public List<string> AvailableFacades = new List<string>();
+
+	public string RequiredSkillPerkID;
 
 	private static Dictionary<CellOffset, CellOffset[]> placementOffsetsCache = new Dictionary<CellOffset, CellOffset[]>();
 }

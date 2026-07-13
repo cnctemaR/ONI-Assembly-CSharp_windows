@@ -212,7 +212,7 @@ public class SolidConsumerMonitor : GameStateMachine<SolidConsumerMonitor, Solid
 				return false;
 			}
 			int cost = this.GetCost(Grid.PosToCell(this.targetEdible.transform.GetPosition() + this.targetEdibleOffset));
-			return cost != -1 && this.targetEdibleCost <= cost + 4;
+			return cost != -1 && cost <= this.targetEdibleCost + 4;
 		}
 
 		public void ClearTargetEdible()

@@ -1,4 +1,5 @@
 ﻿using System;
+using STRINGS;
 using TUNING;
 using UnityEngine;
 
@@ -13,11 +14,13 @@ public class WireRefinedBridgeHighWattageConfig : WireBridgeHighWattageConfig
 	{
 		BuildingDef buildingDef = base.CreateBuildingDef();
 		buildingDef.AnimFiles = new KAnimFile[] { Assets.GetAnim("heavywatttile_conductive_kanim") };
-		buildingDef.Mass = BUILDINGS.CONSTRUCTION_MASS_KG.TIER2;
+		buildingDef.Mass = global::TUNING.BUILDINGS.CONSTRUCTION_MASS_KG.TIER2;
 		buildingDef.MaterialCategory = MATERIALS.REFINED_METALS;
 		buildingDef.SceneLayer = Grid.SceneLayer.WireBridges;
 		buildingDef.ForegroundLayer = Grid.SceneLayer.TileMain;
 		GeneratedBuildings.RegisterWithOverlay(OverlayScreen.WireIDs, "WireRefinedBridgeHighWattage");
+		buildingDef.AddSearchTerms(SEARCH_TERMS.POWER);
+		buildingDef.AddSearchTerms(SEARCH_TERMS.WIRE);
 		return buildingDef;
 	}
 

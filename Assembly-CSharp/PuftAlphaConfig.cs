@@ -27,25 +27,9 @@ public class PuftAlphaConfig : IEntityConfig
 		return gameObject;
 	}
 
-	public string[] GetDlcIds()
-	{
-		return DlcManager.AVAILABLE_ALL_VERSIONS;
-	}
-
 	public GameObject CreatePrefab()
 	{
-		GameObject gameObject = PuftAlphaConfig.CreatePuftAlpha("PuftAlpha", global::STRINGS.CREATURES.SPECIES.PUFT.VARIANT_ALPHA.NAME, global::STRINGS.CREATURES.SPECIES.PUFT.VARIANT_ALPHA.DESC, "puft_kanim", false);
-		string text = "PuftAlphaEgg";
-		string text2 = global::STRINGS.CREATURES.SPECIES.PUFT.VARIANT_ALPHA.EGG_NAME;
-		string text3 = global::STRINGS.CREATURES.SPECIES.PUFT.VARIANT_ALPHA.DESC;
-		string text4 = "egg_puft_kanim";
-		float egg_MASS = PuftTuning.EGG_MASS;
-		string text5 = "PuftAlphaBaby";
-		float num = 45f;
-		float num2 = 15f;
-		List<FertilityMonitor.BreedingChance> egg_CHANCES_ALPHA = PuftTuning.EGG_CHANCES_ALPHA;
-		int egg_SORT_ORDER = PuftAlphaConfig.EGG_SORT_ORDER;
-		return EntityTemplates.ExtendEntityToFertileCreature(gameObject, text, text2, text3, text4, egg_MASS, text5, num, num2, egg_CHANCES_ALPHA, this.GetDlcIds(), egg_SORT_ORDER, true, false, true, 1f, false);
+		return EntityTemplates.ExtendEntityToFertileCreature(PuftAlphaConfig.CreatePuftAlpha("PuftAlpha", global::STRINGS.CREATURES.SPECIES.PUFT.VARIANT_ALPHA.NAME, global::STRINGS.CREATURES.SPECIES.PUFT.VARIANT_ALPHA.DESC, "puft_kanim", false), this as IHasDlcRestrictions, "PuftAlphaEgg", global::STRINGS.CREATURES.SPECIES.PUFT.VARIANT_ALPHA.EGG_NAME, global::STRINGS.CREATURES.SPECIES.PUFT.VARIANT_ALPHA.DESC, "egg_puft_kanim", PuftTuning.EGG_MASS, "PuftAlphaBaby", 45f, 15f, PuftTuning.EGG_CHANCES_ALPHA, PuftAlphaConfig.EGG_SORT_ORDER, true, false, 1f, false);
 	}
 
 	public void OnPrefabInit(GameObject inst)

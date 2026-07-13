@@ -34,7 +34,7 @@ namespace Database
 					IngredientSet = new Tag[] { SimHashes.Sucrose.CreateTag() },
 					AmountKG = 3f
 				}
-			}, new Color(0.039f, 0.725f, 0.831f), Color.white, null, new AttributeModifier("SpaceNavigation", 3f, "Spices", false, false, true), "spice_recipe2", DlcManager.AVAILABLE_EXPANSION1_ONLY);
+			}, new Color(0.039f, 0.725f, 0.831f), Color.white, null, new AttributeModifier("SpaceNavigation", 3f, "Spices", false, false, true), "spice_recipe2", DlcManager.EXPANSION1);
 			this.StrengthSpice = new Spice(this, "STRENGTH_SPICE", new Spice.Ingredient[]
 			{
 				new Spice.Ingredient

@@ -31,6 +31,7 @@ public class GeneticAnalysisStationConfig : IBuildingConfig
 		buildingDef.ExhaustKilowattsWhenActive = 0.5f;
 		buildingDef.SelfHeatKilowattsWhenActive = 4f;
 		buildingDef.Deprecated = !DlcManager.FeaturePlantMutationsEnabled();
+		buildingDef.RequiredSkillPerkID = Db.Get().SkillPerks.CanIdentifyMutantSeeds.Id;
 		return buildingDef;
 	}
 

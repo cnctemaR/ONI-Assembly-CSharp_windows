@@ -4,7 +4,7 @@ using STRINGS;
 using UnityEngine;
 
 [EntityConfigOrder(1)]
-public class IceBellyConfig : IEntityConfig
+public class IceBellyConfig : IEntityConfig, IHasDlcRestrictions
 {
 	public static GameObject CreateIceBelly(string id, string name, string desc, string anim_file, bool is_baby)
 	{
@@ -29,14 +29,19 @@ public class IceBellyConfig : IEntityConfig
 		return gameObject2;
 	}
 
-	public string[] GetDlcIds()
+	public string[] GetRequiredDlcIds()
 	{
-		return DlcManager.AVAILABLE_DLC_2;
+		return DlcManager.DLC2;
+	}
+
+	public string[] GetForbiddenDlcIds()
+	{
+		return null;
 	}
 
 	public GameObject CreatePrefab()
 	{
-		GameObject gameObject = EntityTemplates.ExtendEntityToFertileCreature(IceBellyConfig.CreateIceBelly("IceBelly", CREATURES.SPECIES.ICEBELLY.NAME, CREATURES.SPECIES.ICEBELLY.DESC, "ice_belly_kanim", false), "IceBellyEgg", CREATURES.SPECIES.ICEBELLY.EGG_NAME, CREATURES.SPECIES.ICEBELLY.DESC, "egg_icebelly_kanim", 8f, "IceBellyBaby", 120.00001f, 40f, BellyTuning.EGG_CHANCES_BASE, this.GetDlcIds(), IceBellyConfig.EGG_SORT_ORDER, true, false, true, 1f, false);
+		GameObject gameObject = EntityTemplates.ExtendEntityToFertileCreature(IceBellyConfig.CreateIceBelly("IceBelly", CREATURES.SPECIES.ICEBELLY.NAME, CREATURES.SPECIES.ICEBELLY.DESC, "ice_belly_kanim", false), this, "IceBellyEgg", CREATURES.SPECIES.ICEBELLY.EGG_NAME, CREATURES.SPECIES.ICEBELLY.DESC, "egg_icebelly_kanim", 8f, "IceBellyBaby", 120.00001f, 40f, BellyTuning.EGG_CHANCES_BASE, IceBellyConfig.EGG_SORT_ORDER, true, false, 1f, false);
 		gameObject.AddTag(GameTags.LargeCreature);
 		return gameObject;
 	}

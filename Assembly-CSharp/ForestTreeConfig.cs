@@ -6,11 +6,6 @@ using UnityEngine;
 
 public class ForestTreeConfig : IEntityConfig
 {
-	public string[] GetDlcIds()
-	{
-		return DlcManager.AVAILABLE_ALL_VERSIONS;
-	}
-
 	public GameObject CreatePrefab()
 	{
 		string text = "ForestTree";
@@ -68,6 +63,7 @@ public class ForestTreeConfig : IEntityConfig
 		gameObject.AddComponent<StandardCropPlant>().wiltsOnReadyToHarvest = true;
 		gameObject.AddComponent<ForestTreeSeedMonitor>();
 		GameObject gameObject2 = gameObject;
+		IHasDlcRestrictions hasDlcRestrictions = this as IHasDlcRestrictions;
 		SeedProducer.ProductionType productionType = SeedProducer.ProductionType.Hidden;
 		string text5 = "ForestTreeSeed";
 		string text6 = global::STRINGS.CREATURES.SPECIES.SEEDS.WOOD_TREE.NAME;
@@ -79,7 +75,7 @@ public class ForestTreeConfig : IEntityConfig
 		list2.Add(GameTags.CropSeed);
 		SingleEntityReceptacle.ReceptacleDirection receptacleDirection = SingleEntityReceptacle.ReceptacleDirection.Top;
 		string text9 = global::STRINGS.CREATURES.SPECIES.WOOD_TREE.DOMESTICATEDDESC;
-		EntityTemplates.CreateAndRegisterPreviewForPlant(EntityTemplates.CreateAndRegisterSeedForPlant(gameObject2, productionType, text5, text6, text7, anim2, text8, num4, list2, receptacleDirection, default(Tag), 4, text9, EntityTemplates.CollisionShape.CIRCLE, 0.3f, 0.3f, null, "", false, null), "ForestTree_preview", Assets.GetAnim("tree_kanim"), "place", 3, 3);
+		EntityTemplates.CreateAndRegisterPreviewForPlant(EntityTemplates.CreateAndRegisterSeedForPlant(gameObject2, hasDlcRestrictions, productionType, text5, text6, text7, anim2, text8, num4, list2, receptacleDirection, default(Tag), 4, text9, EntityTemplates.CollisionShape.CIRCLE, 0.3f, 0.3f, null, "", false), "ForestTree_preview", Assets.GetAnim("tree_kanim"), "place", 3, 3);
 		return gameObject;
 	}
 

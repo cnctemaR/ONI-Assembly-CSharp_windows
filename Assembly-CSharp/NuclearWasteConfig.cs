@@ -11,11 +11,6 @@ public class NuclearWasteConfig : IOreConfig
 		}
 	}
 
-	public string[] GetDlcIds()
-	{
-		return DlcManager.AVAILABLE_ALL_VERSIONS;
-	}
-
 	public GameObject CreatePrefab()
 	{
 		GameObject gameObject = EntityTemplates.CreateLiquidOreEntity(this.ElementID, null);

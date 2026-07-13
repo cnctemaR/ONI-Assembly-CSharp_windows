@@ -452,8 +452,15 @@ public class KAnimBatch
 				else
 				{
 					Texture2D texture2D = this.atlases[i];
-					Texture2D texture = StreamedTextures.GetTexture(texture2D.name);
-					material_property_block.SetTexture(KAnimBatchManager.AtlasNames[num], (texture != null) ? texture : texture2D);
+					if (StreamedTextures.AreBundlesLoaded())
+					{
+						Texture2D texture = StreamedTextures.GetTexture(texture2D.name);
+						if (texture != null)
+						{
+							texture2D = texture;
+						}
+					}
+					material_property_block.SetTexture(KAnimBatchManager.AtlasNames[num], texture2D);
 				}
 			}
 			if (flag && !KAnimBatch.AtlasList.reported_overflow)

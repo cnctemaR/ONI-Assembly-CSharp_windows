@@ -220,12 +220,12 @@ public class MinionPersonalityPanel : DetailScreenTab
 		{
 			foreach (Skill skill2 in list)
 			{
-				if (SaveLoader.Instance.IsDLCActiveForCurrentSave(skill2.dlcId))
+				if (Game.IsCorrectDlcActiveForCurrentSave(skill2))
 				{
 					string text = "";
 					foreach (SkillPerk skillPerk in skill2.perks)
 					{
-						if (SaveLoader.Instance.IsAllDlcActiveForCurrentSave(skillPerk.requiredDlcIds))
+						if (Game.IsCorrectDlcActiveForCurrentSave(skillPerk))
 						{
 							text = text + "  • " + skillPerk.Name + "\n";
 						}

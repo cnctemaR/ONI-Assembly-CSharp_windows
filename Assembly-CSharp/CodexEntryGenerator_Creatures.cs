@@ -121,7 +121,7 @@ public class CodexEntryGenerator_Creatures
 		List<ContentContainer> list = new List<ContentContainer>();
 		foreach (GameObject gameObject in brains)
 		{
-			if (gameObject.GetDef<BabyMonitor.Def>() == null && SaveLoader.Instance.IsDlcListActiveForCurrentSave(gameObject.GetComponent<KPrefabID>().requiredDlcIds))
+			if (gameObject.GetDef<BabyMonitor.Def>() == null && Game.IsCorrectDlcActiveForCurrentSave(gameObject.GetComponent<KPrefabID>()))
 			{
 				Sprite sprite = null;
 				CreatureBrain component = gameObject.GetComponent<CreatureBrain>();

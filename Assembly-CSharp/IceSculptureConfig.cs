@@ -1,4 +1,5 @@
 ﻿using System;
+using STRINGS;
 using TUNING;
 using UnityEngine;
 
@@ -12,7 +13,7 @@ public class IceSculptureConfig : IBuildingConfig
 		string text2 = "icesculpture_kanim";
 		int num3 = 10;
 		float num4 = 120f;
-		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER4;
+		float[] tier = global::TUNING.BUILDINGS.CONSTRUCTION_MASS_KG.TIER4;
 		string[] array = new string[] { "Ice" };
 		float num5 = 273.15f;
 		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloor;
@@ -30,6 +31,10 @@ public class IceSculptureConfig : IBuildingConfig
 		buildingDef.DefaultAnimState = "slab";
 		buildingDef.PermittedRotations = PermittedRotations.FlipH;
 		buildingDef.Temperature = 253.15f;
+		buildingDef.RequiredSkillPerkID = Db.Get().SkillPerks.CanArt.Id;
+		buildingDef.AddSearchTerms(SEARCH_TERMS.STATUE);
+		buildingDef.AddSearchTerms(SEARCH_TERMS.MORALE);
+		buildingDef.AddSearchTerms(SEARCH_TERMS.ARTWORK);
 		return buildingDef;
 	}
 

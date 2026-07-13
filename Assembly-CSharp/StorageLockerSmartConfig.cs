@@ -29,6 +29,7 @@ public class StorageLockerSmartConfig : IBuildingConfig
 		buildingDef.EnergyConsumptionWhenActive = 60f;
 		buildingDef.ExhaustKilowattsWhenActive = 0.125f;
 		buildingDef.LogicOutputPorts = new List<LogicPorts.Port> { LogicPorts.Port.OutputPort(FilteredStorage.FULL_PORT_ID, new CellOffset(0, 1), global::STRINGS.BUILDINGS.PREFABS.STORAGELOCKERSMART.LOGIC_PORT, global::STRINGS.BUILDINGS.PREFABS.STORAGELOCKERSMART.LOGIC_PORT_ACTIVE, global::STRINGS.BUILDINGS.PREFABS.STORAGELOCKERSMART.LOGIC_PORT_INACTIVE, true, false) };
+		buildingDef.AddSearchTerms(SEARCH_TERMS.STORAGE);
 		return buildingDef;
 	}
 

@@ -4,7 +4,7 @@ using Klei.AI;
 using STRINGS;
 using UnityEngine;
 
-public class BionicMinionConfig : IEntityConfig
+public class BionicMinionConfig : IEntityConfig, IHasDlcRestrictions
 {
 	public static string[] GetAttributes()
 	{
@@ -29,6 +29,16 @@ public class BionicMinionConfig : IEntityConfig
 	public static AttributeModifier[] GetTraits()
 	{
 		return BaseMinionConfig.BaseMinionTraits(BionicMinionConfig.MODEL);
+	}
+
+	public string[] GetRequiredDlcIds()
+	{
+		return DlcManager.DLC3;
+	}
+
+	public string[] GetForbiddenDlcIds()
+	{
+		return null;
 	}
 
 	public GameObject CreatePrefab()
@@ -124,11 +134,6 @@ public class BionicMinionConfig : IEntityConfig
 			}
 			DiscoveredResources.Instance.Discover(PowerControlStationConfig.TINKER_TOOLS);
 		}, null, null);
-	}
-
-	public string[] GetDlcIds()
-	{
-		return DlcManager.DLC3;
 	}
 
 	public BionicMinionConfig()

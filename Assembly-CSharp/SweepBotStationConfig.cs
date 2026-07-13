@@ -1,4 +1,5 @@
 ﻿using System;
+using STRINGS;
 using TUNING;
 using UnityEngine;
 
@@ -12,12 +13,12 @@ public class SweepBotStationConfig : IBuildingConfig
 		string text2 = "sweep_bot_base_station_kanim";
 		int num3 = 30;
 		float num4 = 30f;
-		float[] array = new float[] { BUILDINGS.CONSTRUCTION_MASS_KG.TIER2[0] - SweepBotConfig.MASS };
+		float[] array = new float[] { global::TUNING.BUILDINGS.CONSTRUCTION_MASS_KG.TIER2[0] - SweepBotConfig.MASS };
 		string[] refined_METALS = MATERIALS.REFINED_METALS;
 		float num5 = 1600f;
 		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloor;
 		EffectorValues none = NOISE_POLLUTION.NONE;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, array, refined_METALS, num5, buildLocationRule, BUILDINGS.DECOR.PENALTY.TIER1, none, 0.2f);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, array, refined_METALS, num5, buildLocationRule, global::TUNING.BUILDINGS.DECOR.PENALTY.TIER1, none, 0.2f);
 		buildingDef.ViewMode = OverlayModes.Power.ID;
 		buildingDef.Floodable = false;
 		buildingDef.AudioCategory = "Metal";
@@ -25,6 +26,7 @@ public class SweepBotStationConfig : IBuildingConfig
 		buildingDef.EnergyConsumptionWhenActive = 240f;
 		buildingDef.ExhaustKilowattsWhenActive = 0f;
 		buildingDef.SelfHeatKilowattsWhenActive = 1f;
+		buildingDef.AddSearchTerms(SEARCH_TERMS.ROBOT);
 		return buildingDef;
 	}
 

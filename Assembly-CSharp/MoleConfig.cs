@@ -37,24 +37,9 @@ public class MoleConfig : IEntityConfig
 		return gameObject;
 	}
 
-	public string[] GetDlcIds()
-	{
-		return DlcManager.AVAILABLE_ALL_VERSIONS;
-	}
-
 	public GameObject CreatePrefab()
 	{
-		GameObject gameObject = MoleConfig.CreateMole("Mole", global::STRINGS.CREATURES.SPECIES.MOLE.NAME, global::STRINGS.CREATURES.SPECIES.MOLE.DESC, "driller_kanim", false);
-		string text = "MoleEgg";
-		string text2 = global::STRINGS.CREATURES.SPECIES.MOLE.EGG_NAME;
-		string text3 = global::STRINGS.CREATURES.SPECIES.MOLE.DESC;
-		string text4 = "egg_driller_kanim";
-		float egg_MASS = MoleTuning.EGG_MASS;
-		string text5 = "MoleBaby";
-		float num = 60.000004f;
-		float num2 = 20f;
-		int egg_SORT_ORDER = MoleConfig.EGG_SORT_ORDER;
-		return EntityTemplates.ExtendEntityToFertileCreature(gameObject, text, text2, text3, text4, egg_MASS, text5, num, num2, MoleTuning.EGG_CHANCES_BASE, this.GetDlcIds(), egg_SORT_ORDER, true, false, true, 1f, false);
+		return EntityTemplates.ExtendEntityToFertileCreature(MoleConfig.CreateMole("Mole", global::STRINGS.CREATURES.SPECIES.MOLE.NAME, global::STRINGS.CREATURES.SPECIES.MOLE.DESC, "driller_kanim", false), this as IHasDlcRestrictions, "MoleEgg", global::STRINGS.CREATURES.SPECIES.MOLE.EGG_NAME, global::STRINGS.CREATURES.SPECIES.MOLE.DESC, "egg_driller_kanim", MoleTuning.EGG_MASS, "MoleBaby", 60.000004f, 20f, MoleTuning.EGG_CHANCES_BASE, MoleConfig.EGG_SORT_ORDER, true, false, 1f, false);
 	}
 
 	public void OnPrefabInit(GameObject prefab)

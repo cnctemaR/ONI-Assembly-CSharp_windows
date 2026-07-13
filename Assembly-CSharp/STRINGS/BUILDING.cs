@@ -2556,14 +2556,9 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Skill-Required Operation";
 
-				public static LocString TOOLTIP = string.Concat(new string[]
-				{
-					"Only Duplicants with one of the following ",
-					UI.PRE_KEYWORD,
-					"Skills",
-					UI.PST_KEYWORD,
-					" can operate this building:\n{Skills}"
-				});
+				public static LocString TOOLTIP = "Only Duplicants with the {Skills} Skill can operate this building";
+
+				public static LocString TOOLTIP_DLC3 = "Only Duplicants with the {Skills} Skill or {Boosters} can operate this building";
 			}
 
 			public class DIGREQUIRESSKILLPERK
@@ -2578,6 +2573,8 @@ namespace STRINGS
 					UI.PST_KEYWORD,
 					" can mine this material:\n{Skills}"
 				});
+
+				public static LocString TOOLTIP_DLC3 = "Only Duplicants with the {Skills} Skill or {Boosters} can mine this material";
 			}
 
 			public class COLONYLACKSREQUIREDSKILLPERK
@@ -2585,6 +2582,8 @@ namespace STRINGS
 				public static LocString NAME = "Colony Lacks {Skills} Skill";
 
 				public static LocString TOOLTIP = "{Skills} Skill required to operate\n\nOpen the " + UI.FormatAsManagementMenu("Skills Panel", global::Action.ManageSkills) + " to teach {Skills} to a Duplicant";
+
+				public static LocString TOOLTIP_DLC3 = "{Skills} Skill or {Boosters} required to operate\n\nOpen the " + UI.FormatAsManagementMenu("Skills Panel", global::Action.ManageSkills) + " to teach {Skills} to a Duplicant";
 			}
 
 			public class CLUSTERCOLONYLACKSREQUIREDSKILLPERK
@@ -2592,6 +2591,8 @@ namespace STRINGS
 				public static LocString NAME = "Local Colony Lacks {Skills} Skill";
 
 				public static LocString TOOLTIP = BUILDING.STATUSITEMS.COLONYLACKSREQUIREDSKILLPERK.TOOLTIP + ", or bring a Duplicant with the skill from another " + UI.CLUSTERMAP.PLANETOID;
+
+				public static LocString TOOLTIP_DLC3 = BUILDING.STATUSITEMS.COLONYLACKSREQUIREDSKILLPERK.TOOLTIP_DLC3 + ", or bring a Duplicant with this skill or booster from another " + UI.CLUSTERMAP.PLANETOID;
 			}
 
 			public class WORKREQUIRESMINION

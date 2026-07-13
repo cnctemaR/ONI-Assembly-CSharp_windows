@@ -275,15 +275,17 @@ public class EntityTemplates
 		return prefab;
 	}
 
-	public static GameObject ExtendEntityToFertileCreature(GameObject prefab, string eggId, string eggName, string eggDesc, string egg_anim, float egg_mass, string baby_id, float fertility_cycles, float incubation_cycles, List<FertilityMonitor.BreedingChance> egg_chances, string[] dlcIds, int eggSortOrder = -1, bool is_ranchable = true, bool add_fish_overcrowding_monitor = false, bool add_fixed_capturable_monitor = true, float egg_anim_scale = 1f, bool deprecated = false)
+	public static GameObject ExtendEntityToFertileCreature(GameObject prefab, IHasDlcRestrictions dlcRestrictions, string eggId, string eggName, string eggDesc, string eggAnim, float eggMass, string babyId, float fertilityCycles, float incubationCycles, List<FertilityMonitor.BreedingChance> eggChances, int eggSortOrder = -1, bool is_ranchable = true, bool add_fish_overcrowding_monitor = false, float egg_anim_scale = 1f, bool deprecated = false)
 	{
 		FertilityMonitor.Def def = prefab.AddOrGetDef<FertilityMonitor.Def>();
-		def.baseFertileCycles = fertility_cycles;
+		def.baseFertileCycles = fertilityCycles;
 		DebugUtil.DevAssert(eggSortOrder > -1, "Added a fertile creature without an egg sort order!", null);
-		float num = 100f / (600f * incubation_cycles);
-		GameObject gameObject = EggConfig.CreateEgg(eggId, eggName, eggDesc, baby_id, egg_anim, egg_mass, eggSortOrder, num, dlcIds);
+		float num = 100f / (600f * incubationCycles);
+		string[] requiredDlcsOrNull = DlcRestrictionsUtil.GetRequiredDlcsOrNull(dlcRestrictions);
+		string[] forbiddenDlcIdsOrNull = DlcRestrictionsUtil.GetForbiddenDlcIdsOrNull(dlcRestrictions);
+		GameObject gameObject = EggConfig.CreateEgg(eggId, eggName, eggDesc, babyId, eggAnim, eggMass, eggSortOrder, num, requiredDlcsOrNull, forbiddenDlcIdsOrNull);
 		def.eggPrefab = new Tag(eggId);
-		def.initialBreedingWeights = egg_chances;
+		def.initialBreedingWeights = eggChances;
 		if (egg_anim_scale != 1f)
 		{
 			KBatchedAnimController component = gameObject.GetComponent<KBatchedAnimController>();
@@ -295,13 +297,13 @@ public class EntityTemplates
 		string symbolPrefix = prefab.GetComponent<CreatureBrain>().symbolPrefix;
 		if (!string.IsNullOrEmpty(symbolPrefix))
 		{
-			symbolOverrideController.ApplySymbolOverridesByAffix(Assets.GetAnim(egg_anim), symbolPrefix, null, 0);
+			symbolOverrideController.ApplySymbolOverridesByAffix(Assets.GetAnim(eggAnim), symbolPrefix, null, 0);
 		}
 		KPrefabID creature_prefab_id = prefab.GetComponent<KPrefabID>();
 		creature_prefab_id.prefabSpawnFn += delegate(GameObject inst)
 		{
 			DiscoveredResources.Instance.Discover(eggId.ToTag(), DiscoveredResources.GetCategoryForTags(egg_prefab_id.Tags));
-			DiscoveredResources.Instance.Discover(baby_id.ToTag(), DiscoveredResources.GetCategoryForTags(creature_prefab_id.Tags));
+			DiscoveredResources.Instance.Discover(babyId.ToTag(), DiscoveredResources.GetCategoryForTags(creature_prefab_id.Tags));
 		};
 		if (is_ranchable)
 		{
@@ -319,10 +321,19 @@ public class EntityTemplates
 		return prefab;
 	}
 
-	[Obsolete("Mod compatibility: use ExtendEntityToFertileCreature passing dlcIds")]
+	[Obsolete("Mod compatibility: use ExtendEntityToFertileCreature with IHasDlcRestrictions")]
+	public static GameObject ExtendEntityToFertileCreature(GameObject prefab, string eggId, string eggName, string eggDesc, string egg_anim, float egg_mass, string baby_id, float fertility_cycles, float incubation_cycles, List<FertilityMonitor.BreedingChance> egg_chances, string[] dlcIds, int eggSortOrder = -1, bool is_ranchable = true, bool add_fish_overcrowding_monitor = false, bool add_fixed_capturable_monitor = true, float egg_anim_scale = 1f, bool deprecated = false)
+	{
+		string[] array;
+		string[] array2;
+		DlcManager.ConvertAvailableToRequireAndForbidden(dlcIds, out array, out array2);
+		return EntityTemplates.ExtendEntityToFertileCreature(prefab, DlcRestrictionsUtil.GetTransientHelperObject(array, array2), eggId, eggName, eggDesc, egg_anim, egg_mass, baby_id, fertility_cycles, incubation_cycles, egg_chances, eggSortOrder, is_ranchable, add_fish_overcrowding_monitor, egg_anim_scale, deprecated);
+	}
+
+	[Obsolete("Mod compatibility: use ExtendEntityToFertileCreature with IHasDlcRestrictions")]
 	public static GameObject ExtendEntityToFertileCreature(GameObject prefab, string eggId, string eggName, string eggDesc, string egg_anim, float egg_mass, string baby_id, float fertility_cycles, float incubation_cycles, List<FertilityMonitor.BreedingChance> egg_chances, int eggSortOrder = -1, bool is_ranchable = true, bool add_fish_overcrowding_monitor = false, bool add_fixed_capturable_monitor = true, float egg_anim_scale = 1f, bool deprecated = false)
 	{
-		return EntityTemplates.ExtendEntityToFertileCreature(prefab, eggId, eggName, eggDesc, egg_anim, egg_mass, baby_id, fertility_cycles, incubation_cycles, egg_chances, DlcManager.AVAILABLE_ALL_VERSIONS, eggSortOrder, is_ranchable, add_fish_overcrowding_monitor, add_fixed_capturable_monitor, egg_anim_scale, deprecated);
+		return EntityTemplates.ExtendEntityToFertileCreature(prefab, null, eggId, eggName, eggDesc, egg_anim, egg_mass, baby_id, fertility_cycles, incubation_cycles, egg_chances, eggSortOrder, is_ranchable, add_fish_overcrowding_monitor, egg_anim_scale, deprecated);
 	}
 
 	public static GameObject ExtendEntityToBeingABaby(GameObject prefab, Tag adult_prefab_id, string on_grow_item_drop_id = null, bool force_adult_nav_type = false, float adult_threshold = 5f)
@@ -754,7 +765,7 @@ public class EntityTemplates
 		return gameObject;
 	}
 
-	public static GameObject CreateAndRegisterSeedForPlant(GameObject plant, SeedProducer.ProductionType productionType, string id, string name, string desc, KAnimFile anim, string initialAnim = "object", int numberOfSeeds = 1, List<Tag> additionalTags = null, SingleEntityReceptacle.ReceptacleDirection planterDirection = SingleEntityReceptacle.ReceptacleDirection.Top, Tag replantGroundTag = default(Tag), int sortOrder = 0, string domesticatedDescription = "", EntityTemplates.CollisionShape collisionShape = EntityTemplates.CollisionShape.CIRCLE, float width = 0.25f, float height = 0.25f, Recipe.Ingredient[] recipe_ingredients = null, string recipe_description = "", bool ignoreDefaultSeedTag = false, string[] dlcIds = null)
+	public static GameObject CreateAndRegisterSeedForPlant(GameObject plant, IHasDlcRestrictions dlcRestrictions, SeedProducer.ProductionType productionType, string id, string name, string desc, KAnimFile anim, string initialAnim = "object", int numberOfSeeds = 1, List<Tag> additionalTags = null, SingleEntityReceptacle.ReceptacleDirection planterDirection = SingleEntityReceptacle.ReceptacleDirection.Top, Tag replantGroundTag = default(Tag), int sortOrder = 0, string domesticatedDescription = "", EntityTemplates.CollisionShape collisionShape = EntityTemplates.CollisionShape.CIRCLE, float width = 0.25f, float height = 0.25f, Recipe.Ingredient[] recipe_ingredients = null, string recipe_description = "", bool ignoreDefaultSeedTag = false)
 	{
 		GameObject gameObject = EntityTemplates.CreateLooseEntity(id, name, desc, 1f, true, anim, initialAnim, Grid.SceneLayer.Front, collisionShape, width, height, true, SORTORDER.SEEDS + sortOrder, SimHashes.Creature, null);
 		gameObject.AddOrGet<EntitySplitter>();
@@ -769,7 +780,8 @@ public class EntityTemplates
 		{
 			component.AddTag(tag, false);
 		}
-		component.requiredDlcIds = ((dlcIds == null) ? DlcManager.AVAILABLE_ALL_VERSIONS : dlcIds);
+		component.requiredDlcIds = DlcRestrictionsUtil.GetRequiredDlcsOrNull(dlcRestrictions);
+		component.forbiddenDlcIds = DlcRestrictionsUtil.GetForbiddenDlcIdsOrNull(dlcRestrictions);
 		if (!ignoreDefaultSeedTag)
 		{
 			component.AddTag(GameTags.Seed, false);
@@ -786,6 +798,12 @@ public class EntityTemplates
 		Assets.AddPrefab(component);
 		plant.AddOrGet<SeedProducer>().Configure(id, productionType, numberOfSeeds);
 		return gameObject;
+	}
+
+	[Obsolete("Use version with IHasDlcRestrictions instead")]
+	public static GameObject CreateAndRegisterSeedForPlant(GameObject plant, SeedProducer.ProductionType productionType, string id, string name, string desc, KAnimFile anim, string initialAnim = "object", int numberOfSeeds = 1, List<Tag> additionalTags = null, SingleEntityReceptacle.ReceptacleDirection planterDirection = SingleEntityReceptacle.ReceptacleDirection.Top, Tag replantGroundTag = default(Tag), int sortOrder = 0, string domesticatedDescription = "", EntityTemplates.CollisionShape collisionShape = EntityTemplates.CollisionShape.CIRCLE, float width = 0.25f, float height = 0.25f, Recipe.Ingredient[] recipe_ingredients = null, string recipe_description = "", bool ignoreDefaultSeedTag = false, string[] dlcIds = null)
+	{
+		return EntityTemplates.CreateAndRegisterSeedForPlant(plant, DlcRestrictionsUtil.GetTransientHelperObjectFromAllowList(dlcIds), productionType, id, name, desc, anim, initialAnim, numberOfSeeds, additionalTags, planterDirection, replantGroundTag, sortOrder, domesticatedDescription, collisionShape, width, height, recipe_ingredients, recipe_description, ignoreDefaultSeedTag);
 	}
 
 	public static GameObject CreateAndRegisterPreview(string id, KAnimFile anim, string initial_anim, ObjectLayer object_layer, int width, int height)

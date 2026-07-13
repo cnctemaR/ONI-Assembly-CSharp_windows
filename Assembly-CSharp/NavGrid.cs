@@ -388,7 +388,7 @@ public class NavGrid
 			return string.Format("{0}: {1}->{2} ({3}); offset {4},{5}", new object[] { this.id, this.start, this.end, this.startAxis, this.x, this.y });
 		}
 
-		public Transition(NavType start, NavType end, int x, int y, NavAxis start_axis, bool is_looping, bool loop_has_pre, bool is_escape, int cost, string anim, CellOffset[] void_offsets, CellOffset[] solid_offsets, NavOffset[] valid_nav_offsets, NavOffset[] invalid_nav_offsets, bool critter = false, float animSpeed = 1f)
+		public Transition(NavType start, NavType end, int x, int y, NavAxis start_axis, bool is_looping, bool loop_has_pre, bool is_escape, int cost, string anim, CellOffset[] void_offsets, CellOffset[] solid_offsets, NavOffset[] valid_nav_offsets, NavOffset[] invalid_nav_offsets, bool critter = false, float animSpeed = 1f, bool useOffsetX = false)
 		{
 			DebugUtil.Assert(cost <= 255 && cost >= 0);
 			this.id = byte.MaxValue;
@@ -432,6 +432,7 @@ public class NavGrid
 			this.validNavOffsets = valid_nav_offsets;
 			this.invalidNavOffsets = invalid_nav_offsets;
 			this.isCritter = critter;
+			this.useXOffset = useOffsetX;
 			this.animSpeed = animSpeed;
 		}
 
@@ -660,5 +661,7 @@ public class NavGrid
 		public NavOffset[] invalidNavOffsets;
 
 		public bool isCritter;
+
+		public bool useXOffset;
 	}
 }

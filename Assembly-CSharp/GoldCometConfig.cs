@@ -4,11 +4,6 @@ using UnityEngine;
 
 public class GoldCometConfig : IEntityConfig
 {
-	public string[] GetDlcIds()
-	{
-		return DlcManager.AVAILABLE_ALL_VERSIONS;
-	}
-
 	public GameObject CreatePrefab()
 	{
 		GameObject gameObject = EntityTemplates.CreateEntity(GoldCometConfig.ID, UI.SPACEDESTINATIONS.COMETS.GOLDCOMET.NAME, true);

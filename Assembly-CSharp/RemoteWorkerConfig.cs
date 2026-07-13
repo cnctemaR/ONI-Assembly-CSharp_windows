@@ -2,11 +2,16 @@
 using STRINGS;
 using UnityEngine;
 
-public class RemoteWorkerConfig : IEntityConfig
+public class RemoteWorkerConfig : IEntityConfig, IHasDlcRestrictions
 {
 	public string[] GetRequiredDlcIds()
 	{
-		return new string[] { "DLC3_ID" };
+		return DlcManager.DLC3;
+	}
+
+	public string[] GetForbiddenDlcIds()
+	{
+		return null;
 	}
 
 	public GameObject CreatePrefab()
@@ -103,11 +108,6 @@ public class RemoteWorkerConfig : IEntityConfig
 			hand = HashCache.Get().Add("hand_paint_006"),
 			cuff = HashCache.Get().Add("cuff_006")
 		};
-	}
-
-	string[] IEntityConfig.GetDlcIds()
-	{
-		return this.GetRequiredDlcIds();
 	}
 
 	public static readonly string ID = "RemoteWorker";

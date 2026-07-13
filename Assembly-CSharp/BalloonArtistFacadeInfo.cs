@@ -1,7 +1,7 @@
 ﻿using System;
 using Database;
 
-public class BalloonArtistFacadeInfo : IBlueprintInfo, IBlueprintDlcInfo
+public class BalloonArtistFacadeInfo : IBlueprintInfo, IHasDlcRestrictions
 {
 	public string id { get; set; }
 
@@ -13,9 +13,7 @@ public class BalloonArtistFacadeInfo : IBlueprintInfo, IBlueprintDlcInfo
 
 	public string animFile { get; set; }
 
-	public string[] dlcIds { get; set; }
-
-	public BalloonArtistFacadeInfo(string id, string name, string desc, PermitRarity rarity, string animFile, BalloonArtistFacadeType balloonFacadeType)
+	public BalloonArtistFacadeInfo(string id, string name, string desc, PermitRarity rarity, string animFile, BalloonArtistFacadeType balloonFacadeType, string[] requiredDlcIds = null, string[] forbiddenDlcIds = null)
 	{
 		this.id = id;
 		this.name = name;
@@ -23,8 +21,23 @@ public class BalloonArtistFacadeInfo : IBlueprintInfo, IBlueprintDlcInfo
 		this.rarity = rarity;
 		this.animFile = animFile;
 		this.balloonFacadeType = balloonFacadeType;
-		this.dlcIds = DlcManager.AVAILABLE_ALL_VERSIONS;
+		this.requiredDlcIds = requiredDlcIds;
+		this.forbiddenDlcIds = forbiddenDlcIds;
+	}
+
+	public string[] GetRequiredDlcIds()
+	{
+		return this.requiredDlcIds;
+	}
+
+	public string[] GetForbiddenDlcIds()
+	{
+		return this.forbiddenDlcIds;
 	}
 
 	public BalloonArtistFacadeType balloonFacadeType;
+
+	public string[] requiredDlcIds;
+
+	public string[] forbiddenDlcIds;
 }

@@ -3,6 +3,11 @@ using System.Collections.Generic;
 
 public abstract class BionicColonyDiagnostic : ColonyDiagnostic
 {
+	public override string[] GetRequiredDlcIds()
+	{
+		return DlcManager.DLC3;
+	}
+
 	public BionicColonyDiagnostic(int worldID, string name)
 		: base(worldID, name)
 	{

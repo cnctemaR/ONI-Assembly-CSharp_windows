@@ -207,18 +207,20 @@ public static class InventoryOrganization
 		{
 			"bottom_option_a", "bottom_option_b", "bottom_option_c", "bottom_option_d", "bottom_option_e", "bottom_option_f", "bottom_option_g", "bottom_option_h", "bottom_option_i", "bottom_option_j",
 			"bottom_option_k", "bottom_option_l", "bottom_option_m", "bottom_option_n", "bottom_option_o", "bottom_option_p", "bottom_option_q", "bottom_option_r", "bottom_option_s", "bottom_option_t",
-			"permit_monument_base_a_bionic", "permit_monument_base_b_bionic", "permit_monument_base_c_bionic"
+			"permit_monument_base_a_frosty", "permit_monument_base_b_frosty", "permit_monument_base_c_frosty", "permit_monument_base_a_bionic", "permit_monument_base_b_bionic", "permit_monument_base_c_bionic"
 		});
 		InventoryOrganization.AddSubcategory("MONUMENT_MIDDLE", Def.GetUISprite("MonumentMiddle", "ui", false).first, 300, new string[]
 		{
 			"mid_option_a", "mid_option_b", "mid_option_c", "mid_option_d", "mid_option_e", "mid_option_f", "mid_option_g", "mid_option_h", "mid_option_i", "mid_option_j",
-			"mid_option_k", "mid_option_l", "mid_option_m", "mid_option_n", "mid_option_o", "permit_monument_mid_a_bionic", "permit_monument_mid_b_bionic", "permit_monument_mid_c_bionic"
+			"mid_option_k", "mid_option_l", "mid_option_m", "mid_option_n", "mid_option_o", "permit_monument_mid_a_frosty", "permit_monument_mid_b_frosty", "permit_monument_mid_c_frosty", "permit_monument_mid_a_bionic", "permit_monument_mid_b_bionic",
+			"permit_monument_mid_c_bionic"
 		});
 		InventoryOrganization.AddSubcategory("MONUMENT_TOP", Def.GetUISprite("MonumentTop", "ui", false).first, 300, new string[]
 		{
 			"top_option_a", "top_option_b", "top_option_c", "top_option_d", "top_option_e", "top_option_f", "top_option_g", "top_option_h", "top_option_i", "top_option_j",
 			"top_option_k", "top_option_l", "top_option_m", "top_option_n", "top_option_o", "top_option_p", "top_option_q", "top_option_r", "top_option_s", "top_option_t",
-			"top_option_u", "top_option_v", "top_option_w", "top_option_x", "top_option_y", "top_option_z", "permit_monument_upper_a_bionic", "permit_monument_upper_b_bionic", "permit_monument_upper_c_bionic"
+			"top_option_u", "top_option_v", "top_option_w", "top_option_x", "top_option_y", "top_option_z", "permit_monument_upper_a_frosty", "permit_monument_upper_b_frosty", "permit_monument_upper_c_frosty", "permit_monument_upper_a_bionic",
+			"permit_monument_upper_b_bionic", "permit_monument_upper_c_bionic"
 		});
 		InventoryOrganization.AddSubcategory("CLOTHING_TOPS_BASIC", Assets.GetSprite("icon_inventory_basic_shirts"), 100, new string[] { "TopBasicBlack", "TopBasicWhite", "TopBasicRed", "TopBasicOrange", "TopBasicYellow", "TopBasicGreen", "TopBasicAqua", "TopBasicPurple", "TopBasicPinkOrchid" });
 		InventoryOrganization.AddSubcategory("CLOTHING_TOPS_TSHIRT", Assets.GetSprite("icon_inventory_tees"), 300, new string[] { "TopRaglanDeepRed", "TopRaglanCobalt", "TopRaglanFlamingo", "TopRaglanKellyGreen", "TopRaglanCharcoal", "TopRaglanLemon", "TopRaglanSatsuma", "TopTShirtWhite", "TopTShirtMagenta" });

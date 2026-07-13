@@ -24,6 +24,7 @@ public class SpiceGrinderConfig : IBuildingConfig
 		buildingDef.AudioCategory = "Metal";
 		buildingDef.AudioSize = "large";
 		buildingDef.LogicInputPorts = LogicOperationalController.CreateSingleInputPortList(new CellOffset(0, 0));
+		buildingDef.RequiredSkillPerkID = Db.Get().SkillPerks.CanSpiceGrinder.Id;
 		return buildingDef;
 	}
 

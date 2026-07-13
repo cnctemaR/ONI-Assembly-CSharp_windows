@@ -32,25 +32,10 @@ public class LightBugBlackConfig : IEntityConfig
 		return gameObject;
 	}
 
-	public string[] GetDlcIds()
-	{
-		return DlcManager.AVAILABLE_ALL_VERSIONS;
-	}
-
 	public GameObject CreatePrefab()
 	{
 		GameObject gameObject = LightBugBlackConfig.CreateLightBug("LightBugBlack", global::STRINGS.CREATURES.SPECIES.LIGHTBUG.VARIANT_BLACK.NAME, global::STRINGS.CREATURES.SPECIES.LIGHTBUG.VARIANT_BLACK.DESC, "lightbug_kanim", false);
-		string text = "LightBugBlackEgg";
-		string text2 = global::STRINGS.CREATURES.SPECIES.LIGHTBUG.VARIANT_BLACK.EGG_NAME;
-		string text3 = global::STRINGS.CREATURES.SPECIES.LIGHTBUG.VARIANT_BLACK.DESC;
-		string text4 = "egg_lightbug_kanim";
-		float egg_MASS = LightBugTuning.EGG_MASS;
-		string text5 = "LightBugBlackBaby";
-		float num = 45f;
-		float num2 = 15f;
-		List<FertilityMonitor.BreedingChance> egg_CHANCES_BLACK = LightBugTuning.EGG_CHANCES_BLACK;
-		int egg_SORT_ORDER = LightBugBlackConfig.EGG_SORT_ORDER;
-		EntityTemplates.ExtendEntityToFertileCreature(gameObject, text, text2, text3, text4, egg_MASS, text5, num, num2, egg_CHANCES_BLACK, this.GetDlcIds(), egg_SORT_ORDER, true, false, true, 1f, false);
+		EntityTemplates.ExtendEntityToFertileCreature(gameObject, this as IHasDlcRestrictions, "LightBugBlackEgg", global::STRINGS.CREATURES.SPECIES.LIGHTBUG.VARIANT_BLACK.EGG_NAME, global::STRINGS.CREATURES.SPECIES.LIGHTBUG.VARIANT_BLACK.DESC, "egg_lightbug_kanim", LightBugTuning.EGG_MASS, "LightBugBlackBaby", 45f, 15f, LightBugTuning.EGG_CHANCES_BLACK, LightBugBlackConfig.EGG_SORT_ORDER, true, false, 1f, false);
 		return gameObject;
 	}
 

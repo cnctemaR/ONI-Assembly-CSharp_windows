@@ -1494,7 +1494,7 @@ namespace STRINGS
 
 			public class LEAFYPLANT
 			{
-				public static LocString NAME = UI.FormatAsLink("Mirth Leaf", "POTTED_LEAFY");
+				public static LocString NAME = UI.FormatAsLink("Mirth Leaf", "LEAFYPLANT");
 
 				public static LocString DESC = string.Concat(new string[]
 				{
@@ -1514,7 +1514,7 @@ namespace STRINGS
 
 			public class CACTUSPLANT
 			{
-				public static LocString NAME = UI.FormatAsLink("Jumping Joya", "POTTED_CACTUS");
+				public static LocString NAME = UI.FormatAsLink("Jumping Joya", "CACTUSPLANT");
 
 				public static LocString DESC = string.Concat(new string[]
 				{
@@ -1534,7 +1534,7 @@ namespace STRINGS
 
 			public class BULBPLANT
 			{
-				public static LocString NAME = UI.FormatAsLink("Buddy Bud", "POTTED_BULB");
+				public static LocString NAME = UI.FormatAsLink("Buddy Bud", "BULBPLANT");
 
 				public static LocString DESC = "Buddy Buds are leafy plants that have a positive effect on " + UI.FormatAsLink("Morale", "MORALE") + ", much like a friend.";
 

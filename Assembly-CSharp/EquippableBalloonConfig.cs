@@ -6,11 +6,6 @@ using UnityEngine;
 
 public class EquippableBalloonConfig : IEquipmentConfig
 {
-	public string[] GetDlcIds()
-	{
-		return DlcManager.AVAILABLE_ALL_VERSIONS;
-	}
-
 	public EquipmentDef CreateEquipmentDef()
 	{
 		List<AttributeModifier> list = new List<AttributeModifier>();

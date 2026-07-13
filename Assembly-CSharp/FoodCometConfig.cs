@@ -4,11 +4,6 @@ using UnityEngine;
 
 public class FoodCometConfig : IEntityConfig
 {
-	public string[] GetDlcIds()
-	{
-		return DlcManager.AVAILABLE_ALL_VERSIONS;
-	}
-
 	public GameObject CreatePrefab()
 	{
 		GameObject gameObject = EntityTemplates.CreateEntity(FoodCometConfig.ID, UI.SPACEDESTINATIONS.COMETS.FOODCOMET.NAME, true);

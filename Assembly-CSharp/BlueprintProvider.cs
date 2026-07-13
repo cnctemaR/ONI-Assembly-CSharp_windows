@@ -1,19 +1,16 @@
 ﻿using System;
 using Database;
 
-public abstract class BlueprintProvider
+public abstract class BlueprintProvider : IHasDlcRestrictions
 {
 	protected void AddBuilding(string prefabConfigId, PermitRarity rarity, string permitId, string animFile)
 	{
-		this.blueprintCollection.buildingFacades.Add(new BuildingFacadeInfo(permitId, Strings.Get("STRINGS.BLUEPRINTS." + permitId.ToUpper() + ".NAME"), Strings.Get("STRINGS.BLUEPRINTS." + permitId.ToUpper() + ".DESC"), rarity, prefabConfigId, animFile, this.dlcIds, null));
+		this.blueprintCollection.buildingFacades.Add(new BuildingFacadeInfo(permitId, Strings.Get("STRINGS.BLUEPRINTS." + permitId.ToUpper() + ".NAME"), Strings.Get("STRINGS.BLUEPRINTS." + permitId.ToUpper() + ".DESC"), rarity, prefabConfigId, animFile, null, this.requiredDlcIds, this.forbiddenDlcIds));
 	}
 
 	protected void AddClothing(BlueprintProvider.ClothingType clothingType, PermitRarity rarity, string permitId, string animFile)
 	{
-		this.blueprintCollection.clothingItems.Add(new ClothingItemInfo(permitId, Strings.Get("STRINGS.BLUEPRINTS." + permitId.ToUpper() + ".NAME"), Strings.Get("STRINGS.BLUEPRINTS." + permitId.ToUpper() + ".DESC"), (PermitCategory)clothingType, rarity, animFile)
-		{
-			dlcIds = this.dlcIds
-		});
+		this.blueprintCollection.clothingItems.Add(new ClothingItemInfo(permitId, Strings.Get("STRINGS.BLUEPRINTS." + permitId.ToUpper() + ".NAME"), Strings.Get("STRINGS.BLUEPRINTS." + permitId.ToUpper() + ".DESC"), (PermitCategory)clothingType, rarity, animFile, this.requiredDlcIds, this.forbiddenDlcIds));
 	}
 
 	protected BlueprintProvider.ArtableInfoAuthoringHelper AddArtable(BlueprintProvider.ArtableType artableType, PermitRarity rarity, string permitId, string animFile)
@@ -62,10 +59,7 @@ public abstract class BlueprintProvider
 		if (flag)
 		{
 			KAnimFile kanimFile;
-			ArtableInfo artableInfo = new ArtableInfo(permitId, Strings.Get("STRINGS.BLUEPRINTS." + permitId.ToUpper() + ".NAME"), Strings.Get("STRINGS.BLUEPRINTS." + permitId.ToUpper() + ".DESC"), rarity, animFile, (!Assets.TryGetAnim(animFile, out kanimFile)) ? null : kanimFile.GetData().GetAnim(0).name, 0, false, "error", text, "")
-			{
-				dlcIds = this.dlcIds
-			};
+			ArtableInfo artableInfo = new ArtableInfo(permitId, Strings.Get("STRINGS.BLUEPRINTS." + permitId.ToUpper() + ".NAME"), Strings.Get("STRINGS.BLUEPRINTS." + permitId.ToUpper() + ".DESC"), rarity, animFile, (!Assets.TryGetAnim(animFile, out kanimFile)) ? null : kanimFile.GetData().GetAnim(0).name, 0, false, "error", text, "", this.requiredDlcIds, this.forbiddenDlcIds);
 			artableInfoAuthoringHelper = new BlueprintProvider.ArtableInfoAuthoringHelper(artableType, artableInfo);
 			artableInfoAuthoringHelper.Quality(BlueprintProvider.ArtableQuality.LookingGreat);
 			this.blueprintCollection.artables.Add(artableInfo);
@@ -81,10 +75,7 @@ public abstract class BlueprintProvider
 	{
 		if (joyResponseType == BlueprintProvider.JoyResponseType.BallonSet)
 		{
-			this.blueprintCollection.balloonArtistFacades.Add(new BalloonArtistFacadeInfo(permitId, Strings.Get("STRINGS.BLUEPRINTS." + permitId.ToUpper() + ".NAME"), Strings.Get("STRINGS.BLUEPRINTS." + permitId.ToUpper() + ".DESC"), rarity, animFile, BalloonArtistFacadeType.ThreeSet)
-			{
-				dlcIds = this.dlcIds
-			});
+			this.blueprintCollection.balloonArtistFacades.Add(new BalloonArtistFacadeInfo(permitId, Strings.Get("STRINGS.BLUEPRINTS." + permitId.ToUpper() + ".NAME"), Strings.Get("STRINGS.BLUEPRINTS." + permitId.ToUpper() + ".DESC"), rarity, animFile, BalloonArtistFacadeType.ThreeSet, this.requiredDlcIds, this.forbiddenDlcIds));
 			return;
 		}
 		throw new NotImplementedException("Missing case for " + joyResponseType.ToString());
@@ -92,10 +83,7 @@ public abstract class BlueprintProvider
 
 	protected void AddOutfit(BlueprintProvider.OutfitType outfitType, string outfitId, string[] permitIdList)
 	{
-		this.blueprintCollection.outfits.Add(new ClothingOutfitResource(outfitId, permitIdList, Strings.Get("STRINGS.BLUEPRINTS." + outfitId.ToUpper() + ".NAME"), (ClothingOutfitUtility.OutfitType)outfitType)
-		{
-			dlcIds = this.dlcIds
-		});
+		this.blueprintCollection.outfits.Add(new ClothingOutfitResource(outfitId, permitIdList, Strings.Get("STRINGS.BLUEPRINTS." + outfitId.ToUpper() + ".NAME"), (ClothingOutfitUtility.OutfitType)outfitType, this.requiredDlcIds, this.forbiddenDlcIds));
 	}
 
 	protected void AddMonumentPart(BlueprintProvider.MonumentPart part, PermitRarity rarity, string permitId, string animFile)
@@ -113,27 +101,32 @@ public abstract class BlueprintProvider
 			text = "top";
 			break;
 		}
-		this.blueprintCollection.monumentParts.Add(new MonumentPartInfo(permitId, Strings.Get("STRINGS.BLUEPRINTS." + permitId.ToUpper() + ".NAME"), Strings.Get("STRINGS.BLUEPRINTS." + permitId.ToUpper() + ".DESC"), rarity, animFile, permitId.Replace("permit_", ""), text, (MonumentPartResource.Part)part, this.dlcIds)
-		{
-			dlcIds = this.dlcIds
-		});
+		this.blueprintCollection.monumentParts.Add(new MonumentPartInfo(permitId, Strings.Get("STRINGS.BLUEPRINTS." + permitId.ToUpper() + ".NAME"), Strings.Get("STRINGS.BLUEPRINTS." + permitId.ToUpper() + ".DESC"), rarity, animFile, permitId.Replace("permit_", ""), text, (MonumentPartResource.Part)part, this.requiredDlcIds, this.forbiddenDlcIds));
 	}
 
-	public virtual string[] GetDlcIds()
+	public virtual string[] GetRequiredDlcIds()
 	{
-		return DlcManager.AVAILABLE_ALL_VERSIONS;
+		return this.requiredDlcIds;
+	}
+
+	public virtual string[] GetForbiddenDlcIds()
+	{
+		return this.forbiddenDlcIds;
 	}
 
 	public abstract void SetupBlueprints();
 
-	public void Interal_PreSetupBlueprints()
+	public void Internal_PreSetupBlueprints()
 	{
-		this.dlcIds = this.GetDlcIds();
+		this.requiredDlcIds = this.GetRequiredDlcIds();
+		this.forbiddenDlcIds = this.GetForbiddenDlcIds();
 	}
 
 	public BlueprintCollection blueprintCollection;
 
-	private string[] dlcIds;
+	private string[] requiredDlcIds;
+
+	private string[] forbiddenDlcIds;
 
 	public enum ArtableType
 	{

@@ -1,4 +1,5 @@
 ﻿using System;
+using STRINGS;
 using TUNING;
 using UnityEngine;
 
@@ -12,15 +13,15 @@ public class FlowerVaseHangingFancyConfig : IBuildingConfig
 		string text2 = "flowervase_hanging_kanim";
 		int num3 = 10;
 		float num4 = 10f;
-		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER1;
+		float[] tier = global::TUNING.BUILDINGS.CONSTRUCTION_MASS_KG.TIER1;
 		string[] transparents = MATERIALS.TRANSPARENTS;
 		float num5 = 800f;
 		BuildLocationRule buildLocationRule = BuildLocationRule.OnCeiling;
 		EffectorValues none = NOISE_POLLUTION.NONE;
 		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, transparents, num5, buildLocationRule, new EffectorValues
 		{
-			amount = BUILDINGS.DECOR.BONUS.TIER1.amount,
-			radius = BUILDINGS.DECOR.BONUS.TIER3.radius
+			amount = global::TUNING.BUILDINGS.DECOR.BONUS.TIER1.amount,
+			radius = global::TUNING.BUILDINGS.DECOR.BONUS.TIER3.radius
 		}, none, 0.2f);
 		buildingDef.Floodable = false;
 		buildingDef.Overheatable = false;
@@ -30,6 +31,8 @@ public class FlowerVaseHangingFancyConfig : IBuildingConfig
 		buildingDef.SceneLayer = Grid.SceneLayer.BuildingBack;
 		buildingDef.ForegroundLayer = Grid.SceneLayer.BuildingUse;
 		buildingDef.GenerateOffsets(1, 1);
+		buildingDef.AddSearchTerms(SEARCH_TERMS.GLASS);
+		buildingDef.AddSearchTerms(SEARCH_TERMS.MORALE);
 		return buildingDef;
 	}
 

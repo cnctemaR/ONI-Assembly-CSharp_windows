@@ -1,4 +1,5 @@
 ﻿using System;
+using STRINGS;
 using TUNING;
 using UnityEngine;
 
@@ -17,12 +18,12 @@ public class IceKettleConfig : IBuildingConfig
 		string text2 = "icemelter_kettle_kanim";
 		int num3 = 100;
 		float num4 = 10f;
-		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER4;
+		float[] tier = global::TUNING.BUILDINGS.CONSTRUCTION_MASS_KG.TIER4;
 		string[] raw_METALS = MATERIALS.RAW_METALS;
 		float num5 = 1600f;
 		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloor;
 		EffectorValues none = NOISE_POLLUTION.NONE;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, raw_METALS, num5, buildLocationRule, BUILDINGS.DECOR.NONE, none, 0.2f);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, raw_METALS, num5, buildLocationRule, global::TUNING.BUILDINGS.DECOR.NONE, none, 0.2f);
 		float num6 = 3.7500002f;
 		buildingDef.SelfHeatKilowattsWhenActive = num6 * 0.4f;
 		buildingDef.ExhaustKilowattsWhenActive = num6 - buildingDef.SelfHeatKilowattsWhenActive;
@@ -35,6 +36,7 @@ public class IceKettleConfig : IBuildingConfig
 		buildingDef.DefaultAnimState = "on";
 		buildingDef.POIUnlockable = true;
 		buildingDef.ShowInBuildMenu = true;
+		buildingDef.AddSearchTerms(SEARCH_TERMS.WATER);
 		return buildingDef;
 	}
 

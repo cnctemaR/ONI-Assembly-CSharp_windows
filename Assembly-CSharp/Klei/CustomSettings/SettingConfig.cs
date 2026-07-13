@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Klei.CustomSettings
 {
-	public abstract class SettingConfig
+	public abstract class SettingConfig : IHasDlcRestrictions
 	{
 		public SettingConfig(string id, string label, string tooltip, string default_level_id, string nosweat_default_level_id, long coordinate_range = -1L, bool debug_only = false, bool triggers_custom_game = true, string[] required_content = null, string missing_content_default = "", bool hide_in_ui = false)
 		{
@@ -68,6 +68,16 @@ namespace Klei.CustomSettings
 				return this.missing_content_default;
 			}
 			return this.nosweat_default_level_id;
+		}
+
+		public string[] GetRequiredDlcIds()
+		{
+			return this.required_content;
+		}
+
+		public string[] GetForbiddenDlcIds()
+		{
+			return null;
 		}
 
 		protected string default_level_id;

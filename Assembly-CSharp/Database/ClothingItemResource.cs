@@ -11,14 +11,8 @@ namespace Database
 
 		public ClothingOutfitUtility.OutfitType outfitType { get; private set; }
 
-		[Obsolete("Please use constructor with dlcIds parameter")]
-		public ClothingItemResource(string id, string name, string desc, ClothingOutfitUtility.OutfitType outfitType, PermitCategory category, PermitRarity rarity, string animFile)
-			: this(id, name, desc, outfitType, category, rarity, animFile, DlcManager.AVAILABLE_ALL_VERSIONS)
-		{
-		}
-
-		public ClothingItemResource(string id, string name, string desc, ClothingOutfitUtility.OutfitType outfitType, PermitCategory category, PermitRarity rarity, string animFile, string[] dlcIds)
-			: base(id, name, desc, category, rarity, dlcIds)
+		public ClothingItemResource(string id, string name, string desc, ClothingOutfitUtility.OutfitType outfitType, PermitCategory category, PermitRarity rarity, string animFile, string[] requiredDlcIds = null, string[] forbiddenDlcIds = null)
+			: base(id, name, desc, category, rarity, requiredDlcIds, forbiddenDlcIds)
 		{
 			this.AnimFile = Assets.GetAnim(animFile);
 			this.animFilename = animFile;

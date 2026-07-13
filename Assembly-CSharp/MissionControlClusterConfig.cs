@@ -31,6 +31,7 @@ public class MissionControlClusterConfig : IBuildingConfig
 		buildingDef.AudioCategory = "Metal";
 		buildingDef.AudioSize = "large";
 		buildingDef.DefaultAnimState = "off";
+		buildingDef.RequiredSkillPerkID = Db.Get().SkillPerks.CanMissionControl.Id;
 		return buildingDef;
 	}
 

@@ -163,7 +163,7 @@ public class CodexScreen : KScreen
 		input = input.ToLower();
 		foreach (KeyValuePair<string, CodexEntry> keyValuePair in CodexCache.entries)
 		{
-			if (SaveLoader.Instance.IsCorrectDlcActiveForCurrentSave(keyValuePair.Value.GetDlcIds(), keyValuePair.Value.GetForbiddenDLCs()))
+			if (Game.IsCorrectDlcActiveForCurrentSave(keyValuePair.Value))
 			{
 				if (input == "")
 				{

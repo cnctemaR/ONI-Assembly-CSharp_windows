@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using FMOD.Studio;
 using STRINGS;
 using UnityEngine;
@@ -375,19 +374,19 @@ public class LogicCircuitNetwork : UtilityNetwork
 		}
 	}
 
-	public ReadOnlyCollection<ILogicEventSender> Senders
+	public List<ILogicEventSender> Senders
 	{
 		get
 		{
-			return this.senders.AsReadOnly();
+			return this.senders;
 		}
 	}
 
-	public ReadOnlyCollection<ILogicEventReceiver> Receivers
+	public List<ILogicEventReceiver> Receivers
 	{
 		get
 		{
-			return this.receivers.AsReadOnly();
+			return this.receivers;
 		}
 	}
 

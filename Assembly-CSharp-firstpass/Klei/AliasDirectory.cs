@@ -64,12 +64,11 @@ namespace Klei
 			{
 				return;
 			}
-			string[] files = Directory.GetFiles(actualPath);
-			for (int i = 0; i < files.Length; i++)
+			foreach (string text in Directory.GetFiles(actualPath))
 			{
-				string text = FileSystem.Normalize(files[i]);
-				string virtualPath = this.GetVirtualPath(text);
-				if (re.IsMatch(virtualPath))
+				string text2 = FileSystem.Normalize(text);
+				string virtualPath = this.GetVirtualPath(text2);
+				if (re.IsMatch(virtualPath) && !Path.GetFileName(text).StartsWith("._"))
 				{
 					result.Add(virtualPath);
 				}

@@ -4,11 +4,6 @@ using UnityEngine;
 
 public class CopperCometConfig : IEntityConfig
 {
-	public string[] GetDlcIds()
-	{
-		return DlcManager.AVAILABLE_ALL_VERSIONS;
-	}
-
 	public GameObject CreatePrefab()
 	{
 		GameObject gameObject = EntityTemplates.CreateEntity(CopperCometConfig.ID, UI.SPACEDESTINATIONS.COMETS.COPPERCOMET.NAME, true);

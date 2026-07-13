@@ -36,11 +36,6 @@ public class MorbRoverConfig : IEntityConfig
 		}
 	}
 
-	public string[] GetDlcIds()
-	{
-		return DlcManager.AVAILABLE_ALL_VERSIONS;
-	}
-
 	public const string ID = "MorbRover";
 
 	public const SimHashes MATERIAL = SimHashes.Steel;

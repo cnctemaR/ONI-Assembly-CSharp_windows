@@ -154,6 +154,10 @@ public class EggIncubator : SingleEntityReceptacle, ISaveLoadable, ISim1000ms
 	{
 		global::UnityEngine.Object.Destroy(this.tracker);
 		this.tracker = null;
+		if (base.occupyingObject != null && base.occupyingObject.HasTag(GameTags.Egg))
+		{
+			this.requestedEntityTag = Tag.Invalid;
+		}
 		this.storage.DropAll(false, false, default(Vector3), true, null);
 		base.occupyingObject = null;
 		this.ClearOccupant();

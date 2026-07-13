@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using STRINGS;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -612,60 +611,6 @@ public class ResearchScreen : KModalScreen
 			}
 		}
 		base.OnKeyDown(e);
-	}
-
-	public static bool TechPassesSearchFilter(string techID, string filterString)
-	{
-		if (!string.IsNullOrEmpty(filterString))
-		{
-			filterString = filterString.ToUpper();
-			bool flag = false;
-			Tech tech = Db.Get().Techs.Get(techID);
-			flag = UI.StripLinkFormatting(tech.Name).ToLower().ToUpper()
-				.Contains(filterString);
-			if (!flag)
-			{
-				flag = tech.category.ToUpper().Contains(filterString);
-				foreach (TechItem techItem in tech.unlockedItems)
-				{
-					if (SaveLoader.Instance.IsCorrectDlcActiveForCurrentSave(techItem.requiredDlcIds, techItem.forbiddenDlcIds))
-					{
-						if (UI.StripLinkFormatting(techItem.Name).ToLower().ToUpper()
-							.Contains(filterString))
-						{
-							flag = true;
-							break;
-						}
-						if (UI.StripLinkFormatting(techItem.description).ToLower().ToUpper()
-							.Contains(filterString))
-						{
-							flag = true;
-							break;
-						}
-					}
-				}
-			}
-			return flag;
-		}
-		return true;
-	}
-
-	public static bool TechItemPassesSearchFilter(string techItemID, string filterString)
-	{
-		if (!string.IsNullOrEmpty(filterString))
-		{
-			filterString = filterString.ToUpper();
-			TechItem techItem = Db.Get().TechItems.Get(techItemID);
-			bool flag = UI.StripLinkFormatting(techItem.Name).ToLower().ToUpper()
-				.Contains(filterString);
-			if (!flag)
-			{
-				flag = techItem.Name.ToUpper().Contains(filterString);
-				flag = flag && techItem.description.ToUpper().Contains(filterString);
-			}
-			return flag;
-		}
-		return true;
 	}
 
 	private const float SCROLL_BUFFER = 250f;

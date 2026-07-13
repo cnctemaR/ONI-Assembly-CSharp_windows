@@ -103,6 +103,10 @@ public class TemplateSelectionInfoPanel : KMonoBehaviour, IRender1000ms
 					if (component2 != null)
 					{
 						num2 = component2.Def.MassForTemperatureModification;
+						if (component2.Def.IsFoundation)
+						{
+							num2 = 0f;
+						}
 					}
 					float num3 = num2 * 1000f * component.Element.specificHeatCapacity * component.Temperature;
 					num += num3;

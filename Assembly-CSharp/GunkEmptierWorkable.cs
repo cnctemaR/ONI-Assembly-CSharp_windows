@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Klei.AI;
 using UnityEngine;
 
@@ -48,7 +49,16 @@ public class GunkEmptierWorkable : Workable
 		Room roomOfGameObject = Game.Instance.roomProber.GetRoomOfGameObject(base.gameObject);
 		if (roomOfGameObject != null)
 		{
-			roomOfGameObject.roomType.TriggerRoomEffects(base.GetComponent<KPrefabID>(), base.worker.GetComponent<Effects>());
+			RoomType roomType = roomOfGameObject.roomType;
+			List<EffectInstance> list = null;
+			roomType.TriggerRoomEffects(base.GetComponent<KPrefabID>(), base.worker.GetComponent<Effects>(), out list);
+			if (list != null)
+			{
+				foreach (EffectInstance effectInstance in list)
+				{
+					effectInstance.timeRemaining = 1800f;
+				}
+			}
 		}
 	}
 
@@ -82,6 +92,8 @@ public class GunkEmptierWorkable : Workable
 			base.worker.gameObject.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().DuplicantStatusItems.ExpellingRads, false);
 		}
 	}
+
+	private const float BATHROOM_EFFECTS_DURATION_OVERRIDE = 1800f;
 
 	private Storage storage;
 

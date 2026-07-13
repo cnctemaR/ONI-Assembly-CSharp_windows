@@ -4,11 +4,6 @@ using UnityEngine;
 
 public class LonelyMinionConfig : IEntityConfig
 {
-	public string[] GetDlcIds()
-	{
-		return DlcManager.AVAILABLE_ALL_VERSIONS;
-	}
-
 	public GameObject CreatePrefab()
 	{
 		string text = DUPLICANTS.MODEL.STANDARD.NAME;

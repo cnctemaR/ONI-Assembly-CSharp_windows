@@ -18,6 +18,7 @@ public class GasReservoirConfig : IBuildingConfig
 		buildingDef.UtilityOutputOffset = new CellOffset(0, 0);
 		buildingDef.LogicOutputPorts = new List<LogicPorts.Port> { LogicPorts.Port.OutputPort(SmartReservoir.PORT_ID, new CellOffset(0, 0), global::STRINGS.BUILDINGS.PREFABS.SMARTRESERVOIR.LOGIC_PORT, global::STRINGS.BUILDINGS.PREFABS.SMARTRESERVOIR.LOGIC_PORT_ACTIVE, global::STRINGS.BUILDINGS.PREFABS.SMARTRESERVOIR.LOGIC_PORT_INACTIVE, false, false) };
 		GeneratedBuildings.RegisterWithOverlay(OverlayScreen.GasVentIDs, "GasReservoir");
+		buildingDef.AddSearchTerms(SEARCH_TERMS.STORAGE);
 		return buildingDef;
 	}
 

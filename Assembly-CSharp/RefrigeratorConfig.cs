@@ -31,6 +31,7 @@ public class RefrigeratorConfig : IBuildingConfig
 		buildingDef.AudioCategory = "Metal";
 		SoundEventVolumeCache.instance.AddVolume("fridge_kanim", "Refrigerator_open", NOISE_POLLUTION.NOISY.TIER1);
 		SoundEventVolumeCache.instance.AddVolume("fridge_kanim", "Refrigerator_close", NOISE_POLLUTION.NOISY.TIER1);
+		buildingDef.AddSearchTerms(SEARCH_TERMS.FRIDGE);
 		return buildingDef;
 	}
 

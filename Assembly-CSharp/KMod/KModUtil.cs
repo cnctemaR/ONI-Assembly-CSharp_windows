@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using Klei;
+using STRINGS;
 
 namespace KMod
 {
@@ -37,7 +38,7 @@ namespace KMod
 			}
 			if (kmodHeader.description == null)
 			{
-				kmodHeader.description = defaultDescription;
+				kmodHeader.description = UI.FRONTEND.MODS.NO_DESCRIPTION;
 			}
 			return kmodHeader;
 		}

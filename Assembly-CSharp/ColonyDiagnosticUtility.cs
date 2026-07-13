@@ -208,8 +208,9 @@ public class ColonyDiagnosticUtility : KMonoBehaviour, ISim1000ms
 
 	private void TryAddDiagnosticToWorldCollection(ref List<ColonyDiagnostic> newWorldDiagnostics, ColonyDiagnostic newDiagnostic)
 	{
-		if (!DlcManager.IsDlcListValidForCurrentContent(newDiagnostic.GetDlcIds()))
+		if (!Game.IsCorrectDlcActiveForCurrentSave(newDiagnostic))
 		{
+			newDiagnostic.OnCleanUp();
 			return;
 		}
 		newWorldDiagnostics.Add(newDiagnostic);
@@ -228,16 +229,14 @@ public class ColonyDiagnosticUtility : KMonoBehaviour, ISim1000ms
 			this.diagnosticCriteriaDisabled.Add(worldID, new Dictionary<string, List<string>>());
 		}
 		List<ColonyDiagnostic> list = new List<ColonyDiagnostic>();
+		this.TryAddDiagnosticToWorldCollection(ref list, new IdleDiagnostic(worldID));
 		this.TryAddDiagnosticToWorldCollection(ref list, new BreathabilityDiagnostic(worldID));
 		this.TryAddDiagnosticToWorldCollection(ref list, new FoodDiagnostic(worldID));
 		this.TryAddDiagnosticToWorldCollection(ref list, new StressDiagnostic(worldID));
 		this.TryAddDiagnosticToWorldCollection(ref list, new RadiationDiagnostic(worldID));
 		this.TryAddDiagnosticToWorldCollection(ref list, new ReactorDiagnostic(worldID));
-		this.TryAddDiagnosticToWorldCollection(ref list, new IdleDiagnostic(worldID));
-		if (SaveLoader.Instance.IsDLCActiveForCurrentSave("DLC3_ID"))
-		{
-			this.TryAddDiagnosticToWorldCollection(ref list, new BionicBatteryDiagnostic(worldID));
-		}
+		this.TryAddDiagnosticToWorldCollection(ref list, new SelfChargingElectrobankDiagnostic(worldID));
+		this.TryAddDiagnosticToWorldCollection(ref list, new BionicBatteryDiagnostic(worldID));
 		if (ClusterManager.Instance.GetWorld(worldID).IsModuleInterior)
 		{
 			this.TryAddDiagnosticToWorldCollection(ref list, new FloatingRocketDiagnostic(worldID));

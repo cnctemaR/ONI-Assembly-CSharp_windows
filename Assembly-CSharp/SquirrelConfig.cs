@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using Klei.AI;
 using STRINGS;
 using UnityEngine;
@@ -20,25 +19,9 @@ public class SquirrelConfig : IEntityConfig
 		return gameObject2;
 	}
 
-	public string[] GetDlcIds()
-	{
-		return DlcManager.AVAILABLE_ALL_VERSIONS;
-	}
-
 	public GameObject CreatePrefab()
 	{
-		GameObject gameObject = SquirrelConfig.CreateSquirrel("Squirrel", CREATURES.SPECIES.SQUIRREL.NAME, CREATURES.SPECIES.SQUIRREL.DESC, "squirrel_kanim", false);
-		string text = "SquirrelEgg";
-		string text2 = CREATURES.SPECIES.SQUIRREL.EGG_NAME;
-		string text3 = CREATURES.SPECIES.SQUIRREL.DESC;
-		string text4 = "egg_squirrel_kanim";
-		float egg_MASS = SquirrelTuning.EGG_MASS;
-		string text5 = "SquirrelBaby";
-		float num = 60.000004f;
-		float num2 = 20f;
-		List<FertilityMonitor.BreedingChance> egg_CHANCES_BASE = SquirrelTuning.EGG_CHANCES_BASE;
-		int egg_SORT_ORDER = SquirrelConfig.EGG_SORT_ORDER;
-		return EntityTemplates.ExtendEntityToFertileCreature(gameObject, text, text2, text3, text4, egg_MASS, text5, num, num2, egg_CHANCES_BASE, this.GetDlcIds(), egg_SORT_ORDER, true, false, true, 1f, false);
+		return EntityTemplates.ExtendEntityToFertileCreature(SquirrelConfig.CreateSquirrel("Squirrel", CREATURES.SPECIES.SQUIRREL.NAME, CREATURES.SPECIES.SQUIRREL.DESC, "squirrel_kanim", false), this as IHasDlcRestrictions, "SquirrelEgg", CREATURES.SPECIES.SQUIRREL.EGG_NAME, CREATURES.SPECIES.SQUIRREL.DESC, "egg_squirrel_kanim", SquirrelTuning.EGG_MASS, "SquirrelBaby", 60.000004f, 20f, SquirrelTuning.EGG_CHANCES_BASE, SquirrelConfig.EGG_SORT_ORDER, true, false, 1f, false);
 	}
 
 	public void OnPrefabInit(GameObject prefab)

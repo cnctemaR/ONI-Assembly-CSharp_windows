@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using Klei.AI;
 using STRINGS;
 using TUNING;
@@ -20,25 +19,10 @@ public class OilFloaterDecorConfig : IEntityConfig
 		return BaseOilFloaterConfig.SetupDiet(gameObject, SimHashes.Oxygen.CreateTag(), Tag.Invalid, OilFloaterDecorConfig.CALORIES_PER_KG_OF_ORE, 0f, null, 0f, 0f);
 	}
 
-	public string[] GetDlcIds()
-	{
-		return DlcManager.AVAILABLE_ALL_VERSIONS;
-	}
-
 	public GameObject CreatePrefab()
 	{
 		GameObject gameObject = OilFloaterDecorConfig.CreateOilFloater("OilfloaterDecor", global::STRINGS.CREATURES.SPECIES.OILFLOATER.VARIANT_DECOR.NAME, global::STRINGS.CREATURES.SPECIES.OILFLOATER.VARIANT_DECOR.DESC, "oilfloater_kanim", false);
-		string text = "OilfloaterDecorEgg";
-		string text2 = global::STRINGS.CREATURES.SPECIES.OILFLOATER.VARIANT_DECOR.EGG_NAME;
-		string text3 = global::STRINGS.CREATURES.SPECIES.OILFLOATER.VARIANT_DECOR.DESC;
-		string text4 = "egg_oilfloater_kanim";
-		float egg_MASS = OilFloaterTuning.EGG_MASS;
-		string text5 = "OilfloaterDecorBaby";
-		float num = 90f;
-		float num2 = 30f;
-		List<FertilityMonitor.BreedingChance> egg_CHANCES_DECOR = OilFloaterTuning.EGG_CHANCES_DECOR;
-		int egg_SORT_ORDER = OilFloaterDecorConfig.EGG_SORT_ORDER;
-		EntityTemplates.ExtendEntityToFertileCreature(gameObject, text, text2, text3, text4, egg_MASS, text5, num, num2, egg_CHANCES_DECOR, this.GetDlcIds(), egg_SORT_ORDER, true, false, true, 1f, false);
+		EntityTemplates.ExtendEntityToFertileCreature(gameObject, this as IHasDlcRestrictions, "OilfloaterDecorEgg", global::STRINGS.CREATURES.SPECIES.OILFLOATER.VARIANT_DECOR.EGG_NAME, global::STRINGS.CREATURES.SPECIES.OILFLOATER.VARIANT_DECOR.DESC, "egg_oilfloater_kanim", OilFloaterTuning.EGG_MASS, "OilfloaterDecorBaby", 90f, 30f, OilFloaterTuning.EGG_CHANCES_DECOR, OilFloaterDecorConfig.EGG_SORT_ORDER, true, false, 1f, false);
 		return gameObject;
 	}
 

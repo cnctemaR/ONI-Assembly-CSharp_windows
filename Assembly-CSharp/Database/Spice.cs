@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Database
 {
-	public class Spice : Resource
+	public class Spice : Resource, IHasDlcRestrictions
 	{
 		public AttributeModifier StatBonus { get; private set; }
 
@@ -18,15 +18,12 @@ namespace Database
 
 		public string Image { get; private set; }
 
-		public string[] DlcIds { get; private set; } = DlcManager.AVAILABLE_ALL_VERSIONS;
+		public string[] requiredDlcIds { get; private set; }
 
 		public Spice(ResourceSet parent, string id, Spice.Ingredient[] ingredients, Color primaryColor, Color secondaryColor, AttributeModifier foodMod = null, AttributeModifier statBonus = null, string imageName = "unknown", string[] dlcID = null)
 			: base(id, parent, null)
 		{
-			if (dlcID != null)
-			{
-				this.DlcIds = dlcID;
-			}
+			this.requiredDlcIds = this.requiredDlcIds;
 			this.StatBonus = statBonus;
 			this.FoodModifier = foodMod;
 			this.Ingredients = ingredients;
@@ -37,6 +34,16 @@ namespace Database
 			{
 				this.TotalKG += this.Ingredients[i].AmountKG;
 			}
+		}
+
+		public string[] GetRequiredDlcIds()
+		{
+			return this.requiredDlcIds;
+		}
+
+		public string[] GetForbiddenDlcIds()
+		{
+			return null;
 		}
 
 		public readonly Spice.Ingredient[] Ingredients;

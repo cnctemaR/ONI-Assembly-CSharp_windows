@@ -16,7 +16,7 @@ public class Deepfryer : ComplexFabricator, IGameObjectEffectDescriptor
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		this.workable.requiredSkillPerk = Db.Get().SkillPerks.CanElectricGrill.Id;
+		this.workable.requiredSkillPerk = Db.Get().SkillPerks.CanDeepFry.Id;
 		this.workable.WorkerStatusItem = Db.Get().DuplicantStatusItems.Cooking;
 		this.workable.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_deepfryer_kanim") };
 		this.workable.AttributeConverter = Db.Get().AttributeConverters.CookingSpeed;

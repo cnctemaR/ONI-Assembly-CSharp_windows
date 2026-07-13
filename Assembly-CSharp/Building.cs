@@ -369,11 +369,27 @@ public class Building : KMonoBehaviour, IGameObjectEffectDescriptor, IUniformGri
 			descriptor6.SetupDescriptor(UI.BUILDINGEFFECTS.REQUIRESMANUALOPERATION, UI.BUILDINGEFFECTS.TOOLTIPS.REQUIRESMANUALOPERATION, Descriptor.DescriptorType.Requirement);
 			list.Add(descriptor6);
 		}
-		if (component.isArtable)
+		if (component.Def.RequiredSkillPerkID != null)
 		{
 			Descriptor descriptor7 = default(Descriptor);
-			descriptor7.SetupDescriptor(UI.BUILDINGEFFECTS.REQUIRESCREATIVITY, UI.BUILDINGEFFECTS.TOOLTIPS.REQUIRESCREATIVITY, Descriptor.DescriptorType.Requirement);
+			string text = GameUtil.NamesOfSkillsWithSkillPerk(component.Def.RequiredSkillPerkID);
+			if (Game.IsDlcActiveForCurrentSave("DLC3_ID"))
+			{
+				string text2 = UI.BUILDINGEFFECTS.TOOLTIPS.REQUIRESSKILLEDOPERATION_DLC3.Replace("{Skill}", text).Replace("{Booster}", GameUtil.NamesOfBoostersWithSkillPerk(component.Def.RequiredSkillPerkID));
+				descriptor7.SetupDescriptor(UI.BUILDINGEFFECTS.REQUIRESSKILLEDOPERATION_DLC3, text2, Descriptor.DescriptorType.Requirement);
+			}
+			else
+			{
+				string text3 = UI.BUILDINGEFFECTS.TOOLTIPS.REQUIRESSKILLEDOPERATION.Replace("{Skill}", text);
+				descriptor7.SetupDescriptor(UI.BUILDINGEFFECTS.REQUIRESSKILLEDOPERATION, text3, Descriptor.DescriptorType.Requirement);
+			}
 			list.Add(descriptor7);
+		}
+		if (component.isArtable)
+		{
+			Descriptor descriptor8 = default(Descriptor);
+			descriptor8.SetupDescriptor(UI.BUILDINGEFFECTS.REQUIRESCREATIVITY, UI.BUILDINGEFFECTS.TOOLTIPS.REQUIRESCREATIVITY, Descriptor.DescriptorType.Requirement);
+			list.Add(descriptor8);
 		}
 		if (def.BuildingUnderConstruction != null)
 		{
@@ -391,8 +407,8 @@ public class Building : KMonoBehaviour, IGameObjectEffectDescriptor, IUniformGri
 						stringBuilder.Append(", ");
 					}
 				}
-				string text = stringBuilder.ToString();
-				list.Add(new Descriptor(UI.BUILD_REQUIRES_SKILL.Replace("{Skill}", text), UI.BUILD_REQUIRES_SKILL_TOOLTIP.Replace("{Skill}", text), Descriptor.DescriptorType.Requirement, false));
+				string text4 = stringBuilder.ToString();
+				list.Add(new Descriptor(UI.BUILD_REQUIRES_SKILL.Replace("{Skill}", text4), UI.BUILD_REQUIRES_SKILL_TOOLTIP.Replace("{Skill}", text4), Descriptor.DescriptorType.Requirement, false));
 			}
 		}
 		return list;

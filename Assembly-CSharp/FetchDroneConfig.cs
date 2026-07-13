@@ -5,16 +5,21 @@ using STRINGS;
 using TUNING;
 using UnityEngine;
 
-public class FetchDroneConfig : IEntityConfig
+public class FetchDroneConfig : IEntityConfig, IHasDlcRestrictions
 {
-	public string[] GetDlcIds()
+	public string[] GetRequiredDlcIds()
 	{
 		return DlcManager.DLC3;
 	}
 
+	public string[] GetForbiddenDlcIds()
+	{
+		return null;
+	}
+
 	public GameObject CreatePrefab()
 	{
-		GameObject gameObject = EntityTemplates.CreateBasicEntity("FetchDrone", this.name, this.desc, 300f, true, Assets.GetAnim("swoopy_bot_kanim"), "idle_loop", Grid.SceneLayer.Move, SimHashes.Creature, new List<Tag> { GameTags.Experimental }, 293f);
+		GameObject gameObject = EntityTemplates.CreateBasicEntity("FetchDrone", this.name, this.desc, 200f, true, Assets.GetAnim("swoopy_bot_kanim"), "idle_loop", Grid.SceneLayer.Move, SimHashes.Creature, new List<Tag> { GameTags.Experimental }, 293f);
 		KBatchedAnimController component = gameObject.GetComponent<KBatchedAnimController>();
 		component.isMovable = true;
 		gameObject.AddOrGet<LoopingSounds>();
@@ -54,7 +59,6 @@ public class FetchDroneConfig : IEntityConfig
 			CellOffset.none,
 			new CellOffset(0, 1)
 		};
-		gameObject.AddOrGetDef<RobotElectroBankMonitor.Def>().lowBatteryWarningPercent = 0.2f;
 		gameObject.AddOrGet<FetchDrone>();
 		Storage storage = gameObject.AddComponent<Storage>();
 		storage.fxPrefix = Storage.FXPrefix.PickedUp;
@@ -92,7 +96,13 @@ public class FetchDroneConfig : IEntityConfig
 		{
 			deathAnim = "idle_dead"
 		}, true, Db.Get().ChoreTypes.Die.priority).Add(new DebugGoToStates.Def(), true, -1).Add(new DrowningStates.Def(), true, -1)
-			.Add(new IdleStates.Def(), true, Db.Get().ChoreTypes.Idle.priority);
+			.PushInterruptGroup()
+			.Add(new RobotElectroBankDeadStates.Def(), true, Db.Get().ChoreTypes.Die.priority)
+			.PopInterruptGroup()
+			.Add(new IdleStates.Def
+			{
+				priorityClass = PriorityScreen.PriorityClass.idle
+			}, true, Db.Get().ChoreTypes.Idle.priority);
 		EntityTemplates.AddCreatureBrain(gameObject, builder, GameTags.Robots.Models.FetchDrone, null);
 		KPrefabID kprefabID = gameObject.AddOrGet<KPrefabID>();
 		kprefabID.RemoveTag(GameTags.CreatureBrain);
@@ -305,7 +315,7 @@ public class FetchDroneConfig : IEntityConfig
 
 	public const SimHashes MATERIAL = SimHashes.Steel;
 
-	public const float MASS = 300f;
+	public const float MASS = 200f;
 
 	private const float WIDTH = 1f;
 

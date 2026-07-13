@@ -10,7 +10,7 @@ namespace ProcGen
 {
 	[DebuggerDisplay("{name}")]
 	[Serializable]
-	public class ClusterLayout
+	public class ClusterLayout : IHasDlcRestrictions
 	{
 		public List<WorldPlacement> worldPlacements { get; set; }
 
@@ -127,6 +127,16 @@ namespace ProcGen
 				}
 			}
 			return true;
+		}
+
+		public string[] GetRequiredDlcIds()
+		{
+			return this.requiredDlcIds;
+		}
+
+		public string[] GetForbiddenDlcIds()
+		{
+			return this.forbiddenDlcIds;
 		}
 
 		public const string directory = "clusters";

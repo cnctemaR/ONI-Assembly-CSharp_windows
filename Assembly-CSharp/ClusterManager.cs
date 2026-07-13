@@ -29,11 +29,11 @@ public class ClusterManager : KMonoBehaviour, ISaveLoadable
 		}
 	}
 
-	public IList<WorldContainer> WorldContainers
+	public List<WorldContainer> WorldContainers
 	{
 		get
 		{
-			return this.m_worldContainers.AsReadOnly();
+			return this.m_worldContainers;
 		}
 	}
 
@@ -615,7 +615,7 @@ public class ClusterManager : KMonoBehaviour, ISaveLoadable
 
 	public void UpdateWorldReverbSnapshot(int worldId)
 	{
-		if (!DlcManager.IsPureVanilla())
+		if (DlcManager.FeatureClusterSpaceEnabled())
 		{
 			AudioMixer.instance.Stop(AudioMixerSnapshots.Get().SmallRocketInteriorReverbSnapshot, STOP_MODE.ALLOWFADEOUT);
 			AudioMixer.instance.Stop(AudioMixerSnapshots.Get().MediumRocketInteriorReverbSnapshot, STOP_MODE.ALLOWFADEOUT);

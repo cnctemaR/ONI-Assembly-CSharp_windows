@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
-public abstract class IBuildingConfig
+public abstract class IBuildingConfig : IHasDlcRestrictions
 {
 	public abstract BuildingDef CreateBuildingDef();
 

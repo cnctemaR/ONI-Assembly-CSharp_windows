@@ -28,6 +28,7 @@ public class GlassForgeConfig : IBuildingConfig
 		buildingDef.ViewMode = OverlayModes.Power.ID;
 		buildingDef.AudioCategory = "HollowMetal";
 		buildingDef.AudioSize = "large";
+		buildingDef.AddSearchTerms(SEARCH_TERMS.GLASS);
 		return buildingDef;
 	}
 

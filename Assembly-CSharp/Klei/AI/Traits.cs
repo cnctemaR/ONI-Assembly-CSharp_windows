@@ -27,7 +27,7 @@ namespace Klei.AI
 				if (Db.Get().traits.Exists(text))
 				{
 					Trait trait = Db.Get().traits.Get(text);
-					if (SaveLoader.Instance.IsCorrectDlcActiveForCurrentSave(trait.requiredDlcIds, trait.forbiddenDlcIds))
+					if (Game.IsCorrectDlcActiveForCurrentSave(trait))
 					{
 						this.AddInternal(trait);
 					}

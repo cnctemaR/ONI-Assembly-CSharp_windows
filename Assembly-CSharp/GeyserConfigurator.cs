@@ -59,8 +59,47 @@ public class GeyserConfigurator : KMonoBehaviour
 		Molten
 	}
 
-	public class GeyserType
+	public class GeyserType : IHasDlcRestrictions
 	{
+		public string[] GetRequiredDlcIds()
+		{
+			return this.requiredDlcIds;
+		}
+
+		public string[] GetForbiddenDlcIds()
+		{
+			return this.forbiddenDlcIds;
+		}
+
+		public GeyserType(string id, SimHashes element, GeyserConfigurator.GeyserShape shape, float temperature, float minRatePerCycle, float maxRatePerCycle, float maxPressure, string[] requiredDlcIds, string[] forbiddenDlcIds = null, float minIterationLength = 60f, float maxIterationLength = 1140f, float minIterationPercent = 0.1f, float maxIterationPercent = 0.9f, float minYearLength = 15000f, float maxYearLength = 135000f, float minYearPercent = 0.4f, float maxYearPercent = 0.8f, float geyserTemperature = 372.15f)
+		{
+			this.id = id;
+			this.idHash = id;
+			this.element = element;
+			this.shape = shape;
+			this.temperature = temperature;
+			this.minRatePerCycle = minRatePerCycle;
+			this.maxRatePerCycle = maxRatePerCycle;
+			this.maxPressure = maxPressure;
+			this.minIterationLength = minIterationLength;
+			this.maxIterationLength = maxIterationLength;
+			this.minIterationPercent = minIterationPercent;
+			this.maxIterationPercent = maxIterationPercent;
+			this.minYearLength = minYearLength;
+			this.maxYearLength = maxYearLength;
+			this.minYearPercent = minYearPercent;
+			this.maxYearPercent = maxYearPercent;
+			this.requiredDlcIds = requiredDlcIds;
+			this.forbiddenDlcIds = forbiddenDlcIds;
+			this.geyserTemperature = geyserTemperature;
+			if (GeyserConfigurator.geyserTypes == null)
+			{
+				GeyserConfigurator.geyserTypes = new List<GeyserConfigurator.GeyserType>();
+			}
+			GeyserConfigurator.geyserTypes.Add(this);
+		}
+
+		[Obsolete]
 		public GeyserType(string id, SimHashes element, GeyserConfigurator.GeyserShape shape, float temperature, float minRatePerCycle, float maxRatePerCycle, float maxPressure, float minIterationLength = 60f, float maxIterationLength = 1140f, float minIterationPercent = 0.1f, float maxIterationPercent = 0.9f, float minYearLength = 15000f, float maxYearLength = 135000f, float minYearPercent = 0.4f, float maxYearPercent = 0.8f, float geyserTemperature = 372.15f, string DlcID = "")
 		{
 			this.id = id;
@@ -79,7 +118,7 @@ public class GeyserConfigurator : KMonoBehaviour
 			this.maxYearLength = maxYearLength;
 			this.minYearPercent = minYearPercent;
 			this.maxYearPercent = maxYearPercent;
-			this.DlcID = DlcID;
+			this.requiredDlcIds = new string[] { DlcID };
 			this.geyserTemperature = geyserTemperature;
 			if (GeyserConfigurator.geyserTypes == null)
 			{
@@ -111,7 +150,6 @@ public class GeyserConfigurator : KMonoBehaviour
 			this.minYearPercent = 0f;
 			this.maxYearPercent = 0f;
 			this.geyserTemperature = 0f;
-			this.DlcID = "";
 		}
 
 		public string id;
@@ -150,13 +188,16 @@ public class GeyserConfigurator : KMonoBehaviour
 
 		public float geyserTemperature;
 
+		[Obsolete]
 		public string DlcID;
+
+		public string[] requiredDlcIds;
+
+		public string[] forbiddenDlcIds;
 
 		public const string BLANK_ID = "Blank";
 
 		public const SimHashes BLANK_ELEMENT = SimHashes.Void;
-
-		public const string BLANK_DLCID = "";
 	}
 
 	[Serializable]

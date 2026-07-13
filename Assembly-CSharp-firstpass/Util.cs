@@ -559,6 +559,17 @@ public static class Util
 		});
 	}
 
+	public static string ToHexString(this Color32 c)
+	{
+		return string.Format("{0:X2}{1:X2}{2:X2}{3:X2}", new object[]
+		{
+			(int)c.r,
+			(int)c.g,
+			(int)c.b,
+			(int)c.a
+		});
+	}
+
 	public static void Signal(this global::System.Action action)
 	{
 		if (action != null)
@@ -873,6 +884,15 @@ public static class Util
 			pow >>= 1;
 		}
 		return num;
+	}
+
+	public static string DebugToCommaSeparatedList(this string[] list)
+	{
+		if (list == null || list.Length == 0)
+		{
+			return string.Empty;
+		}
+		return string.Join(", ", list);
 	}
 
 	private static HashSet<char> defaultInvalidUserInputChars = new HashSet<char>(Path.GetInvalidPathChars());

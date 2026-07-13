@@ -5,7 +5,7 @@ using STRINGS;
 using TUNING;
 using UnityEngine;
 
-public class WoodDeerConfig : IEntityConfig
+public class WoodDeerConfig : IEntityConfig, IHasDlcRestrictions
 {
 	public static GameObject CreateWoodDeer(string id, string name, string desc, string anim_file, bool is_baby)
 	{
@@ -33,25 +33,19 @@ public class WoodDeerConfig : IEntityConfig
 		return gameObject2;
 	}
 
-	public string[] GetDlcIds()
+	public string[] GetRequiredDlcIds()
 	{
-		return DlcManager.AVAILABLE_DLC_2;
+		return DlcManager.DLC2;
+	}
+
+	public string[] GetForbiddenDlcIds()
+	{
+		return null;
 	}
 
 	public GameObject CreatePrefab()
 	{
-		GameObject gameObject = WoodDeerConfig.CreateWoodDeer("WoodDeer", global::STRINGS.CREATURES.SPECIES.WOODDEER.NAME, global::STRINGS.CREATURES.SPECIES.WOODDEER.DESC, "ice_floof_kanim", false);
-		string text = "WoodDeerEgg";
-		string text2 = global::STRINGS.CREATURES.SPECIES.WOODDEER.EGG_NAME;
-		string text3 = global::STRINGS.CREATURES.SPECIES.WOODDEER.DESC;
-		string text4 = "egg_ice_floof_kanim";
-		float egg_MASS = DeerTuning.EGG_MASS;
-		string text5 = "WoodDeerBaby";
-		float num = 60.000004f;
-		float num2 = 20f;
-		List<FertilityMonitor.BreedingChance> egg_CHANCES_BASE = DeerTuning.EGG_CHANCES_BASE;
-		int egg_SORT_ORDER = WoodDeerConfig.EGG_SORT_ORDER;
-		return EntityTemplates.ExtendEntityToFertileCreature(gameObject, text, text2, text3, text4, egg_MASS, text5, num, num2, egg_CHANCES_BASE, this.GetDlcIds(), egg_SORT_ORDER, true, false, true, 1f, false);
+		return EntityTemplates.ExtendEntityToFertileCreature(WoodDeerConfig.CreateWoodDeer("WoodDeer", global::STRINGS.CREATURES.SPECIES.WOODDEER.NAME, global::STRINGS.CREATURES.SPECIES.WOODDEER.DESC, "ice_floof_kanim", false), this, "WoodDeerEgg", global::STRINGS.CREATURES.SPECIES.WOODDEER.EGG_NAME, global::STRINGS.CREATURES.SPECIES.WOODDEER.DESC, "egg_ice_floof_kanim", DeerTuning.EGG_MASS, "WoodDeerBaby", 60.000004f, 20f, DeerTuning.EGG_CHANCES_BASE, WoodDeerConfig.EGG_SORT_ORDER, true, false, 1f, false);
 	}
 
 	public void OnPrefabInit(GameObject prefab)

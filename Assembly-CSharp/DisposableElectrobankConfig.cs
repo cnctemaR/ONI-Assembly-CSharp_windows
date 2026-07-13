@@ -16,7 +16,7 @@ public class DisposableElectrobankConfig : IMultiEntityConfig
 		list.Add(this.CreateDisposableElectrobank("DisposableElectrobank_RawMetal", global::STRINGS.ITEMS.INDUSTRIAL_PRODUCTS.ELECTROBANK_METAL_ORE.NAME, global::STRINGS.ITEMS.INDUSTRIAL_PRODUCTS.ELECTROBANK_METAL_ORE.DESC, 20f, SimHashes.Cuprite, "electrobank_popcan_kanim", DlcManager.DLC3, null, "object"));
 		if (DlcManager.IsExpansion1Active())
 		{
-			GameObject gameObject = this.CreateDisposableElectrobank("DisposableElectrobank_UraniumOre", global::STRINGS.ITEMS.INDUSTRIAL_PRODUCTS.ELECTROBANK_URANIUM_ORE.NAME, global::STRINGS.ITEMS.INDUSTRIAL_PRODUCTS.ELECTROBANK_URANIUM_ORE.DESC, 10f, SimHashes.UraniumOre, "electrobank_uranium_kanim", DlcManager.DLC3, null, "object");
+			GameObject gameObject = this.CreateDisposableElectrobank("DisposableElectrobank_UraniumOre", global::STRINGS.ITEMS.INDUSTRIAL_PRODUCTS.ELECTROBANK_URANIUM_ORE.NAME, global::STRINGS.ITEMS.INDUSTRIAL_PRODUCTS.ELECTROBANK_URANIUM_ORE.DESC, 10f, SimHashes.UraniumOre, "electrobank_uranium_kanim", DlcManager.EXPANSION1.Append<string>(DlcManager.DLC3), null, "object");
 			RadiationEmitter radiationEmitter = gameObject.AddOrGet<RadiationEmitter>();
 			radiationEmitter.emitType = RadiationEmitter.RadiationEmitterType.Constant;
 			radiationEmitter.radiusProportionalToRads = false;
@@ -33,10 +33,6 @@ public class DisposableElectrobankConfig : IMultiEntityConfig
 
 	private GameObject CreateDisposableElectrobank(string id, LocString name, LocString description, float mass, SimHashes element, string animName, string[] requiredDlcIDs = null, string[] forbiddenDlcIds = null, string initialAnim = "object")
 	{
-		if (!DlcManager.IsCorrectDlcSubscribed(requiredDlcIDs, forbiddenDlcIds))
-		{
-			return null;
-		}
 		GameObject gameObject = EntityTemplates.CreateLooseEntity(id, name, description, mass, true, Assets.GetAnim(animName), initialAnim, Grid.SceneLayer.Ore, EntityTemplates.CollisionShape.RECTANGLE, 0.5f, 0.8f, true, 0, SimHashes.Creature, new List<Tag>
 		{
 			GameTags.ChargedPortableBattery,
@@ -51,6 +47,9 @@ public class DisposableElectrobankConfig : IMultiEntityConfig
 		gameObject.AddComponent<Electrobank>();
 		gameObject.AddOrGet<OccupyArea>().SetCellOffsets(EntityTemplates.GenerateOffsets(1, 1));
 		gameObject.AddOrGet<DecorProvider>().SetValues(DECOR.PENALTY.TIER0);
+		KPrefabID component = gameObject.GetComponent<KPrefabID>();
+		component.requiredDlcIds = requiredDlcIDs;
+		component.forbiddenDlcIds = forbiddenDlcIds;
 		return gameObject;
 	}
 

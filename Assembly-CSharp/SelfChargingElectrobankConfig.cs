@@ -4,14 +4,20 @@ using STRINGS;
 using TUNING;
 using UnityEngine;
 
-public class SelfChargingElectrobankConfig : IEntityConfig
+public class SelfChargingElectrobankConfig : IEntityConfig, IHasDlcRestrictions
 {
+	public string[] GetRequiredDlcIds()
+	{
+		return DlcManager.EXPANSION1.Append<string>(DlcManager.DLC3);
+	}
+
+	public string[] GetForbiddenDlcIds()
+	{
+		return null;
+	}
+
 	public GameObject CreatePrefab()
 	{
-		if (!DlcManager.IsExpansion1Active())
-		{
-			return null;
-		}
 		GameObject gameObject = EntityTemplates.CreateLooseEntity("SelfChargingElectrobank", global::STRINGS.ITEMS.INDUSTRIAL_PRODUCTS.ELECTROBANK_SELFCHARGING.NAME, global::STRINGS.ITEMS.INDUSTRIAL_PRODUCTS.ELECTROBANK_SELFCHARGING.DESC, 10f, true, Assets.GetAnim("electrobank_large_uranium_kanim"), "idle1", Grid.SceneLayer.Ore, EntityTemplates.CollisionShape.RECTANGLE, 0.5f, 0.8f, true, 0, SimHashes.EnrichedUranium, new List<Tag>
 		{
 			GameTags.ChargedPortableBattery,
@@ -45,11 +51,6 @@ public class SelfChargingElectrobankConfig : IEntityConfig
 
 	public void OnSpawn(GameObject inst)
 	{
-	}
-
-	public string[] GetDlcIds()
-	{
-		return new string[] { "DLC3_ID" };
 	}
 
 	public const string ID = "SelfChargingElectrobank";

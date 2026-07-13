@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Klei.AI
 {
-	public class Attribute : Resource
+	public class Attribute : Resource, IHasDlcRestrictions
 	{
 		public Attribute(string id, bool is_trainable, Attribute.Display show_in_ui, bool is_profession, float base_value = 0f, string uiSprite = null, string thoughtSprite = null, string uiFullColourSprite = null, string[] overrideDLCIDs = null)
 			: base(id, null, null)
@@ -21,10 +21,7 @@ namespace Klei.AI
 			this.uiSprite = uiSprite;
 			this.thoughtSprite = thoughtSprite;
 			this.uiFullColourSprite = uiFullColourSprite;
-			if (overrideDLCIDs != null)
-			{
-				this.DLCIds = overrideDLCIDs;
-			}
+			this.requiredDlcIds = overrideDLCIDs;
 		}
 
 		public Attribute(string id, string name, string profession_name, string attribute_description, float base_value, Attribute.Display show_in_ui, bool is_trainable, string uiSprite = null, string thoughtSprite = null, string uiFullColourSprite = null)
@@ -74,6 +71,16 @@ namespace Klei.AI
 			return this.formatter.GetTooltip(this, instance);
 		}
 
+		public string[] GetRequiredDlcIds()
+		{
+			return this.requiredDlcIds;
+		}
+
+		public string[] GetForbiddenDlcIds()
+		{
+			return null;
+		}
+
 		private static readonly StandardAttributeFormatter defaultFormatter = new StandardAttributeFormatter(GameUtil.UnitClass.SimpleFloat, GameUtil.TimeSlice.None);
 
 		public string Description;
@@ -96,7 +103,9 @@ namespace Klei.AI
 
 		public string uiFullColourSprite;
 
-		public string[] DLCIds = DlcManager.AVAILABLE_ALL_VERSIONS;
+		public string[] requiredDlcIds;
+
+		public string[] forbiddenDlcIds;
 
 		public IAttributeFormatter formatter;
 

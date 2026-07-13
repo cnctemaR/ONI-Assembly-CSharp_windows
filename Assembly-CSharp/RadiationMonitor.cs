@@ -45,6 +45,7 @@ public class RadiationMonitor : GameStateMachine<RadiationMonitor, RadiationMoni
 		this.active.sick.extreme.waiting.ScheduleGoTo(60f, this.active.sick.extreme.vomiting);
 		this.active.sick.extreme.vomiting.ToggleChore(new Func<RadiationMonitor.Instance, Chore>(this.CreateVomitChore), this.active.sick.extreme.waiting);
 		this.active.sick.deadly.ToggleAnims("anim_loco_radiation4_kanim", 4f).ToggleAnims("anim_idle_radiation4_kanim", 4f).ToggleExpression(Db.Get().Expressions.Radiation4, null)
+			.ParamTransition<float>(this.radiationExposure, this.active.sick.extreme, RadiationMonitor.COMPARE_GTE_NO_LONGER_DEADLY)
 			.Enter(delegate(RadiationMonitor.Instance smi)
 			{
 				smi.GetComponent<Health>().Incapacitate(GameTags.RadiationSicknessIncapacitation);
@@ -136,6 +137,8 @@ public class RadiationMonitor : GameStateMachine<RadiationMonitor, RadiationMoni
 	public static readonly StateMachine<RadiationMonitor, RadiationMonitor.Instance, IStateMachineTarget, object>.Parameter<float>.Callback COMPARE_GTE_EXTREME = (RadiationMonitor.Instance smi, float p) => p >= 600f * smi.difficultySettingMod;
 
 	public static readonly StateMachine<RadiationMonitor, RadiationMonitor.Instance, IStateMachineTarget, object>.Parameter<float>.Callback COMPARE_GTE_DEADLY = (RadiationMonitor.Instance smi, float p) => p >= 900f * smi.difficultySettingMod;
+
+	public static readonly StateMachine<RadiationMonitor, RadiationMonitor.Instance, IStateMachineTarget, object>.Parameter<float>.Callback COMPARE_GTE_NO_LONGER_DEADLY = (RadiationMonitor.Instance smi, float p) => p < 900f * smi.difficultySettingMod;
 
 	public class ActiveStates : GameStateMachine<RadiationMonitor, RadiationMonitor.Instance, IStateMachineTarget, object>.State
 	{

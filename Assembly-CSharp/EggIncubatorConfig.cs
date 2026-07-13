@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using STRINGS;
 using TUNING;
 using UnityEngine;
 
@@ -13,12 +14,12 @@ public class EggIncubatorConfig : IBuildingConfig
 		string text2 = "incubator_kanim";
 		int num3 = 30;
 		float num4 = 120f;
-		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER3;
+		float[] tier = global::TUNING.BUILDINGS.CONSTRUCTION_MASS_KG.TIER3;
 		string[] refined_METALS = MATERIALS.REFINED_METALS;
 		float num5 = 1600f;
 		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloor;
 		EffectorValues none = NOISE_POLLUTION.NONE;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, refined_METALS, num5, buildLocationRule, BUILDINGS.DECOR.BONUS.TIER0, none, 0.2f);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, refined_METALS, num5, buildLocationRule, global::TUNING.BUILDINGS.DECOR.BONUS.TIER0, none, 0.2f);
 		buildingDef.AudioCategory = "Metal";
 		buildingDef.RequiresPowerInput = true;
 		buildingDef.EnergyConsumptionWhenActive = 240f;
@@ -27,6 +28,9 @@ public class EggIncubatorConfig : IBuildingConfig
 		buildingDef.OverheatTemperature = 363.15f;
 		buildingDef.SceneLayer = Grid.SceneLayer.Building;
 		buildingDef.ForegroundLayer = Grid.SceneLayer.BuildingFront;
+		buildingDef.RequiredSkillPerkID = Db.Get().SkillPerks.CanWrangleCreatures.Id;
+		buildingDef.AddSearchTerms(SEARCH_TERMS.CRITTER);
+		buildingDef.AddSearchTerms(SEARCH_TERMS.RANCHING);
 		return buildingDef;
 	}
 

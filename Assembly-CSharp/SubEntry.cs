@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using STRINGS;
 using UnityEngine;
 
-public class SubEntry
+public class SubEntry : IHasDlcRestrictions
 {
 	public SubEntry()
 	{
@@ -53,23 +53,21 @@ public class SubEntry
 
 	public string lockID { get; set; }
 
-	public string[] dlcIds { get; set; }
+	public string[] requiredDlcIds { get; set; }
 
-	public string[] forbiddenDLCIds { get; set; }
+	public string[] forbiddenDlcIds { get; set; }
 
-	public string[] GetDlcIds()
+	public string[] GetRequiredDlcIds()
 	{
-		return this.dlcIds;
+		return this.requiredDlcIds;
 	}
 
-	public string[] GetForbiddenDlCIds()
+	public string[] GetForbiddenDlcIds()
 	{
-		return this.forbiddenDLCIds;
+		return this.forbiddenDlcIds;
 	}
 
 	public string sortString { get; set; }
-
-	public bool showBeforeGeneratedCategoryLinks { get; set; }
 
 	public ContentContainer lockedContentContainer;
 

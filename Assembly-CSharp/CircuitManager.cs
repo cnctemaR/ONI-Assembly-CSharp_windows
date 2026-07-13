@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using UnityEngine;
 
 public class CircuitManager
@@ -147,6 +146,7 @@ public class CircuitManager
 			{
 				circuitInfo.bridgeGroups[j].Clear();
 			}
+			circuitInfo.wattsUsed = -1f;
 			this.circuitInfo[i] = circuitInfo;
 		}
 		this.consumersShadow.AddRange(this.consumers);
@@ -683,31 +683,31 @@ public class CircuitManager
 		return this.GetBatteryJoulesAvailable(this.GetBatteriesOnCircuit(circuitID), out num) * (float)num;
 	}
 
-	public ReadOnlyCollection<Generator> GetGeneratorsOnCircuit(ushort circuitID)
+	public List<Generator> GetGeneratorsOnCircuit(ushort circuitID)
 	{
 		if (circuitID == 65535)
 		{
 			return null;
 		}
-		return this.circuitInfo[(int)circuitID].generators.AsReadOnly();
+		return this.circuitInfo[(int)circuitID].generators;
 	}
 
-	public ReadOnlyCollection<IEnergyConsumer> GetConsumersOnCircuit(ushort circuitID)
+	public List<IEnergyConsumer> GetConsumersOnCircuit(ushort circuitID)
 	{
 		if (circuitID == 65535)
 		{
 			return null;
 		}
-		return this.circuitInfo[(int)circuitID].consumers.AsReadOnly();
+		return this.circuitInfo[(int)circuitID].consumers;
 	}
 
-	public ReadOnlyCollection<Battery> GetTransformersOnCircuit(ushort circuitID)
+	public List<Battery> GetTransformersOnCircuit(ushort circuitID)
 	{
 		if (circuitID == 65535)
 		{
 			return null;
 		}
-		return this.circuitInfo[(int)circuitID].inputTransformers.AsReadOnly();
+		return this.circuitInfo[(int)circuitID].inputTransformers;
 	}
 
 	public List<Battery> GetBatteriesOnCircuit(ushort circuitID)

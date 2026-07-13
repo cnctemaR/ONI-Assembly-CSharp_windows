@@ -27,6 +27,7 @@ public class MicrobeMusherConfig : IBuildingConfig
 		buildingDef.ViewMode = OverlayModes.Power.ID;
 		buildingDef.AudioCategory = "Glass";
 		buildingDef.AudioSize = "large";
+		buildingDef.AddSearchTerms(SEARCH_TERMS.FOOD);
 		return buildingDef;
 	}
 
@@ -126,7 +127,7 @@ public class MicrobeMusherConfig : IBuildingConfig
 		{
 			new ComplexRecipe.RecipeElement("Pemmican".ToTag(), 1f, ComplexRecipe.RecipeElement.TemperatureOperation.AverageTemperature, false)
 		};
-		PemmicanConfig.recipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("MicrobeMusher", array9, array10), array9, array10, DlcManager.AVAILABLE_DLC_2)
+		PemmicanConfig.recipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("MicrobeMusher", array9, array10), array9, array10, DlcManager.DLC2)
 		{
 			time = FOOD.RECIPES.STANDARD_COOK_TIME,
 			description = global::STRINGS.ITEMS.FOOD.PEMMICAN.RECIPEDESC,

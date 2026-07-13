@@ -24,6 +24,8 @@ public class FarmStationConfig : IBuildingConfig
 		buildingDef.AudioCategory = "Metal";
 		buildingDef.AudioSize = "large";
 		buildingDef.LogicInputPorts = LogicOperationalController.CreateSingleInputPortList(new CellOffset(0, 0));
+		buildingDef.RequiredSkillPerkID = Db.Get().SkillPerks.CanFarmStation.Id;
+		buildingDef.AddSearchTerms(SEARCH_TERMS.FARM);
 		return buildingDef;
 	}
 

@@ -136,8 +136,14 @@ public class SweepStates : GameStateMachine<SweepStates, SweepStates.Instance, I
 		GameObject gameObject = Grid.Objects[num, 3];
 		if (gameObject != null)
 		{
-			ObjectLayerListItem nextItem = gameObject.GetComponent<Pickupable>().objectLayerListItem.nextItem;
-			return nextItem != null && this.TryStore(nextItem.gameObject, smi);
+			for (ObjectLayerListItem objectLayerListItem = gameObject.GetComponent<Pickupable>().objectLayerListItem.nextItem; objectLayerListItem != null; objectLayerListItem = objectLayerListItem.nextItem)
+			{
+				if (this.TryStore(objectLayerListItem.gameObject, smi))
+				{
+					return true;
+				}
+			}
+			return false;
 		}
 		return false;
 	}

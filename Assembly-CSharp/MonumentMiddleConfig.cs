@@ -1,5 +1,6 @@
 ﻿using System;
 using Database;
+using STRINGS;
 using TUNING;
 using UnityEngine;
 
@@ -23,7 +24,7 @@ public class MonumentMiddleConfig : IBuildingConfig
 		float num5 = 9999f;
 		BuildLocationRule buildLocationRule = BuildLocationRule.BuildingAttachPoint;
 		EffectorValues tier = NOISE_POLLUTION.NOISY.TIER2;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, array, array2, num5, buildLocationRule, BUILDINGS.DECOR.BONUS.MONUMENT.INCOMPLETE, tier, 0.2f);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, array, array2, num5, buildLocationRule, global::TUNING.BUILDINGS.DECOR.BONUS.MONUMENT.INCOMPLETE, tier, 0.2f);
 		BuildingTemplates.CreateMonumentBuildingDef(buildingDef);
 		buildingDef.SceneLayer = Grid.SceneLayer.Building;
 		buildingDef.OverheatTemperature = 2273.15f;
@@ -34,6 +35,8 @@ public class MonumentMiddleConfig : IBuildingConfig
 		buildingDef.attachablePosition = new CellOffset(0, 0);
 		buildingDef.RequiresPowerInput = false;
 		buildingDef.CanMove = false;
+		buildingDef.AddSearchTerms(SEARCH_TERMS.STATUE);
+		buildingDef.AddSearchTerms(SEARCH_TERMS.MORALE);
 		return buildingDef;
 	}
 

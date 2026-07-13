@@ -23,6 +23,9 @@ public class UnderwaterCritterCondoConfig : IBuildingConfig
 		buildingDef.AudioCategory = "Metal";
 		buildingDef.PermittedRotations = PermittedRotations.FlipH;
 		buildingDef.Floodable = false;
+		buildingDef.AddSearchTerms(SEARCH_TERMS.CRITTER);
+		buildingDef.AddSearchTerms(SEARCH_TERMS.RANCHING);
+		buildingDef.AddSearchTerms(SEARCH_TERMS.WATER);
 		return buildingDef;
 	}
 

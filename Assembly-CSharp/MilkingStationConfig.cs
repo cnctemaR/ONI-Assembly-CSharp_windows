@@ -33,6 +33,7 @@ public class MilkingStationConfig : IBuildingConfig
 		buildingDef.LogicInputPorts = LogicOperationalController.CreateSingleInputPortList(new CellOffset(0, 0));
 		buildingDef.OutputConduitType = ConduitType.Liquid;
 		buildingDef.UtilityOutputOffset = new CellOffset(1, 1);
+		buildingDef.RequiredSkillPerkID = Db.Get().SkillPerks.CanUseMilkingStation.Id;
 		return buildingDef;
 	}
 

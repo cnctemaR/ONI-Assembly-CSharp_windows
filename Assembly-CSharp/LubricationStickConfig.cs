@@ -3,11 +3,16 @@ using System.Collections.Generic;
 using STRINGS;
 using UnityEngine;
 
-public class LubricationStickConfig : IEntityConfig
+public class LubricationStickConfig : IEntityConfig, IHasDlcRestrictions
 {
-	public string[] GetDlcIds()
+	public string[] GetRequiredDlcIds()
 	{
 		return DlcManager.DLC3;
+	}
+
+	public string[] GetForbiddenDlcIds()
+	{
+		return null;
 	}
 
 	public GameObject CreatePrefab()

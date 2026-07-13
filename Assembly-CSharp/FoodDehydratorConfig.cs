@@ -32,6 +32,7 @@ public class FoodDehydratorConfig : IBuildingConfig
 		buildingDef.SelfHeatKilowattsWhenActive = 4f;
 		buildingDef.LogicInputPorts = LogicOperationalController.CreateSingleInputPortList(new CellOffset(0, 0));
 		buildingDef.ForegroundLayer = Grid.SceneLayer.BuildingFront;
+		buildingDef.AddSearchTerms(SEARCH_TERMS.FOOD);
 		return buildingDef;
 	}
 

@@ -6,11 +6,6 @@ using UnityEngine;
 
 public class SeaLettuceConfig : IEntityConfig
 {
-	public string[] GetDlcIds()
-	{
-		return DlcManager.AVAILABLE_ALL_VERSIONS;
-	}
-
 	public GameObject CreatePrefab()
 	{
 		string id = SeaLettuceConfig.ID;
@@ -46,6 +41,7 @@ public class SeaLettuceConfig : IEntityConfig
 		gameObject.AddOrGet<StandardCropPlant>();
 		gameObject.AddOrGet<LoopingSounds>();
 		GameObject gameObject2 = gameObject;
+		IHasDlcRestrictions hasDlcRestrictions = this as IHasDlcRestrictions;
 		SeedProducer.ProductionType productionType = SeedProducer.ProductionType.Harvest;
 		string text3 = "SeaLettuceSeed";
 		string text4 = global::STRINGS.CREATURES.SPECIES.SEEDS.SEALETTUCE.NAME;
@@ -57,7 +53,7 @@ public class SeaLettuceConfig : IEntityConfig
 		list.Add(GameTags.WaterSeed);
 		SingleEntityReceptacle.ReceptacleDirection receptacleDirection = SingleEntityReceptacle.ReceptacleDirection.Top;
 		string text7 = global::STRINGS.CREATURES.SPECIES.SEALETTUCE.DOMESTICATEDDESC;
-		EntityTemplates.CreateAndRegisterPreviewForPlant(EntityTemplates.CreateAndRegisterSeedForPlant(gameObject2, productionType, text3, text4, text5, anim, text6, num2, list, receptacleDirection, default(Tag), 3, text7, EntityTemplates.CollisionShape.CIRCLE, 0.25f, 0.25f, null, "", false, null), SeaLettuceConfig.ID + "_preview", Assets.GetAnim("sea_lettuce_kanim"), "place", 1, 2);
+		EntityTemplates.CreateAndRegisterPreviewForPlant(EntityTemplates.CreateAndRegisterSeedForPlant(gameObject2, hasDlcRestrictions, productionType, text3, text4, text5, anim, text6, num2, list, receptacleDirection, default(Tag), 3, text7, EntityTemplates.CollisionShape.CIRCLE, 0.25f, 0.25f, null, "", false), SeaLettuceConfig.ID + "_preview", Assets.GetAnim("sea_lettuce_kanim"), "place", 1, 2);
 		SoundEventVolumeCache.instance.AddVolume("sea_lettuce_kanim", "SeaLettuce_grow", NOISE_POLLUTION.CREATURES.TIER3);
 		SoundEventVolumeCache.instance.AddVolume("sea_lettuce_kanim", "SeaLettuce_harvest", NOISE_POLLUTION.CREATURES.TIER3);
 		return gameObject;

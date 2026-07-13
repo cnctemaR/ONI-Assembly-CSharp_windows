@@ -1477,9 +1477,39 @@ namespace STRINGS
 			public static LocString BODY = "";
 		}
 
+		public class CATEGORIES
+		{
+			public class SHARED
+			{
+				public static LocString BUILDINGS_LIST_TITLE = "Buildings in this category:";
+			}
+
+			public class CREATURERELOCATOR
+			{
+				public static LocString NAME = UI.FormatAsLink("Critter relocator", "GROUPCREATURERELOCATOR");
+
+				public static LocString TITLE = "Critter Relocators";
+
+				public static LocString DESCRIPTION = "Buildings that facilitate the movement of " + UI.FormatAsLink("Critters", "CREATURES") + " from one location to another.";
+
+				public static LocString FLAVOUR = "";
+			}
+
+			public class FARMBUILDING
+			{
+				public static LocString NAME = UI.FormatAsLink("Farm Building", "GROUPFARMBUILDING");
+
+				public static LocString TITLE = "Farm Buildings";
+
+				public static LocString DESCRIPTION = "Buildings that Duplicants can use to plant and tend to a wide variety of colony-sustaining edible crops.";
+
+				public static LocString FLAVOUR = "";
+			}
+		}
+
 		public class ROOM_REQUIREMENT_CLASS
 		{
-			public static LocString NAME = "Category";
+			public static LocString NAME = UI.FormatAsLink("Category", "BUILDCATEGORYCATEGORY");
 
 			public class SHARED
 			{
@@ -1689,15 +1719,6 @@ namespace STRINGS
 				public static LocString TITLE = "Rocket Interior";
 
 				public static LocString DESCRIPTION = "Buildings that must be built inside a rocket.";
-
-				public static LocString FLAVOUR = "";
-			}
-
-			public class CREATURERELOCATOR
-			{
-				public static LocString TITLE = "Critter Relocators";
-
-				public static LocString DESCRIPTION = "Buildings that facilitate the movement of " + UI.FormatAsLink("Critters", "CREATURES") + " from one location to another.";
 
 				public static LocString FLAVOUR = "";
 			}
@@ -2349,6 +2370,166 @@ namespace STRINGS
 			{
 				public static LocString CONTAINER1 = "Evenly distributed throughout the Flox's dense overcoat are countless vibrissae-like hairs that transmit detailed sensory information about its environment, allowing it to detect changes as subtle as the shift in another creature's mood.\n\nFloxes avoid overstimulation by whipping their tails to release the pent-up energy. Because these tactile hairs are so sensitive, they cannot be safely shorn.\n\nFlox antlers, however, are nerveless and cumbersome. Handlers who unburden them of this cranial load are often rewarded with the critter's long, slow blinks of contentment.";
 			}
+		}
+
+		public class DUPLICANT
+		{
+			public static LocString SPECIES_TITLE = "Duplicants";
+
+			public static LocString SPECIES_SUBTITLE = "Colony Workers";
+
+			public class BODY
+			{
+				public static LocString CONTAINER1 = "Duplicants are printed at the " + UI.FormatAsLink("Printing Pod", "HEADQUARTERS") + ", emerging fully formed and clothed in standard-issue uniforms. Unique outfits can be found in the Supply Closet.\n\n";
+			}
+		}
+
+		public class STANDARD
+		{
+			public static LocString TITLE = "Standard Duplicant";
+
+			public static LocString SUBTITLE = "Colony Worker";
+
+			public static LocString HEADER_1 = "Basic Needs";
+
+			public static LocString PARAGRAPH_1 = string.Concat(new string[]
+			{
+				UI.FormatAsLink("Toilets", "BUILDCATEGORYREQUIREMENTCLASSTOILETTYPE"),
+				": Duplicants will empty their bladders every {time}. A lack of accessible facilities will result in ",
+				UI.FormatAsLink("Stress", "STRESS"),
+				" and wet colony floors.\n\n",
+				UI.FormatAsLink("Oxygen", "BUILDCATEGORYOXYGEN"),
+				": Duplicants inhale ",
+				UI.FormatAsLink("Oxygen", "OXYGEN"),
+				" at a rate of {O2gperSec} and exhale ",
+				UI.FormatAsLink("Carbon Dioxide", "CARBONDIOXIDE"),
+				" at a rate of {CO2gperSec}. They can hold their breath for short periods. Long-term lack of breathable gases will result in suffocation.\n\n",
+				UI.FormatAsLink("Food", "FOOD"),
+				": Daily caloric intake is {caloriesrequired}. ",
+				UI.FormatAsLink("Food", "BUILDCATEGORYFOOD"),
+				" can be produced via ",
+				UI.FormatAsLink("Farming", "BUILDCATEGORYREQUIREMENTCLASSFARMBUILDING"),
+				" and ",
+				UI.FormatAsLink("Ranching", "BUILDCATEGORYREQUIREMENTCLASSRANCHSTATIONTYPE"),
+				" buildings, and further enhanced at ",
+				UI.FormatAsLink("Cooking Stations", "BUILDCATEGORYREQUIREMENTCLASSCOOKTOP"),
+				".\n\n",
+				UI.FormatAsLink("Sleep", "HEALTH"),
+				": Duplicants require a ",
+				UI.FormatAsLink("Bed", "BUILDCATEGORYREQUIREMENTCLASSBEDTYPE"),
+				" and a ",
+				UI.FormatAsLink("Schedule", "MISCELLANEOUSTIPS14"),
+				" that includes adequate Bedtime in order to avoid the ",
+				UI.FormatAsLink("Stress", "STRESS"),
+				" and Stamina-depleting effects of overwork.\n\n"
+			});
+
+			public static LocString HEADER_2 = "Worker Optimization";
+
+			public static LocString PARAGRAPH_2 = string.Concat(new string[]
+			{
+				UI.FormatAsLink("Skills", "ROLES"),
+				": Performing colony duties helps Duplicants earn Skill Points that can be exchanged for useful Skills. Duplicants' individual traits may predispose them to prefer some careers over others, or bar them from a particular career path entirely.\n\n",
+				UI.FormatAsLink("Morale", "MORALE"),
+				": Morale in excess of a Duplicant's expectations will trigger Overjoyed responses that positively affect a variety of colony functions. ",
+				UI.FormatAsLink("Recreational", "BUILDCATEGORYREQUIREMENTCLASSRECBUILDING"),
+				" building usage, ",
+				UI.FormatAsLink("attractive buildings ", "BUILDCATEGORYREQUIREMENTCLASSDECORATION"),
+				" that increase ",
+				UI.FormatAsLink("Decor", "DECOR"),
+				", and improved ",
+				UI.FormatAsLink("Foods", "FOOD"),
+				" contribute to higher morale.\n\n",
+				UI.FormatAsLink("Stress", "STRESS"),
+				": When Stress levels reach 100%, Duplicants will exhibit negative Stress responses that can disrupt work and damage buildings.\n\n",
+				UI.FormatAsLink("Research", "TECH"),
+				": Using ",
+				UI.FormatAsLink("science buildings", "BUILDCATEGORYREQUIREMENTCLASSSCIENCEBUILDING"),
+				" unlocks advanced technologies that increase work efficiency and improve the colony's standard of living.\n\n",
+				UI.FormatAsLink("Health", "HEALTH"),
+				": Workplace hazards, including exposure to extreme ",
+				UI.FormatAsLink("Heat", "HEAT"),
+				" or ",
+				UI.FormatAsLink("Germs", "DISEASE"),
+				", can severely impact Duplicants' health. Specialized ",
+				UI.FormatAsLink("Medical", "BUILDCATEGORYMEDICAL"),
+				" buildings accelerate recovery.\n\n<i>More information about sustaining Duplicants' well-being is covered in ",
+				UI.FormatAsLink("Tips", "MISCELLANEOUSTIPS"),
+				" and ",
+				UI.FormatAsLink("Tutorials", "LESSONS"),
+				".</i>\n\n"
+			});
+		}
+
+		public class BIONIC
+		{
+			public static LocString TITLE = "Bionic Duplicant";
+
+			public static LocString SUBTITLE = "Specialized Colony Worker";
+
+			public static LocString HEADER_1 = "Basic Needs";
+
+			public static LocString PARAGRAPH_1 = string.Concat(new string[]
+			{
+				UI.FormatAsLink("Power", "POWER"),
+				": Bionic Duplicants run on portable ",
+				UI.FormatAsLink("Power Banks", "ELECTROBANK"),
+				" that they automatically replace during scheduled Downtime. If power banks are depleted, the Bionic Duplicant will become Powerless and may perish if they deplete their ",
+				UI.FormatAsLink("Oxygen", "OXYGEN"),
+				" tanks before being rebooted.\n\n",
+				UI.FormatAsLink("Gunk Extractors", "GUNKEMPTIER"),
+				": Bionic systems must dispose of built-up ",
+				UI.FormatAsLink("Gunk", "LIQUIDGUNK"),
+				" every {time}, or risk making a mess. If there are no purpose-built extractors available, Bionic Duplicants will clog a nearby ",
+				UI.FormatAsLink("Toilet", "BUILDCATEGORYREQUIREMENTCLASSTOILETTYPE"),
+				".\n\n",
+				UI.FormatAsLink("Oxygen", "BUILDCATEGORYOXYGEN"),
+				": Bionic Duplicants ventilate their mechanisms using internal ",
+				UI.FormatAsLink("Oxygen", "OXYGEN"),
+				" tanks. These must be refilled every {number} to prevent suffocation. They do not produce ",
+				UI.FormatAsLink("Carbon Dioxide", "CARBONDIOXIDE"),
+				".\n\n",
+				UI.FormatAsLink("Gear Oil", "LUBRICATINGOIL"),
+				": Maintaining efficient operation of bionic systems requires visits to the ",
+				UI.FormatAsLink("Lubrication Station", "OILCHANGER"),
+				" or use of ",
+				UI.FormatAsLink("Gear Balm", "LUBRICATIONSTICK"),
+				". If neither are available, workers slow down to avoid grinding gears.\n\n"
+			});
+
+			public static LocString HEADER_2 = "Worker Optimization";
+
+			public static LocString PARAGRAPH_2 = string.Concat(new string[]
+			{
+				UI.FormatAsLink("Boosters", "BOOSTER"),
+				": Bionic Duplicants gain specialized building usage and increase attributes by installing boosters. These can be added or removed at any time to customize a Bionic Duplicant's career path or mitigate the consequences of bionic bugs.\n\n",
+				UI.FormatAsLink("Skills", "ROLES"),
+				": Performing colony duties helps Bionic Duplicants earn skill points that can be exchanged for skills that may increase attributes and expand their capacity to install ",
+				UI.FormatAsLink("Boosters", "BOOSTER"),
+				" and ",
+				UI.FormatAsLink("Power Banks", "ELECTROBANK"),
+				".\n\n",
+				UI.FormatAsLink("Morale", "MORALE"),
+				": Morale in excess of a Duplicant's expectations will trigger Overjoyed responses that positively affect a variety of colony functions. ",
+				UI.FormatAsLink("Recreational", "BUILDCATEGORYREQUIREMENTCLASSRECBUILDING"),
+				" building usage, ",
+				UI.FormatAsLink("attractive buildings ", "BUILDCATEGORYREQUIREMENTCLASSDECORATION"),
+				" that increase ",
+				UI.FormatAsLink("Decor", "DECOR"),
+				", and improved ",
+				UI.FormatAsLink("Foods", "FOOD"),
+				" contribute to higher morale.\n\n",
+				UI.FormatAsLink("Stress", "STRESS"),
+				": When Stress levels reach 100%, Bionic Duplicants will exhibit negative Stress responses that can disrupt work and damage buildings.\n\n",
+				UI.FormatAsLink("Research", "TECH"),
+				": Using ",
+				UI.FormatAsLink("science buildings", "BUILDCATEGORYREQUIREMENTCLASSSCIENCEBUILDING"),
+				" unlocks advanced technologies that increase work efficiency and improve the colony's standard of living.\n\n<i>More information about sustaining Bionic Duplicants' well-being is covered in ",
+				UI.FormatAsLink("Tips", "MISCELLANEOUSTIPS"),
+				" and ",
+				UI.FormatAsLink("Tutorials", "LESSONS"),
+				".</i>\n\n"
+			});
 		}
 
 		public class B6_AICONTROL
@@ -4615,6 +4796,19 @@ namespace STRINGS
 				UI.FormatAsLink("Disease", "DISEASE"),
 				" than physical damage.\n\n"
 			});
+
+			public static LocString HEADER_3 = "Sleep and Stamina";
+
+			public static LocString PARAGRAPH_3 = string.Concat(new string[]
+			{
+				"Sleep deprivation increases ",
+				UI.FormatAsLink("Stress", "STRESS"),
+				" and depletes stamina. When stamina reaches zero, exhausted Duplicants will pass out from fatigue.\n\nEach Duplicant should be assigned a ",
+				UI.FormatAsLink("Bed", "BED"),
+				" of their own, and have adequate time ",
+				UI.FormatAsLink("scheduled", "MISCELLANEOUSTIPS14"),
+				" for rest.\n\n"
+			});
 		}
 
 		public class HEAT
@@ -4919,11 +5113,15 @@ namespace STRINGS
 				"\n",
 				STRINGS.RESEARCH.TYPES.GAMMA.NAME,
 				" is performed at the ",
-				BUILDINGS.PREFABS.ORBITALRESEARCHCENTER.NAME,
+				BUILDINGS.PREFABS.COSMICRESEARCHCENTER.NAME,
 				"\n",
 				STRINGS.RESEARCH.TYPES.DELTA.NAME,
 				" is performed at the ",
 				BUILDINGS.PREFABS.NUCLEARRESEARCHCENTER.NAME,
+				"\n",
+				STRINGS.RESEARCH.TYPES.ORBITAL.NAME,
+				" is performed at the ",
+				BUILDINGS.PREFABS.ORBITALRESEARCHCENTER.NAME,
 				"\n\n"
 			});
 		}

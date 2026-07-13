@@ -8,12 +8,18 @@ namespace Database
 	{
 		[Obsolete("Please use constructor with dlcIds parameter")]
 		public BuildingFacadeResource(string Id, string Name, string Description, PermitRarity Rarity, string PrefabID, string AnimFile, Dictionary<string, string> workables = null)
-			: this(Id, Name, Description, Rarity, PrefabID, AnimFile, DlcManager.AVAILABLE_ALL_VERSIONS, workables)
+			: this(Id, Name, Description, Rarity, PrefabID, AnimFile, workables, null, null)
 		{
 		}
 
+		[Obsolete("Please use constructor with dlcIds parameter")]
 		public BuildingFacadeResource(string Id, string Name, string Description, PermitRarity Rarity, string PrefabID, string AnimFile, string[] dlcIds, Dictionary<string, string> workables = null)
-			: base(Id, Name, Description, PermitCategory.Building, Rarity, dlcIds)
+			: this(Id, Name, Description, Rarity, PrefabID, AnimFile, workables, null, null)
+		{
+		}
+
+		public BuildingFacadeResource(string Id, string Name, string Description, PermitRarity Rarity, string PrefabID, string AnimFile, Dictionary<string, string> workables = null, string[] requiredDlcIds = null, string[] forbiddenDlcIds = null)
+			: base(Id, Name, Description, PermitCategory.Building, Rarity, requiredDlcIds, forbiddenDlcIds)
 		{
 			this.Id = Id;
 			this.PrefabID = PrefabID;

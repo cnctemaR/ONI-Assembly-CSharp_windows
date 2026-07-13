@@ -82,7 +82,7 @@ public static class BaseMinionConfig
 		gridVisibility.innerRadius = 20f;
 		gameObject.AddOrGet<MiningSounds>();
 		gameObject.AddOrGet<LoopingSounds>().updatePosition = true;
-		gameObject.AddOrGet<SaveLoadRoot>();
+		gameObject.AddOrGet<SaveLoadRoot>().associatedTag = MinionConfig.ID;
 		MoverLayerOccupier moverLayerOccupier = gameObject.AddOrGet<MoverLayerOccupier>();
 		moverLayerOccupier.objectLayers = new ObjectLayer[]
 		{

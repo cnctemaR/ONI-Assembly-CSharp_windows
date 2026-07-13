@@ -34,6 +34,7 @@ public class MissileLauncherConfig : IBuildingConfig
 		buildingDef.ViewMode = OverlayModes.SolidConveyor.ID;
 		buildingDef.ExhaustKilowattsWhenActive = 0.5f;
 		buildingDef.SelfHeatKilowattsWhenActive = 2f;
+		buildingDef.AddSearchTerms(SEARCH_TERMS.MISSILE);
 		return buildingDef;
 	}
 

@@ -11,7 +11,7 @@ public class KInputTextField : TMP_InputField
 		{
 			if (value.IsNullOrWhiteSpace())
 			{
-				this.skipValueChangeRefeshDelay = true;
+				this.skipValueChangeRefreshDelay = true;
 			}
 			this.timeOfLastEditCompletion = Time.unscaledTime;
 			this.waitingForValueChangeRefresh = true;
@@ -25,14 +25,16 @@ public class KInputTextField : TMP_InputField
 		{
 			return;
 		}
-		if (this.skipValueChangeRefeshDelay || Time.unscaledTime - this.timeOfLastEditCompletion >= 0.2f)
+		if (this.skipValueChangeRefreshDelay || Time.unscaledTime - this.timeOfLastEditCompletion >= 0.2f)
 		{
 			this.waitingForValueChangeRefresh = false;
-			this.skipValueChangeRefeshDelay = false;
-			if (this.OnValueChangesPaused != null)
+			this.skipValueChangeRefreshDelay = false;
+			global::System.Action onValueChangesPaused = this.OnValueChangesPaused;
+			if (onValueChangesPaused == null)
 			{
-				this.OnValueChangesPaused();
+				return;
 			}
+			onValueChangesPaused();
 		}
 	}
 
@@ -56,11 +58,16 @@ public class KInputTextField : TMP_InputField
 		base.OnDeselect(null);
 	}
 
+	public void ForceChangeValueRefresh()
+	{
+		this.skipValueChangeRefreshDelay = true;
+	}
+
 	private const float VALUE_CHANGE_REFRESH_DELAY = 0.2f;
 
 	private bool waitingForValueChangeRefresh;
 
-	private bool skipValueChangeRefeshDelay;
+	private bool skipValueChangeRefreshDelay;
 
 	private float timeOfLastEditCompletion = -1f;
 

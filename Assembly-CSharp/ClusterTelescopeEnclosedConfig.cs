@@ -32,6 +32,7 @@ public class ClusterTelescopeEnclosedConfig : IBuildingConfig
 		buildingDef.ViewMode = OverlayModes.Power.ID;
 		buildingDef.AudioCategory = "Metal";
 		buildingDef.AudioSize = "large";
+		buildingDef.RequiredSkillPerkID = Db.Get().SkillPerks.CanUseClusterTelescopeEnclosed.Id;
 		return buildingDef;
 	}
 

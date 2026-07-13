@@ -10,19 +10,27 @@ namespace Database
 			base.Initialize();
 			foreach (EquippableFacadeInfo equippableFacadeInfo in Blueprints.Get().all.equippableFacades)
 			{
-				this.Add(equippableFacadeInfo.id, equippableFacadeInfo.name, equippableFacadeInfo.desc, equippableFacadeInfo.rarity, equippableFacadeInfo.defID, equippableFacadeInfo.buildOverride, equippableFacadeInfo.animFile, equippableFacadeInfo.dlcIds);
+				this.Add(equippableFacadeInfo.id, equippableFacadeInfo.name, equippableFacadeInfo.desc, equippableFacadeInfo.rarity, equippableFacadeInfo.defID, equippableFacadeInfo.buildOverride, equippableFacadeInfo.animFile, equippableFacadeInfo.GetRequiredDlcIds(), equippableFacadeInfo.GetForbiddenDlcIds());
 			}
 		}
 
-		[Obsolete("Please use Add(...) with dlcIds parameter")]
+		[Obsolete("Please use Add(...) with required forbidden")]
 		public void Add(string id, string name, string desc, PermitRarity rarity, string defID, string buildOverride, string animFile)
 		{
-			this.Add(id, name, desc, rarity, defID, buildOverride, animFile, DlcManager.AVAILABLE_ALL_VERSIONS);
+			this.Add(id, name, desc, rarity, defID, buildOverride, animFile, null, null);
 		}
 
+		[Obsolete("Please use Add(...) with required forbidden")]
 		public void Add(string id, string name, string desc, PermitRarity rarity, string defID, string buildOverride, string animFile, string[] dlcIds)
 		{
-			EquippableFacadeResource equippableFacadeResource = new EquippableFacadeResource(id, name, desc, rarity, buildOverride, defID, animFile, dlcIds);
+			DlcRestrictionsUtil.TemporaryHelperObject transientHelperObjectFromAllowList = DlcRestrictionsUtil.GetTransientHelperObjectFromAllowList(dlcIds);
+			EquippableFacadeResource equippableFacadeResource = new EquippableFacadeResource(id, name, desc, rarity, buildOverride, defID, animFile, transientHelperObjectFromAllowList.GetRequiredDlcIds(), transientHelperObjectFromAllowList.GetForbiddenDlcIds());
+			this.resources.Add(equippableFacadeResource);
+		}
+
+		public void Add(string id, string name, string desc, PermitRarity rarity, string defID, string buildOverride, string animFile, string[] requiredDlcIds = null, string[] forbiddenDlcIds = null)
+		{
+			EquippableFacadeResource equippableFacadeResource = new EquippableFacadeResource(id, name, desc, rarity, buildOverride, defID, animFile, requiredDlcIds, forbiddenDlcIds);
 			this.resources.Add(equippableFacadeResource);
 		}
 	}

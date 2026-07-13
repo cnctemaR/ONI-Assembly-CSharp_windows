@@ -332,8 +332,8 @@ public class PauseScreen : KModalButtonMenu
 
 	private void RefreshDLCButton(string DLCID, MultiToggle button, bool userEditable)
 	{
-		button.ChangeState(SaveLoader.Instance.IsDLCActiveForCurrentSave(DLCID) ? 1 : 0);
-		button.GetComponent<Image>().material = (SaveLoader.Instance.IsDLCActiveForCurrentSave(DLCID) ? GlobalResources.Instance().AnimUIMaterial : GlobalResources.Instance().AnimMaterialUIDesaturated);
+		button.ChangeState(Game.IsDlcActiveForCurrentSave(DLCID) ? 1 : 0);
+		button.GetComponent<Image>().material = (Game.IsDlcActiveForCurrentSave(DLCID) ? GlobalResources.Instance().AnimUIMaterial : GlobalResources.Instance().AnimMaterialUIDesaturated);
 		ToolTip component = button.GetComponent<ToolTip>();
 		string dlcTitle = DlcManager.GetDlcTitle(DLCID);
 		if (!DlcManager.IsContentSubscribed(DLCID))
@@ -344,20 +344,20 @@ public class PauseScreen : KModalButtonMenu
 		}
 		if (userEditable)
 		{
-			component.SetSimpleTooltip(SaveLoader.Instance.IsDLCActiveForCurrentSave(DLCID) ? string.Format(UI.FRONTEND.PAUSE_SCREEN.ADD_DLC_MENU.DLC_ENABLED_TOOLTIP, dlcTitle) : string.Format(UI.FRONTEND.PAUSE_SCREEN.ADD_DLC_MENU.DLC_DISABLED_TOOLTIP, dlcTitle));
+			component.SetSimpleTooltip(Game.IsDlcActiveForCurrentSave(DLCID) ? string.Format(UI.FRONTEND.PAUSE_SCREEN.ADD_DLC_MENU.DLC_ENABLED_TOOLTIP, dlcTitle) : string.Format(UI.FRONTEND.PAUSE_SCREEN.ADD_DLC_MENU.DLC_DISABLED_TOOLTIP, dlcTitle));
 			button.onClick = delegate
 			{
 				this.OnClickAddDLCButton(DLCID);
 			};
 			return;
 		}
-		component.SetSimpleTooltip(SaveLoader.Instance.IsDLCActiveForCurrentSave(DLCID) ? string.Format(UI.FRONTEND.PAUSE_SCREEN.ADD_DLC_MENU.DLC_ENABLED_TOOLTIP, dlcTitle) : string.Format(UI.FRONTEND.PAUSE_SCREEN.ADD_DLC_MENU.DLC_DISABLED_NOT_EDITABLE_TOOLTIP, dlcTitle));
+		component.SetSimpleTooltip(Game.IsDlcActiveForCurrentSave(DLCID) ? string.Format(UI.FRONTEND.PAUSE_SCREEN.ADD_DLC_MENU.DLC_ENABLED_TOOLTIP, dlcTitle) : string.Format(UI.FRONTEND.PAUSE_SCREEN.ADD_DLC_MENU.DLC_DISABLED_NOT_EDITABLE_TOOLTIP, dlcTitle));
 		button.onClick = null;
 	}
 
 	private void OnClickAddDLCButton(string dlcID)
 	{
-		if (!SaveLoader.Instance.IsDLCActiveForCurrentSave(dlcID))
+		if (!Game.IsDlcActiveForCurrentSave(dlcID))
 		{
 			this.ConfirmDecision(UI.FRONTEND.PAUSE_SCREEN.ADD_DLC_MENU.ENABLE_QUESTION, UI.FRONTEND.PAUSE_SCREEN.ADD_DLC_MENU.CONFIRM, delegate
 			{

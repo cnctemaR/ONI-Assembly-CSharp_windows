@@ -26,6 +26,7 @@ public class CraftingTableConfig : IBuildingConfig
 		buildingDef.AudioCategory = "Metal";
 		buildingDef.PowerInputOffset = new CellOffset(1, 0);
 		buildingDef.POIUnlockable = true;
+		buildingDef.AddSearchTerms(SEARCH_TERMS.BIONIC);
 		return buildingDef;
 	}
 
@@ -38,6 +39,7 @@ public class CraftingTableConfig : IBuildingConfig
 		complexFabricator.sideScreenStyle = ComplexFabricatorSideScreen.StyleSetting.ListQueueHybrid;
 		go.AddOrGet<FabricatorIngredientStatusManager>();
 		go.AddOrGet<CopyBuildingSettings>();
+		go.AddOrGet<BuildingComplete>().isManuallyOperated = true;
 		go.AddOrGet<ComplexFabricatorWorkable>().overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_craftingstation_kanim") };
 		Prioritizable.AddRef(go);
 		BuildingTemplates.CreateComplexFabricatorStorage(go, complexFabricator);

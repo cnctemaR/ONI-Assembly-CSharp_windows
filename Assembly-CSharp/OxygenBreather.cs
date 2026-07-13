@@ -120,13 +120,21 @@ public class OxygenBreather : KMonoBehaviour, ISim200ms
 		}
 	}
 
+	public static void BreathableGasConsumed(OxygenBreather breather, SimHashes elementConsumed, float massConsumed, float temperature, byte disseaseIDX, int disseaseCount)
+	{
+		if (breather != null)
+		{
+			breather.BreathableGasConsumed(elementConsumed, massConsumed, temperature, disseaseIDX, disseaseCount);
+		}
+	}
+
 	public void Sim200ms(float dt)
 	{
 		if (!base.gameObject.HasTag(GameTags.Dead))
 		{
 			float num = this.airConsumptionRate.GetTotalValue() * dt;
 			OxygenBreather.IGasProvider currentGasProvider = this.GetCurrentGasProvider();
-			bool flag = currentGasProvider != null && currentGasProvider.ConsumeGas(this, num, new Action<SimHashes, float, float, byte, int>(this.BreathableGasConsumed));
+			bool flag = currentGasProvider != null && currentGasProvider.ConsumeGas(this, num);
 			if (flag)
 			{
 				if (currentGasProvider.ShouldEmitCO2())
@@ -288,7 +296,7 @@ public class OxygenBreather : KMonoBehaviour, ISim200ms
 
 		void OnClearOxygenBreather(OxygenBreather oxygen_breather);
 
-		bool ConsumeGas(OxygenBreather oxygen_breather, float amount, Action<SimHashes, float, float, byte, int> onConsumptionCompletedCallback);
+		bool ConsumeGas(OxygenBreather oxygen_breather, float amount);
 
 		bool ShouldEmitCO2();
 

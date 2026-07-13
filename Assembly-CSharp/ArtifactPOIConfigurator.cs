@@ -44,7 +44,7 @@ public class ArtifactPOIConfigurator : KMonoBehaviour
 
 	private static List<ArtifactPOIConfigurator.ArtifactPOIType> _poiTypes;
 
-	public static ArtifactPOIConfigurator.ArtifactPOIType defaultArtifactPoiType = new ArtifactPOIConfigurator.ArtifactPOIType("HarvestablePOIArtifacts", null, false, 30000f, 60000f, "EXPANSION1_ID");
+	public static ArtifactPOIConfigurator.ArtifactPOIType defaultArtifactPoiType = new ArtifactPOIConfigurator.ArtifactPOIType("HarvestablePOIArtifacts", null, false, 30000f, 60000f, DlcManager.EXPANSION1, null);
 
 	public HashedString presetType;
 
@@ -52,8 +52,36 @@ public class ArtifactPOIConfigurator : KMonoBehaviour
 
 	public float presetMax = 1f;
 
-	public class ArtifactPOIType
+	public class ArtifactPOIType : IHasDlcRestrictions
 	{
+		public string[] GetRequiredDlcIds()
+		{
+			return this.requiredDlcIds;
+		}
+
+		public string[] GetForbiddenDlcIds()
+		{
+			return this.forbiddenDlcIds;
+		}
+
+		public ArtifactPOIType(string id, string harvestableArtifactID = null, bool destroyOnHarvest = false, float poiRechargeTimeMin = 30000f, float poiRechargeTimeMax = 60000f, string[] requiredDlcIds = null, string[] forbiddenDlcIds = null)
+		{
+			this.id = id;
+			this.idHash = id;
+			this.harvestableArtifactID = harvestableArtifactID;
+			this.destroyOnHarvest = destroyOnHarvest;
+			this.poiRechargeTimeMin = poiRechargeTimeMin;
+			this.poiRechargeTimeMax = poiRechargeTimeMax;
+			this.requiredDlcIds = requiredDlcIds;
+			this.forbiddenDlcIds = forbiddenDlcIds;
+			if (ArtifactPOIConfigurator._poiTypes == null)
+			{
+				ArtifactPOIConfigurator._poiTypes = new List<ArtifactPOIConfigurator.ArtifactPOIType>();
+			}
+			ArtifactPOIConfigurator._poiTypes.Add(this);
+		}
+
+		[Obsolete]
 		public ArtifactPOIType(string id, string harvestableArtifactID = null, bool destroyOnHarvest = false, float poiRechargeTimeMin = 30000f, float poiRechargeTimeMax = 60000f, string dlcID = "EXPANSION1_ID")
 		{
 			this.id = id;
@@ -82,7 +110,12 @@ public class ArtifactPOIConfigurator : KMonoBehaviour
 
 		public float poiRechargeTimeMax;
 
+		[Obsolete]
 		public string dlcID;
+
+		public string[] requiredDlcIds;
+
+		public string[] forbiddenDlcIds;
 
 		public List<string> orbitalObject = new List<string> { Db.Get().OrbitalTypeCategories.gravitas.Id };
 	}

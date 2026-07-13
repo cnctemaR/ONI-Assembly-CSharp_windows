@@ -95,10 +95,8 @@ public class FetchDroneConfig : IEntityConfig, IHasDlcRestrictions
 		ChoreTable.Builder builder = new ChoreTable.Builder().Add(new RobotDeathStates.Def
 		{
 			deathAnim = "idle_dead"
-		}, true, Db.Get().ChoreTypes.Die.priority).Add(new DebugGoToStates.Def(), true, -1).Add(new DrowningStates.Def(), true, -1)
-			.PushInterruptGroup()
-			.Add(new RobotElectroBankDeadStates.Def(), true, Db.Get().ChoreTypes.Die.priority)
-			.PopInterruptGroup()
+		}, true, Db.Get().ChoreTypes.Die.priority).Add(new RobotElectroBankDeadStates.Def(), true, Db.Get().ChoreTypes.Die.priority).Add(new DebugGoToStates.Def(), true, -1)
+			.Add(new DrowningStates.Def(), true, -1)
 			.Add(new IdleStates.Def
 			{
 				priorityClass = PriorityScreen.PriorityClass.idle

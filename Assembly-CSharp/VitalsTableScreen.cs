@@ -343,15 +343,15 @@ public class VitalsTableScreen : TableScreen
 					{
 						Effects component = minionIdentity.GetComponent<Effects>();
 						string text;
-						if (component.HasEffect(RadiationMonitor.minorSicknessEffect))
+						if (component.HasEffect(RadiationMonitor.minorSicknessEffect) || component.HasEffect(RadiationMonitor.bionic_minorSicknessEffect))
 						{
 							text = Db.Get().effects.Get(RadiationMonitor.minorSicknessEffect).Name;
 						}
-						else if (component.HasEffect(RadiationMonitor.majorSicknessEffect))
+						else if (component.HasEffect(RadiationMonitor.majorSicknessEffect) || component.HasEffect(RadiationMonitor.bionic_majorSicknessEffect))
 						{
 							text = Db.Get().effects.Get(RadiationMonitor.majorSicknessEffect).Name;
 						}
-						else if (component.HasEffect(RadiationMonitor.extremeSicknessEffect))
+						else if (component.HasEffect(RadiationMonitor.extremeSicknessEffect) || component.HasEffect(RadiationMonitor.bionic_extremeSicknessEffect))
 						{
 							text = Db.Get().effects.Get(RadiationMonitor.extremeSicknessEffect).Name;
 						}

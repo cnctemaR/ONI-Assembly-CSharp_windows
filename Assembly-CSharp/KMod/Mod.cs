@@ -224,23 +224,31 @@ namespace KMod
 
 		private Mod.ArchivedVersion GetMostSuitableArchive()
 		{
-			Mod.PackagedModInfo modInfoForFolder = this.GetModInfoForFolder("");
-			if (modInfoForFolder == null)
+			Mod.PackagedModInfo packagedModInfo = this.GetModInfoForFolder("");
+			if (packagedModInfo == null)
 			{
-				global::Debug.Log(string.Format("{0}: Is missing a mod_info.yaml file and will not be loaded, which is required. See the stickied post in the Mods and Tools section on the Klei forums.", this.label));
-				return null;
+				if (!this.ScanContentFromSourceForTranslationsOnly(""))
+				{
+					global::Debug.Log(string.Format("{0}: Is missing a mod_info.yaml file and will not be loaded, which is required. See the stickied post in the Mods and Tools section on the Klei forums.", this.label));
+					return null;
+				}
+				this.ModDevLogWarning(string.Format("{0}: No mod_info.yaml found, but since it's a translation we will load it.", this.label));
+				packagedModInfo = new Mod.PackagedModInfo
+				{
+					minimumSupportedBuild = 0
+				};
 			}
-			this.requiredDlcIds = modInfoForFolder.requiredDlcIds;
-			this.forbiddenDlcIds = modInfoForFolder.forbiddenDlcIds;
+			this.requiredDlcIds = packagedModInfo.requiredDlcIds;
+			this.forbiddenDlcIds = packagedModInfo.forbiddenDlcIds;
 			Mod.ArchivedVersion archivedVersion = new Mod.ArchivedVersion
 			{
 				relativePath = "",
-				info = modInfoForFolder
+				info = packagedModInfo
 			};
 			if (!this.file_source.Exists("archived_versions"))
 			{
 				this.ModDevLog(string.Format("\t{0}: No archived_versions for this mod, using root version directly.", this.label));
-				if (!DlcManager.IsCorrectDlcSubscribed(modInfoForFolder))
+				if (!DlcManager.IsCorrectDlcSubscribed(packagedModInfo))
 				{
 					return null;
 				}
@@ -253,7 +261,7 @@ namespace KMod
 				if (list.Count == 0)
 				{
 					this.ModDevLog(string.Format("\t{0}: No archived_versions for this mod, using root version directly.", this.label));
-					if (!DlcManager.IsCorrectDlcSubscribed(modInfoForFolder))
+					if (!DlcManager.IsCorrectDlcSubscribed(packagedModInfo))
 					{
 						return null;
 					}
@@ -268,13 +276,13 @@ namespace KMod
 						if (fileSystemItem.type != FileSystemItem.ItemType.File)
 						{
 							string text = Path.Combine("archived_versions", fileSystemItem.name);
-							Mod.PackagedModInfo modInfoForFolder2 = this.GetModInfoForFolder(text);
-							if (modInfoForFolder2 != null)
+							Mod.PackagedModInfo modInfoForFolder = this.GetModInfoForFolder(text);
+							if (modInfoForFolder != null)
 							{
 								list2.Add(new Mod.ArchivedVersion
 								{
 									relativePath = text,
-									info = modInfoForFolder2
+									info = modInfoForFolder
 								});
 							}
 						}
@@ -282,7 +290,7 @@ namespace KMod
 					list2 = list2.Where<Mod.ArchivedVersion>((Mod.ArchivedVersion v) => DlcManager.IsCorrectDlcSubscribed(v.info)).ToList<Mod.ArchivedVersion>();
 					list2 = list2.Where<Mod.ArchivedVersion>((Mod.ArchivedVersion v) => v.info.APIVersion == 2 || v.info.APIVersion == 0).ToList<Mod.ArchivedVersion>();
 					Mod.ArchivedVersion archivedVersion2 = (from v in list2
-						where (long)v.info.minimumSupportedBuild <= 659901L
+						where (long)v.info.minimumSupportedBuild <= 660272L
 						orderby v.info.minimumSupportedBuild descending
 						select v).FirstOrDefault<Mod.ArchivedVersion>();
 					if (archivedVersion2 != null)
@@ -422,7 +430,7 @@ namespace KMod
 				this.label,
 				text,
 				packagedModInfo.requiredDlcIds.DebugToCommaSeparatedList(),
-				packagedModInfo.requiredDlcIds.DebugToCommaSeparatedList(),
+				packagedModInfo.forbiddenDlcIds.DebugToCommaSeparatedList(),
 				packagedModInfo.minimumSupportedBuild
 			}));
 			return packagedModInfo;
@@ -447,6 +455,21 @@ namespace KMod
 				}
 			}
 			return available > (Content)0;
+		}
+
+		private bool ScanContentFromSourceForTranslationsOnly(string relativeRoot)
+		{
+			this.available_content = (Content)0;
+			List<FileSystemItem> list = new List<FileSystemItem>();
+			this.file_source.GetTopLevelItems(list, relativeRoot);
+			foreach (FileSystemItem fileSystemItem in list)
+			{
+				if (fileSystemItem.type == FileSystemItem.ItemType.File && fileSystemItem.name.ToLower().EndsWith(".po"))
+				{
+					this.available_content |= Content.Translation;
+				}
+			}
+			return this.available_content > (Content)0;
 		}
 
 		public string ContentPath

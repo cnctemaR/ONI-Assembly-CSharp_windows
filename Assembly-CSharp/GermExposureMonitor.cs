@@ -67,6 +67,7 @@ public class GermExposureMonitor : GameStateMachine<GermExposureMonitor, GermExp
 			this.inhaleExposureTick = new Dictionary<HashedString, GermExposureMonitor.Instance.InhaleTickInfo>();
 			GameClock.Instance.Subscribe(-722330267, new Action<object>(this.OnNightTime));
 			base.gameObject.Subscribe(-1582839653, new Action<object>(this.OnBionicTagsChanged));
+			this.inateImmunities = DUPLICANTSTATS.GetStatsFor(base.gameObject).DiseaseImmunities.IMMUNITIES;
 			OxygenBreather component = base.GetComponent<OxygenBreather>();
 			if (component != null)
 			{
@@ -195,11 +196,27 @@ public class GermExposureMonitor : GameStateMachine<GermExposureMonitor, GermExp
 			return false;
 		}
 
+		public bool IsImmuneToDisease(string sicknessID)
+		{
+			if (this.inateImmunities == null)
+			{
+				return false;
+			}
+			for (int i = 0; i < this.inateImmunities.Length; i++)
+			{
+				if (sicknessID == this.inateImmunities[i])
+				{
+					return true;
+				}
+			}
+			return false;
+		}
+
 		public void InjectDisease(Disease disease, int count, Tag source, Sickness.InfectionVector vector)
 		{
 			foreach (ExposureType exposureType in GERM_EXPOSURE.TYPES)
 			{
-				if (disease.id == exposureType.germ_id && count > exposureType.exposure_threshold && this.HasMinExposurePeriodElapsed(exposureType.germ_id) && this.IsExposureValidForTraits(exposureType))
+				if (disease.id == exposureType.germ_id && !this.IsImmuneToDisease(exposureType.sickness_id) && count > exposureType.exposure_threshold && this.HasMinExposurePeriodElapsed(exposureType.germ_id) && this.IsExposureValidForTraits(exposureType))
 				{
 					Sickness sickness = ((exposureType.sickness_id != null) ? Db.Get().Sicknesses.Get(exposureType.sickness_id) : null);
 					if (sickness == null || sickness.infectionVectors.Contains(vector))
@@ -542,6 +559,8 @@ public class GermExposureMonitor : GameStateMachine<GermExposureMonitor, GermExp
 		public Dictionary<HashedString, float> lastExposureTime;
 
 		private Dictionary<HashedString, GermExposureMonitor.Instance.InhaleTickInfo> inhaleExposureTick;
+
+		private string[] inateImmunities;
 
 		private Sicknesses sicknesses;
 

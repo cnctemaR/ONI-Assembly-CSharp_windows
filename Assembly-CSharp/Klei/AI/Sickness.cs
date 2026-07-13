@@ -70,11 +70,16 @@ namespace Klei.AI
 
 		public List<Descriptor> GetSymptoms()
 		{
+			return this.GetSymptoms(null);
+		}
+
+		public List<Descriptor> GetSymptoms(GameObject victim)
+		{
 			List<Descriptor> list = new List<Descriptor>();
 			for (int i = 0; i < this.components.Count; i++)
 			{
-				List<Descriptor> symptoms = this.components[i].GetSymptoms();
-				if (symptoms != null)
+				List<Descriptor> symptoms = this.components[i].GetSymptoms(victim);
+				if (symptoms != null && symptoms.Count > 0)
 				{
 					list.AddRange(symptoms);
 				}
@@ -171,6 +176,11 @@ namespace Klei.AI
 			public virtual List<Descriptor> GetSymptoms()
 			{
 				return null;
+			}
+
+			public virtual List<Descriptor> GetSymptoms(GameObject victim)
+			{
+				return this.GetSymptoms();
 			}
 		}
 

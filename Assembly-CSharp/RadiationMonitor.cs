@@ -24,21 +24,42 @@ public class RadiationMonitor : GameStateMachine<RadiationMonitor, RadiationMoni
 		{
 			smi.sm.isSick.Set(false, smi, false);
 		});
-		this.active.sick.minor.ToggleEffect(RadiationMonitor.minorSicknessEffect).ParamTransition<float>(this.radiationExposure, this.active.sick.deadly, RadiationMonitor.COMPARE_GTE_DEADLY).ParamTransition<float>(this.radiationExposure, this.active.sick.extreme, RadiationMonitor.COMPARE_GTE_EXTREME)
+		this.active.sick.minor.ToggleEffect(delegate(RadiationMonitor.Instance smi)
+		{
+			if (!smi.master.gameObject.HasTag(GameTags.Minions.Models.Bionic))
+			{
+				return RadiationMonitor.minorSicknessEffect;
+			}
+			return RadiationMonitor.bionic_minorSicknessEffect;
+		}).ParamTransition<float>(this.radiationExposure, this.active.sick.deadly, RadiationMonitor.COMPARE_GTE_DEADLY).ParamTransition<float>(this.radiationExposure, this.active.sick.extreme, RadiationMonitor.COMPARE_GTE_EXTREME)
 			.ParamTransition<float>(this.radiationExposure, this.active.sick.major, RadiationMonitor.COMPARE_GTE_MAJOR)
 			.ToggleAnims("anim_loco_radiation1_kanim", 4f)
 			.ToggleAnims("anim_idle_radiation1_kanim", 4f)
 			.ToggleExpression(Db.Get().Expressions.Radiation1, null)
 			.DefaultState(this.active.sick.minor.waiting);
 		this.active.sick.minor.reacting.ToggleChore(new Func<RadiationMonitor.Instance, Chore>(this.CreateVomitChore), this.active.sick.minor.waiting);
-		this.active.sick.major.ToggleEffect(RadiationMonitor.majorSicknessEffect).ParamTransition<float>(this.radiationExposure, this.active.sick.deadly, RadiationMonitor.COMPARE_GTE_DEADLY).ParamTransition<float>(this.radiationExposure, this.active.sick.extreme, RadiationMonitor.COMPARE_GTE_EXTREME)
+		this.active.sick.major.ToggleEffect(delegate(RadiationMonitor.Instance smi)
+		{
+			if (!smi.master.gameObject.HasTag(GameTags.Minions.Models.Bionic))
+			{
+				return RadiationMonitor.majorSicknessEffect;
+			}
+			return RadiationMonitor.bionic_majorSicknessEffect;
+		}).ParamTransition<float>(this.radiationExposure, this.active.sick.deadly, RadiationMonitor.COMPARE_GTE_DEADLY).ParamTransition<float>(this.radiationExposure, this.active.sick.extreme, RadiationMonitor.COMPARE_GTE_EXTREME)
 			.ToggleAnims("anim_loco_radiation2_kanim", 4f)
 			.ToggleAnims("anim_idle_radiation2_kanim", 4f)
 			.ToggleExpression(Db.Get().Expressions.Radiation2, null)
 			.DefaultState(this.active.sick.major.waiting);
 		this.active.sick.major.waiting.ScheduleGoTo(120f, this.active.sick.major.vomiting);
 		this.active.sick.major.vomiting.ToggleChore(new Func<RadiationMonitor.Instance, Chore>(this.CreateVomitChore), this.active.sick.major.waiting);
-		this.active.sick.extreme.ParamTransition<float>(this.radiationExposure, this.active.sick.deadly, RadiationMonitor.COMPARE_GTE_DEADLY).ToggleEffect(RadiationMonitor.extremeSicknessEffect).ToggleAnims("anim_loco_radiation3_kanim", 4f)
+		this.active.sick.extreme.ParamTransition<float>(this.radiationExposure, this.active.sick.deadly, RadiationMonitor.COMPARE_GTE_DEADLY).ToggleEffect(delegate(RadiationMonitor.Instance smi)
+		{
+			if (!smi.master.gameObject.HasTag(GameTags.Minions.Models.Bionic))
+			{
+				return RadiationMonitor.extremeSicknessEffect;
+			}
+			return RadiationMonitor.bionic_extremeSicknessEffect;
+		}).ToggleAnims("anim_loco_radiation3_kanim", 4f)
 			.ToggleAnims("anim_idle_radiation3_kanim", 4f)
 			.ToggleExpression(Db.Get().Expressions.Radiation3, null)
 			.DefaultState(this.active.sick.extreme.waiting);
@@ -119,6 +140,12 @@ public class RadiationMonitor : GameStateMachine<RadiationMonitor, RadiationMoni
 	public static string majorSicknessEffect = "RadiationExposureMajor";
 
 	public static string extremeSicknessEffect = "RadiationExposureExtreme";
+
+	public static string bionic_minorSicknessEffect = "BionicRadiationExposureMinor";
+
+	public static string bionic_majorSicknessEffect = "BionicRadiationExposureMajor";
+
+	public static string bionic_extremeSicknessEffect = "BionicRadiationExposureExtreme";
 
 	public GameStateMachine<RadiationMonitor, RadiationMonitor.Instance, IStateMachineTarget, object>.State init;
 

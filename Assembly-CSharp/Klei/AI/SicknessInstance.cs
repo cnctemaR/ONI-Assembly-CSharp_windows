@@ -148,7 +148,7 @@ namespace Klei.AI
 					str = str.Replace("{Doctor}", DUPLICANTS.DISEASES.STATUS_ITEM_TOOLTIP.DOCTORED);
 				}
 			}
-			List<Descriptor> symptoms = this.modifier.GetSymptoms();
+			List<Descriptor> symptoms = this.modifier.GetSymptoms(this.smi.gameObject);
 			string text = "";
 			foreach (Descriptor descriptor in symptoms)
 			{

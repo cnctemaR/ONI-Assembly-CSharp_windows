@@ -4370,6 +4370,8 @@ namespace STRINGS
 
 			public static LocString LEGEND_POSTAMBLE = "\n•  Select an infected object for more details";
 
+			public static LocString ATTRIBUTE_BY_MODEL_MODIFIER_SYMPTOMS = "({0}) {1}: {2}";
+
 			public static LocString ATTRIBUTE_MODIFIER_SYMPTOMS = "{0}: {1}";
 
 			public static LocString ATTRIBUTE_MODIFIER_SYMPTOMS_TOOLTIP = "Modifies {0} by {1}";
@@ -7125,6 +7127,62 @@ namespace STRINGS
 			}
 
 			public class RADIATIONEXPOSUREDEADLY
+			{
+				public static LocString NAME = "Deadly Radiation Sickness";
+
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"Extreme ",
+					UI.PRE_KEYWORD,
+					"Radiation",
+					UI.PST_KEYWORD,
+					" exposure has incapacitated this Duplicant"
+				});
+			}
+
+			public class BIONICRADIATIONEXPOSUREMINOR
+			{
+				public static LocString NAME = "Minor Radiation Sickness";
+
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"A bit of ",
+					UI.PRE_KEYWORD,
+					"Radiation",
+					UI.PST_KEYWORD,
+					" exposure has made this Duplicant feel sluggish"
+				});
+			}
+
+			public class BIONICRADIATIONEXPOSUREMAJOR
+			{
+				public static LocString NAME = "Major Radiation Sickness";
+
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"Significant ",
+					UI.PRE_KEYWORD,
+					"Radiation",
+					UI.PST_KEYWORD,
+					" exposure has left this Duplicant totally exhausted"
+				});
+			}
+
+			public class BIONICRADIATIONEXPOSUREEXTREME
+			{
+				public static LocString NAME = "Extreme Radiation Sickness";
+
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"Dangerously high ",
+					UI.PRE_KEYWORD,
+					"Radiation",
+					UI.PST_KEYWORD,
+					" exposure is making this Duplicant wish they'd never been printed"
+				});
+			}
+
+			public class BIONICRADIATIONEXPOSUREDEADLY
 			{
 				public static LocString NAME = "Deadly Radiation Sickness";
 

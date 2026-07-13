@@ -991,6 +991,10 @@ namespace TUNING
 			BaseStats = new DUPLICANTSTATS.BASESTATS
 			{
 				MAX_CALORIES = 0f
+			},
+			DiseaseImmunities = new DUPLICANTSTATS.DISEASEIMMUNITIES
+			{
+				IMMUNITIES = new string[] { "FoodSickness" }
 			}
 		};
 
@@ -1007,6 +1011,8 @@ namespace TUNING
 		};
 
 		public DUPLICANTSTATS.BASESTATS BaseStats = new DUPLICANTSTATS.BASESTATS();
+
+		public DUPLICANTSTATS.DISEASEIMMUNITIES DiseaseImmunities = new DUPLICANTSTATS.DISEASEIMMUNITIES();
 
 		public DUPLICANTSTATS.TEMPERATURE Temperature = new DUPLICANTSTATS.TEMPERATURE();
 
@@ -1349,6 +1355,11 @@ namespace TUNING
 			public float HEAT_GENERATION_EFFICIENCY = 0.012f;
 
 			public float GUESSTIMATE_CALORIES_PER_CYCLE = -1600000f;
+		}
+
+		public class DISEASEIMMUNITIES
+		{
+			public string[] IMMUNITIES;
 		}
 
 		public class TEMPERATURE

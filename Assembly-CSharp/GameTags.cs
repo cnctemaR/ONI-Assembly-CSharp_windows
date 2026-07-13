@@ -948,15 +948,15 @@ public class GameTags
 				return "";
 			}
 
+			public static readonly Tag Standard = TagManager.Create("Minion", DUPLICANTS.MODEL.STANDARD.NAME);
+
+			public static readonly Tag Bionic = TagManager.Create("BionicMinion", DUPLICANTS.MODEL.BIONIC.NAME);
+
 			public static readonly Tag[] AllModels = new Tag[]
 			{
 				GameTags.Minions.Models.Standard,
 				GameTags.Minions.Models.Bionic
 			};
-
-			public static readonly Tag Standard = TagManager.Create("Minion", DUPLICANTS.MODEL.STANDARD.NAME);
-
-			public static readonly Tag Bionic = TagManager.Create("BionicMinion", DUPLICANTS.MODEL.BIONIC.NAME);
 		}
 	}
 

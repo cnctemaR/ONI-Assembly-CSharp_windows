@@ -89,6 +89,8 @@ public class RobotElectroBankDeadStates : GameStateMachine<RobotElectroBankDeadS
 		public Instance(Chore<RobotElectroBankDeadStates.Instance> chore, RobotElectroBankDeadStates.Def def)
 			: base(chore, def)
 		{
+			chore.choreType.interruptPriority = Db.Get().ChoreTypes.Die.interruptPriority;
+			chore.masterPriority.priority_class = PriorityScreen.PriorityClass.compulsory;
 			chore.AddPrecondition(ChorePreconditions.instance.CheckBehaviourPrecondition, GameTags.Robots.Behaviours.NoElectroBank);
 		}
 	}

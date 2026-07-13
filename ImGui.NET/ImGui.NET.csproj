@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{9CEA7310-694F-448C-9526-C8572799B4F8}</ProjectGuid>
+    <ProjectGuid>{CDA888E5-14A7-4EC1-B977-77138A38180D}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>ImGuiNET</RootNamespace>
     <AssemblyName>ImGui.NET</AssemblyName>
@@ -140,23 +140,23 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{9CEA7310-694F-448C-9526-C8572799B4FC}</Project>
+      <Project>{CDA888E5-14A7-4EC1-B977-77138A381811}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Numerics\System.Numerics.csproj">
-      <Project>{9CEA7310-694F-448C-9526-C8572799B50A}</Project>
+      <Project>{CDA888E5-14A7-4EC1-B977-77138A38181F}</Project>
       <Name>System.Numerics</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Runtime.CompilerServices.Unsafe\System.Runtime.CompilerServices.Unsafe.csproj">
-      <Project>{9CEA7310-694F-448C-9526-C8572799B50B}</Project>
+      <Project>{CDA888E5-14A7-4EC1-B977-77138A381820}</Project>
       <Name>System.Runtime.CompilerServices.Unsafe</Name>
     </ProjectReference>
     <ProjectReference Include="..\System\System.csproj">
-      <Project>{9CEA7310-694F-448C-9526-C8572799B504}</Project>
+      <Project>{CDA888E5-14A7-4EC1-B977-77138A381819}</Project>
       <Name>System</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
-      <Project>{9CEA7310-694F-448C-9526-C8572799B520}</Project>
+      <Project>{CDA888E5-14A7-4EC1-B977-77138A381835}</Project>
       <Name>UnityEngine.CoreModule</Name>
     </ProjectReference>
   </ItemGroup>

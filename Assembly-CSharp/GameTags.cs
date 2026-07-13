@@ -689,6 +689,14 @@ public class GameTags
 
 	public static Tag[] StartingRefinedMetalOres = null;
 
+	public static TagSet HiddenElementTags = new TagSet
+	{
+		GameTags.HideFromCodex,
+		GameTags.HideFromSpawnTool,
+		GameTags.StartingMetalOre,
+		GameTags.StartingRefinedMetalOre
+	};
+
 	public static class Worlds
 	{
 		public static readonly Tag Ceres = TagManager.Create("Ceres");

@@ -27,7 +27,7 @@ public class ScheduleManager : KMonoBehaviour, ISim33ms
 	{
 		if (this.schedules.Count == 0)
 		{
-			this.AddDefaultSchedule(true);
+			this.AddDefaultSchedule(true, true);
 		}
 	}
 
@@ -42,7 +42,7 @@ public class ScheduleManager : KMonoBehaviour, ISim33ms
 	{
 		if (this.schedules.Count == 0)
 		{
-			this.AddDefaultSchedule(true);
+			this.AddDefaultSchedule(true, true);
 		}
 		foreach (Schedule schedule in this.schedules)
 		{
@@ -77,6 +77,10 @@ public class ScheduleManager : KMonoBehaviour, ISim33ms
 	private void OnAddDupe(MinionIdentity minion)
 	{
 		Schedulable component = minion.GetComponent<Schedulable>();
+		if (component.GetSchedule() != null)
+		{
+			return;
+		}
 		Schedule schedule = this.schedules[0];
 		if (minion.model == GameTags.Minions.Models.Bionic)
 		{
@@ -101,6 +105,10 @@ public class ScheduleManager : KMonoBehaviour, ISim33ms
 					}
 					schedule = schedule2;
 					schedule2.isDefaultForBionics = true;
+					if (this.onSchedulesChanged != null)
+					{
+						this.onSchedulesChanged(this.schedules);
+					}
 				}
 			}
 			else
@@ -133,9 +141,9 @@ public class ScheduleManager : KMonoBehaviour, ISim33ms
 		}
 	}
 
-	public void AddDefaultSchedule(bool alarmOn)
+	public void AddDefaultSchedule(bool alarmOn, bool useDefaultName = true)
 	{
-		Schedule schedule = this.AddSchedule(Db.Get().ScheduleGroups.allGroups, UI.SCHEDULESCREEN.SCHEDULE_NAME_DEFAULT, alarmOn);
+		Schedule schedule = this.AddSchedule(Db.Get().ScheduleGroups.allGroups, useDefaultName ? UI.SCHEDULESCREEN.SCHEDULE_NAME_DEFAULT : UI.SCHEDULESCREEN.SCHEDULE_NAME_NEW, alarmOn);
 		if (Game.Instance.FastWorkersModeActive)
 		{
 			for (int i = 0; i < 21; i++)

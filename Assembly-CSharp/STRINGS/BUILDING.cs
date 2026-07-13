@@ -1728,13 +1728,6 @@ namespace STRINGS
 				public static LocString TOOLTIP = "This amenity cannot be used while full\n\nEmptying it will produce " + UI.FormatAsLink("Polluted Dirt", "TOXICSAND");
 			}
 
-			public class TOILETNEEDSEMPTYINGGUNK
-			{
-				public static LocString NAME = "Requires Emptying";
-
-				public static LocString TOOLTIP = "This amenity cannot be used while full\n\nEmptying it will produce " + UI.FormatAsLink("Gunk", "LIQUIDGUNK");
-			}
-
 			public class DESALINATORNEEDSEMPTYING
 			{
 				public static LocString NAME = "Requires Emptying";

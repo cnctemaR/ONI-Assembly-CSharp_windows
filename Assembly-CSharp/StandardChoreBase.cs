@@ -236,8 +236,15 @@ public abstract class StandardChoreBase : Chore
 	{
 		if (this.arePreconditionsDirty)
 		{
-			this.preconditions.Sort((Chore.PreconditionInstance x, Chore.PreconditionInstance y) => x.condition.sortOrder.CompareTo(y.condition.sortOrder));
-			this.arePreconditionsDirty = false;
+			List<Chore.PreconditionInstance> list = this.preconditions;
+			lock (list)
+			{
+				if (this.arePreconditionsDirty)
+				{
+					this.preconditions.Sort((Chore.PreconditionInstance x, Chore.PreconditionInstance y) => x.condition.sortOrder.CompareTo(y.condition.sortOrder));
+					this.arePreconditionsDirty = false;
+				}
+			}
 		}
 		return this.preconditions;
 	}

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using STRINGS;
 using UnityEngine;
 
 public class OwnablesSecondSideScreen : KScreen
@@ -69,13 +70,14 @@ public class OwnablesSecondSideScreen : KScreen
 		{
 			Components.AssignableItems.Register(new Action<Assignable>(this.OnNewItemAvailable), new Action<Assignable>(this.OnItemUnregistered));
 		}
-		this.RefreshItemListOptions();
+		this.RefreshItemListOptions(true);
 	}
 
 	public void SortRows()
 	{
 		if (this.itemRows != null)
 		{
+			this.itemRows.Sort((OwnablesSecondSideScreenRow a, OwnablesSecondSideScreenRow b) => string.Compare(UI.StripLinkFormatting(a.nameLabel.text), UI.StripLinkFormatting(b.nameLabel.text)) * -1);
 			OwnablesSecondSideScreenRow ownablesSecondSideScreenRow = null;
 			for (int i = 0; i < this.itemRows.Count; i++)
 			{
@@ -91,6 +93,10 @@ public class OwnablesSecondSideScreen : KScreen
 						ownablesSecondSideScreenRow2.transform.SetAsLastSibling();
 					}
 				}
+				else
+				{
+					ownablesSecondSideScreenRow2.transform.SetAsFirstSibling();
+				}
 			}
 			if (ownablesSecondSideScreenRow != null)
 			{
@@ -100,7 +106,7 @@ public class OwnablesSecondSideScreen : KScreen
 		this.noneRow.transform.SetAsFirstSibling();
 	}
 
-	public void RefreshItemListOptions()
+	public void RefreshItemListOptions(bool sortRows = false)
 	{
 		GameObject gameObject = ((this.OwnerIdentity == null) ? null : this.OwnerIdentity.GetOwners()[0].GetComponent<MinionAssignablesProxy>().GetTargetGameObject());
 		int worldID = ((this.OwnerIdentity == null) ? 255 : gameObject.GetMyWorldId());
@@ -164,7 +170,10 @@ public class OwnablesSecondSideScreen : KScreen
 				ownablesSecondSideScreenRow3.gameObject.SetActive(false);
 			}
 		}
-		this.SortRows();
+		if (sortRows)
+		{
+			this.SortRows();
+		}
 		this.RefreshNoneRow();
 	}
 
@@ -191,7 +200,6 @@ public class OwnablesSecondSideScreen : KScreen
 	private void OnItemRowAsigneeChanged(OwnablesSecondSideScreenRow correspondingItemRow)
 	{
 		correspondingItemRow.Refresh();
-		this.SortRows();
 		this.RefreshNoneRow();
 	}
 
@@ -217,7 +225,7 @@ public class OwnablesSecondSideScreen : KScreen
 		if (this.Slot != null)
 		{
 			this.Slot.Unassign(true);
-			this.RefreshItemListOptions();
+			this.RefreshItemListOptions(false);
 		}
 	}
 
@@ -225,7 +233,7 @@ public class OwnablesSecondSideScreen : KScreen
 	{
 		if (this.Slot != null && item.slotID == this.SlotType.Id)
 		{
-			this.RefreshItemListOptions();
+			this.RefreshItemListOptions(false);
 		}
 	}
 
@@ -233,7 +241,7 @@ public class OwnablesSecondSideScreen : KScreen
 	{
 		if (this.Slot != null && item.slotID == this.SlotType.Id)
 		{
-			this.RefreshItemListOptions();
+			this.RefreshItemListOptions(false);
 		}
 	}
 

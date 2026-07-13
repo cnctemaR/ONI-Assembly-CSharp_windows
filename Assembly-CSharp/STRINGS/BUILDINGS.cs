@@ -125,7 +125,7 @@ namespace STRINGS
 
 				public static LocString DESC = "Bionic Duplicants are much more relaxed after a visit to the gunk extractor.";
 
-				public static LocString EFFECT = "Cleanses stale " + UI.FormatAsLink("Liquid Gunk", "LIQUIDGUNK") + " build-up from Duplicants' bionic parts.";
+				public static LocString EFFECT = "Cleanses stale " + UI.FormatAsLink("Gunk", "LIQUIDGUNK") + " build-up from Duplicants' bionic parts.";
 			}
 
 			public class OILCHANGER

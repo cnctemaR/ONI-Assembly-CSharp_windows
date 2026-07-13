@@ -69,7 +69,6 @@ public class JobsTableScreen : TableScreen
 		}
 		PrioritizeRowTableColumn prioritizeRowTableColumn = new PrioritizeRowTableColumn(null, new Action<object, int>(this.ChangeRowPriority), new Func<object, int, string>(this.HoverChangeRowPriorityButton));
 		base.RegisterColumn("prioritize_row", prioritizeRowTableColumn);
-		this.settingsButton.onClick += this.OnSettingsButtonClicked;
 		this.resetSettingsButton.onClick += this.OnResetSettingsClicked;
 		this.toggleAdvancedModeButton.onClick += this.OnAdvancedModeToggleClicked;
 		this.toggleAdvancedModeButton.fgImage.gameObject.SetActive(Game.Instance.advancedPersonalPriorities);
@@ -541,6 +540,15 @@ public class JobsTableScreen : TableScreen
 		{
 			this.SizeRows();
 		}
+		this.ConfigureOptionsPanel();
+	}
+
+	private void ConfigureOptionsPanel()
+	{
+		HierarchyReferences component = this.header_row.GetComponent<HierarchyReferences>();
+		this.settingsButton = component.GetReference<KButton>("OptionsButton");
+		this.settingsButton.ClearOnClick();
+		this.settingsButton.onClick += this.OnSettingsButtonClicked;
 	}
 
 	private void SizeRows()
@@ -940,7 +948,6 @@ public class JobsTableScreen : TableScreen
 	[SerializeField]
 	private int skillLevelHigh = 10;
 
-	[SerializeField]
 	private KButton settingsButton;
 
 	[SerializeField]

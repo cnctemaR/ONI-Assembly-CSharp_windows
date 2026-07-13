@@ -117,6 +117,7 @@ public class FetchDroneConfig : IEntityConfig
 		gameObject.AddOrGet<Health>();
 		gameObject.AddOrGetDef<MoveToLocationMonitor.Def>().invalidTagsForMoveTo = new Tag[] { GameTags.Robots.Behaviours.NoElectroBank };
 		SymbolOverrideControllerUtil.AddToPrefab(gameObject);
+		gameObject.AddOrGet<CopyBuildingSettings>();
 		return gameObject;
 	}
 

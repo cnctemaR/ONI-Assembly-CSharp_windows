@@ -1,6 +1,5 @@
 ﻿using System;
 using FMODUnity;
-using Klei.AI;
 using ProcGenGame;
 using UnityEngine;
 
@@ -103,68 +102,50 @@ public class NewBaseScreen : KScreen
 		GameObject telepad = GameUtil.GetTelepad(ClusterManager.Instance.GetStartWorld().id);
 		if (telepad)
 		{
-			this.SpawnMinions(Grid.PosToCell(telepad));
+			this.SpawnMinions(telepad);
 		}
 		Game.Instance.baseAlreadyCreated = true;
 		this.Deactivate();
 	}
 
-	private void SpawnMinions(int headquartersCell)
+	private void SpawnMinions(GameObject start_pad)
 	{
-		if (headquartersCell == -1)
+		int num = Grid.PosToCell(start_pad);
+		if (num == -1)
 		{
 			global::Debug.LogWarning("No headquarters in saved base template. Cannot place minions. Confirm there is a headquarters saved to the base template, or consider creating a new one.");
 			return;
 		}
-		int num;
 		int num2;
-		Grid.CellToXY(headquartersCell, out num, out num2);
+		int num3;
+		Grid.CellToXY(num, out num2, out num3);
 		if (Grid.WidthInCells < 64)
 		{
 			return;
 		}
 		int baseLeft = this.m_clusterLayout.currentWorld.BaseLeft;
 		int baseRight = this.m_clusterLayout.currentWorld.BaseRight;
-		Effect a_new_hope = Db.Get().effects.Get("AnewHope");
-		Action<object> <>9__0;
+		Db.Get().effects.Get("AnewHope");
+		Telepad component = start_pad.GetComponent<Telepad>();
 		for (int i = 0; i < this.m_minionStartingStats.Length; i++)
 		{
 			MinionStartingStats minionStartingStats = (MinionStartingStats)this.m_minionStartingStats[i];
-			int num3 = num + i % (baseRight - baseLeft) + 1;
-			int num4 = num2;
-			int num5 = Grid.XYToCell(num3, num4);
+			int num4 = num2 + i % (baseRight - baseLeft) + 1;
+			int num5 = num3;
+			int num6 = Grid.XYToCell(num4, num5);
 			GameObject prefab = Assets.GetPrefab(BaseMinionConfig.GetMinionIDForModel(minionStartingStats.personality.model));
 			GameObject gameObject = Util.KInstantiate(prefab, null, null);
 			gameObject.name = prefab.name;
 			Immigration.Instance.ApplyDefaultPersonalPriorities(gameObject);
-			gameObject.transform.SetLocalPosition(Grid.CellToPosCBC(num5, Grid.SceneLayer.Move));
+			gameObject.transform.SetLocalPosition(Grid.CellToPosCBC(num6, Grid.SceneLayer.Move));
 			gameObject.SetActive(true);
 			minionStartingStats.Apply(gameObject);
-			GameScheduler instance = GameScheduler.Instance;
-			string text = "ANewHope";
-			float num6 = 3f + 0.5f * (float)i;
-			Action<object> action;
-			if ((action = <>9__0) == null)
+			if (component != null)
 			{
-				action = (<>9__0 = delegate(object m)
-				{
-					GameObject gameObject2 = m as GameObject;
-					if (gameObject2 == null)
-					{
-						return;
-					}
-					gameObject2.GetComponent<Effects>().Add(a_new_hope, true);
-				});
-			}
-			instance.Schedule(text, num6, action, gameObject, null);
-			if (minionStartingStats.personality.model == GameTags.Minions.Models.Bionic)
-			{
-				GameScheduler.Instance.Schedule("ExtraPowerBanks", 3f + 4.5f * (float)i, delegate(object m)
-				{
-					GameUtil.GetTelepad(ClusterManager.Instance.GetStartWorld().id).Trigger(1982288670, null);
-				}, gameObject, null);
+				component.AddNewBaseMinion(gameObject, minionStartingStats.personality.model == GameTags.Minions.Models.Bionic);
 			}
 		}
+		component.ScheduleNewBaseEvents();
 		ClusterManager.Instance.activeWorld.SetDupeVisited();
 	}
 

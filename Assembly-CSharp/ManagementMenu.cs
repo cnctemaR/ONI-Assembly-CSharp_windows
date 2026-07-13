@@ -132,8 +132,8 @@ public class ManagementMenu : KIconToggleMenu
 		List<KIconToggleMenu.ToggleInfo> list = new List<KIconToggleMenu.ToggleInfo>();
 		list.Add(this.vitalsInfo);
 		list.Add(this.consumablesInfo);
-		list.Add(this.scheduleInfo);
 		list.Add(this.jobsInfo);
+		list.Add(this.scheduleInfo);
 		list.Add(this.skillsInfo);
 		list.Add(this.researchInfo);
 		if (DlcManager.FeatureClusterSpaceEnabled())

@@ -350,6 +350,9 @@ namespace Database
 				Action<KMonoBehaviour> action9 = null;
 				array = DlcManager.AVAILABLE_EXPANSION1_ONLY;
 				this.RunAReactor = base.Add(new ColonyAchievement(text65, text66, text67, text68, flag9, list9, text69, text70, text71, text72, action9, default(EventReference), "thats_rad", array, "EXPANSION1_ID", null));
+			}
+			if (DlcManager.IsContentSubscribed("DLC3_ID"))
+			{
 				string text73 = "EfficientData";
 				string text74 = "EFFICIENT_DATAMINING";
 				string text75 = COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.DATA_DRIVEN;
@@ -362,7 +365,7 @@ namespace Database
 				string text79 = "";
 				string text80 = "";
 				Action<KMonoBehaviour> action10 = null;
-				array = DlcManager.DLC3;
+				string[] array = DlcManager.DLC3;
 				this.EfficientData = base.Add(new ColonyAchievement(text73, text74, text75, text76, flag10, list10, text77, text78, text79, text80, action10, default(EventReference), "efficient_data_mining", array, "DLC3_ID", null));
 				string text81 = "AllTheCircuits";
 				string text82 = "ALL_THE_CIRCUITS";

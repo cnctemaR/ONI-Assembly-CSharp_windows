@@ -374,6 +374,8 @@ namespace STRINGS
 
 		public static LocString VITALSSCREEN_SICKNESS = "Disease";
 
+		public static LocString VITALSSCREEN_POWERBANKS = "Power";
+
 		public static LocString VITALSSCREEN_CALORIES = "Fullness";
 
 		public static LocString VITALSSCREEN_RATIONS = "Calories / Cycle";
@@ -8057,6 +8059,8 @@ namespace STRINGS
 						public static LocString FAILURE = "No Control Station\n\nA new Rocket Control Station must be installed inside the rocket";
 
 						public static LocString WARNING = "Control Station warning";
+
+						public static LocString WARNING_ROBO_PILOT = "No Control Station\n\nA Robot Pilot Module is piloting this rocket";
 					}
 				}
 
@@ -9619,6 +9623,8 @@ namespace STRINGS
 
 			public static LocString COLUMN_SORT_BY_EXPECTATIONS = "Sort by <b>Morale</b>";
 
+			public static LocString COLUMN_SORT_BY_POWERBANKS = "Sort by <b>Power Banks</b>";
+
 			public static LocString NA = "N/A";
 
 			public static LocString INFORMATION_NOT_AVAILABLE_TOOLTIP = "Information is not available because {1} is in {0}";
@@ -9955,6 +9961,8 @@ namespace STRINGS
 			public static LocString SCHEDULE_EDITOR = "SCHEDULE EDITOR";
 
 			public static LocString SCHEDULE_NAME_DEFAULT = "Default Standard Schedule";
+
+			public static LocString SCHEDULE_NAME_NEW = "New Schedule";
 
 			public static LocString SCHEDULE_NAME_FORMAT = "Schedule {0}";
 

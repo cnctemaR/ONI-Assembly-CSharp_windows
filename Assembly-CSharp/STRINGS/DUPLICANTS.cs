@@ -3821,13 +3821,6 @@ namespace STRINGS
 				public static LocString TOOLTIP = "This Duplicant is putting <b>{Item}</b> away in <b>{Target}</b>";
 			}
 
-			public class LOADINGELECTROBANK
-			{
-				public static LocString NAME = "Loading {Item}";
-
-				public static LocString TOOLTIP = "This Duplicant is loading an <b>{Item}</b> into a <b>{Target}</b>";
-			}
-
 			public class BUILDING
 			{
 				public static LocString NAME = "Building {Target}";

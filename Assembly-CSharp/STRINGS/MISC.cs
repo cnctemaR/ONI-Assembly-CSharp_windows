@@ -385,7 +385,7 @@ namespace STRINGS
 				"Combustible Liquids can be burned as fuels to be used in energy production, such as in a ",
 				UI.FormatAsLink("Petroleum Generator", "PETROLEUMGENERATOR"),
 				" or a ",
-				UI.FormatAsLink("Petroleum Engine", "KEROSENEENGINE"),
+				UI.FormatAsLink(KeroseneEngineHelper.NAME, KeroseneEngineHelper.CODEXID),
 				".\n\nThough these liquids have other uses, such as fertilizer for growing a ",
 				UI.FormatAsLink("Nosh Bean", "BEANPLANTSEED"),
 				", their primary usefulness lies in their ability to be burned for ",

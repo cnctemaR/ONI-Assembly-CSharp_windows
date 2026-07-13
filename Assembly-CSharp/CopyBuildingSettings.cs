@@ -25,6 +25,10 @@ public class CopyBuildingSettings : KMonoBehaviour
 	public static bool ApplyCopy(int targetCell, GameObject sourceGameObject)
 	{
 		ObjectLayer objectLayer = ObjectLayer.Building;
+		if (sourceGameObject.GetComponent<MoverLayerOccupier>() != null)
+		{
+			objectLayer = ObjectLayer.Mover;
+		}
 		Building component = sourceGameObject.GetComponent<BuildingComplete>();
 		if (component != null)
 		{

@@ -2,11 +2,87 @@
 using System.Collections;
 using System.Collections.Generic;
 using Klei.AI;
+using KSerialization;
 using STRINGS;
 using UnityEngine;
 
 public class Telepad : StateMachineComponent<Telepad.StatesInstance>
 {
+	public void AddNewBaseMinion(GameObject minion, bool extra_power_banks)
+	{
+		Ref<MinionIdentity> @ref = new Ref<MinionIdentity>(minion.GetComponent<MinionIdentity>());
+		this.aNewHopeEvents.Add(@ref);
+		if (extra_power_banks)
+		{
+			this.extraPowerBanksEvents.Add(@ref);
+		}
+	}
+
+	public void ScheduleNewBaseEvents()
+	{
+		this.aNewHopeEvents.RemoveAll((Ref<MinionIdentity> entry) => entry == null || entry.Get() == null);
+		this.extraPowerBanksEvents.RemoveAll((Ref<MinionIdentity> entry) => entry == null || entry.Get() == null);
+		Effect a_new_hope = Db.Get().effects.Get("AnewHope");
+		Action<object> <>9__2;
+		for (int i = 0; i < this.aNewHopeEvents.Count; i++)
+		{
+			GameObject gameObject = this.aNewHopeEvents[i].Get().gameObject;
+			GameScheduler instance = GameScheduler.Instance;
+			string text = "ANewHope";
+			float num = 3f + 0.5f * (float)i;
+			Action<object> action;
+			if ((action = <>9__2) == null)
+			{
+				action = (<>9__2 = delegate(object m)
+				{
+					GameObject gameObject3 = m as GameObject;
+					if (gameObject3 == null)
+					{
+						return;
+					}
+					this.RemoveFromEvents(this.aNewHopeEvents, gameObject3);
+					gameObject3.GetComponent<Effects>().Add(a_new_hope, true);
+				});
+			}
+			instance.Schedule(text, num, action, gameObject, null);
+		}
+		Action<object> <>9__3;
+		for (int j = 0; j < this.extraPowerBanksEvents.Count; j++)
+		{
+			GameObject gameObject2 = this.extraPowerBanksEvents[j].Get().gameObject;
+			GameScheduler instance2 = GameScheduler.Instance;
+			string text2 = "ExtraPowerBanks";
+			float num2 = 3f + 4.5f * (float)j;
+			Action<object> action2;
+			if ((action2 = <>9__3) == null)
+			{
+				action2 = (<>9__3 = delegate(object m)
+				{
+					GameObject gameObject4 = m as GameObject;
+					if (gameObject4 == null)
+					{
+						return;
+					}
+					this.RemoveFromEvents(this.extraPowerBanksEvents, gameObject4);
+					GameUtil.GetTelepad(ClusterManager.Instance.GetStartWorld().id).Trigger(1982288670, null);
+				});
+			}
+			instance2.Schedule(text2, num2, action2, gameObject2, null);
+		}
+	}
+
+	private void RemoveFromEvents(List<Ref<MinionIdentity>> listToRemove, GameObject go)
+	{
+		for (int i = listToRemove.Count - 1; i >= 0; i--)
+		{
+			if (listToRemove[i].Get() != null && listToRemove[i].Get() == go.GetComponent<MinionIdentity>())
+			{
+				listToRemove.RemoveAt(i);
+				return;
+			}
+		}
+	}
+
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
@@ -34,6 +110,7 @@ public class Telepad : StateMachineComponent<Telepad.StatesInstance>
 		this.meter = new MeterController(base.GetComponent<KBatchedAnimController>(), "meter_target", "meter", Meter.Offset.Behind, Grid.SceneLayer.NoLayer, new string[] { "meter_target", "meter_fill", "meter_frame", "meter_OL" });
 		this.meter.gameObject.GetComponent<KBatchedAnimController>().SetDirty();
 		base.smi.StartSM();
+		this.ScheduleNewBaseEvents();
 	}
 
 	protected override void OnCleanUp()
@@ -119,6 +196,12 @@ public class Telepad : StateMachineComponent<Telepad.StatesInstance>
 	private List<MinionStartingStats> minionStats;
 
 	public float startingSkillPoints;
+
+	[Serialize]
+	private List<Ref<MinionIdentity>> aNewHopeEvents = new List<Ref<MinionIdentity>>();
+
+	[Serialize]
+	private List<Ref<MinionIdentity>> extraPowerBanksEvents = new List<Ref<MinionIdentity>>();
 
 	public static readonly HashedString[] PortalBirthAnim = new HashedString[] { "portalbirth" };
 

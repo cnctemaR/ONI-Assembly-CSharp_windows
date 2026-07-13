@@ -44,6 +44,11 @@ public class ScheduleScreenEntry : KMonoBehaviour
 	protected override void OnCleanUp()
 	{
 		base.OnCleanUp();
+		this.Deregister();
+	}
+
+	public void Deregister()
+	{
 		if (this.schedule != null)
 		{
 			Schedule schedule = this.schedule;
@@ -167,6 +172,10 @@ public class ScheduleScreenEntry : KMonoBehaviour
 
 	private void RebuildMinionWidgets()
 	{
+		if (this.IsNullOrDestroyed())
+		{
+			return;
+		}
 		if (!this.MinionWidgetsNeedRebuild())
 		{
 			return;

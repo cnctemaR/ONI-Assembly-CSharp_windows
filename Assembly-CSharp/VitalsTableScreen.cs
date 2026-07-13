@@ -20,9 +20,12 @@ public class VitalsTableScreen : TableScreen
 			base.GetWidgetRow(widget_go).SelectAndFocusMinion();
 		}, new Comparison<IAssignableIdentity>(base.compare_rows_alphabetical), new Action<IAssignableIdentity, GameObject, ToolTip>(this.on_tooltip_name), new Action<IAssignableIdentity, GameObject, ToolTip>(base.on_tooltip_sort_alphabetically), false);
 		base.AddLabelColumn("Stress", new Action<IAssignableIdentity, GameObject>(this.on_load_stress), new Func<IAssignableIdentity, GameObject, string>(this.get_value_stress_label), new Comparison<IAssignableIdentity>(this.compare_rows_stress), new Action<IAssignableIdentity, GameObject, ToolTip>(this.on_tooltip_stress), new Action<IAssignableIdentity, GameObject, ToolTip>(this.on_tooltip_sort_stress), 64, true);
-		base.AddLabelColumn("QOLExpectations", new Action<IAssignableIdentity, GameObject>(this.on_load_qualityoflife_expectations), new Func<IAssignableIdentity, GameObject, string>(this.get_value_qualityoflife_expectations_label), new Comparison<IAssignableIdentity>(this.compare_rows_qualityoflife_expectations), new Action<IAssignableIdentity, GameObject, ToolTip>(this.on_tooltip_qualityoflife_expectations), new Action<IAssignableIdentity, GameObject, ToolTip>(this.on_tooltip_sort_qualityoflife_expectations), 128, true);
+		base.AddLabelColumn("QOLExpectations", new Action<IAssignableIdentity, GameObject>(this.on_load_qualityoflife_expectations), new Func<IAssignableIdentity, GameObject, string>(this.get_value_qualityoflife_expectations_label), new Comparison<IAssignableIdentity>(this.compare_rows_qualityoflife_expectations), new Action<IAssignableIdentity, GameObject, ToolTip>(this.on_tooltip_qualityoflife_expectations), new Action<IAssignableIdentity, GameObject, ToolTip>(this.on_tooltip_sort_qualityoflife_expectations), 64, true);
+		if (SaveLoader.Instance.IsDLCActiveForCurrentSave("DLC3_ID"))
+		{
+			base.AddLabelColumn("PowerBanks", new Action<IAssignableIdentity, GameObject>(this.on_load_power_banks), new Func<IAssignableIdentity, GameObject, string>(this.get_value_power_banks_label), new Comparison<IAssignableIdentity>(this.compare_rows_power_banks), new Action<IAssignableIdentity, GameObject, ToolTip>(this.on_tooltip_power_banks), new Action<IAssignableIdentity, GameObject, ToolTip>(this.on_tooltip_sort_power_banks), 64, true);
+		}
 		base.AddLabelColumn("Fullness", new Action<IAssignableIdentity, GameObject>(this.on_load_fullness), new Func<IAssignableIdentity, GameObject, string>(this.get_value_fullness_label), new Comparison<IAssignableIdentity>(this.compare_rows_fullness), new Action<IAssignableIdentity, GameObject, ToolTip>(this.on_tooltip_fullness), new Action<IAssignableIdentity, GameObject, ToolTip>(this.on_tooltip_sort_fullness), 96, true);
-		base.AddLabelColumn("EatenToday", new Action<IAssignableIdentity, GameObject>(this.on_load_eaten_today), new Func<IAssignableIdentity, GameObject, string>(this.get_value_eaten_today_label), new Comparison<IAssignableIdentity>(this.compare_rows_eaten_today), new Action<IAssignableIdentity, GameObject, ToolTip>(this.on_tooltip_eaten_today), new Action<IAssignableIdentity, GameObject, ToolTip>(this.on_tooltip_sort_eaten_today), 96, true);
 		base.AddLabelColumn("Health", new Action<IAssignableIdentity, GameObject>(this.on_load_health), new Func<IAssignableIdentity, GameObject, string>(this.get_value_health_label), new Comparison<IAssignableIdentity>(this.compare_rows_health), new Action<IAssignableIdentity, GameObject, ToolTip>(this.on_tooltip_health), new Action<IAssignableIdentity, GameObject, ToolTip>(this.on_tooltip_sort_health), 64, true);
 		base.AddLabelColumn("Immunity", new Action<IAssignableIdentity, GameObject>(this.on_load_sickness), new Func<IAssignableIdentity, GameObject, string>(this.get_value_sickness_label), new Comparison<IAssignableIdentity>(this.compare_rows_sicknesses), new Action<IAssignableIdentity, GameObject, ToolTip>(this.on_tooltip_sicknesses), new Action<IAssignableIdentity, GameObject, ToolTip>(this.on_tooltip_sort_sicknesses), 192, true);
 	}
@@ -555,6 +558,7 @@ public class VitalsTableScreen : TableScreen
 				if (amountInstance != null)
 				{
 					tooltip.AddMultiStringTooltip(amountInstance.GetTooltip(), null);
+					tooltip.AddMultiStringTooltip("\n" + string.Format(UI.VITALSSCREEN.EATEN_TODAY_TOOLTIP, GameUtil.GetFormattedCalories(VitalsTableScreen.RationsEatenToday(minionIdentity), GameUtil.TimeSlice.None, true)), null);
 					return;
 				}
 			}
@@ -696,6 +700,108 @@ public class VitalsTableScreen : TableScreen
 		{
 		case TableRow.RowType.Header:
 			tooltip.AddMultiStringTooltip(UI.TABLESCREENS.COLUMN_SORT_BY_EATEN_TODAY, null);
+			break;
+		case TableRow.RowType.Default:
+		case TableRow.RowType.Minion:
+		case TableRow.RowType.StoredMinon:
+			break;
+		default:
+			return;
+		}
+	}
+
+	private void on_load_power_banks(IAssignableIdentity minion, GameObject widget_go)
+	{
+		TableRow widgetRow = base.GetWidgetRow(widget_go);
+		LocText componentInChildren = widget_go.GetComponentInChildren<LocText>(true);
+		if (minion != null)
+		{
+			componentInChildren.text = (base.GetWidgetColumn(widget_go) as LabelTableColumn).get_value_action(minion, widget_go);
+			return;
+		}
+		componentInChildren.text = (widgetRow.isDefault ? "" : UI.VITALSSCREEN_POWERBANKS.ToString());
+	}
+
+	private string get_value_power_banks_label(IAssignableIdentity minion, GameObject widget_go)
+	{
+		TableRow widgetRow = base.GetWidgetRow(widget_go);
+		if (widgetRow.rowType == TableRow.RowType.Minion)
+		{
+			MinionIdentity minionIdentity = minion as MinionIdentity;
+			if (minionIdentity != null && minionIdentity.HasTag(GameTags.Minions.Models.Bionic))
+			{
+				return GameUtil.GetFormattedJoules(minionIdentity.GetAmounts().Get(Db.Get().Amounts.BionicInternalBattery).value, "F1", GameUtil.TimeSlice.None);
+			}
+			return UI.TABLESCREENS.NA;
+		}
+		else
+		{
+			if (widgetRow.rowType == TableRow.RowType.StoredMinon)
+			{
+				return UI.TABLESCREENS.NA;
+			}
+			return "";
+		}
+	}
+
+	private int compare_rows_power_banks(IAssignableIdentity a, IAssignableIdentity b)
+	{
+		MinionIdentity minionIdentity = a as MinionIdentity;
+		MinionIdentity minionIdentity2 = b as MinionIdentity;
+		float num;
+		if (minionIdentity != null && minionIdentity.HasTag(GameTags.Minions.Models.Bionic))
+		{
+			num = minionIdentity.GetAmounts().Get(Db.Get().Amounts.BionicInternalBattery).value;
+		}
+		else
+		{
+			num = -1f;
+		}
+		float num2;
+		if (minionIdentity2 != null && minionIdentity2.HasTag(GameTags.Minions.Models.Bionic))
+		{
+			num2 = minionIdentity2.GetAmounts().Get(Db.Get().Amounts.BionicInternalBattery).value;
+		}
+		else
+		{
+			num2 = -1f;
+		}
+		return num2.CompareTo(num);
+	}
+
+	protected void on_tooltip_power_banks(IAssignableIdentity minion, GameObject widget_go, ToolTip tooltip)
+	{
+		tooltip.ClearMultiStringTooltip();
+		switch (base.GetWidgetRow(widget_go).rowType)
+		{
+		case TableRow.RowType.Header:
+		case TableRow.RowType.Default:
+			break;
+		case TableRow.RowType.Minion:
+		{
+			MinionIdentity minionIdentity = minion as MinionIdentity;
+			if (minionIdentity != null && minionIdentity != null && minionIdentity.HasTag(GameTags.Minions.Models.Bionic))
+			{
+				tooltip.SetSimpleTooltip(minionIdentity.GetAmounts().Get(Db.Get().Amounts.BionicInternalBattery).GetDescription());
+				return;
+			}
+			break;
+		}
+		case TableRow.RowType.StoredMinon:
+			this.StoredMinionTooltip(minion, tooltip);
+			break;
+		default:
+			return;
+		}
+	}
+
+	protected void on_tooltip_sort_power_banks(IAssignableIdentity minion, GameObject widget_go, ToolTip tooltip)
+	{
+		tooltip.ClearMultiStringTooltip();
+		switch (base.GetWidgetRow(widget_go).rowType)
+		{
+		case TableRow.RowType.Header:
+			tooltip.AddMultiStringTooltip(UI.TABLESCREENS.COLUMN_SORT_BY_POWERBANKS, null);
 			break;
 		case TableRow.RowType.Default:
 		case TableRow.RowType.Minion:

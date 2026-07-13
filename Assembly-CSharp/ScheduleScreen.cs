@@ -54,7 +54,9 @@ public class ScheduleScreen : KScreen
 
 	private void SetScreenHeight()
 	{
-		base.GetComponent<LayoutElement>().preferredHeight = (float)((ScheduleManager.Instance.GetSchedules().Count == 1) ? 374 : 710);
+		bool flag = ScheduleManager.Instance.GetSchedules().Count == 1;
+		base.GetComponent<LayoutElement>().preferredHeight = (float)(flag ? 410 : 604);
+		this.bottomSpacer.SetActive(flag);
 	}
 
 	public void RefreshAllPaintButtons()
@@ -67,7 +69,7 @@ public class ScheduleScreen : KScreen
 
 	private void OnAddScheduleClick()
 	{
-		ScheduleManager.Instance.AddDefaultSchedule(false);
+		ScheduleManager.Instance.AddDefaultSchedule(false, false);
 	}
 
 	private void AddScheduleEntry(Schedule schedule)
@@ -82,7 +84,8 @@ public class ScheduleScreen : KScreen
 	{
 		foreach (ScheduleScreenEntry scheduleScreenEntry in this.scheduleEntries)
 		{
-			Util.KDestroyGameObject(scheduleScreenEntry);
+			scheduleScreenEntry.Deregister();
+			Util.KDestroyGameObject(scheduleScreenEntry.gameObject);
 		}
 		this.scheduleEntries.Clear();
 		foreach (Schedule schedule in schedules)
@@ -158,6 +161,9 @@ public class ScheduleScreen : KScreen
 
 	[SerializeField]
 	private KButton closeButton;
+
+	[SerializeField]
+	private GameObject bottomSpacer;
 
 	private List<ScheduleScreenEntry> scheduleEntries;
 }

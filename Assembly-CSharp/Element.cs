@@ -143,7 +143,7 @@ public class Element : IComparable<Element>
 			for (int i = 0; i < this.oreTags.Length; i++)
 			{
 				Tag tag = new Tag(this.oreTags[i]);
-				if (!(tag == GameTags.HideFromCodex) && !(tag == GameTags.HideFromSpawnTool))
+				if (!GameTags.HiddenElementTags.Contains(tag))
 				{
 					text3 += tag.ProperName();
 					if (i < this.oreTags.Length - 1)

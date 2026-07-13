@@ -10,11 +10,16 @@ public class ConditionHasControlStation : ProcessCondition
 
 	public override ProcessCondition.Status EvaluateCondition()
 	{
-		if (Components.RocketControlStations.GetWorldItems(this.module.CraftInterface.GetComponent<WorldContainer>().id, false).Count <= 0)
+		ProcessCondition.Status status = ProcessCondition.Status.Failure;
+		if (Components.RocketControlStations.GetWorldItems(this.module.CraftInterface.GetComponent<WorldContainer>().id, false).Count > 0)
 		{
-			return ProcessCondition.Status.Failure;
+			status = ProcessCondition.Status.Ready;
 		}
-		return ProcessCondition.Status.Ready;
+		else if (this.module.CraftInterface.GetRobotPilotModule() != null)
+		{
+			status = ProcessCondition.Status.Warning;
+		}
+		return status;
 	}
 
 	public override string GetStatusMessage(ProcessCondition.Status status)
@@ -22,6 +27,10 @@ public class ConditionHasControlStation : ProcessCondition
 		if (status == ProcessCondition.Status.Ready)
 		{
 			return UI.STARMAP.LAUNCHCHECKLIST.HAS_CONTROLSTATION.STATUS.READY;
+		}
+		if (status == ProcessCondition.Status.Warning)
+		{
+			return UI.STARMAP.LAUNCHCHECKLIST.HAS_CONTROLSTATION.STATUS.WARNING;
 		}
 		return UI.STARMAP.LAUNCHCHECKLIST.HAS_CONTROLSTATION.STATUS.FAILURE;
 	}
@@ -32,12 +41,16 @@ public class ConditionHasControlStation : ProcessCondition
 		{
 			return UI.STARMAP.LAUNCHCHECKLIST.HAS_CONTROLSTATION.TOOLTIP.READY;
 		}
+		if (status == ProcessCondition.Status.Warning)
+		{
+			return UI.STARMAP.LAUNCHCHECKLIST.HAS_CONTROLSTATION.TOOLTIP.WARNING_ROBO_PILOT;
+		}
 		return UI.STARMAP.LAUNCHCHECKLIST.HAS_CONTROLSTATION.TOOLTIP.FAILURE;
 	}
 
 	public override bool ShowInUI()
 	{
-		return this.EvaluateCondition() == ProcessCondition.Status.Failure;
+		return this.EvaluateCondition() != ProcessCondition.Status.Ready;
 	}
 
 	private RocketModuleCluster module;

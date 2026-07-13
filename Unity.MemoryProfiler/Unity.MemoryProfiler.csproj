@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{7A1AC9B1-28DF-4ED1-8FD4-5932F023E66B}</ProjectGuid>
+    <ProjectGuid>{50570CA1-D704-4589-BC5C-BE6271F1CAE1}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>Unity.MemoryProfiler</RootNamespace>
     <AssemblyName>Unity.MemoryProfiler</AssemblyName>
@@ -22,15 +22,15 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{7A1AC9B1-28DF-4ED1-8FD4-5932F023E655}</Project>
+      <Project>{50570CA1-D704-4589-BC5C-BE6271F1CACB}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
     <ProjectReference Include="..\System\System.csproj">
-      <Project>{7A1AC9B1-28DF-4ED1-8FD4-5932F023E65D}</Project>
+      <Project>{50570CA1-D704-4589-BC5C-BE6271F1CAD3}</Project>
       <Name>System</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
-      <Project>{7A1AC9B1-28DF-4ED1-8FD4-5932F023E679}</Project>
+      <Project>{50570CA1-D704-4589-BC5C-BE6271F1CAEF}</Project>
       <Name>UnityEngine.CoreModule</Name>
     </ProjectReference>
   </ItemGroup>

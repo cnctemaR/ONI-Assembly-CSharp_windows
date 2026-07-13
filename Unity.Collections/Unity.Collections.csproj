@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{7A8CA083-BFE8-4515-B64F-A293D8E9EAFE}</ProjectGuid>
+    <ProjectGuid>{E38246CB-07DE-44B9-B28F-ED64A7E54D08}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>Unity.Collections</RootNamespace>
     <AssemblyName>Unity.Collections</AssemblyName>
@@ -216,31 +216,31 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{7A8CA083-BFE8-4515-B64F-A293D8E9EAE5}</Project>
+      <Project>{E38246CB-07DE-44B9-B28F-ED64A7E54CEF}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
     <ProjectReference Include="..\netstandard\netstandard.csproj">
-      <Project>{7A8CA083-BFE8-4515-B64F-A293D8E9EAE6}</Project>
+      <Project>{E38246CB-07DE-44B9-B28F-ED64A7E54CF0}</Project>
       <Name>netstandard</Name>
     </ProjectReference>
     <ProjectReference Include="..\System\System.csproj">
-      <Project>{7A8CA083-BFE8-4515-B64F-A293D8E9EAED}</Project>
+      <Project>{E38246CB-07DE-44B9-B28F-ED64A7E54CF7}</Project>
       <Name>System</Name>
     </ProjectReference>
     <ProjectReference Include="..\Unity.Burst\Unity.Burst.csproj">
-      <Project>{7A8CA083-BFE8-4515-B64F-A293D8E9EAFC}</Project>
+      <Project>{E38246CB-07DE-44B9-B28F-ED64A7E54D06}</Project>
       <Name>Unity.Burst</Name>
     </ProjectReference>
     <ProjectReference Include="..\Unity.Collections.LowLevel.ILSupport\Unity.Collections.LowLevel.ILSupport.csproj">
-      <Project>{7A8CA083-BFE8-4515-B64F-A293D8E9EAFF}</Project>
+      <Project>{E38246CB-07DE-44B9-B28F-ED64A7E54D09}</Project>
       <Name>Unity.Collections.LowLevel.ILSupport</Name>
     </ProjectReference>
     <ProjectReference Include="..\Unity.Mathematics\Unity.Mathematics.csproj">
-      <Project>{7A8CA083-BFE8-4515-B64F-A293D8E9EB00}</Project>
+      <Project>{E38246CB-07DE-44B9-B28F-ED64A7E54D0A}</Project>
       <Name>Unity.Mathematics</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
-      <Project>{7A8CA083-BFE8-4515-B64F-A293D8E9EB10}</Project>
+      <Project>{E38246CB-07DE-44B9-B28F-ED64A7E54D1A}</Project>
       <Name>UnityEngine.CoreModule</Name>
     </ProjectReference>
   </ItemGroup>

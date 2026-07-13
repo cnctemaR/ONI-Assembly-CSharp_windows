@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{7A8CA083-BFE8-4515-B64F-A293D8E9EB49}</ProjectGuid>
+    <ProjectGuid>{E38246CB-07DE-44B9-B28F-ED64A7E54D53}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>UnityEngine.XR</RootNamespace>
     <AssemblyName>UnityEngine.XRModule</AssemblyName>
@@ -58,23 +58,23 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\netstandard\netstandard.csproj">
-      <Project>{7A8CA083-BFE8-4515-B64F-A293D8E9EAE6}</Project>
+      <Project>{E38246CB-07DE-44B9-B28F-ED64A7E54CF0}</Project>
       <Name>netstandard</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
-      <Project>{7A8CA083-BFE8-4515-B64F-A293D8E9EB10}</Project>
+      <Project>{E38246CB-07DE-44B9-B28F-ED64A7E54D1A}</Project>
       <Name>UnityEngine.CoreModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.PhysicsModule\UnityEngine.PhysicsModule.csproj">
-      <Project>{7A8CA083-BFE8-4515-B64F-A293D8E9EB23}</Project>
+      <Project>{E38246CB-07DE-44B9-B28F-ED64A7E54D2D}</Project>
       <Name>UnityEngine.PhysicsModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
-      <Project>{7A8CA083-BFE8-4515-B64F-A293D8E9EB28}</Project>
+      <Project>{E38246CB-07DE-44B9-B28F-ED64A7E54D32}</Project>
       <Name>UnityEngine.SharedInternalsModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.SubsystemsModule\UnityEngine.SubsystemsModule.csproj">
-      <Project>{7A8CA083-BFE8-4515-B64F-A293D8E9EB2D}</Project>
+      <Project>{E38246CB-07DE-44B9-B28F-ED64A7E54D37}</Project>
       <Name>UnityEngine.SubsystemsModule</Name>
     </ProjectReference>
   </ItemGroup>

@@ -402,7 +402,7 @@ public class FetchChore : Chore<FetchChore.StatesInstance>
 			{
 				flag2 = FetchManager.IsFetchablePickup(pickupable2, fetchChore2, context.consumerState.storage);
 			}
-			return flag2 && !((GameObject)data == context.consumerState.gameObject) && ((pickupable2.targetWorkable == null || pickupable2.targetWorkable as Pickupable != null) && context.consumerState.consumer.navigator.CanReach(pickupable2.cachedCell, pickupable2.GetOffsets()));
+			return flag2 && !((GameObject)data == context.consumerState.gameObject) && ((pickupable2.targetWorkable == null || pickupable2.targetWorkable as Pickupable != null) && context.consumerState.consumer.navigator.CanReach(pickupable2.cachedCell));
 		}
 	};
 

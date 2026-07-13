@@ -53,7 +53,10 @@ public class ShearingStationConfig : IBuildingConfig
 		};
 		def.OnRanchCompleteCb = delegate(GameObject creature_go, WorkerBase rancher_wb)
 		{
-			creature_go.GetSMI<IShearable>().Shear();
+			IShearable smi2 = creature_go.GetSMI<IShearable>();
+			global::Tuple<Tag, float> itemDroppedOnShear = smi2.GetItemDroppedOnShear();
+			this.DropShearable(rancher_wb.gameObject, creature_go, itemDroppedOnShear.first, itemDroppedOnShear.second);
+			smi2.Shear();
 		};
 		def.RancherInteractAnim = "anim_interacts_shearingstation_kanim";
 		def.WorkTime = 12f;
@@ -62,6 +65,25 @@ public class ShearingStationConfig : IBuildingConfig
 		def.RanchedPstAnim = "shearing_pst";
 		go.AddOrGet<SkillPerkMissingComplainer>().requiredSkillPerk = Db.Get().SkillPerks.CanUseRanchStation.Id;
 		Prioritizable.AddRef(go);
+	}
+
+	private void DropShearable(GameObject go, GameObject critter, Tag item_dropped, float mass)
+	{
+		PrimaryElement component = critter.GetComponent<PrimaryElement>();
+		GameObject gameObject = Util.KInstantiate(Assets.GetPrefab(item_dropped), null, null);
+		int num = Grid.CellLeft(Grid.PosToCell(go));
+		gameObject.transform.SetPosition(Grid.CellToPosCCC(num, Grid.SceneLayer.Ore));
+		PrimaryElement component2 = gameObject.GetComponent<PrimaryElement>();
+		component2.Temperature = component.Temperature;
+		component2.Mass = mass;
+		component2.AddDisease(component.DiseaseIdx, component.DiseaseCount, "Shearing");
+		gameObject.SetActive(true);
+		Vector2 vector = new Vector2(global::UnityEngine.Random.Range(-1f, 1f) * 1f, global::UnityEngine.Random.value * 2f + 2f);
+		if (GameComps.Fallers.Has(gameObject))
+		{
+			GameComps.Fallers.Remove(gameObject);
+		}
+		GameComps.Fallers.Add(gameObject, vector);
 	}
 
 	public const string ID = "ShearingStation";

@@ -227,7 +227,7 @@ public static class InventoryOrganization
 			"top_option_a", "top_option_b", "top_option_c", "top_option_d", "top_option_e", "top_option_f", "top_option_g", "top_option_h", "top_option_i", "top_option_j",
 			"top_option_k", "top_option_l", "top_option_m", "top_option_n", "top_option_o", "top_option_p", "top_option_q", "top_option_r", "top_option_s", "top_option_t",
 			"top_option_u", "top_option_v", "top_option_w", "top_option_x", "top_option_y", "top_option_z", "permit_monument_upper_a_frosty", "permit_monument_upper_b_frosty", "permit_monument_upper_c_frosty", "permit_monument_upper_a_bionic",
-			"permit_monument_upper_b_bionic", "permit_monument_upper_c_bionic", "permit_monument_upper_a_prehistoric"
+			"permit_monument_upper_b_bionic", "permit_monument_upper_c_bionic", "permit_monument_upper_a_prehistoric", "permit_monument_upper_b_prehistoric"
 		});
 		InventoryOrganization.AddSubcategory("CLOTHING_TOPS_BASIC", Assets.GetSprite("icon_inventory_basic_shirts"), 100, new string[] { "TopBasicBlack", "TopBasicWhite", "TopBasicRed", "TopBasicOrange", "TopBasicYellow", "TopBasicGreen", "TopBasicAqua", "TopBasicPurple", "TopBasicPinkOrchid" });
 		InventoryOrganization.AddSubcategory("CLOTHING_TOPS_TSHIRT", Assets.GetSprite("icon_inventory_tees"), 300, new string[] { "TopRaglanDeepRed", "TopRaglanCobalt", "TopRaglanFlamingo", "TopRaglanKellyGreen", "TopRaglanCharcoal", "TopRaglanLemon", "TopRaglanSatsuma", "TopTShirtWhite", "TopTShirtMagenta" });

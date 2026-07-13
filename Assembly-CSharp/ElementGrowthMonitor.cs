@@ -149,22 +149,13 @@ public class ElementGrowthMonitor : GameStateMachine<ElementGrowthMonitor, Eleme
 
 		public void Shear()
 		{
-			PrimaryElement component = base.smi.GetComponent<PrimaryElement>();
-			GameObject gameObject = Util.KInstantiate(Assets.GetPrefab(base.def.itemDroppedOnShear), null, null);
-			gameObject.transform.SetPosition(Grid.CellToPosCCC(Grid.CellLeft(Grid.PosToCell(this)), Grid.SceneLayer.Ore));
-			PrimaryElement component2 = gameObject.GetComponent<PrimaryElement>();
-			component2.Temperature = component.Temperature;
-			component2.Mass = base.def.dropMass;
-			component2.AddDisease(component.DiseaseIdx, component.DiseaseCount, "Shearing");
-			gameObject.SetActive(true);
-			Vector2 vector = new Vector2(global::UnityEngine.Random.Range(-1f, 1f) * 1f, global::UnityEngine.Random.value * 2f + 2f);
-			if (GameComps.Fallers.Has(gameObject))
-			{
-				GameComps.Fallers.Remove(gameObject);
-			}
-			GameComps.Fallers.Add(gameObject, vector);
 			this.elementGrowth.value = 0f;
 			ElementGrowthMonitor.UpdateGrowth(this, 0f);
+		}
+
+		public global::Tuple<Tag, float> GetItemDroppedOnShear()
+		{
+			return new global::Tuple<Tag, float>(base.def.itemDroppedOnShear, base.def.dropMass);
 		}
 
 		public AmountInstance elementGrowth;

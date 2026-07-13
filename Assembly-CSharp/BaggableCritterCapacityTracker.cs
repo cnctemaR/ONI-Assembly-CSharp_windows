@@ -53,6 +53,10 @@ public class BaggableCritterCapacityTracker : KMonoBehaviour, ISim1000ms, IUserC
 
 	protected override void OnCleanUp()
 	{
+		if (this.requireLiquidOffset)
+		{
+			GameScenePartitioner.Instance.Free(ref this.partitionerEntry);
+		}
 		TreeFilterable treeFilterable = this.filter;
 		treeFilterable.OnFilterChanged = (Action<HashSet<Tag>>)Delegate.Remove(treeFilterable.OnFilterChanged, new Action<HashSet<Tag>>(this.RefreshCreatureCount));
 		base.Unsubscribe(144050788);

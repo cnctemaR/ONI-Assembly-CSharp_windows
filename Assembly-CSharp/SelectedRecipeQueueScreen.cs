@@ -251,16 +251,17 @@ public class SelectedRecipeQueueScreen : KScreen
 	{
 		float num = 16f;
 		float num2 = 0f;
+		float num3 = (float)((this.selectedRecipe.consumedHEP > 0) ? 94 : 0);
 		num2 += (float)(this.materialSelectionRowsByContainer.Count * 32);
 		foreach (KeyValuePair<GameObject, List<GameObject>> keyValuePair in this.materialSelectionRowsByContainer)
 		{
 			num2 += (float)(Mathf.Max(1, keyValuePair.Value.Count) * 48);
 		}
 		num2 += (float)((this.materialSelectionRowsByContainer.Count - 1) * 12);
-		float num3 = (float)Mathf.Max(this.selectedRecipes[0].results.Length * 32 + (this.recipeEffectsDescriptorRows.Count - this.selectedRecipes[0].results.Length) * 16, 40);
-		num3 += 46f;
-		float num4 = num + num2 + num3;
-		this.scrollContainer.minHeight = Mathf.Min((float)(Screen.height - 448), num4);
+		float num4 = (float)Mathf.Max(this.selectedRecipes[0].results.Length * 32 + (this.recipeEffectsDescriptorRows.Count - this.selectedRecipes[0].results.Length) * 16, 40);
+		num4 += 46f;
+		float num5 = num + num2 + num3 + num4;
+		this.scrollContainer.minHeight = Mathf.Min((float)(Screen.height - 448), num5);
 	}
 
 	private void CyclePreviousRecipe()
@@ -456,6 +457,10 @@ public class SelectedRecipeQueueScreen : KScreen
 	{
 		new List<SelectedRecipeQueueScreen.DescriptorWithSprite>();
 		this.IngredientsDescriptorPanel.gameObject.SetActive(true);
+		this.radboltSpacer.gameObject.SetActive(this.selectedRecipe.consumedHEP > 0);
+		this.radboltHeader.gameObject.SetActive(this.selectedRecipe.consumedHEP > 0);
+		this.RadboltDescriptorPanel.gameObject.SetActive(this.selectedRecipe.consumedHEP > 0);
+		this.radboltLabel.SetText(ITEMS.RADIATION.HIGHENERGYPARITCLE.NAME + ": " + this.selectedRecipe.consumedHEP.ToString());
 		this.materialSelectionContainers.ForEach(delegate(GameObject container)
 		{
 			Util.KDestroyGameObject(container);
@@ -593,6 +598,14 @@ public class SelectedRecipeQueueScreen : KScreen
 	public ToolTip recipeDurationTooltip;
 
 	public GameObject IngredientsDescriptorPanel;
+
+	public GameObject radboltSpacer;
+
+	public GameObject radboltHeader;
+
+	public GameObject RadboltDescriptorPanel;
+
+	public LocText radboltLabel;
 
 	public GameObject EffectsDescriptorPanel;
 

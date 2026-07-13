@@ -11249,6 +11249,10 @@ namespace STRINGS
 
 				public static LocString INGREDIENT_CATEGORY = "Ingredient #{0}";
 
+				public static LocString ADDITIONAL_REQUIREMENTS = "Additional Requirements";
+
+				public static LocString ADDITIONAL_REQUIREMENTS_TOOLTIP = "This recipe requires a supply of " + ITEMS.RADIATION.HIGHENERGYPARITCLE.NAME + "s to be collected by the building's input port.";
+
 				public static LocString NO_DISCOVERED_INGREDIENTS = "No ingredients discovered";
 
 				public static LocString UNDISCOVERED_INGREDIENTS_IN_CATEGORY = "Some ingredient options have not been discovered yet:\n\n{0}";

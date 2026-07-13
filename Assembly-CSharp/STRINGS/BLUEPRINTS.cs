@@ -1750,6 +1750,13 @@ namespace STRINGS
 			public static LocString DESC = "A monument topper so mighty that even real Rhexes cower before it.";
 		}
 
+		public class PERMIT_MONUMENT_UPPER_B_PREHISTORIC
+		{
+			public static LocString NAME = "Higby Noggin";
+
+			public static LocString DESC = "Ranchers really look up to it.";
+		}
+
 		public class PERMIT_PAINTING_ART_STEGO
 		{
 			public static LocString NAME = "Safari Selfie";

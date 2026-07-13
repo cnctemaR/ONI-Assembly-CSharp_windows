@@ -56,6 +56,7 @@ public class Blueprints_DlcPack4 : BlueprintProvider
 		base.AddJoyResponse(BlueprintProvider.JoyResponseType.BallonSet, PermitRarity.Universal, "permit_balloon_babystego_egg", "balloon_babystego_egg_kanim");
 		base.AddJoyResponse(BlueprintProvider.JoyResponseType.BallonSet, PermitRarity.Universal, "permit_balloon_babyrhex_egg", "balloon_babyrhex_egg_kanim");
 		base.AddMonumentPart(BlueprintProvider.MonumentPart.Top, PermitRarity.Universal, "permit_monument_upper_a_prehistoric", "monument_upper_a_prehistoric_kanim");
+		base.AddMonumentPart(BlueprintProvider.MonumentPart.Top, PermitRarity.Universal, "permit_monument_upper_b_prehistoric", "monument_upper_b_prehistoric_kanim");
 		base.AddArtable(BlueprintProvider.ArtableType.Painting, PermitRarity.Universal, "permit_painting_art_stego", "painting_art_stego_kanim");
 		base.AddArtable(BlueprintProvider.ArtableType.PaintingWide, PermitRarity.Universal, "permit_painting_wide_art_rhex", "painting_wide_art_rhex_kanim");
 		base.AddBuildingWithInteract("MassageTable", PermitRarity.Universal, "permit_masseur_prehistoric", "masseur_prehistoric_kanim", new Dictionary<string, string> { { "MassageTableComplete", "anim_interacts_masseur_balloon_kanim" } });

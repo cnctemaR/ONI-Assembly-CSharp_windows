@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{666AADE5-FFF2-439B-916A-9429A220BD6E}</ProjectGuid>
+    <ProjectGuid>{F81D2BFE-81C9-4B8C-8B4E-DCB90FF9B9ED}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>System</RootNamespace>
     <AssemblyName>System.Runtime.Serialization</AssemblyName>
@@ -317,27 +317,27 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{666AADE5-FFF2-439B-916A-9429A220BD5B}</Project>
+      <Project>{F81D2BFE-81C9-4B8C-8B4E-DCB90FF9B9DA}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Configuration\System.Configuration.csproj">
-      <Project>{666AADE5-FFF2-439B-916A-9429A220BD5F}</Project>
+      <Project>{F81D2BFE-81C9-4B8C-8B4E-DCB90FF9B9DE}</Project>
       <Name>System.Configuration</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Core\System.Core.csproj">
-      <Project>{666AADE5-FFF2-439B-916A-9429A220BD60}</Project>
+      <Project>{F81D2BFE-81C9-4B8C-8B4E-DCB90FF9B9DF}</Project>
       <Name>System.Core</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.ServiceModel.Internals\System.ServiceModel.Internals.csproj">
-      <Project>{666AADE5-FFF2-439B-916A-9429A220BD70}</Project>
+      <Project>{F81D2BFE-81C9-4B8C-8B4E-DCB90FF9B9EF}</Project>
       <Name>System.ServiceModel.Internals</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Xml\System.Xml.csproj">
-      <Project>{666AADE5-FFF2-439B-916A-9429A220BD72}</Project>
+      <Project>{F81D2BFE-81C9-4B8C-8B4E-DCB90FF9B9F1}</Project>
       <Name>System.Xml</Name>
     </ProjectReference>
     <ProjectReference Include="..\System\System.csproj">
-      <Project>{666AADE5-FFF2-439B-916A-9429A220BD63}</Project>
+      <Project>{F81D2BFE-81C9-4B8C-8B4E-DCB90FF9B9E2}</Project>
       <Name>System</Name>
     </ProjectReference>
   </ItemGroup>

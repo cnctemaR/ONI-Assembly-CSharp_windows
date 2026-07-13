@@ -34,7 +34,7 @@ public class RunningAverage
 		for (int i = 0; i < this.samples.Count; i++)
 		{
 			float num3 = this.samples[i];
-			if (num3 != float.NaN)
+			if (!float.IsNaN(num3))
 			{
 				num += num3;
 				num2++;

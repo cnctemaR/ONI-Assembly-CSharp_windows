@@ -51,7 +51,7 @@ public class RunningWeightedAverage
 		for (int i = 0; i < this.samples.Count; i++)
 		{
 			RunningWeightedAverage.Entry entry = this.samples[i];
-			if (entry.time != float.NaN && time - entry.time <= seconds)
+			if (!float.IsNaN(entry.time) && time - entry.time <= seconds)
 			{
 				num++;
 			}
@@ -67,7 +67,7 @@ public class RunningWeightedAverage
 		for (int i = 0; i < this.samples.Count; i++)
 		{
 			RunningWeightedAverage.Entry entry = this.samples[i];
-			if (entry.time != float.NaN && time - entry.time <= seconds)
+			if (!float.IsNaN(entry.time) && time - entry.time <= seconds)
 			{
 				num += entry.value;
 				num2++;

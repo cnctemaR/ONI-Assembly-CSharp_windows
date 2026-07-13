@@ -751,13 +751,16 @@ public class Door : Workable, ISaveLoadable, ISim200ms, INavDoor
 			this.closed.PlayAnim("closed").ParamTransition<bool>(this.isOpen, this.opening, GameStateMachine<Door.Controller, Door.Controller.Instance, Door, object>.IsTrue).ParamTransition<bool>(this.isLocked, this.locking, GameStateMachine<Door.Controller, Door.Controller.Instance, Door, object>.IsTrue)
 				.Enter("SetWorldStateClosed", delegate(Door.Controller.Instance smi)
 				{
-					smi.master.SetWorldState(true);
+					if (!this.isLocked.Get(smi))
+					{
+						smi.master.SetWorldState(true);
+					}
 				});
-			this.locking.PlayAnim("locked_pre").OnAnimQueueComplete(this.locked).Enter("SetWorldStateClosed", delegate(Door.Controller.Instance smi)
+			this.locking.PlayAnim("locked_pre").OnAnimQueueComplete(this.locked);
+			this.locked.PlayAnim("locked").ParamTransition<bool>(this.isLocked, this.unlocking, GameStateMachine<Door.Controller, Door.Controller.Instance, Door, object>.IsFalse).Enter("SetWorldStateClosed", delegate(Door.Controller.Instance smi)
 			{
 				smi.master.SetWorldState(true);
 			});
-			this.locked.PlayAnim("locked").ParamTransition<bool>(this.isLocked, this.unlocking, GameStateMachine<Door.Controller, Door.Controller.Instance, Door, object>.IsFalse);
 			this.unlocking.PlayAnim("locked_pst").OnAnimQueueComplete(this.closed);
 			this.opening.ToggleTag(GameTags.Transition).ToggleLoopingSound("Opening loop", (Door.Controller.Instance smi) => smi.master.doorOpeningSound, (Door.Controller.Instance smi) => !string.IsNullOrEmpty(smi.master.doorOpeningSound)).Enter("SetParams", delegate(Door.Controller.Instance smi)
 			{

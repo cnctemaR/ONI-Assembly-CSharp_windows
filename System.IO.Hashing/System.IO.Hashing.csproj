@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{666AADE5-FFF2-439B-916A-9429A220BD68}</ProjectGuid>
+    <ProjectGuid>{F81D2BFE-81C9-4B8C-8B4E-DCB90FF9B9E7}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>System.IO.Hashing</RootNamespace>
     <AssemblyName>System.IO.Hashing</AssemblyName>

@@ -139,7 +139,7 @@ public struct StructureTemperaturePayload
 			get
 			{
 				float averageValue = this.kw_accumulator.AverageValue;
-				if (averageValue == float.NaN)
+				if (float.IsNaN(averageValue))
 				{
 					return 0f;
 				}

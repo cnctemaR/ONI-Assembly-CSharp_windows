@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Net;
+using System.Net.Http;
 using System.Text;
 using Klei;
 using Newtonsoft.Json;
@@ -316,16 +316,12 @@ public class KleiItems : ThreadedHttps<KleiItems>
 		base.End();
 	}
 
-	protected override void OnReplyRecieved(WebResponse response)
+	protected override void OnReplyRecieved(HttpResponseMessage response)
 	{
 		string text = "";
 		if (response != null)
 		{
-			Stream responseStream = response.GetResponseStream();
-			StreamReader streamReader = new StreamReader(responseStream);
-			text = streamReader.ReadToEnd();
-			streamReader.Close();
-			responseStream.Close();
+			text = response.Content.ReadAsStringAsync().Result;
 		}
 		this.Response = text;
 		this.RequestCompleted = true;

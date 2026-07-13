@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Net;
+using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Net.Security;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
@@ -76,6 +77,20 @@ public class ThreadedHttps<T> where T : class, new()
 		return !this.certFail;
 	}
 
+	private HttpClient GetOrCreateHttpClient()
+	{
+		if (this.httpClient == null)
+		{
+			HttpClientHandler httpClientHandler = new HttpClientHandler
+			{
+				AllowAutoRedirect = false,
+				ServerCertificateCustomValidationCallback = (HttpRequestMessage message, X509Certificate2 cert, X509Chain chain, SslPolicyErrors errors) => this.RemoteCertificateValidationCallback(message, cert, chain, errors)
+			};
+			this.httpClient = new HttpClient(httpClientHandler);
+		}
+		return this.httpClient;
+	}
+
 	public void Start()
 	{
 		if (this.updateThread != null)
@@ -106,13 +121,13 @@ public class ThreadedHttps<T> where T : class, new()
 		this.updateThread = null;
 	}
 
-	protected virtual void OnReplyRecieved(WebResponse response)
+	protected virtual void OnReplyRecieved(HttpResponseMessage response)
 	{
 	}
 
 	protected string Send(byte[] byteArray, bool isForce = false)
 	{
-		ServicePointManager.ServerCertificateValidationCallback = (RemoteCertificateValidationCallback)Delegate.Combine(ServicePointManager.ServerCertificateValidationCallback, new RemoteCertificateValidationCallback(this.RemoteCertificateValidationCallback));
+		HttpClient orCreateHttpClient = this.GetOrCreateHttpClient();
 		string text = "";
 		int num = 0;
 		for (;;)
@@ -120,97 +135,26 @@ public class ThreadedHttps<T> where T : class, new()
 			try
 			{
 				string text2 = "https://" + this.LIVE_ENDPOINT;
-				Stream stream = null;
-				WebResponse webResponse = null;
-				HttpWebRequest httpWebRequest = (HttpWebRequest)WebRequest.Create(text2);
-				httpWebRequest.AllowAutoRedirect = false;
-				httpWebRequest.Method = "POST";
-				httpWebRequest.ContentType = "application/x-www-form-urlencoded";
-				httpWebRequest.ContentLength = (long)byteArray.Length;
-				try
+				HttpResponseMessage result = orCreateHttpClient.PostAsync(text2, new ByteArrayContent(byteArray)
 				{
-					stream = httpWebRequest.GetRequestStream();
-				}
-				catch (WebException ex)
-				{
-					string message = ex.Message;
-					text = string.Concat(new string[]
+					Headers = 
 					{
-						DateTime.Now.ToLongTimeString(),
-						" ",
-						this.serviceName,
-						": Exception getting Request Stream:",
-						message
-					});
-					Debug.LogWarning(text);
-					throw;
-				}
-				try
-				{
-					stream.Write(byteArray, 0, byteArray.Length);
-				}
-				catch (WebException ex2)
-				{
-					string message2 = ex2.Message;
-					text = string.Concat(new string[]
-					{
-						DateTime.Now.ToLongTimeString(),
-						" ",
-						this.serviceName,
-						": Exception writing data to Stream:",
-						message2
-					});
-					Debug.LogWarning(text);
-					throw;
-				}
-				stream.Close();
-				try
-				{
-					webResponse = httpWebRequest.GetResponse();
-				}
-				catch (WebException ex3)
-				{
-					string message3 = ex3.Message;
-					WebResponse response = ex3.Response;
-					if (response != null)
-					{
-						using (Stream responseStream = response.GetResponseStream())
-						{
-							text = new StreamReader(responseStream).ReadToEnd();
-							goto IL_0170;
-						}
+						ContentType = new MediaTypeHeaderValue("application/x-www-form-urlencoded")
 					}
-					text = " -- we.Response is NULL";
-					IL_0170:
-					text = string.Concat(new string[]
-					{
-						DateTime.Now.ToLongTimeString(),
-						" ",
-						this.serviceName,
-						": Exception getting response:",
-						message3,
-						text
-					});
-					Debug.LogWarning(text);
-					throw;
-				}
-				text = ((HttpWebResponse)webResponse).StatusDescription;
-				if (text != "OK")
+				}).Result;
+				text = result.ReasonPhrase;
+				if (result.StatusCode != HttpStatusCode.OK)
 				{
-					stream = webResponse.GetResponseStream();
-					StreamReader streamReader = new StreamReader(stream);
-					string text3 = streamReader.ReadToEnd();
-					streamReader.Close();
-					stream.Close();
-					text = string.Concat(new string[] { this.serviceName, ": Server Responded with Status: [", text, "] Response: ", text3 });
+					string result2 = result.Content.ReadAsStringAsync().Result;
+					text = string.Concat(new string[] { this.serviceName, ": Server Responded with Status: [", text, "] Response: ", result2 });
 				}
 				else
 				{
-					this.OnReplyRecieved(webResponse);
+					this.OnReplyRecieved(result);
 				}
-				webResponse.Close();
+				result.Dispose();
 			}
-			catch (Exception ex4)
+			catch (Exception ex)
 			{
 				if (!this.shouldQuit)
 				{
@@ -252,8 +196,8 @@ public class ThreadedHttps<T> where T : class, new()
 						this.QuitOnError();
 						break;
 					}
-					string message4 = ex4.Message;
-					string stackTrace = ex4.StackTrace;
+					string message = ex.Message;
+					string stackTrace = ex.StackTrace;
 					TimeSpan timeSpan = TimeSpan.FromSeconds(Math.Pow(2.0, (double)(num + 3)));
 					text = string.Concat(new string[]
 					{
@@ -263,14 +207,14 @@ public class ThreadedHttps<T> where T : class, new()
 						": Exception (retrying in ",
 						timeSpan.TotalSeconds.ToString(),
 						" seconds): ",
-						message4,
+						message,
 						"\n",
 						stackTrace
 					});
 					Debug.LogWarning(text);
 					if (isForce)
 					{
-						Debug.LogWarning(ex4.StackTrace);
+						Debug.LogWarning(ex.StackTrace);
 						break;
 					}
 					Thread.Sleep(timeSpan);
@@ -279,7 +223,6 @@ public class ThreadedHttps<T> where T : class, new()
 			}
 			break;
 		}
-		ServicePointManager.ServerCertificateValidationCallback = (RemoteCertificateValidationCallback)Delegate.Remove(ServicePointManager.ServerCertificateValidationCallback, new RemoteCertificateValidationCallback(this.RemoteCertificateValidationCallback));
 		return text;
 	}
 
@@ -387,6 +330,8 @@ public class ThreadedHttps<T> where T : class, new()
 	protected string LIVE_ENDPOINT;
 
 	private bool certFail;
+
+	private HttpClient httpClient;
 
 	protected int RetryCount = 3;
 

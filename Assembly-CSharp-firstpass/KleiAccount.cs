@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Net;
+using System.Net.Http;
 using System.Text;
 using Newtonsoft.Json;
 
@@ -15,7 +14,7 @@ public class KleiAccount : ThreadedHttps<KleiAccount>
 		this.ClearAuthTicket();
 	}
 
-	protected override void OnReplyRecieved(WebResponse response)
+	protected override void OnReplyRecieved(HttpResponseMessage response)
 	{
 		if (response == null)
 		{
@@ -24,12 +23,8 @@ public class KleiAccount : ThreadedHttps<KleiAccount>
 			this.gotUserID();
 			return;
 		}
-		Stream responseStream = response.GetResponseStream();
-		StreamReader streamReader = new StreamReader(responseStream);
-		string text = streamReader.ReadToEnd();
-		streamReader.Close();
-		responseStream.Close();
-		KleiAccount.AccountReply accountReply = JsonConvert.DeserializeObject<KleiAccount.AccountReply>(text);
+		string result = response.Content.ReadAsStringAsync().Result;
+		KleiAccount.AccountReply accountReply = JsonConvert.DeserializeObject<KleiAccount.AccountReply>(result);
 		if (!accountReply.Error)
 		{
 			Debug.Log("[Account] Got login for user " + accountReply.UserID);
@@ -39,7 +34,7 @@ public class KleiAccount : ThreadedHttps<KleiAccount>
 		}
 		else
 		{
-			Debug.Log("[Account] Error logging in: " + text + " for ticket=" + ((this.authTicket != null) ? this.EncodeToAsciiHEX(this.authTicket) : "<unknown>"));
+			Debug.Log("[Account] Error logging in: " + result + " for ticket=" + ((this.authTicket != null) ? this.EncodeToAsciiHEX(this.authTicket) : "<unknown>"));
 			this.gotUserID();
 		}
 		base.End();

@@ -1850,6 +1850,10 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 			});
 			this.Exit(string.Concat(new string[] { "Unreserve(", pickup_target.name, ", ", requested_amount.name, ")" }), delegate(StateMachineInstanceType smi)
 			{
+				if (smi.dataTable[data_idx] == null)
+				{
+					return;
+				}
 				int num5 = (int)smi.dataTable[data_idx];
 				smi.dataTable[data_idx] = null;
 				Pickupable pickupable2 = pickup_target.Get<Pickupable>(smi);

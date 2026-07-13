@@ -34,10 +34,19 @@ public class MinionSelectScreen : CharacterSelectionController
 	{
 		yield return SequenceUtil.WaitForNextFrame;
 		SettingLevel currentQualitySetting = CustomGameSettings.Instance.GetCurrentQualitySetting(CustomGameSettingConfigs.ClusterLayout);
-		if (SettingsCache.clusterLayouts.GetClusterData(currentQualitySetting.id).clusterTags.Contains("CeresCluster"))
+		ClusterLayout clusterData = SettingsCache.clusterLayouts.GetClusterData(currentQualitySetting.id);
+		bool flag = clusterData.clusterTags.Contains("CeresCluster");
+		bool flag2 = clusterData.clusterTags.Contains("PrehistoricCluster");
+		if (flag)
 		{
 			((CharacterContainer)this.containers[2]).SetMinion(new MinionStartingStats(Db.Get().Personalities.Get("FREYJA"), null, null, false));
 			((CharacterContainer)this.containers[1]).GenerateCharacter(true, null);
+			((CharacterContainer)this.containers[0]).GenerateCharacter(true, null);
+		}
+		else if (flag2)
+		{
+			((CharacterContainer)this.containers[2]).SetMinion(new MinionStartingStats(Db.Get().Personalities.Get("MAYA"), null, null, false));
+			((CharacterContainer)this.containers[1]).SetMinion(new MinionStartingStats(Db.Get().Personalities.Get("HIGBY"), null, null, false));
 			((CharacterContainer)this.containers[0]).GenerateCharacter(true, null);
 		}
 		yield break;

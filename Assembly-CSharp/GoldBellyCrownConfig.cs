@@ -18,7 +18,7 @@ public class GoldBellyCrownConfig : IEntityConfig, IHasDlcRestrictions
 
 	public GameObject CreatePrefab()
 	{
-		GameObject gameObject = EntityTemplates.CreateLooseEntity("GoldBellyCrown", global::STRINGS.ITEMS.INDUSTRIAL_PRODUCTS.GOLD_BELLY_CROWN.NAME, global::STRINGS.ITEMS.INDUSTRIAL_PRODUCTS.GOLD_BELLY_CROWN.DESC, 1f, true, Assets.GetAnim("bammoth_crown_kanim"), "idle1", Grid.SceneLayer.Ore, EntityTemplates.CollisionShape.RECTANGLE, 0.6f, 0.5f, true, 0, SimHashes.GoldAmalgam, new List<Tag> { GameTags.PedestalDisplayable });
+		GameObject gameObject = EntityTemplates.CreateLooseEntity("GoldBellyCrown", global::STRINGS.ITEMS.INDUSTRIAL_PRODUCTS.GOLD_BELLY_CROWN.NAME, global::STRINGS.ITEMS.INDUSTRIAL_PRODUCTS.GOLD_BELLY_CROWN.DESC, 250f, true, Assets.GetAnim("bammoth_crown_kanim"), "idle1", Grid.SceneLayer.Ore, EntityTemplates.CollisionShape.RECTANGLE, 0.6f, 0.5f, true, 0, SimHashes.GoldAmalgam, new List<Tag> { GameTags.PedestalDisplayable });
 		gameObject.GetComponent<KCollider2D>();
 		gameObject.AddTag(GameTags.IndustrialProduct);
 		gameObject.AddOrGet<OccupyArea>().SetCellOffsets(EntityTemplates.GenerateOffsets(1, 1));
@@ -37,4 +37,6 @@ public class GoldBellyCrownConfig : IEntityConfig, IHasDlcRestrictions
 	}
 
 	public const string ID = "GoldBellyCrown";
+
+	public const float MASS_PER_UNIT = 250f;
 }

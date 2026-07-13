@@ -5,6 +5,11 @@ using System.Collections.Generic;
 public class MedicineInfo
 {
 	public MedicineInfo(string id, string effect, MedicineInfo.MedicineType medicineType, string doctorStationId, string[] curedDiseases = null)
+		: this(id, effect, medicineType, doctorStationId, curedDiseases, null)
+	{
+	}
+
+	public MedicineInfo(string id, string effect, MedicineInfo.MedicineType medicineType, string doctorStationId, string[] curedDiseases, string[] curedEffects)
 	{
 		Debug.Assert(!string.IsNullOrEmpty(effect) || (curedDiseases != null && curedDiseases.Length != 0), "Medicine should have an effect or cure diseases");
 		this.id = id;
@@ -14,9 +19,17 @@ public class MedicineInfo
 		if (curedDiseases != null)
 		{
 			this.curedSicknesses = new List<string>(curedDiseases);
+		}
+		else
+		{
+			this.curedSicknesses = new List<string>();
+		}
+		if (curedEffects != null)
+		{
+			this.curedEffects = new List<string>(curedEffects);
 			return;
 		}
-		this.curedSicknesses = new List<string>();
+		this.curedEffects = new List<string>();
 	}
 
 	public Tag GetSupplyTag()
@@ -38,6 +51,8 @@ public class MedicineInfo
 	public MedicineInfo.MedicineType medicineType;
 
 	public List<string> curedSicknesses;
+
+	public List<string> curedEffects;
 
 	public string doctorStationId;
 

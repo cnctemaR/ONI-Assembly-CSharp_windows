@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using UnityEngine;
 
 public static class CreatureHelpers
@@ -231,50 +230,45 @@ public static class CreatureHelpers
 			global::Debug.LogWarning(self.name + " is trying to flee, bus has no threats");
 			return null;
 		}
-		int num = Grid.PosToCell(threat);
-		int num2 = Grid.PosToCell(self);
-		Navigator nav = self.GetComponent<Navigator>();
-		if (nav == null)
+		CreatureHelpers.fleeThreatInfo fleeThreatInfo;
+		fleeThreatInfo.threatCell = Grid.PosToCell(threat);
+		fleeThreatInfo.selfCell = Grid.PosToCell(self);
+		fleeThreatInfo.nav = self.GetComponent<Navigator>();
+		if (fleeThreatInfo.nav == null)
 		{
 			global::Debug.LogWarning(self.name + " is trying to flee, bus has no navigator component attached.");
 			return null;
 		}
-		HashSet<int> hashSet = GameUtil.FloodCollectCells(Grid.PosToCell(self), (int cell) => CreatureHelpers.CanFleeTo(cell, nav), 300, null, true);
-		int num3 = -1;
-		int num4 = -1;
-		foreach (int num5 in hashSet)
+		int num = GameUtil.FloodFillFindBest<CreatureHelpers.fleeThreatInfo>(CreatureHelpers.fleeCellRater, fleeThreatInfo, CreatureHelpers.fleeCellVaidator, Grid.PosToCell(self), 300);
+		if (num != -1)
 		{
-			if (nav.CanReach(num5) && num5 != num2)
-			{
-				int num6 = -1;
-				num6 += Grid.GetCellDistance(num5, num);
-				if (CreatureHelpers.isInFavoredFleeDirection(num5, num, self))
-				{
-					num6 += 2;
-				}
-				if (num6 > num4)
-				{
-					num4 = num6;
-					num3 = num5;
-				}
-			}
-		}
-		if (num3 != -1)
-		{
-			return ChoreHelpers.CreateLocator("GoToLocator", Grid.CellToPos(num3));
+			return ChoreHelpers.CreateLocator("GoToLocator", Grid.CellToPos(num));
 		}
 		return null;
 	}
 
-	private static bool isInFavoredFleeDirection(int targetFleeCell, int threatCell, GameObject self)
+	private static bool isInFavoredFleeDirection(int targetFleeCell, int threatCell, int selfCell)
 	{
-		bool flag = Grid.CellToPos(threatCell).x < self.transform.GetPosition().x;
+		bool flag = Grid.CellToPos(threatCell).x < Grid.CellToPos(selfCell).x;
 		bool flag2 = Grid.CellToPos(threatCell).x < Grid.CellToPos(targetFleeCell).x;
 		return flag == flag2;
 	}
 
 	private static bool CanFleeTo(int cell, Navigator nav)
 	{
-		return nav.CanReach(cell) || nav.CanReach(Grid.OffsetCell(cell, -1, -1)) || nav.CanReach(Grid.OffsetCell(cell, 1, -1)) || nav.CanReach(Grid.OffsetCell(cell, -1, 1)) || nav.CanReach(Grid.OffsetCell(cell, 1, 1));
+		return nav.GetNavigationCost(cell, OffsetGroups.Use) != -1;
+	}
+
+	private static Func<int, CreatureHelpers.fleeThreatInfo, float> fleeCellRater = (int cell, CreatureHelpers.fleeThreatInfo threat) => (float)Grid.GetCellDistance(cell, threat.threatCell) + (CreatureHelpers.isInFavoredFleeDirection(cell, threat.threatCell, threat.selfCell) ? 2f : 0f);
+
+	private static Func<int, CreatureHelpers.fleeThreatInfo, bool> fleeCellVaidator = (int cell, CreatureHelpers.fleeThreatInfo info) => CreatureHelpers.CanFleeTo(cell, info.nav);
+
+	private struct fleeThreatInfo
+	{
+		public int threatCell;
+
+		public int selfCell;
+
+		public Navigator nav;
 	}
 }

@@ -10,9 +10,35 @@ public class KAnimBatchGroup
 		KAnimBatchGroup.cache.Finalise();
 	}
 
-	private Material CreateTemperaturePostProcesingMaterial()
+	public static string GetShaderNameForMaterialType(KAnimBatchGroup.MaterialType material_type)
 	{
-		Material material = new Material(Shader.Find("Klei/BatchedAnimationPstTemperature"));
+		switch (material_type)
+		{
+		case KAnimBatchGroup.MaterialType.Simple:
+			return "Klei/AnimationSimple";
+		case KAnimBatchGroup.MaterialType.UI:
+			return "Klei/BatchedAnimationUI";
+		case KAnimBatchGroup.MaterialType.Invisible:
+			return "Klei/AnimationInvisible";
+		case KAnimBatchGroup.MaterialType.Human:
+			return "Klei/BatchedAnimationHuman";
+		}
+		return "Klei/BatchedAnimation";
+	}
+
+	private Material CreateMaterial(KAnimBatchGroup.MaterialType material_type)
+	{
+		Material material = new Material(Shader.Find(KAnimBatchGroup.GetShaderNameForMaterialType(material_type)));
+		material.name = "Material:" + this.batchID.ToString();
+		material.SetFloat(KAnimBatchGroup.ShaderProperty_SYMBOLS_PER_BUILD, (float)this.data.maxSymbolsPerBuild);
+		material.SetFloat(KAnimBatchGroup.ShaderProperty_ANIM_TEXTURE_START_OFFSET, (float)(this.data.animDataStartOffset / 4));
+		material.SetFloat(KAnimBatchGroup.ShaderProperty_SYMBOL_OVERRIDES_PER_BUILD, (float)this.data.symbolFrameInstances.Count);
+		return material;
+	}
+
+	private Material CreatePostProcesingMaterial(KAnimConverter.PostProcessingEffects effect)
+	{
+		Material material = new Material(Shader.Find(KAnimConverter.ShaderNameForPostProcessingEffect[effect]));
 		material.name = "Material:" + this.batchID.ToString() + "_PST";
 		material.SetFloat(KAnimBatchGroup.ShaderProperty_SYMBOLS_PER_BUILD, (float)this.data.maxSymbolsPerBuild);
 		material.SetFloat(KAnimBatchGroup.ShaderProperty_ANIM_TEXTURE_START_OFFSET, (float)(this.data.animDataStartOffset / 4));
@@ -20,30 +46,14 @@ public class KAnimBatchGroup
 		return material;
 	}
 
-	private Material CreateMaterial(KAnimBatchGroup.MaterialType material_type)
+	public Material GetPostProcessingMaterial(KAnimConverter.PostProcessingEffects effectToRender)
 	{
-		Material material = null;
-		switch (material_type)
+		Material material;
+		if (!this.postEffectMaterials.TryGetValue(effectToRender, out material))
 		{
-		case KAnimBatchGroup.MaterialType.Simple:
-			material = new Material(Shader.Find("Klei/AnimationSimple"));
-			goto IL_0074;
-		case KAnimBatchGroup.MaterialType.UI:
-			material = new Material(Shader.Find("Klei/BatchedAnimationUI"));
-			goto IL_0074;
-		case KAnimBatchGroup.MaterialType.Overlay:
-			global::Debug.LogError("MaterialType.Overlay no longer supported.");
-			goto IL_0074;
-		case KAnimBatchGroup.MaterialType.Human:
-			material = new Material(Shader.Find("Klei/BatchedAnimationHuman"));
-			goto IL_0074;
+			material = this.CreatePostProcesingMaterial(effectToRender);
+			this.postEffectMaterials[effectToRender] = material;
 		}
-		material = new Material(Shader.Find("Klei/BatchedAnimation"));
-		IL_0074:
-		material.name = "Material:" + this.batchID.ToString();
-		material.SetFloat(KAnimBatchGroup.ShaderProperty_SYMBOLS_PER_BUILD, (float)this.data.maxSymbolsPerBuild);
-		material.SetFloat(KAnimBatchGroup.ShaderProperty_ANIM_TEXTURE_START_OFFSET, (float)(this.data.animDataStartOffset / 4));
-		material.SetFloat(KAnimBatchGroup.ShaderProperty_SYMBOL_OVERRIDES_PER_BUILD, (float)this.data.symbolFrameInstances.Count);
 		return material;
 	}
 
@@ -54,15 +64,6 @@ public class KAnimBatchGroup
 			this.materials[(int)material_type] = this.CreateMaterial(material_type);
 		}
 		return this.materials[(int)material_type];
-	}
-
-	public Material GetTemperaturePostProcessingMaterial(KAnimBatchGroup.MaterialType material_type)
-	{
-		if (this.pstMaterial == null)
-		{
-			this.pstMaterial = this.CreateTemperaturePostProcesingMaterial();
-		}
-		return this.pstMaterial;
 	}
 
 	public int maxGroupSize { get; private set; }
@@ -286,7 +287,7 @@ public class KAnimBatchGroup
 
 	private static int ShaderProperty_instanceTex = Shader.PropertyToID("instanceTex");
 
-	private Material pstMaterial;
+	private Dictionary<KAnimConverter.PostProcessingEffects, Material> postEffectMaterials = new Dictionary<KAnimConverter.PostProcessingEffects, Material>();
 
 	private Material[] materials;
 
@@ -380,7 +381,10 @@ public class KAnimBatchGroup
 
 			public Entry(int float4s_width, int float4s_height)
 			{
-				DebugUtil.DevAssert(float4s_width > 0 && MathUtil.IsPowerOfTwo(float4s_width), string.Format("Width ({0}) must be a power of two in order for fast indexing of the texture to work!", float4s_width), null);
+				if (float4s_width <= 0 || !MathUtil.IsPowerOfTwo(float4s_width))
+				{
+					DebugUtil.DevAssert(false, string.Format("Width ({0}) must be a power of two in order for fast indexing of the texture to work!", float4s_width), null);
+				}
 				this.texture = new Texture2D(float4s_width, float4s_height, TextureFormat.RGBAFloat, false);
 				this.texture.wrapMode = TextureWrapMode.Clamp;
 				this.texture.filterMode = FilterMode.Point;
@@ -396,7 +400,10 @@ public class KAnimBatchGroup
 
 			public void SetTextureAndSize(MaterialPropertyBlock property_block)
 			{
-				DebugUtil.DevAssert(this.width > 0 && MathUtil.IsPowerOfTwo(this.width), string.Format("Width ({0}) must be a power of two in order for fast indexing of the texture to work!", this.width), null);
+				if (this.width <= 0 || !MathUtil.IsPowerOfTwo(this.width))
+				{
+					DebugUtil.DevAssert(false, string.Format("Width ({0}) must be a power of two in order for fast indexing of the texture to work!", this.width), null);
+				}
 				Vector2I vector2I = MathUtil.PowerOfTwoToMaskAndShift(this.width);
 				property_block.SetTexture(this.texturePropertyId, this.texture);
 				property_block.SetVector(this.textureSizePropertyId, new Vector4(this.texelSize.x, this.texelSize.y, (float)vector2I.x, (float)vector2I.y));
@@ -476,7 +483,7 @@ public class KAnimBatchGroup
 		Simple,
 		Placer,
 		UI,
-		Overlay,
+		Invisible,
 		Human,
 		NumMaterials
 	}

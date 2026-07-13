@@ -38,4 +38,6 @@ public class FossilBitsSmallConfig : IEntityConfig
 	public void OnSpawn(GameObject inst)
 	{
 	}
+
+	public const string ID = "FossilBitsSmall";
 }

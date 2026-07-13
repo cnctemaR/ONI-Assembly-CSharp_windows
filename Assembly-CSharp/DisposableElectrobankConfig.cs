@@ -43,7 +43,6 @@ public class DisposableElectrobankConfig : IMultiEntityConfig
 		{
 			Assets.AddCountableTag(GameTags.ChargedPortableBattery);
 		}
-		gameObject.GetComponent<KCollider2D>();
 		gameObject.AddComponent<Electrobank>();
 		gameObject.AddOrGet<OccupyArea>().SetCellOffsets(EntityTemplates.GenerateOffsets(1, 1));
 		gameObject.AddOrGet<DecorProvider>().SetValues(DECOR.PENALTY.TIER0);

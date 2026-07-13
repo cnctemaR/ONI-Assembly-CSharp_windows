@@ -192,5 +192,33 @@ namespace STRINGS
 
 			public static LocString DESCRIPTION = "A cluster of visitable planetoids with an Ice Cave starting world that was fractured by an experiment gone wrong.";
 		}
+
+		public static class PREHISTORIC_BASE_CLUSTER
+		{
+			public static LocString NAME = "Relica";
+
+			public static LocString DESCRIPTION = "An endangered location with abundant food resources.\n\n<smallcaps>Relica's biodiversity makes reliable food production more attainable for new colonies. Construction materials and fuels are also ample. Surface defence must be prioritized to minimize damage from an incoming impactor asteroid.</smallcaps>";
+		}
+
+		public static class PREHISTORIC_CLASSIC_CLUSTER
+		{
+			public static LocString NAME = "Relica Cluster";
+
+			public static LocString DESCRIPTION = "A cluster of visitable planetoids with a Garden starting world.";
+		}
+
+		public static class PREHISTORIC_SPACEDOUT_CLUSTER
+		{
+			public static LocString NAME = "Relica Minor Cluster";
+
+			public static LocString DESCRIPTION = "A cluster of visitable planetoids with a Garden starting world.";
+		}
+
+		public static class PREHISTORIC_SHATTERED_CLUSTER
+		{
+			public static LocString NAME = "RelicAAAA<sup>AAAGHH</sup> Cluster";
+
+			public static LocString DESCRIPTION = "A cluster of visitable planetoids with an impactor-struck starting world.";
+		}
 	}
 }

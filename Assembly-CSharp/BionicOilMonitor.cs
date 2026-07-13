@@ -98,10 +98,30 @@ public class BionicOilMonitor : GameStateMachine<BionicOilMonitor, BionicOilMoni
 		return smi.GetGrindingGearReactable();
 	}
 
+	public static void ApplyLubricationEffects(Effects targetBionicEffects, SimHashes lubricant)
+	{
+		foreach (SimHashes simHashes in BionicOilMonitor.LUBRICANT_TYPE_EFFECT.Keys)
+		{
+			if (BionicOilMonitor.LUBRICANT_TYPE_EFFECT.ContainsKey(simHashes))
+			{
+				Effect effect = BionicOilMonitor.LUBRICANT_TYPE_EFFECT[simHashes];
+				if (lubricant == simHashes)
+				{
+					targetBionicEffects.Add(effect, true);
+				}
+				else
+				{
+					targetBionicEffects.Remove(effect);
+				}
+			}
+		}
+	}
+
 	// Note: this type is marked as 'beforefieldinit'.
 	static BionicOilMonitor()
 	{
 		Dictionary<SimHashes, Effect> dictionary = new Dictionary<SimHashes, Effect>();
+		dictionary[SimHashes.Tallow] = BionicOilMonitor.CreateFreshOilEffectVariation(SimHashes.Tallow.ToString(), -0.016666668f, 3f);
 		dictionary[SimHashes.CrudeOil] = BionicOilMonitor.CreateFreshOilEffectVariation(SimHashes.CrudeOil.ToString(), -0.016666668f, 3f);
 		dictionary[SimHashes.PhytoOil] = BionicOilMonitor.CreateFreshOilEffectVariation(SimHashes.PhytoOil.ToString(), -0.008333334f, 2f);
 		BionicOilMonitor.LUBRICANT_TYPE_EFFECT = dictionary;

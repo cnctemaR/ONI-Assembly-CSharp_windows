@@ -43,9 +43,9 @@ public class OrbitalObject : KMonoBehaviour, IRenderEveryTick
 
 	public void RenderEveryTick(float dt)
 	{
-		float time = GameClock.Instance.GetTime();
+		float num = 450f;
 		bool flag;
-		Vector3 vector = this.CalculateWorldPos(time, out flag);
+		Vector3 vector = this.CalculateWorldPos(num, out flag);
 		Vector3 vector2 = vector;
 		if (this.orbitData.periodInCycles > 0f)
 		{

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Klei;
 using Klei.AI;
 using STRINGS;
 using TUNING;
@@ -114,11 +115,14 @@ public class TinkerStation : Workable, IGameObjectEffectDescriptor, ISim1000ms
 		if (primaryElement != null)
 		{
 			SimHashes elementID = primaryElement.ElementID;
-			this.storage.ConsumeIgnoringDisease(elementID.CreateTag(), this.massPerTinker);
+			float num = 1f;
+			float num2;
+			SimUtil.DiseaseInfo diseaseInfo;
+			this.storage.ConsumeAndGetDisease(elementID.CreateTag(), this.massPerTinker, out num2, out diseaseInfo, out num);
 			GameObject gameObject = GameUtil.KInstantiate(Assets.GetPrefab(this.outputPrefab), base.transform.GetPosition() + Vector3.up, Grid.SceneLayer.Ore, null, 0);
 			PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
 			component.SetElement(elementID, true);
-			component.Temperature = this.outputTemperature;
+			component.Temperature = num;
 			gameObject.SetActive(true);
 		}
 		this.chore = null;
@@ -150,7 +154,7 @@ public class TinkerStation : Workable, IGameObjectEffectDescriptor, ISim1000ms
 
 	private bool HasMaterial()
 	{
-		return this.storage.MassStored() > 0f;
+		return this.storage.FindFirstWithMass(this.inputMaterial, this.massPerTinker) != null;
 	}
 
 	private bool ToolsRequested()

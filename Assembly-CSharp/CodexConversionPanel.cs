@@ -62,7 +62,7 @@ public class CodexConversionPanel : CodexWidget<CodexConversionPanel>
 		{
 			return new global::Tuple<Sprite, Color>(Assets.GetSprite(tag.Name), Color.white);
 		}
-		return null;
+		return Def.GetUISprite(tag, "ui", false);
 	}
 
 	private void ConfigureConversion()

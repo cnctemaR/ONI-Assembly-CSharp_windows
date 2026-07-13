@@ -443,6 +443,14 @@ public static class CodexCache
 			codexEntry.disabled = entry.disabled;
 		}
 		codexEntry.showBeforeGeneratedCategoryLinks = entry.showBeforeGeneratedCategoryLinks;
+		if (!string.IsNullOrEmpty(entry.category))
+		{
+			codexEntry.category = entry.category;
+		}
+		if (!string.IsNullOrEmpty(entry.parentId))
+		{
+			codexEntry.parentId = entry.parentId;
+		}
 		foreach (ContentContainer contentContainer in entry.contentContainers)
 		{
 			if (contentContainer.lockID != null)

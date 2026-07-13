@@ -4,9 +4,19 @@ using System.Diagnostics;
 using UnityEngine;
 
 [DebuggerDisplay("{base.Id}")]
-public abstract class GameplayEvent : Resource, IComparable<GameplayEvent>
+public abstract class GameplayEvent : Resource, IComparable<GameplayEvent>, IHasDlcRestrictions
 {
 	public int importance { get; private set; }
+
+	public string[] GetRequiredDlcIds()
+	{
+		return this.requiredDlcIds;
+	}
+
+	public string[] GetForbiddenDlcIds()
+	{
+		return this.forbiddenDlcIds;
+	}
 
 	public virtual bool IsAllowed()
 	{
@@ -36,7 +46,7 @@ public abstract class GameplayEvent : Resource, IComparable<GameplayEvent>
 
 	public virtual bool WillNeverRunAgain()
 	{
-		return this.numTimesAllowed != -1 && GameplayEventManager.Instance.NumberOfPastEvents(this.Id) >= this.numTimesAllowed;
+		return !Game.IsCorrectDlcActiveForCurrentSave(this) || (this.numTimesAllowed != -1 && GameplayEventManager.Instance.NumberOfPastEvents(this.Id) >= this.numTimesAllowed);
 	}
 
 	public int GetCashedPriority()
@@ -158,6 +168,13 @@ public abstract class GameplayEvent : Resource, IComparable<GameplayEvent>
 		this.animFileName = id;
 	}
 
+	public GameplayEvent(string id, int priority, int importance, string[] requiredDlcIds, string[] forbiddenDlcIds = null)
+		: this(id, priority, importance)
+	{
+		this.requiredDlcIds = requiredDlcIds;
+		this.forbiddenDlcIds = forbiddenDlcIds;
+	}
+
 	public abstract StateMachine.Instance GetSMI(GameplayEventManager manager, GameplayEventInstance eventInstance);
 
 	public GameplayEventInstance CreateInstance(int worldId)
@@ -195,4 +212,8 @@ public abstract class GameplayEvent : Resource, IComparable<GameplayEvent>
 	public HashedString animFileName;
 
 	public List<Tag> tags;
+
+	private string[] requiredDlcIds;
+
+	private string[] forbiddenDlcIds;
 }

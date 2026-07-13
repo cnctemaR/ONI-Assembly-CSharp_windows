@@ -67,6 +67,7 @@ public class Assets : KMonoBehaviour, ISerializationCallbackReceiver
 		}
 		LegacyModMain.Load();
 		Db.Get().PostProcess();
+		ComplexRecipeManager.Get().PostProcess();
 	}
 
 	protected override void OnSpawn()
@@ -173,12 +174,14 @@ public class Assets : KMonoBehaviour, ISerializationCallbackReceiver
 		{
 			GameTags.StartingMetalOres[i] = list[i].tag;
 		}
-		List<Element> list2 = ElementLoader.elements.FindAll((Element e) => e.HasTag(GameTags.StartingRefinedMetalOre));
-		GameTags.StartingRefinedMetalOres = new Tag[list2.Count];
+		GameTags.BasicMetalOres = GameTags.StartingMetalOres.Append<Tag>(GameTags.BasicMetalOres);
+		List<Element> list2 = ElementLoader.elements.FindAll((Element e) => e.HasTag(GameTags.StartingRefinedMetal));
+		GameTags.StartingRefinedMetals = new Tag[list2.Count];
 		for (int j = 0; j < list2.Count; j++)
 		{
-			GameTags.StartingRefinedMetalOres[j] = list2[j].tag;
+			GameTags.StartingRefinedMetals[j] = list2[j].tag;
 		}
+		GameTags.BasicRefinedMetals = GameTags.StartingRefinedMetals.Append<Tag>(GameTags.BasicRefinedMetals);
 	}
 
 	public static string GetSimpleSoundEventName(EventReference event_ref)
@@ -373,6 +376,20 @@ public class Assets : KMonoBehaviour, ISerializationCallbackReceiver
 			if (Assets.Prefabs[i].GetComponent<Type>() != null)
 			{
 				list.Add(Assets.Prefabs[i].gameObject);
+			}
+		}
+		return list;
+	}
+
+	public static List<Type> GetPrefabsWithComponentAsListOfComponents<Type>()
+	{
+		List<Type> list = new List<Type>();
+		for (int i = 0; i < Assets.Prefabs.Count; i++)
+		{
+			Type component = Assets.Prefabs[i].GetComponent<Type>();
+			if (component != null)
+			{
+				list.Add(component);
 			}
 		}
 		return list;

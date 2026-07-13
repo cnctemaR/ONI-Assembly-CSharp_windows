@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 using Klei.AI;
 using KSerialization;
@@ -303,7 +304,7 @@ public class Constructable : Workable, ISaveLoadable
 			Grid.CellToXY(Grid.PosToCell(this), out num4, out num5);
 			int num6 = num5 - 3;
 			this.ladderDetectionExtents = new Extents(num4, num6, 1, 5);
-			this.ladderParititonerEntry = GameScenePartitioner.Instance.Add("Constructable.OnNearbyBuildingLayerChanged", base.gameObject, this.ladderDetectionExtents, GameScenePartitioner.Instance.objectLayers[1], new Action<object>(this.OnNearbyBuildingLayerChanged));
+			this.ladderPartitionerEntry = GameScenePartitioner.Instance.Add("Constructable.OnNearbyBuildingLayerChanged", base.gameObject, this.ladderDetectionExtents, GameScenePartitioner.Instance.objectLayers[1], new Action<object>(this.OnNearbyBuildingLayerChanged));
 			this.OnNearbyBuildingLayerChanged(null);
 		}
 		this.fetchList.Submit(new global::System.Action(this.OnFetchListComplete), true);
@@ -364,6 +365,21 @@ public class Constructable : Workable, ISaveLoadable
 		{
 			Grid.IsTileUnderConstruction[num] = false;
 		}
+		this.ClearPendingUproots();
+	}
+
+	private void ClearPendingUproots()
+	{
+		foreach (Uprootable uprootable in this.pendingUproots)
+		{
+			if (!uprootable.IsNullOrDestroyed())
+			{
+				uprootable.Unsubscribe(-216549700, new Action<object>(this.OnSolidChangedOrDigDestroyed));
+				uprootable.Unsubscribe(1198393204, new Action<object>(this.OnSolidChangedOrDigDestroyed));
+				uprootable.ForceCancelUproot(null);
+			}
+		}
+		this.pendingUproots.Clear();
 	}
 
 	private void OnNearbyBuildingLayerChanged(object data)
@@ -433,7 +449,7 @@ public class Constructable : Workable, ISaveLoadable
 		}
 		GameScenePartitioner.Instance.Free(ref this.solidPartitionerEntry);
 		GameScenePartitioner.Instance.Free(ref this.digPartitionerEntry);
-		GameScenePartitioner.Instance.Free(ref this.ladderParititonerEntry);
+		GameScenePartitioner.Instance.Free(ref this.ladderPartitionerEntry);
 		SaveLoadRoot component = base.GetComponent<SaveLoadRoot>();
 		if (component != null)
 		{
@@ -444,15 +460,24 @@ public class Constructable : Workable, ISaveLoadable
 			this.fetchList.Cancel("Constructable destroyed");
 		}
 		this.UnmarkArea();
-		int[] placementCells = this.building.PlacementCells;
-		for (int i = 0; i < placementCells.Length; i++)
+		HashSetPool<Uprootable, Constructable>.PooledHashSet pooledHashSet = HashSetPool<Uprootable, Constructable>.Allocate();
+		foreach (int num2 in this.building.PlacementCells)
 		{
-			Diggable diggable = Diggable.GetDiggable(placementCells[i]);
+			Diggable diggable = Diggable.GetDiggable(num2);
 			if (diggable != null)
 			{
 				diggable.gameObject.DeleteObject();
 			}
+			Constructable.<OnCleanUp>g__TryAddUprootable|48_0(Grid.Objects[num2, 1], pooledHashSet);
+			Constructable.<OnCleanUp>g__TryAddUprootable|48_0(Grid.Objects[num2, 5], pooledHashSet);
 		}
+		foreach (Uprootable uprootable in pooledHashSet)
+		{
+			uprootable.Unsubscribe(-216549700, new Action<object>(this.OnSolidChangedOrDigDestroyed));
+			uprootable.Unsubscribe(1198393204, new Action<object>(this.OnSolidChangedOrDigDestroyed));
+			uprootable.ForceCancelUproot(null);
+		}
+		pooledHashSet.Recycle();
 		base.OnCleanUp();
 	}
 
@@ -499,18 +524,20 @@ public class Constructable : Workable, ISaveLoadable
 			this.OnDiggableReachabilityChanged(null);
 			return;
 		}
-		bool digs_complete = true;
 		if (!this.solidPartitionerEntry.IsValid())
 		{
 			Extents validPlacementExtents = this.building.GetValidPlacementExtents();
-			this.solidPartitionerEntry = GameScenePartitioner.Instance.Add("Constructable.OnFetchListComplete", base.gameObject, validPlacementExtents, GameScenePartitioner.Instance.solidChangedLayer, new Action<object>(this.OnSolidChangedOrDigDestroyed));
-			this.digPartitionerEntry = GameScenePartitioner.Instance.Add("Constructable.OnFetchListComplete", base.gameObject, validPlacementExtents, GameScenePartitioner.Instance.digDestroyedLayer, new Action<object>(this.OnSolidChangedOrDigDestroyed));
+			this.solidPartitionerEntry = GameScenePartitioner.Instance.Add("Constructable.PlaceDiggables", base.gameObject, validPlacementExtents, GameScenePartitioner.Instance.solidChangedLayer, new Action<object>(this.OnSolidChangedOrDigDestroyed));
+			this.digPartitionerEntry = GameScenePartitioner.Instance.Add("Constructable.PlaceDiggables", base.gameObject, validPlacementExtents, GameScenePartitioner.Instance.digDestroyedLayer, new Action<object>(this.OnSolidChangedOrDigDestroyed));
 		}
+		bool digs_complete = true;
 		if (!this.IsReplacementTile)
 		{
+			PrioritySetting master_priority = base.GetComponent<Prioritizable>().GetMasterPriority();
+			HashSetPool<Uprootable, Constructable>.PooledHashSet uprootables = HashSetPool<Uprootable, Constructable>.Allocate();
 			this.building.RunOnArea(delegate(int offset_cell)
 			{
-				PrioritySetting masterPriority = this.GetComponent<Prioritizable>().GetMasterPriority();
+				Uprootable uprootable5;
 				if (Diggable.IsDiggable(offset_cell))
 				{
 					digs_complete = false;
@@ -518,29 +545,76 @@ public class Constructable : Workable, ISaveLoadable
 					if (diggable != null && !diggable.isActiveAndEnabled)
 					{
 						diggable.Unsubscribe(-1432940121, new Action<object>(this.OnDiggableReachabilityChanged));
+						diggable = null;
 					}
-					if (diggable == null || !diggable.isActiveAndEnabled)
+					if (diggable == null)
 					{
 						diggable = GameUtil.KInstantiate(Assets.GetPrefab(new Tag("DigPlacer")), Grid.SceneLayer.Move, null, 0).GetComponent<Diggable>();
+						diggable.choreTypeIdHash = Db.Get().ChoreTypes.BuildDig.IdHash;
 						diggable.gameObject.SetActive(true);
 						diggable.transform.SetPosition(Grid.CellToPosCBC(offset_cell, Grid.SceneLayer.Move));
 						Grid.Objects[offset_cell, 7] = diggable.gameObject;
+						diggable.Subscribe(-1432940121, new Action<object>(this.OnDiggableReachabilityChanged));
 					}
-					diggable.Subscribe(-1432940121, new Action<object>(this.OnDiggableReachabilityChanged));
-					diggable.choreTypeIdHash = Db.Get().ChoreTypes.BuildDig.IdHash;
-					diggable.GetComponent<Prioritizable>().SetMasterPriority(masterPriority);
+					diggable.GetComponent<Prioritizable>().SetMasterPriority(master_priority);
 					RenderUtil.EnableRenderer(diggable.transform, false);
 					SaveLoadRoot component = diggable.GetComponent<SaveLoadRoot>();
 					if (component != null)
 					{
 						global::UnityEngine.Object.Destroy(component);
+						return;
 					}
 				}
+				else if (this.building.Def.ObjectLayer == ObjectLayer.Building && Uprootable.CanUproot(Grid.Objects[offset_cell, 5], out uprootable5))
+				{
+					uprootables.Add(uprootable5);
+				}
 			});
+			if (uprootables.Count != 0)
+			{
+				digs_complete = false;
+			}
+			ListPool<Uprootable, Constructable>.PooledList pooledList = ListPool<Uprootable, Constructable>.Allocate();
+			ListPool<Uprootable, Constructable>.PooledList pooledList2 = ListPool<Uprootable, Constructable>.Allocate();
+			foreach (Uprootable uprootable in this.pendingUproots)
+			{
+				if (uprootable.IsNullOrDestroyed())
+				{
+					pooledList2.Add(uprootable);
+				}
+				else if (!uprootables.Contains(uprootable))
+				{
+					pooledList.Add(uprootable);
+				}
+			}
+			foreach (Uprootable uprootable2 in pooledList)
+			{
+				uprootable2.Unsubscribe(-216549700, new Action<object>(this.OnSolidChangedOrDigDestroyed));
+				uprootable2.Unsubscribe(1198393204, new Action<object>(this.OnSolidChangedOrDigDestroyed));
+				this.pendingUproots.Remove(uprootable2);
+			}
+			pooledList.Recycle();
+			foreach (Uprootable uprootable3 in pooledList2)
+			{
+				this.pendingUproots.Remove(uprootable3);
+			}
+			pooledList2.Recycle();
+			foreach (Uprootable uprootable4 in uprootables)
+			{
+				bool flag = this.pendingUproots.Add(uprootable4);
+				uprootable4.choreTypeIdHash = Db.Get().ChoreTypes.BuildUproot.IdHash;
+				uprootable4.MarkForUproot(true);
+				if (flag)
+				{
+					uprootable4.Subscribe(-216549700, new Action<object>(this.OnSolidChangedOrDigDestroyed));
+					uprootable4.Subscribe(1198393204, new Action<object>(this.OnSolidChangedOrDigDestroyed));
+				}
+			}
+			uprootables.Recycle();
 			this.OnDiggableReachabilityChanged(null);
 		}
-		bool flag = this.building.Def.IsValidBuildLocation(base.gameObject, base.transform.GetPosition(), this.building.Orientation, this.IsReplacementTile);
-		if (flag)
+		bool flag2 = this.building.Def.IsValidBuildLocation(base.gameObject, base.transform.GetPosition(), this.building.Orientation, this.IsReplacementTile);
+		if (flag2)
 		{
 			this.notifier.Remove(this.invalidLocation);
 		}
@@ -548,15 +622,15 @@ public class Constructable : Workable, ISaveLoadable
 		{
 			this.notifier.Add(this.invalidLocation, "");
 		}
-		base.GetComponent<KSelectable>().ToggleStatusItem(Db.Get().BuildingStatusItems.InvalidBuildingLocation, !flag, this);
-		bool flag2 = digs_complete && flag && this.fetchList == null;
-		if (flag2 && this.buildChore == null)
+		base.GetComponent<KSelectable>().ToggleStatusItem(Db.Get().BuildingStatusItems.InvalidBuildingLocation, !flag2, this);
+		bool flag3 = digs_complete && flag2 && this.fetchList == null;
+		if (flag3 && this.buildChore == null)
 		{
 			this.buildChore = new WorkChore<Constructable>(Db.Get().ChoreTypes.Build, this, null, true, new Action<Chore>(this.UpdateBuildState), new Action<Chore>(this.UpdateBuildState), new Action<Chore>(this.UpdateBuildState), true, null, false, true, null, true, true, true, PriorityScreen.PriorityClass.basic, 5, false, true);
 			this.UpdateBuildState(this.buildChore);
 			return;
 		}
-		if (!flag2 && this.buildChore != null)
+		if (!flag3 && this.buildChore != null)
 		{
 			this.buildChore.Cancel("Need to dig");
 			this.buildChore = null;
@@ -595,12 +669,8 @@ public class Constructable : Workable, ISaveLoadable
 	private void UpdateBuildState(Chore chore)
 	{
 		KSelectable component = base.GetComponent<KSelectable>();
-		if (chore.InProgress())
-		{
-			component.SetStatusItem(Db.Get().StatusItemCategories.Main, Db.Get().BuildingStatusItems.UnderConstruction, null);
-			return;
-		}
-		component.SetStatusItem(Db.Get().StatusItemCategories.Main, Db.Get().BuildingStatusItems.UnderConstructionNoWorker, null);
+		StatusItem statusItem = (chore.InProgress() ? Db.Get().BuildingStatusItems.UnderConstruction : Db.Get().BuildingStatusItems.UnderConstructionNoWorker);
+		component.SetStatusItem(Db.Get().StatusItemCategories.Main, statusItem, null);
 	}
 
 	[OnDeserialized]
@@ -665,6 +735,22 @@ public class Constructable : Workable, ISaveLoadable
 	{
 		DetailsScreen.Instance.Show(false);
 		this.ClearMaterialNeeds();
+		this.ClearPendingUproots();
+	}
+
+	[CompilerGenerated]
+	internal static void <OnCleanUp>g__TryAddUprootable|48_0(GameObject plant, HashSet<Uprootable> _uprootables)
+	{
+		if (plant == null)
+		{
+			return;
+		}
+		Uprootable component = plant.GetComponent<Uprootable>();
+		if (component == null)
+		{
+			return;
+		}
+		_uprootables.Add(component);
 	}
 
 	[MyCmpAdd]
@@ -716,7 +802,9 @@ public class Constructable : Workable, ISaveLoadable
 
 	private HandleVector<int>.Handle digPartitionerEntry;
 
-	private HandleVector<int>.Handle ladderParititonerEntry;
+	private HandleVector<int>.Handle ladderPartitionerEntry;
+
+	private readonly HashSet<Uprootable> pendingUproots = new HashSet<Uprootable>();
 
 	private LoggerFSS log = new LoggerFSS("Constructable", 35);
 

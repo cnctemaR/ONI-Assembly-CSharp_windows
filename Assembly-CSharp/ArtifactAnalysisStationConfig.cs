@@ -45,9 +45,9 @@ public class ArtifactAnalysisStationConfig : IBuildingConfig
 		manualDeliveryKG.SetStorage(storage);
 		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.MachineFetch.IdHash;
 		manualDeliveryKG.RequestedItemTag = GameTags.CharmedArtifact;
-		manualDeliveryKG.refillMass = 1f;
-		manualDeliveryKG.MinimumMass = 1f;
-		manualDeliveryKG.capacity = 1f;
+		manualDeliveryKG.refillMass = 1f * ArtifactConfig.ARTIFACT_MASS;
+		manualDeliveryKG.MinimumMass = 1f * ArtifactConfig.ARTIFACT_MASS;
+		manualDeliveryKG.capacity = 1f * ArtifactConfig.ARTIFACT_MASS;
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)

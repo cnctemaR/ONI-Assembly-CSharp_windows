@@ -263,16 +263,25 @@ public class GravitasCreatureManipulator : GameStateMachine<GravitasCreatureMani
 		{
 			List<GameObject> list = new List<GameObject>();
 			Vector3 vector = Grid.CellToPosCBC(Grid.PosToCell(base.smi), Grid.SceneLayer.Creatures);
+			base.smi.def.dropOffset.ToVector3();
+			if (this.m_storage.items.Count > 0 && this.m_storage.items[0] != null)
+			{
+				KBoxCollider2D component = this.m_storage.items[0].GetComponent<KBoxCollider2D>();
+				if (component != null && component.size.x > 1.5f && component.PrefabID() != "Moo")
+				{
+					vector.x += 0.5f;
+				}
+			}
 			this.m_storage.DropAll(vector, false, false, base.smi.def.dropOffset.ToVector3(), true, list);
 			foreach (GameObject gameObject in list)
 			{
-				CreatureBrain component = gameObject.GetComponent<CreatureBrain>();
-				if (!(component == null))
+				CreatureBrain component2 = gameObject.GetComponent<CreatureBrain>();
+				if (!(component2 == null))
 				{
-					this.Scan(component.species);
-					if (component.HasTag(GameTags.OriginalCreature) && this.IsMorphMode)
+					this.Scan(component2.species);
+					if (component2.HasTag(GameTags.OriginalCreature) && this.IsMorphMode)
 					{
-						this.SpawnMorph(component);
+						this.SpawnMorph(component2);
 					}
 					else
 					{

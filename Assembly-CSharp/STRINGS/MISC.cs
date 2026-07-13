@@ -12,27 +12,17 @@ namespace STRINGS
 
 			public static LocString FILTER_DESC = string.Concat(new string[]
 			{
-				"Filtration Mediums are materials which are supplied to some filtration buildings that are used in separating purified ",
-				UI.FormatAsLink("gases", "ELEMENTS_GASSES"),
+				"Filtration Mediums are materials used to separate purified ",
+				UI.FormatAsLink("gases", "ELEMENTS_GAS"),
 				" or ",
 				UI.FormatAsLink("liquids", "ELEMENTS_LIQUID"),
-				" from their polluted forms.\n\nExamples include filtering ",
-				UI.FormatAsLink("Water", "WATER"),
-				" from ",
-				UI.FormatAsLink("Polluted Water", "DIRTYWATER"),
-				" using a ",
-				UI.FormatAsLink("Water Sieve", "WATERPURIFIER"),
-				", or a ",
-				UI.FormatAsLink("Deodorizer", "AIRFILTER"),
-				" purifying ",
-				UI.FormatAsLink("Oxygen", "OXYGEN"),
-				" from ",
-				UI.FormatAsLink("Polluted Oxygen", "CONTAMINATEDOXYGEN"),
-				".\n\nFiltration Mediums are a consumable that will be transformed by the filtering process to generate a by-product, like when ",
-				UI.FormatAsLink("Polluted Dirt", "TOXICSAND"),
-				" is the result after ",
+				" from their polluted forms.\n\nThey are consumables that will be transformed by the filtering process. For example, ",
 				UI.FormatAsLink("Sand", "SAND"),
-				" has been used to filter polluted water. The filtering building will cease to function once the filtering material has been consumed. Once the Filtering Material has been resupplied to the filtering building it will start working again."
+				" that has been used to filter ",
+				UI.FormatAsLink("Polluted Water", "DIRTYWATER"),
+				" will become ",
+				UI.FormatAsLink("Polluted Dirt", "TOXICSAND"),
+				"."
 			});
 
 			public static LocString ICEORE = UI.FormatAsLink("Ice", "ICEORE");
@@ -68,6 +58,10 @@ namespace STRINGS
 			public static LocString BUILDABLEANY_DESC = "";
 
 			public static LocString DEHYDRATED = "Dehydrated";
+
+			public static LocString FOSSILS = UI.FormatAsLink("Fossil", "FOSSILS");
+
+			public static LocString FOSSILS_DESC = "Fossil is a category of composite rocks and minerals that contain traces of petrified lifeforms.\n\nThey have varied uses as basic building materials, sculpting blocks, or raw ingredients in the production of higher-grade materials.";
 
 			public static LocString PLASTIFIABLELIQUID = UI.FormatAsLink("Plastic Monomer", "PLASTIFIABLELIQUID");
 
@@ -120,7 +114,7 @@ namespace STRINGS
 
 			public static LocString ALLOY = UI.FormatAsLink("Alloy", "ALLOY");
 
-			public static LocString BUILDINGFIBER = UI.FormatAsLink("Fiber", "BUILDINGFIBER");
+			public static LocString BUILDINGFIBER = UI.FormatAsLink("Fibers", "BUILDINGFIBER");
 
 			public static LocString BUILDINGFIBER_DESC = "Fibers are organically sourced polymers which are both sturdy and sensorially pleasant, making them suitable in the construction of " + UI.FormatAsLink("Morale", "MORALE") + "-boosting buildings.";
 
@@ -192,7 +186,18 @@ namespace STRINGS
 
 			public static LocString CONSUMABLEORE = "Consumable Ore";
 
-			public static LocString SUBLIMATING = "Sublimators";
+			public static LocString SUBLIMATING = UI.FormatAsLink("Sublimators", "SUBLIMATES");
+
+			public static LocString SUBLIMATING_SUBHEADER = "Off-Gassing Elements";
+
+			public static LocString SUBLIMATING_DESC = string.Concat(new string[]
+			{
+				"Sublimators are a class of ",
+				UI.FormatAsLink("Solid", "ELEMENTS_SOLID"),
+				" elements that passively convert to a ",
+				UI.FormatAsLink("Gaseous", "ELEMENTS_GAS"),
+				" state. When off-gassing is complete, no trace of the original solid remains.\n\nThis passive conversion persists when the element is left in storage."
+			});
 
 			public static LocString ORE = "Ore";
 
@@ -226,7 +231,7 @@ namespace STRINGS
 
 			public static LocString BED = "Beds";
 
-			public static LocString MESSSTATION = "Dining Table";
+			public static LocString MESSSTATION = "Dining Tables";
 
 			public static LocString TOY = "Toy";
 
@@ -247,6 +252,8 @@ namespace STRINGS
 			public static LocString PLUMBABLE_DESC = "";
 
 			public static LocString COMPOSTABLE = UI.FormatAsLink("Compostable", "COMPOSTABLE");
+
+			public static LocString COMPOSTABLE_SUBHEADER = "Recyclable Organics";
 
 			public static LocString COMPOSTABLE_DESC = string.Concat(new string[]
 			{
@@ -925,6 +932,27 @@ namespace STRINGS
 				public static LocString NAME = "Temporal Tear closed";
 
 				public static LocString TOOLTIP = "Perhaps some technology could open the passage";
+			}
+
+			public class LARGEIMPACTORSTATUS
+			{
+				public static LocString NAME = "Time until impact: {0}";
+
+				public static LocString TOOLTIP = "This impactor asteroid will reach its target in {0}";
+			}
+
+			public class LARGEIMPACTORHEALTH
+			{
+				public static LocString NAME = "Health: {0} / {1}";
+
+				public static LocString TOOLTIP = "Collision damage can be avoided by destroying this impactor asteroid with " + UI.FormatAsLink("Intracosmic Blastshot", "LONGRANGEMISSILE") + " before it makes contact";
+			}
+
+			public class LONGRANGEMISSILETTI
+			{
+				public static LocString NAME = "Time To Intercept {0}: {1}";
+
+				public static LocString TOOLTIP = "This projectile will reach its destination in {1}";
 			}
 
 			public class MARKEDFORMOVE
@@ -2020,6 +2048,13 @@ namespace STRINGS
 				public static LocString TOOLTIP = "Extreme heat has melted these buildings:";
 			}
 
+			public class LARGE_IMPACTOR_GEYSER_ERUPTION
+			{
+				public static LocString NAME = "Geyser triggered";
+
+				public static LocString TOOLTIP = "Demolior's impact has triggered the eruption of a natural vent on this world";
+			}
+
 			public class SUIT_DROPPED
 			{
 				public static LocString NAME = "No Docks available";
@@ -2220,13 +2255,45 @@ namespace STRINGS
 
 			public class POIRESEARCHUNLOCKCOMPLETE
 			{
-				public static LocString NAME = "Research Discovered";
+				public static LocString NAME = "Portal Unlocked!";
 
 				public static LocString MESSAGEBODY = "Eureka! We've decrypted the Research Portal's final transmission. New buildings have become available:\n  {0}\n\nOne file was labeled \"Open This First.\" New Database Entry unlocked.";
 
 				public static LocString TOOLTIP = "{0} unlocked!";
 
 				public static LocString BUTTON_VIEW_LORE = "View entry";
+			}
+
+			public class POIRESEARCHUNLOCKCOMPLETE_NOLORE
+			{
+				public static LocString NAME = "Portal Unlocked!";
+
+				public static LocString MESSAGEBODY = "Eureka! We've decrypted the Research Portal's final transmission. New buildings have become available:\n  {0}\n\n";
+
+				public static LocString TOOLTIP = "{0} unlocked!";
+			}
+
+			public class INCOMINGPREHISTORICASTEROIDNOTIFICATION
+			{
+				public static LocString NAME = "DEMOLIOR";
+
+				public static LocString TOOLTIP = "Incoming Asteroid: <b><color=#ff1111>DEMOLIOR</color></b>\n• Health: {0}/{1}\n• Time until impact: {2}\n\nCollision damage can be avoided by destroying <b><color=#ff1111>DEMOLIOR</color></b> with " + UI.FormatAsLink("Intracosmic Blastshot", "LONGRANGEMISSILE") + " before it makes contact";
+
+				public static LocString TOGGLE_TOOLTIP = "Click to toggle impact zone preview";
+			}
+
+			public class LARGEIMPACTORREVEALSEQUENCE
+			{
+				public class RETICLE
+				{
+					public static LocString LARGE_IMPACTOR_NAME = "DEMOLIOR";
+
+					public static LocString SIDE_PANEL_TITLE = "IMMINENT THREAT";
+
+					public static LocString SIDE_PANEL_DESCRIPTION = "\n\nTIME UNTIL IMPACT: {0} CYCLES.";
+
+					public static LocString CALCULATING_IMPACT_ZONE_TEXT = "CALCULATING IMPACT ZONE...";
+				}
 			}
 
 			public class BIONICRESEARCHUNLOCK

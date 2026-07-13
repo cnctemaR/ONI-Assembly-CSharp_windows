@@ -74,6 +74,7 @@ public class FishOvercrowingManager : KMonoBehaviour, ISim1000ms
 						if (!this.cavityIdToCavityInfo.TryGetValue(num6, out cavityInfo))
 						{
 							cavityInfo = default(FishOvercrowingManager.CavityInfo);
+							cavityInfo.fishPrefabs = new List<KPrefabID>();
 						}
 						cavityInfo.fishCount += num8;
 						cavityInfo.cellCount++;
@@ -92,10 +93,31 @@ public class FishOvercrowingManager : KMonoBehaviour, ISim1000ms
 		{
 			FishOvercrowingManager.Cell cell2 = this.cells[fishInfo3.cell];
 			FishOvercrowingManager.CavityInfo cavityInfo2 = default(FishOvercrowingManager.CavityInfo);
-			this.cavityIdToCavityInfo.TryGetValue(cell2.cavityId, out cavityInfo2);
+			if (this.cavityIdToCavityInfo.TryGetValue(cell2.cavityId, out cavityInfo2))
+			{
+				cavityInfo2.fishPrefabs.Add(fishInfo3.fish.GetComponent<KPrefabID>());
+			}
 			fishInfo3.fish.SetOvercrowdingInfo(cavityInfo2.cellCount, cavityInfo2.fishCount);
 		}
 		pooledList.Recycle();
+	}
+
+	public int GetFishCavityCount(int cell, HashSet<Tag> accepted_tags)
+	{
+		int num = 0;
+		FishOvercrowingManager.Cell cell2 = this.cells[cell];
+		FishOvercrowingManager.CavityInfo cavityInfo = default(FishOvercrowingManager.CavityInfo);
+		if (this.cavityIdToCavityInfo.TryGetValue(cell2.cavityId, out cavityInfo))
+		{
+			foreach (KPrefabID kprefabID in cavityInfo.fishPrefabs)
+			{
+				if (!kprefabID.HasTag(GameTags.Creatures.Bagged) && !kprefabID.HasTag(GameTags.Trapped) && accepted_tags.Contains(kprefabID.PrefabTag))
+				{
+					num++;
+				}
+			}
+		}
+		return num;
 	}
 
 	public static FishOvercrowingManager Instance;
@@ -126,6 +148,8 @@ public class FishOvercrowingManager : KMonoBehaviour, ISim1000ms
 
 	private struct CavityInfo
 	{
+		public List<KPrefabID> fishPrefabs;
+
 		public int fishCount;
 
 		public int cellCount;

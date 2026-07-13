@@ -181,7 +181,7 @@ public class SingleEntityReceptacle : Workable, IRender1000ms
 	{
 		if (this.fetchChore == null && entityTag.IsValid && entityTag != GameTags.Empty)
 		{
-			this.fetchChore = new FetchChore(this.choreType, this.storage, 1f, new HashSet<Tag> { entityTag }, FetchChore.MatchCriteria.MatchID, (additionalRequiredTag.IsValid && additionalRequiredTag != GameTags.Empty) ? additionalRequiredTag : Tag.Invalid, null, null, true, new Action<Chore>(this.OnFetchComplete), delegate(Chore chore)
+			this.fetchChore = new FetchChore(this.choreType, this.storage, FetchChore.GetMinimumFetchAmount(entityTag, 1f), new HashSet<Tag> { entityTag }, FetchChore.MatchCriteria.MatchID, (additionalRequiredTag.IsValid && additionalRequiredTag != GameTags.Empty) ? additionalRequiredTag : Tag.Invalid, null, null, true, new Action<Chore>(this.OnFetchComplete), delegate(Chore chore)
 			{
 				this.UpdateStatusItem();
 			}, delegate(Chore chore)

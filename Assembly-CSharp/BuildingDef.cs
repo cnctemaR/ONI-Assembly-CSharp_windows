@@ -316,14 +316,15 @@ public class BuildingDef : Def, IHasDlcRestrictions
 
 	private bool IsAreaClear(GameObject source_go, int cell, Orientation orientation, ObjectLayer layer, ObjectLayer tile_layer, bool replace_tile, out string fail_reason)
 	{
-		return this.IsAreaClear(source_go, cell, orientation, layer, tile_layer, replace_tile, true, out fail_reason);
+		return this.IsAreaClear(source_go, cell, orientation, layer, tile_layer, replace_tile, true, out fail_reason, true);
 	}
 
-	private bool IsAreaClear(GameObject source_go, int cell, Orientation orientation, ObjectLayer layer, ObjectLayer tile_layer, bool replace_tile, bool restrictToActiveWorld, out string fail_reason)
+	private bool IsAreaClear(GameObject source_go, int cell, Orientation orientation, ObjectLayer layer, ObjectLayer tile_layer, bool replace_tile, bool restrictToActiveWorld, out string fail_reason, bool permitUproots = true)
 	{
 		bool flag = true;
 		fail_reason = null;
 		int i = 0;
+		BuildLocationRule buildLocationRule;
 		while (i < this.PlacementOffsets.Length)
 		{
 			CellOffset rotatedCellOffset = Rotatable.GetRotatedCellOffset(this.PlacementOffsets[i], orientation);
@@ -366,10 +367,14 @@ public class BuildingDef : Def, IHasDlcRestrictions
 					Building component = gameObject2.GetComponent<Building>();
 					if (component != null)
 					{
-						flag3 = component.Def.BuildLocationRule == BuildLocationRule.LogicBridge || component.Def.BuildLocationRule == BuildLocationRule.Conduit || component.Def.BuildLocationRule == BuildLocationRule.WireBridge;
+						buildLocationRule = component.Def.BuildLocationRule;
+						if (buildLocationRule - BuildLocationRule.Conduit <= 2)
+						{
+							flag3 = true;
+						}
 					}
 				}
-				if (!flag3)
+				if (!flag3 && (!permitUproots || !Uprootable.CanUproot(gameObject2)))
 				{
 					if (gameObject2 != null && gameObject2 != source_go && (gameObject == null || gameObject != gameObject2) && (gameObject2.GetComponent<Wire>() == null || this.BuildingComplete.GetComponent<Wire>() == null))
 					{
@@ -457,7 +462,7 @@ public class BuildingDef : Def, IHasDlcRestrictions
 				}
 			}
 		}
-		BuildLocationRule buildLocationRule = this.BuildLocationRule;
+		buildLocationRule = this.BuildLocationRule;
 		switch (buildLocationRule)
 		{
 		case BuildLocationRule.NotInTiles:
@@ -586,6 +591,11 @@ public class BuildingDef : Def, IHasDlcRestrictions
 			{
 				CellOffset rotatedCellOffset = Rotatable.GetRotatedCellOffset(this.PlacementOffsets[i], orientation);
 				int num = Grid.OffsetCell(cell, rotatedCellOffset);
+				GameObject gameObject = Grid.Objects[num, (int)layer];
+				if (Uprootable.CanUproot(gameObject))
+				{
+					Grid.Objects[num, 5] = gameObject;
+				}
 				Grid.Objects[num, (int)layer] = go;
 			}
 		}
@@ -920,7 +930,7 @@ public class BuildingDef : Def, IHasDlcRestrictions
 				return false;
 			}
 		}
-		return this.IsAreaClear(source_go, cell, orientation, this.ObjectLayer, this.TileLayer, replace_tile, restrictToActiveWorld, out fail_reason);
+		return this.IsAreaClear(source_go, cell, orientation, this.ObjectLayer, this.TileLayer, replace_tile, restrictToActiveWorld, out fail_reason, true);
 	}
 
 	public bool IsValidReplaceLocation(Vector3 pos, Orientation orientation, ObjectLayer replace_layer, ObjectLayer obj_layer)

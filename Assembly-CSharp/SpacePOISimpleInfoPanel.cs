@@ -173,6 +173,18 @@ public class SpacePOISimpleInfoPanel : SimpleInfoPanel
 
 	private void RefreshArtifacts(ArtifactPOIConfigurator artifactConfigurator, GameObject selectedTarget, CollapsibleDetailContentPanel spacePOIPanel)
 	{
+		if (artifactConfigurator == null)
+		{
+			if (this.artifactsSpacer != null)
+			{
+				this.artifactsSpacer.SetActive(false);
+			}
+			if (this.artifactRow != null)
+			{
+				this.artifactRow.SetActive(false);
+			}
+			return;
+		}
 		if (this.artifactsSpacer == null)
 		{
 			this.artifactsSpacer = Util.KInstantiateUI(this.simpleInfoRoot.spacerRow, spacePOIPanel.Content.gameObject, true);
@@ -180,6 +192,8 @@ public class SpacePOISimpleInfoPanel : SimpleInfoPanel
 		}
 		this.artifactsSpacer.rectTransform().SetAsLastSibling();
 		this.artifactRow.rectTransform().SetAsLastSibling();
+		this.artifactsSpacer.SetActive(true);
+		this.artifactRow.SetActive(true);
 		ArtifactPOIStates.Instance smi = artifactConfigurator.GetSMI<ArtifactPOIStates.Instance>();
 		smi.configuration.GetArtifactID();
 		HierarchyReferences component = this.artifactRow.GetComponent<HierarchyReferences>();

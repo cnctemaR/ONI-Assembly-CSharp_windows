@@ -701,7 +701,7 @@ public class SpaceTreeBranch : GameStateMachine<SpaceTreeBranch, SpaceTreeBranch
 			return this.GetcurrentGrowthPercentage();
 		}
 
-		public Crop GetGropComponent()
+		public Crop GetCropComponent()
 		{
 			return base.GetComponent<Crop>();
 		}
@@ -714,6 +714,11 @@ public class SpaceTreeBranch : GameStateMachine<SpaceTreeBranch, SpaceTreeBranch
 		public float WildGrowthTime()
 		{
 			return this.maturity.GetMax() / base.smi.wildGrowingRate.Value;
+		}
+
+		public bool IsWildPlanted()
+		{
+			return this.IsTrunkWildPlanted;
 		}
 
 		[MyCmpGet]

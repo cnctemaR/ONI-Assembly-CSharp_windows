@@ -28,6 +28,10 @@ namespace TUNING
 
 		public const float STATERPILLAR_POWER_CHARGE_LOSS_RATE = -0.055555556f;
 
+		public const float HUNT_FAILED_DURATION = 45f;
+
+		public const float EVADED_HUNT_DURATION = 10f;
+
 		public class HITPOINTS
 		{
 			public const float TIER0 = 5f;
@@ -450,9 +454,14 @@ namespace TUNING
 				{ "Bee", 120 },
 				{ "Moo", 130 },
 				{ "Glom", 140 },
-				{ "WoodDeer", 140 },
-				{ "Seal", 150 },
-				{ "IceBelly", 160 }
+				{ "WoodDeer", 150 },
+				{ "Seal", 160 },
+				{ "IceBelly", 170 },
+				{ "Stego", 180 },
+				{ "Butterfly", 190 },
+				{ "Mosquito", 200 },
+				{ "Chameleon", 210 },
+				{ "PrehistoricPacu", 220 }
 			};
 		}
 	}

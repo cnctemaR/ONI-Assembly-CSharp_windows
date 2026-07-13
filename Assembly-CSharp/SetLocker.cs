@@ -91,7 +91,13 @@ public class SetLocker : StateMachineComponent<SetLocker.StatesInstance>, ISides
 		this.chore = new WorkChore<Workable>(Db.Get().ChoreTypes.EmptyStorage, this, null, true, delegate(Chore o)
 		{
 			this.CompleteChore();
-		}, null, null, true, null, false, true, Assets.GetAnim(this.overrideAnim), false, true, true, PriorityScreen.PriorityClass.high, 5, false, true);
+		}, delegate(Chore o)
+		{
+			base.smi.GoTo(base.smi.sm.being_worked);
+		}, delegate(Chore o)
+		{
+			this.OnChoreEnd();
+		}, true, null, false, true, Assets.GetAnim(this.overrideAnim), false, true, true, PriorityScreen.PriorityClass.high, 5, false, true);
 	}
 
 	public void CancelChore(object param = null)
@@ -107,10 +113,26 @@ public class SetLocker : StateMachineComponent<SetLocker.StatesInstance>, ISides
 		this.chore = null;
 	}
 
+	private void OnChoreEnd()
+	{
+		if (this.skipAnim && this.chore != null)
+		{
+			base.smi.GoTo(base.smi.sm.closed);
+		}
+	}
+
 	private void CompleteChore()
 	{
 		this.used = true;
-		base.smi.GoTo(base.smi.sm.open);
+		if (this.skipAnim)
+		{
+			this.DropContents();
+			base.smi.GoTo(base.smi.sm.off);
+		}
+		else
+		{
+			base.smi.GoTo(base.smi.sm.open);
+		}
 		this.chore = null;
 		this.pendingRummage = false;
 		Game.Instance.userMenu.Refresh(base.gameObject);
@@ -186,6 +208,8 @@ public class SetLocker : StateMachineComponent<SetLocker.StatesInstance>, ISides
 
 	public bool dropOnDeconstruct;
 
+	public bool skipAnim;
+
 	[Serialize]
 	private bool pendingRummage;
 
@@ -231,6 +255,7 @@ public class SetLocker : StateMachineComponent<SetLocker.StatesInstance>, ISides
 					}
 				}
 			});
+			this.being_worked.DoNothing();
 			this.open.PlayAnim("working_pre").QueueAnim("working_loop", false, null).QueueAnim("working_pst", false, null)
 				.OnAnimQueueComplete(this.off)
 				.Exit(delegate(SetLocker.StatesInstance smi)
@@ -251,6 +276,8 @@ public class SetLocker : StateMachineComponent<SetLocker.StatesInstance>, ISides
 		}
 
 		public GameStateMachine<SetLocker.States, SetLocker.StatesInstance, SetLocker, object>.State closed;
+
+		public GameStateMachine<SetLocker.States, SetLocker.StatesInstance, SetLocker, object>.State being_worked;
 
 		public GameStateMachine<SetLocker.States, SetLocker.StatesInstance, SetLocker, object>.State open;
 

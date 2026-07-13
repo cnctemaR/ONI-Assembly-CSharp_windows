@@ -44,10 +44,10 @@ public class ScannerModule : GameStateMachine<ScannerModule, ScannerModule.Insta
 			{
 				ClusterFogOfWarManager.Instance smi = SaveGame.Instance.GetSMI<ClusterFogOfWarManager.Instance>();
 				AxialI location = component.Location;
-				smi.RevealLocation(location, base.def.scanRadius);
+				smi.RevealLocation(location, base.def.scanRadius, 2);
 				foreach (ClusterGridEntity clusterGridEntity in ClusterGrid.Instance.GetNotVisibleEntitiesAtAdjacentCell(location))
 				{
-					smi.RevealLocation(clusterGridEntity.Location, 0);
+					smi.RevealLocation(clusterGridEntity.Location, 0, 2);
 				}
 			}
 		}

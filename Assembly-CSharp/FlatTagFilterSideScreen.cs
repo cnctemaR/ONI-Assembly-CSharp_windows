@@ -5,9 +5,15 @@ using UnityEngine.UI;
 
 public class FlatTagFilterSideScreen : SideScreenContent
 {
+	public override int GetSideScreenSortOrder()
+	{
+		return 400;
+	}
+
 	public override bool IsValidForTarget(GameObject target)
 	{
-		return target.GetComponent<FlatTagFilterable>() != null;
+		FlatTagFilterable component = target.GetComponent<FlatTagFilterable>();
+		return component != null && component.currentlyUserAssignable;
 	}
 
 	public override void SetTarget(GameObject target)

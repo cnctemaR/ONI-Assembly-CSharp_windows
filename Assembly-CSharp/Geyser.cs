@@ -14,9 +14,13 @@ public class Geyser : StateMachineComponent<Geyser.StatesInstance>, IGameObjectE
 		return GameClock.Instance.GetTime() + this.timeShift;
 	}
 
-	public void AlterTime(float timeOffset)
+	public void AlterTime(float timeOffset, bool shouldSurviveSaveLoad = false)
 	{
 		this.timeShift = Mathf.Max(timeOffset, -GameClock.Instance.GetTime());
+		if (shouldSurviveSaveLoad)
+		{
+			this.serializedTimeShift = this.timeShift;
+		}
 		float num = this.RemainingEruptTime();
 		float num2 = this.RemainingNonEruptTime();
 		float num3 = this.RemainingActiveTime();
@@ -57,7 +61,7 @@ public class Geyser : StateMachineComponent<Geyser.StatesInstance>, IGameObjectE
 		}
 	}
 
-	public void ShiftTimeTo(Geyser.TimeShiftStep step)
+	public void ShiftTimeTo(Geyser.TimeShiftStep step, bool shouldSurviveSaveLoad = false)
 	{
 		float num = this.RemainingEruptTime();
 		float num2 = this.RemainingNonEruptTime();
@@ -69,19 +73,19 @@ public class Geyser : StateMachineComponent<Geyser.StatesInstance>, IGameObjectE
 		case Geyser.TimeShiftStep.ActiveState:
 		{
 			float num5 = ((num3 > 0f) ? (this.configuration.GetYearOnDuration() - num3) : (yearLength - num4));
-			this.AlterTime(this.timeShift - num5);
+			this.AlterTime(this.timeShift - num5, shouldSurviveSaveLoad);
 			return;
 		}
 		case Geyser.TimeShiftStep.DormantState:
 		{
 			float num6 = ((num3 > 0f) ? num3 : (-(this.configuration.GetYearOffDuration() - num4)));
-			this.AlterTime(this.timeShift + num6);
+			this.AlterTime(this.timeShift + num6, shouldSurviveSaveLoad);
 			return;
 		}
 		case Geyser.TimeShiftStep.NextIteration:
 		{
 			float num7 = ((num > 0f) ? (num + this.configuration.GetOffDuration()) : num2);
-			this.AlterTime(this.timeShift + num7);
+			this.AlterTime(this.timeShift + num7, shouldSurviveSaveLoad);
 			return;
 		}
 		case Geyser.TimeShiftStep.PreviousIteration:
@@ -91,7 +95,7 @@ public class Geyser : StateMachineComponent<Geyser.StatesInstance>, IGameObjectE
 			{
 				num8 -= this.configuration.GetIterationLength();
 			}
-			this.AlterTime(this.timeShift + num8);
+			this.AlterTime(this.timeShift + num8, shouldSurviveSaveLoad);
 			return;
 		}
 		default:
@@ -210,6 +214,7 @@ public class Geyser : StateMachineComponent<Geyser.StatesInstance>, IGameObjectE
 		}
 		this.ApplyConfigurationEmissionValues(this.configuration);
 		this.GenerateName();
+		this.timeShift = this.serializedTimeShift;
 		base.smi.StartSM();
 		Workable component3 = base.GetComponent<Studyable>();
 		if (component3 != null)
@@ -256,6 +261,20 @@ public class Geyser : StateMachineComponent<Geyser.StatesInstance>, IGameObjectE
 		if (this.emitter.IsSimActive)
 		{
 			this.emitter.SetSimActive(true);
+		}
+	}
+
+	public void Unentomb()
+	{
+		OccupyArea component = base.GetComponent<OccupyArea>();
+		int num = Grid.PosToCell(this);
+		foreach (CellOffset cellOffset in component.OccupiedCellsOffsets)
+		{
+			int num2 = Grid.OffsetCell(num, cellOffset);
+			if (Grid.IsSolidCell(num2) && Grid.Element[num2].id != SimHashes.Unobtanium)
+			{
+				SimMessages.Dig(num2, -1, false);
+			}
 		}
 	}
 
@@ -504,6 +523,9 @@ public class Geyser : StateMachineComponent<Geyser.StatesInstance>, IGameObjectE
 	public List<Geyser.GeyserModification> modifications = new List<Geyser.GeyserModification>();
 
 	private Geyser.GeyserModification modifier;
+
+	[Serialize]
+	private float serializedTimeShift;
 
 	private const float PRE_PCT = 0.1f;
 

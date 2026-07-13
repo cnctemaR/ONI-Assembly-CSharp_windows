@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Text;
 using Klei.AI;
 using STRINGS;
 using UnityEngine;
@@ -120,58 +121,63 @@ public class Element : IComparable<Element>
 
 	public string FullDescription(bool addHardnessColor = true)
 	{
-		string text = this.Description();
+		StringBuilder stringBuilder = GlobalStringBuilderPool.Alloc();
+		stringBuilder.Clear();
+		stringBuilder.Append(this.Description());
 		if (this.IsSolid)
 		{
-			text += "\n\n";
-			text += string.Format(ELEMENTS.ELEMENTDESCSOLID, this.GetMaterialCategoryTag().ProperName(), GameUtil.GetFormattedTemperature(this.highTemp, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false), GameUtil.GetHardnessString(this, addHardnessColor));
+			stringBuilder.Append("\n\n");
+			stringBuilder.AppendFormat(ELEMENTS.ELEMENTDESCSOLID, this.GetMaterialCategoryTag().ProperName(), GameUtil.GetFormattedTemperature(this.highTemp, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false), GameUtil.GetHardnessString(this, addHardnessColor));
 		}
 		else if (this.IsLiquid)
 		{
-			text += "\n\n";
-			text += string.Format(ELEMENTS.ELEMENTDESCLIQUID, this.GetMaterialCategoryTag().ProperName(), GameUtil.GetFormattedTemperature(this.lowTemp, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false), GameUtil.GetFormattedTemperature(this.highTemp, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false));
+			stringBuilder.Append("\n\n");
+			stringBuilder.AppendFormat(ELEMENTS.ELEMENTDESCLIQUID, this.GetMaterialCategoryTag().ProperName(), GameUtil.GetFormattedTemperature(this.lowTemp, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false), GameUtil.GetFormattedTemperature(this.highTemp, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false));
 		}
 		else if (!this.IsVacuum)
 		{
-			text += "\n\n";
-			text += string.Format(ELEMENTS.ELEMENTDESCGAS, this.GetMaterialCategoryTag().ProperName(), GameUtil.GetFormattedTemperature(this.lowTemp, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false));
+			stringBuilder.Append("\n\n");
+			stringBuilder.AppendFormat(ELEMENTS.ELEMENTDESCGAS, this.GetMaterialCategoryTag().ProperName(), GameUtil.GetFormattedTemperature(this.lowTemp, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false));
 		}
-		string text2 = ELEMENTS.THERMALPROPERTIES;
-		text2 = text2.Replace("{SPECIFIC_HEAT_CAPACITY}", GameUtil.GetFormattedSHC(this.specificHeatCapacity));
-		text2 = text2.Replace("{THERMAL_CONDUCTIVITY}", GameUtil.GetFormattedThermalConductivity(this.thermalConductivity));
-		text = text + "\n" + text2;
+		StringBuilder stringBuilder2 = GlobalStringBuilderPool.Alloc();
+		stringBuilder2.Append(ELEMENTS.THERMALPROPERTIES);
+		stringBuilder2.Replace("{SPECIFIC_HEAT_CAPACITY}", GameUtil.GetFormattedSHC(this.specificHeatCapacity));
+		stringBuilder2.Replace("{THERMAL_CONDUCTIVITY}", GameUtil.GetFormattedThermalConductivity(this.thermalConductivity));
+		stringBuilder.Append("\n");
+		stringBuilder.Append(stringBuilder2.ToString());
+		GlobalStringBuilderPool.Free(stringBuilder2);
 		if (DlcManager.FeatureRadiationEnabled())
 		{
-			text = text + "\n" + string.Format(ELEMENTS.RADIATIONPROPERTIES, this.radiationAbsorptionFactor, GameUtil.GetFormattedRads(this.radiationPer1000Mass * 1.1f / 600f, GameUtil.TimeSlice.PerCycle));
+			stringBuilder.Append("\n");
+			stringBuilder.AppendFormat(ELEMENTS.RADIATIONPROPERTIES, this.radiationAbsorptionFactor, GameUtil.GetFormattedRads(this.radiationPer1000Mass * 1.1f / 600f, GameUtil.TimeSlice.PerCycle));
 		}
 		if (this.oreTags.Length != 0 && !this.IsVacuum)
 		{
-			text += "\n\n";
-			string text3 = "";
+			stringBuilder.Append("\n\n");
+			StringBuilder stringBuilder3 = GlobalStringBuilderPool.Alloc();
 			for (int i = 0; i < this.oreTags.Length; i++)
 			{
 				Tag tag = new Tag(this.oreTags[i]);
 				if (!GameTags.HiddenElementTags.Contains(tag))
 				{
-					text3 += tag.ProperName();
+					stringBuilder3.Append(tag.ProperName());
 					if (i < this.oreTags.Length - 1)
 					{
-						text3 += ", ";
+						stringBuilder3.Append(", ");
 					}
 				}
 			}
-			text += string.Format(ELEMENTS.ELEMENTPROPERTIES, text3);
+			stringBuilder.AppendFormat(ELEMENTS.ELEMENTPROPERTIES, GlobalStringBuilderPool.ReturnAndFree(stringBuilder3));
 		}
 		if (this.attributeModifiers.Count > 0)
 		{
 			foreach (AttributeModifier attributeModifier in this.attributeModifiers)
 			{
-				string name = Db.Get().BuildingAttributes.Get(attributeModifier.AttributeId).Name;
-				string formattedString = attributeModifier.GetFormattedString();
-				text = text + "\n" + string.Format(DUPLICANTS.MODIFIERS.MODIFIER_FORMAT, name, formattedString);
+				stringBuilder.AppendLine();
+				stringBuilder.AppendFormat(DUPLICANTS.MODIFIERS.MODIFIER_FORMAT, Db.Get().BuildingAttributes.Get(attributeModifier.AttributeId).Name, attributeModifier.GetFormattedString());
 			}
 		}
-		return text;
+		return GlobalStringBuilderPool.ReturnAndFree(stringBuilder);
 	}
 
 	public string Description()
@@ -273,6 +279,8 @@ public class Element : IComparable<Element>
 	public float radiationPer1000Mass;
 
 	public Sim.PhysicsData defaultValues;
+
+	public SimHashes refinedMetalTarget;
 
 	public float toxicity;
 

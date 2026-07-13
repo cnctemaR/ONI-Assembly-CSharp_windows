@@ -123,7 +123,6 @@ namespace ProcGen
 		{
 			if (this.world != null && this.world.defaultsOverrides != null && this.world.defaultsOverrides.startingWorldElements != null)
 			{
-				DebugUtil.LogArgs(new object[] { string.Format("World '{0}' is overriding startingWorldElements", this.world.name) });
 				return this.world.defaultsOverrides.startingWorldElements;
 			}
 			return SettingsCache.defaults.startingWorldElements;

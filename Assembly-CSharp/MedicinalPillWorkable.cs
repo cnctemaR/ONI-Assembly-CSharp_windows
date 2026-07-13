@@ -17,9 +17,9 @@ public class MedicinalPillWorkable : Workable, IConsumableUIItem
 
 	protected override void OnCompleteWork(WorkerBase worker)
 	{
+		Effects component = worker.GetComponent<Effects>();
 		if (!string.IsNullOrEmpty(this.pill.info.effect))
 		{
-			Effects component = worker.GetComponent<Effects>();
 			EffectInstance effectInstance = component.Get(this.pill.info.effect);
 			if (effectInstance != null)
 			{
@@ -38,6 +38,14 @@ public class MedicinalPillWorkable : Workable, IConsumableUIItem
 			{
 				Game.Instance.savedInfo.curedDisease = true;
 				sicknessInstance.Cure();
+			}
+		}
+		foreach (string text2 in this.pill.info.curedEffects)
+		{
+			if (component.HasEffect(text2))
+			{
+				Game.Instance.savedInfo.curedDisease = true;
+				component.Remove(text2);
 			}
 		}
 		base.gameObject.DeleteObject();
@@ -70,6 +78,15 @@ public class MedicinalPillWorkable : Workable, IConsumableUIItem
 		foreach (SicknessInstance sicknessInstance in sicknesses)
 		{
 			if (this.pill.info.curedSicknesses.Contains(sicknessInstance.modifier.Id))
+			{
+				return true;
+			}
+		}
+		consumer.GetComponent<Effects>();
+		for (int i = 0; i < this.pill.info.curedEffects.Count; i++)
+		{
+			string text = this.pill.info.curedEffects[i];
+			if (this.pill.info.curedEffects.Contains(text))
 			{
 				return true;
 			}

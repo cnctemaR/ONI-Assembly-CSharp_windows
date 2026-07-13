@@ -121,9 +121,13 @@ public class LonelyMinion : GameStateMachine<LonelyMinion, LonelyMinion.Instance
 		int num = instance.GetCurrentCount(LonelyMinionConfig.FoodCriteriaId) - 1;
 		if (idleAnim == LonelyMinionConfig.FOOD_IDLE && num >= 0)
 		{
-			KBatchedAnimController component = Assets.GetPrefab(instance.GetSatisfyingItem(LonelyMinionConfig.FoodCriteriaId, global::UnityEngine.Random.Range(0, num))).GetComponent<KBatchedAnimController>();
-			smi.PackageSnapPoint.SwapAnims(component.AnimFiles);
-			smi.PackageSnapPoint.Play("object", KAnim.PlayMode.Loop, 1f, 0f);
+			GameObject prefab = Assets.GetPrefab(instance.GetSatisfyingItem(LonelyMinionConfig.FoodCriteriaId, global::UnityEngine.Random.Range(0, num)));
+			if (prefab != null)
+			{
+				KBatchedAnimController component = prefab.GetComponent<KBatchedAnimController>();
+				smi.PackageSnapPoint.SwapAnims(component.AnimFiles);
+				smi.PackageSnapPoint.Play("object", KAnim.PlayMode.Loop, 1f, 0f);
+			}
 		}
 		if (!(idleAnim == LonelyMinionConfig.FOOD_IDLE) && !(idleAnim == LonelyMinionConfig.DECOR_IDLE) && !(idleAnim == LonelyMinionConfig.POWER_IDLE))
 		{

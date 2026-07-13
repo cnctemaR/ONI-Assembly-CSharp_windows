@@ -12,7 +12,7 @@ public class LaunchInitializer : MonoBehaviour
 
 	public static int UpdateNumber()
 	{
-		return 55;
+		return 56;
 	}
 
 	private void Update()
@@ -85,9 +85,9 @@ public class LaunchInitializer : MonoBehaviour
 
 	private const string PREFIX = "U";
 
-	private const int UPDATE_NUMBER = 55;
+	private const int UPDATE_NUMBER = 56;
 
-	private static readonly string BUILD_PREFIX = "U" + 55.ToString();
+	private static readonly string BUILD_PREFIX = "U" + 56.ToString();
 
 	public GameObject[] SpawnPrefabs;
 

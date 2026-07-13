@@ -3964,6 +3964,20 @@ namespace STRINGS
 				public static LocString TOOLTIP = "This building has a partially obstructed view of space\n\nTo properly function, this building requires an unblocked view of space";
 			}
 
+			public class MISSILELAUNCHER_LONGRANGECOOLDOWN
+			{
+				public static LocString NAME = "Reloading";
+
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"This building recently fired an ",
+					UI.PRE_KEYWORD,
+					"Intracosmic Blastshot",
+					UI.PST_KEYWORD,
+					" and needs a moment to reload"
+				});
+			}
+
 			public class COMPLEXFABRICATOR
 			{
 				public class COOKING

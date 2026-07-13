@@ -1,4 +1,5 @@
 ﻿using System;
+using STRINGS;
 using TUNING;
 using UnityEngine;
 
@@ -17,12 +18,12 @@ public class BatteryModuleConfig : IBuildingConfig
 		string text2 = "rocket_battery_pack_kanim";
 		int num3 = 1000;
 		float num4 = 30f;
-		float[] hollow_TIER = BUILDINGS.ROCKETRY_MASS_KG.HOLLOW_TIER2;
+		float[] hollow_TIER = global::TUNING.BUILDINGS.ROCKETRY_MASS_KG.HOLLOW_TIER2;
 		string[] raw_METALS = MATERIALS.RAW_METALS;
 		float num5 = 9999f;
 		BuildLocationRule buildLocationRule = BuildLocationRule.Anywhere;
 		EffectorValues tier = NOISE_POLLUTION.NOISY.TIER2;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, hollow_TIER, raw_METALS, num5, buildLocationRule, BUILDINGS.DECOR.NONE, tier, 0.2f);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, hollow_TIER, raw_METALS, num5, buildLocationRule, global::TUNING.BUILDINGS.DECOR.NONE, tier, 0.2f);
 		BuildingTemplates.CreateRocketBuildingDef(buildingDef);
 		buildingDef.DefaultAnimState = "grounded";
 		buildingDef.AttachmentSlotTag = GameTags.Rocket;
@@ -37,6 +38,7 @@ public class BatteryModuleConfig : IBuildingConfig
 		buildingDef.UseWhitePowerOutputConnectorColour = true;
 		buildingDef.CanMove = true;
 		buildingDef.Cancellable = false;
+		buildingDef.AddSearchTerms(SEARCH_TERMS.BATTERY);
 		return buildingDef;
 	}
 

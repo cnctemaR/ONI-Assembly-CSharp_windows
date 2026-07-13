@@ -663,7 +663,8 @@ public class BuildMenu : KScreen
 				new BuildMenu.BuildingInfo("Deepfryer", global::Action.BuildMenuKeyG),
 				new BuildMenu.BuildingInfo("SpiceGrinder", global::Action.BuildMenuKeyG),
 				new BuildMenu.BuildingInfo("GourmetCookingStation", global::Action.BuildMenuKeyS),
-				new BuildMenu.BuildingInfo("EggCracker", global::Action.BuildMenuKeyE)
+				new BuildMenu.BuildingInfo("EggCracker", global::Action.BuildMenuKeyE),
+				new BuildMenu.BuildingInfo("Smoker", global::Action.BuildMenuKeyM)
 			}),
 			new BuildMenu.DisplayInfo(BuildMenu.CacheHashString("Ranching"), "icon_category_food", global::Action.BuildCategoryRanching, KKeyCode.R, new List<BuildMenu.BuildingInfo>
 			{
@@ -714,6 +715,8 @@ public class BuildMenu : KScreen
 			}),
 			new BuildMenu.DisplayInfo(BuildMenu.CacheHashString("Decor"), "icon_category_furniture", global::Action.BuildCategoryDecor, KKeyCode.D, new List<BuildMenu.BuildingInfo>
 			{
+				new BuildMenu.BuildingInfo("CeilingFossilSculpture", global::Action.BuildMenuKeyL),
+				new BuildMenu.BuildingInfo("FossilSculpture", global::Action.BuildMenuKeyO),
 				new BuildMenu.BuildingInfo("FlowerVase", global::Action.BuildMenuKeyF),
 				new BuildMenu.BuildingInfo("Canvas", global::Action.BuildMenuKeyC),
 				new BuildMenu.BuildingInfo("CanvasWide", global::Action.BuildMenuKeyW),
@@ -759,6 +762,7 @@ public class BuildMenu : KScreen
 				new BuildMenu.BuildingInfo("ManualGenerator", global::Action.BuildMenuKeyG),
 				new BuildMenu.BuildingInfo("Generator", global::Action.BuildMenuKeyC),
 				new BuildMenu.BuildingInfo("WoodGasGenerator", global::Action.BuildMenuKeyW),
+				new BuildMenu.BuildingInfo("PeatGenerator", global::Action.BuildMenuKeyP),
 				new BuildMenu.BuildingInfo("NuclearReactor", global::Action.BuildMenuKeyN),
 				new BuildMenu.BuildingInfo("HydrogenGenerator", global::Action.BuildMenuKeyD),
 				new BuildMenu.BuildingInfo("MethaneGenerator", global::Action.BuildMenuKeyA),
@@ -869,6 +873,7 @@ public class BuildMenu : KScreen
 				new BuildMenu.BuildingInfo("MetalRefinery", global::Action.BuildMenuKeyT),
 				new BuildMenu.BuildingInfo("GlassForge", global::Action.BuildMenuKeyF),
 				new BuildMenu.BuildingInfo("OxyliteRefinery", global::Action.BuildMenuKeyO),
+				new BuildMenu.BuildingInfo("ChemicalRefinery", global::Action.BuildMenuKeyN),
 				new BuildMenu.BuildingInfo("SupermaterialRefinery", global::Action.BuildMenuKeyS),
 				new BuildMenu.BuildingInfo("UraniumCentrifuge", global::Action.BuildMenuKeyU)
 			}),

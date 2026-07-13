@@ -413,6 +413,10 @@ public class StructureTemperatureComponents : KGameObjectSplitComponentManager<S
 		{
 			return;
 		}
+		if (primaryElement.Element == null)
+		{
+			primaryElement.ElementID = ElementLoader.GetElementID(GameTags.IronOre);
+		}
 		if (primaryElement.Element.IsTemperatureInsulated)
 		{
 			return;

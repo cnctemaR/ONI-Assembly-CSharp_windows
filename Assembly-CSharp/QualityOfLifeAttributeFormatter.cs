@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text;
 using Klei.AI;
 using STRINGS;
 
@@ -17,17 +18,21 @@ public class QualityOfLifeAttributeFormatter : StandardAttributeFormatter
 
 	public override string GetTooltip(Klei.AI.Attribute master, AttributeInstance instance)
 	{
-		string text = base.GetTooltip(master, instance);
+		StringBuilder stringBuilder = GlobalStringBuilderPool.Alloc();
+		stringBuilder.Append(base.GetTooltip(master, instance));
 		AttributeInstance attributeInstance = Db.Get().Attributes.QualityOfLifeExpectation.Lookup(instance.gameObject);
-		text = text + "\n\n" + string.Format(DUPLICANTS.ATTRIBUTES.QUALITYOFLIFE.TOOLTIP_EXPECTATION, this.GetFormattedValue(attributeInstance.GetTotalDisplayValue(), GameUtil.TimeSlice.None));
+		stringBuilder.Append("\n\n");
+		stringBuilder.AppendFormat(DUPLICANTS.ATTRIBUTES.QUALITYOFLIFE.TOOLTIP_EXPECTATION, this.GetFormattedValue(attributeInstance.GetTotalDisplayValue(), GameUtil.TimeSlice.None));
 		if (instance.GetTotalDisplayValue() - attributeInstance.GetTotalDisplayValue() >= 0f)
 		{
-			text = text + "\n\n" + DUPLICANTS.ATTRIBUTES.QUALITYOFLIFE.TOOLTIP_EXPECTATION_OVER;
+			stringBuilder.Append("\n\n");
+			stringBuilder.Append(DUPLICANTS.ATTRIBUTES.QUALITYOFLIFE.TOOLTIP_EXPECTATION_OVER);
 		}
 		else
 		{
-			text = text + "\n\n" + DUPLICANTS.ATTRIBUTES.QUALITYOFLIFE.TOOLTIP_EXPECTATION_UNDER;
+			stringBuilder.Append("\n\n");
+			stringBuilder.Append(DUPLICANTS.ATTRIBUTES.QUALITYOFLIFE.TOOLTIP_EXPECTATION_UNDER);
 		}
-		return text;
+		return GlobalStringBuilderPool.ReturnAndFree(stringBuilder);
 	}
 }

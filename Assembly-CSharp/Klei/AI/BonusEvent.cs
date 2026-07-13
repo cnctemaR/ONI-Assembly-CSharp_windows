@@ -9,7 +9,7 @@ namespace Klei.AI
 	public class BonusEvent : GameplayEvent<BonusEvent.StatesInstance>
 	{
 		public BonusEvent(string id, string overrideEffect = null, int numTimesAllowed = 1, bool preSelectMinion = false, int priority = 0)
-			: base(id, priority, 0)
+			: base(id, priority, 0, null, null)
 		{
 			this.title = Strings.Get("STRINGS.GAMEPLAY_EVENTS.BONUS." + id.ToUpper() + ".NAME");
 			this.description = Strings.Get("STRINGS.GAMEPLAY_EVENTS.BONUS." + id.ToUpper() + ".DESCRIPTION");

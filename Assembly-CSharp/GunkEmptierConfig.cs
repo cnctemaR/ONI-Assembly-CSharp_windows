@@ -39,6 +39,7 @@ public class GunkEmptierConfig : IBuildingConfig
 
 	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
+		go.GetComponent<KPrefabID>().AddTag(GameTags.CodexCategories.BionicBuilding, false);
 		Prioritizable.AddRef(go);
 		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.FlushToiletType, false);
 		Storage storage = go.AddComponent<Storage>();

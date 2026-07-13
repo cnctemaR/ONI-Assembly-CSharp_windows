@@ -121,52 +121,41 @@ public class RoomProber : ISim1000ms
 			}
 			this.cavityInfos.Free(handle3);
 		}
-		this.RebuildDirtyCavities(this.visitedCells);
+		this.RebuildDirtyCavities();
 		this.releasedIDs.Clear();
 		this.visitedCells.Clear();
 		this.solidChanges.Clear();
 		this.floodFillSet.Clear();
 	}
 
-	private void RebuildDirtyCavities(ICollection<int> visited_cells)
+	private void RebuildDirtyCavities()
 	{
 		int maxRoomSize = TuningData<RoomProber.Tuning>.Get().maxRoomSize;
-		foreach (int num in visited_cells)
+		HashSetPool<RoomProber.BuildingId, RoomProber>.PooledHashSet pooledHashSet = HashSetPool<RoomProber.BuildingId, RoomProber>.Allocate();
+		foreach (int num in this.visitedCells)
 		{
 			HandleVector<int>.Handle handle = this.CellCavityID[num];
 			if (handle.IsValid())
 			{
 				CavityInfo data = this.cavityInfos.GetData(handle);
-				if (0 < data.numCells && data.numCells <= maxRoomSize)
+				if (data.numCells > 0 && data.numCells <= maxRoomSize)
 				{
 					GameObject gameObject = Grid.Objects[num, 1];
-					if (gameObject != null)
+					if (!(gameObject == null))
 					{
 						KPrefabID component = gameObject.GetComponent<KPrefabID>();
-						bool flag = false;
-						foreach (KPrefabID kprefabID in data.buildings)
+						RoomProber.BuildingId buildingId = new RoomProber.BuildingId
 						{
-							if (component.InstanceID == kprefabID.InstanceID)
-							{
-								flag = true;
-								break;
-							}
-						}
-						foreach (KPrefabID kprefabID2 in data.plants)
-						{
-							if (component.InstanceID == kprefabID2.InstanceID)
-							{
-								flag = true;
-								break;
-							}
-						}
-						if (!flag)
+							prefab = component.GetHashCode(),
+							instance = component.InstanceID
+						};
+						if (pooledHashSet.Add(buildingId))
 						{
 							if (component.HasTag(GameTags.RoomProberBuilding))
 							{
 								data.AddBuilding(component);
 							}
-							else if (component.HasTag(GameTags.Plant) && !component.HasTag(GameTags.PlantBranch))
+							else if (component.HasTag(GameTags.Plant))
 							{
 								data.AddPlants(component);
 							}
@@ -175,7 +164,7 @@ public class RoomProber : ISim1000ms
 				}
 			}
 		}
-		visited_cells.Clear();
+		pooledHashSet.Recycle();
 	}
 
 	public void Sim1000ms(float dt)
@@ -487,5 +476,12 @@ public class RoomProber : ISim1000ms
 		private int maxX;
 
 		private int maxY;
+	}
+
+	private struct BuildingId
+	{
+		public int prefab;
+
+		public int instance;
 	}
 }

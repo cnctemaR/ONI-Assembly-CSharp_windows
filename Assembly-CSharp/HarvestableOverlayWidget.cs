@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using Klei.AI;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -25,7 +24,7 @@ public class HarvestableOverlayWidget : KMonoBehaviour
 			GameObject gameObject = Util.KInstantiateUI(this.horizontal_container_prefab, this.vertical_container, false);
 			this.horizontal_containers[i] = gameObject;
 		}
-		for (int j = 0; j < 13; j++)
+		for (int j = 0; j < 14; j++)
 		{
 			if (this.condition_sprites.ContainsKey((WiltCondition.Condition)j))
 			{
@@ -39,10 +38,9 @@ public class HarvestableOverlayWidget : KMonoBehaviour
 	public void Refresh(HarvestDesignatable target_harvestable)
 	{
 		Image image = this.bar.GetComponent<HierarchyReferences>().GetReference("Fill") as Image;
-		AmountInstance amountInstance = Db.Get().Amounts.Maturity.Lookup(target_harvestable);
-		if (amountInstance != null)
+		if (target_harvestable.growingStateManager != null)
 		{
-			float num = amountInstance.value / amountInstance.GetMax();
+			float num = target_harvestable.growingStateManager.PercentGrown();
 			image.rectTransform.offsetMin = new Vector2(image.rectTransform.offsetMin.x, 3f);
 			if (this.bar.activeSelf != !target_harvestable.CanBeHarvested())
 			{
@@ -136,7 +134,7 @@ public class HarvestableOverlayWidget : KMonoBehaviour
 	[SerializeField]
 	private GameObject horizontal_container_prefab;
 
-	private GameObject[] horizontal_containers = new GameObject[6];
+	private GameObject[] horizontal_containers = new GameObject[7];
 
 	[SerializeField]
 	private GameObject icon_gameobject_prefab;

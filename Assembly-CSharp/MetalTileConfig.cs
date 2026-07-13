@@ -37,6 +37,7 @@ public class MetalTileConfig : IBuildingConfig
 		buildingDef.DecorPlaceBlockTileInfo = Assets.GetBlockTileDecorInfo("tiles_metal_tops_decor_place_info");
 		buildingDef.ConstructionOffsetFilter = BuildingDef.ConstructionOffsetFilter_OneDown;
 		buildingDef.AddSearchTerms(SEARCH_TERMS.TILE);
+		buildingDef.AddSearchTerms(SEARCH_TERMS.METAL);
 		return buildingDef;
 	}
 

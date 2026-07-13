@@ -367,6 +367,7 @@ public class DebugBaseTemplateButton : KScreen
 		this.GetEntities<Geyser>(rootX, rootY, ref list4, ref list5, ref hashSet);
 		this.GetEntities<OccupyArea>(rootX, rootY, ref list4, ref list5, ref hashSet);
 		this.GetEntities<FogOfWarMask>(rootX, rootY, ref list4, ref list5, ref hashSet);
+		list5.RemoveAll((Prefab x) => Assets.GetPrefab(x.id).HasTag(GameTags.ExcludeFromTemplate));
 		TemplateContainer templateContainer = new TemplateContainer();
 		templateContainer.Init(list, list2, list3, list4, list5);
 		return templateContainer;

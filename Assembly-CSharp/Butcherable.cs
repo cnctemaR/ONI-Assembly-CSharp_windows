@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using STRINGS;
 using UnityEngine;
 
@@ -6,6 +7,22 @@ using UnityEngine;
 public class Butcherable : Workable, ISaveLoadable
 {
 	public void SetDrops(string[] drops)
+	{
+		Dictionary<string, float> dictionary = new Dictionary<string, float>();
+		for (int i = 0; i < drops.Length; i++)
+		{
+			if (!dictionary.ContainsKey(drops[i]))
+			{
+				dictionary.Add(drops[i], 0f);
+			}
+			Dictionary<string, float> dictionary2 = dictionary;
+			string text = drops[i];
+			dictionary2[text] += 1f;
+		}
+		this.SetDrops(dictionary);
+	}
+
+	public void SetDrops(Dictionary<string, float> drops)
 	{
 		this.drops = drops;
 	}
@@ -80,19 +97,22 @@ public class Butcherable : Workable, ISaveLoadable
 		this.OnButcherComplete();
 	}
 
-	public GameObject[] CreateDrops()
+	public GameObject[] CreateDrops(float multiplier = 1f)
 	{
-		GameObject[] array = new GameObject[this.drops.Length];
-		for (int i = 0; i < this.drops.Length; i++)
+		GameObject[] array = new GameObject[this.drops.Count];
+		int num = 0;
+		foreach (KeyValuePair<string, float> keyValuePair in this.drops)
 		{
-			GameObject gameObject = Scenario.SpawnPrefab(this.GetDropSpawnLocation(), 0, 0, this.drops[i], Grid.SceneLayer.Ore);
+			GameObject gameObject = Scenario.SpawnPrefab(this.GetDropSpawnLocation(), 0, 0, keyValuePair.Key, Grid.SceneLayer.Ore);
 			gameObject.SetActive(true);
+			gameObject.GetComponent<PrimaryElement>().Mass = gameObject.GetComponent<PrimaryElement>().Mass * multiplier * keyValuePair.Value;
 			Edible component = gameObject.GetComponent<Edible>();
 			if (component)
 			{
 				ReportManager.Instance.ReportValue(ReportManager.ReportType.CaloriesCreated, component.Calories, StringFormatter.Replace(UI.ENDOFDAYREPORT.NOTES.BUTCHERED, "{0}", gameObject.GetProperName()), UI.ENDOFDAYREPORT.NOTES.BUTCHERED_CONTEXT);
 			}
-			array[i] = gameObject;
+			array[num] = gameObject;
+			num++;
 		}
 		return array;
 	}
@@ -110,7 +130,7 @@ public class Butcherable : Workable, ISaveLoadable
 		}
 		Pickupable component2 = base.GetComponent<Pickupable>();
 		Storage storage = ((component2 != null) ? component2.storage : null);
-		GameObject[] array = this.CreateDrops();
+		GameObject[] array = this.CreateDrops(1f);
 		if (array != null)
 		{
 			for (int i = 0; i < array.Length; i++)
@@ -149,7 +169,7 @@ public class Butcherable : Workable, ISaveLoadable
 
 	private bool butchered;
 
-	public string[] drops;
+	public Dictionary<string, float> drops;
 
 	private Chore chore;
 

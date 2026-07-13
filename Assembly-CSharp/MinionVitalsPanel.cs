@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Text;
 using Klei.AI;
 using STRINGS;
 using UnityEngine;
@@ -100,6 +101,46 @@ public class MinionVitalsPanel : CollapsibleDetailContentPanel
 			}
 			return MinionVitalsPanel.CheckboxLineDisplayType.Hidden;
 		}, (GameObject go) => this.check_radiation(go), (GameObject go) => this.GetRadiationTooltip(go));
+		this.AddCheckboxLine(null, this.conditionsContainerNormal, (GameObject go) => this.GetEntityConsumptionLabel(go), delegate(GameObject go)
+		{
+			if (go.GetComponent<IPlantConsumeEntities>() != null)
+			{
+				return MinionVitalsPanel.CheckboxLineDisplayType.Normal;
+			}
+			return MinionVitalsPanel.CheckboxLineDisplayType.Hidden;
+		}, (GameObject go) => this.check_entity_consumed(go), (GameObject go) => this.GetEntityConsumedTooltip(go));
+		this.AddCheckboxLine(null, this.conditionsContainerNormal, (GameObject go) => this.GetPollinationLabel(go), delegate(GameObject go)
+		{
+			if (go.GetSMI<PollinationMonitor.StatesInstance>() == null)
+			{
+				return MinionVitalsPanel.CheckboxLineDisplayType.Hidden;
+			}
+			return MinionVitalsPanel.CheckboxLineDisplayType.Normal;
+		}, (GameObject go) => go.GetComponent<WiltCondition>().IsConditionSatisifed(WiltCondition.Condition.Pollination), (GameObject go) => this.GetPollinationTooltip(go));
+	}
+
+	public string UnpollinatedTooltip
+	{
+		get
+		{
+			if (string.IsNullOrEmpty(this.unpollinatedTooltip))
+			{
+				StringBuilder stringBuilder = GlobalStringBuilderPool.Alloc();
+				DictionaryPool<Tag, GameObject, MinionVitalsPanel>.PooledDictionary pooledDictionary = DictionaryPool<Tag, GameObject, MinionVitalsPanel>.Allocate();
+				CodexEntryGenerator.CollectCritterTypes(pooledDictionary);
+				foreach (KeyValuePair<Tag, GameObject> keyValuePair in pooledDictionary)
+				{
+					KPrefabID component = keyValuePair.Value.GetComponent<KPrefabID>();
+					if (component != null && component.HasTag(GameTags.Creatures.Pollinator))
+					{
+						stringBuilder.AppendFormat("\n{0}{1}", "    • ", keyValuePair.Value.GetProperName());
+					}
+				}
+				pooledDictionary.Recycle();
+				this.unpollinatedTooltip = string.Format(UI.TOOLTIPS.VITALS_CHECKBOX_UNPOLLINATED, GlobalStringBuilderPool.ReturnAndFree(stringBuilder));
+			}
+			return this.unpollinatedTooltip;
+		}
 	}
 
 	protected override void OnPrefabInit()
@@ -346,7 +387,7 @@ public class MinionVitalsPanel : CollapsibleDetailContentPanel
 				reference3.text = string.Format(UI.VITALSSCREEN.CONDITIONS_GROWING.WILD.BASE, GameUtil.GetFormattedCycles(manageGrowingStates.WildGrowthTime(), "F1", false));
 				reference3.GetComponent<ToolTip>().SetSimpleTooltip(string.Format(UI.VITALSSCREEN.CONDITIONS_GROWING.WILD.TOOLTIP, GameUtil.GetFormattedCycles(manageGrowingStates.WildGrowthTime(), "F1", false)));
 				LocText reference4 = this.conditionsContainerAdditional.GetComponent<HierarchyReferences>().GetReference<LocText>("Label");
-				reference4.color = (selectedEntity.GetComponent<ReceptacleMonitor>().Replanted ? Color.black : Color.grey);
+				reference4.color = (manageGrowingStates.IsWildPlanted() ? Color.grey : Color.black);
 				reference4.text = "";
 				reference4.text = (flag4 ? string.Format(UI.VITALSSCREEN.CONDITIONS_GROWING.ADDITIONAL_DOMESTIC.BASE, GameUtil.GetFormattedCycles(manageGrowingStates.DomesticGrowthTime(), "F1", false)) : string.Format(UI.VITALSSCREEN.CONDITIONS_GROWING.DOMESTIC.BASE, GameUtil.GetFormattedCycles(manageGrowingStates.DomesticGrowthTime(), "F1", false)));
 				reference4.GetComponent<ToolTip>().SetSimpleTooltip(string.Format(UI.VITALSSCREEN.CONDITIONS_GROWING.ADDITIONAL_DOMESTIC.TOOLTIP, GameUtil.GetFormattedCycles(manageGrowingStates.DomesticGrowthTime(), "F1", false)));
@@ -454,6 +495,22 @@ public class MinionVitalsPanel : CollapsibleDetailContentPanel
 		return UI.TOOLTIPS.VITALS_CHECKBOX_RECEPTACLE_INOPERATIONAL;
 	}
 
+	private string GetEntityConsumedTooltip(GameObject go)
+	{
+		IPlantConsumeEntities component = go.GetComponent<IPlantConsumeEntities>();
+		component.AreEntitiesConsumptionRequirementsSatisfied();
+		return GameUtil.SafeStringFormat(UI.TOOLTIPS.VITALS_CHECKBOX_ENTITY_CONSUMER_REQUIREMENTS, new object[] { component.GetConsumableEntitiesCategoryName() });
+	}
+
+	private string GetPollinationTooltip(GameObject go)
+	{
+		if (!go.GetComponent<WiltCondition>().IsConditionSatisifed(WiltCondition.Condition.Pollination))
+		{
+			return this.UnpollinatedTooltip;
+		}
+		return UI.TOOLTIPS.VITALS_CHECKBOX_POLLINATED;
+	}
+
 	private string GetAtmosphereTooltip(GameObject go)
 	{
 		PressureVulnerable component = go.GetComponent<PressureVulnerable>();
@@ -538,6 +595,17 @@ public class MinionVitalsPanel : CollapsibleDetailContentPanel
 		return illuminationTracker.GetIlluminationUILabel();
 	}
 
+	private string GetEntityConsumptionLabel(GameObject go)
+	{
+		IPlantConsumeEntities component = go.GetComponent<IPlantConsumeEntities>();
+		return component.GetRequirementText() + "\n    • " + (this.check_entity_consumed(go) ? GameUtil.SafeStringFormat(UI.TOOLTIPS.VITALS_CHECKBOX_ENTITY_CONSUMER_SATISFIED, new object[] { component.GetConsumedEntityName() }) : UI.TOOLTIPS.VITALS_CHECKBOX_ENTITY_CONSUMER_UNSATISFIED);
+	}
+
+	private string GetPollinationLabel(GameObject go)
+	{
+		return UI.VITALSSCREEN.POLLINATION;
+	}
+
 	private string GetAtmosphereLabel(GameObject go)
 	{
 		PressureVulnerable component = go.GetComponent<PressureVulnerable>();
@@ -617,6 +685,11 @@ public class MinionVitalsPanel : CollapsibleDetailContentPanel
 		return !(component != null) || component.testAreaElementSafe;
 	}
 
+	private bool check_entity_consumed(GameObject go)
+	{
+		return go.GetComponent<IPlantConsumeEntities>().AreEntitiesConsumptionRequirementsSatisfied();
+	}
+
 	public GameObject LineItemPrefab;
 
 	public GameObject CheckboxLinePrefab;
@@ -632,6 +705,8 @@ public class MinionVitalsPanel : CollapsibleDetailContentPanel
 	public Transform conditionsContainerNormal;
 
 	public Transform conditionsContainerAdditional;
+
+	private string unpollinatedTooltip;
 
 	[DebuggerDisplay("{amount.Name}")]
 	public struct AmountLine

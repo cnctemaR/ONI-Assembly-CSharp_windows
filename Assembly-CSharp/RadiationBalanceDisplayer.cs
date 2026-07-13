@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text;
 using Klei.AI;
 using STRINGS;
 using UnityEngine;
@@ -18,21 +19,21 @@ public class RadiationBalanceDisplayer : StandardAmountDisplayer
 
 	public override string GetTooltip(Amount master, AmountInstance instance)
 	{
-		string text = "";
+		StringBuilder stringBuilder = GlobalStringBuilderPool.Alloc();
 		if (instance.gameObject.GetSMI<RadiationMonitor.Instance>() != null)
 		{
 			int num = Grid.PosToCell(instance.gameObject);
 			if (Grid.IsValidCell(num))
 			{
-				text += DUPLICANTS.STATS.RADIATIONBALANCE.TOOLTIP_CURRENT_BALANCE;
+				stringBuilder.Append(DUPLICANTS.STATS.RADIATIONBALANCE.TOOLTIP_CURRENT_BALANCE);
 			}
-			text += "\n\n";
+			stringBuilder.Append("\n\n");
 			float num2 = Mathf.Clamp01(1f - Db.Get().Attributes.RadiationResistance.Lookup(instance.gameObject).GetTotalValue());
-			text += string.Format(DUPLICANTS.STATS.RADIATIONBALANCE.CURRENT_EXPOSURE, Mathf.RoundToInt(Grid.Radiation[num] * num2));
-			text += "\n";
-			text += string.Format(DUPLICANTS.STATS.RADIATIONBALANCE.CURRENT_REJUVENATION, Mathf.RoundToInt(Db.Get().Attributes.RadiationRecovery.Lookup(instance.gameObject).GetTotalValue() * 600f));
+			stringBuilder.AppendFormat(DUPLICANTS.STATS.RADIATIONBALANCE.CURRENT_EXPOSURE, Mathf.RoundToInt(Grid.Radiation[num] * num2));
+			stringBuilder.Append("\n");
+			stringBuilder.AppendFormat(DUPLICANTS.STATS.RADIATIONBALANCE.CURRENT_REJUVENATION, Mathf.RoundToInt(Db.Get().Attributes.RadiationRecovery.Lookup(instance.gameObject).GetTotalValue() * 600f));
 		}
-		return text;
+		return GlobalStringBuilderPool.ReturnAndFree(stringBuilder);
 	}
 
 	public class RadiationAttributeFormatter : StandardAttributeFormatter

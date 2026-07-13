@@ -104,7 +104,10 @@ namespace Database
 					FOOD.FOOD_TYPES.DEEP_FRIED_SHELLFISH.Id,
 					FOOD.FOOD_TYPES.COOKED_MEAT.Id,
 					FOOD.FOOD_TYPES.SURF_AND_TURF.Id,
-					FOOD.FOOD_TYPES.BURGER.Id
+					FOOD.FOOD_TYPES.BURGER.Id,
+					FOOD.FOOD_TYPES.JAWBOFILLET.Id,
+					FOOD.FOOD_TYPES.SMOKED_FISH.Id,
+					FOOD.FOOD_TYPES.SMOKED_DINOSAURMEAT.Id
 				})
 			}, "", "", "", "", null, default(EventReference), "Carnivore", null, null, null, null));
 			this.NoFarmTilesAndKCal = base.Add(new ColonyAchievement("NoFarmTilesAndKCal", "NO_PLANTERBOX", COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.NO_PLANTERBOX, COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.NO_PLANTERBOX_DESCRIPTION, false, new List<ColonyAchievementRequirement>
@@ -114,7 +117,7 @@ namespace Database
 			}, "", "", "", "", null, default(EventReference), "Locavore", null, null, null, null));
 			this.Generate240000kJClean = base.Add(new ColonyAchievement("Generate240000kJClean", "CLEAN_ENERGY", COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.CLEAN_ENERGY, COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.CLEAN_ENERGY_DESCRIPTION, false, new List<ColonyAchievementRequirement>
 			{
-				new ProduceXEngeryWithoutUsingYList(240000f, new List<Tag> { "MethaneGenerator", "PetroleumGenerator", "WoodGasGenerator", "Generator" })
+				new ProduceXEngeryWithoutUsingYList(240000f, new List<Tag> { "MethaneGenerator", "PetroleumGenerator", "WoodGasGenerator", "Generator", "PeatGenerator" })
 			}, "", "", "", "", null, default(EventReference), "sustainably_sustaining", null, null, null, null));
 			this.BuildOutsideStartBiome = base.Add(new ColonyAchievement("BuildOutsideStartBiome", "BUILD_OUTSIDE_BIOME", COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.BUILD_OUTSIDE_BIOME, COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.BUILD_OUTSIDE_BIOME_DESCRIPTION, false, new List<ColonyAchievementRequirement>
 			{
@@ -145,7 +148,7 @@ namespace Database
 			}, "", "", "", "", null, default(EventReference), "enter_oil_biome", null, null, null, null));
 			this.EatCookedFood = base.Add(new ColonyAchievement("EatCookedFood", "COOKED_FOOD", COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.COOKED_FOOD, COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.COOKED_FOOD_DESCRIPTION, false, new List<ColonyAchievementRequirement>
 			{
-				new EatXKCalProducedByY(1, new List<Tag> { "GourmetCookingStation", "CookingStation" })
+				new EatXKCalProducedByY(1, new List<Tag> { "GourmetCookingStation", "CookingStation", "Deepfryer", "Smoker" })
 			}, "", "", "", "", null, default(EventReference), "its_not_raw", null, null, null, null));
 			this.BasicPumping = base.Add(new ColonyAchievement("BasicPumping", "BASIC_PUMPING", COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.BASIC_PUMPING, COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.BASIC_PUMPING_DESCRIPTION, false, new List<ColonyAchievementRequirement>
 			{
@@ -382,6 +385,35 @@ namespace Database
 				array = DlcManager.DLC3;
 				this.AllTheCircuits = base.Add(new ColonyAchievement(text81, text82, text83, text84, flag11, list11, text85, text86, text87, text88, action11, default(EventReference), "all_the_circuits", array, null, "DLC3_ID", null));
 			}
+			if (DlcManager.IsContentSubscribed("DLC4_ID"))
+			{
+				string text89 = "AsteroidDestroyed";
+				string text90 = "ASTEROID_DESTROYED";
+				string text91 = COLONY_ACHIEVEMENTS.ASTEROID_DESTROYED.NAME;
+				string text92 = COLONY_ACHIEVEMENTS.ASTEROID_DESTROYED.DESCRIPTION;
+				bool flag12 = true;
+				List<ColonyAchievementRequirement> list12 = new List<ColonyAchievementRequirement>();
+				list12.Add(new DefeatPrehistoricAsteroid());
+				this.AsteroidDestroyed = base.Add(new ColonyAchievement(text89, text90, text91, text92, flag12, list12, COLONY_ACHIEVEMENTS.ASTEROID_DESTROYED.MESSAGE_TITLE, COLONY_ACHIEVEMENTS.ASTEROID_DESTROYED.MESSAGE_BODY, "DLC4/LargeImpactorDefeatedVideo", "DLC4/LargeImpactorSpacePOIVideo", delegate(KMonoBehaviour a)
+				{
+					LargeImpactorDestroyedSequence.Start();
+				}, AudioMixerSnapshots.Get().VictoryNISGenericSnapshot, "blast_line_of_defense", DlcManager.DLC4, null, "DLC4_ID", "DemoliorImperative"));
+				string text93 = "AsteroidSurvived";
+				string text94 = "ASTEROID_SURVIVED";
+				string text95 = COLONY_ACHIEVEMENTS.ASTEROID_SURVIVED.NAME;
+				string text96 = COLONY_ACHIEVEMENTS.ASTEROID_SURVIVED.DESCRIPTION;
+				bool flag13 = false;
+				List<ColonyAchievementRequirement> list13 = new List<ColonyAchievementRequirement>();
+				list13.Add(new SurvivedPrehistoricAsteroidImpact(100));
+				list13.Add(new NoDuplicantsCanDie());
+				string text97 = "";
+				string text98 = "";
+				string text99 = "";
+				string text100 = "";
+				Action<KMonoBehaviour> action12 = null;
+				string[] array = DlcManager.DLC4;
+				this.AsteroidSurvived = base.Add(new ColonyAchievement(text93, text94, text95, text96, flag13, list13, text97, text98, text99, text100, action12, default(EventReference), "life_found_a_way", array, null, "DLC4_ID", "DemoliorSurivedAchievement"));
+			}
 		}
 
 		public ColonyAchievement Thriving;
@@ -479,5 +511,9 @@ namespace Database
 		public ColonyAchievement EfficientData;
 
 		public ColonyAchievement AllTheCircuits;
+
+		public ColonyAchievement AsteroidDestroyed;
+
+		public ColonyAchievement AsteroidSurvived;
 	}
 }

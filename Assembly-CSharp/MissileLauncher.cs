@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using KSerialization;
 using UnityEngine;
 
 public class MissileLauncher : GameStateMachine<MissileLauncher, MissileLauncher.Instance, IStateMachineTarget, MissileLauncher.Def>
@@ -32,13 +33,15 @@ public class MissileLauncher : GameStateMachine<MissileLauncher, MissileLauncher
 		{
 			smi.Searching(dt);
 		}, UpdateRate.SIM_EVERY_TICK, false)
-			.EventTransition(GameHashes.OnStorageChange, this.NoAmmo, (MissileLauncher.Instance smi) => smi.MissileStorage.Count <= 0)
+			.EventTransition(GameHashes.OnStorageChange, this.NoAmmo, (MissileLauncher.Instance smi) => smi.MissileStorage.Count <= 0 && smi.LongRangeStorage.Count <= 0)
 			.ParamTransition<GameObject>(this.meteorTarget, this.Launch.targeting, (MissileLauncher.Instance smi, GameObject meteor) => meteor != null)
+			.ParamTransition<GameObject>(this.longRangeTarget, this.Launch.targetingLongRange, (MissileLauncher.Instance smi, GameObject longrange) => smi.ShouldRotateToLongRange())
 			.Exit(delegate(MissileLauncher.Instance smi)
 			{
 				smi.sm.rotationComplete.Set(false, smi, false);
 			});
 		this.On.idle.Target(this.masterTarget).PlayAnim("idle", KAnim.PlayMode.Loop).UpdateTransition(this.On, (MissileLauncher.Instance smi, float dt) => smi.Operational.IsOperational && smi.MeteorDetected(), UpdateRate.SIM_200ms, false)
+			.EventTransition(GameHashes.ClusterDestinationChanged, this.On.searching, (MissileLauncher.Instance smi) => smi.LongRangeStorage.Count > 0)
 			.Target(this.cannonTarget)
 			.PlayAnim("Cannon_working_pst");
 		this.On.shutdown.Target(this.masterTarget).PlayAnim("working_pst").OnAnimQueueComplete(this.Off)
@@ -62,9 +65,19 @@ public class MissileLauncher : GameStateMachine<MissileLauncher, MissileLauncher
 				smi.GoTo(this.On.searching);
 			}
 		}, UpdateRate.SIM_EVERY_TICK, false).ParamTransition<bool>(this.rotationComplete, this.Launch.shoot, GameStateMachine<MissileLauncher, MissileLauncher.Instance, IStateMachineTarget, MissileLauncher.Def>.IsTrue);
+		this.Launch.targetingLongRange.Update("TargetingLongRange", delegate(MissileLauncher.Instance smi, float dt)
+		{
+		}, UpdateRate.SIM_EVERY_TICK, false).ParamTransition<bool>(this.rotationComplete, this.Launch.shoot, GameStateMachine<MissileLauncher, MissileLauncher.Instance, IStateMachineTarget, MissileLauncher.Def>.IsTrue);
 		this.Launch.shoot.ScheduleGoTo(this.shootDelayDuration, this.Launch.pst).Exit("LaunchMissile", delegate(MissileLauncher.Instance smi)
 		{
-			smi.LaunchMissile();
+			if (smi.sm.meteorTarget.Get(smi) != null)
+			{
+				smi.LaunchMissile();
+			}
+			else if (smi.sm.longRangeTarget.Get(smi) != null)
+			{
+				smi.LaunchLongRangeMissile();
+			}
 			this.cannonTarget.Get(smi).GetComponent<KBatchedAnimController>().Play("Cannon_shooting_pre", KAnim.PlayMode.Once, 1f, 0f);
 		});
 		this.Launch.pst.Target(this.masterTarget).Enter(delegate(MissileLauncher.Instance smi)
@@ -80,10 +93,7 @@ public class MissileLauncher : GameStateMachine<MissileLauncher, MissileLauncher
 		}).Target(this.cannonTarget)
 			.PlayAnim("Cannon_shooting_pst")
 			.OnAnimQueueComplete(this.Cooldown);
-		this.Cooldown.Update("Rotate", delegate(MissileLauncher.Instance smi, float dt)
-		{
-			smi.RotateToMeteor(dt);
-		}, UpdateRate.SIM_EVERY_TICK, false).Exit(delegate(MissileLauncher.Instance smi)
+		this.Cooldown.Exit(delegate(MissileLauncher.Instance smi)
 		{
 			smi.SpawnOre();
 		}).Enter(delegate(MissileLauncher.Instance smi)
@@ -99,8 +109,20 @@ public class MissileLauncher : GameStateMachine<MissileLauncher, MissileLauncher
 			}
 			smi.sm.rotationComplete.Set(false, smi, false);
 			smi.sm.meteorTarget.Set(null, smi, false);
-		})
-			.OnAnimQueueComplete(this.On.searching);
+			smi.GoTo(smi.CooldownGoToState);
+		});
+		this.Cooldown.basic.Update("Rotate", delegate(MissileLauncher.Instance smi, float dt)
+		{
+			smi.RotateToMeteor(dt);
+		}, UpdateRate.SIM_EVERY_TICK, false).OnAnimQueueComplete(this.On.searching);
+		this.Cooldown.longrange.QueueAnim("cooldown", true, null).ToggleStatusItem(MissileLauncher.LongRangeCooldown, null).Target(this.cannonTarget)
+			.QueueAnim("cooldown_cannon_pre", false, null)
+			.QueueAnim("cooldown_cannon", true, null)
+			.ScheduleGoTo(MissileLauncher.longrangeCooldownTime, this.On.searching)
+			.Exit(delegate(MissileLauncher.Instance smi)
+			{
+				this.cannonTarget.Get(smi).GetComponent<KBatchedAnimController>().Play("cooldown_cannon_pst", KAnim.PlayMode.Once, 1f, 0f);
+			});
 		this.Nosurfacesight.Target(this.masterTarget).PlayAnim("working_pst").QueueAnim("error", false, null)
 			.ParamTransition<bool>(this.fullyBlocked, this.On, GameStateMachine<MissileLauncher, MissileLauncher.Instance, IStateMachineTarget, MissileLauncher.Def>.IsFalse)
 			.Target(this.cannonTarget)
@@ -109,7 +131,7 @@ public class MissileLauncher : GameStateMachine<MissileLauncher, MissileLauncher
 			{
 				smi.Operational.SetActive(false, false);
 			});
-		this.NoAmmo.PlayAnim("off_open").EventTransition(GameHashes.OnStorageChange, this.On, (MissileLauncher.Instance smi) => smi.MissileStorage.Count > 0).Enter(delegate(MissileLauncher.Instance smi)
+		this.NoAmmo.PlayAnim("off_open").EventTransition(GameHashes.OnStorageChange, this.On, (MissileLauncher.Instance smi) => smi.MissileStorage.Count > 0 || smi.LongRangeStorage.Count > 0).Enter(delegate(MissileLauncher.Instance smi)
 		{
 			smi.Operational.SetActive(false, false);
 		})
@@ -125,11 +147,13 @@ public class MissileLauncher : GameStateMachine<MissileLauncher, MissileLauncher
 
 	private static StatusItem PartiallyBlockedStatus = new StatusItem("MissileLauncher_PartiallyBlocked", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, false, 129022, null);
 
+	private static StatusItem LongRangeCooldown = new StatusItem("MissileLauncher_LongRangeCooldown", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, false, 129022, null);
+
 	public float shutdownDuration = 50f;
 
 	public float shootDelayDuration = 0.25f;
 
-	public static float SHELL_MASS = MissileBasicConfig.recipe.ingredients[0].amount / 5f / 2f;
+	public static float SHELL_MASS = 2.5f;
 
 	public static float SHELL_TEMPERATURE = 353.15f;
 
@@ -140,6 +164,10 @@ public class MissileLauncher : GameStateMachine<MissileLauncher, MissileLauncher
 	public StateMachine<MissileLauncher, MissileLauncher.Instance, IStateMachineTarget, MissileLauncher.Def>.TargetParameter cannonTarget;
 
 	public StateMachine<MissileLauncher, MissileLauncher.Instance, IStateMachineTarget, MissileLauncher.Def>.BoolParameter fullyBlocked;
+
+	public StateMachine<MissileLauncher, MissileLauncher.Instance, IStateMachineTarget, MissileLauncher.Def>.ObjectParameter<GameObject> longRangeTarget = new StateMachine<MissileLauncher, MissileLauncher.Instance, IStateMachineTarget, MissileLauncher.Def>.ObjectParameter<GameObject>();
+
+	public static float longrangeCooldownTime = 10f;
 
 	public GameStateMachine<MissileLauncher, MissileLauncher.Instance, IStateMachineTarget, MissileLauncher.Def>.State Off;
 
@@ -185,6 +213,7 @@ public class MissileLauncher : GameStateMachine<MissileLauncher, MissileLauncher
 		public Instance(IStateMachineTarget master, MissileLauncher.Def def)
 			: base(master, def)
 		{
+			Components.MissileLaunchers.Add(this);
 			KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
 			string text = component.name + ".cannon";
 			base.smi.cannonGameObject = new GameObject(text);
@@ -215,9 +244,26 @@ public class MissileLauncher : GameStateMachine<MissileLauncher, MissileLauncher
 				global::Debug.LogWarning("MissileLauncher anim data is missing");
 				this.launchAnimTime = 1f;
 			}
-			this.meter = new MeterController(base.GetComponent<KBatchedAnimController>(), "meter_target", "meter", Meter.Offset.Infront, Grid.SceneLayer.NoLayer, Array.Empty<string>());
+			this.meter = new MeterController(component, "meter_target", "meter", Meter.Offset.Infront, Grid.SceneLayer.NoLayer, Array.Empty<string>());
+			this.longRangemeter = new MeterController(component, "meter_target_longrange", "meter_longrange", Meter.Offset.Infront, Grid.SceneLayer.NoLayer, Array.Empty<string>());
 			base.Subscribe(-1201923725, new Action<object>(this.OnHighlight));
-			this.MissileStorage.Subscribe(-1697596308, new Action<object>(this.OnStorage));
+			base.Subscribe(-905833192, new Action<object>(this.OnCopySettings));
+			foreach (Storage storage in base.smi.gameObject.GetComponents<Storage>())
+			{
+				if (storage.storageID == "MissileBasic")
+				{
+					this.MissileStorage = storage;
+				}
+				else if (storage.storageID == "MissileLongRange")
+				{
+					this.LongRangeStorage = storage;
+				}
+				else if (storage.storageID == "CondiutStorage")
+				{
+					this.LoadingStorage = storage;
+				}
+			}
+			base.Subscribe(-1697596308, new Action<object>(this.OnStorage));
 			FlatTagFilterable component2 = base.smi.master.GetComponent<FlatTagFilterable>();
 			foreach (GameObject gameObject in Assets.GetPrefabsWithTag(GameTags.Comet))
 			{
@@ -231,16 +277,26 @@ public class MissileLauncher : GameStateMachine<MissileLauncher, MissileLauncher
 					component2.selectedTags.Remove(GassyMooCometConfig.ID);
 				}
 			}
+			this.ManualDeliveryKgs = base.smi.gameObject.GetComponents<ManualDeliveryKG>();
 		}
 
 		public override void StartSM()
 		{
 			base.StartSM();
 			this.OnStorage(null);
+			base.smi.master.GetComponent<FlatTagFilterable>().currentlyUserAssignable = this.AmmunitionIsAllowed("MissileBasic");
+			this.clusterDestinationSelector = base.smi.master.GetComponent<EntityClusterDestinationSelector>();
+			if (this.clusterDestinationSelector != null)
+			{
+				this.clusterDestinationSelector.assignable = this.AmmunitionIsAllowed("MissileLongRange");
+			}
+			this.UpdateAmmunitionDelivery();
+			this.UpdateMeterVisibility();
 		}
 
 		protected override void OnCleanUp()
 		{
+			Components.MissileLaunchers.Remove(this);
 			base.Unsubscribe(-1201923725, new Action<object>(this.OnHighlight));
 			base.OnCleanUp();
 		}
@@ -251,14 +307,72 @@ public class MissileLauncher : GameStateMachine<MissileLauncher, MissileLauncher
 			base.smi.cannonAnimController.HighlightColour = component.HighlightColour;
 		}
 
+		private void OnCopySettings(object data)
+		{
+			GameObject gameObject = (GameObject)data;
+			if (gameObject != null)
+			{
+				MissileLauncher.Instance smi = gameObject.GetSMI<MissileLauncher.Instance>();
+				if (smi != null)
+				{
+					this.ammunitionPermissions.Clear();
+					foreach (KeyValuePair<Tag, bool> keyValuePair in smi.ammunitionPermissions)
+					{
+						this.ChangeAmmunition(keyValuePair.Key, smi.AmmunitionIsAllowed(keyValuePair.Key));
+					}
+					base.smi.master.GetComponent<FlatTagFilterable>().currentlyUserAssignable = this.AmmunitionIsAllowed("MissileBasic");
+					this.clusterDestinationSelector = base.smi.master.GetComponent<EntityClusterDestinationSelector>();
+					if (this.clusterDestinationSelector != null)
+					{
+						this.clusterDestinationSelector.assignable = this.AmmunitionIsAllowed("MissileLongRange");
+					}
+					if (smi.sm.longRangeTarget != null)
+					{
+						base.sm.longRangeTarget.Set(smi.sm.longRangeTarget.Get(smi), this, false);
+					}
+				}
+			}
+		}
+
 		private void OnStorage(object data)
 		{
+			if (this.LoadingStorage.items.Count > 0)
+			{
+				KPrefabID component = this.LoadingStorage.items[0].GetComponent<KPrefabID>();
+				if (this.AmmunitionIsAllowed(component.PrefabTag))
+				{
+					Pickupable component2 = component.GetComponent<Pickupable>();
+					Storage storage = null;
+					if (component.PrefabTag == "MissileBasic")
+					{
+						storage = this.MissileStorage;
+					}
+					else if (component.PrefabTag == "MissileLongRange")
+					{
+						storage = this.LongRangeStorage;
+					}
+					if (storage != null && storage.Capacity() - storage.MassStored() >= component2.PrimaryElement.Mass)
+					{
+						this.LoadingStorage.Transfer(component2.gameObject, storage, true, true);
+					}
+				}
+			}
 			this.meter.SetPositionPercent(Mathf.Clamp01(this.MissileStorage.MassStored() / this.MissileStorage.capacityKg));
+			this.longRangemeter.SetPositionPercent(Mathf.Clamp01(this.LongRangeStorage.MassStored() / this.LongRangeStorage.capacityKg));
+		}
+
+		private void UpdateMeterVisibility()
+		{
+			this.meter.gameObject.SetActive(this.AmmunitionIsAllowed("MissileBasic"));
+			this.longRangemeter.gameObject.SetActive(this.AmmunitionIsAllowed("MissileLongRange"));
 		}
 
 		public void Searching(float dt)
 		{
-			this.FindMeteor();
+			if (!this.FindMeteor())
+			{
+				this.FindLongRangeTarget();
+			}
 			this.RotateCannon(dt, base.def.rotationSpeed / 2f);
 			if (base.smi.sm.rotationComplete.Get(base.smi))
 			{
@@ -267,15 +381,57 @@ public class MissileLauncher : GameStateMachine<MissileLauncher, MissileLauncher
 			}
 		}
 
-		public void FindMeteor()
+		private bool FindMeteor()
 		{
-			GameObject gameObject = this.ChooseClosestInterceptionPoint(this.myWorld.id);
-			if (gameObject != null)
+			if (this.MissileStorage.items.Count > 0)
 			{
-				base.smi.sm.meteorTarget.Set(gameObject, base.smi, false);
-				gameObject.GetComponent<Comet>().Targeted = true;
-				base.smi.cannonRotation = this.CalculateLaunchAngle(gameObject.transform.position);
+				GameObject gameObject = this.ChooseClosestInterceptionPoint(this.myWorld.id);
+				if (gameObject != null)
+				{
+					base.smi.sm.meteorTarget.Set(gameObject, base.smi, false);
+					gameObject.GetComponent<Comet>().Targeted = true;
+					base.smi.cannonRotation = this.CalculateLaunchAngle(gameObject.transform.position);
+					return true;
+				}
 			}
+			return false;
+		}
+
+		private bool FindLongRangeTarget()
+		{
+			if (this.LongRangeStorage.items.Count > 0)
+			{
+				GameObject gameObject = null;
+				if (this.clusterDestinationSelector != null)
+				{
+					if (this.clusterDestinationSelector.GetDestination() != this.myWorld.GetComponent<ClusterGridEntity>().Location)
+					{
+						ClusterGridEntity visibleEntityOfLayerAtCell = ClusterGrid.Instance.GetVisibleEntityOfLayerAtCell(this.clusterDestinationSelector.GetDestination(), EntityLayer.Meteor);
+						gameObject = ((visibleEntityOfLayerAtCell != null) ? visibleEntityOfLayerAtCell.gameObject : null);
+					}
+				}
+				else
+				{
+					GameplayEventInstance gameplayEventInstance = GameplayEventManager.Instance.GetGameplayEventInstance(Db.Get().GameplayEvents.LargeImpactor.IdHash, -1);
+					if (gameplayEventInstance != null)
+					{
+						GameObject impactorInstance = ((LargeImpactorEvent.StatesInstance)gameplayEventInstance.smi).impactorInstance;
+						gameObject = ((impactorInstance != null) ? impactorInstance.gameObject : null);
+					}
+				}
+				if (gameObject != null)
+				{
+					Vector3 position = base.transform.position;
+					position.y += 50f;
+					if (this.IsPathClear(this.launchPosition, position))
+					{
+						base.smi.sm.longRangeTarget.Set(gameObject, base.smi, false);
+						base.smi.cannonRotation = this.CalculateLaunchAngle(position);
+						return true;
+					}
+				}
+			}
+			return false;
 		}
 
 		private float CalculateLaunchAngle(Vector3 targetPosition)
@@ -303,6 +459,32 @@ public class MissileLauncher : GameStateMachine<MissileLauncher, MissileLauncher
 				if (!gameObject2.IsNullOrDestroyed())
 				{
 					pickupable.GetSMI<MissileProjectile.StatesInstance>().PrepareLaunch(gameObject2.GetComponent<Comet>(), base.def.launchSpeed, this.launchPosition, base.smi.cannonRotation);
+					this.CooldownGoToState = base.sm.Cooldown.basic;
+				}
+			}
+		}
+
+		public void LaunchLongRangeMissile()
+		{
+			GameObject gameObject = this.LongRangeStorage.FindFirst("MissileLongRange");
+			if (gameObject != null)
+			{
+				Pickupable pickupable = gameObject.GetComponent<Pickupable>();
+				if (pickupable.TotalAmount <= 1f)
+				{
+					this.LongRangeStorage.Drop(pickupable.gameObject, true);
+				}
+				else
+				{
+					pickupable = EntitySplitter.Split(pickupable, 1f, null);
+				}
+				this.SetMissileElement(gameObject);
+				GameObject gameObject2 = base.smi.sm.longRangeTarget.Get(base.smi);
+				if (!gameObject2.IsNullOrDestroyed())
+				{
+					pickupable.GetSMI<MissileLongRangeProjectile.StatesInstance>().PrepareLaunch(gameObject2, base.def.launchSpeed, this.launchPosition, base.smi.cannonRotation);
+					this.CooldownGoToState = base.sm.Cooldown.longrange;
+					base.smi.sm.longRangeTarget.Set(null, base.smi, false);
 				}
 			}
 		}
@@ -447,49 +629,101 @@ public class MissileLauncher : GameStateMachine<MissileLauncher, MissileLauncher
 			base.smi.sm.rotationComplete.Set(true, base.smi, false);
 		}
 
+		public bool ShouldRotateToLongRange()
+		{
+			return !base.smi.sm.longRangeTarget.Get(base.smi).IsNullOrDestroyed() && this.LongRangeStorage.items.Count > 0 && this.IsPathClear(this.launchPosition, this.launchPosition + new Vector3(0f, 50f, 0f));
+		}
+
 		public void RotateToMeteor(float dt)
 		{
 			GameObject gameObject = base.sm.meteorTarget.Get(this);
-			if (gameObject.IsNullOrDestroyed())
+			float num;
+			if (!gameObject.IsNullOrDestroyed())
 			{
-				return;
+				num = this.CalculateLaunchAngle(gameObject.transform.position);
 			}
-			float num = this.CalculateLaunchAngle(gameObject.transform.position) - this.simpleAngle;
-			if (num > 180f)
+			else
 			{
-				num -= 360f;
+				if (!this.ShouldRotateToLongRange())
+				{
+					return;
+				}
+				Vector3 position = base.transform.position;
+				position.y += 50f;
+				num = this.CalculateLaunchAngle(position);
 			}
-			else if (num < -180f)
+			float num2 = num - this.simpleAngle;
+			if (num2 > 180f)
 			{
-				num += 360f;
+				num2 -= 360f;
 			}
-			float num2 = base.def.rotationSpeed * dt;
-			if (num > 0f && num2 < num)
+			else if (num2 < -180f)
 			{
-				this.simpleAngle += num2;
+				num2 += 360f;
+			}
+			float num3 = base.def.rotationSpeed * dt;
+			if (num2 > 0f && num3 < num2)
+			{
+				this.simpleAngle += num3;
 				this.cannonAnimController.Rotation = this.simpleAngle;
 				return;
 			}
-			if (num < 0f && -num2 > num)
+			if (num2 < 0f && -num3 > num2)
 			{
-				this.simpleAngle -= num2;
+				this.simpleAngle -= num3;
 				this.cannonAnimController.Rotation = this.simpleAngle;
 				return;
 			}
 			base.smi.sm.rotationComplete.Set(true, base.smi, false);
 		}
 
+		public void ChangeAmmunition(Tag tag, bool allowed)
+		{
+			if (!this.ammunitionPermissions.ContainsKey(tag))
+			{
+				this.ammunitionPermissions.Add(tag, false);
+			}
+			this.ammunitionPermissions[tag] = allowed;
+			this.UpdateAmmunitionDelivery();
+			this.OnStorage(null);
+			this.UpdateMeterVisibility();
+		}
+
+		public bool AmmunitionIsAllowed(Tag tag)
+		{
+			return this.ammunitionPermissions.ContainsKey(tag) && this.ammunitionPermissions[tag];
+		}
+
+		private void UpdateAmmunitionDelivery()
+		{
+			foreach (ManualDeliveryKG manualDeliveryKG in this.ManualDeliveryKgs)
+			{
+				bool flag = this.AmmunitionIsAllowed(manualDeliveryKG.RequestedItemTag);
+				manualDeliveryKG.Pause(!flag, "ammunitionnotallowed");
+			}
+		}
+
 		[MyCmpReq]
 		public Operational Operational;
 
-		[MyCmpReq]
 		public Storage MissileStorage;
+
+		public Storage LongRangeStorage;
+
+		private Storage LoadingStorage;
+
+		public ManualDeliveryKG[] ManualDeliveryKgs;
 
 		[MyCmpReq]
 		public KSelectable Selectable;
 
 		[MyCmpReq]
 		public FlatTagFilterable TargetFilter;
+
+		private EntityClusterDestinationSelector clusterDestinationSelector;
+
+		[Serialize]
+		private Dictionary<Tag, bool> ammunitionPermissions = new Dictionary<Tag, bool> { { "MissileBasic", true } };
 
 		private Vector3 launchPosition;
 
@@ -509,6 +743,10 @@ public class MissileLauncher : GameStateMachine<MissileLauncher, MissileLauncher
 
 		private MeterController meter;
 
+		private MeterController longRangemeter;
+
+		public GameStateMachine<MissileLauncher, MissileLauncher.Instance, IStateMachineTarget, MissileLauncher.Def>.State CooldownGoToState;
+
 		private WorldContainer worldContainer;
 	}
 
@@ -527,6 +765,8 @@ public class MissileLauncher : GameStateMachine<MissileLauncher, MissileLauncher
 	{
 		public GameStateMachine<MissileLauncher, MissileLauncher.Instance, IStateMachineTarget, MissileLauncher.Def>.State targeting;
 
+		public GameStateMachine<MissileLauncher, MissileLauncher.Instance, IStateMachineTarget, MissileLauncher.Def>.State targetingLongRange;
+
 		public GameStateMachine<MissileLauncher, MissileLauncher.Instance, IStateMachineTarget, MissileLauncher.Def>.State shoot;
 
 		public GameStateMachine<MissileLauncher, MissileLauncher.Instance, IStateMachineTarget, MissileLauncher.Def>.State pst;
@@ -534,10 +774,8 @@ public class MissileLauncher : GameStateMachine<MissileLauncher, MissileLauncher
 
 	public class CooldownState : GameStateMachine<MissileLauncher, MissileLauncher.Instance, IStateMachineTarget, MissileLauncher.Def>.State
 	{
-		public GameStateMachine<MissileLauncher, MissileLauncher.Instance, IStateMachineTarget, MissileLauncher.Def>.State cooling;
+		public GameStateMachine<MissileLauncher, MissileLauncher.Instance, IStateMachineTarget, MissileLauncher.Def>.State longrange;
 
-		public GameStateMachine<MissileLauncher, MissileLauncher.Instance, IStateMachineTarget, MissileLauncher.Def>.State exit;
-
-		public GameStateMachine<MissileLauncher, MissileLauncher.Instance, IStateMachineTarget, MissileLauncher.Def>.State exitNoAmmo;
+		public GameStateMachine<MissileLauncher, MissileLauncher.Instance, IStateMachineTarget, MissileLauncher.Def>.State basic;
 	}
 }

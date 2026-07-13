@@ -356,7 +356,7 @@ public class LanguageOptionsScreen : KModalScreen, SteamUGCService.IClient
 		string text = Path.Combine(mod.ContentPath, "strings.po");
 		if (!File.Exists(text))
 		{
-			global::Debug.LogWarning("GetLanguagFile: " + text + " missing for mod " + mod.label.title);
+			global::Debug.LogWarning("GetLanguageFile: " + text + " missing for mod " + mod.label.title);
 			return null;
 		}
 		return text;

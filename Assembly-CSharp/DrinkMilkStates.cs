@@ -250,7 +250,7 @@ public class DrinkMilkStates : GameStateMachine<DrinkMilkStates, DrinkMilkStates
 			return rotatedCellOffset;
 		}
 
-		public static CellOffset DrinkCellOffsetGet_BammothAdult(MilkFeeder.Instance milkFeederInstance, DrinkMilkMonitor.Instance critterInstance, bool isCramped)
+		public static CellOffset DrinkCellOffsetGet_TwoByTwo(MilkFeeder.Instance milkFeederInstance, DrinkMilkMonitor.Instance critterInstance, bool isCramped)
 		{
 			Rotatable component = milkFeederInstance.GetComponent<Rotatable>();
 			CellOffset rotatedCellOffset = component.GetRotatedCellOffset(MilkFeederConfig.DRINK_FROM_OFFSET);

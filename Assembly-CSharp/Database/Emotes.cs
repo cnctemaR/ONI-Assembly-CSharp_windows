@@ -326,6 +326,20 @@ namespace Database
 						anim = "react_sad"
 					}
 				}, null);
+				this.Roar = new Emote(this, "Roar", new EmoteStep[]
+				{
+					new EmoteStep
+					{
+						anim = "roar"
+					}
+				}, null);
+				this.RaptorSignal = new Emote(this, "Signal", new EmoteStep[]
+				{
+					new EmoteStep
+					{
+						anim = "signal"
+					}
+				}, null);
 			}
 
 			public Emote Hungry;
@@ -337,6 +351,10 @@ namespace Database
 			public Emote Idle;
 
 			public Emote Sad;
+
+			public Emote Roar;
+
+			public Emote RaptorSignal;
 		}
 	}
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -60,11 +61,11 @@ namespace ProcGenGame
 							this.unplacedStoryTraits.Add(cachedStoryTrait);
 						}
 					}
-					goto IL_00E9;
+					goto IL_00F4;
 				}
 			}
 			this.chosenStoryTraitIds = new List<string>();
-			IL_00E9:
+			IL_00F4:
 			if (CustomGameSettings.Instance != null)
 			{
 				foreach (string text2 in CustomGameSettings.Instance.GetCurrentDlcMixingIds())
@@ -130,6 +131,7 @@ namespace ProcGenGame
 				Vector2I worldsize = worldGen.Settings.world.worldsize;
 				worldGen.SetWorldSize(worldsize.x, worldsize.y);
 				worldGen.SetPosition(new Vector2I(worldPlacement.x, worldPlacement.y));
+				worldGen.SetHiddenYOffset(worldGen.Settings.world.hiddenY);
 				if (!reuseWorldgen && worldPlacement.worldMixing.mixingWasApplied)
 				{
 					worldGen.Settings.world.worldTemplateRules.AddRange(worldPlacement.worldMixing.additionalWorldTemplateRules);
@@ -158,20 +160,19 @@ namespace ProcGenGame
 		private void LogBeginGeneration()
 		{
 			string text = ((CustomGameSettings.Instance != null) ? CustomGameSettings.Instance.GetSettingsCoordinate() : this.seed.ToString());
+			if (this.chosenStoryTraitIds.Count > 0)
+			{
+				string text2 = "storytraits:";
+				foreach (string text3 in this.chosenStoryTraitIds)
+				{
+					text2 = text2 + "\n  - " + text3;
+				}
+				DebugUtil.LogArgs(new object[] { text2 });
+			}
 			Console.WriteLine("\n\n");
-			DebugUtil.LogArgs(new object[] { "WORLDGEN START" });
-			DebugUtil.LogArgs(new object[] { " - seed:     " + text });
-			DebugUtil.LogArgs(new object[] { " - cluster:  " + this.clusterLayout.filePath });
-			if (this.chosenStoryTraitIds.Count == 0)
-			{
-				DebugUtil.LogArgs(new object[] { " - storytraits: none" });
-				return;
-			}
-			DebugUtil.LogArgs(new object[] { " - storytraits:" });
-			foreach (string text2 in this.chosenStoryTraitIds)
-			{
-				DebugUtil.LogArgs(new object[] { "    - " + text2 });
-			}
+			DebugUtil.LogArgs(new object[] { "WORLDGEN START seed=" + text + ", cluster=" + this.clusterLayout.filePath });
+			this.worldgenDebugTimer.Restart();
+			this.worldgenDebugTimer.Start();
 		}
 
 		public void Generate(WorldGen.OfflineCallbackFunction callbackFn, Action<OfflineWorldGen.ErrorInfo> error_cb, int worldSeed = -1, int layoutSeed = -1, int terrainSeed = -1, int noiseSeed = -1, bool doSimSettle = true, bool debug = false, bool skipPlacingTemplates = false)
@@ -273,7 +274,8 @@ namespace ProcGenGame
 					array = null;
 					array2 = null;
 					List<WorldTrait> list3 = new List<WorldTrait>();
-					if (!worldGen2.RenderOffline(this.doSimSettle, binaryWriter, ref array, ref array2, num, ref list3, worldGen2.isStartingWorld))
+					uint num2 = (uint)this.seed;
+					if (!worldGen2.RenderOffline(this.doSimSettle, num2, binaryWriter, ref array, ref array2, num, ref list3, worldGen2.isStartingWorld))
 					{
 						this.StopThread();
 						return;
@@ -305,18 +307,18 @@ namespace ProcGenGame
 				return;
 			}
 			DebugUtil.Separator();
-			DebugUtil.LogArgs(new object[] { "Placing worlds on cluster map" });
 			if (!this.AssignClusterLocations())
 			{
 				this.StopThread();
 				return;
 			}
+			DebugUtil.Separator();
+			this.worldgenDebugTimer.Stop();
+			DebugUtil.LogArgs(new object[] { string.Format("WORLDGEN COMPLETE (took {0:F2}s)\n\n\n", this.worldgenDebugTimer.Elapsed.TotalSeconds) });
 			BinaryWriter binaryWriter2 = new BinaryWriter(File.Open(WorldGen.WORLDGEN_SAVE_FILENAME, FileMode.Create));
 			this.Save(binaryWriter2);
 			binaryWriter2.Write(memoryStream.ToArray());
 			this.StopThread();
-			DebugUtil.Separator();
-			DebugUtil.LogArgs(new object[] { "WORLDGEN COMPLETE\n\n\n" });
 			this.IsGenerationComplete = true;
 		}
 
@@ -709,6 +711,9 @@ namespace ProcGenGame
 		public List<string> chosenStoryTraitIds;
 
 		private MutatedClusterLayout mutatedClusterLayout;
+
+		[NonSerialized]
+		private Stopwatch worldgenDebugTimer = new Stopwatch();
 
 		private Thread thread;
 

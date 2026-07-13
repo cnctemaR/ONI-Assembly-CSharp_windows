@@ -217,6 +217,10 @@ public class GeoTunerConfig : IBuildingConfig
 				GeoTunerConfig.CategorySettings[GeoTunerConfig.Category.ORGANIC_CATEGORY]
 			},
 			{
+				"chlorine_gas_cool",
+				GeoTunerConfig.CategorySettings[GeoTunerConfig.Category.ORGANIC_CATEGORY]
+			},
+			{
 				"hot_co2",
 				GeoTunerConfig.CategorySettings[GeoTunerConfig.Category.CO2_CATEGORY]
 			},

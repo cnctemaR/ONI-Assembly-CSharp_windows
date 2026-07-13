@@ -660,7 +660,7 @@ namespace STRINGS
 
 			public class BIONICUPKEEP
 			{
-				public static LocString NAME = UI.FormatAsLink("Bionic service station", "REQUIREMENTCLASSBIONICUPKEEP");
+				public static LocString NAME = UI.FormatAsLink("Bionic service station", "GROUPBIONICUPKEEP");
 
 				public static LocString DESCRIPTION = "Requires at least one Lubrication Station and one Gunk Extractor";
 

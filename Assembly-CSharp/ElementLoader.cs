@@ -119,6 +119,7 @@ public class ElementLoader
 		elem.highTempTransitionOreMassConversion = entry.highTempTransitionOreMassConversion;
 		elem.lowTempTransitionOreID = (SimHashes)Hash.SDBMLower(entry.lowTempTransitionOreId);
 		elem.lowTempTransitionOreMassConversion = entry.lowTempTransitionOreMassConversion;
+		elem.refinedMetalTarget = (SimHashes)Hash.SDBMLower(entry.refinedMetalTarget);
 		elem.sublimateId = (SimHashes)Hash.SDBMLower(entry.sublimateId);
 		elem.convertId = (SimHashes)Hash.SDBMLower(entry.convertId);
 		elem.sublimateFX = (SpawnFXHashes)Hash.SDBMLower(entry.sublimateFx);
@@ -573,6 +574,8 @@ public class ElementLoader
 		public string localizationID { get; set; }
 
 		public string dlcId { get; set; }
+
+		public string refinedMetalTarget { get; set; }
 
 		public ElementLoader.ElementComposition[] composition { get; set; }
 

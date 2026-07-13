@@ -29,6 +29,7 @@ public class TreeFilterable : KMonoBehaviour, ISaveLoadable
 		if (SaveLoader.Instance.GameInfo.IsVersionOlderThan(7, 29))
 		{
 			this.acceptedTagSet.UnionWith(this.acceptedTags);
+			this.acceptedTagSet.ExceptWith(this.ForbiddenTags);
 			this.acceptedTags = null;
 		}
 	}
@@ -193,6 +194,7 @@ public class TreeFilterable : KMonoBehaviour, ISaveLoadable
 	{
 		this.acceptedTagSet.Clear();
 		this.acceptedTagSet.UnionWith(filters);
+		this.acceptedTagSet.ExceptWith(this.ForbiddenTags);
 		if (this.OnFilterChanged != null)
 		{
 			this.OnFilterChanged(this.acceptedTagSet);
@@ -310,6 +312,8 @@ public class TreeFilterable : KMonoBehaviour, ISaveLoadable
 	[SerializeField]
 	[Serialize]
 	private HashSet<Tag> acceptedTagSet = new HashSet<Tag>();
+
+	public HashSet<Tag> ForbiddenTags = new HashSet<Tag>();
 
 	public Action<HashSet<Tag>> OnFilterChanged;
 

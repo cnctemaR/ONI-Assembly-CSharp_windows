@@ -97,7 +97,7 @@ public class TemporalTear : ClusterGridEntity
 			for (int i = 0; i < Components.MinionIdentities.Count; i++)
 			{
 				MinionIdentity minionIdentity = Components.MinionIdentities[i];
-				if (minionIdentity.GetMyWorldId() == craft.ModuleInterface.GetInteriorWorld().id)
+				if (minionIdentity != null && minionIdentity.GetMyWorldId() == craft.ModuleInterface.GetInteriorWorld().id)
 				{
 					Util.KDestroyGameObject(minionIdentity.gameObject);
 				}

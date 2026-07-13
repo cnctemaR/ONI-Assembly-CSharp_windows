@@ -12,10 +12,11 @@ public class ClusterMapMeteorShower : GameStateMachine<ClusterMapMeteorShower, C
 	{
 		base.serializable = StateMachine.SerializeType.ParamsOnly;
 		default_state = this.traveling;
-		this.traveling.DefaultState(this.traveling.unidentified).EventTransition(GameHashes.ClusterDestinationReached, this.arrived, null);
+		this.traveling.DefaultState(this.traveling.unidentified).EventTransition(GameHashes.ClusterDestinationReached, this.arrived, null).EventTransition(GameHashes.MissileDamageEncountered, this.destroyed, null);
 		this.traveling.unidentified.ParamTransition<bool>(this.IsIdentified, this.traveling.identified, GameStateMachine<ClusterMapMeteorShower, ClusterMapMeteorShower.Instance, IStateMachineTarget, ClusterMapMeteorShower.Def>.IsTrue);
 		this.traveling.identified.ParamTransition<bool>(this.IsIdentified, this.traveling.unidentified, GameStateMachine<ClusterMapMeteorShower, ClusterMapMeteorShower.Instance, IStateMachineTarget, ClusterMapMeteorShower.Def>.IsFalse).ToggleStatusItem(Db.Get().MiscStatusItems.ClusterMeteorRemainingTravelTime, null);
 		this.arrived.Enter(new StateMachine<ClusterMapMeteorShower, ClusterMapMeteorShower.Instance, IStateMachineTarget, ClusterMapMeteorShower.Def>.State.Callback(ClusterMapMeteorShower.DestinationReached));
+		this.destroyed.Enter(new StateMachine<ClusterMapMeteorShower, ClusterMapMeteorShower.Instance, IStateMachineTarget, ClusterMapMeteorShower.Def>.State.Callback(ClusterMapMeteorShower.HandleDestruction));
 	}
 
 	public static void DestinationReached(ClusterMapMeteorShower.Instance smi)
@@ -24,11 +25,23 @@ public class ClusterMapMeteorShower : GameStateMachine<ClusterMapMeteorShower, C
 		Util.KDestroyGameObject(smi.gameObject);
 	}
 
+	public static void HandleDestruction(ClusterMapMeteorShower.Instance smi)
+	{
+		GameplayEventInstance gameplayEventInstance = GameplayEventManager.Instance.GetGameplayEventInstance(smi.def.eventID, smi.DestinationWorldID);
+		if (gameplayEventInstance != null)
+		{
+			gameplayEventInstance.smi.StopSM("ShotDown");
+		}
+		Util.KDestroyGameObject(smi.gameObject);
+	}
+
 	public StateMachine<ClusterMapMeteorShower, ClusterMapMeteorShower.Instance, IStateMachineTarget, ClusterMapMeteorShower.Def>.BoolParameter IsIdentified;
 
 	public ClusterMapMeteorShower.TravelingState traveling;
 
 	public GameStateMachine<ClusterMapMeteorShower, ClusterMapMeteorShower.Instance, IStateMachineTarget, ClusterMapMeteorShower.Def>.State arrived;
+
+	public GameStateMachine<ClusterMapMeteorShower, ClusterMapMeteorShower.Instance, IStateMachineTarget, ClusterMapMeteorShower.Def>.State destroyed;
 
 	public class Def : StateMachine.BaseDef, IGameObjectEffectDescriptor
 	{
@@ -149,6 +162,7 @@ public class ClusterMapMeteorShower : GameStateMachine<ClusterMapMeteorShower, C
 		protected override void OnCleanUp()
 		{
 			this.visualizer.Deselect();
+			Components.LongRangeMissileTargetables.Remove(base.gameObject.GetComponent<ClusterGridEntity>());
 			base.OnCleanUp();
 		}
 
@@ -187,6 +201,7 @@ public class ClusterMapMeteorShower : GameStateMachine<ClusterMapMeteorShower, C
 			{
 				this.Setup(base.def.destinationWorldID, base.def.arrivalTime);
 			}
+			Components.LongRangeMissileTargetables.Add(base.gameObject.GetComponent<ClusterGridEntity>());
 			this.RefreshVisuals(false);
 		}
 

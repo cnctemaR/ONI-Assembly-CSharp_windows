@@ -16,7 +16,7 @@ public class ClusterMapMeteorShowerVisualizer : ClusterGridEntity
 	{
 		get
 		{
-			return EntityLayer.Craft;
+			return EntityLayer.Meteor;
 		}
 	}
 
@@ -63,7 +63,16 @@ public class ClusterMapMeteorShowerVisualizer : ClusterGridEntity
 	{
 		get
 		{
-			return ClusterGrid.Instance.GetCellRevealLevel(base.Location);
+			ClusterRevealLevel cellRevealLevel = ClusterGrid.Instance.GetCellRevealLevel(base.Location);
+			if (cellRevealLevel == ClusterRevealLevel.Visible)
+			{
+				return cellRevealLevel;
+			}
+			if (this.forceRevealed)
+			{
+				return ClusterRevealLevel.Peeked;
+			}
+			return cellRevealLevel;
 		}
 	}
 
@@ -71,7 +80,7 @@ public class ClusterMapMeteorShowerVisualizer : ClusterGridEntity
 	{
 		get
 		{
-			if (!this.revealed || this.clusterCellRevealLevel != ClusterRevealLevel.Visible)
+			if (!this.forceRevealed && (!this.revealed || this.clusterCellRevealLevel != ClusterRevealLevel.Visible))
 			{
 				return "unknown";
 			}
@@ -83,7 +92,7 @@ public class ClusterMapMeteorShowerVisualizer : ClusterGridEntity
 	{
 		get
 		{
-			if (!this.revealed || this.clusterCellRevealLevel != ClusterRevealLevel.Visible)
+			if (!this.forceRevealed && (!this.revealed || this.clusterCellRevealLevel != ClusterRevealLevel.Visible))
 			{
 				return this.questionMarkAnimConfig.initialAnim;
 			}
@@ -230,4 +239,6 @@ public class ClusterMapMeteorShowerVisualizer : ClusterGridEntity
 	public string clusterAnimName;
 
 	public bool revealed;
+
+	public bool forceRevealed;
 }

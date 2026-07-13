@@ -19,7 +19,7 @@ public class BaseStaterpillarConfig
 			text = "DreckoNavGrid";
 			gameObject.AddOrGetDef<ConduitSleepMonitor.Def>().conduitLayer = conduitLayer;
 		}
-		EntityTemplates.ExtendEntityToBasicCreature(gameObject, FactionManager.FactionID.Pest, trait_id, text, NavType.Floor, 32, 1f, "Meat", 2, false, false, warningLowTemperature, warningHighTemperature, lethalLowTemperature, lethalHighTemperature);
+		EntityTemplates.ExtendEntityToBasicCreature(gameObject, FactionManager.FactionID.Pest, trait_id, text, NavType.Floor, 32, 1f, "Meat", 2f, false, false, warningLowTemperature, warningHighTemperature, lethalLowTemperature, lethalHighTemperature);
 		if (symbolOverridePrefix != null)
 		{
 			gameObject.AddOrGet<SymbolOverrideController>().ApplySymbolOverridesByAffix(Assets.GetAnim(anim_file), symbolOverridePrefix, null, 0);

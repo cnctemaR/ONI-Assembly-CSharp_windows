@@ -489,6 +489,22 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>, ISaveL
 		return num;
 	}
 
+	public int GetNavigationCost(int cell, IReadOnlyList<CellOffset> offsets)
+	{
+		int num = -1;
+		int count = offsets.Count;
+		for (int i = 0; i < count; i++)
+		{
+			int num2 = Grid.OffsetCell(cell, offsets[i]);
+			int navigationCost = this.GetNavigationCost(num2);
+			if (navigationCost != -1 && (num == -1 || navigationCost < num))
+			{
+				num = navigationCost;
+			}
+		}
+		return num;
+	}
+
 	public int GetNavigationCost(IApproachable approachable)
 	{
 		return this.GetNavigationCost(approachable.GetCell(), approachable.GetOffsets());
@@ -724,5 +740,150 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>, ISaveL
 		private int cell;
 
 		private Navigator navigator;
+	}
+
+	public class Scanner<T> where T : KMonoBehaviour
+	{
+		public Scanner(int radius, ScenePartitionerLayer layer, Func<T, bool> filterFn)
+		{
+			this.radius = radius;
+			this.layer = layer;
+			this.filterFn = filterFn;
+			this.offsets = Navigator.Scanner<T>.NO_OFFSETS;
+			this.offsetsFn = null;
+			this.early_out_threshold = null;
+		}
+
+		public void SetConstantOffsets(CellOffset[] offsets)
+		{
+			this.offsets = offsets;
+		}
+
+		public void SetDynamicOffsetsFn(Action<T, List<CellOffset>> offsetsFn)
+		{
+			this.offsetsFn = offsetsFn;
+		}
+
+		public void SetEarlyOutThreshold(int early_out_threshold)
+		{
+			this.early_out_threshold = new int?(early_out_threshold);
+		}
+
+		private int NavCostFromConstantOffsets(Navigator navigator, T destinationObject, CellOffset[] offsets)
+		{
+			return navigator.GetNavigationCost(Grid.PosToCell(destinationObject.gameObject), offsets);
+		}
+
+		private int NavCostFromDynamicOffsets(Navigator navigator, T destinationObject, Action<T, List<CellOffset>> offsetsFn)
+		{
+			ListPool<CellOffset, Navigator>.PooledList pooledList = ListPool<CellOffset, Navigator>.Allocate();
+			offsetsFn(destinationObject, pooledList);
+			int navigationCost = navigator.GetNavigationCost(Grid.PosToCell(destinationObject.gameObject), pooledList);
+			pooledList.Recycle();
+			return navigationCost;
+		}
+
+		public T Scan(Vector2I gridPos, Navigator navigator)
+		{
+			ListPool<ScenePartitionerEntry, Navigator>.PooledList pooledList = ListPool<ScenePartitionerEntry, Navigator>.Allocate();
+			GameScenePartitioner.Instance.GatherEntries(gridPos.x - this.radius, gridPos.y - this.radius, this.radius * 2, this.radius * 2, this.layer, pooledList);
+			T t = default(T);
+			int num = -1;
+			if (this.early_out_threshold != null)
+			{
+				pooledList.Shuffle<ScenePartitionerEntry>();
+				if (this.offsetsFn != null)
+				{
+					for (int i = 0; i < pooledList.Count; i++)
+					{
+						T t2 = pooledList[i].obj as T;
+						if (this.filterFn(t2))
+						{
+							int num2 = this.NavCostFromDynamicOffsets(navigator, t2, this.offsetsFn);
+							if (num2 != -1 && (t == null || num2 < num))
+							{
+								t = t2;
+								num = num2;
+								if (num2 <= this.early_out_threshold.Value)
+								{
+									break;
+								}
+							}
+						}
+					}
+				}
+				else
+				{
+					for (int j = 0; j < pooledList.Count; j++)
+					{
+						T t3 = pooledList[j].obj as T;
+						if (this.filterFn(t3))
+						{
+							int num3 = this.NavCostFromConstantOffsets(navigator, t3, this.offsets);
+							if (num3 != -1 && (t == null || num3 < num))
+							{
+								t = t3;
+								num = num3;
+								if (num3 <= this.early_out_threshold.Value)
+								{
+									break;
+								}
+							}
+						}
+					}
+				}
+			}
+			else if (this.offsetsFn != null)
+			{
+				for (int k = 0; k < pooledList.Count; k++)
+				{
+					T t4 = pooledList[k].obj as T;
+					if (this.filterFn(t4))
+					{
+						int num4 = this.NavCostFromDynamicOffsets(navigator, t4, this.offsetsFn);
+						if (num4 != -1 && (t == null || num4 < num))
+						{
+							t = t4;
+							num = num4;
+						}
+					}
+				}
+			}
+			else
+			{
+				for (int l = 0; l < pooledList.Count; l++)
+				{
+					T t5 = pooledList[l].obj as T;
+					if (this.filterFn(t5))
+					{
+						int num5 = this.NavCostFromConstantOffsets(navigator, t5, this.offsets);
+						if (num5 != -1 && (t == null || num5 < num))
+						{
+							t = t5;
+							num = num5;
+						}
+					}
+				}
+			}
+			pooledList.Recycle();
+			return t;
+		}
+
+		private static readonly CellOffset[] NO_OFFSETS = new CellOffset[]
+		{
+			new CellOffset(0, 0)
+		};
+
+		private readonly int radius;
+
+		private readonly ScenePartitionerLayer layer;
+
+		private readonly Func<T, bool> filterFn;
+
+		private CellOffset[] offsets;
+
+		private Action<T, List<CellOffset>> offsetsFn;
+
+		private int? early_out_threshold;
 	}
 }

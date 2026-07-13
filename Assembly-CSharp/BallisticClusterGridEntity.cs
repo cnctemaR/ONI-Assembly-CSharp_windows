@@ -20,6 +20,11 @@ public class BallisticClusterGridEntity : ClusterGridEntity
 		}
 	}
 
+	public override bool KeepRotationWhenSpacingOutInHex()
+	{
+		return this.keepRotationWhenSpacingOutInHex;
+	}
+
 	public override List<ClusterGridEntity.AnimConfig> AnimConfigs
 	{
 		get
@@ -118,4 +123,6 @@ public class BallisticClusterGridEntity : ClusterGridEntity
 	private string clusterAnimSymbolSwapTarget;
 
 	private string clusterAnimSymbolSwapSymbol;
+
+	public bool keepRotationWhenSpacingOutInHex;
 }

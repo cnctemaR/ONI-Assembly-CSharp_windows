@@ -102,6 +102,7 @@ namespace TUNING
 			{ "ManualGenerator", "generators" },
 			{ "Generator", "generators" },
 			{ "WoodGasGenerator", "generators" },
+			{ "PeatGenerator", "generators" },
 			{ "HydrogenGenerator", "generators" },
 			{ "MethaneGenerator", "generators" },
 			{ "PetroleumGenerator", "generators" },
@@ -151,6 +152,7 @@ namespace TUNING
 			{ "SpiceGrinder", "cooking" },
 			{ "FoodDehydrator", "cooking" },
 			{ "FoodRehydrator", "cooking" },
+			{ "Smoker", "cooking" },
 			{ "PlanterBox", "farming" },
 			{ "FarmTile", "farming" },
 			{ "HydroponicFarm", "farming" },
@@ -261,6 +263,7 @@ namespace TUNING
 			{ "OilRefinery", "oil" },
 			{ "Polymerizer", "oil" },
 			{ "OxyliteRefinery", "advanced" },
+			{ "ChemicalRefinery", "advanced" },
 			{ "SupermaterialRefinery", "advanced" },
 			{ "DiamondPress", "advanced" },
 			{ "Chlorinator", "advanced" },
@@ -314,6 +317,8 @@ namespace TUNING
 			{ "MarbleSculpture", "decor" },
 			{ "MetalSculpture", "decor" },
 			{ "WoodSculpture", "decor" },
+			{ "FossilSculpture", "decor" },
+			{ "CeilingFossilSculpture", "decor" },
 			{ "CrownMoulding", "decor" },
 			{ "CornerMoulding", "decor" },
 			{ "Canvas", "decor" },
@@ -564,6 +569,7 @@ namespace TUNING
 				"ManualGenerator",
 				"Generator",
 				"WoodGasGenerator",
+				"PeatGenerator",
 				"HydrogenGenerator",
 				"MethaneGenerator",
 				"PetroleumGenerator",
@@ -594,9 +600,9 @@ namespace TUNING
 			}, null, null),
 			new PlanScreen.PlanInfo(new HashedString("Food"), false, new List<string>
 			{
-				"MicrobeMusher", "CookingStation", "Deepfryer", "GourmetCookingStation", "SpiceGrinder", "FoodDehydrator", "FoodRehydrator", "PlanterBox", "FarmTile", "HydroponicFarm",
-				"RationBox", "Refrigerator", "CreatureDeliveryPoint", "CritterPickUp", "CritterDropOff", "FishDeliveryPoint", "CreatureFeeder", "FishFeeder", "MilkFeeder", "EggIncubator",
-				"EggCracker", "CreatureGroundTrap", "WaterTrap", "CreatureAirTrap", "CritterCondo", "UnderwaterCritterCondo", "AirBorneCritterCondo"
+				"MicrobeMusher", "CookingStation", "Deepfryer", "GourmetCookingStation", "SpiceGrinder", "FoodDehydrator", "FoodRehydrator", "Smoker", "PlanterBox", "FarmTile",
+				"HydroponicFarm", "RationBox", "Refrigerator", "CreatureDeliveryPoint", "CritterPickUp", "CritterDropOff", "FishDeliveryPoint", "CreatureFeeder", "FishFeeder", "MilkFeeder",
+				"EggIncubator", "EggCracker", "CreatureGroundTrap", "WaterTrap", "CreatureAirTrap", "CritterCondo", "UnderwaterCritterCondo", "AirBorneCritterCondo"
 			}, null, null),
 			new PlanScreen.PlanInfo(new HashedString("Plumbing"), false, new List<string>
 			{
@@ -659,7 +665,7 @@ namespace TUNING
 			new PlanScreen.PlanInfo(new HashedString("Refining"), false, new List<string>
 			{
 				"Compost", "WaterPurifier", "Desalinator", "FertilizerMaker", "AlgaeDistillery", "EthanolDistillery", "RockCrusher", "Kiln", "SludgePress", "MetalRefinery",
-				"GlassForge", "OilRefinery", "Polymerizer", "OxyliteRefinery", "Chlorinator", "SupermaterialRefinery", "DiamondPress", "MilkFatSeparator", "MilkPress"
+				"GlassForge", "OilRefinery", "Polymerizer", "OxyliteRefinery", "Chlorinator", "ChemicalRefinery", "SupermaterialRefinery", "DiamondPress", "MilkFatSeparator", "MilkPress"
 			}, null, null),
 			new PlanScreen.PlanInfo(new HashedString("Medical"), false, new List<string>
 			{
@@ -700,6 +706,8 @@ namespace TUNING
 				"WoodSculpture",
 				"MarbleSculpture",
 				"MetalSculpture",
+				"FossilSculpture",
+				"CeilingFossilSculpture",
 				"CrownMoulding",
 				"CornerMoulding",
 				"Canvas",
@@ -942,7 +950,6 @@ namespace TUNING
 			typeof(Overheatable),
 			typeof(CreatureCalorieMonitor.Def),
 			typeof(LureableMonitor.Def),
-			typeof(CropSleepingMonitor.Def),
 			typeof(FertilizationMonitor.Def),
 			typeof(IrrigationMonitor.Def),
 			typeof(ScaleGrowthMonitor.Def),

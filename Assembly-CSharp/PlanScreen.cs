@@ -815,15 +815,23 @@ public class PlanScreen : KIconToggleMenu
 					KeyValuePair<string, SearchUtil.SubcategoryCache> keyValuePair = enumerator.Current;
 					keyValuePair.Value.Reset();
 				}
-				goto IL_0098;
+				goto IL_00C5;
 			}
 		}
 		string text = BuildingGroupScreen.Instance.inputField.text.ToUpper().Trim();
 		foreach (KeyValuePair<string, SearchUtil.SubcategoryCache> keyValuePair2 in this.subcategorySearchCaches)
 		{
-			keyValuePair2.Value.Bind(text);
+			try
+			{
+				keyValuePair2.Value.Bind(text);
+			}
+			catch (Exception ex)
+			{
+				KCrashReporter.ReportDevNotification("Fuzzy score bind failed", Environment.StackTrace, ex.Message, false, null);
+				keyValuePair2.Value.Reset();
+			}
 		}
-		IL_0098:
+		IL_00C5:
 		this.SortButtons();
 		this.SortSubcategories();
 		this.ForceRefreshAllBuildingToggles();
@@ -864,16 +872,18 @@ public class PlanScreen : KIconToggleMenu
 				}
 			}
 		}
+		bool flag = false;
 		if (ktoggle != null && this.allBuildingToggles.Count != 0)
 		{
-			bool flag = !BuildingGroupScreen.SearchIsEmpty;
+			bool flag2 = !BuildingGroupScreen.SearchIsEmpty;
 			if (this.forceRefreshAllBuildings)
 			{
 				this.forceRefreshAllBuildings = false;
 				for (int num = 0; num != this.allBuildingToggles.Count; num++)
 				{
-					this.UpdateBuildingButton(num, flag);
+					this.UpdateBuildingButton(num, flag2);
 				}
+				flag = this.categoryPanelSizeNeedsRefresh;
 			}
 			else
 			{
@@ -883,7 +893,7 @@ public class PlanScreen : KIconToggleMenu
 					{
 						this.building_button_refresh_idx = 0;
 					}
-					this.UpdateBuildingButton(this.building_button_refresh_idx, flag);
+					this.UpdateBuildingButton(this.building_button_refresh_idx, flag2);
 					this.building_button_refresh_idx++;
 				}
 			}
@@ -901,14 +911,14 @@ public class PlanScreen : KIconToggleMenu
 						num2++;
 					}
 				}
-				bool flag2 = num2 > 0;
-				if (keyValuePair.Value.activeSelf != flag2)
+				bool flag3 = num2 > 0;
+				if (keyValuePair.Value.activeSelf != flag3)
 				{
-					keyValuePair.Value.SetActive(flag2);
+					keyValuePair.Value.SetActive(flag3);
 				}
 			}
 		}
-		if (this.categoryPanelSizeNeedsRefresh && this.building_button_refresh_idx >= this.activeCategoryBuildingToggles.Count)
+		if (flag || (this.categoryPanelSizeNeedsRefresh && this.building_button_refresh_idx >= this.activeCategoryBuildingToggles.Count))
 		{
 			this.categoryPanelSizeNeedsRefresh = false;
 			this.ConfigurePanelSize(null);

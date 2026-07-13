@@ -113,11 +113,13 @@ public class MainMenu : KScreen
 		this.logoDLC1.GetReference<Image>("icon").material = (DlcManager.IsContentSubscribed("EXPANSION1_ID") ? GlobalResources.Instance().AnimUIMaterial : GlobalResources.Instance().AnimMaterialUIDesaturated);
 		this.logoDLC2.GetReference<Image>("icon").material = (DlcManager.IsContentSubscribed("DLC2_ID") ? GlobalResources.Instance().AnimUIMaterial : GlobalResources.Instance().AnimMaterialUIDesaturated);
 		this.logoDLC3.GetReference<Image>("icon").material = (DlcManager.IsContentSubscribed("DLC3_ID") ? GlobalResources.Instance().AnimUIMaterial : GlobalResources.Instance().AnimMaterialUIDesaturated);
+		this.logoDLC4.GetReference<Image>("icon").material = (DlcManager.IsContentSubscribed("DLC4_ID") ? GlobalResources.Instance().AnimUIMaterial : GlobalResources.Instance().AnimMaterialUIDesaturated);
 		if (DistributionPlatform.Initialized || Application.isEditor)
 		{
 			string DLC1_STORE_URL = "";
 			string DLC2_STORE_URL = "";
 			string DLC3_STORE_URL = "";
+			string DLC4_STORE_URL = "";
 			string name = DistributionPlatform.Inst.Name;
 			if (!(name == "Steam"))
 			{
@@ -127,17 +129,20 @@ public class MainMenu : KScreen
 					{
 						DLC1_STORE_URL = "https://www.wegame.com.cn/store/2001539/";
 						DLC2_STORE_URL = "https://www.wegame.com.cn/store/2002196/";
-						DLC3_STORE_URL = "https://www.wegame.com.cn/store/2002196/";
+						DLC3_STORE_URL = "https://www.wegame.com.cn/store/2002347";
+						DLC4_STORE_URL = "https://www.wegame.com.cn/store/2002496";
 						this.logoDLC1.GetReference<Image>("icon").sprite = Assets.GetSprite("dlc1_logo_crop_cn");
 						this.logoDLC2.GetReference<Image>("icon").sprite = Assets.GetSprite("dlc2_logo_crop_cn");
 						this.logoDLC3.GetReference<Image>("icon").sprite = Assets.GetSprite("dlc3_logo_crop_cn");
+						this.logoDLC4.GetReference<Image>("icon").sprite = Assets.GetSprite("dlc4_logo_crop_cn");
 					}
 				}
 				else
 				{
 					DLC1_STORE_URL = "https://store.epicgames.com/en-US/p/oxygen-not-included--spaced-out";
 					DLC2_STORE_URL = "https://store.epicgames.com/p/oxygen-not-included-oxygen-not-included-the-frosty-planet-pack-915ba1";
-					DLC3_STORE_URL = "https://store.epicgames.com/p/oxygen-not-included-oxygen-not-included-the-frosty-planet-pack-915ba1";
+					DLC3_STORE_URL = "https://store.epicgames.com/p/oxygen-not-included-oxygen-not-included-the-bionic-booster-pack-3ba9e9";
+					DLC4_STORE_URL = "https://store.epicgames.com/p/oxygen-not-included-oxygen-not-included-the-prehistoric-planet-pack-c14f10";
 				}
 			}
 			else
@@ -145,6 +150,7 @@ public class MainMenu : KScreen
 				DLC1_STORE_URL = "https://store.steampowered.com/app/1452490/Oxygen_Not_Included__Spaced_Out/";
 				DLC2_STORE_URL = "https://store.steampowered.com/app/2952300/Oxygen_Not_Included_The_Frosty_Planet_Pack/";
 				DLC3_STORE_URL = "https://store.steampowered.com/app/3302470/Oxygen_Not_Included_The_Bionic_Booster_Pack/";
+				DLC4_STORE_URL = "https://store.steampowered.com/app/3655420/Oxygen_Not_Included_The_Prehistoric_Planet_Pack/";
 			}
 			MultiToggle reference = this.logoDLC1.GetReference<MultiToggle>("multitoggle");
 			reference.onClick = (global::System.Action)Delegate.Combine(reference.onClick, new global::System.Action(delegate
@@ -184,6 +190,15 @@ public class MainMenu : KScreen
 			string text3 = this.GetDLCStatusString("DLC3_ID", true);
 			text3 = text3 + "\n\n" + UI.FRONTEND.MAINMENU.WISHLIST_AD_TOOLTIP;
 			this.logoDLC3.GetReference<ToolTip>("tooltip").SetSimpleTooltip(text3);
+			MultiToggle reference4 = this.logoDLC4.GetReference<MultiToggle>("multitoggle");
+			reference4.onClick = (global::System.Action)Delegate.Combine(reference4.onClick, new global::System.Action(delegate
+			{
+				App.OpenWebURL(DLC4_STORE_URL);
+			}));
+			this.logoDLC4.GetReference<LocText>("statuslabel").SetText(this.GetDLCStatusString("DLC4_ID", false));
+			string text4 = this.GetDLCStatusString("DLC4_ID", true);
+			text4 = text4 + "\n\n" + UI.FRONTEND.MAINMENU.WISHLIST_AD_TOOLTIP;
+			this.logoDLC4.GetReference<ToolTip>("tooltip").SetSimpleTooltip(text4);
 		}
 	}
 
@@ -518,7 +533,7 @@ public class MainMenu : KScreen
 					header = saveFileEntry.header;
 					gameInfo = saveFileEntry.headerData;
 				}
-				if (header.buildVersion > 663500U || gameInfo.saveMajorVersion != 7 || gameInfo.saveMinorVersion > 35)
+				if (header.buildVersion > 674504U || gameInfo.saveMajorVersion != 7 || gameInfo.saveMinorVersion > 35)
 				{
 					flag = false;
 				}
@@ -755,6 +770,9 @@ public class MainMenu : KScreen
 
 	[SerializeField]
 	private HierarchyReferences logoDLC3;
+
+	[SerializeField]
+	private HierarchyReferences logoDLC4;
 
 	private KButton lockerButton;
 

@@ -27,7 +27,6 @@ public class ElectrobankConfig : IEntityConfig, IHasDlcRestrictions
 		{
 			Assets.AddCountableTag(GameTags.ChargedPortableBattery);
 		}
-		gameObject.GetComponent<KCollider2D>();
 		gameObject.AddTag(GameTags.IndustrialProduct);
 		gameObject.AddComponent<Electrobank>().rechargeable = true;
 		gameObject.AddOrGet<OccupyArea>().SetCellOffsets(EntityTemplates.GenerateOffsets(1, 1));

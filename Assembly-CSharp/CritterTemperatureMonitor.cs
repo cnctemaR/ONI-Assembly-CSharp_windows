@@ -90,8 +90,6 @@ public class CritterTemperatureMonitor : GameStateMachine<CritterTemperatureMoni
 		public float secondsUntilDamageStarts = 1f;
 
 		public float damagePerSecond = 0.25f;
-
-		public bool isBammoth;
 	}
 
 	public class TemperatureStates : GameStateMachine<CritterTemperatureMonitor, CritterTemperatureMonitor.Instance, IStateMachineTarget, CritterTemperatureMonitor.Def>.State
@@ -171,14 +169,11 @@ public class CritterTemperatureMonitor : GameStateMachine<CritterTemperatureMoni
 				flag = true;
 				for (int i = 0; i < this.occupyArea.OccupiedCellsOffsets.Length; i++)
 				{
-					if (!base.def.isBammoth || this.occupyArea.OccupiedCellsOffsets[i].x == 0)
+					int num = Grid.OffsetCell(cachedCell, this.occupyArea.OccupiedCellsOffsets[i]);
+					if (!Grid.IsValidCell(num) || !Grid.Element[num].IsVacuum)
 					{
-						int num = Grid.OffsetCell(cachedCell, this.occupyArea.OccupiedCellsOffsets[i]);
-						if (!Grid.IsValidCell(num) || !Grid.Element[num].IsVacuum)
-						{
-							flag = false;
-							break;
-						}
+						flag = false;
+						break;
 					}
 				}
 			}
@@ -203,15 +198,12 @@ public class CritterTemperatureMonitor : GameStateMachine<CritterTemperatureMoni
 				int num2 = 0;
 				for (int i = 0; i < this.occupyArea.OccupiedCellsOffsets.Length; i++)
 				{
-					if (!base.def.isBammoth || this.occupyArea.OccupiedCellsOffsets[i].x == 0)
+					int num3 = Grid.OffsetCell(cachedCell, this.occupyArea.OccupiedCellsOffsets[i]);
+					if (Grid.IsValidCell(num3))
 					{
-						int num3 = Grid.OffsetCell(cachedCell, this.occupyArea.OccupiedCellsOffsets[i]);
-						if (Grid.IsValidCell(num3))
-						{
-							bool flag = Grid.Element[num3].id == SimHashes.Vacuum || Grid.Element[num3].id == SimHashes.Void;
-							num2++;
-							num += (flag ? this.GetTemperatureInternal() : Grid.Temperature[num3]);
-						}
+						bool flag = Grid.Element[num3].id == SimHashes.Vacuum || Grid.Element[num3].id == SimHashes.Void;
+						num2++;
+						num += (flag ? this.GetTemperatureInternal() : Grid.Temperature[num3]);
 					}
 				}
 				return num / (float)Mathf.Max(1, num2);

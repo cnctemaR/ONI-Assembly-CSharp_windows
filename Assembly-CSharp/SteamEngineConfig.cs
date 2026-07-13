@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using STRINGS;
 using TUNING;
 using UnityEngine;
 
@@ -18,12 +19,12 @@ public class SteamEngineConfig : IBuildingConfig
 		string text2 = "rocket_steam_engine_kanim";
 		int num3 = 1000;
 		float num4 = 480f;
-		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER7;
+		float[] tier = global::TUNING.BUILDINGS.CONSTRUCTION_MASS_KG.TIER7;
 		string[] array = new string[] { SimHashes.Steel.ToString() };
 		float num5 = 9999f;
 		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloor;
 		EffectorValues tier2 = NOISE_POLLUTION.NOISY.TIER2;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, array, num5, buildLocationRule, BUILDINGS.DECOR.NONE, tier2, 0.2f);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, array, num5, buildLocationRule, global::TUNING.BUILDINGS.DECOR.NONE, tier2, 0.2f);
 		BuildingTemplates.CreateRocketBuildingDef(buildingDef);
 		buildingDef.SceneLayer = Grid.SceneLayer.BuildingFront;
 		buildingDef.OverheatTemperature = 2273.15f;
@@ -35,6 +36,7 @@ public class SteamEngineConfig : IBuildingConfig
 		buildingDef.InputConduitType = ConduitType.Gas;
 		buildingDef.RequiresPowerInput = false;
 		buildingDef.CanMove = true;
+		buildingDef.AddSearchTerms(SEARCH_TERMS.STEAM);
 		return buildingDef;
 	}
 
@@ -67,7 +69,7 @@ public class SteamEngineConfig : IBuildingConfig
 		rocketEngine.exhaustElement = SimHashes.Steam;
 		rocketEngine.exhaustTemperature = ElementLoader.FindElementByHash(SimHashes.Steam).lowTemp + 50f;
 		Storage storage = go.AddOrGet<Storage>();
-		storage.capacityKg = BUILDINGS.ROCKETRY_MASS_KG.FUEL_TANK_WET_MASS[0];
+		storage.capacityKg = global::TUNING.BUILDINGS.ROCKETRY_MASS_KG.FUEL_TANK_WET_MASS[0];
 		storage.SetDefaultStoredItemModifiers(new List<Storage.StoredItemModifier>
 		{
 			Storage.StoredItemModifier.Hide,

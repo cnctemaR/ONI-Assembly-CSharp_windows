@@ -214,7 +214,7 @@ public class FindAndConsumeOxygenSourceChore : Chore<FindAndConsumeOxygenSourceC
 		}
 	}
 
-	public class Instance : GameStateMachine<FindAndConsumeOxygenSourceChore.States, FindAndConsumeOxygenSourceChore.Instance, FindAndConsumeOxygenSourceChore, object>.GameInstance
+	public class Instance : GameStateMachine<FindAndConsumeOxygenSourceChore.States, FindAndConsumeOxygenSourceChore.Instance, FindAndConsumeOxygenSourceChore, object>.GameInstance, BionicOxygenTankMonitor.IChore
 	{
 		public BionicOxygenTankMonitor.Instance oxygenTankMonitor
 		{
@@ -227,6 +227,11 @@ public class FindAndConsumeOxygenSourceChore : Chore<FindAndConsumeOxygenSourceC
 		public Instance(FindAndConsumeOxygenSourceChore master, GameObject duplicant)
 			: base(master)
 		{
+		}
+
+		public bool IsConsumingOxygen()
+		{
+			return !base.IsInsideState(base.sm.fetch);
 		}
 
 		public void ShowBottleSymbolOverrideObject(Element elementOfCanister)

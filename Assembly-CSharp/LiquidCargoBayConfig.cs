@@ -1,4 +1,5 @@
 ﻿using System;
+using STRINGS;
 using TUNING;
 using UnityEngine;
 
@@ -17,12 +18,12 @@ public class LiquidCargoBayConfig : IBuildingConfig
 		string text2 = "rocket_storage_liquid_kanim";
 		int num3 = 1000;
 		float num4 = 60f;
-		float[] cargo_MASS = BUILDINGS.ROCKETRY_MASS_KG.CARGO_MASS;
+		float[] cargo_MASS = global::TUNING.BUILDINGS.ROCKETRY_MASS_KG.CARGO_MASS;
 		string[] array = new string[] { SimHashes.Steel.ToString() };
 		float num5 = 9999f;
 		BuildLocationRule buildLocationRule = BuildLocationRule.BuildingAttachPoint;
 		EffectorValues tier = NOISE_POLLUTION.NOISY.TIER2;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, cargo_MASS, array, num5, buildLocationRule, BUILDINGS.DECOR.NONE, tier, 0.2f);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, cargo_MASS, array, num5, buildLocationRule, global::TUNING.BUILDINGS.DECOR.NONE, tier, 0.2f);
 		BuildingTemplates.CreateRocketBuildingDef(buildingDef);
 		buildingDef.SceneLayer = Grid.SceneLayer.BuildingFront;
 		buildingDef.OverheatTemperature = 2273.15f;
@@ -34,6 +35,7 @@ public class LiquidCargoBayConfig : IBuildingConfig
 		buildingDef.RequiresPowerInput = false;
 		buildingDef.CanMove = true;
 		buildingDef.attachablePosition = new CellOffset(0, 0);
+		buildingDef.AddSearchTerms(SEARCH_TERMS.TRANSPORT);
 		return buildingDef;
 	}
 

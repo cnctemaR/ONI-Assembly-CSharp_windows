@@ -143,6 +143,8 @@ public struct AxialI : IEquatable<AxialI>
 		return this.r ^ this.q;
 	}
 
+	public static readonly AxialI INVALID = new AxialI(int.MaxValue, int.MaxValue);
+
 	public static readonly AxialI ZERO = new AxialI(0, 0);
 
 	public static readonly AxialI NORTHWEST = new AxialI(0, -1);

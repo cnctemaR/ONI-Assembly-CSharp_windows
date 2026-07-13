@@ -7,18 +7,6 @@ using UnityEngine;
 
 public class Growing : StateMachineComponent<Growing.StatesInstance>, IGameObjectEffectDescriptor, IManageGrowingStates
 {
-	private Crop crop
-	{
-		get
-		{
-			if (this._crop == null)
-			{
-				this._crop = base.GetComponent<Crop>();
-			}
-			return this._crop;
-		}
-	}
-
 	protected override void OnPrefabInit()
 	{
 		Amounts amounts = base.gameObject.GetAmounts();
@@ -55,7 +43,7 @@ public class Growing : StateMachineComponent<Growing.StatesInstance>, IGameObjec
 		{
 			KCrashReporter.ReportDevNotification("Maturity.OnNewGameSpawn", Environment.StackTrace, "", false, null);
 		}
-		this.maturity.SetValue(this.maturity.maxAttribute.GetTotalValue() * global::UnityEngine.Random.Range(0f, 1f));
+		this.maturity.SetValue(this.maturity.maxAttribute.GetTotalValue() * this.MaxMaturityValuePercentageToSpawnWith * global::UnityEngine.Random.Range(0f, 1f));
 	}
 
 	public void OverrideMaturityLevel(float percent)
@@ -157,10 +145,19 @@ public class Growing : StateMachineComponent<Growing.StatesInstance>, IGameObjec
 		base.gameObject.Trigger(-1793167409, null);
 	}
 
-	public Crop GetGropComponent()
+	public Crop GetCropComponent()
 	{
 		return base.GetComponent<Crop>();
 	}
+
+	public bool IsWildPlanted()
+	{
+		return !this.rm.Replanted;
+	}
+
+	public Func<GameObject, bool> CustomGrowStallCondition_IsStalled;
+
+	public float MaxMaturityValuePercentageToSpawnWith = 1f;
 
 	public float GROWTH_RATE = 0.0016666667f;
 
@@ -186,8 +183,6 @@ public class Growing : StateMachineComponent<Growing.StatesInstance>, IGameObjec
 	[MyCmpReq]
 	private ReceptacleMonitor rm;
 
-	private Crop _crop;
-
 	private static readonly EventSystem.IntraObjectHandler<Growing> OnNewGameSpawnDelegate = new EventSystem.IntraObjectHandler<Growing>(delegate(Growing component, object data)
 	{
 		component.OnNewGameSpawn(data);
@@ -206,6 +201,7 @@ public class Growing : StateMachineComponent<Growing.StatesInstance>, IGameObjec
 			this.baseGrowingRate = new AttributeModifier(master.maturity.deltaAttribute.Id, master.GROWTH_RATE, CREATURES.STATS.MATURITY.GROWING, false, false, true);
 			this.wildGrowingRate = new AttributeModifier(master.maturity.deltaAttribute.Id, master.WILD_GROWTH_RATE, CREATURES.STATS.MATURITY.GROWINGWILD, false, false, true);
 			this.getOldRate = new AttributeModifier(master.oldAge.deltaAttribute.Id, master.shouldGrowOld ? 1f : 0f, null, false, false, true);
+			this.harvestable = base.GetComponent<Harvestable>();
 		}
 
 		public bool IsGrown()
@@ -228,15 +224,19 @@ public class Growing : StateMachineComponent<Growing.StatesInstance>, IGameObjec
 			return base.master.wiltCondition != null && base.master.wiltCondition.IsWilting();
 		}
 
-		public bool IsSleeping()
+		public bool IsStalledByCustomCondition()
 		{
-			CropSleepingMonitor.Instance smi = base.master.GetSMI<CropSleepingMonitor.Instance>();
-			return smi != null && smi.IsSleeping();
+			bool flag = false;
+			if (base.master.CustomGrowStallCondition_IsStalled != null)
+			{
+				flag = base.master.CustomGrowStallCondition_IsStalled(base.master.gameObject);
+			}
+			return flag;
 		}
 
 		public bool CanExitStalled()
 		{
-			return !this.IsWilting() && !this.IsSleeping();
+			return !this.IsWilting() && (base.master.CustomGrowStallCondition_IsStalled == null || !base.master.CustomGrowStallCondition_IsStalled(base.master.gameObject));
 		}
 
 		public AttributeModifier baseGrowingRate;
@@ -244,6 +244,8 @@ public class Growing : StateMachineComponent<Growing.StatesInstance>, IGameObjec
 		public AttributeModifier wildGrowingRate;
 
 		public AttributeModifier getOldRate;
+
+		public Harvestable harvestable;
 	}
 
 	public class States : GameStateMachine<Growing.States, Growing.StatesInstance, Growing>
@@ -252,10 +254,10 @@ public class Growing : StateMachineComponent<Growing.StatesInstance>, IGameObjec
 		{
 			default_state = this.growing;
 			base.serializable = StateMachine.SerializeType.Both_DEPRECATED;
-			this.growing.EventTransition(GameHashes.Wilt, this.stalled, (Growing.StatesInstance smi) => smi.IsWilting()).EventTransition(GameHashes.CropSleep, this.stalled, (Growing.StatesInstance smi) => smi.IsSleeping()).EventTransition(GameHashes.ReceptacleMonitorChange, this.growing.planted, (Growing.StatesInstance smi) => smi.master.rm.Replanted)
-				.EventTransition(GameHashes.ReceptacleMonitorChange, this.growing.wild, (Growing.StatesInstance smi) => !smi.master.rm.Replanted)
-				.EventTransition(GameHashes.PlanterStorage, this.growing.planted, (Growing.StatesInstance smi) => smi.master.rm.Replanted)
-				.EventTransition(GameHashes.PlanterStorage, this.growing.wild, (Growing.StatesInstance smi) => !smi.master.rm.Replanted)
+			this.growing.EventTransition(GameHashes.Wilt, this.stalled, (Growing.StatesInstance smi) => smi.IsWilting()).EventTransition(GameHashes.CropSleep, this.stalled, (Growing.StatesInstance smi) => smi.IsStalledByCustomCondition()).EventTransition(GameHashes.ReceptacleMonitorChange, this.growing.planted, (Growing.StatesInstance smi) => !smi.master.IsWildPlanted())
+				.EventTransition(GameHashes.ReceptacleMonitorChange, this.growing.wild, (Growing.StatesInstance smi) => smi.master.IsWildPlanted())
+				.EventTransition(GameHashes.PlanterStorage, this.growing.planted, (Growing.StatesInstance smi) => !smi.master.IsWildPlanted())
+				.EventTransition(GameHashes.PlanterStorage, this.growing.wild, (Growing.StatesInstance smi) => smi.master.IsWildPlanted())
 				.TriggerOnEnter(GameHashes.Grow, null)
 				.Update("CheckGrown", delegate(Growing.StatesInstance smi, float dt)
 				{
@@ -267,7 +269,7 @@ public class Growing : StateMachineComponent<Growing.StatesInstance>, IGameObjec
 				.ToggleStatusItem(Db.Get().CreatureStatusItems.Growing, (Growing.StatesInstance smi) => smi.master.GetComponent<IManageGrowingStates>())
 				.Enter(delegate(Growing.StatesInstance smi)
 				{
-					GameStateMachine<Growing.States, Growing.StatesInstance, Growing, object>.State state = (smi.master.rm.Replanted ? this.growing.planted : this.growing.wild);
+					GameStateMachine<Growing.States, Growing.StatesInstance, Growing, object>.State state = (smi.master.IsWildPlanted() ? this.growing.wild : this.growing.planted);
 					smi.GoTo(state);
 				});
 			this.growing.wild.ToggleAttributeModifier("GrowingWild", (Growing.StatesInstance smi) => smi.wildGrowingRate, null);
@@ -291,27 +293,27 @@ public class Growing : StateMachineComponent<Growing.StatesInstance>, IGameObjec
 				});
 			this.grown.idle.Update("CheckNotGrown", delegate(Growing.StatesInstance smi, float dt)
 			{
-				if (smi.master.shouldGrowOld && smi.master.oldAge.value >= smi.master.oldAge.GetMax())
+				if (smi.master.shouldGrowOld && smi.master.oldAge.value >= smi.master.oldAge.GetMax() && smi.harvestable && smi.harvestable.CanBeHarvested)
 				{
-					smi.GoTo(this.grown.try_self_harvest);
+					if (smi.harvestable.harvestDesignatable != null)
+					{
+						bool harvestWhenReady = smi.harvestable.harvestDesignatable.HarvestWhenReady;
+						smi.harvestable.ForceCancelHarvest(null);
+						smi.harvestable.Harvest();
+						if (harvestWhenReady && smi.harvestable != null)
+						{
+							smi.harvestable.harvestDesignatable.SetHarvestWhenReady(true);
+						}
+					}
+					else
+					{
+						smi.harvestable.ForceCancelHarvest(null);
+						smi.harvestable.Harvest();
+					}
+					smi.master.maturity.SetValue(0f);
+					smi.master.oldAge.SetValue(0f);
 				}
 			}, UpdateRate.SIM_4000ms, false);
-			this.grown.try_self_harvest.Enter(delegate(Growing.StatesInstance smi)
-			{
-				Harvestable component = smi.master.GetComponent<Harvestable>();
-				if (component && component.CanBeHarvested)
-				{
-					bool harvestWhenReady = component.harvestDesignatable.HarvestWhenReady;
-					component.ForceCancelHarvest(null);
-					component.Harvest();
-					if (harvestWhenReady && component != null)
-					{
-						component.harvestDesignatable.SetHarvestWhenReady(true);
-					}
-				}
-				smi.master.maturity.SetValue(0f);
-				smi.master.oldAge.SetValue(0f);
-			}).GoTo(this.grown.idle);
 		}
 
 		public Growing.States.GrowingStates growing;
@@ -330,8 +332,6 @@ public class Growing : StateMachineComponent<Growing.StatesInstance>, IGameObjec
 		public class GrownStates : GameStateMachine<Growing.States, Growing.StatesInstance, Growing, object>.State
 		{
 			public GameStateMachine<Growing.States, Growing.StatesInstance, Growing, object>.State idle;
-
-			public GameStateMachine<Growing.States, Growing.StatesInstance, Growing, object>.State try_self_harvest;
 		}
 	}
 }

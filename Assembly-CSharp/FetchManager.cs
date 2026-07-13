@@ -112,7 +112,11 @@ public class FetchManager : KMonoBehaviour, ISim1000ms
 	{
 		KPrefabID kprefabID = pickup.KPrefabID;
 		Storage storage = pickup.storage;
-		if (pickup.UnreservedAmount <= 0f)
+		if (pickup.UnreservedFetchAmount <= 0f)
+		{
+			return false;
+		}
+		if (pickup.PrimaryElement.MassPerUnit > 1f && pickup.PrimaryElement.MassPerUnit > chore.originalAmount)
 		{
 			return false;
 		}
@@ -235,7 +239,7 @@ public class FetchManager : KMonoBehaviour, ISim1000ms
 		foreach (FetchManager.Pickup pickup2 in this.pickups)
 		{
 			Pickupable pickupable = pickup2.pickupable;
-			if (FetchManager.IsFetchablePickup_Exclude(pickupable.KPrefabID, pickupable.storage, pickupable.UnreservedAmount, exclude_tags, required_tags, destination))
+			if (FetchManager.IsFetchablePickup_Exclude(pickupable.KPrefabID, pickupable.storage, pickupable.UnreservedFetchAmount, exclude_tags, required_tags, destination))
 			{
 				int num2 = (int)pickup2.PathCost + (5 - pickup2.foodQuality) * 50;
 				if (num2 < num)
@@ -265,7 +269,7 @@ public class FetchManager : KMonoBehaviour, ISim1000ms
 							{
 								Edible component2 = storage.items[0].GetComponent<Edible>();
 								Pickupable component3 = component2.GetComponent<Pickupable>();
-								if (FetchManager.IsFetchablePickup_Exclude(component3.KPrefabID, component3.storage, component3.UnreservedAmount, exclude_tags, required_tags, destination))
+								if (FetchManager.IsFetchablePickup_Exclude(component3.KPrefabID, component3.storage, component3.UnreservedFetchAmount, exclude_tags, required_tags, destination))
 								{
 									int num4 = cost + (5 - component2.FoodInfo.Quality + 1) * 50 + 5;
 									if (num4 < num)

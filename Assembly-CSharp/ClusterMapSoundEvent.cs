@@ -11,7 +11,7 @@ public class ClusterMapSoundEvent : SoundEvent
 
 	public override void OnPlay(AnimEventManager.EventPlayerData behaviour)
 	{
-		if (ClusterMapScreen.Instance.IsActive())
+		if (ClusterMapScreen.Instance != null && ClusterMapScreen.Instance.IsActive())
 		{
 			this.PlaySound(behaviour);
 		}

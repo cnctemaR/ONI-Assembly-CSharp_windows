@@ -10,6 +10,14 @@ using UnityEngine;
 [AddComponentMenu("KMonoBehaviour/scripts/ColonyAchievementTracker")]
 public class ColonyAchievementTracker : KMonoBehaviour, ISaveLoadableDetails, IRenderEveryTick
 {
+	public bool HasAnyDupeDied
+	{
+		get
+		{
+			return this.deadDupeCounter > 0;
+		}
+	}
+
 	public bool GeothermalFacilityDiscovered
 	{
 		get
@@ -530,7 +538,19 @@ public class ColonyAchievementTracker : KMonoBehaviour, ISaveLoadableDetails, IR
 	public bool fullyBoostedBionic;
 
 	[Serialize]
+	public int deadDupeCounter;
+
+	[Serialize]
 	private int geothermalProgress;
+
+	[Serialize]
+	public ColonyAchievementTracker.LargeImpactorState largeImpactorState;
+
+	[Serialize]
+	public float LargeImpactorBackgroundScale = 0.6f;
+
+	[Serialize]
+	public int largeImpactorLandedCycle = -1;
 
 	private const int GEO_DISCOVERED_BIT = 1;
 
@@ -573,4 +593,11 @@ public class ColonyAchievementTracker : KMonoBehaviour, ISaveLoadableDetails, IR
 	{
 		component.OnNewDay(data);
 	});
+
+	public enum LargeImpactorState
+	{
+		Alive,
+		Defeated,
+		Landed
+	}
 }

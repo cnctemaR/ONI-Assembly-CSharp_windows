@@ -27,7 +27,7 @@ namespace Klei.AI
 		}
 
 		public MeteorShowerEvent(string id, float duration, float secondsPerMeteor, MathUtil.MinMax secondsBombardmentOff = default(MathUtil.MinMax), MathUtil.MinMax secondsBombardmentOn = default(MathUtil.MinMax), string clusterMapMeteorShowerID = null, bool affectedByDifficulty = true)
-			: base(id, 0, 0)
+			: base(id, 0, 0, null, null)
 		{
 			this.allowMultipleEventInstances = true;
 			this.clusterMapMeteorShowerID = clusterMapMeteorShowerID;

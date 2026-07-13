@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using KSerialization;
 using UnityEngine;
 
@@ -231,9 +232,9 @@ public class SpecialCargoBayClusterReceptacle : SingleEntityReceptacle, IBaggedS
 			this.RemoveCritterTracker();
 			base.Occupant.GetComponent<KBatchedAnimController>().SetVisiblity(false);
 			Butcherable component = base.Occupant.GetComponent<Butcherable>();
-			if (component != null && component.drops != null && component.drops.Length != 0)
+			if (component != null && component.drops != null && component.drops.Count > 0)
 			{
-				this.SetLootSymbolImage(component.drops[0]);
+				this.SetLootSymbolImage(component.drops.Keys.ToList<string>()[0].ToTag());
 			}
 			else
 			{

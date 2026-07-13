@@ -137,7 +137,10 @@ public class FertilityMonitor : GameStateMachine<FertilityMonitor, FertilityMoni
 					}
 				}
 				this.egg.SetActive(true);
-				Db.Get().Amounts.Wildness.Copy(this.egg, base.gameObject);
+				if (Db.Get().Amounts.Wildness.Lookup(base.gameObject) != null)
+				{
+					Db.Get().Amounts.Wildness.Copy(this.egg, base.gameObject);
+				}
 				this.egg = null;
 			}
 		}

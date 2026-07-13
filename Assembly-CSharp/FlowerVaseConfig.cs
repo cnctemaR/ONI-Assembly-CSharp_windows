@@ -32,7 +32,9 @@ public class FlowerVaseConfig : IBuildingConfig
 	{
 		go.AddOrGet<Storage>();
 		Prioritizable.AddRef(go);
-		go.AddOrGet<PlantablePlot>().AddDepositTag(GameTags.DecorSeed);
+		PlantablePlot plantablePlot = go.AddOrGet<PlantablePlot>();
+		plantablePlot.IsOffGround = true;
+		plantablePlot.AddDepositTag(GameTags.DecorSeed);
 		go.AddOrGet<FlowerVase>();
 		go.GetComponent<KPrefabID>().AddTag(GameTags.Decoration, false);
 	}

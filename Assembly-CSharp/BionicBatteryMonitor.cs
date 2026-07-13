@@ -344,15 +344,7 @@ public class BionicBatteryMonitor : GameStateMachine<BionicBatteryMonitor, Bioni
 		{
 			get
 			{
-				return (int)(this.storage.GetMassAvailable("EmptyElectrobank") / 20f);
-			}
-		}
-
-		public int DamagedElectrobankCount
-		{
-			get
-			{
-				return (int)(this.storage.GetMassAvailable("GarbageElectrobank") / 20f);
+				return base.sm.DepletedElectrobankCount.Get(this);
 			}
 		}
 
@@ -415,7 +407,7 @@ public class BionicBatteryMonitor : GameStateMachine<BionicBatteryMonitor, Bioni
 			this.dataHolder.UpdateData<BionicBatteryMonitor.Instance>(dataPackData);
 		}
 
-		public override void OnParamsDeserialized()
+		public override void PostParamsInitialized()
 		{
 			MinionStorageDataHolder.DataPack dataPack = this.dataHolder.GetDataPack<BionicBatteryMonitor.Instance>();
 			if (dataPack != null && dataPack.IsStoringNewData)
@@ -430,7 +422,7 @@ public class BionicBatteryMonitor : GameStateMachine<BionicBatteryMonitor, Bioni
 				}
 			}
 			this.RefreshCharge();
-			base.OnParamsDeserialized();
+			base.PostParamsInitialized();
 		}
 
 		public void DropAllDischargedElectrobanks()
@@ -602,56 +594,59 @@ public class BionicBatteryMonitor : GameStateMachine<BionicBatteryMonitor, Bioni
 
 		public void RefreshCharge()
 		{
-			List<GameObject> list = new List<GameObject>();
-			List<GameObject> list2 = new List<GameObject>();
-			this.storage.Find(GameTags.ChargedPortableBattery, list);
-			this.storage.Find(GameTags.EmptyPortableBattery, list2);
+			ListPool<GameObject, BionicBatteryMonitor.Instance>.PooledList pooledList = ListPool<GameObject, BionicBatteryMonitor.Instance>.Allocate();
+			ListPool<GameObject, BionicBatteryMonitor.Instance>.PooledList pooledList2 = ListPool<GameObject, BionicBatteryMonitor.Instance>.Allocate();
+			this.storage.Find(GameTags.ChargedPortableBattery, pooledList);
+			this.storage.Find(GameTags.EmptyPortableBattery, pooledList2);
 			float num = 0f;
 			if (this.IsOnline)
 			{
-				for (int i = 0; i < list.Count; i++)
+				for (int i = 0; i < pooledList.Count; i++)
 				{
-					Electrobank component = list[i].GetComponent<Electrobank>();
+					Electrobank component = pooledList[i].GetComponent<Electrobank>();
 					num += component.Charge;
 				}
 			}
 			this.BionicBattery.SetValue(num);
-			base.sm.ChargedElectrobankCount.Set(list.Count, this, false);
-			base.sm.DepletedElectrobankCount.Set(list2.Count, this, false);
+			base.sm.ChargedElectrobankCount.Set(pooledList.Count, this, false);
+			pooledList.Recycle();
+			base.sm.DepletedElectrobankCount.Set(pooledList2.Count, this, false);
+			pooledList2.Recycle();
 			this.UpdateNotifications();
 		}
 
 		public void ConsumePower(float joules)
 		{
-			List<GameObject> list = new List<GameObject>();
-			this.storage.Find(GameTags.ChargedPortableBattery, list);
+			ListPool<GameObject, BionicBatteryMonitor.Instance>.PooledList pooledList = ListPool<GameObject, BionicBatteryMonitor.Instance>.Allocate();
+			this.storage.Find(GameTags.ChargedPortableBattery, pooledList);
 			float num = joules;
-			for (int i = 0; i < list.Count; i++)
+			for (int i = 0; i < pooledList.Count; i++)
 			{
-				Electrobank component = list[i].GetComponent<Electrobank>();
+				Electrobank component = pooledList[i].GetComponent<Electrobank>();
 				float num2 = Mathf.Min(component.Charge, num);
 				float num3 = component.RemovePower(num2, false);
 				num -= num3;
 				WorldResourceAmountTracker<ElectrobankTracker>.Get().RegisterAmountConsumed(component.ID, num3);
 			}
 			this.RefreshCharge();
+			pooledList.Recycle();
 		}
 
 		public void DebugAddCharge(float joules)
 		{
 			float num = MathF.Min(joules, (float)this.ElectrobankCountCapacity * 120000f - this.CurrentCharge);
-			List<GameObject> list = new List<GameObject>();
-			this.storage.Find(GameTags.ChargedPortableBattery, list);
+			ListPool<GameObject, BionicBatteryMonitor.Instance>.PooledList pooledList = ListPool<GameObject, BionicBatteryMonitor.Instance>.Allocate();
+			this.storage.Find(GameTags.ChargedPortableBattery, pooledList);
 			int num2 = 0;
-			while (num > 0f && num2 < list.Count)
+			while (num > 0f && num2 < pooledList.Count)
 			{
-				Electrobank component = list[num2].GetComponent<Electrobank>();
+				Electrobank component = pooledList[num2].GetComponent<Electrobank>();
 				float num3 = Mathf.Min(120000f - component.Charge, num);
 				component.AddPower(num3);
 				num -= num3;
 				num2++;
 			}
-			if (num > 0f && list.Count < this.ElectrobankCountCapacity)
+			if (num > 0f && pooledList.Count < this.ElectrobankCountCapacity)
 			{
 				int num4 = this.storage.items.Count - 1;
 				while (num > 0f && num4 >= 0)
@@ -690,6 +685,7 @@ public class BionicBatteryMonitor : GameStateMachine<BionicBatteryMonitor, Bioni
 				while (num > 0f && this.storage.items.Count < this.ElectrobankCountCapacity && num > 0f);
 			}
 			this.RefreshCharge();
+			pooledList.Recycle();
 		}
 
 		private void UpdateNotifications()

@@ -7,10 +7,7 @@ public class FruitCakeConfig : IEntityConfig
 {
 	public GameObject CreatePrefab()
 	{
-		GameObject gameObject = EntityTemplates.CreateLooseEntity("FruitCake", global::STRINGS.ITEMS.FOOD.FRUITCAKE.NAME, global::STRINGS.ITEMS.FOOD.FRUITCAKE.DESC, 1f, false, Assets.GetAnim("fruitcake_kanim"), "object", Grid.SceneLayer.Front, EntityTemplates.CollisionShape.RECTANGLE, 0.8f, 0.4f, true, 0, SimHashes.Creature, null);
-		gameObject = EntityTemplates.ExtendEntityToFood(gameObject, FOOD.FOOD_TYPES.FRUITCAKE);
-		ComplexRecipeManager.Get().GetRecipe(FruitCakeConfig.recipe.id).FabricationVisualizer = MushBarConfig.CreateFabricationVisualizer(gameObject);
-		return gameObject;
+		return EntityTemplates.ExtendEntityToFood(EntityTemplates.CreateLooseEntity("FruitCake", global::STRINGS.ITEMS.FOOD.FRUITCAKE.NAME, global::STRINGS.ITEMS.FOOD.FRUITCAKE.DESC, 1f, false, Assets.GetAnim("fruitcake_kanim"), "object", Grid.SceneLayer.Front, EntityTemplates.CollisionShape.RECTANGLE, 0.8f, 0.4f, true, 0, SimHashes.Creature, null), FOOD.FOOD_TYPES.FRUITCAKE);
 	}
 
 	public void OnPrefabInit(GameObject inst)
@@ -22,6 +19,8 @@ public class FruitCakeConfig : IEntityConfig
 	}
 
 	public const string ID = "FruitCake";
+
+	public const string ANIM = "fruitcake_kanim";
 
 	public static ComplexRecipe recipe;
 }

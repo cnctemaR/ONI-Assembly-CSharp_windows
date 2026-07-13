@@ -36,7 +36,7 @@ public class BipedTransitionLayer : TransitionDriver.OverrideLayer
 			{
 				return;
 			}
-			num = this.GetMovementSpeedMultiplier(navigator);
+			num = this.GetMovementSpeedMultiplier();
 		}
 		int num2 = Grid.PosToCell(navigator);
 		float num3 = 1f;
@@ -129,14 +129,19 @@ public class BipedTransitionLayer : TransitionDriver.OverrideLayer
 		return DUPLICANTSTATS.STANDARD.BaseStats.TRANSIT_TUBE_TRAVEL_SPEED;
 	}
 
-	public float GetMovementSpeedMultiplier(Navigator navigator)
+	public static float GetMovementSpeedMultiplier(AttributeConverterInstance movementSpeed)
 	{
 		float num = 1f;
-		if (this.movementSpeed != null)
+		if (movementSpeed != null)
 		{
-			num += this.movementSpeed.Evaluate();
+			num += movementSpeed.Evaluate();
 		}
 		return Mathf.Max(0.1f, num);
+	}
+
+	public float GetMovementSpeedMultiplier()
+	{
+		return BipedTransitionLayer.GetMovementSpeedMultiplier(this.movementSpeed);
 	}
 
 	private bool isWalking;

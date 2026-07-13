@@ -21,7 +21,7 @@ public class DLCBetaMessageScreen : KModalScreen
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		if (!this.betaIsLive || (Application.isEditor && this.skipInEditor) || !DlcManager.GetActiveDLCIds().Contains("DLC3_ID"))
+		if (!this.betaIsLive || (Application.isEditor && this.skipInEditor) || !DlcManager.IsContentSubscribed("DLC4_ID"))
 		{
 			global::UnityEngine.Object.Destroy(base.gameObject);
 			return;

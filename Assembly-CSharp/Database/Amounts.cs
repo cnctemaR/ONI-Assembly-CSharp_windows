@@ -36,6 +36,8 @@ namespace Database
 			this.AirPressure.SetDisplayer(new StandardAmountDisplayer(GameUtil.UnitClass.Mass, GameUtil.TimeSlice.PerSecond, null, GameUtil.IdentityDescriptorTense.Normal));
 			this.Maturity = this.CreateAmount("Maturity", 0f, 0f, true, Units.Flat, 0.0009166667f, true, "STRINGS.CREATURES", "ui_icon_maturity", null, null);
 			this.Maturity.SetDisplayer(new StandardAmountDisplayer(GameUtil.UnitClass.Cycles, GameUtil.TimeSlice.None, null, GameUtil.IdentityDescriptorTense.Normal));
+			this.Maturity2 = this.CreateAmount("Maturity2", 0f, 0f, true, Units.Flat, 0.0009166667f, true, false, "STRINGS.CREATURES", "ui_icon_maturity", null, null);
+			this.Maturity2.SetDisplayer(new StandardAmountDisplayer(GameUtil.UnitClass.Cycles, GameUtil.TimeSlice.None, null, GameUtil.IdentityDescriptorTense.Normal));
 			this.OldAge = this.CreateAmount("OldAge", 0f, 0f, false, Units.Flat, 0f, false, "STRINGS.CREATURES", null, null, null);
 			this.Fertilization = this.CreateAmount("Fertilization", 0f, 100f, true, Units.Flat, 0.1675f, true, "STRINGS.CREATURES", null, null, null);
 			this.Fertilization.SetDisplayer(new StandardAmountDisplayer(GameUtil.UnitClass.Percent, GameUtil.TimeSlice.PerSecond, null, GameUtil.IdentityDescriptorTense.Normal));
@@ -126,9 +128,15 @@ namespace Database
 
 		public Amount CreateAmount(string id, float min, float max, bool show_max, Units units, float delta_threshold, bool show_in_ui, string string_root, string uiSprite = null, string thoughtSprite = null, string uiFullColourSprite = null)
 		{
+			return this.CreateAmount(id, min, max, show_max, units, delta_threshold, show_in_ui, true, string_root, uiSprite, thoughtSprite, uiFullColourSprite);
+		}
+
+		public Amount CreateAmount(string id, float min, float max, bool show_max, Units units, float delta_threshold, bool show_in_ui, bool show_delta_in_ui, string string_root, string uiSprite = null, string thoughtSprite = null, string uiFullColourSprite = null)
+		{
 			string text = Strings.Get(string.Format("{1}.STATS.{0}.NAME", id.ToUpper(), string_root.ToUpper()));
 			string text2 = Strings.Get(string.Format("{1}.STATS.{0}.TOOLTIP", id.ToUpper(), string_root.ToUpper()));
 			global::Klei.AI.Attribute.Display display = (show_in_ui ? global::Klei.AI.Attribute.Display.Normal : global::Klei.AI.Attribute.Display.Never);
+			global::Klei.AI.Attribute.Display display2 = (show_delta_in_ui ? global::Klei.AI.Attribute.Display.Normal : global::Klei.AI.Attribute.Display.Never);
 			string text3 = id + "Min";
 			StringEntry stringEntry;
 			string text4 = (Strings.TryGet(new StringKey(string.Format("{1}.ATTRIBUTES.{0}.NAME", text3.ToUpper(), string_root)), out stringEntry) ? stringEntry.String : ("Minimum" + text));
@@ -144,7 +152,7 @@ namespace Database
 			string text9 = id + "Delta";
 			string text10 = Strings.Get(string.Format("{1}.ATTRIBUTES.{0}.NAME", text9.ToUpper(), string_root));
 			string text11 = Strings.Get(string.Format("{1}.ATTRIBUTES.{0}.DESC", text9.ToUpper(), string_root));
-			global::Klei.AI.Attribute attribute3 = new global::Klei.AI.Attribute(text9, text10, "", text11, 0f, global::Klei.AI.Attribute.Display.Normal, false, null, null, uiFullColourSprite);
+			global::Klei.AI.Attribute attribute3 = new global::Klei.AI.Attribute(text9, text10, "", text11, 0f, display2, false, null, null, uiFullColourSprite);
 			Amount amount = new Amount(id, text, text2, attribute, attribute2, attribute3, show_max, units, delta_threshold, show_in_ui, uiSprite, thoughtSprite);
 			Db.Get().Attributes.Add(attribute);
 			Db.Get().Attributes.Add(attribute2);
@@ -188,6 +196,8 @@ namespace Database
 		public Amount AirPressure;
 
 		public Amount Maturity;
+
+		public Amount Maturity2;
 
 		public Amount OldAge;
 

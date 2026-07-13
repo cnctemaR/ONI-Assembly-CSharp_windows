@@ -126,6 +126,19 @@ public class Deconstructable : Workable
 		float temperature = component3.Temperature;
 		byte disease_idx = component3.DiseaseIdx;
 		int disease_count = component3.DiseaseCount;
+		if (temperature <= 0f)
+		{
+			temperature = component3.InternalTemperature;
+			if (temperature <= 0f)
+			{
+				temperature = 293f;
+				if (!Deconstructable._0_temp_notified)
+				{
+					KCrashReporter.ReportDevNotification("0 temp deconstruction", Environment.StackTrace, "", false, null);
+					Deconstructable._0_temp_notified = true;
+				}
+			}
+		}
 		if (component2 != null)
 		{
 			if (component.Def.TileLayer != ObjectLayer.NumLayers)
@@ -421,6 +434,8 @@ public class Deconstructable : Workable
 	{
 		component.OnDeconstruct(data);
 	});
+
+	private static bool _0_temp_notified = false;
 
 	private static readonly Vector2 INITIAL_VELOCITY_RANGE = new Vector2(0.5f, 4f);
 

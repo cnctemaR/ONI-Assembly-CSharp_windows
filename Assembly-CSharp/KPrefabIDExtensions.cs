@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public static class KPrefabIDExtensions
@@ -43,7 +44,17 @@ public static class KPrefabIDExtensions
 		return cmp.GetComponent<KPrefabID>().HasAnyTags(tags);
 	}
 
+	public static bool HasAnyTags(this Component cmp, List<Tag> tags)
+	{
+		return cmp.GetComponent<KPrefabID>().HasAnyTags(tags);
+	}
+
 	public static bool HasAnyTags(this GameObject go, Tag[] tags)
+	{
+		return go.GetComponent<KPrefabID>().HasAnyTags(tags);
+	}
+
+	public static bool HasAnyTags(this GameObject go, List<Tag> tags)
 	{
 		return go.GetComponent<KPrefabID>().HasAnyTags(tags);
 	}

@@ -21,6 +21,14 @@ public class WorldInventory : KMonoBehaviour, ISaveLoadable
 		}
 	}
 
+	private MinionGroupProber Prober
+	{
+		get
+		{
+			return MinionGroupProber.Get();
+		}
+	}
+
 	public bool HasValidCount
 	{
 		get
@@ -105,7 +113,6 @@ public class WorldInventory : KMonoBehaviour, ISaveLoadable
 
 	protected override void OnSpawn()
 	{
-		this.Prober = MinionGroupProber.Get();
 		base.StartCoroutine(this.InitialRefresh());
 	}
 
@@ -361,8 +368,6 @@ public class WorldInventory : KMonoBehaviour, ISaveLoadable
 	public List<Tag> notifyResources = new List<Tag>();
 
 	private Dictionary<Tag, HashSet<Pickupable>> Inventory = new Dictionary<Tag, HashSet<Pickupable>>();
-
-	private MinionGroupProber Prober;
 
 	private Dictionary<Tag, float> accessibleAmounts = new Dictionary<Tag, float>();
 

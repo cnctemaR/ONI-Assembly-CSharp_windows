@@ -42,6 +42,8 @@ public class AgeMonitor : GameStateMachine<AgeMonitor, AgeMonitor.Instance, ISta
 			prefab.AddOrGet<Modifiers>().initialAmounts.Add(Db.Get().Amounts.Age.Id);
 		}
 
+		public float minAgePercentOnSpawn;
+
 		public float maxAgePercentOnSpawn = 0.75f;
 	}
 
@@ -59,7 +61,7 @@ public class AgeMonitor : GameStateMachine<AgeMonitor, AgeMonitor.Instance, ISta
 
 		public void RandomizeAge()
 		{
-			this.age.value = global::UnityEngine.Random.value * this.age.GetMax() * base.def.maxAgePercentOnSpawn;
+			this.age.value = Mathf.Lerp(this.age.GetMax() * base.def.minAgePercentOnSpawn, this.age.GetMax() * base.def.maxAgePercentOnSpawn, global::UnityEngine.Random.value);
 			AmountInstance amountInstance = Db.Get().Amounts.Fertility.Lookup(base.gameObject);
 			if (amountInstance != null)
 			{

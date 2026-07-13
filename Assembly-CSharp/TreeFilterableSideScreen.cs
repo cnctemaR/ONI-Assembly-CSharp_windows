@@ -367,7 +367,7 @@ public class TreeFilterableSideScreen : SideScreenContent
 		freeElement.standardCommodity = !STORAGEFILTERS.SPECIAL_STORAGE.Contains(rowTag);
 		this.tagRowMap.Add(rowTag, freeElement);
 		Dictionary<Tag, bool> dictionary = new Dictionary<Tag, bool>();
-		foreach (TreeFilterableSideScreen.TagOrderInfo tagOrderInfo in this.GetTagsSortedAlphabetically(DiscoveredResources.Instance.GetDiscoveredResourcesFromTag(rowTag)))
+		foreach (TreeFilterableSideScreen.TagOrderInfo tagOrderInfo in this.GetTagsSortedAlphabetically(DiscoveredResources.Instance.GetDiscoveredResourcesFromTag(rowTag)).FindAll((TreeFilterableSideScreen.TagOrderInfo t) => !this.targetFilterable.ForbiddenTags.Contains(t.tag)))
 		{
 			dictionary.Add(tagOrderInfo.tag, this.targetFilterable.ContainsTag(tagOrderInfo.tag) || this.targetFilterable.ContainsTag(rowTag));
 		}

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text;
 using Klei.AI;
 using STRINGS;
 
@@ -12,29 +13,30 @@ public class MaturityDisplayer : AsPercentAmountDisplayer
 
 	public override string GetTooltipDescription(Amount master, AmountInstance instance)
 	{
-		string text = base.GetTooltipDescription(master, instance);
+		StringBuilder stringBuilder = GlobalStringBuilderPool.Alloc();
+		stringBuilder.Append(base.GetTooltipDescription(master, instance));
 		Growing component = instance.gameObject.GetComponent<Growing>();
 		if (component.IsGrowing())
 		{
 			float num = (instance.GetMax() - instance.value) / instance.GetDelta();
 			if (component != null && component.IsGrowing())
 			{
-				text += string.Format(CREATURES.STATS.MATURITY.TOOLTIP_GROWING_CROP, GameUtil.GetFormattedCycles(num, "F1", false), GameUtil.GetFormattedCycles(component.TimeUntilNextHarvest(), "F1", false));
+				stringBuilder.AppendFormat(CREATURES.STATS.MATURITY.TOOLTIP_GROWING_CROP, GameUtil.GetFormattedCycles(num, "F1", false), GameUtil.GetFormattedCycles(component.TimeUntilNextHarvest(), "F1", false));
 			}
 			else
 			{
-				text += string.Format(CREATURES.STATS.MATURITY.TOOLTIP_GROWING, GameUtil.GetFormattedCycles(num, "F1", false));
+				stringBuilder.AppendFormat(CREATURES.STATS.MATURITY.TOOLTIP_GROWING, GameUtil.GetFormattedCycles(num, "F1", false));
 			}
 		}
 		else if (component.ReachedNextHarvest())
 		{
-			text += CREATURES.STATS.MATURITY.TOOLTIP_GROWN;
+			stringBuilder.Append(CREATURES.STATS.MATURITY.TOOLTIP_GROWN);
 		}
 		else
 		{
-			text += CREATURES.STATS.MATURITY.TOOLTIP_STALLED;
+			stringBuilder.Append(CREATURES.STATS.MATURITY.TOOLTIP_STALLED);
 		}
-		return text;
+		return GlobalStringBuilderPool.ReturnAndFree(stringBuilder);
 	}
 
 	public override string GetDescription(Amount master, AmountInstance instance)

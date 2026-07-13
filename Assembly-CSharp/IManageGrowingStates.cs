@@ -6,11 +6,13 @@ public interface IManageGrowingStates
 
 	float PercentGrown();
 
-	Crop GetGropComponent();
+	Crop GetCropComponent();
 
 	void OverrideMaturityLevel(float percentage);
 
 	float DomesticGrowthTime();
 
 	float WildGrowthTime();
+
+	bool IsWildPlanted();
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using FMOD;
 using FMOD.Studio;
 using FMODUnity;
+using Klei;
 using UnityEngine;
 
 public class KFMOD
@@ -32,6 +33,10 @@ public class KFMOD
 		try
 		{
 			Settings instance = Settings.Instance;
+			if (GenericGameSettings.instance.enableAudioLogging)
+			{
+				Settings.Instance.LoggingLevel = DEBUG_FLAGS.LOG;
+			}
 			if (!DlcManager.IsExpansion1Active())
 			{
 				instance.Banks.RemoveAll((string b) => b.StartsWith("expansion1_"));

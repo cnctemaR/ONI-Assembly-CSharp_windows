@@ -18,11 +18,11 @@ public class FakeFloorAdder : KMonoBehaviour
 			return;
 		}
 		int num = Grid.PosToCell(this);
-		Building component = base.GetComponent<Building>();
+		Rotatable component = base.GetComponent<Rotatable>();
 		foreach (CellOffset cellOffset in this.floorOffsets)
 		{
-			CellOffset rotatedOffset = component.GetRotatedOffset(cellOffset);
-			int num2 = Grid.OffsetCell(num, rotatedOffset);
+			CellOffset cellOffset2 = ((component == null) ? cellOffset : component.GetRotatedCellOffset(cellOffset));
+			int num2 = Grid.OffsetCell(num, cellOffset2);
 			if (active)
 			{
 				Grid.FakeFloor.Add(num2);

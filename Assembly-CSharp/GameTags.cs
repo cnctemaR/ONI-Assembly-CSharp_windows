@@ -1,9 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reflection;
 using STRINGS;
 
 public class GameTags
 {
+	public static Tag[] Reflection_GetTagsInClass(Type classAddress, BindingFlags variableFlags = BindingFlags.Static | BindingFlags.Public)
+	{
+		List<FieldInfo> list = new List<FieldInfo>(classAddress.GetFields(variableFlags)).FindAll((FieldInfo f) => f.FieldType == typeof(Tag));
+		Tag[] array = new Tag[list.Count];
+		for (int i = 0; i < array.Length; i++)
+		{
+			array[i] = list[i].Name;
+		}
+		return array;
+	}
+
 	public static readonly Tag DeprecatedContent = TagManager.Create("DeprecatedContent");
 
 	public static readonly Tag Any = TagManager.Create("Any");
@@ -37,6 +49,8 @@ public class GameTags
 	public static readonly Tag PlantBranch = TagManager.Create("PlantBranch");
 
 	public static readonly Tag GrowingPlant = TagManager.Create("GrowingPlant");
+
+	public static readonly Tag FullyGrown = TagManager.Create("FullyGrown");
 
 	public static readonly Tag PlantedOnFloorVessel = TagManager.Create("PlantedOnFloorVessel");
 
@@ -544,6 +558,12 @@ public class GameTags
 
 	public static readonly Tag ClusterEntityGrounded = TagManager.Create("ClusterEntityGrounded ");
 
+	public static readonly Tag LongRangeMissileMoving = TagManager.Create("LongRangeMissileMoving");
+
+	public static readonly Tag LongRangeMissileIdle = TagManager.Create("LongRangeMissileIdle");
+
+	public static readonly Tag LongRangeMissileExploding = TagManager.Create("LongRangeMissileExploding");
+
 	public static readonly Tag EntityInSpace = TagManager.Create("EntityInSpace");
 
 	public static readonly Tag Monument = TagManager.Create("Monument");
@@ -587,6 +607,8 @@ public class GameTags
 	public static readonly Tag MinionSelectPreview = TagManager.Create("MinionSelectPreview");
 
 	public static readonly Tag Empty = TagManager.Create("Empty");
+
+	public static readonly Tag ExcludeFromTemplate = TagManager.Create("ExcludeFromTemplate");
 
 	public static readonly Tag SpaceDanger = TagManager.Create("SpaceDanger");
 
@@ -683,18 +705,28 @@ public class GameTags
 
 	public static Tag StartingMetalOre = new Tag("StartingMetalOre");
 
-	public static Tag StartingRefinedMetalOre = new Tag("StartingRefinedMetalOre");
+	public static Tag StartingRefinedMetal = new Tag("StartingRefinedMetal");
 
 	public static Tag[] StartingMetalOres;
 
-	public static Tag[] StartingRefinedMetalOres = null;
+	public static Tag[] StartingRefinedMetals = null;
+
+	public static Tag[] BasicMetalOres = new Tag[] { SimHashes.IronOre.CreateTag() };
+
+	public static Tag[] BasicRefinedMetals = new Tag[] { SimHashes.Iron.CreateTag() };
 
 	public static TagSet HiddenElementTags = new TagSet
 	{
 		GameTags.HideFromCodex,
 		GameTags.HideFromSpawnTool,
 		GameTags.StartingMetalOre,
-		GameTags.StartingRefinedMetalOre
+		GameTags.StartingRefinedMetal
+	};
+
+	public static Tag[] Fabrics = new Tag[]
+	{
+		"BasicFabric".ToTag(),
+		FeatherFabricConfig.ID
 	};
 
 	public static class Worlds
@@ -747,7 +779,9 @@ public class GameTags
 
 		public static readonly Tag Deliverable = TagManager.Create("Deliverable");
 
-		public static readonly Tag Stunned = TagManager.Create("Stunned");
+		public static readonly Tag StunnedForCapture = TagManager.Create("StunnedForCapture");
+
+		public static readonly Tag StunnedBeingEaten = TagManager.Create("StunnedBeingEaten");
 
 		public static readonly Tag Falling = TagManager.Create("Falling");
 
@@ -760,6 +794,14 @@ public class GameTags
 		public static readonly Tag WantsToExitBurrow = TagManager.Create("WantsToExitBurrow");
 
 		public static readonly Tag WantsToEat = TagManager.Create("WantsToEat");
+
+		public static readonly Tag SuppressedDiet = TagManager.Create("SuppressedDiet");
+
+		public static readonly Tag UrgeToPoke = TagManager.Create("UrgeToPoke");
+
+		public static readonly Tag WantsToStomp = TagManager.Create("WantsToStomp");
+
+		public static readonly Tag WantsToHarvest = TagManager.Create("WantsToHarvest");
 
 		public static readonly Tag Behaviour_TryToDrinkMilkFromFeeder = TagManager.Create("Behaviour_TryToDrinkMilkFromFeeder");
 
@@ -869,41 +911,64 @@ public class GameTags
 
 		public static readonly Tag RequiresMilking = TagManager.Create("RequiresMilking");
 
+		public static readonly Tag TargetedPreyBehaviour = TagManager.Create("TargetedPrey");
+
+		public static readonly Tag WantsToPollinate = TagManager.Create("WantsToPollinate");
+
+		public static readonly Tag Pollinator = TagManager.Create("Pollinator");
+
 		public static class Species
 		{
-			public static readonly Tag HatchSpecies = TagManager.Create("HatchSpecies");
+			public static Tag[] AllSpecies_REFLECTION()
+			{
+				return GameTags.Reflection_GetTagsInClass(typeof(GameTags.Creatures.Species), BindingFlags.Static | BindingFlags.Public);
+			}
 
-			public static readonly Tag LightBugSpecies = TagManager.Create("LightBugSpecies");
+			public static readonly Tag HatchSpecies = TagManager.Create("HatchSpecies", CREATURES.FAMILY_PLURAL.HATCHSPECIES);
 
-			public static readonly Tag OilFloaterSpecies = TagManager.Create("OilFloaterSpecies");
+			public static readonly Tag LightBugSpecies = TagManager.Create("LightBugSpecies", CREATURES.FAMILY_PLURAL.LIGHTBUGSPECIES);
 
-			public static readonly Tag DreckoSpecies = TagManager.Create("DreckoSpecies");
+			public static readonly Tag OilFloaterSpecies = TagManager.Create("OilFloaterSpecies", CREATURES.FAMILY_PLURAL.OILFLOATERSPECIES);
 
-			public static readonly Tag GlomSpecies = TagManager.Create("GlomSpecies");
+			public static readonly Tag DreckoSpecies = TagManager.Create("DreckoSpecies", CREATURES.FAMILY_PLURAL.DRECKOSPECIES);
 
-			public static readonly Tag PuftSpecies = TagManager.Create("PuftSpecies");
+			public static readonly Tag GlomSpecies = TagManager.Create("GlomSpecies", CREATURES.FAMILY_PLURAL.GLOMSPECIES);
 
-			public static readonly Tag PacuSpecies = TagManager.Create("PacuSpecies");
+			public static readonly Tag PuftSpecies = TagManager.Create("PuftSpecies", CREATURES.FAMILY_PLURAL.PUFTSPECIES);
 
-			public static readonly Tag MooSpecies = TagManager.Create("MooSpecies");
+			public static readonly Tag MosquitoSpecies = TagManager.Create("MosquitoSpecies", CREATURES.FAMILY_PLURAL.MOSQUITOSPECIES);
 
-			public static readonly Tag MoleSpecies = TagManager.Create("MoleSpecies");
+			public static readonly Tag PacuSpecies = TagManager.Create("PacuSpecies", CREATURES.FAMILY_PLURAL.PACUSPECIES);
 
-			public static readonly Tag SquirrelSpecies = TagManager.Create("SquirrelSpecies");
+			public static readonly Tag MooSpecies = TagManager.Create("MooSpecies", CREATURES.FAMILY_PLURAL.MOOSPECIES);
 
-			public static readonly Tag CrabSpecies = TagManager.Create("CrabSpecies");
+			public static readonly Tag MoleSpecies = TagManager.Create("MoleSpecies", CREATURES.FAMILY_PLURAL.MOLESPECIES);
 
-			public static readonly Tag StaterpillarSpecies = TagManager.Create("StaterpillarSpecies");
+			public static readonly Tag SquirrelSpecies = TagManager.Create("SquirrelSpecies", CREATURES.FAMILY_PLURAL.SQUIRRELSPECIES);
 
-			public static readonly Tag BeetaSpecies = TagManager.Create("BeetaSpecies");
+			public static readonly Tag CrabSpecies = TagManager.Create("CrabSpecies", CREATURES.FAMILY_PLURAL.CRABSPECIES);
 
-			public static readonly Tag DivergentSpecies = TagManager.Create("DivergentSpecies");
+			public static readonly Tag StaterpillarSpecies = TagManager.Create("StaterpillarSpecies", CREATURES.FAMILY_PLURAL.STATERPILLARSPECIES);
 
-			public static readonly Tag DeerSpecies = TagManager.Create("DeerSpecies");
+			public static readonly Tag BeetaSpecies = TagManager.Create("BeetaSpecies", CREATURES.FAMILY_PLURAL.BEETASPECIES);
 
-			public static readonly Tag BellySpecies = TagManager.Create("BellySpecies");
+			public static readonly Tag DivergentSpecies = TagManager.Create("DivergentSpecies", CREATURES.FAMILY_PLURAL.DIVERGENTSPECIES);
 
-			public static readonly Tag SealSpecies = TagManager.Create("SealSpecies");
+			public static readonly Tag DeerSpecies = TagManager.Create("DeerSpecies", CREATURES.FAMILY_PLURAL.DEERSPECIES);
+
+			public static readonly Tag BellySpecies = TagManager.Create("BellySpecies", CREATURES.FAMILY_PLURAL.BELLYSPECIES);
+
+			public static readonly Tag SealSpecies = TagManager.Create("SealSpecies", CREATURES.FAMILY_PLURAL.SEALSPECIES);
+
+			public static readonly Tag RaptorSpecies = TagManager.Create("RaptorSpecies", CREATURES.FAMILY_PLURAL.RAPTORSPECIES);
+
+			public static readonly Tag ChameleonSpecies = TagManager.Create("ChameleonSpecies", CREATURES.FAMILY_PLURAL.CHAMELEONSPECIES);
+
+			public static readonly Tag PrehistoricPacuSpecies = TagManager.Create("PrehistoricPacuSpecies", CREATURES.FAMILY_PLURAL.PREHISTORICPACUSPECIES);
+
+			public static readonly Tag StegoSpecies = TagManager.Create("StegoSpecies", CREATURES.FAMILY_PLURAL.STEGOSPECIES);
+
+			public static readonly Tag ButterflySpecies = TagManager.Create("ButterflySpecies", CREATURES.FAMILY_PLURAL.BUTTERFLYSPECIES);
 		}
 
 		public static class Behaviours
@@ -978,6 +1043,8 @@ public class GameTags
 		public static Tag CreatureRelocator = GameTags.CodexCategories.AllTags.AddAndReturn(TagManager.Create("CreatureRelocator"));
 
 		public static Tag FarmBuilding = GameTags.CodexCategories.AllTags.AddAndReturn("FarmBuilding".ToTag());
+
+		public static Tag BionicBuilding = GameTags.CodexCategories.AllTags.AddAndReturn("BionicBuilding".ToTag());
 	}
 
 	public static class Robots

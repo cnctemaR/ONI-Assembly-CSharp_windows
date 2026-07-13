@@ -41,6 +41,8 @@ namespace ProcGen
 
 		public bool startWorld { get; set; }
 
+		public int hiddenY { get; private set; }
+
 		public WorldPlacement()
 		{
 			this.allowedRings = new MinMaxI(0, 9999);

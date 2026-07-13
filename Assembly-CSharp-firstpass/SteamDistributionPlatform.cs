@@ -184,7 +184,8 @@ internal class SteamDistributionPlatform : MonoBehaviour, DistributionPlatform.I
 	{
 		{ "EXPANSION1_ID", 1452490U },
 		{ "DLC2_ID", 2952300U },
-		{ "DLC3_ID", 3302470U }
+		{ "DLC3_ID", 3302470U },
+		{ "DLC4_ID", 3655420U }
 	};
 
 	public class SteamUserId : DistributionPlatform.UserId

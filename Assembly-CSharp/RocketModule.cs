@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using STRINGS;
 using UnityEngine;
 
@@ -72,7 +71,6 @@ public class RocketModule : KMonoBehaviour
 		{
 			component.AddStatusItem(Db.Get().BuildingStatusItems.RocketName, this);
 		}
-		base.Subscribe<RocketModule>(1502190696, RocketModule.DEBUG_OnDestroyDelegate);
 		this.FixSorting();
 		AttachableBuilding component2 = base.GetComponent<AttachableBuilding>();
 		component2.onAttachmentNetworkChanged = (Action<object>)Delegate.Combine(component2.onAttachmentNetworkChanged, new Action<object>(this.OnAttachmentNetworkChanged));
@@ -130,15 +128,6 @@ public class RocketModule : KMonoBehaviour
 		kbatchedAnimController.FlipX = component.FlipX;
 		kbatchedAnimController.FlipY = component.FlipY;
 		gameObject.SetActive(true);
-	}
-
-	private void DEBUG_OnDestroy(object data)
-	{
-		if (this.conditionManager != null && !App.IsExiting && !KMonoBehaviour.isLoadingScene)
-		{
-			Spacecraft spacecraftFromLaunchConditionManager = SpacecraftManager.instance.GetSpacecraftFromLaunchConditionManager(this.conditionManager);
-			this.conditionManager.DEBUG_TraceModuleDestruction(base.name, (spacecraftFromLaunchConditionManager == null) ? "null spacecraft" : spacecraftFromLaunchConditionManager.state.ToString(), new StackTrace(true).ToString());
-		}
 	}
 
 	private void OnRocketOnGroundTag(object data)
@@ -412,11 +401,6 @@ public class RocketModule : KMonoBehaviour
 	private KAnimFile bgAnimFile;
 
 	protected string parentRocketName = UI.STARMAP.DEFAULT_NAME;
-
-	private static readonly EventSystem.IntraObjectHandler<RocketModule> DEBUG_OnDestroyDelegate = new EventSystem.IntraObjectHandler<RocketModule>(delegate(RocketModule component, object data)
-	{
-		component.DEBUG_OnDestroy(data);
-	});
 
 	private static readonly EventSystem.IntraObjectHandler<RocketModule> OnRocketOnGroundTagDelegate = GameUtil.CreateHasTagHandler<RocketModule>(GameTags.RocketOnGround, delegate(RocketModule component, object data)
 	{

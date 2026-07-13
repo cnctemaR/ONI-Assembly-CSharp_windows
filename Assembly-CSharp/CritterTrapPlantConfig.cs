@@ -33,18 +33,15 @@ public class CritterTrapPlantConfig : IEntityConfig, IHasDlcRestrictions
 		GameObject gameObject = EntityTemplates.CreatePlacedEntity(text, text2, text3, num, anim, text4, sceneLayer, num2, num3, effectorValues, default(EffectorValues), SimHashes.Creature, null, freezing_);
 		EntityTemplates.ExtendEntityToBasicPlant(gameObject, global::TUNING.CREATURES.TEMPERATURE.FREEZING_10, global::TUNING.CREATURES.TEMPERATURE.FREEZING_9, global::TUNING.CREATURES.TEMPERATURE.FREEZING, global::TUNING.CREATURES.TEMPERATURE.COOL, null, false, 0f, 0.15f, "PlantMeat", true, true, true, false, 2400f, 0f, 2200f, "CritterTrapPlantOriginal", global::STRINGS.CREATURES.SPECIES.CRITTERTRAPPLANT.NAME);
 		global::UnityEngine.Object.DestroyImmediate(gameObject.GetComponent<MutantPlant>());
-		TrapTrigger trapTrigger = gameObject.AddOrGet<TrapTrigger>();
-		trapTrigger.trappableCreatures = new Tag[]
-		{
-			GameTags.Creatures.Walker,
-			GameTags.Creatures.Hoverer
-		};
-		trapTrigger.trappedOffset = new Vector2(0.5f, 0f);
-		trapTrigger.enabled = false;
 		CritterTrapPlant critterTrapPlant = gameObject.AddOrGet<CritterTrapPlant>();
+		critterTrapPlant.CONSUMABLE_TAGs = CritterTrapPlantConfig.AllowedPreyTags;
 		critterTrapPlant.gasOutputRate = 0.041666668f;
 		critterTrapPlant.outputElement = SimHashes.Hydrogen;
 		critterTrapPlant.gasVentThreshold = 33.25f;
+		TrapTrigger trapTrigger = gameObject.AddOrGet<TrapTrigger>();
+		trapTrigger.trappableCreatures = CritterTrapPlantConfig.AllowedPreyTags;
+		trapTrigger.trappedOffset = new Vector2(0.5f, 0f);
+		trapTrigger.enabled = false;
 		gameObject.AddOrGet<LoopingSounds>();
 		gameObject.AddOrGet<Storage>();
 		Tag tag = ElementLoader.FindElementByHash(SimHashes.DirtyWater).tag;
@@ -74,6 +71,8 @@ public class CritterTrapPlantConfig : IEntityConfig, IHasDlcRestrictions
 
 	public void OnPrefabInit(GameObject inst)
 	{
+		CritterTrapPlant component = inst.GetComponent<CritterTrapPlant>();
+		inst.GetComponent<TrapTrigger>().customConditionsToTrap = new Func<GameObject, bool>(component.IsEntityEdible);
 	}
 
 	public void OnSpawn(GameObject inst)
@@ -87,4 +86,10 @@ public class CritterTrapPlantConfig : IEntityConfig, IHasDlcRestrictions
 	public const float GAS_RATE = 0.041666668f;
 
 	public const float GAS_VENT_THRESHOLD = 33.25f;
+
+	private static Tag[] AllowedPreyTags = new Tag[]
+	{
+		GameTags.Creatures.Walker,
+		GameTags.Creatures.Hoverer
+	};
 }

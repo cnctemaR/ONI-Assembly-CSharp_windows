@@ -147,12 +147,18 @@ public class CustomGameSettings : KMonoBehaviour
 		action(CustomGameSettingConfigs.SaveToCloud);
 		action(CustomGameSettingConfigs.Teleporters);
 		action(CustomGameSettingConfigs.BionicWattage);
+		action(CustomGameSettingConfigs.DemoliorDifficulty);
 		action3(CustomMixingSettingsConfigs.DLC2Mixing);
 		action3(CustomMixingSettingsConfigs.IceCavesMixing);
 		action3(CustomMixingSettingsConfigs.CarrotQuarryMixing);
 		action3(CustomMixingSettingsConfigs.SugarWoodsMixing);
 		action3(CustomMixingSettingsConfigs.CeresAsteroidMixing);
 		action3(CustomMixingSettingsConfigs.DLC3Mixing);
+		action3(CustomMixingSettingsConfigs.DLC4Mixing);
+		action3(CustomMixingSettingsConfigs.GardenMixing);
+		action3(CustomMixingSettingsConfigs.RaptorMixing);
+		action3(CustomMixingSettingsConfigs.WetlandsMixing);
+		action3(CustomMixingSettingsConfigs.PrehistoricAsteroidMixing);
 		foreach (Story story in Db.Get().Stories.GetStoriesSortedByCoordinateOrder())
 		{
 			int num = ((story.kleiUseOnlyCoordinateOrder == -1) ? (-1) : 3);

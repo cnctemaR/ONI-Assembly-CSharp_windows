@@ -98,7 +98,7 @@ public class ClusterMapHex : MultiToggle, ICanvasRaycastFilter
 	{
 		if (DebugHandler.InstantBuildMode)
 		{
-			SaveGame.Instance.GetSMI<ClusterFogOfWarManager.Instance>().RevealLocation(this.location, 0);
+			SaveGame.Instance.GetSMI<ClusterFogOfWarManager.Instance>().RevealLocation(this.location, 0, 2);
 		}
 		ClusterMapScreen.Instance.SelectHex(this);
 	}

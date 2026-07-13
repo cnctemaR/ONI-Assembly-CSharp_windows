@@ -48,8 +48,12 @@ public class Carvable : Workable, IDigActionEntity
 		base.Subscribe<Carvable>(493375141, Carvable.OnRefreshUserMenuDelegate);
 		this.faceTargetWhenWorking = true;
 		Prioritizable.AddRef(base.gameObject);
-		Extents extents = new Extents(Grid.PosToCell(base.gameObject), base.gameObject.GetComponent<OccupyArea>().OccupiedCellsOffsets);
-		this.partitionerEntry = GameScenePartitioner.Instance.Add(base.gameObject.name, base.gameObject.GetComponent<KPrefabID>(), extents, GameScenePartitioner.Instance.plants, null);
+		OccupyArea component = base.gameObject.GetComponent<OccupyArea>();
+		int num = Grid.PosToCell(this);
+		foreach (CellOffset cellOffset in component.OccupiedCellsOffsets)
+		{
+			Grid.ObjectLayers[5][Grid.OffsetCell(num, cellOffset)] = base.gameObject;
+		}
 		if (this.isMarkedForCarve)
 		{
 			this.MarkForCarve(true);
@@ -122,8 +126,16 @@ public class Carvable : Workable, IDigActionEntity
 
 	protected override void OnCleanUp()
 	{
+		OccupyArea component = base.gameObject.GetComponent<OccupyArea>();
+		int num = Grid.PosToCell(this);
+		foreach (CellOffset cellOffset in component.OccupiedCellsOffsets)
+		{
+			if (Grid.ObjectLayers[5][Grid.OffsetCell(num, cellOffset)] == base.gameObject)
+			{
+				Grid.ObjectLayers[5][Grid.OffsetCell(num, cellOffset)] = null;
+			}
+		}
 		base.OnCleanUp();
-		GameScenePartitioner.Instance.Free(ref this.partitionerEntry);
 	}
 
 	protected override void OnStartWork(WorkerBase worker)

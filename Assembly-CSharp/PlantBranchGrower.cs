@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using KSerialization;
 using UnityEngine;
 
-public class PlantBranchGrower : GameStateMachine<PlantBranchGrower, PlantBranchGrower.Instance, IStateMachineTarget, PlantBranchGrower.Def>
+public class PlantBranchGrower : PlantBranchGrowerBase<PlantBranchGrower, PlantBranchGrower.Instance, IStateMachineTarget, PlantBranchGrower.Def>
 {
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
@@ -57,12 +57,8 @@ public class PlantBranchGrower : GameStateMachine<PlantBranchGrower, PlantBranch
 
 	public GameStateMachine<PlantBranchGrower, PlantBranchGrower.Instance, IStateMachineTarget, PlantBranchGrower.Def>.State fullyGrown;
 
-	public class Def : StateMachine.BaseDef
+	public class Def : PlantBranchGrowerBase<PlantBranchGrower, PlantBranchGrower.Instance, IStateMachineTarget, PlantBranchGrower.Def>.PlantBranchGrowerBaseDef
 	{
-		public string BRANCH_PREFAB_NAME;
-
-		public int MAX_BRANCH_COUNT = -1;
-
 		public CellOffset[] BRANCH_OFFSETS;
 
 		public bool harvestOnDrown;

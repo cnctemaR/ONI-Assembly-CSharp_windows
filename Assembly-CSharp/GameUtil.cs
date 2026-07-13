@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading;
 using Database;
 using Klei;
@@ -11,6 +12,61 @@ using UnityEngine;
 
 public static class GameUtil
 {
+	public static CellOffset[] Expand(this CellOffset[] original)
+	{
+		List<CellOffset> list = new List<CellOffset>(original);
+		Vector4 vector = new Vector2(float.MaxValue, float.MinValue);
+		Vector4 vector2 = new Vector2(float.MaxValue, float.MinValue);
+		foreach (CellOffset cellOffset in original)
+		{
+			if ((float)cellOffset.x < vector.x)
+			{
+				vector.x = (float)cellOffset.x;
+			}
+			if ((float)cellOffset.x > vector.y)
+			{
+				vector.y = (float)cellOffset.x;
+			}
+			if ((float)cellOffset.y < vector2.x)
+			{
+				vector2.x = (float)cellOffset.y;
+			}
+			if ((float)cellOffset.y > vector2.y)
+			{
+				vector2.y = (float)cellOffset.y;
+			}
+		}
+		foreach (CellOffset cellOffset2 in original)
+		{
+			Vector2Int zero = Vector2Int.zero;
+			if ((float)cellOffset2.x == vector.x)
+			{
+				list.Add(new CellOffset(cellOffset2.x - 1, cellOffset2.y));
+				zero.x = -1;
+			}
+			if ((float)cellOffset2.x == vector.y)
+			{
+				list.Add(new CellOffset(cellOffset2.x + 1, cellOffset2.y));
+				zero.x = 1;
+			}
+			if ((float)cellOffset2.y == vector2.x)
+			{
+				list.Add(new CellOffset(cellOffset2.x, cellOffset2.y - 1));
+				zero.y = -1;
+			}
+			if ((float)cellOffset2.y == vector2.y)
+			{
+				list.Add(new CellOffset(cellOffset2.x, cellOffset2.y + 1));
+				zero.y = 1;
+			}
+			if (zero.x != 0 && zero.y != 0)
+			{
+				list.Add(new CellOffset((int)((zero.x < 0) ? vector.x : vector.y) + zero.x, (int)((zero.y < 0) ? vector2.x : vector2.y) + zero.y));
+			}
+		}
+		return list.ToArray();
+	}
+
 	public static string GetTemperatureUnitSuffix()
 	{
 		GameUtil.TemperatureUnit temperatureUnit = GameUtil.temperatureUnit;
@@ -155,6 +211,24 @@ public static class GameUtil
 			return text + UI.UNITSUFFIXES.PERCYCLE;
 		}
 		return text;
+	}
+
+	public static void AddTimeSliceText(StringBuilder builder, GameUtil.TimeSlice timeSlice)
+	{
+		switch (timeSlice)
+		{
+		case GameUtil.TimeSlice.None:
+		case GameUtil.TimeSlice.ModifyOnly:
+			break;
+		case GameUtil.TimeSlice.PerSecond:
+			builder.Append(UI.UNITSUFFIXES.PERSECOND);
+			return;
+		case GameUtil.TimeSlice.PerCycle:
+			builder.Append(UI.UNITSUFFIXES.PERCYCLE);
+			break;
+		default:
+			return;
+		}
 	}
 
 	public static string AddPositiveSign(string text, bool positive)
@@ -326,6 +400,29 @@ public static class GameUtil
 		return f.ToString(format);
 	}
 
+	public unsafe static void AppendFloatToString(StringBuilder builder, float f, string format = null)
+	{
+		if (float.IsPositiveInfinity(f))
+		{
+			builder.Append(UI.POS_INFINITY);
+			return;
+		}
+		if (float.IsNegativeInfinity(f))
+		{
+			builder.Append(UI.NEG_INFINITY);
+			return;
+		}
+		if (format != null)
+		{
+			Span<char> span = new Span<char>(stackalloc byte[(UIntPtr)128], 64);
+			int num;
+			f.TryFormat(span, out num, format, null);
+			builder.Append(span.Slice(0, num));
+			return;
+		}
+		builder.Append(f);
+	}
+
 	public static string GetFloatWithDecimalPoint(float f)
 	{
 		string text;
@@ -342,6 +439,21 @@ public static class GameUtil
 			text = "#,###.#";
 		}
 		return GameUtil.FloatToString(f, text);
+	}
+
+	public static void AppendFloatWithDecimalPoint(StringBuilder builder, float f)
+	{
+		if (f == 0f)
+		{
+			builder.AppendFormat("{0:0}", f);
+			return;
+		}
+		if (Mathf.Abs(f) < 1f)
+		{
+			builder.AppendFormat("{0:#,##0.#}", f);
+			return;
+		}
+		builder.AppendFormat("{0:#,###.#}", f);
 	}
 
 	public static string GetStandardFloat(float f)
@@ -366,6 +478,36 @@ public static class GameUtil
 		return GameUtil.FloatToString(f, text);
 	}
 
+	public static void AppendStandardFloat(StringBuilder builder, float f)
+	{
+		if (float.IsPositiveInfinity(f))
+		{
+			builder.Append(UI.POS_INFINITY);
+			return;
+		}
+		if (float.IsNegativeInfinity(f))
+		{
+			builder.Append(UI.NEG_INFINITY);
+			return;
+		}
+		if (f == 0f)
+		{
+			builder.AppendFormat("{0:0}", f);
+			return;
+		}
+		if (Math.Abs(f) < 1f)
+		{
+			builder.AppendFormat("{0:#,##0.##}", f);
+			return;
+		}
+		if (Math.Abs(f) < 10f)
+		{
+			builder.AppendFormat("{0:#,##0.##}", f);
+			return;
+		}
+		builder.AppendFormat("{0:#,###}", f);
+	}
+
 	public static string GetStandardPercentageFloat(float f, bool allowHundredths = false)
 	{
 		string text;
@@ -386,6 +528,26 @@ public static class GameUtil
 			text = "##0";
 		}
 		return GameUtil.FloatToString(f, text);
+	}
+
+	public static void AppendStandardPercentageFloat(StringBuilder builder, float f, bool allowHundredths = false)
+	{
+		if (Mathf.Abs(f) == 0f)
+		{
+			builder.AppendFormat("{0:0}", f);
+			return;
+		}
+		if (Mathf.Abs(f) < 0.1f && allowHundredths)
+		{
+			builder.AppendFormat("{0:##0.##}", f);
+			return;
+		}
+		if (Mathf.Abs(f) < 1f)
+		{
+			builder.AppendFormat("{0:##0.#}", f);
+			return;
+		}
+		builder.AppendFormat("{0:##0}", f);
 	}
 
 	public static string GetUnitFormattedName(GameObject go, bool upperName = false)
@@ -412,35 +574,73 @@ public static class GameUtil
 		return StringFormatter.Replace(UI.NAME_WITH_UNITS, "{0}", name).Replace("{1}", string.Format("{0:0.##}", count));
 	}
 
-	public static string GetFormattedUnits(float units, GameUtil.TimeSlice timeSlice = GameUtil.TimeSlice.None, bool displaySuffix = true, string floatFormatOverride = "")
+	public static void AppendFormattedUnits(StringBuilder builder, float units, GameUtil.TimeSlice timeSlice = GameUtil.TimeSlice.None, bool displaySuffix = true, string floatFormatOverride = "")
 	{
-		string text = ((units == 1f) ? UI.UNITSUFFIXES.UNIT : UI.UNITSUFFIXES.UNITS);
 		units = GameUtil.ApplyTimeSlice(units, timeSlice);
-		string text2 = GameUtil.GetStandardFloat(units);
 		if (!floatFormatOverride.IsNullOrWhiteSpace())
 		{
-			text2 = string.Format(floatFormatOverride, units);
+			builder.AppendFormat(floatFormatOverride, units);
+		}
+		else
+		{
+			GameUtil.AppendStandardFloat(builder, units);
 		}
 		if (displaySuffix)
 		{
-			text2 += text;
+			builder.Append((units == 1f) ? UI.UNITSUFFIXES.UNIT : UI.UNITSUFFIXES.UNITS);
 		}
-		return GameUtil.AddTimeSliceText(text2, timeSlice);
+		GameUtil.AddTimeSliceText(builder, timeSlice);
+	}
+
+	public static string GetFormattedUnits(float units, GameUtil.TimeSlice timeSlice = GameUtil.TimeSlice.None, bool displaySuffix = true, string floatFormatOverride = "")
+	{
+		StringBuilder stringBuilder = GlobalStringBuilderPool.Alloc();
+		GameUtil.AppendFormattedUnits(stringBuilder, units, timeSlice, displaySuffix, floatFormatOverride);
+		return GlobalStringBuilderPool.ReturnAndFree(stringBuilder);
+	}
+
+	public static void AppendFormattedRocketRangePerCycle(StringBuilder builder, float range, bool displaySuffix = true)
+	{
+		if (displaySuffix)
+		{
+			builder.AppendFormat("{0:N1} {1}", range, UI.CLUSTERMAP.TILES_PER_CYCLE);
+			return;
+		}
+		builder.AppendFormat("{0:N1}", range);
 	}
 
 	public static string GetFormattedRocketRangePerCycle(float range, bool displaySuffix = true)
 	{
-		return range.ToString("N1") + (displaySuffix ? (" " + UI.CLUSTERMAP.TILES_PER_CYCLE) : "");
+		StringBuilder stringBuilder = GlobalStringBuilderPool.Alloc();
+		GameUtil.AppendFormattedRocketRangePerCycle(stringBuilder, range, displaySuffix);
+		return GlobalStringBuilderPool.ReturnAndFree(stringBuilder);
+	}
+
+	public static void AppendFormattedRocketRange(StringBuilder builder, int rangeInTiles, bool displaySuffix = true)
+	{
+		builder.Append(rangeInTiles);
+		if (displaySuffix)
+		{
+			builder.Append(" ");
+			builder.Append(UI.CLUSTERMAP.TILES);
+		}
 	}
 
 	public static string GetFormattedRocketRange(int rangeInTiles, bool displaySuffix = true)
 	{
-		return rangeInTiles.ToString() + (displaySuffix ? (" " + UI.CLUSTERMAP.TILES) : "");
+		StringBuilder stringBuilder = GlobalStringBuilderPool.Alloc();
+		GameUtil.AppendFormattedRocketRange(stringBuilder, rangeInTiles, displaySuffix);
+		return GlobalStringBuilderPool.ReturnAndFree(stringBuilder);
 	}
 
 	public static string ApplyBoldString(string source)
 	{
 		return "<b>" + source + "</b>";
+	}
+
+	public static void AppendBoldString(StringBuilder builder, string source)
+	{
+		builder.AppendFormat("<b>{0}</b>", source);
 	}
 
 	public static float GetRoundedTemperatureInKelvin(float kelvin)
@@ -461,7 +661,7 @@ public static class GameUtil
 		return num;
 	}
 
-	public static string GetFormattedTemperature(float temp, GameUtil.TimeSlice timeSlice = GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation interpretation = GameUtil.TemperatureInterpretation.Absolute, bool displayUnits = true, bool roundInDestinationFormat = false)
+	public static void AppendFormattedTemperature(StringBuilder builder, float temp, GameUtil.TimeSlice timeSlice = GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation interpretation = GameUtil.TemperatureInterpretation.Absolute, bool displayUnits = true, bool roundInDestinationFormat = false)
 	{
 		if (interpretation != GameUtil.TemperatureInterpretation.Absolute)
 		{
@@ -475,29 +675,51 @@ public static class GameUtil
 			temp = GameUtil.GetConvertedTemperature(temp, roundInDestinationFormat);
 		}
 		temp = GameUtil.ApplyTimeSlice(temp, timeSlice);
-		string text;
 		if (Mathf.Abs(temp) < 0.1f)
 		{
-			text = GameUtil.FloatToString(temp, "##0.####");
+			builder.AppendFormat("{0:##0.####}", temp);
 		}
 		else
 		{
-			text = GameUtil.FloatToString(temp, "##0.#");
+			builder.AppendFormat("{0:##0.#}", temp);
 		}
 		if (displayUnits)
 		{
-			text = GameUtil.AddTemperatureUnitSuffix(text);
+			builder.Append(GameUtil.GetTemperatureUnitSuffix());
 		}
-		return GameUtil.AddTimeSliceText(text, timeSlice);
+		GameUtil.AddTimeSliceText(builder, timeSlice);
+	}
+
+	public static string GetFormattedTemperature(float temp, GameUtil.TimeSlice timeSlice = GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation interpretation = GameUtil.TemperatureInterpretation.Absolute, bool displayUnits = true, bool roundInDestinationFormat = false)
+	{
+		StringBuilder stringBuilder = GlobalStringBuilderPool.Alloc();
+		GameUtil.AppendFormattedTemperature(stringBuilder, temp, timeSlice, interpretation, displayUnits, roundInDestinationFormat);
+		return GlobalStringBuilderPool.ReturnAndFree(stringBuilder);
+	}
+
+	public static void AppendFormattedCaloriesForItem(StringBuilder builder, Tag tag, float amount, GameUtil.TimeSlice timeSlice = GameUtil.TimeSlice.None, bool forceKcal = true)
+	{
+		EdiblesManager.FoodInfo foodInfo = EdiblesManager.GetFoodInfo(tag.Name);
+		GameUtil.AppendFormattedCalories(builder, (foodInfo != null) ? (foodInfo.CaloriesPerUnit * amount) : (-1f), timeSlice, forceKcal);
 	}
 
 	public static string GetFormattedCaloriesForItem(Tag tag, float amount, GameUtil.TimeSlice timeSlice = GameUtil.TimeSlice.None, bool forceKcal = true)
 	{
-		EdiblesManager.FoodInfo foodInfo = EdiblesManager.GetFoodInfo(tag.Name);
-		return GameUtil.GetFormattedCalories((foodInfo != null) ? (foodInfo.CaloriesPerUnit * amount) : (-1f), timeSlice, forceKcal);
+		return GameUtil.GetFormattedCaloriesForItem(tag, amount, true, timeSlice, forceKcal);
 	}
 
-	public static string GetFormattedCalories(float calories, GameUtil.TimeSlice timeSlice = GameUtil.TimeSlice.None, bool forceKcal = true)
+	public static string GetFormattedCaloriesForItem(Tag tag, float amount, bool showSuffix, GameUtil.TimeSlice timeSlice = GameUtil.TimeSlice.None, bool forceKcal = true)
+	{
+		EdiblesManager.FoodInfo foodInfo = EdiblesManager.GetFoodInfo(tag.Name);
+		return GameUtil.GetFormattedCalories((foodInfo != null) ? (foodInfo.CaloriesPerUnit * amount) : (-1f), showSuffix, timeSlice, forceKcal);
+	}
+
+	public static void AppendFormattedCalories(StringBuilder builder, float calories, GameUtil.TimeSlice timeSlice = GameUtil.TimeSlice.None, bool forceKcal = true)
+	{
+		GameUtil.AppendFormattedCalories(builder, calories, true, timeSlice, forceKcal);
+	}
+
+	public static void AppendFormattedCalories(StringBuilder builder, float calories, bool showSuffix, GameUtil.TimeSlice timeSlice = GameUtil.TimeSlice.None, bool forceKcal = true)
 	{
 		string text = UI.UNITSUFFIXES.CALORIES.CALORIE;
 		if (Mathf.Abs(calories) >= 1000f || forceKcal)
@@ -506,7 +728,30 @@ public static class GameUtil
 			text = UI.UNITSUFFIXES.CALORIES.KILOCALORIE;
 		}
 		calories = GameUtil.ApplyTimeSlice(calories, timeSlice);
-		return GameUtil.AddTimeSliceText(GameUtil.GetStandardFloat(calories) + text, timeSlice);
+		GameUtil.AppendStandardFloat(builder, calories);
+		if (showSuffix)
+		{
+			builder.Append(text);
+			GameUtil.AddTimeSliceText(builder, timeSlice);
+		}
+	}
+
+	public static string GetFormattedCalories(float calories, GameUtil.TimeSlice timeSlice = GameUtil.TimeSlice.None, bool forceKcal = true)
+	{
+		return GameUtil.GetFormattedCalories(calories, true, timeSlice, forceKcal);
+	}
+
+	public static string GetFormattedCalories(float calories, bool showSuffix, GameUtil.TimeSlice timeSlice = GameUtil.TimeSlice.None, bool forceKcal = true)
+	{
+		StringBuilder stringBuilder = GlobalStringBuilderPool.Alloc();
+		GameUtil.AppendFormattedCalories(stringBuilder, calories, showSuffix, timeSlice, forceKcal);
+		return GlobalStringBuilderPool.ReturnAndFree(stringBuilder);
+	}
+
+	public static string GetFormattedPreyConsumptionValuePerCycle(Tag preyTag, float crittersPerSecond, bool perCycle = true)
+	{
+		Assets.GetPrefab(preyTag).GetComponent<PrimaryElement>();
+		return GameUtil.GetFormattedUnits(crittersPerSecond, GameUtil.TimeSlice.PerCycle, true, "");
 	}
 
 	public static string GetFormattedDirectPlantConsumptionValuePerCycle(Tag plantTag, float consumer_caloriesLossPerCaloriesPerKG, bool perCycle = true)
@@ -524,6 +769,15 @@ public static class GameUtil
 			}
 		}
 		return "Error";
+	}
+
+	public static string GetFormattedBranchGrowerPlantProductionValuePerCycle(Tag productTag, float outputAmountPerBranch, int branchCount, bool perCycle = true)
+	{
+		return GameUtil.SafeStringFormat(UI.BUILDINGEFFECTS.TOOLTIPS.BRANCH_GROWER_PLANT_POTENTIAL_OUTPUT, new object[]
+		{
+			GameUtil.GetFormattedByTag(productTag, outputAmountPerBranch, false, GameUtil.TimeSlice.PerCycle),
+			GameUtil.GetFormattedByTag(productTag, outputAmountPerBranch * (float)branchCount, GameUtil.TimeSlice.PerCycle)
+		});
 	}
 
 	public static string GetFormattedPlantStorageConsumptionValuePerCycle(Tag plantTag, float consumer_caloriesLossPerCaloriesPerKG, bool perCycle = true)
@@ -559,25 +813,54 @@ public static class GameUtil
 		return list.ToArray();
 	}
 
-	public static string GetFormattedPlantGrowth(float percent, GameUtil.TimeSlice timeSlice = GameUtil.TimeSlice.None)
+	public static void AppendFormattedPlantGrowth(StringBuilder builder, float percent, GameUtil.TimeSlice timeSlice = GameUtil.TimeSlice.None)
 	{
 		percent = GameUtil.ApplyTimeSlice(percent, timeSlice);
-		return GameUtil.AddTimeSliceText(GameUtil.GetStandardPercentageFloat(percent, true) + UI.UNITSUFFIXES.PERCENT + " " + UI.UNITSUFFIXES.GROWTH, timeSlice);
+		GameUtil.AppendStandardPercentageFloat(builder, percent, true);
+		builder.Append(UI.UNITSUFFIXES.PERCENT);
+		builder.Append(" ");
+		builder.Append(UI.UNITSUFFIXES.GROWTH);
+		GameUtil.AddTimeSliceText(builder, timeSlice);
+	}
+
+	public static string GetFormattedPlantGrowth(float percent, GameUtil.TimeSlice timeSlice = GameUtil.TimeSlice.None)
+	{
+		StringBuilder stringBuilder = GlobalStringBuilderPool.Alloc();
+		GameUtil.AppendFormattedPlantGrowth(stringBuilder, percent, timeSlice);
+		return GlobalStringBuilderPool.ReturnAndFree(stringBuilder);
+	}
+
+	public static void AppendFormattedPercent(StringBuilder builder, float percent, GameUtil.TimeSlice timeSlice = GameUtil.TimeSlice.None)
+	{
+		GameUtil.AppendStandardPercentageFloat(builder, GameUtil.ApplyTimeSlice(percent, timeSlice), false);
+		builder.Append(UI.UNITSUFFIXES.PERCENT);
+		GameUtil.AddTimeSliceText(builder, timeSlice);
 	}
 
 	public static string GetFormattedPercent(float percent, GameUtil.TimeSlice timeSlice = GameUtil.TimeSlice.None)
 	{
-		percent = GameUtil.ApplyTimeSlice(percent, timeSlice);
-		return GameUtil.AddTimeSliceText(GameUtil.GetStandardPercentageFloat(percent, true) + UI.UNITSUFFIXES.PERCENT, timeSlice);
+		StringBuilder stringBuilder = GlobalStringBuilderPool.Alloc();
+		GameUtil.AppendFormattedPercent(stringBuilder, percent, timeSlice);
+		return GlobalStringBuilderPool.ReturnAndFree(stringBuilder);
+	}
+
+	public static void AppendFormattedRoundedJoules(StringBuilder builder, float joules)
+	{
+		if (Mathf.Abs(joules) > 1000f)
+		{
+			builder.AppendFormat("{0:F1}", joules / 1000f);
+			builder.Append(UI.UNITSUFFIXES.ELECTRICAL.KILOJOULE);
+			return;
+		}
+		builder.AppendFormat("{0:F1}", joules);
+		builder.Append(UI.UNITSUFFIXES.ELECTRICAL.JOULE);
 	}
 
 	public static string GetFormattedRoundedJoules(float joules)
 	{
-		if (Mathf.Abs(joules) > 1000f)
-		{
-			return GameUtil.FloatToString(joules / 1000f, "F1") + UI.UNITSUFFIXES.ELECTRICAL.KILOJOULE;
-		}
-		return GameUtil.FloatToString(joules, "F1") + UI.UNITSUFFIXES.ELECTRICAL.JOULE;
+		StringBuilder stringBuilder = GlobalStringBuilderPool.Alloc();
+		GameUtil.AppendFormattedRoundedJoules(stringBuilder, joules);
+		return GlobalStringBuilderPool.ReturnAndFree(stringBuilder);
 	}
 
 	public static string GetFormattedJoules(float joules, string floatFormat = "F1", GameUtil.TimeSlice timeSlice = GameUtil.TimeSlice.None)
@@ -603,107 +886,152 @@ public static class GameUtil
 		return GameUtil.AddTimeSliceText(text, timeSlice);
 	}
 
-	public static string GetFormattedRads(float rads, GameUtil.TimeSlice timeSlice = GameUtil.TimeSlice.None)
+	public static void AppendFormattedRads(StringBuilder builder, float rads, GameUtil.TimeSlice timeSlice = GameUtil.TimeSlice.None)
 	{
 		rads = GameUtil.ApplyTimeSlice(rads, timeSlice);
-		return GameUtil.AddTimeSliceText(GameUtil.GetStandardFloat(rads) + UI.UNITSUFFIXES.RADIATION.RADS, timeSlice);
+		GameUtil.AppendStandardFloat(builder, rads);
+		builder.Append(UI.UNITSUFFIXES.RADIATION.RADS);
+		GameUtil.AddTimeSliceText(builder, timeSlice);
+	}
+
+	public static string GetFormattedRads(float rads, GameUtil.TimeSlice timeSlice = GameUtil.TimeSlice.None)
+	{
+		StringBuilder stringBuilder = GlobalStringBuilderPool.Alloc();
+		GameUtil.AppendFormattedRads(stringBuilder, rads, timeSlice);
+		return GlobalStringBuilderPool.ReturnAndFree(stringBuilder);
+	}
+
+	public static void AppendFormattedHighEnergyParticles(StringBuilder builder, float units, GameUtil.TimeSlice timeSlice = GameUtil.TimeSlice.None, bool displayUnits = true)
+	{
+		GameUtil.AppendFloatWithDecimalPoint(builder, units);
+		if (displayUnits)
+		{
+			builder.Append((units == 1f) ? UI.UNITSUFFIXES.HIGHENERGYPARTICLES.PARTRICLE : UI.UNITSUFFIXES.HIGHENERGYPARTICLES.PARTRICLES);
+		}
+		GameUtil.AddTimeSliceText(builder, timeSlice);
 	}
 
 	public static string GetFormattedHighEnergyParticles(float units, GameUtil.TimeSlice timeSlice = GameUtil.TimeSlice.None, bool displayUnits = true)
 	{
-		string text = ((units == 1f) ? UI.UNITSUFFIXES.HIGHENERGYPARTICLES.PARTRICLE : UI.UNITSUFFIXES.HIGHENERGYPARTICLES.PARTRICLES);
-		units = GameUtil.ApplyTimeSlice(units, timeSlice);
-		return GameUtil.AddTimeSliceText(displayUnits ? (GameUtil.GetFloatWithDecimalPoint(units) + text) : GameUtil.GetFloatWithDecimalPoint(units), timeSlice);
+		StringBuilder stringBuilder = GlobalStringBuilderPool.Alloc();
+		GameUtil.AppendFormattedHighEnergyParticles(stringBuilder, units, timeSlice, displayUnits);
+		return GlobalStringBuilderPool.ReturnAndFree(stringBuilder);
 	}
 
-	public static string GetFormattedWattage(float watts, GameUtil.WattageFormatterUnit unit = GameUtil.WattageFormatterUnit.Automatic, bool displayUnits = true)
+	public static void AppendFormattedWattage(StringBuilder builder, float watts, GameUtil.WattageFormatterUnit unit = GameUtil.WattageFormatterUnit.Automatic, bool displayUnits = true)
 	{
-		LocString locString = "";
+		string text = null;
 		switch (unit)
 		{
 		case GameUtil.WattageFormatterUnit.Watts:
-			locString = UI.UNITSUFFIXES.ELECTRICAL.WATT;
+			text = UI.UNITSUFFIXES.ELECTRICAL.WATT;
 			break;
 		case GameUtil.WattageFormatterUnit.Kilowatts:
 			watts /= 1000f;
-			locString = UI.UNITSUFFIXES.ELECTRICAL.KILOWATT;
+			text = UI.UNITSUFFIXES.ELECTRICAL.KILOWATT;
 			break;
 		case GameUtil.WattageFormatterUnit.Automatic:
 			if (Mathf.Abs(watts) > 1000f)
 			{
 				watts /= 1000f;
-				locString = UI.UNITSUFFIXES.ELECTRICAL.KILOWATT;
+				text = UI.UNITSUFFIXES.ELECTRICAL.KILOWATT;
 			}
 			else
 			{
-				locString = UI.UNITSUFFIXES.ELECTRICAL.WATT;
+				text = UI.UNITSUFFIXES.ELECTRICAL.WATT;
 			}
 			break;
 		}
-		if (displayUnits)
+		GameUtil.AppendFloatToString(builder, watts, "###0.##");
+		if (displayUnits && text != null)
 		{
-			return GameUtil.FloatToString(watts, "###0.##") + locString;
+			builder.Append(text);
 		}
-		return GameUtil.FloatToString(watts, "###0.##");
 	}
 
-	public static string GetFormattedHeatEnergy(float dtu, GameUtil.HeatEnergyFormatterUnit unit = GameUtil.HeatEnergyFormatterUnit.Automatic)
+	public static string GetFormattedWattage(float watts, GameUtil.WattageFormatterUnit unit = GameUtil.WattageFormatterUnit.Automatic, bool displayUnits = true)
 	{
-		LocString locString = "";
+		StringBuilder stringBuilder = GlobalStringBuilderPool.Alloc();
+		GameUtil.AppendFormattedWattage(stringBuilder, watts, unit, displayUnits);
+		return GlobalStringBuilderPool.ReturnAndFree(stringBuilder);
+	}
+
+	public static void AppendFormattedHeatEnergy(StringBuilder builder, float dtu, GameUtil.HeatEnergyFormatterUnit unit = GameUtil.HeatEnergyFormatterUnit.Automatic)
+	{
 		string text;
+		string text2;
 		switch (unit)
 		{
 		case GameUtil.HeatEnergyFormatterUnit.DTU_S:
-			locString = UI.UNITSUFFIXES.HEAT.DTU;
-			text = "###0.";
+			text = UI.UNITSUFFIXES.HEAT.DTU;
+			text2 = "###0.";
 			break;
 		case GameUtil.HeatEnergyFormatterUnit.KDTU_S:
 			dtu /= 1000f;
-			locString = UI.UNITSUFFIXES.HEAT.KDTU;
-			text = "###0.##";
+			text = UI.UNITSUFFIXES.HEAT.KDTU;
+			text2 = "###0.##";
 			break;
 		default:
 			if (Mathf.Abs(dtu) > 1000f)
 			{
 				dtu /= 1000f;
-				locString = UI.UNITSUFFIXES.HEAT.KDTU;
-				text = "###0.##";
+				text = UI.UNITSUFFIXES.HEAT.KDTU;
+				text2 = "###0.##";
 			}
 			else
 			{
-				locString = UI.UNITSUFFIXES.HEAT.DTU;
-				text = "###0.";
+				text = UI.UNITSUFFIXES.HEAT.DTU;
+				text2 = "###0.";
 			}
 			break;
 		}
-		return GameUtil.FloatToString(dtu, text) + locString;
+		GameUtil.AppendFloatToString(builder, dtu, text2);
+		builder.Append(text);
 	}
 
-	public static string GetFormattedHeatEnergyRate(float dtu_s, GameUtil.HeatEnergyFormatterUnit unit = GameUtil.HeatEnergyFormatterUnit.Automatic)
+	public static string GetFormattedHeatEnergy(float dtu, GameUtil.HeatEnergyFormatterUnit unit = GameUtil.HeatEnergyFormatterUnit.Automatic)
 	{
-		LocString locString = "";
+		StringBuilder stringBuilder = GlobalStringBuilderPool.Alloc();
+		GameUtil.AppendFormattedHeatEnergy(stringBuilder, dtu, unit);
+		return GlobalStringBuilderPool.ReturnAndFree(stringBuilder);
+	}
+
+	public static void AppendFormattedHeatEnergyRate(StringBuilder builder, float dtu_s, GameUtil.HeatEnergyFormatterUnit unit = GameUtil.HeatEnergyFormatterUnit.Automatic)
+	{
+		string text = null;
 		switch (unit)
 		{
 		case GameUtil.HeatEnergyFormatterUnit.DTU_S:
-			locString = UI.UNITSUFFIXES.HEAT.DTU_S;
+			text = UI.UNITSUFFIXES.HEAT.DTU_S;
 			break;
 		case GameUtil.HeatEnergyFormatterUnit.KDTU_S:
 			dtu_s /= 1000f;
-			locString = UI.UNITSUFFIXES.HEAT.KDTU_S;
+			text = UI.UNITSUFFIXES.HEAT.KDTU_S;
 			break;
 		case GameUtil.HeatEnergyFormatterUnit.Automatic:
 			if (Mathf.Abs(dtu_s) > 1000f)
 			{
 				dtu_s /= 1000f;
-				locString = UI.UNITSUFFIXES.HEAT.KDTU_S;
+				text = UI.UNITSUFFIXES.HEAT.KDTU_S;
 			}
 			else
 			{
-				locString = UI.UNITSUFFIXES.HEAT.DTU_S;
+				text = UI.UNITSUFFIXES.HEAT.DTU_S;
 			}
 			break;
 		}
-		return GameUtil.FloatToString(dtu_s, "###0.##") + locString;
+		GameUtil.AppendFloatToString(builder, dtu_s, null);
+		if (text != null)
+		{
+			builder.Append(text);
+		}
+	}
+
+	public static string GetFormattedHeatEnergyRate(float dtu_s, GameUtil.HeatEnergyFormatterUnit unit = GameUtil.HeatEnergyFormatterUnit.Automatic)
+	{
+		StringBuilder stringBuilder = GlobalStringBuilderPool.Alloc();
+		GameUtil.AppendFormattedHeatEnergyRate(stringBuilder, dtu_s, unit);
+		return GlobalStringBuilderPool.ReturnAndFree(stringBuilder);
 	}
 
 	public static string GetFormattedInt(float num, GameUtil.TimeSlice timeSlice = GameUtil.TimeSlice.None)
@@ -712,36 +1040,138 @@ public static class GameUtil
 		return GameUtil.AddTimeSliceText(GameUtil.FloatToString(num, "F0"), timeSlice);
 	}
 
-	public static string GetFormattedSimple(float num, GameUtil.TimeSlice timeSlice = GameUtil.TimeSlice.None, string formatString = null)
+	public static string GetSpeciesNameFromGameObject(GameObject critterGameObject)
 	{
-		num = GameUtil.ApplyTimeSlice(num, timeSlice);
-		string text;
-		if (formatString != null)
+		CreatureBrain component = critterGameObject.GetComponent<CreatureBrain>();
+		if (component != null)
 		{
-			text = GameUtil.FloatToString(num, formatString);
+			return GameUtil.GetNameForSpecies(component.species);
 		}
-		else if (num == 0f)
+		return "UNKNOWN SPECIES";
+	}
+
+	public static string GetNameForSpecies(Tag species)
+	{
+		Option<string> option = Option.None;
+		if (species == GameTags.Creatures.Species.HatchSpecies)
 		{
-			text = "0";
+			option = Option.Some<string>(global::STRINGS.CREATURES.FAMILY_PLURAL.HATCHSPECIES);
 		}
-		else if (Mathf.Abs(num) < 1f)
+		else if (species == GameTags.Creatures.Species.LightBugSpecies)
 		{
-			text = GameUtil.FloatToString(num, "#,##0.##");
+			option = Option.Some<string>(global::STRINGS.CREATURES.FAMILY_PLURAL.LIGHTBUGSPECIES);
 		}
-		else if (Mathf.Abs(num) < 10f)
+		else if (species == GameTags.Creatures.Species.OilFloaterSpecies)
 		{
-			text = GameUtil.FloatToString(num, "#,###.##");
+			option = Option.Some<string>(global::STRINGS.CREATURES.FAMILY_PLURAL.OILFLOATERSPECIES);
+		}
+		else if (species == GameTags.Creatures.Species.DreckoSpecies)
+		{
+			option = Option.Some<string>(global::STRINGS.CREATURES.FAMILY_PLURAL.DRECKOSPECIES);
+		}
+		else if (species == GameTags.Creatures.Species.GlomSpecies)
+		{
+			option = Option.Some<string>(global::STRINGS.CREATURES.FAMILY_PLURAL.GLOMSPECIES);
+		}
+		else if (species == GameTags.Creatures.Species.PuftSpecies)
+		{
+			option = Option.Some<string>(global::STRINGS.CREATURES.FAMILY_PLURAL.PUFTSPECIES);
+		}
+		else if (species == GameTags.Creatures.Species.PacuSpecies)
+		{
+			option = Option.Some<string>(global::STRINGS.CREATURES.FAMILY_PLURAL.PACUSPECIES);
+		}
+		else if (species == GameTags.Creatures.Species.MooSpecies)
+		{
+			option = Option.Some<string>(global::STRINGS.CREATURES.FAMILY_PLURAL.MOOSPECIES);
+		}
+		else if (species == GameTags.Creatures.Species.MoleSpecies)
+		{
+			option = Option.Some<string>(global::STRINGS.CREATURES.FAMILY_PLURAL.MOLESPECIES);
+		}
+		else if (species == GameTags.Creatures.Species.SquirrelSpecies)
+		{
+			option = Option.Some<string>(global::STRINGS.CREATURES.FAMILY_PLURAL.SQUIRRELSPECIES);
+		}
+		else if (species == GameTags.Creatures.Species.CrabSpecies)
+		{
+			option = Option.Some<string>(global::STRINGS.CREATURES.FAMILY_PLURAL.CRABSPECIES);
+		}
+		else if (species == GameTags.Creatures.Species.DivergentSpecies)
+		{
+			option = Option.Some<string>(global::STRINGS.CREATURES.FAMILY_PLURAL.DIVERGENTSPECIES);
+		}
+		else if (species == GameTags.Creatures.Species.StaterpillarSpecies)
+		{
+			option = Option.Some<string>(global::STRINGS.CREATURES.FAMILY_PLURAL.STATERPILLARSPECIES);
+		}
+		else if (species == GameTags.Creatures.Species.BeetaSpecies)
+		{
+			option = Option.Some<string>(global::STRINGS.CREATURES.FAMILY_PLURAL.BEETASPECIES);
+		}
+		else if (species == GameTags.Creatures.Species.BellySpecies)
+		{
+			option = Option.Some<string>(global::STRINGS.CREATURES.FAMILY_PLURAL.BELLYSPECIES);
+		}
+		else if (species == GameTags.Creatures.Species.SealSpecies)
+		{
+			option = Option.Some<string>(global::STRINGS.CREATURES.FAMILY_PLURAL.SEALSPECIES);
+		}
+		else if (species == GameTags.Creatures.Species.DeerSpecies)
+		{
+			option = Option.Some<string>(global::STRINGS.CREATURES.FAMILY_PLURAL.DEERSPECIES);
 		}
 		else
 		{
-			text = GameUtil.FloatToString(num, "#,###.##");
+			option = Option.None;
 		}
-		return GameUtil.AddTimeSliceText(text, timeSlice);
+		return option.Value;
+	}
+
+	public static void AppendFormattedSimple(StringBuilder builder, float num, GameUtil.TimeSlice timeSlice = GameUtil.TimeSlice.None, string formatString = null)
+	{
+		num = GameUtil.ApplyTimeSlice(num, timeSlice);
+		if (formatString != null)
+		{
+			GameUtil.AppendFloatToString(builder, num, formatString);
+		}
+		else if (num == 0f)
+		{
+			builder.Append("0");
+		}
+		else if (Mathf.Abs(num) < 1f)
+		{
+			GameUtil.AppendFloatToString(builder, num, "#,##0.##");
+		}
+		else if (Mathf.Abs(num) < 10f)
+		{
+			GameUtil.AppendFloatToString(builder, num, "#,###.##");
+		}
+		else
+		{
+			GameUtil.AppendFloatToString(builder, num, "#,###.##");
+		}
+		GameUtil.AddTimeSliceText(builder, timeSlice);
+	}
+
+	public static string GetFormattedSimple(float num, GameUtil.TimeSlice timeSlice = GameUtil.TimeSlice.None, string formatString = null)
+	{
+		StringBuilder stringBuilder = GlobalStringBuilderPool.Alloc();
+		GameUtil.AppendFormattedSimple(stringBuilder, num, timeSlice, formatString);
+		return GlobalStringBuilderPool.ReturnAndFree(stringBuilder);
+	}
+
+	public static void AppendFormattedLux(StringBuilder builder, int lux)
+	{
+		builder.Append(lux);
+		builder.Append(UI.UNITSUFFIXES.LIGHT.LUX);
 	}
 
 	public static string GetFormattedLux(int lux)
 	{
-		return lux.ToString() + UI.UNITSUFFIXES.LIGHT.LUX;
+		StringBuilder stringBuilder = GlobalStringBuilderPool.Alloc();
+		GameUtil.AppendFormattedLux(stringBuilder, lux);
+		return GlobalStringBuilderPool.ReturnAndFree(stringBuilder);
 	}
 
 	public static string GetLightDescription(int lux)
@@ -802,17 +1232,37 @@ public static class GameUtil
 		return UI.OVERLAYS.RADIATION.RANGES.MAX;
 	}
 
-	public static string GetFormattedByTag(Tag tag, float amount, GameUtil.TimeSlice timeSlice = GameUtil.TimeSlice.None)
+	public static void AppendFormattedByTag(StringBuilder builder, Tag tag, float amount, GameUtil.TimeSlice timeSlice = GameUtil.TimeSlice.None)
 	{
 		if (GameTags.DisplayAsCalories.Contains(tag))
 		{
-			return GameUtil.GetFormattedCaloriesForItem(tag, amount, timeSlice, true);
+			GameUtil.AppendFormattedCaloriesForItem(builder, tag, amount, timeSlice, true);
+			return;
 		}
 		if (GameTags.DisplayAsUnits.Contains(tag))
 		{
-			return GameUtil.GetFormattedUnits(amount, timeSlice, true, "");
+			GameUtil.AppendFormattedUnits(builder, amount, timeSlice, true, "");
+			return;
 		}
-		return GameUtil.GetFormattedMass(amount, timeSlice, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}");
+		GameUtil.AppendFormattedMass(builder, amount, timeSlice, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}");
+	}
+
+	public static string GetFormattedByTag(Tag tag, float amount, GameUtil.TimeSlice timeSlice = GameUtil.TimeSlice.None)
+	{
+		return GameUtil.GetFormattedByTag(tag, amount, true, timeSlice);
+	}
+
+	public static string GetFormattedByTag(Tag tag, float amount, bool showSuffix, GameUtil.TimeSlice timeSlice = GameUtil.TimeSlice.None)
+	{
+		if (GameTags.DisplayAsCalories.Contains(tag))
+		{
+			return GameUtil.GetFormattedCaloriesForItem(tag, amount, showSuffix, timeSlice, true);
+		}
+		if (GameTags.DisplayAsUnits.Contains(tag))
+		{
+			return GameUtil.GetFormattedUnits(amount, timeSlice, showSuffix, "");
+		}
+		return GameUtil.GetFormattedMass(amount, timeSlice, GameUtil.MetricMassFormat.UseThreshold, showSuffix, "{0:0.#}");
 	}
 
 	public static string GetFormattedFoodQuality(int quality)
@@ -886,19 +1336,24 @@ public static class GameUtil
 		return locString;
 	}
 
-	public static string GetFormattedMass(float mass, GameUtil.TimeSlice timeSlice = GameUtil.TimeSlice.None, GameUtil.MetricMassFormat massFormat = GameUtil.MetricMassFormat.UseThreshold, bool includeSuffix = true, string floatFormat = "{0:0.#}")
+	public static void AppendFormattedMass(StringBuilder builder, float mass, GameUtil.TimeSlice timeSlice = GameUtil.TimeSlice.None, GameUtil.MetricMassFormat massFormat = GameUtil.MetricMassFormat.UseThreshold, bool includeSuffix = true, string floatFormat = "{0:0.#}")
 	{
 		if (mass == -3.4028235E+38f)
 		{
-			return UI.CALCULATING;
+			builder.Append(UI.CALCULATING);
+			return;
 		}
 		if (float.IsPositiveInfinity(mass))
 		{
-			return UI.POS_INFINITY + UI.UNITSUFFIXES.MASS.TONNE;
+			builder.Append(UI.POS_INFINITY);
+			builder.Append(UI.UNITSUFFIXES.MASS.TONNE);
+			return;
 		}
 		if (float.IsNegativeInfinity(mass))
 		{
-			return UI.NEG_INFINITY + UI.UNITSUFFIXES.MASS.TONNE;
+			builder.Append(UI.NEG_INFINITY);
+			builder.Append(UI.UNITSUFFIXES.MASS.TONNE);
+			return;
 		}
 		mass = GameUtil.ApplyTimeSlice(mass, timeSlice);
 		string text;
@@ -974,12 +1429,24 @@ public static class GameUtil
 				}
 			}
 		}
-		if (!includeSuffix)
+		builder.AppendFormat(floatFormat, mass);
+		if (includeSuffix)
 		{
-			text = "";
-			timeSlice = GameUtil.TimeSlice.None;
+			builder.Append(text);
+			GameUtil.AddTimeSliceText(builder, timeSlice);
 		}
-		return GameUtil.AddTimeSliceText(string.Format(floatFormat, mass) + text, timeSlice);
+	}
+
+	public static string GetFormattedMass(float mass, GameUtil.TimeSlice timeSlice = GameUtil.TimeSlice.None, GameUtil.MetricMassFormat massFormat = GameUtil.MetricMassFormat.UseThreshold, bool includeSuffix = true, string floatFormat = "{0:0.#}")
+	{
+		StringBuilder stringBuilder = GlobalStringBuilderPool.Alloc();
+		GameUtil.AppendFormattedMass(stringBuilder, mass, timeSlice, massFormat, includeSuffix, floatFormat);
+		return GlobalStringBuilderPool.ReturnAndFree(stringBuilder);
+	}
+
+	public static void AppendFormattedTime(StringBuilder builder, float seconds)
+	{
+		builder.AppendFormat(UI.FORMATSECONDS, (int)seconds);
 	}
 
 	public static string GetFormattedTime(float seconds, string floatFormat = "F0")
@@ -987,37 +1454,58 @@ public static class GameUtil
 		return string.Format(UI.FORMATSECONDS, seconds.ToString(floatFormat));
 	}
 
+	public static void AppendFormattedEngineEfficiency(StringBuilder builder, float amount)
+	{
+		builder.Append(amount);
+		builder.Append(" km /");
+		builder.Append(UI.UNITSUFFIXES.MASS.KILOGRAM);
+	}
+
 	public static string GetFormattedEngineEfficiency(float amount)
 	{
-		return amount.ToString() + " km /" + UI.UNITSUFFIXES.MASS.KILOGRAM;
+		StringBuilder stringBuilder = GlobalStringBuilderPool.Alloc();
+		GameUtil.AppendFormattedEngineEfficiency(stringBuilder, amount);
+		return GlobalStringBuilderPool.ReturnAndFree(stringBuilder);
+	}
+
+	public static void AppendFormattedDistance(StringBuilder builder, float meters)
+	{
+		if (Mathf.Abs(meters) < 1f)
+		{
+			builder.AppendFormat("{0:0.0} cm", Math.Abs(meters * 100f));
+			return;
+		}
+		if (meters < 1000f)
+		{
+			builder.Append(meters);
+			builder.Append(" m");
+			return;
+		}
+		builder.AppendFormat("{0:0.0} km", meters / 1000f);
 	}
 
 	public static string GetFormattedDistance(float meters)
 	{
-		if (Mathf.Abs(meters) < 1f)
+		StringBuilder stringBuilder = GlobalStringBuilderPool.Alloc();
+		GameUtil.AppendFormattedDistance(stringBuilder, meters);
+		return GlobalStringBuilderPool.ReturnAndFree(stringBuilder);
+	}
+
+	public static void AppendFormattedCycles(StringBuilder builder, float seconds, bool forceCycles = false)
+	{
+		if (forceCycles || Math.Abs(seconds) > 100f)
 		{
-			string text = (meters * 100f).ToString();
-			string text2 = text.Substring(0, text.LastIndexOf('.') + Mathf.Min(3, text.Length - text.LastIndexOf('.')));
-			if (text2 == "-0.0")
-			{
-				text2 = "0";
-			}
-			return text2 + " cm";
+			builder.AppendFormat(UI.FORMATDAY, seconds / 600f);
+			return;
 		}
-		if (meters < 1000f)
-		{
-			return meters.ToString() + " m";
-		}
-		return Util.FormatOneDecimalPlace(meters / 1000f) + " km";
+		GameUtil.AppendFormattedTime(builder, seconds);
 	}
 
 	public static string GetFormattedCycles(float seconds, string formatString = "F1", bool forceCycles = false)
 	{
-		if (forceCycles || Mathf.Abs(seconds) > 100f)
-		{
-			return string.Format(UI.FORMATDAY, GameUtil.FloatToString(seconds / 600f, formatString));
-		}
-		return GameUtil.GetFormattedTime(seconds, "F0");
+		StringBuilder stringBuilder = GlobalStringBuilderPool.Alloc();
+		GameUtil.AppendFormattedCycles(stringBuilder, seconds, forceCycles);
+		return GlobalStringBuilderPool.ReturnAndFree(stringBuilder);
 	}
 
 	public static float GetDisplaySHC(float shc)
@@ -1236,6 +1724,14 @@ public static class GameUtil
 		return GameUtil.FloodFillFind<ArgType>(fn, arg, start_cell, max_depth, stop_at_solid, stop_at_liquid) != -1;
 	}
 
+	private static void FillThreadLocalNeighbors(int cell)
+	{
+		GameUtil.FloodFillNeighbors.Value[0] = Grid.CellLeft(cell);
+		GameUtil.FloodFillNeighbors.Value[1] = Grid.CellAbove(cell);
+		GameUtil.FloodFillNeighbors.Value[2] = Grid.CellRight(cell);
+		GameUtil.FloodFillNeighbors.Value[3] = Grid.CellBelow(cell);
+	}
+
 	private static bool CellCheck(int cell, bool stop_at_solid, bool stop_at_liquid)
 	{
 		if (!Grid.IsValidCell(cell))
@@ -1270,10 +1766,7 @@ public static class GameUtil
 				}
 				if (floodFillInfo.depth < max_depth)
 				{
-					GameUtil.FloodFillNeighbors.Value[0] = Grid.CellLeft(floodFillInfo.cell);
-					GameUtil.FloodFillNeighbors.Value[1] = Grid.CellAbove(floodFillInfo.cell);
-					GameUtil.FloodFillNeighbors.Value[2] = Grid.CellRight(floodFillInfo.cell);
-					GameUtil.FloodFillNeighbors.Value[3] = Grid.CellBelow(floodFillInfo.cell);
+					GameUtil.FillThreadLocalNeighbors(floodFillInfo.cell);
 					foreach (int num2 in GameUtil.FloodFillNeighbors.Value)
 					{
 						if (GameUtil.CellCheck(num2, stop_at_solid, stop_at_liquid))
@@ -1291,6 +1784,56 @@ public static class GameUtil
 		GameUtil.FloodFillVisited.Value.Clear();
 		GameUtil.FloodFillNext.Value.Clear();
 		return num;
+	}
+
+	public static int FloodFillFindBest<ArgType>(Func<int, ArgType, float> rateCell, ArgType arg, Func<int, ArgType, bool> validCheck, int startCell, int maxCellEvaluations = -1)
+	{
+		if (!validCheck(startCell, arg))
+		{
+			return Grid.InvalidCell;
+		}
+		float num = rateCell(startCell, arg);
+		int num2 = startCell;
+		if (validCheck(startCell, arg))
+		{
+			GameUtil.FloodFillNext.Value.Enqueue(new GameUtil.FloodFillInfo
+			{
+				cell = startCell,
+				depth = 0
+			});
+		}
+		GameUtil.FloodFillVisited.Value.Add(Grid.InvalidCell);
+		GameUtil.FloodFillVisited.Value.Add(startCell);
+		while (GameUtil.FloodFillNext.Value.Count > 0 && maxCellEvaluations != 0)
+		{
+			GameUtil.FloodFillInfo floodFillInfo = GameUtil.FloodFillNext.Value.Dequeue();
+			float num3 = rateCell(floodFillInfo.cell, arg);
+			if (num3 > num)
+			{
+				num = num3;
+				num2 = floodFillInfo.cell;
+			}
+			GameUtil.FillThreadLocalNeighbors(floodFillInfo.cell);
+			foreach (int num4 in GameUtil.FloodFillNeighbors.Value)
+			{
+				if (!GameUtil.FloodFillVisited.Value.Contains(num4) && validCheck(num4, arg))
+				{
+					GameUtil.FloodFillNext.Value.Enqueue(new GameUtil.FloodFillInfo
+					{
+						cell = num4,
+						depth = floodFillInfo.depth + 1
+					});
+					GameUtil.FloodFillVisited.Value.Add(num4);
+				}
+			}
+			if (maxCellEvaluations > 0)
+			{
+				maxCellEvaluations--;
+			}
+		}
+		GameUtil.FloodFillNext.Value.Clear();
+		GameUtil.FloodFillVisited.Value.Clear();
+		return num2;
 	}
 
 	public static void FloodFillConditional(int start_cell, Func<int, bool> condition, ICollection<int> visited_cells, ICollection<int> valid_cells = null)
@@ -1344,49 +1887,61 @@ public static class GameUtil
 		queue.Clear();
 	}
 
-	public static string GetHardnessString(Element element, bool addColor = true)
+	public static void AppendHardnessString(StringBuilder builder, Element element, bool addColor = true)
 	{
 		if (!element.IsSolid)
 		{
-			return ELEMENTS.HARDNESS.NA;
+			builder.Append(ELEMENTS.HARDNESS.NA);
+			return;
 		}
 		Color color = GameUtil.Hardness.firmColor;
 		string text;
 		if (element.hardness >= 255)
 		{
 			color = GameUtil.Hardness.ImpenetrableColor;
-			text = string.Format(ELEMENTS.HARDNESS.IMPENETRABLE, element.hardness);
+			text = ELEMENTS.HARDNESS.IMPENETRABLE;
 		}
 		else if (element.hardness >= 150)
 		{
 			color = GameUtil.Hardness.nearlyImpenetrableColor;
-			text = string.Format(ELEMENTS.HARDNESS.NEARLYIMPENETRABLE, element.hardness);
+			text = ELEMENTS.HARDNESS.NEARLYIMPENETRABLE;
 		}
 		else if (element.hardness >= 50)
 		{
 			color = GameUtil.Hardness.veryFirmColor;
-			text = string.Format(ELEMENTS.HARDNESS.VERYFIRM, element.hardness);
+			text = ELEMENTS.HARDNESS.VERYFIRM;
 		}
 		else if (element.hardness >= 25)
 		{
 			color = GameUtil.Hardness.firmColor;
-			text = string.Format(ELEMENTS.HARDNESS.FIRM, element.hardness);
+			text = ELEMENTS.HARDNESS.FIRM;
 		}
 		else if (element.hardness >= 10)
 		{
 			color = GameUtil.Hardness.softColor;
-			text = string.Format(ELEMENTS.HARDNESS.SOFT, element.hardness);
+			text = ELEMENTS.HARDNESS.SOFT;
 		}
 		else
 		{
 			color = GameUtil.Hardness.verySoftColor;
-			text = string.Format(ELEMENTS.HARDNESS.VERYSOFT, element.hardness);
+			text = ELEMENTS.HARDNESS.VERYSOFT;
 		}
 		if (addColor)
 		{
-			text = string.Format("<color=#{0}>{1}</color>", color.ToHexString(), text);
+			builder.AppendFormat("<color=#{0}>", color.ToHexString());
 		}
-		return text;
+		builder.AppendFormat(text, element.hardness);
+		if (addColor)
+		{
+			builder.Append("</color>");
+		}
+	}
+
+	public static string GetHardnessString(Element element, bool addColor = true)
+	{
+		StringBuilder stringBuilder = GlobalStringBuilderPool.Alloc();
+		GameUtil.AppendHardnessString(stringBuilder, element, addColor);
+		return GlobalStringBuilderPool.ReturnAndFree(stringBuilder);
 	}
 
 	public static string GetGermResistanceModifierString(float modifier, bool addColor = true)

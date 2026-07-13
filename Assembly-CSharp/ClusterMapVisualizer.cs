@@ -50,6 +50,11 @@ public class ClusterMapVisualizer : KMonoBehaviour
 				new ClusterMapRocketAnimator.StatesInstance(this, this.entity).StartSM();
 				return;
 			}
+			if (this.entity is ClusterMapLongRangeMissileGridEntity)
+			{
+				new ClusterMapLongRangeMissileAnimator.StatesInstance(this, this.entity).StartSM();
+				return;
+			}
 			if (this.entity is BallisticClusterGridEntity)
 			{
 				new ClusterMapBallisticAnimator.StatesInstance(this, this.entity).StartSM();
@@ -64,6 +69,10 @@ public class ClusterMapVisualizer : KMonoBehaviour
 
 	protected override void OnCleanUp()
 	{
+		if (this.mapPath != null)
+		{
+			global::Util.KDestroyGameObject(this.mapPath);
+		}
 		if (this.entity != null)
 		{
 			this.entity.Unsubscribe(543433792, new Action<object>(this.OnClusterDestinationChanged));

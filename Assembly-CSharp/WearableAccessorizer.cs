@@ -74,6 +74,23 @@ public class WearableAccessorizer : KMonoBehaviour
 		{
 			this.wearables.Remove(wearableType);
 		}
+		foreach (KeyValuePair<ClothingOutfitUtility.OutfitType, List<ResourceRef<ClothingItemResource>>> keyValuePair2 in this.customOutfitItems)
+		{
+			ClothingOutfitUtility.OutfitType outfitType;
+			List<ResourceRef<ClothingItemResource>> list2;
+			keyValuePair2.Deconstruct(out outfitType, out list2);
+			List<ResourceRef<ClothingItemResource>> list3 = list2;
+			if (list3 != null && list3.Count != 0)
+			{
+				for (int num = list3.Count - 1; num != -1; num--)
+				{
+					if (list3[num].Get() == null)
+					{
+						list3.RemoveAt(num);
+					}
+				}
+			}
+		}
 		if (this.clothingItems.Count > 0)
 		{
 			this.customOutfitItems[ClothingOutfitUtility.OutfitType.Clothing] = new List<ResourceRef<ClothingItemResource>>(this.clothingItems);

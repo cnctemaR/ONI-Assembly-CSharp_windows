@@ -13,15 +13,15 @@ public class GoldBellyConfig : IEntityConfig, IHasDlcRestrictions
 		Trait trait = Db.Get().CreateTrait("GoldBellyBaseTrait", name, name, null, false, null, true, true);
 		trait.Add(new AttributeModifier(Db.Get().Amounts.Calories.maxAttribute.Id, BellyTuning.STANDARD_STOMACH_SIZE, name, false, false, true));
 		trait.Add(new AttributeModifier(Db.Get().Amounts.Calories.deltaAttribute.Id, -BellyTuning.STANDARD_CALORIES_PER_CYCLE / 600f, UI.TOOLTIPS.BASE_VALUE, false, false, true));
-		trait.Add(new AttributeModifier(Db.Get().Amounts.HitPoints.maxAttribute.Id, 25f, name, false, false, true));
+		trait.Add(new AttributeModifier(Db.Get().Amounts.HitPoints.maxAttribute.Id, 50f, name, false, false, true));
 		trait.Add(new AttributeModifier(Db.Get().Amounts.Age.maxAttribute.Id, 200f, name, false, false, true));
 		string text = "PollenGerms";
 		gameObject.AddOrGet<DiseaseSourceVisualizer>().alwaysShowDisease = text;
 		WellFedShearable.Def def = gameObject.AddOrGetDef<WellFedShearable.Def>();
 		def.effectId = "GoldBellyWellFed";
 		def.caloriesPerCycle = BellyTuning.STANDARD_CALORIES_PER_CYCLE;
-		def.growthDurationCycles = GoldBellyConfig.SCALE_GROWTH_TIME_IN_CYCLES;
-		def.dropMass = 1f;
+		def.growthDurationCycles = 10f;
+		def.dropMass = 250f;
 		def.itemDroppedOnShear = GoldBellyConfig.SCALE_GROWTH_EMIT_ELEMENT;
 		def.requiredDiet = "FriesCarrot";
 		def.levelCount = 6;
@@ -69,9 +69,9 @@ public class GoldBellyConfig : IEntityConfig, IHasDlcRestrictions
 
 	public static float SCALE_INITIAL_GROWTH_PCT = 0.25f;
 
-	public static float SCALE_GROWTH_TIME_IN_CYCLES = 10f;
+	public const float SCALE_GROWTH_TIME_IN_CYCLES = 10f;
 
-	public static float GOLD_PER_CYCLE = 25f;
+	public const float GOLD_PER_CYCLE = 25f;
 
 	public static int EGG_SORT_ORDER = 0;
 

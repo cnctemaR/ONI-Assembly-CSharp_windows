@@ -1,4 +1,5 @@
 ﻿using System;
+using STRINGS;
 using TUNING;
 using UnityEngine;
 
@@ -12,12 +13,12 @@ public class TravelTubeWallBridgeConfig : IBuildingConfig
 		string text2 = "tube_tile_bridge_kanim";
 		int num3 = 100;
 		float num4 = 3f;
-		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER2;
+		float[] tier = global::TUNING.BUILDINGS.CONSTRUCTION_MASS_KG.TIER2;
 		string[] plastics = MATERIALS.PLASTICS;
 		float num5 = 1600f;
 		BuildLocationRule buildLocationRule = BuildLocationRule.Tile;
 		EffectorValues none = NOISE_POLLUTION.NONE;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, plastics, num5, buildLocationRule, BUILDINGS.DECOR.NONE, none, 0.2f);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, plastics, num5, buildLocationRule, global::TUNING.BUILDINGS.DECOR.NONE, none, 0.2f);
 		BuildingTemplates.CreateFoundationTileDef(buildingDef);
 		buildingDef.Overheatable = false;
 		buildingDef.Floodable = false;
@@ -31,6 +32,7 @@ public class TravelTubeWallBridgeConfig : IBuildingConfig
 		buildingDef.UtilityOutputOffset = new CellOffset(0, 2);
 		buildingDef.SceneLayer = Grid.SceneLayer.BuildingFront;
 		buildingDef.ForegroundLayer = Grid.SceneLayer.TileMain;
+		buildingDef.AddSearchTerms(SEARCH_TERMS.TRANSPORT);
 		return buildingDef;
 	}
 

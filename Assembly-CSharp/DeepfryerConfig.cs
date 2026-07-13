@@ -85,19 +85,21 @@ public class DeepfryerConfig : IBuildingConfig
 		{
 			new ComplexRecipe.RecipeElement("DeepFriedNosh", 1f, ComplexRecipe.RecipeElement.TemperatureOperation.Heated, false)
 		};
-		FriesCarrotConfig.recipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("Deepfryer", array3, array4), array3, array4, this.GetRequiredDlcIds())
-		{
-			time = FOOD.RECIPES.STANDARD_COOK_TIME,
-			description = global::STRINGS.ITEMS.FOOD.DEEPFRIEDNOSH.RECIPEDESC,
-			nameDisplay = ComplexRecipe.RecipeNameDisplay.Result,
-			fabricators = new List<Tag> { "Deepfryer" },
-			sortOrder = 200
-		};
+		ComplexRecipe complexRecipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("Deepfryer", array3, array4), array3, array4, this.GetRequiredDlcIds());
+		complexRecipe.time = FOOD.RECIPES.STANDARD_COOK_TIME;
+		complexRecipe.description = global::STRINGS.ITEMS.FOOD.DEEPFRIEDNOSH.RECIPEDESC;
+		complexRecipe.nameDisplay = ComplexRecipe.RecipeNameDisplay.Result;
+		complexRecipe.fabricators = new List<Tag> { "Deepfryer" };
+		complexRecipe.sortOrder = 200;
 		ComplexRecipe.RecipeElement[] array5 = new ComplexRecipe.RecipeElement[]
 		{
 			new ComplexRecipe.RecipeElement("FishMeat", 1f),
 			new ComplexRecipe.RecipeElement("Tallow", 2.4f),
-			new ComplexRecipe.RecipeElement("ColdWheatSeed", 2f)
+			new ComplexRecipe.RecipeElement(new Tag[]
+			{
+				"ColdWheatSeed",
+				FernFoodConfig.ID
+			}, 2f)
 		};
 		ComplexRecipe.RecipeElement[] array6 = new ComplexRecipe.RecipeElement[]
 		{
@@ -115,7 +117,11 @@ public class DeepfryerConfig : IBuildingConfig
 		{
 			new ComplexRecipe.RecipeElement("ShellfishMeat", 1f),
 			new ComplexRecipe.RecipeElement("Tallow", 2.4f),
-			new ComplexRecipe.RecipeElement("ColdWheatSeed", 2f)
+			new ComplexRecipe.RecipeElement(new Tag[]
+			{
+				"ColdWheatSeed",
+				FernFoodConfig.ID
+			}, 2f)
 		};
 		ComplexRecipe.RecipeElement[] array8 = new ComplexRecipe.RecipeElement[]
 		{

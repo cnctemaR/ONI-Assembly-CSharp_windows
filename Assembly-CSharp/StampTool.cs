@@ -51,6 +51,23 @@ public class StampTool : InterfaceTool
 		this.Stamp(cursor_pos);
 	}
 
+	public override void OnKeyDown(KButtonEvent e)
+	{
+		if (e.TryConsume(global::Action.BuildMenuKeyQ))
+		{
+			Vector3 cursorPos = this.GetCursorPos();
+			DebugBaseTemplateButton.Instance.ClearSelection();
+			if (this.stampTemplate.cells != null)
+			{
+				for (int i = 0; i < this.stampTemplate.cells.Count; i++)
+				{
+					DebugBaseTemplateButton.Instance.AddToSelection(Grid.XYToCell((int)(cursorPos.x + (float)this.stampTemplate.cells[i].location_x), (int)(cursorPos.y + (float)this.stampTemplate.cells[i].location_y)));
+				}
+			}
+		}
+		base.OnKeyDown(e);
+	}
+
 	private void Stamp(Vector2 pos)
 	{
 		if (!this.ready)

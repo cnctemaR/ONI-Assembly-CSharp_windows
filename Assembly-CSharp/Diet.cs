@@ -7,15 +7,17 @@ public class Diet
 {
 	public Diet.Info[] infos { get; private set; }
 
-	public Diet.Info[] noPlantInfos { get; private set; }
+	public Diet.Info[] solidEdiblesInfo { get; private set; }
 
 	public Diet.Info[] directlyEatenPlantInfos { get; private set; }
 
-	public bool CanEatAnyNonDirectlyEdiblePlant
+	public Diet.Info[] preyInfos { get; private set; }
+
+	public bool CanEatAnySolid
 	{
 		get
 		{
-			return this.noPlantInfos != null && this.noPlantInfos.Length != 0;
+			return this.solidEdiblesInfo != null && this.solidEdiblesInfo.Length != 0;
 		}
 	}
 
@@ -27,23 +29,30 @@ public class Diet
 		}
 	}
 
-	public bool AllConsumablesAreDirectlyEdiblePlants
+	public bool CanEatPreyCritter
 	{
 		get
 		{
-			return this.CanEatAnyPlantDirectly && (this.noPlantInfos == null || this.noPlantInfos.Length == 0);
+			return this.preyInfos != null && this.preyInfos.Length != 0;
 		}
 	}
 
 	public bool IsConsumedTagAbleToBeEatenDirectly(Tag tag)
 	{
-		if (this.directlyEatenPlantInfos == null)
+		if (this.directlyEatenPlantInfos == null && this.preyInfos == null)
 		{
 			return false;
 		}
 		for (int i = 0; i < this.directlyEatenPlantInfos.Length; i++)
 		{
 			if (this.directlyEatenPlantInfos[i].consumedTags.Contains(tag))
+			{
+				return true;
+			}
+		}
+		for (int j = 0; j < this.preyInfos.Length; j++)
+		{
+			if (this.preyInfos[j].consumedTags.Contains(tag))
 			{
 				return true;
 			}
@@ -72,7 +81,17 @@ public class Diet
 		{
 			array2 = null;
 		}
-		this.noPlantInfos = array2;
+		this.solidEdiblesInfo = array2;
+		Diet.Info[] array3;
+		if (this.infos != null)
+		{
+			array3 = this.infos.Where<Diet.Info>((Diet.Info i) => i.foodType == Diet.Info.FoodType.EatPrey || i.foodType == Diet.Info.FoodType.EatButcheredPrey).ToArray<Diet.Info>();
+		}
+		else
+		{
+			array3 = null;
+		}
+		this.preyInfos = array3;
 	}
 
 	public Diet(params Diet.Info[] infos)
@@ -155,6 +174,35 @@ public class Diet
 		return info;
 	}
 
+	public float AvailableCaloriesInPrey(Tag tag)
+	{
+		Diet.Info dietInfo = this.GetDietInfo(tag);
+		if (dietInfo == null)
+		{
+			return 0f;
+		}
+		GameObject prefab = Assets.GetPrefab(tag);
+		if (dietInfo.foodType == Diet.Info.FoodType.EatPrey)
+		{
+			return prefab.GetComponent<PrimaryElement>().Mass * dietInfo.caloriesPerKg;
+		}
+		Butcherable component = prefab.GetComponent<Butcherable>();
+		float num = 0f;
+		if (component == null)
+		{
+			return 0f;
+		}
+		foreach (KeyValuePair<string, float> keyValuePair in component.drops)
+		{
+			Diet.Info dietInfo2 = this.GetDietInfo(new Tag(keyValuePair.Key));
+			if (dietInfo2 != null)
+			{
+				num += keyValuePair.Value * dietInfo2.caloriesPerKg;
+			}
+		}
+		return num;
+	}
+
 	public void FilterDLC()
 	{
 		foreach (Diet.Info info in this.infos)
@@ -162,7 +210,8 @@ public class Diet
 			List<Tag> list = new List<Tag>();
 			foreach (Tag tag in info.consumedTags)
 			{
-				if (!Game.IsCorrectDlcActiveForCurrentSave(Assets.GetPrefab(tag).GetComponent<KPrefabID>()))
+				GameObject prefab = Assets.GetPrefab(tag);
+				if (prefab == null || !Game.IsCorrectDlcActiveForCurrentSave(prefab.GetComponent<KPrefabID>()))
 				{
 					list.Add(tag);
 				}
@@ -177,10 +226,13 @@ public class Diet
 					this.consumedTagToInfo.Remove(invalid_tag);
 				}
 			}
-			GameObject gameObject = ((info.producedElement != Tag.Invalid) ? Assets.GetPrefab(info.producedElement) : null);
-			if (gameObject != null && !Game.IsCorrectDlcActiveForCurrentSave(gameObject.GetComponent<KPrefabID>()))
+			if (info.producedElement != Tag.Invalid)
 			{
-				info.consumedTags.Clear();
+				GameObject prefab2 = Assets.GetPrefab(info.producedElement);
+				if (prefab2 == null || !Game.IsCorrectDlcActiveForCurrentSave(prefab2.GetComponent<KPrefabID>()))
+				{
+					info.consumedTags.Clear();
+				}
 			}
 		}
 		this.infos = this.infos.Where<Diet.Info>((Diet.Info i) => i.consumedTags.Count > 0).ToArray<Diet.Info>();
@@ -306,7 +358,9 @@ public class Diet
 		{
 			EatSolid,
 			EatPlantDirectly,
-			EatPlantStorage
+			EatPlantStorage,
+			EatPrey,
+			EatButcheredPrey
 		}
 	}
 }

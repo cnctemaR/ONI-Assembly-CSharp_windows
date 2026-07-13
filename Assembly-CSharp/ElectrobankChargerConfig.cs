@@ -49,7 +49,6 @@ public class ElectrobankChargerConfig : IBuildingConfig
 		manualDeliveryKG.RequestedItemTag = GameTags.EmptyPortableBattery;
 		manualDeliveryKG.capacity = storage.capacityKg;
 		manualDeliveryKG.refillMass = 20f;
-		manualDeliveryKG.MassPerUnit = 20f;
 		manualDeliveryKG.MinimumMass = 20f;
 		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.PowerFetch.IdHash;
 	}

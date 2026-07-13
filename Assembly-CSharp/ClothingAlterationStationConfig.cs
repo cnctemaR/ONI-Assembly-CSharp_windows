@@ -52,7 +52,7 @@ public class ClothingAlterationStationConfig : IBuildingConfig
 		ComplexRecipe.RecipeElement[] array = new ComplexRecipe.RecipeElement[]
 		{
 			new ComplexRecipe.RecipeElement("Funky_Vest".ToTag(), 1f, false),
-			new ComplexRecipe.RecipeElement("BasicFabric".ToTag(), 3f)
+			new ComplexRecipe.RecipeElement(GameTags.Fabrics, 3f, ComplexRecipe.RecipeElement.TemperatureOperation.AverageTemperature, "", false, false)
 		};
 		foreach (EquippableFacadeResource equippableFacadeResource in Db.GetEquippableFacades().resources.FindAll((EquippableFacadeResource match) => match.DefID == "CustomClothing"))
 		{

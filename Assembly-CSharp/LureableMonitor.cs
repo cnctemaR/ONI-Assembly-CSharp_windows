@@ -34,10 +34,19 @@ public class LureableMonitor : GameStateMachine<LureableMonitor, LureableMonitor
 	{
 		public List<Descriptor> GetDescriptors(GameObject go)
 		{
-			return new List<Descriptor>
+			List<Descriptor> list = new List<Descriptor>();
+			foreach (Tag tag in this.lures)
 			{
-				new Descriptor(UI.BUILDINGEFFECTS.CAPTURE_METHOD_LURE, UI.BUILDINGEFFECTS.TOOLTIPS.CAPTURE_METHOD_LURE, Descriptor.DescriptorType.Effect, false)
-			};
+				if (tag == GameTags.Creatures.FlyersLure)
+				{
+					list.Add(new Descriptor(UI.BUILDINGEFFECTS.CAPTURE_METHOD_FLYING_TRAP, UI.BUILDINGEFFECTS.TOOLTIPS.CAPTURE_METHOD_FLYING_TRAP, Descriptor.DescriptorType.Effect, false));
+				}
+				else if (tag == GameTags.Creatures.FishTrapLure)
+				{
+					list.Add(new Descriptor(UI.BUILDINGEFFECTS.CAPTURE_METHOD_FISH_TRAP, UI.BUILDINGEFFECTS.TOOLTIPS.CAPTURE_METHOD_FISH_TRAP, Descriptor.DescriptorType.Effect, false));
+				}
+			}
+			return list;
 		}
 
 		public float cooldown = 20f;

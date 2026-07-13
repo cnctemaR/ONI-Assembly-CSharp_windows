@@ -21,6 +21,10 @@ public class Artable : Workable
 	protected Artable()
 	{
 		this.faceTargetWhenWorking = true;
+		if (string.IsNullOrEmpty(this.requiredSkillPerk))
+		{
+			this.requiredSkillPerk = Db.Get().SkillPerks.CanArt.Id;
+		}
 	}
 
 	protected override void OnPrefabInit()
@@ -31,14 +35,13 @@ public class Artable : Workable
 		this.attributeExperienceMultiplier = DUPLICANTSTATS.ATTRIBUTE_LEVELING.MOST_DAY_EXPERIENCE;
 		this.skillExperienceSkillGroup = Db.Get().SkillGroups.Art.Id;
 		this.skillExperienceMultiplier = SKILLS.MOST_DAY_EXPERIENCE;
-		this.requiredSkillPerk = Db.Get().SkillPerks.CanArt.Id;
 		base.SetWorkTime(80f);
 	}
 
 	protected override void OnSpawn()
 	{
 		base.GetComponent<KPrefabID>().PrefabID();
-		if (string.IsNullOrEmpty(this.currentStage) || this.currentStage == this.defaultArtworkId)
+		if (string.IsNullOrEmpty(this.currentStage) || this.currentStage == "Default")
 		{
 			this.SetDefault();
 		}
@@ -53,13 +56,13 @@ public class Artable : Workable
 	[OnDeserialized]
 	public void OnDeserialized()
 	{
-		if (Db.GetArtableStages().TryGet(this.currentStage) == null && this.currentStage != this.defaultArtworkId)
+		if (Db.GetArtableStages().TryGet(this.currentStage) == null && this.currentStage != "Default")
 		{
 			string text = string.Format("{0}_{1}", base.GetComponent<KPrefabID>().PrefabID().ToString(), this.currentStage);
 			if (Db.GetArtableStages().TryGet(text) == null)
 			{
 				global::Debug.LogWarning("Failed up to update " + this.currentStage + " to ArtableStages");
-				this.currentStage = this.defaultArtworkId;
+				this.currentStage = "Default";
 				return;
 			}
 			this.currentStage = text;
@@ -114,7 +117,7 @@ public class Artable : Workable
 
 	public void SetDefault()
 	{
-		this.currentStage = this.defaultArtworkId;
+		this.currentStage = "Default";
 		base.GetComponent<KBatchedAnimController>().SwapAnims(base.GetComponent<Building>().Def.AnimFiles);
 		base.GetComponent<KAnimControllerBase>().Play(this.defaultAnimName, KAnim.PlayMode.Once, 1f, 0f);
 		KSelectable component = base.GetComponent<KSelectable>();
@@ -124,13 +127,14 @@ public class Artable : Workable
 		this.GetAttributes().Remove(this.artQualityDecorModifier);
 		this.shouldShowSkillPerkStatusItem = false;
 		this.UpdateStatusItem(null);
-		if (this.currentStage == this.defaultArtworkId)
+		if (this.currentStage == "Default")
 		{
 			this.shouldShowSkillPerkStatusItem = true;
 			Prioritizable.AddRef(base.gameObject);
-			this.chore = new WorkChore<Artable>(Db.Get().ChoreTypes.Art, this, null, true, null, null, null, true, null, false, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 5, false, true);
+			this.chore = new WorkChore<Artable>(Db.Get().ChoreTypes.Art, this, null, true, null, null, null, true, null, false, this.onlyWorkableWhenOperational, null, false, true, true, PriorityScreen.PriorityClass.basic, 5, false, true);
 			this.chore.AddPrecondition(ChorePreconditions.instance.HasSkillPerk, this.requiredSkillPerk);
 		}
+		base.Trigger(111068960, this.currentStage);
 	}
 
 	public virtual void SetStage(string stage_id, bool skip_effect)
@@ -156,6 +160,7 @@ public class Artable : Workable
 		base.gameObject.GetComponent<BuildingComplete>().SetDescriptionFlavour(artableStage.Description);
 		this.shouldShowSkillPerkStatusItem = false;
 		this.UpdateStatusItem(null);
+		base.Trigger(111068960, this.currentStage);
 	}
 
 	public void SetUserChosenTargetState(string stageID)
@@ -172,9 +177,11 @@ public class Artable : Workable
 
 	private AttributeModifier artQualityDecorModifier;
 
-	private string defaultArtworkId = "Default";
+	public const string defaultArtworkId = "Default";
 
 	public string defaultAnimName;
+
+	public bool onlyWorkableWhenOperational = true;
 
 	private WorkChore<Artable> chore;
 }

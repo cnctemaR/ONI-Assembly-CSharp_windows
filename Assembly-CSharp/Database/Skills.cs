@@ -58,7 +58,8 @@ namespace Database
 			this.Researching1 = this.AddSkill(new Skill("Researching1", DUPLICANTS.ROLES.JUNIOR_RESEARCHER.NAME, DUPLICANTS.ROLES.JUNIOR_RESEARCHER.DESCRIPTION, 0, "hat_role_research1", "skillbadge_role_research1", Db.Get().SkillGroups.Research.Id, new List<SkillPerk>
 			{
 				Db.Get().SkillPerks.IncreaseLearningSmall,
-				Db.Get().SkillPerks.AllowAdvancedResearch
+				Db.Get().SkillPerks.AllowAdvancedResearch,
+				Db.Get().SkillPerks.AllowChemistry
 			}, null, "Minion", null, null));
 			this.Researching2 = this.AddSkill(new Skill("Researching2", DUPLICANTS.ROLES.RESEARCHER.NAME, DUPLICANTS.ROLES.RESEARCHER.DESCRIPTION, 1, "hat_role_research2", "skillbadge_role_research2", Db.Get().SkillGroups.Research.Id, new List<SkillPerk>
 			{

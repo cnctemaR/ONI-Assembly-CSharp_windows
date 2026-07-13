@@ -29,7 +29,7 @@ public static class BaseDreckoConfig
 		{
 			text2 = "DreckoBabyNavGrid";
 		}
-		EntityTemplates.ExtendEntityToBasicCreature(gameObject, FactionManager.FactionID.Pest, trait_id, text2, NavType.Floor, 32, 1f, "Meat", 2, true, false, warnLowTemp, warnHighTemp, lethalLowTemp, lethalHighTemp);
+		EntityTemplates.ExtendEntityToBasicCreature(gameObject, FactionManager.FactionID.Pest, trait_id, text2, NavType.Floor, 32, 1f, "Meat", 2f, true, false, warnLowTemp, warnHighTemp, lethalLowTemp, lethalHighTemp);
 		if (!string.IsNullOrEmpty(symbol_override_prefix))
 		{
 			gameObject.AddOrGet<SymbolOverrideController>().ApplySymbolOverridesByAffix(Assets.GetAnim(anim_file), symbol_override_prefix, null, 0);

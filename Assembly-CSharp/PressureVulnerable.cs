@@ -167,9 +167,11 @@ public class PressureVulnerable : StateMachineComponent<PressureVulnerable.State
 		bool flag = this.testAreaElementSafe;
 		PressureVulnerable.testAreaPressure = 0f;
 		PressureVulnerable.testAreaCount = 0;
+		PressureVulnerable.testAreaSafeElementCount = 0;
 		this.testAreaElementSafe = false;
 		this.currentAtmoElement = null;
 		this.occupyArea.TestArea(cell, this, PressureVulnerable.testAreaCB);
+		this.testAreaElementSafe = (this.allCellsMustBeSafe ? (PressureVulnerable.testAreaSafeElementCount == this.occupyArea.OccupiedCellsOffsets.Length) : (PressureVulnerable.testAreaSafeElementCount > 0));
 		PressureVulnerable.testAreaPressure = ((PressureVulnerable.testAreaCount > 0) ? (PressureVulnerable.testAreaPressure / (float)PressureVulnerable.testAreaCount) : 0f);
 		if (this.testAreaElementSafe != flag)
 		{
@@ -234,6 +236,8 @@ public class PressureVulnerable : StateMachineComponent<PressureVulnerable.State
 
 	private static int testAreaCount;
 
+	private static int testAreaSafeElementCount;
+
 	public bool testAreaElementSafe = true;
 
 	public Element currentAtmoElement;
@@ -248,7 +252,7 @@ public class PressureVulnerable : StateMachineComponent<PressureVulnerable.State
 			{
 				PressureVulnerable.testAreaPressure += Grid.Mass[test_cell];
 				PressureVulnerable.testAreaCount++;
-				pressureVulnerable.testAreaElementSafe = true;
+				PressureVulnerable.testAreaSafeElementCount++;
 				pressureVulnerable.currentAtmoElement = element;
 			}
 			if (pressureVulnerable.currentAtmoElement == null)
@@ -262,6 +266,8 @@ public class PressureVulnerable : StateMachineComponent<PressureVulnerable.State
 	private AmountInstance displayPressureAmount;
 
 	public bool pressure_sensitive = true;
+
+	public bool allCellsMustBeSafe;
 
 	public HashSet<Element> safe_atmospheres = new HashSet<Element>();
 

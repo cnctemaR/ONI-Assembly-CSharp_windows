@@ -108,7 +108,15 @@ public class TreeClimbStates : GameStateMachine<TreeClimbStates, TreeClimbStates
 
 		public void Toss(Pickupable pu)
 		{
-			Pickupable pickupable = pu.Take(Mathf.Min(1f, pu.UnreservedAmount));
+			Pickupable pickupable = null;
+			if (pu.PrimaryElement.MassPerUnit > 1f)
+			{
+				pickupable = pu.TakeUnit(1f);
+			}
+			else
+			{
+				pu.Take(Mathf.Min(1f, pu.UnreservedFetchAmount));
+			}
 			if (pickupable != null)
 			{
 				this.storage.Store(pickupable.gameObject, true, false, true, false);

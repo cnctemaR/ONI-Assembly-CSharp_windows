@@ -93,18 +93,25 @@ namespace Database
 			this.Incubating = new StatusItem("Incubating", "CREATURES", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022, null);
 			this.Drowning = new StatusItem("Drowning", "CREATURES", "status_item_flooded", StatusItem.IconType.Custom, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 129022, null);
 			this.Drowning.resolveStringCallback = (string str, object data) => str;
+			this.AquaticCreatureSuffocating = new StatusItem("AquaticCreatureSuffocating", "CREATURES", "", StatusItem.IconType.Info, NotificationType.Bad, false, OverlayModes.None.ID, true, 129022, null);
+			this.AquaticCreatureSuffocating.resolveTooltipCallback = delegate(string str, object data)
+			{
+				AquaticCreatureSuffocationMonitor.Instance instance = (AquaticCreatureSuffocationMonitor.Instance)data;
+				str = GameUtil.SafeStringFormat(str, new object[] { GameUtil.GetFormattedCycles(instance.TimeUntilDeath, "F1", false) });
+				return str;
+			};
 			this.ProducingSugarWater = new StatusItem("ProducingSugarWater", "CREATURES", "", StatusItem.IconType.Info, NotificationType.Good, false, OverlayModes.None.ID, true, 129022, null);
 			this.ProducingSugarWater.resolveStringCallback = delegate(string str, object data)
 			{
-				SpaceTreePlant.Instance instance = (SpaceTreePlant.Instance)data;
-				str = str.Replace("{0}", GameUtil.GetFormattedPercent(instance.CurrentProductionProgress * 100f, GameUtil.TimeSlice.None));
+				SpaceTreePlant.Instance instance2 = (SpaceTreePlant.Instance)data;
+				str = str.Replace("{0}", GameUtil.GetFormattedPercent(instance2.CurrentProductionProgress * 100f, GameUtil.TimeSlice.None));
 				return str;
 			};
 			this.ProducingSugarWater.resolveTooltipCallback = delegate(string str, object data)
 			{
-				SpaceTreePlant.Instance instance2 = (SpaceTreePlant.Instance)data;
-				PlantBranchGrower.Instance smi = instance2.GetSMI<PlantBranchGrower.Instance>();
-				for (int i = 0; i < instance2.def.OptimalAmountOfBranches; i++)
+				SpaceTreePlant.Instance instance3 = (SpaceTreePlant.Instance)data;
+				PlantBranchGrower.Instance smi = instance3.GetSMI<PlantBranchGrower.Instance>();
+				for (int i = 0; i < instance3.def.OptimalAmountOfBranches; i++)
 				{
 					string text = CREATURES.STATUSITEMS.PRODUCINGSUGARWATER.BRANCH_LINE_MISSING;
 					string text2 = SpaceTreeBranchConfig.BRANCH_NAMES[i];
@@ -132,23 +139,23 @@ namespace Database
 					string text3 = "{BRANCH_" + i.ToString() + "}";
 					str = str.Replace(text3, text);
 				}
-				str = str.Replace("{0}", GameUtil.GetFormattedMass(instance2.GetProductionSpeed() * 20f / instance2.OptimalProductionDuration, GameUtil.TimeSlice.PerSecond, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"));
-				str = str.Replace("{1}", instance2.def.OptimalAmountOfBranches.ToString());
+				str = str.Replace("{0}", GameUtil.GetFormattedMass(instance3.GetProductionSpeed() * 20f / instance3.OptimalProductionDuration, GameUtil.TimeSlice.PerSecond, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"));
+				str = str.Replace("{1}", instance3.def.OptimalAmountOfBranches.ToString());
 				str = str.Replace("{2}", GameUtil.GetFormattedLux(10000));
 				return str;
 			};
 			this.SugarWaterProductionPaused = new StatusItem("SugarWaterProductionPaused", "CREATURES", "", StatusItem.IconType.Info, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 129022, null);
 			this.SugarWaterProductionPaused.resolveStringCallback = delegate(string str, object data)
 			{
-				SpaceTreePlant.Instance instance3 = (SpaceTreePlant.Instance)data;
-				str = str.Replace("{0}", GameUtil.GetFormattedPercent(instance3.CurrentProductionProgress * 100f, GameUtil.TimeSlice.None));
+				SpaceTreePlant.Instance instance4 = (SpaceTreePlant.Instance)data;
+				str = str.Replace("{0}", GameUtil.GetFormattedPercent(instance4.CurrentProductionProgress * 100f, GameUtil.TimeSlice.None));
 				return str;
 			};
 			this.SugarWaterProductionPaused.resolveTooltipCallback = delegate(string str, object data)
 			{
-				SpaceTreePlant.Instance instance4 = (SpaceTreePlant.Instance)data;
-				PlantBranchGrower.Instance smi3 = instance4.GetSMI<PlantBranchGrower.Instance>();
-				for (int j = 0; j < instance4.def.OptimalAmountOfBranches; j++)
+				SpaceTreePlant.Instance instance5 = (SpaceTreePlant.Instance)data;
+				PlantBranchGrower.Instance smi3 = instance5.GetSMI<PlantBranchGrower.Instance>();
+				for (int j = 0; j < instance5.def.OptimalAmountOfBranches; j++)
 				{
 					string text4 = CREATURES.STATUSITEMS.SUGARWATERPRODUCTIONPAUSED.BRANCH_LINE_MISSING;
 					string text5 = SpaceTreeBranchConfig.BRANCH_NAMES[j];
@@ -176,29 +183,29 @@ namespace Database
 					string text6 = "{BRANCH_" + j.ToString() + "}";
 					str = str.Replace(text6, text4);
 				}
-				str = str.Replace("{0}", instance4.def.OptimalAmountOfBranches.ToString());
+				str = str.Replace("{0}", instance5.def.OptimalAmountOfBranches.ToString());
 				str = str.Replace("{1}", GameUtil.GetFormattedLux(10000));
 				return str;
 			};
 			this.SugarWaterProductionWilted = new StatusItem("SugarWaterProductionWilted", "CREATURES", "", StatusItem.IconType.Info, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 129022, null);
 			this.SugarWaterProductionWilted.resolveStringCallback = delegate(string str, object data)
 			{
-				SpaceTreePlant.Instance instance5 = (SpaceTreePlant.Instance)data;
-				str = str.Replace("{0}", GameUtil.GetFormattedPercent(instance5.CurrentProductionProgress * 100f, GameUtil.TimeSlice.None));
+				SpaceTreePlant.Instance instance6 = (SpaceTreePlant.Instance)data;
+				str = str.Replace("{0}", GameUtil.GetFormattedPercent(instance6.CurrentProductionProgress * 100f, GameUtil.TimeSlice.None));
 				return str;
 			};
 			this.SpaceTreeBranchLightStatus = new StatusItem("SpaceTreeBranchLightStatus", "CREATURES", "", StatusItem.IconType.Info, NotificationType.Good, false, OverlayModes.None.ID, true, 129022, null);
 			this.SpaceTreeBranchLightStatus.resolveStringCallback = delegate(string str, object data)
 			{
-				SpaceTreeBranch.Instance instance6 = (SpaceTreeBranch.Instance)data;
-				str = str.Replace("{0}", GameUtil.GetFormattedPercent(instance6.Productivity * 100f, GameUtil.TimeSlice.None));
+				SpaceTreeBranch.Instance instance7 = (SpaceTreeBranch.Instance)data;
+				str = str.Replace("{0}", GameUtil.GetFormattedPercent(instance7.Productivity * 100f, GameUtil.TimeSlice.None));
 				return str;
 			};
 			this.SpaceTreeBranchLightStatus.resolveTooltipCallback = delegate(string str, object data)
 			{
-				SpaceTreeBranch.Instance instance7 = (SpaceTreeBranch.Instance)data;
-				str = str.Replace("{0}", GameUtil.GetFormattedLux(instance7.def.OPTIMAL_LUX_LEVELS));
-				str = str.Replace("{1}", GameUtil.GetFormattedLux(instance7.CurrentAmountOfLux));
+				SpaceTreeBranch.Instance instance8 = (SpaceTreeBranch.Instance)data;
+				str = str.Replace("{0}", GameUtil.GetFormattedLux(instance8.def.OPTIMAL_LUX_LEVELS));
+				str = str.Replace("{1}", GameUtil.GetFormattedLux(instance8.CurrentAmountOfLux));
 				return str;
 			};
 			this.Saturated = new StatusItem("Saturated", "CREATURES", "status_item_flooded", StatusItem.IconType.Custom, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 129022, null);
@@ -211,7 +218,7 @@ namespace Database
 			this.Growing.resolveStringCallback = delegate(string str, object data)
 			{
 				IManageGrowingStates manageGrowingStates = (IManageGrowingStates)data;
-				if (manageGrowingStates.GetGropComponent() != null)
+				if (manageGrowingStates.GetCropComponent() != null)
 				{
 					float num = manageGrowingStates.TimeUntilNextHarvest();
 					str = str.Replace("{TimeUntilNextHarvest}", GameUtil.GetFormattedCycles(num, "F1", false));
@@ -220,35 +227,47 @@ namespace Database
 				str = str.Replace("{PercentGrow}", Math.Floor((double)Math.Max(num2, 0f)).ToString("F0"));
 				return str;
 			};
-			this.CropSleeping = new StatusItem("Crop_Sleeping", "CREATURES", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 1026, null);
-			this.CropSleeping.resolveStringCallback = delegate(string str, object data)
+			this.GrowingFruit = new StatusItem("GrowingFruit", "CREATURES", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 1026, null);
+			this.GrowingFruit.resolveStringCallback = delegate(string str, object data)
 			{
-				CropSleepingMonitor.Instance instance8 = (CropSleepingMonitor.Instance)data;
-				return str.Replace("{REASON}", instance8.def.prefersDarkness ? CREATURES.STATUSITEMS.CROP_SLEEPING.REASON_TOO_BRIGHT : CREATURES.STATUSITEMS.CROP_SLEEPING.REASON_TOO_DARK);
+				IManageGrowingStates manageGrowingStates2 = (IManageGrowingStates)data;
+				if (manageGrowingStates2.GetCropComponent() != null)
+				{
+					float num3 = manageGrowingStates2.TimeUntilNextHarvest();
+					str = str.Replace("{TimeUntilNextHarvest}", GameUtil.GetFormattedCycles(num3, "F1", false));
+				}
+				float num4 = 100f * manageGrowingStates2.PercentGrown();
+				str = str.Replace("{PercentGrow}", Math.Floor((double)Math.Max(num4, 0f)).ToString("F0"));
+				return str;
 			};
-			this.CropSleeping.resolveTooltipCallback = delegate(string str, object data)
+			this.CarnivorousPlantAwaitingVictim = new StatusItem("CarnivorousPlantAwaitingVictim", "CREATURES", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 1026, null);
+			this.CarnivorousPlantAwaitingVictim.resolveTooltipCallback = delegate(string str, object data)
 			{
-				CropSleepingMonitor.Instance instance9 = (CropSleepingMonitor.Instance)data;
-				AttributeInstance attributeInstance = Db.Get().PlantAttributes.MinLightLux.Lookup(instance9.gameObject);
-				string text7 = string.Format(CREATURES.STATUSITEMS.CROP_SLEEPING.REQUIREMENT_LUMINANCE, attributeInstance.GetTotalValue());
-				return str.Replace("{REQUIREMENTS}", text7);
+				string[] formattedPossiblePreyList = ((IPlantConsumeEntities)data).GetFormattedPossiblePreyList();
+				string text7 = "";
+				for (int k = 0; k < formattedPossiblePreyList.Length; k++)
+				{
+					text7 = text7 + "\n" + GameUtil.SafeStringFormat(CREATURES.STATUSITEMS.CARNIVOROUSPLANTAWAITINGVICTIM.TOOLTIP_ITEM, new object[] { formattedPossiblePreyList[k] });
+				}
+				str += text7;
+				return str;
 			};
 			this.EnvironmentTooWarm = new StatusItem("EnvironmentTooWarm", "CREATURES", "", StatusItem.IconType.Info, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 129022, null);
 			this.EnvironmentTooWarm.resolveStringCallback = delegate(string str, object data)
 			{
-				float num3 = Grid.Temperature[Grid.PosToCell(((TemperatureVulnerable)data).gameObject)];
-				float num4 = ((TemperatureVulnerable)data).TemperatureLethalHigh - 1f;
-				str = str.Replace("{ExternalTemperature}", GameUtil.GetFormattedTemperature(num3, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false));
-				str = str.Replace("{TargetTemperature}", GameUtil.GetFormattedTemperature(num4, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false));
+				float num5 = Grid.Temperature[Grid.PosToCell(((TemperatureVulnerable)data).gameObject)];
+				float num6 = ((TemperatureVulnerable)data).TemperatureLethalHigh - 1f;
+				str = str.Replace("{ExternalTemperature}", GameUtil.GetFormattedTemperature(num5, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false));
+				str = str.Replace("{TargetTemperature}", GameUtil.GetFormattedTemperature(num6, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false));
 				return str;
 			};
 			this.EnvironmentTooCold = new StatusItem("EnvironmentTooCold", "CREATURES", "", StatusItem.IconType.Info, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 129022, null);
 			this.EnvironmentTooCold.resolveStringCallback = delegate(string str, object data)
 			{
-				float num5 = Grid.Temperature[Grid.PosToCell(((TemperatureVulnerable)data).gameObject)];
-				float num6 = ((TemperatureVulnerable)data).TemperatureLethalLow + 1f;
-				str = str.Replace("{ExternalTemperature}", GameUtil.GetFormattedTemperature(num5, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false));
-				str = str.Replace("{TargetTemperature}", GameUtil.GetFormattedTemperature(num6, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false));
+				float num7 = Grid.Temperature[Grid.PosToCell(((TemperatureVulnerable)data).gameObject)];
+				float num8 = ((TemperatureVulnerable)data).TemperatureLethalLow + 1f;
+				str = str.Replace("{ExternalTemperature}", GameUtil.GetFormattedTemperature(num7, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false));
+				str = str.Replace("{TargetTemperature}", GameUtil.GetFormattedTemperature(num8, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false));
 				return str;
 			};
 			this.Entombed = new StatusItem("Entombed", "CREATURES", "", StatusItem.IconType.Info, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 129022, null);
@@ -401,24 +420,24 @@ namespace Database
 			this.Fresh = new StatusItem("Fresh", "CREATURES", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022, null);
 			this.Fresh.resolveStringCallback = delegate(string str, object data)
 			{
-				Rottable.Instance instance10 = (Rottable.Instance)data;
-				return str.Replace("{RotPercentage}", "(" + Util.FormatWholeNumber(instance10.RotConstitutionPercentage * 100f) + "%)");
+				Rottable.Instance instance9 = (Rottable.Instance)data;
+				return str.Replace("{RotPercentage}", "(" + Util.FormatWholeNumber(instance9.RotConstitutionPercentage * 100f) + "%)");
 			};
 			this.Fresh.resolveTooltipCallback = delegate(string str, object data)
 			{
-				Rottable.Instance instance11 = (Rottable.Instance)data;
-				return str.Replace("{RotTooltip}", instance11.GetToolTip());
+				Rottable.Instance instance10 = (Rottable.Instance)data;
+				return str.Replace("{RotTooltip}", instance10.GetToolTip());
 			};
 			this.Stale = new StatusItem("Stale", "CREATURES", "", StatusItem.IconType.Info, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 129022, null);
 			this.Stale.resolveStringCallback = delegate(string str, object data)
 			{
-				Rottable.Instance instance12 = (Rottable.Instance)data;
-				return str.Replace("{RotPercentage}", "(" + Util.FormatWholeNumber(instance12.RotConstitutionPercentage * 100f) + "%)");
+				Rottable.Instance instance11 = (Rottable.Instance)data;
+				return str.Replace("{RotPercentage}", "(" + Util.FormatWholeNumber(instance11.RotConstitutionPercentage * 100f) + "%)");
 			};
 			this.Stale.resolveTooltipCallback = delegate(string str, object data)
 			{
-				Rottable.Instance instance13 = (Rottable.Instance)data;
-				return str.Replace("{RotTooltip}", instance13.GetToolTip());
+				Rottable.Instance instance12 = (Rottable.Instance)data;
+				return str.Replace("{RotTooltip}", instance12.GetToolTip());
 			};
 			this.Spoiled = new StatusItem("Spoiled", "CREATURES", "", StatusItem.IconType.Info, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 129022, null);
 			Func<string, object, string> func5 = delegate(string str, object data)
@@ -437,8 +456,8 @@ namespace Database
 			this.Old = new StatusItem("Old", "CREATURES", "", StatusItem.IconType.Info, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 129022, null);
 			this.Old.resolveTooltipCallback = delegate(string str, object data)
 			{
-				AgeMonitor.Instance instance14 = (AgeMonitor.Instance)data;
-				return str.Replace("{TimeUntilDeath}", GameUtil.GetFormattedCycles(instance14.CyclesUntilDeath * 600f, "F1", false));
+				AgeMonitor.Instance instance13 = (AgeMonitor.Instance)data;
+				return str.Replace("{TimeUntilDeath}", GameUtil.GetFormattedCycles(instance13.CyclesUntilDeath * 600f, "F1", false));
 			};
 			this.ExchangingElementConsume = new StatusItem("ExchangingElementConsume", "CREATURES", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022, null);
 			this.ExchangingElementConsume.resolveStringCallback = delegate(string str, object data)
@@ -534,16 +553,16 @@ namespace Database
 			this.ElementGrowthGrowing = new StatusItem("Element_Growth_Growing", "CREATURES", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022, null);
 			this.ElementGrowthGrowing.resolveTooltipCallback = delegate(string str, object data)
 			{
-				ElementGrowthMonitor.Instance instance15 = (ElementGrowthMonitor.Instance)data;
+				ElementGrowthMonitor.Instance instance14 = (ElementGrowthMonitor.Instance)data;
 				StringBuilder stringBuilder = new StringBuilder(str, str.Length * 2);
-				stringBuilder.Replace("{templo}", GameUtil.GetFormattedTemperature(instance15.def.minTemperature, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false));
-				stringBuilder.Replace("{temphi}", GameUtil.GetFormattedTemperature(instance15.def.maxTemperature, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false));
-				if (instance15.lastConsumedTemperature > 0f)
+				stringBuilder.Replace("{templo}", GameUtil.GetFormattedTemperature(instance14.def.minTemperature, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false));
+				stringBuilder.Replace("{temphi}", GameUtil.GetFormattedTemperature(instance14.def.maxTemperature, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false));
+				if (instance14.lastConsumedTemperature > 0f)
 				{
 					stringBuilder.Append("\n\n");
 					stringBuilder.Append(CREATURES.STATUSITEMS.ELEMENT_GROWTH_GROWING.PREFERRED_TEMP);
-					stringBuilder.Replace("{element}", ElementLoader.FindElementByHash(instance15.lastConsumedElement).name);
-					stringBuilder.Replace("{temperature}", GameUtil.GetFormattedTemperature(instance15.lastConsumedTemperature, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false));
+					stringBuilder.Replace("{element}", ElementLoader.FindElementByHash(instance14.lastConsumedElement).name);
+					stringBuilder.Replace("{temperature}", GameUtil.GetFormattedTemperature(instance14.lastConsumedTemperature, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false));
 				}
 				return stringBuilder.ToString();
 			};
@@ -551,8 +570,8 @@ namespace Database
 			this.ElementGrowthStunted.resolveTooltipCallback = this.ElementGrowthGrowing.resolveTooltipCallback;
 			this.ElementGrowthStunted.resolveStringCallback = delegate(string str, object data)
 			{
-				ElementGrowthMonitor.Instance instance16 = (ElementGrowthMonitor.Instance)data;
-				string text13 = ((instance16.lastConsumedTemperature < instance16.def.minTemperature) ? CREATURES.STATUSITEMS.ELEMENT_GROWTH_STUNTED.TOO_COLD : CREATURES.STATUSITEMS.ELEMENT_GROWTH_STUNTED.TOO_HOT);
+				ElementGrowthMonitor.Instance instance15 = (ElementGrowthMonitor.Instance)data;
+				string text13 = ((instance15.lastConsumedTemperature < instance15.def.minTemperature) ? CREATURES.STATUSITEMS.ELEMENT_GROWTH_STUNTED.TOO_COLD : CREATURES.STATUSITEMS.ELEMENT_GROWTH_STUNTED.TOO_HOT);
 				str = str.Replace("{reason}", text13);
 				return str;
 			};
@@ -568,8 +587,8 @@ namespace Database
 			this.MilkProducer = new StatusItem("MilkProducer", "CREATURES", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022, null);
 			this.MilkProducer.resolveStringCallback = delegate(string str, object data)
 			{
-				MilkProductionMonitor.Instance instance17 = (MilkProductionMonitor.Instance)data;
-				str = str.Replace("{amount}", GameUtil.GetFormattedMass(instance17.MilkPercentage, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"));
+				MilkProductionMonitor.Instance instance16 = (MilkProductionMonitor.Instance)data;
+				str = str.Replace("{amount}", GameUtil.GetFormattedMass(instance16.MilkPercentage, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"));
 				return str;
 			};
 			this.GettingRanched = new StatusItem("Getting_Ranched", "CREATURES", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022, null);
@@ -581,28 +600,31 @@ namespace Database
 			this.TemperatureColdDeadly = new StatusItem("TemperatureColdDeadly", CREATURES.STATUSITEMS.TEMPERATURE_COLD_DEADLY.NAME, CREATURES.STATUSITEMS.TEMPERATURE_COLD_DEADLY.TOOLTIP, "", StatusItem.IconType.Exclamation, NotificationType.Bad, false, OverlayModes.None.ID, 129022, true, null);
 			this.TemperatureHotUncomfortable.resolveStringCallback = delegate(string str, object obj)
 			{
-				CritterTemperatureMonitor.Instance instance18 = (CritterTemperatureMonitor.Instance)obj;
+				CritterTemperatureMonitor.Instance instance17 = (CritterTemperatureMonitor.Instance)obj;
 				return string.Format(str, new object[]
 				{
-					GameUtil.GetFormattedTemperature(instance18.GetTemperatureInternal(), GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false),
-					GameUtil.GetFormattedTemperature(instance18.def.temperatureColdUncomfortable, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false),
-					GameUtil.GetFormattedTemperature(instance18.def.temperatureHotUncomfortable, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false),
-					Effect.CreateTooltip(instance18.sm.uncomfortableEffect, false, "\n    • ", true)
+					GameUtil.GetFormattedTemperature(instance17.GetTemperatureInternal(), GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false),
+					GameUtil.GetFormattedTemperature(instance17.def.temperatureColdUncomfortable, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false),
+					GameUtil.GetFormattedTemperature(instance17.def.temperatureHotUncomfortable, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false),
+					Effect.CreateTooltip(instance17.sm.uncomfortableEffect, false, "\n    • ", true)
 				});
 			};
 			this.TemperatureHotDeadly.resolveStringCallback = delegate(string str, object obj)
 			{
-				CritterTemperatureMonitor.Instance instance19 = (CritterTemperatureMonitor.Instance)obj;
+				CritterTemperatureMonitor.Instance instance18 = (CritterTemperatureMonitor.Instance)obj;
 				return string.Format(str, new object[]
 				{
-					GameUtil.GetFormattedTemperature(instance19.GetTemperatureExternal(), GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false),
-					GameUtil.GetFormattedTemperature(instance19.def.temperatureColdDeadly, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false),
-					GameUtil.GetFormattedTemperature(instance19.def.temperatureHotDeadly, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false),
-					Effect.CreateTooltip(instance19.sm.deadlyEffect, false, "\n    • ", true)
+					GameUtil.GetFormattedTemperature(instance18.GetTemperatureExternal(), GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false),
+					GameUtil.GetFormattedTemperature(instance18.def.temperatureColdDeadly, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false),
+					GameUtil.GetFormattedTemperature(instance18.def.temperatureHotDeadly, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false),
+					Effect.CreateTooltip(instance18.sm.deadlyEffect, false, "\n    • ", true)
 				});
 			};
 			this.TemperatureColdUncomfortable.resolveStringCallback = this.TemperatureHotUncomfortable.resolveStringCallback;
 			this.TemperatureColdDeadly.resolveStringCallback = this.TemperatureHotDeadly.resolveStringCallback;
+			this.TravelingToPollinate = new StatusItem("POLLINATING.MOVINGTO", "CREATURES", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022, null);
+			this.Pollinating = new StatusItem("POLLINATING.INTERACTING", "CREATURES", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022, null);
+			this.NotPollinated = new StatusItem("NOT_POLLINATED", "CREATURES", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022, null);
 		}
 
 		public StatusItem Dead;
@@ -633,6 +655,8 @@ namespace Database
 
 		public StatusItem Suffocating;
 
+		public StatusItem AquaticCreatureSuffocating;
+
 		public StatusItem Hatching;
 
 		public StatusItem Incubating;
@@ -645,7 +669,9 @@ namespace Database
 
 		public StatusItem Growing;
 
-		public StatusItem CropSleeping;
+		public StatusItem GrowingFruit;
+
+		public StatusItem CarnivorousPlantAwaitingVictim;
 
 		public StatusItem ReadyForHarvest;
 
@@ -772,5 +798,11 @@ namespace Database
 		public StatusItem TemperatureColdUncomfortable;
 
 		public StatusItem TemperatureColdDeadly;
+
+		public StatusItem TravelingToPollinate;
+
+		public StatusItem Pollinating;
+
+		public StatusItem NotPollinated;
 	}
 }

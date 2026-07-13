@@ -36,10 +36,10 @@ public class CodexScreen : KScreen
 		{
 			this.ChangeArticle("HOME", false, default(Vector3), CodexScreen.HistoryDirection.NewArticle);
 		}
-		this.searchInputField.onValueChanged.AddListener(delegate(string value)
+		this.searchInputField.OnValueChangesPaused = delegate
 		{
-			this.FilterSearch(value);
-		});
+			this.FilterSearch(this.searchInputField.text);
+		};
 		KInputTextField kinputTextField = this.searchInputField;
 		kinputTextField.onFocus = (global::System.Action)Delegate.Combine(kinputTextField.onFocus, new global::System.Action(delegate
 		{
@@ -160,32 +160,53 @@ public class CodexScreen : KScreen
 	{
 		this.searchResults.Clear();
 		this.subEntrySearchResults.Clear();
-		input = input.ToLower();
-		foreach (KeyValuePair<string, CodexEntry> keyValuePair in CodexCache.entries)
+		input = SearchUtil.Canonicalize(input).Trim();
+		if (string.IsNullOrEmpty(input))
 		{
-			if (Game.IsCorrectDlcActiveForCurrentSave(keyValuePair.Value))
+			foreach (KeyValuePair<string, CodexEntry> keyValuePair in CodexCache.entries)
 			{
-				if (input == "")
-				{
-					if (!keyValuePair.Value.searchOnly)
-					{
-						this.searchResults.Add(keyValuePair.Value);
-					}
-				}
-				else if (input == keyValuePair.Value.name.ToLower() || input.Contains(keyValuePair.Value.name.ToLower()) || keyValuePair.Value.name.ToLower().Contains(input))
+				if (Game.IsCorrectDlcActiveForCurrentSave(keyValuePair.Value) && !keyValuePair.Value.searchOnly)
 				{
 					this.searchResults.Add(keyValuePair.Value);
 				}
 			}
+			this.FilterEntries(false);
 		}
-		foreach (KeyValuePair<string, SubEntry> keyValuePair2 in CodexCache.subEntries)
+		else
 		{
-			if (input == keyValuePair2.Value.name.ToLower() || input.Contains(keyValuePair2.Value.name.ToLower()) || keyValuePair2.Value.name.ToLower().Contains(input))
+			foreach (KeyValuePair<string, CodexEntry> keyValuePair2 in CodexCache.entries)
 			{
-				this.subEntrySearchResults.Add(keyValuePair2.Value);
+				if (Game.IsCorrectDlcActiveForCurrentSave(keyValuePair2.Value))
+				{
+					try
+					{
+						if (SearchUtil.IsPassingScore(FuzzySearch.CanonicalizeAndScore(input, keyValuePair2.Value.name).score))
+						{
+							this.searchResults.Add(keyValuePair2.Value);
+						}
+					}
+					catch (Exception ex)
+					{
+						KCrashReporter.ReportDevNotification("Fuzzy score bind failed", Environment.StackTrace, ex.Message, false, null);
+					}
+				}
 			}
+			foreach (KeyValuePair<string, SubEntry> keyValuePair3 in CodexCache.subEntries)
+			{
+				try
+				{
+					if (SearchUtil.IsPassingScore(FuzzySearch.CanonicalizeAndScore(input, keyValuePair3.Value.name).score))
+					{
+						this.subEntrySearchResults.Add(keyValuePair3.Value);
+					}
+				}
+				catch (Exception ex2)
+				{
+					KCrashReporter.ReportDevNotification("Fuzzy score bind failed", Environment.StackTrace, ex2.Message, false, null);
+				}
+			}
+			this.FilterEntries(true);
 		}
-		this.FilterEntries(input != "");
 		return this.searchResults;
 	}
 
@@ -220,6 +241,7 @@ public class CodexScreen : KScreen
 				if (transform.GetChild(i).gameObject.activeSelf)
 				{
 					flag = true;
+					break;
 				}
 			}
 			gameObject.SetActive(flag);

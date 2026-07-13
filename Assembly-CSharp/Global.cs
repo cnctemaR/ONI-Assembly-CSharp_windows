@@ -278,7 +278,7 @@ public class Global : MonoBehaviour
 		{
 			SceneInitializerLoader.ReportDeferredError = delegate(SceneInitializerLoader.DeferredError deferred_error)
 			{
-				crash_reporter.ShowDialog(deferred_error.msg, deferred_error.stack_trace);
+				crash_reporter.ShowDialog(deferred_error.msg, deferred_error.stack_trace, true, null, null);
 			};
 		}
 		this.globalCanvas = GameObject.Find("Canvas");
@@ -638,7 +638,7 @@ public class Global : MonoBehaviour
 	private void SetONIStaticSessionVariables()
 	{
 		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Branch", "release");
-		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Build", 663500U);
+		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Build", 674504U);
 		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("SaveFolderWriteTest", Global.saveFolderTestResult);
 		if (KPlayerPrefs.HasKey(UnitConfigurationScreen.MassUnitKey))
 		{

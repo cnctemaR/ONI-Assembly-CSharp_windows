@@ -462,6 +462,101 @@ public class HarvestablePOIConfig : IMultiEntityConfig
 				3.5f
 			}
 		}, 15000f, 25000f, 30000f, 60000f, true, HarvestablePOIConfig.AsteroidFieldOrbit, 20, DlcManager.EXPANSION1.Append<string>(DlcManager.DLC2), null)));
+		list.Add(new HarvestablePOIConfig.HarvestablePOIParams("prehistoric_SO1", new HarvestablePOIConfigurator.HarvestablePOIType("DLC4PrehistoricMixingField", new Dictionary<SimHashes, float>
+		{
+			{
+				SimHashes.NickelOre,
+				4.5f
+			},
+			{
+				SimHashes.Peat,
+				2.5f
+			},
+			{
+				SimHashes.Shale,
+				1f
+			},
+			{
+				SimHashes.Amber,
+				1f
+			},
+			{
+				SimHashes.Iridium,
+				0.5f
+			}
+		}, 15000f, 25000f, 30000f, 60000f, true, HarvestablePOIConfig.AsteroidFieldOrbit, 20, DlcManager.EXPANSION1.Append<string>(DlcManager.DLC4), null)));
+		list.Add(new HarvestablePOIConfig.HarvestablePOIParams("prehistoric_SO2", new HarvestablePOIConfigurator.HarvestablePOIType("DLC4PrehistoricOreField", new Dictionary<SimHashes, float>
+		{
+			{
+				SimHashes.NickelOre,
+				1.5f
+			},
+			{
+				SimHashes.Peat,
+				2.5f
+			},
+			{
+				SimHashes.Shale,
+				1f
+			},
+			{
+				SimHashes.Amber,
+				1f
+			}
+		}, 15000f, 25000f, 30000f, 60000f, true, HarvestablePOIConfig.AsteroidFieldOrbit, 20, DlcManager.EXPANSION1.Append<string>(DlcManager.DLC4), null)));
+		list.Add(new HarvestablePOIConfig.HarvestablePOIParams("prehistoric_impactor_1", new HarvestablePOIConfigurator.HarvestablePOIType("DLC4ImpactorDebrisField1", new Dictionary<SimHashes, float>
+		{
+			{
+				SimHashes.Iridium,
+				1.7f
+			},
+			{
+				SimHashes.MaficRock,
+				2.3f
+			},
+			{
+				SimHashes.Gold,
+				2.1f
+			},
+			{
+				SimHashes.Granite,
+				3.9f
+			}
+		}, 35000f, 45000f, 30000f, 30000f, false, HarvestablePOIConfig.AsteroidFieldOrbit, 20, DlcManager.EXPANSION1.Append<string>(DlcManager.DLC4), null)));
+		list.Add(new HarvestablePOIConfig.HarvestablePOIParams("prehistoric_impactor_2", new HarvestablePOIConfigurator.HarvestablePOIType("DLC4ImpactorDebrisField2", new Dictionary<SimHashes, float>
+		{
+			{
+				SimHashes.Isoresin,
+				1.8f
+			},
+			{
+				SimHashes.Petroleum,
+				3.5f
+			},
+			{
+				SimHashes.LiquidSulfur,
+				4.7f
+			}
+		}, 33400f, 66800f, 30000f, 30000f, false, HarvestablePOIConfig.AsteroidFieldOrbit, 20, DlcManager.EXPANSION1.Append<string>(DlcManager.DLC4), null)));
+		list.Add(new HarvestablePOIConfig.HarvestablePOIParams("prehistoric_impactor_3", new HarvestablePOIConfigurator.HarvestablePOIType("DLC4ImpactorDebrisField3", new Dictionary<SimHashes, float>
+		{
+			{
+				SimHashes.MoltenIridium,
+				3.7f
+			},
+			{
+				SimHashes.LiquidOxygen,
+				0.6f
+			},
+			{
+				SimHashes.LiquidHydrogen,
+				0.6f
+			},
+			{
+				SimHashes.Magma,
+				5.1f
+			}
+		}, 110000f, 137500f, 30000f, 30000f, false, HarvestablePOIConfig.AsteroidFieldOrbit, 20, DlcManager.EXPANSION1.Append<string>(DlcManager.DLC4), null)));
 		list.RemoveAll((HarvestablePOIConfig.HarvestablePOIParams poi) => !DlcManager.IsCorrectDlcSubscribed(poi.poiType));
 		return list;
 	}
@@ -515,6 +610,16 @@ public class HarvestablePOIConfig : IMultiEntityConfig
 	public const string DLC2CeresField = "DLC2CeresField";
 
 	public const string DLC2CeresOreField = "DLC2CeresOreField";
+
+	public const string DLC4PrehistoricMixingField = "DLC4PrehistoricMixingField";
+
+	public const string DLC4PrehistoricOreField = "DLC4PrehistoricOreField";
+
+	public const string DLC4ImpactorDebrisField1 = "DLC4ImpactorDebrisField1";
+
+	public const string DLC4ImpactorDebrisField2 = "DLC4ImpactorDebrisField2";
+
+	public const string DLC4ImpactorDebrisField3 = "DLC4ImpactorDebrisField3";
 
 	private static readonly List<string> GasFieldOrbit = new List<string>
 	{

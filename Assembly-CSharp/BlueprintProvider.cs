@@ -45,6 +45,12 @@ public abstract class BlueprintProvider : IHasDlcRestrictions
 		case BlueprintProvider.ArtableType.SculptureWood:
 			text = "WoodSculpture";
 			break;
+		case BlueprintProvider.ArtableType.FossilSculpture:
+			text = "FossilSculpture";
+			break;
+		case BlueprintProvider.ArtableType.CeilingFossilSculpture:
+			text = "CeilingFossilSculpture";
+			break;
 		default:
 			text = null;
 			break;
@@ -138,7 +144,9 @@ public abstract class BlueprintProvider : IHasDlcRestrictions
 		SculptureIce,
 		SculptureMetal,
 		SculptureMarble,
-		SculptureWood
+		SculptureWood,
+		FossilSculpture,
+		CeilingFossilSculpture
 	}
 
 	public enum ArtableQuality

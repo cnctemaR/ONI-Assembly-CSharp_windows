@@ -86,7 +86,6 @@ public class FetchDroneConfig : IEntityConfig, IHasDlcRestrictions
 		manualDeliveryKG.capacity = 1f;
 		manualDeliveryKG.refillMass = 1.2f;
 		manualDeliveryKG.MinimumMass = 1f;
-		manualDeliveryKG.MassPerUnit = 21f;
 		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.RepairFetch.IdHash;
 		gameObject.AddOrGetDef<RobotElectroBankMonitor.Def>().lowBatteryWarningPercent = 0.2f;
 		gameObject.AddOrGetDef<RobotAi.Def>().DeleteOnDead = true;

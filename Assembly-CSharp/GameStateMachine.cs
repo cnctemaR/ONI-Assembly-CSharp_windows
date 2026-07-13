@@ -1809,7 +1809,7 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 				float num = requested_amount.Get(smi);
 				float num2 = Mathf.Max(1f, Db.Get().Attributes.CarryAmount.Lookup(gameObject).GetTotalValue());
 				float num3 = Math.Min(num, num2);
-				num3 = Math.Min(num3, pickupable.UnreservedAmount);
+				num3 = Math.Min(num3, pickupable.UnreservedFetchAmount);
 				if (num3 <= 0f)
 				{
 					pickupable.PrintReservations();
@@ -1819,7 +1819,7 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 						", ",
 						num.ToString(),
 						", ",
-						pickupable.UnreservedAmount.ToString(),
+						pickupable.UnreservedFetchAmount.ToString(),
 						", ",
 						num3.ToString()
 					}));
@@ -2353,6 +2353,36 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 			return this;
 		}
 
+		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State MoveTo<ApproachableType>(StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.TargetParameter move_parameter, GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State success_state, Func<StateMachineInstanceType, CellOffset[]> override_offsets, GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State fail_state = null, NavTactic tactic = null) where ApproachableType : IApproachable
+		{
+			this.EventTransition(GameHashes.DestinationReached, success_state, null);
+			this.EventTransition(GameHashes.NavigationFailed, fail_state, null);
+			StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.TargetParameter state_target = this.GetStateTarget();
+			CellOffset[] offsets;
+			this.Enter("MoveTo(" + move_parameter.name + ")", delegate(StateMachineInstanceType smi)
+			{
+				offsets = override_offsets(smi);
+				IApproachable approachable = move_parameter.Get<ApproachableType>(smi);
+				KMonoBehaviour kmonoBehaviour = move_parameter.Get<KMonoBehaviour>(smi);
+				if (kmonoBehaviour == null)
+				{
+					smi.GoTo(fail_state);
+					return;
+				}
+				Navigator component = state_target.Get(smi).GetComponent<Navigator>();
+				if (offsets == null)
+				{
+					offsets = approachable.GetOffsets();
+				}
+				component.GoTo(kmonoBehaviour, offsets, tactic);
+			});
+			this.Exit("StopMoving()", delegate(StateMachineInstanceType smi)
+			{
+				state_target.Get<Navigator>(smi).Stop(false, true);
+			});
+			return this;
+		}
+
 		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State MoveTo<ApproachableType>(StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.TargetParameter move_parameter, GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State success_state, Func<StateMachineInstanceType, NavTactic> nav_tactic, GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State fail_state = null, CellOffset[] override_offsets = null) where ApproachableType : IApproachable
 		{
 			this.EventTransition(GameHashes.DestinationReached, success_state, null);
@@ -2520,6 +2550,20 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 				if (kanimControllerBase != null)
 				{
 					kanimControllerBase.Play(anim_cb(smi), mode, 1f, 0f);
+				}
+			});
+			return this;
+		}
+
+		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State PlayAnim(Func<StateMachineInstanceType, string> anim_cb, Func<StateMachineInstanceType, KAnim.PlayMode> mode_cb)
+		{
+			StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.TargetParameter state_target = this.GetStateTarget();
+			this.Enter("PlayAnim(Dynamic)", delegate(StateMachineInstanceType smi)
+			{
+				KAnimControllerBase kanimControllerBase = state_target.Get<KAnimControllerBase>(smi);
+				if (kanimControllerBase != null)
+				{
+					kanimControllerBase.Play(anim_cb(smi), mode_cb(smi), 1f, 0f);
 				}
 			});
 			return this;
@@ -2774,6 +2818,12 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State InitializeStates(StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.TargetParameter mover, StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.TargetParameter move_target, GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State success_state, GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State failure_state = null, CellOffset[] override_offsets = null, NavTactic tactic = null)
 		{
 			base.root.Target(mover).OnTargetLost(move_target, failure_state).MoveTo<ApproachableType>(move_target, success_state, failure_state, override_offsets, (tactic == null) ? NavigationTactics.ReduceTravelDistance : tactic);
+			return this;
+		}
+
+		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State InitializeStates(StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.TargetParameter mover, StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.TargetParameter move_target, Func<StateMachineInstanceType, CellOffset[]> override_offsets, GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State success_state, GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State failure_state = null, NavTactic tactic = null)
+		{
+			base.root.Target(mover).OnTargetLost(move_target, failure_state).MoveTo<ApproachableType>(move_target, success_state, override_offsets, failure_state, (tactic == null) ? NavigationTactics.ReduceTravelDistance : tactic);
 			return this;
 		}
 

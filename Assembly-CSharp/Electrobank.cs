@@ -56,61 +56,38 @@ public class Electrobank : KMonoBehaviour, ISim1000ms, ISim200ms, IConsumableUII
 		this.radiationEmitter.Refresh();
 	}
 
-	public static GameObject ReplaceEmptyWithCharged(GameObject EmptyElectrobank, bool dropFromStorage = false)
+	private static GameObject Replace(GameObject electrobank, Tag replacement, bool dropFromStorage = false)
 	{
-		Vector3 position = EmptyElectrobank.transform.GetPosition();
-		GameObject gameObject = Util.KInstantiate(Assets.GetPrefab("Electrobank"), position);
-		gameObject.GetComponent<PrimaryElement>().SetElement(EmptyElectrobank.GetComponent<PrimaryElement>().Element.id, true);
+		Vector3 position = electrobank.transform.GetPosition();
+		GameObject gameObject = Util.KInstantiate(Assets.GetPrefab(replacement), position);
+		gameObject.GetComponent<PrimaryElement>().SetElement(electrobank.GetComponent<PrimaryElement>().Element.id, true);
 		gameObject.SetActive(true);
-		Storage storage = EmptyElectrobank.GetComponent<Pickupable>().storage;
+		Storage storage = electrobank.GetComponent<Pickupable>().storage;
 		if (storage != null)
 		{
-			storage.Remove(EmptyElectrobank, true);
+			storage.Remove(electrobank, true);
 		}
-		EmptyElectrobank.DeleteObject();
+		electrobank.DeleteObject();
 		if (storage != null && !dropFromStorage)
 		{
 			storage.Store(gameObject, false, false, true, false);
 		}
 		return gameObject;
+	}
+
+	public static GameObject ReplaceEmptyWithCharged(GameObject EmptyElectrobank, bool dropFromStorage = false)
+	{
+		return Electrobank.Replace(EmptyElectrobank, "Electrobank", dropFromStorage);
 	}
 
 	public static GameObject ReplaceChargedWithEmpty(GameObject ChargedElectrobank, bool dropFromStorage = false)
 	{
-		Vector3 position = ChargedElectrobank.transform.GetPosition();
-		GameObject gameObject = Util.KInstantiate(Assets.GetPrefab("EmptyElectrobank"), position);
-		gameObject.GetComponent<PrimaryElement>().SetElement(ChargedElectrobank.GetComponent<PrimaryElement>().Element.id, true);
-		gameObject.SetActive(true);
-		Storage storage = ChargedElectrobank.GetComponent<Pickupable>().storage;
-		if (storage != null)
-		{
-			storage.Remove(ChargedElectrobank, true);
-		}
-		ChargedElectrobank.DeleteObject();
-		if (storage != null && !dropFromStorage)
-		{
-			storage.Store(gameObject, false, false, true, false);
-		}
-		return gameObject;
+		return Electrobank.Replace(ChargedElectrobank, "EmptyElectrobank", dropFromStorage);
 	}
 
 	public static GameObject ReplaceEmptyWithGarbage(GameObject ChargedElectrobank, bool dropFromStorage = false)
 	{
-		Vector3 position = ChargedElectrobank.transform.GetPosition();
-		GameObject gameObject = Util.KInstantiate(Assets.GetPrefab("GarbageElectrobank"), position);
-		gameObject.GetComponent<PrimaryElement>().SetElement(ChargedElectrobank.GetComponent<PrimaryElement>().Element.id, true);
-		gameObject.SetActive(true);
-		Storage storage = ChargedElectrobank.GetComponent<Pickupable>().storage;
-		if (storage != null)
-		{
-			storage.Remove(ChargedElectrobank, true);
-		}
-		ChargedElectrobank.DeleteObject();
-		if (storage != null && !dropFromStorage)
-		{
-			storage.Store(gameObject, false, false, true, false);
-		}
-		return gameObject;
+		return Electrobank.Replace(ChargedElectrobank, "GarbageElectrobank", dropFromStorage);
 	}
 
 	public float AddPower(float joules)

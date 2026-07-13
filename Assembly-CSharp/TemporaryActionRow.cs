@@ -83,11 +83,8 @@ public class TemporaryActionRow : KMonoBehaviour, IRender200ms
 	protected override void OnCmpDisable()
 	{
 		base.OnCmpDisable();
-		if (this.IsVisible)
-		{
-			this.HideImmediatly();
-			this._OnRowHidden();
-		}
+		this.HideImmediatly();
+		this._OnRowHidden();
 	}
 
 	public void SetLifetime(float lifetime)

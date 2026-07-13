@@ -19,7 +19,7 @@ public class OwnablesSidescreen : SideScreenContent
 			{
 				new OwnablesSidescreenCategoryRow.AssignableSlotData(Db.Get().AssignableSlots.Bed, new Func<IAssignableIdentity, bool>(this.Always)),
 				new OwnablesSidescreenCategoryRow.AssignableSlotData(Db.Get().AssignableSlots.Toilet, new Func<IAssignableIdentity, bool>(this.Always)),
-				new OwnablesSidescreenCategoryRow.AssignableSlotData(Db.Get().AssignableSlots.MessStation, this.HasAmount("Calories"))
+				new OwnablesSidescreenCategoryRow.AssignableSlotData(Db.Get().AssignableSlots.MessStation, new Func<IAssignableIdentity, bool>(MessStation.CanBeAssignedTo))
 			}));
 			this.categories = array;
 		}

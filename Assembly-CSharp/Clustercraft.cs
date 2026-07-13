@@ -337,7 +337,7 @@ public class Clustercraft : ClusterGridEntity, IClusterRange, ISim4000ms, ISim10
 
 	public ClusterGridEntity GetPOIAtCurrentLocation()
 	{
-		if (this.status != Clustercraft.CraftStatus.InFlight || this.IsFlightInProgress())
+		if ((this.status != Clustercraft.CraftStatus.InFlight || this.IsFlightInProgress()) && (this.status != Clustercraft.CraftStatus.Launching || !(this.m_location == this.Destination)))
 		{
 			return null;
 		}

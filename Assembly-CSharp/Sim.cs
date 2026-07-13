@@ -31,6 +31,9 @@ public static class Sim
 	public unsafe static extern IntPtr SIM_HandleMessage(int sim_msg_id, int msg_length, byte* msg);
 
 	[DllImport("SimDLL")]
+	public unsafe static extern IntPtr SIM_HandleMessages(int sim_msg_id, int msg_length, int msg_count, byte* msg);
+
+	[DllImport("SimDLL")]
 	private unsafe static extern byte* SIM_BeginSave(int* size, int x, int y);
 
 	[DllImport("SimDLL")]
@@ -93,7 +96,7 @@ public static class Sim
 
 	public static void AllocateCells(int width, int height, bool headless = false)
 	{
-		using (MemoryStream memoryStream = new MemoryStream(8))
+		using (MemoryStream memoryStream = new MemoryStream(16))
 		{
 			using (BinaryWriter binaryWriter = new BinaryWriter(memoryStream))
 			{

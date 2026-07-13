@@ -35,6 +35,7 @@ public class MissileLauncherConfig : IBuildingConfig
 		buildingDef.ExhaustKilowattsWhenActive = 0.5f;
 		buildingDef.SelfHeatKilowattsWhenActive = 2f;
 		buildingDef.AddSearchTerms(SEARCH_TERMS.MISSILE);
+		buildingDef.POIUnlockable = true;
 		return buildingDef;
 	}
 
@@ -53,6 +54,7 @@ public class MissileLauncherConfig : IBuildingConfig
 		go.AddOrGetDef<MissileLauncher.Def>();
 		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.IndustrialMachinery, false);
 		Storage storage = BuildingTemplates.CreateDefaultStorage(go, false);
+		storage.storageID = "MissileBasic";
 		storage.showInUI = true;
 		storage.SetDefaultStoredItemModifiers(Storage.StandardSealedStorage);
 		storage.storageFilters = new List<Tag> { "MissileBasic" };
@@ -64,13 +66,49 @@ public class MissileLauncherConfig : IBuildingConfig
 		manualDeliveryKG.RequestedItemTag = "MissileBasic";
 		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.MachineFetch.IdHash;
 		manualDeliveryKG.operationalRequirement = Operational.State.None;
-		manualDeliveryKG.refillMass = 5f;
-		manualDeliveryKG.MinimumMass = 1f;
-		manualDeliveryKG.capacity = storage.Capacity() / 10f;
-		manualDeliveryKG.MassPerUnit = 10f;
+		manualDeliveryKG.refillMass = 50f;
+		manualDeliveryKG.MinimumMass = 10f;
+		manualDeliveryKG.capacity = storage.Capacity();
+		Storage storage2 = go.AddComponent<Storage>();
+		storage2.storageID = "MissileLongRange";
+		storage2.showInUI = true;
+		storage2.SetDefaultStoredItemModifiers(Storage.StandardSealedStorage);
+		storage2.storageFilters = new List<Tag> { "MissileLongRange" };
+		storage2.allowSettingOnlyFetchMarkedItems = false;
+		storage2.fetchCategory = Storage.FetchCategory.GeneralStorage;
+		storage2.capacityKg = 1000f;
+		ManualDeliveryKG manualDeliveryKG2 = go.AddComponent<ManualDeliveryKG>();
+		manualDeliveryKG2.SetStorage(storage2);
+		manualDeliveryKG2.RequestedItemTag = "MissileLongRange";
+		manualDeliveryKG2.choreTypeIDHash = Db.Get().ChoreTypes.MachineFetch.IdHash;
+		manualDeliveryKG2.operationalRequirement = Operational.State.None;
+		manualDeliveryKG2.refillMass = 1000f;
+		manualDeliveryKG2.MinimumMass = 200f;
+		manualDeliveryKG2.capacity = storage2.Capacity();
+		manualDeliveryKG2.FillToMinimumMass = true;
+		Storage storage3 = go.AddComponent<Storage>();
+		storage3.storageID = "CondiutStorage";
+		storage3.capacityKg = 200f;
+		storage3.SetDefaultStoredItemModifiers(new List<Storage.StoredItemModifier>
+		{
+			Storage.StoredItemModifier.Hide,
+			Storage.StoredItemModifier.Seal,
+			Storage.StoredItemModifier.Insulate
+		});
+		storage3.showInUI = false;
 		SolidConduitConsumer solidConduitConsumer = go.AddOrGet<SolidConduitConsumer>();
 		solidConduitConsumer.alwaysConsume = true;
-		solidConduitConsumer.capacityKG = storage.Capacity();
+		solidConduitConsumer.capacityKG = storage3.capacityKg;
+		solidConduitConsumer.storage = storage3;
+		if (DlcManager.IsContentSubscribed("EXPANSION1_ID"))
+		{
+			EntityClusterDestinationSelector entityClusterDestinationSelector = go.AddOrGet<EntityClusterDestinationSelector>();
+			entityClusterDestinationSelector.assignable = true;
+			entityClusterDestinationSelector.sidescreenTitleString = UI.UISIDESCREENS.CLUSTERDESTINATIONSIDESCREEN.TITLE_MISSILE_TARGET;
+			entityClusterDestinationSelector.changeTargetButtonTooltipString = UI.UISIDESCREENS.CLUSTERDESTINATIONSIDESCREEN.CHANGE_DESTINATION_BUTTON_TOOLTIP_MISSILE;
+			entityClusterDestinationSelector.clearTargetButtonTooltipString = UI.UISIDESCREENS.CLUSTERDESTINATIONSIDESCREEN.CLEAR_DESTINATION_BUTTON_TOOLTIP_MISSILE;
+			entityClusterDestinationSelector.requiredEntityLayer = EntityLayer.Meteor;
+		}
 		this.AddVisualizer(go);
 	}
 
@@ -93,7 +131,7 @@ public class MissileLauncherConfig : IBuildingConfig
 	{
 		SymbolOverrideControllerUtil.AddToPrefab(go);
 		go.AddOrGet<TreeFilterable>().dropIncorrectOnFilterChange = false;
-		FlatTagFilterable flatTagFilterable = go.AddOrGet<FlatTagFilterable>();
+		FlatTagFilterable flatTagFilterable = go.AddComponent<FlatTagFilterable>();
 		flatTagFilterable.displayOnlyDiscoveredTags = false;
 		flatTagFilterable.headerText = global::STRINGS.BUILDINGS.PREFABS.MISSILELAUNCHER.TARGET_SELECTION_HEADER;
 	}
@@ -122,4 +160,6 @@ public class MissileLauncherConfig : IBuildingConfig
 	}
 
 	public const string ID = "MissileLauncher";
+
+	public const string CONDUIT_STORAGE = "CondiutStorage";
 }

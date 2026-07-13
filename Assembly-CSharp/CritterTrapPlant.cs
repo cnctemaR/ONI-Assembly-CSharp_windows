@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using KSerialization;
 using STRINGS;
 using UnityEngine;
 
-public class CritterTrapPlant : StateMachineComponent<CritterTrapPlant.StatesInstance>
+public class CritterTrapPlant : StateMachineComponent<CritterTrapPlant.StatesInstance>, IPlantConsumeEntities
 {
 	protected override void OnSpawn()
 	{
@@ -38,6 +39,75 @@ public class CritterTrapPlant : StateMachineComponent<CritterTrapPlant.StatesIns
 		return new Notification(CREATURES.STATUSITEMS.PLANTDEATH.NOTIFICATION, NotificationType.Bad, (List<Notification> notificationList, object data) => CREATURES.STATUSITEMS.PLANTDEATH.NOTIFICATION_TOOLTIP + notificationList.ReduceMessages(false), "/t• " + base.gameObject.GetProperName(), true, 0f, null, null, null, true, false, false);
 	}
 
+	public string GetConsumableEntitiesCategoryName()
+	{
+		return CREATURES.SPECIES.CRITTERTRAPPLANT.VICTIM_IDENTIFIER;
+	}
+
+	public string GetRequirementText()
+	{
+		return CREATURES.SPECIES.CRITTERTRAPPLANT.PLANT_HUNGER_REQUIREMENT;
+	}
+
+	public bool AreEntitiesConsumptionRequirementsSatisfied()
+	{
+		return base.smi != null && base.smi.sm.hasEatenCreature.Get(base.smi);
+	}
+
+	public string GetConsumedEntityName()
+	{
+		if (base.smi != null)
+		{
+			return base.smi.LastConsumedEntityName;
+		}
+		return "Unknown Critter";
+	}
+
+	public List<KPrefabID> GetPrefabsOfPossiblePrey()
+	{
+		List<GameObject> prefabsWithComponent = Assets.GetPrefabsWithComponent<CreatureBrain>();
+		List<KPrefabID> list = new List<KPrefabID>();
+		for (int i = 0; i < prefabsWithComponent.Count; i++)
+		{
+			KPrefabID component = prefabsWithComponent[i].GetComponent<KPrefabID>();
+			if (!list.Contains(component) && this.IsEntityEdible(component) && Game.IsCorrectDlcActiveForCurrentSave(component))
+			{
+				list.Add(component);
+			}
+		}
+		return list;
+	}
+
+	public string[] GetFormattedPossiblePreyList()
+	{
+		List<string> list = new List<string>();
+		foreach (KPrefabID kprefabID in this.GetPrefabsOfPossiblePrey())
+		{
+			CreatureBrain component = kprefabID.GetComponent<CreatureBrain>();
+			if (component != null)
+			{
+				string text = component.species.ProperName();
+				if (!list.Contains(text))
+				{
+					list.Add(text);
+				}
+			}
+		}
+		return list.ToArray();
+	}
+
+	public bool IsEntityEdible(GameObject entity)
+	{
+		return this.IsEntityEdible(entity.GetComponent<KPrefabID>());
+	}
+
+	public bool IsEntityEdible(KPrefabID entity)
+	{
+		return entity.HasAnyTags(this.CONSUMABLE_TAGs) && entity.GetComponent<Trappable>() != null && entity.GetComponent<OccupyArea>().OccupiedCellsOffsets.Length < 3;
+	}
+
+	private const string CONSUMED_ENTITY_NAME_FALLBACK = "Unknown Critter";
+
 	[MyCmpReq]
 	private Crop crop;
 
@@ -59,6 +129,8 @@ public class CritterTrapPlant : StateMachineComponent<CritterTrapPlant.StatesIns
 	[MyCmpReq]
 	private Storage storage;
 
+	public Tag[] CONSUMABLE_TAGs = new Tag[0];
+
 	public float gasOutputRate;
 
 	public float gasVentThreshold;
@@ -74,6 +146,18 @@ public class CritterTrapPlant : StateMachineComponent<CritterTrapPlant.StatesIns
 
 	public class StatesInstance : GameStateMachine<CritterTrapPlant.States, CritterTrapPlant.StatesInstance, CritterTrapPlant, object>.GameInstance
 	{
+		public string LastConsumedEntityName
+		{
+			get
+			{
+				if (!string.IsNullOrEmpty(this.lastConsumedEntityPrefabID))
+				{
+					return Assets.GetPrefab(this.lastConsumedEntityPrefabID).GetProperName();
+				}
+				return "Unknown Critter";
+			}
+		}
+
 		public StatesInstance(CritterTrapPlant master)
 			: base(master)
 		{
@@ -109,6 +193,9 @@ public class CritterTrapPlant : StateMachineComponent<CritterTrapPlant.StatesIns
 			PrimaryElement primaryElement = base.smi.master.storage.FindPrimaryElement(base.smi.master.outputElement);
 			return !(primaryElement == null) && primaryElement.Mass >= base.smi.master.gasVentThreshold;
 		}
+
+		[Serialize]
+		public string lastConsumedEntityPrefabID;
 	}
 
 	public class States : GameStateMachine<CritterTrapPlant.States, CritterTrapPlant.StatesInstance, CritterTrapPlant>
@@ -118,20 +205,23 @@ public class CritterTrapPlant : StateMachineComponent<CritterTrapPlant.StatesIns
 			base.serializable = StateMachine.SerializeType.Both_DEPRECATED;
 			default_state = this.trap;
 			this.trap.DefaultState(this.trap.open);
-			this.trap.open.ToggleComponent<TrapTrigger>(false).Enter(delegate(CritterTrapPlant.StatesInstance smi)
+			this.trap.open.ToggleComponent<TrapTrigger>(false).ToggleStatusItem(Db.Get().CreatureStatusItems.CarnivorousPlantAwaitingVictim, (CritterTrapPlant.StatesInstance smi) => smi.master.GetComponent<IPlantConsumeEntities>()).Enter(delegate(CritterTrapPlant.StatesInstance smi)
 			{
 				smi.VentGas();
 				smi.master.storage.ConsumeAllIgnoringDisease();
-			}).EventHandler(GameHashes.TrapTriggered, delegate(CritterTrapPlant.StatesInstance smi, object data)
-			{
-				smi.OnTrapTriggered(data);
 			})
+				.EventHandler(GameHashes.TrapTriggered, delegate(CritterTrapPlant.StatesInstance smi, object data)
+				{
+					smi.OnTrapTriggered(data);
+				})
 				.EventTransition(GameHashes.Wilt, this.trap.wilting, null)
 				.OnSignal(this.trapTriggered, this.trap.trigger)
 				.ParamTransition<bool>(this.hasEatenCreature, this.trap.digesting, GameStateMachine<CritterTrapPlant.States, CritterTrapPlant.StatesInstance, CritterTrapPlant, object>.IsTrue)
 				.PlayAnim("idle_open", KAnim.PlayMode.Loop);
 			this.trap.trigger.PlayAnim("trap", KAnim.PlayMode.Once).Enter(delegate(CritterTrapPlant.StatesInstance smi)
 			{
+				GameObject gameObject = smi.master.storage.FindFirst(GameTags.Creature);
+				smi.lastConsumedEntityPrefabID = ((gameObject != null) ? gameObject.PrefabID().ToString() : null);
 				smi.master.storage.ConsumeAllIgnoringDisease();
 				smi.sm.hasEatenCreature.Set(true, smi, false);
 			}).OnAnimQueueComplete(this.trap.digesting);

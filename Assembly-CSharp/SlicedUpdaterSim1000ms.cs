@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using KSerialization;
+using UnityEngine;
 
 public abstract class SlicedUpdaterSim1000ms<T> : KMonoBehaviour, ISim200ms where T : KMonoBehaviour, ISlicedSim1000ms
 {
@@ -30,7 +31,7 @@ public abstract class SlicedUpdaterSim1000ms<T> : KMonoBehaviour, ISim200ms wher
 
 	private int GetSliceIdx(T toBeUpdated)
 	{
-		return toBeUpdated.GetComponent<KPrefabID>().InstanceID % this.m_slices.Count;
+		return Mathf.Abs(toBeUpdated.GetComponent<KPrefabID>().InstanceID) % this.m_slices.Count;
 	}
 
 	public void RegisterUpdate1000ms(T toBeUpdated)

@@ -31,6 +31,7 @@ public class HydrogenGeneratorConfig : IBuildingConfig
 		buildingDef.InputConduitType = ConduitType.Gas;
 		buildingDef.LogicInputPorts = LogicOperationalController.CreateSingleInputPortList(new CellOffset(-1, 0));
 		buildingDef.AddSearchTerms(SEARCH_TERMS.POWER);
+		buildingDef.AddSearchTerms(SEARCH_TERMS.GENERATOR);
 		return buildingDef;
 	}
 

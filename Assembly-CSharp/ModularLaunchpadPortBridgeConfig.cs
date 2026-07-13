@@ -28,6 +28,7 @@ public class ModularLaunchpadPortBridgeConfig : IBuildingConfig
 		buildingDef.Floodable = false;
 		buildingDef.Entombable = false;
 		buildingDef.DefaultAnimState = "idle";
+		buildingDef.UseStructureTemperature = false;
 		buildingDef.AudioCategory = "Metal";
 		buildingDef.AudioSize = "medium";
 		return buildingDef;

@@ -35,7 +35,9 @@ public class POICeresTechUnlockConfig : IEntityConfig, IHasDlcRestrictions
 		component.Temperature = 294.15f;
 		gameObject.AddOrGet<OccupyArea>().objectLayers = new ObjectLayer[] { ObjectLayer.Building };
 		gameObject.AddOrGet<Demolishable>();
-		gameObject.AddOrGet<POITechItemUnlockWorkable>().workTime = 5f;
+		POITechItemUnlockWorkable poitechItemUnlockWorkable = gameObject.AddOrGet<POITechItemUnlockWorkable>();
+		poitechItemUnlockWorkable.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_research_unlock_kanim") };
+		poitechItemUnlockWorkable.workTime = 5f;
 		POITechItemUnlocks.Def def = gameObject.AddOrGetDef<POITechItemUnlocks.Def>();
 		def.POITechUnlockIDs = new List<string> { "Campfire", "IceKettle", "WoodTile" };
 		def.PopUpName = global::STRINGS.BUILDINGS.PREFABS.DLC2POITECHUNLOCKS.NAME;

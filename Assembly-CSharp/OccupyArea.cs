@@ -42,6 +42,10 @@ public class OccupyArea : KMonoBehaviour
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
+		if (this.facing != null)
+		{
+			this.facingLeft = this.facing.facingLeft;
+		}
 		if (this.applyToCells)
 		{
 			this.UpdateOccupiedArea();
@@ -97,6 +101,18 @@ public class OccupyArea : KMonoBehaviour
 				this._RotatedOccupiedCellsOffsets[i] = this.rotatable.GetRotatedCellOffset(cellOffset);
 			}
 			this.appliedOrientation = this.rotatable.Orientation;
+			return;
+		}
+		if (this.facing != null && this.facingLeft != this.facing.facingLeft)
+		{
+			this.facingLeft = this.facing.facingLeft;
+			this._RotatedOccupiedCellsOffsets = new CellOffset[this._UnrotatedOccupiedCellsOffsets.Length];
+			for (int j = 0; j < this._UnrotatedOccupiedCellsOffsets.Length; j++)
+			{
+				CellOffset cellOffset2 = this._UnrotatedOccupiedCellsOffsets[j];
+				cellOffset2.x *= ((!this.facingLeft) ? (-1) : 1);
+				this._RotatedOccupiedCellsOffsets[j] = cellOffset2;
+			}
 		}
 	}
 
@@ -324,6 +340,11 @@ public class OccupyArea : KMonoBehaviour
 	private Rotatable rotatable;
 
 	private Orientation appliedOrientation;
+
+	[MyCmpGet]
+	private Facing facing;
+
+	private bool facingLeft;
 
 	public CellOffset[] _UnrotatedOccupiedCellsOffsets;
 

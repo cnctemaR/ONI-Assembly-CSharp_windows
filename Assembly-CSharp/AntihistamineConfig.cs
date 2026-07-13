@@ -12,14 +12,25 @@ public class AntihistamineConfig : IEntityConfig
 		EntityTemplates.ExtendEntityToMedicine(gameObject, MEDICINE.ANTIHISTAMINE);
 		ComplexRecipe.RecipeElement[] array = new ComplexRecipe.RecipeElement[]
 		{
-			new ComplexRecipe.RecipeElement("PrickleFlowerSeed", 1f),
-			new ComplexRecipe.RecipeElement(SimHashes.Dirt.CreateTag(), 1f)
+			new ComplexRecipe.RecipeElement("Antihistamine", 10f, ComplexRecipe.RecipeElement.TemperatureOperation.AverageTemperature, false)
 		};
 		ComplexRecipe.RecipeElement[] array2 = new ComplexRecipe.RecipeElement[]
 		{
-			new ComplexRecipe.RecipeElement("Antihistamine", 10f, ComplexRecipe.RecipeElement.TemperatureOperation.AverageTemperature, false)
+			new ComplexRecipe.RecipeElement(new Tag[]
+			{
+				"PrickleFlowerSeed",
+				KelpConfig.ID
+			}, new float[] { 1f, 10f }),
+			new ComplexRecipe.RecipeElement(SimHashes.Dirt.CreateTag(), 1f)
 		};
-		AntihistamineConfig.recipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("Apothecary", array, array2), array, array2)
+		string text = ComplexRecipeManager.MakeRecipeID("Apothecary", array2, array);
+		AntihistamineConfig.recipes.Add(this.CreateComplexRecipe(text, array2, array));
+		return gameObject;
+	}
+
+	public ComplexRecipe CreateComplexRecipe(string recipeID, ComplexRecipe.RecipeElement[] input, ComplexRecipe.RecipeElement[] output)
+	{
+		return new ComplexRecipe(recipeID, input, output)
 		{
 			time = 100f,
 			description = global::STRINGS.ITEMS.PILLS.ANTIHISTAMINE.RECIPEDESC,
@@ -27,7 +38,6 @@ public class AntihistamineConfig : IEntityConfig
 			fabricators = new List<Tag> { "Apothecary" },
 			sortOrder = 10
 		};
-		return gameObject;
 	}
 
 	public void OnPrefabInit(GameObject inst)
@@ -40,5 +50,5 @@ public class AntihistamineConfig : IEntityConfig
 
 	public const string ID = "Antihistamine";
 
-	public static ComplexRecipe recipe;
+	public static List<ComplexRecipe> recipes = new List<ComplexRecipe>();
 }

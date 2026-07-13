@@ -25,9 +25,9 @@ public class RangeVisualizerEffect : MonoBehaviour
 		}
 		if (rangeVisualizer != null)
 		{
-			if (this.OcclusionTex == null)
+			if (this.OcclusionTex == null || this.OcclusionTex.width != rangeVisualizer.TexSize.X || this.OcclusionTex.height != rangeVisualizer.TexSize.Y)
 			{
-				this.OcclusionTex = new Texture2D(64, 64, TextureFormat.Alpha8, false);
+				this.OcclusionTex = new Texture2D(rangeVisualizer.TexSize.X, rangeVisualizer.TexSize.Y, TextureFormat.Alpha8, false);
 				this.OcclusionTex.filterMode = FilterMode.Point;
 				this.OcclusionTex.wrapMode = TextureWrapMode.Clamp;
 			}

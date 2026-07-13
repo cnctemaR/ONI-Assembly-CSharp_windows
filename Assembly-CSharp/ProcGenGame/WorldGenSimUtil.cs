@@ -11,12 +11,12 @@ namespace ProcGenGame
 {
 	public static class WorldGenSimUtil
 	{
-		public unsafe static bool DoSettleSim(WorldGenSettings settings, BinaryWriter writer, ref Sim.Cell[] cells, ref float[] bgTemp, ref Sim.DiseaseCell[] dcs, WorldGen.OfflineCallbackFunction updateProgressFn, Data data, List<TemplateSpawning.TemplateSpawner> templateSpawnTargets, Action<OfflineWorldGen.ErrorInfo> error_cb, int baseId)
+		public unsafe static bool DoSettleSim(WorldGenSettings settings, BinaryWriter writer, uint simSeed, ref Sim.Cell[] cells, ref float[] bgTemp, ref Sim.DiseaseCell[] dcs, WorldGen.OfflineCallbackFunction updateProgressFn, Data data, List<TemplateSpawning.TemplateSpawner> templateSpawnTargets, Action<OfflineWorldGen.ErrorInfo> error_cb, int baseId)
 		{
 			Sim.SIM_Initialize(new Sim.GAME_MessageHandler(Sim.DLL_MessageHandler));
 			SimMessages.CreateSimElementsTable(ElementLoader.elements);
 			SimMessages.CreateDiseaseTable(WorldGen.diseaseStats);
-			SimMessages.SimDataInitializeFromCells(Grid.WidthInCells, Grid.HeightInCells, cells, bgTemp, dcs, true);
+			SimMessages.SimDataInitializeFromCells(Grid.WidthInCells, Grid.HeightInCells, simSeed, cells, bgTemp, dcs, true);
 			updateProgressFn(UI.WORLDGEN.SETTLESIM.key, 0f, WorldGenProgressStages.Stages.SettleSim);
 			Sim.Start();
 			byte[] array = new byte[Grid.CellCount];

@@ -68,13 +68,17 @@ public class TableScreen : ShowOptimizedKScreen
 			{
 				foreach (TableRow tableRow in this.rows)
 				{
-					tableRow.GetScroller(text).transform.parent.GetComponent<ScrollRect>().horizontalNormalizedPosition = 0f;
+					ScrollRect component = tableRow.GetScroller(text).transform.parent.GetComponent<ScrollRect>();
+					if (component.horizontalNormalizedPosition > 0.001f)
+					{
+						component.horizontalNormalizedPosition = 0f;
+					}
 				}
 			}
 			foreach (KeyValuePair<int, GameObject> keyValuePair in this.worldDividers)
 			{
 				ScrollRect componentInChildren = keyValuePair.Value.GetComponentInChildren<ScrollRect>();
-				if (componentInChildren != null)
+				if (componentInChildren != null && componentInChildren.horizontalNormalizedPosition > 0.001f)
 				{
 					componentInChildren.horizontalNormalizedPosition = 0f;
 				}

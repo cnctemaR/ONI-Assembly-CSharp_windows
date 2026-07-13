@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using KSerialization;
 using STRINGS;
 using UnityEngine;
@@ -65,11 +66,11 @@ public class ManualDeliveryKG : KMonoBehaviour, ISim1000ms
 		}
 	}
 
-	private float MassStoredPerUnit
+	private float MassStored
 	{
 		get
 		{
-			return this.storage.GetMassAvailable(this.requestedItemTag) / this.MassPerUnit;
+			return this.storage.GetMassAvailable(this.requestedItemTag);
 		}
 	}
 
@@ -160,10 +161,10 @@ public class ManualDeliveryKG : KMonoBehaviour, ISim1000ms
 		{
 			return;
 		}
-		float massStoredPerUnit = this.MassStoredPerUnit;
-		if (massStoredPerUnit < this.capacity)
+		float massStored = this.MassStored;
+		if (massStored < this.capacity)
 		{
-			this.CreateFetchChore(massStoredPerUnit);
+			this.CreateFetchChore(massStored);
 		}
 	}
 
@@ -221,9 +222,21 @@ public class ManualDeliveryKG : KMonoBehaviour, ISim1000ms
 				return;
 			}
 		}
-		else if (this.fetchList == null && this.MassStoredPerUnit < this.refillMass)
+		else if (this.fetchList == null)
 		{
-			this.RequestDelivery();
+			if (this.MassStored < this.refillMass)
+			{
+				this.RequestDelivery();
+				return;
+			}
+		}
+		else if (this.FillToMinimumMass)
+		{
+			Dictionary<Tag, float> remaining = this.fetchList.GetRemaining();
+			if (remaining.ContainsKey(this.requestedItemTag) && remaining[this.requestedItemTag] < this.MinimumMass)
+			{
+				this.AbortDelivery("Invalid Mass");
+			}
 		}
 	}
 
@@ -293,9 +306,6 @@ public class ManualDeliveryKG : KMonoBehaviour, ISim1000ms
 	public bool RoundFetchAmountToInt;
 
 	[SerializeField]
-	public float MassPerUnit = 1f;
-
-	[SerializeField]
 	public bool FillToCapacity;
 
 	[SerializeField]
@@ -316,6 +326,8 @@ public class ManualDeliveryKG : KMonoBehaviour, ISim1000ms
 	public bool handlePrioritizable = true;
 
 	public bool ShowStatusItem = true;
+
+	public bool FillToMinimumMass;
 
 	private FetchList2 fetchList;
 

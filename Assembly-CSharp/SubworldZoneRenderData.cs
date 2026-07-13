@@ -198,6 +198,6 @@ public class SubworldZoneRenderData : KMonoBehaviour
 	{
 		0, 1, 2, 3, 4, 5, 5, 3, 6, 7,
 		8, 9, 10, 11, 12, 7, 3, 13, 0, 0,
-		0
+		0, 14, 15, 16
 	};
 }

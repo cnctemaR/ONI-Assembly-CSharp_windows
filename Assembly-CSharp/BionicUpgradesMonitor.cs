@@ -218,7 +218,7 @@ public class BionicUpgradesMonitor : GameStateMachine<BionicUpgradesMonitor, Bio
 			this.dataHolder.UpdateData<BionicUpgradesMonitor.Instance>(dataPackData);
 		}
 
-		public override void OnParamsDeserialized()
+		public override void PostParamsInitialized()
 		{
 			MinionStorageDataHolder.DataPack dataPack = this.dataHolder.GetDataPack<BionicUpgradesMonitor.Instance>();
 			if (dataPack != null && dataPack.IsStoringNewData)
@@ -237,7 +237,7 @@ public class BionicUpgradesMonitor : GameStateMachine<BionicUpgradesMonitor, Bio
 					}
 				}
 			}
-			base.OnParamsDeserialized();
+			base.PostParamsInitialized();
 		}
 
 		protected override void OnCleanUp()

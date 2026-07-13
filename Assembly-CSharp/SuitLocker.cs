@@ -36,6 +36,20 @@ public class SuitLocker : StateMachineComponent<SuitLocker.StatesInstance>
 	{
 		base.OnSpawn();
 		this.meter = new MeterController(base.GetComponent<KBatchedAnimController>(), "meter_target", "meter", Meter.Offset.Infront, Grid.SceneLayer.NoLayer, new string[] { "meter_target", "meter_arrow", "meter_scale" });
+		DebugUtil.DevAssert(this.OutfitTags.Length == 1, "Suit Locker " + base.name + " requesting more than one suit type, this will break the fetch chore", null);
+		if (this.OutfitTags.Length == 1)
+		{
+			GameObject prefab = Assets.GetPrefab(this.OutfitTags[0]);
+			if (prefab != null)
+			{
+				PrimaryElement component = prefab.GetComponent<PrimaryElement>();
+				this.OutfitMass = component.MassPerUnit;
+			}
+		}
+		else
+		{
+			this.OutfitMass = (float)global::TUNING.EQUIPMENT.SUITS.ATMOSUIT_MASS;
+		}
 		SuitLocker.UpdateSuitMarkerStates(Grid.PosToCell(base.transform.position), base.gameObject);
 		base.smi.StartSM();
 		Tutorial.Instance.TutorialMessage(Tutorial.TutorialMessages.TM_Suits, true);
@@ -113,7 +127,7 @@ public class SuitLocker : StateMachineComponent<SuitLocker.StatesInstance>
 
 	private void CreateFetchChore()
 	{
-		this.fetchChore = new FetchChore(Db.Get().ChoreTypes.EquipmentFetch, base.GetComponent<Storage>(), 1f, new HashSet<Tag>(this.OutfitTags), FetchChore.MatchCriteria.MatchID, Tag.Invalid, new Tag[] { GameTags.Assigned }, null, true, null, null, null, Operational.State.None, 0);
+		this.fetchChore = new FetchChore(Db.Get().ChoreTypes.EquipmentFetch, base.GetComponent<Storage>(), this.OutfitMass, new HashSet<Tag>(this.OutfitTags), FetchChore.MatchCriteria.MatchID, Tag.Invalid, new Tag[] { GameTags.Assigned }, null, true, null, null, null, Operational.State.None, 0);
 		this.fetchChore.allowMultifetch = false;
 	}
 
@@ -446,6 +460,8 @@ public class SuitLocker : StateMachineComponent<SuitLocker.StatesInstance>
 	private Building building;
 
 	public Tag[] OutfitTags;
+
+	private float OutfitMass;
 
 	private FetchChore fetchChore;
 

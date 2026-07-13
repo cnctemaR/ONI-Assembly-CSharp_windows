@@ -201,10 +201,11 @@ public class LocText : TextMeshProUGUI
 		{
 			return input;
 		}
-		StringBuilder stringBuilder = new StringBuilder(input);
+		StringBuilder stringBuilder = GlobalStringBuilderPool.Alloc();
+		stringBuilder.Append(input);
 		stringBuilder.Replace("<link=\"", LocText.combinedPrefix);
 		stringBuilder.Replace("</link>", LocText.combinedSuffix);
-		return stringBuilder.ToString();
+		return GlobalStringBuilderPool.ReturnAndFree(stringBuilder);
 	}
 
 	private void RefreshLinkHandler()

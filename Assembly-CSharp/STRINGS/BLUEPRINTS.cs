@@ -1364,6 +1364,495 @@ namespace STRINGS
 			public static LocString DESC = "Color-coded wire bridges make it easy to see how things are connected.";
 		}
 
+		public class PERMIT_ATMO_BELT_RAPTOR
+		{
+			public static LocString NAME = "Rhex Atmo Belt";
+
+			public static LocString DESC = "An atmo belt inspired by the mighty apex predator.";
+		}
+
+		public class PERMIT_ATMO_BELT_STEGO
+		{
+			public static LocString NAME = "Lumb Atmo Belt";
+
+			public static LocString DESC = "An atmo belt inspired by the blissfully blank herbivore.";
+		}
+
+		public class PERMIT_ATMO_BELT_CHAMELEO
+		{
+			public static LocString NAME = "Dartle Atmo Belt";
+
+			public static LocString DESC = "An atmo belt inspired by the most unbothered critter on the planetoid.";
+		}
+
+		public class PERMIT_ATMO_BELT_PACULACANTH
+		{
+			public static LocString NAME = "Jawbo Atmo Belt";
+
+			public static LocString DESC = "An atmo belt inspired by an aquatic behemoth.";
+		}
+
+		public class PERMIT_ATMOSUIT_RAPTOR
+		{
+			public static LocString NAME = "Rhex Atmo Suit";
+
+			public static LocString DESC = "Each feather was painstakingly secured to the suit fabric by hand.";
+		}
+
+		public class PERMIT_ATMOSUIT_STEGO
+		{
+			public static LocString NAME = "Lumb Atmo Suit";
+
+			public static LocString DESC = "The tail attachment has a tendency to knock things over.";
+		}
+
+		public class PERMIT_ATMOSUIT_CHAMELEO
+		{
+			public static LocString NAME = "Dartle Atmo Suit";
+
+			public static LocString DESC = "Slow and steady wins the (space) race, right?";
+		}
+
+		public class PERMIT_ATMOSUIT_PACULACANTH
+		{
+			public static LocString NAME = "Jawbo Atmo Suit";
+
+			public static LocString DESC = "It makes the wearer feel like a <i>very</i> big fish in a small pond.";
+		}
+
+		public class PERMIT_ATMO_SHOES_RAPTOR
+		{
+			public static LocString NAME = "Rhex Atmo Boots";
+
+			public static LocString DESC = "The official protective footwear of the apex predator.";
+		}
+
+		public class PERMIT_ATMO_SHOES_STEGO
+		{
+			public static LocString NAME = "Lumb Atmo Boots";
+
+			public static LocString DESC = "Weighted boots built to clomp through extreme environments.";
+		}
+
+		public class PERMIT_ATMO_SHOES_CHAMELEO
+		{
+			public static LocString NAME = "Dartle Atmo Boots";
+
+			public static LocString DESC = "For meandering safely through hostile environments.";
+		}
+
+		public class PERMIT_ATMO_SHOES_PACULACANTH
+		{
+			public static LocString NAME = "Jawbo Atmo Boots";
+
+			public static LocString DESC = "They're always a bit damp. But they work!";
+		}
+
+		public class PERMIT_ATMO_GLOVES_RAPTOR
+		{
+			public static LocString NAME = "Rhex Atmo Gloves";
+
+			public static LocString DESC = "Wiggling the fingers makes the feathers rustle.";
+		}
+
+		public class PERMIT_ATMO_GLOVES_STEGO
+		{
+			public static LocString NAME = "Lumb Atmo Gloves";
+
+			public static LocString DESC = "These gloves are the epitome of \"heavy-handed\".";
+		}
+
+		public class PERMIT_ATMO_GLOVES_CHAMELEO
+		{
+			public static LocString NAME = "Dartle Atmo Gloves";
+
+			public static LocString DESC = "The added fingertip seams are a sensory nightmare for some.";
+		}
+
+		public class PERMIT_ATMO_GLOVES_PACULACANTH
+		{
+			public static LocString NAME = "Jawbo Atmo Gloves";
+
+			public static LocString DESC = "Now with webbed fingers!";
+		}
+
+		public class PERMIT_ATMO_HELMET_RAPTOR
+		{
+			public static LocString NAME = "Rhex Atmo Helmet";
+
+			public static LocString DESC = "Warning: do not headbutt colleagues while wearing this helmet.";
+		}
+
+		public class PERMIT_ATMO_HELMET_STEGO
+		{
+			public static LocString NAME = "Lumb Atmo Helmet";
+
+			public static LocString DESC = "Listen, it's not about looking smart. Or being smart. Or...what was the question?";
+		}
+
+		public class PERMIT_ATMO_HELMET_CHAMELEO
+		{
+			public static LocString NAME = "Dartle Atmo Helmet";
+
+			public static LocString DESC = "Pranksters often spear small items on one of the horns and see how long it takes the wearer to notice.";
+		}
+
+		public class PERMIT_ATMO_HELMET_PACULACANTH
+		{
+			public static LocString NAME = "Jawbo Atmo Helmet";
+
+			public static LocString DESC = "The official helmet of the hangry space explorer.";
+		}
+
+		public class PERMIT_JUMPSUIT_ROMPER_TAN_FRASS
+		{
+			public static LocString NAME = "Fieldwork Coveralls";
+
+			public static LocString DESC = "Made from densely woven canvas that compromises breathability without providing any real useful protection from the elements.";
+		}
+
+		public class PERMIT_PJ_DINO
+		{
+			public static LocString NAME = "Jurassic Jammies";
+
+			public static LocString DESC = "Pajamas for the sleepy paleontology buffs in the colony.";
+		}
+
+		public class PERMIT_PJ_DINO2
+		{
+			public static LocString NAME = "Pangaea Jammies";
+
+			public static LocString DESC = "If all beds were part of a single bed mass, colony life would be one big slumber party.";
+		}
+
+		public class PERMIT_PJ_DINO3
+		{
+			public static LocString NAME = "Triassic Jammies";
+
+			public static LocString DESC = "The label inside reads: \"If at first you can't fall asleep, tri, tri again.\"";
+		}
+
+		public class PERMIT_PANTS_SUSPENDERS_FRASS
+		{
+			public static LocString NAME = "Arbor Hugger Pants";
+
+			public static LocString DESC = "The suspenders are made from reconstituted wood pulp. They're not stretchy.";
+		}
+
+		public class PERMIT_PANTS_WADER_ALGAE
+		{
+			public static LocString NAME = "Fishing Waders";
+
+			public static LocString DESC = "Hydrophobic high-waisted pants that also double as protective dinnerwear for messy eaters.";
+		}
+
+		public class PERMIT_SHORTS_SCOUT_BROWN
+		{
+			public static LocString NAME = "Scout Shorts";
+
+			public static LocString DESC = "The leather belt doubles as a grab-handle to yank fellow explorers out of harm's way.";
+		}
+
+		public class PERMIT_SHOES_BASIC_FRASS
+		{
+			public static LocString NAME = "Basic Frass Shoes";
+
+			public static LocString DESC = "A fresh pair of brown shoes that go with everything.";
+		}
+
+		public class PERMIT_SHOES_SCOUT_BROWN
+		{
+			public static LocString NAME = "Lace-Up Trekkers";
+
+			public static LocString DESC = "With built-in socks!";
+		}
+
+		public class PERMIT_SHOES_ROMPER_FRASS_TAN
+		{
+			public static LocString NAME = "Frass Leather Shoes";
+
+			public static LocString DESC = "Sustainable \"leather\" foot covers made from processed frass.";
+		}
+
+		public class PERMIT_GLOVES_BASIC_BROWN
+		{
+			public static LocString NAME = "Basic Frass Gloves";
+
+			public static LocString DESC = "A good, solid pair of brown gloves that go with everything.";
+		}
+
+		public class PERMIT_GLOVES_BASIC_GRIME
+		{
+			public static LocString NAME = "Basic Grime Gloves";
+
+			public static LocString DESC = "A good, solid pair of brown gloves that go with everything.";
+		}
+
+		public class PERMIT_GLOVES_CUFFLESS_SHINY_ALGAE
+		{
+			public static LocString NAME = "Geiger Glovelets";
+
+			public static LocString DESC = "For the Duplicant who thinks \"Geiger counter\" is the academic term for counting on one's fingers.";
+		}
+
+		public class PERMIT_TOP_SWEATER_RIBBED_RUST
+		{
+			public static LocString NAME = "Arbor Hugger Sweater";
+
+			public static LocString DESC = "The ribbed knit gets snagged on the tree trunk every single time.";
+		}
+
+		public class PERMIT_TOP_SWEATER_WADER_LTBLUE
+		{
+			public static LocString NAME = "Woolly Fishing Sweater";
+
+			public static LocString DESC = "It doesn't retain heat, but it shows fish that they're dealing with a pro.";
+		}
+
+		public class PERMIT_TOP_SCOUT_WHITE
+		{
+			public static LocString NAME = "Explorer Shirt";
+
+			public static LocString DESC = "A well-tied neckerchief prevents tiny critters from wandering down the back of one's neck.";
+		}
+
+		public class PERMIT_BED_ROCK
+		{
+			public static LocString NAME = UI.FormatAsLink("Stone Cot", "BED");
+
+			public static LocString DESC = "Who ordered the extra-extra-extra-firm mattress?";
+		}
+
+		public class PERMIT_GENERATORMANUAL_ROCK
+		{
+			public static LocString NAME = UI.FormatAsLink("Rustic Manual Generator", "MANUALGENERATOR");
+
+			public static LocString DESC = "It gets off to a rocky start, but it works so well that there's no point reinventing it.";
+		}
+
+		public class PERMIT_HQBASE_DINO
+		{
+			public static LocString NAME = UI.FormatAsLink("Forgotten Printing Pod", "HEADQUARTERS");
+
+			public static LocString DESC = "Reclaimed by nature after centuries of neglect. It's a wonder that it still works.";
+		}
+
+		public class PERMIT_RANCHERSTATION_DINO
+		{
+			public static LocString NAME = UI.FormatAsLink("Overgrown Grooming Station", "RANCHSTATION");
+
+			public static LocString DESC = "These hardy plants survive on the small amounts of drool produced by happy critters during grooming sessions.";
+		}
+
+		public class PERMIT_GASSTORAGE_DARTLE
+		{
+			public static LocString NAME = UI.FormatAsLink("Dartle Gas Reservoir", "GASRESERVOIR");
+
+			public static LocString DESC = "The splotchy parts have an unsettlingly leather-like texture.";
+		}
+
+		public class PERMIT_GASSTORAGE_LUMB
+		{
+			public static LocString NAME = UI.FormatAsLink("Lumb Gas Reservoir", "GASRESERVOIR");
+
+			public static LocString DESC = "Does not stomp.";
+		}
+
+		public class PERMIT_MILKPRESS_STEGO
+		{
+			public static LocString NAME = UI.FormatAsLink("Lumb Plant Pulverizer", "MILKPRESS");
+
+			public static LocString DESC = "Industrial equipment inspired by nature.";
+		}
+
+		public class PERMIT_BALLOON_BABYSTEGO_EGG
+		{
+			public static LocString NAME = "Bug-Eyed Blep";
+
+			public static LocString DESC = "A happy little trio of inflatable critters. Now with blep.";
+		}
+
+		public class PERMIT_BALLOON_BABYRHEX_EGG
+		{
+			public static LocString NAME = "Poppable Lil' Predators";
+
+			public static LocString DESC = "These balloons are so cute that they often get popped by overenthusiastic critter fans.";
+		}
+
+		public class PERMIT_MONUMENT_UPPER_A_PREHISTORIC
+		{
+			public static LocString NAME = "Rhex Noggin";
+
+			public static LocString DESC = "A monument topper so mighty that even real Rhexes cower before it.";
+		}
+
+		public class PERMIT_PAINTING_ART_STEGO
+		{
+			public static LocString NAME = "Safari Selfie";
+
+			public static LocString DESC = "If this Duplicant had their own private fridge, this is the picture that would be displayed on it.";
+		}
+
+		public class PERMIT_PAINTING_WIDE_ART_RHEX
+		{
+			public static LocString NAME = "Hide and Seek";
+
+			public static LocString DESC = "The fact that this was just a friendly game was not made clear to everyone involved.";
+		}
+
+		public class PERMIT_MASSEUR_PREHISTORIC
+		{
+			public static LocString NAME = UI.FormatAsLink("Foot Massage Table", "MASSAGETABLE");
+
+			public static LocString DESC = "Reflexology for the whole body!";
+		}
+
+		public class PERMIT_FOSSILSCULPTURE_IDLE_RHEX
+		{
+			public static LocString NAME = "Roar O'Saurus";
+
+			public static LocString DESC = "This display model's open jaw makes it an unsuitable shape for after-hours bowling.";
+		}
+
+		public class PERMIT_FOSSILSCULPTURE_IDLE_STEGO
+		{
+			public static LocString NAME = "Pointy Plates";
+
+			public static LocString DESC = "Some Duplicants like to crawl into this Lumb sculpture and run a spoon over the ribs like a musical instrument.";
+		}
+
+		public class PERMIT_FOSSILSCULPTURE_IDLE_JAWBO
+		{
+			public static LocString NAME = "The Dangler";
+
+			public static LocString DESC = "It is safe to say that no critter ever mocked the Jawbo for having four eyes.";
+		}
+
+		public class PERMIT_FOSSILSCULPTURE_IDLE_SHELLONOIDIS
+		{
+			public static LocString NAME = "Uncanny Carapace";
+
+			public static LocString DESC = "It's unclear whether this sculpture is based on a long-extinct creature, or a very vivid dream.";
+		}
+
+		public class PERMIT_WALLS_CHAMELEO
+		{
+			public static LocString NAME = UI.FormatAsLink("Pixel Dartle", "EXTERIORWALL");
+
+			public static LocString DESC = "The only known image of an adult Dartle with both eyes wide open. So awake!";
+		}
+
+		public class PERMIT_WALLS_PACULACANTH
+		{
+			public static LocString NAME = UI.FormatAsLink("Pixel Jawbo", "EXTERIORWALL");
+
+			public static LocString DESC = "It's just so dang cute without its rows and rows of jagged teeth.";
+		}
+
+		public class PERMIT_WALLS_RAPTOR
+		{
+			public static LocString NAME = UI.FormatAsLink("Pixel Rhex", "EXTERIORWALL");
+
+			public static LocString DESC = "Never before has this huge predator looked so much like an escapee from a petting zoo.";
+		}
+
+		public class PERMIT_WALLS_STEGO
+		{
+			public static LocString NAME = UI.FormatAsLink("Pixel Lumb", "EXTERIORWALL");
+
+			public static LocString DESC = "Instead of having blank walls, consider blank-stare walls!";
+		}
+
+		public class PERMIT_WALLS_FOSSIL_CHAMELEO
+		{
+			public static LocString NAME = UI.FormatAsLink("Dartle Carving", "EXTERIORWALL");
+
+			public static LocString DESC = "Viewers remark upon this carving's age, but the real wonder is that its top-heavy subject matter didn't fall on its face more often.";
+		}
+
+		public class PERMIT_WALLS_FOSSIL_PACULACANTH
+		{
+			public static LocString NAME = UI.FormatAsLink("Jawbo Carving", "EXTERIORWALL");
+
+			public static LocString DESC = "A visual retelling of the terrifying creature that once ate an entire fish farm population without even calling dibs.";
+		}
+
+		public class PERMIT_WALLS_FOSSIL_RAPTOR
+		{
+			public static LocString NAME = UI.FormatAsLink("Rhex Carving", "EXTERIORWALL");
+
+			public static LocString DESC = "The omission of a prey animal in the creature's jaws is an intentional dig at its famously subpar hunting skills.";
+		}
+
+		public class PERMIT_WALLS_FOSSIL_STEGO
+		{
+			public static LocString NAME = UI.FormatAsLink("Lumb Carving", "EXTERIORWALL");
+
+			public static LocString DESC = "This carving was originally found at the site of one of the most renowned farms on the planetoid.";
+		}
+
+		public class PERMIT_WALLS_SILHOUETTE_PREHISTORICCRITTERS
+		{
+			public static LocString NAME = UI.FormatAsLink("Shadowy Figures", "EXTERIORWALL");
+
+			public static LocString DESC = "A subtle nod to all prehistoric critters great and small.";
+		}
+
+		public class OUTFIT_SCOUT
+		{
+			public static LocString NAME = "Explorer Outfit";
+		}
+
+		public class OUTFIT_ROMPER_TAN
+		{
+			public static LocString NAME = "Fieldwork Outfit";
+		}
+
+		public class OUTFIT_WADER
+		{
+			public static LocString NAME = "Wader Outfit";
+		}
+
+		public class OUTFIT_SUSPENDERS
+		{
+			public static LocString NAME = "Arbor Hugger Outfit";
+		}
+
+		public class OUTFIT_PJ_DINO
+		{
+			public static LocString NAME = "Jurassic Jammies Outfit";
+		}
+
+		public class OUTFIT_PJ_DINO2
+		{
+			public static LocString NAME = "Pangaea Jammies Outfit";
+		}
+
+		public class OUTFIT_PJ_DINO3
+		{
+			public static LocString NAME = "Triassic Jammies Outfit";
+		}
+
+		public class OUTFIT_ATMOSUIT_RAPTOR
+		{
+			public static LocString NAME = "Rhex Atmo Outfit";
+		}
+
+		public class OUTFIT_ATMOSUIT_STEGO
+		{
+			public static LocString NAME = "Lumb Atmo Outfit";
+		}
+
+		public class OUTFIT_ATMOSUIT_CHAMELEO
+		{
+			public static LocString NAME = "Dartle Atmo Outfit";
+		}
+
+		public class OUTFIT_ATMOSUIT_PACULACANTH
+		{
+			public static LocString NAME = "Jawbo Atmo Outfit";
+		}
+
 		public class PERMIT_ELEGANTBED_HATCH
 		{
 			public static LocString NAME = UI.FormatAsLink("Hatch Bed", "LUXURYBED");

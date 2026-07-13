@@ -173,16 +173,21 @@ public class EntitySplitter : KMonoBehaviour
 			PrimaryElement primaryElement = pickupable.PrimaryElement;
 			if (primaryElement != null)
 			{
-				float num = 0f;
+				float num = component.Temperature;
 				float mass = component.Mass;
 				float mass2 = primaryElement.Mass;
 				if (mass > 0f && mass2 > 0f)
 				{
-					num = SimUtil.CalculateFinalTemperature(mass, component.Temperature, mass2, primaryElement.Temperature);
+					num = SimUtil.CalculateFinalTemperature(mass, num, mass2, primaryElement.Temperature);
 				}
-				else if (primaryElement.Mass > 0f)
+				else if (mass2 > 0f)
 				{
 					num = primaryElement.Temperature;
+				}
+				if (mass2 == 0f && !EntitySplitter._empty_other_notified)
+				{
+					EntitySplitter._empty_other_notified = true;
+					KCrashReporter.ReportDevNotification("EntitySplitter::OnAbsorb other_pe is 0 mass", Environment.StackTrace, this.ToString() + " <- " + pickupable.ToString(), false, null);
 				}
 				component.SetMassTemperature(mass + mass2, num);
 				if (CameraController.Instance != null)
@@ -205,4 +210,6 @@ public class EntitySplitter : KMonoBehaviour
 	{
 		component.OnAbsorb(data);
 	});
+
+	private static bool _empty_other_notified = false;
 }

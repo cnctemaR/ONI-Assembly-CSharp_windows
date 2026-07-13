@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using STRINGS;
 using TUNING;
 using UnityEngine;
 
@@ -13,12 +14,12 @@ public class TravelTubeEntranceConfig : IBuildingConfig
 		string text2 = "tube_launcher_kanim";
 		int num3 = 100;
 		float num4 = 120f;
-		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER5;
+		float[] tier = global::TUNING.BUILDINGS.CONSTRUCTION_MASS_KG.TIER5;
 		string[] refined_METALS = MATERIALS.REFINED_METALS;
 		float num5 = 1600f;
 		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloor;
 		EffectorValues none = NOISE_POLLUTION.NONE;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, refined_METALS, num5, buildLocationRule, BUILDINGS.DECOR.PENALTY.TIER1, none, 0.2f);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, refined_METALS, num5, buildLocationRule, global::TUNING.BUILDINGS.DECOR.PENALTY.TIER1, none, 0.2f);
 		buildingDef.Overheatable = false;
 		buildingDef.RequiresPowerInput = true;
 		buildingDef.EnergyConsumptionWhenActive = 960f;
@@ -26,6 +27,7 @@ public class TravelTubeEntranceConfig : IBuildingConfig
 		buildingDef.AudioCategory = "Metal";
 		buildingDef.PowerInputOffset = new CellOffset(1, 0);
 		buildingDef.LogicInputPorts = LogicOperationalController.CreateSingleInputPortList(new CellOffset(1, 1));
+		buildingDef.AddSearchTerms(SEARCH_TERMS.TRANSPORT);
 		return buildingDef;
 	}
 

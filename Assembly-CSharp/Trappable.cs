@@ -63,7 +63,7 @@ public class Trappable : KMonoBehaviour, IGameObjectEffectDescriptor
 	{
 		return new List<Descriptor>
 		{
-			new Descriptor(UI.BUILDINGEFFECTS.CAPTURE_METHOD_TRAP, UI.BUILDINGEFFECTS.TOOLTIPS.CAPTURE_METHOD_TRAP, Descriptor.DescriptorType.Effect, false)
+			new Descriptor(UI.BUILDINGEFFECTS.CAPTURE_METHOD_LAND_TRAP, UI.BUILDINGEFFECTS.TOOLTIPS.CAPTURE_METHOD_TRAP, Descriptor.DescriptorType.Effect, false)
 		};
 	}
 
@@ -73,9 +73,22 @@ public class Trappable : KMonoBehaviour, IGameObjectEffectDescriptor
 		if (storage && (storage.GetComponent<Trap>() != null || storage.GetSMI<ReusableTrap.Instance>() != null))
 		{
 			base.gameObject.AddTag(GameTags.Trapped);
-			return;
+			Navigator component = base.gameObject.GetComponent<Navigator>();
+			if (component != null)
+			{
+				component.Stop(false, true);
+			}
+			Brain component2 = base.gameObject.GetComponent<Brain>();
+			if (component2 != null)
+			{
+				Game.BrainScheduler.PrioritizeBrain(component2);
+				return;
+			}
 		}
-		base.gameObject.RemoveTag(GameTags.Trapped);
+		else
+		{
+			base.gameObject.RemoveTag(GameTags.Trapped);
+		}
 	}
 
 	private bool registered;

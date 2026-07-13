@@ -586,12 +586,13 @@ public static class SimMessages
 		array = null;
 	}
 
-	public static void SimDataInitializeFromCells(int width, int height, Sim.Cell[] cells, float[] bgTemp, Sim.DiseaseCell[] dc, bool headless)
+	public static void SimDataInitializeFromCells(int width, int height, uint simSeed, Sim.Cell[] cells, float[] bgTemp, Sim.DiseaseCell[] dc, bool headless)
 	{
-		MemoryStream memoryStream = new MemoryStream(Marshal.SizeOf(typeof(int)) + Marshal.SizeOf(typeof(int)) + Marshal.SizeOf(typeof(Sim.Cell)) * width * height + Marshal.SizeOf(typeof(float)) * width * height + Marshal.SizeOf(typeof(Sim.DiseaseCell)) * width * height);
+		MemoryStream memoryStream = new MemoryStream(Marshal.SizeOf(typeof(int)) + Marshal.SizeOf(typeof(int)) + Marshal.SizeOf(typeof(uint)) + Marshal.SizeOf(typeof(bool)) + Marshal.SizeOf(typeof(bool)) + Marshal.SizeOf(typeof(Sim.Cell)) * width * height + Marshal.SizeOf(typeof(float)) * width * height + Marshal.SizeOf(typeof(Sim.DiseaseCell)) * width * height);
 		BinaryWriter binaryWriter = new BinaryWriter(memoryStream);
 		binaryWriter.Write(width);
 		binaryWriter.Write(height);
+		binaryWriter.Write(simSeed);
 		bool flag = Sim.IsRadiationEnabled();
 		binaryWriter.Write(flag);
 		binaryWriter.Write(headless);

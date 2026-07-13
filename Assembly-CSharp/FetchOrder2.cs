@@ -194,7 +194,7 @@ public class FetchOrder2
 					{
 						if (kprefabID.HasTag(tag))
 						{
-							amount = component.TotalAmount;
+							amount = component.FetchTotalAmount;
 							out_item = component;
 							return true;
 						}

@@ -81,7 +81,7 @@ public class SolidConduitDispenser : KMonoBehaviour, ISaveLoadable, IConduitDisp
 				{
 					if (pickupable.PrimaryElement.Mass > 20f)
 					{
-						pickupable = pickupable.Take(20f);
+						pickupable = pickupable.Take(Mathf.Max(20f, pickupable.PrimaryElement.MassPerUnit));
 					}
 					conduitFlow.AddPickupable(this.utilityCell, pickupable);
 					flag = true;

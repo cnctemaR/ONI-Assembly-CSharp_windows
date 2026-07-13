@@ -28,7 +28,8 @@ public class Blueprints
 		new Blueprints_U51AndBefore(),
 		new Blueprints_DlcPack2(),
 		new Blueprints_U53(),
-		new Blueprints_DlcPack3()
+		new Blueprints_DlcPack3(),
+		new Blueprints_DlcPack4()
 	};
 
 	private static Blueprints instance;

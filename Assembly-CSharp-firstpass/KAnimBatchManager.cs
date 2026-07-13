@@ -214,41 +214,47 @@ public class KAnimBatchManager
 		}
 	}
 
-	public void RenderKAnimTemperaturePostProcessingEffects()
+	public void RenderKAnimPostProcessingEffects(KAnimConverter.PostProcessingEffects effectsToRender)
 	{
 		if (!this.ready)
 		{
 			return;
 		}
-		int num = LayerMask.NameToLayer("Overlay");
-		foreach (BatchSet batchSet in this.activeBatchSets)
+		foreach (KAnimConverter.PostProcessingEffects postProcessingEffects in KAnimConverter.ShaderNameForPostProcessingEffect.Keys)
 		{
-			DebugUtil.Assert(batchSet != null);
-			DebugUtil.Assert(batchSet.group != null);
-			Mesh mesh = batchSet.group.mesh;
-			for (int i = 0; i < batchSet.batchCount; i++)
+			if ((effectsToRender & postProcessingEffects) != (KAnimConverter.PostProcessingEffects)0)
 			{
-				KAnimBatch batch = batchSet.GetBatch(i);
-				float num2 = 0.01f / (float)(1 + batch.id % 256);
-				if (batch.size != 0 && batch.active && batch.materialType == KAnimBatchGroup.MaterialType.Default)
+				int num = LayerMask.NameToLayer("Overlay");
+				foreach (BatchSet batchSet in this.activeBatchSets)
 				{
-					bool flag = false;
-					using (List<KAnimConverter.IAnimConverter>.Enumerator enumerator2 = batch.Controllers.GetEnumerator())
+					DebugUtil.Assert(batchSet != null);
+					DebugUtil.Assert(batchSet.group != null);
+					Mesh mesh = batchSet.group.mesh;
+					for (int i = 0; i < batchSet.batchCount; i++)
 					{
-						while (enumerator2.MoveNext())
+						KAnimBatch batch = batchSet.GetBatch(i);
+						float num2 = 0.01f / (float)(1 + batch.id % 256);
+						if (batch.size != 0 && batch.active)
 						{
-							if ((enumerator2.Current.GetPostProcessingEffectsCompatibility() & KAnimConverter.PostProcessingEffects.TemperatureOverlay) != (KAnimConverter.PostProcessingEffects)0)
+							bool flag = false;
+							using (List<KAnimConverter.IAnimConverter>.Enumerator enumerator3 = batch.Controllers.GetEnumerator())
 							{
-								flag = true;
-								break;
+								while (enumerator3.MoveNext())
+								{
+									if ((enumerator3.Current.GetPostProcessingEffectsCompatibility() & postProcessingEffects) != (KAnimConverter.PostProcessingEffects)0)
+									{
+										flag = true;
+										break;
+									}
+								}
+							}
+							if (flag)
+							{
+								Vector3 zero = Vector3.zero;
+								zero.z = batch.position.z + num2;
+								Graphics.DrawMesh(mesh, zero, Quaternion.identity, batchSet.group.GetPostProcessingMaterial(postProcessingEffects), num, null, 0, batch.matProperties);
 							}
 						}
-					}
-					if (flag)
-					{
-						Vector3 zero = Vector3.zero;
-						zero.z = batch.position.z + num2;
-						Graphics.DrawMesh(mesh, zero, Quaternion.identity, batchSet.group.GetTemperaturePostProcessingMaterial(batch.materialType), num, null, 0, batch.matProperties);
 					}
 				}
 			}

@@ -67,6 +67,7 @@ public class MicrobeMusherConfig : IBuildingConfig
 			fabricators = new List<Tag> { "MicrobeMusher" },
 			sortOrder = 1
 		};
+		MushBarConfig.recipe.SetFabricationAnim("mushbar_kanim");
 		ComplexRecipe.RecipeElement[] array3 = new ComplexRecipe.RecipeElement[]
 		{
 			new ComplexRecipe.RecipeElement("BasicPlantFood", 2f),
@@ -84,6 +85,7 @@ public class MicrobeMusherConfig : IBuildingConfig
 			fabricators = new List<Tag> { "MicrobeMusher" },
 			sortOrder = 2
 		};
+		BasicPlantBarConfig.recipe.SetFabricationAnim("liceloaf_kanim");
 		ComplexRecipe.RecipeElement[] array5 = new ComplexRecipe.RecipeElement[]
 		{
 			new ComplexRecipe.RecipeElement("BeanPlantSeed", 6f),
@@ -101,10 +103,19 @@ public class MicrobeMusherConfig : IBuildingConfig
 			fabricators = new List<Tag> { "MicrobeMusher" },
 			sortOrder = 3
 		};
+		TofuConfig.recipe.SetFabricationAnim("loafu_kanim");
 		ComplexRecipe.RecipeElement[] array7 = new ComplexRecipe.RecipeElement[]
 		{
-			new ComplexRecipe.RecipeElement("ColdWheatSeed", 5f),
-			new ComplexRecipe.RecipeElement(PrickleFruitConfig.ID, 1f)
+			new ComplexRecipe.RecipeElement(new Tag[]
+			{
+				"ColdWheatSeed",
+				FernFoodConfig.ID
+			}, 5f),
+			new ComplexRecipe.RecipeElement(new Tag[]
+			{
+				PrickleFruitConfig.ID,
+				"HardSkinBerry"
+			}, new float[] { 1f, 2f })
 		};
 		ComplexRecipe.RecipeElement[] array8 = new ComplexRecipe.RecipeElement[]
 		{
@@ -118,23 +129,28 @@ public class MicrobeMusherConfig : IBuildingConfig
 			fabricators = new List<Tag> { "MicrobeMusher" },
 			sortOrder = 3
 		};
-		ComplexRecipe.RecipeElement[] array9 = new ComplexRecipe.RecipeElement[]
+		FruitCakeConfig.recipe.SetFabricationAnim("fruitcake_kanim");
+		if (DlcManager.IsContentSubscribed("DLC2_ID"))
 		{
-			new ComplexRecipe.RecipeElement("Meat", 1f),
-			new ComplexRecipe.RecipeElement("Tallow", 1f)
-		};
-		ComplexRecipe.RecipeElement[] array10 = new ComplexRecipe.RecipeElement[]
-		{
-			new ComplexRecipe.RecipeElement("Pemmican".ToTag(), 1f, ComplexRecipe.RecipeElement.TemperatureOperation.AverageTemperature, false)
-		};
-		PemmicanConfig.recipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("MicrobeMusher", array9, array10), array9, array10, DlcManager.DLC2)
-		{
-			time = FOOD.RECIPES.STANDARD_COOK_TIME,
-			description = global::STRINGS.ITEMS.FOOD.PEMMICAN.RECIPEDESC,
-			nameDisplay = ComplexRecipe.RecipeNameDisplay.Result,
-			fabricators = new List<Tag> { "MicrobeMusher" },
-			sortOrder = 4
-		};
+			ComplexRecipe.RecipeElement[] array9 = new ComplexRecipe.RecipeElement[]
+			{
+				new ComplexRecipe.RecipeElement("Meat", 1f),
+				new ComplexRecipe.RecipeElement("Tallow", 1f)
+			};
+			ComplexRecipe.RecipeElement[] array10 = new ComplexRecipe.RecipeElement[]
+			{
+				new ComplexRecipe.RecipeElement("Pemmican".ToTag(), 1f, ComplexRecipe.RecipeElement.TemperatureOperation.AverageTemperature, false)
+			};
+			PemmicanConfig.recipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("MicrobeMusher", array9, array10), array9, array10, DlcManager.DLC2)
+			{
+				time = FOOD.RECIPES.STANDARD_COOK_TIME,
+				description = global::STRINGS.ITEMS.FOOD.PEMMICAN.RECIPEDESC,
+				nameDisplay = ComplexRecipe.RecipeNameDisplay.Result,
+				fabricators = new List<Tag> { "MicrobeMusher" },
+				sortOrder = 4
+			};
+			PemmicanConfig.recipe.SetFabricationAnim("pemmican_kanim");
+		}
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)

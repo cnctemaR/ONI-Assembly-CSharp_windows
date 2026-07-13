@@ -64,4 +64,6 @@ public class FlatTagFilterable : KMonoBehaviour
 	public string headerText;
 
 	public bool displayOnlyDiscoveredTags = true;
+
+	public bool currentlyUserAssignable = true;
 }

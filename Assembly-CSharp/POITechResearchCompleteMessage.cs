@@ -31,17 +31,17 @@ public class POITechResearchCompleteMessage : Message
 				text = text + "\n    • " + techItem.Name;
 			}
 		}
-		return string.Format(MISC.NOTIFICATIONS.POIRESEARCHUNLOCKCOMPLETE.MESSAGEBODY, text);
+		return string.Format(MISC.NOTIFICATIONS.POIRESEARCHUNLOCKCOMPLETE_NOLORE.MESSAGEBODY, text);
 	}
 
 	public override string GetTitle()
 	{
-		return MISC.NOTIFICATIONS.POIRESEARCHUNLOCKCOMPLETE.NAME;
+		return MISC.NOTIFICATIONS.POIRESEARCHUNLOCKCOMPLETE_NOLORE.NAME;
 	}
 
 	public override string GetTooltip()
 	{
-		return string.Format(MISC.NOTIFICATIONS.POIRESEARCHUNLOCKCOMPLETE.TOOLTIP, this.popupName);
+		return string.Format(MISC.NOTIFICATIONS.POIRESEARCHUNLOCKCOMPLETE_NOLORE.TOOLTIP, this.popupName);
 	}
 
 	public override bool IsValid()
@@ -51,7 +51,7 @@ public class POITechResearchCompleteMessage : Message
 
 	public override bool ShowDialog()
 	{
-		EventInfoData eventInfoData = new EventInfoData(MISC.NOTIFICATIONS.POIRESEARCHUNLOCKCOMPLETE.NAME, this.GetMessageBody(), this.animName);
+		EventInfoData eventInfoData = new EventInfoData(MISC.NOTIFICATIONS.POIRESEARCHUNLOCKCOMPLETE_NOLORE.NAME, this.GetMessageBody(), this.animName);
 		eventInfoData.AddDefaultOption(null);
 		EventInfoScreen.ShowPopup(eventInfoData);
 		Messenger.Instance.RemoveMessage(this);

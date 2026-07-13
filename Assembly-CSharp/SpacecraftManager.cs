@@ -233,6 +233,67 @@ public class SpacecraftManager : KMonoBehaviour, ISim1000ms
 		this.destinations.AddRange(list5);
 	}
 
+	public void AddDestination(string id, SpacecraftManager.DestinationLocationSelectionType selection)
+	{
+		List<int> list = new List<int>();
+		int num = 0;
+		foreach (SpaceDestination spaceDestination in this.destinations)
+		{
+			num = Math.Max(num, spaceDestination.distance);
+		}
+		for (int i = 0; i <= num; i++)
+		{
+			int num2 = 0;
+			using (List<SpaceDestination>.Enumerator enumerator = this.destinations.GetEnumerator())
+			{
+				while (enumerator.MoveNext())
+				{
+					if (enumerator.Current.distance == i)
+					{
+						num2++;
+					}
+				}
+			}
+			if (num2 < 3)
+			{
+				list.Add(i);
+			}
+		}
+		if (list.Count == 0)
+		{
+			global::Debug.LogError("Failed to find location to spawn new destination " + id);
+			return;
+		}
+		int num3 = list[0];
+		if (selection != SpacecraftManager.DestinationLocationSelectionType.Nearest)
+		{
+			if (selection == SpacecraftManager.DestinationLocationSelectionType.Random)
+			{
+				num3 = list[global::UnityEngine.Random.Range(0, list.Count)];
+			}
+		}
+		else
+		{
+			num3 = list[0];
+		}
+		List<float> list2 = new List<float>();
+		for (float num4 = 0f; num4 < 0.999f; num4 += 0.1f)
+		{
+			list2.Add(num4);
+		}
+		foreach (SpaceDestination spaceDestination2 in this.destinations)
+		{
+			if (spaceDestination2.distance == num3)
+			{
+				list2.Remove(spaceDestination2.startingOrbitPercentage);
+			}
+		}
+		SpaceDestination spaceDestination3 = new SpaceDestination(this.destinations.Count, id, num3);
+		spaceDestination3.startingOrbitPercentage = list2[global::UnityEngine.Random.Range(0, list2.Count)];
+		this.destinations.Add(spaceDestination3);
+		base.Trigger(611818744, spaceDestination3);
+	}
+
 	private void RestoreDestinations()
 	{
 		if (this.destinationsGenerated)
@@ -589,6 +650,12 @@ public class SpacecraftManager : KMonoBehaviour, ISim1000ms
 
 	[Serialize]
 	public Dictionary<int, float> destinationAnalysisScores = new Dictionary<int, float>();
+
+	public enum DestinationLocationSelectionType
+	{
+		Nearest,
+		Random
+	}
 
 	public enum DestinationAnalysisState
 	{

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using STRINGS;
 using TUNING;
 using UnityEngine;
 
@@ -18,12 +19,12 @@ public class SteamEngineClusterConfig : IBuildingConfig
 		string text2 = "rocket_cluster_steam_engine_kanim";
 		int num3 = 1000;
 		float num4 = 60f;
-		float[] dense_TIER = BUILDINGS.ROCKETRY_MASS_KG.DENSE_TIER0;
+		float[] dense_TIER = global::TUNING.BUILDINGS.ROCKETRY_MASS_KG.DENSE_TIER0;
 		string[] refined_METALS = MATERIALS.REFINED_METALS;
 		float num5 = 9999f;
 		BuildLocationRule buildLocationRule = BuildLocationRule.Anywhere;
 		EffectorValues tier = NOISE_POLLUTION.NOISY.TIER2;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, dense_TIER, refined_METALS, num5, buildLocationRule, BUILDINGS.DECOR.NONE, tier, 0.2f);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, dense_TIER, refined_METALS, num5, buildLocationRule, global::TUNING.BUILDINGS.DECOR.NONE, tier, 0.2f);
 		BuildingTemplates.CreateRocketBuildingDef(buildingDef);
 		buildingDef.SceneLayer = Grid.SceneLayer.Building;
 		buildingDef.OverheatTemperature = 2273.15f;
@@ -40,6 +41,7 @@ public class SteamEngineClusterConfig : IBuildingConfig
 		buildingDef.CanMove = true;
 		buildingDef.Cancellable = false;
 		buildingDef.ShowInBuildMenu = false;
+		buildingDef.AddSearchTerms(SEARCH_TERMS.STEAM);
 		return buildingDef;
 	}
 
@@ -75,7 +77,7 @@ public class SteamEngineClusterConfig : IBuildingConfig
 		rocketEngineCluster.exhaustTemperature = ElementLoader.FindElementByHash(SimHashes.Steam).lowTemp + 50f;
 		go.AddOrGet<ModuleGenerator>();
 		Storage storage = go.AddOrGet<Storage>();
-		storage.capacityKg = BUILDINGS.ROCKETRY_MASS_KG.FUEL_TANK_WET_MASS_GAS_LARGE[0];
+		storage.capacityKg = global::TUNING.BUILDINGS.ROCKETRY_MASS_KG.FUEL_TANK_WET_MASS_GAS_LARGE[0];
 		storage.SetDefaultStoredItemModifiers(new List<Storage.StoredItemModifier>
 		{
 			Storage.StoredItemModifier.Hide,

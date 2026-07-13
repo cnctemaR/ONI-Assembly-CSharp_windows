@@ -104,7 +104,7 @@ public class FoodDehydratorConfig : IBuildingConfig
 			Tag item2 = valueTuple.Item2;
 			ComplexRecipe.RecipeElement[] array = new ComplexRecipe.RecipeElement[]
 			{
-				new ComplexRecipe.RecipeElement(item, 6000000f / item.CaloriesPerUnit),
+				new ComplexRecipe.RecipeElement(item, 6000000f / item.CaloriesPerUnit, true),
 				new ComplexRecipe.RecipeElement(SimHashes.Polypropylene.CreateTag(), 12f)
 			};
 			ComplexRecipe.RecipeElement[] array2 = new ComplexRecipe.RecipeElement[]

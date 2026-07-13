@@ -64,6 +64,7 @@ public class FishFeederConfig : IBuildingConfig
 		CreatureFeeder creatureFeeder = go.AddOrGet<CreatureFeeder>();
 		creatureFeeder.effectId = effect.Id;
 		creatureFeeder.feederOffset = new CellOffset(0, -2);
+		go.GetComponent<KPrefabID>().prefabInitFn += this.OnPrefabInit;
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)
@@ -80,12 +81,39 @@ public class FishFeederConfig : IBuildingConfig
 	public override void ConfigurePost(BuildingDef def)
 	{
 		List<Tag> list = new List<Tag>();
-		foreach (KeyValuePair<Tag, Diet> keyValuePair in DietManager.CollectDiets(new Tag[] { GameTags.Creatures.Species.PacuSpecies }))
+		foreach (KeyValuePair<Tag, Diet> keyValuePair in DietManager.CollectDiets(new Tag[]
 		{
+			GameTags.Creatures.Species.PacuSpecies,
+			GameTags.Creatures.Species.PrehistoricPacuSpecies
+		}))
+		{
+			Diet value = keyValuePair.Value;
+			if (value.CanEatPreyCritter)
+			{
+				Diet.Info[] preyInfos = value.preyInfos;
+				for (int i = 0; i < preyInfos.Length; i++)
+				{
+					foreach (Tag tag in preyInfos[i].consumedTags)
+					{
+						FishFeederConfig.forbiddenTags.Add(tag);
+					}
+				}
+			}
 			list.Add(keyValuePair.Key);
 		}
 		def.BuildingComplete.GetComponent<Storage>().storageFilters = list;
 	}
 
+	private void OnPrefabInit(GameObject instance)
+	{
+		TreeFilterable component = instance.GetComponent<TreeFilterable>();
+		foreach (Tag tag in FishFeederConfig.forbiddenTags)
+		{
+			component.ForbiddenTags.Add(tag);
+		}
+	}
+
 	public const string ID = "FishFeeder";
+
+	private static HashSet<Tag> forbiddenTags = new HashSet<Tag>();
 }

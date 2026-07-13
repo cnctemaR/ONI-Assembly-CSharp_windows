@@ -120,7 +120,8 @@ public class CreatureDeliveryPoint : StateMachineComponent<CreatureDeliveryPoint
 		}
 		if (num6 == 0 && this.fetches.Count < num)
 		{
-			FetchOrder2 fetchOrder = new FetchOrder2(creatureFetch, tags, FetchChore.MatchCriteria.MatchID, GameTags.Creatures.Deliverable, null, component, 1f, Operational.State.Operational, 0);
+			float minimumFetchAmount = FetchChore.GetMinimumFetchAmount(tags);
+			FetchOrder2 fetchOrder = new FetchOrder2(creatureFetch, tags, FetchChore.MatchCriteria.MatchID, GameTags.Creatures.Deliverable, null, component, minimumFetchAmount, Operational.State.Operational, 0);
 			fetchOrder.validateRequiredTagOnTagChange = true;
 			fetchOrder.Submit(new Action<FetchOrder2, Pickupable>(this.OnFetchComplete), false, new Action<FetchOrder2, Pickupable>(this.OnFetchBegun));
 			this.fetches.Add(fetchOrder);

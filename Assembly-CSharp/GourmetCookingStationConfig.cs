@@ -57,12 +57,7 @@ public class GourmetCookingStationConfig : IBuildingConfig
 		conduitConsumer.alwaysConsume = true;
 		conduitConsumer.storage = gourmetCookingStation.inStorage;
 		conduitConsumer.forceAlwaysSatisfied = true;
-		ElementConverter elementConverter = go.AddOrGet<ElementConverter>();
-		elementConverter.consumedElements = new ElementConverter.ConsumedElement[]
-		{
-			new ElementConverter.ConsumedElement(this.FUEL_TAG, 0.1f, true)
-		};
-		elementConverter.outputElements = new ElementConverter.OutputElement[]
+		go.AddOrGet<ElementConverter>().outputElements = new ElementConverter.OutputElement[]
 		{
 			new ElementConverter.OutputElement(0.025f, SimHashes.CarbonDioxide, 348.15f, false, false, 0f, 2f, 1f, byte.MaxValue, 0, true)
 		};
@@ -139,7 +134,11 @@ public class GourmetCookingStationConfig : IBuildingConfig
 		};
 		ComplexRecipe.RecipeElement[] array7 = new ComplexRecipe.RecipeElement[]
 		{
-			new ComplexRecipe.RecipeElement("ColdWheatSeed", 10f),
+			new ComplexRecipe.RecipeElement(new Tag[]
+			{
+				"ColdWheatSeed",
+				FernFoodConfig.ID
+			}, 10f),
 			new ComplexRecipe.RecipeElement(SpiceNutConfig.ID, 1f)
 		};
 		ComplexRecipe.RecipeElement[] array8 = new ComplexRecipe.RecipeElement[]
@@ -228,9 +227,18 @@ public class GourmetCookingStationConfig : IBuildingConfig
 		{
 			ComplexRecipe.RecipeElement[] array17 = new ComplexRecipe.RecipeElement[]
 			{
-				new ComplexRecipe.RecipeElement("ColdWheatSeed", 3f),
+				new ComplexRecipe.RecipeElement(new Tag[]
+				{
+					"ColdWheatSeed",
+					FernFoodConfig.ID
+				}, 3f),
 				new ComplexRecipe.RecipeElement("WormSuperFruit", 4f),
-				new ComplexRecipe.RecipeElement("GrilledPrickleFruit", 1f)
+				new ComplexRecipe.RecipeElement(new Tag[]
+				{
+					"GrilledPrickleFruit",
+					"CookedPikeapple",
+					VineFruitConfig.ID
+				}, new float[] { 1f, 1.6667f, 6.153f })
 			};
 			ComplexRecipe.RecipeElement[] array18 = new ComplexRecipe.RecipeElement[]
 			{

@@ -104,6 +104,14 @@ public class ReceptacleMonitor : StateMachineComponent<ReceptacleMonitor.StatesI
 
 	public class StatesInstance : GameStateMachine<ReceptacleMonitor.States, ReceptacleMonitor.StatesInstance, ReceptacleMonitor, object>.GameInstance
 	{
+		public SingleEntityReceptacle ReceptacleObject
+		{
+			get
+			{
+				return base.sm.receptacle.Get(this);
+			}
+		}
+
 		public StatesInstance(ReceptacleMonitor master)
 			: base(master)
 		{

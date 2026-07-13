@@ -49,7 +49,9 @@ public class DivergentWormConfig : IEntityConfig, IHasDlcRestrictions
 
 	public GameObject CreatePrefab()
 	{
-		return EntityTemplates.ExtendEntityToFertileCreature(DivergentWormConfig.CreateWorm("DivergentWorm", global::STRINGS.CREATURES.SPECIES.DIVERGENT.VARIANT_WORM.NAME, global::STRINGS.CREATURES.SPECIES.DIVERGENT.VARIANT_WORM.DESC, "worm_head_kanim", false), this, "DivergentWormEgg", global::STRINGS.CREATURES.SPECIES.DIVERGENT.VARIANT_WORM.EGG_NAME, global::STRINGS.CREATURES.SPECIES.DIVERGENT.VARIANT_WORM.DESC, "egg_worm_kanim", DivergentTuning.EGG_MASS, "DivergentWormBaby", 90f, 30f, DivergentTuning.EGG_CHANCES_WORM, DivergentWormConfig.EGG_SORT_ORDER, true, false, 1f, false);
+		GameObject gameObject = EntityTemplates.ExtendEntityToFertileCreature(DivergentWormConfig.CreateWorm("DivergentWorm", global::STRINGS.CREATURES.SPECIES.DIVERGENT.VARIANT_WORM.NAME, global::STRINGS.CREATURES.SPECIES.DIVERGENT.VARIANT_WORM.DESC, "worm_head_kanim", false), this, "DivergentWormEgg", global::STRINGS.CREATURES.SPECIES.DIVERGENT.VARIANT_WORM.EGG_NAME, global::STRINGS.CREATURES.SPECIES.DIVERGENT.VARIANT_WORM.DESC, "egg_worm_kanim", DivergentTuning.EGG_MASS, "DivergentWormBaby", 90f, 30f, DivergentTuning.EGG_CHANCES_WORM, DivergentWormConfig.EGG_SORT_ORDER, true, false, 1f, false);
+		gameObject.AddTag(GameTags.Creatures.Pollinator);
+		return gameObject;
 	}
 
 	public void OnPrefabInit(GameObject prefab)
@@ -87,4 +89,6 @@ public class DivergentWormConfig : IEntityConfig, IHasDlcRestrictions
 	public static int EGG_SORT_ORDER = 0;
 
 	private static float MINI_POOP_SIZE_IN_KG = 4f;
+
+	public const string CROP_TENDING_EFFECT = "DivergentCropTendedWorm";
 }

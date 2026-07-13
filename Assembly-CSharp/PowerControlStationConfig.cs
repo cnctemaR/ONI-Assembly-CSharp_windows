@@ -43,12 +43,12 @@ public class PowerControlStationConfig : IBuildingConfig
 		storage.capacityKg = 50f;
 		storage.showInUI = true;
 		storage.storageFilters = new List<Tag> { PowerControlStationConfig.MATERIAL_FOR_TINKER };
+		storage.SetDefaultStoredItemModifiers(Storage.StandardInsulatedStorage);
 		TinkerStation tinkerstation = go.AddOrGet<TinkerStation>();
 		tinkerstation.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_electricianworkdesk_kanim") };
 		tinkerstation.inputMaterial = PowerControlStationConfig.MATERIAL_FOR_TINKER;
 		tinkerstation.massPerTinker = 5f;
 		tinkerstation.outputPrefab = PowerControlStationConfig.TINKER_TOOLS;
-		tinkerstation.outputTemperature = 308.15f;
 		tinkerstation.requiredSkillPerk = PowerControlStationConfig.ROLE_PERK;
 		tinkerstation.choreType = Db.Get().ChoreTypes.PowerFabricate.IdHash;
 		tinkerstation.useFilteredStorage = true;
@@ -77,6 +77,4 @@ public class PowerControlStationConfig : IBuildingConfig
 	public const float MASS_PER_TINKER = 5f;
 
 	public static string ROLE_PERK = "CanPowerTinker";
-
-	public const float OUTPUT_TEMPERATURE = 308.15f;
 }

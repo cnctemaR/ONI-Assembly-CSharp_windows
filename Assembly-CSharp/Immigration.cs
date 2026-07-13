@@ -44,6 +44,26 @@ public class Immigration : KMonoBehaviour, ISaveLoadable, ISim200ms, IPersonalPr
 		List<CarePackageInfo> list2 = new List<CarePackageInfo>();
 		list2.Add(new CarePackageInfo("DisposableElectrobank_RawMetal", 3f, () => Immigration.CycleCondition(12)));
 		dictionary.Add(text2, list2);
+		string text3 = "DLC4_ID";
+		List<CarePackageInfo> list3 = new List<CarePackageInfo>();
+		list3.Add(new CarePackageInfo(ElementLoader.FindElementByHash(SimHashes.Peat).tag.ToString(), 3000f, null));
+		list3.Add(new CarePackageInfo(ElementLoader.FindElementByHash(SimHashes.NickelOre).tag.ToString(), 2000f, () => Immigration.CycleCondition(12) && Immigration.DiscoveredCondition(ElementLoader.FindElementByHash(SimHashes.NickelOre).tag)));
+		list3.Add(new CarePackageInfo("GardenFoodPlantSeed", 1f, null));
+		list3.Add(new CarePackageInfo("GardenDecorPlantSeed", 1f, null));
+		list3.Add(new CarePackageInfo("DinofernSeed", 1f, () => Immigration.CycleCondition(48)));
+		list3.Add(new CarePackageInfo("DewDripperPlantSeed", 1f, () => Immigration.CycleCondition(48)));
+		list3.Add(new CarePackageInfo("KelpPlantSeed", 1f, () => Immigration.CycleCondition(48)));
+		list3.Add(new CarePackageInfo("FlyTrapPlantSeed", 1f, () => Immigration.CycleCondition(48)));
+		list3.Add(new CarePackageInfo("VineMotherSeed", 1f, () => Immigration.CycleCondition(48)));
+		list3.Add(new CarePackageInfo("GardenForagePlant", 3f, null));
+		list3.Add(new CarePackageInfo(VineFruitConfig.ID, 6f, null));
+		list3.Add(new CarePackageInfo("SmokedDinosaurMeat", 1f, () => Immigration.CycleCondition(48)));
+		list3.Add(new CarePackageInfo("StegoBaby", 1f, null));
+		list3.Add(new CarePackageInfo("ChameleonEgg", 1f, () => Immigration.CycleCondition(48)));
+		list3.Add(new CarePackageInfo("MosquitoEgg", 3f, () => Immigration.CycleCondition(48)));
+		list3.Add(new CarePackageInfo("PrehistoricPacuEgg", 1f, () => Immigration.CycleCondition(100)));
+		list3.Add(new CarePackageInfo("RaptorEgg", 1f, () => Immigration.CycleCondition(100)));
+		dictionary.Add(text3, list3);
 		this.carePackagesByDlc = dictionary;
 		foreach (KeyValuePair<Tag, BionicUpgradeComponentConfig.BionicUpgradeData> keyValuePair in BionicUpgradeComponentConfig.UpgradesData)
 		{
@@ -109,6 +129,8 @@ public class Immigration : KMonoBehaviour, ISaveLoadable, ISim200ms, IPersonalPr
 		list.Add(new CarePackageInfo("SwampLilySeed", 1f, () => Immigration.CycleCondition(24)));
 		list.Add(new CarePackageInfo("ColdBreatherSeed", 1f, () => Immigration.CycleCondition(24)));
 		list.Add(new CarePackageInfo("SpiceVineSeed", 1f, () => Immigration.CycleCondition(24)));
+		list.Add(new CarePackageInfo("SaltPlantSeed", 1f, () => Immigration.CycleCondition(24)));
+		list.Add(new CarePackageInfo("BasicSingleHarvestPlantSeed", 1f, () => Immigration.CycleCondition(24)));
 		list.Add(new CarePackageInfo("FieldRation", 5f, null));
 		list.Add(new CarePackageInfo("BasicForagePlant", 6f, null));
 		list.Add(new CarePackageInfo("CookedEgg", 3f, () => Immigration.CycleCondition(6)));
@@ -171,12 +193,14 @@ public class Immigration : KMonoBehaviour, ISaveLoadable, ISim200ms, IPersonalPr
 		list.Add(new CarePackageInfo("MushroomSeed", 1f, null));
 		list.Add(new CarePackageInfo("PrickleFlowerSeed", 2f, () => Immigration.DiscoveredCondition("PrickleFlowerSeed") || Immigration.CycleCondition(500)));
 		list.Add(new CarePackageInfo("OxyfernSeed", 1f, null));
+		list.Add(new CarePackageInfo("BasicSingleHarvestPlantSeed", 1f, () => Immigration.DiscoveredCondition("BasicSingleHarvestPlantSeed") || Immigration.CycleCondition(500)));
 		list.Add(new CarePackageInfo("ForestTreeSeed", 1f, () => Immigration.DiscoveredCondition("ForestTreeSeed") || Immigration.CycleCondition(500)));
 		list.Add(new CarePackageInfo(BasicFabricMaterialPlantConfig.SEED_ID, 3f, () => Immigration.CycleCondition(24) && (Immigration.DiscoveredCondition(BasicFabricMaterialPlantConfig.SEED_ID) || Immigration.CycleCondition(500))));
 		list.Add(new CarePackageInfo("SwampLilySeed", 1f, () => Immigration.CycleCondition(24) && (Immigration.DiscoveredCondition("SwampLilySeed") || Immigration.CycleCondition(500))));
 		list.Add(new CarePackageInfo("ColdBreatherSeed", 1f, () => Immigration.CycleCondition(24) && (Immigration.DiscoveredCondition("ColdBreatherSeed") || Immigration.CycleCondition(500))));
 		list.Add(new CarePackageInfo("SpiceVineSeed", 1f, () => Immigration.CycleCondition(24) && (Immigration.DiscoveredCondition("SpiceVineSeed") || Immigration.CycleCondition(500))));
 		list.Add(new CarePackageInfo("WormPlantSeed", 1f, () => Immigration.CycleCondition(24) && (Immigration.DiscoveredCondition("WormPlantSeed") || Immigration.CycleCondition(500))));
+		list.Add(new CarePackageInfo("SaltPlantSeed", 1f, () => Immigration.CycleCondition(24) && (Immigration.DiscoveredCondition("SaltPlantSeed") || Immigration.CycleCondition(500))));
 		list.Add(new CarePackageInfo("FieldRation", 5f, null));
 		list.Add(new CarePackageInfo("BasicForagePlant", 6f, () => Immigration.DiscoveredCondition("BasicForagePlant")));
 		list.Add(new CarePackageInfo("ForestForagePlant", 2f, () => Immigration.DiscoveredCondition("ForestForagePlant")));

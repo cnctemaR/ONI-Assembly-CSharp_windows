@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text;
 using Klei.AI;
 using STRINGS;
 using UnityEngine;
@@ -77,11 +78,12 @@ public class StandardAttributeFormatter : IAttributeFormatter
 
 	public string GetTooltip(Klei.AI.Attribute master, List<AttributeModifier> modifiers, AttributeConverters converters)
 	{
-		string text = this.GetTooltipDescription(master);
-		text += string.Format(DUPLICANTS.ATTRIBUTES.TOTAL_VALUE, this.GetFormattedValue(AttributeInstance.GetTotalDisplayValue(master, modifiers), GameUtil.TimeSlice.None), master.Name);
+		StringBuilder stringBuilder = GlobalStringBuilderPool.Alloc();
+		stringBuilder.Append(this.GetTooltipDescription(master));
+		stringBuilder.AppendFormat(DUPLICANTS.ATTRIBUTES.TOTAL_VALUE, this.GetFormattedValue(AttributeInstance.GetTotalDisplayValue(master, modifiers), GameUtil.TimeSlice.None), master.Name);
 		if (master.BaseValue != 0f)
 		{
-			text += string.Format(DUPLICANTS.ATTRIBUTES.BASE_VALUE, master.BaseValue);
+			stringBuilder.AppendFormat(DUPLICANTS.ATTRIBUTES.BASE_VALUE, master.BaseValue);
 		}
 		List<AttributeModifier> list = new List<AttributeModifier>(modifiers);
 		list.Sort((AttributeModifier p1, AttributeModifier p2) => p2.Value.CompareTo(p1.Value));
@@ -91,29 +93,31 @@ public class StandardAttributeFormatter : IAttributeFormatter
 			string formattedString = attributeModifier.GetFormattedString();
 			if (formattedString != null)
 			{
-				text += string.Format(DUPLICANTS.ATTRIBUTES.MODIFIER_ENTRY, attributeModifier.GetDescription(), formattedString);
+				stringBuilder.AppendFormat(DUPLICANTS.ATTRIBUTES.MODIFIER_ENTRY, attributeModifier.GetDescription(), formattedString);
 			}
 		}
-		string text2 = "";
+		bool flag = true;
 		if (converters != null && master.converters.Count > 0)
 		{
 			foreach (AttributeConverterInstance attributeConverterInstance in converters.converters)
 			{
 				if (attributeConverterInstance.converter.attribute == master)
 				{
-					string text3 = attributeConverterInstance.DescriptionFromAttribute(attributeConverterInstance.Evaluate(), attributeConverterInstance.gameObject);
-					if (text3 != null)
+					string text = attributeConverterInstance.DescriptionFromAttribute(attributeConverterInstance.Evaluate(), attributeConverterInstance.gameObject);
+					if (text != null)
 					{
-						text2 = text2 + "\n" + text3;
+						if (flag)
+						{
+							stringBuilder.AppendLine();
+							flag = false;
+						}
+						stringBuilder.AppendLine();
+						stringBuilder.Append(text);
 					}
 				}
 			}
 		}
-		if (text2.Length > 0)
-		{
-			text = text + "\n" + text2;
-		}
-		return text;
+		return GlobalStringBuilderPool.ReturnAndFree(stringBuilder);
 	}
 
 	public GameUtil.UnitClass unitClass;

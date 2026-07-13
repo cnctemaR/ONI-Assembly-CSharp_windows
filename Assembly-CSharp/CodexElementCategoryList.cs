@@ -22,18 +22,15 @@ public class CodexElementCategoryList : CodexCollapsibleHeader
 		RectTransform reference2 = component.GetReference<RectTransform>("PrefabLabelWithIcon");
 		this.ClearPanel(reference2.transform.parent, reference2);
 		reference.GetComponent<LocText>().SetText(UI.CODEX.CATEGORYNAMES.ELEMENTS);
-		foreach (Element element in ElementLoader.elements)
+		foreach (GameObject gameObject in Assets.GetPrefabsWithTag(this.categoryTag))
 		{
-			if (element.HasTag(this.categoryTag) && !element.disabled)
-			{
-				GameObject gameObject = Util.KInstantiateUI(reference2.gameObject, reference2.parent.gameObject, true);
-				Image componentInChildren = gameObject.GetComponentInChildren<Image>();
-				global::Tuple<Sprite, Color> uisprite = Def.GetUISprite(element, "ui", false);
-				componentInChildren.sprite = uisprite.first;
-				componentInChildren.color = uisprite.second;
-				gameObject.GetComponentInChildren<LocText>().SetText(element.tag.ProperName());
-				this.rows.Add(gameObject);
-			}
+			GameObject gameObject2 = Util.KInstantiateUI(reference2.gameObject, reference2.parent.gameObject, true);
+			Image componentInChildren = gameObject2.GetComponentInChildren<Image>();
+			global::Tuple<Sprite, Color> uisprite = Def.GetUISprite(gameObject, "ui", false);
+			componentInChildren.sprite = uisprite.first;
+			componentInChildren.color = uisprite.second;
+			gameObject2.GetComponentInChildren<LocText>().SetText(gameObject.GetProperName());
+			this.rows.Add(gameObject2);
 		}
 	}
 

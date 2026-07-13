@@ -304,6 +304,7 @@ public class Light2D : KMonoBehaviour, IGameObjectEffectDescriptor
 	{
 		this.RemoveFromScenePartitioner();
 		this.emitter.RemoveFromGrid();
+		this.cachedCell = Grid.InvalidCell;
 	}
 
 	public Light2D.RefreshResult RefreshShapeAndPosition()
@@ -340,6 +341,7 @@ public class Light2D : KMonoBehaviour, IGameObjectEffectDescriptor
 		this.dirty_shape = false;
 		this.dirty_position = false;
 		this.dirty_falloff = false;
+		this.cachedCell = num;
 		return Light2D.RefreshResult.Updated;
 	}
 
@@ -364,6 +366,8 @@ public class Light2D : KMonoBehaviour, IGameObjectEffectDescriptor
 	private bool dirty_position;
 
 	private bool dirty_falloff;
+
+	public int cachedCell;
 
 	[SerializeField]
 	private LightGridManager.LightGridEmitter.State pending_emitter_state = LightGridManager.LightGridEmitter.State.DEFAULT;

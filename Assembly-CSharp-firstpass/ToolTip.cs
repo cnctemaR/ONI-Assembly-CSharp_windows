@@ -22,6 +22,8 @@ public class ToolTip : KMonoBehaviour, IPointerEnterHandler, IEventSystemHandler
 		}
 	}
 
+	public bool isHovering { get; private set; }
+
 	public Func<string> OnToolTip
 	{
 		get
@@ -247,8 +249,6 @@ public class ToolTip : KMonoBehaviour, IPointerEnterHandler, IEventSystemHandler
 	public bool forceRefresh;
 
 	public bool refreshWhileHovering;
-
-	private bool isHovering;
 
 	private float lastUpdateTime;
 

@@ -294,7 +294,7 @@ public class FishFeeder : GameStateMachine<FishFeeder, FishFeeder.Instance, ISta
 			}
 			this.anim.SetSymbolVisiblity(FishFeeder.FishFeederBot.HASH_FEEDBALL, true);
 			KAnim.Build build = stored_go.GetComponent<KBatchedAnimController>().AnimFiles[0].GetData().build;
-			KAnim.Build.Symbol symbol = (stored_go.HasTag(GameTags.Seed) ? build.GetSymbol("object") : build.GetSymbol("algae"));
+			KAnim.Build.Symbol symbol = ((build.GetSymbol("algae") != null) ? build.GetSymbol("algae") : build.GetSymbol("object"));
 			if (symbol != null)
 			{
 				this.anim.GetComponent<SymbolOverrideController>().AddSymbolOverride(FishFeeder.FishFeederBot.HASH_FEEDBALL, symbol, 0);

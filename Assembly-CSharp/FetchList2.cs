@@ -95,6 +95,7 @@ public class FetchList2 : IFetchList
 
 	public void Add(Tag tag, Tag[] forbidden_tags = null, float amount = 1f, Operational.State operationalRequirementDEPRECATED = Operational.State.None)
 	{
+		amount = FetchChore.GetMinimumFetchAmount(tag, amount);
 		if (!this.MinimumAmount.ContainsKey(tag))
 		{
 			this.MinimumAmount[tag] = amount;
@@ -174,13 +175,13 @@ public class FetchList2 : IFetchList
 					KPrefabID kprefabID = component.KPrefabID;
 					if (dictionary.ContainsKey(kprefabID.PrefabTag))
 					{
-						dictionary[kprefabID.PrefabTag] = Math.Max(dictionary[kprefabID.PrefabTag] - component.TotalAmount, 0f);
+						dictionary[kprefabID.PrefabTag] = Math.Max(dictionary[kprefabID.PrefabTag] - component.FetchTotalAmount, 0f);
 					}
 					foreach (Tag tag2 in kprefabID.Tags)
 					{
 						if (dictionary.ContainsKey(tag2))
 						{
-							dictionary[tag2] = Math.Max(dictionary[tag2] - component.TotalAmount, 0f);
+							dictionary[tag2] = Math.Max(dictionary[tag2] - component.FetchTotalAmount, 0f);
 						}
 					}
 				}

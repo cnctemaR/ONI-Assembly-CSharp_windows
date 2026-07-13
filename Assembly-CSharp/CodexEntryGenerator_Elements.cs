@@ -11,16 +11,18 @@ public class CodexEntryGenerator_Elements
 {
 	public static Dictionary<string, CodexEntry> GenerateEntries()
 	{
-		CodexEntryGenerator_Elements.<>c__DisplayClass8_0 CS$<>8__locals1;
+		CodexEntryGenerator_Elements.<>c__DisplayClass9_0 CS$<>8__locals1;
 		CS$<>8__locals1.entriesElements = new Dictionary<string, CodexEntry>();
 		Dictionary<string, CodexEntry> dictionary = new Dictionary<string, CodexEntry>();
 		Dictionary<string, CodexEntry> dictionary2 = new Dictionary<string, CodexEntry>();
 		Dictionary<string, CodexEntry> dictionary3 = new Dictionary<string, CodexEntry>();
 		Dictionary<string, CodexEntry> dictionary4 = new Dictionary<string, CodexEntry>();
-		CodexEntryGenerator_Elements.<GenerateEntries>g__AddCategoryEntry|8_0(CodexEntryGenerator_Elements.ELEMENTS_SOLIDS_ID, UI.CODEX.CATEGORYNAMES.ELEMENTSSOLID, Assets.GetSprite("ui_elements-solid"), dictionary, ref CS$<>8__locals1);
-		CodexEntryGenerator_Elements.<GenerateEntries>g__AddCategoryEntry|8_0(CodexEntryGenerator_Elements.ELEMENTS_LIQUIDS_ID, UI.CODEX.CATEGORYNAMES.ELEMENTSLIQUID, Assets.GetSprite("ui_elements-liquids"), dictionary2, ref CS$<>8__locals1);
-		CodexEntryGenerator_Elements.<GenerateEntries>g__AddCategoryEntry|8_0(CodexEntryGenerator_Elements.ELEMENTS_GASES_ID, UI.CODEX.CATEGORYNAMES.ELEMENTSGAS, Assets.GetSprite("ui_elements-gases"), dictionary3, ref CS$<>8__locals1);
-		CodexEntryGenerator_Elements.<GenerateEntries>g__AddCategoryEntry|8_0(CodexEntryGenerator_Elements.ELEMENTS_OTHER_ID, UI.CODEX.CATEGORYNAMES.ELEMENTSOTHER, Assets.GetSprite("ui_elements-other"), dictionary4, ref CS$<>8__locals1);
+		Dictionary<string, CodexEntry> dictionary5 = new Dictionary<string, CodexEntry>();
+		CodexEntryGenerator_Elements.<GenerateEntries>g__AddCategoryEntry|9_0(CodexEntryGenerator_Elements.ELEMENTS_SOLIDS_ID, UI.CODEX.CATEGORYNAMES.ELEMENTSSOLID, Assets.GetSprite("ui_elements-solid"), dictionary, ref CS$<>8__locals1);
+		CodexEntryGenerator_Elements.<GenerateEntries>g__AddCategoryEntry|9_0(CodexEntryGenerator_Elements.ELEMENTS_LIQUIDS_ID, UI.CODEX.CATEGORYNAMES.ELEMENTSLIQUID, Assets.GetSprite("ui_elements-liquids"), dictionary2, ref CS$<>8__locals1);
+		CodexEntryGenerator_Elements.<GenerateEntries>g__AddCategoryEntry|9_0(CodexEntryGenerator_Elements.ELEMENTS_GASES_ID, UI.CODEX.CATEGORYNAMES.ELEMENTSGAS, Assets.GetSprite("ui_elements-gases"), dictionary3, ref CS$<>8__locals1);
+		CodexEntryGenerator_Elements.<GenerateEntries>g__AddCategoryEntry|9_0(CodexEntryGenerator_Elements.ELEMENTS_OTHER_ID, UI.CODEX.CATEGORYNAMES.ELEMENTSOTHER, Assets.GetSprite("ui_elements-other"), dictionary4, ref CS$<>8__locals1);
+		CodexEntryGenerator_Elements.<GenerateEntries>g__AddCategoryEntry|9_0(CodexEntryGenerator_Elements.ELEMENT_TYPES, UI.CODEX.CATEGORYNAMES.ELEMENTTYPES, Assets.GetSprite("ui_elements-other"), dictionary5, ref CS$<>8__locals1);
 		foreach (Element element in ElementLoader.elements)
 		{
 			if (!element.disabled)
@@ -54,26 +56,26 @@ public class CodexEntryGenerator_Elements
 					CodexEntryGenerator.GenerateImageContainers(new global::Tuple<Sprite, Color>[] { tuple }, list, ContentContainer.ContentLayout.Horizontal);
 					CodexEntryGenerator_Elements.GenerateElementDescriptionContainers(element, list);
 					string text;
-					Dictionary<string, CodexEntry> dictionary5;
+					Dictionary<string, CodexEntry> dictionary6;
 					if (element.IsSolid)
 					{
 						text = CodexEntryGenerator_Elements.ELEMENTS_SOLIDS_ID;
-						dictionary5 = dictionary;
+						dictionary6 = dictionary;
 					}
 					else if (element.IsLiquid)
 					{
 						text = CodexEntryGenerator_Elements.ELEMENTS_LIQUIDS_ID;
-						dictionary5 = dictionary2;
+						dictionary6 = dictionary2;
 					}
 					else if (element.IsGas)
 					{
 						text = CodexEntryGenerator_Elements.ELEMENTS_GASES_ID;
-						dictionary5 = dictionary3;
+						dictionary6 = dictionary3;
 					}
 					else
 					{
 						text = CodexEntryGenerator_Elements.ELEMENTS_OTHER_ID;
-						dictionary5 = dictionary4;
+						dictionary6 = dictionary4;
 					}
 					string text2 = element.id.ToString();
 					CodexEntry codexEntry = new CodexEntry(text, list, element.name);
@@ -81,7 +83,7 @@ public class CodexEntryGenerator_Elements
 					codexEntry.icon = tuple.first;
 					codexEntry.iconColor = tuple.second;
 					CodexCache.AddEntry(text2, codexEntry, null);
-					dictionary5.Add(text2, codexEntry);
+					dictionary6.Add(text2, codexEntry);
 				}
 			}
 		}
@@ -90,7 +92,7 @@ public class CodexEntryGenerator_Elements
 		if (gameObject != null)
 		{
 			string elements_SOLIDS_ID = CodexEntryGenerator_Elements.ELEMENTS_SOLIDS_ID;
-			Dictionary<string, CodexEntry> dictionary6 = dictionary;
+			Dictionary<string, CodexEntry> dictionary7 = dictionary;
 			KPrefabID component = gameObject.GetComponent<KPrefabID>();
 			InfoDescription component2 = gameObject.GetComponent<InfoDescription>();
 			string properName = gameObject.GetProperName();
@@ -111,7 +113,7 @@ public class CodexEntryGenerator_Elements
 			codexEntry2.icon = uisprite.first;
 			codexEntry2.iconColor = uisprite.second;
 			CodexCache.AddEntry(text3, codexEntry2, null);
-			dictionary6.Add(text3, codexEntry2);
+			dictionary7.Add(text3, codexEntry2);
 		}
 		CodexEntryGenerator.PopulateCategoryEntries(CS$<>8__locals1.entriesElements);
 		return CS$<>8__locals1.entriesElements;
@@ -247,9 +249,9 @@ public class CodexEntryGenerator_Elements
 		if (CodexEntryGenerator_Elements.contextInstance == null)
 		{
 			CodexEntryGenerator_Elements.CodexElementMap codexElementMap = new CodexEntryGenerator_Elements.CodexElementMap();
-			CodexEntryGenerator_Elements.<>c__DisplayClass12_0 CS$<>8__locals1;
+			CodexEntryGenerator_Elements.<>c__DisplayClass13_0 CS$<>8__locals1;
 			CS$<>8__locals1.madeMap = new CodexEntryGenerator_Elements.CodexElementMap();
-			CodexEntryGenerator_Elements.<>c__DisplayClass12_1 CS$<>8__locals2;
+			CodexEntryGenerator_Elements.<>c__DisplayClass13_1 CS$<>8__locals2;
 			CS$<>8__locals2.waterTag = ElementLoader.FindElementByHash(SimHashes.Water).tag;
 			CS$<>8__locals2.dirtyWaterTag = ElementLoader.FindElementByHash(SimHashes.DirtyWater).tag;
 			foreach (PlanScreen.PlanInfo planInfo in global::TUNING.BUILDINGS.PLANORDER)
@@ -263,7 +265,7 @@ public class CodexEntryGenerator_Elements
 					}
 					if (!buildingDef.Deprecated && !buildingDef.BuildingComplete.HasTag(GameTags.DevBuilding))
 					{
-						CodexEntryGenerator_Elements.<GetElementEntryContext>g__CheckPrefab|12_0(buildingDef.BuildingComplete, codexElementMap, CS$<>8__locals1.madeMap, ref CS$<>8__locals1, ref CS$<>8__locals2);
+						CodexEntryGenerator_Elements.<GetElementEntryContext>g__CheckPrefab|13_0(buildingDef.BuildingComplete, codexElementMap, CS$<>8__locals1.madeMap, ref CS$<>8__locals1, ref CS$<>8__locals2);
 					}
 				}
 			}
@@ -274,16 +276,16 @@ public class CodexEntryGenerator_Elements
 			}
 			foreach (GameObject gameObject2 in hashSet)
 			{
-				if (!(gameObject2.GetComponent<BudUprootedMonitor>() != null))
+				if (!gameObject2.HasTag(GameTags.HideFromCodex))
 				{
-					CodexEntryGenerator_Elements.<GetElementEntryContext>g__CheckPrefab|12_0(gameObject2, codexElementMap, CS$<>8__locals1.madeMap, ref CS$<>8__locals1, ref CS$<>8__locals2);
+					CodexEntryGenerator_Elements.<GetElementEntryContext>g__CheckPrefab|13_0(gameObject2, codexElementMap, CS$<>8__locals1.madeMap, ref CS$<>8__locals1, ref CS$<>8__locals2);
 				}
 			}
 			foreach (GameObject gameObject3 in Assets.GetPrefabsWithComponent<CreatureBrain>())
 			{
 				if (gameObject3.GetDef<BabyMonitor.Def>() == null)
 				{
-					CodexEntryGenerator_Elements.<GetElementEntryContext>g__CheckPrefab|12_0(gameObject3, codexElementMap, CS$<>8__locals1.madeMap, ref CS$<>8__locals1, ref CS$<>8__locals2);
+					CodexEntryGenerator_Elements.<GetElementEntryContext>g__CheckPrefab|13_0(gameObject3, codexElementMap, CS$<>8__locals1.madeMap, ref CS$<>8__locals1, ref CS$<>8__locals2);
 				}
 			}
 			foreach (KeyValuePair<Tag, Diet> keyValuePair2 in DietManager.CollectSaveDiets(null))
@@ -302,11 +304,34 @@ public class CodexEntryGenerator_Elements
 					Diet value = keyValuePair2.Value;
 					foreach (Diet.Info info in value.infos)
 					{
-						float num2 = -num / info.caloriesPerKg;
-						float num3 = num2 * info.producedConversionRate;
 						foreach (Tag tag in info.consumedTags)
 						{
-							ElementUsage elementUsage = (value.IsConsumedTagAbleToBeEatenDirectly(tag) ? new ElementUsage(tag, num2, true, new Func<Tag, float, bool, string>(GameUtil.GetFormattedDirectPlantConsumptionValuePerCycle)) : new ElementUsage(tag, num2, true));
+							float num2 = -num / info.caloriesPerKg;
+							float num3 = num2 * info.producedConversionRate;
+							bool flag = value.IsConsumedTagAbleToBeEatenDirectly(tag);
+							ElementUsage elementUsage = null;
+							if (flag)
+							{
+								if (info.foodType == Diet.Info.FoodType.EatPlantDirectly)
+								{
+									elementUsage = new ElementUsage(tag, num2, true, new Func<Tag, float, bool, string>(GameUtil.GetFormattedDirectPlantConsumptionValuePerCycle));
+								}
+								else if (info.foodType == Diet.Info.FoodType.EatPlantStorage)
+								{
+									elementUsage = new ElementUsage(tag, num2, true, new Func<Tag, float, bool, string>(GameUtil.GetFormattedPlantStorageConsumptionValuePerCycle));
+								}
+								else if (info.foodType == Diet.Info.FoodType.EatPrey || info.foodType == Diet.Info.FoodType.EatButcheredPrey)
+								{
+									float num4 = value.AvailableCaloriesInPrey(tag);
+									num2 = -num / num4;
+									num3 = num2 * info.producedConversionRate * num4 / info.caloriesPerKg;
+									elementUsage = new ElementUsage(tag, num2, true, new Func<Tag, float, bool, string>(GameUtil.GetFormattedPreyConsumptionValuePerCycle));
+								}
+							}
+							else
+							{
+								elementUsage = new ElementUsage(tag, num2, true);
+							}
 							CodexEntryGenerator_Elements.ConversionEntry conversionEntry = new CodexEntryGenerator_Elements.ConversionEntry();
 							conversionEntry.title = gameObject4.GetProperName();
 							conversionEntry.prefab = gameObject4;
@@ -330,7 +355,7 @@ public class CodexEntryGenerator_Elements
 	}
 
 	[CompilerGenerated]
-	internal static void <GenerateEntries>g__AddCategoryEntry|8_0(string categoryId, string name, Sprite icon, Dictionary<string, CodexEntry> entries, ref CodexEntryGenerator_Elements.<>c__DisplayClass8_0 A_4)
+	internal static void <GenerateEntries>g__AddCategoryEntry|9_0(string categoryId, string name, Sprite icon, Dictionary<string, CodexEntry> entries, ref CodexEntryGenerator_Elements.<>c__DisplayClass9_0 A_4)
 	{
 		CodexEntry codexEntry = CodexEntryGenerator.GenerateCategoryEntry(categoryId, name, entries, icon, true, true, null);
 		codexEntry.parentId = CodexEntryGenerator_Elements.ELEMENTS_ID;
@@ -339,7 +364,7 @@ public class CodexEntryGenerator_Elements
 	}
 
 	[CompilerGenerated]
-	internal static void <GetElementEntryContext>g__CheckPrefab|12_0(GameObject prefab, CodexEntryGenerator_Elements.CodexElementMap usedMap, CodexEntryGenerator_Elements.CodexElementMap made, ref CodexEntryGenerator_Elements.<>c__DisplayClass12_0 A_3, ref CodexEntryGenerator_Elements.<>c__DisplayClass12_1 A_4)
+	internal static void <GetElementEntryContext>g__CheckPrefab|13_0(GameObject prefab, CodexEntryGenerator_Elements.CodexElementMap usedMap, CodexEntryGenerator_Elements.CodexElementMap made, ref CodexEntryGenerator_Elements.<>c__DisplayClass13_0 A_3, ref CodexEntryGenerator_Elements.<>c__DisplayClass13_1 A_4)
 	{
 		HashSet<ElementUsage> hashSet = new HashSet<ElementUsage>();
 		HashSet<ElementUsage> hashSet2 = new HashSet<ElementUsage>();
@@ -361,16 +386,68 @@ public class CodexEntryGenerator_Elements
 		IEnumerable<ElementConverter> components = prefab.GetComponents<ElementConverter>();
 		foreach (ElementConverter elementConverter in (components ?? Enumerable.Empty<ElementConverter>()))
 		{
+			List<CodexEntryGenerator_Elements.ConversionEntry> list = new List<CodexEntryGenerator_Elements.ConversionEntry>();
 			IEnumerable<ElementConverter.ConsumedElement> consumedElements = elementConverter.consumedElements;
-			foreach (ElementConverter.ConsumedElement consumedElement in (consumedElements ?? Enumerable.Empty<ElementConverter.ConsumedElement>()))
+			using (IEnumerator<ElementConverter.ConsumedElement> enumerator4 = (consumedElements ?? Enumerable.Empty<ElementConverter.ConsumedElement>()).GetEnumerator())
 			{
-				hashSet.Add(new ElementUsage(consumedElement.Tag, consumedElement.MassConsumptionRate, true));
+				while (enumerator4.MoveNext())
+				{
+					ElementConverter.ConsumedElement c2 = enumerator4.Current;
+					if (elementConverter.inputIsCategory)
+					{
+						using (List<Element>.Enumerator enumerator5 = ElementLoader.FindElements((Element e) => e.HasTag(c2.Tag)).GetEnumerator())
+						{
+							while (enumerator5.MoveNext())
+							{
+								Element element = enumerator5.Current;
+								list.Add(new CodexEntryGenerator_Elements.ConversionEntry
+								{
+									title = prefab.GetProperName(),
+									prefab = prefab,
+									inSet = 
+									{
+										new ElementUsage(element.tag, c2.MassConsumptionRate, true)
+									}
+								});
+							}
+							continue;
+						}
+					}
+					hashSet.Add(new ElementUsage(c2.Tag, c2.MassConsumptionRate, true));
+				}
 			}
 			IEnumerable<ElementConverter.OutputElement> outputElements = elementConverter.outputElements;
 			foreach (ElementConverter.OutputElement outputElement in (outputElements ?? Enumerable.Empty<ElementConverter.OutputElement>()))
 			{
-				Tag tag2 = ElementLoader.FindElementByHash(outputElement.elementHash).tag;
-				hashSet2.Add(new ElementUsage(tag2, outputElement.massGenerationRate, true));
+				ElementUsage elementUsage = new ElementUsage(ElementLoader.FindElementByHash(outputElement.elementHash).tag, outputElement.massGenerationRate, true);
+				if (elementConverter.inputIsCategory)
+				{
+					using (List<CodexEntryGenerator_Elements.ConversionEntry>.Enumerator enumerator7 = list.GetEnumerator())
+					{
+						while (enumerator7.MoveNext())
+						{
+							CodexEntryGenerator_Elements.ConversionEntry conversionEntry = enumerator7.Current;
+							conversionEntry.outSet.Add(elementUsage);
+						}
+						continue;
+					}
+				}
+				hashSet2.Add(elementUsage);
+			}
+			foreach (CodexEntryGenerator_Elements.ConversionEntry conversionEntry2 in list)
+			{
+				if (conversionEntry2.inSet.Count > 0 && conversionEntry2.outSet.Count > 0)
+				{
+					usedMap.Add(prefab.PrefabID(), conversionEntry2);
+				}
+				foreach (ElementUsage elementUsage2 in conversionEntry2.inSet)
+				{
+					usedMap.Add(elementUsage2.tag, conversionEntry2);
+				}
+				foreach (ElementUsage elementUsage3 in conversionEntry2.outSet)
+				{
+					A_3.madeMap.Add(elementUsage3.tag, conversionEntry2);
+				}
 			}
 		}
 		IEnumerable<ElementConsumer> components2 = prefab.GetComponents<ElementConsumer>();
@@ -378,8 +455,8 @@ public class CodexEntryGenerator_Elements
 		{
 			if (!elementConsumer.storeOnConsume)
 			{
-				Tag tag3 = ElementLoader.FindElementByHash(elementConsumer.elementToConsume).tag;
-				hashSet.Add(new ElementUsage(tag3, elementConsumer.consumptionRate, true));
+				Tag tag2 = ElementLoader.FindElementByHash(elementConsumer.elementToConsume).tag;
+				hashSet.Add(new ElementUsage(tag2, elementConsumer.consumptionRate, true));
 			}
 		}
 		IrrigationMonitor.Def def = prefab.GetDef<IrrigationMonitor.Def>();
@@ -398,26 +475,27 @@ public class CodexEntryGenerator_Elements
 				hashSet.Add(new ElementUsage(consumeInfo2.tag, consumeInfo2.massConsumptionRate, true));
 			}
 		}
-		Crop component2 = prefab.GetComponent<Crop>();
-		if (component2 != null)
+		IPlantConsumeEntities component2 = prefab.GetComponent<IPlantConsumeEntities>();
+		Crop component3 = prefab.GetComponent<Crop>();
+		if (component3 != null && component2 == null)
 		{
-			hashSet2.Add(new ElementUsage(component2.cropId, (float)component2.cropVal.numProduced / component2.cropVal.cropDuration, true));
+			hashSet2.Add(new ElementUsage(component3.cropId, (float)component3.cropVal.numProduced / component3.cropVal.cropDuration, true));
 		}
-		FlushToilet component3 = prefab.GetComponent<FlushToilet>();
-		if (component3)
-		{
-			hashSet.Add(new ElementUsage(A_4.waterTag, component3.massConsumedPerUse, false));
-			hashSet2.Add(new ElementUsage(A_4.dirtyWaterTag, component3.massEmittedPerUse, false));
-		}
-		HandSanitizer component4 = prefab.GetComponent<HandSanitizer>();
+		FlushToilet component4 = prefab.GetComponent<FlushToilet>();
 		if (component4)
 		{
-			Tag tag4 = ElementLoader.FindElementByHash(component4.consumedElement).tag;
-			hashSet.Add(new ElementUsage(tag4, component4.massConsumedPerUse, false));
-			if (component4.outputElement != SimHashes.Vacuum)
+			hashSet.Add(new ElementUsage(A_4.waterTag, component4.massConsumedPerUse, false));
+			hashSet2.Add(new ElementUsage(A_4.dirtyWaterTag, component4.massEmittedPerUse, false));
+		}
+		HandSanitizer component5 = prefab.GetComponent<HandSanitizer>();
+		if (component5)
+		{
+			Tag tag3 = ElementLoader.FindElementByHash(component5.consumedElement).tag;
+			hashSet.Add(new ElementUsage(tag3, component5.massConsumedPerUse, false));
+			if (component5.outputElement != SimHashes.Vacuum)
 			{
-				Tag tag5 = ElementLoader.FindElementByHash(component4.outputElement).tag;
-				hashSet2.Add(new ElementUsage(tag5, component4.massConsumedPerUse, false));
+				Tag tag4 = ElementLoader.FindElementByHash(component5.outputElement).tag;
+				hashSet2.Add(new ElementUsage(tag4, component5.massConsumedPerUse, false));
 			}
 		}
 		if (prefab.IsPrefabID("Moo"))
@@ -425,93 +503,135 @@ public class CodexEntryGenerator_Elements
 			hashSet.Add(new ElementUsage("GasGrass", MooConfig.DAYS_PLANT_GROWTH_EATEN_PER_CYCLE, false));
 			hashSet2.Add(new ElementUsage(ElementLoader.FindElementByHash(SimHashes.Milk).tag, MooTuning.MILK_PER_CYCLE, false));
 		}
-		CodexEntryGenerator_Elements.ConversionEntry conversionEntry = new CodexEntryGenerator_Elements.ConversionEntry();
-		conversionEntry.title = prefab.GetProperName();
-		conversionEntry.prefab = prefab;
-		conversionEntry.inSet = hashSet;
-		conversionEntry.outSet = hashSet2;
+		CodexEntryGenerator_Elements.ConversionEntry conversionEntry3 = new CodexEntryGenerator_Elements.ConversionEntry();
+		conversionEntry3.title = prefab.GetProperName();
+		conversionEntry3.prefab = prefab;
+		conversionEntry3.inSet = hashSet;
+		conversionEntry3.outSet = hashSet2;
 		if (hashSet.Count > 0 && hashSet2.Count > 0)
 		{
-			usedMap.Add(prefab.PrefabID(), conversionEntry);
+			usedMap.Add(prefab.PrefabID(), conversionEntry3);
 		}
-		foreach (ElementUsage elementUsage in hashSet)
+		foreach (ElementUsage elementUsage4 in hashSet)
 		{
-			usedMap.Add(elementUsage.tag, conversionEntry);
+			usedMap.Add(elementUsage4.tag, conversionEntry3);
 		}
-		foreach (ElementUsage elementUsage2 in hashSet2)
+		foreach (ElementUsage elementUsage5 in hashSet2)
 		{
-			A_3.madeMap.Add(elementUsage2.tag, conversionEntry);
+			A_3.madeMap.Add(elementUsage5.tag, conversionEntry3);
 		}
-		PlantBranchGrower.Def def3 = prefab.GetDef<PlantBranchGrower.Def>();
-		if (def3 != null)
+		IPlantBranchGrower defImplementingInterface = prefab.GetDefImplementingInterface<IPlantBranchGrower>();
+		if (defImplementingInterface != null)
 		{
-			GameObject prefab2 = Assets.GetPrefab(def3.BRANCH_PREFAB_NAME);
+			GameObject prefab2 = Assets.GetPrefab(defImplementingInterface.GetPlantBranchPrefabName());
 			if (prefab2 != null)
 			{
-				Crop component5 = prefab2.GetComponent<Crop>();
-				if (component5 != null && (component2 == null || component5.cropId != component2.cropId || component5.cropVal.numProduced != component2.cropVal.numProduced))
+				Crop component6 = prefab2.GetComponent<Crop>();
+				if (component6 != null && (component3 == null || component6.cropId != component3.cropId || component6.cropVal.numProduced != component3.cropVal.numProduced))
 				{
-					CodexEntryGenerator_Elements.ConversionEntry conversionEntry2 = new CodexEntryGenerator_Elements.ConversionEntry();
-					conversionEntry2.title = prefab2.GetProperName();
-					conversionEntry2.prefab = prefab;
-					usedMap.Add(prefab.PrefabID(), conversionEntry2);
-					conversionEntry2.inSet = new HashSet<ElementUsage>();
-					conversionEntry2.outSet = new HashSet<ElementUsage>();
-					conversionEntry2.outSet.Add(new ElementUsage(component5.cropId, (float)component5.cropVal.numProduced, false));
-					A_3.madeMap.Add(component5.cropId, conversionEntry2);
+					CodexEntryGenerator_Elements.ConversionEntry conversionEntry4 = new CodexEntryGenerator_Elements.ConversionEntry();
+					conversionEntry4.title = prefab2.GetProperName();
+					conversionEntry4.prefab = prefab;
+					usedMap.Add(prefab.PrefabID(), conversionEntry4);
+					conversionEntry4.inSet = new HashSet<ElementUsage>();
+					IrrigationMonitor.Def def3 = prefab.GetDef<IrrigationMonitor.Def>();
+					if (def3 != null)
+					{
+						foreach (PlantElementAbsorber.ConsumeInfo consumeInfo3 in def3.consumedElements)
+						{
+							conversionEntry4.inSet.Add(new ElementUsage(consumeInfo3.tag, consumeInfo3.massConsumptionRate, true));
+						}
+					}
+					FertilizationMonitor.Def def4 = prefab.GetDef<FertilizationMonitor.Def>();
+					if (def4 != null)
+					{
+						foreach (PlantElementAbsorber.ConsumeInfo consumeInfo4 in def4.consumedElements)
+						{
+							conversionEntry4.inSet.Add(new ElementUsage(consumeInfo4.tag, consumeInfo4.massConsumptionRate, true));
+						}
+					}
+					conversionEntry4.outSet = new HashSet<ElementUsage>();
+					int branchCount = defImplementingInterface.GetMaxBranchCount();
+					conversionEntry4.outSet.Add(new ElementUsage(component6.cropId, (float)component6.cropVal.numProduced / component6.cropVal.cropDuration, true, (Tag t, float a, bool b) => GameUtil.GetFormattedBranchGrowerPlantProductionValuePerCycle(t, a, branchCount, true)));
+					A_3.madeMap.Add(component6.cropId, conversionEntry4);
 				}
 			}
 		}
-		ScaleGrowthMonitor.Def def4 = prefab.GetDef<ScaleGrowthMonitor.Def>();
-		if (def4 != null)
+		if (component2 != null)
 		{
-			CodexEntryGenerator_Elements.ConversionEntry conversionEntry3 = new CodexEntryGenerator_Elements.ConversionEntry();
-			conversionEntry3.title = Assets.GetPrefab("ShearingStation").GetProperName();
-			conversionEntry3.prefab = Assets.GetPrefab("ShearingStation");
-			conversionEntry3.inSet = new HashSet<ElementUsage>();
-			conversionEntry3.inSet.Add(new ElementUsage(prefab.PrefabID(), 1f, false));
-			usedMap.Add(prefab.PrefabID(), conversionEntry3);
-			conversionEntry3.outSet = new HashSet<ElementUsage>();
-			conversionEntry3.outSet.Add(new ElementUsage(def4.itemDroppedOnShear, def4.dropMass, false));
-			A_3.madeMap.Add(def4.itemDroppedOnShear, conversionEntry3);
+			List<KPrefabID> prefabsOfPossiblePrey = component2.GetPrefabsOfPossiblePrey();
+			List<string> list2 = new List<string>();
+			foreach (KPrefabID kprefabID in prefabsOfPossiblePrey)
+			{
+				CreatureBrain component7 = kprefabID.GetComponent<CreatureBrain>();
+				Tag tag5 = ((component7 == null) ? kprefabID.PrefabID() : component7.species);
+				string text = tag5.ProperName();
+				if (!list2.Contains(text))
+				{
+					CodexEntryGenerator_Elements.ConversionEntry conversionEntry5 = new CodexEntryGenerator_Elements.ConversionEntry();
+					conversionEntry5.title = component2.GetConsumableEntitiesCategoryName() + ": " + text;
+					conversionEntry5.prefab = prefab;
+					conversionEntry5.inSet.Add(new ElementUsage(tag5, (component3 == null) ? 1f : (1f / component3.cropVal.cropDuration), component3 != null, (Tag t, float amount, bool c) => GameUtil.GetFormattedUnits(amount, c ? GameUtil.TimeSlice.PerCycle : GameUtil.TimeSlice.None, true, "")));
+					if (component3 != null)
+					{
+						conversionEntry5.outSet.Add(new ElementUsage(component3.cropId, (float)component3.cropVal.numProduced / component3.cropVal.cropDuration, true));
+						A_3.madeMap.Add(component3.cropId, conversionEntry5);
+					}
+					usedMap.Add(prefab.PrefabID(), conversionEntry5);
+					list2.Add(text);
+				}
+			}
 		}
-		WellFedShearable.Def def5 = prefab.GetDef<WellFedShearable.Def>();
+		ScaleGrowthMonitor.Def def5 = prefab.GetDef<ScaleGrowthMonitor.Def>();
 		if (def5 != null)
 		{
-			CodexEntryGenerator_Elements.ConversionEntry conversionEntry4 = new CodexEntryGenerator_Elements.ConversionEntry();
-			conversionEntry4.title = Assets.GetPrefab("ShearingStation").GetProperName();
-			conversionEntry4.prefab = Assets.GetPrefab("ShearingStation");
-			conversionEntry4.inSet = new HashSet<ElementUsage>();
-			conversionEntry4.inSet.Add(new ElementUsage(prefab.PrefabID(), 1f, false));
-			usedMap.Add(prefab.PrefabID(), conversionEntry4);
-			conversionEntry4.outSet = new HashSet<ElementUsage>();
-			conversionEntry4.outSet.Add(new ElementUsage(def5.itemDroppedOnShear, def5.dropMass, false));
-			A_3.madeMap.Add(def5.itemDroppedOnShear, conversionEntry4);
+			CodexEntryGenerator_Elements.ConversionEntry conversionEntry6 = new CodexEntryGenerator_Elements.ConversionEntry();
+			conversionEntry6.title = Assets.GetPrefab("ShearingStation").GetProperName();
+			conversionEntry6.prefab = Assets.GetPrefab("ShearingStation");
+			conversionEntry6.inSet = new HashSet<ElementUsage>();
+			conversionEntry6.inSet.Add(new ElementUsage(prefab.PrefabID(), 1f, false));
+			usedMap.Add(prefab.PrefabID(), conversionEntry6);
+			conversionEntry6.outSet = new HashSet<ElementUsage>();
+			conversionEntry6.outSet.Add(new ElementUsage(def5.itemDroppedOnShear, def5.dropMass, false));
+			A_3.madeMap.Add(def5.itemDroppedOnShear, conversionEntry6);
 		}
-		Butcherable component6 = prefab.GetComponent<Butcherable>();
-		if (component6 != null)
+		WellFedShearable.Def def6 = prefab.GetDef<WellFedShearable.Def>();
+		if (def6 != null)
 		{
-			CodexEntryGenerator_Elements.ConversionEntry conversionEntry5 = new CodexEntryGenerator_Elements.ConversionEntry();
-			conversionEntry5.title = prefab.GetProperName();
-			conversionEntry5.prefab = prefab;
-			usedMap.Add(prefab.PrefabID(), conversionEntry5);
-			conversionEntry5.outSet = new HashSet<ElementUsage>();
+			CodexEntryGenerator_Elements.ConversionEntry conversionEntry7 = new CodexEntryGenerator_Elements.ConversionEntry();
+			conversionEntry7.title = Assets.GetPrefab("ShearingStation").GetProperName();
+			conversionEntry7.prefab = Assets.GetPrefab("ShearingStation");
+			conversionEntry7.inSet = new HashSet<ElementUsage>();
+			conversionEntry7.inSet.Add(new ElementUsage(prefab.PrefabID(), 1f, false));
+			usedMap.Add(prefab.PrefabID(), conversionEntry7);
+			conversionEntry7.outSet = new HashSet<ElementUsage>();
+			conversionEntry7.outSet.Add(new ElementUsage(def6.itemDroppedOnShear, def6.dropMass, false));
+			A_3.madeMap.Add(def6.itemDroppedOnShear, conversionEntry7);
+		}
+		Butcherable component8 = prefab.GetComponent<Butcherable>();
+		if (component8 != null)
+		{
+			CodexEntryGenerator_Elements.ConversionEntry conversionEntry8 = new CodexEntryGenerator_Elements.ConversionEntry();
+			conversionEntry8.title = prefab.GetProperName();
+			conversionEntry8.prefab = prefab;
+			usedMap.Add(prefab.PrefabID(), conversionEntry8);
+			conversionEntry8.outSet = new HashSet<ElementUsage>();
 			Dictionary<string, float> dictionary = new Dictionary<string, float>();
-			foreach (string text in component6.drops)
+			foreach (KeyValuePair<string, float> keyValuePair in component8.drops)
 			{
 				float num;
-				dictionary.TryGetValue(text, out num);
-				dictionary[text] = num + Assets.GetPrefab(text).GetComponent<PrimaryElement>().Mass;
+				dictionary.TryGetValue(keyValuePair.Key, out num);
+				dictionary[keyValuePair.Key] = num + Assets.GetPrefab(keyValuePair.Key).GetComponent<PrimaryElement>().Mass * keyValuePair.Value;
 			}
-			foreach (KeyValuePair<string, float> keyValuePair in dictionary)
+			foreach (KeyValuePair<string, float> keyValuePair2 in dictionary)
 			{
 				string text2;
 				float num2;
-				keyValuePair.Deconstruct(out text2, out num2);
+				keyValuePair2.Deconstruct(out text2, out num2);
 				string text3 = text2;
 				float num3 = num2;
-				conversionEntry5.outSet.Add(new ElementUsage(text3, num3, false));
-				A_3.madeMap.Add(text3, conversionEntry5);
+				conversionEntry8.outSet.Add(new ElementUsage(text3, num3, false));
+				A_3.madeMap.Add(text3, conversionEntry8);
 			}
 		}
 	}
@@ -525,6 +645,8 @@ public class CodexEntryGenerator_Elements
 	public static string ELEMENTS_GASES_ID = CodexCache.FormatLinkID("ELEMENTS_GAS");
 
 	public static string ELEMENTS_OTHER_ID = CodexCache.FormatLinkID("ELEMENTS_OTHER");
+
+	public static string ELEMENT_TYPES = CodexCache.FormatLinkID("ELEMENTTYPES");
 
 	private static CodexEntryGenerator_Elements.ElementEntryContext contextInstance;
 

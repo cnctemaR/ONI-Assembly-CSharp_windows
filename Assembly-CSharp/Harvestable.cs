@@ -28,11 +28,11 @@ public class Harvestable : Workable
 		this.workerStatusItem = Db.Get().DuplicantStatusItems.Harvesting;
 		this.multitoolContext = "harvest";
 		this.multitoolHitEffectTag = "fx_harvest_splash";
+		this.harvestDesignatable = base.GetComponent<HarvestDesignatable>();
 	}
 
 	protected override void OnSpawn()
 	{
-		this.harvestDesignatable = base.GetComponent<HarvestDesignatable>();
 		base.Subscribe<Harvestable>(2127324410, Harvestable.ForceCancelHarvestDelegate);
 		base.SetWorkTime(10f);
 		base.Subscribe<Harvestable>(2127324410, Harvestable.OnCancelDelegate);
@@ -54,7 +54,10 @@ public class Harvestable : Workable
 
 	public void Harvest()
 	{
-		this.harvestDesignatable.MarkedForHarvest = false;
+		if (this.harvestDesignatable != null)
+		{
+			this.harvestDesignatable.MarkedForHarvest = false;
+		}
 		this.chore = null;
 		base.Trigger(1272413801, this);
 		KSelectable component = base.GetComponent<KSelectable>();
@@ -71,7 +74,6 @@ public class Harvestable : Workable
 			this.chore = new WorkChore<Harvestable>(Db.Get().ChoreTypes.Harvest, this, null, true, null, null, null, true, null, false, true, null, true, true, true, PriorityScreen.PriorityClass.basic, 5, false, true);
 			component.AddStatusItem(Db.Get().MiscStatusItems.PendingHarvest, this);
 		}
-		component.RemoveStatusItem(Db.Get().MiscStatusItems.NotMarkedForHarvest, false);
 	}
 
 	public void SetCanBeHarvested(bool state)
@@ -81,13 +83,20 @@ public class Harvestable : Workable
 		if (this.canBeHarvested)
 		{
 			component.AddStatusItem(this.readyForHarvestStatusItem, null);
-			if (this.harvestDesignatable.HarvestWhenReady)
+			if (this.harvestDesignatable != null)
 			{
-				this.harvestDesignatable.MarkForHarvest();
+				if (this.harvestDesignatable.HarvestWhenReady)
+				{
+					this.harvestDesignatable.MarkForHarvest();
+				}
+				else if (this.harvestDesignatable.InPlanterBox)
+				{
+					component.AddStatusItem(Db.Get().MiscStatusItems.NotMarkedForHarvest, this);
+				}
 			}
-			else if (this.harvestDesignatable.InPlanterBox)
+			else
 			{
-				component.AddStatusItem(Db.Get().MiscStatusItems.NotMarkedForHarvest, this);
+				this.OnMarkedForHarvest();
 			}
 		}
 		else
@@ -112,12 +121,12 @@ public class Harvestable : Workable
 			this.chore.Cancel("Cancel harvest");
 			this.chore = null;
 			base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().MiscStatusItems.PendingHarvest, false);
-			if (flag)
+			if (flag && this.harvestDesignatable != null)
 			{
 				this.harvestDesignatable.SetHarvestWhenReady(false);
 			}
 		}
-		if (flag)
+		if (flag && this.harvestDesignatable != null)
 		{
 			this.harvestDesignatable.MarkedForHarvest = false;
 		}

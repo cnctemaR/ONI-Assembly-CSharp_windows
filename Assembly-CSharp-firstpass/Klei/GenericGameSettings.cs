@@ -74,7 +74,7 @@ namespace Klei
 
 		public string[] devWorldMixing { get; set; }
 
-		public string[] enabledDLCAddOns { get; set; }
+		public bool enableAudioLogging { get; set; }
 
 		public GenericGameSettings.PerformanceCapture performanceCapture { get; set; }
 

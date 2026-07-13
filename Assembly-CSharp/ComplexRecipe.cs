@@ -5,6 +5,12 @@ using UnityEngine;
 
 public class ComplexRecipe : IHasDlcRestrictions
 {
+	public void SetDLCRestrictions(string[] required, string[] forbidden)
+	{
+		this.requiredDlcIds = required;
+		this.forbiddenDlcIds = forbidden;
+	}
+
 	public string[] GetRequiredDlcIds()
 	{
 		return this.requiredDlcIds;
@@ -27,12 +33,36 @@ public class ComplexRecipe : IHasDlcRestrictions
 		}
 	}
 
+	private static GameObject CreateFabricationVisualizer(string anim, string nameRoot = null)
+	{
+		GameObject gameObject = new GameObject();
+		if (nameRoot != null)
+		{
+			gameObject.name = nameRoot + "Visualizer";
+		}
+		gameObject.SetActive(false);
+		gameObject.transform.SetLocalPosition(Vector3.zero);
+		KBatchedAnimController kbatchedAnimController = gameObject.AddComponent<KBatchedAnimController>();
+		kbatchedAnimController.AnimFiles = new KAnimFile[] { Assets.GetAnim(anim) };
+		kbatchedAnimController.initialAnim = "fabricating";
+		kbatchedAnimController.isMovable = true;
+		KBatchedAnimTracker kbatchedAnimTracker = gameObject.AddComponent<KBatchedAnimTracker>();
+		kbatchedAnimTracker.symbol = new HashedString("meter_ration");
+		kbatchedAnimTracker.offset = Vector3.zero;
+		global::UnityEngine.Object.DontDestroyOnLoad(gameObject);
+		return gameObject;
+	}
+
 	public ComplexRecipe(string id, ComplexRecipe.RecipeElement[] ingredients, ComplexRecipe.RecipeElement[] results)
 	{
 		this.id = id;
 		this.ingredients = ingredients;
 		this.results = results;
-		ComplexRecipeManager.Get().Add(this);
+		this.recipeCategoryID = ComplexRecipeManager.MakeRecipeCategoryID(id, "Default", results[0].material.ToString());
+		if (!ComplexRecipeManager.Get().IsPostProcessing)
+		{
+			ComplexRecipeManager.Get().preProcessRecipes.Add(this);
+		}
 	}
 
 	public ComplexRecipe(string id, ComplexRecipe.RecipeElement[] ingredients, ComplexRecipe.RecipeElement[] results, int consumedHEP, int producedHEP)
@@ -69,6 +99,11 @@ public class ComplexRecipe : IHasDlcRestrictions
 	{
 		this.requiredDlcIds = requiredDlcIds;
 		this.forbiddenDlcIds = forbiddenDlcIds;
+	}
+
+	public void SetFabricationAnim(string anim)
+	{
+		this.FabricationVisualizer = ComplexRecipe.CreateFabricationVisualizer(anim, this.id);
 	}
 
 	public float TotalResultUnits()
@@ -186,6 +221,8 @@ public class ComplexRecipe : IHasDlcRestrictions
 
 	public string id;
 
+	public string recipeCategoryID;
+
 	public ComplexRecipe.RecipeElement[] ingredients;
 
 	public ComplexRecipe.RecipeElement[] results;
@@ -197,8 +234,6 @@ public class ComplexRecipe : IHasDlcRestrictions
 	public int consumedHEP;
 
 	public int producedHEP;
-
-	public string recipeCategoryID = "";
 
 	private string[] requiredDlcIds;
 
@@ -233,9 +268,50 @@ public class ComplexRecipe : IHasDlcRestrictions
 
 	public class RecipeElement
 	{
+		public RecipeElement(Tag[] materialOptions, float amount)
+		{
+			this.material = null;
+			this.possibleMaterials = materialOptions;
+			this.amount = amount;
+			this.temperatureOperation = ComplexRecipe.RecipeElement.TemperatureOperation.AverageTemperature;
+		}
+
+		public RecipeElement(Tag[] materialOptions, float[] amounts)
+		{
+			this.material = null;
+			this.possibleMaterials = materialOptions;
+			this.possibleMaterialAmounts = amounts;
+			this.temperatureOperation = ComplexRecipe.RecipeElement.TemperatureOperation.AverageTemperature;
+		}
+
+		public RecipeElement(Tag[] materialOptions, float amount, ComplexRecipe.RecipeElement.TemperatureOperation temperatureOperation, string facadeID, bool storeElement = false, bool inheritElement = false)
+		{
+			this.material = null;
+			this.possibleMaterials = materialOptions;
+			this.amount = amount;
+			this.temperatureOperation = temperatureOperation;
+			this.storeElement = storeElement;
+			this.facadeID = facadeID;
+			this.inheritElement = inheritElement;
+		}
+
+		public RecipeElement(Tag[] materialOptions, float[] amounts, ComplexRecipe.RecipeElement.TemperatureOperation temperatureOperation, string facadeID, bool storeElement = false, bool inheritElement = false, bool doNotConsume = false)
+		{
+			this.material = null;
+			this.possibleMaterials = materialOptions;
+			this.possibleMaterialAmounts = amounts;
+			this.amount = this.amount;
+			this.temperatureOperation = temperatureOperation;
+			this.storeElement = storeElement;
+			this.facadeID = facadeID;
+			this.inheritElement = inheritElement;
+			this.doNotConsume = doNotConsume;
+		}
+
 		public RecipeElement(Tag material, float amount, bool inheritElement)
 		{
 			this.material = material;
+			this.possibleMaterials = new Tag[] { material };
 			this.amount = amount;
 			this.temperatureOperation = ComplexRecipe.RecipeElement.TemperatureOperation.AverageTemperature;
 			this.inheritElement = inheritElement;
@@ -244,6 +320,7 @@ public class ComplexRecipe : IHasDlcRestrictions
 		public RecipeElement(Tag material, float amount)
 		{
 			this.material = material;
+			this.possibleMaterials = new Tag[] { material };
 			this.amount = amount;
 			this.temperatureOperation = ComplexRecipe.RecipeElement.TemperatureOperation.AverageTemperature;
 		}
@@ -251,6 +328,7 @@ public class ComplexRecipe : IHasDlcRestrictions
 		public RecipeElement(Tag material, float amount, ComplexRecipe.RecipeElement.TemperatureOperation temperatureOperation, bool storeElement = false)
 		{
 			this.material = material;
+			this.possibleMaterials = new Tag[] { material };
 			this.amount = amount;
 			this.temperatureOperation = temperatureOperation;
 			this.storeElement = storeElement;
@@ -259,22 +337,28 @@ public class ComplexRecipe : IHasDlcRestrictions
 		public RecipeElement(Tag material, float amount, ComplexRecipe.RecipeElement.TemperatureOperation temperatureOperation, string facadeID, bool storeElement = false)
 		{
 			this.material = material;
+			this.possibleMaterials = new Tag[] { material };
 			this.amount = amount;
 			this.temperatureOperation = temperatureOperation;
 			this.storeElement = storeElement;
 			this.facadeID = facadeID;
 		}
 
-		public RecipeElement(EdiblesManager.FoodInfo foodInfo, float amount)
+		public RecipeElement(EdiblesManager.FoodInfo foodInfo, float amount, bool DoNotConsume = false)
 		{
 			this.material = foodInfo.Id;
+			this.possibleMaterials = new Tag[] { this.material };
 			this.amount = amount;
-			this.Edible = true;
+			this.doNotConsume = DoNotConsume;
 		}
 
-		public float amount { get; private set; }
+		public float amount { get; set; }
 
 		public Tag material;
+
+		public Tag[] possibleMaterials;
+
+		public float[] possibleMaterialAmounts;
 
 		public ComplexRecipe.RecipeElement.TemperatureOperation temperatureOperation;
 
@@ -284,7 +368,20 @@ public class ComplexRecipe : IHasDlcRestrictions
 
 		public string facadeID;
 
-		public bool Edible;
+		public bool doNotConsume;
+
+		public struct IngredientDataSet
+		{
+			public IngredientDataSet(Tag[] substitutionOptions, float[] amounts)
+			{
+				this.substitutionOptions = substitutionOptions;
+				this.amounts = amounts;
+			}
+
+			public Tag[] substitutionOptions;
+
+			public float[] amounts;
+		}
 
 		public enum TemperatureOperation
 		{

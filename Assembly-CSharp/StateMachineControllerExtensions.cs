@@ -24,6 +24,16 @@ public static class StateMachineControllerExtensions
 		return component.GetDef<DefType>();
 	}
 
+	public static InterfaceType GetDefImplementingInterface<InterfaceType>(this GameObject go) where InterfaceType : class
+	{
+		StateMachineController component = go.GetComponent<StateMachineController>();
+		if (component == null)
+		{
+			return default(InterfaceType);
+		}
+		return component.GetDefImplementingInterfaceOfType<InterfaceType>();
+	}
+
 	public static StateMachineInstanceType GetSMI<StateMachineInstanceType>(this Component cmp) where StateMachineInstanceType : class
 	{
 		return cmp.gameObject.GetSMI<StateMachineInstanceType>();

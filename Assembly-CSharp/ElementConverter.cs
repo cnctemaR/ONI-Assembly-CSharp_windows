@@ -492,6 +492,8 @@ public class ElementConverter : StateMachineComponent<ElementConverter.StatesIns
 	[MyCmpReq]
 	private Storage storage;
 
+	public bool inputIsCategory;
+
 	public Action<float> onConvertMass;
 
 	private float totalDiseaseWeight = float.MaxValue;

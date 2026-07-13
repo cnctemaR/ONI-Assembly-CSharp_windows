@@ -21,6 +21,7 @@ public class Brain : KMonoBehaviour
 
 	public virtual void UpdateBrain()
 	{
+		SuperluminalPerf.BeginEvent("UpdateBrain", base.name);
 		if (this.onPreUpdate != null)
 		{
 			this.onPreUpdate();
@@ -29,6 +30,7 @@ public class Brain : KMonoBehaviour
 		{
 			this.UpdateChores();
 		}
+		SuperluminalPerf.EndEvent();
 	}
 
 	private bool FindBetterChore(ref Chore.Precondition.Context context)

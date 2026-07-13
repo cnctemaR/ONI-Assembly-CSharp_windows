@@ -7,6 +7,38 @@ namespace STRINGS
 	{
 		public class PREFABS
 		{
+			public class FOSSILSCULPTURE
+			{
+				public static LocString NAME = UI.FormatAsLink("Fossil Block", "FOSSILSCULPTURE");
+
+				public static LocString DESC = "Duplicants who have learned art skills can produce more decorative sculptures.";
+
+				public static LocString EFFECT = string.Concat(new string[]
+				{
+					"Majorly increases ",
+					UI.FormatAsLink("Decor", "DECOR"),
+					", contributing to ",
+					UI.FormatAsLink("Morale", "MORALE"),
+					".\n\nMust be sculpted by a Duplicant."
+				});
+			}
+
+			public class CEILINGFOSSILSCULPTURE
+			{
+				public static LocString NAME = UI.FormatAsLink("Hanging Fossil Block", "CEILINGFOSSILSCULPTURE");
+
+				public static LocString DESC = "Duplicants who have learned art skills can produce more decorative ceiling sculptures.";
+
+				public static LocString EFFECT = string.Concat(new string[]
+				{
+					"Majorly increases ",
+					UI.FormatAsLink("Decor", "DECOR"),
+					", contributing to ",
+					UI.FormatAsLink("Morale", "MORALE"),
+					".\n\nMust be sculpted by a Duplicant."
+				});
+			}
+
 			public class HEADQUARTERSCOMPLETE
 			{
 				public static LocString NAME = UI.FormatAsLink("Printing Pod", "HEADQUARTERS");
@@ -134,14 +166,7 @@ namespace STRINGS
 
 				public static LocString DESC = "A fresh supply of oil keeps the ol' joints from getting too creaky.";
 
-				public static LocString EFFECT = string.Concat(new string[]
-				{
-					"Uses ",
-					UI.FormatAsLink("Phyto Oil", "PHYTOOIL"),
-					" or ",
-					UI.FormatAsLink("Crude Oil", "CRUDEOIL"),
-					" to keep Duplicants' bionic parts running smoothly."
-				});
+				public static LocString EFFECT = "Uses " + UI.FormatAsLink("Gear Oil", "LUBRICATINGOIL") + " to keep Duplicants' bionic parts running smoothly.";
 			}
 
 			public class OXYLITEREFINERY
@@ -1390,7 +1415,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = UI.FormatAsLink("Kiln", "KILN");
 
-				public static LocString DESC = "Kilns can also be used to refine coal into pure carbon.";
+				public static LocString DESC = "It gets quite hot.";
 
 				public static LocString EFFECT = string.Concat(new string[]
 				{
@@ -1398,6 +1423,12 @@ namespace STRINGS
 					UI.FormatAsLink("Clay", "CLAY"),
 					" to produce ",
 					UI.FormatAsLink("Ceramic", "CERAMIC"),
+					", and ",
+					UI.FormatAsLink("Coal", "CARBON"),
+					" or ",
+					UI.FormatAsLink("Wood", "WOOD"),
+					" to produce ",
+					UI.FormatAsLink("Refined Carbon", "REFINEDCARBON"),
 					".\n\nDuplicants will not fabricate items unless recipes are queued."
 				});
 			}
@@ -2344,7 +2375,9 @@ namespace STRINGS
 				{
 					"Reduces ",
 					UI.FormatAsLink("Polluted Dirt", "TOXICSAND"),
-					" and other compostables down into ",
+					", rotting ",
+					UI.FormatAsLink("Foods", "FOOD"),
+					", and discarded organics down into ",
 					UI.FormatAsLink("Dirt", "DIRT"),
 					"."
 				});
@@ -3542,6 +3575,26 @@ namespace STRINGS
 				});
 			}
 
+			public class PEATGENERATOR
+			{
+				public static LocString NAME = UI.FormatAsLink("Peat Burner", "PEATGENERATOR");
+
+				public static LocString DESC = "It gives off an aroma that some Duplicants find inexplicably nostalgic.";
+
+				public static LocString EFFECT = string.Concat(new string[]
+				{
+					"Burns ",
+					UI.FormatAsLink("Peat", "PEAT"),
+					" to produce electrical ",
+					UI.FormatAsLink("Power", "POWER"),
+					".\n\nProduces a small amount of ",
+					UI.FormatAsLink("Carbon Dioxide", "CARBONDIOXIDE"),
+					" and ",
+					ELEMENTS.DIRTYWATER.NAME,
+					"."
+				});
+			}
+
 			public class PETROLEUMGENERATOR
 			{
 				public static LocString NAME = UI.FormatAsLink("Petroleum Generator", "PETROLEUMGENERATOR");
@@ -3550,10 +3603,12 @@ namespace STRINGS
 
 				public static LocString EFFECT = string.Concat(new string[]
 				{
-					"Converts either ",
+					"Converts ",
 					UI.FormatAsLink("Petroleum", "PETROLEUM"),
-					" or ",
+					", ",
 					UI.FormatAsLink("Ethanol", "ETHANOL"),
+					" or ",
+					UI.FormatAsLink("Biodiesel", "REFINEDLIPID"),
 					" into electrical ",
 					UI.FormatAsLink("Power", "POWER"),
 					".\n\nProduces ",
@@ -4493,7 +4548,7 @@ namespace STRINGS
 
 			public class CREATUREGROUNDTRAP
 			{
-				public static LocString NAME = UI.FormatAsLink("Critter Trap", "CREATURETRAP");
+				public static LocString NAME = UI.FormatAsLink("Critter Trap", "CREATUREGROUNDTRAP");
 
 				public static LocString DESC = "It's designed for land critters, but flopping fish sometimes find their way in too.";
 
@@ -5186,49 +5241,49 @@ namespace STRINGS
 					{
 						public static LocString NAME = "Hatch Top";
 
-						public static LocString DESC = "A great-monument-sized hatch.";
+						public static LocString DESC = "A great-monument-sized Hatch.";
 					}
 
 					public class OPTION_K
 					{
 						public static LocString NAME = "Glossy Drecko Top";
 
-						public static LocString DESC = "A great-monument-sized glossy drecko.";
+						public static LocString DESC = "A great-monument-sized Glossy Drecko.";
 					}
 
 					public class OPTION_L
 					{
 						public static LocString NAME = "Shove Vole Top";
 
-						public static LocString DESC = "A great-monument-sized shove vole.";
+						public static LocString DESC = "A great-monument-sized Shove Vole.";
 					}
 
 					public class OPTION_M
 					{
 						public static LocString NAME = "Gassy Moo Top";
 
-						public static LocString DESC = "A great-monument-sized moo. Bigger and moo-ier than ever.";
+						public static LocString DESC = "A great-monument-sized Gassy Moo. Gassier and moo-ier than ever.";
 					}
 
 					public class OPTION_N
 					{
 						public static LocString NAME = "Morb Top";
 
-						public static LocString DESC = "A great-monument-sized morb.";
+						public static LocString DESC = "A great-monument-sized Morb.";
 					}
 
 					public class OPTION_O
 					{
 						public static LocString NAME = "Shine Bug Top";
 
-						public static LocString DESC = "A great-monument-sized shine bug.";
+						public static LocString DESC = "A great-monument-sized Shine Bug.";
 					}
 
 					public class OPTION_P
 					{
 						public static LocString NAME = "Slickster Top";
 
-						public static LocString DESC = "A great-monument-sized slickster.";
+						public static LocString DESC = "A great-monument-sized Slickster.";
 					}
 
 					public class OPTION_Q
@@ -5242,21 +5297,21 @@ namespace STRINGS
 					{
 						public static LocString NAME = "Beeta Top";
 
-						public static LocString DESC = "A great-monument-sized beeta.";
+						public static LocString DESC = "A great-monument-sized Beeta.";
 					}
 
 					public class OPTION_S
 					{
 						public static LocString NAME = "Sweetle Top";
 
-						public static LocString DESC = "A great-monument-sized sweetle.";
+						public static LocString DESC = "A great-monument-sized Sweetle.";
 					}
 
 					public class OPTION_T
 					{
 						public static LocString NAME = "Plug Slug Top";
 
-						public static LocString DESC = "A great-monument-sized plug slug. Does not require a power source.";
+						public static LocString DESC = "A great-monument-sized Plug Slug. Does not require a power source.";
 					}
 
 					public class OPTION_U
@@ -5465,6 +5520,13 @@ namespace STRINGS
 			}
 
 			public class DLC2POITECHUNLOCKS
+			{
+				public static LocString NAME = "Research Portal";
+
+				public static LocString DESC = "A functional research decrypter with one transmission remaining.\n\nIt was designed to support colony survival.";
+			}
+
+			public class DLC4POITECHUNLOCKS
 			{
 				public static LocString NAME = "Research Portal";
 
@@ -6688,6 +6750,15 @@ namespace STRINGS
 				public static LocString INGREDIENTHEADER = "Ingredients per 1000kcal:";
 			}
 
+			public class SMOKER
+			{
+				public static LocString NAME = UI.FormatAsLink("Smoker", "SMOKER");
+
+				public static LocString DESC = "With a little patience, even tough meat can become deliciously edible.";
+
+				public static LocString EFFECT = "Cooks improved " + UI.FormatAsLink("foods", "FOOD") + " over low, slow heat.\n\nDuplicants will not fabricate items unless recipes are queued.";
+			}
+
 			public class STORAGELOCKER
 			{
 				public static LocString NAME = UI.FormatAsLink("Storage Bin", "STORAGELOCKER");
@@ -7358,9 +7429,7 @@ namespace STRINGS
 				public static LocString EFFECT = string.Concat(new string[]
 				{
 					"Converts ",
-					UI.FormatAsLink("Petroleum", "PETROLEUM"),
-					" or ",
-					UI.FormatAsLink("Nectar", "SUGARWATER"),
+					UI.FormatAsLink("Plastic Monomers", "PLASTIFIABLELIQUID"),
 					" into raw ",
 					UI.FormatAsLink("Plastic", "POLYPROPYLENE"),
 					"."
@@ -7542,6 +7611,8 @@ namespace STRINGS
 				});
 
 				public static LocString RECIPE_DESCRIPTION = "Produces {0} from {1} and {2}.";
+
+				public static LocString RECIPE_DESCRIPTION_LONGRANGE = "Produces {0} from {1}, {2}, and {3}.";
 			}
 
 			public class GLASSFORGE
@@ -7583,6 +7654,12 @@ namespace STRINGS
 				public static LocString LIME_RECIPE_DESCRIPTION = "Crushes {1} into {0}";
 
 				public static LocString LIME_FROM_LIMESTONE_RECIPE_DESCRIPTION = "Crushes {0} into {1} and a small amount of pure {2}";
+
+				public static LocString RESIN_FROM_AMBER_RECIPE_DESCRIPTION = "Crushes {0} into {1} and {2}, and a small amount of {3}";
+
+				public static LocString SAND_FROM_RAW_MINERAL_NAME = UI.FormatAsLink("Raw Mineral", "BUILDABLERAW") + " to " + UI.FormatAsLink("Sand", "SAND");
+
+				public static LocString SAND_FROM_RAW_MINERAL_DESCRIPTION = "Crushes " + UI.FormatAsLink("Raw Minerals", "BUILDABLERAW") + " into " + UI.FormatAsLink("Sand", "SAND");
 
 				public class FACADES
 				{
@@ -7653,6 +7730,26 @@ namespace STRINGS
 				public static LocString EFFECT = "Separates " + UI.FormatAsLink("Mud", "MUD") + " and other sludges into their base elements.\n\nDuplicants will not fabricate items unless recipes are queued.";
 
 				public static LocString RECIPE_DESCRIPTION = "Separates {0} into its base elements.";
+			}
+
+			public class CHEMICALREFINERY
+			{
+				public static LocString NAME = UI.FormatAsLink("Emulsifier", "CHEMICALREFINERY");
+
+				public static LocString DESC = "It's like a blender, but better.";
+
+				public static LocString EFFECT = "Combines " + UI.FormatAsLink("Liquids", "ELEMENTS_LIQUID") + " and other inputs into fluid compounds.\n\nDuplicants will not fabricate emulsions unless recipes are queued.";
+
+				public static LocString REFINEDLIPID_RECIPE_DESCRIPTION = string.Concat(new string[]
+				{
+					"Biodiesel is a ",
+					UI.FormatAsLink("Liquid", "ELEMENTS_LIQUID"),
+					" used in ",
+					UI.FormatAsLink("Power", "POWER"),
+					" production."
+				});
+
+				public static LocString SALTWATER_RECIPE_DESCRIPTION = "Salt Water is a " + UI.FormatAsLink("Liquid", "ELEMENTS_LIQUID") + " with insulating and radiation-absorbing properties.";
 			}
 
 			public class SUPERMATERIALREFINERY
@@ -7743,7 +7840,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = UI.FormatAsLink("Fish Release", "FISHDELIVERYPOINT");
 
-				public static LocString DESC = "A fish release must be built above liquid to prevent released fish from suffocating.";
+				public static LocString DESC = "A fish release must be built in liquid to prevent released fish from suffocating.";
 
 				public static LocString EFFECT = "Releases trapped " + UI.FormatAsLink("Pacu", "PACU") + " back into the world.\n\nCan be used multiple times.";
 			}
@@ -9888,9 +9985,9 @@ namespace STRINGS
 
 				public static LocString DESC = "Some meteors drop harvestable resources when they're blown to smithereens.";
 
-				public static LocString EFFECT = "Fires " + UI.FormatAsLink("Blastshot", "MISSILELAUNCHER") + " shells at meteor showers to defend the colony from impact-related damage.\n\nRange: 16 tiles horizontally, 32 tiles vertically.";
+				public static LocString EFFECT = "Fires explosive projectiles at incoming space objects to defend the colony from impact-related damage.\n\nProjectiles must be crafted at a " + UI.FormatAsLink("Blastshot Maker", "MISSILEFABRICATOR") + ".\n\nRange: 16 tiles horizontally, 32 tiles vertically.";
 
-				public static LocString TARGET_SELECTION_HEADER = "Target Selection";
+				public static LocString TARGET_SELECTION_HEADER = "Short Range Target Selection";
 
 				public class BODY
 				{
@@ -10190,6 +10287,13 @@ namespace STRINGS
 				public static LocString NAME = "Off-site Locker";
 
 				public static LocString DESC = "A locker made with ultra-lightweight textiles.\n\nIt contains an assortment of personal effects.";
+			}
+
+			public class MISSILESETLOCKER
+			{
+				public static LocString NAME = "Explosives Locker";
+
+				public static LocString DESC = "A locker that once belonged to an explosives engineer.\n\nThere's an " + UI.FormatAsLink("Intracosmic Blastshot", "MISSILELAUNCHER") + " in it.";
 			}
 
 			public class PROPGRAVITASSMALLSEEDLOCKER
@@ -10672,9 +10776,17 @@ namespace STRINGS
 
 				public static LocString WHEAT_MILK_RECIPE_DESCRIPTION = "Converts {0} to {1}";
 
+				public static LocString VINEFRUIT_JAM_RECIPE_DESCRIPTION = "Converts {0} to {1}";
+
 				public static LocString NUT_MILK_RECIPE_DESCRIPTION = "Converts {0} to {1}";
 
 				public static LocString PHYTO_OIL_RECIPE_DESCRIPTION = "Converts {0} to {1} and {2}";
+
+				public static LocString KELP_TO_PHYTO_OIL_RECIPE_DESCRIPTION = "Converts {0} to {1}";
+
+				public static LocString DEWDRIPPER_MILK_RECIPE_DESCRIPTION = "Converts {0} to {1}";
+
+				public static LocString RESIN_FROM_AMBER_RECIPE_DESCRIPTION = "Converts {0} into {1}, {2}, and a small amount of {3}";
 			}
 
 			public class FOODDEHYDRATOR

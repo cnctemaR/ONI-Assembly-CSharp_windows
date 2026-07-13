@@ -15,6 +15,28 @@ public class Uprootable : Workable, IDigActionEntity
 		}
 	}
 
+	public bool CanUproot()
+	{
+		return this.canBeUprooted && !this.uprootComplete;
+	}
+
+	public static bool CanUproot(GameObject plant, out Uprootable uprootable)
+	{
+		if (plant == null)
+		{
+			uprootable = null;
+			return false;
+		}
+		uprootable = plant.GetComponent<Uprootable>();
+		return uprootable != null && uprootable.CanUproot();
+	}
+
+	public static bool CanUproot(GameObject plant)
+	{
+		Uprootable uprootable;
+		return Uprootable.CanUproot(plant, out uprootable);
+	}
+
 	public Storage GetPlanterStorage
 	{
 		get
@@ -62,6 +84,7 @@ public class Uprootable : Workable, IDigActionEntity
 		base.gameObject.AddTag(GameTags.Plant);
 		Extents extents = new Extents(Grid.PosToCell(base.gameObject), base.gameObject.GetComponent<OccupyArea>().OccupiedCellsOffsets);
 		this.partitionerEntry = GameScenePartitioner.Instance.Add(base.gameObject.name, base.gameObject.GetComponent<KPrefabID>(), extents, GameScenePartitioner.Instance.plants, null);
+		GameScenePartitioner.Instance.TriggerEvent(extents, GameScenePartitioner.Instance.plantsChangedLayer, this);
 		if (this.isMarkedForUproot)
 		{
 			this.MarkForUproot(true);
@@ -121,7 +144,8 @@ public class Uprootable : Workable, IDigActionEntity
 		}
 		else if (this.chore == null)
 		{
-			this.chore = new WorkChore<Uprootable>(Db.Get().ChoreTypes.Uproot, this, null, true, null, null, null, true, null, false, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 5, false, true);
+			ChoreType choreType = (this.choreTypeIdHash.IsValid ? Db.Get().ChoreTypes.GetByHash(this.choreTypeIdHash) : Db.Get().ChoreTypes.Uproot);
+			this.chore = new WorkChore<Uprootable>(choreType, this, null, true, null, null, null, true, null, false, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 5, false, true);
 			base.GetComponent<KSelectable>().AddStatusItem(this.pendingStatusItem, this);
 		}
 		this.isMarkedForUproot = true;
@@ -141,7 +165,9 @@ public class Uprootable : Workable, IDigActionEntity
 			base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().MiscStatusItems.PendingUproot, false);
 		}
 		this.isMarkedForUproot = false;
+		this.choreTypeIdHash = HashedString.Invalid;
 		Game.Instance.userMenu.Refresh(base.gameObject);
+		base.Trigger(1198393204, null);
 	}
 
 	public bool HasChore()
@@ -193,7 +219,9 @@ public class Uprootable : Workable, IDigActionEntity
 	protected override void OnCleanUp()
 	{
 		base.OnCleanUp();
+		Extents extents = new Extents(Grid.PosToCell(base.gameObject), base.gameObject.GetComponent<OccupyArea>().OccupiedCellsOffsets);
 		GameScenePartitioner.Instance.Free(ref this.partitionerEntry);
+		GameScenePartitioner.Instance.TriggerEvent(extents, GameScenePartitioner.Instance.plantsChangedLayer, this);
 		Components.Uprootables.Remove(this);
 	}
 
@@ -220,6 +248,9 @@ public class Uprootable : Workable, IDigActionEntity
 
 	[MyCmpReq]
 	private Prioritizable prioritizable;
+
+	[SerializeField]
+	public HashedString choreTypeIdHash;
 
 	[Serialize]
 	protected bool canBeUprooted = true;

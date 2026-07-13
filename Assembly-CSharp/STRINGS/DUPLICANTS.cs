@@ -26,6 +26,17 @@ namespace STRINGS
 			public class STANDARD
 			{
 				public static LocString NAME = "Standard Duplicant";
+
+				public static LocString DESC = string.Concat(new string[]
+				{
+					"Standard Duplicants are hard workers who enjoy good ",
+					UI.FormatAsLink("Food", "FOOD"),
+					", fresh ",
+					UI.FormatAsLink("Oxygen", "OXYGEN"),
+					" and creative colony-building.\n\nThey will complete errands in order of ",
+					UI.FormatAsLink("Priority", "PRIORITY"),
+					"."
+				});
 			}
 
 			public class BIONIC
@@ -33,6 +44,17 @@ namespace STRINGS
 				public static LocString NAME = "Bionic Duplicant";
 
 				public static LocString NAME_TOOLTIP = "This Duplicant is a curious combination of organic and inorganic parts";
+
+				public static LocString DESC = string.Concat(new string[]
+				{
+					"Bionic Duplicants run on ",
+					UI.FormatAsLink("Power Banks", "ELECTROBANK"),
+					", ",
+					UI.FormatAsLink("Gear Oil", "LUBRICATINGOIL"),
+					" and unbridled enthusiasm.\n\nThey should not be permitted to use standard ",
+					UI.FormatAsLink("Toilets", "MISCELLANEOUSTIPS"),
+					"."
+				});
 			}
 
 			public class REMOTEWORKER
@@ -205,7 +227,7 @@ namespace STRINGS
 					UI.PRE_KEYWORD,
 					"Breath",
 					UI.PST_KEYWORD,
-					" will begin suffocating"
+					" will die immediately"
 				});
 			}
 
@@ -377,6 +399,13 @@ namespace STRINGS
 				public static LocString NAME = "Trunk Health";
 
 				public static LocString TOOLTIP = "Tree branches will die if they do not have a healthy trunk to grow from";
+			}
+
+			public class VINEMOTHERHEALTH
+			{
+				public static LocString NAME = "Node Health";
+
+				public static LocString TOOLTIP = "Vines cannot grow if they do not have a healthy node to grow from";
 			}
 		}
 
@@ -1570,6 +1599,15 @@ namespace STRINGS
 				public static LocString STATUS = "Going to construction dig";
 
 				public static LocString TOOLTIP = "This Duplicant is making room for a planned construction task by performing this dig";
+			}
+
+			public class BUILDUPROOT
+			{
+				public static LocString NAME = "Construction Uproot";
+
+				public static LocString STATUS = "Going to construction uproot";
+
+				public static LocString TOOLTIP = "This Duplicant is making room for a planned construction task by uprooting a plant";
 			}
 
 			public class DIG
@@ -5149,7 +5187,18 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Frost Resistant";
 
-				public static LocString TOOLTIP = "This Duplicant recently visited a warming station, sauna, or hot tub\n\nThey are impervious to cold as a result";
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"This Duplicant recently visited a warming station, sauna, or hot tub\n\nThey are impervious to ",
+					UI.PRE_KEYWORD,
+					"Chilly Surroundings",
+					UI.PST_KEYWORD,
+					" and ",
+					UI.PRE_KEYWORD,
+					"Soggy Feet",
+					UI.PST_KEYWORD,
+					" as a result"
+				});
 
 				public static LocString PROVIDERS_NAME = "Frost Resistance";
 
@@ -5170,7 +5219,14 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Heat Resistant";
 
-				public static LocString TOOLTIP = "This Duplicant recently visited a cooling station and is totally unbothered by heat as a result";
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"This Duplicant recently visited a cooling station and is impervious to ",
+					UI.PRE_KEYWORD,
+					"Toasty Surroundings",
+					UI.PST_KEYWORD,
+					" as a result"
+				});
 			}
 
 			public class GUNKSICK
@@ -9077,13 +9133,6 @@ namespace STRINGS
 				public static LocString DESC = "{0} loves his new colony, even if their collective body odor makes his eyes water.";
 			}
 
-			public class CALVIN
-			{
-				public static LocString NAME = "Calvin";
-
-				public static LocString DESC = "This {0} loves the thrill of running head-first into a wall to see what it's made of.";
-			}
-
 			public class FREYJA
 			{
 				public static LocString NAME = "Freyja";
@@ -9131,6 +9180,20 @@ namespace STRINGS
 				public static LocString NAME = "Ulti";
 
 				public static LocString DESC = "This {0}'s favorite dance move is The Robot. They don't get why others think that's funny.";
+			}
+
+			public class HIGBY
+			{
+				public static LocString NAME = "Higby";
+
+				public static LocString DESC = "This {0}'s got a song in his heart. Now if only he could remember how it goes.";
+			}
+
+			public class MAYA
+			{
+				public static LocString NAME = "Maya";
+
+				public static LocString DESC = "This {0} got her hand crushed in a pneumatic door once. It was the most alive she's ever felt.";
 			}
 		}
 
@@ -10594,7 +10657,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = UI.FormatAsLink("Improved Gears I", "BIONICS_B1");
 
-				public static LocString DESCRIPTION = "Significantly reduces the negative impacts of low " + UI.FormatAsLink("Gear Oil", "GEAROIL") + ".";
+				public static LocString DESCRIPTION = "Significantly reduces the negative impacts of low " + UI.FormatAsLink("Gear Oil", "LUBRICATINGOIL") + ".";
 			}
 
 			public class BIONICS_B2

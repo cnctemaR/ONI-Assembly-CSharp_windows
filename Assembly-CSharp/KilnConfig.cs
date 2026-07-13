@@ -51,12 +51,19 @@ public class KilnConfig : IBuildingConfig
 		Tag tag = SimHashes.Ceramic.CreateTag();
 		Tag tag2 = SimHashes.Clay.CreateTag();
 		Tag tag3 = SimHashes.Carbon.CreateTag();
+		Tag tag4 = SimHashes.WoodLog.CreateTag();
+		Tag tag5 = SimHashes.Peat.CreateTag();
 		float num = 100f;
 		float num2 = 25f;
 		ComplexRecipe.RecipeElement[] array = new ComplexRecipe.RecipeElement[]
 		{
 			new ComplexRecipe.RecipeElement(tag2, num),
-			new ComplexRecipe.RecipeElement(tag3, num2)
+			new ComplexRecipe.RecipeElement(new Tag[]
+			{
+				SimHashes.Carbon.CreateTag(),
+				SimHashes.WoodLog.CreateTag(),
+				SimHashes.Peat.CreateTag()
+			}, num2)
 		};
 		ComplexRecipe.RecipeElement[] array2 = new ComplexRecipe.RecipeElement[]
 		{
@@ -71,42 +78,24 @@ public class KilnConfig : IBuildingConfig
 		complexRecipe.nameDisplay = ComplexRecipe.RecipeNameDisplay.Result;
 		complexRecipe.sortOrder = 100;
 		ComplexRecipeManager.Get().AddObsoleteIDMapping(text, text2);
-		Tag tag4 = SimHashes.RefinedCarbon.CreateTag();
+		Tag tag6 = SimHashes.RefinedCarbon.CreateTag();
 		ComplexRecipe.RecipeElement[] array3 = new ComplexRecipe.RecipeElement[]
 		{
-			new ComplexRecipe.RecipeElement(tag3, num + num2)
+			new ComplexRecipe.RecipeElement(new Tag[] { tag3, tag4, tag5 }, new float[] { 125f, 200f, 300f })
 		};
 		ComplexRecipe.RecipeElement[] array4 = new ComplexRecipe.RecipeElement[]
 		{
-			new ComplexRecipe.RecipeElement(tag4, num, ComplexRecipe.RecipeElement.TemperatureOperation.Heated, false)
+			new ComplexRecipe.RecipeElement(tag6, 100f, ComplexRecipe.RecipeElement.TemperatureOperation.Heated, false)
 		};
-		string text3 = ComplexRecipeManager.MakeObsoleteRecipeID("Kiln", tag4);
+		string text3 = ComplexRecipeManager.MakeObsoleteRecipeID("Kiln", tag6);
 		string text4 = ComplexRecipeManager.MakeRecipeID("Kiln", array3, array4);
 		ComplexRecipe complexRecipe2 = new ComplexRecipe(text4, array3, array4);
 		complexRecipe2.time = 40f;
 		complexRecipe2.description = string.Format(global::STRINGS.BUILDINGS.PREFABS.EGGCRACKER.RECIPE_DESCRIPTION, ElementLoader.FindElementByHash(SimHashes.Carbon).name, ElementLoader.FindElementByHash(SimHashes.RefinedCarbon).name);
 		complexRecipe2.fabricators = new List<Tag> { TagManager.Create("Kiln") };
-		complexRecipe2.nameDisplay = ComplexRecipe.RecipeNameDisplay.IngredientToResult;
+		complexRecipe2.nameDisplay = ComplexRecipe.RecipeNameDisplay.Result;
 		complexRecipe2.sortOrder = 200;
 		ComplexRecipeManager.Get().AddObsoleteIDMapping(text3, text4);
-		Tag tag5 = SimHashes.RefinedCarbon.CreateTag();
-		ComplexRecipe.RecipeElement[] array5 = new ComplexRecipe.RecipeElement[]
-		{
-			new ComplexRecipe.RecipeElement(SimHashes.WoodLog.CreateTag(), 100f)
-		};
-		ComplexRecipe.RecipeElement[] array6 = new ComplexRecipe.RecipeElement[]
-		{
-			new ComplexRecipe.RecipeElement(tag5, 50f, ComplexRecipe.RecipeElement.TemperatureOperation.Heated, false)
-		};
-		string text5 = ComplexRecipeManager.MakeObsoleteRecipeID("Kiln", tag5);
-		string text6 = ComplexRecipeManager.MakeRecipeID("Kiln", array5, array6);
-		ComplexRecipe complexRecipe3 = new ComplexRecipe(text6, array5, array6);
-		complexRecipe3.time = 40f;
-		complexRecipe3.description = string.Format(global::STRINGS.BUILDINGS.PREFABS.EGGCRACKER.RECIPE_DESCRIPTION, ElementLoader.FindElementByHash(SimHashes.WoodLog).name, ElementLoader.FindElementByHash(SimHashes.RefinedCarbon).name);
-		complexRecipe3.fabricators = new List<Tag> { TagManager.Create("Kiln") };
-		complexRecipe3.nameDisplay = ComplexRecipe.RecipeNameDisplay.IngredientToResult;
-		complexRecipe3.sortOrder = 300;
-		ComplexRecipeManager.Get().AddObsoleteIDMapping(text5, text6);
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)

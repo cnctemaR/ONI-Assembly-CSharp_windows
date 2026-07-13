@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using KSerialization;
+using TUNING;
 using UnityEngine;
 
 public class Grave : StateMachineComponent<Grave.StatesInstance>
@@ -100,7 +101,7 @@ public class Grave : StateMachineComponent<Grave.StatesInstance>
 
 		public void CreateFetchTask()
 		{
-			this.chore = new FetchChore(Db.Get().ChoreTypes.FetchCritical, base.GetComponent<Storage>(), 1f, new HashSet<Tag> { GameTags.BaseMinion }, FetchChore.MatchCriteria.MatchTags, GameTags.Corpse, null, null, true, null, null, null, Operational.State.Operational, 0);
+			this.chore = new FetchChore(Db.Get().ChoreTypes.FetchCritical, base.GetComponent<Storage>(), DUPLICANTSTATS.STANDARD.BaseStats.DEFAULT_MASS, new HashSet<Tag> { GameTags.BaseMinion }, FetchChore.MatchCriteria.MatchTags, GameTags.Corpse, null, null, true, null, null, null, Operational.State.Operational, 0);
 			this.chore.allowMultifetch = false;
 		}
 

@@ -199,7 +199,7 @@ public abstract class StateMachine
 			this.log = new LoggerFSSSS(this.stateMachine.name, 35);
 		}
 
-		public virtual void OnParamsDeserialized()
+		public virtual void PostParamsInitialized()
 		{
 		}
 
@@ -299,7 +299,7 @@ public abstract class StateMachine
 				DebugUtil.Assert(defaultState != null);
 				if (!component.Restore(this))
 				{
-					this.OnParamsDeserialized();
+					this.PostParamsInitialized();
 					this.GoTo(defaultState);
 				}
 			}

@@ -391,6 +391,8 @@ public class PlantablePlot : SingleEntityReceptacle, ISaveLoadable, IGameObjectE
 
 	public Tag tagOnPlanted = Tag.Invalid;
 
+	public bool IsOffGround;
+
 	[Serialize]
 	private Ref<KPrefabID> plantRef;
 

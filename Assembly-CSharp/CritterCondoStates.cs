@@ -81,7 +81,22 @@ public class CritterCondoStates : GameStateMachine<CritterCondoStates, CritterCo
 		{
 			return Grid.InvalidCell;
 		}
-		return instance.GetInteractStartCell();
+		int num = instance.GetInteractStartCell();
+		if (smi.isLargeCritter)
+		{
+			bool isRotated = instance.Get<Rotatable>().IsRotated;
+			Vector2I vector2I = Grid.PosToXY(smi.gameObject.transform.position);
+			Vector2I vector2I2 = Grid.CellToXY(num);
+			if (vector2I.x > vector2I2.x && !isRotated)
+			{
+				num = Grid.CellLeft(num);
+			}
+			else if (vector2I.x < vector2I2.x && isRotated)
+			{
+				num = Grid.CellRight(num);
+			}
+		}
+		return num;
 	}
 
 	private static void ApplyEffects(CritterCondoStates.Instance smi)
@@ -91,9 +106,10 @@ public class CritterCondoStates : GameStateMachine<CritterCondoStates, CritterCo
 
 	private static void PlayCondoBuildingAnim(CritterCondoStates.Instance smi, string anim_name)
 	{
-		if (smi.def.entersBuilding)
+		CritterCondo.Instance smi2 = smi.sm.targetCondo.GetSMI<CritterCondo.Instance>(smi);
+		if (smi2 != null)
 		{
-			smi.sm.targetCondo.Get<KBatchedAnimController>(smi).Play(anim_name, KAnim.PlayMode.Once, 1f, 0f);
+			smi2.UpdateCritterAnims(anim_name, smi.def.entersBuilding, smi.isLargeCritter);
 		}
 	}
 
@@ -118,7 +134,10 @@ public class CritterCondoStates : GameStateMachine<CritterCondoStates, CritterCo
 			: base(chore, def)
 		{
 			chore.AddPrecondition(ChorePreconditions.instance.CheckBehaviourPrecondition, GameTags.Creatures.Behaviour_InteractWithCritterCondo);
+			this.isLargeCritter = base.GetComponent<KPrefabID>().HasTag(GameTags.LargeCreature);
 		}
+
+		public bool isLargeCritter;
 	}
 
 	public class InteractState : GameStateMachine<CritterCondoStates, CritterCondoStates.Instance, IStateMachineTarget, CritterCondoStates.Def>.State

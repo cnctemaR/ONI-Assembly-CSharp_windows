@@ -17,6 +17,12 @@ public class KeepsakeConfig : IMultiEntityConfig
 		GameObject gameObject = KeepsakeConfig.CreateKeepsake("MorbRoverMaker", UI.KEEPSAKES.MORB_ROVER_MAKER.NAME, UI.KEEPSAKES.MORB_ROVER_MAKER.DESCRIPTION, "keepsake_morb_tank_kanim", "idle", "ui", null, null, null, SimHashes.Creature);
 		gameObject.AddOrGetDef<MorbRoverMakerKeepsake.Def>();
 		list.Add(gameObject);
+		GameObject gameObject2 = KeepsakeConfig.CreateKeepsake("LargeImpactor", UI.KEEPSAKES.VIEWMASTER.NAME, UI.KEEPSAKES.VIEWMASTER.DESCRIPTION, "keepsake_demolior_kanim", "idle", "ui", DlcManager.DLC4, null, null, SimHashes.Creature);
+		if (gameObject2 != null)
+		{
+			gameObject2.AddOrGetDef<LargeImpactorKeepsake.Def>();
+			list.Add(gameObject2);
+		}
 		list.RemoveAll((GameObject x) => x == null);
 		return list;
 	}

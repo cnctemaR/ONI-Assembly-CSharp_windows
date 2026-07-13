@@ -30,6 +30,7 @@ public class GeneratorConfig : IBuildingConfig
 		buildingDef.AudioSize = "large";
 		buildingDef.LogicInputPorts = LogicOperationalController.CreateSingleInputPortList(new CellOffset(0, 0));
 		buildingDef.AddSearchTerms(SEARCH_TERMS.POWER);
+		buildingDef.AddSearchTerms(SEARCH_TERMS.GENERATOR);
 		return buildingDef;
 	}
 

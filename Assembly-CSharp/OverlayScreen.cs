@@ -82,11 +82,6 @@ public class OverlayScreen : KMonoBehaviour
 		this.currentModeInfo.mode.Update();
 	}
 
-	public void RunPostProcessEffects(RenderTexture src, RenderTexture dest)
-	{
-		this.currentModeInfo.mode.OnRenderImage(src, dest);
-	}
-
 	public void ToggleOverlay(HashedString newMode, bool allowSound = true)
 	{
 		bool flag = allowSound && !(this.currentModeInfo.mode.ViewMode() == newMode);

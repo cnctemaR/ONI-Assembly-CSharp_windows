@@ -483,6 +483,37 @@ namespace STRINGS
 			}
 		}
 
+		public class ASTEROID_DESTROYED
+		{
+			public static LocString NAME = "Blast Line of Defense";
+
+			public static LocString DESCRIPTION = "";
+
+			public static LocString MESSAGE_TITLE = "OUR BEST SHOT";
+
+			public static LocString MESSAGE_BODY = "We've blasted Demolior into oblivion! My colony is safe for now.\n\nAmong the impactor's remains, I've identified several useful resources as well as a small, familiar object... How did such a thing find its way onto an uninhabited asteroid? I have always hoped that other worlds existed... Perhaps they do, and we are more alike than I ever imagined.\n\nThere is so much we have yet to discover.\n";
+
+			public static LocString REQUIREMENT_NAME = "Destroy Demolior asteroid";
+
+			public static LocString REQUIREMENT_DESCRIPTION = "Destroyed Demolior before it arrived: {0}/{1}";
+		}
+
+		public class ASTEROID_SURVIVED
+		{
+			public static LocString NAME = "The Lab: Life Found A Way";
+
+			public static LocString DESCRIPTION = "Survive 100 cycles after Demolior asteroid collides with RelicAAAA<sup>AAAGHH</sup>.";
+
+			public static LocString REQUIREMENT_NAME = "Survive 100 cycles after Demolior impacts";
+
+			public static LocString REQUIREMENT_DESCRIPTION = "Survived {0}/{1} cycles after Demolior impact";
+		}
+
+		public class NO_DUPES_HAVE_DIED
+		{
+			public static LocString REQUIREMENT_NAME = "Zero Duplicant deaths in the colony";
+		}
+
 		public class ACTIVATEGEOTHERMALPLANT
 		{
 			public static LocString NAME = "Full Steam Ahead";

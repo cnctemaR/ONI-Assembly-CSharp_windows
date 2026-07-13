@@ -7,7 +7,7 @@ public class LongRangeSculpture : Sculpture
 		base.OnPrefabInit();
 		this.overrideAnims = null;
 		base.SetOffsetTable(OffsetGroups.InvertedStandardTable);
-		this.multitoolContext = "paint";
-		this.multitoolHitEffectTag = "fx_paint_splash";
+		this.multitoolContext = "dig";
+		this.multitoolHitEffectTag = "fx_dig_splash";
 	}
 }

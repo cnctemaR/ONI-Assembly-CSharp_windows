@@ -62,7 +62,8 @@ public class StorageTileConfig : IBuildingConfig
 		def.specialItemCases = new StorageTile.SpecificItemTagSizeInstruction[]
 		{
 			new StorageTile.SpecificItemTagSizeInstruction(GameTags.AirtightSuit, 0.5f),
-			new StorageTile.SpecificItemTagSizeInstruction(GameTags.Dehydrated, 0.6f)
+			new StorageTile.SpecificItemTagSizeInstruction(GameTags.Dehydrated, 0.6f),
+			new StorageTile.SpecificItemTagSizeInstruction(GameTags.MoltShell, 0.5f)
 		};
 		go.AddOrGet<TileTemperature>();
 		go.AddOrGet<BuildingHP>().destroyOnDamaged = true;

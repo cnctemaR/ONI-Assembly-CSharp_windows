@@ -1,4 +1,5 @@
 ﻿using System;
+using Klei.AI;
 using STRINGS;
 using UnityEngine;
 
@@ -45,9 +46,12 @@ public class UseSolidLubricantChore : Chore<UseSolidLubricantChore.Instance>
 		{
 			Util.KDestroyGameObject(component.gameObject);
 			smi.sm.pickedUpSolidLubricant.Set(null, smi);
-			return;
 		}
-		component.Mass -= num;
+		else
+		{
+			component.Mass -= num;
+		}
+		BionicOilMonitor.ApplyLubricationEffects(smi.master.GetComponent<Effects>(), component.GetComponent<PrimaryElement>().ElementID);
 	}
 
 	public static void SetOverrideAnimSymbol(UseSolidLubricantChore.Instance smi, bool overriding)
@@ -128,7 +132,7 @@ public class UseSolidLubricantChore : Chore<UseSolidLubricantChore.Instance>
 
 		public StateMachine<UseSolidLubricantChore.States, UseSolidLubricantChore.Instance, UseSolidLubricantChore, object>.FloatParameter actualunits;
 
-		public StateMachine<UseSolidLubricantChore.States, UseSolidLubricantChore.Instance, UseSolidLubricantChore, object>.FloatParameter amountRequested = new StateMachine<UseSolidLubricantChore.States, UseSolidLubricantChore.Instance, UseSolidLubricantChore, object>.FloatParameter(1f);
+		public StateMachine<UseSolidLubricantChore.States, UseSolidLubricantChore.Instance, UseSolidLubricantChore, object>.FloatParameter amountRequested = new StateMachine<UseSolidLubricantChore.States, UseSolidLubricantChore.Instance, UseSolidLubricantChore, object>.FloatParameter(LubricationStickConfig.MASS_PER_RECIPE);
 
 		public class InstallState : GameStateMachine<UseSolidLubricantChore.States, UseSolidLubricantChore.Instance, UseSolidLubricantChore, object>.State
 		{

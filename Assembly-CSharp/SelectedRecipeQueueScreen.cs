@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Database;
 using STRINGS;
 using UnityEngine;
@@ -7,24 +8,62 @@ using UnityEngine.UI;
 
 public class SelectedRecipeQueueScreen : KScreen
 {
+	private ComplexRecipe selectedRecipe
+	{
+		get
+		{
+			return this.CalculateSelectedRecipe();
+		}
+	}
+
+	private List<ComplexRecipe> selectedRecipes
+	{
+		get
+		{
+			return this.target.GetRecipesWithCategoryID(this.selectedRecipeCategoryID);
+		}
+	}
+
+	private ComplexRecipe firstSelectedRecipe
+	{
+		get
+		{
+			return this.selectedRecipes[0];
+		}
+	}
+
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
 		this.DecrementButton.onClick = delegate
 		{
+			if (this.selectedRecipe == null)
+			{
+				return;
+			}
 			this.target.DecrementRecipeQueueCount(this.selectedRecipe, false);
+			this.RefreshIngredientDescriptors();
 			this.RefreshQueueCountDisplay();
-			this.ownerScreen.RefreshQueueCountDisplayForRecipe(this.selectedRecipe, this.target);
+			this.ownerScreen.RefreshQueueCountDisplayForRecipeCategory(this.selectedRecipeCategoryID, this.target);
 		};
 		this.IncrementButton.onClick = delegate
 		{
+			if (this.selectedRecipe == null)
+			{
+				return;
+			}
 			this.target.IncrementRecipeQueueCount(this.selectedRecipe);
+			this.RefreshIngredientDescriptors();
 			this.RefreshQueueCountDisplay();
-			this.ownerScreen.RefreshQueueCountDisplayForRecipe(this.selectedRecipe, this.target);
+			this.ownerScreen.RefreshQueueCountDisplayForRecipeCategory(this.selectedRecipeCategoryID, this.target);
 		};
 		this.InfiniteButton.GetComponentInChildren<LocText>().text = UI.UISIDESCREENS.FABRICATORSIDESCREEN.RECIPE_FOREVER;
 		this.InfiniteButton.onClick += delegate
 		{
+			if (this.selectedRecipe == null)
+			{
+				return;
+			}
 			if (this.target.GetRecipeQueueCount(this.selectedRecipe) != ComplexFabricator.QUEUE_INFINITE)
 			{
 				this.target.SetRecipeQueueCount(this.selectedRecipe, ComplexFabricator.QUEUE_INFINITE);
@@ -34,14 +73,19 @@ public class SelectedRecipeQueueScreen : KScreen
 				this.target.SetRecipeQueueCount(this.selectedRecipe, 0);
 			}
 			this.RefreshQueueCountDisplay();
-			this.ownerScreen.RefreshQueueCountDisplayForRecipe(this.selectedRecipe, this.target);
+			this.ownerScreen.RefreshQueueCountDisplayForRecipeCategory(this.selectedRecipeCategoryID, this.target);
 		};
 		this.QueueCount.onEndEdit += delegate
 		{
 			base.isEditing = false;
+			if (this.selectedRecipe == null)
+			{
+				return;
+			}
 			this.target.SetRecipeQueueCount(this.selectedRecipe, Mathf.RoundToInt(this.QueueCount.currentValue));
+			this.RefreshIngredientDescriptors();
 			this.RefreshQueueCountDisplay();
-			this.ownerScreen.RefreshQueueCountDisplayForRecipe(this.selectedRecipe, this.target);
+			this.ownerScreen.RefreshQueueCountDisplayForRecipeCategory(this.selectedRecipeCategoryID, this.target);
 		};
 		this.QueueCount.onStartEdit += delegate
 		{
@@ -57,9 +101,9 @@ public class SelectedRecipeQueueScreen : KScreen
 	protected override void OnCmpDisable()
 	{
 		base.OnCmpDisable();
-		if (this.selectedRecipe != null)
+		if (this.firstSelectedRecipe != null)
 		{
-			GameObject prefab = Assets.GetPrefab(this.selectedRecipe.results[0].material);
+			GameObject prefab = Assets.GetPrefab(this.firstSelectedRecipe.results[0].material);
 			Equippable equippable = ((prefab != null) ? prefab.GetComponent<Equippable>() : null);
 			if (equippable != null && equippable.GetBuildOverride() != null)
 			{
@@ -68,26 +112,119 @@ public class SelectedRecipeQueueScreen : KScreen
 		}
 	}
 
-	public void SetRecipe(ComplexFabricatorSideScreen owner, ComplexFabricator target, ComplexRecipe recipe)
+	private void AutoSelectBestRecipeInCategory()
 	{
-		this.ownerScreen = owner;
-		this.target = target;
-		this.selectedRecipe = recipe;
-		this.recipeName.text = recipe.GetUIName(false);
-		global::Tuple<Sprite, Color> tuple;
-		if (recipe.nameDisplay == ComplexRecipe.RecipeNameDisplay.Ingredient)
+		int num = -1;
+		List<ComplexRecipe> list = new List<ComplexRecipe>();
+		this.selectedMaterialOption.Clear();
+		ComplexRecipe complexRecipe = null;
+		if (this.target.mostRecentRecipeSelectionByCategory.ContainsKey(this.selectedRecipeCategoryID))
 		{
-			tuple = Def.GetUISprite(recipe.ingredients[0].material, "ui", false);
+			complexRecipe = this.target.GetRecipe(this.target.mostRecentRecipeSelectionByCategory[this.selectedRecipeCategoryID]);
 		}
-		else if (recipe.nameDisplay == ComplexRecipe.RecipeNameDisplay.Custom && !string.IsNullOrEmpty(recipe.customSpritePrefabID))
+		if (complexRecipe != null)
 		{
-			tuple = Def.GetUISprite(recipe.customSpritePrefabID, "ui", false);
+			foreach (ComplexRecipe.RecipeElement recipeElement in complexRecipe.ingredients)
+			{
+				this.selectedMaterialOption.Add(recipeElement.material);
+			}
 		}
 		else
 		{
-			tuple = Def.GetUISprite(recipe.results[0].material, recipe.results[0].facadeID);
+			foreach (ComplexRecipe complexRecipe2 in this.selectedRecipes)
+			{
+				int num2 = this.target.GetRecipeQueueCount(complexRecipe2);
+				if (num2 == ComplexFabricator.QUEUE_INFINITE)
+				{
+					num2 = int.MaxValue;
+				}
+				if (num2 >= num)
+				{
+					if (num2 > num)
+					{
+						list.Clear();
+						num = num2;
+					}
+					list.Add(complexRecipe2);
+				}
+			}
+			int num3 = list[0].ingredients.Length;
+			Tag[] array = new Tag[num3];
+			for (int j = 0; j < num3; j++)
+			{
+				float num4 = -1f;
+				foreach (ComplexRecipe complexRecipe3 in list)
+				{
+					float amount = this.target.GetMyWorld().worldInventory.GetAmount(complexRecipe3.ingredients[j].material, true);
+					if (amount > num4)
+					{
+						array[j] = complexRecipe3.ingredients[j].material;
+						num4 = amount;
+					}
+				}
+			}
+			this.selectedMaterialOption.AddRange(array);
 		}
-		if (recipe.nameDisplay == ComplexRecipe.RecipeNameDisplay.HEP)
+		this.RefreshIngredientDescriptors();
+		this.RefreshQueueCountDisplay();
+	}
+
+	public bool IsSelectedMaterials(ComplexRecipe recipe)
+	{
+		if (this.selectedRecipeCategoryID != recipe.recipeCategoryID)
+		{
+			return false;
+		}
+		for (int i = 0; i < recipe.ingredients.Length; i++)
+		{
+			if (recipe.ingredients[i].material != this.selectedMaterialOption[i])
+			{
+				return false;
+			}
+		}
+		return true;
+	}
+
+	public void SelectNextQueuedRecipeInCategory()
+	{
+		this.cycleRecipeVariantIdx++;
+		this.selectedMaterialOption.Clear();
+		List<ComplexRecipe> list = this.selectedRecipes.Where<ComplexRecipe>((ComplexRecipe match) => this.target.IsRecipeQueued(match)).ToList<ComplexRecipe>();
+		if (list.Count == 0)
+		{
+			this.AutoSelectBestRecipeInCategory();
+			return;
+		}
+		ComplexRecipe complexRecipe = list[this.cycleRecipeVariantIdx % list.Count];
+		for (int i = 0; i < complexRecipe.ingredients.Length; i++)
+		{
+			this.selectedMaterialOption.Add(complexRecipe.ingredients[i].material);
+		}
+		this.RefreshIngredientDescriptors();
+		this.RefreshQueueCountDisplay();
+	}
+
+	public void SetRecipeCategory(ComplexFabricatorSideScreen owner, ComplexFabricator target, string recipeCategoryID)
+	{
+		this.ownerScreen = owner;
+		this.target = target;
+		this.selectedRecipeCategoryID = recipeCategoryID;
+		this.AutoSelectBestRecipeInCategory();
+		this.recipeName.text = this.firstSelectedRecipe.GetUIName(false);
+		global::Tuple<Sprite, Color> tuple;
+		if (this.firstSelectedRecipe.nameDisplay == ComplexRecipe.RecipeNameDisplay.Ingredient)
+		{
+			tuple = Def.GetUISprite(this.firstSelectedRecipe.ingredients[0].material, "ui", false);
+		}
+		else if (this.firstSelectedRecipe.nameDisplay == ComplexRecipe.RecipeNameDisplay.Custom && !string.IsNullOrEmpty(this.firstSelectedRecipe.customSpritePrefabID))
+		{
+			tuple = Def.GetUISprite(this.firstSelectedRecipe.customSpritePrefabID, "ui", false);
+		}
+		else
+		{
+			tuple = Def.GetUISprite(this.firstSelectedRecipe.results[0].material, this.firstSelectedRecipe.results[0].facadeID);
+		}
+		if (this.firstSelectedRecipe.nameDisplay == ComplexRecipe.RecipeNameDisplay.HEP)
 		{
 			this.recipeIcon.sprite = owner.radboltSprite;
 			this.recipeIcon.sprite = owner.radboltSprite;
@@ -97,15 +234,33 @@ public class SelectedRecipeQueueScreen : KScreen
 			this.recipeIcon.sprite = tuple.first;
 			this.recipeIcon.color = tuple.second;
 		}
-		string text = (recipe.time.ToString() + " " + UI.UNITSUFFIXES.SECONDS).ToLower();
-		this.recipeMainDescription.SetText(recipe.description);
+		string text = (this.firstSelectedRecipe.time.ToString() + " " + UI.UNITSUFFIXES.SECONDS).ToLower();
+		this.recipeMainDescription.SetText(this.firstSelectedRecipe.description);
 		this.recipeDuration.SetText(text);
 		string text2 = string.Format(UI.UISIDESCREENS.FABRICATORSIDESCREEN.TOOLTIPS.RECIPE_WORKTIME, text);
 		this.recipeDurationTooltip.SetSimpleTooltip(text2);
+		this.cycleRecipeVariantIdx = 0;
 		this.RefreshIngredientDescriptors();
 		this.RefreshResultDescriptors();
+		this.RefreshSizeScrollContainerSize();
 		this.RefreshQueueCountDisplay();
 		this.ToggleAndRefreshMinionDisplay();
+	}
+
+	private void RefreshSizeScrollContainerSize()
+	{
+		float num = 16f;
+		float num2 = 0f;
+		num2 += (float)(this.materialSelectionRowsByContainer.Count * 32);
+		foreach (KeyValuePair<GameObject, List<GameObject>> keyValuePair in this.materialSelectionRowsByContainer)
+		{
+			num2 += (float)(Mathf.Max(1, keyValuePair.Value.Count) * 48);
+		}
+		num2 += (float)((this.materialSelectionRowsByContainer.Count - 1) * 12);
+		float num3 = (float)Mathf.Max(this.selectedRecipes[0].results.Length * 32 + (this.recipeEffectsDescriptorRows.Count - this.selectedRecipes[0].results.Length) * 16, 40);
+		num3 += 46f;
+		float num4 = num + num2 + num3;
+		this.scrollContainer.minHeight = Mathf.Min((float)(Screen.height - 448), num4);
 	}
 
 	private void CyclePreviousRecipe()
@@ -125,7 +280,7 @@ public class SelectedRecipeQueueScreen : KScreen
 
 	private bool RefreshMinionDisplayAnim()
 	{
-		GameObject prefab = Assets.GetPrefab(this.selectedRecipe.results[0].material);
+		GameObject prefab = Assets.GetPrefab(this.firstSelectedRecipe.results[0].material);
 		if (prefab == null)
 		{
 			return false;
@@ -142,9 +297,9 @@ public class SelectedRecipeQueueScreen : KScreen
 		}
 		this.minionWidget.SetDefaultPortraitAnimator();
 		KAnimFile kanimFile = buildOverride;
-		if (!this.selectedRecipe.results[0].facadeID.IsNullOrWhiteSpace())
+		if (!this.firstSelectedRecipe.results[0].facadeID.IsNullOrWhiteSpace())
 		{
-			EquippableFacadeResource equippableFacadeResource = Db.GetEquippableFacades().TryGet(this.selectedRecipe.results[0].facadeID);
+			EquippableFacadeResource equippableFacadeResource = Db.GetEquippableFacades().TryGet(this.firstSelectedRecipe.results[0].facadeID);
 			if (equippableFacadeResource != null)
 			{
 				kanimFile = Assets.GetAnim(equippableFacadeResource.BuildOverride);
@@ -154,26 +309,61 @@ public class SelectedRecipeQueueScreen : KScreen
 		return true;
 	}
 
+	private ComplexRecipe CalculateSelectedRecipe()
+	{
+		foreach (ComplexRecipe complexRecipe in this.target.GetRecipesWithCategoryID(this.selectedRecipeCategoryID))
+		{
+			bool flag = true;
+			for (int i = 0; i < this.selectedMaterialOption.Count; i++)
+			{
+				if (complexRecipe.ingredients[i].material != this.selectedMaterialOption[i])
+				{
+					flag = false;
+					break;
+				}
+			}
+			if (flag)
+			{
+				return complexRecipe;
+			}
+		}
+		return null;
+	}
+
 	private void RefreshQueueCountDisplay()
 	{
-		this.ResearchRequiredContainer.SetActive(!this.selectedRecipe.IsRequiredTechUnlocked());
-		bool flag = this.target.GetRecipeQueueCount(this.selectedRecipe) == ComplexFabricator.QUEUE_INFINITE;
-		if (!flag)
+		this.ResearchRequiredContainer.SetActive(!this.selectedRecipes[0].IsRequiredTechUnlocked());
+		if (this.selectedRecipe == null)
 		{
-			this.QueueCount.SetAmount((float)this.target.GetRecipeQueueCount(this.selectedRecipe));
+			return;
+		}
+		bool flag = true;
+		foreach (Tag tag in this.selectedMaterialOption)
+		{
+			if (!DiscoveredResources.Instance.IsDiscovered(tag))
+			{
+				flag = DebugHandler.InstantBuildMode;
+			}
+		}
+		this.UndiscoveredMaterialsContainer.SetActive(!flag);
+		int recipeQueueCount = this.target.GetRecipeQueueCount(this.selectedRecipe);
+		bool flag2 = recipeQueueCount == ComplexFabricator.QUEUE_INFINITE;
+		if (!flag2)
+		{
+			this.QueueCount.SetAmount((float)recipeQueueCount);
 		}
 		else
 		{
 			this.QueueCount.SetDisplayValue("");
 		}
-		this.InfiniteIcon.gameObject.SetActive(flag);
+		this.InfiniteIcon.gameObject.SetActive(flag2);
 	}
 
 	private void RefreshResultDescriptors()
 	{
 		List<SelectedRecipeQueueScreen.DescriptorWithSprite> list = new List<SelectedRecipeQueueScreen.DescriptorWithSprite>();
-		list.AddRange(this.GetResultDescriptions(this.selectedRecipe));
-		foreach (Descriptor descriptor in this.target.AdditionalEffectsForRecipe(this.selectedRecipe))
+		list.AddRange(this.GetResultDescriptions(this.selectedRecipes[0]));
+		foreach (Descriptor descriptor in this.target.AdditionalEffectsForRecipe(this.selectedRecipes[0]))
 		{
 			list.Add(new SelectedRecipeQueueScreen.DescriptorWithSprite(descriptor, null, false));
 		}
@@ -185,20 +375,33 @@ public class SelectedRecipeQueueScreen : KScreen
 				Util.KDestroyGameObject(keyValuePair.Value);
 			}
 			this.recipeEffectsDescriptorRows.Clear();
+			bool flag = true;
 			foreach (SelectedRecipeQueueScreen.DescriptorWithSprite descriptorWithSprite in list)
 			{
 				GameObject gameObject = Util.KInstantiateUI(this.recipeElementDescriptorPrefab, this.EffectsDescriptorPanel.gameObject, true);
 				HierarchyReferences component = gameObject.GetComponent<HierarchyReferences>();
 				Image reference = component.GetReference<Image>("Icon");
-				bool flag = descriptorWithSprite.tintedSprite != null && descriptorWithSprite.tintedSprite.first != null;
+				bool flag2 = descriptorWithSprite.tintedSprite != null && descriptorWithSprite.tintedSprite.first != null;
 				reference.sprite = ((descriptorWithSprite.tintedSprite == null) ? null : descriptorWithSprite.tintedSprite.first);
-				reference.gameObject.SetActive(flag);
-				if (!flag)
+				reference.gameObject.SetActive(true);
+				if (!flag2)
 				{
-					reference.gameObject.transform.parent.GetComponent<HorizontalLayoutGroup>().padding.left = 30;
+					reference.color = Color.clear;
+					if (flag)
+					{
+						gameObject.GetComponent<VerticalLayoutGroup>().padding.top = -8;
+						flag = false;
+					}
 				}
-				reference.color = ((descriptorWithSprite.tintedSprite == null) ? Color.white : descriptorWithSprite.tintedSprite.second);
-				component.GetReference<LocText>("Label").SetText(flag ? descriptorWithSprite.descriptor.IndentedText() : descriptorWithSprite.descriptor.text);
+				else
+				{
+					reference.color = ((descriptorWithSprite.tintedSprite == null) ? Color.white : descriptorWithSprite.tintedSprite.second);
+					flag = true;
+				}
+				reference.gameObject.GetComponent<LayoutElement>().minWidth = (float)(flag2 ? 32 : 40);
+				reference.gameObject.GetComponent<LayoutElement>().minHeight = (float)(flag2 ? 32 : 0);
+				reference.gameObject.GetComponent<LayoutElement>().preferredHeight = (float)(flag2 ? 32 : 0);
+				component.GetReference<LocText>("Label").SetText(flag2 ? descriptorWithSprite.descriptor.IndentedText() : descriptorWithSprite.descriptor.text);
 				component.GetReference<RectTransform>("FilterControls").gameObject.SetActive(false);
 				component.GetReference<ToolTip>("Tooltip").SetSimpleTooltip(descriptorWithSprite.descriptor.tooltipText);
 				this.recipeEffectsDescriptorRows.Add(descriptorWithSprite, gameObject);
@@ -252,44 +455,131 @@ public class SelectedRecipeQueueScreen : KScreen
 	private void RefreshIngredientDescriptors()
 	{
 		new List<SelectedRecipeQueueScreen.DescriptorWithSprite>();
-		List<SelectedRecipeQueueScreen.DescriptorWithSprite> ingredientDescriptions = this.GetIngredientDescriptions(this.selectedRecipe);
 		this.IngredientsDescriptorPanel.gameObject.SetActive(true);
-		foreach (KeyValuePair<SelectedRecipeQueueScreen.DescriptorWithSprite, GameObject> keyValuePair in this.recipeIngredientDescriptorRows)
+		this.materialSelectionContainers.ForEach(delegate(GameObject container)
 		{
-			Util.KDestroyGameObject(keyValuePair.Value);
-		}
-		this.recipeIngredientDescriptorRows.Clear();
-		foreach (SelectedRecipeQueueScreen.DescriptorWithSprite descriptorWithSprite in ingredientDescriptions)
+			Util.KDestroyGameObject(container);
+		});
+		this.materialSelectionContainers.Clear();
+		this.materialSelectionRowsByContainer.Clear();
+		for (int i = 0; i < this.selectedRecipes[0].ingredients.Length; i++)
 		{
-			GameObject gameObject = Util.KInstantiateUI(this.recipeElementDescriptorPrefab, this.IngredientsDescriptorPanel.gameObject, true);
+			GameObject gameObject = Util.KInstantiateUI(this.materialSelectionContainerPrefab, this.IngredientsDescriptorPanel.gameObject, true);
+			this.materialSelectionContainers.Add(gameObject);
+			this.materialSelectionRowsByContainer.Add(this.materialSelectionContainers[i], new List<GameObject>());
 			HierarchyReferences component = gameObject.GetComponent<HierarchyReferences>();
-			component.GetReference<LocText>("Label").SetText(descriptorWithSprite.descriptor.IndentedText());
-			component.GetReference<Image>("Icon").sprite = ((descriptorWithSprite.tintedSprite == null) ? null : descriptorWithSprite.tintedSprite.first);
-			component.GetReference<Image>("Icon").color = ((descriptorWithSprite.tintedSprite == null) ? Color.white : descriptorWithSprite.tintedSprite.second);
-			component.GetReference<RectTransform>("FilterControls").gameObject.SetActive(false);
-			component.GetReference<ToolTip>("Tooltip").SetSimpleTooltip(descriptorWithSprite.descriptor.tooltipText);
-			this.recipeIngredientDescriptorRows.Add(descriptorWithSprite, gameObject);
+			int idx = i;
+			List<Tag> list = new List<Tag>();
+			bool flag = false;
+			HashSet<Tag> hashSet = new HashSet<Tag>();
+			for (int j = 0; j < this.selectedRecipes.Count; j++)
+			{
+				Tag newTag = this.selectedRecipes[j].ingredients[idx].material;
+				if (!list.Contains(newTag))
+				{
+					bool flag2 = DiscoveredResources.Instance.IsDiscovered(newTag);
+					if (!flag2)
+					{
+						hashSet.Add(newTag);
+					}
+					if (flag2 || DebugHandler.InstantBuildMode)
+					{
+						flag = true;
+						GameObject gameObject2 = Util.KInstantiateUI(this.materialFilterRowPrefab, this.materialSelectionContainers[idx].gameObject, true);
+						this.materialSelectionRowsByContainer[this.materialSelectionContainers[idx]].Add(gameObject2);
+						list.Add(newTag);
+						LocText reference = gameObject2.GetComponent<HierarchyReferences>().GetReference<LocText>("Label");
+						bool flag3 = false;
+						string ingredientDescription = this.GetIngredientDescription(this.selectedRecipes[j].ingredients[idx], out flag3);
+						bool flag4 = this.selectedMaterialOption[i] == this.selectedRecipes[j].ingredients[i].material;
+						if (flag4)
+						{
+							component.GetReference<Image>("HeaderBG").color = (flag3 ? Util.ColorFromHex("D9DAE3") : Util.ColorFromHex("E3DAD9"));
+						}
+						reference.color = (flag3 ? Color.black : new Color(0.2f, 0.2f, 0.2f, 1f));
+						HierarchyReferences component2 = gameObject2.GetComponent<HierarchyReferences>();
+						component2.GetReference<RectTransform>("SelectionHover").gameObject.SetActive(flag4);
+						component2.GetReference<RectTransform>("SelectionHover").GetComponent<Image>().color = (flag3 ? Util.ColorFromHex("F0F6FC") : Util.ColorFromHex("FBE9EB"));
+						component2.GetReference<LocText>("OrderCountLabel").SetText(this.target.GetIngredientQueueCount(this.selectedRecipeCategoryID, newTag).ToString());
+						Image reference2 = component2.GetReference<Image>("Icon");
+						reference2.material = ((!flag3) ? GlobalResources.Instance().AnimMaterialUIDesaturated : GlobalResources.Instance().AnimUIMaterial);
+						reference2.color = (flag3 ? Color.white : new Color(1f, 1f, 1f, 0.55f));
+						reference.SetText(ingredientDescription);
+						reference2.sprite = Def.GetUISprite(newTag, "").first;
+						MultiToggle component3 = gameObject2.GetComponent<MultiToggle>();
+						component3.ChangeState(flag4 ? 1 : 0);
+						component3.onClick = (global::System.Action)Delegate.Combine(component3.onClick, new global::System.Action(delegate
+						{
+							Tag newTag2 = newTag;
+							this.selectedMaterialOption[idx] = newTag2;
+							this.RefreshIngredientDescriptors();
+							this.RefreshQueueCountDisplay();
+							this.ownerScreen.RefreshQueueCountDisplayForRecipeCategory(this.selectedRecipeCategoryID, this.target);
+						}));
+					}
+				}
+			}
+			ToolTip reference3 = component.GetReference<ToolTip>("HeaderTooltip");
+			string text = UI.UISIDESCREENS.FABRICATORSIDESCREEN.UNDISCOVERED_INGREDIENTS_IN_CATEGORY;
+			object[] array = new object[1];
+			array[0] = "    • " + string.Join("\n    • ", hashSet.Select<Tag, string>((Tag t) => t.ProperName()).ToArray<string>());
+			string text2 = GameUtil.SafeStringFormat(text, array);
+			reference3.SetSimpleTooltip((hashSet.Count == 0) ? UI.UISIDESCREENS.FABRICATORSIDESCREEN.ALL_INGREDIENTS_IN_CATEGORY_DISOVERED : text2);
+			RectTransform reference4 = component.GetReference<RectTransform>("NoDiscoveredRow");
+			reference4.gameObject.SetActive(!flag);
+			if (!flag)
+			{
+				reference4.GetComponent<ToolTip>().SetSimpleTooltip(text2);
+			}
+			string text3 = GameUtil.SafeStringFormat(UI.UISIDESCREENS.FABRICATORSIDESCREEN.INGREDIENT_CATEGORY, new object[] { i + 1 });
+			if (!flag)
+			{
+				component.GetReference<Image>("HeaderBG").color = Util.ColorFromHex("E3DAD9");
+			}
+			if (hashSet.Count > 0)
+			{
+				text3 = string.Concat(new string[]
+				{
+					text3,
+					" <color=#bf5858>(",
+					list.Count.ToString(),
+					"/",
+					(list.Count + hashSet.Count).ToString(),
+					")",
+					UIConstants.ColorSuffix
+				});
+			}
+			component.GetReference<LocText>("HeaderLabel").SetText(text3);
 		}
+		if (!this.target.mostRecentRecipeSelectionByCategory.ContainsKey(this.selectedRecipeCategoryID))
+		{
+			this.target.mostRecentRecipeSelectionByCategory.Add(this.selectedRecipeCategoryID, null);
+		}
+		this.target.mostRecentRecipeSelectionByCategory[this.selectedRecipeCategoryID] = this.selectedRecipe.id;
 	}
 
-	private List<SelectedRecipeQueueScreen.DescriptorWithSprite> GetIngredientDescriptions(ComplexRecipe recipe)
+	private string GetIngredientDescription(ComplexRecipe.RecipeElement ingredient, out bool hasEnoughMaterial)
 	{
-		List<SelectedRecipeQueueScreen.DescriptorWithSprite> list = new List<SelectedRecipeQueueScreen.DescriptorWithSprite>();
-		foreach (ComplexRecipe.RecipeElement recipeElement in recipe.ingredients)
+		GameObject prefab = Assets.GetPrefab(ingredient.material);
+		string formattedByTag = GameUtil.GetFormattedByTag(ingredient.material, ingredient.amount, GameUtil.TimeSlice.None);
+		float amount = this.target.GetMyWorld().worldInventory.GetAmount(ingredient.material, true);
+		string formattedByTag2 = GameUtil.GetFormattedByTag(ingredient.material, amount, GameUtil.TimeSlice.None);
+		hasEnoughMaterial = amount >= ingredient.amount;
+		string text = GameUtil.SafeStringFormat(UI.UISIDESCREENS.FABRICATORSIDESCREEN.RECIPE_REQUIREMENT, new object[]
 		{
-			GameObject prefab = Assets.GetPrefab(recipeElement.material);
-			string formattedByTag = GameUtil.GetFormattedByTag(recipeElement.material, recipeElement.amount, GameUtil.TimeSlice.None);
-			float amount = this.target.GetMyWorld().worldInventory.GetAmount(recipeElement.material, true);
-			string formattedByTag2 = GameUtil.GetFormattedByTag(recipeElement.material, amount, GameUtil.TimeSlice.None);
-			string text = ((amount >= recipeElement.amount) ? string.Format(UI.UISIDESCREENS.FABRICATORSIDESCREEN.RECIPERQUIREMENT, prefab.GetProperName(), formattedByTag, formattedByTag2) : ("<color=#F44A47>" + string.Format(UI.UISIDESCREENS.FABRICATORSIDESCREEN.RECIPERQUIREMENT, prefab.GetProperName(), formattedByTag, formattedByTag2) + "</color>"));
-			list.Add(new SelectedRecipeQueueScreen.DescriptorWithSprite(new Descriptor(text, text, Descriptor.DescriptorType.Requirement, false), Def.GetUISprite(recipeElement.material, "ui", false), Assets.GetPrefab(recipeElement.material).GetComponent<MutantPlant>() != null));
-		}
-		if (recipe.consumedHEP > 0)
+			prefab.GetProperName(),
+			formattedByTag
+		});
+		text += "\n";
+		if (hasEnoughMaterial)
 		{
-			HighEnergyParticleStorage component = this.target.GetComponent<HighEnergyParticleStorage>();
-			list.Add(new SelectedRecipeQueueScreen.DescriptorWithSprite(new Descriptor(string.Format("<b>{0}</b>: {1} / {2}", UI.FormatAsLink(ITEMS.RADIATION.HIGHENERGYPARITCLE.NAME, "HEP"), recipe.consumedHEP, component.Particles), string.Format("<b>{0}</b>: {1} / {2}", ITEMS.RADIATION.HIGHENERGYPARITCLE.NAME, recipe.consumedHEP, component.Particles), Descriptor.DescriptorType.Requirement, false), new global::Tuple<Sprite, Color>(Assets.GetSprite("radbolt"), Color.white), false));
+			text = text + "<size=12>" + GameUtil.SafeStringFormat(UI.UISIDESCREENS.FABRICATORSIDESCREEN.RECIPE_AVAILABLE, new object[] { formattedByTag2 }) + "</size>";
 		}
-		return list;
+		else
+		{
+			text = text + "<size=12><color=#E68280>" + GameUtil.SafeStringFormat(UI.UISIDESCREENS.FABRICATORSIDESCREEN.RECIPE_AVAILABLE, new object[] { formattedByTag2 }) + "</color></size>";
+		}
+		return text;
 	}
 
 	public Image recipeIcon;
@@ -318,11 +608,25 @@ public class SelectedRecipeQueueScreen : KScreen
 
 	public GameObject ResearchRequiredContainer;
 
+	public GameObject UndiscoveredMaterialsContainer;
+
+	[SerializeField]
+	private GameObject materialFilterRowPrefab;
+
+	[SerializeField]
+	private GameObject materialSelectionContainerPrefab;
+
+	private List<GameObject> materialSelectionContainers = new List<GameObject>();
+
+	private Dictionary<GameObject, List<GameObject>> materialSelectionRowsByContainer = new Dictionary<GameObject, List<GameObject>>();
+
 	private ComplexFabricator target;
 
 	private ComplexFabricatorSideScreen ownerScreen;
 
-	private ComplexRecipe selectedRecipe;
+	private List<Tag> selectedMaterialOption = new List<Tag>();
+
+	private string selectedRecipeCategoryID;
 
 	[SerializeField]
 	private GameObject recipeElementDescriptorPrefab;
@@ -339,6 +643,11 @@ public class SelectedRecipeQueueScreen : KScreen
 
 	[SerializeField]
 	private MultiToggle nextRecipeButton;
+
+	[SerializeField]
+	private LayoutElement scrollContainer;
+
+	private int cycleRecipeVariantIdx;
 
 	private class DescriptorWithSprite
 	{

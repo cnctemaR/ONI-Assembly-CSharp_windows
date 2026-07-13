@@ -128,7 +128,7 @@ public class CarePackageContainer : KScreen, ITelepadDeliverableContainer
 		}
 		else if (foodInfo != null)
 		{
-			num = (int)(this.info.quantity % foodInfo.CaloriesPerUnit);
+			num = (int)Mathf.Max(1f, this.info.quantity % foodInfo.CaloriesPerUnit);
 		}
 		else
 		{

@@ -158,6 +158,8 @@ namespace Klei.AI
 
 		public string[] immunityEffectsNames;
 
+		public Tag? tag;
+
 		public string emoteAnim;
 
 		public Emote emote;

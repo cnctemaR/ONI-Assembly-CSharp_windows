@@ -33,6 +33,7 @@ public class MethaneGeneratorConfig : IBuildingConfig
 		buildingDef.OutputConduitType = ConduitType.Gas;
 		buildingDef.LogicInputPorts = LogicOperationalController.CreateSingleInputPortList(new CellOffset(0, 0));
 		buildingDef.AddSearchTerms(SEARCH_TERMS.POWER);
+		buildingDef.AddSearchTerms(SEARCH_TERMS.GENERATOR);
 		return buildingDef;
 	}
 

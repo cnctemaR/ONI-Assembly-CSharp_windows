@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading;
 using Klei;
 using STRINGS;
 using UnityEngine;
@@ -244,7 +245,7 @@ public class DebugHandler : IInputHandler
 			{
 				if (!(DiscoveredResources.Instance != null))
 				{
-					goto IL_0CB6;
+					goto IL_0CE3;
 				}
 				using (List<Element>.Enumerator enumerator = ElementLoader.elements.GetEnumerator())
 				{
@@ -253,7 +254,7 @@ public class DebugHandler : IInputHandler
 						Element element = enumerator.Current;
 						DiscoveredResources.Instance.Discover(element.tag, element.GetMaterialCategoryTag());
 					}
-					goto IL_0CB6;
+					goto IL_0CE3;
 				}
 			}
 			if (e.TryConsume(global::Action.DebugToggleUI))
@@ -359,7 +360,7 @@ public class DebugHandler : IInputHandler
 								smi2.GoToCursor();
 							}
 						}
-						goto IL_0CB6;
+						goto IL_0CE3;
 					}
 				}
 				if (e.TryConsume(global::Action.DebugTeleport))
@@ -511,7 +512,10 @@ public class DebugHandler : IInputHandler
 						{
 							if (GenericGameSettings.instance.developerDebugEnable)
 							{
-								Sim.SIM_DebugCrash();
+								new Thread(delegate
+								{
+									Sim.SIM_DebugCrash();
+								}).Start();
 							}
 						}
 						else if (e.TryConsume(global::Action.DebugNextCall))
@@ -530,7 +534,7 @@ public class DebugHandler : IInputHandler
 				}
 			}
 		}
-		IL_0CB6:
+		IL_0CE3:
 		if (e.Consumed && Game.Instance != null)
 		{
 			Game.Instance.debugWasUsed = true;

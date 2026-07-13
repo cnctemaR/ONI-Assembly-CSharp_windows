@@ -18,7 +18,7 @@ public class GameScenePartitioner : KMonoBehaviour
 	{
 		global::Debug.Assert(GameScenePartitioner.instance == null);
 		GameScenePartitioner.instance = this;
-		this.partitioner = new ScenePartitioner(16, 66, Grid.WidthInCells, Grid.HeightInCells);
+		this.partitioner = new ScenePartitioner(16, 67, Grid.WidthInCells, Grid.HeightInCells);
 		this.solidChangedLayer = this.partitioner.CreateMask("SolidChanged");
 		this.liquidChangedLayer = this.partitioner.CreateMask("LiquidChanged");
 		this.digDestroyedLayer = this.partitioner.CreateMask("DigDestroyed");
@@ -29,6 +29,7 @@ public class GameScenePartitioner : KMonoBehaviour
 		this.pickupablesLayer = this.partitioner.CreateMask("Pickupables");
 		this.storedPickupablesLayer = this.partitioner.CreateMask("StoredPickupables");
 		this.pickupablesChangedLayer = this.partitioner.CreateMask("PickupablesChanged");
+		this.plantsChangedLayer = this.partitioner.CreateMask("PlantsChanged");
 		this.gasConduitsLayer = this.partitioner.CreateMask("GasConduit");
 		this.liquidConduitsLayer = this.partitioner.CreateMask("LiquidConduit");
 		this.solidConduitsLayer = this.partitioner.CreateMask("SolidConduit");
@@ -67,6 +68,7 @@ public class GameScenePartitioner : KMonoBehaviour
 		this.fetchChoreLayer = null;
 		this.pickupablesLayer = null;
 		this.storedPickupablesLayer = null;
+		this.plantsChangedLayer = null;
 		this.pickupablesChangedLayer = null;
 		this.gasConduitsLayer = null;
 		this.liquidConduitsLayer = null;
@@ -317,6 +319,8 @@ public class GameScenePartitioner : KMonoBehaviour
 	public ScenePartitionerLayer lure;
 
 	public ScenePartitionerLayer plants;
+
+	public ScenePartitionerLayer plantsChangedLayer;
 
 	public ScenePartitionerLayer industrialBuildings;
 

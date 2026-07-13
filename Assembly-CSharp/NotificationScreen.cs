@@ -47,6 +47,13 @@ public class NotificationScreen : KScreen
 	{
 		base.OnPrefabInit();
 		NotificationScreen.Instance = this;
+		foreach (NotificationScreen.CustomNotificationPrefabs customNotificationPrefabs in this.customNotificationPrefabs)
+		{
+			if (customNotificationPrefabs.notificationPrefab != null)
+			{
+				customNotificationPrefabs.notificationPrefab.SetActive(false);
+			}
+		}
 		this.MessagesPrefab.gameObject.SetActive(false);
 		this.LabelPrefab.gameObject.SetActive(false);
 		this.InitNotificationSounds();
@@ -131,7 +138,13 @@ public class NotificationScreen : KScreen
 		if (entry == null)
 		{
 			HierarchyReferences hierarchyReferences;
-			if (notification.Type == NotificationType.Messages)
+			if (notification.Type == NotificationType.Custom)
+			{
+				NotificationScreen.CustomNotificationPrefabs customNotificationPrefabs = this.customNotificationPrefabs.Find((NotificationScreen.CustomNotificationPrefabs d) => d.ID == notification.customNotificationID);
+				global::Debug.Assert(customNotificationPrefabs != null, "Custom notification prefab not found for notification ID: " + notification.customNotificationID);
+				hierarchyReferences = global::Util.KInstantiateUI<HierarchyReferences>(customNotificationPrefabs.notificationPrefab, customNotificationPrefabs.parentFolder, false);
+			}
+			else if (notification.Type == NotificationType.Messages)
 			{
 				hierarchyReferences = global::Util.KInstantiateUI<HierarchyReferences>(this.MessagesPrefab, this.MessagesFolder, false);
 			}
@@ -186,13 +199,13 @@ public class NotificationScreen : KScreen
 				reference3.color = GlobalAssets.Instance.colorSet.NotificationBad;
 				reference2.color = GlobalAssets.Instance.colorSet.NotificationBad;
 				reference2.sprite = ((notification.Type == NotificationType.Bad) ? this.icon_bad : this.icon_threatening);
-				goto IL_043D;
+				goto IL_049F;
 			case NotificationType.Tutorial:
 				colors.normalColor = GlobalAssets.Instance.colorSet.NotificationTutorialBG;
 				reference3.color = GlobalAssets.Instance.colorSet.NotificationTutorial;
 				reference2.color = GlobalAssets.Instance.colorSet.NotificationTutorial;
 				reference2.sprite = this.icon_warning;
-				goto IL_043D;
+				goto IL_049F;
 			case NotificationType.Messages:
 			{
 				colors.normalColor = GlobalAssets.Instance.colorSet.NotificationMessageBG;
@@ -202,34 +215,36 @@ public class NotificationScreen : KScreen
 				MessageNotification messageNotification = notification as MessageNotification;
 				if (messageNotification == null)
 				{
-					goto IL_043D;
+					goto IL_049F;
 				}
 				TutorialMessage tutorialMessage = messageNotification.message as TutorialMessage;
 				if (tutorialMessage != null && !string.IsNullOrEmpty(tutorialMessage.videoClipId))
 				{
 					reference2.sprite = this.icon_video;
-					goto IL_043D;
+					goto IL_049F;
 				}
-				goto IL_043D;
+				goto IL_049F;
 			}
 			case NotificationType.Event:
 				colors.normalColor = GlobalAssets.Instance.colorSet.NotificationEventBG;
 				reference3.color = GlobalAssets.Instance.colorSet.NotificationEvent;
 				reference2.color = GlobalAssets.Instance.colorSet.NotificationEvent;
 				reference2.sprite = this.icon_event;
-				goto IL_043D;
+				goto IL_049F;
 			case NotificationType.MessageImportant:
 				colors.normalColor = GlobalAssets.Instance.colorSet.NotificationMessageImportantBG;
 				reference3.color = GlobalAssets.Instance.colorSet.NotificationMessageImportant;
 				reference2.color = GlobalAssets.Instance.colorSet.NotificationMessageImportant;
 				reference2.sprite = this.icon_message_important;
-				goto IL_043D;
+				goto IL_049F;
+			case NotificationType.Custom:
+				goto IL_049F;
 			}
 			colors.normalColor = GlobalAssets.Instance.colorSet.NotificationNormalBG;
 			reference3.color = GlobalAssets.Instance.colorSet.NotificationNormal;
 			reference2.color = GlobalAssets.Instance.colorSet.NotificationNormal;
 			reference2.sprite = this.icon_normal;
-			IL_043D:
+			IL_049F:
 			reference4.colors = colors;
 			reference4.onClick.AddListener(delegate
 			{
@@ -503,6 +518,8 @@ public class NotificationScreen : KScreen
 
 	public GameObject MessagesFolder;
 
+	public List<NotificationScreen.CustomNotificationPrefabs> customNotificationPrefabs;
+
 	private MessageDialogFrame messageDialog;
 
 	private float initTime;
@@ -580,6 +597,16 @@ public class NotificationScreen : KScreen
 	private List<NotificationScreen.Entry> entries = new List<NotificationScreen.Entry>();
 
 	private Dictionary<string, NotificationScreen.Entry> entriesByMessage = new Dictionary<string, NotificationScreen.Entry>();
+
+	[Serializable]
+	public class CustomNotificationPrefabs
+	{
+		public string ID;
+
+		public GameObject notificationPrefab;
+
+		public GameObject parentFolder;
+	}
 
 	private class Entry
 	{

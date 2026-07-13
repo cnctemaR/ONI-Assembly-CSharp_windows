@@ -22,7 +22,6 @@ public class Conduit : KMonoBehaviour, IFirstFrameCallback, IHaveUtilityNetworkM
 			this.firstFrameCallback();
 			this.firstFrameCallback = null;
 		}
-		yield return null;
 		yield break;
 	}
 

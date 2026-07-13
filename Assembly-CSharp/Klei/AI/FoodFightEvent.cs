@@ -8,7 +8,7 @@ namespace Klei.AI
 	public class FoodFightEvent : GameplayEvent<FoodFightEvent.StatesInstance>
 	{
 		public FoodFightEvent()
-			: base("FoodFight", 0, 0)
+			: base("FoodFight", 0, 0, null, null)
 		{
 			this.title = GAMEPLAY_EVENTS.EVENT_TYPES.FOOD_FIGHT.NAME;
 			this.description = GAMEPLAY_EVENTS.EVENT_TYPES.FOOD_FIGHT.DESCRIPTION;

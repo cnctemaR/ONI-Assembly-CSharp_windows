@@ -401,17 +401,20 @@ public class AchievementWidget : KMonoBehaviour
 		}
 		foreach (Tag tag in produceXEngeryWithoutUsingYList.disallowedBuildings)
 		{
-			hierarchyReferences = this.GetNextRequirementWidget();
-			if (Game.Instance.savedInfo.powerCreatedbyGeneratorType.ContainsKey(tag))
-			{
-				this.SetIcon(this.statusFailureIcon, Color.red, hierarchyReferences);
-			}
-			else
-			{
-				this.SetIcon(this.statusSuccessIcon, Color.green, hierarchyReferences);
-			}
 			BuildingDef buildingDef = Assets.GetBuildingDef(tag.Name);
-			this.SetDescription(string.Format(COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.STATUS.NO_BUILDING, buildingDef.Name), hierarchyReferences);
+			if (!(buildingDef == null))
+			{
+				hierarchyReferences = this.GetNextRequirementWidget();
+				if (Game.Instance.savedInfo.powerCreatedbyGeneratorType.ContainsKey(tag))
+				{
+					this.SetIcon(this.statusFailureIcon, Color.red, hierarchyReferences);
+				}
+				else
+				{
+					this.SetIcon(this.statusSuccessIcon, Color.green, hierarchyReferences);
+				}
+				this.SetDescription(string.Format(COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.STATUS.NO_BUILDING, buildingDef.Name), hierarchyReferences);
+			}
 		}
 	}
 

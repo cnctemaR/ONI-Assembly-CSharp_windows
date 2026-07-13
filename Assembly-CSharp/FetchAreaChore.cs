@@ -145,7 +145,8 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 			global::Debug.Assert(root_fetchable != null, "root_fetchable was null");
 			ListPool<Pickupable, FetchAreaChore>.PooledList potential_fetchables = ListPool<Pickupable, FetchAreaChore>.Allocate();
 			potential_fetchables.Add(root_fetchable);
-			float fetch_amount_available = root_fetchable.UnreservedAmount;
+			float fetch_amount_available = root_fetchable.UnreservedFetchAmount;
+			max_carry_weight = Mathf.Max(root_fetchable.PrimaryElement.MassPerUnit, max_carry_weight);
 			float minTakeAmount = root_fetchable.MinTakeAmount;
 			int num3 = 0;
 			int num4 = 0;
@@ -174,7 +175,7 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 				{
 					return true;
 				}
-				if (pickupable2.UnreservedAmount <= 0f)
+				if (pickupable2.UnreservedFetchAmount <= 0f)
 				{
 					return true;
 				}
@@ -223,9 +224,9 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 						return true;
 					}
 				}
-				float unreservedAmount = pickupable2.UnreservedAmount;
+				float unreservedFetchAmount = pickupable2.UnreservedFetchAmount;
 				potential_fetchables.Add(pickupable2);
-				fetch_amount_available += unreservedAmount;
+				fetch_amount_available += unreservedFetchAmount;
 				return potential_fetchables.Count < 10;
 			};
 			GameScenePartitioner.Instance.AsyncSafeVisit<object>(num3, num4, num5, num5, GameScenePartitioner.Instance.pickupablesLayer, func, null);
@@ -272,7 +273,7 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 			while (num10 < potential_fetchables.Count && num9 > 0f)
 			{
 				Pickupable pickupable = potential_fetchables[num10];
-				num9 -= pickupable.UnreservedAmount;
+				num9 -= pickupable.UnreservedFetchAmount;
 				this.fetchables.Add(pickupable);
 				num10++;
 			}
@@ -306,7 +307,7 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 			}
 			this.deliverables.RemoveAll(delegate(Pickupable x)
 			{
-				if (x == null || x.TotalAmount <= 0f)
+				if (x == null || x.FetchTotalAmount <= 0f)
 				{
 					return true;
 				}
@@ -396,7 +397,7 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 		public void DeliverComplete()
 		{
 			Pickupable pickupable = base.sm.deliveryObject.Get<Pickupable>(base.smi);
-			if (!(pickupable == null) && pickupable.TotalAmount > 0f)
+			if (!(pickupable == null) && pickupable.FetchTotalAmount > 0f)
 			{
 				if (this.deliveries.Count > 0)
 				{
@@ -475,9 +476,9 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 				{
 					break;
 				}
-				if (!pickupable.KPrefabID.HasTag(GameTags.MarkedForMove))
+				if (!pickupable.KPrefabID.HasTag(GameTags.MarkedForMove) && (pickupable.PrimaryElement.MassPerUnit <= 1f || num >= pickupable.PrimaryElement.MassPerUnit))
 				{
-					float num2 = Math.Min(num, pickupable.UnreservedAmount);
+					float num2 = Math.Min(num, pickupable.UnreservedFetchAmount);
 					num -= num2;
 					FetchAreaChore.StatesInstance.Reservation reservation = new FetchAreaChore.StatesInstance.Reservation(choreConsumer, pickupable, num2);
 					this.reservations.Add(reservation);
@@ -628,9 +629,9 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 							else
 							{
 								Pickupable pickupable2 = deliverables[num2].Take(num);
-								if (pickupable2 != null && pickupable2.TotalAmount > 0f)
+								if (pickupable2 != null && pickupable2.FetchTotalAmount > 0f)
 								{
-									num -= pickupable2.TotalAmount;
+									num -= pickupable2.FetchTotalAmount;
 									this.destination.Store(pickupable2.gameObject, false, false, true, false);
 									pickupable = pickupable2;
 									if (pickupable2 == deliverables[num2])

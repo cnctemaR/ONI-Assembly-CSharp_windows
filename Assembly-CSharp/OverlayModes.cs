@@ -2010,10 +2010,6 @@ public abstract class OverlayModes
 		{
 		}
 
-		public virtual void OnRenderImage(RenderTexture src, RenderTexture dest)
-		{
-		}
-
 		public abstract string GetSoundName();
 
 		protected bool InFilter(string layer, Dictionary<string, ToolParameterMenu.ToggleState> filter)
@@ -3413,6 +3409,7 @@ public abstract class OverlayModes
 			base.Enable();
 			this.previousUserSetting = SimDebugView.Instance.user_temperatureThresholds;
 			this.RefreshLegendValues();
+			CameraController.Instance.EnableKAnimPostProcessingEffect(KAnimConverter.PostProcessingEffects.TemperatureOverlay);
 		}
 
 		public void RefreshLegendValues()
@@ -3446,15 +3443,6 @@ public abstract class OverlayModes
 					ToolParameterMenu.ToggleState.Off
 				}
 			};
-		}
-
-		public override void OnRenderImage(RenderTexture src, RenderTexture dest)
-		{
-			if (Game.IsQuitting())
-			{
-				return;
-			}
-			KAnimBatchManager.Instance().RenderKAnimTemperaturePostProcessingEffects();
 		}
 
 		public override List<LegendEntry> GetCustomLegendData()
@@ -3529,6 +3517,7 @@ public abstract class OverlayModes
 		{
 			Infrared.Instance.SetMode(Infrared.Mode.Disabled);
 			CameraController.Instance.ToggleColouredOverlayView(false);
+			CameraController.Instance.DisableKAnimPostProcessingEffect(KAnimConverter.PostProcessingEffects.TemperatureOverlay);
 			base.Disable();
 		}
 

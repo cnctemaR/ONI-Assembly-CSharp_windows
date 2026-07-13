@@ -81,7 +81,7 @@ public abstract class ClosestPickupableSensor<T> : Sensor where T : Component
 		int num = int.MaxValue;
 		foreach (Pickupable pickupable2 in pickupables)
 		{
-			if (FetchManager.IsFetchablePickup_Exclude(pickupable2.KPrefabID, pickupable2.storage, pickupable2.UnreservedAmount, exclude_tags, otherRequiredTags, destination))
+			if (FetchManager.IsFetchablePickup_Exclude(pickupable2.KPrefabID, pickupable2.storage, pickupable2.UnreservedFetchAmount, exclude_tags, otherRequiredTags, destination))
 			{
 				int navigationCost = pickupable2.GetNavigationCost(this.navigator, pickupable2.cachedCell);
 				if (navigationCost != -1 && navigationCost < num)

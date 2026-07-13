@@ -43,6 +43,8 @@ namespace TUNING
 
 		public const string INSULATOR = "Insulator";
 
+		public const string FOSSILS_TAG = "Fossils";
+
 		public static readonly string[] ALL_METALS = new string[] { "Metal" };
 
 		public static readonly string[] RAW_METALS = new string[] { "Metal" };
@@ -60,6 +62,8 @@ namespace TUNING
 		public static readonly string[] RAW_MINERALS_OR_WOOD = new string[] { "BuildableRaw&" + GameTags.BuildingWood.ToString() };
 
 		public static readonly string[] WOODS = new string[] { "BuildingWood" };
+
+		public static readonly string[] FOSSILS = new string[] { "Fossils" };
 
 		public static readonly string[] REFINED_MINERALS = new string[] { "BuildableProcessed" };
 

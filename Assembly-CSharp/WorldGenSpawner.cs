@@ -129,6 +129,11 @@ public class WorldGenSpawner : KMonoBehaviour
 		return list;
 	}
 
+	public WorldGenSpawner.Spawnable GetSpawnableInCell(int cell)
+	{
+		return this.spawnables.Find((WorldGenSpawner.Spawnable s) => s.cell == cell);
+	}
+
 	public List<Tag> GetSpawnersWithTag(Tag tag, int worldID, bool includeSpawned = false)
 	{
 		List<Tag> list = new List<Tag>();

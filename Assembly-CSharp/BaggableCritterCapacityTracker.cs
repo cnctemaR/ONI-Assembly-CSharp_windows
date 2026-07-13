@@ -20,6 +20,15 @@ public class BaggableCritterCapacityTracker : KMonoBehaviour, ISim1000ms, IUserC
 		TreeFilterable treeFilterable = this.filter;
 		treeFilterable.OnFilterChanged = (Action<HashSet<Tag>>)Delegate.Combine(treeFilterable.OnFilterChanged, new Action<HashSet<Tag>>(this.RefreshCreatureCount));
 		base.Subscribe(-905833192, new Action<object>(this.OnCopySettings));
+		if (this.requireLiquidOffset)
+		{
+			this.partitionerEntry = GameScenePartitioner.Instance.Add("BaggableCritterCapacityTracker.OnSpawn", base.gameObject, new Extents(this.cavityCell, new CellOffset[]
+			{
+				new CellOffset(0, 0)
+			}), GameScenePartitioner.Instance.liquidChangedLayer, new Action<object>(this.OnLiquidChanged));
+			this.OnLiquidChanged(null);
+			return;
+		}
 		base.Subscribe(144050788, new Action<object>(this.RefreshCreatureCount));
 	}
 
@@ -39,7 +48,7 @@ public class BaggableCritterCapacityTracker : KMonoBehaviour, ISim1000ms, IUserC
 				return str;
 			};
 		}
-		base.GetComponent<KSelectable>().SetStatusItem(Db.Get().StatusItemCategories.Main, BaggableCritterCapacityTracker.capacityStatusItem, this);
+		this.selectable.SetStatusItem(Db.Get().StatusItemCategories.Main, BaggableCritterCapacityTracker.capacityStatusItem, this);
 	}
 
 	protected override void OnCleanUp()
@@ -48,6 +57,21 @@ public class BaggableCritterCapacityTracker : KMonoBehaviour, ISim1000ms, IUserC
 		treeFilterable.OnFilterChanged = (Action<HashSet<Tag>>)Delegate.Remove(treeFilterable.OnFilterChanged, new Action<HashSet<Tag>>(this.RefreshCreatureCount));
 		base.Unsubscribe(144050788);
 		base.OnCleanUp();
+	}
+
+	private void OnLiquidChanged(object data)
+	{
+		if (this.requireLiquidOffset)
+		{
+			bool flag = Grid.IsLiquid(this.cavityCell);
+			if (flag)
+			{
+				this.RefreshCreatureCount();
+			}
+			this.operational.SetFlag(BaggableCritterCapacityTracker.isInLiquid, flag);
+			this.selectable.ToggleStatusItem(Db.Get().BuildingStatusItems.NotSubmerged, !flag, this);
+			this.selectable.ToggleStatusItem(BaggableCritterCapacityTracker.capacityStatusItem, flag, this);
+		}
 	}
 
 	private void OnCopySettings(object data)
@@ -67,19 +91,14 @@ public class BaggableCritterCapacityTracker : KMonoBehaviour, ISim1000ms, IUserC
 
 	public void RefreshCreatureCount(object data = null)
 	{
-		CavityInfo cavityForCell = Game.Instance.roomProber.GetCavityForCell(this.cavityCell);
 		int storedCreatureCount = this.storedCreatureCount;
-		this.storedCreatureCount = 0;
-		if (cavityForCell != null)
+		if (this.requireLiquidOffset)
 		{
-			foreach (KPrefabID kprefabID in cavityForCell.creatures)
-			{
-				if (!kprefabID.HasTag(GameTags.Creatures.Bagged) && !kprefabID.HasTag(GameTags.Trapped) && (!this.filteredCount || this.filter.AcceptedTags.Contains(kprefabID.PrefabTag)))
-				{
-					int storedCreatureCount2 = this.storedCreatureCount;
-					this.storedCreatureCount = storedCreatureCount2 + 1;
-				}
-			}
+			this.storedCreatureCount = this.RefreshSwimmingCreatureCount();
+		}
+		else
+		{
+			this.storedCreatureCount = this.RefreshCreatureCount();
 		}
 		if (this.onCountChanged != null && this.storedCreatureCount != storedCreatureCount)
 		{
@@ -87,9 +106,31 @@ public class BaggableCritterCapacityTracker : KMonoBehaviour, ISim1000ms, IUserC
 		}
 	}
 
+	private int RefreshCreatureCount()
+	{
+		int num = 0;
+		CavityInfo cavityForCell = Game.Instance.roomProber.GetCavityForCell(this.cavityCell);
+		if (cavityForCell != null)
+		{
+			foreach (KPrefabID kprefabID in cavityForCell.creatures)
+			{
+				if (!kprefabID.HasTag(GameTags.Creatures.Bagged) && !kprefabID.HasTag(GameTags.Trapped) && (!this.filteredCount || this.filter.AcceptedTags.Contains(kprefabID.PrefabTag)))
+				{
+					num++;
+				}
+			}
+		}
+		return num;
+	}
+
+	private int RefreshSwimmingCreatureCount()
+	{
+		return FishOvercrowingManager.Instance.GetFishCavityCount(this.cavityCell, this.filter.AcceptedTags);
+	}
+
 	public void Sim1000ms(float dt)
 	{
-		this.RefreshCreatureCount(null);
+		this.RefreshCreatureCount();
 	}
 
 	float IUserControlledCapacity.UserMaxCapacity
@@ -150,6 +191,8 @@ public class BaggableCritterCapacityTracker : KMonoBehaviour, ISim1000ms, IUserC
 
 	public int maximumCreatures = 40;
 
+	public bool requireLiquidOffset;
+
 	public CellOffset cavityOffset;
 
 	public bool filteredCount;
@@ -161,5 +204,15 @@ public class BaggableCritterCapacityTracker : KMonoBehaviour, ISim1000ms, IUserC
 	[MyCmpReq]
 	private TreeFilterable filter;
 
+	[MyCmpGet]
+	private Operational operational;
+
+	private static readonly Operational.Flag isInLiquid = new Operational.Flag("isInLiquid", Operational.Flag.Type.Requirement);
+
+	[MyCmpGet]
+	private KSelectable selectable;
+
 	private static StatusItem capacityStatusItem;
+
+	private HandleVector<int>.Handle partitionerEntry;
 }

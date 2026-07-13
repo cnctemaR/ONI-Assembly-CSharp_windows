@@ -56,6 +56,7 @@ public class PolymerizerConfig : IBuildingConfig
 		conduitDispenser.invertElementFilter = false;
 		conduitDispenser.elementFilter = new SimHashes[] { SimHashes.CarbonDioxide };
 		ElementConverter elementConverter = go.AddOrGet<ElementConverter>();
+		elementConverter.inputIsCategory = true;
 		elementConverter.consumedElements = new ElementConverter.ConsumedElement[]
 		{
 			new ElementConverter.ConsumedElement(PolymerizerConfig.INPUT_ELEMENT_TAG, 0.8333333f, true)

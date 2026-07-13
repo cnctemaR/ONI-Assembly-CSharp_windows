@@ -22,10 +22,6 @@ public class SimDebugViewCompositor : MonoBehaviour
 	private void OnRenderImage(RenderTexture src, RenderTexture dest)
 	{
 		Graphics.Blit(src, dest, this.material);
-		if (OverlayScreen.Instance != null)
-		{
-			OverlayScreen.Instance.RunPostProcessEffects(src, dest);
-		}
 	}
 
 	public void Toggle(bool is_on)

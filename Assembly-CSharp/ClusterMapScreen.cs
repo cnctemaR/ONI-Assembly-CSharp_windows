@@ -62,7 +62,10 @@ public class ClusterMapScreen : KScreen
 		this.mapScrollRect.content.localScale = new Vector3(this.m_currentZoomScale, this.m_currentZoomScale, 1f);
 		this.m_onDestinationChangedDelegate = new Action<object>(this.OnDestinationChanged);
 		this.m_onSelectObjectDelegate = new Action<object>(this.OnSelectObject);
-		base.Subscribe(1980521255, new Action<object>(this.UpdateVis));
+		base.Subscribe(1980521255, delegate(object _)
+		{
+			this.UpdateVis(false);
+		});
 	}
 
 	protected void MoveToNISPosition()
@@ -194,7 +197,7 @@ public class ClusterMapScreen : KScreen
 		{
 			this.m_destinationSelector = null;
 		}
-		this.UpdateVis(null);
+		this.UpdateVis(false);
 	}
 
 	public ClusterMapScreen.Mode GetMode()
@@ -208,7 +211,7 @@ public class ClusterMapScreen : KScreen
 		if (show)
 		{
 			this.MoveToNISPosition();
-			this.UpdateVis(null);
+			this.UpdateVis(true);
 			if (this.m_mode == ClusterMapScreen.Mode.Default)
 			{
 				this.TrySelectDefault();
@@ -271,7 +274,7 @@ public class ClusterMapScreen : KScreen
 
 	private void OnDestinationChanged(object data)
 	{
-		this.UpdateVis(null);
+		this.UpdateVis(false);
 	}
 
 	private void OnSelectObject(object data)
@@ -297,17 +300,17 @@ public class ClusterMapScreen : KScreen
 				this.SetMode(ClusterMapScreen.Mode.Default);
 			}
 		}
-		this.UpdateVis(null);
+		this.UpdateVis(false);
 	}
 
 	private void OnFogOfWarRevealed(object data = null)
 	{
-		this.UpdateVis(null);
+		this.UpdateVis(false);
 	}
 
 	private void OnNewTelescopeTarget(object data = null)
 	{
-		this.UpdateVis(null);
+		this.UpdateVis(false);
 	}
 
 	private void Update()
@@ -322,7 +325,7 @@ public class ClusterMapScreen : KScreen
 	{
 		if (this.m_selectedHex != null && this.m_selectedEntity != null)
 		{
-			this.UpdateVis(null);
+			this.UpdateVis(false);
 			return;
 		}
 		WorldContainer activeWorld = ClusterManager.Instance.activeWorld;
@@ -358,7 +361,7 @@ public class ClusterMapScreen : KScreen
 			maxQ = Mathf.Max(maxQ, component.location.Q);
 		}
 		this.SetupVisGameObjects();
-		this.UpdateVis(null);
+		this.UpdateVis(false);
 	}
 
 	public Transform GetGridEntityNameTarget(ClusterGridEntity entity)
@@ -432,6 +435,7 @@ public class ClusterMapScreen : KScreen
 						gameObject = this.telescopeVisContainer;
 						break;
 					case EntityLayer.Payload:
+					case EntityLayer.Meteor:
 						clusterMapVisualizer = this.mobileVisPrefab;
 						gameObject = this.mobileVisContainer;
 						break;
@@ -475,7 +479,7 @@ public class ClusterMapScreen : KScreen
 
 	private void OnClusterLocationChanged(object data)
 	{
-		this.UpdateVis(null);
+		this.UpdateVis(false);
 	}
 
 	public static ClusterRevealLevel GetRevealLevel(ClusterGridEntity entity)
@@ -493,7 +497,7 @@ public class ClusterMapScreen : KScreen
 		return ClusterRevealLevel.Hidden;
 	}
 
-	private void UpdateVis(object data = null)
+	private void UpdateVis(bool onShow = false)
 	{
 		this.SetupVisGameObjects();
 		this.UpdatePaths();
@@ -503,7 +507,7 @@ public class ClusterMapScreen : KScreen
 			keyValuePair.Value.Show(revealLevel);
 			bool flag = this.m_selectedEntity == keyValuePair.Key;
 			keyValuePair.Value.Select(flag);
-			if (keyValuePair.Key.positionDirty)
+			if (keyValuePair.Key.positionDirty || onShow)
 			{
 				Vector3 position = ClusterGrid.Instance.GetPosition(keyValuePair.Key);
 				keyValuePair.Value.rectTransform().SetLocalPosition(position);
@@ -568,7 +572,7 @@ public class ClusterMapScreen : KScreen
 			ClusterMapHex component = this.m_cellVisByLocation[entity.Location].GetComponent<ClusterMapHex>();
 			this.m_selectedHex = component;
 		}
-		this.UpdateVis(null);
+		this.UpdateVis(false);
 	}
 
 	public void SelectHex(ClusterMapHex newSelectionHex)
@@ -616,7 +620,7 @@ public class ClusterMapScreen : KScreen
 				}
 			}
 		}
-		this.UpdateVis(null);
+		this.UpdateVis(false);
 	}
 
 	public bool HasCurrentHover()
@@ -634,7 +638,7 @@ public class ClusterMapScreen : KScreen
 		this.m_hoveredHex = newHoverHex;
 		if (this.m_mode == ClusterMapScreen.Mode.SelectDestination)
 		{
-			this.UpdateVis(null);
+			this.UpdateVis(false);
 		}
 		this.UpdateHexToggleStates();
 	}

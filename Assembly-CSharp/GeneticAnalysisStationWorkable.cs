@@ -47,7 +47,7 @@ public class GeneticAnalysisStationWorkable : Workable
 			Pickupable pickupable;
 			if (component.PrimaryElement.Units > 1f)
 			{
-				pickupable = component.Take(1f);
+				pickupable = component.TakeUnit(1f);
 			}
 			else
 			{

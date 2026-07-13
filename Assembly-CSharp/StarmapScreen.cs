@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Text;
 using Database;
 using FMOD.Studio;
 using STRINGS;
@@ -123,6 +124,11 @@ public class StarmapScreen : KModalScreen
 			this.RefreshAnalyzeButton();
 			this.UpdateDestinationStates();
 		});
+		SpacecraftManager.instance.Subscribe(611818744, delegate(object obj)
+		{
+			this.OnSpaceDestinationAdded(obj);
+			this.UpdateDestinationStates();
+		});
 	}
 
 	protected override void OnCleanUp()
@@ -206,7 +212,19 @@ public class StarmapScreen : KModalScreen
 					planet.SetAnalysisActive(SpacecraftManager.instance.GetStarmapAnalysisDestinationID() == KVP.Key.id);
 					bool flag2 = SpacecraftManager.instance.GetDestinationAnalysisState(key) == SpacecraftManager.DestinationAnalysisState.Complete;
 					SpaceDestinationType destinationType = key.GetDestinationType();
-					planet.SetLabel(flag2 ? (destinationType.Name + "\n<color=#979798> " + GameUtil.GetFormattedDistance((float)KVP.Key.OneBasedDistance * 10000f * 1000f) + "</color>") : (UI.STARMAP.UNKNOWN_DESTINATION + "\n" + string.Format(UI.STARMAP.ANALYSIS_AMOUNT.text, GameUtil.GetFormattedPercent(100f * (SpacecraftManager.instance.GetDestinationAnalysisScore(KVP.Key) / (float)ROCKETRY.DESTINATION_ANALYSIS.COMPLETE), GameUtil.TimeSlice.None))));
+					StringBuilder stringBuilder = GlobalStringBuilderPool.Alloc();
+					if (flag2)
+					{
+						stringBuilder.Append(destinationType.Name);
+						stringBuilder.Append("\n<color=#979798>");
+						GameUtil.AppendFormattedDistance(stringBuilder, (float)KVP.Key.OneBasedDistance * 10000f * 1000f);
+						stringBuilder.Append("</color>");
+					}
+					else
+					{
+						stringBuilder.AppendFormat(UI.STARMAP.ANALYSIS_AMOUNT.text, GameUtil.GetFormattedPercent(100f * (SpacecraftManager.instance.GetDestinationAnalysisScore(KVP.Key) / (float)ROCKETRY.DESTINATION_ANALYSIS.COMPLETE), GameUtil.TimeSlice.None));
+					}
+					planet.SetLabel(GlobalStringBuilderPool.ReturnAndFree(stringBuilder));
 					planet.SetSprite(flag2 ? Assets.GetSprite(destinationType.spriteName) : Assets.GetSprite("unknown"), flag2 ? Color.white : color2);
 					planet.SetUnknownBGActive(SpacecraftManager.instance.GetDestinationAnalysisState(KVP.Key) != SpacecraftManager.DestinationAnalysisState.Complete, color2);
 					planet.SetFillAmount(SpacecraftManager.instance.GetDestinationAnalysisScore(KVP.Key) / (float)ROCKETRY.DESTINATION_ANALYSIS.COMPLETE);
@@ -239,6 +257,25 @@ public class StarmapScreen : KModalScreen
 		}
 	}
 
+	private void OnSpaceDestinationAdded(object destinationObj)
+	{
+		SpaceDestination spaceDestination = destinationObj as SpaceDestination;
+		if ((float)spaceDestination.OneBasedDistance * 10000f > this.planetsMaxDistance)
+		{
+			this.planetsMaxDistance = (float)spaceDestination.OneBasedDistance * 10000f;
+		}
+		while (this.planetRows.Count < spaceDestination.distance + 1)
+		{
+			GameObject gameObject = global::Util.KInstantiateUI(this.rowPrefab, this.rowsContiner.gameObject, true);
+			gameObject.rectTransform().SetAsFirstSibling();
+			this.planetRows.Add(gameObject);
+			gameObject.GetComponentInChildren<Image>().color = this.distanceColors[this.planetRows.Count % this.distanceColors.Length];
+			gameObject.GetComponentInChildren<LocText>().text = this.DisplayDistance((float)(this.planetRows.Count + 1) * 10000f);
+		}
+		GameObject gameObject2 = global::Util.KInstantiateUI(this.planetPrefab.gameObject, this.planetRows[spaceDestination.distance], true);
+		this.planetWidgets.Add(spaceDestination, gameObject2.GetComponent<StarmapPlanet>());
+	}
+
 	protected override void OnActivate()
 	{
 		base.OnActivate();
@@ -247,7 +284,7 @@ public class StarmapScreen : KModalScreen
 
 	private string DisplayDistance(float distance)
 	{
-		return global::Util.FormatWholeNumber(distance) + " " + UI.UNITSUFFIXES.DISTANCE.KILOMETER;
+		return string.Format("{0:0} {1}", distance, UI.UNITSUFFIXES.DISTANCE.KILOMETER);
 	}
 
 	private string DisplayDestinationMass(SpaceDestination selectedDestination)
@@ -271,15 +308,17 @@ public class StarmapScreen : KModalScreen
 
 	private string StorageCapacityTooltip(CommandModule command, SpaceDestination dest)
 	{
-		string text = "";
+		StringBuilder stringBuilder = GlobalStringBuilderPool.Alloc();
 		bool flag = dest != null && SpacecraftManager.instance.GetDestinationAnalysisState(dest) == SpacecraftManager.DestinationAnalysisState.Complete;
 		if (dest != null && flag)
 		{
 			if (dest.AvailableMass <= ConditionHasMinimumMass.CargoCapacity(dest, command))
 			{
-				text = text + UI.STARMAP.LAUNCHCHECKLIST.INSUFFICENT_MASS_TOOLTIP + "\n\n";
+				stringBuilder.Append(UI.STARMAP.LAUNCHCHECKLIST.INSUFFICENT_MASS_TOOLTIP);
+				stringBuilder.Append("\n\n");
 			}
-			text = text + string.Format(UI.STARMAP.LAUNCHCHECKLIST.RESOURCE_MASS_TOOLTIP, dest.GetDestinationType().Name, GameUtil.GetFormattedMass(dest.AvailableMass, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.Kilogram, true, "{0:0.#}"), GameUtil.GetFormattedMass(ConditionHasMinimumMass.CargoCapacity(dest, command), GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.Kilogram, true, "{0:0.#}")) + "\n\n";
+			stringBuilder.AppendFormat(UI.STARMAP.LAUNCHCHECKLIST.RESOURCE_MASS_TOOLTIP, dest.GetDestinationType().Name, GameUtil.GetFormattedMass(dest.AvailableMass, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.Kilogram, true, "{0:0.#}"), GameUtil.GetFormattedMass(ConditionHasMinimumMass.CargoCapacity(dest, command), GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.Kilogram, true, "{0:0.#}"));
+			stringBuilder.Append("\n\n");
 		}
 		float num = ((dest != null) ? dest.AvailableMass : 0f);
 		foreach (GameObject gameObject in AttachableBuilding.GetAttachedNetwork(command.GetComponent<AttachableBuilding>()))
@@ -292,49 +331,28 @@ public class StarmapScreen : KModalScreen
 					float availableResourcesPercentage = dest.GetAvailableResourcesPercentage(component.storageType);
 					float num2 = Mathf.Min(component.storage.Capacity(), availableResourcesPercentage * num);
 					num -= num2;
-					text = string.Concat(new string[]
-					{
-						text,
-						component.gameObject.GetProperName(),
-						" ",
-						string.Format(UI.STARMAP.STORAGESTATS.STORAGECAPACITY, GameUtil.GetFormattedMass(Mathf.Min(num2, component.storage.Capacity()), GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.Kilogram, true, "{0:0.#}"), GameUtil.GetFormattedMass(component.storage.Capacity(), GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.Kilogram, true, "{0:0.#}")),
-						"\n"
-					});
+					stringBuilder.Append(component.gameObject.GetProperName());
+					stringBuilder.Append(" ");
+					stringBuilder.AppendFormat(UI.STARMAP.STORAGESTATS.STORAGECAPACITY, GameUtil.GetFormattedMass(Mathf.Min(num2, component.storage.Capacity()), GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.Kilogram, true, "{0:0.#}"), GameUtil.GetFormattedMass(component.storage.Capacity(), GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.Kilogram, true, "{0:0.#}"));
+					stringBuilder.Append("\n");
 				}
 				else
 				{
-					text = string.Concat(new string[]
-					{
-						text,
-						component.gameObject.GetProperName(),
-						" ",
-						string.Format(UI.STARMAP.STORAGESTATS.STORAGECAPACITY, GameUtil.GetFormattedMass(0f, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.Kilogram, true, "{0:0.#}"), GameUtil.GetFormattedMass(component.storage.Capacity(), GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.Kilogram, true, "{0:0.#}")),
-						"\n"
-					});
+					stringBuilder.Append(component.gameObject.GetProperName());
+					stringBuilder.Append(" ");
+					stringBuilder.AppendFormat(UI.STARMAP.STORAGESTATS.STORAGECAPACITY, GameUtil.GetFormattedMass(0f, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.Kilogram, true, "{0:0.#}"), GameUtil.GetFormattedMass(component.storage.Capacity(), GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.Kilogram, true, "{0:0.#}"));
+					stringBuilder.Append("\n");
 				}
 			}
 		}
-		return text;
+		return GlobalStringBuilderPool.ReturnAndFree(stringBuilder);
 	}
 
 	private void LoadPlanets()
 	{
 		foreach (SpaceDestination spaceDestination in Game.Instance.spacecraftManager.destinations)
 		{
-			if ((float)spaceDestination.OneBasedDistance * 10000f > this.planetsMaxDistance)
-			{
-				this.planetsMaxDistance = (float)spaceDestination.OneBasedDistance * 10000f;
-			}
-			while (this.planetRows.Count < spaceDestination.distance + 1)
-			{
-				GameObject gameObject = global::Util.KInstantiateUI(this.rowPrefab, this.rowsContiner.gameObject, true);
-				gameObject.rectTransform().SetAsFirstSibling();
-				this.planetRows.Add(gameObject);
-				gameObject.GetComponentInChildren<Image>().color = this.distanceColors[this.planetRows.Count % this.distanceColors.Length];
-				gameObject.GetComponentInChildren<LocText>().text = this.DisplayDistance((float)(this.planetRows.Count + 1) * 10000f);
-			}
-			GameObject gameObject2 = global::Util.KInstantiateUI(this.planetPrefab.gameObject, this.planetRows[spaceDestination.distance], true);
-			this.planetWidgets.Add(spaceDestination, gameObject2.GetComponent<StarmapPlanet>());
+			this.OnSpaceDestinationAdded(spaceDestination);
 		}
 		this.UpdateDestinationStates();
 	}
@@ -535,7 +553,7 @@ public class StarmapScreen : KModalScreen
 		{
 			while (enumerator.MoveNext())
 			{
-				StarmapScreen.<>c__DisplayClass114_0 CS$<>8__locals1 = new StarmapScreen.<>c__DisplayClass114_0();
+				StarmapScreen.<>c__DisplayClass115_0 CS$<>8__locals1 = new StarmapScreen.<>c__DisplayClass115_0();
 				CS$<>8__locals1.<>4__this = this;
 				CS$<>8__locals1.rocket = enumerator.Current;
 				HierarchyReferences hierarchyReferences = global::Util.KInstantiateUI<HierarchyReferences>(this.listRocketTemplate.gameObject, this.rocketListContainer.gameObject, true);

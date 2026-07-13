@@ -155,6 +155,23 @@ public class StateMachineController : KMonoBehaviour, ISaveLoadableDetails, ISta
 		return default(DefType);
 	}
 
+	public InterfaceType GetDefImplementingInterfaceOfType<InterfaceType>() where InterfaceType : class
+	{
+		if (!this.defHandle.IsValid())
+		{
+			return default(InterfaceType);
+		}
+		foreach (StateMachine.BaseDef baseDef in this.cmpdef.defs)
+		{
+			InterfaceType interfaceType = baseDef as InterfaceType;
+			if (interfaceType != null)
+			{
+				return interfaceType;
+			}
+		}
+		return default(InterfaceType);
+	}
+
 	public List<DefType> GetDefs<DefType>() where DefType : StateMachine.BaseDef
 	{
 		List<DefType> list = new List<DefType>();

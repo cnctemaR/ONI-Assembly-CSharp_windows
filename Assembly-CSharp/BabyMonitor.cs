@@ -45,6 +45,8 @@ public class BabyMonitor : GameStateMachine<BabyMonitor, BabyMonitor.Instance, I
 
 		public string onGrowDropID;
 
+		public float onGrowDropUnits = 1f;
+
 		public bool forceAdultNavType;
 
 		public float adultThreshold = 5f;
@@ -71,7 +73,9 @@ public class BabyMonitor : GameStateMachine<BabyMonitor, BabyMonitor.Instance, I
 			}
 			if (base.smi.def.onGrowDropID != null)
 			{
-				Util.KInstantiate(Assets.GetPrefab(base.smi.def.onGrowDropID), position).SetActive(true);
+				GameObject gameObject2 = Util.KInstantiate(Assets.GetPrefab(base.smi.def.onGrowDropID), position);
+				gameObject2.GetComponent<PrimaryElement>().Mass *= base.smi.def.onGrowDropUnits;
+				gameObject2.SetActive(true);
 			}
 			foreach (AmountInstance amountInstance in base.gameObject.GetAmounts())
 			{

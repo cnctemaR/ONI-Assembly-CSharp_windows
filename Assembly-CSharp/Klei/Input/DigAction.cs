@@ -9,16 +9,27 @@ namespace Klei.Input
 	{
 		public void Uproot(int cell)
 		{
-			ListPool<ScenePartitionerEntry, GameScenePartitioner>.PooledList pooledList = ListPool<ScenePartitionerEntry, GameScenePartitioner>.Allocate();
-			int num;
-			int num2;
-			Grid.CellToXY(cell, out num, out num2);
-			GameScenePartitioner.Instance.GatherEntries(num, num2, 1, 1, GameScenePartitioner.Instance.plants, pooledList);
-			if (pooledList.Count > 0)
+			if (!Grid.ObjectLayers[1].ContainsKey(cell))
 			{
-				this.EntityDig((pooledList[0].obj as Component).GetComponent<IDigActionEntity>());
+				if (Grid.ObjectLayers[5].ContainsKey(cell))
+				{
+					GameObject gameObject = Grid.ObjectLayers[5][cell];
+					if (gameObject == null)
+					{
+						return;
+					}
+					IDigActionEntity component = gameObject.GetComponent<IDigActionEntity>();
+					this.EntityDig(component);
+				}
+				return;
 			}
-			pooledList.Recycle();
+			GameObject gameObject2 = Grid.ObjectLayers[1][cell];
+			if (gameObject2 == null)
+			{
+				return;
+			}
+			IDigActionEntity component2 = gameObject2.GetComponent<IDigActionEntity>();
+			this.EntityDig(component2);
 		}
 
 		public abstract void Dig(int cell, int distFromOrigin);

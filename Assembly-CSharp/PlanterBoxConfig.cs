@@ -31,8 +31,10 @@ public class PlanterBoxConfig : IBuildingConfig
 
 	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
+		go.GetComponent<KPrefabID>().AddTag(GameTags.CodexCategories.FarmBuilding, false);
 		Storage storage = go.AddOrGet<Storage>();
 		PlantablePlot plantablePlot = go.AddOrGet<PlantablePlot>();
+		plantablePlot.IsOffGround = true;
 		plantablePlot.tagOnPlanted = GameTags.PlantedOnFloorVessel;
 		plantablePlot.AddDepositTag(GameTags.CropSeed);
 		plantablePlot.SetFertilizationFlags(true, false);

@@ -10,5 +10,6 @@ public enum NotificationType
 	Messages,
 	DuplicantThreatening,
 	Event,
-	MessageImportant
+	MessageImportant,
+	Custom
 }

@@ -56,6 +56,14 @@ public class UnderwaterCritterCondoConfig : IBuildingConfig
 			}
 			return true;
 		};
+		def.UpdateForegroundVisibilitySymbols = delegate(KBatchedAnimController foreground_controller, bool is_large_critter)
+		{
+			if (foreground_controller != null)
+			{
+				foreground_controller.SetSymbolVisiblity("doorway_fg", !is_large_critter);
+				foreground_controller.SetSymbolVisiblity("condo_fg", is_large_critter);
+			}
+		};
 		def.moveToStatusItem = new StatusItem("UNDERWATERCRITTERCONDO.MOVINGTO", "CREATURES", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022, null);
 		def.interactStatusItem = new StatusItem("UNDERWATERCRITTERCONDO.INTERACTING", "CREATURES", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022, null);
 		def.condoTag = "UnderwaterCritterCondo";

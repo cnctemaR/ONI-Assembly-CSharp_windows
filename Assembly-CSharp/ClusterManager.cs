@@ -175,7 +175,7 @@ public class ClusterManager : KMonoBehaviour, ISaveLoadable
 				this.activeWorldIdx = id;
 			}
 		}
-		this.GetSMI<ClusterFogOfWarManager.Instance>().RevealLocation(axialI, 1);
+		this.GetSMI<ClusterFogOfWarManager.Instance>().RevealLocation(axialI, 1, 2);
 		this.m_clusterPOIsManager.PopulatePOIsFromWorldGen(clusterLayout);
 	}
 

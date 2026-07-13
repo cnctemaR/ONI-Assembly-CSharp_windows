@@ -8,7 +8,6 @@ public class POITechItemUnlockWorkable : Workable
 		this.workerStatusItem = Db.Get().DuplicantStatusItems.ResearchingFromPOI;
 		this.alwaysShowProgressBar = true;
 		this.resetProgressOnStop = false;
-		this.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_research_unlock_kanim") };
 		this.synchronizeAnims = true;
 	}
 

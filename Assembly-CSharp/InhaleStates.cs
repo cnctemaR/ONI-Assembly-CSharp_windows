@@ -140,7 +140,7 @@ public class InhaleStates : GameStateMachine<InhaleStates, InhaleStates.Instance
 				if (dietInfo != null)
 				{
 					CreatureCalorieMonitor.Instance smi = base.smi.gameObject.GetSMI<CreatureCalorieMonitor.Instance>();
-					float num2 = Mathf.Clamp01(smi.GetCalories0to1() / 0.9f);
+					float num2 = Mathf.Clamp01(smi.GetCalories0to1() / smi.HungryRatio);
 					float num3 = 1f - num2;
 					float consumptionRate = base.smi.monitor.def.consumptionRate;
 					float num4 = dietInfo.ConvertConsumptionMassToCalories(consumptionRate);

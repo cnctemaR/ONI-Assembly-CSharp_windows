@@ -20,24 +20,54 @@ namespace Database
 			this.orbitalResearchPoint = this.AddTechItem("OrbitalResearchPoint", RESEARCH.OTHER_TECH_ITEMS.ORBITAL_RESEARCH_POINT.NAME, RESEARCH.OTHER_TECH_ITEMS.ORBITAL_RESEARCH_POINT.DESC, this.GetSpriteFnBuilder("research_type_orbital_icon"), null, null, false);
 			this.conveyorOverlay = this.AddTechItem("ConveyorOverlay", RESEARCH.OTHER_TECH_ITEMS.CONVEYOR_OVERLAY.NAME, RESEARCH.OTHER_TECH_ITEMS.CONVEYOR_OVERLAY.DESC, this.GetSpriteFnBuilder("overlay_conveyor"), null, null, false);
 			this.jetSuit = this.AddTechItem("JetSuit", RESEARCH.OTHER_TECH_ITEMS.JET_SUIT.NAME, RESEARCH.OTHER_TECH_ITEMS.JET_SUIT.DESC, this.GetPrefabSpriteFnBuilder("Jet_Suit".ToTag()), null, null, false);
+			if (this.jetSuit != null)
+			{
+				this.jetSuit.AddSearchTerms(SEARCH_TERMS.ATMOSUIT);
+			}
 			this.atmoSuit = this.AddTechItem("AtmoSuit", RESEARCH.OTHER_TECH_ITEMS.ATMO_SUIT.NAME, RESEARCH.OTHER_TECH_ITEMS.ATMO_SUIT.DESC, this.GetPrefabSpriteFnBuilder("Atmo_Suit".ToTag()), null, null, false);
+			if (this.atmoSuit != null)
+			{
+				this.atmoSuit.AddSearchTerms(SEARCH_TERMS.ATMOSUIT);
+			}
 			this.oxygenMask = this.AddTechItem("OxygenMask", RESEARCH.OTHER_TECH_ITEMS.OXYGEN_MASK.NAME, RESEARCH.OTHER_TECH_ITEMS.OXYGEN_MASK.DESC, this.GetPrefabSpriteFnBuilder("Oxygen_Mask".ToTag()), null, null, false);
+			if (this.oxygenMask != null)
+			{
+				this.oxygenMask.AddSearchTerms(SEARCH_TERMS.OXYGEN);
+			}
+			this.superLiquids = this.AddTechItem("SUPER_LIQUIDS", RESEARCH.OTHER_TECH_ITEMS.SUPER_LIQUIDS.NAME, RESEARCH.OTHER_TECH_ITEMS.SUPER_LIQUIDS.DESC, this.GetPrefabSpriteFnBuilder(SimHashes.ViscoGel.CreateTag()), null, null, false);
 			this.deltaResearchPoint = this.AddTechItem("DeltaResearchPoint", RESEARCH.OTHER_TECH_ITEMS.DELTA_RESEARCH_POINT.NAME, RESEARCH.OTHER_TECH_ITEMS.DELTA_RESEARCH_POINT.DESC, this.GetSpriteFnBuilder("research_type_delta_icon"), DlcManager.EXPANSION1, null, false);
 			this.leadSuit = this.AddTechItem("LeadSuit", RESEARCH.OTHER_TECH_ITEMS.LEAD_SUIT.NAME, RESEARCH.OTHER_TECH_ITEMS.LEAD_SUIT.DESC, this.GetPrefabSpriteFnBuilder("Lead_Suit".ToTag()), DlcManager.EXPANSION1, null, false);
 			this.disposableElectrobankMetalOre = this.AddTechItem("DisposableElectrobank_RawMetal", RESEARCH.OTHER_TECH_ITEMS.DISPOSABLE_ELECTROBANK_METAL_ORE.NAME, RESEARCH.OTHER_TECH_ITEMS.DISPOSABLE_ELECTROBANK_METAL_ORE.DESC, this.GetPrefabSpriteFnBuilder("DisposableElectrobank_RawMetal".ToTag()), DlcManager.DLC3, null, false);
+			if (this.disposableElectrobankMetalOre != null)
+			{
+				this.disposableElectrobankMetalOre.AddSearchTerms(SEARCH_TERMS.BATTERY);
+			}
 			this.lubricationStick = this.AddTechItem("LubricationStick", RESEARCH.OTHER_TECH_ITEMS.LUBRICATION_STICK.NAME, RESEARCH.OTHER_TECH_ITEMS.LUBRICATION_STICK.DESC, this.GetPrefabSpriteFnBuilder("LubricationStick".ToTag()), DlcManager.DLC3, null, false);
 			if (this.lubricationStick != null)
 			{
 				this.lubricationStick.AddSearchTerms(SEARCH_TERMS.MEDICINE);
+				this.lubricationStick.AddSearchTerms(SEARCH_TERMS.BIONIC);
 			}
 			this.disposableElectrobankUraniumOre = this.AddTechItem("DisposableElectrobank_UraniumOre", RESEARCH.OTHER_TECH_ITEMS.DISPOSABLE_ELECTROBANK_URANIUM_ORE.NAME, RESEARCH.OTHER_TECH_ITEMS.DISPOSABLE_ELECTROBANK_URANIUM_ORE.DESC, this.GetPrefabSpriteFnBuilder("DisposableElectrobank_UraniumOre".ToTag()), new string[] { "EXPANSION1_ID", "DLC3_ID" }, null, false);
+			if (this.disposableElectrobankUraniumOre != null)
+			{
+				this.disposableElectrobankUraniumOre.AddSearchTerms(SEARCH_TERMS.BATTERY);
+			}
 			this.electrobank = this.AddTechItem("Electrobank", RESEARCH.OTHER_TECH_ITEMS.ELECTROBANK.NAME, RESEARCH.OTHER_TECH_ITEMS.ELECTROBANK.DESC, this.GetPrefabSpriteFnBuilder("Electrobank".ToTag()), DlcManager.DLC3, null, false);
+			if (this.electrobank != null)
+			{
+				this.electrobank.AddSearchTerms(SEARCH_TERMS.BATTERY);
+			}
 			this.fetchDrone = this.AddTechItem("FetchDrone", RESEARCH.OTHER_TECH_ITEMS.FETCHDRONE.NAME, RESEARCH.OTHER_TECH_ITEMS.FETCHDRONE.DESC, this.GetPrefabSpriteFnBuilder("FetchDrone".ToTag()), DlcManager.DLC3, null, false);
 			if (this.fetchDrone != null)
 			{
 				this.fetchDrone.AddSearchTerms(SEARCH_TERMS.ROBOT);
 			}
 			this.selfChargingElectrobank = this.AddTechItem("SelfChargingElectrobank", RESEARCH.OTHER_TECH_ITEMS.SELFCHARGINGELECTROBANK.NAME, RESEARCH.OTHER_TECH_ITEMS.SELFCHARGINGELECTROBANK.DESC, this.GetPrefabSpriteFnBuilder("SelfChargingElectrobank".ToTag()), new string[] { "EXPANSION1_ID", "DLC3_ID" }, null, false);
+			if (this.selfChargingElectrobank != null)
+			{
+				this.selfChargingElectrobank.AddSearchTerms(SEARCH_TERMS.BATTERY);
+			}
 		}
 
 		private Func<string, bool, Sprite> GetSpriteFnBuilder(string spriteName)
@@ -149,6 +179,8 @@ namespace Database
 		public TechItem fetchDrone;
 
 		public TechItem selfChargingElectrobank;
+
+		public TechItem superLiquids;
 
 		public const string BETA_RESEARCH_POINT_ID = "BetaResearchPoint";
 

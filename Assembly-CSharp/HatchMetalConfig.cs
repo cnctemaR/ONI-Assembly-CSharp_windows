@@ -12,19 +12,11 @@ public class HatchMetalConfig : IEntityConfig
 	{
 		get
 		{
-			HashSet<Tag> hashSet = new HashSet<Tag>
+			return new HashSet<Tag>(GameTags.BasicMetalOres)
 			{
-				SimHashes.Cuprite.CreateTag(),
 				SimHashes.GoldAmalgam.CreateTag(),
-				SimHashes.IronOre.CreateTag(),
-				SimHashes.Wolframite.CreateTag(),
-				SimHashes.AluminumOre.CreateTag()
+				SimHashes.Wolframite.CreateTag()
 			};
-			if (DlcManager.IsExpansion1Active())
-			{
-				hashSet.Add(SimHashes.Cobaltite.CreateTag());
-			}
-			return hashSet;
 		}
 	}
 

@@ -21,6 +21,8 @@ namespace ProcGen
 
 		public int height { get; private set; }
 
+		public int paddingX { get; private set; }
+
 		[StringEnumConverter]
 		public Mob.Location location { get; private set; }
 
@@ -37,7 +39,10 @@ namespace ProcGen
 			ShallowLiquid,
 			Surface,
 			LiquidFloor,
-			AnyFloor
+			AnyFloor,
+			LiquidCeiling,
+			Liquid,
+			EntombedFloorPeek
 		}
 	}
 }

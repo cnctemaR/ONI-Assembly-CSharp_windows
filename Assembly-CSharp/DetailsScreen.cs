@@ -233,7 +233,6 @@ public class DetailsScreen : KTabMenu
 
 	private string CodexEntryButton_GetCodexId()
 	{
-		string text = "";
 		global::Debug.Assert(this.target != null, "Details Screen has no target");
 		KSelectable component = this.target.GetComponent<KSelectable>();
 		DebugUtil.AssertArgs(component != null, new object[] { "Details Screen target is not a KSelectable", this.target });
@@ -241,7 +240,8 @@ public class DetailsScreen : KTabMenu
 		BuildingUnderConstruction component3 = component.GetComponent<BuildingUnderConstruction>();
 		CreatureBrain component4 = component.GetComponent<CreatureBrain>();
 		PlantableSeed component5 = component.GetComponent<PlantableSeed>();
-		BudUprootedMonitor component6 = component.GetComponent<BudUprootedMonitor>();
+		CodexEntryRedirector component6 = component.GetComponent<CodexEntryRedirector>();
+		string text;
 		if (component2 != null)
 		{
 			text = CodexCache.FormatLinkID(component2.element.id.ToString());
@@ -260,16 +260,9 @@ public class DetailsScreen : KTabMenu
 			text = CodexCache.FormatLinkID(component.PrefabID().ToString());
 			text = text.Replace("SEED", "");
 		}
-		else if (component6 != null)
+		else if (component6 != null && !string.IsNullOrEmpty(component6.CodexID))
 		{
-			if (component6.parentObject.Get() != null)
-			{
-				text = CodexCache.FormatLinkID(component6.parentObject.Get().PrefabID().ToString());
-			}
-			else if (component6.GetComponent<TreeBud>() != null)
-			{
-				text = CodexCache.FormatLinkID(component6.GetComponent<TreeBud>().buddingTrunk.Get().PrefabID().ToString());
-			}
+			text = CodexCache.FormatLinkID(component6.CodexID);
 		}
 		else
 		{
@@ -481,6 +474,10 @@ public class DetailsScreen : KTabMenu
 
 	public void RefreshTitle()
 	{
+		if (this.target != null)
+		{
+			this.TabTitle.SetTitle(this.target.GetProperName());
+		}
 		for (int i = 0; i < this.sidescreenTabs.Length; i++)
 		{
 			DetailsScreen.SidescreenTab tab = this.sidescreenTabs[i];

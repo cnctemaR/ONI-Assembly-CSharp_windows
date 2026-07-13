@@ -33,6 +33,7 @@ public class FarmStationConfig : IBuildingConfig
 	{
 		go.AddOrGet<LoopingSounds>();
 		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.FarmStationType, false);
+		go.GetComponent<KPrefabID>().AddTag(GameTags.CodexCategories.FarmBuilding, false);
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)
@@ -40,6 +41,7 @@ public class FarmStationConfig : IBuildingConfig
 		go.AddOrGet<LogicOperationalController>();
 		Storage storage = go.AddOrGet<Storage>();
 		storage.showInUI = true;
+		storage.SetDefaultStoredItemModifiers(Storage.StandardInsulatedStorage);
 		ManualDeliveryKG manualDeliveryKG = go.AddOrGet<ManualDeliveryKG>();
 		manualDeliveryKG.SetStorage(storage);
 		manualDeliveryKG.RequestedItemTag = FarmStationConfig.MATERIAL_FOR_TINKER;
@@ -51,7 +53,6 @@ public class FarmStationConfig : IBuildingConfig
 		tinkerStation.inputMaterial = FarmStationConfig.MATERIAL_FOR_TINKER;
 		tinkerStation.massPerTinker = 5f;
 		tinkerStation.outputPrefab = FarmStationConfig.TINKER_TOOLS;
-		tinkerStation.outputTemperature = 308.15f;
 		tinkerStation.requiredSkillPerk = Db.Get().SkillPerks.CanFarmTinker.Id;
 		tinkerStation.choreType = Db.Get().ChoreTypes.FarmingFabricate.IdHash;
 		tinkerStation.fetchChoreType = Db.Get().ChoreTypes.FarmFetch.IdHash;
@@ -80,6 +81,4 @@ public class FarmStationConfig : IBuildingConfig
 	public static Tag TINKER_TOOLS = FarmStationToolsConfig.tag;
 
 	public const float MASS_PER_TINKER = 5f;
-
-	public const float OUTPUT_TEMPERATURE = 308.15f;
 }

@@ -34,6 +34,7 @@ public class RocketControlStationConfig : IBuildingConfig
 		buildingDef.OnePerWorld = true;
 		buildingDef.RequiredSkillPerkID = Db.Get().SkillPerks.CanUseRocketControlStation.Id;
 		buildingDef.LogicInputPorts = new List<LogicPorts.Port> { LogicPorts.Port.InputPort(RocketControlStation.PORT_ID, new CellOffset(0, 0), global::STRINGS.BUILDINGS.PREFABS.ROCKETCONTROLSTATION.LOGIC_PORT, global::STRINGS.BUILDINGS.PREFABS.ROCKETCONTROLSTATION.LOGIC_PORT_ACTIVE, global::STRINGS.BUILDINGS.PREFABS.ROCKETCONTROLSTATION.LOGIC_PORT_INACTIVE, false, false) };
+		buildingDef.AddSearchTerms(SEARCH_TERMS.ROCKET);
 		return buildingDef;
 	}
 

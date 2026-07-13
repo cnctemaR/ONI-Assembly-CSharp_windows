@@ -18,6 +18,7 @@ public class PropTableConfig : IEntityConfig
 		PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
 		component.SetElement(SimHashes.Unobtanium, true);
 		component.Temperature = 294.15f;
+		LoreBearerUtil.AddLoreTo(gameObject, new LoreBearerAction(LoreBearerUtil.UnlockNextJournalEntry));
 		gameObject.AddOrGet<Demolishable>();
 		return gameObject;
 	}

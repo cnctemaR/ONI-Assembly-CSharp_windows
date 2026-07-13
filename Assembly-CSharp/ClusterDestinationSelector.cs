@@ -1,5 +1,6 @@
 ﻿using System;
 using KSerialization;
+using STRINGS;
 
 public class ClusterDestinationSelector : KMonoBehaviour
 {
@@ -21,9 +22,14 @@ public class ClusterDestinationSelector : KMonoBehaviour
 		return ClusterUtil.GetAsteroidWorldIdAtLocation(this.m_destination);
 	}
 
-	public AxialI GetDestination()
+	public virtual AxialI GetDestination()
 	{
 		return this.m_destination;
+	}
+
+	public virtual ClusterGridEntity GetClusterEntityTarget()
+	{
+		return null;
 	}
 
 	public virtual void SetDestination(AxialI location)
@@ -61,6 +67,14 @@ public class ClusterDestinationSelector : KMonoBehaviour
 	public bool requireLaunchPadOnAsteroidDestination;
 
 	public bool shouldPointTowardsPath;
+
+	public string sidescreenTitleString = UI.UISIDESCREENS.CLUSTERDESTINATIONSIDESCREEN.TITLE;
+
+	public string changeTargetButtonTooltipString = UI.UISIDESCREENS.CLUSTERDESTINATIONSIDESCREEN.CHANGE_DESTINATION_BUTTON_TOOLTIP;
+
+	public string clearTargetButtonTooltipString = UI.UISIDESCREENS.CLUSTERDESTINATIONSIDESCREEN.CLEAR_DESTINATION_BUTTON_TOOLTIP;
+
+	public EntityLayer requiredEntityLayer = EntityLayer.None;
 
 	private EventSystem.IntraObjectHandler<ClusterDestinationSelector> OnClusterLocationChangedDelegate = new EventSystem.IntraObjectHandler<ClusterDestinationSelector>(delegate(ClusterDestinationSelector cmp, object data)
 	{

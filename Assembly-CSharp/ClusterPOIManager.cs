@@ -157,7 +157,7 @@ public class ClusterPOIManager : KMonoBehaviour
 			return;
 		}
 		AxialI location = this.m_temporalTear.Get().Location;
-		this.GetFOWManager().RevealLocation(location, 1);
+		this.GetFOWManager().RevealLocation(location, 1, 2);
 	}
 
 	public bool IsTemporalTearRevealed()

@@ -9,7 +9,7 @@ namespace Klei.AI
 	public class PlantBlightEvent : GameplayEvent<PlantBlightEvent.StatesInstance>
 	{
 		public PlantBlightEvent(string id, string targetPlantPrefab, float infectionDuration, float incubationDuration)
-			: base(id, 0, 0)
+			: base(id, 0, 0, null, null)
 		{
 			this.targetPlantPrefab = targetPlantPrefab;
 			this.infectionDuration = infectionDuration;

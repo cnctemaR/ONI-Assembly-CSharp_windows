@@ -7,5 +7,7 @@ public enum EntityLayer
 	POI,
 	Telescope,
 	Payload,
-	FX
+	FX,
+	Meteor,
+	None
 }

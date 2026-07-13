@@ -115,7 +115,10 @@ namespace ProcGen
 			Moo,
 			IceCaves,
 			CarrotQuarry,
-			SugarWoods
+			SugarWoods,
+			PrehistoricGarden,
+			PrehistoricRaptor,
+			PrehistoricWetlands
 		}
 	}
 }

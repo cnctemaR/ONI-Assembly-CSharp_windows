@@ -31,6 +31,7 @@ public class WoodGasGeneratorConfig : IBuildingConfig
 		buildingDef.PowerOutputOffset = new CellOffset(0, 0);
 		buildingDef.AddSearchTerms(SEARCH_TERMS.LUMBER);
 		buildingDef.AddSearchTerms(SEARCH_TERMS.POWER);
+		buildingDef.AddSearchTerms(SEARCH_TERMS.GENERATOR);
 		return buildingDef;
 	}
 

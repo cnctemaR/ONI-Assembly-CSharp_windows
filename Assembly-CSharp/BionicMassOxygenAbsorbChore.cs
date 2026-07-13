@@ -284,7 +284,7 @@ public class BionicMassOxygenAbsorbChore : Chore<BionicMassOxygenAbsorbChore.Ins
 		public float dt;
 	}
 
-	public class Instance : GameStateMachine<BionicMassOxygenAbsorbChore.States, BionicMassOxygenAbsorbChore.Instance, BionicMassOxygenAbsorbChore, object>.GameInstance
+	public class Instance : GameStateMachine<BionicMassOxygenAbsorbChore.States, BionicMassOxygenAbsorbChore.Instance, BionicMassOxygenAbsorbChore, object>.GameInstance, BionicOxygenTankMonitor.IChore
 	{
 		public float CRITICAL_OXYGEN_MASS_GIVE_UP_TRESHOLD
 		{
@@ -318,6 +318,11 @@ public class BionicMassOxygenAbsorbChore : Chore<BionicMassOxygenAbsorbChore.Ins
 			Klei.AI.Attribute deltaAttribute = Db.Get().Amounts.Breath.deltaAttribute;
 			float recover_BREATH_DELTA = DUPLICANTSTATS.STANDARD.BaseStats.RECOVER_BREATH_DELTA;
 			this.recoveringbreath = new AttributeModifier(deltaAttribute.Id, recover_BREATH_DELTA, DUPLICANTS.MODIFIERS.RECOVERINGBREATH.NAME, false, false, true);
+		}
+
+		public bool IsConsumingOxygen()
+		{
+			return !base.IsInsideState(base.sm.move);
 		}
 
 		public void ChangeCellReservation(int newCell)

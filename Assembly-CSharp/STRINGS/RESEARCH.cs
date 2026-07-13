@@ -225,6 +225,22 @@ namespace STRINGS
 				public static LocString DESC = "Enables access to the " + UI.FormatAsOverlay("Conveyor Overlay") + ".";
 			}
 
+			public class SUPER_LIQUIDS
+			{
+				public static LocString NAME = UI.PRE_KEYWORD + "Advanced Chemical Production" + UI.PST_KEYWORD;
+
+				public static LocString DESC = string.Concat(new string[]
+				{
+					"Enables production of ",
+					ELEMENTS.VISCOGEL.NAME,
+					" and ",
+					ELEMENTS.SUPERCOOLANT.NAME,
+					" at the ",
+					BUILDINGS.PREFABS.CHEMICALREFINERY.NAME,
+					"."
+				});
+			}
+
 			public class LUBRICATION_STICK
 			{
 				public static LocString NAME = UI.PRE_KEYWORD + "Gear Balm" + UI.PST_KEYWORD + " Pattern";
@@ -953,6 +969,13 @@ namespace STRINGS
 				public static LocString DESC = "Distill difficult mixtures down to their most useful parts.";
 			}
 
+			public class ADVANCEDDISTILLATION
+			{
+				public static LocString NAME = UI.FormatAsLink("Emulsification", "ADVANCEDDISTILLATION");
+
+				public static LocString DESC = "Specialized production of " + UI.FormatAsLink("Liquid", "ELEMENTS_LIQUID") + " compounds.";
+			}
+
 			public class CATALYTICS
 			{
 				public static LocString NAME = UI.FormatAsLink("Catalytics", "CATALYTICS");
@@ -1328,7 +1351,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = UI.FormatAsLink("Advanced Gas Flow", "SPACEGAS");
 
-				public static LocString DESC = UI.FormatAsLink("Gas", "ELEMENTS_GASSES") + " engines and transportation for rockets.";
+				public static LocString DESC = UI.FormatAsLink("Gas", "ELEMENTS_GAS") + " engines and transportation for rockets.";
 			}
 
 			public class DATASCIENCE

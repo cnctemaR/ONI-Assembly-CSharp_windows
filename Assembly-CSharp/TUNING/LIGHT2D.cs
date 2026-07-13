@@ -51,6 +51,38 @@ namespace TUNING
 
 		public const int CEILINGLIGHT_LUX = 1800;
 
+		public const float FOSSILSCULPTURE_RANGE = 8f;
+
+		public const float FOSSILSCULPTURE_CEILING_RANGE = 8f;
+
+		public const float FOSSILSCULPTURE_ANGLE = 0f;
+
+		public const float FOSSILSCULPTURE_CEILING_ANGLE = 2.6f;
+
+		public const int FOSSILSCULPTURE_LIGHT_WIDTH = 3;
+
+		public const DiscreteShadowCaster.Direction FOSSILSCULPTURE_LIGHT_DIRECTION = DiscreteShadowCaster.Direction.North;
+
+		public const DiscreteShadowCaster.Direction FOSSILSCULPTURE_CEILING_LIGHT_DIRECTION = DiscreteShadowCaster.Direction.South;
+
+		public const global::LightShape FOSSILSCULPTURE_SHAPE = global::LightShape.Quad;
+
+		public const global::LightShape FOSSILSCULPTURE_CEILING_SHAPE = global::LightShape.Quad;
+
+		public static readonly Color FOSSILSCULPTURE_COLOR = LIGHT2D.LIGHT_YELLOW;
+
+		public static readonly Color FOSSILSCULPTURE_OVERLAYCOLOR = LIGHT2D.LIGHT_OVERLAY;
+
+		public static readonly Vector2 FOSSILSCULPTURE_OFFSET = new Vector2(0.05f, 0.65f);
+
+		public static readonly Vector2 FOSSILSCULPTURE_CEILING_OFFSET = new Vector2(0.05f, 1.65f);
+
+		public static readonly Vector2 FOSSILSCULPTURE_DIRECTION = Vector2.up;
+
+		public static readonly Vector2 FOSSILSCULPTURE_CEILING_DIRECTION = LIGHT2D.DEFAULT_DIRECTION;
+
+		public const int FOSSILSCULPTURE_LUX = 3000;
+
 		public static readonly int SUNLAMP_LUX = (int)((float)BeachChairConfig.TAN_LUX * 4f);
 
 		public const float SUNLAMP_RANGE = 16f;

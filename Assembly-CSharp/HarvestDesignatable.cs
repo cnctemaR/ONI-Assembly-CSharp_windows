@@ -49,6 +49,11 @@ public class HarvestDesignatable : KMonoBehaviour
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
+		this.growingStateManager = base.GetComponent<IManageGrowingStates>();
+		if (this.growingStateManager == null)
+		{
+			this.growingStateManager = base.gameObject.GetSMI<IManageGrowingStates>();
+		}
 		if (this.isMarkedForHarvest)
 		{
 			this.MarkForHarvest();
@@ -211,6 +216,7 @@ public class HarvestDesignatable : KMonoBehaviour
 		{
 			component.OnMarkedForHarvest();
 		}
+		base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().MiscStatusItems.NotMarkedForHarvest, false);
 	}
 
 	protected virtual void OnClickHarvestWhenReady()
@@ -258,6 +264,8 @@ public class HarvestDesignatable : KMonoBehaviour
 	private bool isInPlanterBox;
 
 	public bool showUserMenuButtons = true;
+
+	public IManageGrowingStates growingStateManager;
 
 	[Serialize]
 	protected bool harvestWhenReady;

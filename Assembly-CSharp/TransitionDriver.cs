@@ -4,6 +4,18 @@ using UnityEngine;
 
 public class TransitionDriver
 {
+	private Action<object> onAnimCompleteBinding
+	{
+		get
+		{
+			if (this.onAnimComplete_ == null)
+			{
+				this.onAnimComplete_ = new Action<object>(this.OnAnimComplete);
+			}
+			return this.onAnimComplete_;
+		}
+	}
+
 	public Navigator.ActiveTransition GetTransition
 	{
 		get
@@ -87,7 +99,7 @@ public class TransitionDriver
 			KBatchedAnimController animController2 = navigator.animController;
 			animController2.PlaySpeedMultiplier = transition.animSpeed;
 			animController2.Play(transition.anim, KAnim.PlayMode.Once, 1f, 0f);
-			navigator.Subscribe(-1061186183, new Action<object>(this.OnAnimComplete));
+			navigator.Subscribe(-1061186183, this.onAnimCompleteBinding);
 		}
 		if (transition.navGridTransition.y != 0)
 		{
@@ -226,7 +238,7 @@ public class TransitionDriver
 				overrideLayer.EndTransition(this.navigator, this.transition);
 			}
 			this.navigator.animController.PlaySpeedMultiplier = 1f;
-			this.navigator.Unsubscribe(-1061186183, new Action<object>(this.OnAnimComplete));
+			this.navigator.Unsubscribe(-1061186183, this.onAnimCompleteBinding);
 			if (this.brain != null)
 			{
 				this.brain.Resume("move_handler");
@@ -242,7 +254,7 @@ public class TransitionDriver
 	{
 		if (this.navigator != null)
 		{
-			this.navigator.Unsubscribe(-1061186183, new Action<object>(this.OnAnimComplete));
+			this.navigator.Unsubscribe(-1061186183, this.onAnimCompleteBinding);
 		}
 		this.isComplete = true;
 	}
@@ -274,6 +286,8 @@ public class TransitionDriver
 	public List<TransitionDriver.OverrideLayer> overrideLayers = new List<TransitionDriver.OverrideLayer>();
 
 	private LoggerFS log;
+
+	private Action<object> onAnimComplete_;
 
 	public class OverrideLayer
 	{

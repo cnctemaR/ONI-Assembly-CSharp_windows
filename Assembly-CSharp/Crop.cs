@@ -66,7 +66,7 @@ public class Crop : KMonoBehaviour, IGameObjectEffectDescriptor
 
 	public void SpawnSomeFruit(Tag cropID, float amount)
 	{
-		GameObject gameObject = GameUtil.KInstantiate(Assets.GetPrefab(cropID), base.transform.GetPosition() + new Vector3(0f, 0.75f, 0f), Grid.SceneLayer.Ore, null, 0);
+		GameObject gameObject = GameUtil.KInstantiate(Assets.GetPrefab(cropID), base.transform.GetPosition() + this.cropSpawnOffset, Grid.SceneLayer.Ore, null, 0);
 		if (gameObject != null)
 		{
 			MutantPlant component = base.GetComponent<MutantPlant>();
@@ -113,6 +113,17 @@ public class Crop : KMonoBehaviour, IGameObjectEffectDescriptor
 		List<Descriptor> list = new List<Descriptor>();
 		Tag tag = new Tag(this.cropVal.cropId);
 		GameObject prefab = Assets.GetPrefab(tag);
+		if (prefab == null)
+		{
+			DebugUtil.LogWarningArgs(new object[]
+			{
+				"Crop",
+				base.gameObject.name,
+				"has an invalid crop prefab:",
+				tag
+			});
+			return list;
+		}
 		Edible component = prefab.GetComponent<Edible>();
 		Klei.AI.Attribute yieldAmount = Db.Get().PlantAttributes.YieldAmount;
 		float preModifiedAttributeValue = go.GetComponent<Modifiers>().GetPreModifiedAttributeValue(yieldAmount);
@@ -162,6 +173,8 @@ public class Crop : KMonoBehaviour, IGameObjectEffectDescriptor
 	public Crop.CropVal cropVal;
 
 	private AttributeInstance yield;
+
+	public Vector3 cropSpawnOffset = new Vector3(0f, 0.75f, 0f);
 
 	public string domesticatedDesc = "";
 

@@ -127,6 +127,8 @@ public class SteamManager : MonoBehaviour
 
 	public const uint STEAM_DLC3_APPLICATION_ID = 3302470U;
 
+	public const uint STEAM_DLC4_APPLICATION_ID = 3655420U;
+
 	public static List<AppId_t> ONI_STEAM_APP_IDS = new List<AppId_t>
 	{
 		new AppId_t(457140U),

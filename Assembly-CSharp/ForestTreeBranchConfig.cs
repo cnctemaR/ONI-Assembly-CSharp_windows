@@ -22,6 +22,7 @@ public class ForestTreeBranchConfig : IEntityConfig
 		List<Tag> list = new List<Tag>
 		{
 			GameTags.HideFromSpawnTool,
+			GameTags.HideFromCodex,
 			GameTags.PlantBranch
 		};
 		GameObject gameObject = EntityTemplates.CreatePlacedEntity(text, text2, text3, num, anim, text4, sceneLayer, num2, num3, effectorValues, default(EffectorValues), SimHashes.Creature, list, 298.15f);
@@ -29,6 +30,7 @@ public class ForestTreeBranchConfig : IEntityConfig
 		gameObject.AddOrGet<TreeBud>();
 		gameObject.AddOrGet<StandardCropPlant>();
 		gameObject.AddOrGet<BudUprootedMonitor>();
+		gameObject.AddOrGet<CodexEntryRedirector>().CodexID = "ForestTree";
 		PlantBranch.Def def = gameObject.AddOrGetDef<PlantBranch.Def>();
 		def.preventStartSMIOnSpawn = true;
 		def.onEarlySpawn = new Action<PlantBranch.Instance>(this.TranslateOldTrunkToNewSystem);

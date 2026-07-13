@@ -209,6 +209,108 @@ namespace STRINGS
 
 		public class INVESTIGATIONS
 		{
+			public class DLC4_SURFACEPOI
+			{
+				public static LocString TITLE = "Environmental Pledge";
+
+				public static LocString SUBTITLE = "ENCRYPTION LEVEL: NONE";
+
+				public class BODY
+				{
+					public static LocString TITLE2 = "<b>Gravitas Vows Space Junk Solution</b>";
+
+					public static LocString CONTAINER1 = "The Gravitas Facility has pledged to reduce the number of injuries caused by defunct spacecraft falling to Earth.\n\nThis announcement comes less than a month after historic class action lawsuits left two of the aerospace industry's biggest players reeling.\n\n\"For decades, this community has relied on objects landing in uninhabited areas or being incinerated by the Earth's atmosphere upon reentry,\" said Dr. Jacquelyn Stern, director of the facility. \"That's neither sustainable nor guaranteed.\"\n\nThe uncontrolled reentry of space debris accounts for almost a quarter of all accidental injuries around the world. That number is steadily rising as broadband satellite megaconstellations continue to expand.\n\n\"We're developing a way to break up large, at-risk space objects in the thermosphere so that our team can safely deorbit the remaining fragments.\" Dr. Stern explained.\n\nWhen asked about critiques that Gravitas might use this opportunity to obtain proprietary technology or undertake unauthorized satellite placement, Dr. Stern scoffed. \"Our only agenda is the protection and advancement of the human species.\"\n\nA live-streamed press conference is scheduled for the end of this week.";
+				}
+			}
+
+			public class DLC4_EXPEDITION
+			{
+				public static LocString TITLE = "Personal Journal: B214";
+
+				public static LocString SUBTITLE = "ENCRYPTION LEVEL: NONE";
+
+				public class BODY
+				{
+					public static LocString CONTAINER1 = "Assignments came in this morning: I'm officially leading the Gravitas arm of the Clear Skies Coalition.\n\nI requested Higby and Gossmann for my crew. Gossmann might be a little salty about deprioritizing her swarm craft sensor project again, but she'd never let that get in the way.\n\nThe Director said Gossmann's a no-go. Third crew member is some CSC contest winner who pitched the top LEO debris cleanup solution last year. I must have made a face, because the Director arched an eyebrow and asked if I had something to say.\n\nNo, ma'am. I've babysat worse. Just one more eventuality to plan for.\n\nOur space tourism program depends on traveling through LEO and beyond. Plus that's the warmup for resettlement missions.\n\nNot much hope for either of those right now, given that I'm the only one who can dodge all the debris we've left up there. We need an interstellar highway, not cosmic Frogger.\n\n------------------\n\n";
+
+					public static LocString CONTAINER2 = "The newbie's not a newbie at all. She's a multi-PhD commercial space comms satellite engineer on her third major career change. Dr. Maya Tayeh, with a string of acronyms after her name that's almost as long as Higby's.\n\nWorks for one of the major players as a consultant. Private-sector-sized ego to match. But her short-wavelength laser net debris vaporizer does sound more efficient than sending up a manual retrieval crew.\n\nShe calls it the LASSO. Higby's already got a space cowboys theme song in the works.\n\nMission control has some words for us about the debris shields. Glad Higby stopped singing before the call came through.\n\n------------------\n\n";
+
+					public static LocString CONTAINER3 = "Sent Higby and Tayeh out to investigate reported issues with debris shield sensors. Everything's copacetic. Must be something on the Terra side.\n\nGossmann patched in at the end of the call. In a real <i>mood</i>. She's been assigned a solo mission. Somewhere \"colder than the Director's heart.\" I didn't even know anything <i>could</i> upset her. Even when we were stranded on the space station for almost a year, she was cracking jokes.\n\nWhatever it is, it's gotta be a step down from the CSC initiative. This is the first time all three major spacefaring corporations are collaborating. We're making histor-\n\n-stand by, the orbit control system is glitc-\n\n-what in the world is th-\n\n-oh my g-\n\nHIGBY!\n\n------------------\n";
+				}
+			}
+
+			public class DLC4_FOREWORD
+			{
+				public static LocString TITLE = "Posthumous Publication";
+
+				public static LocString SUBTITLE = "ENCRYPTION LEVEL: NONE";
+
+				public class BODY
+				{
+					public static LocString CONTAINER1 = "<b>Praise for <i>Swept Into the Stars</i>:</b>\n\n\"Unspeakably beautiful.\"\n\n<indent=10%>—Li Fu, author of <i>The Moments Between Now and Tomorrow</i></indent>\n\n\"Stunning compositions by one of the world's most celebrated scientific minds.\"\n\n<indent=10%>—Quinn Kelly, The Ballyhoo Book Review</indent>\n\n\"I dare you to read this and not feel inspired.\"\n\n<indent=10%>—Dolores Greene, Newplane Publishing House</indent>\n\n------------------\n\n";
+
+					public static LocString CONTAINER2 = "<b>FOREWORD</b>";
+
+					public static LocString CONTAINER3 = "\"Our advancements as a species do not occur in a vacuum. Our success is built on the efforts of those who came before us. Their explorations, ideas, hopes, and breakthroughs illuminate ours, and give us a reason to keep pushing forward. Science is our vehicle, but people—friends, strangers, and rivals alike—are our purpose.\"\n\nThat's the short version of the monologue that Dr. Austin Higby delivered at least once a week.\n\nDr. Higby was a staunch advocate of collaboration. His research took astrobiology into exciting new territory, a feat he attributed to the contributions of co-authors and sources from every branch of science. He also had a deep appreciation for the arts. Many of his colleagues attended their first theater production at his invitation, myself included.\n\nDuring one of his rotations at the Gravitas Facility, I asked him how he found time for it all. He laughed. \"It finds <i>me!</i>\"\n\nThree months later, he and the crew of the Starsweep II vanished while on a now-infamous mission for the Clear Skies Coalition. No trace of their spacecraft has ever been found.\n\nThen these writings were discovered among Dr. Higby's personal files. Dozens upon dozens of poems and essays so profound that they make the reader feel transported to another place and time...one that feels at once familiar and completely alien.\n\n<i>Swept Into the Stars</i> is a labour of love by countless friends, colleagues, students, and fans who worked tirelessly to organize and edit Dr. Higby's words.\n\nWith permission from the Higby family, this edition also includes the farewell speech he had penned for the retirement announcement he never had a chance to make.\n\nHigby would be equal parts proud and embarrassed.\n\nI miss you, my friend. I hope we meet again someday, so you can tell me what wonders found you out there at the edges of the universe.\n\nThis one's for you. For all of us.\n\nAlways,\n<indent=10%>Emily G.</indent>\n\n<i>One hundred percent of the proceeds from Dr. Austin Higby's estate, including the sale of this book, will be donated to the Higby Memorial Scholarship fund for students who wish to pursue combined studies in science and the arts.</i>";
+				}
+			}
+
+			public class DLC4_ALLCOMINGBACK
+			{
+				public static LocString TITLE = "Song of the Scientist";
+
+				public static LocString SUBTITLE = "ENCRYPTION LEVEL: THREE";
+
+				public class BODY
+				{
+					public static LocString CONTAINER1 = "<smallcaps>[Log Fragmentation Detected]\n[Voice Recognition Unavailable]</smallcaps>\n\n[LOG BEGINS]\n\n(sound of a throat being cleared)\n\nThere were times when our tests got so close\nThat my samples waved a claw\nAnd maybe didn't live long but that was a win, though\n\nThere was data that gave us strong clues\nThen over years we lost trust\nAnd knew our hopes of cloning had dried up forever...forever...\n\n(sound of earth rumbling)\n\n...We had exhausted every fellowship and fund\nAnd we couldn't recreate Cretaceous creatures\nAnd we'd got our hands on every single fossil that we could...\n\nBut when I crash-landed here\nAnd saw ...them... grazing so near\nIt's amazing to see that it's all growing back so green\n\nWhen they peer through ferns here\nUnderneath skies so clear\nIt's so hard to believe, but it's all grown back so green\nIt's all growing back, it's all growing back so green now\n\nThere are moments of awe\nAnd there are clashes and fights\nThere are plants I've never seen before\nAnd they don't seem to need light\nTheropods and tillyardembia\nIt is more than any lab could hope\n\nMaybe\n\nMaybe\n\nIf I had a lab here\nA mass spectrometer there\nI could show them back home\nthat it's all growing back so green...\n\n(sound of a twig snapping)\n\n...hello?\n\n[LOG ENDS]\n\n------------------\n\n";
+
+					public static LocString CONTAINER2 = "[LOG BEGINS]\n\nAmazing...\n\n...it's almost as if they have some distant memory of having been sung to.\n\nPerhaps they have more in common with our own creatures than I thought.\n\n[LOG ENDS]\n\n------------------\n\n";
+				}
+			}
+
+			public class DLC4_JOURNAL_B824
+			{
+				public static LocString TITLE = "Personal Journal: B824";
+
+				public static LocString SUBTITLE = "ENCRYPTION LEVEL: NONE";
+
+				public class BODY
+				{
+					public static LocString CONTAINER1 = "It's been four whole business days since I put on my crisp white Gravitas Facility lab coat for the first time...and I still haven't taken it off! I'm not supposed to wear it outside the lab, but I love it so much! I've worn it home and slept in it every single night. It's a little wrinkled now.\n\nEverybody else's lab coats are also wrinkled, though, and I bet at least ONE other person has ferret fur on theirs too.\n\nNo one else from my program got hired, but I'm already starting to get to know my new colleagues. In the cafeteria today, I offered someone a bite of my fish noodle sandwich, and she said \"Gross, ew! Get that away from me!\"\n\nSo now I know she doesn't like sandwiches!\n\nI was surprised, because she'd been staring since I unwrapped it. Maybe she just liked the starry print on the wrap? It matched the glittery pen on her clipboard. I would LOVE a glittery pen. I wonder if she has extras!\n\n------------------\n\nWow, wow, wow! We were discussing hybrid entanglement today and when I cited my favorite paper on the subject, I learned that one of the scientists on my new team is THE DR. SKLODOWSKA! WHO CO-AUTHORED THAT PAPER!\n\nHer work is the reason I've wanted to be a physicist since I was eight years old! She said she was surprised that I had grasped the concepts at that age. Then she laughed and added, \"I suppose we're both accustomed to age-based assumptions, dear.\"\n\nShe told me to call her Magdalena. I said it out loud three times to make sure I'd remember, and that made her laugh again.\n\nIt was a different kind of laugh than I'm used to. I liked it.\n\n------------------\n\n";
+
+					public static LocString CONTAINER2 = "Director Stern was in my lab when I got in this morning. She was looking at my Chicxhulub asteroid recurrence model. I started to explain that it was just a silly exercise I do when I'm letting other data percolate, but she just handed me a hard drive and told me to run that data through my program.\n\nThe updated graphs were SO wild!\n\nAs soon as everything finished loading, the Director copied everything back onto the hard drive. She said, \"Delete everything,\" and left.\n\nI had no idea she was so interested in theoretical physics games. I wonder if there are enough of us at Gravitas to start a club? I emailed Dr. Sklodowska—I mean, Magdalena—to ask, but she hasn't replied to my other six emails yet so maybe she thinks I'm asking too many questions?\n\nPeople say that a lot. But they're being silly because science is all about inquiry!\n\nI'm going to email the graphs to Magdalena and then delete them, just like the Director said.\n\n------------------\n\n";
+				}
+			}
+
+			public class DLC4_INCOMINGASTEROID
+			{
+				public static LocString TITLE = "Incoming";
+
+				public static LocString SUBTITLE = "ENCRYPTION LEVEL: THREE";
+
+				public class BODY
+				{
+					public static LocString CONTAINER1 = "<smallcaps>[Voice Recognition Initialized]\n[Subjects Identified: A001, B111]</smallcaps>\n\n[LOG BEGINS]\n\nOlivia: So we've...hastened the end of the world?\n\nJackie: By some measures, yes. But this changes nothing.\n\nOlivia: It changes everything, Jackie!\n\nJackie: Even if the [REDACTED] technology has shortened the timeline to the next asteroid impact--\n\nOlivia: It hasn't just shortened it, it's increased its likelihood!\n\nJackie: --it is unlikely to be less than a hundred years.\n\nJackie: That is ample time to develop damage-mitigation strategies.\n\nOlivia: According to this model, the original timeline for a possible recurrence was more than a hundred <i>million</i> years!\n\nJackie: And how many of those years do you think humanity would survive without the advancements we're making here?\n\nOlivia: I-I just don't think we can be certain...\n\nJackie: The only certainty is that without the [REDACTED], there will be no one left to save.\n\n[LOG ENDS]\n\n------------------\n\n";
+				}
+			}
+
+			public class DLC4_SEEPAGE
+			{
+				public static LocString TITLE = "Ground Seepage";
+
+				public static LocString SUBTITLE = "ENCRYPTION LEVEL: TWO";
+
+				public class BODY
+				{
+					public static LocString CONTAINER1 = "<smallcaps><b>[FILE FRAGMENTATION DETECTED]</b>\n\n[Voice Recognition unavailable]</smallcaps>\n\n[LOG BEGINS]\n\nI've been posted up at the Biowaste Processing and Containment buildings for weeks. Glorified dumpster watch, if I'm honest. Lab techs haul huge steel tanks up the hill once in a while. Nobody stays long. Except the janitor. He comes up twice a week to clean...whatever's behind those doors.\n\nEveryone said private security was easy, safe money. They never mentioned the silent killer: boredom.\n\nNo personal devices allowed on the grounds, so I've been counting things.\n\nThirty-nine leaves on the bush by the sewage sanitation entrance. Seventeen scratches on my CCTV monitor screens. Two paperclips in the drawer.\n\n------------------\n\nThe motion sensors in section 6 went off last night. Everything looked fine on the cameras. I was halfway through counting the ceiling slats. I jogged over to investigate. The area was deserted.\n\nIt felt like I was being watched, but two full sweeps confirmed that I was alone. I reset the sensors and returned to my post.\n\n------------------\n\nThose sensors have gone off every twenty minutes on the past two shifts! I have to get all the way over to section 6 every single time. It's always a false alarm.\n\nI called IT. Nobody answered. Typical.\n\nIn the meantime, I'm stuck running back and forth through the damp smoggy air for nothing.\n\nThe janitor showed up while I was catching my breath. He fished around in his cart and offered me a shirt. He said it was fresh.\n\nI politely declined.\n\n[LOG ENDS]\n\n------------------\n\n";
+
+					public static LocString CONTAINER2 = "<smallcaps><b>[FILE FRAGMENTATION DETECTED]</b>\n\n[Voice Recognition unavailable]</smallcaps>\n\n[LOG BEGINS]\n\nIt's a cat. That's what's been setting off the sensors. A fat orange stray.\n\nIt was drinking out of a puddle when I came around the corner. No collar. It bolted when I tried to pick it up. Good thing, too, since it's probably riddled with disease.\n\nI need to figure out how to lure it away from the sensors so I can stop running laps.\n\n------------------\n\nThe cat followed the trail of fish sticks all the way to my booth at the edge of the lot.\n\nI put a towel on the floor in the corner for him to sleep on. When I turned around, he was watching from my chair. I tried to wave him off, but he just closed his eyes. I tipped the chair until he slid off onto the towel.\n\n------------------\n\nDr. Byron came through a few hours later. She was nice, but looked more haggard than usual.\n\nCat hid until she left. When he popped his head out from under the desk I could tell by the mayo on his whiskers that my lunch was gone.\n\nI grabbed him to throw him out...and he started purring. Man. He really likes me. Or maybe he just likes mayonnaise.\n\nI wonder what else he likes.\n\n------------------\n\nNow I get to count daily gifts from Cat.\n\nSo far: three mice, nine caterpillars and something that might have been a bird wing. It was bigger than any bird I'd expect Cat to catch.\n\nGunderson, that's the janitor, has been here almost every day since Cat showed up. Not much of a conversationalist, but it's nice to have company.\n\nPlus he cleans up Cat's gifts before the smell gets too bad.\n\n------------------\n\nCat is not a he. He's a <i>she!</i> And a <i>mom.</i>\n\nTwo hours ago, Cat gave birth to a litter...on my lap!\n\nAll three kittens are alive. But they're covered in something unnaturally sticky, and there's something...wrong with them. Two of them have little nubs on their heads, like a tiny horn. The third one has a row of ridges down its back. What on earth??\n\nIt's so freaky. But I can't get up to reach the phone without touching them. I really don't want to touch them.\n\nMy legs are falling asleep. Cat has been purring nonstop and bathing her babies. She can't tell they're little aliens!?\n\n\n\n------------------\n\n";
+
+					public static LocString CONTAINER3 = "I woke up a few hours later to Gunderson carefully placing the last kitten into a towel-lined bin in his cart. Cat was already inside, nuzzling her babies.\n\nGunderson wasn't fazed by their weird deformities. He glanced meaningfully toward the locked doors. \"They ain't built those tanks to last,\" he said. Then he draped a second towel over the \"cats\" and wheeled the cart away, whistling.\n\n------------------\n\nIt took three washes to get the goo off my uniform. Ugh.\n\nWhatever's behind those doors, it does <i>not</i> belong out in the world.\n\nShould I...report this? Who would I even report it to? <i>What</i> would I report?\n\n[LOG ENDS]";
+				}
+			}
+
 			public static class DLC3_TALKSHOW
 			{
 				public static LocString TITLE = "Humanitarian Aid";
@@ -247,7 +349,7 @@ namespace STRINGS
 				{
 					public static LocString CONTAINER1 = "Wellness World is proud to officially announce an exclusive partnership with the Gravitas Facility!\n\nThis makes us the first and only holistic health center to offer clients access to Gravitas's innovative new Far Reach Network...the best way to deliver remote training and treatments that are <i>truly embodied</i>.\n\nOur new tier of VIP subscription includes a discounted* monthly rental rate for Remote Controller, with a small additional fee for professional in-home installation.\n\nGravitas's technology captures your movements without the need for uncomfortable suits or wearables, and perfectly replicates them in Wellness World's purpose-built remote fitness studio.\n\nWith expert instructors, zero-latency streaming and 360-degree reflective surfaces, it truly feels like you're there.\n\nIdeal for high-profile clientele who wish to work out icognito!\n\nMembers can also opt to install the Remote Worker Dock to receive deeply personalized hands-on care from our team of elite physiotherapists and masseurs.\n\nWellness World...now <i>truly</i> worldwide!\n\n";
 
-					public static LocString CONTAINER2 = "<size=11><i>Discount applies to new memberships only. Standard joiner fees apply.</size></i>";
+					public static LocString CONTAINER2 = "<size=11><i>*Discount applies to new memberships only. Standard joiner fees apply.</size></i>";
 				}
 			}
 
@@ -537,7 +639,7 @@ namespace STRINGS
 
 					public static LocString PACU = "Sample collected. Review data for more information.";
 
-					public static LocString MOO = "Whoops! This scanner wasn't designed for critters of these proportions. This organism's genetic makeup will remain shrouded in mystery.";
+					public static LocString MOO = "WARNING: METHANE OVERLOAD. Review data for more information.";
 
 					public static LocString MOLE = "This critter felt right at home in the cramped scanning bed. It can't wait to come back! ";
 
@@ -551,11 +653,21 @@ namespace STRINGS
 
 					public static LocString BEETA = "Strong collective consciousness detected. Review data for more information.";
 
-					public static LocString ICEBELLY = "Whoops! This scanner wasn't designed for critters of these proportions. Fortunately, this critter's thick coat protected the machinery from damage.";
+					public static LocString ICEBELLY = "Specimen produced substantial stool sample. Review data for more information.";
 
 					public static LocString SEAL = "Specimen scanned. Review data for more information.";
 
 					public static LocString WOODDEER = "This critter seemed amused by the scanning process. Review data for more information.";
+
+					public static LocString RAPTOR = "Species scanned. Review data for more information.";
+
+					public static LocString STEGO = "This critter was temporarily stuck in the scanning area. Review data for more information.";
+
+					public static LocString MOSQUITO = "Sample collected. Review data for more information.";
+
+					public static LocString CHAMELEON = "Scanning interrupted due to instrument displacement caused by specimen's lingual grasp.\n\nReview data for more information.";
+
+					public static LocString PREHISTORICPACU = "This critter attacked the transducer. Review data for more information.";
 
 					public static LocString UNKNOWN_TITLE = "FAILURE TO FLUX: Unknown Species";
 
@@ -578,7 +690,7 @@ namespace STRINGS
 
 					public static LocString PACU = "This species flopped wildly during analysis. Surfaces that came into contact with its scales now display a thin layer of viscous scum. It does not appear to be corrosive.\n\nInitiating fumigation sequence to neutralize fishy odor.";
 
-					public static LocString MOO = "Whoops! This scanner wasn't designed for critters of these proportions. This organism's genetic makeup will remain shrouded in mystery.";
+					public static LocString MOO = "WARNING: METHANE OVERLOAD. This scanner was unable to analyze this subject due to overheating caused by excessive gas production.\n\nThis organism's genetic makeup will remain shrouded in mystery.";
 
 					public static LocString MOLE = "This critter felt right at home in the cramped scanning bed. It can't wait to come back! ";
 
@@ -592,11 +704,21 @@ namespace STRINGS
 
 					public static LocString BEETA = "This species may not be fully sentient, but it possesses a strong collective consciousness.\n\nIt is unclear how information is communicated between members of the species. What is clear is that knowledge is being shared and passed down from one generation to another.\n\nMonitor closely.";
 
-					public static LocString ICEBELLY = "Whoops! This scanner wasn't designed for critters of these proportions. Fortunately, this critter's thick coat protected the machinery from damage.";
+					public static LocString ICEBELLY = "Specimen produced substantial stool sample directly onto scanner bed.\n\nRemarkably, its white coat remained pristine. Analysis of coat fibers revealed that each follicle is sealed with polytetrafluoroethylene, providing strong stain resistance.";
 
 					public static LocString SEAL = "This critter's pupils appear to be permanently constricted, possibly as a result of long-term exposure to excess illumination.\n\nIts sense of smell is extremely well-developed, however: it immediately identified areas touched by previous species, and marked each one with a small puddle of liquid ethanol.";
 
 					public static LocString WOODDEER = "This critter's perpetual grin grew as it observed each step of the process extremely closely.\n\nBehavioral analysis indicates a tendency toward mischief. Close supervision - and minimal access to advanced machinery - is recommended.";
+
+					public static LocString RAPTORSPECIES = "This critter's x-ray imaging indicates that its cranial protrusion may not be a horn at all.\n\nIt is not composed of live bone surrounded by a keratin-and-protein shell, but rather an ennervated, calcified structure. An illogically located tooth, or perhaps a rostrum?\n\nFascinating.";
+
+					public static LocString STEGOSPECIES = "This critter was temporarily stuck in the scanning area due to its size. It appeared to enjoy being shoved backward and forward on the conveyor belt during dislodgment.\n\nUpon finally reaching the exit, the critter seemed confused as to why the ride was over.";
+
+					public static LocString MOSQUITOSPECIES = "On the surface of this critter's wings are thousands of microperforations. These appear to act as acoustic liners, allowing the Gnit to approach targets without the high-pitched whine of its wingbeats giving away its position.";
+
+					public static LocString CHAMELEONSPECIES = "Scanning interrupted due to instrument displacement caused by specimen's lingual grasp.\n\nResidual markings left by specimen's tongue ridges and grooves are a 72% match to a set of unmarked fingerprints from the Gravitas personnel database.";
+
+					public static LocString PREHISTORICPACUSPECIES = "This critter attacked the transducer.\n\nWhen the swallowed component was regurgitated, it was coated in microorganisms that predate this colony by at least several millenia.\n\nUnfortunately, it was reingested before analysis was completed.";
 
 					public static LocString UNKNOWN_TITLE = "Unknown Species";
 
@@ -1319,6 +1441,27 @@ namespace STRINGS
 			}
 		}
 
+		public class POLLINATORS
+		{
+			public static LocString TITLE = "Pollination";
+
+			public static LocString SUBTITLE = "Critter-Boosted Growth";
+
+			public class BODY
+			{
+				public static LocString CONTAINER1 = string.Concat(new string[]
+				{
+					"Pollination is a symbiotic interaction between ",
+					UI.FormatAsLink("Plants", "PLANTS"),
+					" and certain ",
+					UI.FormatAsLink("Critter", "CREATURES"),
+					" species, which benefits plant growth.\n\nSome ",
+					UI.FormatAsLink("Plants", "PLANTS"),
+					" rely on pollinators in order to grow at all, while others receive a valuable acceleration to their natural growth speed."
+				});
+			}
+		}
+
 		public class HEADQUARTERS
 		{
 			public static LocString TITLE = "Printing Pod";
@@ -1413,6 +1556,8 @@ namespace STRINGS
 
 			public static LocString CRITTERDROPS = "Drops";
 
+			public static LocString CRITTER_EXTRA_DIET_PRODUCTION = "Dewdrip";
+
 			public static LocString FOODEFFECTS = "Nutritional Effects";
 
 			public static LocString FOODSWITHEFFECT = "Foods with this effect";
@@ -1501,7 +1646,18 @@ namespace STRINGS
 
 				public static LocString TITLE = "Farm Buildings";
 
-				public static LocString DESCRIPTION = "Buildings that Duplicants can use to plant and tend to a wide variety of colony-sustaining edible crops.";
+				public static LocString DESCRIPTION = "Buildings that Duplicants can use to plant and tend to a wide variety of colony-sustaining crops.";
+
+				public static LocString FLAVOUR = "";
+			}
+
+			public class BIONICBUILDING
+			{
+				public static LocString NAME = UI.FormatAsLink("Bionic Service Station", "GROUPBIONICBUILDING");
+
+				public static LocString TITLE = "Bionic Service Stations";
+
+				public static LocString DESCRIPTION = "Buildings that keep Bionic Duplicants' complex inner machinery operating smoothly.";
 
 				public static LocString FLAVOUR = "";
 			}
@@ -1743,17 +1899,6 @@ namespace STRINGS
 				public static LocString FLAVOUR = "";
 			}
 
-			public class BIONICUPKEEP
-			{
-				public static LocString TITLE = "Bionic Service Stations";
-
-				public static LocString DESCRIPTION = "Buildings that keep Bionic Duplicants' complex inner machinery operating smoothly.";
-
-				public static LocString FLAVOUR = "";
-
-				public static LocString ROOMSREQUIRING = "";
-			}
-
 			public class GENERATORTYPE
 			{
 				public static LocString TITLE = "Generators";
@@ -1796,6 +1941,38 @@ namespace STRINGS
 			}
 		}
 
+		public class BUTTERFLY
+		{
+			public static LocString SPECIES_TITLE = "Mimikas";
+
+			public static LocString SPECIES_SUBTITLE = "Uncategorized Organism";
+
+			public static LocString TITLE = "Mimika";
+
+			public static LocString SUBTITLE = "Critter?";
+
+			public class BODY
+			{
+				public static LocString CONTAINER1 = "Mimikas are difficult to categorize. Biologists theorize that the " + UI.FormatAsLink("Mimika Bud", "BUTTERFLYPLANT") + " engages in this rare variation of reproductive mimicry to improve seed-dispersal and survive the extinction of key species native to its original habitat.\n\nThese charming moth-like organisms feature a microscopic cluster of phytoprotein \"brain\" cells and are driven by a singular instinct to tend to their host plants.\n\nDue to a monogenic malfunction, however, this plant-tending behavior benefits all of the flora in its area <i>except</i> its own.";
+			}
+		}
+
+		public class CHAMELEON
+		{
+			public static LocString SPECIES_TITLE = "Dartles";
+
+			public static LocString SPECIES_SUBTITLE = "Critter Species";
+
+			public static LocString TITLE = "Dartle";
+
+			public static LocString SUBTITLE = "Domesticable Critter";
+
+			public class BODY
+			{
+				public static LocString CONTAINER1 = "Dartles are docile reptilian critters whose existence centers around maximum energy conservation.\n\nThis species was once known as the fastest land-based critter in existence. However, its deep aversion to physical exertion has grown stronger than its desire to escape predation. Researchers are uncertain what, if anything, the Dartle is saving its energy for.";
+			}
+		}
+
 		public class DIVERGENT
 		{
 			public static LocString TITLE = "Divergent";
@@ -1835,6 +2012,18 @@ namespace STRINGS
 			public class BODY
 			{
 				public static LocString CONTAINER1 = "<smallcaps>Pictured: \"Glossy\" Drecko variant</smallcaps>";
+			}
+		}
+
+		public class FETCHDRONE
+		{
+			public static LocString TITLE = "Flydo";
+
+			public static LocString SUBTITLE = "Delivery Robot";
+
+			public class BODY
+			{
+				public static LocString CONTAINER1 = "The Flydo is an airborne delivery robot designed to transport solid items across great distances, both horizontal and vertical.\n\nThese wireless robots may deplete their " + UI.FormatAsLink("Power Banks", "ELECTROBANK") + " in mid-flight and temporarily shut down until a replacement is delivered. Once rebooted, they reawaken feeling as energized as if it was their very first day on the job.\n\nTragically, some powered-down Flydos fall into liquid pools and may never be rebooted at all.";
 			}
 		}
 
@@ -1965,6 +2154,22 @@ namespace STRINGS
 				public static LocString CONTAINER2 = "It poses a severe disease risk to humans due to the thick slime it excretes to surround its inner cartilage structures.\n\nA single teaspoon of Morb slime can contain up to a quadrillion bacteria that work to deter would-be predators and liquefy its food.";
 
 				public static LocString CONTAINER3 = "Petting a Morb is not recommended.";
+			}
+		}
+
+		public class MOSQUITO
+		{
+			public static LocString SPECIES_TITLE = "Gnits";
+
+			public static LocString SPECIES_SUBTITLE = "Critter Species";
+
+			public static LocString TITLE = "Gnit";
+
+			public static LocString SUBTITLE = "Pest Critter";
+
+			public class BODY
+			{
+				public static LocString CONTAINER1 = "The Gnit is an insectoid critter that relies on supplementary nutrients and minerals from Duplicants and other critters to mitigate the outsized energy requirements of its reproductive system.\n\nGnits' antennae double as maxillary palps equipped with finely tuned olfactory receptor neurons that enable them to pinpoint nutrient sources from a great distance.\n\nThese same receptors activate the insectoid's flight response upon detecting certain changes in an organism's respiration, such as the sharp intake of breath that precedes a fatal counter-attack.";
 			}
 		}
 
@@ -2118,6 +2323,22 @@ namespace STRINGS
 			}
 		}
 
+		public class PREHISTORICPACU
+		{
+			public static LocString SPECIES_TITLE = "Jawbos";
+
+			public static LocString SPECIES_SUBTITLE = "Aquatic Species";
+
+			public static LocString TITLE = "Jawbo";
+
+			public static LocString SUBTITLE = "Aquatic Critter";
+
+			public class BODY
+			{
+				public static LocString CONTAINER1 = "While the Jawbo may be terrifying to behold, in truth it is quite harmless for trained handlers.\n\nA disproportionately sized mandible makes it impossible for this critter to properly chew its food, necessitating a preference for prey that are small enough to be swallowed whole.\n\nThough much of its DNA suggests that the Jawbo evolved in isolation, it does share a small number of genetic markers with serrasalmids such as the " + UI.FormatAsLink("Pacu", "PACU") + ". Familial connection, however, does not preclude consideration as a food source.";
+			}
+		}
+
 		public class PUFT
 		{
 			public static LocString SPECIES_TITLE = "Pufts";
@@ -2173,6 +2394,22 @@ namespace STRINGS
 				public static LocString CONTAINER1 = "<smallcaps>Pictured: Puft \"Prince\" variant</smallcaps>";
 
 				public static LocString CONTAINER2 = "A specialized air bladder in the Puft's chest cavity stores varying concentrations of gas, allowing it to control its buoyancy and float effortlessly through the air.\n\nCombined with extremely lightweight and elastic skin, the Puft is capable of maintaining flotation indefinitely with negligible energy expenditure. Its orientation and balance, meanwhile, are maintained by counterweighted formations of bone located in its otherwise useless legs.";
+			}
+		}
+
+		public class RAPTOR
+		{
+			public static LocString SPECIES_TITLE = "Rhexes";
+
+			public static LocString SPECIES_SUBTITLE = "Critter Species";
+
+			public static LocString TITLE = "Rhex";
+
+			public static LocString SUBTITLE = "Carnivorous Critter";
+
+			public class BODY
+			{
+				public static LocString CONTAINER1 = "For all their bluster, Rhexes are emotionally sensitive creatures that thrive on positive reinforcement, especially words of affirmation.\n\nThese sightless apex predators have exceptionally acidic gastric juices that kill most known bacteria and toxins, enabling them to safely digest their prey. This protective mechanism renders them susceptible to chronic ulcers if food is not readily available.\n\nThe Rhex's tailfeather can be shorn to harvest fibers for textile production. Rhexes don't mind this - some even enjoy it.";
 			}
 		}
 
@@ -2344,6 +2581,22 @@ namespace STRINGS
 			}
 		}
 
+		public class STEGO
+		{
+			public static LocString SPECIES_TITLE = "Lumbs";
+
+			public static LocString SPECIES_SUBTITLE = "Critter Species";
+
+			public static LocString TITLE = "Lumb";
+
+			public static LocString SUBTITLE = "Domesticable Critter";
+
+			public class BODY
+			{
+				public static LocString CONTAINER1 = "While other creatures with the Lumb's low forebrain neuron count rapidly become extinct, these docile creatures are uniquely positioned for survival.\n\nTheir large size and spiny protrusions make them unappealing to most predators. Anecdotal evidence also suggests that smaller species will sometimes adopt orphaned Lumbs.\n\nSome experts theorize that this may be motivated by a desire to benefit from the Lumb's genetic muscular condition (akin to restless leg syndrome), which causes them to regularly pound the earth in such a way as to cause nearby plants to drop desirable foods.";
+			}
+		}
+
 		public class SWEEPY
 		{
 			public static LocString TITLE = "Sweepy";
@@ -2352,7 +2605,7 @@ namespace STRINGS
 
 			public class BODY
 			{
-				public static LocString CONTAINER1 = "The Sweepy is a domesticated sweeping robot programmed to clean solid and liquid debris. The Sweepy Dock will automatically launch the Sweepy, store the debris the robot picks up, and recharge the Sweepy's battery, provided it has been plugged into a power source.\n\nThough the Sweepy can not travel over gaps or uneven ground, it is programmed to feel really bad about this.";
+				public static LocString CONTAINER1 = "The Sweepy is a domesticated sweeping robot programmed to clean solid and liquid debris. The " + UI.FormatAsLink("Sweepy's Dock", "SWEEPBOTSTATION") + " will automatically launch the Sweepy, store the debris the robot picks up, and recharge the Sweepy's battery, provided it has been plugged into a power source.\n\nThough the Sweepy can not travel over gaps or uneven ground, it is programmed to feel really bad about this.";
 			}
 		}
 
@@ -2394,7 +2647,7 @@ namespace STRINGS
 
 			public static LocString PARAGRAPH_1 = string.Concat(new string[]
 			{
-				UI.FormatAsLink("Toilets", "BUILDCATEGORYREQUIREMENTCLASSTOILETTYPE"),
+				UI.FormatAsLink("Toilets", "REQUIREMENTCLASSTOILETTYPE"),
 				": Duplicants will empty their bladders every {time}. A lack of accessible facilities will result in ",
 				UI.FormatAsLink("Stress", "STRESS"),
 				" and wet colony floors.\n\n",
@@ -2408,15 +2661,15 @@ namespace STRINGS
 				": Daily caloric intake is {caloriesrequired}. ",
 				UI.FormatAsLink("Food", "BUILDCATEGORYFOOD"),
 				" can be produced via ",
-				UI.FormatAsLink("Farming", "BUILDCATEGORYREQUIREMENTCLASSFARMBUILDING"),
+				UI.FormatAsLink("Farming", "GROUPFARMBUILDING"),
 				" and ",
-				UI.FormatAsLink("Ranching", "BUILDCATEGORYREQUIREMENTCLASSRANCHSTATIONTYPE"),
+				UI.FormatAsLink("Ranching", "REQUIREMENTCLASSRANCHSTATIONTYPE"),
 				" buildings, and further enhanced at ",
-				UI.FormatAsLink("Cooking Stations", "BUILDCATEGORYREQUIREMENTCLASSCOOKTOP"),
+				UI.FormatAsLink("Cooking Stations", "REQUIREMENTCLASSCOOKTOP"),
 				".\n\n",
 				UI.FormatAsLink("Sleep", "HEALTH"),
 				": Duplicants require a ",
-				UI.FormatAsLink("Bed", "BUILDCATEGORYREQUIREMENTCLASSBEDTYPE"),
+				UI.FormatAsLink("Bed", "REQUIREMENTCLASSBEDTYPE"),
 				" and a ",
 				UI.FormatAsLink("Schedule", "MISCELLANEOUSTIPS14"),
 				" that includes adequate Bedtime in order to avoid the ",
@@ -2432,9 +2685,9 @@ namespace STRINGS
 				": Performing colony duties helps Duplicants earn Skill Points that can be exchanged for useful Skills. Duplicants' individual traits may predispose them to prefer some careers over others, or bar them from a particular career path entirely.\n\n",
 				UI.FormatAsLink("Morale", "MORALE"),
 				": Morale in excess of a Duplicant's expectations will trigger Overjoyed responses that positively affect a variety of colony functions. ",
-				UI.FormatAsLink("Recreational", "BUILDCATEGORYREQUIREMENTCLASSRECBUILDING"),
+				UI.FormatAsLink("Recreational", "REQUIREMENTCLASSRECBUILDING"),
 				" building usage, ",
-				UI.FormatAsLink("attractive buildings ", "BUILDCATEGORYREQUIREMENTCLASSDECORATION"),
+				UI.FormatAsLink("attractive buildings ", "REQUIREMENTCLASSDECORATION"),
 				" that increase ",
 				UI.FormatAsLink("Decor", "DECOR"),
 				", and improved ",
@@ -2444,7 +2697,7 @@ namespace STRINGS
 				": When Stress levels reach 100%, Duplicants will exhibit negative Stress responses that can disrupt work and damage buildings.\n\n",
 				UI.FormatAsLink("Research", "TECH"),
 				": Using ",
-				UI.FormatAsLink("science buildings", "BUILDCATEGORYREQUIREMENTCLASSSCIENCEBUILDING"),
+				UI.FormatAsLink("science buildings", "REQUIREMENTCLASSSCIENCEBUILDING"),
 				" unlocks advanced technologies that increase work efficiency and improve the colony's standard of living.\n\n",
 				UI.FormatAsLink("Health", "HEALTH"),
 				": Workplace hazards, including exposure to extreme ",
@@ -2452,7 +2705,7 @@ namespace STRINGS
 				" or ",
 				UI.FormatAsLink("Germs", "DISEASE"),
 				", can severely impact Duplicants' health. Specialized ",
-				UI.FormatAsLink("Medical", "BUILDCATEGORYMEDICAL"),
+				UI.FormatAsLink("Medical", "REQUIREMENTCLASSCLINIC"),
 				" buildings accelerate recovery.\n\n<i>More information about sustaining Duplicants' well-being is covered in ",
 				UI.FormatAsLink("Tips", "MISCELLANEOUSTIPS"),
 				" and ",
@@ -2481,7 +2734,7 @@ namespace STRINGS
 				": Bionic systems must dispose of built-up ",
 				UI.FormatAsLink("Gunk", "LIQUIDGUNK"),
 				" every {time}, or risk making a mess. If there are no purpose-built extractors available, Bionic Duplicants will clog a nearby ",
-				UI.FormatAsLink("Toilet", "BUILDCATEGORYREQUIREMENTCLASSTOILETTYPE"),
+				UI.FormatAsLink("Toilet", "REQUIREMENTCLASSTOILETTYPE"),
 				".\n\n",
 				UI.FormatAsLink("Oxygen", "BUILDCATEGORYOXYGEN"),
 				": Bionic Duplicants ventilate their mechanisms using internal ",
@@ -2511,9 +2764,9 @@ namespace STRINGS
 				".\n\n",
 				UI.FormatAsLink("Morale", "MORALE"),
 				": Morale in excess of a Duplicant's expectations will trigger Overjoyed responses that positively affect a variety of colony functions. ",
-				UI.FormatAsLink("Recreational", "BUILDCATEGORYREQUIREMENTCLASSRECBUILDING"),
+				UI.FormatAsLink("Recreational", "REQUIREMENTCLASSRECBUILDING"),
 				" building usage, ",
-				UI.FormatAsLink("attractive buildings ", "BUILDCATEGORYREQUIREMENTCLASSDECORATION"),
+				UI.FormatAsLink("attractive buildings ", "REQUIREMENTCLASSDECORATION"),
 				" that increase ",
 				UI.FormatAsLink("Decor", "DECOR"),
 				", and improved ",
@@ -2523,7 +2776,7 @@ namespace STRINGS
 				": When Stress levels reach 100%, Bionic Duplicants will exhibit negative Stress responses that can disrupt work and damage buildings.\n\n",
 				UI.FormatAsLink("Research", "TECH"),
 				": Using ",
-				UI.FormatAsLink("science buildings", "BUILDCATEGORYREQUIREMENTCLASSSCIENCEBUILDING"),
+				UI.FormatAsLink("science buildings", "REQUIREMENTCLASSSCIENCEBUILDING"),
 				" unlocks advanced technologies that increase work efficiency and improve the colony's standard of living.\n\n<i>More information about sustaining Bionic Duplicants' well-being is covered in ",
 				UI.FormatAsLink("Tips", "MISCELLANEOUSTIPS"),
 				" and ",
@@ -3071,6 +3324,27 @@ namespace STRINGS
 			}
 		}
 
+		public class DEWDRIP
+		{
+			public static LocString TITLE = "Dewdrip";
+
+			public static LocString SUBTITLE = "Plant Byproduct";
+
+			public class BODY
+			{
+				public static LocString CONTAINER1 = string.Concat(new string[]
+				{
+					"A crystallized blob of ",
+					UI.FormatAsLink("Brackene", "MILK"),
+					" from the ",
+					UI.FormatAsLink("Dew Dripper", "DEWDRIPPERPLANT"),
+					".\n\nIt must be processed at the ",
+					UI.FormatAsLink("Plant Pulverizer", "MILKPRESS"),
+					" to release its contents."
+				});
+			}
+		}
+
 		public class EGG_SHELL
 		{
 			public static LocString TITLE = "Egg Shell";
@@ -3095,6 +3369,18 @@ namespace STRINGS
 			}
 		}
 
+		public class FEATHER_FABRIC
+		{
+			public static LocString TITLE = "Feather Fiber";
+
+			public static LocString SUBTITLE = "Textile Ingredient";
+
+			public class BODY
+			{
+				public static LocString CONTAINER1 = "A stalk of raw keratin used in the production of " + UI.FormatAsLink("Clothing", "EQUIPMENT") + " and textiles.";
+			}
+		}
+
 		public class VARIANT_GOLD
 		{
 			public static LocString TITLE = "Regal Bammoth Crest";
@@ -3104,6 +3390,27 @@ namespace STRINGS
 			public class BODY
 			{
 				public static LocString CONTAINER1 = "Heavy was the head that wore this crest, until it was relieved of its burden by a helpful Duplicant.";
+			}
+		}
+
+		public class KELP
+		{
+			public static LocString TITLE = "Seakomb Leaf";
+
+			public static LocString SUBTITLE = "Plant Byproduct";
+
+			public class BODY
+			{
+				public static LocString CONTAINER1 = string.Concat(new string[]
+				{
+					"The leaf of a ",
+					UI.FormatAsLink("Seakomb", "KELPPLANT"),
+					".\n\nIt can be processed into ",
+					UI.FormatAsLink("Phyto Oil", "PHYTOOIL"),
+					" or used as an ingredient in ",
+					UI.FormatAsLink("Allergy Medication", "ANTIHISTAMINE "),
+					"."
+				});
 			}
 		}
 
@@ -3141,6 +3448,29 @@ namespace STRINGS
 			public class BODY
 			{
 				public static LocString CONTAINER1 = "Microchips are engineered tools containing countless lines of proprietary code. New applications are still being discovered.";
+			}
+		}
+
+		public class FARM_STATION_TOOLS
+		{
+			public static LocString TITLE = "Micronutrient Fertilizer";
+
+			public static LocString SUBTITLE = "Specialized Farming Equipment";
+
+			public class BODY
+			{
+				public static LocString CONTAINER1 = string.Concat(new string[]
+				{
+					"Micronutrient fertilizer is a specialized ",
+					UI.FormatAsLink("Fertilizer", "FERTILIZER"),
+					" produced at the ",
+					UI.FormatAsLink("Farm Station", "FARMSTATION"),
+					".\n\nIt must be crafted by Duplicants with the ",
+					DUPLICANTS.ROLES.FARMER.NAME,
+					" Skill, and helps ",
+					UI.FormatAsLink("Plants", "PLANTS"),
+					" grow faster."
+				});
 			}
 		}
 
@@ -3634,6 +3964,153 @@ namespace STRINGS
 			}
 		}
 
+		public class ADVANCEDCURE
+		{
+			public static LocString TITLE = "Serum Vial";
+
+			public static LocString SUBTITLE = "Pharmaceutical Care";
+
+			public class BODY
+			{
+				public static LocString CONTAINER1 = string.Concat(new string[]
+				{
+					"An extremely powerful medication created to treat severe ",
+					UI.FormatAsLink("Diseases", "DISEASE"),
+					". ",
+					ITEMS.PILLS.ADVANCEDCURE.NAME,
+					" is very effective against ",
+					UI.FormatAsLink("Zombie Spores", "ZOMBIESPORES"),
+					".\n\nMust be administered by a Duplicant with the ",
+					DUPLICANTS.ROLES.SENIOR_MEDIC.NAME,
+					" Skill."
+				});
+			}
+		}
+
+		public class ANTIHISTAMINE
+		{
+			public static LocString TITLE = "Allergy Medication";
+
+			public static LocString SUBTITLE = "Antihistamine";
+
+			public class BODY
+			{
+				public static LocString CONTAINER1 = "A strong antihistamine Duplicants can take to halt an allergic reaction. Each dose will also prevent further reactions from occurring for a short time after ingestion.";
+			}
+		}
+
+		public class BASICBOOSTER
+		{
+			public static LocString TITLE = "Vitamin Chews";
+
+			public static LocString SUBTITLE = "Health Supplement";
+
+			public class BODY
+			{
+				public static LocString CONTAINER1 = string.Concat(new string[]
+				{
+					"A supplement that minorly reduces the chance of contracting a ",
+					UI.PRE_KEYWORD,
+					"Germ",
+					UI.PST_KEYWORD,
+					"-based ",
+					UI.FormatAsLink("Disease", "DISEASE"),
+					".\n\nMust be taken daily."
+				});
+			}
+		}
+
+		public class BASICCURE
+		{
+			public static LocString TITLE = "Curative Tablet";
+
+			public static LocString SUBTITLE = "Self-Administered Medicine";
+
+			public class BODY
+			{
+				public static LocString CONTAINER1 = string.Concat(new string[]
+				{
+					"Duplicants can take this to cure themselves of minor ",
+					UI.PRE_KEYWORD,
+					"Germ",
+					UI.PST_KEYWORD,
+					"-based ",
+					UI.FormatAsLink("Diseases", "DISEASE"),
+					".\n\nCurative Tablets are very effective against ",
+					UI.FormatAsLink("Food Poisoning", "FOODSICKNESS"),
+					"."
+				});
+			}
+		}
+
+		public class BASICRADPILL
+		{
+			public static LocString TITLE = "Basic Rad Pill";
+
+			public static LocString SUBTITLE = "Radiation Recovery";
+
+			public class BODY
+			{
+				public static LocString CONTAINER1 = "A supplement that speeds up the rate at which a Duplicant body absorbs radiation, allowing them to manage increased radiation exposure.\n\nMust be taken daily.";
+			}
+		}
+
+		public class INTERMEDIATEBOOSTER
+		{
+			public static LocString TITLE = "Immuno Booster";
+
+			public static LocString SUBTITLE = "Health Supplement";
+
+			public class BODY
+			{
+				public static LocString CONTAINER1 = string.Concat(new string[]
+				{
+					"A supplement that significantly reduces the chance of contracting a ",
+					UI.PRE_KEYWORD,
+					"Germ",
+					UI.PST_KEYWORD,
+					"-based ",
+					UI.FormatAsLink("Disease", "DISEASE"),
+					".\n\nMust be taken daily."
+				});
+			}
+		}
+
+		public class INTERMEDIATECURE
+		{
+			public static LocString TITLE = "Medical Pack";
+
+			public static LocString SUBTITLE = "Pharmaceutical Care";
+
+			public class BODY
+			{
+				public static LocString CONTAINER1 = string.Concat(new string[]
+				{
+					"A doctor-administered cure for moderate ",
+					UI.FormatAsLink("Diseases", "DISEASE"),
+					". ",
+					ITEMS.PILLS.INTERMEDIATECURE.NAME,
+					"s are very effective against ",
+					UI.FormatAsLink("Slimelung", "SLIMESICKNESS"),
+					".\n\nMust be administered by a Duplicant with the ",
+					DUPLICANTS.ROLES.MEDIC.NAME,
+					" Skill."
+				});
+			}
+		}
+
+		public class INTERMEDIATERADPILL
+		{
+			public static LocString TITLE = "Intermediate Rad Pill";
+
+			public static LocString SUBTITLE = "Accelerated Radiation Recovery";
+
+			public class BODY
+			{
+				public static LocString CONTAINER1 = "A supplement that speeds up the rate at which a Duplicant body absorbs radiation, allowing them to manage increased radiation exposure.\n\nMust be taken daily.";
+			}
+		}
+
 		public class LOCKS
 		{
 			public static LocString NEURALVACILLATOR = "Neural Vacillator";
@@ -4005,7 +4482,7 @@ namespace STRINGS
 				{
 					"The Alveo Vera's fleshy stems are dotted with small apertures featuring bidirectional valves through which ",
 					UI.FormatAsLink("Carbon Dioxide", "CARBONDIOXIDE"),
-					" is absorbed and sticky oxygenated waste is secreted.\n\nThis buildup resulting from this respiration cycle crystallizes into ",
+					" is absorbed and sticky oxygenated waste is secreted.\n\nThe buildup from this respiration cycle crystallizes into ",
 					UI.FormatAsLink("Oxylite", "OXYROCK"),
 					" ore.\n\nHorticulturists have long been curious about the protective epithelium that prevents the ",
 					UI.FormatAsLink("Oxylite", "OXYROCK"),
@@ -4100,15 +4577,39 @@ namespace STRINGS
 			}
 		}
 
+		public class LILYPAD
+		{
+			public static LocString TITLE = "Cura Lotus";
+
+			public static LocString SUBTITLE = "Decorative Plant";
+
+			public class BODY
+			{
+				public static LocString CONTAINER1 = "Cura Lotuses are ornamental aquatic plants that have inspired artists since their blossoms were first spotted bobbing on the surface of a quiet pond.\n\nThese ethereal beauties are a panacea for both the mind and the body - their delicate spores are highly sought-after for their natural antihistamine properties.";
+			}
+		}
+
 		public class DASHASALTVINE
 		{
-			public static LocString TITLE = "Dasha Salt Vine";
+			public static LocString TITLE = "Dasha Saltvine";
 
 			public static LocString SUBTITLE = "Edible Spice Plant";
 
 			public class BODY
 			{
 				public static LocString CONTAINER1 = "The Dasha Saltvine is a unique plant that needs large amounts of salt to balance the levels of water in its body.\n\nIn order to keep a supply of salt on hand, the end of the vine is coated in microscopic formations which bind with sodium atoms, forming large crystals over time.";
+			}
+		}
+
+		public class DEWDRIPPERPLANT
+		{
+			public static LocString TITLE = "Dew Dripper";
+
+			public static LocString SUBTITLE = "Cultivable Plant";
+
+			public class BODY
+			{
+				public static LocString CONTAINER1 = "The Dew Dripper is sometimes referred to as the \"purple starling\" of the plant world for the magnificent feather-like leaves that encircle its base.\n\nThis sculptural plant slow-drips excess sap that coagulates upon contact with air. The resulting globule is so dense that its weight would snap the Dew Dripper's hollow stem if planted in the ground.\n\nNo one has ever been seriously injured by a falling Dewdrip, but it's best not to linger beneath them.";
 			}
 		}
 
@@ -4132,7 +4633,7 @@ namespace STRINGS
 
 			public class BODY
 			{
-				public static LocString CONTAINER1 = "Experiment 52B is an aggressive, yet sessile creature that produces " + 5f.ToString() + " kilograms of resin per 1000 kcal it consumes.\n\nDuplicants would do well to maintain a safe distance when delivering food to Experiment 52B.\n\nWhile this creature may look like a tree, its taxonomy more closely resembles a giant land-based coral with cybernetic implants.\n\nAlthough normally lab-grown creatures would be given a better name than Experiment 52B, in this particular case the experimenting scientists weren't sure that they were done.";
+				public static LocString CONTAINER1 = "Experiment 52B is an aggressive, yet sessile creature that produces " + 5f.ToString() + " kilograms of sap per 1000 kcal it consumes.\n\nDuplicants would do well to maintain a safe distance when delivering food to Experiment 52B.\n\nWhile this creature may look like a tree, its taxonomy more closely resembles a giant land-based coral with cybernetic implants.\n\nAlthough normally lab-grown creatures would be given a better name than Experiment 52B, in this particular case the experimenting scientists weren't sure that they were done.";
 			}
 		}
 
@@ -4174,7 +4675,14 @@ namespace STRINGS
 
 			public class BODY
 			{
-				public static LocString CONTAINER1 = "The Grubfruit Plant exhibits a coevolutionary relationship with the Divergent species.\n\nThough capable of producing fruit without the help of the Divergent, the Spindly Grubfruit is a substandard version of the Grubfruit in both taste and caloric value.\n\nThe mechanism for how the Divergent inspires Grubfruit Plant growth is not entirely known but is thought to be somehow tied to the infrasonic 'songs' these insects lovingly purr to their plants.";
+				public static LocString CONTAINER1 = string.Concat(new string[]
+				{
+					"The Grubfruit Plant exhibits a coevolutionary relationship with the ",
+					UI.FormatAsLink("Divergent", "DIVERGENTSPECIES"),
+					" species.\n\nThough capable of producing fruit without the help of the Divergent, the ",
+					UI.FormatAsLink("Spindly Grubfruit", "WORMPLANT"),
+					" is a substandard version of the Grubfruit in both taste and caloric value per cycle.\n\nThe mechanism for how the Divergent inspires Grubfruit Plant growth is not entirely known but is thought to be somehow tied to the infrasonic 'songs' these insects lovingly purr to their plants."
+				});
 			}
 		}
 
@@ -4222,7 +4730,19 @@ namespace STRINGS
 
 			public class BODY
 			{
-				public static LocString CONTAINER1 = "The Jumping Joya is a decorative plant that brings a feeling of calmness and wellbeing to individuals in its vacinity.\n\nTheir rounded appendages and eccentrically shaped polyps are a favorite of interior designers looking to offset the rigid straight walls of an institutional setting.\n\nThe Jumping Joya's capacity to thrive in many environments and the ease in which they propagate make them the go-to house plant for the lazy gardener.";
+				public static LocString CONTAINER1 = "The Jumping Joya is a decorative plant that brings a feeling of calmness and wellbeing to individuals in its vicinity.\n\nTheir rounded appendages and eccentrically shaped polyps are a favorite of interior designers looking to offset the rigid straight walls of an institutional setting.\n\nThe Jumping Joya's capacity to thrive in many environments and the ease in which they propagate make them the go-to house plant for the lazy gardener.";
+			}
+		}
+
+		public class FLYTRAPPLANT
+		{
+			public static LocString TITLE = "Lura Plant";
+
+			public static LocString SUBTITLE = "Carnivorous Plant";
+
+			public class BODY
+			{
+				public static LocString CONTAINER1 = "Lura Plants are carnivorous flowers with ribbon-like anthers that detect the presence of airborne critters within trapping range.\n\nThe Lura's petals are covered in fine, hollow hairs that immobilize prey and ensure even distribution of digestive enzymes. The only part of a critter that the plant cannot fully digest is the exoskeleton, which irritate its mucous membrane.\n\nLiquefied exoskeletal remains are flushed from the plant as needed.";
 			}
 		}
 
@@ -4238,6 +4758,18 @@ namespace STRINGS
 			}
 		}
 
+		public class DINOFERN
+		{
+			public static LocString TITLE = "Megafrond";
+
+			public static LocString SUBTITLE = "Cultivable Plant";
+
+			public class BODY
+			{
+				public static LocString CONTAINER1 = "<i>Megafrondia Byronalis</i>, commonly known as \"Megafrond,\" is a gigantic plant that dwarfs its surroundings.\n\nIts size is not the only daunting factor in its cultivation: the Megafrond's gigantism is possible thanks to its singular adaptation to cold temperatures and a caustic gas environment that few other living things (including farmers) enjoy.\n\nThese challenges are considered a fair price for bragging rights and a useful grain harvest.";
+			}
+		}
+
 		public class MELLOWMALLOW
 		{
 			public static LocString TITLE = "Mellow Mallow";
@@ -4247,6 +4779,25 @@ namespace STRINGS
 			public class BODY
 			{
 				public static LocString CONTAINER1 = "The Mellow Mallow is a type of fungus that is known for its ease of propagation when cut.\n\nIt is deadly when consumed, however creatures that mistakenly eat it are said to experience a state of extreme calm before death.";
+			}
+		}
+
+		public class BUTTERFLYPLANT
+		{
+			public static LocString TITLE = "Mimika Bud";
+
+			public static LocString SUBTITLE = "Edible Plant";
+
+			public class BODY
+			{
+				public static LocString CONTAINER1 = string.Concat(new string[]
+				{
+					"Mimika Buds are excellent companion plants that provide a farm with the advantages of beneficial insect presence without the challenges of managing an additional critter population.\n\nInside each tightly wrapped bud is a highly concentrated pool of enzymes and imaginal discs similar to those found in the Lepidoptera insect family.\n\nUnder the right conditions, this unique concoction produces a ",
+					UI.FormatAsLink("Mimika", "BUTTERFLY"),
+					", an ephemeral pseudo-insect organism that accelerates growth in neighboring plants before settling into its final seed form.\n\nThe sight of a ",
+					UI.FormatAsLink("Mimika", "BUTTERFLY"),
+					" never fails to fill a gardener with awe."
+				});
 			}
 		}
 
@@ -4286,6 +4837,18 @@ namespace STRINGS
 			}
 		}
 
+		public class VINEMOTHER
+		{
+			public static LocString TITLE = "Ovagro";
+
+			public static LocString SUBTITLE = "Vine Plant";
+
+			public class BODY
+			{
+				public static LocString CONTAINER1 = "Ovagros are resilient plants with highly efficient nutrient storage and redistribution systems. A healthy node produces many times the amount of energy that it requires. This is used to fuel the growth of exploratory vines that expand onto the surrounding territory.\n\nVines are entirely reliant on the node for nutrients. Each vine features hooked thorns that protect unripe fruit and act as crampons enabling the vine to use any empty surface as a trellis. They also make vine removal a tedious task.";
+			}
+		}
+
 		public class OXYFERN
 		{
 			public static LocString TITLE = "Oxyfern";
@@ -4322,6 +4885,30 @@ namespace STRINGS
 			}
 		}
 
+		public class CARROTPLANT
+		{
+			public static LocString TITLE = "Plume Squash Plant";
+
+			public static LocString SUBTITLE = "Edible Plant";
+
+			public class BODY
+			{
+				public static LocString CONTAINER1 = "Plume Squashes contain over a dozen types of remarkably stable anthocyanins; twice the number found in any other plant. This high concentration of flavonoids contributes to the tuber's vivid pigmentation and tolerance to low temperatures.\n\nThe entire root is safe to eat, including the peel. The upper \"plume\" can be used to brush wayward bits off one's chin after the meal.";
+			}
+		}
+
+		public class GARDENDECORPLANT
+		{
+			public static LocString TITLE = "Ring Rosebush";
+
+			public static LocString SUBTITLE = "Decor Plant";
+
+			public class BODY
+			{
+				public static LocString CONTAINER1 = "Ring Rosebushes are decorative plants with circular blooms and bottom leaves reminiscent of cheery polka dots. A single prominent stamen protrudes from each flower, like a pin stuck into a map to mark a favorite destination.";
+			}
+		}
+
 		public class SATURNCRITTERTRAP
 		{
 			public static LocString TITLE = "Saturn Critter Trap";
@@ -4331,6 +4918,18 @@ namespace STRINGS
 			public class BODY
 			{
 				public static LocString CONTAINER1 = "The Saturn Critter Trap plant is a carnivorous plant that lays in wait for unsuspecting critters to happen by, then traps them in its mouth for consumption.\n\nThe Saturn Trap Plant's predatory mechanism is reflective of the harsh radioactive habitat it resides in.\n\nOnce trapped in the deadly maw of the plant, creatures are gently asphyxiated then digested through powerful acidic enzymes which coat the inner sides of the Saturn Trap Plant's leaves.";
+			}
+		}
+
+		public class KELPPLANT
+		{
+			public static LocString TITLE = "Seakomb";
+
+			public static LocString SUBTITLE = "Aquatic Plant";
+
+			public class BODY
+			{
+				public static LocString CONTAINER1 = "Seakombs are hyperefficient photosynthesizers. While most plants grow towards the light, this aquatic fern's needs are so low that it can prioritize other survival needs.\n\nIt sprouts on the ceiling of liquid-filled caves, its tendrils reaching down to brush passing critters. This contact encourages critters to consume the plant and excrete the fertilizer that supports its continued growth.";
 			}
 		}
 
@@ -4360,6 +4959,18 @@ namespace STRINGS
 			}
 		}
 
+		public class GARDENFORAGEPLANTPLANTED
+		{
+			public static LocString TITLE = "Snactus";
+
+			public static LocString SUBTITLE = "Edible Plant";
+
+			public class BODY
+			{
+				public static LocString CONTAINER1 = "Snacti are fruit-bearing succulents whose DNA shows signs of having been crossed with an unnaturally formed fungi long ago.\n\nThe infestation is neither fatal nor contagious. It does, however, produce visible discoloration spots and fruit whose flavor is best described as \"musty\".";
+			}
+		}
+
 		public class SPACETREE
 		{
 			public static LocString TITLE = "Bonbon Tree";
@@ -4380,7 +4991,14 @@ namespace STRINGS
 
 			public class BODY
 			{
-				public static LocString CONTAINER1 = "";
+				public static LocString CONTAINER1 = string.Concat(new string[]
+				{
+					"Spindly Grubfruit Plants have leggy stems that limit the distribution of nutrients and enzymes to the fruit-bearing branch. This results in a reliable but relatively tasteless harvest.\n\nIntroducing the ",
+					UI.FormatAsLink("Divergent", "DIVERGENTSPECIES"),
+					" critter species to these plants enable them to develop into ",
+					UI.FormatAsLink("Grubfruit Plants", "SUPERWORMPLANT"),
+					" with stronger vascular systems and improved fruit."
+				});
 			}
 		}
 
@@ -4405,6 +5023,18 @@ namespace STRINGS
 			public class BODY
 			{
 				public static LocString CONTAINER1 = "Swamp Chard is a unique member of the Amaranthaceae family that has adapted to grow in humid environments, in or near pools of standing water.\n\nWhile the leaves are technically edible, the most nutritious and palatable part of the plant is the heart, which is rich in a number of essential vitamins.";
+			}
+		}
+
+		public class GARDENFOODPLANT
+		{
+			public static LocString TITLE = "Sweatcorn Stalk";
+
+			public static LocString SUBTITLE = "Edible Plant";
+
+			public class BODY
+			{
+				public static LocString CONTAINER1 = "The Sweatcorn Stalk is one of the oldest living members of the Zea genus.\n\nThis robust monopodial plant features eye-catching vegetable cobs prized for their color and intense sweetness.\n\nFarmers gift the best of their harvest to their most valued neighbors. Some etymologists theorize that the term \"corny\" was coined to describe the heartfelt sentiments expressed in the accompanying card.";
 			}
 		}
 

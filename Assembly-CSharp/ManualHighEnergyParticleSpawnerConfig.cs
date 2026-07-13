@@ -36,6 +36,8 @@ public class ManualHighEnergyParticleSpawnerConfig : IBuildingConfig
 		buildingDef.DiseaseCellVisName = "RadiationSickness";
 		buildingDef.UtilityOutputOffset = CellOffset.none;
 		buildingDef.Deprecated = !Sim.IsRadiationEnabled();
+		buildingDef.AddSearchTerms(SEARCH_TERMS.POWER);
+		buildingDef.AddSearchTerms(SEARCH_TERMS.GENERATOR);
 		return buildingDef;
 	}
 

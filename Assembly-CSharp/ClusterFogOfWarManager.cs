@@ -52,7 +52,7 @@ public class ClusterFogOfWarManager : GameStateMachine<ClusterFogOfWarManager, C
 
 		public void DEBUG_REVEAL_ENTIRE_MAP()
 		{
-			this.RevealLocation(AxialI.ZERO, 100);
+			this.RevealLocation(AxialI.ZERO, 100, 2);
 		}
 
 		public bool IsLocationRevealed(AxialI location)
@@ -86,7 +86,7 @@ public class ClusterFogOfWarManager : GameStateMachine<ClusterFogOfWarManager, C
 			}
 		}
 
-		public void RevealLocation(AxialI location, int radius = 0)
+		public void RevealLocation(AxialI location, int radius = 0, int peekRadius = 2)
 		{
 			if (ClusterGrid.Instance.GetHiddenEntitiesOfLayerAtCell(location, EntityLayer.Asteroid).Count > 0 || ClusterGrid.Instance.GetVisibleEntityOfLayerAtCell(location, EntityLayer.Asteroid) != null)
 			{
@@ -95,7 +95,7 @@ public class ClusterFogOfWarManager : GameStateMachine<ClusterFogOfWarManager, C
 			bool flag = false;
 			foreach (AxialI axialI in AxialUtil.GetAllPointsWithinRadius(location, radius))
 			{
-				flag |= this.RevealCellIfValid(axialI);
+				flag |= this.RevealCellIfValid(axialI, peekRadius);
 			}
 			if (flag)
 			{
@@ -122,7 +122,7 @@ public class ClusterFogOfWarManager : GameStateMachine<ClusterFogOfWarManager, C
 			}
 			if (this.IsLocationRevealed(location))
 			{
-				this.RevealLocation(location, 0);
+				this.RevealLocation(location, 0, 2);
 				this.PeekLocation(location, 2);
 				Game.Instance.Trigger(-1991583975, location);
 			}
@@ -146,7 +146,7 @@ public class ClusterFogOfWarManager : GameStateMachine<ClusterFogOfWarManager, C
 			return 0f;
 		}
 
-		private bool RevealCellIfValid(AxialI cell)
+		private bool RevealCellIfValid(AxialI cell, int peekRadius = 2)
 		{
 			if (!ClusterGrid.Instance.IsValidCell(cell))
 			{
@@ -157,7 +157,7 @@ public class ClusterFogOfWarManager : GameStateMachine<ClusterFogOfWarManager, C
 				return false;
 			}
 			this.m_revealPointsByCell[cell] = ROCKETRY.CLUSTER_FOW.POINTS_TO_REVEAL;
-			this.PeekLocation(cell, 2);
+			this.PeekLocation(cell, peekRadius);
 			return true;
 		}
 
@@ -185,7 +185,7 @@ public class ClusterFogOfWarManager : GameStateMachine<ClusterFogOfWarManager, C
 			{
 				if (worldContainer.IsDiscovered && !DebugHandler.RevealFogOfWar)
 				{
-					this.RevealLocation(worldContainer.GetComponent<ClusterGridEntity>().Location, num);
+					this.RevealLocation(worldContainer.GetComponent<ClusterGridEntity>().Location, num, 2);
 				}
 			}
 		}

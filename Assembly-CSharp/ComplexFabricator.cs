@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.Serialization;
 using Klei;
 using KSerialization;
@@ -118,6 +119,11 @@ public class ComplexFabricator : RemoteDockWorkTargetComponent, ISim200ms, ISim1
 		{
 			return this.workingOrderIdx > -1;
 		}
+	}
+
+	public List<ComplexRecipe> GetRecipesWithCategoryID(string categoryID)
+	{
+		return this.recipe_list.Where<ComplexRecipe>((ComplexRecipe match) => match.recipeCategoryID == categoryID).ToList<ComplexRecipe>();
 	}
 
 	public List<FetchList2> DebugFetchLists
@@ -511,6 +517,7 @@ public class ComplexFabricator : RemoteDockWorkTargetComponent, ISim200ms, ISim1
 					{
 						float num5;
 						pooledDictionary2.TryGetValue(recipeElement2.material, out num5);
+						num4 *= FetchChore.GetMinimumFetchAmount(recipeElement2.material, 1f);
 						pooledDictionary2[recipeElement2.material] = num5 + num4;
 						pooledDictionary[recipeElement2.material] = 0f;
 					}
@@ -665,6 +672,21 @@ public class ComplexFabricator : RemoteDockWorkTargetComponent, ISim200ms, ISim1
 		return StringComparer.InvariantCulture.Compare(a.id, b.id);
 	}
 
+	public ComplexRecipe GetRecipe(string id)
+	{
+		if (this.recipe_list != null)
+		{
+			foreach (ComplexRecipe complexRecipe in this.recipe_list)
+			{
+				if (complexRecipe.id == id)
+				{
+					return complexRecipe;
+				}
+			}
+		}
+		return null;
+	}
+
 	public ComplexRecipe[] GetRecipes()
 	{
 		if (this.recipe_list == null)
@@ -687,6 +709,13 @@ public class ComplexFabricator : RemoteDockWorkTargetComponent, ISim200ms, ISim1
 			}
 			this.recipe_list = list.ToArray();
 			Array.Sort<ComplexRecipe>(this.recipe_list, new Comparison<ComplexRecipe>(this.CompareRecipe));
+			foreach (ComplexRecipe complexRecipe2 in this.recipe_list)
+			{
+				if (!this.mostRecentRecipeSelectionByCategory.ContainsKey(complexRecipe2.recipeCategoryID))
+				{
+					this.mostRecentRecipeSelectionByCategory.Add(complexRecipe2.recipeCategoryID, null);
+				}
+			}
 		}
 		return this.recipe_list;
 	}
@@ -730,6 +759,45 @@ public class ComplexFabricator : RemoteDockWorkTargetComponent, ISim200ms, ISim1
 	public int GetRecipeQueueCount(ComplexRecipe recipe)
 	{
 		return this.recipeQueueCounts[recipe.id];
+	}
+
+	public int GetIngredientQueueCount(string recipeCategoryID, Tag tag)
+	{
+		int num = 0;
+		foreach (ComplexRecipe complexRecipe in this.GetRecipesWithCategoryID(recipeCategoryID))
+		{
+			ComplexRecipe.RecipeElement[] ingredients = complexRecipe.ingredients;
+			for (int i = 0; i < ingredients.Length; i++)
+			{
+				if (ingredients[i].material == tag)
+				{
+					num += this.GetRecipeQueueCount(complexRecipe);
+					break;
+				}
+			}
+		}
+		return num;
+	}
+
+	public int GetRecipeCategoryQueueCount(string recipeCategoryID)
+	{
+		int num = 0;
+		IEnumerable<ComplexRecipe> enumerable = this.recipe_list;
+		Func<ComplexRecipe, bool> <>9__0;
+		Func<ComplexRecipe, bool> func;
+		if ((func = <>9__0) == null)
+		{
+			func = (<>9__0 = (ComplexRecipe match) => match.recipeCategoryID == recipeCategoryID);
+		}
+		foreach (ComplexRecipe complexRecipe in enumerable.Where<ComplexRecipe>(func))
+		{
+			if (this.recipeQueueCounts[complexRecipe.id] == ComplexFabricator.QUEUE_INFINITE)
+			{
+				return ComplexFabricator.QUEUE_INFINITE;
+			}
+			num += this.recipeQueueCounts[complexRecipe.id];
+		}
+		return num;
 	}
 
 	public bool IsRecipeQueued(ComplexRecipe recipe)
@@ -930,7 +998,7 @@ public class ComplexFabricator : RemoteDockWorkTargetComponent, ISim200ms, ISim1
 				{
 					goto Block_2;
 				}
-				this.inStorage.Transfer(this.buildStorage, recipeElement.material, num, false, true);
+				this.inStorage.TransferUnitMass(this.buildStorage, recipeElement.material, num, false, false, true);
 			}
 			IL_009D:
 			i++;
@@ -1036,7 +1104,7 @@ public class ComplexFabricator : RemoteDockWorkTargetComponent, ISim200ms, ISim1
 				recipeElement2 = recipeElement3;
 				element = this.buildStorage.FindFirst(recipeElement3.material).GetComponent<PrimaryElement>().Element;
 			}
-			if (recipeElement3.Edible)
+			if (recipeElement3.doNotConsume)
 			{
 				recipeElement2 = recipeElement3;
 				this.buildStorage.TransferMass(this.outStorage, recipeElement3.material, recipeElement3.amount, true, true, true);
@@ -1278,6 +1346,9 @@ public class ComplexFabricator : RemoteDockWorkTargetComponent, ISim200ms, ISim1
 
 	[Serialize]
 	private Dictionary<string, int> recipeQueueCounts = new Dictionary<string, int>();
+
+	[Serialize]
+	public Dictionary<string, string> mostRecentRecipeSelectionByCategory = new Dictionary<string, string>();
 
 	private int nextOrderIdx;
 

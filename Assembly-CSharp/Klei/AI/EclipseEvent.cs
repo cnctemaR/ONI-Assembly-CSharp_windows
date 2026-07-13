@@ -6,7 +6,7 @@ namespace Klei.AI
 	public class EclipseEvent : GameplayEvent<EclipseEvent.StatesInstance>
 	{
 		public EclipseEvent()
-			: base("EclipseEvent", 0, 0)
+			: base("EclipseEvent", 0, 0, null, null)
 		{
 			this.title = GAMEPLAY_EVENTS.EVENT_TYPES.ECLIPSE.NAME;
 			this.description = GAMEPLAY_EVENTS.EVENT_TYPES.ECLIPSE.DESCRIPTION;

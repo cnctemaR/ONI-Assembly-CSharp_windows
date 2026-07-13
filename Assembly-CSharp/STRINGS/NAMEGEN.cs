@@ -1120,6 +1120,8 @@ namespace STRINGS
 
 				public static LocString CERES = "Wintr\nPolar\nSubzer\nImpass\nGlac\nBlust\nGelid\nCryo\nIcicl\nSlush\nSleet\nHail\nShivrr\n";
 
+				public static LocString PREHISTORIC = "Primor\nPaleo\nDino\nCret\nFoss\nFern\nClaw\nSaur\nBront\nCamb\n";
+
 				public static LocString MAGMA = "Fier\nMagm\nToast\nScorch\nBurn\nObsid\nLav\nMelt\nHot\nSweltr\nBlist\nFlam\nTherm\nCombust\nCauter\nTorch\nStok\nChar\n";
 
 				public static LocString SWAMP = "Goop\nMud\nMuck\nGross\nStink\nSmell\nYuck\nReek\nBlag\nSogg\nDripp\nUgh\nPustul\nIck\nCurd\nSlop\nPhlegm\nGurg\nSmear\nOoz\n";

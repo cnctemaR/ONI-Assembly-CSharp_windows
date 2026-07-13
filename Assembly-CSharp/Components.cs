@@ -213,6 +213,8 @@ public class Components
 
 	public static Components.CmpsByWorld<SelfChargingElectrobank> SelfChargingElectrobanks = new Components.CmpsByWorld<SelfChargingElectrobank>();
 
+	public static Components.Cmps<ClusterGridEntity> LongRangeMissileTargetables = new Components.Cmps<ClusterGridEntity>();
+
 	public static Components.Cmps<IncubationMonitor.Instance> IncubationMonitors = new Components.Cmps<IncubationMonitor.Instance>();
 
 	public static Components.Cmps<FixedCapturableMonitor.Instance> FixedCapturableMonitors = new Components.Cmps<FixedCapturableMonitor.Instance>();
@@ -222,6 +224,8 @@ public class Components
 	public static Components.Cmps<StateMachine.Instance> EffectImmunityProviderStations = new Components.Cmps<StateMachine.Instance>();
 
 	public static Components.Cmps<PeeChoreMonitor.Instance> CriticalBladders = new Components.Cmps<PeeChoreMonitor.Instance>();
+
+	public static Components.Cmps<MissileLauncher.Instance> MissileLaunchers = new Components.Cmps<MissileLauncher.Instance>();
 
 	public class Cmps<T> : ICollection, IEnumerable, IEnumerable<T>
 	{
@@ -306,6 +310,10 @@ public class Components
 
 		public List<T> GetWorldItems(int worldId, bool checkChildWorlds = false)
 		{
+			if (ClusterManager.Instance.worldCount == 1)
+			{
+				return this.Items;
+			}
 			ICollection<int> collection = null;
 			if (checkChildWorlds)
 			{

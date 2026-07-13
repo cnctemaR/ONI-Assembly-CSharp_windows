@@ -51,7 +51,10 @@ public class IncubationMonitor : GameStateMachine<IncubationMonitor, IncubationM
 		{
 			SelectTool.Instance.Select(gameObject.GetComponent<KSelectable>(), false);
 		}
-		Db.Get().Amounts.Wildness.Copy(gameObject, smi.gameObject);
+		if (Db.Get().Amounts.Wildness.Lookup(gameObject) != null)
+		{
+			Db.Get().Amounts.Wildness.Copy(gameObject, smi.gameObject);
+		}
 		if (smi.incubator != null)
 		{
 			smi.incubator.StoreBaby(gameObject);
@@ -67,6 +70,10 @@ public class IncubationMonitor : GameStateMachine<IncubationMonitor, IncubationM
 
 	private static GameObject SpawnShell(IncubationMonitor.Instance smi)
 	{
+		if (smi.def.preventEggDrops)
+		{
+			return null;
+		}
 		Vector3 position = smi.transform.GetPosition();
 		GameObject gameObject = Util.KInstantiate(Assets.GetPrefab("EggShell"), position);
 		PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
@@ -78,6 +85,10 @@ public class IncubationMonitor : GameStateMachine<IncubationMonitor, IncubationM
 
 	private static GameObject SpawnEggInnards(IncubationMonitor.Instance smi)
 	{
+		if (smi.def.preventEggDrops)
+		{
+			return null;
+		}
 		Vector3 position = smi.transform.GetPosition();
 		GameObject gameObject = Util.KInstantiate(Assets.GetPrefab("RawEgg"), position);
 		PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
@@ -92,7 +103,7 @@ public class IncubationMonitor : GameStateMachine<IncubationMonitor, IncubationM
 		IncubationMonitor.SpawnShell(smi);
 		GameObject gameObject = IncubationMonitor.SpawnEggInnards(smi);
 		KSelectable component = smi.gameObject.GetComponent<KSelectable>();
-		if (SelectTool.Instance != null && SelectTool.Instance.selected != null && SelectTool.Instance.selected == component)
+		if (gameObject != null && SelectTool.Instance != null && SelectTool.Instance.selected != null && SelectTool.Instance.selected == component)
 		{
 			SelectTool.Instance.Select(gameObject.GetComponent<KSelectable>(), false);
 		}
@@ -145,6 +156,8 @@ public class IncubationMonitor : GameStateMachine<IncubationMonitor, IncubationM
 			initialAmounts.Add(Db.Get().Amounts.Incubation.Id);
 			initialAmounts.Add(Db.Get().Amounts.Viability.Id);
 		}
+
+		public bool preventEggDrops;
 
 		public float baseIncubationRate;
 

@@ -99,6 +99,14 @@ public class WorldContainer : KMonoBehaviour
 		}
 	}
 
+	public Dictionary<string, int> LargeImpactorFragmentsFixedTraits
+	{
+		get
+		{
+			return this.largeImpactorFragmentsFixedTraits;
+		}
+	}
+
 	public Dictionary<string, int> CosmicRadiationFixedTraits
 	{
 		get
@@ -403,6 +411,7 @@ public class WorldContainer : KMonoBehaviour
 		this.sunlight = this.GetSunlightValueFromFixedTrait();
 		this.cosmicRadiation = this.GetCosmicRadiationValueFromFixedTrait();
 		this.northernlights = this.GetNorthernlightValueFromFixedTrait();
+		this.largeImpactorFragments = this.GetLargeImpactorFragmentsValueFromFixedTrait();
 	}
 
 	private void RefreshHasTopPriorityChore()
@@ -464,7 +473,7 @@ public class WorldContainer : KMonoBehaviour
 	{
 		get
 		{
-			return new Vector2((float)(this.worldOffset.x + (this.worldSize.x - 1)), (float)(this.worldOffset.y + (this.worldSize.y - 1)));
+			return new Vector2((float)(this.worldOffset.x + (this.worldSize.x - 1)), (float)(this.worldOffset.y + (this.worldSize.y - this.hiddenYOffset - 1)));
 		}
 	}
 
@@ -481,6 +490,14 @@ public class WorldContainer : KMonoBehaviour
 		get
 		{
 			return this.worldOffset;
+		}
+	}
+
+	public int HiddenYOffset
+	{
+		get
+		{
+			return this.hiddenYOffset;
 		}
 	}
 
@@ -629,6 +646,10 @@ public class WorldContainer : KMonoBehaviour
 
 	private int GetDefaultValueForFixedTraitCategory(Dictionary<string, int> traitCategory)
 	{
+		if (traitCategory == this.largeImpactorFragmentsFixedTraits)
+		{
+			return FIXEDTRAITS.LARGEIMPACTORFRAGMENTS.DEFAULT_VALUE;
+		}
 		if (traitCategory == this.northernLightsFixedTraits)
 		{
 			return FIXEDTRAITS.NORTHERNLIGHTS.DEFAULT_VALUE;
@@ -646,6 +667,10 @@ public class WorldContainer : KMonoBehaviour
 
 	private string GetDefaultFixedTraitFor(Dictionary<string, int> traitCategory)
 	{
+		if (traitCategory == this.largeImpactorFragmentsFixedTraits)
+		{
+			return FIXEDTRAITS.LARGEIMPACTORFRAGMENTS.NAME.DEFAULT;
+		}
 		if (traitCategory == this.northernLightsFixedTraits)
 		{
 			return FIXEDTRAITS.NORTHERNLIGHTS.NAME.DEFAULT;
@@ -686,6 +711,11 @@ public class WorldContainer : KMonoBehaviour
 		return this.GetDefaultValueForFixedTraitCategory(traitCategory);
 	}
 
+	private string GetLargeImpactorFragmentsFixedTraits(WorldGen world)
+	{
+		return this.GetFixedTraitsFor(this.LargeImpactorFragmentsFixedTraits, world);
+	}
+
 	private string GetNorthernlightFixedTraits(WorldGen world)
 	{
 		return this.GetFixedTraitsFor(this.northernLightsFixedTraits, world);
@@ -699,6 +729,11 @@ public class WorldContainer : KMonoBehaviour
 	private string GetCosmicRadiationFromFixedTraits(WorldGen world)
 	{
 		return this.GetFixedTraitsFor(this.cosmicRadiationFixedTraits, world);
+	}
+
+	private int GetLargeImpactorFragmentsValueFromFixedTrait()
+	{
+		return this.GetFixedTraitValueForTrait(this.largeImpactorFragmentsFixedTraits, ref this.largeImpactorFragmentsFixedTrait);
 	}
 
 	private int GetNorthernlightValueFromFixedTrait()
@@ -723,6 +758,7 @@ public class WorldContainer : KMonoBehaviour
 			this.fullyEnclosedBorder = world.Settings.GetBoolSetting("DrawWorldBorder") && world.Settings.GetBoolSetting("DrawWorldBorderOverVacuum");
 			this.worldOffset = world.GetPosition();
 			this.worldSize = world.GetSize();
+			this.hiddenYOffset = world.HiddenYOffset;
 			this.isDiscovered = world.isStartingWorld;
 			this.isStartWorld = world.isStartingWorld;
 			this.worldName = world.Settings.world.filePath;
@@ -733,6 +769,7 @@ public class WorldContainer : KMonoBehaviour
 			this.isModuleInterior = world.Settings.world.moduleInterior;
 			this.m_seasonIds = new List<string>(world.Settings.world.seasons);
 			this.m_generatedSubworlds = world.Settings.world.generatedSubworlds;
+			this.largeImpactorFragmentsFixedTrait = this.GetLargeImpactorFragmentsFixedTraits(world);
 			this.northernLightFixedTrait = this.GetNorthernlightFixedTraits(world);
 			this.sunlightFixedTrait = this.GetSunlightFromFixedTraits(world);
 			this.cosmicRadiationFixedTrait = this.GetCosmicRadiationFromFixedTraits(world);
@@ -800,6 +837,11 @@ public class WorldContainer : KMonoBehaviour
 				GridVisibility.Reveal(i + this.worldOffset.X, j + this.worldOffset.y, 7, 1f);
 			}
 		}
+	}
+
+	public void RevealHiddenY()
+	{
+		this.hiddenYOffset = 0;
 	}
 
 	private Vector3? SetSurfaceCameraPos()
@@ -1210,6 +1252,9 @@ public class WorldContainer : KMonoBehaviour
 	private bool fullyEnclosedBorder;
 
 	[Serialize]
+	private int hiddenYOffset;
+
+	[Serialize]
 	private bool isModuleInterior;
 
 	[Serialize]
@@ -1258,6 +1303,9 @@ public class WorldContainer : KMonoBehaviour
 	public int northernlights = FIXEDTRAITS.NORTHERNLIGHTS.DEFAULT_VALUE;
 
 	[Serialize]
+	public int largeImpactorFragments = FIXEDTRAITS.LARGEIMPACTORFRAGMENTS.DEFAULT_VALUE;
+
+	[Serialize]
 	public int sunlight = FIXEDTRAITS.SUNLIGHT.DEFAULT_VALUE;
 
 	[Serialize]
@@ -1277,6 +1325,9 @@ public class WorldContainer : KMonoBehaviour
 
 	[Serialize]
 	public string northernLightFixedTrait;
+
+	[Serialize]
+	public string largeImpactorFragmentsFixedTrait;
 
 	[Serialize]
 	public int fixedTraitsUpdateVersion = 1;
@@ -1338,6 +1389,18 @@ public class WorldContainer : KMonoBehaviour
 		{
 			FIXEDTRAITS.NORTHERNLIGHTS.NAME.ENABLED,
 			FIXEDTRAITS.NORTHERNLIGHTS.ENABLED
+		}
+	};
+
+	private Dictionary<string, int> largeImpactorFragmentsFixedTraits = new Dictionary<string, int>
+	{
+		{
+			FIXEDTRAITS.LARGEIMPACTORFRAGMENTS.NAME.NONE,
+			FIXEDTRAITS.LARGEIMPACTORFRAGMENTS.NONE
+		},
+		{
+			FIXEDTRAITS.LARGEIMPACTORFRAGMENTS.NAME.ALLOWED,
+			FIXEDTRAITS.LARGEIMPACTORFRAGMENTS.ALLOWED
 		}
 	};
 

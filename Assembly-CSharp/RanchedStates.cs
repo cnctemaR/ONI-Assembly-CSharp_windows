@@ -150,7 +150,17 @@ public class RanchedStates : GameStateMachine<RanchedStates, RanchedStates.Insta
 	private static int GetRanchNavTarget(RanchedStates.Instance smi)
 	{
 		RanchStation.Instance ranchStation = RanchedStates.GetRanchStation(smi);
-		return smi.ModifyNavTargetForCritter(ranchStation.GetRanchNavTarget());
+		int num = smi.ModifyNavTargetForCritter(ranchStation.GetRanchNavTarget());
+		if (smi.HasTag(GameTags.LargeCreature))
+		{
+			ref Vector2I ptr = Grid.PosToXY(smi.gameObject.transform.position);
+			Vector2I vector2I = Grid.CellToXY(num);
+			if (ptr.x > vector2I.x)
+			{
+				num = Grid.CellLeft(num);
+			}
+		}
+		return num;
 	}
 
 	private static int GetRunawayCell(RanchedStates.Instance smi)

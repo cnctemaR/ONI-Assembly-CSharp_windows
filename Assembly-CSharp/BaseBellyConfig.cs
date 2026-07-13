@@ -20,8 +20,7 @@ public static class BaseBellyConfig
 		{
 			text = "WalkerBabyNavGrid";
 		}
-		EntityTemplates.ExtendEntityToBasicCreature(true, gameObject, FactionManager.FactionID.Pest, traitId, text, NavType.Floor, 32, 2f, "Meat", 14, true, false, 303.15f, 343.15f, 173.15f, 373.15f);
-		gameObject.GetDef<CritterTemperatureMonitor.Def>().isBammoth = true;
+		EntityTemplates.ExtendEntityToBasicCreature(true, gameObject, FactionManager.FactionID.Pest, traitId, text, NavType.Floor, 32, 2f, "Meat", 14f, true, false, 303.15f, 343.15f, 173.15f, 373.15f);
 		gameObject.AddOrGet<Navigator>();
 		if (symbolOverridePrefix != null)
 		{
@@ -35,14 +34,6 @@ public static class BaseBellyConfig
 		gameObject.AddOrGetDef<WorldSpawnableMonitor.Def>();
 		gameObject.AddOrGetDef<ThreatMonitor.Def>().fleethresholdState = Health.HealthState.Dead;
 		gameObject.AddWeapon(1f, 1f, AttackProperties.DamageType.Standard, AttackProperties.TargetType.Single, 1, 0f);
-		SoundEventVolumeCache.instance.AddVolume("hatch_kanim", "Hatch_voice_idle", NOISE_POLLUTION.CREATURES.TIER2);
-		SoundEventVolumeCache.instance.AddVolume("FloorSoundEvent", "Hatch_footstep", NOISE_POLLUTION.CREATURES.TIER1);
-		SoundEventVolumeCache.instance.AddVolume("hatch_kanim", "Hatch_land", NOISE_POLLUTION.CREATURES.TIER3);
-		SoundEventVolumeCache.instance.AddVolume("hatch_kanim", "Hatch_chew", NOISE_POLLUTION.CREATURES.TIER3);
-		SoundEventVolumeCache.instance.AddVolume("hatch_kanim", "Hatch_voice_hurt", NOISE_POLLUTION.CREATURES.TIER5);
-		SoundEventVolumeCache.instance.AddVolume("hatch_kanim", "Hatch_voice_die", NOISE_POLLUTION.CREATURES.TIER5);
-		SoundEventVolumeCache.instance.AddVolume("hatch_kanim", "Hatch_drill_emerge", NOISE_POLLUTION.CREATURES.TIER6);
-		SoundEventVolumeCache.instance.AddVolume("hatch_kanim", "Hatch_drill_hide", NOISE_POLLUTION.CREATURES.TIER6);
 		EntityTemplates.CreateAndRegisterBaggedCreature(gameObject, true, true, false);
 		KPrefabID component = gameObject.GetComponent<KPrefabID>();
 		component.AddTag(GameTags.Creatures.Walker, false);
@@ -65,14 +56,17 @@ public static class BaseBellyConfig
 			.PushInterruptGroup()
 			.Add(new CreatureSleepStates.Def(), true, -1)
 			.Add(new FixedCaptureStates.Def(), true, -1)
-			.Add(new RanchedStates.Def(), !is_baby, -1)
+			.Add(new RanchedStates.Def
+			{
+				WaitCellOffset = 2
+			}, !is_baby, -1)
 			.Add(new PlayAnimsStates.Def(GameTags.Creatures.WantsToEnterBurrow, false, "hide", global::STRINGS.CREATURES.STATUSITEMS.BURROWING.NAME, global::STRINGS.CREATURES.STATUSITEMS.BURROWING.TOOLTIP), flag, -1)
 			.Add(new LayEggStates.Def(), !is_baby, -1)
 			.Add(new EatStates.Def(), true, -1)
 			.Add(new DrinkMilkStates.Def
 			{
 				shouldBeBehindMilkTank = false,
-				drinkCellOffsetGetFn = (is_baby ? new DrinkMilkStates.Def.DrinkCellOffsetGetFn(DrinkMilkStates.Def.DrinkCellOffsetGet_CritterOneByOne) : new DrinkMilkStates.Def.DrinkCellOffsetGetFn(DrinkMilkStates.Def.DrinkCellOffsetGet_BammothAdult))
+				drinkCellOffsetGetFn = (is_baby ? new DrinkMilkStates.Def.DrinkCellOffsetGetFn(DrinkMilkStates.Def.DrinkCellOffsetGet_CritterOneByOne) : new DrinkMilkStates.Def.DrinkCellOffsetGetFn(DrinkMilkStates.Def.DrinkCellOffsetGet_TwoByTwo))
 			}, true, -1)
 			.Add(new PlayAnimsStates.Def(GameTags.Creatures.Poop, false, "poop", global::STRINGS.CREATURES.STATUSITEMS.EXPELLING_SOLID.NAME, global::STRINGS.CREATURES.STATUSITEMS.EXPELLING_SOLID.TOOLTIP), true, -1)
 			.Add(new CallAdultStates.Def(), is_baby, -1)

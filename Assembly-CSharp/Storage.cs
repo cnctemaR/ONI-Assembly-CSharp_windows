@@ -516,6 +516,40 @@ public class Storage : Workable, ISaveLoadableDetails, IGameObjectEffectDescript
 		return false;
 	}
 
+	public void TransferUnitMass(Storage dest_storage, Tag tag, float unitAmount, bool flatten = false, bool block_events = false, bool hide_popups = false)
+	{
+		float num = 0f;
+		GameObject gameObject = this.FindFirst(tag);
+		while (num < unitAmount && gameObject != null)
+		{
+			PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
+			if (unitAmount < component.Units)
+			{
+				Pickupable component2 = gameObject.GetComponent<Pickupable>();
+				Pickupable pickupable = component2.TakeUnit(unitAmount);
+				dest_storage.Store(pickupable.gameObject, hide_popups, block_events, true, false);
+				if (block_events)
+				{
+					break;
+				}
+				base.Trigger(-1697596308, component2.gameObject);
+				Action<GameObject> onStorageChange = this.OnStorageChange;
+				if (onStorageChange == null)
+				{
+					return;
+				}
+				onStorageChange(component2.gameObject);
+				return;
+			}
+			else
+			{
+				this.Transfer(gameObject, dest_storage, block_events, hide_popups);
+				num += component.Units;
+				gameObject = this.FindFirst(tag);
+			}
+		}
+	}
+
 	public bool DropSome(Tag tag, float amount, bool ventGas = false, bool dumpLiquid = false, Vector3 offset = default(Vector3), bool doDiseaseTransfer = true, bool showInWorldNotification = false)
 	{
 		bool flag = false;

@@ -356,6 +356,90 @@ namespace Database
 					{ "HardSkinBerryPlantSeed", 4 }
 				}, Db.Get().ArtifactDropRates.Good, 384000000, 383980000, 60, true));
 			}
+			if (DlcManager.IsContentSubscribed("DLC4_ID"))
+			{
+				this.DLC4PrehistoricSpaceDestination = base.Add(new SpaceDestinationType("DLC4PrehistoricSpaceDestination", parent, UI.SPACEDESTINATIONS.PLANETS.DLC4PREHISTORICSPACEDESTINATION.NAME, UI.SPACEDESTINATIONS.PLANETS.DLC4PREHISTORICSPACEDESTINATION.DESCRIPTION, 96, "prehistoric_base", new Dictionary<SimHashes, MathUtil.MinMax>
+				{
+					{
+						SimHashes.NickelOre,
+						new MathUtil.MinMax(100f, 200f)
+					},
+					{
+						SimHashes.Peat,
+						new MathUtil.MinMax(100f, 200f)
+					},
+					{
+						SimHashes.Shale,
+						new MathUtil.MinMax(100f, 200f)
+					},
+					{
+						SimHashes.Amber,
+						new MathUtil.MinMax(100f, 200f)
+					},
+					{
+						SimHashes.Iridium,
+						new MathUtil.MinMax(100f, 200f)
+					}
+				}, new Dictionary<string, int>
+				{
+					{ "Stego", 1 },
+					{ "Raptor", 1 },
+					{ "VineMotherSeed", 4 }
+				}, Db.Get().ArtifactDropRates.Good, 384000000, 383980000, 60, true));
+				this.DLC4PrehistoricDemoliorSpaceDestination = base.Add(new SpaceDestinationType("DLC4PrehistoricDemoliorSpaceDestination", parent, UI.SPACEDESTINATIONS.PLANETS.DLC4PREHISTORICDEMOLIORSPACEDESTINATION.NAME, UI.SPACEDESTINATIONS.PLANETS.DLC4PREHISTORICDEMOLIORSPACEDESTINATION.DESCRIPTION, 96, "prehistoric_demolior_debris1", new Dictionary<SimHashes, MathUtil.MinMax>
+				{
+					{
+						SimHashes.Iridium,
+						new MathUtil.MinMax(100f, 200f)
+					},
+					{
+						SimHashes.MaficRock,
+						new MathUtil.MinMax(100f, 200f)
+					},
+					{
+						SimHashes.Gold,
+						new MathUtil.MinMax(100f, 200f)
+					},
+					{
+						SimHashes.Granite,
+						new MathUtil.MinMax(100f, 200f)
+					}
+				}, null, Db.Get().ArtifactDropRates.None, 384000000, 383980000, 60, true));
+				this.DLC4PrehistoricDemoliorSpaceDestination2 = base.Add(new SpaceDestinationType("DLC4PrehistoricDemoliorSpaceDestination2", parent, UI.SPACEDESTINATIONS.PLANETS.DLC4PREHISTORICDEMOLIORSPACEDESTINATION2.NAME, UI.SPACEDESTINATIONS.PLANETS.DLC4PREHISTORICDEMOLIORSPACEDESTINATION2.DESCRIPTION, 96, "prehistoric_demolior_debris2", new Dictionary<SimHashes, MathUtil.MinMax>
+				{
+					{
+						SimHashes.Isoresin,
+						new MathUtil.MinMax(100f, 200f)
+					},
+					{
+						SimHashes.Petroleum,
+						new MathUtil.MinMax(100f, 200f)
+					},
+					{
+						SimHashes.LiquidSulfur,
+						new MathUtil.MinMax(100f, 200f)
+					}
+				}, null, Db.Get().ArtifactDropRates.None, 384000000, 383980000, 60, true));
+				this.DLC4PrehistoricDemoliorSpaceDestination3 = base.Add(new SpaceDestinationType("DLC4PrehistoricDemoliorSpaceDestination3", parent, UI.SPACEDESTINATIONS.PLANETS.DLC4PREHISTORICDEMOLIORSPACEDESTINATION3.NAME, UI.SPACEDESTINATIONS.PLANETS.DLC4PREHISTORICDEMOLIORSPACEDESTINATION3.DESCRIPTION, 96, "prehistoric_demolior_debris3", new Dictionary<SimHashes, MathUtil.MinMax>
+				{
+					{
+						SimHashes.MoltenIridium,
+						new MathUtil.MinMax(100f, 200f)
+					},
+					{
+						SimHashes.LiquidOxygen,
+						new MathUtil.MinMax(100f, 200f)
+					},
+					{
+						SimHashes.LiquidHydrogen,
+						new MathUtil.MinMax(100f, 200f)
+					},
+					{
+						SimHashes.Magma,
+						new MathUtil.MinMax(100f, 200f)
+					}
+				}, null, Db.Get().ArtifactDropRates.None, 384000000, 383980000, 60, true));
+			}
 		}
 
 		public SpaceDestinationType Satellite;
@@ -405,6 +489,14 @@ namespace Database
 		public SpaceDestinationType Earth;
 
 		public SpaceDestinationType DLC2CeresSpaceDestination;
+
+		public SpaceDestinationType DLC4PrehistoricSpaceDestination;
+
+		public SpaceDestinationType DLC4PrehistoricDemoliorSpaceDestination;
+
+		public SpaceDestinationType DLC4PrehistoricDemoliorSpaceDestination2;
+
+		public SpaceDestinationType DLC4PrehistoricDemoliorSpaceDestination3;
 
 		public static Dictionary<SimHashes, MathUtil.MinMax> extendedElementTable = new Dictionary<SimHashes, MathUtil.MinMax>
 		{

@@ -91,7 +91,7 @@ public class AsteroidGridEntity : ClusterGridEntity
 		Game.Instance.Subscribe(1749562766, new Action<object>(this.OnMeteorShowerEventChanged));
 		if (ClusterGrid.Instance.IsCellVisible(this.m_location))
 		{
-			SaveGame.Instance.GetSMI<ClusterFogOfWarManager.Instance>().RevealLocation(this.m_location, 1);
+			SaveGame.Instance.GetSMI<ClusterFogOfWarManager.Instance>().RevealLocation(this.m_location, 1, 2);
 		}
 		base.OnSpawn();
 	}

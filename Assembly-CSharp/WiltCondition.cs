@@ -39,6 +39,7 @@ public class WiltCondition : KMonoBehaviour
 		this.WiltConditions.Add(10, true);
 		this.WiltConditions.Add(11, true);
 		this.WiltConditions.Add(12, true);
+		this.WiltConditions.Add(13, true);
 		base.Subscribe<WiltCondition>(-107174716, WiltCondition.SetTemperatureFalseDelegate);
 		base.Subscribe<WiltCondition>(-1758196852, WiltCondition.SetTemperatureFalseDelegate);
 		base.Subscribe<WiltCondition>(-1234705021, WiltCondition.SetTemperatureFalseDelegate);
@@ -67,6 +68,7 @@ public class WiltCondition : KMonoBehaviour
 		base.Subscribe<WiltCondition>(912965142, WiltCondition.SetRootHealthDelegate);
 		base.Subscribe<WiltCondition>(874353739, WiltCondition.SetRadiationComfortTrueDelegate);
 		base.Subscribe<WiltCondition>(1788072223, WiltCondition.SetRadiationComfortFalseDelegate);
+		base.Subscribe<WiltCondition>(-200207042, WiltCondition.SetPollinatedDelegate);
 	}
 
 	protected override void OnSpawn()
@@ -99,6 +101,12 @@ public class WiltCondition : KMonoBehaviour
 		this.wiltSchedulerHandler.ClearScheduler();
 		this.recoverSchedulerHandler.ClearScheduler();
 		base.OnCleanUp();
+	}
+
+	public bool IsConditionSatisifed(WiltCondition.Condition condition)
+	{
+		bool flag;
+		return this.WiltConditions.TryGetValue((int)condition, out flag) && flag;
 	}
 
 	private void SetCondition(WiltCondition.Condition condition, bool satisfiedState)
@@ -367,6 +375,11 @@ public class WiltCondition : KMonoBehaviour
 		component.SetCondition(WiltCondition.Condition.Radiation, true);
 	});
 
+	private static readonly EventSystem.IntraObjectHandler<WiltCondition> SetPollinatedDelegate = new EventSystem.IntraObjectHandler<WiltCondition>(delegate(WiltCondition component, object data)
+	{
+		component.SetCondition(WiltCondition.Condition.Pollination, (bool)data);
+	});
+
 	public enum Condition
 	{
 		Temperature,
@@ -382,6 +395,7 @@ public class WiltCondition : KMonoBehaviour
 		Entombed,
 		UnhealthyRoot,
 		Radiation,
+		Pollination,
 		Count
 	}
 }

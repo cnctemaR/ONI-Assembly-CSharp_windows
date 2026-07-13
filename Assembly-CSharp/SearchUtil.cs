@@ -118,7 +118,8 @@ public static class SearchUtil
 						},
 						searchTerms = techItem2.searchTerms
 					},
-					recipes = list
+					recipes = list,
+					tier = tech.tier
 				};
 				dictionary2[techItem.Id] = techItemCache;
 			}
@@ -139,7 +140,8 @@ public static class SearchUtil
 					},
 					searchTerms = tech.searchTerms
 				},
-				techItems = dictionary2
+				techItems = dictionary2,
+				tier = tech.tier
 			};
 			dictionary[tech.Id] = techCache;
 		}
@@ -190,7 +192,8 @@ public static class SearchUtil
 		{
 			nameDescSearchTerms = nameDescSearchTermsCache,
 			effect = matchCache,
-			recipes = list
+			recipes = list,
+			techTier = Db.Get().TechItems.GetTechTierForItem(def.PrefabID)
 		};
 	}
 
@@ -223,6 +226,14 @@ public static class SearchUtil
 			this.localMaxCmp = 0;
 		}
 
+		public readonly bool IsTieBroken
+		{
+			get
+			{
+				return this.globalMaxCmp != 0;
+			}
+		}
+
 		private int CacheLocalScore(int score, int cmp)
 		{
 			if (this.localMaxScore == -1 || this.localMaxScore < score)
@@ -245,7 +256,7 @@ public static class SearchUtil
 
 		public int Consider(int lhs, int rhs)
 		{
-			if (this.globalMaxCmp != 0)
+			if (this.IsTieBroken)
 			{
 				return this.globalMaxCmp;
 			}
@@ -269,7 +280,7 @@ public static class SearchUtil
 
 		public int Consider<T>(T lhs, T rhs) where T : IComparable, SearchUtil.IScore
 		{
-			if (this.globalMaxCmp != 0)
+			if (this.IsTieBroken)
 			{
 				return this.globalMaxCmp;
 			}
@@ -505,6 +516,14 @@ public static class SearchUtil
 			SearchUtil.TieBreaker tieBreaker = new SearchUtil.TieBreaker(score);
 			tieBreaker.Consider<SearchUtil.MatchCache>(this.nameDescSearchTerms.nameDesc.name, buildingDefCache.nameDescSearchTerms.nameDesc.name);
 			tieBreaker.Consider(this.nameDescSearchTerms.SearchTermsScore.score, buildingDefCache.nameDescSearchTerms.SearchTermsScore.score);
+			if (!tieBreaker.IsTieBroken)
+			{
+				int num2 = this.techTier.CompareTo(buildingDefCache.techTier);
+				if (num2 != 0)
+				{
+					return num2;
+				}
+			}
 			tieBreaker.Consider<SearchUtil.MatchCache>(this.effect, buildingDefCache.effect);
 			return tieBreaker.Consider<SearchUtil.MatchCache>(this.nameDescSearchTerms.nameDesc.desc, buildingDefCache.nameDescSearchTerms.nameDesc.desc);
 		}
@@ -514,6 +533,8 @@ public static class SearchUtil
 		public SearchUtil.MatchCache effect;
 
 		public List<SearchUtil.NameDescCache> recipes;
+
+		public int techTier;
 	}
 
 	public class TechItemCache : IComparable, SearchUtil.IScore
@@ -568,13 +589,25 @@ public static class SearchUtil
 				return num;
 			}
 			SearchUtil.TieBreaker tieBreaker = new SearchUtil.TieBreaker(score);
-			tieBreaker.Consider<SearchUtil.NameDescSearchTermsCache>(this.nameDescSearchTerms, techItemCache.nameDescSearchTerms);
+			tieBreaker.Consider<SearchUtil.MatchCache>(this.nameDescSearchTerms.nameDesc.name, techItemCache.nameDescSearchTerms.nameDesc.name);
+			tieBreaker.Consider(this.nameDescSearchTerms.SearchTermsScore.score, techItemCache.nameDescSearchTerms.SearchTermsScore.score);
+			if (!tieBreaker.IsTieBroken)
+			{
+				int num2 = this.tier.CompareTo(techItemCache.tier);
+				if (num2 != 0)
+				{
+					return num2;
+				}
+			}
+			tieBreaker.Consider<SearchUtil.MatchCache>(this.nameDescSearchTerms.nameDesc.desc, techItemCache.nameDescSearchTerms.nameDesc.desc);
 			return tieBreaker.Consider<SearchUtil.NameDescCache>(this.BestRecipe, techItemCache.BestRecipe);
 		}
 
 		public SearchUtil.NameDescSearchTermsCache nameDescSearchTerms;
 
 		public List<SearchUtil.NameDescCache> recipes;
+
+		public int tier;
 	}
 
 	public class TechCache : IComparable
@@ -629,13 +662,25 @@ public static class SearchUtil
 				return num;
 			}
 			SearchUtil.TieBreaker tieBreaker = new SearchUtil.TieBreaker(score);
-			tieBreaker.Consider<SearchUtil.NameDescSearchTermsCache>(this.tech, techCache.tech);
+			tieBreaker.Consider<SearchUtil.MatchCache>(this.tech.nameDesc.name, techCache.tech.nameDesc.name);
+			tieBreaker.Consider(this.tech.SearchTermsScore.score, techCache.tech.SearchTermsScore.score);
+			if (!tieBreaker.IsTieBroken)
+			{
+				int num2 = this.tier.CompareTo(techCache.tier);
+				if (num2 != 0)
+				{
+					return num2;
+				}
+			}
+			tieBreaker.Consider<SearchUtil.MatchCache>(this.tech.nameDesc.desc, techCache.tech.nameDesc.desc);
 			return tieBreaker.Consider<SearchUtil.TechItemCache>(this.BestItem, techCache.BestItem);
 		}
 
 		public SearchUtil.NameDescSearchTermsCache tech;
 
 		public Dictionary<string, SearchUtil.TechItemCache> techItems;
+
+		public int tier;
 	}
 
 	public class SubcategoryCache : IComparable

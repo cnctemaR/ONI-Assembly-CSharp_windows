@@ -85,6 +85,10 @@ public class TrapTrigger : KMonoBehaviour
 		{
 			return;
 		}
+		if (this.customConditionsToTrap != null && !this.customConditionsToTrap(trappable.gameObject))
+		{
+			return;
+		}
 		this.storage.Store(trappable.gameObject, true, false, true, false);
 		this.SetStoredPosition(trappable.gameObject);
 		base.Trigger(-358342870, trappable.gameObject);
@@ -97,6 +101,8 @@ public class TrapTrigger : KMonoBehaviour
 	}
 
 	private HandleVector<int>.Handle partitionerEntry;
+
+	public Func<GameObject, bool> customConditionsToTrap;
 
 	public Tag[] trappableCreatures;
 

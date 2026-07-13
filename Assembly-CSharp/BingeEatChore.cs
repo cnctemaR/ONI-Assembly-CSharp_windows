@@ -51,7 +51,7 @@ public class BingeEatChore : Chore<BingeEatChore.StatesInstance>
 				if (!edible2.HasTag(GameTags.Dehydrated) && !(edible2 == null) && !(edible2 == base.sm.ediblesource.Get<Edible>(base.smi)) && !edible2.isBeingConsumed)
 				{
 					Pickupable component2 = edible2.GetComponent<Pickupable>();
-					if (component2.UnreservedAmount > 0f && component2.CouldBePickedUpByMinion(base.GetComponent<KPrefabID>().InstanceID) && !component2.HasTag(GameTags.StoredPrivate))
+					if (component2.UnreservedFetchAmount > 0f && component2.CouldBePickedUpByMinion(base.GetComponent<KPrefabID>().InstanceID) && !component2.HasTag(GameTags.StoredPrivate))
 					{
 						int navigationCost = component.GetNavigationCost(edible2);
 						if (navigationCost != -1 && navigationCost < num)

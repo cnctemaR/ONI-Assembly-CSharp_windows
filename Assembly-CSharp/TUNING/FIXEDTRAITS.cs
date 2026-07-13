@@ -22,6 +22,24 @@ namespace TUNING
 			}
 		}
 
+		public class LARGEIMPACTORFRAGMENTS
+		{
+			public static int NONE = 0;
+
+			public static int ALLOWED = 1;
+
+			public static int DEFAULT_VALUE = FIXEDTRAITS.LARGEIMPACTORFRAGMENTS.NONE;
+
+			public class NAME
+			{
+				public static string NONE = "largeImpactorFragmentsNone";
+
+				public static string ALLOWED = "largeImpactorFragmentsAllowed";
+
+				public static string DEFAULT = FIXEDTRAITS.LARGEIMPACTORFRAGMENTS.NAME.NONE;
+			}
+		}
+
 		public class SUNLIGHT
 		{
 			public static int DEFAULT_SPACED_OUT_SUNLIGHT = 40000;

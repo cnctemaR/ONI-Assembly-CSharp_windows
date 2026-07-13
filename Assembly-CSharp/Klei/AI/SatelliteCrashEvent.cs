@@ -7,7 +7,7 @@ namespace Klei.AI
 	public class SatelliteCrashEvent : GameplayEvent<SatelliteCrashEvent.StatesInstance>
 	{
 		public SatelliteCrashEvent()
-			: base("SatelliteCrash", 0, 0)
+			: base("SatelliteCrash", 0, 0, null, null)
 		{
 			this.title = GAMEPLAY_EVENTS.EVENT_TYPES.SATELLITE_CRASH.NAME;
 			this.description = GAMEPLAY_EVENTS.EVENT_TYPES.SATELLITE_CRASH.DESCRIPTION;

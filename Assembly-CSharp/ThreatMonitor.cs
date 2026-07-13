@@ -251,6 +251,7 @@ public class ThreatMonitor : GameStateMachine<ThreatMonitor, ThreatMonitor.Insta
 			this.mainThreat = threat;
 			if (this.mainThreat != null)
 			{
+				this.mainThreatFaction = this.mainThreat.GetComponent<FactionAlignment>().Alignment;
 				this.mainThreat.Subscribe(1623392196, this.refreshThreatDelegate);
 				this.mainThreat.Subscribe(1969584890, this.refreshThreatDelegate);
 			}
@@ -277,6 +278,7 @@ public class ThreatMonitor : GameStateMachine<ThreatMonitor, ThreatMonitor.Insta
 		{
 			FactionAlignment factionAlignment = (FactionAlignment)data;
 			this.revengeThreat.Reset(factionAlignment);
+			Game.BrainScheduler.PrioritizeBrain(base.GetComponent<Brain>());
 			if (this.mainThreat == null)
 			{
 				this.SetMainThreat(factionAlignment.gameObject);
@@ -309,7 +311,7 @@ public class ThreatMonitor : GameStateMachine<ThreatMonitor, ThreatMonitor.Insta
 					return false;
 				}
 			}
-			return this.health.State < base.smi.def.fleethresholdState;
+			return (this.IAmADuplicant || base.smi.mainThreatFaction != FactionManager.FactionID.Predator) && this.health.State < base.smi.def.fleethresholdState;
 		}
 
 		private void GotoThreatResponse()
@@ -469,6 +471,8 @@ public class ThreatMonitor : GameStateMachine<ThreatMonitor, ThreatMonitor.Insta
 		public int currentUpdateIndex;
 
 		private GameObject mainThreat;
+
+		private FactionManager.FactionID mainThreatFaction;
 
 		private List<FactionAlignment> threats = new List<FactionAlignment>();
 

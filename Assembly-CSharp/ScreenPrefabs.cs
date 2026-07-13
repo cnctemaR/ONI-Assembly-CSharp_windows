@@ -72,6 +72,8 @@ public class ScreenPrefabs : KMonoBehaviour
 
 	public LanguageOptionsScreen languageOptionsScreen;
 
+	public LargeImpactorSequenceUIReticle largeImpactorSequenceReticlePrefab;
+
 	public ModsScreen modsMenu;
 
 	public RailModUploadScreen RailModUploadMenu;

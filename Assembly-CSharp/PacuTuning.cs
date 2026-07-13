@@ -4,6 +4,8 @@ using TUNING;
 
 public static class PacuTuning
 {
+	public static float MASS = 200f;
+
 	public static List<FertilityMonitor.BreedingChance> EGG_CHANCES_BASE = new List<FertilityMonitor.BreedingChance>
 	{
 		new FertilityMonitor.BreedingChance

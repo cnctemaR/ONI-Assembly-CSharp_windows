@@ -66,24 +66,35 @@ public class ClusterDestinationSideScreen : SideScreenContent
 			}
 		}
 		this.targetRocketSelector = this.targetSelector as RocketClusterDestinationSelector;
+		this.changeDestinationButton.GetComponent<ToolTip>().SetSimpleTooltip(this.targetSelector.changeTargetButtonTooltipString);
+		this.clearDestinationButton.GetComponent<ToolTip>().SetSimpleTooltip(this.targetSelector.clearTargetButtonTooltipString);
 	}
 
 	private void Refresh(object data = null)
 	{
 		if (!this.targetSelector.IsAtDestination())
 		{
-			Sprite sprite;
-			string text;
-			string text2;
-			ClusterGrid.Instance.GetLocationDescription(this.targetSelector.GetDestination(), out sprite, out text, out text2);
-			this.destinationImage.sprite = sprite;
-			this.destinationLabel.text = UI.UISIDESCREENS.CLUSTERDESTINATIONSIDESCREEN.TITLE + ": " + text;
+			ClusterGridEntity clusterEntityTarget = this.targetSelector.GetClusterEntityTarget();
+			if (clusterEntityTarget != null)
+			{
+				this.destinationImage.sprite = clusterEntityTarget.GetUISprite();
+				this.destinationLabel.text = this.targetSelector.sidescreenTitleString + ": " + clusterEntityTarget.GetProperName();
+			}
+			else
+			{
+				Sprite sprite;
+				string text;
+				string text2;
+				ClusterGrid.Instance.GetLocationDescription(this.targetSelector.GetDestination(), out sprite, out text, out text2);
+				this.destinationImage.sprite = sprite;
+				this.destinationLabel.text = this.targetSelector.sidescreenTitleString + ": " + text;
+			}
 			this.clearDestinationButton.isInteractable = true;
 		}
 		else
 		{
 			this.destinationImage.sprite = Assets.GetSprite("hex_unknown");
-			this.destinationLabel.text = UI.UISIDESCREENS.CLUSTERDESTINATIONSIDESCREEN.TITLE + ": " + UI.SPACEDESTINATIONS.NONE.NAME;
+			this.destinationLabel.text = this.targetSelector.sidescreenTitleString + ": " + UI.SPACEDESTINATIONS.NONE.NAME;
 			this.clearDestinationButton.isInteractable = false;
 		}
 		if (this.targetRocketSelector != null)

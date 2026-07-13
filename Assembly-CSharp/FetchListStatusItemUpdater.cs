@@ -92,7 +92,7 @@ public class FetchListStatusItemUpdater : KMonoBehaviour, IRender200ms
 						{
 							if (pickupable.KPrefabID.HasTag(tag))
 							{
-								num2 += pickupable.TotalAmount;
+								num2 += pickupable.FetchTotalAmount;
 							}
 						}
 						pooledDictionary4[tag] = num2;

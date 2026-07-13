@@ -86,7 +86,7 @@ public class Pickupable : Workable, IHasSortOrder
 
 	private bool CouldBePickedUpCommon(int carrierID)
 	{
-		return this.UnreservedAmount >= this.MinTakeAmount && (this.UnreservedAmount > 0f || this.FindReservedAmount(carrierID) > 0f);
+		return this.UnreservedFetchAmount >= this.MinTakeAmount && (this.UnreservedFetchAmount > 0f || this.FindReservedAmount(carrierID) > 0f);
 	}
 
 	[Obsolete("Use Instance ID")]
@@ -138,6 +138,22 @@ public class Pickupable : Workable, IHasSortOrder
 	}
 
 	public float ReservedAmount { get; private set; }
+
+	public float FetchTotalAmount
+	{
+		get
+		{
+			return this.primaryElement.MassPerUnit * this.primaryElement.Units;
+		}
+	}
+
+	public float UnreservedFetchAmount
+	{
+		get
+		{
+			return this.FetchTotalAmount - this.ReservedAmount;
+		}
+	}
 
 	public float TotalAmount
 	{
@@ -655,6 +671,11 @@ public class Pickupable : Workable, IHasSortOrder
 		base.OnCleanUp();
 	}
 
+	public Pickupable TakeUnit(float units)
+	{
+		return this.Take(units * this.primaryElement.MassPerUnit);
+	}
+
 	public Pickupable Take(float amount)
 	{
 		if (amount <= 0f)
@@ -669,16 +690,17 @@ public class Pickupable : Workable, IHasSortOrder
 			}
 			return this;
 		}
-		if (amount >= this.TotalAmount && this.storage != null && !this.primaryElement.KeepZeroMassObject)
+		float num = this.TotalAmount * this.primaryElement.MassPerUnit;
+		if (amount >= num && this.storage != null && !this.primaryElement.KeepZeroMassObject)
 		{
 			this.storage.Remove(base.gameObject, true);
 		}
-		float num = Math.Min(this.TotalAmount, amount);
-		if (num <= 0f)
+		float num2 = Math.Min(num, amount) / this.primaryElement.MassPerUnit;
+		if (num2 <= 0f)
 		{
 			return null;
 		}
-		return this.OnTake(this, num);
+		return this.OnTake(this, num2);
 	}
 
 	private void Absorb(Pickupable pickupable)

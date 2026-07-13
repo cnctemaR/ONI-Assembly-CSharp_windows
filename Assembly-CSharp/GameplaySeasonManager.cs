@@ -64,14 +64,14 @@ public class GameplaySeasonManager : GameStateMachine<GameplaySeasonManager, Gam
 			IL_0146:
 			foreach (GameplaySeason gameplaySeason2 in list)
 			{
-				if (Game.IsDlcActiveForCurrentSave(gameplaySeason2.dlcId) && gameplaySeason2.startActive && !this.SeasonExists(gameplaySeason2) && gameplaySeason2.events.Count > 0)
+				if (Game.IsCorrectDlcActiveForCurrentSave(gameplaySeason2) && gameplaySeason2.startActive && !this.SeasonExists(gameplaySeason2) && gameplaySeason2.events.Count > 0)
 				{
 					this.activeSeasons.Add(gameplaySeason2.Instantiate(this.GetWorldId()));
 				}
 			}
 			foreach (GameplaySeasonInstance gameplaySeasonInstance in new List<GameplaySeasonInstance>(this.activeSeasons))
 			{
-				if (!list.Contains(gameplaySeasonInstance.Season) || !Game.IsDlcActiveForCurrentSave(gameplaySeasonInstance.Season.dlcId))
+				if (!list.Contains(gameplaySeasonInstance.Season) || !Game.IsCorrectDlcActiveForCurrentSave(gameplaySeasonInstance.Season))
 				{
 					this.activeSeasons.Remove(gameplaySeasonInstance);
 				}
@@ -104,7 +104,7 @@ public class GameplaySeasonManager : GameStateMachine<GameplaySeasonManager, Gam
 
 		public void StartNewSeason(GameplaySeason seasonType)
 		{
-			if (Game.IsDlcActiveForCurrentSave(seasonType.dlcId))
+			if (Game.IsCorrectDlcActiveForCurrentSave(seasonType))
 			{
 				this.activeSeasons.Add(seasonType.Instantiate(this.GetWorldId()));
 			}

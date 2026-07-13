@@ -302,6 +302,16 @@ public class StorageTile : GameStateMachine<StorageTile, StorageTile.Instance, I
 			this.filteredStorage.FilterChanged();
 		}
 
+		public override void PostParamsInitialized()
+		{
+			if (this.TargetTag != StorageTile.INVALID_TAG && Assets.GetPrefab(this.TargetTag) == null)
+			{
+				this.SetTargetItem(StorageTile.INVALID_TAG);
+				this.DropUndesiredItems();
+			}
+			base.PostParamsInitialized();
+		}
+
 		private void OnObjectReplaced(object data)
 		{
 			Constructable.ReplaceCallbackParameters replaceCallbackParameters = (Constructable.ReplaceCallbackParameters)data;

@@ -171,23 +171,23 @@ public class DevToolGeyserModifiers : DevTool
 			this.selectedGeyser.configuration.Init(true);
 			if (flag)
 			{
-				this.selectedGeyser.ShiftTimeTo(Geyser.TimeShiftStep.ActiveState);
+				this.selectedGeyser.ShiftTimeTo(Geyser.TimeShiftStep.ActiveState, false);
 			}
 			if (flag2)
 			{
-				this.selectedGeyser.ShiftTimeTo(Geyser.TimeShiftStep.DormantState);
+				this.selectedGeyser.ShiftTimeTo(Geyser.TimeShiftStep.DormantState, false);
 			}
 			if (flag3)
 			{
-				this.selectedGeyser.ShiftTimeTo(Geyser.TimeShiftStep.PreviousIteration);
+				this.selectedGeyser.ShiftTimeTo(Geyser.TimeShiftStep.PreviousIteration, false);
 			}
 			if (flag4)
 			{
-				this.selectedGeyser.ShiftTimeTo(Geyser.TimeShiftStep.NextIteration);
+				this.selectedGeyser.ShiftTimeTo(Geyser.TimeShiftStep.NextIteration, false);
 			}
 			if (flag5)
 			{
-				this.selectedGeyser.AlterTime(0f);
+				this.selectedGeyser.AlterTime(0f, false);
 			}
 			this.DrawYearAndIterationsGraph(this.selectedGeyser);
 			ImGui.Indent();

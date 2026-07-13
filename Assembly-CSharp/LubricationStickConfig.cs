@@ -17,7 +17,7 @@ public class LubricationStickConfig : IEntityConfig, IHasDlcRestrictions
 
 	public GameObject CreatePrefab()
 	{
-		GameObject gameObject = EntityTemplates.CreateLooseEntity("LubricationStick", ITEMS.LUBRICATIONSTICK.NAME, ITEMS.LUBRICATIONSTICK.DESC, this.MASS_PER_RECIPE, true, Assets.GetAnim("lubricant_applicator_kanim"), "idle1", Grid.SceneLayer.Front, EntityTemplates.CollisionShape.RECTANGLE, 0.4f, 1f, true, 0, SimHashes.Creature, null);
+		GameObject gameObject = EntityTemplates.CreateLooseEntity("LubricationStick", ITEMS.LUBRICATIONSTICK.NAME, ITEMS.LUBRICATIONSTICK.DESC, LubricationStickConfig.MASS_PER_RECIPE, true, Assets.GetAnim("lubricant_applicator_kanim"), "idle1", Grid.SceneLayer.Front, EntityTemplates.CollisionShape.RECTANGLE, 0.4f, 1f, true, 0, SimHashes.LiquidGunk, null);
 		gameObject.AddOrGet<EntitySplitter>();
 		gameObject.AddTag(GameTags.MedicalSupplies);
 		gameObject.AddTag(GameTags.SolidLubricant);
@@ -57,5 +57,5 @@ public class LubricationStickConfig : IEntityConfig, IHasDlcRestrictions
 
 	private const float WATER_MASS = 200f;
 
-	private float MASS_PER_RECIPE = GunkMonitor.GUNK_CAPACITY;
+	public static float MASS_PER_RECIPE = GunkMonitor.GUNK_CAPACITY;
 }

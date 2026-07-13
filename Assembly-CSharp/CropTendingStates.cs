@@ -104,9 +104,10 @@ public class CropTendingStates : GameStateMachine<CropTendingStates, CropTending
 					if (component2 != null)
 					{
 						bool flag = false;
-						foreach (string text in smi.def.ignoreEffectGroup)
+						for (int i = 0; i < smi.def.ignoreEffectGroup.Length; i++)
 						{
-							if (component2.HasEffect(text))
+							HashedString hashedString = smi.def.ignoreEffectGroup[i];
+							if (component2.HasEffect(hashedString))
 							{
 								flag = true;
 								break;
@@ -118,54 +119,50 @@ public class CropTendingStates : GameStateMachine<CropTendingStates, CropTending
 						}
 					}
 				}
-				Growing component3 = crop2.GetComponent<Growing>();
-				if (!(component3 != null) || !component3.IsGrown())
+				KPrefabID component3 = crop2.GetComponent<KPrefabID>();
+				if (!component3.HasTag(GameTags.FullyGrown) && !component3.HasTag(GameTags.Creatures.ReservedByCreature))
 				{
-					KPrefabID component4 = crop2.GetComponent<KPrefabID>();
-					if (!component4.HasTag(GameTags.Creatures.ReservedByCreature))
+					int num4;
+					smi.def.interests.TryGetValue(crop2.PrefabID(), out num4);
+					if (num4 >= num3)
 					{
-						int num4;
-						smi.def.interests.TryGetValue(crop2.PrefabID(), out num4);
-						if (num4 >= num3)
+						bool flag2 = num4 > num3;
+						int num5 = Grid.PosToCell(crop2);
+						int[] array = new int[]
 						{
-							bool flag2 = num4 > num3;
-							int num5 = Grid.PosToCell(crop2);
-							int[] array = new int[]
+							Grid.CellLeft(num5),
+							Grid.CellRight(num5)
+						};
+						if (component3.HasTag(GameTags.PlantedOnFloorVessel))
+						{
+							array = new int[]
 							{
 								Grid.CellLeft(num5),
-								Grid.CellRight(num5)
+								Grid.CellRight(num5),
+								Grid.CellDownLeft(num5),
+								Grid.CellDownRight(num5)
 							};
-							if (component4.HasTag(GameTags.PlantedOnFloorVessel))
+						}
+						int num6 = 100;
+						int num7 = Grid.InvalidCell;
+						for (int j = 0; j < array.Length; j++)
+						{
+							if (Grid.IsValidCell(array[j]))
 							{
-								array = new int[]
+								int navigationCost = component.GetNavigationCost(array[j]);
+								if (navigationCost != -1 && navigationCost < num6)
 								{
-									Grid.CellLeft(num5),
-									Grid.CellRight(num5),
-									Grid.CellDownLeft(num5),
-									Grid.CellDownRight(num5)
-								};
-							}
-							int num6 = 100;
-							int num7 = Grid.InvalidCell;
-							for (int j = 0; j < array.Length; j++)
-							{
-								if (Grid.IsValidCell(array[j]))
-								{
-									int navigationCost = component.GetNavigationCost(array[j]);
-									if (navigationCost != -1 && navigationCost < num6)
-									{
-										num6 = navigationCost;
-										num7 = array[j];
-									}
+									num6 = navigationCost;
+									num7 = array[j];
 								}
 							}
-							if (num6 != -1 && num7 != Grid.InvalidCell && (flag2 || num6 < num2))
-							{
-								num = num7;
-								num2 = num6;
-								num3 = num4;
-								crop = crop2;
-							}
+						}
+						if (num6 != -1 && num7 != Grid.InvalidCell && (flag2 || num6 < num2))
+						{
+							num = num7;
+							num2 = num6;
+							num3 = num4;
+							crop = crop2;
 						}
 					}
 				}
@@ -296,7 +293,7 @@ public class CropTendingStates : GameStateMachine<CropTendingStates, CropTending
 	{
 		public string effectId;
 
-		public string[] ignoreEffectGroup;
+		public HashedString[] ignoreEffectGroup;
 
 		public Dictionary<Tag, int> interests = new Dictionary<Tag, int>();
 

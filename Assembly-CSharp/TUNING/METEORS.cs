@@ -107,6 +107,8 @@ namespace TUNING
 			public const float TIER4 = 12000f;
 
 			public const float TIER5 = 30000f;
+
+			public const float TIER6 = 60000f;
 		}
 
 		public class BOMBARDMENT_ON

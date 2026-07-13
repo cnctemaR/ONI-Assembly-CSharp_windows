@@ -60,6 +60,4 @@ public class SelfChargingElectrobankConfig : IEntityConfig, IHasDlcRestrictions
 	public const float POWER_DURATION = 90000f;
 
 	public const float SELF_CHARGE_WATTAGE = 60f;
-
-	public static ComplexRecipe recipe;
 }

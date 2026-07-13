@@ -108,6 +108,22 @@ public class WildnessMonitor : GameStateMachine<WildnessMonitor, WildnessMonitor
 			this.wildness.value = this.wildness.GetMax();
 		}
 
+		public bool IsWild()
+		{
+			return WildnessMonitor.IsWild(this);
+		}
+
+		[ContextMenu("Tame Critter")]
+		public void DebugTame()
+		{
+			AmountInstance amountInstance = Db.Get().Amounts.Wildness.Lookup(base.gameObject);
+			if (amountInstance != null)
+			{
+				amountInstance.value = 0f;
+				base.smi.GoTo(base.sm.tame);
+			}
+		}
+
 		public AmountInstance wildness;
 	}
 }

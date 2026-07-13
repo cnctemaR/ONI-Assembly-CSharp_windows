@@ -20,8 +20,9 @@ public enum SolidAmbienceType
 	Mud,
 	ToxicMud,
 	Snow,
-	Magnesium,
 	Cinnabar,
 	Gunk,
+	Shale,
+	Iridium,
 	NumTypes
 }

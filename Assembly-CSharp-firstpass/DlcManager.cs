@@ -672,11 +672,15 @@ public class DlcManager
 
 	public const string DLC3_ID = "DLC3_ID";
 
+	public const string DLC4_ID = "DLC4_ID";
+
 	public static readonly string[] EXPANSION1 = new string[] { "EXPANSION1_ID" };
 
 	public static readonly string[] DLC2 = new string[] { "DLC2_ID" };
 
 	public static readonly string[] DLC3 = new string[] { "DLC3_ID" };
+
+	public static readonly string[] DLC4 = new string[] { "DLC4_ID" };
 
 	public const string EXPANSION1_VERIFICATION_FILE_NAME = "expansion1_bundle";
 
@@ -695,6 +699,10 @@ public class DlcManager
 		{
 			"DLC3_ID",
 			new DlcManager.DlcInfo("DLC3_ID", "dlc3_bundle", "R", "dlc3", "dlc3_mini_logo", "dlc3_logo", new StringKey("STRINGS.UI.DLC3.NAME"), "dlc3_banner", new Color(0.79607844f, 0.3882353f, 0.95686275f))
+		},
+		{
+			"DLC4_ID",
+			new DlcManager.DlcInfo("DLC4_ID", "dlc4_bundle", "P", "dlc4", "dlc4_mini_logo", "dlc4_logo", new StringKey("STRINGS.UI.DLC4.NAME"), "dlc4_banner", new Color(0.3137255f, 0.6745098f, 0.31764707f))
 		}
 	};
 

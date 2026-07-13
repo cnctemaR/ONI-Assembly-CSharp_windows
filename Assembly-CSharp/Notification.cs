@@ -130,6 +130,8 @@ public class Notification
 
 	public object customClickData;
 
+	public string customNotificationID;
+
 	private int notificationIncrement;
 
 	private string notifierName;

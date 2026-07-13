@@ -27,6 +27,7 @@ public class CreatureFallMonitor : GameStateMachine<CreatureFallMonitor, Creatur
 		public Instance(IStateMachineTarget master, CreatureFallMonitor.Def def)
 			: base(master, def)
 		{
+			this.largeCritter = this.collider.size.y > 1f;
 		}
 
 		public void SnapToGround()
@@ -101,6 +102,10 @@ public class CreatureFallMonitor : GameStateMachine<CreatureFallMonitor, Creatur
 				{
 					num = 0.5f;
 				}
+				else if (this.largeCritter)
+				{
+					num = 0.25f;
+				}
 				position.y += this.collider.size.y * num;
 				if (Grid.IsSubstantialLiquid(Grid.PosToCell(position), 0.35f))
 				{
@@ -127,5 +132,7 @@ public class CreatureFallMonitor : GameStateMachine<CreatureFallMonitor, Creatur
 
 		[MyCmpReq]
 		private KBoxCollider2D collider;
+
+		private bool largeCritter;
 	}
 }

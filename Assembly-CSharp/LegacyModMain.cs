@@ -258,6 +258,12 @@ public class LegacyModMain
 			{
 				id = SimHashes.HardPolypropylene,
 				overheatMod = 900f
+			},
+			new LegacyModMain.ElementInfo
+			{
+				id = SimHashes.Iridium,
+				overheatMod = 500f,
+				decor = 0.2f
 			}
 		})
 		{

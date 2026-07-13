@@ -40,6 +40,8 @@ public class Chunk
 
 	public Vector2I size;
 
+	public int hiddenY;
+
 	public float[] data;
 
 	public float[] overrides;

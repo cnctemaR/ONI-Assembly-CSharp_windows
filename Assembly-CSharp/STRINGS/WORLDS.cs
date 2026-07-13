@@ -117,7 +117,7 @@ namespace STRINGS
 		{
 			public static LocString NAME = "Irradiated Forest Asteroid";
 
-			public static LocString DESCRIPTION = "A mid-sized sandstone and forest world with significant radiation.\n\n<smallcaps>Irradiated Forest Asteroids have an abundance of metal for the taking if Duplicants can withstand the planetoid's radiation.</smallcaps>";
+			public static LocString DESCRIPTION = "A sandstone and forest world with significant radiation.\n\n<smallcaps>Irradiated Forest Asteroids have an abundance of metal for the taking if Duplicants can withstand the planetoid's radiation.</smallcaps>";
 		}
 
 		public class METALHEAVYLANDINGSITE
@@ -225,11 +225,18 @@ namespace STRINGS
 			public static LocString DESCRIPTION = "A partially frozen world with an oily core.\n\n<smallcaps>While Oily Swamp Asteroids are largely swampy, they also contain a great deal of rust.</smallcaps>";
 		}
 
+		public class WARPOILYSANDYSWAMP
+		{
+			public static LocString NAME = "Oily Sandy Swamp Asteroid";
+
+			public static LocString DESCRIPTION = "A mildly frozen world with an oily core.\n\n<smallcaps>While Oily Sandy Swamp Asteroids are largely swampy, they also contain a great deal of wasteland.</smallcaps>";
+		}
+
 		public class OILRICHWARPTARGET
 		{
 			public static LocString NAME = "Rusty Oil Asteroid";
 
-			public static LocString DESCRIPTION = "A rusty mid-sized world with an oily core.\n\n<smallcaps>Duplicants must sift through a great deal of rust and ocean to reach the prize of this planetoid's oil.</smallcaps>";
+			public static LocString DESCRIPTION = "A rusty world with an oily core.\n\n<smallcaps>Duplicants must sift through a great deal of rust and ocean to reach the prize of this planetoid's oil.</smallcaps>";
 		}
 
 		public class MEDIUMRADIOACTIVEVANILLAWARPPLANET
@@ -243,7 +250,7 @@ namespace STRINGS
 		{
 			public static LocString NAME = "Radioactive Forest Asteroid";
 
-			public static LocString DESCRIPTION = "A large-ish forested asteroid with a frozen radioactive core.\n\n<smallcaps>While Radioactive Forest Asteroid are largely foresty, they also contain a great deal of rust and ocean.</smallcaps>";
+			public static LocString DESCRIPTION = "A large-ish forested asteroid with a frozen radioactive core.\n\n<smallcaps>While Radioactive Forest Asteroid are largely foresty, they also contain a great deal of rust.</smallcaps>";
 		}
 
 		public class MEDIUMSANDYRADIOACTIVEVANILLAWARPPLANET
@@ -264,7 +271,7 @@ namespace STRINGS
 		{
 			public static LocString NAME = "Radioactive Terrabog Asteroid";
 
-			public static LocString DESCRIPTION = "A mid-sized terra world with a radioactive core.\n\n<smallcaps>The Radioactive Terrabog Asteroid is fairly dry and sandy, but does contain swampy areas with a partially frozen surface.</smallcaps>";
+			public static LocString DESCRIPTION = "A large-ish terra world with a radioactive core.\n\n<smallcaps>The Radioactive Terrabog Asteroid is fairly dry and sandy, but does contain swampy areas with a partially frozen surface.</smallcaps>";
 		}
 
 		public class MEDIUMFORESTYWASTELAND
@@ -503,6 +510,41 @@ namespace STRINGS
 			public static LocString NAME = "Ceres Fragment";
 
 			public static LocString DESCRIPTION = "A fragment of a frosty starting world with sub-zero temperatures throughout.\n\n<smallcaps>Duplicants who work in sub-zero temperatures will need to wear or build warming equipment. Abundant natural fuel sources could lead to a well-powered colony.</smallcaps>";
+		}
+
+		public class PREHISTORICBASEGAME
+		{
+			public static LocString NAME = "Relica";
+
+			public static LocString DESCRIPTION = "An endangered location with abundant food resources.\n\n<smallcaps>Relica's biodiversity makes reliable food production more attainable for new colonies. Construction materials and fuels are also ample. Surface defence must be prioritized to minimize damage from an incoming impactor asteroid.</smallcaps>";
+		}
+
+		public class PREHISTORICSHATTERED
+		{
+			public static LocString NAME = "RelicAAAA<sup>AAAGHH</sup>";
+
+			public static LocString DESCRIPTION = "A geyser-rich location that will be struck by an impactor asteroid almost immediately.\n\n<smallcaps>Impact-related damage will trigger the eruption of this world's unusually high number of geyers. Colonies that survive the volatile aftermath will reap the benefits of the abundant natural resources released into the environment.</smallcaps>";
+		}
+
+		public class PREHISTORICCLASSIC
+		{
+			public static LocString NAME = "Relica Asteroid";
+
+			public static LocString DESCRIPTION = "An endangered starting world with abundant food resources.\n\n<smallcaps>Relica's biodiversity makes reliable food production more attainable for new colonies. Construction materials and fuels are also ample. Surface defence must be prioritized to minimize damage from an incoming impactor asteroid.</smallcaps>";
+		}
+
+		public class PREHISTORICSPACEDOUT
+		{
+			public static LocString NAME = "Relica Minor";
+
+			public static LocString DESCRIPTION = "A smaller endangered starting world with abundant food resources.\n\n<smallcaps>Relica's biodiversity makes reliable food production more attainable for new colonies. Construction materials and fuels are also ample. Surface defence must be prioritized to minimize damage from an incoming impactor asteroid.</smallcaps>";
+		}
+
+		public class PREHISTORICMIXING
+		{
+			public static LocString NAME = "Relica Fragment";
+
+			public static LocString DESCRIPTION = "A fragment of a prehistoric starting world.\n\n<smallcaps>Its biodiversity makes reliable food production more attainable for new colonies. Construction materials and fuels are also ample. </smallcaps>";
 		}
 	}
 }

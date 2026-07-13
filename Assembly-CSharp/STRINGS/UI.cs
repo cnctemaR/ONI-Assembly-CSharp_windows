@@ -325,7 +325,7 @@ namespace STRINGS
 
 		public static LocString PRODUCTINFO_RESEARCHREQUIRED = "Research required...";
 
-		public static LocString PRODUCTINFO_REQUIRESRESEARCHDESC = "Requires {0} Research";
+		public static LocString PRODUCTINFO_REQUIRESRESEARCHDESC = "Requires research: {0}";
 
 		public static LocString PRODUCTINFO_APPLICABLERESOURCES = "Required resources:";
 
@@ -417,7 +417,7 @@ namespace STRINGS
 
 		public static LocString CALCULATING = "Calculating...";
 
-		public static LocString FORMATDAY = "{0} cycles";
+		public static LocString FORMATDAY = "{0:F1} cycles";
 
 		public static LocString FORMATSECONDS = "{0}s";
 
@@ -436,6 +436,10 @@ namespace STRINGS
 		public static LocString WELCOMEMESSAGEBODY_KF23 = "This asteroid is oddly tilted, as though a powerful external force once knocked it off its axis.\n\nI'll need to recalibrate my approach to colony-building in order to make the most of this unusual distribution of resources.";
 
 		public static LocString WELCOMEMESSAGEBODY_DLC2_CERES = "The ambient temperatures of this planet are inhospitably low.\n\nI've detected the ruins of a scientifically advanced settlement buried deep beneath our landing site.\n\nIf my Duplicants can survive the journey into this frosty planet's core, we could use this newfound technology to build a colony like no other.";
+
+		public static LocString WELCOMEMESSAGEBODY_DLC4_PREHISTORIC = "My collision monitoring system has detected an imminent threat to our survival: a huge impactor asteroid is hurtling directly at this planet.\n\nWe must make our way to the surface and mount a defense system in time to destroy the incoming asteroid before it destroys us.";
+
+		public static LocString WELCOMEMESSAGEBODY_DLC4_PREHISTORIC_SHATTERED = "Impactor asteroid collision in 10 cycles!\n\nMy scans indicate that the impact will trigger the eruption of all geysers that surround our landing site. There are...so many.\n\nInitiate survival procedures immediately.";
 
 		public static LocString WELCOMEMESSAGEBEGIN = "BEGIN";
 
@@ -545,6 +549,15 @@ namespace STRINGS
 			public static LocString NAME_ITAL = "<i>" + UI.DLC3.NAME + "</i>";
 
 			public static LocString MIXING_TOOLTIP = UI.DLC3.NAME_ITAL + " features portable power storage, bionic Duplicants, and remote building operation";
+		}
+
+		public class DLC4
+		{
+			public static LocString NAME = "The Prehistoric Planet Pack";
+
+			public static LocString NAME_ITAL = "<i>" + UI.DLC4.NAME + "</i>";
+
+			public static LocString MIXING_TOOLTIP = UI.DLC4.NAME_ITAL + " features carnivorous flora and fauna, biofuel, and a focus on surface defense";
 		}
 
 		public class DIAGNOSTICS_SCREEN
@@ -1816,6 +1829,104 @@ namespace STRINGS
 						"."
 					});
 				}
+
+				public class DLC4PREHISTORICOREFIELD
+				{
+					public static LocString NAME = "Amber Field";
+
+					public static LocString DESC = string.Concat(new string[]
+					{
+						"The harvestable remains of a planet containing ",
+						UI.FormatAsLink("Nickel Ore", "NICKELORE"),
+						", ",
+						UI.FormatAsLink("Peat", "PEAT"),
+						", ",
+						UI.FormatAsLink("Amber", "AMBER"),
+						" and ",
+						UI.FormatAsLink("Shale", "SHALE"),
+						".\n\nHarvesting resources requires a rocket equipped with a ",
+						UI.FormatAsLink("Drillcone", "NOSECONEHARVEST"),
+						"."
+					});
+				}
+
+				public class DLC4PREHISTORICMIXINGFIELD
+				{
+					public static LocString NAME = "Conductive Ore Field";
+
+					public static LocString DESC = string.Concat(new string[]
+					{
+						"An asteroid field containing ",
+						UI.FormatAsLink("Nickel Ore", "NICKELORE"),
+						", ",
+						UI.FormatAsLink("Peat", "PEAT"),
+						", ",
+						UI.FormatAsLink("Amber", "AMBER"),
+						" and ",
+						UI.FormatAsLink("Shale", "SHALE"),
+						".\n\nHarvesting resources requires a rocket equipped with a ",
+						UI.FormatAsLink("Drillcone", "NOSECONEHARVEST"),
+						"."
+					});
+				}
+
+				public class DLC4IMPACTORDEBRISFIELD1
+				{
+					public static LocString NAME = "Demolior Debris";
+
+					public static LocString DESC = string.Concat(new string[]
+					{
+						"The solid harvestable remains of Demolior, containing ",
+						UI.FormatAsLink("Iridium", "IRIDIUM"),
+						", ",
+						UI.FormatAsLink("Mafic Rock", "MAFICROCK"),
+						", ",
+						UI.FormatAsLink("Gold", "GOLD"),
+						", and ",
+						UI.FormatAsLink("Granite", "GRANITE"),
+						", as well as a strangely familiar artifact.\n\nHarvesting resources requires a rocket equipped with a ",
+						UI.FormatAsLink("Drillcone", "NOSECONEHARVEST"),
+						"."
+					});
+				}
+
+				public class DLC4IMPACTORDEBRISFIELD2
+				{
+					public static LocString NAME = "Liquid Demolior Debris";
+
+					public static LocString DESC = string.Concat(new string[]
+					{
+						"The harvestable liquid remains of Demolior, containing ",
+						UI.FormatAsLink("Isosap", "ISORESIN"),
+						", ",
+						UI.FormatAsLink("Petroleum", "PETROLEUM"),
+						", and ",
+						UI.FormatAsLink("Liquid Sulfur", "LIQUIDSULFUR"),
+						".\n\nHarvesting resources requires a rocket equipped with a ",
+						UI.FormatAsLink("Drillcone", "NOSECONEHARVEST"),
+						"."
+					});
+				}
+
+				public class DLC4IMPACTORDEBRISFIELD3
+				{
+					public static LocString NAME = "Molten Demolior Debris";
+
+					public static LocString DESC = string.Concat(new string[]
+					{
+						"The harvestable molten remains of Demolior, containing ",
+						UI.FormatAsLink("Molten Iridium", "LIQUIDIRIDIUM"),
+						", ",
+						UI.FormatAsLink("Magma", "MAGMA"),
+						", ",
+						UI.FormatAsLink("Liquid Oxygen", "LIQUIDOXYGEN"),
+						", and ",
+						UI.FormatAsLink("Liquid Hydrogen", "LIQUIDHYDROGEN"),
+						".\n\nHarvesting resources requires a rocket equipped with a ",
+						UI.FormatAsLink("Drillcone", "NOSECONEHARVEST"),
+						"."
+					});
+				}
 			}
 
 			public class GRAVITAS_SPACE_POI
@@ -1974,6 +2085,30 @@ namespace STRINGS
 				}
 			}
 
+			public class CLUSTERMAPMETEORS
+			{
+				public class COPPER
+				{
+					public static LocString NAME = "Copper Meteor";
+
+					public static LocString DESCRIPTION = "A shower of metallic meteors on a collision course with the surface of an asteroid.";
+				}
+
+				public class IRON
+				{
+					public static LocString NAME = "Iron Meteor";
+
+					public static LocString DESCRIPTION = "A shower of metallic space rocks on a collision course with the surface of an asteroid.";
+				}
+
+				public class LARGEIMACTOR
+				{
+					public static LocString NAME = "Demolior";
+
+					public static LocString DESCRIPTION = "An ancient impactor asteroid on a collision course with the surface of this world.";
+				}
+			}
+
 			public class COMETS
 			{
 				public class ROCKCOMET
@@ -2044,6 +2179,11 @@ namespace STRINGS
 				public class SPACETREESEEDCOMET
 				{
 					public static LocString NAME = "Bonbon Meteor";
+				}
+
+				public class IRIDIUMCOMET
+				{
+					public static LocString NAME = "Iridium Meteor";
 				}
 
 				public class HARDICECOMET
@@ -2183,6 +2323,34 @@ namespace STRINGS
 					public static LocString NAME = "Ceres";
 
 					public static LocString DESCRIPTION = "A frozen planet peppered with cinnabar deposits.";
+				}
+
+				public class DLC4PREHISTORICSPACEDESTINATION
+				{
+					public static LocString NAME = "Prehistoric Ore Field";
+
+					public static LocString DESCRIPTION = "A destination with extractable resources from another era.";
+				}
+
+				public class DLC4PREHISTORICDEMOLIORSPACEDESTINATION
+				{
+					public static LocString NAME = "Demolior Debris";
+
+					public static LocString DESCRIPTION = "The remains of an obliterated asteroid containing a renewable source of iridium.";
+				}
+
+				public class DLC4PREHISTORICDEMOLIORSPACEDESTINATION2
+				{
+					public static LocString NAME = "Liquid Demolior Debris";
+
+					public static LocString DESCRIPTION = "The liquid remains of an obliterated asteroid containing a renewable source of Isosap.";
+				}
+
+				public class DLC4PREHISTORICDEMOLIORSPACEDESTINATION3
+				{
+					public static LocString NAME = "Molten Demolior Debris";
+
+					public static LocString DESCRIPTION = "The hot metallic remains of an obliterated asteroid containing a renewable source of iridium.";
 				}
 			}
 
@@ -2588,6 +2756,13 @@ namespace STRINGS
 				public static LocString NAME = "Shiny Coprolite";
 
 				public static LocString DESCRIPTION = "A spectacular sample of organic material fossilized into lead.\n\nSome things really <i>do</i> get better with age.";
+			}
+
+			public class VIEWMASTER
+			{
+				public static LocString NAME = "Stereoscope";
+
+				public static LocString DESCRIPTION = "A tool used to gaze into frozen moments of time.\n\nOne of the images is of a child standing in a field, waving a huge piece of blackened titanium.";
 			}
 		}
 
@@ -3280,6 +3455,58 @@ namespace STRINGS
 								public static LocString NAME = "Analog";
 
 								public static LocString TOOLTIP = "These Bionic Duplicants run on old-school enthusiasm, and barely consume power at all";
+							}
+						}
+					}
+
+					public class DEMOLIORDIFFICULTY
+					{
+						public static LocString NAME = "Demolior Impact";
+
+						public static LocString TOOLTIP = "Adjusts how soon the Demolior asteroid collides with <i>The Prehistoric Planet Pack</i> asteroid";
+
+						public static class LEVELS
+						{
+							public static class VERYHARD
+							{
+								public static LocString NAME = "Imminent Extinction";
+
+								public static LocString TOOLTIP = "It'll all be over soon\n\nOnly " + 100f.ToString() + " cycles until collision";
+							}
+
+							public static class HARD
+							{
+								public static LocString NAME = "Early Arrival";
+
+								public static LocString TOOLTIP = "Demolior impacts sooner than usual\n\n" + 150f.ToString() + " cycles until collision";
+							}
+
+							public static class DEFAULT
+							{
+								public static LocString NAME = "Default";
+
+								public static LocString TOOLTIP = "Demolior impacts in " + 200f.ToString() + " cycles";
+							}
+
+							public static class EASY
+							{
+								public static LocString NAME = "Slightly Delayed";
+
+								public static LocString TOOLTIP = "Demolior impacts later than usual\n\n" + 300f.ToString() + " cycles until collision";
+							}
+
+							public static class VERYEASY
+							{
+								public static LocString NAME = "Far-Off Forecast";
+
+								public static LocString TOOLTIP = "Duplicants could probably build a whole new asteroid by the time Demolior impacts this one\n\n500 cycles until collision";
+							}
+
+							public static class OFF
+							{
+								public static LocString NAME = "Disabled";
+
+								public static LocString TOOLTIP = "Demolior does not exist in this universe and the achievement cannot be earned";
 							}
 						}
 					}
@@ -6367,6 +6594,11 @@ namespace STRINGS
 					public static LocString DESCRIPTION = BUILDINGS.PREFABS.GEOTUNER.NAME + " Usage";
 				}
 
+				public class CHEMISTRY
+				{
+					public static LocString DESCRIPTION = BUILDINGS.PREFABS.CHEMICALREFINERY.NAME + " Usage";
+				}
+
 				public class CAN_CLOTHING_ALTERATION
 				{
 					public static LocString DESCRIPTION = BUILDINGS.PREFABS.CLOTHINGALTERATIONSTATION.NAME + " Usage";
@@ -7401,7 +7633,7 @@ namespace STRINGS
 				UI.PRE_KEYWORD,
 				"Radiation",
 				UI.PST_KEYWORD,
-				". It needs at between {minRads} and {maxRads} to grow"
+				". It needs between {minRads} and {maxRads} to grow"
 			});
 
 			public static LocString VITALS_CHECKBOX_RADIATION_NO_MIN = string.Concat(new string[]
@@ -7411,6 +7643,37 @@ namespace STRINGS
 				"Radiation",
 				UI.PST_KEYWORD,
 				". It needs less than {maxRads} to grow"
+			});
+
+			public static LocString VITALS_CHECKBOX_ENTITY_CONSUMER_REQUIREMENTS = string.Concat(new string[]
+			{
+				"This plant must consume ",
+				UI.PRE_KEYWORD,
+				"{0}",
+				UI.PST_KEYWORD,
+				" in order to grow"
+			});
+
+			public static LocString VITALS_CHECKBOX_ENTITY_CONSUMER_SATISFIED = UI.PRE_KEYWORD + "{0}" + UI.PST_KEYWORD + " consumed";
+
+			public static LocString VITALS_CHECKBOX_ENTITY_CONSUMER_UNSATISFIED = "Awaiting prey";
+
+			public static LocString VITALS_CHECKBOX_POLLINATED = string.Concat(new string[]
+			{
+				"This plant was recently pollinated by a ",
+				UI.PRE_KEYWORD,
+				"Critter",
+				UI.PST_KEYWORD,
+				" "
+			});
+
+			public static LocString VITALS_CHECKBOX_UNPOLLINATED = string.Concat(new string[]
+			{
+				"This plant must be pollinated by a ",
+				UI.PRE_KEYWORD,
+				"Critter",
+				UI.PST_KEYWORD,
+				"{0}"
 			});
 		}
 
@@ -7440,7 +7703,7 @@ namespace STRINGS
 
 			public static LocString SELECT_DESTINATION = "Select a new destination on the map";
 
-			public static LocString TOOLTIP_INVALID_DESTINATION_FOG_OF_WAR = "Rockets cannot travel to this hex until it has been analyzed\n\nSpace can be analyzed with a " + BUILDINGS.PREFABS.CLUSTERTELESCOPE.NAME + " or " + BUILDINGS.PREFABS.SCANNERMODULE.NAME;
+			public static LocString TOOLTIP_INVALID_DESTINATION_FOG_OF_WAR = "Cannot travel to this hex until it has been analyzed\n\nSpace can be analyzed with a " + BUILDINGS.PREFABS.CLUSTERTELESCOPE.NAME + " or " + BUILDINGS.PREFABS.SCANNERMODULE.NAME;
 
 			public static LocString TOOLTIP_INVALID_DESTINATION_NO_PATH = string.Concat(new string[]
 			{
@@ -7468,7 +7731,9 @@ namespace STRINGS
 
 			public static LocString TOOLTIP_INVALID_DESTINATION_REQUIRE_ASTEROID = "Must select a " + UI.CLUSTERMAP.PLANETOID_KEYWORD + " destination";
 
-			public static LocString TOOLTIP_INVALID_DESTINATION_OUT_OF_RANGE = "This destination is further away than the rocket's maximum range of {0}.";
+			public static LocString TOOLTIP_INVALID_DESTINATION_OUT_OF_RANGE = "This destination is further away than the rocket's maximum range of {0}";
+
+			public static LocString TOOLTIP_INVALID_METEOR_TARGET = "This destination does not have an impactor asteroid to target";
 
 			public static LocString TOOLTIP_HIDDEN_HEX = "???";
 
@@ -8752,11 +9017,15 @@ namespace STRINGS
 
 				public static LocString ELEMENTSOTHER = UI.FormatAsLink("Other", "ELEMENTS_OTHER");
 
+				public static LocString ELEMENTTYPES = UI.FormatAsLink("Element Properties", "ELEMENT_TYPES");
+
 				public static LocString BUILDINGMATERIALCLASSES = UI.FormatAsLink("Building Materials", "BUILDING_MATERIAL_CLASSES");
 
 				public static LocString INDUSTRIALINGREDIENTS = UI.FormatAsLink("Industrial Ingredients", "INDUSTRIALINGREDIENTS");
 
 				public static LocString DUPLICANTSCATEGORY = UI.FormatAsLink("Duplicants", "DUPLICANTS");
+
+				public static LocString MEDICINES = UI.FormatAsLink("Medicines", "MEDICINES");
 
 				public static LocString GEYSERS = UI.FormatAsLink("Geysers", "GEYSERS");
 
@@ -10023,6 +10292,8 @@ namespace STRINGS
 
 			public static LocString QUALITYOFLIFE_EXPECTATIONS_TOOLTIP = "This Duplicant requires " + UI.FormatAsLink("{0} Morale", "MORALE") + ".\n\nCurrent Morale:";
 
+			public static LocString POLLINATION = "Pollination";
+
 			public class CONDITIONS_GROWING
 			{
 				public class WILD
@@ -10876,6 +11147,24 @@ namespace STRINGS
 				public static LocString TITLE = "Options";
 			}
 
+			public class MISSILESELECTIONSIDESCREEN
+			{
+				public static LocString TITLE = BUILDINGS.PREFABS.MISSILELAUNCHER.NAME;
+
+				public static LocString HEADER = "Projectile Selection";
+
+				public class VANILLALARGEIMPACTOR
+				{
+					public static LocString HEALTH_BAR_TITLE = "Health";
+
+					public static LocString HEALTH_BAR_TOOLTIP = "Demolior health: {0} / {1}";
+
+					public static LocString TIME_UNTIL_COLLISION_TITLE = "Time Until Impact";
+
+					public static LocString TIME_UNTIL_COLLISION_TOOLTIP = "{0} cycles remaining until impact";
+				}
+			}
+
 			public class LOGICBROADCASTCHANNELSIDESCREEN
 			{
 				public static LocString TITLE = "Channel Selector";
@@ -10906,6 +11195,8 @@ namespace STRINGS
 
 				public static LocString NORECIPEDISCOVERED_BODY = "Discover new ingredients or research new technology to unlock some recipes.";
 
+				public static LocString UNDISCOVERED_RECIPES = "The following recipes are not yet discovered.\nI must discover new ingredients or research new technology to unlock them:";
+
 				public static LocString NORECIPESELECTED = "No recipe selected";
 
 				public static LocString SELECTRECIPE = "Select a recipe to fabricate.";
@@ -10922,7 +11213,9 @@ namespace STRINGS
 
 				public static LocString CANCEL = "Cancel";
 
-				public static LocString RECIPERQUIREMENT = "{0}: {1} / {2}";
+				public static LocString RECIPE_REQUIREMENT = "{0}: {1}";
+
+				public static LocString RECIPE_AVAILABLE = "Available: {0}";
 
 				public static LocString RECIPEPRODUCT = "{0}: {1}";
 
@@ -10940,17 +11233,33 @@ namespace STRINGS
 
 				public static LocString RECIPE_DETAILS = "Recipe Details";
 
-				public static LocString RECIPE_QUEUE = "Order Production Quantity:";
+				public static LocString RECIPE_QUEUE = "Order Production Quantity: ";
+
+				public static LocString RECIPE_QUEUE_CLICK_DESCRIPTION = "<b>" + UI.CLICK(UI.ClickType.Click) + " to select the next queued variant of this recipe</b>";
 
 				public static LocString RECIPE_FOREVER = "Forever";
+
+				public static LocString RECIPE_NONE = "No Orders Queued";
 
 				public static LocString CHANGE_RECIPE_ARROW_LABEL = "Change recipe";
 
 				public static LocString RECIPE_RESEARCH_REQUIRED = "Research Required";
 
+				public static LocString RECIPE_UNDISCOVERED_INGREDIENTS = "Undiscovered ingredients";
+
+				public static LocString INGREDIENT_CATEGORY = "Ingredient #{0}";
+
+				public static LocString NO_DISCOVERED_INGREDIENTS = "No ingredients discovered";
+
+				public static LocString UNDISCOVERED_INGREDIENTS_IN_CATEGORY = "Some ingredient options have not been discovered yet:\n\n{0}";
+
+				public static LocString ALL_INGREDIENTS_IN_CATEGORY_DISOVERED = "All ingredient options in this category have been discovered.";
+
 				public static LocString INGREDIENTS = "<b>Ingredients:</b>";
 
 				public static LocString RECIPE_EFFECTS = "<b>Effects:</b>";
+
+				public static LocString RECIPE_EFFECTS_HEADER = "Effects";
 
 				public static LocString ALLOW_MUTANT_SEED_INGREDIENTS = "Building accepts mutant seeds";
 
@@ -10965,6 +11274,8 @@ namespace STRINGS
 					public static LocString RECIPERQUIREMENT_INSUFFICIENT = "This recipe requires {1} {0}\nAvailable: {2}";
 
 					public static LocString RECIPEPRODUCT = "This recipe produces {1} {0}";
+
+					public static LocString ADDITIONAL_INGREDIENT_OPTIONS_MESSAGE = UIConstants.ColorPrefixYellow + "Alternative ingredient options are available." + UIConstants.ColorSuffix;
 				}
 
 				public class EFFECTS
@@ -11729,6 +12040,8 @@ namespace STRINGS
 			{
 				public static LocString TITLE = "Destination";
 
+				public static LocString TITLE_MISSILE_TARGET = "Long Range Target";
+
 				public static LocString FIRSTAVAILABLE = "Any " + BUILDINGS.PREFABS.LAUNCHPAD.NAME;
 
 				public static LocString NONEAVAILABLE = "No landing site";
@@ -11751,9 +12064,17 @@ namespace STRINGS
 
 				public static LocString CHANGE_DESTINATION_BUTTON_TOOLTIP = "Select a new destination for this rocket";
 
+				public static LocString CHANGE_DESTINATION_BUTTON_TOOLTIP_MISSILE = "Select a new target for this missile launcher";
+
+				public static LocString CHANGE_DESTINATION_BUTTON_TOOLTIP_RAILGUN = "Select a new target for this payload launcher";
+
 				public static LocString CLEAR_DESTINATION_BUTTON = "Clear";
 
 				public static LocString CLEAR_DESTINATION_BUTTON_TOOLTIP = "Clear this rocket's selected destination";
+
+				public static LocString CLEAR_DESTINATION_BUTTON_TOOLTIP_MISSILE = "Clear this missile launcher's selected target";
+
+				public static LocString CLEAR_DESTINATION_BUTTON_TOOLTIP_RAILGUN = "Clear this payload launcher's selected target";
 
 				public static LocString LOOP_BUTTON_TOOLTIP = "Toggle a roundtrip flight between this rocket's destination and its original takeoff location";
 
@@ -13177,17 +13498,32 @@ namespace STRINGS
 
 			public class OPEN_TECHUNLOCKS
 			{
-				public static LocString NAME = "Unlock Research";
+				public static LocString NAME = "Unlock Portal";
 
 				public static LocString TOOLTIP = "Retrieve data stored in this building";
 
-				public static LocString NAME_OFF = "Cancel Unlock Research";
+				public static LocString NAME_OFF = "Cancel Unlock Portal";
 
-				public static LocString TOOLTIP_OFF = "Cancel this research access order";
+				public static LocString TOOLTIP_OFF = "Cancel this portal access order";
 
 				public static LocString ALREADY_RUMMAGED = "Already Unlocked";
 
 				public static LocString TOOLTIP_ALREADYRUMMAGED = "All data has been accessed and recorded";
+			}
+
+			public class UNLOCK_ASTEROID_VISUALIZER
+			{
+				public static LocString NAME = "Inspect";
+
+				public static LocString TOOLTIP = "Something here looks ominous\n\nClick to take a closer look";
+
+				public static LocString NAME_OFF = "Cancel Inspect";
+
+				public static LocString TOOLTIP_OFF = "Cancel this inspection";
+
+				public static LocString ALREADY_RUMMAGED = "Already Inspected";
+
+				public static LocString TOOLTIP_ALREADYRUMMAGED = "This has been thoroughly inspected";
 			}
 
 			public class EMPTYSTORAGE
@@ -15320,6 +15656,8 @@ namespace STRINGS
 				public static LocString NAME = "Config";
 
 				public static LocString TOOLTIP = "<b>Config</b>\nView and change filters, recipes, production orders and more";
+
+				public static LocString TOOLTIP_DUPLICANT = "<b>Config</b>\nView and change assigned equipment and amenities";
 			}
 		}
 
@@ -15518,9 +15856,11 @@ namespace STRINGS
 
 			public static LocString CAPTURE_METHOD_WRANGLE = "Capture Method: Wrangling";
 
-			public static LocString CAPTURE_METHOD_LURE = "Capture Method: Lures";
+			public static LocString CAPTURE_METHOD_FLYING_TRAP = "Capture Method: Airborne Critter Trap";
 
-			public static LocString CAPTURE_METHOD_TRAP = "Capture Method: Traps";
+			public static LocString CAPTURE_METHOD_LAND_TRAP = "Capture Method: Critter Trap";
+
+			public static LocString CAPTURE_METHOD_FISH_TRAP = "Capture Method: Fish Trap";
 
 			public static LocString DIET_HEADER = "Digestion:";
 
@@ -15535,6 +15875,8 @@ namespace STRINGS
 			public static LocString DIET_PRODUCED_ITEM = "{Item}: {Percent} of consumed mass";
 
 			public static LocString DIET_PRODUCED_ITEM_FROM_PLANT = "{Item}: {Amount} when properly fed";
+
+			public static LocString DIET_ADDITIONAL_PRODUCED = "Secondary Excretion: {Items}";
 
 			public static LocString SCALE_GROWTH = "Shearable {Item}: {Amount} per {Time}";
 
@@ -16301,9 +16643,11 @@ namespace STRINGS
 					" skill in order to wrangle critters"
 				});
 
-				public static LocString CAPTURE_METHOD_LURE = "This critter can be moved using an " + STRINGS.BUILDINGS.PREFABS.AIRBORNECREATURELURE.NAME;
+				public static LocString CAPTURE_METHOD_FLYING_TRAP = "This critter can be captured and moved using an " + STRINGS.BUILDINGS.PREFABS.CREATUREAIRTRAP.NAME;
 
-				public static LocString CAPTURE_METHOD_TRAP = "This critter can be captured using a " + STRINGS.BUILDINGS.PREFABS.CREATURETRAP.NAME;
+				public static LocString CAPTURE_METHOD_TRAP = "This critter can be captured and moved using a " + STRINGS.BUILDINGS.PREFABS.CREATURETRAP.NAME;
+
+				public static LocString CAPTURE_METHOD_FISH_TRAP = "This critter can be captured and moved using a " + STRINGS.BUILDINGS.PREFABS.FISHTRAP.NAME;
 
 				public static LocString NOISE_POLLUTION_INCREASE = "Produces noise at <b>{0} dB</b> in a <b>{1}</b> tile radius";
 
@@ -16323,6 +16667,8 @@ namespace STRINGS
 				public static LocString DIET_CONSUMED = "This critter can typically consume these materials at the following rates:\n\n{Foodlist}";
 
 				public static LocString DIET_PRODUCED = "This critter will \"produce\" the following materials:\n\n{Items}";
+
+				public static LocString DIET_ADDITIONAL_PRODUCED = "This critter gets bloated after eating and will produce {Items}";
 
 				public static LocString ROCKETRESTRICTION_HEADER = "Controls whether a building is operational within a rocket interior";
 
@@ -16363,6 +16709,8 @@ namespace STRINGS
 					UI.PST_KEYWORD,
 					" elements is currently disabled"
 				});
+
+				public static LocString BRANCH_GROWER_PLANT_POTENTIAL_OUTPUT = "{0} to {1}";
 
 				public static LocString EDIBLE_PLANT_INTERNAL_STORAGE = "{0} of stored {1}";
 
@@ -16710,6 +17058,8 @@ namespace STRINGS
 
 			public static LocString PLANT_DO_NOT_HARVEST = "Autoharvest Disabled";
 
+			public static LocString REQUIRES_POLLINATION = "Pollination";
+
 			public class INSULATED
 			{
 				public static LocString NAME = "Insulated";
@@ -16878,6 +17228,15 @@ namespace STRINGS
 				public static LocString MUTANT_SEED_TOOLTIP = "\n\nGrowing near its maximum radiation increases the chance of mutant seeds being produced";
 
 				public static LocString MUTANT_STERILE = "This plant will not produce seeds of its own due to changes to its DNA";
+
+				public static LocString REQUIRES_POLLINATION = string.Concat(new string[]
+				{
+					"This plant must be tended by a ",
+					UI.PRE_KEYWORD,
+					"Critter",
+					UI.PST_KEYWORD,
+					" to grow"
+				});
 			}
 
 			public class DAMAGE_POPS

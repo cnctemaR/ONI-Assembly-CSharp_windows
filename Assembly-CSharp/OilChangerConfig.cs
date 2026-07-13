@@ -36,12 +36,14 @@ public class OilChangerConfig : IBuildingConfig
 		buildingDef.AudioCategory = "Metal";
 		buildingDef.PermittedRotations = PermittedRotations.Unrotatable;
 		buildingDef.AddSearchTerms(SEARCH_TERMS.BIONIC);
+		buildingDef.AddSearchTerms(SEARCH_TERMS.MEDICINE);
 		return buildingDef;
 	}
 
 	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
 		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.BionicUpkeepType, false);
+		go.GetComponent<KPrefabID>().AddTag(GameTags.CodexCategories.BionicBuilding, false);
 		Storage storage = go.AddComponent<Storage>();
 		storage.capacityKg = this.OIL_CAPACITY;
 		storage.SetDefaultStoredItemModifiers(Storage.StandardSealedStorage);

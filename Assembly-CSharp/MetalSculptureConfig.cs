@@ -34,6 +34,7 @@ public class MetalSculptureConfig : IBuildingConfig
 		buildingDef.AddSearchTerms(SEARCH_TERMS.STATUE);
 		buildingDef.AddSearchTerms(SEARCH_TERMS.ARTWORK);
 		buildingDef.AddSearchTerms(SEARCH_TERMS.MORALE);
+		buildingDef.AddSearchTerms(SEARCH_TERMS.METAL);
 		return buildingDef;
 	}
 

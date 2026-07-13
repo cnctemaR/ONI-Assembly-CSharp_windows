@@ -1,8 +1,20 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class KAnimConverter
 {
+	// Note: this type is marked as 'beforefieldinit'.
+	static KAnimConverter()
+	{
+		Dictionary<KAnimConverter.PostProcessingEffects, string> dictionary = new Dictionary<KAnimConverter.PostProcessingEffects, string>();
+		dictionary[KAnimConverter.PostProcessingEffects.TemperatureOverlay] = "Klei/BatchedAnimationPstTemperature";
+		KAnimConverter.ShaderNameForPostProcessingEffect = dictionary;
+	}
+
+	public static readonly Dictionary<KAnimConverter.PostProcessingEffects, string> ShaderNameForPostProcessingEffect;
+
+	[Flags]
 	public enum PostProcessingEffects : byte
 	{
 		TemperatureOverlay = 1

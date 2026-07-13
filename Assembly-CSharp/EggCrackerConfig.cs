@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using STRINGS;
 using TUNING;
 using UnityEngine;
@@ -6,6 +7,25 @@ using UnityEngine;
 [EntityConfigOrder(2)]
 public class EggCrackerConfig : IBuildingConfig
 {
+	public static void RegisterEgg(Tag eggPrefabTag, string name, string description, float mass, string[] requiredDLC, string[] forbiddenDLC)
+	{
+		EggCrackerConfig.EggData eggData = new EggCrackerConfig.EggData(eggPrefabTag, name, description, mass, requiredDLC, forbiddenDLC);
+		EggCrackerConfig.uncategorizedEggData.Add(eggData);
+	}
+
+	public static void CategorizeEggs()
+	{
+		foreach (EggCrackerConfig.EggData eggData in EggCrackerConfig.uncategorizedEggData)
+		{
+			Tag species = Assets.GetPrefab(Assets.GetPrefab(eggData.id).GetDef<IncubationMonitor.Def>().spawnedCreature).GetComponent<CreatureBrain>().species;
+			if (!EggCrackerConfig.EggsBySpecies.ContainsKey(species))
+			{
+				EggCrackerConfig.EggsBySpecies.Add(species, new List<EggCrackerConfig.EggData>());
+			}
+			EggCrackerConfig.EggsBySpecies[species].Add(eggData);
+		}
+	}
+
 	public override BuildingDef CreateBuildingDef()
 	{
 		string text = "EggCracker";
@@ -52,5 +72,87 @@ public class EggCrackerConfig : IBuildingConfig
 		go.AddOrGet<LogicOperationalController>();
 	}
 
+	public override void ConfigurePost(BuildingDef def)
+	{
+		base.ConfigurePost(def);
+		this.MakeRecipes();
+	}
+
+	public void MakeRecipes()
+	{
+		EggCrackerConfig.CategorizeEggs();
+		foreach (KeyValuePair<Tag, List<EggCrackerConfig.EggData>> keyValuePair in EggCrackerConfig.EggsBySpecies)
+		{
+			Tag[] array = new Tag[keyValuePair.Value.Count];
+			for (int i = 0; i < array.Length; i++)
+			{
+				array[i] = keyValuePair.Value[i].id;
+			}
+			EggCrackerConfig.EggData eggData = keyValuePair.Value[0];
+			string text = string.Format(global::STRINGS.BUILDINGS.PREFABS.EGGCRACKER.RESULT_DESCRIPTION, eggData.name);
+			ComplexRecipe.RecipeElement[] array2 = new ComplexRecipe.RecipeElement[]
+			{
+				new ComplexRecipe.RecipeElement(array, 1f)
+				{
+					material = array[0]
+				}
+			};
+			ComplexRecipe.RecipeElement[] array3 = new ComplexRecipe.RecipeElement[]
+			{
+				new ComplexRecipe.RecipeElement("RawEgg", 0.5f * eggData.mass, ComplexRecipe.RecipeElement.TemperatureOperation.AverageTemperature, false),
+				new ComplexRecipe.RecipeElement("EggShell", 0.5f * eggData.mass, ComplexRecipe.RecipeElement.TemperatureOperation.AverageTemperature, false)
+			};
+			string text2 = ComplexRecipeManager.MakeObsoleteRecipeID("EggCracker", "RawEgg");
+			string text3 = ComplexRecipeManager.MakeRecipeID("EggCracker", array2, array3);
+			ComplexRecipe complexRecipe = new ComplexRecipe(text3, array2, array3, eggData.requiredDlcIds, eggData.forbiddenDlcIds);
+			complexRecipe.description = string.Format(global::STRINGS.BUILDINGS.PREFABS.EGGCRACKER.RECIPE_DESCRIPTION, eggData.name, text);
+			complexRecipe.fabricators = new List<Tag> { "EggCracker" };
+			complexRecipe.time = 5f;
+			complexRecipe.nameDisplay = ComplexRecipe.RecipeNameDisplay.Custom;
+			complexRecipe.customName = keyValuePair.Key.ProperName();
+			complexRecipe.customSpritePrefabID = ((array2[0].material != null) ? array2[0].material.Name : array2[0].possibleMaterials[0].Name);
+			ComplexRecipeManager.Get().AddObsoleteIDMapping(text2, text3);
+		}
+	}
+
 	public const string ID = "EggCracker";
+
+	private static Dictionary<Tag, List<EggCrackerConfig.EggData>> EggsBySpecies = new Dictionary<Tag, List<EggCrackerConfig.EggData>>();
+
+	private static List<EggCrackerConfig.EggData> uncategorizedEggData = new List<EggCrackerConfig.EggData>();
+
+	private class EggData : IHasDlcRestrictions
+	{
+		public EggData(Tag id, string name, string description, float mass, string[] requiredDLC, string[] forbiddenDLC)
+		{
+			this.id = id;
+			this.name = name;
+			this.description = description;
+			this.mass = mass;
+			this.requiredDlcIds = requiredDLC;
+			this.forbiddenDlcIds = forbiddenDLC;
+		}
+
+		public string[] GetRequiredDlcIds()
+		{
+			return this.requiredDlcIds;
+		}
+
+		public string[] GetForbiddenDlcIds()
+		{
+			return this.forbiddenDlcIds;
+		}
+
+		public Tag id;
+
+		public float mass;
+
+		public string name;
+
+		public string description;
+
+		public string[] requiredDlcIds;
+
+		public string[] forbiddenDlcIds;
+	}
 }

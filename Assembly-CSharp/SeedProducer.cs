@@ -90,14 +90,15 @@ public class SeedProducer : KMonoBehaviour, IGameObjectEffectDescriptor
 
 	public void CropPicked(object data)
 	{
-		if (this.seedInfo.productionType == SeedProducer.ProductionType.Harvest)
+		if (this.seedInfo.productionType == SeedProducer.ProductionType.Harvest || this.seedInfo.productionType == SeedProducer.ProductionType.HarvestOnly)
 		{
 			WorkerBase completed_by = base.GetComponent<Harvestable>().completed_by;
-			float num = 0.1f;
+			float num = this.seedDropChances;
 			if (completed_by != null)
 			{
 				num += completed_by.GetComponent<AttributeConverters>().Get(Db.Get().AttributeConverters.SeedHarvestChance).Evaluate();
 			}
+			num *= this.seedDropChanceMultiplier;
 			int num2 = ((global::UnityEngine.Random.Range(0f, 1f) <= num) ? 1 : 0);
 			if (num2 > 0)
 			{
@@ -125,8 +126,9 @@ public class SeedProducer : KMonoBehaviour, IGameObjectEffectDescriptor
 		case SeedProducer.ProductionType.Crop:
 			return null;
 		case SeedProducer.ProductionType.Harvest:
+		case SeedProducer.ProductionType.HarvestOnly:
 			list.Add(new Descriptor(UI.GAMEOBJECTEFFECTS.SEED_PRODUCTION_HARVEST, UI.GAMEOBJECTEFFECTS.TOOLTIPS.SEED_PRODUCTION_HARVEST, Descriptor.DescriptorType.Lifecycle, true));
-			list.Add(new Descriptor(string.Format(UI.UISIDESCREENS.PLANTERSIDESCREEN.BONUS_SEEDS, GameUtil.GetFormattedPercent(10f, GameUtil.TimeSlice.None)), string.Format(UI.UISIDESCREENS.PLANTERSIDESCREEN.TOOLTIPS.BONUS_SEEDS, GameUtil.GetFormattedPercent(10f, GameUtil.TimeSlice.None)), Descriptor.DescriptorType.Effect, false));
+			list.Add(new Descriptor(string.Format(UI.UISIDESCREENS.PLANTERSIDESCREEN.BONUS_SEEDS, GameUtil.GetFormattedPercent(this.seedDropChances * 100f * this.seedDropChanceMultiplier, GameUtil.TimeSlice.None)), string.Format(UI.UISIDESCREENS.PLANTERSIDESCREEN.TOOLTIPS.BONUS_SEEDS, GameUtil.GetFormattedPercent(this.seedDropChances * 100f * this.seedDropChanceMultiplier, GameUtil.TimeSlice.None)), Descriptor.DescriptorType.Effect, false));
 			break;
 		case SeedProducer.ProductionType.Fruit:
 			list.Add(new Descriptor(UI.GAMEOBJECTEFFECTS.SEED_PRODUCTION_FRUIT, UI.GAMEOBJECTEFFECTS.TOOLTIPS.SEED_PRODUCTION_DIG_ONLY, Descriptor.DescriptorType.Lifecycle, true));
@@ -143,11 +145,18 @@ public class SeedProducer : KMonoBehaviour, IGameObjectEffectDescriptor
 
 	public SeedProducer.SeedInfo seedInfo;
 
+	public float seedDropChanceMultiplier = 1f;
+
+	public float seedDropChances = 0.1f;
+
 	private bool droppedSeedAlready;
 
 	private static readonly EventSystem.IntraObjectHandler<SeedProducer> DropSeedDelegate = new EventSystem.IntraObjectHandler<SeedProducer>(delegate(SeedProducer component, object data)
 	{
-		component.DropSeed(data);
+		if (component.seedInfo.productionType != SeedProducer.ProductionType.HarvestOnly)
+		{
+			component.DropSeed(data);
+		}
 	});
 
 	private static readonly EventSystem.IntraObjectHandler<SeedProducer> CropPickedDelegate = new EventSystem.IntraObjectHandler<SeedProducer>(delegate(SeedProducer component, object data)
@@ -172,6 +181,7 @@ public class SeedProducer : KMonoBehaviour, IGameObjectEffectDescriptor
 		Harvest,
 		Fruit,
 		Sterile,
-		Crop
+		Crop,
+		HarvestOnly
 	}
 }

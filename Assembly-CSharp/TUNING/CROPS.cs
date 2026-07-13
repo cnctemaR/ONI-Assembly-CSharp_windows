@@ -43,15 +43,22 @@ namespace TUNING
 			new Crop.CropVal("SpaceTreeBranch", 2700f, 1, true),
 			new Crop.CropVal("HardSkinBerry", 1800f, 1, true),
 			new Crop.CropVal(CarrotConfig.ID, 5400f, 1, true),
+			new Crop.CropVal(VineFruitConfig.ID, 1800f, 1, true),
 			new Crop.CropVal(SimHashes.OxyRock.ToString(), 1200f, 2 * Mathf.RoundToInt(17.76f), true),
 			new Crop.CropVal("Lettuce", 7200f, 12, true),
+			new Crop.CropVal(KelpConfig.ID, 3000f, 50, true),
 			new Crop.CropVal("BeanPlantSeed", 12600f, 12, true),
 			new Crop.CropVal("OxyfernSeed", 7200f, 1, true),
 			new Crop.CropVal("PlantMeat", 18000f, 10, true),
 			new Crop.CropVal("WormBasicFruit", 2400f, 1, true),
 			new Crop.CropVal("WormSuperFruit", 4800f, 8, true),
+			new Crop.CropVal(DewDripConfig.ID, 1200f, 1, true),
+			new Crop.CropVal(FernFoodConfig.ID, 5400f, 36, true),
 			new Crop.CropVal(SimHashes.Salt.ToString(), 3600f, 65, true),
-			new Crop.CropVal(SimHashes.Water.ToString(), 6000f, 350, true)
+			new Crop.CropVal(SimHashes.Water.ToString(), 6000f, 350, true),
+			new Crop.CropVal(SimHashes.Amber.ToString(), 7200f, 264, true),
+			new Crop.CropVal("GardenFoodPlantFood", 1800f, 1, true),
+			new Crop.CropVal("Butterfly", 3000f, 1, true)
 		};
 	}
 }

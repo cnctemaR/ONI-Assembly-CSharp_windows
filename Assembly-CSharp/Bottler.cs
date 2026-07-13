@@ -143,12 +143,10 @@ public class Bottler : Workable, IUserControlledCapacity
 		if (this.workerMeter != null)
 		{
 			this.CleanupBottleProxyObject();
-			KCrashReporter.ReportDevNotification("CreateBottleProxyObject called before cleanup", Environment.StackTrace, "", false, null);
 		}
 		PrimaryElement firstPrimaryElement = this.smi.master.GetFirstPrimaryElement();
 		if (firstPrimaryElement == null)
 		{
-			KCrashReporter.ReportDevNotification("CreateBottleProxyObject on a null element", Environment.StackTrace, "", false, null);
 			return;
 		}
 		this.workerMeter = new MeterController(worker.GetComponent<KBatchedAnimController>(), "snapto_chest", "meter", Meter.Offset.Infront, Grid.SceneLayer.NoLayer, new string[] { "snapto_chest" });
@@ -284,7 +282,7 @@ public class Bottler : Workable, IUserControlledCapacity
 
 	private void UpdateStoredItemState()
 	{
-		this.storage.allowItemRemoval = this.smi != null && this.smi.GetCurrentState() == this.smi.sm.ready;
+		this.storage.allowItemRemoval = this.smi != null && this.smi.GetCurrentState() == this.smi.sm.operational.ready;
 		foreach (GameObject gameObject in this.storage.items)
 		{
 			if (gameObject != null)
@@ -327,27 +325,41 @@ public class Bottler : Workable, IUserControlledCapacity
 	{
 		public override void InitializeStates(out StateMachine.BaseState default_state)
 		{
-			default_state = this.empty;
-			this.empty.PlayAnim("off").EventHandlerTransition(GameHashes.OnStorageChange, this.filling, (Bottler.Controller.Instance smi, object o) => Bottler.Controller.IsFull(smi)).EnterTransition(this.ready, new StateMachine<Bottler.Controller, Bottler.Controller.Instance, Bottler, object>.Transition.ConditionCallback(Bottler.Controller.IsFull));
-			this.filling.PlayAnim("working").Enter(delegate(Bottler.Controller.Instance smi)
+			default_state = this.nonoperational;
+			this.root.Enter(delegate(Bottler.Controller.Instance smi)
+			{
+				smi.master.storage.allowItemRemoval = false;
+			});
+			this.nonoperational.PlayAnim("off").TagTransition(GameTags.Operational, this.operational, false);
+			this.operational.EnterTransition(this.operational.ready, new StateMachine<Bottler.Controller, Bottler.Controller.Instance, Bottler, object>.Transition.ConditionCallback(Bottler.Controller.IsFull)).DefaultState(this.operational.empty).TagTransition(GameTags.Operational, this.nonoperational, true);
+			this.operational.empty.PlayAnim("off").EventHandlerTransition(GameHashes.OnStorageChange, this.operational.filling, (Bottler.Controller.Instance smi, object o) => Bottler.Controller.IsFull(smi));
+			this.operational.filling.PlayAnim("working").Enter(delegate(Bottler.Controller.Instance smi)
 			{
 				smi.UpdateMeter();
-			}).OnAnimQueueComplete(this.ready);
-			this.ready.EventTransition(GameHashes.OnStorageChange, this.empty, GameStateMachine<Bottler.Controller, Bottler.Controller.Instance, Bottler, object>.Not(new StateMachine<Bottler.Controller, Bottler.Controller.Instance, Bottler, object>.Transition.ConditionCallback(Bottler.Controller.IsFull))).PlayAnim("ready").Enter(delegate(Bottler.Controller.Instance smi)
+			}).OnAnimQueueComplete(this.operational.ready);
+			this.operational.ready.EventTransition(GameHashes.OnStorageChange, this.operational.empty, GameStateMachine<Bottler.Controller, Bottler.Controller.Instance, Bottler, object>.Not(new StateMachine<Bottler.Controller, Bottler.Controller.Instance, Bottler, object>.Transition.ConditionCallback(Bottler.Controller.IsFull))).PlayAnim("ready").Enter(delegate(Bottler.Controller.Instance smi)
 			{
 				smi.master.storage.allowItemRemoval = true;
-				smi.UpdateMeter();
-				foreach (GameObject gameObject in smi.master.storage.items)
-				{
-					Pickupable component = gameObject.GetComponent<Pickupable>();
-					component.targetWorkable = smi.master;
-					component.SetOffsets(new CellOffset[] { smi.master.workCellOffset });
-					Pickupable pickupable = component;
-					pickupable.OnReservationsChanged = (Action<Pickupable, bool, Pickupable.Reservation>)Delegate.Combine(pickupable.OnReservationsChanged, new Action<Pickupable, bool, Pickupable.Reservation>(smi.master.OnReservationsChanged));
-					component.KPrefabID.AddTag(smi.master.SourceTag, false);
-					gameObject.Trigger(-778359855, smi.master.storage);
-				}
 			})
+				.Exit(delegate(Bottler.Controller.Instance smi)
+				{
+					smi.master.storage.allowItemRemoval = false;
+				})
+				.Enter(delegate(Bottler.Controller.Instance smi)
+				{
+					smi.master.storage.allowItemRemoval = true;
+					smi.UpdateMeter();
+					foreach (GameObject gameObject in smi.master.storage.items)
+					{
+						Pickupable component = gameObject.GetComponent<Pickupable>();
+						component.targetWorkable = smi.master;
+						component.SetOffsets(new CellOffset[] { smi.master.workCellOffset });
+						Pickupable pickupable = component;
+						pickupable.OnReservationsChanged = (Action<Pickupable, bool, Pickupable.Reservation>)Delegate.Combine(pickupable.OnReservationsChanged, new Action<Pickupable, bool, Pickupable.Reservation>(smi.master.OnReservationsChanged));
+						component.KPrefabID.AddTag(smi.master.SourceTag, false);
+						gameObject.Trigger(-778359855, smi.master.storage);
+					}
+				})
 				.Exit(delegate(Bottler.Controller.Instance smi)
 				{
 					smi.master.storage.allowItemRemoval = false;
@@ -370,14 +382,21 @@ public class Bottler : Workable, IUserControlledCapacity
 
 		public static bool IsFull(Bottler.Controller.Instance smi)
 		{
-			return smi.master.storage.MassStored() >= smi.master.userMaxCapacity;
+			return smi.master.storage.MassStored() >= smi.master.userMaxCapacity && smi.master.userMaxCapacity > 0f;
 		}
 
-		public GameStateMachine<Bottler.Controller, Bottler.Controller.Instance, Bottler, object>.State empty;
+		public GameStateMachine<Bottler.Controller, Bottler.Controller.Instance, Bottler, object>.State nonoperational;
 
-		public GameStateMachine<Bottler.Controller, Bottler.Controller.Instance, Bottler, object>.State filling;
+		public Bottler.Controller.OperationalStates operational;
 
-		public GameStateMachine<Bottler.Controller, Bottler.Controller.Instance, Bottler, object>.State ready;
+		public class OperationalStates : GameStateMachine<Bottler.Controller, Bottler.Controller.Instance, Bottler, object>.State
+		{
+			public GameStateMachine<Bottler.Controller, Bottler.Controller.Instance, Bottler, object>.State empty;
+
+			public GameStateMachine<Bottler.Controller, Bottler.Controller.Instance, Bottler, object>.State filling;
+
+			public GameStateMachine<Bottler.Controller, Bottler.Controller.Instance, Bottler, object>.State ready;
+		}
 
 		public new class Instance : GameStateMachine<Bottler.Controller, Bottler.Controller.Instance, Bottler, object>.GameInstance
 		{

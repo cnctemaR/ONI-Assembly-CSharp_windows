@@ -6,7 +6,7 @@ namespace Klei.AI
 	public class SolarFlareEvent : GameplayEvent<SolarFlareEvent.StatesInstance>
 	{
 		public SolarFlareEvent()
-			: base("SolarFlareEvent", 0, 0)
+			: base("SolarFlareEvent", 0, 0, null, null)
 		{
 			this.title = GAMEPLAY_EVENTS.EVENT_TYPES.SOLAR_FLARE.NAME;
 			this.description = GAMEPLAY_EVENTS.EVENT_TYPES.SOLAR_FLARE.DESCRIPTION;

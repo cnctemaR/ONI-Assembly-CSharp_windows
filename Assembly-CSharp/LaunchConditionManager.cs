@@ -1,35 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using KSerialization;
 using UnityEngine;
 
 [AddComponentMenu("KMonoBehaviour/scripts/LaunchConditionManager")]
 public class LaunchConditionManager : KMonoBehaviour, ISim4000ms, ISim1000ms
 {
 	public List<RocketModule> rocketModules { get; private set; }
-
-	public void DEBUG_TraceModuleDestruction(string moduleName, string state, string stackTrace)
-	{
-		if (this.DEBUG_ModuleDestructions == null)
-		{
-			this.DEBUG_ModuleDestructions = new List<global::Tuple<string, string, string>>();
-		}
-		this.DEBUG_ModuleDestructions.Add(new global::Tuple<string, string, string>(moduleName, state, stackTrace));
-	}
-
-	[ContextMenu("Dump Module Destructions")]
-	private void DEBUG_DumpModuleDestructions()
-	{
-		if (this.DEBUG_ModuleDestructions == null || this.DEBUG_ModuleDestructions.Count == 0)
-		{
-			DebugUtil.LogArgs(new object[] { "Sorry, no logged module destructions. :(" });
-			return;
-		}
-		foreach (global::Tuple<string, string, string> tuple in this.DEBUG_ModuleDestructions)
-		{
-			DebugUtil.LogArgs(new object[] { tuple.first, ">", tuple.second, "\n", tuple.third, "\nEND MODULE DUMP\n\n" });
-		}
-	}
 
 	protected override void OnPrefabInit()
 	{
@@ -235,9 +211,6 @@ public class LaunchConditionManager : KMonoBehaviour, ISim4000ms, ISim1000ms
 	public HashedString statusPort;
 
 	private ILaunchableRocket launchable;
-
-	[Serialize]
-	private List<global::Tuple<string, string, string>> DEBUG_ModuleDestructions;
 
 	private Dictionary<ProcessCondition, Guid> conditionStatuses = new Dictionary<ProcessCondition, Guid>();
 

@@ -125,6 +125,26 @@ public class CameraController : KMonoBehaviour, IInputHandler
 		this.mrt.ToggleColouredOverlayView(enabled);
 	}
 
+	public void EnableKAnimPostProcessingEffect(KAnimConverter.PostProcessingEffects effect)
+	{
+		this.kAnimPostProcessingEffects.EnableEffect(effect);
+	}
+
+	public void DisableKAnimPostProcessingEffect(KAnimConverter.PostProcessingEffects effect)
+	{
+		this.kAnimPostProcessingEffects.DisableEffect(effect);
+	}
+
+	public void RegisterCustomScreenPostProcessingEffect(Func<RenderTexture, Material> effectFn)
+	{
+		this.customActiveScreenPostProcessingEffects.RegisterEffect(effectFn);
+	}
+
+	public void UnregisterCustomScreenPostProcessingEffect(Func<RenderTexture, Material> effectFn)
+	{
+		this.customActiveScreenPostProcessingEffects.UnregisterEffect(effectFn);
+	}
+
 	protected override void OnPrefabInit()
 	{
 		global::Util.Reset(base.transform);
@@ -171,6 +191,8 @@ public class CameraController : KMonoBehaviour, IInputHandler
 		this.overlayCamera.renderingPath = RenderingPath.Forward;
 		this.overlayCamera.allowHDR = false;
 		this.overlayCamera.tag = "Untagged";
+		this.kAnimPostProcessingEffects = this.overlayCamera.GetComponent<KAnimActivePostProcessingEffects>();
+		this.customActiveScreenPostProcessingEffects = this.overlayCamera.GetComponent<CustomActiveScreenPostProcessingEffects>();
 		this.overlayCamera.gameObject.AddComponent<CameraReferenceTexture>().referenceCamera = this.baseCamera;
 		ColorCorrectionLookup component = this.overlayCamera.GetComponent<ColorCorrectionLookup>();
 		component.Convert(this.dayColourCube, "");
@@ -201,6 +223,10 @@ public class CameraController : KMonoBehaviour, IInputHandler
 		this.overlayNoDepthCamera.gameObject.AddComponent<SkyVisibilityVisualizerEffect>();
 		this.overlayNoDepthCamera.gameObject.AddComponent<ScannerNetworkVisualizerEffect>();
 		this.overlayNoDepthCamera.gameObject.AddComponent<RocketLaunchConditionVisualizerEffect>();
+		if (DlcManager.IsContentSubscribed("DLC4_ID"))
+		{
+			this.overlayNoDepthCamera.gameObject.AddComponent<LargeImpactorVisualizerEffect>();
+		}
 		this.uiCamera = this.CopyCamera(this.overlayCamera, "uiCamera");
 		this.uiCamera.clearFlags = CameraClearFlags.Depth;
 		this.uiCamera.cullingMask = LayerMask.GetMask(new string[] { "UI" });
@@ -285,7 +311,7 @@ public class CameraController : KMonoBehaviour, IInputHandler
 		{
 			base.StopCoroutine(this.activeFadeRoutine);
 		}
-		this.activeFadeRoutine = base.StartCoroutine(this.FadeWithBlack(true, 0f, targetPercentage, speed, null));
+		this.activeFadeRoutine = base.StartCoroutine(this.FadeWithBlack(true, 0f, targetPercentage, speed, callback));
 	}
 
 	public void FadeIn(float targetPercentage = 0f, float speed = 1f, global::System.Action callback = null)
@@ -295,6 +321,24 @@ public class CameraController : KMonoBehaviour, IInputHandler
 			base.StopCoroutine(this.activeFadeRoutine);
 		}
 		this.activeFadeRoutine = base.StartCoroutine(this.FadeWithBlack(true, 1f, targetPercentage, speed, callback));
+	}
+
+	public void FadeOutColor(Color color, float targetPercentage = 1f, float speed = 1f, global::System.Action callback = null)
+	{
+		if (this.activeFadeRoutine != null)
+		{
+			base.StopCoroutine(this.activeFadeRoutine);
+		}
+		this.activeFadeRoutine = base.StartCoroutine(this.FadeWithColor(true, 1f, targetPercentage, color, speed, callback));
+	}
+
+	public void FadeInColor(Color color, float targetPercentage = 0f, float speed = 1f, global::System.Action callback = null)
+	{
+		if (this.activeFadeRoutine != null)
+		{
+			base.StopCoroutine(this.activeFadeRoutine);
+		}
+		this.activeFadeRoutine = base.StartCoroutine(this.FadeWithColor(true, 1f, targetPercentage, color, speed, callback));
 	}
 
 	public void ActiveWorldStarWipe(int id, global::System.Action callback = null)
@@ -361,16 +405,23 @@ public class CameraController : KMonoBehaviour, IInputHandler
 
 	private IEnumerator FadeWithBlack(bool fadeUI, float startBlackPercent, float targetBlackPercent, float speed = 1f, global::System.Action callback = null)
 	{
+		return this.FadeWithColor(fadeUI, startBlackPercent, targetBlackPercent, Color.black, speed, callback);
+	}
+
+	private IEnumerator FadeWithColor(bool fadeUI, float startPercent, float targetPercent, Color color, float speed = 1f, global::System.Action callback = null)
+	{
 		Image fadePlane = (fadeUI ? GameScreenManager.Instance.fadePlaneFront : GameScreenManager.Instance.fadePlaneBack);
 		float percent = 0f;
 		while (percent < 1f)
 		{
 			percent += Time.unscaledDeltaTime * speed;
-			float num = MathUtil.ReRange(percent, 0f, 1f, startBlackPercent, targetBlackPercent);
-			fadePlane.color = new Color(0f, 0f, 0f, num);
+			float num = MathUtil.ReRange(percent, 0f, 1f, startPercent, targetPercent);
+			color.a = num;
+			fadePlane.color = color;
 			yield return SequenceUtil.WaitForNextFrame;
 		}
-		fadePlane.color = new Color(0f, 0f, 0f, targetBlackPercent);
+		color.a = targetPercent;
+		fadePlane.color = color;
 		if (callback != null)
 		{
 			callback();
@@ -1463,6 +1514,10 @@ public class CameraController : KMonoBehaviour, IInputHandler
 	public List<Camera> cameras = new List<Camera>();
 
 	private MultipleRenderTarget mrt;
+
+	private KAnimActivePostProcessingEffects kAnimPostProcessingEffects;
+
+	private CustomActiveScreenPostProcessingEffects customActiveScreenPostProcessingEffects;
 
 	public SoundCuller soundCuller;
 

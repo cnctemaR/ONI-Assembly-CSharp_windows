@@ -237,23 +237,30 @@ public class Unlocks : KMonoBehaviour
 					orderRule = LoreCollectionOverride.OrderRule.Invalid;
 					return null;
 				}
-				string[] array = this.lockCollections[loreCollectionOverride.collection];
-				if (randomize)
+				if (!this.lockCollections.ContainsKey(loreCollectionOverride.collection))
 				{
-					array.Shuffle<string>();
+					DebugUtil.DevLogError("Lore collection '" + loreCollectionOverride.collection + "' is missing but defined in the cluster file.");
 				}
-				foreach (string text in array)
+				else
 				{
-					if (!this.IsUnlocked(text))
+					string[] array = this.lockCollections[loreCollectionOverride.collection];
+					if (randomize)
+					{
+						array.Shuffle<string>();
+					}
+					foreach (string text in array)
+					{
+						if (!this.IsUnlocked(text))
+						{
+							orderRule = loreCollectionOverride.orderRule;
+							return text;
+						}
+					}
+					if (loreCollectionOverride.orderRule == LoreCollectionOverride.OrderRule.Replace)
 					{
 						orderRule = loreCollectionOverride.orderRule;
-						return text;
+						return null;
 					}
-				}
-				if (loreCollectionOverride.orderRule == LoreCollectionOverride.OrderRule.Replace)
-				{
-					orderRule = loreCollectionOverride.orderRule;
-					return null;
 				}
 			}
 		}
@@ -447,73 +454,6 @@ public class Unlocks : KMonoBehaviour
 		this.Unlock("surfacebreach", true);
 	}
 
-	public void Sim4000ms(float dt)
-	{
-		int num = int.MinValue;
-		int num2 = int.MinValue;
-		int num3 = int.MaxValue;
-		int num4 = int.MaxValue;
-		foreach (MinionIdentity minionIdentity in Components.MinionIdentities.Items)
-		{
-			if (!(minionIdentity == null))
-			{
-				int num5 = Grid.PosToCell(minionIdentity);
-				if (Grid.IsValidCell(num5))
-				{
-					int num6;
-					int num7;
-					Grid.CellToXY(num5, out num6, out num7);
-					if (num7 > num2)
-					{
-						num2 = num7;
-						num = num6;
-					}
-					if (num7 < num4)
-					{
-						num3 = num6;
-						num4 = num7;
-					}
-				}
-			}
-		}
-		if (num2 != -2147483648)
-		{
-			int num8 = num2;
-			for (int i = 0; i < 30; i++)
-			{
-				num8++;
-				int num9 = Grid.XYToCell(num, num8);
-				if (!Grid.IsValidCell(num9))
-				{
-					break;
-				}
-				if (global::World.Instance.zoneRenderData.GetSubWorldZoneType(num9) == SubWorld.ZoneType.Space)
-				{
-					this.Unlock("nearingsurface", true);
-					break;
-				}
-			}
-		}
-		if (num4 != 2147483647)
-		{
-			int num10 = num4;
-			for (int j = 0; j < 30; j++)
-			{
-				num10--;
-				int num11 = Grid.XYToCell(num3, num10);
-				if (!Grid.IsValidCell(num11))
-				{
-					break;
-				}
-				if (global::World.Instance.zoneRenderData.GetSubWorldZoneType(num11) == SubWorld.ZoneType.ToxicJungle && Grid.Element[num11].id == SimHashes.Magma)
-				{
-					this.Unlock("nearingmagma", true);
-					return;
-				}
-			}
-		}
-	}
-
 	[CompilerGenerated]
 	private bool <EvalMetaCategories>g__EvaluateCollection|14_0(LoreCollectionOverride loreUnlock, ref Unlocks.<>c__DisplayClass14_0 A_2)
 	{
@@ -565,6 +505,10 @@ public class Unlocks : KMonoBehaviour
 			new string[] { "email_ulti" }
 		},
 		{
+			"dlc4emails",
+			new string[] { "notices_foreword", "notes_HigbySong" }
+		},
+		{
 			"journals",
 			new string[]
 			{
@@ -577,6 +521,10 @@ public class Unlocks : KMonoBehaviour
 		{
 			"dlc3journals",
 			new string[] { "journal_potatobattery1", "journal_potatobattery2", "journal_potatobattery3" }
+		},
+		{
+			"dlc4journals",
+			new string[] { "journal_expedition1", "journal_expedition2", "journal_expedition3", "journal_B824", "journal_incoming" }
 		},
 		{
 			"researchnotes",
@@ -594,6 +542,10 @@ public class Unlocks : KMonoBehaviour
 		{
 			"dlc3researchnotes",
 			new string[] { "notes_talkshow", "notes_remoteworkstation" }
+		},
+		{
+			"dlc4researchnotes",
+			new string[] { "notes_seepage" }
 		},
 		{
 			"dimensionallore",
@@ -618,6 +570,10 @@ public class Unlocks : KMonoBehaviour
 		{
 			"dlc2geoplantcomplete",
 			new string[] { "notes_earthquake" }
+		},
+		{
+			"dlc4surfacepoi",
+			new string[] { "notice_surfacepoi" }
 		},
 		{
 			"space",

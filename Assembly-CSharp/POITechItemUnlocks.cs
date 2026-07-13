@@ -20,6 +20,12 @@ public class POITechItemUnlocks : GameStateMachine<POITechItemUnlocks, POITechIt
 		this.unlocked.done.PlayAnim("off");
 	}
 
+	private static void OnNotificationAknowledged(object o)
+	{
+		GameObject gameObject = (GameObject)o;
+		Game.Instance.Trigger(1633134300, gameObject);
+	}
+
 	private static string GetMessageBody(POITechItemUnlocks.Instance smi)
 	{
 		string text = "";
@@ -27,7 +33,7 @@ public class POITechItemUnlocks : GameStateMachine<POITechItemUnlocks, POITechIt
 		{
 			text = text + "\n    • " + techItem.Name;
 		}
-		return string.Format(MISC.NOTIFICATIONS.POIRESEARCHUNLOCKCOMPLETE.MESSAGEBODY, text);
+		return string.Format((smi.def.loreUnlockId != null) ? MISC.NOTIFICATIONS.POIRESEARCHUNLOCKCOMPLETE.MESSAGEBODY : MISC.NOTIFICATIONS.POIRESEARCHUNLOCKCOMPLETE_NOLORE.MESSAGEBODY, text);
 	}
 
 	private static EventInfoData GenerateEventPopupData(POITechItemUnlocks.Instance smi)
@@ -57,12 +63,14 @@ public class POITechItemUnlocks : GameStateMachine<POITechItemUnlocks, POITechIt
 				smi.notificationReference = null;
 				Game.Instance.unlocks.Unlock(smi.def.loreUnlockId, true);
 				ManagementMenu.Instance.OpenCodexToLockId(smi.def.loreUnlockId, false);
+				POITechItemUnlocks.OnNotificationAknowledged(smi.gameObject);
 			};
 		}
 		eventInfoData.AddDefaultOption(delegate
 		{
 			smi.sm.seenNotification.Set(true, smi, false);
 			smi.notificationReference = null;
+			POITechItemUnlocks.OnNotificationAknowledged(smi.gameObject);
 		});
 		eventInfoData.clickFocus = smi.gameObject.transform;
 		return eventInfoData;

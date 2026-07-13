@@ -1,5 +1,6 @@
 ﻿using System;
 using Klei.AI;
+using Klei.CustomSettings;
 using STRINGS;
 using TUNING;
 
@@ -138,6 +139,13 @@ namespace Database
 			string fullID = ClusterMapMeteorShowerConfig.GetFullID("IceAndTrees");
 			MathUtil.MinMax unlimited = METEORS.BOMBARDMENT_ON.UNLIMITED;
 			this.ClusterIceAndTreesShower = base.Add(new MeteorShowerEvent(text, num, num2, METEORS.BOMBARDMENT_OFF.NONE, unlimited, fullID, true).AddMeteor(SpaceTreeSeedCometConfig.ID, 1f).AddMeteor(HardIceCometConfig.ID, 2f).AddMeteor(SnowballCometConfig.ID, 22f));
+			this.LargeImpactor = base.Add(new LargeImpactorEvent("LargeImpactor", DlcManager.DLC4, null));
+			this.LargeImpactor.AddPrecondition(GameplayEventPreconditions.Instance.Or(GameplayEventPreconditions.Instance.Not(GameplayEventPreconditions.Instance.DifficultySetting(CustomGameSettingConfigs.DemoliorDifficulty, "Off")), GameplayEventPreconditions.Instance.ClusterHasTag("DemoliorImminentImpact")));
+			string text2 = "IridiumShower";
+			float num3 = 30f;
+			float num4 = 0.5f;
+			unlimited = new MathUtil.MinMax(80f, 80f);
+			this.IridiumShowerEvent = base.Add(new MeteorShowerEvent(text2, num3, num4, METEORS.BOMBARDMENT_OFF.NONE, unlimited, null, true).AddMeteor(IridiumCometConfig.ID, 1f));
 		}
 
 		private void BonusEvents()
@@ -294,6 +302,8 @@ namespace Database
 
 		public GameplayEvent ClusterBleachStoneShower;
 
+		public GameplayEvent IridiumShowerEvent;
+
 		public GameplayEvent ClusterIceAndTreesShower;
 
 		public GameplayEvent BonusDream1;
@@ -339,5 +349,7 @@ namespace Database
 		public GameplayEvent WarpWorldReveal;
 
 		public GameplayEvent ArtifactReveal;
+
+		public GameplayEvent LargeImpactor;
 	}
 }

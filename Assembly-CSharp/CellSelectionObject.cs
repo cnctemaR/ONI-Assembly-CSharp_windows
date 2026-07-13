@@ -192,7 +192,7 @@ public class CellSelectionObject : KMonoBehaviour
 
 	public static bool IsExposedToSpace(int cell)
 	{
-		return Game.Instance.world.zoneRenderData.GetSubWorldZoneType(cell) == SubWorld.ZoneType.Space && Grid.Objects[cell, 2] == null;
+		return Game.Instance.world.zoneRenderData.GetSubWorldZoneType(cell) == SubWorld.ZoneType.Space && Grid.Objects[cell, 2] == null && Grid.Objects[cell, 9] == null && !Grid.HasDoor[cell];
 	}
 
 	private void UpdateStatusItem()

@@ -54,7 +54,7 @@ public class KInputField : KScreen
 	{
 		if (base.isEditing)
 		{
-			yield return new WaitForEndOfFrame();
+			yield return KInputField.waitForEndOfFrame;
 			this.StopEditing();
 		}
 		yield break;
@@ -82,4 +82,6 @@ public class KInputField : KScreen
 
 	[SerializeField]
 	private KInputTextField inputField;
+
+	private static WaitForEndOfFrame waitForEndOfFrame = new WaitForEndOfFrame();
 }

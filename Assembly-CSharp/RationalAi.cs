@@ -15,7 +15,7 @@ public class RationalAi : GameStateMachine<RationalAi, RationalAi.Instance>
 			}
 			smi.GoTo(this.alive);
 		});
-		this.alive.TagTransition(GameTags.Dead, this.dead, false).ToggleStateMachineList(new Func<RationalAi.Instance, Func<RationalAi.Instance, StateMachine.Instance>[]>(RationalAi.GetStateMachinesToRunWhenAlive));
+		this.alive.TagTransition(GameTags.Dead, this.dead, false).Exit(new StateMachine<RationalAi, RationalAi.Instance, IStateMachineTarget, object>.State.Callback(RationalAi.IncreaseDeathCounterIfDying)).ToggleStateMachineList(new Func<RationalAi.Instance, Func<RationalAi.Instance, StateMachine.Instance>[]>(RationalAi.GetStateMachinesToRunWhenAlive));
 		this.dead.ToggleStateMachine((RationalAi.Instance smi) => new FallWhenDeadMonitor.Instance(smi.master)).ToggleBrain("dead").Enter("RefreshUserMenu", delegate(RationalAi.Instance smi)
 		{
 			smi.RefreshUserMenu();
@@ -29,6 +29,14 @@ public class RationalAi : GameStateMachine<RationalAi, RationalAi.Instance>
 	public static Func<RationalAi.Instance, StateMachine.Instance>[] GetStateMachinesToRunWhenAlive(RationalAi.Instance smi)
 	{
 		return smi.stateMachinesToRunWhenAlive;
+	}
+
+	private static void IncreaseDeathCounterIfDying(RationalAi.Instance smi)
+	{
+		if (smi.HasTag(GameTags.Dead))
+		{
+			SaveGame.Instance.ColonyAchievementTracker.deadDupeCounter++;
+		}
 	}
 
 	public GameStateMachine<RationalAi, RationalAi.Instance, IStateMachineTarget, object>.State alive;

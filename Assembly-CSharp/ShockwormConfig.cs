@@ -20,7 +20,7 @@ public class ShockwormConfig : IEntityConfig
 		int num2 = 32;
 		float num3 = 2f;
 		string text6 = "Meat";
-		int num4 = 3;
+		float num4 = 3f;
 		bool flag = true;
 		bool flag2 = true;
 		float freezing_ = global::TUNING.CREATURES.TEMPERATURE.FREEZING_2;

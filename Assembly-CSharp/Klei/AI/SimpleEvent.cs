@@ -7,7 +7,7 @@ namespace Klei.AI
 	public class SimpleEvent : GameplayEvent<SimpleEvent.StatesInstance>
 	{
 		public SimpleEvent(string id, string title, string description, string animFileName, string buttonText = null, string buttonTooltip = null)
-			: base(id, 0, 0)
+			: base(id, 0, 0, null, null)
 		{
 			this.title = title;
 			this.description = description;

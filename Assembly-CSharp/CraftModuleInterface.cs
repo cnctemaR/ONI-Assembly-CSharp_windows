@@ -725,9 +725,9 @@ public class CraftModuleInterface : KMonoBehaviour, ISim4000ms
 					if (gameObject.HasTag(GameTags.Creature))
 					{
 						Butcherable component = gameObject.GetComponent<Butcherable>();
-						if (component != null && component.drops != null && component.drops.Length != 0)
+						if (component != null && component.drops != null && component.drops.Count > 0)
 						{
-							GameObject[] array = component.CreateDrops();
+							GameObject[] array = component.CreateDrops(1f);
 							list2.AddRange(array);
 						}
 						gameObject.DeleteObject();

@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using Database;
 using Klei.AI;
+using Klei.CustomSettings;
+using ProcGen;
 
 public class GameplayEventPreconditions
 {
@@ -56,16 +58,16 @@ public class GameplayEventPreconditions
 
 	public GameplayEventPrecondition RoomBuilt(RoomType roomType)
 	{
-		Predicate<Room> <>9__1;
+		Predicate<global::Room> <>9__1;
 		return new GameplayEventPrecondition
 		{
 			condition = delegate
 			{
-				List<Room> rooms = Game.Instance.roomProber.rooms;
-				Predicate<Room> predicate;
+				List<global::Room> rooms = Game.Instance.roomProber.rooms;
+				Predicate<global::Room> predicate;
 				if ((predicate = <>9__1) == null)
 				{
-					predicate = (<>9__1 = (Room match) => match.roomType == roomType);
+					predicate = (<>9__1 = (global::Room match) => match.roomType == roomType);
 				}
 				return rooms.Exists(predicate);
 			},
@@ -149,6 +151,28 @@ public class GameplayEventPreconditions
 		{
 			condition = () => GameplayEventManager.Instance.NumberOfPastEvents(evtId) >= count,
 			description = string.Format("The {0} event has triggered {1} times.", evtId, count)
+		};
+	}
+
+	public GameplayEventPrecondition DifficultySetting(SettingConfig config, string levelId)
+	{
+		return new GameplayEventPrecondition
+		{
+			condition = () => CustomGameSettings.Instance.GetCurrentQualitySetting(config).id == levelId,
+			description = string.Concat(new string[] { "The config ", config.id, " is level ", levelId, "." })
+		};
+	}
+
+	public GameplayEventPrecondition ClusterHasTag(string tag)
+	{
+		return new GameplayEventPrecondition
+		{
+			condition = delegate
+			{
+				ClusterLayout currentClusterLayout = CustomGameSettings.Instance.GetCurrentClusterLayout();
+				return currentClusterLayout != null && currentClusterLayout.clusterTags.Contains(tag);
+			},
+			description = "The cluster is tagged with " + tag + "."
 		};
 	}
 

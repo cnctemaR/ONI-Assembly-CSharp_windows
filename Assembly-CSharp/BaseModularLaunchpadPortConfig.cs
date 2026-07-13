@@ -42,12 +42,13 @@ public class BaseModularLaunchpadPortConfig
 		}
 		buildingDef.PowerInputOffset = new CellOffset(1, 0);
 		buildingDef.EnergyConsumptionWhenActive = 240f;
-		buildingDef.SelfHeatKilowattsWhenActive = 1f;
-		buildingDef.ExhaustKilowattsWhenActive = 0.25f;
+		buildingDef.SelfHeatKilowattsWhenActive = 0f;
+		buildingDef.ExhaustKilowattsWhenActive = 0f;
 		buildingDef.ObjectLayer = ObjectLayer.Building;
 		buildingDef.RequiresPowerInput = true;
 		buildingDef.DefaultAnimState = "idle";
 		buildingDef.CanMove = false;
+		buildingDef.UseStructureTemperature = false;
 		return buildingDef;
 	}
 

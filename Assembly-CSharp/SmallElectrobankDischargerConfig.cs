@@ -45,7 +45,7 @@ public class SmallElectrobankDischargerConfig : IBuildingConfig
 		go.AddOrGet<LoopingSounds>();
 		Storage storage = go.AddOrGet<Storage>();
 		storage.showInUI = true;
-		storage.capacityKg = 1f;
+		storage.capacityKg = 20f;
 		storage.storageFilters = STORAGEFILTERS.POWER_BANKS;
 		go.AddOrGet<TreeFilterable>().allResourceFilterLabelString = UI.UISIDESCREENS.TREEFILTERABLESIDESCREEN.ALLBUTTON;
 		go.AddOrGet<ElectrobankDischarger>().wattageRating = 60f;

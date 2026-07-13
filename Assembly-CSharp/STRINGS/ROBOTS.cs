@@ -185,7 +185,7 @@ namespace STRINGS
 
 			public class SWEEPBOT
 			{
-				public static LocString NAME = "Sweepy";
+				public static LocString NAME = UI.FormatAsLink("Sweepy", "SWEEPY");
 
 				public static LocString DESC = string.Concat(new string[]
 				{
@@ -201,7 +201,7 @@ namespace STRINGS
 
 			public class FLYDO
 			{
-				public static LocString NAME = "Flydo";
+				public static LocString NAME = UI.FormatAsLink("Flydo", "FETCHDRONE");
 
 				public static LocString DESC = "A programmable delivery robot.\n\nPicks up " + UI.FormatAsLink("Solid", "ELEMENTS_SOLID") + " objects for delivery to selected destinations.";
 			}

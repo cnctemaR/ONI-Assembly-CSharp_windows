@@ -17,10 +17,7 @@ public class PemmicanConfig : IEntityConfig, IHasDlcRestrictions
 
 	public GameObject CreatePrefab()
 	{
-		GameObject gameObject = EntityTemplates.CreateLooseEntity("Pemmican", global::STRINGS.ITEMS.FOOD.PEMMICAN.NAME, global::STRINGS.ITEMS.FOOD.PEMMICAN.DESC, 1f, false, Assets.GetAnim("pemmican_kanim"), "object", Grid.SceneLayer.Front, EntityTemplates.CollisionShape.RECTANGLE, 0.8f, 0.4f, true, 0, SimHashes.Creature, null);
-		gameObject = EntityTemplates.ExtendEntityToFood(gameObject, FOOD.FOOD_TYPES.PEMMICAN);
-		ComplexRecipeManager.Get().GetRecipe(PemmicanConfig.recipe.id).FabricationVisualizer = MushBarConfig.CreateFabricationVisualizer(gameObject);
-		return gameObject;
+		return EntityTemplates.ExtendEntityToFood(EntityTemplates.CreateLooseEntity("Pemmican", global::STRINGS.ITEMS.FOOD.PEMMICAN.NAME, global::STRINGS.ITEMS.FOOD.PEMMICAN.DESC, 1f, false, Assets.GetAnim("pemmican_kanim"), "object", Grid.SceneLayer.Front, EntityTemplates.CollisionShape.RECTANGLE, 0.8f, 0.4f, true, 0, SimHashes.Creature, null), FOOD.FOOD_TYPES.PEMMICAN);
 	}
 
 	public void OnPrefabInit(GameObject inst)
@@ -32,6 +29,8 @@ public class PemmicanConfig : IEntityConfig, IHasDlcRestrictions
 	}
 
 	public const string ID = "Pemmican";
+
+	public const string ANIM = "pemmican_kanim";
 
 	public static ComplexRecipe recipe;
 }

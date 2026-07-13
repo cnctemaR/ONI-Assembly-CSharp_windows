@@ -180,6 +180,7 @@ public class EntityTemplates
 		template.AddOrGet<Prioritizable>();
 		template.AddOrGet<Uprootable>();
 		template.AddOrGet<Effects>();
+		template.AddOrGetDef<PollinationVFXMonitor.Def>();
 		if (require_solid_tile)
 		{
 			template.AddOrGet<UprootedMonitor>();
@@ -277,13 +278,18 @@ public class EntityTemplates
 
 	public static GameObject ExtendEntityToFertileCreature(GameObject prefab, IHasDlcRestrictions dlcRestrictions, string eggId, string eggName, string eggDesc, string eggAnim, float eggMass, string babyId, float fertilityCycles, float incubationCycles, List<FertilityMonitor.BreedingChance> eggChances, int eggSortOrder = -1, bool is_ranchable = true, bool add_fish_overcrowding_monitor = false, float egg_anim_scale = 1f, bool deprecated = false)
 	{
+		return EntityTemplates.ExtendEntityToFertileCreature(prefab, dlcRestrictions, eggId, eggName, eggDesc, eggAnim, eggMass, babyId, fertilityCycles, incubationCycles, eggChances, eggSortOrder, is_ranchable, add_fish_overcrowding_monitor, egg_anim_scale, deprecated, false);
+	}
+
+	public static GameObject ExtendEntityToFertileCreature(GameObject prefab, IHasDlcRestrictions dlcRestrictions, string eggId, string eggName, string eggDesc, string eggAnim, float eggMass, string babyId, float fertilityCycles, float incubationCycles, List<FertilityMonitor.BreedingChance> eggChances, int eggSortOrder, bool is_ranchable, bool add_fish_overcrowding_monitor, float egg_anim_scale, bool deprecated, bool preventEggFromDroppingProducts)
+	{
 		FertilityMonitor.Def def = prefab.AddOrGetDef<FertilityMonitor.Def>();
 		def.baseFertileCycles = fertilityCycles;
 		DebugUtil.DevAssert(eggSortOrder > -1, "Added a fertile creature without an egg sort order!", null);
 		float num = 100f / (600f * incubationCycles);
 		string[] requiredDlcsOrNull = DlcRestrictionsUtil.GetRequiredDlcsOrNull(dlcRestrictions);
 		string[] forbiddenDlcIdsOrNull = DlcRestrictionsUtil.GetForbiddenDlcIdsOrNull(dlcRestrictions);
-		GameObject gameObject = EggConfig.CreateEgg(eggId, eggName, eggDesc, babyId, eggAnim, eggMass, eggSortOrder, num, requiredDlcsOrNull, forbiddenDlcIdsOrNull);
+		GameObject gameObject = EggConfig.CreateEgg(eggId, eggName, eggDesc, babyId, eggAnim, eggMass, eggSortOrder, num, requiredDlcsOrNull, forbiddenDlcIdsOrNull, preventEggFromDroppingProducts);
 		def.eggPrefab = new Tag(eggId);
 		def.initialBreedingWeights = eggChances;
 		if (egg_anim_scale != 1f)
@@ -352,12 +358,12 @@ public class EntityTemplates
 		return prefab;
 	}
 
-	public static GameObject ExtendEntityToBasicCreature(GameObject template, FactionManager.FactionID faction = FactionManager.FactionID.Prey, string initialTraitID = null, string NavGridName = "WalkerNavGrid1x1", NavType navType = NavType.Floor, int max_probing_radius = 32, float moveSpeed = 2f, string onDeathDropID = "Meat", int onDeathDropCount = 1, bool drownVulnerable = true, bool entombVulnerable = true, float warningLowTemperature = 283.15f, float warningHighTemperature = 293.15f, float lethalLowTemperature = 243.15f, float lethalHighTemperature = 343.15f)
+	public static GameObject ExtendEntityToBasicCreature(GameObject template, FactionManager.FactionID faction = FactionManager.FactionID.Prey, string initialTraitID = null, string NavGridName = "WalkerNavGrid1x1", NavType navType = NavType.Floor, int max_probing_radius = 32, float moveSpeed = 2f, string onDeathDropID = "Meat", float onDeathDropCount = 1f, bool drownVulnerable = true, bool entombVulnerable = true, float warningLowTemperature = 283.15f, float warningHighTemperature = 293.15f, float lethalLowTemperature = 243.15f, float lethalHighTemperature = 343.15f)
 	{
 		return EntityTemplates.ExtendEntityToBasicCreature(false, template, faction, initialTraitID, NavGridName, navType, max_probing_radius, moveSpeed, onDeathDropID, onDeathDropCount, drownVulnerable, entombVulnerable, warningLowTemperature, warningHighTemperature, lethalLowTemperature, lethalHighTemperature);
 	}
 
-	public static GameObject ExtendEntityToBasicCreature(bool isWarmBlooded, GameObject template, FactionManager.FactionID faction = FactionManager.FactionID.Prey, string initialTraitID = null, string NavGridName = "WalkerNavGrid1x1", NavType navType = NavType.Floor, int max_probing_radius = 32, float moveSpeed = 2f, string onDeathDropID = "Meat", int onDeathDropCount = 1, bool drownVulnerable = true, bool entombVulnerable = true, float warningLowTemperature = 283.15f, float warningHighTemperature = 293.15f, float lethalLowTemperature = 243.15f, float lethalHighTemperature = 343.15f)
+	public static GameObject ExtendEntityToBasicCreature(bool isWarmBlooded, GameObject template, FactionManager.FactionID faction = FactionManager.FactionID.Prey, string initialTraitID = null, string NavGridName = "WalkerNavGrid1x1", NavType navType = NavType.Floor, int max_probing_radius = 32, float moveSpeed = 2f, string onDeathDropID = "Meat", float onDeathDropCount = 1f, bool drownVulnerable = true, bool entombVulnerable = true, float warningLowTemperature = 283.15f, float warningHighTemperature = 293.15f, float lethalLowTemperature = 243.15f, float lethalHighTemperature = 343.15f)
 	{
 		template.GetComponent<KBatchedAnimController>().isMovable = true;
 		template.AddOrGet<KPrefabID>().AddTag(GameTags.Creature, false);
@@ -423,15 +429,11 @@ public class EntityTemplates
 		{
 			template.AddOrGet<EntombVulnerable>();
 		}
-		if (onDeathDropCount > 0 && onDeathDropID != "")
+		EntityTemplates.DeathDropFunction(template, onDeathDropCount, onDeathDropID);
+		template.GetComponent<KPrefabID>().prefabInitFn += delegate(GameObject inst)
 		{
-			string[] array = new string[onDeathDropCount];
-			for (int i = 0; i < array.Length; i++)
-			{
-				array[i] = onDeathDropID;
-			}
-			template.AddOrGet<Butcherable>().SetDrops(array);
-		}
+			EntityTemplates.DeathDropFunction(inst, onDeathDropCount, onDeathDropID);
+		};
 		Navigator navigator = template.AddOrGet<Navigator>();
 		navigator.NavGridName = NavGridName;
 		navigator.CurrentNavType = navType;
@@ -440,6 +442,22 @@ public class EntityTemplates
 		navigator.maxProbingRadius = max_probing_radius;
 		navigator.sceneLayer = Grid.SceneLayer.Creatures;
 		return template;
+	}
+
+	public static void AddSecondaryExcretion(GameObject template, SimHashes element, float kgPerKcalConsumed)
+	{
+		CaloriesConsumedElementProducer caloriesConsumedElementProducer = template.AddComponent<CaloriesConsumedElementProducer>();
+		caloriesConsumedElementProducer.producedElement = element;
+		caloriesConsumedElementProducer.kgProducedPerKcalConsumed = kgPerKcalConsumed;
+	}
+
+	private static void DeathDropFunction(GameObject inst, float onDeathDropCount, string onDeathDropID)
+	{
+		if (onDeathDropCount > 0f && !string.IsNullOrEmpty(onDeathDropID))
+		{
+			Dictionary<string, float> dictionary = new Dictionary<string, float> { { onDeathDropID, onDeathDropCount } };
+			inst.AddOrGet<Butcherable>().SetDrops(dictionary);
+		}
 	}
 
 	public static void AddCreatureBrain(GameObject prefab, ChoreTable.Builder chore_table, Tag species, string symbol_prefix)

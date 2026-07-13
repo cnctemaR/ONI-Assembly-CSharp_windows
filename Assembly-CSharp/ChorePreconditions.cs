@@ -595,11 +595,20 @@ public class ChorePreconditions
 		precondition.canExecuteOnAnyThread = true;
 		this.HasTag = precondition;
 		precondition = default(Chore.Precondition);
-		precondition.id = "CheckBehaviourPrecondition";
+		precondition.id = "DoesntHaveTag";
 		precondition.fn = delegate(ref Chore.Precondition.Context context, object data)
 		{
 			Tag tag2 = (Tag)data;
-			return context.consumerState.consumer.RunBehaviourPrecondition(tag2);
+			return !context.consumerState.prefabid.HasTag(tag2);
+		};
+		precondition.canExecuteOnAnyThread = true;
+		this.DoesntHaveTag = precondition;
+		precondition = default(Chore.Precondition);
+		precondition.id = "CheckBehaviourPrecondition";
+		precondition.fn = delegate(ref Chore.Precondition.Context context, object data)
+		{
+			Tag tag3 = (Tag)data;
+			return context.consumerState.consumer.RunBehaviourPrecondition(tag3);
 		};
 		precondition.canExecuteOnAnyThread = false;
 		this.CheckBehaviourPrecondition = precondition;
@@ -687,8 +696,8 @@ public class ChorePreconditions
 		precondition.description = DUPLICANTS.CHORES.PRECONDITIONS.NOT_A_ROBOT;
 		precondition.fn = delegate(ref Chore.Precondition.Context context, object exempt_robot)
 		{
-			Tag tag3 = exempt_robot as string;
-			return context.consumerState.resume != null || context.consumerState.prefabid.PrefabTag == tag3;
+			Tag tag4 = exempt_robot as string;
+			return context.consumerState.resume != null || context.consumerState.prefabid.PrefabTag == tag4;
 		};
 		precondition.canExecuteOnAnyThread = true;
 		this.IsNotARobot = precondition;
@@ -812,6 +821,8 @@ public class ChorePreconditions
 	public Chore.Precondition IsAllowedByAutomation;
 
 	public Chore.Precondition HasTag;
+
+	public Chore.Precondition DoesntHaveTag;
 
 	public Chore.Precondition CheckBehaviourPrecondition;
 

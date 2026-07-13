@@ -19,6 +19,27 @@ public class ClusterTraveler : KMonoBehaviour, ISim200ms
 		}
 	}
 
+	public AxialI CurrentLocation
+	{
+		get
+		{
+			return this.m_clusterGridEntity.Location;
+		}
+	}
+
+	public AxialI Destination
+	{
+		get
+		{
+			List<AxialI> currentPath = this.CurrentPath;
+			if (currentPath.Count == 0)
+			{
+				return this.CurrentLocation;
+			}
+			return currentPath[currentPath.Count - 1];
+		}
+	}
+
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
@@ -36,7 +57,7 @@ public class ClusterTraveler : KMonoBehaviour, ISim200ms
 	{
 		if (!ClusterGrid.Instance.IsCellVisible(location))
 		{
-			SaveGame.Instance.GetSMI<ClusterFogOfWarManager.Instance>().RevealLocation(location, 0);
+			SaveGame.Instance.GetSMI<ClusterFogOfWarManager.Instance>().RevealLocation(location, 0, this.peekRadius);
 		}
 	}
 
@@ -79,6 +100,29 @@ public class ClusterTraveler : KMonoBehaviour, ISim200ms
 	public int GetDestinationWorldID()
 	{
 		return this.m_destinationSelector.GetDestinationWorld();
+	}
+
+	public float EstimatedTimeToReachDestination()
+	{
+		if (this.CurrentPath == null || this.getSpeedCB == null)
+		{
+			return 0f;
+		}
+		return this.TravelETA(this.m_cachedPathDestination);
+	}
+
+	public float TravelETA(AxialI location)
+	{
+		if (this.CurrentPath == null || this.getSpeedCB == null)
+		{
+			return 0f;
+		}
+		int num = this.CurrentPath.IndexOf(location);
+		if (num == -1)
+		{
+			return 0f;
+		}
+		return Mathf.Max(0f, (float)(num + 1) * 600f - this.m_movePotential) / this.getSpeedCB();
 	}
 
 	public float TravelETA()
@@ -147,15 +191,18 @@ public class ClusterTraveler : KMonoBehaviour, ISim200ms
 				this.m_movePotential += num;
 				if (this.m_movePotential >= 600f)
 				{
-					this.m_movePotential = 600f;
+					this.m_movePotential = 0f;
 					if (this.AdvancePathOneStep())
 					{
 						global::Debug.Assert(ClusterGrid.Instance.GetVisibleEntityOfLayerAtCell(this.m_clusterGridEntity.Location, EntityLayer.Asteroid) == null || (flag2 && this.CurrentPath.Count == 0), string.Format("Somehow this clustercraft pathed through an asteroid at {0}", this.m_clusterGridEntity.Location));
-						this.m_movePotential -= 600f;
 						if (this.onTravelCB != null)
 						{
 							this.onTravelCB();
 						}
+					}
+					else
+					{
+						this.m_movePotential = 600f;
 					}
 				}
 			}
@@ -291,10 +338,47 @@ public class ClusterTraveler : KMonoBehaviour, ISim200ms
 
 	public bool quickTravelToAsteroidIfInOrbit = true;
 
+	public int peekRadius = 2;
+
 	public bool stopAndNotifyWhenPathChanges;
 
 	private static EventSystem.IntraObjectHandler<ClusterTraveler> ClusterDestinationChangedHandler = new EventSystem.IntraObjectHandler<ClusterTraveler>(delegate(ClusterTraveler cmp, object data)
 	{
 		cmp.OnClusterDestinationChanged(data);
 	});
+
+	public class BackgroundMotion : ParallaxBackgroundObject.IMotion
+	{
+		public BackgroundMotion(ClusterTraveler traveler)
+		{
+			this.traveler = traveler;
+		}
+
+		public float GetETA()
+		{
+			return this.traveler.TravelETA();
+		}
+
+		public float GetDuration()
+		{
+			if (this.duration == null)
+			{
+				float eta = this.GetETA();
+				if (eta == 0f)
+				{
+					return 0f;
+				}
+				this.duration = new float?(eta);
+			}
+			return this.duration.Value;
+		}
+
+		public void OnNormalizedDistanceChanged(float normalizedDistance)
+		{
+		}
+
+		private readonly ClusterTraveler traveler;
+
+		private float? duration;
+	}
 }

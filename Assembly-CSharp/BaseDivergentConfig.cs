@@ -16,7 +16,7 @@ public static class BaseDivergentConfig
 		{
 			text = "WalkerBabyNavGrid";
 		}
-		EntityTemplates.ExtendEntityToBasicCreature(gameObject, FactionManager.FactionID.Pest, traitId, text, NavType.Floor, 32, 2f, "Meat", meatAmount, true, false, 283.15f, 313.15f, 243.15f, 373.15f);
+		EntityTemplates.ExtendEntityToBasicCreature(gameObject, FactionManager.FactionID.Pest, traitId, text, NavType.Floor, 32, 2f, "Meat", (float)meatAmount, true, false, 283.15f, 313.15f, 243.15f, 373.15f);
 		if (symbolOverridePrefix != null)
 		{
 			gameObject.AddOrGet<SymbolOverrideController>().ApplySymbolOverridesByAffix(Assets.GetAnim(anim_file), symbolOverridePrefix, null, 0);
@@ -47,7 +47,7 @@ public static class BaseDivergentConfig
 			crop_tending_pst = "wormwood_tending_pst",
 			hide_symbols_after_pre = new string[] { "flower", "flower_wilted" }
 		});
-		def.ignoreEffectGroup = BaseDivergentConfig.ignoreEffectGroup;
+		def.ignoreEffectGroup = PollinationMonitor.PollinationEffects;
 		ChoreTable.Builder builder = new ChoreTable.Builder().Add(new DeathStates.Def(), true, -1).Add(new AnimInterruptStates.Def(), true, -1).Add(new GrowUpStates.Def(), is_baby, -1)
 			.Add(new TrappedStates.Def(), true, -1)
 			.Add(new IncubatingStates.Def(), is_baby, -1)
@@ -98,6 +98,8 @@ public static class BaseDivergentConfig
 	public const float CROP_TENDED_MULTIPLIER_DURATION = 600f;
 
 	public const float CROP_TENDED_MULTIPLIER_EFFECT = 0.05f;
+
+	public const string DEFAULT_CROP_TENDING_EFFECT = "DivergentCropTended";
 
 	public static string[] ignoreEffectGroup = new string[] { "DivergentCropTended", "DivergentCropTendedWorm" };
 }

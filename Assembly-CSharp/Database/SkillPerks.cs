@@ -81,6 +81,7 @@ namespace Database
 			this.AllowNuclearResearch = base.Add(new SimpleSkillPerk("AllowNuclearResearch", UI.ROLES_SCREEN.PERKS.NUCLEAR_RESEARCH.DESCRIPTION));
 			this.AllowOrbitalResearch = base.Add(new SimpleSkillPerk("AllowOrbitalResearch", UI.ROLES_SCREEN.PERKS.ORBITAL_RESEARCH.DESCRIPTION));
 			this.AllowGeyserTuning = base.Add(new SimpleSkillPerk("AllowGeyserTuning", UI.ROLES_SCREEN.PERKS.GEYSER_TUNING.DESCRIPTION));
+			this.AllowChemistry = base.Add(new SimpleSkillPerk("AllowChemistry", UI.ROLES_SCREEN.PERKS.CHEMISTRY.DESCRIPTION));
 			this.CanStudyWorldObjects = base.Add(new SimpleSkillPerk("CanStudyWorldObjects", UI.ROLES_SCREEN.PERKS.CAN_STUDY_WORLD_OBJECTS.DESCRIPTION));
 			this.CanUseClusterTelescope = base.Add(new SimpleSkillPerk("CanUseClusterTelescope", UI.ROLES_SCREEN.PERKS.CAN_USE_CLUSTER_TELESCOPE.DESCRIPTION));
 			this.CanUseClusterTelescopeEnclosed = base.Add(new SimpleSkillPerk("CanUseClusterTelescopeEnclosed", UI.ROLES_SCREEN.PERKS.CAN_CLUSTERTELESCOPEENCLOSED.DESCRIPTION));
@@ -260,6 +261,8 @@ namespace Database
 		public SkillPerk AllowOrbitalResearch;
 
 		public SkillPerk AllowGeyserTuning;
+
+		public SkillPerk AllowChemistry;
 
 		public SkillPerk CanStudyWorldObjects;
 

@@ -123,7 +123,8 @@ public class BionicUpgradeComponentConfig : IMultiEntityConfig
 		{
 			Db.Get().SkillPerks.AllowAdvancedResearch,
 			Db.Get().SkillPerks.CanStudyWorldObjects,
-			Db.Get().SkillPerks.AllowGeyserTuning
+			Db.Get().SkillPerks.AllowGeyserTuning,
+			Db.Get().SkillPerks.AllowChemistry
 		};
 		BionicUpgradeComponentConfig.<>c__DisplayClass27_3 CS$<>8__locals8 = CS$<>8__locals7;
 		string text8 = text7;

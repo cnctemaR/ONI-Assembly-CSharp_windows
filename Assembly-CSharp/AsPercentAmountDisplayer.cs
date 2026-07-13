@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text;
 using Klei.AI;
 using STRINGS;
 
@@ -46,23 +47,25 @@ public class AsPercentAmountDisplayer : IAmountDisplayer
 
 	public virtual string GetTooltip(Amount master, AmountInstance instance)
 	{
-		string text = string.Format(master.description, this.formatter.GetFormattedValue(instance.value, GameUtil.TimeSlice.None));
-		text += "\n\n";
+		StringBuilder stringBuilder = GlobalStringBuilderPool.Alloc();
+		stringBuilder.AppendFormat(master.description, this.formatter.GetFormattedValue(instance.value, GameUtil.TimeSlice.None));
+		stringBuilder.Append("\n\n");
 		if (this.formatter.DeltaTimeSlice == GameUtil.TimeSlice.PerCycle)
 		{
-			text += string.Format(UI.CHANGEPERCYCLE, this.formatter.GetFormattedValue(this.ToPercent(instance.deltaAttribute.GetTotalDisplayValue(), instance), GameUtil.TimeSlice.PerCycle));
+			stringBuilder.AppendFormat(UI.CHANGEPERCYCLE, this.formatter.GetFormattedValue(this.ToPercent(instance.deltaAttribute.GetTotalDisplayValue(), instance), GameUtil.TimeSlice.PerCycle));
 		}
 		else
 		{
-			text += string.Format(UI.CHANGEPERSECOND, this.formatter.GetFormattedValue(this.ToPercent(instance.deltaAttribute.GetTotalDisplayValue(), instance), GameUtil.TimeSlice.PerSecond));
+			stringBuilder.AppendFormat(UI.CHANGEPERSECOND, this.formatter.GetFormattedValue(this.ToPercent(instance.deltaAttribute.GetTotalDisplayValue(), instance), GameUtil.TimeSlice.PerSecond));
 		}
 		for (int num = 0; num != instance.deltaAttribute.Modifiers.Count; num++)
 		{
 			AttributeModifier attributeModifier = instance.deltaAttribute.Modifiers[num];
 			float modifierContribution = instance.deltaAttribute.GetModifierContribution(attributeModifier);
-			text = text + "\n" + string.Format(UI.MODIFIER_ITEM_TEMPLATE, attributeModifier.GetDescription(), this.formatter.GetFormattedValue(this.ToPercent(modifierContribution, instance), this.formatter.DeltaTimeSlice));
+			stringBuilder.Append("\n");
+			stringBuilder.AppendFormat(UI.MODIFIER_ITEM_TEMPLATE, attributeModifier.GetDescription(), this.formatter.GetFormattedValue(this.ToPercent(modifierContribution, instance), this.formatter.DeltaTimeSlice));
 		}
-		return text;
+		return GlobalStringBuilderPool.ReturnAndFree(stringBuilder);
 	}
 
 	public string GetFormattedAttribute(AttributeInstance instance)

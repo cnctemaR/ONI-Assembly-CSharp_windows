@@ -23,9 +23,7 @@ public class ElectrobankDischarger : Generator
 		this.smi = new ElectrobankDischarger.StatesInstance(this);
 		this.smi.StartSM();
 		base.Subscribe(-1697596308, new Action<object>(this.OnStorageChange));
-		base.Subscribe(-592767678, new Action<object>(this.RefreshOperationalActive));
 		this.RefreshCells(null);
-		this.RefreshOperationalActive(null);
 		this.filteredStorage = new FilteredStorage(this, null, null, false, Db.Get().ChoreTypes.PowerFetch);
 		this.filteredStorage.SetHasMeter(false);
 		this.filteredStorage.FilterChanged();
@@ -58,7 +56,6 @@ public class ElectrobankDischarger : Generator
 	private void OnStorageChange(object data = null)
 	{
 		this.RefreshCells(null);
-		this.RefreshOperationalActive(null);
 		this.UpdateSymbolSwap();
 	}
 
@@ -85,26 +82,18 @@ public class ElectrobankDischarger : Generator
 		component2.RemoveSymbolOverride("electrobank_s", 0);
 	}
 
-	private void RefreshOperationalActive(object data = null)
-	{
-		if (this.operational.IsOperational)
-		{
-			if (this.storedCells.Count > 0)
-			{
-				this.operational.SetActive(true, false);
-				return;
-			}
-			this.operational.SetActive(false, false);
-		}
-	}
-
 	public override void EnergySim200ms(float dt)
 	{
 		base.EnergySim200ms(dt);
+		bool flag = false;
 		ushort circuitID = base.CircuitID;
 		this.operational.SetFlag(Generator.wireConnectedFlag, circuitID != ushort.MaxValue);
-		if (!this.operational.IsActive)
+		if (!this.operational.IsOperational)
 		{
+			if (this.operational.IsActive)
+			{
+				this.operational.SetActive(false, false);
+			}
 			return;
 		}
 		float num = 0f;
@@ -119,8 +108,10 @@ public class ElectrobankDischarger : Generator
 		}
 		if (num > 0f)
 		{
+			flag = true;
 			base.GenerateJoules(num, false);
 		}
+		this.operational.SetActive(flag, false);
 	}
 
 	private void RefreshCells(object data = null)
@@ -163,7 +154,7 @@ public class ElectrobankDischarger : Generator
 		{
 			default_state = this.noBattery;
 			this.root.EventTransition(GameHashes.ActiveChanged, this.discharging, (ElectrobankDischarger.StatesInstance smi) => smi.GetComponent<Operational>().IsActive);
-			this.noBattery.PlayAnim("off").Enter(delegate(ElectrobankDischarger.StatesInstance smi)
+			this.noBattery.PlayAnim("off").EnterTransition(this.inoperational, (ElectrobankDischarger.StatesInstance smi) => smi.master.storage.items.Count != 0).Enter(delegate(ElectrobankDischarger.StatesInstance smi)
 			{
 				smi.master.UpdateMeter();
 			});

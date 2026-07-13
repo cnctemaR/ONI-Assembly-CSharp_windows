@@ -17,6 +17,7 @@ public class Tinkerable : Workable
 		Tinkerable tinkerable = prefab.AddOrGet<Tinkerable>();
 		tinkerable.tinkerMaterialTag = PowerControlStationConfig.TINKER_TOOLS;
 		tinkerable.tinkerMaterialAmount = 1f;
+		tinkerable.tinkerMass = 5f;
 		tinkerable.requiredSkillPerk = PowerControlStationConfig.ROLE_PERK;
 		tinkerable.onCompleteSFX = "Generator_Microchip_installed";
 		tinkerable.boostSymbolNames = new string[] { "booster", "blue_light_bloom" };
@@ -49,6 +50,7 @@ public class Tinkerable : Workable
 		Tinkerable tinkerable = prefab.AddOrGet<Tinkerable>();
 		tinkerable.tinkerMaterialTag = FarmStationConfig.TINKER_TOOLS;
 		tinkerable.tinkerMaterialAmount = 1f;
+		tinkerable.tinkerMass = 5f;
 		tinkerable.requiredSkillPerk = Db.Get().SkillPerks.CanFarmTinker.Id;
 		tinkerable.workerStatusItem = Db.Get().DuplicantStatusItems.Tinkering;
 		tinkerable.addedEffect = "FarmTinker";
@@ -166,7 +168,7 @@ public class Tinkerable : Workable
 			}
 			else
 			{
-				this.chore = new FetchChore(Db.Get().ChoreTypes.GetByHash(this.choreTypeFetch), this.storage, this.tinkerMaterialAmount, new HashSet<Tag> { this.tinkerMaterialTag }, FetchChore.MatchCriteria.MatchID, Tag.Invalid, null, null, true, new Action<Chore>(this.OnFetchComplete), null, null, Operational.State.Functional, 0);
+				this.chore = new FetchChore(Db.Get().ChoreTypes.GetByHash(this.choreTypeFetch), this.storage, this.tinkerMaterialAmount * this.tinkerMass, new HashSet<Tag> { this.tinkerMaterialTag }, FetchChore.MatchCriteria.MatchID, Tag.Invalid, null, null, true, new Action<Chore>(this.OnFetchComplete), null, null, Operational.State.Functional, 0);
 			}
 			this.chore.AddPrecondition(ChorePreconditions.instance.HasSkillPerk, this.requiredSkillPerk);
 			if (!string.IsNullOrEmpty(base.GetComponent<RoomTracker>().requiredRoomType))
@@ -306,6 +308,8 @@ public class Tinkerable : Workable
 	public Tag tinkerMaterialTag;
 
 	public float tinkerMaterialAmount;
+
+	public float tinkerMass;
 
 	public string addedEffect;
 

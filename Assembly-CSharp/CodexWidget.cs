@@ -26,6 +26,8 @@ public abstract class CodexWidget<SubClass> : ICodexWidget
 	protected void ConfigurePreferredLayout(GameObject contentGameObject)
 	{
 		LayoutElement componentInChildren = contentGameObject.GetComponentInChildren<LayoutElement>();
+		componentInChildren.minWidth = (float)this.preferredWidth;
+		componentInChildren.minHeight = (float)this.preferredHeight;
 		componentInChildren.preferredHeight = (float)this.preferredHeight;
 		componentInChildren.preferredWidth = (float)this.preferredWidth;
 	}

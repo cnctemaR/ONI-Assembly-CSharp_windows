@@ -60,11 +60,11 @@ public class PropertyTextures : KMonoBehaviour, ISim200ms
 
 	public void OnReset(object data = null)
 	{
-		this.lerpers = new TextureLerper[15];
+		this.lerpers = new TextureLerper[16];
 		this.texturePagePool = new TexturePagePool();
-		this.textureBuffers = new TextureBuffer[15];
-		this.externallyUpdatedTextures = new Texture2D[15];
-		for (int i = 0; i < 15; i++)
+		this.textureBuffers = new TextureBuffer[16];
+		this.externallyUpdatedTextures = new Texture2D[16];
+		for (int i = 0; i < 16; i++)
 		{
 			PropertyTextures.TextureProperties textureProperties = new PropertyTextures.TextureProperties
 			{
@@ -120,7 +120,7 @@ public class PropertyTextures : KMonoBehaviour, ISim200ms
 
 	private void OnShadersReloaded()
 	{
-		for (int i = 0; i < 15; i++)
+		for (int i = 0; i < 16; i++)
 		{
 			TextureLerper textureLerper = this.lerpers[i];
 			if (textureLerper != null)
@@ -203,6 +203,9 @@ public class PropertyTextures : KMonoBehaviour, ISim200ms
 			case PropertyTextures.Property.Radiation:
 				this.UpdateTextureThreaded(textureRegion, x0, y0, x1, y1, new PropertyTextures.WorkItem.Callback(PropertyTextures.UpdateRadiation));
 				break;
+			case PropertyTextures.Property.SolidLiquidGasMassForLight:
+				this.UpdateTextureThreaded(textureRegion, x0, y0, x1, y1, new PropertyTextures.WorkItem.Callback(PropertyTextures.UpdateSolidLiquidGasMassForLight));
+				break;
 			}
 			textureRegion.Unlock();
 			return;
@@ -248,7 +251,7 @@ public class PropertyTextures : KMonoBehaviour, ISim200ms
 		}
 		else
 		{
-			zero = new Vector4((float)worldSize.x, (float)worldSize.y, (float)worldOffset.x, (float)worldOffset.y);
+			zero = new Vector4((float)worldSize.x, (float)(worldSize.y - activeWorld.HiddenYOffset), (float)worldOffset.x, (float)worldOffset.y);
 		}
 		return zero;
 	}
@@ -262,7 +265,7 @@ public class PropertyTextures : KMonoBehaviour, ISim200ms
 		Shader.SetGlobalVector(this.WorldSizeID, new Vector4((float)Grid.WidthInCells, (float)Grid.HeightInCells, 1f / (float)Grid.WidthInCells, 1f / (float)Grid.HeightInCells));
 		Vector4 vector = PropertyTextures.CalculateClusterWorldSize();
 		float num = (CameraController.Instance.FreeCameraEnabled ? TuningData<CameraController.Tuning>.Get().maxOrthographicSizeDebug : 20f);
-		Shader.SetGlobalVector(this.CameraZoomID, new Vector4(CameraController.Instance.OrthographicSize, CameraController.Instance.minOrthographicSize, num, (CameraController.Instance.OrthographicSize - CameraController.Instance.minOrthographicSize) / (num - CameraController.Instance.minOrthographicSize)));
+		Shader.SetGlobalVector(this.CameraZoomID, new Vector4(CameraController.Instance.OrthographicSize, CameraController.Instance.overlayCamera.aspect, num, (CameraController.Instance.OrthographicSize - CameraController.Instance.minOrthographicSize) / (num - CameraController.Instance.minOrthographicSize)));
 		Shader.SetGlobalVector(this.ClusterWorldSizeID, vector);
 		Shader.SetGlobalVector(this.PropTexWsToCsID, new Vector4(0f, 0f, 1f, 1f));
 		Shader.SetGlobalVector(this.PropTexCsToWsID, new Vector4(0f, 0f, 1f, 1f));
@@ -292,7 +295,7 @@ public class PropertyTextures : KMonoBehaviour, ISim200ms
 				this.UpdateProperty(ref textureProperties2, num2, num3, num4, num5);
 			}
 		}
-		for (int j = 0; j < 15; j++)
+		for (int j = 0; j < 16; j++)
 		{
 			TextureLerper textureLerper = this.lerpers[j];
 			if (textureLerper != null)
@@ -587,7 +590,17 @@ public class PropertyTextures : KMonoBehaviour, ISim200ms
 		}
 	}
 
+	private static void UpdateSolidLiquidGasMassForLight(TextureRegion region, int x0, int y0, int x1, int y1)
+	{
+		PropertyTextures.UpdateSolidLiquidGasMass(region, x0, y0, x1, y1, false);
+	}
+
 	private static void UpdateSolidLiquidGasMass(TextureRegion region, int x0, int y0, int x1, int y1)
+	{
+		PropertyTextures.UpdateSolidLiquidGasMass(region, x0, y0, x1, y1, true);
+	}
+
+	private static void UpdateSolidLiquidGasMass(TextureRegion region, int x0, int y0, int x1, int y1, bool diferenciateImpermeable)
 	{
 		for (int i = y0; i <= y1; i++)
 		{
@@ -604,7 +617,7 @@ public class PropertyTextures : KMonoBehaviour, ISim200ms
 					byte b = 0;
 					byte b2 = 0;
 					byte b3 = 0;
-					if (element.IsSolid || Grid.LiquidImpermeable[num])
+					if (element.IsSolid || (diferenciateImpermeable && Grid.LiquidImpermeable[num]))
 					{
 						if (element.IsSolid)
 						{
@@ -921,6 +934,16 @@ public class PropertyTextures : KMonoBehaviour, ISim200ms
 		},
 		new PropertyTextures.TextureProperties
 		{
+			simProperty = PropertyTextures.Property.SolidLiquidGasMassForLight,
+			textureFormat = TextureFormat.RGBA32,
+			filterMode = FilterMode.Point,
+			updateEveryFrame = true,
+			updatedExternally = false,
+			blend = false,
+			blendSpeed = 0f
+		},
+		new PropertyTextures.TextureProperties
+		{
 			simProperty = PropertyTextures.Property.Temperature,
 			textureFormat = TextureFormat.RGB24,
 			filterMode = FilterMode.Bilinear,
@@ -962,6 +985,7 @@ public class PropertyTextures : KMonoBehaviour, ISim200ms
 		FallingSolid,
 		Radiation,
 		LiquidData,
+		SolidLiquidGasMassForLight,
 		Num
 	}
 

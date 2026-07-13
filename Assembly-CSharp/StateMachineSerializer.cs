@@ -231,7 +231,7 @@ public class StateMachineSerializer
 				StateMachine.BaseState state = smi.GetStateMachine().GetState(this.currentState);
 				if (state != null)
 				{
-					smi.OnParamsDeserialized();
+					smi.PostParamsInitialized();
 					smi.GoTo(state);
 					return true;
 				}

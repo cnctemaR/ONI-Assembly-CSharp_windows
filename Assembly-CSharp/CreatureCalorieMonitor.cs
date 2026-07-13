@@ -134,14 +134,23 @@ public class CreatureCalorieMonitor : GameStateMachine<CreatureCalorieMonitor, C
 						where !string.IsNullOrEmpty(s)
 						select s).ToArray<string>());
 				}
-				if (this.diet.CanEatAnyNonDirectlyEdiblePlant)
+				Diet.Info info;
+				if (this.diet.CanEatPreyCritter)
 				{
 					if (this.diet.CanEatAnyPlantDirectly)
 					{
 						text2 += "\n";
 					}
-					Diet.Info info;
-					text2 += string.Join("\n", (from t in stomach.diet.consumedTags.FindAll((KeyValuePair<Tag, float> t) => this.diet.directlyEatenPlantInfos.FirstOrDefault<Diet.Info>((Diet.Info info) => info.consumedTags.Contains(t.Key)) == null)
+					text2 += string.Join("\n", (from t in stomach.diet.consumedTags.FindAll((KeyValuePair<Tag, float> t) => this.diet.preyInfos.FirstOrDefault<Diet.Info>((Diet.Info info) => info.consumedTags.Contains(t.Key)) != null)
+						select UI.BUILDINGEFFECTS.DIET_CONSUMED_ITEM.text.Replace("{Food}", t.Key.ProperName()).Replace("{Amount}", GameUtil.GetFormattedPreyConsumptionValuePerCycle(t.Key, -calorie_loss_per_second / t.Value, true))).ToArray<string>());
+				}
+				if (this.diet.CanEatAnySolid)
+				{
+					if (this.diet.CanEatAnyPlantDirectly || this.diet.CanEatPreyCritter)
+					{
+						text2 += "\n";
+					}
+					text2 += string.Join("\n", (from t in stomach.diet.consumedTags.FindAll((KeyValuePair<Tag, float> t) => this.diet.solidEdiblesInfo.FirstOrDefault<Diet.Info>((Diet.Info info) => info.consumedTags.Contains(t.Key)) != null)
 						select UI.BUILDINGEFFECTS.DIET_CONSUMED_ITEM.text.Replace("{Food}", t.Key.ProperName()).Replace("{Amount}", GameUtil.GetFormattedMass(-calorie_loss_per_second / t.Value, GameUtil.TimeSlice.PerCycle, GameUtil.MetricMassFormat.Kilogram, true, "{0:0.#}"))).ToArray<string>());
 				}
 				list.Add(new Descriptor(UI.BUILDINGEFFECTS.DIET_CONSUMED.text.Replace("{Foodlist}", text), UI.BUILDINGEFFECTS.TOOLTIPS.DIET_CONSUMED.text.Replace("{Foodlist}", text2), Descriptor.DescriptorType.Effect, false));
@@ -168,12 +177,12 @@ public class CreatureCalorieMonitor : GameStateMachine<CreatureCalorieMonitor, C
 					text4 = string.Join("\n", list2.Select<KeyValuePair<Tag, float>, string>((KeyValuePair<Tag, float> t) => UI.BUILDINGEFFECTS.DIET_PRODUCED_ITEM_FROM_PLANT.text.Replace("{Item}", t.Key.ProperName()).Replace("{Amount}", GameUtil.GetFormattedMass(t.Value, GameUtil.TimeSlice.PerCycle, GameUtil.MetricMassFormat.Kilogram, true, "{0:0.#}"))).ToArray<string>());
 					text4 += "\n";
 				}
-				else if (stomach.diet.CanEatAnyNonDirectlyEdiblePlant)
+				else if (stomach.diet.CanEatAnySolid)
 				{
 					List<KeyValuePair<Tag, float>> list3 = new List<KeyValuePair<Tag, float>>();
 					foreach (KeyValuePair<Tag, float> keyValuePair2 in stomach.diet.producedTags)
 					{
-						foreach (Diet.Info info2 in this.diet.noPlantInfos)
+						foreach (Diet.Info info2 in this.diet.solidEdiblesInfo)
 						{
 							if (info2.producedElement == keyValuePair2.Key)
 							{
@@ -189,6 +198,8 @@ public class CreatureCalorieMonitor : GameStateMachine<CreatureCalorieMonitor, C
 		}
 
 		public Diet diet;
+
+		public float hungryRatio = 0.9f;
 
 		public float minConsumedCaloriesBeforePooping = 100f;
 
@@ -416,7 +427,6 @@ public class CreatureCalorieMonitor : GameStateMachine<CreatureCalorieMonitor, C
 				{
 					caloriesConsumedEntry.calories += calories;
 					this.caloriesConsumed[i] = caloriesConsumedEntry;
-					this.caloriesConsumed[i] = caloriesConsumedEntry;
 					return;
 				}
 			}
@@ -468,6 +478,14 @@ public class CreatureCalorieMonitor : GameStateMachine<CreatureCalorieMonitor, C
 
 	public new class Instance : GameStateMachine<CreatureCalorieMonitor, CreatureCalorieMonitor.Instance, IStateMachineTarget, CreatureCalorieMonitor.Def>.GameInstance
 	{
+		public float HungryRatio
+		{
+			get
+			{
+				return base.def.hungryRatio;
+			}
+		}
+
 		public Instance(IStateMachineTarget master, CreatureCalorieMonitor.Def def)
 			: base(master, def)
 		{
@@ -511,15 +529,13 @@ public class CreatureCalorieMonitor : GameStateMachine<CreatureCalorieMonitor, C
 
 		public bool IsHungry()
 		{
-			return this.GetCalories0to1() < 0.9f;
+			return this.GetCalories0to1() < this.HungryRatio;
 		}
 
 		public bool IsOutOfCalories()
 		{
 			return this.GetCalories0to1() <= 0f;
 		}
-
-		public const float HUNGRY_RATIO = 0.9f;
 
 		public AmountInstance calories;
 

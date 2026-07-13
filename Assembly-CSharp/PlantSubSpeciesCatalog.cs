@@ -40,6 +40,7 @@ public class PlantSubSpeciesCatalog : KMonoBehaviour
 	{
 		base.OnSpawn();
 		this.EnsureOriginalSubSpecies();
+		this.RemoveInvalidMutantPlants();
 	}
 
 	public List<Tag> GetAllDiscoveredSpecies()
@@ -164,6 +165,27 @@ public class PlantSubSpeciesCatalog : KMonoBehaviour
 				this.discoveredSubspeciesBySpecies[speciesID].Add(component.GetSubSpeciesInfo());
 			}
 			this.identifiedSubSpecies.Add(component.SubSpeciesID);
+		}
+	}
+
+	private void RemoveInvalidMutantPlants()
+	{
+		List<Tag> list = new List<Tag>();
+		foreach (KeyValuePair<Tag, List<PlantSubSpeciesCatalog.SubSpeciesInfo>> keyValuePair in this.discoveredSubspeciesBySpecies)
+		{
+			GameObject prefab = Assets.GetPrefab(keyValuePair.Key);
+			if (prefab != null && prefab.GetComponent<MutantPlant>() == null)
+			{
+				list.Add(keyValuePair.Key);
+			}
+		}
+		foreach (Tag tag in list)
+		{
+			foreach (PlantSubSpeciesCatalog.SubSpeciesInfo subSpeciesInfo in this.discoveredSubspeciesBySpecies[tag])
+			{
+				this.identifiedSubSpecies.Remove(subSpeciesInfo.ID);
+			}
+			this.discoveredSubspeciesBySpecies.Remove(tag);
 		}
 	}
 

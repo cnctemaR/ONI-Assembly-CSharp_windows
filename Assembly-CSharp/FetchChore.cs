@@ -133,6 +133,58 @@ public class FetchChore : Chore<FetchChore.StatesInstance>
 		return this.amount;
 	}
 
+	public static float GetMinimumFetchAmount(HashSet<Tag> match_tags)
+	{
+		float num = 1f;
+		foreach (Tag tag in match_tags)
+		{
+			GameObject prefab = Assets.GetPrefab(tag);
+			if (prefab != null)
+			{
+				PrimaryElement component = prefab.GetComponent<PrimaryElement>();
+				if (component != null && component.MassPerUnit > 1f)
+				{
+					num = Mathf.Max(num, component.MassPerUnit);
+				}
+			}
+			else
+			{
+				foreach (GameObject gameObject in Assets.GetPrefabsWithTag(tag))
+				{
+					PrimaryElement component2 = gameObject.GetComponent<PrimaryElement>();
+					if (component2 != null && component2.MassPerUnit > 1f)
+					{
+						num = Mathf.Max(num, component2.MassPerUnit);
+					}
+				}
+			}
+		}
+		return num;
+	}
+
+	public static float GetMinimumFetchAmount(Tag requested_tag, float requested_amount)
+	{
+		float num = requested_amount;
+		GameObject prefab = Assets.GetPrefab(requested_tag);
+		if (prefab != null)
+		{
+			PrimaryElement component = prefab.GetComponent<PrimaryElement>();
+			if (component != null && component.MassPerUnit > 1f)
+			{
+				return Mathf.Max(num, component.MassPerUnit);
+			}
+		}
+		foreach (GameObject gameObject in Assets.GetPrefabsWithTag(requested_tag))
+		{
+			PrimaryElement component2 = gameObject.GetComponent<PrimaryElement>();
+			if (component2 != null && component2.MassPerUnit > 1f)
+			{
+				num = Mathf.Max(num, component2.MassPerUnit);
+			}
+		}
+		return num;
+	}
+
 	public FetchChore(ChoreType choreType, Storage destination, float amount, HashSet<Tag> tags, FetchChore.MatchCriteria criteria, Tag required_tag, Tag[] forbidden_tags = null, ChoreProvider chore_provider = null, bool run_until_complete = true, Action<Chore> on_complete = null, Action<Chore> on_begin = null, Action<Chore> on_end = null, Operational.State operational_requirement = Operational.State.Operational, int priority_mod = 0)
 		: base(choreType, destination, chore_provider, run_until_complete, on_complete, on_begin, on_end, PriorityScreen.PriorityClass.basic, 5, false, true, priority_mod, false, ReportManager.ReportType.WorkTime)
 	{

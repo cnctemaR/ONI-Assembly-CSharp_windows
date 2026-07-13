@@ -30,6 +30,7 @@ public class ManualGeneratorConfig : IBuildingConfig
 		buildingDef.LogicInputPorts = LogicOperationalController.CreateSingleInputPortList(new CellOffset(0, 0));
 		buildingDef.SelfHeatKilowattsWhenActive = 1f;
 		buildingDef.AddSearchTerms(SEARCH_TERMS.POWER);
+		buildingDef.AddSearchTerms(SEARCH_TERMS.GENERATOR);
 		return buildingDef;
 	}
 

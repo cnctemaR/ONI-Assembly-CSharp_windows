@@ -158,12 +158,12 @@ public class KCrashReporter : MonoBehaviour
 			}
 			else
 			{
-				this.ShowDialog(text2, text3);
+				this.ShowDialog(text2, text3, true, null, null);
 			}
 		}
 	}
 
-	public bool ShowDialog(string error, string stack_trace)
+	public bool ShowDialog(string error, string stack_trace, bool includeSaveFile = true, string[] extraCategories = null, string[] extraFiles = null)
 	{
 		if (this.errorScreen != null)
 		{
@@ -197,7 +197,7 @@ public class KCrashReporter : MonoBehaviour
 		{
 			errorDialog.PopupSubmitErrorDialog(text, delegate
 			{
-				KCrashReporter.ReportError(error, stack_trace, this.confirmDialogPrefab, this.errorScreen, errorDialog.UserMessage(), true, null, null);
+				KCrashReporter.ReportError(error, stack_trace, this.confirmDialogPrefab, this.errorScreen, errorDialog.UserMessage(), includeSaveFile, extraCategories, extraFiles);
 			}, new global::System.Action(this.OnQuitToDesktop), KCrashReporter.terminateOnError ? null : new global::System.Action(this.OnCloseErrorDialog));
 		}
 		return true;
@@ -484,7 +484,7 @@ public class KCrashReporter : MonoBehaviour
 		{
 			return;
 		}
-		KCrashReporter.ReportError(msg, stack_trace, null, null, "", true, new string[] { KCrashReporter.CRASH_CATEGORY.SIM }, new string[] { dmp_filename });
+		KCrashReporter.pendingReport = new KCrashReporter.PendingReport(msg, stack_trace, dmp_filename);
 	}
 
 	private static byte[] CreateArchiveZip(string log, List<string> files)
@@ -536,6 +536,24 @@ public class KCrashReporter : MonoBehaviour
 
 	private void Update()
 	{
+		if (KCrashReporter.pendingReport != null)
+		{
+			KCrashReporter.PendingReport pendingReport = KCrashReporter.pendingReport;
+			KCrashReporter.pendingReport = null;
+			if (KCrashReporter.hasReportedError)
+			{
+				return;
+			}
+			KCrashReporter component = Global.Instance.GetComponent<KCrashReporter>();
+			if (component != null)
+			{
+				component.ShowDialog(pendingReport.message, pendingReport.stack_trace, true, new string[] { KCrashReporter.CRASH_CATEGORY.SIM }, new string[] { pendingReport.additional_filename });
+			}
+			else
+			{
+				KCrashReporter.ReportError(pendingReport.message, pendingReport.stack_trace, null, null, "", true, new string[] { KCrashReporter.CRASH_CATEGORY.SIM }, new string[] { pendingReport.additional_filename });
+			}
+		}
 		if (KCrashReporter.pendingCrash != null)
 		{
 			KCrashReporter.PendingCrash pendingCrash = KCrashReporter.pendingCrash;
@@ -585,6 +603,8 @@ public class KCrashReporter : MonoBehaviour
 	private static readonly string[] IgnoreStrings = new string[] { "Releasing render texture whose render buffer is set as Camera's target buffer with Camera.SetTargetBuffers!", "The profiler has run out of samples for this frame. This frame will be skipped. Increase the sample limit using Profiler.maxNumberOfSamplesPerFrame", "Trying to add Text (LocText) for graphic rebuild while we are already inside a graphic rebuild loop. This is not supported.", "Texture has out of range width / height", "<I> Failed to get cursor position:\r\nSuccess.\r\n" };
 
 	private static HashSet<int> previouslyReportedDevNotifications;
+
+	private static KCrashReporter.PendingReport pendingReport;
 
 	private static KCrashReporter.PendingCrash pendingCrash;
 
@@ -728,7 +748,7 @@ public class KCrashReporter : MonoBehaviour
 
 		public string sku = "";
 
-		public int build = 663500;
+		public int build = 674504;
 
 		public string callstack = "";
 
@@ -770,5 +790,21 @@ public class KCrashReporter : MonoBehaviour
 		public global::System.Action successCallback;
 
 		public Action<long> failureCallback;
+	}
+
+	public class PendingReport
+	{
+		public PendingReport(string msg, string stack_trace, string filename)
+		{
+			this.message = msg;
+			this.stack_trace = stack_trace;
+			this.additional_filename = filename;
+		}
+
+		public string message;
+
+		public string stack_trace;
+
+		public string additional_filename;
 	}
 }

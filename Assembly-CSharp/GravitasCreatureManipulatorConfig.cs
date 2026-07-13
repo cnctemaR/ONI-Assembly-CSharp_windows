@@ -84,148 +84,22 @@ public class GravitasCreatureManipulatorConfig : IBuildingConfig
 
 	public static Option<string> GetNameForSpeciesTag(Tag species)
 	{
-		if (species == GameTags.Creatures.Species.HatchSpecies)
+		StringEntry stringEntry;
+		if (!Strings.TryGet("STRINGS.CREATURES.FAMILY_PLURAL." + species.ToString().ToUpper(), out stringEntry))
 		{
-			return Option.Some<string>(global::STRINGS.CREATURES.FAMILY_PLURAL.HATCHSPECIES);
+			return Option.None;
 		}
-		if (species == GameTags.Creatures.Species.LightBugSpecies)
-		{
-			return Option.Some<string>(global::STRINGS.CREATURES.FAMILY_PLURAL.LIGHTBUGSPECIES);
-		}
-		if (species == GameTags.Creatures.Species.OilFloaterSpecies)
-		{
-			return Option.Some<string>(global::STRINGS.CREATURES.FAMILY_PLURAL.OILFLOATERSPECIES);
-		}
-		if (species == GameTags.Creatures.Species.DreckoSpecies)
-		{
-			return Option.Some<string>(global::STRINGS.CREATURES.FAMILY_PLURAL.DRECKOSPECIES);
-		}
-		if (species == GameTags.Creatures.Species.GlomSpecies)
-		{
-			return Option.Some<string>(global::STRINGS.CREATURES.FAMILY_PLURAL.GLOMSPECIES);
-		}
-		if (species == GameTags.Creatures.Species.PuftSpecies)
-		{
-			return Option.Some<string>(global::STRINGS.CREATURES.FAMILY_PLURAL.PUFTSPECIES);
-		}
-		if (species == GameTags.Creatures.Species.PacuSpecies)
-		{
-			return Option.Some<string>(global::STRINGS.CREATURES.FAMILY_PLURAL.PACUSPECIES);
-		}
-		if (species == GameTags.Creatures.Species.MooSpecies)
-		{
-			return Option.Some<string>(global::STRINGS.CREATURES.FAMILY_PLURAL.MOOSPECIES);
-		}
-		if (species == GameTags.Creatures.Species.MoleSpecies)
-		{
-			return Option.Some<string>(global::STRINGS.CREATURES.FAMILY_PLURAL.MOLESPECIES);
-		}
-		if (species == GameTags.Creatures.Species.SquirrelSpecies)
-		{
-			return Option.Some<string>(global::STRINGS.CREATURES.FAMILY_PLURAL.SQUIRRELSPECIES);
-		}
-		if (species == GameTags.Creatures.Species.CrabSpecies)
-		{
-			return Option.Some<string>(global::STRINGS.CREATURES.FAMILY_PLURAL.CRABSPECIES);
-		}
-		if (species == GameTags.Creatures.Species.DivergentSpecies)
-		{
-			return Option.Some<string>(global::STRINGS.CREATURES.FAMILY_PLURAL.DIVERGENTSPECIES);
-		}
-		if (species == GameTags.Creatures.Species.StaterpillarSpecies)
-		{
-			return Option.Some<string>(global::STRINGS.CREATURES.FAMILY_PLURAL.STATERPILLARSPECIES);
-		}
-		if (species == GameTags.Creatures.Species.BeetaSpecies)
-		{
-			return Option.Some<string>(global::STRINGS.CREATURES.FAMILY_PLURAL.BEETASPECIES);
-		}
-		if (species == GameTags.Creatures.Species.BellySpecies)
-		{
-			return Option.Some<string>(global::STRINGS.CREATURES.FAMILY_PLURAL.BELLYSPECIES);
-		}
-		if (species == GameTags.Creatures.Species.SealSpecies)
-		{
-			return Option.Some<string>(global::STRINGS.CREATURES.FAMILY_PLURAL.SEALSPECIES);
-		}
-		if (species == GameTags.Creatures.Species.DeerSpecies)
-		{
-			return Option.Some<string>(global::STRINGS.CREATURES.FAMILY_PLURAL.DEERSPECIES);
-		}
-		return Option.None;
+		return Option.Some<string>(stringEntry);
 	}
 
 	public static Option<string> GetDescriptionForSpeciesTag(Tag species)
 	{
-		if (species == GameTags.Creatures.Species.HatchSpecies)
+		StringEntry stringEntry;
+		if (!Strings.TryGet("STRINGS.CODEX.STORY_TRAITS.CRITTER_MANIPULATOR.SPECIES_ENTRIES." + species.ToString().ToUpper().Replace("SPECIES", ""), out stringEntry))
 		{
-			return Option.Some<string>(CODEX.STORY_TRAITS.CRITTER_MANIPULATOR.SPECIES_ENTRIES.HATCH);
+			return Option.None;
 		}
-		if (species == GameTags.Creatures.Species.LightBugSpecies)
-		{
-			return Option.Some<string>(CODEX.STORY_TRAITS.CRITTER_MANIPULATOR.SPECIES_ENTRIES.LIGHTBUG);
-		}
-		if (species == GameTags.Creatures.Species.OilFloaterSpecies)
-		{
-			return Option.Some<string>(CODEX.STORY_TRAITS.CRITTER_MANIPULATOR.SPECIES_ENTRIES.OILFLOATER);
-		}
-		if (species == GameTags.Creatures.Species.DreckoSpecies)
-		{
-			return Option.Some<string>(CODEX.STORY_TRAITS.CRITTER_MANIPULATOR.SPECIES_ENTRIES.DRECKO);
-		}
-		if (species == GameTags.Creatures.Species.GlomSpecies)
-		{
-			return Option.Some<string>(CODEX.STORY_TRAITS.CRITTER_MANIPULATOR.SPECIES_ENTRIES.GLOM);
-		}
-		if (species == GameTags.Creatures.Species.PuftSpecies)
-		{
-			return Option.Some<string>(CODEX.STORY_TRAITS.CRITTER_MANIPULATOR.SPECIES_ENTRIES.PUFT);
-		}
-		if (species == GameTags.Creatures.Species.PacuSpecies)
-		{
-			return Option.Some<string>(CODEX.STORY_TRAITS.CRITTER_MANIPULATOR.SPECIES_ENTRIES.PACU);
-		}
-		if (species == GameTags.Creatures.Species.MooSpecies)
-		{
-			return Option.Some<string>(CODEX.STORY_TRAITS.CRITTER_MANIPULATOR.SPECIES_ENTRIES.MOO);
-		}
-		if (species == GameTags.Creatures.Species.MoleSpecies)
-		{
-			return Option.Some<string>(CODEX.STORY_TRAITS.CRITTER_MANIPULATOR.SPECIES_ENTRIES.MOLE);
-		}
-		if (species == GameTags.Creatures.Species.SquirrelSpecies)
-		{
-			return Option.Some<string>(CODEX.STORY_TRAITS.CRITTER_MANIPULATOR.SPECIES_ENTRIES.SQUIRREL);
-		}
-		if (species == GameTags.Creatures.Species.CrabSpecies)
-		{
-			return Option.Some<string>(CODEX.STORY_TRAITS.CRITTER_MANIPULATOR.SPECIES_ENTRIES.CRAB);
-		}
-		if (species == GameTags.Creatures.Species.DivergentSpecies)
-		{
-			return Option.Some<string>(CODEX.STORY_TRAITS.CRITTER_MANIPULATOR.SPECIES_ENTRIES.DIVERGENTSPECIES);
-		}
-		if (species == GameTags.Creatures.Species.StaterpillarSpecies)
-		{
-			return Option.Some<string>(CODEX.STORY_TRAITS.CRITTER_MANIPULATOR.SPECIES_ENTRIES.STATERPILLAR);
-		}
-		if (species == GameTags.Creatures.Species.BeetaSpecies)
-		{
-			return Option.Some<string>(CODEX.STORY_TRAITS.CRITTER_MANIPULATOR.SPECIES_ENTRIES.BEETA);
-		}
-		if (species == GameTags.Creatures.Species.BellySpecies)
-		{
-			return Option.Some<string>(CODEX.STORY_TRAITS.CRITTER_MANIPULATOR.SPECIES_ENTRIES.ICEBELLY);
-		}
-		if (species == GameTags.Creatures.Species.SealSpecies)
-		{
-			return Option.Some<string>(CODEX.STORY_TRAITS.CRITTER_MANIPULATOR.SPECIES_ENTRIES.SEAL);
-		}
-		if (species == GameTags.Creatures.Species.DeerSpecies)
-		{
-			return Option.Some<string>(CODEX.STORY_TRAITS.CRITTER_MANIPULATOR.SPECIES_ENTRIES.WOODDEER);
-		}
-		return Option.None;
+		return Option.Some<string>(stringEntry);
 	}
 
 	public const string ID = "GravitasCreatureManipulator";

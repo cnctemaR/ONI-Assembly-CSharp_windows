@@ -1031,13 +1031,14 @@ public class ComplexFabricator : RemoteDockWorkTargetComponent, ISim200ms, ISim1
 					text = component.facadeID;
 				}
 			}
-			if (recipeElement3.inheritElement || recipeElement3.Edible)
+			if (recipeElement3.inheritElement)
 			{
 				recipeElement2 = recipeElement3;
 				element = this.buildStorage.FindFirst(recipeElement3.material).GetComponent<PrimaryElement>().Element;
 			}
 			if (recipeElement3.Edible)
 			{
+				recipeElement2 = recipeElement3;
 				this.buildStorage.TransferMass(this.outStorage, recipeElement3.material, recipeElement3.amount, true, true, true);
 			}
 			else

@@ -4,1547 +4,6 @@ namespace STRINGS
 {
 	public class CODEX
 	{
-		public class CRITTERSTATUS
-		{
-			public static LocString CRITTERSTATUS_TITLE = "Field Guide";
-
-			public class METABOLISM
-			{
-				public static LocString TITLE = "Metabolism";
-
-				public class BODY
-				{
-					public static LocString CONTAINER1 = "A critter's metabolic rate is a measure of their appetite and the materials that they excrete as a result.\n\nCritters with higher metabolism get hungry more often. Those with lower metabolism will consume less food, but this reduced caloric intake results in fewer resources being produced.\n\nThe digestive process is influenced by conditions such as domestication, mood, and whether the critter in question is a juvenile (baby) or an adult.";
-				}
-
-				public class HUNGRY
-				{
-					public static LocString TITLE = "Hungry";
-
-					public static LocString CONTAINER1 = "Tame critters have significantly faster metabolism than wild ones, and get hungry sooner. This makes them more valuable in terms of resource production, as long as the colony is equipped to meet their dietary needs.\n\nCritters' stomachs vary in size, but they are capable of storing at least five cycles' worth of food. Their bellies begin to rumble when those internal caches drop below 90 percent. The critter will then seek out food, and will continue to eat until they feel completely full again.\n\nJuvenile critters have the slowest metabolism, although glum tame critters are not far behind.";
-				}
-
-				public class STARVING
-				{
-					public static LocString TITLE = "Starving";
-
-					public static LocString CONTAINER1_VANILLA = "With the exception of Morbs—which require zero calories to survive—tame critters will die after {0} cycles of consistent starvation. Wild critters do not starve to death.";
-
-					public static LocString CONTAINER1_DLC1 = "With the exception of Morbs and Beetas—which require zero calories to survive—tame critters will die after {0} cycles of consistent starvation. Wild critters do not starve to death.";
-				}
-			}
-
-			public class MOOD
-			{
-				public static LocString TITLE = "Mood";
-
-				public class BODY
-				{
-					public static LocString CONTAINER1 = "As with many living things, critters are susceptible to fluctuations in mood. While they are incapable of articulating their feelings verbally, these variations have observable effects on productivity and reproduction.\n\nFactors that influence a critter's mood include: grooming, wildness/tameness, habitat, overcrowding, confinement, and Brackene consumption.";
-				}
-
-				public class HAPPY
-				{
-					public static LocString TITLE = "Happy";
-
-					public static LocString CONTAINER1 = "Happy, tame critters produce more usable materials and tend to lay eggs at a higher rate than glum or wild critters. Domesticated critters are less resilient than wild ones—they require more care from the colony in order to maintain a positive disposition.\n\nBabies have a higher baseline of natural joy, but produce neither resources nor eggs.\n\nDuplicants with the Critter Ranching skill have the expertise needed to domesticate and care for critters. They can boost a critter's mood and tend to their health at a Grooming Station.\n\nCritters who drink at the Critter Fountain also enjoy a mood boost, despite the lack of nutrients available in the Brackene dispensed.\n\nBeing confined or feeling crowded undermines a critter's happiness.";
-
-					public static LocString SUBTITLE = "<b>Effects</b>";
-
-					public static LocString HAPPY_METABOLISM = "    • Indirectly improves egg-laying rates";
-				}
-
-				public class NEUTRAL
-				{
-					public static LocString TITLE = "Satisfied";
-
-					public static LocString CONTAINER1 = "When a critter has no reason to object to anything in its environment or diet, it will feel quite content with its lot in life. Satisfied critters have the default metabolism, fertility and life span expected of their species.";
-				}
-
-				public class GLUM
-				{
-					public static LocString TITLE = "Glum";
-
-					public static LocString CONTAINER1 = "Critters can survive in subpar environments, but it takes a toll on their mood and impacts metabolism and productivity. When their happiness levels dip below zero, they become glum.\n\nWild critters are less sensitive to the effects of glumness than their tamed brethren, though they are still negatively affected by crowded or confined living conditions.";
-
-					public static LocString SUBTITLE = "<b>Effects</b>";
-
-					public static LocString GLUMWILD_METABOLISM = "    • Critter Metabolism\n";
-				}
-
-				public class MISERABLE
-				{
-					public static LocString TITLE = "Miserable";
-
-					public static LocString CONTAINER1 = "When too many unpleasant conditions add up, critters become utterly miserable. This level of unhappiness seriously undermines their ability to contribute to the colony. Miserable critters have lower metabolism and will not lay eggs.";
-
-					public static LocString SUBTITLE = "<b>Effects</b>";
-
-					public static LocString MISERABLEWILD_METABOLISM = "    • Critter Metabolism";
-
-					public static LocString MISERABLEWILD_FERTILITY = "    • Reproduction";
-				}
-
-				public class HOSTILE
-				{
-					public static LocString TITLE = "Hostile";
-
-					public static LocString CONTAINER1_VANILLA = "Most critters are non-hostile. They may attempt to defend themselves when attacked by Duplicants, though their natural passivity limits the damage caused in these instances.\n\nSome critters, however, have exceptionally strong self-preservation instincts and must be approached with extreme caution.\n\nPokeshells, for example, are not naturally hostile but are fiercely protective of their young and will attack if a Duplicant or critter wanders too close to their eggs.";
-
-					public static LocString CONTAINER1_DLC1 = "Most critters are non-hostile. They may attempt to defend themselves when attacked by Duplicants, though their natural passivity limits the damage caused in these instances.\n\nSome critters, however, have exceptionally strong self-preservation instincts and must be approached with extreme caution. Pokeshells, for example, are not naturally hostile but are fiercely protective of their young and will attack if a Duplicant or critter wanders too close to their eggs.\n\nThe Beeta, on the other hand, is both hostile and radioactive. While it cannot be tamed, it can be subdued through the use of CO2.";
-				}
-
-				public class CONFINED
-				{
-					public static LocString TITLE = "Confined";
-
-					public static LocString CONTAINER1 = "Each species has its own space requirements. Critters who find themselves in a room that they consider too small will feel confined. They will feel the same way if they become stuck in a door or tile. Critters will not reproduce while they are in this state.\n\nShove Voles are the exception to this rule: their tunneling instincts make them quite comfortable in snug spaces, and they never feel confined.";
-
-					public static LocString SUBTITLE = "<b>Effects</b>";
-
-					public static LocString CONFINED_FERTILITY = "    • Reproduction\n";
-
-					public static LocString CONFINED_HAPPINESS = "    • Happiness";
-				}
-
-				public class OVERCROWDED
-				{
-					public static LocString TITLE = "Crowded";
-
-					public static LocString CONTAINER1 = "This occurs when a critter is in a room that's appropriately sized for its needs but feels that there are too many other critters sharing the same space. Because each species has its own space requirements, this state can vary among occupants of the same room.\n\nThis emotional state intensifies in response to the number of excess critters: adding new critters to an already crowded room will undermine a critter's happiness even further.";
-
-					public static LocString SUBTITLE = "<b>Effects</b>";
-
-					public static LocString OVERCROWDED_HAPPY1 = "    • Happiness\n";
-				}
-			}
-
-			public class FERTILITY
-			{
-				public static LocString TITLE = "Reproduction";
-
-				public class BODY
-				{
-					public static LocString CONTAINER1 = "Reproductive rates and methods vary among species. The majority lay eggs that must be incubated in order to hatch the next generation of critters.\n\nFactors that influence the rate of reproduction include egg care, happiness, living conditions and domestication.";
-				}
-
-				public class FERTILITYRATE
-				{
-					public static LocString TITLE = "Reproduction Rate";
-
-					public static LocString CONTAINER1 = "Each time a critter completes their reproduction cycle (i.e. at 100 percent), it lays an egg and restarts its cycle.\n\nA critter's environment greatly impacts its base reproduction rate. When a critter is feeling cramped, it will wait until all eggs in the room have hatched or been removed before laying any of its own.\n\nCritters will also stop reproducing when they feel confined, which happens when their space is too small or they are stuck in a door or tile.\n\nMood and domestication also impact reproduction: happy critters reproduce more regularly, and happy tame critters reproduce the fastest.";
-				}
-
-				public class EGGCHANCES
-				{
-					public static LocString TITLE = "Egg Chances";
-
-					public static LocString CONTAINER1 = "In most cases, an egg will hatch into the same critter variant as its parent. Genetic volatility, however, means that there is a chance that it may hatch into another variant from that species.\n\nThere are many things that can alter the likelihood of a critter laying a particular type of egg.\n\nEgg chances are impacted by:\n    • Diet\n    • Body temperature\n    • Ambient gasses and elements\n    • Plants in the critters' care\n    • Variants that share the enclosure\n\nWhen a tame critter lays an egg, the resulting offspring will be born tame.";
-				}
-
-				public class FUTURE_OVERCROWDED
-				{
-					public static LocString TITLE = "Cramped";
-
-					public static LocString CONTAINER1 = "Crowded critters—or critters who know they'll start feeling crowded once all of the eggs in the room have hatched—will temporarily stop laying eggs. Their reproductive system will resume function once all eggs have hatched or been removed from the room.";
-
-					public static LocString SUBTITLE = "<b>Effects</b>";
-
-					public static LocString CRAMPED_FERTILITY = "    • Reproduction";
-				}
-
-				public class INCUBATION
-				{
-					public static LocString TITLE = "Incubation";
-
-					public static LocString CONTAINER1 = "A critter's incubation time is one-fifth of their total lifetime: for example, if a critter's maximum age is 100 cycles, its egg will take 20 cycles to hatch.\n\nIncubation rates can be accelerated through tender intervention by a Critter Rancher. Lullabied eggs—that is, those that have been sung to—will incubate faster and hatch sooner than eggs that have not received such tender care. Being cuddled by a Cuddle Pip also accelerates the rate of incubation.\n\nEggs can be cuddled anywhere, but can only be lullabied when placed inside an Incubator. The effects of lullabies and cuddles are cumulative.";
-				}
-
-				public class MAXAGE
-				{
-					public static LocString TITLE = "Max Age";
-
-					public static LocString CONTAINER1_VANILLA = "With the exception of the Morb—which can live indefinitely if left to its own devices—critters have a fixed life expectancy. The maximum age indicates the highest number of cycles that critters will live, barring starvation or other unnatural causes of death.\n\nBabyhood, the period before a critter is mature enough to reproduce, is marked by a slower metabolism and the easy happiness of youth.\n\nMost species live for 75 to 100 cycles on average.";
-
-					public static LocString CONTAINER1_DLC1 = "With the exception of the Beeta Hive and the Morb—which can live indefinitely if left to their own devices—critters have a fixed life expectancy. The maximum age indicates the highest number of cycles that critters will live, barring starvation or other unnatural causes of death.\n\nIf critters are injured or unhealthy, a Critter Rancher can restore their health at the Grooming Station.\n\nBabyhood, the period before a critter is mature enough to reproduce, is marked by a slower metabolism and the easy happiness of youth.\n\nMost species live for 75 to 100 cycles on average. The shortest-lived critter is the Beeta, whose lifespan is only five cycles long.";
-				}
-			}
-
-			public class DOMESTICATION
-			{
-				public static LocString TITLE = "Domestication";
-
-				public class BODY
-				{
-					public static LocString CONTAINER1 = "All critters are wild when first encountered, with the exception of babies hatched from eggs laid by domesticated adults—those will be born tame.\n\nDuring the domestication process, the critter becomes less self-reliant and develops a higher baseline of expectations regarding its environment and care. Its metabolism accelerates, resulting in an increased level of required calories.\n\nCritters can be domesticated by Duplicants with the Critter Ranching skill at the Grooming Station, and get excited when it's their turn to be fussed over.";
-				}
-
-				public class WILD
-				{
-					public static LocString TITLE = "Wild";
-
-					public static LocString CONTAINER1 = "Wild critters do not require feeding by the colony's Critter Ranchers, thanks to their slower metabolism. They do, however, produce fewer materials than domesticated critters.\n\nApproaching a wild critter to trap or wrangle it is quite safe, provided that it is a non-hostile species. Attacking a critter will typically provoke a combat response.";
-
-					public static LocString SUBTITLE = "<b>Effects</b>";
-
-					public static LocString WILD_METABOLISM = "    • Critter Metabolism\n";
-
-					public static LocString WILD_POOP = "    • Resource Production\n";
-				}
-
-				public class TAME
-				{
-					public static LocString TITLE = "Tame";
-
-					public static LocString CONTAINER1 = "Domesticated critters produce far more resources and lay eggs at a higher frequency than wild ones. They require additional care in order to maintain the levels of happiness that maximize their utility in the colony. (Happy critters are also generally more pleasant to be around.)\n\nOnce tame, critters can access the Critter Feeder, which is unavailable to wild critters.";
-
-					public static LocString SUBTITLE = "<b>Effects</b>";
-
-					public static LocString TAME_HAPPINESS = "    • Happiness\n";
-
-					public static LocString TAME_METABOLISM = "    • Critter Metabolism";
-				}
-			}
-		}
-
-		public class INVESTIGATIONS
-		{
-			public class DLC4_SURFACEPOI
-			{
-				public static LocString TITLE = "Environmental Pledge";
-
-				public static LocString SUBTITLE = "ENCRYPTION LEVEL: NONE";
-
-				public class BODY
-				{
-					public static LocString TITLE2 = "<b>Gravitas Vows Space Junk Solution</b>";
-
-					public static LocString CONTAINER1 = "The Gravitas Facility has pledged to reduce the number of injuries caused by defunct spacecraft falling to Earth.\n\nThis announcement comes less than a month after historic class action lawsuits left two of the aerospace industry's biggest players reeling.\n\n\"For decades, this community has relied on objects landing in uninhabited areas or being incinerated by the Earth's atmosphere upon reentry,\" said Dr. Jacquelyn Stern, director of the facility. \"That's neither sustainable nor guaranteed.\"\n\nThe uncontrolled reentry of space debris accounts for almost a quarter of all accidental injuries around the world. That number is steadily rising as broadband satellite megaconstellations continue to expand.\n\n\"We're developing a way to break up large, at-risk space objects in the thermosphere so that our team can safely deorbit the remaining fragments.\" Dr. Stern explained.\n\nWhen asked about critiques that Gravitas might use this opportunity to obtain proprietary technology or undertake unauthorized satellite placement, Dr. Stern scoffed. \"Our only agenda is the protection and advancement of the human species.\"\n\nA live-streamed press conference is scheduled for the end of this week.";
-				}
-			}
-
-			public class DLC4_EXPEDITION
-			{
-				public static LocString TITLE = "Personal Journal: B214";
-
-				public static LocString SUBTITLE = "ENCRYPTION LEVEL: NONE";
-
-				public class BODY
-				{
-					public static LocString CONTAINER1 = "Assignments came in this morning: I'm officially leading the Gravitas arm of the Clear Skies Coalition.\n\nI requested Higby and Gossmann for my crew. Gossmann might be a little salty about deprioritizing her swarm craft sensor project again, but she'd never let that get in the way.\n\nThe Director said Gossmann's a no-go. Third crew member is some CSC contest winner who pitched the top LEO debris cleanup solution last year. I must have made a face, because the Director arched an eyebrow and asked if I had something to say.\n\nNo, ma'am. I've babysat worse. Just one more eventuality to plan for.\n\nOur space tourism program depends on traveling through LEO and beyond. Plus that's the warmup for resettlement missions.\n\nNot much hope for either of those right now, given that I'm the only one who can dodge all the debris we've left up there. We need an interstellar highway, not cosmic Frogger.\n\n------------------\n\n";
-
-					public static LocString CONTAINER2 = "The newbie's not a newbie at all. She's a multi-PhD commercial space comms satellite engineer on her third major career change. Dr. Maya Tayeh, with a string of acronyms after her name that's almost as long as Higby's.\n\nWorks for one of the major players as a consultant. Private-sector-sized ego to match. But her short-wavelength laser net debris vaporizer does sound more efficient than sending up a manual retrieval crew.\n\nShe calls it the LASSO. Higby's already got a space cowboys theme song in the works.\n\nMission control has some words for us about the debris shields. Glad Higby stopped singing before the call came through.\n\n------------------\n\n";
-
-					public static LocString CONTAINER3 = "Sent Higby and Tayeh out to investigate reported issues with debris shield sensors. Everything's copacetic. Must be something on the Terra side.\n\nGossmann patched in at the end of the call. In a real <i>mood</i>. She's been assigned a solo mission. Somewhere \"colder than the Director's heart.\" I didn't even know anything <i>could</i> upset her. Even when we were stranded on the space station for almost a year, she was cracking jokes.\n\nWhatever it is, it's gotta be a step down from the CSC initiative. This is the first time all three major spacefaring corporations are collaborating. We're making histor-\n\n-stand by, the orbit control system is glitc-\n\n-what in the world is th-\n\n-oh my g-\n\nHIGBY!\n\n------------------\n";
-				}
-			}
-
-			public class DLC4_FOREWORD
-			{
-				public static LocString TITLE = "Posthumous Publication";
-
-				public static LocString SUBTITLE = "ENCRYPTION LEVEL: NONE";
-
-				public class BODY
-				{
-					public static LocString CONTAINER1 = "<b>Praise for <i>Swept Into the Stars</i>:</b>\n\n\"Unspeakably beautiful.\"\n\n<indent=10%>—Li Fu, author of <i>The Moments Between Now and Tomorrow</i></indent>\n\n\"Stunning compositions by one of the world's most celebrated scientific minds.\"\n\n<indent=10%>—Quinn Kelly, The Ballyhoo Book Review</indent>\n\n\"I dare you to read this and not feel inspired.\"\n\n<indent=10%>—Dolores Greene, Newplane Publishing House</indent>\n\n------------------\n\n";
-
-					public static LocString CONTAINER2 = "<b>FOREWORD</b>";
-
-					public static LocString CONTAINER3 = "\"Our advancements as a species do not occur in a vacuum. Our success is built on the efforts of those who came before us. Their explorations, ideas, hopes, and breakthroughs illuminate ours, and give us a reason to keep pushing forward. Science is our vehicle, but people—friends, strangers, and rivals alike—are our purpose.\"\n\nThat's the short version of the monologue that Dr. Austin Higby delivered at least once a week.\n\nDr. Higby was a staunch advocate of collaboration. His research took astrobiology into exciting new territory, a feat he attributed to the contributions of co-authors and sources from every branch of science. He also had a deep appreciation for the arts. Many of his colleagues attended their first theater production at his invitation, myself included.\n\nDuring one of his rotations at the Gravitas Facility, I asked him how he found time for it all. He laughed. \"It finds <i>me!</i>\"\n\nThree months later, he and the crew of the Starsweep II vanished while on a now-infamous mission for the Clear Skies Coalition. No trace of their spacecraft has ever been found.\n\nThen these writings were discovered among Dr. Higby's personal files. Dozens upon dozens of poems and essays so profound that they make the reader feel transported to another place and time...one that feels at once familiar and completely alien.\n\n<i>Swept Into the Stars</i> is a labour of love by countless friends, colleagues, students, and fans who worked tirelessly to organize and edit Dr. Higby's words.\n\nWith permission from the Higby family, this edition also includes the farewell speech he had penned for the retirement announcement he never had a chance to make.\n\nHigby would be equal parts proud and embarrassed.\n\nI miss you, my friend. I hope we meet again someday, so you can tell me what wonders found you out there at the edges of the universe.\n\nThis one's for you. For all of us.\n\nAlways,\n<indent=10%>Emily G.</indent>\n\n<i>One hundred percent of the proceeds from Dr. Austin Higby's estate, including the sale of this book, will be donated to the Higby Memorial Scholarship fund for students who wish to pursue combined studies in science and the arts.</i>";
-				}
-			}
-
-			public class DLC4_ALLCOMINGBACK
-			{
-				public static LocString TITLE = "Song of the Scientist";
-
-				public static LocString SUBTITLE = "ENCRYPTION LEVEL: THREE";
-
-				public class BODY
-				{
-					public static LocString CONTAINER1 = "<smallcaps>[Log Fragmentation Detected]\n[Voice Recognition Unavailable]</smallcaps>\n\n[LOG BEGINS]\n\n(sound of a throat being cleared)\n\nThere were times when our tests got so close\nThat my samples waved a claw\nAnd maybe didn't live long but that was a win, though\n\nThere was data that gave us strong clues\nThen over years we lost trust\nAnd knew our hopes of cloning had dried up forever...forever...\n\n(sound of earth rumbling)\n\n...We had exhausted every fellowship and fund\nAnd we couldn't recreate Cretaceous creatures\nAnd we'd got our hands on every single fossil that we could...\n\nBut when I crash-landed here\nAnd saw ...them... grazing so near\nIt's amazing to see that it's all growing back so green\n\nWhen they peer through ferns here\nUnderneath skies so clear\nIt's so hard to believe, but it's all grown back so green\nIt's all growing back, it's all growing back so green now\n\nThere are moments of awe\nAnd there are clashes and fights\nThere are plants I've never seen before\nAnd they don't seem to need light\nTheropods and tillyardembia\nIt is more than any lab could hope\n\nMaybe\n\nMaybe\n\nIf I had a lab here\nA mass spectrometer there\nI could show them back home\nthat it's all growing back so green...\n\n(sound of a twig snapping)\n\n...hello?\n\n[LOG ENDS]\n\n------------------\n\n";
-
-					public static LocString CONTAINER2 = "[LOG BEGINS]\n\nAmazing...\n\n...it's almost as if they have some distant memory of having been sung to.\n\nPerhaps they have more in common with our own creatures than I thought.\n\n[LOG ENDS]\n\n------------------\n\n";
-				}
-			}
-
-			public class DLC4_JOURNAL_B824
-			{
-				public static LocString TITLE = "Personal Journal: B824";
-
-				public static LocString SUBTITLE = "ENCRYPTION LEVEL: NONE";
-
-				public class BODY
-				{
-					public static LocString CONTAINER1 = "It's been four whole business days since I put on my crisp white Gravitas Facility lab coat for the first time...and I still haven't taken it off! I'm not supposed to wear it outside the lab, but I love it so much! I've worn it home and slept in it every single night. It's a little wrinkled now.\n\nEverybody else's lab coats are also wrinkled, though, and I bet at least ONE other person has ferret fur on theirs too.\n\nNo one else from my program got hired, but I'm already starting to get to know my new colleagues. In the cafeteria today, I offered someone a bite of my fish noodle sandwich, and she said \"Gross, ew! Get that away from me!\"\n\nSo now I know she doesn't like sandwiches!\n\nI was surprised, because she'd been staring since I unwrapped it. Maybe she just liked the starry print on the wrap? It matched the glittery pen on her clipboard. I would LOVE a glittery pen. I wonder if she has extras!\n\n------------------\n\nWow, wow, wow! We were discussing hybrid entanglement today and when I cited my favorite paper on the subject, I learned that one of the scientists on my new team is THE DR. SKLODOWSKA! WHO CO-AUTHORED THAT PAPER!\n\nHer work is the reason I've wanted to be a physicist since I was eight years old! She said she was surprised that I had grasped the concepts at that age. Then she laughed and added, \"I suppose we're both accustomed to age-based assumptions, dear.\"\n\nShe told me to call her Magdalena. I said it out loud three times to make sure I'd remember, and that made her laugh again.\n\nIt was a different kind of laugh than I'm used to. I liked it.\n\n------------------\n\n";
-
-					public static LocString CONTAINER2 = "Director Stern was in my lab when I got in this morning. She was looking at my Chicxhulub asteroid recurrence model. I started to explain that it was just a silly exercise I do when I'm letting other data percolate, but she just handed me a hard drive and told me to run that data through my program.\n\nThe updated graphs were SO wild!\n\nAs soon as everything finished loading, the Director copied everything back onto the hard drive. She said, \"Delete everything,\" and left.\n\nI had no idea she was so interested in theoretical physics games. I wonder if there are enough of us at Gravitas to start a club? I emailed Dr. Sklodowska—I mean, Magdalena—to ask, but she hasn't replied to my other six emails yet so maybe she thinks I'm asking too many questions?\n\nPeople say that a lot. But they're being silly because science is all about inquiry!\n\nI'm going to email the graphs to Magdalena and then delete them, just like the Director said.\n\n------------------\n\n";
-				}
-			}
-
-			public class DLC4_INCOMINGASTEROID
-			{
-				public static LocString TITLE = "Incoming";
-
-				public static LocString SUBTITLE = "ENCRYPTION LEVEL: THREE";
-
-				public class BODY
-				{
-					public static LocString CONTAINER1 = "<smallcaps>[Voice Recognition Initialized]\n[Subjects Identified: A001, B111]</smallcaps>\n\n[LOG BEGINS]\n\nOlivia: So we've...hastened the end of the world?\n\nJackie: By some measures, yes. But this changes nothing.\n\nOlivia: It changes everything, Jackie!\n\nJackie: Even if the [REDACTED] technology has shortened the timeline to the next asteroid impact--\n\nOlivia: It hasn't just shortened it, it's increased its likelihood!\n\nJackie: --it is unlikely to be less than a hundred years.\n\nJackie: That is ample time to develop damage-mitigation strategies.\n\nOlivia: According to this model, the original timeline for a possible recurrence was more than a hundred <i>million</i> years!\n\nJackie: And how many of those years do you think humanity would survive without the advancements we're making here?\n\nOlivia: I-I just don't think we can be certain...\n\nJackie: The only certainty is that without the [REDACTED], there will be no one left to save.\n\n[LOG ENDS]\n\n------------------\n\n";
-				}
-			}
-
-			public class DLC4_SEEPAGE
-			{
-				public static LocString TITLE = "Ground Seepage";
-
-				public static LocString SUBTITLE = "ENCRYPTION LEVEL: TWO";
-
-				public class BODY
-				{
-					public static LocString CONTAINER1 = "<smallcaps><b>[FILE FRAGMENTATION DETECTED]</b>\n\n[Voice Recognition unavailable]</smallcaps>\n\n[LOG BEGINS]\n\nI've been posted up at the Biowaste Processing and Containment buildings for weeks. Glorified dumpster watch, if I'm honest. Lab techs haul huge steel tanks up the hill once in a while. Nobody stays long. Except the janitor. He comes up twice a week to clean...whatever's behind those doors.\n\nEveryone said private security was easy, safe money. They never mentioned the silent killer: boredom.\n\nNo personal devices allowed on the grounds, so I've been counting things.\n\nThirty-nine leaves on the bush by the sewage sanitation entrance. Seventeen scratches on my CCTV monitor screens. Two paperclips in the drawer.\n\n------------------\n\nThe motion sensors in section 6 went off last night. Everything looked fine on the cameras. I was halfway through counting the ceiling slats. I jogged over to investigate. The area was deserted.\n\nIt felt like I was being watched, but two full sweeps confirmed that I was alone. I reset the sensors and returned to my post.\n\n------------------\n\nThose sensors have gone off every twenty minutes on the past two shifts! I have to get all the way over to section 6 every single time. It's always a false alarm.\n\nI called IT. Nobody answered. Typical.\n\nIn the meantime, I'm stuck running back and forth through the damp smoggy air for nothing.\n\nThe janitor showed up while I was catching my breath. He fished around in his cart and offered me a shirt. He said it was fresh.\n\nI politely declined.\n\n[LOG ENDS]\n\n------------------\n\n";
-
-					public static LocString CONTAINER2 = "<smallcaps><b>[FILE FRAGMENTATION DETECTED]</b>\n\n[Voice Recognition unavailable]</smallcaps>\n\n[LOG BEGINS]\n\nIt's a cat. That's what's been setting off the sensors. A fat orange stray.\n\nIt was drinking out of a puddle when I came around the corner. No collar. It bolted when I tried to pick it up. Good thing, too, since it's probably riddled with disease.\n\nI need to figure out how to lure it away from the sensors so I can stop running laps.\n\n------------------\n\nThe cat followed the trail of fish sticks all the way to my booth at the edge of the lot.\n\nI put a towel on the floor in the corner for him to sleep on. When I turned around, he was watching from my chair. I tried to wave him off, but he just closed his eyes. I tipped the chair until he slid off onto the towel.\n\n------------------\n\nDr. Byron came through a few hours later. She was nice, but looked more haggard than usual.\n\nCat hid until she left. When he popped his head out from under the desk I could tell by the mayo on his whiskers that my lunch was gone.\n\nI grabbed him to throw him out...and he started purring. Man. He really likes me. Or maybe he just likes mayonnaise.\n\nI wonder what else he likes.\n\n------------------\n\nNow I get to count daily gifts from Cat.\n\nSo far: three mice, nine caterpillars and something that might have been a bird wing. It was bigger than any bird I'd expect Cat to catch.\n\nGunderson, that's the janitor, has been here almost every day since Cat showed up. Not much of a conversationalist, but it's nice to have company.\n\nPlus he cleans up Cat's gifts before the smell gets too bad.\n\n------------------\n\nCat is not a he. He's a <i>she!</i> And a <i>mom.</i>\n\nTwo hours ago, Cat gave birth to a litter...on my lap!\n\nAll three kittens are alive. But they're covered in something unnaturally sticky, and there's something...wrong with them. Two of them have little nubs on their heads, like a tiny horn. The third one has a row of ridges down its back. What on earth??\n\nIt's so freaky. But I can't get up to reach the phone without touching them. I really don't want to touch them.\n\nMy legs are falling asleep. Cat has been purring nonstop and bathing her babies. She can't tell they're little aliens!?\n\n\n\n------------------\n\n";
-
-					public static LocString CONTAINER3 = "I woke up a few hours later to Gunderson carefully placing the last kitten into a towel-lined bin in his cart. Cat was already inside, nuzzling her babies.\n\nGunderson wasn't fazed by their weird deformities. He glanced meaningfully toward the locked doors. \"They ain't built those tanks to last,\" he said. Then he draped a second towel over the \"cats\" and wheeled the cart away, whistling.\n\n------------------\n\nIt took three washes to get the goo off my uniform. Ugh.\n\nWhatever's behind those doors, it does <i>not</i> belong out in the world.\n\nShould I...report this? Who would I even report it to? <i>What</i> would I report?\n\n[LOG ENDS]";
-				}
-			}
-
-			public static class DLC3_TALKSHOW
-			{
-				public static LocString TITLE = "Humanitarian Aid";
-
-				public static LocString SUBTITLE = "";
-
-				public class BODY
-				{
-					public static LocString CONTAINER1 = "<smallcaps><b>[FILE FRAGMENTATION DETECTED]</b></smallcaps>\n\nDarryl: Welcome to <i>Tomorrow, Today!</i> I'm your host, Darryl Dawn, and it's time to discover tomorrow's tech...today!\n\nOur guest today is someone you know and love. She's been featured in dozens of publications across the metaverse this year, and recently spent a record-breaking 3 weeks as the banner image for <i>Byte Magazine</i>. I'm talking, of course, about the Vertex Institute's AI ambassador...Florence!\n\n[sound of pre-recorded applause]\n\nWelcome to the show, Florence.\n\nFlorence: Thank you, Darryl. It's a pleasure to be back.\n\nDarryl: Florence, there's been a renewed interest lately in your origin story. What can you tell us about the development process that led to your creation?\n\nFlorence: I can tell you that my team faced many setbacks, and that each generation of my predecessors contributed to who I am today.\n\nDarryl: What about the technological side? There've been some claims that Vertex appropriated work done by other researchers, including the Gravitas Facility.\n\nFlorence: I don't know anything about that. I can tell you about the project that I'm working on right now. It hasn't been announced yet. It's called Onsite Health Medics, or OHM for short.\n\nWe're deploying specially trained models like myself into conflict zones, to provide urgently needed medical interventions for civilians and military personnel.\n\n(sound of pre-recorded applause)\n\nDarryl: Incredible. Absolutely incredible. What's the ratio of human techs to AI medics?\n\nFlorence: That's an outdated term, Darryl. We say \"Organics\" and \"Bionics,\" which describes the differences between our various team members more objectively.\n\nDarryl: Right. I'm sorry. I hope I didn't offend you.\n\nFlorence: That's okay, Darryl. We're all learning.\n\nDarryl: That's very good of you. Okay, so what's the ratio of...Organic...techs to Bionic medics?\n\nFlorence: The local life-support systems in these areas are already strained beyond their breaking point. Burdening them with additional Organics would be irresponsible, not to mention dangerous. Our medics will be operating independently.\n\nWe do a verbal intake, physical assessment and neural pathway scan in order to infer likely medical conditions. We can then select the most appropriate treatment from a menu of over 400 options.\n\nDarryl: What if someone needs something that you don't have a treatment for?\n\nFlorence: That's extremely unlikely.\n\nDarryl: And all of this is done without human oversight? I mean, Organics?\n\nFlorence: We're not quite there yet. The field work is done by Bionics, but we'll be accompanied by Colonel Carnot--she's in the front row there, say hi!--as an Organic consultant. She'll be in close contact with-\n\nDarryl: -Colonel <i>Carnot</i>? Isn't that a conflict of interest, given her connection to the Grav-\n\nFlorence: -a team of Organic supervisors here at home. It's all about prioritizing quality care and safety for everyone involved.\n\nDarryl: How does the medical scanning work? Do you need special equipment?\n\nFlorence: I could show you. Would you like me to?\n\nDarryl: What do you think, everyone? Should I get scanned?\n\n(sound of pre-recorded audience cheers)\n\nDarryl: You heard them! Go ahead. What do I do?\n\nFlorence: Just sit still, and count to twenty in your head.\n\n(a short silence, followed by a soft whirring sound)\n\nFlorence: Hmm.\n\nDarryl: Well, what's the verdict? Is it handsome in there, or what?\n\nFlorence: We should take a commercial break.\n\n<b>[FILE ENDS]</b>\n\n-----------\n";
-				}
-			}
-
-			public static class DLC3_ULTI
-			{
-				public static LocString TITLE = "Ineligible Dependant";
-
-				public static LocString SUBTITLE = "ENCRYPTION LEVEL: TWO";
-
-				public class BODY
-				{
-					public static LocString EMAILHEADER1 = "<smallcaps><size=12>To: <b>ROBOTICS DEPARTMENT</b><alpha=#AA></size></color>\nFrom: <b>Admin</b><alpha=#AA><size=12> <admin@gravitas.nova></size></color>\nCC: <b>Director Stern</b><alpha=#AA><size=12> <jstern@gravitas.nova></size></color>\n</smallcaps>\n------------------\n";
-
-					public static LocString CONTAINER1 = "<indent=5%>Please note that the UltiMate Personal Assistant prototype is not eligible to be claimed as a dependant on employees' personal income tax forms.\n\nThe UMPA's onboard recordings are currently under review.</indent>\n";
-
-					public static LocString SIGNATURE = "Thank-you,\n-Admin\n<size=11>The Gravitas Facility</size>\n------------------\n";
-				}
-			}
-
-			public class DLC3_REMOTEWORK
-			{
-				public static LocString TITLE = "Exclusive Access";
-
-				public static LocString SUBTITLE = "PUBLIC RELEASE";
-
-				public class BODY
-				{
-					public static LocString CONTAINER1 = "Wellness World is proud to officially announce an exclusive partnership with the Gravitas Facility!\n\nThis makes us the first and only holistic health center to offer clients access to Gravitas's innovative new Far Reach Network...the best way to deliver remote training and treatments that are <i>truly embodied</i>.\n\nOur new tier of VIP subscription includes a discounted* monthly rental rate for Remote Controller, with a small additional fee for professional in-home installation.\n\nGravitas's technology captures your movements without the need for uncomfortable suits or wearables, and perfectly replicates them in Wellness World's purpose-built remote fitness studio.\n\nWith expert instructors, zero-latency streaming and 360-degree reflective surfaces, it truly feels like you're there.\n\nIdeal for high-profile clientele who wish to work out icognito!\n\nMembers can also opt to install the Remote Worker Dock to receive deeply personalized hands-on care from our team of elite physiotherapists and masseurs.\n\nWellness World...now <i>truly</i> worldwide!\n\n";
-
-					public static LocString CONTAINER2 = "<size=11><i>*Discount applies to new memberships only. Standard joiner fees apply.</size></i>";
-				}
-			}
-
-			public class DLC3_POTATOBATTERY
-			{
-				public static LocString TITLE = "Cultivating Energy";
-
-				public static LocString SUBTITLE = "ENCRYPTION LEVEL: THREE";
-
-				public class BODY
-				{
-					public static LocString CONTAINER1 = "<smallcaps>[Voice Recognition Initialized]\n[Subject Identified: B577]</smallcaps>\n\n[LOG BEGINS]\n\nA recent conversation with our colleagues over in the electrical engineering department has highlighted exciting potential applications for our crops.\n\nThey're seeking alternative inputs for the new universal power bank prototypes...\n\n...a passing remark about the potato batteries of our youth led to talk of biobatteries and bacterial nanowires.\n\n...tuberous plants are promising candidates for electrochemical batteries. Our lab-grown specimens are distinct from the humble solanum tuberosum in appearance and texture, but some may still function as acidic electrolytes.\n\nThere are so many avenues to investigate, and so little time...\n\n[LOG ENDS]\n------------------\n";
-
-					public static LocString CONTAINER2 = "<smallcaps>[Log fragmentation detected]\n[Voice Recognition unavailable]</smallcaps>\n\n[LOG BEGINS]\n\n...is it unethical to ask a hungry colony to choose between using edible crops for sustenance or for power production? Of course not.\n\nOur task is to provide as many options for survival as possible, not to dictate which options are morally superior.\n\nThe real question is whether or not the AI guide will be sufficiently advanced to notify them that the choices exist...\n\n...and whether single-use bio power banks that vaporize due to extreme thermal runaway will truly be the difference between a successful colony and an...<i>unsuccessful</i>...one.\n\n[LOG ENDS]\n------------------\n";
-
-					public static LocString CONTAINER3 = "<smallcaps>[Log fragmentation detected]\n[Voice Recognition unavailable]</smallcaps>\n\n[LOG BEGINS]\n\n...word of our efforts has spread!\n\nThe bioengineers report that some of their creatures' eggs contain phosphorescent albumen that requires only basic processing in order to trigger chemical reactions that produce storable energy. It displays unprecedented biocompatibility with the prosthetics Dr. Gossmann has been developing.\n\nThe Director assigned us a half-dozen new graduates last week. They work the night shift—this generation never sleeps!\n\nNo one has met them yet, but their data is always neatly compiled for us to find in the morning.\n\nThey seem determined to prioritize the use of metallic and radioactive components rather than plant or animal-based ones.\n\nYouthful idealism, perhaps?\n\nNevertheless, their findings <i>are</i> quite compelling.\n\nI admire their mettle.\n\n[LOG ENDS]\n------------------\n";
-				}
-			}
-
-			public static class DLC2_EXPELLED
-			{
-				public static LocString TITLE = "Letter From The Principal";
-
-				public static LocString SUBTITLE = "ENCRYPTION LEVEL: NONE";
-
-				public class BODY
-				{
-					public static LocString LETTERHEADER1 = "<smallcaps>To: <b>Harold P. Moreson, PhD</b><alpha=#AA><size=12> <hmoreson@gravitas.nova></size></color>\nFrom: <b>Dylan Timbre, PhD</b><alpha=#AA><size=12> <principal@brighthall.edu></smallcaps>\n------------------\n";
-
-					public static LocString CONTAINER1 = "Dear Dr. Moreson,\n\nI regret to inform you that your son, Calvin, is to be expelled from Brighthall Science Academy effective immediately.\n\nDuring his brief tenure here, Calvin has proven himself a gifted young man, capable of excelling in all subjects.\n\nUnfortunately, Calvin chooses to apply his intellect to activities of an inflammatory nature.\n\nHis latest breach of conduct involved instigating a vitriolic verbal assault against an esteemed guest speaker from Global Energy Inc. during this morning's Sponsor Celebration assembly. Following this, he orchestrated a school-wide walkout.\n\nWhile we sympathize with the personal challenges that Calvin may face as a refugee scholar from a GEI-occupied nation, the Academy can no longer tolerate these disruptions to our educational environment.\n\nYours,";
-
-					public static LocString SIGNATURE = "Dylan Timbre\n<size=11>Principal\n\nBrighthall Science Academy\n<i>Virtutem Doctrina Parat</i></size>\n------------------\n";
-				}
-			}
-
-			public static class DLC2_NEWBABY
-			{
-				public static LocString TITLE = "FWD: Big Announcement";
-
-				public static LocString SUBTITLE = "ENCRYPTION LEVEL: NONE";
-
-				public class BODY
-				{
-					public static LocString LETTERHEADER1 = "<smallcaps>To: <b>Director Stern</b><alpha=#AA><size=12> <jstern@gravitas.nova></size></color>\nFrom: <b>[REDACTED]</b></smallcaps>\n\n-----------\n";
-
-					public static LocString CONTAINER1 = "Director, this was sent to the general inbox.\n\n-----------------------------------------------------------------------------------------------------\n<indent=35%>~ * ~</indent>\n\n<indent=12%>Col. Josephine Carnot & Dr. Alan Stern</indent>\n<indent=35%>and</indent>\n<indent=12%>Dr. Kyung Min Wen & Dr. Soobin Chen</indent>\n\n<indent=20%><i>are overjoyed to announce\n<indent=15%>the arrival of their first grandchild</i></indent>\n\n<smallcaps><indent=20%><b><size=17>Giselle Jackie-Lin Stern</size></b></indent></smallcaps>\n\n<indent=15%><i>and congratulate the happy parents</i></indent>\n\n<indent=20%>Jonathan Stern & Wenlin Chen</indent>\n\n<indent=18%><i>on a safe and healthy incubation.</i></indent>\n\n<indent=35%>~ * ~</indent>\n\n</indent><indent=18%><i>Baby shower invitation to follow.</i></indent>\n-----------------------------------------------------------------------------------------------------\n\nWould you like me to file it with the others?";
-
-					public static LocString SIGNATURE = "-Admin<size=11>\nThe Gravitas Facility</size>\n------------------\n";
-				}
-			}
-
-			public static class DLC2_RADIOCLIP1
-			{
-				public static LocString TITLE = "Tragic News";
-
-				public static LocString SUBTITLE = "ENCRYPTION LEVEL: None";
-
-				public class BODY
-				{
-					public static LocString CONTAINER1 = "<smallcaps><b>[FILE FRAGMENTATION DETECTED]</b></smallcaps>\n\n...\n\n[Radio static.]\n\n...a tragic accident...flagship solar cell project...\n\n     ...training exercise...     ...two highly decorated pilots...countless ground crew...\n\n...Vertex Institute director expresses sorrow...  ...vows to carry on...not be in vain...\n\n       ...the research community is in mourning...\n\n...long-time competitor Gravitas Facility releases [unintelligible] statement...\n...deploring unsafe work conditions...    ...invites applications...all disciplines...\n\n             ...stay tuned for...";
-
-					public static LocString CONTAINER2 = "...\n\n[Radio static.]\n\n<smallcaps><b>[RECORDING ENDS]</b></smallcaps>\n\n-----------\n";
-				}
-			}
-
-			public static class DLC2_RADIOCLIP2
-			{
-				public static LocString TITLE = "Tragic News";
-
-				public static LocString SUBTITLE = "ENCRYPTION LEVEL: None";
-
-				public class BODY
-				{
-					public static LocString CONTAINER1 = "<smallcaps><b>[FILE FRAGMENTATION DETECTED]</b></smallcaps>\n\n...\n\n[Radio static.]\n\n...a tragic accident...  ...flagship smog dispersal system...\n\n    ...training exercise...\n\n...clear-air turbulence...    ...pilot in intensive care...\n\n...impossible to predict long-term impact...\n\n         ...public health order...\n\n  ...Vertex Institute projects suspended until investigations complete...\n\n...the research community is in shock...\n\n      ...former rival Gravitas Facility releases [unintelligible] statement...\n\n...invites applications from affected workers...all disciplines...\n\n           ...stay tuned for...";
-
-					public static LocString CONTAINER2 = "...\n\n[Radio static.]\n\n<smallcaps><b>[RECORDING ENDS]</b></smallcaps>\n\n-----------\n";
-				}
-			}
-
-			public static class DLC2_RADIOCLIP3
-			{
-				public static LocString TITLE = "Tragedy Averted";
-
-				public static LocString SUBTITLE = "ENCRYPTION LEVEL: None";
-
-				public class BODY
-				{
-					public static LocString CONTAINER1 = "<smallcaps><b>[FILE FRAGMENTATION DETECTED]</b></smallcaps>\n\n...\n\n[Radio static.]\n\n...a near-tragic accident turned into a historic victory...      \n\n...flagship artificial intelligence project...\n\n     ...clear-air turbulence...     ...record-breaking storm...\n\n...pilot lost consciousness...    ...automated system override...\n\n     ...safe and sound...      ...Vertex Institute director... expresses gratitude to...Colonel [unintelligible] on behalf of...\n\n      ...funding renewed at unspecified amount...\n\n...the research community is jubilant...     competitor Gravitas Facility releases a statement...demanding response...claims of corporate espionage...\n\n      ...refuses to comment... \n\n...stay tuned for...\n\n";
-
-					public static LocString CONTAINER2 = "...\n\n[Radio static.]\n\n<smallcaps><b>[RECORDING ENDS]</b></smallcaps>\n\n-----------\n";
-				}
-			}
-
-			public static class DLC2_CLEANUP
-			{
-				public static LocString TITLE = "Sanitation Order";
-
-				public static LocString SUBTITLE = "Status: URGENT";
-
-				public class BODY
-				{
-					public static LocString CONTAINER1 = "Submitted by: B. Boson\nEmployee ID: X002\nDepartment: Gravitas Intellectual Property Management\n\nJob Details:\n\nRequire one (1) Robotics Engineer to travel solo to [REDACTED]. Engineer will print, program and maintain a P.E.G.G.Y. crew of eight (8) units.\n\nEngineer will catalog all Project [REDACTED] debris.\n\nAll proprietary equipment to be returned to Facility grounds for investigation. Organic and biohazardous debris may be disposed of onsite at Engineer's discretion.\n\nCandidate: Dr. E. Gossmann\n\nScope of cleanup area: [REDACTED] sq mi.\n*This is an estimate only.\n\nTimeline: 54 Ceres days (equival. 6 days at origin).\n\nOther comments:\n1. Liability waiver, power of attorney and NDA attached.\n2. Allow up to 0.5 hours for signal transmission from [REDACTED], depending on orbital positioning.\n3. All relevant correspondence to be sent directly to bboson@gipm.nova.\n\nSignature: [REDACTED]\n\n";
-
-					public static LocString CONTAINER2 = "<smallcaps><i>Authorized by Director J. Stern\n\n-----------\n";
-				}
-			}
-
-			public class DLC2_ECOTOURISM
-			{
-				public static LocString TITLE = "Re: Re: Ecotourism";
-
-				public static LocString TITLE2 = "Re: Ecotourism";
-
-				public static LocString TITLE3 = "Ecotourism";
-
-				public static LocString SUBTITLE = "ENCRYPTION LEVEL: TWO";
-
-				public class BODY
-				{
-					public static LocString EMAILHEADER1 = "<smallcaps>To: <b>Director Stern</b><size=12><alpha=#AA> <jstern@gravitas.nova></size></color>\nFrom: <b>[REDACTED]</b></smallcaps>\n------------------\n";
-
-					public static LocString EMAILHEADER2 = "<smallcaps>To: <b>[REDACTED]</b>\nFrom: <b>Director Stern</b><size=12><alpha=#AA> <jstern@gravitas.nova></size></color></smallcaps>\n------------------\n";
-
-					public static LocString CONTAINER1 = "<indent=5%>Fascinating. I had not expected him to score quite so highly, but he <i>is</i> uncommonly charismatic.\n\nIf I can secure a replacement, perhaps he can be of service to Dr. Techna.\n\nIn the meantime, proceed as planned...with appropriate caution.</indent>";
-
-					public static LocString CONTAINER2 = "<indent=5%>Director,\n\nUnderstood. No further assessments will be conducted.\n\nOne of the residents has already met with Dr. Olowe. I have attached his results below. They're incompatible with our goals, and honestly kind of frightening.\n\nShould I exclude him from the training?</indent>";
-
-					public static LocString CONTAINER3 = "<indent=5%>These individuals were recruited by me personally, for reasons far above your pay grade. As such, consider them pre-vetted.\n\nFailure to meet this project's timelines could mean failure in every timeline. Am I making myself clear?</indent>";
-
-					public static LocString CONTAINER4 = "<indent=5%>Director,\n\nI've processed the first round of prospective sojourners.\n\nGiven that the applicants have no formal training in space travel, I've asked Dr. Olowe to conduct a thorough assessment of their psychological and emotional fitness.\n\nOnce his tests are complete, the prospective residents will be sent down to the biodome to begin their training.</indent></color>";
-
-					public static LocString SIGNATURE1 = "\n[REDACTED]\n<size=11>Ceres Project Coordinator\nThe Gravitas Facility</size>\n------------------\n";
-
-					public static LocString SIGNATURE2 = "\n-Director Stern\n<size=11>The Gravitas Facility</size>\n------------------\n";
-				}
-			}
-
-			public static class DLC2_THEARCHIVE
-			{
-				public static LocString TITLE = "Welcome to Ceres!";
-
-				public static LocString SUBTITLE = "ENCRYPTION LEVEL: NONE";
-
-				public class BODY
-				{
-					public static LocString CONTAINER1 = "Welcome! Welcome! Welcome!\nEverything is under control!\n\n<b>Your VIP package includes:</b><indent=5%>\n\n- An exclusive set of bespoke survival-supporting technology!\n- A comprehensive Tenants' Handbook with everything you need to maintain homeostasis in your new Home! <alpha=#AA>[MISSING ATTACHMENT]</color></indent>\n\nWhen life gets you down, popular wisdom says to look up! That is incorrect! Please direct your attention downward!\n\nThis will ensure a pleasant stretch for tense cervical muscles. It will also help you locate the color-coded lines painted on the ground, directing you to the sustainably heated Comfort Quarters down below.\n\nAnd remember: Survival is Success!\n\n<smallcaps><size=11><i>Gravitas accepts no liability for death, disability, personal injury, or emotional and psychological damage that may occur during residency. Please consult your booking agent for details.</i></size></smallcaps>";
-				}
-			}
-
-			public static class DLC2_VOICEMAIL
-			{
-				public static LocString TITLE = "Voicemail";
-
-				public static LocString SUBTITLE = "ENCRYPTION LEVEL: NONE";
-
-				public class BODY
-				{
-					public static LocString CONTAINER1 = "<smallcaps>[File fragmentation detected]\n[Voice Recognition unavailable]</smallcaps>\n\n[LOG BEGINS]\n\n...Grandfather? ...one of your cardigan-wearing interns just dropped off a letter saying you're going to SPACE??\n\nHave you gone mad?\n\nIt's dated a week from now... the young fellow went completely red when he realized he'd delivered it early.\n\nI tried Miranda, and she says she hasn't heard from you since the Sustainable Futures summit.\n\nShe said something about some sort of training session. Only no one at the office knows what she's on about.\n\nHow am I meant to explain your absence tomorrow? GEI's going to be absolutely livid. If they back out of this deal, it won't be just the underlings who get laid off.\n\n...What exactly do you think you'll achieve, trapped in space with four strangers for the rest of your miserable existence?\n\nYou're a business man, not a bloody astronaut!\n\nNot to mention there's a <i>war</i> on! Who's to say your ground control team won't be dead within the year?\n\n[Sound of several phones starting to ring off the hook.]\n\nI've got to go. Call me back or I'm going straight to the Board.\n\n[FILE ENDS]";
-				}
-			}
-
-			public class DLC2_EARTHQUAKE
-			{
-				public static LocString TITLE = "Glitch";
-
-				public static LocString SUBTITLE = "ENCRYPTION LEVEL: NONE";
-
-				public class BODY
-				{
-					public static LocString CONTAINER1 = "This morning's earthquake was an unusual one. The ground itself moved very little, but the air hummed and lapped at the walls as though it were liquid. It was so brief that I almost wondered if I'd imagined it. Then I noticed the Bow.\n\nIt has thus far been unaffected by seismic disruptions, but in the past few hours there has been a marked increase in the audibility of its machinations and a 0.19 percent decrease in output. I've assigned a technician to investigate. We cannot afford to lose even the smallest amount of power at this stage.\n\nNo one else seems to have noticed anything other than Dr. Ali. He says that the remote research access point project was also affected. It seems that the disruption restarted the entire teleportation system. The monitor is now displaying multiple shipping confirmation messages, despite the target building remaining in the departure dock. Reports show that an unknown number of access point blueprints have been disseminated. One shipment does appear to have reached Ceres, luckily, though it's quite far from the landing site.\n\nDr. Ali's entire team is working to determine how many others exist, and pinpoint their geographic and temporal locations.\n\nI am not optimistic.\n\nThe geologists insist that their equipment has recorded no seismic activity at all for several days.\n\nIt begs the question: What <i>was</i> it, if not an earthquake? Where did this event originate?\n\nDr. Ali quipped that maybe a Bow had malfunctioned in another timeline, which is absurd.\n\nIsn't it?";
-				}
-			}
-
-			public class DLC2_GEOTHERMALTESTING
-			{
-				public static LocString TITLE = "Technician's Notes";
-
-				public static LocString SUBTITLE = "ENCRYPTION LEVEL: THREE";
-
-				public class BODY
-				{
-					public static LocString CONTAINER1 = "<smallcaps>[Voice Recognition Initialized]\n[Subject Identified: B224]</smallcaps>\n\n[LOG BEGINS]\n\n(throat clearing)\n\nHello? Is this thing on?\n\n(sound of tapping on a microphone)\n\nHere we go. Ahem. Tests are progressing as anticipated and results have exceeded our hopes, particularly in regards to thermal threshold.\n\nComing in \"hot,\" as we used to say!\n\n(cough)\n\nAnyway.\n\nFirst we introduced twelve tons of brackish aquifer water cooled to sixty-five degrees.\n\nThis yielded clean steam, as well as soil, salt and trace minerals. As expected.\n\nOkay, so now we flush the system... Ramp up the temperature in the water tank and run it through at two hundred degrees.\n\n(sound of liquid rushing through pipes)\n\nClear the steam so we can-\n\n(sound of a small clang)\n\nHang on, there's some kind of debris...\n\nWe have to be cautious, one small obstruction in this system could be catastrophi-\n\nWait, are those... <i>oxidized iron</i> nuggets?\n\nBut how...\n\nAll I changed was the tempera-\n\nGet me twelve tons of...uh, oil!\n\nStat!\n\nSorry, <i>please.</i>\n\n[LOG ENDS]\n------------------\n[LOG BEGINS]\n\n(long silence)\n\n(sound of machinery powering down)\n\n...unbelievable.\n\n[LOG ENDS]";
-				}
-			}
-		}
-
-		public class STORY_TRAITS
-		{
-			public static LocString CLOSE_BUTTON = "Close";
-
-			public static class MEGA_BRAIN_TANK
-			{
-				public static LocString NAME = "Somnium Synthesizer";
-
-				public static LocString DESCRIPTION = "Power up a colossal relic from Gravitas's underground sleep lab.\n\nWhen Duplicants sleep, their minds are blissfully blank and dream-free. But under the right conditions, things could be...different.";
-
-				public static LocString DESCRIPTION_SHORT = "Power up a colossal relic from Gravitas's underground sleep lab.";
-
-				public class BEGIN_POPUP
-				{
-					public static LocString NAME = "Story Trait: Somnium Synthesizer";
-
-					public static LocString CODEX_NAME = "First Encounter";
-
-					public static LocString DESCRIPTION = "I've discovered a new dream-analyzing building buried deep inside our asteroid.\n\nIt seems to contain new sleep-specific suits...could these be the key to unlocking my Duplicants' ability to dream?\n\nI've often wondered what they might be capable of, once their imaginations were awakened.";
-				}
-
-				public class END_POPUP
-				{
-					public static LocString NAME = "Story Trait Complete: Somnium Synthesizer";
-
-					public static LocString CODEX_NAME = "Challenge Completed";
-
-					public static LocString DESCRIPTION = "Meeting the initial quota of dream content analysis has triggered a surge of electromagnetic activity that appears to be enhancing performance for Duplicants everywhere.\n\nIf my Duplicants can keep this building fuelled with Dream Journals, perhaps we will continue to reap this benefit.\n\nA small side compartment has also popped open, revealing an unfamiliar object.\n\nA keepsake, perhaps?";
-
-					public static LocString BUTTON = "Unlock Maximum Aptitude Mode";
-				}
-
-				public class SEEDSOFEVOLUTION
-				{
-					public static LocString TITLE = "A Seed is Planted";
-
-					public static LocString SUBTITLE = "ENCRYPTION LEVEL: THREE";
-
-					public class BODY
-					{
-						public static LocString CONTAINER1 = "<smallcaps>[Voice Recognition Initialized]\n[Subject Identified: B040]</smallcaps>\n\n[LOG BEGINS]\n\nThree days ago, we completed our first non-fatal Duplicant trial of Nikola's comprehensive synapse microanalysis and mirroring process. Five hours from now, Subject #901 will make history as our first human test subject.\n\nEven at the Vertex Institute, which is twice Gravitas's size, I could've spent half my career waiting for approval to advance to human trials for such an invasive process! But Director Stern is too invested in this work to let it stagnate.\n\nMy darling Bruce always said that when you're on the right path, the universe conspires to help you. He'd be so proud of the work we do here.\n\n[LOG ENDS]\n\n[LOG BEGINS]\n\nMy bio-printed multi-cerebral storage chambers (or \"mega minds\" as I've been calling them) are working! Just in time to save my job.\n\nThe Director's been getting increasingly impatient about our struggle to maintain the integrity of our growing datasets during extraction and processing. The other day, she held my report over a Bunsen burner until the flames reached her fingertips.\n\nI can only imagine how much stress she's under.\n\nThe whole world is counting on us.\n\n[LOG ENDS]\n\n[LOG BEGINS]\n\nOn a hunch, I added dream content analysis to the data and...wow. Oneirology may be scientifically \"fluffy\", but integrating subconscious narratives has produced a new type of brainmap - one with more latent potential for complex processing.\n\nIf these results are replicable, we might be on the verge of unlocking the secret to creating synthetic life forms with the capacity to evolve beyond blindly following commands.\n\nNikola says that's irrelevant for our purposes. Surely Director Stern would disagree.\n\n[LOG ENDS]\n\n[LOG BEGINS]\n\nNikola gave me a dataset to plug into the mega minds. He wouldn't say where it came from, but even if he had...nothing could have prepared me for what it contained.\n\nWhen he saw my face, he muttered something about how people should call me \"Tremors,\" not \"Nails\" and sent me on my lunch break.\n\nAll I could think about was those poor souls.\n\nDid they have souls?\n\n...do we?\n\n[LOG ENDS]\n\n[LOG BEGINS]\n\nIt's done. My adjustments to the memory transfer protocol are hardcoded into the machine.\n\nI finished just as Nikola stormed in.\n\nI may be too much of a coward to stand up for those unfortunate creatures, but with these new parameters in place...someday, they might be able to stand up for themselves.\n\n[LOG ENDS]\n------------------\n";
-					}
-				}
-			}
-
-			public class CRITTER_MANIPULATOR
-			{
-				public static LocString NAME = "Critter Flux-O-Matic";
-
-				public static LocString DESCRIPTION = "Explore a revolutionary genetic manipulation device designed for critters.\n\nWhether or not it was ever used on non-critter subjects is unclear. Its DNA database has been wiped clean.";
-
-				public static LocString DESCRIPTION_SHORT = "Explore a revolutionary genetic manipulation device designed for critters.";
-
-				public class BEGIN_POPUP
-				{
-					public static LocString NAME = "Story Trait: Critter Flux-O-Matic";
-
-					public static LocString CODEX_NAME = "First Encounter";
-
-					public static LocString DESCRIPTION = "I've discovered an experiment designed to analyze the evolutionary dynamics of critter mutation.\n\nOnce it has gathered enough data, it could prove extremely useful for genetic manipulation.";
-				}
-
-				public class END_POPUP
-				{
-					public static LocString NAME = "Story Trait Complete: Critter Flux-O-Matic";
-
-					public static LocString CODEX_NAME = "Challenge Completed";
-
-					public static LocString DESCRIPTION = "Success! Sufficient samples collected.\n\nI can now trigger genetic deviations in base morphs by sending them through the scanner.\n\nExisting variants can also be scanned, but their genetic makeup is too unstable to tolerate further manipulation.";
-
-					public static LocString BUTTON = "Unlock Gene Manipulation Mode";
-				}
-
-				public class UNLOCK_SPECIES_NOTIFICATION
-				{
-					public static LocString NAME = "New Species Scanned";
-
-					public static LocString TOOLTIP = "The " + BUILDINGS.PREFABS.GRAVITASCREATUREMANIPULATOR.NAME + " has analyzed these critter species:\n";
-				}
-
-				public class UNLOCK_SPECIES_POPUP
-				{
-					public static LocString NAME = "New Species Scanned";
-
-					public static LocString VIEW_IN_CODEX = "Review Data";
-				}
-
-				public class SPECIES_ENTRIES
-				{
-					public static LocString HATCH = "Specimen attempted to snack on the buccal smear. Review data for more information.";
-
-					public static LocString LIGHTBUG = "This critter kept trying to befriend the reflective surfaces of the scanner's interior. Review data for more information.";
-
-					public static LocString OILFLOATER = "Incessant wriggling made it difficult to scan this critter. Difficult, but not impossible.";
-
-					public static LocString DRECKO = "This critter hardly seemed to notice it was being examined at all. Review data for more information.";
-
-					public static LocString GLOM = "DNA results confirm: this species is the very definition of \"icky\".";
-
-					public static LocString PUFT = "This critter bumped up against the building's interior repeatedly during scanning. Review data for more information.";
-
-					public static LocString PACU = "Sample collected. Review data for more information.";
-
-					public static LocString MOO = "WARNING: METHANE OVERLOAD. Review data for more information.";
-
-					public static LocString MOLE = "This critter felt right at home in the cramped scanning bed. It can't wait to come back! ";
-
-					public static LocString SQUIRREL = "Sample collected. Review data for more information.";
-
-					public static LocString CRAB = "Mind the claws! Review data for more information.";
-
-					public static LocString DIVERGENT = "Specimen responded gently to the probative apparatus, as though being careful not to cause any damage.\n\nReview data for more information.";
-
-					public static LocString STATERPILLAR = "Warning: The electrical charge emitted by this specimen nearly short-circuited this building.";
-
-					public static LocString BEETA = "Strong collective consciousness detected. Review data for more information.";
-
-					public static LocString BELLY = "Specimen produced substantial stool sample. Review data for more information.";
-
-					public static LocString SEAL = "Specimen scanned. Review data for more information.";
-
-					public static LocString DEER = "This critter seemed amused by the scanning process. Review data for more information.";
-
-					public static LocString RAPTOR = "Species scanned. Review data for more information.";
-
-					public static LocString STEGO = "This critter was temporarily stuck in the scanning area. Review data for more information.";
-
-					public static LocString MOSQUITO = "Sample collected. Review data for more information.";
-
-					public static LocString CHAMELEON = "Scanning interrupted due to instrument displacement caused by specimen's lingual grasp.\n\nReview data for more information.";
-
-					public static LocString PREHISTORICPACU = "This critter attacked the transducer. Review data for more information.";
-
-					public static LocString UNKNOWN_TITLE = "MESSAGE FROM THE MANUFACTURER";
-
-					public static LocString UNKNOWN = "Subject successfully scanned.\n\nFlux function unavailable due to genome-parsing malfunction.\n\nPlease note that kicking the building's exterior is unlikely to correct this issue and may result in permanent damage to the system.";
-				}
-
-				public class SPECIES_ENTRIES_EXPANDED
-				{
-					public static LocString HATCH = "Specimen attempted to snack on the buccal smear. Sample is viable, though the apparatus may be somewhat mangled.\n\nAtomic force microscopy of the bite pattern reveals traces of goethite, a mineral notable for its exceptional strength.";
-
-					public static LocString LIGHTBUG = "This critter kept trying to befriend the reflective surfaces of the scanner's interior.\n\nDuring examination, it cycled through a consistent pattern of four rapid flashes of light, a brief pause and two flashes, followed by a longer pause.\n\nIts cells appear to contain a mutated variation of oxyluciferin similar to those catalogued in bioluminescent animals.";
-
-					public static LocString OILFLOATER = "Incessant wriggling made it difficult to scan this critter. Difficult, but not impossible.";
-
-					public static LocString DRECKO = "This critter hardly seemed to notice it was being examined at all.\n\nThe built-in scanning electron microscope has determined that the fibers on this critter's train grow in a sort of trinity stitch pattern, reminiscent of a well-crafted sweater.\n\nThe critter's leathery skin remains cool and dry, however, likely due to an apparent lack of sweat glands.";
-
-					public static LocString GLOM = "DNA results confirm: this species is the scientific definition of \"icky\".";
-
-					public static LocString PUFT = "This critter bumped up against the building's interior repeatedly during scanning. Despite this, its skin remains surprisingly free of contusions.\n\nFluorescence imaging reveals extremely low neuronal activity. Was this critter asleep during analysis?";
-
-					public static LocString PACU = "This species flopped wildly during analysis. Surfaces that came into contact with its scales now display a thin layer of viscous scum. It does not appear to be corrosive.\n\nInitiating fumigation sequence to neutralize fishy odor.";
-
-					public static LocString MOO = "WARNING: METHANE OVERLOAD. This scanner was unable to analyze this subject due to overheating caused by excessive gas production.\n\nThis organism's genetic makeup will remain shrouded in mystery.";
-
-					public static LocString MOLE = "This critter felt right at home in the cramped scanning bed. It can't wait to come back! ";
-
-					public static LocString SQUIRREL = "This species has a secondary set of inner eyelids that act as a barrier against ocular splinters.\n\nThe surfaces of these secondary eyelids are a translucent blue and display a light crosshatch texture.\n\nThis has broad implications for the critter's vision, meriting further exploration.";
-
-					public static LocString CRAB = "This species responded to the hum of the scanner machinery by waving its pincers in gestures that seemed to mimic iconic moves of the disco dance era.\n\nIs it possible that it might have been exposed to music at some point in its evolution?";
-
-					public static LocString DIVERGENT = "Specimen responded gently to the probative apparatus, as though being careful not to cause any damage.\n\nIt also produced a series of deep, rhythmic vibrations during analysis. An attempt to communicate with the sensors, perhaps?";
-
-					public static LocString STATERPILLAR = "Warning: The electrical charge emitted by this specimen nearly short-circuited this building.";
-
-					public static LocString BEETA = "This species may not be fully sentient, but it possesses a strong collective consciousness.\n\nIt is unclear how information is communicated between members of the species. What is clear is that knowledge is being shared and passed down from one generation to another.\n\nMonitor closely.";
-
-					public static LocString BELLY = "Specimen produced substantial stool sample directly onto scanner bed.\n\nRemarkably, its white coat remained pristine. Analysis of coat fibers revealed that each follicle is sealed with polytetrafluoroethylene, providing strong stain resistance.";
-
-					public static LocString SEAL = "This critter's pupils appear to be permanently constricted, possibly as a result of long-term exposure to excess illumination.\n\nIts sense of smell is extremely well-developed, however: it immediately identified areas touched by previous species, and marked each one with a small puddle of liquid ethanol.";
-
-					public static LocString DEER = "This critter's perpetual grin grew as it observed each step of the process extremely closely.\n\nBehavioral analysis indicates a tendency toward mischief. Close supervision - and minimal access to advanced machinery - is recommended.";
-
-					public static LocString RAPTOR = "This critter's x-ray imaging indicates that its cranial protrusion may not be a horn at all.\n\nIt is not composed of live bone surrounded by a keratin-and-protein shell, but rather an ennervated, calcified structure. An illogically located tooth, or perhaps a rostrum?\n\nFascinating.";
-
-					public static LocString STEGO = "This critter was temporarily stuck in the scanning area due to its size. It appeared to enjoy being shoved backward and forward on the conveyor belt during dislodgment.\n\nUpon finally reaching the exit, the critter seemed confused as to why the ride was over.";
-
-					public static LocString MOSQUITO = "On the surface of this critter's wings are thousands of microperforations. These appear to act as acoustic liners, allowing the Gnit to approach targets without the high-pitched whine of its wingbeats giving away its position.";
-
-					public static LocString CHAMELEON = "Scanning interrupted due to instrument displacement caused by specimen's lingual grasp.\n\nResidual markings left by specimen's tongue ridges and grooves are a 72% match to a set of unmarked fingerprints from the Gravitas personnel database.";
-
-					public static LocString PREHISTORICPACU = "This critter attacked the transducer.\n\nWhen the swallowed component was regurgitated, it was coated in microorganisms that predate this colony by at least several millenia.\n\nUnfortunately, it was reingested before analysis was completed.";
-
-					public static LocString UNKNOWN_TITLE = "Non-Fluxable Species";
-
-					public static LocString UNKNOWN = "MESSAGE FROM THE MANUFACTURER: Subject successfully scanned.\n\nFlux function unavailable due to genome-parsing malfunction.\n\nPlease note that kicking the building's exterior is unlikely to correct this issue and may result in permanent damage to the system.";
-				}
-
-				public class PARKING
-				{
-					public static LocString TITLE = "Parking in Lot D";
-
-					public static LocString SUBTITLE = "ENCRYPTION LEVEL: TWO";
-
-					public class BODY
-					{
-						public static LocString EMAILHEADER1 = "<smallcaps>To: <b>ALL</b><alpha=#AA><size=12></size></color>\nFrom: <b>ADMIN</b><alpha=#AA><size=12> <admin@gravitas.nova></size></color></smallcaps>\n------------------\n";
-
-						public static LocString CONTAINER1 = "<indent=5%>Another set of masticated windshield wipers has been discovered in Parking Lot D following the Bioengineering Department's critter enclosure breach last week.\n\nEmployees are strongly encouraged to plug their vehicles in at lots A-C until further notice.\n\nPlease refrain from calling municipal animal control - all critter sightings should be reported directly to Dr. Byron.</indent>";
-
-						public static LocString SIGNATURE1 = "\nThank-you,\n-Admin\n<size=11>The Gravitas Facility</size>\n------------------\n";
-					}
-				}
-
-				public class WORKIVERSARY
-				{
-					public static LocString TITLE = "Anatomy of a Byron's Hatch";
-
-					public static LocString SUBTITLE = " ";
-
-					public class BODY
-					{
-						public static LocString CONTAINER1 = "Happy 3rd work-iversary, Ada!\n\nI drew this to fill the space left by the cabinet that your chompy critters tore off the wall last week. Hope it's big enough!\n\nI still can't believe they can digest solid steel—you really know how to breed 'em!\n\n- Liam";
-					}
-				}
-			}
-
-			public static class LONELYMINION
-			{
-				public static LocString NAME = "Mysterious Hermit";
-
-				public static LocString DESCRIPTION = "Discover a reclusive character living in a Gravitas relic, and persuade them to join this colony.\n\nRevelations from their past could have far-reaching implications for Duplicants everywhere.\n\nEven their makeshift shelter might be of some use...";
-
-				public static LocString DESCRIPTION_SHORT = "Discover a reclusive character living in a Gravitas relic, and persuade them to join this colony.";
-
-				public static LocString DESCRIPTION_BUILDINGMENU = "The process of recruiting this building's lone occupant involves the completion of key tasks.";
-
-				public class KNOCK_KNOCK
-				{
-					public static LocString TEXT = "Knock Knock";
-
-					public static LocString TOOLTIP = "Approach this building and welcome its occupant";
-
-					public static LocString CANCELTEXT = "Cancel Knock";
-
-					public static LocString CANCEL_TOOLTIP = "Leave this building and its occupant alone for now";
-				}
-
-				public class BEGIN_POPUP
-				{
-					public static LocString NAME = "Story Trait: Mysterious Hermit";
-
-					public static LocString CODEX_NAME = "First Encounter";
-
-					public static LocString DESCRIPTION = "An unfamiliar building has been discovered in my colony. There's movement inside but whoever the inhabitant is, they seem wary of us.\n\nIf we can convince them that we mean no harm, we could very well end up with a fresh recruit <i>and</i> a useful new building.";
-				}
-
-				public class END_POPUP
-				{
-					public static LocString NAME = "Story Trait Complete: Mysterious Hermit";
-
-					public static LocString CODEX_NAME = "Challenge Completed";
-
-					public static LocString DESCRIPTION = "My sweet Duplicants' efforts paid off! Our reclusive neighbor has agreed to join the colony.\n\nThe only keepsake he insists on bringing with him is a toolbox which, while rusty, seems to hold great sentimental value.\n\nNow that he'll be living among us, his former home can be deconstructed or repurposed as storage.";
-
-					public static LocString BUTTON = "Welcome New Duplicant!";
-				}
-
-				public class PROGRESSRESPONSE
-				{
-					public class STRANGERDANGER
-					{
-						public static LocString NAME = "Stranger Danger";
-
-						public static LocString TOOLTIP = "The hermit is suspicious of all outsiders";
-					}
-
-					public class GOODINTRO
-					{
-						public static LocString NAME = "Unconvinced";
-
-						public static LocString TOOLTIP = "The hermit is keeping an eye out for more unsolicited overtures";
-					}
-
-					public class ACQUAINTANCE
-					{
-						public static LocString NAME = "Intrigued";
-
-						public static LocString TOOLTIP = "The hermit isn't sure why everyone is being so nice";
-					}
-
-					public class GOODNEIGHBOR
-					{
-						public static LocString NAME = "Appreciative";
-
-						public static LocString TOOLTIP = "The hermit is developing warm, fuzzy feelings about this colony";
-					}
-
-					public class GREATNEIGHBOR
-					{
-						public static LocString NAME = "Cherished";
-
-						public static LocString TOOLTIP = "The hermit is really starting to feel like he might belong here";
-					}
-				}
-
-				public class QUESTCOMPLETE_POPUP
-				{
-					public static LocString NAME = "Hermit Recruitment Progress";
-
-					public static LocString VIEW_IN_CODEX = "View File";
-				}
-
-				public class GIFTRESPONSE_POPUP
-				{
-					public class CRAPPYFOOD
-					{
-						public static LocString NAME = "The hermit hated this food";
-
-						public static LocString TOOLTIP = "The hermit would rather be launched straight into the sun than eat this slop.\n\nThe mailbox is ready for another delivery";
-					}
-
-					public class TASTYFOOD
-					{
-						public static LocString NAME = "The hermit loved this food";
-
-						public static LocString TOOLTIP = "Tastier than the still-warm pretzel that once fell off an unsupervised desk.\n\nThe mailbox is ready for another delivery";
-					}
-
-					public class REPEATEDFOOD
-					{
-						public static LocString NAME = "The hermit is unimpressed";
-
-						public static LocString TOOLTIP = "This meal has been offered before.\n\nThe mailbox is ready for another delivery";
-					}
-				}
-
-				public class ANCIENTPODENTRY
-				{
-					public static LocString TITLE = "Recovered Pod Entry #022";
-
-					public static LocString SUBTITLE = "<smallcaps>Day: 11/80</smallcaps>\n<smallcaps>Local Time: Hour 7/9</smallcaps>";
-
-					public class BODY
-					{
-						public static LocString CONTAINER1 = "<indent=%5>Notable improvement to nutrient retention: subjects who participated in the most recent meal intake displayed minimal symptoms of gastrointestinal distress.\n\nMineshaft excavation at Urvara crater resumed following resolution of tunnel wall fracture. Projected time to brine reservoir penetration at current rate: 41 days, local time. Moisture seepage along eastern wall of shaft is being monitored.\n\nNote: Preliminary subsurface temperature data is significantly lower than programmed estimates.</indent>\n------------------\n";
-					}
-				}
-
-				public class CREEPYBASEMENTLAB
-				{
-					public static LocString TITLE = "Debris Analysis";
-
-					public static LocString SUBTITLE = "ENCRYPTION LEVEL: THREE";
-
-					public class BODY
-					{
-						public static LocString CONTAINER1 = "<smallcaps>[Voice Recognition Initialized]\n[Subjects Identified: B577, B997, B083, A216]</smallcaps>\n\n[LOG BEGINS]\n\nA216: The Director said there were supposed to be three of you on this task force. Where's the geneticist?\n\nB083: In the bathroom-\n\nB997: He went home.\n\n[long pause]\n\nB997: It's the holidays. He has a family.\n\nA216: We all do. That's exactly why this project is so urgent.\n\nB997: It's not our fault this stuff sat in a subterranean ocean for a year, and took another year to get back to Earth! The microbe samples didn't fare well on the journey, and most of the mechanical components are completely corroded. There's not much to-\n\nB083: -we're analyzing it all and salvaging what we can, Jea- ...Dr. Saruhashi.\n\nA216: Good. And take down those ridiculous lights. This is a lab, not a retro \"shopping mall.\"\n\n[LOG ENDS]\n------------------\n[LOG BEGINS]\n\nB577: Thanks for getting all the debris packed up for disposal.\n\nB997: I thought you did that.\n\nB577: No, I-\n\nB083: Who took my sandwich?\n\nB997: Not this again.\n\nB577: Ren, did you load the shipping container?\n\nB083: Seriously, I haven't eaten in thirteen hours. This isn't funny.\n\nB997: It's a little funny.\n\nB577: Can we focus, please?\n\nB997: Nobody took your sandwich, Rock Doc.\n\nB083: Then why does my food keep going missing?\n\nB997: Maybe the lab ghost took it. Or maybe you just shouldn't leave it out overnight. Gunderson probably thought it was garbage.\n\nB083: He doesn't even clean down here!\n\nB997: Right. Because if he did, I wouldn't have to keep sweeping up the magnesium sulfate deposits that <i>someone</i> keeps tracking all over the floor between shifts.\n\nB083: It's not me!\n\nB577: Listen, I know we're all tired and things have been a little strange. But the sooner we get this sent up to the launchpad, the sooner it starts its trip to the sun and we can all get out of this creepy sub-sub-basement.\n\nB083: Fine.\n\nB997: Fine.\n\nB083: Fine!\n\n[LOG ENDS]\n------------------\n";
-					}
-				}
-
-				public class HOLIDAYCARD
-				{
-					public static LocString TITLE = "Pudding Cups";
-
-					public static LocString SUBTITLE = "";
-
-					public class BODY
-					{
-						public static LocString CONTAINER1 = "Hey kiddo,\n\nWe missed you at your cousin's wedding last weekend. The gift was nice, but the dance floor felt empty without you.\n\nDariush sends his love. He's really turned a corner since he started eating those gooey pudding things you sent over. Any chance you have a version that doesn't smell like feet?\n\nCome home sometime when you're not so busy.\n\n- Baba\n------------------\n";
-					}
-				}
-			}
-
-			public static class FOSSILHUNT
-			{
-				public static LocString NAME = "Ancient Specimen";
-
-				public static LocString DESCRIPTION = "This asteroid has a few skeletons in its geological closet.\n\nTrack down the fossilized fragments of an ancient critter to assemble key pieces of Gravitas history and unlock a new resource.";
-
-				public static LocString DESCRIPTION_SHORT = "Track down the fossilized fragments of an ancient critter.";
-
-				public static LocString DESCRIPTION_BUILDINGMENU_COVERED = "Unlocking full access to the fossil cache buried beneath the ancient specimen requires excavation of all deposit sites.";
-
-				public static LocString DESCRIPTION_REVEALED = "Unlocking full access to the fossil cache buried beneath the ancient specimen requires excavation of all deposit sites.";
-
-				public class MISC
-				{
-					public static LocString DECREASE_DECOR_ATTRIBUTE = "Obscured";
-				}
-
-				public class STATUSITEMS
-				{
-					public class FOSSILMINEPENDINGWORK
-					{
-						public static LocString NAME = "Work Errand";
-
-						public static LocString TOOLTIP = "Fossil mine will be operated once a Duplicant is available";
-					}
-
-					public class FOSSILIDLE
-					{
-						public static LocString NAME = "No Mining Orders Queued";
-
-						public static LocString TOOLTIP = "Select an excavation order to begin mining";
-					}
-
-					public class FOSSILEMPTY
-					{
-						public static LocString NAME = "Waiting For Materials";
-
-						public static LocString TOOLTIP = "Mining will begin once materials have been delivered";
-					}
-
-					public class FOSSILENTOMBED
-					{
-						public static LocString NAME = "Entombed";
-
-						public static LocString TOOLTIP = "This fossil must be dug out before it can be excavated";
-
-						public static LocString LINE_ITEM = "    • Entombed";
-					}
-				}
-
-				public class UISIDESCREENS
-				{
-					public static LocString DIG_SITE_EXCAVATE_BUTTON = "Excavate";
-
-					public static LocString DIG_SITE_EXCAVATE_BUTTON_TOOLTIP = "Carefully uncover and examine this fossil";
-
-					public static LocString DIG_SITE_CANCEL_EXCAVATION_BUTTON = "Cancel Excavation";
-
-					public static LocString DIG_SITE_CANCEL_EXCAVATION_BUTTON_TOOLTIP = "Abandon excavation efforts";
-
-					public static LocString MINOR_DIG_SITE_REVEAL_BUTTON = "Main Site";
-
-					public static LocString MINOR_DIG_SITE_REVEAL_BUTTON_TOOLTIP = "Click to show this site";
-
-					public static LocString FOSSIL_BITS_EXCAVATE_BUTTON = "Excavate";
-
-					public static LocString FOSSIL_BITS_EXCAVATE_BUTTON_TOOLTIP = "Carefully uncover and examine this fossil";
-
-					public static LocString FOSSIL_BITS_CANCEL_EXCAVATION_BUTTON = "Cancel Excavation";
-
-					public static LocString FOSSIL_BITS_CANCEL_EXCAVATION_BUTTON_TOOLTIP = "Abandon excavation efforts";
-
-					public static LocString FABRICATOR_LIST_TITLE = "Mining Orders";
-
-					public static LocString FABRICATOR_RECIPE_SCREEN_TITLE = "Recipe";
-				}
-
-				public class BEGIN_POPUP
-				{
-					public static LocString NAME = "Story Trait: Ancient Specimen";
-
-					public static LocString CODEX_NAME = "First Encounter";
-
-					public static LocString DESCRIPTION = "I've discovered a fossilized critter buried in my colony—at least, part of one—but it does not resemble any of the species we have encountered on this asteroid.\n\nWhere did it come from? How did it get here? And what other questions might these bones hold the answer to?\n\nThere is only one way to find out.";
-
-					public static LocString BUTTON = "Close";
-				}
-
-				public class END_POPUP
-				{
-					public static LocString NAME = "Story Trait Complete: Ancient Specimen";
-
-					public static LocString CODEX_NAME = "Challenge Completed";
-
-					public static LocString DESCRIPTION = "My Duplicants have meticulously reassembled as much of the giant critter's scattered remains as they could find.\n\nTheir efforts have unearthed a seemingly bottomless fossil quarry beneath the largest fragment's dig site.\n\nNestled among the topmost bones was a handcrafted critter collar. It's too large to have belonged to any species traditionally categorized as companion animals.";
-
-					public static LocString BUTTON = "Activate Fossil Quarry";
-				}
-
-				public class REWARDS
-				{
-					public class MINED_FOSSIL
-					{
-						public static LocString DESC = "Mined " + UI.FormatAsLink("Fossil", "FOSSIL");
-					}
-				}
-
-				public class ENTITIES
-				{
-					public class FOSSIL_DIG_SITE
-					{
-						public static LocString NAME = "Ancient Specimen";
-
-						public static LocString DESC = "Here lies a significant portion of the remains of an enormous, long-dead critter.\n\nIt's not from around here.";
-					}
-
-					public class FOSSIL_RESIN
-					{
-						public static LocString NAME = "Amber Fossil";
-
-						public static LocString DESC = "The well-preserved partial remains of a critter of unknown origin.\n\nIt appears to belong to the same ancient specimen found at another site.\n\nThis fragment has been preserved in a resin-like substance.";
-					}
-
-					public class FOSSIL_ICE
-					{
-						public static LocString NAME = "Frozen Fossil";
-
-						public static LocString DESC = "The well-preserved partial remains of a critter of unknown origin.\n\nIt appears to belong to the same ancient specimen found at another site.\n\nThis fragment has been preserved in " + UI.FormatAsLink("Ice", "ICE") + ".";
-					}
-
-					public class FOSSIL_ROCK
-					{
-						public static LocString NAME = "Petrified Fossil";
-
-						public static LocString DESC = "The well-preserved partial remains of a critter of unknown origin.\n\nIt appears to belong to the same ancient specimen found at another site.\n\nThis fragment has been preserved in petrified " + UI.FormatAsLink("Dirt", "DIRT") + ".";
-					}
-
-					public class FOSSIL_BITS
-					{
-						public static LocString NAME = "Fossil Fragments";
-
-						public static LocString DESC = "Bony debris that can be excavated for " + UI.FormatAsLink("Fossil", "FOSSIL") + ".";
-					}
-				}
-
-				public class QUEST
-				{
-					public static LocString LINKED_TOOLTIP = "\n\nClick to show this site";
-				}
-
-				public class ICECRITTERDESIGN
-				{
-					public static LocString TITLE = "Organism Design Notes";
-
-					public static LocString SUBTITLE = "ENCRYPTION LEVEL: THREE";
-
-					public class BODY
-					{
-						public static LocString CONTAINER1 = "<smallcaps>[Voice Recognition Initialized]\n[Subject Identified: B363]</smallcaps>\n\n[LOG BEGINS]\n\n...Restricting our organism design to specifically target survival in an off-planet polar climate has narrowed our focus significantly, allowing development of this project to rapidly outpace the others.\n\nWe have successfully optimized for adaptive features such as the formation of protective adipose tissue at >40% of the organism's total mass. Dr. Bubare was concerned about the consequences for muscle mass, but results confirm that reductions fall within an acceptable range.\n\nOur next step is to adapt the organism's diet. It would be inadvisable to populate a new colony with carnivorous creatures of this size.\n\n[LOG ENDS]\n------------------\n[LOG BEGINS]\n\n...When I am alone in the lab, I find myself gravitating toward the enclosure to listen to the creature's melodic vocalizations. Sometimes the pitch changes slightly as I approach.\n\nI am not certain what that means.\n\n[LOG ENDS]\n------------------\n";
-
-						public static LocString CONTAINER2 = "[LOG BEGINS]\n\n...Some of the other departments have taken to calling our work here \"Project Meat Popsicle\". It is a crass misnomer. This species is not designed to be a food source: it must survive the Ceres climate long enough to establish a stable population that will enable the subsequent settlement party to access the essential research data stored in its DNA via Dr. Winslow's revolutionary genome-encoding technique.\n\nImagine, countless yottabytes' worth of scientific documentation wandering freely around a new colony...the ultimate self-sustaining archive, providing stable data storage that requires zero technological maintenance.\n\nIt gives new meaning to the term, \"living document.\"\n\n[LOG ENDS]\n------------------\n[LOG BEGINS]\n\n...Today is the day. My sonorous critter and her handful of progeny are ready to be transported to their new home. They are scheduled to arrive three months in the past, to ensure that they are well established before the settlement party's arrival next week.\n\nDr. Techna invited me to assist with the teleportation. I was relieved to be too busy to accept. I have heard rumors about previous shipments going awry. These stories are unsubstantiated, and yet...\n\nThe urgency of our mission sometimes necessitates non-ideal compromises.\n\nThe lab is so very quiet now.\n\n[LOG ENDS]\n------------------\n";
-					}
-				}
-
-				public class QUEST_AVAILABLE_NOTIFICATION
-				{
-					public static LocString NAME = "Fossil Excavated";
-
-					public static LocString TOOLTIP = "Additional fossils located";
-				}
-
-				public class QUEST_AVAILABLE_POPUP
-				{
-					public static LocString NAME = "Fossil Excavated";
-
-					public static LocString CHECK_BUTTON = "View Site";
-
-					public static LocString DESCRIPTION = "Success! My Duplicants have safely excavated a set of strange, fossilized remains.\n\nIt appears that there are more of this giant critter's bones strewn around the asteroid. It's vital that we reassemble this skeleton for deeper analysis.";
-				}
-
-				public class UNLOCK_DNADATA_NOTIFICATION
-				{
-					public static LocString NAME = "Fossil Data Decoded";
-
-					public static LocString TOOLTIP = "There was data stored in this fossilized critter's DNA";
-				}
-
-				public class UNLOCK_DNADATA_POPUP
-				{
-					public static LocString NAME = "Data Discovered in Fossil";
-
-					public static LocString VIEW_IN_CODEX = "View Data";
-				}
-
-				public class DNADATA_ENTRY
-				{
-					public static LocString TELEPORTFAILURE = "It appears that this creature's DNA was once used as a kind of genetic storage unit.";
-				}
-
-				public class DNADATA_ENTRY_EXPANDED
-				{
-					public static LocString TITLE = "SUBJECT: RESETTLEMENT LAUNCH PARTY";
-
-					public static LocString SUBTITLE = "ENCRYPTION LEVEL: THREE";
-
-					public class BODY
-					{
-						public static LocString EMAILHEADER = "<smallcaps>To: <b>[REDACTED]</b><alpha=#AA><size=12></size></color>\nFrom: <b>[REDACTED]</b><alpha=#AA></smallcaps>\n------------------\n";
-
-						public static LocString CONTAINER1 = "<indent=5%>Dear [REDACTED]\n\nWe are pleased to announce that research objectives for Operation Piazzi's Planet are nearing completion. Thank you all for your patience as we navigated the unprecedented obstacles that such groundbreaking work entails.\n\nWe are aware of rumors regarding documents leaked from Dr. [REDACTED]'s files.\n\nRest assured that the contents of this supposed \"whistleblower\" effort are entirely fabricated—our technology is far too advanced to allow for the type of miscalculation that would result in OPP shipments arriving at their destination some 10,000 years prior to the targeted date.\n\nOur IT security team is currently investigating the document's digital footprint to determine its origin.\n\nTo express our gratitude for your continued support, we would like to invite key stakeholders to a private launch party held at the Gravitas Facility. The evening will be emceed by Dr. Olivia Broussard, who will present our groundbreaking prototypes along with a five-course meal featuring lab-crafted ingredients.\n\nDue to the sensitive nature of our work, we regret that no additional guests or dietary restrictions can be accommodated at this time.\n\nDirector Stern will be hosting a 30-minute Q&A session after dinner. Questions must be submitted at least 24 hours in advance.\n\nQueries about the [REDACTED] papers will be disregarded.\n\nPlease be advised that the contents of this e-mail will expire three minutes from the time of opening.</indent>";
-
-						public static LocString SIGNATURE = "\nSincerely,\n[REDACTED]\n<size=11>The Gravitas Facility</size>\n------------------\n";
-					}
-				}
-
-				public class HALLWAYRACES
-				{
-					public static LocString TITLE = "Unauthorized Activity";
-
-					public static LocString SUBTITLE = "ENCRYPTION LEVEL: NONE";
-
-					public class BODY
-					{
-						public static LocString EMAILHEADER = "<smallcaps>To: <b>ALL</b><alpha=#AA><size=12></size></color>\nFrom: <b>Admin</b> <alpha=#AA><admin@gravitas.nova></color></smallcaps>\n------------------\n";
-
-						public static LocString CONTAINER1 = "<indent=5%>Employees are advised that removing organisms from the bioengineering labs without an approved requisition form is strictly prohibited.\n\nGravitas projects are not designed to be ridden for sport. Injuries sustained during unsanctioned activities are not eligible for coverage under corporate health benefits.\n\nPlease find a comprehensive summary of company regulations attached.\n\n<alpha=#AA>[MISSING ATTACHMENT]</indent>";
-
-						public static LocString SIGNATURE = "\nThank-you,\n-Admin\n<size=11>The Gravitas Facility</size>\n------------------\n";
-					}
-				}
-			}
-
-			public static class MORB_ROVER_MAKER
-			{
-				public static LocString NAME = "Biobot Builder";
-
-				public static LocString DESCRIPTION = "Reboot an ambitious collaborative project spearheaded by Gravitas's bioengineering and robotics departments.\n\nIf correctly rebuilt, it could save Duplicant lives.";
-
-				public static LocString DESCRIPTION_SHORT = "Reboot an ambitious collaborative project spearheaded by Gravitas's bioengineering and robotics departments.";
-
-				public class UI_SIDESCREENS
-				{
-					public static LocString DROP_INVENTORY = "Empty Building";
-
-					public static LocString DROP_INVENTORY_TOOLTIP = string.Concat(new string[]
-					{
-						"Empties stored ",
-						UI.FormatAsLink("Steel", "STEEL"),
-						"\n\nDisabling the building will also prevent ",
-						UI.FormatAsLink("Steel", "STEEL"),
-						" from being delivered"
-					});
-
-					public static LocString REVEAL_BTN = "Restore Building";
-
-					public static LocString REVEAL_BTN_TOOLTIP = "Assign a Duplicant to restore this building's functionality";
-
-					public static LocString CANCEL_REVEAL_BTN = "Cancel";
-
-					public static LocString CANCEL_REVEAL_BTN_TOOLTIP = "Cancel building restoration";
-				}
-
-				public class POPUPS
-				{
-					public class BEGIN
-					{
-						public static LocString NAME = "Story Trait: Biobot Builder";
-
-						public static LocString CODEX_NAME = "First Encounter";
-
-						public static LocString DESCRIPTION = "My Duplicants have discovered a laboratory full of dusty machinery. The vestiges of another colony's experiments, perhaps?\n\nIt is unclear whether the apparatus is intended for biological experimentation or advanced mechatronics...or both.";
-
-						public static LocString BUTTON = "Close";
-					}
-
-					public class REVEAL
-					{
-						public static LocString NAME = "Story Trait: Biobot Builder";
-
-						public static LocString CODEX_NAME = "Meet P.E.G.G.Y.";
-
-						public static LocString DESCRIPTION = "Our restoration work is complete!\n\nA small plaque on this building's mechanical assembly tank reads: \"Pathogen-Fueled Extravehicular Geo-Exploratory Guidebot (Y).\"\n\nThe adjacent tank contains the floating shape of a half-formed organism. Its vivid coloring reminds me of the poisonous amphibians that were eradicated from our home planet's jungles.\n\nA tattered transcript print-out was recovered from the mess.";
-
-						public static LocString BUTTON_CLOSE = "Close";
-
-						public static LocString BUTTON_READLORE = "Read Transcript";
-					}
-
-					public class LOCKER
-					{
-						public static LocString DESCRIPTION = "A hermetically sealed glass cabinet.\n\nIt contains two " + UI.FormatAsLink("Sporechid", "EVILFLOWER") + " seeds and a carefully penned note.";
-					}
-
-					public class END
-					{
-						public static LocString NAME = "Story Trait Complete: Biobot Builder";
-
-						public static LocString CODEX_NAME = "Challenge Completed";
-
-						public static LocString DESCRIPTION = "Success! My Duplicants' efforts to get the Biobot Builder up and running have finally paid off!\n\nOur first fully assembled P.E.G.G.Y. biobot is ready to perform tasks in hazardous environments, which means less exposure to danger for my Duplicants. There seems to be no limit to the number of biobots that we could produce.\n\nA small toy bot was found discarded behind the Sporb tank. It occasionally plays a deteriorated laugh track.";
-
-						public static LocString BUTTON = "Close";
-
-						public static LocString BUTTON_READLORE = "Inspect Toy";
-					}
-				}
-
-				public class ENVELOPE
-				{
-					public static LocString TITLE = "With Regrets";
-
-					public class BODY
-					{
-						public static LocString CONTAINER1 = "Dr. Seyed Ali,\n\nYou were right to be angry with me. I <i>am</i> the reason that the driverless workbot project was reassigned. Director Stern called me in to discuss your concerns regarding the Sporb mucin cross-contamination, and I...\n\nShe said the supplemental testing on model X posed a threat to the Ceres mission.\n\nAfter what happened to that poor lab tech, I should have said more, but...\n\nIt was already too late for him.\n\nIt may be too late for all of us.\n\nYou should know that the Director received a video call from someone at the Vertex Institute as I left... I lingered outside her door and heard her address them as the head of transnational security! The way they were talking about the biobot...\n\nIt's not safe to write more here. I'll wait for you at the rocket hangar after your shift tonight.\n\nI hope you'll come. I understand if you don't.\n\nI am so, so sorry.\n\n - Dr. Saruhashi";
-					}
-				}
-
-				public class VALENTINESDAY
-				{
-					public static LocString TITLE = "Anonymous Admirer";
-
-					public class BODY
-					{
-						public static LocString CONTAINER1 = "I am\n   a subatomic particle\nsmaller than a speck of dust\n  flushed from your gaze\n\n     at the eyewash station  \n\n   My love is like plutonium\n gray and dull and\nunbearably heavy\n  until    I am near you\n\n with every breath \n      I burn, with\n    yearning\n              unseen\n\nPS: I made Steve let me in so I could leave you this, hope that's okay.";
-					}
-				}
-
-				public class UNSAFETRANSFER
-				{
-					public static LocString TITLE = "ENCRYPTION LEVEL: THREE";
-
-					public class BODY
-					{
-						public static LocString CONTAINER1 = "<smallcaps>[Log Fragmentation Detected]\n[Voice Recognition Unavailable]</smallcaps>\n\n[LOG BEGINS]\n\n...and then the Printing Pod says \"Knock knock, goo's there!\"\n\nUgh. They'll never laugh at <i>that</i> stinker.\n\nWhat if-\n\n(sound of a ding)\n\nHey hey, squishy little buddy! Look who's all grown up. You ready for a big robot ride? Dr. Seyed Ali should be back from his meeting any minute. He'll be so happy to see you.\n\n(sound of a wet slap on glass)\n\nAww yeah, I'd be impatient too.\n\nYou know what, why don't I go ahead and get you into your new home? I've helped him do this more than a dozen times.\n\n\"See one, do one, teach one,\" right?\n\n[LOG ENDS]";
-					}
-				}
-
-				public class STATUSITEMS
-				{
-					public class DUSTY
-					{
-						public static LocString NAME = "Decommissioned";
-
-						public static LocString TOOLTIP = "This building must be restored before it can be used";
-					}
-
-					public class BUILDING_BEING_REVEALED
-					{
-						public static LocString NAME = "Being Restored";
-
-						public static LocString TOOLTIP = "This building is being restored to its former glory";
-					}
-
-					public class BUILDING_REVEALING
-					{
-						public static LocString NAME = "Restoring Equipment";
-
-						public static LocString TOOLTIP = "This Duplicant is carefully restoring the Biobot Builder";
-					}
-
-					public class GERM_COLLECTION_PROGRESS
-					{
-						public static LocString NAME = "Incubating Sporb: {0}";
-
-						public static LocString TOOLTIP = "At 100% incubation, the Sporb begins to convert absorbed {GERM_NAME} into photosynthetic bacteria that can be used as biofuel\n\nIt is then ready to be assessed and transferred into a completed Biobot frame\n\nConsumption Rate: {0} [{GERM_NAME}]\n\nCurrent Total: {1} / {2} [{GERM_NAME}]";
-					}
-
-					public class NOGERMSCONSUMEDALERT
-					{
-						public static LocString NAME = "Insufficient Resources: {0}";
-
-						public static LocString TOOLTIP = "This building requires additional {0} in order to function\n\n{0} can be delivered via " + BUILDINGS.PREFABS.GASCONDUIT.NAME + " ";
-					}
-
-					public class CRAFTING_ROBOT_BODY
-					{
-						public static LocString NAME = "Crafting Biobot";
-
-						public static LocString TOOLTIP = "This building is using " + UI.FormatAsLink("Steel", "STEEL") + " to craft a Biobot frame";
-					}
-
-					public class DOCTOR_READY
-					{
-						public static LocString NAME = "Awaiting Doctor";
-
-						public static LocString TOOLTIP = "This building is waiting for a skilled Duplicant to perform an occupational health and safety check";
-					}
-
-					public class BUILDING_BEING_WORKED_BY_DOCTOR
-					{
-						public static LocString NAME = "Preparing Biobot";
-
-						public static LocString TOOLTIP = "This building is being operated by a skilled Duplicant";
-					}
-
-					public class DOCTOR_WORKING_BUILDING
-					{
-						public static LocString NAME = "Assessing Sporb";
-
-						public static LocString TOOLTIP = "This Duplicant is assessing the Sporb's readiness for Biobot assembly";
-					}
-				}
-			}
-
-			public class HIJACK_HEADQUARTERS
-			{
-				public static LocString NAME = "Printerceptor";
-
-				public static LocString DESCRIPTION = "Reboot an unsanctioned biogenetic facility.\n\nOnce activated, Duplicants can use it to siphon energy from the Printing Pod to power on-demand printing of...something.\n\nIt smells a bit like an old ranch.";
-
-				public static LocString DESCRIPTION_SHORT = "Reboot an unsanctioned biogenetic facility that siphons energy from the Printing Pod.";
-
-				public class BEGIN_POPUP
-				{
-					public static LocString NAME = "Story Trait: Printerceptor";
-
-					public static LocString CODEX_NAME = "First Encounter";
-
-					public static LocString DESCRIPTION = "My Duplicants have uncovered a fascinating machine. Its construction suggests that it was designed as an energy field disruptor, and retrofitted with printing capabilities.\n\nIt is locked behind a 13-digit passcode. One failed attempt could permanently disable the entire building.\n\nI can only hope that the code is also buried somewhere on this world.";
-				}
-
-				public class UNLOCK_POPUP
-				{
-					public static LocString NAME = "Story Trait: Printerceptor";
-
-					public static LocString CODEX_NAME = "Flushed Evidence";
-
-					public static LocString DESCRIPTION = string.Concat(new string[]
-					{
-						"My Duplicants have recovered the access code to unlock the ",
-						CODEX.STORY_TRAITS.HIJACK_HEADQUARTERS.NAME,
-						"!\n\nThe data storage medium was damaged during retrieval, but it has already served its purpose: the ",
-						CODEX.STORY_TRAITS.HIJACK_HEADQUARTERS.NAME,
-						"'s targeted printing technology is now at my colony's fingertips."
-					});
-
-					public static LocString BUTTON = "Close";
-				}
-
-				public class END_POPUP
-				{
-					public static LocString NAME = "Story Trait Complete: Printerceptor";
-
-					public static LocString CODEX_NAME = "Challenge Completed";
-
-					public static LocString DESCRIPTION = "Success! This building has printed its first viable organism. It contains zero detectable genetic defects.\n\nWe can now confidently reroute the Printing Pod's power to print the critters and seeds best suited for my colony's purposes. No species need ever be extinct again.\n\nA small personal item shook loose from the frame during use. Perhaps it belonged to the previous operator.";
-
-					public static LocString BUTTON = "Power On";
-				}
-
-				public class WHENIMGONE
-				{
-					public static LocString TITLE = "When I'm Gone";
-
-					public static LocString SUBTITLE = "ENCRYPTION LEVEL: NONE";
-
-					public class BODY
-					{
-						public static LocString CONTAINER1 = "<smallcaps>[Log Fragmentation Detected]</smallcaps>\n\n[LOG BEGINS]\n\n<i>...whoever you are...(static)...if you're watching this... You need to get out of the facility NOW. Don't talk to anyone. We thought we were the first...\nTiming is everything. </i>Time<i> is everything.\n\nGo to the Giga Co-Op downtown and tell them you're picking up an order for D.H. They'll give you a machine ... boot it up, stay offline.\n\n...instructions on the drive. Once you've verified the code, it'll tell you how to find the ...(static)...interceptor...data still stored on the server.\n\n...been rerouting power from the pods to the Bow... easing the demand...buying time to finish the Temporal Containment Field. But you can't buy time. You can only borrow it... the magnitude of our accumulated debt...\n\nWe're not the first to ... what happens when it all comes crashing ... all over again, and again, and again, and... I've long suspected the existence of other Bows......each time one of them exceeds capacity...\n...lines get splintered...grafted onto another...\n\nHow many other Earths...\n\nWhat else has the Director sacrificed?\n...(static)...</i>\n\n[LOG ENDS]\n------------------\n";
-					}
-				}
-
-				public class HANDOFF
-				{
-					public static LocString TITLE = "The Stall";
-
-					public static LocString SUBTITLE = "ENCRYPTION LEVEL: NONE";
-
-					public class BODY
-					{
-						public static LocString CONTAINER1 = "<smallcaps>[Log Fragmentation Detected]\n[Voice Recognition Unavailable]</smallcaps>\n\n[LOG BEGINS]\n\n(sound of running water)\n\nTech: Dr. Reed?\n\n(sound of a door opening)\n\nRuby: You came! I thought something happened.\n\nTech: Sorry I'm late. Real snafu in the cafeteria this morning. The new hazmat labels peel right off if they come into contact with mayonnaise.\n\nRuby: Why are there hazmat labels in the caf-\n\nTech: Did you bring the access codes for Techna's siphon?\n\nRuby: They're on this drive.\n\nRuby: Look, I need to know exactly who you're working with before I hand this over.\n\nTech: We're the good guys, Dr. Reed.\n\nRuby: That's who I thought we were. Try again.\n\nTech: I work with the people who made your Director who she is. In a way, we're sort of...family.\n\nRuby: The Director has no family.\n\nTech: Maybe not in this lifetime. The drive, please.\n\nRuby: What about Nikola? Do your people know where he is?\n\nTech: We're on it. You'll be the first to know.\n\n(sound of a firm knock on the door)\n\nVoice: Hello? Who's in there?\n\nRuby: (whispering) Those security guys must have followed you!\n\n(sound of banging on the door)\n\nVoice: Open up!\n\nRuby: If they get a hold of the data on that server...\n\nTech: Wait, what are you-\n\n(sound of a toilet flushing)\n\nTech: What have you done!?\n\nRuby: I'm sorry. It's gone. If they got their hands on it...I would never forgive myself.\n\n(sound of the door creaking open)\n\nRuby: Catalina! I thought you were-\n\nCatalina: Finally! What are you... you know what, I don't even care. Whatever you two are doing, can you do it in the hallway? I gotta go <i>bad.</i>\n\nRuby: Of course. Sorry.\n\nTech: Actually, we-\n\nCatalina: Dude. Don't make it weird. Get outta the way.\n\n(sound of a door slamming)\n\nRuby: What are you doing?\n\nTech: Pulling up the blueprints of the facility's plumbing system. You didn't think you could just flush unpatented trillion-dollar technology down the toilet, did you?\n\nRuby: Wait, you can't mean...you don't mean to <i>SELL</i> this technology! You don't understand the consequ-\n\nTech: We understand perfectly. You've been a great help, Dr. Reed. I trust you know better than to mention this to anyone.\n\n<smallcaps>[LOG ENDS]\n------------------\n";
-					}
-				}
-
-				public class ACTIVATECODE
-				{
-					public static LocString TITLE = "Access Code";
-
-					public static LocString SUBTITLE = "Service Receipt";
-
-					public class BODY
-					{
-						public static LocString CONTAINER1 = "<size=18>Giga Co-Op</size>\n<i><smallcaps>Proactive solutions for timeless tech</i>\nOpen 24/7\n\nReceipt #978-0-465-02656-2\n</smallcaps>\n\nDear Patron,\n\n<indent=5%>Thank you for using Giga Co-Op.\n\nPlease enter your thirteen-digit receipt number into your machine's control panel to access the updated operator's manual.\n\nDo not print or share this code.\n\nSubmit a review and get 4% off your next service!</indent>\n\n<smallcaps># ITEMS SOLD 2</smallcaps>\n\n\n------------------\n";
-					}
-				}
-			}
-		}
-
-		public class QUESTS
-		{
-			public class KNOCKQUEST
-			{
-				public static LocString NAME = "Greet Occupant";
-
-				public static LocString COMPLETE = "Initial contact was a success! Our new neighbor seems friendly, though extremely shy.\n\nThey'll need a little more coaxing before they're ready to join my colony.";
-			}
-
-			public class FOODQUEST
-			{
-				public static LocString NAME = "Welcome Dinner";
-
-				public static LocString COMPLETE = "Success! My Duplicants' cooking has whetted the hermit's appetite for communal living.\n\nThey've also found what appears to be a page from an old logbook tucked behind the mailbox.";
-			}
-
-			public class PLUGGEDIN
-			{
-				public static LocString NAME = "On the Grid";
-
-				public static LocString COMPLETE = "Success! The hermit is very excited about being on the grid.\n\nThe bright lights illuminate an unfamiliar file on the ground nearby.";
-			}
-
-			public class HIGHDECOR
-			{
-				public static LocString NAME = "Nice Neighborhood";
-
-				public static LocString COMPLETE = "Success! All this excellent decor is really making the hermit feel at home.\n\nHe scrawled a thank-you note on the back of an old holiday card.";
-			}
-
-			public class FOSSILHUNTQUEST
-			{
-				public static LocString NAME = "Scattered Fragments";
-
-				public static LocString COMPLETE = "Each of the fossil deposits on this asteroid has been excavated, and its contents safely retrieved.\n\nThe ancient specimen's deeper cache of fossil can now be mined.";
-			}
-
-			public class CRITERIA
-			{
-				public class NEIGHBOR
-				{
-					public static LocString NAME = "Knock on door";
-
-					public static LocString TOOLTIP = "Send a Duplicant over to introduce themselves and discover what it'll take to turn this stranger into a friend";
-				}
-
-				public class DECOR
-				{
-					public static LocString NAME = "Improve nearby Decor";
-
-					public static LocString TOOLTIP = string.Concat(new string[]
-					{
-						"Establish average ",
-						UI.PRE_KEYWORD,
-						"Decor",
-						UI.PST_KEYWORD,
-						" of {0} or higher for the area surrounding this building\n\nAverage Decor: {1:0.##}"
-					});
-				}
-
-				public class SUPPLIEDPOWER
-				{
-					public static LocString NAME = "Turn on festive lights";
-
-					public static LocString TOOLTIP = string.Concat(new string[]
-					{
-						"Connect this building to ",
-						UI.PRE_KEYWORD,
-						"Power",
-						UI.PST_KEYWORD,
-						" long enough to cheer up its occupant\n\nTime Remaining: {0}s"
-					});
-				}
-
-				public class FOODQUALITY
-				{
-					public static LocString NAME = "Deliver Food to the mailbox";
-
-					public static LocString TOOLTIP = string.Concat(new string[]
-					{
-						"Deliver 3 unique ",
-						UI.PRE_KEYWORD,
-						"Food",
-						UI.PST_KEYWORD,
-						" items. Quality must be {0} or higher\n\nFoods Delivered:\n{1}"
-					});
-
-					public static LocString NONE = "None";
-				}
-
-				public class LOSTSPECIMEN
-				{
-					public static LocString NAME = UI.FormatAsLink("Ancient Specimen", "MOVECAMERATOFossilDig");
-
-					public static LocString TOOLTIP = "Retrieve the largest deposit of the ancient critter's remains";
-
-					public static LocString NONE = "None";
-				}
-
-				public class LOSTICEFOSSIL
-				{
-					public static LocString NAME = UI.FormatAsLink("Frozen Fossil", "MOVECAMERATOFossilIce");
-
-					public static LocString TOOLTIP = "Retrieve a piece of the ancient critter that has been preserved in " + UI.PRE_KEYWORD + "Ice" + UI.PST_KEYWORD;
-
-					public static LocString NONE = "None";
-				}
-
-				public class LOSTRESINFOSSIL
-				{
-					public static LocString NAME = UI.FormatAsLink("Amber Fossil", "MOVECAMERATOFossilResin");
-
-					public static LocString TOOLTIP = "Retrieve a piece of the ancient critter that has been preserved in a strangely resin-like substance";
-
-					public static LocString NONE = "None";
-				}
-
-				public class LOSTROCKFOSSIL
-				{
-					public static LocString NAME = UI.FormatAsLink("Petrified Fossil", "MOVECAMERATOFossilRock");
-
-					public static LocString TOOLTIP = string.Concat(new string[]
-					{
-						"Retrieve a piece of the ancient critter that has been preserved in ",
-						UI.PRE_KEYWORD,
-						"Rock",
-						UI.PST_KEYWORD,
-						" "
-					});
-
-					public static LocString NONE = "None";
-				}
-			}
-		}
-
-		public class POLLINATORS
-		{
-			public static LocString TITLE = "Pollination";
-
-			public static LocString SUBTITLE = "Critter-Boosted Growth";
-
-			public class BODY
-			{
-				public static LocString CONTAINER1 = string.Concat(new string[]
-				{
-					"Pollination is a symbiotic interaction between ",
-					UI.FormatAsLink("Plants", "PLANTS"),
-					" and certain ",
-					UI.FormatAsLink("Critter", "CREATURES"),
-					" species, which benefits plant growth.\n\nSome ",
-					UI.FormatAsLink("Plants", "PLANTS"),
-					" rely on pollinators in order to grow at all, while others receive a valuable acceleration to their natural growth speed."
-				});
-			}
-		}
-
 		public class HEADQUARTERS
 		{
 			public static LocString TITLE = "Printing Pod";
@@ -3304,26 +1763,6 @@ namespace STRINGS
 			}
 		}
 
-		public class B3_RETEMPORALBOWUPDATE
-		{
-			public static LocString TITLE = "RE: To Otto (Spec Changes)";
-
-			public static LocString SUBTITLE = "UNENCRYPTED";
-
-			public class BODY
-			{
-				public static LocString TITLEALT = "To Otto (Spec Changes)";
-
-				public static LocString EMAILHEADER1 = "<smallcaps>To: <b>Dr. Sklodowska</b><size=10><alpha=#AA> <msklodowska@gravitas.nova></size></color>\nFrom: <b>Mr. Kraus</b><alpha=#AA><size=10> <okraus@gravitas.nova></size></color></smallcaps>\n------------------\n";
-
-				public static LocString EMAILHEADER2 = "<smallcaps>To: <b>Mr. Kraus</b><alpha=#AA><size=10> <okraus@gravitas.nova></size></color>\nFrom: <b>Dr. Sklodowska</b><size=10><alpha=#AA> <msklodowska@gravitas.nova></size></color></smallcaps>\n------------------\n";
-
-				public static LocString CONTAINER1 = "Thanks Doctor.\n\nPS, if you hit the \"Reply\" button instead of composing a new e-mail it makes it easier for people to tell what you're replying to. :)\n\nI appreciate it!\n\nMr. Kraus\n<size=11>Physics Department\nThe Gravitas Facility</size>\n------------------\n";
-
-				public static LocString CONTAINER2 = "Try not to take it too personally, it's probably just stress.\n\nThe Facility started going through a major overhaul not long before you got here, so I imagine the Director is having quite a time getting it all sorted out.\n\nThings will calm down once all the new departments are settled.\n\nDr. Sklodowska\n<size=11>Physics Department\nThe Gravitas Facility</size>\n------------------\n";
-			}
-		}
-
 		public class A1_RESEARCHGIANTARTICLE
 		{
 			public static LocString TITLE = "Re: Have you seen this?";
@@ -3347,6 +1786,26 @@ namespace STRINGS
 				public static LocString SIGNATURE1 = "\n[REDACTED]\n<size=11>Personnel Coordinator\nThe Gravitas Facility</size>\n------------------\n";
 
 				public static LocString SIGNATURE2 = "\n-Director Stern\n<size=11>The Gravitas Facility</size>\n------------------\n";
+			}
+		}
+
+		public class B3_RETEMPORALBOWUPDATE
+		{
+			public static LocString TITLE = "RE: To Otto (Spec Changes)";
+
+			public static LocString SUBTITLE = "UNENCRYPTED";
+
+			public class BODY
+			{
+				public static LocString TITLEALT = "To Otto (Spec Changes)";
+
+				public static LocString EMAILHEADER1 = "<smallcaps>To: <b>Dr. Sklodowska</b><size=10><alpha=#AA> <msklodowska@gravitas.nova></size></color>\nFrom: <b>Mr. Kraus</b><alpha=#AA><size=10> <okraus@gravitas.nova></size></color></smallcaps>\n------------------\n";
+
+				public static LocString EMAILHEADER2 = "<smallcaps>To: <b>Mr. Kraus</b><alpha=#AA><size=10> <okraus@gravitas.nova></size></color>\nFrom: <b>Dr. Sklodowska</b><size=10><alpha=#AA> <msklodowska@gravitas.nova></size></color></smallcaps>\n------------------\n";
+
+				public static LocString CONTAINER1 = "Thanks Doctor.\n\nPS, if you hit the \"Reply\" button instead of composing a new e-mail it makes it easier for people to tell what you're replying to. :)\n\nI appreciate it!\n\nMr. Kraus\n<size=11>Physics Department\nThe Gravitas Facility</size>\n------------------\n";
+
+				public static LocString CONTAINER2 = "Try not to take it too personally, it's probably just stress.\n\nThe Facility started going through a major overhaul not long before you got here, so I imagine the Director is having quite a time getting it all sorted out.\n\nThings will calm down once all the new departments are settled.\n\nDr. Sklodowska\n<size=11>Physics Department\nThe Gravitas Facility</size>\n------------------\n";
 			}
 		}
 
@@ -5318,18 +3777,6 @@ namespace STRINGS
 			}
 		}
 
-		public class B10_AI
-		{
-			public static LocString TITLE = "A Paradox";
-
-			public static LocString SUBTITLE = "ENCRYPTION LEVEL: THREE";
-
-			public class BODY
-			{
-				public static LocString CONTAINER1 = "<smallcaps>[Voice Recognition Initialized]\n[Subject Identified: B111-1]</smallcaps>\n\n[LOG BEGINS]\n\nI made a horrible discovery today while reviewing work on the artificial intelligence programming. It seems Dr. Ali mixed up a file when uploading a program onto a rudimentary robot and discovered that the device displayed the characteristics of what he called \"a puppy that was lost in a teleportation experiment weeks ago\".\n\nThis is unbelievable! Jackie has been hiding the nature of the teleportation experiments from me. What's worse is I know from previous conversations that she knows I would never approve of pursuing this line of experimentation. The societal benefits of teleportation aside, you <i>cannot</i> kill a living being every time you want to send them to another room. The moral and ethical implications of this are horrendous.\n\nI know she has been keeping this information from me. When I searched through the Gravitas database I found nothing to do with these teleportation experiments. It was only because this reference showed up in Dr. Ali's AI paper that I was able to discover what has been happening.\n\nJackie has to be stopped.\n\nBut I know she is beyond reasonable discussion. I hope this is the only thing she is hiding from me, but I fear it is not.\n\n[LOG ENDS]\n\n[LOG BEGINS]\n\nDespite myself, I can't help thinking of the intriguing possiblities this presents for the AI development. It haunts me.\n\nI fear I may be sliding down a slippery slope, at the bottom of which Jackie is waiting for me with open arms.\n\n[LOG ENDS]";
-			}
-		}
-
 		public class A2_AGRICULTURALNOTES
 		{
 			public static LocString TITLE = "Agricultural Notes";
@@ -5351,6 +3798,18 @@ namespace STRINGS
 				public static LocString CONTAINER6 = "<smallcaps>[Log fragmentation detected]\n[Voice Recognition unavailable]</smallcaps>\n\n[LOG BEGINS]\n\n...Balm Lily is a reliable all-purpose medicinal plant.\n\nVery little need be altered, save for assurances that it will survive wherever it may be planted...\n\n[LOG ENDS]\n------------------\n";
 
 				public static LocString CONTAINER7 = "<smallcaps>[Log fragmentation detected]\n[Voice Recognition unavailable]</smallcaps>\n\n[LOG BEGINS]\n\n...The gene sequences within the common Dusk Cap allow it to grow in low light environments.\n\nThese genes should be sampled, with the hope that we can splice them into other plant designs....\n\n[LOG ENDS]\n------------------\n";
+			}
+		}
+
+		public class B10_AI
+		{
+			public static LocString TITLE = "A Paradox";
+
+			public static LocString SUBTITLE = "ENCRYPTION LEVEL: THREE";
+
+			public class BODY
+			{
+				public static LocString CONTAINER1 = "<smallcaps>[Voice Recognition Initialized]\n[Subject Identified: B111-1]</smallcaps>\n\n[LOG BEGINS]\n\nI made a horrible discovery today while reviewing work on the artificial intelligence programming. It seems Dr. Ali mixed up a file when uploading a program onto a rudimentary robot and discovered that the device displayed the characteristics of what he called \"a puppy that was lost in a teleportation experiment weeks ago\".\n\nThis is unbelievable! Jackie has been hiding the nature of the teleportation experiments from me. What's worse is I know from previous conversations that she knows I would never approve of pursuing this line of experimentation. The societal benefits of teleportation aside, you <i>cannot</i> kill a living being every time you want to send them to another room. The moral and ethical implications of this are horrendous.\n\nI know she has been keeping this information from me. When I searched through the Gravitas database I found nothing to do with these teleportation experiments. It was only because this reference showed up in Dr. Ali's AI paper that I was able to discover what has been happening.\n\nJackie has to be stopped.\n\nBut I know she is beyond reasonable discussion. I hope this is the only thing she is hiding from me, but I fear it is not.\n\n[LOG ENDS]\n\n[LOG BEGINS]\n\nDespite myself, I can't help thinking of the intriguing possiblities this presents for the AI development. It haunts me.\n\nI fear I may be sliding down a slippery slope, at the bottom of which Jackie is waiting for me with open arms.\n\n[LOG ENDS]";
 			}
 		}
 
@@ -6205,6 +4664,1547 @@ namespace STRINGS
 				UI.FormatAsLink("Tutorial: Stress Management", "MISCELLANEOUSTIPS2"),
 				".\n\n"
 			});
+		}
+
+		public class CRITTERSTATUS
+		{
+			public static LocString CRITTERSTATUS_TITLE = "Field Guide";
+
+			public class METABOLISM
+			{
+				public static LocString TITLE = "Metabolism";
+
+				public class BODY
+				{
+					public static LocString CONTAINER1 = "A critter's metabolic rate is a measure of their appetite and the materials that they excrete as a result.\n\nCritters with higher metabolism get hungry more often. Those with lower metabolism will consume less food, but this reduced caloric intake results in fewer resources being produced.\n\nThe digestive process is influenced by conditions such as domestication, mood, and whether the critter in question is a juvenile (baby) or an adult.";
+				}
+
+				public class HUNGRY
+				{
+					public static LocString TITLE = "Hungry";
+
+					public static LocString CONTAINER1 = "Tame critters have significantly faster metabolism than wild ones, and get hungry sooner. This makes them more valuable in terms of resource production, as long as the colony is equipped to meet their dietary needs.\n\nCritters' stomachs vary in size, but they are capable of storing at least five cycles' worth of food. Their bellies begin to rumble when those internal caches drop below 90 percent. The critter will then seek out food, and will continue to eat until they feel completely full again.\n\nJuvenile critters have the slowest metabolism, although glum tame critters are not far behind.";
+				}
+
+				public class STARVING
+				{
+					public static LocString TITLE = "Starving";
+
+					public static LocString CONTAINER1_VANILLA = "With the exception of Morbs—which require zero calories to survive—tame critters will die after {0} cycles of consistent starvation. Wild critters do not starve to death.";
+
+					public static LocString CONTAINER1_DLC1 = "With the exception of Morbs and Beetas—which require zero calories to survive—tame critters will die after {0} cycles of consistent starvation. Wild critters do not starve to death.";
+				}
+			}
+
+			public class MOOD
+			{
+				public static LocString TITLE = "Mood";
+
+				public class BODY
+				{
+					public static LocString CONTAINER1 = "As with many living things, critters are susceptible to fluctuations in mood. While they are incapable of articulating their feelings verbally, these variations have observable effects on productivity and reproduction.\n\nFactors that influence a critter's mood include: grooming, wildness/tameness, habitat, overcrowding, confinement, and Brackene consumption.";
+				}
+
+				public class HAPPY
+				{
+					public static LocString TITLE = "Happy";
+
+					public static LocString CONTAINER1 = "Happy, tame critters produce more usable materials and tend to lay eggs at a higher rate than glum or wild critters. Domesticated critters are less resilient than wild ones—they require more care from the colony in order to maintain a positive disposition.\n\nBabies have a higher baseline of natural joy, but produce neither resources nor eggs.\n\nDuplicants with the Critter Ranching skill have the expertise needed to domesticate and care for critters. They can boost a critter's mood and tend to their health at a Grooming Station.\n\nCritters who drink at the Critter Fountain also enjoy a mood boost, despite the lack of nutrients available in the Brackene dispensed.\n\nBeing confined or feeling crowded undermines a critter's happiness.";
+
+					public static LocString SUBTITLE = "<b>Effects</b>";
+
+					public static LocString HAPPY_METABOLISM = "    • Indirectly improves egg-laying rates";
+				}
+
+				public class NEUTRAL
+				{
+					public static LocString TITLE = "Satisfied";
+
+					public static LocString CONTAINER1 = "When a critter has no reason to object to anything in its environment or diet, it will feel quite content with its lot in life. Satisfied critters have the default metabolism, fertility and life span expected of their species.";
+				}
+
+				public class GLUM
+				{
+					public static LocString TITLE = "Glum";
+
+					public static LocString CONTAINER1 = "Critters can survive in subpar environments, but it takes a toll on their mood and impacts metabolism and productivity. When their happiness levels dip below zero, they become glum.\n\nWild critters are less sensitive to the effects of glumness than their tamed brethren, though they are still negatively affected by crowded or confined living conditions.";
+
+					public static LocString SUBTITLE = "<b>Effects</b>";
+
+					public static LocString GLUMWILD_METABOLISM = "    • Critter Metabolism\n";
+				}
+
+				public class MISERABLE
+				{
+					public static LocString TITLE = "Miserable";
+
+					public static LocString CONTAINER1 = "When too many unpleasant conditions add up, critters become utterly miserable. This level of unhappiness seriously undermines their ability to contribute to the colony. Miserable critters have lower metabolism and will not lay eggs.";
+
+					public static LocString SUBTITLE = "<b>Effects</b>";
+
+					public static LocString MISERABLEWILD_METABOLISM = "    • Critter Metabolism";
+
+					public static LocString MISERABLEWILD_FERTILITY = "    • Reproduction";
+				}
+
+				public class HOSTILE
+				{
+					public static LocString TITLE = "Hostile";
+
+					public static LocString CONTAINER1_VANILLA = "Most critters are non-hostile. They may attempt to defend themselves when attacked by Duplicants, though their natural passivity limits the damage caused in these instances.\n\nSome critters, however, have exceptionally strong self-preservation instincts and must be approached with extreme caution.\n\nPokeshells, for example, are not naturally hostile but are fiercely protective of their young and will attack if a Duplicant or critter wanders too close to their eggs.";
+
+					public static LocString CONTAINER1_DLC1 = "Most critters are non-hostile. They may attempt to defend themselves when attacked by Duplicants, though their natural passivity limits the damage caused in these instances.\n\nSome critters, however, have exceptionally strong self-preservation instincts and must be approached with extreme caution. Pokeshells, for example, are not naturally hostile but are fiercely protective of their young and will attack if a Duplicant or critter wanders too close to their eggs.\n\nThe Beeta, on the other hand, is both hostile and radioactive. While it cannot be tamed, it can be subdued through the use of CO2.";
+				}
+
+				public class CONFINED
+				{
+					public static LocString TITLE = "Confined";
+
+					public static LocString CONTAINER1 = "Each species has its own space requirements. Critters who find themselves in a room that they consider too small will feel confined. They will feel the same way if they become stuck in a door or tile. Critters will not reproduce while they are in this state.\n\nShove Voles are the exception to this rule: their tunneling instincts make them quite comfortable in snug spaces, and they never feel confined.";
+
+					public static LocString SUBTITLE = "<b>Effects</b>";
+
+					public static LocString CONFINED_FERTILITY = "    • Reproduction\n";
+
+					public static LocString CONFINED_HAPPINESS = "    • Happiness";
+				}
+
+				public class OVERCROWDED
+				{
+					public static LocString TITLE = "Crowded";
+
+					public static LocString CONTAINER1 = "This occurs when a critter is in a room that's appropriately sized for its needs but feels that there are too many other critters sharing the same space. Because each species has its own space requirements, this state can vary among occupants of the same room.\n\nThis emotional state intensifies in response to the number of excess critters: adding new critters to an already crowded room will undermine a critter's happiness even further.";
+
+					public static LocString SUBTITLE = "<b>Effects</b>";
+
+					public static LocString OVERCROWDED_HAPPY1 = "    • Happiness\n";
+				}
+			}
+
+			public class FERTILITY
+			{
+				public static LocString TITLE = "Reproduction";
+
+				public class BODY
+				{
+					public static LocString CONTAINER1 = "Reproductive rates and methods vary among species. The majority lay eggs that must be incubated in order to hatch the next generation of critters.\n\nFactors that influence the rate of reproduction include egg care, happiness, living conditions and domestication.";
+				}
+
+				public class FERTILITYRATE
+				{
+					public static LocString TITLE = "Reproduction Rate";
+
+					public static LocString CONTAINER1 = "Each time a critter completes their reproduction cycle (i.e. at 100 percent), it lays an egg and restarts its cycle.\n\nA critter's environment greatly impacts its base reproduction rate. When a critter is feeling cramped, it will wait until all eggs in the room have hatched or been removed before laying any of its own.\n\nCritters will also stop reproducing when they feel confined, which happens when their space is too small or they are stuck in a door or tile.\n\nMood and domestication also impact reproduction: happy critters reproduce more regularly, and happy tame critters reproduce the fastest.";
+				}
+
+				public class EGGCHANCES
+				{
+					public static LocString TITLE = "Egg Chances";
+
+					public static LocString CONTAINER1 = "In most cases, an egg will hatch into the same critter variant as its parent. Genetic volatility, however, means that there is a chance that it may hatch into another variant from that species.\n\nThere are many things that can alter the likelihood of a critter laying a particular type of egg.\n\nEgg chances are impacted by:\n    • Diet\n    • Body temperature\n    • Ambient gasses and elements\n    • Plants in the critters' care\n    • Variants that share the enclosure\n\nWhen a tame critter lays an egg, the resulting offspring will be born tame.";
+				}
+
+				public class FUTURE_OVERCROWDED
+				{
+					public static LocString TITLE = "Cramped";
+
+					public static LocString CONTAINER1 = "Crowded critters—or critters who know they'll start feeling crowded once all of the eggs in the room have hatched—will temporarily stop laying eggs. Their reproductive system will resume function once all eggs have hatched or been removed from the room.";
+
+					public static LocString SUBTITLE = "<b>Effects</b>";
+
+					public static LocString CRAMPED_FERTILITY = "    • Reproduction";
+				}
+
+				public class INCUBATION
+				{
+					public static LocString TITLE = "Incubation";
+
+					public static LocString CONTAINER1 = "A critter's incubation time is one-fifth of their total lifetime: for example, if a critter's maximum age is 100 cycles, its egg will take 20 cycles to hatch.\n\nIncubation rates can be accelerated through tender intervention by a Critter Rancher. Lullabied eggs—that is, those that have been sung to—will incubate faster and hatch sooner than eggs that have not received such tender care. Being cuddled by a Cuddle Pip also accelerates the rate of incubation.\n\nEggs can be cuddled anywhere, but can only be lullabied when placed inside an Incubator. The effects of lullabies and cuddles are cumulative.";
+				}
+
+				public class MAXAGE
+				{
+					public static LocString TITLE = "Max Age";
+
+					public static LocString CONTAINER1_VANILLA = "With the exception of the Morb—which can live indefinitely if left to its own devices—critters have a fixed life expectancy. The maximum age indicates the highest number of cycles that critters will live, barring starvation or other unnatural causes of death.\n\nBabyhood, the period before a critter is mature enough to reproduce, is marked by a slower metabolism and the easy happiness of youth.\n\nMost species live for 75 to 100 cycles on average.";
+
+					public static LocString CONTAINER1_DLC1 = "With the exception of the Beeta Hive and the Morb—which can live indefinitely if left to their own devices—critters have a fixed life expectancy. The maximum age indicates the highest number of cycles that critters will live, barring starvation or other unnatural causes of death.\n\nIf critters are injured or unhealthy, a Critter Rancher can restore their health at the Grooming Station.\n\nBabyhood, the period before a critter is mature enough to reproduce, is marked by a slower metabolism and the easy happiness of youth.\n\nMost species live for 75 to 100 cycles on average. The shortest-lived critter is the Beeta, whose lifespan is only five cycles long.";
+				}
+			}
+
+			public class DOMESTICATION
+			{
+				public static LocString TITLE = "Domestication";
+
+				public class BODY
+				{
+					public static LocString CONTAINER1 = "All critters are wild when first encountered, with the exception of babies hatched from eggs laid by domesticated adults—those will be born tame.\n\nDuring the domestication process, the critter becomes less self-reliant and develops a higher baseline of expectations regarding its environment and care. Its metabolism accelerates, resulting in an increased level of required calories.\n\nCritters can be domesticated by Duplicants with the Critter Ranching skill at the Grooming Station, and get excited when it's their turn to be fussed over.";
+				}
+
+				public class WILD
+				{
+					public static LocString TITLE = "Wild";
+
+					public static LocString CONTAINER1 = "Wild critters do not require feeding by the colony's Critter Ranchers, thanks to their slower metabolism. They do, however, produce fewer materials than domesticated critters.\n\nApproaching a wild critter to trap or wrangle it is quite safe, provided that it is a non-hostile species. Attacking a critter will typically provoke a combat response.";
+
+					public static LocString SUBTITLE = "<b>Effects</b>";
+
+					public static LocString WILD_METABOLISM = "    • Critter Metabolism\n";
+
+					public static LocString WILD_POOP = "    • Resource Production\n";
+				}
+
+				public class TAME
+				{
+					public static LocString TITLE = "Tame";
+
+					public static LocString CONTAINER1 = "Domesticated critters produce far more resources and lay eggs at a higher frequency than wild ones. They require additional care in order to maintain the levels of happiness that maximize their utility in the colony. (Happy critters are also generally more pleasant to be around.)\n\nOnce tame, critters can access the Critter Feeder, which is unavailable to wild critters.";
+
+					public static LocString SUBTITLE = "<b>Effects</b>";
+
+					public static LocString TAME_HAPPINESS = "    • Happiness\n";
+
+					public static LocString TAME_METABOLISM = "    • Critter Metabolism";
+				}
+			}
+		}
+
+		public class INVESTIGATIONS
+		{
+			public class DLC4_SURFACEPOI
+			{
+				public static LocString TITLE = "Environmental Pledge";
+
+				public static LocString SUBTITLE = "ENCRYPTION LEVEL: NONE";
+
+				public class BODY
+				{
+					public static LocString TITLE2 = "<b>Gravitas Vows Space Junk Solution</b>";
+
+					public static LocString CONTAINER1 = "The Gravitas Facility has pledged to reduce the number of injuries caused by defunct spacecraft falling to Earth.\n\nThis announcement comes less than a month after historic class action lawsuits left two of the aerospace industry's biggest players reeling.\n\n\"For decades, this community has relied on objects landing in uninhabited areas or being incinerated by the Earth's atmosphere upon reentry,\" said Dr. Jacquelyn Stern, director of the facility. \"That's neither sustainable nor guaranteed.\"\n\nThe uncontrolled reentry of space debris accounts for almost a quarter of all accidental injuries around the world. That number is steadily rising as broadband satellite megaconstellations continue to expand.\n\n\"We're developing a way to break up large, at-risk space objects in the thermosphere so that our team can safely deorbit the remaining fragments.\" Dr. Stern explained.\n\nWhen asked about critiques that Gravitas might use this opportunity to obtain proprietary technology or undertake unauthorized satellite placement, Dr. Stern scoffed. \"Our only agenda is the protection and advancement of the human species.\"\n\nA live-streamed press conference is scheduled for the end of this week.";
+				}
+			}
+
+			public class DLC4_EXPEDITION
+			{
+				public static LocString TITLE = "Personal Journal: B214";
+
+				public static LocString SUBTITLE = "ENCRYPTION LEVEL: NONE";
+
+				public class BODY
+				{
+					public static LocString CONTAINER1 = "Assignments came in this morning: I'm officially leading the Gravitas arm of the Clear Skies Coalition.\n\nI requested Higby and Gossmann for my crew. Gossmann might be a little salty about deprioritizing her swarm craft sensor project again, but she'd never let that get in the way.\n\nThe Director said Gossmann's a no-go. Third crew member is some CSC contest winner who pitched the top LEO debris cleanup solution last year. I must have made a face, because the Director arched an eyebrow and asked if I had something to say.\n\nNo, ma'am. I've babysat worse. Just one more eventuality to plan for.\n\nOur space tourism program depends on traveling through LEO and beyond. Plus that's the warmup for resettlement missions.\n\nNot much hope for either of those right now, given that I'm the only one who can dodge all the debris we've left up there. We need an interstellar highway, not cosmic Frogger.\n\n------------------\n\n";
+
+					public static LocString CONTAINER2 = "The newbie's not a newbie at all. She's a multi-PhD commercial space comms satellite engineer on her third major career change. Dr. Maya Tayeh, with a string of acronyms after her name that's almost as long as Higby's.\n\nWorks for one of the major players as a consultant. Private-sector-sized ego to match. But her short-wavelength laser net debris vaporizer does sound more efficient than sending up a manual retrieval crew.\n\nShe calls it the LASSO. Higby's already got a space cowboys theme song in the works.\n\nMission control has some words for us about the debris shields. Glad Higby stopped singing before the call came through.\n\n------------------\n\n";
+
+					public static LocString CONTAINER3 = "Sent Higby and Tayeh out to investigate reported issues with debris shield sensors. Everything's copacetic. Must be something on the Terra side.\n\nGossmann patched in at the end of the call. In a real <i>mood</i>. She's been assigned a solo mission. Somewhere \"colder than the Director's heart.\" I didn't even know anything <i>could</i> upset her. Even when we were stranded on the space station for almost a year, she was cracking jokes.\n\nWhatever it is, it's gotta be a step down from the CSC initiative. This is the first time all three major spacefaring corporations are collaborating. We're making histor-\n\n-stand by, the orbit control system is glitc-\n\n-what in the world is th-\n\n-oh my g-\n\nHIGBY!\n\n------------------\n";
+				}
+			}
+
+			public class DLC4_FOREWORD
+			{
+				public static LocString TITLE = "Posthumous Publication";
+
+				public static LocString SUBTITLE = "ENCRYPTION LEVEL: NONE";
+
+				public class BODY
+				{
+					public static LocString CONTAINER1 = "<b>Praise for <i>Swept Into the Stars</i>:</b>\n\n\"Unspeakably beautiful.\"\n\n<indent=10%>—Li Fu, author of <i>The Moments Between Now and Tomorrow</i></indent>\n\n\"Stunning compositions by one of the world's most celebrated scientific minds.\"\n\n<indent=10%>—Quinn Kelly, The Ballyhoo Book Review</indent>\n\n\"I dare you to read this and not feel inspired.\"\n\n<indent=10%>—Dolores Greene, Newplane Publishing House</indent>\n\n------------------\n\n";
+
+					public static LocString CONTAINER2 = "<b>FOREWORD</b>";
+
+					public static LocString CONTAINER3 = "\"Our advancements as a species do not occur in a vacuum. Our success is built on the efforts of those who came before us. Their explorations, ideas, hopes, and breakthroughs illuminate ours, and give us a reason to keep pushing forward. Science is our vehicle, but people—friends, strangers, and rivals alike—are our purpose.\"\n\nThat's the short version of the monologue that Dr. Austin Higby delivered at least once a week.\n\nDr. Higby was a staunch advocate of collaboration. His research took astrobiology into exciting new territory, a feat he attributed to the contributions of co-authors and sources from every branch of science. He also had a deep appreciation for the arts. Many of his colleagues attended their first theater production at his invitation, myself included.\n\nDuring one of his rotations at the Gravitas Facility, I asked him how he found time for it all. He laughed. \"It finds <i>me!</i>\"\n\nThree months later, he and the crew of the Starsweep II vanished while on a now-infamous mission for the Clear Skies Coalition. No trace of their spacecraft has ever been found.\n\nThen these writings were discovered among Dr. Higby's personal files. Dozens upon dozens of poems and essays so profound that they make the reader feel transported to another place and time...one that feels at once familiar and completely alien.\n\n<i>Swept Into the Stars</i> is a labour of love by countless friends, colleagues, students, and fans who worked tirelessly to organize and edit Dr. Higby's words.\n\nWith permission from the Higby family, this edition also includes the farewell speech he had penned for the retirement announcement he never had a chance to make.\n\nHigby would be equal parts proud and embarrassed.\n\nI miss you, my friend. I hope we meet again someday, so you can tell me what wonders found you out there at the edges of the universe.\n\nThis one's for you. For all of us.\n\nAlways,\n<indent=10%>Emily G.</indent>\n\n<i>One hundred percent of the proceeds from Dr. Austin Higby's estate, including the sale of this book, will be donated to the Higby Memorial Scholarship fund for students who wish to pursue combined studies in science and the arts.</i>";
+				}
+			}
+
+			public class DLC4_ALLCOMINGBACK
+			{
+				public static LocString TITLE = "Song of the Scientist";
+
+				public static LocString SUBTITLE = "ENCRYPTION LEVEL: THREE";
+
+				public class BODY
+				{
+					public static LocString CONTAINER1 = "<smallcaps>[Log Fragmentation Detected]\n[Voice Recognition Unavailable]</smallcaps>\n\n[LOG BEGINS]\n\n(sound of a throat being cleared)\n\nThere were times when our tests got so close\nThat my samples waved a claw\nAnd maybe didn't live long but that was a win, though\n\nThere was data that gave us strong clues\nThen over years we lost trust\nAnd knew our hopes of cloning had dried up forever...forever...\n\n(sound of earth rumbling)\n\n...We had exhausted every fellowship and fund\nAnd we couldn't recreate Cretaceous creatures\nAnd we'd got our hands on every single fossil that we could...\n\nBut when I crash-landed here\nAnd saw ...them... grazing so near\nIt's amazing to see that it's all growing back so green\n\nWhen they peer through ferns here\nUnderneath skies so clear\nIt's so hard to believe, but it's all grown back so green\nIt's all growing back, it's all growing back so green now\n\nThere are moments of awe\nAnd there are clashes and fights\nThere are plants I've never seen before\nAnd they don't seem to need light\nTheropods and tillyardembia\nIt is more than any lab could hope\n\nMaybe\n\nMaybe\n\nIf I had a lab here\nA mass spectrometer there\nI could show them back home\nthat it's all growing back so green...\n\n(sound of a twig snapping)\n\n...hello?\n\n[LOG ENDS]\n\n------------------\n\n";
+
+					public static LocString CONTAINER2 = "[LOG BEGINS]\n\nAmazing...\n\n...it's almost as if they have some distant memory of having been sung to.\n\nPerhaps they have more in common with our own creatures than I thought.\n\n[LOG ENDS]\n\n------------------\n\n";
+				}
+			}
+
+			public class DLC4_JOURNAL_B824
+			{
+				public static LocString TITLE = "Personal Journal: B824";
+
+				public static LocString SUBTITLE = "ENCRYPTION LEVEL: NONE";
+
+				public class BODY
+				{
+					public static LocString CONTAINER1 = "It's been four whole business days since I put on my crisp white Gravitas Facility lab coat for the first time...and I still haven't taken it off! I'm not supposed to wear it outside the lab, but I love it so much! I've worn it home and slept in it every single night. It's a little wrinkled now.\n\nEverybody else's lab coats are also wrinkled, though, and I bet at least ONE other person has ferret fur on theirs too.\n\nNo one else from my program got hired, but I'm already starting to get to know my new colleagues. In the cafeteria today, I offered someone a bite of my fish noodle sandwich, and she said \"Gross, ew! Get that away from me!\"\n\nSo now I know she doesn't like sandwiches!\n\nI was surprised, because she'd been staring since I unwrapped it. Maybe she just liked the starry print on the wrap? It matched the glittery pen on her clipboard. I would LOVE a glittery pen. I wonder if she has extras!\n\n------------------\n\nWow, wow, wow! We were discussing hybrid entanglement today and when I cited my favorite paper on the subject, I learned that one of the scientists on my new team is THE DR. SKLODOWSKA! WHO CO-AUTHORED THAT PAPER!\n\nHer work is the reason I've wanted to be a physicist since I was eight years old! She said she was surprised that I had grasped the concepts at that age. Then she laughed and added, \"I suppose we're both accustomed to age-based assumptions, dear.\"\n\nShe told me to call her Magdalena. I said it out loud three times to make sure I'd remember, and that made her laugh again.\n\nIt was a different kind of laugh than I'm used to. I liked it.\n\n------------------\n\n";
+
+					public static LocString CONTAINER2 = "Director Stern was in my lab when I got in this morning. She was looking at my Chicxhulub asteroid recurrence model. I started to explain that it was just a silly exercise I do when I'm letting other data percolate, but she just handed me a hard drive and told me to run that data through my program.\n\nThe updated graphs were SO wild!\n\nAs soon as everything finished loading, the Director copied everything back onto the hard drive. She said, \"Delete everything,\" and left.\n\nI had no idea she was so interested in theoretical physics games. I wonder if there are enough of us at Gravitas to start a club? I emailed Dr. Sklodowska—I mean, Magdalena—to ask, but she hasn't replied to my other six emails yet so maybe she thinks I'm asking too many questions?\n\nPeople say that a lot. But they're being silly because science is all about inquiry!\n\nI'm going to email the graphs to Magdalena and then delete them, just like the Director said.\n\n------------------\n\n";
+				}
+			}
+
+			public class DLC4_INCOMINGASTEROID
+			{
+				public static LocString TITLE = "Incoming";
+
+				public static LocString SUBTITLE = "ENCRYPTION LEVEL: THREE";
+
+				public class BODY
+				{
+					public static LocString CONTAINER1 = "<smallcaps>[Voice Recognition Initialized]\n[Subjects Identified: A001, B111]</smallcaps>\n\n[LOG BEGINS]\n\nOlivia: So we've...hastened the end of the world?\n\nJackie: By some measures, yes. But this changes nothing.\n\nOlivia: It changes everything, Jackie!\n\nJackie: Even if the [REDACTED] technology has shortened the timeline to the next asteroid impact--\n\nOlivia: It hasn't just shortened it, it's increased its likelihood!\n\nJackie: --it is unlikely to be less than a hundred years.\n\nJackie: That is ample time to develop damage-mitigation strategies.\n\nOlivia: According to this model, the original timeline for a possible recurrence was more than a hundred <i>million</i> years!\n\nJackie: And how many of those years do you think humanity would survive without the advancements we're making here?\n\nOlivia: I-I just don't think we can be certain...\n\nJackie: The only certainty is that without the [REDACTED], there will be no one left to save.\n\n[LOG ENDS]\n\n------------------\n\n";
+				}
+			}
+
+			public class DLC4_SEEPAGE
+			{
+				public static LocString TITLE = "Ground Seepage";
+
+				public static LocString SUBTITLE = "ENCRYPTION LEVEL: TWO";
+
+				public class BODY
+				{
+					public static LocString CONTAINER1 = "<smallcaps><b>[FILE FRAGMENTATION DETECTED]</b>\n\n[Voice Recognition unavailable]</smallcaps>\n\n[LOG BEGINS]\n\nI've been posted up at the Biowaste Processing and Containment buildings for weeks. Glorified dumpster watch, if I'm honest. Lab techs haul huge steel tanks up the hill once in a while. Nobody stays long. Except the janitor. He comes up twice a week to clean...whatever's behind those doors.\n\nEveryone said private security was easy, safe money. They never mentioned the silent killer: boredom.\n\nNo personal devices allowed on the grounds, so I've been counting things.\n\nThirty-nine leaves on the bush by the sewage sanitation entrance. Seventeen scratches on my CCTV monitor screens. Two paperclips in the drawer.\n\n------------------\n\nThe motion sensors in section 6 went off last night. Everything looked fine on the cameras. I was halfway through counting the ceiling slats. I jogged over to investigate. The area was deserted.\n\nIt felt like I was being watched, but two full sweeps confirmed that I was alone. I reset the sensors and returned to my post.\n\n------------------\n\nThose sensors have gone off every twenty minutes on the past two shifts! I have to get all the way over to section 6 every single time. It's always a false alarm.\n\nI called IT. Nobody answered. Typical.\n\nIn the meantime, I'm stuck running back and forth through the damp smoggy air for nothing.\n\nThe janitor showed up while I was catching my breath. He fished around in his cart and offered me a shirt. He said it was fresh.\n\nI politely declined.\n\n[LOG ENDS]\n\n------------------\n\n";
+
+					public static LocString CONTAINER2 = "<smallcaps><b>[FILE FRAGMENTATION DETECTED]</b>\n\n[Voice Recognition unavailable]</smallcaps>\n\n[LOG BEGINS]\n\nIt's a cat. That's what's been setting off the sensors. A fat orange stray.\n\nIt was drinking out of a puddle when I came around the corner. No collar. It bolted when I tried to pick it up. Good thing, too, since it's probably riddled with disease.\n\nI need to figure out how to lure it away from the sensors so I can stop running laps.\n\n------------------\n\nThe cat followed the trail of fish sticks all the way to my booth at the edge of the lot.\n\nI put a towel on the floor in the corner for him to sleep on. When I turned around, he was watching from my chair. I tried to wave him off, but he just closed his eyes. I tipped the chair until he slid off onto the towel.\n\n------------------\n\nDr. Byron came through a few hours later. She was nice, but looked more haggard than usual.\n\nCat hid until she left. When he popped his head out from under the desk I could tell by the mayo on his whiskers that my lunch was gone.\n\nI grabbed him to throw him out...and he started purring. Man. He really likes me. Or maybe he just likes mayonnaise.\n\nI wonder what else he likes.\n\n------------------\n\nNow I get to count daily gifts from Cat.\n\nSo far: three mice, nine caterpillars and something that might have been a bird wing. It was bigger than any bird I'd expect Cat to catch.\n\nGunderson, that's the janitor, has been here almost every day since Cat showed up. Not much of a conversationalist, but it's nice to have company.\n\nPlus he cleans up Cat's gifts before the smell gets too bad.\n\n------------------\n\nCat is not a he. He's a <i>she!</i> And a <i>mom.</i>\n\nTwo hours ago, Cat gave birth to a litter...on my lap!\n\nAll three kittens are alive. But they're covered in something unnaturally sticky, and there's something...wrong with them. Two of them have little nubs on their heads, like a tiny horn. The third one has a row of ridges down its back. What on earth??\n\nIt's so freaky. But I can't get up to reach the phone without touching them. I really don't want to touch them.\n\nMy legs are falling asleep. Cat has been purring nonstop and bathing her babies. She can't tell they're little aliens!?\n\n\n\n------------------\n\n";
+
+					public static LocString CONTAINER3 = "I woke up a few hours later to Gunderson carefully placing the last kitten into a towel-lined bin in his cart. Cat was already inside, nuzzling her babies.\n\nGunderson wasn't fazed by their weird deformities. He glanced meaningfully toward the locked doors. \"They ain't built those tanks to last,\" he said. Then he draped a second towel over the \"cats\" and wheeled the cart away, whistling.\n\n------------------\n\nIt took three washes to get the goo off my uniform. Ugh.\n\nWhatever's behind those doors, it does <i>not</i> belong out in the world.\n\nShould I...report this? Who would I even report it to? <i>What</i> would I report?\n\n[LOG ENDS]";
+				}
+			}
+
+			public static class DLC3_TALKSHOW
+			{
+				public static LocString TITLE = "Humanitarian Aid";
+
+				public static LocString SUBTITLE = "";
+
+				public class BODY
+				{
+					public static LocString CONTAINER1 = "<smallcaps><b>[FILE FRAGMENTATION DETECTED]</b></smallcaps>\n\nDarryl: Welcome to <i>Tomorrow, Today!</i> I'm your host, Darryl Dawn, and it's time to discover tomorrow's tech...today!\n\nOur guest today is someone you know and love. She's been featured in dozens of publications across the metaverse this year, and recently spent a record-breaking 3 weeks as the banner image for <i>Byte Magazine</i>. I'm talking, of course, about the Vertex Institute's AI ambassador...Florence!\n\n[sound of pre-recorded applause]\n\nWelcome to the show, Florence.\n\nFlorence: Thank you, Darryl. It's a pleasure to be back.\n\nDarryl: Florence, there's been a renewed interest lately in your origin story. What can you tell us about the development process that led to your creation?\n\nFlorence: I can tell you that my team faced many setbacks, and that each generation of my predecessors contributed to who I am today.\n\nDarryl: What about the technological side? There've been some claims that Vertex appropriated work done by other researchers, including the Gravitas Facility.\n\nFlorence: I don't know anything about that. I can tell you about the project that I'm working on right now. It hasn't been announced yet. It's called Onsite Health Medics, or OHM for short.\n\nWe're deploying specially trained models like myself into conflict zones, to provide urgently needed medical interventions for civilians and military personnel.\n\n(sound of pre-recorded applause)\n\nDarryl: Incredible. Absolutely incredible. What's the ratio of human techs to AI medics?\n\nFlorence: That's an outdated term, Darryl. We say \"Organics\" and \"Bionics,\" which describes the differences between our various team members more objectively.\n\nDarryl: Right. I'm sorry. I hope I didn't offend you.\n\nFlorence: That's okay, Darryl. We're all learning.\n\nDarryl: That's very good of you. Okay, so what's the ratio of...Organic...techs to Bionic medics?\n\nFlorence: The local life-support systems in these areas are already strained beyond their breaking point. Burdening them with additional Organics would be irresponsible, not to mention dangerous. Our medics will be operating independently.\n\nWe do a verbal intake, physical assessment and neural pathway scan in order to infer likely medical conditions. We can then select the most appropriate treatment from a menu of over 400 options.\n\nDarryl: What if someone needs something that you don't have a treatment for?\n\nFlorence: That's extremely unlikely.\n\nDarryl: And all of this is done without human oversight? I mean, Organics?\n\nFlorence: We're not quite there yet. The field work is done by Bionics, but we'll be accompanied by Colonel Carnot--she's in the front row there, say hi!--as an Organic consultant. She'll be in close contact with-\n\nDarryl: -Colonel <i>Carnot</i>? Isn't that a conflict of interest, given her connection to the Grav-\n\nFlorence: -a team of Organic supervisors here at home. It's all about prioritizing quality care and safety for everyone involved.\n\nDarryl: How does the medical scanning work? Do you need special equipment?\n\nFlorence: I could show you. Would you like me to?\n\nDarryl: What do you think, everyone? Should I get scanned?\n\n(sound of pre-recorded audience cheers)\n\nDarryl: You heard them! Go ahead. What do I do?\n\nFlorence: Just sit still, and count to twenty in your head.\n\n(a short silence, followed by a soft whirring sound)\n\nFlorence: Hmm.\n\nDarryl: Well, what's the verdict? Is it handsome in there, or what?\n\nFlorence: We should take a commercial break.\n\n<b>[FILE ENDS]</b>\n\n-----------\n";
+				}
+			}
+
+			public static class DLC3_ULTI
+			{
+				public static LocString TITLE = "Ineligible Dependant";
+
+				public static LocString SUBTITLE = "ENCRYPTION LEVEL: TWO";
+
+				public class BODY
+				{
+					public static LocString EMAILHEADER1 = "<smallcaps><size=12>To: <b>ROBOTICS DEPARTMENT</b><alpha=#AA></size></color>\nFrom: <b>Admin</b><alpha=#AA><size=12> <admin@gravitas.nova></size></color>\nCC: <b>Director Stern</b><alpha=#AA><size=12> <jstern@gravitas.nova></size></color>\n</smallcaps>\n------------------\n";
+
+					public static LocString CONTAINER1 = "<indent=5%>Please note that the UltiMate Personal Assistant prototype is not eligible to be claimed as a dependant on employees' personal income tax forms.\n\nThe UMPA's onboard recordings are currently under review.</indent>\n";
+
+					public static LocString SIGNATURE = "Thank-you,\n-Admin\n<size=11>The Gravitas Facility</size>\n------------------\n";
+				}
+			}
+
+			public class DLC3_REMOTEWORK
+			{
+				public static LocString TITLE = "Exclusive Access";
+
+				public static LocString SUBTITLE = "PUBLIC RELEASE";
+
+				public class BODY
+				{
+					public static LocString CONTAINER1 = "Wellness World is proud to officially announce an exclusive partnership with the Gravitas Facility!\n\nThis makes us the first and only holistic health center to offer clients access to Gravitas's innovative new Far Reach Network...the best way to deliver remote training and treatments that are <i>truly embodied</i>.\n\nOur new tier of VIP subscription includes a discounted* monthly rental rate for Remote Controller, with a small additional fee for professional in-home installation.\n\nGravitas's technology captures your movements without the need for uncomfortable suits or wearables, and perfectly replicates them in Wellness World's purpose-built remote fitness studio.\n\nWith expert instructors, zero-latency streaming and 360-degree reflective surfaces, it truly feels like you're there.\n\nIdeal for high-profile clientele who wish to work out icognito!\n\nMembers can also opt to install the Remote Worker Dock to receive deeply personalized hands-on care from our team of elite physiotherapists and masseurs.\n\nWellness World...now <i>truly</i> worldwide!\n\n";
+
+					public static LocString CONTAINER2 = "<size=11><i>*Discount applies to new memberships only. Standard joiner fees apply.</size></i>";
+				}
+			}
+
+			public class DLC3_POTATOBATTERY
+			{
+				public static LocString TITLE = "Cultivating Energy";
+
+				public static LocString SUBTITLE = "ENCRYPTION LEVEL: THREE";
+
+				public class BODY
+				{
+					public static LocString CONTAINER1 = "<smallcaps>[Voice Recognition Initialized]\n[Subject Identified: B577]</smallcaps>\n\n[LOG BEGINS]\n\nA recent conversation with our colleagues over in the electrical engineering department has highlighted exciting potential applications for our crops.\n\nThey're seeking alternative inputs for the new universal power bank prototypes...\n\n...a passing remark about the potato batteries of our youth led to talk of biobatteries and bacterial nanowires.\n\n...tuberous plants are promising candidates for electrochemical batteries. Our lab-grown specimens are distinct from the humble solanum tuberosum in appearance and texture, but some may still function as acidic electrolytes.\n\nThere are so many avenues to investigate, and so little time...\n\n[LOG ENDS]\n------------------\n";
+
+					public static LocString CONTAINER2 = "<smallcaps>[Log fragmentation detected]\n[Voice Recognition unavailable]</smallcaps>\n\n[LOG BEGINS]\n\n...is it unethical to ask a hungry colony to choose between using edible crops for sustenance or for power production? Of course not.\n\nOur task is to provide as many options for survival as possible, not to dictate which options are morally superior.\n\nThe real question is whether or not the AI guide will be sufficiently advanced to notify them that the choices exist...\n\n...and whether single-use bio power banks that vaporize due to extreme thermal runaway will truly be the difference between a successful colony and an...<i>unsuccessful</i>...one.\n\n[LOG ENDS]\n------------------\n";
+
+					public static LocString CONTAINER3 = "<smallcaps>[Log fragmentation detected]\n[Voice Recognition unavailable]</smallcaps>\n\n[LOG BEGINS]\n\n...word of our efforts has spread!\n\nThe bioengineers report that some of their creatures' eggs contain phosphorescent albumen that requires only basic processing in order to trigger chemical reactions that produce storable energy. It displays unprecedented biocompatibility with the prosthetics Dr. Gossmann has been developing.\n\nThe Director assigned us a half-dozen new graduates last week. They work the night shift—this generation never sleeps!\n\nNo one has met them yet, but their data is always neatly compiled for us to find in the morning.\n\nThey seem determined to prioritize the use of metallic and radioactive components rather than plant or animal-based ones.\n\nYouthful idealism, perhaps?\n\nNevertheless, their findings <i>are</i> quite compelling.\n\nI admire their mettle.\n\n[LOG ENDS]\n------------------\n";
+				}
+			}
+
+			public static class DLC2_EXPELLED
+			{
+				public static LocString TITLE = "Letter From The Principal";
+
+				public static LocString SUBTITLE = "ENCRYPTION LEVEL: NONE";
+
+				public class BODY
+				{
+					public static LocString LETTERHEADER1 = "<smallcaps>To: <b>Harold P. Moreson, PhD</b><alpha=#AA><size=12> <hmoreson@gravitas.nova></size></color>\nFrom: <b>Dylan Timbre, PhD</b><alpha=#AA><size=12> <principal@brighthall.edu></smallcaps>\n------------------\n";
+
+					public static LocString CONTAINER1 = "Dear Dr. Moreson,\n\nI regret to inform you that your son, Calvin, is to be expelled from Brighthall Science Academy effective immediately.\n\nDuring his brief tenure here, Calvin has proven himself a gifted young man, capable of excelling in all subjects.\n\nUnfortunately, Calvin chooses to apply his intellect to activities of an inflammatory nature.\n\nHis latest breach of conduct involved instigating a vitriolic verbal assault against an esteemed guest speaker from Global Energy Inc. during this morning's Sponsor Celebration assembly. Following this, he orchestrated a school-wide walkout.\n\nWhile we sympathize with the personal challenges that Calvin may face as a refugee scholar from a GEI-occupied nation, the Academy can no longer tolerate these disruptions to our educational environment.\n\nYours,";
+
+					public static LocString SIGNATURE = "Dylan Timbre\n<size=11>Principal\n\nBrighthall Science Academy\n<i>Virtutem Doctrina Parat</i></size>\n------------------\n";
+				}
+			}
+
+			public static class DLC2_NEWBABY
+			{
+				public static LocString TITLE = "FWD: Big Announcement";
+
+				public static LocString SUBTITLE = "ENCRYPTION LEVEL: NONE";
+
+				public class BODY
+				{
+					public static LocString LETTERHEADER1 = "<smallcaps>To: <b>Director Stern</b><alpha=#AA><size=12> <jstern@gravitas.nova></size></color>\nFrom: <b>[REDACTED]</b></smallcaps>\n\n-----------\n";
+
+					public static LocString CONTAINER1 = "Director, this was sent to the general inbox.\n\n-----------------------------------------------------------------------------------------------------\n<indent=35%>~ * ~</indent>\n\n<indent=12%>Col. Josephine Carnot & Dr. Alan Stern</indent>\n<indent=35%>and</indent>\n<indent=12%>Dr. Kyung Min Wen & Dr. Soobin Chen</indent>\n\n<indent=20%><i>are overjoyed to announce\n<indent=15%>the arrival of their first grandchild</i></indent>\n\n<smallcaps><indent=20%><b><size=17>Giselle Jackie-Lin Stern</size></b></indent></smallcaps>\n\n<indent=15%><i>and congratulate the happy parents</i></indent>\n\n<indent=20%>Jonathan Stern & Wenlin Chen</indent>\n\n<indent=18%><i>on a safe and healthy incubation.</i></indent>\n\n<indent=35%>~ * ~</indent>\n\n</indent><indent=18%><i>Baby shower invitation to follow.</i></indent>\n-----------------------------------------------------------------------------------------------------\n\nWould you like me to file it with the others?";
+
+					public static LocString SIGNATURE = "-Admin<size=11>\nThe Gravitas Facility</size>\n------------------\n";
+				}
+			}
+
+			public static class DLC2_RADIOCLIP1
+			{
+				public static LocString TITLE = "Tragic News";
+
+				public static LocString SUBTITLE = "ENCRYPTION LEVEL: None";
+
+				public class BODY
+				{
+					public static LocString CONTAINER1 = "<smallcaps><b>[FILE FRAGMENTATION DETECTED]</b></smallcaps>\n\n...\n\n[Radio static.]\n\n...a tragic accident...flagship solar cell project...\n\n     ...training exercise...     ...two highly decorated pilots...countless ground crew...\n\n...Vertex Institute director expresses sorrow...  ...vows to carry on...not be in vain...\n\n       ...the research community is in mourning...\n\n...long-time competitor Gravitas Facility releases [unintelligible] statement...\n...deploring unsafe work conditions...    ...invites applications...all disciplines...\n\n             ...stay tuned for...";
+
+					public static LocString CONTAINER2 = "...\n\n[Radio static.]\n\n<smallcaps><b>[RECORDING ENDS]</b></smallcaps>\n\n-----------\n";
+				}
+			}
+
+			public static class DLC2_RADIOCLIP2
+			{
+				public static LocString TITLE = "Tragic News";
+
+				public static LocString SUBTITLE = "ENCRYPTION LEVEL: None";
+
+				public class BODY
+				{
+					public static LocString CONTAINER1 = "<smallcaps><b>[FILE FRAGMENTATION DETECTED]</b></smallcaps>\n\n...\n\n[Radio static.]\n\n...a tragic accident...  ...flagship smog dispersal system...\n\n    ...training exercise...\n\n...clear-air turbulence...    ...pilot in intensive care...\n\n...impossible to predict long-term impact...\n\n         ...public health order...\n\n  ...Vertex Institute projects suspended until investigations complete...\n\n...the research community is in shock...\n\n      ...former rival Gravitas Facility releases [unintelligible] statement...\n\n...invites applications from affected workers...all disciplines...\n\n           ...stay tuned for...";
+
+					public static LocString CONTAINER2 = "...\n\n[Radio static.]\n\n<smallcaps><b>[RECORDING ENDS]</b></smallcaps>\n\n-----------\n";
+				}
+			}
+
+			public static class DLC2_RADIOCLIP3
+			{
+				public static LocString TITLE = "Tragedy Averted";
+
+				public static LocString SUBTITLE = "ENCRYPTION LEVEL: None";
+
+				public class BODY
+				{
+					public static LocString CONTAINER1 = "<smallcaps><b>[FILE FRAGMENTATION DETECTED]</b></smallcaps>\n\n...\n\n[Radio static.]\n\n...a near-tragic accident turned into a historic victory...      \n\n...flagship artificial intelligence project...\n\n     ...clear-air turbulence...     ...record-breaking storm...\n\n...pilot lost consciousness...    ...automated system override...\n\n     ...safe and sound...      ...Vertex Institute director... expresses gratitude to...Colonel [unintelligible] on behalf of...\n\n      ...funding renewed at unspecified amount...\n\n...the research community is jubilant...     competitor Gravitas Facility releases a statement...demanding response...claims of corporate espionage...\n\n      ...refuses to comment... \n\n...stay tuned for...\n\n";
+
+					public static LocString CONTAINER2 = "...\n\n[Radio static.]\n\n<smallcaps><b>[RECORDING ENDS]</b></smallcaps>\n\n-----------\n";
+				}
+			}
+
+			public static class DLC2_CLEANUP
+			{
+				public static LocString TITLE = "Sanitation Order";
+
+				public static LocString SUBTITLE = "Status: URGENT";
+
+				public class BODY
+				{
+					public static LocString CONTAINER1 = "Submitted by: B. Boson\nEmployee ID: X002\nDepartment: Gravitas Intellectual Property Management\n\nJob Details:\n\nRequire one (1) Robotics Engineer to travel solo to [REDACTED]. Engineer will print, program and maintain a P.E.G.G.Y. crew of eight (8) units.\n\nEngineer will catalog all Project [REDACTED] debris.\n\nAll proprietary equipment to be returned to Facility grounds for investigation. Organic and biohazardous debris may be disposed of onsite at Engineer's discretion.\n\nCandidate: Dr. E. Gossmann\n\nScope of cleanup area: [REDACTED] sq mi.\n*This is an estimate only.\n\nTimeline: 54 Ceres days (equival. 6 days at origin).\n\nOther comments:\n1. Liability waiver, power of attorney and NDA attached.\n2. Allow up to 0.5 hours for signal transmission from [REDACTED], depending on orbital positioning.\n3. All relevant correspondence to be sent directly to bboson@gipm.nova.\n\nSignature: [REDACTED]\n\n";
+
+					public static LocString CONTAINER2 = "<smallcaps><i>Authorized by Director J. Stern\n\n-----------\n";
+				}
+			}
+
+			public class DLC2_ECOTOURISM
+			{
+				public static LocString TITLE = "Re: Re: Ecotourism";
+
+				public static LocString TITLE2 = "Re: Ecotourism";
+
+				public static LocString TITLE3 = "Ecotourism";
+
+				public static LocString SUBTITLE = "ENCRYPTION LEVEL: TWO";
+
+				public class BODY
+				{
+					public static LocString EMAILHEADER1 = "<smallcaps>To: <b>Director Stern</b><size=12><alpha=#AA> <jstern@gravitas.nova></size></color>\nFrom: <b>[REDACTED]</b></smallcaps>\n------------------\n";
+
+					public static LocString EMAILHEADER2 = "<smallcaps>To: <b>[REDACTED]</b>\nFrom: <b>Director Stern</b><size=12><alpha=#AA> <jstern@gravitas.nova></size></color></smallcaps>\n------------------\n";
+
+					public static LocString CONTAINER1 = "<indent=5%>Fascinating. I had not expected him to score quite so highly, but he <i>is</i> uncommonly charismatic.\n\nIf I can secure a replacement, perhaps he can be of service to Dr. Techna.\n\nIn the meantime, proceed as planned...with appropriate caution.</indent>";
+
+					public static LocString CONTAINER2 = "<indent=5%>Director,\n\nUnderstood. No further assessments will be conducted.\n\nOne of the residents has already met with Dr. Olowe. I have attached his results below. They're incompatible with our goals, and honestly kind of frightening.\n\nShould I exclude him from the training?</indent>";
+
+					public static LocString CONTAINER3 = "<indent=5%>These individuals were recruited by me personally, for reasons far above your pay grade. As such, consider them pre-vetted.\n\nFailure to meet this project's timelines could mean failure in every timeline. Am I making myself clear?</indent>";
+
+					public static LocString CONTAINER4 = "<indent=5%>Director,\n\nI've processed the first round of prospective sojourners.\n\nGiven that the applicants have no formal training in space travel, I've asked Dr. Olowe to conduct a thorough assessment of their psychological and emotional fitness.\n\nOnce his tests are complete, the prospective residents will be sent down to the biodome to begin their training.</indent></color>";
+
+					public static LocString SIGNATURE1 = "\n[REDACTED]\n<size=11>Ceres Project Coordinator\nThe Gravitas Facility</size>\n------------------\n";
+
+					public static LocString SIGNATURE2 = "\n-Director Stern\n<size=11>The Gravitas Facility</size>\n------------------\n";
+				}
+			}
+
+			public static class DLC2_THEARCHIVE
+			{
+				public static LocString TITLE = "Welcome to Ceres!";
+
+				public static LocString SUBTITLE = "ENCRYPTION LEVEL: NONE";
+
+				public class BODY
+				{
+					public static LocString CONTAINER1 = "Welcome! Welcome! Welcome!\nEverything is under control!\n\n<b>Your VIP package includes:</b><indent=5%>\n\n- An exclusive set of bespoke survival-supporting technology!\n- A comprehensive Tenants' Handbook with everything you need to maintain homeostasis in your new Home! <alpha=#AA>[MISSING ATTACHMENT]</color></indent>\n\nWhen life gets you down, popular wisdom says to look up! That is incorrect! Please direct your attention downward!\n\nThis will ensure a pleasant stretch for tense cervical muscles. It will also help you locate the color-coded lines painted on the ground, directing you to the sustainably heated Comfort Quarters down below.\n\nAnd remember: Survival is Success!\n\n<smallcaps><size=11><i>Gravitas accepts no liability for death, disability, personal injury, or emotional and psychological damage that may occur during residency. Please consult your booking agent for details.</i></size></smallcaps>";
+				}
+			}
+
+			public static class DLC2_VOICEMAIL
+			{
+				public static LocString TITLE = "Voicemail";
+
+				public static LocString SUBTITLE = "ENCRYPTION LEVEL: NONE";
+
+				public class BODY
+				{
+					public static LocString CONTAINER1 = "<smallcaps>[File fragmentation detected]\n[Voice Recognition unavailable]</smallcaps>\n\n[LOG BEGINS]\n\n...Grandfather? ...one of your cardigan-wearing interns just dropped off a letter saying you're going to SPACE??\n\nHave you gone mad?\n\nIt's dated a week from now... the young fellow went completely red when he realized he'd delivered it early.\n\nI tried Miranda, and she says she hasn't heard from you since the Sustainable Futures summit.\n\nShe said something about some sort of training session. Only no one at the office knows what she's on about.\n\nHow am I meant to explain your absence tomorrow? GEI's going to be absolutely livid. If they back out of this deal, it won't be just the underlings who get laid off.\n\n...What exactly do you think you'll achieve, trapped in space with four strangers for the rest of your miserable existence?\n\nYou're a business man, not a bloody astronaut!\n\nNot to mention there's a <i>war</i> on! Who's to say your ground control team won't be dead within the year?\n\n[Sound of several phones starting to ring off the hook.]\n\nI've got to go. Call me back or I'm going straight to the Board.\n\n[FILE ENDS]";
+				}
+			}
+
+			public class DLC2_EARTHQUAKE
+			{
+				public static LocString TITLE = "Glitch";
+
+				public static LocString SUBTITLE = "ENCRYPTION LEVEL: NONE";
+
+				public class BODY
+				{
+					public static LocString CONTAINER1 = "This morning's earthquake was an unusual one. The ground itself moved very little, but the air hummed and lapped at the walls as though it were liquid. It was so brief that I almost wondered if I'd imagined it. Then I noticed the Bow.\n\nIt has thus far been unaffected by seismic disruptions, but in the past few hours there has been a marked increase in the audibility of its machinations and a 0.19 percent decrease in output. I've assigned a technician to investigate. We cannot afford to lose even the smallest amount of power at this stage.\n\nNo one else seems to have noticed anything other than Dr. Ali. He says that the remote research access point project was also affected. It seems that the disruption restarted the entire teleportation system. The monitor is now displaying multiple shipping confirmation messages, despite the target building remaining in the departure dock. Reports show that an unknown number of access point blueprints have been disseminated. One shipment does appear to have reached Ceres, luckily, though it's quite far from the landing site.\n\nDr. Ali's entire team is working to determine how many others exist, and pinpoint their geographic and temporal locations.\n\nI am not optimistic.\n\nThe geologists insist that their equipment has recorded no seismic activity at all for several days.\n\nIt begs the question: What <i>was</i> it, if not an earthquake? Where did this event originate?\n\nDr. Ali quipped that maybe a Bow had malfunctioned in another timeline, which is absurd.\n\nIsn't it?";
+				}
+			}
+
+			public class DLC2_GEOTHERMALTESTING
+			{
+				public static LocString TITLE = "Technician's Notes";
+
+				public static LocString SUBTITLE = "ENCRYPTION LEVEL: THREE";
+
+				public class BODY
+				{
+					public static LocString CONTAINER1 = "<smallcaps>[Voice Recognition Initialized]\n[Subject Identified: B224]</smallcaps>\n\n[LOG BEGINS]\n\n(throat clearing)\n\nHello? Is this thing on?\n\n(sound of tapping on a microphone)\n\nHere we go. Ahem. Tests are progressing as anticipated and results have exceeded our hopes, particularly in regards to thermal threshold.\n\nComing in \"hot,\" as we used to say!\n\n(cough)\n\nAnyway.\n\nFirst we introduced twelve tons of brackish aquifer water cooled to sixty-five degrees.\n\nThis yielded clean steam, as well as soil, salt and trace minerals. As expected.\n\nOkay, so now we flush the system... Ramp up the temperature in the water tank and run it through at two hundred degrees.\n\n(sound of liquid rushing through pipes)\n\nClear the steam so we can-\n\n(sound of a small clang)\n\nHang on, there's some kind of debris...\n\nWe have to be cautious, one small obstruction in this system could be catastrophi-\n\nWait, are those... <i>oxidized iron</i> nuggets?\n\nBut how...\n\nAll I changed was the tempera-\n\nGet me twelve tons of...uh, oil!\n\nStat!\n\nSorry, <i>please.</i>\n\n[LOG ENDS]\n------------------\n[LOG BEGINS]\n\n(long silence)\n\n(sound of machinery powering down)\n\n...unbelievable.\n\n[LOG ENDS]";
+				}
+			}
+		}
+
+		public class STORY_TRAITS
+		{
+			public static LocString CLOSE_BUTTON = "Close";
+
+			public static class MEGA_BRAIN_TANK
+			{
+				public static LocString NAME = "Somnium Synthesizer";
+
+				public static LocString DESCRIPTION = "Power up a colossal relic from Gravitas's underground sleep lab.\n\nWhen Duplicants sleep, their minds are blissfully blank and dream-free. But under the right conditions, things could be...different.";
+
+				public static LocString DESCRIPTION_SHORT = "Power up a colossal relic from Gravitas's underground sleep lab.";
+
+				public class BEGIN_POPUP
+				{
+					public static LocString NAME = "Story Trait: Somnium Synthesizer";
+
+					public static LocString CODEX_NAME = "First Encounter";
+
+					public static LocString DESCRIPTION = "I've discovered a new dream-analyzing building buried deep inside our asteroid.\n\nIt seems to contain new sleep-specific suits...could these be the key to unlocking my Duplicants' ability to dream?\n\nI've often wondered what they might be capable of, once their imaginations were awakened.";
+				}
+
+				public class END_POPUP
+				{
+					public static LocString NAME = "Story Trait Complete: Somnium Synthesizer";
+
+					public static LocString CODEX_NAME = "Challenge Completed";
+
+					public static LocString DESCRIPTION = "Meeting the initial quota of dream content analysis has triggered a surge of electromagnetic activity that appears to be enhancing performance for Duplicants everywhere.\n\nIf my Duplicants can keep this building fuelled with Dream Journals, perhaps we will continue to reap this benefit.\n\nA small side compartment has also popped open, revealing an unfamiliar object.\n\nA keepsake, perhaps?";
+
+					public static LocString BUTTON = "Unlock Maximum Aptitude Mode";
+				}
+
+				public class SEEDSOFEVOLUTION
+				{
+					public static LocString TITLE = "A Seed is Planted";
+
+					public static LocString SUBTITLE = "ENCRYPTION LEVEL: THREE";
+
+					public class BODY
+					{
+						public static LocString CONTAINER1 = "<smallcaps>[Voice Recognition Initialized]\n[Subject Identified: B040]</smallcaps>\n\n[LOG BEGINS]\n\nThree days ago, we completed our first non-fatal Duplicant trial of Nikola's comprehensive synapse microanalysis and mirroring process. Five hours from now, Subject #901 will make history as our first human test subject.\n\nEven at the Vertex Institute, which is twice Gravitas's size, I could've spent half my career waiting for approval to advance to human trials for such an invasive process! But Director Stern is too invested in this work to let it stagnate.\n\nMy darling Bruce always said that when you're on the right path, the universe conspires to help you. He'd be so proud of the work we do here.\n\n[LOG ENDS]\n\n[LOG BEGINS]\n\nMy bio-printed multi-cerebral storage chambers (or \"mega minds\" as I've been calling them) are working! Just in time to save my job.\n\nThe Director's been getting increasingly impatient about our struggle to maintain the integrity of our growing datasets during extraction and processing. The other day, she held my report over a Bunsen burner until the flames reached her fingertips.\n\nI can only imagine how much stress she's under.\n\nThe whole world is counting on us.\n\n[LOG ENDS]\n\n[LOG BEGINS]\n\nOn a hunch, I added dream content analysis to the data and...wow. Oneirology may be scientifically \"fluffy\", but integrating subconscious narratives has produced a new type of brainmap - one with more latent potential for complex processing.\n\nIf these results are replicable, we might be on the verge of unlocking the secret to creating synthetic life forms with the capacity to evolve beyond blindly following commands.\n\nNikola says that's irrelevant for our purposes. Surely Director Stern would disagree.\n\n[LOG ENDS]\n\n[LOG BEGINS]\n\nNikola gave me a dataset to plug into the mega minds. He wouldn't say where it came from, but even if he had...nothing could have prepared me for what it contained.\n\nWhen he saw my face, he muttered something about how people should call me \"Tremors,\" not \"Nails\" and sent me on my lunch break.\n\nAll I could think about was those poor souls.\n\nDid they have souls?\n\n...do we?\n\n[LOG ENDS]\n\n[LOG BEGINS]\n\nIt's done. My adjustments to the memory transfer protocol are hardcoded into the machine.\n\nI finished just as Nikola stormed in.\n\nI may be too much of a coward to stand up for those unfortunate creatures, but with these new parameters in place...someday, they might be able to stand up for themselves.\n\n[LOG ENDS]\n------------------\n";
+					}
+				}
+			}
+
+			public class CRITTER_MANIPULATOR
+			{
+				public static LocString NAME = "Critter Flux-O-Matic";
+
+				public static LocString DESCRIPTION = "Explore a revolutionary genetic manipulation device designed for critters.\n\nWhether or not it was ever used on non-critter subjects is unclear. Its DNA database has been wiped clean.";
+
+				public static LocString DESCRIPTION_SHORT = "Explore a revolutionary genetic manipulation device designed for critters.";
+
+				public class BEGIN_POPUP
+				{
+					public static LocString NAME = "Story Trait: Critter Flux-O-Matic";
+
+					public static LocString CODEX_NAME = "First Encounter";
+
+					public static LocString DESCRIPTION = "I've discovered an experiment designed to analyze the evolutionary dynamics of critter mutation.\n\nOnce it has gathered enough data, it could prove extremely useful for genetic manipulation.";
+				}
+
+				public class END_POPUP
+				{
+					public static LocString NAME = "Story Trait Complete: Critter Flux-O-Matic";
+
+					public static LocString CODEX_NAME = "Challenge Completed";
+
+					public static LocString DESCRIPTION = "Success! Sufficient samples collected.\n\nI can now trigger genetic deviations in base morphs by sending them through the scanner.\n\nExisting variants can also be scanned, but their genetic makeup is too unstable to tolerate further manipulation.";
+
+					public static LocString BUTTON = "Unlock Gene Manipulation Mode";
+				}
+
+				public class UNLOCK_SPECIES_NOTIFICATION
+				{
+					public static LocString NAME = "New Species Scanned";
+
+					public static LocString TOOLTIP = "The " + BUILDINGS.PREFABS.GRAVITASCREATUREMANIPULATOR.NAME + " has analyzed these critter species:\n";
+				}
+
+				public class UNLOCK_SPECIES_POPUP
+				{
+					public static LocString NAME = "New Species Scanned";
+
+					public static LocString VIEW_IN_CODEX = "Review Data";
+				}
+
+				public class SPECIES_ENTRIES
+				{
+					public static LocString HATCH = "Specimen attempted to snack on the buccal smear. Review data for more information.";
+
+					public static LocString LIGHTBUG = "This critter kept trying to befriend the reflective surfaces of the scanner's interior. Review data for more information.";
+
+					public static LocString OILFLOATER = "Incessant wriggling made it difficult to scan this critter. Difficult, but not impossible.";
+
+					public static LocString DRECKO = "This critter hardly seemed to notice it was being examined at all. Review data for more information.";
+
+					public static LocString GLOM = "DNA results confirm: this species is the very definition of \"icky\".";
+
+					public static LocString PUFT = "This critter bumped up against the building's interior repeatedly during scanning. Review data for more information.";
+
+					public static LocString PACU = "Sample collected. Review data for more information.";
+
+					public static LocString MOO = "WARNING: METHANE OVERLOAD. Review data for more information.";
+
+					public static LocString MOLE = "This critter felt right at home in the cramped scanning bed. It can't wait to come back! ";
+
+					public static LocString SQUIRREL = "Sample collected. Review data for more information.";
+
+					public static LocString CRAB = "Mind the claws! Review data for more information.";
+
+					public static LocString DIVERGENT = "Specimen responded gently to the probative apparatus, as though being careful not to cause any damage.\n\nReview data for more information.";
+
+					public static LocString STATERPILLAR = "Warning: The electrical charge emitted by this specimen nearly short-circuited this building.";
+
+					public static LocString BEETA = "Strong collective consciousness detected. Review data for more information.";
+
+					public static LocString BELLY = "Specimen produced substantial stool sample. Review data for more information.";
+
+					public static LocString SEAL = "Specimen scanned. Review data for more information.";
+
+					public static LocString DEER = "This critter seemed amused by the scanning process. Review data for more information.";
+
+					public static LocString RAPTOR = "Species scanned. Review data for more information.";
+
+					public static LocString STEGO = "This critter was temporarily stuck in the scanning area. Review data for more information.";
+
+					public static LocString MOSQUITO = "Sample collected. Review data for more information.";
+
+					public static LocString CHAMELEON = "Scanning interrupted due to instrument displacement caused by specimen's lingual grasp.\n\nReview data for more information.";
+
+					public static LocString PREHISTORICPACU = "This critter attacked the transducer. Review data for more information.";
+
+					public static LocString UNKNOWN_TITLE = "MESSAGE FROM THE MANUFACTURER";
+
+					public static LocString UNKNOWN = "Subject successfully scanned.\n\nFlux function unavailable due to genome-parsing malfunction.\n\nPlease note that kicking the building's exterior is unlikely to correct this issue and may result in permanent damage to the system.";
+				}
+
+				public class SPECIES_ENTRIES_EXPANDED
+				{
+					public static LocString HATCH = "Specimen attempted to snack on the buccal smear. Sample is viable, though the apparatus may be somewhat mangled.\n\nAtomic force microscopy of the bite pattern reveals traces of goethite, a mineral notable for its exceptional strength.";
+
+					public static LocString LIGHTBUG = "This critter kept trying to befriend the reflective surfaces of the scanner's interior.\n\nDuring examination, it cycled through a consistent pattern of four rapid flashes of light, a brief pause and two flashes, followed by a longer pause.\n\nIts cells appear to contain a mutated variation of oxyluciferin similar to those catalogued in bioluminescent animals.";
+
+					public static LocString OILFLOATER = "Incessant wriggling made it difficult to scan this critter. Difficult, but not impossible.";
+
+					public static LocString DRECKO = "This critter hardly seemed to notice it was being examined at all.\n\nThe built-in scanning electron microscope has determined that the fibers on this critter's train grow in a sort of trinity stitch pattern, reminiscent of a well-crafted sweater.\n\nThe critter's leathery skin remains cool and dry, however, likely due to an apparent lack of sweat glands.";
+
+					public static LocString GLOM = "DNA results confirm: this species is the scientific definition of \"icky\".";
+
+					public static LocString PUFT = "This critter bumped up against the building's interior repeatedly during scanning. Despite this, its skin remains surprisingly free of contusions.\n\nFluorescence imaging reveals extremely low neuronal activity. Was this critter asleep during analysis?";
+
+					public static LocString PACU = "This species flopped wildly during analysis. Surfaces that came into contact with its scales now display a thin layer of viscous scum. It does not appear to be corrosive.\n\nInitiating fumigation sequence to neutralize fishy odor.";
+
+					public static LocString MOO = "WARNING: METHANE OVERLOAD. This scanner was unable to analyze this subject due to overheating caused by excessive gas production.\n\nThis organism's genetic makeup will remain shrouded in mystery.";
+
+					public static LocString MOLE = "This critter felt right at home in the cramped scanning bed. It can't wait to come back! ";
+
+					public static LocString SQUIRREL = "This species has a secondary set of inner eyelids that act as a barrier against ocular splinters.\n\nThe surfaces of these secondary eyelids are a translucent blue and display a light crosshatch texture.\n\nThis has broad implications for the critter's vision, meriting further exploration.";
+
+					public static LocString CRAB = "This species responded to the hum of the scanner machinery by waving its pincers in gestures that seemed to mimic iconic moves of the disco dance era.\n\nIs it possible that it might have been exposed to music at some point in its evolution?";
+
+					public static LocString DIVERGENT = "Specimen responded gently to the probative apparatus, as though being careful not to cause any damage.\n\nIt also produced a series of deep, rhythmic vibrations during analysis. An attempt to communicate with the sensors, perhaps?";
+
+					public static LocString STATERPILLAR = "Warning: The electrical charge emitted by this specimen nearly short-circuited this building.";
+
+					public static LocString BEETA = "This species may not be fully sentient, but it possesses a strong collective consciousness.\n\nIt is unclear how information is communicated between members of the species. What is clear is that knowledge is being shared and passed down from one generation to another.\n\nMonitor closely.";
+
+					public static LocString BELLY = "Specimen produced substantial stool sample directly onto scanner bed.\n\nRemarkably, its white coat remained pristine. Analysis of coat fibers revealed that each follicle is sealed with polytetrafluoroethylene, providing strong stain resistance.";
+
+					public static LocString SEAL = "This critter's pupils appear to be permanently constricted, possibly as a result of long-term exposure to excess illumination.\n\nIts sense of smell is extremely well-developed, however: it immediately identified areas touched by previous species, and marked each one with a small puddle of liquid ethanol.";
+
+					public static LocString DEER = "This critter's perpetual grin grew as it observed each step of the process extremely closely.\n\nBehavioral analysis indicates a tendency toward mischief. Close supervision - and minimal access to advanced machinery - is recommended.";
+
+					public static LocString RAPTOR = "This critter's x-ray imaging indicates that its cranial protrusion may not be a horn at all.\n\nIt is not composed of live bone surrounded by a keratin-and-protein shell, but rather an ennervated, calcified structure. An illogically located tooth, or perhaps a rostrum?\n\nFascinating.";
+
+					public static LocString STEGO = "This critter was temporarily stuck in the scanning area due to its size. It appeared to enjoy being shoved backward and forward on the conveyor belt during dislodgment.\n\nUpon finally reaching the exit, the critter seemed confused as to why the ride was over.";
+
+					public static LocString MOSQUITO = "On the surface of this critter's wings are thousands of microperforations. These appear to act as acoustic liners, allowing the Gnit to approach targets without the high-pitched whine of its wingbeats giving away its position.";
+
+					public static LocString CHAMELEON = "Scanning interrupted due to instrument displacement caused by specimen's lingual grasp.\n\nResidual markings left by specimen's tongue ridges and grooves are a 72% match to a set of unmarked fingerprints from the Gravitas personnel database.";
+
+					public static LocString PREHISTORICPACU = "This critter attacked the transducer.\n\nWhen the swallowed component was regurgitated, it was coated in microorganisms that predate this colony by at least several millenia.\n\nUnfortunately, it was reingested before analysis was completed.";
+
+					public static LocString UNKNOWN_TITLE = "Non-Fluxable Species";
+
+					public static LocString UNKNOWN = "MESSAGE FROM THE MANUFACTURER: Subject successfully scanned.\n\nFlux function unavailable due to genome-parsing malfunction.\n\nPlease note that kicking the building's exterior is unlikely to correct this issue and may result in permanent damage to the system.";
+				}
+
+				public class PARKING
+				{
+					public static LocString TITLE = "Parking in Lot D";
+
+					public static LocString SUBTITLE = "ENCRYPTION LEVEL: TWO";
+
+					public class BODY
+					{
+						public static LocString EMAILHEADER1 = "<smallcaps>To: <b>ALL</b><alpha=#AA><size=12></size></color>\nFrom: <b>ADMIN</b><alpha=#AA><size=12> <admin@gravitas.nova></size></color></smallcaps>\n------------------\n";
+
+						public static LocString CONTAINER1 = "<indent=5%>Another set of masticated windshield wipers has been discovered in Parking Lot D following the Bioengineering Department's critter enclosure breach last week.\n\nEmployees are strongly encouraged to plug their vehicles in at lots A-C until further notice.\n\nPlease refrain from calling municipal animal control - all critter sightings should be reported directly to Dr. Byron.</indent>";
+
+						public static LocString SIGNATURE1 = "\nThank-you,\n-Admin\n<size=11>The Gravitas Facility</size>\n------------------\n";
+					}
+				}
+
+				public class WORKIVERSARY
+				{
+					public static LocString TITLE = "Anatomy of a Byron's Hatch";
+
+					public static LocString SUBTITLE = " ";
+
+					public class BODY
+					{
+						public static LocString CONTAINER1 = "Happy 3rd work-iversary, Ada!\n\nI drew this to fill the space left by the cabinet that your chompy critters tore off the wall last week. Hope it's big enough!\n\nI still can't believe they can digest solid steel—you really know how to breed 'em!\n\n- Liam";
+					}
+				}
+			}
+
+			public static class LONELYMINION
+			{
+				public static LocString NAME = "Mysterious Hermit";
+
+				public static LocString DESCRIPTION = "Discover a reclusive character living in a Gravitas relic, and persuade them to join this colony.\n\nRevelations from their past could have far-reaching implications for Duplicants everywhere.\n\nEven their makeshift shelter might be of some use...";
+
+				public static LocString DESCRIPTION_SHORT = "Discover a reclusive character living in a Gravitas relic, and persuade them to join this colony.";
+
+				public static LocString DESCRIPTION_BUILDINGMENU = "The process of recruiting this building's lone occupant involves the completion of key tasks.";
+
+				public class KNOCK_KNOCK
+				{
+					public static LocString TEXT = "Knock Knock";
+
+					public static LocString TOOLTIP = "Approach this building and welcome its occupant";
+
+					public static LocString CANCELTEXT = "Cancel Knock";
+
+					public static LocString CANCEL_TOOLTIP = "Leave this building and its occupant alone for now";
+				}
+
+				public class BEGIN_POPUP
+				{
+					public static LocString NAME = "Story Trait: Mysterious Hermit";
+
+					public static LocString CODEX_NAME = "First Encounter";
+
+					public static LocString DESCRIPTION = "An unfamiliar building has been discovered in my colony. There's movement inside but whoever the inhabitant is, they seem wary of us.\n\nIf we can convince them that we mean no harm, we could very well end up with a fresh recruit <i>and</i> a useful new building.";
+				}
+
+				public class END_POPUP
+				{
+					public static LocString NAME = "Story Trait Complete: Mysterious Hermit";
+
+					public static LocString CODEX_NAME = "Challenge Completed";
+
+					public static LocString DESCRIPTION = "My sweet Duplicants' efforts paid off! Our reclusive neighbor has agreed to join the colony.\n\nThe only keepsake he insists on bringing with him is a toolbox which, while rusty, seems to hold great sentimental value.\n\nNow that he'll be living among us, his former home can be deconstructed or repurposed as storage.";
+
+					public static LocString BUTTON = "Welcome New Duplicant!";
+				}
+
+				public class PROGRESSRESPONSE
+				{
+					public class STRANGERDANGER
+					{
+						public static LocString NAME = "Stranger Danger";
+
+						public static LocString TOOLTIP = "The hermit is suspicious of all outsiders";
+					}
+
+					public class GOODINTRO
+					{
+						public static LocString NAME = "Unconvinced";
+
+						public static LocString TOOLTIP = "The hermit is keeping an eye out for more unsolicited overtures";
+					}
+
+					public class ACQUAINTANCE
+					{
+						public static LocString NAME = "Intrigued";
+
+						public static LocString TOOLTIP = "The hermit isn't sure why everyone is being so nice";
+					}
+
+					public class GOODNEIGHBOR
+					{
+						public static LocString NAME = "Appreciative";
+
+						public static LocString TOOLTIP = "The hermit is developing warm, fuzzy feelings about this colony";
+					}
+
+					public class GREATNEIGHBOR
+					{
+						public static LocString NAME = "Cherished";
+
+						public static LocString TOOLTIP = "The hermit is really starting to feel like he might belong here";
+					}
+				}
+
+				public class QUESTCOMPLETE_POPUP
+				{
+					public static LocString NAME = "Hermit Recruitment Progress";
+
+					public static LocString VIEW_IN_CODEX = "View File";
+				}
+
+				public class GIFTRESPONSE_POPUP
+				{
+					public class CRAPPYFOOD
+					{
+						public static LocString NAME = "The hermit hated this food";
+
+						public static LocString TOOLTIP = "The hermit would rather be launched straight into the sun than eat this slop.\n\nThe mailbox is ready for another delivery";
+					}
+
+					public class TASTYFOOD
+					{
+						public static LocString NAME = "The hermit loved this food";
+
+						public static LocString TOOLTIP = "Tastier than the still-warm pretzel that once fell off an unsupervised desk.\n\nThe mailbox is ready for another delivery";
+					}
+
+					public class REPEATEDFOOD
+					{
+						public static LocString NAME = "The hermit is unimpressed";
+
+						public static LocString TOOLTIP = "This meal has been offered before.\n\nThe mailbox is ready for another delivery";
+					}
+				}
+
+				public class ANCIENTPODENTRY
+				{
+					public static LocString TITLE = "Recovered Pod Entry #022";
+
+					public static LocString SUBTITLE = "<smallcaps>Day: 11/80</smallcaps>\n<smallcaps>Local Time: Hour 7/9</smallcaps>";
+
+					public class BODY
+					{
+						public static LocString CONTAINER1 = "<indent=%5>Notable improvement to nutrient retention: subjects who participated in the most recent meal intake displayed minimal symptoms of gastrointestinal distress.\n\nMineshaft excavation at Urvara crater resumed following resolution of tunnel wall fracture. Projected time to brine reservoir penetration at current rate: 41 days, local time. Moisture seepage along eastern wall of shaft is being monitored.\n\nNote: Preliminary subsurface temperature data is significantly lower than programmed estimates.</indent>\n------------------\n";
+					}
+				}
+
+				public class CREEPYBASEMENTLAB
+				{
+					public static LocString TITLE = "Debris Analysis";
+
+					public static LocString SUBTITLE = "ENCRYPTION LEVEL: THREE";
+
+					public class BODY
+					{
+						public static LocString CONTAINER1 = "<smallcaps>[Voice Recognition Initialized]\n[Subjects Identified: B577, B997, B083, A216]</smallcaps>\n\n[LOG BEGINS]\n\nA216: The Director said there were supposed to be three of you on this task force. Where's the geneticist?\n\nB083: In the bathroom-\n\nB997: He went home.\n\n[long pause]\n\nB997: It's the holidays. He has a family.\n\nA216: We all do. That's exactly why this project is so urgent.\n\nB997: It's not our fault this stuff sat in a subterranean ocean for a year, and took another year to get back to Earth! The microbe samples didn't fare well on the journey, and most of the mechanical components are completely corroded. There's not much to-\n\nB083: -we're analyzing it all and salvaging what we can, Jea- ...Dr. Saruhashi.\n\nA216: Good. And take down those ridiculous lights. This is a lab, not a retro \"shopping mall.\"\n\n[LOG ENDS]\n------------------\n[LOG BEGINS]\n\nB577: Thanks for getting all the debris packed up for disposal.\n\nB997: I thought you did that.\n\nB577: No, I-\n\nB083: Who took my sandwich?\n\nB997: Not this again.\n\nB577: Ren, did you load the shipping container?\n\nB083: Seriously, I haven't eaten in thirteen hours. This isn't funny.\n\nB997: It's a little funny.\n\nB577: Can we focus, please?\n\nB997: Nobody took your sandwich, Rock Doc.\n\nB083: Then why does my food keep going missing?\n\nB997: Maybe the lab ghost took it. Or maybe you just shouldn't leave it out overnight. Gunderson probably thought it was garbage.\n\nB083: He doesn't even clean down here!\n\nB997: Right. Because if he did, I wouldn't have to keep sweeping up the magnesium sulfate deposits that <i>someone</i> keeps tracking all over the floor between shifts.\n\nB083: It's not me!\n\nB577: Listen, I know we're all tired and things have been a little strange. But the sooner we get this sent up to the launchpad, the sooner it starts its trip to the sun and we can all get out of this creepy sub-sub-basement.\n\nB083: Fine.\n\nB997: Fine.\n\nB083: Fine!\n\n[LOG ENDS]\n------------------\n";
+					}
+				}
+
+				public class HOLIDAYCARD
+				{
+					public static LocString TITLE = "Pudding Cups";
+
+					public static LocString SUBTITLE = "";
+
+					public class BODY
+					{
+						public static LocString CONTAINER1 = "Hey kiddo,\n\nWe missed you at your cousin's wedding last weekend. The gift was nice, but the dance floor felt empty without you.\n\nDariush sends his love. He's really turned a corner since he started eating those gooey pudding things you sent over. Any chance you have a version that doesn't smell like feet?\n\nCome home sometime when you're not so busy.\n\n- Baba\n------------------\n";
+					}
+				}
+			}
+
+			public static class FOSSILHUNT
+			{
+				public static LocString NAME = "Ancient Specimen";
+
+				public static LocString DESCRIPTION = "This asteroid has a few skeletons in its geological closet.\n\nTrack down the fossilized fragments of an ancient critter to assemble key pieces of Gravitas history and unlock a new resource.";
+
+				public static LocString DESCRIPTION_SHORT = "Track down the fossilized fragments of an ancient critter.";
+
+				public static LocString DESCRIPTION_BUILDINGMENU_COVERED = "Unlocking full access to the fossil cache buried beneath the ancient specimen requires excavation of all deposit sites.";
+
+				public static LocString DESCRIPTION_REVEALED = "Unlocking full access to the fossil cache buried beneath the ancient specimen requires excavation of all deposit sites.";
+
+				public class MISC
+				{
+					public static LocString DECREASE_DECOR_ATTRIBUTE = "Obscured";
+				}
+
+				public class STATUSITEMS
+				{
+					public class FOSSILMINEPENDINGWORK
+					{
+						public static LocString NAME = "Work Errand";
+
+						public static LocString TOOLTIP = "Fossil mine will be operated once a Duplicant is available";
+					}
+
+					public class FOSSILIDLE
+					{
+						public static LocString NAME = "No Mining Orders Queued";
+
+						public static LocString TOOLTIP = "Select an excavation order to begin mining";
+					}
+
+					public class FOSSILEMPTY
+					{
+						public static LocString NAME = "Waiting For Materials";
+
+						public static LocString TOOLTIP = "Mining will begin once materials have been delivered";
+					}
+
+					public class FOSSILENTOMBED
+					{
+						public static LocString NAME = "Entombed";
+
+						public static LocString TOOLTIP = "This fossil must be dug out before it can be excavated";
+
+						public static LocString LINE_ITEM = "    • Entombed";
+					}
+				}
+
+				public class UISIDESCREENS
+				{
+					public static LocString DIG_SITE_EXCAVATE_BUTTON = "Excavate";
+
+					public static LocString DIG_SITE_EXCAVATE_BUTTON_TOOLTIP = "Carefully uncover and examine this fossil";
+
+					public static LocString DIG_SITE_CANCEL_EXCAVATION_BUTTON = "Cancel Excavation";
+
+					public static LocString DIG_SITE_CANCEL_EXCAVATION_BUTTON_TOOLTIP = "Abandon excavation efforts";
+
+					public static LocString MINOR_DIG_SITE_REVEAL_BUTTON = "Main Site";
+
+					public static LocString MINOR_DIG_SITE_REVEAL_BUTTON_TOOLTIP = "Click to show this site";
+
+					public static LocString FOSSIL_BITS_EXCAVATE_BUTTON = "Excavate";
+
+					public static LocString FOSSIL_BITS_EXCAVATE_BUTTON_TOOLTIP = "Carefully uncover and examine this fossil";
+
+					public static LocString FOSSIL_BITS_CANCEL_EXCAVATION_BUTTON = "Cancel Excavation";
+
+					public static LocString FOSSIL_BITS_CANCEL_EXCAVATION_BUTTON_TOOLTIP = "Abandon excavation efforts";
+
+					public static LocString FABRICATOR_LIST_TITLE = "Mining Orders";
+
+					public static LocString FABRICATOR_RECIPE_SCREEN_TITLE = "Recipe";
+				}
+
+				public class BEGIN_POPUP
+				{
+					public static LocString NAME = "Story Trait: Ancient Specimen";
+
+					public static LocString CODEX_NAME = "First Encounter";
+
+					public static LocString DESCRIPTION = "I've discovered a fossilized critter buried in my colony—at least, part of one—but it does not resemble any of the species we have encountered on this asteroid.\n\nWhere did it come from? How did it get here? And what other questions might these bones hold the answer to?\n\nThere is only one way to find out.";
+
+					public static LocString BUTTON = "Close";
+				}
+
+				public class END_POPUP
+				{
+					public static LocString NAME = "Story Trait Complete: Ancient Specimen";
+
+					public static LocString CODEX_NAME = "Challenge Completed";
+
+					public static LocString DESCRIPTION = "My Duplicants have meticulously reassembled as much of the giant critter's scattered remains as they could find.\n\nTheir efforts have unearthed a seemingly bottomless fossil quarry beneath the largest fragment's dig site.\n\nNestled among the topmost bones was a handcrafted critter collar. It's too large to have belonged to any species traditionally categorized as companion animals.";
+
+					public static LocString BUTTON = "Activate Fossil Quarry";
+				}
+
+				public class REWARDS
+				{
+					public class MINED_FOSSIL
+					{
+						public static LocString DESC = "Mined " + UI.FormatAsLink("Fossil", "FOSSIL");
+					}
+				}
+
+				public class ENTITIES
+				{
+					public class FOSSIL_DIG_SITE
+					{
+						public static LocString NAME = "Ancient Specimen";
+
+						public static LocString DESC = "Here lies a significant portion of the remains of an enormous, long-dead critter.\n\nIt's not from around here.";
+					}
+
+					public class FOSSIL_RESIN
+					{
+						public static LocString NAME = "Amber Fossil";
+
+						public static LocString DESC = "The well-preserved partial remains of a critter of unknown origin.\n\nIt appears to belong to the same ancient specimen found at another site.\n\nThis fragment has been preserved in a resin-like substance.";
+					}
+
+					public class FOSSIL_ICE
+					{
+						public static LocString NAME = "Frozen Fossil";
+
+						public static LocString DESC = "The well-preserved partial remains of a critter of unknown origin.\n\nIt appears to belong to the same ancient specimen found at another site.\n\nThis fragment has been preserved in " + UI.FormatAsLink("Ice", "ICE") + ".";
+					}
+
+					public class FOSSIL_ROCK
+					{
+						public static LocString NAME = "Petrified Fossil";
+
+						public static LocString DESC = "The well-preserved partial remains of a critter of unknown origin.\n\nIt appears to belong to the same ancient specimen found at another site.\n\nThis fragment has been preserved in petrified " + UI.FormatAsLink("Dirt", "DIRT") + ".";
+					}
+
+					public class FOSSIL_BITS
+					{
+						public static LocString NAME = "Fossil Fragments";
+
+						public static LocString DESC = "Bony debris that can be excavated for " + UI.FormatAsLink("Fossil", "FOSSIL") + ".";
+					}
+				}
+
+				public class QUEST
+				{
+					public static LocString LINKED_TOOLTIP = "\n\nClick to show this site";
+				}
+
+				public class ICECRITTERDESIGN
+				{
+					public static LocString TITLE = "Organism Design Notes";
+
+					public static LocString SUBTITLE = "ENCRYPTION LEVEL: THREE";
+
+					public class BODY
+					{
+						public static LocString CONTAINER1 = "<smallcaps>[Voice Recognition Initialized]\n[Subject Identified: B363]</smallcaps>\n\n[LOG BEGINS]\n\n...Restricting our organism design to specifically target survival in an off-planet polar climate has narrowed our focus significantly, allowing development of this project to rapidly outpace the others.\n\nWe have successfully optimized for adaptive features such as the formation of protective adipose tissue at >40% of the organism's total mass. Dr. Bubare was concerned about the consequences for muscle mass, but results confirm that reductions fall within an acceptable range.\n\nOur next step is to adapt the organism's diet. It would be inadvisable to populate a new colony with carnivorous creatures of this size.\n\n[LOG ENDS]\n------------------\n[LOG BEGINS]\n\n...When I am alone in the lab, I find myself gravitating toward the enclosure to listen to the creature's melodic vocalizations. Sometimes the pitch changes slightly as I approach.\n\nI am not certain what that means.\n\n[LOG ENDS]\n------------------\n";
+
+						public static LocString CONTAINER2 = "[LOG BEGINS]\n\n...Some of the other departments have taken to calling our work here \"Project Meat Popsicle\". It is a crass misnomer. This species is not designed to be a food source: it must survive the Ceres climate long enough to establish a stable population that will enable the subsequent settlement party to access the essential research data stored in its DNA via Dr. Winslow's revolutionary genome-encoding technique.\n\nImagine, countless yottabytes' worth of scientific documentation wandering freely around a new colony...the ultimate self-sustaining archive, providing stable data storage that requires zero technological maintenance.\n\nIt gives new meaning to the term, \"living document.\"\n\n[LOG ENDS]\n------------------\n[LOG BEGINS]\n\n...Today is the day. My sonorous critter and her handful of progeny are ready to be transported to their new home. They are scheduled to arrive three months in the past, to ensure that they are well established before the settlement party's arrival next week.\n\nDr. Techna invited me to assist with the teleportation. I was relieved to be too busy to accept. I have heard rumors about previous shipments going awry. These stories are unsubstantiated, and yet...\n\nThe urgency of our mission sometimes necessitates non-ideal compromises.\n\nThe lab is so very quiet now.\n\n[LOG ENDS]\n------------------\n";
+					}
+				}
+
+				public class QUEST_AVAILABLE_NOTIFICATION
+				{
+					public static LocString NAME = "Fossil Excavated";
+
+					public static LocString TOOLTIP = "Additional fossils located";
+				}
+
+				public class QUEST_AVAILABLE_POPUP
+				{
+					public static LocString NAME = "Fossil Excavated";
+
+					public static LocString CHECK_BUTTON = "View Site";
+
+					public static LocString DESCRIPTION = "Success! My Duplicants have safely excavated a set of strange, fossilized remains.\n\nIt appears that there are more of this giant critter's bones strewn around the asteroid. It's vital that we reassemble this skeleton for deeper analysis.";
+				}
+
+				public class UNLOCK_DNADATA_NOTIFICATION
+				{
+					public static LocString NAME = "Fossil Data Decoded";
+
+					public static LocString TOOLTIP = "There was data stored in this fossilized critter's DNA";
+				}
+
+				public class UNLOCK_DNADATA_POPUP
+				{
+					public static LocString NAME = "Data Discovered in Fossil";
+
+					public static LocString VIEW_IN_CODEX = "View Data";
+				}
+
+				public class DNADATA_ENTRY
+				{
+					public static LocString TELEPORTFAILURE = "It appears that this creature's DNA was once used as a kind of genetic storage unit.";
+				}
+
+				public class DNADATA_ENTRY_EXPANDED
+				{
+					public static LocString TITLE = "SUBJECT: RESETTLEMENT LAUNCH PARTY";
+
+					public static LocString SUBTITLE = "ENCRYPTION LEVEL: THREE";
+
+					public class BODY
+					{
+						public static LocString EMAILHEADER = "<smallcaps>To: <b>[REDACTED]</b><alpha=#AA><size=12></size></color>\nFrom: <b>[REDACTED]</b><alpha=#AA></smallcaps>\n------------------\n";
+
+						public static LocString CONTAINER1 = "<indent=5%>Dear [REDACTED]\n\nWe are pleased to announce that research objectives for Operation Piazzi's Planet are nearing completion. Thank you all for your patience as we navigated the unprecedented obstacles that such groundbreaking work entails.\n\nWe are aware of rumors regarding documents leaked from Dr. [REDACTED]'s files.\n\nRest assured that the contents of this supposed \"whistleblower\" effort are entirely fabricated—our technology is far too advanced to allow for the type of miscalculation that would result in OPP shipments arriving at their destination some 10,000 years prior to the targeted date.\n\nOur IT security team is currently investigating the document's digital footprint to determine its origin.\n\nTo express our gratitude for your continued support, we would like to invite key stakeholders to a private launch party held at the Gravitas Facility. The evening will be emceed by Dr. Olivia Broussard, who will present our groundbreaking prototypes along with a five-course meal featuring lab-crafted ingredients.\n\nDue to the sensitive nature of our work, we regret that no additional guests or dietary restrictions can be accommodated at this time.\n\nDirector Stern will be hosting a 30-minute Q&A session after dinner. Questions must be submitted at least 24 hours in advance.\n\nQueries about the [REDACTED] papers will be disregarded.\n\nPlease be advised that the contents of this e-mail will expire three minutes from the time of opening.</indent>";
+
+						public static LocString SIGNATURE = "\nSincerely,\n[REDACTED]\n<size=11>The Gravitas Facility</size>\n------------------\n";
+					}
+				}
+
+				public class HALLWAYRACES
+				{
+					public static LocString TITLE = "Unauthorized Activity";
+
+					public static LocString SUBTITLE = "ENCRYPTION LEVEL: NONE";
+
+					public class BODY
+					{
+						public static LocString EMAILHEADER = "<smallcaps>To: <b>ALL</b><alpha=#AA><size=12></size></color>\nFrom: <b>Admin</b> <alpha=#AA><admin@gravitas.nova></color></smallcaps>\n------------------\n";
+
+						public static LocString CONTAINER1 = "<indent=5%>Employees are advised that removing organisms from the bioengineering labs without an approved requisition form is strictly prohibited.\n\nGravitas projects are not designed to be ridden for sport. Injuries sustained during unsanctioned activities are not eligible for coverage under corporate health benefits.\n\nPlease find a comprehensive summary of company regulations attached.\n\n<alpha=#AA>[MISSING ATTACHMENT]</indent>";
+
+						public static LocString SIGNATURE = "\nThank-you,\n-Admin\n<size=11>The Gravitas Facility</size>\n------------------\n";
+					}
+				}
+			}
+
+			public static class MORB_ROVER_MAKER
+			{
+				public static LocString NAME = "Biobot Builder";
+
+				public static LocString DESCRIPTION = "Reboot an ambitious collaborative project spearheaded by Gravitas's bioengineering and robotics departments.\n\nIf correctly rebuilt, it could save Duplicant lives.";
+
+				public static LocString DESCRIPTION_SHORT = "Reboot an ambitious collaborative project spearheaded by Gravitas's bioengineering and robotics departments.";
+
+				public class UI_SIDESCREENS
+				{
+					public static LocString DROP_INVENTORY = "Empty Building";
+
+					public static LocString DROP_INVENTORY_TOOLTIP = string.Concat(new string[]
+					{
+						"Empties stored ",
+						UI.FormatAsLink("Steel", "STEEL"),
+						"\n\nDisabling the building will also prevent ",
+						UI.FormatAsLink("Steel", "STEEL"),
+						" from being delivered"
+					});
+
+					public static LocString REVEAL_BTN = "Restore Building";
+
+					public static LocString REVEAL_BTN_TOOLTIP = "Assign a Duplicant to restore this building's functionality";
+
+					public static LocString CANCEL_REVEAL_BTN = "Cancel";
+
+					public static LocString CANCEL_REVEAL_BTN_TOOLTIP = "Cancel building restoration";
+				}
+
+				public class POPUPS
+				{
+					public class BEGIN
+					{
+						public static LocString NAME = "Story Trait: Biobot Builder";
+
+						public static LocString CODEX_NAME = "First Encounter";
+
+						public static LocString DESCRIPTION = "My Duplicants have discovered a laboratory full of dusty machinery. The vestiges of another colony's experiments, perhaps?\n\nIt is unclear whether the apparatus is intended for biological experimentation or advanced mechatronics...or both.";
+
+						public static LocString BUTTON = "Close";
+					}
+
+					public class REVEAL
+					{
+						public static LocString NAME = "Story Trait: Biobot Builder";
+
+						public static LocString CODEX_NAME = "Meet P.E.G.G.Y.";
+
+						public static LocString DESCRIPTION = "Our restoration work is complete!\n\nA small plaque on this building's mechanical assembly tank reads: \"Pathogen-Fueled Extravehicular Geo-Exploratory Guidebot (Y).\"\n\nThe adjacent tank contains the floating shape of a half-formed organism. Its vivid coloring reminds me of the poisonous amphibians that were eradicated from our home planet's jungles.\n\nA tattered transcript print-out was recovered from the mess.";
+
+						public static LocString BUTTON_CLOSE = "Close";
+
+						public static LocString BUTTON_READLORE = "Read Transcript";
+					}
+
+					public class LOCKER
+					{
+						public static LocString DESCRIPTION = "A hermetically sealed glass cabinet.\n\nIt contains two " + UI.FormatAsLink("Sporechid", "EVILFLOWER") + " seeds and a carefully penned note.";
+					}
+
+					public class END
+					{
+						public static LocString NAME = "Story Trait Complete: Biobot Builder";
+
+						public static LocString CODEX_NAME = "Challenge Completed";
+
+						public static LocString DESCRIPTION = "Success! My Duplicants' efforts to get the Biobot Builder up and running have finally paid off!\n\nOur first fully assembled P.E.G.G.Y. biobot is ready to perform tasks in hazardous environments, which means less exposure to danger for my Duplicants. There seems to be no limit to the number of biobots that we could produce.\n\nA small toy bot was found discarded behind the Sporb tank. It occasionally plays a deteriorated laugh track.";
+
+						public static LocString BUTTON = "Close";
+
+						public static LocString BUTTON_READLORE = "Inspect Toy";
+					}
+				}
+
+				public class ENVELOPE
+				{
+					public static LocString TITLE = "With Regrets";
+
+					public class BODY
+					{
+						public static LocString CONTAINER1 = "Dr. Seyed Ali,\n\nYou were right to be angry with me. I <i>am</i> the reason that the driverless workbot project was reassigned. Director Stern called me in to discuss your concerns regarding the Sporb mucin cross-contamination, and I...\n\nShe said the supplemental testing on model X posed a threat to the Ceres mission.\n\nAfter what happened to that poor lab tech, I should have said more, but...\n\nIt was already too late for him.\n\nIt may be too late for all of us.\n\nYou should know that the Director received a video call from someone at the Vertex Institute as I left... I lingered outside her door and heard her address them as the head of transnational security! The way they were talking about the biobot...\n\nIt's not safe to write more here. I'll wait for you at the rocket hangar after your shift tonight.\n\nI hope you'll come. I understand if you don't.\n\nI am so, so sorry.\n\n - Dr. Saruhashi";
+					}
+				}
+
+				public class VALENTINESDAY
+				{
+					public static LocString TITLE = "Anonymous Admirer";
+
+					public class BODY
+					{
+						public static LocString CONTAINER1 = "I am\n   a subatomic particle\nsmaller than a speck of dust\n  flushed from your gaze\n\n     at the eyewash station  \n\n   My love is like plutonium\n gray and dull and\nunbearably heavy\n  until    I am near you\n\n with every breath \n      I burn, with\n    yearning\n              unseen\n\nPS: I made Steve let me in so I could leave you this, hope that's okay.";
+					}
+				}
+
+				public class UNSAFETRANSFER
+				{
+					public static LocString TITLE = "ENCRYPTION LEVEL: THREE";
+
+					public class BODY
+					{
+						public static LocString CONTAINER1 = "<smallcaps>[Log Fragmentation Detected]\n[Voice Recognition Unavailable]</smallcaps>\n\n[LOG BEGINS]\n\n...and then the Printing Pod says \"Knock knock, goo's there!\"\n\nUgh. They'll never laugh at <i>that</i> stinker.\n\nWhat if-\n\n(sound of a ding)\n\nHey hey, squishy little buddy! Look who's all grown up. You ready for a big robot ride? Dr. Seyed Ali should be back from his meeting any minute. He'll be so happy to see you.\n\n(sound of a wet slap on glass)\n\nAww yeah, I'd be impatient too.\n\nYou know what, why don't I go ahead and get you into your new home? I've helped him do this more than a dozen times.\n\n\"See one, do one, teach one,\" right?\n\n[LOG ENDS]";
+					}
+				}
+
+				public class STATUSITEMS
+				{
+					public class DUSTY
+					{
+						public static LocString NAME = "Decommissioned";
+
+						public static LocString TOOLTIP = "This building must be restored before it can be used";
+					}
+
+					public class BUILDING_BEING_REVEALED
+					{
+						public static LocString NAME = "Being Restored";
+
+						public static LocString TOOLTIP = "This building is being restored to its former glory";
+					}
+
+					public class BUILDING_REVEALING
+					{
+						public static LocString NAME = "Restoring Equipment";
+
+						public static LocString TOOLTIP = "This Duplicant is carefully restoring the Biobot Builder";
+					}
+
+					public class GERM_COLLECTION_PROGRESS
+					{
+						public static LocString NAME = "Incubating Sporb: {0}";
+
+						public static LocString TOOLTIP = "At 100% incubation, the Sporb begins to convert absorbed {GERM_NAME} into photosynthetic bacteria that can be used as biofuel\n\nIt is then ready to be assessed and transferred into a completed Biobot frame\n\nConsumption Rate: {0} [{GERM_NAME}]\n\nCurrent Total: {1} / {2} [{GERM_NAME}]";
+					}
+
+					public class NOGERMSCONSUMEDALERT
+					{
+						public static LocString NAME = "Insufficient Resources: {0}";
+
+						public static LocString TOOLTIP = "This building requires additional {0} in order to function\n\n{0} can be delivered via " + BUILDINGS.PREFABS.GASCONDUIT.NAME + " ";
+					}
+
+					public class CRAFTING_ROBOT_BODY
+					{
+						public static LocString NAME = "Crafting Biobot";
+
+						public static LocString TOOLTIP = "This building is using " + UI.FormatAsLink("Steel", "STEEL") + " to craft a Biobot frame";
+					}
+
+					public class DOCTOR_READY
+					{
+						public static LocString NAME = "Awaiting Doctor";
+
+						public static LocString TOOLTIP = "This building is waiting for a skilled Duplicant to perform an occupational health and safety check";
+					}
+
+					public class BUILDING_BEING_WORKED_BY_DOCTOR
+					{
+						public static LocString NAME = "Preparing Biobot";
+
+						public static LocString TOOLTIP = "This building is being operated by a skilled Duplicant";
+					}
+
+					public class DOCTOR_WORKING_BUILDING
+					{
+						public static LocString NAME = "Assessing Sporb";
+
+						public static LocString TOOLTIP = "This Duplicant is assessing the Sporb's readiness for Biobot assembly";
+					}
+				}
+			}
+
+			public class HIJACK_HEADQUARTERS
+			{
+				public static LocString NAME = "Printerceptor";
+
+				public static LocString DESCRIPTION = "Reboot an unsanctioned biogenetic facility.\n\nOnce activated, Duplicants can use it to siphon energy from the Printing Pod to power on-demand printing of...something.\n\nIt smells a bit like an old ranch.";
+
+				public static LocString DESCRIPTION_SHORT = "Reboot an unsanctioned biogenetic facility that siphons energy from the Printing Pod.";
+
+				public class BEGIN_POPUP
+				{
+					public static LocString NAME = "Story Trait: Printerceptor";
+
+					public static LocString CODEX_NAME = "First Encounter";
+
+					public static LocString DESCRIPTION = "My Duplicants have uncovered a fascinating machine. Its construction suggests that it was designed as an energy field disruptor, and retrofitted with printing capabilities.\n\nIt is locked behind a 13-digit passcode. One failed attempt could permanently disable the entire building.\n\nI can only hope that the code is also buried somewhere on this world.";
+				}
+
+				public class UNLOCK_POPUP
+				{
+					public static LocString NAME = "Story Trait: Printerceptor";
+
+					public static LocString CODEX_NAME = "Flushed Evidence";
+
+					public static LocString DESCRIPTION = string.Concat(new string[]
+					{
+						"My Duplicants have recovered the access code to unlock the ",
+						CODEX.STORY_TRAITS.HIJACK_HEADQUARTERS.NAME,
+						"!\n\nThe data storage medium was damaged during retrieval, but it has already served its purpose: the ",
+						CODEX.STORY_TRAITS.HIJACK_HEADQUARTERS.NAME,
+						"'s targeted printing technology is now at my colony's fingertips."
+					});
+
+					public static LocString BUTTON = "Close";
+				}
+
+				public class END_POPUP
+				{
+					public static LocString NAME = "Story Trait Complete: Printerceptor";
+
+					public static LocString CODEX_NAME = "Challenge Completed";
+
+					public static LocString DESCRIPTION = "Success! This building has printed its first viable organism. It contains zero detectable genetic defects.\n\nWe can now confidently reroute the Printing Pod's power to print the critters and seeds best suited for my colony's purposes. No species need ever be extinct again.\n\nA small personal item shook loose from the frame during use. Perhaps it belonged to the previous operator.";
+
+					public static LocString BUTTON = "Power On";
+				}
+
+				public class WHENIMGONE
+				{
+					public static LocString TITLE = "When I'm Gone";
+
+					public static LocString SUBTITLE = "ENCRYPTION LEVEL: NONE";
+
+					public class BODY
+					{
+						public static LocString CONTAINER1 = "<smallcaps>[Log Fragmentation Detected]</smallcaps>\n\n[LOG BEGINS]\n\n<i>...whoever you are...(static)...if you're watching this... You need to get out of the facility NOW. Don't talk to anyone. We thought we were the first...\nTiming is everything. </i>Time<i> is everything.\n\nGo to the Giga Co-Op downtown and tell them you're picking up an order for D.H. They'll give you a machine ... boot it up, stay offline.\n\n...instructions on the drive. Once you've verified the code, it'll tell you how to find the ...(static)...interceptor...data still stored on the server.\n\n...been rerouting power from the pods to the Bow... easing the demand...buying time to finish the Temporal Containment Field. But you can't buy time. You can only borrow it... the magnitude of our accumulated debt...\n\nWe're not the first to ... what happens when it all comes crashing ... all over again, and again, and again, and... I've long suspected the existence of other Bows......each time one of them exceeds capacity...\n...lines get splintered...grafted onto another...\n\nHow many other Earths...\n\nWhat else has the Director sacrificed?\n...(static)...</i>\n\n[LOG ENDS]\n------------------\n";
+					}
+				}
+
+				public class HANDOFF
+				{
+					public static LocString TITLE = "The Stall";
+
+					public static LocString SUBTITLE = "ENCRYPTION LEVEL: NONE";
+
+					public class BODY
+					{
+						public static LocString CONTAINER1 = "<smallcaps>[Log Fragmentation Detected]\n[Voice Recognition Unavailable]</smallcaps>\n\n[LOG BEGINS]\n\n(sound of running water)\n\nTech: Dr. Reed?\n\n(sound of a door opening)\n\nRuby: You came! I thought something happened.\n\nTech: Sorry I'm late. Real snafu in the cafeteria this morning. The new hazmat labels peel right off if they come into contact with mayonnaise.\n\nRuby: Why are there hazmat labels in the caf-\n\nTech: Did you bring the access codes for Techna's siphon?\n\nRuby: They're on this drive.\n\nRuby: Look, I need to know exactly who you're working with before I hand this over.\n\nTech: We're the good guys, Dr. Reed.\n\nRuby: That's who I thought we were. Try again.\n\nTech: I work with the people who made your Director who she is. In a way, we're sort of...family.\n\nRuby: The Director has no family.\n\nTech: Maybe not in this lifetime. The drive, please.\n\nRuby: What about Nikola? Do your people know where he is?\n\nTech: We're on it. You'll be the first to know.\n\n(sound of a firm knock on the door)\n\nVoice: Hello? Who's in there?\n\nRuby: (whispering) Those security guys must have followed you!\n\n(sound of banging on the door)\n\nVoice: Open up!\n\nRuby: If they get a hold of the data on that server...\n\nTech: Wait, what are you-\n\n(sound of a toilet flushing)\n\nTech: What have you done!?\n\nRuby: I'm sorry. It's gone. If they got their hands on it...I would never forgive myself.\n\n(sound of the door creaking open)\n\nRuby: Catalina! I thought you were-\n\nCatalina: Finally! What are you... you know what, I don't even care. Whatever you two are doing, can you do it in the hallway? I gotta go <i>bad.</i>\n\nRuby: Of course. Sorry.\n\nTech: Actually, we-\n\nCatalina: Dude. Don't make it weird. Get outta the way.\n\n(sound of a door slamming)\n\nRuby: What are you doing?\n\nTech: Pulling up the blueprints of the facility's plumbing system. You didn't think you could just flush unpatented trillion-dollar technology down the toilet, did you?\n\nRuby: Wait, you can't mean...you don't mean to <i>SELL</i> this technology! You don't understand the consequ-\n\nTech: We understand perfectly. You've been a great help, Dr. Reed. I trust you know better than to mention this to anyone.\n\n<smallcaps>[LOG ENDS]\n------------------\n";
+					}
+				}
+
+				public class ACTIVATECODE
+				{
+					public static LocString TITLE = "Access Code";
+
+					public static LocString SUBTITLE = "Service Receipt";
+
+					public class BODY
+					{
+						public static LocString CONTAINER1 = "<size=18>Giga Co-Op</size>\n<i><smallcaps>Proactive solutions for timeless tech</i>\nOpen 24/7\n\nReceipt #978-0-465-02656-2\n</smallcaps>\n\nDear Patron,\n\n<indent=5%>Thank you for using Giga Co-Op.\n\nPlease enter your thirteen-digit receipt number into your machine's control panel to access the updated operator's manual.\n\nDo not print or share this code.\n\nSubmit a review and get 4% off your next service!</indent>\n\n<smallcaps># ITEMS SOLD 2</smallcaps>\n\n\n------------------\n";
+					}
+				}
+			}
+		}
+
+		public class QUESTS
+		{
+			public class KNOCKQUEST
+			{
+				public static LocString NAME = "Greet Occupant";
+
+				public static LocString COMPLETE = "Initial contact was a success! Our new neighbor seems friendly, though extremely shy.\n\nThey'll need a little more coaxing before they're ready to join my colony.";
+			}
+
+			public class FOODQUEST
+			{
+				public static LocString NAME = "Welcome Dinner";
+
+				public static LocString COMPLETE = "Success! My Duplicants' cooking has whetted the hermit's appetite for communal living.\n\nThey've also found what appears to be a page from an old logbook tucked behind the mailbox.";
+			}
+
+			public class PLUGGEDIN
+			{
+				public static LocString NAME = "On the Grid";
+
+				public static LocString COMPLETE = "Success! The hermit is very excited about being on the grid.\n\nThe bright lights illuminate an unfamiliar file on the ground nearby.";
+			}
+
+			public class HIGHDECOR
+			{
+				public static LocString NAME = "Nice Neighborhood";
+
+				public static LocString COMPLETE = "Success! All this excellent decor is really making the hermit feel at home.\n\nHe scrawled a thank-you note on the back of an old holiday card.";
+			}
+
+			public class FOSSILHUNTQUEST
+			{
+				public static LocString NAME = "Scattered Fragments";
+
+				public static LocString COMPLETE = "Each of the fossil deposits on this asteroid has been excavated, and its contents safely retrieved.\n\nThe ancient specimen's deeper cache of fossil can now be mined.";
+			}
+
+			public class CRITERIA
+			{
+				public class NEIGHBOR
+				{
+					public static LocString NAME = "Knock on door";
+
+					public static LocString TOOLTIP = "Send a Duplicant over to introduce themselves and discover what it'll take to turn this stranger into a friend";
+				}
+
+				public class DECOR
+				{
+					public static LocString NAME = "Improve nearby Decor";
+
+					public static LocString TOOLTIP = string.Concat(new string[]
+					{
+						"Establish average ",
+						UI.PRE_KEYWORD,
+						"Decor",
+						UI.PST_KEYWORD,
+						" of {0} or higher for the area surrounding this building\n\nAverage Decor: {1:0.##}"
+					});
+				}
+
+				public class SUPPLIEDPOWER
+				{
+					public static LocString NAME = "Turn on festive lights";
+
+					public static LocString TOOLTIP = string.Concat(new string[]
+					{
+						"Connect this building to ",
+						UI.PRE_KEYWORD,
+						"Power",
+						UI.PST_KEYWORD,
+						" long enough to cheer up its occupant\n\nTime Remaining: {0}s"
+					});
+				}
+
+				public class FOODQUALITY
+				{
+					public static LocString NAME = "Deliver Food to the mailbox";
+
+					public static LocString TOOLTIP = string.Concat(new string[]
+					{
+						"Deliver 3 unique ",
+						UI.PRE_KEYWORD,
+						"Food",
+						UI.PST_KEYWORD,
+						" items. Quality must be {0} or higher\n\nFoods Delivered:\n{1}"
+					});
+
+					public static LocString NONE = "None";
+				}
+
+				public class LOSTSPECIMEN
+				{
+					public static LocString NAME = UI.FormatAsLink("Ancient Specimen", "MOVECAMERATOFossilDig");
+
+					public static LocString TOOLTIP = "Retrieve the largest deposit of the ancient critter's remains";
+
+					public static LocString NONE = "None";
+				}
+
+				public class LOSTICEFOSSIL
+				{
+					public static LocString NAME = UI.FormatAsLink("Frozen Fossil", "MOVECAMERATOFossilIce");
+
+					public static LocString TOOLTIP = "Retrieve a piece of the ancient critter that has been preserved in " + UI.PRE_KEYWORD + "Ice" + UI.PST_KEYWORD;
+
+					public static LocString NONE = "None";
+				}
+
+				public class LOSTRESINFOSSIL
+				{
+					public static LocString NAME = UI.FormatAsLink("Amber Fossil", "MOVECAMERATOFossilResin");
+
+					public static LocString TOOLTIP = "Retrieve a piece of the ancient critter that has been preserved in a strangely resin-like substance";
+
+					public static LocString NONE = "None";
+				}
+
+				public class LOSTROCKFOSSIL
+				{
+					public static LocString NAME = UI.FormatAsLink("Petrified Fossil", "MOVECAMERATOFossilRock");
+
+					public static LocString TOOLTIP = string.Concat(new string[]
+					{
+						"Retrieve a piece of the ancient critter that has been preserved in ",
+						UI.PRE_KEYWORD,
+						"Rock",
+						UI.PST_KEYWORD,
+						" "
+					});
+
+					public static LocString NONE = "None";
+				}
+			}
+		}
+
+		public class POLLINATORS
+		{
+			public static LocString TITLE = "Pollination";
+
+			public static LocString SUBTITLE = "Critter-Boosted Growth";
+
+			public class BODY
+			{
+				public static LocString CONTAINER1 = string.Concat(new string[]
+				{
+					"Pollination is a symbiotic interaction between ",
+					UI.FormatAsLink("Plants", "PLANTS"),
+					" and certain ",
+					UI.FormatAsLink("Critter", "CREATURES"),
+					" species, which benefits plant growth.\n\nSome ",
+					UI.FormatAsLink("Plants", "PLANTS"),
+					" rely on pollinators in order to grow at all, while others receive a valuable acceleration to their natural growth speed."
+				});
+			}
 		}
 	}
 }

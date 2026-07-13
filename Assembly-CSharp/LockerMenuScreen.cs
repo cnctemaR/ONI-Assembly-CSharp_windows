@@ -231,7 +231,10 @@ public class LockerMenuScreen : KModalScreen
 			}
 			else if (DistributionPlatform.Inst.Name == "Rail")
 			{
-				dlcId == "COSMETIC1_ID";
+				if (dlcId == "COSMETIC1_ID")
+				{
+					return "https://www.wegame.com.cn/store/2002628";
+				}
 				return "";
 			}
 		}

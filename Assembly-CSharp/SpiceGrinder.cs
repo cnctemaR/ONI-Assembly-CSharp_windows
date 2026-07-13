@@ -9,20 +9,6 @@ using UnityEngine;
 
 public class SpiceGrinder : GameStateMachine<SpiceGrinder, SpiceGrinder.StatesInstance, IStateMachineTarget, SpiceGrinder.Def>
 {
-	public static void InitializeSpices()
-	{
-		Spices spices = Db.Get().Spices;
-		SpiceGrinder.SettingOptions = new Dictionary<Tag, SpiceGrinder.Option>();
-		for (int i = 0; i < spices.Count; i++)
-		{
-			Spice spice = spices[i];
-			if (DlcManager.IsCorrectDlcSubscribed(spice))
-			{
-				SpiceGrinder.SettingOptions.Add(spice.Id, new SpiceGrinder.Option(spice));
-			}
-		}
-	}
-
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
 		default_state = this.inoperational;
@@ -86,7 +72,19 @@ public class SpiceGrinder : GameStateMachine<SpiceGrinder, SpiceGrinder.StatesIn
 		return new WorkChore<SpiceGrinderWorkable>(Db.Get().ChoreTypes.Cook, smi.workable, null, true, null, null, null, true, null, false, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 5, false, true);
 	}
 
-	public static Dictionary<Tag, SpiceGrinder.Option> SettingOptions = null;
+	public static void InitializeSpices()
+	{
+		Spices spices = Db.Get().Spices;
+		SpiceGrinder.SettingOptions = new Dictionary<Tag, SpiceGrinder.Option>();
+		for (int i = 0; i < spices.Count; i++)
+		{
+			Spice spice = spices[i];
+			if (DlcManager.IsCorrectDlcSubscribed(spice))
+			{
+				SpiceGrinder.SettingOptions.Add(spice.Id, new SpiceGrinder.Option(spice));
+			}
+		}
+	}
 
 	public static readonly Operational.Flag spiceSet = new Operational.Flag("spiceSet", Operational.Flag.Type.Functional);
 
@@ -100,136 +98,7 @@ public class SpiceGrinder : GameStateMachine<SpiceGrinder, SpiceGrinder.StatesIn
 
 	public StateMachine<SpiceGrinder, SpiceGrinder.StatesInstance, IStateMachineTarget, SpiceGrinder.Def>.BoolParameter isReady;
 
-	public class Option : IConfigurableConsumerOption
-	{
-		public Effect StatBonus
-		{
-			get
-			{
-				if (this.statBonus == null)
-				{
-					return null;
-				}
-				if (string.IsNullOrEmpty(this.spiceDescription))
-				{
-					this.CreateDescription();
-					this.GetName();
-				}
-				this.statBonus.Name = this.name;
-				this.statBonus.description = this.spiceDescription;
-				return this.statBonus;
-			}
-		}
-
-		public Option(Spice spice)
-		{
-			this.Id = new Tag(spice.Id);
-			this.Spice = spice;
-			if (spice.StatBonus != null)
-			{
-				this.statBonus = new Effect(spice.Id, this.GetName(), this.spiceDescription, 600f, true, false, false, null, -1f, 0f, null, "");
-				this.statBonus.Add(spice.StatBonus);
-				Db.Get().effects.Add(this.statBonus);
-			}
-		}
-
-		public Tag GetID()
-		{
-			return this.Spice.Id;
-		}
-
-		public string GetName()
-		{
-			if (string.IsNullOrEmpty(this.name))
-			{
-				string text = "STRINGS.ITEMS.SPICES." + this.Spice.Id.ToUpper() + ".NAME";
-				StringEntry stringEntry;
-				Strings.TryGet(text, out stringEntry);
-				this.name = "MISSING " + text;
-				if (stringEntry != null)
-				{
-					this.name = stringEntry;
-				}
-			}
-			return this.name;
-		}
-
-		public string GetDetailedDescription()
-		{
-			if (string.IsNullOrEmpty(this.fullDescription))
-			{
-				this.CreateDescription();
-			}
-			return this.fullDescription;
-		}
-
-		public string GetDescription()
-		{
-			if (!string.IsNullOrEmpty(this.spiceDescription))
-			{
-				return this.spiceDescription;
-			}
-			string text = "STRINGS.ITEMS.SPICES." + this.Spice.Id.ToUpper() + ".DESC";
-			StringEntry stringEntry;
-			Strings.TryGet(text, out stringEntry);
-			this.spiceDescription = "MISSING " + text;
-			if (stringEntry != null)
-			{
-				this.spiceDescription = stringEntry.String;
-			}
-			return this.spiceDescription;
-		}
-
-		private void CreateDescription()
-		{
-			string text = "STRINGS.ITEMS.SPICES." + this.Spice.Id.ToUpper() + ".DESC";
-			StringEntry stringEntry;
-			Strings.TryGet(text, out stringEntry);
-			this.spiceDescription = "MISSING " + text;
-			if (stringEntry != null)
-			{
-				this.spiceDescription = stringEntry.String;
-			}
-			this.ingredientDescriptions = string.Format("\n\n<b>{0}</b>", BUILDINGS.PREFABS.SPICEGRINDER.INGREDIENTHEADER);
-			for (int i = 0; i < this.Spice.Ingredients.Length; i++)
-			{
-				Spice.Ingredient ingredient = this.Spice.Ingredients[i];
-				GameObject prefab = Assets.GetPrefab((ingredient.IngredientSet != null && ingredient.IngredientSet.Length != 0) ? ingredient.IngredientSet[0] : null);
-				this.ingredientDescriptions += string.Format("\n{0}{1} {2}{3}", new object[]
-				{
-					"    • ",
-					prefab.GetProperName(),
-					ingredient.AmountKG,
-					GameUtil.GetUnitTypeMassOrUnit(prefab)
-				});
-			}
-			this.fullDescription = this.spiceDescription + this.ingredientDescriptions;
-		}
-
-		public Sprite GetIcon()
-		{
-			return Assets.GetSprite(this.Spice.Image);
-		}
-
-		public IConfigurableConsumerIngredient[] GetIngredients()
-		{
-			return this.Spice.Ingredients;
-		}
-
-		public readonly Tag Id;
-
-		public readonly Spice Spice;
-
-		private string name;
-
-		private string fullDescription;
-
-		private string spiceDescription;
-
-		private string ingredientDescriptions;
-
-		private Effect statBonus;
-	}
+	public static Dictionary<Tag, SpiceGrinder.Option> SettingOptions = null;
 
 	public class Def : StateMachine.BaseDef
 	{
@@ -708,5 +577,136 @@ public class SpiceGrinder : GameStateMachine<SpiceGrinder, SpiceGrinder.StatesIn
 
 		[Serialize]
 		private bool allowMutantSeeds = true;
+	}
+
+	public class Option : IConfigurableConsumerOption
+	{
+		public Effect StatBonus
+		{
+			get
+			{
+				if (this.statBonus == null)
+				{
+					return null;
+				}
+				if (string.IsNullOrEmpty(this.spiceDescription))
+				{
+					this.CreateDescription();
+					this.GetName();
+				}
+				this.statBonus.Name = this.name;
+				this.statBonus.description = this.spiceDescription;
+				return this.statBonus;
+			}
+		}
+
+		public Option(Spice spice)
+		{
+			this.Id = new Tag(spice.Id);
+			this.Spice = spice;
+			if (spice.StatBonus != null)
+			{
+				this.statBonus = new Effect(spice.Id, this.GetName(), this.spiceDescription, 600f, true, false, false, null, -1f, 0f, null, "");
+				this.statBonus.Add(spice.StatBonus);
+				Db.Get().effects.Add(this.statBonus);
+			}
+		}
+
+		public Tag GetID()
+		{
+			return this.Spice.Id;
+		}
+
+		public string GetName()
+		{
+			if (string.IsNullOrEmpty(this.name))
+			{
+				string text = "STRINGS.ITEMS.SPICES." + this.Spice.Id.ToUpper() + ".NAME";
+				StringEntry stringEntry;
+				Strings.TryGet(text, out stringEntry);
+				this.name = "MISSING " + text;
+				if (stringEntry != null)
+				{
+					this.name = stringEntry;
+				}
+			}
+			return this.name;
+		}
+
+		public string GetDetailedDescription()
+		{
+			if (string.IsNullOrEmpty(this.fullDescription))
+			{
+				this.CreateDescription();
+			}
+			return this.fullDescription;
+		}
+
+		public string GetDescription()
+		{
+			if (!string.IsNullOrEmpty(this.spiceDescription))
+			{
+				return this.spiceDescription;
+			}
+			string text = "STRINGS.ITEMS.SPICES." + this.Spice.Id.ToUpper() + ".DESC";
+			StringEntry stringEntry;
+			Strings.TryGet(text, out stringEntry);
+			this.spiceDescription = "MISSING " + text;
+			if (stringEntry != null)
+			{
+				this.spiceDescription = stringEntry.String;
+			}
+			return this.spiceDescription;
+		}
+
+		private void CreateDescription()
+		{
+			string text = "STRINGS.ITEMS.SPICES." + this.Spice.Id.ToUpper() + ".DESC";
+			StringEntry stringEntry;
+			Strings.TryGet(text, out stringEntry);
+			this.spiceDescription = "MISSING " + text;
+			if (stringEntry != null)
+			{
+				this.spiceDescription = stringEntry.String;
+			}
+			this.ingredientDescriptions = string.Format("\n\n<b>{0}</b>", BUILDINGS.PREFABS.SPICEGRINDER.INGREDIENTHEADER);
+			for (int i = 0; i < this.Spice.Ingredients.Length; i++)
+			{
+				Spice.Ingredient ingredient = this.Spice.Ingredients[i];
+				GameObject prefab = Assets.GetPrefab((ingredient.IngredientSet != null && ingredient.IngredientSet.Length != 0) ? ingredient.IngredientSet[0] : null);
+				this.ingredientDescriptions += string.Format("\n{0}{1} {2}{3}", new object[]
+				{
+					"    • ",
+					prefab.GetProperName(),
+					ingredient.AmountKG,
+					GameUtil.GetUnitTypeMassOrUnit(prefab)
+				});
+			}
+			this.fullDescription = this.spiceDescription + this.ingredientDescriptions;
+		}
+
+		public Sprite GetIcon()
+		{
+			return Assets.GetSprite(this.Spice.Image);
+		}
+
+		public IConfigurableConsumerIngredient[] GetIngredients()
+		{
+			return this.Spice.Ingredients;
+		}
+
+		public readonly Tag Id;
+
+		public readonly Spice Spice;
+
+		private string name;
+
+		private string fullDescription;
+
+		private string spiceDescription;
+
+		private string ingredientDescriptions;
+
+		private Effect statBonus;
 	}
 }

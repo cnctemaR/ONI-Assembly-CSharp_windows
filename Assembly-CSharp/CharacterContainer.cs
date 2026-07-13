@@ -919,7 +919,7 @@ public class CharacterContainer : KScreen, ITelepadDeliverableContainer
 		{ 3, "StandardYellow" },
 		{ 4, "StandardGreen" },
 		{ 5, "permit_standard_bionic_outfit" },
-		{ 6, "permit_standard_regal_neutronium_outfit" }
+		{ 414842661, "permit_standard_regal_neutronium_outfit" }
 	};
 
 	[SerializeField]

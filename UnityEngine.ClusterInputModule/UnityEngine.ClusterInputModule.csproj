@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{45B4A029-45B8-413F-A266-ADA2C84D39F3}</ProjectGuid>
+    <ProjectGuid>{7A8CA083-BFE8-4515-B64F-A293D8E9EB0D}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>UnityEngine</RootNamespace>
     <AssemblyName>UnityEngine.ClusterInputModule</AssemblyName>
@@ -20,15 +20,15 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\netstandard\netstandard.csproj">
-      <Project>{45B4A029-45B8-413F-A266-ADA2C84D39CC}</Project>
+      <Project>{7A8CA083-BFE8-4515-B64F-A293D8E9EAE6}</Project>
       <Name>netstandard</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
-      <Project>{45B4A029-45B8-413F-A266-ADA2C84D39F6}</Project>
+      <Project>{7A8CA083-BFE8-4515-B64F-A293D8E9EB10}</Project>
       <Name>UnityEngine.CoreModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
-      <Project>{45B4A029-45B8-413F-A266-ADA2C84D3A0E}</Project>
+      <Project>{7A8CA083-BFE8-4515-B64F-A293D8E9EB28}</Project>
       <Name>UnityEngine.SharedInternalsModule</Name>
     </ProjectReference>
   </ItemGroup>

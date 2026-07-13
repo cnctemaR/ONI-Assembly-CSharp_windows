@@ -9,10 +9,14 @@ public class SuitWearer : GameStateMachine<SuitWearer, SuitWearer.Instance>
 		this.root.EventHandler(GameHashes.PathAdvanced, delegate(SuitWearer.Instance smi, object data)
 		{
 			smi.OnPathAdvanced(data);
+		}).EventHandler(GameHashes.NavigationFailed, delegate(SuitWearer.Instance smi, object data)
+		{
+			smi.UnreserveSuits();
 		}).EventHandler(GameHashes.Died, delegate(SuitWearer.Instance smi, object data)
 		{
 			smi.UnreserveSuits();
-		}).DoNothing();
+		})
+			.DoNothing();
 		this.suit.DoNothing();
 		this.nosuit.DoNothing();
 	}

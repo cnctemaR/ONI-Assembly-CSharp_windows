@@ -52,7 +52,7 @@ public class PathFinder
 				{
 					if (link.link == node2.cell && node2.navType == link.endNavType && node.navType == link.startNavType)
 					{
-						PathFinder.PotentialPath potentialPath = new PathFinder.PotentialPath(node.cell, node.navType, flags);
+						PathFinder.PotentialPath potentialPath = new PathFinder.PotentialPath(node2.cell, node.navType, flags);
 						flag = abilities.TraversePath(ref potentialPath, node.cell, node.navType, 0, (int)link.transitionId, false);
 						if (flag)
 						{

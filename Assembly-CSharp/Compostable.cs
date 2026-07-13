@@ -30,11 +30,6 @@ public class Compostable : KMonoBehaviour
 	private void MarkForCompost(bool force = false)
 	{
 		this.RefreshStatusItem();
-		Storage storage = base.GetComponent<Pickupable>().storage;
-		if (storage != null)
-		{
-			storage.Drop(base.gameObject, true);
-		}
 	}
 
 	private void OnToggleCompost()

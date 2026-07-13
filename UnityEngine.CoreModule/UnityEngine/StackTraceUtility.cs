@@ -20,8 +20,8 @@ namespace UnityEngine
 			}
 		}
 
-		[RequiredByNativeCode]
 		[SecuritySafeCritical]
+		[RequiredByNativeCode]
 		public unsafe static string ExtractStackTrace()
 		{
 			int num = 16384;

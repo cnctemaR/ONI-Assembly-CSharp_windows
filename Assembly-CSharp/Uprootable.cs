@@ -156,7 +156,7 @@ public class Uprootable : Workable, IDigActionEntity
 		this.Uproot();
 	}
 
-	private void OnCancel(object data)
+	private void OnCancel(object _)
 	{
 		if (this.chore != null)
 		{
@@ -185,7 +185,7 @@ public class Uprootable : Workable, IDigActionEntity
 		this.OnCancel(null);
 	}
 
-	public virtual void ForceCancelUproot(object data = null)
+	public virtual void ForceCancelUproot(object _ = null)
 	{
 		this.OnCancel(null);
 	}

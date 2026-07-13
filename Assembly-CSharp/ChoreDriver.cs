@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using STRINGS;
 
 public class ChoreDriver : StateMachineComponent<ChoreDriver.StatesInstance>
@@ -41,7 +42,7 @@ public class ChoreDriver : StateMachineComponent<ChoreDriver.StatesInstance>
 			{
 				text2 = context.chore.GetType().Name;
 			}
-			Debug.LogWarning(string.Concat(new string[] { "Stopping chore ", text, " to start ", text2, " but stopping the first chore cancelled the second one." }));
+			global::Debug.LogWarning(string.Concat(new string[] { "Stopping chore ", text, " to start ", text2, " but stopping the first chore cancelled the second one." }));
 		}
 	}
 
@@ -65,6 +66,11 @@ public class ChoreDriver : StateMachineComponent<ChoreDriver.StatesInstance>
 		public Navigator navigator { get; private set; }
 
 		public WorkerBase worker { get; private set; }
+
+		[Conditional("ENABLE_LOGGER")]
+		public void Log(string name, string param)
+		{
+		}
 
 		public StatesInstance(ChoreDriver master)
 			: base(master)

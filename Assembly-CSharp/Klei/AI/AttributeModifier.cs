@@ -31,9 +31,15 @@ namespace Klei.AI
 		}
 
 		public AttributeModifier(string attribute_id, float value, Func<string> description_cb, bool is_multiplier = false, bool uiOnly = false)
+			: this(attribute_id, value, null, description_cb, is_multiplier, uiOnly)
+		{
+		}
+
+		public AttributeModifier(string attribute_id, float value, Func<string> name_cb, Func<string> description_cb, bool is_multiplier = false, bool uiOnly = false)
 		{
 			this.AttributeId = attribute_id;
 			this.Value = value;
+			this.NameCB = name_cb;
 			this.DescriptionCB = description_cb;
 			this.Description = null;
 			this.IsMultiplier = is_multiplier;
@@ -50,14 +56,48 @@ namespace Klei.AI
 			this.Value = value;
 		}
 
+		public static Attribute FetchAttribute(string attributeId)
+		{
+			Attribute attribute = Db.Get().Attributes.TryGet(attributeId);
+			if (attribute != null)
+			{
+				return attribute;
+			}
+			Attribute attribute2 = Db.Get().BuildingAttributes.TryGet(attributeId);
+			if (attribute2 != null)
+			{
+				return attribute2;
+			}
+			Attribute attribute3 = Db.Get().PlantAttributes.TryGet(attributeId);
+			if (attribute3 != null)
+			{
+				return attribute3;
+			}
+			Attribute attribute4 = Db.Get().CritterAttributes.TryGet(attributeId);
+			if (attribute4 != null)
+			{
+				return attribute4;
+			}
+			return null;
+		}
+
+		private Attribute FetchAttribute()
+		{
+			return AttributeModifier.FetchAttribute(this.AttributeId);
+		}
+
 		public string GetName()
 		{
-			Attribute attribute = Db.Get().Attributes.TryGet(this.AttributeId);
-			if (attribute != null && attribute.ShowInUI != Attribute.Display.Never)
+			Attribute attribute = this.FetchAttribute();
+			if (attribute == null || attribute.ShowInUI == Attribute.Display.Never)
 			{
-				return attribute.Name;
+				return "";
 			}
-			return "";
+			if (this.NameCB != null)
+			{
+				return this.NameCB();
+			}
+			return attribute.Name;
 		}
 
 		public string GetDescription()
@@ -71,31 +111,8 @@ namespace Klei.AI
 
 		public string GetFormattedString()
 		{
-			IAttributeFormatter attributeFormatter = null;
-			Attribute attribute = Db.Get().Attributes.TryGet(this.AttributeId);
-			if (!this.IsMultiplier)
-			{
-				if (attribute != null)
-				{
-					attributeFormatter = attribute.formatter;
-				}
-				else
-				{
-					attribute = Db.Get().BuildingAttributes.TryGet(this.AttributeId);
-					if (attribute != null)
-					{
-						attributeFormatter = attribute.formatter;
-					}
-					else
-					{
-						attribute = Db.Get().PlantAttributes.TryGet(this.AttributeId);
-						if (attribute != null)
-						{
-							attributeFormatter = attribute.formatter;
-						}
-					}
-				}
-			}
+			Attribute attribute = this.FetchAttribute();
+			IAttributeFormatter attributeFormatter = ((!this.IsMultiplier && attribute != null) ? attribute.formatter : null);
 			string text = "";
 			if (attributeFormatter != null)
 			{
@@ -125,6 +142,8 @@ namespace Klei.AI
 		{
 			return new AttributeModifier(this.AttributeId, this.Value, this.Description, false, false, true);
 		}
+
+		public Func<string> NameCB;
 
 		public string Description;
 

@@ -45,7 +45,7 @@ public class UpTopPoopStates : GameStateMachine<UpTopPoopStates, UpTopPoopStates
 
 		public int GetPoopCell()
 		{
-			int num = base.master.gameObject.GetComponent<Navigator>().maxProbingRadius - 1;
+			int num = base.master.gameObject.GetComponent<Navigator>().maxProbeRadiusY - 1;
 			int num2 = Grid.PosToCell(base.gameObject);
 			int num3 = Grid.OffsetCell(num2, 0, 1);
 			while (num > 0 && Grid.IsValidCell(num3) && !Grid.Solid[num3] && !this.IsClosedDoor(num3))

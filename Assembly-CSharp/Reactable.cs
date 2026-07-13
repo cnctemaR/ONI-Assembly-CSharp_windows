@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 
 public abstract class Reactable
@@ -49,7 +50,7 @@ public abstract class Reactable
 		this.UpdateLocation();
 		if (followTransform)
 		{
-			this.transformId = Singleton<CellChangeMonitor>.Instance.RegisterCellChangedHandler(this.gameObject.transform, new global::System.Action(this.UpdateLocation), "Reactable follow transform");
+			this.cellChangedHandleID = Singleton<CellChangeMonitor>.Instance.RegisterCellChangedHandler(this.gameObject.transform, Reactable.UpdateLocationDispatcher, this, "Reactable follow transform");
 		}
 	}
 
@@ -125,10 +126,9 @@ public abstract class Reactable
 	{
 		this.End();
 		this.InternalCleanup();
-		if (this.transformId != -1)
+		if (this.cellChangedHandleID != 0UL)
 		{
-			Singleton<CellChangeMonitor>.Instance.UnregisterCellChangedHandler(this.transformId, new global::System.Action(this.UpdateLocation));
-			this.transformId = -1;
+			Singleton<CellChangeMonitor>.Instance.UnregisterCellChangedHandler(ref this.cellChangedHandleID);
 		}
 		GameScenePartitioner.Instance.Free(ref this.partitionerEntry);
 	}
@@ -178,7 +178,7 @@ public abstract class Reactable
 
 	private int rangeHeight;
 
-	private int transformId = -1;
+	private ulong cellChangedHandleID;
 
 	public float globalCooldown;
 
@@ -199,6 +199,11 @@ public abstract class Reactable
 	private List<Reactable.ReactablePrecondition> additionalPreconditions;
 
 	private ObjectLayer reactionLayer;
+
+	private static readonly Action<object> UpdateLocationDispatcher = delegate(object obj)
+	{
+		Unsafe.As<Reactable>(obj).UpdateLocation();
+	};
 
 	public delegate bool ReactablePrecondition(GameObject go, Navigator.ActiveTransition transition);
 }

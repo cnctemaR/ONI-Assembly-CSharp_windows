@@ -11,10 +11,19 @@ public class EdiblesManager : KMonoBehaviour
 		return EdiblesManager.s_allFoodTypes.Where<EdiblesManager.FoodInfo>(new Func<EdiblesManager.FoodInfo, bool>(DlcManager.IsCorrectDlcSubscribed)).ToList<EdiblesManager.FoodInfo>();
 	}
 
+	public static void ClearSaveFoodCache()
+	{
+		EdiblesManager.s_loadedFoodTypes = null;
+	}
+
 	public static List<EdiblesManager.FoodInfo> GetAllFoodTypes()
 	{
+		if (EdiblesManager.s_loadedFoodTypes == null)
+		{
+			EdiblesManager.s_loadedFoodTypes = EdiblesManager.s_allFoodTypes.Where<EdiblesManager.FoodInfo>(new Func<EdiblesManager.FoodInfo, bool>(Game.IsCorrectDlcActiveForCurrentSave)).ToList<EdiblesManager.FoodInfo>();
+		}
 		global::Debug.Assert(SaveLoader.Instance != null, "Call GetAllLoadedFoodTypes from the frontend");
-		return EdiblesManager.s_allFoodTypes.Where<EdiblesManager.FoodInfo>(new Func<EdiblesManager.FoodInfo, bool>(Game.IsCorrectDlcActiveForCurrentSave)).ToList<EdiblesManager.FoodInfo>();
+		return EdiblesManager.s_loadedFoodTypes;
 	}
 
 	public static EdiblesManager.FoodInfo GetFoodInfo(string foodID)
@@ -39,6 +48,8 @@ public class EdiblesManager : KMonoBehaviour
 	private static List<EdiblesManager.FoodInfo> s_allFoodTypes = new List<EdiblesManager.FoodInfo>();
 
 	private static Dictionary<string, EdiblesManager.FoodInfo> s_allFoodMap = new Dictionary<string, EdiblesManager.FoodInfo>();
+
+	private static List<EdiblesManager.FoodInfo> s_loadedFoodTypes;
 
 	public class FoodInfo : IConsumableUIItem, IHasDlcRestrictions
 	{

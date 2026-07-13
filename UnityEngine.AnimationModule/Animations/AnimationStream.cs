@@ -7,9 +7,9 @@ using UnityEngine.Scripting.APIUpdating;
 namespace UnityEngine.Animations
 {
 	[MovedFrom("UnityEngine.Experimental.Animations")]
+	[NativeHeader("Modules/Animation/ScriptBindings/AnimationStream.bindings.h")]
 	[NativeHeader("Modules/Animation/Director/AnimationStream.h")]
 	[RequiredByNativeCode]
-	[NativeHeader("Modules/Animation/ScriptBindings/AnimationStream.bindings.h")]
 	public struct AnimationStream
 	{
 		internal uint animatorBindingsVersion

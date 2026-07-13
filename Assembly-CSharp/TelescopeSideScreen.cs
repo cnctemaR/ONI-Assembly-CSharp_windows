@@ -51,7 +51,7 @@ public class TelescopeSideScreen : SideScreenContent
 		return target.GetComponent<Telescope>() != null;
 	}
 
-	private void RefreshDisplayState(object data = null)
+	private void RefreshDisplayState(object _ = null)
 	{
 		if (SelectTool.Instance.selected == null)
 		{

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using Klei.AI;
 using UnityEngine;
 
@@ -14,16 +13,6 @@ public class SolidConsumerMonitor : GameStateMachine<SolidConsumerMonitor, Solid
 		}).ToggleBehaviour(GameTags.Creatures.WantsToEat, (SolidConsumerMonitor.Instance smi) => smi.targetEdible != null && !smi.targetEdible.HasTag(GameTags.Creatures.ReservedByCreature), null);
 		this.satisfied.TagTransition(GameTags.Creatures.Hungry, this.lookingforfood, false);
 		this.lookingforfood.TagTransition(GameTags.Creatures.Hungry, this.satisfied, true).PreBrainUpdate(new Action<SolidConsumerMonitor.Instance>(SolidConsumerMonitor.FindFood));
-	}
-
-	[Conditional("DETAILED_SOLID_CONSUMER_MONITOR_PROFILE")]
-	private static void BeginDetailedSample(string region_name)
-	{
-	}
-
-	[Conditional("DETAILED_SOLID_CONSUMER_MONITOR_PROFILE")]
-	private static void EndDetailedSample(string region_name)
-	{
 	}
 
 	private static void FindFood(SolidConsumerMonitor.Instance smi)
@@ -313,7 +302,7 @@ public class SolidConsumerMonitor : GameStateMachine<SolidConsumerMonitor, Solid
 			}
 			AmountInstance amountInstance = Db.Get().Amounts.Calories.Lookup(base.smi.gameObject);
 			string properName = kprefabID.GetProperName();
-			PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Negative, properName, kprefabID.transform, 1.5f, false);
+			PopFXManager.Instance.SpawnFX(global::Def.GetUISprite(kprefabID.gameObject, "ui", false).first, PopFXManager.Instance.sprite_Negative, properName, kprefabID.transform, Vector3.zero, 1.5f, true, false, false);
 			float num = amountInstance.GetMax() - amountInstance.value;
 			float num2 = dietInfo.ConvertCaloriesToConsumptionMass(num);
 			IPlantConsumptionInstructions plantConsumptionInstructions = null;
@@ -357,12 +346,13 @@ public class SolidConsumerMonitor : GameStateMachine<SolidConsumerMonitor, Solid
 				}
 				num3 = dietInfo.ConvertConsumptionMassToCalories(num2);
 			}
-			CreatureCalorieMonitor.CaloriesConsumedEvent caloriesConsumedEvent = new CreatureCalorieMonitor.CaloriesConsumedEvent
+			Boxed<CreatureCalorieMonitor.CaloriesConsumedEvent> boxed = Boxed<CreatureCalorieMonitor.CaloriesConsumedEvent>.Get(new CreatureCalorieMonitor.CaloriesConsumedEvent
 			{
 				tag = kprefabID.PrefabTag,
 				calories = num3
-			};
-			base.Trigger(-2038961714, caloriesConsumedEvent);
+			});
+			base.Trigger(-2038961714, boxed);
+			boxed.Release();
 			this.targetEdible = null;
 		}
 

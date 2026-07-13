@@ -26,26 +26,22 @@ public class DevToolPerformanceInfo : DevTool
 			List<BrainScheduler.BrainGroup> list = Game.BrainScheduler.debugGetBrainGroups();
 			for (int i = 0; i < list.Count; i++)
 			{
+				ImGui.PushID(i);
 				BrainScheduler.BrainGroup brainGroup = list[i];
 				ImGui.Text(brainGroup.tag.ToString());
 				ImGui.Indent();
 				ImGui.Text("Brain count: " + brainGroup.BrainCount.ToString());
-				ImGui.Text("probeSize: " + brainGroup.probeSize.ToString());
-				ImGui.Text("probeCount: " + brainGroup.probeCount.ToString());
 				ImGui.PushID(i);
 				ImGui.Checkbox("Freeze AdjustLoad", ref brainGroup.debugFreezeLoadAdustment);
 				ImGui.PopID();
 				ImGui.SameLine();
-				if (ImGui.Button("Reset probe size/count"))
-				{
-					brainGroup.ResetLoad();
-				}
 				ImGui.Text("Max priority brain count seen: " + brainGroup.debugMaxPriorityBrainCountSeen.ToString());
 				ImGui.SameLine();
 				if (ImGui.Button("Reset"))
 				{
 					brainGroup.debugMaxPriorityBrainCountSeen = 0;
 				}
+				ImGui.PopID();
 				ImGui.Unindent();
 			}
 		}

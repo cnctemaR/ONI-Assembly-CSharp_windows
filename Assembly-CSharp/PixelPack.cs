@@ -72,7 +72,7 @@ public class PixelPack : KMonoBehaviour, ISaveLoadable
 		}
 	}
 
-	private void OnOperationalChanged(object data)
+	private void OnOperationalChanged(object _)
 	{
 		if (this.operational.IsOperational)
 		{

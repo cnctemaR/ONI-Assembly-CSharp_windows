@@ -25,8 +25,8 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void LogLayoutEndGroup();
 
-		[StaticAccessor("GetGUIDebuggerManager()", StaticAccessorType.Dot)]
 		[NativeConditional("UNITY_EDITOR")]
+		[StaticAccessor("GetGUIDebuggerManager()", StaticAccessorType.Dot)]
 		public static void LogBeginProperty(string targetTypeAssemblyQualifiedName, string path, Rect position)
 		{
 			GUIDebugger.LogBeginProperty_Injected(targetTypeAssemblyQualifiedName, path, ref position);

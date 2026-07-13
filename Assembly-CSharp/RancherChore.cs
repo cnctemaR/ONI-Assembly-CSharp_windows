@@ -6,19 +6,9 @@ using TUNING;
 public class RancherChore : Chore<RancherChore.RancherChoreStates.Instance>
 {
 	public RancherChore(KPrefabID rancher_station)
+		: base(Db.Get().ChoreTypes.Ranch, rancher_station, null, false, null, null, null, PriorityScreen.PriorityClass.basic, 5, false, true, 0, false, ReportManager.ReportType.WorkTime)
 	{
-		Chore.Precondition precondition = default(Chore.Precondition);
-		precondition.id = "IsCreatureAvailableForRanching";
-		precondition.description = DUPLICANTS.CHORES.PRECONDITIONS.IS_CREATURE_AVAILABLE_FOR_RANCHING;
-		precondition.sortOrder = -3;
-		precondition.fn = delegate(ref Chore.Precondition.Context context, object data)
-		{
-			RanchStation.Instance instance = data as RanchStation.Instance;
-			return !instance.HasRancher && instance.IsCritterAvailableForRanching;
-		};
-		this.IsOpenForRanching = precondition;
-		base..ctor(Db.Get().ChoreTypes.Ranch, rancher_station, null, false, null, null, null, PriorityScreen.PriorityClass.basic, 5, false, true, 0, false, ReportManager.ReportType.WorkTime);
-		this.AddPrecondition(this.IsOpenForRanching, rancher_station.GetSMI<RanchStation.Instance>());
+		this.AddPrecondition(RancherChore.IsOpenForRanching, rancher_station.GetSMI<RanchStation.Instance>());
 		SkillPerkMissingComplainer component = base.GetComponent<SkillPerkMissingComplainer>();
 		this.AddPrecondition(ChorePreconditions.instance.HasSkillPerk, component.requiredSkillPerk);
 		this.AddPrecondition(ChorePreconditions.instance.IsScheduledTime, Db.Get().ScheduleBlockTypes.Work);
@@ -45,7 +35,17 @@ public class RancherChore : Chore<RancherChore.RancherChoreStates.Instance>
 		base.smi.sm.rancher.Set(null, base.smi);
 	}
 
-	public Chore.Precondition IsOpenForRanching;
+	public static Chore.Precondition IsOpenForRanching = new Chore.Precondition
+	{
+		id = "IsCreatureAvailableForRanching",
+		description = DUPLICANTS.CHORES.PRECONDITIONS.IS_CREATURE_AVAILABLE_FOR_RANCHING,
+		sortOrder = -3,
+		fn = delegate(ref Chore.Precondition.Context context, object data)
+		{
+			RanchStation.Instance instance = data as RanchStation.Instance;
+			return !instance.HasRancher && instance.IsCritterAvailableForRanching;
+		}
+	};
 
 	public class RancherChoreStates : GameStateMachine<RancherChore.RancherChoreStates, RancherChore.RancherChoreStates.Instance>
 	{
@@ -73,12 +73,24 @@ public class RancherChore : Chore<RancherChore.RancherChoreStates.Instance>
 				.Target(this.masterTarget)
 				.EventTransition(GameHashes.CreatureArrivedAtRanchStation, this.ranchCritter.working, null);
 			this.ranchCritter.working.ToggleWork<RancherChore.RancherWorkable>(this.masterTarget, this.ranchCritter.pst, this.waitForAvailableRanchable, null);
-			this.ranchCritter.pst.ToggleAnims(new Func<RancherChore.RancherChoreStates.Instance, HashedString>(RancherChore.RancherChoreStates.GetRancherInteractAnim)).QueueAnim("wipe_brow", false, null).OnAnimQueueComplete(this.waitForAvailableRanchable);
+			this.ranchCritter.pst.Enter(delegate(RancherChore.RancherChoreStates.Instance smi)
+			{
+				if (!RancherChore.RancherChoreStates.HasWipeBrowAnim(smi))
+				{
+					smi.GoTo(this.waitForAvailableRanchable);
+				}
+			}).ToggleAnims(new Func<RancherChore.RancherChoreStates.Instance, HashedString>(RancherChore.RancherChoreStates.GetRancherInteractAnim)).QueueAnim("wipe_brow", false, null)
+				.OnAnimQueueComplete(this.waitForAvailableRanchable);
 		}
 
 		private static HashedString GetRancherInteractAnim(RancherChore.RancherChoreStates.Instance smi)
 		{
 			return smi.ranchStation.def.RancherInteractAnim;
+		}
+
+		private static bool HasWipeBrowAnim(RancherChore.RancherChoreStates.Instance smi)
+		{
+			return smi.ranchStation.def.RancherWipesBrowAnim;
 		}
 
 		public static bool TryRanchCreature(RancherChore.RancherChoreStates.Instance smi)
@@ -164,6 +176,10 @@ public class RancherChore : Chore<RancherChore.RancherChoreStates.Instance>
 			if (this.ranch == null)
 			{
 				return;
+			}
+			if (this.ranch.def.OnRanchWorkBegins != null)
+			{
+				this.ranch.def.OnRanchWorkBegins(this.ranch.ActiveRanchable, this);
 			}
 			this.critterAnimController = this.ranch.ActiveRanchable.AnimController;
 			this.critterAnimController.Play(this.ranch.def.RanchedPreAnim, KAnim.PlayMode.Once, 1f, 0f);

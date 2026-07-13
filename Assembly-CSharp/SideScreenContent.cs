@@ -27,4 +27,6 @@ public abstract class SideScreenContent : KScreen
 	protected string titleKey;
 
 	public GameObject ContentContainer;
+
+	public Func<bool> CheckShouldShowTopTitle;
 }

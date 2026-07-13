@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 
 public class FallMonitor : GameStateMachine<FallMonitor, FallMonitor.Instance>
@@ -98,9 +99,9 @@ public class FallMonitor : GameStateMachine<FallMonitor, FallMonitor.Instance>
 			this.shouldPlayEmotes = shouldPlayEmotes;
 			this.entombedAnimOverride = entombedAnimOverride;
 			Pathfinding.Instance.FlushNavGridsOnLoad();
-			base.Subscribe(915392638, new Action<object>(this.OnCellChanged));
-			base.Subscribe(1027377649, new Action<object>(this.OnMovementStateChanged));
-			base.Subscribe(387220196, new Action<object>(this.OnDestinationReached));
+			base.Subscribe(915392638, FallMonitor.Instance.OnCellChangedDispatcher, this);
+			base.Subscribe(1027377649, FallMonitor.Instance.OnMovementStateChangedDispatcher, this);
+			base.Subscribe(387220196, FallMonitor.Instance.OnDestinationReachedDispatcher, this);
 		}
 
 		private void OnDestinationReached(object data)
@@ -118,7 +119,7 @@ public class FallMonitor : GameStateMachine<FallMonitor, FallMonitor.Instance>
 
 		private void OnMovementStateChanged(object data)
 		{
-			if ((GameHashes)data == GameHashes.ObjectMovementWakeUp)
+			if (((Boxed<GameHashes>)data).value == GameHashes.ObjectMovementWakeUp)
 			{
 				int num = Grid.PosToCell(base.transform.GetPosition());
 				if (!this.safeCells.Contains(num))
@@ -134,10 +135,10 @@ public class FallMonitor : GameStateMachine<FallMonitor, FallMonitor.Instance>
 
 		private void OnCellChanged(object data)
 		{
-			int num = (int)data;
-			if (!this.safeCells.Contains(num))
+			int value = ((Boxed<int>)data).value;
+			if (!this.safeCells.Contains(value))
 			{
-				this.safeCells.Add(num);
+				this.safeCells.Add(value);
 				if (this.safeCells.Count > this.MAX_CELLS_TRACKED)
 				{
 					this.safeCells.RemoveAt(0);
@@ -359,6 +360,21 @@ public class FallMonitor : GameStateMachine<FallMonitor, FallMonitor.Instance>
 		private List<int> safeCells = new List<int>();
 
 		private int MAX_CELLS_TRACKED = 3;
+
+		private static Action<object, object> OnDestinationReachedDispatcher = delegate(object context, object data)
+		{
+			Unsafe.As<FallMonitor.Instance>(context).OnDestinationReached(data);
+		};
+
+		private static Action<object, object> OnMovementStateChangedDispatcher = delegate(object context, object data)
+		{
+			Unsafe.As<FallMonitor.Instance>(context).OnMovementStateChanged(data);
+		};
+
+		private static Action<object, object> OnCellChangedDispatcher = delegate(object context, object data)
+		{
+			Unsafe.As<FallMonitor.Instance>(context).OnCellChanged(data);
+		};
 
 		private bool flipRecoverEmote;
 	}

@@ -12,11 +12,11 @@ public class Reservable : KMonoBehaviour
 		}
 	}
 
-	public bool isReserved
+	public bool IsReserved
 	{
 		get
 		{
-			return !(this.reservedBy == null);
+			return this.reservedBy != null;
 		}
 	}
 
@@ -30,12 +30,14 @@ public class Reservable : KMonoBehaviour
 		return false;
 	}
 
-	public void ClearReservation(GameObject reserver)
+	public void ClearReservation()
 	{
-		if (this.reservedBy == reserver)
-		{
-			this.reservedBy = null;
-		}
+		this.reservedBy = null;
+	}
+
+	public bool IsReservableBy(GameObject reserver)
+	{
+		return this.reservedBy == null || this.reservedBy == reserver;
 	}
 
 	private GameObject reservedBy;

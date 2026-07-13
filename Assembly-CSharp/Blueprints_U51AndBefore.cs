@@ -274,6 +274,11 @@ public class Blueprints_U51AndBefore : BlueprintProvider
 	{
 		this.blueprintCollection.clothingItems.AddRange(new ClothingItemInfo[]
 		{
+			new ClothingItemInfo("TopStandardYellow", EQUIPMENT.PREFABS.CLOTHING_TOPS.FACADES.STANDARD_YELLOW_TOP.NAME, EQUIPMENT.PREFABS.CLOTHING_TOPS.FACADES.STANDARD_YELLOW_TOP.DESC, PermitCategory.DupeTops, PermitRarity.Universal, "top_standard_yellow_kanim", null, null),
+			new ClothingItemInfo("TopStandardRed", EQUIPMENT.PREFABS.CLOTHING_TOPS.FACADES.STANDARD_RED_TOP.NAME, EQUIPMENT.PREFABS.CLOTHING_TOPS.FACADES.STANDARD_RED_TOP.DESC, PermitCategory.DupeTops, PermitRarity.Universal, "top_standard_red_kanim", null, null),
+			new ClothingItemInfo("TopStandardBlue", EQUIPMENT.PREFABS.CLOTHING_TOPS.FACADES.STANDARD_BLUE_TOP.NAME, EQUIPMENT.PREFABS.CLOTHING_TOPS.FACADES.STANDARD_BLUE_TOP.DESC, PermitCategory.DupeTops, PermitRarity.Universal, "top_standard_blue_kanim", null, null),
+			new ClothingItemInfo("TopStandardGreen", EQUIPMENT.PREFABS.CLOTHING_TOPS.FACADES.STANDARD_GREEN_TOP.NAME, EQUIPMENT.PREFABS.CLOTHING_TOPS.FACADES.STANDARD_GREEN_TOP.DESC, PermitCategory.DupeTops, PermitRarity.Universal, "top_standard_green_kanim", null, null),
+			new ClothingItemInfo("GlovesStandardGold", EQUIPMENT.PREFABS.CLOTHING_GLOVES.FACADES.STANDARD_GOLD.NAME, EQUIPMENT.PREFABS.CLOTHING_GLOVES.FACADES.STANDARD_GOLD.DESC, PermitCategory.DupeGloves, PermitRarity.Universal, "gloves_basic_gold_kanim", null, null),
 			new ClothingItemInfo("TopBasicBlack", EQUIPMENT.PREFABS.CLOTHING_TOPS.FACADES.BASIC_BLACK.NAME, EQUIPMENT.PREFABS.CLOTHING_TOPS.FACADES.BASIC_BLACK.DESC, PermitCategory.DupeTops, PermitRarity.Decent, "top_basic_black_kanim", null, null),
 			new ClothingItemInfo("TopBasicWhite", EQUIPMENT.PREFABS.CLOTHING_TOPS.FACADES.BASIC_WHITE.NAME, EQUIPMENT.PREFABS.CLOTHING_TOPS.FACADES.BASIC_WHITE.DESC, PermitCategory.DupeTops, PermitRarity.Decent, "top_basic_white_kanim", null, null),
 			new ClothingItemInfo("TopBasicRed", EQUIPMENT.PREFABS.CLOTHING_TOPS.FACADES.BASIC_RED_BURNT.NAME, EQUIPMENT.PREFABS.CLOTHING_TOPS.FACADES.BASIC_RED_BURNT.DESC, PermitCategory.DupeTops, PermitRarity.Decent, "top_basic_red_kanim", null, null),
@@ -357,6 +362,10 @@ public class Blueprints_U51AndBefore : BlueprintProvider
 			new ClothingItemInfo("visonly_AtmoGlovesBasicBlue", EQUIPMENT.PREFABS.ATMO_SUIT_GLOVES.NAME, EQUIPMENT.PREFABS.ATMO_SUIT_GLOVES.DESC, PermitCategory.AtmoSuitGloves, PermitRarity.Universal, "atmo_gloves_blue_kanim", null, null),
 			new ClothingItemInfo("visonly_AtmoBeltBasicBlue", EQUIPMENT.PREFABS.ATMO_SUIT_BELT.NAME, EQUIPMENT.PREFABS.ATMO_SUIT_BELT.DESC, PermitCategory.AtmoSuitBelt, PermitRarity.Universal, "atmo_belt_basic_blue_kanim", null, null),
 			new ClothingItemInfo("visonly_AtmoShoesBasicBlack", EQUIPMENT.PREFABS.ATMO_SUIT_SHOES.NAME, EQUIPMENT.PREFABS.ATMO_SUIT_SHOES.DESC, PermitCategory.AtmoSuitShoes, PermitRarity.Universal, "atmo_shoes_basic_black_kanim", null, null),
+			new ClothingItemInfo("visonly_JetHelmetClear", "_STRINGS.EQUIPMENT.PREFABS.JET_SUIT_HELMET.NAME", "_STRINGS.EQUIPMENT.PREFABS.JET_SUIT_HELMET.DESC", PermitCategory.JetSuitHelmet, PermitRarity.Universal, "jet_helmet_00_default_kanim", null, null),
+			new ClothingItemInfo("visonly_JetSuitBasic", "_STRINGS.EQUIPMENT.PREFABS.JET_SUIT_BODY.NAME", "_STRINGS.EQUIPMENT.PREFABS.JET_SUIT_BODY.DESC", PermitCategory.JetSuitBody, PermitRarity.Universal, "jetsuit_black_default_kanim", null, null),
+			new ClothingItemInfo("visonly_JetGlovesBasic", "_STRINGS.EQUIPMENT.PREFABS.JET_SUIT_GLOVES.NAME", "_STRINGS.EQUIPMENT.PREFABS.JET_SUIT_GLOVES.DESC", PermitCategory.JetSuitGloves, PermitRarity.Universal, "jet_gloves_default_kanim", null, null),
+			new ClothingItemInfo("visonly_JetShoesBasic", "_STRINGS.EQUIPMENT.PREFABS.JET_SUIT_SHOES.NAME", "_STRINGS.EQUIPMENT.PREFABS.JET_SUIT_SHOES.DESC", PermitCategory.JetSuitShoes, PermitRarity.Universal, "jet_shoes_basic_black_kanim", null, null),
 			new ClothingItemInfo("AtmoHelmetLimone", EQUIPMENT.PREFABS.ATMO_SUIT_HELMET.FACADES.LIMONE.NAME, EQUIPMENT.PREFABS.ATMO_SUIT_HELMET.FACADES.LIMONE.DESC, PermitCategory.AtmoSuitHelmet, PermitRarity.Universal, "atmo_helmet_limone_lime_kanim", null, null),
 			new ClothingItemInfo("AtmoSuitBasicYellow", EQUIPMENT.PREFABS.ATMO_SUIT_BODY.FACADES.LIMONE.NAME, EQUIPMENT.PREFABS.ATMO_SUIT_BODY.FACADES.LIMONE.DESC, PermitCategory.AtmoSuitBody, PermitRarity.Universal, "atmosuit_basic_yellow_kanim", null, null),
 			new ClothingItemInfo("AtmoGlovesLime", EQUIPMENT.PREFABS.ATMO_SUIT_GLOVES.FACADES.LIMONE.NAME, EQUIPMENT.PREFABS.ATMO_SUIT_GLOVES.FACADES.LIMONE.DESC, PermitCategory.AtmoSuitGloves, PermitRarity.Universal, "atmo_gloves_lime_kanim", null, null),
@@ -564,6 +573,10 @@ public class Blueprints_U51AndBefore : BlueprintProvider
 
 	private void SetupClothingOutfits()
 	{
+		this.<SetupClothingOutfits>g__Add|4_0("StandardYellow", new string[] { "TopStandardYellow", "BottomBasicBlack", "GlovesStandardGold", "ShoesBasicBlack" }, UI.OUTFITS.STANDARD_YELLOW.NAME, BlueprintProvider.OutfitType.Clothing);
+		this.<SetupClothingOutfits>g__Add|4_0("StandardRed", new string[] { "TopStandardRed", "BottomBasicBlack", "GlovesStandardGold", "ShoesBasicBlack" }, UI.OUTFITS.STANDARD_RED.NAME, BlueprintProvider.OutfitType.Clothing);
+		this.<SetupClothingOutfits>g__Add|4_0("StandardGreen", new string[] { "TopStandardGreen", "BottomBasicBlack", "GlovesStandardGold", "ShoesBasicBlack" }, UI.OUTFITS.STANDARD_GREEN.NAME, BlueprintProvider.OutfitType.Clothing);
+		this.<SetupClothingOutfits>g__Add|4_0("StandardBlue", new string[] { "TopStandardBlue", "BottomBasicBlack", "GlovesStandardGold", "ShoesBasicBlack" }, UI.OUTFITS.STANDARD_BLUE.NAME, BlueprintProvider.OutfitType.Clothing);
 		this.<SetupClothingOutfits>g__Add|4_0("BasicBlack", new string[] { "TopBasicBlack", "BottomBasicBlack", "GlovesBasicBlack", "ShoesBasicBlack" }, UI.OUTFITS.BASIC_BLACK.NAME, BlueprintProvider.OutfitType.Clothing);
 		this.<SetupClothingOutfits>g__Add|4_0("BasicWhite", new string[] { "TopBasicWhite", "BottomBasicWhite", "GlovesBasicWhite", "ShoesBasicWhite" }, UI.OUTFITS.BASIC_WHITE.NAME, BlueprintProvider.OutfitType.Clothing);
 		this.<SetupClothingOutfits>g__Add|4_0("BasicRed", new string[] { "TopBasicRed", "BottomBasicRed", "GlovesBasicRed", "ShoesBasicRed" }, UI.OUTFITS.BASIC_RED.NAME, BlueprintProvider.OutfitType.Clothing);

@@ -139,6 +139,8 @@ public class OutfitDesignerScreen_OutfitState
 				throw new NotSupportedException("OutfitType.JoyResponse cannot be used with OutfitDesignerScreen_OutfitState. Use JoyResponseOutfitTarget instead.");
 			case ClothingOutfitUtility.OutfitType.AtmoSuit:
 				return new OutfitDesignerScreen_OutfitState.Slots.Atmosuit();
+			case ClothingOutfitUtility.OutfitType.JetSuit:
+				return new OutfitDesignerScreen_OutfitState.Slots.Jetsuit();
 			default:
 				throw new NotImplementedException();
 			}
@@ -315,6 +317,67 @@ public class OutfitDesignerScreen_OutfitState
 					return this.beltSlot;
 				}
 				if (category == PermitCategory.AtmoSuitShoes)
+				{
+					return this.shoesSlot;
+				}
+				return base.FallbackSlot(this, category);
+			}
+		}
+
+		public class Jetsuit : OutfitDesignerScreen_OutfitState.Slots
+		{
+			public Jetsuit()
+				: base(4)
+			{
+			}
+
+			public ref Option<ClothingItemResource> helmetSlot
+			{
+				get
+				{
+					return ref this.array[0];
+				}
+			}
+
+			public ref Option<ClothingItemResource> bodySlot
+			{
+				get
+				{
+					return ref this.array[1];
+				}
+			}
+
+			public ref Option<ClothingItemResource> glovesSlot
+			{
+				get
+				{
+					return ref this.array[2];
+				}
+			}
+
+			public ref Option<ClothingItemResource> shoesSlot
+			{
+				get
+				{
+					return ref this.array[3];
+				}
+			}
+
+			public override ref Option<ClothingItemResource> GetItemSlotForCategory(PermitCategory category)
+			{
+				if (category == PermitCategory.JetSuitHelmet)
+				{
+					return this.helmetSlot;
+				}
+				if (category == PermitCategory.JetSuitBody)
+				{
+					return this.bodySlot;
+				}
+				if (category == PermitCategory.JetSuitGloves)
+				{
+					return this.glovesSlot;
+				}
+				if (category == PermitCategory.JetSuitShoes)
 				{
 					return this.shoesSlot;
 				}

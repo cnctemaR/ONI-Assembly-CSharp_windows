@@ -81,8 +81,25 @@ public class SingleEntityReceptacle : Workable, IRender1000ms
 		}
 	}
 
+	protected Vector3 GetOccupyingObjectRelativePosition()
+	{
+		if (this.Occupant != null && SingleEntityReceptacle.CustomOccupyingObjectRelativePosition.ContainsKey(this.selfPrefabID))
+		{
+			KPrefabID component = this.Occupant.GetComponent<KPrefabID>();
+			foreach (SingleEntityReceptacle.CustomPositionData customPositionData in SingleEntityReceptacle.CustomOccupyingObjectRelativePosition[this.selfPrefabID])
+			{
+				if (component.HasTag(customPositionData.tag))
+				{
+					return customPositionData.pos;
+				}
+			}
+		}
+		return this.occupyingObjectRelativePosition;
+	}
+
 	protected override void OnPrefabInit()
 	{
+		this.selfPrefabID = base.gameObject.PrefabID();
 		base.OnPrefabInit();
 	}
 
@@ -104,6 +121,7 @@ public class SingleEntityReceptacle : Workable, IRender1000ms
 			this.CreateOrder(this.requestedEntityTag, this.requestedEntityAdditionalFilterTag);
 		}
 		base.Subscribe<SingleEntityReceptacle>(-592767678, SingleEntityReceptacle.OnOperationalChangedDelegate);
+		this.TriggerReceptacleOperationalSignal();
 	}
 
 	public void AddDepositTag(Tag t)
@@ -134,22 +152,26 @@ public class SingleEntityReceptacle : Workable, IRender1000ms
 		this.UpdateStatusItem();
 	}
 
-	public void Render1000ms(float dt)
+	public virtual void Render1000ms(float dt)
 	{
 		this.UpdateStatusItem();
 	}
 
-	protected virtual void UpdateStatusItem()
+	protected void UpdateStatusItem()
 	{
-		KSelectable component = base.GetComponent<KSelectable>();
+		this.UpdateStatusItem(base.GetComponent<KSelectable>());
+	}
+
+	protected virtual void UpdateStatusItem(KSelectable selectable)
+	{
 		if (this.Occupant != null)
 		{
-			component.SetStatusItem(Db.Get().StatusItemCategories.EntityReceptacle, null, null);
+			selectable.SetStatusItem(Db.Get().StatusItemCategories.EntityReceptacle, null, null);
 			return;
 		}
 		if (this.fetchChore == null)
 		{
-			component.SetStatusItem(Db.Get().StatusItemCategories.EntityReceptacle, this.statusItemNeed, null);
+			selectable.SetStatusItem(Db.Get().StatusItemCategories.EntityReceptacle, this.statusItemNeed, null);
 			return;
 		}
 		bool flag = this.fetchChore.fetcher != null;
@@ -171,10 +193,10 @@ public class SingleEntityReceptacle : Workable, IRender1000ms
 		}
 		if (flag)
 		{
-			component.SetStatusItem(Db.Get().StatusItemCategories.EntityReceptacle, this.statusItemAwaitingDelivery, null);
+			selectable.SetStatusItem(Db.Get().StatusItemCategories.EntityReceptacle, this.statusItemAwaitingDelivery, null);
 			return;
 		}
-		component.SetStatusItem(Db.Get().StatusItemCategories.EntityReceptacle, this.statusItemNoneAvailable, null);
+		selectable.SetStatusItem(Db.Get().StatusItemCategories.EntityReceptacle, this.statusItemNoneAvailable, null);
 	}
 
 	protected void CreateFetchChore(Tag entityTag, Tag additionalRequiredTag)
@@ -290,7 +312,7 @@ public class SingleEntityReceptacle : Workable, IRender1000ms
 		this.OnDepositObject(depositedObject);
 	}
 
-	private void OnDepositObject(GameObject depositedObject)
+	protected virtual void OnDepositObject(GameObject depositedObject)
 	{
 		this.SetPreview(Tag.Invalid, false);
 		MaterialNeeds.UpdateNeed(this.requestedEntityTag, -1f, base.gameObject.GetMyWorldId());
@@ -341,13 +363,14 @@ public class SingleEntityReceptacle : Workable, IRender1000ms
 
 	protected virtual void PositionOccupyingObject()
 	{
+		Vector3 vector = this.GetOccupyingObjectRelativePosition();
 		if (this.rotatable != null)
 		{
-			this.occupyingObject.transform.SetPosition(base.gameObject.transform.GetPosition() + this.rotatable.GetRotatedOffset(this.occupyingObjectRelativePosition));
+			this.occupyingObject.transform.SetPosition(base.gameObject.transform.GetPosition() + this.rotatable.GetRotatedOffset(vector));
 		}
 		else
 		{
-			this.occupyingObject.transform.SetPosition(base.gameObject.transform.GetPosition() + this.occupyingObjectRelativePosition);
+			this.occupyingObject.transform.SetPosition(base.gameObject.transform.GetPosition() + vector);
 		}
 		KBatchedAnimController component = this.occupyingObject.GetComponent<KBatchedAnimController>();
 		component.enabled = false;
@@ -373,9 +396,18 @@ public class SingleEntityReceptacle : Workable, IRender1000ms
 		base.OnCleanUp();
 	}
 
-	private void OnOperationalChanged(object data)
+	protected virtual void OnOperationalChanged(object data)
 	{
 		this.UpdateActive();
+		this.TriggerReceptacleOperationalSignal();
+	}
+
+	private void TriggerReceptacleOperationalSignal()
+	{
+		if (this.operational == null)
+		{
+			return;
+		}
 		if (this.occupyingObject)
 		{
 			this.occupyingObject.Trigger(this.operational.IsOperational ? 1628751838 : 960378201, null);
@@ -383,7 +415,7 @@ public class SingleEntityReceptacle : Workable, IRender1000ms
 	}
 
 	[MyCmpGet]
-	protected Operational operational;
+	public Operational operational;
 
 	[MyCmpReq]
 	protected Storage storage;
@@ -419,7 +451,11 @@ public class SingleEntityReceptacle : Workable, IRender1000ms
 	[SerializeField]
 	protected SingleEntityReceptacle.ReceptacleDirection direction;
 
+	public static Dictionary<Tag, List<SingleEntityReceptacle.CustomPositionData>> CustomOccupyingObjectRelativePosition = new Dictionary<Tag, List<SingleEntityReceptacle.CustomPositionData>>();
+
 	public Vector3 occupyingObjectRelativePosition = new Vector3(0f, 1f, 3f);
+
+	private Tag selfPrefabID;
 
 	protected StatusItem statusItemAwaitingDelivery;
 
@@ -431,6 +467,19 @@ public class SingleEntityReceptacle : Workable, IRender1000ms
 	{
 		component.OnOperationalChanged(data);
 	});
+
+	public struct CustomPositionData
+	{
+		public CustomPositionData(Tag t, Vector3 p)
+		{
+			this.tag = t;
+			this.pos = p;
+		}
+
+		public Tag tag;
+
+		public Vector3 pos;
+	}
 
 	public enum ReceptacleDirection
 	{

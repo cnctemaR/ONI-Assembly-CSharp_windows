@@ -18,7 +18,9 @@ public class UnstableGroundManager : KMonoBehaviour
 			GameObject prefab = effectInfo.prefab;
 			prefab.SetActive(false);
 			UnstableGroundManager.EffectRuntimeInfo effectRuntimeInfo = default(UnstableGroundManager.EffectRuntimeInfo);
-			GameObjectPool pool = new GameObjectPool(() => this.InstantiateObj(prefab), 16);
+			GameObjectPool pool = new GameObjectPool(() => this.InstantiateObj(prefab), delegate(GameObject _)
+			{
+			}, 16);
 			effectRuntimeInfo.pool = pool;
 			effectRuntimeInfo.releaseFunc = delegate(GameObject go)
 			{

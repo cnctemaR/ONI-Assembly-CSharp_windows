@@ -11,12 +11,12 @@ using UnityEngine.Internal;
 
 namespace Unity.Collections
 {
-	[NativeContainerSupportsDeallocateOnJobCompletion]
-	[NativeContainer]
 	[DebuggerTypeProxy(typeof(NativeArrayDebugView<>))]
-	[NativeContainerSupportsDeferredConvertListToArray]
 	[DebuggerDisplay("Length = {m_Length}")]
+	[NativeContainerSupportsDeallocateOnJobCompletion]
 	[NativeContainerSupportsMinMaxWriteRestriction]
+	[NativeContainerSupportsDeferredConvertListToArray]
+	[NativeContainer]
 	public struct NativeArray<T> : IDisposable, IEnumerable<T>, IEnumerable, IEquatable<NativeArray<T>> where T : struct
 	{
 		public NativeArray(int length, Allocator allocator, NativeArrayOptions options = NativeArrayOptions.ClearMemory)
@@ -79,8 +79,8 @@ namespace Unity.Collections
 			}
 		}
 
-		[BurstDiscard]
 		[Conditional("ENABLE_UNITY_COLLECTIONS_CHECKS")]
+		[BurstDiscard]
 		internal static void IsUnmanagedAndThrow()
 		{
 			bool flag = !UnsafeUtility.IsUnmanaged<T>();
@@ -613,9 +613,9 @@ namespace Unity.Collections
 		}
 
 		[NativeContainerIsReadOnly]
-		[NativeContainer]
-		[DebuggerTypeProxy(typeof(NativeArrayReadOnlyDebugView<>))]
 		[DebuggerDisplay("Length = {Length}")]
+		[DebuggerTypeProxy(typeof(NativeArrayReadOnlyDebugView<>))]
+		[NativeContainer]
 		public struct ReadOnly : IEnumerable<T>, IEnumerable
 		{
 			internal unsafe ReadOnly(void* buffer, int length)

@@ -2,7 +2,7 @@
 using STRINGS;
 using UnityEngine;
 
-[EntityConfigOrder(2)]
+[EntityConfigOrder(4)]
 public class LightBugPinkBabyConfig : IEntityConfig
 {
 	public GameObject CreatePrefab()

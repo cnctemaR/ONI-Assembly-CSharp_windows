@@ -15,36 +15,56 @@ public class RequiresFoundation : KGameObjectComponentManager<RequiresFoundation
 			width = def.WidthInCells,
 			height = def.HeightInCells,
 			buildRule = def.BuildLocationRule,
-			solid = true,
+			validFoundation = true,
+			operationalFlag = RequiresFoundation.solidFoundation,
 			go = go
 		};
+		if (data.buildRule == BuildLocationRule.OnBackWall)
+		{
+			data.operationalFlag = RequiresFoundation.backwallFoundation;
+			data.noFoundationStatusItem = Db.Get().BuildingStatusItems.MissingFoundationBackwall;
+		}
+		else
+		{
+			data.operationalFlag = RequiresFoundation.solidFoundation;
+			data.noFoundationStatusItem = Db.Get().BuildingStatusItems.MissingFoundation;
+		}
 		HandleVector<int>.Handle h = base.Add(go, data);
 		if (def.ContinuouslyCheckFoundation)
 		{
-			data.changeCallback = delegate(object d)
-			{
-				this.OnSolidChanged(h);
-			};
 			Rotatable component = data.go.GetComponent<Rotatable>();
 			Orientation orientation = ((component != null) ? component.GetOrientation() : Orientation.Neutral);
 			int num2 = -(def.WidthInCells - 1) / 2;
 			int num3 = def.WidthInCells / 2;
 			CellOffset cellOffset = new CellOffset(num2, -1);
 			CellOffset cellOffset2 = new CellOffset(num3, -1);
-			if (def.BuildLocationRule == BuildLocationRule.OnCeiling || def.BuildLocationRule == BuildLocationRule.InCorner)
+			BuildLocationRule buildRule = data.buildRule;
+			switch (buildRule)
 			{
+			case BuildLocationRule.OnCeiling:
+			case BuildLocationRule.InCorner:
 				cellOffset.y = def.HeightInCells;
 				cellOffset2.y = def.HeightInCells;
-			}
-			else if (def.BuildLocationRule == BuildLocationRule.OnWall)
-			{
+				break;
+			case BuildLocationRule.OnWall:
 				cellOffset = new CellOffset(num2 - 1, 0);
 				cellOffset2 = new CellOffset(num2 - 1, def.HeightInCells);
-			}
-			else if (def.BuildLocationRule == BuildLocationRule.WallFloor)
-			{
-				cellOffset = new CellOffset(num2 - 1, -1);
-				cellOffset2 = new CellOffset(num3, def.HeightInCells - 1);
+				break;
+			default:
+				if (buildRule != BuildLocationRule.WallFloor)
+				{
+					if (buildRule == BuildLocationRule.OnBackWall)
+					{
+						cellOffset = new CellOffset(num2, 0);
+						cellOffset2 = new CellOffset(num3, def.HeightInCells - 1);
+					}
+				}
+				else
+				{
+					cellOffset = new CellOffset(num2 - 1, -1);
+					cellOffset2 = new CellOffset(num3, def.HeightInCells - 1);
+				}
+				break;
 			}
 			CellOffset rotatedCellOffset = Rotatable.GetRotatedCellOffset(cellOffset, orientation);
 			CellOffset rotatedCellOffset2 = Rotatable.GetRotatedCellOffset(cellOffset2, orientation);
@@ -57,17 +77,32 @@ public class RequiresFoundation : KGameObjectComponentManager<RequiresFoundation
 			float num8 = (float)Mathf.Min(vector2I.y, vector2I2.y);
 			float num9 = (float)Mathf.Max(vector2I.y, vector2I2.y);
 			Rect rect = Rect.MinMaxRect(num6, num8, num7, num9);
-			data.solidPartitionerEntry = GameScenePartitioner.Instance.Add("RequiresFoundation.Add", go, (int)rect.x, (int)rect.y, (int)rect.width + 1, (int)rect.height + 1, GameScenePartitioner.Instance.solidChangedLayer, data.changeCallback);
-			data.buildingPartitionerEntry = GameScenePartitioner.Instance.Add("RequiresFoundation.Add", go, (int)rect.x, (int)rect.y, (int)rect.width + 1, (int)rect.height + 1, GameScenePartitioner.Instance.objectLayers[1], data.changeCallback);
+			if (data.buildRule == BuildLocationRule.OnBackWall)
+			{
+				data.changeCallback = delegate(object d)
+				{
+					this.OnFoundationChanged(h);
+				};
+				data.partitionerEntry1 = GameScenePartitioner.Instance.Add("RequiresFoundation.Add", go, (int)rect.x, (int)rect.y, (int)rect.width + 1, (int)rect.height + 1, GameScenePartitioner.Instance.objectLayers[2], data.changeCallback);
+			}
+			else
+			{
+				data.changeCallback = delegate(object d)
+				{
+					this.OnFoundationChanged(h);
+				};
+				data.partitionerEntry1 = GameScenePartitioner.Instance.Add("RequiresFoundation.Add", go, (int)rect.x, (int)rect.y, (int)rect.width + 1, (int)rect.height + 1, GameScenePartitioner.Instance.solidChangedLayer, data.changeCallback);
+				data.partitionerEntry2 = GameScenePartitioner.Instance.Add("RequiresFoundation.Add", go, (int)rect.x, (int)rect.y, (int)rect.width + 1, (int)rect.height + 1, GameScenePartitioner.Instance.objectLayers[1], data.changeCallback);
+			}
 			if (def.BuildLocationRule == BuildLocationRule.BuildingAttachPoint || def.BuildLocationRule == BuildLocationRule.OnFloorOrBuildingAttachPoint)
 			{
 				AttachableBuilding component2 = data.go.GetComponent<AttachableBuilding>();
 				component2.onAttachmentNetworkChanged = (Action<object>)Delegate.Combine(component2.onAttachmentNetworkChanged, data.changeCallback);
 			}
 			base.SetData(h, data);
-			this.OnSolidChanged(h);
+			data.changeCallback(h);
 			data = base.GetData(h);
-			this.UpdateSolidState(data.solid, ref data, true);
+			this.UpdateValidFoundationState(data.validFoundation, ref data, true);
 		}
 		return h;
 	}
@@ -75,8 +110,8 @@ public class RequiresFoundation : KGameObjectComponentManager<RequiresFoundation
 	protected override void OnCleanUp(HandleVector<int>.Handle h)
 	{
 		RequiresFoundation.Data data = base.GetData(h);
-		GameScenePartitioner.Instance.Free(ref data.solidPartitionerEntry);
-		GameScenePartitioner.Instance.Free(ref data.buildingPartitionerEntry);
+		GameScenePartitioner.Instance.Free(ref data.partitionerEntry1);
+		GameScenePartitioner.Instance.Free(ref data.partitionerEntry2);
 		AttachableBuilding component = data.go.GetComponent<AttachableBuilding>();
 		if (!component.IsNullOrDestroyed())
 		{
@@ -86,7 +121,7 @@ public class RequiresFoundation : KGameObjectComponentManager<RequiresFoundation
 		base.SetData(h, data);
 	}
 
-	private void OnSolidChanged(HandleVector<int>.Handle h)
+	private void OnFoundationChanged(HandleVector<int>.Handle h)
 	{
 		RequiresFoundation.Data data = base.GetData(h);
 		SimCellOccupier component = data.go.GetComponent<SimCellOccupier>();
@@ -102,26 +137,26 @@ public class RequiresFoundation : KGameObjectComponentManager<RequiresFoundation
 				if (list.Count > 0)
 				{
 					Operational component3 = list.Last<GameObject>().GetComponent<Operational>();
-					if (component3 != null && component3.GetFlag(RequiresFoundation.solidFoundation))
+					if (component3 != null && component3.GetFlag(data.operationalFlag))
 					{
 						flag = true;
 					}
 				}
 			}
-			this.UpdateSolidState(flag, ref data, false);
+			this.UpdateValidFoundationState(flag, ref data, false);
 			base.SetData(h, data);
 		}
 	}
 
-	private void UpdateSolidState(bool is_solid, ref RequiresFoundation.Data data, bool forceUpdate = false)
+	private void UpdateValidFoundationState(bool is_validFoundation, ref RequiresFoundation.Data data, bool forceUpdate = false)
 	{
-		if (data.solid != is_solid || forceUpdate)
+		if (data.validFoundation != is_validFoundation || forceUpdate)
 		{
-			data.solid = is_solid;
+			data.validFoundation = is_validFoundation;
 			Operational component = data.go.GetComponent<Operational>();
 			if (component != null)
 			{
-				component.SetFlag(RequiresFoundation.solidFoundation, is_solid);
+				component.SetFlag(data.operationalFlag, is_validFoundation);
 			}
 			AttachableBuilding component2 = data.go.GetComponent<AttachableBuilding>();
 			if (component2 != null)
@@ -130,11 +165,13 @@ public class RequiresFoundation : KGameObjectComponentManager<RequiresFoundation
 				AttachableBuilding.GetAttachedAbove(component2, ref list);
 				AttachableBuilding.NotifyBuildingsNetworkChanged(list, null);
 			}
-			data.go.GetComponent<KSelectable>().ToggleStatusItem(Db.Get().BuildingStatusItems.MissingFoundation, !is_solid, this);
+			data.go.GetComponent<KSelectable>().ToggleStatusItem(data.noFoundationStatusItem, !is_validFoundation, this);
 		}
 	}
 
 	public static readonly Operational.Flag solidFoundation = new Operational.Flag("solid_foundation", Operational.Flag.Type.Functional);
+
+	public static readonly Operational.Flag backwallFoundation = new Operational.Flag("backwall_foundation", Operational.Flag.Type.Functional);
 
 	public struct Data
 	{
@@ -146,13 +183,17 @@ public class RequiresFoundation : KGameObjectComponentManager<RequiresFoundation
 
 		public BuildLocationRule buildRule;
 
-		public HandleVector<int>.Handle solidPartitionerEntry;
+		public HandleVector<int>.Handle partitionerEntry1;
 
-		public HandleVector<int>.Handle buildingPartitionerEntry;
+		public HandleVector<int>.Handle partitionerEntry2;
 
-		public bool solid;
+		public bool validFoundation;
+
+		public Operational.Flag operationalFlag;
 
 		public GameObject go;
+
+		public StatusItem noFoundationStatusItem;
 
 		public Action<object> changeCallback;
 	}

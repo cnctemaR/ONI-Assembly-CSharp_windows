@@ -68,7 +68,7 @@ public class CaloriesConsumedSecondaryExcretionMonitor : GameStateMachine<Calori
 
 		public void OnCaloriesConsumed(object data)
 		{
-			base.smi.consumptionData = (CreatureCalorieMonitor.CaloriesConsumedEvent)data;
+			base.smi.consumptionData = ((Boxed<CreatureCalorieMonitor.CaloriesConsumedEvent>)data).value;
 			base.smi.GoTo(base.smi.sm.schedule_fart);
 		}
 

@@ -29,13 +29,7 @@ public static class BasePacuConfig
 		trait.Add(new AttributeModifier(Db.Get().Amounts.Age.maxAttribute.Id, 25f, name, false, false, true));
 		EntityTemplates.CreateAndRegisterBaggedCreature(gameObject, false, false, true);
 		gameObject.AddComponent<Movable>();
-		EntityTemplates.ExtendEntityToBasicCreature(gameObject, FactionManager.FactionID.Prey, base_trait_id, "SwimmerNavGrid", NavType.Swim, 32, 2f, "FishMeat", 1f, false, false, warnLowTemp, warnHighTemp, lethalLowTemp, lethalHighTemp);
-		if (is_baby)
-		{
-			KBatchedAnimController component2 = gameObject.GetComponent<KBatchedAnimController>();
-			component2.animWidth = 0.5f;
-			component2.animHeight = 0.5f;
-		}
+		EntityTemplates.ExtendEntityToBasicCreature(false, gameObject, anim_file, is_baby ? null : "pacu_build_kanim", symbol_prefix, FactionManager.FactionID.Prey, base_trait_id, "SwimmerNavGrid", NavType.Swim, 32, 2f, "FishMeat", 1f, false, false, warnLowTemp, warnHighTemp, lethalLowTemp, lethalHighTemp);
 		ChoreTable.Builder builder = new ChoreTable.Builder().Add(new DeathStates.Def(), true, -1).Add(new AnimInterruptStates.Def(), true, -1).Add(new GrowUpStates.Def(), is_baby, -1)
 			.Add(new TrappedStates.Def(), true, -1)
 			.Add(new IncubatingStates.Def(), is_baby, -1)
@@ -53,6 +47,7 @@ public static class BasePacuConfig
 			.Add(new PlayAnimsStates.Def(GameTags.Creatures.Poop, false, "lay_egg_pre", global::STRINGS.CREATURES.STATUSITEMS.EXPELLING_SOLID.NAME, global::STRINGS.CREATURES.STATUSITEMS.EXPELLING_SOLID.TOOLTIP), true, -1)
 			.Add(new MoveToLureStates.Def(), true, -1)
 			.Add(new CritterCondoStates.Def(), !is_baby, -1)
+			.Add(new CritterEmoteStates.Def(Assets.GetAnim("pacu_emotes_kanim")), true, -1)
 			.PopInterruptGroup()
 			.Add(new IdleStates.Def(), true, -1);
 		CreatureFallMonitor.Def def = gameObject.AddOrGetDef<CreatureFallMonitor.Def>();

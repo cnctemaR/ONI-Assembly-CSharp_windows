@@ -9,12 +9,12 @@ using UnityEngine.Rendering;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Graphics/ColorGamut.h")]
-	[NativeHeader("Runtime/Graphics/CopyTexture.h")]
+	[NativeHeader("Runtime/Shaders/ComputeShader.h")]
 	[NativeHeader("Runtime/Misc/PlayerSettings.h")]
 	[NativeHeader("Runtime/Graphics/GraphicsScriptBindings.h")]
-	[NativeHeader("Runtime/Shaders/ComputeShader.h")]
+	[NativeHeader("Runtime/Graphics/ColorGamut.h")]
 	[NativeHeader("Runtime/Camera/LightProbeProxyVolume.h")]
+	[NativeHeader("Runtime/Graphics/CopyTexture.h")]
 	public class Graphics
 	{
 		[FreeFunction("GraphicsScripting::GetMaxDrawMeshInstanceCount", IsThreadSafe = true)]
@@ -42,8 +42,8 @@ namespace UnityEngine
 			set;
 		}
 
-		[StaticAccessor("GetPlayerSettings()", StaticAccessorType.Dot)]
 		[NativeMethod(Name = "GetPreserveFramebufferAlpha")]
+		[StaticAccessor("GetPlayerSettings()", StaticAccessorType.Dot)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern bool GetPreserveFramebufferAlpha();
 
@@ -162,8 +162,8 @@ namespace UnityEngine
 			Graphics.Internal_DrawMeshNow2_Injected(mesh, subsetIndex, ref matrix);
 		}
 
-		[FreeFunction("GraphicsScripting::DrawTexture")]
 		[VisibleToOtherModules(new string[] { "UnityEngine.IMGUIModule" })]
+		[FreeFunction("GraphicsScripting::DrawTexture")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern void Internal_DrawTexture(ref Internal_DrawTextureArguments args);
 

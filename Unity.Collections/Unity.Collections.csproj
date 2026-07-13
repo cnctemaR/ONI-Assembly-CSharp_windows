@@ -1,0 +1,248 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <ProjectGuid>{FB7F35FD-6256-4B33-A899-A0A5341DD18A}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>Unity.Collections</RootNamespace>
+    <AssemblyName>Unity.Collections</AssemblyName>
+    <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
+    <FileAlignment>512</FileAlignment>
+    <TargetFramework>net40</TargetFramework>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+    <EnableDefaultItems>False</EnableDefaultItems>
+  </PropertyGroup>
+  <PropertyGroup />
+  <ItemGroup>
+    <Compile Include="$BurstDirectCallInitializer.cs" />
+    <Compile Include="AllocatorHelper.cs" />
+    <Compile Include="AllocatorManager.cs" />
+    <Compile Include="BitField32.cs" />
+    <Compile Include="BitField32DebugView.cs" />
+    <Compile Include="BitField64.cs" />
+    <Compile Include="BitField64DebugView.cs" />
+    <Compile Include="Bitwise.cs" />
+    <Compile Include="BurstCompatibleAttribute.cs" />
+    <Compile Include="CollectionHelper.cs" />
+    <Compile Include="ConcurrentMask.cs" />
+    <Compile Include="ConversionError.cs" />
+    <Compile Include="CopyError.cs" />
+    <Compile Include="CreatePropertyAttribute.cs" />
+    <Compile Include="FixedBytes126.cs" />
+    <Compile Include="FixedBytes16.cs" />
+    <Compile Include="FixedBytes30.cs" />
+    <Compile Include="FixedBytes4094.cs" />
+    <Compile Include="FixedBytes510.cs" />
+    <Compile Include="FixedBytes62.cs" />
+    <Compile Include="FixedList.2.cs" />
+    <Compile Include="FixedList.cs" />
+    <Compile Include="FixedList128.cs" />
+    <Compile Include="FixedList128Bytes.cs" />
+    <Compile Include="FixedList128BytesDebugView.cs" />
+    <Compile Include="FixedList128BytesExtensions.cs" />
+    <Compile Include="FixedList32.cs" />
+    <Compile Include="FixedList32Bytes.cs" />
+    <Compile Include="FixedList32BytesDebugView.cs" />
+    <Compile Include="FixedList32BytesExtensions.cs" />
+    <Compile Include="FixedList4096.cs" />
+    <Compile Include="FixedList4096Bytes.cs" />
+    <Compile Include="FixedList4096BytesDebugView.cs" />
+    <Compile Include="FixedList4096BytesExtensions.cs" />
+    <Compile Include="FixedList512.cs" />
+    <Compile Include="FixedList512Bytes.cs" />
+    <Compile Include="FixedList512BytesDebugView.cs" />
+    <Compile Include="FixedList512BytesExtensions.cs" />
+    <Compile Include="FixedList64.cs" />
+    <Compile Include="FixedList64Bytes.cs" />
+    <Compile Include="FixedList64BytesDebugView.cs" />
+    <Compile Include="FixedList64BytesExtensions.cs" />
+    <Compile Include="FixedListByte128.cs" />
+    <Compile Include="FixedListByte128DebugView.cs" />
+    <Compile Include="FixedListByte32.cs" />
+    <Compile Include="FixedListByte32DebugView.cs" />
+    <Compile Include="FixedListByte4096.cs" />
+    <Compile Include="FixedListByte4096DebugView.cs" />
+    <Compile Include="FixedListByte512.cs" />
+    <Compile Include="FixedListByte512DebugView.cs" />
+    <Compile Include="FixedListByte64.cs" />
+    <Compile Include="FixedListByte64DebugView.cs" />
+    <Compile Include="FixedListExtensions.cs" />
+    <Compile Include="FixedListFloat128.cs" />
+    <Compile Include="FixedListFloat128DebugView.cs" />
+    <Compile Include="FixedListFloat32.cs" />
+    <Compile Include="FixedListFloat32DebugView.cs" />
+    <Compile Include="FixedListFloat4096.cs" />
+    <Compile Include="FixedListFloat4096DebugView.cs" />
+    <Compile Include="FixedListFloat512.cs" />
+    <Compile Include="FixedListFloat512DebugView.cs" />
+    <Compile Include="FixedListFloat64.cs" />
+    <Compile Include="FixedListFloat64DebugView.cs" />
+    <Compile Include="FixedListInt128.cs" />
+    <Compile Include="FixedListInt128DebugView.cs" />
+    <Compile Include="FixedListInt32.cs" />
+    <Compile Include="FixedListInt32DebugView.cs" />
+    <Compile Include="FixedListInt4096.cs" />
+    <Compile Include="FixedListInt4096DebugView.cs" />
+    <Compile Include="FixedListInt512.cs" />
+    <Compile Include="FixedListInt512DebugView.cs" />
+    <Compile Include="FixedListInt64.cs" />
+    <Compile Include="FixedListInt64DebugView.cs" />
+    <Compile Include="FixedString.cs" />
+    <Compile Include="FixedString128.cs" />
+    <Compile Include="FixedString128Bytes.cs" />
+    <Compile Include="FixedString32.cs" />
+    <Compile Include="FixedString32Bytes.cs" />
+    <Compile Include="FixedString4096.cs" />
+    <Compile Include="FixedString4096Bytes.cs" />
+    <Compile Include="FixedString512.cs" />
+    <Compile Include="FixedString512Bytes.cs" />
+    <Compile Include="FixedString64.cs" />
+    <Compile Include="FixedString64Bytes.cs" />
+    <Compile Include="FixedStringMethods.cs" />
+    <Compile Include="FixedStringUtils.cs" />
+    <Compile Include="FormatError.cs" />
+    <Compile Include="HashSetExtensions.cs" />
+    <Compile Include="HeapString.cs" />
+    <Compile Include="IIndexable.cs" />
+    <Compile Include="INativeDisposable.cs" />
+    <Compile Include="INativeList.cs" />
+    <Compile Include="IUTF8Bytes.cs" />
+    <Compile Include="ListExtensions.cs" />
+    <Compile Include="ListPair.cs" />
+    <Compile Include="Long1024.cs" />
+    <Compile Include="Long512.cs" />
+    <Compile Include="Long64.cs" />
+    <Compile Include="Long8.cs" />
+    <Compile Include="LowLevel\Unsafe\HashSetExtensions.cs" />
+    <Compile Include="LowLevel\Unsafe\KeyValue.cs" />
+    <Compile Include="LowLevel\Unsafe\NativeBitArrayUnsafeUtility.cs" />
+    <Compile Include="LowLevel\Unsafe\NativeListUnsafeUtility.cs" />
+    <Compile Include="LowLevel\Unsafe\NativeReferenceUnsafeUtility.cs" />
+    <Compile Include="LowLevel\Unsafe\NotBurstCompatible\Extensions.cs" />
+    <Compile Include="LowLevel\Unsafe\NumberedWords.cs" />
+    <Compile Include="LowLevel\Unsafe\RingControl.cs" />
+    <Compile Include="LowLevel\Unsafe\UnsafeAppendBuffer.cs" />
+    <Compile Include="LowLevel\Unsafe\UnsafeAtomicCounter32.cs" />
+    <Compile Include="LowLevel\Unsafe\UnsafeAtomicCounter64.cs" />
+    <Compile Include="LowLevel\Unsafe\UnsafeBitArray.cs" />
+    <Compile Include="LowLevel\Unsafe\UnsafeBitArrayDebugView.cs" />
+    <Compile Include="LowLevel\Unsafe\UnsafeDisposeJob.cs" />
+    <Compile Include="LowLevel\Unsafe\UnsafeHashMap.cs" />
+    <Compile Include="LowLevel\Unsafe\UnsafeHashMapBase.cs" />
+    <Compile Include="LowLevel\Unsafe\UnsafeHashMapBucketData.cs" />
+    <Compile Include="LowLevel\Unsafe\UnsafeHashMapData.cs" />
+    <Compile Include="LowLevel\Unsafe\UnsafeHashMapDataDispose.cs" />
+    <Compile Include="LowLevel\Unsafe\UnsafeHashMapDataDisposeJob.cs" />
+    <Compile Include="LowLevel\Unsafe\UnsafeHashMapDataEnumerator.cs" />
+    <Compile Include="LowLevel\Unsafe\UnsafeHashMapDebuggerTypeProxy.cs" />
+    <Compile Include="LowLevel\Unsafe\UnsafeHashMapDisposeJob.cs" />
+    <Compile Include="LowLevel\Unsafe\UnsafeHashSet.cs" />
+    <Compile Include="LowLevel\Unsafe\UnsafeHashSetDebuggerTypeProxy.cs" />
+    <Compile Include="LowLevel\Unsafe\UnsafeList.2.cs" />
+    <Compile Include="LowLevel\Unsafe\UnsafeList.cs" />
+    <Compile Include="LowLevel\Unsafe\UnsafeListExtension.cs" />
+    <Compile Include="LowLevel\Unsafe\UnsafeListExtensions.cs" />
+    <Compile Include="LowLevel\Unsafe\UnsafeListTDebugView.cs" />
+    <Compile Include="LowLevel\Unsafe\UnsafeMultiHashMap.cs" />
+    <Compile Include="LowLevel\Unsafe\UnsafeMultiHashMapDebuggerTypeProxy.cs" />
+    <Compile Include="LowLevel\Unsafe\UnsafePtrList.2.cs" />
+    <Compile Include="LowLevel\Unsafe\UnsafePtrList.cs" />
+    <Compile Include="LowLevel\Unsafe\UnsafePtrListDebugView.cs" />
+    <Compile Include="LowLevel\Unsafe\UnsafePtrListExtensions.cs" />
+    <Compile Include="LowLevel\Unsafe\UnsafePtrListTDebugView.cs" />
+    <Compile Include="LowLevel\Unsafe\UnsafePtrListTExtensions.cs" />
+    <Compile Include="LowLevel\Unsafe\UnsafeRingQueue.cs" />
+    <Compile Include="LowLevel\Unsafe\UnsafeRingQueueDebugView.cs" />
+    <Compile Include="LowLevel\Unsafe\UnsafeScratchAllocator.cs" />
+    <Compile Include="LowLevel\Unsafe\UnsafeStream.cs" />
+    <Compile Include="LowLevel\Unsafe\UnsafeStreamBlock.cs" />
+    <Compile Include="LowLevel\Unsafe\UnsafeStreamBlockData.cs" />
+    <Compile Include="LowLevel\Unsafe\UnsafeStreamRange.cs" />
+    <Compile Include="LowLevel\Unsafe\UnsafeText.cs" />
+    <Compile Include="LowLevel\Unsafe\UnsafeTextExtensions.cs" />
+    <Compile Include="LowLevel\Unsafe\UnsafeUtilityExtensions.cs" />
+    <Compile Include="LowLevel\Unsafe\UntypedUnsafeHashMap.cs" />
+    <Compile Include="LowLevel\Unsafe\UntypedUnsafeList.cs" />
+    <Compile Include="LowLevel\Unsafe\Words.cs" />
+    <Compile Include="LowLevel\Unsafe\WordStorage.cs" />
+    <Compile Include="LowLevel\Unsafe\WordStorageDebugView.cs" />
+    <Compile Include="LowLevel\Unsafe\WordStorageStatic.cs" />
+    <Compile Include="Memory.cs" />
+    <Compile Include="Microsoft\CodeAnalysis\EmbeddedAttribute.cs" />
+    <Compile Include="NativeArrayExtensions.cs" />
+    <Compile Include="NativeBitArray.cs" />
+    <Compile Include="NativeHashMap.cs" />
+    <Compile Include="NativeHashMapDebuggerTypeProxy.cs" />
+    <Compile Include="NativeHashMapExtensions.cs" />
+    <Compile Include="NativeHashSet.cs" />
+    <Compile Include="NativeHashSetDebuggerTypeProxy.cs" />
+    <Compile Include="NativeKeyValueArrays.cs" />
+    <Compile Include="NativeList.cs" />
+    <Compile Include="NativeListDebugView.cs" />
+    <Compile Include="NativeListDispose.cs" />
+    <Compile Include="NativeListDisposeJob.cs" />
+    <Compile Include="NativeMultiHashMap.cs" />
+    <Compile Include="NativeMultiHashMapDebuggerTypeProxy.cs" />
+    <Compile Include="NativeMultiHashMapExtensions.cs" />
+    <Compile Include="NativeMultiHashMapIterator.cs" />
+    <Compile Include="NativeQueue.cs" />
+    <Compile Include="NativeQueueBlockHeader.cs" />
+    <Compile Include="NativeQueueBlockPool.cs" />
+    <Compile Include="NativeQueueBlockPoolData.cs" />
+    <Compile Include="NativeQueueData.cs" />
+    <Compile Include="NativeQueueDispose.cs" />
+    <Compile Include="NativeQueueDisposeJob.cs" />
+    <Compile Include="NativeReference.cs" />
+    <Compile Include="NativeReferenceDispose.cs" />
+    <Compile Include="NativeReferenceDisposeJob.cs" />
+    <Compile Include="NativeSortExtension.cs" />
+    <Compile Include="NativeStream.cs" />
+    <Compile Include="NativeText.cs" />
+    <Compile Include="NotBurstCompatibleAttribute.cs" />
+    <Compile Include="NotBurstCompatible\Extensions.cs" />
+    <Compile Include="Pair.cs" />
+    <Compile Include="ParseError.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RewindableAllocator.cs" />
+    <Compile Include="SortJob.cs" />
+    <Compile Include="Spinner.cs" />
+    <Compile Include="System\Runtime\CompilerServices\IsUnmanagedAttribute.cs" />
+    <Compile Include="Unicode.cs" />
+    <Compile Include="UnitySourceGeneratedAssemblyMonoScriptTypes_v1.cs" />
+    <Compile Include="UnmanagedArray.cs" />
+    <Compile Include="UTF8ArrayUnsafeUtility.cs" />
+    <Compile Include="xxHash3.cs" />
+    <Compile Include="xxHashDefaultKey.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\mscorlib\mscorlib.csproj">
+      <Project>{FB7F35FD-6256-4B33-A899-A0A5341DD171}</Project>
+      <Name>mscorlib</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\netstandard\netstandard.csproj">
+      <Project>{FB7F35FD-6256-4B33-A899-A0A5341DD172}</Project>
+      <Name>netstandard</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\System\System.csproj">
+      <Project>{FB7F35FD-6256-4B33-A899-A0A5341DD179}</Project>
+      <Name>System</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Unity.Burst\Unity.Burst.csproj">
+      <Project>{FB7F35FD-6256-4B33-A899-A0A5341DD188}</Project>
+      <Name>Unity.Burst</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Unity.Collections.LowLevel.ILSupport\Unity.Collections.LowLevel.ILSupport.csproj">
+      <Project>{FB7F35FD-6256-4B33-A899-A0A5341DD18B}</Project>
+      <Name>Unity.Collections.LowLevel.ILSupport</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Unity.Mathematics\Unity.Mathematics.csproj">
+      <Project>{FB7F35FD-6256-4B33-A899-A0A5341DD18C}</Project>
+      <Name>Unity.Mathematics</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
+      <Project>{FB7F35FD-6256-4B33-A899-A0A5341DD19C}</Project>
+      <Name>UnityEngine.CoreModule</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup />
+</Project>

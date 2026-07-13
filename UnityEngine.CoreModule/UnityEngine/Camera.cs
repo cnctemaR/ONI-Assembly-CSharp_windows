@@ -11,15 +11,15 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Shaders/Shader.h")]
-	[UsedByNativeCode]
 	[RequireComponent(typeof(Transform))]
+	[UsedByNativeCode]
 	[NativeHeader("Runtime/Misc/GameObjectUtility.h")]
 	[NativeHeader("Runtime/Graphics/RenderTexture.h")]
+	[NativeHeader("Runtime/GfxDevice/GfxDeviceTypes.h")]
 	[NativeHeader("Runtime/Camera/RenderManager.h")]
 	[NativeHeader("Runtime/Camera/Camera.h")]
 	[NativeHeader("Runtime/Graphics/CommandBuffer/RenderingCommandBuffer.h")]
-	[NativeHeader("Runtime/GfxDevice/GfxDeviceTypes.h")]
+	[NativeHeader("Runtime/Shaders/Shader.h")]
 	public sealed class Camera : Behaviour
 	{
 		[NativeProperty("Near")]
@@ -1093,8 +1093,8 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void SubmitRenderRequestsInternal(object requests);
 
-		[FreeFunction("CameraScripting::SubmitBuiltInObjectIDRenderRequest", HasExplicitThis = true)]
 		[NativeConditional("UNITY_EDITOR")]
+		[FreeFunction("CameraScripting::SubmitBuiltInObjectIDRenderRequest", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern Object[] SubmitBuiltInObjectIDRenderRequest(RenderTexture target, int mipLevel, CubemapFace cubemapFace, int depthSlice);
 
@@ -1227,8 +1227,8 @@ namespace UnityEngine
 			return Camera.GetCullingParameters_Internal(this, stereoAware, out cullingParameters, sizeof(ScriptableCullingParameters));
 		}
 
-		[NativeHeader("Runtime/Export/RenderPipeline/ScriptableRenderPipeline.bindings.h")]
 		[FreeFunction("ScriptableRenderPipeline_Bindings::GetCullingParameters_Internal")]
+		[NativeHeader("Runtime/Export/RenderPipeline/ScriptableRenderPipeline.bindings.h")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern bool GetCullingParameters_Internal(Camera camera, bool stereoAware, out ScriptableCullingParameters cullingParameters, int managedCullingParametersSize);
 

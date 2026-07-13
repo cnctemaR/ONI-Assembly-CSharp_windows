@@ -2,6 +2,7 @@
 using STRINGS;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class BuildingGroupScreen : KScreen
 {
@@ -55,6 +56,19 @@ public class BuildingGroupScreen : KScreen
 	{
 		base.OnActivate();
 		base.ConsumeMouseScroll = true;
+		this.BindTooltip();
+		KInputManager.InputChange.AddListener(new UnityAction(this.BindTooltip));
+	}
+
+	protected override void OnDeactivate()
+	{
+		KInputManager.InputChange.RemoveListener(new UnityAction(this.BindTooltip));
+		base.OnDeactivate();
+	}
+
+	private void BindTooltip()
+	{
+		this.inputField.GetComponent<ToolTip>().toolTip = GameUtil.ReplaceHotkeyString(UI.BUILDMENU.SEARCH_TOOLTIP, global::Action.Find);
 	}
 
 	public void ClearSearch()

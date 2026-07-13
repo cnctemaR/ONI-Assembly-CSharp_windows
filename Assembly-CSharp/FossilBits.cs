@@ -48,7 +48,7 @@ public class FossilBits : FossilExcavationWorkable, ISidescreenButtonControl
 
 	private void OnOperationalChanged(object state)
 	{
-		if ((bool)state)
+		if (((Boxed<bool>)state).value)
 		{
 			if (this.MarkedForDig)
 			{

@@ -107,17 +107,40 @@ public class AssignmentManager : KMonoBehaviour
 		}
 	}
 
-	public List<Assignable> GetPreferredAssignables(Assignables owner, AssignableSlot slot)
+	private int CompareAssignables(Assignable a, Assignable b)
+	{
+		int num = a.assignee.NumOwners();
+		int num2 = b.assignee.NumOwners();
+		int num3 = num.CompareTo(num2);
+		if (num3 != 0)
+		{
+			if (num == 0)
+			{
+				return -1;
+			}
+			if (num2 == 0)
+			{
+				return 1;
+			}
+		}
+		int num4 = a.priority.CompareTo(b.priority);
+		if (num4 != 0)
+		{
+			return num4;
+		}
+		return num3;
+	}
+
+	public List<Assignable> GetPreferredAssignables(Assignables owner, Navigator ownerNavigator, AssignableSlot slot)
 	{
 		List<Assignable> preferredAssignableResults = this.PreferredAssignableResults;
 		List<Assignable> preferredAssignableResults2;
 		lock (preferredAssignableResults)
 		{
 			this.PreferredAssignableResults.Clear();
-			int num = int.MaxValue;
 			foreach (Assignable assignable in this.assignables)
 			{
-				if (assignable.slot == slot && assignable.assignee != null && assignable.assignee.HasOwner(owner))
+				if (assignable.slot == slot && assignable.assignee != null && assignable.assignee.HasOwner(owner) && (!(ownerNavigator != null) || assignable.GetNavigationCost(ownerNavigator) != -1))
 				{
 					Room room = assignable.assignee as Room;
 					if (room != null && room.roomType.priority_building_use)
@@ -126,19 +149,10 @@ public class AssignmentManager : KMonoBehaviour
 						this.PreferredAssignableResults.Add(assignable);
 						return this.PreferredAssignableResults;
 					}
-					int num2 = assignable.assignee.NumOwners();
-					if (num2 == num)
-					{
-						this.PreferredAssignableResults.Add(assignable);
-					}
-					else if (num2 < num)
-					{
-						num = num2;
-						this.PreferredAssignableResults.Clear();
-						this.PreferredAssignableResults.Add(assignable);
-					}
+					this.PreferredAssignableResults.Add(assignable);
 				}
 			}
+			this.PreferredAssignableResults.Sort(new Comparison<Assignable>(this.CompareAssignables));
 			preferredAssignableResults2 = this.PreferredAssignableResults;
 		}
 		return preferredAssignableResults2;

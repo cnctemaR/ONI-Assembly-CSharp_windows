@@ -21,6 +21,10 @@ namespace Database
 		Sweepy,
 		Duplicant,
 		Artwork,
-		JoyResponse
+		JoyResponse,
+		JetSuitHelmet,
+		JetSuitBody,
+		JetSuitGloves,
+		JetSuitShoes
 	}
 }

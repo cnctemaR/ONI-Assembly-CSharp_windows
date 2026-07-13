@@ -9,34 +9,61 @@ public class HarvestablePOIConfig : IMultiEntityConfig
 		List<GameObject> list = new List<GameObject>();
 		foreach (HarvestablePOIConfig.HarvestablePOIParams harvestablePOIParams in this.GenerateConfigs())
 		{
-			list.Add(HarvestablePOIConfig.CreateHarvestablePOI(harvestablePOIParams.id, harvestablePOIParams.anim, Strings.Get(harvestablePOIParams.nameStringKey), harvestablePOIParams.descStringKey, harvestablePOIParams.poiType.idHash, harvestablePOIParams.poiType.canProvideArtifacts, harvestablePOIParams.poiType.GetRequiredDlcIds(), harvestablePOIParams.poiType.GetForbiddenDlcIds()));
+			list.Add(HarvestablePOIConfig.CreateHarvestablePOI(harvestablePOIParams));
 		}
 		return list;
 	}
 
-	public static GameObject CreateHarvestablePOI(string id, string anim, string name, StringKey descStringKey, HashedString poiType, bool canProvideArtifacts = false)
+	public static GameObject CreateHarvestablePOI(HarvestablePOIConfig.HarvestablePOIParams def)
 	{
-		return HarvestablePOIConfig.CreateHarvestablePOI(id, anim, name, descStringKey, poiType, canProvideArtifacts, DlcManager.EXPANSION1, null);
-	}
-
-	public static GameObject CreateHarvestablePOI(string id, string anim, string name, StringKey descStringKey, HashedString poiType, bool canProvideArtifacts = false, string[] requiredDlcIds = null, string[] forbiddenDlcIds = null)
-	{
-		GameObject gameObject = EntityTemplates.CreateEntity(id, id, true);
+		GameObject gameObject = EntityTemplates.CreateEntity(def.id, def.id, true);
+		string text = Strings.Get(def.nameStringKey);
 		gameObject.AddOrGet<SaveLoadRoot>();
-		gameObject.AddOrGet<HarvestablePOIConfigurator>().presetType = poiType;
+		gameObject.AddOrGet<HarvestablePOIConfigurator>().presetType = def.poiType.idHash;
 		HarvestablePOIClusterGridEntity harvestablePOIClusterGridEntity = gameObject.AddOrGet<HarvestablePOIClusterGridEntity>();
-		harvestablePOIClusterGridEntity.m_name = name;
-		harvestablePOIClusterGridEntity.m_Anim = anim;
+		harvestablePOIClusterGridEntity.m_name = text;
+		harvestablePOIClusterGridEntity.m_Anim = def.anim;
+		if (def.poiType.initialDataBanks > 0 || def.poiType.initialLiberatedResources != null)
+		{
+			List<ClusterGridOneTimeResourceSpawner.Data> list = new List<ClusterGridOneTimeResourceSpawner.Data>();
+			if (def.poiType.initialDataBanks > 0)
+			{
+				list.Add(new ClusterGridOneTimeResourceSpawner.Data
+				{
+					itemID = DatabankHelper.ID,
+					mass = 1f * (float)def.poiType.initialDataBanks
+				});
+			}
+			if (def.poiType.initialLiberatedResources != null)
+			{
+				foreach (SimHashes simHashes in def.poiType.initialLiberatedResources.Keys)
+				{
+					float num = def.poiType.initialLiberatedResources[simHashes];
+					if (num > 0f)
+					{
+						list.Add(new ClusterGridOneTimeResourceSpawner.Data
+						{
+							itemID = simHashes.CreateTag(),
+							mass = num
+						});
+					}
+				}
+			}
+			if (list.Count > 0)
+			{
+				gameObject.AddOrGetDef<ClusterGridOneTimeResourceSpawner.Def>().thingsToSpawn = list;
+			}
+		}
 		gameObject.AddOrGetDef<HarvestablePOIStates.Def>();
-		if (canProvideArtifacts)
+		if (def.poiType.canProvideArtifacts)
 		{
 			gameObject.AddOrGetDef<ArtifactPOIStates.Def>();
 			gameObject.AddOrGet<ArtifactPOIConfigurator>().presetType = ArtifactPOIConfigurator.defaultArtifactPoiType.idHash;
 		}
-		gameObject.AddOrGet<InfoDescription>().description = Strings.Get(descStringKey);
+		gameObject.AddOrGet<InfoDescription>().description = Strings.Get(def.descStringKey);
 		KPrefabID component = gameObject.GetComponent<KPrefabID>();
-		component.requiredDlcIds = requiredDlcIds;
-		component.forbiddenDlcIds = forbiddenDlcIds;
+		component.requiredDlcIds = def.poiType.GetRequiredDlcIds();
+		component.forbiddenDlcIds = def.poiType.GetForbiddenDlcIds();
 		return gameObject;
 	}
 
@@ -61,6 +88,16 @@ public class HarvestablePOIConfig : IMultiEntityConfig
 				SimHashes.Carbon,
 				5.5f
 			}
+		}, 50, new Dictionary<SimHashes, float>
+		{
+			{
+				SimHashes.Carbon,
+				28070f
+			},
+			{
+				SimHashes.RefinedCarbon,
+				8320f
+			}
 		}, 30000f, 45000f, 30000f, 60000f, true, HarvestablePOIConfig.AsteroidFieldOrbit, 20, DlcManager.EXPANSION1, null)));
 		list.Add(new HarvestablePOIConfig.HarvestablePOIParams("metallic_asteroid_field", new HarvestablePOIConfigurator.HarvestablePOIType("MetallicAsteroidField", new Dictionary<SimHashes, float>
 		{
@@ -74,7 +111,21 @@ public class HarvestablePOIConfig : IMultiEntityConfig
 			},
 			{
 				SimHashes.Obsidian,
-				7f
+				6.25f
+			},
+			{
+				SimHashes.MoltenLead,
+				1.75f
+			}
+		}, 50, new Dictionary<SimHashes, float>
+		{
+			{
+				SimHashes.MoltenIron,
+				14240f
+			},
+			{
+				SimHashes.Cuprite,
+				12280f
 			}
 		}, 54000f, 81000f, 30000f, 60000f, true, HarvestablePOIConfig.AsteroidFieldOrbit, 20, DlcManager.EXPANSION1, null)));
 		list.Add(new HarvestablePOIConfig.HarvestablePOIParams("satellite_field", new HarvestablePOIConfigurator.HarvestablePOIType("SatelliteField", new Dictionary<SimHashes, float>
@@ -95,22 +146,50 @@ public class HarvestablePOIConfig : IMultiEntityConfig
 				SimHashes.Glass,
 				1.33f
 			}
+		}, 50, new Dictionary<SimHashes, float>
+		{
+			{
+				SimHashes.IronOre,
+				17240f
+			},
+			{
+				SimHashes.MoltenCopper,
+				25050f
+			},
+			{
+				SimHashes.Glass,
+				16240f
+			}
 		}, 30000f, 45000f, 30000f, 60000f, true, HarvestablePOIConfig.AsteroidFieldOrbit, 20, DlcManager.EXPANSION1, null)));
 		list.Add(new HarvestablePOIConfig.HarvestablePOIParams("rocky_asteroid_field", new HarvestablePOIConfigurator.HarvestablePOIType("RockyAsteroidField", new Dictionary<SimHashes, float>
 		{
 			{
-				SimHashes.Cuprite,
+				SimHashes.Katairite,
+				2f
+			},
+			{
+				SimHashes.Granite,
 				2f
 			},
 			{
 				SimHashes.SedimentaryRock,
-				4f
+				3f
 			},
 			{
 				SimHashes.IgneousRock,
-				4f
+				3f
 			}
-		}, 54000f, 81000f, 30000f, 60000f, true, HarvestablePOIConfig.AsteroidFieldOrbit, 20, DlcManager.EXPANSION1, null)));
+		}, 50, new Dictionary<SimHashes, float>
+		{
+			{
+				SimHashes.SedimentaryRock,
+				23840f
+			},
+			{
+				SimHashes.Granite,
+				28020f
+			}
+		}, 81000f, 94000f, 30000f, 60000f, true, HarvestablePOIConfig.AsteroidFieldOrbit, 20, DlcManager.EXPANSION1, null)));
 		list.Add(new HarvestablePOIConfig.HarvestablePOIParams("interstellar_ice_field", new HarvestablePOIConfigurator.HarvestablePOIType("InterstellarIceField", new Dictionary<SimHashes, float>
 		{
 			{
@@ -125,7 +204,11 @@ public class HarvestablePOIConfig : IMultiEntityConfig
 				SimHashes.SolidOxygen,
 				0.5f
 			}
-		}, 54000f, 81000f, 30000f, 60000f, true, new List<string>
+		}, 50, new Dictionary<SimHashes, float> { 
+		{
+			SimHashes.Ice,
+			38840f
+		} }, 54000f, 81000f, 30000f, 60000f, true, new List<string>
 		{
 			Db.Get().OrbitalTypeCategories.iceCloud.Id,
 			Db.Get().OrbitalTypeCategories.iceRock.Id
@@ -148,6 +231,16 @@ public class HarvestablePOIConfig : IMultiEntityConfig
 				SimHashes.Dirt,
 				3f
 			}
+		}, 50, new Dictionary<SimHashes, float>
+		{
+			{
+				SimHashes.Dirt,
+				6140f
+			},
+			{
+				SimHashes.Algae,
+				14080f
+			}
 		}, 54000f, 81000f, 30000f, 60000f, true, HarvestablePOIConfig.AsteroidFieldOrbit, 20, DlcManager.EXPANSION1, null)));
 		list.Add(new HarvestablePOIConfig.HarvestablePOIParams("ice_asteroid_field", new HarvestablePOIConfigurator.HarvestablePOIType("IceAsteroidField", new Dictionary<SimHashes, float>
 		{
@@ -166,6 +259,16 @@ public class HarvestablePOIConfig : IMultiEntityConfig
 			{
 				SimHashes.SolidMethane,
 				0.5f
+			}
+		}, 50, new Dictionary<SimHashes, float>
+		{
+			{
+				SimHashes.Ice,
+				33140f
+			},
+			{
+				SimHashes.SolidMethane,
+				16550f
 			}
 		}, 54000f, 81000f, 30000f, 60000f, true, new List<string>
 		{
@@ -190,6 +293,20 @@ public class HarvestablePOIConfig : IMultiEntityConfig
 				SimHashes.Hydrogen,
 				7f
 			}
+		}, 50, new Dictionary<SimHashes, float>
+		{
+			{
+				SimHashes.Methane,
+				32140f
+			},
+			{
+				SimHashes.LiquidMethane,
+				12550f
+			},
+			{
+				SimHashes.Hydrogen,
+				4080f
+			}
 		}, 15000f, 20000f, 30000f, 60000f, true, HarvestablePOIConfig.GasFieldOrbit, 20, DlcManager.EXPANSION1, null)));
 		list.Add(new HarvestablePOIConfig.HarvestablePOIParams("chlorine_cloud", new HarvestablePOIConfigurator.HarvestablePOIType("ChlorineCloud", new Dictionary<SimHashes, float>
 		{
@@ -200,6 +317,16 @@ public class HarvestablePOIConfig : IMultiEntityConfig
 			{
 				SimHashes.BleachStone,
 				7.5f
+			}
+		}, 50, new Dictionary<SimHashes, float>
+		{
+			{
+				SimHashes.Chlorine,
+				13030f
+			},
+			{
+				SimHashes.BleachStone,
+				26480f
 			}
 		}, 54000f, 81000f, 30000f, 60000f, true, HarvestablePOIConfig.GasFieldOrbit, 20, DlcManager.EXPANSION1, null)));
 		list.Add(new HarvestablePOIConfig.HarvestablePOIParams("gilded_asteroid_field", new HarvestablePOIConfigurator.HarvestablePOIType("GildedAsteroidField", new Dictionary<SimHashes, float>
@@ -224,6 +351,16 @@ public class HarvestablePOIConfig : IMultiEntityConfig
 				SimHashes.Regolith,
 				1f
 			}
+		}, 50, new Dictionary<SimHashes, float>
+		{
+			{
+				SimHashes.Gold,
+				19030f
+			},
+			{
+				SimHashes.Regolith,
+				12010f
+			}
 		}, 30000f, 45000f, 30000f, 60000f, true, HarvestablePOIConfig.AsteroidFieldOrbit, 20, DlcManager.EXPANSION1, null)));
 		list.Add(new HarvestablePOIConfig.HarvestablePOIParams("glimmering_asteroid_field", new HarvestablePOIConfigurator.HarvestablePOIType("GlimmeringAsteroidField", new Dictionary<SimHashes, float>
 		{
@@ -243,6 +380,16 @@ public class HarvestablePOIConfig : IMultiEntityConfig
 				SimHashes.CarbonDioxide,
 				1f
 			}
+		}, 50, new Dictionary<SimHashes, float>
+		{
+			{
+				SimHashes.MoltenTungsten,
+				12040f
+			},
+			{
+				SimHashes.Wolframite,
+				12800f
+			}
 		}, 30000f, 45000f, 30000f, 60000f, true, HarvestablePOIConfig.AsteroidFieldOrbit, 20, DlcManager.EXPANSION1, null)));
 		list.Add(new HarvestablePOIConfig.HarvestablePOIParams("helium_cloud", new HarvestablePOIConfigurator.HarvestablePOIType("HeliumCloud", new Dictionary<SimHashes, float>
 		{
@@ -253,6 +400,16 @@ public class HarvestablePOIConfig : IMultiEntityConfig
 			{
 				SimHashes.Water,
 				8f
+			}
+		}, 50, new Dictionary<SimHashes, float>
+		{
+			{
+				SimHashes.Hydrogen,
+				14800f
+			},
+			{
+				SimHashes.Water,
+				21800f
 			}
 		}, 30000f, 45000f, 30000f, 60000f, true, HarvestablePOIConfig.GasFieldOrbit, 20, DlcManager.EXPANSION1, null)));
 		list.Add(new HarvestablePOIConfig.HarvestablePOIParams("oily_asteroid_field", new HarvestablePOIConfigurator.HarvestablePOIType("OilyAsteroidField", new Dictionary<SimHashes, float>
@@ -269,7 +426,11 @@ public class HarvestablePOIConfig : IMultiEntityConfig
 				SimHashes.CrudeOil,
 				1.125f
 			}
-		}, 15000f, 25000f, 30000f, 60000f, true, HarvestablePOIConfig.AsteroidFieldOrbit, 20, DlcManager.EXPANSION1, null)));
+		}, 50, new Dictionary<SimHashes, float> { 
+		{
+			SimHashes.CrudeOil,
+			28780f
+		} }, 15000f, 25000f, 30000f, 60000f, true, HarvestablePOIConfig.AsteroidFieldOrbit, 20, DlcManager.EXPANSION1, null)));
 		list.Add(new HarvestablePOIConfig.HarvestablePOIParams("oxidized_asteroid_field", new HarvestablePOIConfigurator.HarvestablePOIType("OxidizedAsteroidField", new Dictionary<SimHashes, float>
 		{
 			{
@@ -279,6 +440,16 @@ public class HarvestablePOIConfig : IMultiEntityConfig
 			{
 				SimHashes.SolidCarbonDioxide,
 				2f
+			}
+		}, 50, new Dictionary<SimHashes, float>
+		{
+			{
+				SimHashes.Rust,
+				25080f
+			},
+			{
+				SimHashes.SolidCarbonDioxide,
+				12080f
 			}
 		}, 54000f, 81000f, 30000f, 60000f, true, HarvestablePOIConfig.AsteroidFieldOrbit, 20, DlcManager.EXPANSION1, null)));
 		list.Add(new HarvestablePOIConfig.HarvestablePOIParams("salty_asteroid_field", new HarvestablePOIConfigurator.HarvestablePOIType("SaltyAsteroidField", new Dictionary<SimHashes, float>
@@ -294,6 +465,16 @@ public class HarvestablePOIConfig : IMultiEntityConfig
 			{
 				SimHashes.SolidCarbonDioxide,
 				1f
+			}
+		}, 50, new Dictionary<SimHashes, float>
+		{
+			{
+				SimHashes.SaltWater,
+				13000f
+			},
+			{
+				SimHashes.Brine,
+				15080f
 			}
 		}, 54000f, 81000f, 30000f, 60000f, true, HarvestablePOIConfig.AsteroidFieldOrbit, 20, DlcManager.EXPANSION1, null)));
 		list.Add(new HarvestablePOIConfig.HarvestablePOIParams("frozen_ore_field", new HarvestablePOIConfigurator.HarvestablePOIType("FrozenOreField", new Dictionary<SimHashes, float>
@@ -314,6 +495,16 @@ public class HarvestablePOIConfig : IMultiEntityConfig
 				SimHashes.AluminumOre,
 				2f
 			}
+		}, 50, new Dictionary<SimHashes, float>
+		{
+			{
+				SimHashes.Ice,
+				12000f
+			},
+			{
+				SimHashes.Snow,
+				23080f
+			}
 		}, 54000f, 81000f, 30000f, 60000f, true, HarvestablePOIConfig.AsteroidFieldOrbit, 20, DlcManager.EXPANSION1, null)));
 		list.Add(new HarvestablePOIConfig.HarvestablePOIParams("foresty_ore_field", new HarvestablePOIConfigurator.HarvestablePOIType("ForestyOreField", new Dictionary<SimHashes, float>
 		{
@@ -329,6 +520,16 @@ public class HarvestablePOIConfig : IMultiEntityConfig
 				SimHashes.CarbonDioxide,
 				2f
 			}
+		}, 50, new Dictionary<SimHashes, float>
+		{
+			{
+				SimHashes.IgneousRock,
+				10720f
+			},
+			{
+				SimHashes.AluminumOre,
+				9080f
+			}
 		}, 54000f, 81000f, 30000f, 60000f, true, HarvestablePOIConfig.AsteroidFieldOrbit, 20, DlcManager.EXPANSION1, null)));
 		list.Add(new HarvestablePOIConfig.HarvestablePOIParams("swampy_ore_field", new HarvestablePOIConfigurator.HarvestablePOIType("SwampyOreField", new Dictionary<SimHashes, float>
 		{
@@ -343,6 +544,16 @@ public class HarvestablePOIConfig : IMultiEntityConfig
 			{
 				SimHashes.Cobaltite,
 				1f
+			}
+		}, 50, new Dictionary<SimHashes, float>
+		{
+			{
+				SimHashes.Mud,
+				8290f
+			},
+			{
+				SimHashes.Cobaltite,
+				18820f
 			}
 		}, 54000f, 81000f, 30000f, 60000f, true, HarvestablePOIConfig.AsteroidFieldOrbit, 20, DlcManager.EXPANSION1, null)));
 		list.Add(new HarvestablePOIConfig.HarvestablePOIParams("sandy_ore_field", new HarvestablePOIConfigurator.HarvestablePOIType("SandyOreField", new Dictionary<SimHashes, float>
@@ -363,6 +574,16 @@ public class HarvestablePOIConfig : IMultiEntityConfig
 				SimHashes.Sand,
 				3f
 			}
+		}, 50, new Dictionary<SimHashes, float>
+		{
+			{
+				SimHashes.SandStone,
+				12080f
+			},
+			{
+				SimHashes.Cuprite,
+				11450f
+			}
 		}, 54000f, 81000f, 30000f, 60000f, true, HarvestablePOIConfig.AsteroidFieldOrbit, 20, DlcManager.EXPANSION1, null)));
 		list.Add(new HarvestablePOIConfig.HarvestablePOIParams("radioactive_gas_cloud", new HarvestablePOIConfigurator.HarvestablePOIType("RadioactiveGasCloud", new Dictionary<SimHashes, float>
 		{
@@ -378,7 +599,11 @@ public class HarvestablePOIConfig : IMultiEntityConfig
 				SimHashes.CarbonDioxide,
 				7f
 			}
-		}, 5000f, 10000f, 30000f, 60000f, true, HarvestablePOIConfig.AsteroidFieldOrbit, 20, DlcManager.EXPANSION1, null)));
+		}, 50, new Dictionary<SimHashes, float> { 
+		{
+			SimHashes.UraniumOre,
+			10040f
+		} }, 5000f, 10000f, 30000f, 60000f, true, HarvestablePOIConfig.AsteroidFieldOrbit, 20, DlcManager.EXPANSION1, null)));
 		list.Add(new HarvestablePOIConfig.HarvestablePOIParams("radioactive_asteroid_field", new HarvestablePOIConfigurator.HarvestablePOIType("RadioactiveAsteroidField", new Dictionary<SimHashes, float>
 		{
 			{
@@ -397,6 +622,16 @@ public class HarvestablePOIConfig : IMultiEntityConfig
 				SimHashes.Rust,
 				4f
 			}
+		}, 50, new Dictionary<SimHashes, float>
+		{
+			{
+				SimHashes.UraniumOre,
+				8040f
+			},
+			{
+				SimHashes.Sulfur,
+				4080f
+			}
 		}, 5000f, 10000f, 30000f, 60000f, true, HarvestablePOIConfig.AsteroidFieldOrbit, 20, DlcManager.EXPANSION1, null)));
 		list.Add(new HarvestablePOIConfig.HarvestablePOIParams("oxygen_rich_asteroid_field", new HarvestablePOIConfigurator.HarvestablePOIType("OxygenRichAsteroidField", new Dictionary<SimHashes, float>
 		{
@@ -411,6 +646,16 @@ public class HarvestablePOIConfig : IMultiEntityConfig
 			{
 				SimHashes.Ice,
 				4f
+			}
+		}, 50, new Dictionary<SimHashes, float>
+		{
+			{
+				SimHashes.Water,
+				8040f
+			},
+			{
+				SimHashes.ContaminatedOxygen,
+				40080f
 			}
 		}, 15000f, 25000f, 30000f, 60000f, true, HarvestablePOIConfig.AsteroidFieldOrbit, 20, DlcManager.EXPANSION1, null)));
 		list.Add(new HarvestablePOIConfig.HarvestablePOIParams("interstellar_ocean", new HarvestablePOIConfigurator.HarvestablePOIType("InterstellarOcean", new Dictionary<SimHashes, float>
@@ -431,6 +676,16 @@ public class HarvestablePOIConfig : IMultiEntityConfig
 				SimHashes.Ice,
 				2.5f
 			}
+		}, 50, new Dictionary<SimHashes, float>
+		{
+			{
+				SimHashes.SaltWater,
+				14040f
+			},
+			{
+				SimHashes.Brine,
+				12080f
+			}
 		}, 15000f, 25000f, 30000f, 60000f, true, HarvestablePOIConfig.AsteroidFieldOrbit, 20, DlcManager.EXPANSION1, null)));
 		list.Add(new HarvestablePOIConfig.HarvestablePOIParams("ceres_debris_field", new HarvestablePOIConfigurator.HarvestablePOIType("DLC2CeresField", new Dictionary<SimHashes, float>
 		{
@@ -446,6 +701,16 @@ public class HarvestablePOIConfig : IMultiEntityConfig
 				SimHashes.Ice,
 				2.5f
 			}
+		}, 50, new Dictionary<SimHashes, float>
+		{
+			{
+				SimHashes.Cinnabar,
+				50820f
+			},
+			{
+				SimHashes.Mercury,
+				48090f
+			}
 		}, 15000f, 25000f, 30000f, 60000f, true, HarvestablePOIConfig.AsteroidFieldOrbit, 20, DlcManager.EXPANSION1.Append<string>(DlcManager.DLC2), null)));
 		list.Add(new HarvestablePOIConfig.HarvestablePOIParams("ceres_starting_field", new HarvestablePOIConfigurator.HarvestablePOIType("DLC2CeresOreField", new Dictionary<SimHashes, float>
 		{
@@ -460,6 +725,16 @@ public class HarvestablePOIConfig : IMultiEntityConfig
 			{
 				SimHashes.Ice,
 				3.5f
+			}
+		}, 50, new Dictionary<SimHashes, float>
+		{
+			{
+				SimHashes.Cinnabar,
+				13720f
+			},
+			{
+				SimHashes.Ice,
+				9080f
 			}
 		}, 15000f, 25000f, 30000f, 60000f, true, HarvestablePOIConfig.AsteroidFieldOrbit, 20, DlcManager.EXPANSION1.Append<string>(DlcManager.DLC2), null)));
 		list.Add(new HarvestablePOIConfig.HarvestablePOIParams("prehistoric_SO1", new HarvestablePOIConfigurator.HarvestablePOIType("DLC4PrehistoricMixingField", new Dictionary<SimHashes, float>
@@ -484,6 +759,28 @@ public class HarvestablePOIConfig : IMultiEntityConfig
 				SimHashes.Iridium,
 				0.5f
 			}
+		}, 50, new Dictionary<SimHashes, float>
+		{
+			{
+				SimHashes.NickelOre,
+				50720f
+			},
+			{
+				SimHashes.Peat,
+				20880f
+			},
+			{
+				SimHashes.Shale,
+				20080f
+			},
+			{
+				SimHashes.Amber,
+				12080f
+			},
+			{
+				SimHashes.Iridium,
+				10809f
+			}
 		}, 15000f, 25000f, 30000f, 60000f, true, HarvestablePOIConfig.AsteroidFieldOrbit, 20, DlcManager.EXPANSION1.Append<string>(DlcManager.DLC4), null)));
 		list.Add(new HarvestablePOIConfig.HarvestablePOIParams("prehistoric_SO2", new HarvestablePOIConfigurator.HarvestablePOIType("DLC4PrehistoricOreField", new Dictionary<SimHashes, float>
 		{
@@ -502,6 +799,16 @@ public class HarvestablePOIConfig : IMultiEntityConfig
 			{
 				SimHashes.Amber,
 				1f
+			}
+		}, 50, new Dictionary<SimHashes, float>
+		{
+			{
+				SimHashes.Amber,
+				8720f
+			},
+			{
+				SimHashes.Peat,
+				9080f
 			}
 		}, 15000f, 25000f, 30000f, 60000f, true, HarvestablePOIConfig.AsteroidFieldOrbit, 20, DlcManager.EXPANSION1.Append<string>(DlcManager.DLC4), null)));
 		list.Add(new HarvestablePOIConfig.HarvestablePOIParams("prehistoric_impactor_1", new HarvestablePOIConfigurator.HarvestablePOIType("DLC4ImpactorDebrisField1", new Dictionary<SimHashes, float>
@@ -522,6 +829,16 @@ public class HarvestablePOIConfig : IMultiEntityConfig
 				SimHashes.Granite,
 				3.9f
 			}
+		}, 50, new Dictionary<SimHashes, float>
+		{
+			{
+				SimHashes.Iridium,
+				10720f
+			},
+			{
+				SimHashes.Gold,
+				10080f
+			}
 		}, 35000f, 45000f, 30000f, 30000f, false, HarvestablePOIConfig.AsteroidFieldOrbit, 20, DlcManager.EXPANSION1.Append<string>(DlcManager.DLC4), null)));
 		list.Add(new HarvestablePOIConfig.HarvestablePOIParams("prehistoric_impactor_2", new HarvestablePOIConfigurator.HarvestablePOIType("DLC4ImpactorDebrisField2", new Dictionary<SimHashes, float>
 		{
@@ -536,6 +853,16 @@ public class HarvestablePOIConfig : IMultiEntityConfig
 			{
 				SimHashes.LiquidSulfur,
 				4.7f
+			}
+		}, 50, new Dictionary<SimHashes, float>
+		{
+			{
+				SimHashes.Isoresin,
+				2280f
+			},
+			{
+				SimHashes.Petroleum,
+				11080f
 			}
 		}, 33400f, 66800f, 30000f, 30000f, false, HarvestablePOIConfig.AsteroidFieldOrbit, 20, DlcManager.EXPANSION1.Append<string>(DlcManager.DLC4), null)));
 		list.Add(new HarvestablePOIConfig.HarvestablePOIParams("prehistoric_impactor_3", new HarvestablePOIConfigurator.HarvestablePOIType("DLC4ImpactorDebrisField3", new Dictionary<SimHashes, float>
@@ -556,10 +883,22 @@ public class HarvestablePOIConfig : IMultiEntityConfig
 				SimHashes.Magma,
 				5.1f
 			}
+		}, 50, new Dictionary<SimHashes, float>
+		{
+			{
+				SimHashes.MoltenIridium,
+				3280f
+			},
+			{
+				SimHashes.Magma,
+				1580f
+			}
 		}, 110000f, 137500f, 30000f, 30000f, false, HarvestablePOIConfig.AsteroidFieldOrbit, 20, DlcManager.EXPANSION1.Append<string>(DlcManager.DLC4), null)));
 		list.RemoveAll((HarvestablePOIConfig.HarvestablePOIParams poi) => !DlcManager.IsCorrectDlcSubscribed(poi.poiType));
 		return list;
 	}
+
+	public const int DEFAULT_INITIAL_DATABANK_COUNT = 50;
 
 	public const string CarbonAsteroidField = "CarbonAsteroidField";
 

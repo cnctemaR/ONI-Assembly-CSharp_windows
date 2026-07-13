@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class GravityComponents : KGameObjectComponentManager<GravityComponent>
 {
-	public HandleVector<int>.Handle Add(GameObject go, Vector2 initial_velocity, global::System.Action on_landed = null)
+	public HandleVector<int>.Handle Add(GameObject go, Vector2 initial_velocity, Action<Transform> on_landed = null)
 	{
 		bool flag = false;
 		KPrefabID component = go.GetComponent<KPrefabID>();
@@ -55,9 +55,7 @@ public class GravityComponents : KGameObjectComponentManager<GravityComponent>
 				bool flag2 = Grid.IsVisiblyInLiquid(vector3 + new Vector2(0f, groundOffset));
 				if (!flag && flag2)
 				{
-					KBatchedAnimController kbatchedAnimController = FXHelpers.CreateEffect("splash_step_kanim", new Vector3(vector3.x, vector3.y, 0f) + new Vector3(-0.38f, 0.75f, -0.1f), null, false, Grid.SceneLayer.FXFront, false);
-					kbatchedAnimController.Play("fx1", KAnim.PlayMode.Once, 1f, 0f);
-					kbatchedAnimController.destroyOnAnimComplete = true;
+					Game.Instance.SpawnFX(SpawnFXHashes.SplashStep, new Vector3(vector3.x, vector3.y, Grid.GetLayerZ(Grid.SceneLayer.Front)) + new Vector3(-0.38f, 0.75f, -0.1f), 0f);
 				}
 				bool flag3 = false;
 				int num6 = Grid.PosToCell(vector4);
@@ -98,7 +96,7 @@ public class GravityComponents : KGameObjectComponentManager<GravityComponent>
 					}
 					else
 					{
-						Vector2 vector6 = vector3;
+						Vector2 vector6 = vector4;
 						vector6.x -= gravityComponent.extents.x;
 						int num8 = Grid.PosToCell(vector6);
 						if (Grid.IsValidCell(num8) && Grid.Solid[num8])
@@ -108,7 +106,7 @@ public class GravityComponents : KGameObjectComponentManager<GravityComponent>
 						}
 						else
 						{
-							Vector3 vector7 = vector3;
+							Vector3 vector7 = vector4;
 							vector7.x += gravityComponent.extents.x;
 							int num9 = Grid.PosToCell(vector7);
 							if (Grid.IsValidCell(num9) && Grid.Solid[num9])
@@ -126,10 +124,10 @@ public class GravityComponents : KGameObjectComponentManager<GravityComponent>
 					gravityComponent.transform.SetPosition(new Vector3(vector3.x, vector3.y, position.z));
 					if (flag3)
 					{
-						gravityComponent.transform.gameObject.Trigger(1188683690, vector2);
+						gravityComponent.transform.gameObject.BoxingTrigger(1188683690, vector2);
 						if (gravityComponent.onLanded != null)
 						{
-							gravityComponent.onLanded();
+							gravityComponent.onLanded(gravityComponent.transform);
 						}
 					}
 				}

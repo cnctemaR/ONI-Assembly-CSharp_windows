@@ -10,7 +10,7 @@ public class Cancellable : KMonoBehaviour
 		base.Subscribe<Cancellable>(2127324410, Cancellable.OnCancelDelegate);
 	}
 
-	protected virtual void OnCancel(object data)
+	protected virtual void OnCancel(object _)
 	{
 		this.DeleteObject();
 	}

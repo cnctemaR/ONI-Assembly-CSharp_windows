@@ -18,6 +18,8 @@ public static class ClothingOutfitUtility
 			return UI.MINION_BROWSER_SCREEN.OUTFIT_TYPE_JOY_RESPONSE;
 		case ClothingOutfitUtility.OutfitType.AtmoSuit:
 			return UI.MINION_BROWSER_SCREEN.OUTFIT_TYPE_ATMOSUIT;
+		case ClothingOutfitUtility.OutfitType.JetSuit:
+			return UI.MINION_BROWSER_SCREEN.OUTFIT_TYPE_JETSUIT;
 		default:
 			DebugUtil.DevAssert(false, string.Format("Couldn't find name for outfit type: {0}", self), null);
 			return self.ToString();
@@ -201,6 +203,14 @@ public static class ClothingOutfitUtility
 		PermitCategory.AtmoSuitShoes
 	};
 
+	public static readonly PermitCategory[] PERMIT_CATEGORIES_FOR_JET_SUITS = new PermitCategory[]
+	{
+		PermitCategory.JetSuitHelmet,
+		PermitCategory.JetSuitBody,
+		PermitCategory.JetSuitGloves,
+		PermitCategory.JetSuitShoes
+	};
+
 	private static string OutfitFile_U44_to_U46 = "OutfitUserData.json";
 
 	private static string OutfitFile_U47_to_Present = "OutfitUserData2.json";
@@ -210,6 +220,7 @@ public static class ClothingOutfitUtility
 		Clothing,
 		JoyResponse,
 		AtmoSuit,
+		JetSuit,
 		LENGTH
 	}
 }

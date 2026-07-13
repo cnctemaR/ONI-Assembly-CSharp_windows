@@ -18,8 +18,8 @@ namespace UnityEngine.Windows.Speech
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		protected static extern IntPtr CreateFromGrammarFile(object self, string grammarFilePath, ConfidenceLevel minimumConfidence);
 
-		[NativeThrows]
 		[NativeHeader("PlatformDependent/Win/Bindings/SpeechBindings.h")]
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void Start_Internal(IntPtr recognizer);
 
@@ -35,8 +35,8 @@ namespace UnityEngine.Windows.Speech
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void Destroy(IntPtr recognizer);
 
-		[NativeHeader("PlatformDependent/Win/Bindings/SpeechBindings.h")]
 		[ThreadSafe]
+		[NativeHeader("PlatformDependent/Win/Bindings/SpeechBindings.h")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void DestroyThreaded(IntPtr recognizer);
 

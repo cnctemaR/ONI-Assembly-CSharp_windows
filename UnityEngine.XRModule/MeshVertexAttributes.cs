@@ -4,9 +4,9 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.XR
 {
+	[Flags]
 	[UsedByNativeCode]
 	[NativeHeader("Modules/XR/Subsystems/Meshing/XRMeshBindings.h")]
-	[Flags]
 	public enum MeshVertexAttributes
 	{
 		None = 0,

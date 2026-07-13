@@ -426,11 +426,13 @@ public class CodexScreen : KScreen
 			}
 			else
 			{
+				global::Debug.LogWarning("Codex SubEntry not found for target id: " + id);
 				id = "PAGENOTFOUND";
 			}
 		}
 		if (CodexCache.entries[id].disabled)
 		{
+			global::Debug.LogWarning("Codex Entry disabled for target id: " + id);
 			id = "PAGENOTFOUND";
 		}
 		if (string.IsNullOrEmpty(text))
@@ -463,18 +465,21 @@ public class CodexScreen : KScreen
 			int num2 = 0;
 			while (gameObject.transform.childCount > 0)
 			{
-				GameObject gameObject2 = gameObject.transform.GetChild(0).gameObject;
-				Type type;
-				if (gameObject2.name == "PrefabContentLocked")
+				if (DlcManager.IsCorrectDlcSubscribed(CodexCache.entries[this.activeEntryID].contentContainers[num].content[num2] as IHasDlcRestrictions))
 				{
-					text2 = CodexCache.entries[this.activeEntryID].contentContainers[num].lockID;
-					type = typeof(CodexContentLockedIndicator);
+					GameObject gameObject2 = gameObject.transform.GetChild(0).gameObject;
+					Type type;
+					if (gameObject2.name == "PrefabContentLocked")
+					{
+						text2 = CodexCache.entries[this.activeEntryID].contentContainers[num].lockID;
+						type = typeof(CodexContentLockedIndicator);
+					}
+					else
+					{
+						type = CodexCache.entries[this.activeEntryID].contentContainers[num].content[num2].GetType();
+					}
+					this.ContentUIPools[type].ClearElement(gameObject2);
 				}
-				else
-				{
-					type = CodexCache.entries[this.activeEntryID].contentContainers[num].content[num2].GetType();
-				}
-				this.ContentUIPools[type].ClearElement(gameObject2);
 				num2++;
 			}
 			this.contentContainerPool.ClearElement(this.contentContainers.transform.GetChild(0).gameObject);
@@ -491,30 +496,36 @@ public class CodexScreen : KScreen
 		for (int i = 0; i < CodexCache.entries[id].contentContainers.Count; i++)
 		{
 			ContentContainer contentContainer2 = CodexCache.entries[id].contentContainers[i];
-			if (!string.IsNullOrEmpty(contentContainer2.lockID) && !Game.Instance.unlocks.IsUnlocked(contentContainer2.lockID))
+			if (Game.IsCorrectDlcActiveForCurrentSave(contentContainer2))
 			{
-				if (text3 != contentContainer2.lockID)
+				if (!string.IsNullOrEmpty(contentContainer2.lockID) && !Game.Instance.unlocks.IsUnlocked(contentContainer2.lockID))
+				{
+					if (text3 != contentContainer2.lockID)
+					{
+						GameObject gameObject3 = this.contentContainerPool.GetFreeElement(this.contentContainers.gameObject, true).gameObject;
+						this.ConfigureContentContainer(contentContainer2, gameObject3, flag && flag2);
+						text3 = contentContainer2.lockID;
+						GameObject gameObject4 = this.ContentUIPools[typeof(CodexContentLockedIndicator)].GetFreeElement(gameObject3, true).gameObject;
+					}
+				}
+				else
 				{
 					GameObject gameObject3 = this.contentContainerPool.GetFreeElement(this.contentContainers.gameObject, true).gameObject;
 					this.ConfigureContentContainer(contentContainer2, gameObject3, flag && flag2);
-					text3 = contentContainer2.lockID;
-					GameObject gameObject4 = this.ContentUIPools[typeof(CodexContentLockedIndicator)].GetFreeElement(gameObject3, true).gameObject;
-				}
-			}
-			else
-			{
-				GameObject gameObject3 = this.contentContainerPool.GetFreeElement(this.contentContainers.gameObject, true).gameObject;
-				this.ConfigureContentContainer(contentContainer2, gameObject3, flag && flag2);
-				flag2 = !flag2;
-				if (contentContainer2.content != null)
-				{
-					foreach (ICodexWidget codexWidget2 in contentContainer2.content)
+					flag2 = !flag2;
+					if (contentContainer2.content != null)
 					{
-						GameObject gameObject5 = this.ContentUIPools[codexWidget2.GetType()].GetFreeElement(gameObject3, true).gameObject;
-						codexWidget2.Configure(gameObject5, this.displayPane, this.textStyles);
-						if (codexWidget2 == codexWidget)
+						foreach (ICodexWidget codexWidget2 in contentContainer2.content)
 						{
-							rectTransform = gameObject5.rectTransform();
+							if (Game.IsCorrectDlcActiveForCurrentSave(codexWidget2 as IHasDlcRestrictions))
+							{
+								GameObject gameObject5 = this.ContentUIPools[codexWidget2.GetType()].GetFreeElement(gameObject3, true).gameObject;
+								codexWidget2.Configure(gameObject5, this.displayPane, this.textStyles);
+								if (codexWidget2 == codexWidget)
+								{
+									rectTransform = gameObject5.rectTransform();
+								}
+							}
 						}
 					}
 				}

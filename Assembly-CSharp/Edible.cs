@@ -98,7 +98,7 @@ public class Edible : Workable, IGameObjectEffectDescriptor, ISaveLoadable, IExt
 				this.ApplySpiceEffects(this.spices[i], SpiceGrinderConfig.SpicedStatus);
 			}
 		}
-		if (base.GetComponent<KPrefabID>().HasTag(GameTags.Rehydrated))
+		if (this.kpid.HasTag(GameTags.Rehydrated))
 		{
 			base.GetComponent<KSelectable>().AddStatusItem(Db.Get().MiscStatusItems.RehydratedFood, null);
 		}
@@ -107,35 +107,14 @@ public class Edible : Workable, IGameObjectEffectDescriptor, ISaveLoadable, IExt
 
 	public override HashedString[] GetWorkAnims(WorkerBase worker)
 	{
-		EatChore.StatesInstance smi = worker.GetSMI<EatChore.StatesInstance>();
-		bool flag = smi != null && smi.UseSalt();
-		MinionResume component = worker.GetComponent<MinionResume>();
-		if (component != null && component.CurrentHat != null)
-		{
-			if (!flag)
-			{
-				return Edible.hatWorkAnims;
-			}
-			return Edible.saltHatWorkAnims;
-		}
-		else
-		{
-			if (!flag)
-			{
-				return Edible.normalWorkAnims;
-			}
-			return Edible.saltWorkAnims;
-		}
+		return null;
 	}
 
 	public override HashedString[] GetWorkPstAnims(WorkerBase worker, bool successfully_completed)
 	{
-		EatChore.StatesInstance smi = worker.GetSMI<EatChore.StatesInstance>();
-		bool flag = smi != null && smi.UseSalt();
-		MinionResume component = worker.GetComponent<MinionResume>();
-		if (component != null && component.CurrentHat != null)
+		if (this.workerSnapshot.hasHat)
 		{
-			if (!flag)
+			if (!this.workerSnapshot.useSalt)
 			{
 				return Edible.hatWorkPstAnim;
 			}
@@ -143,7 +122,7 @@ public class Edible : Workable, IGameObjectEffectDescriptor, ISaveLoadable, IExt
 		}
 		else
 		{
-			if (!flag)
+			if (!this.workerSnapshot.useSalt)
 			{
 				return Edible.normalWorkPstAnim;
 			}
@@ -177,8 +156,34 @@ public class Edible : Workable, IGameObjectEffectDescriptor, ISaveLoadable, IExt
 		this.caloriesConsumed = 0f;
 		this.unitsConsumed = 0f;
 		this.totalUnits = this.Units;
-		worker.GetComponent<KPrefabID>().AddTag(GameTags.AlwaysConverse, false);
+		this.kpid.AddTag(GameTags.AlwaysConverse, false);
 		this.totalConsumableCalories = this.Units * this.foodInfo.CaloriesPerUnit;
+		this.workerState = Edible.WorkerState.Irrelevant;
+		EatChore.StatesInstance smi = worker.GetSMI<EatChore.StatesInstance>();
+		this.workerSnapshot.convoAnims = Edible.convoAnims;
+		this.workerSnapshot.useSalt = smi != null && smi.UseSalt();
+		MinionResume minionResume;
+		this.workerSnapshot.hasHat = worker.TryGetComponent<MinionResume>(out minionResume) && minionResume.CurrentHat != null;
+		if (this.workerSnapshot.hasHat)
+		{
+			if (this.workerSnapshot.useSalt)
+			{
+				this.workerSnapshot.baseAnims = Edible.saltHatWorkAnims;
+			}
+			else
+			{
+				this.workerSnapshot.baseAnims = Edible.hatWorkAnims;
+			}
+		}
+		else if (this.workerSnapshot.useSalt)
+		{
+			this.workerSnapshot.baseAnims = Edible.saltWorkAnims;
+		}
+		else
+		{
+			this.workerSnapshot.baseAnims = Edible.normalWorkAnims;
+		}
+		worker.GetComponent<KBatchedAnimController>().Stop();
 		this.StartConsuming();
 	}
 
@@ -199,7 +204,12 @@ public class Edible : Workable, IGameObjectEffectDescriptor, ISaveLoadable, IExt
 			worker.GetAttributes().Add(this.caloriesModifier);
 			this.currentModifier = this.caloriesModifier;
 		}
-		return this.OnTickConsume(worker, dt);
+		bool flag = this.OnTickConsume(worker, dt);
+		if (!flag)
+		{
+			this.TickAnimation(worker);
+		}
+		return flag;
 	}
 
 	protected override void OnStopWork(WorkerBase worker)
@@ -209,7 +219,13 @@ public class Edible : Workable, IGameObjectEffectDescriptor, ISaveLoadable, IExt
 			worker.GetAttributes().Remove(this.currentModifier);
 			this.currentModifier = null;
 		}
-		worker.GetComponent<KPrefabID>().RemoveTag(GameTags.AlwaysConverse);
+		worker.RemoveTag(GameTags.AlwaysConverse);
+		this.workerSnapshot = default(Edible.WorkerSnapshot);
+		this.workerState = Edible.WorkerState.Irrelevant;
+		worker.RemoveTag(GameTags.DoNotInterruptMe);
+		KBatchedAnimController component = worker.GetComponent<KBatchedAnimController>();
+		component.SetSymbolVisiblity(Edible.SALT_SYMBOL, true);
+		component.SetSymbolVisiblity(Edible.HAT_SYMBOL, true);
 		this.StopConsuming(worker);
 	}
 
@@ -243,6 +259,47 @@ public class Edible : Workable, IGameObjectEffectDescriptor, ISaveLoadable, IExt
 		return flag;
 	}
 
+	private void TickAnimation(WorkerBase worker)
+	{
+		KBatchedAnimController component = worker.GetComponent<KBatchedAnimController>();
+		if (!component.IsStopped())
+		{
+			return;
+		}
+		switch (this.workerState)
+		{
+		case Edible.WorkerState.Irrelevant:
+			this.workerState = Edible.WorkerState.EatPre;
+			component.Queue(this.workerSnapshot.baseAnims[0], KAnim.PlayMode.Once, 1f, 0f);
+			return;
+		case Edible.WorkerState.EatPre:
+			this.workerState = Edible.WorkerState.EatLoop;
+			component.Queue(this.workerSnapshot.baseAnims[1], KAnim.PlayMode.Once, 1f, 0f);
+			return;
+		case Edible.WorkerState.EatLoop:
+		{
+			HashedString hashedString;
+			if (worker.HasTag(GameTags.CommunalDining) && worker.HasTag(GameTags.WantsToTalk))
+			{
+				worker.RemoveTag(GameTags.WantsToTalk);
+				hashedString = this.workerSnapshot.convoAnims[global::UnityEngine.Random.Range(0, this.workerSnapshot.convoAnims.Length)];
+				component.SetSymbolVisiblity(Edible.SALT_SYMBOL, this.workerSnapshot.useSalt);
+				component.SetSymbolVisiblity(Edible.HAT_SYMBOL, this.workerSnapshot.hasHat);
+			}
+			else
+			{
+				worker.RemoveTag(GameTags.DoNotInterruptMe);
+				hashedString = this.workerSnapshot.baseAnims[1];
+			}
+			component.Queue(hashedString, KAnim.PlayMode.Once, 1f, 0f);
+			return;
+		}
+		default:
+			DebugUtil.DevLogError("Unexpected workerState " + this.workerState.ToString());
+			return;
+		}
+	}
+
 	public void SpiceEdible(SpiceInstance spice, StatusItem status)
 	{
 		this.spices.Add(spice);
@@ -251,7 +308,7 @@ public class Edible : Workable, IGameObjectEffectDescriptor, ISaveLoadable, IExt
 
 	protected virtual void ApplySpiceEffects(SpiceInstance spice, StatusItem status)
 	{
-		base.GetComponent<KPrefabID>().AddTag(spice.Id, true);
+		this.kpid.AddTag(spice.Id, true);
 		this.ToggleGenericSpicedTag(true);
 		base.GetComponent<KSelectable>().AddStatusItem(status, this.spices);
 		if (spice.FoodModifier != null)
@@ -266,15 +323,14 @@ public class Edible : Workable, IGameObjectEffectDescriptor, ISaveLoadable, IExt
 
 	private void ToggleGenericSpicedTag(bool isSpiced)
 	{
-		KPrefabID component = base.GetComponent<KPrefabID>();
 		if (isSpiced)
 		{
-			component.RemoveTag(GameTags.UnspicedFood);
-			component.AddTag(GameTags.SpicedFood, true);
+			this.kpid.RemoveTag(GameTags.UnspicedFood);
+			this.kpid.AddTag(GameTags.SpicedFood, true);
 			return;
 		}
-		component.RemoveTag(GameTags.SpicedFood);
-		component.AddTag(GameTags.UnspicedFood, false);
+		this.kpid.RemoveTag(GameTags.SpicedFood);
+		this.kpid.AddTag(GameTags.UnspicedFood, false);
 	}
 
 	public bool CanAbsorb(Edible other)
@@ -419,11 +475,14 @@ public class Edible : Workable, IGameObjectEffectDescriptor, ISaveLoadable, IExt
 	{
 		Edible component = thePieceTaken.GetComponent<Edible>();
 		this.ApplySpicesToOtherEdible(component);
-		if (base.GetComponent<KPrefabID>().HasTag(GameTags.Rehydrated))
+		if (this.kpid.HasTag(GameTags.Rehydrated))
 		{
-			component.AddTag(GameTags.Rehydrated);
+			component.kpid.AddTag(GameTags.Rehydrated, false);
 		}
 	}
+
+	[MyCmpReq]
+	private readonly KPrefabID kpid;
 
 	private PrimaryElement primaryElement;
 
@@ -450,6 +509,14 @@ public class Edible : Workable, IGameObjectEffectDescriptor, ISaveLoadable, IExt
 
 	private AttributeModifier currentModifier;
 
+	public static readonly HashedString SALT_SYMBOL = "saltshaker_fg";
+
+	public static readonly HashedString HAT_SYMBOL = "hat";
+
+	private Edible.WorkerState workerState;
+
+	private Edible.WorkerSnapshot workerSnapshot;
+
 	private static readonly EventSystem.IntraObjectHandler<Edible> OnCraftDelegate = new EventSystem.IntraObjectHandler<Edible>(delegate(Edible component, object data)
 	{
 		component.OnCraft(data);
@@ -462,6 +529,8 @@ public class Edible : Workable, IGameObjectEffectDescriptor, ISaveLoadable, IExt
 	private static readonly HashedString[] saltWorkAnims = new HashedString[] { "salt_pre", "salt_loop" };
 
 	private static readonly HashedString[] saltHatWorkAnims = new HashedString[] { "salt_hat_pre", "salt_hat_loop" };
+
+	public static readonly HashedString[] convoAnims = new HashedString[] { "convo_loop_01", "convo_loop_02", "convo_loop_03", "convo_loop_04" };
 
 	private static readonly HashedString[] normalWorkPstAnim = new HashedString[] { "working_pst" };
 
@@ -481,6 +550,24 @@ public class Edible : Workable, IGameObjectEffectDescriptor, ISaveLoadable, IExt
 		{ 4, "Edible2" },
 		{ 5, "Edible3" }
 	};
+
+	private enum WorkerState
+	{
+		Irrelevant,
+		EatPre,
+		EatLoop
+	}
+
+	private struct WorkerSnapshot
+	{
+		public bool useSalt;
+
+		public bool hasHat;
+
+		public HashedString[] baseAnims;
+
+		public HashedString[] convoAnims;
+	}
 
 	public class EdibleStartWorkInfo : WorkerBase.StartWorkInfo
 	{

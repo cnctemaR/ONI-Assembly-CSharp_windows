@@ -76,7 +76,7 @@ public class AutoMiner : StateMachineComponent<AutoMiner.Instance>, ISim1000ms
 
 	private void OnOperationalChanged(object data)
 	{
-		if (!(bool)data)
+		if (!((Boxed<bool>)data).value)
 		{
 			this.dig_cell = Grid.InvalidCell;
 			this.rotation_complete = false;
@@ -210,7 +210,7 @@ public class AutoMiner : StateMachineComponent<AutoMiner.Instance>, ISim1000ms
 					int num8;
 					int num9;
 					Grid.CellToXY(num7, out num8, out num9);
-					if (Grid.IsValidCell(num7) && AutoMiner.ValidDigCell(num7) && Grid.TestLineOfSight(num3, num4, num8, num9, new Func<int, bool>(AutoMiner.DigBlockingCB), false, false))
+					if (Grid.IsValidCell(num7) && AutoMiner.ValidDigCell(num7) && Grid.TestLineOfSight(num3, num4, num8, num9, AutoMiner.DigBlockingCB, false, false))
 					{
 						if (num7 == this.dig_cell)
 						{
@@ -243,17 +243,6 @@ public class AutoMiner : StateMachineComponent<AutoMiner.Instance>, ISim1000ms
 			flag = component != null && component.IsOpen() && !component.IsPendingClose();
 		}
 		return Grid.Solid[cell] && (!Grid.Foundation[cell] || flag) && Grid.Element[cell].hardness < 150;
-	}
-
-	public static bool DigBlockingCB(int cell)
-	{
-		bool flag = Grid.HasDoor[cell] && Grid.Foundation[cell] && Grid.ObjectLayers[9].ContainsKey(cell);
-		if (flag)
-		{
-			Door component = Grid.ObjectLayers[9][cell].GetComponent<Door>();
-			flag = component != null && component.IsOpen() && !component.IsPendingClose();
-		}
-		return (Grid.Foundation[cell] && Grid.Solid[cell] && !flag) || Grid.Element[cell].hardness >= 150;
 	}
 
 	private void RotateArm(Vector3 target_dir, bool warp, float dt)
@@ -361,6 +350,17 @@ public class AutoMiner : StateMachineComponent<AutoMiner.Instance>, ISim1000ms
 	{
 		component.OnOperationalChanged(data);
 	});
+
+	public static Func<int, bool> DigBlockingCB = delegate(int cell)
+	{
+		bool flag = Grid.HasDoor[cell] && Grid.Foundation[cell] && Grid.ObjectLayers[9].ContainsKey(cell);
+		if (flag)
+		{
+			Door component = Grid.ObjectLayers[9][cell].GetComponent<Door>();
+			flag = component != null && component.IsOpen() && !component.IsPendingClose();
+		}
+		return (Grid.Foundation[cell] && Grid.Solid[cell] && !flag) || Grid.Element[cell].hardness >= 150;
+	};
 
 	public class Instance : GameStateMachine<AutoMiner.States, AutoMiner.Instance, AutoMiner, object>.GameInstance
 	{

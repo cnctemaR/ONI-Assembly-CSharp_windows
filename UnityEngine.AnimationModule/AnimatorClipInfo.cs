@@ -5,9 +5,9 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[UsedByNativeCode]
 	[NativeHeader("Modules/Animation/ScriptBindings/Animation.bindings.h")]
 	[NativeHeader("Modules/Animation/AnimatorInfo.h")]
+	[UsedByNativeCode]
 	public struct AnimatorClipInfo
 	{
 		public AnimationClip clip

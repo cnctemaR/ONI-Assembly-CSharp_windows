@@ -145,6 +145,10 @@ public class Door : Workable, ISaveLoadable, ISim200ms, INavDoor
 		List<int> list = new List<int>();
 		foreach (int num in this.building.PlacementCells)
 		{
+			if (this.insulationModifier != 1f)
+			{
+				SimMessages.SetInsulation(num, 1f);
+			}
 			SimMessages.ClearCellProperties(num, 12);
 			Grid.RenderedByWorld[num] = Grid.Element[num].substance.renderedByWorld;
 			Grid.FakeFloor.Remove(num);
@@ -199,12 +203,12 @@ public class Door : Workable, ISaveLoadable, ISim200ms, INavDoor
 			this.controller.sm.isLocked.Set(true, this.controller, false);
 			break;
 		}
-		base.Trigger(279163026, this.controlState);
+		base.BoxingTrigger<Door.ControlState>(279163026, this.controlState);
 		this.SetWorldState();
 		base.GetComponent<KSelectable>().SetStatusItem(Db.Get().StatusItemCategories.Main, Db.Get().BuildingStatusItems.CurrentDoorControlState, this);
 	}
 
-	private void OnOperationalChanged(object data)
+	private void OnOperationalChanged(object _)
 	{
 		bool isOperational = this.operational.IsOperational;
 		if (isOperational != this.on)
@@ -317,7 +321,12 @@ public class Door : Workable, ISaveLoadable, ISim200ms, INavDoor
 				World.Instance.groundRenderer.MarkDirty(num2);
 				if (is_door_open)
 				{
-					SimMessages.Dig(num2, Game.Instance.callbackManager.Add(new Game.CallbackInfo(new global::System.Action(this.OnSimDoorOpened), false)).index, true);
+					HandleVector<Game.CallbackInfo>.Handle handle = Game.Instance.callbackManager.Add(new Game.CallbackInfo(new global::System.Action(this.OnSimDoorOpened), false));
+					if (this.insulationModifier != 1f)
+					{
+						SimMessages.SetInsulation(num2, 1f);
+					}
+					SimMessages.Dig(num2, handle.index, true);
 					if (this.ShouldBlockFallingSand)
 					{
 						SimMessages.ClearCellProperties(num2, 4);
@@ -329,14 +338,18 @@ public class Door : Workable, ISaveLoadable, ISim200ms, INavDoor
 				}
 				else
 				{
-					HandleVector<Game.CallbackInfo>.Handle handle = Game.Instance.callbackManager.Add(new Game.CallbackInfo(new global::System.Action(this.OnSimDoorClosed), false));
+					HandleVector<Game.CallbackInfo>.Handle handle2 = Game.Instance.callbackManager.Add(new Game.CallbackInfo(new global::System.Action(this.OnSimDoorClosed), false));
 					float num3 = component.Temperature;
 					if (num3 <= 0f)
 					{
 						num3 = component.Temperature;
 					}
-					SimMessages.ReplaceAndDisplaceElement(num2, component.ElementID, CellEventLogger.Instance.DoorClose, num, num3, byte.MaxValue, 0, handle.index);
+					SimMessages.ReplaceAndDisplaceElement(num2, component.ElementID, CellEventLogger.Instance.DoorClose, num, num3, byte.MaxValue, 0, handle2.index);
 					SimMessages.SetCellProperties(num2, 4);
+					if (this.insulationModifier != 1f)
+					{
+						SimMessages.SetInsulation(num2, this.insulationModifier);
+					}
 				}
 			}
 		}
@@ -623,6 +636,8 @@ public class Door : Workable, ISaveLoadable, ISim200ms, INavDoor
 
 	[SerializeField]
 	public string doorOpeningSoundEventName;
+
+	public float insulationModifier = 1f;
 
 	private string doorClosingSound;
 

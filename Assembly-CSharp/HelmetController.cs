@@ -133,12 +133,12 @@ public class HelmetController : KMonoBehaviour
 		{
 			return;
 		}
-		if (this.jet_go)
+		if (this.jet_anim != null)
 		{
 			return;
 		}
-		this.jet_go = this.AddTrackedAnim("jet", Assets.GetAnim("jetsuit_thruster_fx_kanim"), "loop", Grid.SceneLayer.Creatures, "snapTo_neck");
-		this.glow_go = this.AddTrackedAnim("glow", Assets.GetAnim("jetsuit_thruster_glow_fx_kanim"), "loop", Grid.SceneLayer.Front, "snapTo_neck");
+		this.jet_anim = this.AddTrackedAnim("jet", Assets.GetAnim("jetsuit_thruster_fx_kanim"), "loop", Grid.SceneLayer.Creatures, "snapTo_neck", true);
+		this.glow_anim = this.AddTrackedAnim("glow", Assets.GetAnim("jetsuit_thruster_glow_fx_kanim"), "loop", Grid.SceneLayer.Front, "snapTo_neck", false);
 	}
 
 	private void DisableJets()
@@ -147,13 +147,19 @@ public class HelmetController : KMonoBehaviour
 		{
 			return;
 		}
-		global::UnityEngine.Object.Destroy(this.jet_go);
-		this.jet_go = null;
-		global::UnityEngine.Object.Destroy(this.glow_go);
-		this.glow_go = null;
+		if (this.jet_anim != null)
+		{
+			global::UnityEngine.Object.Destroy(this.jet_anim.gameObject);
+			this.jet_anim = null;
+		}
+		if (this.glow_anim != null)
+		{
+			global::UnityEngine.Object.Destroy(this.glow_anim.gameObject);
+			this.glow_anim = null;
+		}
 	}
 
-	private GameObject AddTrackedAnim(string name, KAnimFile tracked_anim_file, string anim_clip, Grid.SceneLayer layer, string symbol_name)
+	private KBatchedAnimController AddTrackedAnim(string name, KAnimFile tracked_anim_file, string anim_clip, Grid.SceneLayer layer, string symbol_name, bool require_looping_sound = false)
 	{
 		KBatchedAnimController assigneeController = this.GetAssigneeController();
 		if (assigneeController == null)
@@ -170,6 +176,10 @@ public class HelmetController : KMonoBehaviour
 		kbatchedAnimController.initialAnim = anim_clip;
 		kbatchedAnimController.isMovable = true;
 		kbatchedAnimController.sceneLayer = layer;
+		if (require_looping_sound)
+		{
+			gameObject.AddComponent<LoopingSounds>();
+		}
 		gameObject.AddComponent<KBatchedAnimTracker>().symbol = symbol_name;
 		bool flag;
 		Vector3 vector = assigneeController.GetSymbolTransform(symbol_name, out flag).GetColumn(3);
@@ -177,7 +187,7 @@ public class HelmetController : KMonoBehaviour
 		gameObject.transform.SetPosition(vector);
 		gameObject.SetActive(true);
 		kbatchedAnimController.Play(anim_clip, KAnim.PlayMode.Loop, 1f, 0f);
-		return gameObject;
+		return kbatchedAnimController;
 	}
 
 	private void OnBeginRecoverBreath(object data)
@@ -217,6 +227,10 @@ public class HelmetController : KMonoBehaviour
 		}
 	}
 
+	public const string JET_LEFT_SYMBOL_NAME = "left_fire";
+
+	public const string JET_RIGHT_SYMBOL_NAME = "right_fire";
+
 	public string anim_file;
 
 	public bool has_jets;
@@ -229,9 +243,9 @@ public class HelmetController : KMonoBehaviour
 
 	private Navigator owner_navigator;
 
-	private GameObject jet_go;
+	public KBatchedAnimController jet_anim;
 
-	private GameObject glow_go;
+	public KBatchedAnimController glow_anim;
 
 	private static readonly EventSystem.IntraObjectHandler<HelmetController> OnEquippedDelegate = new EventSystem.IntraObjectHandler<HelmetController>(delegate(HelmetController component, object data)
 	{

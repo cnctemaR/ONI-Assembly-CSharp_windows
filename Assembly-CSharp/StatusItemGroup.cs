@@ -124,7 +124,7 @@ public class StatusItemGroup
 		StatusItemGroup.Entry entry = new StatusItemGroup.Entry(item, category, data);
 		if (item.shouldNotify)
 		{
-			entry.notification = new Notification(item.notificationText, item.notificationType, new Func<List<Notification>, object, string>(StatusItemGroup.OnToolTip), item, false, 0f, item.notificationClickCallback, data, null, true, false, false);
+			entry.notification = new Notification(item.notificationText, item.notificationType, StatusItemGroup.OnToolTip, item, false, 0f, item.notificationClickCallback, data, null, true, false, false);
 			this.gameObject.AddOrGet<Notifier>().Add(entry.notification, "");
 		}
 		if (item.ShouldShowIcon())
@@ -202,11 +202,6 @@ public class StatusItemGroup
 		}
 	}
 
-	private static string OnToolTip(List<Notification> notifications, object data)
-	{
-		return ((StatusItem)data).notificationTooltipText + notifications.ReduceMessages(true);
-	}
-
 	public void Destroy()
 	{
 		if (Game.IsQuitting())
@@ -235,6 +230,8 @@ public class StatusItemGroup
 	public Action<StatusItemGroup.Entry, bool> OnRemoveStatusItem;
 
 	private Vector3 offset = new Vector3(0f, 0f, 0f);
+
+	private static Func<List<Notification>, object, string> OnToolTip = (List<Notification> notifications, object data) => ((StatusItem)data).notificationTooltipText + notifications.ReduceMessages(true);
 
 	public struct Entry : IComparable<StatusItemGroup.Entry>, IEquatable<StatusItemGroup.Entry>
 	{

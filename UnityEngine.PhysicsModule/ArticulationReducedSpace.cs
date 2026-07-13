@@ -56,8 +56,8 @@ namespace UnityEngine
 
 		public int dofCount;
 
-		[CompilerGenerated]
 		[UnsafeValueType]
+		[CompilerGenerated]
 		[StructLayout(LayoutKind.Sequential, Size = 12)]
 		public struct <x>e__FixedBuffer
 		{

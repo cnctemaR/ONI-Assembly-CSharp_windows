@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using STRINGS;
 using UnityEngine;
 
@@ -179,12 +180,12 @@ public class Light2D : KMonoBehaviour, IGameObjectEffectDescriptor
 			this.AddToScenePartitioner();
 			this.emitter.Refresh(this.pending_emitter_state, true);
 		}
-		Singleton<CellChangeMonitor>.Instance.RegisterCellChangedHandler(base.transform, new global::System.Action(this.OnMoved), "Light2D.OnMoved");
+		this.cellChangedHandlerID = Singleton<CellChangeMonitor>.Instance.RegisterCellChangedHandler(base.transform, Light2D.OnMovedDispatcher, this, "Light2D.OnMoved");
 	}
 
 	protected override void OnCmpDisable()
 	{
-		Singleton<CellChangeMonitor>.Instance.UnregisterCellChangedHandler(base.transform, new global::System.Action(this.OnMoved));
+		Singleton<CellChangeMonitor>.Instance.UnregisterCellChangedHandler(ref this.cellChangedHandlerID);
 		Components.Light2Ds.Remove(this);
 		base.OnCmpDisable();
 		this.FullRemove();
@@ -392,13 +393,20 @@ public class Light2D : KMonoBehaviour, IGameObjectEffectDescriptor
 
 	public bool disableOnStore;
 
+	private ulong cellChangedHandlerID;
+
 	private static readonly EventSystem.IntraObjectHandler<Light2D> OnOperationalChangedDelegate = new EventSystem.IntraObjectHandler<Light2D>(delegate(Light2D light, object data)
 	{
 		if (light.autoRespondToOperational)
 		{
-			light.enabled = (bool)data;
+			light.enabled = ((Boxed<bool>)data).value;
 		}
 	});
+
+	private static readonly Action<object> OnMovedDispatcher = delegate(object obj)
+	{
+		Unsafe.As<Light2D>(obj).OnMoved();
+	};
 
 	public enum RefreshResult
 	{

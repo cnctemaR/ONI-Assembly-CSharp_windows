@@ -43,18 +43,18 @@ public class Clearable : Workable, ISaveLoadable, IRender1000ms
 		this.RefreshClearableStatus(true);
 	}
 
-	private void OnStore(object data)
+	private void OnStore(object _)
 	{
 		this.CancelClearing();
 	}
 
-	private void OnCancel(object data)
+	private void OnCancel(object _)
 	{
 		for (ObjectLayerListItem objectLayerListItem = this.pickupable.objectLayerListItem; objectLayerListItem != null; objectLayerListItem = objectLayerListItem.nextItem)
 		{
-			if (objectLayerListItem.gameObject != null)
+			if (objectLayerListItem.pickupable != null)
 			{
-				objectLayerListItem.gameObject.GetComponent<Clearable>().CancelClearing();
+				objectLayerListItem.pickupable.Clearable.CancelClearing();
 			}
 		}
 	}

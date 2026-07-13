@@ -33,7 +33,7 @@ public class FloatingRocketDiagnostic : ColonyDiagnostic
 				foreach (Ref<RocketModuleCluster> @ref in component.ModuleInterface.ClusterModules)
 				{
 					ResourceHarvestModule.StatesInstance smi = @ref.Get().GetSMI<ResourceHarvestModule.StatesInstance>();
-					if (smi != null && smi.IsInsideState(smi.sm.not_grounded.harvesting))
+					if (smi != null && smi.IsInsideState(smi.sm.not_grounded.drilling))
 					{
 						flag = true;
 						break;

@@ -15,6 +15,10 @@ public class HandSanitizer : StateMachineComponent<HandSanitizer.SMInstance>, IG
 
 	private void RefreshMeters()
 	{
+		if (!this.hasMeters)
+		{
+			return;
+		}
 		float num = 0f;
 		PrimaryElement primaryElement = base.GetComponent<Storage>().FindPrimaryElement(this.consumedElement);
 		float num2 = (float)this.maxUses * this.massConsumedPerUse;
@@ -41,8 +45,11 @@ public class HandSanitizer : StateMachineComponent<HandSanitizer.SMInstance>, IG
 	{
 		base.OnSpawn();
 		base.smi.StartSM();
-		this.cleanMeter = new MeterController(base.GetComponent<KBatchedAnimController>(), "meter_clean_target", "meter_clean", this.cleanMeterOffset, Grid.SceneLayer.NoLayer, new string[] { "meter_clean_target" });
-		this.dirtyMeter = new MeterController(base.GetComponent<KBatchedAnimController>(), "meter_dirty_target", "meter_dirty", this.dirtyMeterOffset, Grid.SceneLayer.NoLayer, new string[] { "meter_dirty_target" });
+		if (this.hasMeters)
+		{
+			this.cleanMeter = new MeterController(base.GetComponent<KBatchedAnimController>(), "meter_clean_target", "meter_clean", this.cleanMeterOffset, Grid.SceneLayer.NoLayer, new string[] { "meter_clean_target" });
+			this.dirtyMeter = new MeterController(base.GetComponent<KBatchedAnimController>(), "meter_dirty_target", "meter_dirty", this.dirtyMeterOffset, Grid.SceneLayer.NoLayer, new string[] { "meter_dirty_target" });
+		}
 		this.RefreshMeters();
 		Components.HandSanitizers.Add(this);
 		Components.BasicBuildings.Add(this);
@@ -120,6 +127,8 @@ public class HandSanitizer : StateMachineComponent<HandSanitizer.SMInstance>, IG
 	public bool canSanitizeSuit;
 
 	public bool canSanitizeStorage;
+
+	public bool hasMeters = true;
 
 	private WorkableReactable reactable;
 

@@ -22,11 +22,9 @@ namespace Unity.Loading
 		}
 
 		[NativeThrows]
-		internal static ContentFileUnloadHandle ContentFile_UnloadAsync(ContentFile handle)
+		internal static void ContentFile_UnloadAsync(ContentFile handle)
 		{
-			ContentFileUnloadHandle contentFileUnloadHandle;
-			ContentLoadInterface.ContentFile_UnloadAsync_Injected(ref handle, out contentFileUnloadHandle);
-			return contentFileUnloadHandle;
+			ContentLoadInterface.ContentFile_UnloadAsync_Injected(ref handle);
 		}
 
 		internal static Object ContentFile_GetObject(ContentFile handle, ulong localIdentifierInFile)
@@ -62,9 +60,14 @@ namespace Unity.Loading
 			return ContentLoadInterface.WaitForLoadCompletion_Injected(ref handle, timeoutMs);
 		}
 
-		internal static bool WaitForJobCompletion(JobHandle handle, int timeoutMs)
+		internal static bool WaitForUnloadCompletion(ContentFile handle, int timeoutMs)
 		{
-			return ContentLoadInterface.WaitForJobCompletion_Injected(ref handle, timeoutMs);
+			return ContentLoadInterface.WaitForUnloadCompletion_Injected(ref handle, timeoutMs);
+		}
+
+		internal static bool ContentFile_IsUnloadComplete(ContentFile handle)
+		{
+			return ContentLoadInterface.ContentFile_IsUnloadComplete_Injected(ref handle);
 		}
 
 		[NativeThrows]
@@ -147,7 +150,7 @@ namespace Unity.Loading
 		private unsafe static extern void LoadContentFileAsync_Injected(ref ContentNamespace nameSpace, string filename, void* dependencies, int dependencyCount, ref JobHandle dependentFence, bool useUnsafe = false, out ContentFile ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void ContentFile_UnloadAsync_Injected(ref ContentFile handle, out ContentFileUnloadHandle ret);
+		private static extern void ContentFile_UnloadAsync_Injected(ref ContentFile handle);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern Object ContentFile_GetObject_Injected(ref ContentFile handle, ulong localIdentifierInFile);
@@ -165,7 +168,10 @@ namespace Unity.Loading
 		private static extern bool WaitForLoadCompletion_Injected(ref ContentFile handle, int timeoutMs);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool WaitForJobCompletion_Injected(ref JobHandle handle, int timeoutMs);
+		private static extern bool WaitForUnloadCompletion_Injected(ref ContentFile handle, int timeoutMs);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool ContentFile_IsUnloadComplete_Injected(ref ContentFile handle);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private unsafe static extern void LoadSceneAsync_Injected(ref ContentNamespace nameSpace, string filename, string sceneName, ref ContentSceneParameters sceneParams, ContentFile* dependencies, int dependencyCount, ref JobHandle dependentFence, out ContentSceneFile ret);

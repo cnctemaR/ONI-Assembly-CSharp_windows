@@ -46,6 +46,7 @@ public class BasicSingleHarvestPlantConfig : IEntityConfig
 			}
 		});
 		EntityTemplates.CreateAndRegisterPreviewForPlant(gameObject3, "BasicSingleHarvestPlant_preview", Assets.GetAnim("meallice_kanim"), "place", 1, 2);
+		gameObject.AddOrGet<PlantFiberProducer>().amount = 12f;
 		SoundEventVolumeCache.instance.AddVolume("meallice_kanim", "MealLice_harvest", NOISE_POLLUTION.CREATURES.TIER3);
 		SoundEventVolumeCache.instance.AddVolume("meallice_kanim", "MealLice_LP", NOISE_POLLUTION.CREATURES.TIER4);
 		return gameObject;
@@ -64,4 +65,6 @@ public class BasicSingleHarvestPlantConfig : IEntityConfig
 	public const string SEED_ID = "BasicSingleHarvestPlantSeed";
 
 	public const float DIRT_RATE = 0.016666668f;
+
+	public const float PLANT_FIBER_PRODUCED_PER_CYCLE = 12f;
 }

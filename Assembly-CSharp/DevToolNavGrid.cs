@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using ImGuiNET;
 using UnityEngine;
@@ -8,6 +9,12 @@ public class DevToolNavGrid : DevTool
 	public DevToolNavGrid()
 	{
 		DevToolNavGrid.Instance = this;
+		this.drawLinkTypes = new Dictionary<NavType, bool>(11);
+		foreach (object obj in Enum.GetValues(typeof(NavType)))
+		{
+			NavType navType = (NavType)obj;
+			this.drawLinkTypes.Add(navType, true);
+		}
 	}
 
 	private bool Init()
@@ -148,6 +155,18 @@ public class DevToolNavGrid : DevTool
 		ImGui.Checkbox("Draw Links", ref this.drawLinks);
 		if (this.drawLinks)
 		{
+			ImGui.Indent();
+			foreach (NavType navType in this.drawLinkTypes.Keys.ToList<NavType>())
+			{
+				bool flag = this.drawLinkTypes[navType];
+				ImGui.PushID(navType.ToString());
+				if (ImGui.Checkbox(navType.ToString(), ref flag))
+				{
+					this.drawLinkTypes[navType] = flag;
+				}
+				ImGui.PopID();
+			}
+			ImGui.Unindent();
 			this.DebugDrawLinks(navGrid);
 		}
 		ImGui.Spacing();
@@ -222,12 +241,12 @@ public class DevToolNavGrid : DevTool
 			if (navGrid.ValidNavTypes[i] == navGrid.Links[end_cell_idx].startNavType)
 			{
 				color = navGrid.NavTypeColor(navGrid.Links[end_cell_idx].startNavType);
-				return true;
+				return this.drawLinkTypes[navGrid.Links[end_cell_idx].startNavType] || this.drawLinkTypes[navGrid.Links[end_cell_idx].endNavType];
 			}
 			if (navGrid.ValidNavTypes[i] == navGrid.Links[end_cell_idx].endNavType)
 			{
 				color = navGrid.NavTypeColor(navGrid.Links[end_cell_idx].endNavType);
-				return true;
+				return this.drawLinkTypes[navGrid.Links[end_cell_idx].startNavType] || this.drawLinkTypes[navGrid.Links[end_cell_idx].endNavType];
 			}
 		}
 		return false;
@@ -255,6 +274,8 @@ public class DevToolNavGrid : DevTool
 	private int selectedNavGrid;
 
 	private bool drawLinks;
+
+	private Dictionary<NavType, bool> drawLinkTypes = new Dictionary<NavType, bool>();
 
 	public static DevToolNavGrid Instance;
 

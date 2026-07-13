@@ -5,8 +5,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.UIElements
 {
-	[VisibleToOtherModules(new string[] { "Unity.UIElements" })]
 	[NativeHeader("ModuleOverrides/com.unity.ui/Core/Native/UIElementsRuntimeUtilityNative.h")]
+	[VisibleToOtherModules(new string[] { "Unity.UIElements" })]
 	internal static class UIElementsRuntimeUtilityNative
 	{
 		[RequiredByNativeCode]

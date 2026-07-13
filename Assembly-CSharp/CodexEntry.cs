@@ -152,7 +152,7 @@ public class CodexEntry : IHasDlcRestrictions
 			{
 				for (int j = 0; j < this.contentContainers[i].content.Count; j++)
 				{
-					if (this.contentContainers[i].content[j] != null)
+					if (this.contentContainers[i].content[j] != null && Game.IsCorrectDlcActiveForCurrentSave(this.contentContainers[i].content[j] as IHasDlcRestrictions))
 					{
 						return this.contentContainers[i].content[j];
 					}
@@ -161,6 +161,8 @@ public class CodexEntry : IHasDlcRestrictions
 		}
 		return null;
 	}
+
+	public string[] requiredAtLeastOneDlcIds { get; set; }
 
 	public string[] requiredDlcIds { get; set; }
 
@@ -174,6 +176,11 @@ public class CodexEntry : IHasDlcRestrictions
 	public string[] GetForbiddenDlcIds()
 	{
 		return this.forbiddenDlcIds;
+	}
+
+	public string[] GetAnyRequiredDlcIds()
+	{
+		return this.requiredAtLeastOneDlcIds;
 	}
 
 	public string id
@@ -392,6 +399,18 @@ public class CodexEntry : IHasDlcRestrictions
 		}
 	}
 
+	public bool insertMergeContentAtBottom
+	{
+		get
+		{
+			return this._insertMergeContentAtBottom;
+		}
+		set
+		{
+			this._insertMergeContentAtBottom = value;
+		}
+	}
+
 	public EntryDevLog log = new EntryDevLog();
 
 	private List<ContentContainer> _contentContainers = new List<ContentContainer>();
@@ -431,4 +450,6 @@ public class CodexEntry : IHasDlcRestrictions
 	private string _sortString;
 
 	private bool _showBeforeGeneratedCategoryLinks;
+
+	private bool _insertMergeContentAtBottom;
 }

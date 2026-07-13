@@ -16,8 +16,6 @@ public abstract class KAnimControllerBase : MonoBehaviour, ISerializationCallbac
 
 	public abstract KAnim.Anim GetAnim(int index);
 
-	public string debugName { get; private set; }
-
 	public KAnim.Build curBuild { get; protected set; }
 
 	public event Action<Color32> OnOverlayColourChanged;
@@ -445,7 +443,6 @@ public abstract class KAnimControllerBase : MonoBehaviour, ISerializationCallbac
 	private void Awake()
 	{
 		this.aem = Singleton<AnimEventManager>.Instance;
-		this.debugName = base.name;
 		this.SetFGLayer(this.fgLayer);
 		this.OnAwake();
 		if (!string.IsNullOrEmpty(this.initialAnim))
@@ -758,6 +755,24 @@ public abstract class KAnimControllerBase : MonoBehaviour, ISerializationCallbac
 		return flag;
 	}
 
+	public KAnim.Anim GetAnim(HashedString anim_name)
+	{
+		KAnim.Anim anim = null;
+		if (anim_name.IsValid)
+		{
+			KAnimControllerBase.AnimLookupData animLookupData;
+			if (this.anims.TryGetValue(anim_name, out animLookupData))
+			{
+				anim = this.GetAnim(animLookupData.animIndex);
+			}
+			else if (this.overrideAnims.TryGetValue(anim_name, out animLookupData))
+			{
+				anim = this.GetAnim(animLookupData.animIndex);
+			}
+		}
+		return anim;
+	}
+
 	public bool HasAnimationFile(KAnimHashedString anim_file_name)
 	{
 		KAnimFile kanimFile = null;
@@ -1067,8 +1082,6 @@ public abstract class KAnimControllerBase : MonoBehaviour, ISerializationCallbac
 	protected HandleVector<int>.Handle eventManagerHandle = HandleVector<int>.InvalidHandle;
 
 	protected List<KAnimControllerBase.OverrideAnimFileData> overrideAnimFiles = new List<KAnimControllerBase.OverrideAnimFileData>();
-
-	protected DeepProfiler DeepProfiler = new DeepProfiler(false);
 
 	public bool randomiseLoopedOffset;
 

@@ -4,24 +4,20 @@ using UnityEngine.UI;
 
 public class ShowOptimizedKScreen : KScreen
 {
+	protected override void OnPrefabInit()
+	{
+		base.OnPrefabInit();
+		this.canvasGroup = base.GetComponent<CanvasGroup>();
+		this.graphicRaycaster = base.GetComponent<GraphicRaycaster>();
+	}
+
 	public override void Show(bool show = true)
 	{
 		this.mouseOver = false;
-		foreach (Canvas canvas in base.GetComponentsInChildren<Canvas>(true))
-		{
-			if (canvas.enabled != show)
-			{
-				canvas.enabled = show;
-			}
-		}
-		CanvasGroup component = base.GetComponent<CanvasGroup>();
-		if (component != null)
-		{
-			component.interactable = show;
-			component.blocksRaycasts = show;
-			component.ignoreParentGroups = true;
-		}
-		this.isHiddenButActive = !show;
+		this.canvasGroup.alpha = (float)(show ? 1 : 0);
+		this.canvasGroup.interactable = show;
+		this.canvasGroup.blocksRaycasts = show;
+		this.graphicRaycaster.enabled = show;
 		this.OnShow(show);
 		if (this.enableLayoutOnShow != null)
 		{
@@ -29,6 +25,15 @@ public class ShowOptimizedKScreen : KScreen
 		}
 	}
 
+	public override bool IsScreenActive()
+	{
+		return this.canvasGroup.alpha > 0f;
+	}
+
 	[SerializeField]
 	private LayoutGroup enableLayoutOnShow;
+
+	private CanvasGroup canvasGroup;
+
+	private GraphicRaycaster graphicRaycaster;
 }

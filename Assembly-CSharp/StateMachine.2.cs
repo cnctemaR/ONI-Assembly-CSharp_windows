@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using ImGuiNET;
 using KSerialization;
 using UnityEngine;
@@ -32,9 +33,6 @@ public class StateMachine<StateMachineType, StateMachineInstanceType, MasterType
 		}
 		state.name = state_name;
 		state.longName = this.name + "." + state_name;
-		state.debugPushName = "PuS: " + state.longName;
-		state.debugPopName = "PoS: " + state.longName;
-		state.debugExecuteName = "EA: " + state.longName;
 		List<StateMachine.BaseState> list;
 		if (parent_state != null)
 		{
@@ -700,6 +698,8 @@ public class StateMachine<StateMachineType, StateMachineInstanceType, MasterType
 			{
 				this.parameter = parameter;
 				this.callback = callback;
+				this.evaluateAction = new Action<StateMachineInstanceType>(this.Evaluate);
+				this.triggerAction = new Action<StateMachineInstanceType>(this.Trigger);
 			}
 
 			public override void Evaluate(StateMachine.Instance smi)
@@ -728,12 +728,12 @@ public class StateMachine<StateMachineType, StateMachineInstanceType, MasterType
 				if (this.parameter.isSignal && this.callback == null)
 				{
 					StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.Parameter<ParameterType>.Context context2 = context;
-					context2.onDirty = (Action<StateMachineInstanceType>)Delegate.Combine(context2.onDirty, new Action<StateMachineInstanceType>(this.Trigger));
+					context2.onDirty = (Action<StateMachineInstanceType>)Delegate.Combine(context2.onDirty, this.triggerAction);
 				}
 				else
 				{
 					StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.Parameter<ParameterType>.Context context3 = context;
-					context3.onDirty = (Action<StateMachineInstanceType>)Delegate.Combine(context3.onDirty, new Action<StateMachineInstanceType>(this.Evaluate));
+					context3.onDirty = (Action<StateMachineInstanceType>)Delegate.Combine(context3.onDirty, this.evaluateAction);
 				}
 				return new StateMachine.BaseTransition.Context(this);
 			}
@@ -744,11 +744,11 @@ public class StateMachine<StateMachineType, StateMachineInstanceType, MasterType
 				if (this.parameter.isSignal && this.callback == null)
 				{
 					StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.Parameter<ParameterType>.Context context2 = context;
-					context2.onDirty = (Action<StateMachineInstanceType>)Delegate.Remove(context2.onDirty, new Action<StateMachineInstanceType>(this.Trigger));
+					context2.onDirty = (Action<StateMachineInstanceType>)Delegate.Remove(context2.onDirty, this.triggerAction);
 					return;
 				}
 				StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.Parameter<ParameterType>.Context context3 = context;
-				context3.onDirty = (Action<StateMachineInstanceType>)Delegate.Remove(context3.onDirty, new Action<StateMachineInstanceType>(this.Evaluate));
+				context3.onDirty = (Action<StateMachineInstanceType>)Delegate.Remove(context3.onDirty, this.evaluateAction);
 			}
 
 			public override string ToString()
@@ -763,6 +763,10 @@ public class StateMachine<StateMachineType, StateMachineInstanceType, MasterType
 			private StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.Parameter<ParameterType> parameter;
 
 			private StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.Parameter<ParameterType>.Callback callback;
+
+			private Action<StateMachineInstanceType> evaluateAction;
+
+			private Action<StateMachineInstanceType> triggerAction;
 		}
 
 		public new abstract class Context : StateMachine.Parameter.Context
@@ -1432,8 +1436,7 @@ public class StateMachine<StateMachineType, StateMachineInstanceType, MasterType
 				base.Cleanup();
 				if (this.value != null)
 				{
-					this.value.GetComponent<KMonoBehaviour>().Unsubscribe(this.objectDestroyedHandler);
-					this.objectDestroyedHandler = 0;
+					this.value.GetComponent<KMonoBehaviour>().Unsubscribe(ref this.objectDestroyedHandler);
 				}
 			}
 
@@ -1442,12 +1445,11 @@ public class StateMachine<StateMachineType, StateMachineInstanceType, MasterType
 				this.m_smi = smi;
 				if (this.value != null)
 				{
-					this.value.GetComponent<KMonoBehaviour>().Unsubscribe(this.objectDestroyedHandler);
-					this.objectDestroyedHandler = 0;
+					this.value.GetComponent<KMonoBehaviour>().Unsubscribe(ref this.objectDestroyedHandler);
 				}
 				if (value != null)
 				{
-					this.objectDestroyedHandler = value.GetComponent<KMonoBehaviour>().Subscribe(1969584890, new Action<object>(this.OnObjectDestroyed));
+					this.objectDestroyedHandler = value.GetComponent<KMonoBehaviour>().Subscribe(1969584890, StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.TargetParameter.Context.OnObjectDestroyedDispatcher, this);
 				}
 				base.Set(value, smi, silenceEvents);
 			}
@@ -1473,7 +1475,12 @@ public class StateMachine<StateMachineType, StateMachineInstanceType, MasterType
 
 			private StateMachineInstanceType m_smi;
 
-			private int objectDestroyedHandler;
+			private int objectDestroyedHandler = -1;
+
+			private static Action<object, object> OnObjectDestroyedDispatcher = delegate(object context, object data)
+			{
+				Unsafe.As<StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.TargetParameter.Context>(context).OnObjectDestroyed(data);
+			};
 		}
 	}
 

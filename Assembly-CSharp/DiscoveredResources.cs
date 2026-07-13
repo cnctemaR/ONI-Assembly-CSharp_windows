@@ -111,6 +111,17 @@ public class DiscoveredResources : KMonoBehaviour, ISaveLoadable, ISim4000ms
 				}
 			}
 		}
+		if (this.DiscoveredCategories.ContainsKey(GameTags.IndustrialIngredient))
+		{
+			foreach (string text3 in new List<string> { "OrbitalResearchDatabank", "ResearchDatabank" })
+			{
+				if (this.DiscoveredCategories[GameTags.IndustrialIngredient].Contains(text3))
+				{
+					this.DiscoveredCategories[GameTags.IndustrialIngredient].Remove(text3);
+					this.DiscoverCategory(GameTags.TechComponents, text3);
+				}
+			}
+		}
 	}
 
 	public bool CheckAllDiscoveredAreNew()

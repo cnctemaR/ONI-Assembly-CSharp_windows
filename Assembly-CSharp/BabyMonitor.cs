@@ -91,14 +91,28 @@ public class BabyMonitor : GameStateMachine<BabyMonitor, BabyMonitor.Instance, I
 			{
 				gameObject.GetComponent<Effects>().Add(effectInstance.effect, effectInstance.shouldSave).timeRemaining = effectInstance.timeRemaining;
 			}
+			Navigator component = gameObject.GetComponent<Navigator>();
 			if (!base.smi.def.forceAdultNavType)
 			{
-				Navigator component = base.smi.GetComponent<Navigator>();
-				gameObject.GetComponent<Navigator>().SetCurrentNavType(component.CurrentNavType);
+				Navigator component2 = base.smi.GetComponent<Navigator>();
+				component.SetCurrentNavType(component2.CurrentNavType);
+			}
+			int num2 = Grid.PosToCell(position);
+			if (!component.NavGrid.NavTable.IsValid(num2, component.CurrentNavType))
+			{
+				foreach (CellOffset cellOffset in Pickupable.displacementOffsets)
+				{
+					int num3 = Grid.OffsetCell(num2, cellOffset);
+					if (component.NavGrid.NavTable.IsValid(num3, component.CurrentNavType))
+					{
+						gameObject.transform.SetPosition(Grid.CellToPos(num3));
+						break;
+					}
+				}
 			}
 			gameObject.Trigger(-2027483228, base.gameObject);
-			KSelectable component2 = base.gameObject.GetComponent<KSelectable>();
-			if (SelectTool.Instance != null && SelectTool.Instance.selected != null && SelectTool.Instance.selected == component2)
+			KSelectable component3 = base.gameObject.GetComponent<KSelectable>();
+			if (SelectTool.Instance != null && SelectTool.Instance.selected != null && SelectTool.Instance.selected == component3)
 			{
 				SelectTool.Instance.Select(gameObject.GetComponent<KSelectable>(), false);
 			}

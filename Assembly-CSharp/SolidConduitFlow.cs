@@ -311,25 +311,43 @@ public class SolidConduitFlow : IConduitFlow
 		}
 		for (int k = this.pathList.Count - 1; k >= 0; k--)
 		{
-			List<SolidConduitFlow.Conduit> old_path = this.pathList[k];
-			if (new_path.Count >= old_path.Count)
+			List<SolidConduitFlow.Conduit> list4 = this.pathList[k];
+			if (new_path.Count >= list4.Count)
 			{
 				bool flag2 = false;
-				int num4 = new_path.FindIndex((SolidConduitFlow.Conduit t) => t.idx == old_path[0].idx);
-				int num5 = new_path.FindIndex((SolidConduitFlow.Conduit t) => t.idx == old_path[old_path.Count - 1].idx);
+				int idx = list4[0].idx;
+				int idx2 = list4[list4.Count - 1].idx;
+				int num4 = -1;
+				int num5 = -1;
+				for (int l = 0; l < new_path.Count; l++)
+				{
+					if (new_path[l].idx == idx)
+					{
+						num4 = l;
+						break;
+					}
+				}
+				for (int m = 0; m < new_path.Count; m++)
+				{
+					if (new_path[m].idx == idx2)
+					{
+						num5 = m;
+						break;
+					}
+				}
 				if (num4 != -1 && num5 != -1)
 				{
 					flag2 = true;
-					int l = num4;
+					int n = num4;
 					int num6 = 0;
-					while (l < num5)
+					while (n < num5)
 					{
-						if (new_path[l].idx != old_path[num6].idx)
+						if (new_path[n].idx != list4[num6].idx)
 						{
 							flag2 = false;
 							break;
 						}
-						l++;
+						n++;
 						num6++;
 					}
 				}
@@ -339,14 +357,14 @@ public class SolidConduitFlow : IConduitFlow
 				}
 			}
 		}
-		foreach (List<SolidConduitFlow.Conduit> list4 in this.pathList)
+		foreach (List<SolidConduitFlow.Conduit> list5 in this.pathList)
 		{
-			for (int m = new_path.Count - 1; m >= 0; m--)
+			for (int num7 = new_path.Count - 1; num7 >= 0; num7--)
 			{
-				SolidConduitFlow.Conduit new_conduit = new_path[m];
-				if (list4.FindIndex((SolidConduitFlow.Conduit t) => t.idx == new_conduit.idx) != -1 && Mathf.IsPowerOfTwo(this.soaInfo.GetPermittedFlowDirections(new_conduit.idx)))
+				SolidConduitFlow.Conduit new_conduit = new_path[num7];
+				if (list5.FindIndex((SolidConduitFlow.Conduit t) => t.idx == new_conduit.idx) != -1 && Mathf.IsPowerOfTwo(this.soaInfo.GetPermittedFlowDirections(new_conduit.idx)))
 				{
-					new_path.RemoveAt(m);
+					new_path.RemoveAt(num7);
 				}
 			}
 		}
@@ -393,7 +411,7 @@ public class SolidConduitFlow : IConduitFlow
 			KBatchedAnimController component2 = pickupable.GetComponent<KBatchedAnimController>();
 			component2.enabled = false;
 			component2.enabled = true;
-			pickupable.Trigger(856640610, true);
+			pickupable.Trigger(856640610, BoxedBools.True);
 		}
 		this.SetContents(cell, conduitContents);
 	}
@@ -616,7 +634,7 @@ public class SolidConduitFlow : IConduitFlow
 		{
 			pickupable.storage.Remove(pickupable.gameObject, true);
 		}
-		pickupable.Trigger(856640610, true);
+		pickupable.Trigger(856640610, BoxedBools.True);
 		this.SetContents(cell_idx, contents);
 	}
 
@@ -634,7 +652,7 @@ public class SolidConduitFlow : IConduitFlow
 				pickupable = data.pickupable;
 				if (pickupable)
 				{
-					pickupable.Trigger(856640610, false);
+					pickupable.Trigger(856640610, BoxedBools.False);
 				}
 				this.freedHandles.Add(conduitContents.pickupableHandle);
 			}

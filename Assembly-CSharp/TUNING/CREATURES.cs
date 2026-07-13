@@ -174,10 +174,10 @@ namespace TUNING
 						{
 							inst.gameObject.Subscribe(-2038961714, delegate(object data)
 							{
-								CreatureCalorieMonitor.CaloriesConsumedEvent caloriesConsumedEvent = (CreatureCalorieMonitor.CaloriesConsumedEvent)data;
-								if (foodTags.Contains(caloriesConsumedEvent.tag))
+								CreatureCalorieMonitor.CaloriesConsumedEvent value = ((Boxed<CreatureCalorieMonitor.CaloriesConsumedEvent>)data).value;
+								if (foodTags.Contains(value.tag))
 								{
-									inst.AddBreedingChance(eggType, caloriesConsumedEvent.calories * modifierPerCal);
+									inst.AddBreedingChance(eggType, value.calories * modifierPerCal);
 								}
 							});
 						});
@@ -402,6 +402,63 @@ namespace TUNING
 				};
 			}
 
+			private static global::System.Action CreateDecorModifier(string id, Tag eggTag, float minDecor, float modifierPerSecond, bool alsoInvert)
+			{
+				Func<string, string> <>9__1;
+				FertilityModifier.FertilityModFn <>9__2;
+				return delegate
+				{
+					string text = CREATURES.FERTILITY_MODIFIERS.DECOR.NAME;
+					ModifierSet modifierSet = Db.Get();
+					string id2 = id;
+					Tag eggTag2 = eggTag;
+					string text2 = text;
+					string text3 = null;
+					Func<string, string> func;
+					if ((func = <>9__1) == null)
+					{
+						func = (<>9__1 = (string src) => string.Format(CREATURES.FERTILITY_MODIFIERS.DECOR.DESC, GameUtil.GetFormattedDecor(minDecor, false)));
+					}
+					FertilityModifier.FertilityModFn fertilityModFn;
+					if ((fertilityModFn = <>9__2) == null)
+					{
+						fertilityModFn = (<>9__2 = delegate(FertilityMonitor.Instance inst, Tag eggType)
+						{
+							CreatureDecorMonitor.Instance smi = inst.gameObject.GetSMI<CreatureDecorMonitor.Instance>();
+							if (smi != null)
+							{
+								CreatureDecorMonitor.Instance instance = smi;
+								instance.OnHighDecorUpdate = (Action<float>)Delegate.Combine(instance.OnHighDecorUpdate, new Action<float>(delegate(float dt)
+								{
+									inst.AddBreedingChance(eggType, dt * modifierPerSecond);
+								}));
+								if (alsoInvert)
+								{
+									CreatureDecorMonitor.Instance instance2 = smi;
+									instance2.OnLowDecorUpdate = (Action<float>)Delegate.Combine(instance2.OnLowDecorUpdate, new Action<float>(delegate(float dt)
+									{
+										inst.AddBreedingChance(eggType, dt * -modifierPerSecond);
+									}));
+									return;
+								}
+							}
+							else
+							{
+								DebugUtil.LogErrorArgs(new object[]
+								{
+									"Ack! Trying to add decor modifier",
+									id,
+									"to",
+									inst.master.name,
+									"but it doesn't have a CreatureDecorMonitor.Instance"
+								});
+							}
+						});
+					}
+					modifierSet.CreateFertilityModifier(id2, eggTag2, text2, text3, func, fertilityModFn);
+				};
+			}
+
 			public static List<global::System.Action> MODIFIER_CREATORS = new List<global::System.Action>
 			{
 				CREATURES.EGG_CHANCE_MODIFIERS.CreateDietaryModifier("HatchHard", "HatchHardEgg".ToTag(), SimHashes.SedimentaryRock.CreateTag(), 0.05f / HatchTuning.STANDARD_CALORIES_PER_CYCLE),
@@ -432,7 +489,65 @@ namespace TUNING
 				CREATURES.EGG_CHANCE_MODIFIERS.CreateTemperatureModifier("MoleDelicacy", "MoleDelicacyEgg".ToTag(), MoleDelicacyConfig.EGG_CHANCES_TEMPERATURE_MIN, MoleDelicacyConfig.EGG_CHANCES_TEMPERATURE_MAX, 8.333333E-05f, false),
 				CREATURES.EGG_CHANCE_MODIFIERS.CreateElementCreatureModifier("StaterpillarGas", "StaterpillarGasEgg".ToTag(), GameTags.Unbreathable, 0.00025f, true, false, CREATURES.FERTILITY_MODIFIERS.LIVING_IN_ELEMENT.UNBREATHABLE),
 				CREATURES.EGG_CHANCE_MODIFIERS.CreateElementCreatureModifier("StaterpillarLiquid", "StaterpillarLiquidEgg".ToTag(), GameTags.Liquid, 0.00025f, true, false, CREATURES.FERTILITY_MODIFIERS.LIVING_IN_ELEMENT.LIQUID),
-				CREATURES.EGG_CHANCE_MODIFIERS.CreateDietaryModifier("BellyGold", "GoldBellyEgg".ToTag(), "FriesCarrot".ToTag(), 0.05f / BellyTuning.STANDARD_CALORIES_PER_CYCLE)
+				CREATURES.EGG_CHANCE_MODIFIERS.CreateDietaryModifier("BellyGold", "GoldBellyEgg".ToTag(), "FriesCarrot".ToTag(), 0.05f / BellyTuning.STANDARD_CALORIES_PER_CYCLE),
+				CREATURES.EGG_CHANCE_MODIFIERS.CreateDecorModifier("GlassDeerDecor", "GlassDeerEgg".ToTag(), 100f, 8.333333E-05f, true),
+				CREATURES.EGG_CHANCE_MODIFIERS.CreateElementCreatureModifier("AlgaeStego", "AlgaeStegoEgg".ToTag(), SimHashes.CarbonDioxide.CreateTag(), 0.00025f, true, false, null)
+			};
+		}
+
+		public class MOO_SONG_MODIFIERS
+		{
+			private static global::System.Action CreateDietaryModifier(string id, Tag meteorTag, HashSet<Tag> foodTags, float modifierPerCal)
+			{
+				Func<string, string> <>9__1;
+				MooSongModifier.MooSongModFn <>9__2;
+				return delegate
+				{
+					string text = CREATURES.MOO_SONG_MODIFIERS.DIET.NAME;
+					string text2 = CREATURES.MOO_SONG_MODIFIERS.DIET.DESC;
+					ModifierSet modifierSet = Db.Get();
+					string id2 = id;
+					Tag meteorTag2 = meteorTag;
+					string text3 = text;
+					string text4 = text2;
+					Func<string, string> func;
+					if ((func = <>9__1) == null)
+					{
+						func = (<>9__1 = delegate(string descStr)
+						{
+							string text5 = string.Join(", ", foodTags.Select<Tag, string>((Tag t) => t.ProperName()).ToArray<string>());
+							descStr = string.Format(descStr, text5);
+							return descStr;
+						});
+					}
+					MooSongModifier.MooSongModFn mooSongModFn;
+					if ((mooSongModFn = <>9__2) == null)
+					{
+						mooSongModFn = (<>9__2 = delegate(BeckoningMonitor.Instance inst, Tag meteorID)
+						{
+							inst.gameObject.Subscribe(-2038961714, delegate(object data)
+							{
+								CreatureCalorieMonitor.CaloriesConsumedEvent value = ((Boxed<CreatureCalorieMonitor.CaloriesConsumedEvent>)data).value;
+								if (foodTags.Contains(value.tag))
+								{
+									inst.AddSongChance(meteorID, value.calories * modifierPerCal);
+								}
+							});
+						});
+					}
+					modifierSet.CreateMooSongModifier(id2, meteorTag2, text3, text4, func, mooSongModFn);
+				};
+			}
+
+			private static global::System.Action CreateDietaryModifier(string id, Tag meteorTag, Tag foodTag, float modifierPerCal)
+			{
+				return CREATURES.MOO_SONG_MODIFIERS.CreateDietaryModifier(id, meteorTag, new HashSet<Tag> { foodTag }, modifierPerCal);
+			}
+
+			public static List<global::System.Action> MODIFIER_CREATORS = new List<global::System.Action>
+			{
+				CREATURES.MOO_SONG_MODIFIERS.CreateDietaryModifier("GassyMoo", GassyMooCometConfig.ID, "GasGrass", 0.05f / MooTuning.STANDARD_CALORIES_PER_CYCLE),
+				CREATURES.MOO_SONG_MODIFIERS.CreateDietaryModifier("DieselMoo", DieselMooCometConfig.ID, "PlantFiber", 0.05f / MooTuning.STANDARD_CALORIES_PER_CYCLE)
 			};
 		}
 

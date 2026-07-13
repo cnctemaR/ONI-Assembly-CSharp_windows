@@ -190,8 +190,8 @@ public class KBatchGroupData
 		if (!this.frameElementSymbolIndices.ContainsKey(symbol.hash))
 		{
 			this.frameElementSymbolIndices.Add(symbol.hash, this.frameElementSymbols.Count);
+			this.frameElementSymbols.Add(symbol);
 		}
-		this.frameElementSymbols.Add(symbol);
 	}
 
 	public int GetSymbolCount()

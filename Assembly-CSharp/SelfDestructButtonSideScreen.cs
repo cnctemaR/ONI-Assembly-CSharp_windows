@@ -39,7 +39,7 @@ public class SelfDestructButtonSideScreen : SideScreenContent
 
 	private void OnTagsChanged(object data)
 	{
-		if (((TagChangedEventData)data).tag == GameTags.RocketStranded)
+		if (((Boxed<TagChangedEventData>)data).value.tag == GameTags.RocketStranded)
 		{
 			this.Refresh();
 		}

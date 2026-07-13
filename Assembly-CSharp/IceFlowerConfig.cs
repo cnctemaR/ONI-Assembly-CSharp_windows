@@ -33,6 +33,7 @@ public class IceFlowerConfig : IEntityConfig, IHasDlcRestrictions
 			SimHashes.Hydrogen
 		}, true, 0f, 0.15f, null, true, false, true, true, 2400f, 0f, 2200f, "IceFlowerOriginal", global::STRINGS.CREATURES.SPECIES.ICEFLOWER.NAME);
 		PrickleGrass prickleGrass = gameObject.AddOrGet<PrickleGrass>();
+		gameObject.AddOrGetDef<DecorPlantMonitor.Def>();
 		prickleGrass.positive_decor_effect = this.POSITIVE_DECOR_EFFECT;
 		prickleGrass.negative_decor_effect = this.NEGATIVE_DECOR_EFFECT;
 		GameObject gameObject2 = gameObject;

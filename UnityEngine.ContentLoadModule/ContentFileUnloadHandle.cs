@@ -1,5 +1,4 @@
 ﻿using System;
-using Unity.Jobs;
 
 namespace Unity.Loading
 {
@@ -9,15 +8,15 @@ namespace Unity.Loading
 		{
 			get
 			{
-				return this.jobHandle.IsCompleted;
+				return ContentLoadInterface.ContentFile_IsUnloadComplete(this.Id);
 			}
 		}
 
 		public bool WaitForCompletion(int timeoutMs)
 		{
-			return ContentLoadInterface.WaitForJobCompletion(this.jobHandle, timeoutMs);
+			return ContentLoadInterface.WaitForUnloadCompletion(this.Id, timeoutMs);
 		}
 
-		internal JobHandle jobHandle;
+		internal ContentFile Id;
 	}
 }

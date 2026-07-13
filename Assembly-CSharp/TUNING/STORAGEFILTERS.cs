@@ -37,6 +37,7 @@ namespace TUNING
 			GameTags.Liquifiable,
 			GameTags.IndustrialProduct,
 			GameTags.IndustrialIngredient,
+			GameTags.TechComponents,
 			GameTags.MedicalSupplies,
 			GameTags.Clothes,
 			GameTags.ManufacturedMaterial,
@@ -58,9 +59,13 @@ namespace TUNING
 
 		public static List<Tag> STORAGE_LOCKERS_STANDARD = STORAGEFILTERS.NOT_EDIBLE_SOLIDS.Union<Tag>(new List<Tag> { GameTags.Medicine }).ToList<Tag>();
 
+		public static List<Tag> STORAGE_SOLID_CARGO_BAY = STORAGEFILTERS.NOT_EDIBLE_SOLIDS.Union<Tag>(new List<Tag> { GameTags.Medicine }).Except<Tag>(new List<Tag> { GameTags.TechComponents }).ToList<Tag>();
+
 		public static List<Tag> POWER_BANKS = new List<Tag> { GameTags.ChargedPortableBattery };
 
 		public static List<Tag> LIQUIDS = new List<Tag> { GameTags.Liquid };
+
+		public static List<Tag> SO_DATABANKS = new List<Tag> { "OrbitalResearchDatabank" };
 
 		public static List<Tag> GASES = new List<Tag>
 		{

@@ -7,10 +7,10 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Transform/Transform.h")]
 	[NativeHeader("Configuration/UnityConfigure.h")]
-	[RequiredByNativeCode]
+	[NativeHeader("Runtime/Transform/Transform.h")]
 	[NativeHeader("Runtime/Transform/ScriptBindings/TransformScriptBindings.h")]
+	[RequiredByNativeCode]
 	public class Transform : Component, IEnumerable
 	{
 		protected Transform()
@@ -169,8 +169,8 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal extern int GetRotationOrderInternal();
 
-		[NativeConditional("UNITY_EDITOR")]
 		[NativeMethod("SetRotationOrder")]
+		[NativeConditional("UNITY_EDITOR")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal extern void SetRotationOrderInternal(RotationOrder rotationOrder);
 
@@ -740,8 +740,8 @@ namespace UnityEngine
 			this.RotateAroundLocal_Injected(ref axis, angle);
 		}
 
-		[NativeThrows]
 		[FreeFunction("GetChild", HasExplicitThis = true)]
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern Transform GetChild(int index);
 
@@ -782,8 +782,8 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern int internal_getHierarchyCount();
 
-		[NativeConditional("UNITY_EDITOR")]
 		[FreeFunction("IsNonUniformScaleTransform", HasExplicitThis = true)]
+		[NativeConditional("UNITY_EDITOR")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal extern bool IsNonUniformScaleTransform();
 

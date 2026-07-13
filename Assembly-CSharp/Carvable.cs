@@ -92,7 +92,7 @@ public class Carvable : Workable, IDigActionEntity
 		this.Carve();
 	}
 
-	private void OnCancel(object data)
+	private void OnCancel(object _)
 	{
 		if (this.chore != null)
 		{

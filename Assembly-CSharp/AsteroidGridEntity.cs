@@ -137,7 +137,7 @@ public class AsteroidGridEntity : ClusterGridEntity
 
 	private void OnMeteorShowerEventChanged(object _worldID)
 	{
-		if ((int)_worldID == this.m_worldContainer.id)
+		if (((Boxed<int>)_worldID).value == this.m_worldContainer.id)
 		{
 			this.RefreshMeteorShowerEffect();
 		}
@@ -184,7 +184,7 @@ public class AsteroidGridEntity : ClusterGridEntity
 		{
 			return;
 		}
-		if ((AxialI)data != this.m_location)
+		if (((Boxed<AxialI>)data).value != this.m_location)
 		{
 			return;
 		}

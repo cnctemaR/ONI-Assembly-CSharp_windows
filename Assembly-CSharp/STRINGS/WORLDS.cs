@@ -523,7 +523,7 @@ namespace STRINGS
 		{
 			public static LocString NAME = "RelicAAAA<sup>AAAGHH</sup>";
 
-			public static LocString DESCRIPTION = "A geyser-rich location that will be struck by an impactor asteroid almost immediately.\n\n<smallcaps>Impact-related damage will trigger the eruption of this world's unusually high number of geyers. Colonies that survive the volatile aftermath will reap the benefits of the abundant natural resources released into the environment.</smallcaps>";
+			public static LocString DESCRIPTION = "A geyser-rich location that will be struck by an impactor asteroid almost immediately.\n\n<smallcaps>Impact-related damage will trigger the eruption of this world's unusually high number of geysers. Colonies that survive the volatile aftermath will reap the benefits of the abundant natural resources released into the environment.</smallcaps>";
 		}
 
 		public class PREHISTORICCLASSIC

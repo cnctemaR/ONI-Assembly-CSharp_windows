@@ -35,7 +35,7 @@ public class FossilDigsiteLampLight : Light2D
 	{
 		if (light.independent)
 		{
-			light.enabled = (bool)data;
+			light.enabled = ((Boxed<bool>)data).value;
 		}
 	});
 }

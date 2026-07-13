@@ -4,9 +4,9 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Graphics/LOD/LODUtility.h")]
 	[NativeHeader("Runtime/Graphics/LOD/LODGroup.h")]
 	[StaticAccessor("GetLODGroupManager()", StaticAccessorType.Dot)]
+	[NativeHeader("Runtime/Graphics/LOD/LODUtility.h")]
 	[NativeHeader("Runtime/Graphics/LOD/LODGroupManager.h")]
 	public class LODGroup : Component
 	{

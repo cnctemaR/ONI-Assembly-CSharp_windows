@@ -5,8 +5,8 @@ using UnityEngine.Bindings;
 
 namespace Unity.Content
 {
-	[NativeHeader("Runtime/Misc/ContentNamespace.h")]
 	[StaticAccessor("GetContentNamespaceManager()", StaticAccessorType.Dot)]
+	[NativeHeader("Runtime/Misc/ContentNamespace.h")]
 	public struct ContentNamespace
 	{
 		public string GetName()

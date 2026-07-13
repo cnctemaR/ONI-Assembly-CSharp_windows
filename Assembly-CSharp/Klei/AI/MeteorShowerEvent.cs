@@ -146,7 +146,7 @@ namespace Klei.AI
 
 			public static void TriggerMeteorGlobalEvent(MeteorShowerEvent.StatesInstance smi, GameHashes hash)
 			{
-				Game.Instance.Trigger((int)hash, smi.eventInstance.worldId);
+				Game.Instance.BoxingTrigger<int>((int)hash, smi.eventInstance.worldId);
 			}
 
 			public static void CreateClusterMapMeteorShower(MeteorShowerEvent.StatesInstance smi)

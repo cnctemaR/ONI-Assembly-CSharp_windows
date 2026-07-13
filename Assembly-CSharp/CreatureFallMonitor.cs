@@ -32,10 +32,12 @@ public class CreatureFallMonitor : GameStateMachine<CreatureFallMonitor, Creatur
 
 		public void SnapToGround()
 		{
-			Vector3 position = base.smi.transform.GetPosition();
-			Vector3 vector = Grid.CellToPosCBC(Grid.PosToCell(position), Grid.SceneLayer.Creatures);
-			vector.x = position.x;
-			base.smi.transform.SetPosition(vector);
+			Vector3 vector = base.smi.transform.GetPosition();
+			Vector3 vector2 = this.navigator.NavGrid.GetNavTypeData(this.navigator.CurrentNavType).animControllerOffset;
+			vector -= vector2;
+			Vector3 vector3 = Grid.CellToPosCBC(Grid.PosToCell(vector), Grid.SceneLayer.Creatures);
+			vector3.x = vector.x;
+			base.smi.transform.SetPosition(vector3);
 			if (this.navigator.IsValidNavType(NavType.Floor))
 			{
 				this.navigator.SetCurrentNavType(NavType.Floor);

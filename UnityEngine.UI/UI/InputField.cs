@@ -2216,6 +2216,10 @@ namespace UnityEngine.UI
 					{
 						return ch;
 					}
+					if (this.characterValidation == InputField.CharacterValidation.Integer && ch == '.' && (pos == 0 || flag2))
+					{
+						return '-';
+					}
 				}
 			}
 			else if (this.characterValidation == InputField.CharacterValidation.Alphanumeric)
@@ -2432,7 +2436,7 @@ namespace UnityEngine.UI
 			case InputField.ContentType.IntegerNumber:
 				this.m_LineType = InputField.LineType.SingleLine;
 				this.m_InputType = InputField.InputType.Standard;
-				this.m_KeyboardType = TouchScreenKeyboardType.NumberPad;
+				this.m_KeyboardType = TouchScreenKeyboardType.NumbersAndPunctuation;
 				this.m_CharacterValidation = InputField.CharacterValidation.Integer;
 				break;
 			case InputField.ContentType.DecimalNumber:

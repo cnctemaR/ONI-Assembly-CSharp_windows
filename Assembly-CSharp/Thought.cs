@@ -35,6 +35,11 @@ public class Thought : Resource
 		this.showTime = show_time;
 	}
 
+	public void PlayAsSpeech(SpeechMonitor.Instance speechMonitorInstance)
+	{
+		speechMonitorInstance.PlaySpeech(this.speechPrefix, this.sound);
+	}
+
 	public int priority;
 
 	public Sprite sprite;

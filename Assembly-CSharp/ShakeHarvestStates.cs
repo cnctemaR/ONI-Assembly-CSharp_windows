@@ -52,7 +52,7 @@ public class ShakeHarvestStates : GameStateMachine<ShakeHarvestStates, ShakeHarv
 			Harvestable component = gameObject.GetComponent<Harvestable>();
 			if (component != null && component.CanBeHarvested)
 			{
-				component.Trigger(2127324410, true);
+				component.Trigger(2127324410, BoxedBools.True);
 				component.Harvest();
 			}
 		}).BehaviourComplete(GameTags.Creatures.WantsToHarvest, false);

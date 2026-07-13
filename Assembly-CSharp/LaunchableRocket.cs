@@ -343,7 +343,7 @@ public class LaunchableRocket : StateMachineComponent<LaunchableRocket.StatesIns
 							BuildingHP component2 = gameObject.GetComponent<BuildingHP>();
 							if (component2 != null)
 							{
-								gameObject.Trigger(-794517298, new BuildingHP.DamageSourceInfo
+								gameObject.BoxingTrigger(-794517298, new BuildingHP.DamageSourceInfo
 								{
 									damage = component2.MaxHitPoints,
 									source = BUILDINGS.DAMAGESOURCES.ROCKET,

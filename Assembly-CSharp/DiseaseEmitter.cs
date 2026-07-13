@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using Klei.AI;
 using KSerialization;
 using UnityEngine;
@@ -75,7 +76,7 @@ public class DiseaseEmitter : KMonoBehaviour
 		{
 			return;
 		}
-		Singleton<CellChangeMonitor>.Instance.RegisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChanged), "DiseaseEmitter.Modify");
+		this.cellChangedHandlerID = Singleton<CellChangeMonitor>.Instance.RegisterCellChangedHandler(base.transform, DiseaseEmitter.OnCellChangedDispatcher, "DiseaseEmitter.Modify", null);
 		for (int i = 0; i < this.simHandles.Length; i++)
 		{
 			if (this.simHandles[i] == -1)
@@ -100,7 +101,7 @@ public class DiseaseEmitter : KMonoBehaviour
 			}
 			this.simHandles[i] = -1;
 		}
-		Singleton<CellChangeMonitor>.Instance.UnregisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChanged));
+		Singleton<CellChangeMonitor>.Instance.UnregisterCellChangedHandler(ref this.cellChangedHandlerID);
 	}
 
 	private static void OnSimRegisteredCallback(int handle, object data)
@@ -155,4 +156,11 @@ public class DiseaseEmitter : KMonoBehaviour
 
 	[Serialize]
 	private bool enableEmitter;
+
+	private ulong cellChangedHandlerID;
+
+	private static Action<object> OnCellChangedDispatcher = delegate(object obj)
+	{
+		Unsafe.As<DiseaseEmitter>(obj).OnCellChanged();
+	};
 }

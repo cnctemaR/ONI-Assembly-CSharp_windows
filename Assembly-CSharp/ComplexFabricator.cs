@@ -236,7 +236,7 @@ public class ComplexFabricator : RemoteDockWorkTargetComponent, ISim200ms, ISim1
 
 	private void OnOperationalChanged(object data)
 	{
-		if ((bool)data)
+		if (((Boxed<bool>)data).value)
 		{
 			this.queueDirty = true;
 		}
@@ -1142,7 +1142,8 @@ public class ComplexFabricator : RemoteDockWorkTargetComponent, ISim200ms, ISim1
 			case ComplexRecipe.RecipeElement.TemperatureOperation.AverageTemperature:
 			case ComplexRecipe.RecipeElement.TemperatureOperation.Heated:
 			{
-				GameObject gameObject2 = GameUtil.KInstantiate(Assets.GetPrefab(recipeElement4.material), Grid.SceneLayer.Ore, null, 0);
+				GameObject prefab = Assets.GetPrefab(recipeElement4.material);
+				GameObject gameObject2 = GameUtil.KInstantiate(prefab, Grid.SceneLayer.Ore, null, 0);
 				int num6 = Grid.PosToCell(this);
 				gameObject2.transform.SetPosition(Grid.CellToPosCCC(num6, Grid.SceneLayer.Ore) + this.outputOffset);
 				PrimaryElement component3 = gameObject2.GetComponent<PrimaryElement>();
@@ -1177,20 +1178,24 @@ public class ComplexFabricator : RemoteDockWorkTargetComponent, ISim200ms, ISim1
 				{
 					this.outStorage.Store(gameObject2, false, false, true, false);
 				}
+				PopFXManager.Instance.SpawnFX(Def.GetUISprite(prefab, "ui", false).first, PopFXManager.Instance.sprite_Plus, prefab.GetProperName(), gameObject2.transform, Vector3.zero, 1.5f, true, false, false);
 				break;
 			}
 			case ComplexRecipe.RecipeElement.TemperatureOperation.Melted:
 				if (this.storeProduced || recipeElement4.storeElement)
 				{
-					float temperature = ElementLoader.GetElement(recipeElement4.material).defaultValues.temperature;
-					this.outStorage.AddLiquid(ElementLoader.GetElementID(recipeElement4.material), recipeElement4.amount, temperature, 0, 0, false, true);
+					Element element2 = ElementLoader.GetElement(recipeElement4.material);
+					float temperature = element2.defaultValues.temperature;
+					this.outStorage.AddLiquid(element2.id, recipeElement4.amount, temperature, 0, 0, false, true);
+					PopFXManager.Instance.SpawnFX(Def.GetUISprite(element2, "ui", false).first, PopFXManager.Instance.sprite_Plus, element2.name, this.outStorage.transform, Vector3.zero, 1.5f, true, false, false);
 				}
 				break;
 			case ComplexRecipe.RecipeElement.TemperatureOperation.Dehydrated:
 			{
 				for (int j = 0; j < (int)recipeElement4.amount; j++)
 				{
-					GameObject gameObject3 = GameUtil.KInstantiate(Assets.GetPrefab(recipeElement4.material), Grid.SceneLayer.Ore, null, 0);
+					GameObject prefab2 = Assets.GetPrefab(recipeElement4.material);
+					GameObject gameObject3 = GameUtil.KInstantiate(prefab2, Grid.SceneLayer.Ore, null, 0);
 					int num8 = Grid.PosToCell(this);
 					gameObject3.transform.SetPosition(Grid.CellToPosCCC(num8, Grid.SceneLayer.Ore) + this.outputOffset);
 					float num9 = recipeElement2.amount / recipeElement4.amount;
@@ -1208,6 +1213,7 @@ public class ComplexFabricator : RemoteDockWorkTargetComponent, ISim200ms, ISim1
 					{
 						this.outStorage.Store(gameObject3, false, false, true, false);
 					}
+					PopFXManager.Instance.SpawnFX(Def.GetUISprite(prefab2, "ui", false).first, PopFXManager.Instance.sprite_Plus, prefab2.GetProperName(), gameObject3.transform, Vector3.zero, 1.5f, true, false, false);
 				}
 				break;
 			}

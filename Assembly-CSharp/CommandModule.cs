@@ -235,7 +235,7 @@ public class CommandModule : StateMachineComponent<CommandModule.StatesInstance>
 					smi.GoTo(this.grounded.waitingToRelease);
 				}
 			});
-			this.grounded.waitingToRelease.ToggleStatusItem(Db.Get().BuildingStatusItems.DisembarkingDuplicant, null).OnSignal(this.gantryChanged, this.grounded.awaitingAstronaut, delegate(CommandModule.StatesInstance smi)
+			this.grounded.waitingToRelease.ToggleStatusItem(Db.Get().BuildingStatusItems.DisembarkingDuplicant, null).OnSignal(this.gantryChanged, this.grounded.awaitingAstronaut, delegate(CommandModule.StatesInstance smi, StateMachine<CommandModule.States, CommandModule.StatesInstance, CommandModule, object>.SignalParameter param)
 			{
 				if (CommandModule.HasValidGantry(smi.gameObject))
 				{

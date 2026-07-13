@@ -51,7 +51,7 @@ public class UnitConfigurationScreen
 		this.DisplayCurrentUnit();
 		if (Game.Instance != null)
 		{
-			Game.Instance.Trigger(999382396, GameUtil.TemperatureUnit.Celsius);
+			Game.Instance.BoxingTrigger<GameUtil.TemperatureUnit>(999382396, GameUtil.TemperatureUnit.Celsius);
 		}
 	}
 
@@ -62,7 +62,7 @@ public class UnitConfigurationScreen
 		this.DisplayCurrentUnit();
 		if (Game.Instance != null)
 		{
-			Game.Instance.Trigger(999382396, GameUtil.TemperatureUnit.Kelvin);
+			Game.Instance.BoxingTrigger<GameUtil.TemperatureUnit>(999382396, GameUtil.TemperatureUnit.Kelvin);
 		}
 	}
 
@@ -73,7 +73,7 @@ public class UnitConfigurationScreen
 		this.DisplayCurrentUnit();
 		if (Game.Instance != null)
 		{
-			Game.Instance.Trigger(999382396, GameUtil.TemperatureUnit.Fahrenheit);
+			Game.Instance.BoxingTrigger<GameUtil.TemperatureUnit>(999382396, GameUtil.TemperatureUnit.Fahrenheit);
 		}
 	}
 

@@ -2,7 +2,7 @@
 
 namespace UnityEngine.Pool
 {
-	public class LinkedPool<T> : IDisposable, IObjectPool<T> where T : class
+	public class LinkedPool<T> : IDisposable, IPool, IObjectPool<T> where T : class
 	{
 		public LinkedPool(Func<T> createFunc, Action<T> actionOnGet = null, Action<T> actionOnRelease = null, Action<T> actionOnDestroy = null, bool collectionCheck = true, int maxSize = 10000)
 		{
@@ -22,6 +22,7 @@ namespace UnityEngine.Pool
 			this.m_ActionOnDestroy = actionOnDestroy;
 			this.m_Limit = maxSize;
 			this.m_CollectionCheck = collectionCheck;
+			PoolManager.Register(this);
 		}
 
 		public int CountInactive { get; private set; }

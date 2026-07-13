@@ -53,10 +53,10 @@ public class MinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableIdentity
 			this.ValidateProxy();
 			this.CleanupLimboMinions();
 		}
-		PathProber component = base.GetComponent<PathProber>();
+		Navigator component = base.GetComponent<Navigator>();
 		if (component != null)
 		{
-			component.SetGroupProber(MinionGroupProber.Get());
+			component.reportOccupation = true;
 		}
 		this.SetName(this.name);
 		if (this.nameStringKey == null)
@@ -78,10 +78,10 @@ public class MinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableIdentity
 		}
 		if (!this.model.IsValid)
 		{
-			Personality personalityFromNameStringKey2 = Db.Get().Personalities.GetPersonalityFromNameStringKey(this.nameStringKey);
-			if (personalityFromNameStringKey2 != null)
+			Personality personality = Db.Get().Personalities.Get(this.personalityResourceId);
+			if (personality != null)
 			{
-				this.model = personalityFromNameStringKey2.model;
+				this.model = personality.model;
 			}
 		}
 		if (this.addToIdentityList)
@@ -164,7 +164,7 @@ public class MinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableIdentity
 
 	public string GetProperName()
 	{
-		return base.gameObject.GetProperName();
+		return this.selectable.GetProperName();
 	}
 
 	public string GetVoiceId()

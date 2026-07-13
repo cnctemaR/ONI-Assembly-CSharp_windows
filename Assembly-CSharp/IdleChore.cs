@@ -12,20 +12,17 @@ public class IdleChore : Chore<IdleChore.StatesInstance>
 
 	public class StatesInstance : GameStateMachine<IdleChore.States, IdleChore.StatesInstance, IdleChore, object>.GameInstance
 	{
+		public Navigator navigator { get; private set; }
+
+		public KBatchedAnimController animController { get; private set; }
+
 		public StatesInstance(IdleChore master, GameObject idler)
 			: base(master)
 		{
 			base.sm.idler.Set(idler, base.smi, false);
+			this.navigator = base.GetComponent<Navigator>();
+			this.animController = base.GetComponent<KBatchedAnimController>();
 			this.idleCellSensor = base.GetComponent<Sensors>().GetSensor<IdleCellSensor>();
-		}
-
-		public void UpdateNavType()
-		{
-			NavType currentNavType = base.GetComponent<Navigator>().CurrentNavType;
-			base.sm.isOnLadder.Set(currentNavType == NavType.Ladder || currentNavType == NavType.Pole, this, false);
-			base.sm.isOnTube.Set(currentNavType == NavType.Tube, this, false);
-			int num = Grid.PosToCell(base.smi);
-			base.sm.isOnSuitMarkerCell.Set(Grid.IsValidCell(num) && Grid.HasSuitMarker[num], this, false);
 		}
 
 		public int GetIdleCell()
@@ -49,15 +46,16 @@ public class IdleChore : Chore<IdleChore.StatesInstance>
 			base.Target(this.idler);
 			this.idle.DefaultState(this.idle.onfloor).Enter("UpdateNavType", delegate(IdleChore.StatesInstance smi)
 			{
-				smi.UpdateNavType();
+				IdleChore.States.UpdateNavType(smi);
 			}).Update("UpdateNavType", delegate(IdleChore.StatesInstance smi, float dt)
 			{
-				smi.UpdateNavType();
+				IdleChore.States.UpdateNavType(smi);
 			}, UpdateRate.SIM_200ms, false)
 				.ToggleStateMachine((IdleChore.StatesInstance smi) => new TaskAvailabilityMonitor.Instance(smi.master))
 				.ToggleTag(GameTags.Idle);
 			this.idle.onfloor.PlayAnim("idle_default", KAnim.PlayMode.Loop).ParamTransition<bool>(this.isOnLadder, this.idle.onladder, GameStateMachine<IdleChore.States, IdleChore.StatesInstance, IdleChore, object>.IsTrue).ParamTransition<bool>(this.isOnTube, this.idle.ontube, GameStateMachine<IdleChore.States, IdleChore.StatesInstance, IdleChore, object>.IsTrue)
 				.ParamTransition<bool>(this.isOnSuitMarkerCell, this.idle.onsuitmarker, GameStateMachine<IdleChore.States, IdleChore.StatesInstance, IdleChore, object>.IsTrue)
+				.ParamTransition<bool>(this.isHovering, this.idle.hovering, GameStateMachine<IdleChore.States, IdleChore.StatesInstance, IdleChore, object>.IsTrue)
 				.ToggleScheduleCallback("IdleMove", (IdleChore.StatesInstance smi) => (float)global::UnityEngine.Random.Range(5, 15), delegate(IdleChore.StatesInstance smi)
 				{
 					smi.GoTo(this.idle.move);
@@ -73,16 +71,22 @@ public class IdleChore : Chore<IdleChore.StatesInstance>
 					smi.GoTo(this.idle.move);
 				}
 			}, UpdateRate.SIM_1000ms, false);
+			this.idle.hovering.PlayAnim("hover_idle", KAnim.PlayMode.Loop).Update("IdleMove", delegate(IdleChore.StatesInstance smi, float dt)
+			{
+				if (smi.HasIdleCell())
+				{
+					smi.GoTo(this.idle.move);
+				}
+			}, UpdateRate.SIM_1000ms, false);
 			this.idle.onsuitmarker.PlayAnim("idle_default", KAnim.PlayMode.Loop).Enter(delegate(IdleChore.StatesInstance smi)
 			{
-				Navigator component = smi.GetComponent<Navigator>();
-				int num = Grid.PosToCell(component);
+				int num = Grid.PosToCell(smi);
 				Grid.SuitMarker.Flags flags;
 				PathFinder.PotentialPath.Flags flags2;
 				Grid.TryGetSuitMarkerFlags(num, out flags, out flags2);
 				IdleSuitMarkerCellQuery idleSuitMarkerCellQuery = new IdleSuitMarkerCellQuery((flags & Grid.SuitMarker.Flags.Rotated) > (Grid.SuitMarker.Flags)0, Grid.CellToXY(num).X);
-				component.RunQuery(idleSuitMarkerCellQuery);
-				component.GoTo(idleSuitMarkerCellQuery.GetResultCell(), null);
+				smi.navigator.RunQuery(idleSuitMarkerCellQuery);
+				smi.navigator.GoTo(idleSuitMarkerCellQuery.GetResultCell(), null);
 			}).EventTransition(GameHashes.DestinationReached, this.idle, null)
 				.ToggleScheduleCallback("IdleMove", (IdleChore.StatesInstance smi) => (float)global::UnityEngine.Random.Range(5, 15), delegate(IdleChore.StatesInstance smi)
 				{
@@ -93,12 +97,22 @@ public class IdleChore : Chore<IdleChore.StatesInstance>
 				.MoveTo((IdleChore.StatesInstance smi) => smi.GetIdleCell(), this.idle, this.idle, false)
 				.Exit("UpdateNavType", delegate(IdleChore.StatesInstance smi)
 				{
-					smi.UpdateNavType();
+					IdleChore.States.UpdateNavType(smi);
 				})
 				.Exit("ClearWalk", delegate(IdleChore.StatesInstance smi)
 				{
-					smi.GetComponent<KBatchedAnimController>().Play("idle_default", KAnim.PlayMode.Once, 1f, 0f);
+					smi.animController.Play("idle_default", KAnim.PlayMode.Once, 1f, 0f);
 				});
+		}
+
+		public static void UpdateNavType(IdleChore.StatesInstance smi)
+		{
+			NavType currentNavType = smi.navigator.CurrentNavType;
+			smi.sm.isOnLadder.Set(currentNavType == NavType.Ladder || currentNavType == NavType.Pole, smi, false);
+			smi.sm.isOnTube.Set(currentNavType == NavType.Tube, smi, false);
+			smi.sm.isHovering.Set(currentNavType == NavType.Hover, smi, false);
+			int num = Grid.PosToCell(smi);
+			smi.sm.isOnSuitMarkerCell.Set(Grid.IsValidCell(num) && Grid.HasSuitMarker[num], smi, false);
 		}
 
 		public StateMachine<IdleChore.States, IdleChore.StatesInstance, IdleChore, object>.BoolParameter isOnLadder;
@@ -106,6 +120,8 @@ public class IdleChore : Chore<IdleChore.StatesInstance>
 		public StateMachine<IdleChore.States, IdleChore.StatesInstance, IdleChore, object>.BoolParameter isOnTube;
 
 		public StateMachine<IdleChore.States, IdleChore.StatesInstance, IdleChore, object>.BoolParameter isOnSuitMarkerCell;
+
+		public StateMachine<IdleChore.States, IdleChore.StatesInstance, IdleChore, object>.BoolParameter isHovering;
 
 		public StateMachine<IdleChore.States, IdleChore.StatesInstance, IdleChore, object>.TargetParameter idler;
 
@@ -120,6 +136,8 @@ public class IdleChore : Chore<IdleChore.StatesInstance>
 			public GameStateMachine<IdleChore.States, IdleChore.StatesInstance, IdleChore, object>.State ontube;
 
 			public GameStateMachine<IdleChore.States, IdleChore.StatesInstance, IdleChore, object>.State onsuitmarker;
+
+			public GameStateMachine<IdleChore.States, IdleChore.StatesInstance, IdleChore, object>.State hovering;
 
 			public GameStateMachine<IdleChore.States, IdleChore.StatesInstance, IdleChore, object>.State move;
 		}

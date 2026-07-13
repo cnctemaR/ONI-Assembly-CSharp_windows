@@ -75,6 +75,8 @@ namespace UnityEngine
 
 		public static SortingLayer.LayerCallback onLayerRemoved;
 
+		internal static Action onLayerChanged;
+
 		public delegate void LayerCallback(SortingLayer layer);
 	}
 }

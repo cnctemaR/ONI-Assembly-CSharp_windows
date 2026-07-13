@@ -287,6 +287,14 @@ namespace UnityEngine.UIElements
 			}
 		}
 
+		private protected override bool canSwitchToMixedValue
+		{
+			get
+			{
+				return !this.textInputBase.textElement.hasFocus || (this.textInputBase.textElement.hasFocus && this.focusController != null && this.focusController.IsPendingFocus(this));
+			}
+		}
+
 		protected abstract string ValueToString(TValueType value);
 
 		protected abstract TValueType StringToValue(string str);
@@ -310,6 +318,7 @@ namespace UnityEngine.UIElements
 			this.m_TextInputBase.maxLength = maxLength;
 			this.m_TextInputBase.maskChar = maskChar;
 			base.RegisterCallback<CustomStyleResolvedEvent>(new EventCallback<CustomStyleResolvedEvent>(this.OnFieldCustomStyleResolved), TrickleDown.NoTrickleDown);
+			this.m_UpdateTextFromValue = true;
 		}
 
 		private void OnFieldCustomStyleResolved(CustomStyleResolvedEvent e)
@@ -387,7 +396,11 @@ namespace UnityEngine.UIElements
 			bool showMixedValue = base.showMixedValue;
 			if (showMixedValue)
 			{
-				((INotifyValueChanged<string>)this.textInputBase.textElement).SetValueWithoutNotify(BaseField<TValueType>.mixedValueString);
+				bool updateTextFromValue = this.m_UpdateTextFromValue;
+				if (updateTextFromValue)
+				{
+					((INotifyValueChanged<string>)this.textInputBase.textElement).SetValueWithoutNotify(BaseField<TValueType>.mixedValueString);
+				}
 				base.AddToClassList(BaseField<TValueType>.mixedValueLabelUssClassName);
 				VisualElement visualInput = base.visualInput;
 				if (visualInput != null)
@@ -423,6 +436,8 @@ namespace UnityEngine.UIElements
 		private int m_VisualInputTabIndex;
 
 		private TextInputBaseField<TValueType>.TextInputBase m_TextInputBase;
+
+		internal bool m_UpdateTextFromValue;
 
 		internal const int kMaxLengthNone = -1;
 

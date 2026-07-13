@@ -48,7 +48,7 @@ public class AsPercentAmountDisplayer : IAmountDisplayer
 	public virtual string GetTooltip(Amount master, AmountInstance instance)
 	{
 		StringBuilder stringBuilder = GlobalStringBuilderPool.Alloc();
-		stringBuilder.AppendFormat(master.description, this.formatter.GetFormattedValue(instance.value, GameUtil.TimeSlice.None));
+		stringBuilder.Append(this.GetTooltipDescription(master, instance));
 		stringBuilder.Append("\n\n");
 		if (this.formatter.DeltaTimeSlice == GameUtil.TimeSlice.PerCycle)
 		{

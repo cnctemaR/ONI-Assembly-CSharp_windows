@@ -9,8 +9,8 @@ using UnityEngine.Scripting;
 namespace UnityEngine
 {
 	[RequiredByNativeCode]
-	[NativeHeader("Runtime/Misc/ObjectDispatcher.h")]
 	[StaticAccessor("GetObjectDispatcher()", StaticAccessorType.Dot)]
+	[NativeHeader("Runtime/Misc/ObjectDispatcher.h")]
 	internal sealed class ObjectDispatcher : IDisposable
 	{
 		public bool valid

@@ -27,7 +27,8 @@ public class SeedProducer : KMonoBehaviour, IGameObjectEffectDescriptor
 		if (seedId != null && units > 0)
 		{
 			Vector3 vector = base.gameObject.transform.GetPosition() + new Vector3(0f, 0.5f, 0f);
-			GameObject gameObject = GameUtil.KInstantiate(Assets.GetPrefab(new Tag(seedId)), vector, Grid.SceneLayer.Ore, null, 0);
+			GameObject prefab = Assets.GetPrefab(new Tag(seedId));
+			GameObject gameObject = GameUtil.KInstantiate(prefab, vector, Grid.SceneLayer.Ore, null, 0);
 			MutantPlant component = base.GetComponent<MutantPlant>();
 			if (component != null)
 			{
@@ -57,7 +58,7 @@ public class SeedProducer : KMonoBehaviour, IGameObjectEffectDescriptor
 			{
 				text = component.GetSubSpeciesInfo().GetNameWithMutations(text, component.IsIdentified, false);
 			}
-			PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Plus, text, gameObject.transform, 1.5f, false);
+			PopFXManager.Instance.SpawnFX(Def.GetUISprite(prefab, "ui", false).first, PopFXManager.Instance.sprite_Plus, text, gameObject.transform, Vector3.zero, 1.5f, true, false, false);
 			return gameObject;
 		}
 		return null;

@@ -27,7 +27,7 @@ public class RoboPilotModule : KMonoBehaviour
 		this.RequestDataBanksForDestination(null);
 	}
 
-	private void RequestDataBanksForDestination(object data = null)
+	private void RequestDataBanksForDestination(object _ = null)
 	{
 		int num = -1;
 		RocketModuleCluster component = base.GetComponent<RocketModuleCluster>();
@@ -161,6 +161,19 @@ public class RoboPilotModule : KMonoBehaviour
 			return this.databankStorage.UnitsStored() / (float)this.dataBankConsumption * RoboPilotCommandModuleConfig.DATABANKRANGE;
 		}
 		return this.databankStorage.UnitsStored() / (float)this.dataBankConsumption * 600f;
+	}
+
+	public float GetMaxDataBankRange()
+	{
+		if (this.databankStorage == null)
+		{
+			return 0f;
+		}
+		if (this.consumeDataBanksOnLand)
+		{
+			return this.databankStorage.Capacity() / (float)this.dataBankConsumption * RoboPilotCommandModuleConfig.DATABANKRANGE;
+		}
+		return this.databankStorage.Capacity() / (float)this.dataBankConsumption * 600f;
 	}
 
 	private MeterController meter;

@@ -1,0 +1,37 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <ProjectGuid>{FB7F35FD-6256-4B33-A899-A0A5341DD181}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>System.Runtime</RootNamespace>
+    <AssemblyName>System.Runtime</AssemblyName>
+    <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
+    <FileAlignment>512</FileAlignment>
+    <TargetFramework>net40</TargetFramework>
+  </PropertyGroup>
+  <PropertyGroup>
+    <EnableDefaultItems>False</EnableDefaultItems>
+  </PropertyGroup>
+  <PropertyGroup />
+  <ItemGroup>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\mscorlib\mscorlib.csproj">
+      <Project>{FB7F35FD-6256-4B33-A899-A0A5341DD171}</Project>
+      <Name>mscorlib</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\System.ComponentModel.Composition\System.ComponentModel.Composition.csproj">
+      <Project>{FB7F35FD-6256-4B33-A899-A0A5341DD174}</Project>
+      <Name>System.ComponentModel.Composition</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\System.Core\System.Core.csproj">
+      <Project>{FB7F35FD-6256-4B33-A899-A0A5341DD176}</Project>
+      <Name>System.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\System\System.csproj">
+      <Project>{FB7F35FD-6256-4B33-A899-A0A5341DD179}</Project>
+      <Name>System</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup />
+</Project>

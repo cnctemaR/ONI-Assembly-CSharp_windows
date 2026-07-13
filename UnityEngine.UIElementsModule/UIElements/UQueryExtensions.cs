@@ -16,19 +16,24 @@ namespace UnityEngine.UIElements
 
 		public static T Q<T>(this VisualElement e, string name = null, string className = null) where T : VisualElement
 		{
-			bool flag = typeof(T) == typeof(VisualElement);
-			T t;
+			bool flag = e == null;
 			if (flag)
+			{
+				throw new ArgumentNullException("e");
+			}
+			bool flag2 = typeof(T) == typeof(VisualElement);
+			T t;
+			if (flag2)
 			{
 				t = e.Q(name, className) as T;
 			}
 			else
 			{
-				bool flag2 = name == null;
-				if (flag2)
+				bool flag3 = name == null;
+				if (flag3)
 				{
-					bool flag3 = className == null;
-					if (flag3)
+					bool flag4 = className == null;
+					if (flag4)
 					{
 						UQueryState<VisualElement> uqueryState = UQueryExtensions.SingleElementTypeQuery.RebuildOn(e);
 						uqueryState.m_Matchers[0].complexSelector.selectors[0].parts[0] = StyleSelectorPart.CreatePredicate(UQuery.IsOfType<T>.s_Instance);
@@ -44,8 +49,8 @@ namespace UnityEngine.UIElements
 				}
 				else
 				{
-					bool flag4 = className == null;
-					if (flag4)
+					bool flag5 = className == null;
+					if (flag5)
 					{
 						UQueryState<VisualElement> uqueryState = UQueryExtensions.SingleElementTypeAndNameQuery.RebuildOn(e);
 						uqueryState.m_Matchers[0].complexSelector.selectors[0].parts[0] = StyleSelectorPart.CreatePredicate(UQuery.IsOfType<T>.s_Instance);

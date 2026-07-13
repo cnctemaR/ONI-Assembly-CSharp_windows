@@ -33,7 +33,7 @@ public class PropGravitasSmallSeedLockerConfig : IEntityConfig
 		def.SideScreen_CancelCloseButtonTooltip = UI.USERMENUACTIONS.CLOSESTORAGE.TOOLTIP_OFF;
 		def.ObjectsToSpawn = new string[] { "EvilFlowerSeed", "EvilFlowerSeed" };
 		def.LootSymbols = new string[] { "seed1", "seed2" };
-		LoreBearerUtil.AddLoreTo(gameObject, LoreBearerUtil.UnlockSpecificEntry("story_trait_morbrover_locker", CODEX.STORY_TRAITS.MORB_ROVER_MAKER.POPUPS.LOCKER.DESCRIPTION));
+		LoreBearerUtil.AddLoreTo(gameObject, LoreBearerUtil.UnlockSpecificEntry("story_trait_morbrover_locker", CODEX.STORY_TRAITS.MORB_ROVER_MAKER.POPUPS.LOCKER.DESCRIPTION, false));
 		gameObject.AddOrGet<OccupyArea>().objectLayers = new ObjectLayer[] { ObjectLayer.Building };
 		gameObject.AddOrGet<Demolishable>();
 		SymbolOverrideControllerUtil.AddToPrefab(gameObject);

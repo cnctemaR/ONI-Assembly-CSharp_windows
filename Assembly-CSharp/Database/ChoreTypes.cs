@@ -7,10 +7,12 @@ namespace Database
 	{
 		public ChoreType GetByHash(HashedString id_hash)
 		{
-			int num = this.resources.FindIndex((ChoreType item) => item.IdHash == id_hash);
-			if (num != -1)
+			for (int i = 0; i < this.resources.Count; i++)
 			{
-				return this.resources[num];
+				if (this.resources[i].IdHash == id_hash)
+				{
+					return this.resources[i];
+				}
 			}
 			return null;
 		}

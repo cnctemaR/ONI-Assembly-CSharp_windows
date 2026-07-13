@@ -97,6 +97,7 @@ public class Equipment : Assignables
 		}
 		equippable.transform.parent = slot.gameObject.transform;
 		equippable.transform.SetLocalPosition(Vector3.zero);
+		equippable.GetComponent<Pickupable>().UpdateCachedCell(Grid.PosToCell(equippable));
 		this.SetEquippableStoredModifiers(equippable, true);
 		equippable.OnEquip(slot);
 		if (this.refreshHandle.TimeRemaining > 0f)
@@ -229,7 +230,9 @@ public class Equipment : Assignables
 
 	public bool IsEquipped(Equippable equippable)
 	{
-		return equippable.assignee is Equipment && (Equipment)equippable.assignee == this && equippable.isEquipped;
+		Ownables ownables = ((equippable.assignee != null) ? equippable.assignee.GetSoleOwner() : null);
+		Equipment equipment = ((ownables != null) ? ownables.GetComponent<Equipment>() : null);
+		return equipment != null && equipment == this && equippable.isEquipped;
 	}
 
 	public bool IsSlotOccupied(AssignableSlot slot)

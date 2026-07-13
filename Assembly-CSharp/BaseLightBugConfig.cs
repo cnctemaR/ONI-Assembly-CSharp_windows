@@ -6,14 +6,14 @@ using UnityEngine;
 
 public static class BaseLightBugConfig
 {
-	public static GameObject BaseLightBug(string id, string name, string desc, string anim_file, string traitId, Color lightColor, EffectorValues decor, bool is_baby, string symbolOverridePrefix = null)
+	public static GameObject BaseLightBug(string id, string name, string desc, string anim_file, string traitId, Color lightColor, EffectorValues decor, bool is_baby, string symbolOverridePrefix = null, string onDeathDropID = "", float onDeathDropCount = 0f)
 	{
 		GameObject gameObject = EntityTemplates.CreatePlacedEntity(id, name, desc, 5f, Assets.GetAnim(anim_file), "idle_loop", Grid.SceneLayer.Creatures, 1, 1, decor, default(EffectorValues), SimHashes.Creature, null, 293f);
-		EntityTemplates.ExtendEntityToBasicCreature(gameObject, FactionManager.FactionID.Prey, traitId, "FlyerNavGrid1x1", NavType.Hover, 32, 2f, "Meat", 0f, true, true, 283.15f, 313.15f, 173.15f, 373.15f);
-		if (symbolOverridePrefix != null)
+		EntityTemplates.ExtendEntityToBasicCreature(false, gameObject, anim_file, is_baby ? null : "lightbug_build_kanim", symbolOverridePrefix, FactionManager.FactionID.Prey, traitId, "FlyerNavGrid1x1", NavType.Hover, 32, 2f, onDeathDropID, onDeathDropCount, true, true, 283.15f, 313.15f, 173.15f, 373.15f);
+		EggConfig.CUSTOM_EGG_OUTPUTS.Add(id + "Baby", new List<global::Tuple<Tag, float>>
 		{
-			gameObject.AddOrGet<SymbolOverrideController>().ApplySymbolOverridesByAffix(Assets.GetAnim(anim_file), symbolOverridePrefix, null, 0);
-		}
+			new global::Tuple<Tag, float>(SimHashes.NaturalResin.CreateTag(), 5f)
+		});
 		Pickupable pickupable = gameObject.AddOrGet<Pickupable>();
 		int num = CREATURES.SORTING.CRITTER_ORDER["LightBug"];
 		pickupable.sortOrder = num;
@@ -46,12 +46,6 @@ public static class BaseLightBugConfig
 			{
 				inst.GetComponent<RadiationEmitter>().SetEmitting(true);
 			};
-		}
-		if (is_baby)
-		{
-			KBatchedAnimController component2 = gameObject.GetComponent<KBatchedAnimController>();
-			component2.animWidth = 0.5f;
-			component2.animHeight = 0.5f;
 		}
 		if (lightColor != Color.black)
 		{
@@ -91,6 +85,7 @@ public static class BaseLightBugConfig
 			{
 				working_anim = "cc_working_shinebug"
 			}, !is_baby, -1)
+			.Add(new CritterEmoteStates.Def(Assets.GetAnim("lightbug_emotes_kanim")), !is_baby, -1)
 			.PopInterruptGroup()
 			.Add(new IdleStates.Def(), true, -1);
 		EntityTemplates.AddCreatureBrain(gameObject, builder, GameTags.Creatures.Species.LightBugSpecies, symbolOverridePrefix);

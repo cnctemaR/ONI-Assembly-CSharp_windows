@@ -72,6 +72,7 @@ public class Db : EntityModifierSet
 		this.Expressions = new Expressions(this.Root);
 		this.Emotes = new Emotes(this.Root);
 		this.Thoughts = new Thoughts(this.Root);
+		this.CritterEmotions = new CritterEmotions(this.Root);
 		this.Dreams = new Dreams(this.Root);
 		this.Deaths = new Deaths(this.Root);
 		this.StatusItemCategories = new StatusItemCategories(this.Root);
@@ -200,6 +201,8 @@ public class Db : EntityModifierSet
 	public Emotes Emotes;
 
 	public Thoughts Thoughts;
+
+	public CritterEmotions CritterEmotions;
 
 	public Dreams Dreams;
 

@@ -245,7 +245,7 @@ public class DebugHandler : IInputHandler
 			{
 				if (!(DiscoveredResources.Instance != null))
 				{
-					goto IL_0CE3;
+					goto IL_0CF4;
 				}
 				using (List<Element>.Enumerator enumerator = ElementLoader.elements.GetEnumerator())
 				{
@@ -254,7 +254,7 @@ public class DebugHandler : IInputHandler
 						Element element = enumerator.Current;
 						DiscoveredResources.Instance.Discover(element.tag, element.GetMaterialCategoryTag());
 					}
-					goto IL_0CE3;
+					goto IL_0CF4;
 				}
 			}
 			if (e.TryConsume(global::Action.DebugToggleUI))
@@ -360,7 +360,7 @@ public class DebugHandler : IInputHandler
 								smi2.GoToCursor();
 							}
 						}
-						goto IL_0CE3;
+						goto IL_0CF4;
 					}
 				}
 				if (e.TryConsume(global::Action.DebugTeleport))
@@ -386,7 +386,7 @@ public class DebugHandler : IInputHandler
 						selected.transform.SetPosition(Grid.CellToPosCBC(mouseCell, Grid.SceneLayer.Move));
 					}
 				}
-				else if (!e.TryConsume(global::Action.DebugPlace) && (!e.TryConsume(global::Action.DebugSelectMaterial) || !(Camera.main != null)))
+				else if (!e.TryConsume(global::Action.DebugQuickDevActions) && !e.TryConsume(global::Action.DebugPlace) && (!e.TryConsume(global::Action.DebugSelectMaterial) || !(Camera.main != null)))
 				{
 					if (e.TryConsume(global::Action.DebugNotification) && GenericGameSettings.instance != null && Tutorial.Instance != null)
 					{
@@ -534,7 +534,7 @@ public class DebugHandler : IInputHandler
 				}
 			}
 		}
-		IL_0CE3:
+		IL_0CF4:
 		if (e.Consumed && Game.Instance != null)
 		{
 			Game.Instance.debugWasUsed = true;

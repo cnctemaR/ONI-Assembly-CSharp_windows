@@ -5,7 +5,7 @@ using STRINGS;
 using TUNING;
 using UnityEngine;
 
-[EntityConfigOrder(1)]
+[EntityConfigOrder(2)]
 public class HatchHardConfig : IEntityConfig
 {
 	public static GameObject CreateHatch(string id, string name, string desc, string anim_file, bool is_baby)

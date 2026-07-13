@@ -44,6 +44,10 @@ public class ExternalTemperatureMonitor : GameStateMachine<ExternalTemperatureMo
 
 	private const float BODY_TEMPERATURE_AFFECT_EXTERNAL_FEEL_THRESHOLD = 0.5f;
 
+	public const string CHILLY_SURROUNDINGS_EFFECT_NAME = "ColdAir";
+
+	public const string TOASTY_SURROUNDINGS_EFFECT_NAME = "WarmAir";
+
 	public static readonly float BASE_STRESS_TOLERANCE_COLD = DUPLICANTSTATS.STANDARD.BaseStats.DUPLICANT_WARMING_KILOWATTS * 0.2f;
 
 	public static readonly float BASE_STRESS_TOLERANCE_WARM = DUPLICANTSTATS.STANDARD.BaseStats.DUPLICANT_COOLING_KILOWATTS * 0.2f;

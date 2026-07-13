@@ -31,32 +31,31 @@ public class UIPool<T> where T : MonoBehaviour
 	public UIPool(T prefab)
 	{
 		this.prefab = prefab;
-		this.freeElements = new List<T>();
+		this.freeElements = new Stack<T>();
 		this.activeElements = new List<T>();
 	}
 
 	public T GetFreeElement(GameObject instantiateParent = null, bool forceActive = false)
 	{
+		T t;
 		if (this.freeElements.Count == 0)
 		{
-			this.activeElements.Add(Util.KInstantiateUI<T>(this.prefab.gameObject, instantiateParent, false));
+			t = Util.KInstantiateUI<T>(this.prefab.gameObject, instantiateParent, false);
 		}
 		else
 		{
-			T t = this.freeElements[0];
-			this.activeElements.Add(t);
+			t = this.freeElements.Pop();
 			if (t.transform.parent != instantiateParent)
 			{
-				t.transform.SetParent(instantiateParent.transform);
+				t.transform.SetParent((instantiateParent != null) ? instantiateParent.transform : null);
 			}
-			this.freeElements.RemoveAt(0);
 		}
-		T t2 = this.activeElements[this.activeElements.Count - 1];
-		if (t2.gameObject.activeInHierarchy != forceActive)
+		if (t.gameObject.activeInHierarchy != forceActive)
 		{
-			t2.gameObject.SetActive(forceActive);
+			t.gameObject.SetActive(forceActive);
 		}
-		return t2;
+		this.activeElements.Add(t);
+		return t;
 	}
 
 	public void ClearElement(T element)
@@ -68,25 +67,26 @@ public class UIPool<T> where T : MonoBehaviour
 		}
 		if (this.disabledElementParent != null)
 		{
-			element.gameObject.transform.SetParent(this.disabledElementParent);
+			element.transform.SetParent(this.disabledElementParent);
 		}
 		element.gameObject.SetActive(false);
-		this.freeElements.Add(element);
+		this.freeElements.Push(element);
 		this.activeElements.Remove(element);
 	}
 
 	public void ClearAll()
 	{
-		while (this.activeElements.Count > 0)
+		for (int i = this.activeElements.Count - 1; i >= 0; i--)
 		{
+			T t = this.activeElements[i];
+			t.gameObject.SetActive(false);
 			if (this.disabledElementParent != null)
 			{
-				this.activeElements[0].gameObject.transform.SetParent(this.disabledElementParent);
+				t.transform.SetParent(this.disabledElementParent);
 			}
-			this.activeElements[0].gameObject.SetActive(false);
-			this.freeElements.Add(this.activeElements[0]);
-			this.activeElements.RemoveAt(0);
+			this.freeElements.Push(t);
 		}
+		this.activeElements.Clear();
 	}
 
 	public void DestroyAll()
@@ -97,37 +97,43 @@ public class UIPool<T> where T : MonoBehaviour
 
 	public void DestroyAllActive()
 	{
-		this.activeElements.ForEach(delegate(T ae)
+		foreach (T t in this.activeElements)
 		{
-			global::UnityEngine.Object.Destroy(ae.gameObject);
-		});
+			global::UnityEngine.Object.Destroy(t.gameObject);
+		}
 		this.activeElements.Clear();
 	}
 
 	public void DestroyAllFree()
 	{
-		this.freeElements.ForEach(delegate(T ae)
+		foreach (T t in this.freeElements)
 		{
-			global::UnityEngine.Object.Destroy(ae.gameObject);
-		});
+			global::UnityEngine.Object.Destroy(t.gameObject);
+		}
 		this.freeElements.Clear();
 	}
 
 	public void ForEachActiveElement(Action<T> predicate)
 	{
-		this.activeElements.ForEach(predicate);
+		for (int i = 0; i < this.activeElements.Count; i++)
+		{
+			predicate(this.activeElements[i]);
+		}
 	}
 
 	public void ForEachFreeElement(Action<T> predicate)
 	{
-		this.freeElements.ForEach(predicate);
+		foreach (T t in this.freeElements)
+		{
+			predicate(t);
+		}
 	}
 
 	private T prefab;
 
-	private List<T> freeElements = new List<T>();
+	private Stack<T> freeElements;
 
-	private List<T> activeElements = new List<T>();
+	private List<T> activeElements;
 
 	public Transform disabledElementParent;
 }

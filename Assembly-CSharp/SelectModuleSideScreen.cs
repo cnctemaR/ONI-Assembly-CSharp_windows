@@ -541,8 +541,9 @@ public class SelectModuleSideScreen : KScreen
 
 	public static List<string> moduleButtonSortOrder = new List<string>
 	{
-		"CO2Engine", "SugarEngine", "SteamEngineCluster", "KeroseneEngineClusterSmall", "KeroseneEngineCluster", "HEPEngine", "HydrogenEngineCluster", "HabitatModuleSmall", "HabitatModuleMedium", "RoboPilotModule",
-		"NoseconeBasic", "NoseconeHarvest", "OrbitalCargoModule", "ScoutModule", "PioneerModule", "LiquidFuelTankCluster", "SmallOxidizerTank", "OxidizerTankCluster", "OxidizerTankLiquidCluster", "SolidCargoBaySmall",
-		"LiquidCargoBaySmall", "GasCargoBaySmall", "CargoBayCluster", "LiquidCargoBayCluster", "GasCargoBayCluster", "SpecialCargoBayCluster", "BatteryModule", "SolarPanelModule", "ArtifactCargoBay", "ScannerModule"
+		"CO2Engine", "SugarEngine", "SteamEngineCluster", "KeroseneEngineClusterSmall", "KeroseneEngineCluster", "BiodieselEngineCluster", "HEPEngine", "HydrogenEngineCluster", "HabitatModuleSmall", "HabitatModuleMedium",
+		"RoboPilotModule", "NoseconeBasic", "NoseconeHarvest", "OrbitalCargoModule", "ScoutModule", "PioneerModule", "LiquidFuelTankCluster", "SmallOxidizerTank", "OxidizerTankCluster", "OxidizerTankLiquidCluster",
+		"SolidCargoBaySmall", "LiquidCargoBaySmall", "GasCargoBaySmall", "CargoBayCluster", "LiquidCargoBayCluster", "GasCargoBayCluster", "ResearchClusterModule", "SpecialCargoBayCluster", "BatteryModule", "SolarPanelModule",
+		"ArtifactCargoBay", "ScannerModule"
 	};
 }

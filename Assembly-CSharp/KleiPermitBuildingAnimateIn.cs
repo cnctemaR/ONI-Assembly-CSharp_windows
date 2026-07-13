@@ -28,12 +28,12 @@ public class KleiPermitBuildingAnimateIn : MonoBehaviour
 		global::UnityEngine.Object.Destroy(base.gameObject);
 	}
 
-	public static KleiPermitBuildingAnimateIn MakeFor(KBatchedAnimController sourceAnimController, Updater extraUpdater = default(Updater))
+	public static KleiPermitBuildingAnimateIn MakeFor(KBatchedAnimController sourceAnimController, Updater extraUpdater = default(Updater), string place_anim = "place")
 	{
 		sourceAnimController.gameObject.SetActive(false);
 		KBatchedAnimController kbatchedAnimController = global::UnityEngine.Object.Instantiate<KBatchedAnimController>(sourceAnimController, sourceAnimController.transform.parent, false);
 		kbatchedAnimController.gameObject.name = "KleiPermitBuildingAnimateIn.placeAnimController";
-		kbatchedAnimController.initialAnim = "place";
+		kbatchedAnimController.initialAnim = place_anim;
 		KBatchedAnimController kbatchedAnimController2 = global::UnityEngine.Object.Instantiate<KBatchedAnimController>(sourceAnimController, sourceAnimController.transform.parent, false);
 		kbatchedAnimController2.gameObject.name = "KleiPermitBuildingAnimateIn.colorAnimController";
 		KAnimFileData data = sourceAnimController.AnimFiles[0].GetData();

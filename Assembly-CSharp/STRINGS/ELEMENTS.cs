@@ -555,7 +555,16 @@ namespace STRINGS
 		{
 			public static LocString NAME = UI.FormatAsLink("Biodiesel", "REFINEDLIPID");
 
-			public static LocString DESC = "Biodiesel is a a " + UI.FormatAsLink("Liquid", "ELEMENTS_LIQUID") + " composed of highly processed fatty acids derived from purified natural oils.";
+			public static LocString DESC = string.Concat(new string[]
+			{
+				"Biodiesel is a ",
+				UI.FormatAsLink("Liquid", "ELEMENTS_LIQUID"),
+				" composed of highly processed fatty acids derived from purified natural oils.\n\nIts ",
+				UI.FormatAsLink("combustibility", "COMBUSTIBLELIQUID"),
+				" makes it useful for ",
+				UI.FormatAsLink("Power", "POWER"),
+				" production."
+			});
 		}
 
 		public class FROZENPHYTOOIL
@@ -1220,6 +1229,20 @@ namespace STRINGS
 				".\n\nIts insulation properties and positive ",
 				UI.FormatAsLink("Decor", "DECOR"),
 				" also make it a useful <b>Construction Material</b>."
+			});
+		}
+
+		public class FABRICATEDWOOD
+		{
+			public static LocString NAME = UI.FormatAsLink("Plywood", "FABRICATEDWOOD");
+
+			public static LocString DESC = string.Concat(new string[]
+			{
+				"Plywood is a good source of ",
+				UI.FormatAsLink("Heat", "HEAT"),
+				" and ",
+				UI.FormatAsLink("Power", "POWER"),
+				".\n\nIts insulation properties make it a useful <b>Construction Material</b>."
 			});
 		}
 

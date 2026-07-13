@@ -38,6 +38,11 @@ public class MissileLongRangeProjectile : GameStateMachine<MissileLongRangeProje
 
 	public class Def : StateMachine.BaseDef
 	{
+		public string starmapOverrideSymbol = "payload";
+
+		public string missileName = "STRINGS.ITEMS.MISSILE_LONGRANGE.NAME";
+
+		public string missileDesc = "STRINGS.ITEMS.MISSILE_LONGRANGE.DESC";
 	}
 
 	public class StatesInstance : GameStateMachine<MissileLongRangeProjectile, MissileLongRangeProjectile.StatesInstance, IStateMachineTarget, MissileLongRangeProjectile.Def>.GameInstance
@@ -138,7 +143,7 @@ public class MissileLongRangeProjectile : GameStateMachine<MissileLongRangeProje
 				{
 					GameObject gameObject2 = GameUtil.KInstantiate(Assets.GetPrefab("ClusterMapLongRangeMissile"), Grid.SceneLayer.NoLayer, null, 0);
 					gameObject2.SetActive(true);
-					gameObject2.GetSMI<ClusterMapLongRangeMissile.StatesInstance>().Setup(this.myLocation, component);
+					gameObject2.GetSMI<ClusterMapLongRangeMissile.StatesInstance>().Setup(this.myLocation, component, base.def);
 				}
 				else
 				{

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using STRINGS;
 using UnityEngine;
@@ -13,9 +14,37 @@ public class ResearchEntry : KMonoBehaviour
 		base.OnSpawn();
 		this.techLineMap = new Dictionary<Tech, UILineRenderer>();
 		this.BG.color = this.defaultColor;
+		this.QueueStateChanged(false);
+		if (this.targetTech != null)
+		{
+			using (List<TechInstance>.Enumerator enumerator = Research.Instance.GetResearchQueue().GetEnumerator())
+			{
+				while (enumerator.MoveNext())
+				{
+					if (enumerator.Current.tech == this.targetTech)
+					{
+						this.QueueStateChanged(true);
+					}
+				}
+			}
+		}
+		base.StartCoroutine(this.DelayedSetupForLines());
+	}
+
+	private IEnumerator DelayedSetupForLines()
+	{
+		yield return null;
+		yield return null;
+		this.SetupLines();
+		yield break;
+	}
+
+	public void SetupLines()
+	{
 		foreach (Tech tech in this.targetTech.requiredTech)
 		{
-			float num = this.targetTech.width / 2f + 18f;
+			float num = this.researchScreenReference.GetEntry(this.targetTech).rectTransform().rect.width / 2f;
+			float num2 = this.researchScreenReference.GetEntry(tech).rectTransform().rect.width / 2f;
 			Vector2 zero = Vector2.zero;
 			Vector2 zero2 = Vector2.zero;
 			if (tech.center.y > this.targetTech.center.y + 2f)
@@ -29,31 +58,17 @@ public class ResearchEntry : KMonoBehaviour
 				zero2 = new Vector2(0f, 20f);
 			}
 			UILineRenderer component = Util.KInstantiateUI(this.linePrefab, this.lineContainer.gameObject, true).GetComponent<UILineRenderer>();
-			float num2 = 32f;
+			float num3 = 32f;
 			component.Points = new Vector2[]
 			{
 				new Vector2(0f, 0f) + zero,
-				new Vector2(-num2, 0f) + zero,
-				new Vector2(-num2, tech.center.y - this.targetTech.center.y) + zero2,
-				new Vector2(-(this.targetTech.center.x - num - (tech.center.x + num)) + 2f, tech.center.y - this.targetTech.center.y) + zero2
+				new Vector2(-num3, 0f) + zero,
+				new Vector2(-num3, tech.center.y - this.targetTech.center.y) + zero2,
+				new Vector2(-(this.targetTech.center.x - num - (tech.center.x + num2)) - 4f, tech.center.y - this.targetTech.center.y) + zero2
 			};
 			component.LineThickness = (float)this.lineThickness_inactive;
 			component.color = this.inactiveLineColor;
 			this.techLineMap.Add(tech, component);
-		}
-		this.QueueStateChanged(false);
-		if (this.targetTech != null)
-		{
-			using (List<TechInstance>.Enumerator enumerator2 = Research.Instance.GetResearchQueue().GetEnumerator())
-			{
-				while (enumerator2.MoveNext())
-				{
-					if (enumerator2.Current.tech == this.targetTech)
-					{
-						this.QueueStateChanged(true);
-					}
-				}
-			}
 		}
 	}
 
@@ -148,6 +163,7 @@ public class ResearchEntry : KMonoBehaviour
 		foreach (KeyValuePair<Tech, UILineRenderer> keyValuePair in this.techLineMap)
 		{
 			keyValuePair.Value.LineThickness = (float)this.lineThickness_inactive;
+			keyValuePair.Value.Points[0].x = 0f;
 			keyValuePair.Value.color = this.inactiveLineColor;
 		}
 		this.isOn = false;
@@ -164,6 +180,7 @@ public class ResearchEntry : KMonoBehaviour
 		foreach (KeyValuePair<Tech, UILineRenderer> keyValuePair in this.techLineMap)
 		{
 			keyValuePair.Value.LineThickness = (float)this.lineThickness_active;
+			keyValuePair.Value.Points[0].x = (float)(-(float)this.lineThickness_inactive);
 			keyValuePair.Value.color = this.activeLineColor;
 		}
 		base.transform.SetAsLastSibling();
@@ -421,6 +438,8 @@ public class ResearchEntry : KMonoBehaviour
 	public int lineThickness_inactive = 2;
 
 	public Material StandardUIMaterial;
+
+	public ResearchScreen researchScreenReference;
 
 	private Dictionary<string, GameObject> progressBarsByResearchTypeID = new Dictionary<string, GameObject>();
 

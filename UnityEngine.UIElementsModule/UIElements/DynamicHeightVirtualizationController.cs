@@ -172,15 +172,20 @@ namespace UnityEngine.UIElements
 					bool flag3 = this.firstVisibleIndex >= index;
 					if (flag3)
 					{
-						this.m_ForcedFirstVisibleItem = index;
-						this.m_ForcedLastVisibleItem = -1;
-						this.m_ScrollView.scrollOffset = new Vector2(0f, this.GetContentHeightForIndex(index - 1));
+						Vector2 vector = new Vector2(0f, this.GetContentHeightForIndex(index - 1));
+						bool flag4 = vector == this.m_ScrollView.scrollOffset;
+						if (!flag4)
+						{
+							this.m_ForcedFirstVisibleItem = index;
+							this.m_ForcedLastVisibleItem = -1;
+							this.m_ScrollView.scrollOffset = vector;
+						}
 					}
 					else
 					{
 						float contentHeightForIndex = this.GetContentHeightForIndex(index);
-						bool flag4 = contentHeightForIndex < this.contentPadding + height2;
-						if (!flag4)
+						bool flag5 = contentHeightForIndex < this.contentPadding + height2;
+						if (!flag5)
 						{
 							float num = contentHeightForIndex - height2 + (float)BaseVerticalCollectionView.s_DefaultItemHeight;
 							this.m_ForcedLastVisibleItem = index;
@@ -606,12 +611,13 @@ namespace UnityEngine.UIElements
 				{
 					float contentHeightForIndex = this.GetContentHeightForIndex(this.m_ForcedLastVisibleItem);
 					float num4 = contentHeightForIndex + (float)BaseVerticalCollectionView.s_DefaultItemHeight - this.m_ScrollView.contentViewport.layout.height;
-					num3 = num4;
+					num3 = Mathf.Clamp(num4, 0f, num2);
 				}
 			}
 			this.m_ScrollView.verticalScroller.slider.SetHighValueWithoutNotify(num2);
 			this.m_ScrollView.verticalScroller.slider.SetValueWithoutNotify(num3);
 			base.serializedData.scrollOffset.y = this.m_ScrollView.verticalScroller.slider.value;
+			this.m_ForcedLastVisibleItem = -1;
 			bool flag5 = dimensionsOnly || this.m_LastChange == DynamicHeightVirtualizationController<T>.VirtualizationChange.Resize;
 			if (flag5)
 			{
@@ -643,7 +649,7 @@ namespace UnityEngine.UIElements
 						bool flag8 = this.m_ActiveItems[i].rootElement.style.display == DisplayStyle.Flex;
 						if (flag8)
 						{
-							bool flag9 = num5 + expectedItemHeight <= base.serializedData.scrollOffset.y;
+							bool flag9 = num5 + expectedItemHeight < base.serializedData.scrollOffset.y;
 							if (flag9)
 							{
 								t.rootElement.BringToFront();
@@ -674,7 +680,6 @@ namespace UnityEngine.UIElements
 						this.UpdateAnchor();
 					}
 					this.ScheduleScrollDirectionReset();
-					this.m_ForcedLastVisibleItem = -1;
 					this.m_CollectionView.SaveViewData();
 				}
 			}
@@ -1057,7 +1062,7 @@ namespace UnityEngine.UIElements
 			if (!isDragGhost)
 			{
 				this.m_WaitingCache.Add(item.index);
-				item.rootElement.lastLayout = Rect.zero;
+				item.rootElement.lastLayout.size = Vector2.zero;
 				item.rootElement.MarkDirtyRepaint();
 			}
 		}

@@ -118,7 +118,7 @@ public class Exhaust : KMonoBehaviour, ISim200ms
 			this.lastElementEmmited = primary_element.ElementID;
 			if (primary_element.Element != null && primary_element.Element.substance != null)
 			{
-				base.Trigger(-793429877, primary_element.Element.substance.colour);
+				base.BoxingTrigger<Color32>(-793429877, primary_element.Element.substance.colour);
 			}
 		}
 		this.recentlyExhausted = true;

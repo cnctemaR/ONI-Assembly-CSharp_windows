@@ -30,20 +30,14 @@ public class OreSizeVisualizerComponents : KGameObjectComponentManager<OreSizeVi
 
 	protected override void OnPrefabInit(HandleVector<int>.Handle handle)
 	{
-		Action<object> action = delegate(object ev_data)
-		{
-			OreSizeVisualizerComponents.OnMassChanged(handle, ev_data);
-		};
 		OreSizeVisualizerData data = base.GetData(handle);
-		data.onMassChangedCB = action;
-		data.primaryElement.Subscribe(-2064133523, action);
-		data.primaryElement.Subscribe(1335436905, action);
+		data.absorbHandle = data.primaryElement.Subscribe(-2064133523, OreSizeVisualizerComponents.OnMassChangedDispatcher, handle);
+		data.splitFromChunkHandle = data.primaryElement.Subscribe(1335436905, OreSizeVisualizerComponents.OnMassChangedDispatcher, handle);
 		base.SetData(handle, data);
 	}
 
 	protected override void OnSpawn(HandleVector<int>.Handle handle)
 	{
-		base.GetData(handle);
 		OreSizeVisualizerComponents.OnMassChanged(handle, null);
 	}
 
@@ -52,9 +46,8 @@ public class OreSizeVisualizerComponents : KGameObjectComponentManager<OreSizeVi
 		OreSizeVisualizerData data = base.GetData(handle);
 		if (data.primaryElement != null)
 		{
-			Action<object> onMassChangedCB = data.onMassChangedCB;
-			data.primaryElement.Unsubscribe(-2064133523, onMassChangedCB);
-			data.primaryElement.Unsubscribe(1335436905, onMassChangedCB);
+			data.primaryElement.Unsubscribe(ref data.absorbHandle);
+			data.primaryElement.Unsubscribe(ref data.splitFromChunkHandle);
 		}
 	}
 
@@ -89,7 +82,12 @@ public class OreSizeVisualizerComponents : KGameObjectComponentManager<OreSizeVi
 		dictionary[OreSizeVisualizerComponents.TiersSetType.Ores] = OreSizeVisualizerComponents.MassTiers;
 		dictionary[OreSizeVisualizerComponents.TiersSetType.PokeShells] = OreSizeVisualizerComponents.PokeShellMassTiers;
 		dictionary[OreSizeVisualizerComponents.TiersSetType.WoodPokeShells] = OreSizeVisualizerComponents.WoodPokeShellMassTiers;
+		dictionary[OreSizeVisualizerComponents.TiersSetType.PlantFiber] = OreSizeVisualizerComponents.PlantMatterMassTiers;
 		OreSizeVisualizerComponents.TierSets = dictionary;
+		OreSizeVisualizerComponents.OnMassChangedDispatcher = delegate(object context, object data)
+		{
+			OreSizeVisualizerComponents.OnMassChanged((HandleVector<int>.Handle)context, data);
+		};
 	}
 
 	private static readonly OreSizeVisualizerComponents.MassTier[] MassTiers = new OreSizeVisualizerComponents.MassTier[]
@@ -158,7 +156,31 @@ public class OreSizeVisualizerComponents : KGameObjectComponentManager<OreSizeVi
 		}
 	};
 
+	private static readonly OreSizeVisualizerComponents.MassTier[] PlantMatterMassTiers = new OreSizeVisualizerComponents.MassTier[]
+	{
+		new OreSizeVisualizerComponents.MassTier
+		{
+			animName = "idle1",
+			massRequired = 10f,
+			colliderRadius = 0.15f
+		},
+		new OreSizeVisualizerComponents.MassTier
+		{
+			animName = "idle2",
+			massRequired = 50f,
+			colliderRadius = 0.2f
+		},
+		new OreSizeVisualizerComponents.MassTier
+		{
+			animName = "idle3",
+			massRequired = float.MaxValue,
+			colliderRadius = 0.25f
+		}
+	};
+
 	private static readonly Dictionary<OreSizeVisualizerComponents.TiersSetType, OreSizeVisualizerComponents.MassTier[]> TierSets;
+
+	private static Action<object, object> OnMassChangedDispatcher;
 
 	private struct MassTier
 	{
@@ -173,6 +195,7 @@ public class OreSizeVisualizerComponents : KGameObjectComponentManager<OreSizeVi
 	{
 		Ores,
 		PokeShells,
-		WoodPokeShells
+		WoodPokeShells,
+		PlantFiber
 	}
 }

@@ -24,8 +24,8 @@ namespace UnityEngine.VFX
 			};
 		}
 
-		[NativeName("GetValueFromScript<bool>")]
 		[NativeThrows]
+		[NativeName("GetValueFromScript<bool>")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern bool GetBool(int nameID);
 
@@ -39,13 +39,13 @@ namespace UnityEngine.VFX
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern uint GetUInt(int nameID);
 
-		[NativeThrows]
 		[NativeName("GetValueFromScript<float>")]
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern float GetFloat(int nameID);
 
-		[NativeThrows]
 		[NativeName("GetValueFromScript<Vector2f>")]
+		[NativeThrows]
 		public Vector2 GetVector2(int nameID)
 		{
 			Vector2 vector;
@@ -53,8 +53,8 @@ namespace UnityEngine.VFX
 			return vector;
 		}
 
-		[NativeThrows]
 		[NativeName("GetValueFromScript<Vector3f>")]
+		[NativeThrows]
 		public Vector3 GetVector3(int nameID)
 		{
 			Vector3 vector;
@@ -80,8 +80,8 @@ namespace UnityEngine.VFX
 			return matrix4x;
 		}
 
-		[NativeThrows]
 		[NativeName("GetValueFromScript<Texture*>")]
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern Texture GetTexture(int nameID);
 

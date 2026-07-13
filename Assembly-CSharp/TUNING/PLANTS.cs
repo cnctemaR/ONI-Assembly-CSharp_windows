@@ -39,5 +39,16 @@ namespace TUNING
 
 			public const float MUTANT_BASELINE = 250f;
 		}
+
+		public class HUSK_PER_CYCLE
+		{
+			public const float TIER0 = 0f;
+
+			public const float TIER1 = 2f;
+
+			public const float TIER2 = 4f;
+
+			public const float TIER3 = 8f;
+		}
 	}
 }

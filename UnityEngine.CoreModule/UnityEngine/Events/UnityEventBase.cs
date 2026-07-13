@@ -80,6 +80,11 @@ namespace UnityEngine.Events
 			return methodInfo;
 		}
 
+		internal int GetCallsCount()
+		{
+			return this.m_Calls.Count;
+		}
+
 		public int GetPersistentEventCount()
 		{
 			return this.m_PersistentCalls.Count;
@@ -215,8 +220,8 @@ namespace UnityEngine.Events
 
 		private InvokableCallList m_Calls;
 
-		[FormerlySerializedAs("m_PersistentListeners")]
 		[SerializeField]
+		[FormerlySerializedAs("m_PersistentListeners")]
 		private PersistentCallGroup m_PersistentCalls;
 
 		private bool m_CallsDirty = true;

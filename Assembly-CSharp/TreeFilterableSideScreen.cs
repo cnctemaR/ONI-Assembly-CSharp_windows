@@ -167,7 +167,7 @@ public class TreeFilterableSideScreen : SideScreenContent
 		bool flag3 = false;
 		foreach (KeyValuePair<Tag, TreeFilterableSideScreenRow> keyValuePair in this.tagRowMap)
 		{
-			if (keyValuePair.Value.standardCommodity)
+			if (keyValuePair.Value.standardCommodity && keyValuePair.Value.gameObject.activeSelf)
 			{
 				switch (keyValuePair.Value.GetState())
 				{
@@ -260,6 +260,11 @@ public class TreeFilterableSideScreen : SideScreenContent
 
 	public override void SetTarget(GameObject target)
 	{
+		bool flag = true;
+		if (this.target == target)
+		{
+			flag = false;
+		}
 		this.Initialize();
 		this.target = target;
 		if (target == null)
@@ -288,14 +293,21 @@ public class TreeFilterableSideScreen : SideScreenContent
 			this.titlebar.SetActive(true);
 			this.titlebar.GetComponentInChildren<LocText>().SetText(this.storage.GetProperName());
 		}
-		if (!this.InputFieldEmpty)
+		if (flag)
 		{
-			this.ClearSearch();
+			if (!this.InputFieldEmpty)
+			{
+				this.ClearSearch();
+			}
+		}
+		else
+		{
+			this.UpdateSearchFilter();
 		}
 		this.ToggleSearchConfiguration(!this.InputFieldEmpty);
 	}
 
-	private void OnOnlyFetchMarkedItemsSettingChanged(object data)
+	private void OnOnlyFetchMarkedItemsSettingChanged(object _)
 	{
 		this.onlyAllowTransportItemsCheckBox.ChangeState(this.storage.GetOnlyFetchMarkedItems() ? 1 : 0);
 		if (this.storage.allowSettingOnlyFetchMarkedItems)
@@ -306,7 +318,7 @@ public class TreeFilterableSideScreen : SideScreenContent
 		this.onlyallowTransportItemsRow.SetActive(false);
 	}
 
-	private void OnOnlySpicedItemsSettingChanged(object data)
+	private void OnOnlySpicedItemsSettingChanged(object _)
 	{
 		FoodStorage component = this.storage.GetComponent<FoodStorage>();
 		if (component != null)

@@ -95,7 +95,7 @@ public class SaveGame : KMonoBehaviour, ISaveLoadable
 		string text = JsonConvert.SerializeObject(new SaveGame.GameInfo(GameClock.Instance.GetCycle(), Components.LiveMinionIdentities.Count, this.baseName, isAutoSave, originalSaveFileName, SaveLoader.Instance.GameInfo.clusterId, SaveLoader.Instance.GameInfo.worldTraits, SaveLoader.Instance.GameInfo.colonyGuid, SaveLoader.Instance.GameInfo.dlcIds, this.sandboxEnabled));
 		byte[] bytes = Encoding.UTF8.GetBytes(text);
 		header = default(SaveGame.Header);
-		header.buildVersion = 693461U;
+		header.buildVersion = 700348U;
 		header.headerSize = bytes.Length;
 		header.headerVersion = 1U;
 		header.compression = (isCompressed ? 1 : 0);
@@ -329,7 +329,7 @@ public class SaveGame : KMonoBehaviour, ISaveLoadable
 			this.dlcIds = dlcIds;
 			this.dlcId = null;
 			this.saveMajorVersion = 7;
-			this.saveMinorVersion = 36;
+			this.saveMinorVersion = 37;
 		}
 
 		public bool IsVersionOlderThan(int major, int minor)

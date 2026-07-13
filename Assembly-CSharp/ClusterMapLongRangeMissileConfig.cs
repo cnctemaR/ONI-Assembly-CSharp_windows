@@ -17,7 +17,7 @@ public class ClusterMapLongRangeMissileConfig : IEntityConfig, IHasDlcRestrictio
 
 	public GameObject CreatePrefab()
 	{
-		GameObject gameObject = EntityTemplates.CreateBasicEntity("ClusterMapLongRangeMissile", ITEMS.MISSILE_LONGRANGE.NAME, ITEMS.MISSILE_LONGRANGE.DESC, 2000f, true, Assets.GetAnim("longrange_missile_clustermap_kanim"), "object", Grid.SceneLayer.Front, SimHashes.Creature, new List<Tag>
+		GameObject gameObject = EntityTemplates.CreateBasicEntity("ClusterMapLongRangeMissile", ITEMS.MISSILE_LONGRANGE.NAME, ITEMS.MISSILE_LONGRANGE.DESC, 2000f, true, Assets.GetAnim("longrange_missile_clustermap_kanim"), "idle_loop", Grid.SceneLayer.Front, SimHashes.Creature, new List<Tag>
 		{
 			GameTags.IgnoreMaterialCategory,
 			GameTags.Experimental
@@ -38,6 +38,7 @@ public class ClusterMapLongRangeMissileConfig : IEntityConfig, IHasDlcRestrictio
 		clusterDestinationSelector.assignable = false;
 		clusterDestinationSelector.shouldPointTowardsPath = true;
 		gameObject.AddOrGet<ClusterTraveler>();
+		SymbolOverrideControllerUtil.AddToPrefab(gameObject);
 		return gameObject;
 	}
 

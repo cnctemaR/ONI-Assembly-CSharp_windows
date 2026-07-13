@@ -12,6 +12,7 @@ public struct FallerComponent
 		this.partitionerEntry = default(HandleVector<int>.Handle);
 		this.solidChangedCB = null;
 		this.cellChangedCB = null;
+		this.cellChangedHandlerID = 0UL;
 		KCircleCollider2D component = transform.GetComponent<KCircleCollider2D>();
 		if (component != null)
 		{
@@ -41,5 +42,7 @@ public struct FallerComponent
 
 	public Action<object> solidChangedCB;
 
-	public global::System.Action cellChangedCB;
+	public Action<object> cellChangedCB;
+
+	public ulong cellChangedHandlerID;
 }

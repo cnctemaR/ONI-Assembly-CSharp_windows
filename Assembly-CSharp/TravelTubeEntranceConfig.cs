@@ -48,7 +48,7 @@ public class TravelTubeEntranceConfig : IBuildingConfig
 		};
 		storage.SetDefaultStoredItemModifiers(list);
 		ManualDeliveryKG manualDeliveryKG = go.AddOrGet<ManualDeliveryKG>();
-		manualDeliveryKG.requestedItemTag = SimHashes.MilkFat.CreateTag();
+		manualDeliveryKG.RequestedItemTag = SimHashes.MilkFat.CreateTag();
 		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.Fetch.IdHash;
 		manualDeliveryKG.capacity = storage.capacityKg;
 		manualDeliveryKG.refillMass = 0.05f;

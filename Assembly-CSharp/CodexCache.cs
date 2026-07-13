@@ -39,20 +39,18 @@ public static class CodexCache
 		string text = CodexCache.FormatLinkID("DUPLICANTSCATEGORY");
 		dictionary.Add(text, CodexEntryGenerator.GenerateCategoryEntry(text, UI.CODEX.CATEGORYNAMES.DUPLICANTS, CodexEntryGenerator.GenerateDuplicantEntries(), Assets.GetSprite("codexIconDupes"), true, false, UI.CODEX.CATEGORYNAMES.DUPLICANTS));
 		text = CodexCache.FormatLinkID("LESSONS");
-		dictionary.Add(text, CodexEntryGenerator.GenerateCategoryEntry(text, UI.CODEX.CATEGORYNAMES.TIPS, CodexEntryGenerator.GenerateTutorialNotificationEntries(), Assets.GetSprite("codexIconLessons"), true, true, UI.CODEX.CATEGORYNAMES.VIDEOS));
+		dictionary.Add(text, CodexEntryGenerator.GenerateCategoryEntry(text, UI.CODEX.CATEGORYNAMES.TUTORIALS, CodexEntryGenerator.GenerateTutorialNotificationEntries(), Assets.GetSprite("codexIconLessons"), true, true, UI.CODEX.CATEGORYNAMES.TUTORIALS));
 		text = CodexCache.FormatLinkID("creatures");
 		dictionary.Add(text, CodexEntryGenerator.GenerateCategoryEntry(text, UI.CODEX.CATEGORYNAMES.CREATURES, CodexEntryGenerator_Creatures.GenerateEntries(), Assets.GetSprite("codexIconCritters"), true, false, null));
 		DebugUtil.DevAssert(text == "CREATURES", string.Empty, null);
 		text = CodexCache.FormatLinkID("plants");
-		dictionary.Add(text, CodexEntryGenerator.GenerateCategoryEntry(text, UI.CODEX.CATEGORYNAMES.PLANTS, CodexEntryGenerator.GeneratePlantEntries(), null, true, true, null));
+		dictionary.Add(text, CodexEntryGenerator.GenerateCategoryEntry(text, UI.CODEX.CATEGORYNAMES.PLANTS, CodexEntryGenerator.GeneratePlantEntries(), Assets.GetSprite("codexIconPlants"), true, true, null));
 		text = CodexCache.FormatLinkID("food");
 		dictionary.Add(text, CodexEntryGenerator.GenerateCategoryEntry(text, UI.CODEX.CATEGORYNAMES.FOOD, CodexEntryGenerator.GenerateFoodEntries(), Assets.GetSprite("codexIconFood"), true, true, null));
 		text = CodexCache.FormatLinkID("buildings");
 		dictionary.Add(text, CodexEntryGenerator.GenerateCategoryEntry(text, UI.CODEX.CATEGORYNAMES.BUILDINGS, CodexEntryGenerator.GenerateBuildingEntries(), Assets.GetSprite("codexIconBuildings"), true, true, null));
 		text = CodexCache.FormatLinkID("tech");
 		dictionary.Add(text, CodexEntryGenerator.GenerateCategoryEntry(text, UI.CODEX.CATEGORYNAMES.TECH, CodexEntryGenerator.GenerateTechEntries(), Assets.GetSprite("codexIconResearch"), true, true, null));
-		text = CodexCache.FormatLinkID("roles");
-		dictionary.Add(text, CodexEntryGenerator.GenerateCategoryEntry(text, UI.CODEX.CATEGORYNAMES.ROLES, CodexEntryGenerator.GenerateRoleEntries(), Assets.GetSprite("codexIconSkills"), true, true, null));
 		text = CodexCache.FormatLinkID("disease");
 		dictionary.Add(text, CodexEntryGenerator.GenerateCategoryEntry(text, UI.CODEX.CATEGORYNAMES.DISEASE, CodexEntryGenerator.GenerateDiseaseEntries(), Assets.GetSprite("codexIconDisease"), false, true, null));
 		text = CodexCache.FormatLinkID("elements");
@@ -159,6 +157,8 @@ public static class CodexCache
 			}
 			return UI.StripLinkFormatting(a.name).CompareTo(UI.StripLinkFormatting(b.name));
 		});
+		CodexEntryGenerator.PopulateCategoryEntries(CodexCache.categoriesForPostYAMLPopulation, null);
+		CodexCache.categoriesForPostYAMLPopulation.Clear();
 	}
 
 	public static CodexEntry FindEntry(string id)
@@ -436,7 +436,7 @@ public static class CodexCache
 		codexEntry.customContentLength = entry.contentContainers.Count;
 		for (int j = entry.contentContainers.Count - 1; j >= 0; j--)
 		{
-			codexEntry.InsertContentContainer(0, entry.contentContainers[j]);
+			codexEntry.InsertContentContainer(entry.insertMergeContentAtBottom ? (codexEntry.contentContainers.Count - 1) : 0, entry.contentContainers[j]);
 		}
 		if (entry.disabled)
 		{
@@ -587,13 +587,15 @@ public static class CodexCache
 		return Path.GetFileName(path).Contains("SubEntry");
 	}
 
-	private static string baseEntryPath;
+	private static string baseEntryPath = null;
 
-	public static Dictionary<string, CodexEntry> entries;
+	public static Dictionary<string, CodexEntry> entries = null;
 
-	public static Dictionary<string, SubEntry> subEntries;
+	public static Dictionary<string, SubEntry> subEntries = null;
 
 	private static Dictionary<string, List<string>> unlockedEntryLookup;
 
 	private static List<global::Tuple<string, Type>> widgetTagMappings;
+
+	public static List<CategoryEntry> categoriesForPostYAMLPopulation = new List<CategoryEntry>();
 }

@@ -27,10 +27,13 @@ public class SimpleInfoScreen : DetailScreenTab, ISim4000ms, ISim1000ms
 		this.statusItemsFolder = this.statusItemPanel.Content.gameObject;
 		this.spaceSimpleInfoPOIPanel = new SpacePOISimpleInfoPanel(this);
 		this.spacePOIPanel = base.CreateCollapsableSection(null);
+		this.starmapHexCellStorageInfoPanel = new StarmapHexCellInventoryInfoPanel(this);
+		this.spaceHexCellStoragePanel = base.CreateCollapsableSection(null);
 		this.rocketSimpleInfoPanel = new RocketSimpleInfoPanel(this);
 		this.rocketStatusContainer = base.CreateCollapsableSection(UI.DETAILTABS.SIMPLEINFO.GROUPNAME_ROCKET);
 		this.vitalsPanel = global::Util.KInstantiateUI(this.VitalsPanelTemplate, base.gameObject, false).GetComponent<MinionVitalsPanel>();
 		this.fertilityPanel = base.CreateCollapsableSection(UI.DETAILTABS.SIMPLEINFO.GROUPNAME_FERTILITY);
+		this.mooFertilityPanel = base.CreateCollapsableSection(UI.DETAILTABS.SIMPLEINFO.GROUPNAME_MOO_FERTILITY);
 		this.infoPanel = base.CreateCollapsableSection(UI.DETAILTABS.SIMPLEINFO.GROUPNAME_DESCRIPTION);
 		this.requirementsPanel = base.CreateCollapsableSection(UI.DETAILTABS.SIMPLEINFO.GROUPNAME_REQUIREMENTS);
 		this.requirementContent = global::Util.KInstantiateUI<DescriptorPanel>(this.DescriptorContentPrefab.gameObject, this.requirementsPanel.Content.gameObject, false);
@@ -55,6 +58,7 @@ public class SimpleInfoScreen : DetailScreenTab, ISim4000ms, ISim1000ms
 		base.Subscribe(target, -1697596308, new Action<object>(this.TriggerRefreshStorage));
 		base.Subscribe(target, -1197125120, new Action<object>(this.TriggerRefreshStorage));
 		base.Subscribe(target, 1059811075, new Action<object>(this.OnBreedingChanceChanged));
+		base.Subscribe(target, 1105317911, new Action<object>(this.OnMooSongChanceChanged));
 		KSelectable component = target.GetComponent<KSelectable>();
 		if (component != null)
 		{
@@ -87,6 +91,7 @@ public class SimpleInfoScreen : DetailScreenTab, ISim4000ms, ISim1000ms
 		this.RefreshWorldPanel();
 		this.RefreshProcessConditionsPanel();
 		this.spaceSimpleInfoPOIPanel.Refresh(this.spacePOIPanel, this.selectedTarget);
+		this.starmapHexCellStorageInfoPanel.Refresh(this.spaceHexCellStoragePanel, this.selectedTarget);
 	}
 
 	public override void OnDeselectTarget(GameObject target)
@@ -97,6 +102,7 @@ public class SimpleInfoScreen : DetailScreenTab, ISim4000ms, ISim1000ms
 			base.Unsubscribe(target, -1697596308, new Action<object>(this.TriggerRefreshStorage));
 			base.Unsubscribe(target, -1197125120, new Action<object>(this.TriggerRefreshStorage));
 			base.Unsubscribe(target, 1059811075, new Action<object>(this.OnBreedingChanceChanged));
+			base.Unsubscribe(target, 1105317911, new Action<object>(this.OnMooSongChanceChanged));
 		}
 		KSelectable component = target.GetComponent<KSelectable>();
 		if (component != null)
@@ -133,6 +139,11 @@ public class SimpleInfoScreen : DetailScreenTab, ISim4000ms, ISim1000ms
 		SimpleInfoScreen.RefreshFertilityPanel(this.fertilityPanel, this.selectedTarget);
 	}
 
+	private void OnMooSongChanceChanged(object data)
+	{
+		SimpleInfoScreen.RefreshMooSongPanel(this.fertilityPanel, this.selectedTarget);
+	}
+
 	private void OnAddStatusItem(StatusItemGroup.Entry status_item, StatusItemCategory category)
 	{
 		this.DoAddStatusItem(status_item, category, false);
@@ -140,6 +151,10 @@ public class SimpleInfoScreen : DetailScreenTab, ISim4000ms, ISim1000ms
 
 	private void DoAddStatusItem(StatusItemGroup.Entry status_item, StatusItemCategory category, bool show_immediate = false)
 	{
+		if (status_item.item.showInHoverCardOnly)
+		{
+			return;
+		}
 		GameObject gameObject = this.statusItemsFolder;
 		Color color;
 		if (status_item.item.notificationType == NotificationType.BadMinor || status_item.item.notificationType == NotificationType.Bad || status_item.item.notificationType == NotificationType.DuplicantThreatening)
@@ -228,6 +243,7 @@ public class SimpleInfoScreen : DetailScreenTab, ISim4000ms, ISim1000ms
 		SimpleInfoScreen.RefreshStoragePanel(this.StoragePanel, this.selectedTarget);
 		SimpleInfoScreen.RefreshMovePanel(this.movePanel, this.selectedTarget);
 		SimpleInfoScreen.RefreshFertilityPanel(this.fertilityPanel, this.selectedTarget);
+		SimpleInfoScreen.RefreshMooSongPanel(this.mooFertilityPanel, this.selectedTarget);
 		SimpleInfoScreen.RefreshEffectsPanel(this.effectsPanel, this.selectedTarget, this.effectsContent);
 		SimpleInfoScreen.RefreshRequirementsPanel(this.requirementsPanel, this.selectedTarget, this.requirementContent);
 		SimpleInfoScreen.RefreshInfoPanel(this.infoPanel, this.selectedTarget);
@@ -247,6 +263,7 @@ public class SimpleInfoScreen : DetailScreenTab, ISim4000ms, ISim1000ms
 	{
 		this.RefreshWorldPanel();
 		this.spaceSimpleInfoPOIPanel.Refresh(this.spacePOIPanel, this.selectedTarget);
+		this.starmapHexCellStorageInfoPanel.Refresh(this.spaceHexCellStoragePanel, this.selectedTarget);
 	}
 
 	private static void RefreshInfoPanel(CollapsibleDetailContentPanel targetPanel, GameObject targetEntity)
@@ -269,11 +286,11 @@ public class SimpleInfoScreen : DetailScreenTab, ISim4000ms, ISim1000ms
 			}
 			else if (component3 != null)
 			{
-				text = component3.DescEffect + "\n\n" + component3.Desc;
+				text = component3.DescFlavour + "\n\n" + component3.Desc;
 			}
 			else if (component4 != null)
 			{
-				text = component4.DescEffect + "\n\n" + component4.Desc;
+				text = component4.DescFlavour + "\n\n" + component4.Desc;
 			}
 			else if (component5 != null)
 			{
@@ -381,6 +398,33 @@ public class SimpleInfoScreen : DetailScreenTab, ISim4000ms, ISim1000ms
 		targetPanel.Commit();
 	}
 
+	private static void RefreshMooSongPanel(CollapsibleDetailContentPanel targetPanel, GameObject targetEntity)
+	{
+		BeckoningMonitor.Instance smi = targetEntity.GetSMI<BeckoningMonitor.Instance>();
+		if (smi != null)
+		{
+			int num = 0;
+			foreach (BeckoningMonitor.SongChance songChance in smi.songChances)
+			{
+				List<MooSongModifier> forTag = Db.Get().MooSongModifiers.GetForTag(songChance.meteorID);
+				if (forTag.Count > 0)
+				{
+					string text = "";
+					foreach (MooSongModifier mooSongModifier in forTag)
+					{
+						text += string.Format(UI.DETAILTABS.MOO_SONG_CHANCES.CHANCE_MOD_FORMAT, mooSongModifier.GetTooltip());
+					}
+					targetPanel.SetLabel("breeding_" + num++.ToString(), string.Format(UI.DETAILTABS.MOO_SONG_CHANCES.CHANCE_FORMAT, songChance.meteorID.ProperName(), GameUtil.GetFormattedPercent(songChance.weight * 100f, GameUtil.TimeSlice.None)), string.Format(UI.DETAILTABS.MOO_SONG_CHANCES.CHANCE_FORMAT_TOOLTIP, songChance.meteorID.ProperName(), GameUtil.GetFormattedPercent(songChance.weight * 100f, GameUtil.TimeSlice.None), text));
+				}
+				else
+				{
+					targetPanel.SetLabel("breeding_" + num++.ToString(), string.Format(UI.DETAILTABS.MOO_SONG_CHANCES.CHANCE_FORMAT, songChance.meteorID.ProperName(), GameUtil.GetFormattedPercent(songChance.weight * 100f, GameUtil.TimeSlice.None)), string.Format(UI.DETAILTABS.MOO_SONG_CHANCES.CHANCE_FORMAT_TOOLTIP_NOMOD, songChance.meteorID.ProperName(), GameUtil.GetFormattedPercent(songChance.weight * 100f, GameUtil.TimeSlice.None)));
+				}
+			}
+		}
+		targetPanel.Commit();
+	}
+
 	private void TriggerRefreshStorage(object data = null)
 	{
 		SimpleInfoScreen.RefreshStoragePanel(this.StoragePanel, this.selectedTarget);
@@ -411,64 +455,289 @@ public class SimpleInfoScreen : DetailScreenTab, ISim4000ms, ISim1000ms
 		string text = ((targetEntity.GetComponent<MinionIdentity>() != null) ? UI.DETAILTABS.DETAILS.GROUPNAME_MINION_CONTENTS : UI.DETAILTABS.DETAILS.GROUPNAME_CONTENTS);
 		targetPanel.gameObject.SetActive(true);
 		targetPanel.SetTitle(text);
-		int num = 0;
+		DictionaryPool<int, SimpleInfoScreen.StoredItemCategoryData, SimpleInfoScreen>.PooledDictionary pooledDictionary = DictionaryPool<int, SimpleInfoScreen.StoredItemCategoryData, SimpleInfoScreen>.Allocate();
+		SimpleInfoScreen.storageItemPrefabDataIndexesFound.Clear();
 		IStorage[] array2 = array;
 		for (int i = 0; i < array2.Length; i++)
 		{
-			using (List<GameObject>.Enumerator enumerator = array2[i].GetItems().GetEnumerator())
+			foreach (GameObject gameObject in array2[i].GetItems())
+			{
+				if (!(gameObject == null))
+				{
+					KPrefabID component = gameObject.GetComponent<KPrefabID>();
+					PrimaryElement component2 = gameObject.GetComponent<PrimaryElement>();
+					if (!(component2 != null) || component2.Mass != 0f)
+					{
+						int hashCode = component.GetHashCode();
+						float mass = component2.Mass;
+						SimpleInfoScreen.StoredItemCategoryData storedItemCategoryData;
+						if (!pooledDictionary.TryGetValue(hashCode, out storedItemCategoryData))
+						{
+							storedItemCategoryData = new SimpleInfoScreen.StoredItemCategoryData(component.GetProperName(), 0f, component2.MassPerUnit);
+							pooledDictionary[hashCode] = storedItemCategoryData;
+							SimpleInfoScreen.storageItemPrefabDataIndexesFound.Add(hashCode);
+						}
+						storedItemCategoryData.mass += mass;
+						storedItemCategoryData.temperatureRanges.x = Mathf.Min(storedItemCategoryData.temperatureRanges.x, component2.Temperature);
+						storedItemCategoryData.temperatureRanges.y = Mathf.Max(storedItemCategoryData.temperatureRanges.y, component2.Temperature);
+						storedItemCategoryData.instancesFound++;
+						storedItemCategoryData.lastInstance = component;
+						storedItemCategoryData.lastPEInstance = component2;
+					}
+				}
+			}
+		}
+		int num = 0;
+		foreach (int num2 in SimpleInfoScreen.storageItemPrefabDataIndexesFound)
+		{
+			SimpleInfoScreen.StoredItemCategoryData storedItemCategoryData2 = pooledDictionary[num2];
+			int num3 = num2;
+			string text2 = "";
+			string text3 = "";
+			string text4 = "";
+			string text5 = "";
+			text2 = storedItemCategoryData2.name;
+			if (storedItemCategoryData2.instancesFound == 1)
+			{
+				SimpleInfoScreen.ForgeNameAndTooltipForStoredItem(storedItemCategoryData2.lastInstance, storedItemCategoryData2.lastPEInstance, out text2, out text4, out text5, out text3, true);
+				text2 = "• " + text2;
+				KSelectable itemSelectable = storedItemCategoryData2.lastInstance.GetComponent<KSelectable>();
+				targetPanel.SetLabelWithButton("storage_" + num.ToString(), text2, text4, text5, text3, delegate
+				{
+					SelectTool.Instance.Select(itemSelectable, false);
+				}).transform.SetAsFirstSibling();
+			}
+			else
+			{
+				text5 = (storedItemCategoryData2.usingUnits ? GameUtil.GetFormattedUnits(storedItemCategoryData2.mass / storedItemCategoryData2.massPerUnit, GameUtil.TimeSlice.None, true, "") : GameUtil.GetFormattedMass(storedItemCategoryData2.mass, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"));
+				targetPanel.SetCollapsableLabel("storage_group_" + num3.ToString(), text2, text5, text3, new SimpleInfoScreen.StorageCollapsibleRowData
+				{
+					prefabHashCode = num3,
+					storages = array
+				}, new Action<DetailCollapsableLabel>(SimpleInfoScreen.OnStorageCollapsibleRowExpanded), new Action<DetailCollapsableLabel>(SimpleInfoScreen.OnStorageCollapsibleRowCollapsed));
+			}
+			storedItemCategoryData2.ClearData();
+			num++;
+		}
+		if (num == 0)
+		{
+			targetPanel.SetLabel("storage_empty", UI.DETAILTABS.DETAILS.STORAGE_EMPTY, "");
+		}
+		pooledDictionary.Recycle();
+		targetPanel.Commit();
+	}
+
+	private static string GetIconsForItemName(string itemName, KPrefabID item, PrimaryElement pe, int maxIconsAllowed)
+	{
+		string text = itemName;
+		bool flag = maxIconsAllowed <= 0;
+		char c = ' ';
+		if (!flag && item.HasTag(GameTags.RotModifierTags.Refrigerated))
+		{
+			text = text + c.ToString() + UI.DETAILTABS.TEXTICONDATA.REFRIGERATED.ICON;
+			flag = --maxIconsAllowed <= 0;
+		}
+		else if (!flag && item.HasTag(GameTags.RotModifierTags.DeepFrozen))
+		{
+			text = text + c.ToString() + UI.DETAILTABS.TEXTICONDATA.DEEPFROZEN.ICON;
+			flag = --maxIconsAllowed <= 0;
+		}
+		if (!flag && item.HasTag(GameTags.SpicedFood))
+		{
+			text = text + c.ToString() + UI.DETAILTABS.TEXTICONDATA.SPICEDFOOD.ICON;
+			flag = --maxIconsAllowed <= 0;
+		}
+		if (!flag && item.HasTag(GameTags.RotModifierTags.Fresh))
+		{
+			text = text + c.ToString() + UI.DETAILTABS.TEXTICONDATA.FRESH.ICON;
+			flag = --maxIconsAllowed <= 0;
+		}
+		else if (!flag && item.HasTag(GameTags.RotModifierTags.Stale))
+		{
+			text = text + c.ToString() + UI.DETAILTABS.TEXTICONDATA.STALE.ICON;
+			flag = --maxIconsAllowed <= 0;
+		}
+		if (!flag && pe.DiseaseIdx != 255)
+		{
+			Disease disease = Db.Get().Diseases[(int)pe.DiseaseIdx];
+			text = text + c.ToString() + UI.DETAILTABS.TEXTICONDATA.GERMS.ICON;
+			flag = --maxIconsAllowed <= 0;
+		}
+		if (flag)
+		{
+			text += "…";
+		}
+		return text;
+	}
+
+	private static string GetIconsLegendForItem(KPrefabID item, PrimaryElement pe, Rottable.Instance rottable, bool addTabs = false)
+	{
+		string text = "";
+		string text2 = (addTabs ? "\n  " : "\n");
+		char c = ' ';
+		if (item.HasTag(GameTags.SpicedFood))
+		{
+			text = string.Concat(new string[]
+			{
+				text,
+				text2,
+				UI.DETAILTABS.TEXTICONDATA.SPICEDFOOD.ICON,
+				c.ToString(),
+				UI.DETAILTABS.TEXTICONDATA.SPICEDFOOD.NAME
+			});
+		}
+		if (item.HasTag(GameTags.RotModifierTags.Refrigerated))
+		{
+			text = string.Concat(new string[]
+			{
+				text,
+				text2,
+				UI.DETAILTABS.TEXTICONDATA.REFRIGERATED.ICON,
+				c.ToString(),
+				UI.DETAILTABS.TEXTICONDATA.REFRIGERATED.NAME
+			});
+		}
+		else if (item.HasTag(GameTags.RotModifierTags.DeepFrozen))
+		{
+			text = string.Concat(new string[]
+			{
+				text,
+				text2,
+				UI.DETAILTABS.TEXTICONDATA.DEEPFROZEN.ICON,
+				c.ToString(),
+				UI.DETAILTABS.TEXTICONDATA.DEEPFROZEN.NAME
+			});
+		}
+		if (item.HasTag(GameTags.RotModifierTags.Fresh))
+		{
+			string text3 = ((rottable == null) ? UI.DETAILTABS.TEXTICONDATA.FRESH.NAME : rottable.StateString());
+			text = string.Concat(new string[]
+			{
+				text,
+				text2,
+				UI.DETAILTABS.TEXTICONDATA.FRESH.ICON,
+				c.ToString(),
+				text3
+			});
+		}
+		else if (item.HasTag(GameTags.RotModifierTags.Stale))
+		{
+			string text4 = ((rottable == null) ? UI.DETAILTABS.TEXTICONDATA.STALE.NAME : rottable.StateString());
+			text = string.Concat(new string[]
+			{
+				text,
+				text2,
+				UI.DETAILTABS.TEXTICONDATA.STALE.ICON,
+				c.ToString(),
+				text4
+			});
+		}
+		if (pe.DiseaseIdx != 255)
+		{
+			Disease disease = Db.Get().Diseases[(int)pe.DiseaseIdx];
+			text = string.Concat(new string[]
+			{
+				text,
+				text2,
+				UI.DETAILTABS.TEXTICONDATA.GERMS.ICON,
+				c.ToString(),
+				GameUtil.SafeStringFormat(UI.OVERLAYS.DISEASE.DISEASE_FORMAT, new object[]
+				{
+					disease.Name,
+					GameUtil.GetFormattedDiseaseAmount(pe.DiseaseCount, GameUtil.TimeSlice.None)
+				})
+			});
+		}
+		return text.TrimStart('\n');
+	}
+
+	private static string GetTrimmedString(string value, int maxCharacterCount)
+	{
+		if (value.Length <= maxCharacterCount)
+		{
+			return value;
+		}
+		return value.Substring(0, maxCharacterCount) + "…";
+	}
+
+	private static void ForgeNameAndTooltipForStoredItem(KPrefabID itemPrefabID, PrimaryElement pe, out string nameText, out string temperatureText, out string massText, out string tooltip, bool trim)
+	{
+		GameObject gameObject = itemPrefabID.gameObject;
+		Rottable.Instance smi = gameObject.GetSMI<Rottable.Instance>();
+		HighEnergyParticleStorage component = gameObject.GetComponent<HighEnergyParticleStorage>();
+		pe = ((pe == null) ? gameObject.GetComponent<PrimaryElement>() : pe);
+		string text = UI.StripLinkFormatting(gameObject.GetProperName());
+		nameText = (trim ? SimpleInfoScreen.GetTrimmedString(text, 15) : text);
+		tooltip = "";
+		massText = "";
+		temperatureText = "";
+		if (pe != null && component == null)
+		{
+			massText = ((pe.MassPerUnit > 1f) ? GameUtil.GetFormattedUnits(pe.Mass / pe.MassPerUnit, GameUtil.TimeSlice.None, true, "") : GameUtil.GetFormattedMass(pe.Mass, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"));
+			temperatureText = GameUtil.GetFormattedTemperature(pe.Temperature, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false);
+			nameText = SimpleInfoScreen.GetIconsForItemName(nameText, itemPrefabID, pe, trim ? (15 - nameText.Length) : 99999);
+			string iconsLegendForItem = SimpleInfoScreen.GetIconsLegendForItem(itemPrefabID, pe, smi, true);
+			tooltip = text + "\n";
+			tooltip += iconsLegendForItem;
+			tooltip += (string.IsNullOrEmpty(iconsLegendForItem) ? "" : "\n\n");
+		}
+		if (component != null)
+		{
+			nameText = ITEMS.RADIATION.HIGHENERGYPARITCLE.NAME;
+			temperatureText = GameUtil.GetFormattedHighEnergyParticles(component.Particles, GameUtil.TimeSlice.None, true);
+		}
+		if (smi != null)
+		{
+			tooltip += smi.GetToolTip();
+		}
+		tooltip.TrimEnd('\n');
+	}
+
+	private static void OnStorageCollapsibleRowExpanded(DetailCollapsableLabel collapsableLabel)
+	{
+		collapsableLabel.MarkAllRowsUnused();
+		SimpleInfoScreen.StorageCollapsibleRowData storageCollapsibleRowData = collapsableLabel.Data as SimpleInfoScreen.StorageCollapsibleRowData;
+		IStorage[] storages = storageCollapsibleRowData.storages;
+		for (int i = 0; i < storages.Length; i++)
+		{
+			using (List<GameObject>.Enumerator enumerator = storages[i].GetItems().GetEnumerator())
 			{
 				while (enumerator.MoveNext())
 				{
 					GameObject go = enumerator.Current;
 					if (!(go == null))
 					{
-						PrimaryElement component = go.GetComponent<PrimaryElement>();
-						if (!(component != null) || component.Mass != 0f)
+						KPrefabID component = go.GetComponent<KPrefabID>();
+						if (component.GetHashCode() == storageCollapsibleRowData.prefabHashCode)
 						{
-							Rottable.Instance smi = go.GetSMI<Rottable.Instance>();
-							HighEnergyParticleStorage component2 = go.GetComponent<HighEnergyParticleStorage>();
+							string text = "";
 							string text2 = "";
 							string text3 = "";
-							if (component != null && component2 == null)
-							{
-								text2 = GameUtil.GetUnitFormattedName(go, false);
-								text2 = string.Format(UI.DETAILTABS.DETAILS.CONTENTS_MASS, text2, GameUtil.GetFormattedMass(component.Mass, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"));
-								text2 = string.Format(UI.DETAILTABS.DETAILS.CONTENTS_TEMPERATURE, text2, GameUtil.GetFormattedTemperature(component.Temperature, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false));
-							}
-							if (component2 != null)
-							{
-								text2 = ITEMS.RADIATION.HIGHENERGYPARITCLE.NAME;
-								text2 = string.Format(UI.DETAILTABS.DETAILS.CONTENTS_MASS, text2, GameUtil.GetFormattedHighEnergyParticles(component2.Particles, GameUtil.TimeSlice.None, true));
-							}
-							if (smi != null)
-							{
-								string text4 = smi.StateString();
-								if (!string.IsNullOrEmpty(text4))
-								{
-									text2 += string.Format(UI.DETAILTABS.DETAILS.CONTENTS_ROTTABLE, text4);
-								}
-								text3 += smi.GetToolTip();
-							}
-							if (component.DiseaseIdx != 255)
-							{
-								text2 += string.Format(UI.DETAILTABS.DETAILS.CONTENTS_DISEASED, GameUtil.GetFormattedDisease(component.DiseaseIdx, component.DiseaseCount, false));
-								text3 += GameUtil.GetFormattedDisease(component.DiseaseIdx, component.DiseaseCount, true);
-							}
-							targetPanel.SetLabelWithButton("storage_" + num.ToString(), text2, text3, delegate
+							string text4 = "";
+							SimpleInfoScreen.ForgeNameAndTooltipForStoredItem(component, null, out text, out text3, out text2, out text4, true);
+							DetailLabelWithButton detailLabelWithButton = collapsableLabel.AddOrGetAvailableContentRow();
+							detailLabelWithButton.label.SetText(text);
+							detailLabelWithButton.label2.SetText(text3);
+							detailLabelWithButton.label3.SetText(text2);
+							detailLabelWithButton.RefreshLabelsVisibility();
+							detailLabelWithButton.toolTip.SetSimpleTooltip(text4.TrimEnd('\n'));
+							detailLabelWithButton.button.ClearOnClick();
+							detailLabelWithButton.button.onClick += delegate
 							{
 								SelectTool.Instance.Select(go.GetComponent<KSelectable>(), false);
-							});
-							num++;
+							};
 						}
 					}
 				}
 			}
 		}
-		if (num == 0)
-		{
-			targetPanel.SetLabel("storage_empty", UI.DETAILTABS.DETAILS.STORAGE_EMPTY, "");
-		}
-		targetPanel.Commit();
+		collapsableLabel.RefreshRowVisibilityState();
+	}
+
+	private static void OnStorageCollapsibleRowCollapsed(DetailCollapsableLabel collapsableLabel)
+	{
+		collapsableLabel.MarkAllRowsUnused();
+		collapsableLabel.RefreshRowVisibilityState();
 	}
 
 	private void CreateWorldTraitRow()
@@ -538,7 +807,7 @@ public class SimpleInfoScreen : DetailScreenTab, ISim4000ms, ISim1000ms
 						}
 					}
 				}
-				goto IL_029A;
+				goto IL_029C;
 			}
 		}
 		if (moving != null && moving.IsMarkedForMove)
@@ -548,7 +817,7 @@ public class SimpleInfoScreen : DetailScreenTab, ISim4000ms, ISim1000ms
 				SelectTool.Instance.SelectAndFocus(moving.StorageProxy.transform.GetPosition(), moving.StorageProxy.GetComponent<KSelectable>(), new Vector3(5f, 0f, 0f));
 			});
 		}
-		IL_029A:
+		IL_029C:
 		targetPanel.Commit();
 	}
 
@@ -839,27 +1108,29 @@ public class SimpleInfoScreen : DetailScreenTab, ISim4000ms, ISim1000ms
 		{
 			return;
 		}
-		List<ProcessCondition> conditionSet = component.GetConditionSet(conditionType);
-		if (conditionSet.Count == 0)
+		List<ProcessCondition> list;
+		using (ProcessCondition.ListPool.Get(out list))
 		{
-			return;
-		}
-		HierarchyReferences hierarchyReferences = global::Util.KInstantiateUI<HierarchyReferences>(this.processConditionHeader.gameObject, this.processConditionContainer.Content.gameObject, true);
-		hierarchyReferences.GetReference<LocText>("Label").text = Strings.Get("STRINGS.UI.DETAILTABS.PROCESS_CONDITIONS." + conditionType.ToString().ToUpper());
-		hierarchyReferences.GetComponent<ToolTip>().toolTip = Strings.Get("STRINGS.UI.DETAILTABS.PROCESS_CONDITIONS." + conditionType.ToString().ToUpper() + "_TOOLTIP");
-		this.processConditionRows.Add(hierarchyReferences.gameObject);
-		List<ProcessCondition> list = new List<ProcessCondition>();
-		using (List<ProcessCondition>.Enumerator enumerator = conditionSet.GetEnumerator())
-		{
-			while (enumerator.MoveNext())
+			if (component.PopulateConditionSet(conditionType, list) != 0)
 			{
-				ProcessCondition condition = enumerator.Current;
-				if (condition.ShowInUI() && (condition.GetType() == typeof(RequireAttachedComponent) || list.Find((ProcessCondition match) => match.GetType() == condition.GetType()) == null))
+				HierarchyReferences hierarchyReferences = global::Util.KInstantiateUI<HierarchyReferences>(this.processConditionHeader.gameObject, this.processConditionContainer.Content.gameObject, true);
+				hierarchyReferences.GetReference<LocText>("Label").text = Strings.Get("STRINGS.UI.DETAILTABS.PROCESS_CONDITIONS." + conditionType.ToString().ToUpper());
+				hierarchyReferences.GetComponent<ToolTip>().toolTip = Strings.Get("STRINGS.UI.DETAILTABS.PROCESS_CONDITIONS." + conditionType.ToString().ToUpper() + "_TOOLTIP");
+				this.processConditionRows.Add(hierarchyReferences.gameObject);
+				List<ProcessCondition> list2 = new List<ProcessCondition>();
+				using (List<ProcessCondition>.Enumerator enumerator = list.GetEnumerator())
 				{
-					list.Add(condition);
-					GameObject gameObject = global::Util.KInstantiateUI(this.processConditionRow, this.processConditionContainer.Content.gameObject, true);
-					this.processConditionRows.Add(gameObject);
-					ConditionListSideScreen.SetRowState(gameObject, condition);
+					while (enumerator.MoveNext())
+					{
+						ProcessCondition condition = enumerator.Current;
+						if (condition.ShowInUI() && (condition.GetType() == typeof(RequireAttachedComponent) || list2.Find((ProcessCondition match) => match.GetType() == condition.GetType()) == null))
+						{
+							list2.Add(condition);
+							GameObject gameObject = global::Util.KInstantiateUI(this.processConditionRow, this.processConditionContainer.Content.gameObject, true);
+							this.processConditionRows.Add(gameObject);
+							ConditionListSideScreen.SetRowState(gameObject, condition);
+						}
+					}
 				}
 			}
 		}
@@ -920,6 +1191,8 @@ public class SimpleInfoScreen : DetailScreenTab, ISim4000ms, ISim1000ms
 
 	private CollapsibleDetailContentPanel fertilityPanel;
 
+	private CollapsibleDetailContentPanel mooFertilityPanel;
+
 	private CollapsibleDetailContentPanel rocketStatusContainer;
 
 	private CollapsibleDetailContentPanel worldLifePanel;
@@ -933,6 +1206,8 @@ public class SimpleInfoScreen : DetailScreenTab, ISim4000ms, ISim1000ms
 	private CollapsibleDetailContentPanel worldMeteorShowersPanel;
 
 	private CollapsibleDetailContentPanel spacePOIPanel;
+
+	private CollapsibleDetailContentPanel spaceHexCellStoragePanel;
 
 	private CollapsibleDetailContentPanel worldTraitsPanel;
 
@@ -955,6 +1230,8 @@ public class SimpleInfoScreen : DetailScreenTab, ISim4000ms, ISim1000ms
 	private RocketSimpleInfoPanel rocketSimpleInfoPanel;
 
 	private SpacePOISimpleInfoPanel spaceSimpleInfoPOIPanel;
+
+	private StarmapHexCellInventoryInfoPanel starmapHexCellStorageInfoPanel;
 
 	private DetailsPanelDrawer stressDrawer;
 
@@ -986,6 +1263,16 @@ public class SimpleInfoScreen : DetailScreenTab, ISim4000ms, ISim1000ms
 	{
 		component.OnRefreshData(data);
 	});
+
+	private const string STORAGE_ROW_ID_PREFIX = "storage_";
+
+	private const string STORAGE_GROUP_ROW_ID_PREFIX = "storage_group_";
+
+	private const int MAXStoreItemNameCharacterCount = 15;
+
+	private const string TRIMMED_STRING = "…";
+
+	private static List<int> storageItemPrefabDataIndexesFound = new List<int>();
 
 	[DebuggerDisplay("{item.item.Name}")]
 	public class StatusItemEntry : IRenderEveryTick
@@ -1171,5 +1458,56 @@ public class SimpleInfoScreen : DetailScreenTab, ISim4000ms, ISim1000ms
 			WAIT,
 			OUT
 		}
+	}
+
+	private class StorageCollapsibleRowData
+	{
+		public int prefabHashCode;
+
+		public IStorage[] storages;
+	}
+
+	private class StoredItemCategoryData
+	{
+		public bool usingUnits
+		{
+			get
+			{
+				return this.massPerUnit > 1f;
+			}
+		}
+
+		public StoredItemCategoryData(string name, float m, float massPerUnit)
+		{
+			this.temperatureRanges = new Vector2(float.MaxValue, float.MinValue);
+			this.name = name;
+			this.mass = m;
+			this.massPerUnit = massPerUnit;
+		}
+
+		public void ClearData()
+		{
+			this.name = null;
+			this.mass = 0f;
+			this.massPerUnit = 1f;
+			this.temperatureRanges = new Vector2(float.MaxValue, float.MinValue);
+			this.instancesFound = 0;
+			this.lastInstance = null;
+			this.lastPEInstance = null;
+		}
+
+		public float mass;
+
+		public float massPerUnit;
+
+		public string name;
+
+		public Vector2 temperatureRanges;
+
+		public int instancesFound;
+
+		public KPrefabID lastInstance;
+
+		public PrimaryElement lastPEInstance;
 	}
 }

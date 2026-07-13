@@ -490,12 +490,12 @@ public class SuitLocker : StateMachineComponent<SuitLocker.StatesInstance>
 				SuitLocker component = base.GetComponent<SuitLocker>();
 				this.urgentChore = new WorkChore<SuitLocker.ReturnSuitWorkable>(Db.Get().ChoreTypes.ReturnSuitUrgent, this, null, true, null, null, null, true, null, false, false, null, false, true, false, PriorityScreen.PriorityClass.personalNeeds, 5, false, false);
 				this.urgentChore.AddPrecondition(SuitLocker.ReturnSuitWorkable.DoesSuitNeedRechargingUrgent, null);
-				this.urgentChore.AddPrecondition(this.HasSuitMarker, component);
-				this.urgentChore.AddPrecondition(this.SuitTypeMatchesLocker, component);
+				this.urgentChore.AddPrecondition(SuitLocker.ReturnSuitWorkable.HasSuitMarker, component);
+				this.urgentChore.AddPrecondition(SuitLocker.ReturnSuitWorkable.SuitTypeMatchesLocker, component);
 				this.idleChore = new WorkChore<SuitLocker.ReturnSuitWorkable>(Db.Get().ChoreTypes.ReturnSuitIdle, this, null, true, null, null, null, true, null, false, false, null, false, true, false, PriorityScreen.PriorityClass.idle, 5, false, false);
 				this.idleChore.AddPrecondition(SuitLocker.ReturnSuitWorkable.DoesSuitNeedRechargingIdle, null);
-				this.idleChore.AddPrecondition(this.HasSuitMarker, component);
-				this.idleChore.AddPrecondition(this.SuitTypeMatchesLocker, component);
+				this.idleChore.AddPrecondition(SuitLocker.ReturnSuitWorkable.HasSuitMarker, component);
+				this.idleChore.AddPrecondition(SuitLocker.ReturnSuitWorkable.SuitTypeMatchesLocker, component);
 			}
 		}
 
@@ -550,34 +550,6 @@ public class SuitLocker : StateMachineComponent<SuitLocker.StatesInstance>
 			{
 				new HashedString("none")
 			};
-		}
-
-		public ReturnSuitWorkable()
-		{
-			Chore.Precondition precondition = default(Chore.Precondition);
-			precondition.id = "IsValid";
-			precondition.description = DUPLICANTS.CHORES.PRECONDITIONS.HAS_SUIT_MARKER;
-			precondition.fn = delegate(ref Chore.Precondition.Context context, object data)
-			{
-				return ((SuitLocker)data).suitMarkerState == SuitLocker.SuitMarkerState.HasMarker;
-			};
-			this.HasSuitMarker = precondition;
-			precondition = default(Chore.Precondition);
-			precondition.id = "IsValid";
-			precondition.description = DUPLICANTS.CHORES.PRECONDITIONS.HAS_SUIT_MARKER;
-			precondition.fn = delegate(ref Chore.Precondition.Context context, object data)
-			{
-				SuitLocker suitLocker = (SuitLocker)data;
-				Equipment equipment = context.consumerState.equipment;
-				if (equipment == null)
-				{
-					return false;
-				}
-				AssignableSlotInstance slot = equipment.GetSlot(Db.Get().AssignableSlots.Suit);
-				return !(slot.assignable == null) && slot.assignable.GetComponent<KPrefabID>().IsAnyPrefabID(suitLocker.OutfitTags);
-			};
-			this.SuitTypeMatchesLocker = precondition;
-			base..ctor();
 		}
 
 		public static readonly Chore.Precondition DoesSuitNeedRechargingUrgent = new Chore.Precondition
@@ -637,9 +609,32 @@ public class SuitLocker : StateMachineComponent<SuitLocker.StatesInstance>
 			}
 		};
 
-		public Chore.Precondition HasSuitMarker;
+		public static Chore.Precondition HasSuitMarker = new Chore.Precondition
+		{
+			id = "IsValid",
+			description = DUPLICANTS.CHORES.PRECONDITIONS.HAS_SUIT_MARKER,
+			fn = delegate(ref Chore.Precondition.Context context, object data)
+			{
+				return ((SuitLocker)data).suitMarkerState == SuitLocker.SuitMarkerState.HasMarker;
+			}
+		};
 
-		public Chore.Precondition SuitTypeMatchesLocker;
+		public static Chore.Precondition SuitTypeMatchesLocker = new Chore.Precondition
+		{
+			id = "IsValid",
+			description = DUPLICANTS.CHORES.PRECONDITIONS.HAS_SUIT_MARKER,
+			fn = delegate(ref Chore.Precondition.Context context, object data)
+			{
+				SuitLocker suitLocker = (SuitLocker)data;
+				Equipment equipment3 = context.consumerState.equipment;
+				if (equipment3 == null)
+				{
+					return false;
+				}
+				AssignableSlotInstance slot3 = equipment3.GetSlot(Db.Get().AssignableSlots.Suit);
+				return !(slot3.assignable == null) && slot3.assignable.GetComponent<KPrefabID>().IsAnyPrefabID(suitLocker.OutfitTags);
+			}
+		};
 
 		private WorkChore<SuitLocker.ReturnSuitWorkable> urgentChore;
 

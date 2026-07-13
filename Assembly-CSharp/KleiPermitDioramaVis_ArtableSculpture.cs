@@ -18,7 +18,7 @@ public class KleiPermitDioramaVis_ArtableSculpture : KMonoBehaviour, IKleiPermit
 	{
 		ArtableStage artableStage = (ArtableStage)permit;
 		KleiPermitVisUtil.ConfigureToRenderBuilding(this.buildingKAnim, artableStage);
-		KleiPermitVisUtil.AnimateIn(this.buildingKAnim, default(Updater));
+		KleiPermitVisUtil.AnimateIn(this.buildingKAnim, default(Updater), "place");
 	}
 
 	[SerializeField]

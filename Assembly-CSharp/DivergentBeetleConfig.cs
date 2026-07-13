@@ -10,7 +10,7 @@ public class DivergentBeetleConfig : IEntityConfig, IHasDlcRestrictions
 {
 	public static GameObject CreateDivergentBeetle(string id, string name, string desc, string anim_file, bool is_baby)
 	{
-		GameObject gameObject = EntityTemplates.ExtendEntityToWildCreature(BaseDivergentConfig.BaseDivergent(id, name, desc, 50f, anim_file, "DivergentBeetleBaseTrait", is_baby, 8f, null, "DivergentCropTended", 1, true), DivergentTuning.PEN_SIZE_PER_CREATURE);
+		GameObject gameObject = EntityTemplates.ExtendEntityToWildCreature(BaseDivergentConfig.BaseDivergent(id, name, desc, 50f, anim_file, is_baby ? null : "critter_build_kanim", "DivergentBeetleBaseTrait", is_baby, 8f, null, "DivergentCropTended", 1, true, "critter_emotes_kanim"), DivergentTuning.PEN_SIZE_PER_CREATURE);
 		Trait trait = Db.Get().CreateTrait("DivergentBeetleBaseTrait", name, name, null, false, null, true, true);
 		trait.Add(new AttributeModifier(Db.Get().Amounts.Calories.maxAttribute.Id, DivergentTuning.STANDARD_STOMACH_SIZE, name, false, false, true));
 		trait.Add(new AttributeModifier(Db.Get().Amounts.Calories.deltaAttribute.Id, -DivergentTuning.STANDARD_CALORIES_PER_CYCLE / 600f, UI.TOOLTIPS.BASE_VALUE, false, false, true));

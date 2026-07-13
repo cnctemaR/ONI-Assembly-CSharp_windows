@@ -234,12 +234,16 @@ public class TerrainBG : KMonoBehaviour
 			}
 			else if (ClusterGrid.Instance.GetVisibleEntityOfLayerAtAdjacentCell(component.Location, EntityLayer.Asteroid) != null)
 			{
-				material = this.starsMaterial_orbit;
+				material = this.starsMaterial_space;
 			}
 			else
 			{
 				material = this.starsMaterial_space;
 			}
+			bool flag = component.IsFlightInProgress() && component.HasResourcesToMove(1, Clustercraft.CombustionResource.All);
+			material.SetFloat("_IsInFlight", (float)(flag ? 1 : 0));
+			material.SetFloat("_AccelerationTimeStamp", component.LastTimeFlightBegan);
+			material.SetFloat("_DecelerationTimeStamp", component.LastTimeFlightStopped);
 		}
 		material.renderQueue = RenderQueues.Stars;
 		material.SetTexture("_NoiseVolume", this.noiseVolume);

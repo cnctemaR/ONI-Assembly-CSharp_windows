@@ -10,24 +10,24 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.SceneManagement
 {
-	[RequiredByNativeCode]
 	[NativeHeader("Runtime/Export/SceneManager/SceneManager.bindings.h")]
+	[RequiredByNativeCode]
 	public class SceneManager
 	{
 		public static extern int sceneCount
 		{
-			[NativeHeader("Runtime/SceneManager/SceneManager.h")]
 			[NativeMethod("GetSceneCount")]
 			[StaticAccessor("GetSceneManager()", StaticAccessorType.Dot)]
+			[NativeHeader("Runtime/SceneManager/SceneManager.h")]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
 		public static extern int loadedSceneCount
 		{
-			[NativeHeader("Runtime/SceneManager/SceneManager.h")]
 			[StaticAccessor("GetSceneManager()", StaticAccessorType.Dot)]
 			[NativeMethod("GetLoadedSceneCount")]
+			[NativeHeader("Runtime/SceneManager/SceneManager.h")]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
@@ -54,8 +54,8 @@ namespace UnityEngine.SceneManagement
 			return scene;
 		}
 
-		[NativeThrows]
 		[StaticAccessor("SceneManagerBindings", StaticAccessorType.DoubleColon)]
+		[NativeThrows]
 		public static bool SetActiveScene(Scene scene)
 		{
 			return SceneManager.SetActiveScene_Injected(ref scene);
@@ -100,15 +100,15 @@ namespace UnityEngine.SceneManagement
 			return scene;
 		}
 
-		[StaticAccessor("SceneManagerBindings", StaticAccessorType.DoubleColon)]
 		[NativeThrows]
+		[StaticAccessor("SceneManagerBindings", StaticAccessorType.DoubleColon)]
 		private static bool UnloadSceneInternal(Scene scene, UnloadSceneOptions options)
 		{
 			return SceneManager.UnloadSceneInternal_Injected(ref scene, options);
 		}
 
-		[StaticAccessor("SceneManagerBindings", StaticAccessorType.DoubleColon)]
 		[NativeThrows]
+		[StaticAccessor("SceneManagerBindings", StaticAccessorType.DoubleColon)]
 		private static AsyncOperation UnloadSceneAsyncInternal(Scene scene, UnloadSceneOptions options)
 		{
 			return SceneManager.UnloadSceneAsyncInternal_Injected(ref scene, options);
@@ -145,8 +145,8 @@ namespace UnityEngine.SceneManagement
 			return asyncOperation;
 		}
 
-		[StaticAccessor("SceneManagerBindings", StaticAccessorType.DoubleColon)]
 		[NativeThrows]
+		[StaticAccessor("SceneManagerBindings", StaticAccessorType.DoubleColon)]
 		public static void MergeScenes(Scene sourceScene, Scene destinationScene)
 		{
 			SceneManager.MergeScenes_Injected(ref sourceScene, ref destinationScene);

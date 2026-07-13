@@ -67,7 +67,7 @@ public class RoboPilotModuleConfig : IBuildingConfig
 		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.MachineFetch.IdHash;
 		manualDeliveryKG.capacity = storage.capacityKg;
 		manualDeliveryKG.refillMass = 20f;
-		manualDeliveryKG.requestedItemTag = DatabankHelper.TAG;
+		manualDeliveryKG.RequestedItemTag = DatabankHelper.TAG;
 		manualDeliveryKG.MinimumMass = 1f;
 		BuildingTemplates.ExtendBuildingToRocketModuleCluster(go, null, ROCKETRY.BURDEN.MODERATE, 0f, 0f);
 		go.GetComponent<ReorderableBuilding>().buildConditions.Add(new LimitOneRoboPilotModule());

@@ -5,8 +5,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[RequiredByNativeCode]
 	[NativeHeader("Modules/Physics/SphereCollider.h")]
+	[RequiredByNativeCode]
 	public class SphereCollider : Collider
 	{
 		public Vector3 center

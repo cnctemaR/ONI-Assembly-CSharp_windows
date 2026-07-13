@@ -15,7 +15,7 @@ public class KAnimGraphTileVisualizer : KMonoBehaviour, ISaveLoadable, IUtilityI
 		set
 		{
 			this._connections = value;
-			base.Trigger(-1041684577, this._connections);
+			base.BoxingTrigger<UtilityConnections>(-1041684577, this._connections);
 		}
 	}
 

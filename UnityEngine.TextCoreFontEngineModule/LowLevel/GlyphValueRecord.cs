@@ -110,8 +110,8 @@ namespace UnityEngine.TextCore.LowLevel
 			return !(lhs == rhs);
 		}
 
-		[NativeName("xPlacement")]
 		[SerializeField]
+		[NativeName("xPlacement")]
 		private float m_XPlacement;
 
 		[SerializeField]

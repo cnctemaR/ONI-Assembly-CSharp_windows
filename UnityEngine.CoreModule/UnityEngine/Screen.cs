@@ -7,10 +7,10 @@ using UnityEngine.Internal;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Graphics/ScreenManager.h")]
 	[StaticAccessor("GetScreenManager()", StaticAccessorType.Dot)]
-	[NativeHeader("Runtime/Graphics/WindowLayout.h")]
 	[NativeHeader("Runtime/Graphics/GraphicsScriptBindings.h")]
+	[NativeHeader("Runtime/Graphics/WindowLayout.h")]
+	[NativeHeader("Runtime/Graphics/ScreenManager.h")]
 	public sealed class Screen
 	{
 		public static extern int width
@@ -176,8 +176,8 @@ namespace UnityEngine
 			Screen.SetResolution_Injected(width, height, fullscreenMode, ref preferredRefreshRate);
 		}
 
-		[Obsolete("SetResolution(int, int, FullScreenMode, int) is obsolete. Use SetResolution(int, int, FullScreenMode, RefreshRate) instead.")]
 		[EditorBrowsable(EditorBrowsableState.Never)]
+		[Obsolete("SetResolution(int, int, FullScreenMode, int) is obsolete. Use SetResolution(int, int, FullScreenMode, RefreshRate) instead.")]
 		public static void SetResolution(int width, int height, FullScreenMode fullscreenMode, [DefaultValue("0")] int preferredRefreshRate)
 		{
 			bool flag = preferredRefreshRate < 0;

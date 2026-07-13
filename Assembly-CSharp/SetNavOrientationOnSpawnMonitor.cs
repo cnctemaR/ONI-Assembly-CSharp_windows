@@ -17,7 +17,7 @@ public class SetNavOrientationOnSpawnMonitor : GameStateMachine<SetNavOrientatio
 		public Instance(IStateMachineTarget master, SetNavOrientationOnSpawnMonitor.Def def)
 			: base(master, def)
 		{
-			base.Subscribe(1119167081, new Action<object>(this.SetSpawnOrientation));
+			this.setSpawnOrientationHandler = base.Subscribe(1119167081, new Action<object>(this.SetSpawnOrientation));
 		}
 
 		public void SetSpawnOrientation(object o)
@@ -37,8 +37,10 @@ public class SetNavOrientationOnSpawnMonitor : GameStateMachine<SetNavOrientatio
 
 		protected override void OnCleanUp()
 		{
-			base.Unsubscribe(1119167081, new Action<object>(this.SetSpawnOrientation));
+			base.Unsubscribe(ref this.setSpawnOrientationHandler);
 			base.OnCleanUp();
 		}
+
+		private int setSpawnOrientationHandler = -1;
 	}
 }

@@ -81,7 +81,6 @@ public class OrbitalMechanics : KMonoBehaviour
 				{
 					foreach (string text in smi.configuration.poiType.orbitalObject)
 					{
-						this.CreateOrbitalObject(text);
 					}
 				}
 			}
@@ -97,8 +96,7 @@ public class OrbitalMechanics : KMonoBehaviour
 					int num2 = 0;
 					while ((float)num2 < num)
 					{
-						int num3 = krandom.Next(orbitalObject.Count);
-						this.CreateOrbitalObject(orbitalObject[num3]);
+						krandom.Next(orbitalObject.Count);
 						num2++;
 					}
 					return;
@@ -108,17 +106,9 @@ public class OrbitalMechanics : KMonoBehaviour
 		else
 		{
 			Clustercraft component3 = base.GetComponent<Clustercraft>();
-			if (component3 != null)
+			if (component3 != null && !(component3.GetOrbitAsteroid() != null) && component3.Status != Clustercraft.CraftStatus.Launching && component3.Status == Clustercraft.CraftStatus.Landing)
 			{
-				if (component3.GetOrbitAsteroid() != null || component3.Status == Clustercraft.CraftStatus.Launching)
-				{
-					this.CreateOrbitalObject(Db.Get().OrbitalTypeCategories.orbit.Id);
-					return;
-				}
-				if (component3.Status == Clustercraft.CraftStatus.Landing)
-				{
-					this.CreateOrbitalObject(Db.Get().OrbitalTypeCategories.landed.Id);
-				}
+				this.CreateOrbitalObject(Db.Get().OrbitalTypeCategories.landed.Id);
 			}
 		}
 	}

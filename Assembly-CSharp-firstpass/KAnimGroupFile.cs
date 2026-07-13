@@ -28,7 +28,7 @@ public class KAnimGroupFile : ScriptableObject
 	{
 		global::Debug.Assert(KAnimGroupFile.groupfile != null, "GetGroup called before LoadAll called");
 		List<KAnimGroupFile.Group> list = KAnimGroupFile.groupfile.groups;
-		global::Debug.Assert(list != null, list.Count > 0);
+		global::Debug.Assert(list != null);
 		for (int i = 0; i < list.Count; i++)
 		{
 			KAnimGroupFile.Group group = list[i];

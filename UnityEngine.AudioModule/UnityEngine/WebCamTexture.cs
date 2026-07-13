@@ -6,14 +6,14 @@ using UnityEngine.Internal;
 namespace UnityEngine
 {
 	[NativeHeader("Runtime/Video/ScriptBindings/WebCamTexture.bindings.h")]
-	[NativeHeader("AudioScriptingClasses.h")]
 	[NativeHeader("Runtime/Video/BaseWebCamTexture.h")]
+	[NativeHeader("AudioScriptingClasses.h")]
 	public sealed class WebCamTexture : Texture
 	{
 		public static extern WebCamDevice[] devices
 		{
-			[NativeName("Internal_GetDevices")]
 			[StaticAccessor("WebCamTextureBindings", StaticAccessorType.DoubleColon)]
+			[NativeName("Internal_GetDevices")]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
@@ -142,7 +142,7 @@ namespace UnityEngine
 
 		[FreeFunction("WebCamTextureBindings::Internal_GetPixels32", HasExplicitThis = true, ThrowsException = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern Color32[] GetPixels32([DefaultValue("null")] [Unmarshalled] Color32[] colors);
+		public extern Color32[] GetPixels32([Unmarshalled] [DefaultValue("null")] Color32[] colors);
 
 		public Vector2? autoFocusPoint
 		{

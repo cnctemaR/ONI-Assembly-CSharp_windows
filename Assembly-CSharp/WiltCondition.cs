@@ -357,12 +357,12 @@ public class WiltCondition : KMonoBehaviour
 
 	private static readonly EventSystem.IntraObjectHandler<WiltCondition> SetEntombedDelegate = new EventSystem.IntraObjectHandler<WiltCondition>(delegate(WiltCondition component, object data)
 	{
-		component.SetCondition(WiltCondition.Condition.Entombed, !(bool)data);
+		component.SetCondition(WiltCondition.Condition.Entombed, !Boxed<bool>.Unbox(data));
 	});
 
 	private static readonly EventSystem.IntraObjectHandler<WiltCondition> SetRootHealthDelegate = new EventSystem.IntraObjectHandler<WiltCondition>(delegate(WiltCondition component, object data)
 	{
-		component.SetCondition(WiltCondition.Condition.UnhealthyRoot, (bool)data);
+		component.SetCondition(WiltCondition.Condition.UnhealthyRoot, Boxed<bool>.Unbox(data));
 	});
 
 	private static readonly EventSystem.IntraObjectHandler<WiltCondition> SetRadiationComfortFalseDelegate = new EventSystem.IntraObjectHandler<WiltCondition>(delegate(WiltCondition component, object data)
@@ -377,7 +377,7 @@ public class WiltCondition : KMonoBehaviour
 
 	private static readonly EventSystem.IntraObjectHandler<WiltCondition> SetPollinatedDelegate = new EventSystem.IntraObjectHandler<WiltCondition>(delegate(WiltCondition component, object data)
 	{
-		component.SetCondition(WiltCondition.Condition.Pollination, (bool)data);
+		component.SetCondition(WiltCondition.Condition.Pollination, Boxed<bool>.Unbox(data));
 	});
 
 	public enum Condition

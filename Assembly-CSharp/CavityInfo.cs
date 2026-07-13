@@ -10,6 +10,23 @@ public class CavityInfo
 		this.dirty = true;
 	}
 
+	public int NumCells
+	{
+		get
+		{
+			if (this.cells == null)
+			{
+				return 0;
+			}
+			return this.cells.Count;
+		}
+	}
+
+	public void AddEntity(KPrefabID entity)
+	{
+		this.otherEntities.Add(entity);
+	}
+
 	public void AddBuilding(KPrefabID bc)
 	{
 		this.buildings.Add(bc);
@@ -59,7 +76,7 @@ public class CavityInfo
 
 	public bool dirty;
 
-	public int numCells;
+	public List<int> cells;
 
 	public int maxX;
 
@@ -77,5 +94,13 @@ public class CavityInfo
 
 	public List<KPrefabID> creatures = new List<KPrefabID>();
 
+	public List<KPrefabID> fishes = new List<KPrefabID>();
+
+	public List<KPrefabID> otherEntities = new List<KPrefabID>();
+
 	public List<KPrefabID> eggs = new List<KPrefabID>();
+
+	public List<KPrefabID> fish_eggs = new List<KPrefabID>();
+
+	public OvercrowdingMonitor.Occupancy occupancy = new OvercrowdingMonitor.Occupancy();
 }

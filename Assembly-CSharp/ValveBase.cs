@@ -78,6 +78,17 @@ public class ValveBase : KMonoBehaviour, ISaveLoadable
 			Game.Instance.accumulators.Accumulate(this.flowAccumulator, num2);
 			if (num2 > 0f)
 			{
+				if (this.lastElementTransfered != contents.element && contents.element != SimHashes.Vacuum && this.conduitType == ConduitType.Liquid)
+				{
+					Element element = ElementLoader.FindElementByHash(contents.element);
+					if (element != null)
+					{
+						Color color = element.substance.colour;
+						color.a = 1f;
+						this.controller.SetSymbolTint(new KAnimHashedString("water_color"), color);
+					}
+				}
+				this.lastElementTransfered = contents.element;
 				flowManager.RemoveElement(this.inputCell, num2);
 			}
 		}
@@ -139,6 +150,8 @@ public class ValveBase : KMonoBehaviour, ISaveLoadable
 
 	[SerializeField]
 	public ValveBase.AnimRangeInfo[] animFlowRanges;
+
+	private SimHashes lastElementTransfered = SimHashes.Vacuum;
 
 	[Serializable]
 	public struct AnimRangeInfo

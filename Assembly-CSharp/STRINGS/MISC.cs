@@ -12,7 +12,7 @@ namespace STRINGS
 
 			public static LocString FILTER_DESC = string.Concat(new string[]
 			{
-				"Filtration Mediums are materials used to separate purified ",
+				"Filtration mediums are materials used to separate purified ",
 				UI.FormatAsLink("gases", "ELEMENTS_GAS"),
 				" or ",
 				UI.FormatAsLink("liquids", "ELEMENTS_LIQUID"),
@@ -133,6 +133,12 @@ namespace STRINGS
 
 			public static LocString CROPSEEDS = "Crop Seeds";
 
+			public static LocString CROPSEED = "Crop Seed";
+
+			public static LocString WATERSEED = "Aquatic Seed";
+
+			public static LocString DECORSEED = "Decor Seed";
+
 			public static LocString CERAMIC = UI.FormatAsLink("Ceramic", "CERAMIC");
 
 			public static LocString POLYPROPYLENE = UI.FormatAsLink("Plastic", "POLYPROPYLENE");
@@ -162,7 +168,16 @@ namespace STRINGS
 				"."
 			});
 
-			public static LocString SLIPPERY = "Slippery";
+			public static LocString SLIPPERY = UI.FormatAsLink("Slippery", "SLIPPERY");
+
+			public static LocString SLIPPERY_DESC = string.Concat(new string[]
+			{
+				"Some ",
+				UI.FormatAsLink("liquids", "ELEMENTS_LIQUID"),
+				" and ",
+				UI.FormatAsLink("solids", "ELEMENTS_SOLID"),
+				" have a remarkably low coefficient of friction. These present a safety hazard if left on the ground, as Duplicants may slip and fall when traveling across them."
+			});
 
 			public static LocString LEAD = UI.FormatAsLink("Lead", "LEAD");
 
@@ -184,9 +199,18 @@ namespace STRINGS
 
 			public static LocString ORGANICS = "Organic";
 
+			public static LocString ORGANICS_DESC = string.Concat(new string[]
+			{
+				"Organic materials are useful ingredients gathered from the environment, harvested from ",
+				UI.FormatAsLink("plants", "PLANTS"),
+				" or derived from ",
+				UI.FormatAsLink("critters", "CREATURES"),
+				".\n\nSome, not all, require additional processing before they can be used."
+			});
+
 			public static LocString CONSUMABLEORE = "Consumable Ore";
 
-			public static LocString SUBLIMATING = UI.FormatAsLink("Sublimators", "SUBLIMATES");
+			public static LocString SUBLIMATING = UI.FormatAsLink("Sublimator", "SUBLIMATES");
 
 			public static LocString SUBLIMATING_SUBHEADER = "Off-Gassing Elements";
 
@@ -222,6 +246,10 @@ namespace STRINGS
 			public static LocString INDUSTRIALPRODUCT = "Industrial Product";
 
 			public static LocString INDUSTRIALINGREDIENT = UI.FormatAsLink("Industrial Ingredient", "INDUSTRIALINGREDIENT");
+
+			public static LocString TECHCOMPONENTS = UI.FormatAsLink("Tech Component", "TECHCOMPONENTS");
+
+			public static LocString ORNAMENT = UI.FormatAsLink("Ornament", "ORNAMENT");
 
 			public static LocString MEDICALSUPPLIES = "Medical Supplies";
 
@@ -264,7 +292,7 @@ namespace STRINGS
 				".\n\nComposting also generates a small amount of ",
 				UI.FormatAsLink("Heat", "HEAT"),
 				".\n\nOnce it starts to rot, consumable food should be composted to prevent ",
-				UI.FormatAsLink("Food Poisoning", "FOODSICKNESS"),
+				DUPLICANTS.DISEASES.FOODPOISONING.NAME,
 				"."
 			});
 
@@ -370,6 +398,10 @@ namespace STRINGS
 
 			public static LocString OXYGENCANISTER = "Oxygen Canister";
 
+			public static LocString ORNAMENTDISPLAYED = "Ornament";
+
+			public static LocString PEDESTALDISPLAYABLE = "Other Pedestal Displayable";
+
 			public static LocString COMMAND_MODULE = "Command Module";
 
 			public static LocString HABITAT_MODULE = "Habitat Module";
@@ -406,6 +438,8 @@ namespace STRINGS
 
 			public static LocString UNIDENTIFIEDSEED = "Seed (Unidentified Mutation)";
 
+			public static LocString ARTIFACT = "Artifact";
+
 			public static LocString CHARMEDARTIFACT = "Artifact of Interest";
 
 			public static LocString GENE_SHUFFLER = "Neural Vacillator";
@@ -439,6 +473,8 @@ namespace STRINGS
 			public static LocString ADVANCEDDOCTORSTATIONMEDICALSUPPLIES = "Serum Vial";
 
 			public static LocString DOCTORSTATIONMEDICALSUPPLIES = "Medical Pack";
+
+			public static LocString LONGRANGEMISSILE = "Long Range Missile";
 		}
 
 		public class STATUSITEMS
@@ -969,6 +1005,13 @@ namespace STRINGS
 				public static LocString TOOLTIP = "Duplicants cannot reach this object to move it";
 			}
 
+			public class CLUSTERMAPHARVESTABLERESOURCE
+			{
+				public static LocString NAME = "{0}";
+
+				public static LocString TOOLTIP = "{0}";
+			}
+
 			public class PENDINGCARVE
 			{
 				public static LocString NAME = "Carve Errand";
@@ -1247,9 +1290,9 @@ namespace STRINGS
 				{
 					UI.FormatAsLink("Germs", "DISEASE"),
 					" such as ",
-					UI.FormatAsLink("Food Poisoning", "FOODSICKNESS"),
+					DUPLICANTS.DISEASES.FOODPOISONING.NAME,
 					" and ",
-					UI.FormatAsLink("Slimelung", "SLIMESICKNESS"),
+					DUPLICANTS.DISEASES.SLIMELUNG.NAME,
 					" can cause ",
 					UI.FormatAsLink("Disease", "DISEASE"),
 					" in my Duplicants. I can use the ",
@@ -1346,7 +1389,7 @@ namespace STRINGS
 					UI.FormatAsHotKey(global::Action.Overlay15),
 					" to check the scope of the Radiation field. Building thick walls around radiation emitters will dampen the field and protect my Duplicants from getting ",
 					UI.FormatAsLink("Radiation Sickness", "RADIATIONSICKNESS"),
-					" ."
+					"."
 				});
 			}
 
@@ -1949,7 +1992,7 @@ namespace STRINGS
 					" have improved:"
 				});
 
-				public static LocString SUFFIX = " - {0} Skill Level modifier raised to +{1}";
+				public static LocString SUFFIX = " - {0} Attribute Level modifier raised to +{1}";
 			}
 
 			public class RESETSKILL
@@ -2057,9 +2100,9 @@ namespace STRINGS
 
 			public class LARGE_IMPACTOR_KEEPSAKE
 			{
-				public static LocString NAME = "Stereoscope Found";
+				public static LocString NAME = "Artifact found";
 
-				public static LocString TOOLTIP = "A stereoscope artifact has fallen from space";
+				public static LocString TOOLTIP = "An artifact has been found in Demolior's rubble";
 			}
 
 			public class SUIT_DROPPED

@@ -1,5 +1,6 @@
 ﻿using System;
 using UnityEngine;
+using UnityEngine.Pool;
 
 public class KObject
 {
@@ -17,18 +18,24 @@ public class KObject
 	{
 		if (this.eventSystem != null)
 		{
-			this.eventSystem.OnCleanUp();
+			KObject.eventSystemPool.Release(this.eventSystem);
 			this.eventSystem = null;
 		}
 	}
 
-	public EventSystem GetEventSystem()
+	public EventSystem GetOrCreateEventSystem()
 	{
 		if (this.eventSystem == null)
 		{
-			this.eventSystem = new EventSystem();
+			this.eventSystem = KObject.eventSystemPool.Get();
 		}
 		return this.eventSystem;
+	}
+
+	public bool GetEventSystem(out EventSystem evtSys)
+	{
+		evtSys = this.eventSystem;
+		return this.hasEventSystem;
 	}
 
 	public int id { get; private set; }
@@ -40,6 +47,11 @@ public class KObject
 			return this.eventSystem != null;
 		}
 	}
+
+	private static ObjectPool<EventSystem> eventSystemPool = new ObjectPool<EventSystem>(() => new EventSystem(), null, delegate(EventSystem es)
+	{
+		es.OnCleanUp();
+	}, null, false, 32, 10000);
 
 	private EventSystem eventSystem;
 }

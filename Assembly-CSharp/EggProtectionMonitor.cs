@@ -11,17 +11,17 @@ public class EggProtectionMonitor : GameStateMachine<EggProtectionMonitor, EggPr
 		this.find_egg.BatchUpdate(new UpdateBucketWithUpdater<EggProtectionMonitor.Instance>.BatchUpdateDelegate(EggProtectionMonitor.Instance.FindEggToGuard), UpdateRate.SIM_200ms).ParamTransition<bool>(this.hasEggToGuard, this.guard.safe, GameStateMachine<EggProtectionMonitor, EggProtectionMonitor.Instance, IStateMachineTarget, EggProtectionMonitor.Def>.IsTrue);
 		this.guard.Enter(delegate(EggProtectionMonitor.Instance smi)
 		{
-			smi.gameObject.AddOrGet<SymbolOverrideController>().ApplySymbolOverridesByAffix(Assets.GetAnim("pincher_kanim"), smi.def.animPrefix, "_heat", 0);
+			smi.gameObject.AddOrGet<SymbolOverrideController>().ApplySymbolOverridesByAffix(Assets.GetAnim("pincher_build_kanim"), smi.def.animPrefix, "_heat", 0);
 			smi.gameObject.AddOrGet<FactionAlignment>().SwitchAlignment(FactionManager.FactionID.Hostile);
 		}).Exit(delegate(EggProtectionMonitor.Instance smi)
 		{
 			if (!smi.def.animPrefix.IsNullOrWhiteSpace())
 			{
-				smi.gameObject.AddOrGet<SymbolOverrideController>().ApplySymbolOverridesByAffix(Assets.GetAnim("pincher_kanim"), smi.def.animPrefix, null, 0);
+				smi.gameObject.AddOrGet<SymbolOverrideController>().ApplySymbolOverridesByAffix(Assets.GetAnim("pincher_build_kanim"), smi.def.animPrefix, null, 0);
 			}
 			else
 			{
-				smi.gameObject.AddOrGet<SymbolOverrideController>().RemoveBuildOverride(Assets.GetAnim("pincher_kanim").GetData(), 0);
+				smi.gameObject.AddOrGet<SymbolOverrideController>().RemoveBuildOverride(Assets.GetAnim("pincher_build_kanim").GetData(), 0);
 			}
 			smi.gameObject.AddOrGet<FactionAlignment>().SwitchAlignment(FactionManager.FactionID.Pest);
 		}).Update("CanProtectEgg", delegate(EggProtectionMonitor.Instance smi, float dt)
@@ -53,6 +53,8 @@ public class EggProtectionMonitor : GameStateMachine<EggProtectionMonitor, EggPr
 			smi.GoTo(smi.sm.guard.safe);
 		}
 	}
+
+	private const string BUILD = "pincher_build_kanim";
 
 	public StateMachine<EggProtectionMonitor, EggProtectionMonitor.Instance, IStateMachineTarget, EggProtectionMonitor.Def>.BoolParameter hasEggToGuard;
 
@@ -127,7 +129,9 @@ public class EggProtectionMonitor : GameStateMachine<EggProtectionMonitor, EggPr
 			}
 			pooledList.Recycle();
 			EggProtectionMonitor.Instance.find_eggs_job.Reset(null);
-			foreach (UpdateBucketWithUpdater<EggProtectionMonitor.Instance>.Entry entry in new List<UpdateBucketWithUpdater<EggProtectionMonitor.Instance>.Entry>(instances))
+			ListPool<UpdateBucketWithUpdater<EggProtectionMonitor.Instance>.Entry, EggProtectionMonitor>.PooledList pooledList3 = ListPool<UpdateBucketWithUpdater<EggProtectionMonitor.Instance>.Entry, EggProtectionMonitor>.Allocate();
+			pooledList3.AddRange(instances);
+			foreach (UpdateBucketWithUpdater<EggProtectionMonitor.Instance>.Entry entry in pooledList3)
 			{
 				GameObject gameObject = null;
 				int num2 = 100;
@@ -142,6 +146,7 @@ public class EggProtectionMonitor : GameStateMachine<EggProtectionMonitor, EggPr
 				}
 				entry.data.SetEggToGuard(gameObject);
 			}
+			pooledList3.Recycle();
 			pooledList2.Recycle();
 		}
 

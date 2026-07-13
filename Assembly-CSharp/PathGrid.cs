@@ -3,9 +3,28 @@ using System.Collections.Generic;
 
 public class PathGrid
 {
-	public void SetGroupProber(IGroupProber group_prober)
+	public ulong AllocatedClassification
 	{
-		this.groupProber = group_prober;
+		get
+		{
+			DebugUtil.Assert(this.widthInCells < 65535);
+			DebugUtil.Assert(this.heightInCells < 65535);
+			DebugUtil.Assert(this.ValidNavTypes.Length < 256);
+			return (ulong)((((long)this.widthInCells << 16) + (long)this.heightInCells << 8) + (long)this.ValidNavTypes.Length);
+		}
+	}
+
+	public ushort SerialNo
+	{
+		get
+		{
+			return this.serialNo;
+		}
+	}
+
+	public PathGrid(PathGrid other)
+		: this(other.widthInCells, other.heightInCells, other.applyOffset, other.ValidNavTypes)
+	{
 	}
 
 	public PathGrid(int width_in_cells, int height_in_cells, bool apply_offset, NavType[] valid_nav_types)
@@ -31,66 +50,51 @@ public class PathGrid
 		DebugUtil.DevAssert(true, "Cell packs nav type into 4 bits!", null);
 		this.Cells = new PathFinder.Cell[width_in_cells * height_in_cells * this.ValidNavTypes.Length];
 		this.ProberCells = new PathGrid.ProberCell[width_in_cells * height_in_cells];
-		this.serialNo = 0;
-		this.previousSerialNo = -1;
-		this.isUpdating = false;
+	}
+
+	public void CloneNavTypes(PathGrid other)
+	{
+		DebugUtil.Assert(other.ValidNavTypes.Length == this.ValidNavTypes.Length);
+		other.ValidNavTypes.CopyTo(this.ValidNavTypes, 0);
+		int num = 0;
+		for (int i = 0; i < this.NavTypeTable.Length; i++)
+		{
+			this.NavTypeTable[i] = -1;
+			for (int j = 0; j < this.ValidNavTypes.Length; j++)
+			{
+				if (this.ValidNavTypes[j] == (NavType)i)
+				{
+					this.NavTypeTable[i] = num++;
+					break;
+				}
+			}
+		}
 	}
 
 	public void OnCleanUp()
 	{
-		if (this.groupProber != null)
-		{
-			this.groupProber.ReleaseProber(this);
-		}
 	}
 
-	public void ResetUpdate()
+	public void BeginUpdate(ushort new_serial_no, int root_cell, List<int> found_cells_list = null)
 	{
-		this.previousSerialNo = -1;
-	}
-
-	public void BeginUpdate(int root_cell, bool isContinuation)
-	{
-		this.isUpdating = true;
-		this.freshlyOccupiedCells.Clear();
-		if (isContinuation)
-		{
-			return;
-		}
+		this.freshlyOccupiedCells = found_cells_list;
 		if (this.applyOffset)
 		{
 			Grid.CellToXY(root_cell, out this.rootX, out this.rootY);
 			this.rootX -= this.widthInCells / 2;
 			this.rootY -= this.heightInCells / 2;
 		}
-		this.serialNo += 1;
-		if (this.groupProber != null)
-		{
-			this.groupProber.SetValidSerialNos(this, this.previousSerialNo, this.serialNo);
-		}
+		this.serialNo = new_serial_no;
 	}
 
-	public void EndUpdate(bool isComplete)
+	public void EndUpdate()
 	{
-		this.isUpdating = false;
-		if (this.groupProber != null)
-		{
-			this.groupProber.Occupy(this, this.serialNo, this.freshlyOccupiedCells);
-		}
-		if (!isComplete)
-		{
-			return;
-		}
-		if (this.groupProber != null)
-		{
-			this.groupProber.SetValidSerialNos(this, this.serialNo, this.serialNo);
-		}
-		this.previousSerialNo = this.serialNo;
+		this.freshlyOccupiedCells = null;
 	}
 
-	private bool IsValidSerialNo(short serialNo)
+	private bool IsValidSerialNo(ushort serialNo)
 	{
-		return serialNo == this.serialNo || (!this.isUpdating && this.previousSerialNo != -1 && serialNo == this.previousSerialNo);
+		return serialNo == this.serialNo && serialNo > 0;
 	}
 
 	public PathFinder.Cell GetCell(PathFinder.PotentialPath potential_path, out bool is_cell_in_range)
@@ -106,12 +110,30 @@ public class PathGrid
 		{
 			return PathGrid.InvalidCell;
 		}
+		if ((int)nav_type >= this.NavTypeTable.Length)
+		{
+			return PathGrid.InvalidCell;
+		}
+		if (num * this.ValidNavTypes.Length + this.NavTypeTable[(int)nav_type] >= this.Cells.Length)
+		{
+			return PathGrid.InvalidCell;
+		}
 		PathFinder.Cell cell2 = this.Cells[num * this.ValidNavTypes.Length + this.NavTypeTable[(int)nav_type]];
 		if (!this.IsValidSerialNo(cell2.queryId))
 		{
 			return PathGrid.InvalidCell;
 		}
 		return cell2;
+	}
+
+	private PathGrid.ProberCell GetProberCell(int cell)
+	{
+		int num = this.OffsetCell(cell);
+		if (num == -1)
+		{
+			return PathGrid.InvalidProberCell;
+		}
+		return this.ProberCells[num];
 	}
 
 	public void SetCell(PathFinder.PotentialPath potential_path, ref PathFinder.Cell cell_data)
@@ -132,8 +154,14 @@ public class PathGrid
 			{
 				proberCell.queryId = cell_data.queryId;
 				proberCell.cost = cell_data.cost;
+				proberCell.navType = potential_path.navType;
 				this.ProberCells[num] = proberCell;
-				this.freshlyOccupiedCells.Add(potential_path.cell);
+				List<int> list = this.freshlyOccupiedCells;
+				if (list == null)
+				{
+					return;
+				}
+				list.Add(potential_path.cell);
 			}
 		}
 	}
@@ -188,11 +216,50 @@ public class PathGrid
 		return (num2 - this.rootY) * this.widthInCells + num3;
 	}
 
+	public bool BuildPath(int source_cell, int target_cell, NavType current_nav_type, ref PathFinder.Path path)
+	{
+		if (path.nodes != null)
+		{
+			path.nodes.Clear();
+		}
+		path.cost = -1;
+		if (target_cell == PathFinder.InvalidCell || this.GetCost(target_cell) == -1)
+		{
+			return false;
+		}
+		bool flag = false;
+		PathGrid.ProberCell proberCell = this.GetProberCell(target_cell);
+		PathFinder.Cell cell = this.GetCell(target_cell, proberCell.navType, out flag);
+		path.Clear();
+		path.cost = cell.cost;
+		while (target_cell != PathFinder.InvalidCell)
+		{
+			path.AddNode(new PathFinder.Path.Node
+			{
+				cell = target_cell,
+				navType = cell.navType,
+				transitionId = cell.transitionId
+			});
+			if (target_cell == source_cell && cell.navType == current_nav_type)
+			{
+				path.nodes.Reverse();
+				return true;
+			}
+			if (target_cell != PathFinder.InvalidCell)
+			{
+				target_cell = cell.parent;
+				cell = this.GetCell(target_cell, cell.parentNavType, out flag);
+			}
+		}
+		path.Clear();
+		return false;
+	}
+
 	private PathFinder.Cell[] Cells;
 
 	private PathGrid.ProberCell[] ProberCells;
 
-	private List<int> freshlyOccupiedCells = new List<int>();
+	private List<int> freshlyOccupiedCells;
 
 	private NavType[] ValidNavTypes;
 
@@ -208,23 +275,27 @@ public class PathGrid
 
 	private int rootY;
 
-	private short serialNo;
-
-	private short previousSerialNo;
-
-	private bool isUpdating;
-
-	private IGroupProber groupProber;
+	private ushort serialNo;
 
 	public static readonly PathFinder.Cell InvalidCell = new PathFinder.Cell
 	{
-		cost = -1
+		cost = -1,
+		parent = -1
+	};
+
+	private static readonly PathGrid.ProberCell InvalidProberCell = new PathGrid.ProberCell
+	{
+		cost = -1,
+		queryId = 0,
+		navType = NavType.Floor
 	};
 
 	private struct ProberCell
 	{
 		public int cost;
 
-		public short queryId;
+		public ushort queryId;
+
+		public NavType navType;
 	}
 }

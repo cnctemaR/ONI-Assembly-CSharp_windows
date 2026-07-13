@@ -74,7 +74,7 @@ public class EntombVulnerable : KMonoBehaviour, IWiltCause
 		if (this.isEntombed)
 		{
 			base.GetComponent<KPrefabID>().AddTag(GameTags.Entombed, false);
-			base.Trigger(-1089732772, true);
+			base.Trigger(-1089732772, BoxedBools.True);
 		}
 	}
 
@@ -106,7 +106,7 @@ public class EntombVulnerable : KMonoBehaviour, IWiltCause
 					this.selectable.AddStatusItem(this.EntombedStatusItem, base.gameObject);
 				}
 				base.GetComponent<KPrefabID>().AddTag(GameTags.Entombed, false);
-				base.Trigger(-1089732772, true);
+				base.Trigger(-1089732772, BoxedBools.True);
 			}
 		}
 		else if (this.isEntombed)
@@ -114,7 +114,7 @@ public class EntombVulnerable : KMonoBehaviour, IWiltCause
 			this.isEntombed = false;
 			this.selectable.RemoveStatusItem(this.EntombedStatusItem, false);
 			base.GetComponent<KPrefabID>().RemoveTag(GameTags.Entombed);
-			base.Trigger(-1089732772, false);
+			base.Trigger(-1089732772, BoxedBools.False);
 		}
 		if (this.operational != null)
 		{

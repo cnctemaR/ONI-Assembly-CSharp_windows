@@ -98,7 +98,7 @@ public class Durability : KMonoBehaviour
 			JetSuitTank component3 = base.gameObject.GetComponent<JetSuitTank>();
 			if (component3)
 			{
-				component2.AddLiquid(SimHashes.Petroleum, component3.amount, base.GetComponent<PrimaryElement>().Temperature, byte.MaxValue, 0, false, true);
+				component2.AddLiquid((component3.lastFuelUsed != SimHashes.Vacuum) ? component3.lastFuelUsed : SimHashes.Petroleum, component3.amount, base.GetComponent<PrimaryElement>().Temperature, byte.MaxValue, 0, false, true);
 			}
 			component2.DropAll(false, false, default(Vector3), true, null);
 		}

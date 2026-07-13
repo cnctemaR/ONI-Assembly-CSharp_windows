@@ -12,26 +12,6 @@ public class FetchManager : KMonoBehaviour, ISim1000ms
 		return (int)(4f * rot_value);
 	}
 
-	[Conditional("ENABLE_FETCH_PROFILING")]
-	private static void BeginDetailedSample(string region_name)
-	{
-	}
-
-	[Conditional("ENABLE_FETCH_PROFILING")]
-	private static void BeginDetailedSample(string region_name, int count)
-	{
-	}
-
-	[Conditional("ENABLE_FETCH_PROFILING")]
-	private static void EndDetailedSample(string region_name)
-	{
-	}
-
-	[Conditional("ENABLE_FETCH_PROFILING")]
-	private static void EndDetailedSample(string region_name, int count)
-	{
-	}
-
 	public HandleVector<int>.Handle Add(Pickupable pickupable)
 	{
 		Tag tag = pickupable.KPrefabID.PrefabID();
@@ -75,9 +55,8 @@ public class FetchManager : KMonoBehaviour, ISim1000ms
 		}
 	}
 
-	public void UpdatePickups(PathProber path_prober, WorkerBase worker)
+	public void UpdatePickups(Navigator navigator, WorkerBase worker)
 	{
-		Navigator component = worker.GetComponent<Navigator>();
 		this.updateOffsetTables.Reset(null);
 		this.updatePickupsWorkItems.Reset(null);
 		foreach (KeyValuePair<Tag, FetchManager.FetchablesByPrefabId> keyValuePair in this.prefabIdToFetchables)
@@ -87,8 +66,7 @@ public class FetchManager : KMonoBehaviour, ISim1000ms
 			this.updatePickupsWorkItems.Add(new FetchManager.UpdatePickupWorkItem
 			{
 				fetchablesByPrefabId = value,
-				pathProber = path_prober,
-				navigator = component,
+				navigator = navigator,
 				worker = worker.GetComponent<KPrefabID>().InstanceID
 			});
 		}
@@ -256,7 +234,7 @@ public class FetchManager : KMonoBehaviour, ISim1000ms
 			{
 				GameObject gameObject = (GameObject)obj;
 				int num3 = Grid.PosToCell(gameObject);
-				int cost = component.PathProber.GetCost(num3);
+				int cost = component.PathGrid.GetCost(num3);
 				if (cost != -1 && num > cost + 50 + 5)
 				{
 					AccessabilityManager accessabilityManager = ((gameObject != null) ? gameObject.GetComponent<AccessabilityManager>() : null);
@@ -433,7 +411,7 @@ public class FetchManager : KMonoBehaviour, ISim1000ms
 			this.rotUpdaters.Remove(fetchable_handle);
 		}
 
-		public void UpdatePickups(PathProber path_prober, Navigator worker_navigator, int worker)
+		public void UpdatePickups(Navigator worker_navigator, int worker)
 		{
 			this.GatherPickupablesWhichCanBePickedUp(worker);
 			this.GatherReachablePickups(worker_navigator);
@@ -618,12 +596,10 @@ public class FetchManager : KMonoBehaviour, ISim1000ms
 	{
 		public void Run(object shared_data, int threadIndex)
 		{
-			this.fetchablesByPrefabId.UpdatePickups(this.pathProber, this.navigator, this.worker);
+			this.fetchablesByPrefabId.UpdatePickups(this.navigator, this.worker);
 		}
 
 		public FetchManager.FetchablesByPrefabId fetchablesByPrefabId;
-
-		public PathProber pathProber;
 
 		public Navigator navigator;
 

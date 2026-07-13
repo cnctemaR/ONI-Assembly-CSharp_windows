@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 
 public class KBatchedAnimUpdater : Singleton<KBatchedAnimUpdater>
@@ -82,7 +83,7 @@ public class KBatchedAnimUpdater : Singleton<KBatchedAnimUpdater>
 			controller.updateRegistrationState = KBatchedAnimUpdater.RegistrationState.Registered;
 			return;
 		case KBatchedAnimUpdater.RegistrationState.Unregistered:
-			((controller.visibilityType == KAnimControllerBase.VisibilityType.Always) ? this.alwaysUpdateList : this.updateList).AddLast(controller);
+			((controller.visibilityType == KAnimControllerBase.VisibilityType.Always) ? this.alwaysUpdateList : this.updateList).Add(controller);
 			controller.updateRegistrationState = KBatchedAnimUpdater.RegistrationState.Registered;
 			break;
 		default:
@@ -161,29 +162,29 @@ public class KBatchedAnimUpdater : Singleton<KBatchedAnimUpdater>
 		}
 	}
 
-	private static void UpdateRegisteredAnims(LinkedList<KBatchedAnimController> list, float dt)
+	private static void UpdateRegisteredAnims(List<KBatchedAnimController> list, float dt)
 	{
-		LinkedListNode<KBatchedAnimController> next;
-		for (LinkedListNode<KBatchedAnimController> linkedListNode = list.First; linkedListNode != null; linkedListNode = next)
+		for (int i = list.Count - 1; i >= 0; i--)
 		{
-			next = linkedListNode.Next;
-			KBatchedAnimController value = linkedListNode.Value;
-			if (value == null)
+			KBatchedAnimController kbatchedAnimController = list[i];
+			if (kbatchedAnimController == null)
 			{
-				list.Remove(linkedListNode);
+				list[i] = list[list.Count - 1];
+				list.RemoveAt(list.Count - 1);
 			}
-			else if (value.updateRegistrationState != KBatchedAnimUpdater.RegistrationState.Registered)
+			else if (kbatchedAnimController.updateRegistrationState != KBatchedAnimUpdater.RegistrationState.Registered)
 			{
-				value.updateRegistrationState = KBatchedAnimUpdater.RegistrationState.Unregistered;
-				list.Remove(linkedListNode);
+				kbatchedAnimController.updateRegistrationState = KBatchedAnimUpdater.RegistrationState.Unregistered;
+				list[i] = list[list.Count - 1];
+				list.RemoveAt(list.Count - 1);
 			}
-			else if (value.forceUseGameTime)
+			else if (kbatchedAnimController.forceUseGameTime)
 			{
-				value.UpdateAnim(Time.deltaTime);
+				kbatchedAnimController.UpdateAnim(Time.deltaTime);
 			}
 			else
 			{
-				value.UpdateAnim(dt);
+				kbatchedAnimController.UpdateAnim(dt);
 			}
 		}
 	}
@@ -323,7 +324,7 @@ public class KBatchedAnimUpdater : Singleton<KBatchedAnimUpdater>
 					if (Singleton<CellChangeMonitor>.Instance != null)
 					{
 						flag = Singleton<CellChangeMonitor>.Instance.IsMoving(registrationInfo.controller.transform);
-						Singleton<CellChangeMonitor>.Instance.RegisterMovementStateChanged(registrationInfo.controller.transform, new Action<Transform, bool>(this.OnMovementStateChanged));
+						registrationInfo.controller.movementChangedHandlerId = Singleton<CellChangeMonitor>.Instance.RegisterMovementStateChanged(registrationInfo.controller.transform, KBatchedAnimUpdater.onMovementStateChangedAction, registrationInfo.controller);
 					}
 					Dictionary<int, KBatchedAnimController> controllerMap = this.GetControllerMap(controllerChunkInfo.chunkXY);
 					if (controllerMap != null)
@@ -369,7 +370,7 @@ public class KBatchedAnimUpdater : Singleton<KBatchedAnimUpdater>
 						registrationInfo.controller.SetVisiblity(false);
 					}
 					this.movingControllerInfos.Remove(registrationInfo.controllerInstanceId);
-					Singleton<CellChangeMonitor>.Instance.UnregisterMovementStateChanged(registrationInfo.transformId, new Action<Transform, bool>(this.OnMovementStateChanged));
+					Singleton<CellChangeMonitor>.Instance.UnregisterMovementStateChanged(ref registrationInfo.controller.movementChangedHandlerId);
 					this.controllerChunkInfos.Remove(registrationInfo.controllerInstanceId);
 				}
 			}
@@ -377,33 +378,35 @@ public class KBatchedAnimUpdater : Singleton<KBatchedAnimUpdater>
 		this.queuedRegistrations.Clear();
 	}
 
-	public void OnMovementStateChanged(Transform transform, bool is_moving)
+	public void OnMovementStateChanged(Transform transform, bool is_moving, KBatchedAnimController controller)
 	{
 		if (transform == null)
 		{
 			return;
 		}
-		KBatchedAnimController component = transform.GetComponent<KBatchedAnimController>();
-		if (component == null)
+		if (controller == null)
 		{
 			return;
 		}
-		int instanceID = component.GetInstanceID();
+		int instanceID = controller.GetInstanceID();
 		KBatchedAnimUpdater.ControllerChunkInfo controllerChunkInfo = default(KBatchedAnimUpdater.ControllerChunkInfo);
 		DebugUtil.Assert(this.controllerChunkInfos.TryGetValue(instanceID, out controllerChunkInfo));
 		if (is_moving)
 		{
-			DebugUtil.DevAssertArgs(!this.movingControllerInfos.ContainsKey(instanceID), new object[]
+			if (this.movingControllerInfos.ContainsKey(instanceID))
 			{
-				"Readding controller which is already moving",
-				component.name,
-				controllerChunkInfo.chunkXY,
-				this.movingControllerInfos.ContainsKey(instanceID) ? this.movingControllerInfos[instanceID].chunkXY.ToString() : null
-			});
+				DebugUtil.DevAssertArgs(!this.movingControllerInfos.ContainsKey(instanceID), new object[]
+				{
+					"Readding controller which is already moving",
+					controller.name,
+					controllerChunkInfo.chunkXY,
+					this.movingControllerInfos.ContainsKey(instanceID) ? this.movingControllerInfos[instanceID].chunkXY.ToString() : null
+				});
+			}
 			this.movingControllerInfos[instanceID] = new KBatchedAnimUpdater.MovingControllerInfo
 			{
 				controllerInstanceId = instanceID,
-				controller = component,
+				controller = controller,
 				chunkXY = controllerChunkInfo.chunkXY
 			};
 			return;
@@ -452,9 +455,9 @@ public class KBatchedAnimUpdater : Singleton<KBatchedAnimUpdater>
 
 	private Dictionary<int, KBatchedAnimController>[,] controllerGrid;
 
-	private LinkedList<KBatchedAnimController> updateList = new LinkedList<KBatchedAnimController>();
+	private List<KBatchedAnimController> updateList = new List<KBatchedAnimController>();
 
-	private LinkedList<KBatchedAnimController> alwaysUpdateList = new LinkedList<KBatchedAnimController>();
+	private List<KBatchedAnimController> alwaysUpdateList = new List<KBatchedAnimController>();
 
 	private bool[,] visibleChunkGrid;
 
@@ -479,6 +482,11 @@ public class KBatchedAnimUpdater : Singleton<KBatchedAnimUpdater>
 	private int cleanUpChunkIndex;
 
 	private static readonly Vector2 VISIBLE_RANGE_SCALE = new Vector2(1.5f, 1.5f);
+
+	private static Action<Transform, bool, object> onMovementStateChangedAction = delegate(Transform transform, bool is_moving, object context)
+	{
+		Singleton<KBatchedAnimUpdater>.Instance.OnMovementStateChanged(transform, is_moving, Unsafe.As<KBatchedAnimController>(context));
+	};
 
 	public enum RegistrationState
 	{

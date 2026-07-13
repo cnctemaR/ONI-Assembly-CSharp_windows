@@ -83,7 +83,7 @@ public class TuningSystem
 			TuningSystem._TuningPath,
 			string.Empty
 		};
-		if (Thread.CurrentThread == KProfiler.main_thread)
+		if (Thread.CurrentThread == TuningSystem.main_thread)
 		{
 			array[1] = Path.Combine(Application.dataPath, "Tuning.json");
 		}
@@ -129,6 +129,8 @@ public class TuningSystem
 	{
 		return TuningSystem._TuningValues;
 	}
+
+	public static Thread main_thread;
 
 	private static JsonSerializerSettings _SerializationSettings = new JsonSerializerSettings
 	{

@@ -9,10 +9,10 @@ using UnityEngine.Scripting.APIUpdating;
 namespace UnityEngine.Animations
 {
 	[NativeHeader("Runtime/Director/Core/HPlayableGraph.h")]
-	[NativeHeader("Modules/Animation/ScriptBindings/AnimationScriptPlayable.bindings.h")]
+	[NativeHeader("Runtime/Director/Core/HPlayable.h")]
 	[StaticAccessor("AnimationScriptPlayableBindings", StaticAccessorType.DoubleColon)]
 	[RequiredByNativeCode]
-	[NativeHeader("Runtime/Director/Core/HPlayable.h")]
+	[NativeHeader("Modules/Animation/ScriptBindings/AnimationScriptPlayable.bindings.h")]
 	[MovedFrom("UnityEngine.Experimental.Animations")]
 	public struct AnimationScriptPlayable : IAnimationJobPlayable, IPlayable, IEquatable<AnimationScriptPlayable>
 	{

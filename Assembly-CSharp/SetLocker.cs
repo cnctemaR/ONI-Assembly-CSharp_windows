@@ -143,7 +143,15 @@ public class SetLocker : StateMachineComponent<SetLocker.StatesInstance>, ISides
 	{
 		get
 		{
-			return (this.chore == null) ? UI.USERMENUACTIONS.OPENPOI.NAME : UI.USERMENUACTIONS.OPENPOI.NAME_OFF;
+			if (this.used)
+			{
+				return UI.USERMENUACTIONS.OPENPOI.ALREADY_RUMMAGED;
+			}
+			if (this.chore != null)
+			{
+				return UI.USERMENUACTIONS.OPENPOI.NAME_OFF;
+			}
+			return UI.USERMENUACTIONS.OPENPOI.NAME;
 		}
 	}
 
@@ -151,7 +159,15 @@ public class SetLocker : StateMachineComponent<SetLocker.StatesInstance>, ISides
 	{
 		get
 		{
-			return (this.chore == null) ? UI.USERMENUACTIONS.OPENPOI.TOOLTIP : UI.USERMENUACTIONS.OPENPOI.TOOLTIP_OFF;
+			if (this.used)
+			{
+				return UI.USERMENUACTIONS.OPENPOI.TOOLTIP_ALREADYRUMMAGED;
+			}
+			if (this.chore != null)
+			{
+				return UI.USERMENUACTIONS.OPENPOI.TOOLTIP_OFF;
+			}
+			return UI.USERMENUACTIONS.OPENPOI.TOOLTIP;
 		}
 	}
 

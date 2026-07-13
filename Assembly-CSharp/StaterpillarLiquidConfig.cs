@@ -5,6 +5,7 @@ using STRINGS;
 using TUNING;
 using UnityEngine;
 
+[EntityConfigOrder(2)]
 public class StaterpillarLiquidConfig : IEntityConfig, IHasDlcRestrictions
 {
 	public static GameObject CreateStaterpillarLiquid(string id, string name, string desc, string anim_file, bool is_baby)

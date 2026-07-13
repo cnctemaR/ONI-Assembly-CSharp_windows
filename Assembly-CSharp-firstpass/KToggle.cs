@@ -23,6 +23,11 @@ public class KToggle : Toggle
 		}
 	}
 
+	public void ClearOnValueChanged()
+	{
+		this.onValueChanged = null;
+	}
+
 	public void ClearOnClick()
 	{
 		this.onClick = null;

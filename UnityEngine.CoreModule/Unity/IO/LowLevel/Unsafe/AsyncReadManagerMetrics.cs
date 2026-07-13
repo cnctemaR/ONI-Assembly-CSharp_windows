@@ -12,8 +12,8 @@ namespace Unity.IO.LowLevel.Unsafe
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern bool IsEnabled();
 
-		[FreeFunction("GetAsyncReadManagerMetrics()->ClearMetrics")]
 		[ThreadSafe]
+		[FreeFunction("GetAsyncReadManagerMetrics()->ClearMetrics")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void ClearMetrics_Internal();
 
@@ -22,23 +22,23 @@ namespace Unity.IO.LowLevel.Unsafe
 			AsyncReadManagerMetrics.ClearMetrics_Internal();
 		}
 
-		[ThreadSafe]
 		[FreeFunction("GetAsyncReadManagerMetrics()->GetMarshalledMetrics")]
+		[ThreadSafe]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern AsyncReadManagerRequestMetric[] GetMetrics_Internal(bool clear);
 
-		[ThreadSafe]
 		[FreeFunction("GetAsyncReadManagerMetrics()->GetMetrics_NoAlloc")]
+		[ThreadSafe]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern void GetMetrics_NoAlloc_Internal([NotNull("ArgumentNullException")] List<AsyncReadManagerRequestMetric> metrics, bool clear);
 
-		[ThreadSafe]
 		[FreeFunction("GetAsyncReadManagerMetrics()->GetMarshalledMetrics_Filtered_Managed")]
+		[ThreadSafe]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern AsyncReadManagerRequestMetric[] GetMetrics_Filtered_Internal(AsyncReadManagerMetricsFilters filters, bool clear);
 
-		[ThreadSafe]
 		[FreeFunction("GetAsyncReadManagerMetrics()->GetMetrics_NoAlloc_Filtered_Managed")]
+		[ThreadSafe]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern void GetMetrics_NoAlloc_Filtered_Internal([NotNull("ArgumentNullException")] List<AsyncReadManagerRequestMetric> metrics, AsyncReadManagerMetricsFilters filters, bool clear);
 
@@ -94,8 +94,8 @@ namespace Unity.IO.LowLevel.Unsafe
 			return AsyncReadManagerMetrics.GetSummaryMetricsWithFilters_Internal(metricsFilters, flag);
 		}
 
-		[ThreadSafe]
 		[FreeFunction("GetAsyncReadManagerMetrics()->GetSummaryOfMetrics_Managed")]
+		[ThreadSafe]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern AsyncReadManagerSummaryMetrics GetSummaryOfMetrics_Internal(AsyncReadManagerRequestMetric[] metrics);
 
@@ -104,8 +104,8 @@ namespace Unity.IO.LowLevel.Unsafe
 			return AsyncReadManagerMetrics.GetSummaryOfMetrics_Internal(metrics);
 		}
 
-		[FreeFunction("GetAsyncReadManagerMetrics()->GetSummaryOfMetrics_FromContainer_Managed", ThrowsException = true)]
 		[ThreadSafe]
+		[FreeFunction("GetAsyncReadManagerMetrics()->GetSummaryOfMetrics_FromContainer_Managed", ThrowsException = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern AsyncReadManagerSummaryMetrics GetSummaryOfMetrics_FromContainer_Internal(List<AsyncReadManagerRequestMetric> metrics);
 

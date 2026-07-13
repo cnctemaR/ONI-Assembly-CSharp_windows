@@ -48,6 +48,10 @@ namespace STRINGS
 
 		public static LocString DECOR = "Decor, Decor Item";
 
+		public static LocString ORNAMENTDISPLAYED = "Ornament, Decoration, Artifact, Keepsake";
+
+		public static LocString DINING = "Dine, Dining, Table";
+
 		public static LocString WIRE = "Wire, Wiring, Cables";
 
 		public static LocString STEAM = "Steam";

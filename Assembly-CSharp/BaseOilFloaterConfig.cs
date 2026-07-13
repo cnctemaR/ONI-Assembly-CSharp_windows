@@ -23,11 +23,7 @@ public static class BaseOilFloaterConfig
 		{
 			inst.GetAttributes().Add(Db.Get().Attributes.MaxUnderwaterTravelCost);
 		};
-		EntityTemplates.ExtendEntityToBasicCreature(gameObject, FactionManager.FactionID.Pest, traitId, "FloaterNavGrid", NavType.Hover, 32, 2f, "Meat", 2f, true, false, warnLowTemp, warnHighTemp, lethalLowTemp, lethalHighTemp);
-		if (!string.IsNullOrEmpty(symbolOverridePrefix))
-		{
-			gameObject.AddOrGet<SymbolOverrideController>().ApplySymbolOverridesByAffix(Assets.GetAnim(anim_file), symbolOverridePrefix, null, 0);
-		}
+		EntityTemplates.ExtendEntityToBasicCreature(false, gameObject, anim_file, is_baby ? null : "oilfloater_build_kanim", symbolOverridePrefix, FactionManager.FactionID.Pest, traitId, "FloaterNavGrid", NavType.Hover, 32, 2f, "Meat", 2f, true, false, warnLowTemp, warnHighTemp, lethalLowTemp, lethalHighTemp);
 		Pickupable pickupable = gameObject.AddOrGet<Pickupable>();
 		int num5 = CREATURES.SORTING.CRITTER_ORDER["Oilfloater"];
 		pickupable.sortOrder = num5;
@@ -64,6 +60,7 @@ public static class BaseOilFloaterConfig
 			.Add(new SameSpotPoopStates.Def(), true, -1)
 			.Add(new CallAdultStates.Def(), is_baby, -1)
 			.Add(new CritterCondoStates.Def(), !is_baby, -1)
+			.Add(new CritterEmoteStates.Def(Assets.GetAnim("oilfloater_emotes_kanim")), true, -1)
 			.PopInterruptGroup()
 			.Add(new IdleStates.Def(), true, -1);
 		EntityTemplates.AddCreatureBrain(gameObject, builder, GameTags.Creatures.Species.OilFloaterSpecies, symbolOverridePrefix);

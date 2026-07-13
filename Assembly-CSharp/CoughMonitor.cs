@@ -20,12 +20,12 @@ public class CoughMonitor : GameStateMachine<CoughMonitor, CoughMonitor.Instance
 		{
 			return;
 		}
-		float num = (float)data;
-		float num2 = ((smi.lastConsumeTime <= 0f) ? 0f : (timeInCycles - smi.lastConsumeTime));
+		float value = ((Boxed<float>)data).value;
+		float num = ((smi.lastConsumeTime <= 0f) ? 0f : (timeInCycles - smi.lastConsumeTime));
 		smi.lastConsumeTime = timeInCycles;
-		smi.amountConsumed -= 0.05f * num2;
+		smi.amountConsumed -= 0.05f * num;
 		smi.amountConsumed = Mathf.Max(smi.amountConsumed, 0f);
-		smi.amountConsumed += num;
+		smi.amountConsumed += value;
 		if (smi.amountConsumed >= 1f)
 		{
 			this.shouldCough.Set(true, smi, false);

@@ -97,7 +97,7 @@ public class Checkpoint : StateMachineComponent<Checkpoint.SMInstance>
 		}
 	}
 
-	private void OnOperationalChanged(object data)
+	private void OnOperationalChanged(object _)
 	{
 		this.statusDirty = true;
 	}

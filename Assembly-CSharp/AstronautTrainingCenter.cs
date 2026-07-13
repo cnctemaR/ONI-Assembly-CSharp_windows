@@ -50,23 +50,18 @@ public class AstronautTrainingCenter : Workable
 		return 0f;
 	}
 
-	public AstronautTrainingCenter()
-	{
-		Chore.Precondition precondition = default(Chore.Precondition);
-		precondition.id = "IsNotMarkedForDeconstruction";
-		precondition.description = DUPLICANTS.CHORES.PRECONDITIONS.IS_MARKED_FOR_DECONSTRUCTION;
-		precondition.fn = delegate(ref Chore.Precondition.Context context, object data)
-		{
-			Deconstructable deconstructable = data as Deconstructable;
-			return deconstructable == null || !deconstructable.IsMarkedForDeconstruction();
-		};
-		this.IsNotMarkedForDeconstruction = precondition;
-		base..ctor();
-	}
-
 	public float daysToMasterRole;
 
 	private Chore chore;
 
-	public Chore.Precondition IsNotMarkedForDeconstruction;
+	public static Chore.Precondition IsNotMarkedForDeconstruction = new Chore.Precondition
+	{
+		id = "IsNotMarkedForDeconstruction",
+		description = DUPLICANTS.CHORES.PRECONDITIONS.IS_MARKED_FOR_DECONSTRUCTION,
+		fn = delegate(ref Chore.Precondition.Context context, object data)
+		{
+			Deconstructable deconstructable = data as Deconstructable;
+			return deconstructable == null || !deconstructable.IsMarkedForDeconstruction();
+		}
+	};
 }

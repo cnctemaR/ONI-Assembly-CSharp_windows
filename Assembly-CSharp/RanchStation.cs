@@ -31,6 +31,8 @@ public class RanchStation : GameStateMachine<RanchStation, RanchStation.Instance
 
 		public Action<GameObject, WorkerBase> OnRanchCompleteCb;
 
+		public Action<RanchedStates.Instance, Workable> OnRanchWorkBegins;
+
 		public Action<GameObject, float, Workable> OnRanchWorkTick;
 
 		public HashedString RanchedPreAnim = "idle_loop";
@@ -42,6 +44,8 @@ public class RanchStation : GameStateMachine<RanchStation, RanchStation.Instance
 		public HashedString RanchedAbortAnim = "idle_loop";
 
 		public HashedString RancherInteractAnim = "anim_interacts_rancherstation_kanim";
+
+		public bool RancherWipesBrowAnim;
 
 		public StatusItem RanchingStatusItem = Db.Get().DuplicantStatusItems.Ranching;
 
@@ -137,7 +141,7 @@ public class RanchStation : GameStateMachine<RanchStation, RanchStation.Instance
 		public override void StartSM()
 		{
 			base.StartSM();
-			base.Subscribe(144050788, new Action<object>(this.OnRoomUpdated));
+			this.onRoomUpdatedHandle = base.Subscribe(144050788, new Action<object>(this.OnRoomUpdated));
 			CavityInfo cavityForCell = Game.Instance.roomProber.GetCavityForCell(this.GetTargetRanchCell());
 			if (cavityForCell != null && cavityForCell.room != null)
 			{
@@ -148,7 +152,7 @@ public class RanchStation : GameStateMachine<RanchStation, RanchStation.Instance
 		public override void StopSM(string reason)
 		{
 			base.StopSM(reason);
-			base.Unsubscribe(144050788, new Action<object>(this.OnRoomUpdated));
+			base.Unsubscribe(ref this.onRoomUpdatedHandle);
 		}
 
 		private void OnRoomUpdated(object data)
@@ -225,8 +229,9 @@ public class RanchStation : GameStateMachine<RanchStation, RanchStation.Instance
 			{
 				return;
 			}
-			foreach (RanchableMonitor.Instance instance in this.targetRanchables.ToArray())
+			for (int i = this.targetRanchables.Count - 1; i >= 0; i--)
 			{
+				RanchableMonitor.Instance instance = this.targetRanchables[i];
 				if (instance.States == null || !this.CanRanchableBeRanchedAtRanchStation(instance))
 				{
 					this.Abandon(instance);
@@ -389,5 +394,7 @@ public class RanchStation : GameStateMachine<RanchStation, RanchStation.Instance
 		private WorkerBase rancher;
 
 		private BuildingComplete station;
+
+		private int onRoomUpdatedHandle = -1;
 	}
 }

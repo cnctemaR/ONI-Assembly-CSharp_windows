@@ -80,30 +80,30 @@ public class WorldSelector : KScreen, ISim4000ms
 
 	private void AddWorld(object data)
 	{
-		int num = (int)data;
+		int value = ((Boxed<int>)data).value;
 		MultiToggle component = Util.KInstantiateUI(this.worldRowPrefab, this.worldRowContainer, false).GetComponent<MultiToggle>();
-		this.worldRows.Add(num, component);
-		this.previousWorldDiagnosticStatus.Add(num, ColonyDiagnostic.DiagnosticResult.Opinion.Normal);
-		int id = num;
+		this.worldRows.Add(value, component);
+		this.previousWorldDiagnosticStatus.Add(value, ColonyDiagnostic.DiagnosticResult.Opinion.Normal);
+		int id = value;
 		MultiToggle multiToggle = component;
 		multiToggle.onClick = (global::System.Action)Delegate.Combine(multiToggle.onClick, new global::System.Action(delegate
 		{
 			this.OnWorldRowClicked(id);
 		}));
-		component.GetComponentInChildren<AlertVignette>().worldID = num;
+		component.GetComponentInChildren<AlertVignette>().worldID = value;
 		this.RefreshToggles();
 	}
 
 	private void RemoveWorld(object data)
 	{
-		int num = (int)data;
+		int value = ((Boxed<int>)data).value;
 		MultiToggle multiToggle;
-		if (this.worldRows.TryGetValue(num, out multiToggle))
+		if (this.worldRows.TryGetValue(value, out multiToggle))
 		{
 			multiToggle.DeleteObject();
 		}
-		this.worldRows.Remove(num);
-		this.previousWorldDiagnosticStatus.Remove(num);
+		this.worldRows.Remove(value);
+		this.previousWorldDiagnosticStatus.Remove(value);
 		this.RefreshToggles();
 	}
 
@@ -325,24 +325,31 @@ public class WorldSelector : KScreen, ISim4000ms
 
 	private IEnumerator VisualNotificationRoutine(GameObject contentGameObject, RectTransform indicator, GameObject spacer)
 	{
-		spacer.GetComponent<NotificationAnimator>().Begin(false);
 		Vector2 defaultIndicatorSize = new Vector2(8f, 8f);
-		float bounceDuration = 1.5f;
+		RectTransform contentRect = contentGameObject.rectTransform();
+		float bounceDuration = 1f;
 		for (float i = 0f; i < bounceDuration; i += Time.unscaledDeltaTime)
 		{
+			float num = Mathf.Sin(i * 3.1415927f) * 50f;
+			contentRect.anchoredPosition = Vector2.left * num;
 			indicator.sizeDelta = defaultIndicatorSize + Vector2.one * (float)Mathf.RoundToInt(Mathf.Sin(6f * (3.1415927f * (i / bounceDuration))));
 			yield return 0;
 		}
 		for (float i = 0f; i < bounceDuration; i += Time.unscaledDeltaTime)
 		{
+			float num2 = Mathf.Sin(i * 3.1415927f) * 25f;
+			contentRect.anchoredPosition = Vector2.left * num2;
 			indicator.sizeDelta = defaultIndicatorSize + Vector2.one * (float)Mathf.RoundToInt(Mathf.Sin(6f * (3.1415927f * (i / bounceDuration))));
 			yield return 0;
 		}
 		for (float i = 0f; i < bounceDuration; i += Time.unscaledDeltaTime)
 		{
+			float num3 = Mathf.Sin(i * 3.1415927f) * 12f;
+			contentRect.anchoredPosition = Vector2.left * num3;
 			indicator.sizeDelta = defaultIndicatorSize + Vector2.one * (float)Mathf.RoundToInt(Mathf.Sin(6f * (3.1415927f * (i / bounceDuration))));
 			yield return 0;
 		}
+		contentRect.anchoredPosition = Vector2.zero;
 		defaultIndicatorSize = new Vector2(8f, 8f);
 		indicator.sizeDelta = defaultIndicatorSize;
 		contentGameObject.rectTransform().localPosition = Vector2.zero;

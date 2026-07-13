@@ -243,6 +243,14 @@ namespace UnityEngine.UIElements
 			}
 		}
 
+		public IEnumerable<int> selectedIds
+		{
+			get
+			{
+				return this.m_Selection.selectedIds;
+			}
+		}
+
 		public int selectedIndex
 		{
 			get
@@ -260,14 +268,6 @@ namespace UnityEngine.UIElements
 			get
 			{
 				return this.m_Selection.indices;
-			}
-		}
-
-		internal IEnumerable<int> selectedIds
-		{
-			get
-			{
-				return this.m_Selection.selectedIds;
 			}
 		}
 
@@ -323,9 +323,7 @@ namespace UnityEngine.UIElements
 
 		internal float ResolveItemHeight(float height = -1f)
 		{
-			float scaledPixelsPerPoint = base.scaledPixelsPerPoint;
-			height = ((height < 0f) ? this.fixedItemHeight : height);
-			return Mathf.Round(height * scaledPixelsPerPoint) / scaledPixelsPerPoint;
+			return (height < 0f) ? this.fixedItemHeight : height;
 		}
 
 		public bool showBorder
@@ -1115,10 +1113,15 @@ namespace UnityEngine.UIElements
 						if (flag4)
 						{
 							this.m_TouchDownPosition = evt.position;
+							PointerDownEvent pointerDownEvent = evt as PointerDownEvent;
+							long num = ((pointerDownEvent != null) ? pointerDownEvent.timestamp : 0L);
+							this.m_PointerDownCount = ((num - this.m_LastPointerDownTimeStamp < (long)Event.GetDoubleClickTime()) ? (this.m_PointerDownCount + 1) : 1);
+							this.m_LastPointerDownTimeStamp = num;
 						}
 						else
 						{
-							this.DoSelect(evt.localPosition, evt.clickCount, evt.actionKey, evt.shiftKey);
+							this.m_PointerDownCount = evt.clickCount;
+							this.DoSelect(evt.localPosition, this.m_PointerDownCount, evt.actionKey, evt.shiftKey);
 						}
 					}
 				}
@@ -1142,8 +1145,11 @@ namespace UnityEngine.UIElements
 							bool flag5 = (evt.position - this.m_TouchDownPosition).sqrMagnitude <= 100f;
 							if (flag5)
 							{
-								this.DoSelect(evt.localPosition, evt.clickCount, evt.actionKey, evt.shiftKey);
+								this.DoSelect(evt.localPosition, this.m_PointerDownCount, evt.actionKey, evt.shiftKey);
 							}
+							PointerUpEvent pointerUpEvent = evt as PointerUpEvent;
+							long num = ((pointerUpEvent != null) ? pointerUpEvent.timestamp : 0L);
+							this.m_PointerDownCount = ((num - this.m_LastPointerDownTimeStamp < (long)Event.GetDoubleClickTime()) ? this.m_PointerDownCount : 0);
 						}
 						else
 						{
@@ -1733,6 +1739,10 @@ namespace UnityEngine.UIElements
 		internal static readonly string backgroundFillUssClassName = BaseVerticalCollectionView.ussClassName + "__background-fill";
 
 		private Vector3 m_TouchDownPosition;
+
+		private long m_LastPointerDownTimeStamp;
+
+		private int m_PointerDownCount;
 
 		public new class UxmlTraits : BindableElement.UxmlTraits
 		{

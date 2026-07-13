@@ -154,12 +154,14 @@ public class Deconstructable : Workable
 			}
 			component2.DestroySelf(delegate
 			{
-				this.TriggerDestroy(temperature, disease_idx, disease_count, worker);
+				List<GameObject> list2 = this.TriggerDestroy(temperature, disease_idx, disease_count, worker);
+				this.SpawnPopFxs(list2);
 			});
 		}
 		else
 		{
-			this.TriggerDestroy(temperature, disease_idx, disease_count);
+			List<GameObject> list = this.TriggerDestroy(temperature, disease_idx, disease_count);
+			this.SpawnPopFxs(list);
 		}
 		if (component == null || component.Def.PlayConstructionSounds)
 		{
@@ -176,6 +178,20 @@ public class Deconstructable : Workable
 		get
 		{
 			return this.destroyed;
+		}
+	}
+
+	public void SpawnPopFxs(List<GameObject> items)
+	{
+		if (items == null)
+		{
+			return;
+		}
+		foreach (GameObject gameObject in items)
+		{
+			string properName = gameObject.GetProperName();
+			PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
+			PopFXManager.Instance.SpawnFX(Def.GetUISprite(gameObject, "ui", false).first, PopFXManager.Instance.sprite_Plus, properName + " " + GameUtil.GetFormattedMass(component.Mass, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"), gameObject.transform, Vector3.zero, 1.5f, true, false, false);
 		}
 	}
 
@@ -389,7 +405,7 @@ public class Deconstructable : Workable
 		}
 	}
 
-	private void OnCancel(object data)
+	private void OnCancel(object _)
 	{
 		this.CancelDeconstruction();
 	}

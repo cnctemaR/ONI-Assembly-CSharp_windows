@@ -162,6 +162,10 @@ public class GasLiquidExposureMonitor : GameStateMachine<GasLiquidExposureMonito
 
 	public const float MIN_REACT_INTERVAL = 60f;
 
+	public const string MINOR_EFFECT_NAME = "MinorIrritation";
+
+	public const string MAJOR_EFFECT_NAME = "MajorIrritation";
+
 	private static Dictionary<SimHashes, float> customExposureRates;
 
 	private static Effect minorIrritationEffect;

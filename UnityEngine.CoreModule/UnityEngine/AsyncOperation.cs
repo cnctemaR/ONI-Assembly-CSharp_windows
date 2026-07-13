@@ -6,14 +6,14 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Export/Scripting/AsyncOperation.bindings.h")]
 	[RequiredByNativeCode]
+	[NativeHeader("Runtime/Export/Scripting/AsyncOperation.bindings.h")]
 	[NativeHeader("Runtime/Misc/AsyncOperation.h")]
 	[StructLayout(LayoutKind.Sequential)]
 	public class AsyncOperation : YieldInstruction
 	{
-		[NativeMethod(IsThreadSafe = true)]
 		[StaticAccessor("AsyncOperationBindings", StaticAccessorType.DoubleColon)]
+		[NativeMethod(IsThreadSafe = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void InternalDestroy(IntPtr ptr);
 

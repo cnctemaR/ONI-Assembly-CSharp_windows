@@ -48,6 +48,7 @@ public class MetricsOptionsScreen : KModalScreen
 		{
 			App.OpenWebURL("https://www.kleientertainment.com/privacy-policy");
 		});
+		this.openKleiAccountButton.onClick += this.OpenKleiAccount;
 		this.Refresh();
 	}
 
@@ -82,6 +83,11 @@ public class MetricsOptionsScreen : KModalScreen
 		this.dismissButton.GetComponentInChildren<LocText>().text = UI.FRONTEND.METRICS_OPTIONS_SCREEN.DONE_BUTTON;
 	}
 
+	private void OpenKleiAccount()
+	{
+		App.OpenWebURL("https://accounts.klei.com/login/auto?Game=ONI&ClientToken=" + KleiAccount.KleiToken);
+	}
+
 	public LocText title;
 
 	public KButton dismissButton;
@@ -95,4 +101,6 @@ public class MetricsOptionsScreen : KModalScreen
 	public LocText restartWarningText;
 
 	private bool disableDataCollection;
+
+	public KButton openKleiAccountButton;
 }

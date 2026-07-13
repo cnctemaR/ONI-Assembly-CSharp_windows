@@ -5,11 +5,11 @@ using UnityEngine.Internal;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Graphics/GraphicsScriptBindings.h")]
-	[StaticAccessor("GetGfxDevice()", StaticAccessorType.Dot)]
 	[NativeHeader("Runtime/GfxDevice/GfxDevice.h")]
-	[NativeHeader("Runtime/Camera/CameraUtil.h")]
+	[StaticAccessor("GetGfxDevice()", StaticAccessorType.Dot)]
 	[NativeHeader("Runtime/Camera/Camera.h")]
+	[NativeHeader("Runtime/Graphics/GraphicsScriptBindings.h")]
+	[NativeHeader("Runtime/Camera/CameraUtil.h")]
 	public sealed class GL
 	{
 		[NativeName("ImmediateVertex")]
@@ -123,8 +123,8 @@ namespace UnityEngine
 			GL.MultMatrix_Injected(ref m);
 		}
 
-		[Obsolete("IssuePluginEvent(eventID) is deprecated. Use IssuePluginEvent(callback, eventID) instead.", false)]
 		[NativeName("InsertCustomMarker")]
+		[Obsolete("IssuePluginEvent(eventID) is deprecated. Use IssuePluginEvent(callback, eventID) instead.", false)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void IssuePluginEvent(int eventID);
 

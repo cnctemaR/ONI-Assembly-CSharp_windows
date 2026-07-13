@@ -31,10 +31,11 @@ public class ClearTool : DragTool
 		while (objectLayerListItem != null)
 		{
 			GameObject gameObject2 = objectLayerListItem.gameObject;
+			Pickupable pickupable = objectLayerListItem.pickupable;
 			objectLayerListItem = objectLayerListItem.nextItem;
-			if (!(gameObject2 == null) && !(gameObject2.GetComponent<MinionIdentity>() != null) && gameObject2.GetComponent<Clearable>().isClearable)
+			if (!(gameObject2 == null) && !pickupable.KPrefabID.HasTag(GameTags.BaseMinion) && pickupable.Clearable.isClearable)
 			{
-				gameObject2.GetComponent<Clearable>().MarkForClear(false, false);
+				pickupable.Clearable.MarkForClear(false, false);
 				Prioritizable component = gameObject2.GetComponent<Prioritizable>();
 				if (component != null)
 				{

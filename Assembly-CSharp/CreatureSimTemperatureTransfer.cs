@@ -29,7 +29,7 @@ public class CreatureSimTemperatureTransfer : SimTemperatureTransfer, ISim200ms
 	{
 		get
 		{
-			return Time.time - this.lastTemperatureRecordTime < 2f && this.average_kilowatts_exchanged.HasEverHadValidValues && this.average_kilowatts_exchanged.ValidRecordsInLastSeconds(4f) > 5;
+			return Time.time - this.lastTemperatureRecordTime < 2f && this.average_kilowatts_exchanged.ValidRecordsInLastSeconds(4f) > 5;
 		}
 	}
 

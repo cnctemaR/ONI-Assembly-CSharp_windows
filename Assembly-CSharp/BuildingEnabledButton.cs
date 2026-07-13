@@ -19,7 +19,7 @@ public class BuildingEnabledButton : KMonoBehaviour, ISaveLoadable, IToggleHandl
 			Game.Instance.userMenu.Refresh(base.gameObject);
 			this.buildingEnabled = value;
 			base.GetComponent<KSelectable>().ToggleStatusItem(Db.Get().BuildingStatusItems.BuildingDisabled, !this.buildingEnabled, null);
-			base.Trigger(1088293757, this.buildingEnabled);
+			base.Trigger(1088293757, BoxedBools.Box(this.buildingEnabled));
 		}
 	}
 

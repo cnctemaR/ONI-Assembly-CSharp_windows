@@ -4,11 +4,11 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
+	[NativeHeader("Modules/ParticleSystem/ParticleSystemForceField.h")]
 	[RequireComponent(typeof(Transform))]
+	[NativeHeader("ParticleSystemScriptingClasses.h")]
 	[NativeHeader("Modules/ParticleSystem/ScriptBindings/ParticleSystemScriptBindings.h")]
 	[NativeHeader("Modules/ParticleSystem/ParticleSystemForceFieldManager.h")]
-	[NativeHeader("Modules/ParticleSystem/ParticleSystemForceField.h")]
-	[NativeHeader("ParticleSystemScriptingClasses.h")]
 	[NativeHeader("Modules/ParticleSystem/ParticleSystem.h")]
 	public class ParticleSystemForceField : Behaviour
 	{

@@ -92,12 +92,12 @@ namespace UnityEngine.UIElements
 		[SerializeField]
 		private int m_MinAtlasSize;
 
-		[HideInInspector]
 		[SerializeField]
+		[HideInInspector]
 		private int m_MaxAtlasSize;
 
-		[HideInInspector]
 		[SerializeField]
+		[HideInInspector]
 		private int m_MaxSubTextureSize;
 
 		[HideInInspector]

@@ -213,6 +213,7 @@ public class Geyser : StateMachineComponent<Geyser.StatesInstance>, IGameObjectE
 			}
 		}
 		this.ApplyConfigurationEmissionValues(this.configuration);
+		base.GetComponent<CodexEntryRedirector>().CodexID = "GEYSERGENERIC" + this.configuration.geyserType.id.ToUpper();
 		this.GenerateName();
 		this.timeShift = this.serializedTimeShift;
 		base.smi.StartSM();

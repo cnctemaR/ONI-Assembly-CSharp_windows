@@ -460,7 +460,7 @@ public class SelectedRecipeQueueScreen : KScreen
 		this.radboltSpacer.gameObject.SetActive(this.selectedRecipe.consumedHEP > 0);
 		this.radboltHeader.gameObject.SetActive(this.selectedRecipe.consumedHEP > 0);
 		this.RadboltDescriptorPanel.gameObject.SetActive(this.selectedRecipe.consumedHEP > 0);
-		this.radboltLabel.SetText(ITEMS.RADIATION.HIGHENERGYPARITCLE.NAME + ": " + this.selectedRecipe.consumedHEP.ToString());
+		this.radboltLabel.SetText(GameUtil.SafeStringFormat(UI.UISIDESCREENS.FABRICATORSIDESCREEN.RECIPE_RADBOLTS_REQUIRED, new object[] { this.selectedRecipe.consumedHEP.ToString() }));
 		this.materialSelectionContainers.ForEach(delegate(GameObject container)
 		{
 			Util.KDestroyGameObject(container);

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections;
-using FMOD.Studio;
 using STRINGS;
 using UnityEngine;
 using UnityEngine.UI;
@@ -21,7 +20,7 @@ public class RocketModuleSideScreen : SideScreenContent
 
 	public override int GetSideScreenSortOrder()
 	{
-		return 500;
+		return 104;
 	}
 
 	protected override void OnSpawn()
@@ -48,7 +47,6 @@ public class RocketModuleSideScreen : SideScreenContent
 			}
 			this.ClickChangeModule(vector2.y);
 		};
-		this.viewInteriorButton.onClick += this.ClickViewInterior;
 		this.moduleNameLabel.textStyleSetting = this.nameSetting;
 		this.moduleDescriptionLabel.textStyleSetting = this.descriptionSetting;
 		this.moduleNameLabel.ApplySettings();
@@ -91,35 +89,15 @@ public class RocketModuleSideScreen : SideScreenContent
 		this.changeModuleButton.GetComponent<ToolTip>().SetSimpleTooltip(this.changeModuleButton.isInteractable ? UI.UISIDESCREENS.ROCKETMODULESIDESCREEN.BUTTONCHANGEMODULE.DESC.text : UI.UISIDESCREENS.ROCKETMODULESIDESCREEN.BUTTONCHANGEMODULE.INVALID.text);
 		this.addNewModuleButton.isInteractable = true;
 		this.addNewModuleButton.GetComponent<ToolTip>().SetSimpleTooltip(UI.UISIDESCREENS.ROCKETMODULESIDESCREEN.ADDMODULE.DESC.text);
-		this.removeModuleButton.isInteractable = this.reorderable.CanRemoveModule();
-		this.removeModuleButton.GetComponent<ToolTip>().SetSimpleTooltip(this.removeModuleButton.isInteractable ? UI.UISIDESCREENS.ROCKETMODULESIDESCREEN.BUTTONREMOVEMODULE.DESC.text : UI.UISIDESCREENS.ROCKETMODULESIDESCREEN.BUTTONREMOVEMODULE.INVALID.text);
+		Deconstructable component = this.reorderable.GetComponent<Deconstructable>();
+		bool flag = component != null && component.IsMarkedForDeconstruction();
+		this.removeModuleButton.isInteractable = component != null && this.reorderable.CanRemoveModule();
+		this.removeModuleButton.GetComponent<ToolTip>().SetSimpleTooltip(this.removeModuleButton.isInteractable ? (flag ? UI.UISIDESCREENS.ROCKETMODULESIDESCREEN.BUTTONREMOVEMODULE.DESC_CANCEL.text : UI.UISIDESCREENS.ROCKETMODULESIDESCREEN.BUTTONREMOVEMODULE.DESC.text) : UI.UISIDESCREENS.ROCKETMODULESIDESCREEN.BUTTONREMOVEMODULE.INVALID.text);
+		this.removeButtonLabel.SetText(flag ? UI.UISIDESCREENS.ROCKETMODULESIDESCREEN.BUTTONREMOVEMODULE.LABEL_CANCEL : UI.UISIDESCREENS.ROCKETMODULESIDESCREEN.BUTTONREMOVEMODULE.LABEL);
 		this.moveModuleDownButton.isInteractable = this.reorderable.CanSwapDown(true);
 		this.moveModuleDownButton.GetComponent<ToolTip>().SetSimpleTooltip(this.moveModuleDownButton.isInteractable ? UI.UISIDESCREENS.ROCKETMODULESIDESCREEN.BUTTONSWAPMODULEDOWN.DESC.text : UI.UISIDESCREENS.ROCKETMODULESIDESCREEN.BUTTONSWAPMODULEDOWN.INVALID.text);
 		this.moveModuleUpButton.isInteractable = this.reorderable.CanSwapUp(true);
 		this.moveModuleUpButton.GetComponent<ToolTip>().SetSimpleTooltip(this.moveModuleUpButton.isInteractable ? UI.UISIDESCREENS.ROCKETMODULESIDESCREEN.BUTTONSWAPMODULEUP.DESC.text : UI.UISIDESCREENS.ROCKETMODULESIDESCREEN.BUTTONSWAPMODULEUP.INVALID.text);
-		ClustercraftExteriorDoor component = this.reorderable.GetComponent<ClustercraftExteriorDoor>();
-		if (!(component != null) || !component.HasTargetWorld())
-		{
-			this.viewInteriorButton.isInteractable = false;
-			this.viewInteriorButton.GetComponentInChildren<LocText>().SetText(UI.UISIDESCREENS.ROCKETMODULESIDESCREEN.BUTTONVIEWINTERIOR.LABEL);
-			this.viewInteriorButton.GetComponent<ToolTip>().SetSimpleTooltip(this.viewInteriorButton.isInteractable ? UI.UISIDESCREENS.ROCKETMODULESIDESCREEN.BUTTONVIEWINTERIOR.DESC.text : UI.UISIDESCREENS.ROCKETMODULESIDESCREEN.BUTTONVIEWINTERIOR.INVALID.text);
-			return;
-		}
-		if (ClusterManager.Instance.activeWorld == component.GetTargetWorld())
-		{
-			this.changeModuleButton.isInteractable = false;
-			this.addNewModuleButton.isInteractable = false;
-			this.removeModuleButton.isInteractable = false;
-			this.moveModuleDownButton.isInteractable = false;
-			this.moveModuleUpButton.isInteractable = false;
-			this.viewInteriorButton.isInteractable = component.GetMyWorldId() != 255;
-			this.viewInteriorButton.GetComponentInChildren<LocText>().SetText(UI.UISIDESCREENS.ROCKETMODULESIDESCREEN.BUTTONVIEWEXTERIOR.LABEL);
-			this.viewInteriorButton.GetComponent<ToolTip>().SetSimpleTooltip(this.viewInteriorButton.isInteractable ? UI.UISIDESCREENS.ROCKETMODULESIDESCREEN.BUTTONVIEWEXTERIOR.DESC.text : UI.UISIDESCREENS.ROCKETMODULESIDESCREEN.BUTTONVIEWEXTERIOR.INVALID.text);
-			return;
-		}
-		this.viewInteriorButton.isInteractable = this.reorderable.GetComponent<PassengerRocketModule>() != null;
-		this.viewInteriorButton.GetComponentInChildren<LocText>().SetText(UI.UISIDESCREENS.ROCKETMODULESIDESCREEN.BUTTONVIEWINTERIOR.LABEL);
-		this.viewInteriorButton.GetComponent<ToolTip>().SetSimpleTooltip(this.viewInteriorButton.isInteractable ? UI.UISIDESCREENS.ROCKETMODULESIDESCREEN.BUTTONVIEWINTERIOR.DESC.text : UI.UISIDESCREENS.ROCKETMODULESIDESCREEN.BUTTONVIEWINTERIOR.INVALID.text);
 	}
 
 	public void ClickAddNew(float scrollViewPosition, BuildingDef autoSelectDef = null)
@@ -158,8 +136,21 @@ public class RocketModuleSideScreen : SideScreenContent
 
 	private void ClickRemove()
 	{
-		this.reorderable.Trigger(-790448070, null);
+		Deconstructable component = this.reorderable.GetComponent<Deconstructable>();
+		if (component == null)
+		{
+			return;
+		}
+		if (component.IsMarkedForDeconstruction())
+		{
+			component.CancelDeconstruction();
+		}
+		else
+		{
+			this.reorderable.Trigger(-790448070, null);
+		}
 		this.UpdateButtonStates();
+		component.Trigger(1980521255, null);
 	}
 
 	private void ClickSwapUp()
@@ -182,31 +173,6 @@ public class RocketModuleSideScreen : SideScreenContent
 		this.ScrollToTargetPoint(scrollViewPosition);
 	}
 
-	private void ClickViewInterior()
-	{
-		ClustercraftExteriorDoor component = this.reorderable.GetComponent<ClustercraftExteriorDoor>();
-		PassengerRocketModule component2 = this.reorderable.GetComponent<PassengerRocketModule>();
-		WorldContainer targetWorld = component.GetTargetWorld();
-		WorldContainer myWorld = component.GetMyWorld();
-		if (ClusterManager.Instance.activeWorld == targetWorld)
-		{
-			if (myWorld.id != 255)
-			{
-				AudioMixer.instance.Stop(component2.interiorReverbSnapshot, STOP_MODE.ALLOWFADEOUT);
-				AudioMixer.instance.PauseSpaceVisibleSnapshot(false);
-				ClusterManager.Instance.SetActiveWorld(myWorld.id);
-			}
-		}
-		else
-		{
-			AudioMixer.instance.Start(component2.interiorReverbSnapshot);
-			AudioMixer.instance.PauseSpaceVisibleSnapshot(true);
-			ClusterManager.Instance.SetActiveWorld(targetWorld.id);
-		}
-		DetailsScreen.Instance.ClearSecondarySideScreen();
-		this.UpdateButtonStates();
-	}
-
 	public static RocketModuleSideScreen instance;
 
 	private ReorderableBuilding reorderable;
@@ -226,9 +192,9 @@ public class RocketModuleSideScreen : SideScreenContent
 
 	public KButton moveModuleDownButton;
 
-	public KButton viewInteriorButton;
-
 	[Header("Labels")]
+	public LocText removeButtonLabel;
+
 	public LocText moduleNameLabel;
 
 	public LocText moduleDescriptionLabel;

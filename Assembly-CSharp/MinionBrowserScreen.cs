@@ -8,6 +8,14 @@ using UnityEngine.UI;
 
 public class MinionBrowserScreen : KMonoBehaviour
 {
+	public MinionBrowserScreen.CyclerUI Cycler
+	{
+		get
+		{
+			return this.cycler;
+		}
+	}
+
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
@@ -92,7 +100,7 @@ public class MinionBrowserScreen : KMonoBehaviour
 		this.galleryGridItemPool.ReturnAll();
 		foreach (MinionBrowserScreen.GridItem gridItem in this.Config.items)
 		{
-			this.<PopulateGallery>g__AddGridIcon|32_0(gridItem);
+			this.<PopulateGallery>g__AddGridIcon|34_0(gridItem);
 		}
 		this.RefreshGallery();
 		this.SelectMinion(this.Config.defaultSelectedItem.Unwrap());
@@ -169,6 +177,7 @@ public class MinionBrowserScreen : KMonoBehaviour
 	public void SetEditingOutfitType(ClothingOutfitUtility.OutfitType outfitType)
 	{
 		this.currentOutfitType = outfitType;
+		this.cycler.SetLabel(outfitType.GetName());
 		switch (outfitType)
 		{
 		case ClothingOutfitUtility.OutfitType.Clothing:
@@ -183,6 +192,10 @@ public class MinionBrowserScreen : KMonoBehaviour
 			this.editButtonText.text = UI.MINION_BROWSER_SCREEN.BUTTON_EDIT_ATMO_SUIT_OUTFIT_ITEMS;
 			this.changeOutfitButton.gameObject.SetActive(true);
 			break;
+		case ClothingOutfitUtility.OutfitType.JetSuit:
+			this.editButtonText.text = UI.MINION_BROWSER_SCREEN.BUTTON_EDIT_JET_SUIT_OUTFIT_ITEMS;
+			this.changeOutfitButton.gameObject.SetActive(true);
+			break;
 		default:
 			throw new NotImplementedException();
 		}
@@ -193,6 +206,7 @@ public class MinionBrowserScreen : KMonoBehaviour
 			{
 			case ClothingOutfitUtility.OutfitType.Clothing:
 			case ClothingOutfitUtility.OutfitType.AtmoSuit:
+			case ClothingOutfitUtility.OutfitType.JetSuit:
 				OutfitDesignerScreenConfig.Minion(this.selectedOutfit.IsSome() ? this.selectedOutfit.Unwrap() : ClothingOutfitTarget.ForNewTemplateOutfit(outfitType), this.selectedGridItem).ApplyAndOpenScreen();
 				return;
 			case ClothingOutfitUtility.OutfitType.JoyResponse:
@@ -212,6 +226,7 @@ public class MinionBrowserScreen : KMonoBehaviour
 			{
 			case ClothingOutfitUtility.OutfitType.Clothing:
 			case ClothingOutfitUtility.OutfitType.AtmoSuit:
+			case ClothingOutfitUtility.OutfitType.JetSuit:
 				this.selectedOutfit = this.selectedGridItem.GetClothingOutfitTarget(outfitType);
 				this.UIMinion.SetOutfit(outfitType, this.selectedOutfit);
 				this.outfitDescriptionPanel.Refresh(this.selectedOutfit, outfitType, this.selectedGridItem.GetPersonality());
@@ -229,20 +244,19 @@ public class MinionBrowserScreen : KMonoBehaviour
 			}
 		};
 		this.RefreshOutfitDescription();
+		this.RefreshPreview();
 	}
 
 	private MinionBrowserScreen.CyclerUI.OnSelectedFn[] CreateCycleOptions()
 	{
-		MinionBrowserScreen.CyclerUI.OnSelectedFn[] array = new MinionBrowserScreen.CyclerUI.OnSelectedFn[3];
-		for (int i = 0; i < 3; i++)
+		MinionBrowserScreen.CyclerUI.OnSelectedFn[] array = new MinionBrowserScreen.CyclerUI.OnSelectedFn[4];
+		for (int i = 0; i < 4; i++)
 		{
 			ClothingOutfitUtility.OutfitType outfitType = (ClothingOutfitUtility.OutfitType)i;
 			array[i] = delegate
 			{
 				this.selectedOutfitType = Option.Some<ClothingOutfitUtility.OutfitType>(outfitType);
-				this.cycler.SetLabel(outfitType.GetName());
 				this.SetEditingOutfitType(outfitType);
-				this.RefreshPreview();
 			};
 		}
 		return array;
@@ -254,7 +268,7 @@ public class MinionBrowserScreen : KMonoBehaviour
 	}
 
 	[CompilerGenerated]
-	private void <PopulateGallery>g__AddGridIcon|32_0(MinionBrowserScreen.GridItem item)
+	private void <PopulateGallery>g__AddGridIcon|34_0(MinionBrowserScreen.GridItem item)
 	{
 		GameObject gameObject = this.galleryGridItemPool.Borrow();
 		gameObject.GetComponent<HierarchyReferences>().GetReference<Image>("Icon").sprite = item.GetIcon();
@@ -265,6 +279,7 @@ public class MinionBrowserScreen : KMonoBehaviour
 		if (DlcManager.IsDlcId(requiredDlcId))
 		{
 			component2.gameObject.SetActive(true);
+			component2.sprite = Assets.GetSprite(DlcManager.GetDlcBannerSprite(requiredDlcId));
 			component2.color = DlcManager.GetDlcBannerColor(requiredDlcId);
 			component.SetSimpleTooltip(string.Format(UI.MINION_BROWSER_SCREEN.TOOLTIP_FROM_DLC, DlcManager.GetDlcTitle(requiredDlcId)));
 		}
@@ -404,6 +419,8 @@ public class MinionBrowserScreen : KMonoBehaviour
 		public void SetLabel(string text)
 		{
 			this.currentLabel.text = text;
+			this.cyclePrevButton.GetComponent<ToolTip>().SetSimpleTooltip(UI.MINION_BROWSER_SCREEN.TOOLTIP_CYCLE_PREVIOUS_OUTFIT_TYPE);
+			this.cycleNextButton.GetComponent<ToolTip>().SetSimpleTooltip(UI.MINION_BROWSER_SCREEN.TOOLTIP_CYCLE_NEXT_OUTFIT_TYPE);
 		}
 
 		[SerializeField]

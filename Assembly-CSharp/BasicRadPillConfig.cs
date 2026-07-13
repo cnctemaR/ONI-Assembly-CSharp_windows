@@ -18,7 +18,7 @@ public class BasicRadPillConfig : IEntityConfig, IHasDlcRestrictions
 
 	public GameObject CreatePrefab()
 	{
-		GameObject gameObject = EntityTemplates.CreateLooseEntity("BasicRadPill", global::STRINGS.ITEMS.PILLS.BASICRADPILL.NAME, global::STRINGS.ITEMS.PILLS.BASICRADPILL.DESC, 1f, true, Assets.GetAnim("pill_radiation_kanim"), "object", Grid.SceneLayer.Front, EntityTemplates.CollisionShape.RECTANGLE, 0.8f, 0.4f, true, 0, SimHashes.Creature, null);
+		GameObject gameObject = EntityTemplates.CreateLooseEntity("BasicRadPill", global::STRINGS.ITEMS.PILLS.BASICRADPILL.NAME, global::STRINGS.ITEMS.PILLS.BASICRADPILL.DESC, 1f, true, Assets.GetAnim("pill_radiation_kanim"), "object", Grid.SceneLayer.Front, EntityTemplates.CollisionShape.RECTANGLE, 0.8f, 0.4f, true, 0, SimHashes.Creature, new List<Tag> { GameTags.PedestalDisplayable });
 		EntityTemplates.ExtendEntityToMedicine(gameObject, MEDICINE.BASICRADPILL);
 		ComplexRecipe.RecipeElement[] array = new ComplexRecipe.RecipeElement[]
 		{

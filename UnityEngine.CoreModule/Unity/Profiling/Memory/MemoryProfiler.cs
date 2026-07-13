@@ -21,9 +21,9 @@ namespace Unity.Profiling.Memory
 		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 		public static event Action<MemorySnapshotMetadata> CreatingMetadata;
 
-		[StaticAccessor("profiling::memory::GetMemorySnapshotManager()", StaticAccessorType.Dot)]
 		[NativeMethod("StartOperation")]
 		[NativeConditional("ENABLE_PROFILER")]
+		[StaticAccessor("profiling::memory::GetMemorySnapshotManager()", StaticAccessorType.Dot)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void StartOperation(uint captureFlag, bool requestScreenshot, string path, bool isRemote);
 

@@ -21,21 +21,13 @@ public class RecentThingConversation : ConversationType
 		{
 			return null;
 		}
-		List<Conversation.ModeType> list;
-		if (lastTopic == null)
-		{
-			list = new List<Conversation.ModeType>
-			{
-				Conversation.ModeType.Query,
-				Conversation.ModeType.Statement,
-				Conversation.ModeType.Musing
-			};
-		}
-		else
-		{
-			list = RecentThingConversation.transitions[lastTopic.mode];
-		}
+		List<Conversation.ModeType> list = ((lastTopic == null) ? RecentThingConversation.INITIAL_MODES : RecentThingConversation.transitions[lastTopic.mode]);
 		Conversation.ModeType modeType = list[global::UnityEngine.Random.Range(0, list.Count)];
+		if (modeType == Conversation.ModeType.Segue)
+		{
+			this.NewTarget(speaker);
+			modeType = RecentThingConversation.INITIAL_MODES[global::UnityEngine.Random.Range(0, RecentThingConversation.INITIAL_MODES.Count)];
+		}
 		return new Conversation.Topic(this.target, modeType);
 	}
 
@@ -111,5 +103,12 @@ public class RecentThingConversation : ConversationType
 				Conversation.ModeType.End
 			}
 		}
+	};
+
+	private static readonly List<Conversation.ModeType> INITIAL_MODES = new List<Conversation.ModeType>
+	{
+		Conversation.ModeType.Query,
+		Conversation.ModeType.Statement,
+		Conversation.ModeType.Musing
 	};
 }

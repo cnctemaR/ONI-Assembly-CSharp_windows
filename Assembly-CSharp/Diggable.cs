@@ -64,7 +64,7 @@ public class Diggable : Workable
 		this.OnSolidChanged(null);
 		new ReachabilityMonitor.Instance(this).StartSM();
 		base.Subscribe<Diggable>(493375141, Diggable.OnRefreshUserMenuDelegate);
-		this.handle = Game.Instance.Subscribe(-1523247426, new Action<object>(this.UpdateStatusItem));
+		this.handle = Game.Instance.Subscribe(-1523247426, Workable.UpdateStatusItemDispatcher, this);
 		Components.Diggables.Add(this);
 	}
 
@@ -381,7 +381,7 @@ public class Diggable : Workable
 			this.childRenderer = base.GetComponentInChildren<MeshRenderer>();
 		}
 		Material material = this.childRenderer.material;
-		this.isReachable = (bool)data;
+		this.isReachable = ((Boxed<bool>)data).value;
 		if (material.color == Game.Instance.uiColours.Dig.invalidLocation)
 		{
 			return;
@@ -447,7 +447,7 @@ public class Diggable : Workable
 		base.OnCleanUp();
 		GameScenePartitioner.Instance.Free(ref this.partitionerEntry);
 		GameScenePartitioner.Instance.Free(ref this.unstableEntry);
-		Game.Instance.Unsubscribe(this.handle);
+		Game.Instance.Unsubscribe(ref this.handle);
 		int num = Grid.PosToCell(this);
 		GameScenePartitioner.Instance.TriggerEvent(num, GameScenePartitioner.Instance.digDestroyedLayer, null);
 		Components.Diggables.Remove(this);

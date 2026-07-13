@@ -58,9 +58,9 @@ public class PassengerRocketModule : KMonoBehaviour
 
 	private void OnReachableChanged(object data)
 	{
-		bool flag = (bool)data;
+		bool value = ((Boxed<bool>)data).value;
 		KSelectable component = base.GetComponent<KSelectable>();
-		if (flag)
+		if (value)
 		{
 			component.RemoveStatusItem(Db.Get().BuildingStatusItems.PassengerModuleUnreachable, false);
 			return;
@@ -157,10 +157,16 @@ public class PassengerRocketModule : KMonoBehaviour
 
 	public bool CheckPilotBoarded()
 	{
+		GameObject dupePilot = this.GetDupePilot();
+		return dupePilot != null && dupePilot.GetMyWorldId() == (int)Grid.WorldIdx[base.GetComponent<ClustercraftExteriorDoor>().TargetCell()];
+	}
+
+	public GameObject GetDupePilot()
+	{
 		ICollection<IAssignableIdentity> members = base.GetComponent<AssignmentGroupController>().GetMembers();
 		if (members.Count == 0)
 		{
-			return false;
+			return null;
 		}
 		List<IAssignableIdentity> list = new List<IAssignableIdentity>();
 		foreach (IAssignableIdentity assignableIdentity in members)
@@ -177,19 +183,17 @@ public class PassengerRocketModule : KMonoBehaviour
 		}
 		if (list.Count == 0)
 		{
-			return false;
+			return null;
 		}
-		using (List<IAssignableIdentity>.Enumerator enumerator2 = list.GetEnumerator())
+		foreach (IAssignableIdentity assignableIdentity2 in list)
 		{
-			while (enumerator2.MoveNext())
+			GameObject targetGameObject = ((MinionAssignablesProxy)assignableIdentity2).GetTargetGameObject();
+			if (targetGameObject.GetMyWorldId() == (int)Grid.WorldIdx[base.GetComponent<ClustercraftExteriorDoor>().TargetCell()])
 			{
-				if (((MinionAssignablesProxy)enumerator2.Current).GetTargetGameObject().GetMyWorldId() == (int)Grid.WorldIdx[base.GetComponent<ClustercraftExteriorDoor>().TargetCell()])
-				{
-					return true;
-				}
+				return targetGameObject;
 			}
 		}
-		return false;
+		return ((MinionAssignablesProxy)list[0]).GetTargetGameObject();
 	}
 
 	public global::Tuple<int, int> GetCrewBoardedFraction()
@@ -216,6 +220,11 @@ public class PassengerRocketModule : KMonoBehaviour
 	public bool HasCrewAssigned()
 	{
 		return ((ICollection<IAssignableIdentity>)base.GetComponent<AssignmentGroupController>().GetMembers()).Count > 0;
+	}
+
+	public int GetCrewCount()
+	{
+		return ((ICollection<IAssignableIdentity>)base.GetComponent<AssignmentGroupController>().GetMembers()).Count;
 	}
 
 	public bool CheckPassengersBoarded(bool require_pilot = true)

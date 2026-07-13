@@ -498,7 +498,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Current State: {ControlState}";
 
-				public static LocString TOOLTIP = "Current State: {ControlState}\n\nAuto: Duplicants open and close this door as needed\nLocked: Nothing may pass through\nOpen: This door will remain open";
+				public static LocString TOOLTIP = "Current State: {ControlState}\n\nOpen: Door will remain open\nAuto: Door will open and close as needed\nLocked: Nothing may pass through";
 
 				public static LocString OPENED = "Opened";
 
@@ -994,6 +994,28 @@ namespace STRINGS
 					UI.PST_KEYWORD,
 					" beneath this building to regain function\n\nTile can be found in the ",
 					UI.FormatAsBuildMenuTab("Base Tab", global::Action.Plan1),
+					" of the Build Menu"
+				});
+			}
+
+			public class MISSINGFOUNDATIONBACKWALL
+			{
+				public static LocString NAME = "Missing Back Wall";
+
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"Build a ",
+					UI.PRE_KEYWORD,
+					"Drywall",
+					UI.PST_KEYWORD,
+					" or ",
+					UI.PRE_KEYWORD,
+					"Tempshift Plate",
+					UI.PST_KEYWORD,
+					" behind this building to regain function\n\nThey can be found in the ",
+					UI.FormatAsBuildMenuTab("Base Tab", global::Action.Plan1),
+					" and ",
+					UI.FormatAsBuildMenuTab("Utilities Tab", global::Action.Plan11),
 					" of the Build Menu"
 				});
 			}
@@ -2353,7 +2375,7 @@ namespace STRINGS
 
 			public class WORKING
 			{
-				public static LocString NAME = "Nominal";
+				public static LocString NAME = "Normal";
 
 				public static LocString TOOLTIP = "This building is working as intended";
 			}
@@ -3144,6 +3166,27 @@ namespace STRINGS
 				});
 			}
 
+			public class ORNAMENTDISABLED
+			{
+				public static LocString NAME = "Broken Display";
+
+				public static LocString TOOLTIP = "This ornament's display structure is currently disabled\n\nIt will not be counted as a displayed ornament";
+			}
+
+			public class PEDESTALNOITEMDISPLAYED
+			{
+				public static LocString NAME = "No Object Displayed";
+
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"This building must display an object in order to be counted as a ",
+					UI.PRE_KEYWORD,
+					"Decor building",
+					UI.PST_KEYWORD,
+					" for a room"
+				});
+			}
+
 			public class NEEDEGG
 			{
 				public static LocString NAME = "No Egg Selected";
@@ -3493,16 +3536,34 @@ namespace STRINGS
 
 			public class SPACEPOIHARVESTING
 			{
-				public static LocString NAME = "Extracting Resources: {0}";
+				public static LocString NAME = "Drilling {0}: {1}";
 
-				public static LocString TOOLTIP = "Resources are being mined from this space debris";
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"This ",
+					UI.PRE_KEYWORD,
+					"Drillcone",
+					UI.PST_KEYWORD,
+					" is breaking up space debris into harvestable resources\n\nHarvestable resources can be retrieved by a a rocket equipped with a ",
+					UI.PRE_KEYWORD,
+					"Cargo Bay",
+					UI.PST_KEYWORD,
+					" module"
+				});
 			}
 
-			public class SPACEPOIWASTING
+			public class COLLECTINGHEXCELLINVENTORYITEMS
 			{
-				public static LocString NAME = "Cannot store resources: {0}";
+				public static LocString NAME = "Harvesting Resources";
 
-				public static LocString TOOLTIP = "Some resources being mined from this space debris cannot be stored in this rocket";
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"One or more ",
+					UI.PRE_KEYWORD,
+					"Cargo Bay",
+					UI.PST_KEYWORD,
+					" modules are collecting resources from this rocket's current hex cell"
+				});
 			}
 
 			public class RAILGUNPAYLOADNEEDSEMPTYING
@@ -3775,7 +3836,7 @@ namespace STRINGS
 
 			public class MODULEGENERATORNOTPOWERED
 			{
-				public static LocString NAME = "Thrust Generation: {ActiveWattage}/{MaxWattage}";
+				public static LocString NAME = "In-Flight Generator: {ActiveWattage}/{MaxWattage}";
 
 				public static LocString TOOLTIP = string.Concat(new string[]
 				{
@@ -3785,13 +3846,17 @@ namespace STRINGS
 					UI.PRE_KEYWORD,
 					"Power",
 					UI.PST_KEYWORD,
-					" once traveling through space\n\nRight now, it's not doing much of anything"
+					" while traveling through space\n\nWhen thruster is idle, no ",
+					UI.PRE_KEYWORD,
+					"Power",
+					UI.PST_KEYWORD,
+					" is generated"
 				});
 			}
 
 			public class MODULEGENERATORPOWERED
 			{
-				public static LocString NAME = "Thrust Generation: {ActiveWattage}/{MaxWattage}";
+				public static LocString NAME = "In-Flight Generator: {ActiveWattage}/{MaxWattage}";
 
 				public static LocString TOOLTIP = string.Concat(new string[]
 				{

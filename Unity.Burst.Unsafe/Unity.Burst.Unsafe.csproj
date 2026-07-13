@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <ProjectGuid>{FB7F35FD-6256-4B33-A899-A0A5341DD189}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>Unity.Burst.Unsafe</RootNamespace>
+    <AssemblyName>Unity.Burst.Unsafe</AssemblyName>
+    <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
+    <FileAlignment>512</FileAlignment>
+    <TargetFramework>net40</TargetFramework>
+  </PropertyGroup>
+  <PropertyGroup>
+    <EnableDefaultItems>False</EnableDefaultItems>
+  </PropertyGroup>
+  <PropertyGroup />
+  <ItemGroup>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="System\Runtime\CompilerServices\IsReadOnlyAttribute.cs" />
+    <Compile Include="System\Runtime\Versioning\NonVersionableAttribute.cs" />
+    <Compile Include="Unity\Burst\Unsafe.cs" />
+  </ItemGroup>
+</Project>

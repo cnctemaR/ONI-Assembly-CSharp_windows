@@ -163,6 +163,81 @@ public class CraftModuleInterface : KMonoBehaviour, ISim4000ms
 		}
 	}
 
+	public int MaxRange
+	{
+		get
+		{
+			float num = 0f;
+			RocketEngineCluster engine = this.GetEngine();
+			if (engine != null)
+			{
+				num = this.BurnableMassCapacity / engine.GetComponent<RocketModuleCluster>().performanceStats.FuelKilogramPerDistance;
+			}
+			bool flag;
+			RocketModuleCluster primaryPilotModule = this.GetPrimaryPilotModule(out flag);
+			if (flag)
+			{
+				num = Mathf.Min(primaryPilotModule.GetComponent<RoboPilotModule>().GetMaxDataBankRange(), num);
+			}
+			return (int)Mathf.Floor((num + 0.001f) / 600f);
+		}
+	}
+
+	public float BurnableMassCapacity
+	{
+		get
+		{
+			RocketEngineCluster engine = this.GetEngine();
+			if (!(engine != null))
+			{
+				return 0f;
+			}
+			if (!engine.requireOxidizer)
+			{
+				return this.FuelCapacity;
+			}
+			return Mathf.Min(this.FuelCapacity, this.OxidizerCapacity);
+		}
+	}
+
+	public float FuelCapacity
+	{
+		get
+		{
+			if (this.GetEngine() == null)
+			{
+				return 0f;
+			}
+			float num = 0f;
+			foreach (Ref<RocketModuleCluster> @ref in this.clusterModules)
+			{
+				IFuelTank component = @ref.Get().GetComponent<IFuelTank>();
+				if (!component.IsNullOrDestroyed())
+				{
+					num += component.Storage.Capacity();
+				}
+			}
+			return (float)Mathf.CeilToInt(num);
+		}
+	}
+
+	public float OxidizerCapacity
+	{
+		get
+		{
+			float num = 0f;
+			foreach (Ref<RocketModuleCluster> @ref in this.clusterModules)
+			{
+				OxidizerTank component = @ref.Get().GetComponent<OxidizerTank>();
+				if (component != null)
+				{
+					num += component.UserMaxCapacity;
+				}
+			}
+			return (float)Mathf.CeilToInt(num);
+		}
+	}
+
 	public int MaxHeight
 	{
 		get
@@ -658,19 +733,38 @@ public class CraftModuleInterface : KMonoBehaviour, ISim4000ms
 		return this.returnConditions;
 	}
 
+	public int PopulateConditionSet(ProcessCondition.ProcessConditionType conditionType, List<ProcessCondition> conditions)
+	{
+		int num = 0;
+		foreach (Ref<RocketModuleCluster> @ref in this.clusterModules)
+		{
+			num += @ref.Get().PopulateConditionSet(conditionType, conditions);
+		}
+		if (this.CurrentPad != null)
+		{
+			num += this.CurrentPad.GetComponent<LaunchPadConditions>().PopulateConditionSet(conditionType, conditions);
+		}
+		return num;
+	}
+
 	private ProcessCondition.Status EvaluateConditionSet(ProcessCondition.ProcessConditionType conditionType)
 	{
 		ProcessCondition.Status status = ProcessCondition.Status.Ready;
-		foreach (ProcessCondition processCondition in this.GetConditionSet(conditionType))
+		List<ProcessCondition> list;
+		using (ProcessCondition.ListPool.Get(out list))
 		{
-			ProcessCondition.Status status2 = processCondition.EvaluateCondition();
-			if (status2 < status)
+			this.PopulateConditionSet(conditionType, list);
+			foreach (ProcessCondition processCondition in list)
 			{
-				status = status2;
-			}
-			if (status == ProcessCondition.Status.Failure)
-			{
-				break;
+				ProcessCondition.Status status2 = processCondition.EvaluateCondition();
+				if (status2 < status)
+				{
+					status = status2;
+				}
+				if (status == ProcessCondition.Status.Failure)
+				{
+					break;
+				}
 			}
 		}
 		return status;

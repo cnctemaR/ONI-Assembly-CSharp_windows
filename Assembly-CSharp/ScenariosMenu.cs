@@ -96,7 +96,7 @@ public class ScenariosMenu : KModalScreen, SteamUGCService.IClient
 		File.WriteAllBytes(text2, bytesFromZip);
 		SaveLoader.SetActiveSaveFilePath(text2);
 		Time.timeScale = 0f;
-		App.LoadScene("backend");
+		SaveLoader.LoadScene();
 	}
 
 	private ConfirmDialogScreen GetConfirmDialog()

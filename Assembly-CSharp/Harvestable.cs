@@ -64,6 +64,7 @@ public class Harvestable : Workable
 		component.RemoveStatusItem(Db.Get().MiscStatusItems.PendingHarvest, false);
 		component.RemoveStatusItem(Db.Get().MiscStatusItems.Operating, false);
 		Game.Instance.userMenu.Refresh(base.gameObject);
+		this.completed_by = null;
 	}
 
 	public void OnMarkedForHarvest()
@@ -115,7 +116,7 @@ public class Harvestable : Workable
 
 	protected virtual void OnCancel(object data)
 	{
-		bool flag = data == null || (data is bool && !(bool)data);
+		bool flag = data == null || (data is Boxed<bool> && !((Boxed<bool>)data).value);
 		if (this.chore != null)
 		{
 			this.chore.Cancel("Cancel harvest");

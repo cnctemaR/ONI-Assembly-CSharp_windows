@@ -10,6 +10,12 @@ public class ClusterDestinationSideScreen : SideScreenContent
 
 	private RocketClusterDestinationSelector targetRocketSelector { get; set; }
 
+	protected override void OnPrefabInit()
+	{
+		base.OnPrefabInit();
+		this.CheckShouldShowTopTitle = () => false;
+	}
+
 	protected override void OnSpawn()
 	{
 		this.changeDestinationButton.onClick += this.OnClickChangeDestination;
@@ -21,7 +27,7 @@ public class ClusterDestinationSideScreen : SideScreenContent
 
 	public override int GetSideScreenSortOrder()
 	{
-		return 300;
+		return 103;
 	}
 
 	protected override void OnShow(bool show)
@@ -34,6 +40,10 @@ public class ClusterDestinationSideScreen : SideScreenContent
 			{
 				this.Refresh(null);
 			});
+			this.m_refreshOnCancelHandle = this.targetSelector.Subscribe(94158097, delegate(object data)
+			{
+				this.Refresh(null);
+			});
 			return;
 		}
 		if (this.m_refreshHandle != -1)
@@ -42,13 +52,27 @@ public class ClusterDestinationSideScreen : SideScreenContent
 			this.m_refreshHandle = -1;
 			this.launchPadDropDown.Close();
 		}
+		if (this.m_refreshOnCancelHandle != -1)
+		{
+			this.targetSelector.Unsubscribe(this.m_refreshOnCancelHandle);
+			this.m_refreshOnCancelHandle = -1;
+			this.launchPadDropDown.Close();
+		}
 	}
 
 	public override bool IsValidForTarget(GameObject target)
 	{
 		ClusterDestinationSelector component = target.GetComponent<ClusterDestinationSelector>();
-		return (component != null && component.assignable) || (target.GetComponent<RocketModule>() != null && target.HasTag(GameTags.LaunchButtonRocketModule)) || (target.GetComponent<RocketControlStation>() != null && target.GetComponent<RocketControlStation>().GetMyWorld().GetComponent<Clustercraft>()
-			.Status != Clustercraft.CraftStatus.Launching);
+		bool flag = component != null && component.assignable;
+		bool flag2 = target.GetComponent<RocketModuleCluster>() != null && target.GetComponent<RocketModuleCluster>().GetComponent<PassengerRocketModule>() != null;
+		bool flag3 = target.GetComponent<RocketModuleCluster>() != null && target.GetComponent<RocketModuleCluster>().GetComponent<RoboPilotModule>() != null;
+		if (flag2 || flag3)
+		{
+			return true;
+		}
+		bool flag4 = target.GetComponent<RocketControlStation>() != null && target.GetComponent<RocketControlStation>().GetMyWorld().GetComponent<Clustercraft>()
+			.Status != Clustercraft.CraftStatus.Launching;
+		return flag || flag4;
 	}
 
 	public override void SetTarget(GameObject target)
@@ -66,42 +90,50 @@ public class ClusterDestinationSideScreen : SideScreenContent
 			}
 		}
 		this.targetRocketSelector = this.targetSelector as RocketClusterDestinationSelector;
-		this.changeDestinationButton.GetComponent<ToolTip>().SetSimpleTooltip(this.targetSelector.changeTargetButtonTooltipString);
+		this.changeDestinationButtonTooltip.SetSimpleTooltip(this.targetSelector.changeTargetButtonTooltipString);
 		this.clearDestinationButton.GetComponent<ToolTip>().SetSimpleTooltip(this.targetSelector.clearTargetButtonTooltipString);
 	}
 
 	private void Refresh(object data = null)
 	{
+		EntityLayer entityLayer = EntityLayer.None;
+		bool flag = ClusterMapScreen.Instance.GetMode() == ClusterMapScreen.Mode.SelectDestination;
 		if (!this.targetSelector.IsAtDestination())
 		{
 			ClusterGridEntity clusterEntityTarget = this.targetSelector.GetClusterEntityTarget();
 			if (clusterEntityTarget != null)
 			{
 				this.destinationImage.sprite = clusterEntityTarget.GetUISprite();
-				this.destinationLabel.text = this.targetSelector.sidescreenTitleString + ": " + clusterEntityTarget.GetProperName();
+				this.destinationInfoLabel.text = GameUtil.SafeStringFormat(UI.UISIDESCREENS.CLUSTERDESTINATIONSIDESCREEN.DESTINATION_LABEL, new object[] { clusterEntityTarget.GetProperName() });
 			}
 			else
 			{
 				Sprite sprite;
 				string text;
 				string text2;
-				ClusterGrid.Instance.GetLocationDescription(this.targetSelector.GetDestination(), out sprite, out text, out text2);
+				ClusterGrid.Instance.GetLocationDescription(this.targetSelector.GetDestination(), out sprite, out text, out text2, out entityLayer);
 				this.destinationImage.sprite = sprite;
-				this.destinationLabel.text = this.targetSelector.sidescreenTitleString + ": " + text;
+				this.destinationInfoLabel.text = GameUtil.SafeStringFormat(UI.UISIDESCREENS.CLUSTERDESTINATIONSIDESCREEN.DESTINATION_LABEL, new object[] { text });
 			}
-			this.clearDestinationButton.isInteractable = true;
+			this.clearDestinationButton.isInteractable = !flag;
 		}
 		else
 		{
 			this.destinationImage.sprite = Assets.GetSprite("hex_unknown");
-			this.destinationLabel.text = this.targetSelector.sidescreenTitleString + ": " + UI.SPACEDESTINATIONS.NONE.NAME;
+			this.destinationInfoLabel.text = GameUtil.SafeStringFormat(UI.UISIDESCREENS.CLUSTERDESTINATIONSIDESCREEN.DESTINATION_LABEL, new object[] { UI.UISIDESCREENS.CLUSTERDESTINATIONSIDESCREEN.DESTINATION_LABEL_INVALID });
 			this.clearDestinationButton.isInteractable = false;
+		}
+		this.changeDestinationButtonTooltip.SetSimpleTooltip(flag ? UI.UISIDESCREENS.CLUSTERDESTINATIONSIDESCREEN.CHANGE_DESTINATION_BUTTON_SELECTING_TOOLTIP : this.targetSelector.changeTargetButtonTooltipString);
+		this.changeDestinationButton.isInteractable = !flag;
+		if (flag)
+		{
+			this.destinationInfoLabel.text = UI.UISIDESCREENS.CLUSTERDESTINATIONSIDESCREEN.DESTINATION_LABEL_SELECTING;
 		}
 		if (this.targetRocketSelector != null)
 		{
 			List<LaunchPad> launchPadsForDestination = LaunchPad.GetLaunchPadsForDestination(this.targetRocketSelector.GetDestination());
-			this.launchPadDropDown.gameObject.SetActive(true);
-			this.repeatButton.gameObject.SetActive(true);
+			this.landingPlatformSection.gameObject.SetActive(true);
+			this.roundtripSection.gameObject.SetActive(true);
 			this.launchPadDropDown.Initialize(launchPadsForDestination, new Action<IListableOption, object>(this.OnLaunchPadEntryClick), new Func<IListableOption, IListableOption, object, int>(this.PadDropDownSort), new Action<DropDownEntry, object>(this.PadDropDownEntryRefreshAction), true, this.targetRocketSelector);
 			if (!this.targetRocketSelector.IsAtDestination() && launchPadsForDestination.Count > 0)
 			{
@@ -110,25 +142,28 @@ public class ClusterDestinationSideScreen : SideScreenContent
 				if (destinationPad != null)
 				{
 					this.launchPadDropDown.selectedLabel.text = destinationPad.GetProperName();
+					this.landingPlatformInfoLabel.SetText(GameUtil.SafeStringFormat(UI.UISIDESCREENS.CLUSTERDESTINATIONSIDESCREEN.LANDING_PLATFORM_LABEL, new object[] { destinationPad.GetProperName() }));
 				}
 				else
 				{
 					this.launchPadDropDown.selectedLabel.text = UI.UISIDESCREENS.CLUSTERDESTINATIONSIDESCREEN.FIRSTAVAILABLE;
+					this.landingPlatformInfoLabel.SetText(GameUtil.SafeStringFormat(UI.UISIDESCREENS.CLUSTERDESTINATIONSIDESCREEN.LANDING_PLATFORM_LABEL, new object[] { UI.UISIDESCREENS.CLUSTERDESTINATIONSIDESCREEN.FIRSTAVAILABLE }));
 				}
 			}
 			else
 			{
 				this.launchPadDropDown.selectedLabel.text = UI.UISIDESCREENS.CLUSTERDESTINATIONSIDESCREEN.FIRSTAVAILABLE;
+				this.landingPlatformInfoLabel.SetText(GameUtil.SafeStringFormat(UI.UISIDESCREENS.CLUSTERDESTINATIONSIDESCREEN.LANDING_PLATFORM_LABEL, new object[] { UI.UISIDESCREENS.CLUSTERDESTINATIONSIDESCREEN.FIRSTAVAILABLE }));
 				this.launchPadDropDown.openButton.isInteractable = false;
 			}
-			this.StyleRepeatButton();
+			this.RefreshRepeatButtonLabels();
 		}
 		else
 		{
-			this.launchPadDropDown.gameObject.SetActive(false);
-			this.repeatButton.gameObject.SetActive(false);
+			this.landingPlatformSection.gameObject.SetActive(false);
+			this.roundtripSection.gameObject.SetActive(false);
 		}
-		this.StyleChangeDestinationButton();
+		this.hexEmptyBG.gameObject.SetActive(entityLayer == EntityLayer.POI);
 	}
 
 	private void OnClickChangeDestination()
@@ -136,12 +171,20 @@ public class ClusterDestinationSideScreen : SideScreenContent
 		if (this.targetSelector.assignable)
 		{
 			ClusterMapScreen.Instance.ShowInSelectDestinationMode(this.targetSelector);
+			AxialI myWorldLocation = this.targetSelector.GetMyWorldLocation();
+			AxialI destination = this.targetSelector.GetDestination();
+			AxialI randomVisibleAdjacentCellLocation = ClusterGrid.Instance.GetRandomVisibleAdjacentCellLocation(myWorldLocation, destination);
+			if (randomVisibleAdjacentCellLocation != AxialI.INVALID)
+			{
+				ClusterMapScreen.Instance.OnHoverHex(ClusterMapScreen.Instance.GetClusterMapHexAtLocation(randomVisibleAdjacentCellLocation));
+			}
 		}
-		this.StyleChangeDestinationButton();
-	}
-
-	private void StyleChangeDestinationButton()
-	{
+		this.Refresh(null);
+		if (this.changeDestinationButtonTooltip.isHovering)
+		{
+			ToolTipScreen.Instance.ClearToolTip(this.changeDestinationButtonTooltip);
+			ToolTipScreen.Instance.SetToolTip(this.changeDestinationButtonTooltip);
+		}
 	}
 
 	private void OnClickClearDestination()
@@ -187,34 +230,55 @@ public class ClusterDestinationSideScreen : SideScreenContent
 	private void OnRepeatClicked()
 	{
 		this.targetRocketSelector.Repeat = !this.targetRocketSelector.Repeat;
-		this.StyleRepeatButton();
+		this.RefreshRepeatButtonLabels();
 	}
 
-	private void StyleRepeatButton()
+	private void RefreshRepeatButtonLabels()
 	{
-		this.repeatButton.bgImage.colorStyleSetting = (this.targetRocketSelector.Repeat ? this.repeatOn : this.repeatOff);
-		this.repeatButton.bgImage.ApplyColorStyleSetting();
+		this.roundTripInfoLabel.SetText(this.targetRocketSelector.Repeat ? UI.UISIDESCREENS.CLUSTERDESTINATIONSIDESCREEN.ROUNDTRIP_LABEL_ROUNDTRIP : UI.UISIDESCREENS.CLUSTERDESTINATIONSIDESCREEN.ROUNDTRIP_LABEL_ONE_WAY);
+		this.roundTripButtonLabel.SetText(this.targetRocketSelector.Repeat ? UI.UISIDESCREENS.CLUSTERDESTINATIONSIDESCREEN.ROUNDTRIP_BUTTON_ONE_WAY : UI.UISIDESCREENS.CLUSTERDESTINATIONSIDESCREEN.ROUNDTRIP_BUTTON_ROUNDTRIP);
+		this.roundtripButtonTooltip.SetSimpleTooltip(this.targetRocketSelector.Repeat ? UI.UISIDESCREENS.CLUSTERDESTINATIONSIDESCREEN.ROUNDTRIP_BUTTON_TOOLTIP_ONE_WAY : UI.UISIDESCREENS.CLUSTERDESTINATIONSIDESCREEN.ROUNDTRIP_BUTTON_TOOLTIP_ROUNDTRIP);
 	}
+
+	public Image hexEmptyBG;
 
 	public Image destinationImage;
 
-	public LocText destinationLabel;
+	[Header("Destination selection Section")]
+	public RectTransform destinationSection;
+
+	public LocText destinationInfoLabel;
 
 	public KButton changeDestinationButton;
 
+	public ToolTip changeDestinationButtonTooltip;
+
 	public KButton clearDestinationButton;
+
+	[Header("Landing Platform Section")]
+	public RectTransform landingPlatformSection;
+
+	public LocText landingPlatformInfoLabel;
 
 	public DropDown launchPadDropDown;
 
+	[Header("Round Trip Section")]
+	public RectTransform roundtripSection;
+
+	public LocText roundTripInfoLabel;
+
+	public LocText roundTripButtonLabel;
+
 	public KButton repeatButton;
 
-	public ColorStyleSetting repeatOff;
+	public ToolTip roundtripButtonTooltip;
 
-	public ColorStyleSetting repeatOn;
-
+	[Space]
 	public ColorStyleSetting defaultButton;
 
 	public ColorStyleSetting highlightButton;
 
 	private int m_refreshHandle = -1;
+
+	private int m_refreshOnCancelHandle = -1;
 }

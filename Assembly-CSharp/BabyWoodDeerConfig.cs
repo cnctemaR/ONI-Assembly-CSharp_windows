@@ -3,7 +3,7 @@ using Klei.AI;
 using STRINGS;
 using UnityEngine;
 
-[EntityConfigOrder(2)]
+[EntityConfigOrder(3)]
 public class BabyWoodDeerConfig : IEntityConfig, IHasDlcRestrictions
 {
 	public string[] GetRequiredDlcIds()

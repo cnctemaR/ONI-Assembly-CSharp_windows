@@ -5,7 +5,7 @@ public class StorageController : GameStateMachine<StorageController, StorageCont
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
 		default_state = this.off;
-		this.root.EventTransition(GameHashes.OnStorageInteracted, this.working, null);
+		this.root.EventTransition(GameHashes.OnStorageInteracted, this.working, (StorageController.Instance smi) => smi.hasWorkingAnim);
 		this.off.PlayAnim("off").EventTransition(GameHashes.OperationalChanged, this.on, (StorageController.Instance smi) => smi.GetComponent<Operational>().IsOperational);
 		this.on.PlayAnim("on").EventTransition(GameHashes.OperationalChanged, this.off, (StorageController.Instance smi) => !smi.GetComponent<Operational>().IsOperational);
 		this.working.PlayAnim("working").OnAnimQueueComplete(this.off);
@@ -26,6 +26,10 @@ public class StorageController : GameStateMachine<StorageController, StorageCont
 		public Instance(IStateMachineTarget master, StorageController.Def def)
 			: base(master)
 		{
+			KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
+			this.hasWorkingAnim = component.HasAnimation("working");
 		}
+
+		public bool hasWorkingAnim;
 	}
 }

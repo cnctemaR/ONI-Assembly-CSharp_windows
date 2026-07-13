@@ -23,6 +23,20 @@ public class ComplexRecipe : IHasDlcRestrictions
 
 	public bool ProductHasFacade { get; set; }
 
+	public bool IsAnyProductDeprecated()
+	{
+		ComplexRecipe.RecipeElement[] array = this.results;
+		for (int i = 0; i < array.Length; i++)
+		{
+			GameObject prefab = Assets.GetPrefab(array[i].material);
+			if (prefab != null && prefab.HasTag(GameTags.DeprecatedContent))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
 	public bool RequiresAllIngredientsDiscovered { get; set; }
 
 	public Tag FirstResult

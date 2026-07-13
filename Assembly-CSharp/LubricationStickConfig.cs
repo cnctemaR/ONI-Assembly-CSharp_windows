@@ -21,6 +21,7 @@ public class LubricationStickConfig : IEntityConfig, IHasDlcRestrictions
 		gameObject.AddOrGet<EntitySplitter>();
 		gameObject.AddTag(GameTags.MedicalSupplies);
 		gameObject.AddTag(GameTags.SolidLubricant);
+		gameObject.AddTag(GameTags.PedestalDisplayable);
 		ComplexRecipe.RecipeElement[] array = new ComplexRecipe.RecipeElement[]
 		{
 			new ComplexRecipe.RecipeElement(SimHashes.LiquidGunk.CreateTag(), GunkMonitor.GUNK_CAPACITY),

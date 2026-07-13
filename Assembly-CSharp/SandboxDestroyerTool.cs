@@ -51,13 +51,9 @@ public class SandboxDestroyerTool : BrushTool
 	public override void GetOverlayColorData(out HashSet<ToolMenu.CellColorData> colors)
 	{
 		colors = new HashSet<ToolMenu.CellColorData>();
-		foreach (int num in this.recentlyAffectedCells)
+		foreach (int num in this.cellsInRadius)
 		{
-			colors.Add(new ToolMenu.CellColorData(num, this.recentlyAffectedCellColor));
-		}
-		foreach (int num2 in this.cellsInRadius)
-		{
-			colors.Add(new ToolMenu.CellColorData(num2, this.radiusIndicatorColor));
+			colors.Add(new ToolMenu.CellColorData(num, this.radiusIndicatorColor));
 		}
 	}
 
@@ -67,71 +63,11 @@ public class SandboxDestroyerTool : BrushTool
 		KFMOD.PlayUISound(GlobalAssets.GetSound("SandboxTool_Delete", false));
 	}
 
-	public override void OnMouseMove(Vector3 cursorPos)
-	{
-		base.OnMouseMove(cursorPos);
-	}
-
 	protected override void OnPaintCell(int cell, int distFromOrigin)
 	{
 		base.OnPaintCell(cell, distFromOrigin);
-		this.recentlyAffectedCells.Add(cell);
-		Game.CallbackInfo callbackInfo = new Game.CallbackInfo(delegate
-		{
-			this.recentlyAffectedCells.Remove(cell);
-		}, false);
-		int index = Game.Instance.callbackManager.Add(callbackInfo).index;
-		SimMessages.ReplaceElement(cell, SimHashes.Vacuum, CellEventLogger.Instance.SandBoxTool, 0f, 0f, byte.MaxValue, 0, index);
-		HashSetPool<GameObject, SandboxDestroyerTool>.PooledHashSet pooledHashSet = HashSetPool<GameObject, SandboxDestroyerTool>.Allocate();
-		foreach (Pickupable pickupable in Components.Pickupables.Items)
-		{
-			if (Grid.PosToCell(pickupable) == cell)
-			{
-				pooledHashSet.Add(pickupable.gameObject);
-			}
-		}
-		foreach (BuildingComplete buildingComplete in Components.BuildingCompletes.Items)
-		{
-			if (Grid.PosToCell(buildingComplete) == cell)
-			{
-				pooledHashSet.Add(buildingComplete.gameObject);
-			}
-		}
-		if (Grid.Objects[cell, 1] != null)
-		{
-			pooledHashSet.Add(Grid.Objects[cell, 1]);
-		}
-		foreach (Crop crop in Components.Crops.Items)
-		{
-			if (Grid.PosToCell(crop) == cell)
-			{
-				pooledHashSet.Add(crop.gameObject);
-			}
-		}
-		foreach (Health health in Components.Health.Items)
-		{
-			if (Grid.PosToCell(health) == cell)
-			{
-				pooledHashSet.Add(health.gameObject);
-			}
-		}
-		foreach (Comet comet in Components.Meteors.GetItems((int)Grid.WorldIdx[cell]))
-		{
-			if (!comet.IsNullOrDestroyed() && Grid.PosToCell(comet) == cell)
-			{
-				pooledHashSet.Add(comet.gameObject);
-			}
-		}
-		foreach (GameObject gameObject in pooledHashSet)
-		{
-			Util.KDestroyGameObject(gameObject);
-		}
-		pooledHashSet.Recycle();
+		GameUtil.DestroyCell(cell, CellEventLogger.Instance.SandBoxTool, true);
 	}
 
 	public static SandboxDestroyerTool instance;
-
-	protected HashSet<int> recentlyAffectedCells = new HashSet<int>();
-
-	protected Color recentlyAffectedCellColor = new Color(1f, 1f, 1f, 0.1f);
 }

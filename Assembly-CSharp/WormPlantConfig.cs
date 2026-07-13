@@ -33,6 +33,7 @@ public class WormPlantConfig : IEntityConfig, IHasDlcRestrictions
 				massConsumptionRate = 0.016666668f
 			}
 		});
+		gameObject.AddOrGet<PlantFiberProducer>().amount = 8f;
 		gameObject.AddOrGet<StandardCropPlant>();
 		gameObject.AddOrGet<LoopingSounds>();
 		return gameObject;
@@ -89,6 +90,8 @@ public class WormPlantConfig : IEntityConfig, IHasDlcRestrictions
 	public const string SEED_ID = "WormPlantSeed";
 
 	public const float SULFUR_CONSUMPTION_RATE = 0.016666668f;
+
+	public const float PLANT_FIBER_PRODUCED_PER_CYCLE = 8f;
 
 	public static readonly EffectorValues BASIC_DECOR = DECOR.PENALTY.TIER0;
 

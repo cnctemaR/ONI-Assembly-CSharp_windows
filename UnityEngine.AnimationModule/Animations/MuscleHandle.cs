@@ -6,9 +6,9 @@ using UnityEngine.Scripting.APIUpdating;
 
 namespace UnityEngine.Animations
 {
+	[NativeHeader("Modules/Animation/MuscleHandle.h")]
 	[MovedFrom("UnityEngine.Experimental.Animations")]
 	[NativeHeader("Modules/Animation/Animator.h")]
-	[NativeHeader("Modules/Animation/MuscleHandle.h")]
 	public struct MuscleHandle
 	{
 		public HumanPartDof humanPartDof { readonly get; private set; }

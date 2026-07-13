@@ -21,6 +21,7 @@ public class CactusPlantConfig : IEntityConfig
 			SimHashes.CarbonDioxide
 		}, false, 0f, 0.15f, null, true, false, true, true, 2400f, 0f, 2200f, "CactusPlantOriginal", global::STRINGS.CREATURES.SPECIES.CACTUSPLANT.NAME);
 		PrickleGrass prickleGrass = gameObject.AddOrGet<PrickleGrass>();
+		gameObject.AddOrGetDef<DecorPlantMonitor.Def>();
 		prickleGrass.positive_decor_effect = this.POSITIVE_DECOR_EFFECT;
 		prickleGrass.negative_decor_effect = this.NEGATIVE_DECOR_EFFECT;
 		GameObject gameObject2 = gameObject;

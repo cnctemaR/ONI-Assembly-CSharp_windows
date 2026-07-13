@@ -756,75 +756,79 @@ namespace UnityEngine
 
 		public void SelectToPosition(Vector2 cursorPosition)
 		{
-			bool flag = !this.m_MouseDragSelectsWholeWords;
-			if (flag)
+			bool flag = this.characterCount == 0;
+			if (!flag)
 			{
-				this.cursorIndex = this.m_TextHandle.GetCursorIndexFromPosition(cursorPosition, true);
-			}
-			else
-			{
-				int num = this.m_TextHandle.GetCursorIndexFromPosition(cursorPosition, true);
-				num = this.EnsureValidCodePointIndex(num);
-				bool flag2 = this.dblClickSnap == TextEditor.DblClickSnapping.WORDS;
+				bool flag2 = !this.m_MouseDragSelectsWholeWords;
 				if (flag2)
 				{
-					bool flag3 = num <= this.m_DblClickInitPosStart;
-					if (flag3)
-					{
-						this.cursorIndex = this.FindEndOfClassification(num, TextSelectingUtilities.Direction.Backward);
-						this.selectIndex = this.FindEndOfClassification(this.m_DblClickInitPosEnd - 1, TextSelectingUtilities.Direction.Forward);
-					}
-					else
-					{
-						bool flag4 = num >= this.m_DblClickInitPosEnd;
-						if (flag4)
-						{
-							this.cursorIndex = this.FindEndOfClassification(num - 1, TextSelectingUtilities.Direction.Forward);
-							this.selectIndex = this.FindEndOfClassification(this.m_DblClickInitPosStart + 1, TextSelectingUtilities.Direction.Backward);
-						}
-						else
-						{
-							this.cursorIndex = this.m_DblClickInitPosStart;
-							this.selectIndex = this.m_DblClickInitPosEnd;
-						}
-					}
+					this.cursorIndex = this.m_TextHandle.GetCursorIndexFromPosition(cursorPosition, true);
 				}
 				else
 				{
-					bool flag5 = num <= this.m_DblClickInitPosStart;
-					if (flag5)
+					int num = this.m_TextHandle.GetCursorIndexFromPosition(cursorPosition, true);
+					num = this.EnsureValidCodePointIndex(num);
+					bool flag3 = this.dblClickSnap == TextEditor.DblClickSnapping.WORDS;
+					if (flag3)
 					{
-						bool flag6 = num > 0;
-						if (flag6)
+						bool flag4 = num <= this.m_DblClickInitPosStart;
+						if (flag4)
 						{
-							this.cursorIndex = this.m_TextHandle.LastIndexOf('\n', Mathf.Max(0, num - 1)) + 1;
+							this.cursorIndex = this.FindEndOfClassification(num, TextSelectingUtilities.Direction.Backward);
+							this.selectIndex = this.FindEndOfClassification(this.m_DblClickInitPosEnd - 1, TextSelectingUtilities.Direction.Forward);
 						}
 						else
 						{
-							this.cursorIndex = 0;
-						}
-						this.selectIndex = this.m_TextHandle.LastIndexOf('\n', Mathf.Min(this.characterCount - 1, this.m_DblClickInitPosEnd + 1));
-					}
-					else
-					{
-						bool flag7 = num >= this.m_DblClickInitPosEnd;
-						if (flag7)
-						{
-							bool flag8 = num < this.characterCount;
-							if (flag8)
+							bool flag5 = num >= this.m_DblClickInitPosEnd;
+							if (flag5)
 							{
-								this.cursorIndex = this.IndexOfEndOfLine(num);
+								this.cursorIndex = this.FindEndOfClassification(num - 1, TextSelectingUtilities.Direction.Forward);
+								this.selectIndex = this.FindEndOfClassification(this.m_DblClickInitPosStart + 1, TextSelectingUtilities.Direction.Backward);
 							}
 							else
 							{
-								this.cursorIndex = this.characterCount;
+								this.cursorIndex = this.m_DblClickInitPosStart;
+								this.selectIndex = this.m_DblClickInitPosEnd;
 							}
-							this.selectIndex = this.m_TextHandle.LastIndexOf('\n', Mathf.Max(0, this.m_DblClickInitPosEnd - 2)) + 1;
+						}
+					}
+					else
+					{
+						bool flag6 = num <= this.m_DblClickInitPosStart;
+						if (flag6)
+						{
+							bool flag7 = num > 0;
+							if (flag7)
+							{
+								this.cursorIndex = this.m_TextHandle.LastIndexOf('\n', Mathf.Max(0, num - 1)) + 1;
+							}
+							else
+							{
+								this.cursorIndex = 0;
+							}
+							this.selectIndex = this.m_TextHandle.LastIndexOf('\n', Mathf.Min(this.characterCount - 1, this.m_DblClickInitPosEnd + 1));
 						}
 						else
 						{
-							this.cursorIndex = this.m_DblClickInitPosStart;
-							this.selectIndex = this.m_DblClickInitPosEnd;
+							bool flag8 = num >= this.m_DblClickInitPosEnd;
+							if (flag8)
+							{
+								bool flag9 = num < this.characterCount;
+								if (flag9)
+								{
+									this.cursorIndex = this.IndexOfEndOfLine(num);
+								}
+								else
+								{
+									this.cursorIndex = this.characterCount;
+								}
+								this.selectIndex = this.m_TextHandle.LastIndexOf('\n', Mathf.Max(0, this.m_DblClickInitPosEnd - 2)) + 1;
+							}
+							else
+							{
+								this.cursorIndex = this.m_DblClickInitPosStart;
+								this.selectIndex = this.m_DblClickInitPosEnd;
+							}
 						}
 					}
 				}

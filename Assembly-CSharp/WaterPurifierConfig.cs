@@ -82,7 +82,6 @@ public class WaterPurifierConfig : IBuildingConfig
 	public override void DoPostConfigureComplete(GameObject go)
 	{
 		go.AddOrGet<LogicOperationalController>();
-		go.AddOrGetDef<PoweredActiveController.Def>();
 		go.GetComponent<KPrefabID>().AddTag(GameTags.OverlayBehindConduits, false);
 	}
 

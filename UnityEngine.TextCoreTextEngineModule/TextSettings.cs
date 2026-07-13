@@ -299,8 +299,8 @@ namespace UnityEngine.TextCore.Text
 		[SerializeField]
 		protected string m_Version;
 
-		[SerializeField]
 		[FormerlySerializedAs("m_defaultFontAsset")]
+		[SerializeField]
 		protected FontAsset m_DefaultFontAsset;
 
 		[FormerlySerializedAs("m_defaultFontAssetPath")]
@@ -311,8 +311,8 @@ namespace UnityEngine.TextCore.Text
 		[SerializeField]
 		protected List<FontAsset> m_FallbackFontAssets;
 
-		[FormerlySerializedAs("m_matchMaterialPreset")]
 		[SerializeField]
+		[FormerlySerializedAs("m_matchMaterialPreset")]
 		protected bool m_MatchMaterialPreset;
 
 		[FormerlySerializedAs("m_missingGlyphCharacter")]
@@ -326,8 +326,8 @@ namespace UnityEngine.TextCore.Text
 		[SerializeField]
 		protected SpriteAsset m_DefaultSpriteAsset;
 
-		[SerializeField]
 		[FormerlySerializedAs("m_defaultSpriteAssetPath")]
+		[SerializeField]
 		protected string m_DefaultSpriteAssetPath = "Sprite Assets/";
 
 		[SerializeField]

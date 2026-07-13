@@ -69,8 +69,8 @@ namespace UnityEngine.Experimental.Rendering
 			}
 		}
 
-		[StaticAccessor("ScriptableRuntimeReflectionSystem", StaticAccessorType.DoubleColon)]
 		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+		[StaticAccessor("ScriptableRuntimeReflectionSystem", StaticAccessorType.DoubleColon)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void ScriptingDirtyReflectionSystemInstance();
 

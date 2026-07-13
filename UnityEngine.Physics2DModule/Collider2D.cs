@@ -251,7 +251,7 @@ namespace UnityEngine
 		}
 
 		[NativeMethod("IsTouching")]
-		private bool IsTouching_OtherColliderWithFilter([Writable] [NotNull("ArgumentNullException")] Collider2D collider, ContactFilter2D contactFilter)
+		private bool IsTouching_OtherColliderWithFilter([NotNull("ArgumentNullException")] [Writable] Collider2D collider, ContactFilter2D contactFilter)
 		{
 			return this.IsTouching_OtherColliderWithFilter_Injected(collider, ref contactFilter);
 		}
@@ -380,7 +380,7 @@ namespace UnityEngine
 		}
 
 		[NativeMethod("CastArray_Binding")]
-		private int CastArray_Internal(Vector2 direction, float distance, ContactFilter2D contactFilter, bool ignoreSiblingColliders, [Unmarshalled] [NotNull("ArgumentNullException")] RaycastHit2D[] results)
+		private int CastArray_Internal(Vector2 direction, float distance, ContactFilter2D contactFilter, bool ignoreSiblingColliders, [NotNull("ArgumentNullException")] [Unmarshalled] RaycastHit2D[] results)
 		{
 			return this.CastArray_Internal_Injected(ref direction, distance, ref contactFilter, ignoreSiblingColliders, results);
 		}

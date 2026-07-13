@@ -6,9 +6,9 @@ using UnityEngine.Scripting.APIUpdating;
 
 namespace UnityEngine.Windows.WebCam
 {
+	[MovedFrom("UnityEngine.XR.WSA.WebCam")]
 	[UsedByNativeCode]
 	[NativeHeader("PlatformDependent/Win/Webcam/CameraParameters.h")]
-	[MovedFrom("UnityEngine.XR.WSA.WebCam")]
 	public struct CameraParameters
 	{
 		public float hologramOpacity

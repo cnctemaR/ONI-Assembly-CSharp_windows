@@ -9,8 +9,8 @@ using UnityEngine.Scripting;
 namespace Unity.IO.Archive
 {
 	[NativeHeader("Runtime/VirtualFileSystem/ArchiveFileSystem/ArchiveFileHandle.h")]
-	[StaticAccessor("GetManagedArchiveSystem()", StaticAccessorType.Dot)]
 	[RequiredByNativeCode]
+	[StaticAccessor("GetManagedArchiveSystem()", StaticAccessorType.Dot)]
 	public static class ArchiveFileInterface
 	{
 		public static ArchiveHandle MountAsync(ContentNamespace namespaceId, string filePath, string prefix)

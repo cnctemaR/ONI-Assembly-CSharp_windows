@@ -144,6 +144,11 @@ public class StoryContentPanel : KMonoBehaviour
 				list2.Add(list3[0]);
 			}
 		}
+		if (!list2.Contains(Db.Get().Stories.HijackedHeadquarters))
+		{
+			list2.RemoveAt(0);
+			list2.Add(Db.Get().Stories.HijackedHeadquarters);
+		}
 		foreach (Story story in list)
 		{
 			this.SetStoryState(story.Id, list2.Contains(story) ? StoryContentPanel.StoryState.Guaranteed : StoryContentPanel.StoryState.Forbidden);
@@ -216,7 +221,7 @@ public class StoryContentPanel : KMonoBehaviour
 		{
 			if (num != 1)
 			{
-				text2 = string.Format(UI.FRONTEND.COLONYDESTINATIONSCREEN.TRAIT_COUNT, num);
+				text2 = GameUtil.SafeStringFormat(UI.FRONTEND.COLONYDESTINATIONSCREEN.TRAIT_COUNT, new object[] { num });
 			}
 			else
 			{
@@ -234,24 +239,13 @@ public class StoryContentPanel : KMonoBehaviour
 		}
 		if (tooltip)
 		{
-			foreach (KeyValuePair<string, StoryContentPanel.StoryState> keyValuePair2 in this.storyStates)
-			{
-				if (keyValuePair2.Value == StoryContentPanel.StoryState.Guaranteed)
-				{
-					WorldTrait storyTrait = Db.Get().Stories.Get(keyValuePair2.Key).StoryTrait;
-					text = string.Concat(new string[]
-					{
-						text,
-						"\n\n<b>",
-						Strings.Get(storyTrait.name).String,
-						"</b>\n",
-						Strings.Get(storyTrait.description).String
-					});
-				}
-			}
 			if (num > num2)
 			{
 				text = text + "\n\n" + UI.FRONTEND.COLONYDESTINATIONSCREEN.TOO_MANY_TRAITS_WARNING_TOOLTIP;
+			}
+			else
+			{
+				text = text + "\n\n" + UI.FRONTEND.COLONYDESTINATIONSCREEN.TRAIT_COUNT_TOOLTIP;
 			}
 		}
 		return text;

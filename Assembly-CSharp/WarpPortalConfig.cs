@@ -35,7 +35,7 @@ public class WarpPortalConfig : IEntityConfig, IHasDlcRestrictions
 		gameObject.AddOrGet<WarpPortal>();
 		gameObject.AddOrGet<LoopingSounds>();
 		gameObject.AddOrGet<Ownable>().tintWhenUnassigned = false;
-		LoreBearerUtil.AddLoreTo(gameObject, LoreBearerUtil.UnlockSpecificEntry("notes_teleportation", UI.USERMENUACTIONS.READLORE.SEARCH_TELEPORTER_SENDER));
+		LoreBearerUtil.AddLoreTo(gameObject, LoreBearerUtil.UnlockSpecificEntry("notes_teleportation", UI.USERMENUACTIONS.READLORE.SEARCH_TELEPORTER_SENDER, false));
 		gameObject.AddOrGet<Prioritizable>();
 		KBatchedAnimController kbatchedAnimController = gameObject.AddOrGet<KBatchedAnimController>();
 		kbatchedAnimController.sceneLayer = Grid.SceneLayer.BuildingBack;

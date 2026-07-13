@@ -6,10 +6,10 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Animations
 {
-	[UsedByNativeCode]
 	[RequireComponent(typeof(Transform))]
-	[NativeHeader("Modules/Animation/Constraints/LookAtConstraint.h")]
 	[NativeHeader("Modules/Animation/Constraints/Constraint.bindings.h")]
+	[NativeHeader("Modules/Animation/Constraints/LookAtConstraint.h")]
+	[UsedByNativeCode]
 	public sealed class LookAtConstraint : Behaviour, IConstraint, IConstraintInternal
 	{
 		private LookAtConstraint()

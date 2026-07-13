@@ -17,7 +17,7 @@ public static class BaseSquirrelConfig
 		{
 			text = "DreckoBabyNavGrid";
 		}
-		EntityTemplates.ExtendEntityToBasicCreature(gameObject, FactionManager.FactionID.Pest, traitId, text, NavType.Floor, 32, 2f, "Meat", 1f, true, false, 283.15f, 313.15f, 228.15f, 373.15f);
+		EntityTemplates.ExtendEntityToBasicCreature(false, gameObject, anim_file, is_baby ? null : "squirrel_build_kanim", symbolOverridePrefix, FactionManager.FactionID.Pest, traitId, text, NavType.Floor, 32, 2f, "Meat", 1f, true, false, 283.15f, 313.15f, 228.15f, 373.15f);
 		if (symbolOverridePrefix != null)
 		{
 			gameObject.AddOrGet<SymbolOverrideController>().ApplySymbolOverridesByAffix(Assets.GetAnim(anim_file), symbolOverridePrefix, null, 0);
@@ -75,6 +75,7 @@ public static class BaseSquirrelConfig
 			.Add(new CallAdultStates.Def(), is_baby, -1)
 			.Add(new SeedPlantingStates.Def(symbolOverridePrefix), true, -1)
 			.Add(new CritterCondoStates.Def(), !is_baby, -1)
+			.Add(new CritterEmoteStates.Def(Assets.GetAnim("squirrel_emotes_kanim")), !is_baby, -1)
 			.PopInterruptGroup()
 			.Add(new IdleStates.Def(), true, -1);
 		EntityTemplates.AddCreatureBrain(gameObject, builder, GameTags.Creatures.Species.SquirrelSpecies, symbolOverridePrefix);

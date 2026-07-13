@@ -146,6 +146,11 @@ public class WearableAccessorizer : KMonoBehaviour
 			outfitType = ClothingOutfitUtility.OutfitType.AtmoSuit;
 			return true;
 		}
+		if (equipment.Id == "Jet_Suit")
+		{
+			outfitType = ClothingOutfitUtility.OutfitType.JetSuit;
+			return true;
+		}
 		outfitType = ClothingOutfitUtility.OutfitType.LENGTH;
 		return false;
 	}
@@ -419,8 +424,21 @@ public class WearableAccessorizer : KMonoBehaviour
 		}
 		this.ApplyWearable();
 		Equippable suitEquippable = this.GetSuitEquippable();
+		bool flag;
 		ClothingOutfitUtility.OutfitType outfitType2;
-		bool flag = (suitEquippable == null && outfitType == ClothingOutfitUtility.OutfitType.Clothing) || (suitEquippable != null && this.TryGetEquippableClothingType(suitEquippable.def, out outfitType2) && outfitType2 == outfitType);
+		if (suitEquippable == null && outfitType == ClothingOutfitUtility.OutfitType.Clothing)
+		{
+			flag = true;
+		}
+		else if (suitEquippable != null && this.TryGetEquippableClothingType(suitEquippable.def, out outfitType2))
+		{
+			this.ApplyEquipment(suitEquippable, suitEquippable.GetBuildOverride());
+			flag = outfitType2 == outfitType;
+		}
+		else
+		{
+			flag = false;
+		}
 		if (!base.GetComponent<MinionIdentity>().IsNullOrDestroyed() && this.animController.materialType != KAnimBatchGroup.MaterialType.UI && flag)
 		{
 			this.QueueOutfitChangedFX();
@@ -497,7 +515,7 @@ public class WearableAccessorizer : KMonoBehaviour
 		{
 			return WearableAccessorizer.WearableType.CustomClothing;
 		}
-		if (outfitType != ClothingOutfitUtility.OutfitType.AtmoSuit)
+		if (outfitType - ClothingOutfitUtility.OutfitType.AtmoSuit > 1)
 		{
 			global::Debug.LogWarning("Add a wearable type for clothing outfit type " + outfitType.ToString());
 			return WearableAccessorizer.WearableType.Basic;

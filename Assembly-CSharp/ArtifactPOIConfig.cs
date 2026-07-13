@@ -9,12 +9,17 @@ public class ArtifactPOIConfig : IMultiEntityConfig
 		List<GameObject> list = new List<GameObject>();
 		foreach (ArtifactPOIConfig.ArtifactPOIParams artifactPOIParams in this.GenerateConfigs())
 		{
-			list.Add(ArtifactPOIConfig.CreateArtifactPOI(artifactPOIParams.id, artifactPOIParams.anim, Strings.Get(artifactPOIParams.nameStringKey), Strings.Get(artifactPOIParams.descStringKey), artifactPOIParams.poiType.idHash));
+			list.Add(ArtifactPOIConfig.CreateArtifactPOI(artifactPOIParams.id, artifactPOIParams.anim, Strings.Get(artifactPOIParams.nameStringKey), Strings.Get(artifactPOIParams.descStringKey), artifactPOIParams.poiType.idHash, artifactPOIParams.poiType.initialDatabankCount));
 		}
 		return list;
 	}
 
 	public static GameObject CreateArtifactPOI(string id, string anim, string name, string desc, HashedString poiType)
+	{
+		return ArtifactPOIConfig.CreateArtifactPOI(id, anim, name, desc, poiType, 0);
+	}
+
+	public static GameObject CreateArtifactPOI(string id, string anim, string name, string desc, HashedString poiType, int initialDatabankCount)
 	{
 		GameObject gameObject = EntityTemplates.CreateEntity(id, id, true);
 		gameObject.AddOrGet<SaveLoadRoot>();
@@ -22,7 +27,19 @@ public class ArtifactPOIConfig : IMultiEntityConfig
 		ArtifactPOIClusterGridEntity artifactPOIClusterGridEntity = gameObject.AddOrGet<ArtifactPOIClusterGridEntity>();
 		artifactPOIClusterGridEntity.m_name = name;
 		artifactPOIClusterGridEntity.m_Anim = anim;
+		if (initialDatabankCount > 0)
+		{
+			gameObject.AddOrGetDef<ClusterGridOneTimeResourceSpawner.Def>().thingsToSpawn = new List<ClusterGridOneTimeResourceSpawner.Data>
+			{
+				new ClusterGridOneTimeResourceSpawner.Data
+				{
+					itemID = DatabankHelper.ID,
+					mass = 1f * (float)initialDatabankCount
+				}
+			};
+		}
 		gameObject.AddOrGetDef<ArtifactPOIStates.Def>();
+		gameObject.AddOrGet<InfoDescription>().description = desc;
 		LoreBearerUtil.AddLoreTo(gameObject, new LoreBearerAction(LoreBearerUtil.UnlockNextSpaceEntry));
 		return gameObject;
 	}
@@ -42,18 +59,20 @@ public class ArtifactPOIConfig : IMultiEntityConfig
 		{
 			return list;
 		}
-		list.Add(new ArtifactPOIConfig.ArtifactPOIParams("station_1", new ArtifactPOIConfigurator.ArtifactPOIType("GravitasSpaceStation1", null, false, 30000f, 60000f, DlcManager.EXPANSION1, null)));
-		list.Add(new ArtifactPOIConfig.ArtifactPOIParams("station_2", new ArtifactPOIConfigurator.ArtifactPOIType("GravitasSpaceStation2", null, false, 30000f, 60000f, DlcManager.EXPANSION1, null)));
-		list.Add(new ArtifactPOIConfig.ArtifactPOIParams("station_3", new ArtifactPOIConfigurator.ArtifactPOIType("GravitasSpaceStation3", null, false, 30000f, 60000f, DlcManager.EXPANSION1, null)));
-		list.Add(new ArtifactPOIConfig.ArtifactPOIParams("station_4", new ArtifactPOIConfigurator.ArtifactPOIType("GravitasSpaceStation4", null, false, 30000f, 60000f, DlcManager.EXPANSION1, null)));
-		list.Add(new ArtifactPOIConfig.ArtifactPOIParams("station_5", new ArtifactPOIConfigurator.ArtifactPOIType("GravitasSpaceStation5", null, false, 30000f, 60000f, DlcManager.EXPANSION1, null)));
-		list.Add(new ArtifactPOIConfig.ArtifactPOIParams("station_6", new ArtifactPOIConfigurator.ArtifactPOIType("GravitasSpaceStation6", null, false, 30000f, 60000f, DlcManager.EXPANSION1, null)));
-		list.Add(new ArtifactPOIConfig.ArtifactPOIParams("station_7", new ArtifactPOIConfigurator.ArtifactPOIType("GravitasSpaceStation7", null, false, 30000f, 60000f, DlcManager.EXPANSION1, null)));
-		list.Add(new ArtifactPOIConfig.ArtifactPOIParams("station_8", new ArtifactPOIConfigurator.ArtifactPOIType("GravitasSpaceStation8", null, false, 30000f, 60000f, DlcManager.EXPANSION1, null)));
+		list.Add(new ArtifactPOIConfig.ArtifactPOIParams("station_1", new ArtifactPOIConfigurator.ArtifactPOIType("GravitasSpaceStation1", 50, null, false, 30000f, 60000f, DlcManager.EXPANSION1, null)));
+		list.Add(new ArtifactPOIConfig.ArtifactPOIParams("station_2", new ArtifactPOIConfigurator.ArtifactPOIType("GravitasSpaceStation2", 50, null, false, 30000f, 60000f, DlcManager.EXPANSION1, null)));
+		list.Add(new ArtifactPOIConfig.ArtifactPOIParams("station_3", new ArtifactPOIConfigurator.ArtifactPOIType("GravitasSpaceStation3", 50, null, false, 30000f, 60000f, DlcManager.EXPANSION1, null)));
+		list.Add(new ArtifactPOIConfig.ArtifactPOIParams("station_4", new ArtifactPOIConfigurator.ArtifactPOIType("GravitasSpaceStation4", 50, null, false, 30000f, 60000f, DlcManager.EXPANSION1, null)));
+		list.Add(new ArtifactPOIConfig.ArtifactPOIParams("station_5", new ArtifactPOIConfigurator.ArtifactPOIType("GravitasSpaceStation5", 50, null, false, 30000f, 60000f, DlcManager.EXPANSION1, null)));
+		list.Add(new ArtifactPOIConfig.ArtifactPOIParams("station_6", new ArtifactPOIConfigurator.ArtifactPOIType("GravitasSpaceStation6", 50, null, false, 30000f, 60000f, DlcManager.EXPANSION1, null)));
+		list.Add(new ArtifactPOIConfig.ArtifactPOIParams("station_7", new ArtifactPOIConfigurator.ArtifactPOIType("GravitasSpaceStation7", 50, null, false, 30000f, 60000f, DlcManager.EXPANSION1, null)));
+		list.Add(new ArtifactPOIConfig.ArtifactPOIParams("station_8", new ArtifactPOIConfigurator.ArtifactPOIType("GravitasSpaceStation8", 50, null, false, 30000f, 60000f, DlcManager.EXPANSION1, null)));
 		list.Add(new ArtifactPOIConfig.ArtifactPOIParams("russels_teapot", new ArtifactPOIConfigurator.ArtifactPOIType("RussellsTeapot", "artifact_TeaPot", true, 30000f, 60000f, DlcManager.EXPANSION1, null)));
 		list.RemoveAll((ArtifactPOIConfig.ArtifactPOIParams poi) => !DlcManager.IsCorrectDlcSubscribed(poi.poiType));
 		return list;
 	}
+
+	public const int DEFAULT_INITIAL_DATABANK_COUNT = 50;
 
 	public const string GravitasSpaceStation1 = "GravitasSpaceStation1";
 

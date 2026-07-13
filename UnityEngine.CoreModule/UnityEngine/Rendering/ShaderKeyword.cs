@@ -6,8 +6,8 @@ using UnityEngine.Scripting;
 namespace UnityEngine.Rendering
 {
 	[NativeHeader("Runtime/Shaders/Keywords/KeywordSpaceScriptBindings.h")]
-	[UsedByNativeCode]
 	[NativeHeader("Runtime/Graphics/ShaderScriptBindings.h")]
+	[UsedByNativeCode]
 	public struct ShaderKeyword
 	{
 		[FreeFunction("ShaderScripting::GetGlobalKeywordCount")]

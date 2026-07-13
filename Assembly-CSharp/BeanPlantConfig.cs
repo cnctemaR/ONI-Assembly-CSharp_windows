@@ -39,6 +39,7 @@ public class BeanPlantConfig : IEntityConfig
 		});
 		gameObject.AddOrGet<StandardCropPlant>();
 		gameObject.AddOrGet<DirectlyEdiblePlant_Growth>();
+		gameObject.AddOrGet<PlantFiberProducer>().amount = 42f;
 		GameObject gameObject3 = gameObject;
 		IHasDlcRestrictions hasDlcRestrictions = this as IHasDlcRestrictions;
 		SeedProducer.ProductionType productionType = SeedProducer.ProductionType.Crop;
@@ -73,4 +74,6 @@ public class BeanPlantConfig : IEntityConfig
 	public const float FERTILIZATION_RATE = 0.008333334f;
 
 	public const float WATER_RATE = 0.033333335f;
+
+	public const float PLANT_FIBER_PRODUCED_PER_CYCLE = 42f;
 }

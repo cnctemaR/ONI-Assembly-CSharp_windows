@@ -42,6 +42,7 @@ public class RanchStationConfig : IBuildingConfig
 		go.AddOrGet<LogicOperationalController>();
 		RanchStation.Def def = go.AddOrGetDef<RanchStation.Def>();
 		def.IsCritterEligibleToBeRanchedCb = (GameObject creature_go, RanchStation.Instance ranch_station_smi) => !creature_go.GetComponent<Effects>().HasEffect("Ranched");
+		def.RancherWipesBrowAnim = true;
 		def.OnRanchCompleteCb = delegate(GameObject creature_go, WorkerBase rancher_wb)
 		{
 			creature_go.GetSMI<RanchableMonitor.Instance>().TargetRanchStation.GetSMI<RancherChore.RancherChoreStates.Instance>();

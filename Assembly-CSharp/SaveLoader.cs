@@ -489,6 +489,9 @@ public class SaveLoader : KMonoBehaviour
 			GameObject gameObject = ((FrontEndManager.Instance == null) ? GameScreenManager.Instance.ssOverlayCanvas : FrontEndManager.Instance.gameObject);
 			global::Util.KInstantiateUI(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, gameObject, true).GetComponent<ConfirmDialogScreen>().PopupConfirmDialog(text2, null, null, null, null, null, null, null, null);
 		}
+		finally
+		{
+		}
 		return list;
 	}
 
@@ -1118,7 +1121,7 @@ public class SaveLoader : KMonoBehaviour
 		return list;
 	}
 
-	private float GetFrameTime()
+	public float GetFrameTime()
 	{
 		PerformanceMonitor component = Global.Instance.GetComponent<PerformanceMonitor>();
 		DebugUtil.LogArgs(new object[]
@@ -1252,6 +1255,12 @@ public class SaveLoader : KMonoBehaviour
 				LoadScreen.DoLoad(current_save);
 			});
 		}
+	}
+
+	public static void LoadScene()
+	{
+		PerformanceCaptureMonitor.StartLoadingSave();
+		App.LoadScene("backend");
 	}
 
 	[MyCmpGet]

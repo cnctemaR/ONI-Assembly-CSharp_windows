@@ -6,11 +6,11 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Animations
 {
-	[RequiredByNativeCode]
-	[NativeHeader("Modules/Animation/ScriptBindings/AnimationRemoveScalePlayable.bindings.h")]
-	[NativeHeader("Modules/Animation/Director/AnimationRemoveScalePlayable.h")]
 	[NativeHeader("Runtime/Director/Core/HPlayable.h")]
 	[StaticAccessor("AnimationRemoveScalePlayableBindings", StaticAccessorType.DoubleColon)]
+	[RequiredByNativeCode]
+	[NativeHeader("Modules/Animation/Director/AnimationRemoveScalePlayable.h")]
+	[NativeHeader("Modules/Animation/ScriptBindings/AnimationRemoveScalePlayable.bindings.h")]
 	internal struct AnimationRemoveScalePlayable : IPlayable, IEquatable<AnimationRemoveScalePlayable>
 	{
 		public static AnimationRemoveScalePlayable Null

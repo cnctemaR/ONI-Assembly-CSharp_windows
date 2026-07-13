@@ -171,7 +171,7 @@ public class MinionStartingStats : ITelepadDeliverable
 
 	private int GenerateTraits(bool is_starter_minion, List<ChoreGroup> disabled_chore_groups, string guaranteedAptitudeID = null, string guaranteedTraitID = null, bool isDebugMinion = false)
 	{
-		MinionStartingStats.<>c__DisplayClass19_0 CS$<>8__locals1 = new MinionStartingStats.<>c__DisplayClass19_0();
+		MinionStartingStats.<>c__DisplayClass20_0 CS$<>8__locals1 = new MinionStartingStats.<>c__DisplayClass20_0();
 		CS$<>8__locals1.<>4__this = this;
 		CS$<>8__locals1.is_starter_minion = is_starter_minion;
 		CS$<>8__locals1.isDebugMinion = isDebugMinion;
@@ -498,6 +498,20 @@ public class MinionStartingStats : ITelepadDeliverable
 		}
 	}
 
+	public Option<ClothingOutfitTarget> GetSelectedOutfitOption()
+	{
+		Option<ClothingOutfitTarget> option = default(Option<ClothingOutfitTarget>);
+		if (this.overrideOutfitID != null)
+		{
+			option = ClothingOutfitTarget.TryFromTemplateId(this.overrideOutfitID);
+		}
+		else
+		{
+			option = ClothingOutfitTarget.TryFromTemplateId(this.personality.GetSelectedTemplateOutfitId(ClothingOutfitUtility.OutfitType.Clothing));
+		}
+		return option;
+	}
+
 	public void Apply(GameObject go)
 	{
 		MinionIdentity component = go.GetComponent<MinionIdentity>();
@@ -511,7 +525,7 @@ public class MinionStartingStats : ITelepadDeliverable
 		this.ApplyAptitudes(go);
 		this.ApplyAccessories(go);
 		this.ApplyExperience(go);
-		this.ApplyOutfit(this.personality, go);
+		this.ApplyOutfit(this.personality, go, this.GetSelectedOutfitOption());
 		this.ApplyJoyResponseOutfit(this.personality, go);
 	}
 
@@ -530,14 +544,16 @@ public class MinionStartingStats : ITelepadDeliverable
 		component.UpdateHairBasedOnHat();
 	}
 
-	public void ApplyOutfit(Personality personality, GameObject go)
+	public void ApplyOutfit(Personality personality, GameObject go, Option<ClothingOutfitTarget> overrideOutfit)
 	{
 		WearableAccessorizer component = go.GetComponent<WearableAccessorizer>();
-		Option<ClothingOutfitTarget> option = ClothingOutfitTarget.TryFromTemplateId(personality.GetSelectedTemplateOutfitId(ClothingOutfitUtility.OutfitType.Clothing));
+		Option<ClothingOutfitTarget> option = overrideOutfit;
 		if (option.IsSome())
 		{
 			component.ApplyClothingItems(ClothingOutfitUtility.OutfitType.Clothing, option.Unwrap().ReadItemValues());
+			return;
 		}
+		component.ClearClothingItems(null);
 	}
 
 	public void ApplyJoyResponseOutfit(Personality personality, GameObject go)
@@ -739,6 +755,8 @@ public class MinionStartingStats : ITelepadDeliverable
 	public List<Accessory> accessories = new List<Accessory>();
 
 	public bool IsValid;
+
+	public string overrideOutfitID;
 
 	public Dictionary<SkillGroup, float> skillAptitudes = new Dictionary<SkillGroup, float>();
 }

@@ -9,6 +9,7 @@ using Klei.AI;
 using STRINGS;
 using TUNING;
 using UnityEngine;
+using UnityEngine.Pool;
 
 public static class GameUtil
 {
@@ -777,6 +778,15 @@ public static class GameUtil
 		{
 			GameUtil.GetFormattedByTag(productTag, outputAmountPerBranch, false, GameUtil.TimeSlice.PerCycle),
 			GameUtil.GetFormattedByTag(productTag, outputAmountPerBranch * (float)branchCount, GameUtil.TimeSlice.PerCycle)
+		});
+	}
+
+	public static string GetFormattedBranchGrowerPlantPlantFiberProductionValuePerCycle(Tag productTag, float outputAmountPerBranch, int branchCount, bool perCycle = true)
+	{
+		return GameUtil.SafeStringFormat(UI.BUILDINGEFFECTS.TOOLTIPS.BRANCH_GROWER_PLANT_POTENTIAL_OUTPUT, new object[]
+		{
+			GameUtil.GetFormattedMass(GameUtil.ApplyTimeSlice(outputAmountPerBranch, GameUtil.TimeSlice.PerCycle), GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"),
+			GameUtil.GetFormattedMass(outputAmountPerBranch * (float)branchCount, GameUtil.TimeSlice.PerCycle, GameUtil.MetricMassFormat.Kilogram, true, "{0:0.#}")
 		});
 	}
 
@@ -1836,7 +1846,7 @@ public static class GameUtil
 		return num2;
 	}
 
-	public static void FloodFillConditional(int start_cell, Func<int, bool> condition, ICollection<int> visited_cells, ICollection<int> valid_cells = null)
+	public static void FloodFillConditional(int start_cell, Func<int, bool> condition, HashSet<int> visited_cells, List<int> valid_cells = null)
 	{
 		GameUtil.FloodFillNext.Value.Enqueue(new GameUtil.FloodFillInfo
 		{
@@ -1846,42 +1856,38 @@ public static class GameUtil
 		GameUtil.FloodFillConditional(GameUtil.FloodFillNext.Value, condition, visited_cells, valid_cells, 10000);
 	}
 
-	public static void FloodFillConditional(Queue<GameUtil.FloodFillInfo> queue, Func<int, bool> condition, ICollection<int> visited_cells, ICollection<int> valid_cells = null, int max_depth = 10000)
+	public static void FloodFillConditional(Queue<GameUtil.FloodFillInfo> queue, Func<int, bool> condition, HashSet<int> visited_cells, List<int> valid_cells = null, int max_depth = 10000)
 	{
 		while (queue.Count > 0)
 		{
 			GameUtil.FloodFillInfo floodFillInfo = queue.Dequeue();
-			if (floodFillInfo.depth < max_depth && Grid.IsValidCell(floodFillInfo.cell) && !visited_cells.Contains(floodFillInfo.cell))
+			if (floodFillInfo.depth < max_depth && Grid.IsValidCell(floodFillInfo.cell) && visited_cells.Add(floodFillInfo.cell) && condition(floodFillInfo.cell))
 			{
-				visited_cells.Add(floodFillInfo.cell);
-				if (condition(floodFillInfo.cell))
+				if (valid_cells != null)
 				{
-					if (valid_cells != null)
-					{
-						valid_cells.Add(floodFillInfo.cell);
-					}
-					int num = floodFillInfo.depth + 1;
-					queue.Enqueue(new GameUtil.FloodFillInfo
-					{
-						cell = Grid.CellLeft(floodFillInfo.cell),
-						depth = num
-					});
-					queue.Enqueue(new GameUtil.FloodFillInfo
-					{
-						cell = Grid.CellRight(floodFillInfo.cell),
-						depth = num
-					});
-					queue.Enqueue(new GameUtil.FloodFillInfo
-					{
-						cell = Grid.CellAbove(floodFillInfo.cell),
-						depth = num
-					});
-					queue.Enqueue(new GameUtil.FloodFillInfo
-					{
-						cell = Grid.CellBelow(floodFillInfo.cell),
-						depth = num
-					});
+					valid_cells.Add(floodFillInfo.cell);
 				}
+				int num = floodFillInfo.depth + 1;
+				queue.Enqueue(new GameUtil.FloodFillInfo
+				{
+					cell = Grid.CellLeft(floodFillInfo.cell),
+					depth = num
+				});
+				queue.Enqueue(new GameUtil.FloodFillInfo
+				{
+					cell = Grid.CellRight(floodFillInfo.cell),
+					depth = num
+				});
+				queue.Enqueue(new GameUtil.FloodFillInfo
+				{
+					cell = Grid.CellAbove(floodFillInfo.cell),
+					depth = num
+				});
+				queue.Enqueue(new GameUtil.FloodFillInfo
+				{
+					cell = Grid.CellBelow(floodFillInfo.cell),
+					depth = num
+				});
 			}
 		}
 		queue.Clear();
@@ -2343,31 +2349,31 @@ public static class GameUtil
 		switch (mModifier)
 		{
 		case global::Modifier.Alt:
-			text2 = GameUtil.GetKeycodeLocalized(KKeyCode.LeftAlt).ToUpper();
+			text2 = INPUT.ALT.ToString();
 			break;
 		case global::Modifier.Ctrl:
-			text2 = GameUtil.GetKeycodeLocalized(KKeyCode.LeftControl).ToUpper();
+			text2 = INPUT.CTRL.ToString();
 			break;
 		case (global::Modifier)3:
 			break;
 		case global::Modifier.Shift:
-			text2 = GameUtil.GetKeycodeLocalized(KKeyCode.LeftShift).ToUpper();
+			text2 = INPUT.SHIFT.ToString();
 			break;
 		default:
 			if (mModifier != global::Modifier.CapsLock)
 			{
 				if (mModifier == global::Modifier.Backtick)
 				{
-					text2 = GameUtil.GetKeycodeLocalized(KKeyCode.BackQuote).ToUpper();
+					text2 = GameUtil.GetKeycodeLocalized(KKeyCode.BackQuote);
 				}
 			}
 			else
 			{
-				text2 = GameUtil.GetKeycodeLocalized(KKeyCode.CapsLock).ToUpper();
+				text2 = GameUtil.GetKeycodeLocalized(KKeyCode.CapsLock);
 			}
 			break;
 		}
-		return text2 + " + " + GameUtil.GetKeycodeLocalized(mKeyCode).ToUpper();
+		return (text2 + " + " + GameUtil.GetKeycodeLocalized(mKeyCode)).ToUpper();
 	}
 
 	public static void CreateExplosion(Vector3 explosion_pos)
@@ -2857,11 +2863,19 @@ public static class GameUtil
 
 	public static float GetDecorAtCell(int cell)
 	{
+		return GameUtil.GetDecorAtCell(cell, true);
+	}
+
+	public static float GetDecorAtCell(int cell, bool includeLightDecor)
+	{
 		float num = 0f;
 		if (!Grid.Solid[cell])
 		{
 			num = Grid.Decor[cell];
-			num += (float)DecorProvider.GetLightDecorBonus(cell);
+			if (includeLightDecor)
+			{
+				num += (float)DecorProvider.GetLightDecorBonus(cell);
+			}
 		}
 		return num;
 	}
@@ -3576,7 +3590,9 @@ public static class GameUtil
 	{
 		if (triggerImmediately)
 		{
-			handler.Trigger(target.gameObject, new TagChangedEventData(Tag.Invalid, false));
+			Boxed<TagChangedEventData> boxed = Boxed<TagChangedEventData>.Get(new TagChangedEventData(Tag.Invalid, false));
+			handler.Trigger(target.gameObject, boxed);
+			Boxed<TagChangedEventData>.Release(boxed);
 		}
 		target.Subscribe<T>(-1582839653, handler);
 	}
@@ -3590,17 +3606,86 @@ public static class GameUtil
 	{
 		return new EventSystem.IntraObjectHandler<T>(delegate(T component, object data)
 		{
-			TagChangedEventData tagChangedEventData = (TagChangedEventData)data;
-			if (tagChangedEventData.tag == Tag.Invalid)
+			TagChangedEventData value = ((Boxed<TagChangedEventData>)data).value;
+			if (value.tag == Tag.Invalid)
 			{
 				KPrefabID component2 = component.GetComponent<KPrefabID>();
-				tagChangedEventData = new TagChangedEventData(tag, component2.HasTag(tag));
+				value = new TagChangedEventData(tag, component2.HasTag(tag));
 			}
-			if (tagChangedEventData.tag == tag && tagChangedEventData.added)
+			if (value.tag == tag && value.added)
 			{
 				callback(component, data);
 			}
 		});
+	}
+
+	public static void DestroyCell(int cell, CellElementEvent eventSource, bool deleteMinions = true)
+	{
+		List<GameObject> list;
+		using (CollectionPool<List<GameObject>, GameObject>.Get(out list))
+		{
+			list.Add(Grid.Objects[cell, 2]);
+			list.Add(Grid.Objects[cell, 1]);
+			list.Add(Grid.Objects[cell, 9]);
+			list.Add(Grid.Objects[cell, 5]);
+			list.Add(Grid.Objects[cell, 12]);
+			list.Add(Grid.Objects[cell, 15]);
+			list.Add(Grid.Objects[cell, 16]);
+			list.Add(Grid.Objects[cell, 19]);
+			list.Add(Grid.Objects[cell, 20]);
+			list.Add(Grid.Objects[cell, 23]);
+			list.Add(Grid.Objects[cell, 26]);
+			list.Add(Grid.Objects[cell, 29]);
+			list.Add(Grid.Objects[cell, 27]);
+			list.Add(Grid.Objects[cell, 31]);
+			list.Add(Grid.Objects[cell, 30]);
+			foreach (Comet comet in Components.Meteors.GetItems((int)Grid.WorldIdx[cell]))
+			{
+				if (!comet.IsNullOrDestroyed() && Grid.PosToCell(comet) == cell)
+				{
+					list.Add(comet.gameObject);
+				}
+			}
+			foreach (GameObject gameObject in list)
+			{
+				if (gameObject != null)
+				{
+					Util.KDestroyGameObject(gameObject);
+				}
+			}
+			GameUtil.ClearCell(cell, deleteMinions);
+			FallingWater.instance.ClearParticles(cell);
+			if (ElementLoader.elements[(int)Grid.ElementIdx[cell]].id == SimHashes.Void)
+			{
+				SimMessages.ReplaceElement(cell, SimHashes.Void, eventSource, 0f, 0f, byte.MaxValue, 0, -1);
+			}
+			else
+			{
+				SimMessages.ReplaceElement(cell, SimHashes.Vacuum, eventSource, 0f, 0f, byte.MaxValue, 0, -1);
+			}
+		}
+	}
+
+	public static void ClearCell(int cell, bool deleteMinions = true)
+	{
+		Vector2I vector2I = Grid.CellToXY(cell);
+		List<ScenePartitionerEntry> list;
+		using (CollectionPool<List<ScenePartitionerEntry>, ScenePartitionerEntry>.Get(out list))
+		{
+			GameScenePartitioner.Instance.GatherEntries(vector2I.x, vector2I.y, 1, 1, GameScenePartitioner.Instance.pickupablesLayer, list);
+			for (int i = 0; i < list.Count; i++)
+			{
+				Pickupable pickupable = list[i].obj as Pickupable;
+				if (!(pickupable == null))
+				{
+					bool flag = pickupable.KPrefabID.HasTag(GameTags.BaseMinion);
+					if (deleteMinions || !flag)
+					{
+						Util.KDestroyGameObject(pickupable.gameObject);
+					}
+				}
+			}
+		}
 	}
 
 	public static GameUtil.TemperatureUnit temperatureUnit;

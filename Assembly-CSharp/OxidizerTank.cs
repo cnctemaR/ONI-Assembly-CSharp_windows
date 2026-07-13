@@ -107,7 +107,7 @@ public class OxidizerTank : KMonoBehaviour, IUserControlledCapacity
 		base.Subscribe<OxidizerTank>(-905833192, OxidizerTank.OnCopySettingsDelegate);
 		if (this.supportsMultipleOxidizers)
 		{
-			this.filteredStorage = new FilteredStorage(this, null, this, true, Db.Get().ChoreTypes.Fetch);
+			this.filteredStorage = new FilteredStorage(this, null, this, false, Db.Get().ChoreTypes.Fetch);
 			this.filteredStorage.FilterChanged();
 			KBatchedAnimTracker componentInChildren = base.gameObject.GetComponentInChildren<KBatchedAnimTracker>();
 			componentInChildren.forceAlwaysAlive = true;

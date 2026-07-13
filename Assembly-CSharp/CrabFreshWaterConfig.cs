@@ -5,7 +5,7 @@ using STRINGS;
 using TUNING;
 using UnityEngine;
 
-[EntityConfigOrder(1)]
+[EntityConfigOrder(2)]
 public class CrabFreshWaterConfig : IEntityConfig
 {
 	public static GameObject CreateCrabFreshWater(string id, string name, string desc, string anim_file, bool is_baby, string deathDropID = null, int deathDropCount = 0)

@@ -4,8 +4,8 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine.Experimental.Audio
 {
-	[NativeHeader("Modules/Audio/Public/AudioSource.h")]
 	[NativeHeader("AudioScriptingClasses.h")]
+	[NativeHeader("Modules/Audio/Public/AudioSource.h")]
 	[NativeHeader("Modules/Audio/Public/ScriptBindings/AudioSourceExtensions.bindings.h")]
 	internal static class AudioSourceExtensionsInternal
 	{

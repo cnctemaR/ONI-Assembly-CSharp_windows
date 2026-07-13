@@ -330,7 +330,11 @@ public class MainMenu : KScreen
 			global::Util.KInstantiateUI<ConfirmDialogScreen>(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, base.gameObject, true).PopupConfirmDialog(text3, null, null, null, null, null, null, null, null);
 		}
 		Global.Instance.modManager.Report(base.gameObject);
-		if ((GenericGameSettings.instance.autoResumeGame && !MainMenu.HasAutoresumedOnce && !KCrashReporter.hasCrash) || !string.IsNullOrEmpty(GenericGameSettings.instance.performanceCapture.saveGame) || KPlayerPrefs.HasKey("AutoResumeSaveFile"))
+		if (GenericGameSettings.instance.devBootSmoke && !GenericGameSettings.instance.devBootModReport)
+		{
+			App.QuitCode(KCrashReporter.hasCrash ? 1 : 0);
+		}
+		if ((GenericGameSettings.instance.autoResumeGame && !MainMenu.HasAutoresumedOnce && !KCrashReporter.hasCrash) || !string.IsNullOrEmpty(GenericGameSettings.instance.scriptedProfile.saveGame) || KPlayerPrefs.HasKey("AutoResumeSaveFile"))
 		{
 			MainMenu.HasAutoresumedOnce = true;
 			this.ResumeGame();
@@ -416,9 +420,10 @@ public class MainMenu : KScreen
 			text = KPlayerPrefs.GetString("AutoResumeSaveFile");
 			KPlayerPrefs.DeleteKey("AutoResumeSaveFile");
 		}
-		else if (!string.IsNullOrEmpty(GenericGameSettings.instance.performanceCapture.saveGame))
+		else if (!string.IsNullOrEmpty(GenericGameSettings.instance.scriptedProfile.saveGame))
 		{
-			text = GenericGameSettings.instance.performanceCapture.saveGame;
+			global::Debug.LogWarning("Scripted Profile run without KPROFILER_ENABLED!");
+			text = GenericGameSettings.instance.scriptedProfile.saveGame;
 		}
 		else
 		{
@@ -428,10 +433,7 @@ public class MainMenu : KScreen
 		{
 			KCrashReporter.MOST_RECENT_SAVEFILE = text;
 			SaveLoader.SetActiveSaveFilePath(text);
-			LoadingOverlay.Load(delegate
-			{
-				App.LoadScene("backend");
-			});
+			LoadingOverlay.Load(new global::System.Action(SaveLoader.LoadScene));
 		}
 	}
 
@@ -499,6 +501,7 @@ public class MainMenu : KScreen
 
 	private void Update()
 	{
+		PerformanceCaptureMonitor.TryRecordMainMenuStats();
 	}
 
 	public void RefreshResumeButton(bool simpleCheck = false)
@@ -533,7 +536,7 @@ public class MainMenu : KScreen
 					header = saveFileEntry.header;
 					gameInfo = saveFileEntry.headerData;
 				}
-				if (header.buildVersion > 693461U || gameInfo.saveMajorVersion != 7 || gameInfo.saveMinorVersion > 36)
+				if (header.buildVersion > 700348U || gameInfo.saveMajorVersion != 7 || gameInfo.saveMinorVersion > 37)
 				{
 					flag = false;
 				}

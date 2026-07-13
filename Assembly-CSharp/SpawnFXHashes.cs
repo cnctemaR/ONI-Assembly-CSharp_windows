@@ -24,5 +24,6 @@ public enum SpawnFXHashes
 	NuclearWasteDrip = -1160340439,
 	MissileExplosion = -1228570257,
 	MinionOutfitChanged = 1047510235,
-	ElectrobankDamage = 63589143
+	ElectrobankDamage = 63589143,
+	SplashStep = -1526600845
 }

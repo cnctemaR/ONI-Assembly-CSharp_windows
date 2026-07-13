@@ -4,8 +4,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.TextCore.LowLevel
 {
-	[DebuggerDisplay("Language = {tag},  Feature Count = {featureIndexes.Length}")]
 	[UsedByNativeCode]
+	[DebuggerDisplay("Language = {tag},  Feature Count = {featureIndexes.Length}")]
 	internal struct OTL_Language
 	{
 		public string tag;

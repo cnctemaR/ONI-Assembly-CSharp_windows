@@ -4,6 +4,7 @@ using System.Runtime.Serialization;
 using Klei;
 using KSerialization;
 using UnityEngine;
+using UnityEngine.Pool;
 
 [SerializationConfig(MemberSerialization.OptIn)]
 [AddComponentMenu("KMonoBehaviour/scripts/GameClock")]
@@ -78,7 +79,12 @@ public class GameClock : KMonoBehaviour, ISaveLoadable, ISim33ms, IRender1000ms
 		int num2 = Mathf.FloorToInt(this.timeSinceStartOfCycle / 25f);
 		if (num != num2)
 		{
-			base.Trigger(-1215042067, num2);
+			GameClock.GameClockBlockEventData gameClockBlockEventData;
+			using (GameClock.GameClockBlockEventData.Pool.Get(out gameClockBlockEventData))
+			{
+				gameClockBlockEventData.block = num2;
+				base.Trigger(-1215042067, gameClockBlockEventData);
+			}
 		}
 	}
 
@@ -201,4 +207,11 @@ public class GameClock : KMonoBehaviour, ISaveLoadable, ISim33ms, IRender1000ms
 	private bool isNight;
 
 	public static readonly string NewCycleKey = "NewCycle";
+
+	private class GameClockBlockEventData
+	{
+		public int block = -1;
+
+		public static ObjectPool<GameClock.GameClockBlockEventData> Pool = new ObjectPool<GameClock.GameClockBlockEventData>(() => new GameClock.GameClockBlockEventData(), null, null, null, false, 4, 4);
+	}
 }

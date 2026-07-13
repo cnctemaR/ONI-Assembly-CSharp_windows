@@ -4,8 +4,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeHeader("Modules/Cloth/Cloth.h")]
 	[UsedByNativeCode]
+	[NativeHeader("Modules/Cloth/Cloth.h")]
 	public struct ClothSphereColliderPair
 	{
 		public SphereCollider first { readonly get; set; }

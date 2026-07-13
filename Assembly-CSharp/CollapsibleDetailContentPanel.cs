@@ -14,6 +14,7 @@ public class CollapsibleDetailContentPanel : KMonoBehaviour
 		this.log = new LoggerFSS("detailpanel", 35);
 		this.labels = new Dictionary<string, CollapsibleDetailContentPanel.Label<DetailLabel>>();
 		this.buttonLabels = new Dictionary<string, CollapsibleDetailContentPanel.Label<DetailLabelWithButton>>();
+		this.collapsableButtonLabels = new Dictionary<string, CollapsibleDetailContentPanel.Label<DetailCollapsableLabel>>();
 		this.Commit();
 	}
 
@@ -57,6 +58,22 @@ public class CollapsibleDetailContentPanel : KMonoBehaviour
 			}
 			label2.used = false;
 		}
+		foreach (CollapsibleDetailContentPanel.Label<DetailCollapsableLabel> label3 in this.collapsableButtonLabels.Values)
+		{
+			if (label3.used)
+			{
+				num++;
+				if (!label3.obj.gameObject.activeSelf)
+				{
+					label3.obj.gameObject.SetActive(true);
+				}
+			}
+			else if (!label3.used && label3.obj.gameObject.activeSelf)
+			{
+				label3.obj.gameObject.SetActive(false);
+			}
+			label3.used = false;
+		}
 		if (base.gameObject.activeSelf && num == 0)
 		{
 			base.gameObject.SetActive(false);
@@ -87,7 +104,12 @@ public class CollapsibleDetailContentPanel : KMonoBehaviour
 		label.used = true;
 	}
 
-	public void SetLabelWithButton(string id, string text, string tooltip, global::System.Action buttonCb)
+	public DetailLabelWithButton SetLabelWithButton(string id, string text, string tooltip, global::System.Action buttonCb)
+	{
+		return this.SetLabelWithButton(id, text, null, null, tooltip, buttonCb);
+	}
+
+	public DetailLabelWithButton SetLabelWithButton(string id, string mainText, string secondaryText, string thirdText, string tooltip, global::System.Action buttonCb)
 	{
 		CollapsibleDetailContentPanel.Label<DetailLabelWithButton> label;
 		if (!this.buttonLabels.TryGetValue(id, out label))
@@ -102,11 +124,51 @@ public class CollapsibleDetailContentPanel : KMonoBehaviour
 		}
 		label.obj.label.AllowLinks = false;
 		label.obj.label.raycastTarget = false;
-		label.obj.label.text = text;
+		label.obj.label.text = mainText;
+		label.obj.label2.AllowLinks = false;
+		label.obj.label2.raycastTarget = false;
+		label.obj.label2.text = secondaryText;
+		label.obj.label3.AllowLinks = false;
+		label.obj.label3.raycastTarget = false;
+		label.obj.label3.text = thirdText;
+		label.obj.RefreshLabelsVisibility();
 		label.obj.toolTip.toolTip = tooltip;
 		label.obj.button.ClearOnClick();
 		label.obj.button.onClick += buttonCb;
 		label.used = true;
+		return label.obj;
+	}
+
+	public DetailCollapsableLabel SetCollapsableLabel(string id, string text, string valueText, string tooltip, object data, Action<DetailCollapsableLabel> onExpanded, Action<DetailCollapsableLabel> onCollapsed)
+	{
+		CollapsibleDetailContentPanel.Label<DetailCollapsableLabel> label;
+		if (!this.collapsableButtonLabels.TryGetValue(id, out label))
+		{
+			label = new CollapsibleDetailContentPanel.Label<DetailCollapsableLabel>
+			{
+				used = true,
+				obj = Util.KInstantiateUI(this.labelWithCollapsableToggleTemplate.gameObject, this.Content.gameObject, false).GetComponent<DetailCollapsableLabel>()
+			};
+			label.obj.gameObject.name = id;
+			this.collapsableButtonLabels[id] = label;
+		}
+		label.obj.nameLabel.AllowLinks = false;
+		label.obj.nameLabel.raycastTarget = false;
+		label.obj.nameLabel.SetText(text);
+		label.obj.valueLabel.SetText(valueText);
+		label.obj.toolTip.toolTip = tooltip;
+		label.obj.ClearToggleCallbacks();
+		DetailCollapsableLabel obj = label.obj;
+		obj.OnCollapsed = (Action<DetailCollapsableLabel>)Delegate.Combine(obj.OnCollapsed, onCollapsed);
+		DetailCollapsableLabel obj2 = label.obj;
+		obj2.OnExpanded = (Action<DetailCollapsableLabel>)Delegate.Combine(obj2.OnExpanded, onExpanded);
+		label.used = true;
+		label.obj.SetData(data);
+		if (label.obj.IsExpanded)
+		{
+			label.obj.ManualTriggerOnExpanded();
+		}
+		return label.obj;
 	}
 
 	private void ToggleOpen()
@@ -155,9 +217,13 @@ public class CollapsibleDetailContentPanel : KMonoBehaviour
 
 	public DetailLabelWithButton labelWithActionButtonTemplate;
 
+	public DetailCollapsableLabel labelWithCollapsableToggleTemplate;
+
 	private Dictionary<string, CollapsibleDetailContentPanel.Label<DetailLabel>> labels;
 
 	private Dictionary<string, CollapsibleDetailContentPanel.Label<DetailLabelWithButton>> buttonLabels;
+
+	private Dictionary<string, CollapsibleDetailContentPanel.Label<DetailCollapsableLabel>> collapsableButtonLabels;
 
 	private LoggerFSS log;
 

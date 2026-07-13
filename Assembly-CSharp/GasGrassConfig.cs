@@ -15,7 +15,7 @@ public class GasGrassConfig : IEntityConfig
 		float num = 1f;
 		EffectorValues tier = DECOR.BONUS.TIER3;
 		GameObject gameObject = EntityTemplates.CreatePlacedEntity(text, text2, text3, num, Assets.GetAnim("gassygrass_kanim"), "idle_empty", Grid.SceneLayer.BuildingFront, 1, 3, tier, default(EffectorValues), SimHashes.Creature, null, 255f);
-		EntityTemplates.ExtendEntityToBasicPlant(gameObject, 218.15f, 0f, 348.15f, 373.15f, null, false, 0f, 0.15f, "GasGrassHarvested", true, true, true, true, 2400f, 0f, 12200f, "GasGrassOriginal", global::STRINGS.CREATURES.SPECIES.GASGRASS.NAME);
+		EntityTemplates.ExtendEntityToBasicPlant(gameObject, 218.15f, 0f, 348.15f, 373.15f, null, false, 0f, 0.15f, "PlantFiber", true, true, true, true, 2400f, 0f, 12200f, "GasGrassOriginal", global::STRINGS.CREATURES.SPECIES.GASGRASS.NAME);
 		EntityTemplates.ExtendPlantToIrrigated(gameObject, new PlantElementAbsorber.ConsumeInfo[]
 		{
 			new PlantElementAbsorber.ConsumeInfo
@@ -34,7 +34,6 @@ public class GasGrassConfig : IEntityConfig
 		});
 		gameObject.AddOrGet<StandardCropPlant>();
 		gameObject.AddOrGet<DirectlyEdiblePlant_Growth>();
-		gameObject.AddOrGet<HarvestDesignatable>().defaultHarvestStateWhenPlanted = false;
 		Modifiers component = gameObject.GetComponent<Modifiers>();
 		Db.Get().traits.Get(component.initialTraits[0]).Add(new AttributeModifier(Db.Get().PlantAttributes.MinLightLux.Id, 10000f, global::STRINGS.CREATURES.SPECIES.GASGRASS.NAME, false, false, true));
 		component.initialAttributes.Add(Db.Get().PlantAttributes.MinLightLux.Id);
@@ -73,4 +72,6 @@ public class GasGrassConfig : IEntityConfig
 	public const float CHLORINE_FERTILIZATION_RATE = 0.00083333335f;
 
 	public const float DIRT_FERTILIZATION_RATE = 0.041666668f;
+
+	public const int PLANT_FIBER_KG_PER_HARVEST = 400;
 }

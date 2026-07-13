@@ -106,6 +106,8 @@ public enum GameHashes
 	AnimQueueComplete = -1061186183,
 	HungerStatusChanged = -12937937,
 	TutorialOpened = 1634669191,
+	CreatureHighDecor = 810247908,
+	CreatureLowDecor = -1926395984,
 	CreatureStatusChanged = -151109373,
 	LevelUp = -110704193,
 	NewDay = 631075836,
@@ -144,6 +146,7 @@ public enum GameHashes
 	CropTended = 90606262,
 	SeedProduced = 472291861,
 	SeedDropped = -1736624145,
+	ClusterDestinationSelectionCanceled = 94158097,
 	DestinationReached = 387220196,
 	NavigationFailed = -766531887,
 	NavigationCellChanged = 915392638,
@@ -339,6 +342,7 @@ public enum GameHashes
 	CapturePointNoLongerAvailable = 1034952693,
 	ElementNoLongerAvailable = 801383139,
 	BreedingChancesChanged = 1059811075,
+	MooSongChancesChanged = 1105317911,
 	ToggleSandbox = -1948169901,
 	ConsumePlant = -1793167409,
 	AteFromStorage = -1452790913,
@@ -487,5 +491,6 @@ public enum GameHashes
 	MissileDamageEncountered = -2056344675,
 	SpaceDestinationAdded = 611818744,
 	UprootCancelled = 1198393204,
-	ClusterMapTravelAnimatorMoveComplete = -408710611
+	ClusterMapTravelAnimatorMoveComplete = -408710611,
+	PrinterceptorPrint = 1816718186
 }

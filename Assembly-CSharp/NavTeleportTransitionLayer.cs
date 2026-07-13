@@ -16,12 +16,15 @@ public class NavTeleportTransitionLayer : TransitionDriver.OverrideLayer
 			int num2;
 			int num3;
 			Grid.CellToXY(num, out num2, out num3);
-			int num4 = navigator.NavGrid.teleportTransitions[num];
-			int num5;
+			int num4 = num2;
+			int num5 = num3;
 			int num6;
-			Grid.CellToXY(navigator.NavGrid.teleportTransitions[num], out num5, out num6);
-			transition.x = num5 - num2;
-			transition.y = num6 - num3;
+			if (navigator.NavGrid.teleportTransitions.TryGetValue(num, out num6))
+			{
+				Grid.CellToXY(num6, out num4, out num5);
+			}
+			transition.x = num4 - num2;
+			transition.y = num5 - num3;
 		}
 	}
 }

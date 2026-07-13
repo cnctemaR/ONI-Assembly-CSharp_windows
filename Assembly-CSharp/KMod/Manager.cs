@@ -139,6 +139,11 @@ namespace KMod
 			}
 			pooledList.Recycle();
 			this.Report(parent);
+			this.WriteDevBootReport();
+			if (GenericGameSettings.instance.devBootSmoke)
+			{
+				App.QuitCode(KCrashReporter.hasCrash ? 1 : 0);
+			}
 		}
 
 		public bool HaveMods()
@@ -867,6 +872,16 @@ namespace KMod
 			}
 			pooledList.Recycle();
 			this.Update(this);
+		}
+
+		private void WriteDevBootReport()
+		{
+			if (!GenericGameSettings.instance.devBootModReport)
+			{
+				return;
+			}
+			string text = JsonConvert.SerializeObject(this.mods, Formatting.Indented);
+			File.WriteAllText(Path.GetDirectoryName(Application.dataPath) + "/modReport.json", text);
 		}
 
 		public void Report(GameObject parent)

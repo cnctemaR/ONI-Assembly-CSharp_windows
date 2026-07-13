@@ -11,8 +11,8 @@ public class FlopStates : GameStateMachine<FlopStates, FlopStates.Instance, ISta
 		string text = CREATURES.STATUSITEMS.FLOPPING.NAME;
 		string text2 = CREATURES.STATUSITEMS.FLOPPING.TOOLTIP;
 		string text3 = "";
-		StatusItem.IconType iconType = StatusItem.IconType.Info;
-		NotificationType notificationType = NotificationType.Neutral;
+		StatusItem.IconType iconType = StatusItem.IconType.Exclamation;
+		NotificationType notificationType = NotificationType.Bad;
 		bool flag = false;
 		StatusItemCategory main = Db.Get().StatusItemCategories.Main;
 		root.ToggleStatusItem(text, text2, text3, iconType, notificationType, flag, default(HashedString), 129022, null, null, main);
@@ -90,12 +90,30 @@ public class FlopStates : GameStateMachine<FlopStates, FlopStates.Instance, ISta
 		Vector3 vector = position;
 		vector.x = position.x + smi.currentDir * dt * 1f;
 		int num = Grid.PosToCell(vector);
-		if (Grid.IsValidCell(num) && !Grid.Solid[num] && !Grid.CritterImpassable[num])
+		if (FlopStates.CanFlopForward(smi, num))
 		{
 			smi.transform.SetPosition(vector);
 			return;
 		}
 		smi.currentDir = -smi.currentDir;
+	}
+
+	private static bool CanFlopForward(FlopStates.Instance smi, int new_cell)
+	{
+		if (!Grid.IsValidCell(new_cell) || Grid.Solid[new_cell] || Grid.CritterImpassable[new_cell])
+		{
+			return false;
+		}
+		CellOffset[] occupiedCellsOffsets = smi.GetComponent<OccupyArea>().OccupiedCellsOffsets;
+		for (int i = 0; i < occupiedCellsOffsets.Length; i++)
+		{
+			int num = Grid.OffsetCell(new_cell, occupiedCellsOffsets[i]);
+			if (!Grid.IsValidCell(num) || Grid.Solid[num] || Grid.CritterImpassable[num])
+			{
+				return false;
+			}
+		}
+		return true;
 	}
 
 	public static bool IsSubstantialLiquid(FlopStates.Instance smi)

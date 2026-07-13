@@ -332,7 +332,7 @@ public class OutfitBrowserScreen : KMonoBehaviour
 		GameObject isUnownedOverlayGO = spawn.transform.GetChild(2).gameObject;
 		GameObject dlcBannerGO = spawn.transform.GetChild(3).gameObject;
 		gameObject.SetActive(true);
-		bool flag = target.IsNone() || this.state.CurrentOutfitType == ClothingOutfitUtility.OutfitType.AtmoSuit;
+		bool flag = target.IsNone() || this.state.CurrentOutfitType == ClothingOutfitUtility.OutfitType.AtmoSuit || this.state.CurrentOutfitType == ClothingOutfitUtility.OutfitType.JetSuit;
 		UIMannequin componentInChildren = gameObject.GetComponentInChildren<UIMannequin>();
 		this.dioramaMinionOrMannequin.mannequin.shouldShowOutfitWithDefaultItems = flag;
 		componentInChildren.shouldShowOutfitWithDefaultItems = flag;
@@ -356,6 +356,12 @@ public class OutfitBrowserScreen : KMonoBehaviour
 		case ClothingOutfitUtility.OutfitType.AtmoSuit:
 			num = 24f;
 			num2 = 16f;
+			num3 = 32f;
+			num4 = 8f;
+			break;
+		case ClothingOutfitUtility.OutfitType.JetSuit:
+			num = 32f;
+			num2 = 24f;
 			num3 = 32f;
 			num4 = 8f;
 			break;
@@ -402,7 +408,9 @@ public class OutfitBrowserScreen : KMonoBehaviour
 					string dlcIdFrom = databaseAuthoredTemplate.resource.GetDlcIdFrom();
 					if (DlcManager.IsDlcId(dlcIdFrom))
 					{
-						dlcBannerGO.GetComponent<Image>().color = DlcManager.GetDlcBannerColor(dlcIdFrom);
+						Image component2 = dlcBannerGO.GetComponent<Image>();
+						component2.sprite = Assets.GetSprite(DlcManager.GetDlcBannerSprite(dlcIdFrom));
+						component2.color = DlcManager.GetDlcBannerColor(dlcIdFrom);
 						dlcBannerGO.SetActive(true);
 						return;
 					}

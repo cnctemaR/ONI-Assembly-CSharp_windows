@@ -57,7 +57,7 @@ public class ClusterFogOfWarManager : GameStateMachine<ClusterFogOfWarManager, C
 
 		public bool IsLocationRevealed(AxialI location)
 		{
-			return this.GetRevealCompleteFraction(location) >= 1f;
+			return ClusterGrid.Instance.IsValidCell(location) && this.GetRevealCompleteFraction(location) >= 1f;
 		}
 
 		private void EnsureRevealedTilesHavePeek()
@@ -99,16 +99,16 @@ public class ClusterFogOfWarManager : GameStateMachine<ClusterFogOfWarManager, C
 			}
 			if (flag)
 			{
-				Game.Instance.Trigger(-1991583975, location);
+				Game.Instance.BoxingTrigger<AxialI>(-1991583975, location);
 			}
 		}
 
-		public void EarnRevealPointsForLocation(AxialI location, float points)
+		public bool EarnRevealPointsForLocation(AxialI location, float points)
 		{
 			global::Debug.Assert(ClusterGrid.Instance.IsValidCell(location), string.Format("EarnRevealPointsForLocation called with invalid location: {0}", location));
 			if (this.IsLocationRevealed(location))
 			{
-				return;
+				return false;
 			}
 			if (this.m_revealPointsByCell.ContainsKey(location))
 			{
@@ -118,14 +118,16 @@ public class ClusterFogOfWarManager : GameStateMachine<ClusterFogOfWarManager, C
 			else
 			{
 				this.m_revealPointsByCell[location] = points;
-				Game.Instance.Trigger(-1554423969, location);
+				Game.Instance.BoxingTrigger<AxialI>(-1554423969, location);
 			}
 			if (this.IsLocationRevealed(location))
 			{
 				this.RevealLocation(location, 0, 2);
 				this.PeekLocation(location, 2);
-				Game.Instance.Trigger(-1991583975, location);
+				Game.Instance.BoxingTrigger<AxialI>(-1991583975, location);
+				return true;
 			}
+			return false;
 		}
 
 		public float GetRevealCompleteFraction(AxialI location)

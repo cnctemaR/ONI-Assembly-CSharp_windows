@@ -37,6 +37,13 @@ public class ReloadElectrobankChore : Chore<ReloadElectrobankChore.Instance>
 		base.Begin(context);
 	}
 
+	private static void SetZ(GameObject go, float z)
+	{
+		Vector3 position = go.transform.GetPosition();
+		position.z = z;
+		go.transform.SetPosition(position);
+	}
+
 	public bool IsInstallingAtMessStation()
 	{
 		return base.smi.IsInsideState(base.smi.sm.installAtMessStation.install);
@@ -63,12 +70,12 @@ public class ReloadElectrobankChore : Chore<ReloadElectrobankChore.Instance>
 
 	public static void InstallElectrobank(ReloadElectrobankChore.Instance smi)
 	{
-		Storage[] components = smi.gameObject.GetComponents<Storage>();
-		for (int i = 0; i < components.Length; i++)
+		Storage[] storages = smi.Storages;
+		for (int i = 0; i < storages.Length; i++)
 		{
-			if (components[i] != smi.batteryMonitor.storage && components[i].FindFirst(GameTags.ChargedPortableBattery) != null)
+			if (storages[i] != smi.batteryMonitor.storage && storages[i].FindFirst(GameTags.ChargedPortableBattery) != null)
 			{
-				components[i].Transfer(smi.batteryMonitor.storage, false, false);
+				storages[i].Transfer(smi.batteryMonitor.storage, false, false);
 				break;
 			}
 		}
@@ -81,15 +88,13 @@ public class ReloadElectrobankChore : Chore<ReloadElectrobankChore.Instance>
 		{
 			return;
 		}
-		KBatchedAnimTracker component = item.GetComponent<KBatchedAnimTracker>();
-		if (component != null)
+		KBatchedAnimTracker kbatchedAnimTracker;
+		if (item.TryGetComponent<KBatchedAnimTracker>(out kbatchedAnimTracker))
 		{
-			component.enabled = visible;
+			kbatchedAnimTracker.enabled = visible;
 		}
 		Storage.MakeItemInvisible(item, !visible, false);
 	}
-
-	public const float LOOP_LENGTH = 4.333f;
 
 	public static readonly Chore.Precondition ElectrobankIsNotNull = new Chore.Precondition
 	{
@@ -105,7 +110,7 @@ public class ReloadElectrobankChore : Chore<ReloadElectrobankChore.Instance>
 	{
 		private bool IsMessStationInvalid(GameObject messStation)
 		{
-			return messStation == null || !messStation.GetComponent<Operational>().IsOperational;
+			return EatChore.IsMessStationNonOperational(messStation);
 		}
 
 		public override void InitializeStates(out StateMachine.BaseState default_state)
@@ -120,24 +125,24 @@ public class ReloadElectrobankChore : Chore<ReloadElectrobankChore.Instance>
 			}).EventHandler(GameHashes.AssignablesChanged, delegate(ReloadElectrobankChore.Instance smi)
 			{
 				smi.UpdateMessStation();
+			}).Exit(delegate(ReloadElectrobankChore.Instance smi)
+			{
+				smi.ClearMessStation();
 			});
 			this.fetch.InitializeStates(this.dupe, this.electrobankSource, this.pickedUpElectrobank, this.amountRequested, this.actualunits, this.installAtMessStation, null).OnTargetLost(this.electrobankSource, this.electrobankLost);
-			this.installAtMessStation.Enter(delegate(ReloadElectrobankChore.Instance smi)
-			{
-				EatChore.StatesInstance.SetZ(this.pickedUpElectrobank.Get(smi), Grid.GetLayerZ(Grid.SceneLayer.Ore));
-			}).EnterTransition(this.installAtSafeLocation, (ReloadElectrobankChore.Instance smi) => this.IsMessStationInvalid(this.messstation.Get(smi))).DefaultState(this.installAtMessStation.approach)
-				.ParamTransition<GameObject>(this.messstation, this.installAtSafeLocation, (ReloadElectrobankChore.Instance _, GameObject messStation) => this.IsMessStationInvalid(messStation));
+			this.installAtMessStation.EnterTransition(this.installAtSafeLocation, (ReloadElectrobankChore.Instance smi) => this.IsMessStationInvalid(this.messstation.Get(smi))).DefaultState(this.installAtMessStation.approach).ParamTransition<GameObject>(this.messstation, this.installAtSafeLocation, (ReloadElectrobankChore.Instance _, GameObject messStation) => this.IsMessStationInvalid(messStation));
 			this.installAtMessStation.approach.InitializeStates(this.dupe, this.messstation, this.installAtMessStation.removeDepletedBatteries, this.installAtSafeLocation, null, null);
 			this.installAtMessStation.removeDepletedBatteries.InitializeStates(this.installAtMessStation.install);
 			this.installAtMessStation.install.InitializeStates(this.complete, new ReloadElectrobankChore.States.MessStationInstallBatteryAnim()).Enter(delegate(ReloadElectrobankChore.Instance smi)
 			{
 				GameObject gameObject = this.dupe.Get(smi);
-				EatChore.StatesInstance.SetZ(gameObject, Grid.GetLayerZ(Grid.SceneLayer.BuildingFront));
-				EatChore.StatesInstance.SetZ(this.pickedUpElectrobank.Get(smi), Grid.GetLayerZ(Grid.SceneLayer.Ore));
-				EatChore.StatesInstance.ApplyRoomAndSaltEffects(this.messstation.Get(smi), gameObject, new float?(1800f));
+				smi.eatAnim = EatChore.StatesInstance.OnEnterMessStation(this.messstation.Get(smi), gameObject, this.pickedUpElectrobank.Get(smi), true, new float?(1800f));
+				ReloadElectrobankChore.SetZ(gameObject, Grid.GetLayerZ(Grid.SceneLayer.BuildingFront));
 			}).Exit(delegate(ReloadElectrobankChore.Instance smi)
 			{
-				EatChore.StatesInstance.SetZ(this.dupe.Get(smi), Grid.GetLayerZ(Grid.SceneLayer.Move));
+				GameObject gameObject2 = this.dupe.Get(smi);
+				EatChore.StatesInstance.OnExitMessStation(this.messstation.Get(smi), gameObject2, smi.eatAnim);
+				ReloadElectrobankChore.SetZ(gameObject2, Grid.GetLayerZ(Grid.SceneLayer.Move));
 			});
 			this.installAtSafeLocation.Enter("CreateSafeLocation", delegate(ReloadElectrobankChore.Instance smi)
 			{
@@ -216,9 +221,16 @@ public class ReloadElectrobankChore : Chore<ReloadElectrobankChore.Instance>
 			public GameStateMachine<ReloadElectrobankChore.States, ReloadElectrobankChore.Instance, ReloadElectrobankChore, object>.State end;
 		}
 
+		public struct WorkerSnapshot
+		{
+			public bool hasHat;
+
+			public bool hasSalt;
+		}
+
 		public interface IInstallBatteryAnim
 		{
-			string GetBank();
+			HashedString GetBank(ReloadElectrobankChore.Instance smi);
 
 			string GetPrefix(ReloadElectrobankChore.Instance smi, ReloadElectrobankChore.States.IInstallBatteryAnim.Anim anim);
 
@@ -227,16 +239,17 @@ public class ReloadElectrobankChore : Chore<ReloadElectrobankChore.Instance>
 			public enum Anim
 			{
 				Pre,
-				Loop,
+				Idle,
+				Convo,
 				Pst
 			}
 		}
 
 		public class DefaultInstallBatteryAnim : ReloadElectrobankChore.States.IInstallBatteryAnim
 		{
-			public string GetBank()
+			public HashedString GetBank(ReloadElectrobankChore.Instance _)
 			{
-				return "anim_bionic_kanim";
+				return ReloadElectrobankChore.States.DefaultInstallBatteryAnim.bank;
 			}
 
 			public string GetPrefix(ReloadElectrobankChore.Instance _smi, ReloadElectrobankChore.States.IInstallBatteryAnim.Anim _anim)
@@ -248,42 +261,39 @@ public class ReloadElectrobankChore : Chore<ReloadElectrobankChore.Instance>
 			{
 				return false;
 			}
+
+			private static readonly HashedString bank = "anim_bionic_kanim";
 		}
 
 		public class MessStationInstallBatteryAnim : ReloadElectrobankChore.States.IInstallBatteryAnim
 		{
-			public string GetBank()
+			public HashedString GetBank(ReloadElectrobankChore.Instance smi)
 			{
-				return "anim_bionic_eat_table_kanim";
+				IDiningSeat diningSeat = EatChore.ResolveDiningSeat(smi.sm.messstation.Get(smi));
+				if (diningSeat == null)
+				{
+					return MessStation.reloadElectrobankAnim;
+				}
+				return diningSeat.ReloadElectrobankAnim;
 			}
 
 			public string GetPrefix(ReloadElectrobankChore.Instance smi, ReloadElectrobankChore.States.IInstallBatteryAnim.Anim anim)
 			{
-				MinionResume component = smi.GetComponent<MinionResume>();
-				bool flag = component != null && component.CurrentHat != null;
-				bool flag2 = false;
-				GameObject gameObject = smi.sm.messstation.Get(smi);
-				if (gameObject != null)
-				{
-					MessStation component2 = gameObject.GetComponent<MessStation>();
-					if (component2 != null && component2.HasSalt)
-					{
-						flag2 = true;
-					}
-				}
-				if (flag2 && flag)
+				bool hasHat = smi.workerSnapshot.hasHat;
+				bool hasSalt = smi.workerSnapshot.hasSalt;
+				if (hasSalt && hasHat)
 				{
 					return "salt_hat";
 				}
-				if (flag2)
+				if (hasSalt)
 				{
 					return "salt";
 				}
-				if (!flag)
+				if (!hasHat)
 				{
 					return "working";
 				}
-				if (anim == ReloadElectrobankChore.States.IInstallBatteryAnim.Anim.Loop)
+				if (anim == ReloadElectrobankChore.States.IInstallBatteryAnim.Anim.Idle)
 				{
 					return "working";
 				}
@@ -298,40 +308,95 @@ public class ReloadElectrobankChore : Chore<ReloadElectrobankChore.Instance>
 
 		public class InstallBattery : GameStateMachine<ReloadElectrobankChore.States, ReloadElectrobankChore.Instance, ReloadElectrobankChore, object>.State
 		{
+			private static ReloadElectrobankChore.States.WorkerSnapshot Snapshot(ReloadElectrobankChore.Instance smi)
+			{
+				bool flag = smi.Resume != null && smi.Resume.CurrentHat != null;
+				bool flag2 = EatChore.StatesInstance.UseSalt(smi.sm.messstation.Get(smi));
+				return new ReloadElectrobankChore.States.WorkerSnapshot
+				{
+					hasHat = flag,
+					hasSalt = flag2
+				};
+			}
+
 			public ReloadElectrobankChore.States.InstallBattery InitializeStates(GameStateMachine<ReloadElectrobankChore.States, ReloadElectrobankChore.Instance, ReloadElectrobankChore, object>.State nextState, ReloadElectrobankChore.States.IInstallBatteryAnim anim)
 			{
-				base.DefaultState(this.pre).ToggleAnims(anim.GetBank(), 0f).Enter("Add Symbol Override", delegate(ReloadElectrobankChore.Instance smi)
+				base.DefaultState(this.pre).Enter("Install Battery", delegate(ReloadElectrobankChore.Instance smi)
 				{
+					KAnimFile anim2 = Assets.GetAnim(anim.GetBank(smi));
+					smi.AnimController.AddAnims(anim2);
+					smi.AnimController.AddAnimOverrides(anim2, 0f);
 					smi.StowElectrobank(false);
-					if (anim.ForceFacing())
+					if (anim.ForceFacing() && smi.Facing != null)
 					{
-						Facing component = smi.GetComponent<Facing>();
-						if (component != null)
-						{
-							component.SetFacing(false);
-						}
+						smi.Facing.SetFacing(false);
 					}
+					smi.workerSnapshot = ReloadElectrobankChore.States.InstallBattery.Snapshot(smi);
+					smi.diningTimedOut = false;
+				}).ScheduleAction("Dining Timeout", 60f, delegate(ReloadElectrobankChore.Instance smi)
+				{
+					smi.diningTimedOut = true;
 				})
-					.Exit("Revert Symbol Override", delegate(ReloadElectrobankChore.Instance smi)
+					.Exit("Exit Install Battery", delegate(ReloadElectrobankChore.Instance smi)
 					{
 						smi.StowElectrobank(true);
+						KAnimFile anim3 = Assets.GetAnim(anim.GetBank(smi));
+						smi.AnimController.RemoveAnimOverrides(anim3);
+						smi.workerSnapshot = default(ReloadElectrobankChore.States.WorkerSnapshot);
+						smi.Kpid.RemoveTag(GameTags.DoNotInterruptMe);
 					});
-				this.pre.PlayAnim((ReloadElectrobankChore.Instance smi) => anim.GetPrefix(smi, ReloadElectrobankChore.States.IInstallBatteryAnim.Anim.Pre) + "_pre", KAnim.PlayMode.Once).OnAnimQueueComplete(this.loop).ScheduleGoTo(5f, this.loop);
-				this.loop.PlayAnim((ReloadElectrobankChore.Instance smi) => anim.GetPrefix(smi, ReloadElectrobankChore.States.IInstallBatteryAnim.Anim.Loop) + "_loop", KAnim.PlayMode.Loop).ScheduleGoTo(4.333f, this.pst);
-				this.pst.PlayAnim((ReloadElectrobankChore.Instance smi) => anim.GetPrefix(smi, ReloadElectrobankChore.States.IInstallBatteryAnim.Anim.Pst) + "_pst", KAnim.PlayMode.Once).OnAnimQueueComplete(nextState).ScheduleGoTo(5f, nextState);
+				this.pre.PlayAnim((ReloadElectrobankChore.Instance smi) => anim.GetPrefix(smi, ReloadElectrobankChore.States.IInstallBatteryAnim.Anim.Pre) + "_pre", KAnim.PlayMode.Once).ToggleTag(GameTags.SuppressConversation).OnAnimQueueComplete(this.idle)
+					.ScheduleGoTo(15f, this.idle);
+				this.idle.PlayAnim((ReloadElectrobankChore.Instance smi) => anim.GetPrefix(smi, ReloadElectrobankChore.States.IInstallBatteryAnim.Anim.Idle) + "_loop", KAnim.PlayMode.Once).OnAnimQueueComplete(this.idleOrConvo).ScheduleGoTo(15f, this.idleOrConvo);
+				this.idleOrConvo.Enter("IdleOrConvo", delegate(ReloadElectrobankChore.Instance smi)
+				{
+					if (!smi.Kpid.HasTag(GameTags.CommunalDining) || smi.diningTimedOut)
+					{
+						smi.GoTo(this.pst);
+						return;
+					}
+					if (smi.Kpid.HasTag(GameTags.WantsToTalk))
+					{
+						smi.GoTo(this.convo);
+						return;
+					}
+					smi.GoTo(this.idle);
+				});
+				this.convo.Enter("Convo", delegate(ReloadElectrobankChore.Instance smi)
+				{
+					smi.Kpid.RemoveTag(GameTags.WantsToTalk);
+					smi.AnimController.SetSymbolVisiblity(Edible.SALT_SYMBOL, smi.workerSnapshot.hasSalt);
+					smi.AnimController.SetSymbolVisiblity(Edible.HAT_SYMBOL, smi.workerSnapshot.hasHat);
+				}).PlayAnim((ReloadElectrobankChore.Instance _) => Edible.convoAnims[global::UnityEngine.Random.Range(0, Edible.convoAnims.Length)], KAnim.PlayMode.Once).OnAnimQueueComplete(this.idleOrConvo)
+					.ScheduleGoTo(15f, this.idleOrConvo)
+					.Exit("Exit Convo", delegate(ReloadElectrobankChore.Instance smi)
+					{
+						smi.Kpid.RemoveTag(GameTags.DoNotInterruptMe);
+						smi.AnimController.SetSymbolVisiblity(Edible.SALT_SYMBOL, true);
+						smi.AnimController.SetSymbolVisiblity(Edible.HAT_SYMBOL, true);
+					});
+				this.pst.PlayAnim((ReloadElectrobankChore.Instance smi) => anim.GetPrefix(smi, ReloadElectrobankChore.States.IInstallBatteryAnim.Anim.Pst) + "_pst", KAnim.PlayMode.Once).OnAnimQueueComplete(nextState).ScheduleGoTo(15f, nextState);
 				return this;
 			}
 
 			public GameStateMachine<ReloadElectrobankChore.States, ReloadElectrobankChore.Instance, ReloadElectrobankChore, object>.State pre;
 
-			public GameStateMachine<ReloadElectrobankChore.States, ReloadElectrobankChore.Instance, ReloadElectrobankChore, object>.State loop;
+			public GameStateMachine<ReloadElectrobankChore.States, ReloadElectrobankChore.Instance, ReloadElectrobankChore, object>.State idle;
+
+			public GameStateMachine<ReloadElectrobankChore.States, ReloadElectrobankChore.Instance, ReloadElectrobankChore, object>.State idleOrConvo;
+
+			public GameStateMachine<ReloadElectrobankChore.States, ReloadElectrobankChore.Instance, ReloadElectrobankChore, object>.State convo;
 
 			public GameStateMachine<ReloadElectrobankChore.States, ReloadElectrobankChore.Instance, ReloadElectrobankChore, object>.State pst;
+
+			private const float ANIMATION_TIMEOUT = 15f;
+
+			private const float DINING_DURATION_MAXIMUM = 60f;
 		}
 
 		public class InstallAtMessStation : GameStateMachine<ReloadElectrobankChore.States, ReloadElectrobankChore.Instance, ReloadElectrobankChore, object>.State
 		{
-			public GameStateMachine<ReloadElectrobankChore.States, ReloadElectrobankChore.Instance, ReloadElectrobankChore, object>.ApproachSubState<MessStation> approach;
+			public GameStateMachine<ReloadElectrobankChore.States, ReloadElectrobankChore.Instance, ReloadElectrobankChore, object>.ApproachSubState<IApproachable> approach;
 
 			public ReloadElectrobankChore.States.RemoveDepletedBatteries removeDepletedBatteries;
 
@@ -358,28 +423,56 @@ public class ReloadElectrobankChore : Chore<ReloadElectrobankChore.Instance>
 			}
 		}
 
+		public KPrefabID Kpid { get; private set; }
+
+		public KBatchedAnimController AnimController { get; private set; }
+
+		public SymbolOverrideController SymbolOverrideController { get; private set; }
+
+		public Facing Facing { get; private set; }
+
+		public Storage[] Storages { get; private set; }
+
+		public MinionResume Resume { get; private set; }
+
 		public Instance(ReloadElectrobankChore master, GameObject duplicant)
 			: base(master)
 		{
+			this.Kpid = master.GetComponent<KPrefabID>();
+			this.AnimController = master.GetComponent<KBatchedAnimController>();
+			this.SymbolOverrideController = master.GetComponent<SymbolOverrideController>();
+			this.Facing = master.GetComponent<Facing>();
+			this.Storages = master.gameObject.GetComponents<Storage>();
+			this.Resume = master.GetComponent<MinionResume>();
 		}
 
 		public void UpdateMessStation()
 		{
-			base.sm.messstation.Set(EatChore.StatesInstance.GetPreferredMessStation(base.sm.dupe.Get(this).GetComponent<MinionIdentity>()), this);
+			Assignable assignable = EatChore.StatesInstance.ReserveMessStation(base.sm.messstation.Get(base.smi), base.sm.dupe.Get(base.smi));
+			base.sm.messstation.Set(assignable, base.smi);
+		}
+
+		public void ClearMessStation()
+		{
+			GameObject gameObject = base.smi.sm.messstation.Get(base.smi);
+			if (gameObject != null)
+			{
+				gameObject.GetComponent<Reservable>().ClearReservation();
+			}
+			base.sm.messstation.Set(null, base.smi);
 		}
 
 		public void ShowElectrobankSymbol(bool show, KAnim.Build.Symbol symbol)
 		{
-			SymbolOverrideController component = base.GetComponent<SymbolOverrideController>();
 			if (show)
 			{
-				component.AddSymbolOverride(ReloadElectrobankChore.Instance.SYMBOL_NAME, symbol, 0);
+				this.SymbolOverrideController.AddSymbolOverride(ReloadElectrobankChore.Instance.SYMBOL_NAME, symbol, 0);
 			}
 			else
 			{
-				component.RemoveSymbolOverride(ReloadElectrobankChore.Instance.SYMBOL_NAME, 0);
+				this.SymbolOverrideController.RemoveSymbolOverride(ReloadElectrobankChore.Instance.SYMBOL_NAME, 0);
 			}
-			base.GetComponent<KBatchedAnimController>().SetSymbolVisiblity(ReloadElectrobankChore.Instance.SYMBOL_NAME, show);
+			this.AnimController.SetSymbolVisiblity(ReloadElectrobankChore.Instance.SYMBOL_NAME, show);
 		}
 
 		public void StowElectrobank(bool stow)
@@ -390,6 +483,12 @@ public class ReloadElectrobankChore : Chore<ReloadElectrobankChore.Instance>
 			this.ShowElectrobankSymbol(!stow, symbol);
 		}
 
-		private static readonly string SYMBOL_NAME = "object";
+		public ReloadElectrobankChore.States.WorkerSnapshot workerSnapshot;
+
+		public bool diningTimedOut;
+
+		public KAnimFile eatAnim;
+
+		private static readonly HashedString SYMBOL_NAME = "object";
 	}
 }

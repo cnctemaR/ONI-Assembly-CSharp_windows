@@ -95,11 +95,12 @@ public class CraftingTableConfig : IBuildingConfig
 		};
 		ComplexRecipe complexRecipe3 = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("CraftingTable", array5, array6), array5, array6);
 		complexRecipe3.time = (float)global::TUNING.EQUIPMENT.SUITS.OXYMASK_FABTIME;
-		complexRecipe3.description = global::STRINGS.EQUIPMENT.PREFABS.OXYGEN_MASK.RECIPE_DESC;
-		complexRecipe3.nameDisplay = ComplexRecipe.RecipeNameDisplay.ResultWithIngredient;
+		complexRecipe3.description = global::STRINGS.EQUIPMENT.PREFABS.OXYGEN_MASK.REPAIR_WORN_DESC;
+		complexRecipe3.nameDisplay = ComplexRecipe.RecipeNameDisplay.Custom;
 		complexRecipe3.fabricators = new List<Tag> { "CraftingTable" };
 		complexRecipe3.requiredTech = Db.Get().TechItems.oxygenMask.parentTechId;
 		complexRecipe3.sortOrder = 2;
+		complexRecipe3.customName = global::STRINGS.EQUIPMENT.PREFABS.OXYGEN_MASK.REPAIR_WORN_RECIPE_NAME;
 	}
 
 	private void CreateMetalMiniVoltRecipe(Tag[] inputMetals)
@@ -134,6 +135,7 @@ public class CraftingTableConfig : IBuildingConfig
 			component.AttributeExperienceMultiplier = DUPLICANTSTATS.ATTRIBUTE_LEVELING.PART_DAY_EXPERIENCE;
 			component.SkillExperienceSkillGroup = Db.Get().SkillGroups.Technicals.Id;
 			component.SkillExperienceMultiplier = SKILLS.PART_DAY_EXPERIENCE;
+			DiscoveredResources.Instance.Discover("Worn_Oxygen_Mask");
 		};
 	}
 

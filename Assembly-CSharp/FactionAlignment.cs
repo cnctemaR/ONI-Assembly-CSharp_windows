@@ -123,7 +123,7 @@ public class FactionAlignment : KMonoBehaviour
 		this.SetAlignmentActive(false);
 		this.Alignment = newAlignment;
 		this.SetAlignmentActive(true);
-		base.Trigger(-971105736, newAlignment);
+		base.BoxingTrigger<FactionManager.FactionID>(-971105736, newAlignment);
 	}
 
 	private void OnQueueDestroyObject()

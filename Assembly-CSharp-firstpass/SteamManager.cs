@@ -63,14 +63,14 @@ public class SteamManager : MonoBehaviour
 			string text = "[Steamworks.NET] Could not load [lib]steam_api.dll/so/dylib. It's likely not in the correct location. Refer to the README for more details.\n";
 			DllNotFoundException ex2 = ex;
 			global::Debug.LogError(text + ((ex2 != null) ? ex2.ToString() : null), this);
-			App.Quit();
+			App.QuitCode(2);
 			return;
 		}
 		this.m_bInitialized = SteamAPI.Init();
 		if (!this.m_bInitialized)
 		{
 			global::Debug.LogWarning("[Steamworks.NET] SteamAPI_Init() failed. Refer to Valve's documentation or the comment above this line for more information.", this);
-			App.Quit();
+			App.QuitCode(2);
 			return;
 		}
 	}
@@ -129,11 +129,16 @@ public class SteamManager : MonoBehaviour
 
 	public const uint STEAM_DLC4_APPLICATION_ID = 3655420U;
 
+	public const uint STEAM_COSMETIC1_ID_APPLICATION_ID = 4157740U;
+
 	public static List<AppId_t> ONI_STEAM_APP_IDS = new List<AppId_t>
 	{
 		new AppId_t(457140U),
 		new AppId_t(1452490U),
-		new AppId_t(2952300U)
+		new AppId_t(2952300U),
+		new AppId_t(3302470U),
+		new AppId_t(3655420U),
+		new AppId_t(4157740U)
 	};
 
 	private static SteamManager s_instance;

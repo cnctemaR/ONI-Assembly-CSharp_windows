@@ -107,7 +107,7 @@ public class DevToolBatchedAnimDebug : DevTool
 					KAnim.Build.Symbol symbol2 = data.GetSymbol(j);
 					if (symbol2.hash.HashValue == num2 || this.StringContains(symbol2.hash.ToString(), this.Filter))
 					{
-						ImGui.Text(string.Format("[{0}]: {1}", symbol2.symbolIndexInSourceBuild, symbol2.hash));
+						ImGui.Text(string.Format("[{0}]: {1} ({2})", symbol2.symbolIndexInSourceBuild, symbol2.hash, symbol2.hash.HashValue));
 					}
 				}
 				ImGui.EndChild();
@@ -126,7 +126,16 @@ public class DevToolBatchedAnimDebug : DevTool
 				{
 					KAnim.Anim.FrameElement frameElement = batchGroupData.GetFrameElement(frame.firstElementIdx + k);
 					int symbolIndex = batchGroupData.GetSymbolIndex(frameElement.symbol);
-					ImGui.Text(string.Format("FrameElement [{0}]: symbolIdx= {1} symbol= {2}", frame.firstElementIdx + k, symbolIndex, frameElement.symbol));
+					bool symbolVisiblity = component.GetSymbolVisiblity(frameElement.symbol);
+					bool flag = component.symbolInstanceGpuData.IsVisible(symbolIndex);
+					ImGui.Text(string.Format("FrameElement [{0}]: symbolIdx= {1} symbol= {2} visible= {3} gpu: {4}", new object[]
+					{
+						frame.firstElementIdx + k,
+						symbolIndex,
+						frameElement.symbol,
+						symbolVisiblity,
+						flag
+					}));
 				}
 				ImGui.EndTabItem();
 			}

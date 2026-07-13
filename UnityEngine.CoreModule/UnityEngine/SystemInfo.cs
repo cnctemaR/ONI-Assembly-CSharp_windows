@@ -6,12 +6,12 @@ using UnityEngine.Rendering;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Shaders/GraphicsCapsScriptBindings.h")]
 	[NativeHeader("Runtime/Misc/SystemInfo.h")]
+	[NativeHeader("Runtime/Shaders/GraphicsCapsScriptBindings.h")]
 	[NativeHeader("Runtime/Graphics/Mesh/MeshScriptBindings.h")]
-	[NativeHeader("Runtime/Camera/RenderLoops/MotionVectorRenderLoop.h")]
 	[NativeHeader("Runtime/Input/GetInput.h")]
 	[NativeHeader("Runtime/Graphics/GraphicsFormatUtility.bindings.h")]
+	[NativeHeader("Runtime/Camera/RenderLoops/MotionVectorRenderLoop.h")]
 	public sealed class SystemInfo
 	{
 		[NativeProperty]

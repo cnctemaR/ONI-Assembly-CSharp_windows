@@ -68,7 +68,7 @@ namespace STRINGS
 
 			public static LocString TAME_GASSYMOO = "Moovin' On Up";
 
-			public static LocString TAME_GASSYMOO_DESCRIPTION = "Find and tame a Gassy Moo.";
+			public static LocString TAME_GASSYMOO_DESCRIPTION = "Find and tame a Moo.";
 
 			public static LocString SIXKELVIN_BUILDING = "Not 0K, But Pretty Cool";
 
@@ -160,7 +160,7 @@ namespace STRINGS
 
 			public static LocString COOKED_FOOD = "It's Not Raw";
 
-			public static LocString COOKED_FOOD_DESCRIPTION = "Have a Duplicant eat any cooked meal prepared at an Electric Grill or Gas Range.";
+			public static LocString COOKED_FOOD_DESCRIPTION = "Have a Duplicant eat any cooked meal prepared at an eligible cooking station.";
 
 			public static LocString PLUMBED_WASHROOMS = "Royal Flush";
 
@@ -188,7 +188,7 @@ namespace STRINGS
 
 			public static LocString LAND_ON_ALL_WORLDS = "Cluster Conquest";
 
-			public static LocString LAND_ON_ALL_WORLDS_DESCRIPTION = "Land dupes or rovers on all worlds in the cluster.";
+			public static LocString LAND_ON_ALL_WORLDS_DESCRIPTION = "Land Duplicants or rovers on all worlds in the cluster.";
 
 			public static LocString REACTOR_USAGE = "That's Rad!";
 

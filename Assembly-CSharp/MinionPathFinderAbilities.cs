@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 
 public class MinionPathFinderAbilities : PathFinderAbilities
 {
@@ -15,7 +14,9 @@ public class MinionPathFinderAbilities : PathFinderAbilities
 
 	protected override void Refresh(Navigator navigator)
 	{
-		this.proxyID = navigator.GetComponent<MinionIdentity>().assignableProxy.Get().GetComponent<KPrefabID>().InstanceID;
+		MinionAssignablesProxy minionAssignablesProxy = navigator.GetComponent<MinionIdentity>().assignableProxy.Get();
+		this.proxyID = minionAssignablesProxy.GetComponent<KPrefabID>().InstanceID;
+		this.accessControlDefaultKey = GridRestrictionSerializer.Instance.GetTagId(minionAssignablesProxy.GetMinionModel());
 		this.out_of_fuel = navigator.HasTag(GameTags.JetSuitOutOfFuel);
 	}
 
@@ -24,9 +25,9 @@ public class MinionPathFinderAbilities : PathFinderAbilities
 		this.idleNavMaskEnabled = enabled;
 	}
 
-	private static bool IsAccessPermitted(int proxyID, int cell, int from_cell, NavType from_nav_type)
+	private static bool IsAccessPermitted(int proxyID, int proxyTag, int cell, int from_cell, NavType from_nav_type)
 	{
-		return Grid.HasPermission(cell, proxyID, from_cell, from_nav_type);
+		return Grid.HasPermission(cell, proxyID, proxyTag, from_cell, from_nav_type);
 	}
 
 	public override int GetSubmergedPathCostPenalty(PathFinder.PotentialPath path, NavGrid.Link link)
@@ -40,14 +41,14 @@ public class MinionPathFinderAbilities : PathFinderAbilities
 
 	public override bool TraversePath(ref PathFinder.PotentialPath path, int from_cell, NavType from_nav_type, int cost, int transition_id, bool submerged)
 	{
-		if (!MinionPathFinderAbilities.IsAccessPermitted(this.proxyID, path.cell, from_cell, from_nav_type))
+		if (!MinionPathFinderAbilities.IsAccessPermitted(this.proxyID, this.accessControlDefaultKey, path.cell, from_cell, from_nav_type))
 		{
 			return false;
 		}
 		foreach (CellOffset cellOffset in this.transitionVoidOffsets[transition_id])
 		{
 			int num = Grid.OffsetCell(from_cell, cellOffset);
-			if (!MinionPathFinderAbilities.IsAccessPermitted(this.proxyID, num, from_cell, from_nav_type))
+			if (!MinionPathFinderAbilities.IsAccessPermitted(this.proxyID, this.accessControlDefaultKey, num, from_cell, from_nav_type))
 			{
 				return false;
 			}
@@ -101,19 +102,11 @@ public class MinionPathFinderAbilities : PathFinderAbilities
 		return true;
 	}
 
-	[Conditional("ENABLE_NAVIGATION_MASK_PROFILING")]
-	private void BeginSample(string region_name)
-	{
-	}
-
-	[Conditional("ENABLE_NAVIGATION_MASK_PROFILING")]
-	private void EndSample(string region_name)
-	{
-	}
-
 	private CellOffset[][] transitionVoidOffsets;
 
 	private int proxyID;
+
+	private int accessControlDefaultKey;
 
 	private bool out_of_fuel;
 

@@ -59,7 +59,7 @@ public class DebugTool : DragTool
 				return;
 			}
 			case DebugTool.Type.Clear:
-				this.ClearCell(cell);
+				GameUtil.ClearCell(cell, true);
 				return;
 			case DebugTool.Type.AddSelection:
 				DebugBaseTemplateButton.Instance.AddToSelection(cell);
@@ -71,7 +71,7 @@ public class DebugTool : DragTool
 				this.DeconstructCell(cell);
 				return;
 			case DebugTool.Type.Destroy:
-				this.DestroyCell(cell);
+				GameUtil.DestroyCell(cell, CellEventLogger.Instance.DebugTool, true);
 				return;
 			case DebugTool.Type.Sample:
 				DebugPaintElementScreen.Instance.SampleCell(cell);
@@ -175,51 +175,6 @@ public class DebugTool : DragTool
 		{
 			DebugHandler.InstantBuildMode = false;
 		}
-	}
-
-	public void DestroyCell(int cell)
-	{
-		foreach (GameObject gameObject in new List<GameObject>
-		{
-			Grid.Objects[cell, 2],
-			Grid.Objects[cell, 1],
-			Grid.Objects[cell, 12],
-			Grid.Objects[cell, 16],
-			Grid.Objects[cell, 20],
-			Grid.Objects[cell, 0],
-			Grid.Objects[cell, 26],
-			Grid.Objects[cell, 31],
-			Grid.Objects[cell, 30]
-		})
-		{
-			if (gameObject != null)
-			{
-				Util.KDestroyGameObject(gameObject);
-			}
-		}
-		this.ClearCell(cell);
-		if (ElementLoader.elements[(int)Grid.ElementIdx[cell]].id == SimHashes.Void)
-		{
-			SimMessages.ReplaceElement(cell, SimHashes.Void, CellEventLogger.Instance.DebugTool, 0f, 0f, byte.MaxValue, 0, -1);
-			return;
-		}
-		SimMessages.ReplaceElement(cell, SimHashes.Vacuum, CellEventLogger.Instance.DebugTool, 0f, 0f, byte.MaxValue, 0, -1);
-	}
-
-	public void ClearCell(int cell)
-	{
-		Vector2I vector2I = Grid.CellToXY(cell);
-		ListPool<ScenePartitionerEntry, DebugTool>.PooledList pooledList = ListPool<ScenePartitionerEntry, DebugTool>.Allocate();
-		GameScenePartitioner.Instance.GatherEntries(vector2I.x, vector2I.y, 1, 1, GameScenePartitioner.Instance.pickupablesLayer, pooledList);
-		for (int i = 0; i < pooledList.Count; i++)
-		{
-			Pickupable pickupable = pooledList[i].obj as Pickupable;
-			if (pickupable != null && pickupable.GetComponent<MinionBrain>() == null)
-			{
-				Util.KDestroyGameObject(pickupable.gameObject);
-			}
-		}
-		pooledList.Recycle();
 	}
 
 	public void DoStoreSubstance(int cell)

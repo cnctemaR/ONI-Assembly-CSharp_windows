@@ -598,7 +598,7 @@ namespace UnityEngine
 			RuntimePlatform runtimePlatform = platform;
 			RuntimePlatform runtimePlatform2 = runtimePlatform;
 			bool flag;
-			if (runtimePlatform2 != RuntimePlatform.Android && runtimePlatform2 != RuntimePlatform.WebGLPlayer)
+			if (runtimePlatform2 != RuntimePlatform.Android && runtimePlatform2 - RuntimePlatform.WebGLPlayer > 3)
 			{
 				flag = TouchScreenKeyboard.isSupported;
 			}

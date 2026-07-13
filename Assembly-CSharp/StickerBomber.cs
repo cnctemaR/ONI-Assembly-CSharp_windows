@@ -121,27 +121,20 @@ public class StickerBomber : GameStateMachine<StickerBomber, StickerBomber.Insta
 			private int FindPlacementCell()
 			{
 				int num = Grid.PosToCell(this.reactor.transform.GetPosition() + Vector3.up);
+				HashSetPool<int, PathFinder>.PooledHashSet pooledHashSet = HashSetPool<int, PathFinder>.Allocate();
 				ListPool<int, PathFinder>.PooledList pooledList = ListPool<int, PathFinder>.Allocate();
-				ListPool<int, PathFinder>.PooledList pooledList2 = ListPool<int, PathFinder>.Allocate();
 				QueuePool<GameUtil.FloodFillInfo, Comet>.PooledQueue pooledQueue = QueuePool<GameUtil.FloodFillInfo, Comet>.Allocate();
 				pooledQueue.Enqueue(new GameUtil.FloodFillInfo
 				{
 					cell = num,
 					depth = 0
 				});
-				GameUtil.FloodFillConditional(pooledQueue, this.canPlaceStickerCb, pooledList, pooledList2, 2);
-				if (pooledList2.Count > 0)
-				{
-					int random = pooledList2.GetRandom<int>();
-					pooledList.Recycle();
-					pooledList2.Recycle();
-					pooledQueue.Recycle();
-					return random;
-				}
-				pooledList.Recycle();
-				pooledList2.Recycle();
+				GameUtil.FloodFillConditional(pooledQueue, this.canPlaceStickerCb, pooledHashSet, pooledList, 2);
+				pooledHashSet.Recycle();
 				pooledQueue.Recycle();
-				return 0;
+				int num2 = ((pooledList.Count > 0) ? pooledList.GetRandom<int>() : 0);
+				pooledList.Recycle();
+				return num2;
 			}
 
 			private void PlaceSticker()

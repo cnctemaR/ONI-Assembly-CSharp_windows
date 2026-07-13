@@ -74,9 +74,13 @@ namespace Klei
 
 		public string[] devWorldMixing { get; set; }
 
+		public bool devBootSmoke { get; set; }
+
+		public bool devBootModReport { get; set; }
+
 		public bool enableAudioLogging { get; set; }
 
-		public GenericGameSettings.PerformanceCapture performanceCapture { get; set; }
+		public GenericGameSettings.ScriptedProfile scriptedProfile { get; set; }
 
 		private static string Path
 		{
@@ -94,7 +98,7 @@ namespace Klei
 			this.sleepWhenOutOfFocus = true;
 			this.debugEnable = false;
 			this.developerDebugEnable = false;
-			this.performanceCapture = new GenericGameSettings.PerformanceCapture();
+			this.scriptedProfile = new GenericGameSettings.ScriptedProfile();
 			GenericGameSettings._instance = this;
 		}
 
@@ -114,13 +118,17 @@ namespace Klei
 
 		public bool devAutoWorldGenActive;
 
-		public class PerformanceCapture
+		public class ScriptedProfile
 		{
 			public string saveGame { get; set; }
 
-			public float waitTime { get; set; }
+			public bool disableGC { get; set; }
 
-			public bool gcStats { get; set; }
+			public float startWaitTime { get; set; }
+
+			public int frameCount { get; set; }
+
+			public string eventFilename { get; set; }
 		}
 	}
 }

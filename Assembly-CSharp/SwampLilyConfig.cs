@@ -17,6 +17,7 @@ public class SwampLilyConfig : IEntityConfig
 		EntityTemplates.ExtendEntityToBasicPlant(gameObject, 258.15f, 308.15f, 358.15f, 448.15f, new SimHashes[] { SimHashes.ChlorineGas }, true, 0f, 0.15f, SwampLilyFlowerConfig.ID, true, true, true, true, 2400f, 0f, 4600f, SwampLilyConfig.ID + "Original", global::STRINGS.CREATURES.SPECIES.SWAMPLILY.NAME);
 		gameObject.AddOrGet<StandardCropPlant>();
 		gameObject.AddOrGet<DirectlyEdiblePlant_Growth>();
+		gameObject.AddOrGet<PlantFiberProducer>().amount = 24f;
 		GameObject gameObject2 = gameObject;
 		IHasDlcRestrictions hasDlcRestrictions = this as IHasDlcRestrictions;
 		SeedProducer.ProductionType productionType = SeedProducer.ProductionType.Harvest;
@@ -50,4 +51,6 @@ public class SwampLilyConfig : IEntityConfig
 	public static string ID = "SwampLily";
 
 	public const string SEED_ID = "SwampLilySeed";
+
+	public const float PLANT_FIBER_PRODUCED_PER_CYCLE = 24f;
 }

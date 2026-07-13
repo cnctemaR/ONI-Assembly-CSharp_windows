@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class RunningWeightedAverage
@@ -9,7 +8,11 @@ public class RunningWeightedAverage
 		this.min = minValue;
 		this.max = maxValue;
 		this.ignoreZero = !allowZero;
-		this.samples = new List<global::Tuple<float, float>>();
+		this.samples = new RingBuffer<RunningWeightedAverage.Entry>(sampleCount, new RunningWeightedAverage.Entry
+		{
+			time = float.NaN,
+			value = float.NaN
+		});
 	}
 
 	public float GetUnweightedAverage
@@ -17,14 +20,6 @@ public class RunningWeightedAverage
 		get
 		{
 			return this.GetAverageOfLastSeconds(4f);
-		}
-	}
-
-	public bool HasEverHadValidValues
-	{
-		get
-		{
-			return this.validSampleCount >= this.maxSamples;
 		}
 	}
 
@@ -42,25 +37,24 @@ public class RunningWeightedAverage
 		{
 			value = this.min;
 		}
-		if (this.validSampleCount <= this.maxSamples)
+		this.samples.Add(new RunningWeightedAverage.Entry
 		{
-			this.validSampleCount++;
-		}
-		this.samples.Add(new global::Tuple<float, float>(value, timeOfRecord));
-		if (this.samples.Count > this.maxSamples)
-		{
-			this.samples.RemoveAt(0);
-		}
+			time = timeOfRecord,
+			value = value
+		});
 	}
 
 	public int ValidRecordsInLastSeconds(float seconds)
 	{
 		int num = 0;
-		int num2 = this.samples.Count - 1;
-		while (num2 >= 0 && Time.time - this.samples[num2].second <= seconds)
+		float time = Time.time;
+		for (int i = 0; i < this.samples.Count; i++)
 		{
-			num++;
-			num2--;
+			RunningWeightedAverage.Entry entry = this.samples[i];
+			if (entry.time != float.NaN && time - entry.time <= seconds)
+			{
+				num++;
+			}
 		}
 		return num;
 	}
@@ -69,12 +63,15 @@ public class RunningWeightedAverage
 	{
 		float num = 0f;
 		int num2 = 0;
-		int num3 = this.samples.Count - 1;
-		while (num3 >= 0 && Time.time - this.samples[num3].second <= seconds)
+		float time = Time.time;
+		for (int i = 0; i < this.samples.Count; i++)
 		{
-			num += this.samples[num3].first;
-			num2++;
-			num3--;
+			RunningWeightedAverage.Entry entry = this.samples[i];
+			if (entry.time != float.NaN && time - entry.time <= seconds)
+			{
+				num += entry.value;
+				num2++;
+			}
 		}
 		if (num2 == 0)
 		{
@@ -83,7 +80,7 @@ public class RunningWeightedAverage
 		return num / (float)num2;
 	}
 
-	private List<global::Tuple<float, float>> samples = new List<global::Tuple<float, float>>();
+	private RingBuffer<RunningWeightedAverage.Entry> samples;
 
 	private float min;
 
@@ -91,7 +88,15 @@ public class RunningWeightedAverage
 
 	private bool ignoreZero;
 
-	private int validSampleCount;
+	private struct Entry
+	{
+		public bool IsValid()
+		{
+			return this.time != float.NaN;
+		}
 
-	private int maxSamples = 20;
+		public float time;
+
+		public float value;
+	}
 }

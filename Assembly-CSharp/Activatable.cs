@@ -45,7 +45,7 @@ public class Activatable : Workable, ISidescreenButtonControl
 	{
 		base.GetComponent<Operational>().SetFlag(this.Required ? Activatable.activatedFlagRequirement : Activatable.activatedFlagFunctional, this.activated);
 		base.GetComponent<KSelectable>().ToggleStatusItem(Db.Get().BuildingStatusItems.DuplicantActivationRequired, !this.activated, null);
-		base.Trigger(-1909216579, this.IsActivated);
+		base.Trigger(-1909216579, BoxedBools.Box(this.IsActivated));
 	}
 
 	private void CreateChore()
@@ -128,7 +128,7 @@ public class Activatable : Workable, ISidescreenButtonControl
 
 	public bool SidescreenButtonInteractable()
 	{
-		return !this.activated;
+		return !this.activated && (this.activationCondition == null || this.activationCondition());
 	}
 
 	public int ButtonSideScreenSortOrder()
@@ -147,6 +147,8 @@ public class Activatable : Workable, ISidescreenButtonControl
 
 	[Serialize]
 	private bool awaitingActivation;
+
+	public Func<bool> activationCondition;
 
 	private Guid statusItem;
 

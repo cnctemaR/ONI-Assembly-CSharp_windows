@@ -114,6 +114,11 @@ namespace Klei.AI
 
 		public EffectInstance Add(Effect newEffect, bool should_save)
 		{
+			return this.Add(newEffect, should_save, null);
+		}
+
+		public EffectInstance Add(Effect newEffect, bool should_save, Func<string, object, string> resolveTooltipCallback = null)
+		{
 			if (this.HasImmunityTo(newEffect))
 			{
 				return null;
@@ -144,7 +149,7 @@ namespace Klei.AI
 			}
 			if (effectInstance == null)
 			{
-				effectInstance = new EffectInstance(base.gameObject, newEffect, should_save);
+				effectInstance = new EffectInstance(base.gameObject, newEffect, should_save, resolveTooltipCallback);
 				newEffect.AddTo(attributes);
 				this.effects.Add(effectInstance);
 				if (newEffect.duration > 0f)
@@ -326,7 +331,7 @@ namespace Klei.AI
 			}
 			Effects.EffectImmunity effectImmunity2 = new Effects.EffectImmunity(effect, giverID, shouldSave);
 			this.effectImmunites.Add(effectImmunity2);
-			base.Trigger(1152870979, effectImmunity2);
+			base.BoxingTrigger<Effects.EffectImmunity>(1152870979, effectImmunity2);
 		}
 
 		public void RemoveImmunity(Effect effect, string ID)
@@ -344,7 +349,7 @@ namespace Klei.AI
 			if (flag)
 			{
 				this.effectImmunites.Remove(effectImmunity);
-				base.Trigger(964452195, effectImmunity);
+				base.BoxingTrigger<Effects.EffectImmunity>(964452195, effectImmunity);
 			}
 		}
 

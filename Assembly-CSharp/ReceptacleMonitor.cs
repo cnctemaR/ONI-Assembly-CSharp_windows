@@ -4,7 +4,7 @@ using STRINGS;
 using UnityEngine;
 
 [SkipSaveFileSerialization]
-public class ReceptacleMonitor : StateMachineComponent<ReceptacleMonitor.StatesInstance>, IGameObjectEffectDescriptor, IWiltCause, ISim1000ms
+public class ReceptacleMonitor : StateMachineComponent<ReceptacleMonitor.StatesInstance>, IGameObjectEffectDescriptor, IWiltCause
 {
 	public bool Replanted
 	{
@@ -12,6 +12,26 @@ public class ReceptacleMonitor : StateMachineComponent<ReceptacleMonitor.StatesI
 		{
 			return this.replanted;
 		}
+	}
+
+	private static bool HasReceptacleOperationalComponent(ReceptacleMonitor.StatesInstance smi)
+	{
+		return smi.ReceptacleObject != null && smi.ReceptacleObject.GetComponent<Operational>() != null;
+	}
+
+	private static bool IsReceptacleOperational(ReceptacleMonitor.StatesInstance smi)
+	{
+		return ReceptacleMonitor.HasReceptacleOperationalComponent(smi) && smi.ReceptacleObject.GetComponent<Operational>().IsOperational;
+	}
+
+	private static bool IsReceptacleOperational(ReceptacleMonitor.StatesInstance smi, object obj)
+	{
+		return ReceptacleMonitor.IsReceptacleOperational(smi);
+	}
+
+	private static bool IsReceptacle_NOT_Operational(ReceptacleMonitor.StatesInstance smi, object obj)
+	{
+		return !ReceptacleMonitor.IsReceptacleOperational(smi);
 	}
 
 	protected override void OnSpawn()
@@ -40,27 +60,6 @@ public class ReceptacleMonitor : StateMachineComponent<ReceptacleMonitor.StatesI
 		base.Trigger(-1636776682, null);
 	}
 
-	public void Sim1000ms(float dt)
-	{
-		if (base.smi.sm.receptacle.Get(base.smi) == null)
-		{
-			base.smi.GoTo(base.smi.sm.wild);
-			return;
-		}
-		Operational component = base.smi.sm.receptacle.Get(base.smi).GetComponent<Operational>();
-		if (component == null)
-		{
-			base.smi.GoTo(base.smi.sm.operational);
-			return;
-		}
-		if (component.IsOperational)
-		{
-			base.smi.GoTo(base.smi.sm.operational);
-			return;
-		}
-		base.smi.GoTo(base.smi.sm.inoperational);
-	}
-
 	WiltCondition.Condition[] IWiltCause.Conditions
 	{
 		get
@@ -74,7 +73,7 @@ public class ReceptacleMonitor : StateMachineComponent<ReceptacleMonitor.StatesI
 		get
 		{
 			string text = "";
-			if (base.smi.IsInsideState(base.smi.sm.inoperational))
+			if (base.smi.IsInsideState(base.smi.sm.domestic.operationalExist.inoperational))
 			{
 				text += CREATURES.STATUSITEMS.RECEPTACLEINOPERATIONAL.NAME;
 			}
@@ -89,7 +88,7 @@ public class ReceptacleMonitor : StateMachineComponent<ReceptacleMonitor.StatesI
 
 	public bool HasOperationalReceptacle()
 	{
-		return base.smi.IsInsideState(base.smi.sm.operational);
+		return base.smi.IsInsideState(base.smi.sm.domestic.operationalExist.operational);
 	}
 
 	public List<Descriptor> GetDescriptors(GameObject go)
@@ -124,17 +123,32 @@ public class ReceptacleMonitor : StateMachineComponent<ReceptacleMonitor.StatesI
 		{
 			default_state = this.wild;
 			base.serializable = StateMachine.SerializeType.Never;
-			this.wild.TriggerOnEnter(GameHashes.ReceptacleOperational, null);
-			this.inoperational.TriggerOnEnter(GameHashes.ReceptacleInoperational, null);
-			this.operational.TriggerOnEnter(GameHashes.ReceptacleOperational, null);
+			this.wild.ParamTransition<SingleEntityReceptacle>(this.receptacle, this.domestic, (ReceptacleMonitor.StatesInstance smi, SingleEntityReceptacle p) => p != null);
+			this.domestic.ParamTransition<SingleEntityReceptacle>(this.receptacle, this.wild, (ReceptacleMonitor.StatesInstance smi, SingleEntityReceptacle p) => p == null).EnterTransition(this.domestic.operationalExist, new StateMachine<ReceptacleMonitor.States, ReceptacleMonitor.StatesInstance, ReceptacleMonitor, object>.Transition.ConditionCallback(ReceptacleMonitor.HasReceptacleOperationalComponent)).EnterTransition(this.domestic.simple, GameStateMachine<ReceptacleMonitor.States, ReceptacleMonitor.StatesInstance, ReceptacleMonitor, object>.Not(new StateMachine<ReceptacleMonitor.States, ReceptacleMonitor.StatesInstance, ReceptacleMonitor, object>.Transition.ConditionCallback(ReceptacleMonitor.HasReceptacleOperationalComponent)));
+			this.domestic.simple.DoNothing();
+			this.domestic.operationalExist.EnterTransition(this.domestic.operationalExist.operational, new StateMachine<ReceptacleMonitor.States, ReceptacleMonitor.StatesInstance, ReceptacleMonitor, object>.Transition.ConditionCallback(ReceptacleMonitor.IsReceptacleOperational)).EnterGoTo(this.domestic.operationalExist.inoperational);
+			this.domestic.operationalExist.inoperational.EventHandlerTransition(GameHashes.ReceptacleOperational, this.domestic.operationalExist.operational, new Func<ReceptacleMonitor.StatesInstance, object, bool>(ReceptacleMonitor.IsReceptacleOperational));
+			this.domestic.operationalExist.operational.EventHandlerTransition(GameHashes.ReceptacleInoperational, this.domestic.operationalExist.inoperational, new Func<ReceptacleMonitor.StatesInstance, object, bool>(ReceptacleMonitor.IsReceptacle_NOT_Operational));
 		}
 
 		public StateMachine<ReceptacleMonitor.States, ReceptacleMonitor.StatesInstance, ReceptacleMonitor, object>.ObjectParameter<SingleEntityReceptacle> receptacle;
 
 		public GameStateMachine<ReceptacleMonitor.States, ReceptacleMonitor.StatesInstance, ReceptacleMonitor, object>.State wild;
 
-		public GameStateMachine<ReceptacleMonitor.States, ReceptacleMonitor.StatesInstance, ReceptacleMonitor, object>.State inoperational;
+		public ReceptacleMonitor.States.DomesticState domestic;
 
-		public GameStateMachine<ReceptacleMonitor.States, ReceptacleMonitor.StatesInstance, ReceptacleMonitor, object>.State operational;
+		public class DomesticState : GameStateMachine<ReceptacleMonitor.States, ReceptacleMonitor.StatesInstance, ReceptacleMonitor, object>.State
+		{
+			public GameStateMachine<ReceptacleMonitor.States, ReceptacleMonitor.StatesInstance, ReceptacleMonitor, object>.State simple;
+
+			public ReceptacleMonitor.States.OperationalState operationalExist;
+		}
+
+		public class OperationalState : GameStateMachine<ReceptacleMonitor.States, ReceptacleMonitor.StatesInstance, ReceptacleMonitor, object>.State
+		{
+			public GameStateMachine<ReceptacleMonitor.States, ReceptacleMonitor.StatesInstance, ReceptacleMonitor, object>.State inoperational;
+
+			public GameStateMachine<ReceptacleMonitor.States, ReceptacleMonitor.StatesInstance, ReceptacleMonitor, object>.State operational;
+		}
 	}
 }

@@ -74,6 +74,16 @@ public class CosmeticsPanel : TargetPanel
 			this.editButton.gameObject.SetActive(true);
 			this.mannequin.gameObject.SetActive(true);
 			this.mannequin.SetOutfit(clothingOutfitTarget);
+			Vector2 vector = new Vector2(0f, 0f);
+			if (clothingOutfitTarget.OutfitType == ClothingOutfitUtility.OutfitType.AtmoSuit)
+			{
+				vector = new Vector2(-8f, -8f);
+			}
+			else if (clothingOutfitTarget.OutfitType == ClothingOutfitUtility.OutfitType.JetSuit)
+			{
+				vector = new Vector2(-12f, -12f);
+			}
+			this.mannequin.rectTransform().sizeDelta = vector;
 			this.buildingIcon.gameObject.SetActive(false);
 			this.editButton.ClearOnClick();
 			this.editButton.onClick += this.OnClickEditOutfit;
@@ -136,7 +146,7 @@ public class CosmeticsPanel : TargetPanel
 		MinionBrowserScreenConfig.MinionInstances(this.selectedTarget).ApplyAndOpenScreen(delegate
 		{
 			AudioMixer.instance.Stop(AudioMixerSnapshots.Get().FrontEndSupplyClosetSnapshot, STOP_MODE.ALLOWFADEOUT);
-		});
+		}, this.selectedOutfitCategory);
 	}
 
 	private void RefreshOutfitCategories()
@@ -150,22 +160,25 @@ public class CosmeticsPanel : TargetPanel
 		Dictionary<ClothingOutfitUtility.OutfitType, string> dictionary = new Dictionary<ClothingOutfitUtility.OutfitType, string>();
 		dictionary.Add(ClothingOutfitUtility.OutfitType.Clothing, UI.UISIDESCREENS.BLUEPRINT_TAB.SUBCATEGORY_OUTFIT);
 		dictionary.Add(ClothingOutfitUtility.OutfitType.AtmoSuit, UI.UISIDESCREENS.BLUEPRINT_TAB.SUBCATEGORY_ATMOSUIT);
-		for (int i = 0; i < 3; i++)
+		dictionary.Add(ClothingOutfitUtility.OutfitType.JetSuit, UI.UISIDESCREENS.BLUEPRINT_TAB.SUBCATEGORY_JETSUIT);
+		for (int i = 0; i < 4; i++)
 		{
 			if (i != 1)
 			{
 				int idx = i;
 				GameObject gameObject = global::Util.KInstantiateUI(this.outfitCategoryButtonPrefab, this.outfitCategoryButtonContainer, true);
 				this.outfitCategories.Add((ClothingOutfitUtility.OutfitType)idx, gameObject);
-				gameObject.GetComponent<HierarchyReferences>().GetReference<LocText>("Label").SetText(dictionary[(ClothingOutfitUtility.OutfitType)i]);
-				MultiToggle component = gameObject.GetComponent<MultiToggle>();
-				component.onClick = (global::System.Action)Delegate.Combine(component.onClick, new global::System.Action(delegate
+				HierarchyReferences component = gameObject.GetComponent<HierarchyReferences>();
+				component.GetReference<LocText>("Label").SetText(dictionary[(ClothingOutfitUtility.OutfitType)i]);
+				component.GetReference<Image>("FG").sprite = Assets.GetSprite(CosmeticsPanel.categoryIcons[(ClothingOutfitUtility.OutfitType)i]);
+				MultiToggle component2 = gameObject.GetComponent<MultiToggle>();
+				component2.onClick = (global::System.Action)Delegate.Combine(component2.onClick, new global::System.Action(delegate
 				{
 					this.selectedOutfitCategory = (ClothingOutfitUtility.OutfitType)idx;
 					this.Refresh();
 					this.selectionPanel.SelectedOutfitCategory = this.selectedOutfitCategory;
 				}));
-				component.ChangeState((this.selectedOutfitCategory == (ClothingOutfitUtility.OutfitType)idx) ? 1 : 0);
+				component2.ChangeState((this.selectedOutfitCategory == (ClothingOutfitUtility.OutfitType)idx) ? 1 : 0);
 			}
 		}
 	}
@@ -201,4 +214,20 @@ public class CosmeticsPanel : TargetPanel
 	private GameObject outfitCategoryButtonContainer;
 
 	private ClothingOutfitUtility.OutfitType selectedOutfitCategory;
+
+	private static Dictionary<ClothingOutfitUtility.OutfitType, string> categoryIcons = new Dictionary<ClothingOutfitUtility.OutfitType, string>
+	{
+		{
+			ClothingOutfitUtility.OutfitType.Clothing,
+			"icon_inventory_equipment"
+		},
+		{
+			ClothingOutfitUtility.OutfitType.AtmoSuit,
+			"icon_inventory_atmosuits"
+		},
+		{
+			ClothingOutfitUtility.OutfitType.JetSuit,
+			"icon_inventory_jetsuits"
+		}
+	};
 }

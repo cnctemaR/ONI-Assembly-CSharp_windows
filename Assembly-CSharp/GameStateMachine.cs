@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
+using Database;
 using Klei.AI;
 using UnityEngine;
 
@@ -69,6 +71,8 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 
 	protected static StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.Parameter<int>.Callback IsGTZero_Int = (StateMachineInstanceType smi, int p) => p > 0;
 
+	protected static StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.Parameter<int>.Callback IsLTEZero_int = (StateMachineInstanceType smi, int p) => (float)p <= 0f;
+
 	public class PreLoopPostState : GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State
 	{
 		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State pre;
@@ -122,6 +126,10 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 			this.onRemove = on_remove;
 			this.target = target;
 			this.tags_callback = tags_callback;
+			this.callbackDispatcher = delegate(object context, object data)
+			{
+				this.OnCallback(Unsafe.As<StateMachineInstanceType>(context));
+			};
 		}
 
 		public override void Evaluate(StateMachine.Instance smi)
@@ -185,13 +193,10 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 
 		public override StateMachine.BaseTransition.Context Register(StateMachine.Instance smi)
 		{
-			StateMachineInstanceType smi_internal = smi as StateMachineInstanceType;
-			global::Debug.Assert(smi_internal != null);
-			StateMachine.BaseTransition.Context context = base.Register(smi_internal);
-			context.handlerId = this.target.Get(smi_internal).Subscribe(-1582839653, delegate(object data)
-			{
-				this.OnCallback(smi_internal);
-			});
+			StateMachineInstanceType stateMachineInstanceType = smi as StateMachineInstanceType;
+			global::Debug.Assert(stateMachineInstanceType != null);
+			StateMachine.BaseTransition.Context context = base.Register(stateMachineInstanceType);
+			context.handlerId = this.target.Get(stateMachineInstanceType).Subscribe(-1582839653, this.callbackDispatcher, stateMachineInstanceType);
 			return context;
 		}
 
@@ -215,6 +220,8 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 		private bool is_executing;
 
 		private Func<StateMachineInstanceType, Tag[]> tags_callback;
+
+		private Action<object, object> callbackDispatcher;
 	}
 
 	public class EventTransitionData : StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.Transition
@@ -225,6 +232,10 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 			this.evtId = evt;
 			this.target = target;
 			this.globalEventSystemCallback = global_event_system_callback;
+			this.callbackDispatcher = delegate(object context, object data)
+			{
+				this.OnCallback(Unsafe.As<StateMachineInstanceType>(context));
+			};
 		}
 
 		public override void Evaluate(StateMachine.Instance smi)
@@ -252,27 +263,23 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 
 		public override StateMachine.BaseTransition.Context Register(StateMachine.Instance smi)
 		{
-			StateMachineInstanceType smi_internal = smi as StateMachineInstanceType;
-			global::Debug.Assert(smi_internal != null);
-			StateMachine.BaseTransition.Context context = base.Register(smi_internal);
-			Action<object> action = delegate(object d)
-			{
-				this.OnCallback(smi_internal);
-			};
+			StateMachineInstanceType stateMachineInstanceType = smi as StateMachineInstanceType;
+			global::Debug.Assert(stateMachineInstanceType != null);
+			StateMachine.BaseTransition.Context context = base.Register(stateMachineInstanceType);
 			GameObject gameObject;
 			if (this.globalEventSystemCallback != null)
 			{
-				gameObject = this.globalEventSystemCallback(smi_internal).gameObject;
+				gameObject = this.globalEventSystemCallback(stateMachineInstanceType).gameObject;
 			}
 			else
 			{
-				gameObject = this.target.Get(smi_internal);
+				gameObject = this.target.Get(stateMachineInstanceType);
 				if (gameObject == null)
 				{
 					throw new InvalidOperationException("TargetParameter: " + this.target.name + " is null");
 				}
 			}
-			context.handlerId = gameObject.Subscribe((int)this.evtId, action);
+			context.handlerId = gameObject.Subscribe((int)this.evtId, this.callbackDispatcher, stateMachineInstanceType);
 			return context;
 		}
 
@@ -305,6 +312,8 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 		private StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.TargetParameter target;
 
 		private Func<StateMachineInstanceType, KMonoBehaviour> globalEventSystemCallback;
+
+		private Action<object, object> callbackDispatcher;
 	}
 
 	public new class State : StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State
@@ -897,34 +906,45 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 			return this;
 		}
 
-		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State ToggleCreatureThought(Thought thought, Func<StateMachineInstanceType, bool> condition_callback = null)
+		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State ToggleCritterEmotion(CritterEmotion emotion, Func<StateMachineInstanceType, bool> condition_callback = null)
 		{
 			StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.TargetParameter state_target = this.GetStateTarget();
-			this.Enter("AddCreatureThought(" + thought.Id + ")", delegate(StateMachineInstanceType smi)
+			this.Enter("AddCritterEmotion(" + emotion.id + ")", delegate(StateMachineInstanceType smi)
 			{
 				if (condition_callback == null || condition_callback(smi))
 				{
-					state_target.Get(smi).GetSMI<CreatureThoughtGraph.Instance>().AddThought(thought);
+					CritterEmoteMonitor.Instance smi2 = state_target.Get(smi).GetSMI<CritterEmoteMonitor.Instance>();
+					if (smi2 != null)
+					{
+						smi2.AddCritterEmotion(emotion);
+					}
 				}
 			});
 			if (condition_callback != null)
 			{
-				this.Update("ValidateCreatureThought(" + thought.Id + ")", delegate(StateMachineInstanceType smi, float dt)
+				this.Update("AddCritterEmotion(" + emotion.id + ")", delegate(StateMachineInstanceType smi, float dt)
 				{
+					CritterEmoteMonitor.Instance smi3 = state_target.Get(smi).GetSMI<CritterEmoteMonitor.Instance>();
 					if (condition_callback(smi))
 					{
-						state_target.Get(smi).GetSMI<CreatureThoughtGraph.Instance>().AddThought(thought);
-						return;
+						if (smi3 != null)
+						{
+							smi3.AddCritterEmotion(emotion);
+							return;
+						}
 					}
-					state_target.Get(smi).GetSMI<CreatureThoughtGraph.Instance>().RemoveThought(thought);
+					else if (smi3 != null)
+					{
+						smi3.RemoveCritterEmotion(emotion);
+					}
 				}, UpdateRate.SIM_200ms, false);
 			}
-			this.Exit("RemoveCreatureThought(" + thought.Id + ")", delegate(StateMachineInstanceType smi)
+			this.Exit("RemoveCritterEmotion(" + emotion.id + ")", delegate(StateMachineInstanceType smi)
 			{
-				CreatureThoughtGraph.Instance smi2 = state_target.Get(smi).GetSMI<CreatureThoughtGraph.Instance>();
-				if (smi2 != null)
+				CritterEmoteMonitor.Instance smi4 = state_target.Get(smi).GetSMI<CritterEmoteMonitor.Instance>();
+				if (smi4 != null)
 				{
-					smi2.RemoveThought(thought);
+					smi4.RemoveCritterEmotion(emotion);
 				}
 			});
 			return this;
@@ -1205,7 +1225,7 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 			{
 				this.Exit("BehaviourComplete()", delegate(StateMachineInstanceType smi)
 				{
-					smi.Trigger(-739654666, tag_cb(smi));
+					smi.BoxingTrigger<Tag>(-739654666, tag_cb(smi));
 					smi.GoTo(null);
 				});
 			}
@@ -1213,7 +1233,7 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 			{
 				this.Enter("BehaviourComplete()", delegate(StateMachineInstanceType smi)
 				{
-					smi.Trigger(-739654666, tag_cb(smi));
+					smi.BoxingTrigger<Tag>(-739654666, tag_cb(smi));
 					smi.GoTo(null);
 				});
 			}
@@ -1226,7 +1246,7 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 			{
 				this.Exit("BehaviourComplete(" + tag.ToString() + ")", delegate(StateMachineInstanceType smi)
 				{
-					smi.Trigger(-739654666, tag);
+					smi.BoxingTrigger<Tag>(-739654666, tag);
 					smi.GoTo(null);
 				});
 			}
@@ -1234,7 +1254,7 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 			{
 				this.Enter("BehaviourComplete(" + tag.ToString() + ")", delegate(StateMachineInstanceType smi)
 				{
-					smi.Trigger(-739654666, tag);
+					smi.BoxingTrigger<Tag>(-739654666, tag);
 					smi.GoTo(null);
 				});
 			}
@@ -1263,7 +1283,7 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 			{
 				this.EventHandler(GameHashes.BehaviourTagComplete, delegate(StateMachineInstanceType smi, object data)
 				{
-					if ((Tag)data == behaviour_tag)
+					if (((Boxed<Tag>)data).value == behaviour_tag)
 					{
 						on_complete(smi);
 					}
@@ -1294,7 +1314,7 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 			{
 				this.EventHandler(GameHashes.BehaviourTagComplete, delegate(StateMachineInstanceType smi, object data)
 				{
-					if ((Tag)data == behaviour_tag_cb(smi))
+					if (((Boxed<Tag>)data).value == behaviour_tag_cb(smi))
 					{
 						on_complete(smi);
 					}
@@ -2174,9 +2194,9 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 			return this;
 		}
 
-		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State OnSignal(StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.Signal signal, GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State state, Func<StateMachineInstanceType, bool> callback)
+		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State OnSignal(StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.Signal signal, GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State state, StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.Parameter<StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.SignalParameter>.Callback callback)
 		{
-			this.ParamTransition<StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.SignalParameter>(signal, state, (StateMachineInstanceType smi, StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.SignalParameter p) => callback(smi));
+			this.ParamTransition<StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.SignalParameter>(signal, state, callback);
 			return this;
 		}
 
@@ -2278,7 +2298,7 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 		{
 			this.EventHandler(GameHashes.BehaviourTagComplete, delegate(StateMachineInstanceType smi, object d)
 			{
-				if ((Tag)d == behaviour)
+				if (((Boxed<Tag>)d).value == behaviour)
 				{
 					cb(smi);
 				}
@@ -2300,6 +2320,11 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 			this.Enter("MoveTo()", delegate(StateMachineInstanceType smi)
 			{
 				int num = cell_callback(smi);
+				if (num == Grid.InvalidCell)
+				{
+					smi.GoTo(fail_state);
+					return;
+				}
 				Navigator navigator = state_target.Get<Navigator>(smi);
 				CellOffset[] array = default_offset;
 				if (cell_offsets_callback != null)
@@ -2519,23 +2544,43 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 			return this;
 		}
 
-		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State PlayAnim(string anim)
+		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State PlayAnim(HashedString anim)
 		{
 			StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.TargetParameter state_target = this.GetStateTarget();
 			KAnim.PlayMode mode = KAnim.PlayMode.Once;
-			this.Enter(string.Concat(new string[]
-			{
-				"PlayAnim(",
-				anim,
-				", ",
-				mode.ToString(),
-				")"
-			}), delegate(StateMachineInstanceType smi)
+			string[] array = new string[5];
+			array[0] = "PlayAnim(";
+			int num = 1;
+			HashedString anim2 = anim;
+			array[num] = anim2.ToString();
+			array[2] = ", ";
+			array[3] = mode.ToString();
+			array[4] = ")";
+			this.Enter(string.Concat(array), delegate(StateMachineInstanceType smi)
 			{
 				KAnimControllerBase kanimControllerBase = state_target.Get<KAnimControllerBase>(smi);
 				if (kanimControllerBase != null)
 				{
 					kanimControllerBase.Play(anim, mode, 1f, 0f);
+				}
+			});
+			return this;
+		}
+
+		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State PlayAnim(string anim)
+		{
+			return this.PlayAnim(new HashedString(anim));
+		}
+
+		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State PlayAnim(Func<StateMachineInstanceType, HashedString> anim_cb, KAnim.PlayMode mode = KAnim.PlayMode.Once)
+		{
+			StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.TargetParameter state_target = this.GetStateTarget();
+			this.Enter("PlayAnim(" + mode.ToString() + ")", delegate(StateMachineInstanceType smi)
+			{
+				KAnimControllerBase kanimControllerBase = state_target.Get<KAnimControllerBase>(smi);
+				if (kanimControllerBase != null)
+				{
+					kanimControllerBase.Play(anim_cb(smi), mode, 1f, 0f);
 				}
 			});
 			return this;
@@ -2753,29 +2798,32 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 			this.id = id;
 			this.target = target;
 			this.callback = callback;
+			this.callbackDispatcher = new Action<object, object>(this.InvokeCallback);
 			this.globalEventSystemCallback = global_event_system_callback;
+		}
+
+		public void InvokeCallback(object context, object data)
+		{
+			StateMachineInstanceType stateMachineInstanceType = (StateMachineInstanceType)((object)context);
+			if (StateMachine.Instance.error)
+			{
+				return;
+			}
+			this.callback(stateMachineInstanceType, data);
 		}
 
 		public override StateEvent.Context Subscribe(StateMachine.Instance smi)
 		{
 			StateEvent.Context context = base.Subscribe(smi);
-			StateMachineInstanceType cast_smi = (StateMachineInstanceType)((object)smi);
-			Action<object> action = delegate(object d)
-			{
-				if (StateMachine.Instance.error)
-				{
-					return;
-				}
-				this.callback(cast_smi, d);
-			};
+			StateMachineInstanceType stateMachineInstanceType = (StateMachineInstanceType)((object)smi);
 			if (this.globalEventSystemCallback != null)
 			{
-				KMonoBehaviour kmonoBehaviour = this.globalEventSystemCallback(cast_smi);
-				context.data = kmonoBehaviour.Subscribe((int)this.id, action);
+				KMonoBehaviour kmonoBehaviour = this.globalEventSystemCallback(stateMachineInstanceType);
+				context.data = kmonoBehaviour.Subscribe((int)this.id, this.callbackDispatcher, stateMachineInstanceType);
 			}
 			else
 			{
-				context.data = this.target.Get(cast_smi).Subscribe((int)this.id, action);
+				context.data = this.target.Get(stateMachineInstanceType).Subscribe((int)this.id, this.callbackDispatcher, stateMachineInstanceType);
 			}
 			return context;
 		}
@@ -2805,6 +2853,8 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 		private GameHashes id;
 
 		private StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.TargetParameter target;
+
+		private Action<object, object> callbackDispatcher;
 
 		private GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.GameEvent.Callback callback;
 

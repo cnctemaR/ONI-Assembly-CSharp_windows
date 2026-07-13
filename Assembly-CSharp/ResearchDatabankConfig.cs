@@ -10,8 +10,9 @@ public class ResearchDatabankConfig : IEntityConfig
 	{
 		GameObject gameObject = EntityTemplates.CreateLooseEntity("ResearchDatabank", global::STRINGS.ITEMS.INDUSTRIAL_PRODUCTS.RESEARCH_DATABANK.NAME, global::STRINGS.ITEMS.INDUSTRIAL_PRODUCTS.RESEARCH_DATABANK.DESC, 1f, true, Assets.GetAnim("floppy_disc_kanim"), "object", Grid.SceneLayer.Front, EntityTemplates.CollisionShape.CIRCLE, 0.35f, 0.35f, true, 0, SimHashes.Creature, new List<Tag>
 		{
-			GameTags.IndustrialIngredient,
-			GameTags.Experimental
+			GameTags.TechComponents,
+			GameTags.Experimental,
+			GameTags.PedestalDisplayable
 		});
 		if (DlcManager.FeatureClusterSpaceEnabled())
 		{

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 using Klei.AI;
 using KSerialization;
 using STRINGS;
@@ -49,7 +50,7 @@ public class DrowningMonitor : KMonoBehaviour, IWiltCause, ISlicedSim1000ms
 		SlicedUpdaterSim1000ms<DrowningMonitor>.instance.RegisterUpdate1000ms(this);
 		this.OnMove();
 		this.CheckDrowning(null);
-		Singleton<CellChangeMonitor>.Instance.RegisterCellChangedHandler(base.transform, new global::System.Action(this.OnMove), "DrowningMonitor.OnSpawn");
+		this.cellChangedHandlerID = Singleton<CellChangeMonitor>.Instance.RegisterCellChangedHandler(base.transform, DrowningMonitor.OnMoveDispatcher, this, "DrowningMonitor.OnSpawn");
 	}
 
 	private void OnMove()
@@ -68,7 +69,7 @@ public class DrowningMonitor : KMonoBehaviour, IWiltCause, ISlicedSim1000ms
 
 	protected override void OnCleanUp()
 	{
-		Singleton<CellChangeMonitor>.Instance.UnregisterCellChangedHandler(base.transform, new global::System.Action(this.OnMove));
+		Singleton<CellChangeMonitor>.Instance.UnregisterCellChangedHandler(ref this.cellChangedHandlerID);
 		GameScenePartitioner.Instance.Free(ref this.partitionerEntry);
 		SlicedUpdaterSim1000ms<DrowningMonitor>.instance.UnregisterUpdate1000ms(this);
 		base.OnCleanUp();
@@ -233,6 +234,13 @@ public class DrowningMonitor : KMonoBehaviour, IWiltCause, ISlicedSim1000ms
 	public static Effect drowningEffect;
 
 	public static Effect saturatedEffect;
+
+	private ulong cellChangedHandlerID;
+
+	private static readonly Action<object> OnMoveDispatcher = delegate(object obj)
+	{
+		Unsafe.As<DrowningMonitor>(obj).OnMove();
+	};
 
 	private static readonly Func<int, object, bool> CellSafeTestDelegate = (int testCell, object data) => DrowningMonitor.CellSafeTest(testCell, data);
 }

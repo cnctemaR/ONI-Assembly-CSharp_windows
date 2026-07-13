@@ -7,7 +7,7 @@ public class BionicAttributeUseFx : GameStateMachine<BionicAttributeUseFx, Bioni
 	{
 		default_state = this.pre;
 		base.Target(this.fx);
-		this.root.OnSignal(this.wasProductive, this.productive, (BionicAttributeUseFx.Instance smi) => smi.GetCurrentState() != smi.sm.pst).OnSignal(this.destroyFX, this.pst);
+		this.root.OnSignal(this.wasProductive, this.productive, (BionicAttributeUseFx.Instance smi, StateMachine<BionicAttributeUseFx, BionicAttributeUseFx.Instance, IStateMachineTarget, object>.SignalParameter param) => smi.GetCurrentState() != smi.sm.pst).OnSignal(this.destroyFX, this.pst);
 		this.pre.PlayAnim("bionic_upgrade_active_pre", KAnim.PlayMode.Once).OnAnimQueueComplete(this.idle);
 		this.idle.PlayAnim("bionic_upgrade_active_loop", KAnim.PlayMode.Loop);
 		this.productive.QueueAnim("bionic_upgrade_active_achievement", false, null).OnAnimQueueComplete(this.idle);

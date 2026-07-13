@@ -44,7 +44,7 @@ public class LimitValve : KMonoBehaviour, ISaveLoadable
 		set
 		{
 			this.m_amount = value;
-			base.Trigger(-1722241721, this.Amount);
+			base.BoxingTrigger<float>(-1722241721, this.m_amount);
 			this.Refresh();
 		}
 	}
@@ -53,6 +53,14 @@ public class LimitValve : KMonoBehaviour, ISaveLoadable
 	{
 		base.OnPrefabInit();
 		base.Subscribe<LimitValve>(-905833192, LimitValve.OnCopySettingsDelegate);
+		foreach (KBatchedAnimController kbatchedAnimController in base.GetComponentsInChildren<KBatchedAnimController>())
+		{
+			if (kbatchedAnimController.name.Contains("_fg"))
+			{
+				this.fg_Controller = kbatchedAnimController;
+				return;
+			}
+		}
 	}
 
 	protected override void OnSpawn()
@@ -134,6 +142,18 @@ public class LimitValve : KMonoBehaviour, ISaveLoadable
 				this.Amount += transferredMass / pickupable.PrimaryElement.MassPerUnit;
 			}
 		}
+		if (this.lastElemenet != element && this.conduitType == ConduitType.Liquid)
+		{
+			Element element2 = ElementLoader.FindElementByHash(element);
+			if (element2 != null)
+			{
+				Color color = element2.substance.colour;
+				color.a = 1f;
+				this.controller.SetSymbolTint(new KAnimHashedString("gradient"), color);
+				this.fg_Controller.SetSymbolTint(new KAnimHashedString("water_color_fg"), color);
+			}
+		}
+		this.lastElemenet = element;
 		this.operational.SetActive(this.operational.IsOperational && transferredMass > 0f, false);
 		this.Refresh();
 	}
@@ -194,6 +214,8 @@ public class LimitValve : KMonoBehaviour, ISaveLoadable
 	[MyCmpGet]
 	private KBatchedAnimController controller;
 
+	private KBatchedAnimController fg_Controller;
+
 	[MyCmpReq]
 	private KSelectable selectable;
 
@@ -218,6 +240,8 @@ public class LimitValve : KMonoBehaviour, ISaveLoadable
 	public bool displayUnitsInsteadOfMass;
 
 	public NonLinearSlider.Range[] sliderRanges;
+
+	private SimHashes lastElemenet = SimHashes.Void;
 
 	[MyCmpAdd]
 	private CopyBuildingSettings copyBuildingSettings;

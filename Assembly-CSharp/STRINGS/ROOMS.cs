@@ -1,5 +1,4 @@
 ﻿using System;
-using TUNING;
 
 namespace STRINGS
 {
@@ -170,11 +169,22 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Great Hall";
 
-				public static LocString DESCRIPTION = "A great place to eat, with great decor and great company. Great!\n\nEating in a Great Hall will significantly improve Duplicants' Morale.";
+				public static LocString DESCRIPTION = "A great place to eat, with great decor. Great!\n\nEating in a Great Hall will improve Duplicants' Morale.";
 
 				public static LocString EFFECT = "- Morale bonus";
 
 				public static LocString TOOLTIP = "Eating in a Great Hall will significantly improve Duplicants' Morale";
+			}
+
+			public class BANQUETHALL
+			{
+				public static LocString NAME = "Banquet Hall";
+
+				public static LocString DESCRIPTION = "An exquisite place for communal dining.\n\nEating in a Banquet Hall will dramatically improve Duplicants' Morale.";
+
+				public static LocString EFFECT = "- Morale bonus";
+
+				public static LocString TOOLTIP = "Eating in a Banquet Hall will dramatically improve Duplicants' Morale";
 			}
 
 			public class HOSPITAL
@@ -331,7 +341,7 @@ namespace STRINGS
 
 			public static class DECORATION
 			{
-				public static LocString NAME = UI.FormatAsLink("Decor item", "REQUIREMENTCLASSDECORATION");
+				public static LocString NAME = UI.FormatAsLink("Decor building", "REQUIREMENTCLASSDECORATION");
 
 				public static LocString CONFLICT_DESCRIPTION = ROOMS.CRITERIA.DECORATION.NAME;
 			}
@@ -453,29 +463,20 @@ namespace STRINGS
 
 			public class DECORATIVE_ITEM
 			{
-				public static LocString NAME = UI.FormatAsLink("Decor item", "REQUIREMENTCLASSDECORATION") + " ({0})";
+				public static LocString NAME = UI.FormatAsLink("Decor building", "REQUIREMENTCLASSDECORATION") + " ({0})";
 
-				public static LocString DESCRIPTION = "Requires {0} or more Decor items";
+				public static LocString DESCRIPTION = "Requires {0} or more Decor buildings";
 
 				public static LocString CONFLICT_DESCRIPTION = ROOMS.CRITERIA.DECORATIVE_ITEM.NAME;
 			}
 
-			public class DECOR20
+			public class ORNAMENT
 			{
-				// Note: this type is marked as 'beforefieldinit'.
-				static DECOR20()
-				{
-					string text = "Requires a decorative item with a minimum Decor value of ";
-					int amount = BUILDINGS.DECOR.BONUS.TIER3.amount;
-					ROOMS.CRITERIA.DECOR20.DESCRIPTION = text + amount.ToString();
-					ROOMS.CRITERIA.DECOR20.CONFLICT_DESCRIPTION = ROOMS.CRITERIA.DECOR20.NAME;
-				}
+				public static LocString NAME = UI.FormatAsLink("Displayed Ornament", "REQUIREMENTCLASSORNAMENT");
 
-				public static LocString NAME = UI.FormatAsLink("Fancy decor item", "REQUIREMENTCLASSDECORATION");
+				public static LocString DESCRIPTION = "Requires an ornament displayed on a " + BUILDINGS.PREFABS.ITEMPEDESTAL.NAME + " or " + BUILDINGS.PREFABS.SHELF.NAME;
 
-				public static LocString DESCRIPTION;
-
-				public static LocString CONFLICT_DESCRIPTION;
+				public static LocString CONFLICT_DESCRIPTION = ROOMS.CRITERIA.ORNAMENT.NAME;
 			}
 
 			public class CLINIC
@@ -595,6 +596,7 @@ namespace STRINGS
 				public static LocString CONFLICT_DESCRIPTION = ROOMS.CRITERIA.FOOD_BOX.NAME;
 			}
 
+			[Obsolete("The light requirement constraint in rooms has been removed. This is retained solely to avoid breaking mods")]
 			public class LIGHTSOURCE
 			{
 				public static LocString NAME = UI.FormatAsLink("Light source", "REQUIREMENTCLASSLIGHTSOURCE");
@@ -622,20 +624,29 @@ namespace STRINGS
 				public static LocString CONFLICT_DESCRIPTION = ROOMS.CRITERIA.MASSAGE_TABLE.NAME;
 			}
 
-			public class MESSTABLE
+			public class DININGTABLETYPE
 			{
-				public static LocString NAME = UI.FormatAsLink("Mess Table", "DININGTABLE");
+				public static LocString NAME = UI.FormatAsLink("Dining Table", "REQUIREMENTCLASSDININGTABLETYPE");
 
-				public static LocString DESCRIPTION = "Requires a single Mess Table";
+				public static LocString DESCRIPTION = "Requires a single Mess Table or Communal Table";
 
-				public static LocString CONFLICT_DESCRIPTION = ROOMS.CRITERIA.MESSTABLE.NAME;
+				public static LocString CONFLICT_DESCRIPTION = ROOMS.CRITERIA.DININGTABLETYPE.NAME;
 			}
 
-			public class NO_MESS_STATION
+			public class NO_BASIC_MESS_STATIONS
 			{
 				public static LocString NAME = "No " + UI.FormatAsLink("Mess Table", "DININGTABLE");
 
 				public static LocString DESCRIPTION = "Cannot contain a Mess Table";
+
+				public static LocString CONFLICT_DESCRIPTION = ROOMS.CRITERIA.NO_BASIC_MESS_STATIONS.NAME;
+			}
+
+			public class NO_MESS_STATION
+			{
+				public static LocString NAME = "No " + UI.FormatAsLink("dining tables", "DININGTABLE");
+
+				public static LocString DESCRIPTION = "Cannot contain a Mess Table or Communal Table";
 
 				public static LocString CONFLICT_DESCRIPTION = ROOMS.CRITERIA.NO_MESS_STATION.NAME;
 			}
@@ -647,6 +658,15 @@ namespace STRINGS
 				public static LocString DESCRIPTION = "Requires two or more Mess Tables";
 
 				public static LocString CONFLICT_DESCRIPTION = ROOMS.CRITERIA.MESS_STATION_MULTIPLE.NAME;
+			}
+
+			public class MULTI_MINION_DINING_TABLE
+			{
+				public static LocString NAME = UI.FormatAsLink("Communal Table", "MULTIMINIONDININGTABLE");
+
+				public static LocString DESCRIPTION = "Requires a Communal Table";
+
+				public static LocString CONFLICT_DESCRIPTION = ROOMS.CRITERIA.MULTI_MINION_DINING_TABLE.NAME;
 			}
 
 			public class RESEARCH_STATION
@@ -887,6 +907,11 @@ namespace STRINGS
 			public class PLANT_COUNT
 			{
 				public static LocString NAME = "Plants: {0}";
+			}
+
+			public class ORNAMENT_COUNT
+			{
+				public static LocString NAME = "Displayed ornaments: {0}";
 			}
 		}
 

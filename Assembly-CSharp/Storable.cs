@@ -16,7 +16,7 @@ public class Storable : KMonoBehaviour
 
 	private void RefreshStorageTags(object data = null)
 	{
-		bool flag = data is Storage || (data != null && (bool)data);
+		bool flag = data is Storage || (data != null && ((Boxed<bool>)data).value);
 		Storage storage = (Storage)data;
 		if (storage != null && storage.gameObject == base.gameObject)
 		{

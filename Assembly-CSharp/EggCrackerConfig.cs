@@ -9,7 +9,13 @@ public class EggCrackerConfig : IBuildingConfig
 {
 	public static void RegisterEgg(Tag eggPrefabTag, string name, string description, float mass, string[] requiredDLC, string[] forbiddenDLC)
 	{
+		EggCrackerConfig.RegisterEgg(eggPrefabTag, name, description, mass, requiredDLC, forbiddenDLC, null);
+	}
+
+	public static void RegisterEgg(Tag eggPrefabTag, string name, string description, float mass, string[] requiredDLC, string[] forbiddenDLC, global::Tuple<Tag, float>[] customDrops)
+	{
 		EggCrackerConfig.EggData eggData = new EggCrackerConfig.EggData(eggPrefabTag, name, description, mass, requiredDLC, forbiddenDLC);
+		eggData.customOutput = customDrops;
 		EggCrackerConfig.uncategorizedEggData.Add(eggData);
 	}
 
@@ -17,7 +23,9 @@ public class EggCrackerConfig : IBuildingConfig
 	{
 		foreach (EggCrackerConfig.EggData eggData in EggCrackerConfig.uncategorizedEggData)
 		{
-			Tag species = Assets.GetPrefab(Assets.GetPrefab(eggData.id).GetDef<IncubationMonitor.Def>().spawnedCreature).GetComponent<CreatureBrain>().species;
+			Tag spawnedCreature = Assets.GetPrefab(eggData.id).GetDef<IncubationMonitor.Def>().spawnedCreature;
+			Tag species = Assets.GetPrefab(spawnedCreature).GetComponent<CreatureBrain>().species;
+			eggData.isBaseMorph = Assets.GetPrefab(spawnedCreature).HasTag(GameTags.OriginalCreature);
 			if (!EggCrackerConfig.EggsBySpecies.ContainsKey(species))
 			{
 				EggCrackerConfig.EggsBySpecies.Add(species, new List<EggCrackerConfig.EggData>());
@@ -97,11 +105,19 @@ public class EggCrackerConfig : IBuildingConfig
 					material = array[0]
 				}
 			};
-			ComplexRecipe.RecipeElement[] array3 = new ComplexRecipe.RecipeElement[]
+			List<ComplexRecipe.RecipeElement> list = new List<ComplexRecipe.RecipeElement>
 			{
 				new ComplexRecipe.RecipeElement("RawEgg", 0.5f * eggData.mass, ComplexRecipe.RecipeElement.TemperatureOperation.AverageTemperature, false),
 				new ComplexRecipe.RecipeElement("EggShell", 0.5f * eggData.mass, ComplexRecipe.RecipeElement.TemperatureOperation.AverageTemperature, false)
 			};
+			if (eggData.customOutput != null)
+			{
+				foreach (global::Tuple<Tag, float> tuple in eggData.customOutput)
+				{
+					list.Add(new ComplexRecipe.RecipeElement(tuple.first, tuple.second, ComplexRecipe.RecipeElement.TemperatureOperation.AverageTemperature, false));
+				}
+			}
+			ComplexRecipe.RecipeElement[] array3 = list.ToArray();
 			string text2 = ComplexRecipeManager.MakeObsoleteRecipeID("EggCracker", "RawEgg");
 			string text3 = ComplexRecipeManager.MakeRecipeID("EggCracker", array2, array3);
 			ComplexRecipe complexRecipe = new ComplexRecipe(text3, array2, array3, eggData.requiredDlcIds, eggData.forbiddenDlcIds);
@@ -117,11 +133,11 @@ public class EggCrackerConfig : IBuildingConfig
 
 	public const string ID = "EggCracker";
 
-	private static Dictionary<Tag, List<EggCrackerConfig.EggData>> EggsBySpecies = new Dictionary<Tag, List<EggCrackerConfig.EggData>>();
+	public static Dictionary<Tag, List<EggCrackerConfig.EggData>> EggsBySpecies = new Dictionary<Tag, List<EggCrackerConfig.EggData>>();
 
 	private static List<EggCrackerConfig.EggData> uncategorizedEggData = new List<EggCrackerConfig.EggData>();
 
-	private class EggData : IHasDlcRestrictions
+	public class EggData : IHasDlcRestrictions
 	{
 		public EggData(Tag id, string name, string description, float mass, string[] requiredDLC, string[] forbiddenDLC)
 		{
@@ -154,5 +170,9 @@ public class EggCrackerConfig : IBuildingConfig
 		public string[] requiredDlcIds;
 
 		public string[] forbiddenDlcIds;
+
+		public global::Tuple<Tag, float>[] customOutput;
+
+		public bool isBaseMorph;
 	}
 }

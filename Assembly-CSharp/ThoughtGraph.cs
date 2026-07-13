@@ -7,7 +7,7 @@ public class ThoughtGraph : GameStateMachine<ThoughtGraph, ThoughtGraph.Instance
 	{
 		default_state = this.initialdelay;
 		this.initialdelay.ScheduleGoTo(1f, this.nothoughts);
-		this.nothoughts.OnSignal(this.thoughtsChanged, this.displayingthought, (ThoughtGraph.Instance smi) => smi.HasThoughts()).OnSignal(this.thoughtsChangedImmediate, this.displayingthought, (ThoughtGraph.Instance smi) => smi.HasThoughts());
+		this.nothoughts.OnSignal(this.thoughtsChanged, this.displayingthought, (ThoughtGraph.Instance smi, StateMachine<ThoughtGraph, ThoughtGraph.Instance, IStateMachineTarget, object>.SignalParameter param) => smi.HasThoughts()).OnSignal(this.thoughtsChangedImmediate, this.displayingthought, (ThoughtGraph.Instance smi, StateMachine<ThoughtGraph, ThoughtGraph.Instance, IStateMachineTarget, object>.SignalParameter param) => smi.HasThoughts());
 		this.displayingthought.DefaultState(this.displayingthought.pre).Enter("CreateBubble", delegate(ThoughtGraph.Instance smi)
 		{
 			smi.CreateBubble();
@@ -15,10 +15,11 @@ public class ThoughtGraph : GameStateMachine<ThoughtGraph, ThoughtGraph.Instance
 		{
 			smi.DestroyBubble();
 		})
-			.ScheduleGoTo((ThoughtGraph.Instance smi) => this.thoughtDisplayTime.Get(smi), this.cooldown);
+			.ScheduleGoTo((ThoughtGraph.Instance smi) => this.thoughtDisplayTime.Get(smi), this.displayingthought.finishing);
 		this.displayingthought.pre.ScheduleGoTo((ThoughtGraph.Instance smi) => TuningData<ThoughtGraph.Tuning>.Get().preLengthInSeconds, this.displayingthought.talking);
 		this.displayingthought.talking.Enter(new StateMachine<ThoughtGraph, ThoughtGraph.Instance, IStateMachineTarget, object>.State.Callback(ThoughtGraph.BeginTalking));
-		this.cooldown.OnSignal(this.thoughtsChangedImmediate, this.displayingthought, (ThoughtGraph.Instance smi) => smi.HasImmediateThought()).ScheduleGoTo(20f, this.nothoughts);
+		this.displayingthought.finishing.EnterTransition(this.cooldown, (ThoughtGraph.Instance smi) => !smi.Kpid.HasTag(GameTags.DoNotInterruptMe)).TagTransition(GameTags.DoNotInterruptMe, this.cooldown, true);
+		this.cooldown.OnSignal(this.thoughtsChangedImmediate, this.displayingthought, (ThoughtGraph.Instance smi, StateMachine<ThoughtGraph, ThoughtGraph.Instance, IStateMachineTarget, object>.SignalParameter param) => smi.HasImmediateThought()).ScheduleGoTo(20f, this.nothoughts);
 	}
 
 	private static void BeginTalking(ThoughtGraph.Instance smi)
@@ -27,9 +28,9 @@ public class ThoughtGraph : GameStateMachine<ThoughtGraph, ThoughtGraph.Instance
 		{
 			return;
 		}
-		if (SpeechMonitor.IsAllowedToPlaySpeech(smi.gameObject))
+		if (SpeechMonitor.IsAllowedToPlaySpeech(smi.Kpid, smi.AnimController))
 		{
-			smi.GetSMI<SpeechMonitor.Instance>().PlaySpeech(smi.currentThought.speechPrefix, smi.currentThought.sound);
+			smi.currentThought.PlayAsSpeech(smi.SpeechMonitorInstance);
 		}
 	}
 
@@ -57,13 +58,33 @@ public class ThoughtGraph : GameStateMachine<ThoughtGraph, ThoughtGraph.Instance
 		public GameStateMachine<ThoughtGraph, ThoughtGraph.Instance, IStateMachineTarget, object>.State pre;
 
 		public GameStateMachine<ThoughtGraph, ThoughtGraph.Instance, IStateMachineTarget, object>.State talking;
+
+		public GameStateMachine<ThoughtGraph, ThoughtGraph.Instance, IStateMachineTarget, object>.State finishing;
 	}
 
 	public new class Instance : GameStateMachine<ThoughtGraph, ThoughtGraph.Instance, IStateMachineTarget, object>.GameInstance
 	{
+		public KPrefabID Kpid { get; private set; }
+
+		public KBatchedAnimController AnimController { get; private set; }
+
+		public SpeechMonitor.Instance SpeechMonitorInstance
+		{
+			get
+			{
+				if (this.speechMonitorInstance == null)
+				{
+					this.speechMonitorInstance = base.master.gameObject.GetSMI<SpeechMonitor.Instance>();
+				}
+				return this.speechMonitorInstance;
+			}
+		}
+
 		public Instance(IStateMachineTarget master)
 			: base(master)
 		{
+			this.Kpid = master.GetComponent<KPrefabID>();
+			this.AnimController = master.GetComponent<KBatchedAnimController>();
 			NameDisplayScreen.Instance.RegisterComponent(base.gameObject, this, false);
 		}
 
@@ -157,5 +178,7 @@ public class ThoughtGraph : GameStateMachine<ThoughtGraph, ThoughtGraph.Instance
 		private List<Thought> thoughts = new List<Thought>();
 
 		public Thought currentThought;
+
+		private SpeechMonitor.Instance speechMonitorInstance;
 	}
 }

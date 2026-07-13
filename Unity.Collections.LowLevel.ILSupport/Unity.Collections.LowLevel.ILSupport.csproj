@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <ProjectGuid>{FB7F35FD-6256-4B33-A899-A0A5341DD18B}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>Unity.Collections.LowLevel.ILSupport</RootNamespace>
+    <AssemblyName>Unity.Collections.LowLevel.ILSupport</AssemblyName>
+    <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
+    <FileAlignment>512</FileAlignment>
+    <TargetFramework>net40</TargetFramework>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+    <EnableDefaultItems>False</EnableDefaultItems>
+  </PropertyGroup>
+  <PropertyGroup />
+  <ItemGroup>
+    <Compile Include="Microsoft\CodeAnalysis\EmbeddedAttribute.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="System\Runtime\CompilerServices\IsReadOnlyAttribute.cs" />
+    <Compile Include="Unity\Collections\LowLevel\Unsafe\ILSupport.cs" />
+  </ItemGroup>
+</Project>

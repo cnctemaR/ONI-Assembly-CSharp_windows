@@ -6,10 +6,10 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Animations
 {
-	[NativeHeader("Modules/Animation/Constraints/Constraint.bindings.h")]
-	[UsedByNativeCode]
 	[RequireComponent(typeof(Transform))]
 	[NativeHeader("Modules/Animation/Constraints/ParentConstraint.h")]
+	[NativeHeader("Modules/Animation/Constraints/Constraint.bindings.h")]
+	[UsedByNativeCode]
 	public sealed class ParentConstraint : Behaviour, IConstraint, IConstraintInternal
 	{
 		private ParentConstraint()

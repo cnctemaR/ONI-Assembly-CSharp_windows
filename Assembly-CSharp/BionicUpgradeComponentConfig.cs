@@ -208,7 +208,8 @@ public class BionicUpgradeComponentConfig : IMultiEntityConfig
 		List<SkillPerk> list2 = new List<SkillPerk>
 		{
 			Db.Get().SkillPerks.CanFarmTinker,
-			Db.Get().SkillPerks.CanFarmStation
+			Db.Get().SkillPerks.CanFarmStation,
+			Db.Get().SkillPerks.CanSalvagePlantFiber
 		};
 		if (DlcManager.IsExpansion1Active())
 		{

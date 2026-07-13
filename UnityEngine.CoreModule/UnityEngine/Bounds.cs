@@ -6,12 +6,12 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
+	[NativeType(Header = "Runtime/Geometry/AABB.h")]
 	[NativeHeader("Runtime/Math/MathScripting.h")]
-	[RequiredByNativeCode(Optional = true, GenerateProxy = true)]
 	[NativeHeader("Runtime/Geometry/Intersection.h")]
 	[NativeClass("AABB")]
 	[NativeHeader("Runtime/Geometry/Ray.h")]
-	[NativeType(Header = "Runtime/Geometry/AABB.h")]
+	[RequiredByNativeCode(Optional = true, GenerateProxy = true)]
 	[NativeHeader("Runtime/Geometry/AABB.h")]
 	public struct Bounds : IEquatable<Bounds>, IFormattable
 	{

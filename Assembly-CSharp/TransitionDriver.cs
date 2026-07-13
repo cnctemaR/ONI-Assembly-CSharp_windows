@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Pool;
 
 public class TransitionDriver
 {
@@ -31,9 +32,9 @@ public class TransitionDriver
 
 	public void BeginTransition(Navigator navigator, NavGrid.Transition transition, float defaultSpeed)
 	{
-		Navigator.ActiveTransition instance = TransitionDriver.TransitionPool.GetInstance();
-		instance.Init(transition, defaultSpeed);
-		this.BeginTransition(navigator, instance);
+		Navigator.ActiveTransition activeTransition = TransitionDriver.TransitionPool.Get();
+		activeTransition.Init(transition, defaultSpeed);
+		this.BeginTransition(navigator, activeTransition);
 	}
 
 	private void BeginTransition(Navigator navigator, Navigator.ActiveTransition transition)
@@ -99,7 +100,8 @@ public class TransitionDriver
 			KBatchedAnimController animController2 = navigator.animController;
 			animController2.PlaySpeedMultiplier = transition.animSpeed;
 			animController2.Play(transition.anim, KAnim.PlayMode.Once, 1f, 0f);
-			navigator.Subscribe(-1061186183, this.onAnimCompleteBinding);
+			navigator.Unsubscribe(this.onAnimCompleteHandle);
+			this.onAnimCompleteHandle = navigator.Subscribe(-1061186183, this.onAnimCompleteBinding);
 		}
 		if (transition.navGridTransition.y != 0)
 		{
@@ -214,7 +216,7 @@ public class TransitionDriver
 			int num2 = Grid.PosToCell(position);
 			if (num2 != num)
 			{
-				this.navigator.Trigger(915392638, num2);
+				this.navigator.BoxingTrigger<int>(915392638, num2);
 			}
 		}
 		if (this.isComplete)
@@ -238,12 +240,12 @@ public class TransitionDriver
 				overrideLayer.EndTransition(this.navigator, this.transition);
 			}
 			this.navigator.animController.PlaySpeedMultiplier = 1f;
-			this.navigator.Unsubscribe(-1061186183, this.onAnimCompleteBinding);
+			this.navigator.Unsubscribe(ref this.onAnimCompleteHandle);
 			if (this.brain != null)
 			{
 				this.brain.Resume("move_handler");
 			}
-			TransitionDriver.TransitionPool.ReleaseInstance(this.transition);
+			TransitionDriver.TransitionPool.Release(this.transition);
 			this.transition = null;
 			this.navigator = null;
 			this.brain = null;
@@ -254,22 +256,22 @@ public class TransitionDriver
 	{
 		if (this.navigator != null)
 		{
-			this.navigator.Unsubscribe(-1061186183, this.onAnimCompleteBinding);
+			this.navigator.Unsubscribe(ref this.onAnimCompleteHandle);
 		}
 		this.isComplete = true;
 	}
 
 	public static Navigator.ActiveTransition SwapTransitionWithEmpty(Navigator.ActiveTransition src)
 	{
-		Navigator.ActiveTransition instance = TransitionDriver.TransitionPool.GetInstance();
-		instance.Copy(src);
+		Navigator.ActiveTransition activeTransition = TransitionDriver.TransitionPool.Get();
+		activeTransition.Copy(src);
 		src.Copy(TransitionDriver.emptyTransition);
-		return instance;
+		return activeTransition;
 	}
 
 	private static Navigator.ActiveTransition emptyTransition = new Navigator.ActiveTransition();
 
-	public static ObjectPool<Navigator.ActiveTransition> TransitionPool = new ObjectPool<Navigator.ActiveTransition>(() => new Navigator.ActiveTransition(), 128);
+	public static ObjectPool<Navigator.ActiveTransition> TransitionPool = new ObjectPool<Navigator.ActiveTransition>(() => new Navigator.ActiveTransition(), null, null, null, false, 128, 10000);
 
 	private Stack<TransitionDriver.InterruptOverrideLayer> interruptOverrideStack = new Stack<TransitionDriver.InterruptOverrideLayer>(8);
 
@@ -288,6 +290,8 @@ public class TransitionDriver
 	private LoggerFS log;
 
 	private Action<object> onAnimComplete_;
+
+	private int onAnimCompleteHandle = -1;
 
 	public class OverrideLayer
 	{
@@ -342,7 +346,7 @@ public class TransitionDriver
 			}
 			this.driver.interruptOverrideStack.Pop();
 			transition.Copy(this.originalTransition);
-			TransitionDriver.TransitionPool.ReleaseInstance(this.originalTransition);
+			TransitionDriver.TransitionPool.Release(this.originalTransition);
 			this.originalTransition = null;
 			this.EndTransition(navigator, transition);
 			this.driver.BeginTransition(navigator, transition);
@@ -355,7 +359,7 @@ public class TransitionDriver
 			{
 				return;
 			}
-			TransitionDriver.TransitionPool.ReleaseInstance(this.originalTransition);
+			TransitionDriver.TransitionPool.Release(this.originalTransition);
 			this.originalTransition = null;
 		}
 

@@ -152,7 +152,7 @@ public class Gantry : Switch
 			this.operational.SetActive(this.operational.IsOperational && active, false);
 		}
 
-		private void OnOperationalChanged(object data)
+		private void OnOperationalChanged(object _)
 		{
 			this.UpdateShouldExtend();
 		}

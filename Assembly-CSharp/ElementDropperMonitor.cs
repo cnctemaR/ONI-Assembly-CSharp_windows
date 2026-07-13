@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 
 public class ElementDropperMonitor : GameStateMachine<ElementDropperMonitor, ElementDropperMonitor.Instance, IStateMachineTarget, ElementDropperMonitor.Def>
@@ -10,13 +11,13 @@ public class ElementDropperMonitor : GameStateMachine<ElementDropperMonitor, Ele
 		{
 			smi.DropDeathElement();
 		});
-		this.satisfied.OnSignal(this.cellChangedSignal, this.readytodrop, (ElementDropperMonitor.Instance smi) => smi.ShouldDropElement());
+		this.satisfied.OnSignal(this.cellChangedSignal, this.readytodrop, (ElementDropperMonitor.Instance smi, StateMachine<ElementDropperMonitor, ElementDropperMonitor.Instance, IStateMachineTarget, ElementDropperMonitor.Def>.SignalParameter param) => smi.ShouldDropElement());
 		this.readytodrop.ToggleBehaviour(GameTags.Creatures.WantsToDropElements, (ElementDropperMonitor.Instance smi) => true, delegate(ElementDropperMonitor.Instance smi)
 		{
 			smi.GoTo(this.satisfied);
 		}).EventHandler(GameHashes.ObjectMovementStateChanged, delegate(ElementDropperMonitor.Instance smi, object d)
 		{
-			if ((GameHashes)d == GameHashes.ObjectMovementWakeUp)
+			if (Boxed<GameHashes>.Unbox(d) == GameHashes.ObjectMovementWakeUp)
 			{
 				smi.GoTo(this.satisfied);
 			}
@@ -51,13 +52,13 @@ public class ElementDropperMonitor : GameStateMachine<ElementDropperMonitor, Ele
 		public Instance(IStateMachineTarget master, ElementDropperMonitor.Def def)
 			: base(master, def)
 		{
-			Singleton<CellChangeMonitor>.Instance.RegisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChange), "ElementDropperMonitor.Instance");
+			this.cellChangeHandlerID = Singleton<CellChangeMonitor>.Instance.RegisterCellChangedHandler(base.transform, ElementDropperMonitor.Instance.OnCellChangeDispatcher, this, "ElementDropperMonitor.Instance");
 		}
 
 		public override void StopSM(string reason)
 		{
 			base.StopSM(reason);
-			Singleton<CellChangeMonitor>.Instance.UnregisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChange));
+			Singleton<CellChangeMonitor>.Instance.UnregisterCellChangedHandler(ref this.cellChangeHandlerID);
 		}
 
 		private void OnCellChange()
@@ -104,5 +105,12 @@ public class ElementDropperMonitor : GameStateMachine<ElementDropperMonitor, Ele
 			int num = Grid.PosToCell(base.transform.GetPosition());
 			return Grid.IsValidCell(num) && Grid.IsGas(num) && Grid.Mass[num] <= 1f;
 		}
+
+		private ulong cellChangeHandlerID;
+
+		private static readonly Action<object> OnCellChangeDispatcher = delegate(object obj)
+		{
+			Unsafe.As<ElementDropperMonitor.Instance>(obj).OnCellChange();
+		};
 	}
 }

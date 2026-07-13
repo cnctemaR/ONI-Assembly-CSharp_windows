@@ -131,11 +131,7 @@ public class GameInputMapping
 		}
 		catch
 		{
-			DebugUtil.LogErrorArgs(new object[]
-			{
-				"Error parsing",
-				GameInputMapping.BindingsFilename
-			});
+			DebugUtil.DevLogErrorFormat("Error parsing {0}. Restoring default keybindings.", new object[] { GameInputMapping.BindingsFilename });
 			return;
 		}
 		if (text == "")
@@ -149,11 +145,7 @@ public class GameInputMapping
 		}
 		catch
 		{
-			DebugUtil.LogErrorArgs(new object[]
-			{
-				"Error parsing",
-				GameInputMapping.BindingsFilename
-			});
+			DebugUtil.DevLogErrorFormat("Error parsing {0}. Restoring default keybindings.", new object[] { GameInputMapping.BindingsFilename });
 		}
 		if (array == null || array.Length == 0)
 		{

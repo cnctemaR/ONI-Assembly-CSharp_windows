@@ -464,6 +464,7 @@ public class MaterialSelector : KScreen
 	public static List<Tag> DeprioritizeAutoSelectElementList = new List<Tag>
 	{
 		SimHashes.WoodLog.ToString().ToTag(),
+		SimHashes.FabricatedWood.ToString().ToTag(),
 		SimHashes.SolidMercury.ToString().ToTag(),
 		SimHashes.Lead.ToString().ToTag()
 	};

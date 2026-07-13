@@ -24,7 +24,7 @@ public static class BaseBeeConfig
 			navType = NavType.Floor;
 			num4 = 1;
 		}
-		EntityTemplates.ExtendEntityToBasicCreature(gameObject, FactionManager.FactionID.Hostile, traitId, text2, navType, 32, (float)num4, "Meat", 0f, true, true, 223.15f, 273.15f, 173.15f, 283.15f);
+		EntityTemplates.ExtendEntityToBasicCreature(false, gameObject, anim_file, is_baby ? null : "bee_build_kanim", null, FactionManager.FactionID.Hostile, traitId, text2, navType, 32, (float)num4, "Meat", 0f, true, true, 223.15f, 273.15f, 173.15f, 283.15f);
 		if (symbolOverridePrefix != null)
 		{
 			gameObject.AddOrGet<SymbolOverrideController>().ApplySymbolOverridesByAffix(Assets.GetAnim(anim_file), symbolOverridePrefix, null, 0);
@@ -101,7 +101,8 @@ public static class BaseBeeConfig
 			.Add(new FixedCaptureStates.Def(), true, -1)
 			.Add(new BeeMakeHiveStates.Def(), true, -1)
 			.Add(new BeeForageStates.Def(SimHashes.UraniumOre.CreateTag(), BeeHiveTuning.ORE_DELIVERY_AMOUNT), true, -1)
-			.Add(new BuzzStates.Def(), true, -1);
+			.Add(new BuzzStates.Def(), true, -1)
+			.Add(new CritterEmoteStates.Def(Assets.GetAnim("bee_emotes_kanim")), true, -1);
 		EntityTemplates.AddCreatureBrain(gameObject, builder, GameTags.Creatures.Species.BeetaSpecies, symbolOverridePrefix);
 		return gameObject;
 	}

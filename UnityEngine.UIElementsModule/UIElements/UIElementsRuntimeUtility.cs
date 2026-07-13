@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using Unity.Profiling;
+using UnityEngine.UIElements.UIR;
 
 namespace UnityEngine.UIElements
 {
@@ -249,6 +250,7 @@ namespace UnityEngine.UIElements
 		public static void UpdateRuntimePanels()
 		{
 			UIElementsRuntimeUtility.RemoveUnusedPanels();
+			UIRenderDevice.ProcessDeviceFreeQueue();
 			foreach (Panel panel in UIElementsRuntimeUtility.GetSortedPlayerPanels())
 			{
 				BaseRuntimePanel baseRuntimePanel = (BaseRuntimePanel)panel;

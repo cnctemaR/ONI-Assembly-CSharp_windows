@@ -70,7 +70,35 @@ public class RoomDetails
 		return string.Format(ROOMS.DETAILS.ASSIGNED_TO.NAME, text);
 	});
 
-	public static readonly RoomDetails.Detail SIZE = new RoomDetails.Detail((Room room) => string.Format(ROOMS.DETAILS.SIZE.NAME, room.cavity.numCells));
+	public static readonly RoomDetails.Detail ORNAMENT_COUNT = new RoomDetails.Detail(delegate(Room room)
+	{
+		int num4 = 0;
+		foreach (KPrefabID kprefabID2 in room.buildings)
+		{
+			if (!(kprefabID2 == null))
+			{
+				OrnamentReceptacle component2 = kprefabID2.GetComponent<OrnamentReceptacle>();
+				if (!(component2 == null) && component2.IsHoldingOrnament && component2.IsOperational)
+				{
+					num4++;
+				}
+			}
+		}
+		foreach (KPrefabID kprefabID3 in room.otherEntities)
+		{
+			if (!(kprefabID3 == null))
+			{
+				OrnamentReceptacle component3 = kprefabID3.GetComponent<OrnamentReceptacle>();
+				if (!(component3 == null) && component3.IsHoldingOrnament && component3.IsOperational)
+				{
+					num4++;
+				}
+			}
+		}
+		return GameUtil.SafeStringFormat(ROOMS.DETAILS.ORNAMENT_COUNT.NAME, new object[] { num4 });
+	});
+
+	public static readonly RoomDetails.Detail SIZE = new RoomDetails.Detail((Room room) => string.Format(ROOMS.DETAILS.SIZE.NAME, room.cavity.NumCells));
 
 	public static readonly RoomDetails.Detail BUILDING_COUNT = new RoomDetails.Detail((Room room) => string.Format(ROOMS.DETAILS.BUILDING_COUNT.NAME, room.buildings.Count));
 
@@ -78,18 +106,18 @@ public class RoomDetails
 
 	public static readonly RoomDetails.Detail PLANT_COUNT = new RoomDetails.Detail(delegate(Room room)
 	{
-		int num4 = 0;
-		using (List<KPrefabID>.Enumerator enumerator2 = room.cavity.plants.GetEnumerator())
+		int num5 = 0;
+		using (List<KPrefabID>.Enumerator enumerator3 = room.cavity.plants.GetEnumerator())
 		{
-			while (enumerator2.MoveNext())
+			while (enumerator3.MoveNext())
 			{
-				if (!enumerator2.Current.HasTag(GameTags.PlantBranch))
+				if (!enumerator3.Current.HasTag(GameTags.PlantBranch))
 				{
-					num4++;
+					num5++;
 				}
 			}
 		}
-		return string.Format(ROOMS.DETAILS.PLANT_COUNT.NAME, num4);
+		return string.Format(ROOMS.DETAILS.PLANT_COUNT.NAME, num5);
 	});
 
 	public static readonly RoomDetails.Detail EFFECT = new RoomDetails.Detail((Room room) => room.roomType.effect);

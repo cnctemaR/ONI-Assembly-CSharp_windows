@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using STRINGS;
 using UnityEngine;
 
@@ -172,22 +173,29 @@ public class SapTree : GameStateMachine<SapTree, SapTree.StatesInstance, IStateM
 			base.sm.storedSap.Set(this.storage.GetMassAvailable(SimHashes.Resin.CreateTag()), this, false);
 		}
 
+		private static Util.IterationInstruction checkForFoodVisitor(object obj, ref ValueTuple<SapTree.StatesInstance, bool> context)
+		{
+			Pickupable pickupable = Unsafe.As<Pickupable>(obj);
+			if (pickupable.GetComponent<Edible>() != null)
+			{
+				context.Item1.sm.foodItem.Set(pickupable.gameObject, context.Item1, false);
+				context.Item2 = true;
+			}
+			if (!context.Item2)
+			{
+				return Util.IterationInstruction.Continue;
+			}
+			return Util.IterationInstruction.Halt;
+		}
+
 		public void CheckForFood()
 		{
-			ListPool<ScenePartitionerEntry, SapTree>.PooledList pooledList = ListPool<ScenePartitionerEntry, SapTree>.Allocate();
-			GameScenePartitioner.Instance.GatherEntries(this.feedExtents, GameScenePartitioner.Instance.pickupablesLayer, pooledList);
-			foreach (ScenePartitionerEntry scenePartitionerEntry in pooledList)
+			ValueTuple<SapTree.StatesInstance, bool> valueTuple = new ValueTuple<SapTree.StatesInstance, bool>(this, false);
+			GameScenePartitioner.Instance.VisitEntries<ValueTuple<SapTree.StatesInstance, bool>>(this.feedExtents.x, this.feedExtents.y, this.feedExtents.width, this.feedExtents.height, GameScenePartitioner.Instance.pickupablesLayer, new GameScenePartitioner.VisitorRef<ValueTuple<SapTree.StatesInstance, bool>>(SapTree.StatesInstance.checkForFoodVisitor), ref valueTuple);
+			if (!valueTuple.Item2)
 			{
-				Pickupable pickupable = scenePartitionerEntry.obj as Pickupable;
-				if (pickupable.GetComponent<Edible>() != null)
-				{
-					base.sm.foodItem.Set(pickupable.gameObject, this, false);
-					pooledList.Recycle();
-					return;
-				}
+				base.sm.foodItem.Set(null, this);
 			}
-			base.sm.foodItem.Set(null, this);
-			pooledList.Recycle();
 		}
 
 		public bool DoAttack()

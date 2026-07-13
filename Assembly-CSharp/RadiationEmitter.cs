@@ -1,17 +1,18 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 
 public class RadiationEmitter : SimComponent
 {
 	protected override void OnSpawn()
 	{
-		Singleton<CellChangeMonitor>.Instance.RegisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChange), "RadiationEmitter.OnSpawn");
+		this.cellChangedHandlerID = Singleton<CellChangeMonitor>.Instance.RegisterCellChangedHandler(base.transform, RadiationEmitter.RefreshDispatcher, this, "RadiationEmitter.OnSpawn");
 		base.OnSpawn();
 	}
 
 	protected override void OnCleanUp()
 	{
-		Singleton<CellChangeMonitor>.Instance.UnregisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChange));
+		Singleton<CellChangeMonitor>.Instance.UnregisterCellChangedHandler(ref this.cellChangedHandlerID);
 		base.OnCleanUp();
 	}
 
@@ -33,11 +34,6 @@ public class RadiationEmitter : SimComponent
 			this.SetRadiusProportionalToRads();
 		}
 		SimMessages.ModifyRadiationEmitter(this.simHandle, emissionCell, this.emitRadiusX, this.emitRadiusY, this.emitRads, this.emitRate, this.emitSpeed, this.emitDirection, this.emitAngle, this.emitType);
-	}
-
-	private void OnCellChange()
-	{
-		this.Refresh();
 	}
 
 	private void SetRadiusProportionalToRads()
@@ -120,6 +116,13 @@ public class RadiationEmitter : SimComponent
 
 	[SerializeField]
 	public Vector3 emissionOffset = Vector3.zero;
+
+	private ulong cellChangedHandlerID;
+
+	private static readonly Action<object> RefreshDispatcher = delegate(object obj)
+	{
+		Unsafe.As<RadiationEmitter>(obj).Refresh();
+	};
 
 	public enum RadiationEmitterType
 	{

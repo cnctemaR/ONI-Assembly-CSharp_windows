@@ -10,8 +10,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeHeader("Modules/Physics/PhysicsManager.h")]
 	[StaticAccessor("GetPhysicsManager()", StaticAccessorType.Dot)]
+	[NativeHeader("Modules/Physics/PhysicsManager.h")]
 	public class Physics
 	{
 		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
@@ -543,8 +543,8 @@ namespace UnityEngine
 			return Physics.RaycastAll(ray.origin, ray.direction, maxDistance, layerMask, queryTriggerInteraction);
 		}
 
-		[ExcludeFromDocs]
 		[RequiredByNativeCode]
+		[ExcludeFromDocs]
 		public static RaycastHit[] RaycastAll(Ray ray, float maxDistance, int layerMask)
 		{
 			return Physics.RaycastAll(ray.origin, ray.direction, maxDistance, layerMask, QueryTriggerInteraction.UseGlobal);
@@ -1000,8 +1000,8 @@ namespace UnityEngine
 			return Physics.SphereCastNonAlloc(ray, radius, results, float.PositiveInfinity, -5, QueryTriggerInteraction.UseGlobal);
 		}
 
-		[NativeName("CapsuleTest")]
 		[StaticAccessor("GetPhysicsManager().GetPhysicsQuery()")]
+		[NativeName("CapsuleTest")]
 		private static bool CheckCapsule_Internal(PhysicsScene physicsScene, Vector3 start, Vector3 end, float radius, int layerMask, QueryTriggerInteraction queryTriggerInteraction)
 		{
 			return Physics.CheckCapsule_Internal_Injected(ref physicsScene, ref start, ref end, radius, layerMask, queryTriggerInteraction);
@@ -1223,8 +1223,8 @@ namespace UnityEngine
 			Physics.Internal_RebuildBroadphaseRegions(worldBounds, subdivisions);
 		}
 
-		[StaticAccessor("GetPhysicsManager()")]
 		[ThreadSafe]
+		[StaticAccessor("GetPhysicsManager()")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void BakeMesh(int meshID, bool convex, MeshColliderCookingOptions cookingOptions);
 
@@ -1241,13 +1241,13 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern Component ResolveActorToComponent(IntPtr actorPtr);
 
-		[StaticAccessor("PhysicsManager", StaticAccessorType.DoubleColon)]
 		[ThreadSafe]
+		[StaticAccessor("PhysicsManager", StaticAccessorType.DoubleColon)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern int ResolveShapeToInstanceID(IntPtr shapePtr);
 
-		[StaticAccessor("PhysicsManager", StaticAccessorType.DoubleColon)]
 		[ThreadSafe]
+		[StaticAccessor("PhysicsManager", StaticAccessorType.DoubleColon)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern int ResolveActorToInstanceID(IntPtr actorPtr);
 
@@ -1259,18 +1259,18 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern Component GetBodyByInstanceID(int instanceID);
 
-		[StaticAccessor("PhysicsManager", StaticAccessorType.DoubleColon)]
 		[ThreadSafe]
+		[StaticAccessor("PhysicsManager", StaticAccessorType.DoubleColon)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern uint TranslateTriangleIndex(IntPtr shapePtr, uint rawIndex);
 
-		[ThreadSafe]
 		[StaticAccessor("PhysicsManager", StaticAccessorType.DoubleColon)]
+		[ThreadSafe]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern uint TranslateTriangleIndexFromID(int instanceID, uint faceIndex);
 
-		[StaticAccessor("PhysicsManager", StaticAccessorType.DoubleColon)]
 		[ThreadSafe]
+		[StaticAccessor("PhysicsManager", StaticAccessorType.DoubleColon)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern bool IsShapeTrigger(IntPtr shapePtr);
 
@@ -1286,8 +1286,8 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void SendOnCollisionExit(Component component, Collision collision);
 
-		[StaticAccessor("PhysicsManager", StaticAccessorType.DoubleColon)]
 		[ThreadSafe]
+		[StaticAccessor("PhysicsManager", StaticAccessorType.DoubleColon)]
 		internal static Vector3 GetActorLinearVelocity(IntPtr actorPtr)
 		{
 			Vector3 vector;
@@ -1304,8 +1304,8 @@ namespace UnityEngine
 			return vector;
 		}
 
-		[EditorBrowsable(EditorBrowsableState.Never)]
 		[Obsolete("Use Physics.defaultContactOffset or Collider.contactOffset instead.", true)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		public static float minPenetrationForPenalty
 		{
 			get
@@ -1330,8 +1330,8 @@ namespace UnityEngine
 			}
 		}
 
-		[EditorBrowsable(EditorBrowsableState.Never)]
 		[Obsolete("The sleepVelocity is no longer supported. Use sleepThreshold. Note that sleepThreshold is energy but not velocity.", true)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		public static float sleepVelocity
 		{
 			get
@@ -1395,8 +1395,8 @@ namespace UnityEngine
 			}
 		}
 
-		[Obsolete("penetrationPenaltyForce has no effect.", true)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
+		[Obsolete("penetrationPenaltyForce has no effect.", true)]
 		public static float penetrationPenaltyForce
 		{
 			get
@@ -1597,12 +1597,12 @@ namespace UnityEngine
 		[Obsolete("Please use Physics.IgnoreRaycastLayer instead. (UnityUpgradable) -> IgnoreRaycastLayer", true)]
 		public const int kIgnoreRaycastLayer = 4;
 
-		[Obsolete("Please use Physics.DefaultRaycastLayers instead. (UnityUpgradable) -> DefaultRaycastLayers", true)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
+		[Obsolete("Please use Physics.DefaultRaycastLayers instead. (UnityUpgradable) -> DefaultRaycastLayers", true)]
 		public const int kDefaultRaycastLayers = -5;
 
-		[Obsolete("Please use Physics.AllLayers instead. (UnityUpgradable) -> AllLayers", true)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
+		[Obsolete("Please use Physics.AllLayers instead. (UnityUpgradable) -> AllLayers", true)]
 		public const int kAllLayers = -1;
 
 		private static readonly Collision s_ReusableCollision = new Collision();

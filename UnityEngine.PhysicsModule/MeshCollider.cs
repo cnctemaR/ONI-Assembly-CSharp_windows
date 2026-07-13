@@ -6,9 +6,9 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[RequiredByNativeCode]
 	[NativeHeader("Modules/Physics/MeshCollider.h")]
 	[NativeHeader("Runtime/Graphics/Mesh/Mesh.h")]
+	[RequiredByNativeCode]
 	public class MeshCollider : Collider
 	{
 		public extern Mesh sharedMesh

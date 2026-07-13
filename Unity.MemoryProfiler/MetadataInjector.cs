@@ -8,6 +8,17 @@ namespace Unity.MemoryProfiler
 		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSplashScreen)]
 		private static void PlayerInitMetadata()
 		{
+			if (!Application.isEditor)
+			{
+				DefaultMetadataCollect defaultCollector = MetadataInjector.DefaultCollector;
+				if (defaultCollector != null)
+				{
+					defaultCollector.Dispose();
+				}
+				MetadataInjector.DefaultCollector = null;
+				MetadataInjector.DefaultCollectorInjected = 0;
+				MetadataInjector.CollectorCount = 0L;
+			}
 			MetadataInjector.InitializeMetadataCollection();
 		}
 

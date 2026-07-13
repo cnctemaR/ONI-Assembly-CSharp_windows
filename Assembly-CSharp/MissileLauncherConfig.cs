@@ -73,13 +73,13 @@ public class MissileLauncherConfig : IBuildingConfig
 		storage2.storageID = "MissileLongRange";
 		storage2.showInUI = true;
 		storage2.SetDefaultStoredItemModifiers(Storage.StandardSealedStorage);
-		storage2.storageFilters = new List<Tag> { "MissileLongRange" };
+		storage2.storageFilters = MissileLauncherConfig.CosmicBlastShotTypes;
 		storage2.allowSettingOnlyFetchMarkedItems = false;
 		storage2.fetchCategory = Storage.FetchCategory.GeneralStorage;
 		storage2.capacityKg = 1000f;
 		ManualDeliveryKG manualDeliveryKG2 = go.AddComponent<ManualDeliveryKG>();
 		manualDeliveryKG2.SetStorage(storage2);
-		manualDeliveryKG2.RequestedItemTag = "MissileLongRange";
+		manualDeliveryKG2.RequestedItemTag = GameTags.LongRangeMissile;
 		manualDeliveryKG2.choreTypeIDHash = Db.Get().ChoreTypes.MachineFetch.IdHash;
 		manualDeliveryKG2.operationalRequirement = Operational.State.None;
 		manualDeliveryKG2.refillMass = 1000f;
@@ -162,4 +162,6 @@ public class MissileLauncherConfig : IBuildingConfig
 	public const string ID = "MissileLauncher";
 
 	public const string CONDUIT_STORAGE = "CondiutStorage";
+
+	public static List<Tag> CosmicBlastShotTypes = new List<Tag> { "MissileLongRange" };
 }

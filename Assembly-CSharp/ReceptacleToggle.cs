@@ -9,7 +9,7 @@ public class ReceptacleToggle : KMonoBehaviour
 
 	public LocText amount;
 
-	public KToggle toggle;
+	public MultiToggle toggle;
 
 	public Image image;
 }

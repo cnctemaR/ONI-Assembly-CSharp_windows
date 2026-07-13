@@ -9,9 +9,6 @@ public class JetSuitConfig : IEquipmentConfig
 {
 	public EquipmentDef CreateEquipmentDef()
 	{
-		Dictionary<string, float> dictionary = new Dictionary<string, float>();
-		dictionary.Add(SimHashes.Steel.ToString(), 200f);
-		dictionary.Add(SimHashes.Petroleum.ToString(), 25f);
 		List<AttributeModifier> list = new List<AttributeModifier>();
 		list.Add(new AttributeModifier(global::TUNING.EQUIPMENT.ATTRIBUTE_MOD_IDS.INSULATION, (float)global::TUNING.EQUIPMENT.SUITS.ATMOSUIT_INSULATION, global::STRINGS.EQUIPMENT.PREFABS.ATMO_SUIT.NAME, false, false, true));
 		list.Add(new AttributeModifier(global::TUNING.EQUIPMENT.ATTRIBUTE_MOD_IDS.ATHLETICS, (float)global::TUNING.EQUIPMENT.SUITS.ATMOSUIT_ATHLETICS, global::STRINGS.EQUIPMENT.PREFABS.ATMO_SUIT.NAME, false, false, true));

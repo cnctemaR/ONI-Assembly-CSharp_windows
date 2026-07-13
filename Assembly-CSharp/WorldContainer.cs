@@ -191,10 +191,10 @@ public class WorldContainer : KMonoBehaviour
 
 	private void OnWorldRemoved(object data)
 	{
-		int num = ((data is int) ? ((int)data) : 255);
-		if (num != 255)
+		int value = ((Boxed<int>)data).value;
+		if (value != 255)
 		{
-			this.m_childWorlds.Remove(num);
+			this.m_childWorlds.Remove(value);
 		}
 	}
 
@@ -1137,7 +1137,7 @@ public class WorldContainer : KMonoBehaviour
 					GameObject gameObject = Grid.Objects[num3, i];
 					if (gameObject != null)
 					{
-						gameObject.Trigger(2127324410, true);
+						gameObject.Trigger(2127324410, BoxedBools.True);
 					}
 					num2++;
 				}

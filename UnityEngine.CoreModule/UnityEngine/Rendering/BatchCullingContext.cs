@@ -5,8 +5,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Rendering
 {
-	[UsedByNativeCode]
 	[NativeHeader("Runtime/Camera/BatchRendererGroup.h")]
+	[UsedByNativeCode]
 	public struct BatchCullingContext
 	{
 		internal BatchCullingContext(NativeArray<Plane> inCullingPlanes, NativeArray<CullingSplit> inCullingSplits, LODParameters inLodParameters, Matrix4x4 inLocalToWorldMatrix, BatchCullingViewType inViewType, BatchCullingProjectionType inProjectionType, BatchCullingFlags inBatchCullingFlags, ulong inViewID, uint inCullingLayerMask, ulong inSceneCullingMask, int inReceiverPlaneOffset, int inReceiverPlaneCount)

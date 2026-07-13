@@ -334,8 +334,8 @@ namespace UnityEngine
 			QualitySettings.SetTextureMipmapLimitSettings_Injected(groupName, ref textureMipmapLimitSettings);
 		}
 
-		[NativeName("GetTextureMipmapLimitSettings")]
 		[NativeThrows]
+		[NativeName("GetTextureMipmapLimitSettings")]
 		public static TextureMipmapLimitSettings GetTextureMipmapLimitSettings(string groupName)
 		{
 			TextureMipmapLimitSettings textureMipmapLimitSettings;
@@ -488,6 +488,7 @@ namespace UnityEngine
 			[NativeName("GetSkinWeights")]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
+			[NativeThrows]
 			[NativeName("SetSkinWeights")]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
@@ -497,6 +498,7 @@ namespace UnityEngine
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
+			[NativeThrows]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
 		}

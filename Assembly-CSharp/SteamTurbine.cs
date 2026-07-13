@@ -56,14 +56,9 @@ public class SteamTurbine : Generator
 		float num = this.pumpKGRate * dt / (float)this.srcCells.Length;
 		foreach (int num2 in this.srcCells)
 		{
-			HandleVector<Game.ComplexCallbackInfo<Sim.MassConsumedCallback>>.Handle handle = Game.Instance.massConsumedCallbackManager.Add(new Action<Sim.MassConsumedCallback, object>(SteamTurbine.OnSimConsumeCallback), this, "SteamTurbineConsume");
+			HandleVector<Game.ComplexCallbackInfo<Sim.MassConsumedCallback>>.Handle handle = Game.Instance.massConsumedCallbackManager.Add(SteamTurbine.OnSimConsumeCallback, this, "SteamTurbineConsume");
 			SimMessages.ConsumeMass(num2, this.srcElem, num, 1, handle.index);
 		}
-	}
-
-	private static void OnSimConsumeCallback(Sim.MassConsumedCallback mass_cb_info, object data)
-	{
-		((SteamTurbine)data).OnSimConsume(mass_cb_info);
 	}
 
 	private void OnSimConsume(Sim.MassConsumedCallback mass_cb_info)
@@ -302,6 +297,11 @@ public class SteamTurbine : Generator
 	private HandleVector<int>.Handle structureTemperature;
 
 	private float lastSampleTime = -1f;
+
+	private static Action<Sim.MassConsumedCallback, object> OnSimConsumeCallback = delegate(Sim.MassConsumedCallback mass_cb_info, object data)
+	{
+		((SteamTurbine)data).OnSimConsume(mass_cb_info);
+	};
 
 	public class States : GameStateMachine<SteamTurbine.States, SteamTurbine.Instance, SteamTurbine>
 	{

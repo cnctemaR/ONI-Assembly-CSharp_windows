@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 
 [AddComponentMenu("KMonoBehaviour/scripts/EntityPreview")]
@@ -14,7 +15,7 @@ public class EntityPreview : KMonoBehaviour
 		{
 			this.objectPartitionerEntry = GameScenePartitioner.Instance.Add("EntityPreview", base.gameObject, this.occupyArea.GetExtents(), GameScenePartitioner.Instance.objectLayers[(int)this.objectLayer], new Action<object>(this.OnAreaChanged));
 		}
-		Singleton<CellChangeMonitor>.Instance.RegisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChange), "EntityPreview.OnSpawn");
+		this.cellChangeHandlerID = Singleton<CellChangeMonitor>.Instance.RegisterCellChangedHandler(base.transform, EntityPreview.OnCellChangeDispatcher, this, "EntityPreview.OnSpawn");
 		this.OnAreaChanged(null);
 	}
 
@@ -22,7 +23,7 @@ public class EntityPreview : KMonoBehaviour
 	{
 		GameScenePartitioner.Instance.Free(ref this.solidPartitionerEntry);
 		GameScenePartitioner.Instance.Free(ref this.objectPartitionerEntry);
-		Singleton<CellChangeMonitor>.Instance.UnregisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChange));
+		Singleton<CellChangeMonitor>.Instance.UnregisterCellChangedHandler(ref this.cellChangeHandlerID);
 		base.OnCleanUp();
 	}
 
@@ -57,7 +58,7 @@ public class EntityPreview : KMonoBehaviour
 		}
 		if (valid != this.Valid)
 		{
-			base.Trigger(-1820564715, this.Valid);
+			base.Trigger(-1820564715, BoxedBools.Box(this.Valid));
 		}
 	}
 
@@ -81,6 +82,13 @@ public class EntityPreview : KMonoBehaviour
 	private HandleVector<int>.Handle solidPartitionerEntry;
 
 	private HandleVector<int>.Handle objectPartitionerEntry;
+
+	private ulong cellChangeHandlerID;
+
+	private static readonly Action<object> OnCellChangeDispatcher = delegate(object obj)
+	{
+		Unsafe.As<EntityPreview>(obj).OnCellChange();
+	};
 
 	private static readonly Func<int, object, bool> ValidTestDelegate = (int cell, object data) => EntityPreview.ValidTest(cell, data);
 }

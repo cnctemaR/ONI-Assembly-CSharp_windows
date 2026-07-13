@@ -5,8 +5,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[PreventReadOnlyInstanceModification]
 	[NativeHeader("Runtime/Graphics/LightingSettings.h")]
+	[PreventReadOnlyInstanceModification]
 	public sealed class LightingSettings : Object
 	{
 		[RequiredByNativeCode]

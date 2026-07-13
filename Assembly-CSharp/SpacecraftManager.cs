@@ -604,7 +604,7 @@ public class SpacecraftManager : KMonoBehaviour, ISim1000ms
 	public void SetStarmapAnalysisDestinationID(int id)
 	{
 		this.analyzeDestinationID = id;
-		base.Trigger(532901469, id);
+		base.BoxingTrigger<int>(532901469, id);
 	}
 
 	public int GetStarmapAnalysisDestinationID()

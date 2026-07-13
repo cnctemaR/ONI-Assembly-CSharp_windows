@@ -11,7 +11,7 @@ public static class BaseMoleConfig
 		float num = 25f;
 		EffectorValues none = global::TUNING.BUILDINGS.DECOR.NONE;
 		GameObject gameObject = EntityTemplates.CreatePlacedEntity(id, name, desc, num, Assets.GetAnim(anim_file), "idle_loop", Grid.SceneLayer.Creatures, 1, 1, none, default(EffectorValues), SimHashes.Creature, null, 293f);
-		EntityTemplates.ExtendEntityToBasicCreature(gameObject, FactionManager.FactionID.Pest, traitId, "DiggerNavGrid", NavType.Floor, 32, 2f, "Meat", (float)on_death_drop_count, true, false, warningLowTemperature, warningHighTemperature, lethalLowTemperature, lethalHighTemperature);
+		EntityTemplates.ExtendEntityToBasicCreature(false, gameObject, anim_file, is_baby ? null : "driller_build_kanim", symbolOverridePrefix, FactionManager.FactionID.Pest, traitId, "DiggerNavGrid", NavType.Floor, 32, 2f, "Meat", (float)on_death_drop_count, true, false, warningLowTemperature, warningHighTemperature, lethalLowTemperature, lethalHighTemperature);
 		if (symbolOverridePrefix != null)
 		{
 			gameObject.AddOrGet<SymbolOverrideController>().ApplySymbolOverridesByAffix(Assets.GetAnim(anim_file), symbolOverridePrefix, null, 0);
@@ -48,6 +48,7 @@ public static class BaseMoleConfig
 			.Add(new NestingPoopState.Def(is_baby ? Tag.Invalid : SimHashes.Regolith.CreateTag()), true, -1)
 			.Add(new PlayAnimsStates.Def(GameTags.Creatures.Poop, false, "poop", global::STRINGS.CREATURES.STATUSITEMS.EXPELLING_SOLID.NAME, global::STRINGS.CREATURES.STATUSITEMS.EXPELLING_SOLID.TOOLTIP), true, -1)
 			.Add(new CritterCondoStates.Def(), !is_baby, -1)
+			.Add(new CritterEmoteStates.Def(Assets.GetAnim("driller_emotes_kanim")), !is_baby, -1)
 			.PopInterruptGroup()
 			.Add(new IdleStates.Def
 			{

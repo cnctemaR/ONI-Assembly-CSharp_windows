@@ -31,30 +31,34 @@ public class ConditionListSideScreen : SideScreenContent
 	private void Refresh()
 	{
 		bool flag = false;
-		List<ProcessCondition> conditionSet = this.targetConditionSet.GetConditionSet(ProcessCondition.ProcessConditionType.All);
-		foreach (ProcessCondition processCondition in conditionSet)
+		List<ProcessCondition> list;
+		using (ProcessCondition.ListPool.Get(out list))
 		{
-			if (!this.rows.ContainsKey(processCondition))
+			this.targetConditionSet.PopulateConditionSet(ProcessCondition.ProcessConditionType.All, list);
+			foreach (ProcessCondition processCondition in list)
 			{
-				flag = true;
-				break;
+				if (!this.rows.ContainsKey(processCondition))
+				{
+					flag = true;
+					break;
+				}
 			}
-		}
-		foreach (KeyValuePair<ProcessCondition, GameObject> keyValuePair in this.rows)
-		{
-			if (!conditionSet.Contains(keyValuePair.Key))
+			foreach (KeyValuePair<ProcessCondition, GameObject> keyValuePair in this.rows)
 			{
-				flag = true;
-				break;
+				if (!list.Contains(keyValuePair.Key))
+				{
+					flag = true;
+					break;
+				}
 			}
-		}
-		if (flag)
-		{
-			this.Rebuild();
-		}
-		foreach (KeyValuePair<ProcessCondition, GameObject> keyValuePair2 in this.rows)
-		{
-			ConditionListSideScreen.SetRowState(keyValuePair2.Value, keyValuePair2.Key);
+			if (flag)
+			{
+				this.Rebuild();
+			}
+			foreach (KeyValuePair<ProcessCondition, GameObject> keyValuePair2 in this.rows)
+			{
+				ConditionListSideScreen.SetRowState(keyValuePair2.Value, keyValuePair2.Key);
+			}
 		}
 	}
 
@@ -100,12 +104,17 @@ public class ConditionListSideScreen : SideScreenContent
 
 	private void BuildRows()
 	{
-		foreach (ProcessCondition processCondition in this.targetConditionSet.GetConditionSet(ProcessCondition.ProcessConditionType.All))
+		List<ProcessCondition> list;
+		using (ProcessCondition.ListPool.Get(out list))
 		{
-			if (processCondition.ShowInUI())
+			this.targetConditionSet.PopulateConditionSet(ProcessCondition.ProcessConditionType.All, list);
+			foreach (ProcessCondition processCondition in list)
 			{
-				GameObject gameObject = Util.KInstantiateUI(this.rowPrefab, this.rowContainer, true);
-				this.rows.Add(processCondition, gameObject);
+				if (processCondition.ShowInUI())
+				{
+					GameObject gameObject = Util.KInstantiateUI(this.rowPrefab, this.rowContainer, true);
+					this.rows.Add(processCondition, gameObject);
+				}
 			}
 		}
 	}

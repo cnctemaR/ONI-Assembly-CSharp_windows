@@ -20,7 +20,8 @@ public class RailGunPayloadConfig : IEntityConfig, IHasDlcRestrictions
 		GameObject gameObject = EntityTemplates.CreateLooseEntity("RailGunPayload", ITEMS.RAILGUNPAYLOAD.NAME, ITEMS.RAILGUNPAYLOAD.DESC, 200f, true, Assets.GetAnim("railgun_capsule_kanim"), "object", Grid.SceneLayer.Front, EntityTemplates.CollisionShape.RECTANGLE, 0.75f, 1f, true, 0, SimHashes.Creature, new List<Tag>
 		{
 			GameTags.IgnoreMaterialCategory,
-			GameTags.Experimental
+			GameTags.Experimental,
+			GameTags.PedestalDisplayable
 		});
 		gameObject.AddOrGetDef<RailGunPayload.Def>().attractToBeacons = true;
 		gameObject.AddComponent<LoopingSounds>();
@@ -52,6 +53,7 @@ public class RailGunPayloadConfig : IEntityConfig, IHasDlcRestrictions
 
 	public void OnSpawn(GameObject inst)
 	{
+		inst.GetComponent<Pickupable>().MinTakeAmount = true;
 	}
 
 	public const string ID = "RailGunPayload";

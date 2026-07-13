@@ -36,7 +36,7 @@ public class ReorderableBuilding : KMonoBehaviour
 		}
 	}
 
-	private void OnCancel(object data)
+	private void OnCancel(object _)
 	{
 		if (base.GetComponent<BuildingUnderConstruction>() != null && !this.cancelShield && !ReorderableBuilding.toBeRemoved.Contains(this))
 		{

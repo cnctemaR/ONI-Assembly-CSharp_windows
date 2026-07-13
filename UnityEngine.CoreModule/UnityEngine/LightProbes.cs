@@ -178,8 +178,8 @@ namespace UnityEngine
 
 		public extern int cellCount
 		{
-			[FreeFunction(HasExplicitThis = true)]
 			[NativeName("GetTetrahedraSize")]
+			[FreeFunction(HasExplicitThis = true)]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
@@ -195,8 +195,8 @@ namespace UnityEngine
 		{
 		}
 
-		[EditorBrowsable(EditorBrowsableState.Never)]
 		[Obsolete("Use bakedProbes instead.", true)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		public float[] coefficients
 		{
 			get

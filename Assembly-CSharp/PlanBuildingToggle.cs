@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 public class PlanBuildingToggle : KToggle
 {
-	public void Config(BuildingDef def, PlanScreen planScreen, HashedString buildingCategory, bool? passesSearchFilter)
+	public void Config(BuildingDef def, PlanScreen planScreen, HashedString buildingCategory)
 	{
 		this.def = def;
 		this.planScreen = planScreen;
@@ -30,7 +30,7 @@ public class PlanBuildingToggle : KToggle
 			global::Debug.LogWarning("Building " + def.PrefabID + " has not been added to plan screen subcategory organization in BuildingTuning.cs");
 		}
 		this.CheckResearch(null);
-		this.Refresh(passesSearchFilter);
+		this.Refresh(null);
 	}
 
 	protected override void OnDestroy()

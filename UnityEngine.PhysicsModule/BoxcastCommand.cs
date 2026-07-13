@@ -8,8 +8,8 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Jobs/ScriptBindings/JobsBindingsTypes.h")]
 	[NativeHeader("Modules/Physics/BatchCommands/BoxcastCommand.h")]
+	[NativeHeader("Runtime/Jobs/ScriptBindings/JobsBindingsTypes.h")]
 	public struct BoxcastCommand
 	{
 		public BoxcastCommand(Vector3 center, Vector3 halfExtents, Quaternion orientation, Vector3 direction, QueryParameters queryParameters, float distance = 3.4028235E+38f)

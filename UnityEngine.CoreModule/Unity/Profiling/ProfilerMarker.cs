@@ -10,8 +10,8 @@ using UnityEngine.Scripting;
 
 namespace Unity.Profiling
 {
-	[UsedByNativeCode]
 	[IgnoredByDeepProfiler]
+	[UsedByNativeCode]
 	public struct ProfilerMarker
 	{
 		public IntPtr Handle

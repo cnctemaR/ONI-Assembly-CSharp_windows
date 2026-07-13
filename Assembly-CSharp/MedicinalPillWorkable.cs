@@ -82,11 +82,11 @@ public class MedicinalPillWorkable : Workable, IConsumableUIItem
 				return true;
 			}
 		}
-		consumer.GetComponent<Effects>();
+		Effects component2 = consumer.GetComponent<Effects>();
 		for (int i = 0; i < this.pill.info.curedEffects.Count; i++)
 		{
 			string text = this.pill.info.curedEffects[i];
-			if (this.pill.info.curedEffects.Contains(text))
+			if (component2.HasEffect(text))
 			{
 				return true;
 			}

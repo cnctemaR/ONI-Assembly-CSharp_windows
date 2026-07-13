@@ -2,7 +2,7 @@
 using STRINGS;
 using UnityEngine;
 
-[EntityConfigOrder(2)]
+[EntityConfigOrder(3)]
 public class BabySealConfig : IEntityConfig, IHasDlcRestrictions
 {
 	public string[] GetRequiredDlcIds()

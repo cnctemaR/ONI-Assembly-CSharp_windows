@@ -5,7 +5,19 @@ public class CancellableDig : Cancellable
 {
 	protected override void OnCancel(object data)
 	{
-		if (data != null && (bool)data)
+		bool flag;
+		if (data != null)
+		{
+			Boxed<bool> boxed = data as Boxed<bool>;
+			if (boxed != null)
+			{
+				flag = boxed.value;
+				goto IL_0016;
+			}
+		}
+		flag = false;
+		IL_0016:
+		if (flag)
 		{
 			this.OnAnimationDone("ScaleDown");
 			return;

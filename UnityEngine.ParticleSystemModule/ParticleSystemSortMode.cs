@@ -8,6 +8,8 @@ namespace UnityEngine
 		Distance,
 		OldestInFront,
 		YoungestInFront,
-		Depth
+		Depth,
+		DistanceReverse,
+		DepthReverse
 	}
 }

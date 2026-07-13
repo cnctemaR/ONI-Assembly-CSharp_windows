@@ -5,8 +5,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Subsystems
 {
-	[UsedByNativeCode]
 	[NativeType(Header = "Modules/Subsystems/Example/ExampleSubsystem.h")]
+	[UsedByNativeCode]
 	public class ExampleSubsystem : IntegratedSubsystem<ExampleSubsystemDescriptor>
 	{
 		[MethodImpl(MethodImplOptions.InternalCall)]

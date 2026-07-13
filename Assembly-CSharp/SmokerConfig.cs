@@ -91,11 +91,7 @@ public class SmokerConfig : IBuildingConfig
 		ComplexRecipe.RecipeElement[] array = new ComplexRecipe.RecipeElement[]
 		{
 			new ComplexRecipe.RecipeElement("DinosaurMeat", 6f),
-			new ComplexRecipe.RecipeElement(new Tag[]
-			{
-				SimHashes.WoodLog.CreateTag(),
-				SimHashes.Peat.CreateTag()
-			}, 100f, ComplexRecipe.RecipeElement.TemperatureOperation.AverageTemperature, "", false, false)
+			new ComplexRecipe.RecipeElement(GameTags.BasicWoods.Append(SimHashes.Peat.CreateTag()), 100f, ComplexRecipe.RecipeElement.TemperatureOperation.AverageTemperature, "", false, false)
 		};
 		ComplexRecipe.RecipeElement[] array2 = new ComplexRecipe.RecipeElement[]
 		{
@@ -110,11 +106,7 @@ public class SmokerConfig : IBuildingConfig
 		ComplexRecipe.RecipeElement[] array3 = new ComplexRecipe.RecipeElement[]
 		{
 			new ComplexRecipe.RecipeElement(new Tag[] { "FishMeat", "PrehistoricPacuFillet" }, 6f),
-			new ComplexRecipe.RecipeElement(new Tag[]
-			{
-				SimHashes.WoodLog.CreateTag(),
-				SimHashes.Peat.CreateTag()
-			}, 100f, ComplexRecipe.RecipeElement.TemperatureOperation.AverageTemperature, "", false, false)
+			new ComplexRecipe.RecipeElement(GameTags.BasicWoods.Append(SimHashes.Peat.CreateTag()), 100f, ComplexRecipe.RecipeElement.TemperatureOperation.AverageTemperature, "", false, false)
 		};
 		ComplexRecipe.RecipeElement[] array4 = new ComplexRecipe.RecipeElement[]
 		{
@@ -129,11 +121,7 @@ public class SmokerConfig : IBuildingConfig
 		ComplexRecipe.RecipeElement[] array5 = new ComplexRecipe.RecipeElement[]
 		{
 			new ComplexRecipe.RecipeElement(new Tag[] { "GardenFoodPlantFood", "HardSkinBerry", "WormBasicFruit" }, 7f),
-			new ComplexRecipe.RecipeElement(new Tag[]
-			{
-				SimHashes.WoodLog.CreateTag(),
-				SimHashes.Peat.CreateTag()
-			}, 100f, ComplexRecipe.RecipeElement.TemperatureOperation.AverageTemperature, "", false, false)
+			new ComplexRecipe.RecipeElement(GameTags.BasicWoods.Append(SimHashes.Peat.CreateTag()), 100f, ComplexRecipe.RecipeElement.TemperatureOperation.AverageTemperature, "", false, false)
 		};
 		ComplexRecipe.RecipeElement[] array6 = new ComplexRecipe.RecipeElement[]
 		{

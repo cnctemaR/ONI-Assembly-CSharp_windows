@@ -214,7 +214,7 @@ public class MinionPersonalityPanel : DetailScreenTab
 		targetPanel.SetLabel("mastered_skills_header", UI.DETAILTABS.PERSONALITY.RESUME.MASTERED_SKILLS, UI.DETAILTABS.PERSONALITY.RESUME.MASTERED_SKILLS_TOOLTIP);
 		if (list.Count == 0)
 		{
-			targetPanel.SetLabel("no_skills", "  • " + UI.DETAILTABS.PERSONALITY.RESUME.NO_MASTERED_SKILLS.NAME, string.Format(UI.DETAILTABS.PERSONALITY.RESUME.NO_MASTERED_SKILLS.TOOLTIP, targetEntity.name));
+			targetPanel.SetLabel("no_skills", "    • " + UI.DETAILTABS.PERSONALITY.RESUME.NO_MASTERED_SKILLS.NAME, string.Format(UI.DETAILTABS.PERSONALITY.RESUME.NO_MASTERED_SKILLS.TOOLTIP, targetEntity.name));
 		}
 		else
 		{
@@ -227,10 +227,10 @@ public class MinionPersonalityPanel : DetailScreenTab
 					{
 						if (Game.IsCorrectDlcActiveForCurrentSave(skillPerk))
 						{
-							text = text + "  • " + skillPerk.Name + "\n";
+							text = text + "    • " + skillPerk.Name + "\n";
 						}
 					}
-					targetPanel.SetLabel(skill2.Id, "  • " + skill2.Name, skill2.description + "\n" + text);
+					targetPanel.SetLabel(skill2.Id, "    • " + skill2.Name, skill2.description + "\n" + text);
 				}
 			}
 		}

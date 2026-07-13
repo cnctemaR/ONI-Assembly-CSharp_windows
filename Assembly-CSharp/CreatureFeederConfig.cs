@@ -66,7 +66,8 @@ public class CreatureFeederConfig : IBuildingConfig
 			GameTags.Creatures.Species.SealSpecies,
 			GameTags.Creatures.Species.StegoSpecies,
 			GameTags.Creatures.Species.RaptorSpecies,
-			GameTags.Creatures.Species.ChameleonSpecies
+			GameTags.Creatures.Species.ChameleonSpecies,
+			GameTags.Creatures.Species.MooSpecies
 		}))
 		{
 			Diet value = keyValuePair.Value;

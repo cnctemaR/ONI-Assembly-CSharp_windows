@@ -22,32 +22,13 @@ public class SpacePOISimpleInfoPanel : SimpleInfoPanel
 		}
 		HarvestablePOIClusterGridEntity harvestablePOIClusterGridEntity = ((selectedTarget == null) ? null : selectedTarget.GetComponent<HarvestablePOIClusterGridEntity>());
 		Clustercraft component = selectedTarget.GetComponent<Clustercraft>();
-		ArtifactPOIConfigurator artifactPOIConfigurator = selectedTarget.GetComponent<ArtifactPOIConfigurator>();
-		if (harvestablePOIClusterGridEntity == null && component == null && artifactPOIConfigurator == null)
+		ArtifactPOIConfigurator component2 = selectedTarget.GetComponent<ArtifactPOIConfigurator>();
+		if (harvestablePOIClusterGridEntity == null && component == null && component2 == null)
 		{
 			spacePOIPanel.gameObject.SetActive(false);
 			return;
 		}
-		if (harvestablePOIClusterGridEntity == null && artifactPOIConfigurator == null && component != null)
-		{
-			RocketModuleCluster rocketModuleCluster = null;
-			CraftModuleInterface craftModuleInterface = null;
-			RocketSimpleInfoPanel.GetRocketStuffFromTarget(selectedTarget, ref rocketModuleCluster, ref component, ref craftModuleInterface);
-			if (component != null)
-			{
-				foreach (ClusterGridEntity clusterGridEntity in ClusterGrid.Instance.GetEntitiesOnCell(component.GetMyWorldLocation()))
-				{
-					HarvestablePOIClusterGridEntity harvestablePOIClusterGridEntity2 = clusterGridEntity as HarvestablePOIClusterGridEntity;
-					if (harvestablePOIClusterGridEntity2 != null)
-					{
-						harvestablePOIClusterGridEntity = harvestablePOIClusterGridEntity2;
-						artifactPOIConfigurator = harvestablePOIClusterGridEntity2.GetComponent<ArtifactPOIConfigurator>();
-						break;
-					}
-				}
-			}
-		}
-		bool flag = harvestablePOIClusterGridEntity != null || artifactPOIConfigurator != null;
+		bool flag = harvestablePOIClusterGridEntity != null || component2 != null;
 		spacePOIPanel.gameObject.SetActive(flag);
 		if (!flag)
 		{
@@ -56,7 +37,7 @@ public class SpacePOISimpleInfoPanel : SimpleInfoPanel
 		HarvestablePOIStates.Instance instance = ((harvestablePOIClusterGridEntity == null) ? null : harvestablePOIClusterGridEntity.GetSMI<HarvestablePOIStates.Instance>());
 		this.RefreshMassHeader(instance, selectedTarget, spacePOIPanel);
 		this.RefreshElements(instance, selectedTarget, spacePOIPanel);
-		this.RefreshArtifacts(artifactPOIConfigurator, selectedTarget, spacePOIPanel);
+		this.RefreshArtifacts(component2, selectedTarget, spacePOIPanel);
 	}
 
 	private void RefreshMassHeader(HarvestablePOIStates.Instance harvestable, GameObject selectedTarget, CollapsibleDetailContentPanel spacePOIPanel)
@@ -201,7 +182,7 @@ public class SpacePOISimpleInfoPanel : SimpleInfoPanel
 		component.GetReference<LocText>("ValueLabel").alignment = TextAlignmentOptions.MidlineRight;
 		component.GetReference<Image>("Icon").sprite = Assets.GetSprite("ic_artifacts");
 		component.GetReference<Image>("Icon").color = Color.black;
-		if (smi.CanHarvestArtifact())
+		if (smi.HasArtifactAvailableInHexCell())
 		{
 			component.GetReference<LocText>("ValueLabel").text = UI.CLUSTERMAP.POI.ARTIFACTS_AVAILABLE;
 			return;

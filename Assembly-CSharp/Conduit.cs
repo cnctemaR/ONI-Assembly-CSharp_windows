@@ -41,7 +41,7 @@ public class Conduit : KMonoBehaviour, IFirstFrameCallback, IHaveUtilityNetworkM
 		base.Subscribe<Conduit>(-1735440190, Conduit.OnBuildingFullyRepairedDelegate);
 	}
 
-	protected virtual void OnStructureTemperatureRegistered(object data)
+	protected virtual void OnStructureTemperatureRegistered(object _)
 	{
 		int num = Grid.PosToCell(this);
 		this.GetNetworkManager().AddToNetworks(num, this, false);
@@ -141,13 +141,13 @@ public class Conduit : KMonoBehaviour, IFirstFrameCallback, IHaveUtilityNetworkM
 
 	private void OnHighlighted(object data)
 	{
-		int num = (((bool)data) ? Grid.PosToCell(base.transform.GetPosition()) : (-1));
+		int num = (((Boxed<bool>)data).value ? Grid.PosToCell(base.transform.GetPosition()) : (-1));
 		this.GetFlowVisualizer().SetHighlightedCell(num);
 	}
 
 	private void OnConduitFrozen(object data)
 	{
-		base.Trigger(-794517298, new BuildingHP.DamageSourceInfo
+		base.BoxingTrigger<BuildingHP.DamageSourceInfo>(-794517298, new BuildingHP.DamageSourceInfo
 		{
 			damage = 1,
 			source = BUILDINGS.DAMAGESOURCES.CONDUIT_CONTENTS_FROZE,
@@ -160,7 +160,7 @@ public class Conduit : KMonoBehaviour, IFirstFrameCallback, IHaveUtilityNetworkM
 
 	private void OnConduitBoiling(object data)
 	{
-		base.Trigger(-794517298, new BuildingHP.DamageSourceInfo
+		base.BoxingTrigger<BuildingHP.DamageSourceInfo>(-794517298, new BuildingHP.DamageSourceInfo
 		{
 			damage = 1,
 			source = BUILDINGS.DAMAGESOURCES.CONDUIT_CONTENTS_BOILED,

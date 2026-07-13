@@ -4,8 +4,8 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/GfxDevice/ScalableBufferManager.h")]
 	[StaticAccessor("ScalableBufferManager::GetInstance()", StaticAccessorType.Dot)]
+	[NativeHeader("Runtime/GfxDevice/ScalableBufferManager.h")]
 	public static class ScalableBufferManager
 	{
 		public static extern float widthScaleFactor

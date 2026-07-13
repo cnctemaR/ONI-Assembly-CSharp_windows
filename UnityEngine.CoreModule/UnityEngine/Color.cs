@@ -6,8 +6,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Math/Color.h")]
 	[NativeClass("ColorRGBAf")]
+	[NativeHeader("Runtime/Math/Color.h")]
 	[RequiredByNativeCode(Optional = true, GenerateProxy = true)]
 	public struct Color : IEquatable<Color>, IFormattable
 	{

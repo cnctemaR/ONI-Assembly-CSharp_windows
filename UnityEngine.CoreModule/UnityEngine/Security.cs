@@ -14,15 +14,15 @@ namespace UnityEngine
 			return null;
 		}
 
-		[EditorBrowsable(EditorBrowsableState.Never)]
 		[Obsolete("This was an internal method which is no longer used", true)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		public static Assembly LoadAndVerifyAssembly(byte[] assemblyData)
 		{
 			return null;
 		}
 
-		[Obsolete("Security.PrefetchSocketPolicy is no longer supported, since the Unity Web Player is no longer supported by Unity.", true)]
 		[ExcludeFromDocs]
+		[Obsolete("Security.PrefetchSocketPolicy is no longer supported, since the Unity Web Player is no longer supported by Unity.", true)]
 		public static bool PrefetchSocketPolicy(string ip, int atPort)
 		{
 			int num = 3000;

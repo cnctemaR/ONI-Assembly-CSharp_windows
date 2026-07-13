@@ -115,76 +115,60 @@ public class StructureTemperatureComponents : KGameObjectSplitComponentManager<S
 		List<StructureTemperatureHeader> list;
 		List<StructureTemperaturePayload> list2;
 		base.GetDataLists(out list, out list2);
-		ListPool<int, StructureTemperatureComponents>.PooledList pooledList = ListPool<int, StructureTemperatureComponents>.Allocate();
-		pooledList.Capacity = Math.Max(pooledList.Capacity, list.Count);
-		ListPool<int, StructureTemperatureComponents>.PooledList pooledList2 = ListPool<int, StructureTemperatureComponents>.Allocate();
-		pooledList2.Capacity = Math.Max(pooledList2.Capacity, list.Count);
-		ListPool<int, StructureTemperatureComponents>.PooledList pooledList3 = ListPool<int, StructureTemperatureComponents>.Allocate();
-		pooledList3.Capacity = Math.Max(pooledList3.Capacity, list.Count);
+		StructureTemperaturePayload structureTemperaturePayload = default(StructureTemperaturePayload);
 		for (int num4 = 0; num4 != list.Count; num4++)
 		{
 			StructureTemperatureHeader structureTemperatureHeader = list[num4];
 			if (Sim.IsValidHandle(structureTemperatureHeader.simHandle))
 			{
-				pooledList.Add(num4);
+				bool flag = structureTemperatureHeader.dirty || structureTemperatureHeader.isActiveBuilding;
+				if (flag)
+				{
+					structureTemperaturePayload = list2[num4];
+				}
 				if (structureTemperatureHeader.dirty)
 				{
-					pooledList2.Add(num4);
+					StructureTemperatureComponents.UpdateSimState(ref structureTemperaturePayload);
+					if (structureTemperaturePayload.pendingEnergyModifications != 0f)
+					{
+						SimMessages.ModifyBuildingEnergy(structureTemperaturePayload.simHandleCopy, structureTemperaturePayload.pendingEnergyModifications, 0f, 10000f);
+						structureTemperaturePayload.pendingEnergyModifications = 0f;
+					}
 					structureTemperatureHeader.dirty = false;
 					list[num4] = structureTemperatureHeader;
 				}
 				if (structureTemperatureHeader.isActiveBuilding)
 				{
-					pooledList3.Add(num4);
+					if (structureTemperaturePayload.operational == null || structureTemperaturePayload.operational.IsActive)
+					{
+						num++;
+						if (!structureTemperaturePayload.isActiveStatusItemSet)
+						{
+							num3++;
+							structureTemperaturePayload.primaryElement.GetComponent<KSelectable>().SetStatusItem(Db.Get().StatusItemCategories.OperatingEnergy, this.operatingEnergyStatusItem, structureTemperaturePayload.simHandleCopy);
+							structureTemperaturePayload.isActiveStatusItemSet = true;
+						}
+						structureTemperaturePayload.energySourcesKW = this.AccumulateProducedEnergyKW(structureTemperaturePayload.energySourcesKW, structureTemperaturePayload.OperatingKilowatts, BUILDING.STATUSITEMS.OPERATINGENERGY.OPERATING);
+						if (structureTemperaturePayload.ExhaustKilowatts != 0f)
+						{
+							num2++;
+							StructureTemperatureComponents.ExhaustHeat(structureTemperaturePayload.GetExtents(), structureTemperaturePayload.ExhaustKilowatts, structureTemperaturePayload.maxTemperature, dt);
+							structureTemperaturePayload.energySourcesKW = this.AccumulateProducedEnergyKW(structureTemperaturePayload.energySourcesKW, structureTemperaturePayload.ExhaustKilowatts, BUILDING.STATUSITEMS.OPERATINGENERGY.EXHAUSTING);
+						}
+					}
+					else if (structureTemperaturePayload.isActiveStatusItemSet)
+					{
+						num3++;
+						structureTemperaturePayload.primaryElement.GetComponent<KSelectable>().SetStatusItem(Db.Get().StatusItemCategories.OperatingEnergy, null, null);
+						structureTemperaturePayload.isActiveStatusItemSet = false;
+					}
 				}
-			}
-		}
-		foreach (int num5 in pooledList2)
-		{
-			StructureTemperaturePayload structureTemperaturePayload = list2[num5];
-			StructureTemperatureComponents.UpdateSimState(ref structureTemperaturePayload);
-		}
-		foreach (int num6 in pooledList2)
-		{
-			if (list2[num6].pendingEnergyModifications != 0f)
-			{
-				StructureTemperaturePayload structureTemperaturePayload2 = list2[num6];
-				SimMessages.ModifyBuildingEnergy(structureTemperaturePayload2.simHandleCopy, structureTemperaturePayload2.pendingEnergyModifications, 0f, 10000f);
-				structureTemperaturePayload2.pendingEnergyModifications = 0f;
-				list2[num6] = structureTemperaturePayload2;
-			}
-		}
-		foreach (int num7 in pooledList3)
-		{
-			StructureTemperaturePayload structureTemperaturePayload3 = list2[num7];
-			if (structureTemperaturePayload3.operational == null || structureTemperaturePayload3.operational.IsActive)
-			{
-				num++;
-				if (!structureTemperaturePayload3.isActiveStatusItemSet)
+				if (flag)
 				{
-					num3++;
-					structureTemperaturePayload3.primaryElement.GetComponent<KSelectable>().SetStatusItem(Db.Get().StatusItemCategories.OperatingEnergy, this.operatingEnergyStatusItem, structureTemperaturePayload3.simHandleCopy);
-					structureTemperaturePayload3.isActiveStatusItemSet = true;
-				}
-				structureTemperaturePayload3.energySourcesKW = this.AccumulateProducedEnergyKW(structureTemperaturePayload3.energySourcesKW, structureTemperaturePayload3.OperatingKilowatts, BUILDING.STATUSITEMS.OPERATINGENERGY.OPERATING);
-				if (structureTemperaturePayload3.ExhaustKilowatts != 0f)
-				{
-					num2++;
-					StructureTemperatureComponents.ExhaustHeat(structureTemperaturePayload3.GetExtents(), structureTemperaturePayload3.ExhaustKilowatts, structureTemperaturePayload3.maxTemperature, dt);
-					structureTemperaturePayload3.energySourcesKW = this.AccumulateProducedEnergyKW(structureTemperaturePayload3.energySourcesKW, structureTemperaturePayload3.ExhaustKilowatts, BUILDING.STATUSITEMS.OPERATINGENERGY.EXHAUSTING);
+					list2[num4] = structureTemperaturePayload;
 				}
 			}
-			else if (structureTemperaturePayload3.isActiveStatusItemSet)
-			{
-				num3++;
-				structureTemperaturePayload3.primaryElement.GetComponent<KSelectable>().SetStatusItem(Db.Get().StatusItemCategories.OperatingEnergy, null, null);
-				structureTemperaturePayload3.isActiveStatusItemSet = false;
-			}
-			list2[num7] = structureTemperaturePayload3;
 		}
-		pooledList3.Recycle();
-		pooledList2.Recycle();
-		pooledList.Recycle();
 	}
 
 	public static void ExhaustHeat(Extents extents, float kw, float maxTemperature, float dt)
@@ -457,7 +441,7 @@ public class StructureTemperatureComponents : KGameObjectSplitComponentManager<S
 			structureTemperatureHeader.simHandle = sim_handle;
 			structureTemperaturePayload.simHandleCopy = sim_handle;
 			GameComps.StructureTemperatures.SetData(handle, structureTemperatureHeader, ref structureTemperaturePayload);
-			structureTemperaturePayload.primaryElement.Trigger(-1555603773, sim_handle);
+			structureTemperaturePayload.primaryElement.BoxingTrigger<int>(-1555603773, sim_handle);
 			int num = Grid.PosToCell(structureTemperaturePayload.building.transform.GetPosition());
 			GameScenePartitioner.Instance.TriggerEvent(num, GameScenePartitioner.Instance.contactConductiveLayer, new StructureToStructureTemperature.BuildingChangedObj(StructureToStructureTemperature.BuildingChangeType.Created, structureTemperaturePayload.building, sim_handle));
 			return;

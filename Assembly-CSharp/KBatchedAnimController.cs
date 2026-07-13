@@ -138,11 +138,6 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 		this.ConfigureUpdateListener();
 	}
 
-	private static void OnMovementStateChanged(Transform transform, bool is_moving)
-	{
-		transform.GetComponent<KBatchedAnimController>().OnMovementStateChanged(is_moving);
-	}
-
 	private void SetBatchGroup(KAnimFileData kafd)
 	{
 		if (this.batchGroupID.IsValid && kafd != null && this.batchGroupID == kafd.batchTag)
@@ -150,9 +145,15 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 			return;
 		}
 		DebugUtil.Assert(!this.batchGroupID.IsValid, "Should only be setting the batch group once.");
-		DebugUtil.Assert(kafd != null, "Null anim data!! For", base.name);
+		if (kafd == null)
+		{
+			DebugUtil.Assert(kafd != null, "Null anim data!! For", base.name);
+		}
 		base.curBuild = kafd.build;
-		DebugUtil.Assert(base.curBuild != null, "Null build for anim!! ", base.name, kafd.name);
+		if (base.curBuild == null)
+		{
+			DebugUtil.Assert(base.curBuild != null, "Null build for anim!! ", base.name, kafd.name);
+		}
 		KAnimGroupFile.Group group = KAnimGroupFile.GetGroup(base.curBuild.batchTag);
 		HashedString hashedString = kafd.build.batchTag;
 		if (group.renderType == KAnimBatchGroup.RendererType.DontRender || group.renderType == KAnimBatchGroup.RendererType.AnimOnly)
@@ -220,6 +221,14 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 		if (base.curBuild != null)
 		{
 			this.UpdateHiddenSymbolSet(this.hiddenSymbolsSet);
+		}
+		if (this.curAnim != null)
+		{
+			this.curAnim = base.GetAnim(this.curAnim.name);
+			if (this.eventManagerHandle.IsValid() && this.curAnim != null)
+			{
+				this.aem.SwapAnim(this.eventManagerHandle, this.curAnim);
+			}
 		}
 		this.Register();
 	}
@@ -331,7 +340,7 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 			{
 				KAnim.Build.Symbol symbol = batchGroupData.frameElementSymbols[i];
 				bool flag = !this.hiddenSymbolsSet.Contains(symbol.hash);
-				base.symbolInstanceGpuData.SetVisible(i, flag);
+				base.symbolInstanceGpuData.SetVisible(symbol.symbolIndexInSourceBuild, flag);
 			}
 		}
 		this.SetDirty();
@@ -346,7 +355,7 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 			{
 				KAnim.Build.Symbol symbol = batchGroupData.frameElementSymbols[i];
 				bool flag = !this.hiddenSymbolsSet.Contains(symbol.hash);
-				base.symbolInstanceGpuData.SetVisible(i, flag);
+				base.symbolInstanceGpuData.SetVisible(symbol.symbolIndexInSourceBuild, flag);
 			}
 		}
 		this.SetDirty();
@@ -359,7 +368,7 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 		{
 			KAnim.Build.Symbol symbol = batchGroupData.frameElementSymbols[i];
 			bool flag = !this.hiddenSymbolsSet.Contains(symbol.hash);
-			base.symbolInstanceGpuData.SetVisible(i, flag);
+			base.symbolInstanceGpuData.SetVisible(symbol.symbolIndexInSourceBuild, flag);
 		}
 		this.SetDirty();
 	}
@@ -450,7 +459,7 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 			{
 				return component;
 			}
-			rectTransform = rectTransform.parent.GetComponent<RectTransform>();
+			rectTransform = ((rectTransform.parent == null) ? null : rectTransform.parent.GetComponent<RectTransform>());
 		}
 		return null;
 	}
@@ -674,7 +683,7 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 		CellChangeMonitor instance = Singleton<CellChangeMonitor>.Instance;
 		if (instance != null)
 		{
-			instance.RegisterMovementStateChanged(base.transform, new Action<Transform, bool>(KBatchedAnimController.OnMovementStateChanged));
+			this.movingStateChangedHandlerID = instance.RegisterMovementStateChanged(base.transform, KBatchedAnimController.OnMovementStateChangedDispatcher, null);
 			this.moving = instance.IsMoving(base.transform);
 		}
 		this.symbolOverrideController = base.GetComponent<SymbolOverrideController>();
@@ -748,7 +757,7 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 		CellChangeMonitor instance = Singleton<CellChangeMonitor>.Instance;
 		if (instance != null)
 		{
-			instance.UnregisterMovementStateChanged(base.transform, new Action<Transform, bool>(KBatchedAnimController.OnMovementStateChanged));
+			instance.UnregisterMovementStateChanged(ref this.movingStateChangedHandlerID);
 		}
 		KBatchedAnimUpdater instance2 = Singleton<KBatchedAnimUpdater>.Instance;
 		if (instance2 != null)
@@ -943,6 +952,8 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 
 	private bool moving;
 
+	private ulong movingStateChangedHandlerID;
+
 	private SymbolOverrideController symbolOverrideController;
 
 	private int symbolOverrideControllerVersion;
@@ -968,9 +979,16 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 
 	public bool isMovable;
 
+	public ulong movementChangedHandlerId;
+
 	public Func<Vector4> getPositionDataFunctionInUse;
 
 	public KAnimConverter.PostProcessingEffects postProcessingEffectsAllowed;
 
 	public float postProcessingParameters;
+
+	private static Action<Transform, bool, object> OnMovementStateChangedDispatcher = delegate(Transform transform, bool is_moving, object ignored)
+	{
+		transform.GetComponent<KBatchedAnimController>().OnMovementStateChanged(is_moving);
+	};
 }

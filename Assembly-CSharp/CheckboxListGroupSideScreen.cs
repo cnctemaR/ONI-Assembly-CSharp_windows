@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Pool;
 using UnityEngine.UI;
 
 public class CheckboxListGroupSideScreen : SideScreenContent
@@ -94,8 +95,10 @@ public class CheckboxListGroupSideScreen : SideScreenContent
 	{
 		if (this.checkboxContainerPool == null)
 		{
-			this.checkboxContainerPool = new ObjectPool<CheckboxListGroupSideScreen.CheckboxContainer>(new Func<CheckboxListGroupSideScreen.CheckboxContainer>(this.InstantiateCheckboxContainer), 0);
-			this.checkboxPool = new GameObjectPool(new Func<GameObject>(this.InstantiateCheckbox), 0);
+			this.checkboxContainerPool = new ObjectPool<CheckboxListGroupSideScreen.CheckboxContainer>(new Func<CheckboxListGroupSideScreen.CheckboxContainer>(this.InstantiateCheckboxContainer), null, null, null, false, 10, 10000);
+			this.checkboxPool = new GameObjectPool(new Func<GameObject>(this.InstantiateCheckbox), delegate(GameObject _)
+			{
+			}, 0);
 		}
 		this.descriptionLabel.enabled = !this.targets[0].Description.IsNullOrWhiteSpace();
 		if (!this.targets[0].Description.IsNullOrWhiteSpace())
@@ -112,8 +115,8 @@ public class CheckboxListGroupSideScreen : SideScreenContent
 		{
 			foreach (ICheckboxListGroupControl.ListGroup listGroup in checkboxListGroupControl.GetData())
 			{
-				CheckboxListGroupSideScreen.CheckboxContainer instance = this.checkboxContainerPool.GetInstance();
-				this.InitContainer(checkboxListGroupControl, listGroup, instance);
+				CheckboxListGroupSideScreen.CheckboxContainer checkboxContainer = this.checkboxContainerPool.Get();
+				this.InitContainer(checkboxListGroupControl, listGroup, checkboxContainer);
 			}
 		}
 	}
@@ -133,7 +136,7 @@ public class CheckboxListGroupSideScreen : SideScreenContent
 			{
 				if (++num > this.activeChecklistGroups.Count)
 				{
-					this.InitContainer(checkboxListGroupControl, listGroup, this.checkboxContainerPool.GetInstance());
+					this.InitContainer(checkboxListGroupControl, listGroup, this.checkboxContainerPool.Get());
 				}
 				CheckboxListGroupSideScreen.CheckboxContainer checkboxContainer = this.activeChecklistGroups[num - 1];
 				if (listGroup.resolveTitleCallback != null)
@@ -174,7 +177,7 @@ public class CheckboxListGroupSideScreen : SideScreenContent
 				this.RemoveSingleCheckboxFromContainer(hierarchyReferences, checkboxContainer);
 			}
 			checkboxContainer.container.gameObject.SetActive(false);
-			this.checkboxContainerPool.ReleaseInstance(checkboxContainer);
+			this.checkboxContainerPool.Release(checkboxContainer);
 		}
 	}
 

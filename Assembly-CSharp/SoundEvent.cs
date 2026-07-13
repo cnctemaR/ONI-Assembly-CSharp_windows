@@ -260,7 +260,7 @@ public class SoundEvent : AnimEvent
 
 	protected static bool IsLowPrioritySound(string sound)
 	{
-		return sound != null && Camera.main != null && Camera.main.orthographicSize > AudioMixer.LOW_PRIORITY_CUTOFF_DISTANCE && !AudioMixer.instance.activeNIS && GlobalAssets.IsLowPriority(sound);
+		return sound != null && Game.Instance != null && Game.MainCamera.orthographicSize > AudioMixer.LOW_PRIORITY_CUTOFF_DISTANCE && !AudioMixer.instance.activeNIS && GlobalAssets.IsLowPriority(sound);
 	}
 
 	protected void PrintSoundDebug(string anim_name, string sound, string sound_name, Vector3 sound_pos)

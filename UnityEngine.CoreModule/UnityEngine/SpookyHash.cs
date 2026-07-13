@@ -6,13 +6,6 @@ namespace UnityEngine
 {
 	internal static class SpookyHash
 	{
-		private static bool AttemptDetectAllowUnalignedRead()
-		{
-			string processorType = SystemInfo.processorType;
-			string text = processorType;
-			return text == "x86" || text == "AMD64";
-		}
-
 		public unsafe static void Hash(void* message, ulong length, ulong* hash1, ulong* hash2)
 		{
 			bool flag = length < 192UL;
@@ -37,7 +30,7 @@ namespace UnityEngine
 				ulong num9 = (num10 = (num11 = (num12 = 16045690984833335023UL)));
 				SpookyHash.U u = new SpookyHash.U((ushort*)message);
 				ulong* ptr2 = u.p64 + length / 96UL * 12UL * 8UL / 8UL;
-				bool flag2 = SpookyHash.AllowUnalignedRead || (u.i & 7UL) == 0UL;
+				bool flag2 = (u.i & 7UL) == 0UL;
 				if (flag2)
 				{
 					while (u.p64 < ptr2)
@@ -57,7 +50,7 @@ namespace UnityEngine
 				}
 				ulong num13 = length - (ulong)((long)((byte*)ptr2 - (byte*)message));
 				UnsafeUtility.MemCpy((void*)ptr, (void*)ptr2, (long)num13);
-				SpookyHash.memset((void*)(ptr + num13 / 8UL), 0, 96UL - num13);
+				UnsafeUtility.MemSet((void*)(ptr + num13 / 8UL), 0, (long)(96UL - num13));
 				((byte*)ptr)[95] = (byte)num13;
 				SpookyHash.End(ptr, ref num2, ref num6, ref num10, ref num, ref num5, ref num9, ref num3, ref num7, ref num11, ref num4, ref num8, ref num12);
 				*hash1 = num2;
@@ -133,7 +126,7 @@ namespace UnityEngine
 		{
 			ulong* ptr = stackalloc ulong[(UIntPtr)192];
 			SpookyHash.U u = new SpookyHash.U((ushort*)message);
-			bool flag = !SpookyHash.AllowUnalignedRead && (u.i & 7UL) > 0UL;
+			bool flag = (u.i & 7UL) > 0UL;
 			if (flag)
 			{
 				UnsafeUtility.MemCpy((void*)ptr, message, (long)length);
@@ -178,71 +171,71 @@ namespace UnityEngine
 				case 0U:
 					num4 += 16045690984833335023UL;
 					num5 += 16045690984833335023UL;
-					goto IL_02F9;
+					goto IL_02EF;
 				case 1U:
-					goto IL_02CC;
+					goto IL_02C2;
 				case 2U:
-					goto IL_02B9;
+					goto IL_02AF;
 				case 3U:
 					num4 += (ulong)u.p8[2] << 16;
-					goto IL_02B9;
+					goto IL_02AF;
 				case 4U:
-					goto IL_0296;
+					goto IL_028C;
 				case 5U:
-					goto IL_0282;
+					goto IL_0278;
 				case 6U:
-					goto IL_026E;
+					goto IL_0264;
 				case 7U:
 					num4 += (ulong)u.p8[6] << 48;
-					goto IL_026E;
+					goto IL_0264;
 				case 8U:
-					goto IL_0249;
+					goto IL_023F;
 				case 9U:
-					goto IL_0238;
+					goto IL_022E;
 				case 10U:
-					goto IL_0224;
+					goto IL_021A;
 				case 11U:
 					num5 += (ulong)u.p8[10] << 16;
-					goto IL_0224;
+					goto IL_021A;
 				case 12U:
-					goto IL_01EC;
+					goto IL_01E2;
 				case 13U:
-					goto IL_01D7;
+					goto IL_01CD;
 				case 14U:
 					break;
 				case 15U:
 					num5 += (ulong)u.p8[14] << 48;
 					break;
 				default:
-					goto IL_02F9;
+					goto IL_02EF;
 				}
 				num5 += (ulong)u.p8[13] << 40;
-				IL_01D7:
+				IL_01CD:
 				num5 += (ulong)u.p8[12] << 32;
-				IL_01EC:
+				IL_01E2:
 				num5 += (ulong)u.p32[2];
 				num4 += *u.p64;
-				goto IL_02F9;
-				IL_0224:
+				goto IL_02EF;
+				IL_021A:
 				num5 += (ulong)u.p8[9] << 8;
-				IL_0238:
+				IL_022E:
 				num5 += (ulong)u.p8[8];
-				IL_0249:
+				IL_023F:
 				num4 += *u.p64;
-				goto IL_02F9;
-				IL_026E:
+				goto IL_02EF;
+				IL_0264:
 				num4 += (ulong)u.p8[5] << 40;
-				IL_0282:
+				IL_0278:
 				num4 += (ulong)u.p8[4] << 32;
-				IL_0296:
+				IL_028C:
 				num4 += (ulong)(*u.p32);
-				goto IL_02F9;
-				IL_02B9:
+				goto IL_02EF;
+				IL_02AF:
 				num4 += (ulong)u.p8[1] << 8;
-				IL_02CC:
+				IL_02C2:
 				num4 += (ulong)(*u.p8);
 			}
-			IL_02F9:
+			IL_02EF:
 			SpookyHash.ShortEnd(ref num2, ref num3, ref num4, ref num5);
 			*hash1 = num2;
 			*hash2 = num3;
@@ -388,32 +381,6 @@ namespace UnityEngine
 			SpookyHash.Rot64(ref s11, 46);
 			s10 += s0;
 		}
-
-		private unsafe static void memset(void* dst, int value, ulong numberOfBytes)
-		{
-			ulong num = (ulong)(value | value);
-			ulong* ptr = (ulong*)dst;
-			ulong num2 = numberOfBytes >> 3;
-			for (ulong num3 = 0UL; num3 < num2; num3 += 1UL)
-			{
-				ptr[num3 * 8UL / 8UL] = num;
-			}
-			dst = (void*)ptr;
-			numberOfBytes -= num2;
-			byte* ptr2 = stackalloc byte[(UIntPtr)4];
-			*ptr2 = (byte)(value & 15);
-			ptr2[1] = (byte)(((uint)value >> 4) & 15U);
-			ptr2[2] = (byte)(((uint)value >> 8) & 15U);
-			ptr2[3] = (byte)(((uint)value >> 12) & 15U);
-			byte* ptr3 = (byte*)dst;
-			ulong num4 = numberOfBytes;
-			for (ulong num5 = 0UL; num5 < num4; num5 += 1UL)
-			{
-				ptr3[num5] = ptr2[num5 % 4UL];
-			}
-		}
-
-		private static readonly bool AllowUnalignedRead = SpookyHash.AttemptDetectAllowUnalignedRead();
 
 		private const int k_NumVars = 12;
 

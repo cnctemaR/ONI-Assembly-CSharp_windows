@@ -39,13 +39,28 @@ public static class LoreBearerUtil
 		};
 	}
 
-	public static LoreBearerAction UnlockSpecificEntry(string unlockId, string searchDisplayText)
+	public static LoreBearerAction UnlockSpecificEntry(string unlockId, string searchDisplayText, bool focus = false)
 	{
 		return delegate(InfoDialogScreen screen)
 		{
 			Game.Instance.unlocks.Unlock(unlockId, true);
 			screen.AddPlainText(searchDisplayText);
-			screen.AddOption(UI.USERMENUACTIONS.READLORE.GOTODATABASE, LoreBearerUtil.OpenCodexByLockKeyID(unlockId, false), false);
+			screen.AddOption(UI.USERMENUACTIONS.READLORE.GOTODATABASE, LoreBearerUtil.OpenCodexByLockKeyID(unlockId, focus), false);
+		};
+	}
+
+	public static LoreBearerAction UnlockSpecificEntryThenNext(string unlockId, string searchDisplayText, Action<InfoDialogScreen> next, bool focus = false)
+	{
+		return delegate(InfoDialogScreen screen)
+		{
+			if (!Game.Instance.unlocks.IsUnlocked(unlockId))
+			{
+				Game.Instance.unlocks.Unlock(unlockId, true);
+				screen.AddPlainText(searchDisplayText);
+				screen.AddOption(UI.USERMENUACTIONS.READLORE.GOTODATABASE, LoreBearerUtil.OpenCodexByLockKeyID(unlockId, focus), false);
+				return;
+			}
+			next(screen);
 		};
 	}
 

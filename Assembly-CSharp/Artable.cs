@@ -134,6 +134,7 @@ public class Artable : Workable
 			this.chore = new WorkChore<Artable>(Db.Get().ChoreTypes.Art, this, null, true, null, null, null, true, null, false, this.onlyWorkableWhenOperational, null, false, true, true, PriorityScreen.PriorityClass.basic, 5, false, true);
 			this.chore.AddPrecondition(ChorePreconditions.instance.HasSkillPerk, this.requiredSkillPerk);
 		}
+		this.RefreshDecorTag();
 		base.Trigger(111068960, this.currentStage);
 	}
 
@@ -160,6 +161,7 @@ public class Artable : Workable
 		base.gameObject.GetComponent<BuildingComplete>().SetDescriptionFlavour(artableStage.Description);
 		this.shouldShowSkillPerkStatusItem = false;
 		this.UpdateStatusItem(null);
+		this.RefreshDecorTag();
 		base.Trigger(111068960, this.currentStage);
 	}
 
@@ -167,6 +169,25 @@ public class Artable : Workable
 	{
 		this.SetDefault();
 		this.userChosenTargetStage = stageID;
+	}
+
+	public void RefreshDecorTag()
+	{
+		KPrefabID component = base.GetComponent<KPrefabID>();
+		bool flag = component.HasTag(GameTags.Decoration);
+		bool flag2 = this.CurrentStage != null && this.currentStage != "Default";
+		if (flag2)
+		{
+			component.AddTag(GameTags.Decoration, false);
+		}
+		else
+		{
+			component.RemoveTag(GameTags.Decoration);
+		}
+		if (flag2 != flag)
+		{
+			Game.Instance.roomProber.TriggerBuildingChangedEvent(Grid.PosToCell(base.gameObject), component);
+		}
 	}
 
 	[Serialize]

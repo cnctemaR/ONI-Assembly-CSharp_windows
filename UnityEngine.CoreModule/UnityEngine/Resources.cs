@@ -8,8 +8,8 @@ using UnityEngineInternal;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Export/Resources/Resources.bindings.h")]
 	[NativeHeader("Runtime/Misc/ResourceManagerUtility.h")]
+	[NativeHeader("Runtime/Export/Resources/Resources.bindings.h")]
 	public sealed class Resources
 	{
 		internal static T[] ConvertObjects<T>(Object[] rawObjects) where T : Object

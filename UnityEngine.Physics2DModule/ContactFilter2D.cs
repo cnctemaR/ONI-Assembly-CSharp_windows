@@ -5,9 +5,9 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
+	[RequiredByNativeCode(Optional = true, GenerateProxy = true)]
 	[NativeClass("ContactFilter", "struct ContactFilter;")]
 	[NativeHeader("Modules/Physics2D/Public/Collider2D.h")]
-	[RequiredByNativeCode(Optional = true, GenerateProxy = true)]
 	[Serializable]
 	public struct ContactFilter2D
 	{

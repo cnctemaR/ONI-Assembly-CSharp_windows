@@ -2,7 +2,7 @@
 using STRINGS;
 using UnityEngine;
 
-[EntityConfigOrder(2)]
+[EntityConfigOrder(3)]
 public class BabyPrehistoricPacuConfig : IEntityConfig, IHasDlcRestrictions
 {
 	public string[] GetRequiredDlcIds()

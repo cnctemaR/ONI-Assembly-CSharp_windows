@@ -43,7 +43,7 @@ public class BatterySmart : Battery, IActivationRangeTarget
 		this.UpdateLogicCircuit(null);
 	}
 
-	private void UpdateLogicCircuit(object data)
+	private void UpdateLogicCircuit(object _)
 	{
 		float num = (float)Mathf.RoundToInt(base.PercentFull * 100f);
 		if (this.activated)

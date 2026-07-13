@@ -1,4 +1,5 @@
 ﻿using System;
+using Klei;
 using STRINGS;
 using TUNING;
 using UnityEngine;
@@ -9,25 +10,18 @@ public class JetSuitLocker : StateMachineComponent<JetSuitLocker.StatesInstance>
 	{
 		get
 		{
-			GameObject fuel = this.GetFuel();
-			float num = 0f;
-			if (fuel != null)
-			{
-				num = fuel.GetComponent<PrimaryElement>().Mass / 100f;
-				num = Math.Min(num, 1f);
-			}
-			return num;
+			return Math.Min((0f + this.storage.GetMassAvailable(this.fuel_tag)) / 100f, 1f);
 		}
 	}
 
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		this.fuel_tag = SimHashes.Petroleum.CreateTag();
+		this.fuel_tag = GameTags.CombustibleLiquid;
 		this.fuel_consumer = base.gameObject.AddComponent<ConduitConsumer>();
 		this.fuel_consumer.conduitType = this.portInfo.conduitType;
 		this.fuel_consumer.consumptionRate = 10f;
-		this.fuel_consumer.capacityTag = this.fuel_tag;
+		this.fuel_consumer.capacityTag = GameTags.CombustibleLiquid;
 		this.fuel_consumer.wrongElementResult = ConduitConsumer.WrongElementResult.Dump;
 		this.fuel_consumer.forceAlwaysSatisfied = true;
 		this.fuel_consumer.capacityKG = 100f;
@@ -52,11 +46,6 @@ public class JetSuitLocker : StateMachineComponent<JetSuitLocker.StatesInstance>
 		base.OnCleanUp();
 	}
 
-	private GameObject GetFuel()
-	{
-		return this.storage.FindFirst(this.fuel_tag);
-	}
-
 	public bool IsSuitFullyCharged()
 	{
 		return this.suit_locker.IsSuitFullyCharged();
@@ -74,22 +63,26 @@ public class JetSuitLocker : StateMachineComponent<JetSuitLocker.StatesInstance>
 		{
 			return;
 		}
-		GameObject fuel = this.GetFuel();
-		if (fuel == null)
+		if (!this.HasFuel())
 		{
 			return;
 		}
-		PrimaryElement component = fuel.GetComponent<PrimaryElement>();
-		if (component == null)
+		JetSuitTank component = storedOutfit.GetComponent<JetSuitTank>();
+		float num = dt * 10f;
+		num = Mathf.Min(num, 100f - component.amount);
+		while (num > 0f && this.HasFuel())
 		{
-			return;
+			float num2 = this.storage.GetMassAvailable(this.fuel_tag);
+			num2 = Mathf.Min(num2, num);
+			component.amount += num2;
+			num -= num2;
+			SimHashes simHashes = SimHashes.Petroleum;
+			float num3;
+			SimUtil.DiseaseInfo diseaseInfo;
+			float num4;
+			this.storage.ConsumeAndGetDisease(this.fuel_tag, num2, out num3, out diseaseInfo, out num4, out simHashes);
+			component.lastFuelUsed = simHashes;
 		}
-		JetSuitTank component2 = storedOutfit.GetComponent<JetSuitTank>();
-		float num = 375f * dt / 600f;
-		num = Mathf.Min(num, 25f - component2.amount);
-		num = Mathf.Min(component.Mass, num);
-		component.Mass -= num;
-		component2.amount += num;
 	}
 
 	bool ISecondaryInput.HasSecondaryConduitType(ConduitType type)
@@ -108,8 +101,7 @@ public class JetSuitLocker : StateMachineComponent<JetSuitLocker.StatesInstance>
 
 	public bool HasFuel()
 	{
-		GameObject fuel = this.GetFuel();
-		return fuel != null && fuel.GetComponent<PrimaryElement>().Mass > 0f;
+		return this.storage.Has(this.fuel_tag) && this.storage.GetMassAvailable(this.fuel_tag) > 0f;
 	}
 
 	private void RefreshMeter()
@@ -189,7 +181,7 @@ public class JetSuitLocker : StateMachineComponent<JetSuitLocker.StatesInstance>
 				smi.master.FuelSuit(dt);
 			}, UpdateRate.SIM_1000ms, false);
 			this.charging.nofuel.TagTransition(GameTags.Operational, this.charging.notoperational, true).Transition(this.charging.operational, (JetSuitLocker.StatesInstance smi) => smi.master.HasFuel(), UpdateRate.SIM_200ms).ToggleStatusItem(BUILDING.STATUSITEMS.SUIT_LOCKER.NO_FUEL.NAME, BUILDING.STATUSITEMS.SUIT_LOCKER.NO_FUEL.TOOLTIP, "status_item_no_liquid_to_pump", StatusItem.IconType.Custom, NotificationType.BadMinor, false, default(HashedString), 129022, null, null, null);
-			this.charged.EventTransition(GameHashes.OnStorageChange, this.empty, (JetSuitLocker.StatesInstance smi) => smi.master.GetStoredOutfit() == null);
+			this.charged.Transition(this.charging, (JetSuitLocker.StatesInstance smi) => !smi.master.IsSuitFullyCharged(), UpdateRate.SIM_200ms).EventTransition(GameHashes.OnStorageChange, this.empty, (JetSuitLocker.StatesInstance smi) => smi.master.GetStoredOutfit() == null);
 		}
 
 		public GameStateMachine<JetSuitLocker.States, JetSuitLocker.StatesInstance, JetSuitLocker, object>.State empty;

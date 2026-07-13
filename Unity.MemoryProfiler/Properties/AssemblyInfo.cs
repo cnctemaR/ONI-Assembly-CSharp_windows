@@ -8,4 +8,5 @@ using UnityEngine.Scripting;
 
 [assembly: AssemblyVersion("0.0.0.0")]
 [assembly: Preserve]
+[assembly: AlwaysLinkAssembly]
 [assembly: SecurityPermission(SecurityAction.RequestMinimum, SkipVerification = true)]

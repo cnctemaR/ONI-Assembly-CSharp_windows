@@ -25,8 +25,8 @@ namespace UnityEngine.SceneManagement
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern string GetNameInternal(int sceneHandle);
 
-		[NativeThrows]
 		[StaticAccessor("SceneBindings", StaticAccessorType.DoubleColon)]
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void SetNameInternal(int sceneHandle, string name);
 

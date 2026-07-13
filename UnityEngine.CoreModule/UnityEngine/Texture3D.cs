@@ -10,8 +10,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[ExcludeFromPreset]
 	[NativeHeader("Runtime/Graphics/Texture3D.h")]
+	[ExcludeFromPreset]
 	public sealed class Texture3D : Texture
 	{
 		public extern int depth
@@ -136,8 +136,8 @@ namespace UnityEngine
 		{
 		}
 
-		[ExcludeFromDocs]
 		[RequiredByNativeCode]
+		[ExcludeFromDocs]
 		public Texture3D(int width, int height, int depth, GraphicsFormat format, TextureCreationFlags flags)
 			: this(width, height, depth, format, flags, Texture.GenerateAllMips)
 		{

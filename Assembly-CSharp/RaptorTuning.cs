@@ -30,4 +30,8 @@ public static class RaptorTuning
 	public static float PREY_PRODUCTION_RATE = 256f;
 
 	public static Tag POOP_ELEMENT = SimHashes.BrineIce.CreateTag();
+
+	public static int ROARS_PER_CYCLE = 2;
+
+	public static float ROAR_COOLDOWN = 60f;
 }

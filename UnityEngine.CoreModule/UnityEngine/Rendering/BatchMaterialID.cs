@@ -4,9 +4,9 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Rendering
 {
+	[NativeClass("BatchMaterialID")]
 	[NativeHeader("Runtime/Camera/BatchRendererGroup.h")]
 	[RequiredByNativeCode(Optional = true, GenerateProxy = true)]
-	[NativeClass("BatchMaterialID")]
 	public struct BatchMaterialID : IEquatable<BatchMaterialID>
 	{
 		public override int GetHashCode()

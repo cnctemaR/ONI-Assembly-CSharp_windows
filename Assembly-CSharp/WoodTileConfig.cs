@@ -14,11 +14,11 @@ public class WoodTileConfig : IBuildingConfig
 		int num3 = 100;
 		float num4 = 3f;
 		float[] tier = global::TUNING.BUILDINGS.CONSTRUCTION_MASS_KG.TIER3;
-		string[] array = new string[] { SimHashes.WoodLog.ToString() };
+		string[] woods = MATERIALS.WOODS;
 		float num5 = 1600f;
 		BuildLocationRule buildLocationRule = BuildLocationRule.Tile;
 		EffectorValues none = NOISE_POLLUTION.NONE;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, array, num5, buildLocationRule, global::TUNING.BUILDINGS.DECOR.BONUS.TIER2, none, 0.2f);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, woods, num5, buildLocationRule, global::TUNING.BUILDINGS.DECOR.BONUS.TIER1, none, 0.2f);
 		BuildingTemplates.CreateFoundationTileDef(buildingDef);
 		buildingDef.Floodable = false;
 		buildingDef.Overheatable = false;

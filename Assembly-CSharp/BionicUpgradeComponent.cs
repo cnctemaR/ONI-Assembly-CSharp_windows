@@ -82,7 +82,7 @@ public class BionicUpgradeComponent : Assignable, IGameObjectEffectDescriptor
 		this.RefreshStatusItem(null);
 	}
 
-	private void RefreshStatusItem(object data = null)
+	private void RefreshStatusItem(object _ = null)
 	{
 		if (this.assignee == null && !base.gameObject.HasTag(GameTags.Stored))
 		{

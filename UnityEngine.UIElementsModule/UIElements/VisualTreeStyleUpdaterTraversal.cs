@@ -229,11 +229,12 @@ namespace UnityEngine.UIElements
 			foreach (SelectorMatchRecord selectorMatchRecord2 in matchingSelectors)
 			{
 				StyleSheet sheet = selectorMatchRecord2.sheet;
-				StyleRule rule = selectorMatchRecord2.complexSelector.rule;
+				int ruleIndex = selectorMatchRecord2.complexSelector.ruleIndex;
 				int specificity = selectorMatchRecord2.complexSelector.specificity;
 				num = (num * 397L) ^ (long)sheet.contentHash;
-				num = (num * 397L) ^ (long)rule.GetHashCode();
+				num = (num * 397L) ^ (long)ruleIndex;
 				num = (num * 397L) ^ (long)specificity;
+				StyleRule rule = selectorMatchRecord2.complexSelector.rule;
 				bool flag2 = rule.customPropertiesCount > 0;
 				if (flag2)
 				{

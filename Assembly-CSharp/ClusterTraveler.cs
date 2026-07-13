@@ -79,12 +79,12 @@ public class ClusterTraveler : KMonoBehaviour, ISim200ms
 		this.m_isPathDirty = true;
 	}
 
-	private void OnClusterFogOfWarRevealed(object data)
+	private void OnClusterFogOfWarRevealed(object _)
 	{
 		this.MarkPathDirty();
 	}
 
-	private void OnClusterDestinationChanged(object data)
+	private void OnClusterDestinationChanged(object _)
 	{
 		if (this.m_destinationSelector.IsAtDestination())
 		{

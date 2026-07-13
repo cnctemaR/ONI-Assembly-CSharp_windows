@@ -18,6 +18,7 @@ public class OffsetTableTracker : OffsetTracker
 	{
 		this.table = table;
 		this.cmp = cmp;
+		this.OnCellChangedClosure = new Action<object>(this.OnCellChanged);
 	}
 
 	protected override void UpdateCell(int previous_cell, int current_cell)
@@ -32,8 +33,8 @@ public class OffsetTableTracker : OffsetTracker
 		extents.y--;
 		if (!this.solidPartitionerEntry.IsValid())
 		{
-			this.solidPartitionerEntry = GameScenePartitioner.Instance.Add("OffsetTableTracker.UpdateCell", this.cmp.gameObject, extents, GameScenePartitioner.Instance.solidChangedLayer, new Action<object>(this.OnCellChanged));
-			this.validNavCellChangedPartitionerEntry = GameScenePartitioner.Instance.Add("OffsetTableTracker.UpdateCell", this.cmp.gameObject, extents, GameScenePartitioner.Instance.validNavCellChangedLayer, new Action<object>(this.OnCellChanged));
+			this.solidPartitionerEntry = GameScenePartitioner.Instance.Add("OffsetTableTracker.UpdateCell", this.cmp.gameObject, extents, GameScenePartitioner.Instance.solidChangedLayer, this.OnCellChangedClosure);
+			this.validNavCellChangedPartitionerEntry = GameScenePartitioner.Instance.Add("OffsetTableTracker.UpdateCell", this.cmp.gameObject, extents, GameScenePartitioner.Instance.validNavCellChangedLayer, this.OnCellChangedClosure);
 		}
 		else
 		{
@@ -122,6 +123,8 @@ public class OffsetTableTracker : OffsetTracker
 	private static NavGrid navGridImpl;
 
 	private KMonoBehaviour cmp;
+
+	private Action<object> OnCellChangedClosure;
 
 	private int[] DEBUG_rowValidIdx;
 }

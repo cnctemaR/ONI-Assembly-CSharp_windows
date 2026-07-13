@@ -21,7 +21,14 @@ namespace UnityEngine.UIElements
 		protected override uint StringToValue(string str)
 		{
 			uint num;
-			return UINumericFieldsUtils.TryConvertStringToUInt(str, base.textInputBase.originalText, out num) ? num : base.rawValue;
+			ExpressionEvaluator.Expression expression;
+			bool flag = UINumericFieldsUtils.TryConvertStringToUInt(str, base.textInputBase.originalText, out num, out expression);
+			Action<ExpressionEvaluator.Expression> expressionEvaluated = this.expressionEvaluated;
+			if (expressionEvaluated != null)
+			{
+				expressionEvaluated(expression);
+			}
+			return flag ? num : base.rawValue;
 		}
 
 		public UnsignedIntegerField()
@@ -115,9 +122,7 @@ namespace UnityEngine.UIElements
 
 			protected override uint StringToValue(string str)
 			{
-				uint num;
-				UINumericFieldsUtils.TryConvertStringToUInt(str, base.originalText, out num);
-				return num;
+				return this.parentUnsignedIntegerField.StringToValue(str);
 			}
 		}
 	}

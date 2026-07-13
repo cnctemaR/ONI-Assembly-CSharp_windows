@@ -18,8 +18,8 @@ public class OperationalControlledSwitch : CircuitSwitch
 
 	private void OnOperationalChanged(object data)
 	{
-		bool flag = (bool)data;
-		this.SetState(flag);
+		bool value = ((Boxed<bool>)data).value;
+		this.SetState(value);
 	}
 
 	private static readonly EventSystem.IntraObjectHandler<OperationalControlledSwitch> OnOperationalChangedDelegate = new EventSystem.IntraObjectHandler<OperationalControlledSwitch>(delegate(OperationalControlledSwitch component, object data)

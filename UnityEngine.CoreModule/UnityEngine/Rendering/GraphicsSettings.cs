@@ -5,8 +5,8 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine.Rendering
 {
-	[NativeHeader("Runtime/Camera/GraphicsSettings.h")]
 	[StaticAccessor("GetGraphicsSettings()", StaticAccessorType.Dot)]
+	[NativeHeader("Runtime/Camera/GraphicsSettings.h")]
 	public sealed class GraphicsSettings : Object
 	{
 		private GraphicsSettings()

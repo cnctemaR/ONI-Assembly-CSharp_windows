@@ -3,7 +3,7 @@ using Klei.AI;
 using STRINGS;
 using UnityEngine;
 
-[EntityConfigOrder(1)]
+[EntityConfigOrder(2)]
 public class GoldBellyConfig : IEntityConfig, IHasDlcRestrictions
 {
 	public static GameObject CreateGoldBelly(string id, string name, string desc, string anim_file, bool is_baby)
@@ -26,9 +26,7 @@ public class GoldBellyConfig : IEntityConfig, IHasDlcRestrictions
 		def.requiredDiet = "FriesCarrot";
 		def.levelCount = 6;
 		def.scaleGrowthSymbols = GoldBellyConfig.SCALE_SYMBOLS;
-		GameObject gameObject2 = BaseBellyConfig.SetupDiet(gameObject, BaseBellyConfig.StandardDiets(), BellyTuning.CALORIES_PER_UNIT_EATEN, 1f);
-		gameObject2.AddTag(GameTags.OriginalCreature);
-		return gameObject2;
+		return BaseBellyConfig.SetupDiet(gameObject, BaseBellyConfig.StandardDiets(), BellyTuning.CALORIES_PER_UNIT_EATEN, 1f);
 	}
 
 	public string[] GetRequiredDlcIds()

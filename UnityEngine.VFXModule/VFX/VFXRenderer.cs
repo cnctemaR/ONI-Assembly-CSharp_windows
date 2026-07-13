@@ -6,8 +6,12 @@ namespace UnityEngine.VFX
 {
 	[RejectDragAndDropMaterial]
 	[NativeType(Header = "Modules/VFX/Public/VFXRenderer.h")]
-	[UsedByNativeCode]
+	[RequiredByNativeCode]
 	internal sealed class VFXRenderer : Renderer
 	{
+		[RequiredMember]
+		public VFXRenderer()
+		{
+		}
 	}
 }

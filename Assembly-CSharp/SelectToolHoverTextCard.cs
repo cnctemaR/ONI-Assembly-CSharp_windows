@@ -302,9 +302,9 @@ public class SelectToolHoverTextCard : HoverTextConfiguration
 				{
 					string text8 = UI.OVERLAYS.ROOMS.NOROOM.DESC;
 					int maxRoomSize = TuningData<RoomProber.Tuning>.Get().maxRoomSize;
-					if (cavityForCell.numCells > maxRoomSize)
+					if (cavityForCell.NumCells > maxRoomSize)
 					{
-						text8 = text8 + "\n" + string.Format(UI.OVERLAYS.ROOMS.NOROOM.TOO_BIG, cavityForCell.numCells, maxRoomSize);
+						text8 = text8 + "\n" + string.Format(UI.OVERLAYS.ROOMS.NOROOM.TOO_BIG, cavityForCell.NumCells, maxRoomSize);
 					}
 					hoverTextDrawer.NewLine(26);
 					hoverTextDrawer.DrawText(text8, this.Styles_BodyText.Standard);

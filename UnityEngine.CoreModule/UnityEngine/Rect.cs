@@ -7,8 +7,8 @@ using UnityEngine.Scripting;
 namespace UnityEngine
 {
 	[NativeHeader("Runtime/Math/Rect.h")]
-	[RequiredByNativeCode(Optional = true, GenerateProxy = true)]
 	[NativeClass("Rectf", "template<typename T> class RectT; typedef RectT<float> Rectf;")]
+	[RequiredByNativeCode(Optional = true, GenerateProxy = true)]
 	public struct Rect : IEquatable<Rect>, IFormattable
 	{
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]

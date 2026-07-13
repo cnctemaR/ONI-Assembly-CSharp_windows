@@ -35,7 +35,7 @@ public class PollinationMonitor : GameStateMachine<PollinationMonitor, Pollinati
 		});
 		this.not_pollinated.Enter(delegate(PollinationMonitor.StatesInstance smi)
 		{
-			smi.Trigger(-200207042, false);
+			smi.BoxingTrigger(-200207042, false);
 		}).EventHandler(GameHashes.EffectAdded, delegate(PollinationMonitor.StatesInstance smi, object data)
 		{
 			if (PollinationMonitor.IsPollinationEffect(data as Effect))
@@ -45,7 +45,7 @@ public class PollinationMonitor : GameStateMachine<PollinationMonitor, Pollinati
 		});
 		this.pollinated.Enter(delegate(PollinationMonitor.StatesInstance smi)
 		{
-			smi.Trigger(-200207042, true);
+			smi.BoxingTrigger(-200207042, true);
 		}).EventHandler(GameHashes.EffectRemoved, delegate(PollinationMonitor.StatesInstance smi, object data)
 		{
 			if (!PollinationMonitor.IsPollinationEffect(data as Effect))

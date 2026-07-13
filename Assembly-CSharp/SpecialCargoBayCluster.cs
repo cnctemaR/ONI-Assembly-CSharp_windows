@@ -79,7 +79,7 @@ public class SpecialCargoBayCluster : GameStateMachine<SpecialCargoBayCluster, S
 		public GameStateMachine<SpecialCargoBayCluster, SpecialCargoBayCluster.Instance, IStateMachineTarget, SpecialCargoBayCluster.Def>.State cloud;
 	}
 
-	public new class Instance : GameStateMachine<SpecialCargoBayCluster, SpecialCargoBayCluster.Instance, IStateMachineTarget, SpecialCargoBayCluster.Def>.GameInstance
+	public new class Instance : GameStateMachine<SpecialCargoBayCluster, SpecialCargoBayCluster.Instance, IStateMachineTarget, SpecialCargoBayCluster.Def>.GameInstance, IHexCellCollector
 	{
 		public void PlayDeathCloud()
 		{
@@ -199,6 +199,41 @@ public class SpecialCargoBayCluster : GameStateMachine<SpecialCargoBayCluster, S
 		{
 			bool flag;
 			return this.buildingAnimController.GetSymbolTransform("loot", out flag).GetColumn(3);
+		}
+
+		public bool CheckIsCollecting()
+		{
+			return false;
+		}
+
+		public string GetProperName()
+		{
+			return base.GetComponent<RocketModuleCluster>().GetProperName();
+		}
+
+		public Sprite GetUISprite()
+		{
+			return global::Def.GetUISprite(base.master.gameObject.GetComponent<KPrefabID>().PrefabID(), "ui", false).first;
+		}
+
+		public float GetCapacity()
+		{
+			return 1f;
+		}
+
+		public float GetMassStored()
+		{
+			return (float)this.critterStorage.items.Count;
+		}
+
+		public float TimeInState()
+		{
+			return this.timeinstate;
+		}
+
+		public string GetCapacityBarText()
+		{
+			return string.Format("{0} / {1}", this.GetMassStored(), this.GetCapacity());
 		}
 
 		public MeterController doorMeter;

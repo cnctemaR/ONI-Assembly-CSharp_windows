@@ -9,7 +9,13 @@ public class MonumentPartInfo : IBlueprintInfo, IHasDlcRestrictions
 
 	public string desc { get; set; }
 
-	public PermitRarity rarity { get; set; }
+	public PermitRarity rarity
+	{
+		get
+		{
+			return this.rarity_;
+		}
+	}
 
 	public string animFile { get; set; }
 
@@ -18,7 +24,7 @@ public class MonumentPartInfo : IBlueprintInfo, IHasDlcRestrictions
 		this.id = id;
 		this.name = name;
 		this.desc = desc;
-		this.rarity = rarity;
+		this.rarity_ = rarity;
 		this.animFile = animFilename;
 		this.state = state;
 		this.symbolName = symbolName;
@@ -36,6 +42,8 @@ public class MonumentPartInfo : IBlueprintInfo, IHasDlcRestrictions
 	{
 		return this.forbiddenDlcIds;
 	}
+
+	private readonly PermitRarity rarity_;
 
 	public string state;
 

@@ -204,7 +204,7 @@ public class KPrefabID : KMonoBehaviour, ISaveLoadable, IHasDlcRestrictions
 		if (this.tags.Add(tag))
 		{
 			this.dirtyTagsHash = true;
-			base.Trigger(-1582839653, new TagChangedEventData(tag, true));
+			base.BoxingTrigger<TagChangedEventData>(-1582839653, new TagChangedEventData(tag, true));
 		}
 		if (serialize)
 		{
@@ -217,7 +217,7 @@ public class KPrefabID : KMonoBehaviour, ISaveLoadable, IHasDlcRestrictions
 		if (this.tags.Remove(tag))
 		{
 			this.dirtyTagsHash = true;
-			base.Trigger(-1582839653, new TagChangedEventData(tag, false));
+			base.BoxingTrigger<TagChangedEventData>(-1582839653, new TagChangedEventData(tag, false));
 		}
 		this.serializedTags.Remove(tag);
 	}

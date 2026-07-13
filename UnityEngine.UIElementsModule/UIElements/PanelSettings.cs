@@ -535,16 +535,16 @@ namespace UnityEngine.UIElements
 
 		internal UIDocumentList m_AttachedUIDocumentsList;
 
-		[HideInInspector]
 		[SerializeField]
+		[HideInInspector]
 		private DynamicAtlasSettings m_DynamicAtlasSettings = DynamicAtlasSettings.defaults;
 
 		[SerializeField]
 		[HideInInspector]
 		private Shader m_AtlasBlitShader;
 
-		[HideInInspector]
 		[SerializeField]
+		[HideInInspector]
 		private Shader m_RuntimeShader;
 
 		[HideInInspector]

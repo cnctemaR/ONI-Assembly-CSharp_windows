@@ -7,6 +7,39 @@ using UnityEngine;
 
 public class EatChore : Chore<EatChore.StatesInstance>
 {
+	public static IDiningSeat ResolveDiningSeat(GameObject messStation)
+	{
+		if (messStation == null)
+		{
+			global::Debug.LogWarning("messStation GameObject is null");
+			return null;
+		}
+		IDiningSeat diningSeat;
+		if (!messStation.TryGetComponent<IDiningSeat>(out diningSeat))
+		{
+			global::Debug.LogWarning("messStation GameObject has no IDiningSeat component");
+			return null;
+		}
+		return diningSeat;
+	}
+
+	private static KAnimFile ResolveEatAnim(IDiningSeat diningSeat, bool dinerIsBionic)
+	{
+		HashedString hashedString = ((diningSeat != null) ? (dinerIsBionic ? diningSeat.ReloadElectrobankAnim : diningSeat.EatAnim) : MessStation.eatAnim);
+		KAnimFile anim = Assets.GetAnim(hashedString);
+		if (anim == null)
+		{
+			global::Debug.LogError(string.Format("Animation asset [{0}] does not exist", hashedString));
+			return null;
+		}
+		return anim;
+	}
+
+	private static KAnimFile ResolveEatAnim(GameObject messStation, bool dinerIsBionic)
+	{
+		return EatChore.ResolveEatAnim(EatChore.ResolveDiningSeat(messStation), dinerIsBionic);
+	}
+
 	public EatChore(IStateMachineTarget master)
 		: base(Db.Get().ChoreTypes.Eat, master, master.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.personalNeeds, 5, false, true, 0, false, ReportManager.ReportType.PersonalTime)
 	{
@@ -60,6 +93,26 @@ public class EatChore : Chore<EatChore.StatesInstance>
 		base.Begin(context);
 	}
 
+	public static bool IsMessStationNonOperational(GameObject messStation)
+	{
+		if (messStation == null)
+		{
+			return true;
+		}
+		IDiningSeat diningSeat = EatChore.ResolveDiningSeat(messStation);
+		if (diningSeat == null)
+		{
+			return true;
+		}
+		Operational operational = diningSeat.FindOperational();
+		return operational == null || !operational.IsOperational;
+	}
+
+	private static bool IsMessStationNonOperational(EatChore.StatesInstance _, GameObject messStation)
+	{
+		return EatChore.IsMessStationNonOperational(messStation);
+	}
+
 	public static readonly Chore.Precondition EdibleIsNotNull = new Chore.Precondition
 	{
 		id = "EdibleIsNotNull",
@@ -77,35 +130,64 @@ public class EatChore : Chore<EatChore.StatesInstance>
 		{
 		}
 
-		public static Assignable GetPreferredMessStation(MinionIdentity minionId)
+		private static Assignable GetPreferredMessStation(GameObject diner)
 		{
-			Ownables soleOwner = minionId.GetSoleOwner();
-			List<Assignable> list = Game.Instance.assignmentManager.GetPreferredAssignables(soleOwner, Db.Get().AssignableSlots.MessStation);
-			if (list.Count == 0)
+			Ownables soleOwner = diner.GetComponent<MinionIdentity>().GetSoleOwner();
+			Navigator navigator;
+			diner.TryGetComponent<Navigator>(out navigator);
+			foreach (Assignable assignable in Game.Instance.assignmentManager.GetPreferredAssignables(soleOwner, navigator, Db.Get().AssignableSlots.MessStation))
 			{
-				soleOwner.AutoAssignSlot(Db.Get().AssignableSlots.MessStation);
-				list = Game.Instance.assignmentManager.GetPreferredAssignables(soleOwner, Db.Get().AssignableSlots.MessStation);
+				if (EatChore.ResolveDiningSeat(assignable.gameObject) != null && assignable.GetComponent<Reservable>().IsReservableBy(assignable.gameObject))
+				{
+					return assignable;
+				}
 			}
-			if (list.Count <= 0)
+			return null;
+		}
+
+		public static Assignable ReserveMessStation(GameObject messStation, GameObject diner)
+		{
+			if (messStation != null)
 			{
-				return null;
+				messStation.GetComponent<Reservable>().ClearReservation();
 			}
-			return list[0];
+			Assignable preferredMessStation = EatChore.StatesInstance.GetPreferredMessStation(diner);
+			if (preferredMessStation != null && !preferredMessStation.GetComponent<Reservable>().Reserve(diner))
+			{
+				global::Debug.LogWarning("Failed to reserve dining seat");
+			}
+			return preferredMessStation;
 		}
 
 		public void UpdateMessStation()
 		{
-			base.smi.sm.messstation.Set(EatChore.StatesInstance.GetPreferredMessStation(base.sm.eater.Get(base.smi).GetComponent<MinionIdentity>()), base.smi);
+			Assignable assignable = EatChore.StatesInstance.ReserveMessStation(base.sm.messstation.Get(base.smi), base.sm.eater.Get(base.smi));
+			base.sm.messstation.Set(assignable, base.smi);
+		}
+
+		public void ClearMessStation()
+		{
+			GameObject gameObject = base.smi.sm.messstation.Get(base.smi);
+			if (gameObject != null)
+			{
+				gameObject.GetComponent<Reservable>().ClearReservation();
+			}
+			base.sm.messstation.Set(null, base.smi);
+		}
+
+		public static bool UseSalt(GameObject messStation)
+		{
+			if (messStation == null)
+			{
+				return false;
+			}
+			IDiningSeat diningSeat = EatChore.ResolveDiningSeat(messStation);
+			return diningSeat != null && diningSeat.HasSalt;
 		}
 
 		public bool UseSalt()
 		{
-			if (base.smi.sm.messstation != null && base.smi.sm.messstation.Get(base.smi) != null)
-			{
-				MessStation component = base.smi.sm.messstation.Get(base.smi).GetComponent<MessStation>();
-				return component != null && component.HasSalt;
-			}
-			return false;
+			return base.smi.sm.messstation != null && EatChore.StatesInstance.UseSalt(base.sm.messstation.Get(base.smi));
 		}
 
 		public static ValueTuple<GameObject, int> CreateLocator(Sensors sensors, Transform transform, string locatorName)
@@ -135,31 +217,39 @@ public class EatChore : Chore<EatChore.StatesInstance>
 			base.sm.locator.Set(null, this);
 		}
 
-		public static void SetZ(GameObject go, float z)
+		public static KAnimFile OnEnterMessStation(GameObject messStation, GameObject diner, GameObject food, bool dinerIsBionic, float? effectDurationOverride = null)
 		{
-			Vector3 position = go.transform.GetPosition();
-			position.z = z;
-			go.transform.SetPosition(position);
-		}
-
-		public static void ApplyRoomAndSaltEffects(GameObject messStation, GameObject diner, float? effectDurationOverride = null)
-		{
-			Effects component = diner.GetComponent<Effects>();
-			Room roomOfGameObject = Game.Instance.roomProber.GetRoomOfGameObject(messStation);
-			Storage component2 = messStation.GetComponent<Storage>();
-			EffectInstance effectInstance = null;
-			if (component2 != null && component2.Has(TableSaltConfig.ID.ToTag()))
+			IDiningSeat diningSeat = EatChore.ResolveDiningSeat(messStation);
+			if (diningSeat == null)
 			{
-				component2.ConsumeIgnoringDisease(TableSaltConfig.ID.ToTag(), TableSaltTuning.CONSUMABLE_RATE);
-				effectInstance = component.Add("MessTableSalt", true);
-				messStation.Trigger(1356255274, null);
+				return null;
 			}
+			KAnimControllerBase component = diner.GetComponent<KAnimControllerBase>();
+			KAnimFile kanimFile = EatChore.ResolveEatAnim(diningSeat, dinerIsBionic);
+			component.AddAnimOverrides(kanimFile, 0f);
+			Edible edible;
+			if (food != null && food.TryGetComponent<Edible>(out edible))
+			{
+				edible.workLayer = Grid.SceneLayer.BuildingFront;
+			}
+			EffectInstance effectInstance = null;
+			Effects component2 = diner.GetComponent<Effects>();
+			Storage storage = diningSeat.FindStorage();
+			if (storage != null && storage.Has(TableSaltConfig.TAG))
+			{
+				storage.ConsumeIgnoringDisease(TableSaltConfig.TAG, TableSaltTuning.CONSUMABLE_RATE);
+				effectInstance = component2.Add("MessTableSalt", true);
+			}
+			diningSeat.Diner = diner.GetComponent<KPrefabID>();
+			messStation.Trigger(1356255274, null);
+			Room roomOfGameObject = Game.Instance.roomProber.GetRoomOfGameObject(messStation);
+			KPrefabID component3 = messStation.GetComponent<KPrefabID>();
 			if (effectDurationOverride != null)
 			{
 				List<EffectInstance> list = null;
 				if (roomOfGameObject != null)
 				{
-					roomOfGameObject.roomType.TriggerRoomEffects(messStation.GetComponent<KPrefabID>(), component, out list);
+					roomOfGameObject.roomType.TriggerRoomEffects(component3, component2, out list);
 				}
 				if (effectInstance != null)
 				{
@@ -171,7 +261,7 @@ public class EatChore : Chore<EatChore.StatesInstance>
 				}
 				if (list == null)
 				{
-					return;
+					return kanimFile;
 				}
 				using (List<EffectInstance>.Enumerator enumerator = list.GetEnumerator())
 				{
@@ -180,16 +270,29 @@ public class EatChore : Chore<EatChore.StatesInstance>
 						EffectInstance effectInstance2 = enumerator.Current;
 						effectInstance2.timeRemaining = effectDurationOverride.Value;
 					}
-					return;
+					return kanimFile;
 				}
 			}
 			if (roomOfGameObject != null)
 			{
-				roomOfGameObject.roomType.TriggerRoomEffects(messStation.GetComponent<KPrefabID>(), component);
+				roomOfGameObject.roomType.TriggerRoomEffects(component3, component2);
+			}
+			return kanimFile;
+		}
+
+		public static void OnExitMessStation(GameObject messStation, GameObject diner, KAnimFile eatAnim)
+		{
+			diner.GetComponent<KAnimControllerBase>().RemoveAnimOverrides(eatAnim);
+			IDiningSeat diningSeat = EatChore.ResolveDiningSeat(messStation);
+			if (diningSeat != null)
+			{
+				diningSeat.Diner = null;
 			}
 		}
 
 		private int locatorCell;
+
+		public KAnimFile eatAnim;
 	}
 
 	public class States : GameStateMachine<EatChore.States, EatChore.StatesInstance, EatChore>
@@ -204,6 +307,9 @@ public class EatChore : Chore<EatChore.StatesInstance>
 			}).EventHandler(GameHashes.AssignablesChanged, delegate(EatChore.StatesInstance smi)
 			{
 				smi.UpdateMessStation();
+			}).Exit(delegate(EatChore.StatesInstance smi)
+			{
+				smi.ClearMessStation();
 			});
 			this.chooseaction.EnterTransition(this.rehydrate, (EatChore.StatesInstance smi) => this.ediblesource.Get(smi).HasTag(GameTags.Dehydrated)).EnterTransition(this.fetch, (EatChore.StatesInstance smi) => true);
 			this.rehydrate.Enter(delegate(EatChore.StatesInstance smi)
@@ -248,22 +354,15 @@ public class EatChore : Chore<EatChore.StatesInstance>
 				return !(accessabilityManager3 == null) && accessabilityManager3.CanAccess(this.eater.Get<WorkerBase>(smi).gameObject);
 			}, this.eatatmessstation, null);
 			this.fetch.InitializeStates(this.eater, this.ediblesource, this.ediblechunk, this.requestedfoodunits, this.actualfoodunits, this.eatatmessstation, null);
-			this.eatatmessstation.DefaultState(this.eatatmessstation.moveto).ParamTransition<GameObject>(this.messstation, this.eatonfloorstate, (EatChore.StatesInstance smi, GameObject p) => p == null).ParamTransition<GameObject>(this.messstation, this.eatonfloorstate, (EatChore.StatesInstance smi, GameObject p) => p != null && !p.GetComponent<Operational>().IsOperational);
+			this.eatatmessstation.DefaultState(this.eatatmessstation.moveto).ParamTransition<GameObject>(this.messstation, this.eatonfloorstate, (EatChore.StatesInstance smi, GameObject p) => p == null).ParamTransition<GameObject>(this.messstation, this.eatonfloorstate, new StateMachine<EatChore.States, EatChore.StatesInstance, EatChore, object>.Parameter<GameObject>.Callback(EatChore.IsMessStationNonOperational));
 			this.eatatmessstation.moveto.InitializeStates(this.eater, this.messstation, this.eatatmessstation.eat, this.eatonfloorstate, null, null);
-			this.eatatmessstation.eat.Enter("AnimOverride", delegate(EatChore.StatesInstance smi)
+			this.eatatmessstation.eat.Enter("OnEnterMessStation", delegate(EatChore.StatesInstance smi)
 			{
-				smi.GetComponent<KAnimControllerBase>().AddAnimOverrides(Assets.GetAnim("anim_eat_table_kanim"), 0f);
-			}).DoEat(this.ediblechunk, this.actualfoodunits, null, null).Enter(delegate(EatChore.StatesInstance smi)
+				smi.eatAnim = EatChore.StatesInstance.OnEnterMessStation(this.messstation.Get(smi), this.eater.Get(smi), this.ediblechunk.Get(smi), false, null);
+			}).DoEat(this.ediblechunk, this.actualfoodunits, null, null).Exit(delegate(EatChore.StatesInstance smi)
 			{
-				GameObject gameObject2 = this.eater.Get(smi);
-				EatChore.StatesInstance.SetZ(gameObject2, Grid.GetLayerZ(Grid.SceneLayer.BuildingFront));
-				EatChore.StatesInstance.ApplyRoomAndSaltEffects(this.messstation.Get(smi), gameObject2, null);
-			})
-				.Exit(delegate(EatChore.StatesInstance smi)
-				{
-					EatChore.StatesInstance.SetZ(this.eater.Get(smi), Grid.GetLayerZ(Grid.SceneLayer.Move));
-					smi.GetComponent<KAnimControllerBase>().RemoveAnimOverrides(Assets.GetAnim("anim_eat_table_kanim"));
-				});
+				EatChore.StatesInstance.OnExitMessStation(this.messstation.Get(smi), this.eater.Get(smi), smi.eatAnim);
+			});
 			this.eatonfloorstate.DefaultState(this.eatonfloorstate.moveto).Enter("CreateLocator", delegate(EatChore.StatesInstance smi)
 			{
 				smi.CreateLocator();
@@ -308,7 +407,7 @@ public class EatChore : Chore<EatChore.StatesInstance>
 
 		public class EatAtMessStationState : GameStateMachine<EatChore.States, EatChore.StatesInstance, EatChore, object>.State
 		{
-			public GameStateMachine<EatChore.States, EatChore.StatesInstance, EatChore, object>.ApproachSubState<MessStation> moveto;
+			public GameStateMachine<EatChore.States, EatChore.StatesInstance, EatChore, object>.ApproachSubState<IApproachable> moveto;
 
 			public GameStateMachine<EatChore.States, EatChore.StatesInstance, EatChore, object>.State eat;
 		}

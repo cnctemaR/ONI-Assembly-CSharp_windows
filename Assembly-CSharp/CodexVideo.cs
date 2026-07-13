@@ -29,6 +29,8 @@ public class CodexVideo : CodexWidget<CodexVideo>
 
 	public override void Configure(GameObject contentGameObject, Transform displayPane, Dictionary<CodexTextStyle, TextStyleSetting> textStyles)
 	{
+		base.preferredHeight = 180;
+		base.preferredWidth = 320;
 		this.ConfigureVideo(contentGameObject.GetComponent<VideoWidget>(), this.name, this.overlayName, this.overlayTexts);
 		base.ConfigurePreferredLayout(contentGameObject);
 	}

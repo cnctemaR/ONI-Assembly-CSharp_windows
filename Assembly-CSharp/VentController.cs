@@ -28,8 +28,9 @@ public class VentController : GameStateMachine<VentController, VentController.In
 	{
 		if (data != null)
 		{
-			Color32 color = (Color32)data;
-			smi.SetMeterOutputColor(color);
+			Color32 value = ((Boxed<Color32>)data).value;
+			value.a = byte.MaxValue;
+			smi.SetMeterOutputColor(value);
 		}
 	}
 

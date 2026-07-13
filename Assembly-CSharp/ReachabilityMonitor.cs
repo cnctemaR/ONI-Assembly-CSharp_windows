@@ -7,10 +7,17 @@ public class ReachabilityMonitor : GameStateMachine<ReachabilityMonitor, Reachab
 		default_state = this.unreachable;
 		base.serializable = StateMachine.SerializeType.Never;
 		this.root.FastUpdate("UpdateReachability", ReachabilityMonitor.updateReachabilityCB, UpdateRate.SIM_1000ms, true);
-		this.reachable.ToggleTag(GameTags.Reachable).Enter("TriggerEvent", delegate(ReachabilityMonitor.Instance smi)
+		this.reachable.Enter(delegate(ReachabilityMonitor.Instance smi)
+		{
+			smi.Get<KPrefabID>().AddTag(GameTags.Reachable, false);
+		}).Exit(delegate(ReachabilityMonitor.Instance smi)
+		{
+			smi.Get<KPrefabID>().RemoveTag(GameTags.Reachable);
+		}).Enter("TriggerEvent", delegate(ReachabilityMonitor.Instance smi)
 		{
 			smi.TriggerEvent();
-		}).ParamTransition<bool>(this.isReachable, this.unreachable, GameStateMachine<ReachabilityMonitor, ReachabilityMonitor.Instance, Workable, object>.IsFalse);
+		})
+			.ParamTransition<bool>(this.isReachable, this.unreachable, GameStateMachine<ReachabilityMonitor, ReachabilityMonitor.Instance, Workable, object>.IsFalse);
 		this.unreachable.Enter("TriggerEvent", delegate(ReachabilityMonitor.Instance smi)
 		{
 			smi.TriggerEvent();
@@ -43,8 +50,7 @@ public class ReachabilityMonitor : GameStateMachine<ReachabilityMonitor, Reachab
 
 		public void TriggerEvent()
 		{
-			bool flag = base.sm.isReachable.Get(base.smi);
-			base.Trigger(-1432940121, flag);
+			base.Trigger(-1432940121, BoxedBools.Box(base.sm.isReachable.Get(base.smi)));
 		}
 
 		public void UpdateReachability()

@@ -53,6 +53,8 @@ public class SubEntry : IHasDlcRestrictions
 
 	public string lockID { get; set; }
 
+	public string[] requiredAtLeastOneDlcIds { get; set; }
+
 	public string[] requiredDlcIds { get; set; }
 
 	public string[] forbiddenDlcIds { get; set; }
@@ -65,6 +67,11 @@ public class SubEntry : IHasDlcRestrictions
 	public string[] GetForbiddenDlcIds()
 	{
 		return this.forbiddenDlcIds;
+	}
+
+	public string[] GetAnyRequiredDlcIds()
+	{
+		return this.requiredAtLeastOneDlcIds;
 	}
 
 	public string sortString { get; set; }

@@ -8,10 +8,10 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Math/MathScripting.h")]
 	[UsedByNativeCode]
 	[Il2CppEagerStaticClassConstruction]
 	[NativeType(Header = "Runtime/Math/Quaternion.h")]
+	[NativeHeader("Runtime/Math/MathScripting.h")]
 	public struct Quaternion : IEquatable<Quaternion>, IFormattable
 	{
 		[FreeFunction("FromToQuaternionSafe", IsThreadSafe = true)]

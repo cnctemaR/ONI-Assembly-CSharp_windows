@@ -70,12 +70,12 @@ public static class CSVUtil
 			{
 				if (field.FieldType == typeof(float))
 				{
-					field.SetValue(target, (val == "") ? 0f : float.Parse(val));
+					field.SetValue(target, (val.Trim() == "") ? 0f : float.Parse(val));
 					return;
 				}
 				if (field.FieldType == typeof(int))
 				{
-					field.SetValue(target, (val == "") ? 0 : int.Parse(val));
+					field.SetValue(target, (val.Trim() == "") ? 0 : int.Parse(val));
 					return;
 				}
 				if (field.FieldType == typeof(byte))

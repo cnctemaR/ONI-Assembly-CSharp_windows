@@ -5,9 +5,9 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Rendering
 {
-	[NativeHeader("Runtime/Shaders/Keywords/KeywordSpaceScriptBindings.h")]
 	[UsedByNativeCode]
 	[NativeHeader("Runtime/Graphics/ShaderScriptBindings.h")]
+	[NativeHeader("Runtime/Shaders/Keywords/KeywordSpaceScriptBindings.h")]
 	public readonly struct LocalKeyword : IEquatable<LocalKeyword>
 	{
 		[FreeFunction("keywords::IsKeywordDynamic")]

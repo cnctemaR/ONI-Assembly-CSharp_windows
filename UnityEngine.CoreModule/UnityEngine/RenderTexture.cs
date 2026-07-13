@@ -9,11 +9,11 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
+	[UsedByNativeCode]
+	[NativeHeader("Runtime/Camera/Camera.h")]
+	[NativeHeader("Runtime/Graphics/RenderTexture.h")]
 	[NativeHeader("Runtime/Graphics/RenderBufferManager.h")]
 	[NativeHeader("Runtime/Graphics/GraphicsScriptBindings.h")]
-	[NativeHeader("Runtime/Camera/Camera.h")]
-	[UsedByNativeCode]
-	[NativeHeader("Runtime/Graphics/RenderTexture.h")]
 	public class RenderTexture : Texture
 	{
 		public override extern int width

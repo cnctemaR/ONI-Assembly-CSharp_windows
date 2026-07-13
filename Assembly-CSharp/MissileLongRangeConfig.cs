@@ -8,8 +8,13 @@ public class MissileLongRangeConfig : IEntityConfig
 	public GameObject CreatePrefab()
 	{
 		GameObject gameObject = EntityTemplates.CreateLooseEntity("MissileLongRange", ITEMS.MISSILE_LONGRANGE.NAME, ITEMS.MISSILE_LONGRANGE.DESC, 200f, true, Assets.GetAnim("longrange_missile_kanim"), "object", Grid.SceneLayer.Ore, EntityTemplates.CollisionShape.RECTANGLE, 0.8f, 1f, true, 0, SimHashes.Iron, new List<Tag>());
+		gameObject.AddTag(GameTags.LongRangeMissile);
 		gameObject.AddTag(GameTags.IndustrialProduct);
-		gameObject.AddOrGetDef<MissileLongRangeProjectile.Def>();
+		gameObject.AddTag(GameTags.PedestalDisplayable);
+		MissileLongRangeProjectile.Def def = gameObject.AddOrGetDef<MissileLongRangeProjectile.Def>();
+		def.starmapOverrideSymbol = "payload";
+		def.missileName = "STRINGS.ITEMS.MISSILE_LONGRANGE.NAME";
+		def.missileDesc = "STRINGS.ITEMS.MISSILE_LONGRANGE.DESC";
 		gameObject.AddOrGet<EntitySplitter>().maxStackSize = 200f;
 		return gameObject;
 	}

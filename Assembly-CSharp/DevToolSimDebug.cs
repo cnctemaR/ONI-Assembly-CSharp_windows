@@ -200,7 +200,9 @@ public class DevToolSimDebug : DevTool
 				else
 				{
 					ImGui.Text("Orientation: " + restriction.orientation.ToString());
-					ImGui.Text("Default Restriction: " + restriction.DirectionMasksForMinionInstanceID[-1].ToString());
+					ImGui.Text("Default Minion: " + restriction.DirectionMasksForMinionInstanceID[GridRestrictionSerializer.Instance.GetTagId(GameTags.Minions.Models.Standard)].ToString());
+					ImGui.Text("Default Bionic: " + restriction.DirectionMasksForMinionInstanceID[GridRestrictionSerializer.Instance.GetTagId(GameTags.Minions.Models.Bionic)].ToString());
+					ImGui.Text("Default Robot: " + restriction.DirectionMasksForMinionInstanceID[GridRestrictionSerializer.Instance.GetTagId(GameTags.Robot)].ToString());
 					ImGui.Indent();
 					foreach (MinionIdentity minionIdentity in Components.LiveMinionIdentities.Items)
 					{
@@ -215,6 +217,19 @@ public class DevToolSimDebug : DevTool
 							ImGui.Text(minionIdentity.name + ": Has No restriction");
 						}
 					}
+					foreach (Tag tag in GridRestrictionSerializer.Instance.ValidRobotTypes)
+					{
+						int tagId = GridRestrictionSerializer.Instance.GetTagId(tag);
+						Grid.Restriction.Directions directions2;
+						if (restriction.DirectionMasksForMinionInstanceID.TryGetValue(tagId, out directions2))
+						{
+							ImGui.Text(tag.ProperName() + " Restriction: " + directions2.ToString());
+						}
+						else
+						{
+							ImGui.Text(tag.ProperName() + ": Has No restriction");
+						}
+					}
 					ImGui.Unindent();
 				}
 				ImGui.Unindent();
@@ -223,10 +238,10 @@ public class DevToolSimDebug : DevTool
 			if (this.showGridContents)
 			{
 				ImGui.Indent();
-				for (int i = 0; i < 45; i++)
+				for (int j = 0; j < 45; j++)
 				{
-					GameObject gameObject = Grid.Objects[num3, i];
-					ImGui.Text(Enum.GetName(typeof(ObjectLayer), i) + ": " + ((gameObject != null) ? gameObject.name : "None"));
+					GameObject gameObject = Grid.Objects[num3, j];
+					ImGui.Text(Enum.GetName(typeof(ObjectLayer), j) + ": " + ((gameObject != null) ? gameObject.name : "None"));
 				}
 				ImGui.Unindent();
 			}
@@ -301,7 +316,7 @@ public class DevToolSimDebug : DevTool
 				}
 				if (cavityInfo != null)
 				{
-					ImGui.Text("Cell Count: " + cavityInfo.numCells.ToString());
+					ImGui.Text("Cell Count: " + cavityInfo.NumCells.ToString());
 					Room room = cavityInfo.room;
 					if (room != null)
 					{
@@ -317,7 +332,7 @@ public class DevToolSimDebug : DevTool
 						this.showCreatures = ImGui.CollapsingHeader("Creatures (" + room.cavity.creatures.Count.ToString() + ")");
 						if (!this.showCreatures)
 						{
-							goto IL_0CC0;
+							goto IL_0DC9;
 						}
 						using (List<KPrefabID>.Enumerator enumerator4 = room.cavity.creatures.GetEnumerator())
 						{
@@ -326,7 +341,7 @@ public class DevToolSimDebug : DevTool
 								KPrefabID kprefabID2 = enumerator4.Current;
 								ImGui.Text(kprefabID2.ToString());
 							}
-							goto IL_0CC0;
+							goto IL_0DC9;
 						}
 					}
 					ImGui.Text("Is Room: False");
@@ -335,7 +350,7 @@ public class DevToolSimDebug : DevTool
 				{
 					ImGui.Text("No Cavity Detected");
 				}
-				IL_0CC0:
+				IL_0DC9:
 				ImGui.Unindent();
 			}
 			this.showPropertyInfo = ImGui.CollapsingHeader("Property Info");

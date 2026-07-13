@@ -151,8 +151,8 @@ namespace UnityEngine
 			return flag2;
 		}
 
-		[NativeName("RaycastTest")]
 		[StaticAccessor("GetPhysicsManager().GetPhysicsQuery()", StaticAccessorType.Dot)]
+		[NativeName("RaycastTest")]
 		private static bool Internal_RaycastTest(PhysicsScene physicsScene, Ray ray, float maxDistance, int layerMask, QueryTriggerInteraction queryTriggerInteraction)
 		{
 			return PhysicsScene.Internal_RaycastTest_Injected(ref physicsScene, ref ray, maxDistance, layerMask, queryTriggerInteraction);
@@ -201,8 +201,8 @@ namespace UnityEngine
 			return num;
 		}
 
-		[StaticAccessor("GetPhysicsManager().GetPhysicsQuery()")]
 		[NativeName("RaycastNonAlloc")]
+		[StaticAccessor("GetPhysicsManager().GetPhysicsQuery()")]
 		private static int Internal_RaycastNonAlloc(PhysicsScene physicsScene, Ray ray, [Unmarshalled] RaycastHit[] raycastHits, float maxDistance, int mask, QueryTriggerInteraction queryTriggerInteraction)
 		{
 			return PhysicsScene.Internal_RaycastNonAlloc_Injected(ref physicsScene, ref ray, raycastHits, maxDistance, mask, queryTriggerInteraction);
@@ -238,8 +238,8 @@ namespace UnityEngine
 			return PhysicsScene.Internal_CapsuleCast(this, point1, point2, radius, direction, out hitInfo, maxDistance, layerMask, queryTriggerInteraction);
 		}
 
-		[StaticAccessor("GetPhysicsManager().GetPhysicsQuery()")]
 		[NativeName("CapsuleCastNonAlloc")]
+		[StaticAccessor("GetPhysicsManager().GetPhysicsQuery()")]
 		private static int Internal_CapsuleCastNonAlloc(PhysicsScene physicsScene, Vector3 p0, Vector3 p1, float radius, Vector3 direction, [Unmarshalled] RaycastHit[] raycastHits, float maxDistance, int mask, QueryTriggerInteraction queryTriggerInteraction)
 		{
 			return PhysicsScene.Internal_CapsuleCastNonAlloc_Injected(ref physicsScene, ref p0, ref p1, radius, ref direction, raycastHits, maxDistance, mask, queryTriggerInteraction);
@@ -261,8 +261,8 @@ namespace UnityEngine
 			return num;
 		}
 
-		[StaticAccessor("GetPhysicsManager().GetPhysicsQuery()")]
 		[NativeName("OverlapCapsuleNonAlloc")]
+		[StaticAccessor("GetPhysicsManager().GetPhysicsQuery()")]
 		private static int OverlapCapsuleNonAlloc_Internal(PhysicsScene physicsScene, Vector3 point0, Vector3 point1, float radius, [Unmarshalled] Collider[] results, int layerMask, QueryTriggerInteraction queryTriggerInteraction)
 		{
 			return PhysicsScene.OverlapCapsuleNonAlloc_Internal_Injected(ref physicsScene, ref point0, ref point1, radius, results, layerMask, queryTriggerInteraction);
@@ -273,8 +273,8 @@ namespace UnityEngine
 			return PhysicsScene.OverlapCapsuleNonAlloc_Internal(this, point0, point1, radius, results, layerMask, queryTriggerInteraction);
 		}
 
-		[StaticAccessor("GetPhysicsManager().GetPhysicsQuery()", StaticAccessorType.Dot)]
 		[NativeName("SphereCast")]
+		[StaticAccessor("GetPhysicsManager().GetPhysicsQuery()", StaticAccessorType.Dot)]
 		private static bool Query_SphereCast(PhysicsScene physicsScene, Vector3 origin, float radius, Vector3 direction, float maxDistance, ref RaycastHit hitInfo, int layerMask, QueryTriggerInteraction queryTriggerInteraction)
 		{
 			return PhysicsScene.Query_SphereCast_Injected(ref physicsScene, ref origin, radius, ref direction, maxDistance, ref hitInfo, layerMask, queryTriggerInteraction);
@@ -326,8 +326,8 @@ namespace UnityEngine
 			return num;
 		}
 
-		[NativeName("OverlapSphereNonAlloc")]
 		[StaticAccessor("GetPhysicsManager().GetPhysicsQuery()")]
+		[NativeName("OverlapSphereNonAlloc")]
 		private static int OverlapSphereNonAlloc_Internal(PhysicsScene physicsScene, Vector3 position, float radius, [Unmarshalled] Collider[] results, int layerMask, QueryTriggerInteraction queryTriggerInteraction)
 		{
 			return PhysicsScene.OverlapSphereNonAlloc_Internal_Injected(ref physicsScene, ref position, radius, results, layerMask, queryTriggerInteraction);
@@ -374,8 +374,8 @@ namespace UnityEngine
 			return PhysicsScene.Internal_BoxCast(this, center, halfExtents, Quaternion.identity, direction, out hitInfo, float.PositiveInfinity, -5, QueryTriggerInteraction.UseGlobal);
 		}
 
-		[NativeName("OverlapBoxNonAlloc")]
 		[StaticAccessor("GetPhysicsManager().GetPhysicsQuery()")]
+		[NativeName("OverlapBoxNonAlloc")]
 		private static int OverlapBoxNonAlloc_Internal(PhysicsScene physicsScene, Vector3 center, Vector3 halfExtents, [Unmarshalled] Collider[] results, Quaternion orientation, int mask, QueryTriggerInteraction queryTriggerInteraction)
 		{
 			return PhysicsScene.OverlapBoxNonAlloc_Internal_Injected(ref physicsScene, ref center, ref halfExtents, results, ref orientation, mask, queryTriggerInteraction);
@@ -392,8 +392,8 @@ namespace UnityEngine
 			return PhysicsScene.OverlapBoxNonAlloc_Internal(this, center, halfExtents, results, Quaternion.identity, -5, QueryTriggerInteraction.UseGlobal);
 		}
 
-		[NativeName("BoxCastNonAlloc")]
 		[StaticAccessor("GetPhysicsManager().GetPhysicsQuery()")]
+		[NativeName("BoxCastNonAlloc")]
 		private static int Internal_BoxCastNonAlloc(PhysicsScene physicsScene, Vector3 center, Vector3 halfExtents, Vector3 direction, [Unmarshalled] RaycastHit[] raycastHits, Quaternion orientation, float maxDistance, int mask, QueryTriggerInteraction queryTriggerInteraction)
 		{
 			return PhysicsScene.Internal_BoxCastNonAlloc_Injected(ref physicsScene, ref center, ref halfExtents, ref direction, raycastHits, ref orientation, maxDistance, mask, queryTriggerInteraction);

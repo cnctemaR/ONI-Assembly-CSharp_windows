@@ -137,7 +137,7 @@ namespace UnityEngine
 
 		[FreeFunction(Name = "BillboardRenderer_Bindings::SetVertices", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SetVertices([NotNull("ArgumentNullException")] [Unmarshalled] Vector2[] vertices);
+		public extern void SetVertices([Unmarshalled] [NotNull("ArgumentNullException")] Vector2[] vertices);
 
 		[FreeFunction(Name = "BillboardRenderer_Bindings::SetVerticesInternalList", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]

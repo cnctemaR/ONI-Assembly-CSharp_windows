@@ -60,7 +60,7 @@ public class ProgressBar : KMonoBehaviour
 				base.gameObject.SetActive(false);
 			}
 		}
-		Game.Instance.Subscribe(1983128072, new Action<object>(this.OnActiveWorldChanged));
+		this.activeWorldChangedHandlerID = Game.Instance.Subscribe(1983128072, new Action<object>(this.OnActiveWorldChanged));
 		this.SetWorldActive(ClusterManager.Instance.activeWorldId);
 		base.enabled = this.updatePercentFull != null;
 		this.RefreshVisibility();
@@ -91,7 +91,7 @@ public class ProgressBar : KMonoBehaviour
 		}
 	}
 
-	public virtual void OnOverlayChanged(object data = null)
+	public virtual void OnOverlayChanged(object _ = null)
 	{
 		this.RefreshVisibility();
 	}
@@ -117,7 +117,7 @@ public class ProgressBar : KMonoBehaviour
 		{
 			Game.Instance.Unsubscribe(this.overlayUpdateHandle);
 		}
-		Game.Instance.Unsubscribe(1983128072, new Action<object>(this.OnActiveWorldChanged));
+		Game.Instance.Unsubscribe(ref this.activeWorldChangedHandlerID);
 		base.OnCleanUp();
 	}
 
@@ -154,4 +154,6 @@ public class ProgressBar : KMonoBehaviour
 	private bool lastVisibilityValue = true;
 
 	private bool hasBeenInitialize;
+
+	private int activeWorldChangedHandlerID = -1;
 }

@@ -44,6 +44,7 @@ public class BionicMinionConfig : IEntityConfig, IHasDlcRestrictions
 	public GameObject CreatePrefab()
 	{
 		GameObject gameObject = BaseMinionConfig.BaseMinion(BionicMinionConfig.MODEL, BionicMinionConfig.GetAttributes(), BionicMinionConfig.GetAmounts(), BionicMinionConfig.GetTraits());
+		gameObject.AddOrGet<CodexEntryRedirector>().CodexID = "DUPLICANTS";
 		gameObject.AddOrGet<AttributeLevels>().maxAttributeLevel = 0;
 		Storage storage = gameObject.AddComponent<Storage>();
 		storage.storageID = GameTags.StoragesIds.BionicBatteryStorage;

@@ -102,7 +102,7 @@ public class Health : KMonoBehaviour, ISaveLoadable
 
 	public void OnHealthChanged(float delta)
 	{
-		base.Trigger(-1664904872, delta);
+		base.BoxingTrigger<float>(-1664904872, delta);
 		if (this.State != Health.HealthState.Invincible)
 		{
 			if (this.hitPoints == 0f && !this.IsDefeated())

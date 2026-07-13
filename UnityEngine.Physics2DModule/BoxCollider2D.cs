@@ -38,8 +38,8 @@ namespace UnityEngine
 			set;
 		}
 
-		[EditorBrowsable(EditorBrowsableState.Never)]
 		[Obsolete("BoxCollider2D.center has been deprecated. Use BoxCollider2D.offset instead (UnityUpgradable) -> offset", true)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		public Vector2 center
 		{
 			get

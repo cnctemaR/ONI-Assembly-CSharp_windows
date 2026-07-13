@@ -101,14 +101,12 @@ public class EvilFlower : StateMachineComponent<EvilFlower.StatesInstance>
 			{
 				smi.master.GetComponent<DecorProvider>().SetValues(smi.master.positive_decor_effect);
 				smi.master.GetComponent<DecorProvider>().Refresh();
-				smi.master.AddTag(GameTags.Decoration);
 			});
 			this.alive.wilting.PlayAnim("wilt1", KAnim.PlayMode.Loop).EventTransition(GameHashes.WiltRecover, this.alive.idle, null).ToggleTag(GameTags.PreventEmittingDisease)
 				.Enter(delegate(EvilFlower.StatesInstance smi)
 				{
 					smi.master.GetComponent<DecorProvider>().SetValues(smi.master.negative_decor_effect);
 					smi.master.GetComponent<DecorProvider>().Refresh();
-					smi.master.RemoveTag(GameTags.Decoration);
 				});
 		}
 

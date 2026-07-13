@@ -75,6 +75,11 @@ public class KScreen : KMonoBehaviour, IInputHandler, IPointerEnterHandler, IEve
 		this.hasFocus = has_focus;
 	}
 
+	public virtual bool IsScreenActive()
+	{
+		return base.isActiveAndEnabled;
+	}
+
 	public KScreen()
 	{
 		this.screenName = base.GetType().ToString();
@@ -349,8 +354,6 @@ public class KScreen : KMonoBehaviour, IInputHandler, IPointerEnterHandler, IEve
 	private KScrollRect[] child_scroll_rects;
 
 	private bool hasFocus;
-
-	public bool isHiddenButActive;
 
 	public delegate void PointerEnterActions(PointerEventData eventData);
 

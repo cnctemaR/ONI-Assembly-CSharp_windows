@@ -138,7 +138,12 @@ public struct StructureTemperaturePayload
 		{
 			get
 			{
-				return this.kw_accumulator.AverageValue;
+				float averageValue = this.kw_accumulator.AverageValue;
+				if (averageValue == float.NaN)
+				{
+					return 0f;
+				}
+				return averageValue;
 			}
 		}
 

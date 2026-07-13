@@ -4,8 +4,8 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine.Experimental.Audio
 {
-	[NativeHeader("Modules/Audio/Public/ScriptBindings/AudioSampleProviderExtensions.bindings.h")]
 	[StaticAccessor("AudioSampleProviderExtensionsBindings", StaticAccessorType.DoubleColon)]
+	[NativeHeader("Modules/Audio/Public/ScriptBindings/AudioSampleProviderExtensions.bindings.h")]
 	internal static class AudioSampleProviderExtensionsInternal
 	{
 		public static float GetSpeed(this AudioSampleProvider provider)

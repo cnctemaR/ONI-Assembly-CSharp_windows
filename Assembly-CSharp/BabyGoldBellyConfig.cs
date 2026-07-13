@@ -3,7 +3,7 @@ using Klei.AI;
 using STRINGS;
 using UnityEngine;
 
-[EntityConfigOrder(2)]
+[EntityConfigOrder(4)]
 public class BabyGoldBellyConfig : IEntityConfig, IHasDlcRestrictions
 {
 	public string[] GetRequiredDlcIds()

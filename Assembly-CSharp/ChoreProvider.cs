@@ -11,16 +11,16 @@ public class ChoreProvider : KMonoBehaviour
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		Game.Instance.Subscribe(880851192, new Action<object>(this.OnWorldParentChanged));
-		Game.Instance.Subscribe(586301400, new Action<object>(this.OnMinionMigrated));
-		Game.Instance.Subscribe(1142724171, new Action<object>(this.OnEntityMigrated));
+		this.worldParentChangedHandle = Game.Instance.Subscribe(880851192, new Action<object>(this.OnWorldParentChanged));
+		this.minionMigrationHandle = Game.Instance.Subscribe(586301400, new Action<object>(this.OnMinionMigrated));
+		this.enitityMigrationHandle = Game.Instance.Subscribe(1142724171, new Action<object>(this.OnEntityMigrated));
 	}
 
 	protected override void OnSpawn()
 	{
 		if (ClusterManager.Instance != null)
 		{
-			ClusterManager.Instance.Subscribe(-1078710002, new Action<object>(this.OnWorldRemoved));
+			this.worldRemovedHandle = ClusterManager.Instance.Subscribe(-1078710002, new Action<object>(this.OnWorldRemoved));
 		}
 		base.OnSpawn();
 		this.Name = base.name;
@@ -29,23 +29,23 @@ public class ChoreProvider : KMonoBehaviour
 	protected override void OnCleanUp()
 	{
 		base.OnCleanUp();
-		Game.Instance.Unsubscribe(880851192, new Action<object>(this.OnWorldParentChanged));
-		Game.Instance.Unsubscribe(586301400, new Action<object>(this.OnMinionMigrated));
-		Game.Instance.Unsubscribe(1142724171, new Action<object>(this.OnEntityMigrated));
+		Game.Instance.Unsubscribe(ref this.worldParentChangedHandle);
+		Game.Instance.Unsubscribe(ref this.minionMigrationHandle);
+		Game.Instance.Unsubscribe(ref this.enitityMigrationHandle);
 		if (ClusterManager.Instance != null)
 		{
-			ClusterManager.Instance.Unsubscribe(-1078710002, new Action<object>(this.OnWorldRemoved));
+			ClusterManager.Instance.Unsubscribe(ref this.worldRemovedHandle);
 		}
 	}
 
 	protected virtual void OnWorldRemoved(object data)
 	{
-		int num = (int)data;
-		int parentWorldId = ClusterManager.Instance.GetWorld(num).ParentWorldId;
+		int value = ((Boxed<int>)data).value;
+		int parentWorldId = ClusterManager.Instance.GetWorld(value).ParentWorldId;
 		List<Chore> list;
 		if (this.choreWorldMap.TryGetValue(parentWorldId, out list))
 		{
-			this.ClearWorldChores<Chore>(list, num);
+			this.ClearWorldChores<Chore>(list, value);
 		}
 	}
 
@@ -200,6 +200,14 @@ public class ChoreProvider : KMonoBehaviour
 	}
 
 	public Dictionary<int, List<Chore>> choreWorldMap = new Dictionary<int, List<Chore>>();
+
+	private int worldParentChangedHandle = -1;
+
+	private int minionMigrationHandle = -1;
+
+	private int enitityMigrationHandle = -1;
+
+	private int worldRemovedHandle = -1;
 
 	private static ChoreProvider.ChoreProviderCollectContext batch_context = new ChoreProvider.ChoreProviderCollectContext();
 

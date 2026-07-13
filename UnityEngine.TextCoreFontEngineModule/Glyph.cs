@@ -133,16 +133,16 @@ namespace UnityEngine.TextCore
 			return this.index == other.index && this.metrics == other.metrics && this.glyphRect == other.glyphRect && this.scale == other.scale && this.atlasIndex == other.atlasIndex;
 		}
 
-		[NativeName("index")]
 		[SerializeField]
+		[NativeName("index")]
 		private uint m_Index;
 
-		[NativeName("metrics")]
 		[SerializeField]
+		[NativeName("metrics")]
 		private GlyphMetrics m_Metrics;
 
-		[NativeName("glyphRect")]
 		[SerializeField]
+		[NativeName("glyphRect")]
 		private GlyphRect m_GlyphRect;
 
 		[SerializeField]
@@ -153,8 +153,8 @@ namespace UnityEngine.TextCore
 		[NativeName("atlasIndex")]
 		private int m_AtlasIndex;
 
-		[NativeName("type")]
 		[SerializeField]
+		[NativeName("type")]
 		private GlyphClassDefinitionType m_ClassDefinitionType;
 	}
 }

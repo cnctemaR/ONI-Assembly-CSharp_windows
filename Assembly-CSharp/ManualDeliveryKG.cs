@@ -277,7 +277,7 @@ public class ManualDeliveryKG : KMonoBehaviour, ISim1000ms
 		Game.Instance.userMenu.AddButton(base.gameObject, buttonInfo, 1f);
 	}
 
-	private void OnOperationalChanged(object data)
+	private void OnOperationalChanged(object _)
 	{
 		this.UpdateDeliveryState();
 	}
@@ -289,7 +289,7 @@ public class ManualDeliveryKG : KMonoBehaviour, ISim1000ms
 	private Storage storage;
 
 	[SerializeField]
-	public Tag requestedItemTag;
+	private Tag requestedItemTag;
 
 	private Tag[] forbiddenTags;
 

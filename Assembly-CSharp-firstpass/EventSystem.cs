@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using UnityEngine;
@@ -19,34 +18,58 @@ public class EventSystem
 			return;
 		}
 		this.currentlyTriggering++;
-		for (int num = 0; num != this.intraObjectRoutes.size; num++)
+		List<EventSystem.IntraObjectHandlerBase> list;
+		if (EventSystem.intraObjectDispatcher.TryGetValue(hash, out list))
 		{
-			if (this.intraObjectRoutes[num].eventHash == hash)
+			for (int num = 0; num != this.intraObjectRoutes.size; num++)
 			{
-				EventSystem.intraObjectDispatcher[hash][this.intraObjectRoutes[num].handlerIndex].Trigger(go, data);
+				if (this.intraObjectRoutes[num].eventHash == hash)
+				{
+					list[this.intraObjectRoutes[num].handlerIndex].Trigger(go, data);
+				}
 			}
 		}
-		List<EventSystem.Entry> list;
-		if (this.entryMap.TryGetValue(hash, out list))
+		List<EventSystem.Entry> list2;
+		if (this.entryMap.TryGetValue(hash, out list2))
 		{
-			int count = list.Count;
+			int count = list2.Count;
 			for (int i = 0; i < count; i++)
 			{
-				if (list[i].hash == hash && list[i].handler != null)
-				{
-					list[i].handler(data);
-				}
+				list2[i].Invoke(data);
 			}
 		}
 		this.currentlyTriggering--;
 		if (this.dirty && this.currentlyTriggering == 0)
 		{
 			this.dirty = false;
-			List<EventSystem.Entry> list2;
-			if (this.entryMap.TryGetValue(hash, out list2))
+			List<EventSystem.Entry> list3 = null;
+			int num2 = 0;
+			int j = 0;
+			while (j < this.pendingRemovals.Count)
 			{
-				list2.RemoveAll((EventSystem.Entry x) => x.handler == null);
+				EventSystem.RemovalEntry removalEntry = this.pendingRemovals[j];
+				if (removalEntry.hash == num2)
+				{
+					goto IL_0115;
+				}
+				if (this.entryMap.TryGetValue(removalEntry.hash, out list3))
+				{
+					num2 = removalEntry.hash;
+					goto IL_0115;
+				}
+				IL_0141:
+				j++;
+				continue;
+				IL_0115:
+				EventSystem.IdInfo idInfo;
+				if (this.idToIndex.TryGetValue(removalEntry.id, out idInfo))
+				{
+					this.RemoveEntry(idInfo.hash, list3, idInfo.index);
+					goto IL_0141;
+				}
+				goto IL_0141;
 			}
+			this.pendingRemovals.Clear();
 			this.intraObjectRoutes.RemoveAllSwap((EventSystem.IntraObjectRoute route) => !route.IsValid());
 		}
 	}
@@ -58,7 +81,7 @@ public class EventSystem
 			EventSystem.SubscribedEntry subscribedEntry = this.subscribedEvents[i];
 			if (subscribedEntry.go != null)
 			{
-				this.Unsubscribe(subscribedEntry.go, subscribedEntry.hash, subscribedEntry.handler);
+				subscribedEntry.go.Unsubscribe(subscribedEntry.id);
 			}
 		}
 		foreach (KeyValuePair<int, List<EventSystem.Entry>> keyValuePair in this.entryMap)
@@ -68,6 +91,7 @@ public class EventSystem
 			{
 				EventSystem.Entry entry = value[j];
 				entry.handler = null;
+				entry.extHandler = null;
 				value[j] = entry;
 			}
 			value.Clear();
@@ -75,30 +99,54 @@ public class EventSystem
 		this.entryMap.Clear();
 		this.subscribedEvents.Clear();
 		this.intraObjectRoutes.Clear();
+		this.idToIndex.Clear();
 	}
 
-	public void UnregisterEvent(GameObject target, int eventName, Action<object> handler)
+	public void UnregisterEvent(GameObject target, int id)
 	{
 		for (int i = 0; i < this.subscribedEvents.size; i++)
 		{
-			if (this.subscribedEvents[i].hash == eventName && this.subscribedEvents[i].handler == handler && this.subscribedEvents[i].go == target)
+			if (this.subscribedEvents[i].id == id && this.subscribedEvents[i].go == target)
 			{
-				this.subscribedEvents.RemoveAt(i);
+				this.subscribedEvents.RemoveAtSwap(i);
 				return;
 			}
 		}
 	}
 
-	public void RegisterEvent(GameObject target, int eventName, Action<object> handler)
+	public void RegisterEvent(GameObject target, int id)
 	{
-		this.subscribedEvents.Add(new EventSystem.SubscribedEntry(target, eventName, handler));
+		this.subscribedEvents.Add(new EventSystem.SubscribedEntry(target, id));
+	}
+
+	private void RemoveEntry(int hash, List<EventSystem.Entry> map_entries, int index)
+	{
+		if (this.currentlyTriggering == 0)
+		{
+			int id = map_entries[index].id;
+			map_entries.RemoveAtSwap<EventSystem.Entry>(index);
+			if (index < map_entries.Count)
+			{
+				int id2 = map_entries[index].id;
+				EventSystem.IdInfo idInfo = this.idToIndex[id2];
+				idInfo.index = index;
+				this.idToIndex[id2] = idInfo;
+			}
+			this.idToIndex.Remove(id);
+			return;
+		}
+		this.dirty = true;
+		EventSystem.Entry entry = map_entries[index];
+		entry.handler = null;
+		entry.extHandler = null;
+		map_entries[index] = entry;
+		this.pendingRemovals.Add(new EventSystem.RemovalEntry(hash, entry.id));
 	}
 
 	public int Subscribe(int hash, Action<object> handler)
 	{
-		int num = this.nextId + 1;
-		this.nextId = num;
-		EventSystem.Entry entry = new EventSystem.Entry(hash, handler, num);
+		this.nextId = Mathf.Max(this.nextId + 1, 0);
+		EventSystem.Entry entry = new EventSystem.Entry(hash, handler, this.nextId);
 		List<EventSystem.Entry> list;
 		if (!this.entryMap.TryGetValue(hash, out list))
 		{
@@ -106,8 +154,23 @@ public class EventSystem
 			this.entryMap.Add(hash, list);
 		}
 		list.Add(entry);
-		this.idMap.Add(entry.id, entry.hash);
-		return this.nextId;
+		this.idToIndex[entry.id] = new EventSystem.IdInfo(hash, list.Count - 1);
+		return entry.id;
+	}
+
+	public int Subscribe(int hash, Action<object, object> handler, object handlerData)
+	{
+		this.nextId = Mathf.Max(this.nextId + 1, 0);
+		EventSystem.Entry entry = new EventSystem.Entry(hash, handler, handlerData, this.nextId);
+		List<EventSystem.Entry> list;
+		if (!this.entryMap.TryGetValue(hash, out list))
+		{
+			list = new List<EventSystem.Entry>();
+			this.entryMap.Add(hash, list);
+		}
+		list.Add(entry);
+		this.idToIndex[entry.id] = new EventSystem.IdInfo(hash, list.Count - 1);
+		return entry.id;
 	}
 
 	public void Unsubscribe(int hash, Action<object> handler)
@@ -115,25 +178,12 @@ public class EventSystem
 		List<EventSystem.Entry> list;
 		if (this.entryMap.TryGetValue(hash, out list))
 		{
-			int i = 0;
-			while (i < list.Count)
+			for (int i = 0; i < list.Count; i++)
 			{
-				if (list[i].hash == hash && list[i].handler == handler)
+				if (list[i].handler == handler)
 				{
-					if (this.currentlyTriggering == 0)
-					{
-						list.RemoveAt(i);
-						return;
-					}
-					this.dirty = true;
-					EventSystem.Entry entry = list[i];
-					entry.handler = null;
-					list[i] = entry;
+					this.RemoveEntry(hash, list, i);
 					return;
-				}
-				else
-				{
-					i++;
 				}
 			}
 		}
@@ -141,39 +191,32 @@ public class EventSystem
 
 	public void Unsubscribe(int id)
 	{
-		int num = -1;
+		EventSystem.IdInfo idInfo;
 		List<EventSystem.Entry> list;
-		if (this.idMap.TryGetValue(id, out num) && this.entryMap.TryGetValue(num, out list))
+		if (this.idToIndex.TryGetValue(id, out idInfo) && this.entryMap.TryGetValue(idInfo.hash, out list))
 		{
-			int i = 0;
-			while (i < list.Count)
-			{
-				if (list[i].id == id)
-				{
-					if (this.currentlyTriggering == 0)
-					{
-						list.RemoveAt(i);
-						break;
-					}
-					this.dirty = true;
-					EventSystem.Entry entry = list[i];
-					entry.handler = null;
-					list[i] = entry;
-					break;
-				}
-				else
-				{
-					i++;
-				}
-			}
+			this.RemoveEntry(idInfo.hash, list, idInfo.index);
 		}
-		this.idMap.Remove(id);
+	}
+
+	public void Unsubscribe(ref int id)
+	{
+		this.Unsubscribe(id);
+		id = -1;
 	}
 
 	public int Subscribe(GameObject target, int eventName, Action<object> handler)
 	{
-		this.RegisterEvent(target, eventName, handler);
-		return KObjectManager.Instance.GetOrCreateObject(target).GetEventSystem().Subscribe(eventName, handler);
+		int num = KObjectManager.Instance.GetOrCreateObject(target).GetOrCreateEventSystem().Subscribe(eventName, handler);
+		this.RegisterEvent(target, num);
+		return num;
+	}
+
+	public int Subscribe(GameObject target, int eventName, Action<object, object> handler, object handlerData)
+	{
+		int num = KObjectManager.Instance.GetOrCreateObject(target).GetOrCreateEventSystem().Subscribe(eventName, handler, handlerData);
+		this.RegisterEvent(target, num);
+		return num;
 	}
 
 	public int Subscribe<ComponentType>(int eventName, EventSystem.IntraObjectHandler<ComponentType> handler) where ComponentType : Component
@@ -196,17 +239,74 @@ public class EventSystem
 
 	public void Unsubscribe(GameObject target, int eventName, Action<object> handler)
 	{
-		this.UnregisterEvent(target, eventName, handler);
 		if (target == null)
 		{
 			return;
 		}
-		KObjectManager.Instance.GetOrCreateObject(target).GetEventSystem().Unsubscribe(eventName, handler);
+		KObject kobject = KObjectManager.Instance.Get(target);
+		EventSystem eventSystem;
+		if (kobject == null || !kobject.GetEventSystem(out eventSystem))
+		{
+			return;
+		}
+		List<EventSystem.Entry> list;
+		if (eventSystem.entryMap.TryGetValue(eventName, out list))
+		{
+			for (int i = 0; i < list.Count; i++)
+			{
+				if (list[i].handler == handler)
+				{
+					this.UnregisterEvent(target, list[i].id);
+					break;
+				}
+			}
+		}
+		eventSystem.Unsubscribe(eventName, handler);
+	}
+
+	public void Unsubscribe(GameObject target, int id)
+	{
+		this.UnregisterEvent(target, id);
+		if (target != null)
+		{
+			KObject kobject = KObjectManager.Instance.Get(target);
+			EventSystem eventSystem;
+			if (kobject == null || !kobject.GetEventSystem(out eventSystem))
+			{
+				return;
+			}
+			eventSystem.Unsubscribe(id);
+		}
+	}
+
+	public void Unsubscribe(GameObject target, ref int id)
+	{
+		this.UnregisterEvent(target, id);
+		if (target != null)
+		{
+			KObject kobject = KObjectManager.Instance.Get(target);
+			EventSystem eventSystem;
+			if (kobject == null || !kobject.GetEventSystem(out eventSystem))
+			{
+				return;
+			}
+			eventSystem.Unsubscribe(id);
+		}
+		id = -1;
 	}
 
 	public void Unsubscribe(int eventName, int subscribeHandle, bool suppressWarnings = false)
 	{
-		int num = this.intraObjectRoutes.FindIndex((EventSystem.IntraObjectRoute route) => route.eventHash == eventName && route.handlerIndex == subscribeHandle);
+		int num = -1;
+		for (int i = 0; i < this.intraObjectRoutes.Count; i++)
+		{
+			EventSystem.IntraObjectRoute intraObjectRoute = this.intraObjectRoutes[i];
+			if (intraObjectRoute.eventHash == eventName && intraObjectRoute.handlerIndex == subscribeHandle)
+			{
+				num = i;
+				break;
+			}
+		}
 		if (num == -1)
 		{
 			if (!suppressWarnings)
@@ -247,6 +347,7 @@ public class EventSystem
 		this.Unsubscribe(eventName, num, suppressWarnings);
 	}
 
+	[Obsolete]
 	public void Unsubscribe(string[] eventNames, Action<object> handler)
 	{
 		for (int i = 0; i < eventNames.Length; i++)
@@ -256,15 +357,7 @@ public class EventSystem
 		}
 	}
 
-	[Conditional("ENABLE_DETAILED_EVENT_PROFILE_INFO")]
-	private static void BeginDetailedSample(string region_name)
-	{
-	}
-
-	[Conditional("ENABLE_DETAILED_EVENT_PROFILE_INFO")]
-	private static void EndDetailedSample(string region_name)
-	{
-	}
+	public const int InvalidHandle = -1;
 
 	private int nextId;
 
@@ -276,9 +369,11 @@ public class EventSystem
 
 	private Dictionary<int, List<EventSystem.Entry>> entryMap = new Dictionary<int, List<EventSystem.Entry>>();
 
-	private Dictionary<int, int> idMap = new Dictionary<int, int>();
+	private Dictionary<int, EventSystem.IdInfo> idToIndex = new Dictionary<int, EventSystem.IdInfo>();
 
 	private ArrayRef<EventSystem.IntraObjectRoute> intraObjectRoutes;
+
+	private ArrayRef<EventSystem.RemovalEntry> pendingRemovals;
 
 	private static Dictionary<int, List<EventSystem.IntraObjectHandlerBase>> intraObjectDispatcher = new Dictionary<int, List<EventSystem.IntraObjectHandlerBase>>();
 
@@ -291,29 +386,61 @@ public class EventSystem
 			this.handler = handler;
 			this.hash = hash;
 			this.id = id;
+			this.extended = false;
+			this.extHandler = null;
+			this.context = null;
+		}
+
+		public Entry(int hash, Action<object, object> handler, object data, int id)
+		{
+			this.extended = true;
+			this.handler = null;
+			this.extHandler = handler;
+			this.context = data;
+			this.id = id;
+			this.hash = hash;
+		}
+
+		public void Invoke(object data)
+		{
+			if (this.extended)
+			{
+				if (this.extHandler != null)
+				{
+					this.extHandler(this.context, data);
+					return;
+				}
+			}
+			else if (this.handler != null)
+			{
+				this.handler(data);
+			}
 		}
 
 		public Action<object> handler;
+
+		public Action<object, object> extHandler;
+
+		public object context;
 
 		public int hash;
 
 		public int id;
+
+		public bool extended;
 	}
 
 	private struct SubscribedEntry
 	{
-		public SubscribedEntry(GameObject go, int hash, Action<object> handler)
+		public SubscribedEntry(GameObject go, int id)
 		{
 			this.go = go;
-			this.hash = hash;
-			this.handler = handler;
+			this.id = id;
 		}
 
-		public Action<object> handler;
-
-		public int hash;
-
 		public GameObject go;
+
+		public int id;
 	}
 
 	private struct IntraObjectRoute
@@ -332,6 +459,32 @@ public class EventSystem
 		public int eventHash;
 
 		public int handlerIndex;
+	}
+
+	private struct RemovalEntry
+	{
+		public RemovalEntry(int hash, int id)
+		{
+			this.hash = hash;
+			this.id = id;
+		}
+
+		public int hash;
+
+		public int id;
+	}
+
+	private struct IdInfo
+	{
+		public IdInfo(int hash, int index)
+		{
+			this.hash = hash;
+			this.index = index;
+		}
+
+		public int hash;
+
+		public int index;
 	}
 
 	public abstract class IntraObjectHandlerBase

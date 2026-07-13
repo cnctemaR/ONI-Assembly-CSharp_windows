@@ -211,6 +211,7 @@ public enum Action
 	DebugToggleMusic,
 	DebugToggleSelectInEditor,
 	DebugPathFinding,
+	DebugQuickDevActions,
 	DebugSuperSpeed,
 	DebugGameStep,
 	DebugSimStep,
@@ -280,5 +281,6 @@ public enum Action
 	AnalogCursor,
 	Disconnect,
 	SandboxStoryTraitTool,
+	Find,
 	NumActions
 }

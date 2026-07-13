@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
+using System.Linq;
 using Database;
 using FMODUnity;
 using Klei.AI;
@@ -63,13 +63,12 @@ public class SolidTransferArm : StateMachineComponent<SolidTransferArm.SMInstanc
 		this.DropLeftovers();
 		component.enabled = false;
 		component.enabled = true;
-		MinionGroupProber.Get().SetValidSerialNos(this, this.serial_no, this.serial_no);
 		base.smi.StartSM();
 	}
 
 	protected override void OnCleanUp()
 	{
-		MinionGroupProber.Get().ReleaseProber(this);
+		MinionGroupProber.Get().Vacate(this.reachableCells.ToList<int>());
 		base.OnCleanUp();
 	}
 
@@ -120,16 +119,6 @@ public class SolidTransferArm : StateMachineComponent<SolidTransferArm.SMInstanc
 		this.SetArmAnim(SolidTransferArm.ArmAnim.Idle);
 	}
 
-	private static bool AsyncUpdateVisitor(object obj, SolidTransferArm arm)
-	{
-		Pickupable pickupable = obj as Pickupable;
-		if (Grid.GetCellRange(arm.gameCell, pickupable.cachedCell) <= arm.pickupRange && arm.IsPickupableRelevantToMyInterests(pickupable.KPrefabID, pickupable.cachedCell) && pickupable.CouldBePickedUpByTransferArm(arm.kPrefabID.InstanceID))
-		{
-			arm.pickupables.Add(pickupable);
-		}
-		return true;
-	}
-
 	private bool AsyncUpdate()
 	{
 		int num;
@@ -141,7 +130,7 @@ public class SolidTransferArm : StateMachineComponent<SolidTransferArm.SMInstanc
 			for (int j = num - this.pickupRange; j < num + this.pickupRange + 1; j++)
 			{
 				int num3 = Grid.XYToCell(j, i);
-				if ((Grid.IsValidCell(num3) && Grid.IsPhysicallyAccessible(num, num2, j, i, true)) != this.reachableCells.Contains(num3))
+				if (Grid.IsValidCell(num3) && Grid.IsPhysicallyAccessible(num, num2, j, i, true) != this.reachableCells.Contains(num3))
 				{
 					flag = true;
 				}
@@ -149,6 +138,9 @@ public class SolidTransferArm : StateMachineComponent<SolidTransferArm.SMInstanc
 		}
 		if (flag)
 		{
+			ListPool<int, SolidTransferArm>.PooledList pooledList = ListPool<int, SolidTransferArm>.Allocate();
+			ListPool<int, SolidTransferArm>.PooledList pooledList2 = ListPool<int, SolidTransferArm>.Allocate();
+			pooledList.AddRange(this.reachableCells);
 			this.reachableCells.Clear();
 			for (int k = num2 - this.pickupRange; k < num2 + this.pickupRange + 1; k++)
 			{
@@ -158,22 +150,19 @@ public class SolidTransferArm : StateMachineComponent<SolidTransferArm.SMInstanc
 					if (Grid.IsValidCell(num4) && Grid.IsPhysicallyAccessible(num, num2, l, k, true))
 					{
 						this.reachableCells.Add(num4);
+						pooledList2.Add(num4);
 					}
 				}
 			}
-			this.IncrementSerialNo();
+			MinionGroupProber.Get().Occupy(pooledList2);
+			MinionGroupProber.Get().Vacate(pooledList);
+			pooledList2.Recycle();
+			pooledList.Recycle();
 		}
 		this.pickupables.Clear();
-		GameScenePartitioner.Instance.AsyncSafeVisit<SolidTransferArm>(num - this.pickupRange, num2 - this.pickupRange, 2 * this.pickupRange + 1, 2 * this.pickupRange + 1, GameScenePartitioner.Instance.pickupablesLayer, SolidTransferArm.AsyncUpdateVisitor_s, this);
-		GameScenePartitioner.Instance.AsyncSafeVisit<SolidTransferArm>(num - this.pickupRange, num2 - this.pickupRange, 2 * this.pickupRange + 1, 2 * this.pickupRange + 1, GameScenePartitioner.Instance.storedPickupablesLayer, SolidTransferArm.AsyncUpdateVisitor_s, this);
+		GameScenePartitioner.Instance.ReadonlyVisitEntries<SolidTransferArm>(num - this.pickupRange, num2 - this.pickupRange, 2 * this.pickupRange + 1, 2 * this.pickupRange + 1, GameScenePartitioner.Instance.pickupablesLayer, SolidTransferArm.AsyncUpdateVisitor, this);
+		GameScenePartitioner.Instance.ReadonlyVisitEntries<SolidTransferArm>(num - this.pickupRange, num2 - this.pickupRange, 2 * this.pickupRange + 1, 2 * this.pickupRange + 1, GameScenePartitioner.Instance.storedPickupablesLayer, SolidTransferArm.AsyncUpdateVisitor, this);
 		return flag;
-	}
-
-	private void IncrementSerialNo()
-	{
-		this.serial_no += 1;
-		MinionGroupProber.Get().SetValidSerialNos(this, this.serial_no, this.serial_no);
-		MinionGroupProber.Get().Occupy(this, this.serial_no, this.reachableCells);
 	}
 
 	public bool IsCellReachable(int cell)
@@ -243,7 +232,7 @@ public class SolidTransferArm : StateMachineComponent<SolidTransferArm.SMInstanc
 
 	private void OnOperationalChanged(object data)
 	{
-		if (!(bool)data)
+		if (!((Boxed<bool>)data).value)
 		{
 			if (this.choreDriver.HasChore())
 			{
@@ -315,26 +304,6 @@ public class SolidTransferArm : StateMachineComponent<SolidTransferArm.SMInstanc
 		}
 	}
 
-	[Conditional("ENABLE_FETCH_PROFILING")]
-	private static void BeginDetailedSample(string region_name)
-	{
-	}
-
-	[Conditional("ENABLE_FETCH_PROFILING")]
-	private static void BeginDetailedSample(string region_name, int count)
-	{
-	}
-
-	[Conditional("ENABLE_FETCH_PROFILING")]
-	private static void EndDetailedSample(string region_name)
-	{
-	}
-
-	[Conditional("ENABLE_FETCH_PROFILING")]
-	private static void EndDetailedSample(string region_name, int count)
-	{
-	}
-
 	[MyCmpReq]
 	private Operational operational;
 
@@ -398,9 +367,15 @@ public class SolidTransferArm : StateMachineComponent<SolidTransferArm.SMInstanc
 		component.OnEndChore(data);
 	});
 
-	private static Func<object, SolidTransferArm, bool> AsyncUpdateVisitor_s = new Func<object, SolidTransferArm, bool>(SolidTransferArm.AsyncUpdateVisitor);
-
-	private short serial_no;
+	private static Func<object, SolidTransferArm, Util.IterationInstruction> AsyncUpdateVisitor = delegate(object obj, SolidTransferArm arm)
+	{
+		Pickupable pickupable = obj as Pickupable;
+		if (Grid.GetCellRange(arm.gameCell, pickupable.cachedCell) <= arm.pickupRange && arm.IsPickupableRelevantToMyInterests(pickupable.KPrefabID, pickupable.cachedCell) && pickupable.CouldBePickedUpByTransferArm(arm.kPrefabID.InstanceID))
+		{
+			arm.pickupables.Add(pickupable);
+		}
+		return Util.IterationInstruction.Continue;
+	};
 
 	private static HashedString HASH_ROTATION = "rotation";
 

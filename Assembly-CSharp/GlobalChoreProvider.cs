@@ -17,12 +17,12 @@ public class GlobalChoreProvider : ChoreProvider, IRender200ms
 
 	protected override void OnWorldRemoved(object data)
 	{
-		int num = (int)data;
-		int parentWorldId = ClusterManager.Instance.GetWorld(num).ParentWorldId;
+		int value = ((Boxed<int>)data).value;
+		int parentWorldId = ClusterManager.Instance.GetWorld(value).ParentWorldId;
 		List<FetchChore> list;
 		if (this.fetchMap.TryGetValue(parentWorldId, out list))
 		{
-			base.ClearWorldChores<FetchChore>(list, num);
+			base.ClearWorldChores<FetchChore>(list, value);
 		}
 		base.OnWorldRemoved(data);
 	}
@@ -83,16 +83,15 @@ public class GlobalChoreProvider : ChoreProvider, IRender200ms
 		base.RemoveChore(chore);
 	}
 
-	public void UpdateFetches(PathProber path_prober)
+	public void UpdateFetches(Navigator navigator)
 	{
 		List<FetchChore> list = null;
-		int myParentWorldId = path_prober.gameObject.GetMyParentWorldId();
+		int myParentWorldId = navigator.gameObject.GetMyParentWorldId();
 		if (!this.fetchMap.TryGetValue(myParentWorldId, out list))
 		{
 			return;
 		}
 		this.fetches.Clear();
-		Navigator component = path_prober.GetComponent<Navigator>();
 		for (int i = list.Count - 1; i >= 0; i--)
 		{
 			FetchChore fetchChore = list[i];
@@ -109,7 +108,7 @@ public class GlobalChoreProvider : ChoreProvider, IRender200ms
 					Storage destination = fetchChore.destination;
 					if (!(destination == null))
 					{
-						int navigationCost = component.GetNavigationCost(destination);
+						int navigationCost = navigator.GetNavigationCost(destination);
 						if (navigationCost != -1)
 						{
 							this.fetches.Add(new GlobalChoreProvider.Fetch
@@ -141,7 +140,7 @@ public class GlobalChoreProvider : ChoreProvider, IRender200ms
 			}
 			this.fetches.RemoveRange(num + 1, this.fetches.Count - num - 1);
 		}
-		this.clearableManager.CollectAndSortClearables(component);
+		this.clearableManager.CollectAndSortClearables(navigator);
 	}
 
 	public override void CollectChores(ChoreConsumerState consumer_state, List<Chore.Precondition.Context> succeeded, List<Chore.Precondition.Context> failed_contexts)

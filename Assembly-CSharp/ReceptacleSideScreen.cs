@@ -14,6 +14,31 @@ public class ReceptacleSideScreen : SideScreenContent, IRender1000ms
 		return string.Format(Strings.Get(this.titleKey), this.targetReceptacle.GetProperName());
 	}
 
+	private void RecycleToggle(GameObject toggle)
+	{
+		toggle.SetActive(false);
+		this.recycledEntityToggles.Add(toggle);
+	}
+
+	private GameObject SpawnToggle(GameObject parent)
+	{
+		if (this.recycledEntityToggles.Count > 0)
+		{
+			GameObject gameObject = this.recycledEntityToggles[this.recycledEntityToggles.Count - 1];
+			this.recycledEntityToggles.RemoveAt(this.recycledEntityToggles.Count - 1);
+			gameObject.transform.SetParent(parent.transform);
+			gameObject.SetActive(true);
+			return gameObject;
+		}
+		return Util.KInstantiateUI(this.entityToggle, parent, true);
+	}
+
+	private void RefreshCategoryOpen(GameObject categoryHeader, GameObject categoryGrid, Tag tag)
+	{
+		categoryHeader.GetComponent<MultiToggle>().ChangeState(this.categoryExpandedStatus[tag] ? 0 : 1);
+		categoryGrid.gameObject.SetActive(this.categoryExpandedStatus[tag]);
+	}
+
 	public void Initialize(SingleEntityReceptacle target)
 	{
 		if (target == null)
@@ -26,66 +51,100 @@ public class ReceptacleSideScreen : SideScreenContent, IRender1000ms
 		this.depositObjectMap = new Dictionary<ReceptacleToggle, ReceptacleSideScreen.SelectableEntity>();
 		this.entityToggles.ForEach(delegate(ReceptacleToggle rbi)
 		{
-			global::UnityEngine.Object.Destroy(rbi.gameObject);
+			this.RecycleToggle(rbi.gameObject);
 		});
 		this.entityToggles.Clear();
-		foreach (Tag tag in this.targetReceptacle.possibleDepositObjectTags)
+		List<GameObject> list = new List<GameObject>();
+		if (this.targetReceptacle.possibleDepositObjectTags.Count == 1)
 		{
-			List<GameObject> prefabsWithTag = Assets.GetPrefabsWithTag(tag);
-			int num = prefabsWithTag.Count;
-			List<IHasSortOrder> list = new List<IHasSortOrder>();
-			foreach (GameObject gameObject in prefabsWithTag)
+			this.categoryStartExpanded = true;
+		}
+		using (IEnumerator<Tag> enumerator = this.targetReceptacle.possibleDepositObjectTags.GetEnumerator())
+		{
+			while (enumerator.MoveNext())
 			{
-				if (!this.targetReceptacle.IsValidEntity(gameObject))
+				Tag tag = enumerator.Current;
+				List<GameObject> prefabsWithTag = Assets.GetPrefabsWithTag(tag);
+				int num = prefabsWithTag.Count;
+				if (this.categoryExpandedStatus.ContainsKey(tag))
 				{
-					num--;
+					this.categoryExpandedStatus[tag] = this.categoryStartExpanded;
 				}
-				else
+				if (!this.contentContainers.ContainsKey(tag))
 				{
-					IHasSortOrder component = gameObject.GetComponent<IHasSortOrder>();
-					if (component != null)
+					GameObject gameObject = Util.KInstantiateUI(this.categoryContainerPrefab, this.requestObjectListContainerContent, true);
+					this.contentContainers.Add(tag, gameObject);
+					HierarchyReferences component = gameObject.GetComponent<HierarchyReferences>();
+					component.GetReference<LocText>("HeaderLabel").SetText(tag.ProperName());
+					this.categoryExpandedStatus.Add(tag, this.categoryStartExpanded);
+					MultiToggle toggle = gameObject.GetComponent<HierarchyReferences>().GetReference<MultiToggle>("HeaderToggle");
+					GridLayoutGroup grid = component.GetReference<GridLayoutGroup>("GridLayout");
+					MultiToggle toggle3 = toggle;
+					toggle3.onClick = (global::System.Action)Delegate.Combine(toggle3.onClick, new global::System.Action(delegate
 					{
-						list.Add(component);
+						this.categoryExpandedStatus[tag] = !this.categoryExpandedStatus[tag];
+						this.RefreshCategoryOpen(toggle.gameObject, grid.gameObject, tag);
+					}));
+					this.RefreshCategoryOpen(toggle.gameObject, grid.gameObject, tag);
+				}
+				this.RefreshCategoryOpen(this.contentContainers[tag].GetComponent<HierarchyReferences>().GetReference<MultiToggle>("HeaderToggle").gameObject, this.contentContainers[tag].GetComponent<HierarchyReferences>().GetReference<GridLayoutGroup>("GridLayout").gameObject, tag);
+				List<IHasSortOrder> list2 = new List<IHasSortOrder>();
+				foreach (GameObject gameObject2 in prefabsWithTag)
+				{
+					if (!this.targetReceptacle.IsValidEntity(gameObject2) || list.Contains(gameObject2))
+					{
+						num--;
+					}
+					else
+					{
+						IHasSortOrder component2 = gameObject2.GetComponent<IHasSortOrder>();
+						if (component2 != null)
+						{
+							list.Add(gameObject2);
+							list2.Add(component2);
+						}
 					}
 				}
-			}
-			global::Debug.Assert(list.Count == num, "Not all entities in this receptacle implement IHasSortOrder!");
-			list.Sort((IHasSortOrder a, IHasSortOrder b) => a.sortOrder - b.sortOrder);
-			foreach (IHasSortOrder hasSortOrder in list)
-			{
-				GameObject gameObject2 = (hasSortOrder as MonoBehaviour).gameObject;
-				GameObject gameObject3 = Util.KInstantiateUI(this.entityToggle, this.requestObjectList, false);
-				gameObject3.SetActive(true);
-				ReceptacleToggle newToggle = gameObject3.GetComponent<ReceptacleToggle>();
-				IReceptacleDirection component2 = gameObject2.GetComponent<IReceptacleDirection>();
-				string entityName = this.GetEntityName(gameObject2.PrefabID());
-				newToggle.title.text = entityName;
-				Sprite entityIcon = this.GetEntityIcon(gameObject2.PrefabID());
-				if (entityIcon == null)
+				global::Debug.Assert(list2.Count == num, "Not all entities in this receptacle implement IHasSortOrder!");
+				list2.Sort((IHasSortOrder a, IHasSortOrder b) => a.sortOrder - b.sortOrder);
+				foreach (IHasSortOrder hasSortOrder in list2)
 				{
-					entityIcon = this.elementPlaceholderSpr;
+					GameObject gameObject3 = (hasSortOrder as MonoBehaviour).gameObject;
+					GameObject gameObject4 = this.SpawnToggle(this.contentContainers[tag].GetComponent<HierarchyReferences>().GetReference("GridLayout").gameObject);
+					gameObject4.transform.SetAsLastSibling();
+					gameObject4.SetActive(true);
+					ReceptacleToggle newToggle = gameObject4.GetComponent<ReceptacleToggle>();
+					IReceptacleDirection component3 = gameObject3.GetComponent<IReceptacleDirection>();
+					string entityName = this.GetEntityName(gameObject3.PrefabID());
+					newToggle.title.text = entityName;
+					Sprite entityIcon = this.GetEntityIcon(gameObject3.PrefabID());
+					if (entityIcon == null)
+					{
+						entityIcon = this.elementPlaceholderSpr;
+					}
+					newToggle.image.sprite = entityIcon;
+					if (newToggle.toggle == null)
+					{
+						newToggle.toggle = newToggle.GetComponentInChildren<MultiToggle>();
+					}
+					MultiToggle toggle2 = newToggle.toggle;
+					toggle2.onClick = (global::System.Action)Delegate.Combine(toggle2.onClick, new global::System.Action(delegate
+					{
+						this.ToggleClicked(newToggle);
+					}));
+					ToolTip component4 = newToggle.GetComponent<ToolTip>();
+					if (component4 != null)
+					{
+						component4.SetSimpleTooltip(this.GetEntityTooltip(gameObject3.PrefabID()));
+					}
+					this.depositObjectMap.Add(newToggle, new ReceptacleSideScreen.SelectableEntity
+					{
+						tag = gameObject3.PrefabID(),
+						direction = ((component3 != null) ? component3.Direction : SingleEntityReceptacle.ReceptacleDirection.Top),
+						asset = gameObject3
+					});
+					this.entityToggles.Add(newToggle);
 				}
-				newToggle.image.sprite = entityIcon;
-				newToggle.toggle.onClick += delegate
-				{
-					this.ToggleClicked(newToggle);
-				};
-				newToggle.toggle.onPointerEnter += delegate
-				{
-					this.CheckAmountsAndUpdate(null);
-				};
-				ToolTip component3 = newToggle.GetComponent<ToolTip>();
-				if (component3 != null)
-				{
-					component3.SetSimpleTooltip(this.GetEntityTooltip(gameObject2.PrefabID()));
-				}
-				this.depositObjectMap.Add(newToggle, new ReceptacleSideScreen.SelectableEntity
-				{
-					tag = gameObject2.PrefabID(),
-					direction = ((component2 != null) ? component2.Direction : SingleEntityReceptacle.ReceptacleDirection.Top),
-					asset = gameObject2
-				});
-				this.entityToggles.Add(newToggle);
 			}
 		}
 		this.RestoreSelectionFromOccupant();
@@ -177,9 +236,8 @@ public class ReceptacleSideScreen : SideScreenContent, IRender1000ms
 			};
 			this.requestSelectedEntityBtn.GetComponentInChildren<LocText>().text = Strings.Get(this.requestStringDeposit).ToString();
 			this.targetReceptacle.SetPreview(this.depositObjectMap[this.selectedEntityToggle].tag, false);
-			bool flag = this.CanDepositEntity(this.depositObjectMap[this.selectedEntityToggle]);
+			bool flag = this.CanDepositEntity(this.depositObjectMap[this.selectedEntityToggle], true);
 			this.requestSelectedEntityBtn.isInteractable = flag;
-			this.SetImageToggleState(this.selectedEntityToggle.toggle, flag ? ImageToggleState.State.Active : ImageToggleState.State.DisabledActive);
 			this.ToggleObjectPicker(true);
 			GameObject prefab2 = Assets.GetPrefab(this.selectedDepositObjectTag);
 			if (prefab2 != null)
@@ -195,6 +253,7 @@ public class ReceptacleSideScreen : SideScreenContent, IRender1000ms
 			this.ToggleObjectPicker(true);
 		}
 		this.UpdateAvailableAmounts(null);
+		this.RefreshToggleStates();
 		this.UpdateListeners();
 	}
 
@@ -217,7 +276,7 @@ public class ReceptacleSideScreen : SideScreenContent, IRender1000ms
 		}
 	}
 
-	private void OnOccupantValidChanged(object obj)
+	private void OnOccupantValidChanged(object _)
 	{
 		if (this.targetReceptacle == null)
 		{
@@ -229,7 +288,7 @@ public class ReceptacleSideScreen : SideScreenContent, IRender1000ms
 			ReceptacleSideScreen.SelectableEntity selectableEntity;
 			if (this.depositObjectMap.TryGetValue(this.selectedEntityToggle, out selectableEntity))
 			{
-				flag = this.CanDepositEntity(selectableEntity);
+				flag = this.CanDepositEntity(selectableEntity, true);
 			}
 			if (!flag)
 			{
@@ -241,9 +300,9 @@ public class ReceptacleSideScreen : SideScreenContent, IRender1000ms
 		}
 	}
 
-	private bool CanDepositEntity(ReceptacleSideScreen.SelectableEntity entity)
+	protected bool CanDepositEntity(ReceptacleSideScreen.SelectableEntity entity, bool runAdditionalCanDepositTest = false)
 	{
-		return this.ValidRotationForDeposit(entity.direction) && (!this.RequiresAvailableAmountToDeposit() || this.GetAvailableAmount(entity.tag) > 0f) && this.AdditionalCanDepositTest();
+		return this.ValidRotationForDeposit(entity.direction) && (!this.RequiresAvailableAmountToDeposit() || this.GetAvailableAmount(entity.tag) > 0f) && (!runAdditionalCanDepositTest || this.AdditionalCanDepositTest());
 	}
 
 	protected virtual bool AdditionalCanDepositTest()
@@ -258,10 +317,8 @@ public class ReceptacleSideScreen : SideScreenContent, IRender1000ms
 
 	private void ClearSelection()
 	{
-		foreach (KeyValuePair<ReceptacleToggle, ReceptacleSideScreen.SelectableEntity> keyValuePair in this.depositObjectMap)
-		{
-			keyValuePair.Key.toggle.Deselect();
-		}
+		this.selectedEntityToggle = null;
+		this.RefreshToggleStates();
 	}
 
 	private void ToggleObjectPicker(bool Show)
@@ -271,15 +328,16 @@ public class ReceptacleSideScreen : SideScreenContent, IRender1000ms
 		{
 			this.scrollBarContainer.SetActive(Show);
 		}
-		this.requestObjectList.SetActive(Show);
+		this.requestObjectListContainer.SetActive(Show);
 		this.activeEntityContainer.SetActive(!Show);
 	}
 
 	private void ConfigureActiveEntity(Tag tag)
 	{
 		string properName = Assets.GetPrefab(tag).GetProperName();
-		this.activeEntityContainer.GetComponentInChildrenOnly<LocText>().text = properName;
-		this.activeEntityContainer.transform.GetChild(0).gameObject.GetComponentInChildrenOnly<Image>().sprite = this.GetEntityIcon(tag);
+		HierarchyReferences component = this.activeEntityContainer.GetComponent<HierarchyReferences>();
+		component.GetReference<LocText>("Label").text = properName;
+		component.GetReference<Image>("Icon").sprite = this.GetEntityIcon(tag);
 	}
 
 	protected virtual string GetEntityName(Tag prefabTag)
@@ -347,25 +405,51 @@ public class ReceptacleSideScreen : SideScreenContent, IRender1000ms
 		}
 	}
 
-	protected void SetImageToggleState(KToggle toggle, ImageToggleState.State state)
+	protected void RefreshToggleStates()
+	{
+		foreach (KeyValuePair<ReceptacleToggle, ReceptacleSideScreen.SelectableEntity> keyValuePair in this.depositObjectMap)
+		{
+			if (this.selectedEntityToggle != keyValuePair.Key)
+			{
+				if (this.CanDepositEntity(keyValuePair.Value, false))
+				{
+					this.SetToggleState(keyValuePair.Key.toggle, ImageToggleState.State.Inactive);
+				}
+				else
+				{
+					this.SetToggleState(keyValuePair.Key.toggle, ImageToggleState.State.Disabled);
+				}
+			}
+			else if (this.CanDepositEntity(keyValuePair.Value, false))
+			{
+				this.SetToggleState(keyValuePair.Key.toggle, ImageToggleState.State.Active);
+			}
+			else
+			{
+				this.SetToggleState(keyValuePair.Key.toggle, ImageToggleState.State.DisabledActive);
+			}
+		}
+	}
+
+	protected void SetToggleState(MultiToggle toggle, ImageToggleState.State state)
 	{
 		switch (state)
 		{
 		case ImageToggleState.State.Disabled:
-			toggle.GetComponent<ImageToggleState>().SetDisabled();
-			toggle.gameObject.GetComponentInChildrenOnly<Image>().material = this.desaturatedMaterial;
+			toggle.ChangeState(2);
+			toggle.gameObject.GetComponentsInChildrenOnly<Image>()[1].material = this.desaturatedMaterial;
 			return;
 		case ImageToggleState.State.Inactive:
-			toggle.GetComponent<ImageToggleState>().SetInactive();
-			toggle.gameObject.GetComponentInChildrenOnly<Image>().material = this.defaultMaterial;
+			toggle.ChangeState(0);
+			toggle.gameObject.GetComponentsInChildrenOnly<Image>()[1].material = this.defaultMaterial;
 			return;
 		case ImageToggleState.State.Active:
-			toggle.GetComponent<ImageToggleState>().SetActive();
-			toggle.gameObject.GetComponentInChildrenOnly<Image>().material = this.defaultMaterial;
+			toggle.ChangeState(1);
+			toggle.gameObject.GetComponentsInChildrenOnly<Image>()[1].material = this.defaultMaterial;
 			return;
 		case ImageToggleState.State.DisabledActive:
-			toggle.GetComponent<ImageToggleState>().SetDisabledActive();
-			toggle.gameObject.GetComponentInChildrenOnly<Image>().material = this.desaturatedMaterial;
+			toggle.ChangeState(3);
+			toggle.gameObject.GetComponentsInChildrenOnly<Image>()[1].material = this.desaturatedMaterial;
 			return;
 		default:
 			return;
@@ -413,20 +497,37 @@ public class ReceptacleSideScreen : SideScreenContent, IRender1000ms
 			{
 				if (this.selectedEntityToggle != keyValuePair.Key)
 				{
-					this.SetImageToggleState(keyValuePair.Key.toggle, ImageToggleState.State.Disabled);
+					keyValuePair.Key.toggle.ChangeState(2);
 				}
 				else
 				{
-					this.SetImageToggleState(keyValuePair.Key.toggle, ImageToggleState.State.DisabledActive);
+					keyValuePair.Key.toggle.ChangeState(3);
 				}
 			}
 			else if (this.selectedEntityToggle != keyValuePair.Key)
 			{
-				this.SetImageToggleState(keyValuePair.Key.toggle, ImageToggleState.State.Inactive);
+				keyValuePair.Key.toggle.ChangeState(0);
 			}
 			else
 			{
-				this.SetImageToggleState(keyValuePair.Key.toggle, ImageToggleState.State.Active);
+				keyValuePair.Key.toggle.ChangeState(1);
+			}
+		}
+		foreach (KeyValuePair<Tag, GameObject> keyValuePair2 in this.contentContainers)
+		{
+			Transform transform = keyValuePair2.Value.GetComponent<HierarchyReferences>().GetReference<GridLayoutGroup>("GridLayout").transform;
+			bool flag2 = false;
+			for (int i = 0; i < transform.childCount; i++)
+			{
+				if (transform.GetChild(i).gameObject.activeSelf)
+				{
+					flag2 = true;
+					break;
+				}
+			}
+			if (keyValuePair2.Value.activeSelf != flag2)
+			{
+				keyValuePair2.Value.SetActive(flag2);
 			}
 		}
 		return flag;
@@ -459,17 +560,12 @@ public class ReceptacleSideScreen : SideScreenContent, IRender1000ms
 			global::Debug.LogError("Recipe not found on recipe list.");
 			return;
 		}
-		if (this.selectedEntityToggle != null)
-		{
-			bool flag = this.CanDepositEntity(this.depositObjectMap[this.selectedEntityToggle]);
-			this.requestSelectedEntityBtn.isInteractable = flag;
-			this.SetImageToggleState(this.selectedEntityToggle.toggle, flag ? ImageToggleState.State.Inactive : ImageToggleState.State.Disabled);
-		}
 		this.selectedEntityToggle = toggle;
 		this.entityPreviousSelectionMap[this.targetReceptacle] = this.entityToggles.IndexOf(toggle);
 		this.selectedDepositObjectTag = this.depositObjectMap[toggle].tag;
 		MutantPlant component = this.depositObjectMap[toggle].asset.GetComponent<MutantPlant>();
 		this.selectedDepositObjectAdditionalTag = (component ? component.SubSpeciesID : Tag.Invalid);
+		this.RefreshToggleStates();
 		this.UpdateAvailableAmounts(null);
 		this.UpdateState(null);
 	}
@@ -541,6 +637,14 @@ public class ReceptacleSideScreen : SideScreenContent, IRender1000ms
 	public GameObject nothingDiscoveredContainer;
 
 	[SerializeField]
+	private bool categoryStartExpanded;
+
+	[SerializeField]
+	private GameObject categoryContainerPrefab;
+
+	private Dictionary<Tag, GameObject> contentContainers = new Dictionary<Tag, GameObject>();
+
+	[SerializeField]
 	protected LocText descriptionLabel;
 
 	protected Dictionary<SingleEntityReceptacle, int> entityPreviousSelectionMap = new Dictionary<SingleEntityReceptacle, int>();
@@ -574,10 +678,10 @@ public class ReceptacleSideScreen : SideScreenContent, IRender1000ms
 	public Material desaturatedMaterial;
 
 	[SerializeField]
-	private GameObject requestObjectList;
+	private GameObject requestObjectListContainer;
 
 	[SerializeField]
-	private GameObject requestObjectListContainer;
+	private GameObject requestObjectListContainerContent;
 
 	[SerializeField]
 	private GameObject scrollBarContainer;
@@ -608,6 +712,10 @@ public class ReceptacleSideScreen : SideScreenContent, IRender1000ms
 	protected Dictionary<ReceptacleToggle, ReceptacleSideScreen.SelectableEntity> depositObjectMap;
 
 	protected List<ReceptacleToggle> entityToggles = new List<ReceptacleToggle>();
+
+	private List<GameObject> recycledEntityToggles = new List<GameObject>();
+
+	private Dictionary<Tag, bool> categoryExpandedStatus = new Dictionary<Tag, bool>();
 
 	private int onObjectDestroyedHandle = -1;
 

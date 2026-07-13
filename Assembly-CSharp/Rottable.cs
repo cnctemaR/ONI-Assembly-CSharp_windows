@@ -12,10 +12,11 @@ public class Rottable : GameStateMachine<Rottable, Rottable.Instance, IStateMach
 		default_state = this.Fresh;
 		base.serializable = StateMachine.SerializeType.Both_DEPRECATED;
 		this.root.TagTransition(GameTags.Preserved, this.Preserved, false).TagTransition(GameTags.Entombed, this.Preserved, false);
-		this.Fresh.ToggleStatusItem(Db.Get().CreatureStatusItems.Fresh, (Rottable.Instance smi) => smi).ParamTransition<float>(this.rotParameter, this.Stale_Pre, (Rottable.Instance smi, float p) => p <= smi.def.spoilTime - (smi.def.spoilTime - smi.def.staleTime)).Update(delegate(Rottable.Instance smi, float dt)
-		{
-			smi.sm.rotParameter.Set(smi.RotValue, smi, false);
-		}, UpdateRate.SIM_1000ms, true)
+		this.Fresh.ToggleStatusItem(Db.Get().CreatureStatusItems.Fresh, (Rottable.Instance smi) => smi).ToggleTag(GameTags.RotModifierTags.Fresh).ParamTransition<float>(this.rotParameter, this.Stale_Pre, (Rottable.Instance smi, float p) => p <= smi.def.spoilTime - (smi.def.spoilTime - smi.def.staleTime))
+			.Update(delegate(Rottable.Instance smi, float dt)
+			{
+				smi.sm.rotParameter.Set(smi.RotValue, smi, false);
+			}, UpdateRate.SIM_1000ms, true)
 			.FastUpdate("Rot", Rottable.rotCB, UpdateRate.SIM_1000ms, true);
 		this.Preserved.TagTransition(Rottable.PRESERVED_TAGS, this.Fresh, true).Enter("RefreshModifiers", delegate(Rottable.Instance smi)
 		{
@@ -26,6 +27,7 @@ public class Rottable : GameStateMachine<Rottable, Rottable.Instance, IStateMach
 			smi.GoTo(this.Stale);
 		});
 		this.Stale.ToggleStatusItem(Db.Get().CreatureStatusItems.Stale, (Rottable.Instance smi) => smi).ParamTransition<float>(this.rotParameter, this.Fresh, (Rottable.Instance smi, float p) => p > smi.def.spoilTime - (smi.def.spoilTime - smi.def.staleTime)).ParamTransition<float>(this.rotParameter, this.Spoiled, GameStateMachine<Rottable, Rottable.Instance, IStateMachineTarget, Rottable.Def>.IsLTEZero)
+			.ToggleTag(GameTags.RotModifierTags.Stale)
 			.Update(delegate(Rottable.Instance smi, float dt)
 			{
 				smi.sm.rotParameter.Set(smi.RotValue, smi, false);
@@ -427,15 +429,21 @@ public class Rottable : GameStateMachine<Rottable, Rottable.Instance, IStateMach
 					if (rotRefrigerationLevel == Rottable.RotRefrigerationLevel.Frozen)
 					{
 						this.rotAmountInstance.deltaAttribute.Add(Rottable.Instance.frozenModifier);
+						component.AddTag(GameTags.RotModifierTags.DeepFrozen, false);
+						component.RemoveTag(GameTags.RotModifierTags.Refrigerated);
 					}
 					else
 					{
 						this.rotAmountInstance.deltaAttribute.Add(Rottable.Instance.unrefrigeratedModifier);
+						component.RemoveTag(GameTags.RotModifierTags.Refrigerated);
+						component.RemoveTag(GameTags.RotModifierTags.DeepFrozen);
 					}
 				}
 				else
 				{
 					this.rotAmountInstance.deltaAttribute.Add(Rottable.Instance.refrigeratedModifier);
+					component.AddTag(GameTags.RotModifierTags.Refrigerated, false);
+					component.RemoveTag(GameTags.RotModifierTags.DeepFrozen);
 				}
 				Rottable.RotAtmosphereQuality rotAtmosphereQuality = Rottable.AtmosphereQuality(this);
 				if (rotAtmosphereQuality != Rottable.RotAtmosphereQuality.Sterilizing)

@@ -9,9 +9,9 @@ using UnityEngine.Scripting;
 namespace UnityEngine
 {
 	[NativeClass("TextRendering::Font")]
-	[NativeHeader("Modules/TextRendering/Public/Font.h")]
-	[NativeHeader("Modules/TextRendering/Public/FontImpl.h")]
 	[StaticAccessor("TextRenderingPrivate", StaticAccessorType.DoubleColon)]
+	[NativeHeader("Modules/TextRendering/Public/FontImpl.h")]
+	[NativeHeader("Modules/TextRendering/Public/Font.h")]
 	public sealed class Font : Object
 	{
 		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]

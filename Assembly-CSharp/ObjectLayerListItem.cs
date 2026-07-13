@@ -9,9 +9,12 @@ public class ObjectLayerListItem
 
 	public GameObject gameObject { get; private set; }
 
-	public ObjectLayerListItem(GameObject gameObject, ObjectLayer layer, int new_cell)
+	public Pickupable pickupable { get; private set; }
+
+	public ObjectLayerListItem(GameObject gameObject, Pickupable pickupable, ObjectLayer layer, int new_cell)
 	{
 		this.gameObject = gameObject;
+		this.pickupable = pickupable;
 		this.layer = layer;
 		this.Refresh(new_cell);
 	}

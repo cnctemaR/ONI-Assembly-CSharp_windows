@@ -23,7 +23,14 @@ namespace UnityEngine.UIElements
 		protected override float StringToValue(string str)
 		{
 			float num;
-			return UINumericFieldsUtils.TryConvertStringToFloat(str, base.textInputBase.originalText, out num) ? num : base.rawValue;
+			ExpressionEvaluator.Expression expression;
+			bool flag = UINumericFieldsUtils.TryConvertStringToFloat(str, base.textInputBase.originalText, out num, out expression);
+			Action<ExpressionEvaluator.Expression> expressionEvaluated = this.expressionEvaluated;
+			if (expressionEvaluated != null)
+			{
+				expressionEvaluated(expression);
+			}
+			return flag ? num : base.rawValue;
 		}
 
 		public FloatField()
@@ -118,9 +125,7 @@ namespace UnityEngine.UIElements
 
 			protected override float StringToValue(string str)
 			{
-				float num;
-				UINumericFieldsUtils.TryConvertStringToFloat(str, base.originalText, out num);
-				return num;
+				return this.parentFloatField.StringToValue(str);
 			}
 		}
 	}

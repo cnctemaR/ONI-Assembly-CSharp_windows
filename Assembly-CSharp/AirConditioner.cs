@@ -95,7 +95,14 @@ public class AirConditioner : KMonoBehaviour, ISaveLoadable, IGameObjectEffectDe
 				float num5 = (num - component.Temperature) * component.Element.specificHeatCapacity * num2;
 				float num6 = ((this.lastSampleTime > 0f) ? (Time.time - this.lastSampleTime) : 1f);
 				this.lastSampleTime = Time.time;
+				if (this.isLiquidConditioner && this.lastElement != component.ElementID)
+				{
+					Color color = component.Element.substance.colour;
+					color.a = 1f;
+					this.controller.SetSymbolTint(new KAnimHashedString("liquid"), color);
+				}
 				this.heatEffect.SetHeatBeingProducedValue(Mathf.Abs(num5));
+				this.lastElement = component.ElementID;
 				GameComps.StructureTemperatures.ProduceEnergy(this.structureTemperature, -num5, BUILDING.STATUSITEMS.OPERATINGENERGY.PIPECONTENTS_TRANSFER, num6);
 				break;
 			}
@@ -109,7 +116,7 @@ public class AirConditioner : KMonoBehaviour, ISaveLoadable, IGameObjectEffectDe
 		this.UpdateStatus();
 	}
 
-	private void OnOperationalChanged(object data)
+	private void OnOperationalChanged(object _)
 	{
 		if (this.operational.IsOperational)
 		{
@@ -117,7 +124,7 @@ public class AirConditioner : KMonoBehaviour, ISaveLoadable, IGameObjectEffectDe
 		}
 	}
 
-	private void OnActiveChanged(object data)
+	private void OnActiveChanged(object _)
 	{
 		this.UpdateStatus();
 		if (this.operational.IsActive)
@@ -207,6 +214,9 @@ public class AirConditioner : KMonoBehaviour, ISaveLoadable, IGameObjectEffectDe
 	[MyCmpGet]
 	private KBatchedAnimHeatPostProcessingEffect heatEffect;
 
+	[MyCmpGet]
+	private KBatchedAnimController controller;
+
 	private HandleVector<int>.Handle structureTemperature;
 
 	public float temperatureDelta = -14f;
@@ -239,6 +249,8 @@ public class AirConditioner : KMonoBehaviour, ISaveLoadable, IGameObjectEffectDe
 	});
 
 	private float lastSampleTime = -1f;
+
+	private SimHashes lastElement = SimHashes.Vacuum;
 
 	private float envTemp;
 

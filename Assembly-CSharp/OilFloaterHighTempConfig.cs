@@ -4,6 +4,7 @@ using STRINGS;
 using TUNING;
 using UnityEngine;
 
+[EntityConfigOrder(2)]
 public class OilFloaterHighTempConfig : IEntityConfig
 {
 	public static GameObject CreateOilFloater(string id, string name, string desc, string anim_file, bool is_baby)

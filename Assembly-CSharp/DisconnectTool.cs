@@ -13,7 +13,9 @@ public class DisconnectTool : FilteredDragTool
 	{
 		base.OnPrefabInit();
 		DisconnectTool.Instance = this;
-		this.disconnectVisPool = new GameObjectPool(new Func<GameObject>(this.InstantiateDisconnectVis), this.singleDisconnectMode ? 1 : 10);
+		this.disconnectVisPool = new GameObjectPool(new Func<GameObject>(this.InstantiateDisconnectVis), delegate(GameObject _)
+		{
+		}, this.singleDisconnectMode ? 1 : 10);
 		if (this.singleDisconnectMode)
 		{
 			this.lineModeMaxLength = 2;

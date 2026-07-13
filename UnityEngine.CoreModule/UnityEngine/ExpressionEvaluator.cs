@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using Unity.Collections.LowLevel.Unsafe;
+using UnityEngine.Bindings;
 using UnityEngine.Scripting.APIUpdating;
 
 namespace UnityEngine
@@ -671,6 +672,7 @@ namespace UnityEngine
 			}
 		};
 
+		[VisibleToOtherModules(new string[] { "UnityEngine.UIElementsModule" })]
 		internal class Expression
 		{
 			internal Expression(string expression)
@@ -684,6 +686,23 @@ namespace UnityEngine
 			public bool Evaluate<T>(ref T value, int index = 0, int count = 1)
 			{
 				return ExpressionEvaluator.EvaluateTokens<T>(this.rpnTokens, ref value, index, count);
+			}
+
+			public override bool Equals(object obj)
+			{
+				ExpressionEvaluator.Expression expression = obj as ExpressionEvaluator.Expression;
+				bool flag = expression != null;
+				return flag && this.rpnTokens.SequenceEqual<string>(expression.rpnTokens);
+			}
+
+			public override int GetHashCode()
+			{
+				return this.rpnTokens.GetHashCode();
+			}
+
+			public override string ToString()
+			{
+				return string.Join(" ", this.rpnTokens);
 			}
 
 			internal readonly string[] rpnTokens;

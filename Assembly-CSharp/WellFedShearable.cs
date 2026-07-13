@@ -29,7 +29,9 @@ public class WellFedShearable : GameStateMachine<WellFedShearable, WellFedSheara
 		this.growing.Enter(delegate(WellFedShearable.Instance smi)
 		{
 			WellFedShearable.UpdateScales(smi, 0f);
-		}).Transition(this.fullyGrown, new StateMachine<WellFedShearable, WellFedShearable.Instance, IStateMachineTarget, WellFedShearable.Def>.Transition.ConditionCallback(WellFedShearable.AreScalesFullyGrown), UpdateRate.SIM_1000ms);
+		}).DefaultState(this.growing.stalled).Transition(this.fullyGrown, new StateMachine<WellFedShearable, WellFedShearable.Instance, IStateMachineTarget, WellFedShearable.Def>.Transition.ConditionCallback(WellFedShearable.AreScalesFullyGrown), UpdateRate.SIM_1000ms);
+		this.growing.stalled.ToggleCritterEmotion(Db.Get().CritterEmotions.WellFed, null).Transition(this.growing.growing, (WellFedShearable.Instance smi) => smi.HasWellFedEffect(), UpdateRate.SIM_1000ms);
+		this.growing.growing.Transition(this.growing.stalled, GameStateMachine<WellFedShearable, WellFedShearable.Instance, IStateMachineTarget, WellFedShearable.Def>.Not((WellFedShearable.Instance smi) => smi.HasWellFedEffect()), UpdateRate.SIM_1000ms).ToggleCritterEmotion(Db.Get().CritterEmotions.WellFed, null);
 		this.fullyGrown.Enter(delegate(WellFedShearable.Instance smi)
 		{
 			WellFedShearable.UpdateScales(smi, 0f);
@@ -56,7 +58,7 @@ public class WellFedShearable : GameStateMachine<WellFedShearable, WellFedSheara
 		}
 	}
 
-	public GameStateMachine<WellFedShearable, WellFedShearable.Instance, IStateMachineTarget, WellFedShearable.Def>.State growing;
+	public WellFedShearable.GrowingState growing;
 
 	public GameStateMachine<WellFedShearable, WellFedShearable.Instance, IStateMachineTarget, WellFedShearable.Def>.State fullyGrown;
 
@@ -96,6 +98,13 @@ public class WellFedShearable : GameStateMachine<WellFedShearable, WellFedSheara
 		public static KAnimHashedString[] SCALE_SYMBOL_NAMES = new KAnimHashedString[] { "scale_0", "scale_1", "scale_2", "scale_3", "scale_4" };
 	}
 
+	public class GrowingState : GameStateMachine<WellFedShearable, WellFedShearable.Instance, IStateMachineTarget, WellFedShearable.Def>.State
+	{
+		public GameStateMachine<WellFedShearable, WellFedShearable.Instance, IStateMachineTarget, WellFedShearable.Def>.State growing;
+
+		public GameStateMachine<WellFedShearable, WellFedShearable.Instance, IStateMachineTarget, WellFedShearable.Def>.State stalled;
+	}
+
 	public new class Instance : GameStateMachine<WellFedShearable, WellFedShearable.Instance, IStateMachineTarget, WellFedShearable.Def>.GameInstance, IShearable
 	{
 		public Instance(IStateMachineTarget master, WellFedShearable.Def def)
@@ -112,7 +121,7 @@ public class WellFedShearable : GameStateMachine<WellFedShearable, WellFedSheara
 
 		public void OnCaloriesConsumed(object data)
 		{
-			CreatureCalorieMonitor.CaloriesConsumedEvent caloriesConsumedEvent = (CreatureCalorieMonitor.CaloriesConsumedEvent)data;
+			CreatureCalorieMonitor.CaloriesConsumedEvent caloriesConsumedEvent = Boxed<CreatureCalorieMonitor.CaloriesConsumedEvent>.Unbox(data);
 			if (base.def.requiredDiet != null && caloriesConsumedEvent.tag != base.def.requiredDiet)
 			{
 				return;
@@ -123,6 +132,11 @@ public class WellFedShearable : GameStateMachine<WellFedShearable, WellFedSheara
 				effectInstance = this.effects.Add(base.smi.def.effectId, true);
 			}
 			effectInstance.timeRemaining += caloriesConsumedEvent.calories / base.smi.def.caloriesPerCycle * 600f;
+		}
+
+		public bool HasWellFedEffect()
+		{
+			return this.effects.Get(base.def.effectId) != null;
 		}
 
 		public void Shear()

@@ -22,11 +22,13 @@ public class ModifierSet : ScriptableObject
 		this.traits = new ModifierSet.TraitSet();
 		this.traitGroups = new ModifierSet.TraitGroupSet();
 		this.FertilityModifiers = new FertilityModifiers();
+		this.MooSongModifiers = new MooSongModifiers();
 		this.Amounts = new global::Database.Amounts();
 		this.Amounts.Load();
 		this.AttributeConverters = new global::Database.AttributeConverters();
 		this.LoadEffects();
 		this.LoadFertilityModifiers();
+		this.LoadMooSongsModifiers();
 	}
 
 	public static float ConvertValue(float value, Units units)
@@ -165,29 +167,38 @@ public class ModifierSet : ScriptableObject
 		effect8.Add(new AttributeModifier(Db.Get().Amounts.Beckoning.deltaAttribute.Id, MooTuning.WELLFED_EFFECT, global::STRINGS.CREATURES.MODIFIERS.MOOWELLFED.NAME, false, false, true));
 		effect8.Add(new AttributeModifier(Db.Get().Amounts.MilkProduction.deltaAttribute.Id, MooTuning.MILK_PRODUCTION_PERCENTAGE_PER_SECOND, global::STRINGS.CREATURES.MODIFIERS.MOOWELLFED.NAME, false, false, true));
 		this.effects.Add(effect8);
-		Effect effect9 = new Effect("WoodDeerWellFed", global::STRINGS.CREATURES.MODIFIERS.WOODDEERWELLFED.NAME, global::STRINGS.CREATURES.MODIFIERS.WOODDEERWELLFED.TOOLTIP, 1f, true, true, false, null, -1f, 0f, null, "");
-		effect9.Add(new AttributeModifier(Db.Get().Amounts.ScaleGrowth.deltaAttribute.Id, 100f / (WoodDeerConfig.ANTLER_GROWTH_TIME_IN_CYCLES * 600f), global::STRINGS.CREATURES.MODIFIERS.WOODDEERWELLFED.NAME, false, false, true));
+		Effect effect9 = new Effect("HuskyMooFed", global::STRINGS.CREATURES.MODIFIERS.HUSKYMOOFED.NAME, global::STRINGS.CREATURES.MODIFIERS.HUSKYMOOFED.TOOLTIP, 1f, true, true, false, null, -1f, 0f, null, "");
+		effect9.Add(new AttributeModifier(Db.Get().Amounts.Beckoning.deltaAttribute.Id, MooTuning.WELLFED_EFFECT, global::STRINGS.CREATURES.MODIFIERS.HUSKYMOOFED.NAME, false, false, true));
 		this.effects.Add(effect9);
-		Effect effect10 = new Effect("IceBellyWellFed", global::STRINGS.CREATURES.MODIFIERS.ICEBELLYWELLFED.NAME, global::STRINGS.CREATURES.MODIFIERS.ICEBELLYWELLFED.TOOLTIP, 1f, true, true, false, null, -1f, 0f, null, "");
-		effect10.Add(new AttributeModifier(Db.Get().Amounts.ScaleGrowth.deltaAttribute.Id, 100f / (IceBellyConfig.SCALE_GROWTH_TIME_IN_CYCLES * 600f), global::STRINGS.CREATURES.MODIFIERS.ICEBELLYWELLFED.NAME, false, false, true));
+		Effect effect10 = new Effect("HuskyMooWellFed", global::STRINGS.CREATURES.MODIFIERS.HUSKYMOOWELLFED.NAME, global::STRINGS.CREATURES.MODIFIERS.HUSKYMOOWELLFED.TOOLTIP, 1f, true, true, false, null, -1f, 0f, null, "");
+		effect10.Add(new AttributeModifier(Db.Get().Amounts.MilkProduction.deltaAttribute.Id, MooTuning.MILK_PRODUCTION_PERCENTAGE_PER_SECOND, () => GameUtil.SafeStringFormat(global::STRINGS.CREATURES.STATS.MILKPRODUCTION.DISPLAYED_NAME, new object[] { UI.StripLinkFormatting(ElementLoader.FindElementByHash(DieselMooConfig.MILK_ELEMENT).name) }), () => global::STRINGS.CREATURES.MODIFIERS.HUSKYMOOWELLFED.NAME, false, false));
 		this.effects.Add(effect10);
-		Effect effect11 = new Effect("GoldBellyWellFed", global::STRINGS.CREATURES.MODIFIERS.GOLDBELLYWELLFED.NAME, global::STRINGS.CREATURES.MODIFIERS.GOLDBELLYWELLFED.TOOLTIP, 1f, true, true, false, null, -1f, 0f, null, "");
-		effect11.Add(new AttributeModifier(Db.Get().Amounts.ScaleGrowth.deltaAttribute.Id, 0.016666668f, global::STRINGS.CREATURES.MODIFIERS.GOLDBELLYWELLFED.NAME, false, false, true));
+		Effect effect11 = new Effect("WoodDeerWellFed", global::STRINGS.CREATURES.MODIFIERS.DEERWELLFED.NAME, global::STRINGS.CREATURES.MODIFIERS.DEERWELLFED.TOOLTIP, 1f, true, true, false, null, -1f, 0f, null, "");
+		effect11.Add(new AttributeModifier(Db.Get().Amounts.ScaleGrowth.deltaAttribute.Id, 100f / (WoodDeerConfig.ANTLER_GROWTH_TIME_IN_CYCLES * 600f), () => global::STRINGS.CREATURES.STATS.SCALEGROWTH.DISPLAYED_NAME["WoodDeer"], () => global::STRINGS.CREATURES.MODIFIERS.DEERWELLFED.NAME, false, false));
 		this.effects.Add(effect11);
-		Effect effect12 = new Effect("ButterflyPollinated", global::STRINGS.CREATURES.MODIFIERS.BUTTERFLYPOLLINATED.NAME, global::STRINGS.CREATURES.MODIFIERS.BUTTERFLYPOLLINATED.TOOLTIP, 600f, true, true, false, null, -1f, 0f, null, "");
-		effect12.Add(new AttributeModifier(Db.Get().Amounts.Maturity.deltaAttribute.Id, 0.25f, global::STRINGS.CREATURES.MODIFIERS.BUTTERFLYPOLLINATED.NAME, true, false, true));
-		effect12.Add(new AttributeModifier(Db.Get().Amounts.Maturity2.deltaAttribute.Id, 0.25f, global::STRINGS.CREATURES.MODIFIERS.BUTTERFLYPOLLINATED.NAME, true, false, true));
+		Effect effect12 = new Effect("GlassDeerWellFed", global::STRINGS.CREATURES.MODIFIERS.DEERWELLFED.NAME, global::STRINGS.CREATURES.MODIFIERS.DEERWELLFED.TOOLTIP, 1f, true, true, false, null, -1f, 0f, null, "");
+		effect12.Add(new AttributeModifier(Db.Get().Amounts.ScaleGrowth.deltaAttribute.Id, 0.027777778f, () => global::STRINGS.CREATURES.STATS.SCALEGROWTH.DISPLAYED_NAME["GlassDeer"], () => global::STRINGS.CREATURES.MODIFIERS.DEERWELLFED.NAME, false, false));
 		this.effects.Add(effect12);
-		Effect effect13 = new Effect(PollinationMonitor.INITIALLY_POLLINATED_EFFECT, global::STRINGS.CREATURES.MODIFIERS.INITIALLYPOLLINATED.NAME, global::STRINGS.CREATURES.MODIFIERS.INITIALLYPOLLINATED.TOOLTIP, 600f, false, false, false, null, -1f, 0f, null, "");
+		Effect effect13 = new Effect("IceBellyWellFed", global::STRINGS.CREATURES.MODIFIERS.ICEBELLYWELLFED.NAME, global::STRINGS.CREATURES.MODIFIERS.ICEBELLYWELLFED.TOOLTIP, 1f, true, true, false, null, -1f, 0f, null, "");
+		effect13.Add(new AttributeModifier(Db.Get().Amounts.ScaleGrowth.deltaAttribute.Id, 100f / (IceBellyConfig.SCALE_GROWTH_TIME_IN_CYCLES * 600f), () => global::STRINGS.CREATURES.STATS.SCALEGROWTH.DISPLAYED_NAME["IceBelly"], () => global::STRINGS.CREATURES.MODIFIERS.ICEBELLYWELLFED.NAME, false, false));
 		this.effects.Add(effect13);
-		Effect effect14 = new Effect("RaptorWellFed", global::STRINGS.CREATURES.MODIFIERS.RAPTORWELLFED.NAME, global::STRINGS.CREATURES.MODIFIERS.RAPTORWELLFED.TOOLTIP, 1f, true, true, false, null, -1f, 0f, null, "");
-		effect14.Add(new AttributeModifier(Db.Get().Amounts.ScaleGrowth.deltaAttribute.Id, 100f / (RaptorConfig.SCALE_GROWTH_TIME_IN_CYCLES * 600f), global::STRINGS.CREATURES.MODIFIERS.RAPTORWELLFED.NAME, false, false, true));
+		Effect effect14 = new Effect("GoldBellyWellFed", global::STRINGS.CREATURES.MODIFIERS.GOLDBELLYWELLFED.NAME, global::STRINGS.CREATURES.MODIFIERS.GOLDBELLYWELLFED.TOOLTIP, 1f, true, true, false, null, -1f, 0f, null, "");
+		effect14.Add(new AttributeModifier(Db.Get().Amounts.ScaleGrowth.deltaAttribute.Id, 0.016666668f, () => global::STRINGS.CREATURES.STATS.SCALEGROWTH.DISPLAYED_NAME["GoldBelly"], () => global::STRINGS.CREATURES.MODIFIERS.GOLDBELLYWELLFED.NAME, false, false));
 		this.effects.Add(effect14);
-		Effect effect15 = new Effect("PredatorFailedHunt", global::STRINGS.CREATURES.MODIFIERS.HUNT_FAILED.NAME, global::STRINGS.CREATURES.MODIFIERS.HUNT_FAILED.TOOLTIP, 45f, true, false, true, null, -1f, 0f, null, "");
-		effect15.tag = new Tag?(GameTags.Creatures.SuppressedDiet);
+		Effect effect15 = new Effect("ButterflyPollinated", global::STRINGS.CREATURES.MODIFIERS.BUTTERFLYPOLLINATED.NAME, global::STRINGS.CREATURES.MODIFIERS.BUTTERFLYPOLLINATED.TOOLTIP, 600f, true, true, false, null, -1f, 0f, null, "");
+		effect15.Add(new AttributeModifier(Db.Get().Amounts.Maturity.deltaAttribute.Id, 0.25f, global::STRINGS.CREATURES.MODIFIERS.BUTTERFLYPOLLINATED.NAME, true, false, true));
+		effect15.Add(new AttributeModifier(Db.Get().Amounts.Maturity2.deltaAttribute.Id, 0.25f, global::STRINGS.CREATURES.MODIFIERS.BUTTERFLYPOLLINATED.NAME, true, false, true));
 		this.effects.Add(effect15);
-		Effect effect16 = new Effect("PreyEvadedHunt", global::STRINGS.CREATURES.MODIFIERS.EVADED_HUNT.NAME, global::STRINGS.CREATURES.MODIFIERS.EVADED_HUNT.TOOLTIP, 10f, true, false, false, null, -1f, 0f, null, "");
+		Effect effect16 = new Effect(PollinationMonitor.INITIALLY_POLLINATED_EFFECT, global::STRINGS.CREATURES.MODIFIERS.INITIALLYPOLLINATED.NAME, global::STRINGS.CREATURES.MODIFIERS.INITIALLYPOLLINATED.TOOLTIP, 600f, false, false, false, null, -1f, 0f, null, "");
 		this.effects.Add(effect16);
+		Effect effect17 = new Effect("RaptorWellFed", global::STRINGS.CREATURES.MODIFIERS.RAPTORWELLFED.NAME, global::STRINGS.CREATURES.MODIFIERS.RAPTORWELLFED.TOOLTIP, 1f, true, true, false, null, -1f, 0f, null, "");
+		effect17.Add(new AttributeModifier(Db.Get().Amounts.ScaleGrowth.deltaAttribute.Id, 100f / (RaptorConfig.SCALE_GROWTH_TIME_IN_CYCLES * 600f), () => global::STRINGS.CREATURES.STATS.SCALEGROWTH.DISPLAYED_NAME["Raptor"], () => global::STRINGS.CREATURES.MODIFIERS.RAPTORWELLFED.NAME, false, false));
+		this.effects.Add(effect17);
+		Effect effect18 = new Effect("PredatorFailedHunt", global::STRINGS.CREATURES.MODIFIERS.HUNT_FAILED.NAME, global::STRINGS.CREATURES.MODIFIERS.HUNT_FAILED.TOOLTIP, 45f, true, false, true, null, -1f, 0f, null, "");
+		effect18.tag = new Tag?(GameTags.Creatures.SuppressedDiet);
+		this.effects.Add(effect18);
+		Effect effect19 = new Effect("PreyEvadedHunt", global::STRINGS.CREATURES.MODIFIERS.EVADED_HUNT.NAME, global::STRINGS.CREATURES.MODIFIERS.EVADED_HUNT.TOOLTIP, 10f, true, false, false, null, -1f, 0f, null, "");
+		this.effects.Add(effect19);
 		this.CreateMosquitoEffects();
 	}
 
@@ -221,6 +232,13 @@ public class ModifierSet : ScriptableObject
 		return fertilityModifier;
 	}
 
+	public MooSongModifier CreateMooSongModifier(string id, Tag targetTag, string name, string description, Func<string, string> tooltipCB, MooSongModifier.MooSongModFn applyFunction)
+	{
+		MooSongModifier mooSongModifier = new MooSongModifier(id, targetTag, name, description, tooltipCB, applyFunction);
+		this.MooSongModifiers.Add(mooSongModifier);
+		return mooSongModifier;
+	}
+
 	protected void LoadTraits()
 	{
 		TRAITS.TRAIT_CREATORS.ForEach(delegate(global::System.Action action)
@@ -237,6 +255,14 @@ public class ModifierSet : ScriptableObject
 		});
 	}
 
+	protected void LoadMooSongsModifiers()
+	{
+		global::TUNING.CREATURES.MOO_SONG_MODIFIERS.MODIFIER_CREATORS.ForEach(delegate(global::System.Action action)
+		{
+			action();
+		});
+	}
+
 	public TextAsset modifiersFile;
 
 	public ModifierSet.ModifierInfos modifierInfos;
@@ -248,6 +274,8 @@ public class ModifierSet : ScriptableObject
 	public ModifierSet.TraitGroupSet traitGroups;
 
 	public FertilityModifiers FertilityModifiers;
+
+	public MooSongModifiers MooSongModifiers;
 
 	public global::Database.Attributes Attributes;
 

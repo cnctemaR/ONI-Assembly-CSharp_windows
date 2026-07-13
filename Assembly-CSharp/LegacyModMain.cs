@@ -264,6 +264,11 @@ public class LegacyModMain
 				id = SimHashes.Iridium,
 				overheatMod = 500f,
 				decor = 0.2f
+			},
+			new LegacyModMain.ElementInfo
+			{
+				id = SimHashes.WoodLog,
+				decor = 0.5f
 			}
 		})
 		{

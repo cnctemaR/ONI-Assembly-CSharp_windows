@@ -378,7 +378,7 @@ public class PrimaryElement : KMonoBehaviour, ISaveLoadable
 		}
 		if (delta != 0 && this.diseaseHandle.IsValid() && GameComps.DiseaseContainers.ModifyDiseaseCount(this.diseaseHandle, delta) <= 0 && !this.forcePermanentDiseaseContainer)
 		{
-			base.Trigger(-1689370368, false);
+			base.Trigger(-1689370368, BoxedBools.False);
 			GameComps.DiseaseContainers.Remove(base.gameObject);
 			this.diseaseHandle.Clear();
 		}
@@ -412,7 +412,7 @@ public class PrimaryElement : KMonoBehaviour, ISaveLoadable
 		else if (delta > 0)
 		{
 			this.diseaseHandle = GameComps.DiseaseContainers.Add(base.gameObject, disease_idx, delta);
-			base.Trigger(-1689370368, true);
+			base.Trigger(-1689370368, BoxedBools.True);
 			base.Trigger(-283306403, null);
 		}
 	}

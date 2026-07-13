@@ -48,17 +48,17 @@ public class ClimbableTreeMonitor : GameStateMachine<ClimbableTreeMonitor, Climb
 			return this.climbTarget != null;
 		}
 
-		private static bool FindClimbableTreeVisitor(object obj, ClimbableTreeMonitor.Instance.FindClimableTreeContext context)
+		private static Util.IterationInstruction FindClimbableTree(object obj, ref ClimbableTreeMonitor.Instance.FindClimableTreeContext context)
 		{
 			KMonoBehaviour kmonoBehaviour = obj as KMonoBehaviour;
 			if (kmonoBehaviour.HasTag(GameTags.Creatures.ReservedByCreature))
 			{
-				return true;
+				return Util.IterationInstruction.Continue;
 			}
 			int num = Grid.PosToCell(kmonoBehaviour);
 			if (!context.navigator.CanReach(num))
 			{
-				return true;
+				return Util.IterationInstruction.Continue;
 			}
 			ForestTreeSeedMonitor component = kmonoBehaviour.GetComponent<ForestTreeSeedMonitor>();
 			StorageLocker component2 = kmonoBehaviour.GetComponent<StorageLocker>();
@@ -66,27 +66,27 @@ public class ClimbableTreeMonitor : GameStateMachine<ClimbableTreeMonitor, Climb
 			{
 				if (!component.ExtraSeedAvailable)
 				{
-					return true;
+					return Util.IterationInstruction.Continue;
 				}
 			}
 			else
 			{
 				if (!(component2 != null))
 				{
-					return true;
+					return Util.IterationInstruction.Continue;
 				}
 				Storage component3 = component2.GetComponent<Storage>();
 				if (!component3.allowItemRemoval)
 				{
-					return true;
+					return Util.IterationInstruction.Continue;
 				}
 				if (component3.IsEmpty())
 				{
-					return true;
+					return Util.IterationInstruction.Continue;
 				}
 			}
 			context.targets.Add(kmonoBehaviour);
-			return true;
+			return Util.IterationInstruction.Continue;
 		}
 
 		private void FindClimbableTree()
@@ -97,8 +97,8 @@ public class ClimbableTreeMonitor : GameStateMachine<ClimbableTreeMonitor, Climb
 			ClimbableTreeMonitor.Instance.FindClimableTreeContext findClimableTreeContext;
 			findClimableTreeContext.navigator = base.GetComponent<Navigator>();
 			findClimableTreeContext.targets = ListPool<KMonoBehaviour, ClimbableTreeMonitor>.Allocate();
-			GameScenePartitioner.Instance.AsyncSafeVisit<ClimbableTreeMonitor.Instance.FindClimableTreeContext>(extents.x, extents.y, extents.width, extents.height, GameScenePartitioner.Instance.plants, new Func<object, ClimbableTreeMonitor.Instance.FindClimableTreeContext, bool>(ClimbableTreeMonitor.Instance.FindClimbableTreeVisitor), findClimableTreeContext);
-			GameScenePartitioner.Instance.AsyncSafeVisit<ClimbableTreeMonitor.Instance.FindClimableTreeContext>(extents.x, extents.y, extents.width, extents.height, GameScenePartitioner.Instance.completeBuildings, new Func<object, ClimbableTreeMonitor.Instance.FindClimableTreeContext, bool>(ClimbableTreeMonitor.Instance.FindClimbableTreeVisitor), findClimableTreeContext);
+			GameScenePartitioner.Instance.ReadonlyVisitEntries<ClimbableTreeMonitor.Instance.FindClimableTreeContext>(extents.x, extents.y, extents.width, extents.height, GameScenePartitioner.Instance.plants, ClimbableTreeMonitor.Instance.FindClimbableTreeVisitor, ref findClimableTreeContext);
+			GameScenePartitioner.Instance.ReadonlyVisitEntries<ClimbableTreeMonitor.Instance.FindClimableTreeContext>(extents.x, extents.y, extents.width, extents.height, GameScenePartitioner.Instance.completeBuildings, ClimbableTreeMonitor.Instance.FindClimbableTreeVisitor, ref findClimableTreeContext);
 			if (findClimableTreeContext.targets.Count > 0)
 			{
 				int num = global::UnityEngine.Random.Range(0, findClimableTreeContext.targets.Count);
@@ -116,6 +116,8 @@ public class ClimbableTreeMonitor : GameStateMachine<ClimbableTreeMonitor, Climb
 		public GameObject climbTarget;
 
 		public float nextSearchTime;
+
+		private static GameScenePartitioner.VisitorRef<ClimbableTreeMonitor.Instance.FindClimableTreeContext> FindClimbableTreeVisitor = new GameScenePartitioner.VisitorRef<ClimbableTreeMonitor.Instance.FindClimableTreeContext>(ClimbableTreeMonitor.Instance.FindClimbableTree);
 
 		private struct FindClimableTreeContext
 		{

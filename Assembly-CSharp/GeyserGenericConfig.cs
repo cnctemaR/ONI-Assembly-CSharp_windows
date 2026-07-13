@@ -55,6 +55,7 @@ public class GeyserGenericConfig : IMultiEntityConfig
 		component.Temperature = geyserTemperature;
 		gameObject.AddOrGet<Prioritizable>();
 		gameObject.AddOrGet<Uncoverable>();
+		gameObject.AddOrGet<CodexEntryRedirector>().CodexID = "GEYSERS";
 		gameObject.AddOrGet<Geyser>().outputOffset = new Vector2I(0, 1);
 		gameObject.AddOrGet<GeyserConfigurator>().presetType = presetType;
 		Studyable studyable = gameObject.AddOrGet<Studyable>();

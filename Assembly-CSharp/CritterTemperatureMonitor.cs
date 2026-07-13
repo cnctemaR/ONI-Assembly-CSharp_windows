@@ -20,8 +20,8 @@ public class CritterTemperatureMonitor : GameStateMachine<CritterTemperatureMoni
 				smi.GoTo(targetState);
 			}
 		}, UpdateRate.SIM_200ms, false).Update(new Action<CritterTemperatureMonitor.Instance, float>(CritterTemperatureMonitor.UpdateInternalTemperature), UpdateRate.SIM_1000ms, false);
-		this.hot.TagTransition(GameTags.Dead, this.dead, false).ToggleCreatureThought(Db.Get().Thoughts.Hot, null);
-		this.cold.TagTransition(GameTags.Dead, this.dead, false).ToggleCreatureThought(Db.Get().Thoughts.Cold, null);
+		this.hot.TagTransition(GameTags.Dead, this.dead, false).ToggleCritterEmotion(Db.Get().CritterEmotions.Hot, null);
+		this.cold.TagTransition(GameTags.Dead, this.dead, false).ToggleCritterEmotion(Db.Get().CritterEmotions.Cold, null);
 		this.hot.uncomfortable.ToggleStatusItem(Db.Get().CreatureStatusItems.TemperatureHotUncomfortable, null).ToggleEffect((CritterTemperatureMonitor.Instance smi) => this.uncomfortableEffect);
 		this.hot.deadly.ToggleStatusItem(Db.Get().CreatureStatusItems.TemperatureHotDeadly, null).ToggleEffect((CritterTemperatureMonitor.Instance smi) => this.deadlyEffect).Enter(delegate(CritterTemperatureMonitor.Instance smi)
 		{

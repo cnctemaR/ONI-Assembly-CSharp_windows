@@ -47,6 +47,11 @@ public class SandboxSpawnerTool : InterfaceTool
 			{
 				gameObject.transform.position += Vector3.up * (Grid.CellSizeInMeters / 3f);
 			}
+			if (gameObject.GetComponent<ElementChunk>() != null)
+			{
+				gameObject.GetComponent<PrimaryElement>().Mass = 100f;
+				gameObject.GetComponent<PrimaryElement>().Temperature = prefab.GetComponent<PrimaryElement>().Element.defaultValues.temperature;
+			}
 			gameObject.SetActive(true);
 		}
 		GameUtil.KInstantiate(this.fxPrefab, Grid.CellToPosCCC(this.currentCell, Grid.SceneLayer.FXFront), Grid.SceneLayer.FXFront, null, 0).GetComponent<KAnimControllerBase>().Play("placer", KAnim.PlayMode.Once, 1f, 0f);

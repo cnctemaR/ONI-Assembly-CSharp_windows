@@ -181,7 +181,7 @@ public class MaskStation : StateMachineComponent<MaskStation.SMInstance>, IBasic
 
 	private static readonly EventSystem.IntraObjectHandler<MaskStation> OnOperationalChangedDelegate = new EventSystem.IntraObjectHandler<MaskStation>(delegate(MaskStation component, object data)
 	{
-		component.OnOperationalChanged((bool)data);
+		component.OnOperationalChanged(((Boxed<bool>)data).value);
 	});
 
 	private static readonly EventSystem.IntraObjectHandler<MaskStation> OnRotatedDelegate = new EventSystem.IntraObjectHandler<MaskStation>(delegate(MaskStation component, object data)

@@ -129,7 +129,7 @@ public class Overheatable : StateMachineComponent<Overheatable.StatesInstance>, 
 				return;
 			}
 			this.lastOverheatDamageTime += 7.5f;
-			base.master.Trigger(-794517298, new BuildingHP.DamageSourceInfo
+			base.master.BoxingTrigger<BuildingHP.DamageSourceInfo>(-794517298, new BuildingHP.DamageSourceInfo
 			{
 				damage = 1,
 				source = BUILDINGS.DAMAGESOURCES.BUILDING_OVERHEATED,

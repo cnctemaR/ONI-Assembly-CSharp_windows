@@ -5,6 +5,7 @@ using STRINGS;
 using TUNING;
 using UnityEngine;
 
+[EntityConfigOrder(2)]
 public class PuftAlphaConfig : IEntityConfig
 {
 	public static GameObject CreatePuftAlpha(string id, string name, string desc, string anim_file, bool is_baby)

@@ -15,12 +15,12 @@ using UnityEngine.Scripting;
 namespace UnityEngine
 {
 	[NativeHeader("ParticleSystemScriptingClasses.h")]
+	[NativeHeader("Modules/ParticleSystem/ParticleSystem.h")]
 	[NativeHeader("Modules/ParticleSystem/ParticleSystemGeometryJob.h")]
 	[NativeHeader("Modules/ParticleSystem/ScriptBindings/ParticleSystemScriptBindings.h")]
-	[UsedByNativeCode]
 	[RequireComponent(typeof(Transform))]
 	[NativeHeader("ParticleSystemScriptingClasses.h")]
-	[NativeHeader("Modules/ParticleSystem/ParticleSystem.h")]
+	[UsedByNativeCode]
 	[NativeHeader("Modules/ParticleSystem/ScriptBindings/ParticleSystemScriptBindings.h")]
 	[NativeHeader("Modules/ParticleSystem/ScriptBindings/ParticleSystemModulesScriptBindings.h")]
 	[NativeHeader("Modules/ParticleSystem/ParticleSystem.h")]
@@ -659,6 +659,9 @@ namespace UnityEngine
 		[ThreadSafe]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal unsafe static extern void CopyManagedJobData(void* systemPtr, out NativeParticleData particleData);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal static extern bool UserJobCanBeScheduled();
 
 		public ParticleSystem.MainModule main
 		{

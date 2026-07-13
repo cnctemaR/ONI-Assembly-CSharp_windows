@@ -5,9 +5,9 @@ using UnityEngine.Scripting.APIUpdating;
 
 namespace UnityEngine.Animations
 {
-	[NativeHeader("Modules/Animation/Director/AnimationStreamHandles.h")]
-	[MovedFrom("UnityEngine.Experimental.Animations")]
 	[NativeHeader("Modules/Animation/ScriptBindings/AnimationStreamHandles.bindings.h")]
+	[MovedFrom("UnityEngine.Experimental.Animations")]
+	[NativeHeader("Modules/Animation/Director/AnimationStreamHandles.h")]
 	public struct TransformStreamHandle
 	{
 		public bool IsValid(AnimationStream stream)

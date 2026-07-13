@@ -5,8 +5,8 @@ using UnityEngine.Scripting.APIUpdating;
 
 namespace UnityEngine.Rendering
 {
-	[MovedFrom("UnityEngine.Rendering.RendererUtils")]
 	[NativeHeader("Runtime/Graphics/ScriptableRenderLoop/RendererList.h")]
+	[MovedFrom("UnityEngine.Rendering.RendererUtils")]
 	public struct RendererList
 	{
 		public bool isValid

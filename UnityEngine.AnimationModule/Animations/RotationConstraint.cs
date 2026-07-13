@@ -6,10 +6,10 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Animations
 {
-	[NativeHeader("Modules/Animation/Constraints/RotationConstraint.h")]
-	[UsedByNativeCode]
 	[NativeHeader("Modules/Animation/Constraints/Constraint.bindings.h")]
+	[UsedByNativeCode]
 	[RequireComponent(typeof(Transform))]
+	[NativeHeader("Modules/Animation/Constraints/RotationConstraint.h")]
 	public sealed class RotationConstraint : Behaviour, IConstraint, IConstraintInternal
 	{
 		private RotationConstraint()

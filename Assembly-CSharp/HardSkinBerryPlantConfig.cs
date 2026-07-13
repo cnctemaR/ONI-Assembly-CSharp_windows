@@ -55,6 +55,7 @@ public class HardSkinBerryPlantConfig : IEntityConfig, IHasDlcRestrictions
 			}
 		});
 		EntityTemplates.CreateAndRegisterPreviewForPlant(gameObject3, "HardSkinBerryPlant_preview", Assets.GetAnim("ice_berry_bush_kanim"), "place", 1, 2);
+		gameObject.AddOrGet<PlantFiberProducer>().amount = 12f;
 		SoundEventVolumeCache.instance.AddVolume("meallice_kanim", "MealLice_harvest", NOISE_POLLUTION.CREATURES.TIER3);
 		SoundEventVolumeCache.instance.AddVolume("meallice_kanim", "MealLice_LP", NOISE_POLLUTION.CREATURES.TIER4);
 		return gameObject;
@@ -81,4 +82,6 @@ public class HardSkinBerryPlantConfig : IEntityConfig, IHasDlcRestrictions
 	public const float Temperature_warning_high = 259.15f;
 
 	public const float FERTILIZATION_RATE = 0.008333334f;
+
+	public const float PLANT_FIBER_PRODUCED_PER_CYCLE = 12f;
 }

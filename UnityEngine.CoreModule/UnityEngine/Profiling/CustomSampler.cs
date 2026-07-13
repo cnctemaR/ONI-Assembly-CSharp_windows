@@ -9,8 +9,8 @@ using UnityEngine.Scripting;
 namespace UnityEngine.Profiling
 {
 	[NativeHeader("Runtime/Profiler/ScriptBindings/Sampler.bindings.h")]
-	[NativeHeader("Runtime/Profiler/Marker.h")]
 	[UsedByNativeCode]
+	[NativeHeader("Runtime/Profiler/Marker.h")]
 	public sealed class CustomSampler : Sampler
 	{
 		internal CustomSampler()
@@ -38,8 +38,8 @@ namespace UnityEngine.Profiling
 			return customSampler;
 		}
 
-		[IgnoredByDeepProfiler]
 		[Conditional("ENABLE_PROFILER")]
+		[IgnoredByDeepProfiler]
 		public void Begin()
 		{
 			ProfilerUnsafeUtility.BeginSample(this.m_Ptr);
@@ -52,8 +52,8 @@ namespace UnityEngine.Profiling
 			ProfilerUnsafeUtility.Internal_BeginWithObject(this.m_Ptr, targetObject);
 		}
 
-		[Conditional("ENABLE_PROFILER")]
 		[IgnoredByDeepProfiler]
+		[Conditional("ENABLE_PROFILER")]
 		public void End()
 		{
 			ProfilerUnsafeUtility.EndSample(this.m_Ptr);

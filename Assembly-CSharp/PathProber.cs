@@ -1,85 +1,39 @@
 ﻿using System;
 using System.Collections.Generic;
-using UnityEngine;
+using UnityEngine.Pool;
 
-[SkipSaveFileSerialization]
-[AddComponentMenu("KMonoBehaviour/scripts/PathProber")]
-public class PathProber : KMonoBehaviour
+public static class PathProber
 {
-	protected override void OnCleanUp()
+	public static void Run(int root_cell, PathFinderAbilities abilities, NavGrid nav_grid, NavType starting_nav_type, PathGrid path_grid, ushort serialNo, PathFinder.PotentialScratchPad scratchPad, PathFinder.PotentialList potentials, PathFinder.PotentialPath.Flags flags, List<int> found_cells = null)
 	{
-		if (this.PathGrid != null)
+		path_grid.BeginUpdate(serialNo, root_cell, found_cells);
+		bool flag;
+		PathFinder.Cell cell = path_grid.GetCell(root_cell, starting_nav_type, out flag);
+		PathFinder.AddPotential(new PathFinder.PotentialPath(root_cell, starting_nav_type, flags), Grid.InvalidCell, NavType.NumNavTypes, 0, 0, potentials, path_grid, ref cell);
+		while (potentials.Count > 0)
 		{
-			this.PathGrid.OnCleanUp();
-		}
-		base.OnCleanUp();
-	}
-
-	public void SetGroupProber(IGroupProber group_prober)
-	{
-		this.PathGrid.SetGroupProber(group_prober);
-	}
-
-	public void SetValidNavTypes(NavType[] nav_types, int max_probing_radius)
-	{
-		if (max_probing_radius != 0)
-		{
-			this.PathGrid = new PathGrid(max_probing_radius * 2, max_probing_radius * 2, true, nav_types);
-			return;
-		}
-		this.PathGrid = new PathGrid(Grid.WidthInCells, Grid.HeightInCells, false, nav_types);
-	}
-
-	public int GetCost(int cell)
-	{
-		return this.PathGrid.GetCost(cell);
-	}
-
-	public int GetNavigationCostIgnoreProberOffset(int cell, CellOffset[] offsets)
-	{
-		return this.PathGrid.GetCostIgnoreProberOffset(cell, offsets);
-	}
-
-	public PathGrid GetPathGrid()
-	{
-		return this.PathGrid;
-	}
-
-	public void UpdateProbe(NavGrid nav_grid, int cell, NavType nav_type, PathFinderAbilities abilities, PathFinder.PotentialPath.Flags flags)
-	{
-		if (this.scratchPad == null)
-		{
-			this.scratchPad = new PathFinder.PotentialScratchPad(nav_grid.maxLinksPerCell);
-		}
-		bool flag = this.updateCount == -1;
-		bool flag2 = this.Potentials.Count == 0 || flag;
-		this.PathGrid.BeginUpdate(cell, !flag2);
-		if (flag2)
-		{
-			this.updateCount = 0;
-			bool flag3;
-			PathFinder.Cell cell2 = this.PathGrid.GetCell(cell, nav_type, out flag3);
-			PathFinder.AddPotential(new PathFinder.PotentialPath(cell, nav_type, flags), Grid.InvalidCell, NavType.NumNavTypes, 0, 0, this.Potentials, this.PathGrid, ref cell2);
-		}
-		int num = ((this.potentialCellsPerUpdate <= 0 || flag) ? int.MaxValue : this.potentialCellsPerUpdate);
-		this.updateCount++;
-		while (this.Potentials.Count > 0 && num > 0)
-		{
-			KeyValuePair<int, PathFinder.PotentialPath> keyValuePair = this.Potentials.Next();
-			num--;
-			bool flag3;
-			PathFinder.Cell cell3 = this.PathGrid.GetCell(keyValuePair.Value, out flag3);
-			if (cell3.cost == keyValuePair.Key)
+			KeyValuePair<int, PathFinder.PotentialPath> keyValuePair = potentials.Next();
+			cell = path_grid.GetCell(keyValuePair.Value, out flag);
+			if (cell.cost == keyValuePair.Key)
 			{
-				PathFinder.AddPotentials(this.scratchPad, keyValuePair.Value, cell3.cost, ref abilities, null, nav_grid.maxLinksPerCell, nav_grid.Links, this.Potentials, this.PathGrid, cell3.parent, cell3.parentNavType);
+				PathFinder.AddPotentials(scratchPad, keyValuePair.Value, cell.cost, ref abilities, null, nav_grid.maxLinksPerCell, nav_grid.Links, potentials, path_grid, cell.parent, cell.parentNavType);
 			}
 		}
-		bool flag4 = this.Potentials.Count == 0;
-		this.PathGrid.EndUpdate(flag4);
-		if (flag4)
+		path_grid.EndUpdate();
+	}
+
+	public static void Run(Navigator navigator, List<int> found_cells = null)
+	{
+		PathFinder.PotentialScratchPad potentialScratchPad = PathProber.ScratchPadPool.Get();
+		PathFinder.PotentialList potentialList = PathProber.PotentialListPool.Get();
+		ushort num = navigator.PathGrid.SerialNo + 1;
+		if (num == 0)
 		{
-			int num2 = this.updateCount;
+			num += 1;
 		}
+		PathProber.Run(navigator.cachedCell, navigator.GetCurrentAbilities(), navigator.NavGrid, navigator.CurrentNavType, navigator.PathGrid, num, potentialScratchPad, potentialList, navigator.flags, null);
+		PathProber.ScratchPadPool.Release(potentialScratchPad);
+		PathProber.PotentialListPool.Release(potentialList);
 	}
 
 	public const int InvalidHandle = -1;
@@ -90,15 +44,12 @@ public class PathProber : KMonoBehaviour
 
 	public const int InvalidCost = -1;
 
-	private PathGrid PathGrid;
+	public const ushort InvalidSerialNo = 0;
 
-	private PathFinder.PotentialList Potentials = new PathFinder.PotentialList();
+	private static ObjectPool<PathFinder.PotentialScratchPad> ScratchPadPool = new ObjectPool<PathFinder.PotentialScratchPad>(() => new PathFinder.PotentialScratchPad(Pathfinding.Instance.MaxLinksPerCell()), null, null, null, false, 1, 4);
 
-	public int updateCount = -1;
-
-	private const int updateCountThreshold = 25;
-
-	private PathFinder.PotentialScratchPad scratchPad;
-
-	public int potentialCellsPerUpdate = -1;
+	private static ObjectPool<PathFinder.PotentialList> PotentialListPool = new ObjectPool<PathFinder.PotentialList>(() => new PathFinder.PotentialList(), null, delegate(PathFinder.PotentialList list)
+	{
+		list.Clear();
+	}, null, false, 1, 4);
 }

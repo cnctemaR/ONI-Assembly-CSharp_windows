@@ -57,7 +57,7 @@ namespace UnityEngine.UIElements.UIR.Implementation
 		internal static void ComputeTransformMatrix(VisualElement ve, VisualElement ancestor, out Matrix4x4 result)
 		{
 			ve.GetPivotedMatrixWithLayout(out result);
-			VisualElement visualElement = ve.parent;
+			VisualElement visualElement = ve.hierarchy.parent;
 			bool flag = visualElement == null || ancestor == visualElement;
 			if (!flag)
 			{
@@ -76,7 +76,7 @@ namespace UnityEngine.UIElements.UIR.Implementation
 					{
 						VisualElement.MultiplyMatrix34(ref matrix4x2, ref matrix4x, out result);
 					}
-					visualElement = visualElement.parent;
+					visualElement = visualElement.hierarchy.parent;
 					flag2 = !flag2;
 				}
 				while (visualElement != null && ancestor != visualElement);

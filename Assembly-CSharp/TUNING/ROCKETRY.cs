@@ -78,6 +78,8 @@ namespace TUNING
 
 			public static float MEDIUM = 40f;
 
+			public static float MEDIUM_PLUS = 50f;
+
 			public static float STRONG = 60f;
 
 			public static float BOOSTER = 30f;
@@ -170,6 +172,8 @@ namespace TUNING
 			public static float MEDIUM = 0.075f;
 
 			public static float HIGH = 0.09375f;
+
+			public static float HIGHER = 0.115384616f;
 
 			public static float VERY_HIGH = 0.15f;
 

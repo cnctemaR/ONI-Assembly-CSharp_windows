@@ -51,7 +51,7 @@ public class TravelTube : KMonoBehaviour, IFirstFrameCallback, ITravelTubePiece,
 
 	private void OnConnectionsChanged(object data)
 	{
-		this.connections = (UtilityConnections)data;
+		this.connections = ((Boxed<UtilityConnections>)data).value;
 		bool flag = this.connections == UtilityConnections.Up || this.connections == UtilityConnections.Down || this.connections == UtilityConnections.Left || this.connections == UtilityConnections.Right;
 		if (flag != this.isExitTube)
 		{

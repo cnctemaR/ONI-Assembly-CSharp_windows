@@ -23,7 +23,7 @@ public class Bouncer : MonoBehaviour
 		float completion = 0f;
 		int bouncesCompleted = 0;
 		Vector3 startPos = base.gameObject.transform.position;
-		yield return new WaitForEndOfFrame();
+		yield return Bouncer.waitForEndOfFrame;
 		while (bouncesCompleted < this.numBounces)
 		{
 			float num = 1f / Mathf.Pow(2f, (float)bouncesCompleted);
@@ -46,7 +46,7 @@ public class Bouncer : MonoBehaviour
 					position.y = startPos.y + vector.y;
 				}
 				base.gameObject.transform.SetPosition(position);
-				yield return new WaitForEndOfFrame();
+				yield return Bouncer.waitForEndOfFrame;
 			}
 			int num4 = bouncesCompleted;
 			bouncesCompleted = num4 + 1;
@@ -92,4 +92,6 @@ public class Bouncer : MonoBehaviour
 	public Vector3 bounceTarget;
 
 	public int numBounces = 1;
+
+	private static YieldInstruction waitForEndOfFrame = new WaitForEndOfFrame();
 }

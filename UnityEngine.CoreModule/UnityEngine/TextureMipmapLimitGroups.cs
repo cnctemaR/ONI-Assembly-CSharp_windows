@@ -4,8 +4,8 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Graphics/QualitySettings.h")]
 	[StaticAccessor("GetQualitySettings()", StaticAccessorType.Dot)]
+	[NativeHeader("Runtime/Graphics/QualitySettings.h")]
 	public static class TextureMipmapLimitGroups
 	{
 		[NativeName("GetTextureMipmapLimitGroupNames")]

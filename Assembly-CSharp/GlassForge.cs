@@ -9,7 +9,7 @@ public class GlassForge : ComplexFabricator
 		base.Subscribe<GlassForge>(-2094018600, GlassForge.CheckPipesDelegate);
 	}
 
-	private void CheckPipes(object data)
+	private void CheckPipes(object _)
 	{
 		KSelectable component = base.GetComponent<KSelectable>();
 		int num = Grid.OffsetCell(Grid.PosToCell(this), GlassForgeConfig.outPipeOffset);

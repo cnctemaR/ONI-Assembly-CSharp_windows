@@ -6,11 +6,11 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[ExcludeFromPreset]
-	[NativeHeader("Runtime/2D/Common/ScriptBindings/SpritesMarshalling.h")]
-	[NativeHeader("Runtime/Graphics/SpriteUtility.h")]
 	[NativeType("Runtime/Graphics/SpriteFrame.h")]
+	[ExcludeFromPreset]
+	[NativeHeader("Runtime/Graphics/SpriteUtility.h")]
 	[NativeHeader("Runtime/2D/Common/SpriteDataAccess.h")]
+	[NativeHeader("Runtime/2D/Common/ScriptBindings/SpritesMarshalling.h")]
 	public sealed class Sprite : Object
 	{
 		[RequiredByNativeCode]
@@ -118,7 +118,7 @@ namespace UnityEngine
 
 		[FreeFunction("SpritesBindings::GetSecondaryTextures", ThrowsException = true, HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern int GetSecondaryTextures([NotNull("ArgumentNullException")] [Unmarshalled] SecondarySpriteTexture[] secondaryTexture);
+		public extern int GetSecondaryTextures([Unmarshalled] [NotNull("ArgumentNullException")] SecondarySpriteTexture[] secondaryTexture);
 
 		public extern float pixelsPerUnit
 		{
@@ -285,7 +285,7 @@ namespace UnityEngine
 
 		[FreeFunction("SpritesBindings::OverrideGeometry", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void OverrideGeometry([NotNull("ArgumentNullException")] [Unmarshalled] Vector2[] vertices, [Unmarshalled] [NotNull("ArgumentNullException")] ushort[] triangles);
+		public extern void OverrideGeometry([NotNull("ArgumentNullException")] [Unmarshalled] Vector2[] vertices, [NotNull("ArgumentNullException")] [Unmarshalled] ushort[] triangles);
 
 		internal static Sprite Create(Rect rect, Vector2 pivot, float pixelsToUnits, Texture2D texture)
 		{

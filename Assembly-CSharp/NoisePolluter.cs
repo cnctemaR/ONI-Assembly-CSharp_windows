@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using Klei.AI;
 using STRINGS;
 using UnityEngine;
@@ -161,7 +162,7 @@ public class NoisePolluter : KMonoBehaviour, IPolluter
 		}
 		KBatchedAnimController component2 = base.GetComponent<KBatchedAnimController>();
 		this.isMovable = component2 != null && component2.isMovable;
-		Singleton<CellChangeMonitor>.Instance.RegisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChange), "NoisePolluter.OnSpawn");
+		this.cellChangedHandlerCallback = Singleton<CellChangeMonitor>.Instance.RegisterCellChangedHandler(base.transform, NoisePolluter.RefreshDispatcher, this, "NoisePolluter.OnSpawn");
 		AttributeInstance attributeInstance = this.dB;
 		attributeInstance.OnDirty = (global::System.Action)Delegate.Combine(attributeInstance.OnDirty, this.refreshCallback);
 		AttributeInstance attributeInstance2 = this.dBRadius;
@@ -170,11 +171,6 @@ public class NoisePolluter : KMonoBehaviour, IPolluter
 		{
 			this.OnActiveChanged(component.IsActive);
 		}
-	}
-
-	private void OnCellChange()
-	{
-		this.Refresh();
 	}
 
 	private void OnCollectNoisePolluters(object data)
@@ -205,7 +201,7 @@ public class NoisePolluter : KMonoBehaviour, IPolluter
 			}
 			if (this.isMovable)
 			{
-				Singleton<CellChangeMonitor>.Instance.UnregisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChange));
+				Singleton<CellChangeMonitor>.Instance.UnregisterCellChangedHandler(ref this.cellChangedHandlerCallback);
 			}
 		}
 		if (this.splat != null)
@@ -271,8 +267,15 @@ public class NoisePolluter : KMonoBehaviour, IPolluter
 	[MyCmpReq]
 	public OccupyArea occupyArea;
 
+	private ulong cellChangedHandlerCallback;
+
 	private static readonly EventSystem.IntraObjectHandler<NoisePolluter> OnActiveChangedDelegate = new EventSystem.IntraObjectHandler<NoisePolluter>(delegate(NoisePolluter component, object data)
 	{
 		component.OnActiveChanged(data);
 	});
+
+	private static readonly Action<object> RefreshDispatcher = delegate(object obj)
+	{
+		Unsafe.As<NoisePolluter>(obj).Refresh();
+	};
 }

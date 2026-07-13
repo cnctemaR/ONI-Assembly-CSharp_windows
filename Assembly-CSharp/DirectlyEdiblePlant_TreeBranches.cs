@@ -31,7 +31,7 @@ public class DirectlyEdiblePlant_TreeBranches : KMonoBehaviour, IPlantConsumptio
 			Harvestable component2 = mostMatureBranch.GetComponent<Harvestable>();
 			if (component2 != null)
 			{
-				component2.Trigger(2127324410, true);
+				component2.Trigger(2127324410, BoxedBools.True);
 			}
 			component.ConsumeMass(num);
 			return num;

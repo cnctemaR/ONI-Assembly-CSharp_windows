@@ -48,6 +48,8 @@ public static class KleiItemsUI
 			return UI.OUTFIT_NAME.NONE_JOY_RESPONSE;
 		case ClothingOutfitUtility.OutfitType.AtmoSuit:
 			return UI.OUTFIT_NAME.NONE_ATMO_SUIT;
+		case ClothingOutfitUtility.OutfitType.JetSuit:
+			return UI.OUTFIT_NAME.NONE_JET_SUIT;
 		default:
 			DebugUtil.DevAssert(false, string.Format("Couldn't find \"no item\" string for outfit {0}", outfitType), null);
 			return "-";
@@ -83,6 +85,14 @@ public static class KleiItemsUI
 			return new ValueTuple<string, string>(EQUIPMENT.PREFABS.ATMO_SUIT_SHOES.NAME, EQUIPMENT.PREFABS.ATMO_SUIT_SHOES.DESC);
 		case PermitCategory.JoyResponse:
 			return new ValueTuple<string, string>(UI.OUTFIT_DESCRIPTION.NO_JOY_RESPONSE_NAME, UI.OUTFIT_DESCRIPTION.NO_JOY_RESPONSE_DESC);
+		case PermitCategory.JetSuitHelmet:
+			return new ValueTuple<string, string>(EQUIPMENT.PREFABS.JET_SUIT_HELMET.NAME, EQUIPMENT.PREFABS.JET_SUIT_HELMET.DESC);
+		case PermitCategory.JetSuitBody:
+			return new ValueTuple<string, string>(EQUIPMENT.PREFABS.JET_SUIT_BODY.NAME, EQUIPMENT.PREFABS.JET_SUIT_BODY.DESC);
+		case PermitCategory.JetSuitGloves:
+			return new ValueTuple<string, string>(EQUIPMENT.PREFABS.JET_SUIT_GLOVES.NAME, EQUIPMENT.PREFABS.JET_SUIT_GLOVES.DESC);
+		case PermitCategory.JetSuitShoes:
+			return new ValueTuple<string, string>(EQUIPMENT.PREFABS.JET_SUIT_SHOES.NAME, EQUIPMENT.PREFABS.JET_SUIT_SHOES.DESC);
 		}
 		DebugUtil.DevAssert(false, string.Format("Couldn't find \"no item\" string for category {0}", category), null);
 		return new ValueTuple<string, string>("-", "-");
@@ -209,6 +219,14 @@ public static class KleiItemsUI
 			return "icon_inventory_artworks";
 		case PermitCategory.JoyResponse:
 			return "icon_inventory_joyresponses";
+		case PermitCategory.JetSuitHelmet:
+			return "icon_inventory_jetsuit_helmet";
+		case PermitCategory.JetSuitBody:
+			return "icon_inventory_jetsuit_body";
+		case PermitCategory.JetSuitGloves:
+			return "icon_inventory_jetsuit_gloves";
+		case PermitCategory.JetSuitShoes:
+			return "icon_inventory_jetsuit_boots";
 		default:
 			return "NoTraits";
 		}

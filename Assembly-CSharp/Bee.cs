@@ -66,7 +66,7 @@ public class Bee : KMonoBehaviour
 
 	private void OnAttack(object data)
 	{
-		if ((Tag)data == GameTags.Creatures.Attack)
+		if (((Boxed<Tag>)data).value == GameTags.Creatures.Attack)
 		{
 			base.GetComponent<Health>().Damage(base.GetComponent<Health>().hitPoints);
 		}

@@ -9,7 +9,13 @@ public class ClothingItemInfo : IBlueprintInfo, IHasDlcRestrictions
 
 	public string desc { get; set; }
 
-	public PermitRarity rarity { get; set; }
+	public PermitRarity rarity
+	{
+		get
+		{
+			return this.rarity_;
+		}
+	}
 
 	public string animFile { get; set; }
 
@@ -25,7 +31,7 @@ public class ClothingItemInfo : IBlueprintInfo, IHasDlcRestrictions
 		this.desc = desc;
 		this.outfitType = outfitTypeFor.Unwrap();
 		this.category = category;
-		this.rarity = rarity;
+		this.rarity_ = rarity;
 		this.animFile = animFile;
 		this.requiredDlcIds = requiredDlcIds;
 		this.forbiddenDlcIds = forbiddenDlcIds;
@@ -44,6 +50,8 @@ public class ClothingItemInfo : IBlueprintInfo, IHasDlcRestrictions
 	public ClothingOutfitUtility.OutfitType outfitType;
 
 	public PermitCategory category;
+
+	private readonly PermitRarity rarity_;
 
 	private string[] requiredDlcIds;
 

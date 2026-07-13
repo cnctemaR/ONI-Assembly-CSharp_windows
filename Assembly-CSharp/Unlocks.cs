@@ -584,7 +584,7 @@ public class Unlocks : KMonoBehaviour
 			new string[]
 			{
 				"story_trait_critter_manipulator_initial", "story_trait_critter_manipulator_complete", "storytrait_crittermanipulator_workiversary", "story_trait_mega_brain_tank_initial", "story_trait_mega_brain_tank_competed", "story_trait_fossilhunt_initial", "story_trait_fossilhunt_poi1", "story_trait_fossilhunt_poi2", "story_trait_fossilhunt_poi3", "story_trait_fossilhunt_complete",
-				"story_trait_morbrover_initial", "story_trait_morbrover_reveal", "story_trait_morbrover_reveal_lore", "story_trait_morbrover_complete", "story_trait_morbrover_complete_lore", "story_trait_morbrover_biobot", "story_trait_morbrover_locker"
+				"story_trait_morbrover_initial", "story_trait_morbrover_reveal", "story_trait_morbrover_reveal_lore", "story_trait_morbrover_complete", "story_trait_morbrover_complete_lore", "story_trait_morbrover_biobot", "story_trait_morbrover_locker", "story_trait_hijackheadquarters_mirror", "story_trait_hijackheadquarters_complete", "story_trait_hijackheadquarters_initial"
 			}
 		}
 	};

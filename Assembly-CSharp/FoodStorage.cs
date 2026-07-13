@@ -15,7 +15,7 @@ public class FoodStorage : KMonoBehaviour
 		set
 		{
 			this.onlyStoreSpicedFood = value;
-			base.Trigger(1163645216, this.onlyStoreSpicedFood);
+			base.Trigger(1163645216, BoxedBools.Box(this.onlyStoreSpicedFood));
 			if (this.onlyStoreSpicedFood)
 			{
 				this.FilteredStorage.AddForbiddenTag(GameTags.UnspicedFood);

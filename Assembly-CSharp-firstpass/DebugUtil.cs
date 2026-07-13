@@ -205,26 +205,6 @@ public static class DebugUtil
 	{
 	}
 
-	[Conditional("ENABLE_DETAILED_PROFILING")]
-	public static void ProfileBegin(string str)
-	{
-	}
-
-	[Conditional("ENABLE_DETAILED_PROFILING")]
-	public static void ProfileBegin(string str, global::UnityEngine.Object target)
-	{
-	}
-
-	[Conditional("ENABLE_DETAILED_PROFILING")]
-	public static void ProfileEnd()
-	{
-	}
-
-	public static KProfiler.Region ProfileRegion(string regionName, global::UnityEngine.Object profilerObj = null)
-	{
-		return new KProfiler.Region(regionName, profilerObj);
-	}
-
 	private static StringBuilder s_errorMessageBuilder = new StringBuilder();
 
 	private static Exception s_lastExceptionLogged;

@@ -15,6 +15,11 @@ public class Chore<StateMachineInstanceType> : StandardChoreBase, IStateMachineT
 		return this.GetComponent<KPrefabID>().Subscribe(hash, handler);
 	}
 
+	public int Subscribe(int hash, Action<object, object> handler, object context)
+	{
+		return this.GetComponent<KPrefabID>().Subscribe(hash, handler, context);
+	}
+
 	public void Unsubscribe(int hash, Action<object> handler)
 	{
 		this.GetComponent<KPrefabID>().Unsubscribe(hash, handler);
@@ -23,6 +28,12 @@ public class Chore<StateMachineInstanceType> : StandardChoreBase, IStateMachineT
 	public void Unsubscribe(int id)
 	{
 		this.GetComponent<KPrefabID>().Unsubscribe(id);
+	}
+
+	public void Unsubscribe(ref int id)
+	{
+		this.Unsubscribe(id);
+		id = -1;
 	}
 
 	public void Trigger(int hash, object data = null)
@@ -70,7 +81,7 @@ public class Chore<StateMachineInstanceType> : StandardChoreBase, IStateMachineT
 	public Chore(ChoreType chore_type, IStateMachineTarget target, ChoreProvider chore_provider, bool run_until_complete = true, Action<Chore> on_complete = null, Action<Chore> on_begin = null, Action<Chore> on_end = null, PriorityScreen.PriorityClass master_priority_class = PriorityScreen.PriorityClass.basic, int master_priority_value = 5, bool is_preemptable = false, bool allow_in_context_menu = true, int priority_mod = 0, bool add_to_daily_report = false, ReportManager.ReportType report_type = ReportManager.ReportType.WorkTime)
 		: base(chore_type, target, chore_provider, run_until_complete, on_complete, on_begin, on_end, master_priority_class, master_priority_value, is_preemptable, allow_in_context_menu, priority_mod, add_to_daily_report, report_type)
 	{
-		target.Subscribe(1969584890, new Action<object>(this.OnTargetDestroyed));
+		this.onTargetDestroyedHandlerID = target.Subscribe(1969584890, new Action<object>(this.OnTargetDestroyed));
 		this.reportType = report_type;
 		this.addToDailyReport = add_to_daily_report;
 		if (this.addToDailyReport)
@@ -93,7 +104,7 @@ public class Chore<StateMachineInstanceType> : StandardChoreBase, IStateMachineT
 		base.Cleanup();
 		if (this.target != null)
 		{
-			this.target.Unsubscribe(1969584890, new Action<object>(this.OnTargetDestroyed));
+			this.target.Unsubscribe(ref this.onTargetDestroyedHandlerID);
 		}
 		if (this.onCleanup != null)
 		{
@@ -110,4 +121,6 @@ public class Chore<StateMachineInstanceType> : StandardChoreBase, IStateMachineT
 	{
 		return base.CanPreempt(context);
 	}
+
+	private int onTargetDestroyedHandlerID;
 }

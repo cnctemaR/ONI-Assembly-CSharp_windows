@@ -106,7 +106,7 @@ public class GasBreatherFromWorldProvider : OxygenBreather.IGasProvider
 				return false;
 			}
 			SimHashes elementID = bestBreathableCellAtCurrentLocation.ElementID;
-			HandleVector<Game.ComplexCallbackInfo<Sim.MassConsumedCallback>>.Handle handle = Game.Instance.massConsumedCallbackManager.Add(new Action<Sim.MassConsumedCallback, object>(GasBreatherFromWorldProvider.OnSimConsumeCallback), oxygen_breather, "GasBreatherFromWorldProvider");
+			HandleVector<Game.ComplexCallbackInfo<Sim.MassConsumedCallback>>.Handle handle = Game.Instance.massConsumedCallbackManager.Add(GasBreatherFromWorldProvider.OnSimConsumeCallbackAction, oxygen_breather, "GasBreatherFromWorldProvider");
 			SimMessages.ConsumeMass(bestBreathableCellAtCurrentLocation.Cell, elementID, mass_to_consume, 3, handle.index);
 		}
 		return true;
@@ -131,6 +131,8 @@ public class GasBreatherFromWorldProvider : OxygenBreather.IGasProvider
 	private OxygenBreather oxygenBreather;
 
 	private Navigator nav;
+
+	private static Action<Sim.MassConsumedCallback, object> OnSimConsumeCallbackAction = new Action<Sim.MassConsumedCallback, object>(GasBreatherFromWorldProvider.OnSimConsumeCallback);
 
 	public struct BreathableCellData
 	{

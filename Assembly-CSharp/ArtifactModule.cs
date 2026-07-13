@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
-public class ArtifactModule : SingleEntityReceptacle, IRenderEveryTick
+public class ArtifactModule : SingleEntityReceptacle, IRenderEveryTick, IHexCellCollector
 {
 	protected override void OnSpawn()
 	{
@@ -43,6 +43,41 @@ public class ArtifactModule : SingleEntityReceptacle, IRenderEveryTick
 		{
 			base.occupyingObject.SetActive(true);
 		}
+	}
+
+	public bool CheckIsCollecting()
+	{
+		return false;
+	}
+
+	public string GetProperName()
+	{
+		return base.GetComponent<RocketModuleCluster>().GetProperName();
+	}
+
+	public Sprite GetUISprite()
+	{
+		return Def.GetUISprite(base.gameObject.GetComponent<KPrefabID>().PrefabID(), "ui", false).first;
+	}
+
+	public float GetCapacity()
+	{
+		return 1f;
+	}
+
+	public float GetMassStored()
+	{
+		return (float)this.storage.items.Count;
+	}
+
+	public float TimeInState()
+	{
+		return 0f;
+	}
+
+	public string GetCapacityBarText()
+	{
+		return string.Format("{0} / {1}", this.GetMassStored(), this.GetCapacity());
 	}
 
 	[MyCmpReq]

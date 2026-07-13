@@ -101,15 +101,18 @@ public class Butcherable : Workable, ISaveLoadable
 	{
 		GameObject[] array = new GameObject[this.drops.Count];
 		int num = 0;
+		float temperature = base.GetComponent<PrimaryElement>().Temperature;
 		foreach (KeyValuePair<string, float> keyValuePair in this.drops)
 		{
 			GameObject gameObject = Scenario.SpawnPrefab(this.GetDropSpawnLocation(), 0, 0, keyValuePair.Key, Grid.SceneLayer.Ore);
 			gameObject.SetActive(true);
-			gameObject.GetComponent<PrimaryElement>().Mass = gameObject.GetComponent<PrimaryElement>().Mass * multiplier * keyValuePair.Value;
-			Edible component = gameObject.GetComponent<Edible>();
-			if (component)
+			PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
+			component.Mass = component.Mass * multiplier * keyValuePair.Value;
+			component.Temperature = temperature;
+			Edible component2 = gameObject.GetComponent<Edible>();
+			if (component2)
 			{
-				ReportManager.Instance.ReportValue(ReportManager.ReportType.CaloriesCreated, component.Calories, StringFormatter.Replace(UI.ENDOFDAYREPORT.NOTES.BUTCHERED, "{0}", gameObject.GetProperName()), UI.ENDOFDAYREPORT.NOTES.BUTCHERED_CONTEXT);
+				ReportManager.Instance.ReportValue(ReportManager.ReportType.CaloriesCreated, component2.Calories, StringFormatter.Replace(UI.ENDOFDAYREPORT.NOTES.BUTCHERED, "{0}", gameObject.GetProperName()), UI.ENDOFDAYREPORT.NOTES.BUTCHERED_CONTEXT);
 			}
 			array[num] = gameObject;
 			num++;

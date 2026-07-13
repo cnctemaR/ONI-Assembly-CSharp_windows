@@ -114,6 +114,7 @@ public abstract class Chore
 
 	public delegate bool PreconditionFn(ref Chore.Precondition.Context context, object data);
 
+	[DebuggerDisplay("{condition}")]
 	public struct PreconditionInstance
 	{
 		public Chore.Precondition condition;
@@ -121,6 +122,7 @@ public abstract class Chore
 		public object data;
 	}
 
+	[DebuggerDisplay("{id}")]
 	public struct Precondition
 	{
 		public string id;
@@ -133,7 +135,7 @@ public abstract class Chore
 
 		public bool canExecuteOnAnyThread;
 
-		[DebuggerDisplay("{chore.GetType()}, {chore.gameObject.name}")]
+		[DebuggerDisplay("{chore.GetType()}, {chore.gameObject.name}, {failedPreconditionId}")]
 		public struct Context : IComparable<Chore.Precondition.Context>, IEquatable<Chore.Precondition.Context>
 		{
 			public Context(Chore chore, ChoreConsumerState consumer_state, bool is_attempting_override, object data = null)

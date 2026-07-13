@@ -23,7 +23,14 @@ namespace UnityEngine.UIElements
 		protected override double StringToValue(string str)
 		{
 			double num;
-			return UINumericFieldsUtils.TryConvertStringToDouble(str, base.textInputBase.originalText, out num) ? num : base.rawValue;
+			ExpressionEvaluator.Expression expression;
+			bool flag = UINumericFieldsUtils.TryConvertStringToDouble(str, base.textInputBase.originalText, out num, out expression);
+			Action<ExpressionEvaluator.Expression> expressionEvaluated = this.expressionEvaluated;
+			if (expressionEvaluated != null)
+			{
+				expressionEvaluated(expression);
+			}
+			return flag ? num : base.rawValue;
 		}
 
 		public DoubleField()
@@ -118,9 +125,7 @@ namespace UnityEngine.UIElements
 
 			protected override double StringToValue(string str)
 			{
-				double num;
-				UINumericFieldsUtils.TryConvertStringToDouble(str, base.originalText, out num);
-				return num;
+				return this.parentDoubleField.StringToValue(str);
 			}
 		}
 	}

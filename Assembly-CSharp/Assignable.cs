@@ -360,6 +360,8 @@ public abstract class Assignable : KMonoBehaviour, ISaveLoadable
 	[Serialize]
 	private bool canBeAssigned = true;
 
+	public int priority;
+
 	private List<Func<MinionAssignablesProxy, bool>> autoassignmentPreconditions = new List<Func<MinionAssignablesProxy, bool>>();
 
 	private List<Func<MinionAssignablesProxy, bool>> assignmentPreconditions = new List<Func<MinionAssignablesProxy, bool>>();

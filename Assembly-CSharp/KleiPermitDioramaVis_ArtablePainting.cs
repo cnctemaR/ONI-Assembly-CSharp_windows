@@ -22,7 +22,7 @@ public class KleiPermitDioramaVis_ArtablePainting : KMonoBehaviour, IKleiPermitD
 		this.buildingKAnimPosition.SetOn(this.buildingKAnim);
 		this.buildingKAnim.rectTransform().anchoredPosition += new Vector2(0f, -176f * (float)buildingDef.HeightInCells / 2f + 176f);
 		this.buildingKAnim.rectTransform().localScale = Vector3.one * 0.9f;
-		KleiPermitVisUtil.AnimateIn(this.buildingKAnim, default(Updater));
+		KleiPermitVisUtil.AnimateIn(this.buildingKAnim, default(Updater), "place");
 	}
 
 	[SerializeField]

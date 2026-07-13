@@ -318,6 +318,17 @@ public class BuildTool : DragTool
 		}
 		else if (this.def.IsValidBuildLocation(this.visualizer, vector, this.buildingOrientation, false) && this.def.IsValidPlaceLocation(this.visualizer, vector, this.buildingOrientation, out text))
 		{
+			if (this.def.ObjectLayer == ObjectLayer.Building)
+			{
+				this.def.RunOnArea(cell, this.buildingOrientation, delegate(int offset_cell)
+				{
+					Uprootable uprootable;
+					if (Uprootable.CanUproot(Grid.Objects[offset_cell, (int)this.def.ObjectLayer], out uprootable))
+					{
+						uprootable.CompleteWork(null);
+					}
+				});
+			}
 			float num = ElementLoader.GetMinMeltingPointAmongElements(this.selectedElements) - 10f;
 			gameObject = this.def.Build(cell, this.buildingOrientation, null, this.selectedElements, Mathf.Min(this.def.Temperature, num), this.facadeID, false, GameClock.Instance.GetTime());
 		}

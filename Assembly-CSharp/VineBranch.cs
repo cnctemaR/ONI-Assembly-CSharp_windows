@@ -230,12 +230,12 @@ public class VineBranch : PlantBranchGrowerBase<VineBranch, VineBranch.Instance,
 
 	private static void OnMotherRecovered(VineBranch.Instance smi)
 	{
-		smi.Trigger(912965142, true);
+		smi.BoxingTrigger(912965142, true);
 	}
 
 	private static void OnMotherWilted(VineBranch.Instance smi)
 	{
-		smi.Trigger(912965142, false);
+		smi.BoxingTrigger(912965142, false);
 	}
 
 	private static void RecalculateShapeAndSpawnBranchesIfSpawnedByDiscovery(VineBranch.Instance smi)

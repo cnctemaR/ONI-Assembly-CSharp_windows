@@ -4,6 +4,22 @@ using UnityEngine;
 
 public class Room : IAssignableIdentity
 {
+	public List<KPrefabID> otherEntities
+	{
+		get
+		{
+			return this.cavity.otherEntities;
+		}
+	}
+
+	public List<KPrefabID> creatures
+	{
+		get
+		{
+			return this.cavity.creatures;
+		}
+	}
+
 	public List<KPrefabID> buildings
 	{
 		get

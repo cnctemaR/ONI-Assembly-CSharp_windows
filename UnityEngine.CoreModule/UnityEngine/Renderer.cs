@@ -11,10 +11,10 @@ using UnityEngineInternal;
 
 namespace UnityEngine
 {
-	[RequireComponent(typeof(Transform))]
-	[UsedByNativeCode]
-	[NativeHeader("Runtime/Graphics/Renderer.h")]
 	[NativeHeader("Runtime/Graphics/GraphicsScriptBindings.h")]
+	[NativeHeader("Runtime/Graphics/Renderer.h")]
+	[UsedByNativeCode]
+	[RequireComponent(typeof(Transform))]
 	public class Renderer : Component
 	{
 		[EditorBrowsable(EditorBrowsableState.Never)]

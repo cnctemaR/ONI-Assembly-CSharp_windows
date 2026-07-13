@@ -53,7 +53,6 @@ public class RaptorConfig : IEntityConfig, IHasDlcRestrictions
 
 	public void OnSpawn(GameObject inst)
 	{
-		new CritterEmoteMonitor.Instance(inst.GetComponent<StateMachineController>(), this.RaptorEmotes).StartSM();
 	}
 
 	public const string ID = "Raptor";

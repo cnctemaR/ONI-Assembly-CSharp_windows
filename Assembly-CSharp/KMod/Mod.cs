@@ -290,7 +290,7 @@ namespace KMod
 					list2 = list2.Where<Mod.ArchivedVersion>((Mod.ArchivedVersion v) => DlcManager.IsCorrectDlcSubscribed(v.info)).ToList<Mod.ArchivedVersion>();
 					list2 = list2.Where<Mod.ArchivedVersion>((Mod.ArchivedVersion v) => v.info.APIVersion == 2 || v.info.APIVersion == 0).ToList<Mod.ArchivedVersion>();
 					Mod.ArchivedVersion archivedVersion2 = (from v in list2
-						where (long)v.info.minimumSupportedBuild <= 693461L
+						where (long)v.info.minimumSupportedBuild <= 700348L
 						orderby v.info.minimumSupportedBuild descending
 						select v).FirstOrDefault<Mod.ArchivedVersion>();
 					if (archivedVersion2 != null)
@@ -669,33 +669,36 @@ namespace KMod
 					KAnimFile.Mod mod = new KAnimFile.Mod();
 					foreach (FileInfo fileInfo in directoryInfo.GetFiles())
 					{
-						if (fileInfo.Extension == ".png")
+						if (!fileInfo.Name.StartsWith("._"))
 						{
-							byte[] array = File.ReadAllBytes(fileInfo.FullName);
-							Texture2D texture2D = new Texture2D(2, 2);
-							texture2D.LoadImage(array);
-							mod.textures.Add(texture2D);
-						}
-						else if (fileInfo.Extension == ".bytes")
-						{
-							string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(fileInfo.Name);
-							byte[] array2 = File.ReadAllBytes(fileInfo.FullName);
-							if (fileNameWithoutExtension.EndsWith("_anim"))
+							if (fileInfo.Extension == ".png")
 							{
-								mod.anim = array2;
+								byte[] array = File.ReadAllBytes(fileInfo.FullName);
+								Texture2D texture2D = new Texture2D(2, 2);
+								texture2D.LoadImage(array);
+								mod.textures.Add(texture2D);
 							}
-							else if (fileNameWithoutExtension.EndsWith("_build"))
+							else if (fileInfo.Extension == ".bytes")
 							{
-								mod.build = array2;
+								string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(fileInfo.Name);
+								byte[] array2 = File.ReadAllBytes(fileInfo.FullName);
+								if (fileNameWithoutExtension.EndsWith("_anim"))
+								{
+									mod.anim = array2;
+								}
+								else if (fileNameWithoutExtension.EndsWith("_build"))
+								{
+									mod.build = array2;
+								}
+								else
+								{
+									DebugUtil.LogWarningArgs(new object[] { string.Format("Unhandled TextAsset ({0})...ignoring", fileInfo.FullName) });
+								}
 							}
 							else
 							{
-								DebugUtil.LogWarningArgs(new object[] { string.Format("Unhandled TextAsset ({0})...ignoring", fileInfo.FullName) });
+								DebugUtil.LogWarningArgs(new object[] { string.Format("Unhandled asset ({0})...ignoring", fileInfo.FullName) });
 							}
-						}
-						else
-						{
-							DebugUtil.LogWarningArgs(new object[] { string.Format("Unhandled asset ({0})...ignoring", fileInfo.FullName) });
 						}
 					}
 					string text2 = directoryInfo.Name + "_kanim";

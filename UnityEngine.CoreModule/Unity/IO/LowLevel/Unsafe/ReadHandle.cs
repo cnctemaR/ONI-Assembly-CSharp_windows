@@ -114,8 +114,8 @@ namespace Unity.IO.LowLevel.Unsafe
 			return ReadHandle.GetBytesReadArray(this);
 		}
 
-		[FreeFunction("AsyncReadManagerManaged::GetReadStatus", IsThreadSafe = true)]
 		[ThreadAndSerializationSafe]
+		[FreeFunction("AsyncReadManagerManaged::GetReadStatus", IsThreadSafe = true)]
 		private static ReadStatus GetReadStatus(ReadHandle handle)
 		{
 			return ReadHandle.GetReadStatus_Injected(ref handle);
@@ -135,22 +135,22 @@ namespace Unity.IO.LowLevel.Unsafe
 			return ReadHandle.GetBytesRead_Injected(ref handle);
 		}
 
-		[ThreadAndSerializationSafe]
 		[FreeFunction("AsyncReadManagerManaged::GetBytesReadForCommand", IsThreadSafe = true)]
+		[ThreadAndSerializationSafe]
 		private static long GetBytesReadForCommand(ReadHandle handle, uint readCommandIndex)
 		{
 			return ReadHandle.GetBytesReadForCommand_Injected(ref handle, readCommandIndex);
 		}
 
-		[FreeFunction("AsyncReadManagerManaged::GetBytesReadArray", IsThreadSafe = true)]
 		[ThreadAndSerializationSafe]
+		[FreeFunction("AsyncReadManagerManaged::GetBytesReadArray", IsThreadSafe = true)]
 		private unsafe static ulong* GetBytesReadArray(ReadHandle handle)
 		{
 			return ReadHandle.GetBytesReadArray_Injected(ref handle);
 		}
 
-		[FreeFunction("AsyncReadManagerManaged::ReleaseReadHandle", IsThreadSafe = true)]
 		[ThreadAndSerializationSafe]
+		[FreeFunction("AsyncReadManagerManaged::ReleaseReadHandle", IsThreadSafe = true)]
 		private static void ReleaseReadHandle(ReadHandle handle)
 		{
 			ReadHandle.ReleaseReadHandle_Injected(ref handle);

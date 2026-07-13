@@ -22,13 +22,19 @@ namespace STRINGS
 
 		public static LocString RIGHT_SHIFT = "R-Shift";
 
+		public static LocString SHIFT = "Shift";
+
 		public static LocString LEFT_ALT = "L-Alt";
 
 		public static LocString RIGHT_ALT = "R-Alt";
 
+		public static LocString ALT = "Alt";
+
 		public static LocString LEFT_CTRL = "L-Ctrl";
 
 		public static LocString RIGHT_CTRL = "R-Ctrl";
+
+		public static LocString CTRL = "Ctrl";
 
 		public static LocString NUM = "Num";
 

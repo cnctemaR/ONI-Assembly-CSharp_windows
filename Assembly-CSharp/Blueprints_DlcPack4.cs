@@ -85,5 +85,6 @@ public class Blueprints_DlcPack4 : BlueprintProvider
 		base.AddArtable(BlueprintProvider.ArtableType.FossilSculpture, PermitRarity.Universal, "permit_fossilsculpture_idle_stego", "fossilsculpture_idle_stego_kanim");
 		base.AddArtable(BlueprintProvider.ArtableType.CeilingFossilSculpture, PermitRarity.Universal, "permit_fossilsculpture_idle_jawbo", "fossilsculpture_idle_jawbo_kanim");
 		base.AddArtable(BlueprintProvider.ArtableType.CeilingFossilSculpture, PermitRarity.Universal, "permit_fossilsculpture_idle_shellonoidis", "fossilsculpture_idle_shellonoidis_kanim");
+		base.AddBuilding("ExobaseHeadquarters", PermitRarity.Universal, "permit_porta_pod_y_dino", "porta_pod_y_dino_kanim");
 	}
 }

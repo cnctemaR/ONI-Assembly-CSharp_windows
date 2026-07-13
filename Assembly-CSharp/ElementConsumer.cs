@@ -10,6 +10,8 @@ public class ElementConsumer : SimComponent, ISaveLoadable, IGameObjectEffectDes
 {
 	public event Action<Sim.ConsumedMassInfo> OnElementConsumed;
 
+	public event Action<Sim.ConsumedMassInfo> OnElementConsumedStored;
+
 	public float AverageConsumeRate
 	{
 		get
@@ -125,6 +127,10 @@ public class ElementConsumer : SimComponent, ISaveLoadable, IGameObjectEffectDes
 					else if (element.IsGas)
 					{
 						this.storage.AddGasChunk(element.id, consumed_info.mass, consumed_info.temperature, consumed_info.diseaseIdx, consumed_info.diseaseCount, true, true);
+					}
+					if (this.OnElementConsumedStored != null)
+					{
+						this.OnElementConsumedStored(consumed_info);
 					}
 				}
 			}

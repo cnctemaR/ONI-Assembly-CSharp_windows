@@ -168,7 +168,7 @@ public class StompStates : GameStateMachine<StompStates, StompStates.Instance, I
 						Harvestable component = gameObject.GetComponent<Harvestable>();
 						if (!(component == null) && component.CanBeHarvested)
 						{
-							component.Trigger(2127324410, true);
+							component.Trigger(2127324410, BoxedBools.True);
 							component.Harvest();
 							flag = true;
 							break;

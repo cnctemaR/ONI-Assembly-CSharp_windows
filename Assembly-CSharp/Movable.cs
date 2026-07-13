@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 using KSerialization;
 using STRINGS;
 using UnityEngine;
@@ -30,8 +31,8 @@ public class Movable : Workable
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		base.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
-		base.Subscribe(1335436905, new Action<object>(this.OnSplitFromChunk));
+		base.Subscribe(493375141, Movable.OnRefreshUserMenuDispatcher, this);
+		base.Subscribe(1335436905, Movable.OnSplitFromChunkDispatcher, this);
 	}
 
 	protected override void OnSpawn()
@@ -43,19 +44,19 @@ public class Movable : Workable
 			{
 				if (this.reachableChangedHandle < 0)
 				{
-					this.reachableChangedHandle = base.Subscribe(-1432940121, new Action<object>(this.OnReachableChanged));
+					this.reachableChangedHandle = base.Subscribe(-1432940121, Movable.OnReachableChangedDispatcher, this);
 				}
 				if (this.storageReachableChangedHandle < 0)
 				{
-					this.storageReachableChangedHandle = this.StorageProxy.Subscribe(-1432940121, new Action<object>(this.OnReachableChanged));
+					this.storageReachableChangedHandle = this.StorageProxy.Subscribe(-1432940121, Movable.OnReachableChangedDispatcher, this);
 				}
 				if (this.cancelHandle < 0)
 				{
-					this.cancelHandle = base.Subscribe(2127324410, new Action<object>(this.CleanupMove));
+					this.cancelHandle = base.Subscribe(2127324410, Movable.CleanupMoveDispatcher, this);
 				}
 				if (this.tagsChangedHandle < 0)
 				{
-					this.tagsChangedHandle = base.Subscribe(-1582839653, new Action<object>(this.OnTagsChanged));
+					this.tagsChangedHandle = base.Subscribe(-1582839653, Movable.OnTagsChangedDispatcher, this);
 				}
 				base.gameObject.AddTag(GameTags.MarkedForMove);
 			}
@@ -66,14 +67,14 @@ public class Movable : Workable
 		}
 		if (Movable.IsCritterPickupable(base.gameObject))
 		{
-			this.skillsUpdateHandle = Game.Instance.Subscribe(-1523247426, new Action<object>(this.UpdateStatusItem));
+			this.skillsUpdateHandle = Game.Instance.Subscribe(-1523247426, Workable.UpdateStatusItemDispatcher, this);
 			this.shouldShowSkillPerkStatusItem = this.isMarkedForMove;
 			this.requiredSkillPerk = Db.Get().SkillPerks.CanWrangleCreatures.Id;
 			this.UpdateStatusItem();
 		}
 	}
 
-	private void OnReachableChanged(object data)
+	private void OnReachableChanged(object _)
 	{
 		if (this.isMarkedForMove)
 		{
@@ -125,7 +126,7 @@ public class Movable : Workable
 		}
 	}
 
-	private void CleanupMove(object data)
+	private void CleanupMove(object _)
 	{
 		if (this.StorageProxy != null)
 		{
@@ -151,32 +152,16 @@ public class Movable : Workable
 			this.storageUnreachableGuid = component.RemoveStatusItem(this.storageUnreachableGuid, false);
 			this.ClearStorageProxy();
 			base.gameObject.RemoveTag(GameTags.MarkedForMove);
-			if (this.reachableChangedHandle != -1)
-			{
-				base.Unsubscribe(-1432940121, new Action<object>(this.OnReachableChanged));
-				this.reachableChangedHandle = -1;
-			}
-			if (this.cancelHandle != -1)
-			{
-				base.Unsubscribe(2127324410, new Action<object>(this.CleanupMove));
-				this.cancelHandle = -1;
-			}
-			if (this.tagsChangedHandle != -1)
-			{
-				base.Unsubscribe(-1582839653, new Action<object>(this.OnTagsChanged));
-				this.tagsChangedHandle = -1;
-			}
+			base.Unsubscribe(ref this.reachableChangedHandle);
+			base.Unsubscribe(ref this.cancelHandle);
+			base.Unsubscribe(ref this.tagsChangedHandle);
 		}
 		this.UpdateStatusItem();
 	}
 
 	private void ClearStorageProxy()
 	{
-		if (this.storageReachableChangedHandle != -1)
-		{
-			this.StorageProxy.Unsubscribe(-1432940121, new Action<object>(this.OnReachableChanged));
-			this.storageReachableChangedHandle = -1;
-		}
+		this.StorageProxy.Unsubscribe(ref this.storageReachableChangedHandle);
 		this.storageProxy = null;
 	}
 
@@ -220,12 +205,12 @@ public class Movable : Workable
 		base.Trigger(2127324410, null);
 		this.isMarkedForMove = true;
 		this.OnReachableChanged(null);
-		this.storageReachableChangedHandle = this.StorageProxy.Subscribe(-1432940121, new Action<object>(this.OnReachableChanged));
-		this.reachableChangedHandle = base.Subscribe(-1432940121, new Action<object>(this.OnReachableChanged));
+		this.storageReachableChangedHandle = this.StorageProxy.Subscribe(-1432940121, Movable.OnReachableChangedDispatcher, this);
+		this.reachableChangedHandle = base.Subscribe(-1432940121, Movable.OnReachableChangedDispatcher, this);
 		this.StorageProxy.GetComponent<CancellableMove>().SetMovable(this);
 		base.gameObject.AddTag(GameTags.MarkedForMove);
-		this.cancelHandle = base.Subscribe(2127324410, new Action<object>(this.CleanupMove));
-		this.tagsChangedHandle = base.Subscribe(-1582839653, new Action<object>(this.OnTagsChanged));
+		this.cancelHandle = base.Subscribe(2127324410, Movable.CleanupMoveDispatcher, this);
+		this.tagsChangedHandle = base.Subscribe(-1582839653, Movable.OnTagsChangedDispatcher, this);
 		this.UpdateStatusItem();
 	}
 
@@ -292,4 +277,29 @@ public class Movable : Workable
 	public Action<GameObject> onDeliveryComplete;
 
 	public Action<GameObject> onPickupComplete;
+
+	private static Action<object, object> OnReachableChangedDispatcher = delegate(object context, object data)
+	{
+		Unsafe.As<Movable>(context).OnReachableChanged(data);
+	};
+
+	private static Action<object, object> OnSplitFromChunkDispatcher = delegate(object context, object data)
+	{
+		Unsafe.As<Movable>(context).OnSplitFromChunk(data);
+	};
+
+	private static Action<object, object> CleanupMoveDispatcher = delegate(object context, object data)
+	{
+		Unsafe.As<Movable>(context).CleanupMove(data);
+	};
+
+	private static Action<object, object> OnTagsChangedDispatcher = delegate(object context, object data)
+	{
+		Unsafe.As<Movable>(context).OnTagsChanged(data);
+	};
+
+	private static Action<object, object> OnRefreshUserMenuDispatcher = delegate(object context, object data)
+	{
+		Unsafe.As<Movable>(context).OnRefreshUserMenu(data);
+	};
 }

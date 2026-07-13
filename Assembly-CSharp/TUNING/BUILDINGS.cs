@@ -71,7 +71,9 @@ namespace TUNING
 			{ "CarpetTile", "tiles" },
 			{ "ExobaseHeadquarters", "printingpods" },
 			{ "Door", "doors" },
+			{ "WoodenDoor", "doors" },
 			{ "ManualPressureDoor", "doors" },
+			{ "InsulatedDoor", "doors" },
 			{ "PressureDoor", "doors" },
 			{ "BunkerDoor", "doors" },
 			{ "StorageLocker", "storage" },
@@ -258,6 +260,7 @@ namespace TUNING
 			{ "Desalinator", "materials" },
 			{ "RockCrusher", "materials" },
 			{ "Kiln", "materials" },
+			{ "FabricatedWoodMaker", "materials" },
 			{ "MetalRefinery", "materials" },
 			{ "GlassForge", "materials" },
 			{ "OilRefinery", "oil" },
@@ -291,6 +294,7 @@ namespace TUNING
 			{ "DevLightGenerator", "lights" },
 			{ "MercuryCeilingLight", "lights" },
 			{ "DiningTable", "dining" },
+			{ "MultiMinionDiningTable", "dining" },
 			{ "WaterCooler", "recreation" },
 			{ "Phonobox", "recreation" },
 			{ "ArcadeMachine", "recreation" },
@@ -325,6 +329,7 @@ namespace TUNING
 			{ "CanvasWide", "decor" },
 			{ "CanvasTall", "decor" },
 			{ "ItemPedestal", "decor" },
+			{ "Shelf", "decor" },
 			{ "ParkSign", "decor" },
 			{ "MonumentBottom", "decor" },
 			{ "MonumentMiddle", "decor" },
@@ -512,6 +517,7 @@ namespace TUNING
 			{ "LandingBeacon", "rocketnav" },
 			{ "SteamEngine", "engines" },
 			{ "KeroseneEngine", "engines" },
+			{ "BiodieselEngine", "engines" },
 			{ "HydrogenEngine", "engines" },
 			{ "SolidBooster", "engines" },
 			{ "LiquidFuelTank", "tanks" },
@@ -559,8 +565,9 @@ namespace TUNING
 			new PlanScreen.PlanInfo(new HashedString("Base"), false, new List<string>
 			{
 				"Ladder", "FirePole", "LadderFast", "Tile", "SnowTile", "WoodTile", "GasPermeableMembrane", "MeshTile", "InsulationTile", "PlasticTile",
-				"MetalTile", "GlassTile", "StorageTile", "BunkerTile", "CarpetTile", "ExteriorWall", "ExobaseHeadquarters", "Door", "ManualPressureDoor", "PressureDoor",
-				"BunkerDoor", "StorageLocker", "StorageLockerSmart", "LiquidReservoir", "GasReservoir", "ObjectDispenser", "TravelTube", "TravelTubeEntrance", "TravelTubeWallBridge"
+				"MetalTile", "GlassTile", "StorageTile", "BunkerTile", "CarpetTile", "ExteriorWall", "ExobaseHeadquarters", "Door", "WoodenDoor", "ManualPressureDoor",
+				"InsulatedDoor", "PressureDoor", "BunkerDoor", "StorageLocker", "StorageLockerSmart", "LiquidReservoir", "GasReservoir", "ObjectDispenser", "TravelTube", "TravelTubeEntrance",
+				"TravelTubeWallBridge"
 			}, null, null),
 			new PlanScreen.PlanInfo(new HashedString("Oxygen"), false, new List<string> { "MineralDeoxidizer", "SublimationStation", "Oxysconce", "AlgaeHabitat", "AirFilter", "CO2Scrubber", "Electrolyzer", "RustDeoxidizer" }, null, null),
 			new PlanScreen.PlanInfo(new HashedString("Power"), false, new List<string>
@@ -664,8 +671,9 @@ namespace TUNING
 			}, null, null),
 			new PlanScreen.PlanInfo(new HashedString("Refining"), false, new List<string>
 			{
-				"Compost", "WaterPurifier", "Desalinator", "FertilizerMaker", "AlgaeDistillery", "EthanolDistillery", "RockCrusher", "Kiln", "SludgePress", "MetalRefinery",
-				"GlassForge", "OilRefinery", "Polymerizer", "OxyliteRefinery", "Chlorinator", "ChemicalRefinery", "SupermaterialRefinery", "DiamondPress", "MilkFatSeparator", "MilkPress"
+				"FabricatedWoodMaker", "Compost", "WaterPurifier", "Desalinator", "FertilizerMaker", "AlgaeDistillery", "EthanolDistillery", "RockCrusher", "Kiln", "SludgePress",
+				"MetalRefinery", "GlassForge", "OilRefinery", "Polymerizer", "OxyliteRefinery", "Chlorinator", "ChemicalRefinery", "SupermaterialRefinery", "DiamondPress", "MilkFatSeparator",
+				"MilkPress"
 			}, null, null),
 			new PlanScreen.PlanInfo(new HashedString("Medical"), false, new List<string>
 			{
@@ -674,6 +682,7 @@ namespace TUNING
 			}, null, null),
 			new PlanScreen.PlanInfo(new HashedString("Furniture"), false, new List<string>
 			{
+				"Shelf",
 				"Bed",
 				"LuxuryBed",
 				LadderBedConfig.ID,
@@ -683,6 +692,7 @@ namespace TUNING
 				"DevLightGenerator",
 				"MercuryCeilingLight",
 				"DiningTable",
+				"MultiMinionDiningTable",
 				"WaterCooler",
 				"Phonobox",
 				"ArcadeMachine",
@@ -832,6 +842,7 @@ namespace TUNING
 				"Gantry",
 				"SteamEngine",
 				"KeroseneEngine",
+				"BiodieselEngine",
 				"SolidBooster",
 				"LiquidFuelTank",
 				"OxidizerTank",

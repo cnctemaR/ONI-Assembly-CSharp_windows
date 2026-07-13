@@ -164,23 +164,23 @@ namespace Unity.TLS.LowLevel
 
 		public const int UNITYTLS_SSL_HANDSHAKE_WRAPUP = 15;
 
-		public const int UNITYTLS_SSL_HANDSHAKE_OVER = 16;
+		public const int UNITYTLS_SSL_HANDSHAKE_OVER = 27;
 
-		public const int UNITYTLS_SSL_HANDSHAKE_SERVER_NEW_SESSION_TICKET = 17;
+		public const int UNITYTLS_SSL_HANDSHAKE_SERVER_NEW_SESSION_TICKET = 16;
 
-		public const int UNITYTLS_SSL_HANDSHAKE_HELLO_VERIFY_REQUIRED = 18;
+		public const int UNITYTLS_SSL_HANDSHAKE_HELLO_VERIFY_REQUIRED = 17;
 
-		public const int UNITYTLS_SSL_HANDSHAKE_COUNT = 19;
+		public const int UNITYTLS_SSL_HANDSHAKE_COUNT = 28;
 
 		public const int UNITYTLS_SSL_HANDSHAKE_BEGIN = 0;
 
-		public const int UNITYTLS_SSL_HANDSHAKE_DONE = 16;
+		public const int UNITYTLS_SSL_HANDSHAKE_DONE = 27;
 
 		public const int UNITYTLS_SSL_HANDSHAKE_HANDSHAKE_FLUSH_BUFFERS = 14;
 
 		public const int UNITYTLS_SSL_HANDSHAKE_HANDSHAKE_WRAPUP = 15;
 
-		public const int UNITYTLS_SSL_HANDSHAKE_HANDSHAKE_OVER = 16;
+		public const int UNITYTLS_SSL_HANDSHAKE_HANDSHAKE_OVER = 27;
 
 		public const int UnityTLSClientAuth_None = 0;
 

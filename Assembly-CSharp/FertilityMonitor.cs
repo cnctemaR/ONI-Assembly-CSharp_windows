@@ -20,7 +20,7 @@ public class FertilityMonitor : GameStateMachine<FertilityMonitor, FertilityMoni
 
 	public static bool IsFertile(FertilityMonitor.Instance smi)
 	{
-		return !smi.HasTag(GameTags.Creatures.PausedReproduction) && !smi.HasTag(GameTags.Creatures.Confined) && !smi.HasTag(GameTags.Creatures.Expecting);
+		return !smi.PrefabId.HasTag(GameTags.Creatures.PausedReproduction) && !smi.PrefabId.HasTag(GameTags.Creatures.Confined) && smi.PrefabId.HasTag(GameTags.Creatures.Expecting);
 	}
 
 	public static Tag EggBreedingRoll(List<FertilityMonitor.BreedingChance> breedingChances, bool excludeOriginalCreature = false)
@@ -76,6 +76,14 @@ public class FertilityMonitor : GameStateMachine<FertilityMonitor, FertilityMoni
 
 	public new class Instance : GameStateMachine<FertilityMonitor, FertilityMonitor.Instance, IStateMachineTarget, FertilityMonitor.Def>.GameInstance
 	{
+		public KPrefabID PrefabId
+		{
+			get
+			{
+				return this.prefabId;
+			}
+		}
+
 		public Instance(IStateMachineTarget master, FertilityMonitor.Def def)
 			: base(master, def)
 		{
@@ -87,6 +95,7 @@ public class FertilityMonitor : GameStateMachine<FertilityMonitor, FertilityMoni
 			float num = 100f / (def.baseFertileCycles * 600f);
 			this.fertileEffect = new Effect("Fertile", CREATURES.MODIFIERS.BASE_FERTILITY.NAME, CREATURES.MODIFIERS.BASE_FERTILITY.TOOLTIP, 0f, false, false, false, null, -1f, 0f, null, "");
 			this.fertileEffect.Add(new AttributeModifier(Db.Get().Amounts.Fertility.deltaAttribute.Id, num, CREATURES.MODIFIERS.BASE_FERTILITY.NAME, false, false, true));
+			master.gameObject.GetComponent<KPrefabID>().SetTag(GameTags.Creatures.Expecting, true);
 			this.InitializeBreedingChances();
 		}
 
@@ -239,6 +248,9 @@ public class FertilityMonitor : GameStateMachine<FertilityMonitor, FertilityMoni
 		public AmountInstance fertility;
 
 		private GameObject egg;
+
+		[MyCmpReq]
+		private KPrefabID prefabId;
 
 		[Serialize]
 		public List<FertilityMonitor.BreedingChance> breedingChances;

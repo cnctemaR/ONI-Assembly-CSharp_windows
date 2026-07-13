@@ -71,7 +71,7 @@ public class ClusterManager : KMonoBehaviour, ISaveLoadable
 
 	public void UnregisterWorldContainer(WorldContainer worldContainer)
 	{
-		base.Trigger(-1078710002, worldContainer.id);
+		base.BoxingTrigger<int>(-1078710002, worldContainer.id);
 		this.m_worldContainers.Remove(worldContainer);
 	}
 
@@ -286,7 +286,9 @@ public class ClusterManager : KMonoBehaviour, ISaveLoadable
 		if (num != worldIdx)
 		{
 			this.activeWorldIdx = worldIdx;
-			Game.Instance.Trigger(1983128072, new global::Tuple<int, int>(this.activeWorldIdx, num));
+			this.activeWorldChangedData.first = this.activeWorldIdx;
+			this.activeWorldChangedData.second = num;
+			Game.Instance.Trigger(1983128072, this.activeWorldChangedData);
 			this.UpdateRocketInteriorAudio();
 		}
 	}
@@ -543,7 +545,7 @@ public class ClusterManager : KMonoBehaviour, ISaveLoadable
 				craft_go.GetComponent<CraftModuleInterface>().TriggerEventOnCraftAndRocket(GameHashes.RocketInteriorComplete, null);
 			});
 			craft_go.AddOrGet<OrbitalMechanics>().CreateOrbitalObject(Db.Get().OrbitalTypeCategories.landed.Id);
-			base.Trigger(-1280433810, worldContainer.id);
+			base.BoxingTrigger<int>(-1280433810, worldContainer.id);
 			return worldContainer;
 		}
 		global::Debug.LogError("Failed to create rocket interior.");
@@ -716,6 +718,8 @@ public class ClusterManager : KMonoBehaviour, ISaveLoadable
 	private List<int> _worldIDs = new List<int>();
 
 	private List<int> _discoveredAsteroidIds = new List<int>();
+
+	private global::Tuple<int, int> activeWorldChangedData = new global::Tuple<int, int>(0, 0);
 
 	public enum RocketStatesForAudio
 	{

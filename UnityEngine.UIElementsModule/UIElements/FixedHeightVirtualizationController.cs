@@ -83,42 +83,42 @@ namespace UnityEngine.UIElements
 
 		public override void Resize(Vector2 size)
 		{
-			float resolvedItemHeight = this.resolvedItemHeight;
 			float expectedContentHeight = this.GetExpectedContentHeight();
 			this.m_ScrollView.contentContainer.style.height = expectedContentHeight;
 			float num = Mathf.Max(0f, expectedContentHeight - this.m_ScrollView.contentViewport.layout.height);
 			float num2 = Mathf.Min(base.serializedData.scrollOffset.y, num);
 			this.m_ScrollView.verticalScroller.slider.SetHighValueWithoutNotify(num);
 			this.m_ScrollView.verticalScroller.slider.SetValueWithoutNotify(num2);
-			int num3 = (int)(this.m_CollectionView.ResolveItemHeight(size.y) / resolvedItemHeight);
-			bool flag = num3 > 0;
+			int num3 = 0;
+			float num4 = size.y / this.resolvedItemHeight;
+			bool flag = num4 > 0f;
 			if (flag)
 			{
-				num3 += 2;
+				num3 = (int)num4 + 2;
 			}
-			int num4 = Mathf.Min(num3, base.itemsCount);
-			bool flag2 = this.visibleItemCount != num4;
+			int num5 = Mathf.Min(num3, base.itemsCount);
+			bool flag2 = this.visibleItemCount != num5;
 			if (flag2)
 			{
 				int visibleItemCount = this.visibleItemCount;
-				bool flag3 = this.visibleItemCount > num4;
+				bool flag3 = this.visibleItemCount > num5;
 				if (flag3)
 				{
-					int num5 = visibleItemCount - num4;
-					for (int i = 0; i < num5; i++)
+					int num6 = visibleItemCount - num5;
+					for (int i = 0; i < num6; i++)
 					{
-						int num6 = this.m_ActiveItems.Count - 1;
-						this.ReleaseItem(num6);
+						int num7 = this.m_ActiveItems.Count - 1;
+						this.ReleaseItem(num7);
 					}
 				}
 				else
 				{
-					int num7 = num4 - this.visibleItemCount;
-					for (int j = 0; j < num7; j++)
+					int num8 = num5 - this.visibleItemCount;
+					for (int j = 0; j < num8; j++)
 					{
-						int num8 = j + this.firstVisibleIndex + visibleItemCount;
+						int num9 = j + this.firstVisibleIndex + visibleItemCount;
 						T orMakeItemAtIndex = this.GetOrMakeItemAtIndex(-1, -1);
-						base.Setup(orMakeItemAtIndex, num8);
+						base.Setup(orMakeItemAtIndex, num9);
 					}
 				}
 			}

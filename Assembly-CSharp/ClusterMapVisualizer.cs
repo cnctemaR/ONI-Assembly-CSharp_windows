@@ -80,7 +80,7 @@ public class ClusterMapVisualizer : KMonoBehaviour
 		base.OnCleanUp();
 	}
 
-	private void OnClusterDestinationChanged(object data)
+	private void OnClusterDestinationChanged(object _)
 	{
 		this.RefreshPathDrawing();
 	}
@@ -158,7 +158,7 @@ public class ClusterMapVisualizer : KMonoBehaviour
 				foreach (ClusterGridEntity.AnimConfig animConfig in this.entity.AnimConfigs)
 				{
 					KBatchedAnimController kbatchedAnimController2 = global::UnityEngine.Object.Instantiate<KBatchedAnimController>(this.animControllerPrefab, this.animContainer);
-					kbatchedAnimController2.AnimFiles = new KAnimFile[] { animConfig.animFile };
+					kbatchedAnimController2.SwapAnims(new KAnimFile[] { animConfig.animFile });
 					kbatchedAnimController2.initialMode = animConfig.playMode;
 					kbatchedAnimController2.initialAnim = animConfig.initialAnim;
 					kbatchedAnimController2.Offset = animConfig.animOffset;
@@ -175,6 +175,7 @@ public class ClusterMapVisualizer : KMonoBehaviour
 					}
 					kbatchedAnimController2.gameObject.SetActive(true);
 					this.animControllers.Add(kbatchedAnimController2);
+					this.entity.onClustermapVisualizerAnimCreated(kbatchedAnimController2, animConfig);
 				}
 			}
 			base.gameObject.SetActive(true);

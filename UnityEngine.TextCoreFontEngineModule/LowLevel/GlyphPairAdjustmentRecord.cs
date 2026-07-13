@@ -84,12 +84,12 @@ namespace UnityEngine.TextCore.LowLevel
 			return !(lhs == rhs);
 		}
 
-		[NativeName("firstAdjustmentRecord")]
 		[SerializeField]
+		[NativeName("firstAdjustmentRecord")]
 		private GlyphAdjustmentRecord m_FirstAdjustmentRecord;
 
-		[NativeName("secondAdjustmentRecord")]
 		[SerializeField]
+		[NativeName("secondAdjustmentRecord")]
 		private GlyphAdjustmentRecord m_SecondAdjustmentRecord;
 
 		[SerializeField]

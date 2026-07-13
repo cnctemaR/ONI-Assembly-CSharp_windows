@@ -6,19 +6,11 @@ using UnityEngine;
 public class MingleChore : Chore<MingleChore.StatesInstance>, IWorkerPrioritizable
 {
 	public MingleChore(IStateMachineTarget target)
+		: base(Db.Get().ChoreTypes.Relax, target, target.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.high, 5, false, true, 0, false, ReportManager.ReportType.PersonalTime)
 	{
-		Chore.Precondition precondition = default(Chore.Precondition);
-		precondition.id = "HasMingleCell";
-		precondition.description = DUPLICANTS.CHORES.PRECONDITIONS.HAS_MINGLE_CELL;
-		precondition.fn = delegate(ref Chore.Precondition.Context context, object data)
-		{
-			return ((MingleChore)data).smi.HasMingleCell();
-		};
-		this.HasMingleCell = precondition;
-		base..ctor(Db.Get().ChoreTypes.Relax, target, target.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.high, 5, false, true, 0, false, ReportManager.ReportType.PersonalTime);
 		this.showAvailabilityInHoverText = false;
 		base.smi = new MingleChore.StatesInstance(this, target.gameObject);
-		this.AddPrecondition(this.HasMingleCell, this);
+		this.AddPrecondition(MingleChore.HasMingleCell, this);
 		this.AddPrecondition(ChorePreconditions.instance.IsNotRedAlert, null);
 		this.AddPrecondition(ChorePreconditions.instance.IsScheduledTime, Db.Get().ScheduleBlockTypes.Recreation);
 		this.AddPrecondition(ChorePreconditions.instance.CanDoWorkerPrioritizable, this);
@@ -37,7 +29,15 @@ public class MingleChore : Chore<MingleChore.StatesInstance>, IWorkerPrioritizab
 
 	private int basePriority = RELAXATION.PRIORITY.TIER1;
 
-	private Chore.Precondition HasMingleCell;
+	private static Chore.Precondition HasMingleCell = new Chore.Precondition
+	{
+		id = "HasMingleCell",
+		description = DUPLICANTS.CHORES.PRECONDITIONS.HAS_MINGLE_CELL,
+		fn = delegate(ref Chore.Precondition.Context context, object data)
+		{
+			return ((MingleChore)data).smi.HasMingleCell();
+		}
+	};
 
 	public class States : GameStateMachine<MingleChore.States, MingleChore.StatesInstance, MingleChore>
 	{

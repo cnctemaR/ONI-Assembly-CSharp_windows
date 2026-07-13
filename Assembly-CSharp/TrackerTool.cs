@@ -39,13 +39,13 @@ public class TrackerTool : KMonoBehaviour
 
 	private void Refresh(object data)
 	{
-		int num = (int)data;
-		this.AddNewWorldTrackers(num);
+		int value = ((Boxed<int>)data).value;
+		this.AddNewWorldTrackers(value);
 	}
 
 	private void RemoveWorld(object data)
 	{
-		int world_id = (int)data;
+		int world_id = ((Boxed<int>)data).value;
 		this.worldTrackers.RemoveAll((WorldTracker match) => match.WorldID == world_id);
 	}
 

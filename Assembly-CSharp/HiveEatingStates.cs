@@ -117,12 +117,11 @@ public class HiveEatingStates : GameStateMachine<HiveEatingStates, HiveEatingSta
 				component3.storage.Trigger(-1697596308, smi.gameObject);
 			}
 			float num5 = dietInfo.ConvertConsumptionMassToCalories(num4);
-			CreatureCalorieMonitor.CaloriesConsumedEvent caloriesConsumedEvent = new CreatureCalorieMonitor.CaloriesConsumedEvent
+			smi.gameObject.BoxingTrigger(-2038961714, new CreatureCalorieMonitor.CaloriesConsumedEvent
 			{
 				tag = component.PrefabTag,
 				calories = num5
-			};
-			smi.gameObject.Trigger(-2038961714, caloriesConsumedEvent);
+			});
 		}
 
 		[MyCmpReq]

@@ -26,7 +26,7 @@ public class BuildWatermark : KScreen
 		}
 		else
 		{
-			text += 693461U.ToString();
+			text += 700348U.ToString();
 		}
 		if (DistributionPlatform.Initialized)
 		{
@@ -39,6 +39,10 @@ public class BuildWatermark : KScreen
 		if (DebugHandler.enabled)
 		{
 			text += "D";
+		}
+		if (!"".IsNullOrWhiteSpace())
+		{
+			text += "-<Patch:>";
 		}
 		return text;
 	}

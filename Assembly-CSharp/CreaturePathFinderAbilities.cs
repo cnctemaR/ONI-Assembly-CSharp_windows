@@ -10,7 +10,7 @@ public class CreaturePathFinderAbilities : PathFinderAbilities
 
 	protected override void Refresh(Navigator navigator)
 	{
-		if (PathFinder.IsSubmerged(Grid.PosToCell(navigator)))
+		if (PathFinder.IsSubmerged(navigator.cachedCell))
 		{
 			this.canTraverseSubmered = true;
 			return;

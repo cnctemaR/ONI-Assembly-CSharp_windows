@@ -25,7 +25,7 @@ namespace STRINGS
 		{
 			public class STANDARD
 			{
-				public static LocString NAME = "Standard Duplicant";
+				public static LocString NAME = UI.FormatAsLink("Standard Duplicant", "DUPLICANTS");
 
 				public static LocString DESC = string.Concat(new string[]
 				{
@@ -37,11 +37,13 @@ namespace STRINGS
 					UI.FormatAsLink("Priority", "PRIORITY"),
 					"."
 				});
+
+				public static LocString NAME_ADJECTIVE = UI.FormatAsLink("Standard", "DUPLICANTS");
 			}
 
 			public class BIONIC
 			{
-				public static LocString NAME = "Bionic Duplicant";
+				public static LocString NAME = UI.FormatAsLink("Bionic Duplicant", "DUPLICANTS");
 
 				public static LocString NAME_TOOLTIP = "This Duplicant is a curious combination of organic and inorganic parts";
 
@@ -55,6 +57,8 @@ namespace STRINGS
 					UI.FormatAsLink("Toilets", "MISCELLANEOUSTIPS"),
 					"."
 				});
+
+				public static LocString NAME_ADJECTIVE = UI.FormatAsLink("Bionic", "DUPLICANTS");
 			}
 
 			public class REMOTEWORKER
@@ -4903,7 +4907,7 @@ namespace STRINGS
 
 			public class SKILLLEVEL
 			{
-				public static LocString NAME = "Skill Level";
+				public static LocString NAME = "Attribute Level";
 			}
 
 			public class ROOMPARK
@@ -5060,6 +5064,13 @@ namespace STRINGS
 				public static LocString NAME = "Great Hall";
 
 				public static LocString TOOLTIP = "This Duplicant's most recent meal was eaten in a fancy " + UI.PRE_KEYWORD + "Great Hall" + UI.PST_KEYWORD;
+			}
+
+			public class ROOMBANQUETHALL
+			{
+				public static LocString NAME = "Banquet Hall";
+
+				public static LocString TOOLTIP = "This Duplicant's most recent meal was eaten in a bustling " + UI.PRE_KEYWORD + "Banquet Hall" + UI.PST_KEYWORD;
 			}
 
 			public class ENTITLEMENT
@@ -7070,6 +7081,13 @@ namespace STRINGS
 				});
 			}
 
+			public class COMMUNALDINING
+			{
+				public static LocString NAME = "Communal Dining";
+
+				public static LocString TOOLTIP = "This Duplicant recently had the pleasure of dining with friends at a " + BUILDINGS.PREFABS.MULTIMINIONDININGTABLE.NAME;
+			}
+
 			public class RADIATIONEXPOSUREMINOR
 			{
 				public static LocString NAME = "Minor Radiation Sickness";
@@ -7383,6 +7401,13 @@ namespace STRINGS
 					UI.PST_KEYWORD,
 					" by someone's Banshee Wail"
 				});
+			}
+
+			public class SPACEBUZZ
+			{
+				public static LocString NAME = "Thrilling Flight";
+
+				public static LocString TOOLTIP = "This Duplicant is getting a real adrenaline rush from being in space!";
 			}
 		}
 
@@ -9125,6 +9150,13 @@ namespace STRINGS
 
 				public static LocString DESC = "This {0} got her hand crushed in a pneumatic door once. It was the most alive she's ever felt.";
 			}
+
+			public class SENA
+			{
+				public static LocString NAME = "Sena";
+
+				public static LocString DESC = "{0}s only care about three things: gold accents, true crime, and the advancement of nuclear physics.";
+			}
 		}
 
 		public class NEEDS
@@ -9479,14 +9511,14 @@ namespace STRINGS
 					UI.PRE_KEYWORD,
 					"Research",
 					UI.PST_KEYWORD,
-					" and gains ",
+					" and levels up their ",
 					UI.PRE_KEYWORD,
-					"Skill Points",
+					"Attributes",
 					UI.PST_KEYWORD,
 					"."
 				});
 
-				public static LocString SPEEDMODIFIER = "{0} Skill Leveling";
+				public static LocString SPEEDMODIFIER = "{0} Attribute Leveling Speed";
 
 				public static LocString RESEARCHSPEED = "{0} Research Speed";
 
@@ -10380,7 +10412,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = UI.FormatAsLink("Improved Farming II", "FARMING3");
 
-				public static LocString DESCRIPTION = "Further increases a Duplicant's farming skills";
+				public static LocString DESCRIPTION = "Enables a Duplicant to gather " + ITEMS.INDUSTRIAL_PRODUCTS.PLANT_FIBER.NAME + "s as a byproduct when harvesting certain " + UI.CODEX.CATEGORYNAMES.PLANTS;
 			}
 
 			public class JUNIOR_MINER
@@ -10630,6 +10662,20 @@ namespace STRINGS
 				public static LocString NAME = UI.FormatAsLink("Power Banking", "BIONICS_C3");
 
 				public static LocString DESCRIPTION = "Increases " + UI.FormatAsLink("Power Bank", "ELECTROBANK") + " storage capacity to maximize work time between replacements.";
+			}
+
+			public class BIONICS_D1
+			{
+				public static LocString NAME = UI.FormatAsLink("Improved Hardware", "BIONICS_D1");
+
+				public static LocString DESCRIPTION = "Increases resistance to environmental irritants and pressure-related injuries";
+			}
+
+			public class BIONICS_D2
+			{
+				public static LocString NAME = UI.FormatAsLink("Climate Control", "BIONICS_D2");
+
+				public static LocString DESCRIPTION = "Allows Bionic Duplicants to work comfortably in a wider range of ambient temperatures";
 			}
 		}
 

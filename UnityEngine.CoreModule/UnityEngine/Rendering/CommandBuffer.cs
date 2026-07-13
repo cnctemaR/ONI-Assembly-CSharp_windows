@@ -16,10 +16,10 @@ using UnityEngine.Scripting;
 namespace UnityEngine.Rendering
 {
 	[NativeHeader("Runtime/Shaders/ComputeShader.h")]
-	[NativeType("Runtime/Graphics/CommandBuffer/RenderingCommandBuffer.h")]
 	[NativeHeader("Runtime/Export/Graphics/RenderingCommandBuffer.bindings.h")]
-	[NativeHeader("Runtime/Shaders/RayTracingShader.h")]
+	[NativeType("Runtime/Graphics/CommandBuffer/RenderingCommandBuffer.h")]
 	[UsedByNativeCode]
+	[NativeHeader("Runtime/Shaders/RayTracingShader.h")]
 	public class CommandBuffer : IDisposable
 	{
 		public void ConvertTexture(RenderTargetIdentifier src, RenderTargetIdentifier dst)

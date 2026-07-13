@@ -47,29 +47,26 @@ public class ConduitDiseaseManager : KCompactedVector<ConduitDiseaseManager.Data
 
 	public void Sim200ms(float dt)
 	{
-		using (new KProfiler.Region("ConduitDiseaseManager.SimUpdate", null))
+		for (int i = 0; i < this.data.Count; i++)
 		{
-			for (int i = 0; i < this.data.Count; i++)
+			ConduitDiseaseManager.Data data = this.data[i];
+			if (data.diseaseIdx != 255)
 			{
-				ConduitDiseaseManager.Data data = this.data[i];
-				if (data.diseaseIdx != 255)
+				float num = data.accumulatedError;
+				num += data.growthInfo.CalculateDiseaseCountDelta(data.diseaseCount, data.mass, dt);
+				Disease disease = Db.Get().Diseases[(int)data.diseaseIdx];
+				float num2 = Disease.HalfLifeToGrowthRate(Disease.CalculateRangeHalfLife(this.temperatureManager.GetTemperature(data.temperatureHandle), ref disease.temperatureRange, ref disease.temperatureHalfLives), dt);
+				num += (float)data.diseaseCount * num2 - (float)data.diseaseCount;
+				int num3 = (int)num;
+				data.accumulatedError = num - (float)num3;
+				data.diseaseCount += num3;
+				if (data.diseaseCount <= 0)
 				{
-					float num = data.accumulatedError;
-					num += data.growthInfo.CalculateDiseaseCountDelta(data.diseaseCount, data.mass, dt);
-					Disease disease = Db.Get().Diseases[(int)data.diseaseIdx];
-					float num2 = Disease.HalfLifeToGrowthRate(Disease.CalculateRangeHalfLife(this.temperatureManager.GetTemperature(data.temperatureHandle), ref disease.temperatureRange, ref disease.temperatureHalfLives), dt);
-					num += (float)data.diseaseCount * num2 - (float)data.diseaseCount;
-					int num3 = (int)num;
-					data.accumulatedError = num - (float)num3;
-					data.diseaseCount += num3;
-					if (data.diseaseCount <= 0)
-					{
-						data.diseaseCount = 0;
-						data.diseaseIdx = byte.MaxValue;
-						data.accumulatedError = 0f;
-					}
-					this.data[i] = data;
+					data.diseaseCount = 0;
+					data.diseaseIdx = byte.MaxValue;
+					data.accumulatedError = 0f;
 				}
+				this.data[i] = data;
 			}
 		}
 	}

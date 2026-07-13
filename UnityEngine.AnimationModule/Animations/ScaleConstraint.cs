@@ -6,10 +6,10 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Animations
 {
+	[UsedByNativeCode]
+	[NativeHeader("Modules/Animation/Constraints/Constraint.bindings.h")]
 	[NativeHeader("Modules/Animation/Constraints/ScaleConstraint.h")]
 	[RequireComponent(typeof(Transform))]
-	[NativeHeader("Modules/Animation/Constraints/Constraint.bindings.h")]
-	[UsedByNativeCode]
 	public sealed class ScaleConstraint : Behaviour, IConstraint, IConstraintInternal
 	{
 		private ScaleConstraint()

@@ -22,7 +22,7 @@ public class SelfChargingElectrobankDiagnostic : ColonyDiagnostic
 		ColonyDiagnostic.DiagnosticResult diagnosticResult = new ColonyDiagnostic.DiagnosticResult(ColonyDiagnostic.DiagnosticResult.Opinion.Normal, UI.SELFCHARGINGBATTERYDIAGNOSTIC.NORMAL, null);
 		foreach (SelfChargingElectrobank selfChargingElectrobank in Components.SelfChargingElectrobanks.GetItems(base.worldID))
 		{
-			if (selfChargingElectrobank.LifetimeRemaining <= this.WARNING_LIFETIME)
+			if (!selfChargingElectrobank.IsNullOrDestroyed() && selfChargingElectrobank.LifetimeRemaining <= this.WARNING_LIFETIME)
 			{
 				diagnosticResult.opinion = ColonyDiagnostic.DiagnosticResult.Opinion.Concern;
 				if (diagnosticResult.clickThroughObjects == null)

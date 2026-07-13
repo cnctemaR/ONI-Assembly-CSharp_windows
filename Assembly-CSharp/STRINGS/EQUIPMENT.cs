@@ -28,6 +28,10 @@ namespace STRINGS
 					UI.FormatAsLink("Crafting Station", "CRAFTINGTABLE"),
 					"."
 				});
+
+				public static LocString REPAIR_WORN_RECIPE_NAME = "Repair " + EQUIPMENT.PREFABS.OXYGEN_MASK.NAME;
+
+				public static LocString REPAIR_WORN_DESC = "Restore a " + UI.FormatAsLink("Oxygen Mask", "OXYGEN_MASK") + " to working order.";
 			}
 
 			public class ATMO_SUIT
@@ -531,6 +535,34 @@ namespace STRINGS
 				}
 			}
 
+			public class JET_SUIT_SHOES
+			{
+				public static LocString NAME = "Default Jet Boots";
+
+				public static LocString DESC = "Default footwear for jet suits.";
+			}
+
+			public class JET_SUIT_HELMET
+			{
+				public static LocString NAME = "Default Jet Helmet";
+
+				public static LocString DESC = "Default helmet for jet suits.";
+			}
+
+			public class JET_SUIT_BODY
+			{
+				public static LocString NAME = "Default Jet Uniform";
+
+				public static LocString DESC = "Default top and bottom of a jet suit.";
+			}
+
+			public class JET_SUIT_GLOVES
+			{
+				public static LocString NAME = "Default Jet Gloves";
+
+				public static LocString DESC = "Default gloves for jet suits.";
+			}
+
 			public class AQUA_SUIT
 			{
 				public static LocString NAME = UI.FormatAsLink("Aqua Suit", "AQUA_SUIT");
@@ -595,7 +627,7 @@ namespace STRINGS
 					" in toxic and low breathability environments.\n\nMust be refilled with ",
 					UI.FormatAsLink("Oxygen", "OXYGEN"),
 					" and ",
-					UI.FormatAsLink("Petroleum", "PETROLEUM"),
+					MISC.TAGS.COMBUSTIBLELIQUID,
 					" at a ",
 					UI.FormatAsLink("Jet Suit Dock", "JETSUITLOCKER"),
 					" when depleted."
@@ -617,6 +649,10 @@ namespace STRINGS
 					UI.FormatAsLink("Exosuit Forge", "SUITFABRICATOR"),
 					"."
 				});
+
+				public static LocString REPAIR_WORN_RECIPE_NAME = "Repair " + EQUIPMENT.PREFABS.JET_SUIT.NAME;
+
+				public static LocString REPAIR_WORN_DESC = "Restore a " + UI.FormatAsLink("Worn Jet Suit", "JET_SUIT") + " to working order.";
 			}
 
 			public class LEAD_SUIT
@@ -663,6 +699,10 @@ namespace STRINGS
 					UI.FormatAsLink("Exosuit Forge", "SUITFABRICATOR"),
 					"."
 				});
+
+				public static LocString REPAIR_WORN_RECIPE_NAME = "Repair " + EQUIPMENT.PREFABS.LEAD_SUIT.NAME;
+
+				public static LocString REPAIR_WORN_DESC = "Restore a " + UI.FormatAsLink("Worn Lead Suit", "LEAD_SUIT") + " to working order.";
 			}
 
 			public class COOL_VEST
@@ -759,6 +799,13 @@ namespace STRINGS
 
 				public class FACADES
 				{
+					public class STANDARD_GOLD
+					{
+						public static LocString NAME = "Standard Gloves";
+
+						public static LocString DESC = "Standard-issue gloves for colony workers.";
+					}
+
 					public class BASIC_BLUE_MIDDLE
 					{
 						public static LocString NAME = "Basic Aqua Gloves";
@@ -1106,14 +1153,14 @@ namespace STRINGS
 					{
 						public static LocString NAME = "Frilly Slate Gloves";
 
-						public static LocString DESC = "Thick, soft grey gloves with added flounce.";
+						public static LocString DESC = "Thick, soft gray gloves with added flounce.";
 					}
 
 					public class GINCH_GREY_CHARCOAL
 					{
 						public static LocString NAME = "Frilly Charcoal Gloves";
 
-						public static LocString DESC = "Thick, soft dark grey gloves with added flounce.";
+						public static LocString DESC = "Thick, soft dark gray gloves with added flounce.";
 					}
 				}
 			}
@@ -1126,6 +1173,34 @@ namespace STRINGS
 
 				public class FACADES
 				{
+					public class STANDARD_YELLOW_TOP
+					{
+						public static LocString NAME = "Yellow Uniform Shirt";
+
+						public static LocString DESC = "A standard-issue uniform shirt in flax yellow.";
+					}
+
+					public class STANDARD_GREEN_TOP
+					{
+						public static LocString NAME = "Green Uniform Shirt";
+
+						public static LocString DESC = "A standard-issue uniform shirt in swampy green.";
+					}
+
+					public class STANDARD_RED_TOP
+					{
+						public static LocString NAME = "Red Uniform Shirt";
+
+						public static LocString DESC = "A standard-issue uniform shirt in carmine red.";
+					}
+
+					public class STANDARD_BLUE_TOP
+					{
+						public static LocString NAME = "Blue Uniform Shirt";
+
+						public static LocString DESC = "A standard-issue uniform shirt in a standard-issue blue hue.";
+					}
+
 					public class BASIC_BLUE_MIDDLE
 					{
 						public static LocString NAME = "Basic Aqua Shirt";
@@ -1585,7 +1660,7 @@ namespace STRINGS
 					{
 						public static LocString NAME = "Frilly Charcoal Undershirt";
 
-						public static LocString DESC = "A seamless dark grey undershirt with laser-cut ruffles.";
+						public static LocString DESC = "A seamless dark gray undershirt with laser-cut ruffles.";
 					}
 
 					public class KNIT_POLKADOT_TURQ
@@ -2015,14 +2090,14 @@ namespace STRINGS
 					{
 						public static LocString NAME = "Phlegmy Shorties";
 
-						public static LocString DESC = "Ruffled short-shorts in a rather sticky shade of light grey.";
+						public static LocString DESC = "Ruffled short-shorts in a rather sticky shade of light gray.";
 					}
 
 					public class GINCH_GREY_OBELUS
 					{
 						public static LocString NAME = "Obelus Shorties";
 
-						public static LocString DESC = "Comfy grey short-shorts with a ruffled hem.";
+						public static LocString DESC = "Comfy gray short-shorts with a ruffled hem.";
 					}
 
 					public class KNIT_POLKADOT_TURQ
@@ -2354,14 +2429,14 @@ namespace STRINGS
 					{
 						public static LocString NAME = "Frilly Slate Socks";
 
-						public static LocString DESC = "Thick, soft grey socks with extra flounce.";
+						public static LocString DESC = "Thick, soft gray socks with extra flounce.";
 					}
 
 					public class GINCH_GREY_CHARCOAL
 					{
 						public static LocString NAME = "Frilly Charcoal Socks";
 
-						public static LocString DESC = "Thick, soft dark grey socks with extra flounce.";
+						public static LocString DESC = "Thick, soft dark gray socks with extra flounce.";
 					}
 				}
 			}

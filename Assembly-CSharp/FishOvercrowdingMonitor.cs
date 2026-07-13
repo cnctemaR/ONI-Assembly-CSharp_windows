@@ -12,7 +12,12 @@ public class FishOvercrowdingMonitor : GameStateMachine<FishOvercrowdingMonitor,
 
 	private static void Register(FishOvercrowdingMonitor.Instance smi)
 	{
-		FishOvercrowingManager.Instance.Add(smi);
+		FishOvercrowingManager instance = FishOvercrowingManager.Instance;
+		if (instance == null)
+		{
+			return;
+		}
+		instance.Add(smi.PrefabID);
 	}
 
 	private static void Unregister(FishOvercrowdingMonitor.Instance smi)
@@ -22,12 +27,12 @@ public class FishOvercrowdingMonitor : GameStateMachine<FishOvercrowdingMonitor,
 		{
 			return;
 		}
-		instance.Remove(smi);
+		instance.Remove(smi.PrefabID);
 	}
 
-	public GameStateMachine<FishOvercrowdingMonitor, FishOvercrowdingMonitor.Instance, IStateMachineTarget, FishOvercrowdingMonitor.Def>.State satisfied;
+	private readonly GameStateMachine<FishOvercrowdingMonitor, FishOvercrowdingMonitor.Instance, IStateMachineTarget, FishOvercrowdingMonitor.Def>.State satisfied;
 
-	public GameStateMachine<FishOvercrowdingMonitor, FishOvercrowdingMonitor.Instance, IStateMachineTarget, FishOvercrowdingMonitor.Def>.State overcrowded;
+	private readonly GameStateMachine<FishOvercrowdingMonitor, FishOvercrowdingMonitor.Instance, IStateMachineTarget, FishOvercrowdingMonitor.Def>.State overcrowded;
 
 	public class Def : StateMachine.BaseDef
 	{
@@ -35,19 +40,20 @@ public class FishOvercrowdingMonitor : GameStateMachine<FishOvercrowdingMonitor,
 
 	public new class Instance : GameStateMachine<FishOvercrowdingMonitor, FishOvercrowdingMonitor.Instance, IStateMachineTarget, FishOvercrowdingMonitor.Def>.GameInstance
 	{
+		public KPrefabID PrefabID
+		{
+			get
+			{
+				return this.prefabID;
+			}
+		}
+
 		public Instance(IStateMachineTarget master, FishOvercrowdingMonitor.Def def)
 			: base(master, def)
 		{
 		}
 
-		public void SetOvercrowdingInfo(int cell_count, int fish_count)
-		{
-			this.cellCount = cell_count;
-			this.fishCount = fish_count;
-		}
-
-		public int cellCount;
-
-		public int fishCount;
+		[MyCmpReq]
+		private readonly KPrefabID prefabID;
 	}
 }

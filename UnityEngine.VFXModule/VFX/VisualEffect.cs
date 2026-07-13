@@ -7,9 +7,9 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.VFX
 {
+	[NativeHeader("Modules/VFX/Public/ScriptBindings/VisualEffectBindings.h")]
 	[RequireComponent(typeof(Transform))]
 	[NativeHeader("Modules/VFX/Public/VisualEffect.h")]
-	[NativeHeader("Modules/VFX/Public/ScriptBindings/VisualEffectBindings.h")]
 	public class VisualEffect : Behaviour
 	{
 		public extern bool pause

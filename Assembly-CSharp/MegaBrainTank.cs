@@ -31,7 +31,7 @@ public class MegaBrainTank : StateMachineComponent<MegaBrainTank.StatesInstance>
 
 	private void OnBuildingSelect(object obj)
 	{
-		if (!(bool)obj)
+		if (!((Boxed<bool>)obj).value)
 		{
 			return;
 		}

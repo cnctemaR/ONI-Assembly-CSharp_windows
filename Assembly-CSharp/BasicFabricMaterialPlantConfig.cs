@@ -52,7 +52,9 @@ public class BasicFabricMaterialPlantConfig : IEntityConfig
 		list.Add(GameTags.WaterSeed);
 		SingleEntityReceptacle.ReceptacleDirection receptacleDirection = SingleEntityReceptacle.ReceptacleDirection.Top;
 		text3 = global::STRINGS.CREATURES.SPECIES.BASICFABRICMATERIALPLANT.DOMESTICATEDDESC;
-		EntityTemplates.CreateAndRegisterPreviewForPlant(EntityTemplates.CreateAndRegisterSeedForPlant(gameObject3, hasDlcRestrictions, productionType, seed_ID, text4, text5, anim, text6, num6, list, receptacleDirection, default(Tag), 20, text3, EntityTemplates.CollisionShape.CIRCLE, 0.25f, 0.25f, null, "", false), BasicFabricMaterialPlantConfig.ID + "_preview", Assets.GetAnim("swampreed_kanim"), "place", 1, 3);
+		GameObject gameObject4 = EntityTemplates.CreateAndRegisterSeedForPlant(gameObject3, hasDlcRestrictions, productionType, seed_ID, text4, text5, anim, text6, num6, list, receptacleDirection, default(Tag), 20, text3, EntityTemplates.CollisionShape.CIRCLE, 0.25f, 0.25f, null, "", false);
+		Assets.GetPrefab(BasicFabricMaterialPlantConfig.SEED_ID).AddOrGet<CodexEntryRedirector>().CodexID = "BASICFABRICPLANT";
+		EntityTemplates.CreateAndRegisterPreviewForPlant(gameObject4, BasicFabricMaterialPlantConfig.ID + "_preview", Assets.GetAnim("swampreed_kanim"), "place", 1, 3);
 		SoundEventVolumeCache.instance.AddVolume("swampreed_kanim", "FabricPlant_grow", NOISE_POLLUTION.CREATURES.TIER3);
 		SoundEventVolumeCache.instance.AddVolume("swampreed_kanim", "FabricPlant_harvest", NOISE_POLLUTION.CREATURES.TIER3);
 		return gameObject;

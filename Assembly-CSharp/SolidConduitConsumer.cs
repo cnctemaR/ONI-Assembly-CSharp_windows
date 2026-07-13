@@ -63,7 +63,7 @@ public class SolidConduitConsumer : KMonoBehaviour, IConduitConsumer
 	private void OnConduitConnectionChanged(object data)
 	{
 		this.consuming = this.consuming && this.IsConnected;
-		base.Trigger(-2094018600, this.IsConnected);
+		base.Trigger(-2094018600, BoxedBools.Box(this.IsConnected));
 	}
 
 	private void ConduitUpdate(float dt)

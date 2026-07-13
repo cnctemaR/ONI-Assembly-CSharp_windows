@@ -7,9 +7,9 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[UsedByNativeCode]
 	[NativeHeader("TerrainScriptingClasses.h")]
 	[NativeHeader("Modules/Terrain/Public/TerrainDataScriptingInterface.h")]
+	[UsedByNativeCode]
 	[StructLayout(LayoutKind.Sequential)]
 	public sealed class DetailPrototype
 	{

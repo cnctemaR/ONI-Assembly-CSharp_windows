@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Klei.AI;
 using UnityEngine;
 
 public class CurrentJobConversation : ConversationType
@@ -44,9 +45,52 @@ public class CurrentJobConversation : ConversationType
 		return null;
 	}
 
-	private Conversation.ModeType GetModeForRole(MinionIdentity speaker, string roleId)
+	private unsafe Conversation.ModeType GetModeForRole(MinionIdentity speaker, string roleId)
 	{
-		return Conversation.ModeType.Nominal;
+		MinionResume minionResume;
+		if (!speaker.TryGetComponent<MinionResume>(out minionResume))
+		{
+			return Conversation.ModeType.Nominal;
+		}
+		AttributeInstance attributeInstance = Db.Get().Attributes.QualityOfLife.Lookup(speaker);
+		if (attributeInstance == null)
+		{
+			return Conversation.ModeType.Nominal;
+		}
+		AttributeInstance attributeInstance2 = Db.Get().Attributes.QualityOfLifeExpectation.Lookup(speaker);
+		if (attributeInstance2 == null)
+		{
+			return Conversation.ModeType.Nominal;
+		}
+		float totalValue = attributeInstance2.GetTotalValue();
+		if (totalValue <= 0f)
+		{
+			return Conversation.ModeType.Nominal;
+		}
+		IntPtr intPtr = stackalloc byte[(UIntPtr)12];
+		*intPtr = 0.5f;
+		*(intPtr + 4) = 0.25f;
+		*(intPtr + (IntPtr)2 * 4) = 0.25f;
+		float* ptr = intPtr;
+		float num = attributeInstance.GetTotalValue() / totalValue;
+		for (int num2 = 0; num2 != 3; num2++)
+		{
+			float num3 = ptr[num2];
+			num -= num3;
+			if (num < 0f)
+			{
+				switch (num2)
+				{
+				case 0:
+					return Conversation.ModeType.Stressing;
+				case 1:
+					return Conversation.ModeType.Dissatisfaction;
+				case 2:
+					return Conversation.ModeType.Nominal;
+				}
+			}
+		}
+		return Conversation.ModeType.Satisfaction;
 	}
 
 	private string GetRoleForSpeaker(MinionIdentity speaker)

@@ -112,6 +112,22 @@ namespace Database
 			{
 				PermitCategory.JoyResponse,
 				new PermitCategories.CategoryInfo(UI.KLEI_INVENTORY_SCREEN.CATEGORIES.JOY_RESPONSE, "icon_inventory_joyresponses", ClothingOutfitUtility.OutfitType.JoyResponse)
+			},
+			{
+				PermitCategory.JetSuitHelmet,
+				new PermitCategories.CategoryInfo(UI.KLEI_INVENTORY_SCREEN.CATEGORIES.JET_SUIT_HELMET, "icon_inventory_jetsuit_helmet", ClothingOutfitUtility.OutfitType.JetSuit)
+			},
+			{
+				PermitCategory.JetSuitBody,
+				new PermitCategories.CategoryInfo(UI.KLEI_INVENTORY_SCREEN.CATEGORIES.JET_SUIT_BODY, "icon_inventory_jetsuit_body", ClothingOutfitUtility.OutfitType.JetSuit)
+			},
+			{
+				PermitCategory.JetSuitGloves,
+				new PermitCategories.CategoryInfo(UI.KLEI_INVENTORY_SCREEN.CATEGORIES.JET_SUIT_GLOVES, "icon_inventory_jetsuit_gloves", ClothingOutfitUtility.OutfitType.JetSuit)
+			},
+			{
+				PermitCategory.JetSuitShoes,
+				new PermitCategories.CategoryInfo(UI.KLEI_INVENTORY_SCREEN.CATEGORIES.JET_SUIT_SHOES, "icon_inventory_jetsuit_boots", ClothingOutfitUtility.OutfitType.JetSuit)
 			}
 		};
 

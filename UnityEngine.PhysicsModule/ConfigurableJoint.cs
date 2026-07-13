@@ -4,8 +4,8 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	[NativeClass("Unity::ConfigurableJoint")]
 	[NativeHeader("Modules/Physics/ConfigurableJoint.h")]
+	[NativeClass("Unity::ConfigurableJoint")]
 	public class ConfigurableJoint : Joint
 	{
 		public Vector3 secondaryAxis

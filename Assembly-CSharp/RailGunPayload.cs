@@ -138,7 +138,6 @@ public class RailGunPayload : GameStateMachine<RailGunPayload, RailGunPayload.St
 				if (this.randomSymbolSwapIndex == -1)
 				{
 					this.randomSymbolSwapIndex = global::UnityEngine.Random.Range(0, def.randomClusterSymbolSwaps.Count);
-					global::Debug.Log(string.Format("Rolling a random symbol: {0}", this.randomSymbolSwapIndex), base.gameObject);
 				}
 				base.GetComponent<BallisticClusterGridEntity>().SwapSymbolFromSameAnim(def.clusterAnimSymbolSwapTarget, def.randomClusterSymbolSwaps[this.randomSymbolSwapIndex]);
 				KAnim.Build.Symbol symbol = this.animController.AnimFiles[0].GetData().build.GetSymbol(def.randomWorldSymbolSwaps[this.randomSymbolSwapIndex]);

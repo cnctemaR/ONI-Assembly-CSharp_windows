@@ -25,4 +25,19 @@ public static class EntityTemplateExtensions
 		}
 		return componentType;
 	}
+
+	public static void RemoveDef<DefType>(this GameObject go) where DefType : StateMachine.BaseDef
+	{
+		StateMachineController stateMachineController;
+		if (!go.TryGetComponent<StateMachineController>(out stateMachineController))
+		{
+			return;
+		}
+		DefType def = stateMachineController.GetDef<DefType>();
+		if (def == null)
+		{
+			return;
+		}
+		stateMachineController.cmpdef.defs.Remove(def);
+	}
 }

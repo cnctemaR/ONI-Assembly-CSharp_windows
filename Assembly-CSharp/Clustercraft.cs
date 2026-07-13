@@ -217,6 +217,7 @@ public class Clustercraft : ClusterGridEntity, IClusterRange, ISim4000ms, ISim10
 		base.Subscribe<Clustercraft>(1102426921, Clustercraft.NameChangedHandler);
 		this.SetRocketName(this.m_name);
 		this.UpdateStatusItem();
+		this.RefreshStarBackgroundVariables();
 	}
 
 	public void Sim1000ms(float dt)
@@ -282,12 +283,13 @@ public class Clustercraft : ClusterGridEntity, IClusterRange, ISim4000ms, ISim10
 		}
 	}
 
-	private void OnClusterDestinationChanged(object data)
+	private void OnClusterDestinationChanged(object _)
 	{
 		this.UpdateStatusItem();
+		this.RefreshStarBackgroundVariables();
 	}
 
-	private void OnClusterDestinationReached(object data)
+	private void OnClusterDestinationReached(object _)
 	{
 		RocketClusterDestinationSelector clusterDestinationSelector = this.m_moduleInterface.GetClusterDestinationSelector();
 		global::Debug.Assert(base.Location == clusterDestinationSelector.GetDestination());
@@ -297,11 +299,29 @@ public class Clustercraft : ClusterGridEntity, IClusterRange, ISim4000ms, ISim10
 			this.Land(base.Location, destinationPad);
 		}
 		this.UpdateStatusItem();
+		this.RefreshStarBackgroundVariables();
 	}
 
 	public void SetRocketName(object newName)
 	{
 		this.SetRocketName((string)newName);
+	}
+
+	public void RefreshStarBackgroundVariables()
+	{
+		bool flag = this.IsFlightInProgress() && this.HasResourcesToMove(1, Clustercraft.CombustionResource.All);
+		if (this.wasFlying != flag)
+		{
+			if (flag)
+			{
+				this.LastTimeFlightBegan = Time.timeSinceLevelLoad;
+			}
+			else
+			{
+				this.LastTimeFlightStopped = Time.timeSinceLevelLoad;
+			}
+			this.wasFlying = flag;
+		}
 	}
 
 	public void SetRocketName(string newName)
@@ -493,6 +513,20 @@ public class Clustercraft : ClusterGridEntity, IClusterRange, ISim4000ms, ISim10
 		foreach (Ref<RocketModuleCluster> @ref in this.m_moduleInterface.ClusterModules)
 		{
 			ArtifactHarvestModule.StatesInstance smi = @ref.Get().GetSMI<ArtifactHarvestModule.StatesInstance>();
+			if (smi != null)
+			{
+				list.Add(smi);
+			}
+		}
+		return list;
+	}
+
+	public List<RocketModuleHexCellCollector.Instance> GetAllHexCellCollectorModules()
+	{
+		List<RocketModuleHexCellCollector.Instance> list = new List<RocketModuleHexCellCollector.Instance>();
+		foreach (Ref<RocketModuleCluster> @ref in this.m_moduleInterface.ClusterModules)
+		{
+			RocketModuleHexCellCollector.Instance smi = @ref.Get().GetSMI<RocketModuleHexCellCollector.Instance>();
 			if (smi != null)
 			{
 				list.Add(smi);
@@ -998,8 +1032,19 @@ public class Clustercraft : ClusterGridEntity, IClusterRange, ISim4000ms, ISim10
 		return this.ModuleInterface.RangeInTiles;
 	}
 
+	public int GetMaxRangeInTiles()
+	{
+		return this.ModuleInterface.MaxRange;
+	}
+
 	[Serialize]
 	private string m_name;
+
+	private bool wasFlying;
+
+	public float LastTimeFlightBegan;
+
+	public float LastTimeFlightStopped;
 
 	[MyCmpReq]
 	private ClusterTraveler m_clusterTraveler;

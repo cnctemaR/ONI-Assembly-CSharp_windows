@@ -146,7 +146,7 @@ public class ResearchCenter : Workable, IGameObjectEffectDescriptor, ISim200ms, 
 		return true;
 	}
 
-	protected virtual void UpdateWorkingState(object data)
+	protected virtual void UpdateWorkingState(object _)
 	{
 		bool flag = false;
 		bool flag2 = false;

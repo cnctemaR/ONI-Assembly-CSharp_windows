@@ -6,8 +6,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Export/Math/Gradient.bindings.h")]
 	[RequiredByNativeCode]
+	[NativeHeader("Runtime/Export/Math/Gradient.bindings.h")]
 	[StructLayout(LayoutKind.Sequential)]
 	public class Gradient : IEquatable<Gradient>
 	{

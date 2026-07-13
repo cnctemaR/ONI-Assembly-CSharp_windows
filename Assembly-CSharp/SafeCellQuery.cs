@@ -92,7 +92,7 @@ public class SafeCellQuery : PathFinderQuery
 			this.targetCost = cost;
 			this.targetCell = cell;
 		}
-		return false;
+		return (SafeCellQuery.SafeFlags.AllSafeFlags & ~(flags | this.ignoredFlags)) == (SafeCellQuery.SafeFlags)0;
 	}
 
 	public override int GetResultCell()
@@ -122,6 +122,7 @@ public class SafeCellQuery : PathFinderQuery
 		IsNotRadiated = 32,
 		IsBreathable = 64,
 		IsNotLiquidOnMyFace = 128,
-		IsNotLiquid = 256
+		IsNotLiquid = 256,
+		AllSafeFlags = 511
 	}
 }

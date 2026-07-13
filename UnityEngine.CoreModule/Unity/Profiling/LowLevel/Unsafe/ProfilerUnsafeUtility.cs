@@ -8,9 +8,9 @@ using UnityEngine.Scripting;
 
 namespace Unity.Profiling.LowLevel.Unsafe
 {
-	[IgnoredByDeepProfiler]
-	[UsedByNativeCode]
 	[NativeHeader("Runtime/Profiler/ScriptBindings/ProfilerUnsafeUtility.bindings.h")]
+	[UsedByNativeCode]
+	[IgnoredByDeepProfiler]
 	public static class ProfilerUnsafeUtility
 	{
 		[ThreadSafe]
@@ -85,8 +85,8 @@ namespace Unity.Profiling.LowLevel.Unsafe
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void SetMarkerMetadata(IntPtr markerPtr, int index, string name, byte type, byte unit);
 
-		[ThreadSafe]
 		[RequiredMember]
+		[ThreadSafe]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal unsafe static extern void SetMarkerMetadata__Unmanaged(IntPtr markerPtr, int index, byte* name, int nameLen, byte type, byte unit);
 
@@ -120,8 +120,8 @@ namespace Unity.Profiling.LowLevel.Unsafe
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public unsafe static extern void* CreateCounterValue(out IntPtr counterPtr, string name, ushort categoryId, MarkerFlags flags, byte dataType, byte dataUnit, int dataSize, ProfilerCounterOptions counterOptions);
 
-		[RequiredMember]
 		[ThreadSafe]
+		[RequiredMember]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal unsafe static extern void* CreateCounterValue__Unmanaged(out IntPtr counterPtr, byte* name, int nameLen, ushort categoryId, MarkerFlags flags, byte dataType, byte dataUnit, int dataSize, ProfilerCounterOptions counterOptions);
 

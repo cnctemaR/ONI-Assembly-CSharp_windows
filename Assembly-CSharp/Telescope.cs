@@ -142,7 +142,7 @@ public class Telescope : Workable, OxygenBreather.IGasProvider, IGameObjectEffec
 		return workChore;
 	}
 
-	protected void UpdateWorkingState(object data)
+	protected void UpdateWorkingState(object _)
 	{
 		bool flag = false;
 		if (SpacecraftManager.instance.HasAnalysisTarget() && SpacecraftManager.instance.GetDestinationAnalysisState(SpacecraftManager.instance.GetDestination(SpacecraftManager.instance.GetStarmapAnalysisDestinationID())) != SpacecraftManager.DestinationAnalysisState.Complete)

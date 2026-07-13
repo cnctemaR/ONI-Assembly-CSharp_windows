@@ -6,9 +6,9 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	[NativeConditional("PLATFORM_ANDROID")]
-	[NativeHeader("Modules/AndroidJNI/Public/AndroidJNIBindingsHelpers.h")]
 	[StaticAccessor("AndroidJNIBindingsHelpers", StaticAccessorType.DoubleColon)]
+	[NativeHeader("Modules/AndroidJNI/Public/AndroidJNIBindingsHelpers.h")]
+	[NativeConditional("PLATFORM_ANDROID")]
 	public static class AndroidJNI
 	{
 		[StaticAccessor("jni", StaticAccessorType.DoubleColon)]
@@ -801,7 +801,12 @@ namespace UnityEngine
 
 		[ThreadSafe]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern IntPtr ToBooleanArray(bool[] array);
+		private static extern IntPtr ConvertToBooleanArray(bool[] array);
+
+		public static IntPtr ToBooleanArray(bool[] array)
+		{
+			return (array == null) ? IntPtr.Zero : AndroidJNI.ConvertToBooleanArray(array);
+		}
 
 		[Obsolete("AndroidJNI.ToByteArray is obsolete. Use AndroidJNI.ToSByteArray method instead")]
 		[ThreadSafe]

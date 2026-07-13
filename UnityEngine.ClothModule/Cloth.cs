@@ -6,9 +6,9 @@ using UnityEngine.Internal;
 
 namespace UnityEngine
 {
+	[RequireComponent(typeof(Transform), typeof(SkinnedMeshRenderer))]
 	[NativeClass("Unity::Cloth")]
 	[NativeHeader("Modules/Cloth/Cloth.h")]
-	[RequireComponent(typeof(Transform), typeof(SkinnedMeshRenderer))]
 	public sealed class Cloth : Component
 	{
 		public extern Vector3[] vertices

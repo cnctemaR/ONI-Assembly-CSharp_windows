@@ -26,4 +26,6 @@ public class TableSaltConfig : IEntityConfig
 	}
 
 	public static string ID = "TableSalt";
+
+	public static readonly Tag TAG = TableSaltConfig.ID.ToTag();
 }

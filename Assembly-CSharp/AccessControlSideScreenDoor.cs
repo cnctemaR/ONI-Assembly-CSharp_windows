@@ -35,7 +35,12 @@ public class AccessControlSideScreenDoor : KMonoBehaviour
 			permission = AccessControl.Permission.Neither;
 		}
 		this.UpdateButtonStates(false);
-		this.permissionChangedCallback(this.targetIdentity, permission);
+		if (this.permissionChangedCallback != null)
+		{
+			this.permissionChangedCallback(this.targetIdentity, permission);
+			return;
+		}
+		this.permissionChangedTagCallback(this.targetTag, permission);
 	}
 
 	protected virtual void UpdateButtonStates(bool isDefault)
@@ -65,13 +70,31 @@ public class AccessControlSideScreenDoor : KMonoBehaviour
 		this.UpdateButtonStates(false);
 	}
 
+	public void SetDefaultContent(Tag defaultTag, AccessControl.Permission permission, Action<Tag, AccessControl.Permission> onPermissionChange)
+	{
+		this.SetContent(permission, onPermissionChange);
+		this.targetTag = defaultTag;
+	}
+
+	public void SetContent(AccessControl.Permission permission, Action<Tag, AccessControl.Permission> onPermissionChange)
+	{
+		this.permissionChangedTagCallback = onPermissionChange;
+		this.leftButton.isOn = permission == AccessControl.Permission.Both || permission == AccessControl.Permission.GoLeft;
+		this.rightButton.isOn = permission == AccessControl.Permission.Both || permission == AccessControl.Permission.GoRight;
+		this.UpdateButtonStates(false);
+	}
+
 	public KToggle leftButton;
 
 	public KToggle rightButton;
 
 	private Action<MinionAssignablesProxy, AccessControl.Permission> permissionChangedCallback;
 
+	private Action<Tag, AccessControl.Permission> permissionChangedTagCallback;
+
 	private bool isUpDown;
 
 	protected MinionAssignablesProxy targetIdentity;
+
+	protected Tag targetTag;
 }

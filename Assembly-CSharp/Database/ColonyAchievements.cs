@@ -83,7 +83,7 @@ namespace Database
 			}, "", "", "", "", null, default(EventReference), "no_place_like_clone", null, null, null, null));
 			this.TameAGassyMoo = base.Add(new ColonyAchievement("TameAGassyMoo", "TAME_GASSYMOO", COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.TAME_GASSYMOO, COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.TAME_GASSYMOO_DESCRIPTION, false, new List<ColonyAchievementRequirement>
 			{
-				new CritterTypesWithTraits(new List<Tag> { "Moo" })
+				new CritterTypesWithTraits(new List<Tag> { "Moo", "DieselMoo" }, false)
 			}, "", "", "", "", null, default(EventReference), "moovin_on_up", null, null, null, null));
 			this.CoolBuildingTo6K = base.Add(new ColonyAchievement("CoolBuildingTo6K", "SIXKELVIN_BUILDING", COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.SIXKELVIN_BUILDING, COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.SIXKELVIN_BUILDING_DESCRIPTION, false, new List<ColonyAchievementRequirement>
 			{

@@ -17,7 +17,11 @@ public class KelpConfig : IEntityConfig, IHasDlcRestrictions
 
 	public GameObject CreatePrefab()
 	{
-		GameObject gameObject = EntityTemplates.CreateLooseEntity(KelpConfig.ID, ITEMS.INGREDIENTS.KELP.NAME, ITEMS.INGREDIENTS.KELP.DESC, 1f, false, Assets.GetAnim("kelp_leaf_kanim"), "object", Grid.SceneLayer.Front, EntityTemplates.CollisionShape.RECTANGLE, 0.8f, 0.4f, true, 0, SimHashes.Creature, new List<Tag> { GameTags.IndustrialIngredient });
+		GameObject gameObject = EntityTemplates.CreateLooseEntity(KelpConfig.ID, ITEMS.INGREDIENTS.KELP.NAME, ITEMS.INGREDIENTS.KELP.DESC, 1f, false, Assets.GetAnim("kelp_leaf_kanim"), "object", Grid.SceneLayer.Front, EntityTemplates.CollisionShape.RECTANGLE, 0.8f, 0.4f, true, 0, SimHashes.Creature, new List<Tag>
+		{
+			GameTags.IndustrialIngredient,
+			GameTags.PedestalDisplayable
+		});
 		gameObject.AddOrGet<EntitySplitter>();
 		return gameObject;
 	}

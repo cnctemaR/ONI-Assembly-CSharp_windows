@@ -29,11 +29,7 @@ public static class BaseDreckoConfig
 		{
 			text2 = "DreckoBabyNavGrid";
 		}
-		EntityTemplates.ExtendEntityToBasicCreature(gameObject, FactionManager.FactionID.Pest, trait_id, text2, NavType.Floor, 32, 1f, "Meat", 2f, true, false, warnLowTemp, warnHighTemp, lethalLowTemp, lethalHighTemp);
-		if (!string.IsNullOrEmpty(symbol_override_prefix))
-		{
-			gameObject.AddOrGet<SymbolOverrideController>().ApplySymbolOverridesByAffix(Assets.GetAnim(anim_file), symbol_override_prefix, null, 0);
-		}
+		EntityTemplates.ExtendEntityToBasicCreature(false, gameObject, anim_file, is_baby ? null : "drecko_build_kanim", symbol_override_prefix, FactionManager.FactionID.Pest, trait_id, text2, NavType.Floor, 32, 1f, "Meat", 2f, true, false, warnLowTemp, warnHighTemp, lethalLowTemp, lethalHighTemp);
 		Pickupable pickupable = gameObject.AddOrGet<Pickupable>();
 		int num5 = global::TUNING.CREATURES.SORTING.CRITTER_ORDER["Drecko"];
 		pickupable.sortOrder = num5;
@@ -65,6 +61,7 @@ public static class BaseDreckoConfig
 			.Add(new PlayAnimsStates.Def(GameTags.Creatures.Poop, false, "poop", global::STRINGS.CREATURES.STATUSITEMS.EXPELLING_SOLID.NAME, global::STRINGS.CREATURES.STATUSITEMS.EXPELLING_SOLID.TOOLTIP), true, -1)
 			.Add(new CallAdultStates.Def(), is_baby, -1)
 			.Add(new CritterCondoStates.Def(), !is_baby, -1)
+			.Add(new CritterEmoteStates.Def(Assets.GetAnim("drecko_emotes_kanim")), true, -1)
 			.PopInterruptGroup()
 			.Add(new CreatureSleepStates.Def(), true, -1)
 			.Add(new IdleStates.Def

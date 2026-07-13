@@ -100,7 +100,7 @@ public class EggIncubator : SingleEntityReceptacle, ISaveLoadable, ISim1000ms
 		this.UpdateProgress();
 	}
 
-	private void OnOperationalChanged(object data = null)
+	private new void OnOperationalChanged(object _ = null)
 	{
 		if (!base.occupyingObject)
 		{
@@ -108,7 +108,7 @@ public class EggIncubator : SingleEntityReceptacle, ISaveLoadable, ISim1000ms
 		}
 	}
 
-	private void OnOccupantChanged(object data = null)
+	private void OnOccupantChanged(object _ = null)
 	{
 		if (!base.occupyingObject)
 		{
@@ -116,7 +116,7 @@ public class EggIncubator : SingleEntityReceptacle, ISaveLoadable, ISim1000ms
 		}
 	}
 
-	private void OnStorageChange(object data = null)
+	private void OnStorageChange(object _ = null)
 	{
 		if (base.occupyingObject && !this.storage.items.Contains(base.occupyingObject))
 		{

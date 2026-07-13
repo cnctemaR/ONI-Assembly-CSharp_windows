@@ -30,13 +30,17 @@ public class Desalinator : StateMachineComponent<Desalinator.StatesInstance>
 
 	private void OnConduitConnectionChanged(object data)
 	{
-		bool flag = (bool)data;
+		this.OnConduitConnectionChanged(((Boxed<bool>)data).value);
+	}
+
+	private void OnConduitConnectionChanged(bool is_connected)
+	{
 		foreach (ManualDeliveryKG manualDeliveryKG in this.deliveryComponents)
 		{
 			Element element = ElementLoader.GetElement(manualDeliveryKG.RequestedItemTag);
 			if (element != null && element.IsLiquid)
 			{
-				manualDeliveryKG.Pause(flag, "pipe connected");
+				manualDeliveryKG.Pause(is_connected, "pipe connected");
 			}
 		}
 	}

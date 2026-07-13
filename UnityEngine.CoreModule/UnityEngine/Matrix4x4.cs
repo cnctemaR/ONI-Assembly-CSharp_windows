@@ -7,11 +7,11 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[Il2CppEagerStaticClassConstruction]
 	[NativeClass("Matrix4x4f")]
 	[RequiredByNativeCode(Optional = true, GenerateProxy = true)]
-	[NativeHeader("Runtime/Math/MathScripting.h")]
+	[Il2CppEagerStaticClassConstruction]
 	[NativeType(Header = "Runtime/Math/Matrix4x4.h")]
+	[NativeHeader("Runtime/Math/MathScripting.h")]
 	public struct Matrix4x4 : IEquatable<Matrix4x4>, IFormattable
 	{
 		[ThreadSafe]

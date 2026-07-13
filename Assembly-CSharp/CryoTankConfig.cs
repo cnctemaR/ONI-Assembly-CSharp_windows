@@ -34,7 +34,7 @@ public class CryoTankConfig : IEntityConfig, IHasDlcRestrictions
 		CryoTank cryoTank = gameObject.AddOrGet<CryoTank>();
 		cryoTank.overrideAnim = "anim_interacts_cryo_activation_kanim";
 		cryoTank.dropOffset = new CellOffset(1, 0);
-		LoreBearerUtil.AddLoreTo(gameObject, LoreBearerUtil.UnlockSpecificEntry("cryotank_warning", UI.USERMENUACTIONS.READLORE.SEARCH_CRYO_TANK));
+		LoreBearerUtil.AddLoreTo(gameObject, LoreBearerUtil.UnlockSpecificEntry("cryotank_warning", UI.USERMENUACTIONS.READLORE.SEARCH_CRYO_TANK, false));
 		gameObject.AddOrGet<Demolishable>().allowDemolition = false;
 		gameObject.AddOrGet<OccupyArea>().objectLayers = new ObjectLayer[] { ObjectLayer.Building };
 		return gameObject;

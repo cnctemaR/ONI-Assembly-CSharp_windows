@@ -15,6 +15,7 @@ namespace Database
 			this.LonelyMinion = base.Add(new Story("LonelyMinion", "storytraits/LonelyMinion", 2, 3, 44, "storytraits/lonelyminion_retrofit").SetKeepsake("keepsake_lonelyminion"));
 			this.FossilHunt = base.Add(new Story("FossilHunt", "storytraits/FossilHunt", 3, 4, 44, "storytraits/fossil_hunt_retrofit").SetKeepsake("keepsake_fossilhunt"));
 			this.MorbRoverMaker = base.Add(new Story("MorbRoverMaker", "storytraits/MorbRoverMaker", 4, 5, 50, "storytraits/morb_rover_maker_retrofit").SetKeepsake("keepsake_morbrovermaker"));
+			this.HijackedHeadquarters = base.Add(new Story("HijackHeadquarters", "storytraits/HijackHeadquarters", 5, 6, 57, "storytraits/hijack_headquarters_retrofit").SetKeepsake("keepsake_hijackheadquarters"));
 			this.resources.Sort();
 		}
 
@@ -66,5 +67,7 @@ namespace Database
 		public Story FossilHunt;
 
 		public Story MorbRoverMaker;
+
+		public Story HijackedHeadquarters;
 	}
 }

@@ -42,10 +42,10 @@ public class InspirationEffectMonitor : GameStateMachine<InspirationEffectMonito
 
 	private void SingCatchyTune(InspirationEffectMonitor.Instance smi)
 	{
-		smi.master.gameObject.GetSMI<ThoughtGraph.Instance>().AddThought(Db.Get().Thoughts.CatchyTune);
-		if (!smi.GetSpeechMonitor().IsPlayingSpeech() && SpeechMonitor.IsAllowedToPlaySpeech(smi.gameObject))
+		smi.ThoughtGraphInstance.AddThought(Db.Get().Thoughts.CatchyTune);
+		if (!smi.SpeechMonitorInstance.IsPlayingSpeech() && SpeechMonitor.IsAllowedToPlaySpeech(smi.Kpid, smi.AnimController))
 		{
-			smi.GetSpeechMonitor().PlaySpeech(Db.Get().Thoughts.CatchyTune.speechPrefix, Db.Get().Thoughts.CatchyTune.sound);
+			Db.Get().Thoughts.CatchyTune.PlayAsSpeech(smi.SpeechMonitorInstance);
 		}
 	}
 
@@ -63,20 +63,43 @@ public class InspirationEffectMonitor : GameStateMachine<InspirationEffectMonito
 
 	public new class Instance : GameStateMachine<InspirationEffectMonitor, InspirationEffectMonitor.Instance, IStateMachineTarget, InspirationEffectMonitor.Def>.GameInstance
 	{
+		public KPrefabID Kpid { get; private set; }
+
+		public KBatchedAnimController AnimController { get; private set; }
+
+		public SpeechMonitor.Instance SpeechMonitorInstance
+		{
+			get
+			{
+				if (this.speechMonitorInstance == null)
+				{
+					this.speechMonitorInstance = base.master.gameObject.GetSMI<SpeechMonitor.Instance>();
+				}
+				return this.speechMonitorInstance;
+			}
+		}
+
+		public ThoughtGraph.Instance ThoughtGraphInstance
+		{
+			get
+			{
+				if (this.thoughtGraphInstance == null)
+				{
+					this.thoughtGraphInstance = base.master.gameObject.GetSMI<ThoughtGraph.Instance>();
+				}
+				return this.thoughtGraphInstance;
+			}
+		}
+
 		public Instance(IStateMachineTarget master, InspirationEffectMonitor.Def def)
 			: base(master, def)
 		{
+			this.Kpid = master.GetComponent<KPrefabID>();
+			this.AnimController = master.GetComponent<KBatchedAnimController>();
 		}
 
-		public SpeechMonitor.Instance GetSpeechMonitor()
-		{
-			if (this.speechMonitor == null)
-			{
-				this.speechMonitor = base.master.gameObject.GetSMI<SpeechMonitor.Instance>();
-			}
-			return this.speechMonitor;
-		}
+		private SpeechMonitor.Instance speechMonitorInstance;
 
-		public SpeechMonitor.Instance speechMonitor;
+		private ThoughtGraph.Instance thoughtGraphInstance;
 	}
 }

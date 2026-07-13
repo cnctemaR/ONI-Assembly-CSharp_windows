@@ -55,7 +55,7 @@ public class DeathLoot : GameStateMachine<DeathLoot, DeathLoot.Instance, IStateM
 		public Instance(IStateMachineTarget master, DeathLoot.Def def)
 			: base(master, def)
 		{
-			base.Subscribe(1623392196, new Action<object>(this.OnDeath));
+			this.onDeathHandler = base.Subscribe(1623392196, new Action<object>(this.OnDeath));
 		}
 
 		private void OnDeath(object obj)
@@ -113,7 +113,9 @@ public class DeathLoot : GameStateMachine<DeathLoot, DeathLoot.Instance, IStateM
 
 		protected override void OnCleanUp()
 		{
-			base.Unsubscribe(1623392196, new Action<object>(this.OnDeath));
+			base.Unsubscribe(ref this.onDeathHandler);
 		}
+
+		private int onDeathHandler = -1;
 	}
 }

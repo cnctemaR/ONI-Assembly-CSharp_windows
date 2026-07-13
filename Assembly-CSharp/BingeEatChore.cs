@@ -9,7 +9,7 @@ public class BingeEatChore : Chore<BingeEatChore.StatesInstance>
 		: base(Db.Get().ChoreTypes.BingeEat, target, target.GetComponent<ChoreProvider>(), false, on_complete, null, null, PriorityScreen.PriorityClass.compulsory, 5, false, true, 0, false, ReportManager.ReportType.WorkTime)
 	{
 		base.smi = new BingeEatChore.StatesInstance(this, target.gameObject);
-		base.Subscribe(1121894420, new Action<object>(this.OnEat));
+		this.onEatHandlerID = base.Subscribe(1121894420, new Action<object>(this.OnEat));
 	}
 
 	private void OnEat(object data)
@@ -24,8 +24,10 @@ public class BingeEatChore : Chore<BingeEatChore.StatesInstance>
 	public override void Cleanup()
 	{
 		base.Cleanup();
-		base.Unsubscribe(1121894420, new Action<object>(this.OnEat));
+		base.Unsubscribe(ref this.onEatHandlerID);
 	}
+
+	private int onEatHandlerID;
 
 	public class StatesInstance : GameStateMachine<BingeEatChore.States, BingeEatChore.StatesInstance, BingeEatChore, object>.GameInstance
 	{

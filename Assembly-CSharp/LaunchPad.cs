@@ -73,7 +73,7 @@ public class LaunchPad : KMonoBehaviour, ISim1000ms, IListableOption, IProcessCo
 		int num = ConditionFlightPathIsClear.PadTopEdgeDistanceToCeilingEdge(base.gameObject);
 		if (num < 35)
 		{
-			base.GetComponent<KSelectable>().AddStatusItem(Db.Get().BuildingStatusItems.RocketPlatformCloseToCeiling, num);
+			this.selectable.AddStatusItem(Db.Get().BuildingStatusItems.RocketPlatformCloseToCeiling, num);
 		}
 	}
 
@@ -95,7 +95,7 @@ public class LaunchPad : KMonoBehaviour, ISim1000ms, IListableOption, IProcessCo
 	{
 		if (this.LandedRocket == null)
 		{
-			base.GetComponent<KSelectable>().RemoveStatusItem(this.landedRocketPassengerModuleStatusItem, false);
+			this.selectable.RemoveStatusItem(this.landedRocketPassengerModuleStatusItem, false);
 			this.landedRocketPassengerModuleStatusItem = Guid.Empty;
 			return;
 		}
@@ -103,30 +103,29 @@ public class LaunchPad : KMonoBehaviour, ISim1000ms, IListableOption, IProcessCo
 		{
 			if (this.landedRocketPassengerModuleStatusItem == Guid.Empty)
 			{
-				this.landedRocketPassengerModuleStatusItem = base.GetComponent<KSelectable>().AddStatusItem(Db.Get().BuildingStatusItems.LandedRocketLacksPassengerModule, null);
+				this.landedRocketPassengerModuleStatusItem = this.selectable.AddStatusItem(Db.Get().BuildingStatusItems.LandedRocketLacksPassengerModule, null);
 				return;
 			}
 		}
 		else if (this.landedRocketPassengerModuleStatusItem != Guid.Empty)
 		{
-			base.GetComponent<KSelectable>().RemoveStatusItem(this.landedRocketPassengerModuleStatusItem, false);
+			this.selectable.RemoveStatusItem(this.landedRocketPassengerModuleStatusItem, false);
 			this.landedRocketPassengerModuleStatusItem = Guid.Empty;
 		}
 	}
 
 	public bool IsLogicInputConnected()
 	{
-		int portCell = base.GetComponent<LogicPorts>().GetPortCell(this.triggerPort);
+		int portCell = this.ports.GetPortCell(this.triggerPort);
 		return Game.Instance.logicCircuitManager.GetNetworkForCell(portCell) != null;
 	}
 
 	public void Sim1000ms(float dt)
 	{
-		LogicPorts component = base.gameObject.GetComponent<LogicPorts>();
 		RocketModuleCluster landedRocket = this.LandedRocket;
 		if (landedRocket != null && this.IsLogicInputConnected())
 		{
-			if (component.GetInputValue(this.triggerPort) == 1)
+			if (this.ports.GetInputValue(this.triggerPort) == 1)
 			{
 				if (landedRocket.CraftInterface.CheckReadyForAutomatedLaunchCommand())
 				{
@@ -143,13 +142,13 @@ public class LaunchPad : KMonoBehaviour, ISim1000ms, IListableOption, IProcessCo
 			}
 		}
 		this.CheckLandedRocketPassengerModuleStatus();
-		component.SendSignal(this.landedRocketPort, (landedRocket != null) ? 1 : 0);
+		this.ports.SendSignal(this.landedRocketPort, (landedRocket != null) ? 1 : 0);
 		if (landedRocket != null)
 		{
-			component.SendSignal(this.statusPort, (landedRocket.CraftInterface.CheckReadyForAutomatedLaunch() || landedRocket.CraftInterface.HasTag(GameTags.RocketNotOnGround)) ? 1 : 0);
+			this.ports.SendSignal(this.statusPort, (landedRocket.CraftInterface.CheckReadyForAutomatedLaunch() || landedRocket.CraftInterface.HasTag(GameTags.RocketNotOnGround)) ? 1 : 0);
 			return;
 		}
-		component.SendSignal(this.statusPort, 0);
+		this.ports.SendSignal(this.statusPort, 0);
 	}
 
 	public GameObject AddBaseModule(BuildingDef moduleDefID, IList<Tag> elements)
@@ -288,6 +287,29 @@ public class LaunchPad : KMonoBehaviour, ISim1000ms, IListableOption, IProcessCo
 		return new List<ProcessCondition>();
 	}
 
+	public int PopulateConditionSet(ProcessCondition.ProcessConditionType conditionType, List<ProcessCondition> conditions)
+	{
+		RocketProcessConditionDisplayTarget rocketProcessConditionDisplayTarget = null;
+		RocketModuleCluster landedRocket = this.LandedRocket;
+		if (landedRocket != null)
+		{
+			for (int i = 0; i < landedRocket.CraftInterface.ClusterModules.Count; i++)
+			{
+				RocketProcessConditionDisplayTarget component = landedRocket.CraftInterface.ClusterModules[i].Get().GetComponent<RocketProcessConditionDisplayTarget>();
+				if (component != null)
+				{
+					rocketProcessConditionDisplayTarget = component;
+					break;
+				}
+			}
+		}
+		if (rocketProcessConditionDisplayTarget != null)
+		{
+			return ((IProcessConditionSet)rocketProcessConditionDisplayTarget).PopulateConditionSet(conditionType, conditions);
+		}
+		return 0;
+	}
+
 	public static List<LaunchPad> GetLaunchPadsForDestination(AxialI destination)
 	{
 		List<LaunchPad> list = new List<LaunchPad>();
@@ -309,6 +331,12 @@ public class LaunchPad : KMonoBehaviour, ISim1000ms, IListableOption, IProcessCo
 	public HashedString landedRocketPort;
 
 	private CellOffset baseModulePosition = new CellOffset(0, 2);
+
+	[MyCmpReq]
+	private LogicPorts ports;
+
+	[MyCmpReq]
+	private KSelectable selectable;
 
 	private SchedulerHandle RebuildLaunchTowerHeightHandler;
 

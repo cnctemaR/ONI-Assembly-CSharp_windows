@@ -86,7 +86,7 @@ public class EmptySolidConduitWorkable : Workable, IEmptyConduitWorkable
 		return Game.Instance.solidConduitFlow;
 	}
 
-	private void OnEmptyConduitCancelled(object data)
+	private void OnEmptyConduitCancelled(object _)
 	{
 		this.CancelEmptying();
 	}

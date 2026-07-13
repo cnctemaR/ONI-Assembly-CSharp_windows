@@ -1,168 +1,211 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Diagnostics;
-using System.Text.RegularExpressions;
-using System.Threading;
-using UnityEngine;
+using Klei;
+using Unity.Profiling;
 
 public static class KProfiler
 {
-	public static bool IsEnabled()
+	private static ulong identify_string(string str)
 	{
-		return false;
-	}
-
-	public static void Enable()
-	{
-	}
-
-	public static void Disable()
-	{
-	}
-
-	public static void BeginThread(string name, string group)
-	{
-	}
-
-	public static void NextFrame()
-	{
-	}
-
-	public static int BeginSampleI(string region_name, string group = "Game")
-	{
-		int num = KProfiler.counter;
-		KProfiler.counter++;
-		return num;
-	}
-
-	public static int EndSampleI(string region_name = null)
-	{
-		KProfiler.counter--;
-		return KProfiler.counter;
-	}
-
-	public static string SanitizeName(string name)
-	{
-		return KProfiler.re.Replace(name, "${1}");
-	}
-
-	[Conditional("ENABLE_KPROFILER")]
-	public static void Ping(string display, double value)
-	{
-	}
-
-	[Conditional("ENABLE_KPROFILER")]
-	public static void BeginAsync(string display, string group = "Game")
-	{
-	}
-
-	[Conditional("ENABLE_KPROFILER")]
-	public static void EndAsync(string display)
-	{
-	}
-
-	[Conditional("ENABLE_KPROFILER")]
-	public static void BeginSample(string region_name, string group = "Game")
-	{
-		KProfiler.BeginSampleI(region_name, group);
-	}
-
-	[Conditional("ENABLE_KPROFILER")]
-	public static void EndSample(string region_name = null)
-	{
-		KProfiler.EndSampleI(region_name);
-	}
-
-	[Conditional("ENABLE_KPROFILER")]
-	public static void EndSample(string region_name, int count)
-	{
-		KProfiler.EndSampleI(region_name);
-	}
-
-	[Conditional("ENABLE_KPROFILER")]
-	public static void BeginSample(string region_name, int count)
-	{
-	}
-
-	[Conditional("ENABLE_KPROFILER")]
-	public static void BeginSample(string region_name, string group, int count)
-	{
-		KProfiler.BeginSampleI(region_name, group);
-	}
-
-	public static int BeginSampleI(string region_name, global::UnityEngine.Object profiler_obj)
-	{
-		int num = KProfiler.counter;
-		KProfiler.counter++;
-		return num;
-	}
-
-	[Conditional("ENABLE_KPROFILER")]
-	public static void BeginSample(string region_name, global::UnityEngine.Object profiler_obj)
-	{
-		KProfiler.BeginSampleI(region_name, profiler_obj);
-	}
-
-	[Conditional("ENABLE_KPROFILER")]
-	public static void AddEvent(string event_name)
-	{
-	}
-
-	[Conditional("ENABLE_KPROFILER")]
-	public static void AddCounter(string event_name, List<KeyValuePair<string, int>> series_name_counts)
-	{
-		foreach (KeyValuePair<string, int> keyValuePair in series_name_counts)
+		ulong num;
+		if (KProfiler.known_strings.TryGetValue(str, out num))
 		{
-			KProfiler.EndSampleI(null);
+			return num;
 		}
+		ulong num2 = KProfilerPlugin.kprofile_record_string(str);
+		KProfiler.known_strings[str] = num2;
+		return num2;
+	}
+
+	public static void InitProfileRecorders()
+	{
+	}
+
+	private static long getGCAllocCount()
+	{
+		return -1L;
 	}
 
 	[Conditional("ENABLE_KPROFILER")]
-	public static void AddCounter(string event_name, string series_name, int count)
+	public static void StartProfiling()
 	{
-		KProfiler.EndSampleI(series_name);
+		KProfilerPlugin.kprofiler_start_profiling();
 	}
 
 	[Conditional("ENABLE_KPROFILER")]
-	public static void AddCounter(string event_name, int count)
+	public static void StopProfiling()
 	{
+		KProfilerPlugin.kprofiler_stop_profiling(1);
 	}
 
 	[Conditional("ENABLE_KPROFILER")]
-	public static void BeginThreadProfiling(string threadGroupName, string threadName)
+	public static void BeginSection(string name, string group = "")
 	{
-	}
-
-	[Conditional("ENABLE_KPROFILER")]
-	public static void EndThreadProfiling()
-	{
-	}
-
-	public static int counter = 0;
-
-	public static Thread main_thread;
-
-	public static KProfilerEndpoint AppEndpoint = new KProfilerPluginEndpoint();
-
-	public static KProfilerEndpoint UnityEndpoint = new KProfilerEndpoint();
-
-	public static KProfilerEndpoint ChromeEndpoint = new KProfilerEndpoint();
-
-	private static string pattern = "<link=\"(.+)\">(.+)<\\/link>";
-
-	private static Regex re = new Regex(KProfiler.pattern);
-
-	public struct Region : IDisposable
-	{
-		public Region(string region_name, global::UnityEngine.Object profiler_obj = null)
+		if (!KProfilerPlugin.Initialized)
 		{
-			this.regionName = region_name;
+			return;
 		}
-
-		public void Dispose()
-		{
-		}
-
-		private string regionName;
+		KProfiler.identify_string(name);
+		KProfiler.identify_string(group);
 	}
+
+	[Conditional("ENABLE_KPROFILER")]
+	public static void BeginSection(ulong u_name, ulong u_group)
+	{
+		if (!KProfilerPlugin.Initialized)
+		{
+			return;
+		}
+		KProfilerPlugin.kprofiler_begin_section(u_name, u_group, KProfiler.getGCAllocCount());
+	}
+
+	[Conditional("ENABLE_KPROFILER")]
+	public static void BeginSection(ulong u_name, string group)
+	{
+	}
+
+	[Conditional("ENABLE_KPROFILER")]
+	public static void BeginSection(string name, ulong u_group)
+	{
+	}
+
+	[Conditional("KPROFILER_DETAILED")]
+	public static void BeginDetailedSection(ulong name, ulong group)
+	{
+	}
+
+	[Conditional("KPROFILER_DETAILED")]
+	public static void BeginDetailedSection(string name, ulong group)
+	{
+	}
+
+	[Conditional("KPROFILER_DETAILED")]
+	public static void BeginDetailedSection(ulong name, string group)
+	{
+	}
+
+	[Conditional("KPROFILER_DETAILED")]
+	public static void BeginDetailedSection(string name, string group)
+	{
+	}
+
+	[Conditional("KPROFILER_DETAILED")]
+	public static void BeginDetailedSection(string name)
+	{
+	}
+
+	[Conditional("KPROFILER_DETAILED")]
+	public static void EndDetailedSection()
+	{
+	}
+
+	[Conditional("ENABLE_KPROFILER")]
+	public static void BeginFrameSection()
+	{
+		if (!KProfilerPlugin.Initialized)
+		{
+			return;
+		}
+		ulong num = KProfiler.identify_string("Frame");
+		ulong num2 = KProfiler.identify_string("");
+		long num3 = -1L;
+		KProfilerPlugin.kprofiler_begin_section(num, num2, num3);
+	}
+
+	[Conditional("ENABLE_KPROFILER")]
+	public static void BeginSection(string name, int v)
+	{
+		bool initialized = KProfilerPlugin.Initialized;
+	}
+
+	[Conditional("ENABLE_KPROFILER")]
+	public static void EndSection()
+	{
+		if (!KProfilerPlugin.Initialized)
+		{
+			return;
+		}
+		KProfilerPlugin.kprofiler_end_section(KProfiler.getGCAllocCount());
+	}
+
+	[Conditional("ENABLE_KPROFILER")]
+	public static void EndFrameSection()
+	{
+	}
+
+	[Conditional("ENABLE_KPROFILER")]
+	public static void EndSection(string name, int v = 0)
+	{
+		bool initialized = KProfilerPlugin.Initialized;
+	}
+
+	[Conditional("ENABLE_KPROFILER")]
+	public static void Ping(string name, string group, double value)
+	{
+		if (!KProfilerPlugin.Initialized)
+		{
+			return;
+		}
+		ulong num = KProfiler.identify_string(name);
+		ulong num2 = KProfiler.identify_string(group);
+		KProfilerPlugin.kprofiler_ping(num, num2, value);
+	}
+
+	[Conditional("ENABLE_KPROFILER")]
+	public static void Counter(string name, double value)
+	{
+		if (!KProfilerPlugin.Initialized)
+		{
+			return;
+		}
+		KProfilerPlugin.kprofiler_counter(KProfiler.identify_string(name), value);
+	}
+
+	[Conditional("ENABLE_KPROFILER")]
+	public static void FlushData()
+	{
+		if (!KProfilerPlugin.Initialized)
+		{
+			return;
+		}
+		KProfilerPlugin.kprofiler_flush_data_sender();
+	}
+
+	[Conditional("ENABLE_KPROFILER")]
+	public static void Shutdown()
+	{
+		if (!KProfilerPlugin.Initialized)
+		{
+			return;
+		}
+		KProfilerPlugin.kprofiler_unload_plugin();
+	}
+
+	[Conditional("ENABLE_KPROFILER")]
+	public static void StreamToFile(string path)
+	{
+		if (!KProfilerPlugin.Initialized)
+		{
+			return;
+		}
+		KProfilerPlugin.kprofiler_start_file_data_sender(path);
+	}
+
+	[Conditional("ENABLE_KPROFILER")]
+	public static void IdentifyThread(string name, string group)
+	{
+		if (!KProfilerPlugin.Initialized)
+		{
+			return;
+		}
+		ulong num = KProfilerPlugin.kprofiler_get_thread_uid();
+		ulong num2 = KProfiler.identify_string(name);
+		ulong num3 = KProfiler.identify_string(group);
+		KProfilerPlugin.kprofiler_set_thread_info(num, num2, num3);
+	}
+
+	private static ProfilerRecorder gcAllocRecorder;
+
+	private static ConcurrentDictionary<string, ulong> known_strings = new ConcurrentDictionary<string, ulong>();
 }

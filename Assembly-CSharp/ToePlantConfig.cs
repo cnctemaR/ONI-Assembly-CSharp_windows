@@ -40,6 +40,7 @@ public class ToePlantConfig : IEntityConfig, IHasDlcRestrictions
 		};
 		EntityTemplates.ExtendEntityToBasicPlant(gameObject2, global::TUNING.CREATURES.TEMPERATURE.FREEZING_10, global::TUNING.CREATURES.TEMPERATURE.FREEZING_9, global::TUNING.CREATURES.TEMPERATURE.FREEZING, global::TUNING.CREATURES.TEMPERATURE.COOL, array, true, 0f, 0.15f, null, true, false, true, true, 2400f, 0f, 2200f, "ToePlantOriginal", global::STRINGS.CREATURES.SPECIES.TOEPLANT.NAME);
 		PrickleGrass prickleGrass = gameObject.AddOrGet<PrickleGrass>();
+		gameObject.AddOrGetDef<DecorPlantMonitor.Def>();
 		prickleGrass.positive_decor_effect = ToePlantConfig.POSITIVE_DECOR_EFFECT;
 		prickleGrass.negative_decor_effect = ToePlantConfig.NEGATIVE_DECOR_EFFECT;
 		GameObject gameObject3 = gameObject;

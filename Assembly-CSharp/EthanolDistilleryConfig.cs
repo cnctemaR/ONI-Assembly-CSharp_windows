@@ -43,14 +43,14 @@ public class EthanolDistilleryConfig : IBuildingConfig
 		storage.showInUI = true;
 		ManualDeliveryKG manualDeliveryKG = go.AddOrGet<ManualDeliveryKG>();
 		manualDeliveryKG.SetStorage(storage);
-		manualDeliveryKG.RequestedItemTag = WoodLogConfig.TAG;
+		manualDeliveryKG.RequestedItemTag = "BuildingWood";
 		manualDeliveryKG.capacity = 600f;
 		manualDeliveryKG.refillMass = 150f;
 		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.MachineFetch.IdHash;
 		ElementConverter elementConverter = go.AddOrGet<ElementConverter>();
 		elementConverter.consumedElements = new ElementConverter.ConsumedElement[]
 		{
-			new ElementConverter.ConsumedElement(WoodLogConfig.TAG, 1f, true)
+			new ElementConverter.ConsumedElement("BuildingWood", 1f, true)
 		};
 		elementConverter.outputElements = new ElementConverter.OutputElement[]
 		{

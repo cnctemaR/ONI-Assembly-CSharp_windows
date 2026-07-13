@@ -6,8 +6,8 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine.TestTools
 {
-	[NativeType("Runtime/Scripting/ScriptingCoverage.h")]
 	[NativeClass("ScriptingCoverage")]
+	[NativeType("Runtime/Scripting/ScriptingCoverage.h")]
 	public static class Coverage
 	{
 		public static extern bool enabled

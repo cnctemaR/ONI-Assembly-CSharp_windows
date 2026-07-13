@@ -275,10 +275,6 @@ public abstract class StandardChoreBase : Chore
 
 	public void SetOverrideTarget(ChoreConsumer chore_consumer)
 	{
-		if (chore_consumer != null)
-		{
-			string name = chore_consumer.name;
-		}
 		this.overrideTarget = chore_consumer;
 		this.Fail("New override target");
 	}

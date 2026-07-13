@@ -55,7 +55,7 @@ public class CampfireConfig : IBuildingConfig
 		ManualDeliveryKG manualDeliveryKG = go.AddOrGet<ManualDeliveryKG>();
 		manualDeliveryKG.capacity = 45f;
 		manualDeliveryKG.SetStorage(storage);
-		manualDeliveryKG.requestedItemTag = CampfireConfig.FUEL_TAG;
+		manualDeliveryKG.RequestedItemTag = CampfireConfig.FUEL_TAG;
 		manualDeliveryKG.refillMass = 18f;
 		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.FetchCritical.IdHash;
 		manualDeliveryKG.MinimumMass = 0.025f;
@@ -129,7 +129,7 @@ public class CampfireConfig : IBuildingConfig
 
 	public const int RANGE_Y = 3;
 
-	public static Tag FUEL_TAG = SimHashes.WoodLog.ToString();
+	public static Tag FUEL_TAG = "BuildingWood";
 
 	public const float FUEL_CONSUMPTION_RATE = 0.025f;
 

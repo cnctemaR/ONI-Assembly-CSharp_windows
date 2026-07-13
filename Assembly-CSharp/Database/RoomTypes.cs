@@ -77,19 +77,35 @@ namespace Database
 				RoomDetails.SIZE,
 				RoomDetails.BUILDING_COUNT
 			}, 1, new RoomType[] { this.Bedroom, this.PrivateBedroom }, false, false, new string[] { "RoomBarracks" }, 3));
-			this.GreatHall = base.Add(new RoomType("GreatHall", ROOMS.TYPES.GREATHALL.NAME, ROOMS.TYPES.GREATHALL.DESCRIPTION, ROOMS.TYPES.GREATHALL.TOOLTIP, ROOMS.TYPES.GREATHALL.EFFECT, Db.Get().RoomTypeCategories.Food, RoomConstraints.MESS_STATION_SINGLE, new RoomConstraints.Constraint[]
+			this.BanquetHall = base.Add(new RoomType("BanquetHall", ROOMS.TYPES.BANQUETHALL.NAME, ROOMS.TYPES.BANQUETHALL.DESCRIPTION, ROOMS.TYPES.BANQUETHALL.TOOLTIP, ROOMS.TYPES.BANQUETHALL.EFFECT, Db.Get().RoomTypeCategories.Food, RoomConstraints.MULTI_MINION_DINING_TABLE, new RoomConstraints.Constraint[]
 			{
 				RoomConstraints.NO_INDUSTRIAL_MACHINERY,
 				RoomConstraints.MINIMUM_SIZE_32,
 				RoomConstraints.MAXIMUM_SIZE_120,
-				RoomConstraints.DECORATIVE_ITEM_SCORE_20,
+				RoomConstraints.DECORATIVE_ITEM,
+				RoomConstraints.REC_BUILDING,
+				RoomConstraints.ORNAMENTDISPLAYED,
+				RoomConstraints.NO_BASIC_MESS_STATIONS
+			}, new RoomDetails.Detail[]
+			{
+				RoomDetails.SIZE,
+				RoomDetails.BUILDING_COUNT,
+				RoomDetails.ORNAMENT_COUNT
+			}, 1, null, false, false, new string[] { "RoomBanquetHall" }, 7));
+			this.GreatHall = base.Add(new RoomType("GreatHall", ROOMS.TYPES.GREATHALL.NAME, ROOMS.TYPES.GREATHALL.DESCRIPTION, ROOMS.TYPES.GREATHALL.TOOLTIP, ROOMS.TYPES.GREATHALL.EFFECT, Db.Get().RoomTypeCategories.Food, RoomConstraints.DINING_TABLE, new RoomConstraints.Constraint[]
+			{
+				RoomConstraints.NO_INDUSTRIAL_MACHINERY,
+				RoomConstraints.MINIMUM_SIZE_32,
+				RoomConstraints.MAXIMUM_SIZE_120,
+				RoomConstraints.DECORATIVE_ITEM,
 				RoomConstraints.REC_BUILDING
 			}, new RoomDetails.Detail[]
 			{
 				RoomDetails.SIZE,
-				RoomDetails.BUILDING_COUNT
-			}, 1, null, false, false, new string[] { "RoomGreatHall" }, 6));
-			this.MessHall = base.Add(new RoomType("MessHall", ROOMS.TYPES.MESSHALL.NAME, ROOMS.TYPES.MESSHALL.DESCRIPTION, ROOMS.TYPES.MESSHALL.TOOLTIP, ROOMS.TYPES.MESSHALL.EFFECT, Db.Get().RoomTypeCategories.Food, RoomConstraints.MESS_STATION_SINGLE, new RoomConstraints.Constraint[]
+				RoomDetails.BUILDING_COUNT,
+				RoomDetails.ORNAMENT_COUNT
+			}, 1, new RoomType[] { this.BanquetHall }, false, false, new string[] { "RoomGreatHall" }, 6));
+			this.MessHall = base.Add(new RoomType("MessHall", ROOMS.TYPES.MESSHALL.NAME, ROOMS.TYPES.MESSHALL.DESCRIPTION, ROOMS.TYPES.MESSHALL.TOOLTIP, ROOMS.TYPES.MESSHALL.EFFECT, Db.Get().RoomTypeCategories.Food, RoomConstraints.DINING_TABLE, new RoomConstraints.Constraint[]
 			{
 				RoomConstraints.NO_INDUSTRIAL_MACHINERY,
 				RoomConstraints.MINIMUM_SIZE_12,
@@ -97,8 +113,9 @@ namespace Database
 			}, new RoomDetails.Detail[]
 			{
 				RoomDetails.SIZE,
-				RoomDetails.BUILDING_COUNT
-			}, 1, new RoomType[] { this.GreatHall }, false, false, new string[] { "RoomMessHall" }, 5));
+				RoomDetails.BUILDING_COUNT,
+				RoomDetails.ORNAMENT_COUNT
+			}, 1, new RoomType[] { this.GreatHall, this.BanquetHall }, false, false, new string[] { "RoomMessHall" }, 5));
 			this.Kitchen = base.Add(new RoomType("Kitchen", ROOMS.TYPES.KITCHEN.NAME, ROOMS.TYPES.KITCHEN.DESCRIPTION, ROOMS.TYPES.KITCHEN.TOOLTIP, ROOMS.TYPES.KITCHEN.EFFECT, Db.Get().RoomTypeCategories.Food, RoomConstraints.SPICE_STATION, new RoomConstraints.Constraint[]
 			{
 				RoomConstraints.COOK_TOP,
@@ -110,7 +127,7 @@ namespace Database
 			{
 				RoomDetails.SIZE,
 				RoomDetails.BUILDING_COUNT
-			}, 1, null, false, false, null, 7));
+			}, 1, null, false, false, null, 8));
 			this.MassageClinic = base.Add(new RoomType("MassageClinic", ROOMS.TYPES.MASSAGE_CLINIC.NAME, ROOMS.TYPES.MASSAGE_CLINIC.DESCRIPTION, ROOMS.TYPES.MASSAGE_CLINIC.TOOLTIP, ROOMS.TYPES.MASSAGE_CLINIC.EFFECT, Db.Get().RoomTypeCategories.Hospital, RoomConstraints.MASSAGE_TABLE, new RoomConstraints.Constraint[]
 			{
 				RoomConstraints.NO_INDUSTRIAL_MACHINERY,
@@ -164,7 +181,6 @@ namespace Database
 			}, 2, null, true, true, null, 14));
 			this.Laboratory = base.Add(new RoomType("Laboratory", ROOMS.TYPES.LABORATORY.NAME, ROOMS.TYPES.LABORATORY.DESCRIPTION, ROOMS.TYPES.LABORATORY.TOOLTIP, ROOMS.TYPES.LABORATORY.EFFECT, Db.Get().RoomTypeCategories.Science, RoomConstraints.SCIENCE_BUILDINGS, new RoomConstraints.Constraint[]
 			{
-				RoomConstraints.LIGHT,
 				RoomConstraints.NO_INDUSTRIAL_MACHINERY,
 				RoomConstraints.MINIMUM_SIZE_32,
 				RoomConstraints.MAXIMUM_SIZE_120
@@ -389,6 +405,8 @@ namespace Database
 		public RoomType Kitchen;
 
 		public RoomType GreatHall;
+
+		public RoomType BanquetHall;
 
 		public RoomType Hospital;
 

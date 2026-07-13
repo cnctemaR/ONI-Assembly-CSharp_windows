@@ -31,14 +31,14 @@ public class KAnimGridTileVisualizer : KMonoBehaviour, IBlockTileInfo
 
 	private void OnSelectionChanged(object data)
 	{
-		bool flag = (bool)data;
-		World.Instance.blockTileRenderer.SelectCell(Grid.PosToCell(base.transform.GetPosition()), flag);
+		bool value = ((Boxed<bool>)data).value;
+		World.Instance.blockTileRenderer.SelectCell(Grid.PosToCell(base.transform.GetPosition()), value);
 	}
 
 	private void OnHighlightChanged(object data)
 	{
-		bool flag = (bool)data;
-		World.Instance.blockTileRenderer.HighlightCell(Grid.PosToCell(base.transform.GetPosition()), flag);
+		bool value = ((Boxed<bool>)data).value;
+		World.Instance.blockTileRenderer.HighlightCell(Grid.PosToCell(base.transform.GetPosition()), value);
 	}
 
 	public int GetBlockTileConnectorID()

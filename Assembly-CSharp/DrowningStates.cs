@@ -14,7 +14,7 @@ public class DrowningStates : GameStateMachine<DrowningStates, DrowningStates.In
 		NotificationType notificationType = NotificationType.Neutral;
 		bool flag = false;
 		StatusItemCategory main = Db.Get().StatusItemCategories.Main;
-		root.ToggleStatusItem(text, text2, text3, iconType, notificationType, flag, default(HashedString), 129022, null, null, main).TagTransition(GameTags.Creatures.Drowning, null, true);
+		root.ToggleStatusItem(text, text2, text3, iconType, notificationType, flag, default(HashedString), 129022, null, null, main).TagTransition(GameTags.Creatures.Drowning, null, true).ToggleCritterEmotion(Db.Get().CritterEmotions.Suffocating, null);
 		this.drown.PlayAnim("drown_pre").QueueAnim("drown_loop", true, null).Transition(this.drown_pst, new StateMachine<DrowningStates, DrowningStates.Instance, IStateMachineTarget, DrowningStates.Def>.Transition.ConditionCallback(this.UpdateSafeCell), UpdateRate.SIM_1000ms);
 		this.drown_pst.PlayAnim("drown_pst").OnAnimQueueComplete(this.move_to_safe);
 		this.move_to_safe.MoveTo((DrowningStates.Instance smi) => smi.safeCell, null, null, false);

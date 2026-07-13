@@ -85,16 +85,16 @@ namespace UnityEngine.Events
 			this.m_ObjectArgumentAssemblyTypeName = UnityEventTools.TidyAssemblyTypeName(this.m_ObjectArgumentAssemblyTypeName);
 		}
 
-		[SerializeField]
 		[FormerlySerializedAs("objectArgument")]
+		[SerializeField]
 		private Object m_ObjectArgument;
 
-		[SerializeField]
 		[FormerlySerializedAs("objectArgumentAssemblyTypeName")]
+		[SerializeField]
 		private string m_ObjectArgumentAssemblyTypeName;
 
-		[SerializeField]
 		[FormerlySerializedAs("intArgument")]
+		[SerializeField]
 		private int m_IntArgument;
 
 		[SerializeField]

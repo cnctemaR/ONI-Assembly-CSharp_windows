@@ -130,20 +130,12 @@ public class TravelTubeEntrance : StateMachineComponent<TravelTubeEntrance.SMIns
 
 	private void OnRefreshUserMenu(object data)
 	{
-		if (!this.deliverAndUseWax)
-		{
-			Game.Instance.userMenu.AddButton(base.gameObject, new KIconButtonMenu.ButtonInfo("action_speed_up", UI.USERMENUACTIONS.TRANSITTUBEWAX.NAME, delegate
-			{
-				this.SetWaxUse(true);
-			}, global::Action.NumActions, null, null, null, UI.USERMENUACTIONS.TRANSITTUBEWAX.TOOLTIP, true), 1f);
-		}
-		else
-		{
-			Game.Instance.userMenu.AddButton(base.gameObject, new KIconButtonMenu.ButtonInfo("action_speed_up", UI.USERMENUACTIONS.CANCELTRANSITTUBEWAX.NAME, delegate
-			{
-				this.SetWaxUse(false);
-			}, global::Action.NumActions, null, null, null, UI.USERMENUACTIONS.CANCELTRANSITTUBEWAX.TOOLTIP, true), 1f);
-		}
+		Game.Instance.userMenu.AddButton(base.gameObject, base.smi.buttonInfo, 1f);
+		this.RefreshStatusItem();
+	}
+
+	public void RefreshStatusItem()
+	{
 		KSelectable component = base.GetComponent<KSelectable>();
 		bool flag = this.deliverAndUseWax && this.WaxLaunchesAvailable > 0;
 		if (component != null)
@@ -168,7 +160,8 @@ public class TravelTubeEntrance : StateMachineComponent<TravelTubeEntrance.SMIns
 		{
 			this.storage.DropAll(false, false, default(Vector3), true, null);
 		}
-		this.OnRefreshUserMenu(null);
+		base.smi.RefreshUIButton();
+		this.RefreshStatusItem();
 	}
 
 	private void TubeChanged(object data)
@@ -181,7 +174,7 @@ public class TravelTubeEntrance : StateMachineComponent<TravelTubeEntrance.SMIns
 		GameObject gameObject = data as GameObject;
 		if (data == null)
 		{
-			this.TubeConnectionsChanged(0);
+			this.TubeConnectionsChanged((UtilityConnections)0);
 			return;
 		}
 		TravelTube component = gameObject.GetComponent<TravelTube>();
@@ -191,12 +184,17 @@ public class TravelTubeEntrance : StateMachineComponent<TravelTubeEntrance.SMIns
 			this.travelTube = component;
 			return;
 		}
-		this.TubeConnectionsChanged(0);
+		this.TubeConnectionsChanged((UtilityConnections)0);
 	}
 
 	private void TubeConnectionsChanged(object data)
 	{
-		bool flag = (UtilityConnections)data == UtilityConnections.Up;
+		this.TubeConnectionsChanged(((Boxed<UtilityConnections>)data).value);
+	}
+
+	private void TubeConnectionsChanged(UtilityConnections connections)
+	{
+		bool flag = connections == UtilityConnections.Up;
 		this.operational.SetFlag(TravelTubeEntrance.tubeConnected, flag);
 	}
 
@@ -317,8 +315,8 @@ public class TravelTubeEntrance : StateMachineComponent<TravelTubeEntrance.SMIns
 
 	private void OnOperationalChanged(object data)
 	{
-		bool flag = (bool)data;
-		Grid.SetTubeEntranceOperational(Grid.PosToCell(this), flag);
+		bool value = ((Boxed<bool>)data).value;
+		Grid.SetTubeEntranceOperational(Grid.PosToCell(this), value);
 		this.UpdateActive();
 	}
 
@@ -340,7 +338,8 @@ public class TravelTubeEntrance : StateMachineComponent<TravelTubeEntrance.SMIns
 		this.meter.SetPositionPercent(num);
 		this.energyConsumer.UpdatePoweredStatus();
 		Grid.SetTubeEntranceReservationCapacity(Grid.PosToCell(this), Mathf.FloorToInt(this.availableJoules / this.joulesPerLaunch));
-		this.OnRefreshUserMenu(null);
+		base.smi.RefreshUIButton();
+		this.RefreshStatusItem();
 	}
 
 	private void UpdateWaxCharge()
@@ -510,14 +509,6 @@ public class TravelTubeEntrance : StateMachineComponent<TravelTubeEntrance.SMIns
 		private TravelTubeEntrance entrance;
 	}
 
-	public class SMInstance : GameStateMachine<TravelTubeEntrance.States, TravelTubeEntrance.SMInstance, TravelTubeEntrance, object>.GameInstance
-	{
-		public SMInstance(TravelTubeEntrance master)
-			: base(master)
-		{
-		}
-	}
-
 	public class States : GameStateMachine<TravelTubeEntrance.States, TravelTubeEntrance.SMInstance, TravelTubeEntrance>
 	{
 		public override void InitializeStates(out StateMachine.BaseState default_state)
@@ -579,5 +570,41 @@ public class TravelTubeEntrance : StateMachineComponent<TravelTubeEntrance.SMIns
 		}
 
 		public const string DEFAULT_LAUNCH_ANIM_NAME = "anim_interacts_tube_launcher_kanim";
+	}
+
+	public class SMInstance : GameStateMachine<TravelTubeEntrance.States, TravelTubeEntrance.SMInstance, TravelTubeEntrance, object>.GameInstance
+	{
+		public SMInstance(TravelTubeEntrance master)
+			: base(master)
+		{
+			this.buttonInfo = new KIconButtonMenu.ButtonInfo("action_speed_up", UI.USERMENUACTIONS.TRANSITTUBEWAX.NAME, delegate
+			{
+				master.SetWaxUse(true);
+			}, global::Action.NumActions, null, null, null, UI.USERMENUACTIONS.TRANSITTUBEWAX.TOOLTIP, true);
+		}
+
+		public void RefreshUIButton()
+		{
+			if (!base.master.deliverAndUseWax)
+			{
+				this.buttonInfo.iconName = "action_speed_up";
+				this.buttonInfo.text = UI.USERMENUACTIONS.TRANSITTUBEWAX.NAME;
+				this.buttonInfo.onClick = delegate
+				{
+					base.master.SetWaxUse(true);
+				};
+				this.buttonInfo.tooltipText = UI.USERMENUACTIONS.TRANSITTUBEWAX.TOOLTIP;
+				return;
+			}
+			this.buttonInfo.iconName = "action_speed_up";
+			this.buttonInfo.text = UI.USERMENUACTIONS.CANCELTRANSITTUBEWAX.NAME;
+			this.buttonInfo.onClick = delegate
+			{
+				base.master.SetWaxUse(false);
+			};
+			this.buttonInfo.tooltipText = UI.USERMENUACTIONS.CANCELTRANSITTUBEWAX.TOOLTIP;
+		}
+
+		public KIconButtonMenu.ButtonInfo buttonInfo;
 	}
 }

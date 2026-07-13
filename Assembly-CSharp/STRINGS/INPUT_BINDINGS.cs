@@ -119,6 +119,8 @@ namespace STRINGS
 			public static LocString TOGGLEPAUSE = "Toggle Pause";
 
 			public static LocString ALTERNATEVIEW = "Alternate View";
+
+			public static LocString FIND = "Find";
 		}
 
 		public class TOOL

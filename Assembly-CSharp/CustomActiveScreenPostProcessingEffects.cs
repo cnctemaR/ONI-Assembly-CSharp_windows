@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CustomActiveScreenPostProcessingEffects : MonoBehaviour
+public class CustomActiveScreenPostProcessingEffects : KMonoBehaviour
 {
 	public void RegisterEffect(Func<RenderTexture, Material> effectFn)
 	{
@@ -16,16 +16,26 @@ public class CustomActiveScreenPostProcessingEffects : MonoBehaviour
 
 	private void OnRenderImage(RenderTexture source, RenderTexture destination)
 	{
-		this.CheckTemporaryRenderTextureValidity(ref this.previousSource, source);
-		this.CheckTemporaryRenderTextureValidity(ref this.previousDestination, source);
-		Graphics.Blit(source, this.previousSource);
-		foreach (Func<RenderTexture, Material> func in this.ActiveEffects)
+		if (this.ActiveEffects.Count > 0)
 		{
-			Graphics.Blit(this.previousSource, this.previousDestination, func(source));
-			this.previousSource.DiscardContents();
-			Graphics.Blit(this.previousDestination, this.previousSource);
+			this.CheckTemporaryRenderTextureValidity(ref this.previousSource, source);
+			this.CheckTemporaryRenderTextureValidity(ref this.previousDestination, source);
+			Graphics.Blit(source, this.previousSource);
+			foreach (Func<RenderTexture, Material> func in this.ActiveEffects)
+			{
+				Graphics.Blit(this.previousSource, this.previousDestination, func(source));
+				this.previousSource.DiscardContents();
+				Graphics.Blit(this.previousDestination, this.previousSource);
+			}
+			Graphics.Blit(this.previousSource, destination);
+			return;
 		}
-		Graphics.Blit(this.previousSource, destination);
+		Graphics.Blit(source, destination);
+	}
+
+	protected override void OnCleanUp()
+	{
+		base.OnCleanUp();
 		this.previousSource.Release();
 		this.previousDestination.Release();
 	}

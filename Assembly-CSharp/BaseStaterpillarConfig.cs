@@ -19,7 +19,7 @@ public class BaseStaterpillarConfig
 			text = "DreckoNavGrid";
 			gameObject.AddOrGetDef<ConduitSleepMonitor.Def>().conduitLayer = conduitLayer;
 		}
-		EntityTemplates.ExtendEntityToBasicCreature(gameObject, FactionManager.FactionID.Pest, trait_id, text, NavType.Floor, 32, 1f, "Meat", 2f, false, false, warningLowTemperature, warningHighTemperature, lethalLowTemperature, lethalHighTemperature);
+		EntityTemplates.ExtendEntityToBasicCreature(false, gameObject, anim_file, is_baby ? null : "caterpillar_build_kanim", symbolOverridePrefix, FactionManager.FactionID.Pest, trait_id, text, NavType.Floor, 32, 1f, "Meat", 2f, false, false, warningLowTemperature, warningHighTemperature, lethalLowTemperature, lethalHighTemperature);
 		if (symbolOverridePrefix != null)
 		{
 			gameObject.AddOrGet<SymbolOverrideController>().ApplySymbolOverridesByAffix(Assets.GetAnim(anim_file), symbolOverridePrefix, null, 0);
@@ -59,6 +59,7 @@ public class BaseStaterpillarConfig
 			.Add(new ConduitSleepStates.Def(), true, -1)
 			.Add(new CallAdultStates.Def(), is_baby, -1)
 			.Add(new CritterCondoStates.Def(), !is_baby, -1)
+			.Add(new CritterEmoteStates.Def(Assets.GetAnim("caterpillar_emotes_kanim")), !is_baby, -1)
 			.PopInterruptGroup()
 			.Add(new CreatureSleepStates.Def(), true, -1)
 			.Add(new IdleStates.Def

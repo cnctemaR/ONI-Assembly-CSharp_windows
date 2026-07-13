@@ -7,8 +7,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[UsedByNativeCode]
 	[NativeHeader("Modules/IMGUI/GUIStyle.h")]
+	[UsedByNativeCode]
 	[Serializable]
 	[StructLayout(LayoutKind.Sequential)]
 	public class RectOffset : IFormattable

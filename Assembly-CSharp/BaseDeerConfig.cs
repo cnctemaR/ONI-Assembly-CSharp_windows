@@ -18,7 +18,7 @@ public static class BaseDeerConfig
 		{
 			text = "WalkerBabyNavGrid";
 		}
-		EntityTemplates.ExtendEntityToBasicCreature(gameObject, FactionManager.FactionID.Pest, traitId, text, NavType.Floor, 32, 2f, "Meat", 1f, true, false, 243.15f, 283.15f, 213.15f, 373.15f);
+		EntityTemplates.ExtendEntityToBasicCreature(false, gameObject, anim_file, is_baby ? null : "ice_floof_build_kanim", symbolOverridePrefix, FactionManager.FactionID.Pest, traitId, text, NavType.Floor, 32, 2f, "Meat", 1f, true, false, 243.15f, 283.15f, 213.15f, 373.15f);
 		if (symbolOverridePrefix != null)
 		{
 			gameObject.AddOrGet<SymbolOverrideController>().ApplySymbolOverridesByAffix(Assets.GetAnim(anim_file), symbolOverridePrefix, null, 0);
@@ -30,6 +30,10 @@ public static class BaseDeerConfig
 		gameObject.AddOrGet<LoopingSounds>();
 		gameObject.AddOrGetDef<CreatureFallMonitor.Def>();
 		gameObject.AddOrGetDef<ThreatMonitor.Def>().fleethresholdState = Health.HealthState.Dead;
+		if (!is_baby)
+		{
+			gameObject.AddOrGetDef<CreatureDecorMonitor.Def>().DecorValueTreshold = 100f;
+		}
 		gameObject.AddWeapon(1f, 1f, AttackProperties.DamageType.Standard, AttackProperties.TargetType.Single, 1, 0f);
 		SoundEventVolumeCache.instance.AddVolume("hatch_kanim", "Hatch_voice_idle", NOISE_POLLUTION.CREATURES.TIER2);
 		SoundEventVolumeCache.instance.AddVolume("FloorSoundEvent", "Hatch_footstep", NOISE_POLLUTION.CREATURES.TIER1);
@@ -66,6 +70,7 @@ public static class BaseDeerConfig
 			.Add(new PlayAnimsStates.Def(GameTags.Creatures.Poop, false, "poop", global::STRINGS.CREATURES.STATUSITEMS.EXPELLING_SOLID.NAME, global::STRINGS.CREATURES.STATUSITEMS.EXPELLING_SOLID.TOOLTIP), true, -1)
 			.Add(new CallAdultStates.Def(), is_baby, -1)
 			.Add(new CritterCondoStates.Def(), !is_baby, -1)
+			.Add(new CritterEmoteStates.Def(Assets.GetAnim("ice_floof_emotes_kanim")), true, -1)
 			.PopInterruptGroup()
 			.Add(new IdleStates.Def(), true, -1);
 		EntityTemplates.AddCreatureBrain(gameObject, builder, GameTags.Creatures.Species.DeerSpecies, symbolOverridePrefix);

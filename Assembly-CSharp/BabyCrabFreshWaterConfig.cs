@@ -2,7 +2,7 @@
 using STRINGS;
 using UnityEngine;
 
-[EntityConfigOrder(2)]
+[EntityConfigOrder(4)]
 public class BabyCrabFreshWaterConfig : IEntityConfig
 {
 	public GameObject CreatePrefab()

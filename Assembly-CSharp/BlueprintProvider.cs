@@ -174,13 +174,18 @@ public abstract class BlueprintProvider : IHasDlcRestrictions
 		AtmoSuitBody,
 		AtmoSuitGloves,
 		AtmoSuitBelt,
-		AtmoSuitShoes
+		AtmoSuitShoes,
+		JetSuitHelmet = 18,
+		JetSuitBody,
+		JetSuitGloves,
+		JetSuitShoes
 	}
 
 	public enum OutfitType
 	{
 		Clothing,
-		AtmoSuit = 2
+		AtmoSuit = 2,
+		JetSuit
 	}
 
 	public enum JoyResponseType

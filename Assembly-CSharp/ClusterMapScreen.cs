@@ -68,6 +68,14 @@ public class ClusterMapScreen : KScreen
 		});
 	}
 
+	private void RefreshHexCellsInventoryVisuals()
+	{
+		foreach (StarmapHexCellInventory starmapHexCellInventory in StarmapHexCellInventory.AllInventories.Values)
+		{
+			starmapHexCellInventory.GetComponent<StarmapHexCellInventoryVisuals>().RefreshVisuals();
+		}
+	}
+
 	protected void MoveToNISPosition()
 	{
 		if (!this.movingToTargetNISPosition)
@@ -161,7 +169,12 @@ public class ClusterMapScreen : KScreen
 	{
 		if (this.m_mode == ClusterMapScreen.Mode.SelectDestination && !this.m_closeOnSelect)
 		{
+			ClusterDestinationSelector destinationSelector = this.m_destinationSelector;
 			this.SetMode(ClusterMapScreen.Mode.Default);
+			if (destinationSelector != null)
+			{
+				destinationSelector.Trigger(94158097, null);
+			}
 			return true;
 		}
 		return false;
@@ -170,7 +183,7 @@ public class ClusterMapScreen : KScreen
 	public void ShowInSelectDestinationMode(ClusterDestinationSelector destination_selector)
 	{
 		this.m_destinationSelector = destination_selector;
-		if (!base.gameObject.activeSelf)
+		if (!this.IsScreenActive())
 		{
 			ManagementMenu.Instance.ToggleClusterMap();
 			this.m_closeOnSelect = true;
@@ -212,10 +225,6 @@ public class ClusterMapScreen : KScreen
 		{
 			this.MoveToNISPosition();
 			this.UpdateVis(true);
-			if (this.m_mode == ClusterMapScreen.Mode.Default)
-			{
-				this.TrySelectDefault();
-			}
 			Game.Instance.Subscribe(-1991583975, new Action<object>(this.OnFogOfWarRevealed));
 			Game.Instance.Subscribe(-1554423969, new Action<object>(this.OnNewTelescopeTarget));
 			Game.Instance.Subscribe(-1298331547, new Action<object>(this.OnClusterLocationChanged));
@@ -225,6 +234,7 @@ public class ClusterMapScreen : KScreen
 			AudioMixer.instance.Start(AudioMixerSnapshots.Get().MENUStarmapNotPausedSnapshot);
 			MusicManager.instance.PlaySong("Music_Starmap", false);
 			this.UpdateTearStatus();
+			this.RefreshHexCellsInventoryVisuals();
 			return;
 		}
 		Game.Instance.Unsubscribe(-1554423969, new Action<object>(this.OnNewTelescopeTarget));
@@ -272,12 +282,12 @@ public class ClusterMapScreen : KScreen
 		ClusterMapSelectTool.Instance.Select(kselectable, false);
 	}
 
-	private void OnDestinationChanged(object data)
+	private void OnDestinationChanged(object _)
 	{
 		this.UpdateVis(false);
 	}
 
-	private void OnSelectObject(object data)
+	private void OnSelectObject(object _)
 	{
 		if (this.m_selectedEntity == null)
 		{
@@ -303,42 +313,22 @@ public class ClusterMapScreen : KScreen
 		this.UpdateVis(false);
 	}
 
-	private void OnFogOfWarRevealed(object data = null)
+	private void OnFogOfWarRevealed(object _ = null)
 	{
 		this.UpdateVis(false);
 	}
 
-	private void OnNewTelescopeTarget(object data = null)
+	private void OnNewTelescopeTarget(object _ = null)
 	{
 		this.UpdateVis(false);
 	}
 
 	private void Update()
 	{
-		if (KInputManager.currentControllerIsGamepad)
+		if (KInputManager.currentControllerIsGamepad && this.IsScreenActive())
 		{
 			this.mapScrollRect.AnalogUpdate(KInputManager.steamInputInterpreter.GetSteamCameraMovement() * this.scrollSpeed);
 		}
-	}
-
-	private void TrySelectDefault()
-	{
-		if (this.m_selectedHex != null && this.m_selectedEntity != null)
-		{
-			this.UpdateVis(false);
-			return;
-		}
-		WorldContainer activeWorld = ClusterManager.Instance.activeWorld;
-		if (activeWorld == null)
-		{
-			return;
-		}
-		ClusterGridEntity component = activeWorld.GetComponent<ClusterGridEntity>();
-		if (component == null)
-		{
-			return;
-		}
-		this.SelectEntity(component, false);
 	}
 
 	private void GenerateGridVis(out int minR, out int maxR, out int minQ, out int maxQ)
@@ -442,6 +432,10 @@ public class ClusterMapScreen : KScreen
 					case EntityLayer.FX:
 						clusterMapVisualizer = this.staticVisPrefab;
 						gameObject = this.FXVisContainer;
+						break;
+					case EntityLayer.Debri:
+						clusterMapVisualizer = this.staticVisPrefab;
+						gameObject = this.DebriVisContainer;
 						break;
 					}
 					ClusterNameDisplayScreen.Instance.AddNewEntry(clusterGridEntity);
@@ -609,6 +603,7 @@ public class ClusterMapScreen : KScreen
 			global::Debug.Assert(this.m_destinationSelector != null, "Selected a hex in SelectDestination mode with no ClusterDestinationSelector");
 			if (ClusterGrid.Instance.GetPath(this.m_selectedHex.location, newSelectionHex.location, this.m_destinationSelector) != null)
 			{
+				this.SetMode(ClusterMapScreen.Mode.FinishingSelectDestination);
 				this.m_destinationSelector.SetDestination(newSelectionHex.location);
 				if (this.m_closeOnSelect)
 				{
@@ -657,6 +652,11 @@ public class ClusterMapScreen : KScreen
 		this.m_cellVisByLocation[location].GetComponent<ClusterMapHex>().ChangeState(highlight ? 1 : 0);
 	}
 
+	public ClusterMapHex GetClusterMapHexAtLocation(AxialI location)
+	{
+		return this.m_cellVisByLocation[location].GetComponent<ClusterMapHex>();
+	}
+
 	private void UpdatePaths()
 	{
 		ClusterDestinationSelector clusterDestinationSelector = ((this.m_selectedEntity != null) ? this.m_selectedEntity.GetComponent<ClusterDestinationSelector>() : null);
@@ -691,10 +691,12 @@ public class ClusterMapScreen : KScreen
 		int num = ((path != null) ? path.Count : (-1));
 		if (this.m_selectedEntity != null)
 		{
-			int rangeInTiles = this.m_selectedEntity.GetComponent<IClusterRange>().GetRangeInTiles();
+			IClusterRange component = this.m_selectedEntity.GetComponent<IClusterRange>();
+			int rangeInTiles = component.GetRangeInTiles();
+			int maxRangeInTiles = component.GetMaxRangeInTiles();
 			if (num > rangeInTiles && string.IsNullOrEmpty(text))
 			{
-				text = string.Format(UI.CLUSTERMAP.TOOLTIP_INVALID_DESTINATION_OUT_OF_RANGE, rangeInTiles);
+				text = GameUtil.SafeStringFormat(UI.CLUSTERMAP.TOOLTIP_INVALID_DESTINATION_OUT_OF_RANGE, new object[] { rangeInTiles, maxRangeInTiles });
 			}
 			bool repeat = clusterDestinationSelector.GetComponent<RocketClusterDestinationSelector>().Repeat;
 			this.m_hoveredHex.SetDestinationStatus(text, num, rangeInTiles, repeat);
@@ -705,18 +707,26 @@ public class ClusterMapScreen : KScreen
 
 	private ClusterGridEntity GetSelectorGridEntity(ClusterDestinationSelector selector)
 	{
-		ClusterGridEntity component = selector.GetComponent<ClusterGridEntity>();
-		if (component != null && ClusterGrid.Instance.IsVisible(component))
+		ClusterGridEntity clusterGridEntity = selector.GetComponent<ClusterGridEntity>();
+		if (clusterGridEntity == null)
 		{
-			return component;
+			RocketModuleCluster component = selector.GetComponent<RocketModuleCluster>();
+			if (component != null)
+			{
+				clusterGridEntity = component.CraftInterface.GetComponent<ClusterGridEntity>();
+			}
+		}
+		if (clusterGridEntity != null && ClusterGrid.Instance.IsVisible(clusterGridEntity))
+		{
+			return clusterGridEntity;
 		}
 		ClusterGridEntity visibleEntityOfLayerAtCell = ClusterGrid.Instance.GetVisibleEntityOfLayerAtCell(selector.GetMyWorldLocation(), EntityLayer.Asteroid);
-		global::Debug.Assert(component != null || visibleEntityOfLayerAtCell != null, string.Format("{0} has no grid entity and isn't located at a visible asteroid at {1}", selector, selector.GetMyWorldLocation()));
+		global::Debug.Assert(clusterGridEntity != null || visibleEntityOfLayerAtCell != null, string.Format("{0} has no grid entity and isn't located at a visible asteroid at {1}", selector, selector.GetMyWorldLocation()));
 		if (visibleEntityOfLayerAtCell)
 		{
 			return visibleEntityOfLayerAtCell;
 		}
-		return component;
+		return clusterGridEntity;
 	}
 
 	private void UpdateTearStatus()
@@ -747,6 +757,8 @@ public class ClusterMapScreen : KScreen
 	public GameObject telescopeVisContainer;
 
 	public GameObject POIVisContainer;
+
+	public GameObject DebriVisContainer;
 
 	public GameObject FXVisContainer;
 
@@ -835,6 +847,7 @@ public class ClusterMapScreen : KScreen
 	public enum Mode
 	{
 		Default,
-		SelectDestination
+		SelectDestination,
+		FinishingSelectDestination
 	}
 }

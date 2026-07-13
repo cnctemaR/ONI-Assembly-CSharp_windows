@@ -4,13 +4,13 @@ using STRINGS;
 using UnityEngine;
 
 [AddComponentMenu("KMonoBehaviour/Workable/MessStation")]
-public class MessStation : Workable, IGameObjectEffectDescriptor
+public class MessStation : Workable, IGameObjectEffectDescriptor, IDiningSeat
 {
 	protected override void OnPrefabInit()
 	{
 		this.ownable.AddAssignPrecondition(new Func<MinionAssignablesProxy, bool>(this.HasCaloriesOwnablePrecondition));
 		base.OnPrefabInit();
-		this.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_use_machine_kanim") };
+		this.overrideAnims = new KAnimFile[] { Assets.GetAnim(MessStation.eatAnim) };
 	}
 
 	public static bool CanBeAssignedTo(IAssignableIdentity assignee)
@@ -46,7 +46,7 @@ public class MessStation : Workable, IGameObjectEffectDescriptor
 		List<Descriptor> list = new List<Descriptor>();
 		if (go.GetComponent<Storage>().Has(TableSaltConfig.ID.ToTag()))
 		{
-			list.Add(new Descriptor(string.Format(UI.BUILDINGEFFECTS.MESS_TABLE_SALT, TableSaltTuning.MORALE_MODIFIER), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.MESS_TABLE_SALT, TableSaltTuning.MORALE_MODIFIER), Descriptor.DescriptorType.Effect, false));
+			list.Add(MessStation.TABLE_SALT_DESCRIPTOR);
 		}
 		return list;
 	}
@@ -59,10 +59,44 @@ public class MessStation : Workable, IGameObjectEffectDescriptor
 		}
 	}
 
+	public HashedString EatAnim
+	{
+		get
+		{
+			return MessStation.eatAnim;
+		}
+	}
+
+	public HashedString ReloadElectrobankAnim
+	{
+		get
+		{
+			return MessStation.reloadElectrobankAnim;
+		}
+	}
+
+	public Storage FindStorage()
+	{
+		return base.GetComponent<Storage>();
+	}
+
+	public Operational FindOperational()
+	{
+		return base.GetComponent<Operational>();
+	}
+
+	public KPrefabID Diner { get; set; }
+
+	public static readonly Descriptor TABLE_SALT_DESCRIPTOR = new Descriptor(string.Format(UI.BUILDINGEFFECTS.MESS_TABLE_SALT, TableSaltTuning.MORALE_MODIFIER), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.MESS_TABLE_SALT, TableSaltTuning.MORALE_MODIFIER), Descriptor.DescriptorType.Effect, false);
+
 	[MyCmpGet]
 	private Ownable ownable;
 
 	private MessStation.MessStationSM.Instance smi;
+
+	public static readonly HashedString eatAnim = "anim_eat_table_kanim";
+
+	public static readonly HashedString reloadElectrobankAnim = "anim_bionic_eat_table_kanim";
 
 	public class MessStationSM : GameStateMachine<MessStation.MessStationSM, MessStation.MessStationSM.Instance, MessStation>
 	{
@@ -91,7 +125,7 @@ public class MessStation : Workable, IGameObjectEffectDescriptor
 				: base(master)
 			{
 				this.saltStorage = master.GetComponent<Storage>();
-				this.assigned = master.GetComponent<Assignable>();
+				this.reservable = master.GetComponent<Reservable>();
 			}
 
 			public bool HasSalt
@@ -104,40 +138,34 @@ public class MessStation : Workable, IGameObjectEffectDescriptor
 
 			public bool IsEating()
 			{
-				if (this.assigned == null || this.assigned.assignee == null)
+				if (this.reservable == null)
 				{
 					return false;
 				}
-				Ownables soleOwner = this.assigned.assignee.GetSoleOwner();
-				if (soleOwner == null)
+				if (this.reservable.ReservedBy == null)
 				{
 					return false;
 				}
-				GameObject targetGameObject = soleOwner.GetComponent<MinionAssignablesProxy>().GetTargetGameObject();
-				if (targetGameObject == null)
+				ChoreDriver choreDriver;
+				if (!this.reservable.ReservedBy.TryGetComponent<ChoreDriver>(out choreDriver))
 				{
 					return false;
 				}
-				ChoreDriver component = targetGameObject.GetComponent<ChoreDriver>();
-				if (component == null)
+				if (!choreDriver.HasChore())
 				{
 					return false;
 				}
-				if (!component.HasChore())
-				{
-					return false;
-				}
-				ReloadElectrobankChore reloadElectrobankChore = component.GetCurrentChore() as ReloadElectrobankChore;
+				ReloadElectrobankChore reloadElectrobankChore = choreDriver.GetCurrentChore() as ReloadElectrobankChore;
 				if (reloadElectrobankChore != null)
 				{
 					return reloadElectrobankChore.IsInstallingAtMessStation();
 				}
-				return component.GetCurrentChore().choreType.urge == Db.Get().Urges.Eat;
+				return choreDriver.GetCurrentChore().choreType.urge == Db.Get().Urges.Eat;
 			}
 
 			private Storage saltStorage;
 
-			private Assignable assigned;
+			private Reservable reservable;
 		}
 	}
 }

@@ -64,10 +64,17 @@ public class HarvestablePOIConfigurator : KMonoBehaviour
 		}
 
 		public HarvestablePOIType(string id, Dictionary<SimHashes, float> harvestableElements, float poiCapacityMin = 54000f, float poiCapacityMax = 81000f, float poiRechargeMin = 30000f, float poiRechargeMax = 60000f, bool canProvideArtifacts = true, List<string> orbitalObject = null, int maxNumOrbitingObjects = 20, string[] requiredDlcIds = null, string[] forbiddenDlcIds = null)
+			: this(id, harvestableElements, 0, null, poiCapacityMin, poiCapacityMax, poiRechargeMin, poiRechargeMax, canProvideArtifacts, orbitalObject, maxNumOrbitingObjects, requiredDlcIds, forbiddenDlcIds)
+		{
+		}
+
+		public HarvestablePOIType(string id, Dictionary<SimHashes, float> harvestableElements, int initialDatabanks, Dictionary<SimHashes, float> initialLiberatedResources = null, float poiCapacityMin = 54000f, float poiCapacityMax = 81000f, float poiRechargeMin = 30000f, float poiRechargeMax = 60000f, bool canProvideArtifacts = true, List<string> orbitalObject = null, int maxNumOrbitingObjects = 20, string[] requiredDlcIds = null, string[] forbiddenDlcIds = null)
 		{
 			this.id = id;
 			this.idHash = id;
 			this.harvestableElements = harvestableElements;
+			this.initialDataBanks = initialDatabanks;
+			this.initialLiberatedResources = initialLiberatedResources;
 			this.poiCapacityMin = poiCapacityMin;
 			this.poiCapacityMax = poiCapacityMax;
 			this.poiRechargeMin = poiRechargeMin;
@@ -104,6 +111,10 @@ public class HarvestablePOIConfigurator : KMonoBehaviour
 		public float poiRechargeMin;
 
 		public float poiRechargeMax;
+
+		public int initialDataBanks;
+
+		public Dictionary<SimHashes, float> initialLiberatedResources;
 
 		public bool canProvideArtifacts;
 

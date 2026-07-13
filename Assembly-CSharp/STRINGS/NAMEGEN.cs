@@ -202,6 +202,22 @@ namespace STRINGS
 				public static LocString HARDY = "Hardy";
 
 				public static LocString IMMUNE = "Immune";
+
+				public static LocString CAPITULATING = "Capitulating";
+
+				public static LocString CLINICAL = "Clinical";
+
+				public static LocString ESOTERIC = "Esoteric";
+
+				public static LocString GOBSMACKED = "Gobsmacked";
+
+				public static LocString STOIC = "Stoic";
+
+				public static LocString LIMPID = "Limpid";
+
+				public static LocString SEPTIC = "Septic";
+
+				public static LocString GENTLE = "Gentle";
 			}
 
 			public class NOUN
@@ -329,6 +345,30 @@ namespace STRINGS
 				public static LocString SEWER = "Sewer";
 
 				public static LocString HOSPITAL = "Hospital";
+
+				public static LocString OUTPOST = "Outpost";
+
+				public static LocString DEPOT = "Depot";
+
+				public static LocString GAGGLE = "Gaggle";
+
+				public static LocString CLUBHOUSE = "Clubhouse";
+
+				public static LocString CAPITAL = "Capital";
+
+				public static LocString ORBIT = "Orbit";
+
+				public static LocString ECLIPSE = "Eclipse";
+
+				public static LocString PHASE = "Phase";
+
+				public static LocString POTHOLE = "Pothole";
+
+				public static LocString SANCTUARY = "Sanctuary";
+
+				public static LocString CRAWLSPACE = "Crawlspace";
+
+				public static LocString DEBACLE = "Debacle";
 			}
 		}
 
@@ -419,11 +459,15 @@ namespace STRINGS
 				public class MALE
 				{
 					public static LocString THE_DUDE = "\"The Dude\"";
+
+					public static LocString THE_COMPANY_MAN = "\"The Company Man\"";
 				}
 
 				public class FEMALE
 				{
 					public static LocString THE_DUDETTE = "\"The Dudette\"";
+
+					public static LocString THE_BOSS = "\"The Boss\"";
 				}
 
 				public class NB
@@ -579,6 +623,8 @@ namespace STRINGS
 					public static LocString MONTEREY = "Monterey";
 
 					public static LocString TYBO = "Tybo";
+
+					public static LocString ERIC = "Eric";
 				}
 
 				public class FEMALE
@@ -971,6 +1017,18 @@ namespace STRINGS
 				public static LocString PROGRESS = "Progress";
 
 				public static LocString PEACE = "Peace";
+
+				public static LocString BOLD = "Bold";
+
+				public static LocString NOBLE = "Noble";
+
+				public static LocString GALLANT = "Gallant";
+
+				public static LocString RESOLUTE = "Resolute";
+
+				public static LocString STEADFAST = "Steadfast";
+
+				public static LocString KEEN = "Keen";
 			}
 
 			public class NOUN
@@ -1120,7 +1178,7 @@ namespace STRINGS
 
 				public static LocString CERES = "Wintr\nPolar\nSubzer\nImpass\nGlac\nBlust\nGelid\nCryo\nIcicl\nSlush\nSleet\nHail\nShivrr\n";
 
-				public static LocString PREHISTORIC = "Primor\nPaleo\nDino\nCret\nFoss\nFern\nClaw\nSaur\nBront\nCamb\n";
+				public static LocString PREHISTORIC = "Primor\nPaleo\nDino\nCret\nFoss\nFern\nClaw\nSaur\nBront\nArc\nJur\nAntiq\nNeol\nPter\nCamb\n";
 
 				public static LocString MAGMA = "Fier\nMagm\nToast\nScorch\nBurn\nObsid\nLav\nMelt\nHot\nSweltr\nBlist\nFlam\nTherm\nCombust\nCauter\nTorch\nStok\nChar\n";
 

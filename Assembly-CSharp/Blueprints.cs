@@ -29,7 +29,9 @@ public class Blueprints
 		new Blueprints_DlcPack2(),
 		new Blueprints_U53(),
 		new Blueprints_DlcPack3(),
-		new Blueprints_DlcPack4()
+		new Blueprints_DlcPack4(),
+		new Blueprints_U57(),
+		new Blueprints_CosmeticPack1()
 	};
 
 	private static Blueprints instance;

@@ -43,8 +43,8 @@ namespace UnityEngine
 			}
 		}
 
-		[Obsolete("Resolution.refreshRate is obsolete. Use refreshRateRatio instead.", false)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
+		[Obsolete("Resolution.refreshRate is obsolete. Use refreshRateRatio instead.", false)]
 		public int refreshRate
 		{
 			get

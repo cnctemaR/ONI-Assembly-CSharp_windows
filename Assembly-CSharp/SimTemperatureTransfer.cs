@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 
 [SkipSaveFileSerialization]
@@ -133,7 +134,7 @@ public class SimTemperatureTransfer : KMonoBehaviour
 	{
 		base.OnSpawn();
 		Element element = this.pe.Element;
-		Singleton<CellChangeMonitor>.Instance.RegisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChanged), "SimTemperatureTransfer.OnSpawn");
+		this.cellChangedHandlerID = Singleton<CellChangeMonitor>.Instance.RegisterCellChangedHandler(base.transform, SimTemperatureTransfer.OnCellChangedDispatcher, this, "SimTemperatureTransfer.OnSpawn");
 		if (!Grid.IsValidCell(Grid.PosToCell(this)) || this.pe.Element.HasTag(GameTags.Special) || element.specificHeatCapacity == 0f)
 		{
 			base.enabled = false;
@@ -181,7 +182,7 @@ public class SimTemperatureTransfer : KMonoBehaviour
 
 	protected override void OnCleanUp()
 	{
-		Singleton<CellChangeMonitor>.Instance.UnregisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChanged));
+		Singleton<CellChangeMonitor>.Instance.UnregisterCellChangedHandler(ref this.cellChangedHandlerID);
 		this.SimUnregister();
 		base.OnForcedCleanUp();
 	}
@@ -332,4 +333,11 @@ public class SimTemperatureTransfer : KMonoBehaviour
 	protected float groundTransferScale = 0.0625f;
 
 	private static Dictionary<int, SimTemperatureTransfer> handleInstanceMap = new Dictionary<int, SimTemperatureTransfer>();
+
+	private ulong cellChangedHandlerID;
+
+	private static readonly Action<object> OnCellChangedDispatcher = delegate(object obj)
+	{
+		Unsafe.As<SimTemperatureTransfer>(obj).OnCellChanged();
+	};
 }

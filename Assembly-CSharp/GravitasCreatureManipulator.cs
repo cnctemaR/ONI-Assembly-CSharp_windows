@@ -19,7 +19,7 @@ public class GravitasCreatureManipulator : GameStateMachine<GravitasCreatureMani
 			smi.UpdateMeter();
 		}).EventHandler(GameHashes.BuildingActivated, delegate(GravitasCreatureManipulator.Instance smi, object activated)
 		{
-			if ((bool)activated)
+			if (((Boxed<bool>)activated).value)
 			{
 				StoryManager.Instance.BeginStoryEvent(Db.Get().Stories.CreatureManipulator);
 			}
@@ -89,8 +89,9 @@ public class GravitasCreatureManipulator : GameStateMachine<GravitasCreatureMani
 				while (objectLayerListItem != null)
 				{
 					GameObject gameObject2 = objectLayerListItem.gameObject;
+					Pickupable pickupable = objectLayerListItem.pickupable;
 					objectLayerListItem = objectLayerListItem.nextItem;
-					if (!(gameObject2 == null) && smi.IsAccepted(gameObject2))
+					if (!(gameObject2 == null) && smi.IsAccepted(pickupable.KPrefabID))
 					{
 						smi.SetCritterTarget(gameObject2);
 						return;
@@ -165,19 +166,19 @@ public class GravitasCreatureManipulator : GameStateMachine<GravitasCreatureMani
 				StoryManager.Instance.BeginStoryEvent(Db.Get().Stories.CreatureManipulator);
 			}
 			this.TryShowCompletedNotification();
-			base.Subscribe(-1503271301, new Action<object>(this.OnBuildingSelect));
+			this.onBuildingSelectHandle = base.Subscribe(-1503271301, new Action<object>(this.OnBuildingSelect));
 			StoryManager.Instance.DiscoverStoryEvent(Db.Get().Stories.CreatureManipulator);
 		}
 
 		public override void StopSM(string reason)
 		{
-			base.Unsubscribe(-1503271301, new Action<object>(this.OnBuildingSelect));
+			base.Unsubscribe(ref this.onBuildingSelectHandle);
 			base.StopSM(reason);
 		}
 
 		private void OnBuildingSelect(object obj)
 		{
-			if (!(bool)obj)
+			if (!((Boxed<bool>)obj).value)
 			{
 				return;
 			}
@@ -220,10 +221,9 @@ public class GravitasCreatureManipulator : GameStateMachine<GravitasCreatureMani
 			this.m_progressMeter.SetPositionPercent(Mathf.Clamp01((float)this.ScannedSpecies.Count / (float)base.smi.def.numSpeciesToUnlockMorphMode));
 		}
 
-		public bool IsAccepted(GameObject go)
+		public bool IsAccepted(KPrefabID kpid)
 		{
-			KPrefabID component = go.GetComponent<KPrefabID>();
-			return component.HasTag(GameTags.Creature) && !component.HasTag(GameTags.Robot) && component.PrefabTag != GameTags.Creature;
+			return kpid.HasTag(GameTags.Creature) && !kpid.HasTag(GameTags.Robot) && kpid.PrefabTag != GameTags.Creature;
 		}
 
 		private void DetectLargeCreature(object obj)
@@ -242,7 +242,7 @@ public class GravitasCreatureManipulator : GameStateMachine<GravitasCreatureMani
 		private void DetectCreature(object obj)
 		{
 			Pickupable pickupable = obj as Pickupable;
-			if (pickupable != null && this.IsAccepted(pickupable.gameObject) && base.smi.sm.creatureTarget.IsNull(base.smi) && base.smi.IsInsideState(base.smi.sm.operational.idle))
+			if (pickupable != null && this.IsAccepted(pickupable.KPrefabID) && base.smi.sm.creatureTarget.IsNull(base.smi) && base.smi.IsInsideState(base.smi.sm.operational.idle))
 			{
 				this.SetCritterTarget(pickupable.gameObject);
 			}
@@ -366,7 +366,7 @@ public class GravitasCreatureManipulator : GameStateMachine<GravitasCreatureMani
 
 		public void ShowCritterScannedNotification(Tag species)
 		{
-			GravitasCreatureManipulator.Instance.<>c__DisplayClass29_0 CS$<>8__locals1 = new GravitasCreatureManipulator.Instance.<>c__DisplayClass29_0();
+			GravitasCreatureManipulator.Instance.<>c__DisplayClass30_0 CS$<>8__locals1 = new GravitasCreatureManipulator.Instance.<>c__DisplayClass30_0();
 			CS$<>8__locals1.species = species;
 			CS$<>8__locals1.<>4__this = this;
 			string text = GravitasCreatureManipulatorConfig.CRITTER_LORE_UNLOCK_ID.For(CS$<>8__locals1.species);
@@ -483,5 +483,7 @@ public class GravitasCreatureManipulator : GameStateMachine<GravitasCreatureMani
 		private HandleVector<int>.Handle m_partitionEntry;
 
 		private HandleVector<int>.Handle m_largeCreaturePartitionEntry;
+
+		private int onBuildingSelectHandle;
 	}
 }

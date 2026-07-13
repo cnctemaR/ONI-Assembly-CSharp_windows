@@ -1,9 +1,30 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using UnityEngine;
+using UnityEngine.Pool;
 
 public class CellChangeMonitor : Singleton<CellChangeMonitor>
 {
+	private static ulong Join(int front, uint back)
+	{
+		return new CellChangeMonitor.IDJoiner
+		{
+			front = front,
+			back = back
+		}.full;
+	}
+
+	private static void Split(ulong id, out int front, out uint back)
+	{
+		CellChangeMonitor.IDJoiner idjoiner = new CellChangeMonitor.IDJoiner
+		{
+			full = id
+		};
+		front = idjoiner.front;
+		back = idjoiner.back;
+	}
+
 	public void MarkDirty(Transform transform)
 	{
 		if (this.gridWidth == 0)
@@ -23,87 +44,82 @@ public class CellChangeMonitor : Singleton<CellChangeMonitor>
 		return this.movingTransforms.Contains(transform.GetInstanceID());
 	}
 
-	public void RegisterMovementStateChanged(Transform transform, Action<Transform, bool> handler)
+	public ulong RegisterMovementStateChanged(Transform transform, Action<Transform, bool, object> handler, object context)
 	{
 		int instanceID = transform.GetInstanceID();
-		CellChangeMonitor.MovementStateChangedEntry movementStateChangedEntry = default(CellChangeMonitor.MovementStateChangedEntry);
+		CellChangeMonitor.MovementStateChangedEntry movementStateChangedEntry;
 		if (!this.movementStateChangedHandlers.TryGetValue(instanceID, out movementStateChangedEntry))
 		{
-			movementStateChangedEntry = default(CellChangeMonitor.MovementStateChangedEntry);
-			movementStateChangedEntry.handlers = new List<Action<Transform, bool>>();
-			movementStateChangedEntry.transform = transform;
+			movementStateChangedEntry = CellChangeMonitor.MovementStateChangedEntry.Pool.Get();
+			movementStateChangedEntry.Setup(transform);
+			this.movementStateChangedHandlers[instanceID] = movementStateChangedEntry;
 		}
-		movementStateChangedEntry.handlers.Add(handler);
-		this.movementStateChangedHandlers[instanceID] = movementStateChangedEntry;
+		ulong num = CellChangeMonitor.Join(instanceID, this.nextHandlerID);
+		this.nextHandlerID += 1U;
+		movementStateChangedEntry.AddHandler(handler, context, num);
+		return num;
 	}
 
-	public void UnregisterMovementStateChanged(int instance_id, Action<Transform, bool> callback)
+	public void UnregisterMovementStateChanged(ref ulong handlerid)
 	{
-		CellChangeMonitor.MovementStateChangedEntry movementStateChangedEntry = default(CellChangeMonitor.MovementStateChangedEntry);
-		if (this.movementStateChangedHandlers.TryGetValue(instance_id, out movementStateChangedEntry))
+		int num;
+		uint num2;
+		CellChangeMonitor.Split(handlerid, out num, out num2);
+		CellChangeMonitor.MovementStateChangedEntry movementStateChangedEntry;
+		if (this.movementStateChangedHandlers.TryGetValue(num, out movementStateChangedEntry))
 		{
-			movementStateChangedEntry.handlers.Remove(callback);
-			if (movementStateChangedEntry.handlers.Count == 0)
+			movementStateChangedEntry.RemoveHandler(handlerid);
+			handlerid = 0UL;
+			if (movementStateChangedEntry.Empty)
 			{
-				this.movementStateChangedHandlers.Remove(instance_id);
+				CellChangeMonitor.MovementStateChangedEntry.Pool.Release(movementStateChangedEntry);
+				this.movementStateChangedHandlers.Remove(num);
 			}
 		}
 	}
 
-	public void UnregisterMovementStateChanged(Transform transform, Action<Transform, bool> callback)
-	{
-		this.UnregisterMovementStateChanged(transform.GetInstanceID(), callback);
-	}
-
-	public int RegisterCellChangedHandler(Transform transform, global::System.Action callback, string debug_name)
+	public ulong RegisterCellChangedHandler(Transform transform, Action<object> callback, object context = null, string debug_name = null)
 	{
 		int instanceID = transform.GetInstanceID();
-		CellChangeMonitor.CellChangedEntry cellChangedEntry = default(CellChangeMonitor.CellChangedEntry);
+		CellChangeMonitor.CellChangedEntry cellChangedEntry = null;
 		if (!this.cellChangedHandlers.TryGetValue(instanceID, out cellChangedEntry))
 		{
-			cellChangedEntry = default(CellChangeMonitor.CellChangedEntry);
-			cellChangedEntry.transform = transform;
-			cellChangedEntry.handlers = new List<CellChangeMonitor.CellChangedEntry.Handler>();
+			cellChangedEntry = CellChangeMonitor.CellChangedEntry.Pool.Get();
+			this.cellChangedHandlers[instanceID] = cellChangedEntry;
 		}
-		CellChangeMonitor.CellChangedEntry.Handler handler = new CellChangeMonitor.CellChangedEntry.Handler
-		{
-			name = debug_name,
-			callback = callback
-		};
-		cellChangedEntry.handlers.Add(handler);
-		this.cellChangedHandlers[instanceID] = cellChangedEntry;
-		return instanceID;
+		cellChangedEntry.UpdateTransform(transform);
+		ulong num = CellChangeMonitor.Join(instanceID, this.nextHandlerID);
+		this.nextHandlerID += 1U;
+		cellChangedEntry.AddHandler(callback, context, num, debug_name);
+		return num;
 	}
 
-	public void UnregisterCellChangedHandler(int instance_id, global::System.Action callback)
+	public void UnregisterCellChangedHandler(ref ulong handlerID)
 	{
-		CellChangeMonitor.CellChangedEntry cellChangedEntry = default(CellChangeMonitor.CellChangedEntry);
-		if (this.cellChangedHandlers.TryGetValue(instance_id, out cellChangedEntry))
+		int num;
+		uint num2;
+		CellChangeMonitor.Split(handlerID, out num, out num2);
+		CellChangeMonitor.CellChangedEntry cellChangedEntry;
+		if (this.cellChangedHandlers.TryGetValue(num, out cellChangedEntry))
 		{
-			for (int i = 0; i < cellChangedEntry.handlers.Count; i++)
+			cellChangedEntry.RemoveHandler(handlerID);
+			if (cellChangedEntry.Empty)
 			{
-				if (!(cellChangedEntry.handlers[i].callback != callback))
-				{
-					cellChangedEntry.handlers.RemoveAt(i);
-					break;
-				}
+				CellChangeMonitor.CellChangedEntry.Pool.Release(cellChangedEntry);
+				this.cellChangedHandlers.Remove(num);
 			}
-			if (cellChangedEntry.handlers.Count == 0)
-			{
-				this.cellChangedHandlers.Remove(instance_id);
-			}
+			handlerID = 0UL;
 		}
-	}
-
-	public void UnregisterCellChangedHandler(Transform transform, global::System.Action callback)
-	{
-		this.UnregisterCellChangedHandler(transform.GetInstanceID(), callback);
 	}
 
 	public void ClearLastKnownCell(Transform transform)
 	{
 		int instanceID = transform.GetInstanceID();
-		this.transformLastKnownCell.Remove(instanceID);
+		CellChangeMonitor.CellChangedEntry cellChangedEntry;
+		if (this.cellChangedHandlers.TryGetValue(instanceID, out cellChangedEntry))
+		{
+			cellChangedEntry.SetCell(-1);
+		}
 	}
 
 	public int PosToCell(Vector3 pos)
@@ -121,119 +137,310 @@ public class CellChangeMonitor : Singleton<CellChangeMonitor>
 
 	public void RenderEveryTick()
 	{
-		HashSet<int> hashSet = this.pendingDirtyTransforms;
-		this.pendingDirtyTransforms = this.dirtyTransforms;
-		this.dirtyTransforms = hashSet;
+		this.pendingDirtyTransforms.Swap(this.dirtyTransforms);
 		this.pendingDirtyTransforms.Clear();
 		this.previouslyMovingTransforms.Clear();
-		hashSet = this.previouslyMovingTransforms;
-		this.previouslyMovingTransforms = this.movingTransforms;
-		this.movingTransforms = hashSet;
-		foreach (int num in this.dirtyTransforms)
+		this.previouslyMovingTransforms.Swap(this.movingTransforms);
+		int i = 0;
+		while (i < this.dirtyTransforms.Count)
 		{
-			CellChangeMonitor.CellChangedEntry cellChangedEntry = default(CellChangeMonitor.CellChangedEntry);
-			if (this.cellChangedHandlers.TryGetValue(num, out cellChangedEntry))
+			int num = this.dirtyTransforms[i];
+			CellChangeMonitor.CellChangedEntry cellChangedEntry;
+			if (!this.cellChangedHandlers.TryGetValue(num, out cellChangedEntry))
 			{
-				if (cellChangedEntry.transform == null)
-				{
-					continue;
-				}
-				int num2 = -1;
-				this.transformLastKnownCell.TryGetValue(num, out num2);
-				int num3 = this.PosToCell(cellChangedEntry.transform.GetPosition());
-				if (num2 != num3)
-				{
-					this.cellChangedCallbacksToRun.Clear();
-					this.cellChangedCallbacksToRun.AddRange(cellChangedEntry.handlers);
-					foreach (CellChangeMonitor.CellChangedEntry.Handler handler in this.cellChangedCallbacksToRun)
-					{
-						foreach (CellChangeMonitor.CellChangedEntry.Handler handler2 in cellChangedEntry.handlers)
-						{
-							if (handler2.callback == handler.callback)
-							{
-								handler2.callback();
-								break;
-							}
-						}
-					}
-					this.transformLastKnownCell[num] = num3;
-				}
+				goto IL_006F;
 			}
+			if (cellChangedEntry.Valid)
+			{
+				if (cellChangedEntry.SetCell())
+				{
+					cellChangedEntry.TriggerUpdate();
+					goto IL_006F;
+				}
+				goto IL_006F;
+			}
+			IL_00A1:
+			i++;
+			continue;
+			IL_006F:
 			this.movingTransforms.Add(num);
-			if (!this.previouslyMovingTransforms.Contains(num))
+			CellChangeMonitor.MovementStateChangedEntry movementStateChangedEntry;
+			if (!this.previouslyMovingTransforms.Contains(num) && this.movementStateChangedHandlers.TryGetValue(num, out movementStateChangedEntry))
 			{
-				this.RunMovementStateChangedCallbacks(num, true);
+				movementStateChangedEntry.TriggerUpdate(true);
+				goto IL_00A1;
 			}
+			goto IL_00A1;
 		}
-		foreach (int num4 in this.previouslyMovingTransforms)
+		for (int j = 0; j < this.previouslyMovingTransforms.Count; j++)
 		{
-			if (!this.movingTransforms.Contains(num4))
+			int num2 = this.previouslyMovingTransforms[j];
+			CellChangeMonitor.MovementStateChangedEntry movementStateChangedEntry2;
+			if (!this.movingTransforms.Contains(num2) && this.movementStateChangedHandlers.TryGetValue(num2, out movementStateChangedEntry2))
 			{
-				this.RunMovementStateChangedCallbacks(num4, false);
+				movementStateChangedEntry2.TriggerUpdate(false);
 			}
 		}
 		this.dirtyTransforms.Clear();
-	}
-
-	private void RunMovementStateChangedCallbacks(int instance_id, bool state)
-	{
-		CellChangeMonitor.MovementStateChangedEntry movementStateChangedEntry = default(CellChangeMonitor.MovementStateChangedEntry);
-		if (this.movementStateChangedHandlers.TryGetValue(instance_id, out movementStateChangedEntry))
-		{
-			this.moveChangedCallbacksToRun.Clear();
-			this.moveChangedCallbacksToRun.AddRange(movementStateChangedEntry.handlers);
-			foreach (Action<Transform, bool> action in this.moveChangedCallbacksToRun)
-			{
-				if (movementStateChangedEntry.handlers.Contains(action))
-				{
-					action(movementStateChangedEntry.transform, state);
-				}
-			}
-		}
 	}
 
 	private void Validate()
 	{
 	}
 
+	private uint nextHandlerID = 1U;
+
 	private Dictionary<int, CellChangeMonitor.CellChangedEntry> cellChangedHandlers = new Dictionary<int, CellChangeMonitor.CellChangedEntry>();
 
 	private Dictionary<int, CellChangeMonitor.MovementStateChangedEntry> movementStateChangedHandlers = new Dictionary<int, CellChangeMonitor.MovementStateChangedEntry>();
 
-	private HashSet<int> pendingDirtyTransforms = new HashSet<int>();
+	private HybridListHashSet<int> pendingDirtyTransforms = new HybridListHashSet<int>();
 
-	private HashSet<int> dirtyTransforms = new HashSet<int>();
+	private HybridListHashSet<int> dirtyTransforms = new HybridListHashSet<int>();
 
-	private HashSet<int> movingTransforms = new HashSet<int>();
+	private HybridListHashSet<int> movingTransforms = new HybridListHashSet<int>();
 
-	private HashSet<int> previouslyMovingTransforms = new HashSet<int>();
-
-	private Dictionary<int, int> transformLastKnownCell = new Dictionary<int, int>();
-
-	private List<CellChangeMonitor.CellChangedEntry.Handler> cellChangedCallbacksToRun = new List<CellChangeMonitor.CellChangedEntry.Handler>();
-
-	private List<Action<Transform, bool>> moveChangedCallbacksToRun = new List<Action<Transform, bool>>();
+	private HybridListHashSet<int> previouslyMovingTransforms = new HybridListHashSet<int>();
 
 	private int gridWidth;
 
-	private struct CellChangedEntry
+	[StructLayout(LayoutKind.Explicit, Size = 8)]
+	private struct IDJoiner
 	{
-		public Transform transform;
+		[FieldOffset(0)]
+		public int front;
 
-		public List<CellChangeMonitor.CellChangedEntry.Handler> handlers;
+		[FieldOffset(4)]
+		public uint back;
 
-		public struct Handler
+		[FieldOffset(0)]
+		public ulong full;
+	}
+
+	private class CellChangedEntry
+	{
+		private void Reset()
 		{
-			public string name;
+			this.handlers.Clear();
+			this.lastCell = -1;
+		}
 
-			public global::System.Action callback;
+		public bool Empty
+		{
+			get
+			{
+				return this.handlers.Count == 0;
+			}
+		}
+
+		public bool Valid
+		{
+			get
+			{
+				return this.transform != null;
+			}
+		}
+
+		public void UpdateTransform(Transform transform)
+		{
+			this.transform = transform;
+		}
+
+		public bool SetCell()
+		{
+			return this.SetCell(Singleton<CellChangeMonitor>.Instance.PosToCell(this.transform.GetPosition()));
+		}
+
+		public bool SetCell(int cell)
+		{
+			if (this.lastCell == cell)
+			{
+				return false;
+			}
+			this.lastCell = cell;
+			return true;
+		}
+
+		public void TriggerUpdate()
+		{
+			this.inUpdate = true;
+			this.pendingRemoval = CollectionPool<List<ulong>, ulong>.Get();
+			int count = this.handlers.Count;
+			for (int i = 0; i < count; i++)
+			{
+				if (!this.pendingRemoval.Contains(this.handlers[i].handlerID))
+				{
+					this.handlers[i].Invoke();
+				}
+			}
+			this.inUpdate = false;
+			foreach (ulong num in this.pendingRemoval)
+			{
+				this.RemoveHandler(num);
+			}
+			CollectionPool<List<ulong>, ulong>.Release(this.pendingRemoval);
+			this.pendingRemoval = null;
+		}
+
+		public void AddHandler(Action<object> cb, object context, ulong id, string name = null)
+		{
+			this.handlers.Add(new CellChangeMonitor.CellChangedEntry.Handler
+			{
+				callback = cb,
+				context = context,
+				handlerID = id
+			});
+		}
+
+		public void RemoveHandler(ulong id)
+		{
+			if (this.inUpdate)
+			{
+				this.pendingRemoval.Add(id);
+				return;
+			}
+			for (int i = 0; i < this.handlers.Count; i++)
+			{
+				if (this.handlers[i].handlerID == id)
+				{
+					this.handlers.RemoveAtSwap<CellChangeMonitor.CellChangedEntry.Handler>(i);
+					return;
+				}
+			}
+		}
+
+		public static ObjectPool<CellChangeMonitor.CellChangedEntry> Pool = new ObjectPool<CellChangeMonitor.CellChangedEntry>(() => new CellChangeMonitor.CellChangedEntry(), null, delegate(CellChangeMonitor.CellChangedEntry entry)
+		{
+			entry.Reset();
+		}, null, false, 10, 256);
+
+		private Transform transform;
+
+		private List<CellChangeMonitor.CellChangedEntry.Handler> handlers = new List<CellChangeMonitor.CellChangedEntry.Handler>();
+
+		private bool inUpdate;
+
+		private List<ulong> pendingRemoval;
+
+		private int lastCell = -1;
+
+		private struct Handler
+		{
+			public string name
+			{
+				get
+				{
+					return null;
+				}
+			}
+
+			public void Invoke()
+			{
+				this.callback(this.context);
+			}
+
+			public Action<object> callback;
+
+			public object context;
+
+			public ulong handlerID;
 		}
 	}
 
-	private struct MovementStateChangedEntry
+	private class MovementStateChangedEntry
 	{
-		public Transform transform;
+		public bool Empty
+		{
+			get
+			{
+				return this.handlers == null || this.handlers.Count == 0;
+			}
+		}
 
-		public List<Action<Transform, bool>> handlers;
+		public void Setup(Transform transform)
+		{
+			this.transform = transform;
+		}
+
+		public void Clear()
+		{
+			this.transform = null;
+			this.handlers.Clear();
+		}
+
+		public void TriggerUpdate(bool value)
+		{
+			this.inUpdate = true;
+			this.pendingRemovals = CollectionPool<List<ulong>, ulong>.Get();
+			int count = this.handlers.Count;
+			for (int i = 0; i < count; i++)
+			{
+				if (!this.pendingRemovals.Contains(this.handlers[i].handlerID))
+				{
+					this.handlers[i].Invoke(this.transform, value);
+				}
+			}
+			this.inUpdate = false;
+			foreach (ulong num in this.pendingRemovals)
+			{
+				this.RemoveHandler(num);
+			}
+			CollectionPool<List<ulong>, ulong>.Release(this.pendingRemovals);
+			this.pendingRemovals = null;
+		}
+
+		public void AddHandler(Action<Transform, bool, object> cb, object context, ulong id)
+		{
+			this.handlers.Add(new CellChangeMonitor.MovementStateChangedEntry.Handler
+			{
+				handler = cb,
+				context = context,
+				handlerID = id
+			});
+		}
+
+		public void RemoveHandler(ulong id)
+		{
+			if (this.inUpdate)
+			{
+				this.pendingRemovals.Add(id);
+				return;
+			}
+			for (int i = 0; i < this.handlers.Count; i++)
+			{
+				if (this.handlers[i].handlerID == id)
+				{
+					this.handlers.RemoveAtSwap<CellChangeMonitor.MovementStateChangedEntry.Handler>(i);
+					return;
+				}
+			}
+		}
+
+		private Transform transform;
+
+		private List<CellChangeMonitor.MovementStateChangedEntry.Handler> handlers = new List<CellChangeMonitor.MovementStateChangedEntry.Handler>();
+
+		private bool inUpdate;
+
+		private List<ulong> pendingRemovals;
+
+		public static ObjectPool<CellChangeMonitor.MovementStateChangedEntry> Pool = new ObjectPool<CellChangeMonitor.MovementStateChangedEntry>(() => new CellChangeMonitor.MovementStateChangedEntry(), null, delegate(CellChangeMonitor.MovementStateChangedEntry entry)
+		{
+			entry.Clear();
+		}, null, false, 10, 256);
+
+		private struct Handler
+		{
+			public void Invoke(Transform t, bool b)
+			{
+				this.handler(t, b, this.context);
+			}
+
+			public ulong handlerID;
+
+			public Action<Transform, bool, object> handler;
+
+			public object context;
+		}
 	}
 }

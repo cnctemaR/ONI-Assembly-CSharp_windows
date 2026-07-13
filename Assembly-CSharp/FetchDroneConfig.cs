@@ -19,7 +19,11 @@ public class FetchDroneConfig : IEntityConfig, IHasDlcRestrictions
 
 	public GameObject CreatePrefab()
 	{
-		GameObject gameObject = EntityTemplates.CreateBasicEntity("FetchDrone", this.name, this.desc, 200f, true, Assets.GetAnim("swoopy_bot_kanim"), "idle_loop", Grid.SceneLayer.Move, SimHashes.Creature, new List<Tag> { GameTags.Experimental }, 293f);
+		GameObject gameObject = EntityTemplates.CreateBasicEntity("FetchDrone", this.name, this.desc, 200f, true, Assets.GetAnim("swoopy_bot_kanim"), "idle_loop", Grid.SceneLayer.Move, SimHashes.Creature, new List<Tag>
+		{
+			GameTags.Robots.Behaviours.HasDoorPermissions,
+			GameTags.Experimental
+		}, 293f);
 		KBatchedAnimController component = gameObject.GetComponent<KBatchedAnimController>();
 		component.isMovable = true;
 		gameObject.AddOrGet<LoopingSounds>();
@@ -104,10 +108,11 @@ public class FetchDroneConfig : IEntityConfig, IHasDlcRestrictions
 		kprefabID.AddTag(GameTags.DupeBrain, false);
 		kprefabID.AddTag(GameTags.Robot, false);
 		Navigator navigator = gameObject.AddOrGet<Navigator>();
-		navigator.NavGridName = "FlyerNavGrid1x1";
+		navigator.NavGridName = "RobotFlyerGrid1x1";
 		navigator.CurrentNavType = NavType.Hover;
 		navigator.defaultSpeed = 2f;
 		navigator.updateProber = true;
+		navigator.executePathProbeTaskAsync = true;
 		navigator.sceneLayer = Grid.SceneLayer.Creatures;
 		gameObject.AddOrGet<Sensors>();
 		Pickupable pickupable = gameObject.AddOrGet<Pickupable>();
@@ -279,22 +284,20 @@ public class FetchDroneConfig : IEntityConfig, IHasDlcRestrictions
 		Sensors component = inst.GetComponent<Sensors>();
 		component.Add(new PathProberSensor(component));
 		component.Add(new PickupableSensor(component));
-		PathProber component2 = inst.GetComponent<PathProber>();
-		if (component2 != null)
-		{
-			component2.SetGroupProber(MinionGroupProber.Get());
-		}
 		inst.GetComponent<LoopingSounds>().StartSound(GlobalAssets.GetSound("Flydo_flying_LP", false));
-		Movable component3 = inst.GetComponent<Movable>();
-		component3.tagRequiredForMove = GameTags.Robots.Behaviours.NoElectroBank;
-		component3.onDeliveryComplete = delegate(GameObject go)
+		Movable component2 = inst.GetComponent<Movable>();
+		component2.tagRequiredForMove = GameTags.Robots.Behaviours.NoElectroBank;
+		component2.onDeliveryComplete = delegate(GameObject go)
 		{
 			go.GetComponent<KBatchedAnimController>().Play("dead_battery", KAnim.PlayMode.Once, 1f, 0f);
 		};
-		component3.onPickupComplete = delegate(GameObject go)
+		component2.onPickupComplete = delegate(GameObject go)
 		{
 			go.GetComponent<KBatchedAnimController>().Play("in_storage", KAnim.PlayMode.Once, 1f, 0f);
 		};
+		Navigator navigator = inst.AddOrGet<Navigator>();
+		navigator.transitionDriver.overrideLayers.Add(new DoorTransitionLayer(navigator));
+		navigator.reportOccupation = true;
 	}
 
 	public const string ID = "FetchDrone";

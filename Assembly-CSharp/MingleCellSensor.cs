@@ -8,10 +8,20 @@ public class MingleCellSensor : Sensor
 	{
 		this.navigator = base.GetComponent<Navigator>();
 		this.brain = base.GetComponent<MinionBrain>();
+		this.scheduable = base.GetComponent<Schedulable>();
+	}
+
+	public bool IsAllowed()
+	{
+		return ScheduleManager.Instance.IsAllowed(this.scheduable, Db.Get().ScheduleBlockTypes.Recreation);
 	}
 
 	public override void Update()
 	{
+		if (!this.IsAllowed())
+		{
+			return;
+		}
 		this.cell = Grid.InvalidCell;
 		int num = int.MaxValue;
 		ListPool<int, MingleCellSensor>.PooledList pooledList = ListPool<int, MingleCellSensor>.Allocate();
@@ -50,6 +60,8 @@ public class MingleCellSensor : Sensor
 	private MinionBrain brain;
 
 	private Navigator navigator;
+
+	private Schedulable scheduable;
 
 	private int cell;
 }

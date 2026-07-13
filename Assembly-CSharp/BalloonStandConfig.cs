@@ -24,7 +24,7 @@ public class BalloonStandConfig : IEntityConfig
 	{
 		GetBalloonWorkable component = inst.GetComponent<GetBalloonWorkable>();
 		WorkChore<GetBalloonWorkable> workChore = new WorkChore<GetBalloonWorkable>(Db.Get().ChoreTypes.JoyReaction, component, null, true, new Action<Chore>(this.MakeNewBalloonChore), null, null, true, Db.Get().ScheduleBlockTypes.Recreation, false, true, null, false, true, true, PriorityScreen.PriorityClass.high, 5, true, true);
-		workChore.AddPrecondition(this.HasNoBalloon, workChore);
+		workChore.AddPrecondition(BalloonStandConfig.HasNoBalloon, workChore);
 		workChore.AddPrecondition(ChorePreconditions.instance.IsNotARobot, null);
 		component.GetBalloonArtist().NextBalloonOverride();
 	}
@@ -33,25 +33,20 @@ public class BalloonStandConfig : IEntityConfig
 	{
 		GetBalloonWorkable component = chore.target.GetComponent<GetBalloonWorkable>();
 		WorkChore<GetBalloonWorkable> workChore = new WorkChore<GetBalloonWorkable>(Db.Get().ChoreTypes.JoyReaction, component, null, true, new Action<Chore>(this.MakeNewBalloonChore), null, null, true, Db.Get().ScheduleBlockTypes.Recreation, false, true, null, false, true, true, PriorityScreen.PriorityClass.high, 5, true, true);
-		workChore.AddPrecondition(this.HasNoBalloon, workChore);
+		workChore.AddPrecondition(BalloonStandConfig.HasNoBalloon, workChore);
 		workChore.AddPrecondition(ChorePreconditions.instance.IsNotARobot, null);
 		component.GetBalloonArtist().NextBalloonOverride();
 	}
 
-	public BalloonStandConfig()
-	{
-		Chore.Precondition precondition = default(Chore.Precondition);
-		precondition.id = "HasNoBalloon";
-		precondition.description = "__ Duplicant doesn't have a balloon already";
-		precondition.fn = delegate(ref Chore.Precondition.Context context, object data)
-		{
-			return !(context.consumerState.consumer == null) && !context.consumerState.gameObject.GetComponent<Effects>().HasEffect("HasBalloon");
-		};
-		this.HasNoBalloon = precondition;
-		base..ctor();
-	}
-
 	public static readonly string ID = "BalloonStand";
 
-	private Chore.Precondition HasNoBalloon;
+	private static Chore.Precondition HasNoBalloon = new Chore.Precondition
+	{
+		id = "HasNoBalloon",
+		description = "__ Duplicant doesn't have a balloon already",
+		fn = delegate(ref Chore.Precondition.Context context, object data)
+		{
+			return !(context.consumerState.consumer == null) && !context.consumerState.gameObject.GetComponent<Effects>().HasEffect("HasBalloon");
+		}
+	};
 }

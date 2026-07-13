@@ -39,7 +39,7 @@ public static class ModUtil
 			global::Debug.LogWarning(string.Concat(new string[] { "Mod: Building '", relativeBuildingId, "' doesn't exist, inserting '", building_id, "' at the end of the list instead" }));
 			return;
 		}
-		int num3 = ((ordering == ModUtil.BuildingOrdering.After) ? (num2 + 1) : Mathf.Max(num2 - 1, 0));
+		int num3 = ((ordering == ModUtil.BuildingOrdering.After) ? (num2 + 1) : Mathf.Max(num2, 0));
 		buildingAndSubcategoryData.Insert(num3, keyValuePair);
 	}
 

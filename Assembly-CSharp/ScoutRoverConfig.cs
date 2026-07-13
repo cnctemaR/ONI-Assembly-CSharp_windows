@@ -41,7 +41,7 @@ public class ScoutRoverConfig : IEntityConfig, IHasDlcRestrictions
 		{
 			effects.Add("ScoutBotCharging", false);
 		}
-		inst.Subscribe(856640610, delegate(object data)
+		inst.Subscribe(856640610, delegate(object _)
 		{
 			if (inst.transform.parent == null)
 			{

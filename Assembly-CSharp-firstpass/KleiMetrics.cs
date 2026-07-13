@@ -458,6 +458,11 @@ public class KleiMetrics : ThreadedHttps<KleiMetrics>
 		return ThreadedHttps<KleiMetrics>.Instance.PostMetricData(dictionary, "SendProfileStats") == "OK";
 	}
 
+	public static string GetOSName()
+	{
+		return SystemInfo.operatingSystem;
+	}
+
 	public static Dictionary<string, object> GetHardwareStats()
 	{
 		return new Dictionary<string, object>
@@ -468,7 +473,7 @@ public class KleiMetrics : ThreadedHttps<KleiMetrics>
 			},
 			{
 				"OSname",
-				SystemInfo.operatingSystem
+				KleiMetrics.GetOSName()
 			},
 			{
 				"OSversion",

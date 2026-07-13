@@ -62,7 +62,7 @@ public class Structure : KMonoBehaviour
 			}
 			this.operational.SetFlag(Structure.notEntombedFlag, !this.isEntombed);
 			base.GetComponent<KSelectable>().ToggleStatusItem(Db.Get().BuildingStatusItems.Entombed, this.isEntombed, this);
-			base.Trigger(-1089732772, null);
+			base.Trigger(-1089732772, BoxedBools.Box(this.isEntombed));
 		}
 	}
 

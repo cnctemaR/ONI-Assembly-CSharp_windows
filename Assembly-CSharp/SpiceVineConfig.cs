@@ -59,7 +59,9 @@ public class SpiceVineConfig : IEntityConfig
 		list2.Add(GameTags.CropSeed);
 		SingleEntityReceptacle.ReceptacleDirection receptacleDirection = SingleEntityReceptacle.ReceptacleDirection.Bottom;
 		string text9 = global::STRINGS.CREATURES.SPECIES.SPICE_VINE.DOMESTICATEDDESC;
-		EntityTemplates.MakeHangingOffsets(EntityTemplates.CreateAndRegisterPreviewForPlant(EntityTemplates.CreateAndRegisterSeedForPlant(gameObject2, hasDlcRestrictions, productionType, text5, text6, text7, anim2, text8, num4, list2, receptacleDirection, default(Tag), 4, text9, EntityTemplates.CollisionShape.CIRCLE, 0.3f, 0.3f, null, "", false), "SpiceVine_preview", Assets.GetAnim("vinespicenut_kanim"), "place", 1, 3), 1, 3);
+		GameObject gameObject3 = EntityTemplates.CreateAndRegisterPreviewForPlant(EntityTemplates.CreateAndRegisterSeedForPlant(gameObject2, hasDlcRestrictions, productionType, text5, text6, text7, anim2, text8, num4, list2, receptacleDirection, default(Tag), 4, text9, EntityTemplates.CollisionShape.CIRCLE, 0.3f, 0.3f, null, "", false), "SpiceVine_preview", Assets.GetAnim("vinespicenut_kanim"), "place", 1, 3);
+		gameObject.AddOrGet<PlantFiberProducer>().amount = 16f;
+		EntityTemplates.MakeHangingOffsets(gameObject3, 1, 3);
 		return gameObject;
 	}
 
@@ -78,4 +80,6 @@ public class SpiceVineConfig : IEntityConfig
 	public const float FERTILIZATION_RATE = 0.0016666667f;
 
 	public const float WATER_RATE = 0.058333334f;
+
+	public const float PLANT_FIBER_PRODUCED_PER_CYCLE = 16f;
 }

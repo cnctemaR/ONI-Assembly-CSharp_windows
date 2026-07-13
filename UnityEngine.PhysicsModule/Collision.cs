@@ -210,15 +210,15 @@ namespace UnityEngine
 			return num;
 		}
 
-		[Obsolete("Do not use Collision.GetEnumerator(), enumerate using non-allocating array returned by Collision.GetContacts() or enumerate using Collision.GetContact(index) instead.", false)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
+		[Obsolete("Do not use Collision.GetEnumerator(), enumerate using non-allocating array returned by Collision.GetContacts() or enumerate using Collision.GetContact(index) instead.", false)]
 		public virtual IEnumerator GetEnumerator()
 		{
 			return this.contacts.GetEnumerator();
 		}
 
-		[Obsolete("Use Collision.relativeVelocity instead. (UnityUpgradable) -> relativeVelocity", false)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
+		[Obsolete("Use Collision.relativeVelocity instead. (UnityUpgradable) -> relativeVelocity", false)]
 		public Vector3 impactForceSum
 		{
 			get

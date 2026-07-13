@@ -25,7 +25,7 @@ public class RationBox : KMonoBehaviour, IUserControlledCapacity, IRender1000ms,
 		this.filteredStorage.CleanUp();
 	}
 
-	private void OnOperationalChanged(object data)
+	private void OnOperationalChanged(object _)
 	{
 		Operational component = base.GetComponent<Operational>();
 		component.SetActive(component.IsOperational, false);

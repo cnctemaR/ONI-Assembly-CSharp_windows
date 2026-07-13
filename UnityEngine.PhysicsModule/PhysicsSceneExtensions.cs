@@ -23,8 +23,8 @@ namespace UnityEngine
 			throw new Exception("The physics scene associated with the Unity scene is invalid.");
 		}
 
-		[NativeMethod("GetPhysicsSceneFromUnityScene")]
 		[StaticAccessor("GetPhysicsManager()", StaticAccessorType.Dot)]
+		[NativeMethod("GetPhysicsSceneFromUnityScene")]
 		private static PhysicsScene GetPhysicsScene_Internal(Scene scene)
 		{
 			PhysicsScene physicsScene;

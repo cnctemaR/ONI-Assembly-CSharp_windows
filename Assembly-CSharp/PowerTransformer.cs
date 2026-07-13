@@ -24,7 +24,7 @@ public class PowerTransformer : Generator
 		base.ConsumeEnergy(joules);
 	}
 
-	private void OnOperationalChanged(object data)
+	private void OnOperationalChanged(object _)
 	{
 		this.UpdateJoulesLostPerSecond();
 	}

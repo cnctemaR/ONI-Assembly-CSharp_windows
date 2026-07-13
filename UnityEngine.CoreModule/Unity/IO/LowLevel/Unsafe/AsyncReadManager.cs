@@ -10,8 +10,8 @@ namespace Unity.IO.LowLevel.Unsafe
 	[NativeHeader("Runtime/File/AsyncReadManagerManagedApi.h")]
 	public static class AsyncReadManager
 	{
-		[FreeFunction("AsyncReadManagerManaged::Read", IsThreadSafe = true)]
 		[ThreadAndSerializationSafe]
+		[FreeFunction("AsyncReadManagerManaged::Read", IsThreadSafe = true)]
 		private unsafe static ReadHandle ReadInternal(string filename, void* cmds, uint cmdCount, string assetName, ulong typeID, AssetLoadingSubsystem subsystem)
 		{
 			ReadHandle readHandle;
@@ -43,8 +43,8 @@ namespace Unity.IO.LowLevel.Unsafe
 			return AsyncReadManager.GetFileInfoInternal(filename, (void*)result);
 		}
 
-		[FreeFunction("AsyncReadManagerManaged::ReadWithHandles_NativePtr", IsThreadSafe = true)]
 		[ThreadAndSerializationSafe]
+		[FreeFunction("AsyncReadManagerManaged::ReadWithHandles_NativePtr", IsThreadSafe = true)]
 		private unsafe static ReadHandle ReadWithHandlesInternal_NativePtr(in FileHandle fileHandle, void* readCmdArray, JobHandle dependency)
 		{
 			ReadHandle readHandle;
@@ -81,8 +81,8 @@ namespace Unity.IO.LowLevel.Unsafe
 			return AsyncReadManager.ReadWithHandlesInternal_NativeCopy(in fileHandle, UnsafeUtility.AddressOf<ReadCommandArray>(ref readCmdArray));
 		}
 
-		[FreeFunction("AsyncReadManagerManaged::ScheduleOpenRequest", IsThreadSafe = true)]
 		[ThreadAndSerializationSafe]
+		[FreeFunction("AsyncReadManagerManaged::ScheduleOpenRequest", IsThreadSafe = true)]
 		private static FileHandle OpenFileAsync_Internal(string fileName)
 		{
 			FileHandle fileHandle;
@@ -109,8 +109,8 @@ namespace Unity.IO.LowLevel.Unsafe
 			return jobHandle;
 		}
 
-		[FreeFunction("AsyncReadManagerManaged::ScheduleCloseCachedFileRequest", IsThreadSafe = true)]
 		[ThreadAndSerializationSafe]
+		[FreeFunction("AsyncReadManagerManaged::ScheduleCloseCachedFileRequest", IsThreadSafe = true)]
 		public static JobHandle CloseCachedFileAsync(string fileName, JobHandle dependency = default(JobHandle))
 		{
 			JobHandle jobHandle;

@@ -429,7 +429,10 @@ public class KAnimBatch
 		public int Add(Texture2D atlas)
 		{
 			DebugUtil.Assert(atlas != null, "KAnimBatch Atlas is null");
-			DebugUtil.Assert(this.atlases.Count < this.maxAtlases);
+			if (this.atlases.Count >= this.maxAtlases)
+			{
+				DebugUtil.DevLogError(string.Format("Max atlas count reached. atlases.Count={0}, maxAtlases={1}, atlas.name={2}", this.atlases.Count, this.maxAtlases, atlas.name));
+			}
 			int num = this.atlases.IndexOf(atlas);
 			if (num == -1)
 			{

@@ -6,16 +6,16 @@ public class PickupableSensor : Sensor
 		: base(sensors)
 	{
 		this.worker = base.GetComponent<WorkerBase>();
-		this.pathProber = base.GetComponent<PathProber>();
+		this.navigator = base.GetComponent<Navigator>();
 	}
 
 	public override void Update()
 	{
-		GlobalChoreProvider.Instance.UpdateFetches(this.pathProber);
-		Game.Instance.fetchManager.UpdatePickups(this.pathProber, this.worker);
+		GlobalChoreProvider.Instance.UpdateFetches(this.navigator);
+		Game.Instance.fetchManager.UpdatePickups(this.navigator, this.worker);
 	}
 
-	private PathProber pathProber;
+	private Navigator navigator;
 
 	private WorkerBase worker;
 }

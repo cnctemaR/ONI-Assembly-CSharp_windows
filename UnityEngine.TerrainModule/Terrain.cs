@@ -503,8 +503,8 @@ namespace UnityEngine
 			set;
 		}
 
-		[Obsolete("splatmapDistance is deprecated, please use basemapDistance instead. (UnityUpgradable) -> basemapDistance", true)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
+		[Obsolete("splatmapDistance is deprecated, please use basemapDistance instead. (UnityUpgradable) -> basemapDistance", true)]
 		public float splatmapDistance
 		{
 			get

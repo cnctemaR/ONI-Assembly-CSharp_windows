@@ -1172,7 +1172,7 @@ namespace UnityEngine.UIElements.UIR
 			return this.m_DrawStats;
 		}
 
-		private static void ProcessDeviceFreeQueue()
+		public static void ProcessDeviceFreeQueue()
 		{
 			bool synchronousFree = UIRenderDevice.m_SynchronousFree;
 			if (synchronousFree)

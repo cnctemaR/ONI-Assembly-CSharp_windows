@@ -366,6 +366,11 @@ namespace UnityEngine.UIElements
 		{
 		}
 
+		internal virtual IGenericMenu CreateMenu()
+		{
+			return new GenericDropdownMenu();
+		}
+
 		public virtual void Update()
 		{
 			this.scheduler.UpdateScheduledEvents();

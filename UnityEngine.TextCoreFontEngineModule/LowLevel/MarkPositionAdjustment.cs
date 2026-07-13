@@ -42,8 +42,8 @@ namespace UnityEngine.TextCore.LowLevel
 		[SerializeField]
 		private float m_XPositionAdjustment;
 
-		[NativeName("yCoordinate")]
 		[SerializeField]
+		[NativeName("yCoordinate")]
 		private float m_YPositionAdjustment;
 	}
 }

@@ -27,7 +27,6 @@ namespace UnityEngine.UIElements
 		public Hash128Field(string label, int maxLength = -1)
 			: base(label, maxLength, '\0', new Hash128Field.Hash128Input())
 		{
-			this.m_UpdateTextFromValue = true;
 			this.SetValueWithoutNotify(default(Hash128));
 			base.AddToClassList(Hash128Field.ussClassName);
 			base.labelElement.AddToClassList(Hash128Field.labelUssClassName);
@@ -112,8 +111,6 @@ namespace UnityEngine.UIElements
 				}
 			}
 		}
-
-		internal bool m_UpdateTextFromValue;
 
 		public new static readonly string ussClassName = "unity-hash128-field";
 

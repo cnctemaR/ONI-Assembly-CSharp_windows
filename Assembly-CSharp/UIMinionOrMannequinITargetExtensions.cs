@@ -98,7 +98,37 @@ public static class UIMinionOrMannequinITargetExtensions
 			}
 			break;
 		}
+		case ClothingOutfitUtility.OutfitType.JetSuit:
+			break;
+		default:
+			goto IL_0289;
 		}
+		using (DictionaryPool<PermitCategory, ClothingItemResource, UIMinionOrMannequin.ITarget>.PooledDictionary pooledDictionary2 = PoolsFor<UIMinionOrMannequin.ITarget>.AllocateDict<PermitCategory, ClothingItemResource>())
+		{
+			foreach (ClothingItemResource clothingItemResource2 in outfit)
+			{
+				DebugUtil.DevAssert(!pooledDictionary2.ContainsKey(clothingItemResource2.Category), "Duplicate item for category", null);
+				pooledDictionary2[clothingItemResource2.Category] = clothingItemResource2;
+			}
+			if (!pooledDictionary2.ContainsKey(PermitCategory.JetSuitHelmet))
+			{
+				pooledDictionary2[PermitCategory.JetSuitHelmet] = Db.Get().Permits.ClothingItems.Get("visonly_JetHelmetClear");
+			}
+			if (!pooledDictionary2.ContainsKey(PermitCategory.JetSuitBody))
+			{
+				pooledDictionary2[PermitCategory.JetSuitBody] = Db.Get().Permits.ClothingItems.Get("visonly_JetSuitBasic");
+			}
+			if (!pooledDictionary2.ContainsKey(PermitCategory.JetSuitGloves))
+			{
+				pooledDictionary2[PermitCategory.JetSuitGloves] = Db.Get().Permits.ClothingItems.Get("visonly_JetGlovesBasic");
+			}
+			if (!pooledDictionary2.ContainsKey(PermitCategory.JetSuitShoes))
+			{
+				pooledDictionary2[PermitCategory.JetSuitShoes] = Db.Get().Permits.ClothingItems.Get("visonly_JetShoesBasic");
+			}
+			return pooledDictionary2.Values.ToArray<ClothingItemResource>();
+		}
+		IL_0289:
 		throw new NotImplementedException();
 	}
 
@@ -110,17 +140,21 @@ public static class UIMinionOrMannequinITargetExtensions
 		case PermitCategory.DupeTops:
 		case PermitCategory.AtmoSuitBody:
 		case PermitCategory.AtmoSuitBelt:
+		case PermitCategory.JetSuitBody:
 			return UIMinionOrMannequinReactSource.OnTopChanged;
 		case PermitCategory.DupeBottoms:
 			return UIMinionOrMannequinReactSource.OnBottomChanged;
 		case PermitCategory.DupeGloves:
 		case PermitCategory.AtmoSuitGloves:
+		case PermitCategory.JetSuitGloves:
 			return UIMinionOrMannequinReactSource.OnGlovesChanged;
 		case PermitCategory.DupeShoes:
 		case PermitCategory.AtmoSuitShoes:
+		case PermitCategory.JetSuitShoes:
 			return UIMinionOrMannequinReactSource.OnShoesChanged;
 		case PermitCategory.DupeHats:
 		case PermitCategory.AtmoSuitHelmet:
+		case PermitCategory.JetSuitHelmet:
 			return UIMinionOrMannequinReactSource.OnHatChanged;
 		}
 		DebugUtil.DevAssert(false, string.Format("Couldn't find a reaction for \"{0}\" clothing item category being changed", clothingChangedCategory), null);

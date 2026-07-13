@@ -3,8 +3,8 @@ using System.Collections.Generic;
 
 namespace UnityEngine.TextCore.Text
 {
-	[ExcludeFromObjectFactory]
 	[ExcludeFromPreset]
+	[ExcludeFromObjectFactory]
 	[Serializable]
 	public class TextStyleSheet : ScriptableObject
 	{

@@ -10,7 +10,7 @@ public static class BaseMosquitoConfig
 		float num = 5f;
 		EffectorValues tier = DECOR.PENALTY.TIER0;
 		GameObject gameObject = EntityTemplates.CreatePlacedEntity(id, name, desc, num, Assets.GetAnim(anim_file), "idle_loop", Grid.SceneLayer.Creatures, 1, 1, tier, default(EffectorValues), SimHashes.Creature, null, 293f);
-		EntityTemplates.ExtendEntityToBasicCreature(gameObject, FactionManager.FactionID.Prey, traitId, isBaby ? "SwimmerNavGrid" : "FlyerNavGrid1x1", isBaby ? NavType.Swim : NavType.Hover, 32, 2f, null, 0f, !isBaby, true, warningLowTemperature, warningHighTemperature, lethalLowTemperature, lethalHighTemperature);
+		EntityTemplates.ExtendEntityToBasicCreature(false, gameObject, anim_file, isBaby ? null : "mosquito_build_kanim", null, FactionManager.FactionID.Prey, traitId, isBaby ? "SwimmerNavGrid" : "FlyerNavGrid1x1", isBaby ? NavType.Swim : NavType.Hover, 32, 2f, null, 0f, !isBaby, true, warningLowTemperature, warningHighTemperature, lethalLowTemperature, lethalHighTemperature);
 		if (!string.IsNullOrEmpty(symbol_override_prefix))
 		{
 			gameObject.AddOrGet<SymbolOverrideController>().ApplySymbolOverridesByAffix(Assets.GetAnim(anim_file), symbol_override_prefix, null, 0);
@@ -33,22 +33,24 @@ public static class BaseMosquitoConfig
 		}
 		def.lures = array;
 		gameObject.AddOrGetDef<ThreatMonitor.Def>();
+		OvercrowdingMonitor.Def def2 = gameObject.AddOrGetDef<OvercrowdingMonitor.Def>();
 		if (!isBaby)
 		{
 			component.AddTag(GameTags.Creatures.Flyer, false);
 			gameObject.AddOrGetDef<SubmergedMonitor.Def>();
 			gameObject.AddOrGet<PokeMonitor>();
-			gameObject.AddOrGetDef<OvercrowdingMonitor.Def>().spaceRequiredPerCreature = CREATURES.SPACE_REQUIREMENTS.TIER1;
 			component.prefabInitFn += delegate(GameObject inst)
 			{
 				inst.GetAttributes().Add(Db.Get().Attributes.MaxUnderwaterTravelCost);
 			};
+			def2.spaceRequiredPerCreature = CREATURES.SPACE_REQUIREMENTS.TIER1;
 		}
 		else
 		{
 			component.AddTag(GameTags.SwimmingCreature, false);
 			component.AddTag(GameTags.Creatures.Swimmer, false);
 			gameObject.AddComponent<Movable>();
+			def2.spaceRequiredPerCreature = 0;
 		}
 		EntityTemplates.CreateAndRegisterBaggedCreature(gameObject, !isBaby, !isBaby, isBaby);
 		ChoreTable.Builder builder = new ChoreTable.Builder().Add(new DeathStates.Def(), true, -1).Add(new AnimInterruptStates.Def(), true, -1).Add(new GrowUpStates.Def(), isBaby, -1)
@@ -77,11 +79,12 @@ public static class BaseMosquitoConfig
 				statusItemSTR_poking = pokingStatusItemSTRAddress
 			}, !isBaby, -1)
 			.Add(new MoveToLureStates.Def(), true, -1)
+			.Add(new CritterEmoteStates.Def(Assets.GetAnim("mosquito_emotes_kanim")), true, -1)
 			.PopInterruptGroup()
 			.Add(new IdleStates.Def(), true, -1);
-		CreatureFallMonitor.Def def2 = gameObject.AddOrGetDef<CreatureFallMonitor.Def>();
-		def2.canSwim = isBaby;
-		def2.checkHead = !isBaby;
+		CreatureFallMonitor.Def def3 = gameObject.AddOrGetDef<CreatureFallMonitor.Def>();
+		def3.canSwim = isBaby;
+		def3.checkHead = !isBaby;
 		gameObject.AddOrGetDef<FixedCapturableMonitor.Def>();
 		if (isBaby)
 		{

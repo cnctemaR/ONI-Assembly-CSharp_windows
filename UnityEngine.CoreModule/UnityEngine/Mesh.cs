@@ -13,9 +13,9 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Graphics/Mesh/MeshScriptBindings.h")]
 	[RequiredByNativeCode]
 	[ExcludeFromPreset]
+	[NativeHeader("Runtime/Graphics/Mesh/MeshScriptBindings.h")]
 	public sealed class Mesh : Object
 	{
 		[FreeFunction("MeshScripting::CreateMesh")]
@@ -194,8 +194,8 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern int GetVertexBufferStride(int stream);
 
-		[NativeThrows]
 		[FreeFunction(Name = "MeshScripting::GetNativeVertexBufferPtr", HasExplicitThis = true)]
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern IntPtr GetNativeVertexBufferPtr(int index);
 
@@ -295,8 +295,8 @@ namespace UnityEngine
 			this.InternalSetBoneWeights((IntPtr)bonesPerVertex.GetUnsafeReadOnlyPtr<byte>(), bonesPerVertex.Length, (IntPtr)weights.GetUnsafeReadOnlyPtr<BoneWeight1>(), weights.Length);
 		}
 
-		[SecurityCritical]
 		[FreeFunction(Name = "MeshScripting::SetBoneWeights", HasExplicitThis = true)]
+		[SecurityCritical]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void InternalSetBoneWeights(IntPtr bonesPerVertex, int bonesPerVertexSize, IntPtr weights, int weightsSize);
 
@@ -319,13 +319,13 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern int GetBoneWeightBufferLayoutInternal();
 
-		[FreeFunction(Name = "MeshScripting::GetAllBoneWeightsArray", HasExplicitThis = true)]
 		[SecurityCritical]
+		[FreeFunction(Name = "MeshScripting::GetAllBoneWeightsArray", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern IntPtr GetAllBoneWeightsArray();
 
-		[SecurityCritical]
 		[FreeFunction(Name = "MeshScripting::GetBonesPerVertexArray", HasExplicitThis = true)]
+		[SecurityCritical]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern IntPtr GetBonesPerVertexArray();
 
@@ -2361,8 +2361,8 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void set_bounds_Injected(ref Bounds value);
 
-		[StaticAccessor("MeshDataBindings", StaticAccessorType.DoubleColon)]
 		[NativeHeader("Runtime/Graphics/Mesh/MeshScriptBindings.h")]
+		[StaticAccessor("MeshDataBindings", StaticAccessorType.DoubleColon)]
 		public struct MeshData
 		{
 			[NativeMethod(IsThreadSafe = true)]

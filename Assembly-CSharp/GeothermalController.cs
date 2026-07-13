@@ -265,7 +265,7 @@ public class GeothermalController : StateMachineComponent<GeothermalController.S
 
 	protected void OnBuildingSelected(object clicked)
 	{
-		if (!(bool)clicked)
+		if (!((Boxed<bool>)clicked).value)
 		{
 			return;
 		}

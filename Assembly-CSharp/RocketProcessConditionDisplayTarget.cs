@@ -12,32 +12,49 @@ public class RocketProcessConditionDisplayTarget : KMonoBehaviour, IProcessCondi
 		return this.craftModuleInterface.GetConditionSet(conditionType);
 	}
 
+	public int PopulateConditionSet(ProcessCondition.ProcessConditionType conditionType, List<ProcessCondition> conditions)
+	{
+		if (this.craftModuleInterface == null)
+		{
+			this.craftModuleInterface = base.GetComponent<RocketModuleCluster>().CraftInterface;
+		}
+		return this.craftModuleInterface.PopulateConditionSet(conditionType, conditions);
+	}
+
 	public void Sim1000ms(float dt)
 	{
 		bool flag = false;
-		using (List<ProcessCondition>.Enumerator enumerator = this.GetConditionSet(ProcessCondition.ProcessConditionType.All).GetEnumerator())
+		List<ProcessCondition> list;
+		using (ProcessCondition.ListPool.Get(out list))
 		{
-			while (enumerator.MoveNext())
+			this.PopulateConditionSet(ProcessCondition.ProcessConditionType.All, list);
+			using (List<ProcessCondition>.Enumerator enumerator = list.GetEnumerator())
 			{
-				if (enumerator.Current.EvaluateCondition() == ProcessCondition.Status.Failure)
+				while (enumerator.MoveNext())
 				{
-					flag = true;
-					if (this.statusHandle == Guid.Empty)
+					if (enumerator.Current.EvaluateCondition() == ProcessCondition.Status.Failure)
 					{
-						this.statusHandle = base.GetComponent<KSelectable>().AddStatusItem(Db.Get().BuildingStatusItems.RocketChecklistIncomplete, null);
+						flag = true;
+						if (this.statusHandle == Guid.Empty)
+						{
+							this.statusHandle = this.kselectable.AddStatusItem(Db.Get().BuildingStatusItems.RocketChecklistIncomplete, null);
+							break;
+						}
 						break;
 					}
-					break;
 				}
 			}
 		}
 		if (!flag && this.statusHandle != Guid.Empty)
 		{
-			base.GetComponent<KSelectable>().RemoveStatusItem(this.statusHandle, false);
+			this.kselectable.RemoveStatusItem(this.statusHandle, false);
 		}
 	}
 
 	private CraftModuleInterface craftModuleInterface;
+
+	[MyCmpReq]
+	private KSelectable kselectable;
 
 	private Guid statusHandle = Guid.Empty;
 }

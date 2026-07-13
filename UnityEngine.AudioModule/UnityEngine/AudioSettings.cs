@@ -168,6 +168,18 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern string GetAmbisonicDecoderPluginName();
 
+		public static AudioSpatialExperience audioSpatialExperience
+		{
+			get
+			{
+				return AudioSpatialExperience.Bypassed;
+			}
+			set
+			{
+				Debug.LogWarning("AudioSettings.audioSpatialExperience is not implemented on this platform.");
+			}
+		}
+
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern bool SetConfiguration_Injected(ref AudioConfiguration config);
 

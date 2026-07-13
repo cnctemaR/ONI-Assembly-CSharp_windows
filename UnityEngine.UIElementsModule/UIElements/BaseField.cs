@@ -128,9 +128,21 @@ namespace UnityEngine.UIElements
 				bool flag = value == this.m_ShowMixedValue;
 				if (!flag)
 				{
-					this.m_ShowMixedValue = value;
-					this.UpdateMixedValueContent();
+					bool flag2 = value && !this.canSwitchToMixedValue;
+					if (!flag2)
+					{
+						this.m_ShowMixedValue = value;
+						this.UpdateMixedValueContent();
+					}
 				}
+			}
+		}
+
+		private protected virtual bool canSwitchToMixedValue
+		{
+			get
+			{
+				return true;
 			}
 		}
 
@@ -440,6 +452,8 @@ namespace UnityEngine.UIElements
 		private float m_LabelExtraContextWidth;
 
 		private VisualElement m_VisualInput;
+
+		internal Action<ExpressionEvaluator.Expression> expressionEvaluated;
 
 		[SerializeField]
 		private TValueType m_Value;

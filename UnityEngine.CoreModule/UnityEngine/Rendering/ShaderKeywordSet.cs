@@ -6,8 +6,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Rendering
 {
-	[UsedByNativeCode]
 	[NativeHeader("Editor/Src/Graphics/ShaderCompilerData.h")]
+	[UsedByNativeCode]
 	public struct ShaderKeywordSet
 	{
 		[FreeFunction("keywords::IsKeywordEnabled")]

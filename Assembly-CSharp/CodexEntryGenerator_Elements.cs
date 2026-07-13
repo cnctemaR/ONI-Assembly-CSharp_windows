@@ -22,7 +22,7 @@ public class CodexEntryGenerator_Elements
 		CodexEntryGenerator_Elements.<GenerateEntries>g__AddCategoryEntry|9_0(CodexEntryGenerator_Elements.ELEMENTS_LIQUIDS_ID, UI.CODEX.CATEGORYNAMES.ELEMENTSLIQUID, Assets.GetSprite("ui_elements-liquids"), dictionary2, ref CS$<>8__locals1);
 		CodexEntryGenerator_Elements.<GenerateEntries>g__AddCategoryEntry|9_0(CodexEntryGenerator_Elements.ELEMENTS_GASES_ID, UI.CODEX.CATEGORYNAMES.ELEMENTSGAS, Assets.GetSprite("ui_elements-gases"), dictionary3, ref CS$<>8__locals1);
 		CodexEntryGenerator_Elements.<GenerateEntries>g__AddCategoryEntry|9_0(CodexEntryGenerator_Elements.ELEMENTS_OTHER_ID, UI.CODEX.CATEGORYNAMES.ELEMENTSOTHER, Assets.GetSprite("ui_elements-other"), dictionary4, ref CS$<>8__locals1);
-		CodexEntryGenerator_Elements.<GenerateEntries>g__AddCategoryEntry|9_0(CodexEntryGenerator_Elements.ELEMENT_TYPES, UI.CODEX.CATEGORYNAMES.ELEMENTTYPES, Assets.GetSprite("ui_elements-other"), dictionary5, ref CS$<>8__locals1);
+		CodexEntryGenerator_Elements.<GenerateEntries>g__AddCategoryEntry|9_0(CodexEntryGenerator_Elements.ELEMENT_TYPES, UI.CODEX.CATEGORYNAMES.ELEMENTTYPES, Assets.GetSprite("ui_element_poperties"), dictionary5, ref CS$<>8__locals1);
 		foreach (Element element in ElementLoader.elements)
 		{
 			if (!element.disabled)
@@ -123,6 +123,10 @@ public class CodexEntryGenerator_Elements
 	{
 		List<ICodexWidget> list = new List<ICodexWidget>();
 		List<ICodexWidget> list2 = new List<ICodexWidget>();
+		if (element.sublimateId != (SimHashes)0 || element.HasTag(GameTags.Sublimating))
+		{
+			list.Add(new CodexTemperatureTransitionPanel(element, (element.offGasPercentage != 0f) ? CodexTemperatureTransitionPanel.TransitionType.OFFGASS : CodexTemperatureTransitionPanel.TransitionType.SUBLIMATE));
+		}
 		if (element.highTempTransition != null)
 		{
 			list.Add(new CodexTemperatureTransitionPanel(element, CodexTemperatureTransitionPanel.TransitionType.HEAT));
@@ -142,6 +146,23 @@ public class CodexEntryGenerator_Elements
 				if (element2.lowTempTransition == element || ElementLoader.FindElementByHash(element2.lowTempTransitionOreID) == element)
 				{
 					list2.Add(new CodexTemperatureTransitionPanel(element2, CodexTemperatureTransitionPanel.TransitionType.COOL));
+				}
+				if (element2.sublimateId == element.id || element2.HasTag(GameTags.Sublimating))
+				{
+					bool flag = element2.sublimateId == element.id;
+					if (element2.sublimateId != element.id)
+					{
+						GameObject prefab = Assets.GetPrefab(element2.id.CreateTag());
+						if (prefab != null)
+						{
+							Sublimates component = prefab.GetComponent<Sublimates>();
+							flag = component != null && component.info.sublimatedElement == element.id;
+						}
+					}
+					if (flag)
+					{
+						list2.Add(new CodexTemperatureTransitionPanel(element2, (element2.offGasPercentage != 0f) ? CodexTemperatureTransitionPanel.TransitionType.OFFGASS : CodexTemperatureTransitionPanel.TransitionType.SUBLIMATE));
+					}
 				}
 			}
 		}
@@ -182,7 +203,7 @@ public class CodexEntryGenerator_Elements
 		Func<ComplexRecipe.RecipeElement, bool> <>9__1;
 		foreach (ComplexRecipe complexRecipe in ComplexRecipeManager.Get().recipes)
 		{
-			if (Game.IsCorrectDlcActiveForCurrentSave(complexRecipe))
+			if (Game.IsCorrectDlcActiveForCurrentSave(complexRecipe) && !complexRecipe.IsAnyProductDeprecated())
 			{
 				IEnumerable<ComplexRecipe.RecipeElement> ingredients = complexRecipe.ingredients;
 				Func<ComplexRecipe.RecipeElement, bool> func;
@@ -211,7 +232,7 @@ public class CodexEntryGenerator_Elements
 		{
 			foreach (CodexEntryGenerator_Elements.ConversionEntry conversionEntry in list3)
 			{
-				list.Add(new CodexConversionPanel(conversionEntry.title, conversionEntry.inSet.ToArray<ElementUsage>(), conversionEntry.outSet.ToArray<ElementUsage>(), conversionEntry.prefab));
+				list.Add(new CodexConversionPanel(conversionEntry.title, conversionEntry.inSet.ToArray<ElementUsage>(), conversionEntry.outSet.ToArray<ElementUsage>(), conversionEntry.prefab, conversionEntry.aidIcon1));
 			}
 		}
 		List<CodexEntryGenerator_Elements.ConversionEntry> list4;
@@ -219,7 +240,7 @@ public class CodexEntryGenerator_Elements
 		{
 			foreach (CodexEntryGenerator_Elements.ConversionEntry conversionEntry2 in list4)
 			{
-				list2.Add(new CodexConversionPanel(conversionEntry2.title, conversionEntry2.inSet.ToArray<ElementUsage>(), conversionEntry2.outSet.ToArray<ElementUsage>(), conversionEntry2.prefab));
+				list2.Add(new CodexConversionPanel(conversionEntry2.title, conversionEntry2.inSet.ToArray<ElementUsage>(), conversionEntry2.outSet.ToArray<ElementUsage>(), conversionEntry2.prefab, conversionEntry2.aidIcon1));
 			}
 		}
 		ContentContainer contentContainer = new ContentContainer(list, ContentContainer.ContentLayout.Vertical);
@@ -265,7 +286,7 @@ public class CodexEntryGenerator_Elements
 					}
 					if (!buildingDef.Deprecated && !buildingDef.BuildingComplete.HasTag(GameTags.DevBuilding))
 					{
-						CodexEntryGenerator_Elements.<GetElementEntryContext>g__CheckPrefab|13_0(buildingDef.BuildingComplete, codexElementMap, CS$<>8__locals1.madeMap, ref CS$<>8__locals1, ref CS$<>8__locals2);
+						CodexEntryGenerator_Elements.<GetElementEntryContext>g__CheckPrefab|13_1(buildingDef.BuildingComplete, codexElementMap, CS$<>8__locals1.madeMap, ref CS$<>8__locals1, ref CS$<>8__locals2);
 					}
 				}
 			}
@@ -278,14 +299,14 @@ public class CodexEntryGenerator_Elements
 			{
 				if (!gameObject2.HasTag(GameTags.HideFromCodex))
 				{
-					CodexEntryGenerator_Elements.<GetElementEntryContext>g__CheckPrefab|13_0(gameObject2, codexElementMap, CS$<>8__locals1.madeMap, ref CS$<>8__locals1, ref CS$<>8__locals2);
+					CodexEntryGenerator_Elements.<GetElementEntryContext>g__CheckPrefab|13_1(gameObject2, codexElementMap, CS$<>8__locals1.madeMap, ref CS$<>8__locals1, ref CS$<>8__locals2);
 				}
 			}
 			foreach (GameObject gameObject3 in Assets.GetPrefabsWithComponent<CreatureBrain>())
 			{
 				if (gameObject3.GetDef<BabyMonitor.Def>() == null)
 				{
-					CodexEntryGenerator_Elements.<GetElementEntryContext>g__CheckPrefab|13_0(gameObject3, codexElementMap, CS$<>8__locals1.madeMap, ref CS$<>8__locals1, ref CS$<>8__locals2);
+					CodexEntryGenerator_Elements.<GetElementEntryContext>g__CheckPrefab|13_1(gameObject3, codexElementMap, CS$<>8__locals1.madeMap, ref CS$<>8__locals1, ref CS$<>8__locals2);
 				}
 			}
 			foreach (KeyValuePair<Tag, Diet> keyValuePair2 in DietManager.CollectSaveDiets(null))
@@ -364,7 +385,32 @@ public class CodexEntryGenerator_Elements
 	}
 
 	[CompilerGenerated]
-	internal static void <GetElementEntryContext>g__CheckPrefab|13_0(GameObject prefab, CodexEntryGenerator_Elements.CodexElementMap usedMap, CodexEntryGenerator_Elements.CodexElementMap made, ref CodexEntryGenerator_Elements.<>c__DisplayClass13_0 A_3, ref CodexEntryGenerator_Elements.<>c__DisplayClass13_1 A_4)
+	internal static void <GetElementEntryContext>g__AddPlantFiberInfo|13_0(ref HashSet<ElementUsage> inSet, CodexEntryGenerator_Elements.CodexElementMap usedMap, CodexEntryGenerator_Elements.CodexElementMap madeMap, GameObject prefabOfProducer, GameObject prefabForPlayerFacing, Crop crop, Func<Tag, float, bool, string> customFormating = null)
+	{
+		PlantFiberProducer component = prefabOfProducer.GetComponent<PlantFiberProducer>();
+		if (component != null)
+		{
+			CodexEntryGenerator_Elements.ConversionEntry conversionEntry = new CodexEntryGenerator_Elements.ConversionEntry();
+			conversionEntry.title = prefabForPlayerFacing.GetProperName();
+			conversionEntry.prefab = prefabForPlayerFacing;
+			conversionEntry.inSet = inSet;
+			conversionEntry.outSet.Add(new ElementUsage("PlantFiber", component.amount / crop.cropVal.cropDuration, true, customFormating));
+			CodexEntryGenerator_Elements.ConversionEntry conversionEntry2 = conversionEntry;
+			CodexConversionPanel.IconSettings iconSettings = new CodexConversionPanel.IconSettings();
+			iconSettings.spriteName = "skillbadge_role_farming3";
+			iconSettings.tooltip = CODEX.MISC.TIP_ICON.FARMING3_SKILL.TOOLTIP;
+			iconSettings.onClickActions = delegate
+			{
+				ManagementMenu.Instance.OpenSkills(null);
+			};
+			conversionEntry2.aidIcon1 = iconSettings;
+			usedMap.Add(prefabForPlayerFacing.PrefabID(), conversionEntry);
+			madeMap.Add("PlantFiber", conversionEntry);
+		}
+	}
+
+	[CompilerGenerated]
+	internal static void <GetElementEntryContext>g__CheckPrefab|13_1(GameObject prefab, CodexEntryGenerator_Elements.CodexElementMap usedMap, CodexEntryGenerator_Elements.CodexElementMap made, ref CodexEntryGenerator_Elements.<>c__DisplayClass13_0 A_3, ref CodexEntryGenerator_Elements.<>c__DisplayClass13_1 A_4)
 	{
 		HashSet<ElementUsage> hashSet = new HashSet<ElementUsage>();
 		HashSet<ElementUsage> hashSet2 = new HashSet<ElementUsage>();
@@ -498,11 +544,6 @@ public class CodexEntryGenerator_Elements
 				hashSet2.Add(new ElementUsage(tag4, component5.massConsumedPerUse, false));
 			}
 		}
-		if (prefab.IsPrefabID("Moo"))
-		{
-			hashSet.Add(new ElementUsage("GasGrass", MooConfig.DAYS_PLANT_GROWTH_EATEN_PER_CYCLE, false));
-			hashSet2.Add(new ElementUsage(ElementLoader.FindElementByHash(SimHashes.Milk).tag, MooTuning.MILK_PER_CYCLE, false));
-		}
 		CodexEntryGenerator_Elements.ConversionEntry conversionEntry3 = new CodexEntryGenerator_Elements.ConversionEntry();
 		conversionEntry3.title = prefab.GetProperName();
 		conversionEntry3.prefab = prefab;
@@ -519,6 +560,10 @@ public class CodexEntryGenerator_Elements
 		foreach (ElementUsage elementUsage5 in hashSet2)
 		{
 			A_3.madeMap.Add(elementUsage5.tag, conversionEntry3);
+		}
+		if (component3 != null && component2 == null)
+		{
+			CodexEntryGenerator_Elements.<GetElementEntryContext>g__AddPlantFiberInfo|13_0(ref hashSet, usedMap, A_3.madeMap, prefab, prefab, component3, null);
 		}
 		IPlantBranchGrower defImplementingInterface = prefab.GetDefImplementingInterface<IPlantBranchGrower>();
 		if (defImplementingInterface != null)
@@ -554,6 +599,7 @@ public class CodexEntryGenerator_Elements
 					int branchCount = defImplementingInterface.GetMaxBranchCount();
 					conversionEntry4.outSet.Add(new ElementUsage(component6.cropId, (float)component6.cropVal.numProduced / component6.cropVal.cropDuration, true, (Tag t, float a, bool b) => GameUtil.GetFormattedBranchGrowerPlantProductionValuePerCycle(t, a, branchCount, true)));
 					A_3.madeMap.Add(component6.cropId, conversionEntry4);
+					CodexEntryGenerator_Elements.<GetElementEntryContext>g__AddPlantFiberInfo|13_0(ref hashSet, usedMap, A_3.madeMap, prefab2, prefab, component6, (Tag t, float a, bool b) => GameUtil.GetFormattedBranchGrowerPlantPlantFiberProductionValuePerCycle(t, a, branchCount, true));
 				}
 			}
 		}
@@ -608,14 +654,28 @@ public class CodexEntryGenerator_Elements
 			conversionEntry7.outSet.Add(new ElementUsage(def6.itemDroppedOnShear, def6.dropMass, false));
 			A_3.madeMap.Add(def6.itemDroppedOnShear, conversionEntry7);
 		}
+		MilkProductionMonitor.Def def7 = prefab.GetDef<MilkProductionMonitor.Def>();
+		if (def7 != null)
+		{
+			CodexEntryGenerator_Elements.ConversionEntry conversionEntry8 = new CodexEntryGenerator_Elements.ConversionEntry();
+			GameObject prefab3 = Assets.GetPrefab("MilkingStation");
+			conversionEntry8.title = prefab3.GetProperName();
+			conversionEntry8.prefab = prefab3;
+			conversionEntry8.inSet = new HashSet<ElementUsage>();
+			conversionEntry8.inSet.Add(new ElementUsage(prefab.PrefabID(), 1f, false));
+			usedMap.Add(prefab.PrefabID(), conversionEntry8);
+			conversionEntry8.outSet = new HashSet<ElementUsage>();
+			conversionEntry8.outSet.Add(new ElementUsage(def7.element.CreateTag(), def7.Capacity, false));
+			A_3.madeMap.Add(def7.element.CreateTag(), conversionEntry8);
+		}
 		Butcherable component8 = prefab.GetComponent<Butcherable>();
 		if (component8 != null)
 		{
-			CodexEntryGenerator_Elements.ConversionEntry conversionEntry8 = new CodexEntryGenerator_Elements.ConversionEntry();
-			conversionEntry8.title = prefab.GetProperName();
-			conversionEntry8.prefab = prefab;
-			usedMap.Add(prefab.PrefabID(), conversionEntry8);
-			conversionEntry8.outSet = new HashSet<ElementUsage>();
+			CodexEntryGenerator_Elements.ConversionEntry conversionEntry9 = new CodexEntryGenerator_Elements.ConversionEntry();
+			conversionEntry9.title = prefab.GetProperName();
+			conversionEntry9.prefab = prefab;
+			usedMap.Add(prefab.PrefabID(), conversionEntry9);
+			conversionEntry9.outSet = new HashSet<ElementUsage>();
 			Dictionary<string, float> dictionary = new Dictionary<string, float>();
 			foreach (KeyValuePair<string, float> keyValuePair in component8.drops)
 			{
@@ -630,8 +690,8 @@ public class CodexEntryGenerator_Elements
 				keyValuePair2.Deconstruct(out text2, out num2);
 				string text3 = text2;
 				float num3 = num2;
-				conversionEntry8.outSet.Add(new ElementUsage(text3, num3, false));
-				A_3.madeMap.Add(text3, conversionEntry8);
+				conversionEntry9.outSet.Add(new ElementUsage(text3, num3, false));
+				A_3.madeMap.Add(text3, conversionEntry9);
 			}
 		}
 	}
@@ -659,6 +719,8 @@ public class CodexEntryGenerator_Elements
 		public HashSet<ElementUsage> inSet = new HashSet<ElementUsage>();
 
 		public HashSet<ElementUsage> outSet = new HashSet<ElementUsage>();
+
+		public CodexConversionPanel.IconSettings aidIcon1;
 	}
 
 	public class CodexElementMap

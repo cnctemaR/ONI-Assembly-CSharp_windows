@@ -23,6 +23,11 @@ namespace Klei.AI
 			return this.gameObject.GetComponent<KMonoBehaviour>().Subscribe(hash, handler);
 		}
 
+		public int Subscribe(int hash, Action<object, object> handler, object context)
+		{
+			return this.gameObject.GetComponent<KMonoBehaviour>().Subscribe(hash, handler, context);
+		}
+
 		public void Unsubscribe(int hash, Action<object> handler)
 		{
 			this.gameObject.GetComponent<KMonoBehaviour>().Unsubscribe(hash, handler);

@@ -41,14 +41,35 @@ public class JetSuitMonitor : GameStateMachine<JetSuitMonitor, JetSuitMonitor.In
 		{
 			return;
 		}
-		int num = Grid.PosToCell(gameObject.transform.GetPosition());
-		float num2 = 0.1f * dt;
-		num2 = Mathf.Min(num2, smi.jet_suit_tank.amount);
-		smi.jet_suit_tank.amount -= num2;
-		float num3 = num2 * 3f;
-		if (num3 > 1E-45f)
+		Grid.PosToCell(gameObject.transform.GetPosition());
+		float num = 0.2f * dt;
+		num = Mathf.Min(num, smi.jet_suit_tank.amount);
+		smi.jet_suit_tank.amount -= num;
+		float num2 = num * 0.25f;
+		if (num2 > 1E-45f)
 		{
-			SimMessages.AddRemoveSubstance(num, SimHashes.CarbonDioxide, CellEventLogger.Instance.ElementConsumerSimUpdate, num3, 473.15f, byte.MaxValue, 0, true, -1);
+			Vector3 vector3;
+			Vector3 vector2;
+			Vector3 vector = (vector2 = (vector3 = gameObject.transform.position));
+			Vector3 down = Vector3.down;
+			if (smi.helmetController.jet_anim != null)
+			{
+				KBatchedAnimController jet_anim = smi.helmetController.jet_anim;
+				bool flag;
+				Matrix4x4 symbolTransform = jet_anim.GetSymbolTransform("left_fire", out flag);
+				Matrix4x4 symbolTransform2 = jet_anim.GetSymbolTransform("right_fire", out flag);
+				vector3 = symbolTransform.GetColumn(3);
+				vector2 = symbolTransform2.GetColumn(3);
+				float num3 = Quaternion.LookRotation(symbolTransform.GetColumn(2), symbolTransform.GetColumn(1)).eulerAngles.z * 0.017453292f;
+				down = new Vector3(-Mathf.Sin(num3), Mathf.Cos(num3));
+				vector3 += down.normalized * 0.6f;
+				vector2 += down.normalized * 0.6f;
+			}
+			float num4 = num2 / 2f;
+			float num5 = 0.5f;
+			int num6 = Grid.PosToCell(vector);
+			CO2Manager.instance.SpawnExhaust(vector3, down.normalized * num5, num6, num4, 373.15f);
+			CO2Manager.instance.SpawnExhaust(vector2, down.normalized * num5, num6, num4, 373.15f);
 		}
 		if (smi.jet_suit_tank.amount == 0f)
 		{
@@ -69,9 +90,12 @@ public class JetSuitMonitor : GameStateMachine<JetSuitMonitor, JetSuitMonitor.In
 			: base(master)
 		{
 			base.sm.owner.Set(owner, base.smi, false);
+			this.helmetController = master.GetComponent<HelmetController>();
 			this.navigator = owner.GetComponent<Navigator>();
 			this.jet_suit_tank = master.GetComponent<JetSuitTank>();
 		}
+
+		public HelmetController helmetController;
 
 		public Navigator navigator;
 

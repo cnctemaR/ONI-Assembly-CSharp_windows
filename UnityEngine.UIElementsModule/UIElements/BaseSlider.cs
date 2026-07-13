@@ -16,6 +16,15 @@ namespace UnityEngine.UIElements
 
 		internal TextField inputTextField { get; private set; }
 
+		private protected override bool canSwitchToMixedValue
+		{
+			get
+			{
+				bool flag = this.inputTextField == null;
+				return flag || !this.inputTextField.textInputBase.textElement.hasFocus || (this.inputTextField.textInputBase.textElement.hasFocus && this.focusController != null && this.focusController.IsPendingFocus(this));
+			}
+		}
+
 		public TValueType lowValue
 		{
 			get
@@ -495,13 +504,13 @@ namespace UnityEngine.UIElements
 				bool flag3 = dragElementLastPos > dragElementPos + dragElementLength;
 				bool flag4 = (this.inverted ? flag3 : flag2);
 				bool flag5 = (this.inverted ? flag2 : flag3);
-				float num2 = (this.inverted ? (-this.pageSize) : this.pageSize);
+				this.m_AdjustedPageSizeFromClick = (this.inverted ? (this.m_AdjustedPageSizeFromClick - this.pageSize) : (this.m_AdjustedPageSizeFromClick + this.pageSize));
 				bool flag6 = flag4 && this.clampedDragger.dragDirection != ClampedDragger<TValueType>.DragDirection.LowToHigh;
 				if (flag6)
 				{
 					this.clampedDragger.dragDirection = ClampedDragger<TValueType>.DragDirection.HighToLow;
-					float num3 = Mathf.Max(0f, Mathf.Min(dragElementPos - num2, num)) / num;
-					this.value = this.SliderLerpDirectionalUnclamped(this.lowValue, this.highValue, num3);
+					float num2 = Mathf.Max(0f, Mathf.Min(dragElementPos - this.m_AdjustedPageSizeFromClick, num)) / num;
+					this.value = this.SliderLerpDirectionalUnclamped(this.lowValue, this.highValue, num2);
 				}
 				else
 				{
@@ -509,8 +518,8 @@ namespace UnityEngine.UIElements
 					if (flag7)
 					{
 						this.clampedDragger.dragDirection = ClampedDragger<TValueType>.DragDirection.LowToHigh;
-						float num4 = Mathf.Max(0f, Mathf.Min(dragElementPos + num2, num)) / num;
-						this.value = this.SliderLerpDirectionalUnclamped(this.lowValue, this.highValue, num4);
+						float num3 = Mathf.Max(0f, Mathf.Min(dragElementPos + this.m_AdjustedPageSizeFromClick, num)) / num;
+						this.value = this.SliderLerpDirectionalUnclamped(this.lowValue, this.highValue, num3);
 					}
 				}
 			}
@@ -585,6 +594,7 @@ namespace UnityEngine.UIElements
 							Vector3 vector = new Vector3(num6, 0f, 0f);
 							this.dragElement.transform.position = vector;
 							this.dragBorderElement.transform.position = vector;
+							this.m_AdjustedPageSizeFromClick = 0f;
 						}
 					}
 				}
@@ -603,6 +613,7 @@ namespace UnityEngine.UIElements
 							Vector3 vector2 = new Vector3(0f, num8, 0f);
 							this.dragElement.transform.position = vector2;
 							this.dragBorderElement.transform.position = vector2;
+							this.m_AdjustedPageSizeFromClick = 0f;
 						}
 					}
 				}
@@ -715,10 +726,20 @@ namespace UnityEngine.UIElements
 				{
 					dragElement.RemoveFromHierarchy();
 				}
+				bool flag = this.inputTextField != null;
+				if (flag)
+				{
+					this.inputTextField.showMixedValue = true;
+				}
 			}
 			else
 			{
 				this.dragContainer.Add(this.dragElement);
+				bool flag2 = this.inputTextField != null;
+				if (flag2)
+				{
+					this.inputTextField.showMixedValue = false;
+				}
 			}
 		}
 
@@ -735,6 +756,8 @@ namespace UnityEngine.UIElements
 			this.dragContainer.UnregisterCallback<PointerDownEvent>(new EventCallback<PointerDownEvent>(base.StartEditing), TrickleDown.TrickleDown);
 			this.dragContainer.UnregisterCallback<PointerUpEvent>(new EventCallback<PointerUpEvent>(base.EndEditing), TrickleDown.NoTrickleDown);
 		}
+
+		private float m_AdjustedPageSizeFromClick = 0f;
 
 		private bool m_IsEditingTextField;
 

@@ -31,6 +31,15 @@ public class KleiInventoryScreen : KModalScreen
 		InventoryOrganization.Initialize();
 	}
 
+	protected override void OnSpawn()
+	{
+		base.OnSpawn();
+		if (KPrivacyPrefs.instance.disableDataCollection)
+		{
+			this.barterOfflineLabel.GetComponent<ToolTip>().SetSimpleTooltip(UI.LOCKER_MENU.OFFLINE_ICON_TOOLTIP_DATA_COLLECTIONS);
+		}
+	}
+
 	public override void OnKeyDown(KButtonEvent e)
 	{
 		if (e.TryConsume(global::Action.Escape) || e.TryConsume(global::Action.MouseRight))
@@ -58,7 +67,10 @@ public class KleiInventoryScreen : KModalScreen
 			this.InitConfig();
 			this.ToggleDoublesOnly(0);
 			this.ClearSearch();
+			return;
 		}
+		this.dlcFilter.ResetToDefault();
+		this.dlcFilter.HideDropdown();
 	}
 
 	private void ToggleDoublesOnly(int newState)
@@ -95,6 +107,8 @@ public class KleiInventoryScreen : KModalScreen
 		this.initConfigComplete = true;
 		this.galleryGridLayouter.RequestGridResize();
 		this.categoryListContent.GetComponent<RectTransform>().offsetMax = new Vector2(0f, 0f);
+		this.dlcFilter.ConfigButtons();
+		this.dlcFilter.onDLCFilterChanged = new global::System.Action(this.RefreshGallery);
 		this.PopulateCategories();
 		this.PopulateGallery();
 		this.SelectCategory("BUILDINGS");
@@ -113,9 +127,36 @@ public class KleiInventoryScreen : KModalScreen
 		}));
 	}
 
+	private void RegisterPreventScreenPop()
+	{
+		this.UnregisterPreventScreenPop();
+		this.preventScreenPopFn = delegate
+		{
+			if (this.dlcFilter.IsDropdownVisible())
+			{
+				this.RegisterPreventScreenPop();
+				this.dlcFilter.ResetToDefault();
+				this.dlcFilter.HideDropdown();
+				return true;
+			}
+			return false;
+		};
+		LockerNavigator.Instance.preventScreenPop.Add(this.preventScreenPopFn);
+	}
+
+	private void UnregisterPreventScreenPop()
+	{
+		if (this.preventScreenPopFn != null)
+		{
+			LockerNavigator.Instance.preventScreenPop.Remove(this.preventScreenPopFn);
+			this.preventScreenPopFn = null;
+		}
+	}
+
 	protected override void OnCmpEnable()
 	{
 		base.OnCmpEnable();
+		this.dlcFilter.ResetToDefault();
 		this.ToggleDoublesOnly(0);
 		this.ClearSearch();
 		if (!this.initConfigComplete)
@@ -127,6 +168,7 @@ public class KleiInventoryScreen : KModalScreen
 		{
 			this.RefreshUI();
 		});
+		this.RegisterPreventScreenPop();
 	}
 
 	private void ClearSearch()
@@ -208,11 +250,17 @@ public class KleiInventoryScreen : KModalScreen
 		}
 		this.galleryGridButtons.Clear();
 		this.galleryGridLayouter.ImmediateSizeGridToScreenResolution();
-		foreach (PermitResource permitResource in Db.Get().Permits.resources)
+		HashSet<string> hashSet = new HashSet<string>();
+		foreach (KeyValuePair<string, List<string>> keyValuePair2 in InventoryOrganization.subcategoryIdToPermitIdsMap)
 		{
-			if (!permitResource.Id.StartsWith("visonly_"))
+			foreach (string text in keyValuePair2.Value)
 			{
-				this.AddItemToGallery(permitResource);
+				PermitResource permitResource = Db.Get().Permits.TryGet(text);
+				if (permitResource != null)
+				{
+					this.AddItemToGallery(permitResource);
+					hashSet.Add(text);
+				}
 			}
 		}
 		this.subcategories.Sort((KleiInventoryUISubcategory a, KleiInventoryUISubcategory b) => InventoryOrganization.subcategoryIdToPresentationDataMap[a.subcategoryID].sortKey.CompareTo(InventoryOrganization.subcategoryIdToPresentationDataMap[b.subcategoryID].sortKey));
@@ -290,6 +338,7 @@ public class KleiInventoryScreen : KModalScreen
 		if (DlcManager.IsDlcId(dlcIdFrom))
 		{
 			reference4.gameObject.SetActive(true);
+			reference4.sprite = Assets.GetSprite(DlcManager.GetDlcBannerSprite(dlcIdFrom));
 			reference4.color = DlcManager.GetDlcBannerColor(dlcIdFrom);
 		}
 		else
@@ -389,6 +438,10 @@ public class KleiInventoryScreen : KModalScreen
 				{
 					flag = false;
 				}
+			}
+			if (this.dlcFilter.SelectedDLCID != null && permitResource2.GetDlcIdFrom() != this.dlcFilter.SelectedDLCID)
+			{
+				flag = false;
 			}
 			if (multiToggle2.gameObject.activeSelf != flag)
 			{
@@ -1252,7 +1305,7 @@ public class KleiInventoryScreen : KModalScreen
 			{
 				return "HUD";
 			}
-			if (KleiInventoryScreen.<GetFacadeItemSoundName>g__Has|76_0<Sculpture>(buildingDef2))
+			if (KleiInventoryScreen.<GetFacadeItemSoundName>g__Has|81_0<Sculpture>(buildingDef2))
 			{
 				string text = buildingDef2.PrefabID;
 				if (text == "IceSculpture")
@@ -1267,11 +1320,11 @@ public class KleiInventoryScreen : KModalScreen
 			}
 			else
 			{
-				if (KleiInventoryScreen.<GetFacadeItemSoundName>g__Has|76_0<Painting>(buildingDef2))
+				if (KleiInventoryScreen.<GetFacadeItemSoundName>g__Has|81_0<Painting>(buildingDef2))
 				{
 					return "painting";
 				}
-				if (KleiInventoryScreen.<GetFacadeItemSoundName>g__Has|76_0<MonumentPart>(buildingDef2))
+				if (KleiInventoryScreen.<GetFacadeItemSoundName>g__Has|81_0<MonumentPart>(buildingDef2))
 				{
 					return "monument";
 				}
@@ -1290,7 +1343,7 @@ public class KleiInventoryScreen : KModalScreen
 	}
 
 	[CompilerGenerated]
-	internal static bool <GetFacadeItemSoundName>g__Has|76_0<T>(BuildingDef buildingDef) where T : Component
+	internal static bool <GetFacadeItemSoundName>g__Has|81_0<T>(BuildingDef buildingDef) where T : Component
 	{
 		return !buildingDef.BuildingComplete.GetComponent<T>().IsNullOrDestroyed();
 	}
@@ -1334,6 +1387,9 @@ public class KleiInventoryScreen : KModalScreen
 	[SerializeField]
 	private MultiToggle doublesOnlyToggle;
 
+	[SerializeField]
+	private KleiInventoryDLCFilter dlcFilter;
+
 	public const int FILTER_SHOW_ALL = 0;
 
 	public const int FILTER_SHOW_OWNED_ONLY = 1;
@@ -1341,6 +1397,8 @@ public class KleiInventoryScreen : KModalScreen
 	public const int FILTER_SHOW_DOUBLES_ONLY = 2;
 
 	private int showFilterState;
+
+	private Func<bool> preventScreenPopFn;
 
 	[Header("BarterSection")]
 	[SerializeField]

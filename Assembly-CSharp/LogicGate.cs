@@ -311,12 +311,12 @@ public class LogicGate : LogicGateBase, ILogicEventSender, ILogicNetworkConnecti
 	{
 		if (base.gameObject != null)
 		{
-			base.gameObject.Trigger(-801688580, new LogicValueChanged
-			{
-				portID = port_id,
-				newValue = new_value,
-				prevValue = prev_value
-			});
+			LogicValueChanged logicValueChanged = LogicValueChanged.Pool.Get();
+			logicValueChanged.portID = port_id;
+			logicValueChanged.newValue = new_value;
+			logicValueChanged.prevValue = prev_value;
+			base.gameObject.Trigger(-801688580, logicValueChanged);
+			LogicValueChanged.Pool.Release(logicValueChanged);
 		}
 	}
 

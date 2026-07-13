@@ -6,9 +6,9 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeHeader("Modules/Animation/ScriptBindings/Animation.bindings.h")]
-	[UsedByNativeCode]
 	[NativeHeader("Modules/Animation/AnimatorOverrideController.h")]
+	[UsedByNativeCode]
+	[NativeHeader("Modules/Animation/ScriptBindings/Animation.bindings.h")]
 	public class AnimatorOverrideController : RuntimeAnimatorController
 	{
 		public AnimatorOverrideController()

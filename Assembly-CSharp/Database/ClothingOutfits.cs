@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Database
 {
@@ -31,6 +33,20 @@ namespace Database
 				}
 			}
 			ClothingOutfitUtility.LoadClothingOutfitData(this);
+			this.SortStandardOutfits();
+		}
+
+		private void SortStandardOutfits()
+		{
+			List<string> standard_outfits = new List<string> { "StandardYellow", "StandardRed", "StandardGreen", "StandardBlue", "permit_standard_bionic_outfit", "permit_standard_regal_neutronium_outfit" };
+			this.resources = this.resources.OrderBy<ClothingOutfitResource, int>(delegate(ClothingOutfitResource item)
+			{
+				if (!standard_outfits.Contains(item.Id))
+				{
+					return 1;
+				}
+				return 0;
+			}).ThenBy<ClothingOutfitResource, int>((ClothingOutfitResource item) => this.resources.IndexOf(item)).ToList<ClothingOutfitResource>();
 		}
 	}
 }

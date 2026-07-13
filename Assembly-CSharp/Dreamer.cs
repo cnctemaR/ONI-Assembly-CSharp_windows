@@ -5,7 +5,7 @@ public class Dreamer : GameStateMachine<Dreamer, Dreamer.Instance>
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
 		default_state = this.notDreaming;
-		this.notDreaming.OnSignal(this.startDreaming, this.dreaming, (Dreamer.Instance smi) => smi.currentDream != null);
+		this.notDreaming.OnSignal(this.startDreaming, this.dreaming, (Dreamer.Instance smi, StateMachine<Dreamer, Dreamer.Instance, IStateMachineTarget, object>.SignalParameter param) => smi.currentDream != null);
 		this.dreaming.Enter(new StateMachine<Dreamer, Dreamer.Instance, IStateMachineTarget, object>.State.Callback(Dreamer.PrepareDream)).OnSignal(this.stopDreaming, this.notDreaming).Update(new Action<Dreamer.Instance, float>(this.UpdateDream), UpdateRate.SIM_EVERY_TICK, false)
 			.Exit(new StateMachine<Dreamer, Dreamer.Instance, IStateMachineTarget, object>.State.Callback(this.RemoveDream));
 	}

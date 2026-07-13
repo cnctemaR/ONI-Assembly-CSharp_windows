@@ -6,8 +6,8 @@ using UnityEngine.Internal;
 
 namespace UnityEngine
 {
-	[NativeHeader("Modules/Physics/Rigidbody.h")]
 	[RequireComponent(typeof(Transform))]
+	[NativeHeader("Modules/Physics/Rigidbody.h")]
 	public class Rigidbody : Component
 	{
 		public Vector3 velocity
@@ -567,8 +567,8 @@ namespace UnityEngine
 			return this.SweepTestAll(direction, float.PositiveInfinity, QueryTriggerInteraction.UseGlobal);
 		}
 
-		[EditorBrowsable(EditorBrowsableState.Never)]
 		[Obsolete("The sleepVelocity is no longer supported. Use sleepThreshold. Note that sleepThreshold is energy but not velocity.", true)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		public float sleepVelocity
 		{
 			get
@@ -580,8 +580,8 @@ namespace UnityEngine
 			}
 		}
 
-		[Obsolete("The sleepAngularVelocity is no longer supported. Use sleepThreshold to specify energy.", true)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
+		[Obsolete("The sleepAngularVelocity is no longer supported. Use sleepThreshold to specify energy.", true)]
 		public float sleepAngularVelocity
 		{
 			get
@@ -593,8 +593,8 @@ namespace UnityEngine
 			}
 		}
 
-		[EditorBrowsable(EditorBrowsableState.Never)]
 		[Obsolete("Use Rigidbody.maxAngularVelocity instead.")]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		public void SetMaxAngularVelocity(float a)
 		{
 			this.maxAngularVelocity = a;

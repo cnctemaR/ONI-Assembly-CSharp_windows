@@ -165,6 +165,14 @@ public class KCrashReporter : MonoBehaviour
 
 	public bool ShowDialog(string error, string stack_trace, bool includeSaveFile = true, string[] extraCategories = null, string[] extraFiles = null)
 	{
+		GenericGameSettings instance = GenericGameSettings.instance;
+		if (instance.devBootSmoke || !string.IsNullOrEmpty(instance.scriptedProfile.saveGame))
+		{
+			KCrashReporter.hasCrash = true;
+			global::Debug.Log("Automated test resulted in a crash. Return exit code 1.");
+			App.QuitCode(1);
+			return false;
+		}
 		if (this.errorScreen != null)
 		{
 			return false;
@@ -184,21 +192,20 @@ public class KCrashReporter : MonoBehaviour
 		this.errorScreen.transform.SetParent(gameObject.transform, false);
 		ReportErrorDialog errorDialog = this.errorScreen.GetComponentInChildren<ReportErrorDialog>();
 		string text = error + "\n\n" + stack_trace;
-		KCrashReporter.hasCrash = true;
 		if (Global.Instance != null && Global.Instance.modManager != null && Global.Instance.modManager.HasCrashableMods())
 		{
 			Exception ex = DebugUtil.RetrieveLastExceptionLogged();
 			StackTrace stackTrace = ((ex != null) ? new StackTrace(ex) : new StackTrace(5, true));
 			Global.Instance.modManager.SearchForModsInStackTrace(stackTrace);
 			Global.Instance.modManager.SearchForModsInStackTrace(stack_trace);
-			errorDialog.PopupDisableModsDialog(text, new global::System.Action(this.OnQuitToDesktop), (Global.Instance.modManager.IsInDevMode() || !KCrashReporter.terminateOnError) ? new global::System.Action(this.OnCloseErrorDialog) : null);
+			errorDialog.PopupDisableModsDialog(text, new global::System.Action(this.OnQuitToDesktopCrashed), (Global.Instance.modManager.IsInDevMode() || !KCrashReporter.terminateOnError) ? new global::System.Action(this.OnCloseErrorDialog) : null);
 		}
 		else
 		{
 			errorDialog.PopupSubmitErrorDialog(text, delegate
 			{
 				KCrashReporter.ReportError(error, stack_trace, this.confirmDialogPrefab, this.errorScreen, errorDialog.UserMessage(), includeSaveFile, extraCategories, extraFiles);
-			}, new global::System.Action(this.OnQuitToDesktop), KCrashReporter.terminateOnError ? null : new global::System.Action(this.OnCloseErrorDialog));
+			}, new global::System.Action(this.OnQuitToDesktopCrashed), KCrashReporter.terminateOnError ? null : new global::System.Action(this.OnCloseErrorDialog));
 		}
 		return true;
 	}
@@ -214,9 +221,9 @@ public class KCrashReporter : MonoBehaviour
 		}
 	}
 
-	private void OnQuitToDesktop()
+	private void OnQuitToDesktopCrashed()
 	{
-		App.Quit();
+		App.QuitCode(1);
 	}
 
 	private static string GetUserID()
@@ -748,7 +755,7 @@ public class KCrashReporter : MonoBehaviour
 
 		public string sku = "";
 
-		public int build = 693461;
+		public int build = 700348;
 
 		public string callstack = "";
 

@@ -42,8 +42,8 @@ namespace UnityEngine
 			Material.CreateWithMaterial(this, source);
 		}
 
-		[Obsolete("Creating materials from shader source string is no longer supported. Use Shader assets instead.", false)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
+		[Obsolete("Creating materials from shader source string is no longer supported. Use Shader assets instead.", false)]
 		public Material(string contents)
 		{
 			Material.CreateWithString(this);

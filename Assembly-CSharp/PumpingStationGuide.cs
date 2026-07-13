@@ -2,7 +2,7 @@
 using UnityEngine;
 
 [AddComponentMenu("KMonoBehaviour/scripts/PumpingStationGuide")]
-public class PumpingStationGuide : KMonoBehaviour, IRenderEveryTick
+public class PumpingStationGuide : KMonoBehaviour, IRender200ms
 {
 	protected override void OnSpawn()
 	{
@@ -49,7 +49,7 @@ public class PumpingStationGuide : KMonoBehaviour, IRenderEveryTick
 		}
 	}
 
-	public void RenderEveryTick(float dt)
+	public void Render200ms(float dt)
 	{
 		this.RefreshPosition();
 		this.RefreshTint();

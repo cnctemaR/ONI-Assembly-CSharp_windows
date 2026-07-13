@@ -39,6 +39,21 @@ namespace Database
 			if (def != null)
 			{
 				def.AddFacade(this.Id);
+				KAnimFileData data = def.AnimFiles[0].GetData();
+				KAnimFileData data2 = Assets.GetAnim(this.AnimFile).GetData();
+				for (int i = 0; i < data.animCount; i++)
+				{
+					KAnim.Anim anim = data.GetAnim(i);
+					KAnim.Anim anim2 = data2.GetAnim(anim.name);
+					if (anim2 != null)
+					{
+						bool flag = GameAudioSheets.Get().events.ContainsKey(anim.id);
+						if (!GameAudioSheets.Get().events.ContainsKey(anim2.id) && flag)
+						{
+							GameAudioSheets.Get().skinToBaseAnim[anim2.id] = anim.id;
+						}
+					}
+				}
 			}
 		}
 

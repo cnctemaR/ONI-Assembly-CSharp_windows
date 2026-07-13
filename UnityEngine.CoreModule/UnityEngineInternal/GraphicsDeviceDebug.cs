@@ -4,8 +4,8 @@ using UnityEngine.Bindings;
 
 namespace UnityEngineInternal
 {
-	[StaticAccessor("GraphicsDeviceDebug", StaticAccessorType.DoubleColon)]
 	[NativeHeader("Runtime/Export/Graphics/GraphicsDeviceDebug.bindings.h")]
+	[StaticAccessor("GraphicsDeviceDebug", StaticAccessorType.DoubleColon)]
 	internal static class GraphicsDeviceDebug
 	{
 		internal static GraphicsDeviceDebugSettings settings

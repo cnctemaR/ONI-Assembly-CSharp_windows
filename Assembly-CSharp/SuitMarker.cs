@@ -244,7 +244,7 @@ public class SuitMarker : KMonoBehaviour
 
 	private static readonly EventSystem.IntraObjectHandler<SuitMarker> OnOperationalChangedDelegate = new EventSystem.IntraObjectHandler<SuitMarker>(delegate(SuitMarker component, object data)
 	{
-		component.OnOperationalChanged((bool)data);
+		component.OnOperationalChanged(((Boxed<bool>)data).value);
 	});
 
 	private static readonly EventSystem.IntraObjectHandler<SuitMarker> OnRotatedDelegate = new EventSystem.IntraObjectHandler<SuitMarker>(delegate(SuitMarker component, object data)

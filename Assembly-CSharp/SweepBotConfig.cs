@@ -14,12 +14,13 @@ public class SweepBotConfig : IEntityConfig
 		string text3 = this.desc;
 		float mass = SweepBotConfig.MASS;
 		EffectorValues none = global::TUNING.BUILDINGS.DECOR.NONE;
-		GameObject gameObject = EntityTemplates.CreatePlacedEntity(text, text2, text3, mass, Assets.GetAnim("sweep_bot_kanim"), "idle", Grid.SceneLayer.Creatures, 1, 1, none, default(EffectorValues), SimHashes.Creature, null, 293f);
+		GameObject gameObject = EntityTemplates.CreatePlacedEntity(text, text2, text3, mass, Assets.GetAnim("sweep_bot_kanim"), "idle_loop", Grid.SceneLayer.Creatures, 1, 1, none, default(EffectorValues), SimHashes.Creature, null, 293f);
 		gameObject.AddOrGet<LoopingSounds>();
 		gameObject.GetComponent<KBatchedAnimController>().isMovable = true;
 		KPrefabID kprefabID = gameObject.AddOrGet<KPrefabID>();
 		kprefabID.AddTag(GameTags.Creature, false);
 		kprefabID.AddTag(GameTags.Robot, false);
+		kprefabID.AddTag(GameTags.OrnamentDisplayer, false);
 		gameObject.AddComponent<Pickupable>();
 		gameObject.AddOrGet<Clearable>().isClearable = false;
 		Trait trait = Db.Get().CreateTrait("SweepBotBaseTrait", this.name, this.name, null, false, null, true, true);
@@ -59,7 +60,7 @@ public class SweepBotConfig : IEntityConfig
 		Storage storage = gameObject.AddComponent<Storage>();
 		storage.capacityKg = 500f;
 		storage.storageFXOffset = new Vector3(0f, 0.5f, 0f);
-		gameObject.AddOrGet<OrnamentReceptacle>().AddDepositTag(GameTags.PedestalDisplayable);
+		gameObject.AddOrGet<MovingOrnamentReceptacle>().AddDepositTag(GameTags.PedestalDisplayable);
 		gameObject.AddOrGet<DecorProvider>();
 		gameObject.AddOrGet<UserNameable>();
 		gameObject.AddOrGet<CharacterOverlay>();
@@ -69,7 +70,8 @@ public class SweepBotConfig : IEntityConfig
 		navigator.CurrentNavType = NavType.Floor;
 		navigator.defaultSpeed = 1f;
 		navigator.updateProber = true;
-		navigator.maxProbingRadius = 32;
+		navigator.maxProbeRadiusX = 32;
+		navigator.maxProbeRadiusY = 1;
 		navigator.sceneLayer = Grid.SceneLayer.Creatures;
 		kprefabID.AddTag(GameTags.Creatures.Walker, false);
 		ChoreTable.Builder builder = new ChoreTable.Builder().Add(new FallStates.Def(), true, -1).Add(new AnimInterruptStates.Def(), true, -1).Add(new SweepBotTrappedStates.Def(), true, -1)
@@ -96,7 +98,7 @@ public class SweepBotConfig : IEntityConfig
 	{
 		StorageUnloadMonitor.Instance smi = inst.GetSMI<StorageUnloadMonitor.Instance>();
 		smi.sm.internalStorage.Set(inst.GetComponents<Storage>()[1], smi, false);
-		inst.GetComponent<OrnamentReceptacle>();
+		inst.GetComponent<MovingOrnamentReceptacle>();
 		inst.GetSMI<CreatureFallMonitor.Instance>().anim = "idle_loop";
 	}
 

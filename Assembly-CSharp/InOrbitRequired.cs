@@ -27,10 +27,10 @@ public class InOrbitRequired : KMonoBehaviour, IGameObjectEffectDescriptor
 
 	private void OnTagsChanged(object data)
 	{
-		TagChangedEventData tagChangedEventData = (TagChangedEventData)data;
-		if (tagChangedEventData.tag == GameTags.RocketNotOnGround)
+		TagChangedEventData value = ((Boxed<TagChangedEventData>)data).value;
+		if (value.tag == GameTags.RocketNotOnGround)
 		{
-			this.UpdateFlag(tagChangedEventData.added);
+			this.UpdateFlag(value.added);
 		}
 	}
 

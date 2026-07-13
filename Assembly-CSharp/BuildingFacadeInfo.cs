@@ -12,7 +12,13 @@ public class BuildingFacadeInfo : IBlueprintInfo, IHasDlcRestrictions
 
 	public string desc { get; set; }
 
-	public PermitRarity rarity { get; set; }
+	public PermitRarity rarity
+	{
+		get
+		{
+			return this.rarity_;
+		}
+	}
 
 	public string animFile { get; set; }
 
@@ -21,7 +27,7 @@ public class BuildingFacadeInfo : IBlueprintInfo, IHasDlcRestrictions
 		this.id = id;
 		this.name = name;
 		this.desc = desc;
-		this.rarity = rarity;
+		this.rarity_ = rarity;
 		this.prefabId = prefabId;
 		this.animFile = animFile;
 		this.workables = workables;
@@ -38,6 +44,8 @@ public class BuildingFacadeInfo : IBlueprintInfo, IHasDlcRestrictions
 	{
 		return this.forbiddenDlcIds;
 	}
+
+	private readonly PermitRarity rarity_;
 
 	public string prefabId;
 

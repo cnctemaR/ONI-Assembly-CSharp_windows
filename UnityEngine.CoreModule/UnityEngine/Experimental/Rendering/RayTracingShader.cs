@@ -4,9 +4,9 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine.Experimental.Rendering
 {
+	[NativeHeader("Runtime/Shaders/RayTracingShader.h")]
 	[NativeHeader("Runtime/Graphics/ShaderScriptBindings.h")]
 	[NativeHeader("Runtime/Shaders/RayTracingAccelerationStructure.h")]
-	[NativeHeader("Runtime/Shaders/RayTracingShader.h")]
 	public sealed class RayTracingShader : Object
 	{
 		public extern float maxRecursionDepth

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 
 internal class OilFloaterMovementSound : KMonoBehaviour
 {
@@ -7,18 +8,13 @@ internal class OilFloaterMovementSound : KMonoBehaviour
 		base.OnPrefabInit();
 		this.sound = GlobalAssets.GetSound(this.sound, false);
 		base.Subscribe<OilFloaterMovementSound>(1027377649, OilFloaterMovementSound.OnObjectMovementStateChangedDelegate);
-		Singleton<CellChangeMonitor>.Instance.RegisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChanged), "OilFloaterMovementSound");
+		this.cellChangedHandlerID = Singleton<CellChangeMonitor>.Instance.RegisterCellChangedHandler(base.transform, OilFloaterMovementSound.UpdateSoundDispatcher, this, "OilFloaterMovementSound");
 	}
 
 	private void OnObjectMovementStateChanged(object data)
 	{
-		GameHashes gameHashes = (GameHashes)data;
+		GameHashes gameHashes = Boxed<GameHashes>.Unbox(data);
 		this.isMoving = gameHashes == GameHashes.ObjectMovementWakeUp;
-		this.UpdateSound();
-	}
-
-	private void OnCellChanged()
-	{
 		this.UpdateSound();
 	}
 
@@ -44,7 +40,7 @@ internal class OilFloaterMovementSound : KMonoBehaviour
 	protected override void OnCleanUp()
 	{
 		base.OnCleanUp();
-		Singleton<CellChangeMonitor>.Instance.UnregisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChanged));
+		Singleton<CellChangeMonitor>.Instance.UnregisterCellChangedHandler(ref this.cellChangedHandlerID);
 	}
 
 	public string sound;
@@ -53,8 +49,15 @@ internal class OilFloaterMovementSound : KMonoBehaviour
 
 	public bool isMoving;
 
+	private ulong cellChangedHandlerID;
+
 	private static readonly EventSystem.IntraObjectHandler<OilFloaterMovementSound> OnObjectMovementStateChangedDelegate = new EventSystem.IntraObjectHandler<OilFloaterMovementSound>(delegate(OilFloaterMovementSound component, object data)
 	{
 		component.OnObjectMovementStateChanged(data);
 	});
+
+	private static readonly Action<object> UpdateSoundDispatcher = delegate(object obj)
+	{
+		Unsafe.As<OilFloaterMovementSound>(obj).UpdateSound();
+	};
 }

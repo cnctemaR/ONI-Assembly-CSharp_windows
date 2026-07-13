@@ -63,7 +63,7 @@ public class ArtifactCargoBayConfig : IBuildingConfig
 		}));
 		Prioritizable.AddRef(go);
 		ArtifactModule artifactModule = go.AddOrGet<ArtifactModule>();
-		artifactModule.AddDepositTag(GameTags.PedestalDisplayable);
+		artifactModule.AddDepositTag(GameTags.Artifact);
 		artifactModule.occupyingObjectRelativePosition = new Vector3(0f, 0.5f, -1f);
 		go.AddOrGet<DecorProvider>();
 		go.AddOrGet<ItemPedestal>();

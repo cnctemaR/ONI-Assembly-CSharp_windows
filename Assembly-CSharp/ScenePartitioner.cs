@@ -15,8 +15,7 @@ public class ScenePartitioner : ISim1000ms
 			{
 				for (int k = 0; k < this.nodes.GetLength(2); k++)
 				{
-					this.nodes[i, j, k].entries = new List<ScenePartitionerEntry>();
-					this.nodes[i, j, k].entries_set = new HashSet<ScenePartitionerEntry>();
+					this.nodes[i, j, k].entries = new HybridListHashSet<HandleVector<int>.Handle>();
 				}
 			}
 		}
@@ -25,33 +24,6 @@ public class ScenePartitioner : ISim1000ms
 
 	public void FreeResources()
 	{
-		for (int i = 0; i < this.nodes.GetLength(0); i++)
-		{
-			for (int j = 0; j < this.nodes.GetLength(1); j++)
-			{
-				for (int k = 0; k < this.nodes.GetLength(2); k++)
-				{
-					foreach (ScenePartitionerEntry scenePartitionerEntry in this.nodes[i, j, k].entries)
-					{
-						if (scenePartitionerEntry != null)
-						{
-							scenePartitionerEntry.partitioner = null;
-							scenePartitionerEntry.obj = null;
-						}
-					}
-					foreach (ScenePartitionerEntry scenePartitionerEntry2 in this.nodes[i, j, k].entries_set)
-					{
-						if (scenePartitionerEntry2 != null)
-						{
-							scenePartitionerEntry2.partitioner = null;
-							scenePartitionerEntry2.obj = null;
-						}
-					}
-					this.nodes[i, j, k].entries.Clear();
-					this.nodes[i, j, k].entries_set.Clear();
-				}
-			}
-		}
 		this.nodes = null;
 	}
 
@@ -112,19 +84,25 @@ public class ScenePartitioner : ISim1000ms
 		return this.GetNodeExtents(entry.x, entry.y, entry.width, entry.height);
 	}
 
-	private void Insert(ScenePartitionerEntry entry)
+	private void Insert(HandleVector<int>.Handle handle)
 	{
-		if (entry.obj == null)
+		ScenePartitionerEntry scenePartitionerEntry;
+		if (!GameScenePartitioner.Instance.Lookup(handle, out scenePartitionerEntry))
+		{
+			Debug.LogWarning("Trying to put invalid handle go into scene partitioner");
+			return;
+		}
+		if (scenePartitionerEntry.obj == null)
 		{
 			Debug.LogWarning("Trying to put null go into scene partitioner");
 			return;
 		}
-		Extents nodeExtents = this.GetNodeExtents(entry);
+		Extents nodeExtents = this.GetNodeExtents(scenePartitionerEntry);
 		if (nodeExtents.x + nodeExtents.width > this.nodes.GetLength(2))
 		{
 			Debug.LogError(string.Concat(new string[]
 			{
-				entry.obj.ToString(),
+				scenePartitionerEntry.obj.ToString(),
 				" x/w ",
 				nodeExtents.x.ToString(),
 				"/",
@@ -137,7 +115,7 @@ public class ScenePartitioner : ISim1000ms
 		{
 			Debug.LogError(string.Concat(new string[]
 			{
-				entry.obj.ToString(),
+				scenePartitionerEntry.obj.ToString(),
 				" y/h ",
 				nodeExtents.y.ToString(),
 				"/",
@@ -146,7 +124,7 @@ public class ScenePartitioner : ISim1000ms
 				this.nodes.GetLength(1).ToString()
 			}));
 		}
-		int layer = entry.layer;
+		int layer = scenePartitionerEntry.layer;
 		for (int i = nodeExtents.y; i < nodeExtents.y + nodeExtents.height; i++)
 		{
 			for (int j = nodeExtents.x; j < nodeExtents.x + nodeExtents.width; j++)
@@ -161,17 +139,85 @@ public class ScenePartitioner : ISim1000ms
 						y = i
 					});
 				}
-				if (this.nodes[layer, i, j].entries_set.Add(entry))
-				{
-					this.nodes[layer, i, j].entries.Add(entry);
-				}
+				this.nodes[layer, i, j].entries.Add(handle);
 			}
 		}
 	}
 
-	private void Widthdraw(ScenePartitionerEntry entry)
+	private void Withdraw(int layer, Extents extents, HandleVector<int>.Handle handle)
 	{
-		Extents nodeExtents = this.GetNodeExtents(entry);
+		if (extents.x + extents.width > this.nodes.GetLength(2))
+		{
+			Debug.LogError(string.Concat(new string[]
+			{
+				" x/w ",
+				extents.x.ToString(),
+				"/",
+				extents.width.ToString(),
+				" < ",
+				this.nodes.GetLength(2).ToString()
+			}));
+		}
+		if (extents.y + extents.height > this.nodes.GetLength(1))
+		{
+			Debug.LogError(string.Concat(new string[]
+			{
+				" y/h ",
+				extents.y.ToString(),
+				"/",
+				extents.height.ToString(),
+				" < ",
+				this.nodes.GetLength(1).ToString()
+			}));
+		}
+		for (int i = extents.y; i < extents.y + extents.height; i++)
+		{
+			for (int j = extents.x; j < extents.x + extents.width; j++)
+			{
+				this.nodes[layer, i, j].entries.Remove(handle);
+			}
+		}
+	}
+
+	public void Add(HandleVector<int>.Handle entry)
+	{
+		this.Insert(entry);
+	}
+
+	public void UpdatePosition(int x, int y, HandleVector<int>.Handle handle)
+	{
+		ScenePartitionerEntry scenePartitionerEntry;
+		if (GameScenePartitioner.Instance.Lookup(handle, out scenePartitionerEntry))
+		{
+			this.Withdraw(scenePartitionerEntry.layer, this.GetNodeExtents(scenePartitionerEntry), handle);
+			scenePartitionerEntry.x = x;
+			scenePartitionerEntry.y = y;
+			this.Insert(handle);
+		}
+	}
+
+	public void UpdatePosition(Extents e, HandleVector<int>.Handle handle)
+	{
+		ScenePartitionerEntry scenePartitionerEntry;
+		if (GameScenePartitioner.Instance.Lookup(handle, out scenePartitionerEntry))
+		{
+			this.Withdraw(scenePartitionerEntry.layer, this.GetNodeExtents(scenePartitionerEntry), handle);
+			scenePartitionerEntry.x = e.x;
+			scenePartitionerEntry.y = e.y;
+			scenePartitionerEntry.width = e.width;
+			scenePartitionerEntry.height = e.height;
+			this.Insert(handle);
+		}
+	}
+
+	public void Remove(HandleVector<int>.Handle handle)
+	{
+		ScenePartitionerEntry scenePartitionerEntry;
+		if (!GameScenePartitioner.Instance.Lookup(handle, out scenePartitionerEntry))
+		{
+			return;
+		}
+		Extents nodeExtents = this.GetNodeExtents(scenePartitionerEntry);
 		if (nodeExtents.x + nodeExtents.width > this.nodes.GetLength(2))
 		{
 			Debug.LogError(string.Concat(new string[]
@@ -196,81 +242,7 @@ public class ScenePartitioner : ISim1000ms
 				this.nodes.GetLength(1).ToString()
 			}));
 		}
-		int layer = entry.layer;
-		for (int i = nodeExtents.y; i < nodeExtents.y + nodeExtents.height; i++)
-		{
-			for (int j = nodeExtents.x; j < nodeExtents.x + nodeExtents.width; j++)
-			{
-				if (this.nodes[layer, i, j].entries_set.Remove(entry))
-				{
-					this.nodes[layer, i, j].entries.Remove(entry);
-					if (!this.nodes[layer, i, j].dirty)
-					{
-						this.nodes[layer, i, j].dirty = true;
-						this.dirtyNodes.Add(new ScenePartitioner.DirtyNode
-						{
-							layer = layer,
-							x = j,
-							y = i
-						});
-					}
-				}
-			}
-		}
-	}
-
-	public ScenePartitionerEntry Add(ScenePartitionerEntry entry)
-	{
-		this.Insert(entry);
-		return entry;
-	}
-
-	public void UpdatePosition(int x, int y, ScenePartitionerEntry entry)
-	{
-		this.Widthdraw(entry);
-		entry.x = x;
-		entry.y = y;
-		this.Insert(entry);
-	}
-
-	public void UpdatePosition(Extents e, ScenePartitionerEntry entry)
-	{
-		this.Widthdraw(entry);
-		entry.x = e.x;
-		entry.y = e.y;
-		entry.width = e.width;
-		entry.height = e.height;
-		this.Insert(entry);
-	}
-
-	public void Remove(ScenePartitionerEntry entry)
-	{
-		Extents nodeExtents = this.GetNodeExtents(entry);
-		if (nodeExtents.x + nodeExtents.width > this.nodes.GetLength(2))
-		{
-			Debug.LogError(string.Concat(new string[]
-			{
-				" x/w ",
-				nodeExtents.x.ToString(),
-				"/",
-				nodeExtents.width.ToString(),
-				" < ",
-				this.nodes.GetLength(2).ToString()
-			}));
-		}
-		if (nodeExtents.y + nodeExtents.height > this.nodes.GetLength(1))
-		{
-			Debug.LogError(string.Concat(new string[]
-			{
-				" y/h ",
-				nodeExtents.y.ToString(),
-				"/",
-				nodeExtents.height.ToString(),
-				" < ",
-				this.nodes.GetLength(1).ToString()
-			}));
-		}
-		int layer = entry.layer;
+		int layer = scenePartitionerEntry.layer;
 		for (int i = nodeExtents.y; i < nodeExtents.y + nodeExtents.height; i++)
 		{
 			for (int j = nodeExtents.x; j < nodeExtents.x + nodeExtents.width; j++)
@@ -287,20 +259,20 @@ public class ScenePartitioner : ISim1000ms
 				}
 			}
 		}
-		entry.obj = null;
+		scenePartitionerEntry.obj = null;
 	}
 
 	public void Sim1000ms(float dt)
 	{
 		foreach (ScenePartitioner.DirtyNode dirtyNode in this.dirtyNodes)
 		{
-			this.nodes[dirtyNode.layer, dirtyNode.y, dirtyNode.x].entries_set.RemoveWhere(ScenePartitioner.removeCallback);
-			List<ScenePartitionerEntry> entries = this.nodes[dirtyNode.layer, dirtyNode.y, dirtyNode.x].entries;
+			HybridListHashSet<HandleVector<int>.Handle> entries = this.nodes[dirtyNode.layer, dirtyNode.y, dirtyNode.x].entries;
 			for (int i = entries.Count - 1; i >= 0; i--)
 			{
-				if (ScenePartitioner.removeCallback(entries[i]))
+				ScenePartitionerEntry scenePartitionerEntry;
+				if (!GameScenePartitioner.Instance.Lookup(entries[i], out scenePartitionerEntry))
 				{
-					entries.RemoveAt(i);
+					entries.Remove(entries[i]);
 				}
 			}
 			this.nodes[dirtyNode.layer, dirtyNode.y, dirtyNode.x].dirty = false;
@@ -310,27 +282,55 @@ public class ScenePartitioner : ISim1000ms
 
 	public void TriggerEvent(IEnumerable<int> cells, ScenePartitionerLayer layer, object event_data)
 	{
-		ListPool<ScenePartitionerEntry, ScenePartitioner>.PooledList pooledList = ListPool<ScenePartitionerEntry, ScenePartitioner>.Allocate();
 		this.queryId++;
+		this.RunLayerGlobalEvent(cells, layer, event_data);
 		foreach (int num in cells)
 		{
 			int num2 = 0;
 			int num3 = 0;
 			Grid.CellToXY(num, out num2, out num3);
-			this.GatherEntries(num2, num3, 1, 1, layer, event_data, pooledList, this.queryId);
+			this.TriggerEventInternal(num2, num3, 1, 1, layer, event_data);
 		}
-		this.RunLayerGlobalEvent(cells, layer, event_data);
-		this.RunEntries(pooledList, event_data);
-		pooledList.Recycle();
 	}
 
 	public void TriggerEvent(int x, int y, int width, int height, ScenePartitionerLayer layer, object event_data)
 	{
-		ListPool<ScenePartitionerEntry, ScenePartitioner>.PooledList pooledList = ListPool<ScenePartitionerEntry, ScenePartitioner>.Allocate();
-		this.GatherEntries(x, y, width, height, layer, event_data, pooledList);
+		this.queryId++;
 		this.RunLayerGlobalEvent(x, y, width, height, layer, event_data);
-		this.RunEntries(pooledList, event_data);
-		pooledList.Recycle();
+		this.TriggerEventInternal(x, y, width, height, layer, event_data);
+	}
+
+	private void TriggerEventInternal(int x, int y, int width, int height, ScenePartitionerLayer layer, object event_data)
+	{
+		Extents nodeExtents = this.GetNodeExtents(x, y, width, height);
+		int num = Math.Min(nodeExtents.y + nodeExtents.height, this.nodes.GetLength(1));
+		int num2 = Math.Max(nodeExtents.y, 0);
+		int num3 = Math.Max(nodeExtents.x, 0);
+		int num4 = Math.Min(nodeExtents.x + nodeExtents.width, this.nodes.GetLength(2));
+		int layer2 = layer.layer;
+		for (int i = num2; i < num; i++)
+		{
+			for (int j = num3; j < num4; j++)
+			{
+				HybridListHashSet<HandleVector<int>.Handle> entries = this.nodes[layer2, i, j].entries;
+				for (int k = entries.Count - 1; k >= 0; k--)
+				{
+					ScenePartitionerEntry scenePartitionerEntry;
+					if (GameScenePartitioner.Instance.Lookup(entries[k], out scenePartitionerEntry))
+					{
+						if (x + width - 1 >= scenePartitionerEntry.x && x <= scenePartitionerEntry.x + scenePartitionerEntry.width - 1 && y + height - 1 >= scenePartitionerEntry.y && y <= scenePartitionerEntry.y + scenePartitionerEntry.height - 1 && scenePartitionerEntry.queryId != this.queryId && scenePartitionerEntry.eventCallback != null && scenePartitionerEntry.obj != null)
+						{
+							scenePartitionerEntry.queryId = this.queryId;
+							scenePartitionerEntry.eventCallback(event_data);
+						}
+					}
+					else
+					{
+						entries.Remove(entries[k]);
+					}
+				}
+			}
+		}
 	}
 
 	private void RunLayerGlobalEvent(IEnumerable<int> cells, ScenePartitionerLayer layer, object event_data)
@@ -362,18 +362,6 @@ public class ScenePartitioner : ISim1000ms
 		}
 	}
 
-	private void RunEntries(List<ScenePartitionerEntry> gathered_entries, object event_data)
-	{
-		for (int i = 0; i < gathered_entries.Count; i++)
-		{
-			ScenePartitionerEntry scenePartitionerEntry = gathered_entries[i];
-			if (scenePartitionerEntry.obj != null && scenePartitionerEntry.eventCallback != null)
-			{
-				scenePartitionerEntry.eventCallback(event_data);
-			}
-		}
-	}
-
 	public void GatherEntries(int x, int y, int width, int height, ScenePartitionerLayer layer, object event_data, List<ScenePartitionerEntry> gathered_entries)
 	{
 		int num = this.queryId + 1;
@@ -393,63 +381,102 @@ public class ScenePartitioner : ISim1000ms
 		{
 			for (int j = num3; j < num4; j++)
 			{
-				ListPool<ScenePartitionerEntry, ScenePartitioner>.PooledList pooledList = ListPool<ScenePartitionerEntry, ScenePartitioner>.Allocate();
-				foreach (ScenePartitionerEntry scenePartitionerEntry in this.nodes[layer2, i, j].entries)
+				HybridListHashSet<HandleVector<int>.Handle> entries = this.nodes[layer2, i, j].entries;
+				for (int k = entries.Count - 1; k >= 0; k--)
 				{
-					if (scenePartitionerEntry != null && scenePartitionerEntry.queryId != this.queryId)
+					ScenePartitionerEntry scenePartitionerEntry;
+					if (GameScenePartitioner.Instance.Lookup(entries[k], out scenePartitionerEntry))
 					{
-						if (scenePartitionerEntry.obj == null)
-						{
-							pooledList.Add(scenePartitionerEntry);
-						}
-						else if (x + width - 1 >= scenePartitionerEntry.x && x <= scenePartitionerEntry.x + scenePartitionerEntry.width - 1 && y + height - 1 >= scenePartitionerEntry.y && y <= scenePartitionerEntry.y + scenePartitionerEntry.height - 1)
+						if (x + width - 1 >= scenePartitionerEntry.x && x <= scenePartitionerEntry.x + scenePartitionerEntry.width - 1 && y + height - 1 >= scenePartitionerEntry.y && y <= scenePartitionerEntry.y + scenePartitionerEntry.height - 1 && scenePartitionerEntry.queryId != this.queryId)
 						{
 							scenePartitionerEntry.queryId = this.queryId;
 							gathered_entries.Add(scenePartitionerEntry);
 						}
 					}
-				}
-				this.nodes[layer2, i, j].entries_set.ExceptWith(pooledList);
-				List<ScenePartitionerEntry> entries = this.nodes[layer2, i, j].entries;
-				foreach (ScenePartitionerEntry scenePartitionerEntry2 in pooledList)
-				{
-					entries.Remove(scenePartitionerEntry2);
-				}
-				pooledList.Recycle();
-			}
-		}
-	}
-
-	public IEnumerable<object> AsyncSafeEnumerate(int x, int y, int width, int height, ScenePartitionerLayer layer)
-	{
-		Extents nodeExtents = this.GetNodeExtents(x, y, width, height);
-		int max_y = Math.Min(nodeExtents.y + nodeExtents.height, this.nodes.GetLength(1));
-		int num = Math.Max(nodeExtents.y, 0);
-		int start_x = Math.Max(nodeExtents.x, 0);
-		int max_x = Math.Min(nodeExtents.x + nodeExtents.width, this.nodes.GetLength(2));
-		int layer_idx = layer.layer;
-		int num2;
-		for (int node_y = num; node_y < max_y; node_y = num2)
-		{
-			for (int node_x = start_x; node_x < max_x; node_x = num2)
-			{
-				foreach (ScenePartitionerEntry scenePartitionerEntry in this.nodes[layer_idx, node_y, node_x].entries)
-				{
-					if (scenePartitionerEntry != null && scenePartitionerEntry.obj != null && x + width - 1 >= scenePartitionerEntry.x && x <= scenePartitionerEntry.x + scenePartitionerEntry.width - 1 && y + height - 1 >= scenePartitionerEntry.y && y <= scenePartitionerEntry.y + scenePartitionerEntry.height - 1)
+					else
 					{
-						yield return scenePartitionerEntry.obj;
+						entries.Remove(entries[k]);
 					}
 				}
-				List<ScenePartitionerEntry>.Enumerator enumerator = default(List<ScenePartitionerEntry>.Enumerator);
-				num2 = node_x + 1;
 			}
-			num2 = node_y + 1;
 		}
-		yield break;
-		yield break;
 	}
 
-	public void AsyncSafeVisit<ContextType>(int x, int y, int width, int height, ScenePartitionerLayer layer, Func<object, ContextType, bool> visitor, ContextType context)
+	public void VisitEntries<ContextType>(int x, int y, int width, int height, ScenePartitionerLayer layer, Func<object, ContextType, Util.IterationInstruction> visitor, ContextType context) where ContextType : class
+	{
+		Extents nodeExtents = this.GetNodeExtents(x, y, width, height);
+		this.queryId++;
+		int num = Math.Min(nodeExtents.y + nodeExtents.height, this.nodes.GetLength(1));
+		int num2 = Math.Max(nodeExtents.y, 0);
+		int num3 = Math.Max(nodeExtents.x, 0);
+		int num4 = Math.Min(nodeExtents.x + nodeExtents.width, this.nodes.GetLength(2));
+		int layer2 = layer.layer;
+		for (int i = num2; i < num; i++)
+		{
+			for (int j = num3; j < num4; j++)
+			{
+				HybridListHashSet<HandleVector<int>.Handle> entries = this.nodes[layer2, i, j].entries;
+				for (int k = entries.Count - 1; k >= 0; k--)
+				{
+					ScenePartitionerEntry scenePartitionerEntry;
+					if (GameScenePartitioner.Instance.Lookup(entries[k], out scenePartitionerEntry))
+					{
+						if (x + width - 1 >= scenePartitionerEntry.x && x <= scenePartitionerEntry.x + scenePartitionerEntry.width - 1 && y + height - 1 >= scenePartitionerEntry.y && y <= scenePartitionerEntry.y + scenePartitionerEntry.height - 1 && scenePartitionerEntry.queryId != this.queryId)
+						{
+							scenePartitionerEntry.queryId = this.queryId;
+							if (visitor(scenePartitionerEntry.obj, context) == Util.IterationInstruction.Halt)
+							{
+								return;
+							}
+						}
+					}
+					else
+					{
+						entries.Remove(entries[k]);
+					}
+				}
+			}
+		}
+	}
+
+	public void VisitEntries<ContextType>(int x, int y, int width, int height, ScenePartitionerLayer layer, GameScenePartitioner.VisitorRef<ContextType> visitor, ref ContextType context) where ContextType : struct
+	{
+		Extents nodeExtents = this.GetNodeExtents(x, y, width, height);
+		this.queryId++;
+		int num = Math.Min(nodeExtents.y + nodeExtents.height, this.nodes.GetLength(1));
+		int num2 = Math.Max(nodeExtents.y, 0);
+		int num3 = Math.Max(nodeExtents.x, 0);
+		int num4 = Math.Min(nodeExtents.x + nodeExtents.width, this.nodes.GetLength(2));
+		int layer2 = layer.layer;
+		for (int i = num2; i < num; i++)
+		{
+			for (int j = num3; j < num4; j++)
+			{
+				HybridListHashSet<HandleVector<int>.Handle> entries = this.nodes[layer2, i, j].entries;
+				for (int k = entries.Count - 1; k >= 0; k--)
+				{
+					ScenePartitionerEntry scenePartitionerEntry;
+					if (GameScenePartitioner.Instance.Lookup(entries[k], out scenePartitionerEntry))
+					{
+						if (x + width - 1 >= scenePartitionerEntry.x && x <= scenePartitionerEntry.x + scenePartitionerEntry.width - 1 && y + height - 1 >= scenePartitionerEntry.y && y <= scenePartitionerEntry.y + scenePartitionerEntry.height - 1 && scenePartitionerEntry.queryId != this.queryId)
+						{
+							scenePartitionerEntry.queryId = this.queryId;
+							if (visitor(scenePartitionerEntry.obj, ref context) == Util.IterationInstruction.Halt)
+							{
+								return;
+							}
+						}
+					}
+					else
+					{
+						entries.Remove(entries[k]);
+					}
+				}
+			}
+		}
+	}
+
+	public void ReadonlyVisitEntries<ContextType>(int x, int y, int width, int height, ScenePartitionerLayer layer, Func<object, ContextType, Util.IterationInstruction> visitor, ContextType context) where ContextType : class
 	{
 		Extents nodeExtents = this.GetNodeExtents(x, y, width, height);
 		int num = Math.Min(nodeExtents.y + nodeExtents.height, this.nodes.GetLength(1));
@@ -461,9 +488,36 @@ public class ScenePartitioner : ISim1000ms
 		{
 			for (int j = num3; j < num4; j++)
 			{
-				foreach (ScenePartitionerEntry scenePartitionerEntry in this.nodes[layer2, i, j].entries)
+				HybridListHashSet<HandleVector<int>.Handle> entries = this.nodes[layer2, i, j].entries;
+				for (int k = entries.Count - 1; k >= 0; k--)
 				{
-					if (scenePartitionerEntry != null && scenePartitionerEntry.obj != null && x + width - 1 >= scenePartitionerEntry.x && x <= scenePartitionerEntry.x + scenePartitionerEntry.width - 1 && y + height - 1 >= scenePartitionerEntry.y && y <= scenePartitionerEntry.y + scenePartitionerEntry.height - 1 && !visitor(scenePartitionerEntry.obj, context))
+					ScenePartitionerEntry scenePartitionerEntry;
+					if (GameScenePartitioner.Instance.Lookup(entries[k], out scenePartitionerEntry) && x + width - 1 >= scenePartitionerEntry.x && x <= scenePartitionerEntry.x + scenePartitionerEntry.width - 1 && y + height - 1 >= scenePartitionerEntry.y && y <= scenePartitionerEntry.y + scenePartitionerEntry.height - 1 && visitor(scenePartitionerEntry.obj, context) == Util.IterationInstruction.Halt)
+					{
+						return;
+					}
+				}
+			}
+		}
+	}
+
+	public void ReadonlyVisitEntries<ContextType>(int x, int y, int width, int height, ScenePartitionerLayer layer, GameScenePartitioner.VisitorRef<ContextType> visitor, ref ContextType context) where ContextType : struct
+	{
+		Extents nodeExtents = this.GetNodeExtents(x, y, width, height);
+		int num = Math.Min(nodeExtents.y + nodeExtents.height, this.nodes.GetLength(1));
+		int num2 = Math.Max(nodeExtents.y, 0);
+		int num3 = Math.Max(nodeExtents.x, 0);
+		int num4 = Math.Min(nodeExtents.x + nodeExtents.width, this.nodes.GetLength(2));
+		int layer2 = layer.layer;
+		for (int i = num2; i < num; i++)
+		{
+			for (int j = num3; j < num4; j++)
+			{
+				HybridListHashSet<HandleVector<int>.Handle> entries = this.nodes[layer2, i, j].entries;
+				for (int k = entries.Count - 1; k >= 0; k--)
+				{
+					ScenePartitionerEntry scenePartitionerEntry;
+					if (GameScenePartitioner.Instance.Lookup(entries[k], out scenePartitionerEntry) && x + width - 1 >= scenePartitionerEntry.x && x <= scenePartitionerEntry.x + scenePartitionerEntry.width - 1 && y + height - 1 >= scenePartitionerEntry.y && y <= scenePartitionerEntry.y + scenePartitionerEntry.height - 1 && visitor(scenePartitionerEntry.obj, ref context) == Util.IterationInstruction.Halt)
 					{
 						return;
 					}
@@ -477,6 +531,12 @@ public class ScenePartitioner : ISim1000ms
 		SimAndRenderScheduler.instance.Remove(this);
 	}
 
+	private static Util.IterationInstruction checkForAnyObjectHelper(object obj, ref bool found)
+	{
+		found = true;
+		return Util.IterationInstruction.Halt;
+	}
+
 	public bool DoDebugLayersContainItemsOnCell(int cell)
 	{
 		int num = 0;
@@ -486,8 +546,9 @@ public class ScenePartitioner : ISim1000ms
 		foreach (ScenePartitionerLayer scenePartitionerLayer in this.toggledLayers)
 		{
 			list.Clear();
-			GameScenePartitioner.Instance.GatherEntries(num, num2, 1, 1, scenePartitionerLayer, list);
-			if (list.Count > 0)
+			bool flag = false;
+			GameScenePartitioner.Instance.VisitEntries<bool>(num, num2, 1, 1, scenePartitionerLayer, new GameScenePartitioner.VisitorRef<bool>(ScenePartitioner.checkForAnyObjectHelper), ref flag);
+			if (flag)
 			{
 				return true;
 			}
@@ -505,15 +566,11 @@ public class ScenePartitioner : ISim1000ms
 
 	private int queryId;
 
-	private static readonly Predicate<ScenePartitionerEntry> removeCallback = (ScenePartitionerEntry entry) => entry == null || entry.obj == null;
-
 	public HashSet<ScenePartitionerLayer> toggledLayers = new HashSet<ScenePartitionerLayer>();
 
 	private struct ScenePartitionerNode
 	{
-		public List<ScenePartitionerEntry> entries;
-
-		public HashSet<ScenePartitionerEntry> entries_set;
+		public HybridListHashSet<HandleVector<int>.Handle> entries;
 
 		public bool dirty;
 	}

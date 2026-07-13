@@ -61,7 +61,7 @@ public class ResearchSideScreen : SideScreenContent
 		return target.GetComponent<ResearchCenter>() != null || target.GetComponent<NuclearResearchCenter>() != null;
 	}
 
-	private void RefreshDisplayState(object data = null)
+	private void RefreshDisplayState(object _ = null)
 	{
 		if (SelectTool.Instance.selected == null)
 		{

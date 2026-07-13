@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Runtime.CompilerServices;
 using STRINGS;
 using UnityEngine;
-using UnityEngine.Events;
 using UnityEngine.UI;
 
 public class AccessControlSideScreen : SideScreenContent
@@ -20,15 +19,34 @@ public class AccessControlSideScreen : SideScreenContent
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		this.sortByNameToggle.onValueChanged.AddListener(delegate(bool reverse_sort)
+		this.SpawnContainers();
+		Game.Instance.Subscribe(586301400, new Action<object>(this.OnMinionsChanged));
+		Components.LiveMinionIdentities.OnAdd += new Action<MinionIdentity>(this.OnMinionsChanged);
+		Components.LiveMinionIdentities.OnRemove += new Action<MinionIdentity>(this.OnMinionsChanged);
+	}
+
+	private void OnMinionsChanged(object data)
+	{
+		if (this.target == null)
 		{
-			this.SortEntries(reverse_sort, new Comparison<MinionAssignablesProxy>(AccessControlSideScreen.MinionIdentitySort.CompareByName));
-		});
-		this.sortByRoleToggle.onValueChanged.AddListener(delegate(bool reverse_sort)
+			return;
+		}
+		this.Refresh();
+	}
+
+	private void SpawnContainers()
+	{
+		if (this.containersSpawned)
 		{
-			this.SortEntries(reverse_sort, new Comparison<MinionAssignablesProxy>(AccessControlSideScreen.MinionIdentitySort.CompareByRole));
-		});
-		this.sortByPermissionToggle.onValueChanged.AddListener(new UnityAction<bool>(this.SortByPermission));
+			return;
+		}
+		this.standardMinionSectionHeader = Util.KInstantiateUI(this.entityCategoryPrefab, this.scrollContents, true);
+		this.standardMinionSectionContent = this.standardMinionSectionHeader.GetComponent<HierarchyReferences>().GetReference<RectTransform>("Content").gameObject;
+		this.bionicMinionSectionHeader = Util.KInstantiateUI(this.entityCategoryPrefab, this.scrollContents, true);
+		this.bionicMinionSectionContent = this.bionicMinionSectionHeader.GetComponent<HierarchyReferences>().GetReference<RectTransform>("Content").gameObject;
+		this.robotSectionHeader = Util.KInstantiateUI(this.entityCategoryPrefab, this.scrollContents, true);
+		this.robotSectionContent = this.robotSectionHeader.GetComponent<HierarchyReferences>().GetReference<RectTransform>("Content").gameObject;
+		this.containersSpawned = true;
 	}
 
 	public override bool IsValidForTarget(GameObject target)
@@ -42,6 +60,7 @@ public class AccessControlSideScreen : SideScreenContent
 		{
 			this.ClearTarget();
 		}
+		this.SpawnContainers();
 		this.target = target.GetComponent<AccessControl>();
 		this.doorTarget = target.GetComponent<Door>();
 		if (this.target == null)
@@ -50,13 +69,9 @@ public class AccessControlSideScreen : SideScreenContent
 		}
 		target.Subscribe(1734268753, new Action<object>(this.OnDoorStateChanged));
 		target.Subscribe(-1525636549, new Action<object>(this.OnAccessControlChanged));
-		if (this.rowPool == null)
-		{
-			this.rowPool = new UIPool<AccessControlSideScreenRow>(this.rowPrefab);
-		}
 		base.gameObject.SetActive(true);
-		this.identityList = new List<MinionAssignablesProxy>(Components.MinionAssignablesProxy.Items);
-		this.Refresh(this.identityList, true);
+		this.RefreshContainerObjects();
+		this.Refresh();
 	}
 
 	public override void ClearTarget()
@@ -69,184 +84,401 @@ public class AccessControlSideScreen : SideScreenContent
 		}
 	}
 
-	private void Refresh(List<MinionAssignablesProxy> identities, bool rebuild)
+	private void Refresh()
 	{
 		Rotatable component = this.target.GetComponent<Rotatable>();
-		bool flag = component != null && component.IsRotated;
-		this.defaultsRow.SetRotated(flag);
-		this.defaultsRow.SetContent(this.target.DefaultPermission, new Action<MinionAssignablesProxy, AccessControl.Permission>(this.OnDefaultPermissionChanged));
-		if (rebuild)
+		if (component != null)
 		{
-			this.ClearContent();
+			bool isRotated = component.IsRotated;
 		}
-		foreach (MinionAssignablesProxy minionAssignablesProxy in identities)
+		this.ClearOldRows();
+		this.PopulateRows();
+		this.standardMinionSectionHeader.GetComponent<HierarchyReferences>().GetReference<RectTransform>("EmptyRow").gameObject.SetActive(this.standardMinionSectionContent.transform.childCount <= 1);
+		if (this.standardMinionSectionContent.transform.childCount <= 1)
 		{
-			AccessControlSideScreenRow accessControlSideScreenRow;
-			if (rebuild)
+			this.ToggleCategoryCollapsed(false, this.standardMinionSectionContent.rectTransform(), this.standardMinionSectionHeader.GetComponent<HierarchyReferences>().GetReference<MultiToggle>("CollapseToggle"));
+		}
+		this.bionicMinionSectionHeader.GetComponent<HierarchyReferences>().GetReference<RectTransform>("EmptyRow").gameObject.SetActive(this.bionicMinionSectionContent.transform.childCount <= 1);
+		if (this.bionicMinionSectionContent.transform.childCount <= 1)
+		{
+			this.ToggleCategoryCollapsed(false, this.bionicMinionSectionContent.rectTransform(), this.bionicMinionSectionHeader.GetComponent<HierarchyReferences>().GetReference<MultiToggle>("CollapseToggle"));
+		}
+		this.robotSectionHeader.GetComponent<HierarchyReferences>().GetReference<RectTransform>("EmptyRow").gameObject.SetActive(this.robotSectionContent.transform.childCount <= 1);
+		if (!this.robotsHasEverBeenOpened)
+		{
+			this.ToggleCategoryCollapsed(false, this.robotSectionContent.rectTransform(), this.robotSectionHeader.GetComponent<HierarchyReferences>().GetReference<MultiToggle>("CollapseToggle"));
+		}
+		foreach (GameObject gameObject in this.setInactiveQueue)
+		{
+			gameObject.SetActive(false);
+		}
+		this.disabledOverlay.SetActive(this.target.GetComponent<AccessControl>().overrideAccess == Door.ControlState.Locked);
+	}
+
+	private void ClearOldRows()
+	{
+		foreach (KeyValuePair<MinionAssignablesProxy, GameObject> keyValuePair in this.minionIdentityRows)
+		{
+			this.inactiveRowPool.Add(keyValuePair.Value);
+			this.setInactiveQueue.Add(keyValuePair.Value);
+		}
+		this.minionIdentityRows.Clear();
+		foreach (KeyValuePair<Tag, GameObject> keyValuePair2 in this.robotRows)
+		{
+			this.inactiveRowPool.Add(keyValuePair2.Value);
+			this.setInactiveQueue.Add(keyValuePair2.Value);
+		}
+		this.robotRows.Clear();
+	}
+
+	private void RefreshContainerObjects()
+	{
+		this.<RefreshContainerObjects>g__RefreshContainer|29_0(this.standardMinionSectionHeader, GameTags.Minions.Models.Standard, true);
+		this.<RefreshContainerObjects>g__RefreshContainer|29_0(this.bionicMinionSectionHeader, GameTags.Minions.Models.Bionic, Game.IsDlcActiveForCurrentSave("DLC2_ID"));
+		this.<RefreshContainerObjects>g__RefreshContainer|29_0(this.robotSectionHeader, GameTags.Robot, true);
+	}
+
+	private void ToggleCategoryCollapsed(bool targetState, RectTransform content, MultiToggle collapseToggle)
+	{
+		content.gameObject.SetActive(targetState);
+		collapseToggle.ChangeState(content.gameObject.activeSelf ? 1 : 0);
+	}
+
+	private GameObject InstantiateIndentityRow(GameObject parent)
+	{
+		if (this.inactiveRowPool.Count > 0)
+		{
+			GameObject gameObject = this.inactiveRowPool[0];
+			this.inactiveRowPool.Remove(gameObject);
+			if (gameObject.transform.parent != parent.transform)
 			{
-				accessControlSideScreenRow = this.rowPool.GetFreeElement(this.rowGroup, true);
-				this.identityRowMap.Add(minionAssignablesProxy, accessControlSideScreenRow);
+				gameObject.transform.SetParent(parent.transform);
 			}
-			else
+			gameObject.transform.SetAsLastSibling();
+			gameObject.SetActive(true);
+			if (this.setInactiveQueue.Contains(gameObject))
 			{
-				accessControlSideScreenRow = this.identityRowMap[minionAssignablesProxy];
+				this.setInactiveQueue.Remove(gameObject);
 			}
-			AccessControl.Permission setPermission = this.target.GetSetPermission(minionAssignablesProxy);
-			bool flag2 = this.target.IsDefaultPermission(minionAssignablesProxy);
-			accessControlSideScreenRow.SetRotated(flag);
-			accessControlSideScreenRow.SetMinionContent(minionAssignablesProxy, setPermission, flag2, new Action<MinionAssignablesProxy, AccessControl.Permission>(this.OnPermissionChanged), new Action<MinionAssignablesProxy, bool>(this.OnPermissionDefault));
+			return gameObject;
 		}
-		this.RefreshOnline();
-		this.ContentContainer.SetActive(this.target.controlEnabled);
+		return Util.KInstantiateUI(this.rowPrefab, parent, true);
 	}
 
-	private void RefreshOnline()
+	private void PopulateRows()
 	{
-		bool flag = this.target.Online && (this.doorTarget == null || this.doorTarget.CurrentState == Door.ControlState.Auto);
-		this.disabledOverlay.SetActive(!flag);
-		this.headerBG.ColorState = (flag ? KImage.ColorSelector.Active : KImage.ColorSelector.Inactive);
-	}
-
-	private void SortByPermission(bool state)
-	{
-		this.ExecuteSort<int>(this.sortByPermissionToggle, state, delegate(MinionAssignablesProxy identity)
+		for (int i = 0; i < Components.MinionAssignablesProxy.Count; i++)
 		{
-			if (!this.target.IsDefaultPermission(identity))
+			MinionAssignablesProxy minionAssignablesProxy = Components.MinionAssignablesProxy[i];
+			if (!minionAssignablesProxy.HasTag(GameTags.Dead))
 			{
-				return (int)this.target.GetSetPermission(identity);
-			}
-			return -1;
-		}, false);
-	}
-
-	private void ExecuteSort<T>(Toggle toggle, bool state, Func<MinionAssignablesProxy, T> sortFunction, bool refresh = false)
-	{
-		toggle.GetComponent<ImageToggleState>().SetActiveState(state);
-		if (!state)
-		{
-			return;
-		}
-		this.identityList = (state ? this.identityList.OrderBy<MinionAssignablesProxy, T>(sortFunction).ToList<MinionAssignablesProxy>() : this.identityList.OrderByDescending<MinionAssignablesProxy, T>(sortFunction).ToList<MinionAssignablesProxy>());
-		if (refresh)
-		{
-			this.Refresh(this.identityList, false);
-			return;
-		}
-		for (int i = 0; i < this.identityList.Count; i++)
-		{
-			if (this.identityRowMap.ContainsKey(this.identityList[i]))
-			{
-				this.identityRowMap[this.identityList[i]].transform.SetSiblingIndex(i);
-			}
-		}
-	}
-
-	private void SortEntries(bool reverse_sort, Comparison<MinionAssignablesProxy> compare)
-	{
-		this.identityList.Sort(compare);
-		if (reverse_sort)
-		{
-			this.identityList.Reverse();
-		}
-		for (int i = 0; i < this.identityList.Count; i++)
-		{
-			if (this.identityRowMap.ContainsKey(this.identityList[i]))
-			{
-				this.identityRowMap[this.identityList[i]].transform.SetSiblingIndex(i);
-			}
-		}
-	}
-
-	private void ClearContent()
-	{
-		if (this.rowPool != null)
-		{
-			this.rowPool.ClearAll();
-		}
-		this.identityRowMap.Clear();
-	}
-
-	private void OnDefaultPermissionChanged(MinionAssignablesProxy identity, AccessControl.Permission permission)
-	{
-		this.target.DefaultPermission = permission;
-		this.Refresh(this.identityList, false);
-		foreach (MinionAssignablesProxy minionAssignablesProxy in this.identityList)
-		{
-			if (this.target.IsDefaultPermission(minionAssignablesProxy))
-			{
-				this.target.ClearPermission(minionAssignablesProxy);
+				this.ConfigureRow(minionAssignablesProxy);
 			}
 		}
-	}
-
-	private void OnPermissionChanged(MinionAssignablesProxy identity, AccessControl.Permission permission)
-	{
-		this.target.SetPermission(identity, permission);
-	}
-
-	private void OnPermissionDefault(MinionAssignablesProxy identity, bool isDefault)
-	{
-		if (isDefault)
+		if (Game.IsDlcActiveForCurrentSave("DLC2_ID"))
 		{
-			this.target.ClearPermission(identity);
+			this.ConfigureRow(GameTags.Robots.Models.FetchDrone);
+		}
+		if (Game.IsDlcActiveForCurrentSave("EXPANSION1_ID"))
+		{
+			this.ConfigureRow(GameTags.Robots.Models.ScoutRover);
+		}
+		this.ConfigureRow(GameTags.Robots.Models.MorbRover);
+	}
+
+	private void ConfigureRow(object entity)
+	{
+		GameObject gameObject = null;
+		MinionAssignablesProxy minion = entity as MinionAssignablesProxy;
+		Tag robotTag = GameTags.Robot;
+		if (entity is Tag)
+		{
+			robotTag = (Tag)entity;
+		}
+		if (minion != null)
+		{
+			GameObject targetGameObject = minion.GetTargetGameObject();
+			StoredMinionIdentity component = targetGameObject.GetComponent<StoredMinionIdentity>();
+			if (component != null)
+			{
+				if (component.model == GameTags.Minions.Models.Standard)
+				{
+					gameObject = this.standardMinionSectionContent;
+				}
+				else if (component.model == GameTags.Minions.Models.Bionic)
+				{
+					gameObject = this.bionicMinionSectionContent;
+				}
+			}
+			else if (targetGameObject.HasTag(GameTags.Minions.Models.Standard))
+			{
+				gameObject = this.standardMinionSectionContent;
+			}
+			else if (targetGameObject.HasTag(GameTags.Minions.Models.Bionic))
+			{
+				gameObject = this.bionicMinionSectionContent;
+			}
 		}
 		else
 		{
-			this.target.SetPermission(identity, this.target.DefaultPermission);
+			gameObject = this.robotSectionContent;
 		}
-		this.Refresh(this.identityList, false);
-	}
-
-	private void OnAccessControlChanged(object data)
-	{
-		this.RefreshOnline();
+		GameObject gameObject2 = this.InstantiateIndentityRow(gameObject);
+		HierarchyReferences component2 = gameObject2.GetComponent<HierarchyReferences>();
+		CrewPortrait reference = component2.GetReference<CrewPortrait>("Portrait");
+		RectTransform reference2 = component2.GetReference<RectTransform>("Icon");
+		if (minion != null)
+		{
+			if ((global::UnityEngine.Object)reference.identityObject != minion)
+			{
+				reference.SetIdentityObject(minion, false);
+			}
+			reference.transform.parent.gameObject.SetActive(true);
+			reference2.gameObject.SetActive(false);
+		}
+		else
+		{
+			reference.transform.parent.gameObject.SetActive(false);
+			reference2.gameObject.SetActive(true);
+			reference2.GetComponent<Image>().sprite = Def.GetUISprite(robotTag, "ui", false).first;
+			component2.GetReference<LocText>("NameLabel").SetText(robotTag.ProperName());
+		}
+		MultiToggle reference3 = component2.GetReference<MultiToggle>("UseDefaultButton");
+		reference3.GetComponent<ToolTip>().SetSimpleTooltip(UI.UISIDESCREENS.ACCESS_CONTROL_SIDE_SCREEN.MINION_SELECT_TOOLTIP);
+		if (minion != null)
+		{
+			reference3.ChangeState(this.target.IsDefaultPermission(minion) ? 1 : 0);
+			component2.GetReference<LocText>("AccessSettingLabel").SetText(this.target.IsDefaultPermission(minion) ? UI.UISIDESCREENS.ACCESS_CONTROL_SIDE_SCREEN.USING_DEFAULT : UI.UISIDESCREENS.ACCESS_CONTROL_SIDE_SCREEN.USING_CUSTOM);
+		}
+		else
+		{
+			reference3.ChangeState(this.target.IsDefaultPermission(robotTag) ? 1 : 0);
+			component2.GetReference<LocText>("AccessSettingLabel").SetText(this.target.IsDefaultPermission(robotTag) ? UI.UISIDESCREENS.ACCESS_CONTROL_SIDE_SCREEN.USING_DEFAULT : UI.UISIDESCREENS.ACCESS_CONTROL_SIDE_SCREEN.USING_CUSTOM);
+		}
+		reference3.onClick = delegate
+		{
+			if (minion != null)
+			{
+				if (this.target.IsDefaultPermission(minion))
+				{
+					this.target.SetPermission(minion, this.target.GetDefaultPermission(minion.GetMinionModel()));
+				}
+				else
+				{
+					this.target.ClearPermission(minion);
+				}
+			}
+			else if (this.target.IsDefaultPermission(robotTag))
+			{
+				this.target.ClearPermission(robotTag, GameTags.Robot);
+				this.target.SetPermission(robotTag, this.target.GetDefaultPermission(robotTag));
+			}
+			else
+			{
+				this.target.ClearPermission(robotTag, GameTags.Robot);
+			}
+			this.Refresh();
+		};
+		MultiToggle reference4 = component2.GetReference<MultiToggle>("ToggleLeft");
+		MultiToggle reference5 = component2.GetReference<MultiToggle>("ToggleRight");
+		AccessControl.Permission permission;
+		if (minion != null)
+		{
+			permission = this.target.GetSetPermission(minion);
+		}
+		else
+		{
+			permission = this.target.GetSetPermission(robotTag);
+		}
+		bool flag = permission == AccessControl.Permission.Both || permission == AccessControl.Permission.GoLeft;
+		bool flag2 = permission == AccessControl.Permission.Both || permission == AccessControl.Permission.GoRight;
+		reference4.ChangeState(flag ? 0 : 1);
+		reference5.ChangeState(flag2 ? 0 : 1);
+		reference4.onClick = delegate
+		{
+			if (minion != null)
+			{
+				switch (this.target.GetSetPermission(minion))
+				{
+				case AccessControl.Permission.Both:
+					this.target.SetPermission(minion, AccessControl.Permission.GoRight);
+					break;
+				case AccessControl.Permission.GoLeft:
+					this.target.SetPermission(minion, AccessControl.Permission.Neither);
+					break;
+				case AccessControl.Permission.GoRight:
+					this.target.SetPermission(minion, AccessControl.Permission.Both);
+					break;
+				case AccessControl.Permission.Neither:
+					this.target.SetPermission(minion, AccessControl.Permission.GoLeft);
+					break;
+				}
+			}
+			else
+			{
+				switch (this.target.GetSetPermission(robotTag))
+				{
+				case AccessControl.Permission.Both:
+					this.target.SetPermission(robotTag, AccessControl.Permission.GoRight);
+					break;
+				case AccessControl.Permission.GoLeft:
+					this.target.SetPermission(robotTag, AccessControl.Permission.Neither);
+					break;
+				case AccessControl.Permission.GoRight:
+					this.target.SetPermission(robotTag, AccessControl.Permission.Both);
+					break;
+				case AccessControl.Permission.Neither:
+					this.target.SetPermission(robotTag, AccessControl.Permission.GoLeft);
+					break;
+				}
+			}
+			this.Refresh();
+		};
+		reference5.onClick = delegate
+		{
+			if (minion != null)
+			{
+				switch (this.target.GetSetPermission(minion))
+				{
+				case AccessControl.Permission.Both:
+					this.target.SetPermission(minion, AccessControl.Permission.GoLeft);
+					break;
+				case AccessControl.Permission.GoLeft:
+					this.target.SetPermission(minion, AccessControl.Permission.Both);
+					break;
+				case AccessControl.Permission.GoRight:
+					this.target.SetPermission(minion, AccessControl.Permission.Neither);
+					break;
+				case AccessControl.Permission.Neither:
+					this.target.SetPermission(minion, AccessControl.Permission.GoRight);
+					break;
+				}
+			}
+			else
+			{
+				switch (this.target.GetSetPermission(robotTag))
+				{
+				case AccessControl.Permission.Both:
+					this.target.SetPermission(robotTag, AccessControl.Permission.GoLeft);
+					break;
+				case AccessControl.Permission.GoLeft:
+					this.target.SetPermission(robotTag, AccessControl.Permission.Both);
+					break;
+				case AccessControl.Permission.GoRight:
+					this.target.SetPermission(robotTag, AccessControl.Permission.Neither);
+					break;
+				case AccessControl.Permission.Neither:
+					this.target.SetPermission(robotTag, AccessControl.Permission.GoRight);
+					break;
+				}
+			}
+			this.Refresh();
+		};
+		GameObject gameObject3 = component2.GetReference<RectTransform>("DirectionToggles").gameObject;
+		RectTransform reference6 = component2.GetReference<RectTransform>("DittoMark");
+		if (minion != null)
+		{
+			gameObject3.SetActive(!this.target.IsDefaultPermission(minion));
+			reference6.gameObject.SetActive(this.target.IsDefaultPermission(minion));
+		}
+		else
+		{
+			gameObject3.SetActive(!this.target.IsDefaultPermission(robotTag));
+			reference6.gameObject.SetActive(this.target.IsDefaultPermission(robotTag));
+		}
+		if (minion != null)
+		{
+			this.minionIdentityRows.Add(minion, gameObject2);
+			return;
+		}
+		this.robotRows.Add(robotTag, gameObject2);
 	}
 
 	private void OnDoorStateChanged(object data)
 	{
-		this.RefreshOnline();
+		this.Refresh();
 	}
 
-	private void OnSelectSortFunc(IListableOption role, object data)
+	private void OnAccessControlChanged(object data)
 	{
-		if (role != null)
+		this.Refresh();
+	}
+
+	[CompilerGenerated]
+	private void <RefreshContainerObjects>g__RefreshContainer|29_0(GameObject container, Tag containerTag, bool enabled)
+	{
+		if (!enabled)
 		{
-			foreach (AccessControlSideScreen.MinionIdentitySort.SortInfo sortInfo in AccessControlSideScreen.MinionIdentitySort.SortInfos)
-			{
-				if (sortInfo.name == role.GetProperName())
-				{
-					this.sortInfo = sortInfo;
-					this.identityList.Sort(this.sortInfo.compare);
-					for (int j = 0; j < this.identityList.Count; j++)
-					{
-						if (this.identityRowMap.ContainsKey(this.identityList[j]))
-						{
-							this.identityRowMap[this.identityList[j]].transform.SetSiblingIndex(j);
-						}
-					}
-					return;
-				}
-			}
+			container.SetActive(false);
+			return;
 		}
+		container.SetActive(true);
+		HierarchyReferences component = container.GetComponent<HierarchyReferences>();
+		MultiToggle reference = component.GetReference<MultiToggle>("ToggleLeft");
+		MultiToggle reference2 = component.GetReference<MultiToggle>("ToggleRight");
+		component.GetReference<LocText>("CategoryLabel");
+		MultiToggle collapseToggle = component.GetReference<MultiToggle>("CollapseToggle");
+		RectTransform content = component.GetReference<RectTransform>("Content");
+		component.GetReference<LocText>("CategoryLabel").SetText(AccessControlSideScreen.categoryNames[containerTag]);
+		component.GetReference<ToolTip>("HeaderTooltip").SetSimpleTooltip(UI.UISIDESCREENS.ACCESS_CONTROL_SIDE_SCREEN.CATEGORY_HEADER_TOOLTIP);
+		AccessControl.Permission defaultPermission = this.target.GetDefaultPermission(containerTag);
+		bool flag = defaultPermission == AccessControl.Permission.Both || defaultPermission == AccessControl.Permission.GoLeft;
+		bool flag2 = defaultPermission == AccessControl.Permission.Both || defaultPermission == AccessControl.Permission.GoRight;
+		reference.ChangeState(flag ? 0 : 1);
+		reference2.ChangeState(flag2 ? 0 : 1);
+		reference.onClick = delegate
+		{
+			switch (this.target.GetDefaultPermission(containerTag))
+			{
+			case AccessControl.Permission.Both:
+				this.target.SetDefaultPermission(containerTag, AccessControl.Permission.GoRight);
+				break;
+			case AccessControl.Permission.GoLeft:
+				this.target.SetDefaultPermission(containerTag, AccessControl.Permission.Neither);
+				break;
+			case AccessControl.Permission.GoRight:
+				this.target.SetDefaultPermission(containerTag, AccessControl.Permission.Both);
+				break;
+			case AccessControl.Permission.Neither:
+				this.target.SetDefaultPermission(containerTag, AccessControl.Permission.GoLeft);
+				break;
+			}
+			this.RefreshContainerObjects();
+		};
+		reference2.onClick = delegate
+		{
+			switch (this.target.GetDefaultPermission(containerTag))
+			{
+			case AccessControl.Permission.Both:
+				this.target.SetDefaultPermission(containerTag, AccessControl.Permission.GoLeft);
+				break;
+			case AccessControl.Permission.GoLeft:
+				this.target.SetDefaultPermission(containerTag, AccessControl.Permission.Both);
+				break;
+			case AccessControl.Permission.GoRight:
+				this.target.SetDefaultPermission(containerTag, AccessControl.Permission.Neither);
+				break;
+			case AccessControl.Permission.Neither:
+				this.target.SetDefaultPermission(containerTag, AccessControl.Permission.GoRight);
+				break;
+			}
+			this.RefreshContainerObjects();
+		};
+		collapseToggle.onClick = delegate
+		{
+			if (containerTag == GameTags.Robot)
+			{
+				this.robotsHasEverBeenOpened = true;
+			}
+			this.ToggleCategoryCollapsed(!content.gameObject.activeSelf, content, collapseToggle);
+		};
 	}
 
 	[SerializeField]
-	private AccessControlSideScreenRow rowPrefab;
+	private GameObject entityCategoryPrefab;
 
 	[SerializeField]
-	private GameObject rowGroup;
-
-	[SerializeField]
-	private AccessControlSideScreenDoor defaultsRow;
-
-	[SerializeField]
-	private Toggle sortByNameToggle;
-
-	[SerializeField]
-	private Toggle sortByPermissionToggle;
-
-	[SerializeField]
-	private Toggle sortByRoleToggle;
+	private GameObject rowPrefab;
 
 	[SerializeField]
 	private GameObject disabledOverlay;
@@ -254,73 +486,50 @@ public class AccessControlSideScreen : SideScreenContent
 	[SerializeField]
 	private KImage headerBG;
 
+	[SerializeField]
+	private GameObject scrollContents;
+
+	private GameObject standardMinionSectionHeader;
+
+	private GameObject standardMinionSectionContent;
+
+	private GameObject bionicMinionSectionHeader;
+
+	private GameObject bionicMinionSectionContent;
+
+	private GameObject robotSectionHeader;
+
+	private GameObject robotSectionContent;
+
 	private AccessControl target;
 
 	private Door doorTarget;
 
-	private UIPool<AccessControlSideScreenRow> rowPool;
+	private bool containersSpawned;
 
-	private AccessControlSideScreen.MinionIdentitySort.SortInfo sortInfo = AccessControlSideScreen.MinionIdentitySort.SortInfos[0];
+	private List<GameObject> inactiveRowPool = new List<GameObject>();
 
-	private Dictionary<MinionAssignablesProxy, AccessControlSideScreenRow> identityRowMap = new Dictionary<MinionAssignablesProxy, AccessControlSideScreenRow>();
+	private Dictionary<MinionAssignablesProxy, GameObject> minionIdentityRows = new Dictionary<MinionAssignablesProxy, GameObject>();
 
-	private List<MinionAssignablesProxy> identityList = new List<MinionAssignablesProxy>();
+	private Dictionary<Tag, GameObject> robotRows = new Dictionary<Tag, GameObject>();
 
-	private static class MinionIdentitySort
+	private static Dictionary<Tag, string> categoryNames = new Dictionary<Tag, string>
 	{
-		public static int CompareByName(MinionAssignablesProxy a, MinionAssignablesProxy b)
 		{
-			return a.GetProperName().CompareTo(b.GetProperName());
+			GameTags.Minions.Models.Standard,
+			DUPLICANTS.MODEL.STANDARD.NAME_ADJECTIVE
+		},
+		{
+			GameTags.Minions.Models.Bionic,
+			DUPLICANTS.MODEL.BIONIC.NAME_ADJECTIVE
+		},
+		{
+			GameTags.Robot,
+			ROBOTS.CATEGORY_NAME
 		}
+	};
 
-		public static int CompareByRole(MinionAssignablesProxy a, MinionAssignablesProxy b)
-		{
-			global::Debug.Assert(a, "a was null");
-			global::Debug.Assert(b, "b was null");
-			GameObject targetGameObject = a.GetTargetGameObject();
-			GameObject targetGameObject2 = b.GetTargetGameObject();
-			MinionResume minionResume = (targetGameObject ? targetGameObject.GetComponent<MinionResume>() : null);
-			MinionResume minionResume2 = (targetGameObject2 ? targetGameObject2.GetComponent<MinionResume>() : null);
-			if (minionResume2 == null)
-			{
-				return 1;
-			}
-			if (minionResume == null)
-			{
-				return -1;
-			}
-			int num = minionResume.CurrentRole.CompareTo(minionResume2.CurrentRole);
-			if (num != 0)
-			{
-				return num;
-			}
-			return AccessControlSideScreen.MinionIdentitySort.CompareByName(a, b);
-		}
+	private List<GameObject> setInactiveQueue = new List<GameObject>();
 
-		public static readonly AccessControlSideScreen.MinionIdentitySort.SortInfo[] SortInfos = new AccessControlSideScreen.MinionIdentitySort.SortInfo[]
-		{
-			new AccessControlSideScreen.MinionIdentitySort.SortInfo
-			{
-				name = UI.MINION_IDENTITY_SORT.NAME,
-				compare = new Comparison<MinionAssignablesProxy>(AccessControlSideScreen.MinionIdentitySort.CompareByName)
-			},
-			new AccessControlSideScreen.MinionIdentitySort.SortInfo
-			{
-				name = UI.MINION_IDENTITY_SORT.ROLE,
-				compare = new Comparison<MinionAssignablesProxy>(AccessControlSideScreen.MinionIdentitySort.CompareByRole)
-			}
-		};
-
-		public class SortInfo : IListableOption
-		{
-			public string GetProperName()
-			{
-				return this.name;
-			}
-
-			public LocString name;
-
-			public Comparison<MinionAssignablesProxy> compare;
-		}
-	}
+	private bool robotsHasEverBeenOpened;
 }

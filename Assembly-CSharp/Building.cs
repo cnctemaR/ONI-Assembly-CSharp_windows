@@ -143,6 +143,10 @@ public class Building : KMonoBehaviour, IGameObjectEffectDescriptor, IUniformGri
 	{
 		get
 		{
+			if (this.description != null)
+			{
+				return this.description;
+			}
 			return this.Def.Desc;
 		}
 	}
@@ -151,14 +155,10 @@ public class Building : KMonoBehaviour, IGameObjectEffectDescriptor, IUniformGri
 	{
 		get
 		{
-			return this.descriptionFlavour;
-		}
-	}
-
-	public string DescEffect
-	{
-		get
-		{
+			if (this.descriptionFlavour != null)
+			{
+				return this.descriptionFlavour;
+			}
 			return this.Def.Effect;
 		}
 	}

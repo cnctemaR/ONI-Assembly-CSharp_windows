@@ -52,7 +52,7 @@ public class ConduitDispenser : KMonoBehaviour, ISaveLoadable, IConduitDispenser
 
 	private void OnConduitConnectionChanged(object data)
 	{
-		base.Trigger(-2094018600, this.IsConnected);
+		base.Trigger(-2094018600, BoxedBools.Box(this.IsConnected));
 	}
 
 	protected override void OnSpawn()

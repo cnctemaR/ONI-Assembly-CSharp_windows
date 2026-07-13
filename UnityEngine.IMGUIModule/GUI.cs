@@ -6,8 +6,8 @@ using UnityEngineInternal;
 
 namespace UnityEngine
 {
-	[NativeHeader("Modules/IMGUI/GUI.bindings.h")]
 	[NativeHeader("Modules/IMGUI/GUISkin.bindings.h")]
+	[NativeHeader("Modules/IMGUI/GUI.bindings.h")]
 	public class GUI
 	{
 		public static Color color

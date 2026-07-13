@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using Klei.AI;
 using STRINGS;
 using TUNING;
@@ -113,24 +114,6 @@ public class DecorProvider : KMonoBehaviour, IGameObjectEffectDescriptor
 	{
 		this.Clear();
 		this.AddDecor();
-		bool flag = this.prefabId.HasTag(RoomConstraints.ConstraintTags.Decor20);
-		bool flag2 = this.decor.GetTotalValue() >= 20f;
-		if (flag != flag2)
-		{
-			if (flag2)
-			{
-				this.prefabId.AddTag(RoomConstraints.ConstraintTags.Decor20, false);
-			}
-			else
-			{
-				this.prefabId.RemoveTag(RoomConstraints.ConstraintTags.Decor20);
-			}
-			int num = Grid.PosToCell(this);
-			if (Grid.IsValidCell(num))
-			{
-				Game.Instance.roomProber.SolidChangedEvent(num, true);
-			}
-		}
 	}
 
 	public float GetDecorForCell(int cell)
@@ -172,7 +155,7 @@ public class DecorProvider : KMonoBehaviour, IGameObjectEffectDescriptor
 			this.Refresh();
 		};
 		this.onCollectDecorProvidersCallback = new Action<object>(this.OnCollectDecorProviders);
-		Singleton<CellChangeMonitor>.Instance.RegisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChange), "DecorProvider.OnSpawn");
+		this.cellChangedHandlerID = Singleton<CellChangeMonitor>.Instance.RegisterCellChangedHandler(base.transform, DecorProvider.RefreshDispatcher, this, "DecorProvider.OnSpawn");
 		AttributeInstance attributeInstance = this.decor;
 		attributeInstance.OnDirty = (global::System.Action)Delegate.Combine(attributeInstance.OnDirty, this.refreshCallback);
 		AttributeInstance attributeInstance2 = this.decorRadius;
@@ -199,11 +182,6 @@ public class DecorProvider : KMonoBehaviour, IGameObjectEffectDescriptor
 		}
 	}
 
-	private void OnCellChange()
-	{
-		this.Refresh();
-	}
-
 	private void OnCollectDecorProviders(object data)
 	{
 		((List<DecorProvider>)data).Add(this);
@@ -227,7 +205,7 @@ public class DecorProvider : KMonoBehaviour, IGameObjectEffectDescriptor
 			attributeInstance.OnDirty = (global::System.Action)Delegate.Remove(attributeInstance.OnDirty, this.refreshCallback);
 			AttributeInstance attributeInstance2 = this.decorRadius;
 			attributeInstance2.OnDirty = (global::System.Action)Delegate.Remove(attributeInstance2.OnDirty, this.refreshCallback);
-			Singleton<CellChangeMonitor>.Instance.UnregisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChange));
+			Singleton<CellChangeMonitor>.Instance.UnregisterCellChangedHandler(ref this.cellChangedHandlerID);
 		}
 		this.Clear();
 	}
@@ -311,4 +289,11 @@ public class DecorProvider : KMonoBehaviour, IGameObjectEffectDescriptor
 	private HandleVector<int>.Handle partitionerEntry;
 
 	private HandleVector<int>.Handle solidChangedPartitionerEntry;
+
+	private ulong cellChangedHandlerID;
+
+	private static Action<object> RefreshDispatcher = delegate(object obj)
+	{
+		Unsafe.As<DecorProvider>(obj).Refresh();
+	};
 }

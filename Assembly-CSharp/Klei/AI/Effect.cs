@@ -80,14 +80,10 @@ namespace Klei.AI
 			string text = ((showHeader && (effect.SelfModifiers.Count > 0 || stringEntry != null)) ? DUPLICANTS.MODIFIERS.EFFECT_HEADER.text : "");
 			foreach (AttributeModifier attributeModifier in effect.SelfModifiers)
 			{
-				Attribute attribute = Db.Get().Attributes.TryGet(attributeModifier.AttributeId);
-				if (attribute == null)
-				{
-					attribute = Db.Get().CritterAttributes.TryGet(attributeModifier.AttributeId);
-				}
+				Attribute attribute = AttributeModifier.FetchAttribute(attributeModifier.AttributeId);
 				if (attribute != null && attribute.ShowInUI != Attribute.Display.Never)
 				{
-					text = text + linePrefix + string.Format(DUPLICANTS.MODIFIERS.MODIFIER_FORMAT, attribute.Name, attributeModifier.GetFormattedString());
+					text = text + linePrefix + string.Format(DUPLICANTS.MODIFIERS.MODIFIER_FORMAT, attributeModifier.GetName(), attributeModifier.GetFormattedString());
 				}
 			}
 			if (effect.immunityEffectsNames != null)

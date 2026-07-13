@@ -21,4 +21,26 @@ public class CreatureVariationSoundEvent : SoundEvent
 		}
 		base.PlaySound(behaviour, text);
 	}
+
+	public override void Stop(AnimEventManager.EventPlayerData behaviour)
+	{
+		if (base.looping)
+		{
+			LoopingSounds component = behaviour.GetComponent<LoopingSounds>();
+			if (component != null)
+			{
+				string text = base.sound;
+				CreatureBrain component2 = behaviour.GetComponent<CreatureBrain>();
+				if (component2 != null && !string.IsNullOrEmpty(component2.symbolPrefix))
+				{
+					string sound = GlobalAssets.GetSound(StringFormatter.Combine(component2.symbolPrefix, base.name), false);
+					if (!string.IsNullOrEmpty(sound))
+					{
+						text = sound;
+					}
+				}
+				component.StopSound(text);
+			}
+		}
+	}
 }

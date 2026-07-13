@@ -81,7 +81,7 @@ public class LogicElementSensor : Switch, ISaveLoadable, ISim200ms
 		base.GetComponent<KSelectable>().ToggleStatusItem(Db.Get().BuildingStatusItems.NoFilterElementSelected, flag, null);
 	}
 
-	private void OnOperationalChanged(object data)
+	private void OnOperationalChanged(object _)
 	{
 		this.UpdateLogicCircuit();
 		this.UpdateVisualState(false);

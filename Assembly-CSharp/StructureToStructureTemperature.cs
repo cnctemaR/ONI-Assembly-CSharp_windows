@@ -26,8 +26,8 @@ public class StructureToStructureTemperature : KMonoBehaviour
 
 	private void OnStructureTemperatureRegistered(object _sim_handle)
 	{
-		int num = (int)_sim_handle;
-		this.RegisterToSIM(num);
+		int value = ((Boxed<int>)_sim_handle).value;
+		this.RegisterToSIM(value);
 	}
 
 	private void RegisterToSIM(int sim_handle)

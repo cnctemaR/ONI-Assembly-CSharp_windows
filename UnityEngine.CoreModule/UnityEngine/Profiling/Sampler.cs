@@ -6,8 +6,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Profiling
 {
-	[NativeHeader("Runtime/Profiler/ScriptBindings/Sampler.bindings.h")]
 	[UsedByNativeCode]
+	[NativeHeader("Runtime/Profiler/ScriptBindings/Sampler.bindings.h")]
 	public class Sampler
 	{
 		internal Sampler()

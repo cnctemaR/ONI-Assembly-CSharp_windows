@@ -73,7 +73,6 @@ public class BuildingFacade : KMonoBehaviour
 		Building[] components = base.GetComponents<Building>();
 		foreach (Building building in components)
 		{
-			building.SetDescriptionFlavour(desc);
 			KBatchedAnimController component = building.GetComponent<KBatchedAnimController>();
 			HashedString batchGroupID = component.batchGroupID;
 			component.SwapAnims(animFiles);

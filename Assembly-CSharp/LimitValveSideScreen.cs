@@ -41,6 +41,11 @@ public class LimitValveSideScreen : SideScreenContent
 
 	public override void SetTarget(GameObject target)
 	{
+		bool flag = true;
+		if (this.targetLimitValve != null && this.targetLimitValve.gameObject == target)
+		{
+			flag = false;
+		}
 		this.targetLimitValve = target.GetComponent<LimitValve>();
 		if (this.targetLimitValve == null)
 		{
@@ -63,7 +68,10 @@ public class LimitValveSideScreen : SideScreenContent
 		{
 			this.minLimitLabel.text = GameUtil.GetFormattedUnits(0f, GameUtil.TimeSlice.None, true, "");
 			this.maxLimitLabel.text = GameUtil.GetFormattedUnits(this.targetLimitValve.maxLimitKg, GameUtil.TimeSlice.None, true, "");
-			this.numberInput.SetDisplayValue(GameUtil.GetFormattedUnits(Mathf.Max(0f, this.targetLimitValve.Limit), GameUtil.TimeSlice.None, false, LimitValveSideScreen.FLOAT_FORMAT));
+			if (flag)
+			{
+				this.numberInput.SetDisplayValue(GameUtil.GetFormattedUnits(Mathf.Max(0f, this.targetLimitValve.Limit), GameUtil.TimeSlice.None, false, LimitValveSideScreen.FLOAT_FORMAT));
+			}
 			this.unitsLabel.text = UI.UNITSUFFIXES.UNITS;
 			this.toolTip.enabled = true;
 			this.toolTip.SetSimpleTooltip(UI.UISIDESCREENS.LIMIT_VALVE_SIDE_SCREEN.SLIDER_TOOLTIP_UNITS);
@@ -72,14 +80,17 @@ public class LimitValveSideScreen : SideScreenContent
 		{
 			this.minLimitLabel.text = GameUtil.GetFormattedMass(0f, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.Kilogram, true, "{0:0.#}");
 			this.maxLimitLabel.text = GameUtil.GetFormattedMass(this.targetLimitValve.maxLimitKg, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.Kilogram, true, "{0:0.#}");
-			this.numberInput.SetDisplayValue(GameUtil.GetFormattedMass(Mathf.Max(0f, this.targetLimitValve.Limit), GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.Kilogram, false, LimitValveSideScreen.FLOAT_FORMAT));
+			if (flag)
+			{
+				this.numberInput.SetDisplayValue(GameUtil.GetFormattedMass(Mathf.Max(0f, this.targetLimitValve.Limit), GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.Kilogram, false, LimitValveSideScreen.FLOAT_FORMAT));
+			}
 			this.unitsLabel.text = GameUtil.GetCurrentMassUnit(false);
 			this.toolTip.enabled = false;
 		}
 		this.UpdateAmountLabel(null);
 	}
 
-	private void UpdateAmountLabel(object obj = null)
+	private void UpdateAmountLabel(object _ = null)
 	{
 		if (this.targetLimitValve.displayUnitsInsteadOfMass)
 		{

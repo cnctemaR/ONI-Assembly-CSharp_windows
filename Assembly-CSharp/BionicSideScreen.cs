@@ -103,7 +103,7 @@ public class BionicSideScreen : SideScreenContent
 		{
 			return;
 		}
-		if (((TagChangedEventData)o).tag == GameTags.BionicBedTime)
+		if (((Boxed<TagChangedEventData>)o).value.tag == GameTags.BionicBedTime)
 		{
 			this.OnBionicBedTimeChoreStateChanged(o);
 		}
@@ -146,28 +146,28 @@ public class BionicSideScreen : SideScreenContent
 		this.lastSlotSelected = null;
 		if (this.upgradeMonitor != null)
 		{
-			this.upgradeMonitor.Unsubscribe(160824499, new Action<object>(this.OnBionicBecameOnline));
-			this.upgradeMonitor.Unsubscribe(-1730800797, new Action<object>(this.OnBionicBecameOffline));
-			this.upgradeMonitor.Unsubscribe(2000325176, new Action<object>(this.OnBionicUpgradeChanged));
-			this.upgradeMonitor.Unsubscribe(1095596132, new Action<object>(this.OnBionicUpgradeComponentSlotCountChanged));
+			this.upgradeMonitor.Unsubscribe(ref this.onBionicBecameOnlineHandle);
+			this.upgradeMonitor.Unsubscribe(ref this.onBionicBecameOfflineHandle);
+			this.upgradeMonitor.Unsubscribe(ref this.onBionicUpgradeChangedHandle);
+			this.upgradeMonitor.Unsubscribe(ref this.onBionicUpgradeComponentSlotCountChangedHandle);
 		}
 		if (this.batteryMonitor != null)
 		{
-			this.batteryMonitor.Unsubscribe(1361471071, new Action<object>(this.OnBionicWattageChanged));
+			this.batteryMonitor.Unsubscribe(ref this.onBionicWattageChangedHandle);
 		}
 		if (this.bedTimeMonitor != null)
 		{
-			this.bedTimeMonitor.Unsubscribe(-1582839653, new Action<object>(this.OnBionicTagsChanged));
+			this.bedTimeMonitor.Unsubscribe(ref this.onBionicTagsChangedHandle);
 		}
 		this.batteryMonitor = target.GetSMI<BionicBatteryMonitor.Instance>();
 		this.upgradeMonitor = target.GetSMI<BionicUpgradesMonitor.Instance>();
 		this.bedTimeMonitor = target.GetSMI<BionicBedTimeMonitor.Instance>();
-		this.upgradeMonitor.Subscribe(160824499, new Action<object>(this.OnBionicBecameOnline));
-		this.upgradeMonitor.Subscribe(-1730800797, new Action<object>(this.OnBionicBecameOffline));
-		this.upgradeMonitor.Subscribe(2000325176, new Action<object>(this.OnBionicUpgradeChanged));
-		this.batteryMonitor.Subscribe(1095596132, new Action<object>(this.OnBionicUpgradeComponentSlotCountChanged));
-		this.batteryMonitor.Subscribe(1361471071, new Action<object>(this.OnBionicWattageChanged));
-		this.bedTimeMonitor.Subscribe(-1582839653, new Action<object>(this.OnBionicTagsChanged));
+		this.onBionicBecameOnlineHandle = this.upgradeMonitor.Subscribe(160824499, new Action<object>(this.OnBionicBecameOnline));
+		this.onBionicBecameOfflineHandle = this.upgradeMonitor.Subscribe(-1730800797, new Action<object>(this.OnBionicBecameOffline));
+		this.onBionicUpgradeChangedHandle = this.upgradeMonitor.Subscribe(2000325176, new Action<object>(this.OnBionicUpgradeChanged));
+		this.onBionicUpgradeComponentSlotCountChangedHandle = this.batteryMonitor.Subscribe(1095596132, new Action<object>(this.OnBionicUpgradeComponentSlotCountChanged));
+		this.onBionicWattageChangedHandle = this.batteryMonitor.Subscribe(1361471071, new Action<object>(this.OnBionicWattageChanged));
+		this.onBionicTagsChangedHandle = this.bedTimeMonitor.Subscribe(-1582839653, new Action<object>(this.OnBionicTagsChanged));
 		this.RecreateBionicSlots();
 		this.RefreshSlots();
 	}
@@ -186,7 +186,7 @@ public class BionicSideScreen : SideScreenContent
 		base.ClearTarget();
 		if (this.upgradeMonitor != null)
 		{
-			this.upgradeMonitor.Unsubscribe(2000325176, new Action<object>(this.OnBionicUpgradeChanged));
+			this.upgradeMonitor.Unsubscribe(ref this.onBionicUpgradeChangedHandle);
 		}
 		this.bedTimeMonitor = null;
 		this.upgradeMonitor = null;
@@ -218,4 +218,16 @@ public class BionicSideScreen : SideScreenContent
 	private OwnablesSidescreen ownableSidescreen;
 
 	private AssignableSlotInstance lastSlotSelected;
+
+	private int onBionicBecameOnlineHandle = -1;
+
+	private int onBionicBecameOfflineHandle = -1;
+
+	private int onBionicUpgradeChangedHandle = -1;
+
+	private int onBionicUpgradeComponentSlotCountChangedHandle = -1;
+
+	private int onBionicWattageChangedHandle = -1;
+
+	private int onBionicTagsChangedHandle = -1;
 }

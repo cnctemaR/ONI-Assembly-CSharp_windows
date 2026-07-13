@@ -3,8 +3,8 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/GfxDevice/GfxDeviceTypes.h")]
 	[NativeClass("GfxBufferID")]
+	[NativeHeader("Runtime/GfxDevice/GfxDeviceTypes.h")]
 	public readonly struct GraphicsBufferHandle : IEquatable<GraphicsBufferHandle>
 	{
 		public override int GetHashCode()

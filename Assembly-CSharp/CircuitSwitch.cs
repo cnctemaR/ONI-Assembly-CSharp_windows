@@ -90,7 +90,7 @@ public class CircuitSwitch : Switch, IPlayerControlledToggle, ISim33ms
 	{
 		if (this.attachedWire != null)
 		{
-			this.attachedWire.Unsubscribe(1969584890, new Action<object>(this.OnWireDestroyed));
+			this.UnsubscribeFromWire(this.attachedWire);
 		}
 	}
 
@@ -101,16 +101,16 @@ public class CircuitSwitch : Switch, IPlayerControlledToggle, ISim33ms
 
 	private void SubscribeToWire(Wire wire)
 	{
-		wire.Subscribe(1969584890, new Action<object>(this.OnWireDestroyed));
-		wire.Subscribe(-1735440190, new Action<object>(this.OnWireStateChanged));
-		wire.Subscribe(774203113, new Action<object>(this.OnWireStateChanged));
+		this.objectDestroyedHandle = wire.Subscribe(1969584890, new Action<object>(this.OnWireDestroyed));
+		this.buildingFullyRepairedHandle = wire.Subscribe(-1735440190, new Action<object>(this.OnWireStateChanged));
+		this.buildingBrokenHandle = wire.Subscribe(774203113, new Action<object>(this.OnWireStateChanged));
 	}
 
 	private void UnsubscribeFromWire(Wire wire)
 	{
-		wire.Unsubscribe(1969584890, new Action<object>(this.OnWireDestroyed));
-		wire.Unsubscribe(-1735440190, new Action<object>(this.OnWireStateChanged));
-		wire.Unsubscribe(774203113, new Action<object>(this.OnWireStateChanged));
+		wire.Unsubscribe(ref this.objectDestroyedHandle);
+		wire.Unsubscribe(ref this.buildingFullyRepairedHandle);
+		wire.Unsubscribe(ref this.buildingBrokenHandle);
 	}
 
 	private void UpdateCircuit(bool should_update_anim = true)
@@ -187,4 +187,10 @@ public class CircuitSwitch : Switch, IPlayerControlledToggle, ISim33ms
 	private Guid wireConnectedGUID;
 
 	private bool wasOn;
+
+	private int objectDestroyedHandle = -1;
+
+	private int buildingFullyRepairedHandle = -1;
+
+	private int buildingBrokenHandle = -1;
 }

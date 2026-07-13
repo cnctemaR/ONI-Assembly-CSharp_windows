@@ -71,7 +71,7 @@ namespace KMod
 						List<Assembly> list = new List<Assembly>();
 						foreach (FileInfo fileInfo in directoryInfo.GetFiles())
 						{
-							if (fileInfo.Name.ToLower().EndsWith(".dll"))
+							if (fileInfo.Name.ToLower().EndsWith(".dll") && !fileInfo.Name.StartsWith("._"))
 							{
 								global::Debug.Log(string.Format("Loading MOD dll: {0}", fileInfo.Name));
 								Assembly assembly = Assembly.LoadFrom(fileInfo.FullName);

@@ -13,13 +13,17 @@ public class MissileSelectionSideScreen : SideScreenContent
 
 	public override bool IsValidForTarget(GameObject target)
 	{
-		return target.GetSMI<MissileLauncher.Instance>() != null;
+		return target.GetComponent<IMissileSelectionInterface>() != null || target.GetSMI<IMissileSelectionInterface>() != null;
 	}
 
 	public override void SetTarget(GameObject target)
 	{
 		base.SetTarget(target);
-		this.targetMissileLauncher = target.GetSMI<MissileLauncher.Instance>();
+		this.targetMissileLauncher = target.GetComponent<IMissileSelectionInterface>();
+		if (this.targetMissileLauncher == null)
+		{
+			this.targetMissileLauncher = target.GetSMI<IMissileSelectionInterface>();
+		}
 		this.Build();
 	}
 
@@ -30,6 +34,7 @@ public class MissileSelectionSideScreen : SideScreenContent
 			Util.KDestroyGameObject(keyValuePair.Value);
 		}
 		this.rows.Clear();
+		this.ammunitiontags = this.targetMissileLauncher.GetValidAmmunitionTags();
 		this.UpdateLongRangeMissiles();
 		foreach (Tag tag in this.ammunitiontags)
 		{
@@ -44,23 +49,27 @@ public class MissileSelectionSideScreen : SideScreenContent
 	{
 		if (DlcManager.IsExpansion1Active())
 		{
-			if (!this.ammunitiontags.Contains("MissileLongRange"))
+			using (List<Tag>.Enumerator enumerator = MissileLauncherConfig.CosmicBlastShotTypes.GetEnumerator())
 			{
-				this.ammunitiontags.Add("MissileLongRange");
+				while (enumerator.MoveNext())
+				{
+					Tag tag = enumerator.Current;
+					if (!this.ammunitiontags.Contains(tag))
+					{
+						this.ammunitiontags.Add(tag);
+					}
+				}
 				return;
 			}
 		}
-		else
+		if (GameplayEventManager.Instance.GetGameplayEventInstance(Db.Get().GameplayEvents.LargeImpactor.IdHash, -1) == null)
 		{
-			if (GameplayEventManager.Instance.GetGameplayEventInstance(Db.Get().GameplayEvents.LargeImpactor.IdHash, -1) == null)
-			{
-				this.ammunitiontags.Remove("MissileLongRange");
-				return;
-			}
-			if (!this.ammunitiontags.Contains("MissileLongRange"))
-			{
-				this.ammunitiontags.Add("MissileLongRange");
-			}
+			this.ammunitiontags.Remove("MissileLongRange");
+			return;
+		}
+		if (!this.ammunitiontags.Contains("MissileLongRange"))
+		{
+			this.ammunitiontags.Add("MissileLongRange");
 		}
 	}
 
@@ -77,12 +86,7 @@ public class MissileSelectionSideScreen : SideScreenContent
 				kvp.Value.GetComponent<HierarchyReferences>().GetReference<MultiToggle>("Toggle").onClick = delegate
 				{
 					this.targetMissileLauncher.ChangeAmmunition(kvp.Key, !this.targetMissileLauncher.AmmunitionIsAllowed(kvp.Key));
-					ClusterDestinationSelector component = this.targetMissileLauncher.GetComponent<ClusterDestinationSelector>();
-					if (component != null)
-					{
-						component.assignable = this.targetMissileLauncher.AmmunitionIsAllowed("MissileLongRange");
-					}
-					this.targetMissileLauncher.GetComponent<FlatTagFilterable>().currentlyUserAssignable = this.targetMissileLauncher.AmmunitionIsAllowed("MissileBasic");
+					this.targetMissileLauncher.OnRowToggleClick();
 					DetailsScreen.Instance.Refresh(SelectTool.Instance.selected.gameObject);
 					this.Refresh();
 				};
@@ -97,7 +101,7 @@ public class MissileSelectionSideScreen : SideScreenContent
 		return UI.UISIDESCREENS.MISSILESELECTIONSIDESCREEN.TITLE;
 	}
 
-	private MissileLauncher.Instance targetMissileLauncher;
+	private IMissileSelectionInterface targetMissileLauncher;
 
 	[SerializeField]
 	private GameObject rowPrefab;

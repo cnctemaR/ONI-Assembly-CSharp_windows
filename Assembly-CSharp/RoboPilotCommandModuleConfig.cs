@@ -65,7 +65,7 @@ public class RoboPilotCommandModuleConfig : IBuildingConfig
 		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.MachineFetch.IdHash;
 		manualDeliveryKG.capacity = storage.capacityKg;
 		manualDeliveryKG.refillMass = 20f;
-		manualDeliveryKG.requestedItemTag = DatabankHelper.TAG;
+		manualDeliveryKG.RequestedItemTag = DatabankHelper.TAG;
 		manualDeliveryKG.MinimumMass = 1f;
 		go.AddOrGet<CommandModule>().robotPilotControlled = true;
 		go.AddOrGet<RobotCommandConditions>();

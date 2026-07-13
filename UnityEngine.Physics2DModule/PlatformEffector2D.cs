@@ -64,8 +64,8 @@ namespace UnityEngine
 			set;
 		}
 
-		[Obsolete("PlatformEffector2D.oneWay has been deprecated. Use PlatformEffector2D.useOneWay instead (UnityUpgradable) -> useOneWay", true)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
+		[Obsolete("PlatformEffector2D.oneWay has been deprecated. Use PlatformEffector2D.useOneWay instead (UnityUpgradable) -> useOneWay", true)]
 		public bool oneWay
 		{
 			get
@@ -78,8 +78,8 @@ namespace UnityEngine
 			}
 		}
 
-		[EditorBrowsable(EditorBrowsableState.Never)]
 		[Obsolete("PlatformEffector2D.sideFriction has been deprecated. Use PlatformEffector2D.useSideFriction instead (UnityUpgradable) -> useSideFriction", true)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		public bool sideFriction
 		{
 			get
@@ -92,8 +92,8 @@ namespace UnityEngine
 			}
 		}
 
-		[EditorBrowsable(EditorBrowsableState.Never)]
 		[Obsolete("PlatformEffector2D.sideBounce has been deprecated. Use PlatformEffector2D.useSideBounce instead (UnityUpgradable) -> useSideBounce", true)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		public bool sideBounce
 		{
 			get
@@ -106,8 +106,8 @@ namespace UnityEngine
 			}
 		}
 
-		[Obsolete("PlatformEffector2D.sideAngleVariance has been deprecated. Use PlatformEffector2D.sideArc instead (UnityUpgradable) -> sideArc", true)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
+		[Obsolete("PlatformEffector2D.sideAngleVariance has been deprecated. Use PlatformEffector2D.sideArc instead (UnityUpgradable) -> sideArc", true)]
 		public float sideAngleVariance
 		{
 			get

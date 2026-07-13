@@ -61,17 +61,14 @@ namespace UnityEngine.UIElements
 		internal override int ParseStringToValue(string previousValue, string newValue)
 		{
 			int num;
-			bool flag = UINumericFieldsUtils.TryConvertStringToInt(newValue, previousValue, out num);
-			int num2;
-			if (flag)
+			ExpressionEvaluator.Expression expression;
+			bool flag = UINumericFieldsUtils.TryConvertStringToInt(newValue, previousValue, out num, out expression);
+			Action<ExpressionEvaluator.Expression> expressionEvaluated = this.expressionEvaluated;
+			if (expressionEvaluated != null)
 			{
-				num2 = num;
+				expressionEvaluated(expression);
 			}
-			else
-			{
-				num2 = 0;
-			}
-			return num2;
+			return flag ? num : 0;
 		}
 
 		internal override void ComputeValueAndDirectionFromClick(float sliderLength, float dragElementLength, float dragElementPos, float dragElementLastPos)

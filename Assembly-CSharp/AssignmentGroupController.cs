@@ -131,6 +131,10 @@ public class AssignmentGroupController : KMonoBehaviour
 
 	public List<IAssignableIdentity> GetMembers()
 	{
+		if (string.IsNullOrEmpty(this.AssignmentGroupID))
+		{
+			this.GenerateGroupID();
+		}
 		return Game.Instance.assignmentManager.assignment_groups[this.AssignmentGroupID].GetMembers();
 	}
 

@@ -23,7 +23,14 @@ namespace UnityEngine.UIElements
 		protected override long StringToValue(string str)
 		{
 			long num;
-			return UINumericFieldsUtils.TryConvertStringToLong(str, base.textInputBase.originalText, out num) ? num : base.rawValue;
+			ExpressionEvaluator.Expression expression;
+			bool flag = UINumericFieldsUtils.TryConvertStringToLong(str, base.textInputBase.originalText, out num, out expression);
+			Action<ExpressionEvaluator.Expression> expressionEvaluated = this.expressionEvaluated;
+			if (expressionEvaluated != null)
+			{
+				expressionEvaluated(expression);
+			}
+			return flag ? num : base.rawValue;
 		}
 
 		public LongField()
@@ -150,9 +157,7 @@ namespace UnityEngine.UIElements
 
 			protected override long StringToValue(string str)
 			{
-				long num;
-				UINumericFieldsUtils.TryConvertStringToLong(str, base.originalText, out num);
-				return num;
+				return this.parentLongField.StringToValue(str);
 			}
 		}
 	}

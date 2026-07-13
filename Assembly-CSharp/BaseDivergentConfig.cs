@@ -7,7 +7,7 @@ using UnityEngine;
 
 public static class BaseDivergentConfig
 {
-	public static GameObject BaseDivergent(string id, string name, string desc, float mass, string anim_file, string traitId, bool is_baby, float num_tended_per_cycle = 8f, string symbolOverridePrefix = null, string cropTendingEffect = "DivergentCropTended", int meatAmount = 1, bool is_pacifist = true)
+	public static GameObject BaseDivergent(string id, string name, string desc, float mass, string anim_file, string build_file, string traitId, bool is_baby, float num_tended_per_cycle = 8f, string symbolOverridePrefix = null, string cropTendingEffect = "DivergentCropTended", int meatAmount = 1, bool is_pacifist = true, string emoteAnim = "critter_emotes_kanim")
 	{
 		EffectorValues tier = DECOR.BONUS.TIER0;
 		GameObject gameObject = EntityTemplates.CreatePlacedEntity(id, name, desc, mass, Assets.GetAnim(anim_file), "idle_loop", Grid.SceneLayer.Creatures, 1, 1, tier, default(EffectorValues), SimHashes.Creature, null, 293f);
@@ -16,7 +16,7 @@ public static class BaseDivergentConfig
 		{
 			text = "WalkerBabyNavGrid";
 		}
-		EntityTemplates.ExtendEntityToBasicCreature(gameObject, FactionManager.FactionID.Pest, traitId, text, NavType.Floor, 32, 2f, "Meat", (float)meatAmount, true, false, 283.15f, 313.15f, 243.15f, 373.15f);
+		EntityTemplates.ExtendEntityToBasicCreature(false, gameObject, anim_file, is_baby ? null : build_file, null, FactionManager.FactionID.Pest, traitId, text, NavType.Floor, 32, 2f, "Meat", (float)meatAmount, true, false, 283.15f, 313.15f, 243.15f, 373.15f);
 		if (symbolOverridePrefix != null)
 		{
 			gameObject.AddOrGet<SymbolOverrideController>().ApplySymbolOverridesByAffix(Assets.GetAnim(anim_file), symbolOverridePrefix, null, 0);
@@ -69,6 +69,7 @@ public static class BaseDivergentConfig
 			.Add(new CallAdultStates.Def(), is_baby, -1)
 			.Add(def, !is_baby, -1)
 			.Add(new CritterCondoStates.Def(), !is_baby, -1)
+			.Add(new CritterEmoteStates.Def(Assets.GetAnim(emoteAnim)), true, -1)
 			.PopInterruptGroup()
 			.Add(new IdleStates.Def(), true, -1);
 		EntityTemplates.AddCreatureBrain(gameObject, builder, GameTags.Creatures.Species.DivergentSpecies, symbolOverridePrefix);

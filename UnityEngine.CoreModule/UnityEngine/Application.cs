@@ -15,23 +15,23 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Misc/Player.h")]
-	[NativeHeader("Runtime/File/ApplicationSpecificPersistentDataPath.h")]
-	[NativeHeader("Runtime/Application/AdsIdHandler.h")]
-	[NativeHeader("Runtime/Input/InputManager.h")]
-	[NativeHeader("Runtime/Input/TargetFrameRate.h")]
-	[NativeHeader("Runtime/Logging/LogSystem.h")]
-	[NativeHeader("Runtime/Misc/BuildSettings.h")]
-	[NativeHeader("Runtime/Misc/PlayerSettings.h")]
 	[NativeHeader("Runtime/Input/GetInput.h")]
-	[NativeHeader("Runtime/Application/ApplicationInfo.h")]
-	[NativeHeader("Runtime/Export/Application/Application.bindings.h")]
+	[NativeHeader("Runtime/Misc/PlayerSettings.h")]
+	[NativeHeader("Runtime/Utilities/URLUtility.h")]
+	[NativeHeader("Runtime/PreloadManager/PreloadManager.h")]
+	[NativeHeader("Runtime/Input/InputManager.h")]
 	[NativeHeader("Runtime/Misc/SystemInfo.h")]
 	[NativeHeader("Runtime/Network/NetworkUtility.h")]
+	[NativeHeader("Runtime/Misc/Player.h")]
+	[NativeHeader("Runtime/Misc/BuildSettings.h")]
+	[NativeHeader("Runtime/Input/TargetFrameRate.h")]
+	[NativeHeader("Runtime/Logging/LogSystem.h")]
 	[NativeHeader("Runtime/PreloadManager/LoadSceneOperation.h")]
-	[NativeHeader("Runtime/PreloadManager/PreloadManager.h")]
+	[NativeHeader("Runtime/Export/Application/Application.bindings.h")]
 	[NativeHeader("Runtime/Utilities/Argv.h")]
-	[NativeHeader("Runtime/Utilities/URLUtility.h")]
+	[NativeHeader("Runtime/Application/ApplicationInfo.h")]
+	[NativeHeader("Runtime/Application/AdsIdHandler.h")]
+	[NativeHeader("Runtime/File/ApplicationSpecificPersistentDataPath.h")]
 	[NativeHeader("Runtime/BaseClasses/IsPlaying.h")]
 	public class Application
 	{
@@ -44,8 +44,8 @@ namespace UnityEngine
 			Application.Quit(0);
 		}
 
-		[Obsolete("CancelQuit is deprecated. Use the wantsToQuit event instead.")]
 		[FreeFunction("GetInputManager().CancelQuitApplication")]
+		[Obsolete("CancelQuit is deprecated. Use the wantsToQuit event instead.")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void CancelQuit();
 
@@ -96,8 +96,8 @@ namespace UnityEngine
 			}
 		}
 
-		[EditorBrowsable(EditorBrowsableState.Never)]
 		[Obsolete("Application.webSecurityEnabled is no longer supported, since the Unity Web Player is no longer supported by Unity", true)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		public static bool webSecurityEnabled
 		{
 			get

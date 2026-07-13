@@ -132,7 +132,7 @@ public class InitializeCheck : MonoBehaviour
 	private void Quit()
 	{
 		global::Debug.Log("Quitting...");
-		App.Quit();
+		App.QuitCode(1);
 	}
 
 	private static readonly string testFile = "testfile";

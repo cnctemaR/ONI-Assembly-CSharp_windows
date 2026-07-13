@@ -38,12 +38,23 @@ public class ItemPedestalConfig : IBuildingConfig
 			Storage.StoredItemModifier.Preserve
 		}));
 		Prioritizable.AddRef(go);
-		SingleEntityReceptacle singleEntityReceptacle = go.AddOrGet<SingleEntityReceptacle>();
-		singleEntityReceptacle.AddDepositTag(GameTags.PedestalDisplayable);
-		singleEntityReceptacle.occupyingObjectRelativePosition = new Vector3(0f, 1.2f, -1f);
+		OrnamentReceptacle ornamentReceptacle = go.AddOrGet<OrnamentReceptacle>();
+		ornamentReceptacle.AddDepositTag(GameTags.Ornament);
+		ornamentReceptacle.AddDepositTag(GameTags.Suit);
+		ornamentReceptacle.AddDepositTag(GameTags.Clothes);
+		ornamentReceptacle.AddDepositTag(GameTags.Egg);
+		ornamentReceptacle.AddDepositTag(GameTags.Seed);
+		ornamentReceptacle.AddDepositTag(GameTags.Edible);
+		ornamentReceptacle.AddDepositTag(GameTags.BionicUpgrade);
+		ornamentReceptacle.AddDepositTag(GameTags.Solid);
+		ornamentReceptacle.AddDepositTag(GameTags.Liquid);
+		ornamentReceptacle.AddDepositTag(GameTags.Gas);
+		ornamentReceptacle.AddDepositTag(GameTags.PedestalDisplayable);
+		ornamentReceptacle.occupyingObjectRelativePosition = new Vector3(0f, 1.2f, -1f);
 		go.AddOrGet<DecorProvider>();
 		go.AddOrGet<ItemPedestal>();
 		go.GetComponent<KPrefabID>().AddTag(GameTags.Decoration, false);
+		go.GetComponent<KPrefabID>().AddTag(GameTags.OrnamentDisplayer, false);
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)

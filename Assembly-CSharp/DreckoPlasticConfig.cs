@@ -4,6 +4,7 @@ using Klei.AI;
 using STRINGS;
 using UnityEngine;
 
+[EntityConfigOrder(2)]
 public class DreckoPlasticConfig : IEntityConfig
 {
 	public static GameObject CreateDrecko(string id, string name, string desc, string anim_file, bool is_baby)

@@ -10,6 +10,7 @@ public class MorbRoverConfig : IEntityConfig
 		GameObject gameObject = BaseRoverConfig.BaseRover("MorbRover", global::STRINGS.ROBOTS.MODELS.MORB.NAME, GameTags.Robots.Models.MorbRover, global::STRINGS.ROBOTS.MODELS.MORB.DESC, "morbRover_kanim", 300f, 1f, 2f, global::TUNING.ROBOTS.MORBBOT.CARRY_CAPACITY, 1f, 1f, 3f, global::TUNING.ROBOTS.MORBBOT.HIT_POINTS, 180000f, 30f, Db.Get().Amounts.InternalBioBattery, false);
 		gameObject.GetComponent<PrimaryElement>().SetElement(SimHashes.Steel, false);
 		gameObject.GetComponent<Deconstructable>().customWorkTime = 10f;
+		gameObject.AddOrGet<CodexEntryRedirector>().CodexID = "STORYTRAITMORBROVER";
 		return gameObject;
 	}
 

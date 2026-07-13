@@ -6,10 +6,10 @@ using UnityEngine.Scripting.APIUpdating;
 
 namespace UnityEngine.AI
 {
+	[NativeHeader("Modules/AI/NavMesh/NavMesh.bindings.h")]
 	[NativeHeader("Modules/AI/NavMeshManager.h")]
 	[MovedFrom("UnityEngine")]
 	[StaticAccessor("NavMeshBindings", StaticAccessorType.DoubleColon)]
-	[NativeHeader("Modules/AI/NavMesh/NavMesh.bindings.h")]
 	public static class NavMesh
 	{
 		[RequiredByNativeCode]
@@ -48,9 +48,9 @@ namespace UnityEngine.AI
 			return NavMesh.SamplePosition_Injected(ref sourcePosition, out hit, maxDistance, areaMask);
 		}
 
-		[Obsolete("Use SetAreaCost instead.")]
 		[StaticAccessor("GetNavMeshProjectSettings()")]
 		[NativeName("SetAreaCost")]
+		[Obsolete("Use SetAreaCost instead.")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void SetLayerCost(int layer, float cost);
 
@@ -60,24 +60,24 @@ namespace UnityEngine.AI
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern float GetLayerCost(int layer);
 
-		[NativeName("GetAreaFromName")]
 		[Obsolete("Use GetAreaFromName instead.")]
 		[StaticAccessor("GetNavMeshProjectSettings()")]
+		[NativeName("GetAreaFromName")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern int GetNavMeshLayerFromName(string layerName);
 
-		[StaticAccessor("GetNavMeshProjectSettings()")]
 		[NativeName("SetAreaCost")]
+		[StaticAccessor("GetNavMeshProjectSettings()")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void SetAreaCost(int areaIndex, float cost);
 
-		[StaticAccessor("GetNavMeshProjectSettings()")]
 		[NativeName("GetAreaCost")]
+		[StaticAccessor("GetNavMeshProjectSettings()")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern float GetAreaCost(int areaIndex);
 
-		[StaticAccessor("GetNavMeshProjectSettings()")]
 		[NativeName("GetAreaFromName")]
+		[StaticAccessor("GetNavMeshProjectSettings()")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern int GetAreaFromName(string areaName);
 

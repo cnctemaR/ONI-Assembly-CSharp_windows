@@ -30,10 +30,6 @@ public class AnimEvent
 
 	public void Play(AnimEventManager.EventPlayerData behaviour)
 	{
-		if (this.IsFilteredOut(behaviour))
-		{
-			return;
-		}
 		if (behaviour.previousFrame < behaviour.currentFrame)
 		{
 			if (behaviour.previousFrame < this.frame && behaviour.currentFrame >= this.frame)
@@ -62,11 +58,6 @@ public class AnimEvent
 
 	public virtual void Stop(AnimEventManager.EventPlayerData behaviour)
 	{
-	}
-
-	protected bool IsFilteredOut(AnimEventManager.EventPlayerData behaviour)
-	{
-		return this.file != null && !behaviour.controller.HasAnimationFile(this.fileHash);
 	}
 
 	[SerializeField]

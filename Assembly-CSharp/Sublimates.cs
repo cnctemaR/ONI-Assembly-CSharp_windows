@@ -168,7 +168,7 @@ public class Sublimates : KMonoBehaviour, ISim200ms
 					this.RefreshStatusItem(Sublimates.EmitState.Emitting);
 					if (flag && this.decayStorage && storage != null)
 					{
-						storage.Trigger(-794517298, new BuildingHP.DamageSourceInfo
+						storage.BoxingTrigger<BuildingHP.DamageSourceInfo>(-794517298, new BuildingHP.DamageSourceInfo
 						{
 							damage = 1,
 							source = BUILDINGS.DAMAGESOURCES.CORROSIVE_ELEMENT,

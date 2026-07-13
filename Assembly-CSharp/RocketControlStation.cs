@@ -70,7 +70,7 @@ public class RocketControlStation : StateMachineComponent<RocketControlStation.S
 
 	public void OnTagsChanged(object obj)
 	{
-		if (((TagChangedEventData)obj).tag == GameTags.RocketOnGround)
+		if (((Boxed<TagChangedEventData>)obj).value.tag == GameTags.RocketOnGround)
 		{
 			base.Trigger(1861523068, null);
 		}

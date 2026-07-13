@@ -110,10 +110,10 @@ public class OverlayMenu : KIconToggleMenu
 
 	private void OnOverlayChanged(object overlay_data)
 	{
-		HashedString hashedString = (HashedString)overlay_data;
+		HashedString value = ((Boxed<HashedString>)overlay_data).value;
 		for (int i = 0; i < this.overlayToggleInfos.Count; i++)
 		{
-			this.overlayToggleInfos[i].toggle.isOn = ((OverlayMenu.OverlayToggleInfo)this.overlayToggleInfos[i]).simView == hashedString;
+			this.overlayToggleInfos[i].toggle.isOn = ((OverlayMenu.OverlayToggleInfo)this.overlayToggleInfos[i]).simView == value;
 		}
 	}
 

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.UI;
 
 [AddComponentMenu("KMonoBehaviour/scripts/TableRow")]
@@ -48,7 +49,8 @@ public class TableRow : KMonoBehaviour
 
 	public void ConfigureAsWorldDivider(Dictionary<string, TableColumn> columns, TableScreen screen)
 	{
-		ScrollRect scroll_rect = base.gameObject.GetComponentInChildren<ScrollRect>();
+		HierarchyReferences component = base.GetComponent<HierarchyReferences>();
+		this.scroll_rect = component.GetReference<ScrollRect>("ScrollerScrollRect");
 		this.rowType = TableRow.RowType.WorldDivider;
 		foreach (KeyValuePair<string, TableColumn> keyValuePair in columns)
 		{
@@ -58,13 +60,13 @@ public class TableRow : KMonoBehaviour
 				break;
 			}
 		}
-		scroll_rect.onValueChanged.AddListener(delegate
+		this.scroll_rect.onValueChanged.AddListener(delegate
 		{
 			if (screen.CheckScrollersDirty())
 			{
 				return;
 			}
-			screen.SetScrollersDirty(scroll_rect.horizontalNormalizedPosition);
+			screen.SetScrollersDirty(this.scroll_rect.horizontalNormalizedPosition);
 		});
 	}
 
@@ -79,26 +81,10 @@ public class TableRow : KMonoBehaviour
 		{
 			component.alpha = 0.6f;
 		}
+		UnityAction<Vector2> <>9__0;
 		foreach (KeyValuePair<string, TableColumn> keyValuePair in columns)
 		{
-			GameObject gameObject;
-			if (minion == null)
-			{
-				if (this.isDefault)
-				{
-					gameObject = keyValuePair.Value.GetDefaultWidget(base.gameObject);
-				}
-				else
-				{
-					gameObject = keyValuePair.Value.GetHeaderWidget(base.gameObject);
-				}
-			}
-			else
-			{
-				gameObject = keyValuePair.Value.GetMinionWidget(base.gameObject);
-			}
-			this.widgets.Add(keyValuePair.Value, gameObject);
-			keyValuePair.Value.widgets_by_row.Add(this, gameObject);
+			GameObject gameObject = base.gameObject;
 			if (keyValuePair.Value.scrollerID != "")
 			{
 				foreach (string text in keyValuePair.Value.screen.column_scrollers)
@@ -108,29 +94,52 @@ public class TableRow : KMonoBehaviour
 						if (!this.scrollers.ContainsKey(text))
 						{
 							GameObject gameObject2 = Util.KInstantiateUI(this.scrollerPrefab, base.gameObject, true);
-							ScrollRect scroll_rect = gameObject2.GetComponent<ScrollRect>();
+							this.scroll_rect = gameObject2.GetComponent<ScrollRect>();
 							this.scrollbar = gameObject2.GetComponentInChildren<Scrollbar>();
-							scroll_rect.horizontalScrollbar = this.scrollbar;
-							scroll_rect.horizontalScrollbarVisibility = ScrollRect.ScrollbarVisibility.AutoHide;
-							scroll_rect.onValueChanged.AddListener(delegate
+							this.scroll_rect.horizontalScrollbar = this.scrollbar;
+							this.scroll_rect.horizontalScrollbarVisibility = ScrollRect.ScrollbarVisibility.AutoHide;
+							UnityEvent<Vector2> onValueChanged = this.scroll_rect.onValueChanged;
+							UnityAction<Vector2> unityAction;
+							if ((unityAction = <>9__0) == null)
 							{
-								if (screen.CheckScrollersDirty())
+								unityAction = (<>9__0 = delegate
 								{
-									return;
-								}
-								screen.SetScrollersDirty(scroll_rect.horizontalNormalizedPosition);
-							});
-							this.scrollers.Add(text, scroll_rect.content.gameObject);
-							if (scroll_rect.content.transform.parent.Find("Border") != null)
+									if (screen.CheckScrollersDirty())
+									{
+										return;
+									}
+									screen.SetScrollersDirty(this.scroll_rect.horizontalNormalizedPosition);
+								});
+							}
+							onValueChanged.AddListener(unityAction);
+							this.scrollers.Add(text, this.scroll_rect.content.gameObject);
+							if (this.scroll_rect.content.transform.parent.Find("Border") != null)
 							{
-								this.scrollerBorders.Add(text, scroll_rect.content.transform.parent.Find("Border").gameObject);
+								this.scrollerBorders.Add(text, this.scroll_rect.content.transform.parent.Find("Border").gameObject);
 							}
 						}
-						gameObject.transform.SetParent(this.scrollers[text].transform);
-						this.scrollers[text].transform.parent.GetComponent<ScrollRect>().horizontalNormalizedPosition = 0f;
+						gameObject = this.scrollers[text];
 					}
 				}
 			}
+			GameObject gameObject3;
+			if (minion == null)
+			{
+				if (this.isDefault)
+				{
+					gameObject3 = keyValuePair.Value.GetDefaultWidget(gameObject);
+				}
+				else
+				{
+					gameObject3 = keyValuePair.Value.GetHeaderWidget(gameObject);
+				}
+			}
+			else
+			{
+				gameObject3 = keyValuePair.Value.GetMinionWidget(gameObject);
+			}
+			this.widgets.Add(keyValuePair.Value, gameObject3);
+			keyValuePair.Value.widgets_by_row.Add(this, gameObject3);
 		}
 		this.RefreshColumns(columns);
 		if (minion != null)
@@ -145,15 +154,19 @@ public class TableRow : KMonoBehaviour
 		{
 			this.selectMinionButton.transform.SetAsLastSibling();
 		}
-		foreach (KeyValuePair<string, GameObject> keyValuePair2 in this.scrollerBorders)
+	}
+
+	public void PositionScrollerBorders()
+	{
+		foreach (KeyValuePair<string, GameObject> keyValuePair in this.scrollerBorders)
 		{
-			RectTransform rectTransform = keyValuePair2.Value.rectTransform();
+			RectTransform rectTransform = keyValuePair.Value.rectTransform();
 			float width = rectTransform.rect.width;
-			keyValuePair2.Value.transform.SetParent(base.gameObject.transform);
+			keyValuePair.Value.transform.SetParent(base.gameObject.transform);
 			rectTransform.anchorMin = (rectTransform.anchorMax = new Vector2(0f, 1f));
 			rectTransform.sizeDelta = new Vector2(width, rectTransform.sizeDelta.y);
-			RectTransform rectTransform2 = this.scrollers[keyValuePair2.Key].transform.parent.rectTransform();
-			Vector3 vector = this.scrollers[keyValuePair2.Key].transform.parent.rectTransform().GetLocalPosition() - new Vector3(rectTransform2.sizeDelta.x / 2f, -1f * (rectTransform2.sizeDelta.y / 2f), 0f);
+			RectTransform rectTransform2 = this.scrollers[keyValuePair.Key].transform.parent.rectTransform();
+			Vector3 vector = this.scrollers[keyValuePair.Key].transform.parent.rectTransform().GetLocalPosition() - new Vector3(rectTransform2.sizeDelta.x / 2f, -1f * (rectTransform2.sizeDelta.y / 2f), 0f);
 			vector.y = 0f;
 			rectTransform.sizeDelta = new Vector2(rectTransform.sizeDelta.x, 374f);
 			rectTransform.SetLocalPosition(vector + Vector3.up * rectTransform.GetLocalPosition().y + Vector3.up * -rectTransform.anchoredPosition.y);
@@ -239,6 +252,8 @@ public class TableRow : KMonoBehaviour
 
 	[SerializeField]
 	private Scrollbar scrollbar;
+
+	public ScrollRect scroll_rect;
 
 	public enum RowType
 	{

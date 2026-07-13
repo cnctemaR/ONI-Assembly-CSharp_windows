@@ -52,7 +52,7 @@ public class Baggable : KMonoBehaviour
 	private void OnStore(object data)
 	{
 		Storage storage = data as Storage;
-		if (storage != null || (data != null && (bool)data))
+		if (storage != null || (data != null && ((Boxed<bool>)data).value))
 		{
 			base.gameObject.AddTag(GameTags.Creatures.Bagged);
 			if (storage && storage.HasTag(GameTags.BaseMinion))

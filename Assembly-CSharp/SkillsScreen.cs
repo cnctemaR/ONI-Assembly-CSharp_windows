@@ -264,7 +264,7 @@ public class SkillsScreen : KModalScreen
 			this.moraleWarning.SetActive(true);
 		}
 		string text2 = "";
-		Dictionary<string, float> dictionary = new Dictionary<string, float>();
+		List<global::Tuple<string, float>> list3 = new List<global::Tuple<string, float>>();
 		text2 = string.Concat(new string[]
 		{
 			text2,
@@ -275,20 +275,20 @@ public class SkillsScreen : KModalScreen
 		});
 		for (int l = 0; l < attributeInstance.Modifiers.Count; l++)
 		{
-			dictionary.Add(attributeInstance.Modifiers[l].GetDescription(), attributeInstance.Modifiers[l].Value);
+			list3.Add(new global::Tuple<string, float>(attributeInstance.Modifiers[l].GetDescription(), attributeInstance.Modifiers[l].Value));
 		}
-		List<KeyValuePair<string, float>> list3 = dictionary.ToList<KeyValuePair<string, float>>();
-		list3.Sort((KeyValuePair<string, float> pair1, KeyValuePair<string, float> pair2) => pair2.Value.CompareTo(pair1.Value));
-		foreach (KeyValuePair<string, float> keyValuePair in list3)
+		List<global::Tuple<string, float>> list4 = list3.ToList<global::Tuple<string, float>>();
+		list4.Sort((global::Tuple<string, float> pair1, global::Tuple<string, float> pair2) => pair2.second.CompareTo(pair1.second));
+		foreach (global::Tuple<string, float> tuple in list4)
 		{
 			text2 = string.Concat(new string[]
 			{
 				text2,
 				"    • ",
-				keyValuePair.Key,
+				tuple.first,
 				": ",
-				(keyValuePair.Value > 0f) ? UIConstants.ColorPrefixGreen : UIConstants.ColorPrefixRed,
-				keyValuePair.Value.ToString(),
+				(tuple.second > 0f) ? UIConstants.ColorPrefixGreen : UIConstants.ColorPrefixRed,
+				tuple.second.ToString(),
 				UIConstants.ColorSuffix,
 				"\n"
 			});
@@ -921,12 +921,12 @@ public class SkillsScreen : KModalScreen
 
 	private void WorldRemoved(object worldId)
 	{
-		int num = (int)worldId;
+		int value = ((Boxed<int>)worldId).value;
 		GameObject gameObject;
-		if (this.worldDividers.TryGetValue(num, out gameObject))
+		if (this.worldDividers.TryGetValue(value, out gameObject))
 		{
 			global::UnityEngine.Object.Destroy(gameObject);
-			this.worldDividers.Remove(num);
+			this.worldDividers.Remove(value);
 		}
 	}
 

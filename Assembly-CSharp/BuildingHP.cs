@@ -110,7 +110,7 @@ public class BuildingHP : Workable
 		{
 			return;
 		}
-		this.damageSourceInfo = (BuildingHP.DamageSourceInfo)data;
+		this.damageSourceInfo = ((Boxed<BuildingHP.DamageSourceInfo>)data).value;
 		this.DoDamage(this.damageSourceInfo.damage);
 		this.DoDamagePopFX(this.damageSourceInfo);
 		this.DoTakeDamageFX(this.damageSourceInfo);

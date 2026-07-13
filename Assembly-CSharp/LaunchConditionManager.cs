@@ -75,14 +75,8 @@ public class LaunchConditionManager : KMonoBehaviour, ISim4000ms, ISim1000ms
 		List<ProcessCondition> list = new List<ProcessCondition>();
 		foreach (RocketModule rocketModule in this.rocketModules)
 		{
-			foreach (ProcessCondition processCondition in rocketModule.GetConditionSet(ProcessCondition.ProcessConditionType.RocketPrep))
-			{
-				list.Add(processCondition);
-			}
-			foreach (ProcessCondition processCondition2 in rocketModule.GetConditionSet(ProcessCondition.ProcessConditionType.RocketStorage))
-			{
-				list.Add(processCondition2);
-			}
+			rocketModule.PopulateConditionSet(ProcessCondition.ProcessConditionType.RocketPrep, list);
+			rocketModule.PopulateConditionSet(ProcessCondition.ProcessConditionType.RocketStorage, list);
 		}
 		return list;
 	}
@@ -107,27 +101,35 @@ public class LaunchConditionManager : KMonoBehaviour, ISim4000ms, ISim1000ms
 
 	public bool CheckReadyToLaunch()
 	{
-		foreach (RocketModule rocketModule in this.rocketModules)
+		List<ProcessCondition> list;
+		using (ProcessCondition.ListPool.Get(out list))
 		{
-			using (List<ProcessCondition>.Enumerator enumerator2 = rocketModule.GetConditionSet(ProcessCondition.ProcessConditionType.RocketPrep).GetEnumerator())
+			foreach (RocketModule rocketModule in this.rocketModules)
 			{
-				while (enumerator2.MoveNext())
+				rocketModule.PopulateConditionSet(ProcessCondition.ProcessConditionType.RocketPrep, list);
+				using (List<ProcessCondition>.Enumerator enumerator2 = list.GetEnumerator())
 				{
-					if (enumerator2.Current.EvaluateCondition() == ProcessCondition.Status.Failure)
+					while (enumerator2.MoveNext())
 					{
-						return false;
+						if (enumerator2.Current.EvaluateCondition() == ProcessCondition.Status.Failure)
+						{
+							return false;
+						}
 					}
 				}
-			}
-			using (List<ProcessCondition>.Enumerator enumerator2 = rocketModule.GetConditionSet(ProcessCondition.ProcessConditionType.RocketStorage).GetEnumerator())
-			{
-				while (enumerator2.MoveNext())
+				list.Clear();
+				rocketModule.PopulateConditionSet(ProcessCondition.ProcessConditionType.RocketStorage, list);
+				using (List<ProcessCondition>.Enumerator enumerator2 = list.GetEnumerator())
 				{
-					if (enumerator2.Current.EvaluateCondition() == ProcessCondition.Status.Failure)
+					while (enumerator2.MoveNext())
 					{
-						return false;
+						if (enumerator2.Current.EvaluateCondition() == ProcessCondition.Status.Failure)
+						{
+							return false;
+						}
 					}
 				}
+				list.Clear();
 			}
 		}
 		return true;
@@ -135,17 +137,23 @@ public class LaunchConditionManager : KMonoBehaviour, ISim4000ms, ISim1000ms
 
 	public bool CheckAbleToFly()
 	{
-		foreach (RocketModule rocketModule in this.rocketModules)
+		List<ProcessCondition> list;
+		using (ProcessCondition.ListPool.Get(out list))
 		{
-			using (List<ProcessCondition>.Enumerator enumerator2 = rocketModule.GetConditionSet(ProcessCondition.ProcessConditionType.RocketFlight).GetEnumerator())
+			foreach (RocketModule rocketModule in this.rocketModules)
 			{
-				while (enumerator2.MoveNext())
+				rocketModule.PopulateConditionSet(ProcessCondition.ProcessConditionType.RocketFlight, list);
+				using (List<ProcessCondition>.Enumerator enumerator2 = list.GetEnumerator())
 				{
-					if (enumerator2.Current.EvaluateCondition() == ProcessCondition.Status.Failure)
+					while (enumerator2.MoveNext())
 					{
-						return false;
+						if (enumerator2.Current.EvaluateCondition() == ProcessCondition.Status.Failure)
+						{
+							return false;
+						}
 					}
 				}
+				list.Clear();
 			}
 		}
 		return true;
@@ -177,29 +185,35 @@ public class LaunchConditionManager : KMonoBehaviour, ISim4000ms, ISim1000ms
 				component.SendSignal(this.statusPort, 0);
 			}
 			KSelectable component2 = base.GetComponent<KSelectable>();
-			using (List<RocketModule>.Enumerator enumerator = this.rocketModules.GetEnumerator())
+			List<ProcessCondition> list;
+			using (ProcessCondition.ListPool.Get(out list))
 			{
-				while (enumerator.MoveNext())
+				using (List<RocketModule>.Enumerator enumerator = this.rocketModules.GetEnumerator())
 				{
-					RocketModule rocketModule = enumerator.Current;
-					foreach (ProcessCondition processCondition in rocketModule.GetConditionSet(ProcessCondition.ProcessConditionType.RocketFlight))
+					while (enumerator.MoveNext())
 					{
-						if (processCondition.EvaluateCondition() == ProcessCondition.Status.Failure)
+						RocketModule rocketModule = enumerator.Current;
+						rocketModule.PopulateConditionSet(ProcessCondition.ProcessConditionType.RocketFlight, list);
+						foreach (ProcessCondition processCondition in list)
 						{
-							if (!this.conditionStatuses.ContainsKey(processCondition))
+							if (processCondition.EvaluateCondition() == ProcessCondition.Status.Failure)
 							{
-								StatusItem statusItem = processCondition.GetStatusItem(ProcessCondition.Status.Failure);
-								this.conditionStatuses[processCondition] = component2.AddStatusItem(statusItem, processCondition);
+								if (!this.conditionStatuses.ContainsKey(processCondition))
+								{
+									StatusItem statusItem = processCondition.GetStatusItem(ProcessCondition.Status.Failure);
+									this.conditionStatuses[processCondition] = component2.AddStatusItem(statusItem, processCondition);
+								}
+							}
+							else if (this.conditionStatuses.ContainsKey(processCondition))
+							{
+								component2.RemoveStatusItem(this.conditionStatuses[processCondition], false);
+								this.conditionStatuses.Remove(processCondition);
 							}
 						}
-						else if (this.conditionStatuses.ContainsKey(processCondition))
-						{
-							component2.RemoveStatusItem(this.conditionStatuses[processCondition], false);
-							this.conditionStatuses.Remove(processCondition);
-						}
+						list.Clear();
 					}
+					return;
 				}
-				return;
 			}
 		}
 		this.ClearFlightStatuses();

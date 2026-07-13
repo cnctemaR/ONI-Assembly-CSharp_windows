@@ -48,14 +48,14 @@ public class DateTime : KScreen
 
 	private void OnMilestoneDayApproaching(object data)
 	{
-		int num = (int)data;
+		int value = ((Boxed<int>)data).value;
 		this.milestoneEffect.gameObject.SetActive(true);
 		this.milestoneEffect.Play("100fx_pre", KAnim.PlayMode.Loop, 1f, 0f);
 	}
 
 	private void OnMilestoneDayReached(object data)
 	{
-		int num = (int)data;
+		int value = ((Boxed<int>)data).value;
 		this.milestoneEffect.gameObject.SetActive(true);
 		this.milestoneEffect.Play("100fx", KAnim.PlayMode.Once, 1f, 0f);
 	}

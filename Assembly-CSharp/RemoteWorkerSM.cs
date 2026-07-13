@@ -163,6 +163,10 @@ public class RemoteWorkerSM : StateMachineComponent<RemoteWorkerSM.StatesInstanc
 		public override void InitializeStates(out StateMachine.BaseState default_state)
 		{
 			default_state = this.uncontrolled;
+			this.root.Update(delegate(RemoteWorkerSM.StatesInstance smi, float dt)
+			{
+				smi.GetComponent<Navigator>().UpdateProbe(false);
+			}, UpdateRate.SIM_4000ms, false);
 			this.controlled.Enter(delegate(RemoteWorkerSM.StatesInstance smi)
 			{
 				smi.master.Available = false;

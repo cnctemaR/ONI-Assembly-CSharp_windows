@@ -27,7 +27,7 @@ public class WarpConduitSender : StateMachineComponent<WarpConduitSender.StatesI
 		base.smi.StartSM();
 	}
 
-	public void OnActivatedChanged(object data)
+	public void OnActivatedChanged(object _)
 	{
 		WarpConduitStatus.UpdateWarpConduitsOperational(base.gameObject, (this.receiver != null) ? this.receiver.gameObject : null);
 	}

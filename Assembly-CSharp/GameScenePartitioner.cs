@@ -14,6 +14,17 @@ public class GameScenePartitioner : KMonoBehaviour
 		}
 	}
 
+	public bool Lookup(HandleVector<int>.Handle handle, out ScenePartitionerEntry entry)
+	{
+		if (!this.scenePartitionerEntries.IsValid(handle) || !this.scenePartitionerEntries.IsVersionValid(handle))
+		{
+			entry = null;
+			return false;
+		}
+		entry = this.scenePartitionerEntries.GetData(handle);
+		return true;
+	}
+
 	protected override void OnPrefabInit()
 	{
 		global::Debug.Assert(GameScenePartitioner.instance == null);
@@ -81,22 +92,25 @@ public class GameScenePartitioner : KMonoBehaviour
 		this.floorSwitchActivatorChangedLayer = null;
 		this.contactConductiveLayer = null;
 		this.objectLayers = null;
+		this.scenePartitionerEntries.Clear();
 	}
 
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
 		NavGrid navGrid = Pathfinding.Instance.GetNavGrid("MinionNavGrid");
-		navGrid.OnNavGridUpdateComplete = (Action<IEnumerable<int>>)Delegate.Combine(navGrid.OnNavGridUpdateComplete, new Action<IEnumerable<int>>(this.OnNavGridUpdateComplete));
+		navGrid.OnNavGridUpdateComplete = (Action<List<int>>)Delegate.Combine(navGrid.OnNavGridUpdateComplete, new Action<List<int>>(this.OnNavGridUpdateComplete));
 		NavTable navTable = navGrid.NavTable;
 		navTable.OnValidCellChanged = (Action<int, NavType>)Delegate.Combine(navTable.OnValidCellChanged, new Action<int, NavType>(this.OnValidNavCellChanged));
 	}
 
 	public HandleVector<int>.Handle Add(string name, object obj, int x, int y, int width, int height, ScenePartitionerLayer layer, Action<object> event_callback)
 	{
-		ScenePartitionerEntry scenePartitionerEntry = new ScenePartitionerEntry(name, obj, x, y, width, height, layer, this.partitioner, event_callback);
-		this.partitioner.Add(scenePartitionerEntry);
-		return this.scenePartitionerEntries.Allocate(scenePartitionerEntry);
+		ScenePartitionerEntry scenePartitionerEntry = ScenePartitionerEntry.EntryPool.Get();
+		scenePartitionerEntry.Init(name, obj, x, y, width, height, layer, this.partitioner, event_callback);
+		HandleVector<int>.Handle handle = this.scenePartitionerEntries.Allocate(scenePartitionerEntry);
+		this.partitioner.Add(handle);
+		return handle;
 	}
 
 	public HandleVector<int>.Handle Add(string name, object obj, Extents extents, ScenePartitionerLayer layer, Action<object> event_callback)
@@ -122,7 +136,7 @@ public class GameScenePartitioner : KMonoBehaviour
 		layer.OnEvent = (Action<int, object>)Delegate.Remove(layer.OnEvent, action);
 	}
 
-	public void TriggerEvent(IEnumerable<int> cells, ScenePartitionerLayer layer, object event_data)
+	public void TriggerEvent(List<int> cells, ScenePartitionerLayer layer, object event_data)
 	{
 		this.partitioner.TriggerEvent(cells, layer, event_data);
 	}
@@ -145,6 +159,7 @@ public class GameScenePartitioner : KMonoBehaviour
 		this.TriggerEvent(num, num2, 1, 1, layer, event_data);
 	}
 
+	[Obsolete("use Visit pattern instead")]
 	public void GatherEntries(Extents extents, ScenePartitionerLayer layer, List<ScenePartitionerEntry> gathered_entries)
 	{
 		this.GatherEntries(extents.x, extents.y, extents.width, extents.height, layer, gathered_entries);
@@ -155,50 +170,24 @@ public class GameScenePartitioner : KMonoBehaviour
 		this.partitioner.GatherEntries(x_bottomLeft, y_bottomLeft, width, height, layer, null, gathered_entries);
 	}
 
-	public void Iterate<IteratorType>(int x, int y, int width, int height, ScenePartitionerLayer layer, ref IteratorType iterator) where IteratorType : GameScenePartitioner.Iterator
+	public void VisitEntries<ContextType>(int x, int y, int width, int height, ScenePartitionerLayer layer, Func<object, ContextType, Util.IterationInstruction> visitor, ContextType context) where ContextType : class
 	{
-		ListPool<ScenePartitionerEntry, GameScenePartitioner>.PooledList pooledList = ListPool<ScenePartitionerEntry, GameScenePartitioner>.Allocate();
-		GameScenePartitioner.Instance.GatherEntries(x, y, width, height, layer, pooledList);
-		for (int i = 0; i < pooledList.Count; i++)
-		{
-			ScenePartitionerEntry scenePartitionerEntry = pooledList[i];
-			iterator.Iterate(scenePartitionerEntry.obj);
-		}
-		pooledList.Recycle();
+		this.partitioner.VisitEntries<ContextType>(x, y, width, height, layer, visitor, context);
 	}
 
-	public void Iterate<IteratorType>(int cell, int radius, ScenePartitionerLayer layer, ref IteratorType iterator) where IteratorType : GameScenePartitioner.Iterator
+	public void VisitEntries<ContextType>(int x, int y, int width, int height, ScenePartitionerLayer layer, GameScenePartitioner.VisitorRef<ContextType> visitor, ref ContextType context) where ContextType : struct
 	{
-		int num = 0;
-		int num2 = 0;
-		Grid.CellToXY(cell, out num, out num2);
-		this.Iterate<IteratorType>(num - radius, num2 - radius, radius * 2, radius * 2, layer, ref iterator);
+		this.partitioner.VisitEntries<ContextType>(x, y, width, height, layer, visitor, ref context);
 	}
 
-	public IEnumerable<object> AsyncSafeEnumerate(int x, int y, int width, int height, ScenePartitionerLayer layer)
+	public void ReadonlyVisitEntries<ContextType>(int x, int y, int width, int height, ScenePartitionerLayer layer, Func<object, ContextType, Util.IterationInstruction> visitor, ContextType context) where ContextType : class
 	{
-		return this.partitioner.AsyncSafeEnumerate(x, y, width, height, layer);
+		this.partitioner.ReadonlyVisitEntries<ContextType>(x, y, width, height, layer, visitor, context);
 	}
 
-	public void AsyncSafeVisit<ContextType>(int x, int y, int width, int height, ScenePartitionerLayer layer, Func<object, ContextType, bool> visitor, ContextType context)
+	public void ReadonlyVisitEntries<ContextType>(int x, int y, int width, int height, ScenePartitionerLayer layer, GameScenePartitioner.VisitorRef<ContextType> visitor, ref ContextType context) where ContextType : struct
 	{
-		this.partitioner.AsyncSafeVisit<ContextType>(x, y, width, height, layer, visitor, context);
-	}
-
-	public IEnumerable<object> AsyncSafeEnumerate(int cell, int radius, ScenePartitionerLayer layer)
-	{
-		int num = 0;
-		int num2 = 0;
-		Grid.CellToXY(cell, out num, out num2);
-		return this.AsyncSafeEnumerate(num - radius, num2 - radius, radius * 2, radius * 2, layer);
-	}
-
-	public void AsyncSafeVisit<ContextType>(int cell, int radius, ScenePartitionerLayer layer, Func<object, ContextType, bool> visitor, ContextType context)
-	{
-		int num = 0;
-		int num2 = 0;
-		Grid.CellToXY(cell, out num, out num2);
-		this.AsyncSafeVisit<ContextType>(num - radius, num2 - radius, radius * 2, radius * 2, layer, visitor, context);
+		this.partitioner.ReadonlyVisitEntries<ContextType>(x, y, width, height, layer, visitor, ref context);
 	}
 
 	private void OnValidNavCellChanged(int cell, NavType nav_type)
@@ -206,7 +195,7 @@ public class GameScenePartitioner : KMonoBehaviour
 		this.changedCells.Add(cell);
 	}
 
-	private void OnNavGridUpdateComplete(IEnumerable<int> dirty_nav_cells)
+	private void OnNavGridUpdateComplete(List<int> dirty_nav_cells)
 	{
 		GameScenePartitioner.Instance.TriggerEvent(dirty_nav_cells, GameScenePartitioner.Instance.dirtyNavCellUpdateLayer, null);
 		if (this.changedCells.Count > 0)
@@ -228,7 +217,7 @@ public class GameScenePartitioner : KMonoBehaviour
 		{
 			return;
 		}
-		this.scenePartitionerEntries.GetData(handle).UpdatePosition(x, y);
+		this.scenePartitionerEntries.GetData(handle).UpdatePosition(handle, x, y);
 	}
 
 	public void UpdatePosition(HandleVector<int>.Handle handle, Extents ext)
@@ -237,7 +226,7 @@ public class GameScenePartitioner : KMonoBehaviour
 		{
 			return;
 		}
-		this.scenePartitionerEntries.GetData(handle).UpdatePosition(ext);
+		this.scenePartitionerEntries.GetData(handle).UpdatePosition(handle, ext);
 	}
 
 	public void Free(ref HandleVector<int>.Handle handle)
@@ -246,9 +235,11 @@ public class GameScenePartitioner : KMonoBehaviour
 		{
 			return;
 		}
-		this.scenePartitionerEntries.GetData(handle).Release();
+		ScenePartitionerEntry data = this.scenePartitionerEntries.GetData(handle);
+		data.Release(handle);
 		this.scenePartitionerEntries.Free(handle);
 		handle.Clear();
+		ScenePartitionerEntry.EntryPool.Release(data);
 	}
 
 	protected override void OnCleanUp()
@@ -338,10 +329,5 @@ public class GameScenePartitioner : KMonoBehaviour
 
 	private List<int> changedCells = new List<int>();
 
-	public interface Iterator
-	{
-		void Iterate(object obj);
-
-		void Cleanup();
-	}
+	public delegate Util.IterationInstruction VisitorRef<ContextType>(object obj, ref ContextType context);
 }

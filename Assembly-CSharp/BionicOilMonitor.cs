@@ -22,8 +22,8 @@ public class BionicOilMonitor : GameStateMachine<BionicOilMonitor, BionicOilMoni
 		this.online.EventTransition(GameHashes.BionicOffline, this.offline, GameStateMachine<BionicOilMonitor, BionicOilMonitor.Instance, IStateMachineTarget, BionicOilMonitor.Def>.Not(new StateMachine<BionicOilMonitor, BionicOilMonitor.Instance, IStateMachineTarget, BionicOilMonitor.Def>.Transition.ConditionCallback(BionicOilMonitor.IsBionicOnline))).Enter(new StateMachine<BionicOilMonitor, BionicOilMonitor.Instance, IStateMachineTarget, BionicOilMonitor.Def>.State.Callback(BionicOilMonitor.AddBaseOilDeltaModifier)).DefaultState(this.online.idle)
 			.Enter(new StateMachine<BionicOilMonitor, BionicOilMonitor.Instance, IStateMachineTarget, BionicOilMonitor.Def>.State.Callback(BionicOilMonitor.EnableSolidLubricationSensor))
 			.Exit(new StateMachine<BionicOilMonitor, BionicOilMonitor.Instance, IStateMachineTarget, BionicOilMonitor.Def>.State.Callback(BionicOilMonitor.DisableSolidLubricationSensor));
-		this.online.idle.EnterTransition(this.online.seeking, new StateMachine<BionicOilMonitor, BionicOilMonitor.Instance, IStateMachineTarget, BionicOilMonitor.Def>.Transition.ConditionCallback(BionicOilMonitor.WantsOilChange)).OnSignal(this.OilValueChanged, this.online.seeking, new Func<BionicOilMonitor.Instance, bool>(BionicOilMonitor.WantsOilChange));
-		this.online.seeking.OnSignal(this.OilFilledSignal, this.online.idle).OnSignal(this.OilValueChanged, this.online.idle, new Func<BionicOilMonitor.Instance, bool>(BionicOilMonitor.HasDecentAmountOfOil)).DefaultState(this.online.seeking.hasOil)
+		this.online.idle.EnterTransition(this.online.seeking, new StateMachine<BionicOilMonitor, BionicOilMonitor.Instance, IStateMachineTarget, BionicOilMonitor.Def>.Transition.ConditionCallback(BionicOilMonitor.WantsOilChange)).OnSignal(this.OilValueChanged, this.online.seeking, new StateMachine<BionicOilMonitor, BionicOilMonitor.Instance, IStateMachineTarget, BionicOilMonitor.Def>.Parameter<StateMachine<BionicOilMonitor, BionicOilMonitor.Instance, IStateMachineTarget, BionicOilMonitor.Def>.SignalParameter>.Callback(BionicOilMonitor.WantsOilChange));
+		this.online.seeking.OnSignal(this.OilFilledSignal, this.online.idle).OnSignal(this.OilValueChanged, this.online.idle, new StateMachine<BionicOilMonitor, BionicOilMonitor.Instance, IStateMachineTarget, BionicOilMonitor.Def>.Parameter<StateMachine<BionicOilMonitor, BionicOilMonitor.Instance, IStateMachineTarget, BionicOilMonitor.Def>.SignalParameter>.Callback(BionicOilMonitor.HasDecentAmountOfOil)).DefaultState(this.online.seeking.hasOil)
 			.ToggleThought(Db.Get().Thoughts.RefillOilDesire, null)
 			.ToggleUrge(Db.Get().Urges.OilRefill)
 			.ToggleChore((BionicOilMonitor.Instance smi) => new UseSolidLubricantChore(smi.master), this.online.idle);
@@ -50,10 +50,20 @@ public class BionicOilMonitor : GameStateMachine<BionicOilMonitor, BionicOilMoni
 
 	public static bool HasDecentAmountOfOil(BionicOilMonitor.Instance smi)
 	{
+		return BionicOilMonitor.HasDecentAmountOfOil(smi, null);
+	}
+
+	public static bool HasDecentAmountOfOil(BionicOilMonitor.Instance smi, StateMachine<BionicOilMonitor, BionicOilMonitor.Instance, IStateMachineTarget, BionicOilMonitor.Def>.SignalParameter param)
+	{
 		return smi.CurrentOilPercentage > 0.2f;
 	}
 
 	public static bool WantsOilChange(BionicOilMonitor.Instance smi)
+	{
+		return BionicOilMonitor.WantsOilChange(smi, null);
+	}
+
+	public static bool WantsOilChange(BionicOilMonitor.Instance smi, StateMachine<BionicOilMonitor, BionicOilMonitor.Instance, IStateMachineTarget, BionicOilMonitor.Def>.SignalParameter param)
 	{
 		return smi.CurrentOilPercentage <= 0.2f;
 	}

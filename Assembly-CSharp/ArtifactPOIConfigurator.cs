@@ -65,9 +65,17 @@ public class ArtifactPOIConfigurator : KMonoBehaviour
 		}
 
 		public ArtifactPOIType(string id, string harvestableArtifactID = null, bool destroyOnHarvest = false, float poiRechargeTimeMin = 30000f, float poiRechargeTimeMax = 60000f, string[] requiredDlcIds = null, string[] forbiddenDlcIds = null)
+			: this(id, 0, harvestableArtifactID, destroyOnHarvest, poiRechargeTimeMin, poiRechargeTimeMax, requiredDlcIds, forbiddenDlcIds)
 		{
+		}
+
+		public ArtifactPOIType(string id, int databankCount, string harvestableArtifactID = null, bool destroyOnHarvest = false, float poiRechargeTimeMin = 30000f, float poiRechargeTimeMax = 60000f, string[] requiredDlcIds = null, string[] forbiddenDlcIds = null)
+		{
+			this.orbitalObject = new List<string> { Db.Get().OrbitalTypeCategories.gravitas.Id };
+			base..ctor();
 			this.id = id;
 			this.idHash = id;
+			this.initialDatabankCount = databankCount;
 			this.harvestableArtifactID = harvestableArtifactID;
 			this.destroyOnHarvest = destroyOnHarvest;
 			this.poiRechargeTimeMin = poiRechargeTimeMin;
@@ -84,6 +92,8 @@ public class ArtifactPOIConfigurator : KMonoBehaviour
 		[Obsolete]
 		public ArtifactPOIType(string id, string harvestableArtifactID = null, bool destroyOnHarvest = false, float poiRechargeTimeMin = 30000f, float poiRechargeTimeMax = 60000f, string dlcID = "EXPANSION1_ID")
 		{
+			this.orbitalObject = new List<string> { Db.Get().OrbitalTypeCategories.gravitas.Id };
+			base..ctor();
 			this.id = id;
 			this.idHash = id;
 			this.harvestableArtifactID = harvestableArtifactID;
@@ -113,11 +123,13 @@ public class ArtifactPOIConfigurator : KMonoBehaviour
 		[Obsolete]
 		public string dlcID;
 
+		public int initialDatabankCount;
+
 		public string[] requiredDlcIds;
 
 		public string[] forbiddenDlcIds;
 
-		public List<string> orbitalObject = new List<string> { Db.Get().OrbitalTypeCategories.gravitas.Id };
+		public List<string> orbitalObject;
 	}
 
 	[Serializable]

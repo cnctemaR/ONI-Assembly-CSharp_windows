@@ -133,7 +133,7 @@ public class GameplayEventMonitor : GameStateMachine<GameplayEventMonitor, Gamep
 
 		public void OnSelect(object data)
 		{
-			if (!(bool)data)
+			if (!((Boxed<bool>)data).value)
 			{
 				return;
 			}

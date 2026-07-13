@@ -4,11 +4,11 @@ using UnityEngine.Assertions;
 
 namespace UnityEngine.UIElements
 {
-	[DisallowMultipleComponent]
-	[ExecuteAlways]
-	[HelpURL("UIE-get-started-with-runtime-ui")]
 	[AddComponentMenu("UI Toolkit/UI Document")]
+	[HelpURL("UIE-get-started-with-runtime-ui")]
+	[DisallowMultipleComponent]
 	[DefaultExecutionOrder(-100)]
+	[ExecuteAlways]
 	public sealed class UIDocument : MonoBehaviour
 	{
 		public PanelSettings panelSettings

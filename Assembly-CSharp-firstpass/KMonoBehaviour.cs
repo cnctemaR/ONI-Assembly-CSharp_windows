@@ -201,51 +201,115 @@ public class KMonoBehaviour : MonoBehaviour, IStateMachineTarget, ISaveLoadable,
 
 	public int Subscribe(int hash, Action<object> handler)
 	{
-		return this.obj.GetEventSystem().Subscribe(hash, handler);
+		return this.obj.GetOrCreateEventSystem().Subscribe(hash, handler);
+	}
+
+	public int Subscribe(int hash, Action<object, object> handler, object handlerData)
+	{
+		return this.obj.GetOrCreateEventSystem().Subscribe(hash, handler, handlerData);
 	}
 
 	public int Subscribe(GameObject target, int hash, Action<object> handler)
 	{
-		return this.obj.GetEventSystem().Subscribe(target, hash, handler);
+		return this.obj.GetOrCreateEventSystem().Subscribe(target, hash, handler);
+	}
+
+	public int Subscribe(GameObject target, int hash, Action<object, object> handler, object handlerData)
+	{
+		return this.obj.GetOrCreateEventSystem().Subscribe(target, hash, handler, handlerData);
 	}
 
 	public int Subscribe<ComponentType>(int hash, EventSystem.IntraObjectHandler<ComponentType> handler) where ComponentType : Component
 	{
-		return this.obj.GetEventSystem().Subscribe<ComponentType>(hash, handler);
+		return this.obj.GetOrCreateEventSystem().Subscribe<ComponentType>(hash, handler);
 	}
 
 	public void Unsubscribe(int hash, Action<object> handler)
 	{
-		if (this.obj != null)
+		EventSystem eventSystem;
+		if (this.obj != null && this.obj.GetEventSystem(out eventSystem))
 		{
-			this.obj.GetEventSystem().Unsubscribe(hash, handler);
+			eventSystem.Unsubscribe(hash, handler);
 		}
 	}
 
 	public void Unsubscribe(int id)
 	{
-		this.obj.GetEventSystem().Unsubscribe(id);
+		EventSystem eventSystem;
+		if (this.obj != null && this.obj.GetEventSystem(out eventSystem))
+		{
+			eventSystem.Unsubscribe(id);
+		}
+	}
+
+	public void Unsubscribe(ref int id)
+	{
+		EventSystem eventSystem;
+		if (this.obj != null && this.obj.GetEventSystem(out eventSystem))
+		{
+			eventSystem.Unsubscribe(id);
+		}
+		id = -1;
 	}
 
 	public void Unsubscribe(GameObject target, int hash, Action<object> handler)
 	{
-		this.obj.GetEventSystem().Unsubscribe(target, hash, handler);
+		EventSystem eventSystem;
+		if (this.obj != null && this.obj.GetEventSystem(out eventSystem))
+		{
+			eventSystem.Unsubscribe(target, hash, handler);
+		}
+	}
+
+	public void Unsubscribe(GameObject target, int id)
+	{
+		EventSystem eventSystem;
+		if (this.obj != null && this.obj.GetEventSystem(out eventSystem))
+		{
+			eventSystem.Unsubscribe(target, id);
+		}
+	}
+
+	public void Unsubscribe(GameObject target, ref int id)
+	{
+		this.Unsubscribe(target, id);
+		id = -1;
 	}
 
 	public void Unsubscribe<ComponentType>(int hash, EventSystem.IntraObjectHandler<ComponentType> handler, bool suppressWarnings = false) where ComponentType : Component
 	{
-		if (this.obj != null)
+		EventSystem eventSystem;
+		if (this.obj != null && this.obj.GetEventSystem(out eventSystem))
 		{
-			this.obj.GetEventSystem().Unsubscribe<ComponentType>(hash, handler, suppressWarnings);
+			eventSystem.Unsubscribe<ComponentType>(hash, handler, suppressWarnings);
 		}
 	}
 
 	public void Trigger(int hash, object data = null)
 	{
-		if (this.obj != null && this.obj.hasEventSystem)
+		EventSystem eventSystem;
+		if (this.obj != null && this.obj.GetEventSystem(out eventSystem))
 		{
-			this.obj.GetEventSystem().Trigger(base.gameObject, hash, data);
+			eventSystem.Trigger(base.gameObject, hash, data);
 		}
+	}
+
+	[Obsolete("Use BoxingTrigger to avoid sended boxing object to garbage collection, be careful to unbox parameter in any handlers")]
+	public void Trigger<T>(int hash, T data) where T : struct
+	{
+		this.Trigger(hash, data);
+	}
+
+	public void BoxingTrigger(int hash, bool data)
+	{
+		this.Trigger(hash, BoxedBools.Box(data));
+	}
+
+	public void BoxingTrigger<T>(int hash, T data) where T : struct
+	{
+		Boxed<T> boxed = Boxed<T>.Get(data);
+		this.Trigger(hash, boxed);
+		boxed.Release();
 	}
 
 	public static void PlaySound(string sound)

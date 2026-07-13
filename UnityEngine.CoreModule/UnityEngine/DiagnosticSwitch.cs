@@ -6,8 +6,8 @@ using UnityEngine.Bindings;
 namespace UnityEngine
 {
 	[NativeClass("DiagnosticSwitch", "struct DiagnosticSwitch;")]
-	[NativeAsStruct]
 	[NativeHeader("Runtime/Utilities/DiagnosticSwitch.h")]
+	[NativeAsStruct]
 	[StructLayout(LayoutKind.Sequential)]
 	internal class DiagnosticSwitch
 	{

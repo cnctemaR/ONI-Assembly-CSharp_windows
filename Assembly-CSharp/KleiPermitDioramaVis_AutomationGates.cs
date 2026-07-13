@@ -37,7 +37,7 @@ public class KleiPermitDioramaVis_AutomationGates : KMonoBehaviour, IKleiPermitD
 		this.buildingKAnimPosition.SetOn(this.buildingKAnim);
 		this.buildingKAnim.rectTransform().localScale = Vector3.one * dictionary[buildingDef.WidthInCells];
 		this.buildingKAnim.rectTransform().anchoredPosition += new Vector2(0f, dictionary2[buildingDef.HeightInCells]);
-		KleiPermitVisUtil.AnimateIn(this.buildingKAnim, default(Updater));
+		KleiPermitVisUtil.AnimateIn(this.buildingKAnim, default(Updater), "place");
 	}
 
 	[SerializeField]

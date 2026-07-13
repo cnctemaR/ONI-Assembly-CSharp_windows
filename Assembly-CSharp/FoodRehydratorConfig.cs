@@ -61,7 +61,7 @@ public class FoodRehydratorConfig : IBuildingConfig
 		manualDeliveryKG.refillMass = 5f;
 		manualDeliveryKG.MinimumMass = 1f;
 		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.StorageFetch.Id;
-		manualDeliveryKG.requestedItemTag = GameTags.Dehydrated;
+		manualDeliveryKG.RequestedItemTag = GameTags.Dehydrated;
 		manualDeliveryKG.operationalRequirement = Operational.State.Functional;
 		Storage storage2 = go.AddComponent<Storage>();
 		storage2.showCapacityStatusItem = true;

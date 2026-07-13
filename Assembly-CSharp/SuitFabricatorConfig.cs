@@ -75,21 +75,19 @@ public class SuitFabricatorConfig : IBuildingConfig
 		{
 			new ComplexRecipe.RecipeElement("Atmo_Suit".ToTag(), 1f, ComplexRecipe.RecipeElement.TemperatureOperation.Heated, false)
 		};
-		AtmoSuitConfig.recipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("SuitFabricator", array3, array4), array3, array4)
-		{
-			time = (float)global::TUNING.EQUIPMENT.SUITS.ATMOSUIT_FABTIME,
-			description = global::STRINGS.EQUIPMENT.PREFABS.ATMO_SUIT.REPAIR_WORN_DESC,
-			nameDisplay = ComplexRecipe.RecipeNameDisplay.Custom,
-			fabricators = new List<Tag> { "SuitFabricator" },
-			requiredTech = Db.Get().TechItems.atmoSuit.parentTechId,
-			sortOrder = 2
-		};
-		AtmoSuitConfig.recipe.customName = global::STRINGS.EQUIPMENT.PREFABS.ATMO_SUIT.REPAIR_WORN_RECIPE_NAME;
-		AtmoSuitConfig.recipe.ProductHasFacade = true;
+		ComplexRecipe complexRecipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("SuitFabricator", array3, array4), array3, array4);
+		complexRecipe.time = (float)global::TUNING.EQUIPMENT.SUITS.ATMOSUIT_FABTIME;
+		complexRecipe.description = global::STRINGS.EQUIPMENT.PREFABS.ATMO_SUIT.REPAIR_WORN_DESC;
+		complexRecipe.nameDisplay = ComplexRecipe.RecipeNameDisplay.Custom;
+		complexRecipe.fabricators = new List<Tag> { "SuitFabricator" };
+		complexRecipe.requiredTech = Db.Get().TechItems.atmoSuit.parentTechId;
+		complexRecipe.sortOrder = 2;
+		complexRecipe.customName = global::STRINGS.EQUIPMENT.PREFABS.ATMO_SUIT.REPAIR_WORN_RECIPE_NAME;
+		complexRecipe.ProductHasFacade = true;
 		ComplexRecipe.RecipeElement[] array5 = new ComplexRecipe.RecipeElement[]
 		{
 			new ComplexRecipe.RecipeElement(SimHashes.Steel.ToString(), 200f),
-			new ComplexRecipe.RecipeElement(SimHashes.Petroleum.ToString(), 25f)
+			new ComplexRecipe.RecipeElement(GameTags.Fabrics, 2f, ComplexRecipe.RecipeElement.TemperatureOperation.AverageTemperature, "", false, false)
 		};
 		ComplexRecipe.RecipeElement[] array6 = new ComplexRecipe.RecipeElement[]
 		{
@@ -113,15 +111,14 @@ public class SuitFabricatorConfig : IBuildingConfig
 		{
 			new ComplexRecipe.RecipeElement("Jet_Suit".ToTag(), 1f, ComplexRecipe.RecipeElement.TemperatureOperation.Heated, false)
 		};
-		JetSuitConfig.recipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("SuitFabricator", array7, array8), array7, array8)
-		{
-			time = (float)global::TUNING.EQUIPMENT.SUITS.ATMOSUIT_FABTIME,
-			description = global::STRINGS.EQUIPMENT.PREFABS.JET_SUIT.RECIPE_DESC,
-			nameDisplay = ComplexRecipe.RecipeNameDisplay.ResultWithIngredient,
-			fabricators = new List<Tag> { "SuitFabricator" },
-			requiredTech = Db.Get().TechItems.jetSuit.parentTechId,
-			sortOrder = 4
-		};
+		ComplexRecipe complexRecipe2 = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("SuitFabricator", array7, array8), array7, array8);
+		complexRecipe2.time = (float)global::TUNING.EQUIPMENT.SUITS.ATMOSUIT_FABTIME;
+		complexRecipe2.description = global::STRINGS.EQUIPMENT.PREFABS.JET_SUIT.REPAIR_WORN_DESC;
+		complexRecipe2.nameDisplay = ComplexRecipe.RecipeNameDisplay.Custom;
+		complexRecipe2.fabricators = new List<Tag> { "SuitFabricator" };
+		complexRecipe2.requiredTech = Db.Get().TechItems.jetSuit.parentTechId;
+		complexRecipe2.sortOrder = 4;
+		complexRecipe2.customName = global::STRINGS.EQUIPMENT.PREFABS.JET_SUIT.REPAIR_WORN_RECIPE_NAME;
 		if (DlcManager.FeatureRadiationEnabled())
 		{
 			ComplexRecipe.RecipeElement[] array9 = new ComplexRecipe.RecipeElement[]
@@ -154,15 +151,14 @@ public class SuitFabricatorConfig : IBuildingConfig
 			{
 				new ComplexRecipe.RecipeElement("Lead_Suit".ToTag(), 1f, ComplexRecipe.RecipeElement.TemperatureOperation.Heated, false)
 			};
-			LeadSuitConfig.recipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("SuitFabricator", array11, array12), array11, array12)
-			{
-				time = (float)global::TUNING.EQUIPMENT.SUITS.ATMOSUIT_FABTIME,
-				description = global::STRINGS.EQUIPMENT.PREFABS.LEAD_SUIT.RECIPE_DESC,
-				nameDisplay = ComplexRecipe.RecipeNameDisplay.ResultWithIngredient,
-				fabricators = new List<Tag> { "SuitFabricator" },
-				requiredTech = Db.Get().TechItems.leadSuit.parentTechId,
-				sortOrder = 6
-			};
+			ComplexRecipe complexRecipe3 = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("SuitFabricator", array11, array12), array11, array12);
+			complexRecipe3.time = (float)global::TUNING.EQUIPMENT.SUITS.ATMOSUIT_FABTIME;
+			complexRecipe3.description = global::STRINGS.EQUIPMENT.PREFABS.LEAD_SUIT.REPAIR_WORN_DESC;
+			complexRecipe3.nameDisplay = ComplexRecipe.RecipeNameDisplay.Custom;
+			complexRecipe3.fabricators = new List<Tag> { "SuitFabricator" };
+			complexRecipe3.requiredTech = Db.Get().TechItems.leadSuit.parentTechId;
+			complexRecipe3.sortOrder = 6;
+			complexRecipe3.customName = global::STRINGS.EQUIPMENT.PREFABS.LEAD_SUIT.REPAIR_WORN_RECIPE_NAME;
 		}
 	}
 
@@ -180,6 +176,12 @@ public class SuitFabricatorConfig : IBuildingConfig
 			component.AttributeExperienceMultiplier = DUPLICANTSTATS.ATTRIBUTE_LEVELING.PART_DAY_EXPERIENCE;
 			component.SkillExperienceSkillGroup = Db.Get().SkillGroups.Technicals.Id;
 			component.SkillExperienceMultiplier = SKILLS.PART_DAY_EXPERIENCE;
+			DiscoveredResources.Instance.Discover("Worn_Atmo_Suit");
+			DiscoveredResources.Instance.Discover("Worn_Jet_Suit");
+			if (DlcManager.FeatureRadiationEnabled())
+			{
+				DiscoveredResources.Instance.Discover("Worn_Lead_Suit");
+			}
 		};
 	}
 

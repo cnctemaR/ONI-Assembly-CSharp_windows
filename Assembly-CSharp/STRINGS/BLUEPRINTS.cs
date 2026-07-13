@@ -4,6 +4,259 @@ namespace STRINGS
 {
 	public static class BLUEPRINTS
 	{
+		public class PERMIT_ATMO_BELT_NEUTRONIUM
+		{
+			public static LocString NAME = "Regal Neutronium Atmo Belt";
+
+			public static LocString DESC = "The only acceptable atmo belt for exalted space explorers.";
+		}
+
+		public class PERMIT_ATMOSUIT_NEUTRONIUM
+		{
+			public static LocString NAME = "Regal Neutronium Atmo Suit";
+
+			public static LocString DESC = "Understated elegance topped with a solid-gold collar that protects against sharp space objects and surprise tickle attacks.";
+		}
+
+		public class PERMIT_ATMO_SHOES_NEUTRONIUM
+		{
+			public static LocString NAME = "Regal Atmo Boots";
+
+			public static LocString DESC = "Protective footwear that shines with the promise of safety and new adventures.";
+		}
+
+		public class PERMIT_ATMO_GLOVES_NEUTRONIUM
+		{
+			public static LocString NAME = "Regal Neutronium Atmo Gloves";
+
+			public static LocString DESC = "Thick engineered \"leather\" hand protectors and polished Neutronium cuffs keep little Duplicant fingers safe, no matter what they're tempted to touch.";
+		}
+
+		public class PERMIT_ATMO_HELMET_NEUTRONIUM
+		{
+			public static LocString NAME = "Regal Neutronium Atmo Helmet";
+
+			public static LocString DESC = "A truly magnificent noggin protector that makes every errand feel like an epic expedition.";
+		}
+
+		public class PERMIT_GLOVES_NEUTRONIUM
+		{
+			public static LocString NAME = "Regal Golden Gloves";
+
+			public static LocString DESC = "Manufacturer's note: These gloves will not transform touched objects into gold or neutronium.";
+		}
+
+		public class PERMIT_TOP_REGAL_NEUTRONIUM
+		{
+			public static LocString NAME = "Regal Neutronium Uniform Shirt";
+
+			public static LocString DESC = "The unofficial dress uniform of the super-regal, with a solid gold belt and collar. It's not comfortable, but wow, does it ever look good.";
+		}
+
+		public class PERMIT_BOTTOM_REGAL_NEUTRONIUM
+		{
+			public static LocString NAME = "Regal Neutronium Uniform Pants";
+
+			public static LocString DESC = "These tailored uniform pants come in a rich, deep neutronium-inspired hue that pairs well with gold.";
+		}
+
+		public class PERMIT_SHOES_REGAL_NEUTRONIUM
+		{
+			public static LocString NAME = "Regal Shoes";
+
+			public static LocString DESC = "Classic black work shoes with a lavish gold ankle band.";
+		}
+
+		public class PERMIT_CROWN_MOULDING_NEUTRONIUM
+		{
+			public static LocString NAME = UI.FormatAsLink("Regal Neutronium Ceiling Trim", "CROWNMOULDING");
+
+			public static LocString DESC = "Installing elegant crown moulding is a clever way to distract visitors from unswept tunnel floors.";
+		}
+
+		public class PERMIT_CORNER_TILE_NEUTRONIUM
+		{
+			public static LocString NAME = UI.FormatAsLink("Regal Neutronium Corner Trim", "CORNERMOULDING");
+
+			public static LocString DESC = "Someone once suggested that ornate corner trim tiles be called \"cornate\" tiles. Thankfully, they were overruled.";
+		}
+
+		public class PERMIT_PEDESTAL_NEUTRONIUM
+		{
+			public static LocString NAME = UI.FormatAsLink("Regal Neutronium Pedestal", "ITEMPEDESTAL");
+
+			public static LocString DESC = "This signet ring-style pedestal makes an opulent home for everything from crown jewels to knickknacks.";
+		}
+
+		public class PERMIT_GENERATORMANUAL_NEUTRONIUM
+		{
+			public static LocString NAME = UI.FormatAsLink("Regal Neutronium Manual Generator", "MANUALGENERATOR");
+
+			public static LocString DESC = "Some folks climb up the corporate ladder, others race on the aristocratic wheel.";
+		}
+
+		public class PERMIT_HQBASE_NEUTRONIUM
+		{
+			public static LocString NAME = UI.FormatAsLink("Regal Neutronium Printing Pod", "HEADQUARTERS");
+
+			public static LocString DESC = "A grandiose machine that makes even the most haphazard colony feel like a distinguished outpost.";
+		}
+
+		public class PERMIT_PORTA_POD_Y_NEUTRONIUM
+		{
+			public static LocString NAME = UI.FormatAsLink("Regal Neutronium Mini-Pod", "EXOBASEHEADQUARTERS");
+
+			public static LocString DESC = "A monument to the highfalutin' hopes and dreams of every spacefarer settling in on a new world.";
+		}
+
+		public class PERMIT_RANCHERSTATION_NEUTRONIUM
+		{
+			public static LocString NAME = UI.FormatAsLink("Regal Neutronium Grooming Station", "RANCHSTATION");
+
+			public static LocString DESC = "Mirror, mirror, on the wall...who's the best-groomed of them all?";
+		}
+
+		public class PERMIT_STORAGELOCKER_NEUTRONIUM
+		{
+			public static LocString NAME = UI.FormatAsLink("Regal Neutronium Storage Bin", "STORAGELOCKER");
+
+			public static LocString DESC = "When the outside is this extravagant, who cares what's inside?";
+		}
+
+		public class PERMIT_FRIDGE_NEUTRONIUM
+		{
+			public static LocString NAME = UI.FormatAsLink("Regal Neutronium Refrigerator", "REFRIGERATOR");
+
+			public static LocString DESC = "It's so polished that there's a chance Duplicants might get lost in their own reflection.";
+		}
+
+		public class PERMIT_MINERALDEOXIDIZER_NEUTRONIUM
+		{
+			public static LocString NAME = UI.FormatAsLink("Regal Neutronium Oxygen Diffuser", "MINERALDEOXIDIZER");
+
+			public static LocString DESC = "Enhances breathability by lending an air of affluence to its surroundings.";
+		}
+
+		public class PERMIT_WATERPUMP_NEUTRONIUM
+		{
+			public static LocString NAME = UI.FormatAsLink("Regal Neutronium Water Pump", "LIQUIDPUMPINGSTATION");
+
+			public static LocString DESC = "Some Duplicants dream of stealing the wrought gold pump handle to use as a fancy walking cane.";
+		}
+
+		public class PERMIT_GENERATORPHOS_NEUTRONIUM
+		{
+			public static LocString NAME = UI.FormatAsLink("Regal Neutronium Coal Generator", "GENERATOR");
+
+			public static LocString DESC = "This building's high-gloss finish never loses its shine, no matter how many layers of coal dust it's coated in.";
+		}
+
+		public class PERMIT_STEAMTURBINE2_NEUTRONIUM
+		{
+			public static LocString NAME = UI.FormatAsLink("Regal Neutronium Steam Turbine", "STEAMTURBINE2");
+
+			public static LocString DESC = "It exudes power, literally and figuratively.";
+		}
+
+		public class PERMIT_CO2SCRUBBER_NEUTRONIUM
+		{
+			public static LocString NAME = UI.FormatAsLink("Regal Neutronium Carbon Skimmer", "CO2SCRUBBER");
+
+			public static LocString DESC = "Swiftly and discreetly pulls carbon dioxide out of the air, like a butler pulling an uninvited guest out of a gala.";
+		}
+
+		public class PERMIT_ELECTROLYZER_NEUTRONIUM
+		{
+			public static LocString NAME = UI.FormatAsLink("Regal Neutronium Electrolyzer", "ELECTROLYZER");
+
+			public static LocString DESC = "The oxygenated air produced by this building smells...superior, somehow.";
+		}
+
+		public class PERMIT_RESPECCER_NEUTRONIUM
+		{
+			public static LocString NAME = UI.FormatAsLink("Regal Neutronium Skill Scrubber", "RESETSKILLSSTATION");
+
+			public static LocString DESC = "Duplicants come out feeling very, very fancy, and knowing very, very little.";
+		}
+
+		public class PERMIT_WATERPURIFIER_NEUTRONIUM
+		{
+			public static LocString NAME = UI.FormatAsLink("Regal Neutronium Water Sieve", "WATERPURIFIER");
+
+			public static LocString DESC = "The clean water produced by this gilded filtration system has an unmistakably rich flavor.";
+		}
+
+		public class PERMIT_METALREFINERY_NEUTRONIUM
+		{
+			public static LocString NAME = UI.FormatAsLink("Regal Neutronium Metal Refinery", "METALREFINERY");
+
+			public static LocString DESC = "Some say it's the most refined-looking metal refinery that ever refined metal.";
+		}
+
+		public class PERMIT_BOILER_NEUTRONIUM
+		{
+			public static LocString NAME = UI.FormatAsLink("Regal Neutronium Liquid Tepidizer", "LIQUIDHEATER");
+
+			public static LocString DESC = "An ostentatious immersion heater that gives cool liquids the royal treatment.";
+		}
+
+		public class PERMIT_LIQUIDCONDITIONER_NEUTRONIUM
+		{
+			public static LocString NAME = UI.FormatAsLink("Regal Neutronium Thermo Aquatuner", "LIQUIDCONDITIONER");
+
+			public static LocString DESC = "Duplicants who <i>can</i> say this building's name three times fast are too undignified to use it.";
+		}
+
+		public class PERMIT_JETSUIT_NEUTRONIUM
+		{
+			public static LocString NAME = "Regal Neutronium Jet Suit";
+
+			public static LocString DESC = "In the event of a formal-attire emergency, the golden starburst belt buckle can double as an avant-garde monocle.";
+		}
+
+		public class PERMIT_JET_SHOES_NEUTRONIUM
+		{
+			public static LocString NAME = "Regal Neutronium Jet Boots";
+
+			public static LocString DESC = "A pair of flight boots designed to be as durable as the mysterious substance that clings to space artifacts.";
+		}
+
+		public class PERMIT_JET_GLOVES_NEUTRONIUM
+		{
+			public static LocString NAME = "Regal Neutronium Jet Gloves";
+
+			public static LocString DESC = "These gloves feature heavy neutronium-inspired cuffs that keep them securely attached no matter how fast the wearer is jettin' around.";
+		}
+
+		public class PERMIT_JET_HELMET_NEUTRONIUM
+		{
+			public static LocString NAME = "Regal Neutronium Jet Helmet";
+
+			public static LocString DESC = "This showstopper of a helmet really makes Duplicants feel like jet-settin' legends.";
+		}
+
+		public class PERMIT_WALLS_STRIPES_NEUTRONIUM
+		{
+			public static LocString NAME = UI.FormatAsLink("Regal Neutronium Tuft", "EXTERIORWALL");
+
+			public static LocString DESC = "This sumptuously tufted wall panel transforms basic colony spaces into palatial throne rooms.";
+		}
+
+		public class NEUTRONIUM_ATMO_OUTFIT
+		{
+			public static LocString NAME = "Regal Neutronium Atmo Outfit";
+		}
+
+		public class NEUTRONIUM_JETSUIT_OUTFIT
+		{
+			public static LocString NAME = "Regal Neutronium Jet Outfit";
+		}
+
+		public class PERMIT_STANDARD_REGAL_NEUTRONIUM_OUTFIT
+		{
+			public static LocString NAME = "Regal Neutronium Uniform";
+		}
+
 		public class PERMIT_HEADQUARTERS_CERES
 		{
 			public static LocString NAME = UI.FormatAsLink("Frosty Printing Pod", "HEADQUARTERS");
@@ -702,6 +955,55 @@ namespace STRINGS
 		public class OUTFIT_ATMO_SUIT_80S
 		{
 			public static LocString NAME = "Radical Atmo Outfit";
+		}
+
+		public class PERMIT_PEDESTAL_COTTAGE
+		{
+			public static LocString NAME = UI.FormatAsLink("Handcrafted Pedestal", "ITEMPEDESTAL");
+
+			public static LocString DESC = "A cozy spot to display cherished items.";
+		}
+
+		public class PERMIT_PORTA_POD_Y_ICE
+		{
+			public static LocString NAME = UI.FormatAsLink("Frosty Mini-Pod", "EXOBASEHEADQUARTERS");
+
+			public static LocString DESC = "It could run for a thousand cycles and still be cool to the touch.";
+		}
+
+		public class PERMIT_STANDARD_BIONIC_TOP
+		{
+			public static LocString NAME = "Bionic Uniform Shirt";
+
+			public static LocString DESC = "A standard-issue uniform shirt for non-standard Duplicants.";
+		}
+
+		public class PERMIT_STANDARD_BIONIC_BOTTOM
+		{
+			public static LocString NAME = "Almost-Black Pants";
+
+			public static LocString DESC = "If someone can tell the difference between these and actual black pants, they're standing too close.";
+		}
+
+		public class PERMIT_STANDARD_BIONIC_GLOVES
+		{
+			public static LocString NAME = "Bionic Gloves";
+
+			public static LocString DESC = "Standard uniform gloves for Bionic Duplicants. They do not grant the wearer any special abilities.";
+		}
+
+		public class PERMIT_STANDARD_BIONIC_SHOES
+		{
+			public static LocString NAME = "Bionic Shoes";
+
+			public static LocString DESC = "Standard uniform shoes for Bionic Duplicants.";
+		}
+
+		public class PERMIT_STANDARD_BIONIC_OUTFIT
+		{
+			public static LocString NAME = "Standard Bionic Uniform";
+
+			public static LocString DESC = "The uniform issued to all Bionic Duplicants on their first day in the colony.";
 		}
 
 		public class PERMIT_ATMO_BELT_3TONE_PURPLE
@@ -1428,6 +1730,20 @@ namespace STRINGS
 			public static LocString NAME = "Gaudy Atmo Outfit";
 		}
 
+		public class PERMIT_GENERATORMANUAL_CYBERPUNK
+		{
+			public static LocString NAME = UI.FormatAsLink("Retro LED Manual Generator", "MANUALGENERATOR");
+
+			public static LocString DESC = "Take a spin on the party wheel! It generates raver vibes as well as power.";
+		}
+
+		public class PERMIT_PORTA_POD_Y_CYBERPUNK
+		{
+			public static LocString NAME = UI.FormatAsLink("Retro LED Mini-Pod", "EXOBASEHEADQUARTERS");
+
+			public static LocString DESC = "It's seen things that Duplicants wouldn't believe.";
+		}
+
 		public class PERMIT_ATMO_BELT_RAPTOR
 		{
 			public static LocString NAME = "Rhex Atmo Belt";
@@ -1924,6 +2240,13 @@ namespace STRINGS
 			public static LocString NAME = "Jawbo Atmo Outfit";
 		}
 
+		public class PERMIT_PORTA_POD_Y_DINO
+		{
+			public static LocString NAME = UI.FormatAsLink("Forgotten Mini-Pod", "EXOBASEHEADQUARTERS");
+
+			public static LocString DESC = "Before it was forgotten, it was revered.";
+		}
+
 		public class PERMIT_ELEGANTBED_HATCH
 		{
 			public static LocString NAME = UI.FormatAsLink("Hatch Bed", "LUXURYBED");
@@ -1936,6 +2259,750 @@ namespace STRINGS
 			public static LocString NAME = UI.FormatAsLink("Pipsqueak Bed", "LUXURYBED");
 
 			public static LocString DESC = "Perfect for side sleepers and little spoons.";
+		}
+
+		public class PERMIT_BOTTOM_GOTCH_FLINT_ASH
+		{
+			public static LocString NAME = "Flint Skivvies";
+
+			public static LocString DESC = "Stony gray longjohns with stretchy contrast stitching.";
+		}
+
+		public class PERMIT_BOTTOM_GOTCH_PETAL_NEONPINK
+		{
+			public static LocString NAME = "Petal Skivvies";
+
+			public static LocString DESC = "Vibrant pink longjohns that fold into their own pocket for convenience.";
+		}
+
+		public class PERMIT_BOTTOM_GOTCH_ELECTRO_SWEETLE
+		{
+			public static LocString NAME = "Electro Skivvies";
+
+			public static LocString DESC = "Electric-blue longjohns with someone's name and password sewn into the tag.";
+		}
+
+		public class PERMIT_BOTTOM_GOTCH_WORTSEED_CHROMO
+		{
+			public static LocString NAME = "Wortseed Skivvies";
+
+			public static LocString DESC = "Wort're you wearing? Longjohns as workwear!?";
+		}
+
+		public class PERMIT_BOTTOM_GOTCH_SYMBIO_OAKMOLT
+		{
+			public static LocString NAME = "Symbio Skivvies";
+
+			public static LocString DESC = "Longjohns that form a symbiotic relationship with their wearer after just two wears.";
+		}
+
+		public class PERMIT_BOTTOM_GOTCH_QUANTUM_RADGLO
+		{
+			public static LocString NAME = "Quantum Skivvies";
+
+			public static LocString DESC = "In another universe, these are actually considered capri pants.";
+		}
+
+		public class PERMIT_BOTTOM_GOTCH_PEAGREEN_GLITCH
+		{
+			public static LocString NAME = "Greenpeas Skivvies";
+
+			public static LocString DESC = "Made with bioengineered pea-pod fabric that features sixteen-way stretch and a mild vegetable scent.";
+		}
+
+		public class PERMIT_BOTTOM_GOTCH_MUCK_EARWAX
+		{
+			public static LocString NAME = "Muck Skivvies";
+
+			public static LocString DESC = "Cozy brown longjohns infused with moisturizing muck molecules.";
+		}
+
+		public class PERMIT_BOTTOM_GOTCH_SATSUMA_RESIN
+		{
+			public static LocString NAME = "Hi-Vis Skivvies";
+
+			public static LocString DESC = "Safety is paramount, especially for anyone who's doing construction work in their skivvies.";
+		}
+
+		public class PERMIT_BOTTOM_GOTCH_RUSTY_GRUBBY
+		{
+			public static LocString NAME = "Rusty Skivvies";
+
+			public static LocString DESC = "The vivid hue of these longjohns was achieved using only the finest tetanus-free dyes. Well, mostly.";
+		}
+
+		public class PERMIT_BOTTOM_GOTCH_GRAPE_ALKALI
+		{
+			public static LocString NAME = "Cerebra Skivvies";
+
+			public static LocString DESC = "Purple longjohns for the comfy intellectual.";
+		}
+
+		public class PERMIT_BOTTOM_GOTCH_CHARCOAL_OBELUS
+		{
+			public static LocString NAME = "Charcoal Skivvies";
+
+			public static LocString DESC = "The dark color makes it less obvious that these are supposed to be worn <i>underneath</i> clothes.";
+		}
+
+		public class PERMIT_SOCKS_GOTCH_FLINT_ASH
+		{
+			public static LocString NAME = "Striped Flint Socks";
+
+			public static LocString DESC = "Stony gray crew socks with a helpful stripe to indicate which end the foot goes into.";
+		}
+
+		public class PERMIT_SOCKS_GOTCH_PETAL_NEONPINK
+		{
+			public static LocString NAME = "Striped Petal Socks";
+
+			public static LocString DESC = "Neon pink crew socks with a helpful stripe to indicate which end the foot goes into.";
+		}
+
+		public class PERMIT_SOCKS_GOTCH_ELECTRO_SWEETLE
+		{
+			public static LocString NAME = "Striped Electro Socks";
+
+			public static LocString DESC = "Electric-blue crew socks with a helpful stripe to indicate which end the foot goes into.";
+		}
+
+		public class PERMIT_SOCKS_GOTCH_WORTSEED_CHROMO
+		{
+			public static LocString NAME = "Striped Wortseed Socks";
+
+			public static LocString DESC = "Wheezewort-colored crew socks with a helpful stripe to indicate which end the foot goes into.";
+		}
+
+		public class PERMIT_SOCKS_GOTCH_SYMBIO_OAKMOLT
+		{
+			public static LocString NAME = "Striped Symbio Socks";
+
+			public static LocString DESC = "Bright aquamarine crew socks with a helpful stripe to indicate which end the foot goes into.";
+		}
+
+		public class PERMIT_SOCKS_GOTCH_QUANTUM_RADGLO
+		{
+			public static LocString NAME = "Striped Quantum Socks";
+
+			public static LocString DESC = "Radioactive-green crew socks with a helpful stripe to indicate which end the foot goes into.";
+		}
+
+		public class PERMIT_SOCKS_GOTCH_PEAGREEN_GLITCH
+		{
+			public static LocString NAME = "Striped Greenpeas Socks";
+
+			public static LocString DESC = "Lunchroom-green crew socks with a helpful stripe to indicate which end the foot goes into.";
+		}
+
+		public class PERMIT_SOCKS_GOTCH_MUCK_EARWAX
+		{
+			public static LocString NAME = "Striped Muck Socks";
+
+			public static LocString DESC = "Serious brown crew socks with a helpful stripe to indicate which end the foot goes into.";
+		}
+
+		public class PERMIT_SOCKS_GOTCH_SATSUMA_RESIN
+		{
+			public static LocString NAME = "Striped Hi-Vis Socks";
+
+			public static LocString DESC = "Safety-orange crew socks with a helpful stripe to indicate which end the foot goes into.";
+		}
+
+		public class PERMIT_SOCKS_GOTCH_RUSTY_GRUBBY
+		{
+			public static LocString NAME = "Striped Rusty Socks";
+
+			public static LocString DESC = "Rust-red crew socks with a helpful stripe to indicate which end the foot goes into.";
+		}
+
+		public class PERMIT_SOCKS_GOTCH_GRAPE_ALKALI
+		{
+			public static LocString NAME = "Striped Cerebra Socks";
+
+			public static LocString DESC = "Pensive purple crew socks with a helpful stripe to indicate which end the foot goes into.";
+		}
+
+		public class PERMIT_SOCKS_GOTCH_CHARCOAL_OBELUS
+		{
+			public static LocString NAME = "Striped Charcoal Socks";
+
+			public static LocString DESC = "Almost-black crew socks with a helpful stripe to indicate which end the foot goes into.";
+		}
+
+		public class PERMIT_GLOVES_GOTCH_FLINT_ASH
+		{
+			public static LocString NAME = "Striped Flint Gloves";
+
+			public static LocString DESC = "Stony gray gloves with a sporty stripe at the wrist.";
+		}
+
+		public class PERMIT_GLOVES_GOTCH_PETAL_NEONPINK
+		{
+			public static LocString NAME = "Striped Petal Gloves";
+
+			public static LocString DESC = "Bright pink gloves with a sporty stripe at the wrist.";
+		}
+
+		public class PERMIT_GLOVES_GOTCH_ELECTRO_SWEETLE
+		{
+			public static LocString NAME = "Striped Electro Gloves";
+
+			public static LocString DESC = "Electric-blue gloves with a sporty stripe at the wrist.";
+		}
+
+		public class PERMIT_GLOVES_GOTCH_WORTSEED_CHROMO
+		{
+			public static LocString NAME = "Striped Wortseed Gloves";
+
+			public static LocString DESC = "Wheezewort-colored gloves with a sporty stripe at the wrist.";
+		}
+
+		public class PERMIT_GLOVES_GOTCH_SYMBIO_OAKMOLT
+		{
+			public static LocString NAME = "Striped Symbio Gloves";
+
+			public static LocString DESC = "Bright aquamarine with a sporty stripe at the wrist.";
+		}
+
+		public class PERMIT_GLOVES_GOTCH_QUANTUM_RADGLO
+		{
+			public static LocString NAME = "Striped Quantum Gloves";
+
+			public static LocString DESC = "Radioactive-green with a sporty stripe at the wrist.";
+		}
+
+		public class PERMIT_GLOVES_GOTCH_PEAGREEN_GLITCH
+		{
+			public static LocString NAME = "Striped Greenpeas Gloves";
+
+			public static LocString DESC = "Lunchroom-green gloves with a sporty stripe at the wrist.";
+		}
+
+		public class PERMIT_GLOVES_GOTCH_MUCK_EARWAX
+		{
+			public static LocString NAME = "Striped Muck Gloves";
+
+			public static LocString DESC = "Serious brown gloves with a sporty stripe at the wrist, for whimsy.";
+		}
+
+		public class PERMIT_GLOVES_GOTCH_SATSUMA_RESIN
+		{
+			public static LocString NAME = "Striped Hi-Vis Gloves";
+
+			public static LocString DESC = "Safety-orange gloves with a sporty stripe at the wrist.";
+		}
+
+		public class PERMIT_GLOVES_GOTCH_RUSTY_GRUBBY
+		{
+			public static LocString NAME = "Striped Rusty Gloves";
+
+			public static LocString DESC = "Rust-red gloves with a sporty stripe at the wrist.";
+		}
+
+		public class PERMIT_GLOVES_GOTCH_GRAPE_ALKALI
+		{
+			public static LocString NAME = "Striped Cerebra Gloves";
+
+			public static LocString DESC = "Pensive purple gloves with a sporty stripe at the wrist.";
+		}
+
+		public class PERMIT_GLOVES_GOTCH_CHARCOAL_OBELUS
+		{
+			public static LocString NAME = "Striped Charcoal Gloves";
+
+			public static LocString DESC = "Almost-black gloves with a sporty stripe at the wrist.";
+		}
+
+		public class PERMIT_TOP_GOTCH_ENNUI_FLINT
+		{
+			public static LocString NAME = "Ennui Base Layer";
+
+			public static LocString DESC = "It's a relatively functional sweat-wicking undershirt, or whatever.";
+		}
+
+		public class PERMIT_TOP_GOTCH_GLUON_PETAL
+		{
+			public static LocString NAME = "Gluon Base Layer";
+
+			public static LocString DESC = "A soft pink undershirt for pastel-loving particle physicists.";
+		}
+
+		public class PERMIT_TOP_GOTCH_RIVET_ELECTRO
+		{
+			public static LocString NAME = "Rivet Base Layer";
+
+			public static LocString DESC = "A sweat-wicking undershirt in a really riveting shade of blue.";
+		}
+
+		public class PERMIT_TOP_GOTCH_BASIN_WORTSEED
+		{
+			public static LocString NAME = "Basin Base Layer";
+
+			public static LocString DESC = "A sweat-wicking undershirt with extra padding in the underarms to prevent unsightly stains.";
+		}
+
+		public class PERMIT_TOP_GOTCH_VITRO_SYMBIO
+		{
+			public static LocString NAME = "Vitro Base Layer";
+
+			public static LocString DESC = "A sweat-wicking undershirt in a striking glassy-blue hue.";
+		}
+
+		public class PERMIT_TOP_GOTCH_NUKED_QUANTUM
+		{
+			public static LocString NAME = "Nuked Base Layer";
+
+			public static LocString DESC = "A sweat-wicking undershirt the color of microwaved slime!";
+		}
+
+		public class PERMIT_TOP_GOTCH_MUSH_PEAGREEN
+		{
+			public static LocString NAME = "Mush Base Layer";
+
+			public static LocString DESC = "A sweat-wicking undershirt that effectively hides mush bar stains.";
+		}
+
+		public class PERMIT_TOP_GOTCH_FLATUS_MUCK
+		{
+			public static LocString NAME = "Flatus Base Layer";
+
+			public static LocString DESC = "An unremarkable beige undershirt that enables the wearer to avoid attention when they're passing gas at parties.";
+		}
+
+		public class PERMIT_TOP_GOTCH_CANKER_SATSUMA
+		{
+			public static LocString NAME = "Canker Base Layer";
+
+			public static LocString DESC = "A sweat-wicking undershirt that smells vaguely acidic. No one's sure whether it's citrus or sweat.";
+		}
+
+		public class PERMIT_TOP_GOTCH_PUCE_RUSTY
+		{
+			public static LocString NAME = "Puce Base Layer";
+
+			public static LocString DESC = "A sweat-wicking undershirt the color of sliced Pacu fillet, without the fishy aroma.";
+		}
+
+		public class PERMIT_TOP_GOTCH_DUSKY_GRAPE
+		{
+			public static LocString NAME = "Dusk Base Layer";
+
+			public static LocString DESC = "A sweat-wicking undershirt in a twilight shade of purple, for colonists who haven't seen the sun in a very long time.";
+		}
+
+		public class PERMIT_TOP_GOTCH_ASH_CHARCOAL
+		{
+			public static LocString NAME = "Ash Base Layer";
+
+			public static LocString DESC = "How many cycles has it been since someone last washed this undershirt? It's impossible to tell.";
+		}
+
+		public class PERMIT_JETSUIT_BLACK_HATCHSTONE
+		{
+			public static LocString NAME = "Hatchstone Stealth Jet Suit";
+
+			public static LocString DESC = "A black jet suit with a soft periwinkle sternum protector.";
+		}
+
+		public class PERMIT_JETSUIT_BLACK_KELLY
+		{
+			public static LocString NAME = "Algae Stealth Jet Suit";
+
+			public static LocString DESC = "A black jet suit with a peppy green sternum protector.";
+		}
+
+		public class PERMIT_JETSUIT_BLACK_RED
+		{
+			public static LocString NAME = "Garnet Stealth Jet Suit";
+
+			public static LocString DESC = "A black jet suit with an impressive red sternum protector. Definitely not a red shirt. Nope, nuh-uh, no way.";
+		}
+
+		public class PERMIT_JETSUIT_BLACK_TORPOR
+		{
+			public static LocString NAME = "Torpor Stealth Jet Suit";
+
+			public static LocString DESC = "A black jet suit with a slick gray sternum protector.";
+		}
+
+		public class PERMIT_JETSUIT_BLACK_ULTRA
+		{
+			public static LocString NAME = "Ultra Stealth Jet Suit";
+
+			public static LocString DESC = "A black jet suit with a dramatic blue sternum protector.";
+		}
+
+		public class PERMIT_JETSUIT_WHITE_ATOMIC
+		{
+			public static LocString NAME = "Crisp Atomic Jet Suit";
+
+			public static LocString DESC = "A white jet suit with a hazard-orange sternum protector.";
+		}
+
+		public class PERMIT_JETSUIT_WHITE_CHARCOAL
+		{
+			public static LocString NAME = "Crisp Charcoal Jet Suit";
+
+			public static LocString DESC = "A white jet suit with a fierce dark gray sternum protector.";
+		}
+
+		public class PERMIT_JETSUIT_WHITE_MAGENTA
+		{
+			public static LocString NAME = "Crisp Therma Jet Suit";
+
+			public static LocString DESC = "A white jet suit with a warm coral-hued sternum protector.";
+		}
+
+		public class PERMIT_JET_SHOES_BASIC_BLACK
+		{
+			public static LocString NAME = "Black Jet Boots";
+
+			public static LocString DESC = "Stain-resistant footwear for flight suits. They'll look new forever!";
+		}
+
+		public class PERMIT_JET_SHOES_BASIC_WHITE
+		{
+			public static LocString NAME = "White Jet Boots";
+
+			public static LocString DESC = "Microchannels on the boots' exterior reduce drag and increase dirt accumulation.";
+		}
+
+		public class PERMIT_JET_GLOVES_OBELUS
+		{
+			public static LocString NAME = "Obelus Jet Gloves";
+
+			public static LocString DESC = "Medium-gray technical gloves for jet-setting Duplicants.";
+		}
+
+		public class PERMIT_JET_GLOVES_GLOOM
+		{
+			public static LocString NAME = "Gloom Jet Gloves";
+
+			public static LocString DESC = "Gray technical gloves for jet-setting Duplicants.";
+		}
+
+		public class PERMIT_JET_GLOVES_ORANGE
+		{
+			public static LocString NAME = "Cadmium Jet Gloves";
+
+			public static LocString DESC = "Orange technical gloves for jet-setting Duplicants.";
+		}
+
+		public class PERMIT_JET_HELMET_00_TORPOR_OBELUS
+		{
+			public static LocString NAME = "Torpor Jet Helmet";
+
+			public static LocString DESC = "A pale gray flight helmet for workers who drift in and out of daydreams mid-flight.";
+		}
+
+		public class PERMIT_JET_HELMET_00_CHARCOAL_ORANGE
+		{
+			public static LocString NAME = "Hornet Jet Helmet";
+
+			public static LocString DESC = "A sharp black-and-orange flight helmet for jettin' around the colony.";
+		}
+
+		public class PERMIT_JET_HELMET_00_MAGENTA_OBELUS
+		{
+			public static LocString NAME = "Therma Jet Helmet";
+
+			public static LocString DESC = "A coral-hued flight helmet for jettin' around the colony in vacation mode.";
+		}
+
+		public class PERMIT_JET_HELMET_00_RED_OBELUS
+		{
+			public static LocString NAME = "Garnet Jet Helmet";
+
+			public static LocString DESC = "A serious-as-a-research-grant red flight helmet for jettin' around the colony.";
+		}
+
+		public class PERMIT_JET_HELMET_00_ATOMIC_GLOOM
+		{
+			public static LocString NAME = "Atomic Jet Helmet";
+
+			public static LocString DESC = "A flashy orange flight helmet for jettin' around the colony like a happy little warning label.";
+		}
+
+		public class PERMIT_JET_HELMET_00_KELLY_OBELUS
+		{
+			public static LocString NAME = "Algae Jet Helmet";
+
+			public static LocString DESC = "A chlorophyll-green flight helmet for jettin' around the colony.";
+		}
+
+		public class PERMIT_JET_HELMET_00_HATCHSTONE_OBELUS
+		{
+			public static LocString NAME = "Hatchstone Jet Helmet";
+
+			public static LocString DESC = "A light blue-purple flight helmet for jettin' around the colony.";
+		}
+
+		public class PERMIT_JET_HELMET_00_ULTRA_OBELUS
+		{
+			public static LocString NAME = "Ultra Jet Helmet";
+
+			public static LocString DESC = "A rich blue flight helmet for jettin' around the colony.";
+		}
+
+		public class OUTFIT_JETSUIT_001
+		{
+			public static LocString NAME = "Torpor Jet Outfit";
+		}
+
+		public class OUTFIT_JETSUIT_002
+		{
+			public static LocString NAME = "Hornet Jet Outfit";
+		}
+
+		public class OUTFIT_JETSUIT_003
+		{
+			public static LocString NAME = "Therma Jet Outfit";
+		}
+
+		public class OUTFIT_JETSUIT_004
+		{
+			public static LocString NAME = "Garnet Jet Outfit";
+		}
+
+		public class OUTFIT_JETSUIT_005
+		{
+			public static LocString NAME = "Atomic Jet Outfit";
+		}
+
+		public class OUTFIT_JETSUIT_006
+		{
+			public static LocString NAME = "Algae Jet Outfit";
+		}
+
+		public class OUTFIT_JETSUIT_007
+		{
+			public static LocString NAME = "Hatchstone Jet Outfit";
+		}
+
+		public class OUTFIT_JETSUIT_008
+		{
+			public static LocString NAME = "Ultra Jet Outfit";
+		}
+
+		public class OUTFIT_GOTCHIES_GREY
+		{
+			public static LocString NAME = "Flint Skivvies Outfit";
+		}
+
+		public class OUTFIT_GOTCHIES_PINK
+		{
+			public static LocString NAME = "Petal Skivvies Outfit";
+		}
+
+		public class OUTFIT_GOTCHIES_BLUE
+		{
+			public static LocString NAME = "Electro Skivvies Outfit";
+		}
+
+		public class OUTFIT_GOTCHIES_BLUE_2
+		{
+			public static LocString NAME = "Wortseed Skivvies Outfit";
+		}
+
+		public class OUTFIT_GOTCHIES_TEAL
+		{
+			public static LocString NAME = "Symbio Skivvies Outfit";
+		}
+
+		public class OUTFIT_GOTCHIES_GREEN_RADIOACTIVE
+		{
+			public static LocString NAME = "Quantum Skivvies Outfit";
+		}
+
+		public class OUTFIT_GOTCHIES_GREEN
+		{
+			public static LocString NAME = "Greenpeas Skivvies Outfit";
+		}
+
+		public class OUTFIT_GOTCHIES_BROWN
+		{
+			public static LocString NAME = "Muck Skivvies Outfit";
+		}
+
+		public class OUTFIT_GOTCHIES_ORANGE
+		{
+			public static LocString NAME = "Hi-Vis Skivvies Outfit";
+		}
+
+		public class OUTFIT_GOTCHIES_RED
+		{
+			public static LocString NAME = "Rusty Skivvies Outfit";
+		}
+
+		public class OUTFIT_GOTCHIES_PURPLE
+		{
+			public static LocString NAME = "Cerebra Skivvies Outfit";
+		}
+
+		public class OUTFIT_GOTCHIES_BLACK
+		{
+			public static LocString NAME = "Charcoal Skivvies Outfit";
+		}
+
+		public class PERMIT_GENERATORMANUAL_A
+		{
+			public static LocString NAME = UI.FormatAsLink("Sleek Manual Generator", "MANUALGENERATOR");
+
+			public static LocString DESC = "Clean lines, clean energy...as long as the operator doesn't sweat all over the wheel.";
+		}
+
+		public class PERMIT_GENERATORMANUAL_B
+		{
+			public static LocString NAME = UI.FormatAsLink("Clunky Manual Generator", "MANUALGENERATOR");
+
+			public static LocString DESC = "It looks like someone dug this out of an old rocket hangar.";
+		}
+
+		public class PERMIT_WALLS_TRIANGLE_CHILLI_WHITE
+		{
+			public static LocString NAME = UI.FormatAsLink("Chili Corner", "EXTERIORWALL");
+
+			public static LocString DESC = "A chili-red wallpaper with one crisp white corner cut out, for modular styling.";
+		}
+
+		public class PERMIT_WALLS_TRIANGLE_SATSUMA_WHITE
+		{
+			public static LocString NAME = UI.FormatAsLink("Hi-Vis Corner", "EXTERIORWALL");
+
+			public static LocString DESC = "A safety-orange wallpaper with one crisp white corner cut out, for modular styling.";
+		}
+
+		public class PERMIT_WALLS_TRIANGLE_LEMON_WHITE
+		{
+			public static LocString NAME = UI.FormatAsLink("Brightslug Corner", "EXTERIORWALL");
+
+			public static LocString DESC = "A bright yellow wallpaper with one crisp white corner cut out, for modular styling.";
+		}
+
+		public class PERMIT_WALLS_TRIANGLE_KELLY_WHITE
+		{
+			public static LocString NAME = UI.FormatAsLink("Algae Corner", "EXTERIORWALL");
+
+			public static LocString DESC = "An algae-green wallpaper with one crisp white corner cut out, for modular styling.";
+		}
+
+		public class PERMIT_WALLS_TRIANGLE_COBALT_WHITE
+		{
+			public static LocString NAME = UI.FormatAsLink("Cobalt Corner", "EXTERIORWALL");
+
+			public static LocString DESC = "A strong blue wallpaper with one crisp white corner cut out, for modular styling.";
+		}
+
+		public class PERMIT_WALLS_TRIANGLE_FLAMINGO_WHITE
+		{
+			public static LocString NAME = UI.FormatAsLink("Petal Corner", "EXTERIORWALL");
+
+			public static LocString DESC = "A vivid pink wallpaper with one crisp white corner cut out, for modular styling.";
+		}
+
+		public class PERMIT_WALLS_TRIANGLE_CHARCOAL_WHITE
+		{
+			public static LocString NAME = UI.FormatAsLink("Charcoal Corner", "EXTERIORWALL");
+
+			public static LocString DESC = "A dark-gray wallpaper with one crisp white corner cut out, for modular styling.";
+		}
+
+		public class PERMIT_WALLS_TRIANGLE_WHITE_CHILLI
+		{
+			public static LocString NAME = UI.FormatAsLink("Chili Point", "EXTERIORWALL");
+
+			public static LocString DESC = "This wallpaper features a chili-red triangle pointing into a vast expanse of nothingness.";
+		}
+
+		public class PERMIT_WALLS_TRIANGLE_WHITE_SATSUMA
+		{
+			public static LocString NAME = UI.FormatAsLink("Hi-Vis Point", "EXTERIORWALL");
+
+			public static LocString DESC = "This wallpaper features a safety-orange triangle pointing into a vast expanse of nothingness.";
+		}
+
+		public class PERMIT_WALLS_TRIANGLE_WHITE_LEMON
+		{
+			public static LocString NAME = UI.FormatAsLink("Brightslug Point", "EXTERIORWALL");
+
+			public static LocString DESC = "This wallpaper features a bright yellow triangle pointing into a vast expanse of nothingness.";
+		}
+
+		public class PERMIT_WALLS_TRIANGLE_WHITE_KELLY
+		{
+			public static LocString NAME = UI.FormatAsLink("Algae Point", "EXTERIORWALL");
+
+			public static LocString DESC = "This wallpaper features an algae-green triangle pointing into a vast expanse of nothingness.";
+		}
+
+		public class PERMIT_WALLS_TRIANGLE_WHITE_COBALT
+		{
+			public static LocString NAME = UI.FormatAsLink("Cobalt Point", "EXTERIORWALL");
+
+			public static LocString DESC = "This wallpaper features a cobalt-blue triangle pointing into a vast expanse of nothingness.";
+		}
+
+		public class PERMIT_WALLS_TRIANGLE_WHITE_FLAMINGO
+		{
+			public static LocString NAME = UI.FormatAsLink("Petal Point", "EXTERIORWALL");
+
+			public static LocString DESC = "This wallpaper features a vivid pink triangle pointing into a vast expanse of nothingness.";
+		}
+
+		public class PERMIT_WALLS_TRIANGLE_WHITE_CHARCOAL
+		{
+			public static LocString NAME = UI.FormatAsLink("Charcoal Point", "EXTERIORWALL");
+
+			public static LocString DESC = "This wallpaper features a dark-gray triangle pointing into a vast expanse of nothingness.";
+		}
+
+		public class PERMIT_WALLS_X_CHILLI_WHITE
+		{
+			public static LocString NAME = UI.FormatAsLink("Chili X", "EXTERIORWALL");
+
+			public static LocString DESC = "The chili-red triangles on this wallpaper look like an X marking the spot...or an hourglass marking the passage of time.";
+		}
+
+		public class PERMIT_WALLS_X_SATSUMA_WHITE
+		{
+			public static LocString NAME = UI.FormatAsLink("Hi-Vis X", "EXTERIORWALL");
+
+			public static LocString DESC = "The safety-orange triangles on this wallpaper look like an X marking the spot...or an hourglass marking the passage of time.";
+		}
+
+		public class PERMIT_WALLS_X_LEMON_WHITE
+		{
+			public static LocString NAME = UI.FormatAsLink("Brightslug X", "EXTERIORWALL");
+
+			public static LocString DESC = "The bright yellow triangles on this wallpaper look like an X marking the spot...or an hourglass marking the passage of time.";
+		}
+
+		public class PERMIT_WALLS_X_KELLY_WHITE
+		{
+			public static LocString NAME = UI.FormatAsLink("Algae X", "EXTERIORWALL");
+
+			public static LocString DESC = "The algae-green triangles on this wallpaper look like an X marking the spot...or an hourglass marking the passage of time.";
+		}
+
+		public class PERMIT_WALLS_X_COBALT_WHITE
+		{
+			public static LocString NAME = UI.FormatAsLink("Cobalt X", "EXTERIORWALL");
+
+			public static LocString DESC = "The cobalt-blue triangles on this wallpaper look like an X marking the spot...or an hourglass marking the passage of time.";
+		}
+
+		public class PERMIT_WALLS_X_FLAMINGO_WHITE
+		{
+			public static LocString NAME = UI.FormatAsLink("Petal X", "EXTERIORWALL");
+
+			public static LocString DESC = "The petal-pink triangles on this wallpaper look like an X marking the spot...or an hourglass marking the passage of time.";
+		}
+
+		public class PERMIT_WALLS_X_CHARCOAL_WHITE
+		{
+			public static LocString NAME = UI.FormatAsLink("Charcoal X", "EXTERIORWALL");
+
+			public static LocString DESC = "The dark-gray triangles on this wallpaper look like an X marking the spot...or an hourglass marking the passage of time.";
 		}
 	}
 }

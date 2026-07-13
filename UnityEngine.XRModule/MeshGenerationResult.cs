@@ -4,8 +4,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.XR
 {
-	[NativeHeader("Modules/XR/Subsystems/Meshing/XRMeshBindings.h")]
 	[RequiredByNativeCode]
+	[NativeHeader("Modules/XR/Subsystems/Meshing/XRMeshBindings.h")]
 	public struct MeshGenerationResult : IEquatable<MeshGenerationResult>
 	{
 		public readonly MeshId MeshId { get; }

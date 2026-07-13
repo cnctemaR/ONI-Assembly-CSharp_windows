@@ -158,39 +158,37 @@ public class ConduitFlowVisualizer
 
 	private void AddAudioSource(ConduitFlow.Conduit conduit, Vector3 camera_pos)
 	{
-		using (new KProfiler.Region("AddAudioSource", null))
+		UtilityNetwork network = this.flowManager.GetNetwork(conduit);
+		if (network == null)
 		{
-			UtilityNetwork network = this.flowManager.GetNetwork(conduit);
-			if (network != null)
+			return;
+		}
+		Vector3 vector = Grid.CellToPosCCC(conduit.GetCell(this.flowManager), Grid.SceneLayer.Building);
+		float num = Vector3.SqrMagnitude(vector - camera_pos);
+		bool flag = false;
+		for (int i = 0; i < this.audioInfo.Count; i++)
+		{
+			ConduitFlowVisualizer.AudioInfo audioInfo = this.audioInfo[i];
+			if (audioInfo.networkID == network.id)
 			{
-				Vector3 vector = Grid.CellToPosCCC(conduit.GetCell(this.flowManager), Grid.SceneLayer.Building);
-				float num = Vector3.SqrMagnitude(vector - camera_pos);
-				bool flag = false;
-				for (int i = 0; i < this.audioInfo.Count; i++)
+				if (num < audioInfo.distance)
 				{
-					ConduitFlowVisualizer.AudioInfo audioInfo = this.audioInfo[i];
-					if (audioInfo.networkID == network.id)
-					{
-						if (num < audioInfo.distance)
-						{
-							audioInfo.distance = num;
-							audioInfo.position = vector;
-							this.audioInfo[i] = audioInfo;
-						}
-						flag = true;
-						break;
-					}
+					audioInfo.distance = num;
+					audioInfo.position = vector;
+					this.audioInfo[i] = audioInfo;
 				}
-				if (!flag)
-				{
-					ConduitFlowVisualizer.AudioInfo audioInfo2 = default(ConduitFlowVisualizer.AudioInfo);
-					audioInfo2.networkID = network.id;
-					audioInfo2.position = vector;
-					audioInfo2.distance = num;
-					audioInfo2.blobCount = 0;
-					this.audioInfo.Add(audioInfo2);
-				}
+				flag = true;
+				break;
 			}
+		}
+		if (!flag)
+		{
+			ConduitFlowVisualizer.AudioInfo audioInfo2 = default(ConduitFlowVisualizer.AudioInfo);
+			audioInfo2.networkID = network.id;
+			audioInfo2.position = vector;
+			audioInfo2.distance = num;
+			audioInfo2.blobCount = 0;
+			this.audioInfo.Add(audioInfo2);
 		}
 	}
 

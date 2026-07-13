@@ -25,7 +25,7 @@ public class KInputController : IInputHandler
 		this.IsGamepad = is_gamepad;
 		this.mAxis = new float[4];
 		this.mActiveModifiers = Modifier.None;
-		this.mActionState = new bool[278];
+		this.mActionState = new bool[280];
 		this.mScrollState = new bool[2];
 		this.inputHandler = new KInputHandler(this, this);
 	}
@@ -202,7 +202,7 @@ public class KInputController : IInputHandler
 			}
 			return;
 		}
-		for (int j = 0; j < 278; j++)
+		for (int j = 0; j < 280; j++)
 		{
 			global::Action action = (global::Action)j;
 			bool steamInputActionIsDown = KInputManager.steamInputInterpreter.GetSteamInputActionIsDown(action);
@@ -345,7 +345,7 @@ public class KInputController : IInputHandler
 		{
 			this.mKeyCode = key_code;
 			this.mModifier = modifier;
-			this.mActionFlags = new bool[278];
+			this.mActionFlags = new bool[280];
 		}
 
 		public KKeyCode mKeyCode;

@@ -4,12 +4,13 @@ using UnityEngine;
 
 public class FloodTool : InterfaceTool
 {
-	public HashSet<int> Flood(int startCell)
+	public List<int> Flood(int startCell)
 	{
-		HashSet<int> hashSet = new HashSet<int>();
-		HashSet<int> hashSet2 = new HashSet<int>();
-		GameUtil.FloodFillConditional(startCell, this.floodCriteria, hashSet, hashSet2);
-		return hashSet2;
+		HashSetPool<int, FloodTool>.PooledHashSet pooledHashSet = HashSetPool<int, FloodTool>.Allocate();
+		List<int> list = new List<int>();
+		GameUtil.FloodFillConditional(startCell, this.floodCriteria, pooledHashSet, list);
+		pooledHashSet.Recycle();
+		return list;
 	}
 
 	public override void OnLeftClickDown(Vector3 cursor_pos)
@@ -26,7 +27,7 @@ public class FloodTool : InterfaceTool
 
 	public Func<int, bool> floodCriteria;
 
-	public Action<HashSet<int>> paintArea;
+	public Action<List<int>> paintArea;
 
 	protected Color32 areaColour = new Color(0.5f, 0.7f, 0.5f, 0.2f);
 

@@ -55,7 +55,12 @@ public class App : MonoBehaviour
 
 	public static void Quit()
 	{
-		Application.Quit();
+		App.QuitCode(0);
+	}
+
+	public static void QuitCode(int exitCode)
+	{
+		Application.Quit(exitCode);
 	}
 
 	private void Awake()
@@ -141,6 +146,10 @@ public class App : MonoBehaviour
 		}
 		Application.OpenURL(url);
 	}
+
+	public const int GAME_CRASHED = 1;
+
+	public const int DIST_PLATFORM_FAILED = 2;
 
 	public static App instance;
 

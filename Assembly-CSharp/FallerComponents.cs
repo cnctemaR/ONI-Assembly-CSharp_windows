@@ -26,7 +26,7 @@ public class FallerComponents : KGameObjectComponentManager<FallerComponent>
 		FallerComponent data = base.GetData(h);
 		Vector3 position = data.transform.GetPosition();
 		int num = Grid.PosToCell(position);
-		data.cellChangedCB = delegate
+		data.cellChangedCB = delegate(object _)
 		{
 			FallerComponents.OnSolidChanged(h);
 		};
@@ -63,7 +63,8 @@ public class FallerComponents : KGameObjectComponentManager<FallerComponent>
 	{
 		base.OnSpawn(h);
 		FallerComponent data = base.GetData(h);
-		Singleton<CellChangeMonitor>.Instance.RegisterCellChangedHandler(data.transform, data.cellChangedCB, "FallerComponent.OnSpawn");
+		data.cellChangedHandlerID = Singleton<CellChangeMonitor>.Instance.RegisterCellChangedHandler(data.transform, data.cellChangedCB, null, "FallerComponent.OnSpawn");
+		base.SetData(h, data);
 	}
 
 	private void OnCleanUpImmediate(HandleVector<int>.Handle h)
@@ -72,7 +73,7 @@ public class FallerComponents : KGameObjectComponentManager<FallerComponent>
 		GameScenePartitioner.Instance.Free(ref data.partitionerEntry);
 		if (data.cellChangedCB != null)
 		{
-			Singleton<CellChangeMonitor>.Instance.UnregisterCellChangedHandler(data.transformInstanceId, data.cellChangedCB);
+			Singleton<CellChangeMonitor>.Instance.UnregisterCellChangedHandler(ref data.cellChangedHandlerID);
 			data.cellChangedCB = null;
 		}
 		if (GameComps.Gravities.Has(data.transform.gameObject))
@@ -86,10 +87,7 @@ public class FallerComponents : KGameObjectComponentManager<FallerComponent>
 	{
 		if (!GameComps.Gravities.Has(transform.gameObject))
 		{
-			GameComps.Gravities.Add(transform.gameObject, initial_velocity, delegate
-			{
-				FallerComponents.OnLanded(transform);
-			});
+			GameComps.Gravities.Add(transform.gameObject, initial_velocity, FallerComponents.OnLandedAction);
 			HandleVector<int>.Handle handle = GameComps.Fallers.GetHandle(transform.gameObject);
 			FallerComponent data = GameComps.Fallers.GetData(handle);
 			if (data.partitionerEntry.IsValid())
@@ -154,4 +152,6 @@ public class FallerComponents : KGameObjectComponentManager<FallerComponent>
 	}
 
 	private const float EPSILON = 0.07f;
+
+	private static Action<Transform> OnLandedAction = new Action<Transform>(FallerComponents.OnLanded);
 }

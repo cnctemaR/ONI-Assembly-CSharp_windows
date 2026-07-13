@@ -20,7 +20,7 @@ public static class BaseBellyConfig
 		{
 			text = "WalkerBabyNavGrid";
 		}
-		EntityTemplates.ExtendEntityToBasicCreature(true, gameObject, FactionManager.FactionID.Pest, traitId, text, NavType.Floor, 32, 2f, "Meat", 14f, true, false, 303.15f, 343.15f, 173.15f, 373.15f);
+		EntityTemplates.ExtendEntityToBasicCreature(true, gameObject, anim_file, is_baby ? null : "ice_belly_build_kanim", symbolOverridePrefix, FactionManager.FactionID.Pest, traitId, text, NavType.Floor, 32, 2f, "Meat", 14f, true, false, 303.15f, 343.15f, 173.15f, 373.15f);
 		gameObject.AddOrGet<Navigator>();
 		if (symbolOverridePrefix != null)
 		{
@@ -71,9 +71,11 @@ public static class BaseBellyConfig
 			.Add(new PlayAnimsStates.Def(GameTags.Creatures.Poop, false, "poop", global::STRINGS.CREATURES.STATUSITEMS.EXPELLING_SOLID.NAME, global::STRINGS.CREATURES.STATUSITEMS.EXPELLING_SOLID.TOOLTIP), true, -1)
 			.Add(new CallAdultStates.Def(), is_baby, -1)
 			.Add(new CritterCondoStates.Def(), !is_baby, -1)
+			.Add(new CritterEmoteStates.Def(Assets.GetAnim("ice_belly_emotes_kanim")), true, -1)
 			.PopInterruptGroup()
 			.Add(new IdleStates.Def(), true, -1);
 		EntityTemplates.AddCreatureBrain(gameObject, builder, GameTags.Creatures.Species.BellySpecies, symbolOverridePrefix);
+		gameObject.AddOrGet<OccupyArea>().updateWithFacing = !is_baby;
 		return gameObject;
 	}
 

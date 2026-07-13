@@ -30,7 +30,7 @@ public class Radiator : KMonoBehaviour, IGameObjectEffectDescriptor
 		base.OnCleanUp();
 	}
 
-	private void OnOperationalChanged(object data)
+	private void OnOperationalChanged(object _)
 	{
 		bool isActive = base.GetComponent<Operational>().IsActive;
 		this.emitter.enabled = isActive;

@@ -54,7 +54,7 @@ public class SimpleDoorController : GameStateMachine<SimpleDoorController, Simpl
 		public string GetDefaultAnim()
 		{
 			KBatchedAnimController component = base.master.GetComponent<KBatchedAnimController>();
-			if (component != null)
+			if (component != null && !component.initialAnim.IsNullOrWhiteSpace())
 			{
 				return component.initialAnim;
 			}

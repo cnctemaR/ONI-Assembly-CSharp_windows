@@ -42,7 +42,7 @@ public class MilkingStationConfig : IBuildingConfig
 		go.AddOrGet<LoopingSounds>();
 		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.RanchStationType, false);
 		Storage storage = go.AddOrGet<Storage>();
-		storage.capacityKg = MooTuning.MILK_AMOUNT_AT_MILKING * 2f;
+		storage.capacityKg = Mathf.Max(MooTuning.MILK_AMOUNT_AT_MILKING, MooTuning.DIESEL_PER_CYCLE) * 2f;
 		storage.showInUI = true;
 		go.AddOrGet<BuildingComplete>().isManuallyOperated = true;
 		Prioritizable.AddRef(go);
@@ -55,13 +55,14 @@ public class MilkingStationConfig : IBuildingConfig
 		roomTracker.requirement = RoomTracker.Requirement.Required;
 		go.AddOrGet<SkillPerkMissingComplainer>().requiredSkillPerk = Db.Get().SkillPerks.CanUseMilkingStation.Id;
 		RanchStation.Def ranch_station = go.AddOrGetDef<RanchStation.Def>();
-		ranch_station.IsCritterEligibleToBeRanchedCb = (GameObject creature_go, RanchStation.Instance ranch_station_smi) => !(creature_go.PrefabID() != "Moo") && creature_go.GetComponent<KPrefabID>().HasTag(GameTags.Creatures.RequiresMilking);
+		ranch_station.IsCritterEligibleToBeRanchedCb = (GameObject creature_go, RanchStation.Instance ranch_station_smi) => creature_go.GetSMI<MilkProductionMonitor.Instance>() != null && creature_go.GetComponent<KPrefabID>().HasTag(GameTags.Creatures.RequiresMilking);
 		ranch_station.RancherInteractAnim = "anim_interacts_milking_station_kanim";
 		ranch_station.RanchedPreAnim = "mooshake_pre";
 		ranch_station.RanchedLoopAnim = "mooshake_loop";
 		ranch_station.RanchedPstAnim = "mooshake_pst";
 		ranch_station.WorkTime = 20f;
 		ranch_station.CreatureRanchingStatusItem = Db.Get().CreatureStatusItems.GettingMilked;
+		ranch_station.RancherWipesBrowAnim = false;
 		ranch_station.GetTargetRanchCell = delegate(RanchStation.Instance smi)
 		{
 			int num = Grid.InvalidCell;
@@ -74,11 +75,12 @@ public class MilkingStationConfig : IBuildingConfig
 		ranch_station.OnRanchCompleteCb = delegate(GameObject creature_go, WorkerBase rancher_wb)
 		{
 			RanchStation.Instance targetRanchStation = creature_go.GetSMI<RanchableMonitor.Instance>().TargetRanchStation;
+			MilkProductionMonitor.Instance smi = creature_go.GetSMI<MilkProductionMonitor.Instance>();
 			AmountInstance amountInstance = creature_go.GetAmounts().Get(Db.Get().Amounts.MilkProduction.Id);
 			if (amountInstance.value > 0f)
 			{
-				float num2 = amountInstance.value * (MooTuning.MILK_AMOUNT_AT_MILKING / amountInstance.GetMax());
-				targetRanchStation.GetComponent<Storage>().AddLiquid(SimHashes.Milk, num2, 310.15f, byte.MaxValue, 0, false, true);
+				float num2 = amountInstance.value * (smi.def.Capacity / amountInstance.GetMax());
+				targetRanchStation.GetComponent<Storage>().AddLiquid(smi.def.element, num2, 310.15f, byte.MaxValue, 0, false, true);
 				amountInstance.SetValue(0f);
 			}
 			creature_go.GetComponent<KPrefabID>().RemoveTag(GameTags.Creatures.RequiresMilking);
@@ -88,13 +90,26 @@ public class MilkingStationConfig : IBuildingConfig
 			if (creature_go.GetComponent<KAnimControllerBase>().CurrentAnim.name == ranch_station.RanchedPstAnim)
 			{
 				StateMachine.Instance ranchStation = creature_go.GetSMI<RanchedStates.Instance>().GetRanchStation();
+				MilkProductionMonitor.Instance smi2 = creature_go.GetSMI<MilkProductionMonitor.Instance>();
 				AmountInstance amountInstance2 = creature_go.GetAmounts().Get(Db.Get().Amounts.MilkProduction.Id);
 				float num3 = amountInstance2.GetMax() * dt / workable.workTime;
-				float num4 = num3 * (MooTuning.MILK_AMOUNT_AT_MILKING / amountInstance2.GetMax());
+				float num4 = num3 * (smi2.def.Capacity / amountInstance2.GetMax());
 				float temperature = creature_go.GetComponent<PrimaryElement>().Temperature;
-				ranchStation.GetComponent<Storage>().AddLiquid(SimHashes.Milk, num4, temperature, byte.MaxValue, 0, false, true);
+				ranchStation.GetComponent<Storage>().AddLiquid(smi2.def.element, num4, temperature, byte.MaxValue, 0, false, true);
 				amountInstance2.ApplyDelta(-num3);
 			}
+		};
+		ranch_station.OnRanchWorkBegins = delegate(RanchedStates.Instance creature, Workable workable)
+		{
+			KBatchedAnimController animController = creature.AnimController;
+			MilkProductionMonitor.Instance smi3 = creature.gameObject.GetSMI<MilkProductionMonitor.Instance>();
+			if (smi3 == null)
+			{
+				return;
+			}
+			Color color = ElementLoader.FindElementByHash(smi3.def.element).substance.colour;
+			color.a = 1f;
+			workable.GetComponent<KBatchedAnimController>().SetSymbolTint(new KAnimHashedString("gushfx"), color);
 		};
 		ConduitDispenser conduitDispenser = go.AddOrGet<ConduitDispenser>();
 		conduitDispenser.conduitType = ConduitType.Liquid;

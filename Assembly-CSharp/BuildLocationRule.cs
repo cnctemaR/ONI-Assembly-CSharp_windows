@@ -20,5 +20,6 @@ public enum BuildLocationRule
 	BelowRocketCeiling,
 	OnRocketEnvelope,
 	WallFloor,
-	NoLiquidConduitAtOrigin
+	NoLiquidConduitAtOrigin,
+	OnBackWall
 }

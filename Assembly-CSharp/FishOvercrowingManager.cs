@@ -16,14 +16,14 @@ public class FishOvercrowingManager : KMonoBehaviour, ISim1000ms
 		this.cells = new FishOvercrowingManager.Cell[Grid.CellCount];
 	}
 
-	public void Add(FishOvercrowdingMonitor.Instance fish)
+	public void Add(KPrefabID aquaticEntity)
 	{
-		this.fishes.Add(fish);
+		this.allAquaticEntities.Add(aquaticEntity);
 	}
 
-	public void Remove(FishOvercrowdingMonitor.Instance fish)
+	public void Remove(KPrefabID aquaticEntity)
 	{
-		this.fishes.Remove(fish);
+		this.allAquaticEntities.Remove(aquaticEntity);
 	}
 
 	public void Sim1000ms(float dt)
@@ -31,90 +31,114 @@ public class FishOvercrowingManager : KMonoBehaviour, ISim1000ms
 		int num = this.versionCounter;
 		this.versionCounter = num + 1;
 		int num2 = num;
-		int num3 = 1;
-		this.cavityIdToCavityInfo.Clear();
-		this.cellToFishCount.Clear();
-		ListPool<FishOvercrowingManager.FishInfo, FishOvercrowingManager>.PooledList pooledList = ListPool<FishOvercrowingManager.FishInfo, FishOvercrowingManager>.Allocate();
-		foreach (FishOvercrowdingMonitor.Instance instance in this.fishes)
+		for (int num3 = 0; num3 != this.ponds.Count; num3++)
 		{
-			int num4 = Grid.PosToCell(instance);
-			if (Grid.IsValidCell(num4))
-			{
-				FishOvercrowingManager.FishInfo fishInfo = new FishOvercrowingManager.FishInfo
-				{
-					cell = num4,
-					fish = instance
-				};
-				pooledList.Add(fishInfo);
-				int num5 = 0;
-				this.cellToFishCount.TryGetValue(num4, out num5);
-				num5++;
-				this.cellToFishCount[num4] = num5;
-			}
+			FishOvercrowingManager.Pond pond = this.ponds[num3];
+			pond.fishes.Clear();
+			pond.eggs.Clear();
+			pond.cellCount = 0;
+			pond.occupancy.dirty = true;
 		}
-		foreach (FishOvercrowingManager.FishInfo fishInfo2 in pooledList)
+		int num4 = ((this.ponds.Count == 0) ? (-1) : 0);
+		QueuePool<int, FishOvercrowingManager>.PooledQueue pooledQueue = QueuePool<int, FishOvercrowingManager>.Allocate();
+		foreach (KPrefabID kprefabID in this.allAquaticEntities)
 		{
-			ListPool<int, FishOvercrowingManager>.PooledList pooledList2 = ListPool<int, FishOvercrowingManager>.Allocate();
-			pooledList2.Add(fishInfo2.cell);
-			int i = 0;
-			int num6 = num3++;
-			while (i < pooledList2.Count)
+			if (!kprefabID.IsNullOrDestroyed())
 			{
-				int num7 = pooledList2[i++];
-				if (Grid.IsValidCell(num7))
+				int num5 = Grid.PosToCell(kprefabID);
+				if (Grid.IsValidCell(num5))
 				{
-					FishOvercrowingManager.Cell cell = this.cells[num7];
-					if (cell.version != num2 && Grid.IsLiquid(num7))
+					pooledQueue.Clear();
+					pooledQueue.Enqueue(num5);
+					FishOvercrowingManager.Cell cell = this.cells[num5];
+					int num6;
+					if (cell.Version == num2)
 					{
-						cell.cavityId = num6;
-						cell.version = num2;
-						int num8 = 0;
-						this.cellToFishCount.TryGetValue(num7, out num8);
-						FishOvercrowingManager.CavityInfo cavityInfo = default(FishOvercrowingManager.CavityInfo);
-						if (!this.cavityIdToCavityInfo.TryGetValue(num6, out cavityInfo))
+						num6 = cell.PondIndex;
+					}
+					else if (num4 != -1 && num4 < this.ponds.Count)
+					{
+						num6 = num4;
+						num4++;
+						if (num4 == this.ponds.Count)
 						{
-							cavityInfo = default(FishOvercrowingManager.CavityInfo);
-							cavityInfo.fishPrefabs = new List<KPrefabID>();
+							num4 = -1;
 						}
-						cavityInfo.fishCount += num8;
-						cavityInfo.cellCount++;
-						this.cavityIdToCavityInfo[num6] = cavityInfo;
-						pooledList2.Add(Grid.CellLeft(num7));
-						pooledList2.Add(Grid.CellRight(num7));
-						pooledList2.Add(Grid.CellAbove(num7));
-						pooledList2.Add(Grid.CellBelow(num7));
-						this.cells[num7] = cell;
+					}
+					else
+					{
+						FishOvercrowingManager.Pond pond2 = new FishOvercrowingManager.Pond
+						{
+							fishes = new List<KPrefabID>(),
+							eggs = new List<KPrefabID>()
+						};
+						this.ponds.Add(pond2);
+						num6 = this.ponds.Count - 1;
+					}
+					FishOvercrowingManager.Pond pond3 = this.ponds[num6];
+					if (kprefabID.HasTag(GameTags.Egg))
+					{
+						pond3.eggs.Add(kprefabID);
+					}
+					else
+					{
+						pond3.fishes.Add(kprefabID);
+					}
+					int num7;
+					while (pooledQueue.TryDequeue(out num7))
+					{
+						if (Grid.IsValidCell(num7) && this.cells[num7].Version != num2 && Grid.IsNavigatableLiquid(num7))
+						{
+							this.cells[num7] = new FishOvercrowingManager.Cell(num2, num6);
+							pond3.cellCount++;
+							pooledQueue.Enqueue(Grid.CellLeft(num7));
+							pooledQueue.Enqueue(Grid.CellRight(num7));
+							pooledQueue.Enqueue(Grid.CellAbove(num7));
+							pooledQueue.Enqueue(Grid.CellBelow(num7));
+						}
 					}
 				}
 			}
-			pooledList2.Recycle();
 		}
-		foreach (FishOvercrowingManager.FishInfo fishInfo3 in pooledList)
+		pooledQueue.Recycle();
+		if (num4 != -1)
 		{
-			FishOvercrowingManager.Cell cell2 = this.cells[fishInfo3.cell];
-			FishOvercrowingManager.CavityInfo cavityInfo2 = default(FishOvercrowingManager.CavityInfo);
-			if (this.cavityIdToCavityInfo.TryGetValue(cell2.cavityId, out cavityInfo2))
+			int num8 = this.ponds.Count - num4;
+			if (num8 > 0)
 			{
-				cavityInfo2.fishPrefabs.Add(fishInfo3.fish.GetComponent<KPrefabID>());
+				this.ponds.RemoveRange(num4, num8);
 			}
-			fishInfo3.fish.SetOvercrowdingInfo(cavityInfo2.cellCount, cavityInfo2.fishCount);
 		}
-		pooledList.Recycle();
+		this.allAquaticEntities.RemoveAll(new Predicate<KPrefabID>(Util.IsNullOrDestroyed));
 	}
 
-	public int GetFishCavityCount(int cell, HashSet<Tag> accepted_tags)
+	public FishOvercrowingManager.Pond GetPond(int cell)
+	{
+		if (!Grid.IsValidCell(cell))
+		{
+			return null;
+		}
+		FishOvercrowingManager.Cell cell2 = this.cells[cell];
+		if (cell2.Version != this.versionCounter - 1)
+		{
+			return null;
+		}
+		return this.ponds[cell2.PondIndex];
+	}
+
+	public int GetFishInPondCount(int cell, HashSet<Tag> accepted_tags)
 	{
 		int num = 0;
-		FishOvercrowingManager.Cell cell2 = this.cells[cell];
-		FishOvercrowingManager.CavityInfo cavityInfo = default(FishOvercrowingManager.CavityInfo);
-		if (this.cavityIdToCavityInfo.TryGetValue(cell2.cavityId, out cavityInfo))
+		FishOvercrowingManager.Pond pond = this.GetPond(cell);
+		if (pond == null)
 		{
-			foreach (KPrefabID kprefabID in cavityInfo.fishPrefabs)
+			return 0;
+		}
+		foreach (KPrefabID kprefabID in pond.fishes)
+		{
+			if (!kprefabID.HasTag(GameTags.Creatures.Bagged) && !kprefabID.HasTag(GameTags.Trapped) && accepted_tags.Contains(kprefabID.PrefabTag))
 			{
-				if (!kprefabID.HasTag(GameTags.Creatures.Bagged) && !kprefabID.HasTag(GameTags.Trapped) && accepted_tags.Contains(kprefabID.PrefabTag))
-				{
-					num++;
-				}
+				num++;
 			}
 		}
 		return num;
@@ -122,36 +146,67 @@ public class FishOvercrowingManager : KMonoBehaviour, ISim1000ms
 
 	public static FishOvercrowingManager Instance;
 
-	private List<FishOvercrowdingMonitor.Instance> fishes = new List<FishOvercrowdingMonitor.Instance>();
+	private readonly List<KPrefabID> allAquaticEntities = new List<KPrefabID>();
 
-	private Dictionary<int, FishOvercrowingManager.CavityInfo> cavityIdToCavityInfo = new Dictionary<int, FishOvercrowingManager.CavityInfo>();
-
-	private Dictionary<int, int> cellToFishCount = new Dictionary<int, int>();
+	private readonly List<FishOvercrowingManager.Pond> ponds = new List<FishOvercrowingManager.Pond>();
 
 	private FishOvercrowingManager.Cell[] cells;
 
-	private int versionCounter = 1;
+	private int versionCounter = 2;
 
-	private struct Cell
+	private readonly struct Cell
 	{
-		public int version;
+		public int Version
+		{
+			get
+			{
+				return this.version;
+			}
+		}
 
-		public int cavityId;
+		public int PondIndex
+		{
+			get
+			{
+				return this.pondIndex;
+			}
+		}
+
+		public Cell(int version, int pondIndex)
+		{
+			this.version = version;
+			this.pondIndex = pondIndex;
+		}
+
+		private readonly int version;
+
+		private readonly int pondIndex;
 	}
 
-	private struct FishInfo
+	public class Pond
 	{
-		public int cell;
+		public int FishCount
+		{
+			get
+			{
+				return this.fishes.Count;
+			}
+		}
 
-		public FishOvercrowdingMonitor.Instance fish;
-	}
+		public int EggCount
+		{
+			get
+			{
+				return this.eggs.Count;
+			}
+		}
 
-	private struct CavityInfo
-	{
-		public List<KPrefabID> fishPrefabs;
+		public List<KPrefabID> fishes;
 
-		public int fishCount;
+		public List<KPrefabID> eggs;
 
 		public int cellCount;
+
+		public OvercrowdingMonitor.Occupancy occupancy = new OvercrowdingMonitor.Occupancy();
 	}
 }

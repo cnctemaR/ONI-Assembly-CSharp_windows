@@ -9,49 +9,49 @@ public class ResourceHarvestModule : GameStateMachine<ResourceHarvestModule, Res
 		default_state = this.grounded;
 		this.root.Enter(delegate(ResourceHarvestModule.StatesInstance smi)
 		{
-			smi.CheckIfCanHarvest();
+			smi.CheckIfCanDrill();
 		});
 		this.grounded.TagTransition(GameTags.RocketNotOnGround, this.not_grounded, false).Enter(delegate(ResourceHarvestModule.StatesInstance smi)
 		{
 			smi.UpdateMeter(null);
 		});
-		this.not_grounded.DefaultState(this.not_grounded.not_harvesting).EventHandler(GameHashes.ClusterLocationChanged, (ResourceHarvestModule.StatesInstance smi) => Game.Instance, delegate(ResourceHarvestModule.StatesInstance smi)
+		this.not_grounded.DefaultState(this.not_grounded.not_drilling).EventHandler(GameHashes.ClusterLocationChanged, (ResourceHarvestModule.StatesInstance smi) => Game.Instance, delegate(ResourceHarvestModule.StatesInstance smi)
 		{
-			smi.CheckIfCanHarvest();
+			smi.CheckIfCanDrill();
 		}).EventHandler(GameHashes.OnStorageChange, delegate(ResourceHarvestModule.StatesInstance smi)
 		{
-			smi.CheckIfCanHarvest();
+			smi.CheckIfCanDrill();
 		})
 			.TagTransition(GameTags.RocketNotOnGround, this.grounded, true);
-		this.not_grounded.not_harvesting.PlayAnim("loaded").ParamTransition<bool>(this.canHarvest, this.not_grounded.harvesting, GameStateMachine<ResourceHarvestModule, ResourceHarvestModule.StatesInstance, IStateMachineTarget, ResourceHarvestModule.Def>.IsTrue).Enter(delegate(ResourceHarvestModule.StatesInstance smi)
+		this.not_grounded.not_drilling.PlayAnim("loaded").ParamTransition<bool>(this.canHarvest, this.not_grounded.drilling, GameStateMachine<ResourceHarvestModule, ResourceHarvestModule.StatesInstance, IStateMachineTarget, ResourceHarvestModule.Def>.IsTrue).Enter(delegate(ResourceHarvestModule.StatesInstance smi)
 		{
 			ResourceHarvestModule.StatesInstance.RemoveHarvestStatusItems(smi.master.gameObject.GetComponent<RocketModuleCluster>().CraftInterface.gameObject);
 		})
 			.Update(delegate(ResourceHarvestModule.StatesInstance smi, float dt)
 			{
-				smi.CheckIfCanHarvest();
+				smi.CheckIfCanDrill();
 			}, UpdateRate.SIM_4000ms, false);
-		this.not_grounded.harvesting.PlayAnim("deploying").Exit(delegate(ResourceHarvestModule.StatesInstance smi)
+		this.not_grounded.drilling.PlayAnim("deploying").Exit(delegate(ResourceHarvestModule.StatesInstance smi)
 		{
 			smi.master.gameObject.GetComponent<RocketModuleCluster>().CraftInterface.GetComponent<Clustercraft>().Trigger(939543986, null);
 			ResourceHarvestModule.StatesInstance.RemoveHarvestStatusItems(smi.master.gameObject.GetComponent<RocketModuleCluster>().CraftInterface.gameObject);
 		}).Enter(delegate(ResourceHarvestModule.StatesInstance smi)
 		{
 			Clustercraft component = smi.master.gameObject.GetComponent<RocketModuleCluster>().CraftInterface.GetComponent<Clustercraft>();
-			component.AddTag(GameTags.POIHarvesting);
+			component.AddTag(GameTags.RocketDrilling);
 			component.Trigger(-1762453998, null);
-			ResourceHarvestModule.StatesInstance.AddHarvestStatusItems(smi.master.gameObject.GetComponent<RocketModuleCluster>().CraftInterface.gameObject, smi.def.harvestSpeed);
+			ResourceHarvestModule.StatesInstance.AddHarvestStatusItems(smi.master.gameObject.GetComponent<RocketModuleCluster>().CraftInterface.gameObject, smi);
 		})
 			.Exit(delegate(ResourceHarvestModule.StatesInstance smi)
 			{
-				smi.master.gameObject.GetComponent<RocketModuleCluster>().CraftInterface.GetComponent<Clustercraft>().RemoveTag(GameTags.POIHarvesting);
+				smi.master.gameObject.GetComponent<RocketModuleCluster>().CraftInterface.GetComponent<Clustercraft>().RemoveTag(GameTags.RocketDrilling);
 			})
 			.Update(delegate(ResourceHarvestModule.StatesInstance smi, float dt)
 			{
 				smi.HarvestFromPOI(dt);
 				this.lastHarvestTime.Set(Time.time, smi, false);
 			}, UpdateRate.SIM_4000ms, false)
-			.ParamTransition<bool>(this.canHarvest, this.not_grounded.not_harvesting, GameStateMachine<ResourceHarvestModule, ResourceHarvestModule.StatesInstance, IStateMachineTarget, ResourceHarvestModule.Def>.IsFalse);
+			.ParamTransition<bool>(this.canHarvest, this.not_grounded.not_drilling, GameStateMachine<ResourceHarvestModule, ResourceHarvestModule.StatesInstance, IStateMachineTarget, ResourceHarvestModule.Def>.IsFalse);
 	}
 
 	public StateMachine<ResourceHarvestModule, ResourceHarvestModule.StatesInstance, IStateMachineTarget, ResourceHarvestModule.Def>.BoolParameter canHarvest;
@@ -69,9 +69,9 @@ public class ResourceHarvestModule : GameStateMachine<ResourceHarvestModule, Res
 
 	public class NotGroundedStates : GameStateMachine<ResourceHarvestModule, ResourceHarvestModule.StatesInstance, IStateMachineTarget, ResourceHarvestModule.Def>.State
 	{
-		public GameStateMachine<ResourceHarvestModule, ResourceHarvestModule.StatesInstance, IStateMachineTarget, ResourceHarvestModule.Def>.State not_harvesting;
+		public GameStateMachine<ResourceHarvestModule, ResourceHarvestModule.StatesInstance, IStateMachineTarget, ResourceHarvestModule.Def>.State not_drilling;
 
-		public GameStateMachine<ResourceHarvestModule, ResourceHarvestModule.StatesInstance, IStateMachineTarget, ResourceHarvestModule.Def>.State harvesting;
+		public GameStateMachine<ResourceHarvestModule, ResourceHarvestModule.StatesInstance, IStateMachineTarget, ResourceHarvestModule.Def>.State drilling;
 	}
 
 	public class StatesInstance : GameStateMachine<ResourceHarvestModule, ResourceHarvestModule.StatesInstance, IStateMachineTarget, ResourceHarvestModule.Def>.GameInstance
@@ -81,7 +81,7 @@ public class ResourceHarvestModule : GameStateMachine<ResourceHarvestModule, Res
 		{
 			this.storage = base.GetComponent<Storage>();
 			base.GetComponent<RocketModule>().AddModuleCondition(ProcessCondition.ProcessConditionType.RocketStorage, new ConditionHasResource(this.storage, SimHashes.Diamond, 1000f));
-			base.Subscribe(-1697596308, new Action<object>(this.UpdateMeter));
+			this.onStorageChangeHandle = base.Subscribe(-1697596308, new Action<object>(this.UpdateMeter));
 			this.meter = new MeterController(base.GetComponent<KBatchedAnimController>(), "meter_target", "meter", Meter.Offset.Infront, Grid.SceneLayer.NoLayer, new string[] { "meter_target", "meter_fill", "meter_frame", "meter_OL" });
 			KBatchedAnimTracker component = this.meter.gameObject.GetComponent<KBatchedAnimTracker>();
 			component.matchParentOffset = true;
@@ -92,7 +92,7 @@ public class ResourceHarvestModule : GameStateMachine<ResourceHarvestModule, Res
 		protected override void OnCleanUp()
 		{
 			base.OnCleanUp();
-			base.Unsubscribe(-1697596308, new Action<object>(this.UpdateMeter));
+			base.Unsubscribe(ref this.onStorageChangeHandle);
 		}
 
 		public void UpdateMeter(object data = null)
@@ -103,7 +103,7 @@ public class ResourceHarvestModule : GameStateMachine<ResourceHarvestModule, Res
 		public void HarvestFromPOI(float dt)
 		{
 			Clustercraft component = base.GetComponent<RocketModuleCluster>().CraftInterface.GetComponent<Clustercraft>();
-			if (!this.CheckIfCanHarvest())
+			if (!this.CheckIfCanDrill())
 			{
 				return;
 			}
@@ -112,6 +112,7 @@ public class ResourceHarvestModule : GameStateMachine<ResourceHarvestModule, Res
 			{
 				return;
 			}
+			StarmapHexCellInventory starmapHexCellInventory = ClusterGrid.Instance.AddOrGetHexCellInventory(component.Location);
 			HarvestablePOIStates.Instance smi = poiatCurrentLocation.GetSMI<HarvestablePOIStates.Instance>();
 			Dictionary<SimHashes, float> elementsWithWeights = smi.configuration.GetElementsWithWeights();
 			float num = 0f;
@@ -129,8 +130,6 @@ public class ResourceHarvestModule : GameStateMachine<ResourceHarvestModule, Res
 			}
 			float num2 = Mathf.Min(this.GetMaxExtractKGFromDiamondAvailable(), base.def.harvestSpeed * dt);
 			float num3 = 0f;
-			float num4 = 0f;
-			float num5 = 0f;
 			foreach (KeyValuePair<SimHashes, float> keyValuePair3 in elementsWithWeights)
 			{
 				if (num3 >= num2)
@@ -138,50 +137,14 @@ public class ResourceHarvestModule : GameStateMachine<ResourceHarvestModule, Res
 					break;
 				}
 				SimHashes key = keyValuePair3.Key;
-				float num6 = keyValuePair3.Value / num;
-				float num7 = base.def.harvestSpeed * dt * num6;
-				num3 += num7;
+				float num4 = keyValuePair3.Value / num;
+				float num5 = base.def.harvestSpeed * dt * num4;
 				Element element2 = ElementLoader.FindElementByHash(key);
-				CargoBay.CargoType cargoType = CargoBay.ElementStateToCargoTypes[element2.state & Element.State.Solid];
-				List<CargoBayCluster> cargoBaysOfType = component.GetCargoBaysOfType(cargoType);
-				float num8 = num7;
-				foreach (CargoBayCluster cargoBayCluster in cargoBaysOfType)
-				{
-					float num9 = Mathf.Min(cargoBayCluster.RemainingCapacity, num8);
-					if (num9 != 0f)
-					{
-						num4 += num9;
-						num8 -= num9;
-						switch (element2.state & Element.State.Solid)
-						{
-						case Element.State.Gas:
-							cargoBayCluster.storage.AddGasChunk(key, num9, element2.defaultValues.temperature, byte.MaxValue, 0, false, true);
-							break;
-						case Element.State.Liquid:
-							cargoBayCluster.storage.AddLiquid(key, num9, element2.defaultValues.temperature, byte.MaxValue, 0, false, true);
-							break;
-						case Element.State.Solid:
-							cargoBayCluster.storage.AddOre(key, num9, element2.defaultValues.temperature, byte.MaxValue, 0, false, true);
-							break;
-						}
-					}
-					if (num8 == 0f)
-					{
-						break;
-					}
-				}
-				num5 += num8;
+				starmapHexCellInventory.AddItem(element2, num5);
+				num3 += num5;
 			}
 			smi.DeltaPOICapacity(-num3);
 			this.ConsumeDiamond(num3 * 0.05f);
-			if (num5 > 0f)
-			{
-				component.GetComponent<KSelectable>().AddStatusItem(Db.Get().BuildingStatusItems.SpacePOIWasting, num5 / dt);
-			}
-			else
-			{
-				component.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().BuildingStatusItems.SpacePOIWasting, false);
-			}
 			SaveGame.Instance.ColonyAchievementTracker.totalMaterialsHarvestFromPOI += num3;
 		}
 
@@ -190,12 +153,17 @@ public class ResourceHarvestModule : GameStateMachine<ResourceHarvestModule, Res
 			base.GetComponent<Storage>().ConsumeIgnoringDisease(SimHashes.Diamond.CreateTag(), amount);
 		}
 
+		public bool HasAnyAmountOfDiamond()
+		{
+			return base.GetComponent<Storage>().GetAmountAvailable(SimHashes.Diamond.CreateTag()) > 0f;
+		}
+
 		public float GetMaxExtractKGFromDiamondAvailable()
 		{
 			return base.GetComponent<Storage>().GetAmountAvailable(SimHashes.Diamond.CreateTag()) / 0.05f;
 		}
 
-		public bool CheckIfCanHarvest()
+		public bool CheckIfCanDrill()
 		{
 			Clustercraft component = base.GetComponent<RocketModuleCluster>().CraftInterface.GetComponent<Clustercraft>();
 			if (component == null)
@@ -203,7 +171,7 @@ public class ResourceHarvestModule : GameStateMachine<ResourceHarvestModule, Res
 				base.sm.canHarvest.Set(false, this, false);
 				return false;
 			}
-			if (base.master.GetComponent<Storage>().MassStored() <= 0f)
+			if (!this.HasAnyAmountOfDiamond())
 			{
 				base.sm.canHarvest.Set(false, this, false);
 				return false;
@@ -212,43 +180,15 @@ public class ResourceHarvestModule : GameStateMachine<ResourceHarvestModule, Res
 			bool flag = false;
 			if (poiatCurrentLocation != null && poiatCurrentLocation.GetComponent<HarvestablePOIClusterGridEntity>())
 			{
-				HarvestablePOIStates.Instance smi = poiatCurrentLocation.GetSMI<HarvestablePOIStates.Instance>();
-				if (!smi.POICanBeHarvested())
-				{
-					base.sm.canHarvest.Set(false, this, false);
-					return false;
-				}
-				foreach (KeyValuePair<SimHashes, float> keyValuePair in smi.configuration.GetElementsWithWeights())
-				{
-					Element element = ElementLoader.FindElementByHash(keyValuePair.Key);
-					CargoBay.CargoType cargoType = CargoBay.ElementStateToCargoTypes[element.state & Element.State.Solid];
-					List<CargoBayCluster> cargoBaysOfType = component.GetCargoBaysOfType(cargoType);
-					if (cargoBaysOfType != null && cargoBaysOfType.Count > 0)
-					{
-						using (List<CargoBayCluster>.Enumerator enumerator2 = cargoBaysOfType.GetEnumerator())
-						{
-							while (enumerator2.MoveNext())
-							{
-								if (enumerator2.Current.storage.RemainingCapacity() > 0f)
-								{
-									flag = true;
-								}
-							}
-						}
-						if (flag)
-						{
-							break;
-						}
-					}
-				}
+				flag = poiatCurrentLocation.GetSMI<HarvestablePOIStates.Instance>().POICanBeHarvested();
 			}
 			base.sm.canHarvest.Set(flag, this, false);
 			return flag;
 		}
 
-		public static void AddHarvestStatusItems(GameObject statusTarget, float harvestRate)
+		public static void AddHarvestStatusItems(GameObject statusTarget, ResourceHarvestModule.StatesInstance smi)
 		{
-			statusTarget.GetComponent<KSelectable>().AddStatusItem(Db.Get().BuildingStatusItems.SpacePOIHarvesting, harvestRate);
+			statusTarget.GetComponent<KSelectable>().AddStatusItem(Db.Get().BuildingStatusItems.SpacePOIHarvesting, smi);
 		}
 
 		public static void RemoveHarvestStatusItems(GameObject statusTarget)
@@ -259,5 +199,7 @@ public class ResourceHarvestModule : GameStateMachine<ResourceHarvestModule, Res
 		private MeterController meter;
 
 		private Storage storage;
+
+		private int onStorageChangeHandle = -1;
 	}
 }

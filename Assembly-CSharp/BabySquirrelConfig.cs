@@ -2,7 +2,7 @@
 using STRINGS;
 using UnityEngine;
 
-[EntityConfigOrder(2)]
+[EntityConfigOrder(3)]
 public class BabySquirrelConfig : IEntityConfig
 {
 	public GameObject CreatePrefab()

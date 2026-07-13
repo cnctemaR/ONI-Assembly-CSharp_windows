@@ -248,7 +248,7 @@ public class ObjectDispenser : Switch, IUserControlledCapacity
 			this.operational.SetActive(active, false);
 		}
 
-		private void OnOperationalChanged(object data)
+		private void OnOperationalChanged(object _)
 		{
 			this.UpdateShouldOpen();
 		}

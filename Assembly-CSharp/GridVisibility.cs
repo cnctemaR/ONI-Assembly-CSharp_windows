@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 
 [AddComponentMenu("KMonoBehaviour/scripts/GridVisibility")]
@@ -6,7 +7,7 @@ public class GridVisibility : KMonoBehaviour
 {
 	protected override void OnSpawn()
 	{
-		Singleton<CellChangeMonitor>.Instance.RegisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChange), "GridVisibility.OnSpawn");
+		this.cellChangeHandlerID = Singleton<CellChangeMonitor>.Instance.RegisterCellChangedHandler(base.transform, GridVisibility.OnCellChangeDispatcher, this, "GridVisibility.OnSpawn");
 		this.OnCellChange();
 		WorldContainer myWorld = base.gameObject.GetMyWorld();
 		if (myWorld != null && !base.gameObject.HasTag(GameTags.Stored))
@@ -62,10 +63,17 @@ public class GridVisibility : KMonoBehaviour
 
 	protected override void OnCleanUp()
 	{
-		Singleton<CellChangeMonitor>.Instance.UnregisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChange));
+		Singleton<CellChangeMonitor>.Instance.UnregisterCellChangedHandler(ref this.cellChangeHandlerID);
 	}
 
 	public int radius = 18;
 
 	public float innerRadius = 16.5f;
+
+	private ulong cellChangeHandlerID;
+
+	private static readonly Action<object> OnCellChangeDispatcher = delegate(object obj)
+	{
+		Unsafe.As<GridVisibility>(obj).OnCellChange();
+	};
 }

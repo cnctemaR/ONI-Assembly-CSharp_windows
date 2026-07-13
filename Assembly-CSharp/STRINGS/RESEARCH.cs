@@ -1193,11 +1193,18 @@ namespace STRINGS
 				public static LocString DESC = "Turn Duplicants' eyes to the skies and discover what undiscovered wonders await out there.";
 			}
 
+			public class MISSILES
+			{
+				public static LocString NAME = UI.FormatAsLink("Missiles", "MISSILES");
+
+				public static LocString DESC = "Craft explosives and fire them into outer space.";
+			}
+
 			public class JETPACKS
 			{
-				public static LocString NAME = UI.FormatAsLink("Projectiles", "JETPACKS");
+				public static LocString NAME = UI.FormatAsLink("Personal Flight", "JETPACKS");
 
-				public static LocString DESC = "Things that get Duplicants and explosives off the ground.";
+				public static LocString DESC = "Give Duplicants the gift of a walk-free commute.";
 			}
 
 			public class BASICROCKETRY

@@ -237,6 +237,8 @@ public class StatusItem : Resource
 
 	private bool showShowWorldIcon = true;
 
+	public bool showInHoverCardOnly;
+
 	public const int ALL_OVERLAYS = 129022;
 
 	private static Dictionary<HashedString, StatusItem.StatusItemOverlays> overlayBitfieldMap = new Dictionary<HashedString, StatusItem.StatusItemOverlays>

@@ -77,7 +77,7 @@ public class Compostable : KMonoBehaviour
 		}
 	}
 
-	private void OnStore(object data)
+	private void OnStore(object _)
 	{
 		this.RefreshStatusItem();
 	}

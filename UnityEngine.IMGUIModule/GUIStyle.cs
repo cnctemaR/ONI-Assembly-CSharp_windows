@@ -6,9 +6,9 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeHeader("IMGUIScriptingClasses.h")]
 	[RequiredByNativeCode]
 	[NativeHeader("Modules/IMGUI/GUIStyle.bindings.h")]
+	[NativeHeader("IMGUIScriptingClasses.h")]
 	[Serializable]
 	[StructLayout(LayoutKind.Sequential)]
 	public sealed class GUIStyle
@@ -145,8 +145,8 @@ namespace UnityEngine
 			set;
 		}
 
-		[NativeProperty("m_ClipOffset", false, TargetType.Field)]
 		[Obsolete("Don't use clipOffset - put things inside BeginGroup instead. This functionality will be removed in a later version.", false)]
+		[NativeProperty("m_ClipOffset", false, TargetType.Field)]
 		public Vector2 clipOffset
 		{
 			get

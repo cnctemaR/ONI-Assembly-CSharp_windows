@@ -62,7 +62,7 @@ public class DevToolCavity : DevTool
 		}
 		ImGui.Checkbox("Draw Bounding Box", ref this.shouldDrawBoundingBox);
 		ImGuiEx.SimpleField("Room Type", cavityForCell.room.IsNullOrDestroyed() ? "<None>" : cavityForCell.room.GetProperName());
-		ImGuiEx.SimpleField("Cell Count", cavityForCell.numCells);
+		ImGuiEx.SimpleField("Cell Count", cavityForCell.NumCells);
 		DevToolCavity.DrawKPrefabIdCollection("Creatures", cavityForCell.creatures);
 		DevToolCavity.DrawKPrefabIdCollection("Buildings", cavityForCell.buildings);
 		DevToolCavity.DrawKPrefabIdCollection("Plants", cavityForCell.plants);

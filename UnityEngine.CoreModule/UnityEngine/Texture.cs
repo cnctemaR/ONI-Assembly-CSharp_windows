@@ -7,17 +7,17 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
+	[UsedByNativeCode]
 	[NativeHeader("Runtime/Streaming/TextureStreamingManager.h")]
 	[NativeHeader("Runtime/Graphics/Texture.h")]
-	[UsedByNativeCode]
 	public class Texture : Object
 	{
 		protected Texture()
 		{
 		}
 
-		[NativeProperty("ActiveGlobalMipmapLimit")]
 		[Obsolete("masterTextureLimit has been deprecated. Use globalMipmapLimit instead (UnityUpgradable) -> globalMipmapLimit", false)]
+		[NativeProperty("ActiveGlobalMipmapLimit")]
 		public static extern int masterTextureLimit
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -26,8 +26,8 @@ namespace UnityEngine
 			set;
 		}
 
-		[Obsolete("globalMipmapLimit is not supported. Use QualitySettings.globalTextureMipmapLimit or Mipmap Limit Groups instead.", false)]
 		[NativeProperty("ActiveGlobalMipmapLimit")]
+		[Obsolete("globalMipmapLimit is not supported. Use QualitySettings.globalTextureMipmapLimit or Mipmap Limit Groups instead.", false)]
 		public static extern int globalMipmapLimit
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]

@@ -7,7 +7,7 @@ public class FlatTagFilterSideScreen : SideScreenContent
 {
 	public override int GetSideScreenSortOrder()
 	{
-		return 400;
+		return 50;
 	}
 
 	public override bool IsValidForTarget(GameObject target)

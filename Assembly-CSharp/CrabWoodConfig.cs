@@ -5,7 +5,7 @@ using STRINGS;
 using TUNING;
 using UnityEngine;
 
-[EntityConfigOrder(1)]
+[EntityConfigOrder(2)]
 public class CrabWoodConfig : IEntityConfig
 {
 	public static GameObject CreateCrabWood(string id, string name, string desc, string anim_file, bool is_baby, string deathDropID = "CrabWoodShell", float deathDropCount = 5f)

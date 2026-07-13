@@ -133,7 +133,7 @@ public static class LightBugTuning
 
 	public static float STANDARD_STOMACH_SIZE = LightBugTuning.STANDARD_CALORIES_PER_CYCLE * LightBugTuning.STANDARD_STARVE_CYCLES;
 
-	public static int PEN_SIZE_PER_CREATURE = CREATURES.SPACE_REQUIREMENTS.TIER3;
+	public static int PEN_SIZE_PER_CREATURE = CREATURES.SPACE_REQUIREMENTS.TIER3 / 2;
 
-	public static float EGG_MASS = 0.2f;
+	public static float EGG_MASS = 1f;
 }

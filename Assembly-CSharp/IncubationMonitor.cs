@@ -202,12 +202,12 @@ public class IncubationMonitor : GameStateMachine<IncubationMonitor, IncubationM
 		public void OnStore(object data)
 		{
 			Storage storage = data as Storage;
-			bool flag = storage || (data != null && (bool)data);
+			bool flag = storage || (data != null && ((Boxed<bool>)data).value);
 			EggIncubator eggIncubator = (storage ? storage.GetComponent<EggIncubator>() : null);
 			this.UpdateIncubationState(flag, eggIncubator);
 		}
 
-		public void OnOperationalChanged(object data = null)
+		public void OnOperationalChanged(object _ = null)
 		{
 			bool flag = base.gameObject.HasTag(GameTags.Stored);
 			Storage storage = this.GetStorage();

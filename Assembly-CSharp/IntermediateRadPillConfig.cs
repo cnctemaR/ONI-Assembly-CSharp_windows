@@ -19,6 +19,7 @@ public class IntermediateRadPillConfig : IEntityConfig, IHasDlcRestrictions
 	public GameObject CreatePrefab()
 	{
 		GameObject gameObject = EntityTemplates.CreateLooseEntity("IntermediateRadPill", global::STRINGS.ITEMS.PILLS.INTERMEDIATERADPILL.NAME, global::STRINGS.ITEMS.PILLS.INTERMEDIATERADPILL.DESC, 1f, true, Assets.GetAnim("vial_radiation_kanim"), "object", Grid.SceneLayer.Front, EntityTemplates.CollisionShape.RECTANGLE, 0.8f, 0.4f, true, 0, SimHashes.Creature, null);
+		gameObject.GetComponent<KPrefabID>().AddTag(GameTags.DeprecatedContent, false);
 		EntityTemplates.ExtendEntityToMedicine(gameObject, MEDICINE.INTERMEDIATERADPILL);
 		ComplexRecipe.RecipeElement[] array = new ComplexRecipe.RecipeElement[]
 		{

@@ -53,7 +53,7 @@ public class IceKettleConfig : IBuildingConfig
 		ManualDeliveryKG manualDeliveryKG = go.AddOrGet<ManualDeliveryKG>();
 		manualDeliveryKG.capacity = Mathf.Ceil(152.80188f);
 		manualDeliveryKG.SetStorage(storage);
-		manualDeliveryKG.requestedItemTag = IceKettleConfig.FUEL_TAG;
+		manualDeliveryKG.RequestedItemTag = IceKettleConfig.FUEL_TAG;
 		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.FetchCritical.IdHash;
 		manualDeliveryKG.ShowStatusItem = false;
 		Storage storage2 = go.AddComponent<Storage>();
@@ -64,7 +64,7 @@ public class IceKettleConfig : IBuildingConfig
 		ManualDeliveryKG manualDeliveryKG2 = go.AddComponent<ManualDeliveryKG>();
 		manualDeliveryKG2.capacity = 1000f;
 		manualDeliveryKG2.SetStorage(storage2);
-		manualDeliveryKG2.requestedItemTag = IceKettleConfig.TARGET_ELEMENT_TAG;
+		manualDeliveryKG2.RequestedItemTag = IceKettleConfig.TARGET_ELEMENT_TAG;
 		manualDeliveryKG2.choreTypeIDHash = Db.Get().ChoreTypes.FetchCritical.IdHash;
 		manualDeliveryKG2.refillMass = 100f;
 		manualDeliveryKG2.ShowStatusItem = false;
@@ -106,7 +106,7 @@ public class IceKettleConfig : IBuildingConfig
 
 	public const float PRODUCTION_PER_SECOND = 20f;
 
-	public static Tag FUEL_TAG = SimHashes.WoodLog.CreateTag();
+	public static Tag FUEL_TAG = "BuildingWood";
 
 	public const SimHashes EXHAUST_TAG = SimHashes.CarbonDioxide;
 

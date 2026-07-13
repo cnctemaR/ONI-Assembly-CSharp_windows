@@ -169,6 +169,10 @@ public class BuildingTemplates
 		if (component4 != null)
 		{
 			component4.showUnreachableStatus = true;
+			if (def.WidthInCells > 3)
+			{
+				component4.useWideOffsets = true;
+			}
 		}
 		return template;
 	}
@@ -221,9 +225,13 @@ public class BuildingTemplates
 		CargoBayCluster cargoBayCluster = template.AddOrGet<CargoBayCluster>();
 		cargoBayCluster.storage = storage;
 		cargoBayCluster.storageType = cargoType;
+		RocketModuleHexCellCollector.Def def = template.AddOrGetDef<RocketModuleHexCellCollector.Def>();
+		float num = 3600f;
+		def.collectSpeed = capacity / num;
 		TreeFilterable treeFilterable = template.AddOrGet<TreeFilterable>();
 		treeFilterable.dropIncorrectOnFilterChange = false;
 		treeFilterable.autoSelectStoredOnLoad = false;
+		treeFilterable.uiHeight = TreeFilterable.UISideScreenHeight.Short;
 		return template;
 	}
 

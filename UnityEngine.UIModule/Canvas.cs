@@ -6,11 +6,11 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeHeader("Modules/UI/UIStructs.h")]
-	[NativeHeader("Modules/UI/Canvas.h")]
 	[NativeHeader("Modules/UI/CanvasManager.h")]
-	[NativeClass("UI::Canvas")]
+	[NativeHeader("Modules/UI/UIStructs.h")]
 	[RequireComponent(typeof(RectTransform))]
+	[NativeHeader("Modules/UI/Canvas.h")]
+	[NativeClass("UI::Canvas")]
 	public sealed class Canvas : Behaviour
 	{
 		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
@@ -203,8 +203,8 @@ namespace UnityEngine
 			set;
 		}
 
-		[NativeProperty("SortingBucketNormalizedSize", false, TargetType.Function)]
 		[Obsolete("Setting normalizedSize via a int is not supported. Please use normalizedSortingGridSize", false)]
+		[NativeProperty("SortingBucketNormalizedSize", false, TargetType.Function)]
 		public extern int sortingGridNormalizedSize
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -213,8 +213,8 @@ namespace UnityEngine
 			set;
 		}
 
-		[FreeFunction("UI::GetDefaultUIMaterial")]
 		[Obsolete("Shared default material now used for text and general UI elements, call Canvas.GetDefaultCanvasMaterial()", false)]
+		[FreeFunction("UI::GetDefaultUIMaterial")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern Material GetDefaultCanvasTextMaterial();
 

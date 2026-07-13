@@ -129,7 +129,7 @@ public class BaggableCritterCapacityTracker : KMonoBehaviour, ISim1000ms, IUserC
 
 	private int RefreshSwimmingCreatureCount()
 	{
-		return FishOvercrowingManager.Instance.GetFishCavityCount(this.cavityCell, this.filter.AcceptedTags);
+		return FishOvercrowingManager.Instance.GetFishInPondCount(this.cavityCell, this.filter.AcceptedTags);
 	}
 
 	public void Sim1000ms(float dt)

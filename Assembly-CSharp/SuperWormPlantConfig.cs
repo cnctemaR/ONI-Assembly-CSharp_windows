@@ -19,6 +19,7 @@ public class SuperWormPlantConfig : IEntityConfig, IHasDlcRestrictions
 	{
 		GameObject gameObject = WormPlantConfig.BaseWormPlant("SuperWormPlant", global::STRINGS.CREATURES.SPECIES.SUPERWORMPLANT.NAME, global::STRINGS.CREATURES.SPECIES.SUPERWORMPLANT.DESC, "wormwood_kanim", SuperWormPlantConfig.SUPER_DECOR, "WormSuperFruit");
 		gameObject.AddOrGet<SeedProducer>().Configure("WormPlantSeed", SeedProducer.ProductionType.Harvest, 1);
+		gameObject.AddOrGet<PlantFiberProducer>().amount = 16f;
 		return gameObject;
 	}
 
@@ -42,6 +43,8 @@ public class SuperWormPlantConfig : IEntityConfig, IHasDlcRestrictions
 	public const string SUPER_CROP_ID = "WormSuperFruit";
 
 	public const int CROP_YIELD = 8;
+
+	public const float PLANT_FIBER_PRODUCED_PER_CYCLE = 16f;
 
 	private static StandardCropPlant.AnimSet animSet = new StandardCropPlant.AnimSet
 	{

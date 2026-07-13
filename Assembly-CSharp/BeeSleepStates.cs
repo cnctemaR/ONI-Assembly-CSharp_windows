@@ -29,7 +29,7 @@ public class BeeSleepStates : GameStateMachine<BeeSleepStates, BeeSleepStates.In
 		this.moveToSleepLocation.MoveTo((BeeSleepStates.Instance smi) => smi.targetSleepCell, this.sleep.pre, this.behaviourcomplete, false);
 		this.sleep.Enter("EnableGravity", delegate(BeeSleepStates.Instance smi)
 		{
-			GameComps.Gravities.Add(smi.gameObject, Vector2.zero, delegate
+			GameComps.Gravities.Add(smi.gameObject, Vector2.zero, delegate(Transform transform)
 			{
 				if (GameComps.Gravities.Has(smi.gameObject))
 				{

@@ -8,6 +8,22 @@ public class Pump : KMonoBehaviour, ISim1000ms
 	{
 		base.OnPrefabInit();
 		this.consumer.EnableConsumption(false);
+		this.consumer.OnElementConsumedStored += this.OnElementConsumedStored;
+	}
+
+	private void OnElementConsumedStored(Sim.ConsumedMassInfo elementConsumedInfo)
+	{
+		if (this.dispenser.conduitType == ConduitType.Liquid)
+		{
+			Element element = ElementLoader.elements[(int)elementConsumedInfo.removedElemIdx];
+			if (this.lastElementConsumed != element.id && element.id != SimHashes.Vacuum)
+			{
+				Color color = element.substance.colour;
+				color.a = 1f;
+				this.controller.SetSymbolTint(new KAnimHashedString("water"), color);
+			}
+			this.lastElementConsumed = element.id;
+		}
 	}
 
 	protected override void OnSpawn()
@@ -109,6 +125,9 @@ public class Pump : KMonoBehaviour, ISim1000ms
 	[MyCmpGet]
 	private Storage storage;
 
+	[MyCmpGet]
+	private KBatchedAnimController controller;
+
 	private const float OperationalUpdateInterval = 1f;
 
 	private float elapsedTime;
@@ -118,4 +137,6 @@ public class Pump : KMonoBehaviour, ISim1000ms
 	private Guid conduitBlockedStatusGuid;
 
 	private Guid noElementStatusGuid;
+
+	private SimHashes lastElementConsumed = SimHashes.Vacuum;
 }

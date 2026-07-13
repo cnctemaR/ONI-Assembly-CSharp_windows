@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 using STRINGS;
 using UnityEngine;
 
@@ -180,31 +181,35 @@ public class BeeForageStates : GameStateMachine<BeeForageStates, BeeForageStates
 		return false;
 	}
 
+	private static Util.IterationInstruction findOreVisitor(object obj, ref ValueTuple<Element, Navigator, Pickupable, int> context)
+	{
+		Pickupable pickupable = Unsafe.As<Pickupable>(obj);
+		if (pickupable == null || pickupable.PrimaryElement == null || pickupable.PrimaryElement.Element != context.Item1)
+		{
+			return Util.IterationInstruction.Continue;
+		}
+		if (pickupable.KPrefabID.HasTag(GameTags.Creatures.ReservedByCreature))
+		{
+			return Util.IterationInstruction.Continue;
+		}
+		int navigationCost = context.Item2.GetNavigationCost(Grid.PosToCell(pickupable));
+		if (navigationCost != -1 && navigationCost < context.Item4)
+		{
+			context.Item3 = pickupable;
+			context.Item4 = navigationCost;
+		}
+		return Util.IterationInstruction.Continue;
+	}
+
 	private static bool FindOre(BeeForageStates.Instance smi)
 	{
 		Navigator component = smi.GetComponent<Navigator>();
 		Vector3 position = smi.transform.GetPosition();
-		Pickupable pickupable = null;
-		int num = 100;
 		Extents extents = new Extents((int)position.x, (int)position.y, 15);
-		ListPool<ScenePartitionerEntry, BeeForageStates>.PooledList pooledList = ListPool<ScenePartitionerEntry, BeeForageStates>.Allocate();
-		GameScenePartitioner.Instance.GatherEntries(extents, GameScenePartitioner.Instance.pickupablesLayer, pooledList);
 		Element element = ElementLoader.GetElement(smi.def.oreTag);
-		foreach (ScenePartitionerEntry scenePartitionerEntry in pooledList)
-		{
-			Pickupable pickupable2 = scenePartitionerEntry.obj as Pickupable;
-			if (!(pickupable2 == null) && !(pickupable2.PrimaryElement == null) && pickupable2.PrimaryElement.Element == element && !pickupable2.KPrefabID.HasTag(GameTags.Creatures.ReservedByCreature))
-			{
-				int navigationCost = component.GetNavigationCost(Grid.PosToCell(pickupable2));
-				if (navigationCost != -1 && navigationCost < num)
-				{
-					pickupable = pickupable2;
-					num = navigationCost;
-				}
-			}
-		}
-		pooledList.Recycle();
-		smi.forageTarget = pickupable;
+		ValueTuple<Element, Navigator, Pickupable, int> valueTuple = new ValueTuple<Element, Navigator, Pickupable, int>(element, component, null, 100);
+		GameScenePartitioner.Instance.VisitEntries<ValueTuple<Element, Navigator, Pickupable, int>>(extents.x, extents.y, extents.width, extents.height, GameScenePartitioner.Instance.pickupablesLayer, new GameScenePartitioner.VisitorRef<ValueTuple<Element, Navigator, Pickupable, int>>(BeeForageStates.findOreVisitor), ref valueTuple);
+		smi.forageTarget = valueTuple.Item3;
 		smi.forageTarget_cell = (smi.forageTarget ? Grid.PosToCell(smi.forageTarget) : Grid.InvalidCell);
 		return smi.forageTarget != null;
 	}

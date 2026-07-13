@@ -26,7 +26,7 @@ public class PinnedResourcesPanel : KScreen, IRender1000ms
 		MultiToggle component2 = this.seeAllButton.GetComponent<MultiToggle>();
 		component2.onClick = (global::System.Action)Delegate.Combine(component2.onClick, new global::System.Action(delegate
 		{
-			bool flag = !AllResourcesScreen.Instance.isHiddenButActive;
+			bool flag = AllResourcesScreen.Instance.IsScreenActive();
 			AllResourcesScreen.Instance.Show(!flag);
 		}));
 		this.seeAllLabel = this.seeAllButton.GetComponentInChildren<LocText>();

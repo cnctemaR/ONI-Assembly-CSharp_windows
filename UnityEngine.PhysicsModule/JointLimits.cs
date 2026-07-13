@@ -75,8 +75,8 @@ namespace UnityEngine
 
 		private float m_ContactDistance;
 
-		[Obsolete("minBounce and maxBounce are replaced by a single JointLimits.bounciness for both limit ends.", true)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
+		[Obsolete("minBounce and maxBounce are replaced by a single JointLimits.bounciness for both limit ends.", true)]
 		public float minBounce;
 
 		[Obsolete("minBounce and maxBounce are replaced by a single JointLimits.bounciness for both limit ends.", true)]

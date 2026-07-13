@@ -324,7 +324,7 @@ namespace UnityEngine.UIElements
 					if (flag6)
 					{
 						Vector2 scrollOffset = this.targetScrollView.scrollOffset;
-						this.targetScrollView.ScrollTo(recycledItem.rootElement);
+						this.targetView.ScrollToItem(recycledItem.index);
 						bool flag7 = !Mathf.Approximately(scrollOffset.x, this.targetScrollView.scrollOffset.x) || !Mathf.Approximately(scrollOffset.y, this.targetScrollView.scrollOffset.y);
 						if (flag7)
 						{
@@ -405,10 +405,10 @@ namespace UnityEngine.UIElements
 					int num5 = num;
 					float num6 = 15f;
 					float num7 = 15f;
-					bool flag4 = indentationDepth > 0;
+					VisualElement rootElementForId = baseTreeView.GetRootElementForId(num);
+					bool flag4 = indentationDepth > 0 && rootElementForId != null;
 					if (flag4)
 					{
-						VisualElement rootElementForId = baseTreeView.GetRootElementForId(num);
 						VisualElement visualElement = rootElementForId.Q(BaseTreeView.itemIndentUssClassName, null);
 						VisualElement visualElement2 = rootElementForId.Q(BaseTreeView.itemToggleUssClassName, null);
 						num6 = visualElement2.layout.width;
@@ -440,19 +440,27 @@ namespace UnityEngine.UIElements
 						else
 						{
 							dragPosition.parentId = viewController.GetParentId(num);
-							dragPosition.childIndex = viewController.GetChildIndexForId(num2);
+							bool flag8 = viewController.GetParentId(num2) == viewController.GetIdForIndex(dragPosition.insertAtIndex);
+							if (flag8)
+							{
+								dragPosition.childIndex = viewController.GetChildIndexForId(num) + 1;
+							}
+							else
+							{
+								dragPosition.childIndex = viewController.GetChildIndexForId(num2);
+							}
 						}
 					}
 					else
 					{
 						Vector2 vector = baseTreeView.scrollView.contentContainer.WorldToLocal(pointerPosition);
 						int num8 = Mathf.FloorToInt((vector.x - num6) / num7);
-						bool flag8 = num8 >= num4;
-						if (flag8)
+						bool flag9 = num8 >= num4;
+						if (flag9)
 						{
 							this.m_LeftIndentation = num6 + num7 * (float)num4;
-							bool flag9 = flag3;
-							if (flag9)
+							bool flag10 = flag3;
+							if (flag10)
 							{
 								dragPosition.parentId = num;
 								dragPosition.childIndex = 0;
@@ -468,25 +476,25 @@ namespace UnityEngine.UIElements
 							int i;
 							for (i = viewController.GetIndentationDepth(num5); i > num3; i--)
 							{
-								bool flag10 = i == num8;
-								if (flag10)
+								bool flag11 = i == num8;
+								if (flag11)
 								{
 									break;
 								}
 								num5 = viewController.GetParentId(num5);
 							}
-							bool flag11 = num5 != idForIndex;
-							bool flag12 = flag11;
-							if (flag12)
+							bool flag12 = num5 != idForIndex;
+							bool flag13 = flag12;
+							if (flag13)
 							{
 								VisualElement rootElementForId3 = baseTreeView.GetRootElementForId(num5);
-								bool flag13 = rootElementForId3 != null;
-								if (flag13)
+								bool flag14 = rootElementForId3 != null;
+								if (flag14)
 								{
 									VisualElement contentViewport = this.targetScrollView.contentViewport;
 									Rect rect = contentViewport.WorldToLocal(rootElementForId3.worldBound);
-									bool flag14 = contentViewport.localBound.yMin < rect.yMax && rect.yMax < contentViewport.localBound.yMax;
-									if (flag14)
+									bool flag15 = contentViewport.localBound.yMin < rect.yMax && rect.yMax < contentViewport.localBound.yMax;
+									if (flag15)
 									{
 										this.m_SiblingBottom = rect.yMax;
 									}

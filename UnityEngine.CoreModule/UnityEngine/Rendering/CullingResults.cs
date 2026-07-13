@@ -7,8 +7,8 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine.Rendering
 {
-	[NativeHeader("Runtime/Graphics/ScriptableRenderLoop/ScriptableCulling.h")]
 	[NativeHeader("Runtime/Export/RenderPipeline/ScriptableRenderPipeline.bindings.h")]
+	[NativeHeader("Runtime/Graphics/ScriptableRenderLoop/ScriptableCulling.h")]
 	[NativeHeader("Runtime/Scripting/ScriptingCommonStructDefinitions.h")]
 	public struct CullingResults : IEquatable<CullingResults>
 	{

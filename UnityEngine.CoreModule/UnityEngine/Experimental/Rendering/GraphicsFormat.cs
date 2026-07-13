@@ -95,12 +95,12 @@ namespace UnityEngine.Experimental.Rendering
 		D32_SFloat,
 		D32_SFloat_S8_UInt,
 		S8_UInt,
-		[Obsolete("Enum member GraphicsFormat.RGB_DXT1_SRGB has been deprecated. Use GraphicsFormat.RGBA_DXT1_SRGB instead (UnityUpgradable) -> RGBA_DXT1_SRGB", true)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
+		[Obsolete("Enum member GraphicsFormat.RGB_DXT1_SRGB has been deprecated. Use GraphicsFormat.RGBA_DXT1_SRGB instead (UnityUpgradable) -> RGBA_DXT1_SRGB", true)]
 		RGB_DXT1_SRGB,
 		RGBA_DXT1_SRGB = 96,
-		[EditorBrowsable(EditorBrowsableState.Never)]
 		[Obsolete("Enum member GraphicsFormat.RGB_DXT1_UNorm has been deprecated. Use GraphicsFormat.RGBA_DXT1_UNorm instead (UnityUpgradable) -> RGBA_DXT1_UNorm", true)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		RGB_DXT1_UNorm,
 		RGBA_DXT1_UNorm = 97,
 		RGBA_DXT3_SRGB,

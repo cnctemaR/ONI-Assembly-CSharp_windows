@@ -7,7 +7,7 @@ public class SuperProductiveFX : GameStateMachine<SuperProductiveFX, SuperProduc
 	{
 		default_state = this.pre;
 		base.Target(this.fx);
-		this.root.OnSignal(this.wasProductive, this.productive, (SuperProductiveFX.Instance smi) => smi.GetCurrentState() != smi.sm.pst).OnSignal(this.destroyFX, this.pst);
+		this.root.OnSignal(this.wasProductive, this.productive, (SuperProductiveFX.Instance smi, StateMachine<SuperProductiveFX, SuperProductiveFX.Instance, IStateMachineTarget, object>.SignalParameter param) => smi.GetCurrentState() != smi.sm.pst).OnSignal(this.destroyFX, this.pst);
 		this.pre.PlayAnim("productive_pre", KAnim.PlayMode.Once).OnAnimQueueComplete(this.idle);
 		this.idle.PlayAnim("productive_loop", KAnim.PlayMode.Loop);
 		this.productive.QueueAnim("productive_achievement", false, null).OnAnimQueueComplete(this.idle);

@@ -361,6 +361,24 @@ namespace Database
 			this.LongRangeMissileTTI.resolveTooltipCallback = this.LongRangeMissileTTI.resolveStringCallback;
 			this.MarkedForMove = this.CreateStatusItem("MarkedForMove", "MISC", "status_item_manually_controlled", StatusItem.IconType.Custom, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
 			this.MoveStorageUnreachable = this.CreateStatusItem("MoveStorageUnreachable", "MISC", "status_item_manually_controlled", StatusItem.IconType.Custom, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 129022);
+			this.ClusterMapHarvestableResource = this.CreateStatusItem("ClusterMapHarvestableResource", "MISC", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
+			this.ClusterMapHarvestableResource.showInHoverCardOnly = true;
+			this.ClusterMapHarvestableResource.resolveStringCallback = delegate(string str, object data)
+			{
+				List<StarmapHexCellInventory.SerializedItem> list = data as List<StarmapHexCellInventory.SerializedItem>;
+				string text8 = "";
+				for (int i = 0; i < list.Count; i++)
+				{
+					StarmapHexCellInventory.SerializedItem serializedItem = list[i];
+					text8 = text8 + serializedItem.ID.ProperName() + ": " + (serializedItem.IsEntity ? GameUtil.GetFormattedUnits(serializedItem.Mass, GameUtil.TimeSlice.None, true, "") : GameUtil.GetFormattedMass(serializedItem.Mass, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"));
+					if (i < list.Count - 1)
+					{
+						text8 += "\n";
+					}
+				}
+				return GameUtil.SafeStringFormat(str, new object[] { text8 });
+			};
+			this.ClusterMapHarvestableResource.resolveTooltipCallback = this.ClusterMapHarvestableResource.resolveStringCallback;
 		}
 
 		public StatusItem AttentionRequired;
@@ -486,5 +504,7 @@ namespace Database
 		public StatusItem ElectrobankLifetimeRemaining;
 
 		public StatusItem ElectrobankSelfCharging;
+
+		public StatusItem ClusterMapHarvestableResource;
 	}
 }

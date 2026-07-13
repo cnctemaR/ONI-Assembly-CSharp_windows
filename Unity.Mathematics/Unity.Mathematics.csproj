@@ -1,0 +1,110 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <ProjectGuid>{FB7F35FD-6256-4B33-A899-A0A5341DD18C}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>Unity</RootNamespace>
+    <AssemblyName>Unity.Mathematics</AssemblyName>
+    <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
+    <FileAlignment>512</FileAlignment>
+    <TargetFramework>net40</TargetFramework>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+    <EnableDefaultItems>False</EnableDefaultItems>
+  </PropertyGroup>
+  <PropertyGroup />
+  <ItemGroup>
+    <Compile Include="IL2CPP\CompilerServices\Il2CppEagerStaticClassConstructionAttribute.cs" />
+    <Compile Include="Mathematics\bool2.cs" />
+    <Compile Include="Mathematics\bool2x2.cs" />
+    <Compile Include="Mathematics\bool2x3.cs" />
+    <Compile Include="Mathematics\bool2x4.cs" />
+    <Compile Include="Mathematics\bool3.cs" />
+    <Compile Include="Mathematics\bool3x2.cs" />
+    <Compile Include="Mathematics\bool3x3.cs" />
+    <Compile Include="Mathematics\bool3x4.cs" />
+    <Compile Include="Mathematics\bool4.cs" />
+    <Compile Include="Mathematics\bool4x2.cs" />
+    <Compile Include="Mathematics\bool4x3.cs" />
+    <Compile Include="Mathematics\bool4x4.cs" />
+    <Compile Include="Mathematics\DoNotNormalizeAttribute.cs" />
+    <Compile Include="Mathematics\double2.cs" />
+    <Compile Include="Mathematics\double2x2.cs" />
+    <Compile Include="Mathematics\double2x3.cs" />
+    <Compile Include="Mathematics\double2x4.cs" />
+    <Compile Include="Mathematics\double3.cs" />
+    <Compile Include="Mathematics\double3x2.cs" />
+    <Compile Include="Mathematics\double3x3.cs" />
+    <Compile Include="Mathematics\double3x4.cs" />
+    <Compile Include="Mathematics\double4.cs" />
+    <Compile Include="Mathematics\double4x2.cs" />
+    <Compile Include="Mathematics\double4x3.cs" />
+    <Compile Include="Mathematics\double4x4.cs" />
+    <Compile Include="Mathematics\float2.cs" />
+    <Compile Include="Mathematics\float2x2.cs" />
+    <Compile Include="Mathematics\float2x3.cs" />
+    <Compile Include="Mathematics\float2x4.cs" />
+    <Compile Include="Mathematics\float3.cs" />
+    <Compile Include="Mathematics\float3x2.cs" />
+    <Compile Include="Mathematics\float3x3.cs" />
+    <Compile Include="Mathematics\float3x4.cs" />
+    <Compile Include="Mathematics\float4.cs" />
+    <Compile Include="Mathematics\float4x2.cs" />
+    <Compile Include="Mathematics\float4x3.cs" />
+    <Compile Include="Mathematics\float4x4.cs" />
+    <Compile Include="Mathematics\Geometry\Math.cs" />
+    <Compile Include="Mathematics\Geometry\MinMaxAABB.cs" />
+    <Compile Include="Mathematics\Geometry\Plane.cs" />
+    <Compile Include="Mathematics\half.cs" />
+    <Compile Include="Mathematics\half2.cs" />
+    <Compile Include="Mathematics\half3.cs" />
+    <Compile Include="Mathematics\half4.cs" />
+    <Compile Include="Mathematics\int2.cs" />
+    <Compile Include="Mathematics\int2x2.cs" />
+    <Compile Include="Mathematics\int2x3.cs" />
+    <Compile Include="Mathematics\int2x4.cs" />
+    <Compile Include="Mathematics\int3.cs" />
+    <Compile Include="Mathematics\int3x2.cs" />
+    <Compile Include="Mathematics\int3x3.cs" />
+    <Compile Include="Mathematics\int3x4.cs" />
+    <Compile Include="Mathematics\int4.cs" />
+    <Compile Include="Mathematics\int4x2.cs" />
+    <Compile Include="Mathematics\int4x3.cs" />
+    <Compile Include="Mathematics\int4x4.cs" />
+    <Compile Include="Mathematics\math.cs" />
+    <Compile Include="Mathematics\noise.cs" />
+    <Compile Include="Mathematics\PostNormalizeAttribute.cs" />
+    <Compile Include="Mathematics\quaternion.cs" />
+    <Compile Include="Mathematics\Random.cs" />
+    <Compile Include="Mathematics\RigidTransform.cs" />
+    <Compile Include="Mathematics\uint2.cs" />
+    <Compile Include="Mathematics\uint2x2.cs" />
+    <Compile Include="Mathematics\uint2x3.cs" />
+    <Compile Include="Mathematics\uint2x4.cs" />
+    <Compile Include="Mathematics\uint3.cs" />
+    <Compile Include="Mathematics\uint3x2.cs" />
+    <Compile Include="Mathematics\uint3x3.cs" />
+    <Compile Include="Mathematics\uint3x4.cs" />
+    <Compile Include="Mathematics\uint4.cs" />
+    <Compile Include="Mathematics\uint4x2.cs" />
+    <Compile Include="Mathematics\uint4x3.cs" />
+    <Compile Include="Mathematics\uint4x4.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="UnitySourceGeneratedAssemblyMonoScriptTypes_v1.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\mscorlib\mscorlib.csproj">
+      <Project>{FB7F35FD-6256-4B33-A899-A0A5341DD171}</Project>
+      <Name>mscorlib</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\System\System.csproj">
+      <Project>{FB7F35FD-6256-4B33-A899-A0A5341DD179}</Project>
+      <Name>System</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
+      <Project>{FB7F35FD-6256-4B33-A899-A0A5341DD19C}</Project>
+      <Name>UnityEngine.CoreModule</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup />
+</Project>

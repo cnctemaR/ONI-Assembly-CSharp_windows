@@ -61,9 +61,10 @@ public class GeneratedOre
 		{
 			global::Debug.LogError("Could not find prefab for element " + element.id.ToString());
 		}
-		SubstanceChunk component = GameUtil.KInstantiate(prefab, Grid.SceneLayer.Ore, null, 0).GetComponent<SubstanceChunk>();
+		GameObject gameObject = GameUtil.KInstantiate(prefab, Grid.SceneLayer.Ore, null, 0);
+		SubstanceChunk component = gameObject.GetComponent<SubstanceChunk>();
 		component.transform.SetPosition(position);
-		component.gameObject.SetActive(true);
+		gameObject.SetActive(true);
 		PrimaryElement component2 = component.GetComponent<PrimaryElement>();
 		component2.Mass = mass;
 		component2.Temperature = temperature;

@@ -70,7 +70,7 @@ public class Breakable : Workable
 		if (this.elapsedDamageTime >= this.secondsPerTenPercentDamage)
 		{
 			this.elapsedDamageTime -= this.elapsedDamageTime;
-			base.Trigger(-794517298, new BuildingHP.DamageSourceInfo
+			base.BoxingTrigger<BuildingHP.DamageSourceInfo>(-794517298, new BuildingHP.DamageSourceInfo
 			{
 				damage = this.tenPercentDamage,
 				source = BUILDINGS.DAMAGESOURCES.MINION_DESTRUCTION,

@@ -4,8 +4,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Rendering
 {
-	[NativeHeader("Runtime/Shaders/Keywords/KeywordSpaceScriptBindings.h")]
 	[UsedByNativeCode]
+	[NativeHeader("Runtime/Shaders/Keywords/KeywordSpaceScriptBindings.h")]
 	public enum ShaderKeywordType
 	{
 		None,

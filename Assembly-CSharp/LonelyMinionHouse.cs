@@ -14,7 +14,7 @@ public class LonelyMinionHouse : StoryTraitStateMachine<LonelyMinionHouse, Lonel
 		return component != null && flag != component.IsOperational;
 	}
 
-	private static bool AllQuestsComplete(LonelyMinionHouse.Instance smi)
+	private static bool AllQuestsComplete(LonelyMinionHouse.Instance smi, StateMachine<LonelyMinionHouse, LonelyMinionHouse.Instance, StateMachineController, LonelyMinionHouse.Def>.SignalParameter param)
 	{
 		return 1f - smi.sm.QuestProgress.Get(smi) <= Mathf.Epsilon;
 	}
@@ -48,7 +48,7 @@ public class LonelyMinionHouse : StoryTraitStateMachine<LonelyMinionHouse, Lonel
 		}).Exit(delegate(LonelyMinionHouse.Instance smi)
 		{
 			smi.OnPoweredStateChanged(smi.GetComponent<NonEssentialEnergyConsumer>().IsPowered);
-		}).OnSignal(this.CompleteStory, this.Active.StoryComplete, new Func<LonelyMinionHouse.Instance, bool>(LonelyMinionHouse.AllQuestsComplete))
+		}).OnSignal(this.CompleteStory, this.Active.StoryComplete, new StateMachine<LonelyMinionHouse, LonelyMinionHouse.Instance, StateMachineController, LonelyMinionHouse.Def>.Parameter<StateMachine<LonelyMinionHouse, LonelyMinionHouse.Instance, StateMachineController, LonelyMinionHouse.Def>.SignalParameter>.Callback(LonelyMinionHouse.AllQuestsComplete))
 			.EventTransition(GameHashes.OperationalChanged, this.Inactive, new StateMachine<LonelyMinionHouse, LonelyMinionHouse.Instance, StateMachineController, LonelyMinionHouse.Def>.Transition.ConditionCallback(this.ValidateOperationalTransition));
 		this.Active.StoryComplete.Enter(new StateMachine<LonelyMinionHouse, LonelyMinionHouse.Instance, StateMachineController, LonelyMinionHouse.Def>.State.Callback(LonelyMinionHouse.ActiveStates.OnEnterStoryComplete));
 	}
@@ -167,7 +167,7 @@ public class LonelyMinionHouse : StoryTraitStateMachine<LonelyMinionHouse, Lonel
 				base.StartSM();
 				return;
 			}
-			base.Subscribe(-592767678, new Action<object>(this.OnBuildingActivated));
+			this.onBuildingActivatedHandle = base.Subscribe(-592767678, new Action<object>(this.OnBuildingActivated));
 			base.StartSM();
 			QuestInstance questInstance4 = questInstance;
 			questInstance4.QuestProgressChanged = (Action<QuestInstance, Quest.State, float>)Delegate.Combine(questInstance4.QuestProgressChanged, new Action<QuestInstance, Quest.State, float>(this.OnQuestProgressChanged));
@@ -195,7 +195,7 @@ public class LonelyMinionHouse : StoryTraitStateMachine<LonelyMinionHouse, Lonel
 			Activatable component = base.GetComponent<Activatable>();
 			component.OnWorkableEventCB = (Action<Workable, Workable.WorkableEvent>)Delegate.Remove(component.OnWorkableEventCB, new Action<Workable, Workable.WorkableEvent>(this.OnWorkStateChanged));
 			component.onActivate = (global::System.Action)Delegate.Remove(component.onActivate, new global::System.Action(this.StartStoryTrait));
-			base.Unsubscribe(-592767678, new Action<object>(this.OnBuildingActivated));
+			base.Unsubscribe(ref this.onBuildingActivatedHandle);
 		}
 
 		private void OnQuestProgressChanged(QuestInstance quest, Quest.State prevState, float delta)
@@ -268,7 +268,7 @@ public class LonelyMinionHouse : StoryTraitStateMachine<LonelyMinionHouse, Lonel
 		public override void OnCompleteStorySequence()
 		{
 			this.SpawnMinion();
-			base.Unsubscribe(-592767678, new Action<object>(this.OnBuildingActivated));
+			base.Unsubscribe(ref this.onBuildingActivatedHandle);
 			base.OnCompleteStorySequence();
 			QuestInstance instance = QuestManager.GetInstance(this.questOwnerId, Db.Get().Quests.LonelyMinionFoodQuest);
 			instance.QuestProgressChanged = (Action<QuestInstance, Quest.State, float>)Delegate.Remove(instance.QuestProgressChanged, new Action<QuestInstance, Quest.State, float>(this.OnQuestProgressChanged));
@@ -343,28 +343,30 @@ public class LonelyMinionHouse : StoryTraitStateMachine<LonelyMinionHouse, Lonel
 			minionIdentity.transform.SetPosition(vector);
 		}
 
+		private static Util.IterationInstruction tryFindMailboxVisitor(object obj, ref ValueTuple<LonelyMinionHouse.Instance, bool> param)
+		{
+			if ((obj as GameObject).GetComponent<KPrefabID>().PrefabTag.GetHash() == LonelyMinionMailboxConfig.IdHash.HashValue)
+			{
+				param.Item1.OnBuildingLayerChanged(0, obj);
+				param.Item2 = true;
+			}
+			if (!param.Item2)
+			{
+				return Util.IterationInstruction.Continue;
+			}
+			return Util.IterationInstruction.Halt;
+		}
+
 		private bool TryFindMailbox()
 		{
 			if (base.sm.QuestProgress.Get(this) == 1f)
 			{
 				return true;
 			}
-			int num = Grid.PosToCell(base.gameObject);
-			ListPool<ScenePartitionerEntry, GameScenePartitioner>.PooledList pooledList = ListPool<ScenePartitionerEntry, GameScenePartitioner>.Allocate();
-			GameScenePartitioner.Instance.GatherEntries(new Extents(num, 10), GameScenePartitioner.Instance.objectLayers[1], pooledList);
-			bool flag = false;
-			int num2 = 0;
-			while (!flag && num2 < pooledList.Count)
-			{
-				if ((pooledList[num2].obj as GameObject).GetComponent<KPrefabID>().PrefabTag.GetHash() == LonelyMinionMailboxConfig.IdHash.HashValue)
-				{
-					this.OnBuildingLayerChanged(0, pooledList[num2].obj);
-					flag = true;
-				}
-				num2++;
-			}
-			pooledList.Recycle();
-			return flag;
+			Extents extents = new Extents(Grid.PosToCell(base.gameObject), 10);
+			ValueTuple<LonelyMinionHouse.Instance, bool> valueTuple = new ValueTuple<LonelyMinionHouse.Instance, bool>(this, false);
+			GameScenePartitioner.Instance.VisitEntries<ValueTuple<LonelyMinionHouse.Instance, bool>>(extents.x, extents.y, extents.width, extents.height, GameScenePartitioner.Instance.objectLayers[1], new GameScenePartitioner.VisitorRef<ValueTuple<LonelyMinionHouse.Instance, bool>>(LonelyMinionHouse.Instance.tryFindMailboxVisitor), ref valueTuple);
+			return valueTuple.Item2;
 		}
 
 		private void OnBuildingLayerChanged(int cell, object data)
@@ -393,7 +395,7 @@ public class LonelyMinionHouse : StoryTraitStateMachine<LonelyMinionHouse, Lonel
 			base.TriggerStoryEvent(StoryInstance.State.IN_PROGRESS);
 		}
 
-		protected override void OnBuildingActivated(object data)
+		protected override void OnBuildingActivated(object _)
 		{
 			if (!this.IsIntroSequenceComplete())
 			{
@@ -412,7 +414,7 @@ public class LonelyMinionHouse : StoryTraitStateMachine<LonelyMinionHouse, Lonel
 
 		protected override void OnObjectSelect(object clicked)
 		{
-			if (!(bool)clicked)
+			if (!((Boxed<bool>)clicked).value)
 			{
 				return;
 			}
@@ -690,6 +692,8 @@ public class LonelyMinionHouse : StoryTraitStateMachine<LonelyMinionHouse, Lonel
 		private MeterController meter;
 
 		private MeterController blinds;
+
+		private int onBuildingActivatedHandle = -1;
 
 		private Workable.WorkableEvent currentWorkState = Workable.WorkableEvent.WorkStopped;
 

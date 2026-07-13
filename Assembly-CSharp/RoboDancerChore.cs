@@ -76,16 +76,8 @@ public class RoboDancerChore : Chore<RoboDancerChore.StatesInstance>, IWorkerPri
 	public class StatesInstance : GameStateMachine<RoboDancerChore.States, RoboDancerChore.StatesInstance, RoboDancerChore, object>.GameInstance
 	{
 		public StatesInstance(RoboDancerChore master, GameObject roboDancer)
+			: base(master)
 		{
-			Chore.Precondition precondition = default(Chore.Precondition);
-			precondition.id = "IsNotRoboHyped";
-			precondition.description = "__ Duplicant hasn't watched the dance yet";
-			precondition.fn = delegate(ref Chore.Precondition.Context context, object data)
-			{
-				return !(context.consumerState.consumer == null) && !context.consumerState.gameObject.GetComponent<Effects>().HasEffect(WatchRoboDancerWorkable.TRACKING_EFFECT);
-			};
-			this.IsNotRoboHyped = precondition;
-			base..ctor(master);
 			this.roboDancer = roboDancer;
 			base.sm.roboDancer.Set(roboDancer, base.smi, false);
 		}
@@ -160,7 +152,7 @@ public class RoboDancerChore : Chore<RoboDancerChore.StatesInstance>, IWorkerPri
 					watchRoboDancerWorkable.owner = this.roboDancer;
 					WorkChore<WatchRoboDancerWorkable> workChore = new WorkChore<WatchRoboDancerWorkable>(Db.Get().ChoreTypes.JoyReaction, watchRoboDancerWorkable, null, true, null, null, null, true, Db.Get().ScheduleBlockTypes.Recreation, false, true, null, false, true, true, PriorityScreen.PriorityClass.high, 5, false, true);
 					workChore.AddPrecondition(ChorePreconditions.instance.IsNotARobot, null);
-					workChore.AddPrecondition(this.IsNotRoboHyped, workChore);
+					workChore.AddPrecondition(RoboDancerChore.StatesInstance.IsNotRoboHyped, workChore);
 					num2++;
 				}
 			}
@@ -194,6 +186,14 @@ public class RoboDancerChore : Chore<RoboDancerChore.StatesInstance>, IWorkerPri
 
 		private WatchRoboDancerWorkable[] watchWorkables;
 
-		private Chore.Precondition IsNotRoboHyped;
+		private static Chore.Precondition IsNotRoboHyped = new Chore.Precondition
+		{
+			id = "IsNotRoboHyped",
+			description = "__ Duplicant hasn't watched the dance yet",
+			fn = delegate(ref Chore.Precondition.Context context, object data)
+			{
+				return !(context.consumerState.consumer == null) && !context.consumerState.gameObject.GetComponent<Effects>().HasEffect(WatchRoboDancerWorkable.TRACKING_EFFECT);
+			}
+		};
 	}
 }

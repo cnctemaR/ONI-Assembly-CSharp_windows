@@ -18,7 +18,7 @@ public class SandboxFloodTool : FloodTool
 		base.OnPrefabInit();
 		SandboxFloodTool.instance = this;
 		this.floodCriteria = (int cell) => Grid.IsValidCell(cell) && Grid.Element[cell] == Grid.Element[this.mouseCell] && Grid.WorldIdx[cell] == Grid.WorldIdx[this.mouseCell];
-		this.paintArea = delegate(HashSet<int> cells)
+		this.paintArea = delegate(List<int> cells)
 		{
 			foreach (int num in cells)
 			{
@@ -155,7 +155,7 @@ public class SandboxFloodTool : FloodTool
 
 	protected HashSet<int> recentlyAffectedCells = new HashSet<int>();
 
-	protected HashSet<int> cellsToAffect = new HashSet<int>();
+	protected List<int> cellsToAffect = new List<int>();
 
 	protected Color recentlyAffectedCellColor = new Color(1f, 1f, 1f, 0.1f);
 

@@ -94,9 +94,8 @@ public class OxygenBreather : KMonoBehaviour, ISim200ms
 		this.o2Accumulator = Game.Instance.accumulators.Add("O2", this);
 		this.co2Accumulator = Game.Instance.accumulators.Add("CO2", this);
 		bool flag = base.gameObject.PrefabID() == BionicMinionConfig.ID;
-		KSelectable component = base.GetComponent<KSelectable>();
-		this.o2StatusItem = component.AddStatusItem(flag ? Db.Get().DuplicantStatusItems.BreathingO2Bionic : Db.Get().DuplicantStatusItems.BreathingO2, this);
-		this.cO2StatusItem = component.AddStatusItem(Db.Get().DuplicantStatusItems.EmittingCO2, this);
+		this.o2StatusItem = this.selectable.AddStatusItem(flag ? Db.Get().DuplicantStatusItems.BreathingO2Bionic : Db.Get().DuplicantStatusItems.BreathingO2, this);
+		this.cO2StatusItem = this.selectable.AddStatusItem(Db.Get().DuplicantStatusItems.EmittingCO2, this);
 		this.temperature = Db.Get().Amounts.Temperature.Lookup(this);
 		NameDisplayScreen.Instance.RegisterComponent(base.gameObject, this, false);
 	}
@@ -109,11 +108,11 @@ public class OxygenBreather : KMonoBehaviour, ISim200ms
 		}
 		if (elementConsumed == SimHashes.ContaminatedOxygen)
 		{
-			base.Trigger(-935848905, massConsumed);
+			base.BoxingTrigger<float>(-935848905, massConsumed);
 		}
 		Game.Instance.accumulators.Accumulate(this.O2Accumulator, massConsumed);
 		float num = -massConsumed;
-		ReportManager.Instance.ReportValue(ReportManager.ReportType.OxygenCreated, num, base.gameObject.GetProperName(), null);
+		ReportManager.Instance.ReportValue(ReportManager.ReportType.OxygenCreated, num, this.selectable.GetProperName(), null);
 		if (this.onBreathableGasConsumed != null)
 		{
 			this.onBreathableGasConsumed(elementConsumed, massConsumed, temperature, disseaseIDX, disseaseCount);
@@ -130,7 +129,7 @@ public class OxygenBreather : KMonoBehaviour, ISim200ms
 
 	public void Sim200ms(float dt)
 	{
-		if (!base.gameObject.HasTag(GameTags.Dead))
+		if (!this.prefabID.HasTag(GameTags.Dead))
 		{
 			float num = this.airConsumptionRate.GetTotalValue() * dt;
 			OxygenBreather.IGasProvider currentGasProvider = this.GetCurrentGasProvider();
@@ -141,7 +140,7 @@ public class OxygenBreather : KMonoBehaviour, ISim200ms
 				{
 					if (this.cO2StatusItem != Guid.Empty)
 					{
-						this.cO2StatusItem = base.GetComponent<KSelectable>().AddStatusItem(Db.Get().DuplicantStatusItems.EmittingCO2, this);
+						this.cO2StatusItem = this.selectable.AddStatusItem(Db.Get().DuplicantStatusItems.EmittingCO2, this);
 					}
 					float num2 = num * this.O2toCO2conversion;
 					Game.Instance.accumulators.Accumulate(this.co2Accumulator, num2);
@@ -165,7 +164,7 @@ public class OxygenBreather : KMonoBehaviour, ISim200ms
 				{
 					if (this.cO2StatusItem != Guid.Empty)
 					{
-						this.cO2StatusItem = base.GetComponent<KSelectable>().AddStatusItem(Db.Get().DuplicantStatusItems.EmittingCO2, this);
+						this.cO2StatusItem = this.selectable.AddStatusItem(Db.Get().DuplicantStatusItems.EmittingCO2, this);
 					}
 					Equippable equippable = base.GetComponent<SuitEquipper>().IsWearingAirtightSuit();
 					if (equippable != null)
@@ -182,7 +181,7 @@ public class OxygenBreather : KMonoBehaviour, ISim200ms
 				}
 				else if (this.cO2StatusItem != Guid.Empty)
 				{
-					base.GetComponent<KSelectable>().RemoveStatusItem(this.cO2StatusItem, false);
+					this.selectable.RemoveStatusItem(this.cO2StatusItem, false);
 					this.cO2StatusItem = Guid.Empty;
 				}
 			}
@@ -192,7 +191,7 @@ public class OxygenBreather : KMonoBehaviour, ISim200ms
 				if (this.hasAirTimer.TryStop(2f))
 				{
 					this.hasAir = flag;
-					base.Trigger(-933153513, this.hasAir);
+					base.Trigger(-933153513, BoxedBools.Box(this.hasAir));
 					return;
 				}
 			}
@@ -226,9 +225,8 @@ public class OxygenBreather : KMonoBehaviour, ISim200ms
 	private void OnDeath(object data)
 	{
 		base.enabled = false;
-		KSelectable component = base.GetComponent<KSelectable>();
-		component.RemoveStatusItem(Db.Get().DuplicantStatusItems.BreathingO2, false);
-		component.RemoveStatusItem(Db.Get().DuplicantStatusItems.EmittingCO2, false);
+		this.selectable.RemoveStatusItem(Db.Get().DuplicantStatusItems.BreathingO2, false);
+		this.selectable.RemoveStatusItem(Db.Get().DuplicantStatusItems.EmittingCO2, false);
 	}
 
 	protected override void OnCleanUp()
@@ -264,6 +262,9 @@ public class OxygenBreather : KMonoBehaviour, ISim200ms
 
 	[MyCmpGet]
 	private Facing facing;
+
+	[MyCmpGet]
+	private KSelectable selectable;
 
 	private HandleVector<int>.Handle o2Accumulator = HandleVector<int>.InvalidHandle;
 

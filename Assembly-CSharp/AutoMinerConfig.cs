@@ -62,7 +62,7 @@ public class AutoMinerConfig : IBuildingConfig
 		rangeVisualizer.BlockingTileVisible = false;
 		prefab.GetComponent<KPrefabID>().instantiateFn += delegate(GameObject go)
 		{
-			go.GetComponent<RangeVisualizer>().BlockingCb = new Func<int, bool>(AutoMiner.DigBlockingCB);
+			go.GetComponent<RangeVisualizer>().BlockingCb = AutoMiner.DigBlockingCB;
 		};
 	}
 

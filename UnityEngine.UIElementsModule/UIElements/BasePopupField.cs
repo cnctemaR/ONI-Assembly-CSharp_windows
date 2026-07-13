@@ -76,6 +76,7 @@ namespace UnityEngine.UIElements
 			base.visualInput.Add(this.m_ArrowElement);
 			this.choices = new List<TValueChoice>();
 			base.RegisterCallback<PointerDownEvent>(new EventCallback<PointerDownEvent>(this.OnPointerDownEvent), TrickleDown.NoTrickleDown);
+			base.RegisterCallback<PointerUpEvent>(new EventCallback<PointerUpEvent>(this.OnPointerUpEvent), TrickleDown.NoTrickleDown);
 			base.RegisterCallback<PointerMoveEvent>(new EventCallback<PointerMoveEvent>(this.OnPointerMoveEvent), TrickleDown.NoTrickleDown);
 			base.RegisterCallback<MouseDownEvent>(delegate(MouseDownEvent e)
 			{
@@ -91,6 +92,15 @@ namespace UnityEngine.UIElements
 		private void OnPointerDownEvent(PointerDownEvent evt)
 		{
 			this.ProcessPointerDown<PointerDownEvent>(evt);
+		}
+
+		private void OnPointerUpEvent(PointerUpEvent evt)
+		{
+			bool flag = evt.button == 0 && this.ContainsPointer(evt.pointerId);
+			if (flag)
+			{
+				evt.StopPropagation();
+			}
 		}
 
 		private void OnPointerMoveEvent(PointerMoveEvent evt)
@@ -134,27 +144,7 @@ namespace UnityEngine.UIElements
 
 		internal void ShowMenu()
 		{
-			bool flag = this.createMenuCallback != null;
-			IGenericMenu genericMenu;
-			if (flag)
-			{
-				genericMenu = this.createMenuCallback();
-			}
-			else
-			{
-				BaseVisualElementPanel elementPanel = base.elementPanel;
-				IGenericMenu genericMenu2;
-				if (elementPanel == null || elementPanel.contextType != ContextType.Player)
-				{
-					genericMenu2 = DropdownUtility.CreateDropdown();
-				}
-				else
-				{
-					IGenericMenu genericMenu3 = new GenericDropdownMenu();
-					genericMenu2 = genericMenu3;
-				}
-				genericMenu = genericMenu2;
-			}
+			IGenericMenu genericMenu = ((this.createMenuCallback != null) ? this.createMenuCallback() : base.elementPanel.CreateMenu());
 			this.AddMenuItems(genericMenu);
 			genericMenu.DropDown(base.visualInput.worldBound, this, true);
 		}

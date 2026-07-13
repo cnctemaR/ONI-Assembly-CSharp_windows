@@ -169,42 +169,41 @@ public class HighEnergyParticle : StateMachineComponent<HighEnergyParticle.State
 			ObjectLayerListItem objectLayerListItem = gameObject2.GetComponent<Pickupable>().objectLayerListItem;
 			while (objectLayerListItem != null)
 			{
-				GameObject gameObject3 = objectLayerListItem.gameObject;
+				Pickupable pickupable = objectLayerListItem.pickupable;
 				objectLayerListItem = objectLayerListItem.nextItem;
-				if (!(gameObject3 == null))
+				if (!(pickupable == null) && pickupable.KPrefabID.HasTag(GameTags.Creature))
 				{
-					KPrefabID component4 = gameObject3.GetComponent<KPrefabID>();
-					Health component5 = gameObject2.GetComponent<Health>();
-					if (component5 != null && component4 != null && component4.HasTag(GameTags.Creature) && !component5.IsDefeated())
+					Health component4 = pickupable.GetComponent<Health>();
+					if (component4 != null && !component4.IsDefeated())
 					{
-						component5.Damage(20f);
+						component4.Damage(20f);
 						this.Collide(HighEnergyParticle.CollisionType.Creature);
 						return;
 					}
 				}
 			}
 		}
-		GameObject gameObject4 = Grid.Objects[num, 0];
-		if (gameObject4 != null)
+		GameObject gameObject3 = Grid.Objects[num, 0];
+		if (gameObject3 != null)
 		{
-			Health component6 = gameObject4.GetComponent<Health>();
-			if (component6 != null && !component6.IsDefeated() && !gameObject4.HasTag(GameTags.Dead) && !gameObject4.HasTag(GameTags.Dying))
+			Health component5 = gameObject3.GetComponent<Health>();
+			if (component5 != null && !component5.IsDefeated() && !gameObject3.HasTag(GameTags.Dead) && !gameObject3.HasTag(GameTags.Dying))
 			{
-				component6.Damage(20f);
-				WoundMonitor.Instance smi = gameObject4.GetSMI<WoundMonitor.Instance>();
-				if (smi != null && !component6.IsDefeated())
+				component5.Damage(20f);
+				WoundMonitor.Instance smi = gameObject3.GetSMI<WoundMonitor.Instance>();
+				if (smi != null && !component5.IsDefeated())
 				{
 					smi.PlayKnockedOverImpactAnimation();
 				}
-				gameObject4.GetComponent<PrimaryElement>().AddDisease(Db.Get().Diseases.GetIndex(Db.Get().Diseases.RadiationPoisoning.Id), Mathf.FloorToInt(this.payload * 0.5f / 0.01f), "HEPImpact");
+				gameObject3.GetComponent<PrimaryElement>().AddDisease(Db.Get().Diseases.GetIndex(Db.Get().Diseases.RadiationPoisoning.Id), Mathf.FloorToInt(this.payload * 0.5f / 0.01f), "HEPImpact");
 				this.Collide(HighEnergyParticle.CollisionType.Minion);
 				return;
 			}
 		}
 		if (Grid.IsSolidCell(num))
 		{
-			GameObject gameObject5 = Grid.Objects[num, 9];
-			if (gameObject5 == null || !gameObject5.HasTag(GameTags.HEPPassThrough) || this.capturedBy == null || this.capturedBy.gameObject != gameObject5)
+			GameObject gameObject4 = Grid.Objects[num, 9];
+			if (gameObject4 == null || !gameObject4.HasTag(GameTags.HEPPassThrough) || this.capturedBy == null || this.capturedBy.gameObject != gameObject4)
 			{
 				this.Collide(HighEnergyParticle.CollisionType.Solid);
 			}
@@ -315,11 +314,11 @@ public class HighEnergyParticle : StateMachineComponent<HighEnergyParticle.State
 		{
 			default_state = this.ready.pre;
 			base.serializable = StateMachine.SerializeType.Both_DEPRECATED;
-			this.ready.OnSignal(this.destroySimpleSignal, this.destroying.instant).OnSignal(this.destroySignal, this.destroying.explode, (HighEnergyParticle.StatesInstance smi) => smi.master.collision == HighEnergyParticle.CollisionType.Creature).OnSignal(this.destroySignal, this.destroying.explode, (HighEnergyParticle.StatesInstance smi) => smi.master.collision == HighEnergyParticle.CollisionType.Minion)
-				.OnSignal(this.destroySignal, this.destroying.explode, (HighEnergyParticle.StatesInstance smi) => smi.master.collision == HighEnergyParticle.CollisionType.Solid)
-				.OnSignal(this.destroySignal, this.destroying.blackhole, (HighEnergyParticle.StatesInstance smi) => smi.master.collision == HighEnergyParticle.CollisionType.HighEnergyParticle)
-				.OnSignal(this.destroySignal, this.destroying.captured, (HighEnergyParticle.StatesInstance smi) => smi.master.collision == HighEnergyParticle.CollisionType.Captured)
-				.OnSignal(this.destroySignal, this.catchAndRelease, (HighEnergyParticle.StatesInstance smi) => smi.master.collision == HighEnergyParticle.CollisionType.CaptureAndRelease)
+			this.ready.OnSignal(this.destroySimpleSignal, this.destroying.instant).OnSignal(this.destroySignal, this.destroying.explode, (HighEnergyParticle.StatesInstance smi, StateMachine<HighEnergyParticle.States, HighEnergyParticle.StatesInstance, HighEnergyParticle, object>.SignalParameter param) => smi.master.collision == HighEnergyParticle.CollisionType.Creature).OnSignal(this.destroySignal, this.destroying.explode, (HighEnergyParticle.StatesInstance smi, StateMachine<HighEnergyParticle.States, HighEnergyParticle.StatesInstance, HighEnergyParticle, object>.SignalParameter param) => smi.master.collision == HighEnergyParticle.CollisionType.Minion)
+				.OnSignal(this.destroySignal, this.destroying.explode, (HighEnergyParticle.StatesInstance smi, StateMachine<HighEnergyParticle.States, HighEnergyParticle.StatesInstance, HighEnergyParticle, object>.SignalParameter param) => smi.master.collision == HighEnergyParticle.CollisionType.Solid)
+				.OnSignal(this.destroySignal, this.destroying.blackhole, (HighEnergyParticle.StatesInstance smi, StateMachine<HighEnergyParticle.States, HighEnergyParticle.StatesInstance, HighEnergyParticle, object>.SignalParameter param) => smi.master.collision == HighEnergyParticle.CollisionType.HighEnergyParticle)
+				.OnSignal(this.destroySignal, this.destroying.captured, (HighEnergyParticle.StatesInstance smi, StateMachine<HighEnergyParticle.States, HighEnergyParticle.StatesInstance, HighEnergyParticle, object>.SignalParameter param) => smi.master.collision == HighEnergyParticle.CollisionType.Captured)
+				.OnSignal(this.destroySignal, this.catchAndRelease, (HighEnergyParticle.StatesInstance smi, StateMachine<HighEnergyParticle.States, HighEnergyParticle.StatesInstance, HighEnergyParticle, object>.SignalParameter param) => smi.master.collision == HighEnergyParticle.CollisionType.CaptureAndRelease)
 				.Enter(delegate(HighEnergyParticle.StatesInstance smi)
 				{
 					smi.master.emitter.SetEmitting(true);

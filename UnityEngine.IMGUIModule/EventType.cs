@@ -30,17 +30,17 @@ namespace UnityEngine
 		TouchEnter,
 		TouchLeave,
 		TouchStationary,
-		[EditorBrowsable(EditorBrowsableState.Never)]
 		[Obsolete("Use MouseDown instead (UnityUpgradable) -> MouseDown", true)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		mouseDown = 0,
 		[Obsolete("Use MouseUp instead (UnityUpgradable) -> MouseUp", true)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
 		mouseUp,
-		[EditorBrowsable(EditorBrowsableState.Never)]
 		[Obsolete("Use MouseMove instead (UnityUpgradable) -> MouseMove", true)]
-		mouseMove,
 		[EditorBrowsable(EditorBrowsableState.Never)]
+		mouseMove,
 		[Obsolete("Use MouseDrag instead (UnityUpgradable) -> MouseDrag", true)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		mouseDrag,
 		[EditorBrowsable(EditorBrowsableState.Never)]
 		[Obsolete("Use KeyDown instead (UnityUpgradable) -> KeyDown", true)]
@@ -51,14 +51,14 @@ namespace UnityEngine
 		[EditorBrowsable(EditorBrowsableState.Never)]
 		[Obsolete("Use ScrollWheel instead (UnityUpgradable) -> ScrollWheel", true)]
 		scrollWheel,
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		[Obsolete("Use Repaint instead (UnityUpgradable) -> Repaint", true)]
-		[EditorBrowsable(EditorBrowsableState.Never)]
 		repaint,
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		[Obsolete("Use Layout instead (UnityUpgradable) -> Layout", true)]
-		[EditorBrowsable(EditorBrowsableState.Never)]
 		layout,
-		[Obsolete("Use DragUpdated instead (UnityUpgradable) -> DragUpdated", true)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
+		[Obsolete("Use DragUpdated instead (UnityUpgradable) -> DragUpdated", true)]
 		dragUpdated,
 		[Obsolete("Use DragPerform instead (UnityUpgradable) -> DragPerform", true)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
@@ -66,8 +66,8 @@ namespace UnityEngine
 		[Obsolete("Use Ignore instead (UnityUpgradable) -> Ignore", true)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
 		ignore,
-		[EditorBrowsable(EditorBrowsableState.Never)]
 		[Obsolete("Use Used instead (UnityUpgradable) -> Used", true)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		used
 	}
 }

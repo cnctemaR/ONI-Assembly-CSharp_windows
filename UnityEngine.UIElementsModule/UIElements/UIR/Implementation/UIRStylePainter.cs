@@ -486,7 +486,6 @@ namespace UnityEngine.UIElements.UIR.Implementation
 						VertexFlags vertexFlags;
 						this.TryAtlasTexture(rectParams.texture, rectParams.meshFlags, out rect, out flag4, out textureId, out vertexFlags);
 						MeshBuilderNative.NativeRectParams nativeRectParams = rectParams.ToNativeParams(rect);
-						this.ApplyInset(ref nativeRectParams, rectParams.texture);
 						bool flag5 = rectParams.texture != null;
 						MeshWriteDataInterface meshWriteDataInterface;
 						if (flag5)
@@ -1001,6 +1000,7 @@ namespace UnityEngine.UIElements.UIR.Implementation
 										Vector2 size = rect12.size;
 										size[i] = num14;
 										rect12.size = size;
+										rect2 = rect12;
 										for (int l = 0; l < num13; l++)
 										{
 											Vector2 position4 = rect12.position;
@@ -1176,7 +1176,7 @@ namespace UnityEngine.UIElements.UIR.Implementation
 
 		private void StampRectangleWithSubRect(MeshGenerationContextUtils.RectangleParams rectParams, Rect targetRect, Rect totalRect, Rect targetUV)
 		{
-			bool flag = targetRect.width < 1E-30f || targetRect.height < 1E-30f;
+			bool flag = targetRect.width < 0.001f || targetRect.height < 0.001f;
 			if (!flag)
 			{
 				Rect rect = targetRect;
@@ -1186,7 +1186,7 @@ namespace UnityEngine.UIElements.UIR.Implementation
 				subRect.position *= rect.size;
 				subRect.position += rect.position;
 				subRect.size *= rect.size;
-				bool flag2 = rectParams.HasSlices(1E-30f);
+				bool flag2 = rectParams.HasSlices(0.001f);
 				if (flag2)
 				{
 					rectParams.backgroundRepeatRect = Rect.zero;
@@ -1195,7 +1195,7 @@ namespace UnityEngine.UIElements.UIR.Implementation
 				else
 				{
 					Rect rect2 = MeshGenerationContextUtils.RectangleParams.RectIntersection(subRect, targetRect);
-					bool flag3 = rect2.size.x < 1E-30f || rect2.size.y < 1E-30f;
+					bool flag3 = rect2.size.x < 0.001f || rect2.size.y < 0.001f;
 					if (flag3)
 					{
 						return;
@@ -1393,33 +1393,6 @@ namespace UnityEngine.UIElements.UIR.Implementation
 				}
 				meshWriteData.SetAllVertices(array);
 				meshWriteData.SetAllIndices(array2);
-			}
-		}
-
-		private void ApplyInset(ref MeshBuilderNative.NativeRectParams rectParams, Texture tex)
-		{
-			Rect rect = rectParams.rect;
-			Vector4 rectInset = rectParams.rectInset;
-			bool flag = Mathf.Approximately(rect.size.x, 0f) || Mathf.Approximately(rect.size.y, 0f) || rectInset == Vector4.zero;
-			if (!flag)
-			{
-				Rect rect2 = rect;
-				rect.x += rectInset.x;
-				rect.y += rectInset.y;
-				rect.width -= rectInset.x + rectInset.z;
-				rect.height -= rectInset.y + rectInset.w;
-				rectParams.rect = rect;
-				Rect uv = rectParams.uv;
-				bool flag2 = tex != null && uv.width > 1E-30f && uv.height > 1E-30f;
-				if (flag2)
-				{
-					Vector2 vector = new Vector2(1f / rect2.width, 1f / rect2.height);
-					uv.x += rectInset.x * vector.x;
-					uv.y += rectInset.w * vector.y;
-					uv.width -= (rectInset.x + rectInset.z) * vector.x;
-					uv.height -= (rectInset.y + rectInset.w) * vector.y;
-					rectParams.uv = uv;
-				}
 			}
 		}
 

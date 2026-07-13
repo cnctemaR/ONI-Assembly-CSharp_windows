@@ -85,8 +85,8 @@ namespace Unity.Collections.LowLevel.Unsafe
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern NativeLeakDetectionMode GetLeakDetectionMode();
 
-		[ThreadSafe(ThrowsException = false)]
 		[BurstAuthorizedExternalMethod]
+		[ThreadSafe(ThrowsException = false)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void SetLeakDetectionMode(NativeLeakDetectionMode value);
 

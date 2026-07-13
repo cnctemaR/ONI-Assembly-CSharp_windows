@@ -40,7 +40,7 @@ public class DevLightGeneratorConfig : IBuildingConfig
 	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
 		go.AddTag(GameTags.DevBuilding);
-		go.AddTag(RoomConstraints.ConstraintTags.LightSource);
+		go.AddTag(GameTags.LightSource);
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)

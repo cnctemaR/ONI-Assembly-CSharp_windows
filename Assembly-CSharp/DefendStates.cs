@@ -21,9 +21,9 @@ public class DefendStates : GameStateMachine<DefendStates, DefendStates.Instance
 		this.protectEntity.moveToThreat.InitializeStates(this.masterTarget, this.target, this.protectEntity.attackThreat, null, CrabTuning.DEFEND_OFFSETS, null);
 		this.protectEntity.attackThreat.Enter(delegate(DefendStates.Instance smi)
 		{
-			smi.Play("slap_pre", KAnim.PlayMode.Once);
-			smi.Queue("slap", KAnim.PlayMode.Once);
-			smi.Queue("slap_pst", KAnim.PlayMode.Once);
+			smi.animcontroller.Play("slap_pre", KAnim.PlayMode.Once, 1f, 0f);
+			smi.animcontroller.Queue("slap", KAnim.PlayMode.Once, 1f, 0f);
+			smi.animcontroller.Queue("slap_pst", KAnim.PlayMode.Once, 1f, 0f);
 			smi.Schedule(0.5f, delegate
 			{
 				smi.GetComponent<Weapon>().AttackTarget(this.target.Get(smi));
@@ -49,6 +49,9 @@ public class DefendStates : GameStateMachine<DefendStates, DefendStates.Instance
 		{
 			chore.AddPrecondition(ChorePreconditions.instance.CheckBehaviourPrecondition, GameTags.Creatures.Defend);
 		}
+
+		[MyCmpGet]
+		public KBatchedAnimController animcontroller;
 	}
 
 	public class ProtectStates : GameStateMachine<DefendStates, DefendStates.Instance, IStateMachineTarget, DefendStates.Def>.State

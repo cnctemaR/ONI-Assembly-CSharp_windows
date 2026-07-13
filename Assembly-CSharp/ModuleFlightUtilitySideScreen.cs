@@ -93,6 +93,7 @@ public class ModuleFlightUtilitySideScreen : SideScreenContent
 				this.RefreshModulePanel(smi);
 			}
 		}
+		this.scrollRectLayout.preferredHeight = (this.scrollRectLayout.minHeight = Mathf.Min((float)this.modulePanels.Count, 2.25f) * this.modulePanelPrefab.GetComponent<RectTransform>().rect.height);
 	}
 
 	private void RefreshAll(object data = null)
@@ -104,29 +105,58 @@ public class ModuleFlightUtilitySideScreen : SideScreenContent
 	{
 		HierarchyReferences hierarchyReferences = this.modulePanels[module];
 		hierarchyReferences.GetReference<Image>("icon").sprite = Def.GetUISprite(module.master.gameObject, "ui", false).first;
-		KButton reference = hierarchyReferences.GetReference<KButton>("button");
-		reference.isInteractable = module.CanEmptyCargo();
-		reference.ClearOnClick();
-		reference.onClick += module.EmptyCargo;
-		KButton reference2 = hierarchyReferences.GetReference<KButton>("repeatButton");
+		hierarchyReferences.GetReference<RectTransform>("targetButtons").gameObject.SetActive(module.CanTargetClusterGridEntities);
+		if (module.CanTargetClusterGridEntities)
+		{
+			KButton reference = hierarchyReferences.GetReference<KButton>("selectTargetButton");
+			reference.onClick += delegate
+			{
+				ClusterMapScreen.Instance.ShowInSelectDestinationMode(module.master.GetComponent<ClusterDestinationSelector>());
+			};
+			KButton reference2 = hierarchyReferences.GetReference<KButton>("clearTargetButton");
+			reference2.GetComponentInChildren<ToolTip>().SetSimpleTooltip(UI.UISIDESCREENS.MODULEFLIGHTUTILITYSIDESCREEN.CLEAR_TARGET_BUTTON_TOOLTIP);
+			reference2.onClick += delegate
+			{
+				module.master.GetComponent<EntityClusterDestinationSelector>().SetDestination(AxialI.INVALID);
+				this.RefreshModulePanel(module);
+			};
+			if (module.master.GetComponent<EntityClusterDestinationSelector>().GetClusterEntityTarget() != null)
+			{
+				reference.GetComponentInChildren<LocText>().text = (module as StateMachine.Instance).GetMaster().GetComponent<EntityClusterDestinationSelector>().GetClusterEntityTarget()
+					.GetProperName();
+				reference.isInteractable = false;
+			}
+			else
+			{
+				reference.GetComponentInChildren<LocText>().text = UI.UISIDESCREENS.MODULEFLIGHTUTILITYSIDESCREEN.SELECT_TARGET_BUTTON;
+				reference.isInteractable = true;
+			}
+		}
+		KButton reference3 = hierarchyReferences.GetReference<KButton>("button");
+		reference3.isInteractable = module.CanEmptyCargo();
+		reference3.GetComponentInChildren<LocText>().text = module.GetButtonText;
+		reference3.GetComponentInChildren<ToolTip>().SetSimpleTooltip(module.GetButtonToolip);
+		reference3.ClearOnClick();
+		reference3.onClick += module.EmptyCargo;
+		KButton reference4 = hierarchyReferences.GetReference<KButton>("repeatButton");
 		if (module.CanAutoDeploy)
 		{
 			this.StyleRepeatButton(module);
-			reference2.ClearOnClick();
-			reference2.onClick += delegate
+			reference4.ClearOnClick();
+			reference4.onClick += delegate
 			{
 				this.OnRepeatClicked(module);
 			};
-			reference2.gameObject.SetActive(true);
+			reference4.gameObject.SetActive(true);
 		}
 		else
 		{
-			reference2.gameObject.SetActive(false);
+			reference4.gameObject.SetActive(false);
 		}
-		DropDown reference3 = hierarchyReferences.GetReference<DropDown>("dropDown");
-		reference3.targetDropDownContainer = GameScreenManager.Instance.ssOverlayCanvas;
-		reference3.Close();
-		CrewPortrait reference4 = hierarchyReferences.GetReference<CrewPortrait>("selectedPortrait");
+		DropDown reference5 = hierarchyReferences.GetReference<DropDown>("dropDown");
+		reference5.targetDropDownContainer = GameScreenManager.Instance.ssOverlayCanvas;
+		reference5.Close();
+		CrewPortrait reference6 = hierarchyReferences.GetReference<CrewPortrait>("selectedPortrait");
 		WorldContainer component = (module as StateMachine.Instance).GetMaster().GetComponent<RocketModuleCluster>().CraftInterface.GetComponent<WorldContainer>();
 		if (component != null && module.ChooseDuplicant)
 		{
@@ -135,17 +165,17 @@ public class ModuleFlightUtilitySideScreen : SideScreenContent
 				module.ChosenDuplicant = null;
 			}
 			int id = component.id;
-			reference3.gameObject.SetActive(true);
-			reference3.Initialize(Components.LiveMinionIdentities.GetWorldItems(id, false), new Action<IListableOption, object>(this.OnDuplicantEntryClick), null, new Action<DropDownEntry, object>(this.DropDownEntryRefreshAction), true, module);
-			reference3.selectedLabel.text = ((module.ChosenDuplicant != null) ? this.GetDuplicantRowName(module.ChosenDuplicant) : UI.UISIDESCREENS.MODULEFLIGHTUTILITYSIDESCREEN.SELECT_DUPLICANT.ToString());
-			reference4.gameObject.SetActive(true);
-			reference4.SetIdentityObject(module.ChosenDuplicant, false);
-			reference3.openButton.isInteractable = !module.ModuleDeployed;
+			reference5.gameObject.SetActive(true);
+			reference5.Initialize(Components.LiveMinionIdentities.GetWorldItems(id, false), new Action<IListableOption, object>(this.OnDuplicantEntryClick), null, new Action<DropDownEntry, object>(this.DropDownEntryRefreshAction), true, module);
+			reference5.selectedLabel.text = ((module.ChosenDuplicant != null) ? this.GetDuplicantRowName(module.ChosenDuplicant) : UI.UISIDESCREENS.MODULEFLIGHTUTILITYSIDESCREEN.SELECT_DUPLICANT.ToString());
+			reference6.gameObject.SetActive(true);
+			reference6.SetIdentityObject(module.ChosenDuplicant, false);
+			reference5.openButton.isInteractable = !module.ModuleDeployed;
 		}
 		else
 		{
-			reference3.gameObject.SetActive(false);
-			reference4.gameObject.SetActive(false);
+			reference5.gameObject.SetActive(false);
+			reference6.gameObject.SetActive(false);
 		}
 		hierarchyReferences.GetReference<LocText>("label").SetText(module.master.gameObject.GetProperName());
 	}
@@ -216,6 +246,9 @@ public class ModuleFlightUtilitySideScreen : SideScreenContent
 	public ColorStyleSetting repeatOn;
 
 	private Dictionary<IEmptyableCargo, HierarchyReferences> modulePanels = new Dictionary<IEmptyableCargo, HierarchyReferences>();
+
+	[SerializeField]
+	private LayoutElement scrollRectLayout;
 
 	private List<int> refreshHandle = new List<int>();
 }

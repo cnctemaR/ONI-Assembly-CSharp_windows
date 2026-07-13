@@ -8,8 +8,8 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	[NativeHeader("Modules/Physics/BatchCommands/RaycastCommand.h")]
 	[NativeHeader("Runtime/Jobs/ScriptBindings/JobsBindingsTypes.h")]
+	[NativeHeader("Modules/Physics/BatchCommands/RaycastCommand.h")]
 	public struct RaycastCommand
 	{
 		public RaycastCommand(Vector3 from, Vector3 direction, QueryParameters queryParameters, float distance = 3.4028235E+38f)

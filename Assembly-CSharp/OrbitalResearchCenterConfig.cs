@@ -65,13 +65,11 @@ public class OrbitalResearchCenterConfig : IBuildingConfig
 		{
 			new ComplexRecipe.RecipeElement("OrbitalResearchDatabank".ToTag(), 1f, ComplexRecipe.RecipeElement.TemperatureOperation.AverageTemperature, false)
 		};
-		AtmoSuitConfig.recipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("OrbitalResearchCenter", array, array2), array, array2)
-		{
-			time = 33f,
-			description = global::STRINGS.ITEMS.INDUSTRIAL_PRODUCTS.ORBITAL_RESEARCH_DATABANK.RECIPE_DESC,
-			nameDisplay = ComplexRecipe.RecipeNameDisplay.ResultWithIngredient,
-			fabricators = new List<Tag> { "OrbitalResearchCenter" }
-		};
+		ComplexRecipe complexRecipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("OrbitalResearchCenter", array, array2), array, array2);
+		complexRecipe.time = 33f;
+		complexRecipe.description = global::STRINGS.ITEMS.INDUSTRIAL_PRODUCTS.ORBITAL_RESEARCH_DATABANK.RECIPE_DESC;
+		complexRecipe.nameDisplay = ComplexRecipe.RecipeNameDisplay.ResultWithIngredient;
+		complexRecipe.fabricators = new List<Tag> { "OrbitalResearchCenter" };
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)

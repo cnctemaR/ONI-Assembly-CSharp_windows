@@ -9,7 +9,7 @@ public interface IBlueprintInfo : IHasDlcRestrictions
 
 	string desc { get; set; }
 
-	PermitRarity rarity { get; set; }
+	PermitRarity rarity { get; }
 
 	string animFile { get; set; }
 }

@@ -621,6 +621,8 @@ public class BuildMenu : KScreen
 			}),
 			new BuildMenu.DisplayInfo(BuildMenu.CacheHashString("Doors"), "icon_category_base", global::Action.BuildCategoryDoors, KKeyCode.D, new List<BuildMenu.BuildingInfo>
 			{
+				new BuildMenu.BuildingInfo("WoodenDoor", global::Action.BuildMenuKeyA),
+				new BuildMenu.BuildingInfo("InsulatedDoor", global::Action.BuildMenuKeyI),
 				new BuildMenu.BuildingInfo("Door", global::Action.BuildMenuKeyD),
 				new BuildMenu.BuildingInfo("ManualPressureDoor", global::Action.BuildMenuKeyA),
 				new BuildMenu.BuildingInfo("PressureDoor", global::Action.BuildMenuKeyE),
@@ -707,6 +709,7 @@ public class BuildMenu : KScreen
 				new BuildMenu.BuildingInfo("LuxuryBed", global::Action.BuildMenuKeyX),
 				new BuildMenu.BuildingInfo(LadderBedConfig.ID, global::Action.BuildMenuKeyL),
 				new BuildMenu.BuildingInfo("DiningTable", global::Action.BuildMenuKeyD),
+				new BuildMenu.BuildingInfo("MultiMinionDiningTable", global::Action.BuildMenuKeyQ),
 				new BuildMenu.BuildingInfo("FloorLamp", global::Action.BuildMenuKeyF),
 				new BuildMenu.BuildingInfo("CeilingLight", global::Action.BuildMenuKeyT),
 				new BuildMenu.BuildingInfo("SunLamp", global::Action.BuildMenuKeyS),
@@ -724,6 +727,7 @@ public class BuildMenu : KScreen
 				new BuildMenu.BuildingInfo("Sculpture", global::Action.BuildMenuKeyS),
 				new BuildMenu.BuildingInfo("IceSculpture", global::Action.BuildMenuKeyE),
 				new BuildMenu.BuildingInfo("ItemPedestal", global::Action.BuildMenuKeyD),
+				new BuildMenu.BuildingInfo("Shelf", global::Action.BuildMenuKeyV),
 				new BuildMenu.BuildingInfo("CrownMoulding", global::Action.BuildMenuKeyM),
 				new BuildMenu.BuildingInfo("CornerMoulding", global::Action.BuildMenuKeyN)
 			}),
@@ -861,6 +865,7 @@ public class BuildMenu : KScreen
 			}),
 			new BuildMenu.DisplayInfo(BuildMenu.CacheHashString("Refining"), "icon_category_refinery", global::Action.BuildCategoryRefining, KKeyCode.R, new List<BuildMenu.BuildingInfo>
 			{
+				new BuildMenu.BuildingInfo("FabricatedWoodMaker", global::Action.BuildMenuKeyW),
 				new BuildMenu.BuildingInfo("WaterPurifier", global::Action.BuildMenuKeyW),
 				new BuildMenu.BuildingInfo("AlgaeDistillery", global::Action.BuildMenuKeyA),
 				new BuildMenu.BuildingInfo("EthanolDistillery", global::Action.BuildMenuKeyX),
@@ -901,6 +906,7 @@ public class BuildMenu : KScreen
 				new BuildMenu.BuildingInfo("Gantry", global::Action.BuildMenuKeyT),
 				new BuildMenu.BuildingInfo("ModularLaunchpadPortBridge", global::Action.BuildMenuKeyU),
 				new BuildMenu.BuildingInfo("KeroseneEngine", global::Action.BuildMenuKeyE),
+				new BuildMenu.BuildingInfo("BiodieselEngine", global::Action.BuildMenuKeyF),
 				new BuildMenu.BuildingInfo("SolidBooster", global::Action.BuildMenuKeyB),
 				new BuildMenu.BuildingInfo("SteamEngine", global::Action.BuildMenuKeyS),
 				new BuildMenu.BuildingInfo("LiquidFuelTank", global::Action.BuildMenuKeyQ),

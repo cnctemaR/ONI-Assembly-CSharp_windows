@@ -238,7 +238,7 @@ public class ManualGenerator : RemoteWorkable, ISingleSliderControl, ISliderCont
 		return false;
 	}
 
-	private void OnOperationalChanged(object data)
+	private void OnOperationalChanged(object _)
 	{
 		if (!this.buildingEnabledButton.IsEnabled)
 		{

@@ -311,20 +311,20 @@ namespace UnityEngine.TextCore
 		[SerializeField]
 		private float m_Scale;
 
-		[SerializeField]
 		[NativeName("unitsPerEM")]
+		[SerializeField]
 		private int m_UnitsPerEM;
 
-		[NativeName("lineHeight")]
 		[SerializeField]
+		[NativeName("lineHeight")]
 		private float m_LineHeight;
 
-		[NativeName("ascentLine")]
 		[SerializeField]
+		[NativeName("ascentLine")]
 		private float m_AscentLine;
 
-		[NativeName("capLine")]
 		[SerializeField]
+		[NativeName("capLine")]
 		private float m_CapLine;
 
 		[SerializeField]
@@ -335,16 +335,16 @@ namespace UnityEngine.TextCore
 		[NativeName("baseline")]
 		private float m_Baseline;
 
-		[NativeName("descentLine")]
 		[SerializeField]
+		[NativeName("descentLine")]
 		private float m_DescentLine;
 
 		[NativeName("superscriptOffset")]
 		[SerializeField]
 		private float m_SuperscriptOffset;
 
-		[SerializeField]
 		[NativeName("superscriptSize")]
+		[SerializeField]
 		private float m_SuperscriptSize;
 
 		[SerializeField]
@@ -359,12 +359,12 @@ namespace UnityEngine.TextCore
 		[SerializeField]
 		private float m_UnderlineOffset;
 
-		[SerializeField]
 		[NativeName("underlineThickness")]
+		[SerializeField]
 		private float m_UnderlineThickness;
 
-		[SerializeField]
 		[NativeName("strikethroughOffset")]
+		[SerializeField]
 		private float m_StrikethroughOffset;
 
 		[SerializeField]

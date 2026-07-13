@@ -28,6 +28,7 @@ public class LogicClusterLocationSensorConfig : IBuildingConfig
 		buildingDef.Overheatable = false;
 		buildingDef.Floodable = false;
 		buildingDef.Entombable = false;
+		buildingDef.DefaultAnimState = "off_asteroid";
 		buildingDef.ViewMode = OverlayModes.Logic.ID;
 		buildingDef.AudioCategory = "Metal";
 		buildingDef.SceneLayer = Grid.SceneLayer.Building;

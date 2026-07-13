@@ -7,8 +7,8 @@ using UnityEngine.Scripting;
 
 namespace Unity.Jobs.LowLevel.Unsafe
 {
-	[NativeHeader("Runtime/Jobs/JobSystem.h")]
 	[NativeType(Header = "Runtime/Jobs/ScriptBindings/JobsBindings.h")]
+	[NativeHeader("Runtime/Jobs/JobSystem.h")]
 	public static class JobsUtility
 	{
 		public unsafe static void GetJobRange(ref JobRanges ranges, int jobIndex, out int beginIndex, out int endIndex)
@@ -166,8 +166,8 @@ namespace Unity.Jobs.LowLevel.Unsafe
 
 		public static extern int ThreadIndexCount
 		{
-			[BurstAuthorizedExternalMethod]
 			[FreeFunction("GetJobWorkerIndexCount", IsThreadSafe = true)]
+			[BurstAuthorizedExternalMethod]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}

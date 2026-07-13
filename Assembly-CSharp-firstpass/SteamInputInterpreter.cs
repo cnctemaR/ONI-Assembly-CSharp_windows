@@ -239,14 +239,15 @@ public class SteamInputInterpreter
 			this.GetControllerTypeForGlyphLookup(ref num2, ref empty);
 			num = num4 - num2;
 		}
-		if (num >= 0)
+		if (flag || this.spritesCache == null)
 		{
-			if (flag || this.spritesCache == null)
-			{
-				this.spritesCache = Resources.LoadAll<Sprite>("Sprite Assets/" + empty);
-			}
+			this.spritesCache = Resources.LoadAll<Sprite>("Sprite Assets/" + empty);
+		}
+		if (num >= 0 && this.spritesCache != null && num < this.spritesCache.Length)
+		{
 			return this.spritesCache[num];
 		}
+		global::Debug.LogWarning(string.Format("SteamInputInterpreter detected invalid sprite index {0} for {1}", num, empty));
 		if (!ShowEmptyOnError)
 		{
 			return this.errorSpriteCache[0];

@@ -12,5 +12,10 @@ public interface IUserControlledCapacity
 
 	bool WholeValues { get; }
 
+	bool ControlEnabled()
+	{
+		return true;
+	}
+
 	LocString CapacityUnits { get; }
 }

@@ -3,8 +3,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[UsedByNativeCode]
 	[AttributeUsage(AttributeTargets.Class)]
+	[UsedByNativeCode]
 	public class DefaultExecutionOrder : Attribute
 	{
 		public DefaultExecutionOrder(int order)

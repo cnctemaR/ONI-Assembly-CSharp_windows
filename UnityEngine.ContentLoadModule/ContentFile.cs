@@ -8,7 +8,11 @@ namespace Unity.Loading
 		public ContentFileUnloadHandle UnloadAsync()
 		{
 			this.ThrowIfInvalidHandle();
-			return ContentLoadInterface.ContentFile_UnloadAsync(this);
+			ContentLoadInterface.ContentFile_UnloadAsync(this);
+			return new ContentFileUnloadHandle
+			{
+				Id = this
+			};
 		}
 
 		public Object[] GetObjects()

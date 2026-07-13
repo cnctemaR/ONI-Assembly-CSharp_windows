@@ -5,6 +5,7 @@ using STRINGS;
 using TUNING;
 using UnityEngine;
 
+[EntityConfigOrder(5)]
 public class BaseBeeHiveConfig : IEntityConfig, IHasDlcRestrictions
 {
 	public string[] GetRequiredDlcIds()
@@ -88,7 +89,6 @@ public class BaseBeeHiveConfig : IEntityConfig, IHasDlcRestrictions
 				.PushInterruptGroup()
 				.Add(new HiveGrowingStates.Def(), true, -1)
 				.Add(new HiveHarvestStates.Def(), true, -1)
-				.Add(new PlayAnimsStates.Def(GameTags.Creatures.Poop, false, "poop", global::STRINGS.CREATURES.STATUSITEMS.EXPELLING_SOLID.NAME, global::STRINGS.CREATURES.STATUSITEMS.EXPELLING_SOLID.TOOLTIP), true, -1)
 				.Add(new HiveEatingStates.Def(BeeHiveTuning.CONSUMED_ORE), true, -1)
 				.PopInterruptGroup()
 				.Add(new IdleStandStillStates.Def(), true, -1);

@@ -9,9 +9,9 @@ using UnityEngine.Scripting;
 namespace UnityEngine
 {
 	[NativeHeader("Runtime/Scripting/DelayedCallUtility.h")]
+	[NativeHeader("Runtime/Mono/MonoBehaviour.h")]
 	[ExtensionOfNativeClass]
 	[RequiredByNativeCode]
-	[NativeHeader("Runtime/Mono/MonoBehaviour.h")]
 	public class MonoBehaviour : Behaviour
 	{
 		public CancellationToken destroyCancellationToken

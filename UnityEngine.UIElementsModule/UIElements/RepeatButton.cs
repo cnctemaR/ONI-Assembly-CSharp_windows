@@ -4,6 +4,27 @@ namespace UnityEngine.UIElements
 {
 	public class RepeatButton : TextElement
 	{
+		internal bool acceptClicksIfDisabled
+		{
+			get
+			{
+				return this.m_AcceptClicksIfDisabled;
+			}
+			set
+			{
+				bool flag = this.m_AcceptClicksIfDisabled == value;
+				if (!flag)
+				{
+					this.m_AcceptClicksIfDisabled = value;
+					bool flag2 = this.m_Clickable != null;
+					if (flag2)
+					{
+						this.m_Clickable.acceptClicksIfDisabled = value;
+					}
+				}
+			}
+		}
+
 		public RepeatButton()
 		{
 			base.AddToClassList(RepeatButton.ussClassName);
@@ -28,6 +49,8 @@ namespace UnityEngine.UIElements
 		}
 
 		private Clickable m_Clickable;
+
+		private bool m_AcceptClicksIfDisabled;
 
 		public new static readonly string ussClassName = "unity-repeat-button";
 

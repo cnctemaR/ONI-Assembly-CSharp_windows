@@ -192,8 +192,7 @@ public static class SearchUtil
 		{
 			nameDescSearchTerms = nameDescSearchTermsCache,
 			effect = matchCache,
-			recipes = list,
-			techTier = Db.Get().TechItems.GetTechTierForItem(def.PrefabID)
+			recipes = list
 		};
 	}
 
@@ -338,6 +337,11 @@ public static class SearchUtil
 			{
 				return this.FuzzyMatch.score;
 			}
+		}
+
+		public bool IsPassingScore()
+		{
+			return this.Score >= 79;
 		}
 
 		public FuzzySearch.Match FuzzyMatch { get; private set; }
@@ -516,14 +520,6 @@ public static class SearchUtil
 			SearchUtil.TieBreaker tieBreaker = new SearchUtil.TieBreaker(score);
 			tieBreaker.Consider<SearchUtil.MatchCache>(this.nameDescSearchTerms.nameDesc.name, buildingDefCache.nameDescSearchTerms.nameDesc.name);
 			tieBreaker.Consider(this.nameDescSearchTerms.SearchTermsScore.score, buildingDefCache.nameDescSearchTerms.SearchTermsScore.score);
-			if (!tieBreaker.IsTieBroken)
-			{
-				int num2 = this.techTier.CompareTo(buildingDefCache.techTier);
-				if (num2 != 0)
-				{
-					return num2;
-				}
-			}
 			tieBreaker.Consider<SearchUtil.MatchCache>(this.effect, buildingDefCache.effect);
 			return tieBreaker.Consider<SearchUtil.MatchCache>(this.nameDescSearchTerms.nameDesc.desc, buildingDefCache.nameDescSearchTerms.nameDesc.desc);
 		}
@@ -533,8 +529,6 @@ public static class SearchUtil
 		public SearchUtil.MatchCache effect;
 
 		public List<SearchUtil.NameDescCache> recipes;
-
-		public int techTier;
 	}
 
 	public class TechItemCache : IComparable, SearchUtil.IScore

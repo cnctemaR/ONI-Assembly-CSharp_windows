@@ -73,7 +73,7 @@ public class ReportErrorDialog : MonoBehaviour
 	{
 		if (KCrashReporter.terminateOnError)
 		{
-			App.Quit();
+			App.QuitCode(1);
 		}
 		if (KScreenManager.Instance)
 		{

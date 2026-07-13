@@ -7,9 +7,15 @@ public abstract class PathFinderAbilities
 		this.navigator = navigator;
 	}
 
+	public virtual string KPROFILER_getName()
+	{
+		return null;
+	}
+
 	public void Refresh()
 	{
 		this.prefabInstanceID = this.navigator.gameObject.GetComponent<KPrefabID>().InstanceID;
+		this.navigator.cachedCell = Grid.PosToCell(this.navigator);
 		this.Refresh(this.navigator);
 	}
 

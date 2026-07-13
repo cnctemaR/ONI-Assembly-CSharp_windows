@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using UnityEngine.Pool;
 
 public abstract class ProcessCondition
 {
@@ -31,6 +33,11 @@ public abstract class ProcessCondition
 	}
 
 	protected ProcessCondition parentCondition;
+
+	public static ObjectPool<List<ProcessCondition>> ListPool = new ObjectPool<List<ProcessCondition>>(() => new List<ProcessCondition>(16), null, delegate(List<ProcessCondition> list)
+	{
+		list.Clear();
+	}, null, false, 4, 4);
 
 	public enum ProcessConditionType
 	{

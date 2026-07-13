@@ -36,10 +36,11 @@ public readonly struct MinionBrowserScreenConfig
 		return new MinionBrowserScreenConfig(array, option);
 	}
 
-	public void ApplyAndOpenScreen(global::System.Action onClose = null)
+	public void ApplyAndOpenScreen(global::System.Action onClose = null, ClothingOutfitUtility.OutfitType outfitType = ClothingOutfitUtility.OutfitType.Clothing)
 	{
 		LockerNavigator.Instance.duplicantCatalogueScreen.GetComponent<MinionBrowserScreen>().Configure(this);
 		LockerNavigator.Instance.PushScreen(LockerNavigator.Instance.duplicantCatalogueScreen, onClose);
+		LockerNavigator.Instance.duplicantCatalogueScreen.GetComponent<MinionBrowserScreen>().Cycler.GoTo((int)outfitType);
 	}
 
 	public readonly MinionBrowserScreen.GridItem[] items;

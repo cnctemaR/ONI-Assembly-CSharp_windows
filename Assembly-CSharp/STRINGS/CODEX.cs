@@ -647,17 +647,17 @@ namespace STRINGS
 
 					public static LocString CRAB = "Mind the claws! Review data for more information.";
 
-					public static LocString DIVERGENTSPECIES = "Specimen responded gently to the probative apparatus, as though being careful not to cause any damage.\n\nReview data for more information.";
+					public static LocString DIVERGENT = "Specimen responded gently to the probative apparatus, as though being careful not to cause any damage.\n\nReview data for more information.";
 
 					public static LocString STATERPILLAR = "Warning: The electrical charge emitted by this specimen nearly short-circuited this building.";
 
 					public static LocString BEETA = "Strong collective consciousness detected. Review data for more information.";
 
-					public static LocString ICEBELLY = "Specimen produced substantial stool sample. Review data for more information.";
+					public static LocString BELLY = "Specimen produced substantial stool sample. Review data for more information.";
 
 					public static LocString SEAL = "Specimen scanned. Review data for more information.";
 
-					public static LocString WOODDEER = "This critter seemed amused by the scanning process. Review data for more information.";
+					public static LocString DEER = "This critter seemed amused by the scanning process. Review data for more information.";
 
 					public static LocString RAPTOR = "Species scanned. Review data for more information.";
 
@@ -669,9 +669,9 @@ namespace STRINGS
 
 					public static LocString PREHISTORICPACU = "This critter attacked the transducer. Review data for more information.";
 
-					public static LocString UNKNOWN_TITLE = "FAILURE TO FLUX: Unknown Species";
+					public static LocString UNKNOWN_TITLE = "MESSAGE FROM THE MANUFACTURER";
 
-					public static LocString UNKNOWN = "This species cannot be identified due to a malfunction in the genome-parsing software.\n\nPlease note that kicking the building's exterior is unlikely to correct this issue and may result in permanent damage to the system.";
+					public static LocString UNKNOWN = "Subject successfully scanned.\n\nFlux function unavailable due to genome-parsing malfunction.\n\nPlease note that kicking the building's exterior is unlikely to correct this issue and may result in permanent damage to the system.";
 				}
 
 				public class SPECIES_ENTRIES_EXPANDED
@@ -698,31 +698,31 @@ namespace STRINGS
 
 					public static LocString CRAB = "This species responded to the hum of the scanner machinery by waving its pincers in gestures that seemed to mimic iconic moves of the disco dance era.\n\nIs it possible that it might have been exposed to music at some point in its evolution?";
 
-					public static LocString DIVERGENTSPECIES = "Specimen responded gently to the probative apparatus, as though being careful not to cause any damage.\n\nIt also produced a series of deep, rhythmic vibrations during analysis. An attempt to communicate with the sensors, perhaps?";
+					public static LocString DIVERGENT = "Specimen responded gently to the probative apparatus, as though being careful not to cause any damage.\n\nIt also produced a series of deep, rhythmic vibrations during analysis. An attempt to communicate with the sensors, perhaps?";
 
 					public static LocString STATERPILLAR = "Warning: The electrical charge emitted by this specimen nearly short-circuited this building.";
 
 					public static LocString BEETA = "This species may not be fully sentient, but it possesses a strong collective consciousness.\n\nIt is unclear how information is communicated between members of the species. What is clear is that knowledge is being shared and passed down from one generation to another.\n\nMonitor closely.";
 
-					public static LocString ICEBELLY = "Specimen produced substantial stool sample directly onto scanner bed.\n\nRemarkably, its white coat remained pristine. Analysis of coat fibers revealed that each follicle is sealed with polytetrafluoroethylene, providing strong stain resistance.";
+					public static LocString BELLY = "Specimen produced substantial stool sample directly onto scanner bed.\n\nRemarkably, its white coat remained pristine. Analysis of coat fibers revealed that each follicle is sealed with polytetrafluoroethylene, providing strong stain resistance.";
 
 					public static LocString SEAL = "This critter's pupils appear to be permanently constricted, possibly as a result of long-term exposure to excess illumination.\n\nIts sense of smell is extremely well-developed, however: it immediately identified areas touched by previous species, and marked each one with a small puddle of liquid ethanol.";
 
-					public static LocString WOODDEER = "This critter's perpetual grin grew as it observed each step of the process extremely closely.\n\nBehavioral analysis indicates a tendency toward mischief. Close supervision - and minimal access to advanced machinery - is recommended.";
+					public static LocString DEER = "This critter's perpetual grin grew as it observed each step of the process extremely closely.\n\nBehavioral analysis indicates a tendency toward mischief. Close supervision - and minimal access to advanced machinery - is recommended.";
 
-					public static LocString RAPTORSPECIES = "This critter's x-ray imaging indicates that its cranial protrusion may not be a horn at all.\n\nIt is not composed of live bone surrounded by a keratin-and-protein shell, but rather an ennervated, calcified structure. An illogically located tooth, or perhaps a rostrum?\n\nFascinating.";
+					public static LocString RAPTOR = "This critter's x-ray imaging indicates that its cranial protrusion may not be a horn at all.\n\nIt is not composed of live bone surrounded by a keratin-and-protein shell, but rather an ennervated, calcified structure. An illogically located tooth, or perhaps a rostrum?\n\nFascinating.";
 
-					public static LocString STEGOSPECIES = "This critter was temporarily stuck in the scanning area due to its size. It appeared to enjoy being shoved backward and forward on the conveyor belt during dislodgment.\n\nUpon finally reaching the exit, the critter seemed confused as to why the ride was over.";
+					public static LocString STEGO = "This critter was temporarily stuck in the scanning area due to its size. It appeared to enjoy being shoved backward and forward on the conveyor belt during dislodgment.\n\nUpon finally reaching the exit, the critter seemed confused as to why the ride was over.";
 
-					public static LocString MOSQUITOSPECIES = "On the surface of this critter's wings are thousands of microperforations. These appear to act as acoustic liners, allowing the Gnit to approach targets without the high-pitched whine of its wingbeats giving away its position.";
+					public static LocString MOSQUITO = "On the surface of this critter's wings are thousands of microperforations. These appear to act as acoustic liners, allowing the Gnit to approach targets without the high-pitched whine of its wingbeats giving away its position.";
 
-					public static LocString CHAMELEONSPECIES = "Scanning interrupted due to instrument displacement caused by specimen's lingual grasp.\n\nResidual markings left by specimen's tongue ridges and grooves are a 72% match to a set of unmarked fingerprints from the Gravitas personnel database.";
+					public static LocString CHAMELEON = "Scanning interrupted due to instrument displacement caused by specimen's lingual grasp.\n\nResidual markings left by specimen's tongue ridges and grooves are a 72% match to a set of unmarked fingerprints from the Gravitas personnel database.";
 
-					public static LocString PREHISTORICPACUSPECIES = "This critter attacked the transducer.\n\nWhen the swallowed component was regurgitated, it was coated in microorganisms that predate this colony by at least several millenia.\n\nUnfortunately, it was reingested before analysis was completed.";
+					public static LocString PREHISTORICPACU = "This critter attacked the transducer.\n\nWhen the swallowed component was regurgitated, it was coated in microorganisms that predate this colony by at least several millenia.\n\nUnfortunately, it was reingested before analysis was completed.";
 
-					public static LocString UNKNOWN_TITLE = "Unknown Species";
+					public static LocString UNKNOWN_TITLE = "Non-Fluxable Species";
 
-					public static LocString UNKNOWN = "FAILURE TO FLUX: This species cannot be identified due to a malfunction in the genome-parsing software.\n\nPlease note that kicking the building's exterior is unlikely to correct this issue and may result in permanent damage to the system.";
+					public static LocString UNKNOWN = "MESSAGE FROM THE MANUFACTURER: Subject successfully scanned.\n\nFlux function unavailable due to genome-parsing malfunction.\n\nPlease note that kicking the building's exterior is unlikely to correct this issue and may result in permanent damage to the system.";
 				}
 
 				public class PARKING
@@ -1304,6 +1304,89 @@ namespace STRINGS
 					}
 				}
 			}
+
+			public class HIJACK_HEADQUARTERS
+			{
+				public static LocString NAME = "Printerceptor";
+
+				public static LocString DESCRIPTION = "Reboot an unsanctioned biogenetic facility.\n\nOnce activated, Duplicants can use it to siphon energy from the Printing Pod to power on-demand printing of...something.\n\nIt smells a bit like an old ranch.";
+
+				public static LocString DESCRIPTION_SHORT = "Reboot an unsanctioned biogenetic facility that siphons energy from the Printing Pod.";
+
+				public class BEGIN_POPUP
+				{
+					public static LocString NAME = "Story Trait: Printerceptor";
+
+					public static LocString CODEX_NAME = "First Encounter";
+
+					public static LocString DESCRIPTION = "My Duplicants have uncovered a fascinating machine. Its construction suggests that it was designed as an energy field disruptor, and retrofitted with printing capabilities.\n\nIt is locked behind a 13-digit passcode. One failed attempt could permanently disable the entire building.\n\nI can only hope that the code is also buried somewhere on this world.";
+				}
+
+				public class UNLOCK_POPUP
+				{
+					public static LocString NAME = "Story Trait: Printerceptor";
+
+					public static LocString CODEX_NAME = "Flushed Evidence";
+
+					public static LocString DESCRIPTION = string.Concat(new string[]
+					{
+						"My Duplicants have recovered the access code to unlock the ",
+						CODEX.STORY_TRAITS.HIJACK_HEADQUARTERS.NAME,
+						"!\n\nThe data storage medium was damaged during retrieval, but it has already served its purpose: the ",
+						CODEX.STORY_TRAITS.HIJACK_HEADQUARTERS.NAME,
+						"'s targeted printing technology is now at my colony's fingertips."
+					});
+
+					public static LocString BUTTON = "Close";
+				}
+
+				public class END_POPUP
+				{
+					public static LocString NAME = "Story Trait Complete: Printerceptor";
+
+					public static LocString CODEX_NAME = "Challenge Completed";
+
+					public static LocString DESCRIPTION = "Success! This building has printed its first viable organism. It contains zero detectable genetic defects.\n\nWe can now confidently reroute the Printing Pod's power to print the critters and seeds best suited for my colony's purposes. No species need ever be extinct again.\n\nA small personal item shook loose from the frame during use. Perhaps it belonged to the previous operator.";
+
+					public static LocString BUTTON = "Power On";
+				}
+
+				public class WHENIMGONE
+				{
+					public static LocString TITLE = "When I'm Gone";
+
+					public static LocString SUBTITLE = "ENCRYPTION LEVEL: NONE";
+
+					public class BODY
+					{
+						public static LocString CONTAINER1 = "<smallcaps>[Log Fragmentation Detected]</smallcaps>\n\n[LOG BEGINS]\n\n<i>...whoever you are...(static)...if you're watching this... You need to get out of the facility NOW. Don't talk to anyone. We thought we were the first...\nTiming is everything. </i>Time<i> is everything.\n\nGo to the Giga Co-Op downtown and tell them you're picking up an order for D.H. They'll give you a machine ... boot it up, stay offline.\n\n...instructions on the drive. Once you've verified the code, it'll tell you how to find the ...(static)...interceptor...data still stored on the server.\n\n...been rerouting power from the pods to the Bow... easing the demand...buying time to finish the Temporal Containment Field. But you can't buy time. You can only borrow it... the magnitude of our accumulated debt...\n\nWe're not the first to ... what happens when it all comes crashing ... all over again, and again, and again, and... I've long suspected the existence of other Bows......each time one of them exceeds capacity...\n...lines get splintered...grafted onto another...\n\nHow many other Earths...\n\nWhat else has the Director sacrificed?\n...(static)...</i>\n\n[LOG ENDS]\n------------------\n";
+					}
+				}
+
+				public class HANDOFF
+				{
+					public static LocString TITLE = "The Stall";
+
+					public static LocString SUBTITLE = "ENCRYPTION LEVEL: NONE";
+
+					public class BODY
+					{
+						public static LocString CONTAINER1 = "<smallcaps>[Log Fragmentation Detected]\n[Voice Recognition Unavailable]</smallcaps>\n\n[LOG BEGINS]\n\n(sound of running water)\n\nTech: Dr. Reed?\n\n(sound of a door opening)\n\nRuby: You came! I thought something happened.\n\nTech: Sorry I'm late. Real snafu in the cafeteria this morning. The new hazmat labels peel right off if they come into contact with mayonnaise.\n\nRuby: Why are there hazmat labels in the caf-\n\nTech: Did you bring the access codes for Techna's siphon?\n\nRuby: They're on this drive.\n\nRuby: Look, I need to know exactly who you're working with before I hand this over.\n\nTech: We're the good guys, Dr. Reed.\n\nRuby: That's who I thought we were. Try again.\n\nTech: I work with the people who made your Director who she is. In a way, we're sort of...family.\n\nRuby: The Director has no family.\n\nTech: Maybe not in this lifetime. The drive, please.\n\nRuby: What about Nikola? Do your people know where he is?\n\nTech: We're on it. You'll be the first to know.\n\n(sound of a firm knock on the door)\n\nVoice: Hello? Who's in there?\n\nRuby: (whispering) Those security guys must have followed you!\n\n(sound of banging on the door)\n\nVoice: Open up!\n\nRuby: If they get a hold of the data on that server...\n\nTech: Wait, what are you-\n\n(sound of a toilet flushing)\n\nTech: What have you done!?\n\nRuby: I'm sorry. It's gone. If they got their hands on it...I would never forgive myself.\n\n(sound of the door creaking open)\n\nRuby: Catalina! I thought you were-\n\nCatalina: Finally! What are you... you know what, I don't even care. Whatever you two are doing, can you do it in the hallway? I gotta go <i>bad.</i>\n\nRuby: Of course. Sorry.\n\nTech: Actually, we-\n\nCatalina: Dude. Don't make it weird. Get outta the way.\n\n(sound of a door slamming)\n\nRuby: What are you doing?\n\nTech: Pulling up the blueprints of the facility's plumbing system. You didn't think you could just flush unpatented trillion-dollar technology down the toilet, did you?\n\nRuby: Wait, you can't mean...you don't mean to <i>SELL</i> this technology! You don't understand the consequ-\n\nTech: We understand perfectly. You've been a great help, Dr. Reed. I trust you know better than to mention this to anyone.\n\n<smallcaps>[LOG ENDS]\n------------------\n";
+					}
+				}
+
+				public class ACTIVATECODE
+				{
+					public static LocString TITLE = "Access Code";
+
+					public static LocString SUBTITLE = "Service Receipt";
+
+					public class BODY
+					{
+						public static LocString CONTAINER1 = "<size=18>Giga Co-Op</size>\n<i><smallcaps>Proactive solutions for timeless tech</i>\nOpen 24/7\n\nReceipt #978-0-465-02656-2\n</smallcaps>\n\nDear Patron,\n\n<indent=5%>Thank you for using Giga Co-Op.\n\nPlease enter your thirteen-digit receipt number into your machine's control panel to access the updated operator's manual.\n\nDo not print or share this code.\n\nSubmit a review and get 4% off your next service!</indent>\n\n<smallcaps># ITEMS SOLD 2</smallcaps>\n\n\n------------------\n";
+					}
+				}
+			}
 		}
 
 		public class QUESTS
@@ -1571,6 +1654,14 @@ namespace STRINGS
 
 			public static LocString TEMPERATURE_UNDER = "Temperature under {0}";
 
+			public static LocString SUBLIMATION_NAME = "Sublimation";
+
+			public static LocString OFFGASS_NAME = "Off-Gas";
+
+			public static LocString SUBLIMATION_TRESHOLD = "Surrounding pressure under {0}";
+
+			public static LocString OFFGASS_TRESHOLD = "Surrounding pressure under {0}";
+
 			public static LocString CONSTRUCTION_TIME = "Build Time: {0} seconds";
 
 			public static LocString BUILDING_SIZE = "Building Size: {0} wide x {1} high";
@@ -1597,6 +1688,24 @@ namespace STRINGS
 				public static LocString COMFORT_RANGE = "Comfort range: <b>{0}</b> to <b>{1}</b>";
 
 				public static LocString NON_LETHAL_RANGE = "Livable range: <b>{0}</b> to <b>{1}</b>";
+			}
+		}
+
+		public class MISC
+		{
+			public class TIP_ICON
+			{
+				public class FARMING3_SKILL
+				{
+					public static LocString TOOLTIP = string.Concat(new string[]
+					{
+						"Skill Required\n\nDuplicants must possess the ",
+						DUPLICANTS.ROLES.SENIOR_FARMER.NAME,
+						" skill to salvage ",
+						ITEMS.INDUSTRIAL_PRODUCTS.PLANT_FIBER.NAME,
+						" during harvest"
+					});
+				}
 			}
 		}
 
@@ -1627,6 +1736,8 @@ namespace STRINGS
 			public class SHARED
 			{
 				public static LocString BUILDINGS_LIST_TITLE = "Buildings in this category:";
+
+				public static LocString LIST_TITLE = "In this category:";
 			}
 
 			public class CREATURERELOCATOR
@@ -1669,7 +1780,7 @@ namespace STRINGS
 
 			public class SHARED
 			{
-				public static LocString BUILDINGS_LIST_TITLE = "Buildings in this category:";
+				public static LocString BUILDINGS_LIST_TITLE = "In this category:";
 
 				public static LocString ROOMS_REQUIRED_LIST_TITLE = "Required in:";
 
@@ -1790,9 +1901,9 @@ namespace STRINGS
 
 			public class DECORATION
 			{
-				public static LocString TITLE = "Decor Items";
+				public static LocString TITLE = UI.FormatAsLink("Decor Buildings", "DECORATION");
 
-				public static LocString DESCRIPTION = "Buildings that give the colony a valuable aesthetic boost, and allow Duplicants to express themselves creatively.\n\nSome rooms require Fancy Decor items, which contribute extra-high levels of aesthetic enhancement.";
+				public static LocString DESCRIPTION = "Buildings that give the colony a valuable aesthetic boost, and allow Duplicants to express themselves creatively.\n\nSome decor buildings will only be counted as such if they have been appropriately fulfilled. For example, uncarved sculpting blocks and blank canvases do not contribute to a room's status.";
 
 				public static LocString FLAVOUR = "";
 
@@ -1811,9 +1922,31 @@ namespace STRINGS
 				});
 			}
 
+			public class ORNAMENT
+			{
+				public static LocString TITLE = UI.FormatAsLink("Displayed Ornaments", "ORNAMENTDISPLAYED");
+
+				public static LocString DESCRIPTION = string.Concat(new string[]
+				{
+					"Ornaments are items with exceptionally high ",
+					UI.FormatAsLink("Decor", "DECOR"),
+					", and must be displayed on a ",
+					BUILDINGS.PREFABS.ITEMPEDESTAL.NAME,
+					" or ",
+					BUILDINGS.PREFABS.SHELF.NAME,
+					" in order to be counted toward a room's requirements.\n\nThey can be obtained through exploration, excavation, and study. Some are admired in their original form, while others can be reworked or crafted by ",
+					UI.FormatAsLink("creative", "ARTING1"),
+					" Duplicants."
+				});
+
+				public static LocString FLAVOUR = "";
+
+				public static LocString ROOMSREQUIRING = "    • " + UI.FormatAsLink("Banquet Hall", "BANQUETHALL");
+			}
+
 			public class RANCHSTATIONTYPE
 			{
-				public static LocString TITLE = "Ranching Buildings";
+				public static LocString TITLE = UI.FormatAsLink("Ranching Buildings", "RANCHSTATIONTYPE");
 
 				public static LocString DESCRIPTION = "Buildings dedicated to " + UI.FormatAsLink("Critter", "CREATURES") + " husbandry.";
 
@@ -1824,7 +1957,7 @@ namespace STRINGS
 
 			public class BEDTYPE
 			{
-				public static LocString TITLE = "Beds";
+				public static LocString TITLE = UI.FormatAsLink("Beds", "BEDTYPE");
 
 				public static LocString DESCRIPTION = "Buildings that allow Duplicants to get much-needed rest. If a Duplicant is not assigned one, they will sleep on the floor.";
 
@@ -1861,7 +1994,7 @@ namespace STRINGS
 
 			public class LIGHTSOURCE
 			{
-				public static LocString TITLE = "Light Sources";
+				public static LocString TITLE = UI.FormatAsLink("Light Sources", "LIGHTSOURCE");
 
 				public static LocString DESCRIPTION = "Buildings that produce light, either by design or as a result of their primary operations.";
 
@@ -1872,7 +2005,7 @@ namespace STRINGS
 
 			public class ROCKETINTERIOR
 			{
-				public static LocString TITLE = "Rocket Interior";
+				public static LocString TITLE = UI.FormatAsLink("Rocket Interior", "ROCKETINTERIOR");
 
 				public static LocString DESCRIPTION = "Buildings that must be built inside a rocket.";
 
@@ -1881,7 +2014,7 @@ namespace STRINGS
 
 			public class COOKTOP
 			{
-				public static LocString TITLE = "Cooking Stations";
+				public static LocString TITLE = UI.FormatAsLink("Cooking Stations", "COOKTOP");
 
 				public static LocString DESCRIPTION = "Buildings that transform individual ingredients into delicious meals.";
 
@@ -1892,7 +2025,7 @@ namespace STRINGS
 
 			public class WARMINGSTATION
 			{
-				public static LocString TITLE = "Warming Stations";
+				public static LocString TITLE = UI.FormatAsLink("Warming Stations", "WARMINGSTATION");
 
 				public static LocString DESCRIPTION = "Buildings that Duplicants will visit when they are suffering the effects of cold environments.";
 
@@ -1901,7 +2034,7 @@ namespace STRINGS
 
 			public class GENERATORTYPE
 			{
-				public static LocString TITLE = "Generators";
+				public static LocString TITLE = UI.FormatAsLink("Generators", "GENERATORTYPE");
 
 				public static LocString DESCRIPTION = "Buildings that generate the " + UI.FormatAsLink("Power", "POWER") + " required to run machinery in my colony.\n\nBasic requirements can be met with an entry-level generator, but heavier-duty buildings are essential to colony development.";
 
@@ -1912,13 +2045,35 @@ namespace STRINGS
 
 			public class POWERBUILDING
 			{
-				public static LocString TITLE = "Power Buildings";
+				public static LocString TITLE = UI.FormatAsLink("Power Buildings", "POWERBUILDING");
 
 				public static LocString DESCRIPTION = "Buildings that generate, manage or store the electrical power a colony needs to thrive and expand.";
 
 				public static LocString FLAVOUR = "";
 
 				public static LocString ROOMSREQUIRING = "    • " + UI.FormatAsLink("Power Plant", "POWERPLANT");
+			}
+
+			public class DININGTABLETYPE
+			{
+				public static LocString TITLE = "Dining Tables";
+
+				public static LocString DESCRIPTION = "Buildings that enable Duplicants to enjoy their meals at a dignified distance from the floor.";
+
+				public static LocString FLAVOUR = "";
+
+				public static LocString CONFLICTINGROOMS = "    • " + UI.FormatAsLink("Banquet Hall", "GREATERHALL") + " (No Mess Table)\n";
+
+				public static LocString ROOMSREQUIRING = string.Concat(new string[]
+				{
+					"    • ",
+					UI.FormatAsLink("Mess Hall", "MESSHALL"),
+					"\n    • ",
+					UI.FormatAsLink("Great Hall", "GREATHALL"),
+					"\n    • ",
+					UI.FormatAsLink("Banquet Hall", "GREATERHALL"),
+					" (Communal Table)"
+				});
 			}
 		}
 
@@ -2029,15 +2184,31 @@ namespace STRINGS
 
 		public class GASSYMOO
 		{
+			public static LocString SPECIES_TITLE = "Moos";
+
+			public static LocString SPECIES_SUBTITLE = "Critter Species";
+
 			public static LocString TITLE = "Gassy Moo";
 
 			public static LocString SUBTITLE = "Domesticable Critter";
 
 			public class BODY
 			{
-				public static LocString CONTAINER1 = "Little is currently known of the Gassy Moo due to its alien nature and origin.\n\nIt is capable of surviving in zero gravity conditions and no atmosphere, and is dependent on a second alien species, " + UI.FormatAsLink("Gas Grass", "GASGRASS") + ", for its sustenance and survival.";
+				public static LocString CONTAINER1 = "Little is currently known of the Moo due to its alien nature and origin.\n\nIt is capable of surviving in zero gravity conditions and no atmosphere, and its method of reproduction has yet to be discovered.";
 
-				public static LocString CONTAINER2 = "The Moo has an even temperament and can be farmed for Natural Gas, though their method of reproduction has been as of yet undiscovered.";
+				public static LocString CONTAINER2 = "The Moo has an even temperament and cohabits well with others in a farm setting.";
+			}
+		}
+
+		public class DIESELMOO
+		{
+			public static LocString TITLE = "Husky Moo";
+
+			public static LocString SUBTITLE = "Critter Morph";
+
+			public class BODY
+			{
+				public static LocString CONTAINER1 = "<smallcaps>Pictured: \"Husky\" Moo variant</smallcaps>";
 			}
 		}
 
@@ -2627,13 +2798,15 @@ namespace STRINGS
 
 		public class DUPLICANT
 		{
-			public static LocString SPECIES_TITLE = "Duplicants";
+			public static LocString CODEXCATEGORYNAME = "Duplicants";
+
+			public static LocString SPECIES_TITLE = "Duplicant Types";
 
 			public static LocString SPECIES_SUBTITLE = "Colony Workers";
 
 			public class BODY
 			{
-				public static LocString CONTAINER1 = "Duplicants are printed at the " + UI.FormatAsLink("Printing Pod", "HEADQUARTERS") + ", emerging fully formed and clothed in standard-issue uniforms. Unique outfits can be found in the Supply Closet.\n\n";
+				public static LocString CONTAINER1 = "Duplicants are printed at the " + UI.FormatAsLink("Printing Pod", "HEADQUARTERS") + ", emerging fully formed and clothed in standard-issue uniforms. Unique outfits can be found in the Supply Closet.\n";
 			}
 		}
 
@@ -4470,6 +4643,61 @@ namespace STRINGS
 			}
 		}
 
+		public class ORNAMENT
+		{
+			public static LocString TITLE = "Ornaments";
+
+			public static LocString SUBTITLE = "Collectible Display Items";
+
+			public class BODY
+			{
+				public static LocString CONTAINER1 = string.Concat(new string[]
+				{
+					"Ornaments are decorative objects with which Duplicants enjoy sprucing up their colonies. They tend to be smaller than traditional artwork, and possess very high ",
+					UI.FormatAsLink("Decor", "DECOR"),
+					" value.\n\n",
+					UI.FormatAsLink("Displayed Ornaments", "REQUIREMENTCLASSORNAMENT"),
+					" exhibited atop a ",
+					BUILDINGS.PREFABS.ITEMPEDESTAL.NAME,
+					" or ",
+					BUILDINGS.PREFABS.SHELF.NAME,
+					" allow a colony to benefit from certain ",
+					UI.FormatAsLink("Room", "ROOMS"),
+					" bonuses.\n\n"
+				});
+			}
+		}
+
+		public class FOUNDOBJECT
+		{
+			public static LocString TITLE = "Found Objects ";
+
+			public class BODY
+			{
+				public static LocString CONTAINER1 = "In the course of everyday colony expansion and biome excavation, my Duplicants may uncover aesthetically pleasing displayable objects.\n\n";
+			}
+		}
+
+		public class KEEPSAKE
+		{
+			public static LocString TITLE = "Keepsakes";
+
+			public class BODY
+			{
+				public static LocString CONTAINER1 = "In the aftermath of a successful mission--be it the completion of a story trait or the survival of some epic event--my Duplicants sometimes form sentimental attachments to an item associated with that chapter of their lives.\n\n";
+			}
+		}
+
+		public class SPACEARTIFACT
+		{
+			public static LocString TITLE = "Space Artifacts";
+
+			public class BODY
+			{
+				public static LocString CONTAINER1 = "While out harvesting resources from space POIs, miners may discover rare artifacts that pique their interest.\n\nThese can be gathered and transported back to the colony using a rocket equipped with an " + BUILDINGS.PREFABS.ARTIFACTCARGOBAY.NAME + ".";
+			}
+		}
+
 		public class BLUE_GRASS
 		{
 			public static LocString TITLE = "Alveo Vera";
@@ -4585,7 +4813,7 @@ namespace STRINGS
 
 			public class BODY
 			{
-				public static LocString CONTAINER1 = "Cura Lotuses are ornamental aquatic plants that have inspired artists since their blossoms were first spotted bobbing on the surface of a quiet pond.\n\nThese ethereal beauties are a panacea for both the mind and the body - their delicate spores are highly sought-after for their natural antihistamine properties.";
+				public static LocString CONTAINER1 = "Cura Lotuses are adaptable aquatic plants that have inspired artists since their blossoms were first spotted bobbing on the surface of a quiet pond.\n\nThese ethereal beauties are a panacea for both the mind and the body - their delicate spores are highly sought-after for their natural antihistamine properties.";
 			}
 		}
 
@@ -5234,7 +5462,7 @@ namespace STRINGS
 
 			public class BODY
 			{
-				public static LocString CONTAINER1 = "<smallcaps>[Voice Recognition Initialized]\n[Subject Identified: A001]</smallcaps>\n\n[LOG BEGINS]\n\nDr. Techna's newest notes on Duplicant memories have revealed some interesting discoveries. It seems memories </i>can</i> be transferred to the cloned subject but it requires the host to be subjected to a machine that performs extremely detailed microanalysis. This in-depth dissection of the subject would produce the results we need but at the expense of destroying the host.\n\nOf course this is not ideal for our current situation. The time and energy it took to recruit Gravitas' highly trained staff would be wasted if we were to extirpate these people for the sake of experimentation. But perhaps we can use our Duplicants as experimental subjects until we perfect the process and look into finding volunteers for the future in order to obtain an ideal specimen. I will have to discuss this with Dr. Techna but I'm sure he would be enthusiastic about such an opportunity to continue his work.\n\nI am also very interested in the commercial opportunities this presents. Off the top of my head I can think of applications in genetics, AI development, and teleportation technology. This could be a significant financial windfall for the company.\n\n[LOG ENDS]";
+				public static LocString CONTAINER1 = "<smallcaps>[Voice Recognition Initialized]\n[Subject Identified: A001]</smallcaps>\n\n[LOG BEGINS]\n\nDr. Techna's newest notes on Duplicant memories have revealed some interesting discoveries. It seems memories <i>can</i> be transferred to the cloned subject but it requires the host to be subjected to a machine that performs extremely detailed microanalysis. This in-depth dissection of the subject would produce the results we need but at the expense of destroying the host.\n\nOf course this is not ideal for our current situation. The time and energy it took to recruit Gravitas' highly trained staff would be wasted if we were to extirpate these people for the sake of experimentation. But perhaps we can use our Duplicants as experimental subjects until we perfect the process and look into finding volunteers for the future in order to obtain an ideal specimen. I will have to discuss this with Dr. Techna but I'm sure he would be enthusiastic about such an opportunity to continue his work.\n\nI am also very interested in the commercial opportunities this presents. Off the top of my head I can think of applications in genetics, AI development, and teleportation technology. This could be a significant financial windfall for the company.\n\n[LOG ENDS]";
 			}
 		}
 
@@ -5322,7 +5550,18 @@ namespace STRINGS
 				CREATURES.SPECIES.PRICKLEGRASS.NAME,
 				" would be a combined decor value of ",
 				(MicrobeMusherConfig.DECOR.amount + PrickleGrassConfig.POSITIVE_DECOR_EFFECT.amount).ToString(),
-				"."
+				".\n\n"
+			});
+
+			public static LocString HEADER_3 = "Tutorials";
+
+			public static LocString PARAGRAPH_3 = string.Concat(new string[]
+			{
+				"To learn more, watch ",
+				UI.FormatAsLink("Video: Duplicant Morale", "VIDEOS13"),
+				" and see ",
+				UI.FormatAsLink("Tutorial: Stress Management", "MISCELLANEOUSTIPS2"),
+				".\n\n"
 			});
 		}
 
@@ -5353,7 +5592,7 @@ namespace STRINGS
 				UI.FormatAsLink("Orbital Data Collection Lab", "ORBITALRESEARCHCENTER"),
 				" in orbit around a Planetoid, and ",
 				UI.FormatAsLink("Cartographic Module", "SCANNERMODULE"),
-				" attached to a rocket can also reveal places on a Starmap.\n\nAlways check engine fuel to determine if your rocket can reach its destination, keeping in mind rockets can only land on Plantoids with a ",
+				" attached to a rocket can also reveal places on a Starmap.\n\nAlways check engine fuel to determine if your rocket can reach its destination, keeping in mind rockets can only land on Planetoids with a ",
 				UI.FormatAsLink("Rocket Platform", "LAUNCHPAD"),
 				" on it although some modules like ",
 				UI.FormatAsLink("Rover's Modules", "SCOUTMODULE"),
@@ -5376,6 +5615,87 @@ namespace STRINGS
 				UI.FormatAsLink("Rocket Platform", "LAUNCHPAD"),
 				" or a ",
 				UI.FormatAsLink("Orbital Cargo Module", "ORBITALCARGOMODULE"),
+				" deployed from a rocket in orbit.\n\nAdditionally, the ",
+				UI.FormatAsLink("Interplanetary Launcher", "RAILGUN"),
+				" can send ",
+				UI.FormatAsLink("Interplanetary Payloads", "RAILGUNPAYLOAD"),
+				" full of goods through space but must be opened by a ",
+				UI.FormatAsLink("Payload Opener", "RAILGUNPAYLOADOPENER"),
+				". A ",
+				UI.FormatAsLink("Targeting Beacon", "LANDINGBEACON"),
+				" can guide payloads and orbital modules to land at a specific location on a Planetoid surface."
+			});
+		}
+
+		public class EXOBASESDLC1
+		{
+			public static LocString TITLE = UI.FormatAsLink("Space Travel", "EXOBASES");
+
+			public static LocString HEADER_1 = "Building Rockets";
+
+			public static LocString PARAGRAPH_1 = string.Concat(new string[]
+			{
+				"Building a rocket first requires constructing a ",
+				UI.FormatAsLink("Rocket Platform", "LAUNCHPAD"),
+				" and adding modules from the menu. All rockets will require an engine, a nosecone and a Command Module piloted by a Duplicant possessing the ",
+				UI.FormatAsLink("Rocket Piloting", "ROCKETPILOTING1"),
+				" skill or higher. Note that the ",
+				UI.FormatAsLink("Solo Spacefarer Nosecone", "HABITATMODULESMALL"),
+				" functions as both a Command Module and a nosecone.\n\n"
+			});
+
+			public static LocString HEADER_2 = "Space Exploration";
+
+			public static LocString PARAGRAPH_2 = string.Concat(new string[]
+			{
+				"To scan space and see nearby interstellar destinations a ",
+				UI.FormatAsLink("Telescope", "CLUSTERTELESCOPE"),
+				" must first be built on the surface of a Planetoid. Sending an ",
+				UI.FormatAsLink("Orbital Data Collection Lab", "ORBITALRESEARCHCENTER"),
+				" into orbit around a Planetoid, and having a ",
+				UI.FormatAsLink("Cartographic Module", "SCANNERMODULE"),
+				" attached to a rocket can also reveal places on a Starmap.\n\nAlways check engine fuel to determine if your rocket can reach its destination, keeping in mind that rockets can only land on Planetoids with a ",
+				UI.FormatAsLink("Rocket Platform", "LAUNCHPAD"),
+				" on it. Notably, some modules, like ",
+				UI.FormatAsLink("Rover's Modules", "SCOUTMODULE"),
+				" and ",
+				UI.FormatAsLink("Trailblazer Modules", "PIONEERMODULE"),
+				", can be sent to the surface of a Planetoid from a rocket in orbit.\n\nIf a rocket runs out of fuel before it reaches a viable landing site, it will become stranded."
+			});
+
+			public static LocString HEADER_3 = "Crew Survival";
+
+			public static LocString PARAGRAPH_3 = string.Concat(new string[]
+			{
+				"Rockets must be stocked with adequate ",
+				UI.BUILDCATEGORIES.OXYGEN.NAME,
+				" and ",
+				UI.CODEX.CATEGORYNAMES.FOOD,
+				" to sustain crew members for the entirety of the journey. Shelf-stable rations that do not require refrigeration should be prioritized as onboard space is limited.\n\nSpending extended periods confined to a rocket interior also takes a toll on ",
+				UI.FormatAsLink("Morale", "MORALE"),
+				", which can be mitigated by providing a ",
+				UI.FormatAsLink("Toilet", "REQUIREMENTCLASSTOILETTYPE"),
+				" to prevent messes, choosing higher-",
+				UI.FormatAsLink("Decor", "DECOR"),
+				" furnishings, or dividing up the rocket's interior to benefit from ",
+				UI.CODEX.CATEGORYNAMES.ROOMS,
+				" bonuses."
+			});
+
+			public static LocString HEADER_4 = "Space Transport";
+
+			public static LocString PARAGRAPH_4 = string.Concat(new string[]
+			{
+				"Goods can be teleported between worlds with connected Supply Teleporters through ",
+				UI.FormatAsLink("Gas", "ELEMENTS_GAS"),
+				", ",
+				UI.FormatAsLink("Liquid", "ELEMENTS_LIQUID"),
+				", and ",
+				UI.FormatAsLink("Solid", "ELEMENTS_SOLID"),
+				" conduits.\n\nPlanetoids not connected through Supply Teleporters can use rockets to transport goods, either by landing on a ",
+				UI.FormatAsLink("Rocket Platform", "LAUNCHPAD"),
+				" or a ",
+				UI.FormatAsLink("Orbital Cargo Module", "ORBITALCARGOMODULE"),
 				" deployed from a rocket in orbit. Additionally, the ",
 				UI.FormatAsLink("Interplanetary Launcher", "RAILGUN"),
 				" can send ",
@@ -5385,6 +5705,29 @@ namespace STRINGS
 				". A ",
 				UI.FormatAsLink("Targeting Beacon", "LANDINGBEACON"),
 				" can guide payloads and orbital modules to land at a specific location on a Planetoid surface."
+			});
+
+			public static LocString HEADER_5 = "Space Mining";
+
+			public static LocString PARAGRAPH_5 = string.Concat(new string[]
+			{
+				"Retrieving resources from space requires mining a target mass using a rocket equipped with a ",
+				BUILDINGS.PREFABS.NOSECONEHARVEST.NAME,
+				", then gathering the harvestable fragments with a cargo module designed for those materials. Cargo modules include ",
+				BUILDINGS.PREFABS.SOLIDCARGOBAYSMALL.NAME,
+				", ",
+				BUILDINGS.PREFABS.LIQUIDCARGOBAYCLUSTER.NAME,
+				", ",
+				BUILDINGS.PREFABS.GASCARGOBAYSMALL.NAME,
+				", and more.\n\nFree-floating ",
+				UI.FormatAsLink("Space Artifacts", "SPACEARTIFACT"),
+				" and ",
+				ITEMS.INDUSTRIAL_PRODUCTS.ORBITAL_RESEARCH_DATABANK.NAME,
+				"s can be gathered with an ",
+				BUILDINGS.PREFABS.ARTIFACTCARGOBAY.NAME,
+				" or a ",
+				BUILDINGS.PREFABS.RESEARCHCLUSTERMODULE.NAME,
+				" respectively, no mining required."
 			});
 		}
 
@@ -5398,7 +5741,27 @@ namespace STRINGS
 
 			public static LocString HEADER_2 = "Cultivating Mutated Seeds";
 
-			public static LocString PARAGRAPH_2 = "Once mutated seeds have been analyzed in the Botanical Analyzer, they are ready to be planted. Continued exposure to naturally occurring radiation or a " + UI.FormatAsLink("Radiation Lamp", "RADIATIONLIGHT") + " is necessary to prevent wilting.\n\n";
+			public static LocString PARAGRAPH_2 = string.Concat(new string[]
+			{
+				"Once mutated seeds have been analyzed in the ",
+				UI.FormatAsLink("Botanical Analyzer", "GENETICANALYSISSTATION"),
+				", they are ready to be planted. Continued exposure to naturally occurring radiation or a ",
+				UI.FormatAsLink("Radiation Lamp", "RADIATIONLIGHT"),
+				" is necessary to prevent wilting.\n\n"
+			});
+
+			public static LocString HEADER_3 = "Critter Morphs";
+
+			public static LocString PARAGRAPH_3 = string.Concat(new string[]
+			{
+				"Variations within a ",
+				UI.FormatAsLink("critter", "CREATURES"),
+				" species is common, and while they may share some similarities, different members of a species produce different resources and have their own distinct preferences regarding habitats, environmental ",
+				UI.FormatAsLink("Temperature", "HEAT"),
+				", and diet.\n\nSee the ",
+				UI.FormatAsLink("Field Guide", "CREATURES::GUIDE"),
+				" to learn more about caring for critters."
+			});
 		}
 
 		public class HEALTH
@@ -5439,6 +5802,32 @@ namespace STRINGS
 				UI.FormatAsLink("scheduled", "MISCELLANEOUSTIPS14"),
 				" for rest.\n\n"
 			});
+
+			public static LocString HEADER_4 = "Tutorials";
+
+			public static LocString PARAGRAPH_4 = string.Concat(new string[]
+			{
+				"To learn more about supporting healthy Duplicant function, see:\n    • ",
+				UI.FormatAsLink("Tutorial: Food Safety", "MISCELLANEOUSTIPS11"),
+				"\n    • ",
+				UI.FormatAsLink("Tutorial: Scheduling", "MISCELLANEOUSTIPS14"),
+				"\n    • ",
+				UI.FormatAsLink("Tutorial: Germs and Disease", "MISCELLANEOUSTIPS10"),
+				"\n"
+			});
+
+			public static LocString HEADER_5 = "Tutorials";
+
+			public static LocString PARAGRAPH_5 = string.Concat(new string[]
+			{
+				"To learn more about supporting healthy Duplicant function, see:\n    • ",
+				UI.FormatAsLink("Tutorial: Food Safety", "MISCELLANEOUSTIPS11"),
+				"\n    • ",
+				UI.FormatAsLink("Tutorial: Powering Bionics", "MISCELLANEOUSTIPS20"),
+				"\n    • ",
+				UI.FormatAsLink("Tutorial: Oiling Bionics", "MISCELLANEOUSTIPS23"),
+				"\n\n"
+			});
 		}
 
 		public class HEAT
@@ -5455,7 +5844,7 @@ namespace STRINGS
 
 			public static LocString HEADER_3 = "Thermal Energy";
 
-			public static LocString PARAGRAPH_3 = "Temperature increase when the thermal energy of a substance increases. The value of temperature is equal to the total Thermal Energy divided by the Specific Heat Capacity of the substance. Because Specific Heat Capacity varies between substances so significantly, it is often the case a substance can have a higher temperature than another despite a lower overall thermal energy. This quality makes Water require nearly four times the amount of thermal energy to increase in temperature compared to Oxygen.\n\n";
+			public static LocString PARAGRAPH_3 = "Temperature increases when the thermal energy of a substance increases. The value of temperature is equal to the total Thermal Energy divided by the Specific Heat Capacity of the substance. Because Specific Heat Capacity varies between substances so significantly, it is often the case a substance can have a higher temperature than another despite a lower overall thermal energy. This quality makes Water require nearly four times the amount of thermal energy to increase in temperature compared to Oxygen.\n\n";
 
 			public static LocString HEADER_4 = "Conduction and Insulation";
 
@@ -5463,7 +5852,18 @@ namespace STRINGS
 
 			public static LocString HEADER_5 = "State Changes";
 
-			public static LocString PARAGRAPH_5 = "Water ice melts into liquid water when its temperature rises above its melting point. Liquid water boils into steam when its temperature rises above its boiling point. Similar transitions in state occur for most elements, but each element has its own threshold temperatures. Sometimes the transitions are not reversible - crude oil boiled into sour gas will not condense back to crude oil when cooled. Instead, the substance might condense into a totally different element with a different utility. \n\n";
+			public static LocString PARAGRAPH_5 = "Water ice melts into liquid water when its temperature rises above its melting point. Liquid water boils into steam when its temperature rises above its boiling point. Similar transitions in state occur for most elements, but each element has its own threshold temperatures. Sometimes the transitions are not reversible - crude oil boiled into sour gas will not condense back to crude oil when cooled. Instead, the substance might condense into a totally different element with a different utility.\n\n";
+
+			public static LocString HEADER_6 = "Tutorials";
+
+			public static LocString PARAGRAPH_6 = string.Concat(new string[]
+			{
+				"To learn more, watch ",
+				UI.FormatAsLink("Video: Insulation", "VIDEOS17"),
+				" and see the ",
+				UI.FormatAsLink("Duplicant Temperature", "MISCELLANEOUSTIPS8"),
+				" tutorial.\n\n"
+			});
 		}
 
 		public class LIGHT
@@ -5508,6 +5908,10 @@ namespace STRINGS
 				BUILDINGS.PREFABS.SOLARPANEL.NAME,
 				" generates power proportional to how many Lux it is exposed to.\n\n"
 			});
+
+			public static LocString HEADER_4 = "Video: Power Circuits";
+
+			public static LocString PARAGRAPH_4 = "To learn more about how to keep a colony well-lit, watch the " + UI.FormatAsLink("Power Circuits", "VIDEOS16") + " video tutorial.\n\n";
 		}
 
 		public class MORALE
@@ -5541,6 +5945,17 @@ namespace STRINGS
 			public static LocString HEADER_3 = "Overjoyed Responses";
 
 			public static LocString PARAGRAPH_3 = "If a Duplicant has a very high Morale value, they will spontaneously display an Overjoyed Response. Each Duplicant has a different Overjoyed Behavior - but all overjoyed responses are good. Some will positively affect Building " + UI.FormatAsLink("Decor", "DECOR") + ", others will positively affect Duplicant morale or productivity.\n\n";
+
+			public static LocString HEADER_4 = "Tutorials";
+
+			public static LocString PARAGRAPH_4 = string.Concat(new string[]
+			{
+				"To learn more, watch ",
+				UI.FormatAsLink("Video: Duplicant Morale", "VIDEOS13"),
+				" and see ",
+				UI.FormatAsLink("Tutorial: Stress Management", "MISCELLANEOUSTIPS2"),
+				".\n\n"
+			});
 		}
 
 		public class POWER
@@ -5582,6 +5997,10 @@ namespace STRINGS
 				1000.ToString(),
 				" Watt limit.\n\n"
 			});
+
+			public static LocString HEADER_5 = "Video: Power Circuits";
+
+			public static LocString PARAGRAPH_5 = "To learn more, watch the " + UI.FormatAsLink("Power Circuits", "VIDEOS16") + " video tutorial.\n\n";
 		}
 
 		public class PRIORITY
@@ -5606,6 +6025,10 @@ namespace STRINGS
 			public static LocString HEADER_3 = "Priority Tool";
 
 			public static LocString PARAGRAPH_3 = "The priority of errands can often be modified using the " + UI.FormatAsTool("Priority tool", global::Action.Prioritize) + ". The values applied by this tool are always less influential than the Errand Type priorities described above. If two errands with equal Errand Type Priority are available to a Duplicant, they will choose the errand with a higher priority setting as applied by the tool.\n\n";
+
+			public static LocString HEADER_4 = "Tutorial: Errand Priorities";
+
+			public static LocString PARAGRAPH_4 = "To learn more, see " + UI.FormatAsLink("Tutorial: Errand Priorities", "MISCELLANEOUSTIPS6") + ".";
 		}
 
 		public class RADIATION
@@ -5624,7 +6047,7 @@ namespace STRINGS
 				UI.FormatAsLink("Lead", "LEAD"),
 				", is crucial to ensuring that Duplicants avoid ",
 				UI.FormatAsLink("Radiation Sickness", "RADIATIONSICKNESS"),
-				"."
+				".\n\n"
 			});
 
 			public static LocString HEADER_2 = "Radiation Sickness";
@@ -5676,8 +6099,12 @@ namespace STRINGS
 				UI.FormatAsLink("Steam Turbine", "STEAMTURBINE2"),
 				" to produce a considerable source of ",
 				UI.FormatAsLink("Power", "POWER"),
-				"."
+				".\n\n"
 			});
+
+			public static LocString HEADER_4 = "Tutorial";
+
+			public static LocString PARAGRAPH_4 = "To learn more, see " + UI.FormatAsLink("Tutorial: Radiation", "MISCELLANEOUSTIPS19") + ".\n\n";
 		}
 
 		public class RESEARCH
@@ -5767,6 +6194,17 @@ namespace STRINGS
 			public static LocString HEADER_2 = "Stress Responses";
 
 			public static LocString PARAGRAPH_2 = "If a Duplicant has very high stress values they will experience a Stress Response episode. Each Duplicant has a different Stress Behavior - but all stress responses are bad. After the stress behavior episode is done, the Duplicants stress will reset to a lower value. Though, if the factors causing the Duplicant's high stress are not corrected they are bound to have another stress response episode.\n\n";
+
+			public static LocString HEADER_3 = "Tutorials";
+
+			public static LocString PARAGRAPH_3 = string.Concat(new string[]
+			{
+				"To learn more about managing Duplicants' moods, watch ",
+				UI.FormatAsLink("Video: Duplicant Morale", "VIDEOS13"),
+				" and see ",
+				UI.FormatAsLink("Tutorial: Stress Management", "MISCELLANEOUSTIPS2"),
+				".\n\n"
+			});
 		}
 	}
 }

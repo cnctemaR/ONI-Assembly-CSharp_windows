@@ -26,11 +26,17 @@ public class CodexConversionPanel : CodexWidget<CodexConversionPanel>
 	}
 
 	public CodexConversionPanel(string title, ElementUsage[] ins, ElementUsage[] outs, GameObject converter)
+		: this(title, ins, outs, converter, null)
+	{
+	}
+
+	public CodexConversionPanel(string title, ElementUsage[] ins, ElementUsage[] outs, GameObject converter, CodexConversionPanel.IconSettings aidIcon)
 	{
 		this.title = title;
 		this.ins = ((ins != null) ? ins : new ElementUsage[0]);
 		this.outs = ((outs != null) ? outs : new ElementUsage[0]);
 		this.Converter = converter;
+		this.aidIcon = aidIcon;
 	}
 
 	public override void Configure(GameObject contentGameObject, Transform displayPane, Dictionary<CodexTextStyle, TextStyleSetting> textStyles)
@@ -112,6 +118,16 @@ public class CodexConversionPanel : CodexWidget<CodexConversionPanel>
 		{
 			ManagementMenu.Instance.codexScreen.ChangeArticle(UI.ExtractLinkID(this.Converter.GetProperName()), false, default(Vector3), CodexScreen.HistoryDirection.NewArticle);
 		};
+		Image reference = component2.GetReference<Image>("AidIconIcon");
+		reference.gameObject.SetActive(this.aidIcon != null);
+		if (this.aidIcon != null)
+		{
+			global::Tuple<Sprite, Color> uisprite3 = Def.GetUISprite(this.aidIcon.spriteName, "ui", false);
+			reference.sprite = uisprite3.first;
+			reference.color = uisprite3.second;
+			component2.GetReference<ToolTip>("AidIconTooltip").toolTip = this.aidIcon.tooltip;
+			component2.GetReference<KButton>("AidIconButton").onClick += this.aidIcon.onClickActions;
+		}
 		bool flag2 = false;
 		array = this.outs;
 		for (int i = 0; i < array.Length; i++)
@@ -123,11 +139,11 @@ public class CodexConversionPanel : CodexWidget<CodexConversionPanel>
 				float amount2 = elementUsage2.amount;
 				flag2 = true;
 				HierarchyReferences component3 = Util.KInstantiateUI(this.materialPrefab, this.resultsContainer, true).GetComponent<HierarchyReferences>();
-				global::Tuple<Sprite, Color> uisprite3 = this.GetUISprite(tag);
-				if (uisprite3 != null)
+				global::Tuple<Sprite, Color> uisprite4 = this.GetUISprite(tag);
+				if (uisprite4 != null)
 				{
-					component3.GetReference<Image>("Icon").sprite = uisprite3.first;
-					component3.GetReference<Image>("Icon").color = uisprite3.second;
+					component3.GetReference<Image>("Icon").sprite = uisprite4.first;
+					component3.GetReference<Image>("Icon").color = uisprite4.second;
 				}
 				GameUtil.TimeSlice timeSlice2 = (elementUsage2.continuous ? GameUtil.TimeSlice.PerCycle : GameUtil.TimeSlice.None);
 				component3.GetReference<LocText>("Amount").text = ((elementUsage2.customFormating == null) ? GameUtil.GetFormattedByTag(tag, amount2, timeSlice2) : elementUsage2.customFormating(tag, amount2, elementUsage2.continuous));
@@ -187,4 +203,15 @@ public class CodexConversionPanel : CodexWidget<CodexConversionPanel>
 	private ElementUsage[] outs;
 
 	private GameObject Converter;
+
+	public CodexConversionPanel.IconSettings aidIcon;
+
+	public class IconSettings
+	{
+		public string spriteName;
+
+		public string tooltip;
+
+		public global::System.Action onClickActions;
+	}
 }

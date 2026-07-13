@@ -104,7 +104,7 @@ namespace UnityEngine
 
 		[NativeMethod("GetPathArray_Binding")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern int GetPathArray_Internal(int index, [Unmarshalled] [NotNull("ArgumentNullException")] Vector2[] points);
+		private extern int GetPathArray_Internal(int index, [NotNull("ArgumentNullException")] [Unmarshalled] Vector2[] points);
 
 		public int GetPath(int index, List<Vector2> points)
 		{

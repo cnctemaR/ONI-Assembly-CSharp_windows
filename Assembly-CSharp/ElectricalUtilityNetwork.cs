@@ -98,7 +98,7 @@ public class ElectricalUtilityNetwork : UtilityNetwork
 				}
 				if (this.targetOverloadedWire != null)
 				{
-					this.targetOverloadedWire.Trigger(-794517298, new BuildingHP.DamageSourceInfo
+					this.targetOverloadedWire.BoxingTrigger(-794517298, new BuildingHP.DamageSourceInfo
 					{
 						damage = 1,
 						source = global::STRINGS.BUILDINGS.DAMAGESOURCES.CIRCUIT_OVERLOADED,

@@ -110,7 +110,7 @@ public class SpecialCargoBayClusterReceptacle : SingleEntityReceptacle, IBaggedS
 		this.originWorldID = -1;
 		base.occupyingObject = null;
 		base.UpdateActive();
-		this.UpdateStatusItem();
+		base.UpdateStatusItem();
 		if (!this.isDoorOpen)
 		{
 			if (this.IsRocketOnGround)
@@ -220,7 +220,7 @@ public class SpecialCargoBayClusterReceptacle : SingleEntityReceptacle, IBaggedS
 		this.originWorldID = num;
 		this.PositionOccupyingObject();
 		this.SubscribeToOccupant();
-		this.UpdateStatusItem();
+		base.UpdateStatusItem();
 	}
 
 	private void OnTrappedCritterTagsChanged(object obj)
@@ -281,22 +281,21 @@ public class SpecialCargoBayClusterReceptacle : SingleEntityReceptacle, IBaggedS
 		}
 	}
 
-	protected override void UpdateStatusItem()
+	protected override void UpdateStatusItem(KSelectable selectable)
 	{
-		KSelectable component = base.GetComponent<KSelectable>();
 		bool flag = base.Occupant != null;
-		if (component != null)
+		if (selectable != null)
 		{
 			if (flag)
 			{
-				component.AddStatusItem(Db.Get().BuildingStatusItems.SpecialCargoBayClusterCritterStored, this);
+				selectable.AddStatusItem(Db.Get().BuildingStatusItems.SpecialCargoBayClusterCritterStored, this);
 			}
 			else
 			{
-				component.RemoveStatusItem(Db.Get().BuildingStatusItems.SpecialCargoBayClusterCritterStored, false);
+				selectable.RemoveStatusItem(Db.Get().BuildingStatusItems.SpecialCargoBayClusterCritterStored, false);
 			}
 		}
-		base.UpdateStatusItem();
+		base.UpdateStatusItem(selectable);
 	}
 
 	private void OnCargoBayRelocated(object data)

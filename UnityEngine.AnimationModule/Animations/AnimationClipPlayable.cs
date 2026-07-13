@@ -6,10 +6,10 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Animations
 {
+	[NativeHeader("Modules/Animation/ScriptBindings/AnimationClipPlayable.bindings.h")]
+	[NativeHeader("Modules/Animation/Director/AnimationClipPlayable.h")]
 	[StaticAccessor("AnimationClipPlayableBindings", StaticAccessorType.DoubleColon)]
 	[RequiredByNativeCode]
-	[NativeHeader("Modules/Animation/Director/AnimationClipPlayable.h")]
-	[NativeHeader("Modules/Animation/ScriptBindings/AnimationClipPlayable.bindings.h")]
 	public struct AnimationClipPlayable : IPlayable, IEquatable<AnimationClipPlayable>
 	{
 		public static AnimationClipPlayable Create(PlayableGraph graph, AnimationClip clip)

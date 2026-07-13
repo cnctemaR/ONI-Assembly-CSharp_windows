@@ -6,10 +6,10 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeHeader("PhysicsScriptingClasses.h")]
-	[NativeHeader("Modules/Physics/RaycastHit.h")]
 	[NativeHeader("Runtime/Interfaces/IRaycast.h")]
+	[NativeHeader("PhysicsScriptingClasses.h")]
 	[UsedByNativeCode]
+	[NativeHeader("Modules/Physics/RaycastHit.h")]
 	public struct RaycastHit
 	{
 		public Collider collider

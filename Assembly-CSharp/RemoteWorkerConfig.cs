@@ -56,7 +56,8 @@ public class RemoteWorkerConfig : IEntityConfig, IHasDlcRestrictions
 		navigator.CurrentNavType = NavType.Floor;
 		navigator.defaultSpeed = 1f;
 		navigator.updateProber = true;
-		navigator.maxProbingRadius = 0;
+		navigator.maxProbeRadiusX = 25;
+		navigator.maxProbeRadiusY = 1;
 		navigator.sceneLayer = Grid.SceneLayer.Creatures;
 		PrimaryElement primaryElement = gameObject.AddOrGet<PrimaryElement>();
 		primaryElement.ElementID = SimHashes.Steel;

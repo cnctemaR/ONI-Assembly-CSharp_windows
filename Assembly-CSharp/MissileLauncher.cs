@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using KSerialization;
 using UnityEngine;
 
@@ -196,8 +197,13 @@ public class MissileLauncher : GameStateMachine<MissileLauncher, MissileLauncher
 		public float maxAngle = 80f;
 	}
 
-	public new class Instance : GameStateMachine<MissileLauncher, MissileLauncher.Instance, IStateMachineTarget, MissileLauncher.Def>.GameInstance
+	public new class Instance : GameStateMachine<MissileLauncher, MissileLauncher.Instance, IStateMachineTarget, MissileLauncher.Def>.GameInstance, IMissileSelectionInterface
 	{
+		public bool IsAnyCosmicBlastShotAllowed()
+		{
+			return MissileLauncherConfig.CosmicBlastShotTypes.Any<Tag>((Tag match) => this.AmmunitionIsAllowed(match));
+		}
+
 		public WorldContainer myWorld
 		{
 			get
@@ -275,9 +281,20 @@ public class MissileLauncher : GameStateMachine<MissileLauncher, MissileLauncher
 						component2.selectedTags.Add(gameObject.PrefabID());
 					}
 					component2.selectedTags.Remove(GassyMooCometConfig.ID);
+					component2.selectedTags.Remove(DieselMooCometConfig.ID);
 				}
 			}
-			this.ManualDeliveryKgs = base.smi.gameObject.GetComponents<ManualDeliveryKG>();
+			foreach (ManualDeliveryKG manualDeliveryKG in base.smi.gameObject.GetComponents<ManualDeliveryKG>())
+			{
+				if (manualDeliveryKG.RequestedItemTag == "MissileBasic")
+				{
+					this.ManualDeliveryMissile = manualDeliveryKG;
+				}
+				else
+				{
+					this.ManualDeliveryLongRange = manualDeliveryKG;
+				}
+			}
 		}
 
 		public override void StartSM()
@@ -288,7 +305,7 @@ public class MissileLauncher : GameStateMachine<MissileLauncher, MissileLauncher
 			this.clusterDestinationSelector = base.smi.master.GetComponent<EntityClusterDestinationSelector>();
 			if (this.clusterDestinationSelector != null)
 			{
-				this.clusterDestinationSelector.assignable = this.AmmunitionIsAllowed("MissileLongRange");
+				this.clusterDestinationSelector.assignable = this.IsAnyCosmicBlastShotAllowed();
 			}
 			this.UpdateAmmunitionDelivery();
 			this.UpdateMeterVisibility();
@@ -301,7 +318,7 @@ public class MissileLauncher : GameStateMachine<MissileLauncher, MissileLauncher
 			base.OnCleanUp();
 		}
 
-		private void OnHighlight(object data)
+		private void OnHighlight(object _)
 		{
 			KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
 			base.smi.cannonAnimController.HighlightColour = component.HighlightColour;
@@ -324,7 +341,7 @@ public class MissileLauncher : GameStateMachine<MissileLauncher, MissileLauncher
 					this.clusterDestinationSelector = base.smi.master.GetComponent<EntityClusterDestinationSelector>();
 					if (this.clusterDestinationSelector != null)
 					{
-						this.clusterDestinationSelector.assignable = this.AmmunitionIsAllowed("MissileLongRange");
+						this.clusterDestinationSelector.assignable = this.IsAnyCosmicBlastShotAllowed();
 					}
 					if (smi.sm.longRangeTarget != null)
 					{
@@ -347,7 +364,7 @@ public class MissileLauncher : GameStateMachine<MissileLauncher, MissileLauncher
 					{
 						storage = this.MissileStorage;
 					}
-					else if (component.PrefabTag == "MissileLongRange")
+					else if (MissileLauncherConfig.CosmicBlastShotTypes.Contains(component.PrefabTag))
 					{
 						storage = this.LongRangeStorage;
 					}
@@ -364,7 +381,7 @@ public class MissileLauncher : GameStateMachine<MissileLauncher, MissileLauncher
 		private void UpdateMeterVisibility()
 		{
 			this.meter.gameObject.SetActive(this.AmmunitionIsAllowed("MissileBasic"));
-			this.longRangemeter.gameObject.SetActive(this.AmmunitionIsAllowed("MissileLongRange"));
+			this.longRangemeter.gameObject.SetActive(this.IsAnyCosmicBlastShotAllowed());
 		}
 
 		public void Searching(float dt)
@@ -454,6 +471,7 @@ public class MissileLauncher : GameStateMachine<MissileLauncher, MissileLauncher
 				{
 					pickupable = EntitySplitter.Split(pickupable, 1f, null);
 				}
+				pickupable.allowedChoreTypes = MissileLauncher.Instance.empty_chore_list;
 				this.SetMissileElement(gameObject);
 				GameObject gameObject2 = base.smi.sm.meteorTarget.Get(base.smi);
 				if (!gameObject2.IsNullOrDestroyed())
@@ -466,7 +484,15 @@ public class MissileLauncher : GameStateMachine<MissileLauncher, MissileLauncher
 
 		public void LaunchLongRangeMissile()
 		{
-			GameObject gameObject = this.LongRangeStorage.FindFirst("MissileLongRange");
+			GameObject gameObject = null;
+			foreach (Tag tag in MissileLauncherConfig.CosmicBlastShotTypes)
+			{
+				gameObject = this.LongRangeStorage.FindFirst(tag);
+				if (gameObject != null)
+				{
+					break;
+				}
+			}
 			if (gameObject != null)
 			{
 				Pickupable pickupable = gameObject.GetComponent<Pickupable>();
@@ -478,6 +504,7 @@ public class MissileLauncher : GameStateMachine<MissileLauncher, MissileLauncher
 				{
 					pickupable = EntitySplitter.Split(pickupable, 1f, null);
 				}
+				pickupable.allowedChoreTypes = MissileLauncher.Instance.empty_chore_list;
 				this.SetMissileElement(gameObject);
 				GameObject gameObject2 = base.smi.sm.longRangeTarget.Get(base.smi);
 				if (!gameObject2.IsNullOrDestroyed())
@@ -686,7 +713,28 @@ public class MissileLauncher : GameStateMachine<MissileLauncher, MissileLauncher
 			this.ammunitionPermissions[tag] = allowed;
 			this.UpdateAmmunitionDelivery();
 			this.OnStorage(null);
+			this.DropAmmunitionFromStorage(this.MissileStorage);
+			this.DropAmmunitionFromStorage(this.LongRangeStorage);
 			this.UpdateMeterVisibility();
+		}
+
+		public void OnRowToggleClick()
+		{
+			if (this.clusterDestinationSelector != null)
+			{
+				this.clusterDestinationSelector.assignable = this.IsAnyCosmicBlastShotAllowed();
+			}
+			base.GetComponent<FlatTagFilterable>().currentlyUserAssignable = this.AmmunitionIsAllowed("MissileBasic");
+		}
+
+		public List<Tag> GetValidAmmunitionTags()
+		{
+			List<Tag> list = new List<Tag> { "MissileBasic", "MissileLongRange" };
+			if (GameplayEventManager.Instance.GetGameplayEventInstance(Db.Get().GameplayEvents.LargeImpactor.IdHash, -1) == null)
+			{
+				list.Remove("MissileLongRange");
+			}
+			return list;
 		}
 
 		public bool AmmunitionIsAllowed(Tag tag)
@@ -696,10 +744,37 @@ public class MissileLauncher : GameStateMachine<MissileLauncher, MissileLauncher
 
 		private void UpdateAmmunitionDelivery()
 		{
-			foreach (ManualDeliveryKG manualDeliveryKG in this.ManualDeliveryKgs)
+			bool flag = false;
+			bool flag2 = this.AmmunitionIsAllowed("MissileLongRange");
+			if (flag2)
 			{
-				bool flag = this.AmmunitionIsAllowed(manualDeliveryKG.RequestedItemTag);
-				manualDeliveryKG.Pause(!flag, "ammunitionnotallowed");
+				this.ManualDeliveryLongRange.RequestedItemTag = GameTags.LongRangeMissile;
+			}
+			else if (flag2)
+			{
+				this.ManualDeliveryLongRange.RequestedItemTag = "MissileLongRange";
+			}
+			else
+			{
+				flag = true;
+			}
+			this.ManualDeliveryLongRange.Pause(flag, "ammunitionnotallowed");
+			this.ManualDeliveryMissile.Pause(!this.AmmunitionIsAllowed("MissileBasic"), "ammunitionnotallowed");
+		}
+
+		private void DropAmmunitionFromStorage(Storage targetStorage)
+		{
+			for (int i = targetStorage.items.Count - 1; i >= 0; i--)
+			{
+				GameObject gameObject = targetStorage.items[i];
+				if (!(gameObject == null))
+				{
+					KPrefabID component = gameObject.GetComponent<KPrefabID>();
+					if (!this.AmmunitionIsAllowed(component.PrefabTag))
+					{
+						targetStorage.Drop(gameObject, true);
+					}
+				}
 			}
 		}
 
@@ -712,7 +787,9 @@ public class MissileLauncher : GameStateMachine<MissileLauncher, MissileLauncher
 
 		private Storage LoadingStorage;
 
-		public ManualDeliveryKG[] ManualDeliveryKgs;
+		public ManualDeliveryKG ManualDeliveryMissile;
+
+		public ManualDeliveryKG ManualDeliveryLongRange;
 
 		[MyCmpReq]
 		public KSelectable Selectable;
@@ -748,6 +825,8 @@ public class MissileLauncher : GameStateMachine<MissileLauncher, MissileLauncher
 		public GameStateMachine<MissileLauncher, MissileLauncher.Instance, IStateMachineTarget, MissileLauncher.Def>.State CooldownGoToState;
 
 		private WorldContainer worldContainer;
+
+		private static List<ChoreType> empty_chore_list = new List<ChoreType>();
 	}
 
 	public class OnState : GameStateMachine<MissileLauncher, MissileLauncher.Instance, IStateMachineTarget, MissileLauncher.Def>.State

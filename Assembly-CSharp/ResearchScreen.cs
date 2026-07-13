@@ -25,15 +25,9 @@ public class ResearchScreen : KModalScreen
 	{
 		base.OnPrefabInit();
 		base.ConsumeMouseScroll = true;
-		Transform transform = base.transform;
-		while (this.m_Raycaster == null)
-		{
-			this.m_Raycaster = transform.GetComponent<GraphicRaycaster>();
-			if (this.m_Raycaster == null)
-			{
-				transform = transform.parent;
-			}
-		}
+		this.canvasGroup = base.GetComponent<CanvasGroup>();
+		this.m_Raycaster = base.GetComponent<GraphicRaycaster>();
+		this.scrollContentRaycaster = this.scrollContent.GetComponent<GraphicRaycaster>();
 	}
 
 	private void ZoomOut()
@@ -62,7 +56,7 @@ public class ResearchScreen : KModalScreen
 
 	private void Update()
 	{
-		if (!base.canvas.enabled)
+		if (!this.IsScreenActive())
 		{
 			return;
 		}
@@ -162,7 +156,7 @@ public class ResearchScreen : KModalScreen
 	{
 		base.Subscribe(Research.Instance.gameObject, -1914338957, new Action<object>(this.OnActiveResearchChanged));
 		base.Subscribe(Game.Instance.gameObject, -107300940, new Action<object>(this.OnResearchComplete));
-		base.Subscribe(Game.Instance.gameObject, -1974454597, delegate(object o)
+		this.deactivateResearchScreenHandle = base.Subscribe(Game.Instance.gameObject, -1974454597, delegate(object o)
 		{
 			this.Show(false);
 		});
@@ -215,6 +209,7 @@ public class ResearchScreen : KModalScreen
 			Tech tech = resources[j];
 			researchEntry.name = tech.Name + " Panel";
 			Vector3 vector5 = tech.center + vector4;
+			researchEntry.researchScreenReference = this;
 			researchEntry.transform.rectTransform().anchoredPosition = vector5;
 			researchEntry.transform.rectTransform().sizeDelta = new Vector2(tech.width, tech.height);
 			this.entryMap.Add(tech, researchEntry);
@@ -293,10 +288,7 @@ public class ResearchScreen : KModalScreen
 	protected override void OnCleanUp()
 	{
 		base.OnCleanUp();
-		base.Unsubscribe(Game.Instance.gameObject, -1974454597, delegate(object o)
-		{
-			this.Deactivate();
-		});
+		base.Unsubscribe(Game.Instance.gameObject, ref this.deactivateResearchScreenHandle);
 	}
 
 	private IEnumerator WaitAndSetActiveResearch()
@@ -449,24 +441,19 @@ public class ResearchScreen : KModalScreen
 		}
 	}
 
+	public override bool IsScreenActive()
+	{
+		return this.canvasGroup.alpha > 0f;
+	}
+
 	public override void Show(bool show = true)
 	{
 		this.mouseOver = false;
 		this.scrollContentChildFitter.enabled = show;
-		foreach (Canvas canvas in base.GetComponentsInChildren<Canvas>(true))
-		{
-			if (canvas.enabled != show)
-			{
-				canvas.enabled = show;
-			}
-		}
-		CanvasGroup component = base.GetComponent<CanvasGroup>();
-		if (component != null)
-		{
-			component.interactable = show;
-			component.blocksRaycasts = show;
-			component.ignoreParentGroups = true;
-		}
+		this.canvasGroup.alpha = (float)(show ? 1 : 0);
+		this.m_Raycaster.enabled = show;
+		this.scrollContentRaycaster.enabled = show;
+		this.sideBar.Show(show);
 		this.OnShow(show);
 	}
 
@@ -511,10 +498,6 @@ public class ResearchScreen : KModalScreen
 
 	public override void OnKeyUp(KButtonEvent e)
 	{
-		if (!base.canvas.enabled)
-		{
-			return;
-		}
 		if (!e.Consumed)
 		{
 			if (e.IsAction(global::Action.MouseRight) && !this.isDragging && !this.draggingJustEnded)
@@ -551,10 +534,6 @@ public class ResearchScreen : KModalScreen
 
 	public override void OnKeyDown(KButtonEvent e)
 	{
-		if (!base.canvas.enabled)
-		{
-			return;
-		}
 		if (!e.Consumed)
 		{
 			if (e.TryConsume(global::Action.MouseRight))
@@ -651,6 +630,8 @@ public class ResearchScreen : KModalScreen
 
 	private GraphicRaycaster m_Raycaster;
 
+	private GraphicRaycaster scrollContentRaycaster;
+
 	private PointerEventData m_PointerEventData;
 
 	private Vector3 currentScrollPosition;
@@ -666,6 +647,8 @@ public class ResearchScreen : KModalScreen
 	[SerializeField]
 	private KChildFitter scrollContentChildFitter;
 
+	private CanvasGroup canvasGroup;
+
 	private bool isDragging;
 
 	private Vector3 dragStartPosition;
@@ -680,7 +663,7 @@ public class ResearchScreen : KModalScreen
 
 	private bool draggingJustEnded;
 
-	private float targetZoom = 1f;
+	private float targetZoom = 0.6f;
 
 	private float currentZoom = 1f;
 
@@ -711,6 +694,8 @@ public class ResearchScreen : KModalScreen
 
 	[SerializeField]
 	private float edgeClampFactor = 0.5f;
+
+	private int deactivateResearchScreenHandle = -1;
 
 	public enum ResearchState
 	{

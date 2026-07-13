@@ -178,7 +178,7 @@ namespace STRINGS
 
 			public class SCOUT
 			{
-				public static LocString NAME = "Rover";
+				public static LocString NAME = UI.FormatAsLink("Rover", "SCOUTROVER");
 
 				public static LocString DESC = "A curious bot that can remotely explore new " + UI.CLUSTERMAP.PLANETOID_KEYWORD + " locations.";
 			}

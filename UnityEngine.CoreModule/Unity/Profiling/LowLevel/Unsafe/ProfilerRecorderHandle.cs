@@ -61,8 +61,8 @@ namespace Unity.Profiling.LowLevel.Unsafe
 			return profilerRecorderHandle;
 		}
 
-		[NativeMethod(IsThreadSafe = true)]
 		[RequiredMember]
+		[NativeMethod(IsThreadSafe = true)]
 		internal unsafe static ProfilerRecorderHandle GetByName__Unmanaged(ProfilerCategory category, byte* name, int nameLen)
 		{
 			ProfilerRecorderHandle profilerRecorderHandle;

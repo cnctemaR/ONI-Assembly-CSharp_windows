@@ -6,8 +6,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeHeader("Modules/AssetBundle/Public/AssetBundleLoadingCache.h")]
 	[UsedByNativeCode]
+	[NativeHeader("Modules/AssetBundle/Public/AssetBundleLoadingCache.h")]
 	[Serializable]
 	[StructLayout(LayoutKind.Sequential)]
 	internal static class AssetBundleLoadingCache

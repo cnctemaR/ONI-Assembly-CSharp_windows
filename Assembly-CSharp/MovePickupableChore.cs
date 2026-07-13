@@ -28,10 +28,9 @@ public class MovePickupableChore : Chore<MovePickupableChore.StatesInstance>
 		base.smi.sm.pickupablesource.Set(pickupable.gameObject, base.smi, false);
 		base.smi.sm.deliverypoint.Set(target.gameObject, base.smi, false);
 		this.movePlacer = target.gameObject;
-		bool flag = MinionGroupProber.Get().IsReachable(Grid.PosToCell(pickupable), OffsetGroups.Standard) && MinionGroupProber.Get().IsReachable(Grid.PosToCell(target.gameObject), OffsetGroups.Standard);
-		this.OnReachableChanged(flag);
-		pickupable.Subscribe(-1432940121, new Action<object>(this.OnReachableChanged));
-		target.Subscribe(-1432940121, new Action<object>(this.OnReachableChanged));
+		this.OnReachableChanged(BoxedBools.Box(MinionGroupProber.Get().IsReachable(Grid.PosToCell(pickupable), OffsetGroups.Standard) && MinionGroupProber.Get().IsReachable(Grid.PosToCell(target.gameObject), OffsetGroups.Standard)));
+		this.pickupableOnReachableChangedHandlerID = pickupable.Subscribe(-1432940121, new Action<object>(this.OnReachableChanged));
+		this.targetOnReachableChangedHandlerID = target.Subscribe(-1432940121, new Action<object>(this.OnReachableChanged));
 		Prioritizable component2 = target.GetComponent<Prioritizable>();
 		if (!component2.IsPrioritizable())
 		{
@@ -40,9 +39,23 @@ public class MovePickupableChore : Chore<MovePickupableChore.StatesInstance>
 		base.SetPrioritizable(target.GetComponent<Prioritizable>());
 	}
 
+	public override void Cleanup()
+	{
+		base.Cleanup();
+		if (this.target != null)
+		{
+			this.target.Unsubscribe(this.targetOnReachableChangedHandlerID);
+		}
+		GameObject gameObject = base.smi.sm.pickupablesource.Get(base.smi);
+		if (gameObject != null)
+		{
+			gameObject.Unsubscribe(this.pickupableOnReachableChangedHandlerID);
+		}
+	}
+
 	private void OnReachableChanged(object data)
 	{
-		Color color = (((bool)data) ? Color.white : new Color(0.91f, 0.21f, 0.2f));
+		Color color = (((Boxed<bool>)data).value ? Color.white : new Color(0.91f, 0.21f, 0.2f));
 		this.SetColor(this.movePlacer, color);
 	}
 
@@ -79,6 +92,10 @@ public class MovePickupableChore : Chore<MovePickupableChore.StatesInstance>
 		base.smi.sm.deliverer.Set(context.consumerState.gameObject, base.smi, false);
 		base.Begin(context);
 	}
+
+	private int pickupableOnReachableChangedHandlerID;
+
+	private int targetOnReachableChangedHandlerID;
 
 	public GameObject movePlacer;
 
@@ -144,7 +161,18 @@ public class MovePickupableChore : Chore<MovePickupableChore.StatesInstance>
 				}
 			});
 			this.approachstorage.DefaultState(this.approachstorage.deliveryStorage);
-			this.approachstorage.deliveryStorage.InitializeStates(new Func<MovePickupableChore.StatesInstance, NavTactic>(this.GetNavTactic), this.deliverer, this.deliverypoint, this.delivering.storing, this.delivering.deliverfail, null);
+			this.approachstorage.deliveryStorage.InitializeStates(new Func<MovePickupableChore.StatesInstance, NavTactic>(this.GetNavTactic), this.deliverer, this.deliverypoint, this.delivering.storing, this.delivering.deliverfail, null).Target(this.deliverer).EventHandler(GameHashes.OnStorageChange, delegate(MovePickupableChore.StatesInstance smi, object data)
+			{
+				GameObject gameObject3 = data as GameObject;
+				if (gameObject3 != null)
+				{
+					GameObject gameObject4 = this.pickup.Get(smi);
+					if (gameObject4 == null || gameObject3 == gameObject4)
+					{
+						smi.GoTo(this.delivering.deliverfail);
+					}
+				}
+			});
 			this.delivering.storing.Target(this.deliverer).DoDelivery(this.deliverer, this.deliverypoint, this.success, this.delivering.deliverfail);
 			this.delivering.deliverfail.ReturnFailure();
 			this.success.Enter(delegate(MovePickupableChore.StatesInstance smi)
@@ -152,20 +180,20 @@ public class MovePickupableChore : Chore<MovePickupableChore.StatesInstance>
 				Storage component = this.deliverypoint.Get(smi).GetComponent<Storage>();
 				Storage component2 = this.deliverer.Get(smi).GetComponent<Storage>();
 				float num = this.actualamount.Get(smi);
-				GameObject gameObject3 = this.pickup.Get(smi);
-				num += gameObject3.GetComponent<PrimaryElement>().Mass;
+				GameObject gameObject5 = this.pickup.Get(smi);
+				num += gameObject5.GetComponent<PrimaryElement>().Mass;
 				this.actualamount.Set(num, smi, false);
 				component2.Transfer(this.pickup.Get(smi), component, false, false);
-				this.DropPickupable(component, gameObject3);
+				this.DropPickupable(component, gameObject5);
 				CancellableMove component3 = component.GetComponent<CancellableMove>();
-				Movable component4 = gameObject3.GetComponent<Movable>();
+				Movable component4 = gameObject5.GetComponent<Movable>();
 				component3.RemoveMovable(component4);
 				component4.ClearMove();
 				if (!this.IsDeliveryComplete(smi))
 				{
-					GameObject gameObject4 = this.pickupablesource.Get(smi);
+					GameObject gameObject6 = this.pickupablesource.Get(smi);
 					int num2 = Grid.PosToCell(this.deliverypoint.Get(smi));
-					if (this.pickupablesource.Get(smi) == null || Grid.PosToCell(gameObject4) == num2)
+					if (this.pickupablesource.Get(smi) == null || Grid.PosToCell(gameObject6) == num2)
 					{
 						GameObject nextTarget = component3.GetNextTarget();
 						this.pickupablesource.Set(nextTarget, smi, false);

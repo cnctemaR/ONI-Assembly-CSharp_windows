@@ -109,17 +109,34 @@ public class DlcManager
 
 	public static string GetDlcLargeLogo(string dlcId)
 	{
+		string text = "";
 		if (dlcId == "EXPANSION1_ID")
 		{
-			return "SpacedOut_logo_crop";
+			text = "SpacedOut_logo_crop";
 		}
 		DlcManager.DlcInfo dlcInfo;
 		if (DlcManager.DLC_PACKS.TryGetValue(dlcId, out dlcInfo))
 		{
-			return dlcInfo.largeLogo;
+			text = dlcInfo.largeLogo;
 		}
-		DebugUtil.DevLogError("No bundle exists for " + dlcId);
-		return "unknown";
+		if (DistributionPlatform.Initialized && DistributionPlatform.Inst.Name == "Rail")
+		{
+			text += "_cn";
+		}
+		return text;
+	}
+
+	public static string GetDlcBannerSprite(string dlcId)
+	{
+		if (dlcId == null || dlcId == "" || dlcId == "")
+		{
+			return "research_dlc_banner";
+		}
+		if (dlcId.Contains("COSMETIC"))
+		{
+			return "cosmetics_banner";
+		}
+		return "research_dlc_banner";
 	}
 
 	public static Color GetDlcBannerColor(string dlcId)
@@ -269,7 +286,7 @@ public class DlcManager
 
 	public static bool IsCorrectDlcSubscribed(IHasDlcRestrictions restrictions)
 	{
-		return DlcManager.IsAllContentSubscribed(restrictions.GetRequiredDlcIds()) && !DlcManager.IsAnyContentSubscribed(restrictions.GetForbiddenDlcIds());
+		return (restrictions.GetAnyRequiredDlcIds() == null || DlcManager.IsAnyContentSubscribed(restrictions.GetAnyRequiredDlcIds())) && DlcManager.IsAllContentSubscribed(restrictions.GetRequiredDlcIds()) && !DlcManager.IsAnyContentSubscribed(restrictions.GetForbiddenDlcIds());
 	}
 
 	public static void ConvertAvailableToRequireAndForbidden(string[] dlcIds, out string[] requiredDlcIds, out string[] forbiddenDlcIds)
@@ -378,7 +395,19 @@ public class DlcManager
 
 	private static bool IsContentSettingEnabled(string dlcId)
 	{
-		return DlcManager.IsVanillaId(dlcId) || (DlcManager.CheckPlatformSubscription(dlcId) && KPlayerPrefs.GetInt(dlcId + ".ENABLED", 1) == 1);
+		if (DlcManager.IsVanillaId(dlcId))
+		{
+			return true;
+		}
+		if (!DlcManager.CheckPlatformSubscription(dlcId))
+		{
+			return false;
+		}
+		if (!DlcManager.dlcDotEnabled.ContainsKey(dlcId))
+		{
+			DlcManager.dlcDotEnabled[dlcId] = dlcId + ".ENABLED";
+		}
+		return KPlayerPrefs.GetInt(DlcManager.dlcDotEnabled[dlcId], 1) == 1;
 	}
 
 	public static bool IsContentOwned(string dlcId)
@@ -678,6 +707,8 @@ public class DlcManager
 
 	public const string DLC4_ID = "DLC4_ID";
 
+	public const string COSMETIC1_ID = "COSMETIC1_ID";
+
 	public static readonly string[] EXPANSION1 = new string[] { "EXPANSION1_ID" };
 
 	public static readonly string[] DLC2 = new string[] { "DLC2_ID" };
@@ -692,21 +723,29 @@ public class DlcManager
 
 	public const string EXPANSION1_DIRECTORY = "expansion1";
 
+	public static readonly string[] COSMETIC1 = new string[] { "COSMETIC1_ID" };
+
+	public static List<string> CONTENT_ONLY_DLC_IDS = new List<string> { "COSMETIC1_ID" };
+
 	public static List<string> RELEASE_ORDER = new List<string> { "", "EXPANSION1_ID" };
 
 	public static Dictionary<string, DlcManager.DlcInfo> DLC_PACKS = new Dictionary<string, DlcManager.DlcInfo>
 	{
 		{
 			"DLC2_ID",
-			new DlcManager.DlcInfo("DLC2_ID", "dlc2_bundle", "C", "dlc2", "dlc2_mini_logo", "dlc2_logo", new StringKey("STRINGS.UI.DLC2.NAME"), "dlc2_banner", new Color(0.003921569f, 0.73333335f, 1f))
+			new DlcManager.DlcInfo("DLC2_ID", "dlc2_bundle", "C", "dlc2", "dlc2_mini_logo", "dlc2_logo", new StringKey("STRINGS.UI.DLC2.NAME"), "dlc2_banner", new Color(0.003921569f, 0.73333335f, 1f), false)
 		},
 		{
 			"DLC3_ID",
-			new DlcManager.DlcInfo("DLC3_ID", "dlc3_bundle", "R", "dlc3", "dlc3_mini_logo", "dlc3_logo", new StringKey("STRINGS.UI.DLC3.NAME"), "dlc3_banner", new Color(0.79607844f, 0.3882353f, 0.95686275f))
+			new DlcManager.DlcInfo("DLC3_ID", "dlc3_bundle", "R", "dlc3", "dlc3_mini_logo", "dlc3_logo", new StringKey("STRINGS.UI.DLC3.NAME"), "dlc3_banner", new Color(0.79607844f, 0.3882353f, 0.95686275f), false)
 		},
 		{
 			"DLC4_ID",
-			new DlcManager.DlcInfo("DLC4_ID", "dlc4_bundle", "P", "dlc4", "dlc4_mini_logo", "dlc4_logo", new StringKey("STRINGS.UI.DLC4.NAME"), "dlc4_banner", new Color(0.3137255f, 0.6745098f, 0.31764707f))
+			new DlcManager.DlcInfo("DLC4_ID", "dlc4_bundle", "P", "dlc4", "dlc4_mini_logo", "dlc4_logo", new StringKey("STRINGS.UI.DLC4.NAME"), "dlc4_banner", new Color(0.3137255f, 0.6745098f, 0.31764707f), false)
+		},
+		{
+			"COSMETIC1_ID",
+			new DlcManager.DlcInfo("COSMETIC1_ID", "cosmetic1_bundle", "N", "cosmetic1", "cosmetic1_mini_logo", "cosmetic1_logo", new StringKey("STRINGS.UI.COSMETIC1.NAME"), "cosmetics_banner", new Color(0.43529412f, 0.43529412f, 0.75686276f), true)
 		}
 	};
 
@@ -717,6 +756,8 @@ public class DlcManager
 	private static Dictionary<string, bool> dlcSubscribedCache = new Dictionary<string, bool>();
 
 	private static Dictionary<string, bool> dlcAssetsCache = new Dictionary<string, bool>();
+
+	private static Dictionary<string, string> dlcDotEnabled = new Dictionary<string, string>();
 
 	[Obsolete("Use required forbidden instead of available")]
 	public static readonly string[] AVAILABLE_VANILLA_ONLY = new string[] { "" };
@@ -735,7 +776,7 @@ public class DlcManager
 
 	public struct DlcInfo
 	{
-		public DlcInfo(string dlcName, string bundleName, string versionLetter, string directory, string smallLogo, string largeLogo, StringKey dlcTitle, string banner, Color bannerColor)
+		public DlcInfo(string dlcName, string bundleName, string versionLetter, string directory, string smallLogo, string largeLogo, StringKey dlcTitle, string banner, Color bannerColor, bool isCosmetic)
 		{
 			this.id = dlcName;
 			this.bundleName = bundleName;
@@ -746,6 +787,7 @@ public class DlcManager
 			this.dlcTitle = dlcTitle;
 			this.banner = banner;
 			this.bannerColor = bannerColor;
+			this.isCosmetic = isCosmetic;
 		}
 
 		public string id;
@@ -765,5 +807,7 @@ public class DlcManager
 		public Color bannerColor;
 
 		public StringKey dlcTitle;
+
+		public bool isCosmetic;
 	}
 }

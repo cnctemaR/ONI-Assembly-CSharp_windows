@@ -7,7 +7,6 @@ public abstract class TargetScreen : KScreen
 
 	public virtual void SetTarget(GameObject target)
 	{
-		Console.WriteLine(target);
 		if (this.selectedTarget != target)
 		{
 			if (this.selectedTarget != null)

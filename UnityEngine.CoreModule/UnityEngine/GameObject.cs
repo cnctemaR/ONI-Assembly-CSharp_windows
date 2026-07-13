@@ -12,8 +12,8 @@ using UnityEngineInternal;
 
 namespace UnityEngine
 {
-	[ExcludeFromPreset]
 	[NativeHeader("Runtime/Export/Scripting/GameObject.bindings.h")]
+	[ExcludeFromPreset]
 	[UsedByNativeCode]
 	public sealed class GameObject : Object
 	{
@@ -29,13 +29,13 @@ namespace UnityEngine
 			return castHelper.t;
 		}
 
-		[FreeFunction(Name = "GameObjectBindings::GetComponentFromType", HasExplicitThis = true, ThrowsException = true)]
 		[TypeInferenceRule(TypeInferenceRules.TypeReferencedByFirstArgument)]
+		[FreeFunction(Name = "GameObjectBindings::GetComponentFromType", HasExplicitThis = true, ThrowsException = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern Component GetComponent(Type type);
 
-		[NativeWritableSelf]
 		[FreeFunction(Name = "GameObjectBindings::GetComponentFastPath", HasExplicitThis = true, ThrowsException = true)]
+		[NativeWritableSelf]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal extern void GetComponentFastPath(Type type, IntPtr oneFurtherThanResultValue);
 
@@ -52,8 +52,8 @@ namespace UnityEngine
 			return this.GetComponentByName(type);
 		}
 
-		[FreeFunction(Name = "GameObjectBindings::GetComponentInChildren", HasExplicitThis = true, ThrowsException = true)]
 		[TypeInferenceRule(TypeInferenceRules.TypeReferencedByFirstArgument)]
+		[FreeFunction(Name = "GameObjectBindings::GetComponentInChildren", HasExplicitThis = true, ThrowsException = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern Component GetComponentInChildren(Type type, bool includeInactive);
 
@@ -201,8 +201,8 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal extern Component TryGetComponentInternal(Type type);
 
-		[FreeFunction(Name = "GameObjectBindings::TryGetComponentFastPath", HasExplicitThis = true, ThrowsException = true)]
 		[NativeWritableSelf]
+		[FreeFunction(Name = "GameObjectBindings::TryGetComponentFastPath", HasExplicitThis = true, ThrowsException = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal extern void TryGetComponentFastPath(Type type, IntPtr oneFurtherThanResultValue);
 

@@ -60,7 +60,7 @@ public class HEPBatteryConfig : IBuildingConfig
 		def.minLaunchInterval = 1f;
 		def.minSlider = 0f;
 		def.maxSlider = 100f;
-		def.particleDecayRate = 0.5f;
+		def.particleDecayRate = 0.05f;
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)
@@ -77,7 +77,7 @@ public class HEPBatteryConfig : IBuildingConfig
 
 	public const float HEP_CAPACITY = 1000f;
 
-	public const float DISABLED_DECAY_RATE = 0.5f;
+	public const float DISABLED_DECAY_RATE = 0.05f;
 
 	public const string STORAGE_PORT_ID = "HEP_STORAGE";
 

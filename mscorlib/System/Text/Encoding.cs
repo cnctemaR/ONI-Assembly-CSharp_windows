@@ -174,14 +174,14 @@ namespace System.Text
 			{
 				throw new ArgumentOutOfRangeException("codepage", Environment.GetResourceString("Valid values are between {0} and {1}, inclusive.", new object[] { 0, 65535 }));
 			}
-			if (Encoding.encodings != null)
+			object internalSyncObject = Encoding.InternalSyncObject;
+			lock (internalSyncObject)
 			{
-				Encoding.encodings.TryGetValue(codepage, out encoding);
-			}
-			if (encoding == null)
-			{
-				object internalSyncObject = Encoding.InternalSyncObject;
-				lock (internalSyncObject)
+				if (Encoding.encodings != null)
+				{
+					Encoding.encodings.TryGetValue(codepage, out encoding);
+				}
+				if (encoding == null)
 				{
 					if (Encoding.encodings == null)
 					{
@@ -284,7 +284,6 @@ namespace System.Text
 					IL_0233:
 					Encoding.encodings.Add(codepage, encoding);
 				}
-				return encoding;
 			}
 			return encoding;
 		}

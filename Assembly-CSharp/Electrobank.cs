@@ -247,7 +247,7 @@ public class Electrobank : KMonoBehaviour, ISim1000ms, ISim200ms, IConsumableUII
 		}
 	}
 
-	public void ClearHealthBar(object data = null)
+	public void ClearHealthBar(object _ = null)
 	{
 		if (this.healthBar != null)
 		{

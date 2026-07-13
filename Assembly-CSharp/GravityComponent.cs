@@ -3,7 +3,7 @@ using UnityEngine;
 
 public struct GravityComponent
 {
-	public GravityComponent(Transform transform, global::System.Action on_landed, Vector2 initial_velocity, bool land_on_fake_floors, bool mayLeaveWorld)
+	public GravityComponent(Transform transform, Action<Transform> on_landed, Vector2 initial_velocity, bool land_on_fake_floors, bool mayLeaveWorld)
 	{
 		this.transform = transform;
 		this.elapsedTime = 0f;
@@ -57,7 +57,7 @@ public struct GravityComponent
 
 	public float elapsedTime;
 
-	public global::System.Action onLanded;
+	public Action<Transform> onLanded;
 
 	public bool landOnFakeFloors;
 

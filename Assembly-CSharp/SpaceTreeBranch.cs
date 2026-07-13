@@ -143,7 +143,7 @@ public class SpaceTreeBranch : GameStateMachine<SpaceTreeBranch, SpaceTreeBranch
 
 	public static void OnTrunkSyrupFullnessChanged(SpaceTreeBranch.Instance smi, object obj)
 	{
-		smi.PlayFillAnimation((float)obj);
+		smi.PlayFillAnimation(((Boxed<float>)obj).value);
 	}
 
 	public static void SynchAnimationWithTrunk(SpaceTreeBranch.Instance smi, HashedString animName)

@@ -4,10 +4,10 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Experimental.Rendering
 {
-	[NativeHeader("Runtime/Shaders/RayTracingAccelerationStructure.h")]
-	[NativeHeader("Runtime/Export/Graphics/RayTracingAccelerationStructure.bindings.h")]
 	[UsedByNativeCode]
+	[NativeHeader("Runtime/Shaders/RayTracingAccelerationStructure.h")]
 	[Flags]
+	[NativeHeader("Runtime/Export/Graphics/RayTracingAccelerationStructure.bindings.h")]
 	public enum RayTracingSubMeshFlags
 	{
 		Disabled = 0,

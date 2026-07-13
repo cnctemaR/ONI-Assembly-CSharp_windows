@@ -140,7 +140,7 @@ public class KScreenManager : KMonoBehaviour, IInputHandler
 		for (int i = this.screenStack.Count - 1; i >= 0; i--)
 		{
 			KScreen kscreen = this.screenStack[i];
-			if (kscreen != null && kscreen.isActiveAndEnabled)
+			if (kscreen != null && kscreen.IsScreenActive())
 			{
 				kscreen.ScreenUpdate(flag);
 			}
@@ -160,7 +160,7 @@ public class KScreenManager : KMonoBehaviour, IInputHandler
 		for (int i = this.screenStack.Count - 1; i >= 0; i--)
 		{
 			KScreen kscreen = this.screenStack[i];
-			if (!kscreen.isHiddenButActive && kscreen != null && kscreen.isActiveAndEnabled)
+			if (kscreen != null && kscreen.IsScreenActive())
 			{
 				kscreen.OnKeyDown(e);
 				if (e.Consumed)
@@ -182,7 +182,7 @@ public class KScreenManager : KMonoBehaviour, IInputHandler
 		for (int i = this.screenStack.Count - 1; i >= 0; i--)
 		{
 			KScreen kscreen = this.screenStack[i];
-			if (kscreen != null && kscreen.isActiveAndEnabled)
+			if (kscreen != null && kscreen.IsScreenActive())
 			{
 				kscreen.OnKeyUp(e);
 				if (e.Consumed)

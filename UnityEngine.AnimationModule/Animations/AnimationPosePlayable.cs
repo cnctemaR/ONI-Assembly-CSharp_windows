@@ -6,11 +6,11 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Animations
 {
+	[RequiredByNativeCode]
 	[StaticAccessor("AnimationPosePlayableBindings", StaticAccessorType.DoubleColon)]
 	[NativeHeader("Runtime/Director/Core/HPlayable.h")]
-	[RequiredByNativeCode]
-	[NativeHeader("Modules/Animation/ScriptBindings/AnimationPosePlayable.bindings.h")]
 	[NativeHeader("Modules/Animation/Director/AnimationPosePlayable.h")]
+	[NativeHeader("Modules/Animation/ScriptBindings/AnimationPosePlayable.bindings.h")]
 	internal struct AnimationPosePlayable : IPlayable, IEquatable<AnimationPosePlayable>
 	{
 		public static AnimationPosePlayable Null

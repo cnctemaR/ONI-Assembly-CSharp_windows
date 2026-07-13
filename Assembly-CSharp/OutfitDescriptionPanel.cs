@@ -93,6 +93,14 @@ public class OutfitDescriptionPanel : KMonoBehaviour
 						pooledDictionary.Add(permitCategory2, Option.None);
 					}
 					break;
+				case ClothingOutfitUtility.OutfitType.JetSuit:
+					this.outfitNameLabel.SetText(outfitName);
+					this.outfitDescriptionLabel.gameObject.SetActive(false);
+					foreach (PermitCategory permitCategory3 in ClothingOutfitUtility.PERMIT_CATEGORIES_FOR_JET_SUITS)
+					{
+						pooledDictionary.Add(permitCategory3, Option.None);
+					}
+					break;
 				}
 				foreach (string text2 in outfitItemIds)
 				{
@@ -109,10 +117,10 @@ public class OutfitDescriptionPanel : KMonoBehaviour
 				}
 				foreach (KeyValuePair<PermitCategory, Option<PermitResource>> keyValuePair in pooledDictionary)
 				{
-					PermitCategory permitCategory3;
+					PermitCategory permitCategory4;
 					Option<PermitResource> option2;
-					keyValuePair.Deconstruct(out permitCategory3, out option2);
-					PermitCategory permitCategory4 = permitCategory3;
+					keyValuePair.Deconstruct(out permitCategory4, out option2);
+					PermitCategory permitCategory5 = permitCategory4;
 					Option<PermitResource> option3 = option2;
 					if (option3.HasValue)
 					{
@@ -120,7 +128,7 @@ public class OutfitDescriptionPanel : KMonoBehaviour
 					}
 					else
 					{
-						this.AddItemDescRow(KleiItemsUI.GetNoneClothingItemIcon(permitCategory4, personality), KleiItemsUI.GetNoneClothingItemStrings(permitCategory4).Item1, null, 1f);
+						this.AddItemDescRow(KleiItemsUI.GetNoneClothingItemIcon(permitCategory5, personality), KleiItemsUI.GetNoneClothingItemStrings(permitCategory5).Item1, null, 1f);
 					}
 				}
 				foreach (PermitResource permitResource2 in pooledList)

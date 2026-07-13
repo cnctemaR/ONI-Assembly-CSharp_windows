@@ -87,7 +87,7 @@ public class SandboxToolParameterMenu : KScreen
 		sandboxSettings5.OnChangeStory = (global::System.Action)Delegate.Combine(sandboxSettings5.OnChangeStory, new global::System.Action(delegate
 		{
 			string stringSetting = SandboxToolParameterMenu.instance.settings.GetStringSetting("SandboxTools.SelectedStory");
-			Story story = Db.Get().Stories.Get(stringSetting);
+			Story story = Db.Get().Stories.TryGet(stringSetting);
 			if (story == null)
 			{
 				this.settings.ForceDefaultStringSetting("SandboxTools.SelectedStory");
@@ -101,7 +101,7 @@ public class SandboxToolParameterMenu : KScreen
 		{
 			string stringSetting2 = SandboxToolParameterMenu.instance.settings.GetStringSetting("SandboxTools.SelectedEntity");
 			GameObject gameObject = Assets.TryGetPrefab(stringSetting2);
-			if (gameObject == null || !Game.IsCorrectDlcActiveForCurrentSave(gameObject.GetComponent<KPrefabID>()))
+			if (gameObject == null || !Game.IsCorrectDlcActiveForCurrentSave(gameObject.GetComponent<KPrefabID>()) || gameObject.HasTag(GameTags.HideFromSpawnTool))
 			{
 				this.settings.ForceDefaultStringSetting("SandboxTools.SelectedEntity");
 				return;
@@ -355,9 +355,27 @@ public class SandboxToolParameterMenu : KScreen
 		SandboxToolParameterMenu.SelectorValue.SearchFilter searchFilter11 = new SandboxToolParameterMenu.SelectorValue.SearchFilter(UI.SANDBOXTOOLS.FILTERS.ENTITIES.INDUSTRIAL_PRODUCTS, delegate(object entity)
 		{
 			KPrefabID kprefabID7 = entity as KPrefabID;
-			return !(kprefabID7 == null) && !(kprefabID7.gameObject == null) && !kprefabID7.HasTag(GameTags.DeprecatedContent) && Game.IsCorrectDlcActiveForCurrentSave(kprefabID7) && (kprefabID7.HasTag(GameTags.IndustrialIngredient) || kprefabID7.HasTag(GameTags.IndustrialProduct) || kprefabID7.HasTag(GameTags.Medicine) || kprefabID7.HasTag(GameTags.MedicalSupplies) || kprefabID7.HasTag(GameTags.ChargedPortableBattery));
+			return !(kprefabID7 == null) && !(kprefabID7.gameObject == null) && !kprefabID7.HasTag(GameTags.DeprecatedContent) && Game.IsCorrectDlcActiveForCurrentSave(kprefabID7) && (kprefabID7.HasTag(GameTags.IndustrialIngredient) || kprefabID7.HasTag(GameTags.TechComponents) || kprefabID7.HasTag(GameTags.IndustrialProduct) || kprefabID7.HasTag(GameTags.Medicine) || kprefabID7.HasTag(GameTags.MedicalSupplies) || kprefabID7.HasTag(GameTags.ChargedPortableBattery));
 		}, null, Def.GetUISprite(Assets.GetPrefab("BasicCure"), "ui", false));
 		list.Add(searchFilter11);
+		SandboxToolParameterMenu.SelectorValue.SearchFilter searchFilter12 = new SandboxToolParameterMenu.SelectorValue.SearchFilter(UI.SANDBOXTOOLS.FILTERS.ENTITIES.ORE_CHUNKS, delegate(object entity)
+		{
+			Element element = ElementLoader.FindElementByTag((entity as KPrefabID).PrefabTag);
+			return element != null && element.IsSolid;
+		}, null, new global::Tuple<Sprite, Color>(Assets.GetSprite("ui_elements-solid"), Color.white));
+		list.Add(searchFilter12);
+		SandboxToolParameterMenu.SelectorValue.SearchFilter searchFilter13 = new SandboxToolParameterMenu.SelectorValue.SearchFilter(UI.SANDBOXTOOLS.FILTERS.ENTITIES.BOTTLES, delegate(object entity)
+		{
+			Element element2 = ElementLoader.FindElementByTag((entity as KPrefabID).PrefabTag);
+			return element2 != null && element2.IsLiquid;
+		}, null, new global::Tuple<Sprite, Color>(Assets.GetSprite("ui_elements-liquids"), Color.white));
+		list.Add(searchFilter13);
+		SandboxToolParameterMenu.SelectorValue.SearchFilter searchFilter14 = new SandboxToolParameterMenu.SelectorValue.SearchFilter(UI.SANDBOXTOOLS.FILTERS.ENTITIES.CANISTERS, delegate(object entity)
+		{
+			Element element3 = ElementLoader.FindElementByTag((entity as KPrefabID).PrefabTag);
+			return element3 != null && element3.IsGas;
+		}, null, new global::Tuple<Sprite, Color>(Assets.GetSprite("ui_elements-gases"), Color.white));
+		list.Add(searchFilter14);
 		List<KPrefabID> list3 = new List<KPrefabID>();
 		foreach (KPrefabID kprefabID in Assets.Prefabs)
 		{
@@ -443,7 +461,7 @@ public class SandboxToolParameterMenu : KScreen
 		this.moraleSlider.SetValue((float)this.settings.GetIntSetting("SandbosTools.MoraleAdjustment"), true);
 	}
 
-	private void OnTemperatureUnitChanged(object unit)
+	private void OnTemperatureUnitChanged(object _)
 	{
 		int num = this.settings.GetIntSetting("SandboxTools.SelectedElement");
 		if (num >= ElementLoader.elements.Count)

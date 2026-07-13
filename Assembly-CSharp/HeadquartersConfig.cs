@@ -33,7 +33,7 @@ public class HeadquartersConfig : IBuildingConfig
 
 	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
-		LoreBearerUtil.AddLoreTo(go, LoreBearerUtil.UnlockSpecificEntry("pod_evacuation", UI.USERMENUACTIONS.READLORE.SEARCH_POD));
+		LoreBearerUtil.AddLoreTo(go, LoreBearerUtil.UnlockSpecificEntry("pod_evacuation", UI.USERMENUACTIONS.READLORE.SEARCH_POD, false));
 		Telepad telepad = go.AddOrGet<Telepad>();
 		go.GetComponent<KPrefabID>().AddTag(GameTags.Telepad, false);
 		telepad.startingSkillPoints = 1f;
@@ -56,7 +56,7 @@ public class HeadquartersConfig : IBuildingConfig
 		light2D.overlayColour = LIGHT2D.HEADQUARTERS_OVERLAYCOLOR;
 		light2D.shape = global::LightShape.Circle;
 		light2D.drawOverlay = true;
-		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.LightSource, false);
+		go.GetComponent<KPrefabID>().AddTag(GameTags.LightSource, false);
 		go.GetComponent<KPrefabID>().AddTag(GameTags.Experimental, false);
 		RoleStation roleStation = go.AddOrGet<RoleStation>();
 		roleStation.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_hqbase_skill_upgrade_kanim") };

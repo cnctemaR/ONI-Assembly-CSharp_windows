@@ -133,9 +133,9 @@ public class GameAudioSheets : AudioSheets
 		{
 			soundEvent = new UIAnimationSoundEvent(file_name, sound_name, frame, true);
 		}
-		else if (type == "CreatureVariationSoundEvent")
+		else if (type == "CreatureVariationSoundEvent" || type == "CreatureVariationLoopingSoundEvent")
 		{
-			soundEvent = new CreatureVariationSoundEvent(file_name, sound_name, frame, true, type == "LoopingSoundEvent", min_interval, false);
+			soundEvent = new CreatureVariationSoundEvent(file_name, sound_name, frame, true, type == "CreatureVariationLoopingSoundEvent", min_interval, false);
 		}
 		else if (type == "CountedSoundEvent")
 		{

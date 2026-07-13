@@ -10,11 +10,11 @@ using UnityEngine.Rendering.RendererUtils;
 namespace UnityEngine.Rendering
 {
 	[NativeHeader("Modules/UI/Canvas.h")]
-	[NativeType("Runtime/Graphics/ScriptableRenderLoop/ScriptableRenderContext.h")]
 	[NativeHeader("Runtime/Graphics/ScriptableRenderLoop/ScriptableDrawRenderersUtility.h")]
 	[NativeHeader("Runtime/Export/RenderPipeline/ScriptableRenderContext.bindings.h")]
 	[NativeHeader("Runtime/Export/RenderPipeline/ScriptableRenderPipeline.bindings.h")]
 	[NativeHeader("Modules/UI/CanvasManager.h")]
+	[NativeType("Runtime/Graphics/ScriptableRenderLoop/ScriptableRenderContext.h")]
 	public struct ScriptableRenderContext : IEquatable<ScriptableRenderContext>
 	{
 		[FreeFunction("ScriptableRenderContext::BeginRenderPass")]

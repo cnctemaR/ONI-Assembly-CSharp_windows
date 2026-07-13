@@ -69,9 +69,8 @@ public class KObjectManager : MonoBehaviour
 		{
 			int num = this.pendingDestroys[i];
 			KObject kobject = null;
-			if (this.objects.TryGetValue(num, out kobject))
+			if (this.objects.Remove(num, out kobject))
 			{
-				this.objects.Remove(num);
 				kobject.OnCleanUp();
 			}
 		}

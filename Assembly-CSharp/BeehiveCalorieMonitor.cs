@@ -15,9 +15,6 @@ public class BeehiveCalorieMonitor : GameStateMachine<BeehiveCalorieMonitor, Bee
 		this.root.EventHandler(GameHashes.CaloriesConsumed, delegate(BeehiveCalorieMonitor.Instance smi, object data)
 		{
 			smi.OnCaloriesConsumed(data);
-		}).ToggleBehaviour(GameTags.Creatures.Poop, new StateMachine<BeehiveCalorieMonitor, BeehiveCalorieMonitor.Instance, IStateMachineTarget, BeehiveCalorieMonitor.Def>.Transition.ConditionCallback(BeehiveCalorieMonitor.ReadyToPoop), delegate(BeehiveCalorieMonitor.Instance smi)
-		{
-			smi.Poop();
 		}).Update(new Action<BeehiveCalorieMonitor.Instance, float>(BeehiveCalorieMonitor.UpdateMetabolismCalorieModifier), UpdateRate.SIM_200ms, false);
 		this.normal.Transition(this.hungry, (BeehiveCalorieMonitor.Instance smi) => smi.IsHungry(), UpdateRate.SIM_1000ms);
 		this.hungry.ToggleTag(GameTags.Creatures.Hungry).EventTransition(GameHashes.CaloriesConsumed, this.normal, (BeehiveCalorieMonitor.Instance smi) => !smi.IsHungry()).ToggleStatusItem(Db.Get().CreatureStatusItems.HiveHungry, null)
@@ -32,6 +29,10 @@ public class BeehiveCalorieMonitor : GameStateMachine<BeehiveCalorieMonitor, Bee
 	private static void UpdateMetabolismCalorieModifier(BeehiveCalorieMonitor.Instance smi, float dt)
 	{
 		smi.deltaCalorieMetabolismModifier.SetValue(1f - smi.metabolism.GetTotalValue() / 100f);
+		if (BeehiveCalorieMonitor.ReadyToPoop(smi))
+		{
+			smi.Poop();
+		}
 	}
 
 	public GameStateMachine<BeehiveCalorieMonitor, BeehiveCalorieMonitor.Instance, IStateMachineTarget, BeehiveCalorieMonitor.Def>.State normal;
@@ -91,9 +92,9 @@ public class BeehiveCalorieMonitor : GameStateMachine<BeehiveCalorieMonitor, Bee
 
 		public void OnCaloriesConsumed(object data)
 		{
-			CreatureCalorieMonitor.CaloriesConsumedEvent caloriesConsumedEvent = (CreatureCalorieMonitor.CaloriesConsumedEvent)data;
-			this.calories.value += caloriesConsumedEvent.calories;
-			this.stomach.Consume(caloriesConsumedEvent.tag, caloriesConsumedEvent.calories);
+			CreatureCalorieMonitor.CaloriesConsumedEvent value = ((Boxed<CreatureCalorieMonitor.CaloriesConsumedEvent>)data).value;
+			this.calories.value += value.calories;
+			this.stomach.Consume(value.tag, value.calories);
 			this.lastMealOrPoopTime = Time.time;
 		}
 

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 
 [AddComponentMenu("KMonoBehaviour/scripts/StationaryChoreRangeVisualizer")]
@@ -12,14 +13,17 @@ public class StationaryChoreRangeVisualizer : KMonoBehaviour
 		base.Subscribe<StationaryChoreRangeVisualizer>(-1503271301, StationaryChoreRangeVisualizer.OnSelectDelegate);
 		if (this.movable)
 		{
-			Singleton<CellChangeMonitor>.Instance.RegisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChange), "StationaryChoreRangeVisualizer.OnSpawn");
+			this.cellChangeMonitorHandle = Singleton<CellChangeMonitor>.Instance.RegisterCellChangedHandler(base.transform, StationaryChoreRangeVisualizer.OnCellChangeDispatcher, this, "StationaryChoreRangeVisualizer.OnSpawn");
 			base.Subscribe<StationaryChoreRangeVisualizer>(-1643076535, StationaryChoreRangeVisualizer.OnRotatedDelegate);
 		}
 	}
 
 	protected override void OnCleanUp()
 	{
-		Singleton<CellChangeMonitor>.Instance.UnregisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChange));
+		if (this.cellChangeMonitorHandle != 0UL)
+		{
+			Singleton<CellChangeMonitor>.Instance.UnregisterCellChangedHandler(ref this.cellChangeMonitorHandle);
+		}
 		base.Unsubscribe<StationaryChoreRangeVisualizer>(-1503271301, StationaryChoreRangeVisualizer.OnSelectDelegate, false);
 		base.Unsubscribe<StationaryChoreRangeVisualizer>(-1643076535, StationaryChoreRangeVisualizer.OnRotatedDelegate, false);
 		this.ClearVisualizers();
@@ -28,7 +32,7 @@ public class StationaryChoreRangeVisualizer : KMonoBehaviour
 
 	private void OnSelect(object data)
 	{
-		if ((bool)data)
+		if (((Boxed<bool>)data).value)
 		{
 			SoundEvent.PlayOneShot(GlobalAssets.GetSound("RadialGrid_form", false), base.transform.position, 1f);
 			this.UpdateVisualizers();
@@ -39,11 +43,6 @@ public class StationaryChoreRangeVisualizer : KMonoBehaviour
 	}
 
 	private void OnRotated(object data)
-	{
-		this.UpdateVisualizers();
-	}
-
-	private void OnCellChange()
 	{
 		this.UpdateVisualizers();
 	}
@@ -164,6 +163,8 @@ public class StationaryChoreRangeVisualizer : KMonoBehaviour
 
 	private List<int> newCells = new List<int>();
 
+	private ulong cellChangeMonitorHandle;
+
 	private static readonly EventSystem.IntraObjectHandler<StationaryChoreRangeVisualizer> OnSelectDelegate = new EventSystem.IntraObjectHandler<StationaryChoreRangeVisualizer>(delegate(StationaryChoreRangeVisualizer component, object data)
 	{
 		component.OnSelect(data);
@@ -173,6 +174,11 @@ public class StationaryChoreRangeVisualizer : KMonoBehaviour
 	{
 		component.OnRotated(data);
 	});
+
+	private static readonly Action<object> OnCellChangeDispatcher = delegate(object obj)
+	{
+		Unsafe.As<StationaryChoreRangeVisualizer>(obj).UpdateVisualizers();
+	};
 
 	private struct VisData
 	{

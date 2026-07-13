@@ -37,12 +37,12 @@ public class BeachChairWorkable : Workable, IWorkerPrioritizable
 		this.beachChair.SetLit(flag);
 		if (flag)
 		{
-			base.GetComponent<LoopingSounds>().SetParameter(this.soundPath, this.BEACH_CHAIR_LIT_PARAMETER, 1f);
+			this.loopingSound.SetParameter(this.soundPath, this.BEACH_CHAIR_LIT_PARAMETER, 1f);
 			this.timeLit += dt;
 		}
 		else
 		{
-			base.GetComponent<LoopingSounds>().SetParameter(this.soundPath, this.BEACH_CHAIR_LIT_PARAMETER, 0f);
+			this.loopingSound.SetParameter(this.soundPath, this.BEACH_CHAIR_LIT_PARAMETER, 0f);
 		}
 		return false;
 	}
@@ -87,6 +87,9 @@ public class BeachChairWorkable : Workable, IWorkerPrioritizable
 
 	[MyCmpReq]
 	private Operational operational;
+
+	[MyCmpReq]
+	private LoopingSounds loopingSound;
 
 	private float timeLit;
 

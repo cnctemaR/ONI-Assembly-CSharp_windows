@@ -3,8 +3,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[AttributeUsage(AttributeTargets.Method, AllowMultiple = false)]
 	[RequiredByNativeCode]
+	[AttributeUsage(AttributeTargets.Method, AllowMultiple = false)]
 	public class RuntimeInitializeOnLoadMethodAttribute : PreserveAttribute
 	{
 		public RuntimeInitializeOnLoadMethodAttribute()

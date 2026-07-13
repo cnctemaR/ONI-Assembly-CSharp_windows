@@ -5,25 +5,12 @@ using UnityEngine;
 public class RescueSweepBotChore : Chore<RescueSweepBotChore.StatesInstance>
 {
 	public RescueSweepBotChore(IStateMachineTarget master, GameObject sweepBot, GameObject baseStation)
+		: base(Db.Get().ChoreTypes.RescueIncapacitated, master, null, false, null, null, null, PriorityScreen.PriorityClass.personalNeeds, 5, false, true, 0, false, ReportManager.ReportType.WorkTime)
 	{
-		Chore.Precondition precondition = default(Chore.Precondition);
-		precondition.id = "CanReachBaseStation";
-		precondition.description = DUPLICANTS.CHORES.PRECONDITIONS.CAN_MOVE_TO;
-		precondition.fn = delegate(ref Chore.Precondition.Context context, object data)
-		{
-			if (context.consumerState.consumer == null)
-			{
-				return false;
-			}
-			KMonoBehaviour kmonoBehaviour = (KMonoBehaviour)data;
-			return !(kmonoBehaviour == null) && context.consumerState.consumer.navigator.CanReach(Grid.PosToCell(kmonoBehaviour));
-		};
-		this.CanReachBaseStation = precondition;
-		base..ctor(Db.Get().ChoreTypes.RescueIncapacitated, master, null, false, null, null, null, PriorityScreen.PriorityClass.personalNeeds, 5, false, true, 0, false, ReportManager.ReportType.WorkTime);
 		base.smi = new RescueSweepBotChore.StatesInstance(this);
 		this.runUntilComplete = true;
 		this.AddPrecondition(RescueSweepBotChore.CanReachIncapacitated, sweepBot.GetComponent<Storage>());
-		this.AddPrecondition(this.CanReachBaseStation, baseStation.GetComponent<Storage>());
+		this.AddPrecondition(RescueSweepBotChore.CanReachBaseStation, baseStation.GetComponent<Storage>());
 	}
 
 	public override void Begin(Chore.Precondition.Context context)
@@ -48,7 +35,20 @@ public class RescueSweepBotChore : Chore<RescueSweepBotChore.StatesInstance>
 		}
 	}
 
-	public Chore.Precondition CanReachBaseStation;
+	public static Chore.Precondition CanReachBaseStation = new Chore.Precondition
+	{
+		id = "CanReachBaseStation",
+		description = DUPLICANTS.CHORES.PRECONDITIONS.CAN_MOVE_TO,
+		fn = delegate(ref Chore.Precondition.Context context, object data)
+		{
+			if (context.consumerState.consumer == null)
+			{
+				return false;
+			}
+			KMonoBehaviour kmonoBehaviour = (KMonoBehaviour)data;
+			return !(kmonoBehaviour == null) && context.consumerState.consumer.navigator.CanReach(Grid.PosToCell(kmonoBehaviour));
+		}
+	};
 
 	public static Chore.Precondition CanReachIncapacitated = new Chore.Precondition
 	{
@@ -56,12 +56,12 @@ public class RescueSweepBotChore : Chore<RescueSweepBotChore.StatesInstance>
 		description = DUPLICANTS.CHORES.PRECONDITIONS.CAN_MOVE_TO,
 		fn = delegate(ref Chore.Precondition.Context context, object data)
 		{
-			KMonoBehaviour kmonoBehaviour = (KMonoBehaviour)data;
-			if (kmonoBehaviour == null)
+			KMonoBehaviour kmonoBehaviour2 = (KMonoBehaviour)data;
+			if (kmonoBehaviour2 == null)
 			{
 				return false;
 			}
-			int navigationCost = context.consumerState.navigator.GetNavigationCost(Grid.PosToCell(kmonoBehaviour.transform.GetPosition()));
+			int navigationCost = context.consumerState.navigator.GetNavigationCost(Grid.PosToCell(kmonoBehaviour2.transform.GetPosition()));
 			if (-1 != navigationCost)
 			{
 				context.cost += navigationCost;

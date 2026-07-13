@@ -368,14 +368,14 @@ public class LoopingSoundManager : KMonoBehaviour, IRenderEveryTick
 
 	private void OnPauseChanged(object data)
 	{
-		bool flag = (bool)data;
-		this.GameIsPaused = flag;
+		bool value = ((Boxed<bool>)data).value;
+		this.GameIsPaused = value;
 		foreach (LoopingSoundManager.Sound sound in this.sounds.GetDataList())
 		{
 			if (sound.IsPlaying)
 			{
 				EventInstance ev = sound.ev;
-				ev.setPaused(flag && sound.ShouldPauseOnGamePaused);
+				ev.setPaused(value && sound.ShouldPauseOnGamePaused);
 			}
 		}
 	}

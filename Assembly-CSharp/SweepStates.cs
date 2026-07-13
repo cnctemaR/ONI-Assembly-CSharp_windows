@@ -1,5 +1,4 @@
 ﻿using System;
-using Klei.AI;
 using UnityEngine;
 
 public class SweepStates : GameStateMachine<SweepStates, SweepStates.Instance, IStateMachineTarget, SweepStates.Def>
@@ -19,21 +18,20 @@ public class SweepStates : GameStateMachine<SweepStates, SweepStates.Instance, I
 		});
 		this.moving.Enter(delegate(SweepStates.Instance smi)
 		{
-		}).MoveTo((SweepStates.Instance smi) => this.GetNextCell(smi), this.pause, this.redirected, false).Update(delegate(SweepStates.Instance smi, float dt)
+		}).MoveTo(new Func<SweepStates.Instance, int>(this.GetNextCell), this.pause, this.redirected, false).Update(delegate(SweepStates.Instance smi, float dt)
 		{
 			smi.sm.timeUntilBored.Set(smi.sm.timeUntilBored.Get(smi) - dt, smi, false);
 			if (smi.sm.timeUntilBored.Get(smi) <= 0f)
 			{
 				smi.sm.bored.Set(true, smi, false);
 				smi.sm.timeUntilBored.Set(30f, smi, false);
-				smi.master.gameObject.GetSMI<AnimInterruptMonitor.Instance>().PlayAnim("react_bored");
+				smi.animInterruptMonitor.PlayAnim("react_bored");
 			}
-			StorageUnloadMonitor.Instance smi3 = smi.master.gameObject.GetSMI<StorageUnloadMonitor.Instance>();
-			Storage storage = smi3.sm.sweepLocker.Get(smi3);
+			Storage storage = smi.storageMonitor.sm.sweepLocker.Get(smi.storageMonitor);
 			if (storage != null && smi.sm.headingRight.Get(smi) == smi.master.transform.position.x > storage.transform.position.x)
 			{
-				Navigator component = smi.master.gameObject.GetComponent<Navigator>();
-				if (component.GetNavigationCost(Grid.PosToCell(storage)) >= component.maxProbingRadius - 1)
+				Navigator navigator = smi.navigator;
+				if (navigator.GetNavigationCost(Grid.PosToCell(storage)) >= navigator.maxProbeRadiusX - 1)
 				{
 					smi.GoTo(smi.sm.emoteRedirected);
 				}
@@ -45,11 +43,11 @@ public class SweepStates : GameStateMachine<SweepStates, SweepStates.Instance, I
 			int num = Grid.PosToCell(smi.master.gameObject);
 			if (Grid.IsCellOffsetValid(num, this.headingRight.Get(smi) ? 1 : (-1), -1) && !Grid.Solid[Grid.OffsetCell(num, this.headingRight.Get(smi) ? 1 : (-1), -1)])
 			{
-				smi.Play("gap", KAnim.PlayMode.Once);
+				smi.animController.Play("gap", KAnim.PlayMode.Once, 1f, 0f);
 			}
 			else
 			{
-				smi.Play("bump", KAnim.PlayMode.Once);
+				smi.animController.Play("bump", KAnim.PlayMode.Once, 1f, 0f);
 			}
 			this.headingRight.Set(!this.headingRight.Get(smi), smi, false);
 		}).OnAnimQueueComplete(this.pause);
@@ -95,17 +93,15 @@ public class SweepStates : GameStateMachine<SweepStates, SweepStates.Instance, I
 
 	public void StopMoveSound(SweepStates.Instance smi)
 	{
-		LoopingSounds component = smi.gameObject.GetComponent<LoopingSounds>();
-		component.StopSound(GlobalAssets.GetSound("SweepBot_mvmt_lp", false));
-		component.StopAllSounds();
+		smi.loopingSounds.StopSound(GlobalAssets.GetSound("SweepBot_mvmt_lp", false));
+		smi.loopingSounds.StopAllSounds();
 	}
 
 	public void StartMoveSound(SweepStates.Instance smi)
 	{
-		LoopingSounds component = smi.gameObject.GetComponent<LoopingSounds>();
-		if (!component.IsSoundPlaying(GlobalAssets.GetSound("SweepBot_mvmt_lp", false)))
+		if (!smi.loopingSounds.IsSoundPlaying(GlobalAssets.GetSound("SweepBot_mvmt_lp", false)))
 		{
-			component.StartSound(GlobalAssets.GetSound("SweepBot_mvmt_lp", false));
+			smi.loopingSounds.StartSound(GlobalAssets.GetSound("SweepBot_mvmt_lp", false));
 		}
 	}
 
@@ -155,15 +151,14 @@ public class SweepStates : GameStateMachine<SweepStates, SweepStates.Instance, I
 		{
 			return false;
 		}
-		Storage storage = smi.master.gameObject.GetComponents<Storage>()[1];
-		if (storage.IsFull())
+		if (smi.dustbinStorage.IsFull())
 		{
 			return false;
 		}
 		if (pickupable != null && pickupable.absorbable)
 		{
-			SingleEntityReceptacle component = smi.master.GetComponent<SingleEntityReceptacle>();
-			if (pickupable.gameObject == component.Occupant)
+			SingleEntityReceptacle displayReceptacle = smi.displayReceptacle;
+			if (pickupable.gameObject == displayReceptacle.Occupant)
 			{
 				return false;
 			}
@@ -171,15 +166,13 @@ public class SweepStates : GameStateMachine<SweepStates, SweepStates.Instance, I
 			if (pickupable.TotalAmount > 10f)
 			{
 				pickupable.GetComponent<EntitySplitter>();
-				pickupable = EntitySplitter.Split(pickupable, Mathf.Min(10f, storage.RemainingCapacity()), null);
-				smi.gameObject.GetAmounts().GetValue(Db.Get().Amounts.InternalBattery.Id);
-				storage.Store(pickupable.gameObject, false, false, true, false);
+				pickupable = EntitySplitter.Split(pickupable, Mathf.Min(10f, smi.dustbinStorage.RemainingCapacity()), null);
+				smi.dustbinStorage.Store(pickupable.gameObject, false, false, true, false);
 				flag = true;
 			}
 			else
 			{
-				smi.gameObject.GetAmounts().GetValue(Db.Get().Amounts.InternalBattery.Id);
-				storage.Store(pickupable.gameObject, false, false, true, false);
+				smi.dustbinStorage.Store(pickupable.gameObject, false, false, true, false);
 				flag = true;
 			}
 			if (flag)
@@ -253,6 +246,7 @@ public class SweepStates : GameStateMachine<SweepStates, SweepStates.Instance, I
 		public Instance(Chore<SweepStates.Instance> chore, SweepStates.Def def)
 			: base(chore, def)
 		{
+			this.dustbinStorage = base.smi.master.gameObject.GetComponents<Storage>()[1];
 		}
 
 		public override void StartSM()
@@ -266,5 +260,25 @@ public class SweepStates : GameStateMachine<SweepStates, SweepStates.Instance, I
 			base.OnCleanUp();
 			base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().RobotStatusItems.Working, false);
 		}
+
+		[MyCmpGet]
+		public Navigator navigator;
+
+		[MyCmpGet]
+		public KBatchedAnimController animController;
+
+		[MySmiGet]
+		public StorageUnloadMonitor.Instance storageMonitor;
+
+		[MySmiGet]
+		public AnimInterruptMonitor.Instance animInterruptMonitor;
+
+		[MyCmpGet]
+		public SingleEntityReceptacle displayReceptacle;
+
+		[MyCmpGet]
+		public LoopingSounds loopingSounds;
+
+		public Storage dustbinStorage;
 	}
 }

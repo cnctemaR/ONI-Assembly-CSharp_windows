@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using TUNING;
 
 public static class MoleTuning
 {
@@ -40,7 +39,7 @@ public static class MoleTuning
 
 	public static float DELICACY_STOMACH_SIZE = MoleTuning.STANDARD_STOMACH_SIZE / 2f;
 
-	public static int PEN_SIZE_PER_CREATURE = CREATURES.SPACE_REQUIREMENTS.TIER2;
+	public static int PEN_SIZE_PER_CREATURE = 0;
 
 	public static float EGG_MASS = 2f;
 

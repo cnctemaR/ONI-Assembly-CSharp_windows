@@ -11,8 +11,8 @@ namespace Unity.Jobs
 		{
 		}
 
-		[Conditional("ENABLE_UNITY_COLLECTIONS_CHECKS")]
 		[BurstDiscard]
+		[Conditional("ENABLE_UNITY_COLLECTIONS_CHECKS")]
 		private static void CheckReflectionDataCorrectInternal<T>(IntPtr reflectionData, ref bool burstCompiled)
 		{
 			bool flag = reflectionData == IntPtr.Zero;

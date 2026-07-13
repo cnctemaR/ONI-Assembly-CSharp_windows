@@ -66,7 +66,8 @@ public class Crop : KMonoBehaviour, IGameObjectEffectDescriptor
 
 	public void SpawnSomeFruit(Tag cropID, float amount)
 	{
-		GameObject gameObject = GameUtil.KInstantiate(Assets.GetPrefab(cropID), base.transform.GetPosition() + this.cropSpawnOffset, Grid.SceneLayer.Ore, null, 0);
+		GameObject prefab = Assets.GetPrefab(cropID);
+		GameObject gameObject = GameUtil.KInstantiate(prefab, base.transform.GetPosition() + this.cropSpawnOffset, Grid.SceneLayer.Ore, null, 0);
 		if (gameObject != null)
 		{
 			MutantPlant component = base.GetComponent<MutantPlant>();
@@ -81,16 +82,15 @@ public class Crop : KMonoBehaviour, IGameObjectEffectDescriptor
 			component3.Temperature = base.gameObject.GetComponent<PrimaryElement>().Temperature;
 			base.Trigger(35625290, gameObject);
 			Edible component4 = gameObject.GetComponent<Edible>();
+			string properName = gameObject.GetProperName();
 			if (component4)
 			{
-				ReportManager.Instance.ReportValue(ReportManager.ReportType.CaloriesCreated, component4.Calories, StringFormatter.Replace(UI.ENDOFDAYREPORT.NOTES.HARVESTED, "{0}", component4.GetProperName()), UI.ENDOFDAYREPORT.NOTES.HARVESTED_CONTEXT);
-				return;
+				ReportManager.Instance.ReportValue(ReportManager.ReportType.CaloriesCreated, component4.Calories, StringFormatter.Replace(UI.ENDOFDAYREPORT.NOTES.HARVESTED, "{0}", properName), UI.ENDOFDAYREPORT.NOTES.HARVESTED_CONTEXT);
 			}
+			PopFXManager.Instance.SpawnFX(Def.GetUISprite(prefab, "ui", false).first, PopFXManager.Instance.sprite_Plus, properName, base.transform, Vector3.zero, 1.5f, true, false, false);
+			return;
 		}
-		else
-		{
-			DebugUtil.LogErrorArgs(base.gameObject, new object[] { "tried to spawn an invalid crop prefab:", cropID });
-		}
+		DebugUtil.LogErrorArgs(base.gameObject, new object[] { "tried to spawn an invalid crop prefab:", cropID });
 	}
 
 	protected override void OnCleanUp()

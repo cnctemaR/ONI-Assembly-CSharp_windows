@@ -13,12 +13,12 @@ public class JoyBehaviourMonitor : GameStateMachine<JoyBehaviourMonitor, JoyBeha
 		this.root.TagTransition(GameTags.Dead, null, false);
 		this.neutral.EventHandler(GameHashes.TagsChanged, delegate(JoyBehaviourMonitor.Instance smi, object data)
 		{
-			TagChangedEventData tagChangedEventData = (TagChangedEventData)data;
-			if (!tagChangedEventData.added)
+			TagChangedEventData value = ((Boxed<TagChangedEventData>)data).value;
+			if (!value.added)
 			{
 				return;
 			}
-			if (tagChangedEventData.tag == GameTags.PleasantConversation && global::UnityEngine.Random.Range(0f, 100f) <= 1f)
+			if (value.tag == GameTags.PleasantConversation && global::UnityEngine.Random.Range(0f, 100f) <= 1f)
 			{
 				smi.GoToOverjoyed();
 			}

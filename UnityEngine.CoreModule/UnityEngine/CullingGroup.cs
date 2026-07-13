@@ -100,18 +100,18 @@ namespace UnityEngine
 			return this.QueryIndices(visible, distanceIndex, CullingQueryOptions.Normal, result, firstIndex);
 		}
 
-		[FreeFunction("CullingGroup_Bindings::QueryIndices", HasExplicitThis = true)]
 		[NativeThrows]
+		[FreeFunction("CullingGroup_Bindings::QueryIndices", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern int QueryIndices(bool visible, int distanceIndex, CullingQueryOptions options, [Unmarshalled] int[] result, int firstIndex);
 
-		[FreeFunction("CullingGroup_Bindings::IsVisible", HasExplicitThis = true)]
 		[NativeThrows]
+		[FreeFunction("CullingGroup_Bindings::IsVisible", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern bool IsVisible(int index);
 
-		[FreeFunction("CullingGroup_Bindings::GetDistance", HasExplicitThis = true)]
 		[NativeThrows]
+		[FreeFunction("CullingGroup_Bindings::GetDistance", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern int GetDistance(int index);
 
@@ -139,8 +139,8 @@ namespace UnityEngine
 			this.SetDistanceReferencePoint_InternalTransform(transform);
 		}
 
-		[SecuritySafeCritical]
 		[RequiredByNativeCode]
+		[SecuritySafeCritical]
 		private unsafe static void SendEvents(CullingGroup cullingGroup, IntPtr eventsPtr, int count)
 		{
 			CullingGroupEvent* ptr = (CullingGroupEvent*)eventsPtr.ToPointer();

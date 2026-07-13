@@ -17,11 +17,7 @@ public static class BaseCrabConfig
 		{
 			text = "WalkerBabyNavGrid";
 		}
-		EntityTemplates.ExtendEntityToBasicCreature(gameObject, FactionManager.FactionID.Pest, traitId, text, NavType.Floor, 32, 2f, onDeathDropID, onDeathDropCount, false, false, 273.15f, 313.15f, 223.15f, 373.15f);
-		if (symbolOverridePrefix != null)
-		{
-			gameObject.AddOrGet<SymbolOverrideController>().ApplySymbolOverridesByAffix(Assets.GetAnim(anim_file), symbolOverridePrefix, null, 0);
-		}
+		EntityTemplates.ExtendEntityToBasicCreature(false, gameObject, anim_file, is_baby ? null : "pincher_build_kanim", symbolOverridePrefix, FactionManager.FactionID.Pest, traitId, text, NavType.Floor, 32, 2f, onDeathDropID, onDeathDropCount, false, false, 273.15f, 313.15f, 223.15f, 373.15f);
 		Pickupable pickupable = gameObject.AddOrGet<Pickupable>();
 		int num3 = global::TUNING.CREATURES.SORTING.CRITTER_ORDER["Crab"];
 		pickupable.sortOrder = num3;
@@ -72,6 +68,7 @@ public static class BaseCrabConfig
 			{
 				entersBuilding = false
 			}, !is_baby, -1)
+			.Add(new CritterEmoteStates.Def(Assets.GetAnim("pincher_emotes_kanim")), true, -1)
 			.PopInterruptGroup()
 			.Add(new CreatureDiseaseCleaner.Def(30f), true, -1)
 			.Add(new IdleStates.Def(), true, -1);

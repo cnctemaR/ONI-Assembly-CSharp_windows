@@ -36,7 +36,7 @@ namespace TUNING
 			new Crop.CropVal(SpiceNutConfig.ID, 4800f, 4, true),
 			new Crop.CropVal(BasicFabricConfig.ID, 1200f, 1, true),
 			new Crop.CropVal(SwampLilyFlowerConfig.ID, 7200f, 2, true),
-			new Crop.CropVal("GasGrassHarvested", 2400f, 1, true),
+			new Crop.CropVal("PlantFiber", 2400f, 400, true),
 			new Crop.CropVal("WoodLog", 2700f, 300, true),
 			new Crop.CropVal(SimHashes.WoodLog.ToString(), 2700f, 300, true),
 			new Crop.CropVal(SimHashes.SugarWater.ToString(), 150f, 20, true),

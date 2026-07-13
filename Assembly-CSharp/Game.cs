@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 using System.Threading;
 using FMOD.Studio;
@@ -14,6 +15,7 @@ using ProcGenGame;
 using STRINGS;
 using TUNING;
 using UnityEngine;
+using UnityEngine.Pool;
 using UnityEngine.Rendering;
 using UnityEngine.SceneManagement;
 
@@ -180,8 +182,9 @@ public class Game : KMonoBehaviour
 		Singleton<CellChangeMonitor>.Instance.SetGridSize(Grid.WidthInCells, Grid.HeightInCells);
 		this.unlocks = base.GetComponent<Unlocks>();
 		this.changelistsPlayedOn = new List<uint>();
-		this.changelistsPlayedOn.Add(693461U);
+		this.changelistsPlayedOn.Add(700348U);
 		this.dateGenerated = global::System.DateTime.UtcNow.ToString("U", CultureInfo.InvariantCulture);
+		AsyncPathProber.CreateInstance(1);
 	}
 
 	public void SetGameStarted()
@@ -235,7 +238,7 @@ public class Game : KMonoBehaviour
 		base.OnLoadLevel();
 	}
 
-	private void MarkStatusItemRendererDirty(object data)
+	private void MarkStatusItemRendererDirty(object _)
 	{
 		this.statusItemRenderer.MarkAllDirty();
 	}
@@ -407,278 +410,267 @@ public class Game : KMonoBehaviour
 
 	private unsafe Sim.GameDataUpdate* StepTheSim(float dt)
 	{
-		Sim.GameDataUpdate* ptr;
-		using (new KProfiler.Region("StepTheSim", null))
+		IntPtr intPtr = IntPtr.Zero;
+		if (Grid.Visible == null || Grid.Visible.Length == 0)
 		{
-			IntPtr intPtr = IntPtr.Zero;
-			using (new KProfiler.Region("WaitingForSim", null))
+			global::Debug.LogError("Invalid Grid.Visible, what have you done?!");
+			return null;
+		}
+		intPtr = Sim.HandleMessage(SimMessageHashes.PrepareGameData, Grid.Visible.Length, Grid.Visible);
+		if (intPtr == IntPtr.Zero)
+		{
+			return null;
+		}
+		Sim.GameDataUpdate* ptr = (Sim.GameDataUpdate*)(void*)intPtr;
+		Grid.elementIdx = ptr->elementIdx;
+		Grid.temperature = ptr->temperature;
+		Grid.mass = ptr->mass;
+		Grid.radiation = ptr->radiation;
+		Grid.properties = ptr->properties;
+		Grid.strengthInfo = ptr->strengthInfo;
+		Grid.insulation = ptr->insulation;
+		Grid.diseaseIdx = ptr->diseaseIdx;
+		Grid.diseaseCount = ptr->diseaseCount;
+		Grid.AccumulatedFlowValues = ptr->accumulatedFlow;
+		Grid.exposedToSunlight = (byte*)(void*)ptr->propertyTextureExposedToSunlight;
+		PropertyTextures.externalFlowTex = ptr->propertyTextureFlow;
+		PropertyTextures.externalLiquidTex = ptr->propertyTextureLiquid;
+		PropertyTextures.externalLiquidDataTex = ptr->propertyTextureLiquidData;
+		PropertyTextures.externalExposedToSunlight = ptr->propertyTextureExposedToSunlight;
+		List<Element> elements = ElementLoader.elements;
+		this.simData.emittedMassEntries = ptr->emittedMassEntries;
+		this.simData.elementChunks = ptr->elementChunkInfos;
+		this.simData.buildingTemperatures = ptr->buildingTemperatures;
+		this.simData.diseaseEmittedInfos = ptr->diseaseEmittedInfos;
+		this.simData.diseaseConsumedInfos = ptr->diseaseConsumedInfos;
+		for (int i = 0; i < ptr->numSubstanceChangeInfo; i++)
+		{
+			Sim.SubstanceChangeInfo substanceChangeInfo = ptr->substanceChangeInfo[i];
+			Element element = elements[(int)substanceChangeInfo.newElemIdx];
+			Grid.Element[substanceChangeInfo.cellIdx] = element;
+		}
+		for (int j = 0; j < ptr->numSolidInfo; j++)
+		{
+			Sim.SolidInfo solidInfo = ptr->solidInfo[j];
+			if (!this.solidChangedFilter.Contains(solidInfo.cellIdx))
 			{
-				if (Grid.Visible == null || Grid.Visible.Length == 0)
+				this.solidInfo.Add(new SolidInfo(solidInfo.cellIdx, solidInfo.isSolid != 0));
+				bool flag = solidInfo.isSolid != 0;
+				Grid.SetSolid(solidInfo.cellIdx, flag, CellEventLogger.Instance.SimMessagesSolid);
+				if (flag && Grid.IsWorldValidCell(solidInfo.cellIdx))
 				{
-					global::Debug.LogError("Invalid Grid.Visible, what have you done?!");
-					return null;
+					int num = (int)Grid.WorldIdx[solidInfo.cellIdx];
+					if (num >= 0 && num < ClusterManager.Instance.WorldContainers.Count)
+					{
+						WorldContainer worldContainer = ClusterManager.Instance.WorldContainers[num];
+						int num2;
+						int num3;
+						Grid.CellToXY(solidInfo.cellIdx, out num2, out num3);
+						if (!worldContainer.IsModuleInterior && num3 > worldContainer.WorldOffset.Y + worldContainer.WorldSize.Y - Grid.TopBorderHeight)
+						{
+							SimMessages.Dig(solidInfo.cellIdx, -1, true);
+						}
+					}
 				}
-				intPtr = Sim.HandleMessage(SimMessageHashes.PrepareGameData, Grid.Visible.Length, Grid.Visible);
 			}
-			if (intPtr == IntPtr.Zero)
+		}
+		for (int k = 0; k < ptr->numCallbackInfo; k++)
+		{
+			Sim.CallbackInfo callbackInfo = ptr->callbackInfo[k];
+			HandleVector<Game.CallbackInfo>.Handle handle = new HandleVector<Game.CallbackInfo>.Handle
 			{
-				ptr = null;
+				index = callbackInfo.callbackIdx
+			};
+			if (!this.IsManuallyReleasedHandle(handle))
+			{
+				this.callbackInfo.Add(new global::Klei.CallbackInfo(handle));
 			}
-			else
+		}
+		int numSpawnFallingLiquidInfo = ptr->numSpawnFallingLiquidInfo;
+		for (int l = 0; l < numSpawnFallingLiquidInfo; l++)
+		{
+			Sim.SpawnFallingLiquidInfo spawnFallingLiquidInfo = ptr->spawnFallingLiquidInfo[l];
+			FallingWater.instance.AddParticle(spawnFallingLiquidInfo.cellIdx, spawnFallingLiquidInfo.elemIdx, spawnFallingLiquidInfo.mass, spawnFallingLiquidInfo.temperature, spawnFallingLiquidInfo.diseaseIdx, spawnFallingLiquidInfo.diseaseCount, false, false, false, false);
+		}
+		int numDigInfo = ptr->numDigInfo;
+		WorldDamage component = this.world.GetComponent<WorldDamage>();
+		for (int m = 0; m < numDigInfo; m++)
+		{
+			Sim.SpawnOreInfo spawnOreInfo = ptr->digInfo[m];
+			if (spawnOreInfo.temperature <= 0f && spawnOreInfo.mass > 0f)
 			{
-				Sim.GameDataUpdate* ptr2 = (Sim.GameDataUpdate*)(void*)intPtr;
-				Grid.elementIdx = ptr2->elementIdx;
-				Grid.temperature = ptr2->temperature;
-				Grid.mass = ptr2->mass;
-				Grid.radiation = ptr2->radiation;
-				Grid.properties = ptr2->properties;
-				Grid.strengthInfo = ptr2->strengthInfo;
-				Grid.insulation = ptr2->insulation;
-				Grid.diseaseIdx = ptr2->diseaseIdx;
-				Grid.diseaseCount = ptr2->diseaseCount;
-				Grid.AccumulatedFlowValues = ptr2->accumulatedFlow;
-				Grid.exposedToSunlight = (byte*)(void*)ptr2->propertyTextureExposedToSunlight;
-				PropertyTextures.externalFlowTex = ptr2->propertyTextureFlow;
-				PropertyTextures.externalLiquidTex = ptr2->propertyTextureLiquid;
-				PropertyTextures.externalLiquidDataTex = ptr2->propertyTextureLiquidData;
-				PropertyTextures.externalExposedToSunlight = ptr2->propertyTextureExposedToSunlight;
-				List<Element> elements = ElementLoader.elements;
-				this.simData.emittedMassEntries = ptr2->emittedMassEntries;
-				this.simData.elementChunks = ptr2->elementChunkInfos;
-				this.simData.buildingTemperatures = ptr2->buildingTemperatures;
-				this.simData.diseaseEmittedInfos = ptr2->diseaseEmittedInfos;
-				this.simData.diseaseConsumedInfos = ptr2->diseaseConsumedInfos;
-				for (int i = 0; i < ptr2->numSubstanceChangeInfo; i++)
+				global::Debug.LogError("Sim is telling us to spawn a zero temperature object. This shouldn't be possible because I have asserts in the dll about this....");
+			}
+			component.OnDigComplete(spawnOreInfo.cellIdx, spawnOreInfo.mass, spawnOreInfo.temperature, spawnOreInfo.elemIdx, spawnOreInfo.diseaseIdx, spawnOreInfo.diseaseCount);
+		}
+		int numSpawnOreInfo = ptr->numSpawnOreInfo;
+		for (int n = 0; n < numSpawnOreInfo; n++)
+		{
+			Sim.SpawnOreInfo spawnOreInfo2 = ptr->spawnOreInfo[n];
+			Vector3 vector = Grid.CellToPosCCC(spawnOreInfo2.cellIdx, Grid.SceneLayer.Ore);
+			Element element2 = ElementLoader.elements[(int)spawnOreInfo2.elemIdx];
+			if (spawnOreInfo2.temperature <= 0f && spawnOreInfo2.mass > 0f)
+			{
+				global::Debug.LogError("Sim is telling us to spawn a zero temperature object. This shouldn't be possible because I have asserts in the dll about this....");
+			}
+			element2.substance.SpawnResource(vector, spawnOreInfo2.mass, spawnOreInfo2.temperature, spawnOreInfo2.diseaseIdx, spawnOreInfo2.diseaseCount, false, false, false);
+		}
+		int numSpawnFXInfo = ptr->numSpawnFXInfo;
+		for (int num4 = 0; num4 < numSpawnFXInfo; num4++)
+		{
+			Sim.SpawnFXInfo spawnFXInfo = ptr->spawnFXInfo[num4];
+			this.SpawnFX((SpawnFXHashes)spawnFXInfo.fxHash, spawnFXInfo.cellIdx, spawnFXInfo.rotation);
+		}
+		UnstableGroundManager component2 = this.world.GetComponent<UnstableGroundManager>();
+		int numUnstableCellInfo = ptr->numUnstableCellInfo;
+		for (int num5 = 0; num5 < numUnstableCellInfo; num5++)
+		{
+			Sim.UnstableCellInfo unstableCellInfo = ptr->unstableCellInfo[num5];
+			if (unstableCellInfo.fallingInfo == 0)
+			{
+				component2.Spawn(unstableCellInfo.cellIdx, ElementLoader.elements[(int)unstableCellInfo.elemIdx], unstableCellInfo.mass, unstableCellInfo.temperature, unstableCellInfo.diseaseIdx, unstableCellInfo.diseaseCount);
+			}
+		}
+		int numWorldDamageInfo = ptr->numWorldDamageInfo;
+		for (int num6 = 0; num6 < numWorldDamageInfo; num6++)
+		{
+			Sim.WorldDamageInfo worldDamageInfo = ptr->worldDamageInfo[num6];
+			WorldDamage.Instance.ApplyDamage(worldDamageInfo);
+		}
+		for (int num7 = 0; num7 < ptr->numRemovedMassEntries; num7++)
+		{
+			ElementConsumer.AddMass(ptr->removedMassEntries[num7]);
+		}
+		int numMassConsumedCallbacks = ptr->numMassConsumedCallbacks;
+		HandleVector<Game.ComplexCallbackInfo<Sim.MassConsumedCallback>>.Handle handle2 = default(HandleVector<Game.ComplexCallbackInfo<Sim.MassConsumedCallback>>.Handle);
+		for (int num8 = 0; num8 < numMassConsumedCallbacks; num8++)
+		{
+			Sim.MassConsumedCallback massConsumedCallback = ptr->massConsumedCallbacks[num8];
+			handle2.index = massConsumedCallback.callbackIdx;
+			Game.ComplexCallbackInfo<Sim.MassConsumedCallback> complexCallbackInfo = this.massConsumedCallbackManager.Release(handle2, "massConsumedCB");
+			if (complexCallbackInfo.cb != null)
+			{
+				complexCallbackInfo.cb(massConsumedCallback, complexCallbackInfo.callbackData);
+			}
+		}
+		int numMassEmittedCallbacks = ptr->numMassEmittedCallbacks;
+		HandleVector<Game.ComplexCallbackInfo<Sim.MassEmittedCallback>>.Handle handle3 = default(HandleVector<Game.ComplexCallbackInfo<Sim.MassEmittedCallback>>.Handle);
+		for (int num9 = 0; num9 < numMassEmittedCallbacks; num9++)
+		{
+			Sim.MassEmittedCallback massEmittedCallback = ptr->massEmittedCallbacks[num9];
+			handle3.index = massEmittedCallback.callbackIdx;
+			if (this.massEmitCallbackManager.IsVersionValid(handle3))
+			{
+				Game.ComplexCallbackInfo<Sim.MassEmittedCallback> item = this.massEmitCallbackManager.GetItem(handle3);
+				if (item.cb != null)
 				{
-					Sim.SubstanceChangeInfo substanceChangeInfo = ptr2->substanceChangeInfo[i];
-					Element element = elements[(int)substanceChangeInfo.newElemIdx];
-					Grid.Element[substanceChangeInfo.cellIdx] = element;
+					item.cb(massEmittedCallback, item.callbackData);
 				}
-				for (int j = 0; j < ptr2->numSolidInfo; j++)
+			}
+		}
+		int numDiseaseConsumptionCallbacks = ptr->numDiseaseConsumptionCallbacks;
+		HandleVector<Game.ComplexCallbackInfo<Sim.DiseaseConsumptionCallback>>.Handle handle4 = default(HandleVector<Game.ComplexCallbackInfo<Sim.DiseaseConsumptionCallback>>.Handle);
+		for (int num10 = 0; num10 < numDiseaseConsumptionCallbacks; num10++)
+		{
+			Sim.DiseaseConsumptionCallback diseaseConsumptionCallback = ptr->diseaseConsumptionCallbacks[num10];
+			handle4.index = diseaseConsumptionCallback.callbackIdx;
+			if (this.diseaseConsumptionCallbackManager.IsVersionValid(handle4))
+			{
+				Game.ComplexCallbackInfo<Sim.DiseaseConsumptionCallback> item2 = this.diseaseConsumptionCallbackManager.GetItem(handle4);
+				if (item2.cb != null)
 				{
-					Sim.SolidInfo solidInfo = ptr2->solidInfo[j];
-					if (!this.solidChangedFilter.Contains(solidInfo.cellIdx))
-					{
-						this.solidInfo.Add(new SolidInfo(solidInfo.cellIdx, solidInfo.isSolid != 0));
-						bool flag = solidInfo.isSolid != 0;
-						Grid.SetSolid(solidInfo.cellIdx, flag, CellEventLogger.Instance.SimMessagesSolid);
-						if (flag && Grid.IsWorldValidCell(solidInfo.cellIdx))
-						{
-							int num = (int)Grid.WorldIdx[solidInfo.cellIdx];
-							if (num >= 0 && num < ClusterManager.Instance.WorldContainers.Count)
-							{
-								WorldContainer worldContainer = ClusterManager.Instance.WorldContainers[num];
-								int num2;
-								int num3;
-								Grid.CellToXY(solidInfo.cellIdx, out num2, out num3);
-								if (!worldContainer.IsModuleInterior && num3 > worldContainer.WorldOffset.Y + worldContainer.WorldSize.Y - Grid.TopBorderHeight)
-								{
-									SimMessages.Dig(solidInfo.cellIdx, -1, true);
-								}
-							}
-						}
-					}
+					item2.cb(diseaseConsumptionCallback, item2.callbackData);
 				}
-				for (int k = 0; k < ptr2->numCallbackInfo; k++)
+			}
+		}
+		int numComponentStateChangedMessages = ptr->numComponentStateChangedMessages;
+		HandleVector<Game.ComplexCallbackInfo<int>>.Handle handle5 = default(HandleVector<Game.ComplexCallbackInfo<int>>.Handle);
+		for (int num11 = 0; num11 < numComponentStateChangedMessages; num11++)
+		{
+			Sim.ComponentStateChangedMessage componentStateChangedMessage = ptr->componentStateChangedMessages[num11];
+			handle5.index = componentStateChangedMessage.callbackIdx;
+			if (this.simComponentCallbackManager.IsVersionValid(handle5))
+			{
+				Game.ComplexCallbackInfo<int> complexCallbackInfo2 = this.simComponentCallbackManager.Release(handle5, "component state changed cb");
+				if (complexCallbackInfo2.cb != null)
 				{
-					Sim.CallbackInfo callbackInfo = ptr2->callbackInfo[k];
-					HandleVector<Game.CallbackInfo>.Handle handle = new HandleVector<Game.CallbackInfo>.Handle
-					{
-						index = callbackInfo.callbackIdx
-					};
-					if (!this.IsManuallyReleasedHandle(handle))
-					{
-						this.callbackInfo.Add(new global::Klei.CallbackInfo(handle));
-					}
+					complexCallbackInfo2.cb(componentStateChangedMessage.simHandle, complexCallbackInfo2.callbackData);
 				}
-				int numSpawnFallingLiquidInfo = ptr2->numSpawnFallingLiquidInfo;
-				for (int l = 0; l < numSpawnFallingLiquidInfo; l++)
-				{
-					Sim.SpawnFallingLiquidInfo spawnFallingLiquidInfo = ptr2->spawnFallingLiquidInfo[l];
-					FallingWater.instance.AddParticle(spawnFallingLiquidInfo.cellIdx, spawnFallingLiquidInfo.elemIdx, spawnFallingLiquidInfo.mass, spawnFallingLiquidInfo.temperature, spawnFallingLiquidInfo.diseaseIdx, spawnFallingLiquidInfo.diseaseCount, false, false, false, false);
-				}
-				int numDigInfo = ptr2->numDigInfo;
-				WorldDamage component = this.world.GetComponent<WorldDamage>();
-				for (int m = 0; m < numDigInfo; m++)
-				{
-					Sim.SpawnOreInfo spawnOreInfo = ptr2->digInfo[m];
-					if (spawnOreInfo.temperature <= 0f && spawnOreInfo.mass > 0f)
-					{
-						global::Debug.LogError("Sim is telling us to spawn a zero temperature object. This shouldn't be possible because I have asserts in the dll about this....");
-					}
-					component.OnDigComplete(spawnOreInfo.cellIdx, spawnOreInfo.mass, spawnOreInfo.temperature, spawnOreInfo.elemIdx, spawnOreInfo.diseaseIdx, spawnOreInfo.diseaseCount);
-				}
-				int numSpawnOreInfo = ptr2->numSpawnOreInfo;
-				for (int n = 0; n < numSpawnOreInfo; n++)
-				{
-					Sim.SpawnOreInfo spawnOreInfo2 = ptr2->spawnOreInfo[n];
-					Vector3 vector = Grid.CellToPosCCC(spawnOreInfo2.cellIdx, Grid.SceneLayer.Ore);
-					Element element2 = ElementLoader.elements[(int)spawnOreInfo2.elemIdx];
-					if (spawnOreInfo2.temperature <= 0f && spawnOreInfo2.mass > 0f)
-					{
-						global::Debug.LogError("Sim is telling us to spawn a zero temperature object. This shouldn't be possible because I have asserts in the dll about this....");
-					}
-					element2.substance.SpawnResource(vector, spawnOreInfo2.mass, spawnOreInfo2.temperature, spawnOreInfo2.diseaseIdx, spawnOreInfo2.diseaseCount, false, false, false);
-				}
-				int numSpawnFXInfo = ptr2->numSpawnFXInfo;
-				for (int num4 = 0; num4 < numSpawnFXInfo; num4++)
-				{
-					Sim.SpawnFXInfo spawnFXInfo = ptr2->spawnFXInfo[num4];
-					this.SpawnFX((SpawnFXHashes)spawnFXInfo.fxHash, spawnFXInfo.cellIdx, spawnFXInfo.rotation);
-				}
-				UnstableGroundManager component2 = this.world.GetComponent<UnstableGroundManager>();
-				int numUnstableCellInfo = ptr2->numUnstableCellInfo;
-				for (int num5 = 0; num5 < numUnstableCellInfo; num5++)
-				{
-					Sim.UnstableCellInfo unstableCellInfo = ptr2->unstableCellInfo[num5];
-					if (unstableCellInfo.fallingInfo == 0)
-					{
-						component2.Spawn(unstableCellInfo.cellIdx, ElementLoader.elements[(int)unstableCellInfo.elemIdx], unstableCellInfo.mass, unstableCellInfo.temperature, unstableCellInfo.diseaseIdx, unstableCellInfo.diseaseCount);
-					}
-				}
-				int numWorldDamageInfo = ptr2->numWorldDamageInfo;
-				for (int num6 = 0; num6 < numWorldDamageInfo; num6++)
-				{
-					Sim.WorldDamageInfo worldDamageInfo = ptr2->worldDamageInfo[num6];
-					WorldDamage.Instance.ApplyDamage(worldDamageInfo);
-				}
-				for (int num7 = 0; num7 < ptr2->numRemovedMassEntries; num7++)
-				{
-					ElementConsumer.AddMass(ptr2->removedMassEntries[num7]);
-				}
-				int numMassConsumedCallbacks = ptr2->numMassConsumedCallbacks;
-				HandleVector<Game.ComplexCallbackInfo<Sim.MassConsumedCallback>>.Handle handle2 = default(HandleVector<Game.ComplexCallbackInfo<Sim.MassConsumedCallback>>.Handle);
-				for (int num8 = 0; num8 < numMassConsumedCallbacks; num8++)
-				{
-					Sim.MassConsumedCallback massConsumedCallback = ptr2->massConsumedCallbacks[num8];
-					handle2.index = massConsumedCallback.callbackIdx;
-					Game.ComplexCallbackInfo<Sim.MassConsumedCallback> complexCallbackInfo = this.massConsumedCallbackManager.Release(handle2, "massConsumedCB");
-					if (complexCallbackInfo.cb != null)
-					{
-						complexCallbackInfo.cb(massConsumedCallback, complexCallbackInfo.callbackData);
-					}
-				}
-				int numMassEmittedCallbacks = ptr2->numMassEmittedCallbacks;
-				HandleVector<Game.ComplexCallbackInfo<Sim.MassEmittedCallback>>.Handle handle3 = default(HandleVector<Game.ComplexCallbackInfo<Sim.MassEmittedCallback>>.Handle);
-				for (int num9 = 0; num9 < numMassEmittedCallbacks; num9++)
-				{
-					Sim.MassEmittedCallback massEmittedCallback = ptr2->massEmittedCallbacks[num9];
-					handle3.index = massEmittedCallback.callbackIdx;
-					if (this.massEmitCallbackManager.IsVersionValid(handle3))
-					{
-						Game.ComplexCallbackInfo<Sim.MassEmittedCallback> item = this.massEmitCallbackManager.GetItem(handle3);
-						if (item.cb != null)
-						{
-							item.cb(massEmittedCallback, item.callbackData);
-						}
-					}
-				}
-				int numDiseaseConsumptionCallbacks = ptr2->numDiseaseConsumptionCallbacks;
-				HandleVector<Game.ComplexCallbackInfo<Sim.DiseaseConsumptionCallback>>.Handle handle4 = default(HandleVector<Game.ComplexCallbackInfo<Sim.DiseaseConsumptionCallback>>.Handle);
-				for (int num10 = 0; num10 < numDiseaseConsumptionCallbacks; num10++)
-				{
-					Sim.DiseaseConsumptionCallback diseaseConsumptionCallback = ptr2->diseaseConsumptionCallbacks[num10];
-					handle4.index = diseaseConsumptionCallback.callbackIdx;
-					if (this.diseaseConsumptionCallbackManager.IsVersionValid(handle4))
-					{
-						Game.ComplexCallbackInfo<Sim.DiseaseConsumptionCallback> item2 = this.diseaseConsumptionCallbackManager.GetItem(handle4);
-						if (item2.cb != null)
-						{
-							item2.cb(diseaseConsumptionCallback, item2.callbackData);
-						}
-					}
-				}
-				int numComponentStateChangedMessages = ptr2->numComponentStateChangedMessages;
-				HandleVector<Game.ComplexCallbackInfo<int>>.Handle handle5 = default(HandleVector<Game.ComplexCallbackInfo<int>>.Handle);
-				for (int num11 = 0; num11 < numComponentStateChangedMessages; num11++)
-				{
-					Sim.ComponentStateChangedMessage componentStateChangedMessage = ptr2->componentStateChangedMessages[num11];
-					handle5.index = componentStateChangedMessage.callbackIdx;
-					if (this.simComponentCallbackManager.IsVersionValid(handle5))
-					{
-						Game.ComplexCallbackInfo<int> complexCallbackInfo2 = this.simComponentCallbackManager.Release(handle5, "component state changed cb");
-						if (complexCallbackInfo2.cb != null)
-						{
-							complexCallbackInfo2.cb(componentStateChangedMessage.simHandle, complexCallbackInfo2.callbackData);
-						}
-					}
-				}
-				int numRadiationConsumedCallbacks = ptr2->numRadiationConsumedCallbacks;
-				HandleVector<Game.ComplexCallbackInfo<Sim.ConsumedRadiationCallback>>.Handle handle6 = default(HandleVector<Game.ComplexCallbackInfo<Sim.ConsumedRadiationCallback>>.Handle);
-				for (int num12 = 0; num12 < numRadiationConsumedCallbacks; num12++)
-				{
-					Sim.ConsumedRadiationCallback consumedRadiationCallback = ptr2->radiationConsumedCallbacks[num12];
-					handle6.index = consumedRadiationCallback.callbackIdx;
-					Game.ComplexCallbackInfo<Sim.ConsumedRadiationCallback> complexCallbackInfo3 = this.radiationConsumedCallbackManager.Release(handle6, "radiationConsumedCB");
-					if (complexCallbackInfo3.cb != null)
-					{
-						complexCallbackInfo3.cb(consumedRadiationCallback, complexCallbackInfo3.callbackData);
-					}
-				}
-				int numElementChunkMeltedInfos = ptr2->numElementChunkMeltedInfos;
-				for (int num13 = 0; num13 < numElementChunkMeltedInfos; num13++)
-				{
-					SimTemperatureTransfer.DoOreMeltTransition(ptr2->elementChunkMeltedInfos[num13].handle);
-				}
-				int numBuildingOverheatInfos = ptr2->numBuildingOverheatInfos;
-				for (int num14 = 0; num14 < numBuildingOverheatInfos; num14++)
-				{
-					StructureTemperatureComponents.DoOverheat(ptr2->buildingOverheatInfos[num14].handle);
-				}
-				int numBuildingNoLongerOverheatedInfos = ptr2->numBuildingNoLongerOverheatedInfos;
-				for (int num15 = 0; num15 < numBuildingNoLongerOverheatedInfos; num15++)
-				{
-					StructureTemperatureComponents.DoNoLongerOverheated(ptr2->buildingNoLongerOverheatedInfos[num15].handle);
-				}
-				int numBuildingMeltedInfos = ptr2->numBuildingMeltedInfos;
-				for (int num16 = 0; num16 < numBuildingMeltedInfos; num16++)
-				{
-					StructureTemperatureComponents.DoStateTransition(ptr2->buildingMeltedInfos[num16].handle);
-				}
-				int numCellMeltedInfos = ptr2->numCellMeltedInfos;
-				for (int num17 = 0; num17 < numCellMeltedInfos; num17++)
-				{
-					int gameCell = ptr2->cellMeltedInfos[num17].gameCell;
-					GameObject gameObject = Grid.Objects[gameCell, 9];
-					if (gameObject != null)
-					{
-						gameObject.Trigger(675471409, null);
-						global::Util.KDestroyGameObject(gameObject);
-					}
-				}
-				if (dt > 0f)
-				{
-					this.conduitTemperatureManager.Sim200ms(0.2f);
-					this.conduitDiseaseManager.Sim200ms(0.2f);
-					this.gasConduitFlow.Sim200ms(0.2f);
-					this.liquidConduitFlow.Sim200ms(0.2f);
-					this.solidConduitFlow.Sim200ms(0.2f);
-					this.accumulators.Sim200ms(0.2f);
-					this.plantElementAbsorbers.Sim200ms(0.2f);
-				}
-				Sim.DebugProperties debugProperties;
-				debugProperties.buildingTemperatureScale = 100f;
-				debugProperties.buildingToBuildingTemperatureScale = 0.001f;
-				debugProperties.biomeTemperatureLerpRate = 0.001f;
-				debugProperties.isDebugEditing = ((DebugPaintElementScreen.Instance != null && DebugPaintElementScreen.Instance.gameObject.activeSelf) ? 1 : 0);
-				debugProperties.pad0 = (debugProperties.pad1 = (debugProperties.pad2 = 0));
-				SimMessages.SetDebugProperties(debugProperties);
-				if (dt > 0f)
-				{
-					if (this.circuitManager != null)
-					{
-						this.circuitManager.Sim200msFirst(dt);
-					}
-					if (this.energySim != null)
-					{
-						this.energySim.EnergySim200ms(dt);
-					}
-					if (this.circuitManager != null)
-					{
-						this.circuitManager.Sim200msLast(dt);
-					}
-				}
-				ptr = ptr2;
+			}
+		}
+		int numRadiationConsumedCallbacks = ptr->numRadiationConsumedCallbacks;
+		HandleVector<Game.ComplexCallbackInfo<Sim.ConsumedRadiationCallback>>.Handle handle6 = default(HandleVector<Game.ComplexCallbackInfo<Sim.ConsumedRadiationCallback>>.Handle);
+		for (int num12 = 0; num12 < numRadiationConsumedCallbacks; num12++)
+		{
+			Sim.ConsumedRadiationCallback consumedRadiationCallback = ptr->radiationConsumedCallbacks[num12];
+			handle6.index = consumedRadiationCallback.callbackIdx;
+			Game.ComplexCallbackInfo<Sim.ConsumedRadiationCallback> complexCallbackInfo3 = this.radiationConsumedCallbackManager.Release(handle6, "radiationConsumedCB");
+			if (complexCallbackInfo3.cb != null)
+			{
+				complexCallbackInfo3.cb(consumedRadiationCallback, complexCallbackInfo3.callbackData);
+			}
+		}
+		int numElementChunkMeltedInfos = ptr->numElementChunkMeltedInfos;
+		for (int num13 = 0; num13 < numElementChunkMeltedInfos; num13++)
+		{
+			SimTemperatureTransfer.DoOreMeltTransition(ptr->elementChunkMeltedInfos[num13].handle);
+		}
+		int numBuildingOverheatInfos = ptr->numBuildingOverheatInfos;
+		for (int num14 = 0; num14 < numBuildingOverheatInfos; num14++)
+		{
+			StructureTemperatureComponents.DoOverheat(ptr->buildingOverheatInfos[num14].handle);
+		}
+		int numBuildingNoLongerOverheatedInfos = ptr->numBuildingNoLongerOverheatedInfos;
+		for (int num15 = 0; num15 < numBuildingNoLongerOverheatedInfos; num15++)
+		{
+			StructureTemperatureComponents.DoNoLongerOverheated(ptr->buildingNoLongerOverheatedInfos[num15].handle);
+		}
+		int numBuildingMeltedInfos = ptr->numBuildingMeltedInfos;
+		for (int num16 = 0; num16 < numBuildingMeltedInfos; num16++)
+		{
+			StructureTemperatureComponents.DoStateTransition(ptr->buildingMeltedInfos[num16].handle);
+		}
+		int numCellMeltedInfos = ptr->numCellMeltedInfos;
+		for (int num17 = 0; num17 < numCellMeltedInfos; num17++)
+		{
+			int gameCell = ptr->cellMeltedInfos[num17].gameCell;
+			GameObject gameObject = Grid.Objects[gameCell, 9];
+			if (gameObject != null)
+			{
+				gameObject.Trigger(675471409, null);
+				global::Util.KDestroyGameObject(gameObject);
+			}
+		}
+		if (dt > 0f)
+		{
+			this.conduitTemperatureManager.Sim200ms(0.2f);
+			this.conduitDiseaseManager.Sim200ms(0.2f);
+			this.gasConduitFlow.Sim200ms(0.2f);
+			this.liquidConduitFlow.Sim200ms(0.2f);
+			this.solidConduitFlow.Sim200ms(0.2f);
+			this.accumulators.Sim200ms(0.2f);
+			this.plantElementAbsorbers.Sim200ms(0.2f);
+		}
+		Sim.DebugProperties debugProperties;
+		debugProperties.buildingTemperatureScale = 100f;
+		debugProperties.buildingToBuildingTemperatureScale = 0.001f;
+		debugProperties.biomeTemperatureLerpRate = 0.001f;
+		debugProperties.isDebugEditing = ((DebugPaintElementScreen.Instance != null && DebugPaintElementScreen.Instance.gameObject.activeSelf) ? 1 : 0);
+		debugProperties.pad0 = (debugProperties.pad1 = (debugProperties.pad2 = 0));
+		SimMessages.SetDebugProperties(debugProperties);
+		if (dt > 0f)
+		{
+			if (this.circuitManager != null)
+			{
+				this.circuitManager.Sim200msFirst(dt);
+			}
+			if (this.energySim != null)
+			{
+				this.energySim.EnergySim200ms(dt);
+			}
+			if (this.circuitManager != null)
+			{
+				this.circuitManager.Sim200msLast(dt);
 			}
 		}
 		return ptr;
@@ -754,6 +746,7 @@ public class Game : KMonoBehaviour
 		Singleton<CellChangeMonitor>.Instance.RenderEveryTick();
 		this.SimEveryTick(deltaTime);
 		SuperluminalPerf.EndEvent();
+		AsyncPathProber.Instance.TickFrame();
 	}
 
 	private void SimEveryTick(float dt)
@@ -886,12 +879,12 @@ public class Game : KMonoBehaviour
 		if (Time.timeScale == 0f && !this.IsPaused)
 		{
 			this.IsPaused = true;
-			base.Trigger(-1788536802, this.IsPaused);
+			base.Trigger(-1788536802, BoxedBools.Box(this.IsPaused));
 		}
 		else if (Time.timeScale != 0f && this.IsPaused)
 		{
 			this.IsPaused = false;
-			base.Trigger(-1788536802, this.IsPaused);
+			base.Trigger(-1788536802, BoxedBools.Box(this.IsPaused));
 		}
 		if (Input.GetMouseButton(0))
 		{
@@ -967,94 +960,24 @@ public class Game : KMonoBehaviour
 		}
 		KFMOD.RenderEveryTick(Time.deltaTime);
 		SuperluminalPerf.EndEvent();
-		if (GenericGameSettings.instance.performanceCapture.waitTime != 0f)
-		{
-			this.UpdatePerformanceCapture();
-		}
-	}
-
-	private void UpdatePerformanceCapture()
-	{
-		if (this.IsPaused && SpeedControlScreen.Instance != null)
+		if (GenericGameSettings.instance.scriptedProfile.frameCount != 0 && this.IsPaused && SpeedControlScreen.Instance != null)
 		{
 			SpeedControlScreen.Instance.Unpause(true);
 		}
-		if (Time.timeSinceLevelLoad < GenericGameSettings.instance.performanceCapture.waitTime)
-		{
-			return;
-		}
-		uint num = 693461U;
-		string text = global::System.DateTime.Now.ToShortDateString();
-		string text2 = global::System.DateTime.Now.ToShortTimeString();
-		string fileName = Path.GetFileName(GenericGameSettings.instance.performanceCapture.saveGame);
-		string text3 = "Version,Date,Time,SaveGame";
-		string text4 = string.Format("{0},{1},{2},{3}", new object[] { num, text, text2, fileName });
-		float num2 = 0.1f;
-		if (GenericGameSettings.instance.performanceCapture.gcStats)
-		{
-			global::Debug.Log("Begin GC profiling...");
-			float realtimeSinceStartup = Time.realtimeSinceStartup;
-			GC.Collect();
-			num2 = Time.realtimeSinceStartup - realtimeSinceStartup;
-			global::Debug.Log("\tGC.Collect() took " + num2.ToString() + " seconds");
-			MemorySnapshot memorySnapshot = new MemorySnapshot();
-			string text5 = "{0},{1},{2},{3}";
-			string text6 = "./memory/GCTypeMetrics.csv";
-			if (!File.Exists(text6))
-			{
-				using (StreamWriter streamWriter = new StreamWriter(text6))
-				{
-					streamWriter.WriteLine(string.Format(text5, new object[] { text3, "Type", "Instances", "References" }));
-				}
-			}
-			using (StreamWriter streamWriter2 = new StreamWriter(text6, true))
-			{
-				foreach (MemorySnapshot.TypeData typeData in memorySnapshot.types.Values)
-				{
-					streamWriter2.WriteLine(string.Format(text5, new object[]
-					{
-						text4,
-						"\"" + typeData.type.ToString() + "\"",
-						typeData.instanceCount,
-						typeData.refCount
-					}));
-				}
-			}
-			global::Debug.Log("...end GC profiling");
-		}
-		float fps = Global.Instance.GetComponent<PerformanceMonitor>().FPS;
-		Directory.CreateDirectory("./memory");
-		string text7 = "{0},{1},{2}";
-		string text8 = "./memory/GeneralMetrics.csv";
-		if (!File.Exists(text8))
-		{
-			using (StreamWriter streamWriter3 = new StreamWriter(text8))
-			{
-				streamWriter3.WriteLine(string.Format(text7, text3, "GCDuration", "FPS"));
-			}
-		}
-		using (StreamWriter streamWriter4 = new StreamWriter(text8, true))
-		{
-			streamWriter4.WriteLine(string.Format(text7, text4, num2, fps));
-		}
-		GenericGameSettings.instance.performanceCapture.waitTime = 0f;
-		App.Quit();
 	}
 
 	public void Reset(GameSpawnData gsd, Vector2I world_offset)
 	{
-		using (new KProfiler.Region("World.Reset", null))
+		if (gsd == null)
 		{
-			if (gsd != null)
+			return;
+		}
+		foreach (KeyValuePair<Vector2I, bool> keyValuePair in gsd.preventFoWReveal)
+		{
+			if (keyValuePair.Value)
 			{
-				foreach (KeyValuePair<Vector2I, bool> keyValuePair in gsd.preventFoWReveal)
-				{
-					if (keyValuePair.Value)
-					{
-						Vector2I vector2I = new Vector2I(keyValuePair.Key.X + world_offset.X, keyValuePair.Key.Y + world_offset.Y);
-						Grid.PreventFogOfWarReveal[Grid.PosToCell(vector2I)] = keyValuePair.Value;
-					}
-				}
+				Vector2I vector2I = new Vector2I(keyValuePair.Key.X + world_offset.X, keyValuePair.Key.Y + world_offset.Y);
+				Grid.PreventFogOfWarReveal[Grid.PosToCell(vector2I)] = keyValuePair.Value;
 			}
 		}
 	}
@@ -1102,63 +1025,23 @@ public class Game : KMonoBehaviour
 				};
 				return gameObject;
 			};
-			GameObjectPool pool = new GameObjectPool(func, this.fxSpawnData[fx_idx].initialCount);
+			GameObjectPool pool = new GameObjectPool(func, delegate(GameObject _)
+			{
+			}, this.fxSpawnData[fx_idx].initialCount);
 			this.fxPools[(int)this.fxSpawnData[fx_idx].id] = pool;
 			this.fxSpawner[(int)this.fxSpawnData[fx_idx].id] = delegate(Vector3 pos, float rotation)
 			{
-				Action<object> action = delegate(object obj)
-				{
-					int num3 = Grid.PosToCell(pos);
-					if ((this.activeFX[num3] & fx_mask) == 0)
-					{
-						ushort[] array2 = this.activeFX;
-						int num4 = num3;
-						array2[num4] |= fx_mask;
-						GameObject instance = pool.GetInstance();
-						Game.SpawnPoolData spawnPoolData = this.fxSpawnData[fx_idx];
-						Quaternion quaternion = Quaternion.identity;
-						bool flag = false;
-						string text = spawnPoolData.initialAnim;
-						Game.SpawnRotationConfig rotationConfig = spawnPoolData.rotationConfig;
-						if (rotationConfig != Game.SpawnRotationConfig.Normal)
-						{
-							if (rotationConfig == Game.SpawnRotationConfig.StringName)
-							{
-								int num5 = (int)(rotation / 90f);
-								if (num5 < 0)
-								{
-									num5 += spawnPoolData.rotationData.Length;
-								}
-								text = spawnPoolData.rotationData[num5].animName;
-								flag = spawnPoolData.rotationData[num5].flip;
-							}
-						}
-						else
-						{
-							quaternion = Quaternion.Euler(0f, 0f, rotation);
-						}
-						pos += spawnPoolData.spawnOffset;
-						Vector2 vector = global::UnityEngine.Random.insideUnitCircle;
-						vector.x *= spawnPoolData.spawnRandomOffset.x;
-						vector.y *= spawnPoolData.spawnRandomOffset.y;
-						vector = quaternion * vector;
-						pos.x += vector.x;
-						pos.y += vector.y;
-						instance.transform.SetPosition(pos);
-						instance.transform.rotation = quaternion;
-						KBatchedAnimController component2 = instance.GetComponent<KBatchedAnimController>();
-						component2.FlipX = flag;
-						component2.TintColour = spawnPoolData.colour;
-						component2.Play(text, KAnim.PlayMode.Once, 1f, 0f);
-						component2.enabled = true;
-					}
-				};
+				Game.SpawnFXParams spawnFXParams = Game.SpawnFXParams.Pool.Get();
+				spawnFXParams.pool = pool;
+				spawnFXParams.fx_idx = fx_idx;
+				spawnFXParams.pos = pos;
+				spawnFXParams.rotation = rotation;
 				if (Game.Instance.IsPaused)
 				{
-					action(null);
+					Game.GameInitializeFXSpawners_SpawnFX(spawnFXParams);
 					return;
 				}
-				GameScheduler.Instance.Schedule("SpawnFX", 0f, action, null, null);
+				GameScheduler.Instance.Schedule("SpawnFX", 0f, Game.GameInitializeFXSpawners_SpawnFX, spawnFXParams, null);
 			};
 		}
 	}
@@ -1207,9 +1090,9 @@ public class Game : KMonoBehaviour
 		gameSaveData.savedInfo = this.savedInfo;
 		global::Debug.Assert(gameSaveData.worldDetail != null, "World detail null");
 		gameSaveData.dateGenerated = this.dateGenerated;
-		if (!this.changelistsPlayedOn.Contains(693461U))
+		if (!this.changelistsPlayedOn.Contains(700348U))
 		{
-			this.changelistsPlayedOn.Add(693461U);
+			this.changelistsPlayedOn.Add(700348U);
 		}
 		gameSaveData.changelistsPlayedOn = this.changelistsPlayedOn;
 		if (this.OnSave != null)
@@ -1255,6 +1138,7 @@ public class Game : KMonoBehaviour
 		{
 			this.OnLoad(gameSaveData);
 		}
+		base.StartCoroutine(PerformanceCaptureMonitor.FinishedLoadingSave());
 	}
 
 	public void SetAutoSaveCallbacks(Game.SavingPreCB activatePreCB, Game.SavingActiveCB activateActiveCB, Game.SavingPostCB activatePostCB)
@@ -1505,6 +1389,7 @@ public class Game : KMonoBehaviour
 		KMonoBehaviour.lastGameObject = null;
 		KMonoBehaviour.lastObj = null;
 		Db.Get().ResetProblematicDbs();
+		AsyncPathProber.DestroyInstance();
 		GridSettings.ClearGrid();
 		StateMachineManager.ResetParameters();
 		ChoreTable.Instance.ResetParameters();
@@ -1636,6 +1521,7 @@ public class Game : KMonoBehaviour
 		Singleton<StateMachineUpdater>.Instance.Clear();
 		UpdateObjectCountParameter.Clear();
 		MaterialSelectionPanel.ClearStatics();
+		StarmapHexCellInventory.ClearStatics();
 		StarmapScreen.DestroyInstance();
 		ClusterNameDisplayScreen.DestroyInstance();
 		ClusterManager.DestroyInstance();
@@ -1653,6 +1539,8 @@ public class Game : KMonoBehaviour
 		ClusterMapSelectTool.DestroyInstance();
 		StoryManager.DestroyInstance();
 		AnimEventHandlerManager.DestroyInstance();
+		GridRestrictionSerializer.DestroyInstance();
+		EdiblesManager.ClearSaveFoodCache();
 		Game.Instance = null;
 		Game.BrainScheduler = null;
 		Grid.OnReveal = null;
@@ -1670,7 +1558,15 @@ public class Game : KMonoBehaviour
 			DebugUtil.DevLogError("Game.IsDlcActiveForCurrentSave can only be called when the game is running");
 			return false;
 		}
-		return dlcId == "" || dlcId == null || SaveLoader.Instance.GameInfo.dlcIds.Contains(dlcId);
+		if (dlcId == "" || dlcId == null)
+		{
+			return true;
+		}
+		if (DlcManager.CONTENT_ONLY_DLC_IDS.Contains(dlcId))
+		{
+			return DlcManager.IsContentSubscribed(dlcId);
+		}
+		return SaveLoader.Instance.GameInfo.dlcIds.Contains(dlcId);
 	}
 
 	public static bool IsCorrectDlcActiveForCurrentSave(IHasDlcRestrictions restrictions)
@@ -1680,7 +1576,7 @@ public class Game : KMonoBehaviour
 			DebugUtil.DevLogError("Game.IsCorrectDlcActiveForCurrentSave can only be called when the game is running");
 			return false;
 		}
-		return Game.IsAllDlcActiveForCurrentSave(restrictions.GetRequiredDlcIds()) && !Game.IsAnyDlcActiveForCurrentSave(restrictions.GetForbiddenDlcIds());
+		return (restrictions.GetAnyRequiredDlcIds() == null || Game.IsAnyDlcActiveForCurrentSave(restrictions.GetAnyRequiredDlcIds())) && Game.IsAllDlcActiveForCurrentSave(restrictions.GetRequiredDlcIds()) && !Game.IsAnyDlcActiveForCurrentSave(restrictions.GetForbiddenDlcIds());
 	}
 
 	private static bool IsAllDlcActiveForCurrentSave(string[] dlcIds)
@@ -1956,6 +1852,59 @@ public class Game : KMonoBehaviour
 	private Dictionary<int, Action<Vector3, float>> fxSpawner = new Dictionary<int, Action<Vector3, float>>();
 
 	private Dictionary<int, GameObjectPool> fxPools = new Dictionary<int, GameObjectPool>();
+
+	private static Action<object> GameInitializeFXSpawners_SpawnFX = delegate(object obj)
+	{
+		Game.SpawnFXParams spawnFXParams = Unsafe.As<Game.SpawnFXParams>(obj);
+		ushort num = (ushort)(1 << spawnFXParams.fx_idx);
+		int num2 = Grid.PosToCell(spawnFXParams.pos);
+		if ((Game.Instance.activeFX[num2] & num) == 0)
+		{
+			ushort[] array = Game.Instance.activeFX;
+			int num3 = num2;
+			array[num3] |= num;
+			GameObject instance = spawnFXParams.pool.GetInstance();
+			Game.SpawnPoolData spawnPoolData = Game.Instance.fxSpawnData[spawnFXParams.fx_idx];
+			Quaternion quaternion = Quaternion.identity;
+			bool flag = false;
+			string text = spawnPoolData.initialAnim;
+			Game.SpawnRotationConfig rotationConfig = spawnPoolData.rotationConfig;
+			if (rotationConfig != Game.SpawnRotationConfig.Normal)
+			{
+				if (rotationConfig == Game.SpawnRotationConfig.StringName)
+				{
+					int num4 = (int)(spawnFXParams.rotation / 90f);
+					if (num4 < 0)
+					{
+						num4 += spawnPoolData.rotationData.Length;
+					}
+					text = spawnPoolData.rotationData[num4].animName;
+					flag = spawnPoolData.rotationData[num4].flip;
+				}
+			}
+			else
+			{
+				quaternion = Quaternion.Euler(0f, 0f, spawnFXParams.rotation);
+			}
+			spawnFXParams.pos += spawnPoolData.spawnOffset;
+			Vector2 vector = global::UnityEngine.Random.insideUnitCircle;
+			vector.x *= spawnPoolData.spawnRandomOffset.x;
+			vector.y *= spawnPoolData.spawnRandomOffset.y;
+			vector = quaternion * vector;
+			Game.SpawnFXParams spawnFXParams2 = spawnFXParams;
+			spawnFXParams2.pos.x = spawnFXParams2.pos.x + vector.x;
+			Game.SpawnFXParams spawnFXParams3 = spawnFXParams;
+			spawnFXParams3.pos.y = spawnFXParams3.pos.y + vector.y;
+			instance.transform.SetPosition(spawnFXParams.pos);
+			instance.transform.rotation = quaternion;
+			KBatchedAnimController component = instance.GetComponent<KBatchedAnimController>();
+			component.FlipX = flag;
+			component.TintColour = spawnPoolData.colour;
+			component.Play(text, KAnim.PlayMode.Once, 1f, 0f);
+			component.enabled = true;
+		}
+		Game.SpawnFXParams.Pool.Release(spawnFXParams);
+	};
 
 	private Game.SavingPreCB activatePreCB;
 
@@ -2237,6 +2186,19 @@ public class Game : KMonoBehaviour
 		public Game.SpawnRotationConfig rotationConfig;
 
 		public Game.SpawnRotationData[] rotationData;
+	}
+
+	private class SpawnFXParams
+	{
+		public GameObjectPool pool;
+
+		public int fx_idx;
+
+		public Vector3 pos;
+
+		public float rotation;
+
+		public static ObjectPool<Game.SpawnFXParams> Pool = new ObjectPool<Game.SpawnFXParams>(() => new Game.SpawnFXParams(), null, null, null, false, 128, 1024);
 	}
 
 	[Serializable]

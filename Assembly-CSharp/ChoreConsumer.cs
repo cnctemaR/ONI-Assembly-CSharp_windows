@@ -181,40 +181,7 @@ public class ChoreConsumer : KMonoBehaviour, IPersonalPriorityManager
 			global::Debug.Assert(this.stationaryReach > 0);
 			CellOffset offset = Grid.GetOffset(Grid.PosToCell(this));
 			Extents extents = new Extents(offset.x, offset.y, this.stationaryReach);
-			ListPool<ScenePartitionerEntry, ChoreConsumer>.PooledList pooledList = ListPool<ScenePartitionerEntry, ChoreConsumer>.Allocate();
-			GameScenePartitioner.Instance.GatherEntries(extents, GameScenePartitioner.Instance.fetchChoreLayer, pooledList);
-			foreach (ScenePartitionerEntry scenePartitionerEntry in pooledList)
-			{
-				if (scenePartitionerEntry.obj == null)
-				{
-					DebugUtil.Assert(false, "FindNextChore found an entry that was null");
-				}
-				else
-				{
-					FetchChore fetchChore = scenePartitionerEntry.obj as FetchChore;
-					if (fetchChore == null)
-					{
-						DebugUtil.Assert(false, "FindNextChore found an entry that wasn't a FetchChore");
-					}
-					else if (fetchChore.target == null)
-					{
-						DebugUtil.Assert(false, "FindNextChore found an entry with a null target");
-					}
-					else if (fetchChore.isNull)
-					{
-						global::Debug.LogWarning("FindNextChore found an entry that isNull");
-					}
-					else
-					{
-						int num = Grid.PosToCell(fetchChore.gameObject);
-						if (this.consumerState.solidTransferArm.IsCellReachable(num))
-						{
-							fetchChore.CollectChoresFromGlobalChoreProvider(this.consumerState, this.preconditionSnapshot.succeededContexts, this.preconditionSnapshot.failedContexts, false);
-						}
-					}
-				}
-			}
-			pooledList.Recycle();
+			GameScenePartitioner.Instance.VisitEntries<ChoreConsumer>(extents.x, extents.y, extents.width, extents.height, GameScenePartitioner.Instance.fetchChoreLayer, ChoreConsumer.FindNextChoreEvaluateEntryHelper, this);
 		}
 		else
 		{
@@ -608,6 +575,32 @@ public class ChoreConsumer : KMonoBehaviour, IPersonalPriorityManager
 	private List<HashedString> userDisabledChoreGroups = new List<HashedString>();
 
 	private int stationaryReach = -1;
+
+	private static Func<object, ChoreConsumer, Util.IterationInstruction> FindNextChoreEvaluateEntryHelper = delegate(object obj, ChoreConsumer consumer)
+	{
+		FetchChore fetchChore = obj as FetchChore;
+		if (fetchChore == null)
+		{
+			DebugUtil.Assert(false, "FindNextChore found an entry that wasn't a FetchChore");
+			return Util.IterationInstruction.Continue;
+		}
+		if (fetchChore.target == null)
+		{
+			DebugUtil.Assert(false, "FindNextChore found an entry with a null target");
+			return Util.IterationInstruction.Continue;
+		}
+		if (fetchChore.isNull)
+		{
+			global::Debug.LogWarning("FindNextChore found an entry that isNull");
+			return Util.IterationInstruction.Continue;
+		}
+		int num = Grid.PosToCell(fetchChore.gameObject);
+		if (consumer.consumerState.solidTransferArm.IsCellReachable(num))
+		{
+			fetchChore.CollectChoresFromGlobalChoreProvider(consumer.consumerState, consumer.preconditionSnapshot.succeededContexts, consumer.preconditionSnapshot.failedContexts, false);
+		}
+		return Util.IterationInstruction.Continue;
+	};
 
 	private struct BehaviourPrecondition
 	{

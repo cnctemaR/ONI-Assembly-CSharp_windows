@@ -6,9 +6,9 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Animations
 {
-	[RequiredByNativeCode]
 	[StaticAccessor("AnimationMotionXToDeltaPlayableBindings", StaticAccessorType.DoubleColon)]
 	[NativeHeader("Modules/Animation/ScriptBindings/AnimationMotionXToDeltaPlayable.bindings.h")]
+	[RequiredByNativeCode]
 	internal struct AnimationMotionXToDeltaPlayable : IPlayable, IEquatable<AnimationMotionXToDeltaPlayable>
 	{
 		public static AnimationMotionXToDeltaPlayable Null

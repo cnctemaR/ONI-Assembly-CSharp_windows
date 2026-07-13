@@ -181,11 +181,11 @@ public class SimDebugView : KMonoBehaviour
 		int num3;
 		int num4;
 		Grid.GetVisibleExtents(out num, out num2, out num3, out num4);
-		this.selectedPathProber = null;
+		this.selectedNavigator = null;
 		KSelectable selected = SelectTool.Instance.selected;
 		if (selected != null)
 		{
-			this.selectedPathProber = selected.GetComponent<PathProber>();
+			this.selectedNavigator = selected.GetComponent<Navigator>();
 		}
 		this.updateSimViewWorkItems.Reset(new SimDebugView.UpdateSimViewSharedData(this, this.texBytes, viewMode, this));
 		int num5 = 16;
@@ -214,7 +214,7 @@ public class SimDebugView : KMonoBehaviour
 	public void SetMode(HashedString mode)
 	{
 		this.mode = mode;
-		Game.Instance.gameObject.Trigger(1798162660, mode);
+		Game.Instance.gameObject.BoxingTrigger(1798162660, mode);
 	}
 
 	public HashedString GetMode()
@@ -780,7 +780,7 @@ public class SimDebugView : KMonoBehaviour
 
 	private static Color GetPathProberColour(SimDebugView instance, int cell)
 	{
-		if (!(instance.selectedPathProber != null) || instance.selectedPathProber.GetCost(cell) == -1)
+		if (!(instance.selectedNavigator != null) || instance.selectedNavigator.PathGrid.GetCost(cell) == -1)
 		{
 			return Color.black;
 		}
@@ -852,7 +852,7 @@ public class SimDebugView : KMonoBehaviour
 
 	private SimDebugView.GameGridMode gameGridMode = SimDebugView.GameGridMode.DigAmount;
 
-	private PathProber selectedPathProber;
+	private Navigator selectedNavigator;
 
 	public float minTempExpected = 173.15f;
 

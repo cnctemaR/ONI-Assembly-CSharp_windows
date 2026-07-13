@@ -53,7 +53,7 @@ public class WorldDamage : KMonoBehaviour
 						if (!component.invincible)
 						{
 							int num3 = Mathf.RoundToInt(Mathf.Max((float)component.HitPoints - (1f - num2) * (float)component.MaxHitPoints, 0f));
-							gameObject.Trigger(-794517298, new BuildingHP.DamageSourceInfo
+							gameObject.BoxingTrigger(-794517298, new BuildingHP.DamageSourceInfo
 							{
 								damage = num3,
 								source = source_name,
@@ -206,7 +206,7 @@ public class WorldDamage : KMonoBehaviour
 		Pickupable component = gameObject.GetComponent<Pickupable>();
 		if (component != null && component.GetMyWorld() != null && component.GetMyWorld().worldInventory.IsReachable(component))
 		{
-			PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Resource, Mathf.RoundToInt(num).ToString() + " " + element.name, gameObject.transform, 1.5f, false);
+			PopFXManager.Instance.SpawnFX(Def.GetUISprite(element, "ui", false).first, PopFXManager.Instance.sprite_Plus, Mathf.RoundToInt(num).ToString() + " " + element.name, gameObject.transform, Vector3.zero, 1.5f, true, false, false);
 		}
 	}
 

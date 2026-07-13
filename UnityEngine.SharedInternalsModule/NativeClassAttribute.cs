@@ -3,8 +3,8 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	[VisibleToOtherModules]
 	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct, Inherited = false)]
+	[VisibleToOtherModules]
 	internal sealed class NativeClassAttribute : Attribute
 	{
 		public string QualifiedNativeName { get; private set; }

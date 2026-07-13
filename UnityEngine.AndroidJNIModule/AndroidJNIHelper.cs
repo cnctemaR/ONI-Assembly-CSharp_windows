@@ -8,9 +8,9 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[UsedByNativeCode]
-	[NativeHeader("Modules/AndroidJNI/Public/AndroidJNIBindingsHelpers.h")]
 	[StaticAccessor("AndroidJNIBindingsHelpers", StaticAccessorType.DoubleColon)]
+	[NativeHeader("Modules/AndroidJNI/Public/AndroidJNIBindingsHelpers.h")]
+	[UsedByNativeCode]
 	[NativeConditional("PLATFORM_ANDROID")]
 	public static class AndroidJNIHelper
 	{

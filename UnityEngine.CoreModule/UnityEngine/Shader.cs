@@ -8,13 +8,13 @@ using UnityEngine.Rendering;
 namespace UnityEngine
 {
 	[NativeHeader("Runtime/Shaders/Shader.h")]
-	[NativeHeader("Runtime/Shaders/GpuPrograms/ShaderVariantCollection.h")]
-	[NativeHeader("Runtime/Shaders/ShaderNameRegistry.h")]
 	[NativeHeader("Runtime/Graphics/ShaderScriptBindings.h")]
 	[NativeHeader("Runtime/Graphics/ShaderScriptBindings.h")]
 	[NativeHeader("Runtime/Misc/ResourceManager.h")]
-	[NativeHeader("Runtime/Shaders/ComputeShader.h")]
 	[NativeHeader("Runtime/Shaders/Keywords/KeywordSpaceScriptBindings.h")]
+	[NativeHeader("Runtime/Shaders/ComputeShader.h")]
+	[NativeHeader("Runtime/Shaders/ShaderNameRegistry.h")]
+	[NativeHeader("Runtime/Shaders/GpuPrograms/ShaderVariantCollection.h")]
 	public sealed class Shader : Object
 	{
 		[Obsolete("Use Graphics.activeTier instead (UnityUpgradable) -> UnityEngine.Graphics.activeTier", false)]

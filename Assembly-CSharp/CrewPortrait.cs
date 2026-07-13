@@ -52,7 +52,7 @@ public class CrewPortrait : KMonoBehaviour
 		{
 			return;
 		}
-		kmonoBehaviour.Subscribe(540773776, new Action<object>(this.OnRoleChanged));
+		this.assignedRoleChanged = kmonoBehaviour.Subscribe(540773776, new Action<object>(this.OnRoleChanged));
 		this.areEventsRegistered = true;
 	}
 
@@ -68,7 +68,7 @@ public class CrewPortrait : KMonoBehaviour
 		{
 			return;
 		}
-		kmonoBehaviour.Unsubscribe(540773776, new Action<object>(this.OnRoleChanged));
+		kmonoBehaviour.Unsubscribe(ref this.assignedRoleChanged);
 	}
 
 	protected override void OnCmpEnable()
@@ -306,4 +306,6 @@ public class CrewPortrait : KMonoBehaviour
 	private bool requiresRefresh;
 
 	private bool areEventsRegistered;
+
+	private int assignedRoleChanged = -1;
 }

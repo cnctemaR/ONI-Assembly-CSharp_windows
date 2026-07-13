@@ -4,6 +4,7 @@ using STRINGS;
 using TUNING;
 using UnityEngine;
 
+[EntityConfigOrder(2)]
 public class PuftOxyliteConfig : IEntityConfig
 {
 	public static GameObject CreatePuftOxylite(string id, string name, string desc, string anim_file, bool is_baby)

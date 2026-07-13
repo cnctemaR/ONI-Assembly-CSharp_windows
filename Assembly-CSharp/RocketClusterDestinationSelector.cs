@@ -83,7 +83,7 @@ public class RocketClusterDestinationSelector : ClusterDestinationSelector
 			base.GetComponent<CraftModuleInterface>().TriggerEventOnCraftAndRocket(GameHashes.ClusterDestinationReached, null);
 			if (this.m_repeat)
 			{
-				if (ClusterGrid.Instance.GetVisibleEntityOfLayerAtCell(clusterLocationChangedEvent.newLocation, EntityLayer.POI) != null && this.CanRocketHarvest())
+				if ((ClusterGrid.Instance.GetVisibleEntityOfLayerAtCell(clusterLocationChangedEvent.newLocation, EntityLayer.POI) != null && this.CanRocketDrill()) || this.CanCollectFromHexCellInventory())
 				{
 					this.WaitForPOIHarvest();
 					return;
@@ -101,7 +101,17 @@ public class RocketClusterDestinationSelector : ClusterDestinationSelector
 		this.m_prevLaunchPad.Set(base.GetComponent<CraftModuleInterface>().CurrentPad);
 	}
 
-	private bool CanRocketHarvest()
+	private bool CanCollectFromHexCellInventory()
+	{
+		bool flag = false;
+		foreach (RocketModuleHexCellCollector.Instance instance in base.GetComponent<Clustercraft>().GetAllHexCellCollectorModules())
+		{
+			flag = flag || (instance != null && RocketModuleHexCellCollector.CanCollect(instance));
+		}
+		return flag;
+	}
+
+	private bool CanRocketDrill()
 	{
 		bool flag = false;
 		List<ResourceHarvestModule.StatesInstance> allResourceHarvestModules = base.GetComponent<Clustercraft>().GetAllResourceHarvestModules();
@@ -111,7 +121,7 @@ public class RocketClusterDestinationSelector : ClusterDestinationSelector
 			{
 				while (enumerator.MoveNext())
 				{
-					if (enumerator.Current.CheckIfCanHarvest())
+					if (enumerator.Current.CheckIfCanDrill())
 					{
 						flag = true;
 					}
@@ -138,18 +148,33 @@ public class RocketClusterDestinationSelector : ClusterDestinationSelector
 		return flag;
 	}
 
+	private void OnTagsChanged(object data)
+	{
+		if (((Boxed<TagChangedEventData>)data).value.tag == GameTags.RocketDrilling)
+		{
+			this.CheckAndReturnRocketIfHarvestingEnded();
+		}
+	}
+
 	private void OnStorageChange(object data)
 	{
-		if (!this.CanRocketHarvest())
+		this.CheckAndReturnRocketIfHarvestingEnded();
+	}
+
+	private void CheckAndReturnRocketIfHarvestingEnded()
+	{
+		if (!this.CanRocketDrill() && !this.CanCollectFromHexCellInventory())
 		{
 			this.isHarvesting = false;
-			foreach (Ref<RocketModuleCluster> @ref in base.GetComponent<Clustercraft>().ModuleInterface.ClusterModules)
+			Clustercraft component = base.GetComponent<Clustercraft>();
+			foreach (Ref<RocketModuleCluster> @ref in component.ModuleInterface.ClusterModules)
 			{
 				if (@ref.Get().GetComponent<Storage>())
 				{
 					base.Unsubscribe(@ref.Get().gameObject, -1697596308, new Action<object>(this.OnStorageChange));
 				}
 			}
+			component.Unsubscribe(-1582839653, new Action<object>(this.OnTagsChanged));
 			this.SetUpReturnTrip();
 		}
 	}
@@ -157,13 +182,15 @@ public class RocketClusterDestinationSelector : ClusterDestinationSelector
 	private void WaitForPOIHarvest()
 	{
 		this.isHarvesting = true;
-		foreach (Ref<RocketModuleCluster> @ref in base.GetComponent<Clustercraft>().ModuleInterface.ClusterModules)
+		Clustercraft component = base.GetComponent<Clustercraft>();
+		foreach (Ref<RocketModuleCluster> @ref in component.ModuleInterface.ClusterModules)
 		{
 			if (@ref.Get().GetComponent<Storage>())
 			{
 				base.Subscribe(@ref.Get().gameObject, -1697596308, new Action<object>(this.OnStorageChange));
 			}
 		}
+		component.gameObject.Subscribe(-1582839653, new Action<object>(this.OnTagsChanged));
 	}
 
 	private void OnLaunch(object data)

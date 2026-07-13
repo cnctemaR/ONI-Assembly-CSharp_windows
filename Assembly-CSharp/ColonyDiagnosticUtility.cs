@@ -149,24 +149,24 @@ public class ColonyDiagnosticUtility : KMonoBehaviour, ISim1000ms
 
 	private void Refresh(object data)
 	{
-		int num = (int)data;
-		this.AddWorld(num);
+		int value = ((Boxed<int>)data).value;
+		this.AddWorld(value);
 	}
 
 	private void RemoveWorld(object data)
 	{
-		int num = (int)data;
-		if (this.diagnosticDisplaySettings.Remove(num))
+		int value = ((Boxed<int>)data).value;
+		if (this.diagnosticDisplaySettings.Remove(value))
 		{
 			List<ColonyDiagnostic> list;
-			if (this.worldDiagnostics.TryGetValue(num, out list))
+			if (this.worldDiagnostics.TryGetValue(value, out list))
 			{
 				foreach (ColonyDiagnostic colonyDiagnostic in list)
 				{
 					colonyDiagnostic.OnCleanUp();
 				}
 			}
-			this.worldDiagnostics.Remove(num);
+			this.worldDiagnostics.Remove(value);
 		}
 	}
 

@@ -7,8 +7,8 @@ using UnityEngine.Rendering;
 namespace UnityEngine
 {
 	[NativeHeader("Runtime/Export/Graphics/Light.bindings.h")]
-	[RequireComponent(typeof(Transform))]
 	[NativeHeader("Runtime/Camera/Light.h")]
+	[RequireComponent(typeof(Transform))]
 	[RequireComponent(typeof(Transform))]
 	public sealed class Light : Behaviour
 	{
@@ -261,8 +261,8 @@ namespace UnityEngine
 			set;
 		}
 
-		[Obsolete("Shadow softness is removed in Unity 5.0+", true)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
+		[Obsolete("Shadow softness is removed in Unity 5.0+", true)]
 		public float shadowSoftness
 		{
 			get
@@ -274,8 +274,8 @@ namespace UnityEngine
 			}
 		}
 
-		[EditorBrowsable(EditorBrowsableState.Never)]
 		[Obsolete("Shadow softness is removed in Unity 5.0+", true)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		public float shadowSoftnessFade
 		{
 			get

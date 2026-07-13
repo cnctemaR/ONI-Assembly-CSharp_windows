@@ -6,8 +6,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeClass("UI::RectTransform")]
 	[NativeHeader("Runtime/Transform/RectTransform.h")]
+	[NativeClass("UI::RectTransform")]
 	public sealed class RectTransform : Transform
 	{
 		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]

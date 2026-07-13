@@ -15,8 +15,10 @@ public class CO2Manager : KMonoBehaviour, ISim33ms
 		CO2Manager.instance = this;
 		this.prefab.gameObject.SetActive(false);
 		this.breathPrefab.SetActive(false);
-		this.co2Pool = new GameObjectPool(new Func<GameObject>(this.InstantiateCO2), 16);
-		this.breathPool = new GameObjectPool(new Func<GameObject>(this.InstantiateBreath), 16);
+		this.exhaustPrefab.SetActive(false);
+		this.co2Pool = new GameObjectPool(new Func<GameObject>(this.InstantiateCO2), new Action<GameObject>(CO2Manager.Deactivate), 16);
+		this.breathPool = new GameObjectPool(new Func<GameObject>(this.InstantiateBreath), new Action<GameObject>(CO2Manager.Deactivate), 16);
+		this.exhaustPool = new GameObjectPool(new Func<GameObject>(this.InstantiateExhaust), new Action<GameObject>(CO2Manager.Deactivate), 16);
 	}
 
 	private GameObject InstantiateCO2()
@@ -26,9 +28,20 @@ public class CO2Manager : KMonoBehaviour, ISim33ms
 		return gameObject;
 	}
 
+	private static void Deactivate(GameObject _)
+	{
+	}
+
 	private GameObject InstantiateBreath()
 	{
 		GameObject gameObject = GameUtil.KInstantiate(this.breathPrefab, Grid.SceneLayer.Front, null, 0);
+		gameObject.SetActive(false);
+		return gameObject;
+	}
+
+	private GameObject InstantiateExhaust()
+	{
+		GameObject gameObject = GameUtil.KInstantiate(this.exhaustPrefab, Grid.SceneLayer.Front, null, 0);
 		gameObject.SetActive(false);
 		return gameObject;
 	}
@@ -118,7 +131,12 @@ public class CO2Manager : KMonoBehaviour, ISim33ms
 		}
 	}
 
-	public void SpawnCO2(Vector3 position, float mass, float temperature, bool flip)
+	public CO2 SpawnCO2(Vector3 position, float mass, float temperature, bool flip)
+	{
+		return this.SpawnCO2(position, mass, temperature, flip, 0f);
+	}
+
+	public CO2 SpawnCO2(Vector3 position, float mass, float temperature, bool flip, float rotation)
 	{
 		position.z = Grid.GetLayerZ(Grid.SceneLayer.Front);
 		GameObject gameObject = this.co2Pool.GetInstance();
@@ -135,6 +153,7 @@ public class CO2Manager : KMonoBehaviour, ISim33ms
 		component2.FlipX = flip;
 		component.StartLoop();
 		this.co2Items.Add(component);
+		return component;
 	}
 
 	public void SpawnBreath(Vector3 position, float mass, float temperature, bool flip)
@@ -151,6 +170,25 @@ public class CO2Manager : KMonoBehaviour, ISim33ms
 		component.Play("breath", KAnim.PlayMode.Once, 1f, 0f);
 	}
 
+	public void SpawnExhaust(Vector3 position, Vector3 velocity, int co2Cell, float mass, float temperature)
+	{
+		position.z = Grid.GetLayerZ(Grid.SceneLayer.Front);
+		float num = Mathf.Repeat(Vector3.Angle(Vector3.down, velocity) * Mathf.Sign(velocity.x), 360f);
+		SimMessages.ModifyMass(co2Cell, mass, byte.MaxValue, 0, CellEventLogger.Instance.CO2ManagerFixedUpdate, temperature, SimHashes.CarbonDioxide);
+		GameObject gameObject = this.exhaustPool.GetInstance();
+		gameObject.transform.SetPosition(position);
+		gameObject.SetActive(true);
+		CO2 co = gameObject.AddOrGet<CO2>();
+		co.mass = mass;
+		co.temperature = temperature;
+		co.lifetimeRemaining = 3f;
+		co.affectedByGravity = false;
+		KBatchedAnimController component = gameObject.GetComponent<KBatchedAnimController>();
+		component.onDestroySelf = new Action<GameObject>(this.OnDestroyExhaust);
+		component.Rotation = num;
+		component.Play("smoke_particle", KAnim.PlayMode.Once, 1f, 0f);
+	}
+
 	private void OnDestroyCO2(GameObject co2_go)
 	{
 		co2_go.SetActive(false);
@@ -161,6 +199,12 @@ public class CO2Manager : KMonoBehaviour, ISim33ms
 	{
 		breath_go.SetActive(false);
 		this.breathPool.ReleaseInstance(breath_go);
+	}
+
+	private void OnDestroyExhaust(GameObject go)
+	{
+		go.SetActive(false);
+		this.exhaustPool.ReleaseInstance(go);
 	}
 
 	private const float CO2Lifetime = 3f;
@@ -175,11 +219,16 @@ public class CO2Manager : KMonoBehaviour, ISim33ms
 	private GameObject breathPrefab;
 
 	[SerializeField]
+	private GameObject exhaustPrefab;
+
+	[SerializeField]
 	private Color tintColour;
 
 	private List<CO2> co2Items = new List<CO2>();
 
 	private GameObjectPool breathPool;
+
+	private GameObjectPool exhaustPool;
 
 	private GameObjectPool co2Pool;
 

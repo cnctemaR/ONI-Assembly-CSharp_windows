@@ -180,37 +180,17 @@ namespace UnityEngine.UIElements
 			evt.StopPropagation();
 		}
 
-		private void ShowMenu()
+		internal void ShowMenu()
 		{
 			bool flag = this.m_EnumType == null;
 			if (!flag)
 			{
-				bool flag2 = this.createMenuCallback != null;
-				IGenericMenu genericMenu;
-				if (flag2)
-				{
-					genericMenu = this.createMenuCallback();
-				}
-				else
-				{
-					BaseVisualElementPanel elementPanel = base.elementPanel;
-					IGenericMenu genericMenu2;
-					if (elementPanel == null || elementPanel.contextType != ContextType.Player)
-					{
-						genericMenu2 = DropdownUtility.CreateDropdown();
-					}
-					else
-					{
-						IGenericMenu genericMenu3 = new GenericDropdownMenu();
-						genericMenu2 = genericMenu3;
-					}
-					genericMenu = genericMenu2;
-				}
+				IGenericMenu genericMenu = ((this.createMenuCallback != null) ? this.createMenuCallback() : base.elementPanel.CreateMenu());
 				int num = Array.IndexOf<Enum>(this.m_EnumData.values, this.value);
 				for (int i = 0; i < this.m_EnumData.values.Length; i++)
 				{
-					bool flag3 = num == i;
-					genericMenu.AddItem(this.m_EnumData.displayNames[i], flag3, delegate(object contentView)
+					bool flag2 = num == i;
+					genericMenu.AddItem(this.m_EnumData.displayNames[i], flag2, delegate(object contentView)
 					{
 						this.ChangeValueFromMenu(contentView);
 					}, this.m_EnumData.values[i]);

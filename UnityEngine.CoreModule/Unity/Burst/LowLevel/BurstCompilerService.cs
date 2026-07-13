@@ -7,9 +7,9 @@ using UnityEngine.Bindings;
 
 namespace Unity.Burst.LowLevel
 {
+	[NativeHeader("Runtime/Burst/BurstDelegateCache.h")]
 	[StaticAccessor("BurstCompilerService::Get()", StaticAccessorType.Arrow)]
 	[NativeHeader("Runtime/Burst/Burst.h")]
-	[NativeHeader("Runtime/Burst/BurstDelegateCache.h")]
 	internal static class BurstCompilerService
 	{
 		[NativeMethod("Initialize")]

@@ -13,6 +13,7 @@ public class KeepsakeConfig : IMultiEntityConfig
 		list.Add(KeepsakeConfig.CreateKeepsake("CritterManipulator", UI.KEEPSAKES.CRITTER_MANIPULATOR.NAME, UI.KEEPSAKES.CRITTER_MANIPULATOR.DESCRIPTION, "keepsake_critter_manipulator_kanim", "idle", "ui", null, null, null, SimHashes.Creature));
 		list.Add(KeepsakeConfig.CreateKeepsake("LonelyMinion", UI.KEEPSAKES.LONELY_MINION.NAME, UI.KEEPSAKES.LONELY_MINION.DESCRIPTION, "keepsake_lonelyminion_kanim", "idle", "ui", null, null, null, SimHashes.Creature));
 		list.Add(KeepsakeConfig.CreateKeepsake("FossilHunt", UI.KEEPSAKES.FOSSIL_HUNT.NAME, UI.KEEPSAKES.FOSSIL_HUNT.DESCRIPTION, "keepsake_fossil_dig_kanim", "idle", "ui", null, null, null, SimHashes.Creature));
+		list.Add(KeepsakeConfig.CreateKeepsake("HijackHeadquarters", UI.KEEPSAKES.HIJACK_HEADQUARTERS.NAME, UI.KEEPSAKES.HIJACK_HEADQUARTERS.DESCRIPTION, "keepsake_hijacked_hq_kanim", "idle", "ui", null, null, null, SimHashes.Creature));
 		list.Add(KeepsakeConfig.CreateKeepsake("GeothermalPlant", UI.KEEPSAKES.GEOTHERMAL_PLANT.NAME, UI.KEEPSAKES.GEOTHERMAL_PLANT.DESCRIPTION, "keepsake_geothermal_vent_kanim", "idle", "ui", DlcManager.DLC2, null, null, SimHashes.Creature));
 		GameObject gameObject = KeepsakeConfig.CreateKeepsake("MorbRoverMaker", UI.KEEPSAKES.MORB_ROVER_MAKER.NAME, UI.KEEPSAKES.MORB_ROVER_MAKER.DESCRIPTION, "keepsake_morb_tank_kanim", "idle", "ui", null, null, null, SimHashes.Creature);
 		gameObject.AddOrGetDef<MorbRoverMakerKeepsake.Def>();
@@ -48,9 +49,11 @@ public class KeepsakeConfig : IMultiEntityConfig
 		KPrefabID component = gameObject.GetComponent<KPrefabID>();
 		component.AddTag(GameTags.PedestalDisplayable, false);
 		component.AddTag(GameTags.Keepsake, false);
+		component.AddTag(GameTags.Ornament, false);
 		KPrefabID component2 = gameObject.GetComponent<KPrefabID>();
 		component2.requiredDlcIds = requiredDlcIds;
 		component2.forbiddenDlcIds = forbiddenDlcIds;
+		gameObject.AddOrGet<CodexEntryRedirector>().CodexID = "REQUIREMENTCLASSORNAMENT";
 		return gameObject;
 	}
 

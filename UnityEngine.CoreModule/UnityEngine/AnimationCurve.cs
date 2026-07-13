@@ -6,8 +6,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Math/AnimationCurve.bindings.h")]
 	[RequiredByNativeCode]
+	[NativeHeader("Runtime/Math/AnimationCurve.bindings.h")]
 	[StructLayout(LayoutKind.Sequential)]
 	public class AnimationCurve : IEquatable<AnimationCurve>
 	{
@@ -74,8 +74,8 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void ClearKeys();
 
-		[FreeFunction("AnimationCurveBindings::RemoveKey", HasExplicitThis = true, IsThreadSafe = true)]
 		[NativeThrows]
+		[FreeFunction("AnimationCurveBindings::RemoveKey", HasExplicitThis = true, IsThreadSafe = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void RemoveKey(int index);
 
@@ -98,8 +98,8 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void SetKeys(Keyframe[] keys);
 
-		[FreeFunction("AnimationCurveBindings::GetKey", HasExplicitThis = true, IsThreadSafe = true)]
 		[NativeThrows]
+		[FreeFunction("AnimationCurveBindings::GetKey", HasExplicitThis = true, IsThreadSafe = true)]
 		private Keyframe GetKey(int index)
 		{
 			Keyframe keyframe;
@@ -115,8 +115,8 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public override extern int GetHashCode();
 
-		[FreeFunction("AnimationCurveBindings::SmoothTangents", HasExplicitThis = true, IsThreadSafe = true)]
 		[NativeThrows]
+		[FreeFunction("AnimationCurveBindings::SmoothTangents", HasExplicitThis = true, IsThreadSafe = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void SmoothTangents(int index, float weight);
 

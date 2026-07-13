@@ -89,6 +89,25 @@ public class AnimEventManager : Singleton<AnimEventManager>
 		kcompactedVector.SetData(data.eventDataHandle, data2);
 	}
 
+	public void SwapAnim(HandleVector<int>.Handle handle, KAnim.Anim anim)
+	{
+		AnimEventManager.IndirectionData data = this.indirectionData.GetData(handle);
+		KCompactedVector<AnimEventManager.AnimData> kcompactedVector = (data.isUIData ? this.uiAnimData : this.animData);
+		AnimEventManager.AnimData data2 = kcompactedVector.GetData(data.eventDataHandle);
+		data2.frameRate = anim.frameRate;
+		data2.totalTime = anim.totalTime;
+		data2.numFrames = anim.numFrames;
+		kcompactedVector.SetData(data.animDataHandle, data2);
+		KCompactedVector<AnimEventManager.EventPlayerData> kcompactedVector2 = (data.isUIData ? this.uiEventData : this.eventData);
+		AnimEventManager.EventPlayerData data3 = kcompactedVector2.GetData(data.eventDataHandle);
+		data3.events = GameAudioSheets.Get().GetEvents(anim.id);
+		if (data3.events == null)
+		{
+			data3.events = AnimEventManager.emptyEventList;
+		}
+		kcompactedVector2.SetData(data.eventDataHandle, data3);
+	}
+
 	public void Update()
 	{
 		float deltaTime = Time.deltaTime;

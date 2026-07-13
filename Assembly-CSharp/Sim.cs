@@ -234,6 +234,8 @@ public static class Sim
 
 	public const float MinMass = 1.0001f;
 
+	public const float MAX_SUBLIMATE_MASS = 1.8f;
+
 	private const int PressureUpdateInterval = 1;
 
 	private const int TemperatureUpdateInterval = 1;

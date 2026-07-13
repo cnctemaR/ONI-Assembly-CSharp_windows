@@ -4,7 +4,7 @@ using STRINGS;
 using UnityEngine;
 
 [AddComponentMenu("KMonoBehaviour/scripts/LoreBearer")]
-public class LoreBearer : KMonoBehaviour, ISidescreenButtonControl
+public class LoreBearer : KMonoBehaviour
 {
 	public string content
 	{
@@ -75,16 +75,6 @@ public class LoreBearer : KMonoBehaviour, ISidescreenButtonControl
 		}
 	}
 
-	public int HorizontalGroupID()
-	{
-		return -1;
-	}
-
-	public bool SidescreenEnabled()
-	{
-		return true;
-	}
-
 	public void OnSidescreenButtonPressed()
 	{
 		this.OnClickRead();
@@ -95,14 +85,13 @@ public class LoreBearer : KMonoBehaviour, ISidescreenButtonControl
 		return !this.BeenClicked;
 	}
 
-	public int ButtonSideScreenSortOrder()
+	public int GetSideScreenSortOrder()
 	{
-		return 20;
-	}
-
-	public void SetButtonTextOverride(ButtonMenuTextOverride text)
-	{
-		throw new NotImplementedException();
+		if (this.GetSidescreenSortOrder != null)
+		{
+			return this.GetSidescreenSortOrder();
+		}
+		return -100;
 	}
 
 	[Serialize]
@@ -111,6 +100,8 @@ public class LoreBearer : KMonoBehaviour, ISidescreenButtonControl
 	public string BeenSearched = UI.USERMENUACTIONS.READLORE.ALREADY_SEARCHED;
 
 	private string[] collectionsToUnlockFrom;
+
+	public Func<int> GetSidescreenSortOrder;
 
 	private LoreBearerAction displayContentAction;
 }

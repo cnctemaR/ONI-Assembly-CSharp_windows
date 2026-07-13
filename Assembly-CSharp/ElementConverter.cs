@@ -687,11 +687,13 @@ public class ElementConverter : StateMachineComponent<ElementConverter.StatesIns
 		public void OnOperationalRequirementChanged(object data)
 		{
 			Operational operational = data as Operational;
-			bool flag = ((operational == null) ? ((bool)data) : operational.IsActive);
+			bool flag = ((operational == null) ? ((Boxed<bool>)data).value : operational.IsActive);
 			base.sm.canConvert.Set(flag, this, false);
 		}
 
 		private KSelectable selectable;
+
+		public int subscribedHandle;
 	}
 
 	public class States : GameStateMachine<ElementConverter.States, ElementConverter.StatesInstance, ElementConverter>
@@ -722,13 +724,13 @@ public class ElementConverter : StateMachineComponent<ElementConverter.StatesIns
 		private void OnEnterRoot(ElementConverter.StatesInstance smi)
 		{
 			int eventForState = (int)Operational.GetEventForState(smi.master.OperationalRequirement);
-			smi.Subscribe(eventForState, new Action<object>(smi.OnOperationalRequirementChanged));
+			smi.Unsubscribe(ref smi.subscribedHandle);
+			smi.subscribedHandle = smi.Subscribe(eventForState, new Action<object>(smi.OnOperationalRequirementChanged));
 		}
 
 		private void OnExitRoot(ElementConverter.StatesInstance smi)
 		{
-			int eventForState = (int)Operational.GetEventForState(smi.master.OperationalRequirement);
-			smi.Unsubscribe(eventForState, new Action<object>(smi.OnOperationalRequirementChanged));
+			smi.Unsubscribe(ref smi.subscribedHandle);
 		}
 
 		public override void InitializeStates(out StateMachine.BaseState default_state)

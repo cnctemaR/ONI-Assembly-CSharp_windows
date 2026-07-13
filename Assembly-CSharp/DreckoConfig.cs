@@ -73,6 +73,8 @@ public class DreckoConfig : IEntityConfig
 
 	public static float SCALE_GROWTH_TIME_IN_CYCLES = 8f;
 
+	public static float SCALE_INITIAL_GROWTH_PCT = 0.9f;
+
 	public static float FIBER_PER_CYCLE = 0.25f;
 
 	public static int EGG_SORT_ORDER = 800;

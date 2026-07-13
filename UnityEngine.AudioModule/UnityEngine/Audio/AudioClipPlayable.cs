@@ -7,11 +7,11 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Audio
 {
-	[NativeHeader("Modules/Audio/Public/ScriptBindings/AudioClipPlayable.bindings.h")]
-	[NativeHeader("Modules/Audio/Public/Director/AudioClipPlayable.h")]
-	[NativeHeader("Runtime/Director/Core/HPlayable.h")]
-	[StaticAccessor("AudioClipPlayableBindings", StaticAccessorType.DoubleColon)]
 	[RequiredByNativeCode]
+	[StaticAccessor("AudioClipPlayableBindings", StaticAccessorType.DoubleColon)]
+	[NativeHeader("Runtime/Director/Core/HPlayable.h")]
+	[NativeHeader("Modules/Audio/Public/Director/AudioClipPlayable.h")]
+	[NativeHeader("Modules/Audio/Public/ScriptBindings/AudioClipPlayable.bindings.h")]
 	public struct AudioClipPlayable : IPlayable, IEquatable<AudioClipPlayable>
 	{
 		public static AudioClipPlayable Create(PlayableGraph graph, AudioClip clip, bool looping)

@@ -6,9 +6,9 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Playables
 {
+	[RequiredByNativeCode]
 	[NativeHeader("Runtime/Mono/MonoBehaviour.h")]
 	[NativeHeader("Modules/Director/PlayableDirector.h")]
-	[RequiredByNativeCode]
 	public class PlayableDirector : Behaviour, IExposedPropertyTable
 	{
 		public PlayState state

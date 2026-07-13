@@ -20,7 +20,7 @@ public static class BaseRaptorConfig
 		{
 			text = "WalkerBabyNavGrid";
 		}
-		EntityTemplates.ExtendEntityToBasicCreature(false, gameObject, FactionManager.FactionID.Predator, traitId, text, NavType.Floor, 32, 2f, "DinosaurMeat", 5f, true, false, 223.15f, 288.15f, 173.15f, 373.15f);
+		EntityTemplates.ExtendEntityToBasicCreature(false, gameObject, anim_file, is_baby ? null : "raptor_build_kanim", null, FactionManager.FactionID.Predator, traitId, text, NavType.Floor, 32, 2f, "DinosaurMeat", 5f, true, false, 223.15f, 288.15f, 173.15f, 373.15f);
 		gameObject.AddOrGet<Navigator>();
 		if (symbolOverridePrefix != null)
 		{
@@ -29,6 +29,7 @@ public static class BaseRaptorConfig
 		gameObject.AddOrGet<Pickupable>();
 		gameObject.AddOrGet<Trappable>();
 		gameObject.AddOrGetDef<CreatureFallMonitor.Def>();
+		gameObject.AddOrGetDef<CritterRoarMonitor.Def>().Initialize(RaptorTuning.ROARS_PER_CYCLE, RaptorTuning.ROAR_COOLDOWN);
 		gameObject.AddOrGetDef<WorldSpawnableMonitor.Def>();
 		gameObject.AddOrGetDef<ThreatMonitor.Def>().fleethresholdState = Health.HealthState.Dead;
 		gameObject.AddWeapon(1f, 1f, AttackProperties.DamageType.Standard, AttackProperties.TargetType.Single, 1, 0f);
@@ -66,9 +67,12 @@ public static class BaseRaptorConfig
 			{
 				entersBuilding = false
 			}, !is_baby, -1)
+			.Add(new CritterEmoteStates.Def(Assets.GetAnim("raptor_emotes_kanim")), !is_baby, -1)
+			.Add(new CritterRoarStates.Def(Assets.GetAnim(is_baby ? "baby_raptor_kanim" : "raptor_kanim")), true, -1)
 			.PopInterruptGroup()
 			.Add(new IdleStates.Def(), true, -1);
 		EntityTemplates.AddCreatureBrain(gameObject, builder, GameTags.Creatures.Species.RaptorSpecies, symbolOverridePrefix);
+		gameObject.AddOrGet<OccupyArea>().updateWithFacing = !is_baby;
 		return gameObject;
 	}
 
@@ -80,7 +84,7 @@ public static class BaseRaptorConfig
 		{
 			"Hatch", "HatchBaby", "HatchVeggie", "HatchVeggieBaby", "HatchMetal", "HatchMetalBaby", "HatchHard", "HatchHardBaby", "Squirrel", "SquirrelBaby",
 			"SquirrelHug", "SquirrelHugBaby", "Mole", "MoleBaby", "MoleDelicacy", "MoleDelicacyBaby", "Oilfloater", "OilfloaterBaby", "OilfloaterDecor", "OilfloaterDecorBaby",
-			"OilfloaterHighTemp", "OilfloaterHighTempBaby", "Drecko", "DreckoBaby", "DreckoPlastic", "DreckoPlasticBaby", "StegoBaby", "Chameleon", "ChameleonBaby"
+			"OilfloaterHighTemp", "OilfloaterHighTempBaby", "Drecko", "DreckoBaby", "DreckoPlastic", "DreckoPlasticBaby", "StegoBaby", "AlgaeStegoBaby", "Chameleon", "ChameleonBaby"
 		};
 		if (DlcManager.IsContentSubscribed("EXPANSION1_ID"))
 		{
@@ -101,6 +105,8 @@ public static class BaseRaptorConfig
 			hashSet.Add("GoldBellyBaby");
 			hashSet.Add("WoodDeer");
 			hashSet.Add("WoodDeerBaby");
+			hashSet.Add("GlassDeer");
+			hashSet.Add("GlassDeerBaby");
 		}
 		list.Add(new Diet.Info(hashSet, RaptorTuning.POOP_ELEMENT, RaptorTuning.CALORIES_PER_UNIT_EATEN, RaptorTuning.PREY_PRODUCTION_RATE, null, 0f, false, Diet.Info.FoodType.EatButcheredPrey, false, null));
 		return list;

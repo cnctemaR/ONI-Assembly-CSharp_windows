@@ -35,7 +35,7 @@ public class FlushToilet : StateMachineComponent<FlushToilet.SMInstance>, IUsabl
 
 	private void OnConduitsRebuilt()
 	{
-		base.Trigger(-2094018600, null);
+		base.Trigger(-2094018600, BoxedBools.False);
 	}
 
 	public bool IsUsable()

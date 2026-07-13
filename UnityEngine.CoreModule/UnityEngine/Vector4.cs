@@ -7,10 +7,10 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeClass("Vector4f")]
-	[RequiredByNativeCode(Optional = true, GenerateProxy = true)]
-	[Il2CppEagerStaticClassConstruction]
 	[NativeHeader("Runtime/Math/Vector4.h")]
+	[RequiredByNativeCode(Optional = true, GenerateProxy = true)]
+	[NativeClass("Vector4f")]
+	[Il2CppEagerStaticClassConstruction]
 	public struct Vector4 : IEquatable<Vector4>, IFormattable
 	{
 		public float this[int index]

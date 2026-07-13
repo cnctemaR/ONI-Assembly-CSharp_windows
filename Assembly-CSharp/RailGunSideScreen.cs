@@ -27,15 +27,6 @@ public class RailGunSideScreen : SideScreenContent
 		this.numberInput.decimalPlaces = 1;
 	}
 
-	protected override void OnCmpDisable()
-	{
-		base.OnCmpDisable();
-		if (this.selectedGun)
-		{
-			this.selectedGun = null;
-		}
-	}
-
 	protected override void OnCleanUp()
 	{
 		base.OnCleanUp();

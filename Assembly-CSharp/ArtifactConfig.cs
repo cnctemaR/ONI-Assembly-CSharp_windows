@@ -140,6 +140,8 @@ public class ArtifactConfig : IMultiEntityConfig
 		component.forbiddenDlcIds = forbiddenDlcIds;
 		component.AddTag(GameTags.PedestalDisplayable, false);
 		component.AddTag(GameTags.Artifact, false);
+		component.AddTag(GameTags.Ornament, false);
+		gameObject.AddOrGet<CodexEntryRedirector>().CodexID = "SPACEARTIFACT";
 		return gameObject;
 	}
 

@@ -21,6 +21,7 @@ public class TallowLubricationStickConfig : IEntityConfig, IHasDlcRestrictions
 		gameObject.AddOrGet<EntitySplitter>();
 		gameObject.AddTag(GameTags.MedicalSupplies);
 		gameObject.AddTag(GameTags.SolidLubricant);
+		gameObject.AddTag(GameTags.PedestalDisplayable);
 		ComplexRecipe.RecipeElement[] array = new ComplexRecipe.RecipeElement[]
 		{
 			new ComplexRecipe.RecipeElement(SimHashes.Tallow.CreateTag(), 10f),

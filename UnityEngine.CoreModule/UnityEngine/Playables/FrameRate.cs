@@ -5,8 +5,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Playables
 {
-	[UsedByNativeCode("FrameRate")]
 	[NativeHeader("Runtime/Director/Core/FrameRate.h")]
+	[UsedByNativeCode("FrameRate")]
 	internal struct FrameRate : IEquatable<FrameRate>
 	{
 		public bool dropFrame

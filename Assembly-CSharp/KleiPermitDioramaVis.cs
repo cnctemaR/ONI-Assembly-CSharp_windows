@@ -45,7 +45,7 @@ public class KleiPermitDioramaVis : KMonoBehaviour
 		if (DlcManager.IsDlcId(dlcIdFrom))
 		{
 			this.dlcImage.gameObject.SetActive(true);
-			this.dlcImage.sprite = Assets.GetSprite(DlcManager.GetDlcSmallLogo(dlcIdFrom));
+			this.dlcImage.sprite = Assets.GetSprite(DlcManager.GetDlcLargeLogo(dlcIdFrom));
 			return;
 		}
 		this.dlcImage.gameObject.SetActive(false);
@@ -58,7 +58,7 @@ public class KleiPermitDioramaVis : KMonoBehaviour
 		{
 			return this.fallbackVis.WithError(string.Format("Given invalid permit: {0}", permit));
 		}
-		if (permit.Category == PermitCategory.Equipment || permit.Category == PermitCategory.DupeTops || permit.Category == PermitCategory.DupeBottoms || permit.Category == PermitCategory.DupeGloves || permit.Category == PermitCategory.DupeShoes || permit.Category == PermitCategory.DupeHats || permit.Category == PermitCategory.DupeAccessories || permit.Category == PermitCategory.AtmoSuitHelmet || permit.Category == PermitCategory.AtmoSuitBody || permit.Category == PermitCategory.AtmoSuitGloves || permit.Category == PermitCategory.AtmoSuitBelt || permit.Category == PermitCategory.AtmoSuitShoes)
+		if (permit.Category == PermitCategory.Equipment || permit.Category == PermitCategory.DupeTops || permit.Category == PermitCategory.DupeBottoms || permit.Category == PermitCategory.DupeGloves || permit.Category == PermitCategory.DupeShoes || permit.Category == PermitCategory.DupeHats || permit.Category == PermitCategory.DupeAccessories || permit.Category == PermitCategory.AtmoSuitHelmet || permit.Category == PermitCategory.AtmoSuitBody || permit.Category == PermitCategory.AtmoSuitGloves || permit.Category == PermitCategory.AtmoSuitBelt || permit.Category == PermitCategory.AtmoSuitShoes || permit.Category == PermitCategory.JetSuitHelmet || permit.Category == PermitCategory.JetSuitBody || permit.Category == PermitCategory.JetSuitGloves || permit.Category == PermitCategory.JetSuitShoes)
 		{
 			return this.equipmentVis;
 		}
@@ -66,7 +66,7 @@ public class KleiPermitDioramaVis : KMonoBehaviour
 		{
 			BuildLocationRule? buildLocationRule = KleiPermitVisUtil.GetBuildLocationRule(permit);
 			BuildingDef buildingDef = KleiPermitVisUtil.GetBuildingDef(permit);
-			if (!buildingDef.BuildingComplete.GetComponent<Bed>().IsNullOrDestroyed())
+			if (buildingDef == null || !buildingDef.BuildingComplete.GetComponent<Bed>().IsNullOrDestroyed())
 			{
 				return this.buildingOnFloorVis;
 			}
@@ -82,7 +82,7 @@ public class KleiPermitDioramaVis : KMonoBehaviour
 					return this.buildingAutomationGatesVis;
 				}
 			}
-			if (buildingDef.PrefabID == "RockCrusher" || buildingDef.PrefabID == "GasReservoir" || buildingDef.PrefabID == "ArcadeMachine" || buildingDef.PrefabID == "MicrobeMusher" || buildingDef.PrefabID == "FlushToilet" || buildingDef.PrefabID == "WashSink" || buildingDef.PrefabID == "Headquarters" || buildingDef.PrefabID == "GourmetCookingStation")
+			if (buildingDef.PrefabID == "RockCrusher" || buildingDef.PrefabID == "GasReservoir" || buildingDef.PrefabID == "ArcadeMachine" || buildingDef.PrefabID == "MicrobeMusher" || buildingDef.PrefabID == "FlushToilet" || buildingDef.PrefabID == "WashSink" || buildingDef.PrefabID == "Headquarters" || buildingDef.PrefabID == "GourmetCookingStation" || buildingDef.PrefabID == "ExobaseHeadquarters" || buildingDef.PrefabID == "SteamTurbine2" || buildingDef.PrefabID == "Generator" || buildingDef.PrefabID == "ResetSkillsStation" || buildingDef.PrefabID == "MetalRefinery" || buildingDef.PrefabID == "WaterPurifier")
 			{
 				return this.buildingOnFloorBigVis;
 			}
@@ -107,10 +107,11 @@ public class KleiPermitDioramaVis : KMonoBehaviour
 				BuildLocationRule valueOrDefault = buildLocationRule.GetValueOrDefault();
 				switch (valueOrDefault)
 				{
+				case BuildLocationRule.Anywhere:
 				case BuildLocationRule.OnFloor:
 					break;
 				case BuildLocationRule.OnFloorOverSpace:
-					goto IL_02B9;
+					goto IL_0370;
 				case BuildLocationRule.OnCeiling:
 					return this.buildingOnCeilingVis.WithAlignment(Alignment.Top());
 				case BuildLocationRule.OnWall:
@@ -120,13 +121,13 @@ public class KleiPermitDioramaVis : KMonoBehaviour
 				default:
 					if (valueOrDefault != BuildLocationRule.OnFoundationRotatable)
 					{
-						goto IL_02B9;
+						goto IL_0370;
 					}
 					break;
 				}
 				return this.buildingOnFloorVis;
 			}
-			IL_02B9:
+			IL_0370:
 			return this.fallbackVis.WithError(string.Format("No visualization available for building with BuildLocationRule of {0}", buildLocationRule));
 		}
 		else if (permit.Category == PermitCategory.Artwork)
@@ -187,6 +188,10 @@ public class KleiPermitDioramaVis : KMonoBehaviour
 		case PermitCategory.AtmoSuitGloves:
 		case PermitCategory.AtmoSuitBelt:
 		case PermitCategory.AtmoSuitShoes:
+		case PermitCategory.JetSuitHelmet:
+		case PermitCategory.JetSuitBody:
+		case PermitCategory.JetSuitGloves:
+		case PermitCategory.JetSuitShoes:
 			return Assets.GetSprite("screen_bg_atmosuit");
 		case PermitCategory.Building:
 			return Assets.GetSprite("screen_bg_buildings");
@@ -207,6 +212,7 @@ public class KleiPermitDioramaVis : KMonoBehaviour
 		case ClothingOutfitUtility.OutfitType.JoyResponse:
 			return Assets.GetSprite("screen_bg_joyresponse");
 		case ClothingOutfitUtility.OutfitType.AtmoSuit:
+		case ClothingOutfitUtility.OutfitType.JetSuit:
 			return Assets.GetSprite("screen_bg_atmosuit");
 		default:
 			return null;

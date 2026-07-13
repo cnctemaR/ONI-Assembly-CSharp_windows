@@ -4,7 +4,7 @@ public static class DlcRestrictionsUtil
 {
 	public static bool HasAnyRestrictions(IHasDlcRestrictions restrictions)
 	{
-		return (restrictions.GetRequiredDlcIds() != null && restrictions.GetRequiredDlcIds().Length != 0) || (restrictions.GetForbiddenDlcIds() != null && restrictions.GetForbiddenDlcIds().Length != 0);
+		return (restrictions.GetRequiredDlcIds() != null && restrictions.GetRequiredDlcIds().Length != 0) || (restrictions.GetAnyRequiredDlcIds() != null && restrictions.GetAnyRequiredDlcIds().Length != 0) || (restrictions.GetForbiddenDlcIds() != null && restrictions.GetForbiddenDlcIds().Length != 0);
 	}
 
 	public static string[] GetRequiredDlcsOrNull(IHasDlcRestrictions hasDlcRestrictions)

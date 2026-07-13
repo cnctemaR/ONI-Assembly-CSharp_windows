@@ -2,6 +2,11 @@
 
 public class PathFinderQuery
 {
+	public virtual string Get_KProfilerName()
+	{
+		return "";
+	}
+
 	public virtual bool IsMatch(int cell, int parent_cell, int cost)
 	{
 		return true;

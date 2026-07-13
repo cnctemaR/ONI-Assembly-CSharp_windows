@@ -81,6 +81,11 @@ public static class ClusterUtil
 		{
 			return component.Location;
 		}
+		RocketModuleCluster component2 = gameObject.GetComponent<RocketModuleCluster>();
+		if (component2 != null)
+		{
+			return component2.CraftInterface.GetMyWorldLocation();
+		}
 		WorldContainer myWorld = gameObject.GetMyWorld();
 		DebugUtil.DevAssertArgs(myWorld != null, new object[] { "GetMyWorldLocation called on object with no world", gameObject });
 		return myWorld.GetComponent<ClusterGridEntity>().Location;

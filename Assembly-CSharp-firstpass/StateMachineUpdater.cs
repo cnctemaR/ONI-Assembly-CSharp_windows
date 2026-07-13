@@ -15,9 +15,9 @@ public class StateMachineUpdater : Singleton<StateMachineUpdater>
 		this.simBucketGroups = new List<StateMachineUpdater.BucketGroup>();
 		this.renderBucketGroups = new List<StateMachineUpdater.BucketGroup>();
 		this.renderEveryTickBucketGroups = new List<StateMachineUpdater.BucketGroup>();
-		this.CreateBucketGroup(1, 0.016666668f, UpdateRate.RENDER_EVERY_TICK, this.renderEveryTickBucketGroups);
-		this.CreateBucketGroup(12, 0.016666668f, UpdateRate.RENDER_200ms, this.renderBucketGroups);
-		this.CreateBucketGroup(60, 0.016666668f, UpdateRate.RENDER_1000ms, this.renderBucketGroups);
+		this.CreateRenderBucketGroup(0f, UpdateRate.RENDER_EVERY_TICK, this.renderEveryTickBucketGroups);
+		this.CreateRenderBucketGroup(0.2f, UpdateRate.RENDER_200ms, this.renderBucketGroups);
+		this.CreateRenderBucketGroup(1f, UpdateRate.RENDER_1000ms, this.renderBucketGroups);
 		this.CreateBucketGroup(1, 0.016666668f, UpdateRate.SIM_EVERY_TICK, this.simBucketGroups);
 		this.CreateBucketGroup(2, 0.016666668f, UpdateRate.SIM_33ms, this.simBucketGroups);
 		this.CreateBucketGroup(12, 0.016666668f, UpdateRate.SIM_200ms, this.simBucketGroups);
@@ -28,6 +28,14 @@ public class StateMachineUpdater : Singleton<StateMachineUpdater>
 	private void CreateBucketGroup(int sub_tick_count, float seconds_per_sub_tick, UpdateRate update_rate, List<StateMachineUpdater.BucketGroup> sub_group)
 	{
 		StateMachineUpdater.BucketGroup bucketGroup = new StateMachineUpdater.BucketGroup(sub_tick_count, seconds_per_sub_tick, update_rate);
+		this.bucketGroups.Add(bucketGroup);
+		sub_group.Add(bucketGroup);
+	}
+
+	private void CreateRenderBucketGroup(float seconds, UpdateRate update_rate, List<StateMachineUpdater.BucketGroup> sub_group)
+	{
+		StateMachineUpdater.BucketGroup bucketGroup = new StateMachineUpdater.BucketGroup(1, seconds, update_rate);
+		bucketGroup.useSubticks = false;
 		this.bucketGroups.Add(bucketGroup);
 		sub_group.Add(bucketGroup);
 	}
@@ -113,11 +121,20 @@ public class StateMachineUpdater : Singleton<StateMachineUpdater>
 		private void InternalAdvance(float dt)
 		{
 			this.accumulatedTime += dt;
-			float num = (float)this.subTickCount * this.secondsPerSubTick;
-			while (this.accumulatedTime >= this.secondsPerSubTick)
+			if (this.useSubticks)
 			{
-				this.AdvanceOneSubTick(num);
-				this.accumulatedTime -= this.secondsPerSubTick;
+				float num = (float)this.subTickCount * this.secondsPerSubTick;
+				while (this.accumulatedTime >= this.secondsPerSubTick)
+				{
+					this.AdvanceOneSubTick(num);
+					this.accumulatedTime -= this.secondsPerSubTick;
+				}
+				return;
+			}
+			if (this.accumulatedTime >= this.secondsPerSubTick)
+			{
+				this.AdvanceOneSubTick(this.accumulatedTime);
+				this.accumulatedTime = 0f;
 			}
 		}
 
@@ -167,6 +184,8 @@ public class StateMachineUpdater : Singleton<StateMachineUpdater>
 		private int nextUpdateIndex;
 
 		private int nextBucketFrame;
+
+		public bool useSubticks = true;
 	}
 
 	[DebuggerDisplay("{name}")]

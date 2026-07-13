@@ -35,6 +35,7 @@ public class HandSanitizerConfig : IBuildingConfig
 		handSanitizer.massConsumedPerUse = 0.07f;
 		handSanitizer.consumedElement = SimHashes.BleachStone;
 		handSanitizer.diseaseRemovalCount = HandSanitizerConfig.DISEASE_REMOVAL_COUNT;
+		handSanitizer.hasMeters = false;
 		HandSanitizer.Work work = go.AddOrGet<HandSanitizer.Work>();
 		work.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_handsanitizer_kanim") };
 		work.workTime = 1.8f;

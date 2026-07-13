@@ -7,15 +7,15 @@ namespace UnityEngine.Assertions.Must
 	[Obsolete("Must extensions are deprecated. Use UnityEngine.Assertions.Assert instead")]
 	public static class MustExtensions
 	{
-		[Conditional("UNITY_ASSERTIONS")]
 		[Obsolete("Must extensions are deprecated. Use UnityEngine.Assertions.Assert instead")]
+		[Conditional("UNITY_ASSERTIONS")]
 		public static void MustBeTrue(this bool value)
 		{
 			Assert.IsTrue(value);
 		}
 
-		[Obsolete("Must extensions are deprecated. Use UnityEngine.Assertions.Assert instead")]
 		[Conditional("UNITY_ASSERTIONS")]
+		[Obsolete("Must extensions are deprecated. Use UnityEngine.Assertions.Assert instead")]
 		public static void MustBeTrue(this bool value, string message)
 		{
 			Assert.IsTrue(value, message);
@@ -56,15 +56,15 @@ namespace UnityEngine.Assertions.Must
 			Assert.AreApproximatelyEqual(actual, expected, tolerance);
 		}
 
-		[Conditional("UNITY_ASSERTIONS")]
 		[Obsolete("Must extensions are deprecated. Use UnityEngine.Assertions.Assert instead")]
+		[Conditional("UNITY_ASSERTIONS")]
 		public static void MustBeApproximatelyEqual(this float actual, float expected, float tolerance, string message)
 		{
 			Assert.AreApproximatelyEqual(expected, actual, tolerance, message);
 		}
 
-		[Conditional("UNITY_ASSERTIONS")]
 		[Obsolete("Must extensions are deprecated. Use UnityEngine.Assertions.Assert instead")]
+		[Conditional("UNITY_ASSERTIONS")]
 		public static void MustNotBeApproximatelyEqual(this float actual, float expected)
 		{
 			Assert.AreNotApproximatelyEqual(expected, actual);
@@ -77,29 +77,29 @@ namespace UnityEngine.Assertions.Must
 			Assert.AreNotApproximatelyEqual(expected, actual, message);
 		}
 
-		[Conditional("UNITY_ASSERTIONS")]
 		[Obsolete("Must extensions are deprecated. Use UnityEngine.Assertions.Assert instead")]
+		[Conditional("UNITY_ASSERTIONS")]
 		public static void MustNotBeApproximatelyEqual(this float actual, float expected, float tolerance)
 		{
 			Assert.AreNotApproximatelyEqual(expected, actual, tolerance);
 		}
 
-		[Conditional("UNITY_ASSERTIONS")]
 		[Obsolete("Must extensions are deprecated. Use UnityEngine.Assertions.Assert instead")]
+		[Conditional("UNITY_ASSERTIONS")]
 		public static void MustNotBeApproximatelyEqual(this float actual, float expected, float tolerance, string message)
 		{
 			Assert.AreNotApproximatelyEqual(expected, actual, tolerance, message);
 		}
 
-		[Conditional("UNITY_ASSERTIONS")]
 		[Obsolete("Must extensions are deprecated. Use UnityEngine.Assertions.Assert instead")]
+		[Conditional("UNITY_ASSERTIONS")]
 		public static void MustBeEqual<T>(this T actual, T expected)
 		{
 			Assert.AreEqual<T>(actual, expected);
 		}
 
-		[Obsolete("Must extensions are deprecated. Use UnityEngine.Assertions.Assert instead")]
 		[Conditional("UNITY_ASSERTIONS")]
+		[Obsolete("Must extensions are deprecated. Use UnityEngine.Assertions.Assert instead")]
 		public static void MustBeEqual<T>(this T actual, T expected, string message)
 		{
 			Assert.AreEqual<T>(expected, actual, message);
@@ -112,22 +112,22 @@ namespace UnityEngine.Assertions.Must
 			Assert.AreNotEqual<T>(actual, expected);
 		}
 
-		[Obsolete("Must extensions are deprecated. Use UnityEngine.Assertions.Assert instead")]
 		[Conditional("UNITY_ASSERTIONS")]
+		[Obsolete("Must extensions are deprecated. Use UnityEngine.Assertions.Assert instead")]
 		public static void MustNotBeEqual<T>(this T actual, T expected, string message)
 		{
 			Assert.AreNotEqual<T>(expected, actual, message);
 		}
 
-		[Obsolete("Must extensions are deprecated. Use UnityEngine.Assertions.Assert instead")]
 		[Conditional("UNITY_ASSERTIONS")]
+		[Obsolete("Must extensions are deprecated. Use UnityEngine.Assertions.Assert instead")]
 		public static void MustBeNull<T>(this T expected) where T : class
 		{
 			Assert.IsNull<T>(expected);
 		}
 
-		[Obsolete("Must extensions are deprecated. Use UnityEngine.Assertions.Assert instead")]
 		[Conditional("UNITY_ASSERTIONS")]
+		[Obsolete("Must extensions are deprecated. Use UnityEngine.Assertions.Assert instead")]
 		public static void MustBeNull<T>(this T expected, string message) where T : class
 		{
 			Assert.IsNull<T>(expected, message);

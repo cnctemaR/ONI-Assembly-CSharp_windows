@@ -268,7 +268,14 @@ public class EntityTemplates
 		def.wildEffect.Add(new AttributeModifier(Db.Get().Amounts.ScaleGrowth.deltaAttribute.Id, -0.75f, global::STRINGS.CREATURES.MODIFIERS.WILD.NAME, true, false, true));
 		def.tameEffect = new Effect("Tame" + prefabTag.Name, global::STRINGS.CREATURES.MODIFIERS.TAME.NAME, global::STRINGS.CREATURES.MODIFIERS.TAME.TOOLTIP, 0f, true, true, false, null, -1f, 0f, null, "");
 		def.tameEffect.Add(new AttributeModifier(Db.Get().CritterAttributes.Happiness.Id, -1f, global::STRINGS.CREATURES.MODIFIERS.TAME.NAME, false, false, true));
-		prefab.AddOrGetDef<OvercrowdingMonitor.Def>().spaceRequiredPerCreature = space_required_per_creature;
+		if (space_required_per_creature != 0)
+		{
+			prefab.AddOrGetDef<OvercrowdingMonitor.Def>().spaceRequiredPerCreature = space_required_per_creature;
+		}
+		else
+		{
+			prefab.RemoveDef<OvercrowdingMonitor.Def>();
+		}
 		if (add_fixed_capturable_monitor)
 		{
 			prefab.AddOrGetDef<FixedCapturableMonitor.Def>();
@@ -278,10 +285,15 @@ public class EntityTemplates
 
 	public static GameObject ExtendEntityToFertileCreature(GameObject prefab, IHasDlcRestrictions dlcRestrictions, string eggId, string eggName, string eggDesc, string eggAnim, float eggMass, string babyId, float fertilityCycles, float incubationCycles, List<FertilityMonitor.BreedingChance> eggChances, int eggSortOrder = -1, bool is_ranchable = true, bool add_fish_overcrowding_monitor = false, float egg_anim_scale = 1f, bool deprecated = false)
 	{
-		return EntityTemplates.ExtendEntityToFertileCreature(prefab, dlcRestrictions, eggId, eggName, eggDesc, eggAnim, eggMass, babyId, fertilityCycles, incubationCycles, eggChances, eggSortOrder, is_ranchable, add_fish_overcrowding_monitor, egg_anim_scale, deprecated, false);
+		return EntityTemplates.ExtendEntityToFertileCreature(prefab, dlcRestrictions, eggId, eggName, eggDesc, eggAnim, eggMass, babyId, fertilityCycles, incubationCycles, eggChances, eggSortOrder, is_ranchable, add_fish_overcrowding_monitor, egg_anim_scale, deprecated, false, eggMass);
 	}
 
 	public static GameObject ExtendEntityToFertileCreature(GameObject prefab, IHasDlcRestrictions dlcRestrictions, string eggId, string eggName, string eggDesc, string eggAnim, float eggMass, string babyId, float fertilityCycles, float incubationCycles, List<FertilityMonitor.BreedingChance> eggChances, int eggSortOrder, bool is_ranchable, bool add_fish_overcrowding_monitor, float egg_anim_scale, bool deprecated, bool preventEggFromDroppingProducts)
+	{
+		return EntityTemplates.ExtendEntityToFertileCreature(prefab, dlcRestrictions, eggId, eggName, eggDesc, eggAnim, eggMass, babyId, fertilityCycles, incubationCycles, eggChances, eggSortOrder, is_ranchable, add_fish_overcrowding_monitor, egg_anim_scale, deprecated, preventEggFromDroppingProducts, eggMass);
+	}
+
+	public static GameObject ExtendEntityToFertileCreature(GameObject prefab, IHasDlcRestrictions dlcRestrictions, string eggId, string eggName, string eggDesc, string eggAnim, float eggMass, string babyId, float fertilityCycles, float incubationCycles, List<FertilityMonitor.BreedingChance> eggChances, int eggSortOrder, bool is_ranchable, bool add_fish_overcrowding_monitor, float egg_anim_scale, bool deprecated, bool preventEggFromDroppingProducts, float eggMassToDrop)
 	{
 		FertilityMonitor.Def def = prefab.AddOrGetDef<FertilityMonitor.Def>();
 		def.baseFertileCycles = fertilityCycles;
@@ -289,7 +301,7 @@ public class EntityTemplates
 		float num = 100f / (600f * incubationCycles);
 		string[] requiredDlcsOrNull = DlcRestrictionsUtil.GetRequiredDlcsOrNull(dlcRestrictions);
 		string[] forbiddenDlcIdsOrNull = DlcRestrictionsUtil.GetForbiddenDlcIdsOrNull(dlcRestrictions);
-		GameObject gameObject = EggConfig.CreateEgg(eggId, eggName, eggDesc, babyId, eggAnim, eggMass, eggSortOrder, num, requiredDlcsOrNull, forbiddenDlcIdsOrNull, preventEggFromDroppingProducts);
+		GameObject gameObject = EggConfig.CreateEgg(eggId, eggName, eggDesc, babyId, eggAnim, eggMass, eggSortOrder, num, requiredDlcsOrNull, forbiddenDlcIdsOrNull, preventEggFromDroppingProducts, eggMassToDrop);
 		def.eggPrefab = new Tag(eggId);
 		def.initialBreedingWeights = eggChances;
 		if (egg_anim_scale != 1f)
@@ -344,6 +356,7 @@ public class EntityTemplates
 
 	public static GameObject ExtendEntityToBeingABaby(GameObject prefab, Tag adult_prefab_id, string on_grow_item_drop_id = null, bool force_adult_nav_type = false, float adult_threshold = 5f)
 	{
+		prefab.RemoveDef<FertilityMonitor.Def>();
 		prefab.AddOrGetDef<BabyMonitor.Def>().adultPrefab = adult_prefab_id;
 		prefab.AddOrGetDef<BabyMonitor.Def>().onGrowDropID = on_grow_item_drop_id;
 		prefab.AddOrGetDef<BabyMonitor.Def>().forceAdultNavType = force_adult_nav_type;
@@ -365,7 +378,22 @@ public class EntityTemplates
 
 	public static GameObject ExtendEntityToBasicCreature(bool isWarmBlooded, GameObject template, FactionManager.FactionID faction = FactionManager.FactionID.Prey, string initialTraitID = null, string NavGridName = "WalkerNavGrid1x1", NavType navType = NavType.Floor, int max_probing_radius = 32, float moveSpeed = 2f, string onDeathDropID = "Meat", float onDeathDropCount = 1f, bool drownVulnerable = true, bool entombVulnerable = true, float warningLowTemperature = 283.15f, float warningHighTemperature = 293.15f, float lethalLowTemperature = 243.15f, float lethalHighTemperature = 343.15f)
 	{
-		template.GetComponent<KBatchedAnimController>().isMovable = true;
+		return EntityTemplates.ExtendEntityToBasicCreature(isWarmBlooded, template, null, null, null, faction, initialTraitID, NavGridName, navType, max_probing_radius, moveSpeed, onDeathDropID, onDeathDropCount, drownVulnerable, entombVulnerable, warningLowTemperature, warningHighTemperature, lethalLowTemperature, lethalHighTemperature);
+	}
+
+	public static GameObject ExtendEntityToBasicCreature(bool isWarmBlooded, GameObject template, string anim_filename, string build_filename = null, string symbol_override_prefix = null, FactionManager.FactionID faction = FactionManager.FactionID.Prey, string initialTraitID = null, string NavGridName = "WalkerNavGrid1x1", NavType navType = NavType.Floor, int max_probing_radius = 32, float moveSpeed = 2f, string onDeathDropID = "Meat", float onDeathDropCount = 1f, bool drownVulnerable = true, bool entombVulnerable = true, float warningLowTemperature = 283.15f, float warningHighTemperature = 293.15f, float lethalLowTemperature = 243.15f, float lethalHighTemperature = 343.15f)
+	{
+		List<KAnimFile> list = new List<KAnimFile>();
+		KAnimFile kanimFile = ((anim_filename != null) ? Assets.GetAnim(anim_filename) : null);
+		KAnimFile kanimFile2 = ((build_filename != null) ? Assets.GetAnim(build_filename) : null);
+		list.Add(kanimFile2);
+		list.Add(kanimFile);
+		KBatchedAnimController component = template.GetComponent<KBatchedAnimController>();
+		component.isMovable = true;
+		if (kanimFile2 != null)
+		{
+			component.AnimFiles = list.ToArray();
+		}
 		template.AddOrGet<KPrefabID>().AddTag(GameTags.Creature, false);
 		Modifiers modifiers = template.AddOrGet<Modifiers>();
 		if (initialTraitID != null)
@@ -373,7 +401,6 @@ public class EntityTemplates
 			modifiers.initialTraits.Add(initialTraitID);
 		}
 		modifiers.initialAmounts.Add(Db.Get().Amounts.HitPoints.Id);
-		template.AddOrGet<KBatchedAnimController>().SetSymbolVisiblity("snapto_pivot", false);
 		Pickupable pickupable = template.AddOrGet<Pickupable>();
 		int num = -1;
 		string name = template.PrefabID().Name;
@@ -390,12 +417,17 @@ public class EntityTemplates
 		template.AddOrGet<FactionAlignment>().Alignment = faction;
 		template.AddOrGet<Prioritizable>();
 		template.AddOrGet<Effects>();
+		template.AddOrGetDef<CritterEmoteMonitor.Def>();
 		template.AddOrGetDef<CreatureDebugGoToMonitor.Def>();
 		template.AddOrGetDef<DeathMonitor.Def>();
 		template.AddOrGetDef<CreatureThoughtGraph.Def>();
 		template.AddOrGetDef<AnimInterruptMonitor.Def>();
 		template.AddOrGet<AnimEventHandler>();
-		SymbolOverrideControllerUtil.AddToPrefab(template);
+		SymbolOverrideController symbolOverrideController = SymbolOverrideControllerUtil.AddToPrefab(template);
+		if (symbol_override_prefix != null && kanimFile != null)
+		{
+			symbolOverrideController.ApplySymbolOverridesByAffix((kanimFile2 == null) ? kanimFile : kanimFile2, symbol_override_prefix, null, 0);
+		}
 		CritterTemperatureMonitor.Def def = template.AddOrGetDef<CritterTemperatureMonitor.Def>();
 		def.temperatureHotDeadly = lethalHighTemperature;
 		def.temperatureHotUncomfortable = warningHighTemperature;
@@ -439,8 +471,13 @@ public class EntityTemplates
 		navigator.CurrentNavType = navType;
 		navigator.defaultSpeed = moveSpeed;
 		navigator.updateProber = true;
-		navigator.maxProbingRadius = max_probing_radius;
+		navigator.maxProbeRadiusX = max_probing_radius;
+		navigator.maxProbeRadiusY = max_probing_radius;
 		navigator.sceneLayer = Grid.SceneLayer.Creatures;
+		template.GetComponent<KPrefabID>().prefabSpawnFn += delegate(GameObject inst)
+		{
+			inst.GetComponent<KBatchedAnimController>().SetSymbolVisiblity("snapto_pivot", false);
+		};
 		return template;
 	}
 

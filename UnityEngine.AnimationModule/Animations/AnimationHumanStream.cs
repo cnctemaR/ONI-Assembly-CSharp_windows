@@ -6,10 +6,10 @@ using UnityEngine.Scripting.APIUpdating;
 
 namespace UnityEngine.Animations
 {
+	[RequiredByNativeCode]
+	[NativeHeader("Modules/Animation/Director/AnimationHumanStream.h")]
 	[MovedFrom("UnityEngine.Experimental.Animations")]
 	[NativeHeader("Modules/Animation/ScriptBindings/AnimationHumanStream.bindings.h")]
-	[NativeHeader("Modules/Animation/Director/AnimationHumanStream.h")]
-	[RequiredByNativeCode]
 	public struct AnimationHumanStream
 	{
 		public bool isValid

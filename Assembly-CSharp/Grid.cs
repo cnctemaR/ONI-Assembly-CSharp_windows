@@ -90,7 +90,7 @@ public class Grid
 		Grid.restrictions[cell].DirectionMasksForMinionInstanceID.Remove(minionInstanceID);
 	}
 
-	public static bool HasPermission(int cell, int minionInstanceID, int fromCell, NavType fromNavType)
+	public static bool HasPermission(int cell, int minionInstanceID, int tagID, int fromCell, NavType fromNavType)
 	{
 		if (!Grid.HasAccessDoor[cell])
 		{
@@ -132,7 +132,7 @@ public class Grid
 			break;
 		}
 		Grid.Restriction.Directions directions2 = (Grid.Restriction.Directions)0;
-		return (!restriction.DirectionMasksForMinionInstanceID.TryGetValue(minionInstanceID, out directions2) && !restriction.DirectionMasksForMinionInstanceID.TryGetValue(-1, out directions2)) || (directions2 & directions) == (Grid.Restriction.Directions)0;
+		return (!restriction.DirectionMasksForMinionInstanceID.TryGetValue(minionInstanceID, out directions2) && !restriction.DirectionMasksForMinionInstanceID.TryGetValue(tagID, out directions2)) || (directions2 & directions) == (Grid.Restriction.Directions)0;
 	}
 
 	public static void RegisterTubeEntrance(int cell, int reservationCapacity)
@@ -1805,8 +1805,6 @@ public class Grid
 
 	public struct Restriction
 	{
-		public const int DefaultID = -1;
-
 		public Dictionary<int, Grid.Restriction.Directions> DirectionMasksForMinionInstanceID;
 
 		public Grid.Restriction.Orientation orientation;

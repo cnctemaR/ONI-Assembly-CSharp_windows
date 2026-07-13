@@ -14,7 +14,7 @@ public class InvalidPortReporter : KMonoBehaviour
 		base.OnCleanUp();
 	}
 
-	private void OnTagsChanged(object data)
+	private void OnTagsChanged(object _)
 	{
 		bool flag = base.gameObject.HasTag(GameTags.HasInvalidPorts);
 		Operational component = base.GetComponent<Operational>();

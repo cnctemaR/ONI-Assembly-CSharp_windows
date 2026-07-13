@@ -82,10 +82,6 @@ public class AllDiagnosticsScreen : ShowOptimizedKScreen, ISim4000ms, ISim1000ms
 
 	public override void OnKeyDown(KButtonEvent e)
 	{
-		if (this.isHiddenButActive)
-		{
-			return;
-		}
 		if (e.TryConsume(global::Action.Escape))
 		{
 			KMonoBehaviour.PlaySound(GlobalAssets.GetSound("HUD_Click_Close", false));
@@ -107,10 +103,6 @@ public class AllDiagnosticsScreen : ShowOptimizedKScreen, ISim4000ms, ISim1000ms
 
 	public override void OnKeyUp(KButtonEvent e)
 	{
-		if (this.isHiddenButActive)
-		{
-			return;
-		}
 		if (PlayerController.Instance.ConsumeIfNotDragging(e, global::Action.MouseRight))
 		{
 			KMonoBehaviour.PlaySound(GlobalAssets.GetSound("HUD_Click_Close", false));
@@ -128,7 +120,7 @@ public class AllDiagnosticsScreen : ShowOptimizedKScreen, ISim4000ms, ISim1000ms
 		return 50f;
 	}
 
-	public void Populate(object data = null)
+	public void Populate(object _ = null)
 	{
 		this.SpawnRows();
 		foreach (string text in this.diagnosticRows.Keys)
@@ -435,7 +427,7 @@ public class AllDiagnosticsScreen : ShowOptimizedKScreen, ISim4000ms, ISim1000ms
 
 	public void Sim4000ms(float dt)
 	{
-		if (this.isHiddenButActive)
+		if (!this.IsScreenActive())
 		{
 			return;
 		}
@@ -444,7 +436,7 @@ public class AllDiagnosticsScreen : ShowOptimizedKScreen, ISim4000ms, ISim1000ms
 
 	public void Sim1000ms(float dt)
 	{
-		if (this.isHiddenButActive)
+		if (!this.IsScreenActive())
 		{
 			return;
 		}

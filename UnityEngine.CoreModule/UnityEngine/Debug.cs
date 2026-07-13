@@ -371,9 +371,9 @@ namespace UnityEngine
 			return flag2;
 		}
 
-		[Obsolete("Assert(bool, string, params object[]) is obsolete. Use AssertFormat(bool, string, params object[]) (UnityUpgradable) -> AssertFormat(*)", true)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
 		[Conditional("UNITY_ASSERTIONS")]
+		[Obsolete("Assert(bool, string, params object[]) is obsolete. Use AssertFormat(bool, string, params object[]) (UnityUpgradable) -> AssertFormat(*)", true)]
 		public static void Assert(bool condition, string format, params object[] args)
 		{
 			bool flag = !condition;
@@ -383,8 +383,8 @@ namespace UnityEngine
 			}
 		}
 
-		[Obsolete("Debug.logger is obsolete. Please use Debug.unityLogger instead (UnityUpgradable) -> unityLogger")]
 		[EditorBrowsable(EditorBrowsableState.Never)]
+		[Obsolete("Debug.logger is obsolete. Please use Debug.unityLogger instead (UnityUpgradable) -> unityLogger")]
 		public static ILogger logger
 		{
 			get

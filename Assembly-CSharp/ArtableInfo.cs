@@ -9,7 +9,13 @@ public class ArtableInfo : IBlueprintInfo, IHasDlcRestrictions
 
 	public string desc { get; set; }
 
-	public PermitRarity rarity { get; set; }
+	public PermitRarity rarity
+	{
+		get
+		{
+			return this.rarity_;
+		}
+	}
 
 	public string animFile { get; set; }
 
@@ -18,7 +24,7 @@ public class ArtableInfo : IBlueprintInfo, IHasDlcRestrictions
 		this.id = id;
 		this.name = name;
 		this.desc = desc;
-		this.rarity = rarity;
+		this.rarity_ = rarity;
 		this.animFile = animFile;
 		this.anim = anim;
 		this.decor_value = decor_value;
@@ -39,6 +45,8 @@ public class ArtableInfo : IBlueprintInfo, IHasDlcRestrictions
 	{
 		return this.forbiddenDlcIds;
 	}
+
+	private readonly PermitRarity rarity_;
 
 	public string anim;
 

@@ -157,8 +157,8 @@ namespace UnityEngine
 			}
 		}
 
-		[EditorBrowsable(EditorBrowsableState.Never)]
 		[Obsolete("Obsolete msg (UnityUpgradable) -> * UnityEngine.WWW.GetAudioClip()", true)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		public Object audioClip
 		{
 			get

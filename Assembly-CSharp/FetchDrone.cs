@@ -52,8 +52,8 @@ public class FetchDrone : KMonoBehaviour
 
 	private void OnTagsChanged(object data)
 	{
-		TagChangedEventData tagChangedEventData = (TagChangedEventData)data;
-		if (tagChangedEventData.added && tagChangedEventData.tag == GameTags.Creatures.Die)
+		TagChangedEventData value = ((Boxed<TagChangedEventData>)data).value;
+		if (value.added && value.tag == GameTags.Creatures.Die)
 		{
 			Brain component = base.GetComponent<Brain>();
 			if (component != null && !component.IsRunning())

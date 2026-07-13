@@ -314,18 +314,18 @@ public class StorageTile : GameStateMachine<StorageTile, StorageTile.Instance, I
 
 		private void OnObjectReplaced(object data)
 		{
-			Constructable.ReplaceCallbackParameters replaceCallbackParameters = (Constructable.ReplaceCallbackParameters)data;
+			Constructable.ReplaceCallbackParameters value = ((Boxed<Constructable.ReplaceCallbackParameters>)data).value;
 			List<GameObject> list = new List<GameObject>();
 			Storage storage = this.storage;
 			bool flag = false;
 			bool flag2 = false;
 			List<GameObject> list2 = list;
 			storage.DropAll(flag, flag2, default(Vector3), true, list2);
-			if (replaceCallbackParameters.Worker != null)
+			if (value.Worker != null)
 			{
 				foreach (GameObject gameObject in list)
 				{
-					gameObject.GetComponent<Pickupable>().Trigger(580035959, replaceCallbackParameters.Worker);
+					gameObject.GetComponent<Pickupable>().Trigger(580035959, value.Worker);
 				}
 			}
 		}

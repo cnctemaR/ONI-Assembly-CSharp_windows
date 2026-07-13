@@ -112,7 +112,7 @@ public class GeothermalPlantComponent : KMonoBehaviour, ICheckboxListGroupContro
 		SelectTool.Instance.Select(null, true);
 	}
 
-	protected void OnObjectSelect(object clicked)
+	protected void OnObjectSelect(object _)
 	{
 		base.Unsubscribe(-1503271301, new Action<object>(this.OnObjectSelect));
 		if (SaveGame.Instance.ColonyAchievementTracker.GeothermalFacilityDiscovered)

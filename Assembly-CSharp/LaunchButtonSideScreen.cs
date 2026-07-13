@@ -13,12 +13,12 @@ public class LaunchButtonSideScreen : SideScreenContent
 
 	public override int GetSideScreenSortOrder()
 	{
-		return -100;
+		return -1000;
 	}
 
 	public override bool IsValidForTarget(GameObject target)
 	{
-		return (target.GetComponent<RocketModule>() != null && target.HasTag(GameTags.LaunchButtonRocketModule)) || (target.GetComponent<LaunchPad>() && target.GetComponent<LaunchPad>().HasRocketWithCommandModule());
+		return target.GetComponent<RocketModuleCluster>() != null || (target.GetComponent<LaunchPad>() && target.GetComponent<LaunchPad>().HasRocketWithCommandModule());
 	}
 
 	public override void SetTarget(GameObject target)
@@ -230,6 +230,8 @@ public class LaunchButtonSideScreen : SideScreenContent
 	private float lastRefreshTime;
 
 	private const float UPDATE_FREQUENCY = 1f;
+
+	public const int ROCKET_SIDESCREENS_ORDER_ROOT = 100;
 
 	private static readonly EventSystem.IntraObjectHandler<LaunchButtonSideScreen> RefreshDelegate = new EventSystem.IntraObjectHandler<LaunchButtonSideScreen>(delegate(LaunchButtonSideScreen cmp, object data)
 	{

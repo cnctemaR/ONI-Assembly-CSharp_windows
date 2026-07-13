@@ -338,9 +338,14 @@ public abstract class StateMachine
 			this.Schedule(time, this.scheduleGoToCallback, state);
 		}
 
-		public void Subscribe(int hash, Action<object> handler)
+		public int Subscribe(int hash, Action<object> handler)
 		{
-			this.GetMaster().Subscribe(hash, handler);
+			return this.GetMaster().Subscribe(hash, handler);
+		}
+
+		public int Subscribe(int hash, Action<object, object> handler, object context)
+		{
+			return this.GetMaster().Subscribe(hash, handler, context);
 		}
 
 		public void Unsubscribe(int hash, Action<object> handler)
@@ -348,9 +353,38 @@ public abstract class StateMachine
 			this.GetMaster().Unsubscribe(hash, handler);
 		}
 
+		public void Unsubscribe(int id)
+		{
+			this.GetMaster().Unsubscribe(id);
+		}
+
+		public void Unsubscribe(ref int id)
+		{
+			this.GetMaster().Unsubscribe(id);
+			id = -1;
+		}
+
 		public void Trigger(int hash, object data = null)
 		{
 			this.GetMaster().GetComponent<KPrefabID>().Trigger(hash, data);
+		}
+
+		[Obsolete("Use BoxingTrigger to avoid sended boxing object to garbage collection, be careful to unbox parameter in any handlers")]
+		public void Trigger<T>(int hash, T data) where T : struct
+		{
+			this.Trigger(hash, data);
+		}
+
+		public void BoxingTrigger(int hash, bool data)
+		{
+			this.Trigger(hash, BoxedBools.Box(data));
+		}
+
+		public void BoxingTrigger<T>(int hash, T data) where T : struct
+		{
+			Boxed<T> boxed = Boxed<T>.Get(data);
+			this.Trigger(hash, boxed);
+			boxed.Release();
 		}
 
 		public ComponentType Get<ComponentType>()
@@ -481,12 +515,6 @@ public abstract class StateMachine
 		public string name;
 
 		public string longName;
-
-		public string debugPushName;
-
-		public string debugPopName;
-
-		public string debugExecuteName;
 
 		public StateMachine.BaseState defaultState;
 

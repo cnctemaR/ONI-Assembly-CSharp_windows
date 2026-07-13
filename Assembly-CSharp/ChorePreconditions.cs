@@ -148,7 +148,9 @@ public class ChorePreconditions
 		precondition.fn = delegate(ref Chore.Precondition.Context context, object data)
 		{
 			Assignable assignable2 = (Assignable)data;
-			return Game.Instance.assignmentManager.GetPreferredAssignables(context.consumerState.assignables, assignable2.slot).Contains(assignable2);
+			Navigator navigator;
+			context.chore.gameObject.TryGetComponent<Navigator>(out navigator);
+			return Game.Instance.assignmentManager.GetPreferredAssignables(context.consumerState.assignables, navigator, assignable2.slot).Contains(assignable2);
 		};
 		precondition.canExecuteOnAnyThread = true;
 		this.IsPreferredAssignable = precondition;

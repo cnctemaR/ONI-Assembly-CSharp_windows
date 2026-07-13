@@ -36,7 +36,7 @@ public class LogicHammer : Switch
 		this.UpdateVisualState(flag, false);
 	}
 
-	private void OnOperationalChanged(object data)
+	private void OnOperationalChanged(object _)
 	{
 		if (this.operational.IsOperational)
 		{

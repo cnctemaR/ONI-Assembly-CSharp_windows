@@ -6,6 +6,11 @@ namespace Database
 	public class CritterTypesWithTraits : ColonyAchievementRequirement, AchievementRequirementSerialization_Deprecated
 	{
 		public CritterTypesWithTraits(List<Tag> critterTypes)
+			: this(critterTypes, true)
+		{
+		}
+
+		public CritterTypesWithTraits(List<Tag> critterTypes, bool allRequired)
 		{
 			foreach (Tag tag in critterTypes)
 			{
@@ -15,16 +20,24 @@ namespace Database
 				}
 			}
 			this.hasTrait = false;
+			this.allRequired = allRequired;
 			this.trait = GameTags.Creatures.Wild;
 		}
 
 		public override bool Success()
 		{
 			HashSet<Tag> tamedCritterTypes = SaveGame.Instance.ColonyAchievementTracker.tamedCritterTypes;
-			bool flag = true;
+			bool flag = this.allRequired;
 			foreach (KeyValuePair<Tag, bool> keyValuePair in this.critterTypesToCheck)
 			{
-				flag = flag && tamedCritterTypes.Contains(keyValuePair.Key);
+				if (this.allRequired)
+				{
+					flag = flag && tamedCritterTypes.Contains(keyValuePair.Key);
+				}
+				else
+				{
+					flag = flag || tamedCritterTypes.Contains(keyValuePair.Key);
+				}
 			}
 			this.UpdateSavedState();
 			return flag;
@@ -63,6 +76,8 @@ namespace Database
 		private Tag trait;
 
 		private bool hasTrait;
+
+		private bool allRequired = true;
 
 		private Dictionary<Tag, bool> revisedCritterTypesToCheckState = new Dictionary<Tag, bool>();
 	}

@@ -68,6 +68,7 @@ public class ScheduleMinionWidget : KMonoBehaviour
 		{
 			return;
 		}
+		this.label.text = minionIdentity.GetProperName();
 		if (DlcManager.IsExpansion1Active())
 		{
 			WorldContainer myWorld = minionIdentity.GetMyWorld();

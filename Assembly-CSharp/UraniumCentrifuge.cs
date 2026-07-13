@@ -19,7 +19,7 @@ public class UraniumCentrifuge : ComplexFabricator
 		}
 	}
 
-	private void CheckPipes(object data)
+	private void CheckPipes(object _)
 	{
 		KSelectable component = base.GetComponent<KSelectable>();
 		int num = Grid.OffsetCell(Grid.PosToCell(this), UraniumCentrifugeConfig.outPipeOffset);

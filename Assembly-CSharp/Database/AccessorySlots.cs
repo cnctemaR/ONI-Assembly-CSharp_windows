@@ -40,6 +40,7 @@ namespace Database
 				accessorySlot.AddAccessories(accessorySlot.AnimFile, parent);
 			}
 			Db.Get().Accessories.AddCustomAccessories(Assets.GetAnim("body_lonelyminion_kanim"), parent, this);
+			Db.Get().Accessories.AddCustomAccessories(Assets.GetAnim("body_sena_kanim"), parent, this);
 		}
 
 		public AccessorySlot Find(KAnimHashedString symbol_name)

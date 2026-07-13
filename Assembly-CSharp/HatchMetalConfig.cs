@@ -5,7 +5,7 @@ using STRINGS;
 using TUNING;
 using UnityEngine;
 
-[EntityConfigOrder(1)]
+[EntityConfigOrder(2)]
 public class HatchMetalConfig : IEntityConfig
 {
 	public static HashSet<Tag> METAL_ORE_TAGS

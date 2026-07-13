@@ -9,9 +9,9 @@ using UnityEngine.Scripting.APIUpdating;
 
 namespace UnityEngine.Windows.WebCam
 {
-	[MovedFrom("UnityEngine.XR.WSA.WebCam")]
 	[StaticAccessor("VideoCaptureBindings", StaticAccessorType.DoubleColon)]
 	[NativeHeader("PlatformDependent/Win/Webcam/VideoCaptureBindings.h")]
+	[MovedFrom("UnityEngine.XR.WSA.WebCam")]
 	[StructLayout(LayoutKind.Sequential)]
 	public class VideoCapture : IDisposable
 	{
@@ -72,8 +72,8 @@ namespace UnityEngine.Windows.WebCam
 
 		public extern bool IsRecording
 		{
-			[NativeMethod("VideoCaptureBindings::IsRecording", HasExplicitThis = true)]
 			[NativeConditional("(PLATFORM_WIN || PLATFORM_WINRT) && !PLATFORM_XBOXONE")]
+			[NativeMethod("VideoCaptureBindings::IsRecording", HasExplicitThis = true)]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
@@ -98,8 +98,8 @@ namespace UnityEngine.Windows.WebCam
 			VideoCapture.Instantiate_Internal(false, onCreatedCallback);
 		}
 
-		[NativeName("Instantiate")]
 		[NativeConditional("(PLATFORM_WIN || PLATFORM_WINRT) && !PLATFORM_XBOXONE")]
+		[NativeName("Instantiate")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void Instantiate_Internal(bool showHolograms, VideoCapture.OnVideoCaptureResourceCreatedCallback onCreatedCallback);
 
@@ -142,8 +142,8 @@ namespace UnityEngine.Windows.WebCam
 			this.StartVideoMode_Internal(setupParams, audioState, onVideoModeStartedCallback);
 		}
 
-		[NativeConditional("(PLATFORM_WIN || PLATFORM_WINRT) && !PLATFORM_XBOXONE")]
 		[NativeMethod("VideoCaptureBindings::StartVideoMode", HasExplicitThis = true)]
+		[NativeConditional("(PLATFORM_WIN || PLATFORM_WINRT) && !PLATFORM_XBOXONE")]
 		private void StartVideoMode_Internal(CameraParameters cameraParameters, VideoCapture.AudioState audioState, VideoCapture.OnVideoModeStartedCallback onVideoModeStartedCallback)
 		{
 			this.StartVideoMode_Internal_Injected(ref cameraParameters, audioState, onVideoModeStartedCallback);
@@ -155,8 +155,8 @@ namespace UnityEngine.Windows.WebCam
 			callback(VideoCapture.MakeCaptureResult(hResult));
 		}
 
-		[NativeConditional("(PLATFORM_WIN || PLATFORM_WINRT) && !PLATFORM_XBOXONE")]
 		[NativeMethod("VideoCaptureBindings::StopVideoMode", HasExplicitThis = true)]
+		[NativeConditional("(PLATFORM_WIN || PLATFORM_WINRT) && !PLATFORM_XBOXONE")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void StopVideoModeAsync([NotNull("ArgumentNullException")] VideoCapture.OnVideoModeStoppedCallback onVideoModeStoppedCallback);
 
@@ -204,8 +204,8 @@ namespace UnityEngine.Windows.WebCam
 			callback(VideoCapture.MakeCaptureResult(hResult));
 		}
 
-		[NativeMethod("VideoCaptureBindings::StopRecordingVideoToDisk", HasExplicitThis = true)]
 		[NativeConditional("(PLATFORM_WIN || PLATFORM_WINRT) && !PLATFORM_XBOXONE")]
+		[NativeMethod("VideoCaptureBindings::StopRecordingVideoToDisk", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void StopRecordingAsync([NotNull("ArgumentNullException")] VideoCapture.OnStoppedRecordingVideoCallback onStoppedRecordingVideoCallback);
 
@@ -215,9 +215,9 @@ namespace UnityEngine.Windows.WebCam
 			callback(VideoCapture.MakeCaptureResult(hResult));
 		}
 
-		[NativeConditional("(PLATFORM_WIN || PLATFORM_WINRT) && !PLATFORM_XBOXONE")]
-		[NativeMethod("VideoCaptureBindings::GetUnsafePointerToVideoDeviceController", HasExplicitThis = true)]
 		[ThreadAndSerializationSafe]
+		[NativeMethod("VideoCaptureBindings::GetUnsafePointerToVideoDeviceController", HasExplicitThis = true)]
+		[NativeConditional("(PLATFORM_WIN || PLATFORM_WINRT) && !PLATFORM_XBOXONE")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern IntPtr GetUnsafePointerToVideoDeviceController();
 
@@ -254,8 +254,8 @@ namespace UnityEngine.Windows.WebCam
 			}
 		}
 
-		[NativeConditional("(PLATFORM_WIN || PLATFORM_WINRT) && !PLATFORM_XBOXONE")]
 		[NativeMethod("VideoCaptureBindings::DisposeThreaded", HasExplicitThis = true)]
+		[NativeConditional("(PLATFORM_WIN || PLATFORM_WINRT) && !PLATFORM_XBOXONE")]
 		[ThreadAndSerializationSafe]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void DisposeThreaded_Internal();

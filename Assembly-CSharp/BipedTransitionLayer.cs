@@ -18,7 +18,7 @@ public class BipedTransitionLayer : TransitionDriver.OverrideLayer
 		});
 		this.floorSpeed = floor_speed;
 		this.ladderSpeed = ladder_speed;
-		this.jetPackSpeed = floor_speed;
+		this.jetPackSpeed = 7f;
 		this.movementSpeed = Db.Get().AttributeConverters.MovementSpeed.Lookup(navigator.gameObject);
 		this.attributeLevels = navigator.GetComponent<AttributeLevels>();
 	}
@@ -81,6 +81,11 @@ public class BipedTransitionLayer : TransitionDriver.OverrideLayer
 		else if (flag3)
 		{
 			transition.speed = this.jetPackSpeed;
+			if (transition.x == 0 && transition.y == -1)
+			{
+				transition.speed *= 0.75f;
+			}
+			transition.animSpeed = transition.speed;
 		}
 		else
 		{

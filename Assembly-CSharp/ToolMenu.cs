@@ -51,8 +51,8 @@ public class ToolMenu : KScreen
 
 	private void OnOverlayChanged(object overlay_data)
 	{
-		HashedString hashedString = (HashedString)overlay_data;
-		if (PlayerController.Instance.ActiveTool != null && PlayerController.Instance.ActiveTool.ViewMode != OverlayModes.None.ID && PlayerController.Instance.ActiveTool.ViewMode != hashedString)
+		HashedString value = ((Boxed<HashedString>)overlay_data).value;
+		if (PlayerController.Instance.ActiveTool != null && PlayerController.Instance.ActiveTool.ViewMode != OverlayModes.None.ID && PlayerController.Instance.ActiveTool.ViewMode != value)
 		{
 			this.ChooseCollection(null, true);
 			this.ChooseTool(null);

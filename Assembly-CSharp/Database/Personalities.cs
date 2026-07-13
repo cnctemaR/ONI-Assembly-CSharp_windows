@@ -10,12 +10,15 @@ namespace Database
 		{
 			foreach (Personalities.PersonalityInfo personalityInfo in AsyncLoadManager<IGlobalAsyncLoader>.AsyncLoader<Personalities.PersonalityLoader>.Get().entries)
 			{
-				if (string.IsNullOrEmpty(personalityInfo.RequiredDlcId) || DlcManager.IsContentSubscribed(personalityInfo.RequiredDlcId))
+				if (string.IsNullOrEmpty(personalityInfo.RequiredDlcId) || DlcManager.IsContentSubscribed(personalityInfo.RequiredDlcId) || this.IsCosmeticPersonality(personalityInfo.RequiredDlcId))
 				{
-					base.Add(new Personality(personalityInfo.Name.ToUpper(), Strings.Get(string.Format("STRINGS.DUPLICANTS.PERSONALITIES.{0}.NAME", personalityInfo.Name.ToUpper())), personalityInfo.Gender.ToUpper(), personalityInfo.PersonalityType, personalityInfo.StressTrait, personalityInfo.JoyTrait, personalityInfo.StickerType, personalityInfo.CongenitalTrait, personalityInfo.HeadShape, personalityInfo.Mouth, personalityInfo.Neck, personalityInfo.Eyes, personalityInfo.Hair, personalityInfo.Body, personalityInfo.Belt, personalityInfo.Cuff, personalityInfo.Foot, personalityInfo.Hand, personalityInfo.Pelvis, personalityInfo.Leg, personalityInfo.Leg_Skin, personalityInfo.Arm_Skin, Strings.Get(string.Format("STRINGS.DUPLICANTS.PERSONALITIES.{0}.DESC", personalityInfo.Name.ToUpper())), personalityInfo.ValidStarter, personalityInfo.Grave, personalityInfo.Model, personalityInfo.SpeechMouth)
+					Personality personality = new Personality(personalityInfo.Name.ToUpper(), Strings.Get(string.Format("STRINGS.DUPLICANTS.PERSONALITIES.{0}.NAME", personalityInfo.Name.ToUpper())), personalityInfo.Gender.ToUpper(), personalityInfo.PersonalityType, personalityInfo.StressTrait, personalityInfo.JoyTrait, personalityInfo.StickerType, personalityInfo.CongenitalTrait, personalityInfo.HeadShape, personalityInfo.Mouth, personalityInfo.Neck, personalityInfo.Eyes, personalityInfo.Hair, personalityInfo.Body, personalityInfo.Belt, personalityInfo.Cuff, personalityInfo.Foot, personalityInfo.Hand, personalityInfo.Pelvis, personalityInfo.Leg, personalityInfo.Leg_Skin, personalityInfo.Arm_Skin, Strings.Get(string.Format("STRINGS.DUPLICANTS.PERSONALITIES.{0}.DESC", personalityInfo.Name.ToUpper())), personalityInfo.ValidStarter, personalityInfo.Grave, personalityInfo.Model, personalityInfo.SpeechMouth);
+					personality.requiredDlcId = personalityInfo.RequiredDlcId;
+					if (!DlcManager.IsContentSubscribed(personalityInfo.RequiredDlcId) && this.IsCosmeticPersonality(personalityInfo.RequiredDlcId))
 					{
-						requiredDlcId = personalityInfo.RequiredDlcId
-					});
+						personality.Disabled = true;
+					}
+					base.Add(personality);
 				}
 			}
 		}
@@ -75,6 +78,11 @@ namespace Database
 				}
 			}
 			return null;
+		}
+
+		private bool IsCosmeticPersonality(string required_dlc_id)
+		{
+			return !string.IsNullOrEmpty(required_dlc_id) && DlcManager.CONTENT_ONLY_DLC_IDS.Contains(required_dlc_id);
 		}
 
 		public class PersonalityLoader : AsyncCsvLoader<Personalities.PersonalityLoader, Personalities.PersonalityInfo>

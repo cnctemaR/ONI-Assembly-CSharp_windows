@@ -40,6 +40,7 @@ public class DewDripperPlantConfig : IEntityConfig, IHasDlcRestrictions
 		{
 			new CellOffset(0, 1)
 		};
+		gameObject.AddOrGet<PlantFiberProducer>().amount = 2f;
 		gameObject.AddOrGet<StandardCropPlant>();
 		gameObject.AddOrGet<LoopingSounds>();
 		EntityTemplates.ExtendPlantToFertilizable(gameObject, new PlantElementAbsorber.ConsumeInfo[]
@@ -81,4 +82,6 @@ public class DewDripperPlantConfig : IEntityConfig, IHasDlcRestrictions
 	public const float GROWTH_TIME = 1200f;
 
 	public const float FERTILIZER_RATE = 0.016666668f;
+
+	public const float PLANT_FIBER_PRODUCED_PER_CYCLE = 2f;
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using Klei;
 using Klei.AI;
 using KSerialization;
@@ -118,13 +119,13 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 			{
 				Game.Instance.Unsubscribe(this.skillsUpdateHandle);
 			}
-			this.skillsUpdateHandle = Game.Instance.Subscribe(-1523247426, new Action<object>(this.UpdateStatusItem));
+			this.skillsUpdateHandle = Game.Instance.Subscribe(-1523247426, Workable.UpdateStatusItemDispatcher, this);
 		}
 		if (this.requireMinionToWork && this.minionUpdateHandle != -1)
 		{
 			Game.Instance.Unsubscribe(this.minionUpdateHandle);
 		}
-		this.minionUpdateHandle = Game.Instance.Subscribe(586301400, new Action<object>(this.UpdateStatusItem));
+		this.minionUpdateHandle = Game.Instance.Subscribe(586301400, Workable.UpdateStatusItemDispatcher, this);
 		base.GetComponent<KPrefabID>().AddTag(GameTags.HasChores, false);
 		if (base.gameObject.HasTag(this.laboratoryEfficiencyBonusTagRequired))
 		{
@@ -620,7 +621,7 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 		}
 		if (this.shouldShowSkillPerkStatusItem && !string.IsNullOrEmpty(this.requiredSkillPerk))
 		{
-			this.skillsUpdateHandle = Game.Instance.Subscribe(-1523247426, new Action<object>(this.UpdateStatusItem));
+			this.skillsUpdateHandle = Game.Instance.Subscribe(-1523247426, Workable.UpdateStatusItemDispatcher, this);
 		}
 		this.UpdateStatusItem(null);
 	}
@@ -779,6 +780,11 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 	{
 		component.OnUpdateRoom(data);
 	});
+
+	protected static Action<object, object> UpdateStatusItemDispatcher = delegate(object context, object data)
+	{
+		Unsafe.As<Workable>(context).UpdateStatusItem(data);
+	};
 
 	protected ProgressBar progressBar;
 

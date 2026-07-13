@@ -110,7 +110,7 @@ public class GasAndLiquidConsumerMonitor : GameStateMachine<GasAndLiquidConsumer
 
 		public void Consume(float dt)
 		{
-			int index = Game.Instance.massConsumedCallbackManager.Add(new Action<Sim.MassConsumedCallback, object>(GasAndLiquidConsumerMonitor.Instance.OnMassConsumedCallback), this, "GasAndLiquidConsumerMonitor").index;
+			int index = Game.Instance.massConsumedCallbackManager.Add(GasAndLiquidConsumerMonitor.Instance.OnMassConsumedAction, this, "GasAndLiquidConsumerMonitor").index;
 			SimMessages.ConsumeMass(Grid.PosToCell(this), this.targetElement.id, base.def.consumptionRate * dt, 3, index);
 		}
 
@@ -136,12 +136,11 @@ public class GasAndLiquidConsumerMonitor : GameStateMachine<GasAndLiquidConsumer
 						return;
 					}
 					float num = dietInfo.ConvertConsumptionMassToCalories(mcd.mass);
-					CreatureCalorieMonitor.CaloriesConsumedEvent caloriesConsumedEvent = new CreatureCalorieMonitor.CaloriesConsumedEvent
+					base.BoxingTrigger<CreatureCalorieMonitor.CaloriesConsumedEvent>(-2038961714, new CreatureCalorieMonitor.CaloriesConsumedEvent
 					{
 						tag = this.targetElement.tag,
 						calories = num
-					};
-					base.Trigger(-2038961714, caloriesConsumedEvent);
+					});
 					return;
 				}
 				else if (this.storage != null)
@@ -170,6 +169,8 @@ public class GasAndLiquidConsumerMonitor : GameStateMachine<GasAndLiquidConsumer
 
 		[MyCmpGet]
 		private Storage storage;
+
+		private static Action<Sim.MassConsumedCallback, object> OnMassConsumedAction = new Action<Sim.MassConsumedCallback, object>(GasAndLiquidConsumerMonitor.Instance.OnMassConsumedCallback);
 	}
 
 	public class ConsumableCellQuery : PathFinderQuery

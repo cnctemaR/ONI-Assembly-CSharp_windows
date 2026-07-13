@@ -43,6 +43,7 @@ public class VineBranchConfig : IEntityConfig, IHasDlcRestrictions
 		EntityTemplates.ExtendEntityToBasicPlant(gameObject, 273.15f, 298.15f, 318.15f, 378.15f, null, false, 0f, 0.15f, null, true, true, false, flag, 2400f, 0f, 2200f, text5, global::STRINGS.CREATURES.SPECIES.VINEBRANCH.NAME);
 		gameObject.AddOrGet<HarvestDesignatable>();
 		gameObject.AddOrGet<CodexEntryRedirector>().CodexID = "VineMother";
+		gameObject.AddOrGet<PlantFiberProducer>().amount = 6f;
 		gameObject.AddOrGet<UprootedMonitor>();
 		Crop.CropVal cropVal = CROPS.CROP_TYPES.Find((Crop.CropVal m) => m.cropId == VineFruitConfig.ID);
 		gameObject.AddOrGet<Crop>().Configure(cropVal);
@@ -84,9 +85,13 @@ public class VineBranchConfig : IEntityConfig, IHasDlcRestrictions
 
 	public const string ID = "VineBranch";
 
+	public const float GROWING_DURATION_CYCLES = 3f;
+
 	public const float GROWING_DURATION = 1800f;
 
 	public const float FRUIT_GROWING_DURATION = 1800f;
 
 	public const int FRUIT_COUNT_PER_HARVEST = 1;
+
+	public const float PLANT_FIBER_PRODUCED_PER_CYCLE = 6f;
 }

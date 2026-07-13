@@ -43,7 +43,6 @@ public class StegoConfig : IEntityConfig, IHasDlcRestrictions
 
 	public void OnSpawn(GameObject inst)
 	{
-		new CritterEmoteMonitor.Instance(inst.GetComponent<StateMachineController>(), this.StegoEmotes).StartSM();
 	}
 
 	public const string ID = "Stego";

@@ -4,8 +4,8 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	[RequireComponent(typeof(Transform))]
 	[NativeHeader("Modules/Audio/Public/AudioReverbZone.h")]
+	[RequireComponent(typeof(Transform))]
 	public sealed class AudioReverbZone : Behaviour
 	{
 		public extern float minDistance

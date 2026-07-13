@@ -39,21 +39,25 @@ namespace Database
 				Db.Get().SkillPerks.CanFarmTinker,
 				Db.Get().SkillPerks.CanFarmStation
 			}, new List<string> { this.Farming1.Id }, "Minion", null, null));
-			this.Farming3 = this.AddSkill(new Skill("Farming3", DUPLICANTS.ROLES.SENIOR_FARMER.NAME, DUPLICANTS.ROLES.SENIOR_FARMER.DESCRIPTION, 2, "hat_role_farming3", "skillbadge_role_farming3", Db.Get().SkillGroups.Farming.Id, new List<SkillPerk> { Db.Get().SkillPerks.IncreaseBotanyLarge }, new List<string> { this.Farming2.Id }, "Minion", null, null));
+			this.Farming3 = this.AddSkill(new Skill("Farming3", DUPLICANTS.ROLES.SENIOR_FARMER.NAME, DUPLICANTS.ROLES.SENIOR_FARMER.DESCRIPTION, 2, "hat_role_farming3", "skillbadge_role_farming3", Db.Get().SkillGroups.Farming.Id, new List<SkillPerk>
+			{
+				Db.Get().SkillPerks.IncreaseBotanyLarge,
+				Db.Get().SkillPerks.CanSalvagePlantFiber
+			}, new List<string> { this.Farming2.Id }, "Minion", null, null));
 			if (DlcManager.FeaturePlantMutationsEnabled())
 			{
 				this.Farming3.perks.Add(Db.Get().SkillPerks.CanIdentifyMutantSeeds);
 			}
 			this.Ranching1 = this.AddSkill(new Skill("Ranching1", DUPLICANTS.ROLES.RANCHER.NAME, DUPLICANTS.ROLES.RANCHER.DESCRIPTION, 1, "hat_role_rancher1", "skillbadge_role_rancher1", Db.Get().SkillGroups.Ranching.Id, new List<SkillPerk>
 			{
-				Db.Get().SkillPerks.CanWrangleCreatures,
+				Db.Get().SkillPerks.IncreaseRanchingSmall,
 				Db.Get().SkillPerks.CanUseRanchStation,
-				Db.Get().SkillPerks.IncreaseRanchingSmall
+				Db.Get().SkillPerks.CanWrangleCreatures
 			}, new List<string> { this.Farming1.Id }, "Minion", null, null));
 			this.Ranching2 = this.AddSkill(new Skill("Ranching2", DUPLICANTS.ROLES.SENIOR_RANCHER.NAME, DUPLICANTS.ROLES.SENIOR_RANCHER.DESCRIPTION, 2, "hat_role_rancher2", "skillbadge_role_rancher2", Db.Get().SkillGroups.Ranching.Id, new List<SkillPerk>
 			{
-				Db.Get().SkillPerks.CanUseMilkingStation,
-				Db.Get().SkillPerks.IncreaseRanchingMedium
+				Db.Get().SkillPerks.IncreaseRanchingMedium,
+				Db.Get().SkillPerks.CanUseMilkingStation
 			}, new List<string> { this.Ranching1.Id }, "Minion", null, null));
 			this.Researching1 = this.AddSkill(new Skill("Researching1", DUPLICANTS.ROLES.JUNIOR_RESEARCHER.NAME, DUPLICANTS.ROLES.JUNIOR_RESEARCHER.DESCRIPTION, 0, "hat_role_research1", "skillbadge_role_research1", Db.Get().SkillGroups.Research.Id, new List<SkillPerk>
 			{
@@ -119,14 +123,14 @@ namespace Database
 			}, new List<string> { this.Cooking1.Id }, "Minion", null, null));
 			this.Arting1 = this.AddSkill(new Skill("Arting1", DUPLICANTS.ROLES.JUNIOR_ARTIST.NAME, DUPLICANTS.ROLES.JUNIOR_ARTIST.DESCRIPTION, 0, "hat_role_art1", "skillbadge_role_art1", Db.Get().SkillGroups.Art.Id, new List<SkillPerk>
 			{
-				Db.Get().SkillPerks.CanArt,
+				Db.Get().SkillPerks.IncreaseArtSmall,
 				Db.Get().SkillPerks.CanArtUgly,
-				Db.Get().SkillPerks.IncreaseArtSmall
+				Db.Get().SkillPerks.CanArt
 			}, null, "Minion", null, null));
 			this.Arting2 = this.AddSkill(new Skill("Arting2", DUPLICANTS.ROLES.ARTIST.NAME, DUPLICANTS.ROLES.ARTIST.DESCRIPTION, 1, "hat_role_art2", "skillbadge_role_art2", Db.Get().SkillGroups.Art.Id, new List<SkillPerk>
 			{
-				Db.Get().SkillPerks.CanArtOkay,
 				Db.Get().SkillPerks.IncreaseArtMedium,
+				Db.Get().SkillPerks.CanArtOkay,
 				Db.Get().SkillPerks.CanClothingAlteration
 			}, new List<string> { this.Arting1.Id }, "Minion", null, null));
 			if (DlcManager.FeatureClusterSpaceEnabled())
@@ -135,8 +139,8 @@ namespace Database
 			}
 			this.Arting3 = this.AddSkill(new Skill("Arting3", DUPLICANTS.ROLES.MASTER_ARTIST.NAME, DUPLICANTS.ROLES.MASTER_ARTIST.DESCRIPTION, 2, "hat_role_art3", "skillbadge_role_art3", Db.Get().SkillGroups.Art.Id, new List<SkillPerk>
 			{
-				Db.Get().SkillPerks.CanArtGreat,
-				Db.Get().SkillPerks.IncreaseArtLarge
+				Db.Get().SkillPerks.IncreaseArtLarge,
+				Db.Get().SkillPerks.CanArtGreat
 			}, new List<string> { this.Arting2.Id }, "Minion", null, null));
 			this.Hauling1 = this.AddSkill(new Skill("Hauling1", DUPLICANTS.ROLES.HAULER.NAME, DUPLICANTS.ROLES.HAULER.DESCRIPTION, 0, "hat_role_hauling1", "skillbadge_role_hauling1", Db.Get().SkillGroups.Hauling.Id, new List<SkillPerk>
 			{
@@ -170,8 +174,8 @@ namespace Database
 			}
 			this.Suits1 = this.AddSkill(new Skill("Suits1", DUPLICANTS.ROLES.SUIT_EXPERT.NAME, DUPLICANTS.ROLES.SUIT_EXPERT.DESCRIPTION, 2, "hat_role_suits2", "skillbadge_role_suits3", Db.Get().SkillGroups.Suits.Id, new List<SkillPerk>
 			{
-				Db.Get().SkillPerks.ExosuitExpertise,
-				Db.Get().SkillPerks.IncreaseAthleticsMedium
+				Db.Get().SkillPerks.IncreaseAthleticsMedium,
+				Db.Get().SkillPerks.ExosuitExpertise
 			}, new List<string> { this.ThermalSuits.Id }, "Minion", null, null));
 			this.Technicals1 = this.AddSkill(new Skill("Technicals1", DUPLICANTS.ROLES.MACHINE_TECHNICIAN.NAME, DUPLICANTS.ROLES.MACHINE_TECHNICIAN.DESCRIPTION, 0, "hat_role_technicals1", "skillbadge_role_technicals1", Db.Get().SkillGroups.Technicals.Id, new List<SkillPerk> { Db.Get().SkillPerks.IncreaseMachinerySmall }, null, "Minion", null, null));
 			this.Technicals2 = this.AddSkill(new Skill("Technicals2", DUPLICANTS.ROLES.POWER_TECHNICIAN.NAME, DUPLICANTS.ROLES.POWER_TECHNICIAN.DESCRIPTION, 1, "hat_role_technicals2", "skillbadge_role_technicals2", Db.Get().SkillGroups.Technicals.Id, new List<SkillPerk>
@@ -219,18 +223,18 @@ namespace Database
 			}
 			this.Medicine1 = this.AddSkill(new Skill("Medicine1", DUPLICANTS.ROLES.JUNIOR_MEDIC.NAME, DUPLICANTS.ROLES.JUNIOR_MEDIC.DESCRIPTION, 0, "hat_role_medicalaid1", "skillbadge_role_medicalaid1", Db.Get().SkillGroups.MedicalAid.Id, new List<SkillPerk>
 			{
-				Db.Get().SkillPerks.CanCompound,
-				Db.Get().SkillPerks.IncreaseCaringSmall
+				Db.Get().SkillPerks.IncreaseCaringSmall,
+				Db.Get().SkillPerks.CanCompound
 			}, null, "Minion", null, null));
 			this.Medicine2 = this.AddSkill(new Skill("Medicine2", DUPLICANTS.ROLES.MEDIC.NAME, DUPLICANTS.ROLES.MEDIC.DESCRIPTION, 1, "hat_role_medicalaid2", "skillbadge_role_medicalaid2", Db.Get().SkillGroups.MedicalAid.Id, new List<SkillPerk>
 			{
-				Db.Get().SkillPerks.CanDoctor,
-				Db.Get().SkillPerks.IncreaseCaringMedium
+				Db.Get().SkillPerks.IncreaseCaringMedium,
+				Db.Get().SkillPerks.CanDoctor
 			}, new List<string> { this.Medicine1.Id }, "Minion", null, null));
 			this.Medicine3 = this.AddSkill(new Skill("Medicine3", DUPLICANTS.ROLES.SENIOR_MEDIC.NAME, DUPLICANTS.ROLES.SENIOR_MEDIC.DESCRIPTION, 2, "hat_role_medicalaid3", "skillbadge_role_medicalaid3", Db.Get().SkillGroups.MedicalAid.Id, new List<SkillPerk>
 			{
-				Db.Get().SkillPerks.CanAdvancedMedicine,
-				Db.Get().SkillPerks.IncreaseCaringLarge
+				Db.Get().SkillPerks.IncreaseCaringLarge,
+				Db.Get().SkillPerks.CanAdvancedMedicine
 			}, new List<string> { this.Medicine2.Id }, "Minion", null, null));
 			if (DlcManager.IsContentSubscribed("DLC3_ID"))
 			{
@@ -266,6 +270,17 @@ namespace Database
 					this.BionicsB2.Id,
 					this.BionicsC2.Id
 				}, GameTags.Minions.Models.Bionic.Name, DlcManager.DLC3, null));
+				this.BionicsD1 = this.AddSkill(new Skill("BionicsD1", DUPLICANTS.ROLES.BIONICS_D1.NAME, DUPLICANTS.ROLES.BIONICS_D1.DESCRIPTION, 0, "hat_role_gainingboosters1", "skillbadge_bionic_booster1", Db.Get().SkillGroups.BionicSkills.Id, new List<SkillPerk>
+				{
+					Db.Get().SkillPerks.BionicEardrumsDefense,
+					Db.Get().SkillPerks.BionicMinorEyeIrritationDefense,
+					Db.Get().SkillPerks.BionicMajorEyeIrritationDefense
+				}, new List<string>(), GameTags.Minions.Models.Bionic.Name, DlcManager.DLC3, null));
+				this.BionicsD2 = this.AddSkill(new Skill("BionicsD2", DUPLICANTS.ROLES.BIONICS_D2.NAME, DUPLICANTS.ROLES.BIONICS_D2.DESCRIPTION, 1, "hat_role_gainingboosters1", "skillbadge_bionic_booster1", Db.Get().SkillGroups.BionicSkills.Id, new List<SkillPerk>
+				{
+					Db.Get().SkillPerks.BionicToastySurroundingsDefense,
+					Db.Get().SkillPerks.BionicChillySurroundingsDefense
+				}, new List<string> { this.BionicsD1.Id }, GameTags.Minions.Models.Bionic.Name, DlcManager.DLC3, null));
 			}
 		}
 
@@ -440,5 +455,9 @@ namespace Database
 		public Skill BionicsC2;
 
 		public Skill BionicsC3;
+
+		public Skill BionicsD1;
+
+		public Skill BionicsD2;
 	}
 }

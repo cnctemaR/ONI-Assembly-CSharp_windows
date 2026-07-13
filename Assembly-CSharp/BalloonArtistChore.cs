@@ -7,19 +7,11 @@ using UnityEngine;
 public class BalloonArtistChore : Chore<BalloonArtistChore.StatesInstance>, IWorkerPrioritizable
 {
 	public BalloonArtistChore(IStateMachineTarget target)
+		: base(Db.Get().ChoreTypes.JoyReaction, target, target.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.high, 5, false, true, 0, false, ReportManager.ReportType.PersonalTime)
 	{
-		Chore.Precondition precondition = default(Chore.Precondition);
-		precondition.id = "HasBalloonStallCell";
-		precondition.description = DUPLICANTS.CHORES.PRECONDITIONS.HAS_BALLOON_STALL_CELL;
-		precondition.fn = delegate(ref Chore.Precondition.Context context, object data)
-		{
-			return ((BalloonArtistChore)data).smi.HasBalloonStallCell();
-		};
-		this.HasBalloonStallCell = precondition;
-		base..ctor(Db.Get().ChoreTypes.JoyReaction, target, target.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.high, 5, false, true, 0, false, ReportManager.ReportType.PersonalTime);
 		this.showAvailabilityInHoverText = false;
 		base.smi = new BalloonArtistChore.StatesInstance(this, target.gameObject);
-		this.AddPrecondition(this.HasBalloonStallCell, this);
+		this.AddPrecondition(BalloonArtistChore.HasBalloonStallCell, this);
 		this.AddPrecondition(ChorePreconditions.instance.IsNotRedAlert, null);
 		this.AddPrecondition(ChorePreconditions.instance.IsScheduledTime, Db.Get().ScheduleBlockTypes.Recreation);
 		this.AddPrecondition(ChorePreconditions.instance.CanDoWorkerPrioritizable, this);
@@ -33,7 +25,15 @@ public class BalloonArtistChore : Chore<BalloonArtistChore.StatesInstance>, IWor
 
 	private int basePriority = RELAXATION.PRIORITY.TIER1;
 
-	private Chore.Precondition HasBalloonStallCell;
+	private static Chore.Precondition HasBalloonStallCell = new Chore.Precondition
+	{
+		id = "HasBalloonStallCell",
+		description = DUPLICANTS.CHORES.PRECONDITIONS.HAS_BALLOON_STALL_CELL,
+		fn = delegate(ref Chore.Precondition.Context context, object data)
+		{
+			return ((BalloonArtistChore)data).smi.HasBalloonStallCell();
+		}
+	};
 
 	public class States : GameStateMachine<BalloonArtistChore.States, BalloonArtistChore.StatesInstance, BalloonArtistChore>
 	{

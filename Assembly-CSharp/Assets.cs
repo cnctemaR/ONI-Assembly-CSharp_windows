@@ -226,7 +226,7 @@ public class Assets : KMonoBehaviour, ISerializationCallbackReceiver
 		{
 			for (int i = 0; i < Assets.TintedSprites.Count; i++)
 			{
-				if (Assets.TintedSprites[i].sprite.name == name)
+				if (Assets.TintedSprites[i].name == name)
 				{
 					tintedSprite = Assets.TintedSprites[i];
 					break;

@@ -9,5 +9,6 @@ public enum EntityLayer
 	Payload,
 	FX,
 	Meteor,
+	Debri,
 	None
 }

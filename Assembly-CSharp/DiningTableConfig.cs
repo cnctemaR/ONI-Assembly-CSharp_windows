@@ -1,4 +1,5 @@
 ﻿using System;
+using STRINGS;
 using TUNING;
 using UnityEngine;
 
@@ -12,22 +13,23 @@ public class DiningTableConfig : IBuildingConfig
 		string text2 = "diningtable_kanim";
 		int num3 = 10;
 		float num4 = 10f;
-		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER3;
+		float[] tier = global::TUNING.BUILDINGS.CONSTRUCTION_MASS_KG.TIER3;
 		string[] all_METALS = MATERIALS.ALL_METALS;
 		float num5 = 1600f;
 		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloor;
 		EffectorValues none = NOISE_POLLUTION.NONE;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, all_METALS, num5, buildLocationRule, BUILDINGS.DECOR.BONUS.TIER1, none, 0.2f);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, all_METALS, num5, buildLocationRule, global::TUNING.BUILDINGS.DECOR.BONUS.TIER1, none, 0.2f);
 		buildingDef.WorkTime = 20f;
 		buildingDef.Overheatable = false;
 		buildingDef.AudioCategory = "Metal";
+		buildingDef.AddSearchTerms(SEARCH_TERMS.DINING);
 		return buildingDef;
 	}
 
 	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
 		go.AddOrGet<LoopingSounds>();
-		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.MessTable, false);
+		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.DiningTableType, false);
 		go.AddOrGet<MessStation>();
 		go.AddOrGet<AnimTileable>();
 		go.AddOrGetDef<RocketUsageRestriction.Def>();
@@ -36,7 +38,10 @@ public class DiningTableConfig : IBuildingConfig
 	public override void DoPostConfigureComplete(GameObject go)
 	{
 		go.GetComponent<KAnimControllerBase>().initialAnim = "off";
-		go.AddOrGet<Ownable>().slotID = Db.Get().AssignableSlots.MessStation.Id;
+		Ownable ownable = go.AddOrGet<Ownable>();
+		ownable.slotID = Db.Get().AssignableSlots.MessStation.Id;
+		ownable.canBePublic = true;
+		ownable.priority = 10;
 		Storage storage = BuildingTemplates.CreateDefaultStorage(go, false);
 		storage.showInUI = true;
 		storage.capacityKg = TableSaltTuning.SALTSHAKERSTORAGEMASS;
@@ -47,6 +52,7 @@ public class DiningTableConfig : IBuildingConfig
 		manualDeliveryKG.refillMass = TableSaltTuning.CONSUMABLE_RATE;
 		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.FoodFetch.IdHash;
 		manualDeliveryKG.ShowStatusItem = false;
+		go.AddOrGet<Reservable>();
 	}
 
 	public const string ID = "DiningTable";

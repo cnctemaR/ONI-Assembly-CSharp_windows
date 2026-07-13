@@ -56,7 +56,6 @@ public class StateMachineController : KMonoBehaviour, ISaveLoadableDetails, ISta
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		this.log.SetName(base.name);
 		base.Subscribe<StateMachineController>(1969584890, StateMachineController.OnTargetDestroyedDelegate);
 		base.Subscribe<StateMachineController>(1502190696, StateMachineController.OnTargetDestroyedDelegate);
 	}
@@ -69,6 +68,8 @@ public class StateMachineController : KMonoBehaviour, ISaveLoadableDetails, ISta
 			instance.StopSM("StateMachineController.OnCleanUp");
 			this.stateMachines.Remove(instance);
 		}
+		base.Unsubscribe<StateMachineController>(1969584890, StateMachineController.OnTargetDestroyedDelegate, false);
+		base.Unsubscribe<StateMachineController>(1502190696, StateMachineController.OnTargetDestroyedDelegate, false);
 	}
 
 	protected override void OnLoadLevel()

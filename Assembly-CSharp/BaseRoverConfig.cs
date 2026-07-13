@@ -7,7 +7,11 @@ public static class BaseRoverConfig
 {
 	public static GameObject BaseRover(string id, string name, Tag model, string desc, string anim_file, float mass, float width, float height, float carryingAmount, float digging, float construction, float athletics, float hitPoints, float batteryCapacity, float batteryDepletionRate, Amount batteryType, bool deleteOnDeath)
 	{
-		GameObject gameObject = EntityTemplates.CreateBasicEntity(id, name, desc, mass, true, Assets.GetAnim(anim_file), "idle_loop", Grid.SceneLayer.Creatures, SimHashes.Creature, new List<Tag> { GameTags.Experimental }, 293f);
+		GameObject gameObject = EntityTemplates.CreateBasicEntity(id, name, desc, mass, true, Assets.GetAnim(anim_file), "idle_loop", Grid.SceneLayer.Creatures, SimHashes.Creature, new List<Tag>
+		{
+			GameTags.Robots.Behaviours.HasDoorPermissions,
+			GameTags.Experimental
+		}, 293f);
 		string text = id + "BaseTrait";
 		KBatchedAnimController component = gameObject.GetComponent<KBatchedAnimController>();
 		component.isMovable = true;
@@ -103,6 +107,7 @@ public static class BaseRoverConfig
 		navigator.CurrentNavType = NavType.Floor;
 		navigator.defaultSpeed = 2f;
 		navigator.updateProber = true;
+		navigator.executePathProbeTaskAsync = true;
 		navigator.sceneLayer = Grid.SceneLayer.Creatures;
 		gameObject.AddOrGet<Sensors>();
 		gameObject.AddOrGet<Pickupable>().SetWorkTime(5f);
@@ -272,11 +277,7 @@ public static class BaseRoverConfig
 		component2.transitionDriver.overrideLayers.Add(new SplashTransitionLayer(component2));
 		component2.SetFlags(PathFinder.PotentialPath.Flags.None);
 		component2.CurrentNavType = NavType.Floor;
-		PathProber component3 = inst.GetComponent<PathProber>();
-		if (component3 != null)
-		{
-			component3.SetGroupProber(MinionGroupProber.Get());
-		}
+		component2.reportOccupation = true;
 	}
 
 	public struct LaserEffect

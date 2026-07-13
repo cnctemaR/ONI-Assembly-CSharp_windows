@@ -1,8 +1,9 @@
 ﻿using System;
+using UnityEngine.Pool;
 
 public class ScenePartitionerEntry
 {
-	public ScenePartitionerEntry(string name, object obj, int x, int y, int width, int height, ScenePartitionerLayer layer, ScenePartitioner partitioner, Action<object> event_callback)
+	public void Init(string name, object obj, int x, int y, int width, int height, ScenePartitionerLayer layer, ScenePartitioner partitioner, Action<object> event_callback)
 	{
 		if (x < 0 || y < 0 || width >= 0)
 		{
@@ -17,21 +18,21 @@ public class ScenePartitionerEntry
 		this.obj = obj;
 	}
 
-	public void UpdatePosition(int x, int y)
+	public void UpdatePosition(HandleVector<int>.Handle handle, int x, int y)
 	{
-		this.partitioner.UpdatePosition(x, y, this);
+		this.partitioner.UpdatePosition(x, y, handle);
 	}
 
-	public void UpdatePosition(Extents e)
+	public void UpdatePosition(HandleVector<int>.Handle handle, Extents e)
 	{
-		this.partitioner.UpdatePosition(e, this);
+		this.partitioner.UpdatePosition(e, handle);
 	}
 
-	public void Release()
+	public void Release(HandleVector<int>.Handle handle)
 	{
 		if (this.partitioner != null)
 		{
-			this.partitioner.Remove(this);
+			this.partitioner.Remove(handle);
 		}
 	}
 
@@ -52,4 +53,6 @@ public class ScenePartitionerEntry
 	public Action<object> eventCallback;
 
 	public object obj;
+
+	public static ObjectPool<ScenePartitionerEntry> EntryPool = new ObjectPool<ScenePartitionerEntry>(() => new ScenePartitionerEntry(), null, null, null, false, 1024, 10000);
 }

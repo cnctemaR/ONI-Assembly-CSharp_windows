@@ -5,8 +5,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Subsystems
 {
-	[UsedByNativeCode]
 	[NativeType(Header = "Modules/Subsystems/Example/ExampleSubsystemDescriptor.h")]
+	[UsedByNativeCode]
 	public class ExampleSubsystemDescriptor : IntegratedSubsystemDescriptor<ExampleSubsystem>
 	{
 		public extern bool supportsEditorMode

@@ -94,7 +94,7 @@ public class Disinfectable : Workable
 		}
 	}
 
-	private void OnCancel(object data)
+	private void OnCancel(object _)
 	{
 		this.CancelDisinfection();
 	}

@@ -3,8 +3,8 @@ using UnityEngine.Scripting;
 
 namespace Unity.Burst
 {
-	[RequireAttributeUsages]
 	[AttributeUsage(AttributeTargets.Method)]
+	[RequireAttributeUsages]
 	public class BurstAuthorizedExternalMethodAttribute : Attribute
 	{
 	}

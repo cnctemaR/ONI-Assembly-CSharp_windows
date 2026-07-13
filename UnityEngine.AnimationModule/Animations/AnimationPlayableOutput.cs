@@ -7,12 +7,12 @@ using UnityEngine.Scripting;
 namespace UnityEngine.Animations
 {
 	[StaticAccessor("AnimationPlayableOutputBindings", StaticAccessorType.DoubleColon)]
-	[RequiredByNativeCode]
-	[NativeHeader("Runtime/Director/Core/HPlayableGraph.h")]
-	[NativeHeader("Modules/Animation/ScriptBindings/AnimationPlayableOutput.bindings.h")]
-	[NativeHeader("Modules/Animation/Director/AnimationPlayableOutput.h")]
-	[NativeHeader("Modules/Animation/Animator.h")]
 	[NativeHeader("Runtime/Director/Core/HPlayableOutput.h")]
+	[NativeHeader("Runtime/Director/Core/HPlayableGraph.h")]
+	[NativeHeader("Modules/Animation/Director/AnimationPlayableOutput.h")]
+	[NativeHeader("Modules/Animation/ScriptBindings/AnimationPlayableOutput.bindings.h")]
+	[RequiredByNativeCode]
+	[NativeHeader("Modules/Animation/Animator.h")]
 	public struct AnimationPlayableOutput : IPlayableOutput
 	{
 		public static AnimationPlayableOutput Create(PlayableGraph graph, string name, Animator target)

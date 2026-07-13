@@ -129,12 +129,13 @@ public class Constructable : Workable, ISaveLoadable
 				{
 					component7.SpawnItemsFromConstruction(worker);
 				}
-				Constructable.ReplaceCallbackParameters replaceCallbackParameters = new Constructable.ReplaceCallbackParameters
+				Boxed<Constructable.ReplaceCallbackParameters> boxed = Boxed<Constructable.ReplaceCallbackParameters>.Get(new Constructable.ReplaceCallbackParameters
 				{
 					TileLayer = this.building.Def.TileLayer,
 					Worker = worker
-				};
-				replacementCandidate.Trigger(1606648047, replaceCallbackParameters);
+				});
+				replacementCandidate.Trigger(1606648047, boxed);
+				Boxed<Constructable.ReplaceCallbackParameters>.Release(boxed);
 				replacementCandidate.DeleteObject();
 			}
 		}
@@ -481,7 +482,7 @@ public class Constructable : Workable, ISaveLoadable
 		base.OnCleanUp();
 	}
 
-	private void OnDiggableReachabilityChanged(object data)
+	private void OnDiggableReachabilityChanged(object _)
 	{
 		if (!this.IsReplacementTile)
 		{
@@ -537,7 +538,7 @@ public class Constructable : Workable, ISaveLoadable
 			HashSetPool<Uprootable, Constructable>.PooledHashSet uprootables = HashSetPool<Uprootable, Constructable>.Allocate();
 			this.building.RunOnArea(delegate(int offset_cell)
 			{
-				Uprootable uprootable5;
+				Uprootable uprootable4;
 				if (Diggable.IsDiggable(offset_cell))
 				{
 					digs_complete = false;
@@ -565,49 +566,40 @@ public class Constructable : Workable, ISaveLoadable
 						return;
 					}
 				}
-				else if (this.building.Def.ObjectLayer == ObjectLayer.Building && Uprootable.CanUproot(Grid.Objects[offset_cell, 5], out uprootable5))
+				else if (this.building.Def.ObjectLayer == ObjectLayer.Building && Uprootable.CanUproot(Grid.Objects[offset_cell, 5], out uprootable4))
 				{
-					uprootables.Add(uprootable5);
+					digs_complete = false;
+					uprootables.Add(uprootable4);
 				}
 			});
-			if (uprootables.Count != 0)
-			{
-				digs_complete = false;
-			}
 			ListPool<Uprootable, Constructable>.PooledList pooledList = ListPool<Uprootable, Constructable>.Allocate();
-			ListPool<Uprootable, Constructable>.PooledList pooledList2 = ListPool<Uprootable, Constructable>.Allocate();
 			foreach (Uprootable uprootable in this.pendingUproots)
 			{
 				if (uprootable.IsNullOrDestroyed())
 				{
-					pooledList2.Add(uprootable);
+					pooledList.Add(uprootable);
 				}
 				else if (!uprootables.Contains(uprootable))
 				{
+					uprootable.Unsubscribe(-216549700, new Action<object>(this.OnSolidChangedOrDigDestroyed));
+					uprootable.Unsubscribe(1198393204, new Action<object>(this.OnSolidChangedOrDigDestroyed));
 					pooledList.Add(uprootable);
 				}
 			}
 			foreach (Uprootable uprootable2 in pooledList)
 			{
-				uprootable2.Unsubscribe(-216549700, new Action<object>(this.OnSolidChangedOrDigDestroyed));
-				uprootable2.Unsubscribe(1198393204, new Action<object>(this.OnSolidChangedOrDigDestroyed));
 				this.pendingUproots.Remove(uprootable2);
 			}
 			pooledList.Recycle();
-			foreach (Uprootable uprootable3 in pooledList2)
+			foreach (Uprootable uprootable3 in uprootables)
 			{
-				this.pendingUproots.Remove(uprootable3);
-			}
-			pooledList2.Recycle();
-			foreach (Uprootable uprootable4 in uprootables)
-			{
-				bool flag = this.pendingUproots.Add(uprootable4);
-				uprootable4.choreTypeIdHash = Db.Get().ChoreTypes.BuildUproot.IdHash;
-				uprootable4.MarkForUproot(true);
+				bool flag = this.pendingUproots.Add(uprootable3);
+				uprootable3.choreTypeIdHash = Db.Get().ChoreTypes.BuildUproot.IdHash;
+				uprootable3.MarkForUproot(true);
 				if (flag)
 				{
-					uprootable4.Subscribe(-216549700, new Action<object>(this.OnSolidChangedOrDigDestroyed));
-					uprootable4.Subscribe(1198393204, new Action<object>(this.OnSolidChangedOrDigDestroyed));
+					uprootable3.Subscribe(-216549700, new Action<object>(this.OnSolidChangedOrDigDestroyed));
+					uprootable3.Subscribe(1198393204, new Action<object>(this.OnSolidChangedOrDigDestroyed));
 				}
 			}
 			uprootables.Recycle();
@@ -702,7 +694,7 @@ public class Constructable : Workable, ISaveLoadable
 	private void OnReachableChanged(object data)
 	{
 		KAnimControllerBase component = base.GetComponent<KAnimControllerBase>();
-		if ((bool)data)
+		if (((Boxed<bool>)data).value)
 		{
 			base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().BuildingStatusItems.ConstructionUnreachable, false);
 			if (component != null)
@@ -731,7 +723,7 @@ public class Constructable : Workable, ISaveLoadable
 		base.gameObject.Trigger(2127324410, null);
 	}
 
-	private void OnCancel(object data = null)
+	private void OnCancel(object _ = null)
 	{
 		DetailsScreen.Instance.Show(false);
 		this.ClearMaterialNeeds();

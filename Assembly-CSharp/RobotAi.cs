@@ -99,7 +99,7 @@ public class RobotAi : GameStateMachine<RobotAi, RobotAi.Instance>
 			ChoreConsumer component = base.GetComponent<ChoreConsumer>();
 			component.AddUrge(Db.Get().Urges.EmoteHighPriority);
 			component.AddUrge(Db.Get().Urges.EmoteIdle);
-			base.Subscribe(-1988963660, new Action<object>(this.OnBeginChore));
+			this.onBeginChoreHandlerID = base.Subscribe(-1988963660, new Action<object>(this.OnBeginChore));
 		}
 
 		private void OnBeginChore(object data)
@@ -113,7 +113,7 @@ public class RobotAi : GameStateMachine<RobotAi, RobotAi.Instance>
 
 		protected override void OnCleanUp()
 		{
-			base.Unsubscribe(-1988963660, new Action<object>(this.OnBeginChore));
+			base.Unsubscribe(ref this.onBeginChoreHandlerID);
 			base.OnCleanUp();
 		}
 
@@ -123,5 +123,7 @@ public class RobotAi : GameStateMachine<RobotAi, RobotAi.Instance>
 		}
 
 		public FallMonitor.Instance fallMonitor;
+
+		private int onBeginChoreHandlerID;
 	}
 }

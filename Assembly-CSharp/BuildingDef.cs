@@ -897,6 +897,14 @@ public class BuildingDef : Def, IHasDlcRestrictions
 				return false;
 			}
 		}
+		else if (this.BuildLocationRule == BuildLocationRule.OnBackWall)
+		{
+			if (!BuildingDef.CheckFoundation(cell, orientation, this.BuildLocationRule, this.WidthInCells, this.HeightInCells, default(Tag)))
+			{
+				fail_reason = UI.TOOLTIPS.HELP_BUILDLOCATION_BACK_WALL_REQUIRED;
+				return false;
+			}
+		}
 		else if (this.BuildLocationRule == BuildLocationRule.OnWall)
 		{
 			if (!BuildingDef.CheckFoundation(cell, orientation, this.BuildLocationRule, this.WidthInCells, this.HeightInCells, default(Tag)))
@@ -1421,6 +1429,10 @@ public class BuildingDef : Def, IHasDlcRestrictions
 
 	public static bool CheckFoundation(int cell, Orientation orientation, BuildLocationRule location_rule, int width, int height, Tag optionalFoundationRequiredTag = default(Tag))
 	{
+		if (location_rule == BuildLocationRule.OnBackWall)
+		{
+			return BuildingDef.CheckBackWallFoundation(cell, width, height, orientation);
+		}
 		if (location_rule == BuildLocationRule.OnWall)
 		{
 			return BuildingDef.CheckWallFoundation(cell, width, height, orientation != Orientation.FlipH);
@@ -1451,6 +1463,25 @@ public class BuildingDef : Def, IHasDlcRestrictions
 			if (optionalFoundationRequiredTag.IsValid && (!Grid.ObjectLayers[9].ContainsKey(num3) || !Grid.ObjectLayers[9][num3].HasTag(optionalFoundationRequiredTag)))
 			{
 				return false;
+			}
+		}
+		return true;
+	}
+
+	public static bool CheckBackWallFoundation(int cell, int width, int height, Orientation orientation)
+	{
+		for (int i = 0; i < height; i++)
+		{
+			int num = -(width - 1) / 2;
+			int num2 = width / 2;
+			for (int j = num; j <= num2; j++)
+			{
+				CellOffset rotatedCellOffset = Rotatable.GetRotatedCellOffset(j, i, orientation);
+				int num3 = Grid.OffsetCell(cell, rotatedCellOffset);
+				if (Grid.Solid[num3] || !Grid.ObjectLayers[2].ContainsKey(num3) || Grid.ObjectLayers[2][num3] == null)
+				{
+					return false;
+				}
 			}
 		}
 		return true;

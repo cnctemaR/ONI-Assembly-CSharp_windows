@@ -46,6 +46,8 @@ public class GameTags
 
 	public static readonly Tag Plant = TagManager.Create("Plant");
 
+	public static readonly Tag FibrousPlant = TagManager.Create("FibrousPlant");
+
 	public static readonly Tag PlantBranch = TagManager.Create("PlantBranch");
 
 	public static readonly Tag GrowingPlant = TagManager.Create("GrowingPlant");
@@ -76,6 +78,8 @@ public class GameTags
 
 	public static readonly Tag IndustrialIngredient = TagManager.Create("IndustrialIngredient");
 
+	public static readonly Tag TechComponents = TagManager.Create("TechComponents");
+
 	public static readonly Tag Other = TagManager.Create("Other");
 
 	public static readonly Tag ManufacturedMaterial = TagManager.Create("ManufacturedMaterial");
@@ -87,6 +91,10 @@ public class GameTags
 	public static readonly Tag BuildableAny = TagManager.Create("BuildableAny");
 
 	public static readonly Tag Decoration = TagManager.Create("Decoration");
+
+	public static readonly Tag Ornament = TagManager.Create("Ornament");
+
+	public static readonly Tag OrnamentDisplayer = TagManager.Create("OrnamentDisplay");
 
 	public static readonly Tag Window = TagManager.Create("Window");
 
@@ -149,6 +157,10 @@ public class GameTags
 	public static readonly Tag MarkedForMove = TagManager.Create("MarkedForMove");
 
 	public static readonly Tag HideHealthBar = TagManager.Create("HideHealthBar");
+
+	public static readonly Tag LongRangeMissile = TagManager.Create("LongRangeMissile");
+
+	public static readonly Tag LightSource = TagManager.Create("LightSource");
 
 	public static readonly Tag Incapacitated = TagManager.Create("Incapacitated");
 
@@ -454,6 +466,8 @@ public class GameTags
 
 	public static readonly Tag AlwaysConverse = TagManager.Create("AlwaysConverse");
 
+	public static readonly Tag SuppressConversation = TagManager.Create("SuppressConversation");
+
 	public static readonly Tag HasDebugDestination = TagManager.Create("HasDebugDestination");
 
 	public static readonly Tag Shaded = TagManager.Create("Shaded");
@@ -475,6 +489,12 @@ public class GameTags
 	public static readonly Tag Overjoyed = TagManager.Create("Overjoyed");
 
 	public static readonly Tag PleasantConversation = TagManager.Create("PleasantConversation");
+
+	public static readonly Tag CommunalDining = TagManager.Create("CommunalDining");
+
+	public static readonly Tag WantsToTalk = TagManager.Create("WantsToTalk");
+
+	public static readonly Tag DoNotInterruptMe = TagManager.Create("DoNotInterruptMe");
 
 	public static readonly Tag HasSuitTank = TagManager.Create("HasSuitTank");
 
@@ -548,7 +568,9 @@ public class GameTags
 
 	public static readonly Tag GantryExtended = TagManager.Create("GantryExtended");
 
-	public static readonly Tag POIHarvesting = TagManager.Create("POIHarvesting");
+	public static readonly Tag RocketDrilling = TagManager.Create("RocketDrilling");
+
+	public static readonly Tag RocketCollectingResources = TagManager.Create("RocketCollectingResources");
 
 	public static readonly Tag BallisticEntityLanding = TagManager.Create("BallisticEntityLanding");
 
@@ -629,6 +651,7 @@ public class GameTags
 		GameTags.Clothes,
 		GameTags.IndustrialIngredient,
 		GameTags.IndustrialProduct,
+		GameTags.TechComponents,
 		GameTags.Compostable,
 		GameTags.HighEnergyParticle,
 		GameTags.StoryTraitResource,
@@ -711,6 +734,12 @@ public class GameTags
 
 	public static Tag[] StartingRefinedMetals = null;
 
+	public static Tag[] BasicWoods = new Tag[]
+	{
+		SimHashes.WoodLog.CreateTag(),
+		SimHashes.FabricatedWood.CreateTag()
+	};
+
 	public static Tag[] BasicMetalOres = new Tag[] { SimHashes.IronOre.CreateTag() };
 
 	public static Tag[] BasicRefinedMetals = new Tag[] { SimHashes.Iron.CreateTag() };
@@ -759,6 +788,17 @@ public class GameTags
 		public static readonly Tag Doctoring = TagManager.Create("Doctoring");
 
 		public static readonly Tag Conveyor = TagManager.Create("Conveyor");
+	}
+
+	public static class RotModifierTags
+	{
+		public static readonly Tag Fresh = TagManager.Create("Fresh");
+
+		public static readonly Tag Stale = TagManager.Create("Stale");
+
+		public static readonly Tag DeepFrozen = TagManager.Create("DeepFrozen");
+
+		public static readonly Tag Refrigerated = TagManager.Create("Refrigerated");
 	}
 
 	public static class Creatures
@@ -986,6 +1026,10 @@ public class GameTags
 			public static readonly Tag PlayInterruptAnim = TagManager.Create("PlayInterruptAnim");
 
 			public static readonly Tag DisableCreature = TagManager.Create("DisableCreature");
+
+			public static readonly Tag CritterEmoteBehaviour = TagManager.Create("CritterEmoteBehaviour");
+
+			public static readonly Tag CritterRoarBehaviour = TagManager.Create("CritterRoarBehaviour");
 		}
 	}
 
@@ -1045,6 +1089,8 @@ public class GameTags
 		public static Tag FarmBuilding = GameTags.CodexCategories.AllTags.AddAndReturn("FarmBuilding".ToTag());
 
 		public static Tag BionicBuilding = GameTags.CodexCategories.AllTags.AddAndReturn("BionicBuilding".ToTag());
+
+		public static Tag Ornament = GameTags.CodexCategories.AllTags.AddAndReturn("Ornament".ToTag());
 	}
 
 	public static class Robots
@@ -1073,6 +1119,8 @@ public class GameTags
 			public static readonly Tag TrappedBehaviour = TagManager.Create("TrappedBehaviour");
 
 			public static readonly Tag NoElectroBank = TagManager.Create("NoElectroBank");
+
+			public static readonly Tag HasDoorPermissions = TagManager.Create("HasDoorPermissions");
 		}
 	}
 

@@ -8,6 +8,12 @@ using UnityEngine.UI;
 
 public class ResearchScreenSideBar : KScreen
 {
+	protected override void OnPrefabInit()
+	{
+		base.OnPrefabInit();
+		this.raycaster = this.projectsContainer.GetComponent<GraphicRaycaster>();
+	}
+
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
@@ -49,6 +55,11 @@ public class ResearchScreenSideBar : KScreen
 			this.QueuedDeactivations[j].SetActive(false);
 		}
 		this.QueuedDeactivations.RemoveRange(0, Math.Min(this.QueuedDeactivations.Count, this.activationPerFrame));
+	}
+
+	public override bool IsScreenActive()
+	{
+		return this.researchScreen.IsScreenActive();
 	}
 
 	private void ConfigCompletionFilters()
@@ -132,7 +143,14 @@ public class ResearchScreenSideBar : KScreen
 	protected override void OnShow(bool show)
 	{
 		base.OnShow(show);
+		this.raycaster.enabled = show;
 		this.RefreshWidgets();
+	}
+
+	public override void Show(bool show = true)
+	{
+		this.mouseOver = false;
+		this.OnShow(show);
 	}
 
 	private void SetTextFilter(string newValue, bool suppressUpdate)
@@ -696,6 +714,8 @@ public class ResearchScreenSideBar : KScreen
 
 	[SerializeField]
 	private Color oddRowColor;
+
+	private GraphicRaycaster raycaster;
 
 	private ResearchScreenSideBar.CompletionState completionFilter;
 

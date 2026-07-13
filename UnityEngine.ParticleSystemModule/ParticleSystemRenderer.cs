@@ -7,9 +7,9 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
+	[NativeHeader("ParticleSystemScriptingClasses.h")]
 	[NativeHeader("Modules/ParticleSystem/ParticleSystemRenderer.h")]
 	[NativeHeader("Modules/ParticleSystem/ScriptBindings/ParticleSystemRendererScriptBindings.h")]
-	[NativeHeader("ParticleSystemScriptingClasses.h")]
 	[RequireComponent(typeof(Transform))]
 	public sealed class ParticleSystemRenderer : Renderer
 	{

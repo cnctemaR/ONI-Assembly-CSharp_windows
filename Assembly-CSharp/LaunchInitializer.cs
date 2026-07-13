@@ -12,7 +12,7 @@ public class LaunchInitializer : MonoBehaviour
 
 	public static int UpdateNumber()
 	{
-		return 56;
+		return 57;
 	}
 
 	private void Update()
@@ -21,6 +21,7 @@ public class LaunchInitializer : MonoBehaviour
 		{
 			return;
 		}
+		PerformanceCaptureMonitor.Initialize();
 		if (!DistributionPlatform.Initialized)
 		{
 			if (!SystemInfo.SupportsTextureFormat(TextureFormat.RGBAFloat))
@@ -85,9 +86,9 @@ public class LaunchInitializer : MonoBehaviour
 
 	private const string PREFIX = "U";
 
-	private const int UPDATE_NUMBER = 56;
+	private const int UPDATE_NUMBER = 57;
 
-	private static readonly string BUILD_PREFIX = "U" + 56.ToString();
+	private static readonly string BUILD_PREFIX = "U" + 57.ToString();
 
 	public GameObject[] SpawnPrefabs;
 

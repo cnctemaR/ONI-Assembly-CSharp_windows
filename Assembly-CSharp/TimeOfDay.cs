@@ -106,21 +106,22 @@ public class TimeOfDay : KMonoBehaviour, ISaveLoadable
 	{
 		this.UpdateVisuals();
 		TimeOfDay.TimeRegion currentTimeRegion = this.GetCurrentTimeRegion();
-		int cycle = GameClock.Instance.GetCycle();
+		Boxed<int> boxed = Boxed<int>.Get(GameClock.Instance.GetCycle());
 		if (currentTimeRegion != this.timeRegion)
 		{
 			if (TimeOfDay.IsMilestoneApproaching)
 			{
-				Game.Instance.Trigger(-720092972, cycle);
+				Game.Instance.Trigger(-720092972, boxed);
 			}
 			if (TimeOfDay.IsMilestoneDay)
 			{
-				Game.Instance.Trigger(2070437606, cycle);
+				Game.Instance.Trigger(2070437606, boxed);
 			}
 			this.TriggerSoundChange(currentTimeRegion, TimeOfDay.IsMilestoneDay);
 			this.timeRegion = currentTimeRegion;
 			base.Trigger(1791086652, null);
 		}
+		Boxed<int>.Release(boxed);
 	}
 
 	private void UpdateVisuals()

@@ -40,6 +40,7 @@ public class PrickleFlowerConfig : IEntityConfig
 		component.initialAttributes.Add(Db.Get().PlantAttributes.MinLightLux.Id);
 		gameObject.AddOrGet<IlluminationVulnerable>().SetPrefersDarkness(false);
 		gameObject.AddOrGet<BlightVulnerable>();
+		gameObject.AddOrGet<PlantFiberProducer>().amount = 48f;
 		GameObject gameObject2 = gameObject;
 		IHasDlcRestrictions hasDlcRestrictions = this as IHasDlcRestrictions;
 		SeedProducer.ProductionType productionType = SeedProducer.ProductionType.Harvest;
@@ -73,4 +74,6 @@ public class PrickleFlowerConfig : IEntityConfig
 	public const string ID = "PrickleFlower";
 
 	public const string SEED_ID = "PrickleFlowerSeed";
+
+	public const float PLANT_FIBER_PRODUCED_PER_CYCLE = 48f;
 }

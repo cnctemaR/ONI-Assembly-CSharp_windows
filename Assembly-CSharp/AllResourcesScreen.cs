@@ -86,10 +86,6 @@ public class AllResourcesScreen : ShowOptimizedKScreen, ISim4000ms, ISim1000ms
 
 	public override void OnKeyDown(KButtonEvent e)
 	{
-		if (this.isHiddenButActive)
-		{
-			return;
-		}
 		if (e.TryConsume(global::Action.Escape))
 		{
 			KMonoBehaviour.PlaySound(GlobalAssets.GetSound("HUD_Click_Close", false));
@@ -106,10 +102,6 @@ public class AllResourcesScreen : ShowOptimizedKScreen, ISim4000ms, ISim1000ms
 
 	public override void OnKeyUp(KButtonEvent e)
 	{
-		if (this.isHiddenButActive)
-		{
-			return;
-		}
 		if (PlayerController.Instance.ConsumeIfNotDragging(e, global::Action.MouseRight))
 		{
 			KMonoBehaviour.PlaySound(GlobalAssets.GetSound("HUD_Click_Close", false));
@@ -549,7 +541,7 @@ public class AllResourcesScreen : ShowOptimizedKScreen, ISim4000ms, ISim1000ms
 
 	public void Sim4000ms(float dt)
 	{
-		if (this.isHiddenButActive)
+		if (!this.IsScreenActive())
 		{
 			return;
 		}
@@ -558,7 +550,7 @@ public class AllResourcesScreen : ShowOptimizedKScreen, ISim4000ms, ISim1000ms
 
 	public void Sim1000ms(float dt)
 	{
-		if (this.isHiddenButActive)
+		if (!this.IsScreenActive())
 		{
 			return;
 		}

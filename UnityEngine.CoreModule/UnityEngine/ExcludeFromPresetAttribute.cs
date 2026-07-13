@@ -3,8 +3,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[AttributeUsage(AttributeTargets.Class, Inherited = false)]
 	[UsedByNativeCode]
+	[AttributeUsage(AttributeTargets.Class, Inherited = false)]
 	public class ExcludeFromPresetAttribute : Attribute
 	{
 	}

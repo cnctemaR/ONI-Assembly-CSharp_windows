@@ -77,10 +77,10 @@ public class TableScreen : ShowOptimizedKScreen
 			}
 			foreach (KeyValuePair<int, GameObject> keyValuePair in this.worldDividers)
 			{
-				ScrollRect componentInChildren = keyValuePair.Value.GetComponentInChildren<ScrollRect>();
-				if (componentInChildren != null && componentInChildren.horizontalNormalizedPosition > 0.001f)
+				ScrollRect reference = keyValuePair.Value.GetComponent<HierarchyReferences>().GetReference<ScrollRect>("ScrollerScrollRect");
+				if (reference != null && reference.horizontalNormalizedPosition > 0.001f)
 				{
-					componentInChildren.horizontalNormalizedPosition = 0f;
+					reference.horizontalNormalizedPosition = 0f;
 				}
 			}
 		}
@@ -102,20 +102,20 @@ public class TableScreen : ShowOptimizedKScreen
 	{
 		foreach (TableRow tableRow in this.rows)
 		{
-			ScrollRect componentInChildren = tableRow.GetComponentInChildren<ScrollRect>();
-			if (componentInChildren != null)
+			ScrollRect scroll_rect = tableRow.scroll_rect;
+			if (scroll_rect != null)
 			{
-				componentInChildren.horizontalNormalizedPosition = this.targetScrollerPosition;
+				scroll_rect.horizontalNormalizedPosition = this.targetScrollerPosition;
 			}
 		}
 		foreach (KeyValuePair<int, GameObject> keyValuePair in this.worldDividers)
 		{
 			if (keyValuePair.Value.activeInHierarchy)
 			{
-				ScrollRect componentInChildren2 = keyValuePair.Value.GetComponentInChildren<ScrollRect>();
-				if (componentInChildren2 != null)
+				ScrollRect reference = keyValuePair.Value.GetComponent<HierarchyReferences>().GetReference<ScrollRect>("ScrollerScrollRect");
+				if (reference != null)
 				{
-					componentInChildren2.horizontalNormalizedPosition = this.targetScrollerPosition;
+					reference.horizontalNormalizedPosition = this.targetScrollerPosition;
 				}
 			}
 		}
@@ -124,10 +124,6 @@ public class TableScreen : ShowOptimizedKScreen
 
 	public override void ScreenUpdate(bool topLevel)
 	{
-		if (this.isHiddenButActive)
-		{
-			return;
-		}
 		base.ScreenUpdate(topLevel);
 		if (this.incubating)
 		{
@@ -196,7 +192,9 @@ public class TableScreen : ShowOptimizedKScreen
 		{
 			if (keyValuePair.Value)
 			{
-				this.RemoveWorldDivider(keyValuePair.Key);
+				Boxed<int> boxed = Boxed<int>.Get(keyValuePair.Key);
+				this.RemoveWorldDivider(boxed);
+				boxed.Release();
 			}
 		}
 		this.obsoleteWorldDividerStatus.Clear();
@@ -252,6 +250,11 @@ public class TableScreen : ShowOptimizedKScreen
 		this.obsoleteMinionRowStatus.Clear();
 		this.SortRows();
 		this.rows_dirty = false;
+		LayoutRebuilder.ForceRebuildLayoutImmediate(base.gameObject.rectTransform());
+		foreach (TableRow tableRow2 in this.rows)
+		{
+			tableRow2.PositionScrollerBorders();
+		}
 	}
 
 	public virtual void SetSortComparison(Comparison<IAssignableIdentity> comparison, TableColumn sort_column)
@@ -453,22 +456,24 @@ public class TableScreen : ShowOptimizedKScreen
 			return;
 		}
 		GameObject gameObject = Util.KInstantiateUI(this.prefab_world_divider, this.scroll_content_transform.gameObject, true);
-		gameObject.GetComponentInChildren<Image>().color = ClusterManager.worldColors[worldId % ClusterManager.worldColors.Length];
-		RectTransform component = gameObject.GetComponentInChildren<LocText>().GetComponent<RectTransform>();
-		component.sizeDelta = new Vector2(150f, component.sizeDelta.y);
+		HierarchyReferences component = gameObject.GetComponent<HierarchyReferences>();
+		component.GetReference<Image>("RowBG").color = ClusterManager.worldColors[worldId % ClusterManager.worldColors.Length];
+		LocText reference = component.GetReference<LocText>("NameLabel");
+		RectTransform rectTransform = reference.rectTransform();
+		rectTransform.sizeDelta = new Vector2(150f, rectTransform.sizeDelta.y);
 		WorldContainer world = ClusterManager.Instance.GetWorld(worldId);
 		if (world != null)
 		{
 			ClusterGridEntity component2 = world.GetComponent<ClusterGridEntity>();
 			string text = ((component2 is Clustercraft) ? NAMEGEN.WORLD.SPACECRAFT_PREFIX : NAMEGEN.WORLD.PLANETOID_PREFIX);
-			gameObject.GetComponentInChildren<LocText>().SetText(text + component2.Name);
-			gameObject.GetComponentInChildren<ToolTip>().SetSimpleTooltip(string.Format(NAMEGEN.WORLD.WORLDDIVIDER_TOOLTIP, component2.Name));
+			reference.SetText(text + component2.Name);
+			reference.GetComponent<ToolTip>().SetSimpleTooltip(string.Format(NAMEGEN.WORLD.WORLDDIVIDER_TOOLTIP, component2.Name));
 			gameObject.GetComponent<HierarchyReferences>().GetReference<Image>("Icon").sprite = component2.GetUISprite();
 		}
 		else
 		{
-			gameObject.GetComponentInChildren<LocText>().SetText(NAMEGEN.WORLD.UNKNOWN_WORLD);
-			gameObject.GetComponentInChildren<ToolTip>().SetSimpleTooltip("");
+			reference.SetText(NAMEGEN.WORLD.UNKNOWN_WORLD);
+			reference.GetComponent<ToolTip>().SetSimpleTooltip("");
 			gameObject.GetComponent<HierarchyReferences>().GetReference<Image>("Icon").sprite = Assets.GetSprite("hex_unknown");
 		}
 		this.worldDividers.Add(worldId, gameObject);
@@ -477,11 +482,12 @@ public class TableScreen : ShowOptimizedKScreen
 
 	protected void RemoveWorldDivider(object worldId)
 	{
-		if (this.worldDividers.ContainsKey((int)worldId))
+		int value = ((Boxed<int>)worldId).value;
+		if (this.worldDividers.ContainsKey(value))
 		{
-			this.rows.Remove(this.worldDividers[(int)worldId].GetComponent<TableRow>());
-			Util.KDestroyGameObject(this.worldDividers[(int)worldId]);
-			this.worldDividers.Remove((int)worldId);
+			this.rows.Remove(this.worldDividers[value].GetComponent<TableRow>());
+			Util.KDestroyGameObject(this.worldDividers[value]);
+			this.worldDividers.Remove(value);
 		}
 	}
 

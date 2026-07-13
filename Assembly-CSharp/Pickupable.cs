@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 using FMOD.Studio;
 using KSerialization;
@@ -32,13 +33,7 @@ public class Pickupable : Workable, IHasSortOrder
 
 	public Storage storage { get; set; }
 
-	public float MinTakeAmount
-	{
-		get
-		{
-			return 0f;
-		}
-	}
+	public bool MinTakeAmount { get; set; }
 
 	public bool isChoreAllowedToPickup(ChoreType choreType)
 	{
@@ -66,13 +61,13 @@ public class Pickupable : Workable, IHasSortOrder
 				this.isEntombed = value;
 				if (this.isEntombed)
 				{
-					base.GetComponent<KPrefabID>().AddTag(GameTags.Entombed, false);
+					this.KPrefabID.AddTag(GameTags.Entombed, false);
 				}
 				else
 				{
-					base.GetComponent<KPrefabID>().RemoveTag(GameTags.Entombed);
+					this.KPrefabID.RemoveTag(GameTags.Entombed);
 				}
-				base.Trigger(-1089732772, null);
+				base.Trigger(-1089732772, BoxedBools.Box(this.isEntombed));
 				this.UpdateEntombedVisualizer();
 			}
 		}
@@ -86,7 +81,7 @@ public class Pickupable : Workable, IHasSortOrder
 
 	private bool CouldBePickedUpCommon(int carrierID)
 	{
-		return this.UnreservedFetchAmount >= this.MinTakeAmount && (this.UnreservedFetchAmount > 0f || this.FindReservedAmount(carrierID) > 0f);
+		return this.UnreservedFetchAmount > 0f || this.FindReservedAmount(carrierID) > 0f;
 	}
 
 	[Obsolete("Use Instance ID")]
@@ -251,6 +246,7 @@ public class Pickupable : Workable, IHasSortOrder
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
+		this.OnSolidChangedClosure = new Action<object>(this.OnSolidChanged);
 		this.workingPstComplete = null;
 		this.workingPstFailed = null;
 		this.log = new LoggerFSSF("Pickupable");
@@ -336,10 +332,10 @@ public class Pickupable : Workable, IHasSortOrder
 				return;
 			}
 			GameScenePartitioner.Instance.Free(ref this.storedPartitionerEntry);
-			this.objectLayerListItem = new ObjectLayerListItem(base.gameObject, ObjectLayer.Pickupables, num);
-			this.solidPartitionerEntry = GameScenePartitioner.Instance.Add("Pickupable.RegisterSolidListener", base.gameObject, num, GameScenePartitioner.Instance.solidChangedLayer, new Action<object>(this.OnSolidChanged));
+			this.objectLayerListItem = new ObjectLayerListItem(base.gameObject, this, ObjectLayer.Pickupables, num);
+			this.solidPartitionerEntry = GameScenePartitioner.Instance.Add("Pickupable.RegisterSolidListener", base.gameObject, num, GameScenePartitioner.Instance.solidChangedLayer, this.OnSolidChangedClosure);
 			this.worldPartitionerEntry = GameScenePartitioner.Instance.Add("Pickupable.RegisterPickupable", this, num, GameScenePartitioner.Instance.pickupablesLayer, null);
-			Singleton<CellChangeMonitor>.Instance.RegisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChange), "Pickupable.OnCellChange");
+			this.cellChangedHandlerID = Singleton<CellChangeMonitor>.Instance.RegisterCellChangedHandler(base.transform, Pickupable.OnCellChangeDispatcher, this, "Pickupable.OnCellChange");
 			Singleton<CellChangeMonitor>.Instance.MarkDirty(base.transform);
 			Singleton<CellChangeMonitor>.Instance.ClearLastKnownCell(base.transform);
 			return;
@@ -358,7 +354,7 @@ public class Pickupable : Workable, IHasSortOrder
 			}
 			GameScenePartitioner.Instance.Free(ref this.solidPartitionerEntry);
 			GameScenePartitioner.Instance.Free(ref this.worldPartitionerEntry);
-			Singleton<CellChangeMonitor>.Instance.UnregisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChange));
+			Singleton<CellChangeMonitor>.Instance.UnregisterCellChangedHandler(ref this.cellChangedHandlerID);
 			return;
 		}
 	}
@@ -388,7 +384,7 @@ public class Pickupable : Workable, IHasSortOrder
 		{
 			base.Unsubscribe<Pickupable>(-1582839653, Pickupable.OnTagsChangedDelegate, false);
 		}
-		Singleton<CellChangeMonitor>.Instance.UnregisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChange));
+		Singleton<CellChangeMonitor>.Instance.UnregisterCellChangedHandler(ref this.cellChangedHandlerID);
 	}
 
 	private void OnSolidChanged(object data)
@@ -558,12 +554,11 @@ public class Pickupable : Workable, IHasSortOrder
 					ObjectLayerListItem objectLayerListItem = this.objectLayerListItem.nextItem;
 					while (objectLayerListItem != null)
 					{
-						GameObject gameObject = objectLayerListItem.gameObject;
+						Pickupable pickupable = objectLayerListItem.pickupable;
 						objectLayerListItem = objectLayerListItem.nextItem;
-						Pickupable component = gameObject.GetComponent<Pickupable>();
-						if (component != null)
+						if (pickupable != null)
 						{
-							flag = component.TryAbsorb(this, false, false);
+							flag = pickupable.TryAbsorb(this, false, false);
 							if (flag)
 							{
 								break;
@@ -587,7 +582,7 @@ public class Pickupable : Workable, IHasSortOrder
 		}
 	}
 
-	private void OnTagsChanged(object data)
+	private void OnTagsChanged(object _)
 	{
 		if (!this.KPrefabID.HasTag(GameTags.Stored) && !this.KPrefabID.HasTag(GameTags.Equipped))
 		{
@@ -721,7 +716,7 @@ public class Pickupable : Workable, IHasSortOrder
 
 	private void RefreshStorageTags(object data = null)
 	{
-		bool flag = data is Storage || (data != null && (bool)data);
+		bool flag = data is Storage || (data != null && ((Boxed<bool>)data).value);
 		if (flag && data is Storage && ((Storage)data).gameObject == base.gameObject)
 		{
 			return;
@@ -744,7 +739,7 @@ public class Pickupable : Workable, IHasSortOrder
 	public void OnStore(object data)
 	{
 		this.storage = data as Storage;
-		bool flag = data is Storage || (data != null && (bool)data);
+		bool flag = data is Storage || (data != null && ((Boxed<bool>)data).value);
 		SaveLoadRoot component = base.GetComponent<SaveLoadRoot>();
 		if (this.carryAnimOverride != null && this.lastCarrier != null)
 		{
@@ -877,7 +872,7 @@ public class Pickupable : Workable, IHasSortOrder
 
 	private void OnReachableChanged(object data)
 	{
-		this.isReachable = (bool)data;
+		this.isReachable = ((Boxed<bool>)data).value;
 		KSelectable component = base.GetComponent<KSelectable>();
 		if (this.isReachable)
 		{
@@ -939,8 +934,8 @@ public class Pickupable : Workable, IHasSortOrder
 			this.DeleteObject();
 			return;
 		}
-		Vector2 vector = (Vector2)data;
-		if (vector.sqrMagnitude <= 0.2f || SpeedControlScreen.Instance.IsPaused)
+		Vector2 value = ((Boxed<Vector2>)data).value;
+		if (value.sqrMagnitude <= 0.2f || SpeedControlScreen.Instance.IsPaused)
 		{
 			return;
 		}
@@ -983,7 +978,7 @@ public class Pickupable : Workable, IHasSortOrder
 					num2 = SoundUtil.GetLiquidDepth(num);
 				}
 				FMOD.Studio.EventInstance eventInstance = KFMOD.BeginOneShot(text2, CameraController.Instance.GetVerticallyScaledPosition(base.transform.GetPosition(), false), 1f);
-				eventInstance.setParameterByName("velocity", vector.magnitude, false);
+				eventInstance.setParameterByName("velocity", value.magnitude, false);
 				eventInstance.setParameterByName("liquidDepth", num2, false);
 				KFMOD.EndOneShot(eventInstance);
 			}
@@ -1075,7 +1070,7 @@ public class Pickupable : Workable, IHasSortOrder
 
 	public bool useGunforPickup = true;
 
-	private static CellOffset[] displacementOffsets = new CellOffset[]
+	public static CellOffset[] displacementOffsets = new CellOffset[]
 	{
 		new CellOffset(0, 1),
 		new CellOffset(0, -1),
@@ -1096,6 +1091,8 @@ public class Pickupable : Workable, IHasSortOrder
 	public bool trackOnPickup = true;
 
 	private int nextTicketNumber;
+
+	private ulong cellChangedHandlerID;
 
 	[Serialize]
 	public bool deleteOffGrid = true;
@@ -1148,6 +1145,13 @@ public class Pickupable : Workable, IHasSortOrder
 	{
 		component.OnTagsChanged(data);
 	});
+
+	private Action<object> OnSolidChangedClosure;
+
+	private static Action<object> OnCellChangeDispatcher = delegate(object obj)
+	{
+		Unsafe.As<Pickupable>(obj).OnCellChange();
+	};
 
 	private int entombedCell = -1;
 

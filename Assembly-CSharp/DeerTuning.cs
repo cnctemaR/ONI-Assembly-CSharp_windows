@@ -9,7 +9,26 @@ public static class DeerTuning
 		new FertilityMonitor.BreedingChance
 		{
 			egg = "WoodDeerEgg".ToTag(),
-			weight = 1f
+			weight = 0.98f
+		},
+		new FertilityMonitor.BreedingChance
+		{
+			egg = "GlassDeerEgg".ToTag(),
+			weight = 0.02f
+		}
+	};
+
+	public static List<FertilityMonitor.BreedingChance> EGG_CHANCES_GLASS = new List<FertilityMonitor.BreedingChance>
+	{
+		new FertilityMonitor.BreedingChance
+		{
+			egg = "WoodDeerEgg".ToTag(),
+			weight = 0.35f
+		},
+		new FertilityMonitor.BreedingChance
+		{
+			egg = "GlassDeerEgg".ToTag(),
+			weight = 0.65f
 		}
 	};
 
@@ -22,6 +41,8 @@ public static class DeerTuning
 	public static int PEN_SIZE_PER_CREATURE = CREATURES.SPACE_REQUIREMENTS.TIER3;
 
 	public static int PEN_SIZE_PER_CREATURE_HUG = CREATURES.SPACE_REQUIREMENTS.TIER1;
+
+	public const float MORPH_DECOR_TRESHOLD = 100f;
 
 	public static float EGG_MASS = 2f;
 

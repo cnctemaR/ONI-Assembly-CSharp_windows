@@ -445,8 +445,8 @@ namespace UnityEngine.Rendering
 
 		private int m_NumIterationsEnclosingSphere;
 
-		[CompilerGenerated]
 		[UnsafeValueType]
+		[CompilerGenerated]
 		[StructLayout(LayoutKind.Sequential, Size = 160)]
 		public struct <m_CullingPlanes>e__FixedBuffer
 		{

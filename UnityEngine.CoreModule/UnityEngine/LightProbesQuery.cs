@@ -8,8 +8,8 @@ using UnityEngine.Rendering;
 
 namespace UnityEngine
 {
-	[NativeContainer]
 	[NativeHeader("Runtime/Camera/RenderLoops/LightProbeContext.h")]
+	[NativeContainer]
 	[StaticAccessor("LightProbeContextWrapper", StaticAccessorType.DoubleColon)]
 	public struct LightProbesQuery : IDisposable
 	{

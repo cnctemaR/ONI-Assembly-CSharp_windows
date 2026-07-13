@@ -29,9 +29,9 @@ public class HappySinger : GameStateMachine<HappySinger, HappySinger.Instance>
 			})
 			.Update(delegate(HappySinger.Instance smi, float dt)
 			{
-				if (!smi.GetSpeechMonitor().IsPlayingSpeech() && SpeechMonitor.IsAllowedToPlaySpeech(smi.gameObject))
+				if (!smi.SpeechMonitorInstance.IsPlayingSpeech() && SpeechMonitor.IsAllowedToPlaySpeech(smi.Kpid, smi.AnimController))
 				{
-					smi.GetSpeechMonitor().PlaySpeech(Db.Get().Thoughts.CatchyTune.speechPrefix, Db.Get().Thoughts.CatchyTune.sound);
+					Db.Get().Thoughts.CatchyTune.PlayAsSpeech(smi.SpeechMonitorInstance);
 				}
 			}, UpdateRate.SIM_1000ms, false)
 			.Exit(delegate(HappySinger.Instance smi)
@@ -59,9 +59,27 @@ public class HappySinger : GameStateMachine<HappySinger, HappySinger.Instance>
 
 	public new class Instance : GameStateMachine<HappySinger, HappySinger.Instance, IStateMachineTarget, object>.GameInstance
 	{
+		public KPrefabID Kpid { get; private set; }
+
+		public KBatchedAnimController AnimController { get; private set; }
+
+		public SpeechMonitor.Instance SpeechMonitorInstance
+		{
+			get
+			{
+				if (this.speechMonitorInstance == null)
+				{
+					this.speechMonitorInstance = base.master.gameObject.GetSMI<SpeechMonitor.Instance>();
+				}
+				return this.speechMonitorInstance;
+			}
+		}
+
 		public Instance(IStateMachineTarget master)
 			: base(master)
 		{
+			this.Kpid = master.GetComponent<KPrefabID>();
+			this.AnimController = master.GetComponent<KBatchedAnimController>();
 		}
 
 		public void CreatePasserbyReactable()
@@ -74,15 +92,6 @@ public class HappySinger : GameStateMachine<HappySinger, HappySinger.Instance>
 				emoteReactable.RegisterEmoteStepCallbacks("react", new Action<GameObject>(this.AddReactionEffect), null);
 				this.passerbyReactable = emoteReactable;
 			}
-		}
-
-		public SpeechMonitor.Instance GetSpeechMonitor()
-		{
-			if (this.speechMonitor == null)
-			{
-				this.speechMonitor = base.master.gameObject.GetSMI<SpeechMonitor.Instance>();
-			}
-			return this.speechMonitor;
 		}
 
 		private void AddReactionEffect(GameObject reactor)
@@ -108,6 +117,6 @@ public class HappySinger : GameStateMachine<HappySinger, HappySinger.Instance>
 
 		public GameObject musicParticleFX;
 
-		public SpeechMonitor.Instance speechMonitor;
+		private SpeechMonitor.Instance speechMonitorInstance;
 	}
 }

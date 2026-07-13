@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using STRINGS;
 using UnityEngine;
 
@@ -44,7 +45,7 @@ public class Trappable : KMonoBehaviour, IGameObjectEffectDescriptor
 			return;
 		}
 		base.Subscribe<Trappable>(856640610, Trappable.OnStoreDelegate);
-		Singleton<CellChangeMonitor>.Instance.RegisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChange), "Trappable.Register");
+		this.cellChangedHandlerID = Singleton<CellChangeMonitor>.Instance.RegisterCellChangedHandler(base.transform, Trappable.OnCellChangedDispatcher, this, "Trappable.Register");
 		this.registered = true;
 	}
 
@@ -55,7 +56,7 @@ public class Trappable : KMonoBehaviour, IGameObjectEffectDescriptor
 			return;
 		}
 		base.Unsubscribe<Trappable>(856640610, Trappable.OnStoreDelegate, false);
-		Singleton<CellChangeMonitor>.Instance.UnregisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChange));
+		Singleton<CellChangeMonitor>.Instance.UnregisterCellChangedHandler(ref this.cellChangedHandlerID);
 		this.registered = false;
 	}
 
@@ -92,6 +93,13 @@ public class Trappable : KMonoBehaviour, IGameObjectEffectDescriptor
 	}
 
 	private bool registered;
+
+	private ulong cellChangedHandlerID;
+
+	private static readonly Action<object> OnCellChangedDispatcher = delegate(object obj)
+	{
+		Unsafe.As<Trappable>(obj).OnCellChange();
+	};
 
 	private static readonly EventSystem.IntraObjectHandler<Trappable> OnStoreDelegate = new EventSystem.IntraObjectHandler<Trappable>(delegate(Trappable component, object data)
 	{

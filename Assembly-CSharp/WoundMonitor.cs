@@ -61,8 +61,8 @@ public class WoundMonitor : GameStateMachine<WoundMonitor, WoundMonitor.Instance
 
 		public void OnHealthChanged(object data)
 		{
-			float num = (float)data;
-			if (this.health.hitPoints != 0f && num < 0f)
+			float value = ((Boxed<float>)data).value;
+			if (this.health.hitPoints != 0f && value < 0f)
 			{
 				this.PlayHitAnimation();
 			}

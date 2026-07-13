@@ -28,6 +28,13 @@ public class CharacterContainer : KScreen, ITelepadDeliverableContainer
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
+		this.allAvailableClothingOutfits = new List<Option<ClothingOutfitTarget>>();
+		foreach (ClothingOutfitTarget clothingOutfitTarget in from outfit in ClothingOutfitTarget.GetAllTemplates()
+			where outfit.OutfitType == ClothingOutfitUtility.OutfitType.Clothing
+			select outfit)
+		{
+			this.allAvailableClothingOutfits.Add(clothingOutfitTarget);
+		}
 		this.Initialize();
 		this.characterNameTitle.OnStartedEditing += this.OnStartedEditing;
 		this.characterNameTitle.OnNameChanged += this.OnNameChanged;
@@ -177,6 +184,20 @@ public class CharacterContainer : KScreen, ITelepadDeliverableContainer
 				this.SelectDeliverable();
 			};
 		}
+		Option<ClothingOutfitTarget> selectedOutfit = ClothingOutfitTarget.TryFromTemplateId(this.stats.personality.GetSelectedTemplateOutfitId(ClothingOutfitUtility.OutfitType.Clothing));
+		if (selectedOutfit.IsSome())
+		{
+			this.outfitSelectorIndex = this.allAvailableClothingOutfits.FindIndex((Option<ClothingOutfitTarget> outfit) => outfit.Unwrap().OutfitId == selectedOutfit.Unwrap().OutfitId);
+		}
+		else
+		{
+			this.outfitSelectorIndex = this.allAvailableClothingOutfits.FindIndex((Option<ClothingOutfitTarget> outfit) => outfit.Unwrap().OutfitId == this.stats.personality.GetSelectedTemplateOutfitId(ClothingOutfitUtility.OutfitType.Clothing));
+		}
+		if (this.outfitSelectorIndex == -1)
+		{
+			this.outfitSelectorIndex = this.allAvailableClothingOutfits.FindIndex((Option<ClothingOutfitTarget> outfit) => outfit.Unwrap().OutfitId == CharacterContainer.defaultShirtIdxToDefaultOutfitID[this.stats.personality.body]);
+		}
+		this.RefreshOutfitSelector();
 	}
 
 	private void SetAnimator()
@@ -191,7 +212,7 @@ public class CharacterContainer : KScreen, ITelepadDeliverableContainer
 		this.stats.ApplyTraits(this.animController.gameObject);
 		this.stats.ApplyRace(this.animController.gameObject);
 		this.stats.ApplyAccessories(this.animController.gameObject);
-		this.stats.ApplyOutfit(this.stats.personality, this.animController.gameObject);
+		this.stats.ApplyOutfit(this.stats.personality, this.animController.gameObject, this.stats.GetSelectedOutfitOption());
 		this.stats.ApplyJoyResponseOutfit(this.stats.personality, this.animController.gameObject);
 		this.stats.ApplyExperience(this.animController.gameObject);
 		HashedString idleAnim = this.GetIdleAnim(this.stats);
@@ -232,6 +253,105 @@ public class CharacterContainer : KScreen, ITelepadDeliverableContainer
 			return list.ToArray()[global::UnityEngine.Random.Range(0, list.Count)];
 		}
 		return CharacterContainer.idleAnims[global::UnityEngine.Random.Range(0, CharacterContainer.idleAnims.Length)];
+	}
+
+	private string GetOutfitName(int index)
+	{
+		if (index == -1)
+		{
+			return Strings.Get("STRINGS.UI.CHARACTERCONTAINER_NO_OUTFIT");
+		}
+		return this.allAvailableClothingOutfits[index].Unwrap().ReadName();
+	}
+
+	private void RefreshOutfitSelector()
+	{
+		CharacterContainer.<>c__DisplayClass76_0 CS$<>8__locals1 = new CharacterContainer.<>c__DisplayClass76_0();
+		CS$<>8__locals1.<>4__this = this;
+		Image reference = this.outfitSelectorReferences.GetReference<Image>("CurrentOutfitIcon");
+		Image reference2 = this.outfitSelectorReferences.GetReference<Image>("NextOutfitIcon");
+		MultiToggle component = reference2.transform.parent.GetComponent<MultiToggle>();
+		Image reference3 = this.outfitSelectorReferences.GetReference<Image>("PreviousOutfitIcon");
+		MultiToggle component2 = reference3.transform.parent.GetComponent<MultiToggle>();
+		MultiToggle reference4 = this.outfitSelectorReferences.GetReference<MultiToggle>("PreviousOutfitButton");
+		MultiToggle reference5 = this.outfitSelectorReferences.GetReference<MultiToggle>("NextOutfitButton");
+		CS$<>8__locals1.expandedMenu = this.outfitSelectorReferences.GetReference<RectTransform>("ExpandedMenu");
+		CS$<>8__locals1.expandButton = this.outfitSelectorReferences.GetReference<MultiToggle>("CollapsedButton");
+		CS$<>8__locals1.expandButton.onClick = null;
+		MultiToggle expandButton = CS$<>8__locals1.expandButton;
+		expandButton.onClick = (global::System.Action)Delegate.Combine(expandButton.onClick, new global::System.Action(delegate
+		{
+			CS$<>8__locals1.<>4__this.outfitSelectorExpanded = !CS$<>8__locals1.<>4__this.outfitSelectorExpanded;
+			CS$<>8__locals1.expandButton.gameObject.SetActive(!CS$<>8__locals1.<>4__this.outfitSelectorExpanded);
+			CS$<>8__locals1.expandedMenu.gameObject.SetActive(CS$<>8__locals1.<>4__this.outfitSelectorExpanded);
+			CS$<>8__locals1.<>4__this.RefreshOutfitSelector();
+		}));
+		MultiToggle reference6 = this.outfitSelectorReferences.GetReference<MultiToggle>("CurrentOutfitButton");
+		reference6.onClick = null;
+		reference6.onClick = (global::System.Action)Delegate.Combine(reference6.onClick, new global::System.Action(delegate
+		{
+			CS$<>8__locals1.<>4__this.outfitSelectorExpanded = !CS$<>8__locals1.<>4__this.outfitSelectorExpanded;
+			CS$<>8__locals1.expandButton.gameObject.SetActive(!CS$<>8__locals1.<>4__this.outfitSelectorExpanded);
+			CS$<>8__locals1.expandedMenu.gameObject.SetActive(CS$<>8__locals1.<>4__this.outfitSelectorExpanded);
+			CS$<>8__locals1.<>4__this.RefreshOutfitSelector();
+		}));
+		reference.sprite = CS$<>8__locals1.<RefreshOutfitSelector>g__GetClothingIcon|0(0);
+		CS$<>8__locals1.expandButton.gameObject.GetComponentInChildrenOnly<Image>().sprite = reference.sprite;
+		reference2.sprite = CS$<>8__locals1.<RefreshOutfitSelector>g__GetClothingIcon|0(-1);
+		reference3.sprite = CS$<>8__locals1.<RefreshOutfitSelector>g__GetClothingIcon|0(1);
+		CS$<>8__locals1.expandButton.GetComponent<ToolTip>().SetSimpleTooltip(GameUtil.SafeStringFormat(Strings.Get("STRINGS.UI.CHARACTERCONTAINER_EXPAND_OUTFIT_SELECTOR_BUTTON"), new object[] { this.GetOutfitName(this.outfitSelectorIndex) }));
+		string outfitName = this.GetOutfitName(this.outfitSelectorIndex);
+		reference.transform.parent.GetComponent<ToolTip>().SetSimpleTooltip(outfitName + "\n\n" + UI.CHARACTERCONTAINER_CONFIRM_OUTFIT_SELECTION_TOOLTIP);
+		reference4.onClick = null;
+		MultiToggle multiToggle = reference4;
+		multiToggle.onClick = (global::System.Action)Delegate.Combine(multiToggle.onClick, new global::System.Action(delegate
+		{
+			CS$<>8__locals1.<>4__this.outfitSelectorIndex = CS$<>8__locals1.<>4__this.GetOutfitSelectorIndex(1);
+			CS$<>8__locals1.<>4__this.RefreshOutfitSelector();
+			CS$<>8__locals1.<>4__this.stats.ApplyOutfit(CS$<>8__locals1.<>4__this.stats.personality, CS$<>8__locals1.<>4__this.animController.gameObject, (CS$<>8__locals1.<>4__this.outfitSelectorIndex == -1) ? default(Option<ClothingOutfitTarget>) : CS$<>8__locals1.<>4__this.allAvailableClothingOutfits[CS$<>8__locals1.<>4__this.outfitSelectorIndex]);
+			if (CS$<>8__locals1.<>4__this.fxAnim != null)
+			{
+				CS$<>8__locals1.<>4__this.fxAnim.Play("loop", KAnim.PlayMode.Once, 1f, 0f);
+			}
+			UISounds.Instance.PlaySound3D(GlobalAssets.GetSound("DupeShuffle", false));
+		}));
+		component2.onClick = reference4.onClick;
+		int num = this.GetOutfitSelectorIndex(1);
+		string outfitName2 = this.GetOutfitName(num);
+		reference3.transform.parent.GetComponent<ToolTip>().SetSimpleTooltip(outfitName2);
+		reference5.onClick = null;
+		MultiToggle multiToggle2 = reference5;
+		multiToggle2.onClick = (global::System.Action)Delegate.Combine(multiToggle2.onClick, new global::System.Action(delegate
+		{
+			CS$<>8__locals1.<>4__this.outfitSelectorIndex = CS$<>8__locals1.<>4__this.GetOutfitSelectorIndex(-1);
+			CS$<>8__locals1.<>4__this.RefreshOutfitSelector();
+			CS$<>8__locals1.<>4__this.stats.ApplyOutfit(CS$<>8__locals1.<>4__this.stats.personality, CS$<>8__locals1.<>4__this.animController.gameObject, (CS$<>8__locals1.<>4__this.outfitSelectorIndex == -1) ? default(Option<ClothingOutfitTarget>) : CS$<>8__locals1.<>4__this.allAvailableClothingOutfits[CS$<>8__locals1.<>4__this.outfitSelectorIndex]);
+			if (CS$<>8__locals1.<>4__this.fxAnim != null)
+			{
+				CS$<>8__locals1.<>4__this.fxAnim.Play("loop", KAnim.PlayMode.Once, 1f, 0f);
+			}
+			UISounds.Instance.PlaySound3D(GlobalAssets.GetSound("DupeShuffle", false));
+		}));
+		component.onClick = reference5.onClick;
+		int num2 = this.GetOutfitSelectorIndex(-1);
+		string outfitName3 = this.GetOutfitName(num2);
+		reference2.transform.parent.GetComponent<ToolTip>().SetSimpleTooltip(outfitName3);
+		this.stats.overrideOutfitID = ((this.outfitSelectorIndex == -1) ? null : this.allAvailableClothingOutfits[this.outfitSelectorIndex].Unwrap().OutfitId);
+	}
+
+	private int GetOutfitSelectorIndex(int indexOffset)
+	{
+		int count = this.allAvailableClothingOutfits.Count;
+		int num = this.outfitSelectorIndex + indexOffset;
+		if (num >= count)
+		{
+			num = -1;
+		}
+		if (num < -1)
+		{
+			num = count - 1;
+		}
+		return num;
 	}
 
 	private void SetInfoText()
@@ -792,6 +912,16 @@ public class CharacterContainer : KScreen, ITelepadDeliverableContainer
 
 	public const string SHUFFLE_BUTTON_BIONIC_SOUND_NAME_ON_USE = "DupeShuffle_bionic";
 
+	private static readonly Dictionary<int, string> defaultShirtIdxToDefaultOutfitID = new Dictionary<int, string>
+	{
+		{ 1, "StandardRed" },
+		{ 2, "StandardBlue" },
+		{ 3, "StandardYellow" },
+		{ 4, "StandardGreen" },
+		{ 5, "permit_standard_bionic_outfit" },
+		{ 6, "permit_standard_regal_neutronium_outfit" }
+	};
+
 	[SerializeField]
 	private GameObject contentBody;
 
@@ -884,6 +1014,9 @@ public class CharacterContainer : KScreen, ITelepadDeliverableContainer
 	[SerializeField]
 	private DropDown modelDropDown;
 
+	[SerializeField]
+	private HierarchyReferences outfitSelectorReferences;
+
 	private List<Tag> permittedModels = new List<Tag>
 	{
 		GameTags.Minions.Models.Standard,
@@ -968,6 +1101,12 @@ public class CharacterContainer : KScreen, ITelepadDeliverableContainer
 	private static readonly HashedString[] idleAnims = new HashedString[] { "anim_idle_healthy_kanim", "anim_idle_susceptible_kanim", "anim_idle_keener_kanim", "anim_idle_fastfeet_kanim", "anim_idle_breatherdeep_kanim", "anim_idle_breathershallow_kanim" };
 
 	public float baseCharacterScale = 0.38f;
+
+	private List<Option<ClothingOutfitTarget>> allAvailableClothingOutfits;
+
+	private int outfitSelectorIndex;
+
+	private bool outfitSelectorExpanded;
 
 	[Serializable]
 	public struct ProfessionIcon

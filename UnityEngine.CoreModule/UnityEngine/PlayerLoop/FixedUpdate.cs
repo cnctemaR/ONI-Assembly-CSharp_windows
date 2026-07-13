@@ -4,8 +4,8 @@ using UnityEngine.Scripting.APIUpdating;
 
 namespace UnityEngine.PlayerLoop
 {
-	[RequiredByNativeCode]
 	[MovedFrom("UnityEngine.Experimental.PlayerLoop")]
+	[RequiredByNativeCode]
 	public struct FixedUpdate
 	{
 		[RequiredByNativeCode]

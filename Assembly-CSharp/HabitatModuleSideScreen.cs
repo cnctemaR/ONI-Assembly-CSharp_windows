@@ -25,7 +25,7 @@ public class HabitatModuleSideScreen : SideScreenContent
 
 	public override bool IsValidForTarget(GameObject target)
 	{
-		return target.GetComponent<Clustercraft>() != null && this.GetPassengerModule(target.GetComponent<Clustercraft>()) != null;
+		return false;
 	}
 
 	public override void SetTarget(GameObject target)

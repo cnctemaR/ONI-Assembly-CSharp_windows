@@ -2267,8 +2267,8 @@ namespace UnityEngine.TextCore.Text
 		[FormerlySerializedAs("normalStyle")]
 		internal float m_RegularStyleWeight = 0f;
 
-		[FormerlySerializedAs("normalSpacingOffset")]
 		[SerializeField]
+		[FormerlySerializedAs("normalSpacingOffset")]
 		internal float m_RegularStyleSpacing = 0f;
 
 		[FormerlySerializedAs("boldStyle")]
@@ -2279,12 +2279,12 @@ namespace UnityEngine.TextCore.Text
 		[SerializeField]
 		internal float m_BoldStyleSpacing = 7f;
 
-		[SerializeField]
 		[FormerlySerializedAs("italicStyle")]
+		[SerializeField]
 		internal byte m_ItalicStyleSlant = 35;
 
-		[SerializeField]
 		[FormerlySerializedAs("tabSize")]
+		[SerializeField]
 		internal byte m_TabMultiple = 10;
 
 		internal bool IsFontAssetLookupTablesDirty;

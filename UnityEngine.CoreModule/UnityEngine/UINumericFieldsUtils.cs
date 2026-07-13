@@ -38,9 +38,8 @@ namespace UnityEngine
 			return true;
 		}
 
-		public static bool TryConvertStringToDouble(string str, string initialValueAsString, out double value)
+		public static bool TryConvertStringToDouble(string str, string initialValueAsString, out double value, out ExpressionEvaluator.Expression expression)
 		{
-			ExpressionEvaluator.Expression expression;
 			bool flag = UINumericFieldsUtils.TryConvertStringToDouble(str, out value, out expression);
 			bool flag2 = !flag && expression != null && !string.IsNullOrEmpty(initialValueAsString);
 			if (flag2)
@@ -57,10 +56,10 @@ namespace UnityEngine
 			return flag;
 		}
 
-		public static bool TryConvertStringToFloat(string str, string initialValueAsString, out float value)
+		public static bool TryConvertStringToFloat(string str, string initialValueAsString, out float value, out ExpressionEvaluator.Expression expression)
 		{
 			double num;
-			bool flag = UINumericFieldsUtils.TryConvertStringToDouble(str, initialValueAsString, out num);
+			bool flag = UINumericFieldsUtils.TryConvertStringToDouble(str, initialValueAsString, out num, out expression);
 			value = Mathf.ClampToFloat(num);
 			return flag;
 		}
@@ -76,9 +75,8 @@ namespace UnityEngine
 			return ExpressionEvaluator.Evaluate<long>(str, out value, out expr);
 		}
 
-		public static bool TryConvertStringToLong(string str, string initialValueAsString, out long value)
+		public static bool TryConvertStringToLong(string str, string initialValueAsString, out long value, out ExpressionEvaluator.Expression expression)
 		{
-			ExpressionEvaluator.Expression expression;
 			bool flag = UINumericFieldsUtils.TryConvertStringToLong(str, out value, out expression);
 			bool flag2 = !flag && expression != null && !string.IsNullOrEmpty(initialValueAsString);
 			if (flag2)
@@ -100,9 +98,8 @@ namespace UnityEngine
 			return ExpressionEvaluator.Evaluate<ulong>(str, out value, out expr);
 		}
 
-		public static bool TryConvertStringToULong(string str, string initialValueAsString, out ulong value)
+		public static bool TryConvertStringToULong(string str, string initialValueAsString, out ulong value, out ExpressionEvaluator.Expression expression)
 		{
-			ExpressionEvaluator.Expression expression;
 			bool flag = UINumericFieldsUtils.TryConvertStringToULong(str, out value, out expression);
 			bool flag2 = !flag && expression != null && !string.IsNullOrEmpty(initialValueAsString);
 			if (flag2)
@@ -119,18 +116,18 @@ namespace UnityEngine
 			return flag;
 		}
 
-		public static bool TryConvertStringToInt(string str, string initialValueAsString, out int value)
+		public static bool TryConvertStringToInt(string str, string initialValueAsString, out int value, out ExpressionEvaluator.Expression expression)
 		{
 			long num;
-			bool flag = UINumericFieldsUtils.TryConvertStringToLong(str, initialValueAsString, out num);
+			bool flag = UINumericFieldsUtils.TryConvertStringToLong(str, initialValueAsString, out num, out expression);
 			value = Mathf.ClampToInt(num);
 			return flag;
 		}
 
-		public static bool TryConvertStringToUInt(string str, string initialValueAsString, out uint value)
+		public static bool TryConvertStringToUInt(string str, string initialValueAsString, out uint value, out ExpressionEvaluator.Expression expression)
 		{
 			long num;
-			bool flag = UINumericFieldsUtils.TryConvertStringToLong(str, initialValueAsString, out num);
+			bool flag = UINumericFieldsUtils.TryConvertStringToLong(str, initialValueAsString, out num, out expression);
 			value = Mathf.ClampToUInt(num);
 			return flag;
 		}

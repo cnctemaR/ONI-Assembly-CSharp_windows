@@ -93,7 +93,7 @@ public class Operational : KMonoBehaviour
 			}
 		}
 		this.IsFunctional = flag;
-		base.Trigger(-1852328367, this.IsFunctional);
+		base.Trigger(-1852328367, BoxedBools.Box(this.IsFunctional));
 	}
 
 	private void UpdateOperational()
@@ -124,7 +124,7 @@ public class Operational : KMonoBehaviour
 			{
 				base.GetComponent<KPrefabID>().RemoveTag(GameTags.Operational);
 			}
-			base.Trigger(-592767678, this.IsOperational);
+			base.Trigger(-592767678, BoxedBools.Box(this.IsOperational));
 			Game.Instance.Trigger(-809948329, base.gameObject);
 		}
 	}

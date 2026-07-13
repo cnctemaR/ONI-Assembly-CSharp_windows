@@ -413,11 +413,17 @@ public class ThreatMonitor : GameStateMachine<ThreatMonitor, ThreatMonitor.Insta
 			return this.PickBestTarget(this.threats);
 		}
 
+		private static Util.IterationInstruction collectFactionAlignments(object obj, List<FactionAlignment> alignments)
+		{
+			alignments.Add(obj as FactionAlignment);
+			return Util.IterationInstruction.Continue;
+		}
+
 		private void GatherThreats()
 		{
-			ListPool<ScenePartitionerEntry, ThreatMonitor>.PooledList pooledList = ListPool<ScenePartitionerEntry, ThreatMonitor>.Allocate();
+			ListPool<FactionAlignment, ThreatMonitor>.PooledList pooledList = ListPool<FactionAlignment, ThreatMonitor>.Allocate();
 			Extents extents = new Extents(Grid.PosToCell(base.gameObject), base.def.maxSearchDistance);
-			GameScenePartitioner.Instance.GatherEntries(extents, GameScenePartitioner.Instance.attackableEntitiesLayer, pooledList);
+			GameScenePartitioner.Instance.VisitEntries<ListPool<FactionAlignment, ThreatMonitor>.PooledList>(extents.x, extents.y, extents.width, extents.height, GameScenePartitioner.Instance.attackableEntitiesLayer, new Func<object, ListPool<FactionAlignment, ThreatMonitor>.PooledList, Util.IterationInstruction>(ThreatMonitor.Instance.collectFactionAlignments), pooledList);
 			int count = pooledList.Count;
 			int num = Mathf.Min(count, base.def.maxSearchEntities);
 			for (int i = 0; i < num; i++)
@@ -426,9 +432,8 @@ public class ThreatMonitor : GameStateMachine<ThreatMonitor, ThreatMonitor.Insta
 				{
 					this.currentUpdateIndex = 0;
 				}
-				ScenePartitionerEntry scenePartitionerEntry = pooledList[this.currentUpdateIndex];
+				FactionAlignment factionAlignment = pooledList[this.currentUpdateIndex];
 				this.currentUpdateIndex++;
-				FactionAlignment factionAlignment = scenePartitionerEntry.obj as FactionAlignment;
 				if (!(factionAlignment.transform == null) && !(factionAlignment == this.alignment) && (base.def.friendlyCreatureTags == null || !factionAlignment.kprefabID.HasAnyTags(base.def.friendlyCreatureTags)) && factionAlignment.IsAlignmentActive() && FactionManager.Instance.GetDisposition(this.alignment.Alignment, factionAlignment.Alignment) == FactionManager.Disposition.Attack && this.navigator.CanReach(factionAlignment.attackable.GetCell(), base.smi.def.offsets))
 				{
 					this.threats.Add(factionAlignment);

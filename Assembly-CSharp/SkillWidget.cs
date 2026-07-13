@@ -200,7 +200,7 @@ public class SkillWidget : KMonoBehaviour, IPointerEnterHandler, IEventSystemHan
 				{
 					text += "\n";
 				}
-				text += ((text2 != null) ? text2 : ("• " + skillPerk.Name));
+				text += ((text2 != null) ? text2 : skillPerk.Name);
 			}
 		}
 		return text;
@@ -339,6 +339,10 @@ public class SkillWidget : KMonoBehaviour, IPointerEnterHandler, IEventSystemHan
 
 	public void OnPointerClick(PointerEventData eventData)
 	{
+		if (eventData.button != PointerEventData.InputButton.Left)
+		{
+			return;
+		}
 		MinionIdentity minionIdentity;
 		StoredMinionIdentity storedMinionIdentity;
 		this.skillsScreen.GetMinionIdentity(this.skillsScreen.CurrentlySelectedMinion, out minionIdentity, out storedMinionIdentity);

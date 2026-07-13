@@ -125,7 +125,7 @@ public class InspectSaveScreen : KModalScreen
 			LoadScreen.ForceStopGame();
 		}
 		SaveLoader.SetActiveSaveFilePath(filename);
-		App.LoadScene("backend");
+		SaveLoader.LoadScene();
 		this.Deactivate();
 	}
 

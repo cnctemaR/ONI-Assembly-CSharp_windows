@@ -6,19 +6,18 @@ using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
 [AddComponentMenu("KMonoBehaviour/scripts/JetSuitTank")]
-public class JetSuitTank : KMonoBehaviour, IGameObjectEffectDescriptor
+public class JetSuitTank : KMonoBehaviour, IGameObjectEffectDescriptor, IDevQuickAction
 {
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		this.amount = 25f;
 		base.Subscribe<JetSuitTank>(-1617557748, JetSuitTank.OnEquippedDelegate);
 		base.Subscribe<JetSuitTank>(-170173755, JetSuitTank.OnUnequippedDelegate);
 	}
 
 	public float PercentFull()
 	{
-		return this.amount / 25f;
+		return this.amount / 100f;
 	}
 
 	public bool IsEmpty()
@@ -33,7 +32,7 @@ public class JetSuitTank : KMonoBehaviour, IGameObjectEffectDescriptor
 
 	public bool NeedsRecharging()
 	{
-		return this.PercentFull() < 0.25f;
+		return this.PercentFull() < 0.2f;
 	}
 
 	public List<Descriptor> GetDescriptors(GameObject go)
@@ -76,21 +75,49 @@ public class JetSuitTank : KMonoBehaviour, IGameObjectEffectDescriptor
 		}
 	}
 
+	[ContextMenu("Empty")]
+	public void Empty()
+	{
+		this.amount = 0f;
+	}
+
+	[ContextMenu("Fill Tank")]
+	public void FillTank()
+	{
+		this.amount = 100f;
+		if (this.jetSuitMonitor != null && this.jetSuitMonitor.sm.owner.Get(this.jetSuitMonitor) != null)
+		{
+			this.jetSuitMonitor.sm.owner.Get(this.jetSuitMonitor).RemoveTag(GameTags.JetSuitOutOfFuel);
+		}
+	}
+
+	public List<DevQuickActionInstruction> GetDevInstructions()
+	{
+		return new List<DevQuickActionInstruction>
+		{
+			new DevQuickActionInstruction(IDevQuickAction.CommonMenusNames.Storage, "Fill Fuel", new global::System.Action(this.FillTank)),
+			new DevQuickActionInstruction(IDevQuickAction.CommonMenusNames.Storage, "Empty Fuel", new global::System.Action(this.Empty))
+		};
+	}
+
 	[MyCmpGet]
 	private ElementEmitter elementConverter;
 
 	[Serialize]
+	public SimHashes lastFuelUsed = SimHashes.Vacuum;
+
+	[Serialize]
 	public float amount;
 
-	public const float FUEL_CAPACITY = 25f;
+	public const float FUEL_CAPACITY = 100f;
 
-	public const float FUEL_BURN_RATE = 0.1f;
+	public const float FUEL_BURN_RATE = 0.2f;
 
-	public const float CO2_EMITTED_PER_FUEL_BURNED = 3f;
+	public const float CO2_EMITTED_PER_FUEL_BURNED = 0.25f;
 
-	public const float EMIT_TEMPERATURE = 473.15f;
+	public const float EMIT_TEMPERATURE = 373.15f;
 
-	public const float REFILL_PERCENT = 0.25f;
+	public const float REFILL_PERCENT = 0.2f;
 
 	private JetSuitMonitor.Instance jetSuitMonitor;
 

@@ -87,7 +87,7 @@ public class HighEnergyParticleSpawner : StateMachineComponent<HighEnergyParticl
 
 	public void DoConsumeParticlesWhileDisabled(float dt)
 	{
-		this.particleStorage.ConsumeAndGet(dt * 1f);
+		this.particleStorage.ConsumeAndGet(dt * 0.05f);
 		this.progressMeterController.SetPositionPercent(this.GetProgressBarFillPercentage());
 	}
 
@@ -104,6 +104,8 @@ public class HighEnergyParticleSpawner : StateMachineComponent<HighEnergyParticl
 				base.smi.sm.isAbsorbingRadiation.Set(true, base.smi, false);
 				this.recentPerSecondConsumptionRate = num2 / 600f;
 				this.particleStorage.Store(this.recentPerSecondConsumptionRate * this.radiationSampleRate * 0.1f);
+				float num3 = 286f;
+				this.energyConsumer.BaseWattageRating = Mathf.Clamp(this.recentPerSecondConsumptionRate * num3, 60f, 480f);
 			}
 			else
 			{
@@ -199,6 +201,9 @@ public class HighEnergyParticleSpawner : StateMachineComponent<HighEnergyParticl
 
 	[MyCmpGet]
 	private Operational operational;
+
+	[MyCmpGet]
+	private EnergyConsumer energyConsumer;
 
 	private float recentPerSecondConsumptionRate;
 

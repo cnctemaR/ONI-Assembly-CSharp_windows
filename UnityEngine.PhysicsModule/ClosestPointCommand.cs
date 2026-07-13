@@ -8,8 +8,8 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Jobs/ScriptBindings/JobsBindingsTypes.h")]
 	[NativeHeader("Modules/Physics/BatchCommands/ClosestPointCommand.h")]
+	[NativeHeader("Runtime/Jobs/ScriptBindings/JobsBindingsTypes.h")]
 	public struct ClosestPointCommand
 	{
 		public ClosestPointCommand(Vector3 point, int colliderInstanceID, Vector3 position, Quaternion rotation, Vector3 scale)

@@ -7,9 +7,9 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[UsedByNativeCode]
-	[NativeType("Runtime/Math/Vector2Int.h")]
 	[Il2CppEagerStaticClassConstruction]
+	[NativeType("Runtime/Math/Vector2Int.h")]
+	[UsedByNativeCode]
 	public struct Vector2Int : IEquatable<Vector2Int>, IFormattable
 	{
 		public int x

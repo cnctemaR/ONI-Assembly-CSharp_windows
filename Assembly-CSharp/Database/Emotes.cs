@@ -281,49 +281,23 @@ namespace Database
 			public CritterEmotes(ResourceSet parent)
 				: base("Critter", parent)
 			{
-				this.InitializePhysicalState();
-				this.InitializeEmotionalState();
+				this.InitializeEmotes();
 			}
 
-			private void InitializePhysicalState()
+			private void InitializeEmotes()
 			{
-				this.Hungry = new Emote(this, "Hungry", new EmoteStep[]
+				this.Positive = new Emote(this, "Positive", new EmoteStep[]
 				{
 					new EmoteStep
 					{
-						anim = "react_hungry"
+						anim = "react_pos"
 					}
 				}, null);
-			}
-
-			private void InitializeEmotionalState()
-			{
-				this.Angry = new Emote(this, "Angry", new EmoteStep[]
+				this.Negative = new Emote(this, "Negative", new EmoteStep[]
 				{
 					new EmoteStep
 					{
-						anim = "react_angry"
-					}
-				}, null);
-				this.Happy = new Emote(this, "Happy", new EmoteStep[]
-				{
-					new EmoteStep
-					{
-						anim = "react_happy"
-					}
-				}, null);
-				this.Idle = new Emote(this, "Idle", new EmoteStep[]
-				{
-					new EmoteStep
-					{
-						anim = "react_idle"
-					}
-				}, null);
-				this.Sad = new Emote(this, "Sad", new EmoteStep[]
-				{
-					new EmoteStep
-					{
-						anim = "react_sad"
+						anim = "react_neg"
 					}
 				}, null);
 				this.Roar = new Emote(this, "Roar", new EmoteStep[]
@@ -342,15 +316,9 @@ namespace Database
 				}, null);
 			}
 
-			public Emote Hungry;
+			public Emote Positive;
 
-			public Emote Angry;
-
-			public Emote Happy;
-
-			public Emote Idle;
-
-			public Emote Sad;
+			public Emote Negative;
 
 			public Emote Roar;
 

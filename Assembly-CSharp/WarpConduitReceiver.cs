@@ -59,7 +59,7 @@ public class WarpConduitReceiver : StateMachineComponent<WarpConduitReceiver.Sta
 		base.OnCleanUp();
 	}
 
-	public void OnActivatedChanged(object data)
+	public void OnActivatedChanged(object _)
 	{
 		if (this.senderGasStorage == null)
 		{

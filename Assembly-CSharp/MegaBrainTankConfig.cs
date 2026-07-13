@@ -69,7 +69,7 @@ public class MegaBrainTankConfig : IBuildingConfig
 		storage.capacityKg = 30f;
 		ManualDeliveryKG manualDeliveryKG = go.AddOrGet<ManualDeliveryKG>();
 		manualDeliveryKG.SetStorage(storage);
-		manualDeliveryKG.requestedItemTag = DreamJournalConfig.ID;
+		manualDeliveryKG.RequestedItemTag = DreamJournalConfig.ID;
 		manualDeliveryKG.MinimumMass = 1f;
 		manualDeliveryKG.refillMass = 25f;
 		manualDeliveryKG.capacity = 25f;

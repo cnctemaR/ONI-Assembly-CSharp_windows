@@ -8,7 +8,7 @@ namespace UnityEngine.UI
 		public static bool GetRelativeMousePositionForDrag(PointerEventData eventData, ref Vector2 position)
 		{
 			int displayIndex = eventData.pointerPressRaycast.displayIndex;
-			Vector3 vector = MultipleDisplayUtilities.RelativeMouseAtScaled(eventData.position);
+			Vector3 vector = MultipleDisplayUtilities.RelativeMouseAtScaled(eventData.position, eventData.displayIndex);
 			if ((int)vector.z != displayIndex)
 			{
 				return false;
@@ -19,7 +19,7 @@ namespace UnityEngine.UI
 
 		internal static Vector3 GetRelativeMousePositionForRaycast(PointerEventData eventData)
 		{
-			Vector3 vector = MultipleDisplayUtilities.RelativeMouseAtScaled(eventData.position);
+			Vector3 vector = MultipleDisplayUtilities.RelativeMouseAtScaled(eventData.position, eventData.displayIndex);
 			if (vector == Vector3.zero)
 			{
 				vector = eventData.position;
@@ -27,25 +27,26 @@ namespace UnityEngine.UI
 			return vector;
 		}
 
-		public static Vector3 RelativeMouseAtScaled(Vector2 position)
+		public static Vector3 RelativeMouseAtScaled(Vector2 position, int displayIndex)
 		{
-			if (Display.main.renderingWidth != Display.main.systemWidth || Display.main.renderingHeight != Display.main.systemHeight)
+			Display main = Display.main;
+			if (main.renderingWidth != main.systemWidth || main.renderingHeight != main.systemHeight)
 			{
-				float num = (float)Display.main.systemWidth / (float)Display.main.systemHeight;
-				Vector2 vector = new Vector2((float)Display.main.renderingWidth, (float)Display.main.renderingHeight);
+				float num = (float)main.systemWidth / (float)main.systemHeight;
+				Vector2 vector = new Vector2((float)main.renderingWidth, (float)main.renderingHeight);
 				Vector2 zero = Vector2.zero;
 				if (Screen.fullScreen)
 				{
 					float num2 = (float)Screen.width / (float)Screen.height;
-					if ((float)Display.main.systemHeight * num2 < (float)Display.main.systemWidth)
+					if ((float)main.systemHeight * num2 < (float)main.systemWidth)
 					{
-						vector.x = (float)Display.main.renderingHeight * num;
-						zero.x = (vector.x - (float)Display.main.renderingWidth) * 0.5f;
+						vector.x = (float)main.renderingHeight * num;
+						zero.x = (vector.x - (float)main.renderingWidth) * 0.5f;
 					}
 					else
 					{
-						vector.y = (float)Display.main.renderingWidth / num;
-						zero.y = (vector.y - (float)Display.main.renderingHeight) * 0.5f;
+						vector.y = (float)main.renderingWidth / num;
+						zero.y = (vector.y - (float)main.renderingHeight) * 0.5f;
 					}
 				}
 				Vector2 vector2 = vector - zero;
@@ -54,14 +55,14 @@ namespace UnityEngine.UI
 					Vector2 vector3 = position;
 					if (!Screen.fullScreen)
 					{
-						vector3.x -= (float)(Display.main.renderingWidth - Display.main.systemWidth) * 0.5f;
-						vector3.y -= (float)(Display.main.renderingHeight - Display.main.systemHeight) * 0.5f;
+						vector3.x -= (float)(main.renderingWidth - main.systemWidth) * 0.5f;
+						vector3.y -= (float)(main.renderingHeight - main.systemHeight) * 0.5f;
 					}
 					else
 					{
 						vector3 += zero;
-						vector3.x *= (float)Display.main.systemWidth / vector.x;
-						vector3.y *= (float)Display.main.systemHeight / vector.y;
+						vector3.x *= (float)main.systemWidth / vector.x;
+						vector3.y *= (float)main.systemHeight / vector.y;
 					}
 					Vector3 vector4 = Display.RelativeMouseAt(vector3);
 					if (vector4.z != 0f)

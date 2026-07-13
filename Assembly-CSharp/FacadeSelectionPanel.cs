@@ -242,7 +242,7 @@ public class FacadeSelectionPanel : KMonoBehaviour
 		if (this.usesScrollRect)
 		{
 			LayoutElement component = this.scrollRect.GetComponent<LayoutElement>();
-			component.minHeight = (float)(58 * ((this.activeFacadeToggles.Count <= 5) ? 1 : 2));
+			component.minHeight = (float)(58 * Math.Clamp(Mathf.CeilToInt((float)this.activeFacadeToggles.Count / 5f), 1, 6));
 			component.preferredHeight = component.minHeight;
 		}
 	}
@@ -443,6 +443,7 @@ public class FacadeSelectionPanel : KMonoBehaviour
 			if (DlcManager.IsDlcId(text2))
 			{
 				reference.gameObject.SetActive(true);
+				reference.sprite = Assets.GetSprite(DlcManager.GetDlcBannerSprite(text2));
 				reference.color = DlcManager.GetDlcBannerColor(text2);
 				return;
 			}
@@ -497,6 +498,10 @@ public class FacadeSelectionPanel : KMonoBehaviour
 			if (outfitType == ClothingOutfitUtility.OutfitType.AtmoSuit)
 			{
 				vector = new Vector2(-16f, -16f);
+			}
+			else if (outfitType == ClothingOutfitUtility.OutfitType.JetSuit)
+			{
+				vector = new Vector2(-32f, -24f);
 			}
 			reference.rectTransform().sizeDelta = vector;
 		}

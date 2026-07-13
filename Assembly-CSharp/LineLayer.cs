@@ -5,6 +5,13 @@ using UnityEngine.UI;
 
 public class LineLayer : GraphLayer
 {
+	protected override void OnPrefabInit()
+	{
+		base.OnPrefabInit();
+		this.InitAreaTexture();
+		this.rectTransform = base.gameObject.GetComponent<RectTransform>();
+	}
+
 	private void InitAreaTexture()
 	{
 		if (this.areaTexture != null)
@@ -12,7 +19,8 @@ public class LineLayer : GraphLayer
 			return;
 		}
 		this.areaTexture = new Texture2D(96, 32);
-		this.areaFill.sprite = Sprite.Create(this.areaTexture, new Rect(0f, 0f, (float)this.areaTexture.width, (float)this.areaTexture.height), new Vector2(0.5f, 0.5f), 100f);
+		this.areaFill.sprite = Sprite.Create(this.areaTexture, new Rect(0f, 0f, 96f, 32f), new Vector2(0.5f, 0.5f), 100f);
+		this.areaTexture.filterMode = FilterMode.Point;
 	}
 
 	public virtual GraphedLine NewLine(global::Tuple<float, float>[] points, string ID = "")
@@ -24,13 +32,11 @@ public class LineLayer : GraphLayer
 		}
 		if (this.fillAreaUnderLine)
 		{
-			this.InitAreaTexture();
 			Vector2 vector = this.CalculateMin(points);
 			Vector2 vector2 = this.CalculateMax(points) - vector;
-			this.areaTexture.filterMode = FilterMode.Point;
-			for (int j = 0; j < this.areaTexture.width; j++)
+			for (int j = 0; j < 96; j++)
 			{
-				float num = vector.x + vector2.x * ((float)j / (float)this.areaTexture.width);
+				float num = vector.x + vector2.x * ((float)j / 96f);
 				if (points.Length > 1)
 				{
 					int num2 = 1;
@@ -46,18 +52,20 @@ public class LineLayer : GraphLayer
 					float num3 = (num - points[num2 - 1].first) / vector3.x;
 					bool flag = false;
 					int num4 = -1;
-					for (int l = this.areaTexture.height - 1; l >= 0; l--)
+					for (int l = 31; l >= 0; l--)
 					{
-						if (!flag && vector.y + vector2.y * ((float)l / (float)this.areaTexture.height) < points[num2 - 1].second + vector3.y * num3)
+						if (!flag && vector.y + vector2.y * ((float)l / 32f) < points[num2 - 1].second + vector3.y * num3)
 						{
 							flag = true;
 							num4 = l;
 						}
-						Color color = (flag ? new Color(1f, 1f, 1f, Mathf.Lerp(1f, this.fillAlphaMin, Mathf.Clamp((float)(num4 - l) / this.fillFadePixels, 0f, 1f))) : Color.clear);
-						this.areaTexture.SetPixel(j, l, color);
+						Color32 color = (flag ? new Color32(byte.MaxValue, byte.MaxValue, byte.MaxValue, (byte)(255f * Mathf.Lerp(1f, this.fillAlphaMin, Mathf.Clamp((float)(num4 - l) / this.fillFadePixels, 0f, 1f)))) : Color.clear);
+						LineLayer.s_pixelBuffer[l * 96 + j] = color;
 					}
 				}
 			}
+			this.InitAreaTexture();
+			this.areaTexture.SetPixels32(LineLayer.s_pixelBuffer);
 			this.areaTexture.Apply();
 			this.areaFill.color = this.line_formatting[0].color;
 		}
@@ -163,16 +171,15 @@ public class LineLayer : GraphLayer
 	{
 		if (this.fillAreaUnderLine)
 		{
-			this.InitAreaTexture();
 			Vector2 vector;
 			Vector2 vector2;
 			this.CalculateMinMax(points, out vector, out vector2);
 			Vector2 vector3 = vector2 - vector;
-			this.areaTexture.filterMode = FilterMode.Point;
+			Color32 color = new Color32(0, 0, 0, 0);
 			Vector2 vector4 = default(Vector2);
-			for (int i = 0; i < this.areaTexture.width; i++)
+			for (int i = 0; i < 96; i++)
 			{
-				float num = vector.x + vector3.x * ((float)i / (float)this.areaTexture.width);
+				float num = vector.x + vector3.x * ((float)i / 96f);
 				if (points.Length > 1)
 				{
 					int num2 = 1;
@@ -189,18 +196,19 @@ public class LineLayer : GraphLayer
 					float num3 = (num - points[num2 - 1].first) / vector4.x;
 					bool flag = false;
 					int num4 = -1;
-					for (int k = this.areaTexture.height - 1; k >= 0; k--)
+					for (int k = 31; k >= 0; k--)
 					{
-						if (!flag && vector.y + vector3.y * ((float)k / (float)this.areaTexture.height) < points[num2 - 1].second + vector4.y * num3)
+						if (!flag && vector.y + vector3.y * ((float)k / 32f) < points[num2 - 1].second + vector4.y * num3)
 						{
 							flag = true;
 							num4 = k;
 						}
-						Color color = (flag ? new Color(1f, 1f, 1f, Mathf.Lerp(1f, this.fillAlphaMin, Mathf.Clamp((float)(num4 - k) / this.fillFadePixels, 0f, 1f))) : Color.clear);
-						this.areaTexture.SetPixel(i, k, color);
+						Color32 color2 = (flag ? new Color32(byte.MaxValue, byte.MaxValue, byte.MaxValue, (byte)(255f * Mathf.Lerp(1f, this.fillAlphaMin, Mathf.Clamp((float)(num4 - k) / this.fillFadePixels, 0f, 1f)))) : color);
+						LineLayer.s_pixelBuffer[k * 96 + i] = color2;
 					}
 				}
 			}
+			this.areaTexture.SetPixels32(LineLayer.s_pixelBuffer);
 			this.areaTexture.Apply();
 			this.areaFill.color = this.line_formatting[0].color;
 		}
@@ -327,8 +335,7 @@ public class LineLayer : GraphLayer
 
 	private void Update()
 	{
-		RectTransform component = base.gameObject.GetComponent<RectTransform>();
-		if (!RectTransformUtility.RectangleContainsScreenPoint(component, Input.mousePosition))
+		if (!RectTransformUtility.RectangleContainsScreenPoint(this.rectTransform, Input.mousePosition))
 		{
 			for (int i = 0; i < this.lines.Count; i++)
 			{
@@ -337,8 +344,8 @@ public class LineLayer : GraphLayer
 			return;
 		}
 		Vector2 vector = Vector2.zero;
-		RectTransformUtility.ScreenPointToLocalPointInRectangle(base.gameObject.GetComponent<RectTransform>(), Input.mousePosition, null, out vector);
-		vector += component.sizeDelta / 2f;
+		RectTransformUtility.ScreenPointToLocalPointInRectangle(this.rectTransform, Input.mousePosition, null, out vector);
+		vector += this.rectTransform.sizeDelta / 2f;
 		for (int j = 0; j < this.lines.Count; j++)
 		{
 			if (this.lines[j].PointCount != 0)
@@ -355,6 +362,12 @@ public class LineLayer : GraphLayer
 			}
 		}
 	}
+
+	private const int WIDTH = 96;
+
+	private const int HEIGHT = 32;
+
+	private static Color32[] s_pixelBuffer = new Color32[3072];
 
 	[Header("Lines")]
 	public LineLayer.LineFormat[] line_formatting;
@@ -378,6 +391,8 @@ public class LineLayer : GraphLayer
 	private int compressDataToPointCount = 256;
 
 	private LineLayer.DataScalingType compressType = LineLayer.DataScalingType.DropValues;
+
+	private RectTransform rectTransform;
 
 	[Serializable]
 	public struct LineFormat

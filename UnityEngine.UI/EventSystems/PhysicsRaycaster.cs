@@ -82,7 +82,7 @@ namespace UnityEngine.EventSystems
 			{
 				return false;
 			}
-			Vector3 vector = MultipleDisplayUtilities.RelativeMouseAtScaled(eventData.position);
+			Vector3 vector = MultipleDisplayUtilities.RelativeMouseAtScaled(eventData.position, eventData.displayIndex);
 			if (vector != Vector3.zero)
 			{
 				eventDisplayIndex = (int)vector.z;

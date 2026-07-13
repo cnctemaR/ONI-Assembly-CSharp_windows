@@ -106,13 +106,13 @@ namespace UnityEngineInternal
 				else
 				{
 					string text2 = targetUri.AbsolutePath;
+					string originalString = targetUri.OriginalString;
 					bool flag2 = text2.Contains("%");
 					if (flag2)
 					{
 						bool flag3 = text2.Contains('+');
 						if (flag3)
 						{
-							string originalString = targetUri.OriginalString;
 							bool flag4 = !originalString.StartsWith("file:");
 							if (flag4)
 							{
@@ -126,28 +126,36 @@ namespace UnityEngineInternal
 					{
 						text2 = "/" + text2;
 					}
-					text = "file://" + text2;
+					bool flag6 = originalString.StartsWith("file://\\\\?\\", StringComparison.InvariantCultureIgnoreCase) || originalString.StartsWith("file:///\\\\?\\", StringComparison.InvariantCultureIgnoreCase);
+					if (flag6)
+					{
+						text = originalString;
+					}
+					else
+					{
+						text = "file://" + text2;
+					}
 				}
 			}
 			else
 			{
 				string scheme = targetUri.Scheme;
-				bool flag6 = !prependProtocol && targetUrl.Length >= scheme.Length + 2 && targetUrl[scheme.Length + 1] != '/';
-				if (flag6)
+				bool flag7 = !prependProtocol && targetUrl.Length >= scheme.Length + 2 && targetUrl[scheme.Length + 1] != '/';
+				if (flag7)
 				{
 					StringBuilder stringBuilder = new StringBuilder(scheme, targetUrl.Length);
 					stringBuilder.Append(':');
-					bool flag7 = scheme == "jar";
-					if (flag7)
+					bool flag8 = scheme == "jar";
+					if (flag8)
 					{
 						string text3 = targetUri.AbsolutePath;
-						bool flag8 = text3.Contains("%");
-						if (flag8)
+						bool flag9 = text3.Contains("%");
+						if (flag9)
 						{
 							text3 = WebRequestUtils.URLDecode(text3);
 						}
-						bool flag9 = text3.StartsWith("file:/") && text3.Length > 6 && text3[6] != '/';
-						if (flag9)
+						bool flag10 = text3.StartsWith("file:/") && text3.Length > 6 && text3[6] != '/';
+						if (flag10)
 						{
 							stringBuilder.Append("file://");
 							stringBuilder.Append(text3.Substring(5));
@@ -167,8 +175,8 @@ namespace UnityEngineInternal
 				}
 				else
 				{
-					bool flag10 = targetUrl.Contains("%");
-					if (flag10)
+					bool flag11 = targetUrl.Contains("%");
+					if (flag11)
 					{
 						text = targetUri.OriginalString;
 					}

@@ -220,7 +220,7 @@ public class FossilHuntInitializer : StoryTraitStateMachine<FossilHuntInitialize
 				this.RevealMajorFossilDigSites();
 				this.RevealMinorFossilDigSites();
 			}
-			if (!(bool)clicked)
+			if (!Boxed<bool>.Unbox(clicked))
 			{
 				return;
 			}

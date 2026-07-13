@@ -48,7 +48,7 @@ namespace Klei.AI
 				this.selectable = base.GetComponent<KSelectable>();
 				this.notifier = base.gameObject.AddOrGet<Notifier>();
 				base.StartSM();
-				base.Subscribe(-1503271301, new Action<object>(this.OnObjectSelect));
+				this.onObjectSelectedHandle = base.Subscribe(-1503271301, new Action<object>(this.OnObjectSelect));
 				if (this.buildingActivatedHandle == -1)
 				{
 					this.buildingActivatedHandle = base.master.Subscribe(-1909216579, new Action<object>(this.OnBuildingActivated));
@@ -59,9 +59,8 @@ namespace Klei.AI
 			public override void StopSM(string reason)
 			{
 				base.StopSM(reason);
-				base.Unsubscribe(-1503271301, new Action<object>(this.OnObjectSelect));
-				base.Unsubscribe(-1909216579, new Action<object>(this.OnBuildingActivated));
-				this.buildingActivatedHandle = -1;
+				base.Unsubscribe(ref this.onObjectSelectedHandle);
+				base.Unsubscribe(ref this.buildingActivatedHandle);
 			}
 
 			public void TriggerStoryEvent(StoryInstance.State storyEvent)
@@ -90,7 +89,7 @@ namespace Klei.AI
 
 			protected virtual void OnBuildingActivated(object activated)
 			{
-				if (!(bool)activated)
+				if (!((Boxed<bool>)activated).value)
 				{
 					return;
 				}
@@ -99,7 +98,7 @@ namespace Klei.AI
 
 			protected virtual void OnObjectSelect(object clicked)
 			{
-				if (!(bool)clicked)
+				if (!((Boxed<bool>)clicked).value)
 				{
 					return;
 				}
@@ -210,6 +209,8 @@ namespace Klei.AI
 			}
 
 			protected int buildingActivatedHandle = -1;
+
+			private int onObjectSelectedHandle = -1;
 
 			protected Notifier notifier;
 

@@ -38,7 +38,6 @@ public class LogicDuplicantSensor : Switch, ISim1000ms, ISim200ms
 	protected override void OnCleanUp()
 	{
 		GameScenePartitioner.Instance.Free(ref this.pickupablesChangedEntry);
-		MinionGroupProber.Get().ReleaseProber(this);
 		base.OnCleanUp();
 	}
 

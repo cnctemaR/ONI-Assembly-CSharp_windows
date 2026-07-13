@@ -4,8 +4,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Rendering
 {
-	[UsedByNativeCode]
 	[NativeHeader("Runtime/Shaders/PassIdentifier.h")]
+	[UsedByNativeCode]
 	public readonly struct PassIdentifier : IEquatable<PassIdentifier>
 	{
 		public uint SubshaderIndex

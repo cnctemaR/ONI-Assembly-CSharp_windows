@@ -51,19 +51,17 @@ public class KilnConfig : IBuildingConfig
 		Tag tag = SimHashes.Ceramic.CreateTag();
 		Tag tag2 = SimHashes.Clay.CreateTag();
 		Tag tag3 = SimHashes.Carbon.CreateTag();
-		Tag tag4 = SimHashes.WoodLog.CreateTag();
-		Tag tag5 = SimHashes.Peat.CreateTag();
+		Tag tag4 = SimHashes.Peat.CreateTag();
 		float num = 100f;
 		float num2 = 25f;
 		ComplexRecipe.RecipeElement[] array = new ComplexRecipe.RecipeElement[]
 		{
 			new ComplexRecipe.RecipeElement(tag2, num),
-			new ComplexRecipe.RecipeElement(new Tag[]
+			new ComplexRecipe.RecipeElement(GameTags.BasicWoods.Append<Tag>(new Tag[]
 			{
 				SimHashes.Carbon.CreateTag(),
-				SimHashes.WoodLog.CreateTag(),
 				SimHashes.Peat.CreateTag()
-			}, num2)
+			}), num2)
 		};
 		ComplexRecipe.RecipeElement[] array2 = new ComplexRecipe.RecipeElement[]
 		{
@@ -78,16 +76,16 @@ public class KilnConfig : IBuildingConfig
 		complexRecipe.nameDisplay = ComplexRecipe.RecipeNameDisplay.Result;
 		complexRecipe.sortOrder = 100;
 		ComplexRecipeManager.Get().AddObsoleteIDMapping(text, text2);
-		Tag tag6 = SimHashes.RefinedCarbon.CreateTag();
+		Tag tag5 = SimHashes.RefinedCarbon.CreateTag();
 		ComplexRecipe.RecipeElement[] array3 = new ComplexRecipe.RecipeElement[]
 		{
-			new ComplexRecipe.RecipeElement(new Tag[] { tag3, tag4, tag5 }, new float[] { 125f, 200f, 300f })
+			new ComplexRecipe.RecipeElement(GameTags.BasicWoods.Append<Tag>(new Tag[] { tag3, tag4 }), new float[] { 200f, 200f, 125f, 300f })
 		};
 		ComplexRecipe.RecipeElement[] array4 = new ComplexRecipe.RecipeElement[]
 		{
-			new ComplexRecipe.RecipeElement(tag6, 100f, ComplexRecipe.RecipeElement.TemperatureOperation.Heated, false)
+			new ComplexRecipe.RecipeElement(tag5, 100f, ComplexRecipe.RecipeElement.TemperatureOperation.Heated, false)
 		};
-		string text3 = ComplexRecipeManager.MakeObsoleteRecipeID("Kiln", tag6);
+		string text3 = ComplexRecipeManager.MakeObsoleteRecipeID("Kiln", tag5);
 		string text4 = ComplexRecipeManager.MakeRecipeID("Kiln", array3, array4);
 		ComplexRecipe complexRecipe2 = new ComplexRecipe(text4, array3, array4);
 		complexRecipe2.time = 40f;

@@ -7,8 +7,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeHeader("Modules/Audio/Public/ScriptBindings/Audio.bindings.h")]
 	[StaticAccessor("AudioClipBindings", StaticAccessorType.DoubleColon)]
+	[NativeHeader("Modules/Audio/Public/ScriptBindings/Audio.bindings.h")]
 	public sealed class AudioClip : Object
 	{
 		private AudioClip()

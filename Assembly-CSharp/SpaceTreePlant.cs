@@ -19,13 +19,13 @@ public class SpaceTreePlant : GameStateMachine<SpaceTreePlant, SpaceTreePlant.In
 		this.production.InitializeStates(this.masterTarget, this.dead).EventTransition(GameHashes.Grow, this.growing, GameStateMachine<SpaceTreePlant, SpaceTreePlant.Instance, IStateMachineTarget, SpaceTreePlant.Def>.Not(new StateMachine<SpaceTreePlant, SpaceTreePlant.Instance, IStateMachineTarget, SpaceTreePlant.Def>.Transition.ConditionCallback(SpaceTreePlant.IsTrunkMature))).ParamTransition<bool>(this.ReadyForHarvest, this.harvest, GameStateMachine<SpaceTreePlant, SpaceTreePlant.Instance, IStateMachineTarget, SpaceTreePlant.Def>.IsTrue)
 			.ParamTransition<float>(this.Fullness, this.harvest, GameStateMachine<SpaceTreePlant, SpaceTreePlant.Instance, IStateMachineTarget, SpaceTreePlant.Def>.IsGTEOne)
 			.DefaultState(this.production.producing);
-		this.production.producing.EventTransition(GameHashes.Wilt, this.production.wilted, new StateMachine<SpaceTreePlant, SpaceTreePlant.Instance, IStateMachineTarget, SpaceTreePlant.Def>.Transition.ConditionCallback(SpaceTreePlant.IsTrunkWilted)).OnSignal(this.BranchWiltConditionChanged, this.production.halted, new Func<SpaceTreePlant.Instance, bool>(SpaceTreePlant.CanNOTProduce)).OnSignal(this.BranchGrownStatusChanged, this.production.halted, new Func<SpaceTreePlant.Instance, bool>(SpaceTreePlant.CanNOTProduce))
+		this.production.producing.EventTransition(GameHashes.Wilt, this.production.wilted, new StateMachine<SpaceTreePlant, SpaceTreePlant.Instance, IStateMachineTarget, SpaceTreePlant.Def>.Transition.ConditionCallback(SpaceTreePlant.IsTrunkWilted)).OnSignal(this.BranchWiltConditionChanged, this.production.halted, new StateMachine<SpaceTreePlant, SpaceTreePlant.Instance, IStateMachineTarget, SpaceTreePlant.Def>.Parameter<StateMachine<SpaceTreePlant, SpaceTreePlant.Instance, IStateMachineTarget, SpaceTreePlant.Def>.SignalParameter>.Callback(SpaceTreePlant.CanNOTProduce)).OnSignal(this.BranchGrownStatusChanged, this.production.halted, new StateMachine<SpaceTreePlant, SpaceTreePlant.Instance, IStateMachineTarget, SpaceTreePlant.Def>.Parameter<StateMachine<SpaceTreePlant, SpaceTreePlant.Instance, IStateMachineTarget, SpaceTreePlant.Def>.SignalParameter>.Callback(SpaceTreePlant.CanNOTProduce))
 			.Enter(new StateMachine<SpaceTreePlant, SpaceTreePlant.Instance, IStateMachineTarget, SpaceTreePlant.Def>.State.Callback(SpaceTreePlant.RefreshFullnessAnimation))
 			.EventHandler(GameHashes.OnStorageChange, new StateMachine<SpaceTreePlant, SpaceTreePlant.Instance, IStateMachineTarget, SpaceTreePlant.Def>.State.Callback(SpaceTreePlant.RefreshFullnessAnimation))
 			.ToggleStatusItem(Db.Get().CreatureStatusItems.ProducingSugarWater, null)
 			.Update(new Action<SpaceTreePlant.Instance, float>(SpaceTreePlant.ProductionUpdate), UpdateRate.SIM_200ms, false);
-		this.production.halted.EventTransition(GameHashes.Wilt, this.production.wilted, new StateMachine<SpaceTreePlant, SpaceTreePlant.Instance, IStateMachineTarget, SpaceTreePlant.Def>.Transition.ConditionCallback(SpaceTreePlant.IsTrunkWilted)).EventTransition(GameHashes.TreeBranchCountChanged, this.production.producing, new StateMachine<SpaceTreePlant, SpaceTreePlant.Instance, IStateMachineTarget, SpaceTreePlant.Def>.Transition.ConditionCallback(SpaceTreePlant.CanProduce)).OnSignal(this.BranchWiltConditionChanged, this.production.producing, new Func<SpaceTreePlant.Instance, bool>(SpaceTreePlant.CanProduce))
-			.OnSignal(this.BranchGrownStatusChanged, this.production.producing, new Func<SpaceTreePlant.Instance, bool>(SpaceTreePlant.CanProduce))
+		this.production.halted.EventTransition(GameHashes.Wilt, this.production.wilted, new StateMachine<SpaceTreePlant, SpaceTreePlant.Instance, IStateMachineTarget, SpaceTreePlant.Def>.Transition.ConditionCallback(SpaceTreePlant.IsTrunkWilted)).EventTransition(GameHashes.TreeBranchCountChanged, this.production.producing, new StateMachine<SpaceTreePlant, SpaceTreePlant.Instance, IStateMachineTarget, SpaceTreePlant.Def>.Transition.ConditionCallback(SpaceTreePlant.CanProduce)).OnSignal(this.BranchWiltConditionChanged, this.production.producing, new StateMachine<SpaceTreePlant, SpaceTreePlant.Instance, IStateMachineTarget, SpaceTreePlant.Def>.Parameter<StateMachine<SpaceTreePlant, SpaceTreePlant.Instance, IStateMachineTarget, SpaceTreePlant.Def>.SignalParameter>.Callback(SpaceTreePlant.CanProduce))
+			.OnSignal(this.BranchGrownStatusChanged, this.production.producing, new StateMachine<SpaceTreePlant, SpaceTreePlant.Instance, IStateMachineTarget, SpaceTreePlant.Def>.Parameter<StateMachine<SpaceTreePlant, SpaceTreePlant.Instance, IStateMachineTarget, SpaceTreePlant.Def>.SignalParameter>.Callback(SpaceTreePlant.CanProduce))
 			.ToggleStatusItem(Db.Get().CreatureStatusItems.SugarWaterProductionPaused, null)
 			.Enter(new StateMachine<SpaceTreePlant, SpaceTreePlant.Instance, IStateMachineTarget, SpaceTreePlant.Def>.State.Callback(SpaceTreePlant.RefreshFullnessAnimation));
 		this.production.wilted.EventTransition(GameHashes.WiltRecover, this.production.producing, GameStateMachine<SpaceTreePlant, SpaceTreePlant.Instance, IStateMachineTarget, SpaceTreePlant.Def>.Not(new StateMachine<SpaceTreePlant, SpaceTreePlant.Instance, IStateMachineTarget, SpaceTreePlant.Def>.Transition.ConditionCallback(SpaceTreePlant.IsTrunkWilted))).ToggleStatusItem(Db.Get().CreatureStatusItems.SugarWaterProductionWilted, null).PlayAnim("idle_empty", KAnim.PlayMode.Once)
@@ -211,6 +211,11 @@ public class SpaceTreePlant : GameStateMachine<SpaceTreePlant, SpaceTreePlant.In
 		return smi.IsWilting;
 	}
 
+	public static bool CanNOTProduce(SpaceTreePlant.Instance smi, StateMachine<SpaceTreePlant, SpaceTreePlant.Instance, IStateMachineTarget, SpaceTreePlant.Def>.SignalParameter param)
+	{
+		return SpaceTreePlant.CanNOTProduce(smi);
+	}
+
 	public static bool CanNOTProduce(SpaceTreePlant.Instance smi)
 	{
 		return !SpaceTreePlant.CanProduce(smi);
@@ -227,6 +232,11 @@ public class SpaceTreePlant : GameStateMachine<SpaceTreePlant, SpaceTreePlant.In
 	public static void SelfDestroy(SpaceTreePlant.Instance smi)
 	{
 		Util.KDestroyGameObject(smi.gameObject);
+	}
+
+	public static bool CanProduce(SpaceTreePlant.Instance smi, StateMachine<SpaceTreePlant, SpaceTreePlant.Instance, IStateMachineTarget, SpaceTreePlant.Def>.SignalParameter param)
+	{
+		return SpaceTreePlant.CanProduce(smi);
 	}
 
 	public static bool CanProduce(SpaceTreePlant.Instance smi)
@@ -515,12 +525,12 @@ public class SpaceTreePlant : GameStateMachine<SpaceTreePlant, SpaceTreePlant.In
 
 		public void SubscribeToUpdateNewBranchesReadyForHarvest()
 		{
-			this.tree.Subscribe(-1586842875, new Action<object>(this.OnNewBranchSpawnedWhileTreeIsReadyForHarvest));
+			this.onNewBranchesReadyHandle = this.tree.Subscribe(-1586842875, new Action<object>(this.OnNewBranchSpawnedWhileTreeIsReadyForHarvest));
 		}
 
 		public void UnsubscribeToUpdateNewBranchesReadyForHarvest()
 		{
-			this.tree.Unsubscribe(-1586842875, new Action<object>(this.OnNewBranchSpawnedWhileTreeIsReadyForHarvest));
+			this.tree.Unsubscribe(ref this.onNewBranchesReadyHandle);
 		}
 
 		private void OnNewBranchSpawnedWhileTreeIsReadyForHarvest(object data)
@@ -667,13 +677,19 @@ public class SpaceTreePlant : GameStateMachine<SpaceTreePlant, SpaceTreePlant.In
 
 		public void RefreshFullnessVariable()
 		{
-			float fullness = this.storage.MassStored() / this.storage.capacityKg;
-			base.sm.Fullness.Set(fullness, this, false);
-			this.tree.ActionPerBranch(delegate(GameObject branch)
+			float num = this.storage.MassStored() / this.storage.capacityKg;
+			base.sm.Fullness.Set(num, this, false);
+			Boxed<float> boxed = Boxed<float>.Get(num);
+			for (int i = 0; i < this.tree.CurrentBranchCount; i++)
 			{
-				branch.Trigger(-824970674, fullness);
-			});
-			if (fullness < 0.25f)
+				GameObject branch = this.tree.GetBranch(i);
+				if (branch != null)
+				{
+					branch.Trigger(-824970674, boxed);
+				}
+			}
+			Boxed<float>.Release(boxed);
+			if (num < 0.25f)
 			{
 				this.SetPipingState(false);
 			}
@@ -760,5 +776,7 @@ public class SpaceTreePlant : GameStateMachine<SpaceTreePlant, SpaceTreePlant.In
 		private UnstableEntombDefense.Instance entombDefenseSMI;
 
 		private Chore harvestChore;
+
+		private int onNewBranchesReadyHandle = -1;
 	}
 }

@@ -17,6 +17,8 @@ public class StampToolPreview_Placers : IStampToolPreviewPlugin
 			GameObject gameObject = Util.KInstantiate(placerPrefab, <>4__this.poolParent.gameObject, null);
 			gameObject.SetActive(false);
 			return gameObject;
+		}, delegate(GameObject _)
+		{
 		}, 0);
 	}
 

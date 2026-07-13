@@ -16,8 +16,7 @@ public class ColonyDiagnosticScreen : KScreen, ISim1000ms
 		MultiToggle multiToggle = this.seeAllButton;
 		multiToggle.onClick = (global::System.Action)Delegate.Combine(multiToggle.onClick, new global::System.Action(delegate
 		{
-			bool flag = !AllDiagnosticsScreen.Instance.isHiddenButActive;
-			AllDiagnosticsScreen.Instance.Show(!flag);
+			AllDiagnosticsScreen.Instance.Show(!AllDiagnosticsScreen.Instance.IsScreenActive());
 		}));
 	}
 
@@ -385,26 +384,35 @@ public class ColonyDiagnosticScreen : KScreen, ISim1000ms
 
 		private IEnumerator VisualNotificationRoutine()
 		{
-			this.gameObject.GetComponentInChildren<NotificationAnimator>().Begin(false);
 			RectTransform indicator = this.gameObject.GetComponent<HierarchyReferences>().GetReference<Image>("Indicator").rectTransform;
 			this.defaultIndicatorSizeDelta = Vector2.zero;
 			indicator.sizeDelta = this.defaultIndicatorSizeDelta;
-			float bounceDuration = 3f;
+			RectTransform contentRect = this.gameObject.GetComponent<HierarchyReferences>().GetReference<RectTransform>("Content");
+			float bounceDuration = 1f;
 			for (float i = 0f; i < bounceDuration; i += Time.unscaledDeltaTime)
 			{
+				float num = Mathf.Sin(i * 3.1415927f) * 50f;
+				contentRect.anchoredPosition = Vector2.left * num;
 				indicator.sizeDelta = this.defaultIndicatorSizeDelta + Vector2.one * (float)Mathf.RoundToInt(Mathf.Sin(6f * (3.1415927f * (i / bounceDuration))));
 				yield return 0;
 			}
+			contentRect.anchoredPosition = Vector2.zero;
 			for (float i = 0f; i < bounceDuration; i += Time.unscaledDeltaTime)
 			{
+				float num2 = Mathf.Sin(i * 3.1415927f) * 25f;
+				contentRect.anchoredPosition = Vector2.left * num2;
 				indicator.sizeDelta = this.defaultIndicatorSizeDelta + Vector2.one * (float)Mathf.RoundToInt(Mathf.Sin(6f * (3.1415927f * (i / bounceDuration))));
 				yield return 0;
 			}
+			contentRect.anchoredPosition = Vector2.zero;
 			for (float i = 0f; i < bounceDuration; i += Time.unscaledDeltaTime)
 			{
+				float num3 = Mathf.Sin(i * 3.1415927f) * 12f;
+				contentRect.anchoredPosition = Vector2.left * num3;
 				indicator.sizeDelta = this.defaultIndicatorSizeDelta + Vector2.one * (float)Mathf.RoundToInt(Mathf.Sin(6f * (3.1415927f * (i / bounceDuration))));
 				yield return 0;
 			}
+			contentRect.anchoredPosition = Vector2.zero;
 			this.ResolveNotificationRoutine();
 			yield break;
 		}
@@ -412,7 +420,6 @@ public class ColonyDiagnosticScreen : KScreen, ISim1000ms
 		public void ResolveNotificationRoutine()
 		{
 			this.gameObject.GetComponent<HierarchyReferences>().GetReference<Image>("Indicator").rectTransform.sizeDelta = Vector2.zero;
-			this.gameObject.GetComponent<HierarchyReferences>().GetReference<RectTransform>("Content").localPosition = Vector2.zero;
 			this.activeRoutine = null;
 		}
 

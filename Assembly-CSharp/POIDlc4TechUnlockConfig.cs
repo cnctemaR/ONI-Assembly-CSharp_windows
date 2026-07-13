@@ -27,8 +27,8 @@ public class POIDlc4TechUnlockConfig : IEntityConfig, IHasDlcRestrictions
 		GameObject gameObject = EntityTemplates.CreatePlacedEntity(text, text2, text3, num, Assets.GetAnim("research_unlock_dino_kanim"), "on", Grid.SceneLayer.Building, 3, 3, tier, tier2, SimHashes.Creature, new List<Tag>
 		{
 			GameTags.Gravitas,
-			RoomConstraints.ConstraintTags.LightSource,
-			GameTags.RoomProberBuilding
+			GameTags.RoomProberBuilding,
+			GameTags.LightSource
 		}, 293f);
 		PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
 		component.SetElement(SimHashes.Unobtanium, true);

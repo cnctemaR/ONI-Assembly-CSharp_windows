@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 using TUNING;
 
 public class NavTeleporter : KMonoBehaviour
@@ -8,7 +9,7 @@ public class NavTeleporter : KMonoBehaviour
 		base.OnPrefabInit();
 		base.GetComponent<KPrefabID>().AddTag(GameTags.NavTeleporters, false);
 		this.Register();
-		Singleton<CellChangeMonitor>.Instance.RegisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChanged), "NavTeleporterCellChanged");
+		this.cellChangeHandlerID = Singleton<CellChangeMonitor>.Instance.RegisterCellChangedHandler(base.transform, NavTeleporter.OnCellChangedDispatcher, this, "NavTeleporterCellChanged");
 	}
 
 	protected override void OnCleanUp()
@@ -19,6 +20,7 @@ public class NavTeleporter : KMonoBehaviour
 		{
 			Grid.HasNavTeleporter[cell] = false;
 		}
+		Singleton<CellChangeMonitor>.Instance.UnregisterCellChangedHandler(ref this.cellChangeHandlerID);
 		this.Deregister();
 		Components.NavTeleporters.Remove(this);
 	}
@@ -145,4 +147,11 @@ public class NavTeleporter : KMonoBehaviour
 	public CellOffset offset;
 
 	private int overrideCell = -1;
+
+	private ulong cellChangeHandlerID;
+
+	private static readonly Action<object> OnCellChangedDispatcher = delegate(object obj)
+	{
+		Unsafe.As<NavTeleporter>(obj).OnCellChanged();
+	};
 }

@@ -8,14 +8,14 @@ namespace Klei.AI
 	[DebuggerDisplay("{effect.Id}")]
 	public class EffectInstance : ModifierInstance<Effect>
 	{
-		public EffectInstance(GameObject game_object, Effect effect, bool should_save)
+		public EffectInstance(GameObject game_object, Effect effect, bool should_save, Func<string, object, string> resolveTooltipCallback = null)
 			: base(game_object, effect)
 		{
 			this.effect = effect;
 			this.shouldSave = should_save;
 			this.DefineEffectImmunities();
 			this.ApplyImmunities();
-			this.ConfigureStatusItem();
+			this.ConfigureStatusItem(resolveTooltipCallback);
 			if (effect.showInUI)
 			{
 				KSelectable component = base.gameObject.GetComponent<KSelectable>();
@@ -147,7 +147,7 @@ namespace Klei.AI
 			return this.effect.duration > 0f && this.timeRemaining <= 0f;
 		}
 
-		private void ConfigureStatusItem()
+		private void ConfigureStatusItem(Func<string, object, string> resolveTooltipCallback)
 		{
 			StatusItem.IconType iconType = (this.effect.isBad ? StatusItem.IconType.Exclamation : StatusItem.IconType.Info);
 			if (!this.effect.customIcon.IsNullOrWhiteSpace())
@@ -164,7 +164,7 @@ namespace Klei.AI
 			bool showStatusInWorld = this.effect.showStatusInWorld;
 			this.statusItem = new StatusItem(id, name, description, customIcon, iconType2, notificationType, flag, OverlayModes.None.ID, 2, showStatusInWorld, null);
 			this.statusItem.resolveStringCallback = new Func<string, object, string>(this.ResolveString);
-			this.statusItem.resolveTooltipCallback = new Func<string, object, string>(this.ResolveTooltip);
+			this.statusItem.resolveTooltipCallback = resolveTooltipCallback ?? new Func<string, object, string>(this.ResolveTooltip);
 		}
 
 		private string ResolveString(string str, object data)
@@ -172,7 +172,7 @@ namespace Klei.AI
 			return str;
 		}
 
-		private string ResolveTooltip(string str, object data)
+		public string ResolveTooltip(string str, object data)
 		{
 			string text = str;
 			EffectInstance effectInstance = (EffectInstance)data;

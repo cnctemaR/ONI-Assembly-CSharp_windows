@@ -61,6 +61,7 @@ public class TinkerStation : Workable, IGameObjectEffectDescriptor, ISim1000ms
 		base.OnSpawn();
 		if (this.useFilteredStorage && this.filteredStorage != null)
 		{
+			this.filteredStorage.SetHasMeter(false);
 			this.filteredStorage.FilterChanged();
 		}
 	}
@@ -80,7 +81,7 @@ public class TinkerStation : Workable, IGameObjectEffectDescriptor, ISim1000ms
 		return component != null && component.HasPerk(this.requiredSkillPerk);
 	}
 
-	private void OnOperationalChanged(object data)
+	private void OnOperationalChanged(object _)
 	{
 		RoomTracker component = base.GetComponent<RoomTracker>();
 		if (component != null && component.room != null)

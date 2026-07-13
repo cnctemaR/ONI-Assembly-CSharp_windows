@@ -6,9 +6,9 @@ using UnityEngine.Playables;
 
 namespace UnityEngine.Experimental.Animations
 {
-	[StaticAccessor("AnimationPlayableOutputExtensionsBindings", StaticAccessorType.DoubleColon)]
 	[NativeHeader("Modules/Animation/AnimatorDefines.h")]
 	[NativeHeader("Modules/Animation/ScriptBindings/AnimationPlayableOutputExtensions.bindings.h")]
+	[StaticAccessor("AnimationPlayableOutputExtensionsBindings", StaticAccessorType.DoubleColon)]
 	public static class AnimationPlayableOutputExtensions
 	{
 		public static AnimationStreamSource GetAnimationStreamSource(this AnimationPlayableOutput output)

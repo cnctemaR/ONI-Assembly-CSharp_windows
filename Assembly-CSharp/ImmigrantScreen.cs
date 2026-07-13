@@ -134,16 +134,25 @@ public class ImmigrantScreen : CharacterSelectionController
 
 	private void OnRejectionConfirmed()
 	{
+		this.ClearRejectedShuffleState();
+		this.rejectConfirmationScreen.SetActive(false);
+		this.Show(false);
+		AudioMixer.instance.Stop(AudioMixerSnapshots.Get().MENUNewDuplicantSnapshot, STOP_MODE.ALLOWFADEOUT);
+		AudioMixer.instance.Stop(AudioMixerSnapshots.Get().PortalLPDimmedSnapshot, STOP_MODE.ALLOWFADEOUT);
+	}
+
+	public void ClearRejectedShuffleState()
+	{
+		if (this.telepad == null)
+		{
+			return;
+		}
 		this.telepad.RejectAll();
 		this.containers.ForEach(delegate(ITelepadDeliverableContainer cc)
 		{
 			global::UnityEngine.Object.Destroy(cc.GetGameObject());
 		});
 		this.containers.Clear();
-		this.rejectConfirmationScreen.SetActive(false);
-		this.Show(false);
-		AudioMixer.instance.Stop(AudioMixerSnapshots.Get().MENUNewDuplicantSnapshot, STOP_MODE.ALLOWFADEOUT);
-		AudioMixer.instance.Stop(AudioMixerSnapshots.Get().PortalLPDimmedSnapshot, STOP_MODE.ALLOWFADEOUT);
 	}
 
 	[SerializeField]

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using FMOD.Studio;
 using Klei.AI;
 using STRINGS;
@@ -920,27 +921,24 @@ public abstract class OverlayModes
 			Vector2I vector2I;
 			Vector2I vector2I2;
 			Grid.GetVisibleExtents(out vector2I, out vector2I2);
-			using (new KProfiler.Region("UpdateDiseaseCarriers", null))
+			this.queuedAdds.Clear();
+			foreach (MinionIdentity minionIdentity in Components.LiveMinionIdentities.Items)
 			{
-				this.queuedAdds.Clear();
-				foreach (MinionIdentity minionIdentity in Components.LiveMinionIdentities.Items)
+				if (!(minionIdentity == null))
 				{
-					if (!(minionIdentity == null))
+					Vector2I vector2I3 = Grid.PosToXY(minionIdentity.transform.GetPosition());
+					if (vector2I <= vector2I3 && vector2I3 <= vector2I2 && !this.privateTargets.Contains(minionIdentity))
 					{
-						Vector2I vector2I3 = Grid.PosToXY(minionIdentity.transform.GetPosition());
-						if (vector2I <= vector2I3 && vector2I3 <= vector2I2 && !this.privateTargets.Contains(minionIdentity))
-						{
-							this.AddDiseaseUI(minionIdentity);
-							this.queuedAdds.Add(minionIdentity);
-						}
+						this.AddDiseaseUI(minionIdentity);
+						this.queuedAdds.Add(minionIdentity);
 					}
 				}
-				foreach (KMonoBehaviour kmonoBehaviour in this.queuedAdds)
-				{
-					this.privateTargets.Add(kmonoBehaviour);
-				}
-				this.queuedAdds.Clear();
 			}
+			foreach (KMonoBehaviour kmonoBehaviour in this.queuedAdds)
+			{
+				this.privateTargets.Add(kmonoBehaviour);
+			}
+			this.queuedAdds.Clear();
 			foreach (OverlayModes.Disease.UpdateDiseaseInfo updateDiseaseInfo in this.updateDiseaseInfo)
 			{
 				updateDiseaseInfo.ui.Refresh(updateDiseaseInfo.valueSrc);
@@ -959,7 +957,7 @@ public abstract class OverlayModes
 							flag = true;
 						}
 					}
-					goto IL_01F1;
+					goto IL_01D3;
 				}
 			}
 			foreach (Tag tag2 in OverlayScreen.LiquidVentIDs)
@@ -970,7 +968,7 @@ public abstract class OverlayModes
 					flag = true;
 				}
 			}
-			IL_01F1:
+			IL_01D3:
 			if (Game.Instance.showGasConduitDisease)
 			{
 				using (HashSet<Tag>.Enumerator enumerator4 = OverlayScreen.GasVentIDs.GetEnumerator())
@@ -984,7 +982,7 @@ public abstract class OverlayModes
 							flag = true;
 						}
 					}
-					goto IL_0297;
+					goto IL_0279;
 				}
 			}
 			foreach (Tag tag4 in OverlayScreen.GasVentIDs)
@@ -995,7 +993,7 @@ public abstract class OverlayModes
 					flag = true;
 				}
 			}
-			IL_0297:
+			IL_0279:
 			if (flag)
 			{
 				this.SetLayerZ(-50f);
@@ -1290,255 +1288,252 @@ public abstract class OverlayModes
 				}
 			});
 			OverlayModes.Mode.RemoveOffscreenTargets<ILogicUIElement>(this.ioTargets, this.workingIOTargets, vector2I, vector2I2, new Action<ILogicUIElement>(this.FreeUI), null);
-			using (new KProfiler.Region("UpdateLogicOverlay", null))
+			Action<SaveLoadRoot> <>9__3;
+			foreach (object obj in this.gameObjPartition.GetAllIntersecting(new Vector2((float)vector2I.x, (float)vector2I.y), new Vector2((float)vector2I2.x, (float)vector2I2.y)))
 			{
-				Action<SaveLoadRoot> <>9__3;
-				foreach (object obj in this.gameObjPartition.GetAllIntersecting(new Vector2((float)vector2I.x, (float)vector2I.y), new Vector2((float)vector2I2.x, (float)vector2I2.y)))
+				SaveLoadRoot saveLoadRoot = (SaveLoadRoot)obj;
+				if (saveLoadRoot != null)
 				{
-					SaveLoadRoot saveLoadRoot = (SaveLoadRoot)obj;
-					if (saveLoadRoot != null)
+					KPrefabID component = saveLoadRoot.GetComponent<KPrefabID>();
+					if (component.PrefabTag == wire_id || component.PrefabTag == bridge_id || component.PrefabTag == ribbon_id || component.PrefabTag == ribbon_bridge_id)
 					{
-						KPrefabID component = saveLoadRoot.GetComponent<KPrefabID>();
-						if (component.PrefabTag == wire_id || component.PrefabTag == bridge_id || component.PrefabTag == ribbon_id || component.PrefabTag == ribbon_bridge_id)
+						SaveLoadRoot saveLoadRoot2 = saveLoadRoot;
+						Vector2I vector2I3 = vector2I;
+						Vector2I vector2I4 = vector2I2;
+						ICollection<SaveLoadRoot> collection = this.gameObjTargets;
+						int num = this.conduitTargetLayer;
+						Action<SaveLoadRoot> action;
+						if ((action = <>9__3) == null)
 						{
-							SaveLoadRoot saveLoadRoot2 = saveLoadRoot;
-							Vector2I vector2I3 = vector2I;
-							Vector2I vector2I4 = vector2I2;
-							ICollection<SaveLoadRoot> collection = this.gameObjTargets;
-							int num = this.conduitTargetLayer;
-							Action<SaveLoadRoot> action;
-							if ((action = <>9__3) == null)
+							action = (<>9__3 = delegate(SaveLoadRoot root)
 							{
-								action = (<>9__3 = delegate(SaveLoadRoot root)
+								if (root == null)
 								{
-									if (root == null)
+									return;
+								}
+								KPrefabID component8 = root.GetComponent<KPrefabID>();
+								if (OverlayModes.Logic.HighlightItemIDs.Contains(component8.PrefabTag))
+								{
+									if (component8.PrefabTag == wire_id)
 									{
+										this.wireControllers.Add(root.GetComponent<KBatchedAnimController>());
 										return;
 									}
-									KPrefabID component8 = root.GetComponent<KPrefabID>();
-									if (OverlayModes.Logic.HighlightItemIDs.Contains(component8.PrefabTag))
+									if (component8.PrefabTag == ribbon_id)
 									{
-										if (component8.PrefabTag == wire_id)
-										{
-											this.wireControllers.Add(root.GetComponent<KBatchedAnimController>());
-											return;
-										}
-										if (component8.PrefabTag == ribbon_id)
-										{
-											this.ribbonControllers.Add(root.GetComponent<KBatchedAnimController>());
-											return;
-										}
-										if (component8.PrefabTag == bridge_id)
-										{
-											KBatchedAnimController component9 = root.GetComponent<KBatchedAnimController>();
-											int networkCell2 = root.GetComponent<LogicUtilityNetworkLink>().GetNetworkCell();
-											this.bridgeControllers.Add(new OverlayModes.Logic.BridgeInfo
-											{
-												cell = networkCell2,
-												controller = component9
-											});
-											return;
-										}
-										if (component8.PrefabTag == ribbon_bridge_id)
-										{
-											KBatchedAnimController component10 = root.GetComponent<KBatchedAnimController>();
-											int networkCell3 = root.GetComponent<LogicUtilityNetworkLink>().GetNetworkCell();
-											this.ribbonBridgeControllers.Add(new OverlayModes.Logic.BridgeInfo
-											{
-												cell = networkCell3,
-												controller = component10
-											});
-										}
+										this.ribbonControllers.Add(root.GetComponent<KBatchedAnimController>());
+										return;
 									}
-								});
-							}
-							base.AddTargetIfVisible<SaveLoadRoot>(saveLoadRoot2, vector2I3, vector2I4, collection, num, action, null);
-						}
-						else
-						{
-							base.AddTargetIfVisible<SaveLoadRoot>(saveLoadRoot, vector2I, vector2I2, this.gameObjTargets, this.objectTargetLayer, delegate(SaveLoadRoot root)
-							{
-								Vector3 position2 = root.transform.GetPosition();
-								float num3 = position2.z;
-								KPrefabID component11 = root.GetComponent<KPrefabID>();
-								if (component11 != null)
-								{
-									if (component11.HasTag(GameTags.OverlayInFrontOfConduits))
+									if (component8.PrefabTag == bridge_id)
 									{
-										num3 = Grid.GetLayerZ(Grid.SceneLayer.LogicWires) - 0.2f;
+										KBatchedAnimController component9 = root.GetComponent<KBatchedAnimController>();
+										int networkCell2 = root.GetComponent<LogicUtilityNetworkLink>().GetNetworkCell();
+										this.bridgeControllers.Add(new OverlayModes.Logic.BridgeInfo
+										{
+											cell = networkCell2,
+											controller = component9
+										});
+										return;
 									}
-									else if (component11.HasTag(GameTags.OverlayBehindConduits))
+									if (component8.PrefabTag == ribbon_bridge_id)
 									{
-										num3 = Grid.GetLayerZ(Grid.SceneLayer.LogicWires) + 0.2f;
+										KBatchedAnimController component10 = root.GetComponent<KBatchedAnimController>();
+										int networkCell3 = root.GetComponent<LogicUtilityNetworkLink>().GetNetworkCell();
+										this.ribbonBridgeControllers.Add(new OverlayModes.Logic.BridgeInfo
+										{
+											cell = networkCell3,
+											controller = component10
+										});
 									}
 								}
-								position2.z = num3;
-								root.transform.SetPosition(position2);
-								KBatchedAnimController component12 = root.GetComponent<KBatchedAnimController>();
-								component12.enabled = false;
-								component12.enabled = true;
-							}, null);
+							});
 						}
+						base.AddTargetIfVisible<SaveLoadRoot>(saveLoadRoot2, vector2I3, vector2I4, collection, num, action, null);
 					}
-				}
-				foreach (object obj2 in this.ioPartition.GetAllIntersecting(new Vector2((float)vector2I.x, (float)vector2I.y), new Vector2((float)vector2I2.x, (float)vector2I2.y)))
-				{
-					ILogicUIElement logicUIElement = (ILogicUIElement)obj2;
-					if (logicUIElement != null)
+					else
 					{
-						base.AddTargetIfVisible<ILogicUIElement>(logicUIElement, vector2I, vector2I2, this.ioTargets, this.objectTargetLayer, new Action<ILogicUIElement>(this.AddUI), (KMonoBehaviour kcmp) => kcmp != null && OverlayModes.Logic.HighlightItemIDs.Contains(kcmp.GetComponent<KPrefabID>().PrefabTag));
-					}
-				}
-				this.connectedNetworks.Clear();
-				float num2 = 1f;
-				GameObject gameObject = null;
-				if (SelectTool.Instance != null && SelectTool.Instance.hover != null)
-				{
-					gameObject = SelectTool.Instance.hover.gameObject;
-				}
-				if (gameObject != null)
-				{
-					IBridgedNetworkItem component2 = gameObject.GetComponent<IBridgedNetworkItem>();
-					if (component2 != null)
-					{
-						int networkCell = component2.GetNetworkCell();
-						this.visited.Clear();
-						this.FindConnectedNetworks(networkCell, Game.Instance.logicCircuitSystem, this.connectedNetworks, this.visited);
-						this.visited.Clear();
-						num2 = OverlayModes.ModeUtil.GetHighlightScale();
-					}
-				}
-				LogicCircuitManager logicCircuitManager = Game.Instance.logicCircuitManager;
-				Color32 logicOn = GlobalAssets.Instance.colorSet.logicOn;
-				Color32 logicOff = GlobalAssets.Instance.colorSet.logicOff;
-				logicOff.a = (logicOn.a = 0);
-				foreach (KBatchedAnimController kbatchedAnimController in this.wireControllers)
-				{
-					if (!(kbatchedAnimController == null))
-					{
-						Color32 color = logicOff;
-						LogicCircuitNetwork networkForCell = logicCircuitManager.GetNetworkForCell(Grid.PosToCell(kbatchedAnimController.transform.GetPosition()));
-						if (networkForCell != null)
+						base.AddTargetIfVisible<SaveLoadRoot>(saveLoadRoot, vector2I, vector2I2, this.gameObjTargets, this.objectTargetLayer, delegate(SaveLoadRoot root)
 						{
-							color = (networkForCell.IsBitActive(0) ? logicOn : logicOff);
-						}
-						if (this.connectedNetworks.Count > 0)
-						{
-							IBridgedNetworkItem component3 = kbatchedAnimController.GetComponent<IBridgedNetworkItem>();
-							if (component3 != null && component3.IsConnectedToNetworks(this.connectedNetworks))
+							Vector3 position2 = root.transform.GetPosition();
+							float num3 = position2.z;
+							KPrefabID component11 = root.GetComponent<KPrefabID>();
+							if (component11 != null)
 							{
-								color.r = (byte)((float)color.r * num2);
-								color.g = (byte)((float)color.g * num2);
-								color.b = (byte)((float)color.b * num2);
+								if (component11.HasTag(GameTags.OverlayInFrontOfConduits))
+								{
+									num3 = Grid.GetLayerZ(Grid.SceneLayer.LogicWires) - 0.2f;
+								}
+								else if (component11.HasTag(GameTags.OverlayBehindConduits))
+								{
+									num3 = Grid.GetLayerZ(Grid.SceneLayer.LogicWires) + 0.2f;
+								}
 							}
-						}
-						kbatchedAnimController.TintColour = color;
+							position2.z = num3;
+							root.transform.SetPosition(position2);
+							KBatchedAnimController component12 = root.GetComponent<KBatchedAnimController>();
+							component12.enabled = false;
+							component12.enabled = true;
+						}, null);
 					}
 				}
-				foreach (KBatchedAnimController kbatchedAnimController2 in this.ribbonControllers)
+			}
+			foreach (object obj2 in this.ioPartition.GetAllIntersecting(new Vector2((float)vector2I.x, (float)vector2I.y), new Vector2((float)vector2I2.x, (float)vector2I2.y)))
+			{
+				ILogicUIElement logicUIElement = (ILogicUIElement)obj2;
+				if (logicUIElement != null)
 				{
-					if (!(kbatchedAnimController2 == null))
-					{
-						Color32 color2 = logicOff;
-						Color32 color3 = logicOff;
-						Color32 color4 = logicOff;
-						Color32 color5 = logicOff;
-						LogicCircuitNetwork networkForCell2 = logicCircuitManager.GetNetworkForCell(Grid.PosToCell(kbatchedAnimController2.transform.GetPosition()));
-						if (networkForCell2 != null)
-						{
-							color2 = (networkForCell2.IsBitActive(0) ? logicOn : logicOff);
-							color3 = (networkForCell2.IsBitActive(1) ? logicOn : logicOff);
-							color4 = (networkForCell2.IsBitActive(2) ? logicOn : logicOff);
-							color5 = (networkForCell2.IsBitActive(3) ? logicOn : logicOff);
-						}
-						if (this.connectedNetworks.Count > 0)
-						{
-							IBridgedNetworkItem component4 = kbatchedAnimController2.GetComponent<IBridgedNetworkItem>();
-							if (component4 != null && component4.IsConnectedToNetworks(this.connectedNetworks))
-							{
-								color2.r = (byte)((float)color2.r * num2);
-								color2.g = (byte)((float)color2.g * num2);
-								color2.b = (byte)((float)color2.b * num2);
-								color3.r = (byte)((float)color3.r * num2);
-								color3.g = (byte)((float)color3.g * num2);
-								color3.b = (byte)((float)color3.b * num2);
-								color4.r = (byte)((float)color4.r * num2);
-								color4.g = (byte)((float)color4.g * num2);
-								color4.b = (byte)((float)color4.b * num2);
-								color5.r = (byte)((float)color5.r * num2);
-								color5.g = (byte)((float)color5.g * num2);
-								color5.b = (byte)((float)color5.b * num2);
-							}
-						}
-						kbatchedAnimController2.SetSymbolTint(OverlayModes.Logic.RIBBON_WIRE_1_SYMBOL_NAME, color2);
-						kbatchedAnimController2.SetSymbolTint(OverlayModes.Logic.RIBBON_WIRE_2_SYMBOL_NAME, color3);
-						kbatchedAnimController2.SetSymbolTint(OverlayModes.Logic.RIBBON_WIRE_3_SYMBOL_NAME, color4);
-						kbatchedAnimController2.SetSymbolTint(OverlayModes.Logic.RIBBON_WIRE_4_SYMBOL_NAME, color5);
-					}
+					base.AddTargetIfVisible<ILogicUIElement>(logicUIElement, vector2I, vector2I2, this.ioTargets, this.objectTargetLayer, new Action<ILogicUIElement>(this.AddUI), (KMonoBehaviour kcmp) => kcmp != null && OverlayModes.Logic.HighlightItemIDs.Contains(kcmp.GetComponent<KPrefabID>().PrefabTag));
 				}
-				foreach (OverlayModes.Logic.BridgeInfo bridgeInfo in this.bridgeControllers)
+			}
+			this.connectedNetworks.Clear();
+			float num2 = 1f;
+			GameObject gameObject = null;
+			if (SelectTool.Instance != null && SelectTool.Instance.hover != null)
+			{
+				gameObject = SelectTool.Instance.hover.gameObject;
+			}
+			if (gameObject != null)
+			{
+				IBridgedNetworkItem component2 = gameObject.GetComponent<IBridgedNetworkItem>();
+				if (component2 != null)
 				{
-					if (!(bridgeInfo.controller == null))
-					{
-						Color32 color6 = logicOff;
-						LogicCircuitNetwork networkForCell3 = logicCircuitManager.GetNetworkForCell(bridgeInfo.cell);
-						if (networkForCell3 != null)
-						{
-							color6 = (networkForCell3.IsBitActive(0) ? logicOn : logicOff);
-						}
-						if (this.connectedNetworks.Count > 0)
-						{
-							IBridgedNetworkItem component5 = bridgeInfo.controller.GetComponent<IBridgedNetworkItem>();
-							if (component5 != null && component5.IsConnectedToNetworks(this.connectedNetworks))
-							{
-								color6.r = (byte)((float)color6.r * num2);
-								color6.g = (byte)((float)color6.g * num2);
-								color6.b = (byte)((float)color6.b * num2);
-							}
-						}
-						bridgeInfo.controller.TintColour = color6;
-					}
+					int networkCell = component2.GetNetworkCell();
+					this.visited.Clear();
+					this.FindConnectedNetworks(networkCell, Game.Instance.logicCircuitSystem, this.connectedNetworks, this.visited);
+					this.visited.Clear();
+					num2 = OverlayModes.ModeUtil.GetHighlightScale();
 				}
-				foreach (OverlayModes.Logic.BridgeInfo bridgeInfo2 in this.ribbonBridgeControllers)
+			}
+			LogicCircuitManager logicCircuitManager = Game.Instance.logicCircuitManager;
+			Color32 logicOn = GlobalAssets.Instance.colorSet.logicOn;
+			Color32 logicOff = GlobalAssets.Instance.colorSet.logicOff;
+			logicOff.a = (logicOn.a = 0);
+			foreach (KBatchedAnimController kbatchedAnimController in this.wireControllers)
+			{
+				if (!(kbatchedAnimController == null))
 				{
-					if (!(bridgeInfo2.controller == null))
+					Color32 color = logicOff;
+					LogicCircuitNetwork networkForCell = logicCircuitManager.GetNetworkForCell(Grid.PosToCell(kbatchedAnimController.transform.GetPosition()));
+					if (networkForCell != null)
 					{
-						Color32 color7 = logicOff;
-						Color32 color8 = logicOff;
-						Color32 color9 = logicOff;
-						Color32 color10 = logicOff;
-						LogicCircuitNetwork networkForCell4 = logicCircuitManager.GetNetworkForCell(bridgeInfo2.cell);
-						if (networkForCell4 != null)
-						{
-							color7 = (networkForCell4.IsBitActive(0) ? logicOn : logicOff);
-							color8 = (networkForCell4.IsBitActive(1) ? logicOn : logicOff);
-							color9 = (networkForCell4.IsBitActive(2) ? logicOn : logicOff);
-							color10 = (networkForCell4.IsBitActive(3) ? logicOn : logicOff);
-						}
-						if (this.connectedNetworks.Count > 0)
-						{
-							IBridgedNetworkItem component6 = bridgeInfo2.controller.GetComponent<IBridgedNetworkItem>();
-							if (component6 != null && component6.IsConnectedToNetworks(this.connectedNetworks))
-							{
-								color7.r = (byte)((float)color7.r * num2);
-								color7.g = (byte)((float)color7.g * num2);
-								color7.b = (byte)((float)color7.b * num2);
-								color8.r = (byte)((float)color8.r * num2);
-								color8.g = (byte)((float)color8.g * num2);
-								color8.b = (byte)((float)color8.b * num2);
-								color9.r = (byte)((float)color9.r * num2);
-								color9.g = (byte)((float)color9.g * num2);
-								color9.b = (byte)((float)color9.b * num2);
-								color10.r = (byte)((float)color10.r * num2);
-								color10.g = (byte)((float)color10.g * num2);
-								color10.b = (byte)((float)color10.b * num2);
-							}
-						}
-						bridgeInfo2.controller.SetSymbolTint(OverlayModes.Logic.RIBBON_WIRE_1_SYMBOL_NAME, color7);
-						bridgeInfo2.controller.SetSymbolTint(OverlayModes.Logic.RIBBON_WIRE_2_SYMBOL_NAME, color8);
-						bridgeInfo2.controller.SetSymbolTint(OverlayModes.Logic.RIBBON_WIRE_3_SYMBOL_NAME, color9);
-						bridgeInfo2.controller.SetSymbolTint(OverlayModes.Logic.RIBBON_WIRE_4_SYMBOL_NAME, color10);
+						color = (networkForCell.IsBitActive(0) ? logicOn : logicOff);
 					}
+					if (this.connectedNetworks.Count > 0)
+					{
+						IBridgedNetworkItem component3 = kbatchedAnimController.GetComponent<IBridgedNetworkItem>();
+						if (component3 != null && component3.IsConnectedToNetworks(this.connectedNetworks))
+						{
+							color.r = (byte)((float)color.r * num2);
+							color.g = (byte)((float)color.g * num2);
+							color.b = (byte)((float)color.b * num2);
+						}
+					}
+					kbatchedAnimController.TintColour = color;
+				}
+			}
+			foreach (KBatchedAnimController kbatchedAnimController2 in this.ribbonControllers)
+			{
+				if (!(kbatchedAnimController2 == null))
+				{
+					Color32 color2 = logicOff;
+					Color32 color3 = logicOff;
+					Color32 color4 = logicOff;
+					Color32 color5 = logicOff;
+					LogicCircuitNetwork networkForCell2 = logicCircuitManager.GetNetworkForCell(Grid.PosToCell(kbatchedAnimController2.transform.GetPosition()));
+					if (networkForCell2 != null)
+					{
+						color2 = (networkForCell2.IsBitActive(0) ? logicOn : logicOff);
+						color3 = (networkForCell2.IsBitActive(1) ? logicOn : logicOff);
+						color4 = (networkForCell2.IsBitActive(2) ? logicOn : logicOff);
+						color5 = (networkForCell2.IsBitActive(3) ? logicOn : logicOff);
+					}
+					if (this.connectedNetworks.Count > 0)
+					{
+						IBridgedNetworkItem component4 = kbatchedAnimController2.GetComponent<IBridgedNetworkItem>();
+						if (component4 != null && component4.IsConnectedToNetworks(this.connectedNetworks))
+						{
+							color2.r = (byte)((float)color2.r * num2);
+							color2.g = (byte)((float)color2.g * num2);
+							color2.b = (byte)((float)color2.b * num2);
+							color3.r = (byte)((float)color3.r * num2);
+							color3.g = (byte)((float)color3.g * num2);
+							color3.b = (byte)((float)color3.b * num2);
+							color4.r = (byte)((float)color4.r * num2);
+							color4.g = (byte)((float)color4.g * num2);
+							color4.b = (byte)((float)color4.b * num2);
+							color5.r = (byte)((float)color5.r * num2);
+							color5.g = (byte)((float)color5.g * num2);
+							color5.b = (byte)((float)color5.b * num2);
+						}
+					}
+					kbatchedAnimController2.SetSymbolTint(OverlayModes.Logic.RIBBON_WIRE_1_SYMBOL_NAME, color2);
+					kbatchedAnimController2.SetSymbolTint(OverlayModes.Logic.RIBBON_WIRE_2_SYMBOL_NAME, color3);
+					kbatchedAnimController2.SetSymbolTint(OverlayModes.Logic.RIBBON_WIRE_3_SYMBOL_NAME, color4);
+					kbatchedAnimController2.SetSymbolTint(OverlayModes.Logic.RIBBON_WIRE_4_SYMBOL_NAME, color5);
+				}
+			}
+			foreach (OverlayModes.Logic.BridgeInfo bridgeInfo in this.bridgeControllers)
+			{
+				if (!(bridgeInfo.controller == null))
+				{
+					Color32 color6 = logicOff;
+					LogicCircuitNetwork networkForCell3 = logicCircuitManager.GetNetworkForCell(bridgeInfo.cell);
+					if (networkForCell3 != null)
+					{
+						color6 = (networkForCell3.IsBitActive(0) ? logicOn : logicOff);
+					}
+					if (this.connectedNetworks.Count > 0)
+					{
+						IBridgedNetworkItem component5 = bridgeInfo.controller.GetComponent<IBridgedNetworkItem>();
+						if (component5 != null && component5.IsConnectedToNetworks(this.connectedNetworks))
+						{
+							color6.r = (byte)((float)color6.r * num2);
+							color6.g = (byte)((float)color6.g * num2);
+							color6.b = (byte)((float)color6.b * num2);
+						}
+					}
+					bridgeInfo.controller.TintColour = color6;
+				}
+			}
+			foreach (OverlayModes.Logic.BridgeInfo bridgeInfo2 in this.ribbonBridgeControllers)
+			{
+				if (!(bridgeInfo2.controller == null))
+				{
+					Color32 color7 = logicOff;
+					Color32 color8 = logicOff;
+					Color32 color9 = logicOff;
+					Color32 color10 = logicOff;
+					LogicCircuitNetwork networkForCell4 = logicCircuitManager.GetNetworkForCell(bridgeInfo2.cell);
+					if (networkForCell4 != null)
+					{
+						color7 = (networkForCell4.IsBitActive(0) ? logicOn : logicOff);
+						color8 = (networkForCell4.IsBitActive(1) ? logicOn : logicOff);
+						color9 = (networkForCell4.IsBitActive(2) ? logicOn : logicOff);
+						color10 = (networkForCell4.IsBitActive(3) ? logicOn : logicOff);
+					}
+					if (this.connectedNetworks.Count > 0)
+					{
+						IBridgedNetworkItem component6 = bridgeInfo2.controller.GetComponent<IBridgedNetworkItem>();
+						if (component6 != null && component6.IsConnectedToNetworks(this.connectedNetworks))
+						{
+							color7.r = (byte)((float)color7.r * num2);
+							color7.g = (byte)((float)color7.g * num2);
+							color7.b = (byte)((float)color7.b * num2);
+							color8.r = (byte)((float)color8.r * num2);
+							color8.g = (byte)((float)color8.g * num2);
+							color8.b = (byte)((float)color8.b * num2);
+							color9.r = (byte)((float)color9.r * num2);
+							color9.g = (byte)((float)color9.g * num2);
+							color9.b = (byte)((float)color9.b * num2);
+							color10.r = (byte)((float)color10.r * num2);
+							color10.g = (byte)((float)color10.g * num2);
+							color10.b = (byte)((float)color10.b * num2);
+						}
+					}
+					bridgeInfo2.controller.SetSymbolTint(OverlayModes.Logic.RIBBON_WIRE_1_SYMBOL_NAME, color7);
+					bridgeInfo2.controller.SetSymbolTint(OverlayModes.Logic.RIBBON_WIRE_2_SYMBOL_NAME, color8);
+					bridgeInfo2.controller.SetSymbolTint(OverlayModes.Logic.RIBBON_WIRE_3_SYMBOL_NAME, color9);
+					bridgeInfo2.controller.SetSymbolTint(OverlayModes.Logic.RIBBON_WIRE_4_SYMBOL_NAME, color10);
 				}
 			}
 			this.UpdateUI();
@@ -2387,6 +2382,7 @@ public abstract class OverlayModes
 			this.batteryUIOffset = batteryUIOffset;
 			this.batteryUITransformerOffset = batteryUITransformerOffset;
 			this.batteryUISmallTransformerOffset = batteryUISmallTransformerOffset;
+			this.previousTilePower = new float[Grid.CellCount];
 			this.targetLayer = LayerMask.NameToLayer("MaskedOverlay");
 			this.cameraLayerMask = LayerMask.GetMask(new string[] { "MaskedOverlay", "MaskedOverlayBG" });
 			this.selectionMask = this.cameraLayerMask;
@@ -2444,119 +2440,121 @@ public abstract class OverlayModes
 			Vector2I vector2I2;
 			Grid.GetVisibleExtents(out vector2I, out vector2I2);
 			OverlayModes.Mode.RemoveOffscreenTargets<SaveLoadRoot>(this.layerTargets, vector2I, vector2I2, null);
-			using (new KProfiler.Region("UpdatePowerOverlay", null))
+			foreach (object obj in this.partition.GetAllIntersecting(new Vector2((float)vector2I.x, (float)vector2I.y), new Vector2((float)vector2I2.x, (float)vector2I2.y)))
 			{
-				foreach (object obj in this.partition.GetAllIntersecting(new Vector2((float)vector2I.x, (float)vector2I.y), new Vector2((float)vector2I2.x, (float)vector2I2.y)))
+				SaveLoadRoot saveLoadRoot = (SaveLoadRoot)obj;
+				base.AddTargetIfVisible<SaveLoadRoot>(saveLoadRoot, vector2I, vector2I2, this.layerTargets, this.targetLayer, null, null);
+			}
+			this.connectedNetworks.Clear();
+			float num = 1f;
+			GameObject gameObject = null;
+			if (SelectTool.Instance != null && SelectTool.Instance.hover != null)
+			{
+				gameObject = SelectTool.Instance.hover.gameObject;
+			}
+			if (gameObject != null)
+			{
+				IBridgedNetworkItem component = gameObject.GetComponent<IBridgedNetworkItem>();
+				if (component != null)
 				{
-					SaveLoadRoot saveLoadRoot = (SaveLoadRoot)obj;
-					base.AddTargetIfVisible<SaveLoadRoot>(saveLoadRoot, vector2I, vector2I2, this.layerTargets, this.targetLayer, null, null);
+					int networkCell = component.GetNetworkCell();
+					this.visited.Clear();
+					this.FindConnectedNetworks(networkCell, Game.Instance.electricalConduitSystem, this.connectedNetworks, this.visited);
+					this.visited.Clear();
+					num = OverlayModes.ModeUtil.GetHighlightScale();
 				}
-				this.connectedNetworks.Clear();
-				float num = 1f;
-				GameObject gameObject = null;
-				if (SelectTool.Instance != null && SelectTool.Instance.hover != null)
+			}
+			CircuitManager circuitManager = Game.Instance.circuitManager;
+			foreach (SaveLoadRoot saveLoadRoot2 in this.layerTargets)
+			{
+				if (!(saveLoadRoot2 == null))
 				{
-					gameObject = SelectTool.Instance.hover.gameObject;
-				}
-				if (gameObject != null)
-				{
-					IBridgedNetworkItem component = gameObject.GetComponent<IBridgedNetworkItem>();
-					if (component != null)
+					IBridgedNetworkItem component2 = saveLoadRoot2.GetComponent<IBridgedNetworkItem>();
+					if (component2 != null)
 					{
-						int networkCell = component.GetNetworkCell();
-						this.visited.Clear();
-						this.FindConnectedNetworks(networkCell, Game.Instance.electricalConduitSystem, this.connectedNetworks, this.visited);
-						this.visited.Clear();
-						num = OverlayModes.ModeUtil.GetHighlightScale();
-					}
-				}
-				CircuitManager circuitManager = Game.Instance.circuitManager;
-				foreach (SaveLoadRoot saveLoadRoot2 in this.layerTargets)
-				{
-					if (!(saveLoadRoot2 == null))
-					{
-						IBridgedNetworkItem component2 = saveLoadRoot2.GetComponent<IBridgedNetworkItem>();
-						if (component2 != null)
+						KAnimControllerBase component3 = (component2 as KMonoBehaviour).GetComponent<KBatchedAnimController>();
+						int networkCell2 = component2.GetNetworkCell();
+						UtilityNetwork networkForCell = Game.Instance.electricalConduitSystem.GetNetworkForCell(networkCell2);
+						ushort num2 = ((networkForCell != null) ? ((ushort)networkForCell.id) : ushort.MaxValue);
+						float num3 = circuitManager.GetWattsUsedByCircuit(num2);
+						if (num3 == -1f)
 						{
-							KAnimControllerBase component3 = (component2 as KMonoBehaviour).GetComponent<KBatchedAnimController>();
-							int networkCell2 = component2.GetNetworkCell();
-							UtilityNetwork networkForCell = Game.Instance.electricalConduitSystem.GetNetworkForCell(networkCell2);
-							ushort num2 = ((networkForCell != null) ? ((ushort)networkForCell.id) : ushort.MaxValue);
-							float wattsUsedByCircuit = circuitManager.GetWattsUsedByCircuit(num2);
-							float num3 = circuitManager.GetMaxSafeWattageForCircuit(num2);
-							num3 += POWER.FLOAT_FUDGE_FACTOR;
-							float wattsNeededWhenActive = circuitManager.GetWattsNeededWhenActive(num2);
-							Color32 color;
-							if (wattsUsedByCircuit <= 0f)
-							{
-								color = GlobalAssets.Instance.colorSet.powerCircuitUnpowered;
-							}
-							else if (wattsUsedByCircuit > num3)
-							{
-								color = GlobalAssets.Instance.colorSet.powerCircuitOverloading;
-							}
-							else if (wattsNeededWhenActive > num3 && num3 > 0f && wattsUsedByCircuit / num3 >= 0.75f)
-							{
-								color = GlobalAssets.Instance.colorSet.powerCircuitStraining;
-							}
-							else
-							{
-								color = GlobalAssets.Instance.colorSet.powerCircuitSafe;
-							}
-							if (this.connectedNetworks.Count > 0 && component2.IsConnectedToNetworks(this.connectedNetworks))
-							{
-								color.r = (byte)((float)color.r * num);
-								color.g = (byte)((float)color.g * num);
-								color.b = (byte)((float)color.b * num);
-							}
-							component3.TintColour = color;
+							num3 = this.previousTilePower[networkCell2];
 						}
+						else
+						{
+							this.previousTilePower[networkCell2] = num3;
+						}
+						float num4 = circuitManager.GetMaxSafeWattageForCircuit(num2);
+						num4 += POWER.FLOAT_FUDGE_FACTOR;
+						float wattsNeededWhenActive = circuitManager.GetWattsNeededWhenActive(num2);
+						Color32 color;
+						if (num3 <= 0f)
+						{
+							color = GlobalAssets.Instance.colorSet.powerCircuitUnpowered;
+						}
+						else if (num3 > num4)
+						{
+							color = GlobalAssets.Instance.colorSet.powerCircuitOverloading;
+						}
+						else if (wattsNeededWhenActive > num4 && num4 > 0f && num3 / num4 >= 0.75f)
+						{
+							color = GlobalAssets.Instance.colorSet.powerCircuitStraining;
+						}
+						else
+						{
+							color = GlobalAssets.Instance.colorSet.powerCircuitSafe;
+						}
+						if (this.connectedNetworks.Count > 0 && component2.IsConnectedToNetworks(this.connectedNetworks))
+						{
+							color.r = (byte)((float)color.r * num);
+							color.g = (byte)((float)color.g * num);
+							color.b = (byte)((float)color.b * num);
+						}
+						component3.TintColour = color;
 					}
 				}
 			}
 			this.queuedAdds.Clear();
-			using (new KProfiler.Region("BatteryUI", null))
+			foreach (Battery battery in Components.Batteries.Items)
 			{
-				foreach (Battery battery in Components.Batteries.Items)
+				Vector2I vector2I3 = Grid.PosToXY(battery.transform.GetPosition());
+				if (vector2I <= vector2I3 && vector2I3 <= vector2I2 && battery.GetMyWorldId() == ClusterManager.Instance.activeWorldId)
 				{
-					Vector2I vector2I3 = Grid.PosToXY(battery.transform.GetPosition());
-					if (vector2I <= vector2I3 && vector2I3 <= vector2I2 && battery.GetMyWorldId() == ClusterManager.Instance.activeWorldId)
+					SaveLoadRoot component4 = battery.GetComponent<SaveLoadRoot>();
+					if (!this.privateTargets.Contains(component4))
 					{
-						SaveLoadRoot component4 = battery.GetComponent<SaveLoadRoot>();
-						if (!this.privateTargets.Contains(component4))
+						this.AddBatteryUI(battery);
+						this.queuedAdds.Add(component4);
+					}
+				}
+			}
+			foreach (Generator generator in Components.Generators.Items)
+			{
+				Vector2I vector2I4 = Grid.PosToXY(generator.transform.GetPosition());
+				if (vector2I <= vector2I4 && vector2I4 <= vector2I2 && generator.GetMyWorldId() == ClusterManager.Instance.activeWorldId)
+				{
+					SaveLoadRoot component5 = generator.GetComponent<SaveLoadRoot>();
+					if (!this.privateTargets.Contains(component5))
+					{
+						this.privateTargets.Add(component5);
+						if (generator.GetComponent<PowerTransformer>() == null)
 						{
-							this.AddBatteryUI(battery);
-							this.queuedAdds.Add(component4);
+							this.AddPowerLabels(generator);
 						}
 					}
 				}
-				foreach (Generator generator in Components.Generators.Items)
+			}
+			foreach (EnergyConsumer energyConsumer in Components.EnergyConsumers.Items)
+			{
+				Vector2I vector2I5 = Grid.PosToXY(energyConsumer.transform.GetPosition());
+				if (vector2I <= vector2I5 && vector2I5 <= vector2I2 && energyConsumer.GetMyWorldId() == ClusterManager.Instance.activeWorldId)
 				{
-					Vector2I vector2I4 = Grid.PosToXY(generator.transform.GetPosition());
-					if (vector2I <= vector2I4 && vector2I4 <= vector2I2 && generator.GetMyWorldId() == ClusterManager.Instance.activeWorldId)
+					SaveLoadRoot component6 = energyConsumer.GetComponent<SaveLoadRoot>();
+					if (!this.privateTargets.Contains(component6))
 					{
-						SaveLoadRoot component5 = generator.GetComponent<SaveLoadRoot>();
-						if (!this.privateTargets.Contains(component5))
-						{
-							this.privateTargets.Add(component5);
-							if (generator.GetComponent<PowerTransformer>() == null)
-							{
-								this.AddPowerLabels(generator);
-							}
-						}
-					}
-				}
-				foreach (EnergyConsumer energyConsumer in Components.EnergyConsumers.Items)
-				{
-					Vector2I vector2I5 = Grid.PosToXY(energyConsumer.transform.GetPosition());
-					if (vector2I <= vector2I5 && vector2I5 <= vector2I2 && energyConsumer.GetMyWorldId() == ClusterManager.Instance.activeWorldId)
-					{
-						SaveLoadRoot component6 = energyConsumer.GetComponent<SaveLoadRoot>();
-						if (!this.privateTargets.Contains(component6))
-						{
-							this.privateTargets.Add(component6);
-							this.AddPowerLabels(energyConsumer);
-						}
+						this.privateTargets.Add(component6);
+						this.AddPowerLabels(energyConsumer);
 					}
 				}
 			}
@@ -2807,6 +2805,8 @@ public abstract class OverlayModes
 		private List<OverlayModes.Power.UpdatePowerInfo> updatePowerInfo = new List<OverlayModes.Power.UpdatePowerInfo>();
 
 		private List<OverlayModes.Power.UpdateBatteryInfo> updateBatteryInfo = new List<OverlayModes.Power.UpdateBatteryInfo>();
+
+		private float[] previousTilePower;
 
 		private Canvas powerLabelParent;
 
@@ -3614,36 +3614,28 @@ public abstract class OverlayModes
 			SelectTool.Instance.SetLayerMask(defaultLayerMask | mask);
 		}
 
+		private static global::Util.IterationInstruction updateVisitor(object obj, ref ValueTuple<OverlayModes.TileMode, Vector2I, Vector2I> context)
+		{
+			PrimaryElement component = Unsafe.As<Pickupable>(obj).gameObject.GetComponent<PrimaryElement>();
+			if (component != null)
+			{
+				context.Item1.TryAddObject(component, context.Item2, context.Item3);
+			}
+			return global::Util.IterationInstruction.Continue;
+		}
+
 		public override void Update()
 		{
 			Vector2I vector2I;
 			Vector2I vector2I2;
 			Grid.GetVisibleExtents(out vector2I, out vector2I2);
+			ValueTuple<OverlayModes.TileMode, Vector2I, Vector2I> valueTuple = new ValueTuple<OverlayModes.TileMode, Vector2I, Vector2I>(this, vector2I, vector2I2);
 			OverlayModes.Mode.RemoveOffscreenTargets<PrimaryElement>(this.layerTargets, vector2I, vector2I2, null);
 			int num = vector2I2.y - vector2I.y;
 			int num2 = vector2I2.x - vector2I.x;
 			Extents extents = new Extents(vector2I.x, vector2I.y, num2, num);
-			List<ScenePartitionerEntry> list = new List<ScenePartitionerEntry>();
-			GameScenePartitioner.Instance.GatherEntries(extents, GameScenePartitioner.Instance.pickupablesLayer, list);
-			foreach (ScenePartitionerEntry scenePartitionerEntry in list)
-			{
-				PrimaryElement component = ((Pickupable)scenePartitionerEntry.obj).gameObject.GetComponent<PrimaryElement>();
-				if (component != null)
-				{
-					this.TryAddObject(component, vector2I, vector2I2);
-				}
-			}
-			list.Clear();
-			GameScenePartitioner.Instance.GatherEntries(extents, GameScenePartitioner.Instance.completeBuildings, list);
-			foreach (ScenePartitionerEntry scenePartitionerEntry2 in list)
-			{
-				BuildingComplete buildingComplete = (BuildingComplete)scenePartitionerEntry2.obj;
-				PrimaryElement component2 = buildingComplete.gameObject.GetComponent<PrimaryElement>();
-				if (component2 != null && buildingComplete.gameObject.layer == 0)
-				{
-					this.TryAddObject(component2, vector2I, vector2I2);
-				}
-			}
+			GameScenePartitioner.Instance.VisitEntries<ValueTuple<OverlayModes.TileMode, Vector2I, Vector2I>>(extents.x, extents.y, extents.width, extents.height, GameScenePartitioner.Instance.pickupablesLayer, new GameScenePartitioner.VisitorRef<ValueTuple<OverlayModes.TileMode, Vector2I, Vector2I>>(OverlayModes.TileMode.updateVisitor), ref valueTuple);
+			GameScenePartitioner.Instance.VisitEntries<ValueTuple<OverlayModes.TileMode, Vector2I, Vector2I>>(extents.x, extents.y, extents.width, extents.height, GameScenePartitioner.Instance.completeBuildings, new GameScenePartitioner.VisitorRef<ValueTuple<OverlayModes.TileMode, Vector2I, Vector2I>>(OverlayModes.TileMode.updateVisitor), ref valueTuple);
 			base.UpdateHighlightTypeOverlay<PrimaryElement>(vector2I, vector2I2, this.layerTargets, this.targetIDs, this.highlightConditions, OverlayModes.BringToFrontLayerSetting.Conditional, this.targetLayer);
 		}
 

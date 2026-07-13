@@ -16,7 +16,7 @@ public class BlinkMonitor : GameStateMachine<BlinkMonitor, BlinkMonitor.Instance
 
 	private static bool CanBlink(BlinkMonitor.Instance smi)
 	{
-		return SpeechMonitor.IsAllowedToPlaySpeech(smi.gameObject) && smi.Get<Navigator>().CurrentNavType != NavType.Ladder;
+		return !smi.eye_anim.IsNullOrWhiteSpace() && SpeechMonitor.IsAllowedToPlaySpeech(smi.Kpid, smi.AnimController) && smi.Navigator.CurrentNavType != NavType.Ladder;
 	}
 
 	private static float GetRandomBlinkTime(BlinkMonitor.Instance smi)
@@ -48,7 +48,7 @@ public class BlinkMonitor : GameStateMachine<BlinkMonitor, BlinkMonitor.Instance
 
 	public static void EndBlinking(BlinkMonitor.Instance smi)
 	{
-		smi.GetComponent<SymbolOverrideController>().RemoveSymbolOverride(BlinkMonitor.HASH_SNAPTO_EYES, 3);
+		smi.SymbolOverrideController.RemoveSymbolOverride(BlinkMonitor.HASH_SNAPTO_EYES, 3);
 	}
 
 	public static void UpdateBlinking(BlinkMonitor.Instance smi, float dt)
@@ -78,7 +78,7 @@ public class BlinkMonitor : GameStateMachine<BlinkMonitor, BlinkMonitor.Instance
 				}
 			}
 		}
-		smi.GetComponent<SymbolOverrideController>().AddSymbolOverride(BlinkMonitor.HASH_SNAPTO_EYES, smi.eyes.AnimFiles[0].GetData().build.GetSymbol(hashedString), 3);
+		smi.SymbolOverrideController.AddSymbolOverride(BlinkMonitor.HASH_SNAPTO_EYES, smi.eyes.AnimFiles[0].GetData().build.GetSymbol(hashedString), 3);
 	}
 
 	public GameStateMachine<BlinkMonitor, BlinkMonitor.Instance, IStateMachineTarget, BlinkMonitor.Def>.State satisfied;
@@ -102,9 +102,21 @@ public class BlinkMonitor : GameStateMachine<BlinkMonitor, BlinkMonitor.Instance
 
 	public new class Instance : GameStateMachine<BlinkMonitor, BlinkMonitor.Instance, IStateMachineTarget, BlinkMonitor.Def>.GameInstance
 	{
+		public KPrefabID Kpid { get; private set; }
+
+		public KBatchedAnimController AnimController { get; private set; }
+
+		public Navigator Navigator { get; private set; }
+
+		public SymbolOverrideController SymbolOverrideController { get; private set; }
+
 		public Instance(IStateMachineTarget master, BlinkMonitor.Def def)
 			: base(master, def)
 		{
+			this.Kpid = master.GetComponent<KPrefabID>();
+			this.AnimController = master.GetComponent<KBatchedAnimController>();
+			this.Navigator = master.GetComponent<Navigator>();
+			this.SymbolOverrideController = master.GetComponent<SymbolOverrideController>();
 		}
 
 		public bool IsBlinking()

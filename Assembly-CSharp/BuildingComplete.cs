@@ -15,6 +15,7 @@ public class BuildingComplete : Building
 	{
 		base.OnPrefabInit();
 		Vector3 position = base.transform.GetPosition();
+		Grid.PosToXY(position);
 		position.z = Grid.GetLayerZ(this.Def.SceneLayer);
 		base.transform.SetPosition(position);
 		base.gameObject.SetLayerRecursively(LayerMask.NameToLayer("Default"));
@@ -82,8 +83,8 @@ public class BuildingComplete : Building
 
 	private void OnObjectReplaced(object data)
 	{
-		Constructable.ReplaceCallbackParameters replaceCallbackParameters = (Constructable.ReplaceCallbackParameters)data;
-		this.replacingTileLayer = replaceCallbackParameters.TileLayer;
+		Constructable.ReplaceCallbackParameters value = ((Boxed<Constructable.ReplaceCallbackParameters>)data).value;
+		this.replacingTileLayer = value.TileLayer;
 	}
 
 	protected override void OnSpawn()

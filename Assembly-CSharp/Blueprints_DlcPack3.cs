@@ -10,6 +10,11 @@ public class Blueprints_DlcPack3 : BlueprintProvider
 
 	public override void SetupBlueprints()
 	{
+		base.AddClothing(BlueprintProvider.ClothingType.DupeTops, PermitRarity.Universal, "permit_standard_bionic_top", "top_bionic_kanim");
+		base.AddClothing(BlueprintProvider.ClothingType.DupeBottoms, PermitRarity.Universal, "permit_standard_bionic_bottom", "pants_bionic_kanim");
+		base.AddClothing(BlueprintProvider.ClothingType.DupeGloves, PermitRarity.Universal, "permit_standard_bionic_gloves", "gloves_bionic_kanim");
+		base.AddClothing(BlueprintProvider.ClothingType.DupeShoes, PermitRarity.Universal, "permit_standard_bionic_shoes", "shoes_bionic_kanim");
+		base.AddOutfit(BlueprintProvider.OutfitType.Clothing, "permit_standard_bionic_outfit", new string[] { "permit_standard_bionic_top", "permit_standard_bionic_bottom", "permit_standard_bionic_gloves", "permit_standard_bionic_shoes" });
 		base.AddClothing(BlueprintProvider.ClothingType.AtmoSuitBelt, PermitRarity.Universal, "permit_atmo_belt_3tone_purple", "atmo_belt_3tone_purple_kanim");
 		base.AddClothing(BlueprintProvider.ClothingType.AtmoSuitBelt, PermitRarity.Universal, "permit_atmo_belt_circuit", "atmo_belt_biocircuit_kanim");
 		base.AddClothing(BlueprintProvider.ClothingType.AtmoSuitBody, PermitRarity.Universal, "permit_atmosuit_basic_purple_wildberry", "atmosuit_basic_purple_wildberry_kanim");
@@ -107,6 +112,8 @@ public class Blueprints_DlcPack3 : BlueprintProvider
 		base.AddBuilding("WireRefinedBridge", PermitRarity.Universal, "permit_utilityelectricbridgeconductive_net_pink", "utilityelectricbridgeconductive_net_pink_kanim");
 		base.AddBuilding("WireRefinedBridge", PermitRarity.Universal, "permit_utilityelectricbridgeconductive_diamond_orchid", "utilityelectricbridgeconductive_diamond_orchid_kanim");
 		base.AddBuilding("CraftingTable", PermitRarity.Universal, "permit_craftingstation_cyberpunk", "craftingstation_cyberpunk_kanim");
+		base.AddBuilding("ManualGenerator", PermitRarity.Universal, "permit_generatormanual_cyberpunk", "generatormanual_cyberpunk_kanim");
+		base.AddBuilding("ExobaseHeadquarters", PermitRarity.Universal, "permit_porta_pod_y_cyberpunk", "porta_pod_y_cyberpunk_kanim");
 		base.AddOutfit(BlueprintProvider.OutfitType.Clothing, "outfit_sculpted_steel", new string[] { "permit_dress_futurespace_blue", "permit_gloves_futurespace_blue", "permit_shoes_futurespace_blue" });
 		base.AddOutfit(BlueprintProvider.OutfitType.Clothing, "outfit_starched_blazer", new string[] { "permit_top_snapjacket_brine", "permit_pants_snapjacket_brine", "permit_gloves_snapjacket_brine" });
 		base.AddOutfit(BlueprintProvider.OutfitType.Clothing, "outfit_aerodynamic_flightsuit", new string[] { "permit_jumpsuit_vsuit_stellar", "permit_gloves_vsuit_stellar", "permit_shoes_vsuit_stellar" });

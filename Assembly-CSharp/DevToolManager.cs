@@ -42,6 +42,7 @@ public class DevToolManager
 		this.RegisterDevTool<DevToolUnlockedIds>("Debuggers/UnlockedIds List");
 		this.RegisterDevTool<DevToolStringsTable>("Debuggers/StringsTable");
 		this.RegisterDevTool<DevToolChoreDebugger>("Debuggers/Chore");
+		this.RegisterDevTool<DevToolAllThingsCritter>("Debuggers/Critter Info");
 		this.RegisterDevTool<DevToolBatchedAnimDebug>("Debuggers/Batched Anim");
 		this.RegisterDevTool<DevTool_StoryTraits_Reveal>("Debuggers/Story Traits Reveal");
 		this.RegisterDevTool<DevTool_StoryTrait_CritterManipulator>("Debuggers/Story Trait - Critter Manipulator");

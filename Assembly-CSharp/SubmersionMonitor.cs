@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using STRINGS;
 using UnityEngine;
 
@@ -19,7 +20,7 @@ public class SubmersionMonitor : KMonoBehaviour, IGameObjectEffectDescriptor, IW
 		base.OnSpawn();
 		this.OnMove();
 		this.CheckDry();
-		Singleton<CellChangeMonitor>.Instance.RegisterCellChangedHandler(base.transform, new global::System.Action(this.OnMove), "SubmersionMonitor.OnSpawn");
+		this.cellChangeMonitorHandlerID = Singleton<CellChangeMonitor>.Instance.RegisterCellChangedHandler(base.transform, SubmersionMonitor.OnMoveDispatcher, this, "SubmersionMonitor.OnSpawn");
 	}
 
 	private void OnMove()
@@ -44,7 +45,7 @@ public class SubmersionMonitor : KMonoBehaviour, IGameObjectEffectDescriptor, IW
 
 	protected override void OnCleanUp()
 	{
-		Singleton<CellChangeMonitor>.Instance.UnregisterCellChangedHandler(base.transform, new global::System.Action(this.OnMove));
+		Singleton<CellChangeMonitor>.Instance.UnregisterCellChangedHandler(ref this.cellChangeMonitorHandlerID);
 		GameScenePartitioner.Instance.Free(ref this.partitionerEntry);
 		base.OnCleanUp();
 	}
@@ -129,4 +130,11 @@ public class SubmersionMonitor : KMonoBehaviour, IGameObjectEffectDescriptor, IW
 	private Extents extents;
 
 	private HandleVector<int>.Handle partitionerEntry;
+
+	private ulong cellChangeMonitorHandlerID;
+
+	private static readonly Action<object> OnMoveDispatcher = delegate(object obj)
+	{
+		Unsafe.As<SubmersionMonitor>(obj).OnMove();
+	};
 }

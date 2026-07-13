@@ -75,7 +75,7 @@ namespace STRINGS
 					"-based ",
 					UI.FormatAsLink("Diseases", "DISEASE"),
 					".\n\nCurative Tablets are very effective against ",
-					UI.FormatAsLink("Food Poisoning", "FOODSICKNESS"),
+					DUPLICANTS.DISEASES.FOODPOISONING.NAME,
 					"."
 				});
 			}
@@ -343,7 +343,7 @@ namespace STRINGS
 
 				public class DEHYDRATED
 				{
-					public static LocString NAME = "Dried Frost Burger";
+					public static LocString NAME = UI.FormatAsLink("Dried Frost Burger", "BURGER");
 
 					public static LocString DESC = string.Concat(new string[]
 					{
@@ -396,7 +396,7 @@ namespace STRINGS
 
 				public class DEHYDRATED
 				{
-					public static LocString NAME = "Dried Mushroom Wrap";
+					public static LocString NAME = UI.FormatAsLink("Dried Mushroom Wrap", "MUSHROOMWRAP");
 
 					public static LocString DESC = string.Concat(new string[]
 					{
@@ -543,7 +543,7 @@ namespace STRINGS
 					"Sweet discs made from ",
 					UI.FormatAsLink("Raw Egg", "RAWEGG"),
 					" and ",
-					UI.FormatAsLink("Sleet Wheat Grain", "COLDWHEATSEED"),
+					ITEMS.FOOD.COLDWHEATSEED.NAME,
 					".\n\nThey're so thick!"
 				});
 
@@ -552,7 +552,7 @@ namespace STRINGS
 					"Sweet discs made from ",
 					UI.FormatAsLink("Raw Egg", "RAWEGG"),
 					" and ",
-					UI.FormatAsLink("Sleet Wheat Grain", "COLDWHEATSEED"),
+					ITEMS.FOOD.COLDWHEATSEED.NAME,
 					"."
 				});
 			}
@@ -921,7 +921,7 @@ namespace STRINGS
 
 				public class DEHYDRATED
 				{
-					public static LocString NAME = "Dried Berry Pie";
+					public static LocString NAME = UI.FormatAsLink("Dried Berry Pie", "BERRYPIE");
 
 					public static LocString DESC = string.Concat(new string[]
 					{
@@ -938,9 +938,9 @@ namespace STRINGS
 			{
 				public static LocString NAME = UI.FormatAsLink("Frost Bun", "COLDWHEATBREAD");
 
-				public static LocString DESC = "A simple bun baked from " + UI.FormatAsLink("Sleet Wheat Grain", "COLDWHEATSEED") + ".\n\nEach bite leaves a mild cooling sensation in one's mouth, even when the bun itself is warm.";
+				public static LocString DESC = "A simple bun baked from " + ITEMS.FOOD.COLDWHEATSEED.NAME + ".\n\nEach bite leaves a mild cooling sensation in one's mouth, even when the bun itself is warm.";
 
-				public static LocString RECIPEDESC = "A simple bun baked from " + UI.FormatAsLink("Sleet Wheat Grain", "COLDWHEATSEED") + " grain.";
+				public static LocString RECIPEDESC = "A simple bun baked from " + ITEMS.FOOD.COLDWHEATSEED.NAME + ".";
 			}
 
 			public class BEAN
@@ -961,7 +961,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = UI.FormatAsLink("Ovagro Fig", "VINEFRUIT");
 
-				public static LocString DESC = "These fruit from an " + UI.FormatAsLink("Ovagro Vine", "VINEMOTHER") + ".\n\nIt's fun to squeeze as many as possible in a single mouthful.";
+				public static LocString DESC = "The fruit from an " + UI.FormatAsLink("Ovagro Vine", "VINEMOTHER") + ".\n\nIt's fun to squeeze as many as possible into a single mouthful.";
 			}
 
 			public class SPICEBREAD
@@ -974,7 +974,7 @@ namespace STRINGS
 
 				public class DEHYDRATED
 				{
-					public static LocString NAME = "Dried Pepper Bread";
+					public static LocString NAME = UI.FormatAsLink("Dried Pepper Bread", "SPICEBREAD");
 
 					public static LocString DESC = string.Concat(new string[]
 					{
@@ -1011,7 +1011,7 @@ namespace STRINGS
 
 				public class DEHYDRATED
 				{
-					public static LocString NAME = "Dried Surf'n'Turf";
+					public static LocString NAME = UI.FormatAsLink("Dried Surf'n'Turf", "SURFANDTURF");
 
 					public static LocString DESC = string.Concat(new string[]
 					{
@@ -1043,7 +1043,7 @@ namespace STRINGS
 
 				public class DEHYDRATED
 				{
-					public static LocString NAME = "Dried Spicy Tofu";
+					public static LocString NAME = UI.FormatAsLink("Dried Spicy Tofu", "SPICYTOFU");
 
 					public static LocString DESC = string.Concat(new string[]
 					{
@@ -1080,7 +1080,7 @@ namespace STRINGS
 
 				public class DEHYDRATED
 				{
-					public static LocString NAME = "Dried Curried Beans";
+					public static LocString NAME = UI.FormatAsLink("Dried Curried Beans", "CURRY");
 
 					public static LocString DESC = string.Concat(new string[]
 					{
@@ -1103,7 +1103,7 @@ namespace STRINGS
 
 				public class DEHYDRATED
 				{
-					public static LocString NAME = "Dried Stuffed Berry";
+					public static LocString NAME = UI.FormatAsLink("Dried Stuffed Berry", "SALSA");
 
 					public static LocString DESC = string.Concat(new string[]
 					{
@@ -1244,7 +1244,7 @@ namespace STRINGS
 
 				public class DEHYDRATED
 				{
-					public static LocString NAME = "Dried Mushroom Quiche";
+					public static LocString NAME = UI.FormatAsLink("Dried Mushroom Quiche", "QUICHE");
 
 					public static LocString DESC = string.Concat(new string[]
 					{
@@ -1261,14 +1261,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = UI.FormatAsLink("Sweatcorn", "GARDENFOODPLANTFOOD");
 
-				public static LocString DESC = string.Concat(new string[]
-				{
-					"The sugary fruit of a ",
-					UI.FormatAsLink("Sweatcorn Stalk", "GARDENFOODPLANT"),
-					"\n\nSweatcorn is more calorie-dense than ",
-					UI.FormatAsLink("Snac Fruit", "GARDENFORAGEPLANT"),
-					"."
-				});
+				public static LocString DESC = "The sugary vegetable produced by " + UI.FormatAsLink("Sweatcorn Stalks", "GARDENFOODPLANT") + ".\n\nIt tastes a lot better deep-fried.";
 			}
 
 			public class GARDENFORAGEPLANT
@@ -1280,7 +1273,7 @@ namespace STRINGS
 
 			public class BUTTERFLYPLANTSEED
 			{
-				public static LocString NAME = UI.FormatAsLink("Mimillet", "BUTTERFLYPLANT");
+				public static LocString NAME = UI.FormatAsLink("Mimillet", "BUTTERFLYPLANTSEED");
 
 				public static LocString DESC = string.Concat(new string[]
 				{
@@ -1291,16 +1284,16 @@ namespace STRINGS
 					".\n\nDigging up Buried Objects may uncover a Mimillet Seed."
 				});
 
-				public static LocString RECIPEDESC = "An inedible " + UI.FormatAsLink("Mimillet", "BUTTERFLYPLANT") + " seed.";
+				public static LocString RECIPEDESC = "An inedible " + CREATURES.SPECIES.SEEDS.BUTTERFLYPLANTSEED.NAME + " seed.";
 			}
 
 			public class BUTTERFLYFOOD
 			{
 				public static LocString NAME = UI.FormatAsLink("Toasted Mimillet", "BUTTERFLYFOOD");
 
-				public static LocString DESC = "A lightly toasted " + UI.FormatAsLink("Mimillet", "BUTTERFLYPLANT") + ".\n\nIt makes the tummy feel a bit fluttery.";
+				public static LocString DESC = "A lightly toasted " + CREATURES.SPECIES.SEEDS.BUTTERFLYPLANTSEED.NAME + ".\n\nIt makes the tummy feel a bit fluttery.";
 
-				public static LocString RECIPEDESC = "A lightly toasted " + UI.FormatAsLink("Mimillet", "BUTTERFLYPLANT") + ".";
+				public static LocString RECIPEDESC = "A lightly toasted " + CREATURES.SPECIES.SEEDS.BUTTERFLYPLANTSEED.NAME + ".";
 			}
 		}
 
@@ -1331,7 +1324,7 @@ namespace STRINGS
 					".\n\nIt can be processed into ",
 					UI.FormatAsLink("Phyto Oil", "PHYTOOIL"),
 					" or used as an ingredient in ",
-					UI.FormatAsLink("Allergy Medication", "ANTIHISTAMINE "),
+					UI.FormatAsLink("Allergy Medication", "ANTIHISTAMINE"),
 					"."
 				});
 			}
@@ -1467,6 +1460,22 @@ namespace STRINGS
 				public static LocString NAME = UI.FormatAsLink("Reed Fiber", "BASIC_FABRIC");
 
 				public static LocString DESC = "A ball of raw cellulose used in the production of " + UI.FormatAsLink("Clothing", "EQUIPMENT") + " and textiles.";
+			}
+
+			public class PLANT_FIBER
+			{
+				public static LocString NAME = UI.FormatAsLink("Plant Husk", "PLANT_FIBER");
+
+				public static LocString DESC = string.Concat(new string[]
+				{
+					"A bundle of dried plant matter.\n\nIt can be eaten by ",
+					CREATURES.FAMILY_PLURAL.MOOSPECIES,
+					", or processed into ",
+					UI.FormatAsLink("fuel", "POWER"),
+					" or ",
+					UI.FormatAsLink("building materials", "BUILDINGMATERIALCLASSES"),
+					"."
+				});
 			}
 
 			public class FEATHER_FABRIC
@@ -1700,7 +1709,7 @@ namespace STRINGS
 
 			public class TABLE_SALT
 			{
-				public static LocString NAME = "Table Salt";
+				public static LocString NAME = UI.FormatAsLink("Table Salt", "IDTABLESALT");
 
 				public static LocString DESC = string.Concat(new string[]
 				{
@@ -1768,21 +1777,21 @@ namespace STRINGS
 
 		public class MISSILE_BASIC
 		{
-			public static LocString NAME = UI.FormatAsLink("Blastshot", "MISSILELAUNCHER");
+			public static LocString NAME = UI.FormatAsLink("Blastshot", "MISSILE_BASIC");
 
 			public static LocString DESC = "An explosive projectile designed to defend against meteor showers.\n\nMust be launched by a " + UI.FormatAsLink("Meteor Blaster", "MISSILELAUNCHER") + ".";
 		}
 
 		public class MISSILE_LONGRANGE_VANILLADLC4
 		{
-			public static LocString NAME = UI.FormatAsLink("Intracosmic Blastshot", "MISSILELAUNCHER");
+			public static LocString NAME = UI.FormatAsLink("Intracosmic Blastshot", "MISSILE_LONGRANGE_VANILLADLC4");
 
 			public static LocString DESC = "A long-range explosive projectile that defends against distant space objects.\n\nMust be launched by " + UI.FormatAsLink("Meteor Blaster", "MISSILELAUNCHER") + ".";
 		}
 
 		public class MISSILE_LONGRANGE
 		{
-			public static LocString NAME = UI.FormatAsLink("Intracosmic Blastshot", "MISSILELAUNCHER");
+			public static LocString NAME = UI.FormatAsLink("Intracosmic Blastshot", "MISSILE_LONGRANGE");
 
 			public static LocString DESC = "A long-range explosive projectile that defends against distant space objects.\n\nMust be launched by " + UI.FormatAsLink("Meteor Blaster", "MISSILELAUNCHER") + ".";
 		}
@@ -1813,7 +1822,7 @@ namespace STRINGS
 
 		public class DREAMJOURNAL
 		{
-			public static LocString NAME = "Dream Journal";
+			public static LocString NAME = UI.FormatAsLink("Dream Journal", "STORYTRAITMEGABRAINTANK");
 
 			public static LocString DESC = string.Concat(new string[]
 			{

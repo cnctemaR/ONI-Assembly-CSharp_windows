@@ -9,7 +9,13 @@ public class EquippableFacadeInfo : IBlueprintInfo, IHasDlcRestrictions
 
 	public string desc { get; set; }
 
-	public PermitRarity rarity { get; set; }
+	public PermitRarity rarity
+	{
+		get
+		{
+			return this.rarity_;
+		}
+	}
 
 	public string animFile { get; set; }
 
@@ -18,7 +24,7 @@ public class EquippableFacadeInfo : IBlueprintInfo, IHasDlcRestrictions
 		this.id = id;
 		this.name = name;
 		this.desc = desc;
-		this.rarity = rarity;
+		this.rarity_ = rarity;
 		this.defID = defID;
 		this.buildOverride = buildOverride;
 		this.animFile = animFile;
@@ -35,6 +41,8 @@ public class EquippableFacadeInfo : IBlueprintInfo, IHasDlcRestrictions
 	{
 		return this.forbiddenDlcIds;
 	}
+
+	private readonly PermitRarity rarity_;
 
 	public string buildOverride;
 

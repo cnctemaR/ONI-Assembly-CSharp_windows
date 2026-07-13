@@ -2,8 +2,8 @@
 
 namespace UnityEngine.Bindings
 {
-	[VisibleToOtherModules]
 	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Enum)]
+	[VisibleToOtherModules]
 	internal class NativeTypeAttribute : Attribute, IBindingsHeaderProviderAttribute, IBindingsAttribute, IBindingsGenerateMarshallingTypeAttribute
 	{
 		public string Header { get; set; }

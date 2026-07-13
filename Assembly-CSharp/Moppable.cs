@@ -85,8 +85,13 @@ public class Moppable : Workable, ISim1000ms, ISim200ms
 	{
 		if (this.amountMopped > 0f)
 		{
-			PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Resource, GameUtil.GetFormattedMass(-this.amountMopped, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"), base.transform, 1.5f, false);
+			PopFX popFX = PopFXManager.Instance.SpawnFX((this.lastElementMopped == null) ? PopFXManager.Instance.sprite_Resource : Def.GetUISprite(this.lastElementMopped, "ui", false).first, null, GameUtil.GetFormattedMass(-this.amountMopped, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"), base.transform, Vector3.zero, 1.5f, true, false, false);
+			if (popFX != null && this.lastElementMopped != null && this.lastElementMopped.substance != null)
+			{
+				popFX.SetIconTint(this.lastElementMopped.substance.colour);
+			}
 			this.amountMopped = 0f;
+			this.lastElementMopped = null;
 		}
 	}
 
@@ -109,8 +114,10 @@ public class Moppable : Workable, ISim1000ms, ISim200ms
 		{
 			this.amountMopped += mass_cb_info.mass;
 			int num = Grid.PosToCell(this);
-			SubstanceChunk substanceChunk = LiquidSourceManager.Instance.CreateChunk(ElementLoader.elements[(int)mass_cb_info.elemIdx], mass_cb_info.mass, mass_cb_info.temperature, mass_cb_info.diseaseIdx, mass_cb_info.diseaseCount, Grid.CellToPosCCC(num, Grid.SceneLayer.Ore));
+			Element element = ElementLoader.elements[(int)mass_cb_info.elemIdx];
+			SubstanceChunk substanceChunk = LiquidSourceManager.Instance.CreateChunk(element, mass_cb_info.mass, mass_cb_info.temperature, mass_cb_info.diseaseIdx, mass_cb_info.diseaseCount, Grid.CellToPosCCC(num, Grid.SceneLayer.Ore));
 			substanceChunk.transform.SetPosition(substanceChunk.transform.GetPosition() + new Vector3((global::UnityEngine.Random.value - 0.5f) * 0.5f, 0f, 0f));
+			this.lastElementMopped = element;
 		}
 	}
 
@@ -198,13 +205,13 @@ public class Moppable : Workable, ISim1000ms, ISim200ms
 		if (this.childRenderer != null)
 		{
 			Material material = this.childRenderer.material;
-			bool flag = (bool)data;
+			bool value = ((Boxed<bool>)data).value;
 			if (material.color == Game.Instance.uiColours.Dig.invalidLocation)
 			{
 				return;
 			}
 			KSelectable component = base.GetComponent<KSelectable>();
-			if (flag)
+			if (value)
 			{
 				material.color = Game.Instance.uiColours.Dig.validLocation;
 				component.RemoveStatusItem(Db.Get().BuildingStatusItems.MopUnreachable, false);
@@ -232,6 +239,8 @@ public class Moppable : Workable, ISim1000ms, ISim200ms
 	private SchedulerHandle destroyHandle;
 
 	private float amountMopped;
+
+	private Element lastElementMopped;
 
 	private MeshRenderer childRenderer;
 

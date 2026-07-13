@@ -11,10 +11,10 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Graphics/Texture2D.h")]
+	[UsedByNativeCode]
 	[HelpURL("texture-type-default")]
 	[NativeHeader("Runtime/Graphics/GeneratedTextures.h")]
-	[UsedByNativeCode]
+	[NativeHeader("Runtime/Graphics/Texture2D.h")]
 	[ExcludeFromPreset]
 	public sealed class Texture2D : Texture
 	{

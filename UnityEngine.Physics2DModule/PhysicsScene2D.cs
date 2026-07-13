@@ -222,7 +222,7 @@ namespace UnityEngine
 
 		[StaticAccessor("PhysicsQuery2D", StaticAccessorType.DoubleColon)]
 		[NativeMethod("CircleCastArray_Binding")]
-		private static int CircleCastArray_Internal(PhysicsScene2D physicsScene, Vector2 origin, float radius, Vector2 direction, float distance, ContactFilter2D contactFilter, [NotNull("ArgumentNullException")] [Unmarshalled] RaycastHit2D[] results)
+		private static int CircleCastArray_Internal(PhysicsScene2D physicsScene, Vector2 origin, float radius, Vector2 direction, float distance, ContactFilter2D contactFilter, [Unmarshalled] [NotNull("ArgumentNullException")] RaycastHit2D[] results)
 		{
 			return PhysicsScene2D.CircleCastArray_Internal_Injected(ref physicsScene, ref origin, radius, ref direction, distance, ref contactFilter, results);
 		}
@@ -413,8 +413,8 @@ namespace UnityEngine
 			return PhysicsScene2D.OverlapPointList_Internal(this, point, contactFilter, results);
 		}
 
-		[NativeMethod("OverlapPointList_Binding")]
 		[StaticAccessor("PhysicsQuery2D", StaticAccessorType.DoubleColon)]
+		[NativeMethod("OverlapPointList_Binding")]
 		private static int OverlapPointList_Internal(PhysicsScene2D physicsScene, Vector2 point, ContactFilter2D contactFilter, [NotNull("ArgumentNullException")] List<Collider2D> results)
 		{
 			return PhysicsScene2D.OverlapPointList_Internal_Injected(ref physicsScene, ref point, ref contactFilter, results);
@@ -451,7 +451,7 @@ namespace UnityEngine
 
 		[StaticAccessor("PhysicsQuery2D", StaticAccessorType.DoubleColon)]
 		[NativeMethod("OverlapCircleArray_Binding")]
-		private static int OverlapCircleArray_Internal(PhysicsScene2D physicsScene, Vector2 point, float radius, ContactFilter2D contactFilter, [Unmarshalled] [NotNull("ArgumentNullException")] Collider2D[] results)
+		private static int OverlapCircleArray_Internal(PhysicsScene2D physicsScene, Vector2 point, float radius, ContactFilter2D contactFilter, [NotNull("ArgumentNullException")] [Unmarshalled] Collider2D[] results)
 		{
 			return PhysicsScene2D.OverlapCircleArray_Internal_Injected(ref physicsScene, ref point, radius, ref contactFilter, results);
 		}
@@ -575,8 +575,8 @@ namespace UnityEngine
 			return PhysicsScene2D.OverlapCapsule_Internal(this, point, size, direction, angle, contactFilter);
 		}
 
-		[NativeMethod("OverlapCapsule_Binding")]
 		[StaticAccessor("PhysicsQuery2D", StaticAccessorType.DoubleColon)]
+		[NativeMethod("OverlapCapsule_Binding")]
 		private static Collider2D OverlapCapsule_Internal(PhysicsScene2D physicsScene, Vector2 point, Vector2 size, CapsuleDirection2D direction, float angle, ContactFilter2D contactFilter)
 		{
 			return PhysicsScene2D.OverlapCapsule_Internal_Injected(ref physicsScene, ref point, ref size, direction, angle, ref contactFilter);
@@ -623,8 +623,8 @@ namespace UnityEngine
 			return PhysicsScene2D.OverlapColliderArray_Internal(collider, contactFilter, results);
 		}
 
-		[NativeMethod("OverlapColliderArray_Binding")]
 		[StaticAccessor("PhysicsQuery2D", StaticAccessorType.DoubleColon)]
+		[NativeMethod("OverlapColliderArray_Binding")]
 		private static int OverlapColliderArray_Internal([NotNull("ArgumentNullException")] Collider2D collider, ContactFilter2D contactFilter, [Unmarshalled] [NotNull("ArgumentNullException")] Collider2D[] results)
 		{
 			return PhysicsScene2D.OverlapColliderArray_Internal_Injected(collider, ref contactFilter, results);

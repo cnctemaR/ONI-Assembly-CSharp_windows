@@ -32,7 +32,9 @@ public class FallingWater : KMonoBehaviour, ISim200ms
 		FallingWater._instance = this;
 		base.OnPrefabInit();
 		this.mistEffect.SetActive(false);
-		this.mistPool = new GameObjectPool(new Func<GameObject>(this.InstantiateMist), 16);
+		this.mistPool = new GameObjectPool(new Func<GameObject>(this.InstantiateMist), delegate(GameObject _)
+		{
+		}, 16);
 	}
 
 	protected override void OnSpawn()
@@ -443,6 +445,19 @@ public class FallingWater : KMonoBehaviour, ISim200ms
 					eventInstance.setParameterByName("liquidVolume", this.GetParticleVolume(particleProperties.mass), false);
 					SoundEvent.EndOneShot(eventInstance);
 				}
+			}
+		}
+	}
+
+	public void ClearParticles(int cell)
+	{
+		for (int i = this.physics.Count - 1; i >= 0; i--)
+		{
+			if (Grid.PosToCell(this.physics[i].position) == cell)
+			{
+				FallingWater.ParticleProperties particleProperties = this.particleProperties[i];
+				this.physics.RemoveAt(i);
+				this.particleProperties.RemoveAt(i);
 			}
 		}
 	}

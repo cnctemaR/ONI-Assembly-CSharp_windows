@@ -73,22 +73,20 @@ public class Scheduler : IScheduler
 		}
 		int count = this.Count;
 		int num = 0;
-		using (new KProfiler.Region("Scheduler.Update", null))
+		float time = this.clock.GetTime();
+		if (this.previousTime == time)
 		{
-			float time = this.clock.GetTime();
-			if (this.previousTime != time)
+			return;
+		}
+		this.previousTime = time;
+		while (num < count && time >= this.entries.Peek().Key)
+		{
+			SchedulerEntry value = this.entries.Dequeue().Value;
+			if (value.callback != null)
 			{
-				this.previousTime = time;
-				while (num < count && time >= this.entries.Peek().Key)
-				{
-					SchedulerEntry value = this.entries.Dequeue().Value;
-					if (value.callback != null)
-					{
-						value.callback(value.callbackData);
-					}
-					num++;
-				}
+				value.callback(value.callbackData);
 			}
+			num++;
 		}
 	}
 

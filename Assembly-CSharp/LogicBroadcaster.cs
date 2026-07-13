@@ -70,7 +70,7 @@ public class LogicBroadcaster : KMonoBehaviour, ISimEveryTick
 		}
 	}
 
-	private void OnOperationalChanged(object data)
+	private void OnOperationalChanged(object _)
 	{
 		if (this.operational.IsOperational)
 		{

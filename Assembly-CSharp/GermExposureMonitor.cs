@@ -472,8 +472,8 @@ public class GermExposureMonitor : GameStateMachine<GermExposureMonitor, GermExp
 			{
 				return;
 			}
-			TagChangedEventData tagChangedEventData = (TagChangedEventData)o;
-			if (tagChangedEventData.tag == GameTags.BionicBedTime && !tagChangedEventData.added)
+			TagChangedEventData value = ((Boxed<TagChangedEventData>)o).value;
+			if (value.tag == GameTags.BionicBedTime && !value.added)
 			{
 				this.OnSleepFinished();
 			}

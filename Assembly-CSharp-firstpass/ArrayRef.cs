@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using KSerialization;
 
 [SerializationConfig(MemberSerialization.OptIn)]
@@ -8,12 +9,10 @@ public struct ArrayRef<T>
 	{
 		get
 		{
-			this.ValidateIndex(i);
 			return this.elements[i];
 		}
 		set
 		{
-			this.ValidateIndex(i);
 			this.elements[i] = value;
 		}
 	}
@@ -51,7 +50,7 @@ public struct ArrayRef<T>
 
 	public ArrayRef(T[] elements, int size)
 	{
-		Debug.Assert(size <= elements.Length);
+		global::Debug.Assert(size <= elements.Length);
 		this.elements = elements;
 		this.sizeImpl = size;
 		this.capacityImpl = elements.Length;
@@ -89,20 +88,20 @@ public struct ArrayRef<T>
 
 	public void RemoveAt(int index)
 	{
-		this.ValidateIndex(index);
 		for (int num = index; num != this.size - 1; num++)
 		{
 			this.elements[num] = this.elements[num + 1];
 		}
 		this.sizeImpl--;
+		this.elements[this.sizeImpl] = default(T);
 		DebugUtil.Assert(this.sizeImpl >= 0);
 	}
 
 	public void RemoveAtSwap(int index)
 	{
-		this.ValidateIndex(index);
 		this.elements[index] = this.elements[this.size - 1];
 		this.sizeImpl--;
+		this.elements[this.sizeImpl] = default(T);
 		DebugUtil.Assert(this.sizeImpl >= 0);
 	}
 
@@ -126,6 +125,7 @@ public struct ArrayRef<T>
 			{
 				this.elements[num] = this.elements[this.size - 1];
 				this.sizeImpl--;
+				this.elements[this.sizeImpl] = default(T);
 				DebugUtil.Assert(this.sizeImpl >= 0);
 			}
 			else
@@ -161,8 +161,11 @@ public struct ArrayRef<T>
 		this.Reallocate(this.size);
 	}
 
+	[Conditional("UNITY_EDITOR")]
 	private void ValidateIndex(int index)
 	{
+		global::Debug.Assert(0 <= index);
+		global::Debug.Assert(index < this.size);
 	}
 
 	private void MaybeGrow(int index)
@@ -179,7 +182,7 @@ public struct ArrayRef<T>
 
 	private void Reallocate(int newCapacity)
 	{
-		Debug.Assert(this.size <= newCapacity);
+		global::Debug.Assert(this.size <= newCapacity);
 		this.capacityImpl = newCapacity;
 		T[] array = new T[this.capacity];
 		for (int num = 0; num != this.size; num++)

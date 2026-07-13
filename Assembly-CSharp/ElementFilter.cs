@@ -99,6 +99,17 @@ public class ElementFilter : KMonoBehaviour, ISaveLoadable, ISecondaryOutput
 					float num2 = flowManager.AddElement(num, contents.element, contents.mass, contents.temperature, contents.diseaseIdx, contents.diseaseCount);
 					if (num2 > 0f)
 					{
+						if (this.lastelementMoved != contents.element && contents.element != SimHashes.Vacuum && this.portInfo.conduitType == ConduitType.Liquid)
+						{
+							Element element = ElementLoader.FindElementByHash(contents.element);
+							if (element != null)
+							{
+								Color color = element.substance.colour;
+								color.a = 1f;
+								this.controller.SetSymbolTint(new KAnimHashedString("liquid"), color);
+							}
+						}
+						this.lastelementMoved = contents.element;
 						flowManager.RemoveElement(this.inputCell, num2);
 					}
 				}
@@ -249,6 +260,9 @@ public class ElementFilter : KMonoBehaviour, ISaveLoadable, ISecondaryOutput
 	[MyCmpReq]
 	private Filterable filterable;
 
+	[MyCmpGet]
+	private KBatchedAnimController controller;
+
 	private Guid needsConduitStatusItemGuid;
 
 	private Guid conduitBlockedStatusItemGuid;
@@ -264,4 +278,6 @@ public class ElementFilter : KMonoBehaviour, ISaveLoadable, ISecondaryOutput
 	private HandleVector<int>.Handle partitionerEntry;
 
 	private static StatusItem filterStatusItem;
+
+	private SimHashes lastelementMoved = SimHashes.Vacuum;
 }

@@ -110,17 +110,17 @@ public class Tinkerable : Workable
 		base.OnCleanUp();
 	}
 
-	private void OnOperationalChanged(object data)
+	private void OnOperationalChanged(object _)
 	{
 		this.QueueUpdateChore();
 	}
 
-	private void OnEffectRemoved(object data)
+	private void OnEffectRemoved(object _)
 	{
 		this.QueueUpdateChore();
 	}
 
-	private void OnUpdateRoom(object data)
+	private void OnUpdateRoom(object _)
 	{
 		this.QueueUpdateChore();
 	}

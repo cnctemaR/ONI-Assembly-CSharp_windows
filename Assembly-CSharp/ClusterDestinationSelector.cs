@@ -39,7 +39,7 @@ public class ClusterDestinationSelector : KMonoBehaviour
 			Debug.Assert(ClusterUtil.GetAsteroidWorldIdAtLocation(location) != -1, string.Format("Cannot SetDestination to {0} as there is no world there", location));
 		}
 		this.m_destination = location;
-		base.Trigger(543433792, location);
+		base.BoxingTrigger<AxialI>(543433792, location);
 	}
 
 	public bool HasAsteroidDestination()

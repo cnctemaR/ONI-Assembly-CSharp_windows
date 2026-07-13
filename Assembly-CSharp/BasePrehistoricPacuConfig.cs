@@ -13,7 +13,7 @@ public static class BasePrehistoricPacuConfig
 		int num2 = (is_baby ? 1 : 2);
 		int num3 = (is_baby ? 1 : 2);
 		EffectorValues tier = DECOR.BONUS.TIER0;
-		KAnimFile anim = Assets.GetAnim(anim_file);
+		KAnimFile anim = Assets.GetAnim(is_baby ? anim_file : "paculacanth_build_kanim");
 		string text = "idle_loop";
 		Grid.SceneLayer sceneLayer = Grid.SceneLayer.Creatures;
 		int num4 = num2;
@@ -25,7 +25,6 @@ public static class BasePrehistoricPacuConfig
 		{
 			KBoxCollider2D kboxCollider2D = gameObject.AddOrGet<KBoxCollider2D>();
 			kboxCollider2D.offset = new Vector2f(0f, kboxCollider2D.offset.y);
-			gameObject.GetComponent<KBatchedAnimController>().Offset = new Vector3(0f, 0f, 0f);
 		}
 		KPrefabID component = gameObject.GetComponent<KPrefabID>();
 		component.AddTag(GameTags.SwimmingCreature, false);
@@ -36,7 +35,7 @@ public static class BasePrehistoricPacuConfig
 		trait.Add(new AttributeModifier(Db.Get().Amounts.HitPoints.maxAttribute.Id, 25f, name, false, false, true));
 		trait.Add(new AttributeModifier(Db.Get().Amounts.Age.maxAttribute.Id, 100f, name, false, false, true));
 		gameObject.AddComponent<Movable>();
-		EntityTemplates.ExtendEntityToBasicCreature(gameObject, FactionManager.FactionID.Prey, base_trait_id, is_baby ? "SwimmerNavGrid" : "SwimmerGrid2x2", NavType.Swim, 32, 2f, "PrehistoricPacuFillet", 12f, false, false, warnLowTemp, warnHighTemp, lethalLowTemp, lethalHighTemp);
+		EntityTemplates.ExtendEntityToBasicCreature(false, gameObject, anim_file, is_baby ? null : "paculacanth_build_kanim", null, FactionManager.FactionID.Prey, base_trait_id, is_baby ? "SwimmerNavGrid" : "SwimmerGrid2x2", NavType.Swim, 32, 2f, "PrehistoricPacuFillet", 12f, false, false, warnLowTemp, warnHighTemp, lethalLowTemp, lethalHighTemp);
 		ChoreTable.Builder builder = new ChoreTable.Builder().Add(new DeathStates.Def(), true, -1).Add(new AnimInterruptStates.Def(), true, -1).Add(new GrowUpStates.Def(), is_baby, -1)
 			.Add(new TrappedStates.Def(), true, -1)
 			.Add(new IncubatingStates.Def(), is_baby, -1)
@@ -54,6 +53,7 @@ public static class BasePrehistoricPacuConfig
 			.Add(new PlayAnimsStates.Def(GameTags.Creatures.Poop, false, "lay_egg_pre", global::STRINGS.CREATURES.STATUSITEMS.EXPELLING_SOLID.NAME, global::STRINGS.CREATURES.STATUSITEMS.EXPELLING_SOLID.TOOLTIP), true, -1)
 			.Add(new MoveToLureStates.Def(), true, -1)
 			.Add(new CritterCondoStates.Def(), !is_baby, -1)
+			.Add(new CritterEmoteStates.Def(Assets.GetAnim("paculacanth_emotes_kanim")), true, -1)
 			.PopInterruptGroup()
 			.Add(new IdleStates.Def(), true, -1);
 		CreatureFallMonitor.Def def = gameObject.AddOrGetDef<CreatureFallMonitor.Def>();

@@ -36,6 +36,7 @@ public class ChemicalRefineryConfig : IBuildingConfig
 		buildingDef.PowerInputOffset = new CellOffset(1, 0);
 		buildingDef.UtilityInputOffset = new CellOffset(0, 0);
 		buildingDef.UtilityOutputOffset = new CellOffset(2, 1);
+		buildingDef.RequiredSkillPerkID = Db.Get().SkillPerks.AllowChemistry.Id;
 		return buildingDef;
 	}
 

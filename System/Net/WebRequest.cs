@@ -213,13 +213,24 @@ namespace System.Net
 		private static ArrayList PopulatePrefixList()
 		{
 			ArrayList arrayList = new ArrayList();
-			WebRequestModulesSection webRequestModulesSection = ConfigurationManager.GetSection("system.net/webRequestModules") as WebRequestModulesSection;
-			if (webRequestModulesSection != null)
+			if (Console.IsRunningOnAndroid)
 			{
-				foreach (object obj in webRequestModulesSection.WebRequestModules)
+				IWebRequestCreate webRequestCreate = new HttpRequestCreator();
+				arrayList.Add(new WebRequestPrefixElement("http", webRequestCreate));
+				arrayList.Add(new WebRequestPrefixElement("https", webRequestCreate));
+				arrayList.Add(new WebRequestPrefixElement("file", new FileWebRequestCreator()));
+				arrayList.Add(new WebRequestPrefixElement("ftp", new FtpWebRequestCreator()));
+			}
+			else
+			{
+				WebRequestModulesSection webRequestModulesSection = ConfigurationManager.GetSection("system.net/webRequestModules") as WebRequestModulesSection;
+				if (webRequestModulesSection != null)
 				{
-					WebRequestModuleElement webRequestModuleElement = (WebRequestModuleElement)obj;
-					arrayList.Add(new WebRequestPrefixElement(webRequestModuleElement.Prefix, webRequestModuleElement.Type));
+					foreach (object obj in webRequestModulesSection.WebRequestModules)
+					{
+						WebRequestModuleElement webRequestModuleElement = (WebRequestModuleElement)obj;
+						arrayList.Add(new WebRequestPrefixElement(webRequestModuleElement.Prefix, webRequestModuleElement.Type));
+					}
 				}
 			}
 			return arrayList;

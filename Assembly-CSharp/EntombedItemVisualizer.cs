@@ -13,7 +13,9 @@ public class EntombedItemVisualizer : KMonoBehaviour
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		this.entombedItemPool = new GameObjectPool(new Func<GameObject>(this.InstantiateEntombedObject), 32);
+		this.entombedItemPool = new GameObjectPool(new Func<GameObject>(this.InstantiateEntombedObject), delegate(GameObject _)
+		{
+		}, 32);
 	}
 
 	public bool AddItem(int cell)

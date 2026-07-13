@@ -5,11 +5,11 @@ using UnityEngine.Scripting.APIUpdating;
 
 namespace UnityEngine
 {
-	[MovedFrom("UnityEditor")]
 	[ExcludeFromPreset]
 	[NativeClass("LocalizationAsset")]
 	[NativeHeader("Modules/Localization/Public/LocalizationAsset.bindings.h")]
 	[NativeHeader("Modules/Localization/Public/LocalizationAsset.h")]
+	[MovedFrom("UnityEditor")]
 	public sealed class LocalizationAsset : Object
 	{
 		public LocalizationAsset()

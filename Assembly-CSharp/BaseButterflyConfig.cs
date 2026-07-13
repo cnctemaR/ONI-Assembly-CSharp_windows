@@ -10,7 +10,7 @@ public static class BaseButterflyConfig
 		float num = 5f;
 		EffectorValues tier = DECOR.BONUS.TIER0;
 		GameObject gameObject = EntityTemplates.CreatePlacedEntity(id, name, desc, num, Assets.GetAnim(anim_file), "idle_loop", Grid.SceneLayer.Creatures, 1, 1, tier, default(EffectorValues), SimHashes.Creature, null, 293f);
-		EntityTemplates.ExtendEntityToBasicCreature(gameObject, FactionManager.FactionID.Pest, traitId, "FlyerNavGrid1x1", NavType.Hover, 32, 2f, "ButterflyPlantSeed", 1f, true, true, 283.15f, 318.15f, 233.15f, 353.15f);
+		EntityTemplates.ExtendEntityToBasicCreature(false, gameObject, anim_file, "pollinator_build_kanim", null, FactionManager.FactionID.Pest, traitId, "FlyerNavGrid1x1", NavType.Hover, 32, 2f, "ButterflyPlantSeed", 1f, true, true, 283.15f, 318.15f, 233.15f, 353.15f);
 		if (symbolOverridePrefix != null)
 		{
 			gameObject.AddOrGet<SymbolOverrideController>().ApplySymbolOverridesByAffix(Assets.GetAnim(anim_file), symbolOverridePrefix, null, 0);
@@ -51,6 +51,7 @@ public static class BaseButterflyConfig
 				loopAnim = "pollinate_loop",
 				pstAnim = "pollinate_pst"
 			}, true, -1)
+			.Add(new CritterEmoteStates.Def(Assets.GetAnim("pollinator_emotes_kanim")), true, -1)
 			.PopInterruptGroup()
 			.Add(new IdleStates.Def(), true, -1);
 		EntityTemplates.AddCreatureBrain(gameObject, builder, GameTags.Creatures.Species.ButterflySpecies, symbolOverridePrefix);

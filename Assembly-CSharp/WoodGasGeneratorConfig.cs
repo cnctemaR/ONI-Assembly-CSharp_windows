@@ -50,14 +50,14 @@ public class WoodGasGeneratorConfig : IBuildingConfig
 		go.AddOrGet<LoopingSounds>();
 		ManualDeliveryKG manualDeliveryKG = go.AddOrGet<ManualDeliveryKG>();
 		manualDeliveryKG.SetStorage(storage);
-		manualDeliveryKG.RequestedItemTag = SimHashes.WoodLog.CreateTag();
+		manualDeliveryKG.RequestedItemTag = "BuildingWood";
 		manualDeliveryKG.capacity = 360f;
 		manualDeliveryKG.refillMass = 180f;
 		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.FetchCritical.IdHash;
 		EnergyGenerator energyGenerator = go.AddOrGet<EnergyGenerator>();
 		energyGenerator.powerDistributionOrder = 8;
 		energyGenerator.hasMeter = true;
-		energyGenerator.formula = EnergyGenerator.CreateSimpleFormula(SimHashes.WoodLog.CreateTag(), 1.2f, num, SimHashes.CarbonDioxide, 0.17f, false, new CellOffset(0, 1), 383.15f);
+		energyGenerator.formula = EnergyGenerator.CreateSimpleFormula("BuildingWood", 1.2f, num, SimHashes.CarbonDioxide, 0.17f, false, new CellOffset(0, 1), 383.15f);
 		Tinkerable.MakePowerTinkerable(go);
 		go.AddOrGetDef<PoweredActiveController.Def>();
 	}

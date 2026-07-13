@@ -250,7 +250,7 @@ public class Storage : Workable, ISaveLoadableDetails, IGameObjectEffectDescript
 			{
 				text = string.Format(locString, (int)component.Units, go.GetProperName());
 			}
-			PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Resource, text, transform, this.storageFXOffset, 1.5f, false, false);
+			PopFXManager.Instance.SpawnFX(Def.GetUISprite(go, "ui", false).first, (this.fxPrefix == Storage.FXPrefix.Delivered) ? PopFXManager.Instance.sprite_Plus : PopFXManager.Instance.sprite_Negative, text, transform, this.storageFXOffset, 1.5f, true, false, false);
 		}
 		go.transform.parent = base.transform;
 		Vector3 vector = Grid.CellToPosCCC(Grid.PosToCell(this), Grid.SceneLayer.Move);
@@ -584,7 +584,7 @@ public class Storage : Workable, ISaveLoadableDetails, IGameObjectEffectDescript
 								flag = true;
 								if (showInWorldNotification)
 								{
-									PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Resource, pickupable.GetComponent<PrimaryElement>().Element.name + " " + GameUtil.GetFormattedMass(pickupable.TotalAmount, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"), pickupable.transform, this.storageFXOffset, 1.5f, false, false);
+									PopFXManager.Instance.SpawnFX(Def.GetUISprite(component.gameObject, "ui", false).first, PopFXManager.Instance.sprite_Plus, pickupable.GetComponent<PrimaryElement>().Element.name + " " + GameUtil.GetFormattedMass(pickupable.TotalAmount, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"), pickupable.transform, this.storageFXOffset, 1.5f, true, false, false);
 								}
 							}
 							if (dumpLiquid && pickupable.GetComponent<PrimaryElement>().Element.IsLiquid)
@@ -601,7 +601,7 @@ public class Storage : Workable, ISaveLoadableDetails, IGameObjectEffectDescript
 								flag = true;
 								if (showInWorldNotification)
 								{
-									PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Resource, pickupable.GetComponent<PrimaryElement>().Element.name + " " + GameUtil.GetFormattedMass(pickupable.TotalAmount, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"), pickupable.transform, this.storageFXOffset, 1.5f, false, false);
+									PopFXManager.Instance.SpawnFX(Def.GetUISprite(component.gameObject, "ui", false).first, PopFXManager.Instance.sprite_Plus, pickupable.GetComponent<PrimaryElement>().Element.name + " " + GameUtil.GetFormattedMass(pickupable.TotalAmount, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"), pickupable.transform, this.storageFXOffset, 1.5f, true, false, false);
 								}
 							}
 						}
@@ -626,7 +626,7 @@ public class Storage : Workable, ISaveLoadableDetails, IGameObjectEffectDescript
 						flag = true;
 						if (showInWorldNotification)
 						{
-							PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Resource, pickupable.GetComponent<PrimaryElement>().Element.name + " " + GameUtil.GetFormattedMass(pickupable.TotalAmount, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"), pickupable.transform, this.storageFXOffset, 1.5f, false, false);
+							PopFXManager.Instance.SpawnFX(Def.GetUISprite(component.gameObject, "ui", false).first, PopFXManager.Instance.sprite_Plus, pickupable.GetComponent<PrimaryElement>().Element.name + " " + GameUtil.GetFormattedMass(pickupable.TotalAmount, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"), pickupable.transform, this.storageFXOffset, 1.5f, true, false, false);
 						}
 					}
 				}
@@ -1484,9 +1484,9 @@ public class Storage : Workable, ISaveLoadableDetails, IGameObjectEffectDescript
 
 	private void OnReachableChanged(object data)
 	{
-		bool flag = (bool)data;
+		bool value = ((Boxed<bool>)data).value;
 		KSelectable component = base.GetComponent<KSelectable>();
-		if (flag)
+		if (value)
 		{
 			component.RemoveStatusItem(Db.Get().BuildingStatusItems.StorageUnreachable, false);
 			return;

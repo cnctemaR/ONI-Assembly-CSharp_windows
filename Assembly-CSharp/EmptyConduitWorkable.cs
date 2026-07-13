@@ -91,7 +91,7 @@ public class EmptyConduitWorkable : Workable, IEmptyConduitWorkable
 		return Game.Instance.gasConduitFlow;
 	}
 
-	private void OnEmptyConduitCancelled(object data)
+	private void OnEmptyConduitCancelled(object _)
 	{
 		this.CancelEmptying();
 	}

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace UnityEngine.Pool
 {
-	public class ObjectPool<T> : IDisposable, IObjectPool<T> where T : class
+	public class ObjectPool<T> : IDisposable, IPool, IObjectPool<T> where T : class
 	{
 		public int CountAll { get; private set; }
 
@@ -42,6 +42,7 @@ namespace UnityEngine.Pool
 			this.m_ActionOnRelease = actionOnRelease;
 			this.m_ActionOnDestroy = actionOnDestroy;
 			this.m_CollectionCheck = collectionCheck;
+			PoolManager.Register(this);
 		}
 
 		public T Get()

@@ -111,7 +111,7 @@ public class FetchChore : Chore<FetchChore.StatesInstance>
 		base.End(reason);
 	}
 
-	private void OnTagsChanged(object data)
+	private void OnTagsChanged(object _)
 	{
 		if (base.smi.sm.chunk.Get(base.smi) != null)
 		{
@@ -165,18 +165,18 @@ public class FetchChore : Chore<FetchChore.StatesInstance>
 	public static float GetMinimumFetchAmount(Tag requested_tag, float requested_amount)
 	{
 		float num = requested_amount;
-		GameObject prefab = Assets.GetPrefab(requested_tag);
-		if (prefab != null)
+		GameObject gameObject = Assets.TryGetPrefab(requested_tag);
+		if (gameObject != null)
 		{
-			PrimaryElement component = prefab.GetComponent<PrimaryElement>();
+			PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
 			if (component != null && component.MassPerUnit > 1f)
 			{
 				return Mathf.Max(num, component.MassPerUnit);
 			}
 		}
-		foreach (GameObject gameObject in Assets.GetPrefabsWithTag(requested_tag))
+		foreach (GameObject gameObject2 in Assets.GetPrefabsWithTag(requested_tag))
 		{
-			PrimaryElement component2 = gameObject.GetComponent<PrimaryElement>();
+			PrimaryElement component2 = gameObject2.GetComponent<PrimaryElement>();
 			if (component2 != null && component2.MassPerUnit > 1f)
 			{
 				num = Mathf.Max(num, component2.MassPerUnit);
@@ -248,7 +248,7 @@ public class FetchChore : Chore<FetchChore.StatesInstance>
 			}
 		}
 		this.partitionerEntry = GameScenePartitioner.Instance.Add(destination.name, this, Grid.PosToCell(destination), GameScenePartitioner.Instance.fetchChoreLayer, null);
-		destination.Subscribe(644822890, new Action<object>(this.OnOnlyFetchMarkedItemsSettingChanged));
+		this.onOnlyFetchMarkedItemsSettingChangedHandle = destination.Subscribe(644822890, new Action<object>(this.OnOnlyFetchMarkedItemsSettingChanged));
 		this.automatable = destination.GetComponent<Automatable>();
 		if (this.automatable)
 		{
@@ -296,7 +296,7 @@ public class FetchChore : Chore<FetchChore.StatesInstance>
 		GameScenePartitioner.Instance.Free(ref this.partitionerEntry);
 		if (this.destination != null)
 		{
-			this.destination.Unsubscribe(644822890, new Action<object>(this.OnOnlyFetchMarkedItemsSettingChanged));
+			this.destination.Unsubscribe(ref this.onOnlyFetchMarkedItemsSettingChangedHandle);
 		}
 	}
 
@@ -331,6 +331,8 @@ public class FetchChore : Chore<FetchChore.StatesInstance>
 	public bool allowMultifetch = true;
 
 	private HandleVector<int>.Handle partitionerEntry;
+
+	private int onOnlyFetchMarkedItemsSettingChangedHandle = -1;
 
 	public static readonly Chore.Precondition IsFetchTargetAvailable = new Chore.Precondition
 	{

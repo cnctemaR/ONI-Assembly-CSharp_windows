@@ -24,6 +24,7 @@ public class LandingBeaconConfig : IBuildingConfig
 		EffectorValues tier2 = NOISE_POLLUTION.NOISY.TIER2;
 		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, refined_METALS, num5, buildLocationRule, BUILDINGS.DECOR.PENALTY.TIER1, tier2, 0.2f);
 		BuildingTemplates.CreateRocketBuildingDef(buildingDef);
+		buildingDef.DefaultAnimState = "off";
 		buildingDef.SceneLayer = Grid.SceneLayer.BuildingFront;
 		buildingDef.OverheatTemperature = 398.15f;
 		buildingDef.Floodable = false;

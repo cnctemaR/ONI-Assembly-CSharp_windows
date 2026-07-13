@@ -61,11 +61,18 @@ public abstract class AudioSheets : ScriptableObject
 	public List<AnimEvent> GetEvents(HashedString anim_id)
 	{
 		List<AnimEvent> list = null;
+		HashedString hashedString;
+		if (this.skinToBaseAnim.TryGetValue(anim_id, out hashedString))
+		{
+			anim_id = hashedString;
+		}
 		this.events.TryGetValue(anim_id, out list);
 		return list;
 	}
 
 	public List<AudioSheet> sheets = new List<AudioSheet>();
+
+	public Dictionary<HashedString, HashedString> skinToBaseAnim = new Dictionary<HashedString, HashedString>();
 
 	public Dictionary<HashedString, List<AnimEvent>> events = new Dictionary<HashedString, List<AnimEvent>>();
 }

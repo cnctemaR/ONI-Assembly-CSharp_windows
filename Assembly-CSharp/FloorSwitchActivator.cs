@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 
 [AddComponentMenu("KMonoBehaviour/scripts/FloorSwitchActivator")]
@@ -62,7 +63,7 @@ public class FloorSwitchActivator : KMonoBehaviour
 		}
 		int num = Grid.PosToCell(this);
 		this.partitionerEntry = GameScenePartitioner.Instance.Add("FloorSwitchActivator.Register", this, num, GameScenePartitioner.Instance.floorSwitchActivatorLayer, null);
-		Singleton<CellChangeMonitor>.Instance.RegisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChange), "FloorSwitchActivator.Register");
+		this.cellChangeHandlerID = Singleton<CellChangeMonitor>.Instance.RegisterCellChangedHandler(base.transform, FloorSwitchActivator.OnCellChangeDispatcher, this, "FloorSwitchActivator.Register");
 		this.registered = true;
 	}
 
@@ -73,7 +74,7 @@ public class FloorSwitchActivator : KMonoBehaviour
 			return;
 		}
 		GameScenePartitioner.Instance.Free(ref this.partitionerEntry);
-		Singleton<CellChangeMonitor>.Instance.UnregisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChange));
+		Singleton<CellChangeMonitor>.Instance.UnregisterCellChangedHandler(ref this.cellChangeHandlerID);
 		if (this.last_cell_occupied > -1)
 		{
 			this.NotifyChanged(this.last_cell_occupied);
@@ -89,4 +90,11 @@ public class FloorSwitchActivator : KMonoBehaviour
 	private HandleVector<int>.Handle partitionerEntry;
 
 	private int last_cell_occupied = -1;
+
+	private ulong cellChangeHandlerID;
+
+	private static readonly Action<object> OnCellChangeDispatcher = delegate(object obj)
+	{
+		Unsafe.As<FloorSwitchActivator>(obj).OnCellChange();
+	};
 }

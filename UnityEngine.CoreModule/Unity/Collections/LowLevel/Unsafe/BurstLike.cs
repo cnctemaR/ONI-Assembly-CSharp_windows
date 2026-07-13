@@ -9,12 +9,12 @@ using UnityEngine.Scripting;
 
 namespace Unity.Collections.LowLevel.Unsafe
 {
-	[StaticAccessor("BurstLike", StaticAccessorType.DoubleColon)]
 	[NativeHeader("Runtime/Export/BurstLike/BurstLike.bindings.h")]
+	[StaticAccessor("BurstLike", StaticAccessorType.DoubleColon)]
 	internal static class BurstLike
 	{
-		[ThreadSafe(ThrowsException = false)]
 		[BurstAuthorizedExternalMethod]
+		[ThreadSafe(ThrowsException = false)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern int NativeFunctionCall_Int_IntPtr_IntPtr(IntPtr function, IntPtr p0, IntPtr p1, out int error);
 

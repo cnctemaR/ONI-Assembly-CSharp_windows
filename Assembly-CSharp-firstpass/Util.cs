@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -12,6 +13,70 @@ using UnityEngine;
 
 public static class Util
 {
+	[Conditional("UNITY_EDITOR")]
+	public static void WarnIfCapturing<T>(Predicate<T> pred)
+	{
+		if (pred.Target != null || !pred.Method.IsStatic)
+		{
+			global::Debug.LogWarning("Non-static or capturing predicate used");
+		}
+	}
+
+	[Conditional("UNITY_EDITOR")]
+	public static void WarnIfCapturing<T>(Action<T> action)
+	{
+		if (action.Target != null || !action.Method.IsStatic)
+		{
+			global::Debug.LogWarning("Non-static or capturing predicate used");
+		}
+	}
+
+	[Conditional("UNITY_EDITOR")]
+	public static void WarnIfCapturing<T1, T2>(Action<T1, T2> action)
+	{
+		if (action.Target != null || !action.Method.IsStatic)
+		{
+			global::Debug.LogWarning("Non-static or capturing predicate used");
+		}
+	}
+
+	[Conditional("UNITY_EDITOR")]
+	public static void WarnIfCapturing<T, Y>(Func<T, Y, bool> pred)
+	{
+		if (pred.Target != null || !pred.Method.IsStatic)
+		{
+			global::Debug.LogWarning("Non-static or capturing predicate used");
+		}
+	}
+
+	public static void RemoveAtSwap<T>(this List<T> list, int index)
+	{
+		list[index] = list[list.Count - 1];
+		list.RemoveAt(list.Count - 1);
+	}
+
+	public static void RemoveAllSwap<T>(this List<T> list, Predicate<T> pred)
+	{
+		for (int i = list.Count - 1; i >= 0; i--)
+		{
+			if (pred(list[i]))
+			{
+				list.RemoveAtSwap<T>(i);
+			}
+		}
+	}
+
+	public static void RemoveAllSwap<T, Y>(this List<T> list, Func<T, Y, bool> pred, Y context)
+	{
+		for (int i = list.Count - 1; i >= 0; i--)
+		{
+			if (pred(list[i], context))
+			{
+				list.RemoveAtSwap<T>(i);
+			}
+		}
+	}
+
 	public static void Swap<T>(ref T a, ref T b)
 	{
 		T t = a;
@@ -856,7 +921,12 @@ public static class Util
 
 	public static bool IsNullOrDestroyed(this object obj)
 	{
-		return obj == null || (obj is global::UnityEngine.Object && obj as global::UnityEngine.Object == null);
+		if (obj == null)
+		{
+			return true;
+		}
+		global::UnityEngine.Object @object = obj as global::UnityEngine.Object;
+		return @object != null && @object == null;
 	}
 
 	public static void Deconstruct<TKey, TValue>(this KeyValuePair<TKey, TValue> self, out TKey key, out TValue value)
@@ -906,4 +976,10 @@ public static class Util
 	private static string consoleLogPath = Application.consoleLogPath;
 
 	private static string operatingSystem = SystemInfo.operatingSystem;
+
+	public enum IterationInstruction : byte
+	{
+		Continue,
+		Halt
+	}
 }

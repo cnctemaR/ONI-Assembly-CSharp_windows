@@ -4,8 +4,8 @@ using UnityEngine.Internal;
 
 namespace UnityEngine
 {
-	[EditorBrowsable(EditorBrowsableState.Never)]
 	[Obsolete("GUIElement has been removed. Consider using https://docs.unity3d.com/ScriptReference/UIElements.Image.html, https://docs.unity3d.com/ScriptReference/UIElements.TextElement.html or TextMeshPro instead.", true)]
+	[EditorBrowsable(EditorBrowsableState.Never)]
 	[ExcludeFromObjectFactory]
 	[ExcludeFromPreset]
 	public sealed class GUIElement

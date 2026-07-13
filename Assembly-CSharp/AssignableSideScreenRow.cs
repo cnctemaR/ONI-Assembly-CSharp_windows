@@ -73,19 +73,13 @@ public class AssignableSideScreenRow : KMonoBehaviour
 
 	protected override void OnCleanUp()
 	{
-		if (this.refreshHandle == -1)
-		{
-			Game.Instance.Unsubscribe(this.refreshHandle);
-		}
+		Game.Instance.Unsubscribe(ref this.refreshHandle);
 		base.OnCleanUp();
 	}
 
 	public void SetContent(IAssignableIdentity identity_object, Action<IAssignableIdentity> selectionCallback, AssignableSideScreen assignableSideScreen)
 	{
-		if (this.refreshHandle == -1)
-		{
-			Game.Instance.Unsubscribe(this.refreshHandle);
-		}
+		Game.Instance.Unsubscribe(ref this.refreshHandle);
 		this.refreshHandle = Game.Instance.Subscribe(-2146166042, delegate(object o)
 		{
 			if (this != null && this.gameObject != null && this.gameObject.activeInHierarchy)

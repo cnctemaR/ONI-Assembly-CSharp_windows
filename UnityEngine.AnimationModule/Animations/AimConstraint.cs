@@ -6,10 +6,10 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Animations
 {
-	[UsedByNativeCode]
-	[NativeHeader("Modules/Animation/Constraints/AimConstraint.h")]
 	[NativeHeader("Modules/Animation/Constraints/Constraint.bindings.h")]
+	[NativeHeader("Modules/Animation/Constraints/AimConstraint.h")]
 	[RequireComponent(typeof(Transform))]
+	[UsedByNativeCode]
 	public sealed class AimConstraint : Behaviour, IConstraint, IConstraintInternal
 	{
 		private AimConstraint()

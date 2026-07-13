@@ -95,7 +95,7 @@ public class KSelectable : KMonoBehaviour
 		{
 			component.HighlightColour = new Color(0f, 0f, 0f, 0f);
 		}
-		base.Trigger(-1201923725, false);
+		base.Trigger(-1201923725, BoxedBools.False);
 	}
 
 	private void ApplyHighlight(float highlight)
@@ -105,7 +105,7 @@ public class KSelectable : KMonoBehaviour
 		{
 			component.HighlightColour = new Color(highlight, highlight, highlight, highlight);
 		}
-		base.Trigger(-1201923725, true);
+		base.Trigger(-1201923725, BoxedBools.True);
 	}
 
 	public void Select()
@@ -113,7 +113,7 @@ public class KSelectable : KMonoBehaviour
 		this.selected = true;
 		this.ClearHighlight();
 		this.ApplyHighlight(0.2f);
-		base.Trigger(-1503271301, true);
+		base.Trigger(-1503271301, BoxedBools.True);
 		if (base.GetComponent<LoopingSounds>() != null)
 		{
 			base.GetComponent<LoopingSounds>().UpdateObjectSelection(this.selected);
@@ -144,7 +144,7 @@ public class KSelectable : KMonoBehaviour
 		{
 			this.selected = false;
 			this.ClearHighlight();
-			base.Trigger(-1503271301, false);
+			base.Trigger(-1503271301, BoxedBools.False);
 		}
 		if (base.GetComponent<LoopingSounds>() != null)
 		{

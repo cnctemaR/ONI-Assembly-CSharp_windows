@@ -7,7 +7,7 @@ public class CreatureThoughtGraph : GameStateMachine<CreatureThoughtGraph, Creat
 	{
 		default_state = this.initialdelay;
 		this.initialdelay.ScheduleGoTo(1f, this.nothoughts);
-		this.nothoughts.OnSignal(this.thoughtsChanged, this.displayingthought, (CreatureThoughtGraph.Instance smi) => smi.HasThoughts()).OnSignal(this.thoughtsChangedImmediate, this.displayingthought, (CreatureThoughtGraph.Instance smi) => smi.HasThoughts());
+		this.nothoughts.OnSignal(this.thoughtsChanged, this.displayingthought, (CreatureThoughtGraph.Instance smi, StateMachine<CreatureThoughtGraph, CreatureThoughtGraph.Instance, IStateMachineTarget, CreatureThoughtGraph.Def>.SignalParameter param) => smi.HasThoughts()).OnSignal(this.thoughtsChangedImmediate, this.displayingthought, (CreatureThoughtGraph.Instance smi, StateMachine<CreatureThoughtGraph, CreatureThoughtGraph.Instance, IStateMachineTarget, CreatureThoughtGraph.Def>.SignalParameter param) => smi.HasThoughts());
 		this.displayingthought.Enter("CreateBubble", delegate(CreatureThoughtGraph.Instance smi)
 		{
 			smi.CreateBubble();
@@ -15,7 +15,7 @@ public class CreatureThoughtGraph : GameStateMachine<CreatureThoughtGraph, Creat
 		{
 			smi.DestroyBubble();
 		}).ScheduleGoTo((CreatureThoughtGraph.Instance smi) => this.thoughtDisplayTime.Get(smi), this.cooldown);
-		this.cooldown.OnSignal(this.thoughtsChangedImmediate, this.displayingthought, (CreatureThoughtGraph.Instance smi) => smi.HasImmediateThought()).ScheduleGoTo(20f, this.nothoughts);
+		this.cooldown.OnSignal(this.thoughtsChangedImmediate, this.displayingthought, (CreatureThoughtGraph.Instance smi, StateMachine<CreatureThoughtGraph, CreatureThoughtGraph.Instance, IStateMachineTarget, CreatureThoughtGraph.Def>.SignalParameter param) => smi.HasImmediateThought()).ScheduleGoTo(20f, this.nothoughts);
 	}
 
 	public StateMachine<CreatureThoughtGraph, CreatureThoughtGraph.Instance, IStateMachineTarget, CreatureThoughtGraph.Def>.Signal thoughtsChanged;

@@ -41,6 +41,31 @@ public class RocketModule : KMonoBehaviour
 		return list;
 	}
 
+	public int PopulateConditionSet(ProcessCondition.ProcessConditionType conditionType, List<ProcessCondition> conditions)
+	{
+		int num = 0;
+		if (conditionType == ProcessCondition.ProcessConditionType.All)
+		{
+			using (Dictionary<ProcessCondition.ProcessConditionType, List<ProcessCondition>>.Enumerator enumerator = this.moduleConditions.GetEnumerator())
+			{
+				while (enumerator.MoveNext())
+				{
+					KeyValuePair<ProcessCondition.ProcessConditionType, List<ProcessCondition>> keyValuePair = enumerator.Current;
+					conditions.AddRange(keyValuePair.Value);
+					num += keyValuePair.Value.Count;
+				}
+				return num;
+			}
+		}
+		List<ProcessCondition> list;
+		if (this.moduleConditions.TryGetValue(conditionType, out list))
+		{
+			conditions.AddRange(list);
+			num += list.Count;
+		}
+		return num;
+	}
+
 	public void SetBGKAnim(KAnimFile anim_file)
 	{
 		this.bgAnimFile = anim_file;

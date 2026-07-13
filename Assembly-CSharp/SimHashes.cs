@@ -184,6 +184,7 @@ public enum SimHashes
 	SolidNuclearWaste = -497625153,
 	Cinnabar = 1875790680,
 	WoodLog = 16214647,
+	FabricatedWood = 663200452,
 	Tallow = -1624652107,
 	Gunk = -230085045,
 	NickelOre = 1387581016,

@@ -217,7 +217,7 @@ public class RanchedStates : GameStateMachine<RanchedStates, RanchedStates.Insta
 			this.animController = base.GetComponent<KBatchedAnimController>();
 			this.OriginalSpeed = this.Monitor.NavComponent.defaultSpeed;
 			chore.AddPrecondition(ChorePreconditions.instance.CheckBehaviourPrecondition, GameTags.Creatures.WantsToGetRanched);
-			KAnim.Anim anim = base.smi.Get<KBatchedAnimController>().AnimFiles[0].GetData().GetAnim("excited_loop");
+			KAnim.Anim anim = this.animController.GetAnim(new HashedString("excited_loop"));
 			this.cheerAnimLength = ((anim != null) ? (anim.totalTime + 0.2f) : 1.2f);
 		}
 

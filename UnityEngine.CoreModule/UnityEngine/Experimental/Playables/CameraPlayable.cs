@@ -7,10 +7,10 @@ using UnityEngine.Scripting;
 namespace UnityEngine.Experimental.Playables
 {
 	[RequiredByNativeCode]
+	[StaticAccessor("CameraPlayableBindings", StaticAccessorType.DoubleColon)]
 	[NativeHeader("Runtime/Export/Director/CameraPlayable.bindings.h")]
 	[NativeHeader("Runtime/Camera//Director/CameraPlayable.h")]
 	[NativeHeader("Runtime/Director/Core/HPlayable.h")]
-	[StaticAccessor("CameraPlayableBindings", StaticAccessorType.DoubleColon)]
 	public struct CameraPlayable : IPlayable, IEquatable<CameraPlayable>
 	{
 		public static CameraPlayable Create(PlayableGraph graph, Camera camera)

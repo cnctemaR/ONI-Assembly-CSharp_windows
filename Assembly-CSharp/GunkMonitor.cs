@@ -11,11 +11,11 @@ public class GunkMonitor : GameStateMachine<GunkMonitor, GunkMonitor.Instance, I
 		base.serializable = StateMachine.SerializeType.ParamsOnly;
 		default_state = this.idle;
 		this.root.Update(new Action<GunkMonitor.Instance, float>(GunkMonitor.GunkAmountWatcherUpdate), UpdateRate.SIM_200ms, false);
-		this.idle.OnSignal(this.gunkValueChangedSignal, this.mildUrge, new Func<GunkMonitor.Instance, bool>(GunkMonitor.IsGunkLevelsOverMildUrgeThreshold));
-		this.mildUrge.OnSignal(this.gunkValueChangedSignal, this.criticalUrge, new Func<GunkMonitor.Instance, bool>(GunkMonitor.IsGunkLevelsOverCriticalUrgeThreshold)).OnSignal(this.gunkValueChangedSignal, this.idle, new Func<GunkMonitor.Instance, bool>(GunkMonitor.DoesNotWantToExpellGunk)).DefaultState(this.mildUrge.prevented);
+		this.idle.OnSignal(this.gunkValueChangedSignal, this.mildUrge, new StateMachine<GunkMonitor, GunkMonitor.Instance, IStateMachineTarget, GunkMonitor.Def>.Parameter<StateMachine<GunkMonitor, GunkMonitor.Instance, IStateMachineTarget, GunkMonitor.Def>.SignalParameter>.Callback(GunkMonitor.IsGunkLevelsOverMildUrgeThreshold));
+		this.mildUrge.OnSignal(this.gunkValueChangedSignal, this.criticalUrge, new StateMachine<GunkMonitor, GunkMonitor.Instance, IStateMachineTarget, GunkMonitor.Def>.Parameter<StateMachine<GunkMonitor, GunkMonitor.Instance, IStateMachineTarget, GunkMonitor.Def>.SignalParameter>.Callback(GunkMonitor.IsGunkLevelsOverCriticalUrgeThreshold)).OnSignal(this.gunkValueChangedSignal, this.idle, new StateMachine<GunkMonitor, GunkMonitor.Instance, IStateMachineTarget, GunkMonitor.Def>.Parameter<StateMachine<GunkMonitor, GunkMonitor.Instance, IStateMachineTarget, GunkMonitor.Def>.SignalParameter>.Callback(GunkMonitor.DoesNotWantToExpellGunk)).DefaultState(this.mildUrge.prevented);
 		this.mildUrge.prevented.ScheduleChange(this.mildUrge.allowed, new StateMachine<GunkMonitor, GunkMonitor.Instance, IStateMachineTarget, GunkMonitor.Def>.Transition.ConditionCallback(GunkMonitor.ScheduleAllowsExpelling));
 		this.mildUrge.allowed.ScheduleChange(this.mildUrge.prevented, GameStateMachine<GunkMonitor, GunkMonitor.Instance, IStateMachineTarget, GunkMonitor.Def>.Not(new StateMachine<GunkMonitor, GunkMonitor.Instance, IStateMachineTarget, GunkMonitor.Def>.Transition.ConditionCallback(GunkMonitor.ScheduleAllowsExpelling))).ToggleUrge(Db.Get().Urges.Pee).ToggleUrge(Db.Get().Urges.GunkPee);
-		this.criticalUrge.OnSignal(this.gunkValueChangedSignal, this.idle, new Func<GunkMonitor.Instance, bool>(GunkMonitor.DoesNotWantToExpellGunk)).OnSignal(this.gunkValueChangedSignal, this.mildUrge, (GunkMonitor.Instance smi) => !GunkMonitor.IsGunkLevelsOverCriticalUrgeThreshold(smi)).OnSignal(this.gunkValueChangedSignal, this.cantHold, new Func<GunkMonitor.Instance, bool>(GunkMonitor.CanNotHoldGunkAnymore))
+		this.criticalUrge.OnSignal(this.gunkValueChangedSignal, this.idle, new StateMachine<GunkMonitor, GunkMonitor.Instance, IStateMachineTarget, GunkMonitor.Def>.Parameter<StateMachine<GunkMonitor, GunkMonitor.Instance, IStateMachineTarget, GunkMonitor.Def>.SignalParameter>.Callback(GunkMonitor.DoesNotWantToExpellGunk)).OnSignal(this.gunkValueChangedSignal, this.mildUrge, (GunkMonitor.Instance smi, StateMachine<GunkMonitor, GunkMonitor.Instance, IStateMachineTarget, GunkMonitor.Def>.SignalParameter param) => !GunkMonitor.IsGunkLevelsOverCriticalUrgeThreshold(smi)).OnSignal(this.gunkValueChangedSignal, this.cantHold, new StateMachine<GunkMonitor, GunkMonitor.Instance, IStateMachineTarget, GunkMonitor.Def>.Parameter<StateMachine<GunkMonitor, GunkMonitor.Instance, IStateMachineTarget, GunkMonitor.Def>.SignalParameter>.Callback(GunkMonitor.CanNotHoldGunkAnymore))
 			.ToggleUrge(Db.Get().Urges.GunkPee)
 			.ToggleUrge(Db.Get().Urges.Pee)
 			.ToggleEffect("GunkSick")
@@ -27,9 +27,19 @@ public class GunkMonitor : GameStateMachine<GunkMonitor, GunkMonitor.Instance, I
 		this.emptyRemaining.Enter(new StateMachine<GunkMonitor, GunkMonitor.Instance, IStateMachineTarget, GunkMonitor.Def>.State.Callback(GunkMonitor.ExpellAllGunk)).Enter(new StateMachine<GunkMonitor, GunkMonitor.Instance, IStateMachineTarget, GunkMonitor.Def>.State.Callback(GunkMonitor.ApplyGunkHungoverEffect)).GoTo(this.idle);
 	}
 
+	public static bool IsGunkLevelsOverCriticalUrgeThreshold(GunkMonitor.Instance smi, StateMachine<GunkMonitor, GunkMonitor.Instance, IStateMachineTarget, GunkMonitor.Def>.SignalParameter param)
+	{
+		return GunkMonitor.IsGunkLevelsOverCriticalUrgeThreshold(smi);
+	}
+
 	public static bool IsGunkLevelsOverCriticalUrgeThreshold(GunkMonitor.Instance smi)
 	{
 		return smi.CurrentGunkPercentage >= smi.def.DesperetlySeekForGunkToiletTreshold;
+	}
+
+	public static bool IsGunkLevelsOverMildUrgeThreshold(GunkMonitor.Instance smi, StateMachine<GunkMonitor, GunkMonitor.Instance, IStateMachineTarget, GunkMonitor.Def>.SignalParameter param)
+	{
+		return GunkMonitor.IsGunkLevelsOverMildUrgeThreshold(smi);
 	}
 
 	public static bool IsGunkLevelsOverMildUrgeThreshold(GunkMonitor.Instance smi)
@@ -42,9 +52,14 @@ public class GunkMonitor : GameStateMachine<GunkMonitor, GunkMonitor.Instance, I
 		return smi.DoesCurrentScheduleAllowsGunkToilet;
 	}
 
-	public static bool DoesNotWantToExpellGunk(GunkMonitor.Instance smi)
+	public static bool DoesNotWantToExpellGunk(GunkMonitor.Instance smi, StateMachine<GunkMonitor, GunkMonitor.Instance, IStateMachineTarget, GunkMonitor.Def>.SignalParameter p)
 	{
 		return !GunkMonitor.IsGunkLevelsOverMildUrgeThreshold(smi);
+	}
+
+	public static bool CanNotHoldGunkAnymore(GunkMonitor.Instance smi, StateMachine<GunkMonitor, GunkMonitor.Instance, IStateMachineTarget, GunkMonitor.Def>.SignalParameter p)
+	{
+		return GunkMonitor.CanNotHoldGunkAnymore(smi);
 	}
 
 	public static bool CanNotHoldGunkAnymore(GunkMonitor.Instance smi)

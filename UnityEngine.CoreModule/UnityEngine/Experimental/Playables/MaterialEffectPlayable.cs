@@ -6,11 +6,11 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Experimental.Playables
 {
-	[NativeHeader("Runtime/Shaders/Director/MaterialEffectPlayable.h")]
-	[RequiredByNativeCode]
-	[StaticAccessor("MaterialEffectPlayableBindings", StaticAccessorType.DoubleColon)]
-	[NativeHeader("Runtime/Director/Core/HPlayable.h")]
 	[NativeHeader("Runtime/Export/Director/MaterialEffectPlayable.bindings.h")]
+	[RequiredByNativeCode]
+	[NativeHeader("Runtime/Director/Core/HPlayable.h")]
+	[StaticAccessor("MaterialEffectPlayableBindings", StaticAccessorType.DoubleColon)]
+	[NativeHeader("Runtime/Shaders/Director/MaterialEffectPlayable.h")]
 	public struct MaterialEffectPlayable : IPlayable, IEquatable<MaterialEffectPlayable>
 	{
 		public static MaterialEffectPlayable Create(PlayableGraph graph, Material material, int pass = -1)

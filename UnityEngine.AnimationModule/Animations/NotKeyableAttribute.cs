@@ -3,8 +3,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Animations
 {
-	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Field)]
 	[RequiredByNativeCode]
+	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Field)]
 	public class NotKeyableAttribute : Attribute
 	{
 	}

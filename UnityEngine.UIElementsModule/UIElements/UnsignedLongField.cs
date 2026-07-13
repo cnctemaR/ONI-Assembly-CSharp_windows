@@ -21,7 +21,14 @@ namespace UnityEngine.UIElements
 		protected override ulong StringToValue(string str)
 		{
 			ulong num;
-			return UINumericFieldsUtils.TryConvertStringToULong(str, base.textInputBase.originalText, out num) ? num : base.rawValue;
+			ExpressionEvaluator.Expression expression;
+			bool flag = UINumericFieldsUtils.TryConvertStringToULong(str, base.textInputBase.originalText, out num, out expression);
+			Action<ExpressionEvaluator.Expression> expressionEvaluated = this.expressionEvaluated;
+			if (expressionEvaluated != null)
+			{
+				expressionEvaluated(expression);
+			}
+			return flag ? num : base.rawValue;
 		}
 
 		public UnsignedLongField()
@@ -148,9 +155,7 @@ namespace UnityEngine.UIElements
 
 			protected override ulong StringToValue(string str)
 			{
-				ulong num;
-				UINumericFieldsUtils.TryConvertStringToULong(str, base.originalText, out num);
-				return num;
+				return this.parentUnsignedLongField.StringToValue(str);
 			}
 		}
 	}

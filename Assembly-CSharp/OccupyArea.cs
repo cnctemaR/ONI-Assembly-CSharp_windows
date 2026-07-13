@@ -42,7 +42,7 @@ public class OccupyArea : KMonoBehaviour
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		if (this.facing != null)
+		if (this.updateWithFacing && this.facing != null)
 		{
 			this.facingLeft = this.facing.facingLeft;
 		}
@@ -103,7 +103,7 @@ public class OccupyArea : KMonoBehaviour
 			this.appliedOrientation = this.rotatable.Orientation;
 			return;
 		}
-		if (this.facing != null && this.facingLeft != this.facing.facingLeft)
+		if (this.updateWithFacing && this.facing != null && this.facingLeft != this.facing.facingLeft)
 		{
 			this.facingLeft = this.facing.facingLeft;
 			this._RotatedOccupiedCellsOffsets = new CellOffset[this._UnrotatedOccupiedCellsOffsets.Length];
@@ -345,6 +345,8 @@ public class OccupyArea : KMonoBehaviour
 	private Facing facing;
 
 	private bool facingLeft;
+
+	public bool updateWithFacing;
 
 	public CellOffset[] _UnrotatedOccupiedCellsOffsets;
 

@@ -32,6 +32,7 @@ namespace Database
 			this.CanFarmTinker = base.Add(new SimpleSkillPerk("CanFarmTinker", UI.ROLES_SCREEN.PERKS.CAN_FARM_TINKER.DESCRIPTION));
 			this.CanIdentifyMutantSeeds = base.Add(new SimpleSkillPerk("CanIdentifyMutantSeeds", UI.ROLES_SCREEN.PERKS.CAN_IDENTIFY_MUTANT_SEEDS.DESCRIPTION));
 			this.CanFarmStation = base.Add(new SimpleSkillPerk("CanFarmStation", UI.ROLES_SCREEN.PERKS.CAN_FARM_STATION.DESCRIPTION));
+			this.CanSalvagePlantFiber = base.Add(new SimpleSkillPerk("CanSalvagePlantFiber", UI.ROLES_SCREEN.PERKS.CAN_SALVAGE_PLANT_FIBER.DESCRIPTION));
 			this.IncreaseRanchingSmall = base.Add(new SkillAttributePerk("IncreaseRanchingSmall", Db.Get().Attributes.Ranching.Id, (float)ROLES.ATTRIBUTE_BONUS_FIRST, DUPLICANTS.ROLES.RANCHER.NAME, false));
 			this.IncreaseRanchingMedium = base.Add(new SkillAttributePerk("IncreaseRanchingMedium", Db.Get().Attributes.Ranching.Id, (float)ROLES.ATTRIBUTE_BONUS_SECOND, DUPLICANTS.ROLES.SENIOR_RANCHER.NAME, false));
 			this.CanWrangleCreatures = base.Add(new SimpleSkillPerk("CanWrangleCreatures", UI.ROLES_SCREEN.PERKS.CAN_WRANGLE_CREATURES.DESCRIPTION));
@@ -102,6 +103,11 @@ namespace Database
 				this.ExtraBionicBooster5 = base.Add(new SkillAttributePerk("ExtraBionicBooster5", Db.Get().Attributes.BionicBoosterSlots.Id, 1f, "", false));
 				this.ExtraBionicBooster6 = base.Add(new SkillAttributePerk("ExtraBionicBooster6", Db.Get().Attributes.BionicBoosterSlots.Id, 1f, DUPLICANTS.ATTRIBUTES.BIONICBOOSTERSLOTS.DESC, false));
 				this.ExtraBionicBatteries = base.Add(new SkillAttributePerk("ExtraBionicBatteries", Db.Get().Attributes.BionicBatteryCountCapacity.Id, 2f, UI.ROLES_SCREEN.PERKS.EXTRA_BIONIC_BATTERIES.DESCRIPTION, false));
+				this.BionicEardrumsDefense = base.Add(new ImmunitySkillPerk("BionicEardrumsDefense", "PoppedEarDrums"));
+				this.BionicMinorEyeIrritationDefense = base.Add(new ImmunitySkillPerk("BionicMinorEyeIrritationDefense", "MinorIrritation"));
+				this.BionicMajorEyeIrritationDefense = base.Add(new ImmunitySkillPerk("BionicMajorEyeIrritationDefense", "MajorIrritation"));
+				this.BionicToastySurroundingsDefense = base.Add(new ImmunitySkillPerk("BionicToastySurroundingsDefense", "WarmAir"));
+				this.BionicChillySurroundingsDefense = base.Add(new ImmunitySkillPerk("BionicChillySurroundingsDefense", "ColdAir"));
 				this.ReducedBionicGunkProduction = base.Add(new SimpleSkillPerk("ReducedBionicGunkProduction", UI.ROLES_SCREEN.PERKS.REDUCED_GUNK_PRODUCTION.DESCRIPTION));
 				this.EfficientBionicGears = base.Add(new SimpleSkillPerk("EfficientBionicGears", UI.ROLES_SCREEN.PERKS.EFFICIENT_BIONIC_GEARS.DESCRIPTION));
 				this.IncreaseAthleticsBionicsC1 = base.Add(new SkillAttributePerk("IncreaseAthleticsBionicsC1", Db.Get().Attributes.Athletics.Id, 2f, DUPLICANTS.ROLES.BIONICS_C1.NAME, false));
@@ -157,6 +163,8 @@ namespace Database
 		public SkillPerk CanIdentifyMutantSeeds;
 
 		public SkillPerk CanFarmStation;
+
+		public SkillPerk CanSalvagePlantFiber;
 
 		public SkillPerk CanWrangleCreatures;
 
@@ -301,6 +309,16 @@ namespace Database
 		public SkillPerk EfficientBionicGears;
 
 		public SkillPerk ExtraBionicBatteries;
+
+		public SkillPerk BionicEardrumsDefense;
+
+		public SkillPerk BionicMinorEyeIrritationDefense;
+
+		public SkillPerk BionicMajorEyeIrritationDefense;
+
+		public SkillPerk BionicChillySurroundingsDefense;
+
+		public SkillPerk BionicToastySurroundingsDefense;
 
 		public SkillPerk IncreaseAthleticsBionicsC1;
 

@@ -119,7 +119,7 @@ public class StarmapScreen : KModalScreen
 			this.OnSelectableChanged(null);
 		}));
 		this.SelectDestination(null);
-		SpacecraftManager.instance.Subscribe(532901469, delegate(object data)
+		SpacecraftManager.instance.Subscribe(532901469, delegate(object _)
 		{
 			this.RefreshAnalyzeButton();
 			this.UpdateDestinationStates();

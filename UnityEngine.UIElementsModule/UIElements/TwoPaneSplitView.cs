@@ -260,10 +260,9 @@ namespace UnityEngine.UIElements
 			}
 			else
 			{
-				bool flag2 = this.m_LeftPane == null;
 				this.PostDisplaySetup();
-				bool flag3 = flag2 && this.m_CollapseChildCalledBeforeSetupComplete;
-				if (flag3)
+				bool collapseChildCalledBeforeSetupComplete = this.m_CollapseChildCalledBeforeSetupComplete;
+				if (collapseChildCalledBeforeSetupComplete)
 				{
 					this.CollapseChild(this.m_CollapsedChildIndex);
 					this.m_CollapseChildCalledBeforeSetupComplete = false;
@@ -372,11 +371,11 @@ namespace UnityEngine.UIElements
 					bool flag5 = this.m_FixedPaneIndex == 0;
 					if (flag5)
 					{
-						this.m_DragLineAnchor.style.left = num + this.m_FixedPaneInitialDimension;
+						this.m_DragLineAnchor.style.left = num + fixedPaneDimension;
 					}
 					else
 					{
-						this.m_DragLineAnchor.style.left = base.resolvedStyle.width - num - this.m_FixedPaneInitialDimension - this.m_DragLineAnchor.resolvedStyle.width;
+						this.m_DragLineAnchor.style.left = base.resolvedStyle.width - num - fixedPaneDimension - this.m_DragLineAnchor.resolvedStyle.width;
 					}
 				}
 				else
@@ -385,11 +384,11 @@ namespace UnityEngine.UIElements
 					bool flag6 = this.m_FixedPaneIndex == 0;
 					if (flag6)
 					{
-						this.m_DragLineAnchor.style.top = num2 + this.m_FixedPaneInitialDimension;
+						this.m_DragLineAnchor.style.top = num2 + fixedPaneDimension;
 					}
 					else
 					{
-						this.m_DragLineAnchor.style.top = base.resolvedStyle.height - num2 - this.m_FixedPaneInitialDimension - this.m_DragLineAnchor.resolvedStyle.height;
+						this.m_DragLineAnchor.style.top = base.resolvedStyle.height - num2 - fixedPaneDimension - this.m_DragLineAnchor.resolvedStyle.height;
 					}
 				}
 				bool flag7 = this.m_FixedPaneIndex == 0;

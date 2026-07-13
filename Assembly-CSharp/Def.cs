@@ -64,6 +64,11 @@ public class Def : ScriptableObject
 				{
 					animName = component2.GetUIAnim();
 				}
+				MultiMinionDiningTable.Seat component3 = gameObject.GetComponent<MultiMinionDiningTable.Seat>();
+				if (component3 != null)
+				{
+					gameObject = component3.DiningTable.gameObject;
+				}
 				if (component.HasTag(GameTags.Egg))
 				{
 					IncubationMonitor.Def def = gameObject.GetDef<IncubationMonitor.Def>();
@@ -84,10 +89,10 @@ public class Def : ScriptableObject
 				{
 					animName = BionicUpgradeComponentConfig.UpgradesData[component.PrefabID()].uiAnimName;
 				}
-				KBatchedAnimController component3 = gameObject.GetComponent<KBatchedAnimController>();
-				if (component3)
+				KBatchedAnimController component4 = gameObject.GetComponent<KBatchedAnimController>();
+				if (component4)
 				{
-					Sprite uispriteFromMultiObjectAnim = Def.GetUISpriteFromMultiObjectAnim(component3.AnimFiles[0], animName, centered, "");
+					Sprite uispriteFromMultiObjectAnim = Def.GetUISpriteFromMultiObjectAnim(component4.AnimFiles[0], animName, centered, "");
 					return new global::Tuple<Sprite, Color>(uispriteFromMultiObjectAnim, (uispriteFromMultiObjectAnim != null) ? Color.white : Color.clear);
 				}
 				if (gameObject.GetComponent<Building>() != null)

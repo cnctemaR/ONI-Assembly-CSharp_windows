@@ -780,8 +780,8 @@ namespace UnityEngine
 			}
 		}
 
-		[RequiredByNativeCode]
 		[NativeName("GetSplatDatabase().GetAlphamapResolution")]
+		[RequiredByNativeCode]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal extern float GetAlphamapResolutionInternal();
 
@@ -1120,7 +1120,7 @@ namespace UnityEngine
 			else
 			{
 				Texture2D alphamapTexture = this.GetAlphamapTexture(textureIndex);
-				allowDelayedCPUSync = allowDelayedCPUSync && TerrainData.SupportsCopyTextureBetweenRTAndTexture;
+				allowDelayedCPUSync = allowDelayedCPUSync && TerrainData.SupportsCopyTextureBetweenRTAndTexture && QualitySettings.globalTextureMipmapLimit == 0;
 				bool flag12 = allowDelayedCPUSync;
 				if (flag12)
 				{

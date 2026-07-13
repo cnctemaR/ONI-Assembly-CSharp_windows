@@ -78,8 +78,8 @@ namespace UnityEngine
 		{
 		}
 
-		[EditorBrowsable(EditorBrowsableState.Never)]
 		[Obsolete("DynamicGI.UpdateMaterials(Terrain) is deprecated; instead, use extension method from TerrainExtensions: 'terrain.UpdateGIMaterials()' (UnityUpgradable).", true)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		public static void UpdateMaterials(Object renderer)
 		{
 		}

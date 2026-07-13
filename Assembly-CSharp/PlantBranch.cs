@@ -132,7 +132,7 @@ public class PlantBranch : GameStateMachine<PlantBranch, PlantBranch.Instance, I
 			{
 				this.trunkWiltRecoverHandle = this.trunk.gameObject.Subscribe(712767498, new Action<object>(this.OnTrunkRecover));
 			}
-			base.Trigger(912965142, !this.trunk.GetComponent<WiltCondition>().IsWilting());
+			base.BoxingTrigger(912965142, !this.trunk.GetComponent<WiltCondition>().IsWilting());
 			ReceptacleMonitor component = base.GetComponent<ReceptacleMonitor>();
 			PlantablePlot receptacle = this.trunk.GetComponent<ReceptacleMonitor>().GetReceptacle();
 			component.SetReceptacle(receptacle);
@@ -155,12 +155,12 @@ public class PlantBranch : GameStateMachine<PlantBranch, PlantBranch.Instance, I
 
 		private void OnTrunkWilt(object data = null)
 		{
-			base.Trigger(912965142, false);
+			base.BoxingTrigger(912965142, false);
 		}
 
 		private void OnTrunkRecover(object data = null)
 		{
-			base.Trigger(912965142, true);
+			base.BoxingTrigger(912965142, true);
 		}
 
 		public string WiltStateString

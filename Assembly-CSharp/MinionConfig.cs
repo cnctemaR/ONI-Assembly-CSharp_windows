@@ -40,7 +40,9 @@ public class MinionConfig : IEntityConfig
 
 	public GameObject CreatePrefab()
 	{
-		return BaseMinionConfig.BaseMinion(MinionConfig.MODEL, MinionConfig.GetAttributes(), MinionConfig.GetAmounts(), MinionConfig.GetTraits());
+		GameObject gameObject = BaseMinionConfig.BaseMinion(MinionConfig.MODEL, MinionConfig.GetAttributes(), MinionConfig.GetAmounts(), MinionConfig.GetTraits());
+		gameObject.AddOrGet<CodexEntryRedirector>().CodexID = "DUPLICANTS";
+		return gameObject;
 	}
 
 	public void OnPrefabInit(GameObject go)

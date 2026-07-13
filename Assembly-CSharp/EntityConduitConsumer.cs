@@ -195,9 +195,9 @@ public class EntityConduitConsumer : KMonoBehaviour, IConduitConsumer
 		base.OnCleanUp();
 	}
 
-	private void OnConduitConnectionChanged(object data)
+	private void OnConduitConnectionChanged(object _)
 	{
-		base.Trigger(-2094018600, this.IsConnected);
+		base.Trigger(-2094018600, BoxedBools.Box(this.IsConnected));
 	}
 
 	public void SetOnState(bool onState)
@@ -250,7 +250,7 @@ public class EntityConduitConsumer : KMonoBehaviour, IConduitConsumer
 		bool flag = element.HasTag(this.capacityTag);
 		if (num2 > 0f && this.capacityTag != GameTags.Any && !flag)
 		{
-			base.Trigger(-794517298, new BuildingHP.DamageSourceInfo
+			base.BoxingTrigger<BuildingHP.DamageSourceInfo>(-794517298, new BuildingHP.DamageSourceInfo
 			{
 				damage = 1,
 				source = BUILDINGS.DAMAGESOURCES.BAD_INPUT_ELEMENT,

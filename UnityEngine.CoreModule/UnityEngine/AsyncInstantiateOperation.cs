@@ -6,8 +6,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/GameCode/AsyncInstantiate/AsyncInstantiateOperation.h")]
 	[RequiredByNativeCode]
+	[NativeHeader("Runtime/GameCode/AsyncInstantiate/AsyncInstantiateOperation.h")]
 	[StructLayout(LayoutKind.Sequential)]
 	public class AsyncInstantiateOperation : AsyncOperation
 	{

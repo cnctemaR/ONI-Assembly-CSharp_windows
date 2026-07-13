@@ -8,10 +8,20 @@ public class BalloonStandCellSensor : Sensor
 	{
 		this.navigator = base.GetComponent<Navigator>();
 		this.brain = base.GetComponent<MinionBrain>();
+		this.scheduable = base.GetComponent<Schedulable>();
+	}
+
+	public bool IsAllowed()
+	{
+		return ScheduleManager.Instance.IsAllowed(this.scheduable, Db.Get().ScheduleBlockTypes.Recreation);
 	}
 
 	public override void Update()
 	{
+		if (!this.IsAllowed())
+		{
+			return;
+		}
 		this.cell = Grid.InvalidCell;
 		int num = int.MaxValue;
 		ListPool<int[], BalloonStandCellSensor>.PooledList pooledList = ListPool<int[], BalloonStandCellSensor>.Allocate();
@@ -71,7 +81,7 @@ public class BalloonStandCellSensor : Sensor
 			int num10 = Grid.CellRight(num9);
 			bool cavityForCell4 = Game.Instance.roomProber.GetCavityForCell(num8) != null;
 			CavityInfo cavityForCell5 = Game.Instance.roomProber.GetCavityForCell(num10);
-			if (cavityForCell4 && cavityForCell5 != null && this.navigator.NavGrid.NavTable.IsValid(num8, NavType.Floor) && this.navigator.NavGrid.NavTable.IsValid(num9, NavType.Floor) && this.navigator.NavGrid.NavTable.IsValid(num10, NavType.Floor))
+			if (cavityForCell4 && cavityForCell5 != null && this.navigator.GetNavigationCost(num8) != -1 && this.navigator.GetNavigationCost(num9) != -1 && this.navigator.GetNavigationCost(num10) != -1)
 			{
 				this.cell = num8;
 				this.standCell = num10;
@@ -93,6 +103,8 @@ public class BalloonStandCellSensor : Sensor
 	private MinionBrain brain;
 
 	private Navigator navigator;
+
+	private Schedulable scheduable;
 
 	private int cell;
 

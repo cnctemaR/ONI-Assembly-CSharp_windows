@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 
 public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
@@ -82,15 +83,16 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 		return pickupable.isChoreAllowedToPickup(chore.choreType);
 	}
 
+	private static Util.IterationInstruction gatherNearbyFetchChoresVisitor(object obj, ref ValueTuple<ChoreConsumerState, List<Chore.Precondition.Context>, List<Chore.Precondition.Context>> context)
+	{
+		Unsafe.As<FetchChore>(obj).CollectChoresFromGlobalChoreProvider(context.Item1, context.Item2, null, context.Item3, true);
+		return Util.IterationInstruction.Continue;
+	}
+
 	public static void GatherNearbyFetchChores(FetchChore root_chore, Chore.Precondition.Context context, int x, int y, int radius, List<Chore.Precondition.Context> succeeded_contexts, List<Chore.Precondition.Context> failed_contexts)
 	{
-		ListPool<ScenePartitionerEntry, FetchAreaChore>.PooledList pooledList = ListPool<ScenePartitionerEntry, FetchAreaChore>.Allocate();
-		GameScenePartitioner.Instance.GatherEntries(x - radius, y - radius, radius * 2 + 1, radius * 2 + 1, GameScenePartitioner.Instance.fetchChoreLayer, pooledList);
-		for (int i = 0; i < pooledList.Count; i++)
-		{
-			(pooledList[i].obj as FetchChore).CollectChoresFromGlobalChoreProvider(context.consumerState, succeeded_contexts, null, failed_contexts, true);
-		}
-		pooledList.Recycle();
+		ValueTuple<ChoreConsumerState, List<Chore.Precondition.Context>, List<Chore.Precondition.Context>> valueTuple = new ValueTuple<ChoreConsumerState, List<Chore.Precondition.Context>, List<Chore.Precondition.Context>>(context.consumerState, succeeded_contexts, failed_contexts);
+		GameScenePartitioner.Instance.VisitEntries<ValueTuple<ChoreConsumerState, List<Chore.Precondition.Context>, List<Chore.Precondition.Context>>>(x - radius, y - radius, radius * 2 + 1, radius * 2 + 1, GameScenePartitioner.Instance.fetchChoreLayer, new GameScenePartitioner.VisitorRef<ValueTuple<ChoreConsumerState, List<Chore.Precondition.Context>, List<Chore.Precondition.Context>>>(FetchAreaChore.gatherNearbyFetchChoresVisitor), ref valueTuple);
 	}
 
 	public class StatesInstance : GameStateMachine<FetchAreaChore.States, FetchAreaChore.StatesInstance, FetchAreaChore, object>.GameInstance
@@ -146,8 +148,11 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 			ListPool<Pickupable, FetchAreaChore>.PooledList potential_fetchables = ListPool<Pickupable, FetchAreaChore>.Allocate();
 			potential_fetchables.Add(root_fetchable);
 			float fetch_amount_available = root_fetchable.UnreservedFetchAmount;
+			if (root_fetchable.MinTakeAmount)
+			{
+				max_carry_weight = (float)((int)(max_carry_weight / root_fetchable.PrimaryElement.MassPerUnit)) * root_fetchable.PrimaryElement.MassPerUnit;
+			}
 			max_carry_weight = Mathf.Max(root_fetchable.PrimaryElement.MassPerUnit, max_carry_weight);
-			float minTakeAmount = root_fetchable.MinTakeAmount;
 			int num3 = 0;
 			int num4 = 0;
 			Grid.CellToXY(Grid.PosToCell(root_fetchable.transform.GetPosition()), out num3, out num4);
@@ -155,57 +160,57 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 			num3 -= 3;
 			num4 -= 3;
 			Tag root_fetchable_tag = root_fetchable.GetComponent<KPrefabID>().PrefabTag;
-			Func<object, object, bool> func = delegate(object obj, object _)
+			Func<object, object, Util.IterationInstruction> func = delegate(object obj, object _)
 			{
 				if (fetch_amount_available > max_carry_weight)
 				{
-					return false;
+					return Util.IterationInstruction.Halt;
 				}
 				Pickupable pickupable2 = obj as Pickupable;
 				KPrefabID kprefabID = pickupable2.KPrefabID;
 				if (pickupable2 == root_fetchable)
 				{
-					return true;
+					return Util.IterationInstruction.Continue;
 				}
 				if (kprefabID.HasTag(GameTags.StoredPrivate))
 				{
-					return true;
+					return Util.IterationInstruction.Continue;
 				}
 				if (kprefabID.PrefabTag != root_fetchable_tag)
 				{
-					return true;
+					return Util.IterationInstruction.Continue;
 				}
 				if (pickupable2.UnreservedFetchAmount <= 0f)
 				{
-					return true;
+					return Util.IterationInstruction.Continue;
 				}
 				if (this.rootChore.criteria == FetchChore.MatchCriteria.MatchID && !this.rootChore.tags.Contains(kprefabID.PrefabTag))
 				{
-					return true;
+					return Util.IterationInstruction.Continue;
 				}
 				if (this.rootChore.criteria == FetchChore.MatchCriteria.MatchTags && !kprefabID.HasTag(this.rootChore.tagsFirst))
 				{
-					return true;
+					return Util.IterationInstruction.Continue;
 				}
 				if (this.rootChore.requiredTag.IsValid && !kprefabID.HasTag(this.rootChore.requiredTag))
 				{
-					return true;
+					return Util.IterationInstruction.Continue;
 				}
 				if (kprefabID.HasAnyTags(this.rootChore.forbiddenTags))
 				{
-					return true;
+					return Util.IterationInstruction.Continue;
 				}
 				if (potential_fetchables.Contains(pickupable2))
 				{
-					return true;
+					return Util.IterationInstruction.Continue;
 				}
 				if (!this.rootContext.consumerState.consumer.CanReach(pickupable2))
 				{
-					return true;
+					return Util.IterationInstruction.Continue;
 				}
 				if (kprefabID.HasTag(GameTags.MarkedForMove))
 				{
-					return true;
+					return Util.IterationInstruction.Continue;
 				}
 				if (!pickupable2.storage.IsNullOrDestroyed())
 				{
@@ -221,27 +226,23 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 					}
 					if (!flag)
 					{
-						return true;
+						return Util.IterationInstruction.Continue;
 					}
 				}
 				float unreservedFetchAmount = pickupable2.UnreservedFetchAmount;
 				potential_fetchables.Add(pickupable2);
 				fetch_amount_available += unreservedFetchAmount;
-				return potential_fetchables.Count < 10;
+				if (potential_fetchables.Count >= 10)
+				{
+					return Util.IterationInstruction.Halt;
+				}
+				return Util.IterationInstruction.Continue;
 			};
-			GameScenePartitioner.Instance.AsyncSafeVisit<object>(num3, num4, num5, num5, GameScenePartitioner.Instance.pickupablesLayer, func, null);
-			GameScenePartitioner.Instance.AsyncSafeVisit<object>(num3, num4, num5, num5, GameScenePartitioner.Instance.storedPickupablesLayer, func, null);
+			GameScenePartitioner.Instance.ReadonlyVisitEntries<object>(num3, num4, num5, num5, GameScenePartitioner.Instance.pickupablesLayer, func, null);
+			GameScenePartitioner.Instance.ReadonlyVisitEntries<object>(num3, num4, num5, num5, GameScenePartitioner.Instance.storedPickupablesLayer, func, null);
 			fetch_amount_available = Mathf.Min(max_carry_weight, fetch_amount_available);
-			if (minTakeAmount > 0f)
-			{
-				fetch_amount_available -= fetch_amount_available % minTakeAmount;
-			}
 			this.deliveries.Clear();
 			float num6 = Mathf.Min(this.rootChore.originalAmount, fetch_amount_available);
-			if (minTakeAmount > 0f)
-			{
-				num6 -= num6 % minTakeAmount;
-			}
 			this.deliveries.Add(new FetchAreaChore.StatesInstance.Delivery(this.rootContext, num6, new Action<FetchChore>(this.OnFetchChoreCancelled)));
 			float num7 = num6;
 			int num8 = 0;
@@ -252,10 +253,6 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 				if (fetchChore2 != this.rootChore && fetchChore2.overrideTarget == null && fetchChore2.driver == null && fetchChore2.tagsHash == this.rootChore.tagsHash && fetchChore2.requiredTag == this.rootChore.requiredTag && fetchChore2.forbidHash == this.rootChore.forbidHash)
 				{
 					num6 = Mathf.Min(fetchChore2.originalAmount, fetch_amount_available - num7);
-					if (minTakeAmount > 0f)
-					{
-						num6 -= num6 % minTakeAmount;
-					}
 					this.chores.Add(fetchChore2);
 					this.deliveries.Add(new FetchAreaChore.StatesInstance.Delivery(context2, num6, new Action<FetchChore>(this.OnFetchChoreCancelled)));
 					num7 += num6;
@@ -604,51 +601,49 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 
 			public void Complete(List<Pickupable> deliverables)
 			{
-				using (new KProfiler.Region("FAC.Delivery.Complete", null))
+				if (this.destination == null || this.destination.IsEndOfLife())
 				{
-					if (!(this.destination == null) && !this.destination.IsEndOfLife())
-					{
-						FetchChore chore = this.chore;
-						chore.onCleanup = (Action<Chore>)Delegate.Remove(chore.onCleanup, this.onFetchChoreCleanup);
-						float num = this.amount;
-						Pickupable pickupable = null;
-						int num2 = 0;
-						while (num2 < deliverables.Count && num > 0f)
-						{
-							if (deliverables[num2] == null)
-							{
-								if (num < PICKUPABLETUNING.MINIMUM_PICKABLE_AMOUNT)
-								{
-									this.destination.ForceStore(this.chore.tagsFirst, num);
-								}
-							}
-							else if (!FetchAreaChore.IsPickupableStillValidForChore(deliverables[num2], this.chore))
-							{
-								global::Debug.LogError(string.Format("Attempting to store {0} in a {1} which did not request it", deliverables[num2], this.destination));
-							}
-							else
-							{
-								Pickupable pickupable2 = deliverables[num2].Take(num);
-								if (pickupable2 != null && pickupable2.FetchTotalAmount > 0f)
-								{
-									num -= pickupable2.FetchTotalAmount;
-									this.destination.Store(pickupable2.gameObject, false, false, true, false);
-									pickupable = pickupable2;
-									if (pickupable2 == deliverables[num2])
-									{
-										deliverables[num2] = null;
-									}
-								}
-							}
-							num2++;
-						}
-						if (this.chore.overrideTarget != null)
-						{
-							this.chore.FetchAreaEnd(this.chore.overrideTarget.GetComponent<ChoreDriver>(), pickupable, true);
-						}
-						this.chore = null;
-					}
+					return;
 				}
+				FetchChore chore = this.chore;
+				chore.onCleanup = (Action<Chore>)Delegate.Remove(chore.onCleanup, this.onFetchChoreCleanup);
+				float num = this.amount;
+				Pickupable pickupable = null;
+				int num2 = 0;
+				while (num2 < deliverables.Count && num > 0f)
+				{
+					if (deliverables[num2] == null)
+					{
+						if (num < PICKUPABLETUNING.MINIMUM_PICKABLE_AMOUNT)
+						{
+							this.destination.ForceStore(this.chore.tagsFirst, num);
+						}
+					}
+					else if (!FetchAreaChore.IsPickupableStillValidForChore(deliverables[num2], this.chore))
+					{
+						global::Debug.LogError(string.Format("Attempting to store {0} in a {1} which did not request it", deliverables[num2], this.destination));
+					}
+					else
+					{
+						Pickupable pickupable2 = deliverables[num2].Take(num);
+						if (pickupable2 != null && pickupable2.FetchTotalAmount > 0f)
+						{
+							num -= pickupable2.FetchTotalAmount;
+							this.destination.Store(pickupable2.gameObject, false, false, true, false);
+							pickupable = pickupable2;
+							if (pickupable2 == deliverables[num2])
+							{
+								deliverables[num2] = null;
+							}
+						}
+					}
+					num2++;
+				}
+				if (this.chore.overrideTarget != null)
+				{
+					this.chore.FetchAreaEnd(this.chore.overrideTarget.GetComponent<ChoreDriver>(), pickupable, true);
+				}
+				this.chore = null;
 			}
 
 			private void OnFetchChoreCleanup(Chore chore)

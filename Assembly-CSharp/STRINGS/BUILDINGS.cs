@@ -7,6 +7,22 @@ namespace STRINGS
 	{
 		public class PREFABS
 		{
+			public class SHELF
+			{
+				public static LocString NAME = UI.FormatAsLink("Display Shelf", "SHELF");
+
+				public static LocString DESC = "It looks great even when it's empty.";
+
+				public static LocString EFFECT = string.Concat(new string[]
+				{
+					"Displays cherished items and increases ",
+					CODEX.DECORSYSTEM.TITLE,
+					", contributing to ",
+					CODEX.MORALE.TITLE,
+					".\n\nMust be installed on a back wall."
+				});
+			}
+
 			public class FOSSILSCULPTURE
 			{
 				public static LocString NAME = UI.FormatAsLink("Fossil Block", "FOSSILSCULPTURE");
@@ -296,7 +312,7 @@ namespace STRINGS
 
 			public class CREATUREAIRTRAP
 			{
-				public static LocString NAME = UI.FormatAsLink("Airborne Critter Trap", "FLYINGCREATUREBAIT");
+				public static LocString NAME = UI.FormatAsLink("Airborne Critter Trap", "CREATUREAIRTRAP");
 
 				public static LocString DESC = "It needs to be armed prior to use.";
 
@@ -493,7 +509,7 @@ namespace STRINGS
 
 			public class CARGOBAYCLUSTER
 			{
-				public static LocString NAME = UI.FormatAsLink("Large Cargo Bay", "CARGOBAY");
+				public static LocString NAME = UI.FormatAsLink("Large Cargo Bay", "CARGOBAYCLUSTER");
 
 				public static LocString DESC = "Holds more than a regular cargo bay.";
 
@@ -534,7 +550,7 @@ namespace STRINGS
 
 			public class SPECIALCARGOBAYCLUSTER
 			{
-				public static LocString NAME = UI.FormatAsLink("Critter Cargo Bay", "SPECIALCARGOBAY");
+				public static LocString NAME = UI.FormatAsLink("Critter Cargo Bay", "SPECIALCARGOBAYCLUSTER");
 
 				public static LocString DESC = "Critters do not require feeding during transit.";
 
@@ -659,6 +675,15 @@ namespace STRINGS
 				});
 			}
 
+			public class RESEARCHCLUSTERMODULE
+			{
+				public static LocString NAME = UI.FormatAsLink("Research Module", "RESEARCHMODULE");
+
+				public static LocString DESC = "Unlocks the possibility of Gathering Databanks floating in space";
+
+				public static LocString EFFECT = "The Research module allows the rocket to gather Data banks that happen to be on the same hex cell than the rocket when it travels through the galaxy";
+			}
+
 			public class TOURISTMODULE
 			{
 				public static LocString NAME = UI.FormatAsLink("Sight-Seeing Module", "TOURISTMODULE");
@@ -692,7 +717,7 @@ namespace STRINGS
 
 				public static LocString DESC = "Allows Duplicants to survive space travel... Hopefully.";
 
-				public static LocString EFFECT = "Functions as a Command Module.\n\nHolds up to ten Duplicant travellers.\n\nOne Command Module may be installed per rocket. \n\nEngine must be built via " + BUILDINGS.PREFABS.LAUNCHPAD.NAME + ".";
+				public static LocString EFFECT = "Functions as a Command Module.\n\nHolds up to 10 Duplicant travellers.\n\nOne Command Module may be installed per rocket. \n\nMust be built via " + BUILDINGS.PREFABS.LAUNCHPAD.NAME + ".";
 			}
 
 			public class NOSECONEBASIC
@@ -701,24 +726,24 @@ namespace STRINGS
 
 				public static LocString DESC = "Every rocket requires a nosecone to fly.";
 
-				public static LocString EFFECT = "Protects a rocket during takeoff and entry, enabling space travel.\n\nEngine must be built via " + BUILDINGS.PREFABS.LAUNCHPAD.NAME + ". \n\nMust be built at the top of a rocket.";
+				public static LocString EFFECT = "Protects a rocket during takeoff and entry, enabling space travel.\n\nMust be built via " + BUILDINGS.PREFABS.LAUNCHPAD.NAME + ", and built at the top of a rocket.";
 			}
 
 			public class NOSECONEHARVEST
 			{
 				public static LocString NAME = UI.FormatAsLink("Drillcone", "NOSECONEHARVEST");
 
-				public static LocString DESC = "Harvests resources from the universe.";
+				public static LocString DESC = "Collecting the drilled-out resources requires a storage module.";
 
 				public static LocString EFFECT = string.Concat(new string[]
 				{
-					"Enables a rocket to drill into interstellar debris and collect ",
+					"Enables a rocket to drill into interstellar debris to free up ",
 					UI.FormatAsLink("gas", "ELEMENTS_GAS"),
 					", ",
 					UI.FormatAsLink("liquid", "ELEMENTS_LIQUID"),
 					" and ",
 					UI.FormatAsLink("solid", "ELEMENTS_SOLID"),
-					" resources from space.\n\nEngine must be built via ",
+					" resources in space.\n\nEngine must be built via ",
 					BUILDINGS.PREFABS.LAUNCHPAD.NAME,
 					". \n\nMust be built at the top of a rocket with ",
 					UI.FormatAsLink("gas", "ELEMENTS_GAS"),
@@ -767,7 +792,7 @@ namespace STRINGS
 					UI.FormatAsLink("Petroleum", "PETROLEUM"),
 					" to propel rockets for mid-range space exploration.\n\nPetroleum Engines have generous height restrictions, ideal for hauling many modules.\n\nEngine must be built via ",
 					BUILDINGS.PREFABS.LAUNCHPAD.NAME,
-					". \n\nOnce the engine has been built, more rocket modules can be added."
+					", and requires an oxidizer tank. \n\nOnce the engine has been built, more rocket modules can be added."
 				});
 			}
 
@@ -785,7 +810,32 @@ namespace STRINGS
 					UI.FormatAsLink("Petroleum Engines", "KEROSENEENGINE"),
 					" but have smaller height restrictions.\n\nEngine must be built via ",
 					BUILDINGS.PREFABS.LAUNCHPAD.NAME,
-					". \n\nOnce the engine has been built, more rocket modules can be added."
+					", and requires an oxidizer tank.\n\nOnce the engine has been built, more rocket modules can be added."
+				});
+			}
+
+			public class BIODIESELENGINE
+			{
+				public static LocString NAME = UI.FormatAsLink("Biodiesel Engine", "BIODIESELENGINE");
+
+				public static LocString DESC = "Rockets can be used to send Duplicants into space and retrieve rare resources.";
+
+				public static LocString EFFECT = "Burns " + ELEMENTS.REFINEDLIPID.NAME + " to propel rockets for mid-range space exploration.\n\nBiodiesel Engines have generous height restrictions, ideal for hauling a larger number of modules.\n\nOnce the engine has been built, more rocket modules can be added.";
+			}
+
+			public class BIODIESELENGINECLUSTER
+			{
+				public static LocString NAME = UI.FormatAsLink("Biodiesel Engine", "BIODIESELENGINECLUSTER");
+
+				public static LocString DESC = "More powerful rocket engines can propel heavier burdens.";
+
+				public static LocString EFFECT = string.Concat(new string[]
+				{
+					"Burns ",
+					ELEMENTS.REFINEDLIPID.NAME,
+					" to propel rockets for mid-range space exploration.\n\nBiodiesel Engines have generous height restrictions, ideal for hauling many modules.\n\nEngine must be built via ",
+					BUILDINGS.PREFABS.LAUNCHPAD.NAME,
+					", and requires an oxidizer tank.\n\nOnce the engine has been built, more rocket modules can be added."
 				});
 			}
 
@@ -819,7 +869,7 @@ namespace STRINGS
 					UI.FormatAsLink("Petroleum Engines", "KEROSENEENGINE"),
 					" but are slightly faster.\n\nEngine must be built via ",
 					BUILDINGS.PREFABS.LAUNCHPAD.NAME,
-					".\n\nOnce the engine has been built, more rocket modules can be added."
+					", and requires an oxidizer tank.\n\nOnce the engine has been built, more rocket modules can be added."
 				});
 			}
 
@@ -837,6 +887,8 @@ namespace STRINGS
 					UI.FormatAsLink("Carbon Dioxide Engines", "CO2ENGINE"),
 					", but move slower.\n\nEngine must be built via ",
 					BUILDINGS.PREFABS.LAUNCHPAD.NAME,
+					", and requires a ",
+					BUILDINGS.PREFABS.OXIDIZERTANKCLUSTER.NAME,
 					". \n\nOnce the engine has been built, more rocket modules can be added."
 				});
 			}
@@ -937,14 +989,14 @@ namespace STRINGS
 
 			public class PIONEERLANDER
 			{
-				public static LocString NAME = UI.FormatAsLink("Trailblazer Lander", "PIONEERLANDER");
+				public static LocString NAME = UI.FormatAsLink("Trailblazer Lander", "PIONEERMODULE");
 
 				public static LocString DESC = "Lands a Duplicant on a Planetoid from an orbiting " + BUILDINGS.PREFABS.PIONEERMODULE.NAME + ".";
 			}
 
 			public class SCOUTLANDER
 			{
-				public static LocString NAME = UI.FormatAsLink("Rover's Lander", "SCOUTLANDER");
+				public static LocString NAME = UI.FormatAsLink("Rover's Lander", "SCOUTMODULE");
 
 				public static LocString DESC = string.Concat(new string[]
 				{
@@ -1629,7 +1681,7 @@ namespace STRINGS
 
 			public class LIQUIDCARGOBAYCLUSTER
 			{
-				public static LocString NAME = UI.FormatAsLink("Large Liquid Cargo Tank", "LIQUIDCARGOBAY");
+				public static LocString NAME = UI.FormatAsLink("Large Liquid Cargo Tank", "LIQUIDCARGOBAYCLUSTER");
 
 				public static LocString DESC = "Holds more than a regular cargo tank.";
 
@@ -2407,7 +2459,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = UI.FormatAsLink("Gas Range", "GOURMETCOOKINGSTATION");
 
-				public static LocString DESC = "Luxury meals increase Duplicants' morale and prevents them from becoming stressed.";
+				public static LocString DESC = "Luxury meals increase Duplicants' morale and prevent them from becoming stressed.";
 
 				public static LocString EFFECT = "Cooks a wide variety of quality " + UI.FormatAsLink("Foods", "FOOD") + ".\n\nDuplicants will not fabricate items unless recipes are queued.";
 			}
@@ -2419,6 +2471,15 @@ namespace STRINGS
 				public static LocString DESC = "Duplicants prefer to dine at a table, rather than eat off the floor.";
 
 				public static LocString EFFECT = "Gives one Duplicant a place to eat.\n\nDuplicants will automatically eat at their assigned table when hungry.";
+			}
+
+			public class MULTIMINIONDININGTABLE
+			{
+				public static LocString NAME = UI.FormatAsLink("Communal Table", "MULTIMINIONDININGTABLE");
+
+				public static LocString DESC = "Given the option, Duplicants prefer to dine with friends.";
+
+				public static LocString EFFECT = "Gives three Duplicants a place to eat.\n\nSharing a meal with one or more companions provides a " + UI.FormatAsLink("Morale", "MORALE") + " boost.";
 			}
 
 			public class DOOR
@@ -2654,7 +2715,7 @@ namespace STRINGS
 					UI.FormatAsLink("Seed", "PLANTS"),
 					".\n\nIncreases ",
 					UI.FormatAsLink("Decor", "DECOR"),
-					", contributing to ",
+					" when in use, contributing to ",
 					UI.FormatAsLink("Morale", "MORALE"),
 					"."
 				});
@@ -2719,7 +2780,7 @@ namespace STRINGS
 					UI.FormatAsLink("Seed", "PLANTS"),
 					".\n\nIncreases ",
 					UI.FormatAsLink("Decor", "DECOR"),
-					", contributing to ",
+					" when in use, contributing to ",
 					UI.FormatAsLink("Morale", "MORALE"),
 					".\n\nMust be hung from a wall."
 				});
@@ -2784,7 +2845,7 @@ namespace STRINGS
 					UI.FormatAsLink("Seed", "PLANTS"),
 					".\n\nIncreases ",
 					UI.FormatAsLink("Decor", "DECOR"),
-					", contributing to ",
+					" when in use, contributing to ",
 					UI.FormatAsLink("Morale", "MORALE"),
 					".\n\nMust be hung from a ceiling."
 				});
@@ -2856,7 +2917,7 @@ namespace STRINGS
 					UI.FormatAsLink("Seed", "PLANTS"),
 					".\n\nIncreases ",
 					UI.FormatAsLink("Decor", "DECOR"),
-					", contributing to ",
+					" even when empty, contributing to ",
 					UI.FormatAsLink("Morale", "MORALE"),
 					".\n\nMust be hung from a ceiling."
 				});
@@ -2991,7 +3052,7 @@ namespace STRINGS
 
 			public class FOSSILDIG_COMPLETED
 			{
-				public static LocString NAME = "Fossil Quarry";
+				public static LocString NAME = UI.FormatAsLink("Fossil Quarry", "STORYTRAITFOSSILHUNT");
 
 				public static LocString DESC = "There sure are a lot of old bones in this area.";
 
@@ -3018,7 +3079,7 @@ namespace STRINGS
 
 			public class GASCARGOBAYCLUSTER
 			{
-				public static LocString NAME = UI.FormatAsLink("Large Gas Cargo Canister", "GASCARGOBAY");
+				public static LocString NAME = UI.FormatAsLink("Large Gas Cargo Canister", "GASCARGOBAYCLUSTER");
 
 				public static LocString DESC = "Holds more than a typical gas cargo canister.";
 
@@ -3535,7 +3596,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = UI.FormatAsLink("Research Reactor", "NUCLEARREACTOR");
 
-				public static LocString DESC = "Radbolt generators and reflectors make radiation useable by other buildings.";
+				public static LocString DESC = "Radbolt generators and reflectors make radiation usable by other buildings.";
 
 				public static LocString EFFECT = string.Concat(new string[]
 				{
@@ -3593,6 +3654,24 @@ namespace STRINGS
 					ELEMENTS.DIRTYWATER.NAME,
 					"."
 				});
+			}
+
+			public class FABRICATEDWOODMAKER
+			{
+				public static LocString NAME = UI.FormatAsLink("Plywood Press", "FABRICATEDWOODMAKER");
+
+				public static LocString DESC = "Flattened plant bits are a useful wood substitute.";
+
+				public static LocString EFFECT = string.Concat(new string[]
+				{
+					"Combines a Binder liquid and ",
+					ITEMS.INDUSTRIAL_PRODUCTS.PLANT_FIBER.NAME,
+					" to create ",
+					ELEMENTS.FABRICATEDWOOD.NAME,
+					"."
+				});
+
+				public static LocString RECIPE_DESC = "Combines {0} and {1} to create {2}.";
 			}
 
 			public class PETROLEUMGENERATOR
@@ -5446,7 +5525,7 @@ namespace STRINGS
 
 			public class WOODTILE
 			{
-				public static LocString NAME = "Wood Tile";
+				public static LocString NAME = UI.FormatAsLink("Wood Tile", "WOODTILE");
 
 				public static LocString DESC = "Rooms built with wood tile are cozy and pleasant.";
 
@@ -5462,7 +5541,7 @@ namespace STRINGS
 
 			public class SNOWTILE
 			{
-				public static LocString NAME = "Snow Tile";
+				public static LocString NAME = UI.FormatAsLink("Snow Tile", "SNOWTILE");
 
 				public static LocString DESC = "Snow tiles have low thermal conductivity, but will melt if temperatures get too high.";
 
@@ -5726,6 +5805,33 @@ namespace STRINGS
 				});
 			}
 
+			public class INSULATEDDOOR
+			{
+				public static LocString NAME = UI.FormatAsLink("Insulated Door", "INSULATEDDOOR");
+
+				public static LocString DESC = "A slow-moving door that works best when it's closed.";
+
+				public static LocString EFFECT = "Significantly reduces " + UI.FormatAsLink("Temperature", "HEAT") + " exchange between climate-controlled rooms.";
+			}
+
+			public class WOODENDOOR
+			{
+				public static LocString NAME = UI.FormatAsLink("Wicker Door", "WOODENDOOR");
+
+				public static LocString DESC = "A breezy wooden door combines style and function.";
+
+				public static LocString EFFECT = string.Concat(new string[]
+				{
+					"Encloses areas without blocking ",
+					UI.FormatAsLink("Liquid", "ELEMENTS_LIQUID"),
+					" or ",
+					UI.FormatAsLink("Gas", "ELEMENTS_GAS"),
+					" flow.\n\nWild ",
+					UI.FormatAsLink("Critters", "CREATURES"),
+					" cannot pass through doors."
+				});
+			}
+
 			public class RATIONBOX
 			{
 				public static LocString NAME = UI.FormatAsLink("Ration Box", "RATIONBOX");
@@ -5964,7 +6070,14 @@ namespace STRINGS
 
 				public static LocString DESC = "Telescopes are necessary for learning starmaps and conducting rocket missions.";
 
-				public static LocString EFFECT = "Maps Starmap destinations.\n\nAssigned Duplicants must possess the " + UI.FormatAsLink("Field Research", "RESEARCHING2") + " skill.\n\nBuilding must be exposed to space to function.";
+				public static LocString EFFECT = string.Concat(new string[]
+				{
+					"Maps Starmap destinations, producing ",
+					UI.FormatAsLink("Data Banks", "DATABANK"),
+					" in the process.\n\nAssigned Duplicants must possess the ",
+					UI.FormatAsLink("Field Research", "RESEARCHING2"),
+					" skill.\n\nBuilding must be exposed to space to function."
+				});
 
 				public static LocString REQUIREMENT_TOOLTIP = "A steady {0} supply is required to sustain working Duplicants.";
 			}
@@ -5975,7 +6088,14 @@ namespace STRINGS
 
 				public static LocString DESC = "Telescopes are necessary for studying space, allowing rocket travel to other worlds.";
 
-				public static LocString EFFECT = "Reveals visitable Planetoids in space.\n\nAssigned Duplicants must possess the " + UI.FormatAsLink("Astronomy", "ASTRONOMY") + " skill.\n\nBuilding must be exposed to space to function.";
+				public static LocString EFFECT = string.Concat(new string[]
+				{
+					"Reveals visitable Planetoids in space, producing ",
+					UI.FormatAsLink("Data Banks", "DATABANK"),
+					" in the process.\n\nAssigned Duplicants must possess the ",
+					UI.FormatAsLink("Astronomy", "ASTRONOMY"),
+					" skill.\n\nBuilding must be exposed to space to function."
+				});
 
 				public static LocString REQUIREMENT_TOOLTIP = "A steady {0} supply is required to sustain working Duplicants.";
 			}
@@ -6562,7 +6682,7 @@ namespace STRINGS
 					" and refuels them with ",
 					UI.FormatAsLink("Oxygen", "OXYGEN"),
 					" and ",
-					UI.FormatAsLink("Petroleum", "PETROLEUM"),
+					MISC.TAGS.COMBUSTIBLELIQUID,
 					".\n\nEmpties suits of ",
 					UI.FormatAsLink("Polluted Water", "DIRTYWATER"),
 					".\n\nBuild next to a ",
@@ -7743,7 +7863,7 @@ namespace STRINGS
 				public static LocString REFINEDLIPID_RECIPE_DESCRIPTION = string.Concat(new string[]
 				{
 					"Biodiesel is a ",
-					UI.FormatAsLink("Liquid", "ELEMENTS_LIQUID"),
+					UI.FormatAsLink("Combustible Liquid", "COMBUSTIBLELIQUID"),
 					" used in ",
 					UI.FormatAsLink("Power", "POWER"),
 					" production."
@@ -8359,7 +8479,7 @@ namespace STRINGS
 
 			public class LOGICWATTAGESENSOR
 			{
-				public static LocString NAME = UI.FormatAsLink("Wattage Sensor", "LOGICWATTSENSOR");
+				public static LocString NAME = UI.FormatAsLink("Wattage Sensor", "LOGICWATTAGESENSOR");
 
 				public static LocString DESC = "Wattage sensors can send a signal when a building has switched on or off.";
 
@@ -8513,7 +8633,7 @@ namespace STRINGS
 
 			public class LOGICDUPLICANTSENSOR
 			{
-				public static LocString NAME = UI.FormatAsLink("Duplicant Motion Sensor", "DUPLICANTSENSOR");
+				public static LocString NAME = UI.FormatAsLink("Duplicant Motion Sensor", "LOGICDUPLICANTSENSOR");
 
 				public static LocString DESC = "Motion sensors save power by only enabling buildings when Duplicants are nearby.";
 
@@ -9253,7 +9373,7 @@ namespace STRINGS
 
 			public class GRAVITASPEDESTAL
 			{
-				public static LocString NAME = UI.FormatAsLink("Pedestal", "ITEMPEDESTAL");
+				public static LocString NAME = UI.FormatAsLink("Gravitas Pedestal", "ITEMPEDESTAL");
 
 				public static LocString DESC = "Perception can be drastically changed by a bit of thoughtful presentation.";
 
@@ -9468,7 +9588,7 @@ namespace STRINGS
 
 				public static LocString DESC = "Radbolts are necessary for producing Materials Science research.";
 
-				public static LocString EFFECT = "Attracts nearby " + UI.FormatAsLink("Radiation", "RADIATION") + " to generate Radbolts.\n\nEmits generated Radbolts in the direction of your choosing when the set Radbolt threshold is reached.\n\nRadbolts collected will rapidly decay while this building is disabled.";
+				public static LocString EFFECT = "Attracts nearby " + UI.FormatAsLink("Radiation", "RADIATION") + " to generate Radbolts.\n\nEmits generated Radbolts in the direction of your choosing when the set Radbolt threshold is reached.\n\nRadbolts collected will gradually decay while this building is disabled.";
 
 				public static LocString LOGIC_PORT = "Do not emit Radbolts";
 
@@ -10083,6 +10203,37 @@ namespace STRINGS
 				public static LocString EFFECT = "An experimental DNA manipulator.\n\nAnalyzes " + UI.FormatAsLink("Critters", "CREATURES") + " to transform base morphs into random variants of their species.";
 			}
 
+			public class HIJACKEDHEADQUARTERS
+			{
+				public static LocString NAME = UI.FormatAsLink("Printerceptor", "HIJACKEDHEADQUARTERS");
+
+				public static LocString DESC = "The access code required to reboot it for testing is located somewhere on this world.";
+
+				public static LocString EFFECT = "An unsanctioned bioprinter that runs on power siphoned from the " + BUILDINGS.PREFABS.HEADQUARTERSCOMPLETE.NAME + ".";
+			}
+
+			public class HIJACKEDHEADQUARTERS_COMPLETED
+			{
+				public static LocString NAME = UI.FormatAsLink("Printerceptor", "HIJACKEDHEADQUARTERS");
+
+				public static LocString DESC = "";
+
+				public static LocString EFFECT = string.Concat(new string[]
+				{
+					"Intercepts and stores ",
+					CODEX.POWER.TITLE,
+					" charges from the ",
+					BUILDINGS.PREFABS.HEADQUARTERSCOMPLETE.NAME,
+					".\n\nConverts stored charges and ",
+					UI.FormatAsLink(DatabankHelper.NAME_PLURAL, "Databank"),
+					" into ",
+					UI.FormatAsLink("Seeds", "CREATURES"),
+					" and ",
+					UI.FormatAsLink("Eggs", "CREATURES"),
+					"."
+				});
+			}
+
 			public class FACILITYBACKWALLWINDOW
 			{
 				public static LocString NAME = "Window";
@@ -10359,6 +10510,106 @@ namespace STRINGS
 				public static LocString DESC = "A tall, thin window which once pointed to a courtyard.";
 			}
 
+			public class PROPGRAVITASDESK
+			{
+				public static LocString NAME = "Biophysics Research Desk";
+
+				public static LocString DESC = "The unkempt workspace of a long-departed scientist who expected to return.";
+			}
+
+			public class PROPGRAVITASFRIDGE
+			{
+				public static LocString NAME = "Mini Fridge";
+
+				public static LocString DESC = "A non-functional cold storage unit full of expired samples.\n\nIt was originally someone's home appliance.";
+			}
+
+			public class PROPGRAVITASCLOCKSQUARE
+			{
+				public static LocString NAME = "Clock";
+
+				public static LocString DESC = "A square wall clock.\n\nIt's quite damaged.";
+			}
+
+			public class PROPGRAVITASCEILINGLIGHT
+			{
+				public static LocString NAME = "Light Fixture";
+
+				public static LocString DESC = "A flush mount ceiling light that no longer functions.\n\nThere's dust inside.";
+			}
+
+			public class PROPGRAVITASPOSTERPLANTS
+			{
+				public static LocString NAME = "Wall Chart";
+
+				public static LocString DESC = "A handy reference text with illustrations.\n\nIt details the genetic makeup of proprietary botanicals.";
+			}
+
+			public class PROPGRAVITASPOSTERSEED
+			{
+				public static LocString NAME = "Wall Chart";
+
+				public static LocString DESC = "A handy reference text with illustrations.\n\nIt compares the genetic makeup of select organisms.";
+			}
+
+			public class PROPGRAVITASPOTPLANTDEAD
+			{
+				public static LocString NAME = "Dead Plant";
+
+				public static LocString DESC = "A very dead plant.\n\nIt's a wonder it hasn't crumbled into nothingness.";
+			}
+
+			public class PROPGRAVITASFLIPPHONE
+			{
+				public static LocString NAME = "Flip Phone";
+
+				public static LocString DESC = "An outdated phone left behind by a distracted lab technician.\n\nIt doesn't work.";
+			}
+
+			public class GRAVITASBATHROOMSTALL
+			{
+				public static LocString NAME = "Toilet";
+
+				public static LocString DESC = "";
+
+				public static LocString EFFECT = "A private toilet for senior scientists.\n\nIt was the site of many great scientific breakthroughs.";
+			}
+
+			public class PROPGRAVITASBATHROOMMIRROR
+			{
+				public static LocString NAME = "Mirror";
+
+				public static LocString DESC = "A one-way mirror and shelf.\n\nThe skincare products still smell faintly of shea butter.";
+			}
+
+			public class PROPGRAVITASTRASHCAN
+			{
+				public static LocString NAME = "Trash Can";
+
+				public static LocString DESC = "A wall-mounted garbage receptacle.\n\nThe lid does not close.";
+			}
+
+			public class PROPGRAVITASBATHROOMTOILETPAPERHOLDER
+			{
+				public static LocString NAME = "Toilet Paper Holder";
+
+				public static LocString DESC = "It holds one roll of sanitary paper.\n\nThe sheets are single-ply.";
+			}
+
+			public class PROPGRAVITASBATHROOMSINK
+			{
+				public static LocString NAME = "Enamel Sink";
+
+				public static LocString DESC = "A handwashing station that looks suspiciously under-utilized.\n\nIt was once part of a bulk office order.";
+			}
+
+			public class PROPGRAVITASPAPERTOLELDISPENSER
+			{
+				public static LocString NAME = "Paper Towel Dispenser";
+
+				public static LocString DESC = "It once dispensed paper made from 100% post-consumer recycled content.\n\nThe remaining sheet is jammed.";
+			}
+
 			public class PROPGRAVITASLABWINDOW
 			{
 				public static LocString NAME = "Lab Window";
@@ -10596,7 +10847,7 @@ namespace STRINGS
 
 			public class WARPCONDUITRECEIVER
 			{
-				public static LocString NAME = "Supply Teleporter Output";
+				public static LocString NAME = UI.FormatAsLink("Supply Teleporter Output", "WARPCONDUITRECEIVER");
 
 				public static LocString DESC = "The tubes at the back disappear into nowhere.";
 
@@ -10616,7 +10867,7 @@ namespace STRINGS
 
 			public class WARPCONDUITSENDER
 			{
-				public static LocString NAME = "Supply Teleporter Input";
+				public static LocString NAME = UI.FormatAsLink("Supply Teleporter Input", "WARPCONDUITSENDER");
 
 				public static LocString DESC = "The tubes at the back disappear into nowhere.";
 
@@ -10666,7 +10917,7 @@ namespace STRINGS
 
 			public class LONELYMINIONHOUSE
 			{
-				public static LocString NAME = UI.FormatAsLink("Gravitas Shipping Container", "LONELYMINIONHOUSE");
+				public static LocString NAME = UI.FormatAsLink("Gravitas Shipping Container", "STORYTRAITLONELYMINION");
 
 				public static LocString DESC = "Its occupant has been alone for so long, he's forgotten what friendship feels like.";
 
@@ -10675,7 +10926,7 @@ namespace STRINGS
 
 			public class LONELYMINIONHOUSE_COMPLETE
 			{
-				public static LocString NAME = UI.FormatAsLink("Gravitas Shipping Container", "LONELYMINIONHOUSE_COMPLETE");
+				public static LocString NAME = UI.FormatAsLink("Gravitas Shipping Container", "STORYTRAITLONELYMINION");
 
 				public static LocString DESC = "Someone lived inside it for a while.";
 

@@ -17,7 +17,7 @@ public class KleiPermitDioramaVis_BuildingHangingHook : KMonoBehaviour, IKleiPer
 	{
 		KleiPermitVisUtil.ConfigureToRenderBuilding(this.buildingKAnim, (BuildingFacadeResource)permit);
 		KleiPermitVisUtil.ConfigureBuildingPosition(this.buildingKAnim.rectTransform(), this.buildingKAnimPosition, KleiPermitVisUtil.GetBuildingDef(permit), Alignment.Top());
-		KleiPermitVisUtil.AnimateIn(this.buildingKAnim, default(Updater));
+		KleiPermitVisUtil.AnimateIn(this.buildingKAnim, default(Updater), "place");
 	}
 
 	[SerializeField]

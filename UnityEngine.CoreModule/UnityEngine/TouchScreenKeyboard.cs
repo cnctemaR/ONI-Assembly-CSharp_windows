@@ -5,9 +5,9 @@ using UnityEngine.Internal;
 
 namespace UnityEngine
 {
-	[NativeConditional("ENABLE_ONSCREEN_KEYBOARD")]
 	[NativeHeader("Runtime/Export/TouchScreenKeyboard/TouchScreenKeyboard.bindings.h")]
 	[NativeHeader("Runtime/Input/KeyboardOnScreen.h")]
+	[NativeConditional("ENABLE_ONSCREEN_KEYBOARD")]
 	public class TouchScreenKeyboard
 	{
 		[FreeFunction("TouchScreenKeyboard_Destroy", IsThreadSafe = true)]

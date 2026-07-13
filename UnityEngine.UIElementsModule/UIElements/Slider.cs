@@ -52,17 +52,14 @@ namespace UnityEngine.UIElements
 		internal override float ParseStringToValue(string previousValue, string newValue)
 		{
 			float num;
-			bool flag = UINumericFieldsUtils.TryConvertStringToFloat(newValue, previousValue, out num);
-			float num2;
-			if (flag)
+			ExpressionEvaluator.Expression expression;
+			bool flag = UINumericFieldsUtils.TryConvertStringToFloat(newValue, previousValue, out num, out expression);
+			Action<ExpressionEvaluator.Expression> expressionEvaluated = this.expressionEvaluated;
+			if (expressionEvaluated != null)
 			{
-				num2 = num;
+				expressionEvaluated(expression);
 			}
-			else
-			{
-				num2 = 0f;
-			}
-			return num2;
+			return flag ? num : 0f;
 		}
 
 		internal override void ComputeValueFromKey(BaseSlider<float>.SliderKey sliderKey, bool isShift)

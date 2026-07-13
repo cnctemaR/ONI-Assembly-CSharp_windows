@@ -23,7 +23,8 @@ public class PinkRockCarvedConfig : IEntityConfig, IHasDlcRestrictions
 			GameTags.RareMaterials,
 			GameTags.MiscPickupable,
 			GameTags.PedestalDisplayable,
-			GameTags.Experimental
+			GameTags.Experimental,
+			GameTags.Ornament
 		});
 		gameObject.AddOrGet<OccupyArea>();
 		DecorProvider decorProvider = gameObject.AddOrGet<DecorProvider>();
@@ -40,6 +41,7 @@ public class PinkRockCarvedConfig : IEntityConfig, IHasDlcRestrictions
 		light2D.drawOverlay = true;
 		light2D.disableOnStore = true;
 		gameObject.GetComponent<KCircleCollider2D>().offset = new Vector2(0f, 0.25f);
+		gameObject.AddOrGet<CodexEntryRedirector>().CodexID = "REQUIREMENTCLASSORNAMENT";
 		return gameObject;
 	}
 

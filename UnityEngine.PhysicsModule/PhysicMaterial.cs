@@ -100,8 +100,8 @@ namespace UnityEngine
 			}
 		}
 
-		[Obsolete("Anisotropic friction is no longer supported since Unity 5.0.", true)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
+		[Obsolete("Anisotropic friction is no longer supported since Unity 5.0.", true)]
 		public float staticFriction2
 		{
 			get

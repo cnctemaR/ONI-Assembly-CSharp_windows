@@ -29,7 +29,7 @@ public static class BaseChameleonConfig
 		{
 			text2 = "DreckoBabyNavGrid";
 		}
-		EntityTemplates.ExtendEntityToBasicCreature(gameObject, FactionManager.FactionID.Pest, trait_id, text2, NavType.Floor, 32, 1f, "Meat", 0.5f, true, false, warnLowTemp, warnHighTemp, lethalLowTemp, lethalHighTemp);
+		EntityTemplates.ExtendEntityToBasicCreature(false, gameObject, anim_file, is_baby ? null : "chameleo_build_kanim", null, FactionManager.FactionID.Pest, trait_id, text2, NavType.Floor, 32, 1f, "Meat", 0.5f, true, false, warnLowTemp, warnHighTemp, lethalLowTemp, lethalHighTemp);
 		if (!string.IsNullOrEmpty(symbol_override_prefix))
 		{
 			gameObject.AddOrGet<SymbolOverrideController>().ApplySymbolOverridesByAffix(Assets.GetAnim(anim_file), symbol_override_prefix, null, 0);
@@ -73,6 +73,7 @@ public static class BaseChameleonConfig
 			.Add(new PlayAnimsStates.Def(GameTags.Creatures.Poop, false, "poop", global::STRINGS.CREATURES.STATUSITEMS.EXPELLING_SOLID.NAME, global::STRINGS.CREATURES.STATUSITEMS.EXPELLING_SOLID.TOOLTIP), true, -1)
 			.Add(new CallAdultStates.Def(), is_baby, -1)
 			.Add(new CritterCondoStates.Def(), !is_baby, -1)
+			.Add(new CritterEmoteStates.Def(Assets.GetAnim("chameleo_emotes_kanim")), true, -1)
 			.PopInterruptGroup()
 			.Add(new CreatureSleepStates.Def(), true, -1)
 			.Add(new IdleStates.Def(), true, -1);

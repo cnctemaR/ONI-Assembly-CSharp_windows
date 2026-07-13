@@ -6,13 +6,16 @@ public struct OreSizeVisualizerData
 	public OreSizeVisualizerData(GameObject go)
 	{
 		this.primaryElement = go.GetComponent<PrimaryElement>();
-		this.onMassChangedCB = null;
 		this.tierSetType = OreSizeVisualizerComponents.TiersSetType.Ores;
+		this.absorbHandle = -1;
+		this.splitFromChunkHandle = -1;
 	}
 
 	public PrimaryElement primaryElement;
 
-	public Action<object> onMassChangedCB;
-
 	public OreSizeVisualizerComponents.TiersSetType tierSetType;
+
+	public int absorbHandle;
+
+	public int splitFromChunkHandle;
 }

@@ -16,7 +16,7 @@ public class StorageLockerSmart : StorageLocker
 		this.UpdateLogicAndActiveState();
 	}
 
-	private void UpdateLogicCircuitCB(object data)
+	private void UpdateLogicCircuitCB(object _)
 	{
 		this.UpdateLogicAndActiveState();
 	}

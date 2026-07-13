@@ -24,8 +24,12 @@ public class OperationalValve : ValveBase
 
 	private void OnOperationalChanged(object data)
 	{
-		bool flag = (bool)data;
-		if (flag)
+		this.OnOperationalChanged(((Boxed<bool>)data).value);
+	}
+
+	private void OnOperationalChanged(bool isOperational)
+	{
+		if (isOperational)
 		{
 			base.CurrentFlow = base.MaxFlow;
 		}
@@ -33,7 +37,7 @@ public class OperationalValve : ValveBase
 		{
 			base.CurrentFlow = 0f;
 		}
-		this.operational.SetActive(flag, false);
+		this.operational.SetActive(isOperational, false);
 	}
 
 	protected override void OnMassTransfer(float amount)

@@ -117,8 +117,14 @@ public class ClusterMapLongRangeMissile : GameStateMachine<ClusterMapLongRangeMi
 			this.animController = base.GetComponent<KBatchedAnimController>();
 		}
 
-		public void Setup(AxialI source, ClusterGridEntity target)
+		public void Setup(AxialI source, ClusterGridEntity target, MissileLongRangeProjectile.Def projectile_def)
 		{
+			BallisticClusterGridEntity component = base.GetComponent<BallisticClusterGridEntity>();
+			component.nameKey = new StringKey(projectile_def.missileName);
+			base.GetComponent<InfoDescription>().description = Strings.Get(projectile_def.missileDesc);
+			component.SwapSymbolFromSameAnim("payload", projectile_def.starmapOverrideSymbol);
+			KAnim.Build.Symbol symbol = this.animController.AnimFiles[0].GetData().build.GetSymbol(projectile_def.starmapOverrideSymbol);
+			this.animController.GetComponent<SymbolOverrideController>().AddSymbolOverride("payload", symbol, 0);
 			base.sm.targetObject.Set(target.gameObject, this, false);
 			this.Travel(source, ClusterMapLongRangeMissile.StatesInstance.FindInterceptPoint(source, target, base.GetComponent<ClusterDestinationSelector>(), 99999));
 		}
@@ -153,7 +159,7 @@ public class ClusterMapLongRangeMissile : GameStateMachine<ClusterMapLongRangeMi
 			if (gameObject != null)
 			{
 				ClusterTraveler component2 = gameObject.GetComponent<ClusterTraveler>();
-				if (component2 != null)
+				if (component2 != null && component.CurrentPath != null)
 				{
 					num = component2.TravelETA(component.Destination);
 				}
@@ -170,7 +176,8 @@ public class ClusterMapLongRangeMissile : GameStateMachine<ClusterMapLongRangeMi
 
 		public bool IsTraveling()
 		{
-			return base.GetComponent<ClusterTraveler>().CurrentPath.Count != 0;
+			ClusterTraveler component = base.GetComponent<ClusterTraveler>();
+			return component.CurrentPath != null && component.CurrentPath.Count != 0;
 		}
 
 		[Serialize]

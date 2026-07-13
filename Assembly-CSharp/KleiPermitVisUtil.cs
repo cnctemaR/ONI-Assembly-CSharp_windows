@@ -73,10 +73,10 @@ public static class KleiPermitVisUtil
 		}
 	}
 
-	public static void AnimateIn(KBatchedAnimController buildingKAnim, Updater extraUpdater = default(Updater))
+	public static void AnimateIn(KBatchedAnimController buildingKAnim, Updater extraUpdater = default(Updater), string place_anim = "place")
 	{
 		KleiPermitVisUtil.ClearAnimation();
-		KleiPermitVisUtil.buildingAnimateIn = KleiPermitBuildingAnimateIn.MakeFor(buildingKAnim, extraUpdater);
+		KleiPermitVisUtil.buildingAnimateIn = KleiPermitBuildingAnimateIn.MakeFor(buildingKAnim, extraUpdater, place_anim);
 	}
 
 	public static HashedString GetFirstAnimHash(KAnimFile animFile)

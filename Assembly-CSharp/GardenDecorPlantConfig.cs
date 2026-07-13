@@ -31,6 +31,7 @@ public class GardenDecorPlantConfig : IEntityConfig, IHasDlcRestrictions
 			SimHashes.CarbonDioxide
 		}, false, 0f, 0.15f, null, true, false, true, true, 2400f, 0f, 2200f, "GardenDecorPlantOriginal", global::STRINGS.CREATURES.SPECIES.GARDENDECORPLANT.NAME);
 		PrickleGrass prickleGrass = gameObject.AddOrGet<PrickleGrass>();
+		gameObject.AddOrGetDef<DecorPlantMonitor.Def>();
 		prickleGrass.positive_decor_effect = DECOR.BONUS.TIER3;
 		prickleGrass.negative_decor_effect = DECOR.PENALTY.TIER3;
 		GameObject gameObject2 = gameObject;

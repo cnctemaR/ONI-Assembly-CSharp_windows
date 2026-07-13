@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using KSerialization;
 using STRINGS;
 using UnityEngine;
@@ -8,18 +9,42 @@ using UnityEngine;
 [AddComponentMenu("KMonoBehaviour/scripts/AccessControl")]
 public class AccessControl : KMonoBehaviour, ISaveLoadable, IGameObjectEffectDescriptor
 {
-	public AccessControl.Permission DefaultPermission
+	private int GetTagId(Tag game_tag)
 	{
-		get
+		return GridRestrictionSerializer.Instance.GetTagId(game_tag);
+	}
+
+	public AccessControl.Permission GetDefaultPermission(Tag groupTag)
+	{
+		foreach (KeyValuePair<Tag, AccessControl.Permission> keyValuePair in this.defaultPermissionByTag)
 		{
-			return this._defaultPermission;
+			if (keyValuePair.Key == groupTag)
+			{
+				return keyValuePair.Value;
+			}
 		}
-		set
+		return AccessControl.Permission.Both;
+	}
+
+	public void SetDefaultPermission(Tag groupTag, AccessControl.Permission permission)
+	{
+		bool flag = false;
+		KeyValuePair<Tag, AccessControl.Permission> keyValuePair = new KeyValuePair<Tag, AccessControl.Permission>(groupTag, permission);
+		for (int i = 0; i < this.defaultPermissionByTag.Count; i++)
 		{
-			this._defaultPermission = value;
-			this.SetStatusItem();
-			this.SetGridRestrictions(null, this._defaultPermission);
+			if (this.defaultPermissionByTag[i].Key == groupTag)
+			{
+				this.defaultPermissionByTag[i] = keyValuePair;
+				flag = true;
+				break;
+			}
 		}
+		if (!flag)
+		{
+			this.defaultPermissionByTag.Add(keyValuePair);
+		}
+		this.SetStatusItem();
+		this.SetGridRestrictions(this.GetTagId(groupTag), permission);
 	}
 
 	public bool Online
@@ -41,6 +66,7 @@ public class AccessControl : KMonoBehaviour, ISaveLoadable, IGameObjectEffectDes
 		base.Subscribe<AccessControl>(-905833192, AccessControl.OnCopySettingsDelegate);
 	}
 
+	[Obsolete("Added support for Robots Access Controls")]
 	private void CheckForBadData()
 	{
 		List<KeyValuePair<Ref<KPrefabID>, AccessControl.Permission>> list = new List<KeyValuePair<Ref<KPrefabID>, AccessControl.Permission>>();
@@ -57,19 +83,8 @@ public class AccessControl : KMonoBehaviour, ISaveLoadable, IGameObjectEffectDes
 		}
 	}
 
-	protected override void OnSpawn()
+	private void UpgradeSavePreRobotDoorPermission()
 	{
-		this.isTeleporter = base.GetComponent<NavTeleporter>() != null;
-		base.OnSpawn();
-		if (this.savedPermissions.Count > 0)
-		{
-			this.CheckForBadData();
-		}
-		if (this.registered)
-		{
-			this.RegisterInGrid(true);
-			this.RestorePermissions();
-		}
 		ListPool<global::Tuple<MinionAssignablesProxy, AccessControl.Permission>, AccessControl>.PooledList pooledList = ListPool<global::Tuple<MinionAssignablesProxy, AccessControl.Permission>, AccessControl>.Allocate();
 		for (int i = this.savedPermissions.Count - 1; i >= 0; i--)
 		{
@@ -90,6 +105,38 @@ public class AccessControl : KMonoBehaviour, ISaveLoadable, IGameObjectEffectDes
 			this.SetPermission(tuple.first, tuple.second);
 		}
 		pooledList.Recycle();
+	}
+
+	private void UpgradeSavesToPostRobotDoorPermissions()
+	{
+		if (this._defaultPermission != AccessControl.Permission.Both)
+		{
+			this.SetDefaultPermission(GameTags.Minions.Models.Standard, this._defaultPermission);
+			this.SetDefaultPermission(GameTags.Minions.Models.Bionic, this._defaultPermission);
+			this._defaultPermission = AccessControl.Permission.Both;
+		}
+		foreach (KeyValuePair<Ref<KPrefabID>, AccessControl.Permission> keyValuePair in this.savedPermissions)
+		{
+			this.SetPermission(keyValuePair.Key.Get().GetComponent<MinionAssignablesProxy>(), keyValuePair.Value);
+		}
+		this.savedPermissions.Clear();
+	}
+
+	protected override void OnSpawn()
+	{
+		this.isTeleporter = base.GetComponent<NavTeleporter>() != null;
+		base.OnSpawn();
+		if (this.savedPermissions.Count > 0)
+		{
+			this.CheckForBadData();
+		}
+		if (this.registered)
+		{
+			this.RegisterInGrid(true);
+			this.RestorePermissions();
+		}
+		this.UpgradeSavePreRobotDoorPermission();
+		this.UpgradeSavesToPostRobotDoorPermissions();
 		this.SetStatusItem();
 	}
 
@@ -101,7 +148,8 @@ public class AccessControl : KMonoBehaviour, ISaveLoadable, IGameObjectEffectDes
 
 	private void OnControlStateChanged(object data)
 	{
-		this.overrideAccess = (Door.ControlState)data;
+		this.overrideAccess = ((Boxed<Door.ControlState>)data).value;
+		this.SetStatusItem();
 	}
 
 	private void OnCopySettings(object data)
@@ -109,16 +157,16 @@ public class AccessControl : KMonoBehaviour, ISaveLoadable, IGameObjectEffectDes
 		AccessControl component = ((GameObject)data).GetComponent<AccessControl>();
 		if (component != null)
 		{
-			this.savedPermissions.Clear();
-			foreach (KeyValuePair<Ref<KPrefabID>, AccessControl.Permission> keyValuePair in component.savedPermissions)
+			this.savedPermissionsById.Clear();
+			foreach (KeyValuePair<int, AccessControl.Permission> keyValuePair in component.savedPermissionsById)
 			{
-				if (keyValuePair.Key.Get() != null)
-				{
-					this.SetPermission(keyValuePair.Key.Get().GetComponent<MinionAssignablesProxy>(), keyValuePair.Value);
-				}
+				this.SetPermission(keyValuePair.Key, keyValuePair.Value);
 			}
-			this._defaultPermission = component._defaultPermission;
-			this.SetGridRestrictions(null, this.DefaultPermission);
+			this.defaultPermissionByTag = new List<KeyValuePair<Tag, AccessControl.Permission>>(component.defaultPermissionByTag);
+			foreach (KeyValuePair<Tag, AccessControl.Permission> keyValuePair2 in this.defaultPermissionByTag)
+			{
+				this.SetGridRestrictions(this.GetTagId(keyValuePair2.Key), keyValuePair2.Value);
+			}
 		}
 	}
 
@@ -136,43 +184,46 @@ public class AccessControl : KMonoBehaviour, ISaveLoadable, IGameObjectEffectDes
 		}
 	}
 
-	public void SetPermission(MinionAssignablesProxy key, AccessControl.Permission permission)
+	private void SetPermission(int id, AccessControl.Permission permission)
 	{
-		KPrefabID component = key.GetComponent<KPrefabID>();
-		if (component == null)
-		{
-			return;
-		}
 		bool flag = false;
-		for (int i = 0; i < this.savedPermissions.Count; i++)
+		for (int i = 0; i < this.savedPermissionsById.Count; i++)
 		{
-			if (this.savedPermissions[i].Key.GetId() == component.InstanceID)
+			if (this.savedPermissionsById[i].Key == id)
 			{
 				flag = true;
-				KeyValuePair<Ref<KPrefabID>, AccessControl.Permission> keyValuePair = this.savedPermissions[i];
-				this.savedPermissions[i] = new KeyValuePair<Ref<KPrefabID>, AccessControl.Permission>(keyValuePair.Key, permission);
+				KeyValuePair<int, AccessControl.Permission> keyValuePair = this.savedPermissionsById[i];
+				this.savedPermissionsById[i] = new KeyValuePair<int, AccessControl.Permission>(keyValuePair.Key, permission);
 				break;
 			}
 		}
 		if (!flag)
 		{
-			this.savedPermissions.Add(new KeyValuePair<Ref<KPrefabID>, AccessControl.Permission>(new Ref<KPrefabID>(component), permission));
+			this.savedPermissionsById.Add(new KeyValuePair<int, AccessControl.Permission>(id, permission));
 		}
 		this.SetStatusItem();
-		this.SetGridRestrictions(component, permission);
+		this.SetGridRestrictions(id, permission);
+	}
+
+	public void SetPermission(MinionAssignablesProxy key, AccessControl.Permission permission)
+	{
+		this.SetPermission(key.GetComponent<KPrefabID>().InstanceID, permission);
+	}
+
+	public void SetPermission(Tag gameTag, AccessControl.Permission permission)
+	{
+		this.SetPermission(this.GetTagId(gameTag), permission);
 	}
 
 	private void RestorePermissions()
 	{
-		this.SetGridRestrictions(null, this.DefaultPermission);
-		foreach (KeyValuePair<Ref<KPrefabID>, AccessControl.Permission> keyValuePair in this.savedPermissions)
+		foreach (KeyValuePair<Tag, AccessControl.Permission> keyValuePair in this.defaultPermissionByTag)
 		{
-			KPrefabID kprefabID = keyValuePair.Key.Get();
-			if (kprefabID == null)
-			{
-				DebugUtil.Assert(kprefabID == null, "Tried to set a duplicant-specific access restriction with a null key! This will result in an invisible default permission!");
-			}
-			this.SetGridRestrictions(keyValuePair.Key.Get(), keyValuePair.Value);
+			this.SetGridRestrictions(this.GetTagId(keyValuePair.Key), keyValuePair.Value);
+		}
+		foreach (KeyValuePair<int, AccessControl.Permission> keyValuePair2 in this.savedPermissionsById)
+		{
+			this.SetGridRestrictions(keyValuePair2.Key, keyValuePair2.Value);
 		}
 	}
 
@@ -250,7 +301,7 @@ public class AccessControl : KMonoBehaviour, ISaveLoadable, IGameObjectEffectDes
 		this.registered = register;
 	}
 
-	private void SetGridRestrictions(KPrefabID kpid, AccessControl.Permission permission)
+	private void SetGridRestrictions(int id, AccessControl.Permission permission)
 	{
 		if (!this.registered || !base.isSpawned)
 		{
@@ -262,7 +313,6 @@ public class AccessControl : KMonoBehaviour, ISaveLoadable, IGameObjectEffectDes
 		{
 			return;
 		}
-		int num = ((kpid != null) ? kpid.InstanceID : (-1));
 		Grid.Restriction.Directions directions = (Grid.Restriction.Directions)0;
 		switch (permission)
 		{
@@ -295,23 +345,51 @@ public class AccessControl : KMonoBehaviour, ISaveLoadable, IGameObjectEffectDes
 			int[] array = this.registeredBuildingCells;
 			for (int i = 0; i < array.Length; i++)
 			{
-				Grid.SetRestriction(array[i], num, directions);
+				Grid.SetRestriction(array[i], id, directions);
 			}
 		}
 		else
 		{
 			foreach (CellOffset cellOffset in component2.OccupiedCellsOffsets)
 			{
-				Grid.SetRestriction(Grid.OffsetCell(Grid.PosToCell(component2), cellOffset), num, directions);
+				Grid.SetRestriction(Grid.OffsetCell(Grid.PosToCell(component2), cellOffset), id, directions);
 			}
 		}
 		if (this.isTeleporter)
 		{
-			Grid.SetRestriction(base.GetComponent<NavTeleporter>().GetCell(), num, directions);
+			Grid.SetRestriction(base.GetComponent<NavTeleporter>().GetCell(), id, directions);
 		}
 	}
 
 	private void ClearGridRestrictions(KPrefabID kpid)
+	{
+		if (kpid == null)
+		{
+			return;
+		}
+		Building component = base.GetComponent<Building>();
+		OccupyArea component2 = base.GetComponent<OccupyArea>();
+		if (component2 == null && component == null)
+		{
+			return;
+		}
+		int instanceID = kpid.InstanceID;
+		if (component != null)
+		{
+			int[] array = this.registeredBuildingCells;
+			for (int i = 0; i < array.Length; i++)
+			{
+				Grid.ClearRestriction(array[i], instanceID);
+			}
+			return;
+		}
+		foreach (CellOffset cellOffset in component2.OccupiedCellsOffsets)
+		{
+			Grid.ClearRestriction(Grid.OffsetCell(Grid.PosToCell(component2), cellOffset), instanceID);
+		}
+	}
+
+	private void ClearGridRestrictions(int id, Tag default_id)
 	{
 		Building component = base.GetComponent<Building>();
 		OccupyArea component2 = base.GetComponent<OccupyArea>();
@@ -319,7 +397,11 @@ public class AccessControl : KMonoBehaviour, ISaveLoadable, IGameObjectEffectDes
 		{
 			return;
 		}
-		int num = ((kpid != null) ? kpid.InstanceID : (-1));
+		int num = this.GetTagId(default_id);
+		if (id != Tag.Invalid.GetHash())
+		{
+			num = id;
+		}
 		if (component != null)
 		{
 			int[] array = this.registeredBuildingCells;
@@ -335,42 +417,25 @@ public class AccessControl : KMonoBehaviour, ISaveLoadable, IGameObjectEffectDes
 		}
 	}
 
-	public AccessControl.Permission GetPermission(Navigator minion)
-	{
-		Door.ControlState controlState = this.overrideAccess;
-		if (controlState == Door.ControlState.Opened)
-		{
-			return AccessControl.Permission.Both;
-		}
-		if (controlState == Door.ControlState.Locked)
-		{
-			return AccessControl.Permission.Neither;
-		}
-		return this.GetSetPermission(this.GetKeyForNavigator(minion));
-	}
-
-	private MinionAssignablesProxy GetKeyForNavigator(Navigator minion)
-	{
-		return minion.GetComponent<MinionIdentity>().assignableProxy.Get();
-	}
-
 	public AccessControl.Permission GetSetPermission(MinionAssignablesProxy key)
 	{
-		return this.GetSetPermission(key.GetComponent<KPrefabID>());
+		return this.GetSetPermission(key.GetComponent<KPrefabID>().InstanceID, key.GetMinionModel());
 	}
 
-	private AccessControl.Permission GetSetPermission(KPrefabID kpid)
+	public AccessControl.Permission GetSetPermission(Tag robotTag)
 	{
-		AccessControl.Permission permission = this.DefaultPermission;
-		if (kpid != null)
+		return this.GetSetPermission(this.GetTagId(robotTag), GameTags.Robot);
+	}
+
+	public AccessControl.Permission GetSetPermission(int primary_id, Tag secondary_id)
+	{
+		AccessControl.Permission permission = this.GetDefaultPermission(secondary_id);
+		for (int i = 0; i < this.savedPermissionsById.Count; i++)
 		{
-			for (int i = 0; i < this.savedPermissions.Count; i++)
+			if (this.savedPermissionsById[i].Key == primary_id)
 			{
-				if (this.savedPermissions[i].Key.GetId() == kpid.InstanceID)
-				{
-					permission = this.savedPermissions[i].Value;
-					break;
-				}
+				permission = this.savedPermissionsById[i].Value;
+				break;
 			}
 		}
 		return permission;
@@ -381,32 +446,52 @@ public class AccessControl : KMonoBehaviour, ISaveLoadable, IGameObjectEffectDes
 		KPrefabID component = key.GetComponent<KPrefabID>();
 		if (component != null)
 		{
-			for (int i = 0; i < this.savedPermissions.Count; i++)
+			this.ClearPermission(component.InstanceID, key.GetMinionModel());
+		}
+		this.SetStatusItem();
+		this.ClearGridRestrictions(component.InstanceID, key.GetMinionModel());
+	}
+
+	public void ClearPermission(Tag tag, Tag default_key)
+	{
+		int tagId = this.GetTagId(tag);
+		this.ClearPermission(tagId, default_key);
+	}
+
+	private void ClearPermission(int key, Tag default_key)
+	{
+		for (int i = 0; i < this.savedPermissionsById.Count; i++)
+		{
+			if (this.savedPermissionsById[i].Key == key)
 			{
-				if (this.savedPermissions[i].Key.GetId() == component.InstanceID)
-				{
-					this.savedPermissions.RemoveAt(i);
-					break;
-				}
+				this.savedPermissionsById.RemoveAt(i);
+				break;
 			}
 		}
 		this.SetStatusItem();
-		this.ClearGridRestrictions(component);
+		this.ClearGridRestrictions(key, default_key);
 	}
 
 	public bool IsDefaultPermission(MinionAssignablesProxy key)
 	{
-		bool flag = false;
 		KPrefabID component = key.GetComponent<KPrefabID>();
-		if (component != null)
+		return !(component != null) || this.IsDefaultPermission(component.InstanceID);
+	}
+
+	public bool IsDefaultPermission(Tag robotTag)
+	{
+		return this.IsDefaultPermission(this.GetTagId(robotTag));
+	}
+
+	private bool IsDefaultPermission(int id)
+	{
+		bool flag = false;
+		for (int i = 0; i < this.savedPermissionsById.Count; i++)
 		{
-			for (int i = 0; i < this.savedPermissions.Count; i++)
+			if (this.savedPermissionsById[i].Key == id)
 			{
-				if (this.savedPermissions[i].Key.GetId() == component.InstanceID)
-				{
-					flag = true;
-					break;
-				}
+				flag = true;
+				break;
 			}
 		}
 		return !flag;
@@ -414,7 +499,12 @@ public class AccessControl : KMonoBehaviour, ISaveLoadable, IGameObjectEffectDes
 
 	private void SetStatusItem()
 	{
-		if (this._defaultPermission != AccessControl.Permission.Both || this.savedPermissions.Count > 0)
+		if (this.overrideAccess == Door.ControlState.Locked)
+		{
+			this.selectable.SetStatusItem(Db.Get().StatusItemCategories.AccessControl, null, null);
+			return;
+		}
+		if (this.defaultPermissionByTag.Any<KeyValuePair<Tag, AccessControl.Permission>>((KeyValuePair<Tag, AccessControl.Permission> default_permission) => default_permission.Value > AccessControl.Permission.Both) || this.savedPermissionsById.Count > 0)
 		{
 			this.selectable.SetStatusItem(Db.Get().StatusItemCategories.AccessControl, AccessControl.accessControlActive, null);
 			return;
@@ -445,10 +535,18 @@ public class AccessControl : KMonoBehaviour, ISaveLoadable, IGameObjectEffectDes
 	private int[] registeredBuildingCells;
 
 	[Serialize]
+	[Obsolete("Added support for Robots Access Controls, use savedPermissionsById", false)]
 	private List<KeyValuePair<Ref<KPrefabID>, AccessControl.Permission>> savedPermissions = new List<KeyValuePair<Ref<KPrefabID>, AccessControl.Permission>>();
 
 	[Serialize]
+	[Obsolete("Added support for Robots Access Controls, use defaultPermissionByTag", false)]
 	private AccessControl.Permission _defaultPermission;
+
+	[Serialize]
+	private List<KeyValuePair<Tag, AccessControl.Permission>> defaultPermissionByTag = new List<KeyValuePair<Tag, AccessControl.Permission>>();
+
+	[Serialize]
+	private List<KeyValuePair<int, AccessControl.Permission>> savedPermissionsById = new List<KeyValuePair<int, AccessControl.Permission>>();
 
 	[Serialize]
 	public bool registered = true;

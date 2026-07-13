@@ -9,7 +9,26 @@ public static class StegoTuning
 		new FertilityMonitor.BreedingChance
 		{
 			egg = "StegoEgg".ToTag(),
-			weight = 1f
+			weight = 0.98f
+		},
+		new FertilityMonitor.BreedingChance
+		{
+			egg = "AlgaeStegoEgg".ToTag(),
+			weight = 0.02f
+		}
+	};
+
+	public static List<FertilityMonitor.BreedingChance> EGG_CHANCES_ALGAE = new List<FertilityMonitor.BreedingChance>
+	{
+		new FertilityMonitor.BreedingChance
+		{
+			egg = "StegoEgg".ToTag(),
+			weight = 0.35f
+		},
+		new FertilityMonitor.BreedingChance
+		{
+			egg = "AlgaeStegoEgg".ToTag(),
+			weight = 0.65f
 		}
 	};
 
@@ -38,4 +57,8 @@ public static class StegoTuning
 	public static readonly int PEN_SIZE_PER_CREATURE = CREATURES.SPACE_REQUIREMENTS.TIER4;
 
 	public const int SEARCH_RADIUS = 10;
+
+	public static int ROARS_PER_CYCLE = 2;
+
+	public static float ROAR_COOLDOWN = 60f;
 }

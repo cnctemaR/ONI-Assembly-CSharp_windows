@@ -64,7 +64,7 @@ public class SolidConduitDispenser : KMonoBehaviour, ISaveLoadable, IConduitDisp
 	private void OnConduitConnectionChanged(object data)
 	{
 		this.dispensing = this.dispensing && this.IsConnected;
-		base.Trigger(-2094018600, this.IsConnected);
+		base.Trigger(-2094018600, BoxedBools.Box(this.IsConnected));
 	}
 
 	private void ConduitUpdate(float dt)
@@ -95,7 +95,7 @@ public class SolidConduitDispenser : KMonoBehaviour, ISaveLoadable, IConduitDisp
 	private bool isSolid(GameObject o)
 	{
 		PrimaryElement component = o.GetComponent<PrimaryElement>();
-		return (component != null && component.Element.IsSolid) || Assets.GetPrefab(o.name) != null;
+		return !(component == null) && (component.Element.IsSolid || (double)component.MassPerUnit != 1.0);
 	}
 
 	private Pickupable FindSuitableItem()

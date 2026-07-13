@@ -8,7 +8,7 @@ public class SweepBotReactMonitor : GameStateMachine<SweepBotReactMonitor, Sweep
 		default_state = this.idle;
 		this.idle.EventHandler(GameHashes.OccupantChanged, delegate(SweepBotReactMonitor.Instance smi)
 		{
-			if (smi.master.gameObject.GetComponent<OrnamentReceptacle>().Occupant != null)
+			if (smi.master.gameObject.GetComponent<MovingOrnamentReceptacle>().Occupant != null)
 			{
 				smi.GoTo(this.reactNewOrnament);
 			}

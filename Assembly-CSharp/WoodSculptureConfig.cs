@@ -25,7 +25,7 @@ public class WoodSculptureConfig : IBuildingConfig
 		EffectorValues none = NOISE_POLLUTION.NONE;
 		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, woods, num5, buildLocationRule, new EffectorValues
 		{
-			amount = 4,
+			amount = 3,
 			radius = 4
 		}, none, 0.2f);
 		buildingDef.SceneLayer = Grid.SceneLayer.InteriorWall;

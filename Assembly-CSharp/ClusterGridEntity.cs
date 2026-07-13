@@ -135,6 +135,10 @@ public abstract class ClusterGridEntity : KMonoBehaviour
 		}
 	}
 
+	public virtual void onClustermapVisualizerAnimCreated(KBatchedAnimController controller, ClusterGridEntity.AnimConfig config)
+	{
+	}
+
 	[Serialize]
 	protected AxialI m_location;
 
@@ -163,5 +167,7 @@ public abstract class ClusterGridEntity : KMonoBehaviour
 		public Vector3 animOffset;
 
 		public float animPlaySpeedModifier;
+
+		public object additionalInfo;
 	}
 }

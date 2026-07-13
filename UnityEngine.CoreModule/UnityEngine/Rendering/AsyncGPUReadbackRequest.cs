@@ -7,10 +7,10 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Rendering
 {
-	[NativeHeader("Runtime/Shaders/ComputeShader.h")]
 	[NativeHeader("Runtime/Graphics/AsyncGPUReadbackManaged.h")]
-	[UsedByNativeCode]
 	[NativeHeader("Runtime/Graphics/Texture.h")]
+	[NativeHeader("Runtime/Shaders/ComputeShader.h")]
+	[UsedByNativeCode]
 	public struct AsyncGPUReadbackRequest
 	{
 		public void Update()

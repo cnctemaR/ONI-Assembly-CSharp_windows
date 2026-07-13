@@ -181,8 +181,8 @@ namespace UnityEngine.Events
 			this.m_TargetAssemblyTypeName = UnityEventTools.TidyAssemblyTypeName(this.m_TargetAssemblyTypeName);
 		}
 
-		[SerializeField]
 		[FormerlySerializedAs("instance")]
+		[SerializeField]
 		private Object m_Target;
 
 		[SerializeField]
@@ -201,8 +201,8 @@ namespace UnityEngine.Events
 		private ArgumentCache m_Arguments = new ArgumentCache();
 
 		[FormerlySerializedAs("enabled")]
-		[SerializeField]
 		[FormerlySerializedAs("m_Enabled")]
+		[SerializeField]
 		private UnityEventCallState m_CallState = UnityEventCallState.RuntimeOnly;
 	}
 }

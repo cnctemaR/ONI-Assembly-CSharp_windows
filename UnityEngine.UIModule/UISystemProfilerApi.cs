@@ -5,9 +5,9 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	[StaticAccessor("UI::SystemProfilerApi", StaticAccessorType.DoubleColon)]
 	[IgnoredByDeepProfiler]
 	[NativeHeader("Modules/UI/Canvas.h")]
+	[StaticAccessor("UI::SystemProfilerApi", StaticAccessorType.DoubleColon)]
 	public static class UISystemProfilerApi
 	{
 		[MethodImpl(MethodImplOptions.InternalCall)]

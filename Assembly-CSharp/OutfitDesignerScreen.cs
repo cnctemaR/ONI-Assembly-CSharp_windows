@@ -41,6 +41,7 @@ public class OutfitDesignerScreen : KMonoBehaviour
 			Dictionary<ClothingOutfitUtility.OutfitType, PermitCategory[]> dictionary = new Dictionary<ClothingOutfitUtility.OutfitType, PermitCategory[]>();
 			dictionary[ClothingOutfitUtility.OutfitType.Clothing] = ClothingOutfitUtility.PERMIT_CATEGORIES_FOR_CLOTHING;
 			dictionary[ClothingOutfitUtility.OutfitType.AtmoSuit] = ClothingOutfitUtility.PERMIT_CATEGORIES_FOR_ATMO_SUITS;
+			dictionary[ClothingOutfitUtility.OutfitType.JetSuit] = ClothingOutfitUtility.PERMIT_CATEGORIES_FOR_JET_SUITS;
 			OutfitDesignerScreen.outfitTypeToCategoriesDict = dictionary;
 		}
 		InventoryOrganization.Initialize();
@@ -59,12 +60,15 @@ public class OutfitDesignerScreen : KMonoBehaviour
 		{
 			throw new NotSupportedException("Cannot open OutfitDesignerScreen without a config. Make sure to call Configure() before enabling the screen");
 		}
+		this.dlcFilter.ConfigButtons();
+		this.dlcFilter.onDLCFilterChanged = new global::System.Action(this.RefreshGallery);
 		this.Configure(this.Config);
 	}
 
 	protected override void OnCmpEnable()
 	{
 		base.OnCmpEnable();
+		this.dlcFilter.ResetToDefault();
 		KleiItemsStatusRefresher.AddOrGetListener(this).OnRefreshUI(delegate
 		{
 			this.RefreshCategories();
@@ -76,6 +80,8 @@ public class OutfitDesignerScreen : KMonoBehaviour
 	protected override void OnCmpDisable()
 	{
 		base.OnCmpDisable();
+		this.dlcFilter.ResetToDefault();
+		this.dlcFilter.HideDropdown();
 		this.UnregisterPreventScreenPop();
 	}
 
@@ -250,7 +256,7 @@ public class OutfitDesignerScreen : KMonoBehaviour
 		PermitCategory[] array = OutfitDesignerScreen.outfitTypeToCategoriesDict[this.outfitState.outfitType];
 		for (int i = 0; i < array.Length; i++)
 		{
-			OutfitDesignerScreen.<>c__DisplayClass47_0 CS$<>8__locals1 = new OutfitDesignerScreen.<>c__DisplayClass47_0();
+			OutfitDesignerScreen.<>c__DisplayClass50_0 CS$<>8__locals1 = new OutfitDesignerScreen.<>c__DisplayClass50_0();
 			CS$<>8__locals1.<>4__this = this;
 			CS$<>8__locals1.permitCategory = array[i];
 			GameObject gameObject = this.categoryRowPool.Borrow();
@@ -293,17 +299,32 @@ public class OutfitDesignerScreen : KMonoBehaviour
 		{
 			this.RefreshGalleryFn();
 		}
+		foreach (KeyValuePair<string, GameObject> keyValuePair in this.permitItemToggles)
+		{
+			string dlcIdFrom = Db.Get().Permits.ClothingItems.Get(keyValuePair.Key).GetDlcIdFrom();
+			keyValuePair.Value.SetActive(this.dlcFilter.SelectedDLCID == null || dlcIdFrom == this.dlcFilter.SelectedDLCID);
+		}
+		foreach (GameObject gameObject in this.nonPermitItemToggles)
+		{
+			gameObject.SetActive(this.dlcFilter.SelectedDLCID == null);
+		}
+		foreach (GameObject gameObject2 in this.subcategoryUiPool.GetBorrowedObjects())
+		{
+			gameObject2.GetComponent<KleiInventoryUISubcategory>().RefreshDisplay();
+		}
 	}
 
 	public void PopulateGallery()
 	{
-		OutfitDesignerScreen.<>c__DisplayClass51_0 CS$<>8__locals1 = new OutfitDesignerScreen.<>c__DisplayClass51_0();
+		OutfitDesignerScreen.<>c__DisplayClass54_0 CS$<>8__locals1 = new OutfitDesignerScreen.<>c__DisplayClass54_0();
 		CS$<>8__locals1.<>4__this = this;
 		this.RefreshGalleryFn = null;
 		this.galleryGridItemPool.ReturnAll();
 		this.subcategoryUiPool.ReturnAll();
 		this.galleryGridLayouter.targetGridLayouts.Clear();
 		this.galleryGridLayouter.OnSizeGridComplete = null;
+		this.permitItemToggles.Clear();
+		this.nonPermitItemToggles.Clear();
 		CS$<>8__locals1.onFirstDisplayCategoryDecided = new Promise<KleiInventoryUISubcategory>();
 		CS$<>8__locals1.<PopulateGallery>g__AddGridIconForPermit|0(null);
 		foreach (ClothingItemResource clothingItemResource in Db.Get().Permits.ClothingItems.resources)
@@ -364,6 +385,13 @@ public class OutfitDesignerScreen : KMonoBehaviour
 		this.UnregisterPreventScreenPop();
 		this.preventScreenPopFn = delegate
 		{
+			if (this.dlcFilter.IsDropdownVisible())
+			{
+				this.RegisterPreventScreenPop();
+				this.dlcFilter.ResetToDefault();
+				this.dlcFilter.HideDropdown();
+				return true;
+			}
 			if (this.outfitState.IsDirty())
 			{
 				this.RegisterPreventScreenPop();
@@ -602,7 +630,14 @@ public class OutfitDesignerScreen : KMonoBehaviour
 
 	private UIPrefabLocalPool galleryGridItemPool;
 
+	private List<GameObject> nonPermitItemToggles = new List<GameObject>();
+
+	private Dictionary<string, GameObject> permitItemToggles = new Dictionary<string, GameObject>();
+
 	private GridLayouter galleryGridLayouter;
+
+	[SerializeField]
+	private KleiInventoryDLCFilter dlcFilter;
 
 	[Header("SelectionDetailsColumn")]
 	[SerializeField]

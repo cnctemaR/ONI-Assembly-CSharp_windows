@@ -24,7 +24,8 @@ public class CreatureCalorieMonitor : GameStateMachine<CreatureCalorieMonitor, C
 		this.hungry.hungry.TagTransition(GameTags.Creatures.PausedHunger, this.pause.commonPause, false).Transition(this.normal, (CreatureCalorieMonitor.Instance smi) => !smi.IsHungry(), UpdateRate.SIM_1000ms).Transition(this.hungry.outofcalories, (CreatureCalorieMonitor.Instance smi) => smi.IsOutOfCalories(), UpdateRate.SIM_1000ms)
 			.ToggleStatusItem(Db.Get().CreatureStatusItems.Hungry, null);
 		this.hungry.outofcalories.DefaultState(this.hungry.outofcalories.wild).Transition(this.hungry.hungry, (CreatureCalorieMonitor.Instance smi) => !smi.IsOutOfCalories(), UpdateRate.SIM_1000ms);
-		this.hungry.outofcalories.wild.TagTransition(GameTags.Creatures.PausedHunger, this.pause.commonPause, false).TagTransition(GameTags.Creatures.Wild, this.hungry.outofcalories.tame, true).ToggleStatusItem(Db.Get().CreatureStatusItems.Hungry, null);
+		this.hungry.outofcalories.wild.TagTransition(GameTags.Creatures.PausedHunger, this.pause.commonPause, false).TagTransition(GameTags.Creatures.Wild, this.hungry.outofcalories.tame, true).ToggleStatusItem(Db.Get().CreatureStatusItems.Hungry, null)
+			.ToggleCritterEmotion(Db.Get().CritterEmotions.Hungry, null);
 		this.hungry.outofcalories.tame.Enter("StarvationStartTime", new StateMachine<CreatureCalorieMonitor, CreatureCalorieMonitor.Instance, IStateMachineTarget, CreatureCalorieMonitor.Def>.State.Callback(CreatureCalorieMonitor.StarvationStartTime)).Exit("ClearStarvationTime", delegate(CreatureCalorieMonitor.Instance smi)
 		{
 			this.starvationStartTime.Set(Mathf.Min(-(GameClock.Instance.GetTime() - this.starvationStartTime.Get(smi)), 0f), smi, false);
@@ -33,7 +34,8 @@ public class CreatureCalorieMonitor : GameStateMachine<CreatureCalorieMonitor, C
 			.TagTransition(GameTags.Creatures.Wild, this.hungry.outofcalories.wild, false)
 			.ToggleStatusItem(CREATURES.STATUSITEMS.STARVING.NAME, CREATURES.STATUSITEMS.STARVING.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.BadMinor, false, default(HashedString), 129022, (string str, CreatureCalorieMonitor.Instance smi) => str.Replace("{TimeUntilDeath}", GameUtil.GetFormattedCycles(smi.GetDeathTimeRemaining(), "F1", false)), null, null)
 			.ToggleNotification((CreatureCalorieMonitor.Instance smi) => new Notification(CREATURES.STATUSITEMS.STARVING.NOTIFICATION_NAME, NotificationType.BadMinor, (List<Notification> notifications, object data) => CREATURES.STATUSITEMS.STARVING.NOTIFICATION_TOOLTIP + notifications.ReduceMessages(false), null, true, 0f, null, null, null, true, false, false))
-			.ToggleEffect((CreatureCalorieMonitor.Instance smi) => this.outOfCaloriesTame);
+			.ToggleEffect((CreatureCalorieMonitor.Instance smi) => this.outOfCaloriesTame)
+			.ToggleCritterEmotion(Db.Get().CritterEmotions.Hungry, null);
 		this.hungry.outofcalories.starvedtodeath.Enter(delegate(CreatureCalorieMonitor.Instance smi)
 		{
 			smi.GetSMI<DeathMonitor.Instance>().Kill(Db.Get().Deaths.Starvation);
@@ -296,9 +298,13 @@ public class CreatureCalorieMonitor : GameStateMachine<CreatureCalorieMonitor, C
 			}
 			string text = null;
 			Element element = ElementLoader.GetElement(tag);
+			Sprite sprite = null;
+			Color color = Color.white;
 			if (element != null)
 			{
 				text = element.name;
+				sprite = global::Def.GetUISprite(element, "ui", false).first;
+				color = (element.IsSolid ? Color.white : element.substance.colour);
 			}
 			int num7 = Grid.PosToCell(this.owner.transform.GetPosition());
 			float temperature = this.owner.GetComponent<PrimaryElement>().Temperature;
@@ -308,7 +314,8 @@ public class CreatureCalorieMonitor : GameStateMachine<CreatureCalorieMonitor, C
 				Storage component = this.owner.GetComponent<Storage>();
 				if (element == null)
 				{
-					GameObject gameObject = GameUtil.KInstantiate(Assets.GetPrefab(tag), Grid.CellToPos(num7, CellAlignment.Top, Grid.SceneLayer.Ore), Grid.SceneLayer.Ore, null, 0);
+					GameObject prefab = Assets.GetPrefab(tag);
+					GameObject gameObject = GameUtil.KInstantiate(prefab, Grid.CellToPos(num7, CellAlignment.Top, Grid.SceneLayer.Ore), Grid.SceneLayer.Ore, null, 0);
 					PrimaryElement component2 = gameObject.GetComponent<PrimaryElement>();
 					component2.Mass = num;
 					component2.AddDisease(b, num2, "CreatureCalorieMonitor.Poop");
@@ -316,6 +323,7 @@ public class CreatureCalorieMonitor : GameStateMachine<CreatureCalorieMonitor, C
 					gameObject.SetActive(true);
 					component.Store(gameObject, true, false, true, false);
 					text = gameObject.GetProperName();
+					sprite = global::Def.GetUISprite(prefab, "ui", false).first;
 				}
 				else if (element.IsLiquid)
 				{
@@ -334,13 +342,15 @@ public class CreatureCalorieMonitor : GameStateMachine<CreatureCalorieMonitor, C
 			{
 				if (element == null)
 				{
-					GameObject gameObject2 = GameUtil.KInstantiate(Assets.GetPrefab(tag), Grid.CellToPos(num7, CellAlignment.Top, Grid.SceneLayer.Ore), Grid.SceneLayer.Ore, null, 0);
+					GameObject prefab2 = Assets.GetPrefab(tag);
+					GameObject gameObject2 = GameUtil.KInstantiate(prefab2, Grid.CellToPos(num7, CellAlignment.Top, Grid.SceneLayer.Ore), Grid.SceneLayer.Ore, null, 0);
 					PrimaryElement component3 = gameObject2.GetComponent<PrimaryElement>();
 					component3.Mass = num;
 					component3.AddDisease(b, num2, "CreatureCalorieMonitor.Poop");
 					component3.Temperature = temperature;
 					gameObject2.SetActive(true);
 					text = gameObject2.GetProperName();
+					sprite = global::Def.GetUISprite(prefab2, "ui", false).first;
 				}
 				else if (element.IsLiquid)
 				{
@@ -381,7 +391,11 @@ public class CreatureCalorieMonitor : GameStateMachine<CreatureCalorieMonitor, C
 			Dictionary<Tag, float> creaturePoopAmount = Game.Instance.savedInfo.creaturePoopAmount;
 			Tag prefabTag = component4.PrefabTag;
 			creaturePoopAmount[prefabTag] += num;
-			PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Resource, text, this.owner.transform, 1.5f, false);
+			PopFX popFX = PopFXManager.Instance.SpawnFX(sprite, PopFXManager.Instance.sprite_Plus, text, this.owner.transform, Vector3.zero, 1.5f, true, false, false);
+			if (popFX != null)
+			{
+				popFX.SetIconTint(color);
+			}
 			this.owner.Trigger(-1844238272, null);
 		}
 
@@ -505,9 +519,9 @@ public class CreatureCalorieMonitor : GameStateMachine<CreatureCalorieMonitor, C
 
 		public void OnCaloriesConsumed(object data)
 		{
-			CreatureCalorieMonitor.CaloriesConsumedEvent caloriesConsumedEvent = (CreatureCalorieMonitor.CaloriesConsumedEvent)data;
-			this.calories.value += caloriesConsumedEvent.calories;
-			this.stomach.Consume(caloriesConsumedEvent.tag, caloriesConsumedEvent.calories);
+			CreatureCalorieMonitor.CaloriesConsumedEvent value = ((Boxed<CreatureCalorieMonitor.CaloriesConsumedEvent>)data).value;
+			this.calories.value += value.calories;
+			this.stomach.Consume(value.tag, value.calories);
 			this.lastMealOrPoopTime = Time.time;
 		}
 

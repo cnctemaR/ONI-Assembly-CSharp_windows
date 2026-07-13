@@ -17,7 +17,7 @@ public class KleiPermitDioramaVis_BuildingRocket : KMonoBehaviour, IKleiPermitDi
 	{
 		BuildingFacadeResource buildingFacadeResource = (BuildingFacadeResource)permit;
 		KleiPermitVisUtil.ConfigureToRenderBuilding(this.buildingKAnim, buildingFacadeResource);
-		KleiPermitVisUtil.AnimateIn(this.buildingKAnim, default(Updater));
+		KleiPermitVisUtil.AnimateIn(this.buildingKAnim, default(Updater), "place");
 	}
 
 	[SerializeField]

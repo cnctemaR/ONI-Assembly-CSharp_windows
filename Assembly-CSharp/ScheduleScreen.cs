@@ -33,6 +33,7 @@ public class ScheduleScreen : KScreen
 		};
 		ScheduleManager.Instance.onSchedulesChanged += this.OnSchedulesChanged;
 		Game.Instance.Subscribe(1983128072, new Action<object>(this.RefreshWidgetWorldData));
+		this.uiRefreshHandle = base.Subscribe(1980521255, new Action<object>(this.RefreshWidgetWorldData));
 	}
 
 	protected override void OnCleanUp()
@@ -40,6 +41,7 @@ public class ScheduleScreen : KScreen
 		base.OnCleanUp();
 		ScheduleManager.Instance.onSchedulesChanged -= this.OnSchedulesChanged;
 		ScheduleScreen.Instance = null;
+		base.Unsubscribe(ref this.uiRefreshHandle);
 	}
 
 	protected override void OnShow(bool show)
@@ -166,4 +168,6 @@ public class ScheduleScreen : KScreen
 	private GameObject bottomSpacer;
 
 	private List<ScheduleScreenEntry> scheduleEntries;
+
+	private int uiRefreshHandle;
 }

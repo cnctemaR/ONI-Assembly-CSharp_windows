@@ -119,7 +119,7 @@ public class HarvestDesignatable : KMonoBehaviour
 
 	private void OnEnableOverlay(object data)
 	{
-		if ((HashedString)data == OverlayModes.Harvest.ID)
+		if (((Boxed<HashedString>)data).value == OverlayModes.Harvest.ID)
 		{
 			this.CreateOverlayIcon();
 			return;
@@ -200,7 +200,7 @@ public class HarvestDesignatable : KMonoBehaviour
 		this.RefreshOverlayIcon(null);
 	}
 
-	protected virtual void OnCancel(object data = null)
+	protected virtual void OnCancel(object _ = null)
 	{
 	}
 

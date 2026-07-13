@@ -266,8 +266,8 @@ public class Comet : KMonoBehaviour, ISim33ms
 			num -= num2;
 		}
 		int num3 = Mathf.Min(this.addTiles, Mathf.Clamp(Mathf.RoundToInt((float)this.addTiles * num), 1, this.addTiles));
+		ListPool<int, Comet>.PooledList pooledList = ListPool<int, Comet>.Allocate();
 		HashSetPool<int, Comet>.PooledHashSet pooledHashSet = HashSetPool<int, Comet>.Allocate();
-		HashSetPool<int, Comet>.PooledHashSet pooledHashSet2 = HashSetPool<int, Comet>.Allocate();
 		QueuePool<GameUtil.FloodFillInfo, Comet>.PooledQueue pooledQueue = QueuePool<GameUtil.FloodFillInfo, Comet>.Allocate();
 		int num4 = -1;
 		int num5 = 1;
@@ -292,13 +292,13 @@ public class Comet : KMonoBehaviour, ISim33ms
 			depth = 0
 		});
 		Func<int, bool> func = (int cell) => Grid.IsValidCellInWorld(cell, world) && !Grid.Solid[cell];
-		GameUtil.FloodFillConditional(pooledQueue, func, pooledHashSet2, pooledHashSet, 10);
+		GameUtil.FloodFillConditional(pooledQueue, func, pooledHashSet, pooledList, 10);
 		float num6 = ((num3 > 0) ? (this.addTileMass / (float)this.addTiles) : 1f);
 		int num7 = this.addDiseaseCount / num3;
 		if (element.HasTag(GameTags.Unstable))
 		{
 			UnstableGroundManager component = World.Instance.GetComponent<UnstableGroundManager>();
-			using (HashSet<int>.Enumerator enumerator = pooledHashSet.GetEnumerator())
+			using (List<int>.Enumerator enumerator = pooledList.GetEnumerator())
 			{
 				while (enumerator.MoveNext())
 				{
@@ -313,7 +313,7 @@ public class Comet : KMonoBehaviour, ISim33ms
 				goto IL_0229;
 			}
 		}
-		foreach (int num9 in pooledHashSet)
+		foreach (int num9 in pooledList)
 		{
 			if (num3 <= 0)
 			{
@@ -323,8 +323,8 @@ public class Comet : KMonoBehaviour, ISim33ms
 			num3--;
 		}
 		IL_0229:
+		pooledList.Recycle();
 		pooledHashSet.Recycle();
-		pooledHashSet2.Recycle();
 		pooledQueue.Recycle();
 	}
 
@@ -401,7 +401,7 @@ public class Comet : KMonoBehaviour, ISim33ms
 			BuildingHP component2 = gameObject.GetComponent<BuildingHP>();
 			float num3 = (float)component2.HitPoints / (float)component2.MaxHitPoints;
 			float num4 = num2 * (float)component2.MaxHitPoints;
-			component2.gameObject.Trigger(-794517298, new BuildingHP.DamageSourceInfo
+			component2.gameObject.BoxingTrigger(-794517298, new BuildingHP.DamageSourceInfo
 			{
 				damage = Mathf.RoundToInt(num4),
 				source = BUILDINGS.DAMAGESOURCES.COMET,
@@ -436,7 +436,7 @@ public class Comet : KMonoBehaviour, ISim33ms
 				{
 					this.PlayBuildingDamageSound(component2.Def, Grid.CellToPos(cell), gameObject);
 				}
-				component.gameObject.Trigger(-794517298, new BuildingHP.DamageSourceInfo
+				component.gameObject.BoxingTrigger(-794517298, new BuildingHP.DamageSourceInfo
 				{
 					damage = Mathf.RoundToInt(num),
 					source = BUILDINGS.DAMAGESOURCES.COMET,

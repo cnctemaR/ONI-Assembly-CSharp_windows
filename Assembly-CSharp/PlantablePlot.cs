@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 using KSerialization;
 using STRINGS;
@@ -60,6 +61,7 @@ public class PlantablePlot : SingleEntityReceptacle, ISaveLoadable, IGameObjectE
 
 	protected override void OnPrefabInit()
 	{
+		base.gameObject.RemoveTag(GameTags.Decoration);
 		base.OnPrefabInit();
 		this.choreType = Db.Get().ChoreTypes.FarmFetch;
 		this.statusItemNeed = Db.Get().BuildingStatusItems.NeedSeed;
@@ -84,6 +86,19 @@ public class PlantablePlot : SingleEntityReceptacle, ISaveLoadable, IGameObjectE
 		}
 	}
 
+	protected override void OnSpawn()
+	{
+		if (this.plant != null)
+		{
+			this.RegisterWithPlant(this.plant.gameObject);
+		}
+		base.OnSpawn();
+		this.autoReplaceEntity = false;
+		Components.PlantablePlots.Add(base.gameObject.GetMyWorldId(), this);
+		Prioritizable component = base.GetComponent<Prioritizable>();
+		component.onPriorityChanged = (Action<PrioritySetting>)Delegate.Combine(component.onPriorityChanged, new Action<PrioritySetting>(this.SyncPriority));
+	}
+
 	private void OnCopySettings(object data)
 	{
 		PlantablePlot component = ((GameObject)data).GetComponent<PlantablePlot>();
@@ -103,8 +118,13 @@ public class PlantablePlot : SingleEntityReceptacle, ISaveLoadable, IGameObjectE
 						tag2 = (component3 ? component3.SubSpeciesID : Tag.Invalid);
 					}
 				}
-				base.CancelActiveRequest();
-				this.CreateOrder(tag, tag2);
+				GameObject prefab = Assets.GetPrefab(tag);
+				IReceptacleDirection receptacleDirection = ((prefab == null) ? null : prefab.GetComponent<IReceptacleDirection>());
+				if (receptacleDirection == null || receptacleDirection.Direction == base.Direction)
+				{
+					base.CancelActiveRequest();
+					this.CreateOrder(tag, tag2);
+				}
 			}
 			if (base.occupyingObject != null)
 			{
@@ -147,19 +167,6 @@ public class PlantablePlot : SingleEntityReceptacle, ISaveLoadable, IGameObjectE
 				component2.SetMasterPriority(component.GetMasterPriority());
 			}
 		}
-	}
-
-	protected override void OnSpawn()
-	{
-		if (this.plant != null)
-		{
-			this.RegisterWithPlant(this.plant.gameObject);
-		}
-		base.OnSpawn();
-		this.autoReplaceEntity = false;
-		Components.PlantablePlots.Add(base.gameObject.GetMyWorldId(), this);
-		Prioritizable component = base.GetComponent<Prioritizable>();
-		component.onPriorityChanged = (Action<PrioritySetting>)Delegate.Combine(component.onPriorityChanged, new Action<PrioritySetting>(this.SyncPriority));
 	}
 
 	public void SetFertilizationFlags(bool fertilizer, bool liquid_piping)
@@ -264,7 +271,7 @@ public class PlantablePlot : SingleEntityReceptacle, ISaveLoadable, IGameObjectE
 		base.SubscribeToOccupant();
 		if (base.occupyingObject != null)
 		{
-			base.Subscribe(base.occupyingObject, -216549700, new Action<object>(this.OnOccupantUprooted));
+			this.onOccupantUprootedHandle = base.Subscribe(base.occupyingObject, -216549700, PlantablePlot.OnOccupantUprootedDispatcher, this);
 		}
 	}
 
@@ -273,7 +280,7 @@ public class PlantablePlot : SingleEntityReceptacle, ISaveLoadable, IGameObjectE
 		base.UnsubscribeFromOccupant();
 		if (base.occupyingObject != null)
 		{
-			base.Unsubscribe(base.occupyingObject, -216549700, new Action<object>(this.OnOccupantUprooted));
+			base.Unsubscribe(base.occupyingObject, ref this.onOccupantUprootedHandle);
 		}
 	}
 
@@ -328,24 +335,25 @@ public class PlantablePlot : SingleEntityReceptacle, ISaveLoadable, IGameObjectE
 			gameObject.transform.SetPosition(Vector3.zero);
 			gameObject.transform.SetParent(base.gameObject.transform, false);
 			gameObject.transform.SetLocalPosition(Vector3.zero);
+			Vector3 occupyingObjectRelativePosition = base.GetOccupyingObjectRelativePosition();
 			if (this.rotatable != null)
 			{
 				if (plantableSeed.direction == SingleEntityReceptacle.ReceptacleDirection.Top)
 				{
-					gameObject.transform.SetLocalPosition(this.occupyingObjectRelativePosition);
+					gameObject.transform.SetLocalPosition(occupyingObjectRelativePosition);
 				}
 				else if (plantableSeed.direction == SingleEntityReceptacle.ReceptacleDirection.Side)
 				{
-					gameObject.transform.SetLocalPosition(Rotatable.GetRotatedOffset(this.occupyingObjectRelativePosition, Orientation.R90));
+					gameObject.transform.SetLocalPosition(Rotatable.GetRotatedOffset(occupyingObjectRelativePosition, Orientation.R90));
 				}
 				else
 				{
-					gameObject.transform.SetLocalPosition(Rotatable.GetRotatedOffset(this.occupyingObjectRelativePosition, Orientation.R180));
+					gameObject.transform.SetLocalPosition(Rotatable.GetRotatedOffset(occupyingObjectRelativePosition, Orientation.R180));
 				}
 			}
 			else
 			{
-				gameObject.transform.SetLocalPosition(this.occupyingObjectRelativePosition);
+				gameObject.transform.SetLocalPosition(occupyingObjectRelativePosition);
 			}
 			KBatchedAnimController component2 = gameObject.GetComponent<KBatchedAnimController>();
 			this.OffsetAnim(component2, this.occupyingObjectVisualOffset);
@@ -386,31 +394,6 @@ public class PlantablePlot : SingleEntityReceptacle, ISaveLoadable, IGameObjectE
 		return list;
 	}
 
-	[MyCmpAdd]
-	private CopyBuildingSettings copyBuildingSettings;
-
-	public Tag tagOnPlanted = Tag.Invalid;
-
-	public bool IsOffGround;
-
-	[Serialize]
-	private Ref<KPrefabID> plantRef;
-
-	public Vector3 occupyingObjectVisualOffset = Vector3.zero;
-
-	public Grid.SceneLayer plantLayer = Grid.SceneLayer.BuildingBack;
-
-	private EntityPreview plantPreview;
-
-	[SerializeField]
-	private bool accepts_fertilizer;
-
-	[SerializeField]
-	private bool accepts_irrigation = true;
-
-	[SerializeField]
-	public bool has_liquid_pipe_input;
-
 	private static readonly EventSystem.IntraObjectHandler<PlantablePlot> OnCopySettingsDelegate = new EventSystem.IntraObjectHandler<PlantablePlot>(delegate(PlantablePlot component, object data)
 	{
 		component.OnCopySettings(data);
@@ -423,4 +406,36 @@ public class PlantablePlot : SingleEntityReceptacle, ISaveLoadable, IGameObjectE
 			component.plantRef.Get().Trigger(144050788, data);
 		}
 	});
+
+	public bool IsOffGround;
+
+	public Tag tagOnPlanted = Tag.Invalid;
+
+	public Vector3 occupyingObjectVisualOffset = Vector3.zero;
+
+	public Grid.SceneLayer plantLayer = Grid.SceneLayer.BuildingBack;
+
+	[SerializeField]
+	public bool has_liquid_pipe_input;
+
+	[SerializeField]
+	private bool accepts_fertilizer;
+
+	[SerializeField]
+	private bool accepts_irrigation = true;
+
+	[Serialize]
+	private Ref<KPrefabID> plantRef;
+
+	[MyCmpAdd]
+	private CopyBuildingSettings copyBuildingSettings;
+
+	private EntityPreview plantPreview;
+
+	private static Action<object, object> OnOccupantUprootedDispatcher = delegate(object context, object data)
+	{
+		Unsafe.As<PlantablePlot>(context).OnOccupantUprooted(data);
+	};
+
+	private int onOccupantUprootedHandle = -1;
 }

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using HUSL;
 using UnityEngine;
 
 public class NavGrid
@@ -151,7 +150,7 @@ public class NavGrid
 		this.DirtyCells.Clear();
 	}
 
-	public void UpdateGraph(IEnumerable<int> dirty_nav_cells)
+	public void UpdateGraph(List<int> dirty_nav_cells)
 	{
 		NavGridUpdater.UpdateNavGrid(this.NavTable, this.Validators, this.boundingOffsets, this.maxLinksPerCell, this.Links, this.transitionsByNavType, this.teleportTransitions, dirty_nav_cells);
 		if (this.OnNavGridUpdateComplete != null)
@@ -280,22 +279,7 @@ public class NavGrid
 
 	public Color NavTypeColor(NavType navType)
 	{
-		if (this.debugColorLookup == null)
-		{
-			this.debugColorLookup = new Color[11];
-			for (int i = 0; i < 11; i++)
-			{
-				double num = (double)i / 11.0;
-				IList<double> list = ColorConverter.HUSLToRGB(new double[]
-				{
-					num * 360.0,
-					100.0,
-					50.0
-				});
-				this.debugColorLookup[i] = new Color((float)list[0], (float)list[1], (float)list[2]);
-			}
-		}
-		return this.debugColorLookup[(int)navType];
+		return NavGrid.debugColorLookup[(int)navType];
 	}
 
 	public bool DebugViewAllPaths;
@@ -336,13 +320,27 @@ public class NavGrid
 
 	public PathFinder.PotentialScratchPad potentialScratchPad;
 
-	public Action<IEnumerable<int>> OnNavGridUpdateComplete;
+	public Action<List<int>> OnNavGridUpdateComplete;
 
 	public NavType[] ValidNavTypes;
 
 	public NavGrid.NavTypeData[] navTypeData;
 
-	private Color[] debugColorLookup;
+	private static Color[] debugColorLookup = new Color[]
+	{
+		new Color(0.918f, 0f, 0.394f, 1f),
+		new Color(0.719f, 0.375f, 0f, 1f),
+		new Color(0.564f, 0.455f, 0f, 1f),
+		new Color(0.425f, 0.498f, 0f, 1f),
+		new Color(0f, 0.542f, 0.158f, 1f),
+		new Color(1f, 0.9215686f, 0.01568628f, 1f),
+		new Color(0f, 1f, 0f, 1f),
+		new Color(0f, 0.505f, 0.651f, 1f),
+		new Color(0.256f, 0.411f, 1f, 1f),
+		new Color(0.782f, 0f, 0.937f, 1f),
+		new Color(0.865f, 0f, 0.686f, 1f),
+		Color.red
+	};
 
 	public struct Link
 	{

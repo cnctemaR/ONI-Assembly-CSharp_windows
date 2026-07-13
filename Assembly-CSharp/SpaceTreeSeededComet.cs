@@ -14,8 +14,8 @@ public class SpaceTreeSeededComet : Comet
 			num -= num2;
 		}
 		int num3 = Mathf.Min(this.addTiles, Mathf.Clamp(Mathf.RoundToInt((float)this.addTiles * num), 1, this.addTiles));
+		ListPool<int, Comet>.PooledList pooledList = ListPool<int, Comet>.Allocate();
 		HashSetPool<int, Comet>.PooledHashSet pooledHashSet = HashSetPool<int, Comet>.Allocate();
-		HashSetPool<int, Comet>.PooledHashSet pooledHashSet2 = HashSetPool<int, Comet>.Allocate();
 		QueuePool<GameUtil.FloodFillInfo, Comet>.PooledQueue pooledQueue = QueuePool<GameUtil.FloodFillInfo, Comet>.Allocate();
 		int num4 = -1;
 		int num5 = 1;
@@ -40,14 +40,14 @@ public class SpaceTreeSeededComet : Comet
 			depth = 0
 		});
 		Func<int, bool> func = (int cell) => Grid.IsValidCellInWorld(cell, world) && !Grid.Solid[cell];
-		GameUtil.FloodFillConditional(pooledQueue, func, pooledHashSet2, pooledHashSet, 10);
+		GameUtil.FloodFillConditional(pooledQueue, func, pooledHashSet, pooledList, 10);
 		float num6 = ((num3 > 0) ? (this.addTileMass / (float)this.addTiles) : 1f);
 		int num7 = this.addDiseaseCount / num3;
 		float value = global::UnityEngine.Random.value;
 		float num8 = ((num3 == 0) ? (-1f) : (1f / (float)num3));
 		float num9 = 0f;
 		bool flag = false;
-		using (HashSet<int>.Enumerator enumerator = pooledHashSet.GetEnumerator())
+		using (List<int>.Enumerator enumerator = pooledList.GetEnumerator())
 		{
 			while (enumerator.MoveNext())
 			{
@@ -67,8 +67,8 @@ public class SpaceTreeSeededComet : Comet
 				flag = flag || flag2;
 			}
 		}
+		pooledList.Recycle();
 		pooledHashSet.Recycle();
-		pooledHashSet2.Recycle();
 		pooledQueue.Recycle();
 	}
 

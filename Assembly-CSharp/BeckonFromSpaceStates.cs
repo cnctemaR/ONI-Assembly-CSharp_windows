@@ -6,12 +6,32 @@ internal class BeckonFromSpaceStates : GameStateMachine<BeckonFromSpaceStates, B
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
 		default_state = this.beckoning;
-		this.beckoning.ToggleMainStatusItem(Db.Get().CreatureStatusItems.Beckoning, null).DefaultState(this.beckoning.pre);
-		this.beckoning.pre.PlayAnim("beckoning_pre").OnAnimQueueComplete(this.beckoning.loop);
-		this.beckoning.loop.PlayAnim("beckoning_loop").Enter(new StateMachine<BeckonFromSpaceStates, BeckonFromSpaceStates.Instance, IStateMachineTarget, BeckonFromSpaceStates.Def>.State.Callback(BeckonFromSpaceStates.MooEchoFX)).OnAnimQueueComplete(this.beckoning.pst);
-		this.beckoning.pst.PlayAnim("beckoning_pst").OnAnimQueueComplete(this.behaviourcomplete);
+		this.beckoning.ToggleMainStatusItem(Db.Get().CreatureStatusItems.Beckoning, null).Enter(new StateMachine<BeckonFromSpaceStates, BeckonFromSpaceStates.Instance, IStateMachineTarget, BeckonFromSpaceStates.Def>.State.Callback(BeckonFromSpaceStates.ChooseSong)).DefaultState(this.beckoning.pre);
+		this.beckoning.pre.PlayAnim(new Func<BeckonFromSpaceStates.Instance, string>(BeckonFromSpaceStates.GetSongAnimPre), KAnim.PlayMode.Once).OnAnimQueueComplete(this.beckoning.loop);
+		this.beckoning.loop.PlayAnim(new Func<BeckonFromSpaceStates.Instance, string>(BeckonFromSpaceStates.GetSongAnimLoop), KAnim.PlayMode.Once).Enter(new StateMachine<BeckonFromSpaceStates, BeckonFromSpaceStates.Instance, IStateMachineTarget, BeckonFromSpaceStates.Def>.State.Callback(BeckonFromSpaceStates.MooEchoFX)).OnAnimQueueComplete(this.beckoning.pst);
+		this.beckoning.pst.PlayAnim(new Func<BeckonFromSpaceStates.Instance, string>(BeckonFromSpaceStates.GetSongAnimPst), KAnim.PlayMode.Once).OnAnimQueueComplete(this.behaviourcomplete);
 		this.behaviourcomplete.PlayAnim("idle_loop", KAnim.PlayMode.Loop).Enter(new StateMachine<BeckonFromSpaceStates, BeckonFromSpaceStates.Instance, IStateMachineTarget, BeckonFromSpaceStates.Def>.State.Callback(BeckonFromSpaceStates.DoBeckon)).Enter(new StateMachine<BeckonFromSpaceStates, BeckonFromSpaceStates.Instance, IStateMachineTarget, BeckonFromSpaceStates.Def>.State.Callback(BeckonFromSpaceStates.MooCheer))
 			.BehaviourComplete(GameTags.Creatures.WantsToBeckon, false);
+	}
+
+	public static string GetSongAnimPre(BeckonFromSpaceStates.Instance smi)
+	{
+		return smi.ChosenSong.singAnimPre;
+	}
+
+	public static string GetSongAnimLoop(BeckonFromSpaceStates.Instance smi)
+	{
+		return smi.ChosenSong.singAnimLoop;
+	}
+
+	public static string GetSongAnimPst(BeckonFromSpaceStates.Instance smi)
+	{
+		return smi.ChosenSong.singAnimPst;
+	}
+
+	private static void ChooseSong(BeckonFromSpaceStates.Instance smi)
+	{
+		smi.ChooseSong();
 	}
 
 	private static void MooEchoFX(BeckonFromSpaceStates.Instance smi)
@@ -21,21 +41,25 @@ internal class BeckonFromSpaceStates : GameStateMachine<BeckonFromSpaceStates, B
 		kbatchedAnimController.Play("moo_call", KAnim.PlayMode.Once, 1f, 0f);
 	}
 
+	private static Util.IterationInstruction mooCheerVisitor(object obj, BeckonFromSpaceStates.Instance smi)
+	{
+		KPrefabID kprefabID = (obj as Pickupable).KPrefabID;
+		if (kprefabID.gameObject == smi.gameObject)
+		{
+			return Util.IterationInstruction.Continue;
+		}
+		if (kprefabID.HasTag("Moo") && kprefabID.GetSMI<AnimInterruptMonitor.Instance>() != null)
+		{
+			kprefabID.GetSMI<AnimInterruptMonitor.Instance>().PlayAnimSequence(smi.def.choirAnims);
+		}
+		return Util.IterationInstruction.Continue;
+	}
+
 	private static void MooCheer(BeckonFromSpaceStates.Instance smi)
 	{
 		Vector3 position = smi.transform.GetPosition();
-		ListPool<ScenePartitionerEntry, BeckonFromSpaceStates>.PooledList pooledList = ListPool<ScenePartitionerEntry, BeckonFromSpaceStates>.Allocate();
 		Extents extents = new Extents((int)position.x, (int)position.y, 15);
-		GameScenePartitioner.Instance.GatherEntries(extents, GameScenePartitioner.Instance.pickupablesLayer, pooledList);
-		foreach (ScenePartitionerEntry scenePartitionerEntry in pooledList)
-		{
-			KPrefabID kprefabID = (scenePartitionerEntry.obj as Pickupable).KPrefabID;
-			if (!(kprefabID.gameObject == smi.gameObject) && kprefabID.HasTag("Moo") && kprefabID.GetSMI<AnimInterruptMonitor.Instance>() != null)
-			{
-				kprefabID.GetSMI<AnimInterruptMonitor.Instance>().PlayAnimSequence(smi.def.choirAnims);
-			}
-		}
-		pooledList.Recycle();
+		GameScenePartitioner.Instance.VisitEntries<BeckonFromSpaceStates.Instance>(extents.x, extents.y, extents.width, extents.height, GameScenePartitioner.Instance.pickupablesLayer, new Func<object, BeckonFromSpaceStates.Instance, Util.IterationInstruction>(BeckonFromSpaceStates.mooCheerVisitor), smi);
 	}
 
 	private static void DoBeckon(BeckonFromSpaceStates.Instance smi)
@@ -63,7 +87,7 @@ internal class BeckonFromSpaceStates : GameStateMachine<BeckonFromSpaceStates, B
 		}
 		DebugUtil.DevAssert(myWorld.ContainsPoint(new Vector2(num6, num)), "Gassy Moo spawned outside world bounds", null);
 		Vector3 vector = new Vector3(num6, num, layerZ);
-		GameObject gameObject = Util.KInstantiate(Assets.GetPrefab(smi.def.prefab), vector, Quaternion.identity, null, null, true, 0);
+		GameObject gameObject = Util.KInstantiate(Assets.GetPrefab(smi.ChosenSong.meteorID), vector, Quaternion.identity, null, null, true, 0);
 		GassyMooComet component = gameObject.GetComponent<GassyMooComet>();
 		if (component != null)
 		{
@@ -82,8 +106,6 @@ internal class BeckonFromSpaceStates : GameStateMachine<BeckonFromSpaceStates, B
 
 	public class Def : StateMachine.BaseDef
 	{
-		public string prefab;
-
 		public Grid.SceneLayer sceneLayer;
 
 		public HashedString[] choirAnims = new HashedString[] { "reply_loop" };
@@ -95,7 +117,28 @@ internal class BeckonFromSpaceStates : GameStateMachine<BeckonFromSpaceStates, B
 			: base(chore, def)
 		{
 			chore.AddPrecondition(ChorePreconditions.instance.CheckBehaviourPrecondition, GameTags.Creatures.WantsToBeckon);
+			this.monitor = base.gameObject.GetSMI<BeckoningMonitor.Instance>();
 		}
+
+		public void ChooseSong()
+		{
+			float num = global::UnityEngine.Random.value;
+			BeckoningMonitor.SongChance songChance = null;
+			foreach (BeckoningMonitor.SongChance songChance2 in this.monitor.songChances)
+			{
+				num -= songChance2.weight;
+				if (num <= 0f)
+				{
+					songChance = songChance2;
+					break;
+				}
+			}
+			this.ChosenSong = songChance;
+		}
+
+		public BeckoningMonitor.SongChance ChosenSong;
+
+		private BeckoningMonitor.Instance monitor;
 	}
 
 	public class BeckoningState : GameStateMachine<BeckonFromSpaceStates, BeckonFromSpaceStates.Instance, IStateMachineTarget, BeckonFromSpaceStates.Def>.State

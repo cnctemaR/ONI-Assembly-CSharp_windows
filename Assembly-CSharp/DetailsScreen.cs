@@ -142,6 +142,10 @@ public class DetailsScreen : KTabMenu
 		if (component != null)
 		{
 			component.SetName(newName);
+			if (ScheduleScreen.Instance != null)
+			{
+				ScheduleScreen.Instance.Trigger(1980521255, null);
+			}
 		}
 		else if (component4 != null)
 		{
@@ -237,32 +241,31 @@ public class DetailsScreen : KTabMenu
 		KSelectable component = this.target.GetComponent<KSelectable>();
 		DebugUtil.AssertArgs(component != null, new object[] { "Details Screen target is not a KSelectable", this.target });
 		CellSelectionObject component2 = component.GetComponent<CellSelectionObject>();
-		BuildingUnderConstruction component3 = component.GetComponent<BuildingUnderConstruction>();
-		CreatureBrain component4 = component.GetComponent<CreatureBrain>();
-		PlantableSeed component5 = component.GetComponent<PlantableSeed>();
-		CodexEntryRedirector component6 = component.GetComponent<CodexEntryRedirector>();
+		CodexEntryRedirector component3 = component.GetComponent<CodexEntryRedirector>();
+		BuildingUnderConstruction component4 = component.GetComponent<BuildingUnderConstruction>();
+		CreatureBrain component5 = component.GetComponent<CreatureBrain>();
+		PlantableSeed component6 = component.GetComponent<PlantableSeed>();
 		string text;
 		if (component2 != null)
 		{
 			text = CodexCache.FormatLinkID(component2.element.id.ToString());
 		}
-		else if (component3 != null)
+		else if (component3 != null && !string.IsNullOrEmpty(component3.CodexID))
 		{
-			text = CodexCache.FormatLinkID(component3.Def.PrefabID);
+			text = CodexCache.FormatLinkID(component3.CodexID);
 		}
 		else if (component4 != null)
 		{
-			text = CodexCache.FormatLinkID(component.PrefabID().ToString());
-			text = text.Replace("BABY", "");
+			text = CodexCache.FormatLinkID(component4.Def.PrefabID);
 		}
 		else if (component5 != null)
 		{
 			text = CodexCache.FormatLinkID(component.PrefabID().ToString());
-			text = text.Replace("SEED", "");
+			text = text.Replace("BABY", "");
 		}
-		else if (component6 != null && !string.IsNullOrEmpty(component6.CodexID))
+		else if (component6 != null)
 		{
-			text = CodexCache.FormatLinkID(component6.CodexID);
+			text = CodexCache.FormatLinkID(component6.PrefabID().ToString());
 		}
 		else
 		{
@@ -389,9 +392,10 @@ public class DetailsScreen : KTabMenu
 			}
 			if (this.target != null)
 			{
-				if (this.target.GetComponent<KPrefabID>() != null)
+				KPrefabID component = this.target.GetComponent<KPrefabID>();
+				if (component != null)
 				{
-					this.previousTargetID = this.target.GetComponent<KPrefabID>().PrefabID();
+					this.previousTargetID = component.PrefabID();
 				}
 				else
 				{
@@ -401,10 +405,10 @@ public class DetailsScreen : KTabMenu
 		}
 		this.target = go;
 		this.sortedSideScreens.Clear();
-		CellSelectionObject component = this.target.GetComponent<CellSelectionObject>();
-		if (component)
+		CellSelectionObject component2 = this.target.GetComponent<CellSelectionObject>();
+		if (component2)
 		{
-			component.OnObjectSelected(null);
+			component2.OnObjectSelected(null);
 		}
 		this.UpdateTitle();
 		this.tabHeader.RefreshTabDisplayForTarget(this.target);
@@ -474,10 +478,11 @@ public class DetailsScreen : KTabMenu
 
 	public void RefreshTitle()
 	{
-		if (this.target != null)
+		if (this.target == null)
 		{
-			this.TabTitle.SetTitle(this.target.GetProperName());
+			return;
 		}
+		this.TabTitle.SetTitle(this.target.GetProperName());
 		for (int i = 0; i < this.sidescreenTabs.Length; i++)
 		{
 			DetailsScreen.SidescreenTab tab = this.sidescreenTabs[i];
@@ -486,7 +491,7 @@ public class DetailsScreen : KTabMenu
 				KeyValuePair<DetailsScreen.SideScreenRef, int> keyValuePair = this.sortedSideScreens.Find((KeyValuePair<DetailsScreen.SideScreenRef, int> match) => match.Key.tab == tab.type);
 				if (keyValuePair.Key != null)
 				{
-					tab.SetTitleVisibility(true);
+					tab.SetTitleVisibility(keyValuePair.Key.screenInstance.CheckShouldShowTopTitle == null || keyValuePair.Key.screenInstance.CheckShouldShowTopTitle());
 					tab.SetTitle(keyValuePair.Key.screenInstance.GetTitle());
 				}
 				else
@@ -494,6 +499,18 @@ public class DetailsScreen : KTabMenu
 					tab.SetTitle(UI.UISIDESCREENS.NOCONFIG.TITLE);
 					tab.SetTitleVisibility(tab.type == DetailsScreen.SidescreenTabTypes.Config || tab.type == DetailsScreen.SidescreenTabTypes.Errands);
 				}
+			}
+			if (tab.type == DetailsScreen.SidescreenTabTypes.Config)
+			{
+				if (this.target.GetComponent<MinionIdentity>() == null)
+				{
+					tab.Tooltip_Key = "STRINGS.UI.DETAILTABS.CONFIGURATION.TOOLTIP";
+				}
+				else
+				{
+					tab.Tooltip_Key = "STRINGS.UI.DETAILTABS.CONFIGURATION.TOOLTIP_DUPLICANT";
+				}
+				tab.tabInstance.GetComponent<ToolTip>().SetSimpleTooltip(Strings.Get(tab.Tooltip_Key));
 			}
 		}
 	}
@@ -521,9 +538,15 @@ public class DetailsScreen : KTabMenu
 		{
 			if (sidescreenTabTypes == DetailsScreen.SidescreenTabTypes.Blueprints)
 			{
-				CosmeticsPanel reference = this.GetTabOfType(DetailsScreen.SidescreenTabTypes.Blueprints).bodyInstance.GetComponent<HierarchyReferences>().GetReference<CosmeticsPanel>("CosmeticsPanel");
+				DetailsScreen.SidescreenTab tabOfType = this.GetTabOfType(DetailsScreen.SidescreenTabTypes.Blueprints);
+				CosmeticsPanel reference = tabOfType.bodyInstance.GetComponent<HierarchyReferences>().GetReference<CosmeticsPanel>("CosmeticsPanel");
 				reference.SetTarget(this.target);
 				reference.Refresh();
+				CosmeticsPanel reference2 = tabOfType.OverrideBody.GetComponent<HierarchyReferences>().GetReference<CosmeticsPanel>("CosmeticsPanel");
+				LayoutRebuilder.ForceRebuildLayoutImmediate(reference2.GetComponent<RectTransform>());
+				float num2 = Mathf.Min(384f, reference2.GetComponent<RectTransform>().sizeDelta.y + 16f);
+				tabOfType.OverrideBody.GetComponent<LayoutElement>().minHeight = num2;
+				tabOfType.OverrideBody.GetComponent<LayoutElement>().preferredHeight = num2;
 			}
 		}
 		else
@@ -970,7 +993,9 @@ public class DetailsScreen : KTabMenu
 		{
 			if (this.bodyReferences != null && this.bodyReferences.HasReference("Title"))
 			{
-				this.bodyReferences.GetReference("Title").gameObject.SetActive(visible);
+				Component reference = this.bodyReferences.GetReference("Title");
+				reference.gameObject.SetActive(visible);
+				reference.transform.parent.GetComponent<LayoutGroup>().padding.top = (visible ? 24 : 0);
 			}
 		}
 

@@ -119,7 +119,7 @@ public class POITechItemUnlocks : GameStateMachine<POITechItemUnlocks, POITechIt
 
 		public override void StartSM()
 		{
-			base.Subscribe(-1503271301, new Action<object>(this.OnBuildingSelect));
+			this.onBuildingSelectHandle = base.Subscribe(-1503271301, new Action<object>(this.OnBuildingSelect));
 			this.UpdateUnlocked();
 			base.StartSM();
 			if (base.sm.pendingChore.Get(this) && this.unlockChore == null)
@@ -130,13 +130,13 @@ public class POITechItemUnlocks : GameStateMachine<POITechItemUnlocks, POITechIt
 
 		public override void StopSM(string reason)
 		{
-			base.Unsubscribe(-1503271301, new Action<object>(this.OnBuildingSelect));
+			base.Unsubscribe(ref this.onBuildingSelectHandle);
 			base.StopSM(reason);
 		}
 
 		public void OnBuildingSelect(object obj)
 		{
-			if (!(bool)obj)
+			if (!((Boxed<bool>)obj).value)
 			{
 				return;
 			}
@@ -268,6 +268,8 @@ public class POITechItemUnlocks : GameStateMachine<POITechItemUnlocks, POITechIt
 		public List<TechItem> unlockTechItems;
 
 		public Notification notificationReference;
+
+		private int onBuildingSelectHandle = -1;
 
 		private Chore unlockChore;
 	}

@@ -90,6 +90,7 @@ public class Global : MonoBehaviour
 			new BindingEntry("Root", GamepadButton.NumButtons, KKeyCode.KeypadPlus, Modifier.None, global::Action.SpeedUp, true, false),
 			new BindingEntry("Root", GamepadButton.NumButtons, KKeyCode.KeypadMinus, Modifier.None, global::Action.SlowDown, true, false),
 			new BindingEntry("Root", GamepadButton.Back, KKeyCode.Space, Modifier.None, global::Action.TogglePause, true, false),
+			new BindingEntry("Root", GamepadButton.NumButtons, KKeyCode.F, Modifier.Ctrl, global::Action.Find, true, false),
 			new BindingEntry("Navigation", GamepadButton.NumButtons, KKeyCode.Alpha1, Modifier.Ctrl, global::Action.SetUserNav1, true, false),
 			new BindingEntry("Navigation", GamepadButton.NumButtons, KKeyCode.Alpha2, Modifier.Ctrl, global::Action.SetUserNav2, true, false),
 			new BindingEntry("Navigation", GamepadButton.NumButtons, KKeyCode.Alpha3, Modifier.Ctrl, global::Action.SetUserNav3, true, false),
@@ -143,7 +144,7 @@ public class Global : MonoBehaviour
 			new BindingEntry("Debug", GamepadButton.NumButtons, KKeyCode.Q, Modifier.Ctrl, global::Action.DebugGotoTarget, true, false),
 			new BindingEntry("Debug", GamepadButton.NumButtons, KKeyCode.S, Modifier.Ctrl, global::Action.DebugSelectMaterial, true, false),
 			new BindingEntry("Debug", GamepadButton.NumButtons, KKeyCode.M, Modifier.Ctrl, global::Action.DebugToggleMusic, true, false),
-			new BindingEntry("Debug", GamepadButton.NumButtons, KKeyCode.F, Modifier.Ctrl, global::Action.DebugToggleClusterFX, DlcManager.EXPANSION1),
+			new BindingEntry("Debug", GamepadButton.NumButtons, KKeyCode.F, Modifier.Alt, global::Action.DebugToggleClusterFX, DlcManager.EXPANSION1),
 			new BindingEntry("Debug", GamepadButton.NumButtons, KKeyCode.Backspace, Modifier.None, global::Action.DebugToggle, true, false),
 			new BindingEntry("Debug", GamepadButton.NumButtons, KKeyCode.Backspace, Modifier.Ctrl, global::Action.DebugToggleFastWorkers, true, false),
 			new BindingEntry("Debug", GamepadButton.NumButtons, KKeyCode.Q, Modifier.Alt, global::Action.DebugTeleport, true, false),
@@ -157,6 +158,7 @@ public class Global : MonoBehaviour
 			new BindingEntry("Debug", GamepadButton.NumButtons, KKeyCode.F9, Modifier.Ctrl, global::Action.DebugDiscoverAllElements, true, false),
 			new BindingEntry("Debug", GamepadButton.NumButtons, KKeyCode.T, Modifier.Alt, global::Action.DebugToggleSelectInEditor, true, false),
 			new BindingEntry("Debug", GamepadButton.NumButtons, KKeyCode.P, Modifier.Alt, global::Action.DebugPathFinding, true, false),
+			new BindingEntry("Debug", GamepadButton.NumButtons, KKeyCode.D, Modifier.Alt, global::Action.DebugQuickDevActions, true, false),
 			new BindingEntry("Debug", GamepadButton.NumButtons, KKeyCode.C, Modifier.Ctrl, global::Action.DebugCheerEmote, true, false),
 			new BindingEntry("Debug", GamepadButton.NumButtons, KKeyCode.Z, Modifier.Alt, global::Action.DebugSuperSpeed, true, false),
 			new BindingEntry("Debug", GamepadButton.NumButtons, KKeyCode.Equals, Modifier.Alt, global::Action.DebugGameStep, true, false),
@@ -326,7 +328,7 @@ public class Global : MonoBehaviour
 		this.modManager.Load(Content.Translation);
 		this.modManager.distribution_platforms.Add(new Local("Local", Label.DistributionPlatform.Local, false));
 		this.modManager.distribution_platforms.Add(new Local("Dev", Label.DistributionPlatform.Dev, true));
-		KProfiler.main_thread = Thread.CurrentThread;
+		TuningSystem.main_thread = Thread.CurrentThread;
 		this.RestoreLegacyMetricsSetting();
 		this.TestDataLocations();
 		DistributionPlatform.onExitRequest += this.OnExitRequest;
@@ -638,7 +640,7 @@ public class Global : MonoBehaviour
 	private void SetONIStaticSessionVariables()
 	{
 		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Branch", "release");
-		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Build", 693461U);
+		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Build", 700348U);
 		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("SaveFolderWriteTest", Global.saveFolderTestResult);
 		if (KPlayerPrefs.HasKey(UnitConfigurationScreen.MassUnitKey))
 		{

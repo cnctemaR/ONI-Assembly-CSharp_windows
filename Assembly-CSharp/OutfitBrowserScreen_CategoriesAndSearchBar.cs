@@ -9,20 +9,27 @@ public class OutfitBrowserScreen_CategoriesAndSearchBar
 	public void InitializeWith(OutfitBrowserScreen outfitBrowserScreen)
 	{
 		this.outfitBrowserScreen = outfitBrowserScreen;
-		this.clothingOutfitTypeButton = new OutfitBrowserScreen_CategoriesAndSearchBar.SelectOutfitTypeButton(outfitBrowserScreen, Util.KInstantiateUI(this.selectOutfitType_Prefab.gameObject, this.selectOutfitType_Prefab.transform.parent.gameObject, true));
+		this.clothingOutfitTypeButton = new OutfitBrowserScreen_CategoriesAndSearchBar.SelectOutfitTypeButton(outfitBrowserScreen, Util.KInstantiateUI(this.selectOutfitType_Prefab.gameObject, this.categoryRow, true));
 		this.clothingOutfitTypeButton.button.onClick += delegate
 		{
 			this.SetOutfitType(ClothingOutfitUtility.OutfitType.Clothing);
 		};
 		this.clothingOutfitTypeButton.icon.sprite = Assets.GetSprite("icon_inventory_equipment");
 		KleiItemsUI.ConfigureTooltipOn(this.clothingOutfitTypeButton.button.gameObject, UI.OUTFIT_BROWSER_SCREEN.TOOLTIP_FILTER_BY_CLOTHING);
-		this.atmosuitOutfitTypeButton = new OutfitBrowserScreen_CategoriesAndSearchBar.SelectOutfitTypeButton(outfitBrowserScreen, Util.KInstantiateUI(this.selectOutfitType_Prefab.gameObject, this.selectOutfitType_Prefab.transform.parent.gameObject, true));
+		this.atmosuitOutfitTypeButton = new OutfitBrowserScreen_CategoriesAndSearchBar.SelectOutfitTypeButton(outfitBrowserScreen, Util.KInstantiateUI(this.selectOutfitType_Prefab.gameObject, this.categoryRow, true));
 		this.atmosuitOutfitTypeButton.button.onClick += delegate
 		{
 			this.SetOutfitType(ClothingOutfitUtility.OutfitType.AtmoSuit);
 		};
 		this.atmosuitOutfitTypeButton.icon.sprite = Assets.GetSprite("icon_inventory_atmosuits");
 		KleiItemsUI.ConfigureTooltipOn(this.atmosuitOutfitTypeButton.button.gameObject, UI.OUTFIT_BROWSER_SCREEN.TOOLTIP_FILTER_BY_ATMO_SUITS);
+		this.jetsuitOutfitTypeButton = new OutfitBrowserScreen_CategoriesAndSearchBar.SelectOutfitTypeButton(outfitBrowserScreen, Util.KInstantiateUI(this.selectOutfitType_Prefab.gameObject, this.categoryRow, true));
+		this.jetsuitOutfitTypeButton.button.onClick += delegate
+		{
+			this.SetOutfitType(ClothingOutfitUtility.OutfitType.JetSuit);
+		};
+		this.jetsuitOutfitTypeButton.icon.sprite = Assets.GetSprite("icon_inventory_jetsuits");
+		KleiItemsUI.ConfigureTooltipOn(this.jetsuitOutfitTypeButton.button.gameObject, UI.OUTFIT_BROWSER_SCREEN.TOOLTIP_FILTER_BY_JET_SUITS);
 		this.searchTextField.onValueChanged.AddListener(delegate(string newFilter)
 		{
 			outfitBrowserScreen.state.Filter = newFilter;
@@ -34,23 +41,28 @@ public class OutfitBrowserScreen_CategoriesAndSearchBar
 			{
 				this.clothingOutfitTypeButton.root.gameObject.SetActive(false);
 				this.atmosuitOutfitTypeButton.root.gameObject.SetActive(false);
+				this.jetsuitOutfitTypeButton.root.gameObject.SetActive(false);
 				return;
 			}
 			this.clothingOutfitTypeButton.root.gameObject.SetActive(true);
 			this.atmosuitOutfitTypeButton.root.gameObject.SetActive(true);
+			this.jetsuitOutfitTypeButton.root.gameObject.SetActive(true);
 			this.clothingOutfitTypeButton.SetState(OutfitBrowserScreen_CategoriesAndSearchBar.SelectOutfitTypeButtonState.Unselected);
 			this.atmosuitOutfitTypeButton.SetState(OutfitBrowserScreen_CategoriesAndSearchBar.SelectOutfitTypeButtonState.Unselected);
-			ClothingOutfitUtility.OutfitType currentOutfitType = outfitBrowserScreen.state.CurrentOutfitType;
-			if (currentOutfitType == ClothingOutfitUtility.OutfitType.Clothing)
+			this.jetsuitOutfitTypeButton.SetState(OutfitBrowserScreen_CategoriesAndSearchBar.SelectOutfitTypeButtonState.Unselected);
+			switch (outfitBrowserScreen.state.CurrentOutfitType)
 			{
+			case ClothingOutfitUtility.OutfitType.Clothing:
 				this.clothingOutfitTypeButton.SetState(OutfitBrowserScreen_CategoriesAndSearchBar.SelectOutfitTypeButtonState.Selected);
 				return;
+			case ClothingOutfitUtility.OutfitType.AtmoSuit:
+				this.atmosuitOutfitTypeButton.SetState(OutfitBrowserScreen_CategoriesAndSearchBar.SelectOutfitTypeButtonState.Selected);
+				return;
+			case ClothingOutfitUtility.OutfitType.JetSuit:
+				this.jetsuitOutfitTypeButton.SetState(OutfitBrowserScreen_CategoriesAndSearchBar.SelectOutfitTypeButtonState.Selected);
+				return;
 			}
-			if (currentOutfitType != ClothingOutfitUtility.OutfitType.AtmoSuit)
-			{
-				throw new NotImplementedException();
-			}
-			this.atmosuitOutfitTypeButton.SetState(OutfitBrowserScreen_CategoriesAndSearchBar.SelectOutfitTypeButtonState.Selected);
+			throw new NotImplementedException();
 		};
 	}
 
@@ -66,11 +78,16 @@ public class OutfitBrowserScreen_CategoriesAndSearchBar
 	public OutfitBrowserScreen_CategoriesAndSearchBar.SelectOutfitTypeButton atmosuitOutfitTypeButton;
 
 	[NonSerialized]
+	public OutfitBrowserScreen_CategoriesAndSearchBar.SelectOutfitTypeButton jetsuitOutfitTypeButton;
+
+	[NonSerialized]
 	public OutfitBrowserScreen outfitBrowserScreen;
 
 	public KButton selectOutfitType_Prefab;
 
 	public KInputTextField searchTextField;
+
+	public GameObject categoryRow;
 
 	public enum SelectOutfitTypeButtonState
 	{

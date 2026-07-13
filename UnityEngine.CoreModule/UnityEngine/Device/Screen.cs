@@ -201,8 +201,8 @@ namespace UnityEngine.Device
 			});
 		}
 
-		[EditorBrowsable(EditorBrowsableState.Never)]
 		[Obsolete("SetResolution(int, int, bool, int) is obsolete. Use SetResolution(int, int, FullScreenMode, RefreshRate) instead.")]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		public static void SetResolution(int width, int height, bool fullscreen, [DefaultValue("0")] int preferredRefreshRate)
 		{
 			bool flag = preferredRefreshRate < 0;

@@ -79,6 +79,8 @@ public class Blueprints_DlcPack2 : BlueprintProvider
 		base.AddBuilding("ExteriorWall", PermitRarity.Universal, "permit_walls_igloo", "walls_igloo_kanim");
 		base.AddBuilding("ExteriorWall", PermitRarity.Universal, "permit_walls_forest", "walls_forest_kanim");
 		base.AddBuilding("ExteriorWall", PermitRarity.Universal, "permit_walls_southwest", "walls_southwest_kanim");
+		base.AddBuilding("ItemPedestal", PermitRarity.Universal, "permit_pedestal_cottage", "pedestal_cottage_kanim");
+		base.AddBuilding("ExobaseHeadquarters", PermitRarity.Universal, "permit_porta_pod_y_ice", "porta_pod_y_ice_kanim");
 		base.AddArtable(BlueprintProvider.ArtableType.Painting, PermitRarity.Universal, "permit_painting_art_ceres_a", "painting_art_ceres_a_kanim");
 		base.AddArtable(BlueprintProvider.ArtableType.PaintingWide, PermitRarity.Universal, "permit_painting_wide_art_ceres_a", "painting_wide_art_ceres_a_kanim");
 		base.AddArtable(BlueprintProvider.ArtableType.PaintingTall, PermitRarity.Universal, "permit_painting_tall_art_ceres_a", "painting_tall_art_ceres_a_kanim");

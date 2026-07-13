@@ -10,7 +10,7 @@ public class DivergentWormConfig : IEntityConfig, IHasDlcRestrictions
 {
 	public static GameObject CreateWorm(string id, string name, string desc, string anim_file, bool is_baby)
 	{
-		GameObject gameObject = EntityTemplates.ExtendEntityToWildCreature(BaseDivergentConfig.BaseDivergent(id, name, desc, 200f, anim_file, "DivergentWormBaseTrait", is_baby, 8f, null, "DivergentCropTendedWorm", 3, false), DivergentTuning.PEN_SIZE_PER_CREATURE_WORM);
+		GameObject gameObject = EntityTemplates.ExtendEntityToWildCreature(BaseDivergentConfig.BaseDivergent(id, name, desc, 200f, anim_file, is_baby ? null : "worm_build_kanim", "DivergentWormBaseTrait", is_baby, 8f, null, "DivergentCropTendedWorm", 3, false, "worm_emotes_kanim"), DivergentTuning.PEN_SIZE_PER_CREATURE_WORM);
 		Trait trait = Db.Get().CreateTrait("DivergentWormBaseTrait", name, name, null, false, null, true, true);
 		trait.Add(new AttributeModifier(Db.Get().Amounts.Calories.maxAttribute.Id, DivergentTuning.STANDARD_STOMACH_SIZE, name, false, false, true));
 		trait.Add(new AttributeModifier(Db.Get().Amounts.Calories.deltaAttribute.Id, -DivergentTuning.STANDARD_CALORIES_PER_CYCLE / 600f, UI.TOOLTIPS.BASE_VALUE, false, false, true));

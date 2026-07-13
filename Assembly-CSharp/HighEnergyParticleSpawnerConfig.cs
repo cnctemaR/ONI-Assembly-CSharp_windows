@@ -74,5 +74,5 @@ public class HighEnergyParticleSpawnerConfig : IBuildingConfig
 
 	public const int MAX_SLIDER = 500;
 
-	public const float DISABLED_CONSUMPTION_RATE = 1f;
+	public const float DISABLED_CONSUMPTION_RATE = 0.05f;
 }

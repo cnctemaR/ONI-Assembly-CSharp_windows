@@ -18,6 +18,7 @@ namespace UnityEngine
 				this.m_SpriteChangeEvent = new UnityEvent<SpriteRenderer>();
 			}
 			this.m_SpriteChangeEvent.AddListener(callback);
+			this.hasSpriteChangeEvents = true;
 		}
 
 		public void UnregisterSpriteChangeCallback(UnityAction<SpriteRenderer> callback)
@@ -26,6 +27,11 @@ namespace UnityEngine
 			if (flag)
 			{
 				this.m_SpriteChangeEvent.RemoveListener(callback);
+				bool flag2 = this.m_SpriteChangeEvent.GetCallsCount() == 0;
+				if (flag2)
+				{
+					this.hasSpriteChangeEvents = false;
+				}
 			}
 		}
 
@@ -51,6 +57,14 @@ namespace UnityEngine
 			[NativeMethod("ShouldSupportTiling")]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
+		}
+
+		internal extern bool hasSpriteChangeEvents
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			set;
 		}
 
 		public extern Sprite sprite

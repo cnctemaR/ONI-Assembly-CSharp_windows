@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 
 public abstract class KCollider2D : KMonoBehaviour, IRenderEveryTick
@@ -25,14 +26,14 @@ public abstract class KCollider2D : KMonoBehaviour, IRenderEveryTick
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		Singleton<CellChangeMonitor>.Instance.RegisterMovementStateChanged(base.transform, new Action<Transform, bool>(KCollider2D.OnMovementStateChanged));
+		this.movementStateChangedHandlerId = Singleton<CellChangeMonitor>.Instance.RegisterMovementStateChanged(base.transform, KCollider2D.OnMovementStateChangedDispatcher, this);
 		this.MarkDirty(true);
 	}
 
 	protected override void OnCleanUp()
 	{
 		base.OnCleanUp();
-		Singleton<CellChangeMonitor>.Instance.UnregisterMovementStateChanged(base.transform, new Action<Transform, bool>(KCollider2D.OnMovementStateChanged));
+		Singleton<CellChangeMonitor>.Instance.UnregisterMovementStateChanged(ref this.movementStateChangedHandlerId);
 		GameScenePartitioner.Instance.Free(ref this.partitionerEntry);
 	}
 
@@ -67,11 +68,6 @@ public abstract class KCollider2D : KMonoBehaviour, IRenderEveryTick
 		SimAndRenderScheduler.instance.Remove(this);
 	}
 
-	private static void OnMovementStateChanged(Transform transform, bool is_moving)
-	{
-		transform.GetComponent<KCollider2D>().OnMovementStateChanged(is_moving);
-	}
-
 	public void RenderEveryTick(float dt)
 	{
 		this.MarkDirty(false);
@@ -89,4 +85,11 @@ public abstract class KCollider2D : KMonoBehaviour, IRenderEveryTick
 	private Extents cachedExtents;
 
 	private HandleVector<int>.Handle partitionerEntry;
+
+	private ulong movementStateChangedHandlerId;
+
+	private static Action<Transform, bool, object> OnMovementStateChangedDispatcher = delegate(Transform transform, bool is_moving, object context)
+	{
+		Unsafe.As<KCollider2D>(context).OnMovementStateChanged(is_moving);
+	};
 }

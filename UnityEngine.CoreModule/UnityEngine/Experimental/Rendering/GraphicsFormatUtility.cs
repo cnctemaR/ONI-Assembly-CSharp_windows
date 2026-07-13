@@ -7,8 +7,8 @@ using UnityEngine.Rendering;
 namespace UnityEngine.Experimental.Rendering
 {
 	[NativeHeader("Runtime/Graphics/TextureFormat.h")]
-	[NativeHeader("Runtime/Graphics/Format.h")]
 	[NativeHeader("Runtime/Graphics/GraphicsFormatUtility.bindings.h")]
+	[NativeHeader("Runtime/Graphics/Format.h")]
 	public class GraphicsFormatUtility
 	{
 		[FreeFunction("GetGraphicsFormat_Native_Texture")]

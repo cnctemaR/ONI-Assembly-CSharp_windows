@@ -16,6 +16,16 @@ public class Pathfinding : KMonoBehaviour
 		Pathfinding.Instance = this;
 	}
 
+	public int MaxLinksPerCell()
+	{
+		int num = 0;
+		foreach (NavGrid navGrid in this.NavGrids)
+		{
+			num = Mathf.Max(num, navGrid.maxLinksPerCell);
+		}
+		return num;
+	}
+
 	public void AddNavGrid(NavGrid nav_grid)
 	{
 		this.NavGrids.Add(nav_grid);
@@ -101,12 +111,13 @@ public class Pathfinding : KMonoBehaviour
 
 	public void RefreshNavCell(int cell)
 	{
-		HashSet<int> hashSet = new HashSet<int>();
-		hashSet.Add(cell);
+		ListPool<int, PathFinder>.PooledList pooledList = ListPool<int, PathFinder>.Allocate();
+		pooledList.Add(cell);
 		foreach (NavGrid navGrid in this.NavGrids)
 		{
-			navGrid.UpdateGraph(hashSet);
+			navGrid.UpdateGraph(pooledList);
 		}
+		pooledList.Recycle();
 	}
 
 	protected override void OnCleanUp()

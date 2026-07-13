@@ -3,8 +3,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Serialization
 {
-	[AttributeUsage(AttributeTargets.Field, AllowMultiple = true, Inherited = false)]
 	[RequiredByNativeCode]
+	[AttributeUsage(AttributeTargets.Field, AllowMultiple = true, Inherited = false)]
 	public class FormerlySerializedAsAttribute : Attribute
 	{
 		public FormerlySerializedAsAttribute(string oldName)

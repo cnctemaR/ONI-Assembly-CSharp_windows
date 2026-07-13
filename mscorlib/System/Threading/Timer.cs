@@ -343,7 +343,7 @@ namespace System.Threading
 				Timer.TimerComparer timerComparer = default(Timer.TimerComparer);
 				if (this.needReSort)
 				{
-					this.list.Sort(timerComparer);
+					this.list.Sort(new Comparison<Timer>(timerComparer.Compare));
 					this.needReSort = false;
 				}
 				long num = long.MaxValue;
@@ -381,7 +381,7 @@ namespace System.Threading
 				}
 				if (this.needReSort)
 				{
-					this.list.Sort(timerComparer);
+					this.list.Sort(new Comparison<Timer>(timerComparer.Compare));
 					this.needReSort = false;
 				}
 				int num2 = -1;

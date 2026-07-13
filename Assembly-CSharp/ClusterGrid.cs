@@ -97,6 +97,21 @@ public class ClusterGrid
 			select entity).ToList<ClusterGridEntity>();
 	}
 
+	public StarmapHexCellInventory AddOrGetHexCellInventory(AxialI cell)
+	{
+		StarmapHexCellInventory starmapHexCellInventory = null;
+		if (!StarmapHexCellInventory.AllInventories.TryGetValue(cell, out starmapHexCellInventory))
+		{
+			StarmapHexCellInventoryVisuals component = Util.KInstantiate(Assets.GetPrefab("StarmapHexCellInventory"), null, null).GetComponent<StarmapHexCellInventoryVisuals>();
+			component.gameObject.name = component.gameObject.name + " [" + cell.ToString() + "]";
+			component.Location = cell;
+			component.gameObject.SetActive(true);
+			starmapHexCellInventory = component.inventory;
+			StarmapHexCellInventory.AllInventories.Add(cell, starmapHexCellInventory);
+		}
+		return starmapHexCellInventory;
+	}
+
 	public ClusterGridEntity GetEntityOfLayerAtCell(AxialI cell, EntityLayer entityLayer)
 	{
 		return AxialUtil.GetRing(cell, 0).SelectMany<AxialI, ClusterGridEntity>(new Func<AxialI, IEnumerable<ClusterGridEntity>>(this.GetEntitiesOnCell)).FirstOrDefault<ClusterGridEntity>((ClusterGridEntity entity) => entity.Layer == entityLayer);
@@ -114,6 +129,21 @@ public class ClusterGrid
 	public List<ClusterGridEntity> GetNotVisibleEntitiesAtAdjacentCell(AxialI cell)
 	{
 		return AxialUtil.GetRing(cell, 1).SelectMany<AxialI, ClusterGridEntity>(new Func<AxialI, IEnumerable<ClusterGridEntity>>(this.GetHiddenEntitiesAtCell)).ToList<ClusterGridEntity>();
+	}
+
+	public AxialI GetRandomVisibleAdjacentCellLocation(AxialI cell)
+	{
+		return this.GetRandomVisibleAdjacentCellLocation(cell, AxialI.INVALID);
+	}
+
+	public AxialI GetRandomVisibleAdjacentCellLocation(AxialI cell, AxialI forbidden)
+	{
+		List<AxialI> list = AxialUtil.GetRing(cell, 1).FindAll((AxialI e) => this.IsCellVisible(e) && (forbidden == AxialI.INVALID || forbidden != e));
+		if (list != null)
+		{
+			return list.GetRandom<AxialI>();
+		}
+		return AxialI.INVALID;
 	}
 
 	public List<ClusterGridEntity> GetNotVisibleEntitiesOfLayerAtAdjacentCell(AxialI cell, EntityLayer entityLayer)
@@ -316,7 +346,7 @@ public class ClusterGrid
 
 	public List<AxialI> GetPath(AxialI start, AxialI end, ClusterDestinationSelector destination_selector, out string fail_reason, bool dodgeHiddenAsteroids = false)
 	{
-		ClusterGrid.<>c__DisplayClass41_0 CS$<>8__locals1;
+		ClusterGrid.<>c__DisplayClass44_0 CS$<>8__locals1;
 		CS$<>8__locals1.<>4__this = this;
 		CS$<>8__locals1.destination_selector = destination_selector;
 		CS$<>8__locals1.start = start;
@@ -366,7 +396,7 @@ public class ClusterGrid
 		CS$<>8__locals1.frontier.Add(CS$<>8__locals1.start);
 		while (!CS$<>8__locals1.frontier.Contains(CS$<>8__locals1.end) && CS$<>8__locals1.frontier.Count > 0)
 		{
-			this.<GetPath>g__ExpandFrontier|41_0(ref CS$<>8__locals1);
+			this.<GetPath>g__ExpandFrontier|44_0(ref CS$<>8__locals1);
 		}
 		if (CS$<>8__locals1.frontier.Contains(CS$<>8__locals1.end))
 		{
@@ -386,7 +416,16 @@ public class ClusterGrid
 
 	public void GetLocationDescription(AxialI location, out Sprite sprite, out string label, out string sublabel)
 	{
-		ClusterGridEntity clusterGridEntity = this.GetVisibleEntitiesAtCell(location).Find((ClusterGridEntity x) => x.Layer == EntityLayer.Asteroid);
+		EntityLayer entityLayer;
+		this.GetLocationDescription(location, out sprite, out label, out sublabel, out entityLayer);
+	}
+
+	public void GetLocationDescription(AxialI location, out Sprite sprite, out string label, out string sublabel, out EntityLayer locationEntity)
+	{
+		locationEntity = EntityLayer.None;
+		List<ClusterGridEntity> visibleEntitiesAtCell = this.GetVisibleEntitiesAtCell(location);
+		ClusterGridEntity clusterGridEntity = visibleEntitiesAtCell.Find((ClusterGridEntity x) => x.Layer == EntityLayer.Asteroid);
+		ClusterGridEntity clusterGridEntity2 = visibleEntitiesAtCell.Find((ClusterGridEntity x) => x.Layer == EntityLayer.POI);
 		ClusterGridEntity visibleEntityOfLayerAtAdjacentCell = this.GetVisibleEntityOfLayerAtAdjacentCell(location, EntityLayer.Asteroid);
 		if (clusterGridEntity != null)
 		{
@@ -394,6 +433,15 @@ public class ClusterGrid
 			label = clusterGridEntity.Name;
 			WorldContainer component = clusterGridEntity.GetComponent<WorldContainer>();
 			sublabel = Strings.Get(component.worldType);
+			locationEntity = EntityLayer.Asteroid;
+			return;
+		}
+		if (clusterGridEntity2 != null)
+		{
+			sprite = clusterGridEntity2.GetUISprite();
+			label = clusterGridEntity2.Name;
+			sublabel = clusterGridEntity2.Name;
+			locationEntity = EntityLayer.POI;
 			return;
 		}
 		if (visibleEntityOfLayerAtAdjacentCell != null)
@@ -402,11 +450,12 @@ public class ClusterGrid
 			label = UI.SPACEDESTINATIONS.ORBIT.NAME_FMT.Replace("{Name}", visibleEntityOfLayerAtAdjacentCell.Name);
 			WorldContainer component2 = visibleEntityOfLayerAtAdjacentCell.GetComponent<WorldContainer>();
 			sublabel = Strings.Get(component2.worldType);
+			locationEntity = EntityLayer.None;
 			return;
 		}
 		if (this.IsCellVisible(location))
 		{
-			sprite = Assets.GetSprite("hex_unknown");
+			sprite = Assets.GetSprite("hex_empty");
 			label = UI.SPACEDESTINATIONS.EMPTY_SPACE.NAME;
 			sublabel = "";
 			return;
@@ -417,7 +466,7 @@ public class ClusterGrid
 	}
 
 	[CompilerGenerated]
-	private void <GetPath>g__ExpandFrontier|41_0(ref ClusterGrid.<>c__DisplayClass41_0 A_1)
+	private void <GetPath>g__ExpandFrontier|44_0(ref ClusterGrid.<>c__DisplayClass44_0 A_1)
 	{
 		A_1.buffer.Clear();
 		foreach (AxialI axialI in A_1.frontier)

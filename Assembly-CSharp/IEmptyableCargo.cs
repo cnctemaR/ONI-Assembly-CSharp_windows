@@ -1,4 +1,5 @@
 ﻿using System;
+using STRINGS;
 
 public interface IEmptyableCargo
 {
@@ -17,4 +18,28 @@ public interface IEmptyableCargo
 	bool ModuleDeployed { get; }
 
 	MinionIdentity ChosenDuplicant { get; set; }
+
+	bool CanTargetClusterGridEntities
+	{
+		get
+		{
+			return false;
+		}
+	}
+
+	string GetButtonText
+	{
+		get
+		{
+			return UI.UISIDESCREENS.MODULEFLIGHTUTILITYSIDESCREEN.DEPLOY_BUTTON;
+		}
+	}
+
+	string GetButtonToolip
+	{
+		get
+		{
+			return UI.UISIDESCREENS.MODULEFLIGHTUTILITYSIDESCREEN.DEPLOY_BUTTON_TOOLTIP;
+		}
+	}
 }

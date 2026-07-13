@@ -60,7 +60,7 @@ public class DeathStates : GameStateMachine<DeathStates, DeathStates.Instance, I
 		{
 			if (base.HasTag(GameTags.Creatures.Flyer) && !base.HasTag(GameTags.Stored))
 			{
-				GameComps.Gravities.Add(base.smi.gameObject, Vector2.zero, delegate
+				GameComps.Gravities.Add(base.smi.gameObject, Vector2.zero, delegate(Transform transform)
 				{
 					base.smi.DisableGravity();
 				});

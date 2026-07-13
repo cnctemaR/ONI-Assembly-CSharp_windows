@@ -4,8 +4,8 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine.Rendering
 {
-	[RequireComponent(typeof(Transform))]
 	[NativeType(Header = "Runtime/2D/Sorting/SortingGroup.h")]
+	[RequireComponent(typeof(Transform))]
 	public sealed class SortingGroup : Behaviour
 	{
 		[StaticAccessor("SortingGroup", StaticAccessorType.DoubleColon)]

@@ -512,6 +512,12 @@ namespace UnityEngine.UIElements
 			};
 			this.horizontalScroller.slider.clampedDragger.draggingEnded += this.UpdateElasticBehaviour;
 			this.verticalScroller.slider.clampedDragger.draggingEnded += this.UpdateElasticBehaviour;
+			this.horizontalScroller.slider.clampedDragger.acceptClicksIfDisabled = true;
+			this.verticalScroller.slider.clampedDragger.acceptClicksIfDisabled = true;
+			this.verticalScroller.highButton.acceptClicksIfDisabled = true;
+			this.verticalScroller.lowButton.acceptClicksIfDisabled = true;
+			this.horizontalScroller.highButton.acceptClicksIfDisabled = true;
+			this.horizontalScroller.lowButton.acceptClicksIfDisabled = true;
 			this.horizontalScroller.lowButton.AddAction(new Action(this.UpdateElasticBehaviour));
 			this.horizontalScroller.highButton.AddAction(new Action(this.UpdateElasticBehaviour));
 			this.verticalScroller.lowButton.AddAction(new Action(this.UpdateElasticBehaviour));
@@ -520,7 +526,7 @@ namespace UnityEngine.UIElements
 			this.verticalScroller.style.display = DisplayStyle.None;
 			this.m_ContentAndVerticalScrollContainer.Add(this.verticalScroller);
 			this.touchScrollBehavior = ScrollView.TouchScrollBehavior.Clamped;
-			base.RegisterCallback<WheelEvent>(new EventCallback<WheelEvent>(this.OnScrollWheel), TrickleDown.NoTrickleDown);
+			base.RegisterCallback<WheelEvent>(new EventCallback<WheelEvent>(this.OnScrollWheel), InvokePolicy.IncludeDisabled, TrickleDown.NoTrickleDown);
 			this.verticalScroller.RegisterCallback<GeometryChangedEvent>(new EventCallback<GeometryChangedEvent>(this.OnScrollersGeometryChanged), TrickleDown.NoTrickleDown);
 			this.horizontalScroller.RegisterCallback<GeometryChangedEvent>(new EventCallback<GeometryChangedEvent>(this.OnScrollersGeometryChanged), TrickleDown.NoTrickleDown);
 			this.horizontalPageSize = -1f;

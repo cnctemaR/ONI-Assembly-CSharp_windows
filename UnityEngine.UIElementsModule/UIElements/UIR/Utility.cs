@@ -10,8 +10,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.UIElements.UIR
 {
-	[VisibleToOtherModules(new string[] { "Unity.UIElements" })]
 	[NativeHeader("ModuleOverrides/com.unity.ui/Core/Native/Renderer/UIRendererUtility.h")]
+	[VisibleToOtherModules(new string[] { "Unity.UIElements" })]
 	internal class Utility
 	{
 		public static void SetVectorArray<T>(MaterialPropertyBlock props, int name, NativeSlice<T> vector4s) where T : struct

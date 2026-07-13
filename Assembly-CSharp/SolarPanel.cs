@@ -8,6 +8,7 @@ public class SolarPanel : Generator
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
+		this.cachedCell = Grid.PosToCell(this);
 		base.Subscribe<SolarPanel>(824508782, SolarPanel.OnActiveChangedDelegate);
 		this.smi = new SolarPanel.StatesInstance(this);
 		this.smi.StartSM();
@@ -25,7 +26,7 @@ public class SolarPanel : Generator
 	protected void OnActiveChanged(object data)
 	{
 		StatusItem statusItem = (((Operational)data).IsActive ? Db.Get().BuildingStatusItems.Wattage : Db.Get().BuildingStatusItems.GeneratorOffline);
-		base.GetComponent<KSelectable>().SetStatusItem(Db.Get().StatusItemCategories.Power, statusItem, this);
+		this.selectable.SetStatusItem(Db.Get().StatusItemCategories.Power, statusItem, this);
 	}
 
 	private void UpdateStatusItem()
@@ -38,7 +39,7 @@ public class SolarPanel : Generator
 		}
 		if (this.statusHandle != Guid.Empty)
 		{
-			base.GetComponent<KSelectable>().ReplaceStatusItem(this.statusHandle, Db.Get().BuildingStatusItems.SolarPanelWattage, this);
+			this.selectable.ReplaceStatusItem(this.statusHandle, Db.Get().BuildingStatusItems.SolarPanelWattage, this);
 		}
 	}
 
@@ -54,7 +55,7 @@ public class SolarPanel : Generator
 		float num = 0f;
 		foreach (CellOffset cellOffset in this.solarCellOffsets)
 		{
-			int num2 = Grid.LightIntensity[Grid.OffsetCell(Grid.PosToCell(this), cellOffset)];
+			int num2 = Grid.LightIntensity[Grid.OffsetCell(this.cachedCell, cellOffset)];
 			num += (float)num2 * 0.00053f;
 		}
 		this.operational.SetActive(num > 0f, false);
@@ -85,6 +86,8 @@ public class SolarPanel : Generator
 	private SolarPanel.StatesInstance smi;
 
 	private Guid statusHandle;
+
+	private int cachedCell;
 
 	private CellOffset[] solarCellOffsets = new CellOffset[]
 	{

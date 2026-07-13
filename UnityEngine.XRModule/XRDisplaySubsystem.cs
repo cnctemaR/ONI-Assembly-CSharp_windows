@@ -278,8 +278,8 @@ namespace UnityEngine.XR
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern RenderTexture GetSharedDepthTextureForRenderPass(int renderPass);
 
-		[NativeConditional("ENABLE_XR")]
 		[NativeMethod(Name = "GetPreferredMirrorViewBlitMode", IsThreadSafe = false)]
+		[NativeConditional("ENABLE_XR")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern int GetPreferredMirrorBlitMode();
 
@@ -305,9 +305,9 @@ namespace UnityEngine.XR
 			return this.AddGraphicsThreadMirrorViewBlit(cmd, allowGraphicsStateInvalidate, -1);
 		}
 
-		[NativeMethod(Name = "AddGraphicsThreadMirrorViewBlit", IsThreadSafe = false)]
-		[NativeHeader("Runtime/Graphics/CommandBuffer/RenderingCommandBuffer.h")]
 		[NativeConditional("ENABLE_XR")]
+		[NativeHeader("Runtime/Graphics/CommandBuffer/RenderingCommandBuffer.h")]
+		[NativeMethod(Name = "AddGraphicsThreadMirrorViewBlit", IsThreadSafe = false)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern bool AddGraphicsThreadMirrorViewBlit(CommandBuffer cmd, bool allowGraphicsStateInvalidate, int mode);
 
@@ -389,8 +389,8 @@ namespace UnityEngine.XR
 				XRDisplaySubsystem.XRRenderPass.GetRenderParameter_Injected(ref this, camera, renderParameterIndex, out renderParameter);
 			}
 
-			[NativeMethod(Name = "XRRenderPassScriptApi::GetRenderParameterCount", IsFreeFunction = true, HasExplicitThis = true)]
 			[NativeConditional("ENABLE_XR")]
+			[NativeMethod(Name = "XRRenderPassScriptApi::GetRenderParameterCount", IsFreeFunction = true, HasExplicitThis = true)]
 			public int GetRenderParameterCount()
 			{
 				return XRDisplaySubsystem.XRRenderPass.GetRenderParameterCount_Injected(ref this);

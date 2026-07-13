@@ -167,7 +167,7 @@ public class ProductInfoScreen : KScreen
 
 	private void CheckMouseOver(PointerEventData data)
 	{
-		bool flag = base.GetMouseOver || (PlanScreen.Instance != null && ((PlanScreen.Instance.isActiveAndEnabled && PlanScreen.Instance.GetMouseOver) || BuildingGroupScreen.Instance.GetMouseOver)) || (BuildMenu.Instance != null && BuildMenu.Instance.isActiveAndEnabled && BuildMenu.Instance.GetMouseOver);
+		bool flag = base.GetMouseOver || (PlanScreen.Instance != null && ((PlanScreen.Instance.IsScreenActive() && PlanScreen.Instance.GetMouseOver) || BuildingGroupScreen.Instance.GetMouseOver)) || (BuildMenu.Instance != null && BuildMenu.Instance.IsScreenActive() && BuildMenu.Instance.GetMouseOver);
 		this.ToggleExpandedInfo(flag);
 	}
 
@@ -472,7 +472,6 @@ public class ProductInfoScreen : KScreen
 		RoomConstraints.ConstraintTags.Park,
 		RoomConstraints.ConstraintTags.SpiceStation,
 		RoomConstraints.ConstraintTags.DeStressingBuilding,
-		RoomConstraints.ConstraintTags.Decor20,
 		RoomConstraints.ConstraintTags.MachineShopType
 	};
 

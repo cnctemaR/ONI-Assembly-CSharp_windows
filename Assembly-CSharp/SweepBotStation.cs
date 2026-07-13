@@ -188,7 +188,7 @@ public class SweepBotStation : KMonoBehaviour
 		}
 	}
 
-	private void OnOperationalChanged(object data)
+	private void OnOperationalChanged(object _)
 	{
 		Operational component = base.GetComponent<Operational>();
 		component.SetActive(!component.Flags.ContainsValue(false), false);

@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{A081CAED-200E-4A81-899E-DFD00EC9CDF0}</ProjectGuid>
+    <ProjectGuid>{83A836A8-62F3-4851-B5D4-B3B0E1607BEB}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>mscorlib</RootNamespace>
     <AssemblyName>mscorlib</AssemblyName>

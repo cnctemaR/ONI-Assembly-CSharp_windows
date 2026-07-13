@@ -22,7 +22,7 @@ public class CrabWoodConfig : IEntityConfig
 
 	public GameObject CreatePrefab()
 	{
-		GameObject gameObject = CrabWoodConfig.CreateCrabWood("CrabWood", global::STRINGS.CREATURES.SPECIES.CRAB.VARIANT_WOOD.NAME, global::STRINGS.CREATURES.SPECIES.CRAB.VARIANT_WOOD.DESC, "pincher_kanim", false, "CrabWoodShell", 100f);
+		GameObject gameObject = CrabWoodConfig.CreateCrabWood("CrabWood", global::STRINGS.CREATURES.SPECIES.CRAB.VARIANT_WOOD.NAME, global::STRINGS.CREATURES.SPECIES.CRAB.VARIANT_WOOD.DESC, "pincher_kanim", false, "CrabWoodShell", 500f);
 		gameObject = EntityTemplates.ExtendEntityToFertileCreature(gameObject, this as IHasDlcRestrictions, "CrabWoodEgg", global::STRINGS.CREATURES.SPECIES.CRAB.VARIANT_WOOD.EGG_NAME, global::STRINGS.CREATURES.SPECIES.CRAB.VARIANT_WOOD.DESC, "egg_pincher_kanim", CrabTuning.EGG_MASS, "CrabWoodBaby", 60.000004f, 20f, CrabTuning.EGG_CHANCES_WOOD, CrabWoodConfig.EGG_SORT_ORDER, true, false, 1f, false);
 		EggProtectionMonitor.Def def = gameObject.AddOrGetDef<EggProtectionMonitor.Def>();
 		def.allyTags = new Tag[] { GameTags.Creatures.CrabFriend };

@@ -57,7 +57,12 @@ public class GourmetCookingStationConfig : IBuildingConfig
 		conduitConsumer.alwaysConsume = true;
 		conduitConsumer.storage = gourmetCookingStation.inStorage;
 		conduitConsumer.forceAlwaysSatisfied = true;
-		go.AddOrGet<ElementConverter>().outputElements = new ElementConverter.OutputElement[]
+		ElementConverter elementConverter = go.AddOrGet<ElementConverter>();
+		elementConverter.consumedElements = new ElementConverter.ConsumedElement[]
+		{
+			new ElementConverter.ConsumedElement(this.FUEL_TAG, 0.1f, true)
+		};
+		elementConverter.outputElements = new ElementConverter.OutputElement[]
 		{
 			new ElementConverter.OutputElement(0.025f, SimHashes.CarbonDioxide, 348.15f, false, false, 0f, 2f, 1f, byte.MaxValue, 0, true)
 		};

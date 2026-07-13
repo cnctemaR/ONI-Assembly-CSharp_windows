@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{D74C17D4-F751-45A1-8C04-0A511733F33B}</ProjectGuid>
+    <ProjectGuid>{762A1267-4B76-4A44-9761-A3728714D440}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>UnityEngine.CoreModule</RootNamespace>
     <AssemblyName>UnityEngine.CoreModule</AssemblyName>
@@ -951,11 +951,11 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\netstandard\netstandard.csproj">
-      <Project>{D74C17D4-F751-45A1-8C04-0A511733F311}</Project>
+      <Project>{762A1267-4B76-4A44-9761-A3728714D416}</Project>
       <Name>netstandard</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
-      <Project>{D74C17D4-F751-45A1-8C04-0A511733F353}</Project>
+      <Project>{762A1267-4B76-4A44-9761-A3728714D458}</Project>
       <Name>UnityEngine.SharedInternalsModule</Name>
     </ProjectReference>
   </ItemGroup>

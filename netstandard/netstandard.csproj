@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{D74C17D4-F751-45A1-8C04-0A511733F311}</ProjectGuid>
+    <ProjectGuid>{762A1267-4B76-4A44-9761-A3728714D416}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>netstandard</RootNamespace>
     <AssemblyName>netstandard</AssemblyName>
@@ -17,63 +17,63 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{D74C17D4-F751-45A1-8C04-0A511733F310}</Project>
+      <Project>{762A1267-4B76-4A44-9761-A3728714D415}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.ComponentModel.Composition\System.ComponentModel.Composition.csproj">
-      <Project>{D74C17D4-F751-45A1-8C04-0A511733F313}</Project>
+      <Project>{762A1267-4B76-4A44-9761-A3728714D418}</Project>
       <Name>System.ComponentModel.Composition</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Core\System.Core.csproj">
-      <Project>{D74C17D4-F751-45A1-8C04-0A511733F315}</Project>
+      <Project>{762A1267-4B76-4A44-9761-A3728714D41A}</Project>
       <Name>System.Core</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Data.DataSetExtensions\System.Data.DataSetExtensions.csproj">
-      <Project>{D74C17D4-F751-45A1-8C04-0A511733F316}</Project>
+      <Project>{762A1267-4B76-4A44-9761-A3728714D41B}</Project>
       <Name>System.Data.DataSetExtensions</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Data\System.Data.csproj">
-      <Project>{D74C17D4-F751-45A1-8C04-0A511733F317}</Project>
+      <Project>{762A1267-4B76-4A44-9761-A3728714D41C}</Project>
       <Name>System.Data</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Drawing\System.Drawing.csproj">
-      <Project>{D74C17D4-F751-45A1-8C04-0A511733F319}</Project>
+      <Project>{762A1267-4B76-4A44-9761-A3728714D41E}</Project>
       <Name>System.Drawing</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.IO.Compression.FileSystem\System.IO.Compression.FileSystem.csproj">
-      <Project>{D74C17D4-F751-45A1-8C04-0A511733F31C}</Project>
+      <Project>{762A1267-4B76-4A44-9761-A3728714D421}</Project>
       <Name>System.IO.Compression.FileSystem</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.IO.Compression\System.IO.Compression.csproj">
-      <Project>{D74C17D4-F751-45A1-8C04-0A511733F31B}</Project>
+      <Project>{762A1267-4B76-4A44-9761-A3728714D420}</Project>
       <Name>System.IO.Compression</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Net.Http\System.Net.Http.csproj">
-      <Project>{D74C17D4-F751-45A1-8C04-0A511733F31D}</Project>
+      <Project>{762A1267-4B76-4A44-9761-A3728714D422}</Project>
       <Name>System.Net.Http</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Numerics\System.Numerics.csproj">
-      <Project>{D74C17D4-F751-45A1-8C04-0A511733F31E}</Project>
+      <Project>{762A1267-4B76-4A44-9761-A3728714D423}</Project>
       <Name>System.Numerics</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Runtime.Serialization\System.Runtime.Serialization.csproj">
-      <Project>{D74C17D4-F751-45A1-8C04-0A511733F321}</Project>
+      <Project>{762A1267-4B76-4A44-9761-A3728714D426}</Project>
       <Name>System.Runtime.Serialization</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Transactions\System.Transactions.csproj">
-      <Project>{D74C17D4-F751-45A1-8C04-0A511733F324}</Project>
+      <Project>{762A1267-4B76-4A44-9761-A3728714D429}</Project>
       <Name>System.Transactions</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Xml.Linq\System.Xml.Linq.csproj">
-      <Project>{D74C17D4-F751-45A1-8C04-0A511733F326}</Project>
+      <Project>{762A1267-4B76-4A44-9761-A3728714D42B}</Project>
       <Name>System.Xml.Linq</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Xml\System.Xml.csproj">
-      <Project>{D74C17D4-F751-45A1-8C04-0A511733F325}</Project>
+      <Project>{762A1267-4B76-4A44-9761-A3728714D42A}</Project>
       <Name>System.Xml</Name>
     </ProjectReference>
     <ProjectReference Include="..\System\System.csproj">
-      <Project>{D74C17D4-F751-45A1-8C04-0A511733F318}</Project>
+      <Project>{762A1267-4B76-4A44-9761-A3728714D41D}</Project>
       <Name>System</Name>
     </ProjectReference>
   </ItemGroup>

@@ -140,7 +140,7 @@ public class Growing : StateMachineComponent<Growing.StatesInstance>, IGameObjec
 	public void ConsumeGrowthUnits(float units_to_consume, float unit_maturity_ratio)
 	{
 		float num = units_to_consume / unit_maturity_ratio;
-		global::Debug.Assert(num <= this.maturity.value);
+		num = Mathf.Clamp(num, 0f, this.maturity.value);
 		this.maturity.value -= num;
 		base.gameObject.Trigger(-1793167409, null);
 	}

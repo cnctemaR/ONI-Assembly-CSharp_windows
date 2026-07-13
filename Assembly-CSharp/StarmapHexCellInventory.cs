@@ -174,8 +174,8 @@ public class StarmapHexCellInventory : KMonoBehaviour, ISaveLoadable
 		Element element = ElementLoader.GetElement(ID);
 		if (element != null)
 		{
-			storage.AddElement(element.id, num, element.defaultValues.temperature, byte.MaxValue, 0, false, true);
 			this.DeleteItemMass(serializedItem, num);
+			storage.AddElement(element.id, num, element.defaultValues.temperature, byte.MaxValue, 0, false, true);
 			return num;
 		}
 		GameObject prefab = Assets.GetPrefab(serializedItem.ID);
@@ -185,8 +185,8 @@ public class StarmapHexCellInventory : KMonoBehaviour, ISaveLoadable
 			gameObject.transform.SetLocalPosition(base.transform.GetPosition());
 			gameObject.GetComponent<PrimaryElement>().Units = num;
 			gameObject.SetActive(true);
-			storage.Store(gameObject, true, false, true, false);
 			this.DeleteItemMass(serializedItem, num);
+			storage.Store(gameObject, true, false, true, false);
 			return num;
 		}
 		global::Debug.LogWarning("StarmapHexCellInventory.ExtractAndSpawn() found an invalid item ID(" + ID.ToString() + ") stored. Removing from list.");

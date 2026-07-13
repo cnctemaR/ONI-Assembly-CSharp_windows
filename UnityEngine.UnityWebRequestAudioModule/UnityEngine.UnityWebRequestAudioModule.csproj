@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{D74C17D4-F751-45A1-8C04-0A511733F36A}</ProjectGuid>
+    <ProjectGuid>{762A1267-4B76-4A44-9761-A3728714D46F}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>UnityEngine.Networking</RootNamespace>
     <AssemblyName>UnityEngine.UnityWebRequestAudioModule</AssemblyName>
@@ -21,23 +21,23 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\netstandard\netstandard.csproj">
-      <Project>{D74C17D4-F751-45A1-8C04-0A511733F311}</Project>
+      <Project>{762A1267-4B76-4A44-9761-A3728714D416}</Project>
       <Name>netstandard</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.AudioModule\UnityEngine.AudioModule.csproj">
-      <Project>{D74C17D4-F751-45A1-8C04-0A511733F336}</Project>
+      <Project>{762A1267-4B76-4A44-9761-A3728714D43B}</Project>
       <Name>UnityEngine.AudioModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
-      <Project>{D74C17D4-F751-45A1-8C04-0A511733F33B}</Project>
+      <Project>{762A1267-4B76-4A44-9761-A3728714D440}</Project>
       <Name>UnityEngine.CoreModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
-      <Project>{D74C17D4-F751-45A1-8C04-0A511733F353}</Project>
+      <Project>{762A1267-4B76-4A44-9761-A3728714D458}</Project>
       <Name>UnityEngine.SharedInternalsModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.UnityWebRequestModule\UnityEngine.UnityWebRequestModule.csproj">
-      <Project>{D74C17D4-F751-45A1-8C04-0A511733F36B}</Project>
+      <Project>{762A1267-4B76-4A44-9761-A3728714D470}</Project>
       <Name>UnityEngine.UnityWebRequestModule</Name>
     </ProjectReference>
   </ItemGroup>

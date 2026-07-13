@@ -372,7 +372,7 @@ public class EatChore : Chore<EatChore.StatesInstance>
 			this.fetch.InitializeStates(this.eater, this.ediblesource, this.ediblechunk, this.requestedfoodunits, this.actualfoodunits, this.choosewheretoeat, null);
 			this.choosewheretoeat.ParamTransition<GameObject>(this.messstation, this.eatonfloorstate, (EatChore.StatesInstance smi, GameObject p) => p == null || EatChore.IsMessStationNonOperational(p)).GoTo(this.eatatmessstation);
 			this.eatatmessstation.DefaultState(this.eatatmessstation.moveto).ParamTransition<GameObject>(this.messstation, null, (EatChore.StatesInstance smi, GameObject p) => p == null || EatChore.IsMessStationNonOperational(p));
-			this.eatatmessstation.moveto.InitializeStates(this.eater, this.messstation, this.eatatmessstation.eat, this.eatonfloorstate, null, null);
+			this.eatatmessstation.moveto.InitializeStates(this.eater, this.messstation, this.eatatmessstation.eat, null, null, null);
 			this.eatatmessstation.eat.Enter("OnEnterMessStation", delegate(EatChore.StatesInstance smi)
 			{
 				smi.eatAnim = EatChore.StatesInstance.OnEnterMessStation(this.messstation.Get(smi), this.eater.Get(smi), this.ediblechunk.Get(smi), false, null);

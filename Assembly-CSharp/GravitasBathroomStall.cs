@@ -15,11 +15,19 @@ public class GravitasBathroomStall : GameStateMachine<GravitasBathroomStall, Gra
 		{
 			if (HijackedHeadquarters.Instance.PrinterceptorInstance != null && HijackedHeadquarters.IsOperational(HijackedHeadquarters.Instance.PrinterceptorInstance.GetSMI<HijackedHeadquarters.Instance>()))
 			{
+				smi.sm.hasBeenActivated.Set(smi.master.GetComponent<Activatable>().IsActivated, smi, false);
 				smi.GoTo(this.branch);
 			}
 		}, UpdateRate.SIM_200ms, false);
 		this.branch.ParamTransition<bool>(this.hasBeenActivated, this.blinking, GameStateMachine<GravitasBathroomStall, GravitasBathroomStall.Instance, IStateMachineTarget, GravitasBathroomStall.Def>.IsFalse).ParamTransition<bool>(this.hasBeenActivated, this.activated, GameStateMachine<GravitasBathroomStall, GravitasBathroomStall.Instance, IStateMachineTarget, GravitasBathroomStall.Def>.IsTrue);
-		this.blinking.PlayAnim("code_ready", KAnim.PlayMode.Loop).EventHandlerTransition(GameHashes.BuildingActivated, this.activated, (GravitasBathroomStall.Instance smi, object data) => ((Boxed<bool>)data).value);
+		this.blinking.PlayAnim("code_ready", KAnim.PlayMode.Loop).EventHandlerTransition(GameHashes.BuildingActivated, this.activated, (GravitasBathroomStall.Instance smi, object data) => ((Boxed<bool>)data).value).Enter(delegate(GravitasBathroomStall.Instance smi)
+		{
+			smi.SubscribeToPrinterceptorOperational();
+		})
+			.Exit(delegate(GravitasBathroomStall.Instance smi)
+			{
+				smi.UnsubscribeFromPrinterceptorOperational();
+			});
 		this.activated.Enter(delegate(GravitasBathroomStall.Instance smi)
 		{
 			if (!smi.sm.hasShownPopup.Get(smi))
@@ -106,22 +114,23 @@ public class GravitasBathroomStall : GameStateMachine<GravitasBathroomStall, Gra
 		{
 			StoryManager.Instance.GetStoryInstance(Db.Get().Stories.HijackedHeadquarters.HashId);
 			smi.ClearEndNotification();
-			if (HijackedHeadquarters.Instance.PrinterceptorInstance == null)
+			if (!HijackedHeadquarters.Instance.PrinterceptorInstance.IsNullOrDestroyed())
 			{
 				smi.RevealPrinterceptor();
+				CameraController.Instance.FadeOut(1f, 1f, null);
+				yield return SequenceUtil.WaitForSecondsRealtime(1f);
+				Vector3 vector = new Vector3(2f, 3f, 0f);
+				GameUtil.FocusCamera(HijackedHeadquarters.Instance.PrinterceptorInstance.transform.position + vector, 10f, false, true);
+				yield return SequenceUtil.WaitForSecondsRealtime(1f);
+				if (SpeedControlScreen.Instance.IsPaused)
+				{
+					SpeedControlScreen.Instance.Unpause(false);
+				}
+				CameraController.Instance.FadeIn(0f, 1f, null);
+				yield return SequenceUtil.WaitForSecondsRealtime(1f);
+				HijackedHeadquarters.Instance.PrinterceptorInstance.GetSMI<HijackedHeadquarters.Instance>().UnlockPrinterceptor();
+				yield break;
 			}
-			CameraController.Instance.FadeOut(1f, 1f, null);
-			yield return SequenceUtil.WaitForSecondsRealtime(1f);
-			Vector3 vector = new Vector3(2f, 3f, 0f);
-			GameUtil.FocusCamera(HijackedHeadquarters.Instance.PrinterceptorInstance.transform.position + vector, 10f, false, true);
-			yield return SequenceUtil.WaitForSecondsRealtime(1f);
-			if (SpeedControlScreen.Instance.IsPaused)
-			{
-				SpeedControlScreen.Instance.Unpause(false);
-			}
-			CameraController.Instance.FadeIn(0f, 1f, null);
-			yield return SequenceUtil.WaitForSecondsRealtime(1f);
-			HijackedHeadquarters.Instance.PrinterceptorInstance.GetSMI<HijackedHeadquarters.Instance>().UnlockPrinterceptor();
 			yield break;
 		}
 
@@ -151,10 +160,34 @@ public class GravitasBathroomStall : GameStateMachine<GravitasBathroomStall, Gra
 			this.completeNotification = null;
 		}
 
+		public void SubscribeToPrinterceptorOperational()
+		{
+			this.UnsubscribeFromPrinterceptorOperational();
+			if (HijackedHeadquarters.Instance.PrinterceptorInstance != null)
+			{
+				this.printerceptorOperationalEventHandle = HijackedHeadquarters.Instance.PrinterceptorInstance.Subscribe(-592767678, delegate(object data)
+				{
+					base.smi.master.GetComponent<Activatable>().CancelChore();
+					base.smi.GoTo(base.smi.sm.start);
+				});
+			}
+		}
+
+		public void UnsubscribeFromPrinterceptorOperational()
+		{
+			if (this.printerceptorOperationalEventHandle != -1 && HijackedHeadquarters.Instance.PrinterceptorInstance != null)
+			{
+				HijackedHeadquarters.Instance.PrinterceptorInstance.Unsubscribe(this.printerceptorOperationalEventHandle);
+			}
+			this.printerceptorOperationalEventHandle = -1;
+		}
+
 		private StoryInstance storyInstance;
 
 		private Notification completeNotification;
 
 		private int onBuildingSelectHandle = -1;
+
+		private int printerceptorOperationalEventHandle = -1;
 	}
 }

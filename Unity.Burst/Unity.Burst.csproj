@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{E38246CB-07DE-44B9-B28F-ED64A7E54D06}</ProjectGuid>
+    <ProjectGuid>{D74C17D4-F751-45A1-8C04-0A511733F327}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>Unity.Burst</RootNamespace>
     <AssemblyName>Unity.Burst</AssemblyName>
@@ -57,23 +57,23 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{E38246CB-07DE-44B9-B28F-ED64A7E54CEF}</Project>
+      <Project>{D74C17D4-F751-45A1-8C04-0A511733F310}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Core\System.Core.csproj">
-      <Project>{E38246CB-07DE-44B9-B28F-ED64A7E54CF4}</Project>
+      <Project>{D74C17D4-F751-45A1-8C04-0A511733F315}</Project>
       <Name>System.Core</Name>
     </ProjectReference>
     <ProjectReference Include="..\System\System.csproj">
-      <Project>{E38246CB-07DE-44B9-B28F-ED64A7E54CF7}</Project>
+      <Project>{D74C17D4-F751-45A1-8C04-0A511733F318}</Project>
       <Name>System</Name>
     </ProjectReference>
     <ProjectReference Include="..\Unity.Burst.Unsafe\Unity.Burst.Unsafe.csproj">
-      <Project>{E38246CB-07DE-44B9-B28F-ED64A7E54D07}</Project>
+      <Project>{D74C17D4-F751-45A1-8C04-0A511733F328}</Project>
       <Name>Unity.Burst.Unsafe</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
-      <Project>{E38246CB-07DE-44B9-B28F-ED64A7E54D1A}</Project>
+      <Project>{D74C17D4-F751-45A1-8C04-0A511733F33B}</Project>
       <Name>UnityEngine.CoreModule</Name>
     </ProjectReference>
   </ItemGroup>

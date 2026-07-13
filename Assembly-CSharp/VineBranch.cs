@@ -656,11 +656,19 @@ public class VineBranch : PlantBranchGrowerBase<VineBranch, VineBranch.Instance,
 			}
 		}
 
+		private bool IsMotherWilting
+		{
+			get
+			{
+				return this.MotherSMI != null && this.MotherSMI.IsWilting;
+			}
+		}
+
 		public bool IsWilting
 		{
 			get
 			{
-				return this.wiltCondition.IsWilting() || this.MotherSMI.IsWilting;
+				return this.wiltCondition.IsWilting() || this.IsMotherWilting;
 			}
 		}
 
@@ -936,9 +944,14 @@ public class VineBranch : PlantBranchGrowerBase<VineBranch, VineBranch.Instance,
 			return gameObject;
 		}
 
+		private bool IsMotherCellFoundation(int cell)
+		{
+			return this.MotherSMI != null && this.MotherSMI.IsOnPlanterBox && this.MotherSMI.PlanterboxCell == cell;
+		}
+
 		private bool IsCellFoundation(int cell)
 		{
-			return VineBranch.IsCellFoundation(cell) || (this.MotherSMI.IsOnPlanterBox && this.MotherSMI.PlanterboxCell == cell);
+			return VineBranch.IsCellFoundation(cell) || this.IsMotherCellFoundation(cell);
 		}
 
 		private bool IsCellAvailable(int cell)

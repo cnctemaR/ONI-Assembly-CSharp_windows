@@ -137,9 +137,14 @@ public class EatChore : Chore<EatChore.StatesInstance>
 			diner.TryGetComponent<Navigator>(out navigator);
 			foreach (Assignable assignable in Game.Instance.assignmentManager.GetPreferredAssignables(soleOwner, navigator, Db.Get().AssignableSlots.MessStation))
 			{
-				if (EatChore.ResolveDiningSeat(assignable.gameObject) != null && assignable.GetComponent<Reservable>().IsReservableBy(diner))
+				IDiningSeat diningSeat = EatChore.ResolveDiningSeat(assignable.gameObject);
+				if (diningSeat != null)
 				{
-					return assignable;
+					Operational operational = diningSeat.FindOperational();
+					if ((!(operational != null) || operational.IsOperational) && assignable.GetComponent<Reservable>().IsReservableBy(diner))
+					{
+						return assignable;
+					}
 				}
 			}
 			return null;
@@ -152,9 +157,20 @@ public class EatChore : Chore<EatChore.StatesInstance>
 				messStation.GetComponent<Reservable>().ClearReservation();
 			}
 			Assignable preferredMessStation = EatChore.StatesInstance.GetPreferredMessStation(diner);
-			if (preferredMessStation != null && !preferredMessStation.GetComponent<Reservable>().Reserve(diner))
+			if (preferredMessStation != null)
 			{
-				global::Debug.Log("Failed to reserve dining seat. We have likely already reserved it.");
+				Reservable component = preferredMessStation.GetComponent<Reservable>();
+				if (!component.Reserve(diner))
+				{
+					if (component.IsReservableBy(diner))
+					{
+						global::Debug.Log("Failed to reserve dining seat. We have already reserved it.");
+					}
+					else
+					{
+						global::Debug.LogWarning("Failed to reserve dining seat. Someone else has already reserved it!");
+					}
+				}
 			}
 			return preferredMessStation;
 		}
@@ -353,8 +369,9 @@ public class EatChore : Chore<EatChore.StatesInstance>
 				AccessabilityManager accessabilityManager3 = this.rehydrate.rehydrator.Get(smi);
 				return !(accessabilityManager3 == null) && accessabilityManager3.CanAccess(this.eater.Get<WorkerBase>(smi).gameObject);
 			}, this.eatatmessstation, null);
-			this.fetch.InitializeStates(this.eater, this.ediblesource, this.ediblechunk, this.requestedfoodunits, this.actualfoodunits, this.eatatmessstation, null);
-			this.eatatmessstation.DefaultState(this.eatatmessstation.moveto).ParamTransition<GameObject>(this.messstation, this.eatonfloorstate, (EatChore.StatesInstance smi, GameObject p) => p == null).ParamTransition<GameObject>(this.messstation, this.eatonfloorstate, new StateMachine<EatChore.States, EatChore.StatesInstance, EatChore, object>.Parameter<GameObject>.Callback(EatChore.IsMessStationNonOperational));
+			this.fetch.InitializeStates(this.eater, this.ediblesource, this.ediblechunk, this.requestedfoodunits, this.actualfoodunits, this.choosewheretoeat, null);
+			this.choosewheretoeat.ParamTransition<GameObject>(this.messstation, this.eatonfloorstate, (EatChore.StatesInstance smi, GameObject p) => p == null || EatChore.IsMessStationNonOperational(p)).GoTo(this.eatatmessstation);
+			this.eatatmessstation.DefaultState(this.eatatmessstation.moveto).ParamTransition<GameObject>(this.messstation, null, (EatChore.StatesInstance smi, GameObject p) => p == null || EatChore.IsMessStationNonOperational(p));
 			this.eatatmessstation.moveto.InitializeStates(this.eater, this.messstation, this.eatatmessstation.eat, this.eatonfloorstate, null, null);
 			this.eatatmessstation.eat.Enter("OnEnterMessStation", delegate(EatChore.StatesInstance smi)
 			{
@@ -394,6 +411,8 @@ public class EatChore : Chore<EatChore.StatesInstance>
 		public EatChore.States.RehydrateSubState rehydrate;
 
 		public GameStateMachine<EatChore.States, EatChore.StatesInstance, EatChore, object>.FetchSubState fetch;
+
+		public GameStateMachine<EatChore.States, EatChore.StatesInstance, EatChore, object>.State choosewheretoeat;
 
 		public EatChore.States.EatOnFloorState eatonfloorstate;
 

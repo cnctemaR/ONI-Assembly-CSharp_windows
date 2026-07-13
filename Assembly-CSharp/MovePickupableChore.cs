@@ -17,7 +17,8 @@ public class MovePickupableChore : Chore<MovePickupableChore.StatesInstance>
 		{
 			this.AddPrecondition(MovePickupableChore.CanReachCritter, pickupable);
 			this.AddPrecondition(ChorePreconditions.instance.HasSkillPerk, Db.Get().SkillPerks.CanWrangleCreatures);
-			this.AddPrecondition(ChorePreconditions.instance.CanMoveTo, pickupable.GetComponent<Capturable>());
+			IApproachable approachable = pickupable.GetComponent<IApproachable>();
+			this.AddPrecondition(ChorePreconditions.instance.CanMoveToDynamicCell, new Func<int>(() => approachable.GetCell()));
 		}
 		else
 		{

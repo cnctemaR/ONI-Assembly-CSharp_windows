@@ -50,6 +50,7 @@ public class FallingWater : KMonoBehaviour, ISim200ms
 		this.propertyBlock = new MaterialPropertyBlock();
 		this.propertyBlock.SetTexture("_MainTex", this.texture);
 		this.uvFrameSize = new Vector2(1f / (float)this.numFrames, 1f);
+		this.Deserialize();
 	}
 
 	protected override void OnCleanUp()
@@ -473,6 +474,10 @@ public class FallingWater : KMonoBehaviour, ISim200ms
 
 	public void Render()
 	{
+		if (!this.deserialized)
+		{
+			return;
+		}
 		List<Vector3> vertices = MeshUtil.vertices;
 		List<Color32> colours = MeshUtil.colours32;
 		List<Vector2> uvs = MeshUtil.uvs;
@@ -595,8 +600,7 @@ public class FallingWater : KMonoBehaviour, ISim200ms
 		this.serializedParticleProperties = null;
 	}
 
-	[OnDeserialized]
-	private void OnDeserialized()
+	private void Deserialize()
 	{
 		if (!SaveLoader.Instance.GameInfo.IsVersionOlderThan(7, 26))
 		{
@@ -634,6 +638,7 @@ public class FallingWater : KMonoBehaviour, ISim200ms
 		this.particleProperties = this.properties;
 		IL_015A:
 		this.properties = null;
+		this.deserialized = true;
 	}
 
 	private const float STATE_TRANSITION_TEMPERATURE_BUFER = 3f;
@@ -743,6 +748,8 @@ public class FallingWater : KMonoBehaviour, ISim200ms
 	private static HashedString HASH_LIQUIDDEPTH = "liquidDepth";
 
 	private static HashedString HASH_LIQUIDVOLUME = "liquidVolume";
+
+	private bool deserialized;
 
 	[Serializable]
 	private struct DecorInfo

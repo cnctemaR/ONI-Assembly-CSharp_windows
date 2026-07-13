@@ -165,6 +165,10 @@ public class RocketClusterDestinationSelector : ClusterDestinationSelector
 	{
 		if (!this.CanRocketDrill() && !this.CanCollectFromHexCellInventory())
 		{
+			if (!this.isHarvesting)
+			{
+				return;
+			}
 			this.isHarvesting = false;
 			Clustercraft component = base.GetComponent<Clustercraft>();
 			foreach (Ref<RocketModuleCluster> @ref in component.ModuleInterface.ClusterModules)

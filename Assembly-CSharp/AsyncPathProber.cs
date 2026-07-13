@@ -219,8 +219,8 @@ public static class AsyncPathProber
 			{
 				if (this.workQueue.Count > 0)
 				{
-					order = this.workQueue[this.workQueue.Count - 1];
-					this.workQueue.RemoveAt(this.workQueue.Count - 1);
+					order = this.workQueue[0];
+					this.workQueue.RemoveAt(0);
 					if (this.navigators.ContainsKey(order.navigator))
 					{
 						result = new AsyncPathProber.WorkResult

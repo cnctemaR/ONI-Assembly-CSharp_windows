@@ -245,6 +245,7 @@ public class HijackedHeadquarters : GameStateMachine<HijackedHeadquarters, Hijac
 
 		public void UnlockPrinterceptor()
 		{
+			base.GetComponent<BuildingEnabledButton>().IsEnabled = true;
 			base.smi.sm.passcodeUnlocked.Set(true, base.smi, false);
 		}
 

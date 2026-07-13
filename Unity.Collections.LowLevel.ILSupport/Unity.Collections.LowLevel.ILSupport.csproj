@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{E38246CB-07DE-44B9-B28F-ED64A7E54D09}</ProjectGuid>
+    <ProjectGuid>{D74C17D4-F751-45A1-8C04-0A511733F32A}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>Unity.Collections.LowLevel.ILSupport</RootNamespace>
     <AssemblyName>Unity.Collections.LowLevel.ILSupport</AssemblyName>

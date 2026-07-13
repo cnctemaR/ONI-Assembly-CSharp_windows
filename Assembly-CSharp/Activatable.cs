@@ -22,7 +22,7 @@ public class Activatable : Workable, ISidescreenButtonControl
 	protected override void OnSpawn()
 	{
 		this.UpdateFlag();
-		if (this.awaitingActivation && this.activateChore == null)
+		if (this.awaitingActivation && this.activateChore == null && (this.activationCondition == null || this.activationCondition()))
 		{
 			this.CreateChore();
 		}
@@ -64,7 +64,7 @@ public class Activatable : Workable, ISidescreenButtonControl
 		}
 	}
 
-	private void CancelChore()
+	public void CancelChore()
 	{
 		if (this.activateChore == null)
 		{

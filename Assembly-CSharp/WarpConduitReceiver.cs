@@ -14,7 +14,7 @@ public class WarpConduitReceiver : StateMachineComponent<WarpConduitReceiver.Sta
 		this.FindPartner();
 		if (this.solidPort.solidDispenser != null)
 		{
-			this.solidPort.solidDispenser.solidOnly = false;
+			this.solidPort.solidDispenser.solidOnly = true;
 		}
 		base.smi.StartSM();
 	}

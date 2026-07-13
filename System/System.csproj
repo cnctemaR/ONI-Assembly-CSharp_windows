@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{D14B8DD2-C066-496B-80D7-CDEBBD1D14FC}</ProjectGuid>
+    <ProjectGuid>{B4E77FAE-86EE-431F-B712-D466719AAAEC}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>System</RootNamespace>
     <AssemblyName>System</AssemblyName>
@@ -1651,27 +1651,27 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Mono.Security\Mono.Security.csproj">
-      <Project>{D14B8DD2-C066-496B-80D7-CDEBBD1D14F3}</Project>
+      <Project>{B4E77FAE-86EE-431F-B712-D466719AAAE3}</Project>
       <Name>Mono.Security</Name>
     </ProjectReference>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{D14B8DD2-C066-496B-80D7-CDEBBD1D14F4}</Project>
+      <Project>{B4E77FAE-86EE-431F-B712-D466719AAAE4}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Configuration\System.Configuration.csproj">
-      <Project>{D14B8DD2-C066-496B-80D7-CDEBBD1D14F8}</Project>
+      <Project>{B4E77FAE-86EE-431F-B712-D466719AAAE8}</Project>
       <Name>System.Configuration</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Core\System.Core.csproj">
-      <Project>{D14B8DD2-C066-496B-80D7-CDEBBD1D14F9}</Project>
+      <Project>{B4E77FAE-86EE-431F-B712-D466719AAAE9}</Project>
       <Name>System.Core</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Numerics\System.Numerics.csproj">
-      <Project>{D14B8DD2-C066-496B-80D7-CDEBBD1D1502}</Project>
+      <Project>{B4E77FAE-86EE-431F-B712-D466719AAAF2}</Project>
       <Name>System.Numerics</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Xml\System.Xml.csproj">
-      <Project>{D14B8DD2-C066-496B-80D7-CDEBBD1D1508}</Project>
+      <Project>{B4E77FAE-86EE-431F-B712-D466719AAAF8}</Project>
       <Name>System.Xml</Name>
     </ProjectReference>
   </ItemGroup>

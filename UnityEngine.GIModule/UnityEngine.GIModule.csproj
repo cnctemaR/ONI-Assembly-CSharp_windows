@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{D14B8DD2-C066-496B-80D7-CDEBBD1D151E}</ProjectGuid>
+    <ProjectGuid>{B4E77FAE-86EE-431F-B712-D466719AAB0E}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>UnityEngine.GIModule</RootNamespace>
     <AssemblyName>UnityEngine.GIModule</AssemblyName>
@@ -18,11 +18,11 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\netstandard\netstandard.csproj">
-      <Project>{D14B8DD2-C066-496B-80D7-CDEBBD1D14F5}</Project>
+      <Project>{B4E77FAE-86EE-431F-B712-D466719AAAE5}</Project>
       <Name>netstandard</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
-      <Project>{D14B8DD2-C066-496B-80D7-CDEBBD1D1530}</Project>
+      <Project>{B4E77FAE-86EE-431F-B712-D466719AAB20}</Project>
       <Name>UnityEngine.SharedInternalsModule</Name>
     </ProjectReference>
   </ItemGroup>

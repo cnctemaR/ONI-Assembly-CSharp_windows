@@ -66,7 +66,7 @@ public class BaggableCritterCapacityTracker : KMonoBehaviour, ISim1000ms, IUserC
 			bool flag = Grid.IsLiquid(this.cavityCell);
 			if (flag)
 			{
-				this.RefreshCreatureCount();
+				this.RefreshCreatureCount(null);
 			}
 			this.operational.SetFlag(BaggableCritterCapacityTracker.isInLiquid, flag);
 			this.selectable.ToggleStatusItem(Db.Get().BuildingStatusItems.NotSubmerged, !flag, this);
@@ -98,7 +98,7 @@ public class BaggableCritterCapacityTracker : KMonoBehaviour, ISim1000ms, IUserC
 		}
 		else
 		{
-			this.storedCreatureCount = this.RefreshCreatureCount();
+			this.storedCreatureCount = this.RefreshOtherCreatureCount();
 		}
 		if (this.onCountChanged != null && this.storedCreatureCount != storedCreatureCount)
 		{
@@ -106,7 +106,7 @@ public class BaggableCritterCapacityTracker : KMonoBehaviour, ISim1000ms, IUserC
 		}
 	}
 
-	private int RefreshCreatureCount()
+	private int RefreshOtherCreatureCount()
 	{
 		int num = 0;
 		CavityInfo cavityForCell = Game.Instance.roomProber.GetCavityForCell(this.cavityCell);
@@ -130,7 +130,7 @@ public class BaggableCritterCapacityTracker : KMonoBehaviour, ISim1000ms, IUserC
 
 	public void Sim1000ms(float dt)
 	{
-		this.RefreshCreatureCount();
+		this.RefreshCreatureCount(null);
 	}
 
 	float IUserControlledCapacity.UserMaxCapacity

@@ -233,7 +233,7 @@ public class SpacecraftManager : KMonoBehaviour, ISim1000ms
 		this.destinations.AddRange(list5);
 	}
 
-	public void AddDestination(string id, SpacecraftManager.DestinationLocationSelectionType selection, int minRandomDistance = 0, int maxRandomDistance = 2147483647)
+	public bool AddDestination(string id, SpacecraftManager.DestinationLocationSelectionType selection, int minRandomDistance = 0, int maxRandomDistance = 2147483647, int maxPerDistance = 3)
 	{
 		List<int> list = new List<int>();
 		int num = 0;
@@ -255,15 +255,15 @@ public class SpacecraftManager : KMonoBehaviour, ISim1000ms
 					}
 				}
 			}
-			if (num2 < 3)
+			if (num2 < maxPerDistance)
 			{
 				list.Add(i);
 			}
 		}
 		if (list.Count == 0)
 		{
-			global::Debug.LogError("Failed to find location to spawn new destination " + id);
-			return;
+			global::Debug.LogWarning("Failed to find location to spawn new destination " + id);
+			return false;
 		}
 		int num3 = list[0];
 		if (selection != SpacecraftManager.DestinationLocationSelectionType.Nearest)
@@ -293,6 +293,7 @@ public class SpacecraftManager : KMonoBehaviour, ISim1000ms
 		spaceDestination3.startingOrbitPercentage = list2[global::UnityEngine.Random.Range(0, list2.Count)];
 		this.destinations.Add(spaceDestination3);
 		base.Trigger(611818744, spaceDestination3);
+		return true;
 	}
 
 	private void RestoreDestinations()

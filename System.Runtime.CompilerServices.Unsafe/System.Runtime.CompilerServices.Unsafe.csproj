@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{D14B8DD2-C066-496B-80D7-CDEBBD1D1503}</ProjectGuid>
+    <ProjectGuid>{B4E77FAE-86EE-431F-B712-D466719AAAF3}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>System.Runtime</RootNamespace>
     <AssemblyName>System.Runtime.CompilerServices.Unsafe</AssemblyName>
@@ -20,7 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{D14B8DD2-C066-496B-80D7-CDEBBD1D14F4}</Project>
+      <Project>{B4E77FAE-86EE-431F-B712-D466719AAAE4}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
   </ItemGroup>

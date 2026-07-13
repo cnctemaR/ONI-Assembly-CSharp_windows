@@ -95,7 +95,7 @@ public class SolidConduitDispenser : KMonoBehaviour, ISaveLoadable, IConduitDisp
 	private bool isSolid(GameObject o)
 	{
 		PrimaryElement component = o.GetComponent<PrimaryElement>();
-		return component != null && component.Element.IsSolid;
+		return (component != null && component.Element.IsSolid) || Assets.GetPrefab(o.name) != null;
 	}
 
 	private Pickupable FindSuitableItem()

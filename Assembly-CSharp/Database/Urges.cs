@@ -38,6 +38,7 @@ namespace Database
 			this.OilRefill = base.Add(new Urge("OilRefill"));
 			this.GunkPee = base.Add(new Urge("GunkPee"));
 			this.FindOxygenRefill = base.Add(new Urge("FindOxygenRefill"));
+			this.Fart = base.Add(new Urge("Fart"));
 		}
 
 		public Urge BeIncapacitated;
@@ -105,5 +106,7 @@ namespace Database
 		public Urge OilRefill;
 
 		public Urge GunkPee;
+
+		public Urge Fart;
 	}
 }

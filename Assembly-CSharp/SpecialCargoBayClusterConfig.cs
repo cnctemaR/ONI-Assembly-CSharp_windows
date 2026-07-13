@@ -80,7 +80,11 @@ public class SpecialCargoBayClusterConfig : IBuildingConfig
 
 	public const string ID = "SpecialCargoBayCluster";
 
-	private static readonly List<Storage.StoredItemModifier> StoredCrittersModifiers = new List<Storage.StoredItemModifier> { Storage.StoredItemModifier.Insulate };
+	private static readonly List<Storage.StoredItemModifier> StoredCrittersModifiers = new List<Storage.StoredItemModifier>
+	{
+		Storage.StoredItemModifier.Insulate,
+		Storage.StoredItemModifier.Hide
+	};
 
 	private static readonly List<Storage.StoredItemModifier> StoredLootModifiers = new List<Storage.StoredItemModifier>
 	{

@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{83A836A8-62F3-4851-B5D4-B3B0E1607C07}</ProjectGuid>
+    <ProjectGuid>{801DE16A-B8A3-469E-A951-D3F9C47637EA}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>UnityEngine</RootNamespace>
     <AssemblyName>UnityEngine.AnimationModule</AssemblyName>
@@ -121,15 +121,15 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\netstandard\netstandard.csproj">
-      <Project>{83A836A8-62F3-4851-B5D4-B3B0E1607BEC}</Project>
+      <Project>{801DE16A-B8A3-469E-A951-D3F9C47637CF}</Project>
       <Name>netstandard</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
-      <Project>{83A836A8-62F3-4851-B5D4-B3B0E1607C0F}</Project>
+      <Project>{801DE16A-B8A3-469E-A951-D3F9C47637F2}</Project>
       <Name>UnityEngine.CoreModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
-      <Project>{83A836A8-62F3-4851-B5D4-B3B0E1607C27}</Project>
+      <Project>{801DE16A-B8A3-469E-A951-D3F9C476380A}</Project>
       <Name>UnityEngine.SharedInternalsModule</Name>
     </ProjectReference>
   </ItemGroup>

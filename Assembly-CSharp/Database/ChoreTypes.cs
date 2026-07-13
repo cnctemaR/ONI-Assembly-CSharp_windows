@@ -112,6 +112,7 @@ namespace Database
 			this.Equip = this.Add("Equip", new string[0], "", new string[0], DUPLICANTS.CHORES.EQUIP.NAME, DUPLICANTS.CHORES.EQUIP.STATUS, DUPLICANTS.CHORES.EQUIP.TOOLTIP, false, -1, null);
 			this.JoyReaction = this.Add("JoyReaction", new string[0], "", new string[0], DUPLICANTS.CHORES.JOYREACTION.NAME, DUPLICANTS.CHORES.JOYREACTION.STATUS, DUPLICANTS.CHORES.JOYREACTION.TOOLTIP, false, -1, null);
 			this.RocketControl = this.Add("RocketControl", new string[] { "Rocketry" }, "", new string[0], DUPLICANTS.CHORES.ROCKETCONTROL.NAME, DUPLICANTS.CHORES.ROCKETCONTROL.STATUS, DUPLICANTS.CHORES.ROCKETCONTROL.TOOLTIP, false, -1, null);
+			this.Fart = this.Add("Fart", new string[0], "Fart", new string[0], DUPLICANTS.CHORES.EMOTEHIGHPRIORITY.NAME, DUPLICANTS.CHORES.EMOTEHIGHPRIORITY.STATUS, DUPLICANTS.CHORES.EMOTEHIGHPRIORITY.TOOLTIP, false, -1, null);
 			this.StressHeal = this.Add("StressHeal", new string[0], "", new string[] { "" }, DUPLICANTS.CHORES.STRESSHEAL.NAME, DUPLICANTS.CHORES.STRESSHEAL.STATUS, DUPLICANTS.CHORES.STRESSHEAL.TOOLTIP, false, -1, null);
 			this.Party = this.Add("Party", new string[0], "", new string[0], DUPLICANTS.CHORES.PARTY.NAME, DUPLICANTS.CHORES.PARTY.STATUS, DUPLICANTS.CHORES.PARTY.TOOLTIP, false, -1, null);
 			this.Relax = this.Add("Relax", new string[] { "Recreation" }, "", new string[] { "Sleep" }, DUPLICANTS.CHORES.RELAX.NAME, DUPLICANTS.CHORES.RELAX.STATUS, DUPLICANTS.CHORES.RELAX.TOOLTIP, false, -1, null);
@@ -215,7 +216,7 @@ namespace Database
 				new ChoreType[] { this.Heal, this.SleepDueToDisease, this.RestDueToDisease, this.BionicRestDueToDisease },
 				new ChoreType[] { this.Sleep, this.BionicBedtimeMode, this.Narcolepsy },
 				new ChoreType[] { this.Doctor, this.GetDoctored },
-				new ChoreType[] { this.Emote, this.Hug },
+				new ChoreType[] { this.Emote, this.Hug, this.Fart },
 				new ChoreType[] { this.Mourn },
 				new ChoreType[] { this.StressHeal },
 				new ChoreType[] { this.JoyReaction },
@@ -556,6 +557,8 @@ namespace Database
 		public ChoreType OilChange;
 
 		public ChoreType SolidOilChange;
+
+		public ChoreType Fart;
 
 		private int nextImplicitPriority = 10000;
 

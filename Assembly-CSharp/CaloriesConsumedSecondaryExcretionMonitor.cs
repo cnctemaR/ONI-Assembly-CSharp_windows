@@ -16,12 +16,17 @@ public class CaloriesConsumedSecondaryExcretionMonitor : GameStateMachine<Calori
 		{
 			smi.gameObject.Unsubscribe(this.handle);
 		});
-		this.produce_pre.ScheduleGoTo(4f, this.produce);
-		this.produce.QueueAnim("fart", false, null).OnAnimQueueComplete(this.idle).Enter(delegate(CaloriesConsumedSecondaryExcretionMonitor.Instance smi)
+		this.schedule_fart.ScheduleGoTo((CaloriesConsumedSecondaryExcretionMonitor.Instance smi) => global::UnityEngine.Random.Range(3f, 6f), this.needs_to_fart);
+		this.needs_to_fart.Enter(new StateMachine<CaloriesConsumedSecondaryExcretionMonitor, CaloriesConsumedSecondaryExcretionMonitor.Instance, IStateMachineTarget, object>.State.Callback(CaloriesConsumedSecondaryExcretionMonitor.CreateChore)).ToggleUrge(Db.Get().Urges.Fart).EventHandler(GameHashes.BeginChore, delegate(CaloriesConsumedSecondaryExcretionMonitor.Instance smi, object o)
 		{
-			CreatureCalorieMonitor.CaloriesConsumedEvent consumptionData = smi.consumptionData;
-			smi.DropElement(consumptionData.calories * 0.001f * smi.sm.kgProducedPerKcalConsumed, smi.sm.producedElement, byte.MaxValue, 0);
+			smi.OnStartChore(o);
 		});
+	}
+
+	public static void CreateChore(CaloriesConsumedSecondaryExcretionMonitor.Instance smi)
+	{
+		CreatureCalorieMonitor.CaloriesConsumedEvent consumptionData = smi.consumptionData;
+		new FartChore(smi.GetComponent<ChoreProvider>(), Db.Get().ChoreTypes.Fart, consumptionData.calories * 0.001f * smi.sm.kgProducedPerKcalConsumed, smi.sm.producedElement, byte.MaxValue, 0, smi.sm.overpressureThreshold);
 	}
 
 	public List<Descriptor> GetDescriptors(GameObject go)
@@ -34,9 +39,9 @@ public class CaloriesConsumedSecondaryExcretionMonitor : GameStateMachine<Calori
 
 	public GameStateMachine<CaloriesConsumedSecondaryExcretionMonitor, CaloriesConsumedSecondaryExcretionMonitor.Instance, IStateMachineTarget, object>.State idle;
 
-	public GameStateMachine<CaloriesConsumedSecondaryExcretionMonitor, CaloriesConsumedSecondaryExcretionMonitor.Instance, IStateMachineTarget, object>.State produce_pre;
+	public GameStateMachine<CaloriesConsumedSecondaryExcretionMonitor, CaloriesConsumedSecondaryExcretionMonitor.Instance, IStateMachineTarget, object>.State schedule_fart;
 
-	public GameStateMachine<CaloriesConsumedSecondaryExcretionMonitor, CaloriesConsumedSecondaryExcretionMonitor.Instance, IStateMachineTarget, object>.State produce;
+	public GameStateMachine<CaloriesConsumedSecondaryExcretionMonitor, CaloriesConsumedSecondaryExcretionMonitor.Instance, IStateMachineTarget, object>.State needs_to_fart;
 
 	public SimHashes producedElement;
 
@@ -53,39 +58,18 @@ public class CaloriesConsumedSecondaryExcretionMonitor : GameStateMachine<Calori
 		{
 		}
 
+		public void OnStartChore(object o)
+		{
+			if (((Chore)o).SatisfiesUrge(Db.Get().Urges.Fart))
+			{
+				this.GoTo(base.sm.idle);
+			}
+		}
+
 		public void OnCaloriesConsumed(object data)
 		{
 			base.smi.consumptionData = (CreatureCalorieMonitor.CaloriesConsumedEvent)data;
-			base.smi.GoTo(base.smi.sm.produce_pre);
-		}
-
-		public void DropElement(float mass, SimHashes element_id, byte disease_idx, int disease_count)
-		{
-			if (mass <= 0f)
-			{
-				return;
-			}
-			Element element = ElementLoader.FindElementByHash(element_id);
-			float temperature = base.smi.master.GetComponent<PrimaryElement>().Temperature;
-			if (element.IsGas || element.IsLiquid)
-			{
-				int num = Grid.PosToCell(base.transform.GetPosition());
-				if (this.CheckIsOverpressure(num))
-				{
-					return;
-				}
-				SimMessages.AddRemoveSubstance(num, element_id, CellEventLogger.Instance.ElementConsumerSimUpdate, mass, temperature, disease_idx, disease_count, true, -1);
-			}
-			else if (element.IsSolid)
-			{
-				element.substance.SpawnResource(base.transform.GetPosition() + new Vector3(0f, 0.5f, 0f), mass, temperature, disease_idx, disease_count, false, true, false);
-			}
-			PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Resource, element.name, base.gameObject.transform, 1.5f, false);
-		}
-
-		private bool CheckIsOverpressure(int cell)
-		{
-			return Grid.Mass[cell] > base.sm.overpressureThreshold;
+			base.smi.GoTo(base.smi.sm.schedule_fart);
 		}
 
 		public CreatureCalorieMonitor.CaloriesConsumedEvent consumptionData;

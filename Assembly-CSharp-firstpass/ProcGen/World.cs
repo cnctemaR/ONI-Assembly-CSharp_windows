@@ -76,6 +76,8 @@ namespace ProcGen
 
 		public List<World.SubworldMixingRule> subworldMixingRules { get; private set; }
 
+		public List<World.ModifyLayoutTagsRule> modifyLayoutTags { get; private set; }
+
 		public string startSubworldName { get; private set; }
 
 		public string startingBaseTemplate { get; set; }
@@ -113,6 +115,7 @@ namespace ProcGen
 				new World.TraitRule(2, 4)
 			};
 			this.worldTemplateRules = new List<World.TemplateSpawnRules>();
+			this.modifyLayoutTags = new List<World.ModifyLayoutTagsRule>();
 		}
 
 		public void ReplaceSeasons(List<string> seasons)
@@ -291,6 +294,23 @@ namespace ProcGen
 					DebugUtil.DevAssert(this.forbiddenTags == null, "TraitRule using specificTraits does not support forbiddenTags", null);
 					DebugUtil.DevAssert(this.forbiddenTraits == null, "TraitRule using specificTraits does not support forbiddenTraits", null);
 				}
+			}
+		}
+
+		[Serializable]
+		public class ModifyLayoutTagsRule
+		{
+			public List<string> addTags { get; private set; }
+
+			public List<string> removeTags { get; private set; }
+
+			public List<World.AllowedCellsFilter> allowedCellsFilter { get; private set; }
+
+			public ModifyLayoutTagsRule()
+			{
+				this.addTags = new List<string>();
+				this.removeTags = new List<string>();
+				this.allowedCellsFilter = new List<World.AllowedCellsFilter>();
 			}
 		}
 

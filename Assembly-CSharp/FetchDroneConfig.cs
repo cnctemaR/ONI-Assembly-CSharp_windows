@@ -83,8 +83,8 @@ public class FetchDroneConfig : IEntityConfig, IHasDlcRestrictions
 		ManualDeliveryKG manualDeliveryKG = gameObject.AddOrGet<ManualDeliveryKG>();
 		manualDeliveryKG.SetStorage(storage2);
 		manualDeliveryKG.RequestedItemTag = GameTags.ChargedPortableBattery;
-		manualDeliveryKG.capacity = 1f;
-		manualDeliveryKG.refillMass = 1.2f;
+		manualDeliveryKG.capacity = 21f;
+		manualDeliveryKG.refillMass = 21f;
 		manualDeliveryKG.MinimumMass = 1f;
 		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.RepairFetch.IdHash;
 		gameObject.AddOrGetDef<RobotElectroBankMonitor.Def>().lowBatteryWarningPercent = 0.2f;

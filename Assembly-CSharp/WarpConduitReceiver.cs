@@ -12,6 +12,10 @@ public class WarpConduitReceiver : StateMachineComponent<WarpConduitReceiver.Sta
 	{
 		base.OnSpawn();
 		this.FindPartner();
+		if (this.solidPort.solidDispenser != null)
+		{
+			this.solidPort.solidDispenser.solidOnly = false;
+		}
 		base.smi.StartSM();
 	}
 
@@ -145,7 +149,6 @@ public class WarpConduitReceiver : StateMachineComponent<WarpConduitReceiver.Sta
 				solidConduitDispenser.storage = senderStorage;
 				solidConduitDispenser.alwaysDispense = true;
 				solidConduitDispenser.useSecondaryOutput = true;
-				solidConduitDispenser.solidOnly = true;
 				this.solidDispenser = solidConduitDispenser;
 				this.networkItem = new FlowUtilityNetwork.NetworkItem(ConduitType.Solid, Endpoint.Source, this.outputCell, parent);
 				Game.Instance.solidConduitSystem.AddToNetworks(this.outputCell, this.networkItem, true);

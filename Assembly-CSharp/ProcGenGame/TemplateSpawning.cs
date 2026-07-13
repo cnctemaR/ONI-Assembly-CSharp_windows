@@ -466,7 +466,7 @@ namespace ProcGenGame
 			}
 		}
 
-		private static bool DoesCellMatchFilters(TerrainCell cell, List<global::ProcGen.World.AllowedCellsFilter> filters)
+		public static bool DoesCellMatchFilters(TerrainCell cell, List<global::ProcGen.World.AllowedCellsFilter> filters)
 		{
 			bool flag = false;
 			foreach (global::ProcGen.World.AllowedCellsFilter allowedCellsFilter in filters)

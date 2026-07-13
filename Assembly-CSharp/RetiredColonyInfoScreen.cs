@@ -106,6 +106,15 @@ public class RetiredColonyInfoScreen : KModalScreen
 		this.quitToMainMenuButton.gameObject.SetActive(false);
 	}
 
+	public override void Show(bool show = true)
+	{
+		base.Show(show);
+		if (!show && Game.Instance != null)
+		{
+			Game.Instance.Trigger(-821118536, this);
+		}
+	}
+
 	private void ConfirmDecision(string text, global::System.Action onConfirm)
 	{
 		base.gameObject.SetActive(false);

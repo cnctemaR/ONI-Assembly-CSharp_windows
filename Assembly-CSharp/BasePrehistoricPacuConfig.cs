@@ -81,7 +81,6 @@ public static class BasePrehistoricPacuConfig
 		CreatureCalorieMonitor.Def def3 = gameObject.AddOrGetDef<CreatureCalorieMonitor.Def>();
 		def3.diet = diet;
 		def3.minConsumedCaloriesBeforePooping = BasePrehistoricPacuConfig.CALORIES_PER_KG_OF_PACU * 60f;
-		def3.hungryRatio = 1f - PrehistoricPacuTuning.STANDARD_CALORIES_PER_CYCLE / PrehistoricPacuTuning.STANDARD_STOMACH_SIZE;
 		gameObject.AddOrGetDef<SolidConsumerMonitor.Def>().diet = diet;
 		if (!string.IsNullOrEmpty(symbol_prefix))
 		{

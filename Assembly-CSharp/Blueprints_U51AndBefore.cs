@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using Database;
 using STRINGS;
@@ -153,7 +154,7 @@ public class Blueprints_U51AndBefore : BlueprintProvider
 			new BuildingFacadeInfo("GasReservoir_green_mush", BUILDINGS.PREFABS.GASRESERVOIR.FACADES.GREEN_MUSH.NAME, BUILDINGS.PREFABS.GASRESERVOIR.FACADES.GREEN_MUSH.DESC, PermitRarity.Nifty, "GasReservoir", "gasstorage_green_mush_kanim", null, null, null),
 			new BuildingFacadeInfo("GasReservoir_red_rose", BUILDINGS.PREFABS.GASRESERVOIR.FACADES.RED_ROSE.NAME, BUILDINGS.PREFABS.GASRESERVOIR.FACADES.RED_ROSE.DESC, PermitRarity.Nifty, "GasReservoir", "gasstorage_red_rose_kanim", null, null, null),
 			new BuildingFacadeInfo("GasReservoir_purple_brainfat", BUILDINGS.PREFABS.GASRESERVOIR.FACADES.PURPLE_BRAINFAT.NAME, BUILDINGS.PREFABS.GASRESERVOIR.FACADES.PURPLE_BRAINFAT.DESC, PermitRarity.Nifty, "GasReservoir", "gasstorage_purple_brainfat_kanim", null, null, null),
-			new BuildingFacadeInfo("MassageTable_balloon", BUILDINGS.PREFABS.MASSAGETABLE.FACADES.MASSEUR_BALLOON.NAME, BUILDINGS.PREFABS.MASSAGETABLE.FACADES.MASSEUR_BALLOON.DESC, PermitRarity.Splendid, "MassageTable", "masseur_balloon_kanim", null, null, null),
+			new BuildingFacadeInfo("MassageTable_balloon", BUILDINGS.PREFABS.MASSAGETABLE.FACADES.MASSEUR_BALLOON.NAME, BUILDINGS.PREFABS.MASSAGETABLE.FACADES.MASSEUR_BALLOON.DESC, PermitRarity.Splendid, "MassageTable", "masseur_balloon_kanim", new Dictionary<string, string> { { "MassageTableComplete", "anim_interacts_masseur_balloon_kanim" } }, null, null),
 			new BuildingFacadeInfo("WaterCooler_balloon", BUILDINGS.PREFABS.WATERCOOLER.FACADES.BALLOON.NAME, BUILDINGS.PREFABS.WATERCOOLER.FACADES.BALLOON.DESC, PermitRarity.Splendid, "WaterCooler", "watercooler_balloon_kanim", null, null, null),
 			new BuildingFacadeInfo("Bed_stringlights", BUILDINGS.PREFABS.BED.FACADES.STRINGLIGHTS.NAME, BUILDINGS.PREFABS.BED.FACADES.STRINGLIGHTS.DESC, PermitRarity.Nifty, "Bed", "bed_stringlights_kanim", null, null, null),
 			new BuildingFacadeInfo("CornerMoulding_shineornaments", BUILDINGS.PREFABS.CORNERMOULDING.FACADES.SHINEORNAMENTS.NAME, BUILDINGS.PREFABS.CORNERMOULDING.FACADES.SHINEORNAMENTS.DESC, PermitRarity.Decent, "CornerMoulding", "corner_tile_shineornaments_kanim", null, null, null),

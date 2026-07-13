@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Klei.AI;
 using STRINGS;
 using UnityEngine;
@@ -42,6 +43,7 @@ public class StegoConfig : IEntityConfig, IHasDlcRestrictions
 
 	public void OnSpawn(GameObject inst)
 	{
+		new CritterEmoteMonitor.Instance(inst.GetComponent<StateMachineController>(), this.StegoEmotes).StartSM();
 	}
 
 	public const string ID = "Stego";
@@ -51,4 +53,6 @@ public class StegoConfig : IEntityConfig, IHasDlcRestrictions
 	public const string EGG_ID = "StegoEgg";
 
 	public static int EGG_SORT_ORDER;
+
+	public List<Emote> StegoEmotes = new List<Emote> { Db.Get().Emotes.Critter.Roar };
 }

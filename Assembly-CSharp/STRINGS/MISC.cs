@@ -2055,6 +2055,13 @@ namespace STRINGS
 				public static LocString TOOLTIP = "Demolior's impact has triggered the eruption of a natural vent on this world";
 			}
 
+			public class LARGE_IMPACTOR_KEEPSAKE
+			{
+				public static LocString NAME = "Stereoscope Found";
+
+				public static LocString TOOLTIP = "A stereoscope artifact has fallen from space";
+			}
+
 			public class SUIT_DROPPED
 			{
 				public static LocString NAME = "No Docks available";

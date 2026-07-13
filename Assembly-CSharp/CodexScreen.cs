@@ -156,7 +156,7 @@ public class CodexScreen : KScreen
 		this.ContentPrefabs[typeof(CodexElementCategoryList)] = this.prefabElementCategoryList;
 	}
 
-	private List<CodexEntry> FilterSearch(string input)
+	private HashSet<CodexEntry> FilterSearch(string input)
 	{
 		this.searchResults.Clear();
 		this.subEntrySearchResults.Clear();
@@ -184,25 +184,32 @@ public class CodexScreen : KScreen
 						{
 							this.searchResults.Add(keyValuePair2.Value);
 						}
+						bool flag = false;
+						if (!flag && keyValuePair2.Value.title != null && SearchUtil.IsPassingScore(FuzzySearch.CanonicalizeAndScore(input, Strings.Get(keyValuePair2.Value.title)).score))
+						{
+							this.subEntrySearchResults.UnionWith(keyValuePair2.Value.subEntries);
+							flag = true;
+						}
+						if (!flag && keyValuePair2.Value.category != null && SearchUtil.IsPassingScore(FuzzySearch.CanonicalizeAndScore(input, keyValuePair2.Value.category).score))
+						{
+							this.subEntrySearchResults.UnionWith(keyValuePair2.Value.subEntries);
+							flag = true;
+						}
+						if (!flag)
+						{
+							foreach (SubEntry subEntry in keyValuePair2.Value.subEntries)
+							{
+								if (SearchUtil.IsPassingScore(FuzzySearch.CanonicalizeAndScore(input, subEntry.name).score))
+								{
+									this.subEntrySearchResults.Add(subEntry);
+								}
+							}
+						}
 					}
 					catch (Exception ex)
 					{
 						KCrashReporter.ReportDevNotification("Fuzzy score bind failed", Environment.StackTrace, ex.Message, false, null);
 					}
-				}
-			}
-			foreach (KeyValuePair<string, SubEntry> keyValuePair3 in CodexCache.subEntries)
-			{
-				try
-				{
-					if (SearchUtil.IsPassingScore(FuzzySearch.CanonicalizeAndScore(input, keyValuePair3.Value.name).score))
-					{
-						this.subEntrySearchResults.Add(keyValuePair3.Value);
-					}
-				}
-				catch (Exception ex2)
-				{
-					KCrashReporter.ReportDevNotification("Fuzzy score bind failed", Environment.StackTrace, ex2.Message, false, null);
 				}
 			}
 			this.FilterEntries(true);
@@ -320,7 +327,7 @@ public class CodexScreen : KScreen
 		{
 			global::Tuple<string, CodexEntry> tuple = list[i];
 			string text = tuple.second.category;
-			if (text == "" || text == "Root")
+			if (text == "")
 			{
 				text = "Root";
 			}
@@ -869,9 +876,9 @@ public class CodexScreen : KScreen
 
 	private Dictionary<CodexTextStyle, TextStyleSetting> textStyles = new Dictionary<CodexTextStyle, TextStyleSetting>();
 
-	private List<CodexEntry> searchResults = new List<CodexEntry>();
+	private readonly HashSet<CodexEntry> searchResults = new HashSet<CodexEntry>();
 
-	private List<SubEntry> subEntrySearchResults = new List<SubEntry>();
+	private readonly HashSet<SubEntry> subEntrySearchResults = new HashSet<SubEntry>();
 
 	private Coroutine scrollToTargetRoutine;
 

@@ -24,6 +24,7 @@ public static class LargeImpactorDestroyedSequence
 	{
 		yield return null;
 		WorldContainer world = ClusterManager.Instance.GetWorld(worldID);
+		ParallaxBackgroundObject parallaxBackgroundObj = controller.GetComponent<ParallaxBackgroundObject>();
 		GameObject telepad = GameUtil.GetTelepad(worldID);
 		int centredCell = 0;
 		if (telepad != null)
@@ -51,10 +52,9 @@ public static class LargeImpactorDestroyedSequence
 			num2 = Grid.CellAbove(num2);
 		}
 		midSkyCell = Grid.XYToCell(Grid.CellToXY(centredCell).x, (int)((float)(Grid.CellToXY(num).y + Grid.CellToXY(num3).y) * 0.5f));
-		if (SpeedControlScreen.Instance.IsPaused)
+		if (!SpeedControlScreen.Instance.IsPaused)
 		{
-			SpeedControlScreen.Instance.Unpause(false);
-			SpeedControlScreen.Instance.SetSpeed(0);
+			SpeedControlScreen.Instance.Pause(false, false);
 		}
 		RootMenu.Instance.canTogglePauseScreen = false;
 		CameraController.Instance.DisableUserCameraControl = true;
@@ -68,6 +68,18 @@ public static class LargeImpactorDestroyedSequence
 		CameraController.Instance.FadeIn(0f, 1f, null);
 		AudioMixer.instance.Start(Db.Get().ColonyAchievements.ReachedDistantPlanet.victoryNISSnapshot);
 		MusicManager.instance.PlaySong("Music_Victory_02_NIS", false);
+		KFMOD.PlayUISound(GlobalAssets.GetSound("Asteroid_destroyed_start", false));
+		CameraController.Instance.SetTargetPos(Grid.CellToPos(midSkyCell), 20f, false);
+		yield return SequenceUtil.WaitForSecondsRealtime(4f);
+		parallaxBackgroundObj.PlayExplosion();
+		yield return SequenceUtil.WaitForSecondsRealtime(2.2f);
+		TerrainBG.preventLargeImpactorFragmentsFromProgressing = false;
+		bool fadeOutCompleted = false;
+		CameraController.Instance.FadeOutColor(Color.white, 0f, 1f, 1f, delegate
+		{
+			fadeOutCompleted = true;
+		});
+		yield return new WaitUntil(() => fadeOutCompleted);
 		MissileLauncher.Instance instance = null;
 		float num4 = float.MaxValue;
 		Vector3 position = CameraController.Instance.overlayCamera.transform.position;
@@ -87,45 +99,35 @@ public static class LargeImpactorDestroyedSequence
 				}
 			}
 		}
-		int keepsakeSpawnCell = Grid.InvalidCell;
-		int keepsakeCameraTargetCell = Grid.InvalidCell;
-		bool hasMissileLauncher = instance != null;
-		if (hasMissileLauncher)
+		int num5 = Grid.InvalidCell;
+		int num6 = Grid.InvalidCell;
+		bool flag = instance != null;
+		if (flag)
 		{
-			keepsakeCameraTargetCell = Grid.PosToCell(instance.gameObject);
+			num6 = Grid.PosToCell(instance.gameObject);
 		}
 		else
 		{
-			keepsakeSpawnCell = Grid.XYToCell(Grid.CellToXY(centredCell).x, world.WorldOffset.y + world.Height);
-			keepsakeCameraTargetCell = keepsakeSpawnCell;
+			num5 = Grid.XYToCell(Grid.CellToXY(centredCell).x, world.WorldOffset.y + world.Height);
+			num6 = num5;
 		}
-		CameraController.Instance.SetTargetPos(Grid.CellToPos(keepsakeCameraTargetCell), 10f, false);
-		yield return SequenceUtil.WaitForSecondsRealtime(5f);
-		if (hasMissileLauncher)
+		if (flag)
 		{
-			int num5 = keepsakeCameraTargetCell;
+			int num7 = num6;
 			int y = CameraController.Instance.VisibleArea.CurrentArea.Max.Y;
-			while (Grid.CellToXY(num5).y < y)
+			while (Grid.CellToXY(num7).y < y)
 			{
-				int num6 = Grid.CellAbove(num5);
-				if (!Grid.IsValidCellInWorld(num6, worldID) || Grid.Solid[num6])
+				int num8 = Grid.CellAbove(num7);
+				if (!Grid.IsValidCellInWorld(num8, worldID) || Grid.Solid[num8])
 				{
 					break;
 				}
-				num5 = num6;
+				num7 = num8;
 			}
-			keepsakeSpawnCell = num5;
+			num5 = num7;
 		}
-		LargeImpactorDestroyedSequence.SpawnKeepsake(Grid.CellToPos(keepsakeSpawnCell));
-		yield return SequenceUtil.WaitForSecondsRealtime(3f);
-		CameraController.Instance.SetTargetPos(Grid.CellToPos(midSkyCell), 20f, false);
-		yield return SequenceUtil.WaitForSecondsRealtime(4f);
-		bool fadeOutCompleted = false;
-		CameraController.Instance.FadeOut(1f, 1f, delegate
-		{
-			fadeOutCompleted = true;
-		});
-		yield return new WaitUntil(() => fadeOutCompleted);
+		LargeImpactorDestroyedSequence.SpawnKeepsake(Grid.CellToPos(num5));
+		yield return SequenceUtil.WaitForSecondsRealtime(2f);
 		MusicManager.instance.StopSong("Music_Victory_02_NIS", true, STOP_MODE.ALLOWFADEOUT);
 		AudioMixer.instance.Stop(Db.Get().ColonyAchievements.ReachedDistantPlanet.victoryNISSnapshot, STOP_MODE.ALLOWFADEOUT);
 		yield return null;
@@ -148,6 +150,7 @@ public static class LargeImpactorDestroyedSequence
 		yield return new WaitUntil(() => videoCompleted);
 		VideoScreen videoScreen2 = screen;
 		videoScreen2.OnStop = (global::System.Action)Delegate.Remove(videoScreen2.OnStop, onVideoCompletedCallback);
+		SpeedControlScreen.Instance.SetSpeed(0);
 		CameraController.Instance.FadeIn(0f, 1f, null);
 		CameraController.Instance.SetOverrideZoomSpeed(1f);
 		CameraController.Instance.SetWorldInteractive(true);
@@ -156,11 +159,29 @@ public static class LargeImpactorDestroyedSequence
 		AudioMixer.instance.Stop(AudioMixerSnapshots.Get().VictoryCinematicSnapshot, STOP_MODE.ALLOWFADEOUT);
 		AudioMixer.instance.Stop(AudioMixerSnapshots.Get().MuteDynamicMusicSnapshot, STOP_MODE.ALLOWFADEOUT);
 		RootMenu.Instance.canTogglePauseScreen = true;
-		RootMenu.Instance.canTogglePauseScreen = true;
 		HoverTextScreen.Instance.Show(true);
 		StoryMessageScreen.HideInterface(false);
+		Game.Instance.Subscribe(-821118536, new Action<object>(LargeImpactorDestroyedSequence.OnScreenClosed));
 		controller.Trigger(-467702038, null);
 		yield break;
+	}
+
+	private static void OnScreenClosed(object screenData)
+	{
+		if (screenData != null && screenData is RetiredColonyInfoScreen)
+		{
+			LargeImpactorDestroyedSequence.OnAchievementScreenClosed();
+		}
+	}
+
+	private static void OnAchievementScreenClosed()
+	{
+		if (SpeedControlScreen.Instance != null && SpeedControlScreen.Instance.IsPaused)
+		{
+			SpeedControlScreen.Instance.Unpause(false);
+			SpeedControlScreen.Instance.SetSpeed(0);
+		}
+		Game.Instance.Unsubscribe(-821118536, new Action<object>(LargeImpactorDestroyedSequence.OnScreenClosed));
 	}
 
 	private static void SpawnKeepsake(Vector3 position)
@@ -176,4 +197,6 @@ public static class LargeImpactorDestroyedSequence
 	}
 
 	private const string SongName = "Music_Victory_02_NIS";
+
+	private const string Sound_Destroyed_Victory_Start_Sequence = "Asteroid_destroyed_start";
 }

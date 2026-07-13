@@ -54,6 +54,7 @@ public enum GameHashes
 	NewBuilding = -1661515756,
 	RefreshUserMenu = 493375141,
 	NewConstruction = 2121280625,
+	ScreenClosed = -821118536,
 	DroppedAsLoot = -375153990,
 	DroppedAll = -1957399615,
 	ResearchComplete = -107300940,

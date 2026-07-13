@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Database;
 
 public class Blueprints_DlcPack4 : BlueprintProvider
@@ -57,7 +58,7 @@ public class Blueprints_DlcPack4 : BlueprintProvider
 		base.AddMonumentPart(BlueprintProvider.MonumentPart.Top, PermitRarity.Universal, "permit_monument_upper_a_prehistoric", "monument_upper_a_prehistoric_kanim");
 		base.AddArtable(BlueprintProvider.ArtableType.Painting, PermitRarity.Universal, "permit_painting_art_stego", "painting_art_stego_kanim");
 		base.AddArtable(BlueprintProvider.ArtableType.PaintingWide, PermitRarity.Universal, "permit_painting_wide_art_rhex", "painting_wide_art_rhex_kanim");
-		base.AddBuilding("MassageTable", PermitRarity.Universal, "permit_masseur_prehistoric", "masseur_prehistoric_kanim");
+		base.AddBuildingWithInteract("MassageTable", PermitRarity.Universal, "permit_masseur_prehistoric", "masseur_prehistoric_kanim", new Dictionary<string, string> { { "MassageTableComplete", "anim_interacts_masseur_balloon_kanim" } });
 		base.AddBuilding("ExteriorWall", PermitRarity.Universal, "permit_walls_chameleo", "walls_chameleo_kanim");
 		base.AddBuilding("ExteriorWall", PermitRarity.Universal, "permit_walls_paculacanth", "walls_paculacanth_kanim");
 		base.AddBuilding("ExteriorWall", PermitRarity.Universal, "permit_walls_raptor", "walls_raptor_kanim");

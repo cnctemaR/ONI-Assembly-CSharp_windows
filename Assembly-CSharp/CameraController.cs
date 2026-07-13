@@ -325,11 +325,16 @@ public class CameraController : KMonoBehaviour, IInputHandler
 
 	public void FadeOutColor(Color color, float targetPercentage = 1f, float speed = 1f, global::System.Action callback = null)
 	{
+		this.FadeOutColor(color, 1f, targetPercentage, speed, callback);
+	}
+
+	public void FadeOutColor(Color color, float initialPercentage, float targetPercentage = 1f, float speed = 1f, global::System.Action callback = null)
+	{
 		if (this.activeFadeRoutine != null)
 		{
 			base.StopCoroutine(this.activeFadeRoutine);
 		}
-		this.activeFadeRoutine = base.StartCoroutine(this.FadeWithColor(true, 1f, targetPercentage, color, speed, callback));
+		this.activeFadeRoutine = base.StartCoroutine(this.FadeWithColor(true, initialPercentage, targetPercentage, color, speed, callback));
 	}
 
 	public void FadeInColor(Color color, float targetPercentage = 0f, float speed = 1f, global::System.Action callback = null)

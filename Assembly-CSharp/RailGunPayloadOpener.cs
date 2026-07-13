@@ -45,7 +45,7 @@ public class RailGunPayloadOpener : StateMachineComponent<RailGunPayloadOpener.S
 		solidConduitDispenser.storage = this.resourceStorage;
 		solidConduitDispenser.alwaysDispense = true;
 		solidConduitDispenser.useSecondaryOutput = true;
-		solidConduitDispenser.solidOnly = true;
+		solidConduitDispenser.solidOnly = false;
 		flowNetworkItem = new FlowUtilityNetwork.NetworkItem(ConduitType.Solid, Endpoint.Source, outputCell, base.gameObject);
 		Game.Instance.solidConduitSystem.AddToNetworks(outputCell, flowNetworkItem, true);
 		return solidConduitDispenser;

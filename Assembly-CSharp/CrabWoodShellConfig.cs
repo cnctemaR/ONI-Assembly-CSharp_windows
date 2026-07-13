@@ -14,6 +14,7 @@ public class CrabWoodShellConfig : IEntityConfig
 		});
 		gameObject.AddOrGet<EntitySplitter>();
 		gameObject.AddOrGet<SimpleMassStatusItem>();
+		gameObject.AddComponent<EntitySizeVisualizer>().TierSetType = OreSizeVisualizerComponents.TiersSetType.WoodPokeShells;
 		EntityTemplates.CreateAndRegisterCompostableFromPrefab(gameObject);
 		return gameObject;
 	}

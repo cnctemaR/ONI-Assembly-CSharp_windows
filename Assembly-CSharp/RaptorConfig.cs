@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Klei.AI;
 using STRINGS;
 using TUNING;
@@ -52,10 +53,7 @@ public class RaptorConfig : IEntityConfig, IHasDlcRestrictions
 
 	public void OnSpawn(GameObject inst)
 	{
-		new EmoteMonitor.Instance(inst.GetComponent<StateMachineController>()).StartSM();
-		ChoreProvider component = inst.GetComponent<ChoreProvider>();
-		component.AddChore(new EmoteChore(component, Db.Get().ChoreTypes.Emote, Db.Get().Emotes.Critter.Roar, 1, null));
-		component.AddChore(new EmoteChore(component, Db.Get().ChoreTypes.Emote, Db.Get().Emotes.Critter.RaptorSignal, 1, null));
+		new CritterEmoteMonitor.Instance(inst.GetComponent<StateMachineController>(), this.RaptorEmotes).StartSM();
 	}
 
 	public const string ID = "Raptor";
@@ -75,4 +73,10 @@ public class RaptorConfig : IEntityConfig, IHasDlcRestrictions
 	public static Tag SCALE_GROWTH_EMIT_ELEMENT = FeatherFabricConfig.ID;
 
 	public static KAnimHashedString[] SCALE_SYMBOLS = new KAnimHashedString[] { "scale_0", "scale_1", "scale_2" };
+
+	public List<Emote> RaptorEmotes = new List<Emote>
+	{
+		Db.Get().Emotes.Critter.Roar,
+		Db.Get().Emotes.Critter.RaptorSignal
+	};
 }

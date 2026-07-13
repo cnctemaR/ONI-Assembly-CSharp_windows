@@ -255,7 +255,14 @@ public class TerrainBG : KMonoBehaviour
 					this.LargeImpactorEntryProgress = 0f;
 					this.largeImpactorFragmentsMaterial.SetFloat("_LargeImpactorScale", this.LargeImpactorBackgroundScale);
 				}
-				this.LargeImpactorEntryProgress += Time.unscaledDeltaTime / 1.2f;
+				if (!SpeedControlScreen.Instance.IsPaused)
+				{
+					if (this.LargeImpactorEntryProgress == 0f)
+					{
+						KFMOD.PlayUISound(GlobalAssets.GetSound("Asteroid_destroyed_end", false));
+					}
+					this.LargeImpactorEntryProgress += Time.unscaledDeltaTime / 2.5f;
+				}
 				this.LargeImpactorEntryProgress = Mathf.Clamp01(this.LargeImpactorEntryProgress);
 				this.largeImpactorFragmentsMaterial.SetFloat("_EntryProgress", this.LargeImpactorEntryProgress);
 			}
@@ -309,6 +316,8 @@ public class TerrainBG : KMonoBehaviour
 
 	public bool doDraw = true;
 
+	private const string Sound_Destroyed_Victory_End_Sequence = "Asteroid_destroyed_end";
+
 	[SerializeField]
 	private Texture3D noiseVolume;
 
@@ -328,7 +337,7 @@ public class TerrainBG : KMonoBehaviour
 
 	public static bool preventLargeImpactorFragmentsFromProgressing;
 
-	public const float LargeImpactorFragmentsEntryEffectDuration = 1.2f;
+	public const float LargeImpactorFragmentsEntryEffectDuration = 2.5f;
 
 	private float LargeImpactorEntryProgress = -1f;
 

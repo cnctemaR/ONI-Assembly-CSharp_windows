@@ -895,6 +895,23 @@ namespace ProcGenGame
 				updateProgressFn(UI.WORLDGEN.DRAWWORLDBORDER.key, 1f, WorldGenProgressStages.Stages.DrawWorldBorder);
 			}
 			this.data.gameSpawnData.baseStartPos = this.data.worldLayout.GetStartLocation();
+			foreach (global::ProcGen.World.ModifyLayoutTagsRule modifyLayoutTagsRule in this.Settings.world.modifyLayoutTags)
+			{
+				foreach (TerrainCell terrainCell in this.data.terrainCells)
+				{
+					if (TemplateSpawning.DoesCellMatchFilters(terrainCell, modifyLayoutTagsRule.allowedCellsFilter))
+					{
+						foreach (string text in modifyLayoutTagsRule.addTags)
+						{
+							terrainCell.node.tags.Add(text);
+						}
+						foreach (string text2 in modifyLayoutTagsRule.removeTags)
+						{
+							terrainCell.node.tags.Remove(text2);
+						}
+					}
+				}
+			}
 			return true;
 		}
 

@@ -69,6 +69,11 @@ public class ParallaxBackgroundObject : KMonoBehaviour
 		this.material.SetFloat("_LastTimePlayerClickedNotification", Time.unscaledTime);
 	}
 
+	public void PlayExplosion()
+	{
+		this.material.SetFloat("_LastTimeExploding", Time.unscaledTime);
+	}
+
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
@@ -120,6 +125,7 @@ public class ParallaxBackgroundObject : KMonoBehaviour
 		Vector3 vector4 = num * num2 * Vector3.one;
 		Quaternion quaternion = Quaternion.Lerp(Quaternion.identity, Quaternion.Euler(0f, 0f, -20f), this.normalizedDistance);
 		this.material.SetFloat("_UnscaledTime", Time.unscaledTime);
+		this.material.SetVector("_Random", new Vector4(global::UnityEngine.Random.value, global::UnityEngine.Random.value));
 		this.material.SetFloat("_SizeProgress", this.normalizedDistance);
 		Matrix4x4 matrix4x = Matrix4x4.Translate(vector3) * Matrix4x4.Scale(vector4) * Matrix4x4.Rotate(quaternion);
 		Graphics.DrawMesh(ParallaxBackgroundObject.Mesh, matrix4x, this.material, ParallaxBackgroundObject.Layer);
@@ -151,6 +157,8 @@ public class ParallaxBackgroundObject : KMonoBehaviour
 	private const string SHADER_PLAYER_CLICKED_TIME_VARIABLE_NAME = "_LastTimePlayerClickedNotification";
 
 	private const string SHADER_SIZE_PROGRESS_VARIABLE_NAME = "_SizeProgress";
+
+	private const string SHADER_EXPLOSION_START_TIME_VARIABLE_NAME = "_LastTimeExploding";
 
 	[SerializeField]
 	private Material material;

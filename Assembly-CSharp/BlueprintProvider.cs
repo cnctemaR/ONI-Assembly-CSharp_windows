@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Database;
 
 public abstract class BlueprintProvider : IHasDlcRestrictions
@@ -6,6 +7,11 @@ public abstract class BlueprintProvider : IHasDlcRestrictions
 	protected void AddBuilding(string prefabConfigId, PermitRarity rarity, string permitId, string animFile)
 	{
 		this.blueprintCollection.buildingFacades.Add(new BuildingFacadeInfo(permitId, Strings.Get("STRINGS.BLUEPRINTS." + permitId.ToUpper() + ".NAME"), Strings.Get("STRINGS.BLUEPRINTS." + permitId.ToUpper() + ".DESC"), rarity, prefabConfigId, animFile, null, this.requiredDlcIds, this.forbiddenDlcIds));
+	}
+
+	protected void AddBuildingWithInteract(string prefabConfigId, PermitRarity rarity, string permitId, string animFile, Dictionary<string, string> interact_anim)
+	{
+		this.blueprintCollection.buildingFacades.Add(new BuildingFacadeInfo(permitId, Strings.Get("STRINGS.BLUEPRINTS." + permitId.ToUpper() + ".NAME"), Strings.Get("STRINGS.BLUEPRINTS." + permitId.ToUpper() + ".DESC"), rarity, prefabConfigId, animFile, interact_anim, this.requiredDlcIds, this.forbiddenDlcIds));
 	}
 
 	protected void AddClothing(BlueprintProvider.ClothingType clothingType, PermitRarity rarity, string permitId, string animFile)

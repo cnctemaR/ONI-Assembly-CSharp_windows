@@ -2016,10 +2016,10 @@ internal class UnitySourceGeneratedAssemblyMonoScriptTypes_v1
 			105, 99, 46, 79, 110, 108, 105, 110, 101, 83,
 			101, 114, 118, 105, 99, 101, 115, 46, 67, 111,
 			110, 110, 101, 99, 116, 124, 81, 117, 101, 114,
-			121, 80, 114, 111, 100, 117, 99, 116, 85, "Not showing all elements because this array is too big (102011 elements)"
+			121, 80, 114, 111, 100, 117, 99, 116, 85, "Not showing all elements because this array is too big (102050 elements)"
 		};
 		monoScriptData.TotalFiles = 1066;
-		monoScriptData.TotalTypes = 2292;
+		monoScriptData.TotalTypes = 2293;
 		monoScriptData.IsEditorOnly = false;
 		return monoScriptData;
 	}

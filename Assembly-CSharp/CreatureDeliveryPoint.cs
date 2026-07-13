@@ -188,6 +188,8 @@ public class CreatureDeliveryPoint : StateMachineComponent<CreatureDeliveryPoint
 
 	public CellOffset spawnOffset = new CellOffset(0, 0);
 
+	public CellOffset largeCritterSpawnOffset = new CellOffset(0, 0);
+
 	private List<FetchOrder2> fetches;
 
 	public bool playAnimsOnFetch;
@@ -238,11 +240,20 @@ public class CreatureDeliveryPoint : StateMachineComponent<CreatureDeliveryPoint
 			List<GameObject> items = component.items;
 			int count = items.Count;
 			Vector3 vector = Grid.CellToPosCBC(Grid.OffsetCell(Grid.PosToCell(smi.transform.GetPosition()), smi.master.spawnOffset), Grid.SceneLayer.Creatures);
+			Vector3 vector2 = Grid.CellToPosCBC(Grid.OffsetCell(Grid.PosToCell(smi.transform.GetPosition()), smi.master.largeCritterSpawnOffset), Grid.SceneLayer.Creatures);
 			for (int i = count - 1; i >= 0; i--)
 			{
 				GameObject gameObject = items[i];
 				component.Drop(gameObject, true);
-				gameObject.transform.SetPosition(vector);
+				KPrefabID component2 = gameObject.GetComponent<KPrefabID>();
+				if (component2 == null || !component2.HasTag(GameTags.LargeCreature))
+				{
+					gameObject.transform.SetPosition(vector);
+				}
+				else
+				{
+					gameObject.transform.SetPosition(vector2);
+				}
 				gameObject.GetComponent<KBatchedAnimController>().SetSceneLayer(Grid.SceneLayer.Creatures);
 			}
 			smi.master.critterCapacity.RefreshCreatureCount(null);

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class OreSizeVisualizerComponents : KGameObjectComponentManager<OreSizeVisualizerData>
@@ -12,11 +13,16 @@ public class OreSizeVisualizerComponents : KGameObjectComponentManager<OreSizeVi
 
 	public static HashedString GetAnimForMass(float mass)
 	{
-		for (int i = 0; i < OreSizeVisualizerComponents.MassTiers.Length; i++)
+		return OreSizeVisualizerComponents.GetAnimForMass(OreSizeVisualizerComponents.TiersSetType.Ores, mass);
+	}
+
+	public static HashedString GetAnimForMass(OreSizeVisualizerComponents.TiersSetType tierType, float mass)
+	{
+		for (int i = 0; i < OreSizeVisualizerComponents.TierSets[tierType].Length; i++)
 		{
-			if (mass <= OreSizeVisualizerComponents.MassTiers[i].massRequired)
+			if (mass <= OreSizeVisualizerComponents.TierSets[tierType][i].massRequired)
 			{
-				return OreSizeVisualizerComponents.MassTiers[i].animName;
+				return OreSizeVisualizerComponents.TierSets[tierType][i].animName;
 			}
 		}
 		return HashedString.Invalid;
@@ -37,8 +43,8 @@ public class OreSizeVisualizerComponents : KGameObjectComponentManager<OreSizeVi
 
 	protected override void OnSpawn(HandleVector<int>.Handle handle)
 	{
-		OreSizeVisualizerData data = base.GetData(handle);
-		OreSizeVisualizerComponents.OnMassChanged(handle, data.primaryElement.GetComponent<Pickupable>());
+		base.GetData(handle);
+		OreSizeVisualizerComponents.OnMassChanged(handle, null);
 	}
 
 	protected override void OnCleanUp(HandleVector<int>.Handle handle)
@@ -54,29 +60,36 @@ public class OreSizeVisualizerComponents : KGameObjectComponentManager<OreSizeVi
 
 	private static void OnMassChanged(HandleVector<int>.Handle handle, object other_data)
 	{
-		PrimaryElement primaryElement = GameComps.OreSizeVisualizers.GetData(handle).primaryElement;
-		float num = primaryElement.Mass;
-		if (other_data != null)
-		{
-			PrimaryElement component = ((Pickupable)other_data).GetComponent<PrimaryElement>();
-			num += component.Mass;
-		}
+		OreSizeVisualizerData data = GameComps.OreSizeVisualizers.GetData(handle);
+		PrimaryElement primaryElement = data.primaryElement;
+		float mass = primaryElement.Mass;
 		OreSizeVisualizerComponents.MassTier massTier = default(OreSizeVisualizerComponents.MassTier);
-		for (int i = 0; i < OreSizeVisualizerComponents.MassTiers.Length; i++)
+		OreSizeVisualizerComponents.MassTier[] array = OreSizeVisualizerComponents.TierSets[data.tierSetType];
+		for (int i = 0; i < array.Length; i++)
 		{
-			if (num <= OreSizeVisualizerComponents.MassTiers[i].massRequired)
+			if (mass <= array[i].massRequired)
 			{
-				massTier = OreSizeVisualizerComponents.MassTiers[i];
+				massTier = array[i];
 				break;
 			}
 		}
 		primaryElement.GetComponent<KBatchedAnimController>().Play(massTier.animName, KAnim.PlayMode.Once, 1f, 0f);
-		KCircleCollider2D component2 = primaryElement.GetComponent<KCircleCollider2D>();
-		if (component2 != null)
+		KCircleCollider2D component = primaryElement.GetComponent<KCircleCollider2D>();
+		if (component != null)
 		{
-			component2.radius = massTier.colliderRadius;
+			component.radius = massTier.colliderRadius;
 		}
 		primaryElement.Trigger(1807976145, null);
+	}
+
+	// Note: this type is marked as 'beforefieldinit'.
+	static OreSizeVisualizerComponents()
+	{
+		Dictionary<OreSizeVisualizerComponents.TiersSetType, OreSizeVisualizerComponents.MassTier[]> dictionary = new Dictionary<OreSizeVisualizerComponents.TiersSetType, OreSizeVisualizerComponents.MassTier[]>();
+		dictionary[OreSizeVisualizerComponents.TiersSetType.Ores] = OreSizeVisualizerComponents.MassTiers;
+		dictionary[OreSizeVisualizerComponents.TiersSetType.PokeShells] = OreSizeVisualizerComponents.PokeShellMassTiers;
+		dictionary[OreSizeVisualizerComponents.TiersSetType.WoodPokeShells] = OreSizeVisualizerComponents.WoodPokeShellMassTiers;
+		OreSizeVisualizerComponents.TierSets = dictionary;
 	}
 
 	private static readonly OreSizeVisualizerComponents.MassTier[] MassTiers = new OreSizeVisualizerComponents.MassTier[]
@@ -101,6 +114,52 @@ public class OreSizeVisualizerComponents : KGameObjectComponentManager<OreSizeVi
 		}
 	};
 
+	private static readonly OreSizeVisualizerComponents.MassTier[] PokeShellMassTiers = new OreSizeVisualizerComponents.MassTier[]
+	{
+		new OreSizeVisualizerComponents.MassTier
+		{
+			animName = "idle1",
+			massRequired = 7.5f,
+			colliderRadius = 0.15f
+		},
+		new OreSizeVisualizerComponents.MassTier
+		{
+			animName = "idle2",
+			massRequired = 15f,
+			colliderRadius = 0.2f
+		},
+		new OreSizeVisualizerComponents.MassTier
+		{
+			animName = "idle3",
+			massRequired = float.MaxValue,
+			colliderRadius = 0.25f
+		}
+	};
+
+	private static readonly OreSizeVisualizerComponents.MassTier[] WoodPokeShellMassTiers = new OreSizeVisualizerComponents.MassTier[]
+	{
+		new OreSizeVisualizerComponents.MassTier
+		{
+			animName = "idle1",
+			massRequired = 75f,
+			colliderRadius = 0.15f
+		},
+		new OreSizeVisualizerComponents.MassTier
+		{
+			animName = "idle2",
+			massRequired = 150f,
+			colliderRadius = 0.2f
+		},
+		new OreSizeVisualizerComponents.MassTier
+		{
+			animName = "idle3",
+			massRequired = float.MaxValue,
+			colliderRadius = 0.25f
+		}
+	};
+
+	private static readonly Dictionary<OreSizeVisualizerComponents.TiersSetType, OreSizeVisualizerComponents.MassTier[]> TierSets;
+
 	private struct MassTier
 	{
 		public HashedString animName;
@@ -108,5 +167,12 @@ public class OreSizeVisualizerComponents : KGameObjectComponentManager<OreSizeVi
 		public float massRequired;
 
 		public float colliderRadius;
+	}
+
+	public enum TiersSetType
+	{
+		Ores,
+		PokeShells,
+		WoodPokeShells
 	}
 }

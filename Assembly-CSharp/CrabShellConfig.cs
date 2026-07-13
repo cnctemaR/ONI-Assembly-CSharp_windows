@@ -14,6 +14,7 @@ public class CrabShellConfig : IEntityConfig
 		});
 		gameObject.AddOrGet<EntitySplitter>();
 		gameObject.AddOrGet<SimpleMassStatusItem>();
+		gameObject.AddComponent<EntitySizeVisualizer>().TierSetType = OreSizeVisualizerComponents.TiersSetType.PokeShells;
 		EntityTemplates.CreateAndRegisterCompostableFromPrefab(gameObject);
 		return gameObject;
 	}

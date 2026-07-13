@@ -41,6 +41,7 @@ public class FishDeliveryPointConfig : IBuildingConfig
 			new CellOffset(0, 1)
 		};
 		creatureDeliveryPoint.spawnOffset = new CellOffset(0, -1);
+		creatureDeliveryPoint.largeCritterSpawnOffset = new CellOffset(0, -2);
 		creatureDeliveryPoint.playAnimsOnFetch = true;
 		BaggableCritterCapacityTracker baggableCritterCapacityTracker = go.AddOrGet<BaggableCritterCapacityTracker>();
 		baggableCritterCapacityTracker.maximumCreatures = 20;

@@ -762,7 +762,7 @@ namespace STRINGS
 		{
 			public static LocString NAME = UI.FormatAsLink("Solid Gunk", "GUNK");
 
-			public static LocString DESC = "Solid Gunk is the built-up grime and grit produced by Duplicants' bionic mechanisms that has been frozen into a " + UI.FormatAsLink("Solid", "ELEMENTS_SOLID") + " state.";
+			public static LocString DESC = "Solid Gunk is the built-up grime and grit produced by Duplicants' bionic mechanisms, which has been frozen into a " + UI.FormatAsLink("Solid", "ELEMENTS_SOLID") + " state.";
 		}
 
 		public class SOLIDNUCLEARWASTE

@@ -107,6 +107,7 @@ public class ConditionRobotPilotReady : ProcessCondition
 
 	public override string GetStatusTooltip(ProcessCondition.Status status)
 	{
+		ClusterTraveler component = this.craftInterface.GetComponent<ClusterTraveler>();
 		LaunchableRocketRegisterType launchableRocketRegisterType = this.craftRegisterType;
 		if (launchableRocketRegisterType != LaunchableRocketRegisterType.Spacecraft)
 		{
@@ -116,9 +117,10 @@ public class ConditionRobotPilotReady : ProcessCondition
 				{
 					if (this.craftInterface.GetClusterDestinationSelector().IsAtDestination())
 					{
-						return UI.STARMAP.LAUNCHCHECKLIST.ROBOT_PILOT_DATA_REQUIREMENTS.TOOLTIP.READY_NO_DESTINATION;
+						return string.Format(UI.STARMAP.LAUNCHCHECKLIST.ROBOT_PILOT_DATA_REQUIREMENTS.TOOLTIP.READY_NO_DESTINATION, this.module.GetDataBanksStored());
 					}
-					return UI.STARMAP.LAUNCHCHECKLIST.ROBOT_PILOT_DATA_REQUIREMENTS.TOOLTIP.READY;
+					int num = component.RemainingTravelNodes() * 2 * this.module.dataBankConsumption;
+					return string.Format(UI.STARMAP.LAUNCHCHECKLIST.ROBOT_PILOT_DATA_REQUIREMENTS.TOOLTIP.READY, this.module.GetDataBanksStored(), num);
 				}
 				else if (status == ProcessCondition.Status.Warning)
 				{
@@ -126,25 +128,23 @@ public class ConditionRobotPilotReady : ProcessCondition
 					{
 						return UI.STARMAP.LAUNCHCHECKLIST.ROBOT_PILOT_DATA_REQUIREMENTS.TOOLTIP.WARNING_NO_DATA_BANKS_HUMAN_PILOT;
 					}
-					ClusterTraveler component = this.craftInterface.GetComponent<ClusterTraveler>();
 					if (component == null || component.CurrentPath == null)
 					{
 						return UI.STARMAP.LAUNCHCHECKLIST.ROBOT_PILOT_DATA_REQUIREMENTS.TOOLTIP.FAILURE_NO_DESTINATION;
 					}
-					int num = component.RemainingTravelNodes() * 2 * this.module.dataBankConsumption;
-					return string.Format(UI.STARMAP.LAUNCHCHECKLIST.ROBOT_PILOT_DATA_REQUIREMENTS.TOOLTIP.WARNING, this.module.GetDataBanksStored(), num);
+					int num2 = component.RemainingTravelNodes() * 2 * this.module.dataBankConsumption;
+					return string.Format(UI.STARMAP.LAUNCHCHECKLIST.ROBOT_PILOT_DATA_REQUIREMENTS.TOOLTIP.WARNING, this.module.GetDataBanksStored(), num2);
 				}
 				else
 				{
-					ClusterTraveler component2 = this.craftInterface.GetComponent<ClusterTraveler>();
-					if (this.HasDestination() && !(component2 == null) && component2.CurrentPath != null)
+					if (this.HasDestination() && !(component == null) && component.CurrentPath != null)
 					{
-						int num2 = component2.RemainingTravelNodes();
-						return string.Format(UI.STARMAP.LAUNCHCHECKLIST.ROBOT_PILOT_DATA_REQUIREMENTS.TOOLTIP.FAILURE, num2 * this.module.dataBankConsumption);
+						int num3 = component.RemainingTravelNodes();
+						return string.Format(UI.STARMAP.LAUNCHCHECKLIST.ROBOT_PILOT_DATA_REQUIREMENTS.TOOLTIP.FAILURE, num3 * this.module.dataBankConsumption, this.module.GetDataBanksStored());
 					}
 					if (this.module.IsFull())
 					{
-						return UI.STARMAP.LAUNCHCHECKLIST.ROBOT_PILOT_DATA_REQUIREMENTS.TOOLTIP.READY_NO_DESTINATION;
+						return string.Format(UI.STARMAP.LAUNCHCHECKLIST.ROBOT_PILOT_DATA_REQUIREMENTS.TOOLTIP.READY, this.module.GetDataBanksStored());
 					}
 					return UI.STARMAP.LAUNCHCHECKLIST.ROBOT_PILOT_DATA_REQUIREMENTS.TOOLTIP.FAILURE_NO_DESTINATION;
 				}
@@ -156,25 +156,26 @@ public class ConditionRobotPilotReady : ProcessCondition
 			SpaceDestination spacecraftDestination = SpacecraftManager.instance.GetSpacecraftDestination(id);
 			if (status == ProcessCondition.Status.Ready)
 			{
-				return UI.STARMAP.LAUNCHCHECKLIST.ROBOT_PILOT_DATA_REQUIREMENTS.TOOLTIP.READY;
+				int num4 = spacecraftDestination.OneBasedDistance * 2;
+				return string.Format(UI.STARMAP.LAUNCHCHECKLIST.ROBOT_PILOT_DATA_REQUIREMENTS.TOOLTIP.READY, this.module.GetDataBanksStored(), num4);
 			}
 			if (status == ProcessCondition.Status.Warning)
 			{
 				if (spacecraftDestination != null)
 				{
-					int num3 = spacecraftDestination.OneBasedDistance * 2;
-					return string.Format(UI.STARMAP.LAUNCHCHECKLIST.ROBOT_PILOT_DATA_REQUIREMENTS.TOOLTIP.WARNING, this.module.GetDataBanksStored(), num3);
+					int num5 = spacecraftDestination.OneBasedDistance * 2;
+					return string.Format(UI.STARMAP.LAUNCHCHECKLIST.ROBOT_PILOT_DATA_REQUIREMENTS.TOOLTIP.WARNING, this.module.GetDataBanksStored(), num5);
 				}
 			}
 			else
 			{
 				if (spacecraftDestination != null)
 				{
-					return string.Format(UI.STARMAP.LAUNCHCHECKLIST.ROBOT_PILOT_DATA_REQUIREMENTS.TOOLTIP.FAILURE, spacecraftDestination.OneBasedDistance * 2);
+					return string.Format(UI.STARMAP.LAUNCHCHECKLIST.ROBOT_PILOT_DATA_REQUIREMENTS.TOOLTIP.FAILURE, spacecraftDestination.OneBasedDistance * 2, this.module.GetDataBanksStored());
 				}
 				if (this.module.IsFull())
 				{
-					return UI.STARMAP.LAUNCHCHECKLIST.ROBOT_PILOT_DATA_REQUIREMENTS.TOOLTIP.READY_NO_DESTINATION;
+					return string.Format(UI.STARMAP.LAUNCHCHECKLIST.ROBOT_PILOT_DATA_REQUIREMENTS.TOOLTIP.READY, this.module.GetDataBanksStored());
 				}
 				return UI.STARMAP.LAUNCHCHECKLIST.ROBOT_PILOT_DATA_REQUIREMENTS.TOOLTIP.FAILURE_NO_DESTINATION;
 			}

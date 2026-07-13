@@ -342,7 +342,7 @@ public class BionicOxygenTankMonitor : GameStateMachine<BionicOxygenTankMonitor,
 
 		public void UpdatePotentialCellToAbsorbOxygen()
 		{
-			this.query.Reset(this.brain, BionicOxygenTankMonitor.AreOxygenLevelsCritical(this));
+			this.query.Reset(this.brain, BionicOxygenTankMonitor.AreOxygenLevelsCritical(this), this.AvailableOxygen);
 			this.navigator.RunQuery(base.smi.query);
 			int num = base.smi.query.GetResultCell();
 			if (num == Grid.PosToCell(base.gameObject) && !GasBreatherFromWorldProvider.GetBestBreathableCellAroundSpecificCell(num, GasBreatherFromWorldProvider.DEFAULT_BREATHABLE_OFFSETS, this.oxygenBreather).IsBreathable)

@@ -24,6 +24,7 @@ public class SuitTank : KMonoBehaviour, IGameObjectEffectDescriptor, OxygenBreat
 			this.storage.AddGasChunk(SimHashes.Oxygen, this.amount, base.GetComponent<PrimaryElement>().Temperature, byte.MaxValue, 0, false, true);
 			this.amount = 0f;
 		}
+		this.equippable = base.GetComponent<Equippable>();
 	}
 
 	public float GetTankAmount()
@@ -126,12 +127,42 @@ public class SuitTank : KMonoBehaviour, IGameObjectEffectDescriptor, OxygenBreat
 
 	public bool ShouldEmitCO2()
 	{
-		return !base.GetComponent<KPrefabID>().HasTag(GameTags.AirtightSuit);
+		bool flag = base.GetComponent<KPrefabID>().HasTag(GameTags.AirtightSuit);
+		if (flag)
+		{
+			return false;
+		}
+		bool flag2 = this.IsOwnerBionic();
+		return !flag && !flag2;
 	}
 
 	public bool ShouldStoreCO2()
 	{
-		return base.GetComponent<KPrefabID>().HasTag(GameTags.AirtightSuit);
+		bool flag = base.GetComponent<KPrefabID>().HasTag(GameTags.AirtightSuit);
+		if (!flag)
+		{
+			return false;
+		}
+		bool flag2 = this.IsOwnerBionic();
+		return flag && !flag2;
+	}
+
+	public bool IsOwnerBionic()
+	{
+		bool flag = false;
+		if (this.equippable != null && this.equippable.IsAssigned() && this.equippable.isEquipped)
+		{
+			Ownables soleOwner = this.equippable.assignee.GetSoleOwner();
+			if (soleOwner != null)
+			{
+				GameObject targetGameObject = soleOwner.GetComponent<MinionAssignablesProxy>().GetTargetGameObject();
+				if (targetGameObject)
+				{
+					flag = targetGameObject.PrefabID() == BionicMinionConfig.ID;
+				}
+			}
+		}
+		return flag;
 	}
 
 	public bool IsLowOxygen()
@@ -191,6 +222,8 @@ public class SuitTank : KMonoBehaviour, IGameObjectEffectDescriptor, OxygenBreat
 	public const float REFILL_PERCENT = 0.25f;
 
 	public bool underwaterSupport;
+
+	private Equippable equippable;
 
 	private static readonly EventSystem.IntraObjectHandler<SuitTank> OnEquippedDelegate = new EventSystem.IntraObjectHandler<SuitTank>(delegate(SuitTank component, object data)
 	{

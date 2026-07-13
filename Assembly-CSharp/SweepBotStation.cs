@@ -48,7 +48,7 @@ public class SweepBotStation : KMonoBehaviour
 		if (this.botMaterialStorage.FindFirstWithMass(GameTags.RefinedMetal, SweepBotConfig.MASS) == null)
 		{
 			FetchList2 fetchList = new FetchList2(this.botMaterialStorage, Db.Get().ChoreTypes.Fetch);
-			fetchList.Add(GameTags.RefinedMetal, null, SweepBotConfig.MASS, Operational.State.None);
+			fetchList.Add(base.GetComponent<PrimaryElement>().Element.tag, null, SweepBotConfig.MASS, Operational.State.None);
 			fetchList.Submit(null, true);
 			return;
 		}

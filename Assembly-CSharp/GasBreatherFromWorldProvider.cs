@@ -9,6 +9,12 @@ public class GasBreatherFromWorldProvider : OxygenBreather.IGasProvider
 
 	public static GasBreatherFromWorldProvider.BreathableCellData GetBestBreathableCellAroundSpecificCell(int theSpecificCell, CellOffset[] breathRange, OxygenBreather breather)
 	{
+		float num;
+		return GasBreatherFromWorldProvider.GetBestBreathableCellAroundSpecificCell(theSpecificCell, breathRange, breather, out num);
+	}
+
+	public static GasBreatherFromWorldProvider.BreathableCellData GetBestBreathableCellAroundSpecificCell(int theSpecificCell, CellOffset[] breathRange, OxygenBreather breather, out float totalBreathableMassAroundCell)
+	{
 		if (breathRange == null)
 		{
 			breathRange = GasBreatherFromWorldProvider.DEFAULT_BREATHABLE_OFFSETS;
@@ -16,11 +22,13 @@ public class GasBreatherFromWorldProvider : OxygenBreather.IGasProvider
 		float num = 0f;
 		int num2 = theSpecificCell;
 		SimHashes simHashes = SimHashes.Vacuum;
+		totalBreathableMassAroundCell = 0f;
 		foreach (CellOffset cellOffset in breathRange)
 		{
 			int num3 = Grid.OffsetCell(theSpecificCell, cellOffset);
 			SimHashes simHashes2;
 			float breathableCellMass = GasBreatherFromWorldProvider.GetBreathableCellMass(num3, out simHashes2);
+			totalBreathableMassAroundCell += breathableCellMass;
 			if (breathableCellMass > num && breathableCellMass > breather.noOxygenThreshold)
 			{
 				num = breathableCellMass;

@@ -109,7 +109,6 @@ public class ElectrobankCharger : GameStateMachine<ElectrobankCharger, Electroba
 					if (gameObject != null && gameObject.HasTag(GameTags.EmptyPortableBattery))
 					{
 						this.targetElectrobank = gameObject;
-						base.smi.sm.internalChargeAmount.Set(0f, base.smi, false);
 						base.smi.sm.hasElectrobank.Set(true, base.smi, false);
 						break;
 					}

@@ -964,15 +964,38 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Refill Oxygen Tank";
 
-				public static LocString STATUS = "Refilling oxygen tank: {0} O<sub>2</sub>";
+				public static LocString STATUS = "Refilling oxygen tank";
 
 				public static LocString TOOLTIP = string.Concat(new string[]
 				{
-					"Bionic Duplicants automatically refill their internal ",
+					"This Duplicant is refilling their internal ",
 					UI.PRE_KEYWORD,
 					"Oxygen",
 					UI.PST_KEYWORD,
-					" tanks when levels get too low"
+					" tank: {0} O<sub>2</sub>\n\nBionic Duplicants automatically refill their internal tanks in highly breathable areas during scheduled ",
+					UI.PRE_KEYWORD,
+					"Downtime",
+					UI.PST_KEYWORD
+				});
+			}
+
+			public class BIONICABSORBOXYGENCRITICAL
+			{
+				public static LocString NAME = "Urgent Oxygen Refill";
+
+				public static LocString STATUS = "Urgently refilling oxygen tank";
+
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"This Duplicant is refilling their depleted ",
+					UI.PRE_KEYWORD,
+					"Oxygen",
+					UI.PST_KEYWORD,
+					" tank in the nearest breathable area: {0} O<sub>2</sub>\n\nImproving colony breathability and scheduling regular ",
+					UI.PRE_KEYWORD,
+					"Downtime",
+					UI.PST_KEYWORD,
+					" will prevent future emergencies"
 				});
 			}
 
@@ -5761,6 +5784,20 @@ namespace STRINGS
 				public static LocString NAME = "Low Oxygen";
 
 				public static LocString TOOLTIP = "The air is thin in this area";
+			}
+
+			public class LOWOXYGENBIONIC
+			{
+				public static LocString NAME = "Low Oxygen Tank";
+
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"This Duplicant's internal ",
+					UI.PRE_KEYWORD,
+					"Oxygen",
+					UI.PST_KEYWORD,
+					" tank is dangerously low"
+				});
 			}
 
 			public class MOURNING

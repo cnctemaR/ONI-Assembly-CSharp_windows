@@ -98,32 +98,36 @@ public class PassengerRocketModule : KMonoBehaviour
 					MinionIdentity minionIdentity = enumerator.Current;
 					bool flag2 = Game.Instance.assignmentManager.assignment_groups[base.GetComponent<AssignmentGroupController>().AssignmentGroupID].HasMember(minionIdentity.assignableProxy.Get());
 					bool flag3 = minionIdentity.GetMyWorldId() == (int)Grid.WorldIdx[num];
-					if (!flag3 && flag2)
+					RocketPassengerMonitor.Instance smi = minionIdentity.GetSMI<RocketPassengerMonitor.Instance>();
+					if (smi != null)
 					{
-						minionIdentity.GetSMI<RocketPassengerMonitor.Instance>().SetMoveTarget(num);
-					}
-					else if (flag3 && !flag2)
-					{
-						minionIdentity.GetSMI<RocketPassengerMonitor.Instance>().SetMoveTarget(cell);
-					}
-					else
-					{
-						minionIdentity.GetSMI<RocketPassengerMonitor.Instance>().ClearMoveTarget(num);
+						if (!flag3 && flag2)
+						{
+							smi.SetMoveTarget(num);
+						}
+						else if (flag3 && !flag2)
+						{
+							smi.SetMoveTarget(cell);
+						}
+						else
+						{
+							smi.ClearMoveTarget(num);
+						}
 					}
 				}
-				goto IL_0148;
+				goto IL_0146;
 			}
 		}
 		foreach (MinionIdentity minionIdentity2 in Components.LiveMinionIdentities.Items)
 		{
-			RocketPassengerMonitor.Instance smi = minionIdentity2.GetSMI<RocketPassengerMonitor.Instance>();
-			if (smi != null)
+			RocketPassengerMonitor.Instance smi2 = minionIdentity2.GetSMI<RocketPassengerMonitor.Instance>();
+			if (smi2 != null)
 			{
-				smi.ClearMoveTarget(cell);
-				smi.ClearMoveTarget(num);
+				smi2.ClearMoveTarget(cell);
+				smi2.ClearMoveTarget(num);
 			}
 		}
-		IL_0148:
+		IL_0146:
 		for (int i = 0; i < Components.LiveMinionIdentities.Count; i++)
 		{
 			this.RefreshAccessStatus(Components.LiveMinionIdentities[i], flag);

@@ -63,11 +63,40 @@ public class CommandModule : StateMachineComponent<CommandModule.StatesInstance>
 
 	private bool CanAssignTo(MinionAssignablesProxy worker)
 	{
-		if (worker.target is MinionIdentity)
+		MinionIdentity minionIdentity = worker.target as MinionIdentity;
+		if (minionIdentity != null)
 		{
-			return (worker.target as KMonoBehaviour).GetComponent<MinionResume>().HasPerk(Db.Get().SkillPerks.CanUseRockets);
+			return minionIdentity.GetComponent<MinionResume>().HasPerk(Db.Get().SkillPerks.CanUseRockets);
 		}
-		return worker.target is StoredMinionIdentity && (worker.target as StoredMinionIdentity).HasPerk(Db.Get().SkillPerks.CanUseRockets);
+		StoredMinionIdentity storedMinionIdentity = worker.target as StoredMinionIdentity;
+		if (storedMinionIdentity != null)
+		{
+			if (storedMinionIdentity.model == BionicMinionConfig.MODEL)
+			{
+				MinionStorageDataHolder component = storedMinionIdentity.GetComponent<MinionStorageDataHolder>();
+				if (component != null)
+				{
+					MinionStorageDataHolder.DataPack dataPack = component.GetDataPack<BionicUpgradesMonitor.Instance>();
+					if (dataPack != null)
+					{
+						MinionStorageDataHolder.DataPackData dataPackData = dataPack.PeekData();
+						if (dataPackData != null && dataPackData.Tags != null)
+						{
+							Tag[] tags = dataPackData.Tags;
+							for (int i = 0; i < tags.Length; i++)
+							{
+								if (tags[i] == "Booster_PilotVanilla1")
+								{
+									return true;
+								}
+							}
+						}
+					}
+				}
+			}
+			return storedMinionIdentity.HasPerk(Db.Get().SkillPerks.CanUseRockets);
+		}
+		return false;
 	}
 
 	private static bool HasValidGantry(GameObject go)

@@ -141,6 +141,11 @@ public class MinionStorageDataHolder : KMonoBehaviour, StoredMinionIdentity.ISto
 			return this.data;
 		}
 
+		public MinionStorageDataHolder.DataPackData PeekData()
+		{
+			return this.data;
+		}
+
 		[Serialize]
 		private string id;
 

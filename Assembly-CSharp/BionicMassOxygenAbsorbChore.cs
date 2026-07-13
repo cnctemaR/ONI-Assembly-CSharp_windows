@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using TUNING;
 using UnityEngine;
 
 public class BionicMassOxygenAbsorbChore : Chore<BionicMassOxygenAbsorbChore.Instance>
@@ -91,7 +92,7 @@ public class BionicMassOxygenAbsorbChore : Chore<BionicMassOxygenAbsorbChore.Ins
 		int num2;
 		SimHashes nearBreathableElement = BionicMassOxygenAbsorbChore.GetNearBreathableElement(num2 = Grid.PosToCell(smi.sm.dupe.Get(smi)), BionicMassOxygenAbsorbChore.ABSORB_RANGE, out num2);
 		HandleVector<Game.ComplexCallbackInfo<Sim.MassConsumedCallback>>.Handle handle = Game.Instance.massConsumedCallbackManager.Add(new Action<Sim.MassConsumedCallback, object>(BionicMassOxygenAbsorbChore.OnSimConsumeCallback), absorbUpdateData, "BionicMassOxygenAbsorbChore");
-		SimMessages.ConsumeMass(num2, nearBreathableElement, num, 3, handle.index);
+		SimMessages.ConsumeMass(num2, nearBreathableElement, num, 6, handle.index);
 	}
 
 	private static void OnSimConsumeCallback(Sim.MassConsumedCallback mass_cb_info, object data)
@@ -192,6 +193,10 @@ public class BionicMassOxygenAbsorbChore : Chore<BionicMassOxygenAbsorbChore.Ins
 		{
 			default_state = this.move;
 			base.Target(this.dupe);
+			this.root.Exit(delegate(BionicMassOxygenAbsorbChore.Instance smi)
+			{
+				smi.ChangeCellReservation(Grid.InvalidCell);
+			});
 			this.move.DefaultState(this.move.onGoing).ScheduleChange(this.fail, new StateMachine<BionicMassOxygenAbsorbChore.States, BionicMassOxygenAbsorbChore.Instance, BionicMassOxygenAbsorbChore, object>.Transition.ConditionCallback(BionicMassOxygenAbsorbChore.IsNotAllowedByScheduleAndChoreIsNotCritical));
 			this.move.onGoing.Enter(new StateMachine<BionicMassOxygenAbsorbChore.States, BionicMassOxygenAbsorbChore.Instance, BionicMassOxygenAbsorbChore, object>.State.Callback(BionicMassOxygenAbsorbChore.RefreshTargetSafeCell)).Update(new Action<BionicMassOxygenAbsorbChore.Instance, float>(BionicMassOxygenAbsorbChore.UpdateTargetSafeCellOnlyInCriticalMode), UpdateRate.SIM_200ms, false).MoveTo((BionicMassOxygenAbsorbChore.Instance smi) => smi.targetCell, this.absorb, this.move.fail, true);
 			this.move.fail.ReturnFailure();
@@ -287,10 +292,29 @@ public class BionicMassOxygenAbsorbChore : Chore<BionicMassOxygenAbsorbChore.Ins
 			this.oxygenBreather = duplicant.GetComponent<OxygenBreather>();
 		}
 
+		public void ChangeCellReservation(int newCell)
+		{
+			if (this.targetCell != Grid.InvalidCell && Grid.Reserved[this.targetCell])
+			{
+				Grid.Reserved[this.targetCell] = false;
+			}
+			if (newCell != Grid.InvalidCell && !Grid.Reserved[newCell])
+			{
+				Grid.Reserved[newCell] = true;
+			}
+		}
+
+		public override void StopSM(string reason)
+		{
+			this.ChangeCellReservation(Grid.InvalidCell);
+			base.StopSM(reason);
+		}
+
 		public int UpdateTargetCell()
 		{
 			this.oxygenTankMonitor.UpdatePotentialCellToAbsorbOxygen();
 			int absorbOxygenCell = this.oxygenTankMonitor.AbsorbOxygenCell;
+			this.ChangeCellReservation(absorbOxygenCell);
 			this.targetCell = absorbOxygenCell;
 			return absorbOxygenCell;
 		}
@@ -338,7 +362,8 @@ public class BionicMassOxygenAbsorbChore : Chore<BionicMassOxygenAbsorbChore.Ins
 			}
 			this.AddMassToHistory(mass_cb_info.mass / dt);
 			GameObject gameObject = this.oxygenBreather.gameObject;
-			float num = (BionicOxygenTankMonitor.AreOxygenLevelsCritical(this.oxygenTankMonitor) ? this.CRITICAL_OXYGEN_MASS_GIVE_UP_TRESHOLD : 2f);
+			bool flag = BionicOxygenTankMonitor.AreOxygenLevelsCritical(this.oxygenTankMonitor);
+			float num = (flag ? this.CRITICAL_OXYGEN_MASS_GIVE_UP_TRESHOLD : 2f);
 			if (this.GetAverageMassConsumedPerSecond() <= num)
 			{
 				base.sm.SecondsPassedWithoutOxygen.Set(base.sm.SecondsPassedWithoutOxygen.Get(base.smi) + dt, base.smi, false);
@@ -347,10 +372,15 @@ public class BionicMassOxygenAbsorbChore : Chore<BionicMassOxygenAbsorbChore.Ins
 			{
 				BionicMassOxygenAbsorbChore.ResetOxygenTimer(base.smi);
 			}
-			float num2 = this.oxygenTankMonitor.AddGas(mass_cb_info);
-			if (num2 > Mathf.Epsilon)
+			if (flag)
 			{
-				SimMessages.EmitMass(Grid.PosToCell(gameObject), mass_cb_info.elemIdx, num2, mass_cb_info.temperature, byte.MaxValue, 0, -1);
+				float num2 = DUPLICANTSTATS.STANDARD.Breath.BREATH_RATE * DUPLICANTSTATS.STANDARD.BaseStats.OXYGEN_USED_PER_SECOND;
+				mass_cb_info.mass += DUPLICANTSTATS.STANDARD.BaseStats.RECOVER_BREATH_DELTA * num2 * dt + DUPLICANTSTATS.STANDARD.BaseStats.OXYGEN_USED_PER_SECOND * dt;
+			}
+			float num3 = this.oxygenTankMonitor.AddGas(mass_cb_info);
+			if (num3 > Mathf.Epsilon)
+			{
+				SimMessages.EmitMass(Grid.PosToCell(gameObject), mass_cb_info.elemIdx, num3, mass_cb_info.temperature, byte.MaxValue, 0, -1);
 			}
 			if (!BionicMassOxygenAbsorbChore.HasSpaceInOxygenTank(this))
 			{

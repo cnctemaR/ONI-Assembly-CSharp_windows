@@ -284,6 +284,8 @@ public class GameTags
 
 	public static readonly Tag Oxidizer = TagManager.Create("Oxidizer");
 
+	public static readonly Tag UnrefinedOil = TagManager.Create("UnrefinedOil");
+
 	public static readonly Tag RiverSource = TagManager.Create("RiverSource");
 
 	public static readonly Tag RiverSink = TagManager.Create("RiverSink");

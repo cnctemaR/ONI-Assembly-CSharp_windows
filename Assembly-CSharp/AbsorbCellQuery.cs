@@ -1,4 +1,6 @@
 ﻿using System;
+using TUNING;
+using UnityEngine;
 
 public class AbsorbCellQuery : PathFinderQuery
 {
@@ -7,37 +9,40 @@ public class AbsorbCellQuery : PathFinderQuery
 		this.checker = Game.Instance.safetyConditions.AbsorbCellCellChecker;
 	}
 
-	public AbsorbCellQuery Reset(MinionBrain brain, bool prioritizeClosestCellOverOxygenMass)
+	public AbsorbCellQuery Reset(MinionBrain brain, bool criticalMode, float currentOxygenTankMass)
 	{
 		this.brain = brain;
 		this.targetCell = PathFinder.InvalidCell;
 		this.targetCost = int.MaxValue;
-		this.targetCellFlags = (AbsorbCellQuery.SafeFlags)0;
-		this.targetBreathabilityScore = 0f;
-		this.prioritizeClosestCellOverOxygenMass = prioritizeClosestCellOverOxygenMass;
+		this.targetOxygenScore = float.MinValue;
+		this.targetCellSafetyFlags = (AbsorbCellQuery.AbsorbOxygenSafeCellFlags)0;
+		this.targetBreathableMassAvailable = 0f;
+		this.criticalMode = criticalMode;
+		this.bionicOxygenRemaining = currentOxygenTankMass;
 		this.context = new SafetyChecker.Context(brain);
 		ScaldingMonitor.Instance instance = ((brain == null) ? null : brain.GetSMI<ScaldingMonitor.Instance>());
 		this.scaldingTreshold = ((instance == null) ? (-1f) : instance.GetScaldingThreshold());
 		return this;
 	}
 
-	public static AbsorbCellQuery.SafeFlags GetFlags(int cell, MinionBrain brain, float scaldingTreshold, out float breathabilityScore)
+	public static AbsorbCellQuery.AbsorbOxygenSafeCellFlags GetAbsorbOxygenFlags(int cell, MinionBrain brain, float scaldingTreshold, out float totalBreathableMassAroundCell, out float breathableCellRatioInSample)
 	{
-		breathabilityScore = 0f;
+		totalBreathableMassAroundCell = 0f;
+		breathableCellRatioInSample = 0f;
 		int num = Grid.CellAbove(cell);
 		if (!Grid.IsValidCell(num))
 		{
-			return (AbsorbCellQuery.SafeFlags)0;
+			return (AbsorbCellQuery.AbsorbOxygenSafeCellFlags)0;
 		}
 		if (Grid.Solid[cell] || Grid.Solid[num])
 		{
-			return (AbsorbCellQuery.SafeFlags)0;
+			return (AbsorbCellQuery.AbsorbOxygenSafeCellFlags)0;
 		}
 		if (Grid.IsTileUnderConstruction[cell] || Grid.IsTileUnderConstruction[num])
 		{
-			return (AbsorbCellQuery.SafeFlags)0;
+			return (AbsorbCellQuery.AbsorbOxygenSafeCellFlags)0;
 		}
-		bool flag = brain.IsCellClear(cell);
+		bool flag = true;
 		bool flag2 = !Grid.Element[cell].IsLiquid;
 		bool flag3 = !Grid.Element[num].IsLiquid;
 		bool flag4 = scaldingTreshold < 0f || Grid.Temperature[cell] < scaldingTreshold;
@@ -45,79 +50,104 @@ public class AbsorbCellQuery : PathFinderQuery
 		bool flag6 = false;
 		if (brain.OxygenBreather != null)
 		{
-			GasBreatherFromWorldProvider.BreathableCellData bestBreathableCellAroundSpecificCell = GasBreatherFromWorldProvider.GetBestBreathableCellAroundSpecificCell(cell, GasBreatherFromWorldProvider.DEFAULT_BREATHABLE_OFFSETS, brain.OxygenBreather);
-			flag6 = bestBreathableCellAroundSpecificCell.IsBreathable;
-			if (flag6)
+			for (int i = 0; i < GasBreatherFromWorldProvider.DEFAULT_BREATHABLE_OFFSETS.Length; i++)
 			{
-				breathabilityScore = bestBreathableCellAroundSpecificCell.Mass;
+				int num2 = Grid.OffsetCell(cell, GasBreatherFromWorldProvider.DEFAULT_BREATHABLE_OFFSETS[i]);
+				if (Grid.IsValidCell(num2) && Grid.AreCellsInSameWorld(cell, num2) && Grid.Element[num2].HasTag(GameTags.Breathable))
+				{
+					breathableCellRatioInSample += 1f / (float)GasBreatherFromWorldProvider.DEFAULT_BREATHABLE_OFFSETS.Length;
+				}
 			}
+			flag6 = GasBreatherFromWorldProvider.GetBestBreathableCellAroundSpecificCell(cell, GasBreatherFromWorldProvider.DEFAULT_BREATHABLE_OFFSETS, brain.OxygenBreather, out totalBreathableMassAroundCell).IsBreathable;
 		}
-		bool flag7 = !brain.Navigator.NavGrid.NavTable.IsValid(cell, NavType.Ladder) && !brain.Navigator.NavGrid.NavTable.IsValid(cell, NavType.Pole);
-		bool flag8 = !brain.Navigator.NavGrid.NavTable.IsValid(cell, NavType.Tube);
-		AbsorbCellQuery.SafeFlags safeFlags = (AbsorbCellQuery.SafeFlags)0;
-		if (flag)
-		{
-			safeFlags |= AbsorbCellQuery.SafeFlags.IsClear;
-		}
+		bool flag7 = !brain.Navigator.NavGrid.NavTable.IsValid(cell, NavType.Tube);
+		AbsorbCellQuery.AbsorbOxygenSafeCellFlags absorbOxygenSafeCellFlags = (AbsorbCellQuery.AbsorbOxygenSafeCellFlags)0;
 		if (flag4)
 		{
-			safeFlags |= AbsorbCellQuery.SafeFlags.IsNotScaldingTemperatures;
+			absorbOxygenSafeCellFlags |= AbsorbCellQuery.AbsorbOxygenSafeCellFlags.IsNotScaldingTemperatures;
 		}
 		if (flag5)
 		{
-			safeFlags |= AbsorbCellQuery.SafeFlags.IsNotRadiated;
+			absorbOxygenSafeCellFlags |= AbsorbCellQuery.AbsorbOxygenSafeCellFlags.IsNotRadiated;
 		}
 		if (flag6)
 		{
-			safeFlags |= AbsorbCellQuery.SafeFlags.IsBreathable;
+			absorbOxygenSafeCellFlags |= AbsorbCellQuery.AbsorbOxygenSafeCellFlags.IsBreathable;
+		}
+		if (flag)
+		{
+			absorbOxygenSafeCellFlags |= AbsorbCellQuery.AbsorbOxygenSafeCellFlags.IsClear;
 		}
 		if (flag7)
 		{
-			safeFlags |= AbsorbCellQuery.SafeFlags.IsNotLadder;
-		}
-		if (flag8)
-		{
-			safeFlags |= AbsorbCellQuery.SafeFlags.IsNotTube;
+			absorbOxygenSafeCellFlags |= AbsorbCellQuery.AbsorbOxygenSafeCellFlags.IsNotTube;
 		}
 		if (flag2)
 		{
-			safeFlags |= AbsorbCellQuery.SafeFlags.IsNotLiquid;
+			absorbOxygenSafeCellFlags |= AbsorbCellQuery.AbsorbOxygenSafeCellFlags.IsNotLiquid;
 		}
 		if (flag3)
 		{
-			safeFlags |= AbsorbCellQuery.SafeFlags.IsNotLiquidOnMyFace;
+			absorbOxygenSafeCellFlags |= AbsorbCellQuery.AbsorbOxygenSafeCellFlags.IsNotLiquidOnMyFace;
 		}
-		return safeFlags;
+		return absorbOxygenSafeCellFlags;
 	}
 
 	public override bool IsMatch(int cell, int parent_cell, int cost)
 	{
+		float num = 2.5f * (float)GasBreatherFromWorldProvider.DEFAULT_BREATHABLE_OFFSETS.Length;
+		float num2 = (float)(54 / GasBreatherFromWorldProvider.DEFAULT_BREATHABLE_OFFSETS.Length);
+		float num3 = (float)cost;
 		bool flag;
 		this.checker.GetSafetyConditions(cell, cost, this.context, out flag);
 		if (flag)
 		{
-			float num = 0f;
-			AbsorbCellQuery.SafeFlags flags = AbsorbCellQuery.GetFlags(cell, this.brain, this.scaldingTreshold, out num);
-			bool flag2 = flags > this.targetCellFlags;
-			bool flag3 = flags == this.targetCellFlags && cost < this.targetCost;
-			bool flag4 = flags == this.targetCellFlags && cost == this.targetCost;
-			bool flag5 = num > this.targetBreathabilityScore;
-			bool flag6 = flags == this.targetCellFlags && flag5;
-			bool flag7;
-			if (this.prioritizeClosestCellOverOxygenMass)
+			float num4 = 0.03f;
+			float num5 = num3 / 10f;
+			float num6 = num4 * num5;
+			float num7 = 0f;
+			float num8 = 0f;
+			AbsorbCellQuery.AbsorbOxygenSafeCellFlags absorbOxygenFlags = AbsorbCellQuery.GetAbsorbOxygenFlags(cell, this.brain, this.scaldingTreshold, out num7, out num8);
+			num7 = Mathf.Clamp(num7, 0f, num2);
+			float num9 = (float)absorbOxygenFlags;
+			float num10 = 10f * num8;
+			float num11 = num7 * num10 - num6;
+			bool flag2 = false;
+			if (this.targetCell == Grid.InvalidCell)
 			{
-				flag7 = flag2 || flag3 || (flag4 && flag5);
+				flag2 = true;
 			}
-			else
+			bool flag3 = this.targetBreathableMassAvailable > 0f;
+			bool flag4 = num3 < (float)this.targetCost;
+			bool flag5 = this.targetOxygenScore >= num;
+			bool flag6 = num9 >= (float)this.targetCellSafetyFlags || !flag3;
+			float num12 = this.targetOxygenScore;
+			if (this.criticalMode)
 			{
-				flag7 = flag2 || flag6 || flag3;
+				num12 = Mathf.Min(num, num12);
 			}
-			if (flag7)
+			if (num11 >= num12 && flag6)
 			{
-				this.targetBreathabilityScore = num;
-				this.targetCellFlags = flags;
+				if (this.criticalMode)
+				{
+					if (flag4 || !flag5)
+					{
+						flag2 = true;
+					}
+				}
+				else
+				{
+					flag2 = true;
+				}
+			}
+			flag2 = flag2 && num7 > DUPLICANTSTATS.BIONICS.BaseStats.NO_OXYGEN_THRESHOLD;
+			if (flag2)
+			{
+				this.targetBreathableMassAvailable = num7;
+				this.targetCellSafetyFlags = absorbOxygenFlags;
 				this.targetCost = cost;
 				this.targetCell = cell;
+				this.targetOxygenScore = num11;
 			}
 		}
 		return false;
@@ -136,11 +166,15 @@ public class AbsorbCellQuery : PathFinderQuery
 
 	private int targetCost;
 
-	private bool prioritizeClosestCellOverOxygenMass;
+	private float targetOxygenScore;
 
-	private float targetBreathabilityScore;
+	private bool criticalMode;
 
-	public AbsorbCellQuery.SafeFlags targetCellFlags;
+	private float bionicOxygenRemaining;
+
+	private float targetBreathableMassAvailable;
+
+	public AbsorbCellQuery.AbsorbOxygenSafeCellFlags targetCellSafetyFlags;
 
 	public float targetCellBreathabilityScore;
 
@@ -148,15 +182,14 @@ public class AbsorbCellQuery : PathFinderQuery
 
 	private SafetyChecker.Context context;
 
-	public enum SafeFlags
+	public enum AbsorbOxygenSafeCellFlags
 	{
-		IsClear = 1,
-		IsNotLadder,
-		IsNotTube = 4,
-		IsNotRadiated = 16,
-		IsBreathable = 32,
-		IsNotScaldingTemperatures = 64,
-		IsNotLiquidOnMyFace = 128,
-		IsNotLiquid = 256
+		IsNotTube = 1,
+		IsNotRadiated,
+		IsBreathable = 4,
+		IsNotScaldingTemperatures = 8,
+		IsClear = 16,
+		IsNotLiquidOnMyFace = 32,
+		IsNotLiquid = 64
 	}
 }

@@ -647,7 +647,7 @@ namespace STRINGS
 		{
 			public static LocString NAME = "Squash Stand";
 
-			public static LocString DESC = "The plume curls upward to facilitate floor-sweeping.";
+			public static LocString DESC = "The plume curls upward to enable cleaners to sweep the floor around it.";
 		}
 
 		public class PERMIT_MONUMENT_BASE_C_FROSTY

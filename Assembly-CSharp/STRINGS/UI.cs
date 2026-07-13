@@ -6923,7 +6923,9 @@ namespace STRINGS
 		{
 			public static LocString MANAGEMENTMENU_JOBS = string.Concat(new string[]
 			{
-				"Manage my Duplicant Priorities {Hotkey}\n\nDuplicant Priorities",
+				"Manage my Duplicant Priorities {Hotkey}\n\n",
+				UI.PRE_KEYWORD,
+				"Duplicant Priorities",
 				UI.PST_KEYWORD,
 				" are calculated <i>before</i> the ",
 				UI.PRE_KEYWORD,
@@ -8056,11 +8058,11 @@ namespace STRINGS
 					{
 						public static LocString READY = "The control station is installed and waiting for the pilot";
 
-						public static LocString FAILURE = "No Control Station\n\nA new Rocket Control Station must be installed inside the rocket";
+						public static LocString FAILURE = "No control station\n\nA new Rocket Control Station must be installed inside the rocket";
 
 						public static LocString WARNING = "Control Station warning";
 
-						public static LocString WARNING_ROBO_PILOT = "No Control Station\n\nA Robot Pilot Module is piloting this rocket";
+						public static LocString WARNING_ROBO_PILOT = "No control station\n\nThis rocket is being piloted by a Robo-Pilot Module";
 					}
 				}
 
@@ -8279,7 +8281,11 @@ namespace STRINGS
 							UI.PRE_KEYWORD,
 							"Data Banks",
 							UI.PST_KEYWORD,
-							" for a roundtrip to its destination and back"
+							" for a roundtrip to its destination and back\n    • ",
+							UI.PRE_KEYWORD,
+							"Data Banks",
+							UI.PST_KEYWORD,
+							" stored: {0}/{1}"
 						});
 
 						public static LocString READY_NO_DESTINATION = string.Concat(new string[]
@@ -8291,7 +8297,11 @@ namespace STRINGS
 							UI.PRE_KEYWORD,
 							"Data Banks",
 							UI.PST_KEYWORD,
-							", but no destination has been set"
+							", but no destination has been set\n    • ",
+							UI.PRE_KEYWORD,
+							"Data Banks",
+							UI.PST_KEYWORD,
+							" stored: {0}"
 						});
 
 						public static LocString FAILURE_NO_DESTINATION = "No destination has been set";
@@ -8305,7 +8315,11 @@ namespace STRINGS
 							UI.PRE_KEYWORD,
 							"Data Banks",
 							UI.PST_KEYWORD,
-							" to reach its destination"
+							" to reach its destination\n    • ",
+							UI.PRE_KEYWORD,
+							"Data Banks",
+							UI.PST_KEYWORD,
+							" stored: {1}"
 						});
 
 						public static LocString WARNING = string.Concat(new string[]
@@ -8317,7 +8331,11 @@ namespace STRINGS
 							UI.PRE_KEYWORD,
 							"Data Banks",
 							UI.PST_KEYWORD,
-							" for a roundtrip\n    • {0}/{1} stored"
+							" for a roundtrip to its destination and back\n    • ",
+							UI.PRE_KEYWORD,
+							"Data Banks",
+							UI.PST_KEYWORD,
+							"stored: {0}/{1}"
 						});
 
 						public static LocString WARNING_NO_DATA_BANKS_HUMAN_PILOT = string.Concat(new string[]

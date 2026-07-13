@@ -38,27 +38,33 @@ public class FetchDrone : KMonoBehaviour
 				break;
 			}
 		}
-		this.SetupPickupable();
+		this.animController = base.GetComponent<KBatchedAnimController>();
 		this.pickupableStorage.Subscribe(-1697596308, new Action<object>(this.OnStorageChanged));
+		base.Subscribe(-1582839653, new Action<object>(this.OnTagsChanged));
 	}
 
-	public void SetupPickupable()
+	protected override void OnCleanUp()
 	{
-		this.animController = base.GetComponent<KBatchedAnimController>();
-		GameObject gameObject = Util.NewGameObject(base.gameObject, "pickupableSymbol");
-		gameObject.SetActive(false);
-		bool flag;
-		Vector3 vector = this.animController.GetSymbolTransform(FetchDrone.HASH_SNAPTO_THING, out flag).GetColumn(3);
-		vector.z = Grid.GetLayerZ(Grid.SceneLayer.BuildingUse);
-		gameObject.transform.SetPosition(vector);
-		KBatchedAnimTracker kbatchedAnimTracker = gameObject.AddComponent<KBatchedAnimTracker>();
-		kbatchedAnimTracker.symbol = FetchDrone.HASH_SNAPTO_THING;
-		kbatchedAnimTracker.offset = Vector3.zero;
+		base.Unsubscribe(-1697596308);
+		base.Unsubscribe(-1582839653);
+		base.OnCleanUp();
+	}
+
+	private void OnTagsChanged(object data)
+	{
+		TagChangedEventData tagChangedEventData = (TagChangedEventData)data;
+		if (tagChangedEventData.added && tagChangedEventData.tag == GameTags.Creatures.Die)
+		{
+			Brain component = base.GetComponent<Brain>();
+			if (component != null && !component.IsRunning())
+			{
+				component.Resume("death");
+			}
+		}
 	}
 
 	private void OnStorageChanged(object data)
 	{
-		base.GetComponent<Storage>();
 		GameObject gameObject = (GameObject)data;
 		this.RemoveTracker(gameObject);
 		this.ShowPickupSymbol(gameObject);
@@ -105,8 +111,6 @@ public class FetchDrone : KMonoBehaviour
 			global::UnityEngine.Object.Destroy(kbatchedAnimTracker);
 		}
 	}
-
-	private static string HASH_SNAPTO_THING = "snapTo_thing";
 
 	private static string BOTTOM = "bottom";
 
